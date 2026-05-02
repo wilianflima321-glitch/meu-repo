@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AethelAPIClient, APIError } from '@/lib/api';
 import { isAuthenticated } from '@/lib/auth';
-import type { ChatMessage, ChatThreadSummary, CopilotWorkflowSummary } from '@/lib/api';
+import type { ChatMessage, ChatThreadSummary, ChatStoredMessage, CopilotContextResponse, CopilotWorkflowDetail, CopilotWorkflowSummary } from '@/lib/api';
 import { openConfirmDialog, openPromptDialog } from '@/lib/ui/non-blocking-dialogs';
 import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models';
 
@@ -25,6 +25,32 @@ interface Message {
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: Date;
+}
+
+type CopilotContextPatch = {
+  workflowId: string;
+  livePreview?: unknown;
+  editor?: unknown;
+  openFiles?: unknown[];
+};
+
+function toMessageRole(role: ChatStoredMessage['role']): Message['role'] {
+  return role === 'assistant' || role === 'system' || role === 'user' ? role : 'user';
+}
+
+function isContextRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function buildContextPatch(workflowId: string, context: unknown): CopilotContextPatch | null {
+  if (!isContextRecord(context)) return null;
+
+  const patch: CopilotContextPatch = { workflowId };
+  if ('livePreview' in context) patch.livePreview = context.livePreview;
+  if ('editor' in context) patch.editor = context.editor;
+  if (Array.isArray(context.openFiles)) patch.openFiles = context.openFiles;
+
+  return patch;
 }
 
 const ChatComponent: React.FC = () => {
@@ -59,11 +85,11 @@ const ChatComponent: React.FC = () => {
 
   const loadThreadMessages = async (threadId: string) => {
     const data = await AethelAPIClient.getChatMessages(threadId);
-    const raw = Array.isArray((data as any)?.messages) ? (data as any).messages : [];
+    const raw = Array.isArray(data.messages) ? data.messages : [];
     const restored: Message[] = raw
-      .filter((m: any) => m && typeof m.content === 'string')
-      .map((m: any) => ({
-        role: (m.role as any) || 'user',
+      .filter((m) => m && typeof m.content === 'string')
+      .map((m) => ({
+        role: toMessageRole(m.role),
         content: m.content,
         timestamp: m.createdAt ? new Date(m.createdAt) : new Date(),
       }));
@@ -82,8 +108,8 @@ const ChatComponent: React.FC = () => {
   const refreshWorkflows = async (): Promise<CopilotWorkflowSummary[]> => {
     setWorkflowsLoading(true);
     try {
-      const res = await AethelAPIClient.listCopilotWorkflows().catch(() => ({ workflows: [] as any[] }));
-      const list = Array.isArray((res as any).workflows) ? ((res as any).workflows as CopilotWorkflowSummary[]) : [];
+      const res = await AethelAPIClient.listCopilotWorkflows().catch(() => ({ workflows: [] as CopilotWorkflowSummary[] }));
+      const list = Array.isArray(res.workflows) ? res.workflows : [];
       setWorkflows(list);
       return list;
     } finally {
@@ -98,8 +124,8 @@ const ChatComponent: React.FC = () => {
     let cancelled = false;
     void (async () => {
       try {
-        const ctx = await AethelAPIClient.getCopilotContext().catch(() => ({ projectId: null as any }));
-        const projectId = typeof (ctx as any)?.projectId === 'string' ? String((ctx as any).projectId) : null;
+        const ctx = await AethelAPIClient.getCopilotContext().catch((): CopilotContextResponse => ({ projectId: null, workflowId: null }));
+        const projectId = typeof ctx.projectId === 'string' ? ctx.projectId : null;
         setActiveProjectId(projectId);
 
         const keys = getScopedStorageKeys(projectId);
@@ -111,10 +137,10 @@ const ChatComponent: React.FC = () => {
           ? (window.localStorage.getItem(keys.activeThreadId) || window.localStorage.getItem(keys.legacyActiveThreadId))
           : null;
 
-        let wf: any = null;
+        let wf: CopilotWorkflowDetail | CopilotWorkflowSummary | null = null;
         if (storedWorkflowId) {
           const got = await AethelAPIClient.getCopilotWorkflow(storedWorkflowId).catch(() => null);
-          wf = (got as any)?.workflow ?? null;
+          wf = got?.workflow ?? null;
         }
 
         const wfList = await refreshWorkflows();
@@ -131,8 +157,8 @@ const ChatComponent: React.FC = () => {
           }
         }
 
-        const list = await AethelAPIClient.listChatThreads().catch(() => ({ threads: [] as any[] }));
-        const threads = (Array.isArray((list as any).threads) ? (list as any).threads : []) as ChatThreadSummary[];
+        const list = await AethelAPIClient.listChatThreads().catch(() => ({ threads: [] as ChatThreadSummary[] }));
+        const threads = Array.isArray(list.threads) ? list.threads : [];
 
         // Determina a thread ativa: workflow -> localStorage -> primeira -> cria.
         let threadId: string | null = (wf?.chatThreadId as string | null) ?? (storedThreadId || null);
@@ -144,7 +170,7 @@ const ChatComponent: React.FC = () => {
         }
         if (!threadId) {
           const created = await AethelAPIClient.createChatThread({ title: wf?.title ? String(wf.title) : 'Chat' });
-          threadId = (created as any)?.thread?.id ?? null;
+          threadId = created.thread?.id ?? null;
         }
 
         if (!threadId || cancelled) return;
@@ -172,7 +198,7 @@ const ChatComponent: React.FC = () => {
   const switchWorkflow = async (workflowId: string) => {
     if (connectBusy) return;
     const got = await AethelAPIClient.getCopilotWorkflow(workflowId);
-    const wf = (got as any)?.workflow as CopilotWorkflowSummary | undefined;
+    const wf = got.workflow;
     if (!wf?.id) return;
 
     const projectId = wf.projectId ? String(wf.projectId) : null;
@@ -185,7 +211,7 @@ const ChatComponent: React.FC = () => {
     let threadId: string | null = wf.chatThreadId ? String(wf.chatThreadId) : null;
     if (!threadId) {
       const created = await AethelAPIClient.createChatThread({ title: wf.title || 'Chat' });
-      threadId = (created as any)?.thread?.id ?? null;
+      threadId = created.thread?.id ?? null;
       if (threadId) {
         await AethelAPIClient.updateCopilotWorkflow(String(wf.id), { chatThreadId: threadId }).catch(() => null);
       }
@@ -204,13 +230,13 @@ const ChatComponent: React.FC = () => {
     const title = `Workflow ${new Date().toLocaleString()}`;
     const projectId = activeProjectId;
     const createdThread = await AethelAPIClient.createChatThread({ title, ...(projectId ? { projectId } : {}) });
-    const threadId = (createdThread as any)?.thread?.id as string | undefined;
+    const threadId = createdThread.thread?.id;
     const createdWf = await AethelAPIClient.createCopilotWorkflow({
       title,
       ...(projectId ? { projectId } : {}),
       ...(threadId ? { chatThreadId: threadId } : {}),
     });
-    const wfId = (createdWf as any)?.workflow?.id as string | undefined;
+    const wfId = createdWf.workflow?.id;
     await refreshWorkflows();
     if (wfId) await switchWorkflow(String(wfId));
   };
@@ -228,7 +254,7 @@ const ChatComponent: React.FC = () => {
     try {
       pushSystem('Copiando histórico (server-side)…');
       const sourceRes = await AethelAPIClient.getCopilotWorkflow(connectFromWorkflowId).catch(() => null);
-      const source = (sourceRes as any)?.workflow as any;
+      const source = sourceRes?.workflow ?? null;
       const sourceThreadId = source?.chatThreadId ? String(source.chatThreadId) : null;
       if (!sourceThreadId) {
         pushError('Esse trabalho não tem histórico (thread) para copiar.');
@@ -239,7 +265,7 @@ const ChatComponent: React.FC = () => {
       const title = `${current?.title || 'Workflow'} (cópia)`;
 
       const created = await AethelAPIClient.cloneChatThread({ sourceThreadId, title }).catch(() => null);
-      const newThreadId = (created as any)?.thread?.id ? String((created as any).thread.id) : null;
+      const newThreadId = created?.thread?.id ? String(created.thread.id) : null;
       if (!newThreadId) {
         pushError('Falha ao clonar o histórico.');
         return;
@@ -263,17 +289,18 @@ const ChatComponent: React.FC = () => {
     }
 
     const sourceRes = await AethelAPIClient.getCopilotWorkflow(connectFromWorkflowId).catch(() => null);
-    const source = (sourceRes as any)?.workflow as any;
+    const source = sourceRes?.workflow ?? null;
     const ctx = source?.context;
     if (!ctx || typeof ctx !== 'object') {
       pushError('Esse trabalho não tem contexto salvo para importar.');
       return;
     }
 
-    const patch: any = { workflowId: activeWorkflowId };
-    if ((ctx as any).livePreview) patch.livePreview = (ctx as any).livePreview;
-    if ((ctx as any).editor) patch.editor = (ctx as any).editor;
-    if (Array.isArray((ctx as any).openFiles)) patch.openFiles = (ctx as any).openFiles;
+    const patch = buildContextPatch(activeWorkflowId, ctx);
+    if (!patch) {
+      pushError('Esse trabalho n�o tem contexto salvo para importar.');
+      return;
+    }
 
     if (connectBusy) return;
     setConnectBusy(true);
@@ -306,7 +333,7 @@ const ChatComponent: React.FC = () => {
       pushSystem('Mesclando trabalhos (server-side)…');
 
       const sourceRes = await AethelAPIClient.getCopilotWorkflow(connectFromWorkflowId).catch(() => null);
-      const source = (sourceRes as any)?.workflow as any;
+      const source = sourceRes?.workflow ?? null;
       const sourceThreadId = source?.chatThreadId ? String(source.chatThreadId) : null;
       if (!sourceThreadId) {
         pushError('Esse trabalho não tem histórico (thread) para mesclar.' );
@@ -320,7 +347,7 @@ const ChatComponent: React.FC = () => {
           title: current?.title || 'Chat',
           ...(activeProjectId ? { projectId: activeProjectId } : {}),
         });
-        targetThreadId = (created as any)?.thread?.id ?? null;
+        targetThreadId = created.thread?.id ?? null;
         if (targetThreadId) {
           await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { chatThreadId: targetThreadId }).catch(() => null);
         }
@@ -335,10 +362,8 @@ const ChatComponent: React.FC = () => {
 
       const ctx = source?.context;
       if (ctx && typeof ctx === 'object') {
-        const patch: any = { workflowId: activeWorkflowId };
-        if ((ctx as any).livePreview) patch.livePreview = (ctx as any).livePreview;
-        if ((ctx as any).editor) patch.editor = (ctx as any).editor;
-        if (Array.isArray((ctx as any).openFiles)) patch.openFiles = (ctx as any).openFiles;
+        const patch = buildContextPatch(activeWorkflowId, ctx);
+        if (!patch) return;
         await fetch('/api/copilot/context', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

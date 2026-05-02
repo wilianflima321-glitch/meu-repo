@@ -127,6 +127,56 @@ export interface SystemHealth {
     [key: string]: unknown;
 }
 
+type BridgeApi = {
+    postMessage: (message: unknown) => void;
+};
+
+type GatewayPayload = object;
+
+type GatewayEvent = GatewayPayload & {
+    type?: string;
+    requestId?: string;
+    error?: string;
+    result?: unknown;
+    jobId?: string;
+};
+
+type GatewayListener = (data: unknown) => void;
+
+type PendingRequest<T = unknown> = {
+    resolve: (value: T) => void;
+    reject: (reason?: unknown) => void;
+};
+
+type JobSummary = GatewayPayload;
+type JobStats = GatewayPayload;
+type AssetSummary = GatewayPayload;
+type DNAState = GatewayPayload;
+
+type AethelAudioEngine = {
+    play: (trackId: string, options?: unknown) => string;
+    stop: (instanceId: string, fade?: number) => void;
+    setChannelVolume: (channel: string, volume: number) => void;
+};
+
+declare global {
+    interface Window {
+        __THEIA_PLUGIN_HOST?: unknown;
+        __AETHEL_BRIDGE__?: BridgeApi;
+        acquireVsCodeApi?: () => BridgeApi;
+        __aethelAudio?: AethelAudioEngine;
+    }
+}
+
+function getTheiaBridge(): BridgeApi | undefined {
+    if (typeof window === 'undefined') return undefined;
+    return window.acquireVsCodeApi?.() ?? window.__AETHEL_BRIDGE__;
+}
+
+function isGatewayEvent(value: unknown): value is GatewayEvent {
+    return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
 // ============================================================================
 // PLATFORM DETECTION
 // ============================================================================
@@ -135,17 +185,17 @@ function detectPlatform(): Platform {
     // Check for Theia environment
     if (typeof window !== 'undefined') {
         // Theia exposes these globals
-        if ((window as any).__THEIA_PLUGIN_HOST) {
+        if (window.__THEIA_PLUGIN_HOST) {
             return 'theia';
         }
         
         // Check for VS Code/Theia API
-        if (typeof (window as any).acquireVsCodeApi === 'function') {
+        if (typeof window.acquireVsCodeApi === 'function') {
             return 'theia';
         }
         
         // Check for our bridge
-        if ((window as any).__AETHEL_BRIDGE__) {
+        if (window.__AETHEL_BRIDGE__) {
             return 'theia';
         }
         
@@ -168,7 +218,7 @@ function detectPlatform(): Platform {
 const theiaAdapter = {
     window: {
         showInformationMessage: async (message: string, options?: MessageOptions): Promise<string | undefined> => {
-            const vscode = (window as any).acquireVsCodeApi?.() || (window as any).__AETHEL_BRIDGE__;
+            const vscode = getTheiaBridge();
             if (vscode?.postMessage) {
                 return new Promise(resolve => {
                     const handler = (event: MessageEvent) => {
@@ -190,7 +240,7 @@ const theiaAdapter = {
         },
         
         showWarningMessage: async (message: string, options?: MessageOptions): Promise<string | undefined> => {
-            const vscode = (window as any).acquireVsCodeApi?.() || (window as any).__AETHEL_BRIDGE__;
+            const vscode = getTheiaBridge();
             if (vscode?.postMessage) {
                 return new Promise(resolve => {
                     const handler = (event: MessageEvent) => {
@@ -207,12 +257,12 @@ const theiaAdapter = {
                     });
                 });
             }
-            console.warn(`[WARN] ${message}`);
+            log.warn(`[WARN] ${message}`);
             return undefined;
         },
         
         showErrorMessage: async (message: string, options?: MessageOptions): Promise<string | undefined> => {
-            const vscode = (window as any).acquireVsCodeApi?.() || (window as any).__AETHEL_BRIDGE__;
+            const vscode = getTheiaBridge();
             if (vscode?.postMessage) {
                 return new Promise(resolve => {
                     const handler = (event: MessageEvent) => {
@@ -229,12 +279,12 @@ const theiaAdapter = {
                     });
                 });
             }
-            console.error(`[ERROR] ${message}`);
+            log.error(`[ERROR] ${message}`);
             return undefined;
         },
         
         showQuickPick: async <T extends QuickPickItem>(items: T[], options?: { title?: string; placeholder?: string }): Promise<T | undefined> => {
-            const vscode = (window as any).acquireVsCodeApi?.() || (window as any).__AETHEL_BRIDGE__;
+            const vscode = getTheiaBridge();
             if (vscode?.postMessage) {
                 return new Promise(resolve => {
                     const handler = (event: MessageEvent) => {
@@ -255,7 +305,7 @@ const theiaAdapter = {
         },
         
         showInputBox: async (options: InputBoxOptions): Promise<string | undefined> => {
-            const vscode = (window as any).acquireVsCodeApi?.() || (window as any).__AETHEL_BRIDGE__;
+            const vscode = getTheiaBridge();
             if (vscode?.postMessage) {
                 return new Promise(resolve => {
                     const handler = (event: MessageEvent) => {
@@ -275,7 +325,7 @@ const theiaAdapter = {
         },
         
         showOpenDialog: async (options: OpenDialogOptions): Promise<string[] | undefined> => {
-            const vscode = (window as any).acquireVsCodeApi?.() || (window as any).__AETHEL_BRIDGE__;
+            const vscode = getTheiaBridge();
             if (vscode?.postMessage) {
                 return new Promise(resolve => {
                     const handler = (event: MessageEvent) => {
@@ -295,7 +345,7 @@ const theiaAdapter = {
         },
         
         showSaveDialog: async (options: SaveDialogOptions): Promise<string | undefined> => {
-            const vscode = (window as any).acquireVsCodeApi?.() || (window as any).__AETHEL_BRIDGE__;
+            const vscode = getTheiaBridge();
             if (vscode?.postMessage) {
                 return new Promise(resolve => {
                     const handler = (event: MessageEvent) => {
@@ -318,7 +368,7 @@ const theiaAdapter = {
             options: ProgressOptions,
             task: (progress: { report: (value: ProgressReport) => void }) => Promise<T>
         ): Promise<T> => {
-            const vscode = (window as any).acquireVsCodeApi?.() || (window as any).__AETHEL_BRIDGE__;
+            const vscode = getTheiaBridge();
             const progressId = `progress-${Date.now()}`;
             
             if (vscode?.postMessage) {
@@ -354,7 +404,7 @@ const theiaAdapter = {
         },
         
         setStatusBarMessage: (text: string, hideAfterMs?: number): { dispose: () => void } => {
-            const vscode = (window as any).acquireVsCodeApi?.() || (window as any).__AETHEL_BRIDGE__;
+            const vscode = getTheiaBridge();
             const statusId = `status-${Date.now()}`;
             
             if (vscode?.postMessage) {
@@ -723,8 +773,8 @@ class GatewayClient {
     private ws: WebSocket | null = null;
     private baseUrl: string;
     private wsUrl: string;
-    private listeners: Map<string, Set<(data: any) => void>> = new Map();
-    private pendingRequests: Map<string, { resolve: Function; reject: Function }> = new Map();
+    private listeners: Map<string, Set<GatewayListener>> = new Map();
+    private pendingRequests: Map<string, PendingRequest> = new Map();
     private reconnectAttempts = 0;
     private maxReconnectAttempts = 5;
     
@@ -740,7 +790,7 @@ class GatewayClient {
         return response.json();
     }
     
-    async post<T>(path: string, body?: any): Promise<T> {
+    async post<T>(path: string, body?: unknown): Promise<T> {
         const response = await fetch(`${this.baseUrl}${path}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -777,7 +827,8 @@ class GatewayClient {
             
             this.ws.onmessage = (event) => {
                 try {
-                    const data = JSON.parse(event.data);
+                    const data = JSON.parse(event.data) as unknown;
+                    if (!isGatewayEvent(data)) return;
                     
                     // Handle RPC responses
                     if (data.requestId && this.pendingRequests.has(data.requestId)) {
@@ -797,7 +848,7 @@ class GatewayClient {
                         this.emit(data.type, data);
                     }
                 } catch (err) {
-                    console.error('Failed to parse WebSocket message:', err);
+                    log.error('Failed to parse WebSocket message:', err);
                 }
             };
         });
@@ -824,17 +875,17 @@ class GatewayClient {
         this.ws = null;
     }
     
-    send(type: string, data: any): void {
+    send(type: string, data: GatewayPayload): void {
         if (this.ws?.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({ type, ...data }));
         }
     }
     
-    request<T>(type: string, data: any): Promise<T> {
+    request<T>(type: string, data: GatewayPayload): Promise<T> {
         return new Promise((resolve, reject) => {
             const requestId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             
-            this.pendingRequests.set(requestId, { resolve, reject });
+            this.pendingRequests.set(requestId, { resolve: resolve as (value: unknown) => void, reject });
             
             // Timeout after 30s
             setTimeout(() => {
@@ -848,19 +899,24 @@ class GatewayClient {
         });
     }
     
-    on(event: string, callback: (data: any) => void): () => void {
+    on<T = GatewayEvent>(event: string, callback: (data: T) => void): () => void {
         if (!this.listeners.has(event)) {
             this.listeners.set(event, new Set());
         }
-        this.listeners.get(event)!.add(callback);
+        const listener: GatewayListener = (data) => callback(data as T);
+        this.listeners.get(event)!.add(listener);
         
         return () => {
-            this.listeners.get(event)?.delete(callback);
+            this.listeners.get(event)?.delete(listener);
         };
     }
     
-    private emit(event: string, data: any): void {
+    private emit(event: string, data: unknown): void {
         this.listeners.get(event)?.forEach(cb => cb(data));
+    }
+
+    getBaseUrl(): string {
+        return this.baseUrl;
     }
 }
 
@@ -929,7 +985,7 @@ class AethelSDK {
         },
         
         onProgress: (jobId: string, callback: (progress: RenderJob) => void): () => void => {
-            return this.gateway.on('render-progress', (data) => {
+            return this.gateway.on<RenderJob>('render-progress', (data) => {
                 if (data.jobId === jobId) {
                     callback(data);
                 }
@@ -945,16 +1001,16 @@ class AethelSDK {
             return this.gateway.post('/api/ai/generate', options);
         },
         
-        chat: async (message: string, context?: any): Promise<string> => {
+        chat: async (message: string, context?: GatewayPayload): Promise<string> => {
             const result = await this.gateway.post<{ response: string }>('/api/ai/chat', { message, context });
             return result.response;
         },
         
-        getDNA: async (): Promise<any> => {
+        getDNA: async (): Promise<DNAState> => {
             return this.gateway.get('/api/ai/dna');
         },
         
-        updateDNA: async (dna: any): Promise<void> => {
+        updateDNA: async (dna: DNAState): Promise<void> => {
             await this.gateway.post('/api/ai/dna', dna);
         }
     };
@@ -963,11 +1019,11 @@ class AethelSDK {
      * Jobs/Queue API
      */
     jobs = {
-        list: async (): Promise<any[]> => {
+        list: async (): Promise<JobSummary[]> => {
             return this.gateway.get('/api/jobs');
         },
         
-        get: async (jobId: string): Promise<any> => {
+        get: async (jobId: string): Promise<JobSummary> => {
             return this.gateway.get(`/api/jobs/${jobId}`);
         },
         
@@ -979,7 +1035,7 @@ class AethelSDK {
             await this.gateway.post('/api/jobs/clear-completed');
         },
         
-        getStats: async (): Promise<any> => {
+        getStats: async (): Promise<JobStats> => {
             return this.gateway.get('/api/jobs/stats');
         }
     };
@@ -997,7 +1053,7 @@ class AethelSDK {
         },
         
         subscribe: (callback: (health: SystemHealth) => void): () => void => {
-            return this.gateway.on('health-update', callback);
+            return this.gateway.on<SystemHealth>('health-update', callback);
         }
     };
     
@@ -1005,7 +1061,7 @@ class AethelSDK {
      * Storage/Assets API
      */
     assets = {
-        list: async (path?: string): Promise<any[]> => {
+        list: async (path?: string): Promise<AssetSummary[]> => {
             return this.gateway.get(`/api/assets${path ? `?path=${path}` : ''}`);
         },
         
@@ -1014,7 +1070,7 @@ class AethelSDK {
             formData.append('file', file);
             if (path) formData.append('path', path);
             
-            const response = await fetch(`${this.gateway['baseUrl']}/api/assets/upload`, {
+            const response = await fetch(`${this.gateway.getBaseUrl()}/api/assets/upload`, {
                 method: 'POST',
                 body: formData
             });
@@ -1023,7 +1079,7 @@ class AethelSDK {
         },
         
         download: async (assetId: string): Promise<Blob> => {
-            const response = await fetch(`${this.gateway['baseUrl']}/api/assets/${assetId}/download`);
+            const response = await fetch(`${this.gateway.getBaseUrl()}/api/assets/${assetId}/download`);
             return response.blob();
         },
         
@@ -1045,15 +1101,15 @@ class AethelSDK {
         },
         
         onUserJoined: (callback: (user: { id: string; name: string; color: string }) => void): () => void => {
-            return this.gateway.on('collab-user-joined', callback);
+            return this.gateway.on<{ id: string; name: string; color: string }>('collab-user-joined', callback);
         },
         
         onUserLeft: (callback: (userId: string) => void): () => void => {
-            return this.gateway.on('collab-user-left', callback);
+            return this.gateway.on<string>('collab-user-left', callback);
         },
         
         onCursorUpdate: (callback: (data: { userId: string; position: Position }) => void): () => void => {
-            return this.gateway.on('collab-cursor-update', callback);
+            return this.gateway.on<{ userId: string; position: Position }>('collab-cursor-update', callback);
         },
         
         updateCursor: (position: Position): void => {
@@ -1065,23 +1121,23 @@ class AethelSDK {
      * Audio API (delegates to audio engine)
      */
     audio = {
-        play: (trackId: string, options?: any): string => {
+        play: (trackId: string, options?: unknown): string => {
             // Dynamically import audio engine
-            const audioEngine = (window as any).__aethelAudio;
+            const audioEngine = window.__aethelAudio;
             if (audioEngine) {
                 return audioEngine.play(trackId, options);
             }
-            console.warn('Audio engine not initialized');
+            log.warn('Audio engine not initialized');
             return '';
         },
         
         stop: (instanceId: string, fade?: number): void => {
-            const audioEngine = (window as any).__aethelAudio;
+            const audioEngine = window.__aethelAudio;
             audioEngine?.stop(instanceId, fade);
         },
         
         setVolume: (channel: string, volume: number): void => {
-            const audioEngine = (window as any).__aethelAudio;
+            const audioEngine = window.__aethelAudio;
             audioEngine?.setChannelVolume(channel, volume);
         }
     };

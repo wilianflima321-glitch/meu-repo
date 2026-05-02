@@ -5,35 +5,35 @@
 
 declare module 'yjs' {
   export class Doc {
-    constructor(opts?: { guid?: string; gc?: boolean; gcFilter?: (item: any) => boolean });
+    constructor(opts?: { guid?: string; gc?: boolean; gcFilter?: (item: unknown) => boolean });
     
     guid: string;
     clientID: number;
     
     /** Get a shared type */
-    get<T extends AbstractType<any>>(name: string, TypeConstructor?: new () => T): T;
-    getMap<T = any>(name?: string): YMap<T>;
-    getArray<T = any>(name?: string): YArray<T>;
+    get<T extends AbstractType<unknown>>(name: string, TypeConstructor?: new () => T): T;
+    getMap<T = unknown>(name?: string): YMap<T>;
+    getArray<T = unknown>(name?: string): YArray<T>;
     getText(name?: string): YText;
     getXmlFragment(name?: string): YXmlFragment;
     
     /** Subscribe to updates */
-    on(event: 'update', callback: (update: Uint8Array, origin: any, doc: Doc) => void): void;
-    on(event: 'updateV2', callback: (update: Uint8Array, origin: any, doc: Doc) => void): void;
+    on(event: 'update', callback: (update: Uint8Array, origin: unknown, doc: Doc) => void): void;
+    on(event: 'updateV2', callback: (update: Uint8Array, origin: unknown, doc: Doc) => void): void;
     on(event: 'beforeTransaction', callback: (transaction: Transaction, doc: Doc) => void): void;
     on(event: 'afterTransaction', callback: (transaction: Transaction, doc: Doc) => void): void;
     on(event: 'beforeAllTransactions', callback: (doc: Doc) => void): void;
     on(event: 'afterAllTransactions', callback: (doc: Doc, transactions: Transaction[]) => void): void;
     on(event: 'destroy', callback: (doc: Doc) => void): void;
     
-    off(event: string, callback: Function): void;
-    once(event: string, callback: Function): void;
+    off(event: string, callback: (...args: never[]) => unknown): void;
+    once(event: string, callback: (...args: never[]) => unknown): void;
     
     /** Transaction handling */
-    transact<T>(fn: (transaction: Transaction) => T, origin?: any): T;
+    transact<T>(fn: (transaction: Transaction) => T, origin?: unknown): T;
     
     /** Encoding */
-    toJSON(): any;
+    toJSON(): unknown;
     
     /** Cleanup */
     destroy(): void;
@@ -41,22 +41,22 @@ declare module 'yjs' {
 
   export class Transaction {
     doc: Doc;
-    origin: any;
+    origin: unknown;
     local: boolean;
-    changed: Map<AbstractType<any>, Set<string | null>>;
-    changedParentTypes: Map<AbstractType<any>, any[]>;
+    changed: Map<AbstractType<unknown>, Set<string | null>>;
+    changedParentTypes: Map<AbstractType<unknown>, unknown[]>;
   }
 
   export abstract class AbstractType<EventType> {
     doc: Doc | null;
-    parent: AbstractType<any> | null;
+    parent: AbstractType<unknown> | null;
     
-    toJSON(): any;
+    toJSON(): unknown;
     
     observe(f: (event: EventType, transaction: Transaction) => void): void;
-    observeDeep(f: (events: any[], transaction: Transaction) => void): void;
-    unobserve(f: Function): void;
-    unobserveDeep(f: Function): void;
+    observeDeep(f: (events: unknown[], transaction: Transaction) => void): void;
+    unobserve(f: (...args: never[]) => unknown): void;
+    unobserveDeep(f: (...args: never[]) => unknown): void;
   }
 
   export interface YMapEvent<T> {
@@ -67,7 +67,7 @@ declare module 'yjs' {
     };
   }
 
-  export class YMap<T = any> extends AbstractType<YMapEvent<T>> {
+  export class YMap<T = unknown> extends AbstractType<YMapEvent<T>> {
     constructor(entries?: Iterable<[string, T]>);
     
     get size(): number;
@@ -82,23 +82,23 @@ declare module 'yjs' {
     entries(): IterableIterator<[string, T]>;
     forEach(callback: (value: T, key: string, map: YMap<T>) => void): void;
     
-    toJSON(): { [key: string]: any };
+    toJSON(): { [key: string]: unknown };
     clone(): YMap<T>;
   }
 
   // Aliases compatíveis com uso `new Y.Map()`
-  export class Map<T = any> extends YMap<T> {}
+  export class Map<T = unknown> extends YMap<T> {}
 
   export interface YArrayEvent<T> {
     target: YArray<T>;
     changes: {
-      added: Set<any>;
-      deleted: Set<any>;
+      added: Set<unknown>;
+      deleted: Set<unknown>;
       delta: { insert?: T[]; delete?: number; retain?: number }[];
     };
   }
 
-  export class YArray<T = any> extends AbstractType<YArrayEvent<T>> {
+  export class YArray<T = unknown> extends AbstractType<YArrayEvent<T>> {
     constructor(content?: T[]);
     
     get length(): number;
@@ -114,7 +114,7 @@ declare module 'yjs' {
     forEach(callback: (value: T, index: number, array: YArray<T>) => void): void;
     
     toArray(): T[];
-    toJSON(): any[];
+    toJSON(): unknown[];
     clone(): YArray<T>;
   }
 
@@ -122,9 +122,9 @@ declare module 'yjs' {
     target: YText;
     delta: { insert?: string; delete?: number; retain?: number; attributes?: object }[];
     changes: {
-      added: Set<any>;
-      deleted: Set<any>;
-      delta: any[];
+      added: Set<unknown>;
+      deleted: Set<unknown>;
+      delta: unknown[];
     };
   }
 
@@ -138,8 +138,8 @@ declare module 'yjs' {
     delete(index: number, length: number): void;
     format(index: number, length: number, attributes: object): void;
     
-    applyDelta(delta: any[]): void;
-    toDelta(snapshot?: any, prevSnapshot?: any, computeYChange?: Function): any[];
+    applyDelta(delta: unknown[]): void;
+    toDelta(snapshot?: unknown, prevSnapshot?: unknown, computeYChange?: (...args: never[]) => unknown): unknown[];
     
     toString(): string;
     toJSON(): string;
@@ -164,7 +164,7 @@ declare module 'yjs' {
     get(index: number): YXmlElement | YXmlText;
     
     toArray(): (YXmlElement | YXmlText)[];
-    createTreeWalker(filter: (type: any) => boolean): any;
+    createTreeWalker(filter: (type: unknown) => boolean): unknown;
     querySelector(query: string): YXmlElement | YXmlText | null;
     querySelectorAll(query: string): (YXmlElement | YXmlText)[];
     
@@ -187,7 +187,7 @@ declare module 'yjs' {
     getAttributes(): { [key: string]: string };
   }
 
-  export class YXmlText extends AbstractType<any> {
+  export class YXmlText extends AbstractType<unknown> {
     constructor(text?: string);
     
     get length(): number;
@@ -200,14 +200,14 @@ declare module 'yjs' {
     
     toString(): string;
     toJSON(): string;
-    toDelta(): any[];
+    toDelta(): unknown[];
   }
 
   /** Encoding functions */
   export function encodeStateAsUpdate(doc: Doc, encodedTargetStateVector?: Uint8Array): Uint8Array;
   export function encodeStateAsUpdateV2(doc: Doc, encodedTargetStateVector?: Uint8Array): Uint8Array;
-  export function applyUpdate(doc: Doc, update: Uint8Array, origin?: any): void;
-  export function applyUpdateV2(doc: Doc, update: Uint8Array, origin?: any): void;
+  export function applyUpdate(doc: Doc, update: Uint8Array, origin?: unknown): void;
+  export function applyUpdateV2(doc: Doc, update: Uint8Array, origin?: unknown): void;
   export function encodeStateVector(doc: Doc): Uint8Array;
   export function decodeStateVector(encodedStateVector: Uint8Array): Map<number, number>;
   
@@ -218,33 +218,33 @@ declare module 'yjs' {
     clientID: number;
     doc: Doc;
     
-    getLocalState(): any;
-    setLocalState(state: any): void;
-    setLocalStateField(field: string, value: any): void;
-    getStates(): Map<number, any>;
+    getLocalState(): unknown;
+    setLocalState(state: unknown): void;
+    setLocalStateField(field: string, value: unknown): void;
+    getStates(): Map<number, unknown>;
     
-    on(event: 'change', callback: (changes: { added: number[]; updated: number[]; removed: number[] }, origin: any) => void): void;
-    on(event: 'update', callback: (changes: { added: number[]; updated: number[]; removed: number[] }, origin: any) => void): void;
-    off(event: string, callback: Function): void;
+    on(event: 'change', callback: (changes: { added: number[]; updated: number[]; removed: number[] }, origin: unknown) => void): void;
+    on(event: 'update', callback: (changes: { added: number[]; updated: number[]; removed: number[] }, origin: unknown) => void): void;
+    off(event: string, callback: (...args: never[]) => unknown): void;
     
     destroy(): void;
   }
 
   /** Undo Manager */
   export class UndoManager {
-      undoStack: any[];
-      redoStack: any[];
+      undoStack: unknown[];
+      redoStack: unknown[];
     constructor(
-      typeScope: AbstractType<any> | AbstractType<any>[],
+      typeScope: AbstractType<unknown> | AbstractType<unknown>[],
       options?: {
         captureTimeout?: number;
-        deleteFilter?: (item: any) => boolean;
-        trackedOrigins?: Set<any>;
+        deleteFilter?: (item: unknown) => boolean;
+        trackedOrigins?: Set<unknown>;
       }
     );
     
-    undo(): any;
-    redo(): any;
+    undo(): unknown;
+    redo(): unknown;
     
     canUndo(): boolean;
     canRedo(): boolean;
@@ -252,18 +252,18 @@ declare module 'yjs' {
     clear(): void;
     stopCapturing(): void;
     
-    on(event: 'stack-item-added', callback: (event: { stackItem: any; origin: any; type: 'undo' | 'redo' }) => void): void;
-    on(event: 'stack-item-popped', callback: (event: { stackItem: any; origin: any; type: 'undo' | 'redo' }) => void): void;
-    off(event: string, callback: Function): void;
+    on(event: 'stack-item-added', callback: (event: { stackItem: unknown; origin: unknown; type: 'undo' | 'redo' }) => void): void;
+    on(event: 'stack-item-popped', callback: (event: { stackItem: unknown; origin: unknown; type: 'undo' | 'redo' }) => void): void;
+    off(event: string, callback: (...args: never[]) => unknown): void;
     
     destroy(): void;
   }
 
   /** Relative positions */
-  export function createRelativePositionFromTypeIndex(type: AbstractType<any>, index: number, assoc?: number): any;
-  export function createAbsolutePositionFromRelativePosition(rpos: any, doc: Doc): { type: AbstractType<any>; index: number } | null;
-  export function encodeRelativePosition(rpos: any): Uint8Array;
-  export function decodeRelativePosition(encodedRpos: Uint8Array): any;
+  export function createRelativePositionFromTypeIndex(type: AbstractType<unknown>, index: number, assoc?: number): unknown;
+  export function createAbsolutePositionFromRelativePosition(rpos: unknown, doc: Doc): { type: AbstractType<unknown>; index: number } | null;
+  export function encodeRelativePosition(rpos: unknown): Uint8Array;
+  export function decodeRelativePosition(encodedRpos: Uint8Array): unknown;
 }
 
 declare module 'y-websocket' {
@@ -305,7 +305,7 @@ declare module 'y-websocket' {
     on(event: 'sync', callback: (synced: boolean) => void): void;
     on(event: 'connection-close', callback: (event: CloseEvent, provider: WebsocketProvider) => void): void;
     on(event: 'connection-error', callback: (event: Event, provider: WebsocketProvider) => void): void;
-    off(event: string, callback: Function): void;
+    off(event: string, callback: (...args: never[]) => unknown): void;
   }
 
   export class WebrtcProvider {
@@ -315,7 +315,7 @@ declare module 'y-websocket' {
       awareness?: Awareness;
       maxConns?: number;
       filterBcConns?: boolean;
-      peerOpts?: any;
+      peerOpts?: unknown;
     });
 
     awareness: Awareness;
@@ -328,8 +328,8 @@ declare module 'y-websocket' {
     destroy(): void;
 
     on(event: 'synced', callback: (synced: { synced: boolean }) => void): void;
-    on(event: 'peers', callback: (peers: { webrtcPeers: any[]; bcPeers: any[] }) => void): void;
-    off(event: string, callback: Function): void;
+    on(event: 'peers', callback: (peers: { webrtcPeers: unknown[]; bcPeers: unknown[] }) => void): void;
+    off(event: string, callback: (...args: never[]) => unknown): void;
   }
 }
 
@@ -350,6 +350,6 @@ declare module 'y-indexeddb' {
     clearData(): Promise<void>;
 
     on(event: 'synced', callback: (provider: IndexeddbPersistence) => void): void;
-    off(event: string, callback: Function): void;
+    off(event: string, callback: (...args: never[]) => unknown): void;
   }
 }

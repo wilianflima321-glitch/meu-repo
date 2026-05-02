@@ -84,13 +84,13 @@ export interface ContributedConfiguration {
 
 export interface ConfigurationProperty {
   type: string | string[];
-  default?: any;
+  default?: unknown;
   description?: string;
-  enum?: any[];
+  enum?: unknown[];
   enumDescriptions?: string[];
   minimum?: number;
   maximum?: number;
-  items?: any;
+  items?: unknown;
   scope?: 'application' | 'machine' | 'window' | 'resource' | 'language-overridable';
 }
 
@@ -149,7 +149,7 @@ export interface ContributedViewContainer {
 export interface ContributedTaskDefinition {
   type: string;
   required?: string[];
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 export interface ContributedDebugger {
@@ -158,10 +158,10 @@ export interface ContributedDebugger {
   program?: string;
   runtime?: string;
   languages?: string[];
-  variables?: Record<string, any>;
-  configurationAttributes?: any;
-  initialConfigurations?: any[];
-  configurationSnippets?: any[];
+  variables?: Record<string, unknown>;
+  configurationAttributes?: unknown;
+  initialConfigurations?: unknown[];
+  configurationSnippets?: unknown[];
 }
 
 export interface ContributedBreakpoint {
@@ -185,7 +185,7 @@ export interface Extension {
   manifest: ExtensionManifest;
   extensionPath: string;
   isActive: boolean;
-  exports?: any;
+  exports?: unknown;
 }
 
 export interface ExtensionContext {
@@ -197,12 +197,12 @@ export interface ExtensionContext {
   subscriptions: { dispose: () => void }[];
   globalState: {
     get<T>(key: string, defaultValue?: T): T | undefined;
-    update(key: string, value: any): Promise<void>;
+    update(key: string, value: unknown): Promise<void>;
     keys(): readonly string[];
   };
   workspaceState: {
     get<T>(key: string, defaultValue?: T): T | undefined;
-    update(key: string, value: any): Promise<void>;
+    update(key: string, value: unknown): Promise<void>;
     keys(): readonly string[];
   };
   secrets: {
@@ -216,7 +216,171 @@ export interface ExtensionContext {
 export interface ExtensionHostMessage {
   id: string;
   type: string;
-  payload: any;
+  payload: unknown;
+}
+
+type Disposable = { dispose: () => void };
+type ApiNamespace = Record<string, unknown>;
+type NumericEnum = Record<string, number>;
+type ExtensionCallback = (...args: unknown[]) => unknown | Promise<unknown>;
+type EventListener = (...args: unknown[]) => void;
+type ProviderLike = unknown;
+type DocumentSelector = string | readonly string[] | Record<string, unknown>;
+type QuickPickOptions = Record<string, unknown>;
+type InputBoxOptions = Record<string, unknown>;
+type ViewShowOptions = Record<string, unknown>;
+type WebviewPanelOptions = Record<string, unknown>;
+type TerminalOptions = { name?: string } & Record<string, unknown>;
+type ProgressOptions = Record<string, unknown>;
+type ProgressReport = { message?: string; increment?: number };
+type ProgressReporter = { report: (value: ProgressReport) => void };
+type ProgressTask<R> = (progress: ProgressReporter) => R | Promise<R>;
+type WorkspaceFolder = { uri: UriLike; name: string; index: number };
+type WorkspaceEdit = Record<string, unknown>;
+type DebugConfiguration = Record<string, unknown>;
+type DebugSession = Record<string, unknown>;
+type TaskFilter = Record<string, unknown>;
+type TaskLike = Record<string, unknown>;
+
+type UriLike = {
+  scheme: string;
+  path: string;
+  toString: () => string;
+};
+
+type UriFactory = {
+  file: (p: string) => UriLike;
+  parse: (value: string) => UriLike;
+  joinPath: (base: UriLike, ...pathSegments: string[]) => UriLike;
+};
+
+type OutputChannel = {
+  name: string;
+  append: (value: string) => void;
+  appendLine: (value: string) => void;
+  clear: () => void;
+  show: () => void;
+  hide: () => void;
+  dispose: () => void;
+};
+
+type Terminal = {
+  name: string;
+  processId: Promise<number>;
+  sendText: (text: string) => void;
+  show: () => void;
+  hide: () => void;
+  dispose: () => void;
+};
+
+type WebviewPanel = {
+  viewType: string;
+  title: string;
+  webview: {
+    html: string;
+    onDidReceiveMessage: (listener: EventListener) => Disposable;
+    postMessage: (message: unknown) => Promise<boolean>;
+    asWebviewUri: (uri: UriLike) => UriLike;
+  };
+  visible: boolean;
+  active: boolean;
+  dispose: () => void;
+  reveal: () => void;
+  onDidChangeViewState: (listener: EventListener) => Disposable;
+  onDidDispose: (listener: EventListener) => Disposable;
+};
+
+type StatusBarItem = {
+  id: string;
+  alignment: number;
+  priority: number;
+  text: string;
+  tooltip: string;
+  color: string | undefined;
+  backgroundColor: string | undefined;
+  command: string | undefined;
+  show: () => void;
+  hide: () => void;
+  dispose: () => void;
+};
+
+type ConfigurationReader = {
+  get: (key: string) => unknown;
+};
+
+type DebugConsole = {
+  append: (value?: string) => void;
+  appendLine: (value?: string) => void;
+};
+
+type TaskExecution = {
+  terminate: () => void;
+};
+
+interface PositionLike {
+  line: number;
+  character: number;
+  isEqual(other: PositionLike): boolean;
+  isBefore(other: PositionLike): boolean;
+  isAfter(other: PositionLike): boolean;
+}
+
+type RangeLike = {
+  start: PositionLike;
+  end: PositionLike;
+};
+
+class RuntimePosition implements PositionLike {
+  constructor(public line: number, public character: number) {}
+
+  isEqual(other: PositionLike): boolean {
+    return this.line === other.line && this.character === other.character;
+  }
+
+  isBefore(other: PositionLike): boolean {
+    return this.line < other.line || (this.line === other.line && this.character < other.character);
+  }
+
+  isAfter(other: PositionLike): boolean {
+    return this.line > other.line || (this.line === other.line && this.character > other.character);
+  }
+
+  translate(lineDelta = 0, characterDelta = 0): RuntimePosition {
+    return new RuntimePosition(this.line + lineDelta, this.character + characterDelta);
+  }
+}
+
+class RuntimeRange implements RangeLike {
+  constructor(public start: PositionLike, public end: PositionLike) {}
+
+  static fromPositions(start: PositionLike, end: PositionLike): RuntimeRange {
+    return new RuntimeRange(start, end);
+  }
+
+  get isEmpty(): boolean {
+    return this.start.isEqual(this.end);
+  }
+
+  get isSingleLine(): boolean {
+    return this.start.line === this.end.line;
+  }
+
+  contains(positionOrRange: PositionLike | RangeLike): boolean {
+    if ('start' in positionOrRange) {
+      return this.contains(positionOrRange.start) && this.contains(positionOrRange.end);
+    }
+    return !positionOrRange.isBefore(this.start) && !positionOrRange.isAfter(this.end);
+  }
+}
+
+class RuntimeSelection extends RuntimeRange {
+  constructor(public anchor: PositionLike, public active: PositionLike) {
+    super(anchor, active);
+  }
+
+  get isReversed(): boolean {
+    return this.anchor.isAfter(this.active);
+  }
 }
 
 const nativeRequire = eval('require') as NodeRequire;
@@ -230,24 +394,24 @@ class ExtensionAPI {
   private extensionId: string;
   
   // Declare all API namespaces
-  commands: any;
-  window: any;
-  workspace: any;
-  languages: any;
-  debug: any;
-  tasks: any;
-  extensions: any;
-  env: any;
-  Uri: any;
-  Position: any;
-  Range: any;
-  Selection: any;
-  DiagnosticSeverity: any;
-  CompletionItemKind: any;
-  SymbolKind: any;
-  TreeItemCollapsibleState: any;
-  StatusBarAlignment: any;
-  ViewColumn: any;
+  commands: ApiNamespace;
+  window: ApiNamespace;
+  workspace: ApiNamespace;
+  languages: ApiNamespace;
+  debug: ApiNamespace;
+  tasks: ApiNamespace;
+  extensions: ApiNamespace;
+  env: ApiNamespace;
+  Uri: UriFactory;
+  Position: typeof RuntimePosition;
+  Range: typeof RuntimeRange;
+  Selection: typeof RuntimeSelection;
+  DiagnosticSeverity: NumericEnum;
+  CompletionItemKind: NumericEnum;
+  SymbolKind: NumericEnum;
+  TreeItemCollapsibleState: NumericEnum;
+  StatusBarAlignment: NumericEnum;
+  ViewColumn: NumericEnum;
   
   constructor(host: ExtensionHostRuntime, extensionId: string) {
     this.host = host;
@@ -255,10 +419,10 @@ class ExtensionAPI {
     
     // Initialize all API namespaces in constructor
     this.commands = {
-      registerCommand: (command: string, callback: (...args: any[]) => any) => {
+      registerCommand: (command: string, callback: ExtensionCallback) => {
         return this.host.registerCommand(this.extensionId, command, callback);
       },
-      executeCommand: <T>(command: string, ...args: any[]): Promise<T> => {
+      executeCommand: <T>(command: string, ...args: unknown[]): Promise<T> => {
         return this.host.executeCommand(command, ...args);
       },
       getCommands: (filterInternal?: boolean): Promise<string[]> => {
@@ -276,19 +440,19 @@ class ExtensionAPI {
       showErrorMessage: (message: string, ...items: string[]) => {
         return this.host.showMessage('error', message, items);
       },
-      showQuickPick: (items: any[], options?: any) => {
+      showQuickPick: (items: readonly unknown[], options?: QuickPickOptions) => {
         return this.host.showQuickPick(items, options);
       },
-      showInputBox: (options?: any) => {
+      showInputBox: (options?: Record<string, unknown>) => {
         return this.host.showInputBox(options);
       },
       createOutputChannel: (name: string) => {
         return this.host.createOutputChannel(this.extensionId, name);
       },
-      createTerminal: (options?: any) => {
+      createTerminal: (options?: Record<string, unknown>) => {
         return this.host.createTerminal(this.extensionId, options);
       },
-      createWebviewPanel: (viewType: string, title: string, showOptions: any, options?: any) => {
+      createWebviewPanel: (viewType: string, title: string, showOptions: ViewShowOptions, options?: WebviewPanelOptions) => {
         return this.host.createWebviewPanel(this.extensionId, viewType, title, showOptions, options);
       },
       createStatusBarItem: (alignment?: number, priority?: number) => {
@@ -297,19 +461,19 @@ class ExtensionAPI {
       setStatusBarMessage: (text: string, hideAfterTimeout?: number) => {
         return this.host.setStatusBarMessage(text, hideAfterTimeout);
       },
-      withProgress: (options: any, task: any) => {
+      withProgress: <R>(options: ProgressOptions, task: ProgressTask<R>) => {
         return this.host.withProgress(this.extensionId, options, task);
       },
-      registerTreeDataProvider: (viewId: string, provider: any) => {
+      registerTreeDataProvider: (viewId: string, provider: ProviderLike) => {
         return this.host.registerTreeDataProvider(this.extensionId, viewId, provider);
       },
-      createTreeView: (viewId: string, options: any) => {
+      createTreeView: (viewId: string, options: Record<string, unknown>) => {
         return this.host.createTreeView(this.extensionId, viewId, options);
       },
-      onDidChangeActiveTextEditor: (listener: any) => {
+      onDidChangeActiveTextEditor: (listener: EventListener) => {
         return this.host.onEvent('activeTextEditorChanged', listener);
       },
-      onDidChangeTextEditorSelection: (listener: any) => {
+      onDidChangeTextEditorSelection: (listener: EventListener) => {
         return this.host.onEvent('textEditorSelectionChanged', listener);
       },
     };
@@ -317,155 +481,155 @@ class ExtensionAPI {
     this.workspace = {
       get workspaceFolders() { return host.getWorkspaceFolders(); },
       get name() { return host.getWorkspaceName(); },
-      getConfiguration: (section?: string, scope?: any) => {
+      getConfiguration: (section?: string, scope?: unknown) => {
         return this.host.getConfiguration(section, scope);
       },
-      onDidChangeConfiguration: (listener: any) => {
+      onDidChangeConfiguration: (listener: EventListener) => {
         return this.host.onEvent('configurationChanged', listener);
       },
       findFiles: (include: string, exclude?: string, maxResults?: number) => {
         return this.host.findFiles(include, exclude, maxResults);
       },
-      openTextDocument: (uri: any) => {
+      openTextDocument: (uri: UriLike) => {
         return this.host.openTextDocument(uri);
       },
-      applyEdit: (edit: any) => {
+      applyEdit: (edit: WorkspaceEdit) => {
         return this.host.applyEdit(edit);
       },
       createFileSystemWatcher: (globPattern: string, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean) => {
         return this.host.createFileSystemWatcher(this.extensionId, globPattern, ignoreCreateEvents, ignoreChangeEvents, ignoreDeleteEvents);
       },
-      onDidOpenTextDocument: (listener: any) => {
+      onDidOpenTextDocument: (listener: EventListener) => {
         return this.host.onEvent('textDocumentOpened', listener);
       },
-      onDidCloseTextDocument: (listener: any) => {
+      onDidCloseTextDocument: (listener: EventListener) => {
         return this.host.onEvent('textDocumentClosed', listener);
       },
-      onDidChangeTextDocument: (listener: any) => {
+      onDidChangeTextDocument: (listener: EventListener) => {
         return this.host.onEvent('textDocumentChanged', listener);
       },
-      onDidSaveTextDocument: (listener: any) => {
+      onDidSaveTextDocument: (listener: EventListener) => {
         return this.host.onEvent('textDocumentSaved', listener);
       },
-      registerTextDocumentContentProvider: (scheme: string, provider: any) => {
+      registerTextDocumentContentProvider: (scheme: string, provider: ProviderLike) => {
         return this.host.registerTextDocumentContentProvider(this.extensionId, scheme, provider);
       },
-      registerFileSystemProvider: (scheme: string, provider: any, options?: any) => {
+      registerFileSystemProvider: (scheme: string, provider: ProviderLike, options?: Record<string, unknown>) => {
         return this.host.registerFileSystemProvider(this.extensionId, scheme, provider, options);
       },
     };
     
     this.languages = {
-      registerCompletionItemProvider: (selector: any, provider: any, ...triggerCharacters: string[]) => {
+      registerCompletionItemProvider: (selector: DocumentSelector, provider: ProviderLike, ...triggerCharacters: string[]) => {
         return this.host.registerCompletionProvider(this.extensionId, selector, provider, triggerCharacters);
       },
-      registerHoverProvider: (selector: any, provider: any) => {
+      registerHoverProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerHoverProvider(this.extensionId, selector, provider);
       },
-      registerDefinitionProvider: (selector: any, provider: any) => {
+      registerDefinitionProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerDefinitionProvider(this.extensionId, selector, provider);
       },
-      registerReferenceProvider: (selector: any, provider: any) => {
+      registerReferenceProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerReferenceProvider(this.extensionId, selector, provider);
       },
-      registerDocumentSymbolProvider: (selector: any, provider: any) => {
+      registerDocumentSymbolProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerDocumentSymbolProvider(this.extensionId, selector, provider);
       },
-      registerCodeActionsProvider: (selector: any, provider: any, metadata?: any) => {
+      registerCodeActionsProvider: (selector: DocumentSelector, provider: ProviderLike, metadata?: Record<string, unknown>) => {
         return this.host.registerCodeActionsProvider(this.extensionId, selector, provider, metadata);
       },
-      registerCodeLensProvider: (selector: any, provider: any) => {
+      registerCodeLensProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerCodeLensProvider(this.extensionId, selector, provider);
       },
-      registerDocumentFormattingEditProvider: (selector: any, provider: any) => {
+      registerDocumentFormattingEditProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerDocumentFormattingProvider(this.extensionId, selector, provider);
       },
-      registerDocumentRangeFormattingEditProvider: (selector: any, provider: any) => {
+      registerDocumentRangeFormattingEditProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerDocumentRangeFormattingProvider(this.extensionId, selector, provider);
       },
-      registerSignatureHelpProvider: (selector: any, provider: any, ...triggerCharacters: string[]) => {
+      registerSignatureHelpProvider: (selector: DocumentSelector, provider: ProviderLike, ...triggerCharacters: string[]) => {
         return this.host.registerSignatureHelpProvider(this.extensionId, selector, provider, triggerCharacters);
       },
-      registerRenameProvider: (selector: any, provider: any) => {
+      registerRenameProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerRenameProvider(this.extensionId, selector, provider);
       },
-      registerDocumentLinkProvider: (selector: any, provider: any) => {
+      registerDocumentLinkProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerDocumentLinkProvider(this.extensionId, selector, provider);
       },
-      registerColorProvider: (selector: any, provider: any) => {
+      registerColorProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerColorProvider(this.extensionId, selector, provider);
       },
-      registerFoldingRangeProvider: (selector: any, provider: any) => {
+      registerFoldingRangeProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerFoldingRangeProvider(this.extensionId, selector, provider);
       },
-      registerDeclarationProvider: (selector: any, provider: any) => {
+      registerDeclarationProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerDeclarationProvider(this.extensionId, selector, provider);
       },
-      registerTypeDefinitionProvider: (selector: any, provider: any) => {
+      registerTypeDefinitionProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerTypeDefinitionProvider(this.extensionId, selector, provider);
       },
-      registerImplementationProvider: (selector: any, provider: any) => {
+      registerImplementationProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerImplementationProvider(this.extensionId, selector, provider);
       },
-      setLanguageConfiguration: (language: string, configuration: any) => {
+      setLanguageConfiguration: (language: string, configuration: Record<string, unknown>) => {
         return this.host.setLanguageConfiguration(this.extensionId, language, configuration);
       },
       createDiagnosticCollection: (name?: string) => {
         return this.host.createDiagnosticCollection(this.extensionId, name);
       },
-      getDiagnostics: (uri?: any) => {
+      getDiagnostics: (uri?: UriLike) => {
         return this.host.getDiagnostics(uri);
       },
-      registerInlayHintsProvider: (selector: any, provider: any) => {
+      registerInlayHintsProvider: (selector: DocumentSelector, provider: ProviderLike) => {
         return this.host.registerInlayHintsProvider(this.extensionId, selector, provider);
       },
     };
     
     this.debug = {
-      registerDebugConfigurationProvider: (debugType: string, provider: any) => {
+      registerDebugConfigurationProvider: (debugType: string, provider: ProviderLike) => {
         return this.host.registerDebugConfigurationProvider(this.extensionId, debugType, provider);
       },
-      registerDebugAdapterDescriptorFactory: (debugType: string, factory: any) => {
+      registerDebugAdapterDescriptorFactory: (debugType: string, factory: ProviderLike) => {
         return this.host.registerDebugAdapterDescriptorFactory(this.extensionId, debugType, factory);
       },
-      startDebugging: (folder: any, nameOrConfiguration: any, parentSession?: any) => {
+      startDebugging: (folder: WorkspaceFolder | undefined, nameOrConfiguration: DebugConfiguration, parentSession?: DebugSession) => {
         return this.host.startDebugging(folder, nameOrConfiguration, parentSession);
       },
-      stopDebugging: (session?: any) => {
+      stopDebugging: (session?: DebugSession) => {
         return this.host.stopDebugging(session);
       },
       get activeDebugSession() { return host.getActiveDebugSession(); },
       get activeDebugConsole() { return host.getActiveDebugConsole(); },
       get breakpoints() { return host.getBreakpoints(); },
-      onDidStartDebugSession: (listener: any) => {
+      onDidStartDebugSession: (listener: EventListener) => {
         return this.host.onEvent('debugSessionStarted', listener);
       },
-      onDidTerminateDebugSession: (listener: any) => {
+      onDidTerminateDebugSession: (listener: EventListener) => {
         return this.host.onEvent('debugSessionTerminated', listener);
       },
-      onDidChangeActiveDebugSession: (listener: any) => {
+      onDidChangeActiveDebugSession: (listener: EventListener) => {
         return this.host.onEvent('activeDebugSessionChanged', listener);
       },
-      onDidChangeBreakpoints: (listener: any) => {
+      onDidChangeBreakpoints: (listener: EventListener) => {
         return this.host.onEvent('breakpointsChanged', listener);
       },
     };
     
     this.tasks = {
-      registerTaskProvider: (type: string, provider: any) => {
+      registerTaskProvider: (type: string, provider: ProviderLike) => {
         return this.host.registerTaskProvider(this.extensionId, type, provider);
       },
-      fetchTasks: (filter?: any) => {
+      fetchTasks: (filter?: TaskFilter) => {
         return this.host.fetchTasks(filter);
       },
-      executeTask: (task: any) => {
+      executeTask: (task: TaskLike) => {
         return this.host.executeTask(task);
       },
       get taskExecutions() { return host.getTaskExecutions(); },
-      onDidStartTask: (listener: any) => {
+      onDidStartTask: (listener: EventListener) => {
         return this.host.onEvent('taskStarted', listener);
       },
-      onDidEndTask: (listener: any) => {
+      onDidEndTask: (listener: EventListener) => {
         return this.host.onEvent('taskEnded', listener);
       },
     };
@@ -475,7 +639,7 @@ class ExtensionAPI {
         return this.host.getExtension(extensionId);
       },
       get all() { return host.getAllExtensions(); },
-      onDidChange: (listener: any) => {
+      onDidChange: (listener: EventListener) => {
         return this.host.onEvent('extensionsChanged', listener);
       },
     };
@@ -492,13 +656,13 @@ class ExtensionAPI {
       remoteName: undefined,
       isNewAppInstall: false,
       isTelemetryEnabled: false,
-      onDidChangeTelemetryEnabled: (listener: any) => {
+      onDidChangeTelemetryEnabled: (listener: EventListener) => {
         return this.host.onEvent('telemetryEnabledChanged', listener);
       },
-      openExternal: (target: any) => {
+      openExternal: (target: UriLike | string) => {
         return this.host.openExternal(target);
       },
-      asExternalUri: (target: any) => {
+      asExternalUri: (target: UriLike | string) => {
         return this.host.asExternalUri(target);
       },
     };
@@ -512,53 +676,15 @@ class ExtensionAPI {
         }
         return { scheme: 'file', path: value, toString: () => value };
       },
-      joinPath: (base: any, ...pathSegments: string[]) => {
+      joinPath: (base: UriLike, ...pathSegments: string[]) => {
         const newPath = path.join(base.path, ...pathSegments);
         return { ...base, path: newPath, toString: () => `${base.scheme}://${newPath}` };
       },
     };
     
-    this.Position = class {
-      constructor(public line: number, public character: number) {}
-      isEqual(other: any) { return this.line === other.line && this.character === other.character; }
-      isBefore(other: any) { return this.line < other.line || (this.line === other.line && this.character < other.character); }
-      isAfter(other: any) { return this.line > other.line || (this.line === other.line && this.character > other.character); }
-      translate(lineDelta?: number, characterDelta?: number) { return new (this.constructor as any)(this.line + (lineDelta || 0), this.character + (characterDelta || 0)); }
-    };
-    
-    this.Range = class {
-      public start: any;
-      public end: any;
-      constructor(start: any, end: any) {
-        this.start = start;
-        this.end = end;
-      }
-      static fromPositions(start: any, end: any) { return new this(start, end); }
-      get isEmpty() { return this.start.isEqual(this.end); }
-      get isSingleLine() { return this.start.line === this.end.line; }
-      contains(positionOrRange: any) {
-        if (positionOrRange.start) {
-          return this.contains(positionOrRange.start) && this.contains(positionOrRange.end);
-        }
-        return !positionOrRange.isBefore(this.start) && !positionOrRange.isAfter(this.end);
-      }
-    };
-    
-    this.Selection = class {
-      public anchor: any;
-      public active: any;
-      public start: any;
-      public end: any;
-      constructor(anchor: any, active: any) {
-        this.anchor = anchor;
-        this.active = active;
-        this.start = anchor;
-        this.end = active;
-      }
-      get isReversed() { return this.anchor.isAfter(this.active); }
-      get isEmpty() { return this.start.isEqual(this.end); }
-      get isSingleLine() { return this.start.line === this.end.line; }
-    };
+    this.Position = RuntimePosition;
+    this.Range = RuntimeRange;
+    this.Selection = RuntimeSelection;
     
     this.DiagnosticSeverity = {
       Error: 0,
@@ -610,17 +736,17 @@ class ExtensionAPI {
 
 export class ExtensionHostRuntime extends EventEmitter {
   private extensions: Map<string, Extension> = new Map();
-  private commands: Map<string, { extensionId: string; callback: (...args: any[]) => any }> = new Map();
-  private providers: Map<string, any[]> = new Map();
+  private commands: Map<string, { extensionId: string; callback: ExtensionCallback }> = new Map();
+  private providers: Map<string, unknown[]> = new Map();
   private disposables: Map<string, (() => void)[]> = new Map();
   private worker: Worker | null = null;
-  private pendingRequests: Map<string, { resolve: Function; reject: Function }> = new Map();
+  private pendingRequests: Map<string, { resolve: (value: unknown) => void; reject: (reason?: unknown) => void }> = new Map();
   private requestId: number = 0;
   
   // Workspace state
-  private workspaceFolders: any[] = [];
+  private workspaceFolders: WorkspaceFolder[] = [];
   private workspaceName: string = '';
-  private configuration: Map<string, any> = new Map();
+  private configuration: Map<string, unknown> = new Map();
   
   constructor() {
     super();
@@ -728,8 +854,8 @@ export class ExtensionHostRuntime extends EventEmitter {
       script.runInContext(vmContext);
       
       // Get exports (cast needed for dynamic module)
-      type ExtModule = { activate?: (ctx: ExtensionContext) => Promise<any>; deactivate?: () => Promise<void> };
-      const extensionModule: ExtModule = sandbox.module.exports || sandbox.exports;
+      type ExtModule = { activate?: (ctx: ExtensionContext) => unknown | Promise<unknown>; deactivate?: () => void | Promise<void> };
+      const extensionModule = (sandbox.module.exports || sandbox.exports) as ExtModule;
       
       // Call activate
       if (extensionModule.activate && typeof extensionModule.activate === 'function') {
@@ -739,8 +865,9 @@ export class ExtensionHostRuntime extends EventEmitter {
       extension.isActive = true;
       this.emit('extensionActivated', extension);
       
-    } catch (error: any) {
-      this.emit('extensionError', { extensionId, error: error.message });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.emit('extensionError', { extensionId, error: message });
       throw error;
     }
   }
@@ -921,8 +1048,8 @@ export class ExtensionHostRuntime extends EventEmitter {
       }
     });
     
-    const globalState = new Map<string, any>();
-    const workspaceState = new Map<string, any>();
+    const globalState = new Map<string, unknown>();
+    const workspaceState = new Map<string, unknown>();
     const secrets = new Map<string, string>();
     
     return {
@@ -933,13 +1060,13 @@ export class ExtensionHostRuntime extends EventEmitter {
       logPath,
       subscriptions: [],
       globalState: {
-        get: <T>(key: string, defaultValue?: T) => globalState.get(key) ?? defaultValue,
-        update: async (key: string, value: any) => { globalState.set(key, value); },
+        get: <T>(key: string, defaultValue?: T) => (globalState.get(key) as T | undefined) ?? defaultValue,
+        update: async (key: string, value: unknown) => { globalState.set(key, value); },
         keys: () => Array.from(globalState.keys()),
       },
       workspaceState: {
-        get: <T>(key: string, defaultValue?: T) => workspaceState.get(key) ?? defaultValue,
-        update: async (key: string, value: any) => { workspaceState.set(key, value); },
+        get: <T>(key: string, defaultValue?: T) => (workspaceState.get(key) as T | undefined) ?? defaultValue,
+        update: async (key: string, value: unknown) => { workspaceState.set(key, value); },
         keys: () => Array.from(workspaceState.keys()),
       },
       secrets: {
@@ -951,14 +1078,14 @@ export class ExtensionHostRuntime extends EventEmitter {
     };
   }
   
-  private createRequire(basePath: string): (id: string) => any {
+  private createRequire(basePath: string): (id: string) => unknown {
     return (id: string) => {
       // Handle relative paths
       if (id.startsWith('.')) {
-        return nativeRequire(path.join(basePath, id));
+        return nativeRequire(path.join(basePath, id)) as unknown;
       }
 
-      return nativeRequire(id);
+      return nativeRequire(id) as unknown;
     };
   }
   
@@ -966,15 +1093,15 @@ export class ExtensionHostRuntime extends EventEmitter {
   // API Implementation Stubs (to be connected to main process)
   // ==========================================================================
   
-  registerCommand(extensionId: string, command: string, callback: (...args: any[]) => any) {
+  registerCommand(extensionId: string, command: string, callback: ExtensionCallback): Disposable {
     this.commands.set(command, { extensionId, callback });
     return { dispose: () => this.commands.delete(command) };
   }
   
-  async executeCommand(command: string, ...args: any[]): Promise<any> {
+  async executeCommand<T = unknown>(command: string, ...args: unknown[]): Promise<T> {
     const cmd = this.commands.get(command);
     if (cmd) {
-      return await cmd.callback(...args);
+      return (await cmd.callback(...args)) as T;
     }
     throw new Error(`Command not found: ${command}`);
   }
@@ -989,17 +1116,17 @@ export class ExtensionHostRuntime extends EventEmitter {
     return Promise.resolve(undefined);
   }
   
-  showQuickPick(items: any[], options?: any): Promise<any> {
+  showQuickPick(items: readonly unknown[], options?: QuickPickOptions): Promise<unknown> {
     this.emit('showQuickPick', { items, options });
     return Promise.resolve(undefined);
   }
   
-  showInputBox(options?: any): Promise<string | undefined> {
+  showInputBox(options?: InputBoxOptions): Promise<string | undefined> {
     this.emit('showInputBox', { options });
     return Promise.resolve(undefined);
   }
   
-  createOutputChannel(extensionId: string, name: string): any {
+  createOutputChannel(extensionId: string, name: string): OutputChannel {
     const channel = {
       name,
       append: (value: string) => this.emit('outputAppend', { name, value }),
@@ -1013,7 +1140,7 @@ export class ExtensionHostRuntime extends EventEmitter {
     return channel;
   }
   
-  createTerminal(extensionId: string, options?: any): any {
+  createTerminal(extensionId: string, options?: TerminalOptions): Terminal {
     this.emit('terminalCreate', { extensionId, options });
     return {
       name: options?.name || 'Extension Terminal',
@@ -1025,27 +1152,27 @@ export class ExtensionHostRuntime extends EventEmitter {
     };
   }
   
-  createWebviewPanel(extensionId: string, viewType: string, title: string, showOptions: any, options?: any): any {
+  createWebviewPanel(extensionId: string, viewType: string, title: string, showOptions: ViewShowOptions, options?: WebviewPanelOptions): WebviewPanel {
     this.emit('webviewPanelCreate', { extensionId, viewType, title, showOptions, options });
     return {
       viewType,
       title,
       webview: {
         html: '',
-        onDidReceiveMessage: (listener: any) => ({ dispose: () => {} }),
-        postMessage: (message: any) => Promise.resolve(true),
-        asWebviewUri: (uri: any) => uri,
+        onDidReceiveMessage: (listener: EventListener) => ({ dispose: () => {} }),
+        postMessage: (_message: unknown) => Promise.resolve(true),
+        asWebviewUri: (uri: UriLike) => uri,
       },
       visible: true,
       active: true,
       dispose: () => this.emit('webviewPanelDispose', { viewType }),
       reveal: () => this.emit('webviewPanelReveal', { viewType }),
-      onDidChangeViewState: (listener: any) => ({ dispose: () => {} }),
-      onDidDispose: (listener: any) => ({ dispose: () => {} }),
+      onDidChangeViewState: (listener: EventListener) => ({ dispose: () => {} }),
+      onDidDispose: (listener: EventListener) => ({ dispose: () => {} }),
     };
   }
   
-  createStatusBarItem(extensionId: string, alignment?: number, priority?: number): any {
+  createStatusBarItem(extensionId: string, alignment?: number, priority?: number): StatusBarItem {
     const id = `statusbar_${Date.now()}`;
     return {
       id,
@@ -1067,57 +1194,57 @@ export class ExtensionHostRuntime extends EventEmitter {
     return { dispose: () => {} };
   }
   
-  withProgress(extensionId: string, options: any, task: any): Promise<any> {
+  async withProgress<R>(extensionId: string, options: ProgressOptions, task: ProgressTask<R>): Promise<R> {
     this.emit('progressStart', { extensionId, options });
     return task({
-      report: (value: any) => this.emit('progressReport', { value }),
+      report: (value: ProgressReport) => this.emit('progressReport', { value }),
     });
   }
   
   // Stubs for remaining methods
-  registerTreeDataProvider(extensionId: string, viewId: string, provider: any) { return { dispose: () => {} }; }
-  createTreeView(extensionId: string, viewId: string, options: any) { return { dispose: () => {} }; }
-  onEvent(event: string, listener: any) { this.on(event, listener); return { dispose: () => this.off(event, listener) }; }
+  registerTreeDataProvider(extensionId: string, viewId: string, provider: ProviderLike) { return { dispose: () => {} }; }
+  createTreeView(extensionId: string, viewId: string, options: Record<string, unknown>) { return { dispose: () => {} }; }
+  onEvent(event: string, listener: EventListener) { this.on(event, listener); return { dispose: () => this.off(event, listener) }; }
   getWorkspaceFolders() { return this.workspaceFolders; }
   getWorkspaceName() { return this.workspaceName; }
-  getConfiguration(section?: string, scope?: any) { return { get: (key: string) => this.configuration.get(`${section}.${key}`) }; }
+  getConfiguration(section?: string, _scope?: unknown): ConfigurationReader { return { get: (key: string) => this.configuration.get(`${section}.${key}`) }; }
   findFiles(include: string, exclude?: string, maxResults?: number) { return Promise.resolve([]); }
-  openTextDocument(uri: any) { return Promise.resolve({}); }
-  applyEdit(edit: any) { return Promise.resolve(true); }
-  createFileSystemWatcher(extensionId: string, pattern: string, ...args: any[]) { return { dispose: () => {} }; }
-  registerTextDocumentContentProvider(extensionId: string, scheme: string, provider: any) { return { dispose: () => {} }; }
-  registerFileSystemProvider(extensionId: string, scheme: string, provider: any, options?: any) { return { dispose: () => {} }; }
-  registerCompletionProvider(extensionId: string, selector: any, provider: any, triggers: string[]) { return { dispose: () => {} }; }
-  registerHoverProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerDefinitionProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerReferenceProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerDocumentSymbolProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerCodeActionsProvider(extensionId: string, selector: any, provider: any, metadata?: any) { return { dispose: () => {} }; }
-  registerCodeLensProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerDocumentFormattingProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerDocumentRangeFormattingProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerSignatureHelpProvider(extensionId: string, selector: any, provider: any, triggers: string[]) { return { dispose: () => {} }; }
-  registerRenameProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerDocumentLinkProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerColorProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerFoldingRangeProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerDeclarationProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerTypeDefinitionProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerImplementationProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  setLanguageConfiguration(extensionId: string, language: string, configuration: any) { return { dispose: () => {} }; }
+  openTextDocument(uri: UriLike) { return Promise.resolve({}); }
+  applyEdit(_edit: WorkspaceEdit): Promise<boolean> { return Promise.resolve(true); }
+  createFileSystemWatcher(extensionId: string, pattern: string, ...args: unknown[]) { return { dispose: () => {} }; }
+  registerTextDocumentContentProvider(extensionId: string, scheme: string, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerFileSystemProvider(extensionId: string, scheme: string, provider: ProviderLike, options?: Record<string, unknown>) { return { dispose: () => {} }; }
+  registerCompletionProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike, triggers: string[]) { return { dispose: () => {} }; }
+  registerHoverProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerDefinitionProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerReferenceProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerDocumentSymbolProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerCodeActionsProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike, metadata?: Record<string, unknown>) { return { dispose: () => {} }; }
+  registerCodeLensProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerDocumentFormattingProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerDocumentRangeFormattingProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerSignatureHelpProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike, triggers: string[]) { return { dispose: () => {} }; }
+  registerRenameProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerDocumentLinkProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerColorProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerFoldingRangeProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerDeclarationProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerTypeDefinitionProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerImplementationProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  setLanguageConfiguration(extensionId: string, language: string, configuration: Record<string, unknown>) { return { dispose: () => {} }; }
   createDiagnosticCollection(extensionId: string, name?: string) { return { dispose: () => {}, set: () => {}, delete: () => {}, clear: () => {} }; }
-  getDiagnostics(uri?: any) { return []; }
-  registerInlayHintsProvider(extensionId: string, selector: any, provider: any) { return { dispose: () => {} }; }
-  registerDebugConfigurationProvider(extensionId: string, debugType: string, provider: any) { return { dispose: () => {} }; }
-  registerDebugAdapterDescriptorFactory(extensionId: string, debugType: string, factory: any) { return { dispose: () => {} }; }
-  startDebugging(folder: any, config: any, parent?: any) { return Promise.resolve(true); }
-  stopDebugging(session?: any) { return Promise.resolve(); }
+  getDiagnostics(uri?: UriLike) { return []; }
+  registerInlayHintsProvider(extensionId: string, selector: DocumentSelector, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerDebugConfigurationProvider(extensionId: string, debugType: string, provider: ProviderLike) { return { dispose: () => {} }; }
+  registerDebugAdapterDescriptorFactory(extensionId: string, debugType: string, factory: ProviderLike) { return { dispose: () => {} }; }
+  startDebugging(folder: WorkspaceFolder | undefined, config: DebugConfiguration, parent?: DebugSession) { return Promise.resolve(true); }
+  stopDebugging(session?: DebugSession) { return Promise.resolve(); }
   getActiveDebugSession() { return undefined; }
   getActiveDebugConsole() { return { append: () => {}, appendLine: () => {} }; }
   getBreakpoints() { return []; }
-  registerTaskProvider(extensionId: string, type: string, provider: any) { return { dispose: () => {} }; }
-  fetchTasks(filter?: any) { return Promise.resolve([]); }
-  executeTask(task: any) { return Promise.resolve({ terminate: () => {} }); }
+  registerTaskProvider(extensionId: string, type: string, provider: ProviderLike) { return { dispose: () => {} }; }
+  fetchTasks(filter?: TaskFilter) { return Promise.resolve([]); }
+  executeTask(task: TaskLike) { return Promise.resolve({ terminate: () => {} }); }
   getTaskExecutions() { return []; }
   getExtension(extensionId: string) { return this.extensions.get(extensionId); }
   getAllExtensions() { return Array.from(this.extensions.values()); }
@@ -1127,8 +1254,8 @@ export class ExtensionHostRuntime extends EventEmitter {
   getMachineId() { return 'aethel-machine'; }
   getSessionId() { return `session_${Date.now()}`; }
   getShell() { return process.env.SHELL || 'bash'; }
-  openExternal(target: any) { return Promise.resolve(true); }
-  asExternalUri(target: any) { return Promise.resolve(target); }
+  openExternal(target: UriLike | string) { return Promise.resolve(true); }
+  asExternalUri(target: UriLike | string) { return Promise.resolve(target); }
   
   // ==========================================================================
   // Cleanup

@@ -82,6 +82,7 @@ Aethel response:
 - Added a compact Mission Ledger surface for mission state, acceptance checks, evidence, and next safe action.
 - Typed the VS Code workspace API boundary, reducing app-code `: any` again from `1011` to `984`.
 - Typed the VS Code window API boundary, reducing app-code `: any` from `984` to `963` and tightening another IDE seam that agents depend on for safe editor/message/terminal behavior.
+- Typed the extension host runtime, local Yjs declarations, build/export worker, chat surface, unified SDK, and AI tools registry boundaries; measured app-code `: any` now reports `732`, improving the trust layer behind agent tools, chat continuity, multiplayer, and local/cloud SDK behavior.
 
 ## Product Impact
 The dashboard now has a compact memory/risk/readiness object that makes the current mission legible before the user opens the deep Studio.

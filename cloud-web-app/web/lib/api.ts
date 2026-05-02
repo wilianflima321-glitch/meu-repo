@@ -42,6 +42,10 @@ export type CopilotWorkflowSummary = {
 	lastUsedAt: string;
 };
 
+export type CopilotWorkflowDetail = CopilotWorkflowSummary & {
+	context?: unknown;
+};
+
 export type CopilotContextResponse = {
 	projectId: string | null;
 	workflowId: string | null;
@@ -387,7 +391,7 @@ export const AethelAPIClient = {
 		requestJSON<{ workflow: CopilotWorkflowSummary }>(`/copilot/workflows`, { method: 'POST', body: input ?? {} }),
 
 	getCopilotWorkflow: (workflowId: string) =>
-		requestJSON<{ workflow: any }>(`/copilot/workflows/${encodeURIComponent(workflowId)}`),
+		requestJSON<{ workflow: CopilotWorkflowDetail }>(`/copilot/workflows/${encodeURIComponent(workflowId)}`),
 
 	updateCopilotWorkflow: (workflowId: string, input: { title?: string; archived?: boolean; chatThreadId?: string | null }) =>
 		requestJSON<{ workflow: CopilotWorkflowSummary }>(`/copilot/workflows/${encodeURIComponent(workflowId)}`, {

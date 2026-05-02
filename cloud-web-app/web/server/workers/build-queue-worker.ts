@@ -40,9 +40,95 @@ type BuildQueueMessage = {
   userId?: string;
   platform?: string;
   configuration?: string;
-  options?: Record<string, any> | null;
+  options?: Record<string, unknown> | null;
   reservationId?: string;
 };
+
+type RedisClient = {
+  hincrby(key: string, field: string, increment: number): Promise<number>;
+  hset(key: string, field: string, value: string): Promise<number>;
+  get(key: string): Promise<string | null>;
+  set(key: string, value: string, mode?: string, ttlSecondsOrMs?: number): Promise<unknown>;
+  zadd(key: string, score: number, member: string): Promise<number>;
+  zrangebyscore(key: string, min: number, max: number, limitKeyword?: 'LIMIT', offset?: number, count?: number): Promise<string[]>;
+  zrem(key: string, member: string): Promise<number>;
+  lpush(key: string, value: string): Promise<number>;
+  del(key: string): Promise<number>;
+  lrange(key: string, start: number, stop: number): Promise<string[]>;
+  lrem(key: string, count: number, value: string): Promise<number>;
+  brpoplpush(source: string, destination: string, timeoutSeconds: number): Promise<string | null>;
+  llen(key: string): Promise<number>;
+  quit(): Promise<unknown>;
+  on(event: 'connect', listener: () => void): void;
+  on(event: 'error', listener: (error: unknown) => void): void;
+};
+
+type RedisConstructor = new (...args: unknown[]) => RedisClient;
+
+type ExportState = Record<string, unknown> & {
+  logs?: string[];
+  attempts?: number;
+  progress?: number;
+};
+
+type WorkerMetric = {
+  status: 'success' | 'failed';
+  durationMs?: number;
+  backlog?: number;
+};
+
+type SourceManifest = {
+  includedFiles: number;
+  includedBytes: number;
+  skippedFiles: number;
+  skippedBytes: number;
+  warnings: string[];
+};
+
+type AssetManifest = {
+  projectId: string;
+  generatedAt: string;
+  limits: {
+    maxTotalBytes: number;
+    maxSingleBytes: number;
+  };
+  totals: {
+    includedFiles: number;
+    includedBytes: number;
+    skippedFiles: number;
+    skippedBytes: number;
+  };
+  dbAssets: Array<{
+    id: string;
+    name: string;
+    url: string | null;
+    storagePath?: string | null;
+    type: string;
+    size: number;
+    mimeType?: string | null;
+    downloadUrl?: string | null;
+    downloadExpiresAt?: string | null;
+  }>;
+  localFiles: Array<{
+    path: string;
+    size: number;
+    sha256: string;
+    lods?: Array<{ path: string; ratio: number; size: number; sha256: string }>;
+  }>;
+  warnings: string[];
+};
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error || 'unknown error');
+}
+
+function parseJsonObject(value: string): ExportState | null {
+  const parsed = JSON.parse(value) as unknown;
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return null;
+  }
+  return parsed as ExportState;
+}
 
 function nowIso() {
   return new Date().toISOString();
@@ -55,7 +141,7 @@ function safeFileName(value: string) {
     .slice(0, 120);
 }
 
-function appendLog(existing: any, line: string) {
+function appendLog(existing: ExportState | null | undefined, line: string) {
   const logs = Array.isArray(existing?.logs) ? existing.logs.slice(-500) : [];
   logs.push(`[${nowIso()}] ${line}`);
   return logs;
@@ -67,7 +153,7 @@ function backoffMs(attempt: number) {
   return Math.min(ms, 60_000);
 }
 
-async function recordWorkerMetric(redis: any, data: { status: 'success' | 'failed'; durationMs?: number; backlog?: number }) {
+async function recordWorkerMetric(redis: RedisClient, data: WorkerMetric) {
   try {
     if (data.status === 'success') {
       await redis.hincrby(METRICS_KEY, 'success', 1);
@@ -179,18 +265,18 @@ async function listFilesRecursive(rootDir: string, currentDir: string = rootDir)
   return files;
 }
 
-async function getExportAttempts(redis: any, exportId: string): Promise<number> {
+async function getExportAttempts(redis: RedisClient, exportId: string): Promise<number> {
   try {
     const raw = await redis.get(`export:${exportId}`);
     if (!raw) return 0;
-    const parsed = JSON.parse(raw);
+    const parsed = parseJsonObject(raw);
     return typeof parsed?.attempts === 'number' ? parsed.attempts : 0;
   } catch {
     return 0;
   }
 }
 
-async function scheduleRetry(redis: any, msg: BuildQueueMessage, rawValue: string, reason: string) {
+async function scheduleRetry(redis: RedisClient, msg: BuildQueueMessage, rawValue: string, reason: string) {
   if (!msg.exportId) return;
 
   const attempts = (await getExportAttempts(redis, msg.exportId)) + 1;
@@ -211,7 +297,7 @@ async function scheduleRetry(redis: any, msg: BuildQueueMessage, rawValue: strin
       error: reason,
       startedAt: null,
       completedAt: null,
-    } as any,
+    },
   });
 
   await updateExportState(redis, msg.exportId, {
@@ -226,17 +312,17 @@ async function scheduleRetry(redis: any, msg: BuildQueueMessage, rawValue: strin
   await redis.zadd(DELAYED_QUEUE, Date.now() + delayMs, rawValue);
 }
 
-async function markProcessing(redis: any, msg: BuildQueueMessage) {
+async function markProcessing(redis: RedisClient, msg: BuildQueueMessage) {
   if (!msg.exportId) return;
   await redis.set(`${PROCESSING_TS_PREFIX}${msg.exportId}`, `${Date.now()}`, 'PX', PROCESSING_TIMEOUT_MS * 4);
 }
 
-async function clearProcessing(redis: any, msg: BuildQueueMessage) {
+async function clearProcessing(redis: RedisClient, msg: BuildQueueMessage) {
   if (!msg.exportId) return;
   await redis.del(`${PROCESSING_TS_PREFIX}${msg.exportId}`);
 }
 
-async function drainDelayed(redis: any, max = 25) {
+async function drainDelayed(redis: RedisClient, max = 25) {
   const now = Date.now();
   const due: string[] = await redis.zrangebyscore(DELAYED_QUEUE, 0, now, 'LIMIT', 0, max);
   if (!Array.isArray(due) || due.length === 0) return 0;
@@ -255,7 +341,7 @@ async function drainDelayed(redis: any, max = 25) {
   return due.length;
 }
 
-async function reapProcessing(redis: any, maxScan = 50) {
+async function reapProcessing(redis: RedisClient, maxScan = 50) {
   let items: string[] = [];
   try {
     items = await redis.lrange(PROCESSING_QUEUE, 0, maxScan - 1);
@@ -286,7 +372,7 @@ async function reapProcessing(redis: any, maxScan = 50) {
 
     // Se não há timestamp, assume travado.
     if (!startedAt || now - startedAt > PROCESSING_TIMEOUT_MS) {
-      console.warn(`[build-queue-worker] Reaper: requeuing stuck job exportId=${msg.exportId}`);
+      log.warn(`[build-queue-worker] Reaper: requeuing stuck job exportId=${msg.exportId}`);
       try {
         await updateExportState(redis, msg.exportId, {
           status: 'queued',
@@ -298,7 +384,7 @@ async function reapProcessing(redis: any, maxScan = 50) {
             status: 'queued',
             currentStep: 'Requeued by reaper (processing timeout)',
             completedAt: null,
-          } as any,
+          },
         });
       } catch {
         // ignore
@@ -321,15 +407,15 @@ async function reapProcessing(redis: any, maxScan = 50) {
 }
 
 async function updateExportState(
-  redis: any,
+  redis: RedisClient,
   exportId: string,
-  patch: Partial<Record<string, any>> & { status?: string; progress?: number; currentStep?: string; error?: string }
+  patch: Partial<Record<string, unknown>> & { status?: string; progress?: number; currentStep?: string; error?: string }
 ) {
   const key = `export:${exportId}`;
-  let existing: any = null;
+  let existing: ExportState | null = null;
   try {
     const raw = await redis.get(key);
-    if (raw) existing = JSON.parse(raw);
+    if (raw) existing = parseJsonObject(raw);
   } catch {
     // ignore
   }
@@ -348,39 +434,55 @@ async function updateExportState(
   return payload;
 }
 
-async function createRedisClient() {
+function resolveRedisConstructor(moduleValue: unknown): RedisConstructor {
+  if (typeof moduleValue === 'function') {
+    return moduleValue as RedisConstructor;
+  }
+
+  if (moduleValue && typeof moduleValue === 'object' && 'default' in moduleValue) {
+    const candidate = (moduleValue as { default?: unknown }).default;
+    if (typeof candidate === 'function') {
+      return candidate as RedisConstructor;
+    }
+  }
+
+  throw new Error('Invalid ioredis module shape.');
+}
+
+async function createRedisClient(): Promise<RedisClient> {
   // ioredis é intencionalmente obrigatório para worker.
   // Mantemos o import dinâmico para mensagens de erro mais claras.
-  let IORedis: any;
+  let Redis: RedisConstructor;
   try {
-    IORedis = await eval('import("ioredis")').then((m: any) => m.default || m);
+    const moduleValue = await (eval('import("ioredis")') as Promise<unknown>);
+    Redis = resolveRedisConstructor(moduleValue);
   } catch {
     throw new Error('Missing dependency: ioredis. Install with `npm i ioredis` (cloud-web-app/web).');
   }
 
   const redisUrl = process.env.REDIS_URL;
   if (redisUrl) {
-    return new IORedis(redisUrl, { maxRetriesPerRequest: null });
+    return new Redis(redisUrl, { maxRetriesPerRequest: null });
   }
 
   const host = process.env.REDIS_HOST || 'localhost';
   const port = parseInt(process.env.REDIS_PORT || '6379', 10);
   const password = process.env.REDIS_PASSWORD || undefined;
-  return new IORedis({ host, port, password, maxRetriesPerRequest: null });
+  return new Redis({ host, port, password, maxRetriesPerRequest: null });
 }
 
 async function markExportFailed(
-  redis: any,
+  redis: RedisClient,
   message: BuildQueueMessage,
   reason: string
 ): Promise<void> {
   if (!message.exportId) return;
 
   const key = `export:${message.exportId}`;
-  let existing: any = null;
+  let existing: ExportState | null = null;
   try {
     const raw = await redis.get(key);
-    if (raw) existing = JSON.parse(raw);
+    if (raw) existing = parseJsonObject(raw);
   } catch {
     // ignore
   }
@@ -410,14 +512,14 @@ async function markExportFailed(
       data: {
         status: 'failed',
         completedAt: new Date(),
-      } as any,
+      },
     });
   } catch {
     // ignore: pode não existir, ou schema divergir
   }
 }
 
-async function processExportJob(redis: any, msg: BuildQueueMessage) {
+async function processExportJob(redis: RedisClient, msg: BuildQueueMessage) {
   if (!msg.exportId || !msg.projectId || !msg.userId) {
     throw new Error('Invalid export job payload (missing exportId/projectId/userId)');
   }
@@ -469,7 +571,7 @@ async function processExportJob(redis: any, msg: BuildQueueMessage) {
       currentStep: 'Preparing export',
       startedAt: new Date(),
       error: null,
-    } as any,
+    },
   });
   await updateExportState(redis, msg.exportId, { status: 'preparing', progress: 5, currentStep: 'Preparing export' });
 
@@ -484,14 +586,14 @@ async function processExportJob(redis: any, msg: BuildQueueMessage) {
   await updateExportState(redis, msg.exportId, { status: 'building', progress: 25, currentStep: 'Building export package (zip)' });
   await prisma.exportJob.update({
     where: { id: msg.exportId },
-    data: { status: 'building', progress: 25, currentStep: 'Building export package (zip)' } as any,
+    data: { status: 'building', progress: 25, currentStep: 'Building export package (zip)' },
   });
 
   const zip = new AdmZip();
   const platform = msg.platform || 'source';
   const templatesDir = getRuntimeTemplatesDir();
   const platformWarnings: string[] = [];
-  let assetsManifest: any | null = null;
+  let assetsManifest: AssetManifest | null = null;
 
   if (['windows', 'linux', 'macos'].includes(platform)) {
     const templatePath = path.join(templatesDir, platform);
@@ -594,8 +696,8 @@ async function processExportJob(redis: any, msg: BuildQueueMessage) {
       sourceManifest.includedFiles += 1;
       sourceManifest.includedBytes += fileSize;
     }
-  } catch (error: any) {
-    sourceManifest.warnings.push(`Failed to export source files: ${error?.message || 'unknown error'}`);
+  } catch (error: unknown) {
+    sourceManifest.warnings.push(`Failed to export source files: ${getErrorMessage(error)}`);
   }
 
   zip.addFile('source/manifest.json', Buffer.from(JSON.stringify(sourceManifest, null, 2), 'utf8'));
@@ -617,7 +719,7 @@ async function processExportJob(redis: any, msg: BuildQueueMessage) {
     await updateExportState(redis, msg.exportId, { status: 'building', progress: 40, currentStep: 'Collecting assets' });
     await prisma.exportJob.update({
       where: { id: msg.exportId },
-      data: { status: 'building', progress: 40, currentStep: 'Collecting assets' } as any,
+      data: { status: 'building', progress: 40, currentStep: 'Collecting assets' },
     });
 
     assetsManifest = {
@@ -680,8 +782,8 @@ async function processExportJob(redis: any, msg: BuildQueueMessage) {
 
         assetsManifest.dbAssets.push(entry);
       }
-    } catch (error: any) {
-      assetsManifest.warnings.push(`Failed to read assets from DB: ${error?.message || 'unknown error'}`);
+    } catch (error: unknown) {
+      assetsManifest.warnings.push(`Failed to read assets from DB: ${getErrorMessage(error)}`);
     }
 
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads', msg.projectId);
@@ -755,8 +857,8 @@ async function processExportJob(redis: any, msg: BuildQueueMessage) {
                 assetsManifest.totals.includedFiles += 1;
                 assetsManifest.totals.includedBytes += lodSize;
                 lodFilesGenerated += 1;
-              } catch (error: any) {
-                assetsManifest.warnings.push(`Failed to generate LOD for ${relativePosix} (${ratio}): ${error?.message || 'unknown error'}`);
+              } catch (error: unknown) {
+                assetsManifest.warnings.push(`Failed to generate LOD for ${relativePosix} (${ratio}): ${getErrorMessage(error)}`);
               }
             }
           }
@@ -802,7 +904,7 @@ async function processExportJob(redis: any, msg: BuildQueueMessage) {
   await updateExportState(redis, msg.exportId, { status: 'packaging', progress: 55, currentStep: 'Packaging complete' });
   await prisma.exportJob.update({
     where: { id: msg.exportId },
-    data: { status: 'packaging', progress: 55, currentStep: 'Packaging complete' } as any,
+    data: { status: 'packaging', progress: 55, currentStep: 'Packaging complete' },
   });
 
   // Upload (preferencialmente S3/MinIO). Fallback local: public/exports.
@@ -814,7 +916,7 @@ async function processExportJob(redis: any, msg: BuildQueueMessage) {
   await updateExportState(redis, msg.exportId, { status: 'uploading', progress: 75, currentStep: 'Uploading artifact' });
   await prisma.exportJob.update({
     where: { id: msg.exportId },
-    data: { status: 'uploading', progress: 75, currentStep: 'Uploading artifact' } as any,
+    data: { status: 'uploading', progress: 75, currentStep: 'Uploading artifact' },
   });
 
   if (s3Ok) {
@@ -855,7 +957,7 @@ async function processExportJob(redis: any, msg: BuildQueueMessage) {
       downloadExpiresAt: downloadExpiresAt,
       fileSize: zipBytes.length,
       error: null,
-    } as any,
+    },
   });
 
   await updateExportState(redis, msg.exportId, {
@@ -873,7 +975,7 @@ async function run() {
   const redis = await createRedisClient();
 
   redis.on('connect', () => log.info('[build-queue-worker] Redis connected'));
-  redis.on('error', (err: any) => console.error('[build-queue-worker] Redis error:', err?.message || err));
+  redis.on('error', (err: unknown) => log.error('[build-queue-worker] Redis error:', getErrorMessage(err)));
 
   log.info('[build-queue-worker] Started. Waiting for jobs on build-queue...');
 
@@ -893,7 +995,7 @@ async function run() {
   try {
     const stuck = await redis.lrange(PROCESSING_QUEUE, 0, -1);
     if (Array.isArray(stuck) && stuck.length > 0) {
-      console.warn(`[build-queue-worker] Startup recovery: requeuing ${stuck.length} job(s) from ${PROCESSING_QUEUE}`);
+      log.warn(`[build-queue-worker] Startup recovery: requeuing ${stuck.length} job(s) from ${PROCESSING_QUEUE}`);
       for (const item of stuck) {
         try {
           await redis.lrem(PROCESSING_QUEUE, 1, item);
@@ -938,7 +1040,7 @@ async function run() {
     try {
       msg = JSON.parse(value);
     } catch {
-      console.warn('[build-queue-worker] Invalid JSON payload, skipping');
+      log.warn('[build-queue-worker] Invalid JSON payload, skipping');
       // ack: remove da processing para não ficar travado
       try {
         await redis.lrem(PROCESSING_QUEUE, 1, value);
@@ -971,9 +1073,9 @@ async function run() {
     try {
       await processExportJob(redis, msg);
       await recordWorkerMetric(redis, { status: 'success', durationMs: Date.now() - startedAt, backlog: await redis.llen(SOURCE_QUEUE) });
-    } catch (err: any) {
-      const reason = err?.message || 'Unknown error while processing export';
-      console.error('[build-queue-worker] Export processing failed:', reason);
+    } catch (err: unknown) {
+      const reason = getErrorMessage(err) || 'Unknown error while processing export';
+      log.error('[build-queue-worker] Export processing failed:', reason);
 
       // Retry controlado com backoff.
       try {
@@ -1002,7 +1104,7 @@ async function run() {
   log.info('[build-queue-worker] Stopped');
 }
 
-run().catch((err) => {
-  console.error('[build-queue-worker] Fatal:', err);
+run().catch((err: unknown) => {
+  log.error('[build-queue-worker] Fatal:', getErrorMessage(err));
   process.exit(1);
 });

@@ -185,6 +185,8 @@ Mission Ledger now appears in Studio Home as a compact state/evidence/checklist 
 
 The VS Code window API boundary was typed next, removing another direct IDE/runtime weak-type seam. App-code `: any` moved from `984` to `963`; this is still not strict enough for a 10/10 agentic IDE, but the debt is shrinking without masking remaining hotspots.
 
+The extension host runtime, local Yjs declaration boundary, build/export worker, chat surface, unified SDK, and AI tools registry were tightened next. The measured app-code `: any` ratchet moved from `963` to `732`; the remaining gap is still large, but the highest-risk agent/IDE seams now have explicit contracts instead of broad `any`.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

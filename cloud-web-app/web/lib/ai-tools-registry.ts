@@ -12,6 +12,7 @@
 
 import { prisma } from '@/lib/db';
 import { assertProjectOwnership } from '@/lib/copilot/project-resolver';
+import type { Prisma } from '@prisma/client';
 
 type ToolExecutionContext = {
   userId: string;
@@ -19,16 +20,32 @@ type ToolExecutionContext = {
 };
 
 function getContext(params: Record<string, unknown>): ToolExecutionContext {
-  const ctx = (params as any)?.__aethelContext;
+  const ctx = params.__aethelContext;
   if (!ctx || typeof ctx !== 'object') {
     throw Object.assign(new Error('MISSING_CONTEXT'), { code: 'MISSING_CONTEXT' });
   }
-  const userId = String((ctx as any).userId || '').trim();
-  const projectId = typeof (ctx as any).projectId === 'string' ? String((ctx as any).projectId).trim() : undefined;
+  const contextRecord = ctx as Record<string, unknown>;
+  const userId = String(contextRecord.userId || '').trim();
+  const projectId = typeof contextRecord.projectId === 'string' ? contextRecord.projectId.trim() : undefined;
   if (!userId) {
     throw Object.assign(new Error('MISSING_USER'), { code: 'MISSING_USER' });
   }
   return { userId, projectId };
+}
+
+function getStringParam(params: Record<string, unknown>, key: string, fallback = ''): string {
+  const value = params[key];
+  return typeof value === 'string' ? value : fallback;
+}
+
+function getNumberParam(params: Record<string, unknown>, key: string, fallback: number): number {
+  const value = params[key];
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function getBooleanParam(params: Record<string, unknown>, key: string, fallback = false): boolean {
+  const value = params[key];
+  return typeof value === 'boolean' ? value : fallback;
 }
 
 function normalizePath(path: string): string {
@@ -63,14 +80,14 @@ function clampContent(content: string, maxChars: number): string {
   return s.slice(0, maxChars);
 }
 
-async function audit(userId: string | null, action: string, resource?: string, metadata?: any): Promise<void> {
+async function audit(userId: string | null, action: string, resource?: string, metadata?: unknown): Promise<void> {
   try {
     await prisma.auditLog.create({
       data: {
         userId: userId || undefined,
         action,
         resource: resource || undefined,
-        metadata: metadata ? (metadata as any) : undefined,
+        metadata: metadata === undefined ? undefined : (metadata as Prisma.InputJsonValue),
       },
     });
   } catch {
@@ -265,11 +282,11 @@ aiTools.register({
       }
       await assertProjectOwnership(ctx.userId, ctx.projectId);
 
-      const path = normalizePath(String((params as any).path || ''));
-      const content = clampContent(String((params as any).content ?? ''), 1_000_000);
+      const path = normalizePath(getStringParam(params, 'path'));
+      const content = clampContent(String(params.content ?? ''), 1_000_000);
       const language =
-        typeof (params as any).language === 'string'
-          ? String((params as any).language)
+        typeof params.language === 'string'
+          ? params.language
           : inferLanguageFromPath(path);
 
       const row = await prisma.file.upsert({
@@ -306,10 +323,10 @@ aiTools.register({
       }
       await assertProjectOwnership(ctx.userId, ctx.projectId);
 
-      const path = normalizePath(String((params as any).path || ''));
-      const operation = String((params as any).operation || '').trim();
-      const target = String((params as any).target ?? '');
-      const insertContent = String((params as any).content ?? '');
+      const path = normalizePath(getStringParam(params, 'path'));
+      const operation = getStringParam(params, 'operation').trim();
+      const target = String(params.target ?? '');
+      const insertContent = String(params.content ?? '');
 
       const file = await prisma.file.findFirst({
         where: { projectId: ctx.projectId, OR: [{ path }, { path: path.replace(/^\//, '') }] },
@@ -686,24 +703,28 @@ aiTools.register({
       const ctx = getContext(params);
       if (!ctx.projectId) return { success: false, error: 'Nenhum projeto selecionado' };
       
-      const whereClause: any = { projectId: ctx.projectId, status: 'ready' };
+      const whereClause: Prisma.AssetWhereInput = { projectId: ctx.projectId, status: 'ready' };
       
-      if ((params as any).search) {
-        whereClause.name = { contains: (params as any).search, mode: 'insensitive' };
+      const search = getStringParam(params, 'search').trim();
+      const assetType = getStringParam(params, 'type').trim();
+      const assetPath = getStringParam(params, 'path').trim();
+
+      if (search) {
+        whereClause.name = { contains: search, mode: 'insensitive' };
       }
-      if ((params as any).type && (params as any).type !== 'all') {
-        whereClause.type = (params as any).type;
+      if (assetType && assetType !== 'all') {
+        whereClause.type = assetType;
       }
-      if ((params as any).path) {
-        whereClause.path = { startsWith: (params as any).path };
+      if (assetPath) {
+        whereClause.path = { startsWith: assetPath };
       }
-      if ((params as any).favorites) {
+      if (getBooleanParam(params, 'favorites')) {
         whereClause.isFavorite = true;
       }
 
       const assets = await prisma.asset.findMany({
         where: whereClause,
-        take: (params as any).limit || 50,
+        take: getNumberParam(params, 'limit', 50),
         orderBy: [{ isFavorite: 'desc' }, { updatedAt: 'desc' }],
         select: {
           id: true,
@@ -768,14 +789,14 @@ aiTools.register({
       const ctx = getContext(params);
       if (!ctx.projectId) return { success: false, error: 'Nenhum projeto selecionado' };
       
-      const assetId = (params as any).assetId;
-      const assetPath = (params as any).assetPath;
+      const assetId = getStringParam(params, 'assetId').trim();
+      const assetPath = getStringParam(params, 'assetPath').trim();
       
       if (!assetId && !assetPath) {
         return { success: false, error: 'Forneça assetId ou assetPath' };
       }
 
-      const whereClause: any = { projectId: ctx.projectId };
+      const whereClause: Prisma.AssetWhereInput = { projectId: ctx.projectId };
       if (assetId) whereClause.id = assetId;
       if (assetPath) whereClause.path = assetPath;
 
@@ -871,8 +892,8 @@ aiTools.register({
   execute: async (params) => {
 		try {
 			const ctx = getContext(params);
-			const name = String((params as any).name || '').trim();
-			const template = String((params as any).template || '').trim();
+			const name = getStringParam(params, 'name').trim();
+			const template = getStringParam(params, 'template').trim();
 			if (!name) return { success: false, error: 'name é obrigatório' };
 			if (!template) return { success: false, error: 'template é obrigatório' };
 
