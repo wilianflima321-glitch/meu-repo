@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { analytics } from '@/lib/analytics'
+import { useRuntimeLanePolicy } from '@/hooks/useRuntimeLanePolicy'
 import {
   checkPreviewRuntimeHealth,
   DEFAULT_PREVIEW_RUNTIME_URL,
@@ -58,6 +59,39 @@ export function usePreviewRuntimeManager({
   const [isSyncingRuntime, setIsSyncingRuntime] = useState(false)
   const runtimeAutoDiscoveryTriggeredRef = useRef(false)
   const runtimeAutoProvisionTriggeredRef = useRef(false)
+  const runtimeAutoHoldNoticeShownRef = useRef(false)
+  const operatorLane = useRuntimeLanePolicy('browser-operator', {
+    activeCount: isDiscoveringRuntime || isProvisioningRuntime ? 1 : 0,
+  })
+  const fileSyncLane = useRuntimeLanePolicy('file-sync', {
+    activeCount: isSyncingRuntime ? 1 : 0,
+  })
+
+  const operatorRequiresManualConfirmation = Boolean(operatorLane.budget?.requiresConfirmation)
+  const operatorLaneBlockedReason = operatorLane.decision.canStart ? null : operatorLane.decision.reason
+  const operatorConfirmationReason = operatorRequiresManualConfirmation
+    ? 'Manual confirmation is required on this device profile before browser/operator preview actions can run automatically.'
+    : null
+  const syncLaneBlockedReason = fileSyncLane.decision.canStart ? null : fileSyncLane.decision.reason
+
+  const holdRuntimeAutomation = useCallback(
+    (message: string, tone: RuntimeMessageTone, options?: { silent?: boolean }) => {
+      if (!options?.silent) {
+        setRuntimeDiscoveryTone(tone)
+        setRuntimeDiscoveryMessage(message)
+      }
+
+      analytics?.track?.('engine', 'render_time', {
+        metadata: {
+          surface: 'ide-preview-runtime-lane',
+          status: 'held',
+          tone,
+          message,
+        },
+      })
+    },
+    []
+  )
 
   const refreshRuntimeReadiness = useCallback(async () => {
     try {
@@ -115,6 +149,14 @@ export function usePreviewRuntimeManager({
 
   const discoverRuntime = useCallback(async (mode: 'auto' | 'manual' = 'manual'): Promise<boolean> => {
     if (isDiscoveringRuntime) return false
+    if (operatorLaneBlockedReason) {
+      holdRuntimeAutomation(operatorLaneBlockedReason, 'warning', { silent: mode === 'auto' })
+      return false
+    }
+    if (mode === 'auto' && operatorConfirmationReason) {
+      holdRuntimeAutomation(operatorConfirmationReason, 'info')
+      return false
+    }
     setIsDiscoveringRuntime(true)
     if (mode === 'manual') {
       setRuntimeDiscoveryTone('info')
@@ -186,10 +228,24 @@ export function usePreviewRuntimeManager({
     } finally {
       setIsDiscoveringRuntime(false)
     }
-  }, [isDiscoveringRuntime, refreshRuntimeReadiness])
+  }, [
+    holdRuntimeAutomation,
+    isDiscoveringRuntime,
+    operatorConfirmationReason,
+    operatorLaneBlockedReason,
+    refreshRuntimeReadiness,
+  ])
 
   const provisionRuntime = useCallback(async (mode: 'auto' | 'manual' = 'manual'): Promise<boolean> => {
     if (isProvisioningRuntime) return false
+    if (operatorLaneBlockedReason) {
+      holdRuntimeAutomation(operatorLaneBlockedReason, 'warning', { silent: mode === 'auto' })
+      return false
+    }
+    if (mode === 'auto' && operatorConfirmationReason) {
+      holdRuntimeAutomation(operatorConfirmationReason, 'info')
+      return false
+    }
     setIsProvisioningRuntime(true)
     if (mode === 'manual') {
       setRuntimeDiscoveryTone('info')
@@ -253,13 +309,24 @@ export function usePreviewRuntimeManager({
     } finally {
       setIsProvisioningRuntime(false)
     }
-  }, [isProvisioningRuntime, projectId, refreshRuntimeReadiness])
+  }, [
+    holdRuntimeAutomation,
+    isProvisioningRuntime,
+    operatorConfirmationReason,
+    operatorLaneBlockedReason,
+    projectId,
+    refreshRuntimeReadiness,
+  ])
 
   const syncRuntime = useCallback(async (): Promise<boolean> => {
     if (isSyncingRuntime) return false
     if (!previewSandboxId) {
       setRuntimeDiscoveryTone('warning')
       setRuntimeDiscoveryMessage('Sync indisponivel: sandboxId nao encontrado.')
+      return false
+    }
+    if (syncLaneBlockedReason) {
+      holdRuntimeAutomation(syncLaneBlockedReason, 'warning')
       return false
     }
     setIsSyncingRuntime(true)
@@ -283,11 +350,12 @@ export function usePreviewRuntimeManager({
     } finally {
       setIsSyncingRuntime(false)
     }
-  }, [isSyncingRuntime, previewSandboxId, projectId])
+  }, [holdRuntimeAutomation, isSyncingRuntime, previewSandboxId, projectId, syncLaneBlockedReason])
 
   const syncRuntimeFile = useCallback(
     async (path: string): Promise<boolean> => {
       if (!previewSandboxId) return false
+      if (syncLaneBlockedReason) return false
       try {
         const result = await syncPreviewRuntimeFile(projectId, previewSandboxId, path)
         return Boolean(result.success)
@@ -299,7 +367,7 @@ export function usePreviewRuntimeManager({
         return false
       }
     },
-    [previewSandboxId, projectId]
+    [previewSandboxId, projectId, syncLaneBlockedReason]
   )
 
   const checkRuntime = useCallback(async (runtimeUrl: string | null) => {
@@ -350,6 +418,32 @@ export function usePreviewRuntimeManager({
       void discoverRuntime('auto')
     }
   }, [discoverRuntime, hasToken, previewEnabled, previewRuntimeUrl, provisionRuntime, runtimeReadiness?.recommendedAction])
+
+  useEffect(() => {
+    if (!previewEnabled) return
+    const wantsAutoOperatorAction =
+      !previewRuntimeUrl &&
+      (runtimeReadiness?.recommendedAction === 'provision' ||
+        runtimeReadiness?.recommendedAction === 'discover' ||
+        (!runtimeReadiness?.recommendedAction && !hasToken))
+
+    if (!wantsAutoOperatorAction) {
+      runtimeAutoHoldNoticeShownRef.current = false
+      return
+    }
+
+    if (operatorConfirmationReason && !runtimeAutoHoldNoticeShownRef.current) {
+      runtimeAutoHoldNoticeShownRef.current = true
+      holdRuntimeAutomation(operatorConfirmationReason, 'info')
+    }
+  }, [
+    hasToken,
+    holdRuntimeAutomation,
+    operatorConfirmationReason,
+    previewEnabled,
+    previewRuntimeUrl,
+    runtimeReadiness?.recommendedAction,
+  ])
 
   useEffect(() => {
     if (!previewEnabled || !previewRuntimeUrl) return
@@ -443,6 +537,11 @@ export function usePreviewRuntimeManager({
       runtimeHealth.status === 'unhealthy' ||
       runtimeHealth.status === 'invalid')
 
+  const runtimeActionBlockedReason =
+    runtimePrimaryAction === 'provision' || runtimePrimaryAction === 'discover'
+      ? operatorLaneBlockedReason
+      : null
+
   return {
     previewRuntimeUrl,
     previewRuntimeInput,
@@ -463,6 +562,10 @@ export function usePreviewRuntimeManager({
     runtimeStrategyHint,
     runtimePrimaryAction,
     runtimePrimaryActionLabel,
+    runtimeActionBlockedReason,
+    runtimeAutomationPlacement: operatorLane.budget?.placement ?? null,
+    runtimeAutomationRequiresConfirmation: operatorRequiresManualConfirmation,
+    syncRuntimeBlockedReason: syncLaneBlockedReason,
     forceInlinePreviewFallback,
     applyRuntimeUrl,
     discoverRuntime,

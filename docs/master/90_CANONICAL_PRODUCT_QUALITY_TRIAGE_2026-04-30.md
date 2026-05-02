@@ -199,6 +199,8 @@ Runtime lane scheduling was added on top of the device guard. AI agents, browser
 
 The scheduler is no longer only descriptive. The creation workbench now blocks new AI media jobs when the `ai-agents` lane is saturated, and deploy surfaces now obey the `build-export` lane so users do not unknowingly queue overlapping publishes from multiple entry points.
 
+Preview runtime automation now also obeys the same governor. Runtime discovery/provision flows are held when the `browser-operator` lane is blocked or requires manual confirmation on the current device profile, while runtime sync now respects the `file-sync` lane. The toolbar surfaces the hold state and placement hints directly inside the preview stage so users see policy, not silent failure.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

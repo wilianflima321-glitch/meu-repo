@@ -18,6 +18,9 @@ type WorkbenchPreviewRuntimeControlsProps = Pick<
   | 'runtimeReadiness'
   | 'runtimePrimaryAction'
   | 'runtimePrimaryActionLabel'
+  | 'runtimeActionBlockedReason'
+  | 'runtimeAutomationPlacement'
+  | 'runtimeAutomationRequiresConfirmation'
   | 'runtimeStrategyLabel'
   | 'runtimeStrategyHint'
   | 'runtimeDiscoveryMessage'
@@ -25,6 +28,7 @@ type WorkbenchPreviewRuntimeControlsProps = Pick<
   | 'isDiscoveringRuntime'
   | 'isProvisioningRuntime'
   | 'isSyncingRuntime'
+  | 'syncRuntimeBlockedReason'
   | 'previewSandboxId'
   | 'projectId'
   | 'setPreviewRuntimeInput'
@@ -56,6 +60,9 @@ export function WorkbenchPreviewRuntimeControls({
   runtimeReadiness,
   runtimePrimaryAction,
   runtimePrimaryActionLabel,
+  runtimeActionBlockedReason,
+  runtimeAutomationPlacement,
+  runtimeAutomationRequiresConfirmation,
   runtimeStrategyLabel,
   runtimeStrategyHint,
   runtimeDiscoveryMessage,
@@ -63,6 +70,7 @@ export function WorkbenchPreviewRuntimeControls({
   isDiscoveringRuntime,
   isProvisioningRuntime,
   isSyncingRuntime,
+  syncRuntimeBlockedReason,
   previewSandboxId,
   projectId,
   setPreviewRuntimeInput,
@@ -132,6 +140,9 @@ export function WorkbenchPreviewRuntimeControls({
       runtimeReadiness={runtimeReadiness}
       runtimePrimaryAction={normalizeRuntimePrimaryAction(runtimePrimaryAction)}
       runtimePrimaryActionLabel={runtimePrimaryActionLabel}
+      runtimeActionBlockedReason={runtimeActionBlockedReason}
+      runtimeAutomationPlacement={runtimeAutomationPlacement}
+      runtimeAutomationRequiresConfirmation={runtimeAutomationRequiresConfirmation}
       runtimeStrategyLabel={runtimeStrategyLabel}
       runtimeStrategyHint={runtimeStrategyHint}
       showRuntimeSettings={showRuntimeSettings}
@@ -143,7 +154,8 @@ export function WorkbenchPreviewRuntimeControls({
       isDiscoveringRuntime={isDiscoveringRuntime}
       isProvisioningRuntime={isProvisioningRuntime}
       isSyncingRuntime={isSyncingRuntime}
-      canSyncRuntime={Boolean(previewSandboxId)}
+      canSyncRuntime={Boolean(previewSandboxId) && !syncRuntimeBlockedReason}
+      syncRuntimeBlockedReason={syncRuntimeBlockedReason}
       runtimeDiscoveryMessage={runtimeDiscoveryMessage}
       runtimeDiscoveryTone={runtimeDiscoveryTone}
       deployReadiness={deployReadiness}

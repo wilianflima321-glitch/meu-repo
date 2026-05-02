@@ -22,6 +22,9 @@ type Props = {
   runtimeStrategyHint: string
   runtimePrimaryAction: 'provision' | 'discover' | 'inline'
   runtimePrimaryActionLabel: string
+  runtimeActionBlockedReason: string | null
+  runtimeAutomationPlacement: string | null
+  runtimeAutomationRequiresConfirmation: boolean
   showRuntimeSettings: boolean
   previewRuntimeInput: string
   onToggleSettings: () => void
@@ -38,6 +41,7 @@ type Props = {
   isProvisioningRuntime: boolean
   isSyncingRuntime: boolean
   canSyncRuntime: boolean
+  syncRuntimeBlockedReason?: string | null
   runtimeDiscoveryMessage?: string | null
   runtimeDiscoveryTone?: 'info' | 'success' | 'warning'
   deployReadiness: PreviewDeployReadiness | null
@@ -98,6 +102,9 @@ export default function PreviewRuntimeToolbar({
   runtimeStrategyHint,
   runtimePrimaryAction,
   runtimePrimaryActionLabel,
+  runtimeActionBlockedReason,
+  runtimeAutomationPlacement,
+  runtimeAutomationRequiresConfirmation,
   showRuntimeSettings,
   previewRuntimeInput,
   onToggleSettings,
@@ -114,6 +121,7 @@ export default function PreviewRuntimeToolbar({
   isProvisioningRuntime,
   isSyncingRuntime,
   canSyncRuntime,
+  syncRuntimeBlockedReason = null,
   runtimeDiscoveryMessage,
   runtimeDiscoveryTone = 'info',
   deployReadiness,
@@ -197,6 +205,10 @@ export default function PreviewRuntimeToolbar({
       : runtimePrimaryAction === 'discover'
         ? isDiscoveringRuntime
         : false
+  const primaryActionDisabled =
+    primaryActionBusy ||
+    ((runtimePrimaryAction === 'provision' || runtimePrimaryAction === 'discover') &&
+      Boolean(runtimeActionBlockedReason))
 
   const primaryActionBusyLabel =
     runtimePrimaryAction === 'provision'
@@ -204,6 +216,13 @@ export default function PreviewRuntimeToolbar({
       : runtimePrimaryAction === 'discover'
         ? 'Detecting...'
         : runtimePrimaryActionLabel
+  const runtimeLaneHint = runtimeActionBlockedReason
+    ? runtimeActionBlockedReason
+    : runtimeAutomationRequiresConfirmation
+      ? 'Automatic runtime actions stay held until you confirm them on this device profile.'
+      : runtimeAutomationPlacement
+        ? `Runtime automation prefers ${runtimeAutomationPlacement.replace(/-/g, ' ')}.`
+        : null
 
   const firstBlocker = runtimeReadiness?.blockers?.[0] ?? null
   const runtimeModeLabel = previewRuntimeUrl ? t.externalServer : t.inlineFallback
@@ -246,6 +265,7 @@ export default function PreviewRuntimeToolbar({
   const techFacts = [
     managedProvider ? `provider:${managedProviderLabel}` : null,
     managedProvider ? `mode:${managedProviderMode}` : null,
+    runtimeAutomationPlacement ? `lane:${runtimeAutomationPlacement}` : null,
     `endpoints:${configuredEndpoints.length}`,
     `local:${reachableCandidates}/${totalCandidates}`,
     runtimeReadiness?.preferredRuntimeUrl ? `preferred:${runtimeReadiness.preferredRuntimeUrl}` : null,
@@ -266,6 +286,17 @@ export default function PreviewRuntimeToolbar({
             </ToolbarChip>
             <ToolbarChip toneClass={readinessToneClass}>Readiness: {readinessLabel}</ToolbarChip>
             <ToolbarChip toneClass={runtimeStateClass}>Health: {runtimeStateLabel}</ToolbarChip>
+            {runtimeLaneHint ? (
+              <ToolbarChip
+                toneClass={
+                  runtimeActionBlockedReason
+                    ? 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning)]'
+                    : 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+                }
+              >
+                {runtimeActionBlockedReason ? 'Automation held' : 'Lane policy'}
+              </ToolbarChip>
+            ) : null}
             {checkedAtLabel ? (
               <span className="text-[10px] text-[var(--aethel-text-tertiary)]">Checked {checkedAtLabel}</span>
             ) : null}
@@ -283,6 +314,11 @@ export default function PreviewRuntimeToolbar({
                   ? 'Valide health, mantenha o sync e promova a mesma lane para review sem perder contexto.'
                   : 'Use a acao recomendada para descobrir ou provisionar parity real quando o artefato pedir rede, device ou deploy.'}
               </div>
+              {runtimeLaneHint ? (
+                <div className="mt-1 text-[10px] leading-4 text-[var(--aethel-text-tertiary)]">
+                  {runtimeLaneHint}
+                </div>
+              ) : null}
             </div>
             {firstBlocker ? (
               <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_8%,transparent)] px-2.5 py-1.5 text-[10px] text-[var(--aethel-warning-light)]">
@@ -408,8 +444,9 @@ export default function PreviewRuntimeToolbar({
           <button
             type="button"
             onClick={onRunRecommendedAction}
-            disabled={primaryActionBusy}
+            disabled={primaryActionDisabled}
             aria-label={`Run recommended runtime action: ${runtimePrimaryActionLabel}`}
+            title={runtimeActionBlockedReason ?? undefined}
             className="min-h-[34px] rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 py-1.5 text-[11px] font-medium text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {primaryActionBusy ? primaryActionBusyLabel : runtimePrimaryActionLabel}
@@ -453,8 +490,9 @@ export default function PreviewRuntimeToolbar({
               <button
                 type="button"
                 onClick={onDiscoverRuntime}
-                disabled={isDiscoveringRuntime}
+                disabled={isDiscoveringRuntime || Boolean(runtimeActionBlockedReason)}
                 aria-label={t.autoDetect}
+                title={runtimeActionBlockedReason ?? undefined}
                 className="min-h-[38px] rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isDiscoveringRuntime ? 'Detecting...' : t.autoDetect}
@@ -462,8 +500,9 @@ export default function PreviewRuntimeToolbar({
               <button
                 type="button"
                 onClick={onProvisionRuntime}
-                disabled={isProvisioningRuntime || !routeProvisionSupported}
+                disabled={isProvisioningRuntime || !routeProvisionSupported || Boolean(runtimeActionBlockedReason)}
                 aria-label={t.provisionManaged}
+                title={runtimeActionBlockedReason ?? undefined}
                 className="min-h-[38px] rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-3 py-2 text-[11px] font-medium text-[var(--aethel-success-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-success)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isProvisioningRuntime ? 'Provisioning...' : routeProvisionSupported ? t.provisionManaged : 'Provision unavailable'}
@@ -476,8 +515,9 @@ export default function PreviewRuntimeToolbar({
               <button
                 type="button"
                 onClick={onSyncRuntime}
-                disabled={isSyncingRuntime}
+                disabled={isSyncingRuntime || !canSyncRuntime}
                 aria-label="Sync current files into the preview runtime"
+                title={syncRuntimeBlockedReason ?? undefined}
                 className="min-h-[34px] rounded-xl border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-3 py-2 text-[11px] font-medium text-[var(--aethel-primary-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isSyncingRuntime ? 'Syncing...' : tc.actions.sync}

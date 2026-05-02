@@ -15,6 +15,9 @@ const baseProps = {
   runtimeStrategyHint: 'Mantem parity forte',
   runtimePrimaryAction: 'provision' as const,
   runtimePrimaryActionLabel: 'Provisionar runtime',
+  runtimeActionBlockedReason: null,
+  runtimeAutomationPlacement: null,
+  runtimeAutomationRequiresConfirmation: false,
   showRuntimeSettings: false,
   previewRuntimeInput: '',
   onToggleSettings: vi.fn(),
@@ -31,6 +34,7 @@ const baseProps = {
   isProvisioningRuntime: false,
   isSyncingRuntime: false,
   canSyncRuntime: true,
+  syncRuntimeBlockedReason: null,
   runtimeDiscoveryMessage: null,
   runtimeDiscoveryTone: 'info' as const,
   deployReadiness: { canDeploy: true },
@@ -64,7 +68,22 @@ describe('PreviewRuntimeToolbar', () => {
     rerender(<PreviewRuntimeToolbar {...baseProps} showRuntimeSettings />)
 
     expect(screen.getByText('Estado do runtime')).toBeInTheDocument()
-    expect(screen.getByText('Estratégia de preview')).toBeInTheDocument()
-    expect(screen.getByText('Próxima ação recomendada')).toBeInTheDocument()
+    expect(screen.getByText(/Estrat.gia de preview/i)).toBeInTheDocument()
+    expect(screen.getByText(/Pr.xima a..o recomendada/i)).toBeInTheDocument()
+  })
+
+  it('holds runtime actions when the lane policy blocks automation', () => {
+    render(
+      <PreviewRuntimeToolbar
+        {...baseProps}
+        runtimeActionBlockedReason="Browser operator lane is saturated on this device profile."
+        showRuntimeSettings
+      />
+    )
+
+    expect(screen.getByText('Automation held')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /run recommended runtime action/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /auto-detectar/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /provisionar runtime gerenciado/i })).toBeDisabled()
   })
 })

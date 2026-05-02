@@ -105,6 +105,9 @@ export type UseFullscreenIDEBridgePropsArgs = {
   runtimeReadiness: WorkbenchPreviewPaneProps['runtimeReadiness'];
   runtimePrimaryAction: WorkbenchPreviewPaneProps['runtimePrimaryAction'];
   runtimePrimaryActionLabel: string;
+  runtimeActionBlockedReason: string | null;
+  runtimeAutomationPlacement: string | null;
+  runtimeAutomationRequiresConfirmation: boolean;
   runtimeStrategyLabel: string;
   runtimeStrategyHint: string;
   runtimeDiscoveryMessage: string | null;
@@ -112,6 +115,7 @@ export type UseFullscreenIDEBridgePropsArgs = {
   isDiscoveringRuntime: boolean;
   isProvisioningRuntime: boolean;
   isSyncingRuntime: boolean;
+  syncRuntimeBlockedReason: string | null;
   previewSandboxId: string | null;
   forceInlinePreviewFallback: boolean;
   isSavingFile: boolean;
