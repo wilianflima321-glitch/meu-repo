@@ -38,6 +38,8 @@ describe('agent runtime lane helpers', () => {
   it('recognizes browser operator tools by name', () => {
     expect(isBrowserOperatorToolName('web_search')).toBe(true)
     expect(isBrowserOperatorToolName('fetch_url')).toBe(true)
+    expect(isBrowserOperatorToolName('search_docs')).toBe(true)
+    expect(isBrowserOperatorToolName('web_scrape')).toBe(true)
     expect(isBrowserOperatorToolName('write_file')).toBe(false)
     expect(isBrowserOperatorToolName(null)).toBe(false)
   })

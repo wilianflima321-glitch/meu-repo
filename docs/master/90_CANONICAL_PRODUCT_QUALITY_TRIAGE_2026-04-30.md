@@ -203,6 +203,8 @@ Preview runtime automation now also obeys the same governor. Runtime discovery/p
 
 Agent mode now reflects the same runtime grammar. The panel exposes `ai-agents` and `browser-operator` placement directly in the shell, blocks fresh runs when the agent lane is saturated, and prevents approval of web-search/fetch steps when the browser-operator lane is held. That keeps autonomous internet work aligned with device policy instead of turning approval UX into a fake green light.
 
+The browser-operator guard now also lives in the real tool execution path instead of only the approval chrome. Local and server `AutonomousAgent` flows auto-register the web tools registry, pass a runtime payload into `web_search`, `fetch_url`, `search_docs`, and `web_scrape`, and return explicit runtime block codes when the device policy says those steps must wait or require confirmation.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

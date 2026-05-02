@@ -9,6 +9,10 @@
  */
 
 import { aiTools, type ToolResult } from './ai-tools-registry';
+import {
+  getBrowserOperatorRuntimeBlock,
+  type BrowserOperatorRuntimeContext,
+} from './device/browser-operator-tool-guard'
 
 // ============================================================================
 // CONFIGURAÇÃO
@@ -50,6 +54,58 @@ interface WebPageContent {
     author?: string;
     publishedDate?: string;
   };
+}
+
+function getBrowserOperatorRuntimeContextFromParams(
+  params: Record<string, unknown>
+): BrowserOperatorRuntimeContext | null {
+  const runtime = params.__aethelRuntime
+  if (!runtime || typeof runtime !== 'object') {
+    return null
+  }
+
+  const browserOperator = (runtime as { browserOperator?: unknown }).browserOperator
+  if (!browserOperator || typeof browserOperator !== 'object') {
+    return null
+  }
+
+  const context = browserOperator as Record<string, unknown>
+
+  return {
+    canStart: typeof context.canStart === 'boolean' ? context.canStart : undefined,
+    requiresConfirmation:
+      typeof context.requiresConfirmation === 'boolean'
+        ? context.requiresConfirmation
+        : undefined,
+    approved: typeof context.approved === 'boolean' ? context.approved : undefined,
+    placement: typeof context.placement === 'string' ? context.placement : null,
+    mode: typeof context.mode === 'string' ? context.mode : null,
+    reason: typeof context.reason === 'string' ? context.reason : null,
+  }
+}
+
+function getRuntimeBlockedToolResult(
+  params: Record<string, unknown>
+): ToolResult | null {
+  const block = getBrowserOperatorRuntimeBlock(
+    getBrowserOperatorRuntimeContextFromParams(params)
+  )
+
+  if (!block) {
+    return null
+  }
+
+  return {
+    success: false,
+    error: block.message,
+    data: {
+      code: block.code,
+      runtime: {
+        placement: block.placement,
+        mode: block.mode,
+      },
+    },
+  }
 }
 
 // ============================================================================
@@ -400,6 +456,11 @@ aiTools.register({
   returns: 'Lista de resultados com título, URL e snippet',
   execute: async (params): Promise<ToolResult> => {
     try {
+      const blocked = getRuntimeBlockedToolResult(params as Record<string, unknown>)
+      if (blocked) {
+        return blocked
+      }
+
       const query = String(params.query || '').trim();
       if (!query) {
         return { success: false, error: 'Query de busca é obrigatória' };
@@ -435,6 +496,11 @@ aiTools.register({
   returns: 'Conteúdo da página em texto/markdown',
   execute: async (params): Promise<ToolResult> => {
     try {
+      const blocked = getRuntimeBlockedToolResult(params as Record<string, unknown>)
+      if (blocked) {
+        return blocked
+      }
+
       const url = String(params.url || '').trim();
       if (!url) {
         return { success: false, error: 'URL é obrigatória' };
@@ -466,6 +532,11 @@ aiTools.register({
   returns: 'Resultados da documentação',
   execute: async (params): Promise<ToolResult> => {
     try {
+      const blocked = getRuntimeBlockedToolResult(params as Record<string, unknown>)
+      if (blocked) {
+        return blocked
+      }
+
       const query = String(params.query || '').trim();
       const source = String(params.source || '').trim().toLowerCase();
       
@@ -506,6 +577,11 @@ aiTools.register({
   returns: 'Dados extraídos da página',
   execute: async (params): Promise<ToolResult> => {
     try {
+      const blocked = getRuntimeBlockedToolResult(params as Record<string, unknown>)
+      if (blocked) {
+        return blocked
+      }
+
       const url = String(params.url || '').trim();
       if (!url) {
         return { success: false, error: 'URL é obrigatória' };

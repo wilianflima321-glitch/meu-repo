@@ -68,6 +68,8 @@ P0 rules:
 - Do not let browser operator, build, export, viewport, and indexing jobs compete on the main UI thread.
 - Route each heavy work type through a lane budget before it starts.
 - Use workers, cloud runtimes, or local sandbox lanes for long-running work.
+- Enforce the browser-operator lane inside the tool execution path, not only in surface-level buttons.
+- Pass explicit runtime payloads into web tools so local and cloud agent paths return honest block reasons instead of silent failure.
 - Cap parallel agents per device profile.
 - Pause background indexing during direct user interaction.
 - Keep persistent memory compact by default: mission summaries, accepted evidence, file graph deltas, and decisions.

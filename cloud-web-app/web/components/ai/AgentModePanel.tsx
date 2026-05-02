@@ -28,8 +28,10 @@ import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/Textarea'
 import { ScrollArea } from '@/components/ui/ScrollArea'
 import { AutonomousAgent, AgentTask, AgentStep, ToolCall } from '@/lib/ai/agent-mode'
+import { useDeviceCapabilityProfile } from '@/hooks/useDeviceCapabilityProfile'
 import { useRuntimeLanePolicy } from '@/hooks/useRuntimeLanePolicy'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
+import { buildBrowserOperatorRuntimePayload } from '@/lib/device/browser-operator-tool-guard'
 import {
   describeRuntimePlacement,
   getAiAgentStartBlockNotice,
@@ -77,6 +79,8 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
   const [activeBrowserOperatorCalls, setActiveBrowserOperatorCalls] = useState(0)
   const [expandedSteps, setExpandedSteps] = useState<Set<string>>(new Set())
   const scrollRef = useRef<HTMLDivElement>(null)
+  const browserOperatorApprovalOverrideRef = useRef(false)
+  const capabilityProfile = useDeviceCapabilityProfile()
   const aiAgentLane = useRuntimeLanePolicy('ai-agents', {
     activeCount: status === 'running' || status === 'paused' ? 1 : 0,
   })
@@ -97,24 +101,61 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
     notice?.tone === 'warning'
       ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning-light)]'
       : 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-[var(--aethel-info-light)]'
+  const browserOperatorRequiresConfirmation = Boolean(browserOperatorLane.budget?.requiresConfirmation)
+
+  useEffect(() => {
+    agent.setToolContextProvider((action) => {
+      if (!isBrowserOperatorToolName(action.tool)) {
+        return null
+      }
+
+      return {
+        __aethelRuntime: buildBrowserOperatorRuntimePayload({
+          canStart: browserOperatorLane.decision.canStart,
+          requiresConfirmation: browserOperatorRequiresConfirmation,
+          approved: browserOperatorApprovalOverrideRef.current,
+          placement: browserOperatorLane.decision.placement,
+          mode: capabilityProfile.policy.mode,
+          reason: browserOperatorLane.decision.reason,
+        }),
+      }
+    })
+
+    return () => {
+      agent.setToolContextProvider(null)
+    }
+  }, [
+    agent,
+    browserOperatorLane.decision.canStart,
+    browserOperatorLane.decision.placement,
+    browserOperatorLane.decision.reason,
+    browserOperatorRequiresConfirmation,
+    capabilityProfile.policy.mode,
+  ])
 
   useEffect(() => {
     const handleTaskStarted = (t: AgentTask) => {
       setTask(t)
       setStatus('running')
+      setPendingApproval(null)
       setActiveBrowserOperatorCalls(0)
+      browserOperatorApprovalOverrideRef.current = false
     }
 
     const handleTaskCompleted = (t: AgentTask) => {
       setTask(t)
       setStatus('completed')
+      setPendingApproval(null)
       setActiveBrowserOperatorCalls(0)
+      browserOperatorApprovalOverrideRef.current = false
     }
 
     const handleTaskFailed = (t: AgentTask) => {
       setTask(t)
       setStatus('failed')
+      setPendingApproval(null)
       setActiveBrowserOperatorCalls(0)
+      browserOperatorApprovalOverrideRef.current = false
     }
 
     const handleStepAdded = (step: AgentStep) => {
@@ -129,6 +170,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
     }
 
     const handleApprovalNeeded = (approval: PendingApprovalRequest) => {
+      browserOperatorApprovalOverrideRef.current = false
       setPendingApproval(approval)
     }
 
@@ -141,14 +183,15 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
     }
 
     const handleToolStarted = (toolCall: ToolCall) => {
-      if (toolCall.tool === 'web_search' || toolCall.tool === 'fetch_url') {
+      if (isBrowserOperatorToolName(toolCall.tool)) {
         setActiveBrowserOperatorCalls((current) => current + 1)
       }
     }
 
     const handleToolSettled = (toolCall: ToolCall) => {
-      if (toolCall.tool === 'web_search' || toolCall.tool === 'fetch_url') {
+      if (isBrowserOperatorToolName(toolCall.tool)) {
         setActiveBrowserOperatorCalls((current) => Math.max(0, current - 1))
+        browserOperatorApprovalOverrideRef.current = false
       }
     }
 
@@ -176,6 +219,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
     setProgress(0)
     setPendingApproval(null)
     setActiveBrowserOperatorCalls(0)
+    browserOperatorApprovalOverrideRef.current = false
 
     await agent.execute(input.trim())
     setInput('')
@@ -186,6 +230,9 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
       if (browserOperatorApprovalNotice?.approveDisabled) {
         return
       }
+      if (isBrowserOperatorToolName(pendingApproval.action.tool)) {
+        browserOperatorApprovalOverrideRef.current = true
+      }
       pendingApproval.approve()
       setPendingApproval(null)
     }
@@ -193,6 +240,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
 
   const handleReject = () => {
     if (pendingApproval) {
+      browserOperatorApprovalOverrideRef.current = false
       pendingApproval.reject()
       setPendingApproval(null)
     }
@@ -209,6 +257,9 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
   const handleStop = () => {
     agent.stop()
     setStatus('idle')
+    setPendingApproval(null)
+    setActiveBrowserOperatorCalls(0)
+    browserOperatorApprovalOverrideRef.current = false
   }
 
   const toggleStepExpand = (stepId: string) => {
@@ -274,8 +325,8 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
 
   const iconButtonClass = `h-8 w-8 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
   const stepToggleClass = `flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
-  const agentLaneLabel = `Agent lane · ${describeRuntimePlacement(aiAgentLane.decision.placement)}`
-  const browserOperatorLabel = `Browser operator · ${describeRuntimePlacement(browserOperatorLane.decision.placement)}`
+  const agentLaneLabel = `Agent lane - ${describeRuntimePlacement(aiAgentLane.decision.placement)}`
+  const browserOperatorLabel = `Browser operator - ${describeRuntimePlacement(browserOperatorLane.decision.placement)}`
 
   if (!isOpen) return null
 

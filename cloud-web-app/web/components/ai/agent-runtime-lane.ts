@@ -12,7 +12,12 @@ export type AgentRuntimeNotice = {
   approveDisabled: boolean
 }
 
-const BROWSER_OPERATOR_TOOL_NAMES = new Set(['web_search', 'fetch_url'])
+const BROWSER_OPERATOR_TOOL_NAMES = new Set([
+  'web_search',
+  'fetch_url',
+  'search_docs',
+  'web_scrape',
+])
 
 export function describeRuntimePlacement(
   placement: RuntimeLaneBudget['placement'] | RuntimeLaneDecision['placement'] | string | null | undefined

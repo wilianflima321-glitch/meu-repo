@@ -12,6 +12,7 @@
 
 import { aiService } from '@/lib/ai-service';
 import { toolsRegistry, executeTool } from '@/lib/ai-tools-registry';
+import '@/lib/ai-web-tools'
 import { EventEmitter } from 'events';
 
 // ============================================================================
@@ -77,7 +78,12 @@ export interface AgentConfig {
   enableSelfCorrection: boolean;
   enableParallelExecution: boolean;
   model: string;
+  toolContextProvider?: AgentToolContextProvider | null;
 }
+
+export type AgentToolContextProvider = (
+  action: AgentAction
+) => Record<string, unknown> | null | undefined | Promise<Record<string, unknown> | null | undefined>;
 
 interface AgentPlan {
   analysis: string;
@@ -94,7 +100,7 @@ interface AgentPlan {
   potentialIssues: string[];
 }
 
-interface AgentAction {
+export interface AgentAction {
   type: 'tool_call' | 'ask_human' | 'complete' | 'error';
   tool?: string;
   input?: Record<string, unknown>;
@@ -238,6 +244,7 @@ FORMATO DE RESPOSTA (JSON):
 
 export class AutonomousAgent extends EventEmitter {
   private config: AgentConfig;
+  private toolContextProvider: AgentToolContextProvider | null = null;
   private memory: AgentMemory;
   private currentTask: AgentTask | null = null;
   private steps: AgentStep[] = [];
@@ -258,6 +265,8 @@ export class AutonomousAgent extends EventEmitter {
       enableParallelExecution: config.enableParallelExecution ?? false,
       model: config.model || 'gpt-4',
     };
+
+    this.toolContextProvider = config.toolContextProvider || null;
     
     this.memory = {
       shortTerm: [],
@@ -527,7 +536,11 @@ export class AutonomousAgent extends EventEmitter {
       return { error: 'Missing tool name' };
     }
 
-    const input = action.input || {};
+    const providedContext = await this.resolveToolContext(action)
+    const input = {
+      ...(action.input || {}),
+      ...(providedContext || {}),
+    };
     const step = this.addStep(taskId, 'execute', `Executando ${action.tool}...`);
     
     const toolCall: ToolCall = {
@@ -572,6 +585,25 @@ export class AutonomousAgent extends EventEmitter {
       });
       
       return { error: toolCall.error };
+    }
+  }
+
+  private async resolveToolContext(
+    action: AgentAction
+  ): Promise<Record<string, unknown> | null> {
+    if (!this.toolContextProvider) {
+      return null
+    }
+
+    try {
+      const context = await this.toolContextProvider(action)
+      if (!context || typeof context !== 'object') {
+        return null
+      }
+      return context
+    } catch (error) {
+      this.addMemory('error', `Tool context provider falhou: ${error instanceof Error ? error.message : 'unknown'}`)
+      return null
     }
   }
   
@@ -888,6 +920,10 @@ export class AutonomousAgent extends EventEmitter {
   pause(): void {
     this.isPaused = true;
     this.emit('agent:paused', { reason: 'User requested pause' });
+  }
+
+  setToolContextProvider(provider: AgentToolContextProvider | null): void {
+    this.toolContextProvider = provider
   }
   
   resume(): void {
