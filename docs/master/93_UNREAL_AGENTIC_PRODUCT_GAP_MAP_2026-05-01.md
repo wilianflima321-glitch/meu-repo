@@ -166,6 +166,11 @@ P0: Keep current gates green while reducing structural debt.
 P1: Keep editor split ratchets closed.
 - Reachable editor splits are now closed for the measured `>1000` TSX component scope.
 - Future work should wire/classify domain rooms, not re-expand extracted TSX surfaces.
+
+P1: Add device-native runtime governance before promising Unreal-scale local work.
+- Studio Home now has a device guard that classifies WebNN/WebGPU/CPU/RAM/storage/network signals.
+- The web app can adapt agent count, viewport quality, local model policy, memory persistence, and browser operator throttling.
+- The local Studio still needs a native probe for Windows ML, DirectML, GPU, NPU, storage, and process isolation before claiming full local acceleration.
 - Keep each extracted module under 800 lines where possible.
 
 P2: Expand the Project Brain minimal implementation.

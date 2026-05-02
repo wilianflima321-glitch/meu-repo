@@ -1,8 +1,12 @@
-﻿import dynamic from 'next/dynamic'
+'use client'
+
+import dynamic from 'next/dynamic'
 import { ArrowRight, CheckCircle2, Clock3, Coins, Layers3, ShieldCheck, Sparkles } from 'lucide-react'
 import { APIError } from '@/lib/api'
 import type { ConnectivityResponse, WalletSummary } from '@/lib/api'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
+import { DeviceRuntimeGuardCard } from '@/components/device/DeviceRuntimeGuardCard'
+import { useDeviceCapabilityProfile } from '@/hooks/useDeviceCapabilityProfile'
 
 import type { Project } from './aethel-dashboard-model'
 import { DashboardMissionLedgerCard } from './DashboardMissionLedgerCard'
@@ -129,6 +133,7 @@ export function DashboardOverviewTab({
   onSendSuggestion,
   isGenerating,
 }: DashboardOverviewTabProps) {
+  const deviceProfile = useDeviceCapabilityProfile()
   const activeProjects = projects.filter((project) => project.status === 'active')
   const primaryProject = activeProjects[0] ?? projects[0]
   const pendingApprovals = livePreviewSuggestions.length
@@ -401,6 +406,8 @@ export function DashboardOverviewTab({
         onOpenIde={onOpenIde}
         onOpenProjects={onOpenProjects}
       />
+
+      <DeviceRuntimeGuardCard profile={deviceProfile} />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_380px]">
         <div className={panelClass}>

@@ -97,6 +97,7 @@ Current verified readout after the 2026-05-01 god-component closure pass:
 - `api/dap-api.ts`, `api/lsp-api.ts`, `server/dap-runtime.ts`, `lsp/lsp-server-base.ts`, `lsp/servers/cpp-lsp.ts`, `lsp/servers/rust-lsp.ts`, `api/ai-api.ts`, and `integration/debug-integration.ts` were tightened next; the measured app-code `: any` ratchet now reports `661`.
 - `lsp/servers/{typescript,go,python,java,csharp}-lsp.ts`, `dap/dap-adapter-base.ts`, `dap/adapters/{nodejs,python,java,go}-dap.ts`, `swr-config.ts`, and `api-integration.ts` were tightened next; the measured app-code `: any` ratchet now reports `505`.
 - `app/api/ai/{chat,complete}`, `integration/editor-integration.ts`, `extensions/{extension-system,extension-loader}.ts`, `hooks/useAethelGateway.ts`, `server/websocket-server.ts`, `queue-system.ts`, `debug/debug-adapter.ts`, and `ai/agent-mode.ts` were tightened next; the measured app-code `: any` ratchet now reports `390`.
+- `device-capability-profile.ts`, `useDeviceCapabilityProfile.ts`, and `DeviceRuntimeGuardCard.tsx` add the first runtime governor for NPU/WebNN, WebGPU, CPU/RAM, storage, network, local model, viewport, memory, and agent-concurrency policy.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.
