@@ -6,6 +6,7 @@ import type {
 } from './device-capability-profile'
 
 export const LOCAL_RUNTIME_CAPABILITY_STORAGE_KEY = 'aethel.runtime.local-capabilities.v1'
+export const LOCAL_RUNTIME_DEVICE_ID_STORAGE_KEY = 'aethel.runtime.local-device-id.v1'
 export const LOCAL_RUNTIME_CAPABILITY_EVENT = 'aethel:studio-local-capabilities'
 export const LOCAL_RUNTIME_CAPABILITY_REQUEST_EVENT = 'aethel:request-studio-local-capabilities'
 export const LOCAL_RUNTIME_STALE_MS = 5 * 60 * 1000
@@ -49,6 +50,12 @@ export interface LocalRuntimeBridgeState {
   executorLabel: string
   summary: string
   canUseNativeAcceleration: boolean
+}
+
+function getReportTimestamp(report: LocalRuntimeCapabilityReport | null | undefined): number {
+  if (!report) return 0
+  const timestamp = Date.parse(report.receivedAt)
+  return Number.isFinite(timestamp) ? timestamp : 0
 }
 
 const VIEWPORT_QUALITY_ORDER: Record<DeviceRuntimePolicy['viewportQuality'], number> = {
@@ -237,6 +244,23 @@ export function buildLocalRuntimeBridgeState(
     summary: buildLocalRuntimeSummary(connection, report ?? null),
     canUseNativeAcceleration,
   }
+}
+
+export function isLocalRuntimeReportFresher(
+  candidate: LocalRuntimeCapabilityReport | null | undefined,
+  baseline: LocalRuntimeCapabilityReport | null | undefined
+): boolean {
+  return getReportTimestamp(candidate) > getReportTimestamp(baseline)
+}
+
+export function pickPreferredLocalRuntimeReport(
+  primary: LocalRuntimeCapabilityReport | null | undefined,
+  fallback: LocalRuntimeCapabilityReport | null | undefined
+): LocalRuntimeCapabilityReport | null {
+  if (!primary && !fallback) return null
+  if (!primary) return fallback ?? null
+  if (!fallback) return primary
+  return isLocalRuntimeReportFresher(fallback, primary) ? fallback : primary
 }
 
 export function mergeDeviceCapabilityProfileWithLocalRuntime(

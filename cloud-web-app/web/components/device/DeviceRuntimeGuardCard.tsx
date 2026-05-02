@@ -2,15 +2,15 @@
 
 import { Cpu, Gauge, HardDrive, ShieldCheck, Zap } from 'lucide-react'
 
+import type { LocalRuntimeBridgeHookState } from '@/hooks/useLocalRuntimeBridge'
 import type { DeviceCapabilityProfile, DeviceRuntimeMode } from '@/lib/device/device-capability-profile'
-import type { LocalRuntimeBridgeState } from '@/lib/device/local-runtime-bridge'
 import { buildRuntimeLaneBudgets, decideRuntimeLaneStart } from '@/lib/device/runtime-lane-scheduler'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 import { useRuntimeInteractionPressure } from '@/components/providers/runtime/useRuntimeInteractionPressure'
 
 type DeviceRuntimeGuardCardProps = {
   profile: DeviceCapabilityProfile
-  localBridge?: LocalRuntimeBridgeState
+  localBridge?: LocalRuntimeBridgeHookState
   onRequestLocalProbe?: () => void
 }
 
@@ -50,6 +50,13 @@ function formatBridgeAge(ageMs: number | null | undefined) {
   if (typeof ageMs !== 'number' || !Number.isFinite(ageMs)) return 'Awaiting probe'
   const minutes = Math.max(0, Math.round(ageMs / 60000))
   return minutes <= 1 ? 'Just now' : `${minutes} min ago`
+}
+
+function formatCloudSyncAge(isoTimestamp: string | null | undefined) {
+  if (!isoTimestamp || Number.isNaN(Date.parse(isoTimestamp))) return 'Awaiting cloud handoff'
+  const ageMs = Math.max(0, Date.now() - Date.parse(isoTimestamp))
+  const minutes = Math.round(ageMs / 60000)
+  return minutes <= 1 ? 'Synced just now' : `Synced ${minutes} min ago`
 }
 
 export function DeviceRuntimeGuardCard({
@@ -109,6 +116,14 @@ export function DeviceRuntimeGuardCard({
     localBridge?.connection === 'connected'
       ? formatFreeStorage(localBridge.report?.freeStorageGb)
       : formatStorage(signals.storageQuotaGb, signals.storageUsageGb)
+  const cloudSyncLabel =
+    localBridge?.cloudSyncStatus === 'synced'
+      ? formatCloudSyncAge(localBridge.cloudSyncedAt)
+      : localBridge?.cloudSyncStatus === 'syncing'
+        ? 'Syncing bridge snapshot to cloud'
+        : localBridge?.cloudSyncStatus === 'error'
+          ? localBridge.cloudSyncError ?? 'Cloud handoff needs attention'
+          : 'Cloud handoff pending authentication'
 
   const facts = [
     {
@@ -211,6 +226,7 @@ export function DeviceRuntimeGuardCard({
             {localBridge?.summary ??
               'Studio Local should run native NPU/GPU probes and isolate heavy jobs. Web stays responsive and never assumes NPU access blindly.'}
           </p>
+          <p className="mt-3 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">{cloudSyncLabel}</p>
           {onRequestLocalProbe ? (
             <button
               type="button"

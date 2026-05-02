@@ -207,6 +207,8 @@ The browser-operator guard now also lives in the real tool execution path instea
 
 The runtime profile is now no longer browser-only. A local-native bridge can publish a capability probe from Studio Local into the web shell, and the scheduler, Project Brain, Device Guard, Agent Mode, and runtime boot policy all consume the merged profile. That gives Aethel a real path to recognize native NPU/GPU capacity, stale probes, and thermal pressure before deciding where agent work should run.
 
+That bridge now also has an authenticated cloud handoff. Fresh native capability probes sync into a per-user runtime snapshot route/store, and the web shell can rehydrate from that trusted snapshot after reload instead of pretending the browser alone always knows the machine. This closes an important continuity gap between Studio Home in the web and Studio Local on the device.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

@@ -4,6 +4,7 @@ import { buildDeviceCapabilityProfile } from '@/lib/device/device-capability-pro
 import {
   buildLocalRuntimeBridgeState,
   mergeDeviceCapabilityProfileWithLocalRuntime,
+  pickPreferredLocalRuntimeReport,
   sanitizeLocalRuntimeCapabilityReport,
 } from '@/lib/device/local-runtime-bridge'
 
@@ -115,5 +116,25 @@ describe('local runtime bridge', () => {
 
     expect(merged.policy.mode).toBe('cloud-isolated')
     expect(merged.policy.localModelPolicy).toBe('cloud-only')
+  })
+
+  it('prefers the fresher report when reconciling browser cache and cloud snapshots', () => {
+    const cached = sanitizeLocalRuntimeCapabilityReport({
+      receivedAt: '2026-05-02T16:00:00.000Z',
+      hostKind: 'desktop-app',
+      transport: 'storage-sync',
+      os: 'windows',
+      preferredExecutor: 'local-worker',
+    })
+    const cloud = sanitizeLocalRuntimeCapabilityReport({
+      receivedAt: '2026-05-02T16:05:00.000Z',
+      hostKind: 'desktop-app',
+      transport: 'custom-event',
+      os: 'windows',
+      preferredExecutor: 'local-native',
+      gpuComputeAvailable: true,
+    })
+
+    expect(pickPreferredLocalRuntimeReport(cached, cloud)).toBe(cloud)
   })
 })

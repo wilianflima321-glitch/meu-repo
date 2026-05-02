@@ -29,6 +29,8 @@ The web shell now has a first-pass device guard:
 - `hooks/usePreviewRuntimeManager.ts` now gates preview runtime discovery/provision through the `browser-operator` lane and runtime sync through the `file-sync` lane.
 - `components/ide/PreviewRuntimeToolbar.tsx` now exposes held automation state, preferred placement, and manual-confirmation hints so the user understands why the preview runtime is waiting instead of assuming the product is stalled.
 - `components/ai/AgentModePanel.tsx` now exposes `ai-agents` and `browser-operator` lane status directly inside the autonomous panel, blocking new runs when the agent lane is saturated and holding approval of web steps when the browser-operator lane is not available.
+- `lib/server/local-runtime-capability-store.ts` and `app/api/runtime/local-capabilities/route.ts` now give the local probe an authenticated file-backed handoff into the user's cloud account, so the web shell can recover the freshest trusted native snapshot even after reload.
+- `hooks/useLocalRuntimeBridge.ts` now hydrates from browser cache plus authenticated cloud fallback, syncs fresh native probes back to the account, and tracks whether the local-native bridge has completed its cloud handoff.
 
 Measured policies include:
 
@@ -91,7 +93,7 @@ The local app should sync with the cloud account, but it must not become a forke
 
 ## Next Blocks
 
-1. Add native local Studio probe contract for CPU/GPU/NPU/RAM/storage and expose it to the web account.
+1. Implement the real Studio Local emitter so the desktop runtime sends signed device probes instead of relying on browser-only relay events.
 2. Continue wiring the lane scheduler into deeper browser/build/render/indexing execution paths beyond the first dashboard, deploy, preview-runtime, and agent-mode entry points.
 3. Persist lane pressure telemetry so Aethel can learn safe defaults by device class.
 4. Add durable project memory backed by database/files instead of only UI read models.
