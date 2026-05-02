@@ -553,9 +553,9 @@ export class FileSystemRuntime extends EventEmitter {
     // Try rename first (faster for same filesystem)
     try {
       await fs.rename(resolvedSrc, resolvedDest);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If rename fails (cross-device), fall back to copy+delete
-      if (error.code === 'EXDEV') {
+      if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'EXDEV') {
         await this.copy(resolvedSrc, resolvedDest, { overwrite: true });
         await this.delete(resolvedSrc, { recursive: true, force: true });
       } else {

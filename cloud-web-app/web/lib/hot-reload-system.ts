@@ -56,6 +56,19 @@ export interface HotReloadEvent {
 
 type HotReloadCallback = (event: HotReloadEvent) => void;
 
+type FileWatcherServerMessage = {
+  type?: string;
+  changeType?: FileChange['type'];
+  path?: string;
+  content?: string;
+  hash?: string;
+};
+
+type ShaderMaterialHandle = {
+  needsUpdate?: boolean;
+  [key: string]: unknown;
+};
+
 // ============================================================================
 // FILE WATCHER (WebSocket client)
 // ============================================================================
@@ -144,11 +157,11 @@ export class FileWatcher {
     }, this.config.reconnectIntervalMs);
   }
   
-  private handleServerMessage(data: any): void {
+  private handleServerMessage(data: FileWatcherServerMessage): void {
     if (data.type === 'change') {
       const change: FileChange = {
         type: data.changeType || 'change',
-        path: data.path,
+        path: data.path || '',
         timestamp: Date.now(),
         content: data.content,
         hash: data.hash,
@@ -615,10 +628,10 @@ export class AssetReloader {
 
 export class ShaderReloader {
   private shaderCache: Map<string, string> = new Map();
-  private shaderMaterials: Map<string, WeakSet<any>> = new Map(); // WeakSet of materials using this shader
+  private shaderMaterials: Map<string, WeakSet<ShaderMaterialHandle>> = new Map(); // WeakSet of materials using this shader
   private reloadCallbacks: ((path: string, source: string) => void)[] = [];
   
-  registerMaterial(shaderPath: string, material: any): void {
+  registerMaterial(shaderPath: string, material: ShaderMaterialHandle): void {
     if (!this.shaderMaterials.has(shaderPath)) {
       this.shaderMaterials.set(shaderPath, new WeakSet());
     }
@@ -891,7 +904,7 @@ export class HotReloadManager {
     return this.shaderReloader.onReload(callback);
   }
   
-  registerShaderMaterial(shaderPath: string, material: unknown): void {
+  registerShaderMaterial(shaderPath: string, material: ShaderMaterialHandle): void {
     this.shaderReloader.registerMaterial(shaderPath, material);
   }
   

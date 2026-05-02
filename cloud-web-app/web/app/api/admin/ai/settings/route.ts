@@ -17,6 +17,11 @@ type AiSettingsPayload = {
 
 type UpdatePayload = Partial<AiSettingsPayload> & { environment?: 'staging' | 'production' };
 
+type IdeSettingRow = {
+  key: string;
+  value: unknown;
+};
+
 const DEFAULTS: AiSettingsPayload = {
   model: DEFAULT_OPENROUTER_MODEL_ID,
   creditCost: 0.01,
@@ -50,7 +55,7 @@ export const GET = withAdminAuth(
         where: { scope: environment, key: { in: Object.values(KEYS) } },
       });
 
-      const map = rows.reduce((acc: Record<string, any>, item: any) => {
+      const map = (rows as IdeSettingRow[]).reduce((acc: Record<string, unknown>, item) => {
         acc[item.key] = item.value;
         return acc;
       }, {});

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
-import { dapRequest } from '@/lib/server/dap-runtime';
+import { dapRequest, type DapPayload } from '@/lib/server/dap-runtime';
 
 import { createComponentLogger } from '@/lib/observability/logger'
 
@@ -11,7 +11,7 @@ const log = createComponentLogger('api/dap/request/route')
 interface DAPRequest {
   sessionId: string;
   command: string;
-  arguments: any;
+  arguments: DapPayload;
   seq: number;
 }
 

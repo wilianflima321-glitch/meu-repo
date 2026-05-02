@@ -14,6 +14,20 @@ interface RunTestsRequest {
   workspaceRoot: string;
 }
 
+type JestSuiteResult = {
+	name?: string;
+	status?: string;
+	message?: string;
+	perfStats?: {
+		start?: number;
+		end?: number;
+	};
+};
+
+type JestJsonResult = {
+	testResults?: JestSuiteResult[];
+};
+
 export async function POST(request: NextRequest) {
   try {
 		const user = requireAuth(request);
@@ -108,10 +122,10 @@ export async function POST(request: NextRequest) {
 		const raw = await fs.readFile(outFile, 'utf8').catch(() => '');
 		const json = raw ? JSON.parse(raw) : null;
 
-		const results: Record<string, any> = {};
+		const results: Record<string, unknown> = {};
 
 		// Mapeia por arquivo (nível file). O front usa id=uri; aqui retornamos pelo mesmo id.
-		const suiteResults: any[] = (json && (json as any).testResults) ? (json as any).testResults : [];
+		const suiteResults: JestSuiteResult[] = (json as JestJsonResult | null)?.testResults ?? [];
 		for (const suite of suiteResults) {
 			const filePath = String(suite.name || '');
 			const uri = `file://${filePath.split(path.sep).join('/')}`;

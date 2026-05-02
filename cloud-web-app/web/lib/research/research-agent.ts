@@ -49,6 +49,17 @@ export interface LiveRetrievalConfig {
   excludeDomains?: string[];
 }
 
+type TavilyResult = {
+  title?: string;
+  url?: string;
+  content?: string;
+  score?: number;
+};
+
+type TavilyResponse = {
+  results?: TavilyResult[];
+};
+
 // ============================================================================
 // LIVE RETRIEVAL
 // ============================================================================
@@ -87,10 +98,10 @@ async function searchTavily(
       return [];
     }
 
-    const data = await res.json();
+    const data = await res.json() as TavilyResponse;
     const results = data.results || [];
 
-    return results.map((r: any, i: number) => ({
+    return results.map((r, i: number) => ({
       id: `tavily-${Date.now()}-${i}`,
       index: i + 1,
       title: r.title || 'Untitled',

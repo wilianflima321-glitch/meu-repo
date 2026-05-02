@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
         updatedAt: metrics.updatedAt || null,
       }
     });
-  } catch (error: any) {
-    if (error?.message === 'Unauthorized') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return NextResponse.json({ error: 'Failed to read metrics' }, { status: 500 });

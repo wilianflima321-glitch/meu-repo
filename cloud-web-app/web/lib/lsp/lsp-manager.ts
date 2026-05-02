@@ -4,7 +4,7 @@
  * Updated to use new server implementations
  */
 
-import { LSPServerBase } from './lsp-server-base';
+import { Diagnostic, LSPServerBase } from './lsp-server-base';
 import { createPythonLSPServer } from './servers/python-lsp';
 import { createTypeScriptLSPServer } from './servers/typescript-lsp';
 import { createGoLSPServer } from './servers/go-lsp';
@@ -12,6 +12,11 @@ import { createGoLSPServer } from './servers/go-lsp';
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('lsp/lsp-manager')
+
+type PublishDiagnosticsParams = {
+  uri: string;
+  diagnostics: Diagnostic[];
+};
 
 export class LSPManager {
   private servers: Map<string, LSPServerBase> = new Map();
@@ -93,11 +98,11 @@ export class LSPManager {
       });
 
       // Setup event listeners
-      server.on('diagnostics', (params: any) => {
+      server.on('diagnostics', (params: PublishDiagnosticsParams) => {
         log.info(`[LSP] Diagnostics for ${params.uri}:`, params.diagnostics);
       });
 
-      server.on('error', (error: any) => {
+      server.on('error', (error: unknown) => {
         console.error(`[LSP] Error in ${language} server:`, error);
       });
 

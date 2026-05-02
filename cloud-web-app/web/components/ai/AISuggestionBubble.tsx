@@ -78,6 +78,19 @@ export interface AISuggestion {
   expiresAt?: number;
 }
 
+type AISuggestionApiRecord = {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  action?: {
+    label?: string;
+    command?: string;
+  } | null;
+  priority: AISuggestion['priority'];
+  expiresAt?: number;
+};
+
 interface AISuggestionBubbleProps {
   suggestion: AISuggestion;
   position?: SuggestionPosition;
@@ -648,7 +661,7 @@ export function AISuggestionBubbleAuto() {
         if (res.ok) {
           const data = await res.json();
           if (data.suggestions) {
-            setSuggestions(data.suggestions.map((s: any) => ({
+            setSuggestions((data.suggestions as AISuggestionApiRecord[]).map((s) => ({
               id: s.id,
               type: mapSuggestionType(s.type),
               title: s.title,

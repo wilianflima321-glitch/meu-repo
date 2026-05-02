@@ -23,6 +23,24 @@ interface SearchResult {
   score?: number;
 }
 
+type TavilySearchResponse = {
+  answer?: string;
+  results?: Array<{
+    title?: string;
+    url?: string;
+    content?: string;
+    score?: number;
+  }>;
+};
+
+type SerperSearchResponse = {
+  organic?: Array<{
+    title?: string;
+    link?: string;
+    snippet?: string;
+  }>;
+};
+
 // ==========================
 // Web Search
 // ==========================
@@ -45,13 +63,13 @@ async function searchTavily(query: string, maxResults: number) {
   
   if (!response.ok) throw new Error(`Tavily error: ${response.status}`);
   
-  const data = await response.json();
+  const data = await response.json() as TavilySearchResponse;
   return {
     answer: data.answer,
-    results: data.results.map((r: any) => ({
-      title: r.title,
-      url: r.url,
-      snippet: r.content,
+    results: (data.results || []).map((r) => ({
+      title: r.title || '',
+      url: r.url || '',
+      snippet: r.content || '',
       score: r.score,
     })),
   };
@@ -72,12 +90,12 @@ async function searchSerper(query: string, maxResults: number) {
   
   if (!response.ok) throw new Error(`Serper error: ${response.status}`);
   
-  const data = await response.json();
+  const data = await response.json() as SerperSearchResponse;
   return {
-    results: (data.organic || []).map((r: any) => ({
-      title: r.title,
-      url: r.link,
-      snippet: r.snippet,
+    results: (data.organic || []).map((r) => ({
+      title: r.title || '',
+      url: r.link || '',
+      snippet: r.snippet || '',
     })),
   };
 }

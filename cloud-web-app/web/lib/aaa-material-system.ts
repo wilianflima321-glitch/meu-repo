@@ -64,14 +64,14 @@ export interface ShaderNode {
   position: [number, number];
   inputs: NodeSocket[];
   outputs: NodeSocket[];
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 export interface NodeSocket {
   id: string;
   name: string;
   type: 'float' | 'vec2' | 'vec3' | 'vec4' | 'sampler2D';
-  value?: any;
+  value?: unknown;
   connected?: string; // Connected socket ID
 }
 
@@ -85,7 +85,7 @@ export interface ShaderGraph {
   name: string;
   nodes: ShaderNode[];
   connections: ShaderConnection[];
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -815,7 +815,7 @@ export class ShaderGraphCompiler {
     return code;
   }
   
-  private getGLSLType(value: any): string {
+  private getGLSLType(value: unknown): string {
     if (typeof value === 'number') return 'float';
     if (value instanceof THREE.Vector2) return 'vec2';
     if (value instanceof THREE.Vector3) return 'vec3';

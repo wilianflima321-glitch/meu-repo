@@ -83,7 +83,7 @@ export interface AdvancedLightConfig {
   
   // Animation
   animated: boolean;
-  animationCurve?: any;
+  animationCurve?: unknown;
 }
 
 export const DEFAULT_LIGHT_CONFIG: AdvancedLightConfig = {
@@ -205,9 +205,11 @@ export class CinematicLight {
     return light;
   }
   
-  private createAreaLight(): any {
+  private createAreaLight(): THREE.Light {
     // Area lights usando RectAreaLight do Three.js
-    const { RectAreaLight } = require('three/examples/jsm/lights/RectAreaLight.js');
+    const { RectAreaLight } = require('three/examples/jsm/lights/RectAreaLight.js') as {
+      RectAreaLight: new (color: THREE.Color, intensity: number, width: number, height: number) => THREE.Light;
+    };
     
     const width = this.config.width || 10;
     const height = this.config.height || 10;

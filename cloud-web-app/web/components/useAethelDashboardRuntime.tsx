@@ -7,7 +7,7 @@ import {
   type ConnectivityResponse,
   type WalletSummary,
 } from '@/lib/api'
-import { analytics } from '@/lib/analytics'
+import { analytics, type EventAction, type EventCategory } from '@/lib/analytics'
 import {
   buildAiProviderGateMessage,
   fetchAiProviderStatus,
@@ -265,8 +265,8 @@ export function useAethelDashboardRuntime() {
     billingError,
   })
 
-  const trackEvent = useCallback((category: any, action: any, metadata?: Record<string, unknown>) => {
-    analytics?.track?.(category, action, { metadata })
+  const trackEvent = useCallback((category: string, action: string, metadata?: Record<string, unknown>) => {
+    analytics?.track?.(category as EventCategory, action as EventAction, { metadata })
   }, [])
 
   useDashboardStoragePersistence({

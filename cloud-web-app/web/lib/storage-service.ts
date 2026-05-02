@@ -35,15 +35,27 @@ interface StorageClient {
   send(command: unknown): Promise<StorageSendResponse>;
 }
 
+type StorageCommandInput = Record<string, unknown>;
+
+type StorageCommandConstructor = new (input: StorageCommandInput) => unknown;
+
+type S3Module = {
+  S3Client: new (config: Record<string, unknown>) => StorageClient;
+} & Record<string, unknown>;
+
+function hasStorageNotFoundShape(error: unknown): error is { name?: string; $metadata?: { httpStatusCode?: number } } {
+  return typeof error === 'object' && error !== null;
+}
+
 // Configuração do cliente S3/MinIO - lazy loading
 let storageClient: StorageClient | null = null;
-let s3Module: any | null = null;
+let s3Module: S3Module | null = null;
 
-async function loadS3Module(): Promise<any> {
+async function loadS3Module(): Promise<S3Module> {
   if (s3Module) return s3Module;
   try {
     // Usa eval para evitar que o webpack tente bundlar o módulo
-    s3Module = await eval('import("@aws-sdk/client-s3")');
+    s3Module = await eval('import("@aws-sdk/client-s3")') as S3Module;
     return s3Module;
   } catch (error) {
     const message = 'STORAGE_SDK_NOT_AVAILABLE: instale @aws-sdk/client-s3 e configure S3/MINIO para usar storage real.';
@@ -102,13 +114,13 @@ export interface UploadOptions {
 }
 
 // Helper para criar comandos dinamicamente
-async function createCommand(name: string, input: any): Promise<any> {
+async function createCommand(name: string, input: StorageCommandInput): Promise<unknown> {
   const s3Module = await loadS3Module();
-  const CommandClass = (s3Module as any)[name];
-  if (!CommandClass) {
+  const CommandClass = s3Module[name];
+  if (typeof CommandClass !== 'function') {
     throw new Error(`STORAGE_COMMAND_NOT_AVAILABLE: ${name}`);
   }
-  return new CommandClass(input);
+  return new (CommandClass as StorageCommandConstructor)(input);
 }
 
 /**
@@ -242,8 +254,8 @@ export async function objectExists(
     });
     await client.send(command);
     return true;
-  } catch (error: any) {
-    if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+  } catch (error: unknown) {
+    if (hasStorageNotFoundShape(error) && (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404)) {
       return false;
     }
     throw error;

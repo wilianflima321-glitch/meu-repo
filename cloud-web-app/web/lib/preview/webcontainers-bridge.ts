@@ -39,8 +39,24 @@ export interface WebContainerBridgeAPI {
 
 type WebContainerModule = {
   WebContainer: {
-    boot: () => Promise<any>
+    boot: () => Promise<WebContainerInstance>
   }
+}
+
+type WebContainerProcess = {
+  output: ReadableStream<string>
+  exit: Promise<number>
+  kill: () => void
+}
+
+type WebContainerInstance = {
+  fs: {
+    mkdir: (path: string, options?: { recursive?: boolean }) => Promise<void>
+    writeFile: (path: string, content: string) => Promise<void>
+  }
+  on: (event: 'server-ready', callback: (port: number, url: string) => void) => void
+  spawn: (command: string, args: string[]) => Promise<WebContainerProcess>
+  teardown: () => void
 }
 
 const loadWebContainerModule = async (): Promise<WebContainerModule> => {
@@ -64,8 +80,8 @@ export function createWebContainerBridge(
 ): WebContainerBridgeAPI {
   let state: WebContainerState = 'idle'
   let serverUrl: string | null = null
-  let webcontainerInstance: any = null
-  let serverProcess: any = null
+  let webcontainerInstance: WebContainerInstance | null = null
+  let serverProcess: WebContainerProcess | null = null
 
   const setState = (newState: WebContainerState) => {
     state = newState

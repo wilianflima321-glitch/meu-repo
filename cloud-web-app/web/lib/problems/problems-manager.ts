@@ -54,7 +54,7 @@ export interface TextEdit {
 export interface Command {
   title: string;
   command: string;
-  arguments?: any[];
+  arguments?: unknown[];
 }
 
 export interface ProblemFilter {

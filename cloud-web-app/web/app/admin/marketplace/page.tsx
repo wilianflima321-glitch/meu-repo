@@ -4,10 +4,20 @@ import { useCallback, useEffect, useState } from 'react';
 import { Package, ShoppingCart, Tag } from 'lucide-react';
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
+type MarketplaceItem = {
+  id: string;
+  title: string;
+  category: string;
+  price: number;
+  downloads: number;
+  rating: number;
+  createdAt: string;
+};
+
 export default function AdminMarketplace() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'ok'>('idle');
   const [message, setMessage] = useState<string>('');
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<MarketplaceItem[]>([]);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -132,7 +142,7 @@ export default function AdminMarketplace() {
               </tr>
             </thead>
             <tbody>
-              {filteredItems.map((item: any) => (
+              {filteredItems.map((item) => (
                 <tr key={String(item.id)} className='border-t'>
                   <td className='p-3'>{String(item.title ?? '')}</td>
                   <td className='p-3'>{String(item.category ?? '')}</td>

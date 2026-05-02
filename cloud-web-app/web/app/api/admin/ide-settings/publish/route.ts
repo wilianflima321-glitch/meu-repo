@@ -3,6 +3,11 @@ import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
 import { DEFAULT_SETTINGS, SETTING_DEFINITIONS } from '@/lib/settings/settings-service';
 
+type IdeSettingRow = {
+  key: string;
+  value: unknown;
+};
+
 const resolveScope = (env?: string) => {
   if (env === 'production') return 'production';
   if (env === 'staging') return 'staging';
@@ -27,8 +32,8 @@ export const POST = withAdminAuth(
         ideSetting.findMany({ where: { scope: from } }),
       ]);
 
-      const toMap = (rows: any[]) =>
-        rows.reduce((acc: Record<string, unknown>, item: any) => {
+      const toMap = (rows: IdeSettingRow[]) =>
+        rows.reduce((acc: Record<string, unknown>, item) => {
           acc[item.key] = item.value;
           return acc;
         }, {});

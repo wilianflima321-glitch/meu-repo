@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
@@ -106,7 +107,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
     
     // Busca items do marketplace no banco
-    const where: any = {};
+    const where: Prisma.MarketplaceItemWhereInput = {};
     if (category && category !== 'all') {
       where.category = category;
     }

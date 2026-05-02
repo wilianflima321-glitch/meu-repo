@@ -5,6 +5,30 @@
 
 import { TestAdapterBase, TestItem, TestRun, TestResult, CoverageInfo } from '../test-adapter-base';
 
+type PytestResultItem = {
+  nodeid: string;
+  outcome: 'passed' | 'failed' | 'skipped' | string;
+  duration?: number;
+  call?: {
+    longrepr?: string;
+    stdout?: string;
+    stderr?: string;
+  };
+};
+
+type PytestJsonReport = {
+  tests?: PytestResultItem[];
+};
+
+type PytestCoverageFile = {
+  executed_lines?: Record<string, number>;
+  missing_branches?: Record<string, number[]>;
+};
+
+type PytestCoverageReport = {
+  files?: Record<string, PytestCoverageFile>;
+};
+
 export class PytestAdapter extends TestAdapterBase {
   constructor(workspaceRoot: string) {
     super(workspaceRoot, 'pytest');
@@ -63,7 +87,7 @@ export class PytestAdapter extends TestAdapterBase {
       // Parse results
       const reportPath = `${this.workspaceRoot}/pytest-report.json`;
       const reportData = await this.readFile(reportPath);
-      const pytestResults = JSON.parse(reportData);
+      const pytestResults = JSON.parse(reportData) as PytestJsonReport;
       const results = this.parsePytestResults(pytestResults, tests);
 
       const endTime = Date.now();
@@ -92,7 +116,7 @@ export class PytestAdapter extends TestAdapterBase {
       // Read coverage report
       const coveragePath = `${this.workspaceRoot}/coverage.json`;
       const coverageData = await this.readFile(coveragePath);
-      const coverage = JSON.parse(coverageData);
+      const coverage = JSON.parse(coverageData) as PytestCoverageReport;
 
       return this.parseCoverageData(coverage);
     } catch (error) {
@@ -223,7 +247,7 @@ export class PytestAdapter extends TestAdapterBase {
   /**
    * Parse Pytest results
    */
-  private parsePytestResults(pytestResults: any, tests: TestItem[]): TestResult[] {
+  private parsePytestResults(pytestResults: PytestJsonReport, tests: TestItem[]): TestResult[] {
     const results: TestResult[] = [];
 
     if (!pytestResults.tests) {
@@ -254,16 +278,14 @@ export class PytestAdapter extends TestAdapterBase {
   /**
    * Parse coverage data
    */
-  private parseCoverageData(coverage: any): CoverageInfo[] {
+  private parseCoverageData(coverage: PytestCoverageReport): CoverageInfo[] {
     const coverageInfo: CoverageInfo[] = [];
 
     if (!coverage.files) {
       return coverageInfo;
     }
 
-    for (const [filePath, fileData] of Object.entries(coverage.files)) {
-      const data = fileData as any;
-
+    for (const [filePath, data] of Object.entries(coverage.files)) {
       const lines = Object.entries(data.executed_lines || {}).map(([line, count]) => ({
         line: parseInt(line),
         covered: (count as number) > 0,
@@ -280,7 +302,7 @@ export class PytestAdapter extends TestAdapterBase {
         };
       });
 
-      const functions: any[] = []; // Pytest doesn't provide function coverage
+      const functions: CoverageInfo['functions'] = []; // Pytest doesn't provide function coverage
 
       const linesCovered = lines.filter(l => l.covered).length;
       const linesTotal = lines.length;

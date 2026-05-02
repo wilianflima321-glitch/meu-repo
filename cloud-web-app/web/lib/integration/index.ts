@@ -4,6 +4,7 @@
  */
 
 import { getIDEIntegration } from './ide-integration';
+import type { IDEConfig } from './ide-integration';
 
 import { createComponentLogger } from '@/lib/observability/logger'
 
@@ -21,7 +22,7 @@ export type { DebugSession, Breakpoint, StackFrame, Variable } from './debug-int
 /**
  * Initialize all integrations
  */
-export async function initializeIntegrations(config: any): Promise<void> {
+export async function initializeIntegrations(config?: IDEConfig): Promise<void> {
   const ide = getIDEIntegration(config);
   await ide.initialize();
   log.info('[Integration] All systems initialized');

@@ -21,7 +21,7 @@ interface MagicWandChatProps {
     attributes?: Record<string, string>
   }
   onClose: () => void
-  onSendMessage: (message: string, context: any) => void
+  onSendMessage: (message: string, context: Record<string, unknown>) => void
 }
 
 export function MagicWandChat({ position, elementInfo, onClose, onSendMessage }: MagicWandChatProps) {

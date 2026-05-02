@@ -15,7 +15,7 @@ interface KeyframeData {
   id: string
   time: number
   track: string
-  value: any
+  value: unknown
 }
 
 export function Timeline3D({

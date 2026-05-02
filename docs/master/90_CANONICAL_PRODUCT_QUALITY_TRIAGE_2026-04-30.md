@@ -219,6 +219,8 @@ The next strictness sweep removed explicit `: any` from collaboration/Yjs presen
 
 The follow-up strictness sweep removed explicit `: any` from AI-enhanced LSP, the 3D properties panel, infrastructure Prisma metrics, self-reflection context, legacy live preview input/joystick handling, the credit wallet ledger path, systems integration tests, render progress websocket messages, keybinding contexts, websocket payloads, LSP/DAP clients, E2B runtime sandbox boundaries, AI agent/stream/director routes, asset CRUD errors, chat clone/merge copy paths, copilot action/context routes, project invite-link delegates, engine/settings panels, web-search parsing, audio events, and git response parsing. The measured app-code `: any` ratchet moved from `246` to `134`; the remaining gap is still above the target of `50`, but the weak seams are now mostly small endpoint/library edges rather than broad IDE/runtime foundations.
 
+The final strictness pass for this block typed the remaining high-volume app-code seams across admin pages, admin APIs, asset/download/presign flows, OAuth email parsing, backup/git error handling, chat/copilot/search/test routes, notification and terminal persistence, extension hooks, preview/runtime bridges, LSP/hot-reload/localization/collaboration providers, RAG/vector embeddings, storage adapters, telemetry, test adapters, and worker meshlet execution. The measured app-code `: any` ratchet moved from `134` to `13`, passing the current quality gate target of `<50` without disabling typecheck, lint, tests, or build.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

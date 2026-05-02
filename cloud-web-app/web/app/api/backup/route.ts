@@ -104,10 +104,10 @@ export async function POST(request: NextRequest) {
       backup,
       message: `Backup created successfully. ${backup.filesCount} files, ${backup.assetsCount} assets backed up.`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to create backup:', error);
     
-    if (error.message === 'Project not found or access denied') {
+    if (error instanceof Error && error.message === 'Project not found or access denied') {
       return NextResponse.json(
         { success: false, error: 'Project not found' },
         { status: 404 }
@@ -140,10 +140,10 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'Backup deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to delete backup:', error);
     
-    if (error.message === 'Project not found or access denied') {
+    if (error instanceof Error && error.message === 'Project not found or access denied') {
       return NextResponse.json(
         { success: false, error: 'Project not found' },
         { status: 404 }

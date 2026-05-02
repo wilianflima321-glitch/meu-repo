@@ -12,7 +12,7 @@ const log = createComponentLogger('api/lsp/request/route')
 interface LSPRequest {
   language: string;
   method: string;
-  params: any;
+  params: unknown;
   id: number;
 }
 

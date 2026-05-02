@@ -334,9 +334,9 @@ export async function POST(request: NextRequest) {
       intakePolicy,
       sourcePolicy,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Presign error:', error);
-    if (error.message === 'Unauthorized') {
+    if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return NextResponse.json(
@@ -417,9 +417,9 @@ export async function GET(request: NextRequest) {
       fileName: asset.name,
       expiresIn: 3600,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Download URL error:', error);
-    if (error.message === 'Unauthorized') {
+    if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return NextResponse.json(

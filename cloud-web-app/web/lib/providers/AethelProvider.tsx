@@ -108,6 +108,16 @@ interface Notification {
   read: boolean;
 }
 
+type RealtimeMessage = {
+  type?: string;
+  balance?: number;
+  step?: AIThinkingStep;
+  stepId?: string;
+  updates?: Partial<AIThinkingStep>;
+  result?: unknown;
+  notification?: Notification;
+};
+
 type AethelAction =
   | { type: 'SET_USER'; payload: User | null }
   | { type: 'SET_LOADING'; payload: boolean }
@@ -115,7 +125,7 @@ type AethelAction =
   | { type: 'START_AI_SESSION'; payload: { id: string; prompt: string } }
   | { type: 'ADD_AI_STEP'; payload: AIThinkingStep }
   | { type: 'UPDATE_AI_STEP'; payload: { stepId: string; updates: Partial<AIThinkingStep> } }
-  | { type: 'COMPLETE_AI_SESSION'; payload: { result?: any } }
+  | { type: 'COMPLETE_AI_SESSION'; payload: { result?: unknown } }
   | { type: 'UPDATE_ONBOARDING'; payload: Partial<OnboardingState> }
   | { type: 'SET_PREFERENCES'; payload: Partial<Preferences> }
   | { type: 'SET_WS_CONNECTED'; payload: boolean }
@@ -400,27 +410,33 @@ export function AethelProvider({ children, runtimeReady = true }: AethelProvider
   }, [onboardingData]);
 
   // Handle WebSocket messages
-  const handleWebSocketMessage = useCallback((data: any) => {
+  const handleWebSocketMessage = useCallback((data: RealtimeMessage) => {
     switch (data.type) {
       case 'BALANCE_UPDATED':
-        dispatch({
-          type: 'UPDATE_WALLET',
-          payload: {
-            balance: data.balance,
-            lowBalanceWarning: data.balance < 100,
-          },
-        });
+        if (typeof data.balance === 'number') {
+          dispatch({
+            type: 'UPDATE_WALLET',
+            payload: {
+              balance: data.balance,
+              lowBalanceWarning: data.balance < 100,
+            },
+          });
+        }
         break;
 
       case 'AI_STEP_START':
-        dispatch({ type: 'ADD_AI_STEP', payload: data.step });
+        if (data.step) {
+          dispatch({ type: 'ADD_AI_STEP', payload: data.step });
+        }
         break;
 
       case 'AI_STEP_UPDATE':
-        dispatch({
-          type: 'UPDATE_AI_STEP',
-          payload: { stepId: data.stepId, updates: data.updates },
-        });
+        if (data.stepId && data.updates) {
+          dispatch({
+            type: 'UPDATE_AI_STEP',
+            payload: { stepId: data.stepId, updates: data.updates },
+          });
+        }
         break;
 
       case 'AI_SESSION_COMPLETE':
@@ -428,7 +444,9 @@ export function AethelProvider({ children, runtimeReady = true }: AethelProvider
         break;
 
       case 'NOTIFICATION':
-        dispatch({ type: 'ADD_NOTIFICATION', payload: data.notification });
+        if (data.notification) {
+          dispatch({ type: 'ADD_NOTIFICATION', payload: data.notification });
+        }
         break;
     }
   }, []);
@@ -448,7 +466,7 @@ export function AethelProvider({ children, runtimeReady = true }: AethelProvider
 
       wsRef.current.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data);
+          const data = JSON.parse(event.data) as RealtimeMessage;
           handleWebSocketMessage(data);
         } catch {
           // Invalid message

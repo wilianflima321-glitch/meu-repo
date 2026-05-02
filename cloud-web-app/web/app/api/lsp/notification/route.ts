@@ -11,7 +11,7 @@ const log = createComponentLogger('api/lsp/notification/route')
 interface LSPNotification {
   language: string;
   method: string;
-  params: any;
+  params: unknown;
 }
 
 export async function POST(request: NextRequest) {

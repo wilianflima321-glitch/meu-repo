@@ -17,6 +17,11 @@ type UpdatePayload = {
   environment?: 'staging' | 'production';
 };
 
+type IdeSettingRow = {
+  key: string;
+  value: unknown;
+};
+
 const resolveScope = (env?: string) => {
   if (env === 'production') return 'production';
   if (env === 'staging') return 'staging';
@@ -63,8 +68,8 @@ async function getHandler(request: NextRequest) {
       }),
     ]);
 
-    const toMap = (rows: any[]) =>
-      rows.reduce((acc: Record<string, unknown>, item: any) => {
+    const toMap = (rows: IdeSettingRow[]) =>
+      rows.reduce((acc: Record<string, unknown>, item) => {
         acc[item.key] = item.value;
         return acc;
       }, {});

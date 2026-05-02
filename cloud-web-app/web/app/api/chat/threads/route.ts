@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
     const projectId = url.searchParams.get('projectId');
     const archived = url.searchParams.get('archived');
 
-    const where: any = {
+    const where: Prisma.ChatThreadWhereInput = {
       userId: user.userId,
       ...(typeof archived === 'string' ? { archived: archived === 'true' } : { archived: false }),
       ...(projectId ? { projectId } : {}),

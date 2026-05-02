@@ -56,6 +56,12 @@ interface EmbeddingProvider {
   dimensions: number;
 }
 
+type EmbeddingResponse = {
+  data: Array<{
+    embedding: number[];
+  }>;
+};
+
 class OpenAIEmbeddings implements EmbeddingProvider {
   dimensions = 1536; // text-embedding-3-small
   
@@ -72,7 +78,7 @@ class OpenAIEmbeddings implements EmbeddingProvider {
       }),
     });
     
-    const data = await response.json();
+    const data = await response.json() as EmbeddingResponse;
     return data.data[0].embedding;
   }
   
@@ -89,8 +95,8 @@ class OpenAIEmbeddings implements EmbeddingProvider {
       }),
     });
     
-    const data = await response.json();
-    return data.data.map((d: any) => d.embedding);
+    const data = await response.json() as EmbeddingResponse;
+    return data.data.map((d) => d.embedding);
   }
 }
 
@@ -110,7 +116,7 @@ class VoyageEmbeddings implements EmbeddingProvider {
       }),
     });
     
-    const data = await response.json();
+    const data = await response.json() as EmbeddingResponse;
     return data.data[0].embedding;
   }
   
@@ -127,8 +133,8 @@ class VoyageEmbeddings implements EmbeddingProvider {
       }),
     });
     
-    const data = await response.json();
-    return data.data.map((d: any) => d.embedding);
+    const data = await response.json() as EmbeddingResponse;
+    return data.data.map((d) => d.embedding);
   }
 }
 

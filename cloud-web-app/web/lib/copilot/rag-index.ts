@@ -66,6 +66,10 @@ interface EmbeddingProvider {
   embeddingDimension: number
 }
 
+type EmbeddingResponse = {
+  data: Array<{ embedding: number[] }>
+}
+
 class OpenAIEmbeddingProvider implements EmbeddingProvider {
   embeddingDimension = 1536
   private apiKey: string
@@ -87,8 +91,8 @@ class OpenAIEmbeddingProvider implements EmbeddingProvider {
       }),
     })
     
-    const data = await response.json()
-    return data.data.map((d: any) => d.embedding)
+    const data = await response.json() as EmbeddingResponse
+    return data.data.map((d) => d.embedding)
   }
 }
 

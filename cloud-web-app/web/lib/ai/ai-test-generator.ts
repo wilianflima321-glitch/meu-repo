@@ -155,9 +155,9 @@ export class AITestGenerator {
    */
   async generateTestData(
     dataType: string,
-    schema: any,
+    schema: unknown,
     count: number = 10
-  ): Promise<any[]> {
+  ): Promise<unknown[]> {
     try {
       const prompt = `Generate ${count} realistic test data samples for:\n\n` +
         `Type: ${dataType}\n` +
@@ -418,7 +418,7 @@ export class AITestGenerator {
   /**
    * Parse test data
    */
-  private parseTestData(response: string): any[] {
+  private parseTestData(response: string): unknown[] {
     try {
       const jsonMatch = response.match(/\[[\s\S]*\]/);
       if (jsonMatch) {

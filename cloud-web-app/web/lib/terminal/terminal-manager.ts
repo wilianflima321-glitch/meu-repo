@@ -89,7 +89,7 @@ export interface LaunchConfiguration {
   preLaunchTask?: string;
   postDebugTask?: string;
   internalConsoleOptions?: 'neverOpen' | 'openOnSessionStart' | 'openOnFirstSessionStart';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface TaskExecution {

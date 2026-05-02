@@ -5,6 +5,18 @@ import { CheckCircle, Clock, Users as UsersIcon } from 'lucide-react';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
+type AdminUserApiRecord = {
+  id: string;
+  name?: string | null;
+  email: string;
+  plan?: string | null;
+  createdAt: string;
+  _count?: {
+    projects?: number;
+    sessions?: number;
+  };
+};
+
 /**
  * Admin Users - Gerenciamento de usuários
  * Planos alinhados com estratégia 2025 (sem Free)
@@ -39,8 +51,8 @@ export default function AdminUsers() {
       const res = await fetch('/api/admin/users');
       if (!res.ok) throw new Error('Falha ao carregar usuários');
       const data = await res.json();
-      const nextUsers = Array.isArray(data?.users) ? data.users : [];
-      setUsers(nextUsers.map((user: any) => ({
+      const nextUsers = Array.isArray(data?.users) ? data.users as AdminUserApiRecord[] : [];
+      setUsers(nextUsers.map((user) => ({
         id: user.id,
         name: user.name || null,
         email: user.email,

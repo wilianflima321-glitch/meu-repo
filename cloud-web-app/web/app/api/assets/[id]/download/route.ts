@@ -96,10 +96,10 @@ export async function GET(
       mimeType: asset.mimeType || 'application/octet-stream',
       direct: true,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Download URL error:', error);
     
-    if (error.message === 'Unauthorized') {
+    if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
@@ -213,10 +213,10 @@ export async function POST(
       totalSize: downloads.reduce((sum, d) => sum + (d.size || 0), 0),
       expiresIn: 3600,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Batch download error:', error);
     
-    if (error.message === 'Unauthorized') {
+    if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     

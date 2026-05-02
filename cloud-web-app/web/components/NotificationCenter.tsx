@@ -27,6 +27,10 @@ export interface Notification {
   source?: string;
 }
 
+type PersistedNotification = Omit<Notification, 'timestamp'> & {
+  timestamp: string | number | Date;
+};
+
 export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<'all' | NotificationSeverity>('all');
@@ -38,8 +42,8 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
   const loadNotifications = useCallback(() => {
     const stored = localStorage.getItem('notifications');
     if (stored) {
-      const parsed = JSON.parse(stored);
-      setNotifications(parsed.map((n: any) => ({
+      const parsed = JSON.parse(stored) as PersistedNotification[];
+      setNotifications(parsed.map((n) => ({
         ...n,
         timestamp: new Date(n.timestamp)
       })));

@@ -329,7 +329,7 @@ export class ConsentManager {
     return this.approvedCharges.get(chargeId);
   }
 
-  private async emitConsentEvent(eventType: string, data: any): Promise<void> {
+  private async emitConsentEvent(eventType: string, data: unknown): Promise<void> {
     // Emit to observability system (OTel)
     try {
       const endpoint =

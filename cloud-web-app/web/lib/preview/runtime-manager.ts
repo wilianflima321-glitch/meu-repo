@@ -55,6 +55,27 @@ export type PreviewRuntimeProvisionResponse = {
   };
 };
 
+type PreviewRuntimeSyncMetadata = {
+  sandboxId?: string;
+  filesCount?: number;
+  totalBytes?: number;
+  workdir?: string;
+};
+
+type PreviewRuntimeFileSyncMetadata = {
+  sandboxId?: string;
+  path?: string;
+  sandboxPath?: string;
+  size?: number;
+};
+
+type PreviewRuntimeMutationResponse<TMetadata> = {
+  success?: boolean;
+  error?: string;
+  message?: string;
+  metadata?: TMetadata;
+};
+
 export type PreviewRuntimeReadinessResponse = {
   status?: 'ready' | 'partial' | string;
   strategy?: 'managed' | 'local' | 'inline' | string;
@@ -186,7 +207,7 @@ export async function syncPreviewRuntime(projectId: string | null, sandboxId: st
     },
     body: JSON.stringify({ projectId, sandboxId }),
   });
-  const payload = (await response.json().catch(() => null)) as { success?: boolean; error?: string; message?: string; metadata?: any } | null;
+  const payload = (await response.json().catch(() => null)) as PreviewRuntimeMutationResponse<PreviewRuntimeSyncMetadata> | null;
   if (!response.ok) {
     const reason = payload?.error || payload?.message || `HTTP ${response.status}`;
     throw new Error(reason);
@@ -220,7 +241,7 @@ export async function syncPreviewRuntimeFile(projectId: string | null, sandboxId
     },
     body: JSON.stringify({ projectId, sandboxId, path: filePath }),
   })
-  const payload = (await response.json().catch(() => null)) as { success?: boolean; error?: string; message?: string; metadata?: any } | null
+  const payload = (await response.json().catch(() => null)) as PreviewRuntimeMutationResponse<PreviewRuntimeFileSyncMetadata> | null
   if (!response.ok) {
     const reason = payload?.error || payload?.message || `HTTP ${response.status}`
     throw new Error(reason)

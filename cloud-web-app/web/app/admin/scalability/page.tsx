@@ -2,6 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 
+type InfrastructureServiceMetric = {
+  latency?: number | string | null;
+};
+
 export default function ScalabilityPage() {
   const [metrics, setMetrics] = useState({
     cpuUsage: 0,
@@ -48,7 +52,7 @@ export default function ScalabilityPage() {
       const errorRate = Number(infra?.errorRate || 0);
 
       const latencies = Array.isArray(infra?.services)
-        ? infra.services.map((s: any) => Number(s?.latency || 0)).filter((v: number) => Number.isFinite(v) && v > 0)
+        ? (infra.services as InfrastructureServiceMetric[]).map((s) => Number(s?.latency || 0)).filter((v: number) => Number.isFinite(v) && v > 0)
         : [];
       const responseTime = latencies.length
         ? Math.round(latencies.reduce((a: number, b: number) => a + b, 0) / latencies.length)

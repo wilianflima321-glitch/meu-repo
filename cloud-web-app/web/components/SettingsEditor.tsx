@@ -25,7 +25,7 @@ interface SettingDefinition {
   title: string
   description: string
   type: 'string' | 'number' | 'boolean' | 'enum' | 'object' | 'array'
-  default: any
+  default: unknown
   enum?: string[]
   category: string
   scope?: 'user' | 'workspace' | 'both'
@@ -361,7 +361,7 @@ export default function SettingsEditor() {
     return filteredCategories.find((cat) => cat.id === selectedCategory) || filteredCategories[0]
   }, [filteredCategories, selectedCategory])
 
-  const updateSetting = (key: string, value: any) => {
+  const updateSetting = (key: string, value: unknown) => {
     const newSettings = { ...settings, [key]: value }
     saveSettings(newSettings)
     setModifiedSettings((prev) => new Set(prev).add(key))

@@ -40,12 +40,12 @@ export interface ToolDefinition {
 export interface ToolCall {
   id: string;
   name: string;
-  arguments: Record<string, any>;
+  arguments: Record<string, unknown>;
 }
 
 export interface ToolResult {
   toolCallId: string;
-  result: any;
+  result: unknown;
   error?: string;
 }
 
@@ -783,7 +783,10 @@ export class AdvancedAIProvider extends EventEmitter {
    */
   private convertToGoogle(messages: Message[]): {
     systemInstruction: string;
-    contents: any[];
+    contents: Array<{
+      role: 'model' | 'user';
+      parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }>;
+    }>;
   } {
     const systemMessage = messages.find(m => m.role === 'system');
     const otherMessages = messages.filter(m => m.role !== 'system');

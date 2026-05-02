@@ -55,13 +55,14 @@ export async function GET(req: NextRequest) {
 function getTransactionDescription(
   entryType: string, 
   reference: string | null, 
-  metadata: any
+  metadata: unknown
 ): string {
   if (entryType === 'purchase') {
     return `Compra de créditos`;
   }
   if (entryType === 'bonus') {
-    return metadata?.reason || 'Bônus de créditos';
+    const reason = typeof metadata === 'object' && metadata !== null && 'reason' in metadata ? metadata.reason : null;
+    return typeof reason === 'string' ? reason : 'B?nus de cr?ditos';
   }
   if (entryType === 'usage') {
     if (reference?.startsWith('ai_')) {

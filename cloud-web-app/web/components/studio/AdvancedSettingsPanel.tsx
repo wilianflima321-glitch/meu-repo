@@ -32,11 +32,32 @@ import {
 import { useStudioState } from '@/lib/studio-state'
 import { advancedConfig, Role, ROLE_PERMISSIONS, WebhookEvent } from '@/lib/advanced-config'
 
+type AdvancedSettingsTab = 'api-keys' | 'webhooks' | 'team'
+
+type APIKeyRecord = ReturnType<typeof advancedConfig.generateAPIKey>
+
+type WebhookRecord = {
+  id: string
+  url: string
+  events: string[]
+  active: boolean
+  createdAt: string
+  failureCount: number
+  secret: string
+}
+
+type TeamMemberRecord = {
+  id: string
+  name: string
+  email: string
+  role: string
+}
+
 /**
  * Componente Principal
  */
 export function AdvancedSettingsPanel() {
-  const [activeTab, setActiveTab] = useState<'api-keys' | 'webhooks' | 'team'>('api-keys')
+  const [activeTab, setActiveTab] = useState<AdvancedSettingsTab>('api-keys')
 
   return (
     <div className="space-y-6">
@@ -50,14 +71,14 @@ export function AdvancedSettingsPanel() {
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-[var(--aethel-border-primary)]">
-        {[
+        {([
           { id: 'api-keys', label: 'API Keys', icon: Key },
           { id: 'webhooks', label: 'Webhooks', icon: Webhook },
           { id: 'team', label: 'Time', icon: Users },
-        ].map(({ id, label, icon: Icon }) => (
+        ] satisfies Array<{ id: AdvancedSettingsTab; label: string; icon: typeof Key }>).map(({ id, label, icon: Icon }) => (
           <button type="button"
             key={id}
-            onClick={() => setActiveTab(id as any)}
+            onClick={() => setActiveTab(id)}
             className={`px-4 py-3 font-medium text-sm transition-all flex items-center gap-2 ${
               activeTab === id
                 ? 'text-[var(--aethel-info-light)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
@@ -84,7 +105,7 @@ export function AdvancedSettingsPanel() {
  * Tab de API Keys
  */
 function APIKeysTab() {
-  const [keys, setKeys] = useState<any[]>([])
+  const [keys, setKeys] = useState<APIKeyRecord[]>([])
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [newKeyName, setNewKeyName] = useState('')
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
@@ -194,7 +215,7 @@ function APIKeyCard({
   onRevoke,
   onCopy,
 }: {
-  apiKey: any
+  apiKey: APIKeyRecord
   onRevoke: (id: string) => void
   onCopy: (key: string) => void
 }) {
@@ -274,7 +295,7 @@ function APIKeyCard({
  * Tab de Webhooks
  */
 function WebhooksTab() {
-  const [webhooks, setWebhooks] = useState<any[]>([])
+  const [webhooks, setWebhooks] = useState<WebhookRecord[]>([])
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const { addNotification } = useStudioState()
 
@@ -286,7 +307,7 @@ function WebhooksTab() {
       active: true,
       createdAt: new Date().toISOString(),
       failureCount: 0,
-      secret: advancedConfig.generateAPIKey('webhook', []).secret,
+      secret: advancedConfig.generateAPIKey('webhook', []).secret || '',
     }
 
     setWebhooks([...webhooks, newWebhook])
@@ -340,7 +361,7 @@ function WebhooksTab() {
 /**
  * Card de Webhook
  */
-function WebhookCard({ webhook }: { webhook: any }) {
+function WebhookCard({ webhook }: { webhook: WebhookRecord }) {
   return (
     <GlassCard className="p-4 space-y-3">
       <div className="flex items-start justify-between">
@@ -387,7 +408,7 @@ function WebhookCard({ webhook }: { webhook: any }) {
  * Tab de Time
  */
 function TeamTab() {
-  const [members, setMembers] = useState<any[]>([])
+  const [members, setMembers] = useState<TeamMemberRecord[]>([])
   const [showInviteDialog, setShowInviteDialog] = useState(false)
   const { addNotification } = useStudioState()
 

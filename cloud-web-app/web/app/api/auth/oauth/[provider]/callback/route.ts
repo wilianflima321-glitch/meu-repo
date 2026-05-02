@@ -122,8 +122,8 @@ async function fetchUserInfo(
             Accept: 'application/json',
           },
         });
-        const emails = await emailResponse.json();
-        const primaryEmail = emails.find((e: any) => e.primary) || emails[0];
+        const emails = await emailResponse.json() as Array<{ email?: string; primary?: boolean }>;
+        const primaryEmail = emails.find((e) => e.primary) || emails[0];
         email = primaryEmail?.email;
       }
       return {

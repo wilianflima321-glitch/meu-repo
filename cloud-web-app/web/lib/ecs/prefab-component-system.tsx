@@ -100,6 +100,14 @@ export interface SerializedComponent {
   data: unknown;
 }
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return typeof value === 'object' && value !== null ? value as Record<string, unknown> : {};
+}
+
+function asNumberArray(value: unknown): number[] {
+  return Array.isArray(value) ? value.filter((entry): entry is number => typeof entry === 'number') : [];
+}
+
 // ============================================================================
 // BUILT-IN COMPONENTS
 // ============================================================================
@@ -251,14 +259,17 @@ export class ComponentRegistry {
         rotation: data.rotation.toArray(),
         scale: data.scale.toArray(),
       }),
-      onDeserialize: (serialized: any) => ({
-        position: new THREE.Vector3().fromArray(serialized.position),
-        rotation: new THREE.Quaternion().fromArray(serialized.rotation),
-        scale: new THREE.Vector3().fromArray(serialized.scale),
+      onDeserialize: (serialized) => {
+        const data = asRecord(serialized);
+        return {
+        position: new THREE.Vector3().fromArray(asNumberArray(data.position)),
+        rotation: new THREE.Quaternion().fromArray(asNumberArray(data.rotation)),
+        scale: new THREE.Vector3().fromArray(asNumberArray(data.scale)),
         localPosition: new THREE.Vector3(),
         localRotation: new THREE.Quaternion(),
         localScale: new THREE.Vector3(1, 1, 1),
-      }),
+      };
+      },
     });
     
     // MeshRenderer
@@ -308,10 +319,13 @@ export class ComponentRegistry {
         ...data,
         color: data.color.getHex(),
       }),
-      onDeserialize: (serialized: any) => ({
-        ...serialized,
-        color: new THREE.Color(serialized.color),
-      }),
+      onDeserialize: (serialized) => {
+        const data = asRecord(serialized);
+        return {
+          ...data,
+          color: new THREE.Color(typeof data.color === 'number' || typeof data.color === 'string' ? data.color : 0xffffff),
+        } as LightData;
+      },
     });
     
     // Camera

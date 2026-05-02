@@ -12,6 +12,37 @@ const WORKSPACE_ROOT = typeof process !== 'undefined'
   ? process.env.WORKSPACE_ROOT || process.cwd()
   : '/workspace';
 
+type GitStatusFile = {
+  status: string;
+  path: string;
+};
+
+type GitStatusResponse = {
+  staged?: GitStatusFile[];
+  unstaged?: GitStatusFile[];
+};
+
+type TerminalCommandResponse = {
+  output?: string;
+  error?: string;
+};
+
+type GitCommitResponse = {
+  message?: string;
+  error?: string;
+};
+
+type DuckDuckGoTopic = {
+  Text?: string;
+};
+
+type DuckDuckGoResponse = {
+  Abstract?: string;
+  Heading?: string;
+  AbstractURL?: string;
+  RelatedTopics?: DuckDuckGoTopic[];
+};
+
 function resolveSecurePath(basePath: string, relativePath: string): string | null {
   const path = typeof require !== 'undefined' ? require('path') : null;
   if (!path) return null;
@@ -676,7 +707,7 @@ aethelMCPServer.registerTool(
         body: JSON.stringify({ command, cwd, timeout }),
       });
 
-      const data = await response.json();
+      const data = await response.json() as TerminalCommandResponse;
 
       return {
         content: [{
@@ -705,7 +736,7 @@ aethelMCPServer.registerTool(
   async (): Promise<MCPToolResult> => {
     try {
       const response = await fetch('/api/git/status');
-      const data = await response.json();
+      const data = await response.json() as GitStatusResponse;
 
       return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
     } catch (error) {
@@ -731,19 +762,19 @@ aethelMCPServer.registerTool(
 
     try {
       const response = await fetch('/api/git/status');
-      const data = await response.json();
+      const data = await response.json() as GitStatusResponse;
 
       let diffText = '';
 
       if (data.staged?.length) {
         diffText += '=== STAGED ===\n';
-        diffText += data.staged.map((f: any) => `${f.status}: ${f.path}`).join('\n');
+        diffText += data.staged.map((f) => `${f.status}: ${f.path}`).join('\n');
         diffText += '\n\n';
       }
 
       if (data.unstaged?.length && !staged) {
         diffText += '=== UNSTAGED ===\n';
-        diffText += data.unstaged.map((f: any) => `${f.status}: ${f.path}`).join('\n');
+        diffText += data.unstaged.map((f) => `${f.status}: ${f.path}`).join('\n');
       }
 
       return { content: [{ type: 'text', text: diffText || 'Nenhuma mudança' }] };
@@ -784,7 +815,7 @@ aethelMCPServer.registerTool(
         body: JSON.stringify({ message }),
       });
 
-      const data = await response.json();
+      const data = await response.json() as GitCommitResponse;
 
       return { content: [{ type: 'text', text: data.message || 'Commit criado' }] };
     } catch (error) {
@@ -811,7 +842,7 @@ aethelMCPServer.registerTool(
     try {
       const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`;
       const response = await fetch(url);
-      const data = await response.json();
+      const data = await response.json() as DuckDuckGoResponse;
 
       const results: string[] = [];
 
@@ -823,7 +854,7 @@ aethelMCPServer.registerTool(
 
       if (data.RelatedTopics) {
         results.push('\n### Tópicos Relacionados:');
-        data.RelatedTopics.slice(0, numResults).forEach((topic: any) => {
+        data.RelatedTopics.slice(0, numResults).forEach((topic) => {
           if (topic.Text) {
             results.push(`- ${topic.Text}`);
           }

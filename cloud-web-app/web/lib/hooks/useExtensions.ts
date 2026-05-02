@@ -71,11 +71,48 @@ export interface UseExtensionsReturn {
   checkUpdates: () => Promise<Extension[]>;
 }
 
+type ApiExtension = {
+  id?: string;
+  identifier?: { id?: string };
+  name?: string;
+  displayName?: string;
+  publisher?: string;
+  publisherName?: string;
+  publisherDisplayName?: string;
+  version?: string;
+  description?: string;
+  icon?: string;
+  iconUrl?: string;
+  category?: string;
+  categories?: string[];
+  tags?: string[];
+  rating?: number;
+  averageRating?: number;
+  ratingCount?: number;
+  downloadCount?: number;
+  installCount?: number;
+  isInstalled?: boolean;
+  isEnabled?: boolean;
+  isBuiltIn?: boolean;
+  lastUpdated?: string | number | Date;
+  publishedDate?: string | number | Date;
+  dependencies?: string[];
+  readme?: string;
+  changelog?: string;
+  repository?: string;
+  license?: string;
+};
+
+type MarketplaceExtensionsResponse = {
+  extensions?: ApiExtension[];
+  results?: ApiExtension[];
+};
+
 // ============================================================================
 // API Functions
 // ============================================================================
 
-async function fetchFromApi(endpoint: string, options?: RequestInit): Promise<any> {
+async function fetchFromApi<TResponse = unknown>(endpoint: string, options?: RequestInit): Promise<TResponse> {
   const response = await fetch(endpoint, {
     ...options,
     headers: {
@@ -89,10 +126,10 @@ async function fetchFromApi(endpoint: string, options?: RequestInit): Promise<an
     throw new Error(error.message || `HTTP ${response.status}`);
   }
 
-  return response.json();
+  return response.json() as Promise<TResponse>;
 }
 
-function mapApiExtension(ext: any): Extension {
+function mapApiExtension(ext: ApiExtension): Extension {
   return {
     id: ext.id || ext.identifier?.id || '',
     name: ext.name || '',
@@ -175,7 +212,7 @@ export function useExtensions(options: UseExtensionsOptions = {}): UseExtensions
         params.set('category', category);
       }
 
-      const data = await fetchFromApi(`/api/marketplace?${params}`);
+      const data = await fetchFromApi<MarketplaceExtensionsResponse>(`/api/marketplace?${params}`);
       
       const mappedExtensions = (data.extensions || data.results || []).map(mapApiExtension);
       setExtensions(mappedExtensions);
@@ -272,7 +309,7 @@ export function useExtensions(options: UseExtensionsOptions = {}): UseExtensions
         id: extensionId,
       });
 
-      const data = await fetchFromApi(`/api/marketplace?${params}`);
+      const data = await fetchFromApi<ApiExtension>(`/api/marketplace?${params}`);
       return mapApiExtension(data);
     } catch (err) {
       console.error('Failed to get extension details:', err);
@@ -284,7 +321,7 @@ export function useExtensions(options: UseExtensionsOptions = {}): UseExtensions
   const checkUpdates = useCallback(async (): Promise<Extension[]> => {
     try {
       const params = new URLSearchParams({ action: 'updates' });
-      const data = await fetchFromApi(`/api/marketplace?${params}`);
+      const data = await fetchFromApi<MarketplaceExtensionsResponse>(`/api/marketplace?${params}`);
       return (data.extensions || []).map(mapApiExtension);
     } catch (err) {
       console.error('Failed to check updates:', err);

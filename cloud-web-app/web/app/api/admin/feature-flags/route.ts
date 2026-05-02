@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
 
@@ -29,8 +30,8 @@ export const POST = withAdminAuth(
         description?: string;
         type?: string;
         percentage?: number;
-        rules?: any;
-        environments?: any;
+        rules?: unknown;
+        environments?: unknown;
         enabled?: boolean;
       };
 
@@ -46,8 +47,8 @@ export const POST = withAdminAuth(
           description: description || null,
           type: type || 'boolean',
           percentage: typeof percentage === 'number' ? percentage : null,
-          rules: rules ?? null,
-          environments: environments ?? null,
+          rules: rules == null ? Prisma.JsonNull : rules as Prisma.InputJsonValue,
+          environments: environments == null ? Prisma.JsonNull : environments as Prisma.InputJsonValue,
           enabled: enabled ?? true,
           createdBy: user.id,
         },
@@ -56,8 +57,8 @@ export const POST = withAdminAuth(
           description: description || null,
           type: type || 'boolean',
           percentage: typeof percentage === 'number' ? percentage : null,
-          rules: rules ?? null,
-          environments: environments ?? null,
+          rules: rules == null ? Prisma.JsonNull : rules as Prisma.InputJsonValue,
+          environments: environments == null ? Prisma.JsonNull : environments as Prisma.InputJsonValue,
           enabled: enabled ?? true,
         },
       });

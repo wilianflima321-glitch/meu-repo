@@ -74,8 +74,8 @@ export class SearchManager {
       });
 
       return results;
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
         log.info('[Search Manager] Search cancelled');
         return [];
       }

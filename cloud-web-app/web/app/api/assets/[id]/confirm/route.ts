@@ -72,8 +72,8 @@ export async function POST(
         
         const headResult = await headObject(s3Key);
         actualSize = headResult?.size || asset.size;
-      } catch (s3Error: any) {
-        if (s3Error?.name === 'NotFound') {
+      } catch (s3Error: unknown) {
+        if (s3Error instanceof Error && s3Error.name === 'NotFound') {
           return NextResponse.json(
             { error: 'File not found in storage. Upload may have failed.' },
             { status: 400 }
@@ -152,9 +152,9 @@ export async function POST(
         ],
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Confirm upload error:', error);
-    if (error.message === 'Unauthorized') {
+    if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return NextResponse.json(

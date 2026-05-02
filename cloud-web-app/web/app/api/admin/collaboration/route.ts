@@ -6,6 +6,11 @@ import { withAdminAuth } from '@/lib/rbac';
 // COLLABORATION ADMIN API
 // =============================================================================
 
+type ProjectAdminStateRecord = {
+  projectId: string;
+  status: string;
+};
+
 export const GET = withAdminAuth(
   async () => {
     try {
@@ -19,7 +24,7 @@ export const GET = withAdminAuth(
       const states = await projectAdminState.findMany({
         where: { projectId: { in: projectIds } },
       });
-      const stateMap = new Map(states.map((state: any) => [state.projectId, state.status]));
+      const stateMap = new Map((states as ProjectAdminStateRecord[]).map((state) => [state.projectId, state.status]));
 
       const items = projects.map((project) => ({
         id: project.id,

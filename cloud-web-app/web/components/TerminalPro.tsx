@@ -23,6 +23,10 @@ interface CommandHistoryEntry {
   timestamp: Date
 }
 
+type PersistedCommandHistoryEntry = Omit<CommandHistoryEntry, 'timestamp'> & {
+  timestamp: string | number | Date
+}
+
 interface TerminalProps {
   initialLines?: TerminalLine[]
   onCommand?: (command: string) => Promise<string | void>
@@ -89,8 +93,8 @@ export default function Terminal({
     const savedHistory = localStorage.getItem('terminal-history')
     if (savedHistory) {
       try {
-        const parsed = JSON.parse(savedHistory)
-        setCommandHistory(parsed.map((h: any) => ({
+        const parsed = JSON.parse(savedHistory) as PersistedCommandHistoryEntry[]
+        setCommandHistory(parsed.map((h) => ({
           ...h,
           timestamp: new Date(h.timestamp)
         })))

@@ -44,9 +44,9 @@ export async function POST(
       assetId: asset.id,
       message: 'Favorite toggled (pending prisma generate)',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Toggle favorite error:', error);
-    if (error.message === 'Unauthorized') {
+    if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return NextResponse.json(

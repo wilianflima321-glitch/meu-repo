@@ -74,6 +74,15 @@ interface GodViewStats {
   byPlan: { plan: string; count: number }[];
 }
 
+type GodViewSessionsResponse = {
+  sessions?: Array<Omit<LiveSession, 'duration' | 'device' | 'browser'> & {
+    duration?: number;
+    device?: LiveSession['device'];
+    browser?: string;
+  }>;
+  stats: GodViewStats;
+};
+
 // =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
@@ -405,10 +414,10 @@ export default function GodViewPage() {
     try {
       const res = await fetch('/api/admin/god-view/sessions');
       if (!res.ok) throw new Error('Falha ao buscar');
-      const data = await res.json();
+      const data = await res.json() as GodViewSessionsResponse;
 
       // Enrich sessions with derived data
-      const enriched = data.sessions.map((s: any) => {
+      const enriched = (data.sessions || []).map((s) => {
         const { device, browser } = parseUserAgent(s.userAgent);
         const duration = Math.floor((Date.now() - new Date(s.startedAt).getTime()) / 1000);
         return { ...s, device, browser, duration };

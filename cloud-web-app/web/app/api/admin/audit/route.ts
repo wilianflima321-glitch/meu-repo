@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { withAdminAuth } from '@/lib/rbac';
@@ -22,14 +23,18 @@ async function getHandler(request: NextRequest) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
     
-    const where: any = {};
+    const where: Prisma.AuditLogWhereInput = {};
     
     if (userId) where.userId = userId;
     if (action) where.action = { contains: action };
     if (adminEmail) where.adminEmail = { contains: adminEmail };
     if (severity) where.severity = severity;
-    if (startDate) where.createdAt = { ...where.createdAt, gte: new Date(startDate) };
-    if (endDate) where.createdAt = { ...where.createdAt, lte: new Date(endDate) };
+    if (startDate || endDate) {
+      const createdAt: Prisma.DateTimeFilter = {};
+      if (startDate) createdAt.gte = new Date(startDate);
+      if (endDate) createdAt.lte = new Date(endDate);
+      where.createdAt = createdAt;
+    }
     
     const [logs, total] = await Promise.all([
       prisma.auditLog.findMany({

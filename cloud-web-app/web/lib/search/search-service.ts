@@ -119,8 +119,8 @@ export class SearchService extends EventEmitter {
       this.emit('searchComplete', result);
       return result;
       
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
         this.emit('searchAborted');
         return {
           matches: [],

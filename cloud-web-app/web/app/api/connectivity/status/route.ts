@@ -90,10 +90,10 @@ export async function GET(req: NextRequest) {
       },
     ];
 
-    const anyDown = services.some((s) => s.status === 'down');
-    const anyDegraded = services.some((s) => s.status === 'degraded');
+    const hasDown = services.some((s) => s.status === 'down');
+    const hasDegraded = services.some((s) => s.status === 'degraded');
 
-    const overall_status = anyDown ? 'down' : anyDegraded ? 'degraded' : 'healthy';
+    const overall_status = hasDown ? 'down' : hasDegraded ? 'degraded' : 'healthy';
 
     return NextResponse.json({
       overall_status,

@@ -470,7 +470,7 @@ export async function verifyBackupIntegrity(
     }
 
     return { valid: true };
-  } catch (error: any) {
-    return { valid: false, error: error.message };
+  } catch (error: unknown) {
+    return { valid: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }

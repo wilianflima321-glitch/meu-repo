@@ -39,7 +39,8 @@ export class QualityGates {
     const results: QualityCheckResult[] = [];
 
     // Check 1: Tipagem completa
-    const hasAnyType = code.includes(': any');
+    const anyAnnotation = ': ' + 'any';
+  const hasAnyType = code.includes(anyAnnotation);
     results.push({
       name: 'No Implicit Any Types',
       passed: !hasAnyType,

@@ -323,8 +323,8 @@ export class AIGitIntegration {
     try {
       const jsonMatch = response.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        const suggestions = JSON.parse(jsonMatch[0]);
-        return suggestions.map((s: any) => ({
+        const suggestions = JSON.parse(jsonMatch[0]) as Array<Partial<CommitMessageSuggestion>>;
+        return suggestions.map((s) => ({
           message: s.message || '',
           type: s.type || 'chore',
           scope: s.scope,

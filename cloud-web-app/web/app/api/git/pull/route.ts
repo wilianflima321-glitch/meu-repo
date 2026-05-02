@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       message: 'Pull completed successfully',
       output: stdout
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Git pull failed:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       { 
         success: false, 
         error: 'Failed to pull',
-        details: error.message 
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );

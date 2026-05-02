@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
 
@@ -12,7 +13,7 @@ async function getQueueHandler(req: NextRequest) {
   
   try {
     // Build where clause based on filter
-    const where: any = {};
+    const where: Prisma.ModerationItemWhereInput = {};
     
     if (filter === 'pending') {
       where.status = 'pending';

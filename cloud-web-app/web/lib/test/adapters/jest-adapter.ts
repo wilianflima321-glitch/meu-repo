@@ -5,6 +5,30 @@
 
 import { TestAdapterBase, TestItem, TestRun, TestResult, CoverageInfo } from '../test-adapter-base';
 
+type JestAssertionResult = {
+  title: string;
+  status: 'passed' | 'failed' | 'skipped' | string;
+  duration?: number;
+  failureMessages?: string[];
+};
+
+type JestFileResult = {
+  name: string;
+  assertionResults: JestAssertionResult[];
+};
+
+type JestJsonReport = {
+  testResults?: JestFileResult[];
+};
+
+type JestCoverageFile = {
+  s?: Record<string, number>;
+  b?: Record<string, number[]>;
+  f?: Record<string, number>;
+};
+
+type JestCoverageReport = Record<string, JestCoverageFile>;
+
 export class JestAdapter extends TestAdapterBase {
   constructor(workspaceRoot: string) {
     super(workspaceRoot, 'jest');
@@ -59,7 +83,7 @@ export class JestAdapter extends TestAdapterBase {
       });
 
       // Parse results
-      const jestResults = JSON.parse(result.stdout);
+      const jestResults = JSON.parse(result.stdout) as JestJsonReport;
       const results = this.parseJestResults(jestResults, tests);
 
       const endTime = Date.now();
@@ -88,7 +112,7 @@ export class JestAdapter extends TestAdapterBase {
       // Read coverage report
       const coveragePath = `${this.workspaceRoot}/coverage/coverage-final.json`;
       const coverageData = await this.readFile(coveragePath);
-      const coverage = JSON.parse(coverageData);
+      const coverage = JSON.parse(coverageData) as JestCoverageReport;
 
       return this.parseCoverageData(coverage);
     } catch (error) {
@@ -191,7 +215,7 @@ export class JestAdapter extends TestAdapterBase {
   /**
    * Parse Jest results
    */
-  private parseJestResults(jestResults: any, tests: TestItem[]): TestResult[] {
+  private parseJestResults(jestResults: JestJsonReport, tests: TestItem[]): TestResult[] {
     const results: TestResult[] = [];
 
     if (!jestResults.testResults) {
@@ -222,19 +246,17 @@ export class JestAdapter extends TestAdapterBase {
   /**
    * Parse coverage data
    */
-  private parseCoverageData(coverage: any): CoverageInfo[] {
+  private parseCoverageData(coverage: JestCoverageReport): CoverageInfo[] {
     const coverageInfo: CoverageInfo[] = [];
 
     for (const [filePath, fileData] of Object.entries(coverage)) {
-      const data = fileData as any;
-
-      const lines = Object.entries(data.s || {}).map(([line, count]) => ({
+      const lines = Object.entries(fileData.s || {}).map(([line, count]) => ({
         line: parseInt(line),
         covered: (count as number) > 0,
         count: count as number,
       }));
 
-      const branches = Object.entries(data.b || {}).map(([line, branchData]) => {
+      const branches = Object.entries(fileData.b || {}).map(([line, branchData]) => {
         const counts = branchData as number[];
         return {
           line: parseInt(line),
@@ -244,7 +266,7 @@ export class JestAdapter extends TestAdapterBase {
         };
       });
 
-      const functions = Object.entries(data.f || {}).map(([name, count]) => ({
+      const functions = Object.entries(fileData.f || {}).map(([name, count]) => ({
         name,
         line: 0, // Jest doesn't provide line numbers for functions
         covered: (count as number) > 0,

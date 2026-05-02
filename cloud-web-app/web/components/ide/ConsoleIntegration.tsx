@@ -45,10 +45,12 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
     const originalInfo = consoleApi.info?.bind(consoleApi) ?? (() => undefined)
     const originalDebug = consoleApi.debug?.bind(consoleApi) ?? (() => undefined)
 
-    const addLog = (type: ConsoleLog['type'], args: any[]) => {
+    const addLog = (type: ConsoleLog['type'], args: unknown[]) => {
       const message = args.map(arg => 
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
       ).join(' ')
+      const firstArg = args[0]
+      const stack = firstArg instanceof Error ? firstArg.stack : undefined
       
       const log: ConsoleLog = {
         id: `${Date.now()}-${Math.random()}`,
@@ -56,7 +58,7 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
         message,
         timestamp: Date.now(),
         source: 'browser',
-        stack: type === 'error' && args[0].stack ? args[0].stack : undefined,
+        stack: type === 'error' ? stack : undefined,
       }
       
       setLogs(prev => [...prev.slice(-99), log]) // Keep last 100 logs

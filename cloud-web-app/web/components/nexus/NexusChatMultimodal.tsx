@@ -15,13 +15,14 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
+  type LucideIcon,
 } from 'lucide-react'
 
 interface Agent {
   id: string
   name: string
   role: string
-  icon: any
+  icon: LucideIcon
   color: string
   chipClass: string
 }

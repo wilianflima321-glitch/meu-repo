@@ -257,13 +257,13 @@ export class TaskRunner extends EventEmitter {
       
       this.emit('taskCompleted', execution);
       
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
         execution.status = 'cancelled';
         this.emit('taskCancelled', execution);
       } else {
         execution.status = 'failed';
-        execution.output.push(`Error: ${error.message}`);
+        execution.output.push(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
         this.emit('taskFailed', { execution, error });
       }
       execution.endTime = Date.now();

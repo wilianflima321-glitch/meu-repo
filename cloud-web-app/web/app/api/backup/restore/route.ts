@@ -61,17 +61,17 @@ export async function POST(request: NextRequest) {
         result.preRestoreBackupId ? ` Pre-restore backup created: ${result.preRestoreBackupId}` : ''
       }`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to restore backup:', error);
     
-    if (error.message === 'Project not found or access denied') {
+    if (error instanceof Error && error.message === 'Project not found or access denied') {
       return NextResponse.json(
         { success: false, error: 'Project not found' },
         { status: 404 }
       );
     }
     
-    if (error.message?.includes('checksum mismatch')) {
+    if (error instanceof Error && error.message.includes('checksum mismatch')) {
       return NextResponse.json(
         { success: false, error: 'Backup integrity check failed', code: 'INTEGRITY_FAILED' },
         { status: 400 }

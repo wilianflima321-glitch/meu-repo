@@ -97,7 +97,7 @@ export interface DialogueCondition {
 
 export interface DialogueAction {
   type: 'set_variable' | 'trigger_event' | 'play_audio' | 'camera' | 'custom';
-  params: Record<string, any>;
+  params: Record<string, unknown>;
 }
 
 export interface DialogueNodeData extends Record<string, unknown> {
@@ -122,7 +122,7 @@ export interface Character {
 export interface DialogueVariable {
   name: string;
   type: 'string' | 'number' | 'boolean';
-  defaultValue: any;
+  defaultValue: unknown;
 }
 
 // ============================================================================

@@ -63,7 +63,7 @@ import { DEFAULT_PROJECTS, CURRENT_PLAN_KEY } from './aethel-dashboard-defaults'
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 
 export type DashboardActionsInput = {
-  trackEvent: (category: any, action: any, metadata?: Record<string, unknown>) => void
+  trackEvent: (category: string, action: string, metadata?: Record<string, unknown>) => void
   showToastMessage: (message: string, type?: ToastType) => void
   persistCopilotScope: (workflowId: string | null, threadId: string | null) => void
   navigateToIdeWithContext: (source: string, entry: string) => void

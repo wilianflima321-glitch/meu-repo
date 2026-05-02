@@ -78,7 +78,7 @@ export interface SessionSettings {
 
 export interface WebSocketMessage {
   type: string;
-  payload: any;
+  payload: unknown;
   sessionId: string;
   userId: string;
   timestamp: number;
@@ -212,7 +212,7 @@ export class CollaborationClient extends EventEmitter {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
-  private pendingOperations: DocumentOperation[] = [];
+  private pendingOperations: WebSocketMessage[] = [];
   private documents: Map<string, CRDTDocument> = new Map();
   private users: Map<string, CollaborationUser> = new Map();
   private chatMessages: ChatMessage[] = [];
@@ -504,41 +504,41 @@ export class CollaborationClient extends EventEmitter {
   private handleMessage(message: WebSocketMessage): void {
     switch (message.type) {
       case 'session:joined':
-        this.handleSessionJoined(message.payload);
+        this.handleSessionJoined(message.payload as { users?: CollaborationUser[]; chatHistory?: ChatMessage[] });
         break;
       case 'session:userJoined':
-        this.handleUserJoined(message.payload);
+        this.handleUserJoined(message.payload as { user: CollaborationUser });
         break;
       case 'session:userLeft':
-        this.handleUserLeft(message.payload);
+        this.handleUserLeft(message.payload as { userId: string });
         break;
       case 'document:insert':
-        this.handleRemoteInsert(message.payload);
+        this.handleRemoteInsert(message.payload as { fileUri: string; char: CRDTCharacter });
         break;
       case 'document:delete':
-        this.handleRemoteDelete(message.payload);
+        this.handleRemoteDelete(message.payload as { fileUri: string; charId: string });
         break;
       case 'document:sync':
-        this.handleDocumentSync(message.payload);
+        this.handleDocumentSync(message.payload as { fileUri: string; characters: CRDTCharacter[] });
         break;
       case 'awareness:cursor':
-        this.handleRemoteCursor(message.payload, message.userId);
+        this.handleRemoteCursor(message.payload as { cursor: CursorPosition }, message.userId);
         break;
       case 'awareness:selection':
-        this.handleRemoteSelection(message.payload, message.userId);
+        this.handleRemoteSelection(message.payload as { selection: SelectionRange | null }, message.userId);
         break;
       case 'chat:message':
-        this.handleChatMessage(message.payload);
+        this.handleChatMessage(message.payload as { message: ChatMessage });
         break;
       case 'chat:reaction':
-        this.handleChatReaction(message.payload);
+        this.handleChatReaction(message.payload as { messageId: string; emoji: string; userId: string });
         break;
       default:
         this.emit('message', message);
     }
   }
   
-  private handleSessionJoined(payload: any): void {
+  private handleSessionJoined(payload: { users?: CollaborationUser[]; chatHistory?: ChatMessage[] }): void {
     // Load existing users
     for (const user of payload.users || []) {
       this.users.set(user.id, user);
@@ -637,14 +637,14 @@ export class CollaborationClient extends EventEmitter {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      this.pendingOperations.push(message as any);
+      this.pendingOperations.push(message);
     }
   }
   
   private flushPendingOperations(): void {
     while (this.pendingOperations.length > 0) {
       const op = this.pendingOperations.shift()!;
-      this.send(op as any);
+      this.send(op);
     }
   }
   

@@ -54,6 +54,17 @@ export type CopilotContextResponse = {
 	contextVersion?: number;
 };
 
+export type UserProfile = {
+	id: string;
+	email?: string;
+	name?: string;
+	avatar?: string | null;
+	plan?: string;
+	createdAt?: string;
+	updatedAt?: string;
+	metadata?: unknown;
+};
+
 export type BillingPlan = {
 	id: string;
 	name: string;
@@ -424,11 +435,11 @@ export const AethelAPIClient = {
 	// ========== Profile ==========
 	
 	getProfile: async () => {
-		return requestJSON<{ profile: any }>('/auth/profile');
+		return requestJSON<{ profile: UserProfile }>('/auth/profile');
 	},
 	
 	updateProfile: async (updates: Record<string, unknown>) => {
-		return requestJSON<{ profile: any }>('/auth/profile', { method: 'PATCH', body: updates });
+		return requestJSON<{ profile: UserProfile }>('/auth/profile', { method: 'PATCH', body: updates });
 	},
 	
 	deleteAccount: async () => {

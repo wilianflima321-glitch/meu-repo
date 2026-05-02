@@ -11,6 +11,16 @@ interface DiscoverTestsRequest {
   workspaceRoot: string;
 }
 
+type DiscoveredTest = {
+	id: string;
+	label: string;
+	type: 'file';
+	uri: string;
+	children: DiscoveredTest[];
+	parent?: string;
+	relPath: string;
+};
+
 export async function POST(request: NextRequest) {
   try {
 		const user = requireAuth(request);
@@ -39,11 +49,11 @@ export async function POST(request: NextRequest) {
 		const maxHits = 2000;
 		let scanned = 0;
 		let hits = 0;
-		const tests: any[] = [];
+		const tests: DiscoveredTest[] = [];
 
 		async function walk(dir: string): Promise<void> {
 			if (scanned >= maxFiles || hits >= maxHits) return;
-			let entries: any[] = [];
+			let entries: Array<{ name: string; isDirectory(): boolean; isFile(): boolean }> = [];
 			try {
 				entries = await fs.readdir(dir, { withFileTypes: true });
 			} catch {

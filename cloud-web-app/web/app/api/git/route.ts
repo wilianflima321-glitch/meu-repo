@@ -288,10 +288,10 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Git API error:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
@@ -356,7 +356,7 @@ export async function GET(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Git API error:', error);
     
     // SECURITY: Mapear erros conhecidos, não expor detalhes internos
@@ -364,7 +364,7 @@ export async function GET(request: NextRequest) {
     if (mapped) return mapped;
     
     // Erros genéricos não devem vazar stack trace
-    const safeMessage = error?.code === 'WORKSPACE_ROOT_OUT_OF_BOUNDS' 
+    const safeMessage = typeof error === 'object' && error !== null && 'code' in error && error.code === 'WORKSPACE_ROOT_OUT_OF_BOUNDS'
       ? 'Access denied: path outside workspace'
       : 'Git operation failed';
     

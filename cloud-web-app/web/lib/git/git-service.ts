@@ -424,8 +424,8 @@ export class GitService extends EventEmitter {
       await this.execGit(args);
       this.emit('merged', branch);
       return { success: true };
-    } catch (error: any) {
-      if (error.message.includes('CONFLICT')) {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message.includes('CONFLICT')) {
         const conflicts = await this.getConflictedFiles();
         return { success: false, conflicts };
       }

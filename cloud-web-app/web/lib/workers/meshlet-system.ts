@@ -18,6 +18,29 @@ export interface MeshletStats {
   cullTimeMs: number;
 }
 
+export interface Meshlet {
+  id: number;
+  vertices?: number[] | Float32Array;
+  indices?: number[] | Uint32Array;
+  boundingSphere?: {
+    center: number[];
+    radius: number;
+  };
+  [key: string]: unknown;
+}
+
+export interface MeshletBuildResult {
+  meshlets: Meshlet[];
+  lodTree: number[][];
+  buildTimeMs: number;
+}
+
+export interface MeshletCullResult {
+  visibleMeshletIds: number[];
+  culledCount: number;
+  cullTimeMs: number;
+}
+
 const DEFAULT_CONFIG: MeshletConfig = {
   maxVerticesPerMeshlet: 64,
   maxTrianglesPerMeshlet: 124,
@@ -28,7 +51,7 @@ const DEFAULT_CONFIG: MeshletConfig = {
 class MeshletSystem {
   private worker: Worker | null = null;
   private pendingRequests = new Map<string, {
-    resolve: (value: any) => void;
+    resolve: (value: MeshletBuildResult | MeshletCullResult) => void;
     reject: (error: Error) => void;
   }>();
   private requestId = 0;
@@ -101,11 +124,7 @@ class MeshletSystem {
     meshId: string,
     vertices: Float32Array,
     indices: Uint32Array
-  ): Promise<{
-    meshlets: any[];
-    lodTree: number[][];
-    buildTimeMs: number;
-  }> {
+  ): Promise<MeshletBuildResult> {
     if (!this.worker) {
       // Fallback: return simple placeholder
       console.warn('[MeshletSystem] Worker not available, using fallback');
@@ -118,7 +137,10 @@ class MeshletSystem {
 
     return new Promise((resolve, reject) => {
       const key = `build-${meshId}`;
-      this.pendingRequests.set(key, { resolve, reject });
+      this.pendingRequests.set(key, {
+        resolve: (value) => resolve(value as MeshletBuildResult),
+        reject,
+      });
 
       this.worker!.postMessage({
         type: 'build',
@@ -136,16 +158,12 @@ class MeshletSystem {
    * Perform view-dependent culling
    */
   async cullMeshlets(
-    meshlets: any[],
+    meshlets: Meshlet[],
     viewMatrix: number[],
     projectionMatrix: number[],
     viewportWidth: number,
     viewportHeight: number
-  ): Promise<{
-    visibleMeshletIds: number[];
-    culledCount: number;
-    cullTimeMs: number;
-  }> {
+  ): Promise<MeshletCullResult> {
     if (!this.worker) {
       return {
         visibleMeshletIds: meshlets.map(m => m.id),
@@ -155,7 +173,10 @@ class MeshletSystem {
     }
 
     return new Promise((resolve, reject) => {
-      this.pendingRequests.set('cull', { resolve, reject });
+      this.pendingRequests.set('cull', {
+        resolve: (value) => resolve(value as MeshletCullResult),
+        reject,
+      });
 
       this.worker!.postMessage({
         type: 'cull',

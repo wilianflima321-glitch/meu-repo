@@ -10,7 +10,7 @@ interface FeatureFlag {
   enabled: boolean;
   type: string;
   percentage?: number | null;
-  environments?: any;
+  environments?: unknown;
 }
 
 export default function FeatureFlagsAdmin() {

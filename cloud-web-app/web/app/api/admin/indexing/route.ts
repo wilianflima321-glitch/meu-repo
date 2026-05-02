@@ -8,6 +8,15 @@ import { withAdminAuth } from '@/lib/rbac';
 
 const getFileName = (path: string) => path.split('/').pop() || path;
 
+type IndexingEntryRecord = {
+  fileId: string;
+  filePath: string;
+  indexed: boolean;
+  context?: string | null;
+  file?: { size?: number | null } | null;
+  updatedAt: Date;
+};
+
 export const GET = withAdminAuth(
   async (request) => {
     try {
@@ -33,7 +42,7 @@ export const GET = withAdminAuth(
         include: { file: true },
       });
 
-      const files = entries.map((entry: any) => ({
+      const files = (entries as IndexingEntryRecord[]).map((entry) => ({
         id: entry.fileId,
         name: getFileName(entry.filePath),
         path: entry.filePath,

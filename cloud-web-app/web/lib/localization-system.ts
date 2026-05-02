@@ -48,7 +48,9 @@ export interface TranslationEntry {
   description?: string;
 }
 
-export type TranslationDictionary = Record<string, TranslationEntry | string>;
+export type TranslationNode = TranslationEntry | string | { [key: string]: TranslationNode };
+
+export type TranslationDictionary = Record<string, TranslationNode>;
 
 export interface LocalizationData {
   locale: string;
@@ -470,17 +472,21 @@ export class LocalizationManager {
     
     // Support nested keys with dot notation
     const parts = key.split('.');
-    let current: any = dictionary;
+    let current: TranslationNode | undefined = dictionary;
     
     for (const part of parts) {
       if (current && typeof current === 'object' && part in current) {
-        current = current[part];
+        current = (current as Record<string, TranslationNode>)[part];
       } else {
         return null;
       }
     }
     
-    return current;
+    return typeof current === 'string' || this.isTranslationEntry(current) ? current : null;
+  }
+
+  private isTranslationEntry(value: unknown): value is TranslationEntry {
+    return typeof value === 'object' && value !== null && 'value' in value;
   }
   
   hasTranslation(key: string): boolean {
@@ -639,11 +645,11 @@ export class LocalizationManager {
     if (!dict) return [];
     
     const keys: string[] = [];
-    const traverse = (obj: any, prefix: string = '') => {
+    const traverse = (obj: TranslationDictionary, prefix: string = '') => {
       for (const [key, value] of Object.entries(obj)) {
         const fullKey = prefix ? `${prefix}.${key}` : key;
-        if (typeof value === 'object' && value !== null && !('value' in value)) {
-          traverse(value, fullKey);
+        if (typeof value === 'object' && value !== null && !this.isTranslationEntry(value)) {
+          traverse(value as TranslationDictionary, fullKey);
         } else {
           keys.push(fullKey);
         }

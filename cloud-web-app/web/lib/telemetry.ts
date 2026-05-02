@@ -393,7 +393,7 @@ export function useComponentTelemetry(componentName: string) {
   const startTime = Date.now()
 
   return {
-    trackInteraction: (name: string, metadata?: Record<string, any>) => {
+    trackInteraction: (name: string, metadata?: Record<string, unknown>) => {
       telemetry.trackEvent({
         type: TelemetryEventType.FEATURE_USAGE,
         name: `${componentName}:${name}`,
@@ -414,10 +414,10 @@ export function useComponentTelemetry(componentName: string) {
  * Decorator para rastrear chamadas de função
  */
 export function trackFunction(functionName: string) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: object, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const startTime = Date.now()
       try {
         const result = await originalMethod.apply(this, args)
