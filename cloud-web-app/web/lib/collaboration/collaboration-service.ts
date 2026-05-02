@@ -76,7 +76,40 @@ export interface TextOperation {
   retain?: number;
   insert?: string;
   delete?: number;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
+}
+
+export interface CollaborationComment {
+  id: string;
+  fileId: string;
+  line: number;
+  text: string;
+  userId: string;
+  userName: string;
+  userColor: string;
+  parentId?: string;
+  createdAt: number;
+  resolved: boolean;
+  resolvedAt?: number;
+}
+
+interface AwarenessChange {
+  added: number[];
+  updated: number[];
+  removed: number[];
+}
+
+interface AwarenessState {
+  user?: Partial<CollaborationUser> & Pick<CollaborationUser, 'id' | 'name' | 'color'>;
+  cursor?: CursorPosition;
+  selection?: SelectionRange;
+  lastActive?: number;
+}
+
+interface YTextDeltaOperation {
+  retain?: number;
+  insert?: string;
+  delete?: number;
 }
 
 // ============================================================================
@@ -190,7 +223,7 @@ export class CollaborationService extends EventEmitter {
     });
     
     // Awareness events
-    this.provider.awareness.on('change', (changes: any) => {
+    this.provider.awareness.on('change', (changes: AwarenessChange) => {
       this.handleAwarenessChange(changes);
     });
     
@@ -354,7 +387,9 @@ export class CollaborationService extends EventEmitter {
     
     const users: CollaborationUser[] = [];
     
-    this.provider.awareness.getStates().forEach((state: any, clientId: number) => {
+    const states = this.provider.awareness.getStates() as Map<number, AwarenessState>;
+
+    states.forEach((state: AwarenessState) => {
       if (state.user) {
         users.push({
           id: state.user.id,
@@ -404,7 +439,7 @@ export class CollaborationService extends EventEmitter {
   // ==========================================================================
   
   private setupYjsObservers(): void {
-    this.ydoc.on('update', (update: Uint8Array, origin: any) => {
+    this.ydoc.on('update', (update: Uint8Array, origin: unknown) => {
       this.emit('update', update, origin);
     });
     
@@ -421,7 +456,7 @@ export class CollaborationService extends EventEmitter {
     const changes: DocumentChange[] = [];
     let position = 0;
     
-    event.delta.forEach((op: any) => {
+    event.delta.forEach((op: YTextDeltaOperation) => {
       if (op.retain !== undefined) {
         position += op.retain;
       } else if (op.insert !== undefined) {
@@ -450,11 +485,7 @@ export class CollaborationService extends EventEmitter {
     });
   }
   
-  private handleAwarenessChange(changes: {
-    added: number[];
-    updated: number[];
-    removed: number[];
-  }): void {
+  private handleAwarenessChange(changes: AwarenessChange): void {
     const users = this.getUsers();
     
     if (changes.added.length > 0) {
@@ -513,7 +544,7 @@ export class CollaborationService extends EventEmitter {
   // Comments & Annotations
   // ==========================================================================
   
-  private getComments(fileId: string): Y.YArray<any> {
+  private getComments(fileId: string): Y.YArray<CollaborationComment> {
     return this.ydoc.getArray(`comments:${fileId}`);
   }
   
@@ -560,7 +591,7 @@ export class CollaborationService extends EventEmitter {
     }
   }
   
-  getFileComments(fileId: string): any[] {
+  getFileComments(fileId: string): CollaborationComment[] {
     return this.getComments(fileId).toArray();
   }
   

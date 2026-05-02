@@ -13,6 +13,16 @@
  */
 
 import * as THREE from 'three';
+
+interface GeneratedRoom {
+  center: [number, number, number];
+  size: [number, number, number];
+}
+
+interface GeneratedHallway {
+  from: GeneratedRoom;
+  to: GeneratedRoom;
+}
 import { SimplexNoise } from './terrain-engine';
 
 import { createComponentLogger } from '@/lib/observability/logger'
@@ -689,25 +699,25 @@ export class ProceduralLevelGenerator {
     return group;
   }
   
-  private generateRoomsBSP(count: number, size: [number, number, number]): any[] {
+  private generateRoomsBSP(count: number, size: [number, number, number]): GeneratedRoom[] {
     // Binary Space Partitioning for room layout
-    const rooms: any[] = [];
+    const rooms: GeneratedRoom[] = [];
     // Implementation would recursively split space
     return rooms;
   }
   
-  private generateHallways(rooms: any[]): any[] {
+  private generateHallways(rooms: GeneratedRoom[]): GeneratedHallway[] {
     // Connect rooms with hallways
     return [];
   }
   
-  private createRoom(room: any): THREE.Mesh {
+  private createRoom(_room: GeneratedRoom): THREE.Mesh {
     const geometry = new THREE.BoxGeometry(10, 3, 10);
     const material = new THREE.MeshStandardMaterial({ color: 0x888888 });
     return new THREE.Mesh(geometry, material);
   }
   
-  private createHallway(hallway: any): THREE.Mesh {
+  private createHallway(_hallway: GeneratedHallway): THREE.Mesh {
     const geometry = new THREE.BoxGeometry(3, 3, 10);
     const material = new THREE.MeshStandardMaterial({ color: 0x666666 });
     return new THREE.Mesh(geometry, material);

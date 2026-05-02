@@ -215,6 +215,8 @@ The jobs dispatcher now preserves that same runtime truth. `/api/jobs` sanitizes
 
 The database and TypeScript gates were tightened next. Prisma now has a versioned baseline migration folder (`20260502161641_init`), and `noImplicitAny` is enabled while keeping typecheck green. This closes two platform-confidence gaps from the V10 audit without pretending the remaining explicit `: any` debt is solved.
 
+The next strictness sweep removed explicit `: any` from collaboration/Yjs presence, settings, dialogue/cutscene, S3, Pixel Streaming, Redis, marketplace ingestion, LSP runtime, system health parsing, sandbox output, advanced input, quest custom events, and world streaming seams. The measured app-code `: any` ratchet moved from `379` to `246`; the remaining hotspots are now smaller and more isolated instead of spread across core runtime foundations.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

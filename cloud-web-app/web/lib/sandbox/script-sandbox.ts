@@ -136,7 +136,7 @@ export function sanitizeOutput(
     maxArrayLength?: number;
     maxStringLength?: number;
   }
-): any {
+): unknown {
   const opts = {
     maxDepth: options?.maxDepth ?? 6,
     maxSize: options?.maxSize ?? 100_000,
@@ -147,7 +147,7 @@ export function sanitizeOutput(
   const seen = new WeakSet<object>();
   let size = 0;
 
-  const sanitize = (value: any, depth: number): any => {
+  const sanitize = (value: unknown, depth: number): unknown => {
     if (value === null || value === undefined) return value;
     if (typeof value === 'string') {
       const truncated = value.length > opts.maxStringLength
@@ -167,7 +167,7 @@ export function sanitizeOutput(
     if (depth > opts.maxDepth) return '[MaxDepth]';
 
     if (Array.isArray(value)) {
-      const arr: any[] = [];
+      const arr: unknown[] = [];
       const limit = Math.min(value.length, opts.maxArrayLength);
       for (let i = 0; i < limit; i++) {
         arr.push(sanitize(value[i], depth + 1));
@@ -179,7 +179,7 @@ export function sanitizeOutput(
       return arr;
     }
 
-    const obj: Record<string, any> = {};
+    const obj: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value)) {
       obj[key] = sanitize(val, depth + 1);
       if (size > opts.maxSize) break;
@@ -652,9 +652,9 @@ export class ScriptSandbox {
         memoryUsed: Array.isArray(result) ? Math.max(1, result.length * 8) : 1024,
         logs,
       };
-    } catch (error: any) {
-      const rawMessage = error?.message || 'Execution error';
-      const message = error?.name === 'SyntaxError' || /Unexpected token/.test(rawMessage)
+    } catch (error: unknown) {
+      const rawMessage = error instanceof Error ? error.message : 'Execution error';
+      const message = error instanceof SyntaxError || /Unexpected token/.test(rawMessage)
         ? `SyntaxError: ${rawMessage}`
         : rawMessage;
       return {

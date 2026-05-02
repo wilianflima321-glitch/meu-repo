@@ -298,7 +298,7 @@ export class ComboDetector {
 
 export class GestureRecognizer {
   private gestures: Map<string, GestureConfig> = new Map();
-  private callbacks: Map<string, ((data: any) => void)[]> = new Map();
+  private callbacks: Map<string, ((data: unknown) => void)[]> = new Map();
   
   private touchStart: Map<number, { x: number; y: number; time: number }> = new Map();
   private lastTapTime: number = 0;
@@ -309,7 +309,7 @@ export class GestureRecognizer {
     this.callbacks.set(name, []);
   }
   
-  onGesture(name: string, callback: (data: any) => void): void {
+  onGesture(name: string, callback: (data: unknown) => void): void {
     const callbacks = this.callbacks.get(name);
     if (callbacks) {
       callbacks.push(callback);
@@ -372,7 +372,7 @@ export class GestureRecognizer {
     }
   }
   
-  private emit(name: string, data: any): void {
+  private emit(name: string, data: unknown): void {
     const callbacks = this.callbacks.get(name);
     if (callbacks) {
       for (const cb of callbacks) {
@@ -407,7 +407,7 @@ export class InputRecorder {
     return [...this.recordedInputs];
   }
   
-  recordInput(type: RecordedInput['type'], key?: string, value?: any): void {
+  recordInput(type: RecordedInput['type'], key?: string, value?: RecordedInput['value']): void {
     if (!this.recording) return;
     
     this.recordedInputs.push({
@@ -799,7 +799,7 @@ export class InputManager {
     this.gestureRecognizer.registerGesture(name, config);
   }
   
-  onGesture(name: string, callback: (data: any) => void): void {
+  onGesture(name: string, callback: (data: unknown) => void): void {
     this.gestureRecognizer.onGesture(name, callback);
   }
   

@@ -1,4 +1,20 @@
 import * as THREE from 'three';
+type QuestCustomData = unknown;
+type QuestObjectiveJSON = Omit<QuestObjective, 'targetLocation'> & {
+  targetLocation?: { x: number; y: number; z: number };
+};
+type QuestJSON = Omit<Quest, 'objectives' | 'state' | 'isTracked'> & {
+  objectives?: QuestObjectiveJSON[];
+  state?: QuestState;
+  isTracked?: boolean;
+};
+
+function isCustomObjectiveData(value: QuestCustomData): value is {
+  eventName?: string;
+  matcher?: (data: QuestCustomData) => boolean;
+} {
+  return typeof value === 'object' && value !== null;
+}
 export enum QuestState {
   UNKNOWN = 'unknown',
   AVAILABLE = 'available',
@@ -39,18 +55,18 @@ export interface QuestObjective {
   hidden: boolean;
   order?: number;
   prerequisites?: string[]; // Other objective IDs
-  customData?: any;
+  customData?: QuestCustomData;
 }
 export interface QuestReward {
   type: 'experience' | 'currency' | 'item' | 'reputation' | 'skill' | 'unlock' | 'custom';
   id?: string;
   amount?: number;
-  data?: any;
+  data?: QuestCustomData;
 }
 export interface QuestPrerequisite {
   type: 'quest_completed' | 'level' | 'reputation' | 'item' | 'flag' | 'custom';
   target: string;
-  value?: any;
+  value?: QuestCustomData;
 }
 export interface Quest {
   id: string;
@@ -122,7 +138,7 @@ export class QuestManager {
   registerChain(chain: QuestChain): void {
     this.chains.set(chain.id, chain);
   }
-  loadFromJSON(json: any): Quest {
+  loadFromJSON(json: QuestJSON): Quest {
     const quest: Quest = {
       id: json.id,
       name: json.name,
@@ -427,14 +443,15 @@ export class QuestManager {
       }
     }
   }
-  onCustomEvent(eventName: string, data: any): void {
+  onCustomEvent(eventName: string, data: QuestCustomData): void {
     for (const [questId, quest] of this.quests) {
       if (quest.state !== QuestState.ACTIVE) continue;
       for (const [objId, obj] of quest.objectives) {
         if (obj.state !== ObjectiveState.ACTIVE) continue;
         if (obj.type !== ObjectiveType.CUSTOM) continue;
-        if (obj.customData?.eventName === eventName) {
-          const matcher = obj.customData?.matcher;
+        const customData = isCustomObjectiveData(obj.customData) ? obj.customData : {};
+        if (customData.eventName === eventName) {
+          const matcher = customData.matcher;
           if (!matcher || matcher(data)) {
             this.addObjectiveProgress(questId, objId);
           }

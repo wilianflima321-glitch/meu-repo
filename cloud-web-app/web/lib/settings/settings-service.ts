@@ -11,14 +11,18 @@ import { EventEmitter } from 'events';
 // TYPES
 // ============================================================================
 
+export type SettingValue = unknown;
+export type SettingEnumValue = string | number;
+export type SettingsRecord = Record<string, SettingValue>;
+
 export interface SettingDefinition {
   key: string;
   type: 'string' | 'number' | 'boolean' | 'array' | 'object' | 'enum';
-  default: any;
+  default: SettingValue;
   description: string;
   markdownDescription?: string;
   scope: 'user' | 'workspace' | 'window' | 'resource' | 'machine';
-  enum?: any[];
+  enum?: SettingEnumValue[];
   enumDescriptions?: string[];
   minimum?: number;
   maximum?: number;
@@ -42,12 +46,12 @@ export interface UserProfile {
   id: string;
   name: string;
   icon?: string;
-  settings: Record<string, any>;
+  settings: SettingsRecord;
   extensions: string[];
-  keybindings: any[];
-  snippets: Record<string, any>;
-  tasks: any[];
-  globalState: Record<string, any>;
+  keybindings: SettingValue[];
+  snippets: SettingsRecord;
+  tasks: SettingValue[];
+  globalState: SettingsRecord;
   createdAt: number;
   updatedAt: number;
 }
@@ -63,8 +67,8 @@ export interface SyncState {
 
 export interface SyncConflict {
   key: string;
-  localValue: any;
-  remoteValue: any;
+  localValue: SettingValue;
+  remoteValue: SettingValue;
   timestamp: number;
 }
 
@@ -72,7 +76,7 @@ export interface SyncConflict {
 // DEFAULT SETTINGS
 // ============================================================================
 
-export const DEFAULT_SETTINGS: Record<string, any> = {
+export const DEFAULT_SETTINGS: SettingsRecord = {
   // Editor
   'editor.fontSize': 14,
   'editor.fontFamily': "'JetBrains Mono', 'Fira Code', monospace",
@@ -369,8 +373,8 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
 // ============================================================================
 
 export class SettingsService extends EventEmitter {
-  private settings: Map<string, any> = new Map();
-  private workspaceSettings: Map<string, any> = new Map();
+  private settings: Map<string, SettingValue> = new Map();
+  private workspaceSettings: Map<string, SettingValue> = new Map();
   private profiles: Map<string, UserProfile> = new Map();
   private activeProfileId: string = 'default';
   private syncState: SyncState = {
@@ -390,20 +394,20 @@ export class SettingsService extends EventEmitter {
   // SETTINGS CRUD
   // ==========================================================================
   
-  get<T>(key: string): T {
+  get<T = SettingValue>(key: string): T {
     // Check workspace settings first
     if (this.workspaceSettings.has(key)) {
-      return this.workspaceSettings.get(key);
+      return this.workspaceSettings.get(key) as T;
     }
     // Then user settings
     if (this.settings.has(key)) {
-      return this.settings.get(key);
+      return this.settings.get(key) as T;
     }
     // Fall back to default
-    return DEFAULT_SETTINGS[key];
+    return DEFAULT_SETTINGS[key] as T;
   }
   
-  async set(key: string, value: any, scope: 'user' | 'workspace' = 'user'): Promise<void> {
+  async set(key: string, value: SettingValue, scope: 'user' | 'workspace' = 'user'): Promise<void> {
     const oldValue = this.get(key);
     
     if (scope === 'workspace') {
@@ -440,8 +444,8 @@ export class SettingsService extends EventEmitter {
     return this.settings.has(key) || this.workspaceSettings.has(key) || key in DEFAULT_SETTINGS;
   }
   
-  getAll(): Record<string, any> {
-    const result: Record<string, any> = { ...DEFAULT_SETTINGS };
+  getAll(): SettingsRecord {
+    const result: SettingsRecord = { ...DEFAULT_SETTINGS };
     
     for (const [key, value] of this.settings) {
       result[key] = value;
@@ -454,16 +458,16 @@ export class SettingsService extends EventEmitter {
     return result;
   }
   
-  getUserSettings(): Record<string, any> {
-    const result: Record<string, any> = {};
+  getUserSettings(): SettingsRecord {
+    const result: SettingsRecord = {};
     for (const [key, value] of this.settings) {
       result[key] = value;
     }
     return result;
   }
   
-  getWorkspaceSettings(): Record<string, any> {
-    const result: Record<string, any> = {};
+  getWorkspaceSettings(): SettingsRecord {
+    const result: SettingsRecord = {};
     for (const [key, value] of this.workspaceSettings) {
       result[key] = value;
     }
@@ -578,9 +582,9 @@ export class SettingsService extends EventEmitter {
       
       this.emit('syncCompleted', { lastSync: this.syncState.lastSync });
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.syncState.status = 'error';
-      this.syncState.error = error.message;
+      this.syncState.error = error instanceof Error ? error.message : String(error);
       
       this.emit('syncError', error);
     }
@@ -620,7 +624,11 @@ export class SettingsService extends EventEmitter {
   }
   
   async importSettings(json: string, merge: boolean = true): Promise<void> {
-    const data = JSON.parse(json);
+    const data = JSON.parse(json) as {
+      version?: number;
+      settings?: SettingsRecord;
+      profiles?: UserProfile[];
+    };
     
     if (!data.version || !data.settings) {
       throw new Error('Invalid settings file');
@@ -647,8 +655,8 @@ export class SettingsService extends EventEmitter {
   // SEARCH
   // ==========================================================================
   
-  search(query: string): Array<{ key: string; value: any; definition?: SettingDefinition }> {
-    const results: Array<{ key: string; value: any; definition?: SettingDefinition }> = [];
+  search(query: string): Array<{ key: string; value: SettingValue; definition?: SettingDefinition }> {
+    const results: Array<{ key: string; value: SettingValue; definition?: SettingDefinition }> = [];
     const lowerQuery = query.toLowerCase();
     
     for (const [key, definition] of Object.entries(SETTING_DEFINITIONS)) {
@@ -672,7 +680,7 @@ export class SettingsService extends EventEmitter {
   // VALIDATION
   // ==========================================================================
   
-  validate(key: string, value: any): { valid: boolean; error?: string } {
+  validate(key: string, value: SettingValue): { valid: boolean; error?: string } {
     const definition = SETTING_DEFINITIONS[key];
     if (!definition) {
       return { valid: true }; // Unknown settings are allowed
@@ -685,12 +693,16 @@ export class SettingsService extends EventEmitter {
     }
     
     // Enum check
-    if (definition.type === 'enum' && definition.enum && !definition.enum.includes(value)) {
+    if (
+      definition.type === 'enum' &&
+      definition.enum &&
+      (typeof value !== 'string' && typeof value !== 'number' || !definition.enum.includes(value))
+    ) {
       return { valid: false, error: `Value must be one of: ${definition.enum.join(', ')}` };
     }
     
     // Number range
-    if (definition.type === 'number') {
+    if (definition.type === 'number' && typeof value === 'number') {
       if (definition.minimum !== undefined && value < definition.minimum) {
         return { valid: false, error: `Value must be at least ${definition.minimum}` };
       }

@@ -1,6 +1,62 @@
 
 import * as THREE from 'three';
 
+type DialogueValue = unknown;
+type DialogueVariableMap = Map<string, DialogueValue>;
+type DialogueJsonRecord = Record<string, DialogueValue>;
+
+interface DialogueTreeJSON {
+  id: string;
+  name: string;
+  startNode: string;
+  nodes: DialogueNode[];
+  characters?: Array<Omit<DialogueCharacter, 'portraits'> & { portraits?: Record<string, string> }>;
+  variables?: DialogueJsonRecord;
+}
+
+interface CutsceneJSON {
+  id: string;
+  name: string;
+  duration: number;
+  tracks: CutsceneTrack[];
+  skippable?: boolean;
+}
+
+interface CameraTrackJSON {
+  keyframes?: Array<{
+    time: number;
+    position: { x: number; y: number; z: number };
+    lookAt: { x: number; y: number; z: number };
+    fov?: number;
+    easing?: CameraKeyframe['easing'];
+  }>;
+}
+
+interface NamedEventData extends DialogueJsonRecord {
+  name: string;
+}
+
+function isRecord(value: unknown): value is DialogueJsonRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isCameraTrackJSON(value: unknown): value is CameraTrackJSON {
+  return isRecord(value) && Array.isArray(value.keyframes);
+}
+
+function isNamedEventData(value: unknown): value is NamedEventData {
+  return isRecord(value) && typeof value.name === 'string';
+}
+
+function compareOrdered(
+  left: unknown,
+  right: unknown,
+  predicate: (a: number, b: number) => boolean
+): boolean {
+  const leftNumber = typeof left === 'number' ? left : Number(left);
+  const rightNumber = typeof right === 'number' ? right : Number(right);
+  return Number.isFinite(leftNumber) && Number.isFinite(rightNumber) && predicate(leftNumber, rightNumber);
+}
 
 export interface DialogueNode {
   id: string;
@@ -35,14 +91,14 @@ export interface DialogueCondition {
   type: 'variable' | 'item' | 'quest' | 'flag' | 'relationship' | 'custom';
   key: string;
   operator: '==' | '!=' | '>' | '<' | '>=' | '<=' | 'has' | 'not_has';
-  value: any;
+  value: DialogueValue;
 }
 
 export interface DialogueAction {
   type: 'set_variable' | 'add_item' | 'remove_item' | 'set_flag' | 'start_quest' | 'complete_quest' | 'change_relationship' | 'play_animation' | 'play_sound' | 'trigger_event' | 'custom';
   target?: string;
   key?: string;
-  value?: any;
+  value?: DialogueValue;
   amount?: number;
 }
 
@@ -52,7 +108,7 @@ export interface DialogueTree {
   startNode: string;
   nodes: Map<string, DialogueNode>;
   characters: Map<string, DialogueCharacter>;
-  variables: Map<string, any>;
+  variables: DialogueVariableMap;
 }
 
 export interface DialogueCharacter {
@@ -70,7 +126,7 @@ export interface DialogueState {
   currentTreeId: string | null;
   currentNodeId: string | null;
   history: string[];
-  variables: Map<string, any>;
+  variables: DialogueVariableMap;
   flags: Set<string>;
   relationships: Map<string, number>;
 }
@@ -79,7 +135,7 @@ export interface CutsceneTrack {
   type: 'camera' | 'animation' | 'audio' | 'dialogue' | 'event' | 'subtitle';
   startTime: number;
   duration: number;
-  data: any;
+  data: unknown;
 }
 
 export interface CameraKeyframe {
@@ -120,7 +176,7 @@ export class DialogueSystem {
   private onChoicesAvailable?: (choices: DialogueChoice[]) => void;
   private onAction?: (action: DialogueAction) => void;
   
-  private variableProvider?: (key: string) => any;
+  private variableProvider?: (key: string) => DialogueValue;
   private conditionEvaluator?: (condition: DialogueCondition) => boolean;
   private actionHandler?: (action: DialogueAction) => void;
   
@@ -139,7 +195,7 @@ export class DialogueSystem {
     this.trees.set(tree.id, tree);
   }
   
-  loadFromJSON(json: any): DialogueTree {
+  loadFromJSON(json: DialogueTreeJSON): DialogueTree {
     const tree: DialogueTree = {
       id: json.id,
       name: json.name,
@@ -289,7 +345,7 @@ export class DialogueSystem {
       return this.conditionEvaluator(condition);
     }
     
-    let value: any;
+    let value: DialogueValue;
     
     switch (condition.type) {
       case 'variable':
@@ -309,10 +365,10 @@ export class DialogueSystem {
     switch (condition.operator) {
       case '==': return value === condition.value;
       case '!=': return value !== condition.value;
-      case '>': return value > condition.value;
-      case '<': return value < condition.value;
-      case '>=': return value >= condition.value;
-      case '<=': return value <= condition.value;
+      case '>': return compareOrdered(value, condition.value, (left, right) => left > right);
+      case '<': return compareOrdered(value, condition.value, (left, right) => left < right);
+      case '>=': return compareOrdered(value, condition.value, (left, right) => left >= right);
+      case '<=': return compareOrdered(value, condition.value, (left, right) => left <= right);
       case 'has': return value === true || value !== undefined;
       case 'not_has': return value === false || value === undefined;
       default: return false;
@@ -403,7 +459,7 @@ export class DialogueSystem {
     this.currentLanguage = language;
   }
   
-  setVariableProvider(provider: (key: string) => any): void {
+  setVariableProvider(provider: (key: string) => DialogueValue): void {
     this.variableProvider = provider;
   }
   
@@ -448,12 +504,12 @@ export class CutsceneSystem {
   private scene: THREE.Scene | null = null;
   
   private activeSubtitles: SubtitleEntry[] = [];
-  private activeTracks: Map<CutsceneTrack, any> = new Map();
+  private activeTracks: Map<CutsceneTrack, boolean> = new Map();
   
   private onCutsceneStart?: (cutscene: Cutscene) => void;
   private onCutsceneEnd?: (cutscene: Cutscene) => void;
   private onSubtitleChange?: (subtitles: SubtitleEntry[]) => void;
-  private onEvent?: (eventName: string, data: any) => void;
+  private onEvent?: (eventName: string, data: unknown) => void;
   
   private cinematicBarsEnabled: boolean = false;
   private cinematicBarsProgress: number = 0;
@@ -472,12 +528,12 @@ export class CutsceneSystem {
     this.cutscenes.set(cutscene.id, cutscene);
   }
   
-  loadFromJSON(json: any): Cutscene {
+  loadFromJSON(json: CutsceneJSON): Cutscene {
     const cutscene: Cutscene = {
       id: json.id,
       name: json.name,
       duration: json.duration,
-      tracks: json.tracks.map((track: any) => ({
+      tracks: json.tracks.map((track: CutsceneTrack) => ({
         ...track,
         data: this.parseTrackData(track.type, track.data),
       })),
@@ -488,13 +544,13 @@ export class CutsceneSystem {
     return cutscene;
   }
   
-  private parseTrackData(type: string, data: any): any {
-    if (type === 'camera') {
-      return data.keyframes.map((kf: any) => ({
+  private parseTrackData(type: string, data: unknown): unknown {
+    if (type === 'camera' && isCameraTrackJSON(data)) {
+      return data.keyframes?.map((kf) => ({
         ...kf,
         position: new THREE.Vector3(kf.position.x, kf.position.y, kf.position.z),
         lookAt: new THREE.Vector3(kf.lookAt.x, kf.lookAt.y, kf.lookAt.z),
-      }));
+      })) ?? [];
     }
     return data;
   }
@@ -573,7 +629,9 @@ export class CutsceneSystem {
       case 'event':
         if (!this.activeTracks.has(track)) {
           this.activeTracks.set(track, true);
-          this.onEvent?.(track.data.name, track.data);
+          if (isNamedEventData(track.data)) {
+            this.onEvent?.(track.data.name, track.data);
+          }
         }
         break;
         
@@ -750,7 +808,7 @@ export class CutsceneSystem {
     this.onSubtitleChange = callback;
   }
   
-  setOnEvent(callback: (eventName: string, data: any) => void): void {
+  setOnEvent(callback: (eventName: string, data: unknown) => void): void {
     this.onEvent = callback;
   }
 }

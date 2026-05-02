@@ -47,14 +47,14 @@ export interface WorldChunk {
   state: ChunkState;
   lodLevel: LODLevel;
   priority: number;
-  data: any | null;
+  data: unknown | null;
   neighbors: string[];
   lastAccessTime: number;
   loadTime: number;
   memorySize: number;
   entities: string[];
-  terrainMesh: any | null;
-  collisionMesh: any | null;
+  terrainMesh: unknown | null;
+  collisionMesh: unknown | null;
 }
 
 export interface LODConfig {
@@ -443,7 +443,7 @@ export class WorldStreamingSystem extends EventEmitter {
   // CHUNK MANAGEMENT
   // ============================================================================
   
-  registerChunk(position: Vector3, data?: any): WorldChunk {
+  registerChunk(position: Vector3, data?: unknown): WorldChunk {
     const id = this.getChunkId(position);
     
     if (this.chunks.has(id)) {
@@ -990,9 +990,9 @@ export class WorldStreamingSystem extends EventEmitter {
 // ============================================================================
 
 export interface ChunkLoadResult {
-  data: any;
-  terrainMesh: any;
-  collisionMesh: any;
+  data: unknown;
+  terrainMesh: unknown;
+  collisionMesh: unknown;
   memorySize: number;
   entities?: string[];
 }

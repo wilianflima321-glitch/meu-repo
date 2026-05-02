@@ -77,7 +77,114 @@ export interface SceneObject {
     lockedBy?: string;
     parentId?: string;
     children?: string[];
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
+}
+
+type CollaborationEventListener = (data: unknown) => void;
+
+interface MonacoPosition {
+    lineNumber: number;
+    column: number;
+}
+
+interface MonacoRangeLike {
+    startLineNumber: number;
+    startColumn: number;
+    endLineNumber: number;
+    endColumn: number;
+}
+
+interface MonacoContentChange {
+    range: {
+        startLineNumber: number;
+        startColumn: number;
+    };
+    rangeLength: number;
+    text: string;
+}
+
+interface MonacoModelLike {
+    getValue(): string;
+    setValue(value: string): void;
+    getPositionAt(offset: number): MonacoPosition;
+    getOffsetAt(position: MonacoPosition): number;
+    onDidChangeContent(callback: (event: { changes: MonacoContentChange[] }) => void): { dispose: () => void };
+}
+
+interface MonacoEditorLike {
+    getModel(): MonacoModelLike | null;
+    executeEdits(
+        source: string,
+        edits: Array<{
+            range: MonacoRangeLike;
+            text: string;
+        }>
+    ): void;
+}
+
+interface YTextDelta {
+    retain?: number;
+    insert?: string;
+    delete?: number;
+}
+
+function isVector3(value: unknown): value is SceneObject['position'] {
+    return typeof value === 'object' &&
+        value !== null &&
+        typeof (value as { x?: unknown }).x === 'number' &&
+        typeof (value as { y?: unknown }).y === 'number' &&
+        typeof (value as { z?: unknown }).z === 'number';
+}
+
+function readString(map: Y.Map<unknown>, key: string, fallback = ''): string {
+    const value = map.get(key);
+    return typeof value === 'string' ? value : fallback;
+}
+
+function readBoolean(map: Y.Map<unknown>, key: string, fallback = false): boolean {
+    const value = map.get(key);
+    return typeof value === 'boolean' ? value : fallback;
+}
+
+function readOptionalString(map: Y.Map<unknown>, key: string): string | undefined {
+    const value = map.get(key);
+    return typeof value === 'string' ? value : undefined;
+}
+
+function readStringArray(map: Y.Map<unknown>, key: string): string[] | undefined {
+    const value = map.get(key);
+    return Array.isArray(value) && value.every((entry) => typeof entry === 'string')
+        ? value
+        : undefined;
+}
+
+function readVector(map: Y.Map<unknown>, key: string): SceneObject['position'] {
+    const value = map.get(key);
+    return isVector3(value) ? value : { x: 0, y: 0, z: 0 };
+}
+
+function readProperties(map: Y.Map<unknown>): Record<string, unknown> {
+    const value = map.get('properties');
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
+        ? value as Record<string, unknown>
+        : {};
+}
+
+function sceneObjectFromMap(objMap: Y.Map<unknown>): SceneObject {
+    return {
+        id: readString(objMap, 'id'),
+        type: readString(objMap, 'type'),
+        name: readString(objMap, 'name'),
+        position: readVector(objMap, 'position'),
+        rotation: readVector(objMap, 'rotation'),
+        scale: readVector(objMap, 'scale'),
+        visible: readBoolean(objMap, 'visible'),
+        locked: readBoolean(objMap, 'locked'),
+        lockedBy: readOptionalString(objMap, 'lockedBy'),
+        parentId: readOptionalString(objMap, 'parentId'),
+        children: readStringArray(objMap, 'children'),
+        properties: readProperties(objMap),
+    };
 }
 
 // ============================================================================
@@ -107,11 +214,11 @@ export class CollaborationSession {
     private provider: WebsocketProvider | null = null;
     private awareness: Awareness | null = null;
     private config: CollaborationConfig;
-    private listeners: Map<string, Set<(data: any) => void>> = new Map();
+    private listeners: Map<string, Set<CollaborationEventListener>> = new Map();
     private isDestroyed = false;
     
     // Yjs data structures
-    private sceneMap: Y.Map<Y.Map<any>> | null = null;
+    private sceneMap: Y.Map<Y.Map<unknown>> | null = null;
     private textMap: Y.Map<Y.Text> | null = null;
     private undoManager: Y.UndoManager | null = null;
     
@@ -379,20 +486,7 @@ export class CollaborationSession {
         const objMap = this.sceneMap.get(objectId);
         if (!objMap) return undefined;
         
-        return {
-            id: objMap.get('id'),
-            type: objMap.get('type'),
-            name: objMap.get('name'),
-            position: objMap.get('position'),
-            rotation: objMap.get('rotation'),
-            scale: objMap.get('scale'),
-            visible: objMap.get('visible'),
-            locked: objMap.get('locked'),
-            lockedBy: objMap.get('lockedBy'),
-            parentId: objMap.get('parentId'),
-            children: objMap.get('children'),
-            properties: objMap.get('properties')
-        };
+        return sceneObjectFromMap(objMap);
     }
     
     /**
@@ -403,20 +497,7 @@ export class CollaborationSession {
         
         const objects: SceneObject[] = [];
         this.sceneMap.forEach((objMap) => {
-            objects.push({
-                id: objMap.get('id'),
-                type: objMap.get('type'),
-                name: objMap.get('name'),
-                position: objMap.get('position'),
-                rotation: objMap.get('rotation'),
-                scale: objMap.get('scale'),
-                visible: objMap.get('visible'),
-                locked: objMap.get('locked'),
-                lockedBy: objMap.get('lockedBy'),
-                parentId: objMap.get('parentId'),
-                children: objMap.get('children'),
-                properties: objMap.get('properties')
-            });
+            objects.push(sceneObjectFromMap(objMap));
         });
         
         return objects;
@@ -570,7 +651,7 @@ export class CollaborationSession {
     // EVENTS
     // ========================================================================
     
-    on(event: string, callback: (data: any) => void): () => void {
+    on(event: string, callback: CollaborationEventListener): () => void {
         if (!this.listeners.has(event)) {
             this.listeners.set(event, new Set());
         }
@@ -581,7 +662,7 @@ export class CollaborationSession {
         };
     }
     
-    private emit(event: string, data: any): void {
+    private emit(event: string, data: unknown): void {
         this.listeners.get(event)?.forEach(cb => cb(data));
     }
     
@@ -725,7 +806,7 @@ export interface MonacoBinding {
 export function bindMonaco(
     session: CollaborationSession,
     textName: string,
-    editor: any // Monaco editor instance
+    editor: MonacoEditorLike
 ): MonacoBinding {
     const text = session.getText(textName);
     const model = editor.getModel();
@@ -743,7 +824,7 @@ export function bindMonaco(
         isUpdating = true;
         
         // Apply deltas to Monaco
-        event.delta.forEach((delta: any) => {
+        event.delta.forEach((delta: YTextDelta) => {
             if (delta.retain) {
                 // Skip
             } else if (delta.insert) {
@@ -780,12 +861,12 @@ export function bindMonaco(
     text.observe(observer);
     
     // Sync Monaco -> Yjs
-    const disposable = model.onDidChangeContent((event: any) => {
+    const disposable = model.onDidChangeContent((event) => {
         if (isUpdating) return;
         
         isUpdating = true;
         
-        event.changes.forEach((change: any) => {
+        event.changes.forEach((change) => {
             const startOffset = model.getOffsetAt({
                 lineNumber: change.range.startLineNumber,
                 column: change.range.startColumn

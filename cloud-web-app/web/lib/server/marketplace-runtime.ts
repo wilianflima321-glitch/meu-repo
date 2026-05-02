@@ -95,7 +95,7 @@ export interface ExtensionManifest {
   activationEvents?: string[];
   main?: string;
   browser?: string;
-  contributes?: Record<string, any>;
+  contributes?: Record<string, unknown>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
 }
@@ -122,6 +122,74 @@ interface MarketplaceConfig {
   searchUrl: string;
   downloadUrl: string;
   headers?: Record<string, string>;
+}
+
+interface OpenVsxExtension {
+  namespace: string;
+  name: string;
+  displayName?: string;
+  version: string;
+  description?: string;
+  categories?: string[];
+  tags?: string[];
+  files?: { icon?: string };
+  repository?: string;
+  license?: string;
+  downloadCount?: number;
+  averageRating?: number;
+  reviewCount?: number;
+  verified?: boolean;
+  preview?: boolean;
+  deprecated?: boolean;
+  engines?: Extension['engines'];
+  publishedDate?: string;
+  lastUpdated?: string;
+  timestamp?: string;
+}
+
+interface OpenVsxSearchResponse {
+  extensions?: OpenVsxExtension[];
+  totalSize?: number;
+}
+
+interface VsCodeStatistic {
+  statisticName: string;
+  value: number;
+}
+
+interface VsCodeVersion {
+  version?: string;
+  properties?: Array<{ key: string; value: string }>;
+  files?: Array<{ assetType: string; source: string }>;
+}
+
+interface VsCodeExtension {
+  extensionName: string;
+  displayName?: string;
+  shortDescription?: string;
+  publisher: {
+    publisherName: string;
+    isDomainVerified?: boolean;
+  };
+  versions?: VsCodeVersion[];
+  categories?: string[];
+  tags?: string[];
+  statistics?: VsCodeStatistic[];
+  flags?: string[];
+  publishedDate?: string;
+  lastUpdated?: string;
+}
+
+interface VsCodeResultMetadata {
+  metadataType: string;
+  metadataItems?: Array<{ count?: number }>;
+}
+
+interface VsCodeSearchResponse {
+  results?: Array<{
+    extensions?: VsCodeExtension[];
+    resultMetadata?: VsCodeResultMetadata[];
+  }>;
 }
 
 const OPEN_VSX: MarketplaceConfig = {
@@ -222,9 +290,9 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       throw new Error(`Search failed: ${response.statusText}`);
     }
     
-    const data = await response.json();
+    const data = await response.json() as OpenVsxSearchResponse;
     
-    const extensions: Extension[] = (data.extensions || []).map((ext: any) => ({
+    const extensions: Extension[] = (data.extensions || []).map((ext: OpenVsxExtension) => ({
       id: `${ext.namespace}.${ext.name}`,
       name: ext.name,
       displayName: ext.displayName || ext.name,
@@ -243,8 +311,8 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       preview: ext.preview || false,
       deprecated: ext.deprecated || false,
       engines: ext.engines || {},
-      publishedAt: new Date(ext.publishedDate || ext.timestamp),
-      updatedAt: new Date(ext.lastUpdated || ext.timestamp),
+      publishedAt: new Date(ext.publishedDate || ext.timestamp || Date.now()),
+      updatedAt: new Date(ext.lastUpdated || ext.timestamp || Date.now()),
     }));
     
     return {
@@ -289,17 +357,20 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       throw new Error(`Search failed: ${response.statusText}`);
     }
     
-    const data = await response.json();
+    const data = await response.json() as VsCodeSearchResponse;
     const results = data.results?.[0];
     
-    const extensions: Extension[] = (results?.extensions || []).map((ext: any) => {
+    const extensions: Extension[] = (results?.extensions || []).map((ext: VsCodeExtension) => {
       const latestVersion = ext.versions?.[0];
       const properties = this.parseProperties(latestVersion?.properties || []);
+      const installStatistic = ext.statistics?.find((statistic: VsCodeStatistic) => statistic.statisticName === 'install');
+      const ratingStatistic = ext.statistics?.find((statistic: VsCodeStatistic) => statistic.statisticName === 'averagerating');
+      const ratingCountStatistic = ext.statistics?.find((statistic: VsCodeStatistic) => statistic.statisticName === 'ratingcount');
       
       return {
         id: `${ext.publisher.publisherName}.${ext.extensionName}`,
         name: ext.extensionName,
-        displayName: ext.displayName,
+        displayName: ext.displayName || ext.extensionName,
         publisher: ext.publisher.publisherName,
         version: latestVersion?.version || '0.0.0',
         description: ext.shortDescription || '',
@@ -307,21 +378,21 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
         tags: ext.tags || [],
         icon: this.findAsset(latestVersion?.files, 'Microsoft.VisualStudio.Services.Icons.Default'),
         repository: properties['Microsoft.VisualStudio.Services.Links.Source'],
-        downloadCount: ext.statistics?.find((s: any) => s.statisticName === 'install')?.value || 0,
-        rating: ext.statistics?.find((s: any) => s.statisticName === 'averagerating')?.value || 0,
-        ratingCount: ext.statistics?.find((s: any) => s.statisticName === 'ratingcount')?.value || 0,
+        downloadCount: installStatistic?.value || 0,
+        rating: ratingStatistic?.value || 0,
+        ratingCount: ratingCountStatistic?.value || 0,
         verified: ext.publisher.isDomainVerified || false,
         preview: ext.flags?.includes('preview') || false,
         deprecated: ext.flags?.includes('deprecated') || false,
         engines: { vscode: properties['Microsoft.VisualStudio.Code.Engine'] },
-        publishedAt: new Date(ext.publishedDate),
-        updatedAt: new Date(ext.lastUpdated),
+        publishedAt: new Date(ext.publishedDate || Date.now()),
+        updatedAt: new Date(ext.lastUpdated || Date.now()),
       };
     });
     
     return {
       extensions,
-      totalCount: results?.resultMetadata?.find((m: any) => m.metadataType === 'ResultCount')?.metadataItems?.[0]?.count || extensions.length,
+      totalCount: results?.resultMetadata?.find((metadata: VsCodeResultMetadata) => metadata.metadataType === 'ResultCount')?.metadataItems?.[0]?.count || extensions.length,
       pageNumber,
       pageSize,
     };

@@ -8,9 +8,35 @@
  * apenas com funcionalidades de storage local/fallback.
  */
 
+type S3CommandConstructor = new (input: Record<string, unknown>) => unknown;
+
+interface S3ClientLike {
+  send(command: unknown): Promise<{
+    ContentLength?: number;
+    ContentType?: string;
+  }>;
+}
+
+interface S3Module {
+  S3Client: new (config: Record<string, unknown>) => S3ClientLike;
+  GetObjectCommand: S3CommandConstructor;
+  PutObjectCommand: S3CommandConstructor;
+  HeadObjectCommand: S3CommandConstructor;
+  DeleteObjectCommand: S3CommandConstructor;
+  CopyObjectCommand: S3CommandConstructor;
+}
+
+interface S3PresignerModule {
+  getSignedUrl(
+    client: S3ClientLike,
+    command: unknown,
+    options: { expiresIn: number }
+  ): Promise<string>;
+}
+
 // Estado do carregamento
-let s3ClientInstance: any = null;
-let presignerModule: any = null;
+let s3ClientInstance: S3ClientLike | null = null;
+let presignerModule: S3PresignerModule | null = null;
 let loadAttempted = false;
 let loadSuccessful = false;
 
@@ -32,7 +58,7 @@ export async function isS3Available(): Promise<boolean> {
 /**
  * Obtém o cliente S3 (ou null se não disponível)
  */
-export async function getS3Client(): Promise<any | null> {
+export async function getS3Client(): Promise<S3ClientLike | null> {
   if (s3ClientInstance) return s3ClientInstance;
   if (loadAttempted && !loadSuccessful) return null;
   
@@ -46,7 +72,7 @@ export async function getS3Client(): Promise<any | null> {
   
   try {
     // Import dinâmico - só funciona se o pacote estiver instalado
-    const { S3Client } = await eval('import("@aws-sdk/client-s3")');
+    const { S3Client } = await eval('import("@aws-sdk/client-s3")') as S3Module;
     
     s3ClientInstance = new S3Client({
       region: S3_CONFIG.region,
@@ -70,11 +96,11 @@ export async function getS3Client(): Promise<any | null> {
  * Obtém os comandos do S3 (ou null se não disponível)
  */
 export async function getS3Commands(): Promise<{
-  GetObjectCommand: any;
-  PutObjectCommand: any;
-  HeadObjectCommand: any;
-  DeleteObjectCommand: any;
-  CopyObjectCommand: any;
+  GetObjectCommand: S3CommandConstructor;
+  PutObjectCommand: S3CommandConstructor;
+  HeadObjectCommand: S3CommandConstructor;
+  DeleteObjectCommand: S3CommandConstructor;
+  CopyObjectCommand: S3CommandConstructor;
 } | null> {
   if (loadAttempted && !loadSuccessful) return null;
   
@@ -83,7 +109,7 @@ export async function getS3Commands(): Promise<{
   if (!loadSuccessful) return null;
   
   try {
-    const s3 = await eval('import("@aws-sdk/client-s3")');
+    const s3 = await eval('import("@aws-sdk/client-s3")') as S3Module;
     return {
       GetObjectCommand: s3.GetObjectCommand,
       PutObjectCommand: s3.PutObjectCommand,
@@ -99,7 +125,7 @@ export async function getS3Commands(): Promise<{
 /**
  * Obtém o presigner para URLs assinadas (ou null se não disponível)
  */
-export async function getPresigner(): Promise<{ getSignedUrl: any } | null> {
+export async function getPresigner(): Promise<S3PresignerModule | null> {
   if (presignerModule) return presignerModule;
   if (loadAttempted && !loadSuccessful) return null;
   
@@ -108,7 +134,7 @@ export async function getPresigner(): Promise<{ getSignedUrl: any } | null> {
   if (!loadSuccessful) return null;
   
   try {
-    const presigner = await eval('import("@aws-sdk/s3-request-presigner")');
+    const presigner = await eval('import("@aws-sdk/s3-request-presigner")') as S3PresignerModule;
     presignerModule = presigner;
     return presigner;
   } catch {
@@ -218,7 +244,7 @@ export async function putObject(
       ContentType: contentType,
     });
     await client.send(command);
-    const size = typeof body === 'string' ? Buffer.byteLength(body) : Buffer.byteLength(body as any);
+    const size = typeof body === 'string' ? Buffer.byteLength(body) : body.byteLength;
     return { ok: true, size };
   } catch (error) {
     console.error('[S3] Failed to put object:', error);

@@ -12,10 +12,10 @@ export interface Command {
   command: string;
   title: string;
   tooltip?: string;
-  arguments?: any[];
+  arguments?: unknown[];
 }
 
-type CommandCallback = (...args: any[]) => any;
+type CommandCallback = (...args: unknown[]) => unknown | Promise<unknown>;
 
 class CommandsAPI {
   private commands: Map<string, CommandCallback> = new Map();
@@ -45,7 +45,7 @@ class CommandsAPI {
    */
   registerTextEditorCommand(
     command: string,
-    callback: (textEditor: any, edit: any, ...args: any[]) => void
+    callback: (textEditor: unknown, edit: unknown, ...args: unknown[]) => void
   ): { dispose: () => void } {
     return this.registerCommand(command, callback);
   }
@@ -53,7 +53,7 @@ class CommandsAPI {
   /**
    * Execute a command
    */
-  async executeCommand<T = any>(command: string, ...args: any[]): Promise<T | undefined> {
+  async executeCommand<T = unknown>(command: string, ...args: unknown[]): Promise<T | undefined> {
     const callback = this.commands.get(command);
 
     if (!callback) {
@@ -213,7 +213,7 @@ class CommandsAPI {
   /**
    * Execute built-in command
    */
-  private async executeBuiltInCommand(command: string, ...args: any[]): Promise<any> {
+  private async executeBuiltInCommand(command: string, ...args: unknown[]): Promise<unknown> {
     // Mock implementation for built-in commands
     log.info(`[Commands] Executing built-in command: ${command}`, args);
 

@@ -22,15 +22,43 @@ const log = createComponentLogger('redis-cache')
 // LAZY LOAD - Dependências opcionais
 // ============================================================================
 
-let IORedisModule: any = null;
+interface RedisLike {
+  get(key: string): Promise<string | null>;
+  setex(key: string, ttl: number, value: string): Promise<unknown>;
+  del(...keys: string[]): Promise<number>;
+  keys(pattern: string): Promise<string[]>;
+  smembers(key: string): Promise<string[]>;
+  sadd(key: string, value: string): Promise<unknown>;
+  exists(key: string): Promise<number>;
+  expire(key: string, ttl: number): Promise<number>;
+  incrby(key: string, amount: number): Promise<number>;
+  zadd(key: string, score: number, member: string): Promise<number>;
+  zcard(key: string): Promise<number>;
+  zrevrange(key: string, start: number, stop: number): Promise<string[]>;
+  dbsize(): Promise<number>;
+  info(section: string): Promise<string>;
+  ping(): Promise<unknown>;
+  connect(): Promise<void>;
+  quit(): Promise<void>;
+  on(event: 'connect' | 'close', callback: () => void): void;
+  on(event: 'error', callback: (error: Error) => void): void;
+}
+
+type IORedisConstructor = new (options: Record<string, unknown>) => RedisLike;
+type AsyncCacheable = (...args: unknown[]) => Promise<unknown>;
+
+let IORedisModule: IORedisConstructor | null = null;
 let loadAttempted = false;
 
-async function loadIORedis(): Promise<any | null> {
+async function loadIORedis(): Promise<IORedisConstructor | null> {
   if (loadAttempted) return IORedisModule;
   loadAttempted = true;
   
   try {
-    IORedisModule = await eval('import("ioredis")').then((m: any) => m.default || m);
+    IORedisModule = await eval('import("ioredis")').then((module: unknown) => {
+      const candidate = module as { default?: IORedisConstructor };
+      return candidate.default ?? (module as IORedisConstructor);
+    });
     return IORedisModule;
   } catch {
     console.warn('[RedisCache] ioredis not installed. Using in-memory fallback.');
@@ -166,7 +194,7 @@ class MemoryCache {
 // ============================================================================
 
 class RedisCache {
-  private redis: any | null = null;
+  private redis: RedisLike | null = null;
   private fallback: MemoryCache;
   private fallbackSortedSets: Map<string, Array<{ score: number; value: string }>> = new Map();
   private isConnected = false;
@@ -225,7 +253,7 @@ class RedisCache {
         log.info('[RedisCache] Connected to Redis');
       });
       
-      this.redis.on('error', (error: any) => {
+      this.redis.on('error', (error: Error) => {
         console.error('[RedisCache] Redis error:', error.message);
         this.isConnected = false;
         this.stats.isRedisConnected = false;
@@ -238,7 +266,7 @@ class RedisCache {
       });
       
       // Tenta conectar
-      await this.redis.connect().catch((err: any) => {
+      await this.redis.connect().catch((err: Error) => {
         console.error('[RedisCache] Failed to connect:', err.message);
       });
       
@@ -652,14 +680,15 @@ export const CacheKeys = {
 /**
  * Decorator para cachear resultado de função
  */
-export function cached<T extends (...args: any[]) => Promise<any>>(
+export function cached<T extends AsyncCacheable>(
   keyGenerator: (...args: Parameters<T>) => string,
   options?: CacheOptions
 ) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_target: object, _propertyKey: string, descriptor: TypedPropertyDescriptor<T>) {
     const originalMethod = descriptor.value;
+    if (!originalMethod) return descriptor;
     
-    descriptor.value = async function (...args: Parameters<T>) {
+    descriptor.value = async function (this: unknown, ...args: Parameters<T>) {
       const key = keyGenerator(...args);
       
       // Tenta obter do cache
@@ -674,8 +703,8 @@ export function cached<T extends (...args: any[]) => Promise<any>>(
       // Cacheia resultado
       await cache.set(key, result, options);
       
-      return result;
-    };
+      return result as Awaited<ReturnType<T>>;
+    } as T;
     
     return descriptor;
   };

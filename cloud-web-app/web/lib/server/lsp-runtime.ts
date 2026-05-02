@@ -11,14 +11,19 @@ type JsonRpc = {
   jsonrpc?: '2.0';
   id?: number | string | null;
   method?: string;
-  params?: any;
-  result?: any;
-  error?: any;
+  params?: unknown;
+  result?: unknown;
+  error?: { message?: string; data?: unknown };
 };
 
 type Pending = {
-  resolve: (value: any) => void;
+  resolve: (value: unknown) => void;
   reject: (error: Error) => void;
+};
+
+type ErrorWithData = Error & { data?: unknown };
+type LspGlobal = typeof globalThis & {
+  __AETHEL_LSP_SESSIONS__?: Map<LspSessionKey, LspSession>;
 };
 
 class JsonRpcStdioClient {
@@ -38,10 +43,9 @@ class JsonRpcStdioClient {
   }
 
   private onData(chunk: Buffer) {
-    // Evita problemas de tipagem com Buffer.concat (Uint8Array<ArrayBufferLike> vs ArrayBuffer)
     const next = Buffer.allocUnsafe(this.buffer.length + chunk.length);
-    (this.buffer as any).copy(next as any, 0);
-    (chunk as any).copy(next as any, this.buffer.length);
+    next.set(this.buffer, 0);
+    next.set(chunk, this.buffer.length);
     this.buffer = next;
 
     // Parse: Content-Length: <n>\r\n...\r\n\r\n<json>
@@ -77,8 +81,8 @@ class JsonRpcStdioClient {
         const p = this.pending.get(msg.id)!;
         this.pending.delete(msg.id);
         if (msg.error) {
-          const e = new Error(String(msg.error?.message || 'LSP error'));
-          (e as any).data = msg.error;
+          const e: ErrorWithData = new Error(String(msg.error.message || 'LSP error'));
+          e.data = msg.error.data;
           p.reject(e);
         } else {
           p.resolve(msg.result);
@@ -88,13 +92,13 @@ class JsonRpcStdioClient {
     }
   }
 
-  sendRequest(id: number | string, method: string, params: any): Promise<any> {
+  sendRequest<T = unknown>(id: number | string, method: string, params: unknown): Promise<T> {
     const payload: JsonRpc = { jsonrpc: '2.0', id, method, params };
     const json = JSON.stringify(payload);
     const frame = `Content-Length: ${Buffer.byteLength(json, 'utf8')}\r\n\r\n${json}`;
 
-    return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
+    return new Promise<T>((resolve, reject) => {
+      this.pending.set(id, { resolve: (value: unknown) => resolve(value as T), reject });
       this.child.stdin.write(frame, 'utf8', (err) => {
         if (err) {
           this.pending.delete(id);
@@ -104,7 +108,7 @@ class JsonRpcStdioClient {
     });
   }
 
-  sendNotification(method: string, params: any): void {
+  sendNotification(method: string, params: unknown): void {
     const payload: JsonRpc = { jsonrpc: '2.0', method, params };
     const json = JSON.stringify(payload);
     const frame = `Content-Length: ${Buffer.byteLength(json, 'utf8')}\r\n\r\n${json}`;
@@ -134,11 +138,11 @@ type LspSession = {
 };
 
 function getGlobalSessions(): Map<LspSessionKey, LspSession> {
-  const g = globalThis as any;
+  const g = globalThis as LspGlobal;
   if (!g.__AETHEL_LSP_SESSIONS__) {
     g.__AETHEL_LSP_SESSIONS__ = new Map();
   }
-  return g.__AETHEL_LSP_SESSIONS__ as Map<LspSessionKey, LspSession>;
+  return g.__AETHEL_LSP_SESSIONS__;
 }
 
 async function resolveTsLsEntry(workspaceRoot: string): Promise<string | null> {

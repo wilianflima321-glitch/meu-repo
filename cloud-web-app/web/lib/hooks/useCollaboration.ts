@@ -10,7 +10,10 @@ import {
   CollaborationService,
   CollaborationUser,
   CollaborationOptions,
+  CollaborationComment,
+  CursorPosition,
   DocumentChange,
+  SelectionRange,
   TextOperation,
   getCollaborationService,
 } from '../collaboration/collaboration-service';
@@ -23,10 +26,13 @@ export interface UseCollaborationOptions extends Omit<CollaborationOptions, 'aut
   autoConnect?: boolean;
   onTextChange?: (fileId: string, changes: DocumentChange[]) => void;
   onUsersChange?: (users: CollaborationUser[]) => void;
-  onCursorChange?: (userId: string, cursor: any) => void;
-  onSelectionChange?: (userId: string, selection: any) => void;
+  onCursorChange?: (userId: string, cursor: CursorPosition) => void;
+  onSelectionChange?: (userId: string, selection: SelectionRange) => void;
   onError?: (error: Error) => void;
 }
+
+type RemoteCursorEntry = { cursor: CursorPosition; user: CollaborationUser };
+type RemoteSelectionEntry = { selection: SelectionRange; user: CollaborationUser };
 
 export interface UseCollaborationReturn {
   // Connection
@@ -58,8 +64,8 @@ export interface UseCollaborationReturn {
     endColumn: number
   ) => void;
   clearSelection: () => void;
-  remoteCursors: Map<string, { cursor: any; user: CollaborationUser }>;
-  remoteSelections: Map<string, { selection: any; user: CollaborationUser }>;
+  remoteCursors: Map<string, RemoteCursorEntry>;
+  remoteSelections: Map<string, RemoteSelectionEntry>;
   
   // Undo/Redo
   undo: (fileId: string) => void;
@@ -70,7 +76,7 @@ export interface UseCollaborationReturn {
   // Comments
   addComment: (fileId: string, line: number, text: string, parentId?: string) => string;
   resolveComment: (fileId: string, commentId: string) => void;
-  getComments: (fileId: string) => any[];
+  getComments: (fileId: string) => CollaborationComment[];
   
   // Snapshots
   createSnapshot: (name: string) => Uint8Array;
@@ -106,8 +112,8 @@ export function useCollaboration(options: UseCollaborationOptions): UseCollabora
   const [isConnected, setIsConnected] = useState(false);
   const [isSynced, setIsSynced] = useState(false);
   const [users, setUsers] = useState<CollaborationUser[]>([]);
-  const [remoteCursors, setRemoteCursors] = useState<Map<string, { cursor: any; user: CollaborationUser }>>(new Map());
-  const [remoteSelections, setRemoteSelections] = useState<Map<string, { selection: any; user: CollaborationUser }>>(new Map());
+  const [remoteCursors, setRemoteCursors] = useState<Map<string, RemoteCursorEntry>>(new Map());
+  const [remoteSelections, setRemoteSelections] = useState<Map<string, RemoteSelectionEntry>>(new Map());
   
   // ==========================================================================
   // Initialize Service
@@ -147,8 +153,8 @@ export function useCollaboration(options: UseCollaborationOptions): UseCollabora
       onUsersChange?.(users);
       
       // Update remote cursors and selections
-      const newCursors = new Map<string, { cursor: any; user: CollaborationUser }>();
-      const newSelections = new Map<string, { selection: any; user: CollaborationUser }>();
+      const newCursors = new Map<string, RemoteCursorEntry>();
+      const newSelections = new Map<string, RemoteSelectionEntry>();
       
       users.forEach(user => {
         if (user.id !== userId) {
@@ -305,7 +311,7 @@ export function useCollaboration(options: UseCollaborationOptions): UseCollabora
     serviceRef.current?.resolveComment(fileId, commentId);
   }, []);
   
-  const getComments = useCallback((fileId: string): any[] => {
+  const getComments = useCallback((fileId: string): CollaborationComment[] => {
     return serviceRef.current?.getFileComments(fileId) || [];
   }, []);
   

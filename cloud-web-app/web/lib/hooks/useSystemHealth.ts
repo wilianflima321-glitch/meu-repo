@@ -60,7 +60,7 @@ export interface ProcessMetrics {
   name: string;
   cpuUsage: number;
   memoryUsage: number;
-  status: 'running' | 'sleeping' | 'stopped' | 'zombie';
+  status: 'running' | 'sleeping' | 'stopped' | 'zombie' | 'unknown';
 }
 
 export interface ServiceHealth {
@@ -118,6 +118,55 @@ const DEFAULT_HEALTH_DATA: SystemHealthData = {
   services: [],
   uptime: 0,
   loadAverage: [0, 0, 0],
+};
+
+type HealthRecord = Record<string, unknown>;
+
+const isRecord = (value: unknown): value is HealthRecord => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
+const toNumber = (value: unknown, fallback = 0): number => {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+};
+
+const toString = (value: unknown, fallback: string): string => {
+  return typeof value === 'string' ? value : fallback;
+};
+
+const toNullableNumber = (value: unknown): number | null => {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+};
+
+const toRecordArray = (value: unknown): HealthRecord[] => {
+  return Array.isArray(value) ? value.filter(isRecord) : [];
+};
+
+const toLoadAverage = (value: unknown): [number, number, number] => {
+  if (!Array.isArray(value)) return [0, 0, 0];
+  return [toNumber(value[0]), toNumber(value[1]), toNumber(value[2])];
+};
+
+const toHealthMessage = (value: unknown): { type?: string; channel?: string; payload?: unknown } => {
+  return isRecord(value)
+    ? {
+        type: typeof value.type === 'string' ? value.type : undefined,
+        channel: typeof value.channel === 'string' ? value.channel : undefined,
+        payload: value.payload,
+      }
+    : {};
+};
+
+const toProcessStatus = (value: unknown): ProcessMetrics['status'] => {
+  return value === 'running' || value === 'sleeping' || value === 'stopped' || value === 'zombie'
+    ? value
+    : 'unknown';
+};
+
+const toServiceStatus = (value: unknown): ServiceHealth['status'] => {
+  return value === 'healthy' || value === 'degraded' || value === 'unhealthy'
+    ? value
+    : 'unknown';
 };
 
 // ============================================================================
@@ -208,9 +257,10 @@ export function useSystemHealth(options: UseSystemHealthOptions = {}): UseSystem
     });
 
     // Handler de mensagens
-    ws.on('message', (msg: any) => {
-      if (msg.type === 'system:health' || msg.channel === 'system:health') {
-        const data = parseHealthData(msg.payload);
+    ws.on('message', (msg: unknown) => {
+      const message = toHealthMessage(msg);
+      if (message.type === 'system:health' || message.channel === 'system:health') {
+        const data = parseHealthData(message.payload);
         setHealth(data);
         setStatus(calculateStatus(data));
         
@@ -236,61 +286,67 @@ export function useSystemHealth(options: UseSystemHealthOptions = {}): UseSystem
   }, [wsUrl, autoConnect, refreshInterval, enableProcesses, enableServices, calculateStatus]);
 
   // Parse dos dados de health
-  const parseHealthData = (payload: any): SystemHealthData => {
+  const parseHealthData = (payload: unknown): SystemHealthData => {
+    const data = isRecord(payload) ? payload : {};
+    const cpu = isRecord(data.cpu) ? data.cpu : {};
+    const memory = isRecord(data.memory) ? data.memory : {};
+    const gpu = isRecord(data.gpu) ? data.gpu : null;
+    const network = isRecord(data.network) ? data.network : {};
+
     return {
-      timestamp: new Date(payload.timestamp || Date.now()),
+      timestamp: new Date(typeof data.timestamp === 'string' || typeof data.timestamp === 'number' ? data.timestamp : Date.now()),
       cpu: {
-        usage: payload.cpu?.usage ?? 0,
-        cores: payload.cpu?.cores ?? 4,
-        temperature: payload.cpu?.temperature ?? null,
-        frequency: payload.cpu?.frequency ?? null,
+        usage: toNumber(cpu.usage),
+        cores: toNumber(cpu.cores, 4),
+        temperature: toNullableNumber(cpu.temperature),
+        frequency: toNullableNumber(cpu.frequency),
       },
       memory: {
-        used: payload.memory?.used ?? 0,
-        total: payload.memory?.total ?? 16 * 1024 * 1024 * 1024,
-        percentage: payload.memory?.percentage ?? 0,
-        available: payload.memory?.available ?? 0,
+        used: toNumber(memory.used),
+        total: toNumber(memory.total, 16 * 1024 * 1024 * 1024),
+        percentage: toNumber(memory.percentage),
+        available: toNumber(memory.available),
       },
-      gpu: payload.gpu ? {
-        name: payload.gpu.name ?? 'Unknown GPU',
-        usage: payload.gpu.usage ?? 0,
-        memoryUsed: payload.gpu.memoryUsed ?? 0,
-        memoryTotal: payload.gpu.memoryTotal ?? 0,
-        temperature: payload.gpu.temperature ?? null,
-        fanSpeed: payload.gpu.fanSpeed ?? null,
+      gpu: gpu ? {
+        name: toString(gpu.name, 'Unknown GPU'),
+        usage: toNumber(gpu.usage),
+        memoryUsed: toNumber(gpu.memoryUsed),
+        memoryTotal: toNumber(gpu.memoryTotal),
+        temperature: toNullableNumber(gpu.temperature),
+        fanSpeed: toNullableNumber(gpu.fanSpeed),
       } : null,
-      disks: (payload.disks ?? []).map((d: any) => ({
-        name: d.name ?? 'Disk',
-        used: d.used ?? 0,
-        total: d.total ?? 0,
-        percentage: d.percentage ?? 0,
-        readSpeed: d.readSpeed ?? 0,
-        writeSpeed: d.writeSpeed ?? 0,
+      disks: toRecordArray(data.disks).map((disk) => ({
+        name: toString(disk.name, 'Disk'),
+        used: toNumber(disk.used),
+        total: toNumber(disk.total),
+        percentage: toNumber(disk.percentage),
+        readSpeed: toNumber(disk.readSpeed),
+        writeSpeed: toNumber(disk.writeSpeed),
       })),
       network: {
-        bytesIn: payload.network?.bytesIn ?? 0,
-        bytesOut: payload.network?.bytesOut ?? 0,
-        packetsIn: payload.network?.packetsIn ?? 0,
-        packetsOut: payload.network?.packetsOut ?? 0,
-        latency: payload.network?.latency ?? 0,
-        connections: payload.network?.connections ?? 0,
+        bytesIn: toNumber(network.bytesIn),
+        bytesOut: toNumber(network.bytesOut),
+        packetsIn: toNumber(network.packetsIn),
+        packetsOut: toNumber(network.packetsOut),
+        latency: toNumber(network.latency),
+        connections: toNumber(network.connections),
       },
-      processes: (payload.processes ?? []).map((p: any) => ({
-        pid: p.pid ?? 0,
-        name: p.name ?? 'Unknown',
-        cpuUsage: p.cpuUsage ?? 0,
-        memoryUsage: p.memoryUsage ?? 0,
-        status: p.status ?? 'unknown',
+      processes: toRecordArray(data.processes).map((process) => ({
+        pid: toNumber(process.pid),
+        name: toString(process.name, 'Unknown'),
+        cpuUsage: toNumber(process.cpuUsage),
+        memoryUsage: toNumber(process.memoryUsage),
+        status: toProcessStatus(process.status),
       })),
-      services: (payload.services ?? []).map((s: any) => ({
-        name: s.name ?? 'Unknown',
-        status: s.status ?? 'unknown',
-        latency: s.latency ?? null,
-        lastCheck: new Date(s.lastCheck || Date.now()),
-        message: s.message ?? null,
+      services: toRecordArray(data.services).map((service) => ({
+        name: toString(service.name, 'Unknown'),
+        status: toServiceStatus(service.status),
+        latency: toNullableNumber(service.latency),
+        lastCheck: new Date(typeof service.lastCheck === 'string' || typeof service.lastCheck === 'number' ? service.lastCheck : Date.now()),
+        message: typeof service.message === 'string' ? service.message : null,
       })),
-      uptime: payload.uptime ?? 0,
-      loadAverage: payload.loadAverage ?? [0, 0, 0],
+      uptime: toNumber(data.uptime),
+      loadAverage: toLoadAverage(data.loadAverage),
     };
   };
 

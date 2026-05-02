@@ -5,12 +5,15 @@ import { AlertTriangle, CheckCircle, Layers, Sliders } from 'lucide-react';
 
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
+type SettingValue = unknown;
+type SettingEnumValue = string | number;
+
 type SettingDefinition = {
   key: string;
   type: 'string' | 'number' | 'boolean' | 'array' | 'object' | 'enum';
-  default: any;
+  default: SettingValue;
   description?: string;
-  enum?: any[];
+  enum?: SettingEnumValue[];
   enumDescriptions?: string[];
   minimum?: number;
   maximum?: number;
@@ -27,7 +30,7 @@ type SettingCategory = {
 type IdeSettingsPayload = {
   categories: SettingCategory[];
   definitions: Record<string, SettingDefinition>;
-  values: Record<string, any>;
+  values: Record<string, SettingValue>;
   environment?: 'staging' | 'production';
 };
 
@@ -38,13 +41,34 @@ type HistoryItem = {
   adminRole?: string | null;
   severity?: string | null;
   createdAt: string;
-  metadata?: any;
+  metadata?: SettingValue;
+};
+
+type HistoryMetadata = {
+  environment?: string;
+  to?: string;
+  from?: string;
+  updates?: Record<string, SettingValue>;
+};
+
+const isRecord = (value: SettingValue): value is Record<string, SettingValue> => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
+const toFormValue = (value: SettingValue): string | number => {
+  if (typeof value === 'string' || typeof value === 'number') return value;
+  if (value === null || value === undefined) return '';
+  return String(value);
+};
+
+const toHistoryMetadata = (value: SettingValue): HistoryMetadata => {
+  return isRecord(value) ? value as HistoryMetadata : {};
 };
 
 export default function IDESettings() {
   const [data, setData] = useState<IdeSettingsPayload | null>(null);
-  const [values, setValues] = useState<Record<string, any>>({});
-  const [originalValues, setOriginalValues] = useState<Record<string, any>>({});
+  const [values, setValues] = useState<Record<string, SettingValue>>({});
+  const [originalValues, setOriginalValues] = useState<Record<string, SettingValue>>({});
   const [jsonInputs, setJsonInputs] = useState<Record<string, string>>({});
   const [jsonErrors, setJsonErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -134,7 +158,7 @@ export default function IDESettings() {
     });
   }, [data, categories, category, search]);
 
-  const isEqual = (a: any, b: any) => {
+  const isEqual = (a: SettingValue, b: SettingValue) => {
     return JSON.stringify(a) === JSON.stringify(b);
   };
 
@@ -148,7 +172,7 @@ export default function IDESettings() {
       return;
     }
 
-    const updates: Record<string, any> = {};
+    const updates: Record<string, SettingValue> = {};
     filteredKeys.forEach((key) => {
       if (!isEqual(values[key], originalValues[key])) {
         updates[key] = values[key];
@@ -219,6 +243,7 @@ export default function IDESettings() {
 
   const renderInput = (key: string, def: SettingDefinition) => {
     const currentValue = values[key] ?? def.default;
+    const formValue = toFormValue(currentValue);
 
     switch (def.type) {
       case 'boolean':
@@ -233,7 +258,7 @@ export default function IDESettings() {
         return (
           <input
             type='number'
-            value={currentValue ?? ''}
+            value={formValue}
             min={def.minimum}
             max={def.maximum}
             onChange={(e) => setValues((prev) => ({ ...prev, [key]: Number(e.target.value) }))}
@@ -243,7 +268,7 @@ export default function IDESettings() {
       case 'enum':
         return (
           <select
-            value={currentValue ?? def.default}
+            value={formValue || toFormValue(def.default)}
             onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
             className='border p-2 rounded text-sm w-full'
           >
@@ -287,7 +312,7 @@ export default function IDESettings() {
         return (
           <input
             type='text'
-            value={currentValue ?? ''}
+            value={formValue}
             onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
             className='border p-2 rounded text-sm w-full'
           />
@@ -460,7 +485,9 @@ export default function IDESettings() {
                 <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Sem histórico disponível.</td>
               </tr>
             ) : (
-              history.map((item) => (
+              history.map((item) => {
+                const metadata = toHistoryMetadata(item.metadata);
+                return (
                 <tr key={item.id} className='border-t'>
                   <td className='p-2'>
                     <span className='text-xs px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'>
@@ -468,15 +495,16 @@ export default function IDESettings() {
                     </span>
                   </td>
                   <td className='p-2'>{item.adminEmail || '—'}</td>
-                  <td className='p-2'>{formatEnvironment(item.metadata?.environment || item.metadata?.to)}</td>
+                  <td className='p-2'>{formatEnvironment(metadata.environment || metadata.to)}</td>
                   <td className='p-2 text-xs text-[var(--aethel-text-secondary)]'>
                     {item.action === 'IDE_SETTINGS_PUBLISH'
-                      ? `Publicação ${formatEnvironment(item.metadata?.from)} → ${formatEnvironment(item.metadata?.to)}`
-                      : `Atualizações: ${Object.keys(item.metadata?.updates || {}).length}`}
+                      ? `Publicação ${formatEnvironment(metadata.from)} → ${formatEnvironment(metadata.to)}`
+                      : `Atualizações: ${Object.keys(metadata.updates || {}).length}`}
                   </td>
                   <td className='p-2'>{new Date(item.createdAt).toLocaleString()}</td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>

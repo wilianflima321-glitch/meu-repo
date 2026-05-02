@@ -159,11 +159,80 @@ export type StreamingEventType =
 
 export interface StreamingEvent {
     type: StreamingEventType;
-    data?: any;
+    data?: unknown;
     timestamp: number;
 }
 
 type EventCallback = (event: StreamingEvent) => void;
+
+interface InboundVideoStats extends RTCStats {
+    kind?: string;
+    framesDecoded?: number;
+    framesDropped?: number;
+    bytesReceived?: number;
+    jitter?: number;
+    framesPerSecond?: number;
+    codecId?: string;
+}
+
+interface CandidatePairStats extends RTCStats {
+    state?: string;
+    currentRoundTripTime?: number;
+    bytesReceived?: number;
+}
+
+interface CodecStats extends RTCStats {
+    mimeType?: string;
+}
+
+interface QualityChangeMessage {
+    resolution?: StreamingStats['resolution'];
+    bitrate?: number;
+}
+
+interface ServerStatsMessage {
+    encoderFps?: number;
+    serverRtt?: number;
+}
+
+function isInboundVideoStats(report: RTCStats): report is InboundVideoStats {
+    const candidate = report as InboundVideoStats;
+    return report.type === 'inbound-rtp' && candidate.kind === 'video';
+}
+
+function isCandidatePairStats(report: RTCStats): report is CandidatePairStats {
+    const candidate = report as CandidatePairStats;
+    return report.type === 'candidate-pair' && candidate.state === 'succeeded';
+}
+
+function isCodecStats(report: RTCStats): report is CodecStats {
+    return report.type === 'codec';
+}
+
+function findStats<T extends RTCStats>(
+    stats: RTCStatsReport,
+    predicate: (report: RTCStats) => report is T
+): T | null {
+    let matched: T | null = null;
+    stats.forEach((report: RTCStats) => {
+        if (!matched && predicate(report)) {
+            matched = report;
+        }
+    });
+    return matched;
+}
+
+function isStreamingStats(value: unknown): value is StreamingStats {
+    return typeof value === 'object' && value !== null && 'qualityScore' in value;
+}
+
+function getEventErrorMessage(value: unknown): string {
+    if (typeof value === 'object' && value !== null && 'message' in value) {
+        const message = (value as { message?: unknown }).message;
+        if (typeof message === 'string') return message;
+    }
+    return 'Unknown error';
+}
 
 // ============================================================================
 // DEFAULT CONFIGURATION
@@ -728,17 +797,8 @@ export class PixelStreamingClient {
         
         try {
             const stats = await this.pc.getStats();
-            let inboundRtp: any = null;
-            let candidatePair: any = null;
-            
-            stats.forEach((report: any) => {
-                if (report.type === 'inbound-rtp' && report.kind === 'video') {
-                    inboundRtp = report;
-                }
-                if (report.type === 'candidate-pair' && report.state === 'succeeded') {
-                    candidatePair = report;
-                }
-            });
+            const inboundRtp = findStats(stats, isInboundVideoStats);
+            const candidatePair = findStats(stats, isCandidatePairStats);
             
             if (inboundRtp) {
                 this.stats.framesDecoded = inboundRtp.framesDecoded || 0;
@@ -752,8 +812,8 @@ export class PixelStreamingClient {
                 
                 // Get codec info
                 if (inboundRtp.codecId) {
-                    stats.forEach((report: any) => {
-                        if (report.id === inboundRtp.codecId && report.type === 'codec') {
+                    stats.forEach((report: RTCStats) => {
+                        if (report.id === inboundRtp.codecId && isCodecStats(report)) {
                             this.stats.codec = report.mimeType?.split('/')[1] || this.config.codec;
                         }
                     });
@@ -813,7 +873,7 @@ export class PixelStreamingClient {
         return Math.max(0, Math.min(100, Math.round(score)));
     }
     
-    private handleQualityChange(message: any): void {
+    private handleQualityChange(message: QualityChangeMessage): void {
         if (message.resolution) {
             this.stats.resolution = message.resolution;
         }
@@ -827,7 +887,7 @@ export class PixelStreamingClient {
         });
     }
     
-    private handleServerStats(message: any): void {
+    private handleServerStats(message: ServerStatsMessage): void {
         // Merge server-side stats
         if (message.encoderFps) {
             // Server's actual encoding FPS
@@ -966,7 +1026,7 @@ export class PixelStreamingClient {
         this.eventListeners.get(event)?.delete(callback);
     }
     
-    private emitEvent(type: StreamingEventType, data: any): void {
+    private emitEvent(type: StreamingEventType, data: unknown): void {
         const event: StreamingEvent = {
             type,
             data,
@@ -1127,8 +1187,12 @@ export function usePixelStreaming(options: UsePixelStreamingOptions = {}): UsePi
         });
         client.on('stream-started', () => setIsStreaming(true));
         client.on('stream-stopped', () => setIsStreaming(false));
-        client.on('stats-update', (event) => setStats(event.data));
-        client.on('error', (event) => setError(event.data?.message || 'Unknown error'));
+        client.on('stats-update', (event) => {
+            if (isStreamingStats(event.data)) {
+                setStats(event.data);
+            }
+        });
+        client.on('error', (event) => setError(getEventErrorMessage(event.data)));
         
         if (autoConnect) {
             client.connect().catch(err => {

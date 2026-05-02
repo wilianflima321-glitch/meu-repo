@@ -66,13 +66,19 @@ export interface SettingsSchema {
 }
 
 export type SettingsPath = string;
-export type SettingsValue = any;
+export type SettingsValue = unknown;
+type SettingsRecord = Record<string, SettingsValue>;
+type SettingsListener = (value: SettingsValue) => void;
+
+function isSettingsRecord(value: unknown): value is SettingsRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 export class SettingsManager {
   private userSettings: Partial<SettingsSchema> = {};
   private workspaceSettings: Partial<SettingsSchema> = {};
   private defaultSettings: SettingsSchema;
-  private listeners: Map<string, Set<(value: any) => void>> = new Map();
+  private listeners: Map<string, Set<SettingsListener>> = new Map();
 
   constructor() {
     this.defaultSettings = this.getDefaultSettings();
@@ -177,9 +183,9 @@ export class SettingsManager {
     }
   }
 
-  get<T = any>(path: SettingsPath, scope: 'user' | 'workspace' | 'default' = 'user'): T {
+  get<T = SettingsValue>(path: SettingsPath, scope: 'user' | 'workspace' | 'default' = 'user'): T {
     const parts = path.split('.');
-    let value: any;
+    let value: SettingsValue;
 
     if (scope === 'workspace') {
       value = this.getValueFromObject(this.workspaceSettings, parts);
@@ -199,10 +205,10 @@ export class SettingsManager {
     const parts = path.split('.');
     
     if (scope === 'workspace') {
-      this.setValueInObject(this.workspaceSettings, parts, value);
+      this.setValueInObject(this.workspaceSettings as SettingsRecord, parts, value);
       await this.saveWorkspaceSettings();
     } else {
-      this.setValueInObject(this.userSettings, parts, value);
+      this.setValueInObject(this.userSettings as SettingsRecord, parts, value);
       await this.saveUserSettings();
     }
 
@@ -259,7 +265,7 @@ export class SettingsManager {
     return this.getAll('effective');
   }
 
-  onChange(path: SettingsPath, listener: (value: any) => void): () => void {
+  onChange(path: SettingsPath, listener: SettingsListener): () => void {
     if (!this.listeners.has(path)) {
       this.listeners.set(path, new Set());
     }
@@ -274,7 +280,7 @@ export class SettingsManager {
     };
   }
 
-  private notifyListeners(path: SettingsPath, value: any): void {
+  private notifyListeners(path: SettingsPath, value: SettingsValue): void {
     const listeners = this.listeners.get(path);
     if (listeners) {
       for (const listener of listeners) {
@@ -313,10 +319,13 @@ export class SettingsManager {
     }
   }
 
-  private getValueFromObject(obj: any, parts: string[]): any {
-    let current = obj;
+  private getValueFromObject(obj: unknown, parts: string[]): SettingsValue {
+    let current: unknown = obj;
     for (const part of parts) {
       if (current === undefined || current === null) {
+        return undefined;
+      }
+      if (!isSettingsRecord(current)) {
         return undefined;
       }
       current = current[part];
@@ -324,37 +333,39 @@ export class SettingsManager {
     return current;
   }
 
-  private setValueInObject(obj: any, parts: string[], value: any): void {
+  private setValueInObject(obj: SettingsRecord, parts: string[], value: SettingsValue): void {
     let current = obj;
     for (let i = 0; i < parts.length - 1; i++) {
       const part = parts[i];
-      if (!(part in current)) {
+      if (!isSettingsRecord(current[part])) {
         current[part] = {};
       }
-      current = current[part];
+      current = current[part] as SettingsRecord;
     }
     current[parts[parts.length - 1]] = value;
   }
 
-  private deepMerge<T>(target: T, source: Partial<T>): T {
-    const result = { ...target };
+  private deepMerge<T extends object>(target: T, source: Partial<T>): T {
+    const result: SettingsRecord = { ...(target as SettingsRecord) };
     
-    for (const key in source) {
-      const sourceValue = source[key];
-      const targetValue = (result as any)[key];
+    for (const [key, sourceValue] of Object.entries(source as SettingsRecord)) {
+      const targetValue = result[key];
       
-      if (sourceValue && typeof sourceValue === 'object' && !Array.isArray(sourceValue)) {
-        (result as any)[key] = this.deepMerge(targetValue || {}, sourceValue);
+      if (isSettingsRecord(sourceValue)) {
+        result[key] = this.deepMerge(
+          isSettingsRecord(targetValue) ? targetValue : {},
+          sourceValue
+        );
       } else {
-        (result as any)[key] = sourceValue;
+        result[key] = sourceValue;
       }
     }
     
-    return result;
+    return result as T;
   }
 
   async exportSettings(scope: 'user' | 'workspace' | 'all' = 'all'): Promise<string> {
-    const settings: any = {};
+    const settings: SettingsRecord = {};
     
     if (scope === 'user' || scope === 'all') {
       settings.user = this.userSettings;
@@ -369,21 +380,21 @@ export class SettingsManager {
 
   async importSettings(json: string, scope: 'user' | 'workspace' = 'user'): Promise<void> {
     try {
-      const settings = JSON.parse(json);
+      const settings = JSON.parse(json) as SettingsRecord;
       
-      if (scope === 'user' && settings.user) {
-        this.userSettings = settings.user;
+      if (scope === 'user' && isSettingsRecord(settings.user)) {
+        this.userSettings = settings.user as Partial<SettingsSchema>;
         await this.saveUserSettings();
-      } else if (scope === 'workspace' && settings.workspace) {
-        this.workspaceSettings = settings.workspace;
+      } else if (scope === 'workspace' && isSettingsRecord(settings.workspace)) {
+        this.workspaceSettings = settings.workspace as Partial<SettingsSchema>;
         await this.saveWorkspaceSettings();
       } else {
         // Import directly
         if (scope === 'user') {
-          this.userSettings = settings;
+          this.userSettings = settings as Partial<SettingsSchema>;
           await this.saveUserSettings();
         } else {
-          this.workspaceSettings = settings;
+          this.workspaceSettings = settings as Partial<SettingsSchema>;
           await this.saveWorkspaceSettings();
         }
       }
