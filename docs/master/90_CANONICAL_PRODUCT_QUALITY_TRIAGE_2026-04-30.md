@@ -197,6 +197,8 @@ Device runtime triage was added next so Studio Home can adapt work to the user's
 
 Runtime lane scheduling was added on top of the device guard. AI agents, browser operator, viewport/render, build/export, memory indexing, and file sync now have explicit budgets, placements, confirmation needs, and pause-on-user-input rules so future execution can route heavy work without freezing the UI.
 
+The scheduler is no longer only descriptive. The creation workbench now blocks new AI media jobs when the `ai-agents` lane is saturated, and deploy surfaces now obey the `build-export` lane so users do not unknowingly queue overlapping publishes from multiple entry points.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

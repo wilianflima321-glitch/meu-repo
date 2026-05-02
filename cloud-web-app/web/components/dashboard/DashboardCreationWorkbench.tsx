@@ -7,6 +7,7 @@ import { useProjectGraphStore } from '@/lib/project-graph/store';
 import type { ProjectAsset, ProjectDomain, ProjectGraphState, ProjectJob } from '@/lib/project-graph/types';
 import type { MediaAsset, MediaKind, MediaProject } from '@/components/media/media-studio-core';
 import CanonicalPreviewSurface from '@/components/preview/CanonicalPreviewSurface';
+import { useRuntimeLanePolicy } from '@/hooks/useRuntimeLanePolicy';
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing';
 
 const MediaStudio = dynamic(() => import('@/components/media/MediaStudio'), { ssr: false });
@@ -281,6 +282,13 @@ export default function DashboardCreationWorkbench({
   );
   const recentAssets = useMemo(() => graph.assets.slice(-8).reverse(), [graph.assets]);
   const recentJobs = useMemo(() => graph.jobs.slice(-6).reverse(), [graph.jobs]);
+  const inFlightAiJobs = useMemo(
+    () => graph.jobs.filter((job) => job.status === 'queued' || job.status === 'processing').length,
+    [graph.jobs]
+  );
+  const aiAgentLane = useRuntimeLanePolicy('ai-agents', {
+    activeCount: inFlightAiJobs,
+  });
 
   const queueJobs = useMemo<RenderJob[]>(
     () =>
@@ -400,6 +408,9 @@ export default function DashboardCreationWorkbench({
 
   const startAsyncJob = useCallback(
     async (kind: ProjectJob['kind'], route: string, body: Record<string, unknown>, prompt: string) => {
+      if (!aiAgentLane.decision.canStart) {
+        throw new Error(aiAgentLane.decision.reason);
+      }
       const id = makeId(`job_${kind}`);
       const now = new Date().toISOString();
       upsertJob({ id, kind, status: 'queued', prompt, progress: 0, sourceRoute: route, createdAt: now, updatedAt: now });
@@ -419,7 +430,7 @@ export default function DashboardCreationWorkbench({
         updatedAt: new Date().toISOString(),
       });
     },
-    [upsertJob]
+    [aiAgentLane.decision.canStart, aiAgentLane.decision.reason, upsertJob]
   );
 
   const generateMusic = useCallback(
@@ -451,6 +462,9 @@ export default function DashboardCreationWorkbench({
   );
 
   const generateVoice = useCallback(async () => {
+    if (!aiAgentLane.decision.canStart) {
+      throw new Error(aiAgentLane.decision.reason);
+    }
     const id = makeId('job_voice');
     const now = new Date().toISOString();
     upsertJob({
@@ -488,7 +502,7 @@ export default function DashboardCreationWorkbench({
       createdAt: now,
       updatedAt: new Date().toISOString(),
     });
-  }, [createAsset, upsertJob, voiceText]);
+  }, [aiAgentLane.decision.canStart, aiAgentLane.decision.reason, createAsset, upsertJob, voiceText]);
 
   useEffect(() => {
     const timer = window.setInterval(async () => {
@@ -694,6 +708,17 @@ export default function DashboardCreationWorkbench({
 
           {rightPanel === 'jobs' && (
             <div className="space-y-3">
+              <div className="rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-3 text-xs">
+                <div className="mb-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">AI lane budget</div>
+                <div className="text-[var(--aethel-text-primary)]">
+                  {aiAgentLane.budget?.maxConcurrent ?? 0} concurrent / {aiAgentLane.budget?.placement?.replace(/-/g, ' ') ?? 'unknown'}
+                </div>
+                <div className="mt-1 text-[var(--aethel-text-tertiary)]">
+                  {aiAgentLane.decision.canStart
+                    ? `New job capacity available (${Math.max((aiAgentLane.budget?.maxConcurrent ?? 0) - inFlightAiJobs, 0)} slots left).`
+                    : aiAgentLane.decision.reason}
+                </div>
+              </div>
               <textarea value={musicPrompt} onChange={(e) => setMusicPrompt(e.target.value)} placeholder="Prompt de musica..." className={textAreaClass} aria-label="Prompt para gerar musica" />
               <button type="button" onClick={() => void doAction(generateMusic)} className={`${actionButtonBase} bg-[var(--aethel-info-dark)]`} aria-label="Gerar musica">Gerar Musica</button>
               <textarea value={voiceText} onChange={(e) => setVoiceText(e.target.value)} placeholder="Texto de voz..." className={textAreaClass} aria-label="Texto para gerar voz" />

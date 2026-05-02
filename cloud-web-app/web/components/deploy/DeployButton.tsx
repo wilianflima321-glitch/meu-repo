@@ -9,6 +9,7 @@ import {
   normalizeDeployProjectName,
   persistPreviewDeploy,
 } from '@/components/preview/previewDeployTrust';
+import { useRuntimeLanePolicy } from '@/hooks/useRuntimeLanePolicy';
 import { tokens } from '@/lib/design-tokens';
 
 type DeployStatus =
@@ -35,6 +36,12 @@ type DeployResponse = {
   message?: string;
   missing?: string[];
 };
+
+const ACTIVE_DEPLOY_STATUSES = new Set<DeployStatus>([
+  'preparing',
+  'uploading',
+  'building',
+]);
 
 export interface DeployButtonProps {
   projectName: string;
@@ -77,6 +84,14 @@ export function DeployButton({
   const [statusHref, setStatusHref] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [deployStatus, setDeployStatus] = useState<DeployStatus>('idle');
+  const trackedDeployStatus = useMemo(() => {
+    const stored = getStoredPreviewDeploy(deployProjectName);
+    if (deployStatus !== 'idle') return deployStatus;
+    return stored?.status ?? null;
+  }, [deployProjectName, deployStatus]);
+  const buildExportLane = useRuntimeLanePolicy('build-export', {
+    activeCount: submitting || (trackedDeployStatus ? ACTIVE_DEPLOY_STATUSES.has(trackedDeployStatus) : false) ? 1 : 0,
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -116,7 +131,7 @@ export function DeployButton({
   }, [deployProjectName]);
 
   const deployDisabled =
-    submitting || !deployProjectName || readiness?.canDeploy === false;
+    submitting || !deployProjectName || readiness?.canDeploy === false || !buildExportLane.decision.canStart;
   const isError =
     deployStatus === 'error' ||
     readiness?.canDeploy === false ||
@@ -126,7 +141,9 @@ export function DeployButton({
   const readinessHint =
     readiness?.canDeploy === false && readiness.missing?.length
       ? `Deploy unavailable: configure ${readiness.missing.join(', ')}.`
-      : 'Create a deployment and open status in a new tab';
+      : !buildExportLane.decision.canStart
+        ? buildExportLane.decision.reason
+        : 'Create a deployment and open status in a new tab';
 
   const handleDeploy = async () => {
     if (deployDisabled) return;

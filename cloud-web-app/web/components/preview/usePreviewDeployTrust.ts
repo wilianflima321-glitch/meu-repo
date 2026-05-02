@@ -16,6 +16,7 @@ import {
   type PreviewReviewTarget,
   type PreviewDeployStatus,
 } from '@/components/preview/previewDeployTrust';
+import { useRuntimeLanePolicy } from '@/hooks/useRuntimeLanePolicy';
 import type { PreviewRuntimeHealthStatus } from '@/lib/preview/runtime-manager';
 
 type DeployResponse = PreviewDeployRecord & {
@@ -53,6 +54,10 @@ export function usePreviewDeployTrust({
   const [submitting, setSubmitting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const buildExportLane = useRuntimeLanePolicy('build-export', {
+    activeCount:
+      submitting || (deployment ? ACTIVE_DEPLOY_STATUSES.has(deployment.status) : false) ? 1 : 0,
+  });
 
   const deployStatusHref = useMemo(() => {
     if (!deployment?.id) return null;
@@ -167,9 +172,11 @@ export function usePreviewDeployTrust({
   }, [deployment, refreshDeployment]);
 
   const startDeploy = useCallback(async () => {
-    if (submitting || readiness?.canDeploy === false) {
+    if (submitting || readiness?.canDeploy === false || !buildExportLane.decision.canStart) {
       if (readiness?.canDeploy === false && readiness.message) {
         setFeedback(readiness.message);
+      } else if (!buildExportLane.decision.canStart) {
+        setFeedback(buildExportLane.decision.reason);
       }
       return;
     }
@@ -219,7 +226,15 @@ export function usePreviewDeployTrust({
     } finally {
       setSubmitting(false);
     }
-  }, [projectId, projectName, readiness?.canDeploy, readiness?.message, submitting]);
+  }, [
+    buildExportLane.decision.canStart,
+    buildExportLane.decision.reason,
+    projectId,
+    projectName,
+    readiness?.canDeploy,
+    readiness?.message,
+    submitting,
+  ]);
 
   const copyShareLink = useCallback(async () => {
     const target = reviewTarget ?? shareTarget;
@@ -251,6 +266,8 @@ export function usePreviewDeployTrust({
     shareTarget,
     reviewTarget,
     feedback,
+    runtimeLaneDecision: buildExportLane.decision,
+    runtimeLanePlacement: buildExportLane.budget?.placement ?? null,
     isSubmittingDeploy: submitting,
     isRefreshingDeploy: refreshing,
     startDeploy,

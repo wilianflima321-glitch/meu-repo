@@ -21,8 +21,11 @@ The web shell now has a first-pass device guard:
 - `lib/device/device-capability-profile.ts` classifies device capability.
 - `lib/device/runtime-lane-scheduler.ts` maps that capability into lane budgets and backpressure decisions.
 - `hooks/useDeviceCapabilityProfile.ts` collects browser-side signals without blocking render.
+- `hooks/useRuntimeLanePolicy.ts` gives product surfaces a canonical way to ask whether a lane may start right now.
 - `components/device/DeviceRuntimeGuardCard.tsx` surfaces the policy in Studio Home and shows live protection state while the user is actively interacting.
 - `DashboardOverviewTab.tsx` shows the guard near mission/project continuity, not hidden in settings.
+- `components/dashboard/DashboardCreationWorkbench.tsx` now routes AI media generation through the `ai-agents` lane budget instead of blindly stacking jobs.
+- `components/deploy/DeployButton.tsx` and `components/preview/usePreviewDeployTrust.ts` now respect the `build-export` lane so users do not stack deploys on top of an already active publish.
 
 Measured policies include:
 
