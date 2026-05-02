@@ -16,6 +16,7 @@ export type ProjectBrainSnapshot = {
   summary: string
   nextAction: string
   signals: ProjectBrainSignal[]
+  continuity: ProjectBrainSignal[]
 }
 
 type BuildProjectBrainSnapshotInput = {
@@ -94,6 +95,23 @@ export const buildDashboardProjectBrainSnapshot = ({
   const hasAttentionSignal = signals.some((signal) => signal.status === 'attention')
   const riskStatus: ProjectBrainStatus = hasBlockedSignal ? 'blocked' : hasAttentionSignal ? 'attention' : 'ready'
   const riskLabel = riskStatus === 'blocked' ? 'Blocked' : riskStatus === 'attention' ? 'Needs review' : 'Ready'
+  const continuity: ProjectBrainSignal[] = [
+    {
+      label: 'Checkpoint',
+      value: primaryProject ? 'Ready' : 'After mission',
+      status: primaryProject ? 'ready' : 'attention',
+    },
+    {
+      label: 'Evidence',
+      value: pendingApprovals > 0 ? 'Review queue' : primaryProject ? 'Collecting' : 'Attach later',
+      status: pendingApprovals > 0 ? 'attention' : primaryProject ? 'ready' : 'attention',
+    },
+    {
+      label: 'Permission',
+      value: 'Gated',
+      status: 'ready',
+    },
+  ]
 
   const nextAction = !primaryProject
     ? 'Define the first mission'
@@ -119,5 +137,6 @@ export const buildDashboardProjectBrainSnapshot = ({
     summary,
     nextAction,
     signals,
+    continuity,
   }
 }

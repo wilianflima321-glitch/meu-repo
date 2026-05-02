@@ -16,6 +16,8 @@ describe('dashboard project brain', () => {
     expect(snapshot.domain).toBe('Mission intake')
     expect(snapshot.riskStatus).toBe('attention')
     expect(snapshot.nextAction).toBe('Define the first mission')
+    expect(snapshot.continuity).toContainEqual({ label: 'Checkpoint', value: 'After mission', status: 'attention' })
+    expect(snapshot.continuity).toContainEqual({ label: 'Permission', value: 'Gated', status: 'ready' })
   })
 
   it('keeps runtime failures as blocking signals', () => {
@@ -47,5 +49,6 @@ describe('dashboard project brain', () => {
     expect(snapshot.domain).toBe('Game/film room')
     expect(snapshot.riskStatus).toBe('ready')
     expect(snapshot.nextAction).toBe('Expand Studio')
+    expect(snapshot.continuity).toContainEqual({ label: 'Checkpoint', value: 'Ready', status: 'ready' })
   })
 })

@@ -2,6 +2,8 @@ import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('extensions/vscode-api/languages')
 
+export type LanguageApiValue = unknown;
+export type LanguageApiList = LanguageApiValue[];
 
 /**
  * VS Code Languages API Implementation
@@ -10,99 +12,99 @@ const log = createComponentLogger('extensions/vscode-api/languages')
 
 export interface CompletionItemProvider {
   provideCompletionItems(
-    document: any,
-    position: any,
-    token: any,
-    context: any
-  ): any[] | Promise<any[]>;
-  resolveCompletionItem?(item: any, token: any): any | Promise<any>;
+    document: LanguageApiValue,
+    position: LanguageApiValue,
+    token: LanguageApiValue,
+    context: LanguageApiValue
+  ): LanguageApiList | Promise<LanguageApiList>;
+  resolveCompletionItem?(item: LanguageApiValue, token: LanguageApiValue): LanguageApiValue | Promise<LanguageApiValue>;
 }
 
 export interface HoverProvider {
-  provideHover(document: any, position: any, token: any): any | Promise<any>;
+  provideHover(document: LanguageApiValue, position: LanguageApiValue, token: LanguageApiValue): LanguageApiValue | Promise<LanguageApiValue>;
 }
 
 export interface DefinitionProvider {
-  provideDefinition(document: any, position: any, token: any): any | any[] | Promise<any | any[]>;
+  provideDefinition(document: LanguageApiValue, position: LanguageApiValue, token: LanguageApiValue): LanguageApiValue | LanguageApiList | Promise<LanguageApiValue | LanguageApiList>;
 }
 
 export interface ReferenceProvider {
   provideReferences(
-    document: any,
-    position: any,
-    context: any,
-    token: any
-  ): any[] | Promise<any[]>;
+    document: LanguageApiValue,
+    position: LanguageApiValue,
+    context: LanguageApiValue,
+    token: LanguageApiValue
+  ): LanguageApiList | Promise<LanguageApiList>;
 }
 
 export interface DocumentSymbolProvider {
-  provideDocumentSymbols(document: any, token: any): any[] | Promise<any[]>;
+  provideDocumentSymbols(document: LanguageApiValue, token: LanguageApiValue): LanguageApiList | Promise<LanguageApiList>;
 }
 
 export interface WorkspaceSymbolProvider {
-  provideWorkspaceSymbols(query: string, token: any): any[] | Promise<any[]>;
-  resolveWorkspaceSymbol?(symbol: any, token: any): any | Promise<any>;
+  provideWorkspaceSymbols(query: string, token: LanguageApiValue): LanguageApiList | Promise<LanguageApiList>;
+  resolveWorkspaceSymbol?(symbol: LanguageApiValue, token: LanguageApiValue): LanguageApiValue | Promise<LanguageApiValue>;
 }
 
 export interface CodeActionProvider {
   provideCodeActions(
-    document: any,
-    range: any,
-    context: any,
-    token: any
-  ): any[] | Promise<any[]>;
-  resolveCodeAction?(codeAction: any, token: any): any | Promise<any>;
+    document: LanguageApiValue,
+    range: LanguageApiValue,
+    context: LanguageApiValue,
+    token: LanguageApiValue
+  ): LanguageApiList | Promise<LanguageApiList>;
+  resolveCodeAction?(codeAction: LanguageApiValue, token: LanguageApiValue): LanguageApiValue | Promise<LanguageApiValue>;
 }
 
 export interface CodeLensProvider {
-  provideCodeLenses(document: any, token: any): any[] | Promise<any[]>;
-  resolveCodeLens?(codeLens: any, token: any): any | Promise<any>;
+  provideCodeLenses(document: LanguageApiValue, token: LanguageApiValue): LanguageApiList | Promise<LanguageApiList>;
+  resolveCodeLens?(codeLens: LanguageApiValue, token: LanguageApiValue): LanguageApiValue | Promise<LanguageApiValue>;
 }
 
 export interface DocumentFormattingEditProvider {
   provideDocumentFormattingEdits(
-    document: any,
-    options: any,
-    token: any
-  ): any[] | Promise<any[]>;
+    document: LanguageApiValue,
+    options: LanguageApiValue,
+    token: LanguageApiValue
+  ): LanguageApiList | Promise<LanguageApiList>;
 }
 
 export interface DocumentRangeFormattingEditProvider {
   provideDocumentRangeFormattingEdits(
-    document: any,
-    range: any,
-    options: any,
-    token: any
-  ): any[] | Promise<any[]>;
+    document: LanguageApiValue,
+    range: LanguageApiValue,
+    options: LanguageApiValue,
+    token: LanguageApiValue
+  ): LanguageApiList | Promise<LanguageApiList>;
 }
 
 export interface RenameProvider {
   provideRenameEdits(
-    document: any,
-    position: any,
+    document: LanguageApiValue,
+    position: LanguageApiValue,
     newName: string,
-    token: any
-  ): any | Promise<any>;
-  prepareRename?(document: any, position: any, token: any): any | Promise<any>;
+    token: LanguageApiValue
+  ): LanguageApiValue | Promise<LanguageApiValue>;
+  prepareRename?(document: LanguageApiValue, position: LanguageApiValue, token: LanguageApiValue): LanguageApiValue | Promise<LanguageApiValue>;
 }
 
 export interface SignatureHelpProvider {
   provideSignatureHelp(
-    document: any,
-    position: any,
-    token: any,
-    context: any
-  ): any | Promise<any>;
+    document: LanguageApiValue,
+    position: LanguageApiValue,
+    token: LanguageApiValue,
+    context: LanguageApiValue
+  ): LanguageApiValue | Promise<LanguageApiValue>;
 }
 
 export interface DiagnosticCollection {
   name: string;
-  set(uri: string, diagnostics: any[]): void;
-  set(entries: Array<[string, any[]]>): void;
+  set(uri: string, diagnostics: LanguageApiList): void;
+  set(entries: Array<[string, LanguageApiList]>): void;
   delete(uri: string): void;
   clear(): void;
-  forEach(callback: (uri: string, diagnostics: any[], collection: DiagnosticCollection) => void): void;
-  get(uri: string): any[] | undefined;
+  forEach(callback: (uri: string, diagnostics: LanguageApiList, collection: DiagnosticCollection) => void): void;
+  get(uri: string): LanguageApiList | undefined;
   has(uri: string): boolean;
   dispose(): void;
 }
@@ -301,7 +303,7 @@ class LanguagesAPI {
   registerCodeActionsProvider(
     selector: string | string[],
     provider: CodeActionProvider,
-    metadata?: any
+    metadata?: LanguageApiValue
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
 
@@ -488,11 +490,11 @@ class LanguagesAPI {
    */
   createDiagnosticCollection(name?: string): DiagnosticCollection {
     const collectionName = name || `collection-${this.diagnosticCollections.size}`;
-    const diagnostics = new Map<string, any[]>();
+    const diagnostics = new Map<string, LanguageApiList>();
 
     const collection: DiagnosticCollection = {
       name: collectionName,
-      set: (uriOrEntries: string | Array<[string, any[]]>, diagnosticsArray?: any[]) => {
+      set: (uriOrEntries: string | Array<[string, LanguageApiList]>, diagnosticsArray?: LanguageApiList) => {
         if (typeof uriOrEntries === 'string') {
           diagnostics.set(uriOrEntries, diagnosticsArray || []);
         } else {
@@ -547,7 +549,7 @@ class LanguagesAPI {
    */
   setLanguageConfiguration(
     language: string,
-    configuration: any
+    configuration: LanguageApiValue
   ): { dispose: () => void } {
     log.info('[Languages] Set language configuration for:', language);
 

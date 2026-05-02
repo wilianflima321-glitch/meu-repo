@@ -93,6 +93,24 @@ export function DashboardProjectBrainCard({
           )
         })}
       </div>
+
+      <div className="mt-4 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+            Continuity rails
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {snapshot.continuity.map((item) => (
+              <span
+                key={item.label}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusClasses[item.status]}`}
+              >
+                {item.label}: {item.value}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
     </section>
   )
 }

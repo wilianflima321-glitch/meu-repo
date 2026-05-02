@@ -22,7 +22,7 @@ npm run qa:product-quality-progress
 Current verified readout after the 2026-05-01 god-component closure pass:
 - `console.log/info/debug` in app code: `0` -> closed for the measured app-code scope.
 - Hardcoded hex in component TSX: `36` -> closed for the current ratchet target of `50`, down from `775`.
-- `: any` in app code: `1135` -> still a major strictness gap.
+- `: any` in app code: `1011` -> still a major strictness gap, reduced by the 2026-05-02 runtime typing pass.
 - PT hardcoded component strings: `287` -> still a major i18n/product-language gap.
 - Component files over `1000` lines: `0` -> closed for the measured component scope, down from `28`.
 - Web unit/spec tests: `65` -> V10 claim of `12` is stale for the current branch.
@@ -88,6 +88,8 @@ Current verified readout after the 2026-05-01 god-component closure pass:
 - `94_MARKET_UX_BENCHMARK_RECONCILIATION_2026-05-01.md` records the current Firebase/Replit/Manus/Cursor/GitHub/Unreal benchmark decisions used for this pass.
 - Playwright no longer depends on the missing `server/` package or root `express` install; `tools/e2e-mock-api-server.mjs` provides a dependency-free contract API for E2E startup.
 - `/compare` is now explicitly public in `middleware.ts`, so procurement/buyer trust content is no longer hidden behind login.
+- Project Brain now exposes compact continuity rails for checkpoint, evidence, and permission state without creating a second dashboard surface.
+- `level-serialization.ts` and `extensions/vscode-api/languages.ts` no longer contribute direct `: any` hits, reducing app-code `: any` from `1135` to `1011`.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.

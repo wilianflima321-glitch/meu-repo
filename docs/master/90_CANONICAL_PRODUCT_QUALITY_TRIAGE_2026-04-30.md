@@ -176,6 +176,11 @@ What still needs tightening:
 ## 2026-05-01 Project Brain Update
 Studio Home now includes a compact Project Brain readout that summarizes mission, domain, runtime, AI setup, review approvals, budget, and next action. This aligns the dashboard with the benchmark pattern from Firebase/Replit/Manus/Cursor without adding another dashboard family.
 
+## 2026-05-02 Continuity And Runtime Typing Update
+Project Brain now shows compact continuity rails for checkpoint, evidence, and permission state. This keeps the first screen simple while making long-running agent work safer and closer to Replit-style checkpoint discipline plus Manus-style permission clarity.
+
+The level serialization and VS Code language API boundaries were typed to remove their direct `: any` contribution. The app-code `: any` metric moved from `1135` to `1011`; this is still a gap, but it is now moving in the right direction without fake strictness.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

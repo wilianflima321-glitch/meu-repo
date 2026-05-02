@@ -159,7 +159,7 @@ Aethel should avoid one giant IDE screen. Instead, the Workbench opens focused r
 ## Execution Priority From Here
 P0: Keep current gates green while reducing structural debt.
 - Current measured `component files over 1000 lines`: 0 after the 2026-05-01 god-component closure pass.
-- Current measured `: any`: 1135.
+- Current measured `: any`: 1011 after typing the level serializer and language API boundary.
 - Current measured E2E specs: 15, target 15.
 - Current measured Prisma migrations: 0, target at least 1 after baseline decision.
 
@@ -170,6 +170,7 @@ P1: Keep editor split ratchets closed.
 
 P2: Expand the Project Brain minimal implementation.
 - Studio Home now has a compact read model and card.
+- The compact card now includes continuity rails for checkpoint, evidence, and permission state.
 - Next step is `project.brain.json` or database-backed equivalent.
 - Derive from existing `.aethelrules`, package metadata, docs, routes, assets, tests.
 - Keep the Project Brain compact in Studio/IDE and move deeper detail into mission/evidence rooms.

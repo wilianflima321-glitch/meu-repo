@@ -1,9 +1,9 @@
 /**
  * Level Serialization System REAL
- * 
+ *
  * Sistema REAL de serialização de níveis/cenas com compressão,
  * versionamento, prefabs, assets e referências.
- * 
+ *
  * NÃO É MOCK - Salva e carrega níveis de verdade!
  */
 
@@ -143,12 +143,93 @@ export interface PostProcessingSettings {
   colorGrading?: { enabled: boolean; saturation: number; contrast: number; brightness: number };
 }
 
+export type RuntimeComponentData = Record<string, unknown>;
+
+export interface RuntimeEntity {
+  id?: string;
+  name?: string;
+  parentId?: string | null;
+  transform?: RuntimeTransformSource;
+  position?: RuntimeVector3;
+  rotation?: RuntimeQuaternion;
+  quaternion?: RuntimeQuaternion;
+  scale?: RuntimeVector3;
+  components?: Record<string, unknown>;
+  tags?: string[];
+  layer?: number;
+  active?: boolean;
+  prefabId?: string;
+  prefabInstanceId?: string;
+  [key: string]: unknown;
+}
+
+export interface RuntimePrefab {
+  id?: string;
+  name?: string;
+  entities: RuntimeEntity[];
+  rootEntityId?: string;
+  [key: string]: unknown;
+}
+
+export interface RuntimeLevel {
+  name?: string;
+  description?: string;
+  author?: string;
+  createdAt?: string;
+  modifiedAt?: string;
+  version?: string;
+  thumbnail?: string;
+  tags?: string[];
+  assets?: SerializedAssetRef[];
+  entities: RuntimeEntity[];
+  prefabs: RuntimePrefab[];
+  settings?: LevelSettings;
+}
+
+type RuntimeVector3 = Partial<SerializedVector3>;
+type RuntimeQuaternion = Partial<SerializedQuaternion>;
+type RuntimeTransformSource = {
+  position?: RuntimeVector3;
+  rotation?: RuntimeQuaternion;
+  quaternion?: RuntimeQuaternion;
+  scale?: RuntimeVector3;
+};
+
+const cloneData = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
+
+const toComponentData = (value: unknown): RuntimeComponentData =>
+  value && typeof value === 'object' ? (value as RuntimeComponentData) : {};
+
+const numeric = (value: unknown, fallback: number): number =>
+  typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+
+const vector3 = (value: unknown, fallback: SerializedVector3): SerializedVector3 => {
+  const source = toComponentData(value);
+
+  return {
+    x: numeric(source.x, fallback.x),
+    y: numeric(source.y, fallback.y),
+    z: numeric(source.z, fallback.z),
+  };
+};
+
+const quaternion = (value: unknown, fallback: SerializedQuaternion): SerializedQuaternion => {
+  const source = toComponentData(value);
+
+  return {
+    x: numeric(source.x, fallback.x),
+    y: numeric(source.y, fallback.y),
+    z: numeric(source.z, fallback.z),
+    w: numeric(source.w, fallback.w),
+  };
+};
+
 // ============================================================================
 // COMPONENT SERIALIZERS
 // ============================================================================
 
 type ComponentSerializer = {
-  serialize: (component: unknown) => Record<string, unknown>;
+  serialize: (component: RuntimeComponentData) => Record<string, unknown>;
   deserialize: (data: Record<string, unknown>) => unknown;
 };
 
@@ -161,7 +242,7 @@ export function registerComponentSerializer(type: string, serializer: ComponentS
 // Built-in serializers
 
 registerComponentSerializer('MeshRenderer', {
-  serialize: (component: any) => ({
+  serialize: (component: RuntimeComponentData) => ({
     meshId: component.meshId,
     materialIds: component.materialIds,
     castShadows: component.castShadows,
@@ -176,7 +257,7 @@ registerComponentSerializer('MeshRenderer', {
 });
 
 registerComponentSerializer('Light', {
-  serialize: (component: any) => ({
+  serialize: (component: RuntimeComponentData) => ({
     type: component.type,
     color: component.color,
     intensity: component.intensity,
@@ -197,7 +278,7 @@ registerComponentSerializer('Light', {
 });
 
 registerComponentSerializer('Camera', {
-  serialize: (component: any) => ({
+  serialize: (component: RuntimeComponentData) => ({
     type: component.type,
     fov: component.fov,
     near: component.near,
@@ -216,7 +297,7 @@ registerComponentSerializer('Camera', {
 });
 
 registerComponentSerializer('Collider', {
-  serialize: (component: any) => ({
+  serialize: (component: RuntimeComponentData) => ({
     shape: component.shape,
     size: component.size,
     center: component.center,
@@ -233,7 +314,7 @@ registerComponentSerializer('Collider', {
 });
 
 registerComponentSerializer('RigidBody', {
-  serialize: (component: any) => ({
+  serialize: (component: RuntimeComponentData) => ({
     mass: component.mass,
     drag: component.drag,
     angularDrag: component.angularDrag,
@@ -252,7 +333,7 @@ registerComponentSerializer('RigidBody', {
 });
 
 registerComponentSerializer('AudioSource', {
-  serialize: (component: any) => ({
+  serialize: (component: RuntimeComponentData) => ({
     clipId: component.clipId,
     volume: component.volume,
     pitch: component.pitch,
@@ -275,7 +356,7 @@ registerComponentSerializer('AudioSource', {
 });
 
 registerComponentSerializer('Script', {
-  serialize: (component: any) => ({
+  serialize: (component: RuntimeComponentData) => ({
     scriptId: component.scriptId,
     properties: component.properties,
   }),
@@ -286,7 +367,7 @@ registerComponentSerializer('Script', {
 });
 
 registerComponentSerializer('ParticleSystem', {
-  serialize: (component: any) => ({
+  serialize: (component: RuntimeComponentData) => ({
     presetName: component.presetName,
     emissionRate: component.emissionRate,
     maxParticles: component.maxParticles,
@@ -309,7 +390,7 @@ registerComponentSerializer('ParticleSystem', {
 });
 
 registerComponentSerializer('Animator', {
-  serialize: (component: any) => ({
+  serialize: (component: RuntimeComponentData) => ({
     controllerPath: component.controllerPath,
     parameters: component.parameters,
     rootMotion: component.rootMotion,
@@ -322,7 +403,7 @@ registerComponentSerializer('Animator', {
 });
 
 registerComponentSerializer('NavMeshAgent', {
-  serialize: (component: any) => ({
+  serialize: (component: RuntimeComponentData) => ({
     speed: component.speed,
     angularSpeed: component.angularSpeed,
     acceleration: component.acceleration,
@@ -348,21 +429,21 @@ registerComponentSerializer('NavMeshAgent', {
 
 export class LevelSerializer {
   private static FORMAT_VERSION = '1.0.0';
-  
-  static serializeEntity(entity: any): SerializedEntity {
+
+  static serializeEntity(entity: RuntimeEntity): SerializedEntity {
     const components: SerializedComponent[] = [];
-    
+
     if (entity.components) {
       for (const [type, component] of Object.entries(entity.components)) {
         const serializer = componentSerializers.get(type);
-        const data = serializer 
-          ? serializer.serialize(component)
-          : component as Record<string, unknown>;
-        
+        const data = serializer
+          ? serializer.serialize(toComponentData(component))
+          : toComponentData(component);
+
         components.push({ type, data });
       }
     }
-    
+
     return {
       id: entity.id || this.generateId(),
       name: entity.name || 'Entity',
@@ -376,9 +457,9 @@ export class LevelSerializer {
       prefabInstanceId: entity.prefabInstanceId,
     };
   }
-  
-  static deserializeEntity(data: SerializedEntity): any {
-    const entity: any = {
+
+  static deserializeEntity(data: SerializedEntity): RuntimeEntity {
+    const entity: RuntimeEntity = {
       id: data.id,
       name: data.name,
       parentId: data.parentId,
@@ -389,36 +470,37 @@ export class LevelSerializer {
       prefabInstanceId: data.prefabInstanceId,
       components: {},
     };
-    
+
     // Deserialize transform
     const transform = this.deserializeTransform(data.transform);
     entity.position = transform.position;
     entity.rotation = transform.rotation;
     entity.scale = transform.scale;
-    
+
     // Deserialize components
+    const components = entity.components ?? (entity.components = {});
     for (const comp of data.components) {
       const serializer = componentSerializers.get(comp.type);
-      entity.components[comp.type] = serializer 
+      components[comp.type] = serializer
         ? serializer.deserialize(comp.data)
         : comp.data;
     }
-    
+
     return entity;
   }
-  
-  static serializeTransform(obj: any): SerializedTransform {
-    const position = obj.position || { x: 0, y: 0, z: 0 };
-    const rotation = obj.rotation || obj.quaternion || { x: 0, y: 0, z: 0, w: 1 };
-    const scale = obj.scale || { x: 1, y: 1, z: 1 };
-    
+
+  static serializeTransform(obj: RuntimeTransformSource): SerializedTransform {
+    const position = vector3(obj.position, { x: 0, y: 0, z: 0 });
+    const rotation = quaternion(obj.rotation || obj.quaternion, { x: 0, y: 0, z: 0, w: 1 });
+    const scale = vector3(obj.scale, { x: 1, y: 1, z: 1 });
+
     return {
-      position: { x: position.x, y: position.y, z: position.z },
-      rotation: { x: rotation.x, y: rotation.y, z: rotation.z, w: rotation.w ?? 1 },
-      scale: { x: scale.x, y: scale.y, z: scale.z },
+      position,
+      rotation,
+      scale,
     };
   }
-  
+
   static deserializeTransform(data: SerializedTransform): {
     position: THREE.Vector3;
     rotation: THREE.Quaternion;
@@ -430,19 +512,19 @@ export class LevelSerializer {
       scale: new THREE.Vector3(data.scale.x, data.scale.y, data.scale.z),
     };
   }
-  
-  static serializePrefab(prefab: any): SerializedPrefab {
-    const entities = prefab.entities.map((e: any) => this.serializeEntity(e));
-    
+
+  static serializePrefab(prefab: RuntimePrefab): SerializedPrefab {
+    const entities = prefab.entities.map((e: RuntimeEntity) => this.serializeEntity(e));
+
     return {
       id: prefab.id || this.generateId(),
       name: prefab.name || 'Prefab',
       entities,
-      rootEntityId: prefab.rootEntityId || entities[0]?.id,
+      rootEntityId: prefab.rootEntityId || entities[0]?.id || this.generateId(),
     };
   }
-  
-  static deserializePrefab(data: SerializedPrefab): any {
+
+  static deserializePrefab(data: SerializedPrefab): RuntimePrefab {
     return {
       id: data.id,
       name: data.name,
@@ -450,10 +532,10 @@ export class LevelSerializer {
       rootEntityId: data.rootEntityId,
     };
   }
-  
-  static serializeLevel(level: any): SerializedLevel {
+
+  static serializeLevel(level: RuntimeLevel): SerializedLevel {
     const now = new Date().toISOString();
-    
+
     return {
       formatVersion: this.FORMAT_VERSION,
       metadata: {
@@ -467,18 +549,18 @@ export class LevelSerializer {
         tags: level.tags || [],
       },
       assets: level.assets || [],
-      entities: (level.entities || []).map((e: any) => this.serializeEntity(e)),
-      prefabs: (level.prefabs || []).map((p: any) => this.serializePrefab(p)),
+      entities: (level.entities || []).map((e: RuntimeEntity) => this.serializeEntity(e)),
+      prefabs: (level.prefabs || []).map((p: RuntimePrefab) => this.serializePrefab(p)),
       settings: level.settings || this.getDefaultSettings(),
     };
   }
-  
-  static deserializeLevel(data: SerializedLevel): any {
+
+  static deserializeLevel(data: SerializedLevel): RuntimeLevel {
     // Version migration if needed
     if (data.formatVersion !== this.FORMAT_VERSION) {
       data = this.migrateLevel(data);
     }
-    
+
     return {
       name: data.metadata.name,
       description: data.metadata.description,
@@ -494,7 +576,7 @@ export class LevelSerializer {
       settings: data.settings,
     };
   }
-  
+
   static getDefaultSettings(): LevelSettings {
     return {
       skybox: {
@@ -529,14 +611,14 @@ export class LevelSerializer {
       },
     };
   }
-  
+
   private static migrateLevel(data: SerializedLevel): SerializedLevel {
     // Add migration logic for older versions here
     log.info(`Migrating level from version ${data.formatVersion} to ${this.FORMAT_VERSION}`);
     data.formatVersion = this.FORMAT_VERSION;
     return data;
   }
-  
+
   static generateId(): string {
     return `${Date.now().toString(36)}_${Math.random().toString(36).substr(2, 9)}`;
   }
@@ -552,18 +634,18 @@ export class LevelCompression {
     const inputData = textEncoder.encode(data);
     return pako.deflate(inputData, { level: 9 });
   }
-  
+
   static decompress(data: Uint8Array): string {
     const decompressed = pako.inflate(data);
     const textDecoder = new TextDecoder();
     return textDecoder.decode(decompressed);
   }
-  
+
   static compressLevel(level: SerializedLevel): Uint8Array {
     const json = JSON.stringify(level);
     return this.compress(json);
   }
-  
+
   static decompressLevel(data: Uint8Array): SerializedLevel {
     const json = this.decompress(data);
     return JSON.parse(json);
@@ -577,65 +659,65 @@ export class LevelCompression {
 export class LevelFileFormat {
   private static MAGIC = new Uint8Array([0x41, 0x45, 0x4C, 0x56]); // "AELV"
   private static VERSION = 1;
-  
+
   static async save(level: SerializedLevel): Promise<Blob> {
     // Compress level data
     const compressed = LevelCompression.compressLevel(level);
-    
+
     // Create file header
     const headerSize = 16;
     const totalSize = headerSize + compressed.length;
     const buffer = new ArrayBuffer(totalSize);
     const view = new DataView(buffer);
     const uint8 = new Uint8Array(buffer);
-    
+
     // Write magic number
     uint8.set(this.MAGIC, 0);
-    
+
     // Write version
     view.setUint32(4, this.VERSION, true);
-    
+
     // Write compressed data size
     view.setUint32(8, compressed.length, true);
-    
+
     // Write uncompressed data size (for validation)
     const json = JSON.stringify(level);
     view.setUint32(12, json.length, true);
-    
+
     // Write compressed data
     uint8.set(compressed, headerSize);
-    
+
     return new Blob([buffer], { type: 'application/x-aethel-level' });
   }
-  
+
   static async load(blob: Blob): Promise<SerializedLevel> {
     const buffer = await blob.arrayBuffer();
     const view = new DataView(buffer);
     const uint8 = new Uint8Array(buffer);
-    
+
     // Verify magic number
     const magic = uint8.slice(0, 4);
     if (!this.arrayEquals(magic, this.MAGIC)) {
       throw new Error('Invalid level file format');
     }
-    
+
     // Read version
     const version = view.getUint32(4, true);
     if (version > this.VERSION) {
       throw new Error(`Level file version ${version} is not supported`);
     }
-    
+
     // Read sizes
     const compressedSize = view.getUint32(8, true);
     // const uncompressedSize = view.getUint32(12, true);
-    
+
     // Read compressed data
     const compressed = uint8.slice(16, 16 + compressedSize);
-    
+
     // Decompress and parse
     return LevelCompression.decompressLevel(compressed);
   }
-  
+
   private static arrayEquals(a: Uint8Array, b: Uint8Array): boolean {
     if (a.length !== b.length) return false;
     for (let i = 0; i < a.length; i++) {
@@ -650,23 +732,23 @@ export class LevelFileFormat {
 // ============================================================================
 
 export class LevelManager {
-  private currentLevel: any = null;
-  private prefabLibrary: Map<string, any> = new Map();
-  private assetCache: Map<string, any> = new Map();
-  private onEntityCreated?: (entity: any) => void;
+  private currentLevel: RuntimeLevel | null = null;
+  private prefabLibrary: Map<string, RuntimePrefab> = new Map();
+  private assetCache: Map<string, unknown> = new Map();
+  private onEntityCreated?: (entity: RuntimeEntity) => void;
   private onEntityDestroyed?: (id: string) => void;
-  
+
   constructor() {}
-  
+
   setCallbacks(callbacks: {
-    onEntityCreated?: (entity: any) => void;
+    onEntityCreated?: (entity: RuntimeEntity) => void;
     onEntityDestroyed?: (id: string) => void;
   }): void {
     this.onEntityCreated = callbacks.onEntityCreated;
     this.onEntityDestroyed = callbacks.onEntityDestroyed;
   }
-  
-  async newLevel(name: string = 'New Level'): Promise<any> {
+
+  async newLevel(name: string = 'New Level'): Promise<RuntimeLevel> {
     this.currentLevel = {
       name,
       description: '',
@@ -680,187 +762,199 @@ export class LevelManager {
       prefabs: [],
       settings: LevelSerializer.getDefaultSettings(),
     };
-    
+
     return this.currentLevel;
   }
-  
-  getCurrentLevel(): any {
+
+  getCurrentLevel(): RuntimeLevel | null {
     return this.currentLevel;
   }
-  
+
   async saveLevel(filename?: string): Promise<Blob> {
     if (!this.currentLevel) {
       throw new Error('No level loaded');
     }
-    
+
     const serialized = LevelSerializer.serializeLevel(this.currentLevel);
     return LevelFileFormat.save(serialized);
   }
-  
-  async loadLevel(blob: Blob): Promise<any> {
+
+  async loadLevel(blob: Blob): Promise<RuntimeLevel> {
     const serialized = await LevelFileFormat.load(blob);
     this.currentLevel = LevelSerializer.deserializeLevel(serialized);
-    
+
     // Load prefabs into library
     for (const prefab of this.currentLevel.prefabs) {
-      this.prefabLibrary.set(prefab.id, prefab);
+      if (prefab.id) {
+        this.prefabLibrary.set(prefab.id, prefab);
+      }
     }
-    
+
     // Notify about created entities
     if (this.onEntityCreated) {
       for (const entity of this.currentLevel.entities) {
         this.onEntityCreated(entity);
       }
     }
-    
+
     return this.currentLevel;
   }
-  
+
   async exportToJSON(): Promise<string> {
     if (!this.currentLevel) {
       throw new Error('No level loaded');
     }
-    
+
     const serialized = LevelSerializer.serializeLevel(this.currentLevel);
     return JSON.stringify(serialized, null, 2);
   }
-  
-  async importFromJSON(json: string): Promise<any> {
+
+  async importFromJSON(json: string): Promise<RuntimeLevel> {
     const serialized = JSON.parse(json) as SerializedLevel;
     this.currentLevel = LevelSerializer.deserializeLevel(serialized);
     return this.currentLevel;
   }
-  
+
   // Entity management
-  
-  addEntity(entity: any): string {
+
+  addEntity(entity: RuntimeEntity): string {
     if (!this.currentLevel) {
       throw new Error('No level loaded');
     }
-    
-    entity.id = entity.id || LevelSerializer.generateId();
+
+    const entityId = entity.id || LevelSerializer.generateId();
+    entity.id = entityId;
     this.currentLevel.entities.push(entity);
-    
+
     if (this.onEntityCreated) {
       this.onEntityCreated(entity);
     }
-    
-    return entity.id;
+
+    return entityId;
   }
-  
+
   removeEntity(id: string): boolean {
     if (!this.currentLevel) return false;
-    
-    const index = this.currentLevel.entities.findIndex((e: any) => e.id === id);
+
+    const index = this.currentLevel.entities.findIndex((e: RuntimeEntity) => e.id === id);
     if (index === -1) return false;
-    
+
     // Remove children first
-    const children = this.currentLevel.entities.filter((e: any) => e.parentId === id);
+    const children = this.currentLevel.entities.filter((e: RuntimeEntity) => e.parentId === id);
     for (const child of children) {
-      this.removeEntity(child.id);
+      if (child.id) {
+        this.removeEntity(child.id);
+      }
     }
-    
+
     this.currentLevel.entities.splice(index, 1);
-    
+
     if (this.onEntityDestroyed) {
       this.onEntityDestroyed(id);
     }
-    
+
     return true;
   }
-  
-  getEntity(id: string): any | null {
+
+  getEntity(id: string): RuntimeEntity | null {
     if (!this.currentLevel) return null;
-    return this.currentLevel.entities.find((e: any) => e.id === id) || null;
+    return this.currentLevel.entities.find((e: RuntimeEntity) => e.id === id) || null;
   }
-  
-  findEntitiesByTag(tag: string): any[] {
+
+  findEntitiesByTag(tag: string): RuntimeEntity[] {
     if (!this.currentLevel) return [];
-    return this.currentLevel.entities.filter((e: any) => e.tags?.includes(tag));
+    return this.currentLevel.entities.filter((e: RuntimeEntity) => e.tags?.includes(tag));
   }
-  
-  findEntitiesByName(name: string): any[] {
+
+  findEntitiesByName(name: string): RuntimeEntity[] {
     if (!this.currentLevel) return [];
-    return this.currentLevel.entities.filter((e: any) => e.name === name);
+    return this.currentLevel.entities.filter((e: RuntimeEntity) => e.name === name);
   }
-  
-  findEntitiesByComponent(componentType: string): any[] {
+
+  findEntitiesByComponent(componentType: string): RuntimeEntity[] {
     if (!this.currentLevel) return [];
-    return this.currentLevel.entities.filter((e: any) => 
+    return this.currentLevel.entities.filter((e: RuntimeEntity) =>
       e.components && componentType in e.components
     );
   }
-  
+
   // Prefab management
-  
+
   createPrefab(entityId: string, name: string): string {
     if (!this.currentLevel) {
       throw new Error('No level loaded');
     }
-    
+
     const entity = this.getEntity(entityId);
     if (!entity) {
       throw new Error('Entity not found');
     }
-    
+
     // Collect entity and all children
-    const collectChildren = (id: string): any[] => {
-      const entities: any[] = [];
+    const currentLevel = this.currentLevel;
+    const collectChildren = (id: string): RuntimeEntity[] => {
+      const entities: RuntimeEntity[] = [];
       const e = this.getEntity(id);
       if (e) {
         entities.push({ ...e });
-        const children = this.currentLevel.entities.filter((c: any) => c.parentId === id);
+        const children = currentLevel.entities.filter((c: RuntimeEntity) => c.parentId === id);
         for (const child of children) {
-          entities.push(...collectChildren(child.id));
+          if (child.id) {
+            entities.push(...collectChildren(child.id));
+          }
         }
       }
       return entities;
     };
-    
+
     const entities = collectChildren(entityId);
-    
-    const prefab: any = {
-      id: LevelSerializer.generateId(),
+
+    const prefabId = LevelSerializer.generateId();
+    const prefab: RuntimePrefab = {
+      id: prefabId,
       name,
       entities,
       rootEntityId: entityId,
     };
-    
+
     this.currentLevel.prefabs.push(prefab);
-    this.prefabLibrary.set(prefab.id, prefab);
-    
-    return prefab.id;
+    this.prefabLibrary.set(prefabId, prefab);
+
+    return prefabId;
   }
-  
+
   instantiatePrefab(prefabId: string, position?: THREE.Vector3, rotation?: THREE.Quaternion): string[] {
     const prefab = this.prefabLibrary.get(prefabId);
     if (!prefab) {
       throw new Error('Prefab not found');
     }
-    
+
     const instanceId = LevelSerializer.generateId();
     const idMapping = new Map<string, string>();
     const createdIds: string[] = [];
-    
+
     // Create new IDs for all entities
     for (const entity of prefab.entities) {
-      idMapping.set(entity.id, LevelSerializer.generateId());
+      const sourceId = entity.id || LevelSerializer.generateId();
+      entity.id = sourceId;
+      idMapping.set(sourceId, LevelSerializer.generateId());
     }
-    
+
     // Instantiate entities
     for (const entity of prefab.entities) {
-      const newEntity = JSON.parse(JSON.stringify(entity));
-      newEntity.id = idMapping.get(entity.id)!;
+      const sourceId = entity.id || LevelSerializer.generateId();
+      const newEntity = cloneData(entity);
+      newEntity.id = idMapping.get(sourceId) || LevelSerializer.generateId();
       newEntity.prefabId = prefabId;
       newEntity.prefabInstanceId = instanceId;
-      
+
       // Update parent reference
       if (newEntity.parentId && idMapping.has(newEntity.parentId)) {
         newEntity.parentId = idMapping.get(newEntity.parentId);
       } else {
         newEntity.parentId = null;
       }
-      
+
       // Apply transform offset to root entity
       if (entity.id === prefab.rootEntityId) {
         if (position) {
@@ -870,74 +964,79 @@ export class LevelManager {
           newEntity.rotation = { x: rotation.x, y: rotation.y, z: rotation.z, w: rotation.w };
         }
       }
-      
+
       this.addEntity(newEntity);
-      createdIds.push(newEntity.id);
+      if (newEntity.id) {
+        createdIds.push(newEntity.id);
+      }
     }
-    
+
     return createdIds;
   }
-  
-  getPrefab(id: string): any | null {
+
+  getPrefab(id: string): RuntimePrefab | null {
     return this.prefabLibrary.get(id) || null;
   }
-  
-  getAllPrefabs(): any[] {
+
+  getAllPrefabs(): RuntimePrefab[] {
     return Array.from(this.prefabLibrary.values());
   }
-  
+
   // Asset management
-  
+
   registerAsset(asset: SerializedAssetRef): void {
     if (!this.currentLevel) return;
-    
-    const existing = this.currentLevel.assets.find((a: any) => a.id === asset.id);
+
+    const assets = this.currentLevel.assets ?? (this.currentLevel.assets = []);
+    const existing = assets.find((a: SerializedAssetRef) => a.id === asset.id);
     if (!existing) {
-      this.currentLevel.assets.push(asset);
+      assets.push(asset);
     }
   }
-  
+
   getAsset(id: string): SerializedAssetRef | null {
     if (!this.currentLevel) return null;
-    return this.currentLevel.assets.find((a: any) => a.id === id) || null;
+    return (this.currentLevel.assets ?? []).find((a: SerializedAssetRef) => a.id === id) || null;
   }
-  
-  cacheAsset(id: string, data: any): void {
+
+  cacheAsset(id: string, data: unknown): void {
     this.assetCache.set(id, data);
   }
-  
-  getCachedAsset(id: string): any | null {
+
+  getCachedAsset(id: string): unknown | null {
     return this.assetCache.get(id) || null;
   }
-  
+
   // Level settings
-  
+
   getSettings(): LevelSettings | null {
     return this.currentLevel?.settings || null;
   }
-  
+
   updateSettings(settings: Partial<LevelSettings>): void {
     if (!this.currentLevel) return;
     this.currentLevel.settings = { ...this.currentLevel.settings, ...settings };
   }
-  
+
   // Utility
-  
+
   clear(): void {
     if (!this.currentLevel) return;
-    
+
     // Notify about destroyed entities
     if (this.onEntityDestroyed) {
       for (const entity of this.currentLevel.entities) {
-        this.onEntityDestroyed(entity.id);
+        if (entity.id) {
+          this.onEntityDestroyed(entity.id);
+        }
       }
     }
-    
+
     this.currentLevel.entities = [];
     this.assetCache.clear();
   }
-  
-  clone(): any {
+
+  clone(): RuntimeLevel | null {
     if (!this.currentLevel) return null;
     return JSON.parse(JSON.stringify(this.currentLevel));
   }
@@ -957,53 +1056,53 @@ export class LevelHistory {
   private undoStack: LevelCommand[] = [];
   private redoStack: LevelCommand[] = [];
   private maxHistory: number = 100;
-  
+
   execute(command: LevelCommand): void {
     command.execute();
     this.undoStack.push(command);
     this.redoStack = [];
-    
+
     // Limit history size
     if (this.undoStack.length > this.maxHistory) {
       this.undoStack.shift();
     }
   }
-  
+
   undo(): boolean {
     const command = this.undoStack.pop();
     if (!command) return false;
-    
+
     command.undo();
     this.redoStack.push(command);
     return true;
   }
-  
+
   redo(): boolean {
     const command = this.redoStack.pop();
     if (!command) return false;
-    
+
     command.execute();
     this.undoStack.push(command);
     return true;
   }
-  
+
   canUndo(): boolean {
     return this.undoStack.length > 0;
   }
-  
+
   canRedo(): boolean {
     return this.redoStack.length > 0;
   }
-  
+
   clear(): void {
     this.undoStack = [];
     this.redoStack = [];
   }
-  
+
   getUndoHistory(): string[] {
     return this.undoStack.map(c => c.description);
   }
-  
+
   getRedoHistory(): string[] {
     return this.redoStack.map(c => c.description);
   }
@@ -1014,19 +1113,19 @@ export class LevelHistory {
 export class AddEntityCommand implements LevelCommand {
   description: string;
   private manager: LevelManager;
-  private entity: any;
+  private entity: RuntimeEntity;
   private id: string = '';
-  
-  constructor(manager: LevelManager, entity: any) {
+
+  constructor(manager: LevelManager, entity: RuntimeEntity) {
     this.manager = manager;
     this.entity = entity;
     this.description = `Add entity: ${entity.name || 'Entity'}`;
   }
-  
+
   execute(): void {
     this.id = this.manager.addEntity(this.entity);
   }
-  
+
   undo(): void {
     this.manager.removeEntity(this.id);
   }
@@ -1036,32 +1135,32 @@ export class RemoveEntityCommand implements LevelCommand {
   description: string;
   private manager: LevelManager;
   private entityId: string;
-  private entityData: any = null;
-  private childrenData: any[] = [];
-  
+  private entityData: RuntimeEntity | null = null;
+  private childrenData: RuntimeEntity[] = [];
+
   constructor(manager: LevelManager, entityId: string) {
     this.manager = manager;
     this.entityId = entityId;
     this.description = `Remove entity`;
   }
-  
+
   execute(): void {
     // Store entity data for undo
     this.entityData = this.manager.getEntity(this.entityId);
-    
+
     // Store children data
     const level = this.manager.getCurrentLevel();
     if (level) {
-      this.childrenData = level.entities.filter((e: any) => e.parentId === this.entityId);
+      this.childrenData = level.entities.filter((e: RuntimeEntity) => e.parentId === this.entityId);
     }
-    
+
     this.manager.removeEntity(this.entityId);
   }
-  
+
   undo(): void {
     if (this.entityData) {
       this.manager.addEntity({ ...this.entityData });
-      
+
       for (const child of this.childrenData) {
         this.manager.addEntity({ ...child });
       }
@@ -1073,33 +1172,33 @@ export class ModifyEntityCommand implements LevelCommand {
   description: string;
   private manager: LevelManager;
   private entityId: string;
-  private newData: Partial<any>;
-  private oldData: Partial<any> = {};
-  
-  constructor(manager: LevelManager, entityId: string, newData: Partial<any>) {
+  private newData: Partial<RuntimeEntity>;
+  private oldData: Partial<RuntimeEntity> = {};
+
+  constructor(manager: LevelManager, entityId: string, newData: Partial<RuntimeEntity>) {
     this.manager = manager;
     this.entityId = entityId;
     this.newData = newData;
     this.description = `Modify entity`;
   }
-  
+
   execute(): void {
     const entity = this.manager.getEntity(this.entityId);
     if (!entity) return;
-    
+
     // Store old values
     for (const key of Object.keys(this.newData)) {
       this.oldData[key] = JSON.parse(JSON.stringify(entity[key]));
     }
-    
+
     // Apply new values
     Object.assign(entity, JSON.parse(JSON.stringify(this.newData)));
   }
-  
+
   undo(): void {
     const entity = this.manager.getEntity(this.entityId);
     if (!entity) return;
-    
+
     Object.assign(entity, JSON.parse(JSON.stringify(this.oldData)));
   }
 }
@@ -1116,12 +1215,12 @@ export function createLevelHistory(): LevelHistory {
   return new LevelHistory();
 }
 
-export async function saveLevel(level: any): Promise<Blob> {
+export async function saveLevel(level: RuntimeLevel): Promise<Blob> {
   const serialized = LevelSerializer.serializeLevel(level);
   return LevelFileFormat.save(serialized);
 }
 
-export async function loadLevel(blob: Blob): Promise<any> {
+export async function loadLevel(blob: Blob): Promise<RuntimeLevel> {
   const serialized = await LevelFileFormat.load(blob);
   return LevelSerializer.deserializeLevel(serialized);
 }
