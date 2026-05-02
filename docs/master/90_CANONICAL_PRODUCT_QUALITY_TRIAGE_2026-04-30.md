@@ -201,6 +201,8 @@ The scheduler is no longer only descriptive. The creation workbench now blocks n
 
 Preview runtime automation now also obeys the same governor. Runtime discovery/provision flows are held when the `browser-operator` lane is blocked or requires manual confirmation on the current device profile, while runtime sync now respects the `file-sync` lane. The toolbar surfaces the hold state and placement hints directly inside the preview stage so users see policy, not silent failure.
 
+Agent mode now reflects the same runtime grammar. The panel exposes `ai-agents` and `browser-operator` placement directly in the shell, blocks fresh runs when the agent lane is saturated, and prevents approval of web-search/fetch steps when the browser-operator lane is held. That keeps autonomous internet work aligned with device policy instead of turning approval UX into a fake green light.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

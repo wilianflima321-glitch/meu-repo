@@ -27,8 +27,16 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/Textarea'
 import { ScrollArea } from '@/components/ui/ScrollArea'
-import { AutonomousAgent, AgentTask, AgentStep } from '@/lib/ai/agent-mode'
+import { AutonomousAgent, AgentTask, AgentStep, ToolCall } from '@/lib/ai/agent-mode'
+import { useRuntimeLanePolicy } from '@/hooks/useRuntimeLanePolicy'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
+import {
+  describeRuntimePlacement,
+  getAiAgentStartBlockNotice,
+  getBrowserOperatorApprovalNotice,
+  isBrowserOperatorToolName,
+  type AgentRuntimeNotice,
+} from './agent-runtime-lane'
 
 /**
  * Agent Mode Panel - Interface do modo agente autonomo
@@ -37,6 +45,17 @@ import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 interface AgentModePanelProps {
   isOpen: boolean
   onClose: () => void
+}
+
+type PendingApprovalRequest = {
+  action: {
+    tool?: string
+    input?: Record<string, unknown>
+  }
+  thinking: string
+  confidence: number
+  approve: () => void
+  reject: () => void
 }
 
 export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
@@ -54,24 +73,48 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
   const [steps, setSteps] = useState<AgentStep[]>([])
   const [status, setStatus] = useState<'idle' | 'running' | 'paused' | 'completed' | 'failed'>('idle')
   const [progress, setProgress] = useState(0)
-  const [pendingApproval, setPendingApproval] = useState<any>(null)
+  const [pendingApproval, setPendingApproval] = useState<PendingApprovalRequest | null>(null)
+  const [activeBrowserOperatorCalls, setActiveBrowserOperatorCalls] = useState(0)
   const [expandedSteps, setExpandedSteps] = useState<Set<string>>(new Set())
   const scrollRef = useRef<HTMLDivElement>(null)
+  const aiAgentLane = useRuntimeLanePolicy('ai-agents', {
+    activeCount: status === 'running' || status === 'paused' ? 1 : 0,
+  })
+  const browserOperatorLane = useRuntimeLanePolicy('browser-operator', {
+    activeCount: activeBrowserOperatorCalls,
+    queuedCount: isBrowserOperatorToolName(pendingApproval?.action.tool) ? 1 : 0,
+  })
+  const aiAgentStartBlockNotice = getAiAgentStartBlockNotice({
+    decision: aiAgentLane.decision,
+    budget: aiAgentLane.budget,
+  })
+  const browserOperatorApprovalNotice = getBrowserOperatorApprovalNotice({
+    toolName: pendingApproval?.action.tool,
+    decision: browserOperatorLane.decision,
+    budget: browserOperatorLane.budget,
+  })
+  const runtimeNoticeToneClass = (notice: AgentRuntimeNotice | null) =>
+    notice?.tone === 'warning'
+      ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning-light)]'
+      : 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-[var(--aethel-info-light)]'
 
   useEffect(() => {
     const handleTaskStarted = (t: AgentTask) => {
       setTask(t)
       setStatus('running')
+      setActiveBrowserOperatorCalls(0)
     }
 
     const handleTaskCompleted = (t: AgentTask) => {
       setTask(t)
       setStatus('completed')
+      setActiveBrowserOperatorCalls(0)
     }
 
     const handleTaskFailed = (t: AgentTask) => {
       setTask(t)
       setStatus('failed')
+      setActiveBrowserOperatorCalls(0)
     }
 
     const handleStepAdded = (step: AgentStep) => {
@@ -85,7 +128,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
       setProgress(p)
     }
 
-    const handleApprovalNeeded = (approval: any) => {
+    const handleApprovalNeeded = (approval: PendingApprovalRequest) => {
       setPendingApproval(approval)
     }
 
@@ -97,6 +140,18 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
       setStatus('running')
     }
 
+    const handleToolStarted = (toolCall: ToolCall) => {
+      if (toolCall.tool === 'web_search' || toolCall.tool === 'fetch_url') {
+        setActiveBrowserOperatorCalls((current) => current + 1)
+      }
+    }
+
+    const handleToolSettled = (toolCall: ToolCall) => {
+      if (toolCall.tool === 'web_search' || toolCall.tool === 'fetch_url') {
+        setActiveBrowserOperatorCalls((current) => Math.max(0, current - 1))
+      }
+    }
+
     agent.on('task:started', handleTaskStarted)
     agent.on('task:completed', handleTaskCompleted)
     agent.on('task:failed', handleTaskFailed)
@@ -105,6 +160,9 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
     agent.on('agent:approval_needed', handleApprovalNeeded)
     agent.on('agent:paused', handlePaused)
     agent.on('agent:resumed', handleResumed)
+    agent.on('tool:started', handleToolStarted)
+    agent.on('tool:completed', handleToolSettled)
+    agent.on('tool:failed', handleToolSettled)
 
     return () => {
       agent.removeAllListeners()
@@ -112,18 +170,22 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
   }, [agent])
 
   const handleSubmit = useCallback(async () => {
-    if (!input.trim() || status === 'running') return
+    if (!input.trim() || status === 'running' || status === 'paused' || !aiAgentLane.decision.canStart) return
 
     setSteps([])
     setProgress(0)
     setPendingApproval(null)
+    setActiveBrowserOperatorCalls(0)
 
     await agent.execute(input.trim())
     setInput('')
-  }, [input, status, agent])
+  }, [agent, aiAgentLane.decision.canStart, input, status])
 
   const handleApprove = () => {
     if (pendingApproval) {
+      if (browserOperatorApprovalNotice?.approveDisabled) {
+        return
+      }
       pendingApproval.approve()
       setPendingApproval(null)
     }
@@ -212,6 +274,8 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
 
   const iconButtonClass = `h-8 w-8 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
   const stepToggleClass = `flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const agentLaneLabel = `Agent lane · ${describeRuntimePlacement(aiAgentLane.decision.placement)}`
+  const browserOperatorLabel = `Browser operator · ${describeRuntimePlacement(browserOperatorLane.decision.placement)}`
 
   if (!isOpen) return null
 
@@ -229,6 +293,19 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
           <span className="font-semibold text-[var(--aethel-text-primary)]">Modo agente</span>
           <span className={cn('rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] px-2 py-0.5 text-xs', getStatusColor(status))}>
             {getStatusLabel(status)}
+          </span>
+          <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] px-2 py-0.5 text-[11px] text-[var(--aethel-text-secondary)]">
+            {agentLaneLabel}
+          </span>
+          <span
+            className={cn(
+              'rounded-full border px-2 py-0.5 text-[11px]',
+              browserOperatorApprovalNotice?.approveDisabled
+                ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning-light)]'
+                : 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-[var(--aethel-info-light)]',
+            )}
+          >
+            {browserOperatorLabel}
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -282,6 +359,13 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
         </div>
       )}
 
+      {status === 'idle' && aiAgentStartBlockNotice ? (
+        <div className={`mx-4 mt-4 rounded-lg border p-3 text-xs ${runtimeNoticeToneClass(aiAgentStartBlockNotice)}`}>
+          <div className="font-semibold">{aiAgentStartBlockNotice.title}</div>
+          <div className="mt-1 text-[var(--aethel-text-secondary)]">{aiAgentStartBlockNotice.detail}</div>
+        </div>
+      ) : null}
+
       <AnimatePresence>
         {pendingApproval && (
           <motion.div
@@ -298,8 +382,22 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
             <div className="mb-3 rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] p-2 text-xs font-mono text-[var(--aethel-text-tertiary)]">
               {pendingApproval.action.tool}: {JSON.stringify(pendingApproval.action.input)}
             </div>
+            {browserOperatorApprovalNotice ? (
+              <div className={`mb-3 rounded border px-3 py-2 text-xs ${runtimeNoticeToneClass(browserOperatorApprovalNotice)}`}>
+                <div className="font-semibold">{browserOperatorApprovalNotice.title}</div>
+                <div className="mt-1">{browserOperatorApprovalNotice.detail}</div>
+              </div>
+            ) : null}
             <div className="flex gap-2">
-              <Button type="button" size="sm" onClick={handleApprove} className="bg-[var(--aethel-success-dark)] hover:bg-[var(--aethel-success)]" aria-label="Aprovar acao pendente do agente">
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleApprove}
+                disabled={browserOperatorApprovalNotice?.approveDisabled}
+                title={browserOperatorApprovalNotice?.approveDisabled ? browserOperatorApprovalNotice.detail : undefined}
+                className="bg-[var(--aethel-success-dark)] hover:bg-[var(--aethel-success)] disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label="Aprovar acao pendente do agente"
+              >
                 <CheckCircle className="mr-1 h-3 w-3" />
                 Aprovar
               </Button>
@@ -419,22 +517,30 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
                 handleSubmit()
               }
             }}
-            disabled={status === 'running'}
+            disabled={status === 'running' || status === 'paused'}
           />
           <Button type="button"
             size="icon"
             onClick={handleSubmit}
-            disabled={!input.trim() || status === 'running'}
-            aria-label={status === 'running' ? 'Executando tarefa do agente' : 'Enviar tarefa para o agente'}
+            disabled={!input.trim() || status === 'running' || status === 'paused' || !aiAgentLane.decision.canStart}
+            title={!aiAgentLane.decision.canStart ? aiAgentLane.decision.reason : undefined}
+            aria-label={status === 'running' || status === 'paused' ? 'Executando tarefa do agente' : 'Enviar tarefa para o agente'}
             className={`absolute bottom-2 right-2 h-8 w-8 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary-dark)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
           >
             {status === 'running' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </div>
-        <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">
-          Pressione <kbd className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] px-1">Ctrl</kbd> +{' '}
-          <kbd className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] px-1">Enter</kbd> para enviar
-        </p>
+        {status === 'idle' && aiAgentStartBlockNotice ? (
+          <p className="mt-2 text-xs text-[var(--aethel-warning-light)]">
+            {aiAgentStartBlockNotice.detail}
+          </p>
+        ) : (
+          <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">
+            Pressione <kbd className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] px-1">Ctrl</kbd> +{' '}
+            <kbd className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] px-1">Enter</kbd> para enviar. Browser steps prefer{' '}
+            <span className="text-[var(--aethel-text-secondary)]">{describeRuntimePlacement(browserOperatorLane.decision.placement)}</span>.
+          </p>
+        )}
       </div>
     </motion.div>
   )

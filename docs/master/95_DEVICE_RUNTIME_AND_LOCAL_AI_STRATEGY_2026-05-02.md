@@ -28,6 +28,7 @@ The web shell now has a first-pass device guard:
 - `components/deploy/DeployButton.tsx` and `components/preview/usePreviewDeployTrust.ts` now respect the `build-export` lane so users do not stack deploys on top of an already active publish.
 - `hooks/usePreviewRuntimeManager.ts` now gates preview runtime discovery/provision through the `browser-operator` lane and runtime sync through the `file-sync` lane.
 - `components/ide/PreviewRuntimeToolbar.tsx` now exposes held automation state, preferred placement, and manual-confirmation hints so the user understands why the preview runtime is waiting instead of assuming the product is stalled.
+- `components/ai/AgentModePanel.tsx` now exposes `ai-agents` and `browser-operator` lane status directly inside the autonomous panel, blocking new runs when the agent lane is saturated and holding approval of web steps when the browser-operator lane is not available.
 
 Measured policies include:
 
@@ -87,7 +88,7 @@ The local app should sync with the cloud account, but it must not become a forke
 ## Next Blocks
 
 1. Add native local Studio probe contract for CPU/GPU/NPU/RAM/storage and expose it to the web account.
-2. Continue wiring the lane scheduler into deeper browser/build/render/indexing execution paths beyond the first dashboard, deploy, and preview-runtime entry points.
+2. Continue wiring the lane scheduler into deeper browser/build/render/indexing execution paths beyond the first dashboard, deploy, preview-runtime, and agent-mode entry points.
 3. Persist lane pressure telemetry so Aethel can learn safe defaults by device class.
 4. Add durable project memory backed by database/files instead of only UI read models.
 5. Add safety policy UI for local memory, browser operation, and device-native model execution.
