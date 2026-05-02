@@ -28,7 +28,7 @@ export interface AgentTask {
   completedAt?: Date;
   parentTaskId?: string;
   subtasks: AgentTask[];
-  result?: any;
+  result?: unknown;
   error?: string;
 }
 
@@ -45,8 +45,8 @@ export interface AgentStep {
 export interface ToolCall {
   id: string;
   tool: string;
-  input: Record<string, any>;
-  output?: any;
+  input: Record<string, unknown>;
+  output?: unknown;
   error?: string;
   status: 'pending' | 'running' | 'success' | 'failed';
   startTime: Date;
@@ -56,14 +56,14 @@ export interface ToolCall {
 export interface AgentMemory {
   shortTerm: MemoryEntry[];  // Current task context
   longTerm: MemoryEntry[];   // Persistent knowledge
-  working: Map<string, any>; // Active variables/state
+  working: Map<string, unknown>; // Active variables/state
 }
 
 export interface MemoryEntry {
   id: string;
   type: 'fact' | 'decision' | 'error' | 'success' | 'context';
   content: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   timestamp: Date;
   relevance: number;
 }
@@ -77,6 +77,61 @@ export interface AgentConfig {
   enableSelfCorrection: boolean;
   enableParallelExecution: boolean;
   model: string;
+}
+
+interface AgentPlan {
+  analysis: string;
+  approach: string;
+  subtasks: Array<{
+    id: string;
+    description: string;
+    tools: string[];
+    dependencies: string[];
+    estimatedSteps: number;
+    riskLevel: string;
+  }>;
+  successCriteria: string;
+  potentialIssues: string[];
+}
+
+interface AgentAction {
+  type: 'tool_call' | 'ask_human' | 'complete' | 'error';
+  tool?: string;
+  input?: Record<string, unknown>;
+  reason: string;
+}
+
+interface AgentThinking {
+  thinking: string;
+  action: AgentAction;
+  confidence: number;
+  nextSteps: string[];
+}
+
+interface AgentReflection {
+  assessment: string;
+  success: boolean;
+  progress: number;
+  issues: string[];
+  corrections: string[];
+  nextAction: 'continue' | 'retry' | 'adjust' | 'complete' | 'abort';
+  adjustments: string;
+}
+
+interface AgentReview {
+  success: boolean;
+  result?: unknown;
+  error?: string;
+}
+
+interface AgentToolDescriptor {
+  name: string;
+  description: string;
+  inputSchema: Record<string, unknown>;
+}
+
+function parseJsonObject<T>(raw: string): T {
+  return JSON.parse(raw) as T;
 }
 
 // ============================================================================
@@ -288,20 +343,7 @@ export class AutonomousAgent extends EventEmitter {
   /**
    * Fase de planejamento - decompõe a tarefa
    */
-  private async planTask(task: AgentTask): Promise<{
-    analysis: string;
-    approach: string;
-    subtasks: Array<{
-      id: string;
-      description: string;
-      tools: string[];
-      dependencies: string[];
-      estimatedSteps: number;
-      riskLevel: string;
-    }>;
-    successCriteria: string;
-    potentialIssues: string[];
-  }> {
+  private async planTask(task: AgentTask): Promise<AgentPlan> {
     const step = this.addStep(task.id, 'plan', 'Analisando tarefa e criando plano...');
     
     const availableTools = this.getAvailableTools();
@@ -322,7 +364,7 @@ export class AutonomousAgent extends EventEmitter {
       const jsonMatch = response.content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('Invalid plan format');
       
-      const plan = JSON.parse(jsonMatch[0]);
+      const plan = parseJsonObject<AgentPlan>(jsonMatch[0]);
       step.content = `Plano criado: ${plan.subtasks.length} subtarefas`;
       
       this.emit('agent:planned', { task, plan });
@@ -350,7 +392,7 @@ export class AutonomousAgent extends EventEmitter {
   /**
    * Loop principal de execução
    */
-  private async executeTaskLoop(task: AgentTask, plan: any): Promise<void> {
+  private async executeTaskLoop(task: AgentTask, plan: AgentPlan): Promise<void> {
     while (this.isRunning && !this.isPaused && this.iterationCount < this.config.maxIterations) {
       this.iterationCount++;
       
@@ -434,17 +476,7 @@ export class AutonomousAgent extends EventEmitter {
   /**
    * Pensa sobre o próximo passo
    */
-  private async think(task: AgentTask, subtask: AgentTask): Promise<{
-    thinking: string;
-    action: {
-      type: 'tool_call' | 'ask_human' | 'complete' | 'error';
-      tool?: string;
-      input?: Record<string, any>;
-      reason: string;
-    };
-    confidence: number;
-    nextSteps: string[];
-  }> {
+  private async think(task: AgentTask, subtask: AgentTask): Promise<AgentThinking> {
     const step = this.addStep(task.id, 'think', 'Pensando sobre próximo passo...');
     
     const context = this.buildContext(task, subtask);
@@ -470,7 +502,7 @@ export class AutonomousAgent extends EventEmitter {
       const jsonMatch = response.content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('Invalid thinking format');
       
-      const thinking = JSON.parse(jsonMatch[0]);
+      const thinking = parseJsonObject<AgentThinking>(jsonMatch[0]);
       step.content = thinking.thinking;
       
       return thinking;
@@ -490,13 +522,18 @@ export class AutonomousAgent extends EventEmitter {
   /**
    * Executa uma chamada de ferramenta
    */
-  private async executeToolCall(taskId: string, action: any): Promise<any> {
+  private async executeToolCall(taskId: string, action: AgentAction): Promise<unknown> {
+    if (!action.tool) {
+      return { error: 'Missing tool name' };
+    }
+
+    const input = action.input || {};
     const step = this.addStep(taskId, 'execute', `Executando ${action.tool}...`);
     
     const toolCall: ToolCall = {
       id: this.generateId(),
       tool: action.tool,
-      input: action.input || {},
+      input,
       status: 'running',
       startTime: new Date(),
     };
@@ -506,7 +543,7 @@ export class AutonomousAgent extends EventEmitter {
     this.emit('tool:started', toolCall);
     
     try {
-      const result = await executeTool(action.tool, action.input);
+      const result = await executeTool(action.tool, input);
       
       toolCall.status = 'success';
       toolCall.output = result;
@@ -516,7 +553,7 @@ export class AutonomousAgent extends EventEmitter {
       
       this.addMemory('success', `Tool ${action.tool} executada com sucesso`, {
         tool: action.tool,
-        input: action.input,
+        input,
         output: result,
       });
       
@@ -530,7 +567,7 @@ export class AutonomousAgent extends EventEmitter {
       
       this.addMemory('error', `Tool ${action.tool} falhou: ${toolCall.error}`, {
         tool: action.tool,
-        input: action.input,
+        input,
         error: toolCall.error,
       });
       
@@ -541,15 +578,7 @@ export class AutonomousAgent extends EventEmitter {
   /**
    * Reflete sobre o resultado de uma ação
    */
-  private async reflect(task: AgentTask, action: any, result: any): Promise<{
-    assessment: string;
-    success: boolean;
-    progress: number;
-    issues: string[];
-    corrections: string[];
-    nextAction: 'continue' | 'retry' | 'adjust' | 'complete' | 'abort';
-    adjustments: string;
-  }> {
+  private async reflect(task: AgentTask, action: AgentAction, result: unknown): Promise<AgentReflection> {
     const step = this.addStep(task.id, 'reflect', 'Analisando resultado...');
     
     const history = this.steps.slice(-10).map(s => 
@@ -575,7 +604,7 @@ export class AutonomousAgent extends EventEmitter {
       const jsonMatch = response.content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('Invalid reflection format');
       
-      const reflection = JSON.parse(jsonMatch[0]);
+      const reflection = parseJsonObject<AgentReflection>(jsonMatch[0]);
       step.content = reflection.assessment;
       
       return reflection;
@@ -595,7 +624,7 @@ export class AutonomousAgent extends EventEmitter {
   /**
    * Auto-correção após falha
    */
-  private async selfCorrect(task: AgentTask, reflection: any): Promise<void> {
+  private async selfCorrect(task: AgentTask, reflection: AgentReflection): Promise<void> {
     const step = this.addStep(task.id, 'correct', 'Aplicando auto-correção...');
     
     this.addMemory('decision', `Auto-correção: ${reflection.adjustments}`, {
@@ -611,11 +640,7 @@ export class AutonomousAgent extends EventEmitter {
   /**
    * Review final da execução
    */
-  private async reviewExecution(task: AgentTask): Promise<{
-    success: boolean;
-    result?: any;
-    error?: string;
-  }> {
+  private async reviewExecution(task: AgentTask): Promise<AgentReview> {
     const completedSubtasks = task.subtasks.filter(st => st.status === 'completed');
     const failedSubtasks = task.subtasks.filter(st => st.status === 'failed');
     
@@ -646,7 +671,7 @@ export class AutonomousAgent extends EventEmitter {
   /**
    * Solicita aprovação do usuário
    */
-  private async requestApproval(thinking: any): Promise<boolean> {
+  private async requestApproval(thinking: AgentThinking): Promise<boolean> {
     return new Promise((resolve) => {
       this.emit('agent:approval_needed', {
         action: thinking.action,
@@ -682,7 +707,7 @@ export class AutonomousAgent extends EventEmitter {
     return step;
   }
   
-  private addMemory(type: MemoryEntry['type'], content: string, metadata?: any): void {
+  private addMemory(type: MemoryEntry['type'], content: string, metadata?: Record<string, unknown>): void {
     const entry: MemoryEntry = {
       id: this.generateId(),
       type,
@@ -727,9 +752,9 @@ export class AutonomousAgent extends EventEmitter {
     return context.join('\n');
   }
   
-  private getAvailableTools(): Array<{ name: string; description: string; inputSchema: any }> {
+  private getAvailableTools(): AgentToolDescriptor[] {
     // Get tools from registry dynamically
-    const registeredTools: Array<{ name: string; description: string; inputSchema: any }> = [];
+    const registeredTools: AgentToolDescriptor[] = [];
     
     // Try to get tools from MCP server if available
     try {

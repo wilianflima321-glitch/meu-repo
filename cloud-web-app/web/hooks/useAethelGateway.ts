@@ -107,14 +107,59 @@ export interface Job {
     type: string;
     status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
     priority: 'low' | 'normal' | 'high' | 'critical';
-    payload: any;
+    payload: unknown;
     progress?: number;
-    result?: any;
+    result?: unknown;
     error?: string;
     createdAt: number;
     startedAt?: number;
     completedAt?: number;
 }
+
+type GatewayPayload = unknown;
+type GatewayEventCallback = (data: GatewayPayload) => void;
+type GatewayRequestPayload = Record<string, unknown> | undefined;
+
+type GatewayMessage = {
+    requestId?: string;
+    event?: string;
+    type?: string;
+    data?: unknown;
+    payload?: unknown;
+    message?: string;
+};
+
+type PendingGatewayRequest = {
+    resolve: (value: unknown) => void;
+    reject: (error: Error) => void;
+    timeout: NodeJS.Timeout;
+};
+
+type BridgeToolStatus = {
+    available?: boolean;
+};
+
+type BridgeData = {
+    blender?: BridgeToolStatus;
+    ffmpeg?: BridgeToolStatus;
+    unreal?: BridgeToolStatus;
+    id?: string;
+    path?: string;
+};
+
+type BridgeResult = {
+    type?: string;
+    data?: BridgeData;
+    message?: string;
+    path?: string;
+};
+
+type AwarenessState = {
+    user?: {
+        name?: string;
+        color?: string;
+    };
+};
 
 export interface DiskUsage {
     category: string;
@@ -146,9 +191,9 @@ const logger = createComponentLogger('aethel-gateway');
 interface GatewayContextValue {
     ws: WebSocket | null;
     connected: boolean;
-    send: (data: any) => void;
-    subscribe: (event: string, callback: (data: any) => void) => () => void;
-    request: <T>(type: string, payload?: any) => Promise<T>;
+    send: (data: GatewayPayload) => void;
+    subscribe: <T = GatewayPayload>(event: string, callback: (data: T) => void) => () => void;
+    request: <T>(type: string, payload?: GatewayRequestPayload) => Promise<T>;
 }
 
 const GatewayContext = createContext<GatewayContextValue | null>(null);
@@ -156,8 +201,8 @@ const GatewayContext = createContext<GatewayContextValue | null>(null);
 export function GatewayProvider({ children }: { children: ReactNode }) {
     const wsRef = useRef<WebSocket | null>(null);
     const [connected, setConnected] = useState(false);
-    const listenersRef = useRef<Map<string, Set<(data: any) => void>>>(new Map());
-    const pendingRequestsRef = useRef<Map<string, { resolve: Function; reject: Function; timeout: NodeJS.Timeout }>>(new Map());
+    const listenersRef = useRef<Map<string, Set<GatewayEventCallback>>>(new Map());
+    const pendingRequestsRef = useRef<Map<string, PendingGatewayRequest>>(new Map());
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const reconnectAttemptsRef = useRef(0);
     
@@ -176,7 +221,7 @@ export function GatewayProvider({ children }: { children: ReactNode }) {
             
             ws.onmessage = (event) => {
                 try {
-                    const msg = JSON.parse(event.data);
+                    const msg = JSON.parse(event.data) as GatewayMessage;
                     
                     // Handle request response
                     if (msg.requestId && pendingRequestsRef.current.has(msg.requestId)) {
@@ -231,24 +276,25 @@ export function GatewayProvider({ children }: { children: ReactNode }) {
         };
     }, [connect]);
     
-    const send = useCallback((data: any) => {
+    const send = useCallback((data: GatewayPayload) => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify(data));
         }
     }, []);
     
-    const subscribe = useCallback((event: string, callback: (data: any) => void) => {
+    const subscribe = useCallback(<T,>(event: string, callback: (data: T) => void) => {
         if (!listenersRef.current.has(event)) {
             listenersRef.current.set(event, new Set());
         }
-        listenersRef.current.get(event)!.add(callback);
+        const wrapped: GatewayEventCallback = (data) => callback(data as T);
+        listenersRef.current.get(event)!.add(wrapped);
         
         return () => {
-            listenersRef.current.get(event)?.delete(callback);
+            listenersRef.current.get(event)?.delete(wrapped);
         };
     }, []);
     
-    const request = useCallback(<T,>(type: string, payload?: any): Promise<T> => {
+    const request = useCallback(<T,>(type: string, payload?: GatewayRequestPayload): Promise<T> => {
         return new Promise((resolve, reject) => {
             if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
                 reject(new Error('Not connected'));
@@ -262,7 +308,7 @@ export function GatewayProvider({ children }: { children: ReactNode }) {
                 reject(new Error('Request timeout'));
             }, 30000);
             
-            pendingRequestsRef.current.set(requestId, { resolve, reject, timeout });
+            pendingRequestsRef.current.set(requestId, { resolve: resolve as (value: unknown) => void, reject, timeout });
             
             wsRef.current.send(JSON.stringify({ type, payload, requestId }));
         });
@@ -432,7 +478,7 @@ export function useSystemHealth(): {
                     setState(data.data);
                 }
             } catch (err) {
-                console.error('Failed to fetch health:', err);
+                logger.error('Failed to fetch health:', err);
             }
         };
         
@@ -468,7 +514,7 @@ export function useSystemHealth(): {
                 setState(data.data);
             }
         } catch (err) {
-            console.error('Failed to refresh health:', err);
+            logger.error('Failed to refresh health:', err);
         }
     }, []);
     
@@ -488,7 +534,7 @@ export function useSystemHealth(): {
 export function useJobQueue(): {
     jobs: Job[];
     stats: { pending: number; running: number; completed: number; failed: number };
-    createJob: (type: string, payload: any, priority?: string) => Promise<string>;
+    createJob: (type: string, payload: GatewayRequestPayload, priority?: string) => Promise<string>;
     cancelJob: (id: string) => Promise<void>;
     refresh: () => Promise<void>;
 } {
@@ -505,7 +551,7 @@ export function useJobQueue(): {
                     setJobs(data.data);
                 }
             } catch (err) {
-                console.error('Failed to fetch jobs:', err);
+                logger.error('Failed to fetch jobs:', err);
             }
         };
         
@@ -538,7 +584,7 @@ export function useJobQueue(): {
         failed: jobs.filter(j => j.status === 'failed').length
     }), [jobs]);
     
-    const createJob = useCallback(async (type: string, payload: any, priority = 'normal') => {
+    const createJob = useCallback(async (type: string, payload: GatewayRequestPayload, priority = 'normal') => {
         const response = await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/jobs`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -568,7 +614,7 @@ export function useJobQueue(): {
                 setJobs(data.data);
             }
         } catch (err) {
-            console.error('Failed to refresh jobs:', err);
+            logger.error('Failed to refresh jobs:', err);
         }
     }, []);
     
@@ -601,7 +647,7 @@ export function useDiskUsage(): {
                     setAlerts(data.data.alerts || []);
                 }
             } catch (err) {
-                console.error('Failed to fetch disk usage:', err);
+                logger.error('Failed to fetch disk usage:', err);
             }
         };
         
@@ -650,7 +696,7 @@ export function useDiskUsage(): {
                 setAlerts(data.data.alerts || []);
             }
         } catch (err) {
-            console.error('Failed to refresh disk usage:', err);
+            logger.error('Failed to refresh disk usage:', err);
         }
     }, []);
     
@@ -729,9 +775,9 @@ export function useBridge(): {
     connected: boolean;
     tools: { blender: boolean; ffmpeg: boolean; unreal: boolean };
     checkTools: () => Promise<void>;
-    generateDNA: (genre: string, style: string, description?: string) => Promise<any>;
+    generateDNA: (genre: string, style: string, description?: string) => Promise<BridgeResult>;
     renderBlender: (request: string, output: string) => Promise<string>;
-    getBible: () => Promise<any>;
+    getBible: () => Promise<BridgeResult | BridgeData | undefined>;
     addFact: (category: string, fact: string) => Promise<void>;
 } {
     const { connected, request, send, subscribe } = useGateway();
@@ -747,7 +793,7 @@ export function useBridge(): {
                 
                 ws.onmessage = (event) => {
                     try {
-                        const msg = JSON.parse(event.data);
+                        const msg = JSON.parse(event.data) as BridgeResult;
                         if (msg.type === 'tools_status') {
                             setTools({
                                 blender: msg.data?.blender?.available || false,
@@ -763,7 +809,7 @@ export function useBridge(): {
                     ws.send(JSON.stringify({ command: 'check_tools' }));
                 };
             } catch (err) {
-                console.error('Failed to connect to bridge:', err);
+                logger.error('Failed to connect to bridge:', err);
             }
         };
         
@@ -776,7 +822,7 @@ export function useBridge(): {
         };
     }, [connected]);
     
-    const sendBridgeCommand = useCallback((command: string, data?: any): Promise<any> => {
+    const sendBridgeCommand = useCallback((command: string, data?: Record<string, unknown>): Promise<BridgeResult> => {
         return new Promise((resolve, reject) => {
             const ws = bridgeWsRef.current;
             if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -786,7 +832,7 @@ export function useBridge(): {
             
             const handler = (event: MessageEvent) => {
                 try {
-                    const msg = JSON.parse(event.data);
+                    const msg = JSON.parse(event.data) as BridgeResult;
                     if (msg.type?.includes('complete') || msg.type?.includes('created') || msg.type?.includes('data')) {
                         ws.removeEventListener('message', handler);
                         resolve(msg.data || msg);
@@ -859,15 +905,15 @@ export function useBridge(): {
 
 export function useCollaboration(docName: string): {
     connected: boolean;
-    awareness: any;
-    doc: any;
+    awareness: unknown;
+    doc: unknown;
     users: { id: string; name: string; color: string }[];
 } {
     const { connected } = useGateway();
     const [collabConnected, setCollabConnected] = useState(false);
     const [users, setUsers] = useState<{ id: string; name: string; color: string }[]>([]);
-    const docRef = useRef<any>(null);
-    const awarenessRef = useRef<any>(null);
+    const docRef = useRef<unknown>(null);
+    const awarenessRef = useRef<unknown>(null);
     
     useEffect(() => {
         if (!connected || !docName) return;
@@ -894,7 +940,7 @@ export function useCollaboration(docName: string): {
                 });
                 
                 provider.awareness.on('change', () => {
-                    const states = Array.from(provider.awareness.getStates().values()) as any[];
+                    const states = Array.from(provider.awareness.getStates().values()) as AwarenessState[];
                     setUsers(states.map((state, idx) => ({
                         id: String(idx),
                         name: state.user?.name || 'Anonymous',
@@ -907,7 +953,7 @@ export function useCollaboration(docName: string): {
                     doc.destroy();
                 };
             } catch (err) {
-                console.error('Failed to setup collaboration:', err);
+                logger.error('Failed to setup collaboration:', err);
             }
         };
         

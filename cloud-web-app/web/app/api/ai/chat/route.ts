@@ -3,7 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { aiService } from '@/lib/ai-service';
-import type { Message } from '@/lib/ai-service';
+import type { LLMProvider, Message } from '@/lib/ai-service';
 import { checkModelAccess } from '@/lib/plan-limits';
 import {
   acquireConcurrencyLease,
@@ -25,7 +25,50 @@ import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
 import { applyProjectRulesToMessages, loadProjectRulesContext } from '@/lib/server/project-rules'
 
-function inferProviderFromModel(model?: string): 'openai' | 'openrouter' | 'anthropic' | 'google' | 'groq' | undefined {
+interface AIChatRequestBody {
+  messages?: unknown;
+  projectId?: unknown;
+  model?: unknown;
+  provider?: unknown;
+  temperature?: unknown;
+  maxTokens?: unknown;
+}
+
+const LLM_PROVIDERS = new Set<LLMProvider>(['openai', 'openrouter', 'anthropic', 'google', 'groq']);
+const MESSAGE_ROLES = new Set<Message['role']>(['system', 'user', 'assistant']);
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+function readString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+function readNumber(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function readProvider(value: unknown): LLMProvider | undefined {
+  return typeof value === 'string' && LLM_PROVIDERS.has(value as LLMProvider) ? (value as LLMProvider) : undefined;
+}
+
+function isMessageRole(value: unknown): value is Message['role'] {
+  return typeof value === 'string' && MESSAGE_ROLES.has(value as Message['role']);
+}
+
+function toAiMessage(value: unknown): Message | null {
+  const message = asRecord(value);
+  const role = message.role;
+  const content = message.content;
+  if (!isMessageRole(role) || typeof content !== 'string') {
+    return null;
+  }
+
+  return { role, content };
+}
+
+function inferProviderFromModel(model?: string): LLMProvider | undefined {
   const raw = String(model || '').trim().toLowerCase()
   if (!raw) return undefined
   if (raw.startsWith('openrouter:')) return 'openrouter'
@@ -61,19 +104,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (rateLimited) return rateLimited;
     const entitlements = await requireEntitlementsForUser(auth.userId);
 
-    const body = await req.json().catch(() => null);
-    if (!body || typeof body !== 'object') {
+    const body = asRecord((await req.json().catch(() => null)) as AIChatRequestBody | null);
+    if (Object.keys(body).length === 0) {
       return NextResponse.json({ error: 'INVALID_BODY', message: 'Invalid JSON body.' }, { status: 400 });
     }
 
-    const messages = Array.isArray((body as any).messages) ? (body as any).messages : [];
-    const projectId = typeof (body as any).projectId === 'string' ? (body as any).projectId : undefined
-    const requestedModel = typeof (body as any).model === 'string' ? (body as any).model : undefined
-    const requestedProvider = typeof (body as any).provider === 'string' ? (body as any).provider : undefined
+    const messages = Array.isArray(body.messages) ? body.messages : [];
+    const projectId = readString(body.projectId)
+    const requestedModel = readString(body.model)
+    const requestedProvider = readProvider(body.provider)
     const promptText = messages
-      .map((m: any) => (typeof m?.content === 'string' ? m.content : ''))
+      .map((message) => {
+        const content = asRecord(message).content
+        return typeof content === 'string' ? content : ''
+      })
       .join('\n');
-    const maxTokens = typeof (body as any).maxTokens === 'number' ? Math.max(0, Math.floor((body as any).maxTokens)) : 0;
+    const requestedMaxTokens = readNumber(body.maxTokens)
+    const maxTokens = requestedMaxTokens !== undefined ? Math.max(0, Math.floor(requestedMaxTokens)) : 0;
     const resolvedMaxTokens = maxTokens > 0 ? maxTokens : undefined;
 
     if (!promptText.trim()) {
@@ -171,7 +218,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const demo = demoRouteMetadata({ route: '/api/ai/chat', capability: 'AI_CHAT' });
         return NextResponse.json(
           {
-            content: buildDemoChatContent({ messages }),
+            content: buildDemoChatContent({
+              messages: messages.map((message) => ({ content: readString(asRecord(message).content) })),
+            }),
             provider: AI_DEMO_PROVIDER,
             model: AI_DEMO_MODEL,
             tokensUsed: 0,
@@ -230,16 +279,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const aiMessages: Message[] = messages
-      .filter((m: any) => typeof m?.role === 'string' && typeof m?.content === 'string')
-      .map((m: any) => ({ role: m.role as Message['role'], content: m.content }));
+      .map(toAiMessage)
+      .filter((message): message is Message => Boolean(message));
     const projectRulesContext = await loadProjectRulesContext({ userId: auth.userId, projectId })
     const aiMessagesWithRules = applyProjectRulesToMessages(aiMessages, projectRulesContext)
 
     const response = await aiService.chat({
       messages: aiMessagesWithRules,
-      model: typeof (body as any).model === 'string' ? (body as any).model : undefined,
-      provider: typeof (body as any).provider === 'string' ? (body as any).provider : undefined,
-      temperature: typeof (body as any).temperature === 'number' ? (body as any).temperature : undefined,
+      model: requestedModel,
+      provider: requestedProvider,
+      temperature: readNumber(body.temperature),
       maxTokens: resolvedMaxTokens,
     });
 

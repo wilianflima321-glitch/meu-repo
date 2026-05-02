@@ -30,7 +30,10 @@ const log = createComponentLogger('server/websocket-server');
 // Legacy collaboration bootstrap
 // ============================================================================
 
-let setupWSConnection: ((conn: WebSocket, req: IncomingMessage, options?: any) => void) | null = null;
+type WsRecord = Record<string, unknown>;
+type WsMetadata = Record<string, unknown>;
+
+let setupWSConnection: ((conn: WebSocket, req: IncomingMessage, options?: WsRecord) => void) | null = null;
 let yWebsocketInitPromise: Promise<void> | null = null;
 
 async function importNodeModuleRuntimeOnly<T>(specifier: string): Promise<T> {
@@ -104,7 +107,7 @@ export const eventBus = ServiceEventBus.getInstance();
 export interface WsMessage {
   type: string;
   channel: string;
-  payload: any;
+  payload: unknown;
   timestamp?: number;
 }
 
@@ -116,14 +119,14 @@ export interface WsClient {
   connectedAt: number;
   lastPing: number;
   isAlive: boolean;
-  metadata: Record<string, any>;
+  metadata: WsMetadata;
 }
 
 export interface WsChannel {
   name: string;
   clients: Set<string>;
   type: 'terminal' | 'collaboration' | 'filewatcher' | 'general';
-  metadata: Record<string, any>;
+  metadata: WsMetadata;
 }
 
 type ConnectionType = 'collaboration' | 'terminal' | 'lsp' | 'ai' | 'dap' | 'export' | 'general';
@@ -148,6 +151,11 @@ interface DecodedAuthPayload {
 interface LegacyExportState {
   raw: string | null;
   pollMs: number;
+}
+
+interface TerminalRuntimePayload {
+  sessionId: string;
+  [key: string]: unknown;
 }
 
 // ============================================================================
@@ -232,6 +240,42 @@ function asParsedQuery(query: ReturnType<typeof parseUrl>['query']): ParsedUrlQu
   return query && typeof query === 'object' ? query : {};
 }
 
+function asWsRecord(value: unknown): WsRecord {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as WsRecord) : {};
+}
+
+function readString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+function readNumber(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function readStringArray(value: unknown): string[] | undefined {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string') ? value : undefined;
+}
+
+function readStringMap(value: unknown): Record<string, string> | undefined {
+  if (value == null) {
+    return undefined;
+  }
+
+  const record = asWsRecord(value);
+  const entries = Object.entries(record);
+  if (!entries.every(([, entryValue]) => typeof entryValue === 'string')) {
+    return undefined;
+  }
+
+  return Object.fromEntries(entries) as Record<string, string>;
+}
+
+function asTerminalPayload(value: unknown): TerminalRuntimePayload | null {
+  const record = asWsRecord(value);
+  const sessionId = readString(record.sessionId);
+  return sessionId ? ({ ...record, sessionId } as TerminalRuntimePayload) : null;
+}
+
 function normalizeMessageType(type: unknown): string {
   if (typeof type !== 'string') {
     return '';
@@ -273,10 +317,6 @@ function toUint8Array(data: RawData): Uint8Array | null {
   }
 
   return null;
-}
-
-function isBufferLike(data: unknown): data is Buffer | Uint8Array | ArrayBuffer {
-  return Buffer.isBuffer(data) || data instanceof Uint8Array || data instanceof ArrayBuffer;
 }
 
 // ============================================================================
@@ -631,10 +671,10 @@ export class AethelWebSocketServer extends EventEmitter {
   }
 
   private handleModernMessage(client: WsClient, data: RawData): void {
-    let rawMessage: Record<string, any>;
+    let rawMessage: WsRecord;
 
     try {
-      rawMessage = JSON.parse(data.toString());
+      rawMessage = asWsRecord(JSON.parse(data.toString()));
     } catch {
       this.sendError(client, 'Invalid JSON message');
       return;
@@ -799,9 +839,10 @@ export class AethelWebSocketServer extends EventEmitter {
     }
   }
 
-  private handleAuth(client: WsClient, payload: any, closeOnFailure: boolean): void {
-    const token = typeof payload?.token === 'string' ? payload.token.trim() : '';
-    const requestedUserId = typeof payload?.userId === 'string' ? payload.userId.trim() : '';
+  private handleAuth(client: WsClient, payload: unknown, closeOnFailure: boolean): void {
+    const data = asWsRecord(payload);
+    const token = readString(data.token)?.trim() || '';
+    const requestedUserId = readString(data.userId)?.trim() || '';
 
     if (token) {
       const decoded = this.verifyJwtToken(token);
@@ -873,7 +914,7 @@ export class AethelWebSocketServer extends EventEmitter {
     return userId;
   }
 
-  private setClientIdentity(client: WsClient, userId: string, metadata: Record<string, any>): void {
+  private setClientIdentity(client: WsClient, userId: string, metadata: WsMetadata): void {
     client.userId = userId;
     client.metadata = {
       ...client.metadata,
@@ -886,7 +927,7 @@ export class AethelWebSocketServer extends EventEmitter {
   // Channel management
   // ==========================================================================
 
-  private subscribeToChannel(client: WsClient, channelName: string, options?: any): void {
+  private subscribeToChannel(client: WsClient, channelName: string, options?: unknown): void {
     if (!channelName) {
       this.sendError(client, 'Channel name is required');
       return;
@@ -903,7 +944,7 @@ export class AethelWebSocketServer extends EventEmitter {
         name: channelName,
         clients: new Set(),
         type,
-        metadata: options?.metadata || {},
+        metadata: asWsRecord(asWsRecord(options).metadata),
       };
       this.channels.set(channelName, channel);
     }
@@ -951,8 +992,9 @@ export class AethelWebSocketServer extends EventEmitter {
   // Terminal handlers
   // ==========================================================================
 
-  private async handleTerminalCreate(client: WsClient, payload: any): Promise<void> {
-    const userId = this.ensureUserIdentity(client, typeof payload?.userId === 'string' ? payload.userId : undefined);
+  private async handleTerminalCreate(client: WsClient, payload: unknown): Promise<void> {
+    const data = asWsRecord(payload);
+    const userId = this.ensureUserIdentity(client, readString(data.userId));
     if (!userId) {
       this.sendToClient(client, {
         type: WS_MESSAGE_TYPES.TERMINAL_ERROR,
@@ -964,15 +1006,15 @@ export class AethelWebSocketServer extends EventEmitter {
 
     try {
       const config: TerminalSessionConfig = {
-        id: payload?.sessionId || this.generateClientId(),
+        id: readString(data.sessionId) || this.generateClientId(),
         userId,
-        name: payload?.name || 'Terminal',
-        cwd: payload?.cwd || process.cwd(),
-        shell: payload?.shell,
-        args: payload?.args,
-        env: payload?.env,
-        cols: payload?.cols,
-        rows: payload?.rows,
+        name: readString(data.name) || 'Terminal',
+        cwd: readString(data.cwd) || process.cwd(),
+        shell: readString(data.shell),
+        args: readStringArray(data.args),
+        env: readStringMap(data.env),
+        cols: readNumber(data.cols),
+        rows: readNumber(data.rows),
       };
 
       const session = await this.terminalManager.createSession(config);
@@ -1000,9 +1042,10 @@ export class AethelWebSocketServer extends EventEmitter {
     }
   }
 
-  private handleTerminalInput(client: WsClient, payload: any): void {
-    const sessionId = payload?.sessionId;
-    const data = payload?.data;
+  private handleTerminalInput(client: WsClient, payload: unknown): void {
+    const dataRecord = asWsRecord(payload);
+    const sessionId = dataRecord.sessionId;
+    const data = dataRecord.data;
     if (typeof sessionId !== 'string' || typeof data !== 'string') {
       this.sendError(client, 'Terminal input requires sessionId and data');
       return;
@@ -1017,10 +1060,11 @@ export class AethelWebSocketServer extends EventEmitter {
     }
   }
 
-  private handleTerminalResize(client: WsClient, payload: any): void {
-    const sessionId = payload?.sessionId;
-    const cols = payload?.cols;
-    const rows = payload?.rows;
+  private handleTerminalResize(client: WsClient, payload: unknown): void {
+    const data = asWsRecord(payload);
+    const sessionId = data.sessionId;
+    const cols = data.cols;
+    const rows = data.rows;
     if (typeof sessionId !== 'string' || typeof cols !== 'number' || typeof rows !== 'number') {
       this.sendError(client, 'Terminal resize requires sessionId, cols and rows');
       return;
@@ -1035,8 +1079,8 @@ export class AethelWebSocketServer extends EventEmitter {
     }
   }
 
-  private async handleTerminalKill(client: WsClient, payload: any): Promise<void> {
-    const sessionId = payload?.sessionId;
+  private async handleTerminalKill(client: WsClient, payload: unknown): Promise<void> {
+    const sessionId = asWsRecord(payload).sessionId;
     if (typeof sessionId !== 'string') {
       this.sendError(client, 'Terminal kill requires sessionId');
       return;
@@ -1046,21 +1090,33 @@ export class AethelWebSocketServer extends EventEmitter {
   }
 
   private setupTerminalEvents(): void {
-    this.terminalManager.on('data', (output: any) => {
-      const channelName = `terminal:${output.sessionId}`;
+    this.terminalManager.on('data', (output: unknown) => {
+      const terminalOutput = asTerminalPayload(output);
+      if (!terminalOutput) {
+        log.warn('[Terminal] Ignoring malformed output event', output);
+        return;
+      }
+
+      const channelName = `terminal:${terminalOutput.sessionId}`;
       this.broadcastToChannel(channelName, {
         type: WS_MESSAGE_TYPES.TERMINAL_DATA,
         channel: channelName,
-        payload: output,
+        payload: terminalOutput,
       });
     });
 
-    this.terminalManager.on('exit', (info: any) => {
-      const channelName = `terminal:${info.sessionId}`;
+    this.terminalManager.on('exit', (info: unknown) => {
+      const terminalInfo = asTerminalPayload(info);
+      if (!terminalInfo) {
+        log.warn('[Terminal] Ignoring malformed exit event', info);
+        return;
+      }
+
+      const channelName = `terminal:${terminalInfo.sessionId}`;
       this.broadcastToChannel(channelName, {
         type: WS_MESSAGE_TYPES.TERMINAL_EXIT,
         channel: channelName,
-        payload: info,
+        payload: terminalInfo,
       });
     });
   }
@@ -1069,9 +1125,10 @@ export class AethelWebSocketServer extends EventEmitter {
   // Collaboration handlers (modern protocol)
   // ==========================================================================
 
-  private handleCollabJoin(client: WsClient, payload: any): void {
-    const documentId = typeof payload?.documentId === 'string' ? payload.documentId : 'default';
-    const userId = this.ensureUserIdentity(client, typeof payload?.userId === 'string' ? payload.userId : undefined);
+  private handleCollabJoin(client: WsClient, payload: unknown): void {
+    const data = asWsRecord(payload);
+    const documentId = readString(data.documentId) || 'default';
+    const userId = this.ensureUserIdentity(client, readString(data.userId));
     const channelName = `collab:${documentId}`;
 
     this.subscribeToChannel(client, channelName, {
@@ -1086,8 +1143,8 @@ export class AethelWebSocketServer extends EventEmitter {
         payload: {
           type: 'join',
           userId: userId || client.id,
-          userName: payload?.userName,
-          color: payload?.color,
+          userName: data.userName,
+          color: data.color,
           clientId: client.id,
         },
       },
@@ -1095,14 +1152,15 @@ export class AethelWebSocketServer extends EventEmitter {
     );
   }
 
-  private handleCollabOperation(client: WsClient, channel: string, payload: any): void {
+  private handleCollabOperation(client: WsClient, channel: string, payload: unknown): void {
+    const data = asWsRecord(payload);
     this.broadcastToChannel(
       channel,
       {
         type: WS_MESSAGE_TYPES.COLLAB_OPERATION,
         channel,
         payload: {
-          ...payload,
+          ...data,
           clientId: client.id,
           timestamp: Date.now(),
         },
@@ -1111,13 +1169,14 @@ export class AethelWebSocketServer extends EventEmitter {
     );
   }
 
-  private handleCollabChat(client: WsClient, channel: string, payload: any): void {
-    const userId = this.ensureUserIdentity(client, typeof payload?.userId === 'string' ? payload.userId : undefined);
+  private handleCollabChat(client: WsClient, channel: string, payload: unknown): void {
+    const data = asWsRecord(payload);
+    const userId = this.ensureUserIdentity(client, readString(data.userId));
     this.broadcastToChannel(channel, {
       type: WS_MESSAGE_TYPES.COLLAB_CHAT,
       channel,
       payload: {
-        ...payload,
+        ...data,
         userId: userId || client.id,
         timestamp: Date.now(),
       },
@@ -1177,9 +1236,9 @@ export class AethelWebSocketServer extends EventEmitter {
         }
 
         try {
-          const parsed = JSON.parse(raw);
+          const parsed = asWsRecord(JSON.parse(raw));
           this.sendRaw(ws, { type: 'export-status', exportId, state: parsed });
-          if (['completed', 'failed', 'canceled'].includes(parsed?.status)) {
+          if (['completed', 'failed', 'canceled'].includes(readString(parsed.status) || '')) {
             stop();
           }
         } catch {
@@ -1194,20 +1253,20 @@ export class AethelWebSocketServer extends EventEmitter {
         }
         try {
           sendState(await redis.get(key));
-        } catch (error: any) {
+        } catch (error) {
           if (!stopped && ws.readyState === WebSocket.OPEN) {
             this.sendRaw(ws, {
               type: 'error',
-              error: error?.message || 'Failed to read export state',
+              error: error instanceof Error ? error.message : 'Failed to read export state',
             });
           }
         }
       }, state.pollMs);
-    } catch (error: any) {
+    } catch (error) {
       if (!stopped && ws.readyState === WebSocket.OPEN) {
         this.sendRaw(ws, {
           type: 'error',
-          error: error?.message || 'Failed to init Redis for export status',
+          error: error instanceof Error ? error.message : 'Failed to init Redis for export status',
         });
         ws.close(1011, 'Export status unavailable');
       }
@@ -1262,7 +1321,7 @@ export class AethelWebSocketServer extends EventEmitter {
 
     ws.on('message', (data) => {
       try {
-        const message = JSON.parse(data.toString());
+        const message = asWsRecord(JSON.parse(data.toString()));
         switch (message.type) {
           case 'input':
             eventBus.emit('terminal:input', { terminalId, data: message.data });
@@ -1291,11 +1350,11 @@ export class AethelWebSocketServer extends EventEmitter {
 
     ws.on('message', (data) => {
       try {
-        const message = JSON.parse(data.toString());
+        const message = asWsRecord(JSON.parse(data.toString()));
         eventBus.emit('lsp:message', {
           language,
           message,
-          respond: (response: any) => {
+          respond: (response: unknown) => {
             this.sendRaw(ws, response);
           },
         });
@@ -1310,7 +1369,7 @@ export class AethelWebSocketServer extends EventEmitter {
   private handleLegacyAiConnection(ws: WebSocket): void {
     ws.on('message', (data) => {
       try {
-        const message = JSON.parse(data.toString());
+        const message = asWsRecord(JSON.parse(data.toString()));
         eventBus.emit('ai:stream', {
           ...message,
           stream: (chunk: string) => {
@@ -1334,10 +1393,10 @@ export class AethelWebSocketServer extends EventEmitter {
   private handleLegacyDapConnection(ws: WebSocket): void {
     ws.on('message', (data) => {
       try {
-        const message = JSON.parse(data.toString());
+        const message = asWsRecord(JSON.parse(data.toString()));
         eventBus.emit('dap:message', {
           message,
-          respond: (response: any) => {
+          respond: (response: unknown) => {
             this.sendRaw(ws, response);
           },
         });
@@ -1352,7 +1411,7 @@ export class AethelWebSocketServer extends EventEmitter {
   private handleLegacyGeneralConnection(ws: WebSocket, info: ConnectionInfo): void {
     ws.on('message', (data) => {
       try {
-        const message = JSON.parse(data.toString());
+        const message = asWsRecord(JSON.parse(data.toString()));
         if (message.type === 'join-room') {
           const roomName = String(message.room || 'default');
           const room = this.legacyRooms.get(roomName) || new Set<WebSocket>();
@@ -1470,12 +1529,21 @@ export class AethelWebSocketServer extends EventEmitter {
     }
 
     if (Array.isArray(message)) {
-      ws.send(Buffer.from(message as any));
+      if (message.every((item) => typeof item === 'number')) {
+        ws.send(Buffer.from(message));
+      } else {
+        ws.send(JSON.stringify(message));
+      }
       return;
     }
 
-    if (isBufferLike(message)) {
-      ws.send(message as any);
+    if (Buffer.isBuffer(message)) {
+      ws.send(message);
+      return;
+    }
+
+    if (message instanceof ArrayBuffer) {
+      ws.send(Buffer.from(message));
       return;
     }
 

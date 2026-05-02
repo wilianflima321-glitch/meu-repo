@@ -7,6 +7,20 @@
 
 import { EventEmitter } from 'events';
 
+type DebugPayload = Record<string, unknown>;
+type VariableReferenceData = {
+  type: string;
+  data?: unknown;
+};
+
+function asDebugPayload(value: unknown): DebugPayload {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as DebugPayload) : {};
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 // ============================================================================
 // DAP TYPES (Microsoft Debug Adapter Protocol)
 // ============================================================================
@@ -19,7 +33,7 @@ export interface DebugProtocolMessage {
 export interface DebugProtocolRequest extends DebugProtocolMessage {
   type: 'request';
   command: string;
-  arguments?: any;
+  arguments?: DebugPayload;
 }
 
 export interface DebugProtocolResponse extends DebugProtocolMessage {
@@ -28,13 +42,13 @@ export interface DebugProtocolResponse extends DebugProtocolMessage {
   success: boolean;
   command: string;
   message?: string;
-  body?: any;
+  body?: unknown;
 }
 
 export interface DebugProtocolEvent extends DebugProtocolMessage {
   type: 'event';
   event: string;
-  body?: any;
+  body?: unknown;
 }
 
 export interface Breakpoint {
@@ -147,8 +161,8 @@ export interface Capabilities {
   supportsCompletionsRequest?: boolean;
   completionTriggerCharacters?: string[];
   supportsModulesRequest?: boolean;
-  additionalModuleColumns?: any[];
-  supportedChecksumAlgorithms?: any[];
+  additionalModuleColumns?: unknown[];
+  supportedChecksumAlgorithms?: unknown[];
   supportsRestartRequest?: boolean;
   supportsExceptionOptions?: boolean;
   supportsValueFormattingOptions?: boolean;
@@ -225,7 +239,7 @@ export class DebugAdapter extends EventEmitter {
   private seq: number = 0;
   private sessionState: DebugSessionState;
   private capabilities: Capabilities = {};
-  private variableReferences: Map<number, any> = new Map();
+  private variableReferences: Map<number, VariableReferenceData> = new Map();
   private nextVariableRef: number = 1;
   private breakpointId: number = 1;
   
@@ -515,7 +529,8 @@ export class DebugAdapter extends EventEmitter {
     }
     
     if (refData.type === 'array') {
-      return refData.data.map((item: any, i: number) => ({
+      const items = Array.isArray(refData.data) ? refData.data : [];
+      return items.map((item, i) => ({
         name: `[${i}]`,
         value: JSON.stringify(item),
         type: typeof item,
@@ -524,11 +539,11 @@ export class DebugAdapter extends EventEmitter {
     }
     
     if (refData.type === 'object') {
-      return Object.entries(refData.data).map(([key, value]) => ({
+      return Object.entries(asDebugPayload(refData.data)).map(([key, value]) => ({
         name: key,
         value: JSON.stringify(value),
         type: typeof value,
-        variablesReference: typeof value === 'object' ? this.createVariableReference('object', value) : 0,
+        variablesReference: value && typeof value === 'object' ? this.createVariableReference('object', value) : 0,
       }));
     }
     
@@ -541,7 +556,7 @@ export class DebugAdapter extends EventEmitter {
     }
     
     // Parse and set variable
-    let parsedValue: any;
+    let parsedValue: unknown;
     try {
       parsedValue = JSON.parse(value);
     } catch {
@@ -571,7 +586,7 @@ export class DebugAdapter extends EventEmitter {
     }
     
     // Simulate evaluation
-    let result: any;
+    let result: unknown;
     let type: string;
     
     try {
@@ -579,8 +594,8 @@ export class DebugAdapter extends EventEmitter {
       // In real implementation, send to debug adapter
       result = `<evaluated: ${expression}>`;
       type = 'string';
-    } catch (error: any) {
-      result = `Error: ${error.message}`;
+    } catch (error) {
+      result = `Error: ${getErrorMessage(error)}`;
       type = 'error';
     }
     
@@ -588,7 +603,7 @@ export class DebugAdapter extends EventEmitter {
     if (context === 'repl') {
       this.sessionState.console.push({
         type: type === 'error' ? 'error' : 'output',
-        message: result,
+        message: String(result),
         timestamp: Date.now(),
       });
     }
@@ -635,8 +650,8 @@ export class DebugAdapter extends EventEmitter {
       try {
         const { result } = await this.evaluate(expression, undefined, 'watch');
         results.push({ expression, result });
-      } catch (error: any) {
-        results.push({ expression, result: '', error: error.message });
+      } catch (error) {
+        results.push({ expression, result: '', error: getErrorMessage(error) });
       }
     }
     
@@ -679,7 +694,7 @@ export class DebugAdapter extends EventEmitter {
     return `debug-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
   }
   
-  private createEvent(event: string, body?: any): DebugProtocolEvent {
+  private createEvent(event: string, body?: unknown): DebugProtocolEvent {
     return {
       seq: this.seq++,
       type: 'event',
@@ -688,7 +703,7 @@ export class DebugAdapter extends EventEmitter {
     };
   }
   
-  private createVariableReference(type: string, data?: any): number {
+  private createVariableReference(type: string, data?: unknown): number {
     const ref = this.nextVariableRef++;
     this.variableReferences.set(ref, { type, data });
     return ref;

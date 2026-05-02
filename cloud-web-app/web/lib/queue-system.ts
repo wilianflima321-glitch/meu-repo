@@ -23,8 +23,66 @@ const log = createComponentLogger('queue-system')
 // LAZY LOAD - Dependências opcionais
 // ============================================================================
 
-let BullMQ: any = null;
-let IORedis: any = null;
+interface QueueJobAdapter {
+  id?: string | number;
+  name: string;
+  data: unknown;
+  attemptsMade?: number;
+  progress?: unknown;
+  returnvalue?: unknown;
+  failedReason?: string;
+  timestamp?: number | string;
+  processedOn?: number;
+  finishedOn?: number;
+  getState: () => Promise<string>;
+  remove: () => Promise<void>;
+  retry: () => Promise<void>;
+}
+
+interface QueueAdapter {
+  add: (name: string, data: unknown, options: Record<string, unknown>) => Promise<QueueJobAdapter>;
+  getWaitingCount: () => Promise<number>;
+  getActiveCount: () => Promise<number>;
+  getCompletedCount: () => Promise<number>;
+  getFailedCount: () => Promise<number>;
+  getDelayedCount: () => Promise<number>;
+  getJobs: (states: string[], start: number, end: number, asc: boolean) => Promise<QueueJobAdapter[]>;
+  getJob: (jobId: string) => Promise<QueueJobAdapter | null>;
+  pause: () => Promise<void>;
+  resume: () => Promise<void>;
+  clean: (grace: number, limit: number, type: string) => Promise<unknown[]>;
+  close: () => Promise<void>;
+}
+
+interface QueueEventsAdapter {
+  on: (event: string, listener: (payload: Record<string, unknown>) => void) => void;
+  close: () => Promise<void>;
+}
+
+interface WorkerAdapter {
+  on: (event: string, listener: (job: QueueJobAdapter | undefined, err?: Error) => void) => void;
+  close: () => Promise<void>;
+}
+
+interface RedisConnectionAdapter {
+  on: (event: string, listener: (...args: unknown[]) => void) => void;
+  quit: () => Promise<void>;
+}
+
+interface BullMQRuntime {
+  Queue: new (name: string, options: { connection: RedisConnectionAdapter }) => QueueAdapter;
+  QueueEvents: new (name: string, options: { connection: RedisConnectionAdapter }) => QueueEventsAdapter;
+  Worker: new (
+    name: string,
+    processor: (job: QueueJobAdapter) => Promise<unknown>,
+    options: { connection: RedisConnectionAdapter | null; concurrency: number }
+  ) => WorkerAdapter;
+}
+
+type RedisConstructor = new (config: Record<string, unknown>) => RedisConnectionAdapter;
+
+let BullMQ: BullMQRuntime | null = null;
+let IORedis: RedisConstructor | null = null;
 let loadAttempted = false;
 
 async function loadDependencies(): Promise<boolean> {
@@ -33,11 +91,12 @@ async function loadDependencies(): Promise<boolean> {
   
   try {
     // Dynamic imports usando eval para evitar erros de webpack
-    BullMQ = await eval('import("bullmq")');
-    IORedis = await eval('import("ioredis")').then((m: any) => m.default || m);
+    BullMQ = (await eval('import("bullmq")')) as BullMQRuntime;
+    const redisModule = (await eval('import("ioredis")')) as { default?: RedisConstructor } | RedisConstructor;
+    IORedis = typeof redisModule === 'function' ? redisModule : redisModule.default || null;
     return true;
   } catch {
-    console.warn('[QueueSystem] bullmq/ioredis not installed. Queue features disabled.');
+    log.warn('[QueueSystem] bullmq/ioredis not installed. Queue features disabled.');
     return false;
   }
 }
@@ -54,16 +113,16 @@ const redisConfig = {
 };
 
 // Conexão singleton
-let redisConnection: any = null;
+let redisConnection: RedisConnectionAdapter | null = null;
 
-async function getRedisConnection(): Promise<any | null> {
-  if (!await loadDependencies()) return null;
+async function getRedisConnection(): Promise<RedisConnectionAdapter | null> {
+  if (!await loadDependencies() || !IORedis) return null;
   
   if (!redisConnection) {
     redisConnection = new IORedis(redisConfig);
     
-    redisConnection.on('error', (error: any) => {
-      console.error('[QueueSystem] Redis connection error:', error);
+    redisConnection.on('error', (error: unknown) => {
+      log.error('[QueueSystem] Redis connection error:', error);
     });
     
     redisConnection.on('connect', () => {
@@ -190,9 +249,9 @@ const DEFAULT_JOB_OPTIONS = {
 // ============================================================================
 
 class QueueManager {
-  private queues: Map<string, any> = new Map();
-  private workers: Map<string, any> = new Map();
-  private events: Map<string, any> = new Map();
+  private queues: Map<string, QueueAdapter> = new Map();
+  private workers: Map<string, WorkerAdapter> = new Map();
+  private events: Map<string, QueueEventsAdapter> = new Map();
   private initialized = false;
   private available = false;
   
@@ -213,7 +272,7 @@ class QueueManager {
     
     const connection = await getRedisConnection();
     if (!connection || !BullMQ) {
-      console.warn('[QueueManager] Redis/BullMQ not available. Queue features disabled.');
+      log.warn('[QueueManager] Redis/BullMQ not available. Queue features disabled.');
       this.available = false;
       return;
     }
@@ -230,12 +289,12 @@ class QueueManager {
       const events = new QueueEvents(queueName, { connection });
       this.events.set(queueName, events);
       
-      events.on('completed', ({ jobId }: any) => {
+      events.on('completed', ({ jobId }) => {
         log.info(`[Queue:${name}] Job ${jobId} completed`);
       });
       
-      events.on('failed', ({ jobId, failedReason }: any) => {
-        console.error(`[Queue:${name}] Job ${jobId} failed:`, failedReason);
+      events.on('failed', ({ jobId, failedReason }) => {
+        log.error(`[Queue:${name}] Job ${jobId} failed:`, failedReason);
       });
     }
     
@@ -255,11 +314,11 @@ class QueueManager {
       attempts?: number;
       jobId?: string;
     }
-  ): Promise<any> {
+  ): Promise<QueueJobAdapter | null> {
     await this.initialize();
     
     if (!this.available) {
-      console.warn('[QueueManager] Queue system not available. Job not queued:', jobType);
+      log.warn('[QueueManager] Queue system not available. Job not queued:', jobType);
       return null;
     }
     
@@ -288,15 +347,15 @@ class QueueManager {
   /**
    * Registra worker para processar jobs
    */
-  async registerWorker<T>(
+  async registerWorker(
     queueName: string,
-    processor: (job: any) => Promise<unknown>,
+    processor: (job: QueueJobAdapter) => Promise<unknown>,
     concurrency = 5
-  ): Promise<any | null> {
+  ): Promise<WorkerAdapter | null> {
     await this.initialize();
     
     if (!this.available || !BullMQ) {
-      console.warn('[QueueManager] Queue system not available. Worker not registered.');
+      log.warn('[QueueManager] Queue system not available. Worker not registered.');
       return null;
     }
     
@@ -305,25 +364,25 @@ class QueueManager {
     
     const worker = new Worker(
       queueName,
-      async (job: any) => {
+      async (job: QueueJobAdapter) => {
         log.info(`[Worker:${queueName}] Processing job ${job.id}: ${job.name}`);
         try {
           const result = await processor(job);
           return result;
         } catch (error) {
-          console.error(`[Worker:${queueName}] Job ${job.id} error:`, error);
+          log.error(`[Worker:${queueName}] Job ${job.id} error:`, error);
           throw error;
         }
       },
       { connection, concurrency }
     );
     
-    worker.on('completed', (job: any) => {
-      log.info(`[Worker:${queueName}] Job ${job.id} completed`);
+    worker.on('completed', (job) => {
+      log.info(`[Worker:${queueName}] Job ${job?.id ?? 'unknown'} completed`);
     });
     
-    worker.on('failed', (job: any, err: Error) => {
-      console.error(`[Worker:${queueName}] Job ${job?.id} failed:`, err);
+    worker.on('failed', (job, err) => {
+      log.error(`[Worker:${queueName}] Job ${job?.id} failed:`, err);
     });
     
     this.workers.set(queueName, worker);
@@ -374,7 +433,13 @@ class QueueManager {
     delayed: number;
   }>> {
     await this.initialize();
-    const stats: Record<string, any> = {};
+    const stats: Record<string, {
+      waiting: number;
+      active: number;
+      completed: number;
+      failed: number;
+      delayed: number;
+    }> = {};
     
     for (const queueName of Object.values(QUEUE_NAMES)) {
       stats[queueName] = await this.getQueueStats(queueName);
@@ -638,14 +703,14 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Envia email via fila
  */
-export async function queueEmail(data: EmailJobData, options?: { delay?: number }): Promise<any> {
+export async function queueEmail(data: EmailJobData, options?: { delay?: number }): Promise<QueueJobAdapter | null> {
   return queueManager.addJob(QUEUE_NAMES.EMAIL, 'email:send', data, options);
 }
 
 /**
  * Queue export de projeto
  */
-export async function queueProjectExport(data: ExportJobData): Promise<any> {
+export async function queueProjectExport(data: ExportJobData): Promise<QueueJobAdapter | null> {
   return queueManager.addJob(QUEUE_NAMES.EXPORT, 'export:project', data, {
     priority: 5, // Higher priority
   });
@@ -654,21 +719,21 @@ export async function queueProjectExport(data: ExportJobData): Promise<any> {
 /**
  * Queue processamento de asset
  */
-export async function queueAssetProcess(data: AssetJobData): Promise<any> {
+export async function queueAssetProcess(data: AssetJobData): Promise<QueueJobAdapter | null> {
   return queueManager.addJob(QUEUE_NAMES.ASSET, 'asset:process', data);
 }
 
 /**
  * Queue batch de IA
  */
-export async function queueAIBatch(data: AIBatchJobData): Promise<any> {
+export async function queueAIBatch(data: AIBatchJobData): Promise<QueueJobAdapter | null> {
   return queueManager.addJob(QUEUE_NAMES.AI, 'ai:batch', data);
 }
 
 /**
  * Queue webhook
  */
-export async function queueWebhook(data: WebhookJobData): Promise<any> {
+export async function queueWebhook(data: WebhookJobData): Promise<QueueJobAdapter | null> {
   return queueManager.addJob(QUEUE_NAMES.WEBHOOK, 'webhook:send', data, {
     attempts: 5,
   });

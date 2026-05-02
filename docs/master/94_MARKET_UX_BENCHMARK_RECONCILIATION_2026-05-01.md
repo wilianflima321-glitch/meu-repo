@@ -85,6 +85,7 @@ Aethel response:
 - Typed the extension host runtime, local Yjs declarations, build/export worker, chat surface, unified SDK, and AI tools registry boundaries; measured app-code `: any` now reports `732`, improving the trust layer behind agent tools, chat continuity, multiplayer, and local/cloud SDK behavior.
 - Typed the DAP/LSP API/runtime/base plus C++/Rust LSP mock boundaries; measured app-code `: any` now reports `661`, improving the trust layer behind debug sessions, completions, hover, definitions, code actions, and agent-safe editor operations.
 - Typed the remaining LSP servers, legacy DAP adapter stack, SWR resilience helpers, and API integration facade; measured app-code `: any` now reports `505`, reducing the chance that long-running agents drift because editor, debugger, cache, or API contracts silently accepted invalid shapes.
+- Typed AI chat/complete routes, editor integration, extension runtime/loader, gateway hook, websocket server, queue runtime, debug adapter, and autonomous agent mode; measured app-code `: any` now reports `390`, strengthening the market-critical path for Manus-like personal agents that operate across chat, IDE, browser/cloud/local bridges, collaboration, jobs, and debugging.
 
 ## Product Impact
 The dashboard now has a compact memory/risk/readiness object that makes the current mission legible before the user opens the deep Studio.

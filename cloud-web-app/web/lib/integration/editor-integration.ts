@@ -3,8 +3,21 @@
  * Integrates LSP, AI, and other features with the code editor
  */
 
-import { getLSPApiClient } from '../api/lsp-api';
-import { getAIApiClient } from '../api/ai-api';
+import {
+  getLSPApiClient,
+  LSPCodeActionResult,
+  LSPCompletionResult,
+  LSPHoverResult,
+  LSPLocationResult,
+  LSPTextEditResult,
+  LSPWorkspaceEditResult,
+} from '../api/lsp-api';
+import {
+  AICodeActionResponse,
+  AICompletionResponse,
+  AIHoverResponse,
+  getAIApiClient,
+} from '../api/ai-api';
 
 import { createComponentLogger } from '@/lib/observability/logger'
 
@@ -25,6 +38,38 @@ export interface EditorPosition {
 export interface EditorRange {
   start: EditorPosition;
   end: EditorPosition;
+}
+
+export interface EditorDocumentChange {
+  range?: EditorRange;
+  rangeLength?: number;
+  text: string;
+}
+
+export interface EditorCompletionItem {
+  label: string;
+  kind?: number;
+  detail?: string;
+  documentation?: unknown;
+  sortText?: string;
+  [key: string]: unknown;
+}
+
+export interface EditorCompletionList {
+  items: EditorCompletionItem[];
+}
+
+export interface EditorHover {
+  contents: unknown;
+  range?: EditorRange;
+}
+
+export interface EditorCodeAction {
+  title: string;
+  kind: string;
+  edit?: unknown;
+  command?: unknown;
+  [key: string]: unknown;
 }
 
 export class EditorIntegration {
@@ -55,7 +100,7 @@ export class EditorIntegration {
   /**
    * Change document
    */
-  async changeDocument(uri: string, version: number, changes: any[]): Promise<void> {
+  async changeDocument(uri: string, version: number, changes: EditorDocumentChange[]): Promise<void> {
     const document = this.openDocuments.get(uri);
     if (!document) {
       throw new Error(`Document not open: ${uri}`);
@@ -101,7 +146,7 @@ export class EditorIntegration {
   /**
    * Get completions
    */
-  async getCompletions(uri: string, position: EditorPosition): Promise<any> {
+  async getCompletions(uri: string, position: EditorPosition): Promise<EditorCompletionList> {
     const document = this.openDocuments.get(uri);
     if (!document) {
       throw new Error(`Document not open: ${uri}`);
@@ -128,9 +173,9 @@ export class EditorIntegration {
           return this.mergeCompletions(lspCompletions, aiCompletions);
         }
 
-        return lspCompletions;
+        return { items: this.toCompletionItems(lspCompletions) };
       } catch (error) {
-        console.warn('[Editor Integration] LSP completion failed:', error);
+        log.warn('[Editor Integration] LSP completion failed:', error);
       }
     }
 
@@ -151,7 +196,7 @@ export class EditorIntegration {
   /**
    * Get hover information
    */
-  async getHover(uri: string, position: EditorPosition): Promise<any> {
+  async getHover(uri: string, position: EditorPosition): Promise<EditorHover | null> {
     const document = this.openDocuments.get(uri);
     if (!document) {
       throw new Error(`Document not open: ${uri}`);
@@ -175,9 +220,9 @@ export class EditorIntegration {
           return this.mergeHover(lspHover, aiHover);
         }
 
-        return lspHover;
+        return this.toEditorHover(lspHover);
       } catch (error) {
-        console.warn('[Editor Integration] LSP hover failed:', error);
+        log.warn('[Editor Integration] LSP hover failed:', error);
       }
     }
 
@@ -187,7 +232,7 @@ export class EditorIntegration {
   /**
    * Get definition
    */
-  async getDefinition(uri: string, position: EditorPosition): Promise<any> {
+  async getDefinition(uri: string, position: EditorPosition): Promise<LSPLocationResult> {
     const document = this.openDocuments.get(uri);
     if (!document) {
       throw new Error(`Document not open: ${uri}`);
@@ -203,7 +248,7 @@ export class EditorIntegration {
   /**
    * Get references
    */
-  async getReferences(uri: string, position: EditorPosition): Promise<any> {
+  async getReferences(uri: string, position: EditorPosition): Promise<LSPLocationResult> {
     const document = this.openDocuments.get(uri);
     if (!document) {
       throw new Error(`Document not open: ${uri}`);
@@ -219,13 +264,13 @@ export class EditorIntegration {
   /**
    * Get code actions
    */
-  async getCodeActions(uri: string, range: EditorRange, diagnostics: any[]): Promise<any> {
+  async getCodeActions(uri: string, range: EditorRange, diagnostics: unknown[]): Promise<EditorCodeAction[]> {
     const document = this.openDocuments.get(uri);
     if (!document) {
       throw new Error(`Document not open: ${uri}`);
     }
 
-    const actions: any[] = [];
+    const actions: EditorCodeAction[] = [];
 
     // Get LSP code actions
     if (this.lspClient.isServerActive(document.languageId)) {
@@ -236,9 +281,9 @@ export class EditorIntegration {
           range,
           { diagnostics }
         );
-        actions.push(...(lspActions || []));
+        actions.push(...this.convertLSPCodeActions(lspActions));
       } catch (error) {
-        console.warn('[Editor Integration] LSP code actions failed:', error);
+        log.warn('[Editor Integration] LSP code actions failed:', error);
       }
     }
 
@@ -253,7 +298,7 @@ export class EditorIntegration {
         });
         actions.push(...this.convertAICodeActions(aiActions));
       } catch (error) {
-        console.warn('[Editor Integration] AI code actions failed:', error);
+        log.warn('[Editor Integration] AI code actions failed:', error);
       }
     }
 
@@ -263,7 +308,7 @@ export class EditorIntegration {
   /**
    * Format document
    */
-  async formatDocument(uri: string, options: any): Promise<any> {
+  async formatDocument(uri: string, options: Record<string, unknown>): Promise<LSPTextEditResult> {
     const document = this.openDocuments.get(uri);
     if (!document) {
       throw new Error(`Document not open: ${uri}`);
@@ -279,7 +324,7 @@ export class EditorIntegration {
   /**
    * Rename symbol
    */
-  async rename(uri: string, position: EditorPosition, newName: string): Promise<any> {
+  async rename(uri: string, position: EditorPosition, newName: string): Promise<LSPWorkspaceEditResult> {
     const document = this.openDocuments.get(uri);
     if (!document) {
       throw new Error(`Document not open: ${uri}`);
@@ -325,8 +370,8 @@ export class EditorIntegration {
   /**
    * Merge LSP and AI completions
    */
-  private mergeCompletions(lspCompletions: any, aiCompletions: any): any {
-    const items = [...(lspCompletions.items || [])];
+  private mergeCompletions(lspCompletions: LSPCompletionResult, aiCompletions: AICompletionResponse): EditorCompletionList {
+    const items = this.toCompletionItems(lspCompletions);
     
     for (const aiCompletion of aiCompletions.completions) {
       items.push({
@@ -344,9 +389,9 @@ export class EditorIntegration {
   /**
    * Convert AI completions to LSP format
    */
-  private convertAICompletions(aiCompletions: any): any {
+  private convertAICompletions(aiCompletions: AICompletionResponse): EditorCompletionList {
     return {
-      items: aiCompletions.completions.map((c: any) => ({
+      items: aiCompletions.completions.map((c) => ({
         label: c.text,
         kind: 1,
         detail: 'AI Suggestion',
@@ -358,7 +403,7 @@ export class EditorIntegration {
   /**
    * Merge LSP and AI hover
    */
-  private mergeHover(lspHover: any, aiHover: any): any {
+  private mergeHover(lspHover: NonNullable<LSPHoverResult>, aiHover: AIHoverResponse): EditorHover {
     return {
       contents: [
         lspHover.contents,
@@ -374,13 +419,47 @@ export class EditorIntegration {
   /**
    * Convert AI code actions to LSP format
    */
-  private convertAICodeActions(aiActions: any): any[] {
-    return aiActions.actions.map((action: any) => ({
+  private convertAICodeActions(aiActions: AICodeActionResponse): EditorCodeAction[] {
+    return aiActions.actions.map((action) => ({
       title: `AI: ${action.title}`,
       kind: action.kind,
       edit: action.edit,
       command: action.command,
     }));
+  }
+
+  private convertLSPCodeActions(actions: LSPCodeActionResult): EditorCodeAction[] {
+    return actions.filter(this.isEditorCodeAction);
+  }
+
+  private toCompletionItems(completions: LSPCompletionResult): EditorCompletionItem[] {
+    const rawItems = Array.isArray(completions) ? completions : completions.items || [];
+    return rawItems.filter(this.isCompletionItem);
+  }
+
+  private toEditorHover(hover: LSPHoverResult): EditorHover | null {
+    if (!hover || hover.contents === undefined) {
+      return null;
+    }
+
+    return {
+      contents: hover.contents,
+      range: hover.range,
+    };
+  }
+
+  private isCompletionItem(value: unknown): value is EditorCompletionItem {
+    return Boolean(value && typeof value === 'object' && !Array.isArray(value) && typeof (value as { label?: unknown }).label === 'string');
+  }
+
+  private isEditorCodeAction(value: unknown): value is EditorCodeAction {
+    return Boolean(
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      typeof (value as { title?: unknown }).title === 'string' &&
+      typeof (value as { kind?: unknown }).kind === 'string'
+    );
   }
 
   /**

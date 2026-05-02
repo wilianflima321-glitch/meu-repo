@@ -6,6 +6,9 @@
  */
 
 import { EventEmitter } from 'events';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const log = createComponentLogger('extensions/extension-system');
 
 // ============================================================================
 // EXTENSION MANIFEST (package.json)
@@ -77,7 +80,7 @@ export interface ExtensionContributions {
   iconThemes?: ContributedIconTheme[];
   snippets?: ContributedSnippet[];
   configuration?: ContributedConfiguration;
-  configurationDefaults?: Record<string, any>;
+  configurationDefaults?: Record<string, unknown>;
   views?: ContributedViews;
   viewsContainers?: ContributedViewsContainers;
   viewsWelcome?: ContributedViewsWelcome[];
@@ -129,7 +132,7 @@ export interface ContributedKeybinding {
   linux?: string;
   win?: string;
   when?: string;
-  args?: any;
+  args?: unknown;
 }
 
 export interface ContributedLanguage {
@@ -177,10 +180,10 @@ export interface ContributedConfiguration {
 
 export interface ConfigurationProperty {
   type: 'string' | 'number' | 'boolean' | 'array' | 'object' | 'null' | ('string' | 'number' | 'boolean' | 'array' | 'object' | 'null')[];
-  default?: any;
+  default?: unknown;
   description?: string;
   markdownDescription?: string;
-  enum?: any[];
+  enum?: unknown[];
   enumDescriptions?: string[];
   enumItemLabels?: string[];
   minimum?: number;
@@ -254,9 +257,9 @@ export interface ContributedDebugger {
   runtime?: string;
   runtimeArgs?: string[];
   languages?: string[];
-  configurationAttributes?: Record<string, any>;
-  initialConfigurations?: any[];
-  configurationSnippets?: any[];
+  configurationAttributes?: Record<string, unknown>;
+  initialConfigurations?: unknown[];
+  configurationSnippets?: unknown[];
 }
 
 export interface ContributedBreakpoint {
@@ -380,7 +383,7 @@ export interface Memento {
   keys(): readonly string[];
   get<T>(key: string): T | undefined;
   get<T>(key: string, defaultValue: T): T;
-  update(key: string, value: any): Promise<void>;
+  update(key: string, value: unknown): Promise<void>;
   setKeysForSync(keys: readonly string[]): void;
 }
 
@@ -403,10 +406,18 @@ export interface EnvironmentVariableCollection {
   replace(variable: string, value: string, options?: { applyAtProcessCreation?: boolean; applyAtShellIntegration?: boolean }): void;
   append(variable: string, value: string, options?: { applyAtProcessCreation?: boolean; applyAtShellIntegration?: boolean }): void;
   prepend(variable: string, value: string, options?: { applyAtProcessCreation?: boolean; applyAtShellIntegration?: boolean }): void;
-  get(variable: string): { value: string; type: number; options: any } | undefined;
-  forEach(callback: (variable: string, mutator: any, collection: any) => void): void;
+  get(variable: string): EnvironmentVariableMutator | undefined;
+  forEach(callback: (variable: string, mutator: EnvironmentVariableMutator, collection: Map<string, EnvironmentVariableMutator>) => void): void;
   delete(variable: string): void;
   clear(): void;
+}
+
+type EnvironmentVariableOptions = { applyAtProcessCreation?: boolean; applyAtShellIntegration?: boolean } | undefined;
+
+interface EnvironmentVariableMutator {
+  value: string;
+  type: number;
+  options: EnvironmentVariableOptions;
 }
 
 // ============================================================================
@@ -420,8 +431,8 @@ export interface Extension {
   readonly isActive: boolean;
   readonly packageJSON: ExtensionManifest;
   readonly extensionKind: ExtensionKind;
-  readonly exports: any;
-  activate(): Promise<any>;
+  readonly exports: unknown;
+  activate(): Promise<unknown>;
 }
 
 export enum ExtensionKind {
@@ -434,7 +445,7 @@ export enum ExtensionKind {
 // ============================================================================
 
 export interface ExtensionAPI {
-  activate(context: ExtensionContext): Promise<any> | any;
+  activate(context: ExtensionContext): Promise<unknown> | unknown;
   deactivate?(): Promise<void> | void;
 }
 
@@ -449,8 +460,8 @@ export interface LoadedExtension {
 
 export class ExtensionHost extends EventEmitter {
   private extensions: Map<string, LoadedExtension> = new Map();
-  private commandHandlers: Map<string, (...args: any[]) => any> = new Map();
-  private configurationListeners: Map<string, Set<(e: any) => void>> = new Map();
+  private commandHandlers: Map<string, (...args: unknown[]) => unknown> = new Map();
+  private configurationListeners: Map<string, Set<(e: unknown) => void>> = new Map();
   private disposables: Map<string, Set<{ dispose(): void }>> = new Map();
   
   constructor() {
@@ -494,7 +505,7 @@ export class ExtensionHost extends EventEmitter {
     }
   }
   
-  async activateExtension(id: string): Promise<any> {
+  async activateExtension(id: string): Promise<unknown> {
     const ext = this.extensions.get(id);
     if (!ext) {
       throw new Error(`Extension ${id} not found`);
@@ -507,7 +518,7 @@ export class ExtensionHost extends EventEmitter {
     if (ext.status === 'activating') {
       // Wait for activation to complete
       return new Promise((resolve, reject) => {
-        const handler = (event: any) => {
+        const handler = (event: { id?: string; error?: unknown; exports?: unknown }) => {
           if (event.id === id) {
             this.off('extensionActivated', handler);
             this.off('extensionActivationFailed', handler);
@@ -565,9 +576,9 @@ export class ExtensionHost extends EventEmitter {
       
       return exports;
       
-    } catch (error: any) {
+    } catch (error) {
       ext.status = 'error';
-      ext.error = error;
+      ext.error = error instanceof Error ? error : new Error(String(error));
       
       this.emit('extensionActivationFailed', { id, error });
       
@@ -590,7 +601,7 @@ export class ExtensionHost extends EventEmitter {
         try {
           disposable.dispose();
         } catch (e) {
-          console.error(`Error disposing subscription for ${id}:`, e);
+          log.error(`Error disposing subscription for ${id}:`, e);
         }
       }
       
@@ -601,7 +612,7 @@ export class ExtensionHost extends EventEmitter {
           try {
             d.dispose();
           } catch (e) {
-            console.error(`Error disposing for ${id}:`, e);
+            log.error(`Error disposing for ${id}:`, e);
           }
         }
         extDisposables.clear();
@@ -612,7 +623,7 @@ export class ExtensionHost extends EventEmitter {
       this.emit('extensionDeactivated', { id });
       
     } catch (error) {
-      console.error(`Error deactivating extension ${id}:`, error);
+      log.error(`Error deactivating extension ${id}:`, error);
       throw error;
     }
   }
@@ -636,7 +647,7 @@ export class ExtensionHost extends EventEmitter {
   // COMMANDS
   // ==========================================================================
   
-  registerCommand(command: string, handler: (...args: any[]) => any, extensionId?: string): { dispose(): void } {
+  registerCommand(command: string, handler: (...args: unknown[]) => unknown, extensionId?: string): { dispose(): void } {
     if (this.commandHandlers.has(command)) {
       throw new Error(`Command ${command} is already registered`);
     }
@@ -657,13 +668,13 @@ export class ExtensionHost extends EventEmitter {
     return disposable;
   }
   
-  async executeCommand<T = any>(command: string, ...args: any[]): Promise<T> {
+  async executeCommand<T = unknown>(command: string, ...args: unknown[]): Promise<T> {
     const handler = this.commandHandlers.get(command);
     if (!handler) {
       throw new Error(`Command ${command} not found`);
     }
     
-    return handler(...args);
+    return await Promise.resolve(handler(...args)) as T;
   }
   
   getCommands(filterInternal: boolean = true): string[] {
@@ -684,7 +695,7 @@ export class ExtensionHost extends EventEmitter {
         try {
           await this.activateExtension(id);
         } catch (error) {
-          console.error(`Failed to activate ${id} for event ${event}:`, error);
+          log.error(`Failed to activate ${id} for event ${event}:`, error);
         }
       }
     }
@@ -838,15 +849,15 @@ export class ExtensionHost extends EventEmitter {
   }
   
   private createMemento(key: string): Memento {
-    const storage = new Map<string, any>();
+    const storage = new Map<string, unknown>();
     const syncKeys = new Set<string>();
     
     return {
       keys: () => Array.from(storage.keys()),
       get: <T>(k: string, defaultValue?: T): T | undefined => {
-        return storage.has(k) ? storage.get(k) : defaultValue;
+        return storage.has(k) ? storage.get(k) as T : defaultValue;
       },
-      update: async (k: string, value: any) => {
+      update: async (k: string, value: unknown) => {
         if (value === undefined) {
           storage.delete(k);
         } else {
@@ -882,7 +893,7 @@ export class ExtensionHost extends EventEmitter {
   }
   
   private createEnvVarCollection(): EnvironmentVariableCollection {
-    const vars = new Map<string, { value: string; type: number; options: any }>();
+    const vars = new Map<string, EnvironmentVariableMutator>();
     
     return {
       persistent: true,

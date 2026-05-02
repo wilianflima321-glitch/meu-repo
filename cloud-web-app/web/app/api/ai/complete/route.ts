@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
-import { aiService, type Message } from '@/lib/ai-service'
+import { aiService, type LLMProvider, type Message } from '@/lib/ai-service'
 import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
 import { capabilityResponse } from '@/lib/server/capability-response'
@@ -35,6 +35,40 @@ Rules:
 - Do NOT include markdown or explanations.
 - Do NOT repeat existing prefix/suffix.
 - Keep it short and natural.`
+
+type AICompleteRequestBody = {
+  prompt?: string
+  prefix?: string
+  suffix?: string
+  language?: string
+  filepath?: string
+  provider?: string
+  model?: string
+  projectId?: string
+  maxTokens?: number
+  temperature?: number
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null
+}
+
+function readString(body: Record<string, unknown>, key: keyof AICompleteRequestBody): string | undefined {
+  const value = body[key]
+  return typeof value === 'string' ? value : undefined
+}
+
+function readNumber(body: Record<string, unknown>, key: keyof AICompleteRequestBody): number | undefined {
+  const value = body[key]
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined
+}
+
+function readProvider(body: Record<string, unknown>): LLMProvider | undefined {
+  const provider = readString(body, 'provider')
+  return provider === 'openai' || provider === 'openrouter' || provider === 'anthropic' || provider === 'google' || provider === 'groq'
+    ? provider
+    : undefined
+}
 
 function buildPrompt(args: {
   prefix?: string
@@ -74,24 +108,26 @@ export async function POST(req: NextRequest) {
       config: AI_INLINE_RATE_LIMIT,
     })
     if (rateLimited) return rateLimited
-    const body = await req.json().catch(() => null)
-    if (!body || typeof body !== 'object') {
+    const body = asRecord(await req.json().catch(() => null))
+    if (!body) {
       return NextResponse.json({ error: 'INVALID_BODY', message: 'Invalid JSON body.' }, { status: 400 })
     }
 
     const prompt = buildPrompt({
-      prompt: typeof (body as any).prompt === 'string' ? (body as any).prompt : undefined,
-      prefix: typeof (body as any).prefix === 'string' ? (body as any).prefix : undefined,
-      suffix: typeof (body as any).suffix === 'string' ? (body as any).suffix : undefined,
-      language: typeof (body as any).language === 'string' ? (body as any).language : undefined,
-      filepath: typeof (body as any).filepath === 'string' ? (body as any).filepath : undefined,
+      prompt: readString(body, 'prompt'),
+      prefix: readString(body, 'prefix'),
+      suffix: readString(body, 'suffix'),
+      language: readString(body, 'language'),
+      filepath: readString(body, 'filepath'),
     })
 
-    const provider = typeof (body as any).provider === 'string' ? (body as any).provider : undefined
-    const model = typeof (body as any).model === 'string' ? (body as any).model : undefined
-    const projectId = typeof (body as any).projectId === 'string' ? (body as any).projectId : undefined
-    const maxTokens = typeof (body as any).maxTokens === 'number' ? Math.max(1, Math.floor((body as any).maxTokens)) : 256
-    const temperature = typeof (body as any).temperature === 'number' ? Math.min(1, Math.max(0, (body as any).temperature)) : 0.1
+    const provider = readProvider(body)
+    const model = readString(body, 'model')
+    const projectId = readString(body, 'projectId')
+    const requestedMaxTokens = readNumber(body, 'maxTokens')
+    const requestedTemperature = readNumber(body, 'temperature')
+    const maxTokens = requestedMaxTokens !== undefined ? Math.max(1, Math.floor(requestedMaxTokens)) : 256
+    const temperature = requestedTemperature !== undefined ? Math.min(1, Math.max(0, requestedTemperature)) : 0.1
 
     if (!prompt) {
       return NextResponse.json({ suggestion: '' })
@@ -157,9 +193,9 @@ export async function POST(req: NextRequest) {
         }
         const demo = demoRouteMetadata({ route: '/api/ai/complete', capability: 'AI_COMPLETE' })
         const suggestion = buildDemoCompletion({
-          prompt: typeof (body as any).prompt === 'string' ? (body as any).prompt : undefined,
-          prefix: typeof (body as any).prefix === 'string' ? (body as any).prefix : undefined,
-          language: typeof (body as any).language === 'string' ? (body as any).language : undefined,
+          prompt: readString(body, 'prompt'),
+          prefix: readString(body, 'prefix'),
+          language: readString(body, 'language'),
         })
         return NextResponse.json({
           suggestion,

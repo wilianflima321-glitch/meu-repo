@@ -377,7 +377,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
                                 <pre className="max-h-20 overflow-auto text-[var(--aethel-text-quaternary)]">
                                   {JSON.stringify(tc.input, null, 2)}
                                 </pre>
-                                {tc.output && (
+                                {tc.output !== undefined && tc.output !== null && (
                                   <pre className="mt-1 max-h-20 overflow-auto text-[var(--aethel-success-light)]">
                                     {typeof tc.output === 'string'
                                       ? tc.output.slice(0, 200)

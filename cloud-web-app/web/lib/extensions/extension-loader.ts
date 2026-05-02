@@ -2,6 +2,32 @@ import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('extensions/extension-loader')
 
+type ExtensionStorageRecord = Record<string, unknown>;
+
+export interface ExtensionStateStore {
+  get: (key: string) => unknown;
+  update: (key: string, value: unknown) => void;
+}
+
+export interface ExtensionContext {
+  subscriptions: unknown[];
+  extensionPath: string;
+  extensionUri: string;
+  globalState: ExtensionStateStore;
+  workspaceState: ExtensionStateStore;
+  asAbsolutePath: (relativePath: string) => string;
+}
+
+export interface ExtensionModule {
+  activate?: (context: ExtensionContext) => unknown | Promise<unknown>;
+  deactivate?: () => unknown | Promise<unknown>;
+  [key: string]: unknown;
+}
+
+function asStorageRecord(value: unknown): ExtensionStorageRecord {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as ExtensionStorageRecord) : {};
+}
+
 
 /**
  * Extension Loader
@@ -110,9 +136,9 @@ export interface ConfigurationContribution {
   properties: {
     [key: string]: {
       type: string;
-      default?: any;
+      default?: unknown;
       description?: string;
-      enum?: any[];
+      enum?: unknown[];
       enumDescriptions?: string[];
     };
   };
@@ -123,7 +149,7 @@ export interface DebuggerContribution {
   label: string;
   program?: string;
   runtime?: string;
-  configurationAttributes?: any;
+  configurationAttributes?: unknown;
 }
 
 export interface TaskDefinitionContribution {
@@ -142,8 +168,8 @@ export interface LoadedExtension {
   manifest: ExtensionManifest;
   extensionPath: string;
   isActive: boolean;
-  exports?: any;
-  module?: any;
+  exports?: unknown;
+  module?: ExtensionModule;
   activationPromise?: Promise<void>;
 }
 
@@ -204,9 +230,9 @@ export class ExtensionLoader {
     return res.href;
   }
 
-  private async importExtensionModule(moduleUrl: string): Promise<any> {
+  private async importExtensionModule(moduleUrl: string): Promise<ExtensionModule> {
     // webpackIgnore evita que o bundler tente resolver paths arbitrários em build-time.
-    return await import(/* webpackIgnore: true */ moduleUrl);
+    return (await import(/* webpackIgnore: true */ moduleUrl)) as ExtensionModule;
   }
 
   private getStorage(): Storage | null {
@@ -270,7 +296,7 @@ export class ExtensionLoader {
 
       return extension;
     } catch (error) {
-      console.error(`Failed to load extension from ${extensionPath}:`, error);
+      log.error(`Failed to load extension from ${extensionPath}:`, error);
       throw error;
     }
   }
@@ -316,7 +342,7 @@ export class ExtensionLoader {
       extension.isActive = true;
       log.info(`Extension activated: ${extension.id}`);
     } catch (error) {
-      console.error(`Failed to activate extension ${extension.id}:`, error);
+      log.error(`Failed to activate extension ${extension.id}:`, error);
       throw error;
     }
   }
@@ -348,7 +374,7 @@ export class ExtensionLoader {
       extension.activationPromise = undefined;
       log.info(`Extension deactivated: ${extension.id}`);
     } catch (error) {
-      console.error(`Failed to deactivate extension ${extension.id}:`, error);
+      log.error(`Failed to deactivate extension ${extension.id}:`, error);
     }
   }
 
@@ -384,7 +410,7 @@ export class ExtensionLoader {
 
     const activationPromises = Array.from(extensionIds).map(id =>
       this.activateExtension(id).catch(error =>
-        console.error(`Failed to activate extension ${id} for event ${event}:`, error)
+        log.error(`Failed to activate extension ${id} for event ${event}:`, error)
       )
     );
 
@@ -403,7 +429,7 @@ export class ExtensionLoader {
     return Array.from(this.extensions.values()).filter(ext => ext.isActive);
   }
 
-  private createExtensionContext(extension: LoadedExtension): any {
+  private createExtensionContext(extension: LoadedExtension): ExtensionContext {
     const baseHref = this.resolveExtensionBaseUrl(extension.extensionPath).baseHref;
 
     return {
@@ -412,11 +438,11 @@ export class ExtensionLoader {
       extensionUri: extension.extensionPath,
       globalState: {
         get: (key: string) => this.getGlobalState(extension.id, key),
-        update: (key: string, value: any) => this.updateGlobalState(extension.id, key, value)
+        update: (key: string, value: unknown) => this.updateGlobalState(extension.id, key, value)
       },
       workspaceState: {
         get: (key: string) => this.getWorkspaceState(extension.id, key),
-        update: (key: string, value: any) => this.updateWorkspaceState(extension.id, key, value)
+        update: (key: string, value: unknown) => this.updateWorkspaceState(extension.id, key, value)
       },
       asAbsolutePath: (relativePath: string) => this.resolveExtensionResource(baseHref, relativePath)
     };
@@ -534,31 +560,31 @@ export class ExtensionLoader {
     }
   }
 
-  private getGlobalState(extensionId: string, key: string): any {
+  private getGlobalState(extensionId: string, key: string): unknown {
     const storage = this.getStorage();
     if (!storage) return undefined;
 
     const raw = storage.getItem(`${ExtensionLoader.GLOBAL_STATE_PREFIX}${extensionId}`);
     if (!raw) return undefined;
     try {
-      const data = JSON.parse(raw) as Record<string, any>;
+      const data = asStorageRecord(JSON.parse(raw));
       return data[key];
     } catch {
       return undefined;
     }
   }
 
-  private updateGlobalState(extensionId: string, key: string, value: any): void {
+  private updateGlobalState(extensionId: string, key: string, value: unknown): void {
     const storage = this.getStorage();
     if (!storage) return;
 
     const storageKey = `${ExtensionLoader.GLOBAL_STATE_PREFIX}${extensionId}`;
     const raw = storage.getItem(storageKey);
-    let data: Record<string, any> = {};
+    let data: ExtensionStorageRecord = {};
 
     if (raw) {
       try {
-        data = JSON.parse(raw) as Record<string, any>;
+        data = asStorageRecord(JSON.parse(raw));
       } catch {
         data = {};
       }
@@ -572,31 +598,31 @@ export class ExtensionLoader {
     }
   }
 
-  private getWorkspaceState(extensionId: string, key: string): any {
+  private getWorkspaceState(extensionId: string, key: string): unknown {
     const storage = this.getStorage();
     if (!storage) return undefined;
 
     const raw = storage.getItem(`${ExtensionLoader.WORKSPACE_STATE_PREFIX}${extensionId}`);
     if (!raw) return undefined;
     try {
-      const data = JSON.parse(raw) as Record<string, any>;
+      const data = asStorageRecord(JSON.parse(raw));
       return data[key];
     } catch {
       return undefined;
     }
   }
 
-  private updateWorkspaceState(extensionId: string, key: string, value: any): void {
+  private updateWorkspaceState(extensionId: string, key: string, value: unknown): void {
     const storage = this.getStorage();
     if (!storage) return;
 
     const storageKey = `${ExtensionLoader.WORKSPACE_STATE_PREFIX}${extensionId}`;
     const raw = storage.getItem(storageKey);
-    let data: Record<string, any> = {};
+    let data: ExtensionStorageRecord = {};
 
     if (raw) {
       try {
-        data = JSON.parse(raw) as Record<string, any>;
+        data = asStorageRecord(JSON.parse(raw));
       } catch {
         data = {};
       }

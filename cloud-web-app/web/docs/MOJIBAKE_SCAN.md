@@ -1,5 +1,5 @@
 # MOJIBAKE_SCAN.md
-Generated: 2026-05-02T11:55:33.587Z
+Generated: 2026-05-02T13:20:13.664Z
 
 - Files scanned: 1461
 - Findings: 41

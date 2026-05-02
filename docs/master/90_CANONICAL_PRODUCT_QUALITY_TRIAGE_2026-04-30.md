@@ -191,6 +191,8 @@ The debug adapter protocol, language server protocol API, LSP server base, C++/R
 
 The remaining LSP language servers, legacy DAP adapter base, Node/Python/Java/Go debug adapters, SWR resilience helpers, and API integration facade were tightened next. The measured app-code `: any` ratchet moved from `661` to `505`; the product is still not ready for `noImplicitAny`, but the editor/debug/runtime substrate now has far fewer weak seams for long-running agents.
 
+The AI chat/complete route contracts, editor integration bridge, extension runtime/loader, gateway hook, WebSocket server, queue runtime, debug adapter, and autonomous agent mode were tightened next. The measured app-code `: any` ratchet moved from `505` to `390`; this directly reduces the weak seams around mission chat, tool execution, local/cloud gateway continuity, websocket collaboration, jobs, debug control, and long-running personal agents.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

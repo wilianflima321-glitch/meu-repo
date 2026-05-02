@@ -159,7 +159,7 @@ Aethel should avoid one giant IDE screen. Instead, the Workbench opens focused r
 ## Execution Priority From Here
 P0: Keep current gates green while reducing structural debt.
 - Current measured `component files over 1000 lines`: 0 after the 2026-05-01 god-component closure pass.
-- Current measured `: any`: 505 after typing the level serializer, VS Code language/workspace/window APIs, extension host runtime, chat surface, unified SDK, AI tools registry, DAP, LSP, debug integration, SWR, and API integration boundaries.
+- Current measured `: any`: 390 after typing the level serializer, VS Code language/workspace/window APIs, extension host/runtime/loader, chat/complete routes, unified SDK, AI tools registry, DAP, LSP, debug integration/adapter, SWR, API integration, gateway, websocket, queue, and agent-mode boundaries.
 - Current measured E2E specs: 15, target 15.
 - Current measured Prisma migrations: 0, target at least 1 after baseline decision.
 
