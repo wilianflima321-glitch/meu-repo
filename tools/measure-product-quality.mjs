@@ -163,6 +163,10 @@ const commercialAccessConfigured =
   exists('tools/check-commercial-access-gate.mjs') &&
   exists('docs/master/99_COMMERCIAL_ACCESS_GATE_2026-05-03.md') &&
   packageJson.includes('qa:commercial-access');
+const economicsTransparencyConfigured =
+  exists('tools/check-economics-transparency-gate.mjs') &&
+  exists('docs/master/100_ECONOMICS_TRANSPARENCY_GATE_2026-05-03.md') &&
+  packageJson.includes('qa:economics-transparency');
 
 const metrics = [
   { id: 'console_calls', label: 'console.log/info/debug in app code', value: consoleCalls.total, target: 50, direction: 'lte' },
@@ -183,6 +187,7 @@ const metrics = [
   { id: 'core_experience_routes', label: 'Core experience route contract configured', value: coreExperienceRoutesConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'product_funnel_telemetry', label: 'Product funnel telemetry gate configured', value: productFunnelTelemetryConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'commercial_access', label: 'Commercial access/free trial gate configured', value: commercialAccessConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'economics_transparency', label: 'Chat economics transparency gate configured', value: economicsTransparencyConfigured ? 1 : 0, target: 1, direction: 'eq' },
 ].map((metric) => ({
   ...metric,
   status: statusFor(metric.value, metric.target, metric.direction),

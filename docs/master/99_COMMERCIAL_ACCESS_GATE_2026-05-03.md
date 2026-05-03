@@ -63,11 +63,10 @@ The best-market benchmark is v0/Replit/Cursor-style low-friction entry, but Aeth
 
 This gate closes the factual contract, not the full monetization system. Still open:
 
-1. Stripe Customer Portal self-service polish.
+1. Admin margin dashboard for AI token cost vs revenue.
 2. Trial-expiration email and in-app banner.
-3. Cost meter in chat and agent runs.
-4. Admin margin dashboard for AI token cost vs revenue.
-5. Cleaner pricing tier simplification research: likely Free, Pro, Team/Studio, Enterprise.
+3. Per-agent and per-run cost attribution beyond the compact chat meter.
+4. Cleaner pricing tier simplification research: likely Free, Pro, Team/Studio, Enterprise.
 
 ## Verdict
 

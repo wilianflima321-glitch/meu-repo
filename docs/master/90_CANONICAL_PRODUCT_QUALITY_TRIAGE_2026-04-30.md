@@ -235,6 +235,9 @@ The V12 telemetry critique is now converted into an executable product gate inst
 ## 2026-05-03 Commercial Access Gate
 The V12 distribution critique is now also executable. A canonical `free` plan exists, registration creates a factual `trialEndsAt` for a 14-day Starter trial, expired trials fall back to Free instead of hard-blocking the core Studio loop, and billing usage normalizes trial/unknown plan state through canonical plan definitions. `tools/check-commercial-access-gate.mjs` keeps this from regressing into a prose-only pricing promise.
 
+## 2026-05-03 Economics Transparency Gate
+The V12 cost-visibility critique is now executable inside the AI loop. `AIChatCostMeter` renders a compact cost transparency rail in the chat with live run estimate, wallet, monthly budget pressure, active model, and a handoff into the deeper economics panel. `/api/auth/me` now exposes trial state and days remaining, while `/api/billing/portal` uses structured logging for customer portal self-service. `tools/check-economics-transparency-gate.mjs` keeps these surfaces factual without turning chat into a finance dashboard.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
@@ -243,6 +246,7 @@ As of this checkpoint:
 - `npm run qa:core-experience-routes` is green,
 - `npm run qa:product-funnel-telemetry` is green,
 - `npm run qa:commercial-access` is green,
+- `npm run qa:economics-transparency` is green,
 - `npm run qa:canonical-doc-alignment` is green,
 - the five public UX contracts for mission intake, Studio handoff, compare trust, pricing readiness, and local continuity pass in Chromium,
 - `git diff --check` is green when the repo is validated cleanly.
@@ -397,6 +401,7 @@ This is the shortest honest list of important open gaps.
 - build/parity trust,
 - keep mojibake at zero with the failing scanner,
 - keep commercial access truthful with Free plus a 14-day trial gate.
+- keep chat economics visible with a compact cost meter and billing portal truth.
 
 ### Priority 2
 - viewport dominance,

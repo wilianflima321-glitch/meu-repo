@@ -8,8 +8,11 @@ import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { getStripe } from '@/lib/stripe';
 import { optionalEnv } from '@/lib/env';
+import { createComponentLogger } from '@/lib/observability/logger';
 import { buildAppUrl } from '@/lib/server/app-origin';
 import { billingRuntimeCapabilityResponse, getBillingRuntimeState } from '@/lib/server/billing-runtime';
+
+const routeLogger = createComponentLogger('api.billing.portal');
 
 function resolveAppUrl(req?: NextRequest): string {
   const explicit = optionalEnv('NEXT_PUBLIC_APP_URL') || optionalEnv('NEXTAUTH_URL');
@@ -17,9 +20,15 @@ function resolveAppUrl(req?: NextRequest): string {
 }
 
 function handleStripeConfigError(error: unknown): NextResponse | null {
-  if ((error as any)?.code === 'ENV_NOT_SET') {
+  const code =
+    typeof error === 'object' && error !== null && 'code' in error
+      ? (error as { code?: unknown }).code
+      : undefined;
+
+  if (code === 'ENV_NOT_SET') {
+    const message = error instanceof Error ? error.message : 'Stripe environment is not configured';
     return NextResponse.json(
-      { error: 'STRIPE_NOT_CONFIGURED', message: (error as Error).message },
+      { error: 'STRIPE_NOT_CONFIGURED', message },
       { status: 503 }
     );
   }
@@ -67,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: portalSession.url });
   } catch (error) {
-    console.error('[billing/portal:POST] Error:', error);
+    routeLogger.error('billing.portal.post.failed', error);
     const mapped = handleStripeConfigError(error);
     if (mapped) return mapped;
     return NextResponse.json({ error: 'Failed to create portal session' }, { status: 500 });
@@ -178,7 +187,7 @@ export async function GET(req: NextRequest) {
       canAccessPortal: true,
     });
   } catch (error) {
-    console.error('[billing/portal:GET] Error:', error);
+    routeLogger.error('billing.portal.get.failed', error);
     const mapped = handleStripeConfigError(error);
     if (mapped) return mapped;
     return NextResponse.json({ error: 'Failed to fetch billing info' }, { status: 500 });
@@ -222,7 +231,7 @@ async function getOrCreatePortalConfiguration(stripe: Stripe, req?: NextRequest)
         products: await getProductsForPortal(stripe),
       },
     },
-      default_return_url: `${appUrl}/billing`,
+    default_return_url: `${appUrl}/billing`,
   });
 
   return config.id;

@@ -10,6 +10,7 @@ import { useEditorApplyBridge } from './EditorApplyBridgeContext'
 import { AIChatBenchmarkTelemetry } from '@/components/ai-chat/AIChatBenchmarkTelemetry'
 import { AIChatComposer } from '@/components/ai-chat/AIChatComposer'
 import { AIChatContextStrip } from '@/components/ai-chat/AIChatContextStrip'
+import { AIChatCostMeter } from '@/components/ai-chat/AIChatCostMeter'
 import { AIChatHeader } from '@/components/ai-chat/AIChatHeader'
 import { AIChatPendingDiffTray } from '@/components/ai-chat/AIChatPendingDiffTray'
 import { AIChatProposalPreview } from '@/components/ai-chat/AIChatProposalPreview'
@@ -236,6 +237,14 @@ export default function AIChatPanelPro({
           selectedModelName={resolvedModel.name}
           agentCount={agentCount}
           isAIWorking={isAIWorking}
+        />
+
+        <AIChatCostMeter
+          projectId={projectId}
+          currentRunEstimate={estimatedCost}
+          selectedModelName={resolvedModel.name}
+          isAIWorking={isAIWorking}
+          onOpenEconomics={handleOpenEconomics}
         />
 
         <AIChatLedgerStrip

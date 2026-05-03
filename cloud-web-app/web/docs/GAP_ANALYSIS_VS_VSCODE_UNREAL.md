@@ -155,7 +155,7 @@ These rules are the product guardrails for future implementation.
 
 ## Executable Cohesion Gate
 
-The benchmark contract is now backed by `tools/check-product-experience-cohesion.mjs`, `tools/check-core-experience-routes.mjs`, and `tools/check-product-funnel-telemetry.mjs`.
+The benchmark contract is now backed by `tools/check-product-experience-cohesion.mjs`, `tools/check-core-experience-routes.mjs`, `tools/check-product-funnel-telemetry.mjs`, and `tools/check-economics-transparency-gate.mjs`.
 
 This gate is intentionally narrow and practical. It does not pretend to judge visual beauty from code. It verifies that the core product promises still have live anchors:
 
@@ -174,6 +174,8 @@ The commercial funnel is protected by `tools/check-product-funnel-telemetry.mjs`
 
 The commercial access contract is protected by `tools/check-commercial-access-gate.mjs`, which verifies that Free tier, 14-day Starter trial, entitlement fallback, billing usage, and paid feature locks stay factual. This keeps low-friction entry competitive with v0/Replit/Cursor without pretending deploy, collaboration, marketplace, or extension depth is free.
 
+The chat economics contract is protected by `tools/check-economics-transparency-gate.mjs`, which verifies that the AI loop exposes cost transparency through a compact meter, preserves the deeper economics panel, exposes trial state, and keeps the Stripe portal route structured and factual.
+
 ---
 
 ## Immediate Execution Backlog
@@ -185,11 +187,12 @@ The commercial access contract is protected by `tools/check-commercial-access-ga
 | 3 | Keep `qa:core-experience-routes` green so `/ -> intake -> Studio Home -> IDE -> runtime/local/mobile` stays factual. | Prevents fake success in the first mission loop. |
 | 4 | Keep `qa:product-funnel-telemetry` green for public entry, auth, pricing, mission handoff, and deploy. | Prevents commercial blindness while preserving clean UI. |
 | 5 | Keep `qa:commercial-access` green for Free tier, 14-day trial, billing usage, and paid feature locks. | Prevents pricing promise drift and protects first-value conversion. |
-| 6 | Continue i18n beyond the hardcoded-string gate. | English default is clean, but real localization still matters. |
-| 7 | Add compact benchmark screenshots/notes to the UX arsenal when source assets are available. | Helps future agents preserve the intended product feel. |
-| 8 | Strengthen preview/chat layout tests. | Protects the Firebase/Replit-style core experience. |
-| 9 | Make local/cloud runtime policy visible in more action surfaces. | Prevents device freezes and improves user trust. |
-| 10 | Wire more game/film tools by mode instead of always-visible navigation. | Keeps the web experience simple while preserving IDE depth. |
+| 6 | Keep `qa:economics-transparency` green for chat cost, wallet, monthly budget, trial state, and portal self-service. | Prevents hidden agent spend and strengthens buyer trust without UI noise. |
+| 7 | Continue i18n beyond the hardcoded-string gate. | English default is clean, but real localization still matters. |
+| 8 | Add compact benchmark screenshots/notes to the UX arsenal when source assets are available. | Helps future agents preserve the intended product feel. |
+| 9 | Strengthen preview/chat layout tests. | Protects the Firebase/Replit-style core experience. |
+| 10 | Make local/cloud runtime policy visible in more action surfaces. | Prevents device freezes and improves user trust. |
+| 11 | Wire more game/film tools by mode instead of always-visible navigation. | Keeps the web experience simple while preserving IDE depth. |
 
 ---
 

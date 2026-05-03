@@ -2,8 +2,32 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+
+const routeLogger = createComponentLogger('api.auth.me');
+
+type OptionalCreditBalanceClient = {
+  creditBalance?: {
+    findUnique(args: { where: { userId: string } }): Promise<{ balance: number } | null>;
+  };
+};
+
+function trialStatus(trialEndsAt: Date | null) {
+  if (!trialEndsAt) return null;
+
+  const daysRemaining = Math.max(
+    0,
+    Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  );
+
+  return {
+    endsAt: trialEndsAt.toISOString(),
+    isActive: trialEndsAt.getTime() > Date.now(),
+    daysRemaining,
+  };
+}
 
 /**
  * GET /api/auth/me
@@ -21,6 +45,8 @@ export async function GET(request: NextRequest) {
         email: true,
         name: true,
         emailVerified: true,
+        plan: true,
+        trialEndsAt: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -34,7 +60,8 @@ export async function GET(request: NextRequest) {
     let plan: string | null = null;
 
     try {
-      const creditBalance = await (prisma as any).creditBalance?.findUnique?.({
+      const optionalPrisma = prisma as typeof prisma & OptionalCreditBalanceClient;
+      const creditBalance = await optionalPrisma.creditBalance?.findUnique({
         where: { userId: user.id },
       });
       if (creditBalance) {
@@ -56,10 +83,14 @@ export async function GET(request: NextRequest) {
       // Optional model may not exist.
     }
 
+    const trial = trialStatus(user.trialEndsAt);
+
     return NextResponse.json({
       ...user,
       credits,
-      plan: plan || 'free',
+      trial,
+      trialEndsAt: user.trialEndsAt?.toISOString() ?? null,
+      plan: plan || user.plan || (trial?.isActive ? 'starter_trial' : 'free'),
       authenticated: true,
     });
   } catch (error) {
@@ -84,7 +115,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.error('[auth/me] Error:', error);
+    routeLogger.error('auth.me.failed', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
