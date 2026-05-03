@@ -1,38 +1,86 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
+import { getUserFromRequest } from '@/lib/auth-server'
+import { prisma } from '@/lib/db'
+import { requireEntitlementsForUser } from '@/lib/entitlements'
+import { createComponentLogger } from '@/lib/observability/logger'
+import {
+  buildMissionHandoffUrl,
+  buildMissionProjectSettings,
+  buildMissionWorkspaceName,
+  parseMissionIntake,
+} from '@/lib/workspace/mission-intake'
+
+const routeLogger = createComponentLogger('api.workspace.create')
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { mission, source, template } = body
+    const body = await request.json().catch(() => null)
+    const intake = parseMissionIntake((body ?? {}) as Record<string, unknown>)
 
-    if (!mission) {
+    if (!intake) {
+      return NextResponse.json({ error: 'Mission is required' }, { status: 400 })
+    }
+
+    const user = getUserFromRequest(request)
+    if (!user) {
+      const handoffUrl = buildMissionHandoffUrl(intake)
       return NextResponse.json(
-        { error: 'Mission is required' },
-        { status: 400 }
+        {
+          success: false,
+          requiresAuth: true,
+          handoffUrl,
+          mission: intake.mission,
+          source: intake.source,
+          template: intake.template,
+        },
+        { status: 202 }
       )
     }
 
-    // Simular criação de workspace (em produção, isso criaria o workspace real)
-    // Aqui você integraria com seu sistema de gerenciamento de workspaces
-    
-    const workspaceId = `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const entitlements = await requireEntitlementsForUser(user.userId)
 
-    // Simular tempo de processamento
-    await new Promise(resolve => setTimeout(resolve, 500))
+    if (entitlements.plan.limits.projects !== -1) {
+      const count = await prisma.project.count({ where: { userId: user.userId } })
+      if (count >= entitlements.plan.limits.projects) {
+        return NextResponse.json(
+          {
+            error: 'PROJECT_LIMIT_REACHED',
+            message: `Project limit for this plan (${entitlements.plan.limits.projects}) was reached.`,
+            plan: entitlements.plan.id,
+          },
+          { status: 402 }
+        )
+      }
+    }
 
-    return NextResponse.json({
-      success: true,
-      workspaceId,
-      mission,
-      template,
-      source,
-      createdAt: new Date().toISOString(),
+    const project = await prisma.project.create({
+      data: {
+        name: buildMissionWorkspaceName(intake.mission),
+        description: intake.mission,
+        template: intake.template,
+        userId: user.userId,
+        settings: buildMissionProjectSettings(intake),
+      },
     })
-  } catch (error) {
-    console.error('Error creating workspace:', error)
+
     return NextResponse.json(
-      { error: 'Failed to create workspace' },
-      { status: 500 }
+      {
+        success: true,
+        workspaceId: project.id,
+        projectId: project.id,
+        mission: intake.mission,
+        template: intake.template,
+        source: intake.source,
+        createdAt: project.createdAt.toISOString(),
+      },
+      { status: 201 }
     )
+  } catch (error) {
+    routeLogger.error('Workspace mission intake failed', error)
+
+    const mapped = apiErrorToResponse(error)
+    if (mapped) return mapped
+    return apiInternalError('Failed to create workspace')
   }
 }

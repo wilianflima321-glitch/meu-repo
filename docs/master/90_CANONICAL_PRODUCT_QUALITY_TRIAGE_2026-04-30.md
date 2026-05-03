@@ -228,11 +228,14 @@ The market UX benchmark and mojibake cleanup pass rewrote `cloud-web-app/web/doc
 ## 2026-05-03 Product Experience Cohesion Gate
 The product now has an executable cohesion gate for the experience contract instead of relying only on prose review. `tools/check-product-experience-cohesion.mjs` verifies that Web Entry, Studio Home, the internal IDE, preview/review truth, browser-operator approvals, device runtime routing, and game/film mode depth stay wired to real files and documented anchors. This protects the Firebase/v0/Replit/Manus-style entry path while preserving VS Code-grade IDE depth and Unreal-style mode depth without forcing that complexity onto first-time users.
 
+The route-level core loop was tightened next. `/api/workspace/create` no longer returns random simulated workspace success; it now either creates a real authenticated `Project` with mission settings or returns an explicit auth handoff URL that preserves the mission for Studio Home. `tools/check-core-experience-routes.mjs` verifies the route chain from Web Entry through Studio Home, IDE, preview runtime, jobs runtime target, Studio Local download, and Mobile Companion continuity.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
 - `tsc --noEmit` is green,
 - `npm run qa:enterprise-gate` is green,
+- `npm run qa:core-experience-routes` is green,
 - `npm run qa:canonical-doc-alignment` is green,
 - the five public UX contracts for mission intake, Studio handoff, compare trust, pricing readiness, and local continuity pass in Chromium,
 - `git diff --check` is green when the repo is validated cleanly.

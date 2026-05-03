@@ -167,6 +167,8 @@ This gate is intentionally narrow and practical. It does not pretend to judge vi
 6. NPU/GPU/CPU work routes through a safe device runtime policy.
 7. Game/film depth stays mode-specific instead of becoming default clutter.
 
+The route chain is also protected by `tools/check-core-experience-routes.mjs`, which verifies that the mission box does not fake workspace creation and that the user-visible loop stays connected through Studio Home, IDE, preview runtime, jobs, Studio Local, and Mobile Companion continuity.
+
 ---
 
 ## Immediate Execution Backlog
@@ -175,11 +177,12 @@ This gate is intentionally narrow and practical. It does not pretend to judge vi
 |---:|---|---|
 | 1 | Keep mojibake at zero with a failing gate. | Broken text instantly lowers trust and visual quality. |
 | 2 | Keep `qa:product-experience-cohesion` green for first-run web, Studio Home, IDE, browser operator, device runtime, and viewport. | Prevents future UI clutter and product-family drift. |
-| 3 | Continue i18n beyond the hardcoded-string gate. | English default is clean, but real localization still matters. |
-| 4 | Add compact benchmark screenshots/notes to the UX arsenal when source assets are available. | Helps future agents preserve the intended product feel. |
-| 5 | Strengthen preview/chat layout tests. | Protects the Firebase/Replit-style core experience. |
-| 6 | Make local/cloud runtime policy visible in more action surfaces. | Prevents device freezes and improves user trust. |
-| 7 | Wire more game/film tools by mode instead of always-visible navigation. | Keeps the web experience simple while preserving IDE depth. |
+| 3 | Keep `qa:core-experience-routes` green so `/ -> intake -> Studio Home -> IDE -> runtime/local/mobile` stays factual. | Prevents fake success in the first mission loop. |
+| 4 | Continue i18n beyond the hardcoded-string gate. | English default is clean, but real localization still matters. |
+| 5 | Add compact benchmark screenshots/notes to the UX arsenal when source assets are available. | Helps future agents preserve the intended product feel. |
+| 6 | Strengthen preview/chat layout tests. | Protects the Firebase/Replit-style core experience. |
+| 7 | Make local/cloud runtime policy visible in more action surfaces. | Prevents device freezes and improves user trust. |
+| 8 | Wire more game/film tools by mode instead of always-visible navigation. | Keeps the web experience simple while preserving IDE depth. |
 
 ---
 

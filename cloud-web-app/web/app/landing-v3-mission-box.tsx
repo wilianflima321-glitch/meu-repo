@@ -28,6 +28,12 @@ const GENERATION_STEPS = [
   { step: 'Finalizando handoff...', progress: 96 },
 ]
 
+type WorkspaceCreateResponse = {
+  workspaceId?: string
+  handoffUrl?: string
+  requiresAuth?: boolean
+}
+
 export default function LandingMissionBox() {
   const router = useRouter()
   const [inputValue, setInputValue] = useState('')
@@ -97,12 +103,22 @@ export default function LandingMissionBox() {
         return
       }
 
-      const data = await response.json()
+      const data = (await response.json()) as WorkspaceCreateResponse
       setGenerationProgress(100)
-      setGenerationStep('Missao pronta!')
+      setGenerationStep(data.requiresAuth ? 'Abrindo Studio Home...' : 'Missao pronta!')
 
       await new Promise((resolve) => setTimeout(resolve, 360))
-      router.push(`/dashboard?workspace=${data.workspaceId}&onboarding=1&source=landing-mission-box`)
+      if (data.handoffUrl) {
+        router.push(data.handoffUrl)
+        return
+      }
+
+      if (data.workspaceId) {
+        router.push(`/dashboard?workspace=${data.workspaceId}&onboarding=1&source=landing-mission-box`)
+        return
+      }
+
+      pushMissionFallback(mission, 'landing-v3-handoff')
     } catch {
       pushMissionFallback(mission, 'landing-v3-fallback')
     } finally {

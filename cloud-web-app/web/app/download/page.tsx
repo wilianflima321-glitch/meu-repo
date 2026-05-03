@@ -88,6 +88,7 @@ export default function DownloadPage() {
     'IDE com Monaco Editor e terminal integrado',
     'Fluxo multi-agent com Architect, Engineer e Critic',
     'Preview unificado com status e readiness visiveis',
+    'Politica local/cloud para preservar NPU, GPU, memoria e responsividade',
     'Templates e onboarding guiado para Apps e Pesquisa',
     'Audit trail e rollback deterministico por change set',
     'Sync com o web studio e handoff para deploy',
@@ -209,7 +210,7 @@ export default function DownloadPage() {
         <section className="mx-auto max-w-4xl px-6 pb-20 text-center">
           <h2 className="text-2xl font-bold">Prefere usar no navegador?</h2>
           <p className="mt-3 text-[var(--aethel-text-secondary)]">
-            Abra o Aethel Studio diretamente no browser, com os mesmos recursos do desktop.
+            Abra o Aethel Studio no browser com a mesma conta, missao e continuidade. O desktop fica reservado para profundidade local quando o browser bater no teto.
           </p>
           <Link
             href="/ide"
