@@ -3,7 +3,7 @@ import { getPlanById, type PlanDefinition } from './plans';
 
 type EntitlementResult = {
 	plan: PlanDefinition;
-	source: 'subscription' | 'trial';
+	source: 'subscription' | 'trial' | 'free';
 };
 
 export type FeatureId =
@@ -25,64 +25,67 @@ function isTrialPlan(plan: string | null | undefined): boolean {
 	return String(plan || '').endsWith('_trial');
 }
 
+function requirePlan(planId: string): PlanDefinition {
+	const plan = getPlanById(planId);
+	if (!plan) {
+		throw Object.assign(new Error(`PLAN_NOT_FOUND: ${planId}`), { code: 'PLAN_NOT_FOUND', planId });
+	}
+	return plan;
+}
+
+function freeEntitlement(): EntitlementResult {
+	return { plan: requirePlan('free'), source: 'free' };
+}
+
 export async function requireEntitlementsForUser(userId: string): Promise<EntitlementResult> {
 	const user = await prisma.user.findUnique({
 		where: { id: userId },
-		select: { id: true, plan: true, createdAt: true },
+		select: { id: true, plan: true, createdAt: true, trialEndsAt: true },
 	});
 	if (!user) {
 		throw Object.assign(new Error('USER_NOT_FOUND'), { code: 'USER_NOT_FOUND' });
 	}
 
-	// Assinatura ativa tem prioridade.
+	// Active subscriptions always win over local plan defaults.
 	const subscription = await prisma.subscription.findUnique({ where: { userId } });
 	if (subscription && (subscription.status === 'active' || subscription.status === 'trialing')) {
-		// Evita liberar acesso com assinatura expirada.
 		if (subscription.currentPeriodEnd && subscription.currentPeriodEnd.getTime() < Date.now()) {
-			throw Object.assign(
-				new Error('SUBSCRIPTION_EXPIRED: renove ou faça upgrade para continuar.'),
-				{ code: 'SUBSCRIPTION_EXPIRED' }
-			);
+			return freeEntitlement();
 		}
 
-		const plan = getPlanById(user.plan);
-		if (!plan) {
+		const subscribedPlanId = String(user.plan || '').replace('_trial', '');
+		const plan = getPlanById(subscribedPlanId);
+		if (!plan || plan.id === 'free') {
 			throw Object.assign(
-				new Error('PLAN_MISMATCH: assinatura ativa mas plano inválido no usuário.'),
-				{ code: 'PLAN_MISMATCH', plan: user.plan }
+				new Error('PLAN_MISMATCH: active subscription has no paid plan on user record.'),
+				{ code: 'PLAN_MISMATCH', plan: user.plan },
 			);
 		}
 		return { plan, source: 'subscription' };
 	}
 
-	// Trial (7 dias) — baseado no seu fluxo atual de registro.
+	// Starter trial is 14 days. Legacy users without trialEndsAt keep a deterministic 14-day fallback.
 	if (isTrialPlan(user.plan)) {
-		const trialMs = 7 * 24 * 60 * 60 * 1000;
-		const expiresAt = user.createdAt.getTime() + trialMs;
+		const trialMs = 14 * 24 * 60 * 60 * 1000;
+		const expiresAt = user.trialEndsAt?.getTime() ?? user.createdAt.getTime() + trialMs;
 		if (Date.now() > expiresAt) {
-			throw Object.assign(
-				new Error('TRIAL_EXPIRED: escolha um plano para continuar.'),
-				{ code: 'TRIAL_EXPIRED' }
-			);
+			return freeEntitlement();
 		}
 
-		// Trial atual é do Starter.
-		const plan = getPlanById('starter');
-		if (!plan) {
-			throw Object.assign(new Error('PLAN_NOT_FOUND: starter'), { code: 'PLAN_NOT_FOUND' });
-		}
-		return { plan, source: 'trial' };
+		return { plan: requirePlan('starter'), source: 'trial' };
 	}
 
-	throw Object.assign(
-		new Error('PAYMENT_REQUIRED: assinatura necessária para usar esta funcionalidade.'),
-		{ code: 'PAYMENT_REQUIRED' }
-	);
+	const plan = getPlanById(user.plan);
+	if (plan?.id === 'free') {
+		return { plan, source: 'free' };
+	}
+
+	return freeEntitlement();
 }
 
 function featureAllowedForPlan(planId: string, feature: FeatureId): boolean {
-	// Regra simples e explícita: features avançadas são Pro+.
-	// O restante é liberado para qualquer usuário com entitlements válidos.
+	// Advanced operational surfaces stay paid. Free users keep the core Studio loop:
+	// project, files, assets, search, tasks and tests.
 	switch (feature) {
 		case 'dap':
 		case 'lsp':
@@ -90,6 +93,9 @@ function featureAllowedForPlan(planId: string, feature: FeatureId): boolean {
 		case 'extensions':
 		case 'build':
 			return planId === 'pro' || planId === 'studio' || planId === 'enterprise';
+		case 'terminal':
+		case 'git':
+			return planId === 'basic' || planId === 'pro' || planId === 'studio' || planId === 'enterprise';
 		default:
 			return true;
 	}
@@ -100,9 +106,9 @@ export async function requireFeatureForUser(userId: string, feature: FeatureId):
 	if (!featureAllowedForPlan(entitlements.plan.id, feature)) {
 		throw Object.assign(
 			new Error(
-				`FEATURE_NOT_AVAILABLE: recurso "${feature}" requer plano Pro ou superior.`
+				`FEATURE_NOT_AVAILABLE: recurso "${feature}" requer plano superior.`,
 			),
-			{ code: 'FEATURE_NOT_AVAILABLE', feature, planId: entitlements.plan.id }
+			{ code: 'FEATURE_NOT_AVAILABLE', feature, planId: entitlements.plan.id },
 		);
 	}
 	return entitlements;

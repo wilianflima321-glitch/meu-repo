@@ -75,7 +75,7 @@ const telemetryContracts = [
     markers: [
       ['cloud-web-app/web/components/telemetry/ProductTelemetry.tsx', "'pricing_view'"],
       ['cloud-web-app/web/app/pricing/page.tsx', "'pricing_cycle_change'"],
-      ['cloud-web-app/web/app/pricing/page.tsx', 'data-analytics-action="checkout_start"'],
+      ['cloud-web-app/web/app/pricing/page.tsx', "data-analytics-action={plan.id === 'free' ? 'onboarding_start' : 'checkout_start'}"],
       ['cloud-web-app/web/app/pricing/page.tsx', 'data-analytics-action="contact_sales_start"'],
     ],
   },

@@ -8,9 +8,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getUserFromRequest } from '@/lib/auth-server';
 import { getBuildMinutesUsed } from '@/lib/build-minutes';
-import { PLANS, PlanId } from '@/lib/plans';
+import { getPlanById, isPlanId, type PlanId } from '@/lib/plans';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+
+const routeLogger = createComponentLogger('api.billing.usage');
 
 interface UsageHistoryItem {
   date: string;
@@ -63,9 +66,14 @@ export async function GET(req: NextRequest) {
       // UsageBucket pode não existir - usar valores default
     }
 
-    // Definir limites baseados no plano CENTRALIZADO (lib/plans.ts)
-    const planId = (user.plan as PlanId) || 'starter'; // Default para starter se não definido
-    const planDef = PLANS.find(p => p.id === planId) || PLANS[0];
+    // Centralized plan limits with trial normalization and Free as factual fallback.
+    const rawPlan = String(user.plan || 'free').replace('_trial', '');
+    const normalizedPlanId: PlanId = isPlanId(rawPlan) ? rawPlan : 'free';
+    const planDef = getPlanById(normalizedPlanId) || getPlanById('free');
+    if (!planDef) {
+      throw Object.assign(new Error('PLAN_NOT_FOUND: free'), { code: 'PLAN_NOT_FOUND' });
+    }
+    const planId = planDef.id;
     const planLimits = planDef.limits;
 
     // Contar colaboradores em projetos do usuário
@@ -147,7 +155,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(response);
 
   } catch (error) {
-    console.error('[Billing Usage API] Error:', error);
+    routeLogger.error('[Billing Usage API] Error', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

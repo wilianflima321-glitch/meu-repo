@@ -4,7 +4,8 @@ import {
 	OPENROUTER_FREE_MODELS,
 } from './ai/openrouter-models';
 
-export type PlanId = 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
+export type PlanId = 'free' | 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
+export type PaidPlanId = Exclude<PlanId, 'free'>;
 
 export type PlanLimits = {
 	projects: number; // -1 = unlimited
@@ -75,6 +76,46 @@ const STUDIO_ALLOWED_MODELS = Array.from(
 );
 
 export const PLANS: PlanDefinition[] = [
+	{
+		id: 'free',
+		name: 'Free',
+		price: 0,
+		priceAnnual: 0,
+		priceBRL: 0,
+		priceAnnualBRL: 0,
+		currency: 'USD',
+		interval: 'month',
+		description: 'Para testar o fluxo real do Studio sem cartao e chegar ao primeiro projeto com guardrails claros.',
+		features: [
+			'100K tokens IA/mes',
+			'10 projetos leves',
+			'250 MB storage',
+			'1 sessao simultanea',
+			'Chat + editor + preview',
+			'Modelos gratuitos OpenRouter',
+			'Mission intake + Studio Home',
+			'Upgrade quando precisar de deploy e colaboracao',
+		],
+		limits: {
+			projects: 10,
+			storage: 250 * 1024 * 1024,
+			collaborators: 0,
+			tokensPerMonth: 100_000,
+			tokensPerDay: 5_000,
+			requestsPerHour: 12,
+			concurrent: 1,
+			contextWindow: 4000,
+			historyDays: 7,
+			chatHistoryCopyMaxMessages: 500,
+		},
+		allowedModels: FREE_MODEL_IDS,
+		allowedDomains: ['code'],
+		allowedAgents: ['universal'],
+		extras: {
+			cardRequired: false,
+			upgradeRequiredFor: ['deploy', 'collaboration', 'marketplace', 'extensions'],
+		},
+	},
 	{
 		id: 'starter',
 		name: 'Starter',
@@ -284,11 +325,15 @@ export const PLANS: PlanDefinition[] = [
 	},
 ];
 
-export function isPaidPlanId(value: string): value is PlanId {
+export function isPaidPlanId(value: string): value is PaidPlanId {
 	return value === 'starter' || value === 'basic' || value === 'pro' || value === 'studio' || value === 'enterprise';
 }
 
+export function isPlanId(value: string): value is PlanId {
+	return value === 'free' || isPaidPlanId(value);
+}
+
 export function getPlanById(planId: string): PlanDefinition | null {
-	if (!isPaidPlanId(planId)) return null;
+	if (!isPlanId(planId)) return null;
 	return PLANS.find((plan) => plan.id === planId) || null;
 }

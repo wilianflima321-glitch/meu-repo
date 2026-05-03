@@ -159,6 +159,10 @@ const productFunnelTelemetryConfigured =
   exists('tools/check-product-funnel-telemetry.mjs') &&
   exists('docs/master/98_PRODUCT_FUNNEL_TELEMETRY_GATE_2026-05-03.md') &&
   packageJson.includes('qa:product-funnel-telemetry');
+const commercialAccessConfigured =
+  exists('tools/check-commercial-access-gate.mjs') &&
+  exists('docs/master/99_COMMERCIAL_ACCESS_GATE_2026-05-03.md') &&
+  packageJson.includes('qa:commercial-access');
 
 const metrics = [
   { id: 'console_calls', label: 'console.log/info/debug in app code', value: consoleCalls.total, target: 50, direction: 'lte' },
@@ -178,6 +182,7 @@ const metrics = [
   { id: 'product_experience_cohesion', label: 'Product experience cohesion gate configured', value: productExperienceCohesionConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'core_experience_routes', label: 'Core experience route contract configured', value: coreExperienceRoutesConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'product_funnel_telemetry', label: 'Product funnel telemetry gate configured', value: productFunnelTelemetryConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'commercial_access', label: 'Commercial access/free trial gate configured', value: commercialAccessConfigured ? 1 : 0, target: 1, direction: 'eq' },
 ].map((metric) => ({
   ...metric,
   status: statusFor(metric.value, metric.target, metric.direction),

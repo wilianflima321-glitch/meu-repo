@@ -1,7 +1,7 @@
 import type { PlanId } from '@/lib/plans'
 import type { AssetQualityReport } from '@/lib/server/asset-quality'
 
-type EntitlementSource = 'subscription' | 'trial'
+type EntitlementSource = 'subscription' | 'trial' | 'free'
 
 export type AssetIntakePolicyDecision = {
   allowed: boolean
@@ -19,6 +19,8 @@ export type AssetIntakePolicyDecision = {
 
 function getMinScoreByPlan(planId: PlanId): number {
   switch (planId) {
+    case 'free':
+      return 65
     case 'starter':
       return 55
     case 'basic':

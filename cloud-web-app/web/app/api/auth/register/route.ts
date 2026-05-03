@@ -3,8 +3,11 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { generateTokenWithRole } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+
+const routeLogger = createComponentLogger('api.auth.register');
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,19 +36,20 @@ export async function POST(req: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user - Novo usuário começa em trial do Starter (7 dias)
-    // Após trial, deve escolher um plano pago
+    // New users start with a factual 14-day Starter trial, then fall back to Free.
+    const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name: name || null,
-        plan: 'starter_trial', // Trial de 7 dias do Starter
+        plan: 'starter_trial',
+        trialEndsAt,
       },
     });
 
     // Generate JWT token (real-or-fail). JWT-only (no server sessions).
-    const token = generateTokenWithRole(user.id, user.email, (user as any).role || 'user', user.plan || undefined);
+    const token = generateTokenWithRole(user.id, user.email, user.role || 'user', user.plan || undefined);
 
     // Return user data
     const response = NextResponse.json({
@@ -69,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error('Register error:', error);
+    routeLogger.error('Register error', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

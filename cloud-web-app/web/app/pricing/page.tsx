@@ -194,7 +194,7 @@ export default function PricingPage() {
         </section>
 
         <section className="mx-auto mt-10 max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
             {corePlans.map((plan) => (
               <article
                 key={plan.id}
@@ -249,14 +249,14 @@ export default function PricingPage() {
                 </ul>
 
                 <Link
-                  href={`/dashboard?tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`}
+                  href={plan.id === 'free' ? '/register?plan=free&intent=studio' : `/dashboard?tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`}
                   className={`inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] w-full rounded-xl px-4 py-3 text-sm font-semibold ${plan.popular ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] shadow-lg' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
                   data-analytics-category="billing"
-                  data-analytics-action="checkout_start"
+                  data-analytics-action={plan.id === 'free' ? 'onboarding_start' : 'checkout_start'}
                   data-analytics-label={`pricing_plan:${plan.id}:${isAnnual ? 'year' : 'month'}`}
                   data-analytics-source="pricing-plan-card"
                 >
-                  Selecionar {plan.name}
+                  {plan.id === 'free' ? 'Comecar gratis' : `Selecionar ${plan.name}`}
                 </Link>
               </article>
             ))}

@@ -232,6 +232,9 @@ The route-level core loop was tightened next. `/api/workspace/create` no longer 
 
 The V12 telemetry critique is now converted into an executable product gate instead of another prose-only warning. `ProductTelemetry` is mounted at the root layout, captures route-level `page_load` context, and delegates CTA tracking through `data-analytics-*` attributes so the UI stays clean. Landing mission intake, pricing, auth OAuth starts, deploy click/success/failure, public header CTAs, and `/api/analytics/batch` logger usage are now covered by `tools/check-product-funnel-telemetry.mjs`.
 
+## 2026-05-03 Commercial Access Gate
+The V12 distribution critique is now also executable. A canonical `free` plan exists, registration creates a factual `trialEndsAt` for a 14-day Starter trial, expired trials fall back to Free instead of hard-blocking the core Studio loop, and billing usage normalizes trial/unknown plan state through canonical plan definitions. `tools/check-commercial-access-gate.mjs` keeps this from regressing into a prose-only pricing promise.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
@@ -239,6 +242,7 @@ As of this checkpoint:
 - `npm run qa:enterprise-gate` is green,
 - `npm run qa:core-experience-routes` is green,
 - `npm run qa:product-funnel-telemetry` is green,
+- `npm run qa:commercial-access` is green,
 - `npm run qa:canonical-doc-alignment` is green,
 - the five public UX contracts for mission intake, Studio handoff, compare trust, pricing readiness, and local continuity pass in Chromium,
 - `git diff --check` is green when the repo is validated cleanly.
@@ -391,7 +395,8 @@ This is the shortest honest list of important open gaps.
 ### Priority 1
 - platform confidence,
 - build/parity trust,
-- keep mojibake at zero with the failing scanner.
+- keep mojibake at zero with the failing scanner,
+- keep commercial access truthful with Free plus a 14-day trial gate.
 
 ### Priority 2
 - viewport dominance,

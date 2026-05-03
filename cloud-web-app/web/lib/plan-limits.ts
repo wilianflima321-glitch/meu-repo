@@ -62,7 +62,20 @@ const PRO_MODELS = Array.from(new Set([...BUDGET_MODEL_IDS, ...PRO_BEST_MODELS])
 const STUDIO_MODELS = Array.from(new Set([...BUDGET_MODEL_IDS, ...STUDIO_BEST_MODELS]));
 
 export const PLAN_LIMITS: Record<string, PlanLimits> = {
-  // Free trial - muito limitado
+  // Free - no card required, intentionally limited but useful for first value
+  'free': {
+    tokensPerMonth: 100_000,
+    requestsPerDay: 100,
+    projectsMax: 10,
+    storageGB: 0.25,
+    concurrentSessions: 1,
+    maxAgents: 1,
+    maxTokensPerRequest: 2_000,
+    models: FREE_MODEL_IDS,
+    features: ['editor', 'preview', 'chat'],
+  },
+
+  // Starter trial - 14-day onboarding ramp
   'starter_trial': {
     tokensPerMonth: 10_000,
     requestsPerDay: 20,
@@ -279,7 +292,7 @@ function getUtcMonthWindow(now: Date = new Date()): { start: Date; end: Date } {
 export function getPlanLimits(plan: string): PlanLimits {
   // Remover sufixo _trial se existir para fallback
   const basePlan = plan.replace('_trial', '');
-  return PLAN_LIMITS[plan] || PLAN_LIMITS[basePlan] || PLAN_LIMITS['starter_trial'];
+  return PLAN_LIMITS[plan] || PLAN_LIMITS[basePlan] || PLAN_LIMITS['free'];
 }
 
 /**

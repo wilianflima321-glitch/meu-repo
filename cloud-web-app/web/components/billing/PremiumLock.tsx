@@ -35,7 +35,7 @@ export type FeatureKey =
   | 'advanced-analytics'
   | 'team-management'
   | 'white-label';
-export type PlanId = 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
+export type PlanId = 'free' | 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
 export interface PremiumLockProps {
   /** Feature que requer acesso premium */
   feature: FeatureKey;
@@ -206,13 +206,15 @@ const FEATURE_INFO: Record<FeatureKey, {
 };
 // Plan hierarchy for comparison
 const PLAN_HIERARCHY: Record<PlanId, number> = {
-  starter: 0,
-  basic: 1,
-  pro: 2,
-  studio: 3,
-  enterprise: 4,
+  free: 0,
+  starter: 1,
+  basic: 2,
+  pro: 3,
+  studio: 4,
+  enterprise: 5,
 };
 const PLAN_NAMES: Record<PlanId, string> = {
+  free: 'Free',
   starter: 'Starter',
   basic: 'Basic',
   pro: 'Pro',
@@ -220,16 +222,22 @@ const PLAN_NAMES: Record<PlanId, string> = {
   enterprise: 'Enterprise',
 };
 const PLAN_PRICES: Record<PlanId, string> = {
-  starter: '$3/mes',
-  basic: '$9/mes',
-  pro: '$29/mes',
-  studio: '$79/mes',
+  free: '$0/mes',
+  starter: '$20/mes',
+  basic: '$29/mes',
+  pro: '$49.99/mes',
+  studio: '$99.99/mes',
   enterprise: 'Personalizado',
 };
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
 const fetcher = (url: string) => fetch(url).then(r => r.json());
+function normalizePlanId(plan: string | null | undefined): PlanId {
+  const normalized = plan?.replace('_trial', '') || 'free';
+  return normalized in PLAN_HIERARCHY ? (normalized as PlanId) : 'free';
+}
+
 export function PremiumLock({
   feature,
   requiredPlan,
@@ -242,7 +250,7 @@ export function PremiumLock({
 
   // Fetch user's current plan
   const { data: userData } = useSWR<{ plan: string }>('/api/auth/me', fetcher);
-  const userPlan = (userData?.plan?.replace('_trial', '') || 'starter') as PlanId;
+  const userPlan = normalizePlanId(userData?.plan);
   const featureInfo = FEATURE_INFO[feature];
   const minPlan = requiredPlan || featureInfo.minPlan;
   // Check if user has access

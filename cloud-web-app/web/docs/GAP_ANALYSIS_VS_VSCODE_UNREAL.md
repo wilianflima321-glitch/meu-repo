@@ -172,6 +172,8 @@ The route chain is also protected by `tools/check-core-experience-routes.mjs`, w
 
 The commercial funnel is protected by `tools/check-product-funnel-telemetry.mjs`, which verifies that Aethel can learn from route views, CTAs, mission intake, pricing selection, auth starts, and deploy outcomes instead of relying on guesses.
 
+The commercial access contract is protected by `tools/check-commercial-access-gate.mjs`, which verifies that Free tier, 14-day Starter trial, entitlement fallback, billing usage, and paid feature locks stay factual. This keeps low-friction entry competitive with v0/Replit/Cursor without pretending deploy, collaboration, marketplace, or extension depth is free.
+
 ---
 
 ## Immediate Execution Backlog
@@ -182,11 +184,12 @@ The commercial funnel is protected by `tools/check-product-funnel-telemetry.mjs`
 | 2 | Keep `qa:product-experience-cohesion` green for first-run web, Studio Home, IDE, browser operator, device runtime, and viewport. | Prevents future UI clutter and product-family drift. |
 | 3 | Keep `qa:core-experience-routes` green so `/ -> intake -> Studio Home -> IDE -> runtime/local/mobile` stays factual. | Prevents fake success in the first mission loop. |
 | 4 | Keep `qa:product-funnel-telemetry` green for public entry, auth, pricing, mission handoff, and deploy. | Prevents commercial blindness while preserving clean UI. |
-| 5 | Continue i18n beyond the hardcoded-string gate. | English default is clean, but real localization still matters. |
-| 6 | Add compact benchmark screenshots/notes to the UX arsenal when source assets are available. | Helps future agents preserve the intended product feel. |
-| 7 | Strengthen preview/chat layout tests. | Protects the Firebase/Replit-style core experience. |
-| 8 | Make local/cloud runtime policy visible in more action surfaces. | Prevents device freezes and improves user trust. |
-| 9 | Wire more game/film tools by mode instead of always-visible navigation. | Keeps the web experience simple while preserving IDE depth. |
+| 5 | Keep `qa:commercial-access` green for Free tier, 14-day trial, billing usage, and paid feature locks. | Prevents pricing promise drift and protects first-value conversion. |
+| 6 | Continue i18n beyond the hardcoded-string gate. | English default is clean, but real localization still matters. |
+| 7 | Add compact benchmark screenshots/notes to the UX arsenal when source assets are available. | Helps future agents preserve the intended product feel. |
+| 8 | Strengthen preview/chat layout tests. | Protects the Firebase/Replit-style core experience. |
+| 9 | Make local/cloud runtime policy visible in more action surfaces. | Prevents device freezes and improves user trust. |
+| 10 | Wire more game/film tools by mode instead of always-visible navigation. | Keeps the web experience simple while preserving IDE depth. |
 
 ---
 

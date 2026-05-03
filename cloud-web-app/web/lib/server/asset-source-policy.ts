@@ -1,6 +1,6 @@
 import type { PlanId } from '@/lib/plans'
 
-type EntitlementSource = 'subscription' | 'trial'
+type EntitlementSource = 'subscription' | 'trial' | 'free'
 
 export type AssetSourcePolicyInput = {
   planId: PlanId
@@ -59,13 +59,15 @@ function normalizeKey(value: string | null | undefined, fallback: string): strin
 }
 
 function policyTierByPlan(planId: PlanId): 'strict' | 'balanced' | 'flexible' {
-  if (planId === 'starter' || planId === 'basic') return 'strict'
+  if (planId === 'free' || planId === 'starter' || planId === 'basic') return 'strict'
   if (planId === 'pro') return 'balanced'
   return 'flexible'
 }
 
 function minTrustByPlan(planId: PlanId): number {
   switch (planId) {
+    case 'free':
+      return 80
     case 'starter':
       return 70
     case 'basic':
@@ -124,7 +126,7 @@ export function evaluateAssetSourcePolicy(input: AssetSourcePolicyInput): AssetS
     }
   }
 
-  if ((input.planId === 'starter' || input.planId === 'basic') && source === 'custom_url') {
+  if ((input.planId === 'free' || input.planId === 'starter' || input.planId === 'basic') && source === 'custom_url') {
     return {
       allowed: false,
       reason: 'custom_url source requires Pro plan or higher due compliance risk.',
