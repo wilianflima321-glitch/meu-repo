@@ -103,6 +103,14 @@ export default function LoginPageV2() {
     }
   }
 
+  const startOAuth = (provider: 'github' | 'google') => {
+    analytics?.track?.('user', 'oauth_start', {
+      label: provider,
+      metadata: { source: 'login-form', nextTarget },
+    })
+    window.location.href = `/api/auth/oauth/authorize?provider=${provider}`
+  }
+
   return (
     <CoreUiProviders>
       <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-10 sm:px-6">
@@ -218,7 +226,7 @@ export default function LoginPageV2() {
             <div className="space-y-2">
               <button
                 type="button"
-                onClick={() => window.location.href = '/api/auth/oauth/authorize?provider=github'}
+                onClick={() => startOAuth('github')}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 aria-label="Continuar com GitHub"
               >
@@ -227,7 +235,7 @@ export default function LoginPageV2() {
               </button>
               <button
                 type="button"
-                onClick={() => window.location.href = '/api/auth/oauth/authorize?provider=google'}
+                onClick={() => startOAuth('google')}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 aria-label="Continuar com Google"
               >

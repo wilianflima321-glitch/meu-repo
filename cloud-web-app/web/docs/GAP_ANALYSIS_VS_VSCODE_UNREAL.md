@@ -155,7 +155,7 @@ These rules are the product guardrails for future implementation.
 
 ## Executable Cohesion Gate
 
-The benchmark contract is now backed by `tools/check-product-experience-cohesion.mjs`.
+The benchmark contract is now backed by `tools/check-product-experience-cohesion.mjs`, `tools/check-core-experience-routes.mjs`, and `tools/check-product-funnel-telemetry.mjs`.
 
 This gate is intentionally narrow and practical. It does not pretend to judge visual beauty from code. It verifies that the core product promises still have live anchors:
 
@@ -166,8 +166,11 @@ This gate is intentionally narrow and practical. It does not pretend to judge vi
 5. Browser operator actions remain governed by approval and runtime policy.
 6. NPU/GPU/CPU work routes through a safe device runtime policy.
 7. Game/film depth stays mode-specific instead of becoming default clutter.
+8. Public entry, auth, pricing, mission handoff, and deploy remain measurable without adding UI noise.
 
 The route chain is also protected by `tools/check-core-experience-routes.mjs`, which verifies that the mission box does not fake workspace creation and that the user-visible loop stays connected through Studio Home, IDE, preview runtime, jobs, Studio Local, and Mobile Companion continuity.
+
+The commercial funnel is protected by `tools/check-product-funnel-telemetry.mjs`, which verifies that Aethel can learn from route views, CTAs, mission intake, pricing selection, auth starts, and deploy outcomes instead of relying on guesses.
 
 ---
 
@@ -178,11 +181,12 @@ The route chain is also protected by `tools/check-core-experience-routes.mjs`, w
 | 1 | Keep mojibake at zero with a failing gate. | Broken text instantly lowers trust and visual quality. |
 | 2 | Keep `qa:product-experience-cohesion` green for first-run web, Studio Home, IDE, browser operator, device runtime, and viewport. | Prevents future UI clutter and product-family drift. |
 | 3 | Keep `qa:core-experience-routes` green so `/ -> intake -> Studio Home -> IDE -> runtime/local/mobile` stays factual. | Prevents fake success in the first mission loop. |
-| 4 | Continue i18n beyond the hardcoded-string gate. | English default is clean, but real localization still matters. |
-| 5 | Add compact benchmark screenshots/notes to the UX arsenal when source assets are available. | Helps future agents preserve the intended product feel. |
-| 6 | Strengthen preview/chat layout tests. | Protects the Firebase/Replit-style core experience. |
-| 7 | Make local/cloud runtime policy visible in more action surfaces. | Prevents device freezes and improves user trust. |
-| 8 | Wire more game/film tools by mode instead of always-visible navigation. | Keeps the web experience simple while preserving IDE depth. |
+| 4 | Keep `qa:product-funnel-telemetry` green for public entry, auth, pricing, mission handoff, and deploy. | Prevents commercial blindness while preserving clean UI. |
+| 5 | Continue i18n beyond the hardcoded-string gate. | English default is clean, but real localization still matters. |
+| 6 | Add compact benchmark screenshots/notes to the UX arsenal when source assets are available. | Helps future agents preserve the intended product feel. |
+| 7 | Strengthen preview/chat layout tests. | Protects the Firebase/Replit-style core experience. |
+| 8 | Make local/cloud runtime policy visible in more action surfaces. | Prevents device freezes and improves user trust. |
+| 9 | Wire more game/film tools by mode instead of always-visible navigation. | Keeps the web experience simple while preserving IDE depth. |
 
 ---
 

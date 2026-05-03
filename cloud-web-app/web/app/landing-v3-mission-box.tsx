@@ -66,13 +66,16 @@ export default function LandingMissionBox() {
     event.preventDefault()
     const mission = inputValue.trim()
 
-    if (process.env.NEXT_PUBLIC_ENABLE_MARKETING_ANALYTICS === 'true') {
-      analytics?.track('project', 'project_open', {
-        metadata: { source: 'landing-mission-box', hasMission: mission.length > 0 },
-      })
-    }
+    analytics?.track('project', 'mission_submit', {
+      label: mission ? 'mission_prompt' : 'empty_mission_start',
+      metadata: { source: 'landing-mission-box', hasMission: mission.length > 0 },
+    })
 
     if (!mission) {
+      analytics?.track('project', 'onboarding_start', {
+        label: 'landing_empty_mission',
+        metadata: { source: 'landing-v3' },
+      })
       router.push('/dashboard?onboarding=1&source=landing-v3')
       return
     }
@@ -109,11 +112,20 @@ export default function LandingMissionBox() {
 
       await new Promise((resolve) => setTimeout(resolve, 360))
       if (data.handoffUrl) {
+        analytics?.track('project', 'mission_handoff', {
+          label: 'auth_required',
+          metadata: { source: 'landing-mission-box', target: 'dashboard-auth-handoff' },
+        })
         router.push(data.handoffUrl)
         return
       }
 
       if (data.workspaceId) {
+        analytics?.track('project', 'workspace_create', {
+          label: 'mission_workspace_created',
+          projectId: data.workspaceId,
+          metadata: { source: 'landing-mission-box' },
+        })
         router.push(`/dashboard?workspace=${data.workspaceId}&onboarding=1&source=landing-mission-box`)
         return
       }

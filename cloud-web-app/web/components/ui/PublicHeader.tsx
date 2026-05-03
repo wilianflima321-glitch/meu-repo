@@ -14,7 +14,15 @@ export default function PublicHeader() {
       <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-2xl shadow-xl shadow-black/10">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Navegacao principal">
           <div className="flex items-center gap-3">
-            <Link href="/" className="group flex items-center gap-2.5" aria-label="Aethel Engine - Pagina inicial">
+            <Link
+              href="/"
+              className="group flex items-center gap-2.5"
+              aria-label="Aethel Engine - Pagina inicial"
+              data-analytics-category="user"
+              data-analytics-action="cta_click"
+              data-analytics-label="public_header_logo"
+              data-analytics-source="public-header"
+            >
               <Image
                 src="/branding/aethel-icon-source.png"
                 alt=""
@@ -43,6 +51,10 @@ export default function PublicHeader() {
                 key={link.href}
                 href={link.href}
                 className="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                data-analytics-category="user"
+                data-analytics-action="cta_click"
+                data-analytics-label={`public_nav:${link.href}`}
+                data-analytics-source="public-header"
               >
                 {link.label}
               </Link>
@@ -50,13 +62,34 @@ export default function PublicHeader() {
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
-            <Link href="/contact-sales" className={headerGhostLinkClass}>
+            <Link
+              href="/contact-sales"
+              className={headerGhostLinkClass}
+              data-analytics-category="user"
+              data-analytics-action="contact_sales_start"
+              data-analytics-label="header_contact_sales"
+              data-analytics-source="public-header"
+            >
               Falar com vendas
             </Link>
-            <Link href="/login" className={headerGhostLinkClass}>
+            <Link
+              href="/login"
+              className={headerGhostLinkClass}
+              data-analytics-category="user"
+              data-analytics-action="auth_intent"
+              data-analytics-label="header_login"
+              data-analytics-source="public-header"
+            >
               Entrar
             </Link>
-            <Link href="/dashboard?onboarding=1&source=header" className={headerPrimaryLinkClass}>
+            <Link
+              href="/dashboard?onboarding=1&source=header"
+              className={headerPrimaryLinkClass}
+              data-analytics-category="project"
+              data-analytics-action="onboarding_start"
+              data-analytics-label="header_start_free"
+              data-analytics-source="public-header"
+            >
               Comecar gratis
             </Link>
           </div>
@@ -79,6 +112,10 @@ export default function PublicHeader() {
                     key={link.href}
                     href={link.href}
                     className="block rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                    data-analytics-category="user"
+                    data-analytics-action="cta_click"
+                    data-analytics-label={`mobile_public_nav:${link.href}`}
+                    data-analytics-source="public-header-mobile"
                   >
                     {link.label}
                   </Link>
@@ -86,13 +123,34 @@ export default function PublicHeader() {
               </div>
               <div className="my-3 h-px bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]" />
               <div className="grid gap-2">
-                <Link href="/contact-sales" className="rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]">
+                <Link
+                  href="/contact-sales"
+                  className="rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                  data-analytics-category="user"
+                  data-analytics-action="contact_sales_start"
+                  data-analytics-label="mobile_header_contact_sales"
+                  data-analytics-source="public-header-mobile"
+                >
                   Falar com vendas
                 </Link>
-                <Link href="/login" className={headerGhostLinkClass}>
+                <Link
+                  href="/login"
+                  className={headerGhostLinkClass}
+                  data-analytics-category="user"
+                  data-analytics-action="auth_intent"
+                  data-analytics-label="mobile_header_login"
+                  data-analytics-source="public-header-mobile"
+                >
                   Entrar
                 </Link>
-                <Link href="/dashboard?onboarding=1&source=header-mobile" className={`${headerPrimaryLinkClass} justify-center`}>
+                <Link
+                  href="/dashboard?onboarding=1&source=header-mobile"
+                  className={`${headerPrimaryLinkClass} justify-center`}
+                  data-analytics-category="project"
+                  data-analytics-action="onboarding_start"
+                  data-analytics-label="mobile_header_start_free"
+                  data-analytics-source="public-header-mobile"
+                >
                   Comecar gratis
                 </Link>
               </div>

@@ -8,6 +8,7 @@ import PublicBillingReadiness from '@/components/billing/PublicBillingReadiness'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 import Codicon from '@/components/ide/Codicon'
+import { analytics } from '@/lib/analytics'
 
 function formatStorage(bytes: number) {
   if (bytes < 1024 * 1024 * 1024) return `${Math.round(bytes / (1024 * 1024))} MB`
@@ -77,6 +78,13 @@ export default function PricingPage() {
 
   const enterprisePlan = plans.find((plan) => plan.id === 'enterprise')
   const corePlans = plans.filter((plan) => plan.id !== 'enterprise')
+  const changeBillingCycle = (cycle: 'month' | 'year') => {
+    setBillingCycle(cycle)
+    analytics?.track('billing', 'pricing_cycle_change', {
+      label: cycle,
+      metadata: { source: 'pricing_toggle' },
+    })
+  }
 
   return (
     <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
@@ -105,12 +113,20 @@ export default function PricingPage() {
                 <Link
                   href="/dashboard?onboarding=1&source=pricing-hero"
                   className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] rounded-xl px-5 py-3 text-sm font-semibold"
+                  data-analytics-category="project"
+                  data-analytics-action="onboarding_start"
+                  data-analytics-label="pricing_hero_start_studio"
+                  data-analytics-source="pricing"
                 >
                   Comecar no Studio
                 </Link>
                 <Link
                   href="/contact-sales"
                   className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-xl px-5 py-3 text-sm font-medium"
+                  data-analytics-category="user"
+                  data-analytics-action="contact_sales_start"
+                  data-analytics-label="pricing_hero_contact_sales"
+                  data-analytics-source="pricing"
                 >
                   Falar com vendas
                 </Link>
@@ -119,14 +135,14 @@ export default function PricingPage() {
               <div className="mt-8 inline-flex items-center gap-1 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-1">
                 <button
                   type="button"
-                  onClick={() => setBillingCycle('month')}
+                  onClick={() => changeBillingCycle('month')}
                   className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${ billingCycle === 'month' ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]' }`}
                 >
                   Mensal
                 </button>
                 <button
                   type="button"
-                  onClick={() => setBillingCycle('year')}
+                  onClick={() => changeBillingCycle('year')}
                   className={`flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors ${ billingCycle === 'year' ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]' }`}
                 >
                   Anual
@@ -235,6 +251,10 @@ export default function PricingPage() {
                 <Link
                   href={`/dashboard?tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`}
                   className={`inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] w-full rounded-xl px-4 py-3 text-sm font-semibold ${plan.popular ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] shadow-lg' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
+                  data-analytics-category="billing"
+                  data-analytics-action="checkout_start"
+                  data-analytics-label={`pricing_plan:${plan.id}:${isAnnual ? 'year' : 'month'}`}
+                  data-analytics-source="pricing-plan-card"
                 >
                   Selecionar {plan.name}
                 </Link>
@@ -294,7 +314,14 @@ export default function PricingPage() {
                       ))}
                     </ul>
                   </div>
-                  <Link href="/contact-sales" className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] mt-2 w-full rounded-xl px-4 py-3 text-sm font-semibold md:col-span-2">
+                  <Link
+                    href="/contact-sales"
+                    className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] mt-2 w-full rounded-xl px-4 py-3 text-sm font-semibold md:col-span-2"
+                    data-analytics-category="user"
+                    data-analytics-action="contact_sales_start"
+                    data-analytics-label="pricing_enterprise_contact_sales"
+                    data-analytics-source="pricing-enterprise-card"
+                  >
                     Falar com vendas
                   </Link>
                 </div>

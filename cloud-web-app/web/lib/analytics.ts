@@ -39,6 +39,10 @@ export type EventAction =
   | 'settings_change'
   | 'plan_upgrade'
   | 'plan_downgrade'
+  | 'auth_intent'
+  | 'oauth_start'
+  | 'cta_click'
+  | 'contact_sales_start'
   
   // Project
   | 'project_create'
@@ -47,6 +51,10 @@ export type EventAction =
   | 'project_delete'
   | 'project_export'
   | 'project_share'
+  | 'mission_submit'
+  | 'mission_handoff'
+  | 'workspace_create'
+  | 'onboarding_start'
   
   // AI
   | 'ai_chat'
@@ -64,10 +72,15 @@ export type EventAction =
   | 'animation_create'
   | 'build_start'
   | 'build_complete'
+  | 'deploy_click'
+  | 'deploy_success'
+  | 'deploy_failure'
   | 'play_start'
   | 'play_stop'
   
   // Billing
+  | 'pricing_view'
+  | 'pricing_cycle_change'
   | 'checkout_start'
   | 'checkout_complete'
   | 'checkout_cancel'

@@ -10,6 +10,7 @@ import {
   persistPreviewDeploy,
 } from '@/components/preview/previewDeployTrust';
 import { useRuntimeLanePolicy } from '@/hooks/useRuntimeLanePolicy';
+import { analytics } from '@/lib/analytics';
 import { tokens } from '@/lib/design-tokens';
 
 type DeployStatus =
@@ -151,6 +152,14 @@ export function DeployButton({
     setSubmitting(true);
     setFeedback(null);
     setDeployStatus('preparing');
+    analytics?.track('engine', 'deploy_click', {
+      label: 'deploy_button',
+      projectId: projectId ?? undefined,
+      metadata: {
+        projectName: deployProjectName,
+        runtimeTarget: buildExportLane.route.target,
+      },
+    });
 
     try {
       const response = await fetch('/api/deploy', {
@@ -174,6 +183,15 @@ export function DeployButton({
           `Failed to start deploy (${response.status})`;
         setDeployStatus('error');
         setFeedback(message);
+        analytics?.track('engine', 'deploy_failure', {
+          label: 'deploy_start_rejected',
+          projectId: projectId ?? undefined,
+          metadata: {
+            projectName: deployProjectName,
+            status: response.status,
+            message,
+          },
+        });
         return;
       }
 
@@ -196,6 +214,16 @@ export function DeployButton({
       setDeployStatus(payload.status || 'preparing');
       setFeedback(getDeployStartedLabel(payload.status));
       onDeploymentStarted?.({ ...payload, id: payload.id });
+      analytics?.track('engine', 'deploy_success', {
+        label: payload.status || 'deploy_started',
+        projectId: projectId ?? undefined,
+        metadata: {
+          projectName: deployProjectName,
+          deploymentId: payload.id,
+          url: payload.url,
+          inspectorUrl: payload.inspectorUrl,
+        },
+      });
 
       if (openStatusOnStart) {
         window.open(nextStatusHref, '_blank', 'noopener,noreferrer');
@@ -205,6 +233,14 @@ export function DeployButton({
       setFeedback(
         error instanceof Error ? error.message : 'Failed to start deploy'
       );
+      analytics?.track('engine', 'deploy_failure', {
+        label: 'deploy_network_error',
+        projectId: projectId ?? undefined,
+        metadata: {
+          projectName: deployProjectName,
+          message: error instanceof Error ? error.message : 'Failed to start deploy',
+        },
+      });
     } finally {
       setSubmitting(false);
     }

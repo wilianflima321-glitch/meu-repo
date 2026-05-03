@@ -3,8 +3,10 @@ import type { Prisma } from '@prisma/client'
 import { getUserFromRequest } from '@/lib/auth-server'
 import { apiInternalError } from '@/lib/api-errors'
 import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger'
 
 export const dynamic = 'force-dynamic'
+const routeLogger = createComponentLogger('api.analytics.batch')
 
 type AnalyticsEventPayload = {
   category?: string
@@ -112,7 +114,7 @@ export async function POST(request: NextRequest) {
       dropped: rawEvents.length + rawMetrics.length - createData.length,
     })
   } catch (error) {
-    console.error('Failed to persist analytics batch:', error)
+    routeLogger.error('Failed to persist analytics batch', error)
     return apiInternalError('Failed to persist analytics batch')
   }
 }

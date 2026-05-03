@@ -103,11 +103,12 @@ The product should make these controls visible as compact trust rails, not long 
 ## Next Closure Blocks
 
 1. Keep `qa:core-experience-routes` green so the route-level product loop stays real.
-2. Add visual tests for Web Entry, Studio Home, IDE preview/review, and device runtime card.
-3. Keep all new entry surfaces under the one-protagonist rule.
-4. Continue wiring game/film tools by mode instead of making them global navigation.
-5. Expand Studio Local from capability snapshot into controlled native worker execution.
-6. Add more route-level checks for preview/chat proportions and mobile approval flows.
+2. Keep `qa:product-funnel-telemetry` green so public entry, auth, pricing, mission handoff, and deploy remain measurable.
+3. Add visual tests for Web Entry, Studio Home, IDE preview/review, and device runtime card.
+4. Keep all new entry surfaces under the one-protagonist rule.
+5. Continue wiring game/film tools by mode instead of making them global navigation.
+6. Expand Studio Local from capability snapshot into controlled native worker execution.
+7. Add more route-level checks for preview/chat proportions and mobile approval flows.
 
 ## Verdict
 

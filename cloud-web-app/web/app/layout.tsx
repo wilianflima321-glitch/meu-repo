@@ -2,6 +2,7 @@
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
+import ProductTelemetry from '@/components/telemetry/ProductTelemetry'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -81,6 +82,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR" className={`dark ${inter.variable} ${jetbrains.variable}`}>
       <body className="min-h-screen antialiased bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
+        <ProductTelemetry />
         {children}
       </body>
     </html>
