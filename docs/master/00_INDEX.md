@@ -33,20 +33,23 @@ Status: CANONICAL ENTRYPOINT
 28. `docs/master/91_PRODUCT_QUALITY_EXECUTION_CHECKLIST_2026-04-30.md`
 29. `docs/master/92_V10_AUDIT_RECONCILIATION_2026-04-30.md`
 30. `docs/master/93_UNREAL_AGENTIC_PRODUCT_GAP_MAP_2026-05-01.md`
-31. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
-32. `docs/master/85_EXECUTION_STATUS_MAP_2026-04-22.md`
-33. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
-34. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
-35. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
-36. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
-37. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
-38. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
-39. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
-40. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
-41. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
-42. `AETHEL_INTERFACE_BLUEPRINTS/17_STUDIO_LOCAL.md`
-43. `AETHEL_INTERFACE_BLUEPRINTS/18_DEPTH_MODES_AND_HANDOFFS.md`
-44. `AETHEL_INTERFACE_BLUEPRINTS/19_BEST_IN_MARKET_CLEAN_UX_GUARDRAILS.md`
+31. `docs/master/94_MARKET_UX_BENCHMARK_RECONCILIATION_2026-05-01.md`
+32. `docs/master/95_DEVICE_RUNTIME_AND_LOCAL_AI_STRATEGY_2026-05-02.md`
+33. `docs/master/96_PRODUCT_EXPERIENCE_COHESION_GATE_2026-05-03.md`
+34. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
+35. `docs/master/85_EXECUTION_STATUS_MAP_2026-04-22.md`
+36. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
+37. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
+38. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
+39. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
+40. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
+41. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+42. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+43. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+44. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+45. `AETHEL_INTERFACE_BLUEPRINTS/17_STUDIO_LOCAL.md`
+46. `AETHEL_INTERFACE_BLUEPRINTS/18_DEPTH_MODES_AND_HANDOFFS.md`
+47. `AETHEL_INTERFACE_BLUEPRINTS/19_BEST_IN_MARKET_CLEAN_UX_GUARDRAILS.md`
 
 ## Canonical Interface Layer
 The interface source of truth no longer lives only inside `docs/master`.
@@ -63,6 +66,9 @@ The canonical UI/UX, shell, mode, state, and component contracts now live in:
 - `docs/master/91_PRODUCT_QUALITY_EXECUTION_CHECKLIST_2026-04-30.md`
 - `docs/master/92_V10_AUDIT_RECONCILIATION_2026-04-30.md`
 - `docs/master/93_UNREAL_AGENTIC_PRODUCT_GAP_MAP_2026-05-01.md`
+- `docs/master/94_MARKET_UX_BENCHMARK_RECONCILIATION_2026-05-01.md`
+- `docs/master/95_DEVICE_RUNTIME_AND_LOCAL_AI_STRATEGY_2026-05-02.md`
+- `docs/master/96_PRODUCT_EXPERIENCE_COHESION_GATE_2026-05-03.md`
 
 Rules:
 - `docs/master/65_*` and `66_*` define product and AI-experience direction.
@@ -129,6 +135,9 @@ Rules:
 | `91_PRODUCT_QUALITY_EXECUTION_CHECKLIST_2026-04-30.md` | Checklist de execucao derivado do checkpoint de qualidade para orientar melhorias sem criar novas familias de produto | ACTIVE |
 | `92_V10_AUDIT_RECONCILIATION_2026-04-30.md` | Reconciliacao factual da auditoria V10 fornecida pelo usuario com o estado local atual e o novo medidor de progresso | ACTIVE |
 | `93_UNREAL_AGENTIC_PRODUCT_GAP_MAP_2026-05-01.md` | Gap map canonico para ambicao Unreal/AAA + agentes cloud/local + UX unificada sem inflar claims | ACTIVE |
+| `94_MARKET_UX_BENCHMARK_RECONCILIATION_2026-05-01.md` | Reconciliacao de benchmark UX para preservar entrada limpa, Studio Home, IDE interna e operator sem copiar limitacoes externas | ACTIVE |
+| `95_DEVICE_RUNTIME_AND_LOCAL_AI_STRATEGY_2026-05-02.md` | Estrategia canonica para NPU/GPU/CPU, Studio Local, cloud isolation, memoria persistente e lane scheduling sem travar o dispositivo | ACTIVE |
+| `96_PRODUCT_EXPERIENCE_COHESION_GATE_2026-05-03.md` | Gate executavel para manter Web Entry, Studio Home, IDE, preview, browser operator, device runtime e game/film mode coesos | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |

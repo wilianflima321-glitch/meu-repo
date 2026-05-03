@@ -146,6 +146,12 @@ const deployUiPresent =
   exists('cloud-web-app/web/components/deploy/DeployButton.tsx') ||
   exists('cloud-web-app/web/components/ide/modern-shell/deployTopbarAction.tsx');
 
+const packageJson = exists('package.json') ? read('package.json') : '';
+const productExperienceCohesionConfigured =
+  exists('tools/check-product-experience-cohesion.mjs') &&
+  exists('docs/master/96_PRODUCT_EXPERIENCE_COHESION_GATE_2026-05-03.md') &&
+  packageJson.includes('qa:product-experience-cohesion');
+
 const metrics = [
   { id: 'console_calls', label: 'console.log/info/debug in app code', value: consoleCalls.total, target: 50, direction: 'lte' },
   { id: 'hex_in_tsx', label: 'hardcoded hex colors in component TSX', value: hexInTsx.total, target: 50, direction: 'lte' },
@@ -161,6 +167,7 @@ const metrics = [
   { id: 'no_implicit_any', label: 'TypeScript noImplicitAny enabled', value: noImplicitAny ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'jest_coverage', label: 'Jest coverage ratchet configured', value: jestCoverageEnabled ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'deploy_ui', label: 'Deploy UI wired to /api/deploy', value: deployUiPresent ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'product_experience_cohesion', label: 'Product experience cohesion gate configured', value: productExperienceCohesionConfigured ? 1 : 0, target: 1, direction: 'eq' },
 ].map((metric) => ({
   ...metric,
   status: statusFor(metric.value, metric.target, metric.direction),

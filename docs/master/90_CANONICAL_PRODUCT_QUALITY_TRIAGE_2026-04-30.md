@@ -225,6 +225,9 @@ The UX copy hygiene pass removed the measured Portuguese hardcoded action/status
 
 The market UX benchmark and mojibake cleanup pass rewrote `cloud-web-app/web/docs/GAP_ANALYSIS_VS_VSCODE_UNREAL.md` as a clean Aethel-specific contract across web entry, Studio Home, IDE, desktop/local runtime, mobile companion, VS Code-style tooling, and Unreal/game/film mode. The mojibake scanner is now deterministic and failing, and `qa:product-quality-progress` tracks `mojibake corruption findings` as a zero-tolerance metric. The measured mojibake gate moved from `41` findings to `0`.
 
+## 2026-05-03 Product Experience Cohesion Gate
+The product now has an executable cohesion gate for the experience contract instead of relying only on prose review. `tools/check-product-experience-cohesion.mjs` verifies that Web Entry, Studio Home, the internal IDE, preview/review truth, browser-operator approvals, device runtime routing, and game/film mode depth stay wired to real files and documented anchors. This protects the Firebase/v0/Replit/Manus-style entry path while preserving VS Code-grade IDE depth and Unreal-style mode depth without forcing that complexity onto first-time users.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
@@ -235,7 +238,7 @@ As of this checkpoint:
 - `git diff --check` is green when the repo is validated cleanly.
 
 Known factual residue:
-- mojibake scan still reports `41` findings,
+- mojibake scan reports `0` findings and is tracked as a zero-tolerance gate,
 - platform/build parity is still not a closed story,
 - Studio Local is still blueprint-grade rather than product-ready.
 
@@ -360,10 +363,11 @@ Do not use for:
 1. `Studio Home` is the canonical name for the initial logged-in control surface.
 2. The initial shell already belongs to the Studio family.
 3. Each screen must have one protagonist.
-4. Preview and chat cannot be equal-weight roommates by default.
-5. Web Light simplicity must not erase later Studio depth.
-6. Operator must eventually feel native to the Studio family.
-7. Images can guide quality and hierarchy, but docs and real code remain the source of truth.
+4. One primary action per surface.
+5. Preview and chat cannot be equal-weight roommates by default.
+6. Web Light simplicity must not erase later Studio depth.
+7. Operator must eventually feel native to the Studio family.
+8. Images can guide quality and hierarchy, but docs and real code remain the source of truth.
 
 ## What We Keep Instead Of Re-Inventing
 These are the directions to improve, not replace:
@@ -381,7 +385,7 @@ This is the shortest honest list of important open gaps.
 ### Priority 1
 - platform confidence,
 - build/parity trust,
-- remaining mojibake cleanup.
+- keep mojibake at zero with the failing scanner.
 
 ### Priority 2
 - viewport dominance,

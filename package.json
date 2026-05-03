@@ -74,7 +74,8 @@
     "qa:enterprise-gate": "npm --prefix cloud-web-app/web run qa:enterprise-gate",
     "qa:enterprise-release-gate": "npm --prefix cloud-web-app/web run qa:enterprise-release-gate",
     "qa:design-system-consistency": "node tools/check-design-system-consistency.mjs",
-    "qa:product-quality-progress": "node tools/measure-product-quality.mjs"
+    "qa:product-quality-progress": "node tools/check-product-experience-cohesion.mjs && node tools/measure-product-quality.mjs",
+    "qa:product-experience-cohesion": "node tools/check-product-experience-cohesion.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",

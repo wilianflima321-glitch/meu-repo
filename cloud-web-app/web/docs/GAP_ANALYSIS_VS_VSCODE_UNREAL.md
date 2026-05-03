@@ -153,12 +153,28 @@ These rules are the product guardrails for future implementation.
 
 ---
 
+## Executable Cohesion Gate
+
+The benchmark contract is now backed by `tools/check-product-experience-cohesion.mjs`.
+
+This gate is intentionally narrow and practical. It does not pretend to judge visual beauty from code. It verifies that the core product promises still have live anchors:
+
+1. Web Entry remains mission-first.
+2. Studio Home keeps mission, evidence, project brain, and device policy visible.
+3. The internal IDE keeps professional files/editor/preview/terminal/collaboration primitives.
+4. Preview/review keeps proposal, apply, reject, and deploy-trust paths.
+5. Browser operator actions remain governed by approval and runtime policy.
+6. NPU/GPU/CPU work routes through a safe device runtime policy.
+7. Game/film depth stays mode-specific instead of becoming default clutter.
+
+---
+
 ## Immediate Execution Backlog
 
 | Priority | Work | Why it matters |
 |---:|---|---|
 | 1 | Keep mojibake at zero with a failing gate. | Broken text instantly lowers trust and visual quality. |
-| 2 | Add a visual density checklist for first-run web, Studio Home, IDE, browser operator, and viewport. | Prevents future UI clutter. |
+| 2 | Keep `qa:product-experience-cohesion` green for first-run web, Studio Home, IDE, browser operator, device runtime, and viewport. | Prevents future UI clutter and product-family drift. |
 | 3 | Continue i18n beyond the hardcoded-string gate. | English default is clean, but real localization still matters. |
 | 4 | Add compact benchmark screenshots/notes to the UX arsenal when source assets are available. | Helps future agents preserve the intended product feel. |
 | 5 | Strengthen preview/chat layout tests. | Protects the Firebase/Replit-style core experience. |
