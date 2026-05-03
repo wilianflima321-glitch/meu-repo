@@ -1,265 +1,174 @@
-﻿# ðŸ” GAP ANALYSIS: Aethel IDE vs VS Code & Unreal Engine
+﻿# GAP ANALYSIS: Aethel IDE vs VS Code, Unreal Engine, and AI App Builders
 
-**Data:** 3 de Janeiro de 2026  
-**VersÃ£o:** 1.0  
-**Autor:** AnÃ¡lise Automatizada
-
----
-
-## ðŸ“Š RESUMO EXECUTIVO
-
-| Categoria | Implementado | Parcial | Faltando | % Completo |
-|-----------|-------------|---------|----------|------------|
-| **VS Code Features** | 18 | 6 | 3 | ~80% |
-| **Unreal Engine Features** | 12 | 2 | 0 | ~90% |
-| **Total** | 30 | 8 | 3 | ~84% |
+**Date:** 2026-05-03
+**Version:** 2.0
+**Owner:** Aethel Product Quality Triage
+**Purpose:** Keep the IDE and product experience aligned with the best market references without overloading the UI.
 
 ---
 
-## 1ï¸âƒ£ VS CODE FEATURES
+## Executive Summary
 
-### âœ… IMPLEMENTADO COMPLETAMENTE
+Aethel must not be a generic AI dashboard with an IDE hidden inside it. The winning product shape is a calm mission-first web entry, a powerful internal IDE, and a local/cloud runtime layer that lets agents work safely without freezing the user's device.
 
-| Feature | Arquivo | Notas |
-|---------|---------|-------|
-| **Command Palette (Ctrl+Shift+P)** | [components/ide/CommandPalette.tsx](../components/ide/CommandPalette.tsx) | ImplementaÃ§Ã£o canÃ´nica, comandos categorizados, keybindings |
-| **Quick Open (Ctrl+P)** | [QuickOpen.tsx](../components/QuickOpen.tsx) | 285 linhas, fuzzy search, API integrada |
-| **IntelliSense/Autocomplete** | [lsp-client.ts](../lib/lsp/lsp-client.ts) | LSP completo, CompletionItem, SignatureHelp |
-| **Multi-cursor editing** | [MonacoEditorPro.tsx](../components/editor/MonacoEditorPro.tsx) | Monaco nativo suporta |
-| **Minimap** | [Minimap.tsx](../components/editor/Minimap.tsx) + Monaco | 125 linhas + Monaco builtin |
-| **Terminal integrado** | [IntegratedTerminal.tsx](../components/terminal/IntegratedTerminal.tsx) | xterm.js completo |
-| **Git integration** | [GitPanel.tsx](../components/git/GitPanel.tsx) | Staging, commits, branches |
-| **Diff editor** | [DiffViewer.tsx](../components/ide/DiffViewer.tsx) | 625 linhas, LCS algorithm, hunks |
-| **Settings UI** | [SettingsPanel.tsx](../components/settings/SettingsPanel.tsx) | UI completa |
-| **Extensions marketplace** | [ExtensionManager.tsx](../components/extensions/ExtensionManager.tsx) | Sistema completo em [extension-system.ts](../lib/extensions/extension-system.ts) (1010 linhas) |
-| **Themes system** | [theme-manager.ts](../lib/themes/theme-manager.ts) | 548 linhas, dark/light/high-contrast |
-| **Workspaces** | [WorkspaceSwitcher.tsx](../components/workspace/WorkspaceSwitcher.tsx) | Multi-workspace support |
-| **Split editors** | [SplitEditor.tsx](../components/editor/SplitEditor.tsx) | 663 linhas, drag & drop tabs |
-| **Search and replace** | [SearchPanel.tsx](../components/search/SearchPanel.tsx) | 414 linhas, regex, case-sensitive |
-| **Problems panel** | [ProblemsPanel.tsx](../components/problems/ProblemsPanel.tsx) | Erros e warnings |
-| **Output panel** | [OutputPanel.tsx](../components/output/OutputPanel.tsx) | Logs de output |
-| **Keybindings editor** | [KeyboardShortcutsEditor.tsx](../components/KeyboardShortcutsEditor.tsx) | CustomizaÃ§Ã£o de atalhos |
-| **Tasks system** | [TaskPanel.tsx](../components/tasks/TaskPanel.tsx) | Build tasks |
+The current direction is valid, but the product must keep tightening five experience promises:
 
-### âš ï¸ IMPLEMENTADO PARCIALMENTE
-
-| Feature | Status | O que falta |
-|---------|--------|-------------|
-| **Go to definition/references** | ðŸŸ¡ Parcial | LSP preparado, falta UI "Find All References" dedicada |
-| **Peek definition** | ðŸŸ¡ Parcial | Monaco suporta, falta configurar provider corretamente |
-| **Breadcrumbs navigation** | ðŸŸ¡ Parcial | [Breadcrumbs.tsx](../components/Breadcrumbs.tsx) bÃ¡sico (47 linhas), falta symbol outline |
-| **Git gutter decorations** | ðŸŸ¡ Parcial | MonacoEditorPro tem `GitChange[]` type, falta renderizaÃ§Ã£o inline |
-| **Debug panel** | ðŸŸ¡ Parcial | [DebugPanel.tsx](../components/ide/DebugPanel.tsx) (813 linhas) tem UI, falta integraÃ§Ã£o DAP completa |
-| **Source control panel** | ðŸŸ¡ Parcial | [GitPanelPro.tsx](../components/ide/GitPanelPro.tsx) existe, falta timeline view |
-
-### âŒ FALTANDO
-
-| Feature | Prioridade | EsforÃ§o | Notas |
-|---------|------------|---------|-------|
-| **Breakpoint conditions** | IMPORTANTE | MÃ©dio | Suporte no DAP, falta UI para editar condiÃ§Ãµes |
-| **Watch expressions** | IMPORTANTE | MÃ©dio | DebugPanel tem estrutura, falta implementaÃ§Ã£o real |
-| **Call stack navigation** | IMPORTANTE | Baixo | Estrutura existe, falta click-to-navigate |
+1. One protagonist per screen.
+2. Chat and preview must stay close, but one of them must clearly lead depending on the user mode.
+3. The IDE must feel professional, not like a demo shell.
+4. Browser/operator automation must always show permission, evidence, and interrupt controls.
+5. Advanced game/film tooling must be discoverable without overwhelming first-time web users.
 
 ---
 
-## 2ï¸âƒ£ UNREAL ENGINE FEATURES
+## Market Benchmark Lens
 
-### âœ… IMPLEMENTADO COMPLETAMENTE
-
-| Feature | Arquivo | Linhas | Notas |
-|---------|---------|--------|-------|
-| **Blueprint visual scripting** | [BlueprintEditor.tsx](../components/engine/BlueprintEditor.tsx) | 842 | ReactFlow, node palette, StandardNodes |
-| **3D Viewport** | [GameViewport.tsx](../components/engine/GameViewport.tsx) | ~90 | React Three Fiber, physics |
-| **Level editor** | [LevelEditor.tsx](../components/engine/LevelEditor.tsx) | 1199 | Transform tools, multi-select |
-| **Material editor** | [MaterialEditor.tsx](../components/materials/MaterialEditor.tsx) | - | Node-based materials |
-| **Animation blueprints** | [AnimationBlueprint.tsx](../components/engine/AnimationBlueprint.tsx) | 1219 | State machines, blending |
-| **Niagara particles** | [NiagaraVFX.tsx](../components/engine/NiagaraVFX.tsx) | 1276 | Real particle system, emitters |
-| **Landscape editor** | [LandscapeEditor.tsx](../components/engine/LandscapeEditor.tsx) | 1172 | Sculpting, painting, foliage |
-| **Sequencer** | [sequencer-cinematics.ts](../lib/sequencer-cinematics.ts) | 1203 | Timeline, keyframes, camera cuts |
-| **World outliner** | [WorldOutliner.tsx](../components/engine/WorldOutliner.tsx) | 1032 | Hierarchy, drag & drop |
-| **Details panel** | [DetailsPanel.tsx](../components/engine/DetailsPanel.tsx) | 1334 | Property editors, components |
-| **Content browser** | [EngineContentBrowser.tsx](../components/engine/EngineContentBrowser.tsx) | 995 | Asset management, thumbnails |
-| **Play in editor (PIE)** | [GameViewport.tsx](../components/engine/GameViewport.tsx) | - | Mode edit/play |
-
-### âš ï¸ IMPLEMENTADO PARCIALMENTE
-
-| Feature | Status | O que falta |
-|---------|--------|-------------|
-| **Asset management** | ðŸŸ¡ Parcial | ContentBrowser OK, falta import pipeline visual |
-| **Hot reload** | ðŸŸ¡ Parcial | [hot-reload-server.ts](../lib/hot-reload/hot-reload-server.ts) existe, falta integraÃ§Ã£o blueprint |
-
-### âŒ FALTANDO
-
-**Nenhuma feature core estÃ¡ faltando!** ðŸŽ‰
+| Reference | What Aethel should copy | What Aethel should improve |
+|---|---|---|
+| Firebase Studio | Seamless transition from prompting to full Code OSS-style control, browser previews, rollback, cloud services, and observability. | Do not depend on a single cloud vendor path. Keep local desktop and cloud account continuity as a first-class model. |
+| Replit Project Editor | Home base with prompt, live preview, task board, threads, import paths, collaboration, and deploy from the same workspace. | Avoid noisy panels. Aethel should expose mission state and next action before raw admin metrics. |
+| v0 | High-fidelity UI generation, one-click deploy, diagnostics, and a chat-led production path. | Aethel must go deeper than web UI: IDE, agents, browser operator, games, films, assets, and local runtime. |
+| Cursor | Agent work with codebase context, terminal execution, review diffs, and background agent visibility. | Aethel should make multi-agent governance visible earlier: cost, risk, evidence, rollback, and owner approval. |
+| Manus Browser Operator | Local browser access for logged-in tools, cloud browser isolation, one-time authorization, live monitoring, and interruptibility. | Aethel should unify browser operator with project memory, evidence, and device policy instead of treating it as a separate add-on. |
+| Lovable | Natural-language full-stack creation with real code, GitHub sync, collaboration, security, and governance. | Aethel should make quality gates, deploy readiness, and runtime diagnostics clearer before publish. |
 
 ---
 
-## 3ï¸âƒ£ LISTA PRIORIZADA DE IMPLEMENTAÃ‡ÃƒO
+## Aethel Experience Contract
 
-### ðŸ”´ CRÃTICO (Sem isso nÃ£o parece profissional)
+### Web Entry
 
-| # | Feature | Categoria | EsforÃ§o | Impacto |
-|---|---------|-----------|---------|---------|
-| 1 | **Breadcrumbs com Symbol Outline** | VS Code | 2-3 dias | Alto |
-| 2 | **Git Gutter Decorations** | VS Code | 1-2 dias | Alto |
-| 3 | **Go to References UI** | VS Code | 2-3 dias | Alto |
+The initial web experience should feel closer to Firebase Studio, Gemini, Manus, and v0 than to an admin console.
 
-**Justificativa:** SÃ£o elementos visuais que usuÃ¡rios de VS Code esperam ver imediatamente. A ausÃªncia deles faz a IDE parecer "incompleta".
+Required behavior:
 
-### ðŸŸ  IMPORTANTE (Diferencial de qualidade)
+1. Show a single mission input as the hero.
+2. Offer small domain starters only after the main prompt is clear.
+3. Keep the visible copy short.
+4. Surface account, runtime, and billing state as quiet status rails, not heavy dashboards.
+5. Make the path to Studio obvious without forcing advanced IDE chrome on new users.
 
-| # | Feature | Categoria | EsforÃ§o | Impacto |
-|---|---------|-----------|---------|---------|
-| 4 | **Debug Breakpoint Conditions** | VS Code | 3-4 dias | MÃ©dio |
-| 5 | **Watch Expressions** | VS Code | 2-3 dias | MÃ©dio |
-| 6 | **Call Stack Click Navigation** | VS Code | 1 dia | MÃ©dio |
-| 7 | **Peek Definition Popup** | VS Code | 2-3 dias | MÃ©dio |
-| 8 | **Source Control Timeline** | VS Code | 3-4 dias | MÃ©dio |
-| 9 | **Asset Import Pipeline Visual** | Unreal | 4-5 dias | MÃ©dio |
+Failure modes to avoid:
 
-**Justificativa:** Funcionalidades que diferenciam uma IDE profissional de um editor bÃ¡sico. Desenvolvedores sÃ©rios precisam dessas ferramentas.
+1. Too many equal-weight cards.
+2. Dashboard metrics before the user has a mission.
+3. Long explanatory paragraphs on the first screen.
+4. Admin terminology in learner-facing flows.
+5. Multiple primary buttons competing for attention.
 
-### ðŸŸ¢ NICE-TO-HAVE (Polimento final)
+### Studio Home
 
-| # | Feature | Categoria | EsforÃ§o | Impacto |
-|---|---------|-----------|---------|---------|
-| 10 | **Hot Reload para Blueprints** | Unreal | 5-7 dias | Baixo |
-| 11 | **Problem Matchers AvanÃ§ados** | VS Code | 2-3 dias | Baixo |
-| 12 | **Custom Editor API** | VS Code | 5-7 dias | Baixo |
-| 13 | **Webview Panels** | VS Code | 3-4 dias | Baixo |
+Studio Home should act like the mission control layer before the IDE opens.
 
----
+Required behavior:
 
-## 4ï¸âƒ£ ANÃLISE DE COMPONENTES EXISTENTES
+1. Current mission, preview, agents, evidence, deploy readiness, and next action must be visible.
+2. Every agent run must leave an artifact trail.
+3. Risk and approval must be visible before destructive or costly actions.
+4. Device capability should influence whether work runs local, hybrid, cloud-isolated, or safe-mode.
+5. The user should understand what will happen next without reading logs.
 
-### ðŸ“ components/ide/
-```
-âœ… AIChatPanelPro.tsx     - Chat com IA integrado
-OK DebugPanel.tsx - Debug UI (813 linhas)
-âœ… DiffViewer.tsx         - Diff viewer (625 linhas)
-âœ… EngineSettingsPage.tsx - Config do engine
-âœ… FileExplorerPro.tsx    - Explorer avanÃ§ado
-âœ… GitPanelPro.tsx        - Git avanÃ§ado
-âœ… IDELayout.tsx          - Layout principal
-âœ… InlineCompletion.tsx   - Ghost text
-```
+### IDE
 
-### ðŸ“ components/editor/
-```
-âœ… CodeEditor.tsx         - Editor bÃ¡sico
-âœ… GhostTextDecorations.tsx - AI suggestions
-âœ… InlineEditModal.tsx    - EdiÃ§Ã£o inline
-âœ… Minimap.tsx            - Minimap (125 linhas)
-âœ… MonacoEditor.tsx       - Monaco wrapper
-âœ… MonacoEditorPro.tsx    - Monaco pro (613 linhas)
-âœ… SplitEditor.tsx        - Split view (663 linhas)
-```
+The IDE must remain an internal professional surface, similar in density to VS Code/Firebase Studio, with Unreal-inspired panels only when the user is in game/film mode.
 
-### ðŸ“ components/engine/
-```
-âœ… AnimationBlueprint.tsx - Anim state machine (1219 linhas)
-âœ… BlueprintEditor.tsx    - Visual scripting (842 linhas)
-OK EngineContentBrowser.tsx - Asset browser (995 linhas)
-âœ… DetailsPanel.tsx       - Properties (1334 linhas)
-âœ… GameViewport.tsx       - 3D viewport
-âœ… LandscapeEditor.tsx    - Terrain (1172 linhas)
-âœ… LevelEditor.tsx        - Level editor (1199 linhas)
-âœ… NiagaraVFX.tsx         - Particles (1276 linhas)
-âœ… ProjectSettings.tsx    - Settings
-âœ… WorldOutliner.tsx      - Scene hierarchy (1032 linhas)
-```
+Required behavior:
 
-### ðŸ“ lib/ (Core Systems)
-```
-âœ… lsp/                   - Language Server Protocol
-âœ… dap/                   - Debug Adapter Protocol
-âœ… extensions/            - Extension system (1010 linhas)
-âœ… themes/                - Theme manager (548 linhas)
-âœ… keybindings/           - Keyboard shortcuts
-âœ… search/                - Search manager
-âœ… git/                   - Git operations
-âœ… debug/                 - Debug adapter (real)
-âœ… blueprint-system.ts    - Blueprint core
-âœ… sequencer-cinematics.ts - Sequencer (1203 linhas)
-```
+1. Editor, file tree, terminal, preview, assistant, and status bar must stay coherent.
+2. Code changes need review surfaces, diffs, and rollback paths.
+3. Multi-agent work must not pollute the editor; it belongs in a sidecar/timeline.
+4. Viewport work needs hierarchy, details, transform tools, timeline, and asset browser.
+5. Game/film tools should load by mode, not all at once.
+
+### Desktop/Local Runtime
+
+The desktop/local app should provide device-aware acceleration and safe isolation.
+
+Required behavior:
+
+1. Detect GPU, WebGPU, WebNN/NPU capability, CPU, RAM, storage, and network.
+2. Prefer local acceleration only when it will not freeze the machine.
+3. Use cloud-isolated execution for risky, long, untrusted, or high-memory jobs.
+4. Keep local browser operator actions permissioned and interruptible.
+5. Preserve memory, workspace state, and project rules across web and desktop.
+
+### Mobile Companion
+
+Mobile should not try to be the full IDE by default.
+
+Required behavior:
+
+1. Mission review, approvals, evidence, notifications, and lightweight chat.
+2. Background-agent launch and monitoring.
+3. Preview review and deploy approval.
+4. Emergency stop, rollback, and budget alerts.
+5. Minimal code viewing only when useful.
 
 ---
 
-## 5ï¸âƒ£ MÃ‰TRICAS DE CÃ“DIGO
+## VS Code Gap Triage
 
-| Sistema | Linhas de CÃ³digo | Qualidade |
-|---------|-----------------|-----------|
-| Blueprint Editor | 842 | â­â­â­â­â­ Completo |
-| Level Editor | 1199 | â­â­â­â­â­ Completo |
-| Content Browser | 1491 | â­â­â­â­â­ Completo |
-| Details Panel | 1334 | â­â­â­â­â­ Completo |
-| World Outliner | 1032 | â­â­â­â­â­ Completo |
-| Niagara VFX | 1276 | â­â­â­â­â­ Completo |
-| Animation Blueprint | 1219 | â­â­â­â­â­ Completo |
-| Landscape Editor | 1172 | â­â­â­â­â­ Completo |
-| Sequencer | 1203 | â­â­â­â­â­ Completo |
-| Extension System | 1010 | â­â­â­â­â­ Completo |
-| Split Editor | 663 | â­â­â­â­â­ Completo |
-| Debug Panel | 667 | â­â­â­â­ Bom (falta DAP full) |
-| Diff Viewer | 625 | â­â­â­â­â­ Completo |
-| Monaco Editor Pro | 613 | â­â­â­â­â­ Completo |
-| Theme Manager | 548 | â­â­â­â­â­ Completo |
-| LSP Client | 522 | â­â­â­â­ Bom |
-| Search Panel | 414 | â­â­â­â­â­ Completo |
-| Command Palette | 396 | â­â­â­â­â­ Completo |
-| Quick Open | 285 | â­â­â­â­â­ Completo |
-
-**Total de linhas core:** ~16,000+ linhas de cÃ³digo funcional
+| Feature | Current direction | UX priority | Notes |
+|---|---|---:|---|
+| Command Palette | Present | High | Keep command density high but descriptions short. |
+| Quick Open | Present | High | Must remain fast and keyboard-first. |
+| Inline AI | Present | High | Needs clear apply/review/rollback controls. |
+| Git panel | Present | High | Add gutter and timeline polish when implementation bandwidth allows. |
+| Debug panel | Present | High | Add breakpoint conditions, watch expressions, and call-stack navigation. |
+| Breadcrumbs | Partial | Medium | Symbol outline improves professional feel without adding visual clutter. |
+| Source control timeline | Partial | Medium | Useful for trust and rollback. |
+| Problems panel | Present | Medium | Should stay compact and connected to fix actions. |
 
 ---
 
-## 6ï¸âƒ£ RECOMENDAÃ‡ÃƒO DE PRÃ“XIMOS PASSOS
+## Unreal/Game/Film Gap Triage
 
-### Semana 1: Features CrÃ­ticas
-1. **Breadcrumbs com Symbol Outline** 
-   - Expandir [Breadcrumbs.tsx](../components/Breadcrumbs.tsx)
-   - Integrar com LSP document symbols
-   
-2. **Git Gutter Decorations**
-   - Usar `GitChange[]` em MonacoEditorPro
-   - Adicionar line decorations
-
-### Semana 2: Debugging Completo
-3. **Breakpoint Conditions UI**
-   - Adicionar modal para editar condiÃ§Ãµes
-   - Integrar com DAP
-
-4. **Watch Expressions**
-   - Implementar evaluate em DebugPanel
-   - Adicionar UI de watches
-
-### Semana 3: Polish
-5. **Call Stack Navigation**
-6. **Peek Definition**
-7. **Go to References**
+| System | Current direction | UX priority | Notes |
+|---|---|---:|---|
+| 3D viewport | Present | Critical | Must become mode-primary for game/film tasks, not a tiny preview. |
+| World outliner | Present/aspirational | Critical | Needs to be visible in game/film mode and connected to selection. |
+| Details panel | Present/aspirational | Critical | Required for professional scene editing. |
+| Asset browser | Present | Critical | Needs import state, validation, thumbnails, and pipeline evidence. |
+| Sequencer/timeline | Present | High | Should be available for animation/film mode only. |
+| Materials/VFX | Present | High | Needs clean progressive disclosure. |
+| Physics/gameplay | Partial | High | Must be testable in viewport with clear play/edit state. |
+| Render/export | Partial | Medium | Needs job progress, artifacts, and cost/runtime policy. |
 
 ---
 
-## 7ï¸âƒ£ CONCLUSÃƒO
+## Interface Quality Rules
 
-A **Aethel IDE** estÃ¡ em um estado **muito avanÃ§ado** com ~84% das features principais implementadas. 
+These rules are the product guardrails for future implementation.
 
-### Pontos Fortes:
-- âœ… **Unreal Engine features** quase 100% completas
-- âœ… Sistemas core robustos (Blueprint, Level Editor, Content Browser)
-- âœ… CÃ³digo de alta qualidade (arquivos de 1000+ linhas bem estruturados)
-- âœ… Monaco Editor com customizaÃ§Ãµes avanÃ§adas
-
-### Pontos de Melhoria:
-- âš ï¸ Debug features precisam de mais trabalho
-- âš ï¸ Breadcrumbs e Git Gutter sÃ£o gaps visuais importantes
-- âš ï¸ Algumas integraÃ§Ãµes LSP/DAP incompletas
-
-### Estimativa para 100%:
-- **Tempo:** 2-3 semanas de trabalho focado
-- **Prioridade:** Features CRÃTICAS primeiro
+1. One primary action per surface.
+2. No screen should need more than one sentence to explain itself.
+3. Empty states must teach the next action, not list features.
+4. Status details belong in expandable rails.
+5. Enterprise/security/billing information should be visible but quiet.
+6. Agent actions must expose risk, cost, permission, and rollback.
+7. Preview should be large when the user is evaluating output.
+8. Code should be large when the user is editing implementation.
+9. Viewport should be large when the user is editing worlds, scenes, animation, or films.
+10. Mobile should approve and monitor more than it edits.
 
 ---
 
-*Documento gerado automaticamente via anÃ¡lise de cÃ³digo*
+## Immediate Execution Backlog
 
+| Priority | Work | Why it matters |
+|---:|---|---|
+| 1 | Keep mojibake at zero with a failing gate. | Broken text instantly lowers trust and visual quality. |
+| 2 | Add a visual density checklist for first-run web, Studio Home, IDE, browser operator, and viewport. | Prevents future UI clutter. |
+| 3 | Continue i18n beyond the hardcoded-string gate. | English default is clean, but real localization still matters. |
+| 4 | Add compact benchmark screenshots/notes to the UX arsenal when source assets are available. | Helps future agents preserve the intended product feel. |
+| 5 | Strengthen preview/chat layout tests. | Protects the Firebase/Replit-style core experience. |
+| 6 | Make local/cloud runtime policy visible in more action surfaces. | Prevents device freezes and improves user trust. |
+| 7 | Wire more game/film tools by mode instead of always-visible navigation. | Keeps the web experience simple while preserving IDE depth. |
+
+---
+
+## Conclusion
+
+The product thesis remains strong: Aethel should combine the approachable mission-first entry of the best AI app builders, the real IDE depth of VS Code/Firebase Studio, the browser automation trust model of Manus, and the world-building ambition of Unreal.
+
+The gap is not more raw UI. The gap is disciplined hierarchy, visible evidence, device-aware execution, and mode-specific depth. Every future change should make the product feel calmer at entry and more powerful only when the user asks for power.

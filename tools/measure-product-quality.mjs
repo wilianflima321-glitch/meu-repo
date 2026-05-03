@@ -102,6 +102,16 @@ const activeAbsolutePaths = countRegexInFiles(
   docs,
   /(?:C:\\Users\\|Grosarik|Desktop\\Aethel engine)/g
 );
+const webTextFiles = await list([
+  'cloud-web-app/web/app/**/*.{ts,tsx,md,css}',
+  'cloud-web-app/web/components/**/*.{ts,tsx,md,css}',
+  'cloud-web-app/web/lib/**/*.{ts,tsx,md,css}',
+  'cloud-web-app/web/docs/**/*.md',
+]);
+const mojibakeFindings = countRegexInFiles(
+  webTextFiles.filter((file) => file !== 'cloud-web-app/web/docs/MOJIBAKE_SCAN.md'),
+  /(?:\u00C3[\u0080-\u00BF]|\u00C2[\u0080-\u00BF]|\uFFFD)/g
+);
 
 const godComponents = tsxComponents
   .map((file) => ({ file, lines: lineCount(file) }))
@@ -146,6 +156,7 @@ const metrics = [
   { id: 'e2e_tests', label: 'e2e specs', value: e2eTests.length, target: 15, direction: 'gte' },
   { id: 'prisma_migrations', label: 'Prisma migration folders', value: prismaMigrations, target: 1, direction: 'gte' },
   { id: 'active_doc_absolute_paths', label: 'absolute local paths in active docs', value: activeAbsolutePaths.total, target: 0, direction: 'lte' },
+  { id: 'mojibake_findings', label: 'mojibake corruption findings', value: mojibakeFindings.total, target: 0, direction: 'lte' },
   { id: 'next_image_optimized', label: 'Next Image optimization enabled', value: nextImageOptimized ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'no_implicit_any', label: 'TypeScript noImplicitAny enabled', value: noImplicitAny ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'jest_coverage', label: 'Jest coverage ratchet configured', value: jestCoverageEnabled ? 1 : 0, target: 1, direction: 'eq' },
@@ -163,6 +174,7 @@ const result = {
     consoleCalls: consoleCalls.top,
     hexInTsx: hexInTsx.top,
     anyTypes: anyTypes.top,
+    mojibakeFindings: mojibakeFindings.top,
     godComponents: godComponents.slice(0, 10),
     activeAbsolutePaths: activeAbsolutePaths.top,
   },

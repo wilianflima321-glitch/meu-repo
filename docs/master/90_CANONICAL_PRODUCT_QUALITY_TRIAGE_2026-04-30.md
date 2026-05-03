@@ -223,6 +223,8 @@ The final strictness pass for this block typed the remaining high-volume app-cod
 
 The UX copy hygiene pass removed the measured Portuguese hardcoded action/status strings from component TSX surfaces. The `PT hardcoded UX strings in components` quality gate moved from `287` to `0`, so the active dashboard, IDE, billing, marketplace, security, multiplayer, loading, and error surfaces no longer carry the audited PT action/status debt. This does not replace full i18n work; it closes the current hardcoded-string gate while preserving the existing visual hierarchy and behavior.
 
+The market UX benchmark and mojibake cleanup pass rewrote `cloud-web-app/web/docs/GAP_ANALYSIS_VS_VSCODE_UNREAL.md` as a clean Aethel-specific contract across web entry, Studio Home, IDE, desktop/local runtime, mobile companion, VS Code-style tooling, and Unreal/game/film mode. The mojibake scanner is now deterministic and failing, and `qa:product-quality-progress` tracks `mojibake corruption findings` as a zero-tolerance metric. The measured mojibake gate moved from `41` findings to `0`.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

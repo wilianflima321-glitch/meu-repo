@@ -62,7 +62,7 @@ for (const file of files) {
 
 const report = []
 report.push('# MOJIBAKE_SCAN.md')
-report.push(`Generated: ${new Date().toISOString()}`)
+report.push('Generated: deterministic local scan')
 report.push('')
 report.push(`- Files scanned: ${files.length}`)
 report.push(`- Findings: ${findings.length}`)
@@ -82,3 +82,7 @@ if (findings.length === 0) {
 
 fs.writeFileSync(OUT, `${report.join('\n')}\n`, 'utf8')
 console.log(`[mojibake-scan] findings=${findings.length} report=${rel(OUT)}`)
+
+if (findings.length > 0) {
+  process.exitCode = 1
+}
