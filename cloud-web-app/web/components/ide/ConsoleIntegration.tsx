@@ -205,7 +205,7 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
             >
-              Erros ({logCounts.error})
+              Errors ({logCounts.error})
             </button>
             <button
               type="button"

@@ -346,7 +346,7 @@ function UsageError() {
     <div className="bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded-xl p-8 text-center">
       <AlertTriangle className="w-12 h-12 text-[var(--aethel-error-light)] mx-auto mb-4" />
       <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-2">
-        Erro ao carregar dados de consumo
+        Error loading usage data
       </h3>
       <p className="text-[var(--aethel-text-tertiary)] mb-4">
         Não foi possível carregar seus dados de consumo. Tente novamente.

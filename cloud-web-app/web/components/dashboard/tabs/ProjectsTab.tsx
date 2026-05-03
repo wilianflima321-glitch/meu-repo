@@ -70,7 +70,7 @@ const typeLabels: Record<string, string> = {
 const statusConfig: Record<string, { label: string; variant: 'success' | 'warning' | 'default' | 'info' }> = {
   active: { label: 'Ativo', variant: 'success' },
   paused: { label: 'Pausado', variant: 'warning' },
-  completed: { label: 'Concluido', variant: 'info' },
+  completed: { label: 'Completed', variant: 'info' },
   archived: { label: 'Arquivado', variant: 'default' },
 }
 
@@ -251,7 +251,7 @@ export function ProjectsTab({
             <option value="">Todos os status</option>
             <option value="active">Ativo</option>
             <option value="paused">Pausado</option>
-            <option value="completed">Concluido</option>
+            <option value="completed">Completed</option>
             <option value="archived">Arquivado</option>
           </select>
         </div>

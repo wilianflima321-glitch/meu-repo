@@ -195,7 +195,7 @@ export function SearchProvider({
       setState(prev => ({
         ...prev,
         searching: false,
-        error: error instanceof Error ? error.message : 'Falha ao buscar',
+        error: error instanceof Error ? error.message : 'Failed to search',
       }));
     }
   }, [query, options, onSearch]);

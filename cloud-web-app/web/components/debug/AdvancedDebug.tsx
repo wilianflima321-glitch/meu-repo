@@ -234,7 +234,7 @@ export function BreakpointEditor({
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-2 pt-2">
-          <button type="button" aria-label="Cancelar configuracao de breakpoint"
+          <button type="button" aria-label="Cancel breakpoint configuration"
             onClick={onCancel}
             className="px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
           >

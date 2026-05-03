@@ -538,7 +538,7 @@ export function AIAgentDashboard({
               />
               <MetricCard
                 icon={<Icons.Warning />}
-                label="Erros Hoje"
+                label="Errors Hoje"
                 value={metrics.errorsToday.toString()}
                 color="text-[var(--aethel-error)]"
               />

@@ -176,7 +176,7 @@ const MENTION_TRIGGERS = [
   { trigger: '@File', tag: '@file:', icon: 'file' as const, color: 'green' as const, description: 'Incluir arquivo especifico' },
   { trigger: '@Folder', tag: '@folder:', icon: 'folder' as const, color: 'amber' as const, description: 'Listar conteudo da pasta' },
   { trigger: '@Diff', tag: '@diff', icon: 'diff' as const, color: 'amber' as const, description: 'Diff do workspace' },
-  { trigger: '@Error', tag: '@error', icon: 'bug' as const, color: 'red' as const, description: 'Diagnostico de build/lint' },
+  { trigger: '@Error', tag: '@error', icon: 'bug' as const, color: 'red' as const, description: 'Build/lint diagnostics' },
   { trigger: '@Git', tag: '@git:', icon: 'git' as const, color: 'amber' as const, description: 'Status e logs do Git' },
 ];
 

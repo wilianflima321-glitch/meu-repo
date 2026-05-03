@@ -75,7 +75,7 @@ export function RevenueChartCard({
                             description={stripErrorCodePrefix(error.message)}
                         />
                     ) : (
-                        <ErrorState message={error.message || 'Falha ao carregar dados de receita'} onRetry={onRetry} />
+                        <ErrorState message={error.message || 'Failed to load revenue data'} onRetry={onRetry} />
                     )
                 ) : data.length === 0 ? (
                     <EmptyState
@@ -150,7 +150,7 @@ export function CategoryBreakdownCard() {
                     <LoadingSpinner className="h-48" />
                 ) : error ? (
                     <ErrorState
-                        message={(error as Error).message || 'Falha ao carregar dados de categorias'}
+                        message={(error as Error).message || 'Failed to load category data'}
                         onRetry={() => void refetch()}
                     />
                 ) : !data || data.length === 0 ? (
@@ -230,7 +230,7 @@ export function DownloadTrendChartCard({
                             description={stripErrorCodePrefix(error.message)}
                         />
                     ) : (
-                        <ErrorState message="Falha ao carregar tendencias de download" onRetry={onRetry} />
+                        <ErrorState message="Failed to load download trends" onRetry={onRetry} />
                     )
                 ) : data.length === 0 ? (
                     <EmptyState

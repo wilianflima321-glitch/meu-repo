@@ -277,7 +277,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
         {step === 'provider' && (
           <div className="p-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Configurar provedor de IA</h2>
+              <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Configure AI provider</h2>
               <p className="mt-2 text-sm text-[var(--aethel-text-tertiary)]">
                 Escolha como a IA vai funcionar. Você pode mudar depois em Configurações.
               </p>

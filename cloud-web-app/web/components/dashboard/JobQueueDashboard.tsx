@@ -262,13 +262,13 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
             </button>
           )}
           {(job.status === 'pending' || job.status === 'running') && (
-            <button type="button" aria-label={`Cancelar job ${job.id}`}
+            <button type="button" aria-label={`Cancel job ${job.id}`}
               onClick={(event) => {
                 event.stopPropagation()
                 onCancel(job.id)
               }}
               className={`rounded-xl p-1.5 text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] hover:text-[var(--aethel-error)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
-              title="Cancelar"
+              title="Cancel"
             >
               <Icons.X />
             </button>
@@ -313,7 +313,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
 
           {Boolean(job.error) && (
             <div className="mt-3">
-              <h4 className="mb-1 text-xs font-semibold uppercase text-[var(--aethel-error)]">Erro</h4>
+              <h4 className="mb-1 text-xs font-semibold uppercase text-[var(--aethel-error)]">Error</h4>
               <div className="rounded-md bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] p-2 text-xs font-mono text-[var(--aethel-error)]">
                 {String(job.error)}
               </div>
@@ -369,10 +369,10 @@ export function JobQueueDashboard({
       ])
 
       if (!jobsRes.ok) {
-        throw new Error(`Falha ao buscar jobs: ${jobsRes.status}`)
+        throw new Error(`Failed to fetch jobs: ${jobsRes.status}`)
       }
       if (!statsRes.ok) {
-        throw new Error(`Falha ao buscar estatisticas: ${statsRes.status}`)
+        throw new Error(`Failed to fetch stats: ${statsRes.status}`)
       }
 
       const jobsData = await jobsRes.json()
@@ -381,7 +381,7 @@ export function JobQueueDashboard({
       setJobs(jobsData.jobs || [])
       setStats(statsData)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao buscar dados')
+      setError(err instanceof Error ? err.message : 'Failed to fetch data')
     } finally {
       setIsLoading(false)
     }
@@ -430,37 +430,37 @@ export function JobQueueDashboard({
   const handleRetry = async (id: string) => {
     try {
       const res = await fetch(`${apiUrl}/${id}/retry`, { method: 'POST' })
-      if (!res.ok) throw new Error('Falha ao reenfileirar job')
+      if (!res.ok) throw new Error('Failed to requeue job')
       fetchData()
     } catch {
-      setError('Falha ao reenfileirar job')
+      setError('Failed to requeue job')
     }
   }
 
   const handleCancel = async (id: string) => {
     try {
       const res = await fetch(`${apiUrl}/${id}/cancel`, { method: 'POST' })
-      if (!res.ok) throw new Error('Falha ao cancelar job')
+      if (!res.ok) throw new Error('Failed to cancel job')
       fetchData()
     } catch {
-      setError('Falha ao cancelar job')
+      setError('Failed to cancel job')
     }
   }
 
   const handleToggleQueue = async () => {
     try {
       const res = await fetch(`${apiUrl}/${isQueueRunning ? 'stop' : 'start'}`, { method: 'POST' })
-      if (!res.ok) throw new Error('Falha ao alternar fila')
+      if (!res.ok) throw new Error('Failed to toggle queue')
       setIsQueueRunning(!isQueueRunning)
     } catch {
-      setError('Falha ao alternar fila')
+      setError('Failed to toggle queue')
     }
   }
 
   if (isLoading && jobs.length === 0) {
     return (
       <div className={`flex h-64 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-sm text-[var(--aethel-info-light)] ${className}`} role="status">
-        Carregando fila de jobs...
+        Loading job queue...
       </div>
     )
   }
@@ -508,7 +508,7 @@ export function JobQueueDashboard({
         <div className="grid gap-4 border-b border-[var(--aethel-border-subtle)] p-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Pendentes" value={stats.pending} icon={<Icons.Clock />} color="text-[var(--aethel-warning)]" />
           <StatCard label="Executando" value={stats.running} icon={<Icons.Play />} color="text-[var(--aethel-info)]" />
-          <StatCard label="Concluidos" value={stats.completed} icon={<Icons.Check />} color="text-[var(--aethel-success)]" />
+          <StatCard label="Completeds" value={stats.completed} icon={<Icons.Check />} color="text-[var(--aethel-success)]" />
           <StatCard
             label="Taxa de sucesso"
             value={`${(stats.successRate * 100).toFixed(1)}%`}
@@ -530,7 +530,7 @@ export function JobQueueDashboard({
             <option value="all">Todos os status</option>
             <option value="pending">Pendente</option>
             <option value="running">Executando</option>
-            <option value="completed">Concluido</option>
+            <option value="completed">Completed</option>
             <option value="failed">Falhou</option>
             <option value="cancelled">Cancelado</option>
           </select>

@@ -36,7 +36,7 @@ function DashboardStatsGrid({ controller }: { controller: CreatorDashboardContro
             <Card className="col-span-4">
                 <CardContent className="p-6">
                     <ErrorState
-                        message="Falha ao carregar estatisticas do painel"
+                        message="Failed to load dashboard stats"
                         onRetry={() => void statsQuery.refetch()}
                     />
                 </CardContent>

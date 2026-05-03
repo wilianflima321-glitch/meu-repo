@@ -127,8 +127,8 @@ function createDefaultCommands(handlers: {
     },
     {
       id: 'file.save',
-      label: 'Salvar',
-      description: 'Salvar arquivo atual',
+      label: 'Save',
+      description: 'Save current file',
       category: 'file',
       shortcut: 'Ctrl+S',
       action: handlers.saveFile || (() => {}),
@@ -136,8 +136,8 @@ function createDefaultCommands(handlers: {
     },
     {
       id: 'file.saveAll',
-      label: 'Salvar tudo',
-      description: 'Salvar todos os arquivos alterados',
+      label: 'Save all',
+      description: 'Save all changed files',
       category: 'file',
       shortcut: 'Ctrl+Shift+S',
       action: handlers.saveAll || (() => {}),

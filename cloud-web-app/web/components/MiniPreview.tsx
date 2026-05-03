@@ -10,7 +10,7 @@ const SimpleMini3DPreview = dynamic(
     ssr: false,
     loading: () => (
       <div className="h-full w-full bg-[var(--aethel-surface-primary)] flex items-center justify-center">
-        <div className="animate-pulse text-[var(--aethel-text-tertiary)] text-sm">Carregando preview 3D...</div>
+        <div className="animate-pulse text-[var(--aethel-text-tertiary)] text-sm">Loading preview 3D...</div>
       </div>
     )
   }
@@ -91,7 +91,7 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
             {previewError ? (
               <div className="h-full flex items-center justify-center p-4">
                 <div className="text-center">
-                  <div className="text-[var(--aethel-error-light)] text-sm mb-2">Erro ao carregar preview</div>
+                  <div className="text-[var(--aethel-error-light)] text-sm mb-2">Error loading preview</div>
                   <div className="text-[var(--aethel-text-tertiary)] text-xs">{previewError}</div>
                   <button type="button" aria-label="Fechar erro do mini preview"
                     onClick={() => setPreviewError(null)}

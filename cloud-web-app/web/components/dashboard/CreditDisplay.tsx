@@ -14,7 +14,7 @@ interface CreditData {
 async function fetchCredits(): Promise<CreditData> {
   const response = await fetch('/api/billing/credits');
   if (!response.ok) {
-    throw new Error('Falha ao buscar créditos');
+    throw new Error('Failed to fetch credits');
   }
   return response.json();
 }
@@ -67,7 +67,7 @@ export function CreditDisplay({ collapsed }: CreditDisplayProps) {
         {isLoading ? (
           <Loader2 className="w-3 h-3 animate-spin text-[var(--aethel-text-secondary)]" />
         ) : error ? (
-          <span className="text-xs text-[var(--aethel-error)]">Erro</span>
+          <span className="text-xs text-[var(--aethel-error)]">Error</span>
         ) : (
           <span className="text-xs font-mono text-[var(--aethel-text-primary)] bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5 rounded border border-[var(--aethel-border-secondary)]">
             {credits.toLocaleString('pt-BR')}

@@ -143,8 +143,8 @@ export function AICommandCenter() {
           )
         )
       } catch (error) {
-        const errorContent = `Erro: ${
-          error instanceof Error ? error.message : 'Erro desconhecido'
+        const errorContent = `Error: ${
+          error instanceof Error ? error.message : 'Unknown error'
         }`
         setMessages((prev) =>
           prev.map((msg) =>
@@ -455,7 +455,7 @@ function StepCard({ step, index }: { step: AgentStep; index: number }) {
 
 function formatExecutionResult(execution: AgentExecution): string {
   if (execution.error) {
-    return `**Falha:** ${execution.error}`
+    return `**Failure:** ${execution.error}`
   }
 
   if (execution.finalAnswer) {

@@ -409,7 +409,7 @@ export const SettingsPathConfig: React.FC<{
             <button
               type="button"
               onClick={onClose}
-              aria-label="Cancelar configuracao de caminhos"
+              aria-label="Cancel path configuration"
               className={settingsGhostButtonClass}
               style={{
                 background: 'color-mix(in srgb, var(--aethel-surface-secondary) 72%, transparent)',
@@ -417,17 +417,17 @@ export const SettingsPathConfig: React.FC<{
                 border: '1px solid var(--aethel-border-primary)',
               }}
             >
-              Cancelar
+              Cancel
             </button>
             <button type="button"
               onClick={handleSave}
               disabled={!isDirty}
-              aria-label="Salvar configuracao de caminhos"
+              aria-label="Save path configuration"
               className={`${settingsPrimaryButtonClass} gap-2`}
               style={{ background: 'var(--aethel-primary)', color: 'var(--aethel-text-primary)' }}
             >
               <Save className="h-4 w-4" />
-              Salvar
+              Save
             </button>
           </div>
         </div>

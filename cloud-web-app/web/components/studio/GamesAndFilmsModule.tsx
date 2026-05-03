@@ -466,7 +466,7 @@ function CreateProjectDialog({
                 onClick={onClose}
                 className="w-full px-4 py-2 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] transition-colors"
               >
-                Cancelar
+                Cancel
               </button>
             </GlassCard>
           </motion.div>

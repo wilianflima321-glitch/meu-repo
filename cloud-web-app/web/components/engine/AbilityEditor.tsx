@@ -486,7 +486,7 @@ export function AbilityEditor({
                     >
                       Create Ability
                     </button>
-                    <button type="button" aria-label="Cancelar criacao de ability"
+                    <button type="button" aria-label="Cancel ability creation"
                       onClick={() => setEditMode(false)}
                       className="px-4 py-2 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded-lg text-[var(--aethel-text-primary)] transition"
                     >
@@ -601,7 +601,7 @@ export function AbilityEditor({
             </button>
           )}
 
-          <button type="button" aria-label="Salvar alteracoes da ability"
+          <button type="button" aria-label="Save ability changes"
             onClick={handleSave}
             className="w-full py-2 bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition flex items-center justify-center gap-2"
           >

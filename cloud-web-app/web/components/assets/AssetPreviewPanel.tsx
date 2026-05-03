@@ -156,7 +156,7 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
         });
         if (!response.ok) {
           const payload = await response.json().catch(() => null);
-          throw new Error(payload?.error || 'Falha ao carregar preview');
+          throw new Error(payload?.error || 'Failed to load preview');
         }
         const data = await response.json();
         if (!cancelled) {
@@ -164,7 +164,7 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Falha ao carregar preview');
+          setError(err instanceof Error ? err.message : 'Failed to load preview');
           setDownloadUrl(asset?.thumbnail || null);
         }
       } finally {
@@ -222,7 +222,7 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
               zIndex: 2,
             }}
           >
-            Carregando preview...
+            Loading preview...
           </div>
         )}
 

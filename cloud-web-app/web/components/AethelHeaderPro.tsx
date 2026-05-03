@@ -338,7 +338,7 @@ export default function AethelHeader() {
                       <div className="max-h-80 overflow-y-auto">
                         {notificationsLoading ? (
                           <div className="px-4 py-6 text-sm text-[var(--aethel-text-tertiary)]">
-                            Carregando notificações...
+                            Loading notifications...
                           </div>
                         ) : notificationItems.length > 0 ? (
                           notificationItems.map((item) => (

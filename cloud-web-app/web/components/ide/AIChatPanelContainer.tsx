@@ -82,7 +82,7 @@ export default function AIChatPanelContainer() {
       )}
       {lastFailedMessage && !isLoading && (
         <div className="mx-3 mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-error-light)]">
-          <span>Falha ao processar a ultima mensagem.</span>
+          <span>Failed to process the last message.</span>
           <button
             type="button"
             onClick={() => void handleSendMessage(lastFailedMessage)}

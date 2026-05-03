@@ -77,7 +77,7 @@ export default function AdminDashboardPro() {
       }
       setOpsNotice({ type: 'success', message: labels[action] })
     } catch {
-      setOpsNotice({ type: 'error', message: 'Falha ao executar operacao. Tente novamente.' })
+      setOpsNotice({ type: 'error', message: 'Failed to run operation. Tente novamente.' })
     } finally {
       setRunningAction(null)
     }

@@ -726,7 +726,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className = '' })
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
-        aria-label="Carregando"
+        aria-label="Loading"
     >
       <circle
         className="opacity-25"

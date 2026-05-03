@@ -532,7 +532,7 @@ export function useAethelDashboardRuntime() {
         setActiveChatThreadId(selectedThreadId)
         persistCopilotScope(selectedWorkflowId, selectedThreadId)
       } catch (error) {
-        showToastMessage('Falha ao carregar workflows do Copilot.', 'error')
+        showToastMessage('Failed to load Copilot workflows.', 'error')
       }
     })()
   }, [activeWorkflowId, copilotProjectId, hasToken, persistCopilotScope, setActiveChatThreadId, setActiveWorkflowId, setCopilotWorkflows, showToastMessage])

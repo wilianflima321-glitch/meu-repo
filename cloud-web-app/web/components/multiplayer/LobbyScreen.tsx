@@ -257,11 +257,11 @@ function CreateLobbyModal({
         </div>
 
         <div className="flex gap-3 mt-6">
-          <button type="button" aria-label="Cancelar criação de sala"
+          <button type="button" aria-label="Cancel room creation"
             onClick={onClose}
             className="flex-1 px-4 py-2 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded font-medium transition-colors"
           >
-            Cancelar
+            Cancel
           </button>
           <button type="button" aria-label="Criar sala multiplayer"
             onClick={() => {
@@ -373,7 +373,7 @@ export default function LobbyScreen({
       });
 
       if (!response.ok) {
-        throw new Error('Servidor de matchmaking indisponível');
+        throw new Error('Matchmaking server unavailable');
       }
 
       // Em produção, conectar ao WebSocket real:
@@ -381,11 +381,11 @@ export default function LobbyScreen({
       // await manager.connect();
 
       setIsConnected(true);
-      toast.success('Conectado', 'Conectado ao servidor com sucesso');
+      toast.success('Connected', 'Connected to the server successfully');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Falha na conexão';
+      const errorMessage = error instanceof Error ? error.message : 'Connection failed';
       setConnectionError(errorMessage);
-      toast.error('Falha na Conexão', errorMessage);
+      toast.error('Connection failed', errorMessage);
     } finally {
       setIsConnecting(false);
     }
@@ -428,10 +428,10 @@ export default function LobbyScreen({
       setCurrentLobby(lobby);
       setIsHost(true);
       setLobbies(prev => [...prev, lobby]);
-      toast.success('Sala Criada', `"${name}" está aberta para jogadores`);
+      toast.success('Room created', `"${name}" is open for players`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Falha ao criar sala';
-      toast.error('Falha na Criação', errorMessage);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create room';
+      toast.error('Creation failed', errorMessage);
     }
   }, [localPlayer, toast]);
 
@@ -481,8 +481,8 @@ export default function LobbyScreen({
 
       toast.success('Entrou na Sala', `Bem-vindo a "${lobby.name}"`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Falha ao entrar na sala';
-      toast.error('Falha ao Entrar', errorMessage);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to join room';
+      toast.error('Failed to join', errorMessage);
     }
   }, [lobbies, localPlayer, toast]);
 
@@ -498,7 +498,7 @@ export default function LobbyScreen({
       });
     } catch (error) {
       // Continue with local state update even if API fails
-      console.error('Falha ao notificar servidor sobre saída:', error);
+      console.error('Failed to notify server about exit:', error);
     }
 
     const lobbyName = currentLobby.name;
@@ -764,12 +764,12 @@ export default function LobbyScreen({
         {isLoadingLobbies ? (
           <div className="flex flex-col items-center justify-center py-16">
             <div className="w-12 h-12 border-4 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] border-t-transparent rounded-full animate-spin mb-4" />
-            <p className="text-[var(--aethel-text-secondary)]">Carregando salas...</p>
+            <p className="text-[var(--aethel-text-secondary)]">Loading rooms...</p>
           </div>
         ) : lobbiesError ? (
           <div className="text-center py-12">
             <div className="text-[var(--aethel-error-light)] text-6xl mb-4">⚠️</div>
-            <p className="text-[var(--aethel-error-light)] text-lg mb-2">Falha ao carregar salas</p>
+            <p className="text-[var(--aethel-error-light)] text-lg mb-2">Failed to load rooms</p>
             <p className="text-[var(--aethel-text-secondary)] mb-4">{lobbiesError}</p>
             <button type="button"
               onClick={fetchLobbies}

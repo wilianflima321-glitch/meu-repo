@@ -84,7 +84,7 @@ export default function CodeEditor({
             }`}
             disabled={!isDirty}
           >
-            Salvar
+            Save
           </button>
         </div>
       </div>

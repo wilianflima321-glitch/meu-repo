@@ -10,7 +10,7 @@ import {
 } from '@/components/preview/previewRuntime.types';
 
 export function PreviewSkeleton() {
-  const title = 'Carregando preview...';
+  const title = 'Loading preview...';
   const detail = 'Conectando runtime, arquivos e superficie visual.';
 
   return (
@@ -190,7 +190,7 @@ export function PreviewFailedState({
         </svg>
       </div>
       <div className="text-center">
-        <h3 className="mb-1 text-sm font-medium text-[var(--aethel-text-primary)]">Falha no preview</h3>
+        <h3 className="mb-1 text-sm font-medium text-[var(--aethel-text-primary)]">Failure no preview</h3>
         <p className="max-w-xs text-xs text-[var(--aethel-text-tertiary)]">
           {error || 'Nao foi possivel conectar ao runtime de preview.'}
         </p>

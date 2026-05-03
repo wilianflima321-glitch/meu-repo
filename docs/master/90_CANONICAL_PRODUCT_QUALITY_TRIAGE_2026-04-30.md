@@ -221,6 +221,8 @@ The follow-up strictness sweep removed explicit `: any` from AI-enhanced LSP, th
 
 The final strictness pass for this block typed the remaining high-volume app-code seams across admin pages, admin APIs, asset/download/presign flows, OAuth email parsing, backup/git error handling, chat/copilot/search/test routes, notification and terminal persistence, extension hooks, preview/runtime bridges, LSP/hot-reload/localization/collaboration providers, RAG/vector embeddings, storage adapters, telemetry, test adapters, and worker meshlet execution. The measured app-code `: any` ratchet moved from `134` to `13`, passing the current quality gate target of `<50` without disabling typecheck, lint, tests, or build.
 
+The UX copy hygiene pass removed the measured Portuguese hardcoded action/status strings from component TSX surfaces. The `PT hardcoded UX strings in components` quality gate moved from `287` to `0`, so the active dashboard, IDE, billing, marketplace, security, multiplayer, loading, and error surfaces no longer carry the audited PT action/status debt. This does not replace full i18n work; it closes the current hardcoded-string gate while preserving the existing visual hierarchy and behavior.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

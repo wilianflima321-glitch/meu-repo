@@ -408,7 +408,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
       setStashes(newStashes);
       setCurrentBranch(branch);
     } catch (error) {
-        console.error('Falha ao atualizar Git:', error);
+        console.error('Failed to refresh Git:', error);
     }
     setIsLoading(false);
   }, [gitService]);
@@ -432,7 +432,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
       title: 'Discard changes',
         message: `Descartar alteracoes de ${path}?`,
         confirmText: 'Descartar',
-        cancelText: 'Cancelar',
+        cancelText: 'Cancel',
     });
     if (!shouldDiscard) return;
     await gitService.discard(path);
@@ -482,7 +482,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
       title: 'Excluir branch',
       message: `Excluir branch ${branchName}?`,
       confirmText: 'Excluir',
-      cancelText: 'Cancelar',
+      cancelText: 'Cancel',
     });
     if (!shouldDelete) return;
     await gitService.deleteBranch(branchName);

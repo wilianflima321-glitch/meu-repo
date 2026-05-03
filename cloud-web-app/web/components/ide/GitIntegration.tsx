@@ -279,7 +279,7 @@ export function GitIntegration({
                 onClick={() => setShowCommitDialog(false)}
                 className="px-4 py-2 text-xs text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] transition-colors"
               >
-                Cancelar
+                Cancel
               </button>
               <button
                 type="button"

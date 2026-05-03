@@ -60,7 +60,7 @@ export const ProjectsDashboardCreateModal: React.FC<CreateProjectModalProps> = (
             Novo Projeto
           </h2>
           <p style={{ margin: 0, fontSize: '13px', color: colors.textMuted }}>
-            Configure seu novo projeto de desenvolvimento.
+            Configure your new development project.
           </p>
         </div>
 
@@ -147,7 +147,7 @@ export const ProjectsDashboardCreateModal: React.FC<CreateProjectModalProps> = (
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
             <button
               type="button"
-              aria-label="Cancelar criacao de projeto"
+              aria-label="Cancel project creation"
               onClick={onClose}
               style={{
                 padding: '10px 20px',
@@ -159,7 +159,7 @@ export const ProjectsDashboardCreateModal: React.FC<CreateProjectModalProps> = (
                 cursor: 'pointer',
               }}
             >
-              Cancelar
+              Cancel
             </button>
             <button
               type="submit"

@@ -598,7 +598,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
       title: 'Limpar grafo',
       message: 'Limpar todos os nos?',
       confirmText: 'Limpar',
-      cancelText: 'Cancelar',
+      cancelText: 'Cancel',
     });
     if (!shouldClear) return;
     setNodes([]);
@@ -642,7 +642,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
                   log.info('Compiled Script:', json);
                   navigator.clipboard.writeText(json);
                 }}
-                aria-label="Salvar script visual e copiar JSON"
+                aria-label="Save visual script and copy JSON"
                 style={{
                   padding: '8px 16px',
                   borderRadius: '8px',
@@ -653,7 +653,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
                   cursor: 'pointer',
                 }}
               >
-                Salvar
+                Save
               </button>
               <button type="button"
                 onClick={handleClearGraph}

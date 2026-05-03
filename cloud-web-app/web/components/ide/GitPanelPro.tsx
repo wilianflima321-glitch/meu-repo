@@ -247,8 +247,8 @@ export default function GitPanelPro({
       setAhead(status.ahead)
       setBehind(status.behind)
     } catch (err) {
-      setError('Falha ao carregar status do Git')
-      console.error('Erro ao buscar status do Git:', err)
+      setError('Failed to load Git status')
+      console.error('Error fetching Git status:', err)
     } finally {
       setLoading(false)
     }
@@ -265,7 +265,7 @@ export default function GitPanelPro({
         upstream: b.upstream,
       })))
     } catch (err) {
-      console.error('Erro ao buscar branches:', err)
+      console.error('Error fetching branches:', err)
     }
   }, [gitClient])
 
@@ -280,7 +280,7 @@ export default function GitPanelPro({
         date: new Date(c.date),
       })))
     } catch (err) {
-      console.error('Erro ao buscar commits:', err)
+      console.error('Error fetching commits:', err)
     }
   }, [gitClient])
 
@@ -301,7 +301,7 @@ export default function GitPanelPro({
       await gitClient.add([path])
       await fetchStatus()
     } catch (err) {
-      console.error('Erro ao adicionar arquivo ao stage:', err)
+      console.error('Error staging file:', err)
     }
   }
 
@@ -310,7 +310,7 @@ export default function GitPanelPro({
       await gitClient.reset([path])
       await fetchStatus()
     } catch (err) {
-      console.error('Erro ao remover arquivo do stage:', err)
+      console.error('Error unstaging file:', err)
     }
   }
 
@@ -319,7 +319,7 @@ export default function GitPanelPro({
       await gitClient.add(['.'])
       await fetchStatus()
     } catch (err) {
-      console.error('Erro ao adicionar tudo ao stage:', err)
+      console.error('Error staging all files:', err)
     }
   }
 
@@ -328,7 +328,7 @@ export default function GitPanelPro({
       await gitClient.reset(['.'])
       await fetchStatus()
     } catch (err) {
-      console.error('Erro ao remover tudo do stage:', err)
+      console.error('Error unstaging all files:', err)
     }
   }
 
@@ -340,7 +340,7 @@ export default function GitPanelPro({
       await fetchStatus()
       await fetchCommits()
     } catch (err) {
-      console.error('Erro ao commitar:', err)
+      console.error('Error committing:', err)
     }
   }, [commitMessage, gitClient, fetchStatus, fetchCommits])
 
@@ -362,7 +362,7 @@ export default function GitPanelPro({
         await gitClient.push()
         await fetchStatus()
       } catch (err) {
-        console.error('Erro ao enviar (push):', err)
+        console.error('Error pushing:', err)
       }
     }
   }
@@ -373,7 +373,7 @@ export default function GitPanelPro({
       await fetchStatus()
       await fetchCommits()
     } catch (err) {
-      console.error('Erro ao puxar (pull):', err)
+      console.error('Error pulling:', err)
     }
   }
 
@@ -382,7 +382,7 @@ export default function GitPanelPro({
       await gitClient.fetch()
       await fetchStatus()
     } catch (err) {
-      console.error('Erro ao atualizar (fetch):', err)
+      console.error('Error fetching:', err)
     }
   }
 
@@ -393,7 +393,7 @@ export default function GitPanelPro({
       await fetchBranches()
       setShowBranches(false)
     } catch (err) {
-      console.error('Erro ao trocar de branch:', err)
+      console.error('Error switching branch:', err)
     }
   }
 
@@ -402,7 +402,7 @@ export default function GitPanelPro({
       await gitClient.discardChanges([path])
       await fetchStatus()
     } catch (err) {
-      console.error('Erro ao descartar alterações:', err)
+      console.error('Error discarding changes:', err)
     }
   }
 
@@ -440,7 +440,7 @@ export default function GitPanelPro({
         >
           <Loader2 className="h-7 w-7 animate-spin text-[var(--aethel-info-light)]" />
           <div>
-            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Carregando painel Git</p>
+            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Loading Git panel</p>
             <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
               Buscando branch atual, alterações locais e histórico recente.
             </p>

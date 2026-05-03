@@ -88,7 +88,7 @@ export default function StudioActionRail({
           onClick={onOpenProviderSettings}
           className="hidden rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-warning-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] lg:inline-flex"
         >
-          Configurar IA
+          Configure AI
         </button>
       )}
 

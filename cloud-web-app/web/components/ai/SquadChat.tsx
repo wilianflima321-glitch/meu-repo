@@ -416,7 +416,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
             <div className="mt-4 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] p-4">
               <div className="mb-2 flex items-center gap-2 text-[var(--aethel-error)]">
                 <X className="w-5 h-5" />
-                <span className="font-medium">Erro na tarefa</span>
+                <span className="font-medium">Task error</span>
               </div>
               <button type="button" aria-label="Executar novamente a tarefa com erro"
                 onClick={onRetry}
@@ -681,7 +681,7 @@ export function SystemPanel() {
       setMessages(prev => [...prev, {
         id: `error-${Date.now()}`,
         role: 'system',
-        content: 'Erro ao processar tarefa. Tente novamente.',
+        content: 'Error processing task. Tente novamente.',
         timestamp: new Date(),
       }]);
     } finally {

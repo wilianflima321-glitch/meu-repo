@@ -437,7 +437,7 @@ export function HoverCard({
 }
 
 /**
- * Loading Skeleton com Shimmer Effect
+ * Loading Skeleton with Shimmer Effect
  */
 export function ShimmerSkeleton({
   width = 'w-full',

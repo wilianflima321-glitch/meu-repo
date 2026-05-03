@@ -165,7 +165,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
     settings: [
       {
         key: 'files.autoSave',
-        title: 'Salvar automaticamente',
+        title: 'Autosave',
         description: 'Controla o salvamento automatico de arquivos modificados',
         type: 'enum',
         enum: ['off', 'afterDelay', 'onFocusChange', 'onWindowChange'],
@@ -331,7 +331,7 @@ export default function SettingsEditor() {
       try {
         setSettings(JSON.parse(stored))
       } catch (error) {
-        console.error('Falha ao carregar configuracoes:', error)
+        console.error('Failed to load settings:', error)
       }
     }
   }, [])
@@ -387,7 +387,7 @@ export default function SettingsEditor() {
       title: 'Redefinir configuracoes',
       message: 'Tem certeza de que deseja redefinir todas as configuracoes?',
       confirmText: 'Redefinir',
-      cancelText: 'Cancelar',
+      cancelText: 'Cancel',
     })
     if (!shouldReset) return
     saveSettings({})

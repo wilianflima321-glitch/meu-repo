@@ -89,13 +89,13 @@ const buildRuntimeErrorMessage = (error: unknown) => {
     if (typeof error.data === 'object' && error.data && 'error' in error.data) {
       const code = String((error.data as { error?: unknown }).error ?? '')
       if (code === 'PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE') {
-        return 'O runtime de billing ainda nao esta pronto. Configure Stripe e webhook antes de liberar o checkout.'
+        return 'The billing runtime is not ready yet. Configure Stripe and the webhook before enabling checkout.'
       }
     }
     return error.message
   }
   if (error instanceof Error) return error.message
-  return 'Falha na acao de billing.'
+  return 'Billing action failed.'
 }
 
 const planToCard = (plan: PlanDefinition): Plan => {
@@ -516,7 +516,7 @@ export function BillingTab({
         <Card variant="bordered" padding="md" className="border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-[var(--aethel-error)]">Falha na acao de billing</p>
+              <p className="text-sm font-semibold text-[var(--aethel-error)]">Billing action failed</p>
               <p className="mt-1 text-xs text-[color-mix(in_srgb,var(--aethel-error)_80%,transparent)]">{billingActionError}</p>
             </div>
             <Badge variant="error" size="sm">
@@ -565,7 +565,7 @@ export function BillingTab({
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {isLoading ? (
           <Card variant="elevated" padding="lg" className="text-[var(--aethel-text-secondary)]">
-            Carregando planos...
+            Loading plans...
           </Card>
         ) : (
           resolvedPlans.map((plan) => {

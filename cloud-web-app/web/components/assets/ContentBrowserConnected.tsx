@@ -228,7 +228,7 @@ function AssetPreviewModal({
         <div style={{ flex: 1, padding: '16px', display: 'flex', gap: '16px', minHeight: 0 }}>
           <div style={{ flex: 1, minHeight: 0, background: 'var(--aethel-surface-tertiary)', borderRadius: '8px', padding: '12px' }}>
             {isLoading && (
-              <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: '13px' }}>Carregando preview...</div>
+              <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: '13px' }}>Loading preview...</div>
             )}
             {error && (
               <div style={{ color: 'var(--aethel-error)', fontSize: '13px' }}>{error}</div>
@@ -443,7 +443,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
       title: 'Excluir asset',
       message: `Tem certeza que deseja excluir "${asset.name}"?`,
       confirmText: 'Excluir',
-      cancelText: 'Cancelar',
+      cancelText: 'Cancel',
     });
     if (!shouldDelete) return;
 
@@ -544,7 +544,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
         color: 'var(--aethel-text-tertiary)',
       }}>
         <Loader2 size={32} className="animate-spin" style={{ marginRight: '12px' }} />
-        <span>Carregando assets...</span>
+        <span>Loading assets...</span>
       </div>
     );
   }
@@ -566,7 +566,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
         gap: '12px',
       }}>
         <AlertCircle size={48} />
-        <span>Erro ao carregar assets</span>
+        <span>Error loading assets</span>
         <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>{error.message}</span>
         <button type="button" aria-label="Tentar recarregar assets"
           onClick={refresh}

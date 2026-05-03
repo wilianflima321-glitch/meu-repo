@@ -422,7 +422,7 @@ export default function PreviewPanel({
                   fill
                   unoptimized
                   className="object-contain"
-                  onError={() => setMediaLoadError('Nao foi possivel renderizar a imagem a partir do endpoint de arquivos do runtime.')}
+                  onError={() => setMediaLoadError('Could not render the image from the runtime file endpoint.')}
                 />
               </div>
             )}
@@ -431,7 +431,7 @@ export default function PreviewPanel({
                 controls
                 src={rawAssetUrl}
                 className="w-full max-w-xl"
-                onError={() => setMediaLoadError('Falha no preview de audio: codec nao suportado ou origem do runtime ausente.')}
+                onError={() => setMediaLoadError('Audio preview failed: unsupported codec or missing runtime origin.')}
               />
             )}
             {mode === 'video' && (
@@ -439,7 +439,7 @@ export default function PreviewPanel({
                 controls
                 src={rawAssetUrl}
                 className="max-w-full max-h-full bg-[var(--aethel-surface-primary)]"
-                onError={() => setMediaLoadError('Falha no preview de video: codec nao suportado ou origem do runtime ausente.')}
+                onError={() => setMediaLoadError('Video preview failed: unsupported codec or missing runtime origin.')}
               />
             )}
           </div>

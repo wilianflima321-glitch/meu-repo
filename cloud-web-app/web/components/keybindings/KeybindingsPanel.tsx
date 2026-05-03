@@ -366,13 +366,13 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
           )}
         </div>
         <div style={styles.modalFooter}>
-          <button type="button" aria-label="Cancelar gravação de atalho"
+          <button type="button" aria-label="Cancel shortcut recording"
             style={{ ...styles.button, ...styles.secondaryButton }}
             onClick={onClose}
           >
-            Cancelar
+            Cancel
           </button>
-          <button type="button" aria-label="Salvar atalho gravado"
+          <button type="button" aria-label="Save recorded shortcut"
             style={{ ...styles.button, ...styles.primaryButton }}
             onClick={() => {
               if (recordedKey) {
@@ -381,7 +381,7 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
             }}
             disabled={!recordedKey}
           >
-            Salvar
+            Save
           </button>
         </div>
       </div>

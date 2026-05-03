@@ -153,7 +153,7 @@ const TYPE_CONFIG: Record<SuggestionType, {
     bgColor: 'bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]',
     borderColor: 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)]',
     pulseColor: 'bg-[color-mix(in_srgb,var(--aethel-error)_28%,transparent)]',
-    label: 'Erro',
+    label: 'Error',
   },
   tip: {
     icon: Lightbulb,
@@ -702,12 +702,12 @@ export function AISuggestionBubbleAuto() {
       });
 
       if (!res.ok) {
-        throw new Error('Falha ao aplicar sugestao.');
+        throw new Error('Failed to apply suggestion.');
       }
 
       setSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
     } catch (e) {
-      console.error('Falha ao aplicar sugestao:', e);
+      console.error('Failed to apply suggestion:', e);
       throw e;
     }
   }, []);

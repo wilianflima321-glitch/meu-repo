@@ -42,7 +42,7 @@ export default function AIProviderSetupGuide({
       }
     } catch {
       setState('error')
-      setErrorText('Falha de rede ao validar provider.')
+      setErrorText('Network failure while validating provider.')
     }
   }, [])
 
@@ -66,7 +66,7 @@ export default function AIProviderSetupGuide({
         <div>
           <p className={`${compact ? 'text-xs' : 'text-sm'} font-semibold text-[var(--aethel-warning-light)]`}>Provedor de IA nao configurado</p>
           <p className={`${compact ? 'text-xs' : 'text-sm'} mt-1 text-[var(--aethel-warning-light)]/90`}>
-            {message ?? 'Configure ao menos um provedor para liberar chat, complete e edicao inline.'}
+            {message ?? 'Configure at least one provider to unlock chat, completion, and inline editing.'}
           </p>
           <p className="mt-1 text-[11px] text-[var(--aethel-warning-light)]/80">
             capability: {capability ?? status?.capability ?? 'AI_PROVIDER_CONFIG'}
@@ -123,7 +123,7 @@ export default function AIProviderSetupGuide({
         <p className="mt-2 rounded border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-success)]">
           Modo demo ativo: fluxo de IA liberado com respostas simuladas.
           {typeof status?.demoDailyLimit === 'number' ? ` Limite diario: ${status.demoDailyLimit} interacoes por usuario.` : ''}{' '}
-          Configure provedor real para qualidade de producao.
+          Configure a real provider for production quality.
         </p>
       )}
 

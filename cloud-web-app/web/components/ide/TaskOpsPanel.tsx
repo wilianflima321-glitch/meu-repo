@@ -109,13 +109,13 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
       const response = await fetch(`/api/studio/tasks/${id}`)
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        setError(payload?.message || payload?.error || 'Falha ao carregar a tarefa.')
+        setError(payload?.message || payload?.error || 'Failed to load the task.')
         setTask(null)
         return
       }
       setTask(payload?.task ?? null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao carregar a tarefa.')
+      setError(err instanceof Error ? err.message : 'Failed to load the task.')
     } finally {
       setIsRefreshing(false)
     }
@@ -129,7 +129,7 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
 
   const handlePlan = useCallback(async () => {
     if (!goal.trim()) {
-      setError('Defina um objetivo para criar o plano.')
+      setError('Define a goal to create the plan.')
       return
     }
     setIsPlanning(true)
@@ -143,7 +143,7 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
       })
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        setError(payload?.message || payload?.error || 'Falha ao criar o plano.')
+        setError(payload?.message || payload?.error || 'Failed to create the plan.')
         setLocalAgentPreview(
           buildLocalAgentPlanPreview({ projectId: projectId || 'default' }, goal.trim())
         )
@@ -151,7 +151,7 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
       }
       const nextTask: TaskRecord | null = payload?.metadata?.task ?? null
       if (!nextTask?.id) {
-        setError('Plano criado sem ID de tarefa. Verifique o backend.')
+        setError('Plan was created without a task ID. Check the backend.')
         setLocalAgentPreview(
           buildLocalAgentPlanPreview({ projectId: projectId || 'default' }, goal.trim())
         )
@@ -163,7 +163,7 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
         window.localStorage.setItem(storageKey, nextTask.id)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao criar o plano.')
+      setError(err instanceof Error ? err.message : 'Failed to create the plan.')
       setLocalAgentPreview(
         buildLocalAgentPlanPreview({ projectId: projectId || 'default' }, goal.trim())
       )

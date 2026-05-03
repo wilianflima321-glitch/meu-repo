@@ -57,7 +57,7 @@ export type ThinkingStepType =
   | 'validating'    // Validando resultado
   | 'refining'      // Refinando output
   | 'complete'      // Etapa concluída
-  | 'error';        // Erro na etapa
+  | 'error';        // Error na etapa
 
 export interface ThinkingStep {
   id: string;
@@ -379,7 +379,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
 
             {step.duration && (
               <p className="text-xs text-[var(--aethel-text-tertiary)] mt-0.5">
-                Concluido em {(step.duration / 1000).toFixed(1)}s
+                Completed in {(step.duration / 1000).toFixed(1)}s
               </p>
             )}
           </div>
@@ -544,7 +544,7 @@ export function AIThinkingPanel({
             </h3>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
               {session.status === 'complete'
-                ? `Concluido em ${((session.endTime || Date.now()) - session.startTime) / 1000}s`
+                ? `Completed in ${((session.endTime || Date.now()) - session.startTime) / 1000}s`
                 : `${completedSteps}/${totalSteps} etapas`
               }
             </p>
@@ -674,7 +674,7 @@ export function AIThinkingPanel({
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-[var(--aethel-error)]" />
             <span className="text-sm text-[var(--aethel-error)]">
-              Erro durante processamento
+              Processing error
             </span>
           </div>
         </div>

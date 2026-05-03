@@ -171,7 +171,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
         setStorageRuntime({
           status: 'partial',
           label: 'Storage parcial',
-          detail: message || 'Configure S3/R2 para uploads persistentes.',
+          detail: message || 'Configure S3/R2 for persistent uploads.',
         });
       } catch {
         if (cancelled) return;
@@ -272,7 +272,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           message: 'Novo nome:',
           defaultValue: asset.name,
           confirmText: 'Renomear',
-          cancelText: 'Cancelar',
+          cancelText: 'Cancel',
         });
         if (newName) onAssetRename?.(asset, newName);
         break;
@@ -512,7 +512,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
             title={
               storageRuntime.status === 'ready'
                 ? (storageRuntime.detail || 'Importar para o bucket configurado')
-                : 'Configure o storage persistente para liberar importacoes'
+                : 'Configure persistent storage to unlock imports'
             }
           >
             <Upload size={14} />
@@ -595,7 +595,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
               <p style={{ margin: '8px 0 0', fontSize: '12px' }}>
                 {storageRuntime.status === 'ready'
                   ? 'Importe assets ou crie novos arquivos para comecar.'
-                  : 'Configure o storage persistente para habilitar importacoes confiaveis.'}
+                  : 'Configure persistent storage to enable reliable imports.'}
               </p>
             </div>
           ) : view === 'grid' ? (

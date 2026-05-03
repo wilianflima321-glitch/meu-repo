@@ -423,7 +423,7 @@ function TourOverlay() {
               {isLastStep ? (
                 <>
                   <Check className="w-4 h-4" />
-                  Concluir
+                  Complete
                 </>
               ) : (
                 <>

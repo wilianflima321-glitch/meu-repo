@@ -235,7 +235,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
       <div className={`${panelClass} ${className}`}>
         <div className="flex flex-col items-center justify-center py-12">
           <RefreshCw size={28} className="mb-4 animate-spin text-[var(--aethel-info)]" />
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Carregando dados de saude...</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Loading health data...</p>
         </div>
       </div>
     )
@@ -287,7 +287,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
         </div>
         <div className={metricCardClass}>
           <div className="text-2xl font-semibold text-[var(--aethel-error)]">{health.errors24h}</div>
-          <div className="text-xs text-[var(--aethel-text-tertiary)]">Erros 24h</div>
+          <div className="text-xs text-[var(--aethel-text-tertiary)]">Errors 24h</div>
         </div>
       </div>
 

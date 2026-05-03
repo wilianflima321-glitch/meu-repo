@@ -219,7 +219,7 @@ function KeyRecorder({ value, onChange, onCancel }: KeyRecorderProps) {
           <span className="text-[var(--aethel-text-tertiary)]">Pressione as teclas...</span>
         )}
       </span>
-      <button type="button" aria-label="Cancelar gravação de atalho"
+      <button type="button" aria-label="Cancel shortcut recording"
         onClick={onCancel}
         className="ml-auto p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
       >
@@ -483,12 +483,12 @@ export default function KeybindingsEditor({
             Restaurar tudo
           </button>
           {hasChanges && (
-            <button type="button" aria-label="Salvar alterações de atalhos"
+            <button type="button" aria-label="Save shortcut changes"
               onClick={handleSave}
               className="flex items-center gap-2 px-3 py-1.5 text-sm bg-[var(--aethel-info)] rounded transition-colors hover:brightness-110"
             >
               <Check className="w-4 h-4" />
-              Salvar
+              Save
             </button>
           )}
           {onClose && (

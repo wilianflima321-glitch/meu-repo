@@ -136,7 +136,7 @@ export function InlineEditModal({
       });
 
       if (!response.ok) {
-        throw new Error('Falha ao processar edição');
+        throw new Error('Failed to process edit');
       }
 
       const data = await response.json();
@@ -148,7 +148,7 @@ export function InlineEditModal({
         confidence: data.confidence || 0.9,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setIsProcessing(false);
     }
@@ -351,10 +351,10 @@ export function InlineEditModal({
                   <Button type="button"
                     variant="outline"
                     onClick={onClose}
-                    aria-label="Cancelar e fechar edicao inline"
+                    aria-label="Cancel and close inline editing"
                     className={`border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)] ${focusClass}`}
                   >
-                    Cancelar
+                    Cancel
                   </Button>
                   <button type="button" aria-label="Aplicar edicao inline gerada"
                     onClick={() => void handleApply()}

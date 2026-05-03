@@ -100,7 +100,7 @@ export default function AdminPanel() {
       mutateUsers() // Refresh user data
     } catch (error) {
       console.error('Error adjusting credits:', error)
-      toast.error('Falha ao ajustar creditos')
+      toast.error('Failed to adjust credits')
     }
   }
 
@@ -112,13 +112,13 @@ export default function AdminPanel() {
         body: JSON.stringify({ is_active: false })
       })
 
-      if (!response.ok) throw new Error('Falha ao suspender usuario')
+      if (!response.ok) throw new Error('Failed to suspend user')
 
       toast.success('Usuario suspenso com sucesso')
       mutateUsers() // Refresh user data
     } catch (error) {
       console.error('Error suspending user:', error)
-      toast.error('Falha ao suspender usuario')
+      toast.error('Failed to suspend user')
     }
   }
 
@@ -130,13 +130,13 @@ export default function AdminPanel() {
         body: JSON.stringify({ is_active: true })
       })
 
-      if (!response.ok) throw new Error('Falha ao ativar usuario')
+      if (!response.ok) throw new Error('Failed to activate user')
 
       toast.success('Usuario ativado com sucesso')
       mutateUsers() // Refresh user data
     } catch (error) {
-      console.error('Erro ao ativar usuario:', error)
-      toast.error('Falha ao ativar usuario')
+      console.error('Error activating user:', error)
+      toast.error('Failed to activate user')
     }
   }
 
@@ -359,7 +359,7 @@ export default function AdminPanel() {
                                 message: 'Digite os creditos a adicionar:',
                                 placeholder: '100',
                                 confirmText: 'Adicionar',
-                                cancelText: 'Cancelar',
+                                cancelText: 'Cancel',
                               });
                               if (!amount) return;
                               const parsed = Number.parseFloat(amount);
@@ -572,7 +572,7 @@ export default function AdminPanel() {
             </div>
 
             <div className={PANEL_CLASS}>
-              <h4 className="text-lg font-semibold mb-4">Pagamentos Falhados</h4>
+              <h4 className="text-lg font-semibold mb-4">Pagamentos Failuredos</h4>
               <div className="text-center">
                 <div className="text-3xl font-bold text-[var(--aethel-error-light)] mb-2">2.3%</div>
                 <p className="text-sm text-[var(--aethel-text-tertiary)]">Taxa de falha este mes</p>
@@ -601,7 +601,7 @@ export default function AdminPanel() {
                     <td className="py-3 px-4">$39.00</td>
                     <td className="py-3 px-4">
                       <span className="rounded-full px-2 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]">
-                        Concluido
+                        Completed
                       </span>
                     </td>
                     <td className="py-3 px-4 text-[var(--aethel-text-tertiary)]">2025-01-25</td>
@@ -612,7 +612,7 @@ export default function AdminPanel() {
                     <td className="py-3 px-4">$19.00</td>
                     <td className="py-3 px-4">
                       <span className="rounded-full px-2 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]">
-                        Concluido
+                        Completed
                       </span>
                     </td>
                     <td className="py-3 px-4 text-[var(--aethel-text-tertiary)]">2025-01-24</td>

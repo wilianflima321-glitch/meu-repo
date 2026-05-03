@@ -536,7 +536,7 @@ export function StateEditorModal({ state, onSave, onClose, availableAnimations, 
         </div>
         {/* Actions */}
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-          <button type="button" aria-label="Cancelar edicao do estado de animacao"
+          <button type="button" aria-label="Cancel animation state editing"
             onClick={onClose}
             style={{
               background: 'var(--aethel-surface-quaternary)',
@@ -549,7 +549,7 @@ export function StateEditorModal({ state, onSave, onClose, availableAnimations, 
           >
             Cancel
           </button>
-          <button type="button" aria-label={`Salvar alteracoes do estado ${editedState.name}`}
+          <button type="button" aria-label={`Save state changes ${editedState.name}`}
             onClick={() => onSave(editedState)}
             style={{
               background: 'var(--aethel-primary)',
@@ -790,7 +790,7 @@ export function TransitionEditorModal({ transition, onSave, onClose, parameters 
         </div>
         {/* Actions */}
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-          <button type="button" aria-label="Cancelar edicao da transicao"
+          <button type="button" aria-label="Cancel transition editing"
             onClick={onClose}
             style={{
               background: 'var(--aethel-surface-quaternary)',
@@ -803,7 +803,7 @@ export function TransitionEditorModal({ transition, onSave, onClose, parameters 
           >
             Cancel
           </button>
-          <button type="button" aria-label={`Salvar transicao para ${editedTransition.targetState}`}
+          <button type="button" aria-label={`Save transition to ${editedTransition.targetState}`}
             onClick={() => onSave(editedTransition)}
             style={{
               background: 'var(--aethel-primary)',

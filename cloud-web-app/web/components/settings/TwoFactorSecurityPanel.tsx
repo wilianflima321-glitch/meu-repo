@@ -79,7 +79,7 @@ export default function TwoFactorSecurityPanel({
       const payload = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(payload?.error || 'Nao foi possivel consultar o status de seguranca.')
+        throw new Error(payload?.error || 'Could not query the security status.')
       }
 
       const nextStatus: TwoFactorStatus = {
@@ -92,8 +92,8 @@ export default function TwoFactorSecurityPanel({
       setStatus(nextStatus)
       onStatusChange?.(nextStatus.twoFactorEnabled)
     } catch (loadError) {
-      logger.warn('Falha ao carregar status de 2FA', loadError)
-      setError(loadError instanceof Error ? loadError.message : 'Falha ao carregar status de seguranca.')
+      logger.warn('Failed to load 2FA status', loadError)
+      setError(loadError instanceof Error ? loadError.message : 'Failed to load security status.')
     } finally {
       setLoading(false)
     }
@@ -134,7 +134,7 @@ export default function TwoFactorSecurityPanel({
       const payload = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(payload?.error || 'Falha ao iniciar configuracao do autenticador.')
+        throw new Error(payload?.error || 'Failed to start authenticator setup.')
       }
 
       setSetup({
@@ -144,8 +144,8 @@ export default function TwoFactorSecurityPanel({
       })
       setModal('setup')
     } catch (setupError) {
-      logger.warn('Falha ao iniciar setup de 2FA', setupError)
-      setError(setupError instanceof Error ? setupError.message : 'Falha ao iniciar o setup do 2FA.')
+      logger.warn('Failed to start 2FA setup', setupError)
+      setError(setupError instanceof Error ? setupError.message : 'Failed to start 2FA setup.')
     } finally {
       setActionLoading(false)
     }
@@ -164,15 +164,15 @@ export default function TwoFactorSecurityPanel({
       const payload = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(payload?.error || 'Falha ao validar o codigo do autenticador.')
+        throw new Error(payload?.error || 'Failed to verify the authenticator code.')
       }
 
       setNotice('2FA ativado com sucesso. Guarde os codigos de recuperacao em local seguro.')
       closeModal()
       await loadStatus()
     } catch (verifyError) {
-      logger.warn('Falha ao concluir setup de 2FA', verifyError)
-      setError(verifyError instanceof Error ? verifyError.message : 'Falha ao validar o 2FA.')
+      logger.warn('Failed to complete 2FA setup', verifyError)
+      setError(verifyError instanceof Error ? verifyError.message : 'Failed to verify 2FA.')
     } finally {
       setActionLoading(false)
     }
@@ -191,15 +191,15 @@ export default function TwoFactorSecurityPanel({
       const payload = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(payload?.error || 'Falha ao desativar o 2FA.')
+        throw new Error(payload?.error || 'Failed to disable 2FA.')
       }
 
       setNotice('2FA desativado. Recomendamos reativar a protecao quando concluir a manutencao da conta.')
       closeModal()
       await loadStatus()
     } catch (disableError) {
-      logger.warn('Falha ao desativar 2FA', disableError)
-      setError(disableError instanceof Error ? disableError.message : 'Falha ao desativar o 2FA.')
+      logger.warn('Failed to disable 2FA', disableError)
+      setError(disableError instanceof Error ? disableError.message : 'Failed to disable 2FA.')
     } finally {
       setActionLoading(false)
     }
@@ -218,15 +218,15 @@ export default function TwoFactorSecurityPanel({
       const payload = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(payload?.error || 'Falha ao regenerar os codigos de backup.')
+        throw new Error(payload?.error || 'Failed to regenerate backup codes.')
       }
 
       setBackupCodes(Array.isArray(payload?.backupCodes) ? payload.backupCodes.map(String) : [])
       setNotice('Novos codigos de backup gerados. Substitua imediatamente os codigos antigos.')
       await loadStatus()
     } catch (regenError) {
-      logger.warn('Falha ao regenerar codigos de backup', regenError)
-      setError(regenError instanceof Error ? regenError.message : 'Falha ao regenerar codigos de backup.')
+      logger.warn('Failed to regenerate backup codes', regenError)
+      setError(regenError instanceof Error ? regenError.message : 'Failed to regenerate backup codes.')
     } finally {
       setActionLoading(false)
     }
@@ -240,7 +240,7 @@ export default function TwoFactorSecurityPanel({
       await navigator.clipboard.writeText(codes.join('\n'))
       setCopied(true)
     } catch (copyError) {
-      logger.warn('Falha ao copiar codigos de backup', copyError)
+      logger.warn('Failed to copy backup codes', copyError)
     }
   }, [backupCodes, setup?.backupCodes])
 
@@ -389,7 +389,7 @@ export default function TwoFactorSecurityPanel({
           <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-4">
             <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Proximo passo</p>
             <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">
-              {status?.twoFactorEnabled ? 'Revisar codigos e dispositivos confiaveis' : 'Configurar autenticador em menos de 2 minutos'}
+              {status?.twoFactorEnabled ? 'Review codes and trusted devices' : 'Configure an authenticator in under 2 minutes'}
             </p>
             <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
               {variant === 'settings'
@@ -441,7 +441,7 @@ export default function TwoFactorSecurityPanel({
                     ? 'Ativar autenticacao de dois fatores'
                     : modal === 'disable'
                       ? 'Desativar autenticacao de dois fatores'
-                      : 'Gerar novos codigos de backup'}
+                      : 'Generate new backup codes'}
                 </h4>
               </div>
               <button
@@ -638,7 +638,7 @@ export default function TwoFactorSecurityPanel({
                 onClick={closeModal}
                 className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-2 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-tertiary)]"
               >
-                Cancelar
+                Cancel
               </button>
 
               {modal === 'setup' && (
@@ -679,7 +679,7 @@ export default function TwoFactorSecurityPanel({
                   aria-label={backupCodes.length > 0 ? 'Fechar modal de novos codigos de backup' : 'Confirmar geracao de novos codigos de backup'}
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-4 py-2 text-sm text-[var(--aethel-info-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {backupCodes.length > 0 ? 'Concluir' : actionLoading ? 'Gerando...' : 'Gerar novos codigos'}
+                  {backupCodes.length > 0 ? 'Complete' : actionLoading ? 'Generating...' : 'Generate new codes'}
                 </button>
               )}
             </div>

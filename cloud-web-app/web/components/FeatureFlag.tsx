@@ -165,7 +165,7 @@ export function FeatureFlagAdmin() {
   if (loading) {
     return (
       <div className="p-4 text-[var(--aethel-text-tertiary)]">
-        Carregando feature flags...
+        Loading feature flags...
       </div>
     );
   }

@@ -35,7 +35,7 @@ export function ModernIDELoading() {
     <div style={containerStyle}>
       <div style={spinnerStyle} />
       <span style={{ fontSize: tokens.typography.fontSize.sm }}>
-        Carregando IDE...
+        Loading IDE...
       </span>
     </div>
   );

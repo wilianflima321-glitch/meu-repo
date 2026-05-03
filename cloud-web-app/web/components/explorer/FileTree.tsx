@@ -149,7 +149,7 @@ export const FileTree: React.FC<FileTreeProps> = ({ onFileSelect, onFileOpen }) 
 
   return (
     <div className="file-tree">
-      {root ? renderNode(root) : <div className="loading">Carregando...</div>}
+      {root ? renderNode(root) : <div className="loading">Loading...</div>}
 
       {contextMenu && (
         <FileContextMenu
@@ -258,14 +258,14 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
       title: 'Excluir item',
       message: `Excluir ${path}?`,
       confirmText: 'Excluir',
-      cancelText: 'Cancelar',
+      cancelText: 'Cancel',
     });
     if (!shouldDelete) return;
     try {
       await explorerManager.deleteFiles([path]);
       onAction();
     } catch (error) {
-      console.error('Falha ao excluir:', error);
+      console.error('Failed to delete:', error);
     }
   };
 
@@ -275,7 +275,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
       message: 'New name:',
       defaultValue: path.split('/').pop() ?? '',
       confirmText: 'Rename',
-      cancelText: 'Cancelar',
+      cancelText: 'Cancel',
     });
     if (newName) {
       explorerManager.renameFile(path, newName);

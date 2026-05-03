@@ -468,7 +468,7 @@ export default function FileExplorerPro({
         },
         body: JSON.stringify({ path: '/', maxDepth: 6, projectId }),
       })
-      if (!res.ok) throw new Error('Falha ao carregar workspace')
+      if (!res.ok) throw new Error('Failed to load workspace')
       const data = await res.json()
       const tree = Array.isArray(data?.children)
         ? data.children
@@ -479,7 +479,7 @@ export default function FileExplorerPro({
       setInternalFiles(mapped)
       setLastSyncAt(new Date().toISOString())
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : 'Erro ao carregar arquivos')
+      setLoadError(error instanceof Error ? error.message : 'Error loading files')
       setInternalFiles([])
     } finally {
       setIsLoading(false)
@@ -666,7 +666,7 @@ export default function FileExplorerPro({
         {effectiveLoading && !effectiveError && (
           <div className="px-3 py-2" aria-live="polite">
             <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] px-3 py-3 text-xs text-[var(--aethel-text-secondary)]">
-              <p className="mb-2 font-medium text-[var(--aethel-text-primary)]">Carregando arvore do workspace...</p>
+              <p className="mb-2 font-medium text-[var(--aethel-text-primary)]">Loading workspace tree...</p>
               <div className="space-y-1.5">
                 <div className="h-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]" />
                 <div className="h-2 w-5/6 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]" />

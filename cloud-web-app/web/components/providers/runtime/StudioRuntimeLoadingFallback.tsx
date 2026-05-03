@@ -10,7 +10,7 @@ export default function StudioRuntimeLoadingFallback() {
         </div>
         <div className="space-y-1 text-center">
           <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Inicializando studio</p>
-          <p className="text-xs text-[var(--aethel-text-tertiary)]">Carregando runtime, comandos e contexto do Aethel.</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Loading Aethel runtime, commands, and context.</p>
         </div>
       </div>
     </div>

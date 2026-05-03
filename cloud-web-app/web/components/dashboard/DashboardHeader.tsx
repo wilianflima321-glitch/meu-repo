@@ -147,9 +147,9 @@ export function DashboardHeader({
               type="button"
               onClick={onOpenProviderSettings}
               className="hidden rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-warning-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] lg:inline-flex"
-              title="Configure ao menos um provider para liberar o chat de IA"
+              title="Configure at least one provider to unlock AI chat"
             >
-              Configurar IA
+              Configure AI
             </button>
           )}
 

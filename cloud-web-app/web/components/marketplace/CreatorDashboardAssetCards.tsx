@@ -106,7 +106,7 @@ export function TopAssetsCard({
                 {isLoading ? (
                     <LoadingSpinner className="h-48" />
                 ) : error ? (
-                    <ErrorState message={error.message || 'Falha ao carregar melhores assets'} onRetry={onRetry} />
+                    <ErrorState message={error.message || 'Failed to load top assets'} onRetry={onRetry} />
                 ) : assets.length === 0 ? (
                     <EmptyState
                         icon={Package}
@@ -163,7 +163,7 @@ export function AssetTableCard({
                 {isLoading ? (
                     <LoadingSpinner className="h-48" />
                 ) : error ? (
-                    <ErrorState message={error.message || 'Falha ao carregar seus assets'} onRetry={onRetry} />
+                    <ErrorState message={error.message || 'Failed to load your assets'} onRetry={onRetry} />
                 ) : assets.length === 0 ? (
                     <EmptyState
                         icon={FileX}
@@ -272,7 +272,7 @@ export function RecentSalesCard() {
                         />
                     ) : (
                         <ErrorState
-                            message={(error as Error).message || 'Falha ao carregar vendas recentes'}
+                            message={(error as Error).message || 'Failed to load recent sales'}
                             onRetry={() => void refetch()}
                         />
                     )

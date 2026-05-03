@@ -360,10 +360,10 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {canCancel && (
-                        <button type="button" aria-label={`Cancelar render ${job.name}`}
+                        <button type="button" aria-label={`Cancel render ${job.name}`}
                             onClick={() => onCancel(job.id)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
-                            title="Cancelar"
+                            title="Cancel"
                         >
                             <Square size={18} className="text-[var(--aethel-error)]" />
                         </button>
@@ -412,7 +412,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                         <div className="mb-3 p-3 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded-lg">
                             <div className="flex items-center gap-2 text-[var(--aethel-error)] text-sm">
                                 <AlertCircle size={16} />
-                                <span className="font-medium">Erro:</span>
+                                <span className="font-medium">Error:</span>
                             </div>
                             <p className="text-[var(--aethel-error)] text-sm mt-1">{job.error}</p>
                         </div>

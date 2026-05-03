@@ -499,7 +499,7 @@ export function ImageEditor({
           ))}
         </div>
 
-        <button type="button" aria-label="Salvar imagem editada"
+        <button type="button" aria-label="Save edited image"
           onClick={handleSave}
           className="w-full py-2 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-sm mt-4 hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]"
         >

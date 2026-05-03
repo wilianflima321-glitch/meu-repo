@@ -292,7 +292,7 @@ const GENERAL_SETTINGS: Record<string, Setting[]> = {
       { value: 'off', label: 'Off' },
       { value: 'relative', label: 'Relative' },
     ]},
-    { id: 'editor.formatOnSave', label: 'Formatar ao salvar', type: 'toggle', value: true },
+    { id: 'editor.formatOnSave', label: 'Format on save', type: 'toggle', value: true },
     { id: 'editor.autoSave', label: 'Auto salvar', type: 'select', value: 'afterDelay', options: [
       { value: 'off', label: 'Off' },
       { value: 'afterDelay', label: 'After Delay' },
@@ -304,7 +304,7 @@ const GENERAL_SETTINGS: Record<string, Setting[]> = {
   ],
   keyboard: [
     { id: 'key.commandPalette', label: 'Paleta de comandos', type: 'keybinding', value: 'Ctrl+K' },
-    { id: 'key.save', label: 'Salvar', type: 'keybinding', value: 'Ctrl+S' },
+    { id: 'key.save', label: 'Save', type: 'keybinding', value: 'Ctrl+S' },
     { id: 'key.find', label: 'Buscar', type: 'keybinding', value: 'Ctrl+F' },
     { id: 'key.replace', label: 'Substituir', type: 'keybinding', value: 'Ctrl+H' },
     { id: 'key.goToFile', label: 'Ir para arquivo', type: 'keybinding', value: 'Ctrl+P' },
@@ -535,12 +535,12 @@ export default function EngineSettingsPage() {
                   <RotateCcw className="w-4 h-4" />
                   Redefinir
                 </button>
-                <button type="button" aria-label="Salvar ajustes"
+                <button type="button" aria-label="Save settings"
                   onClick={handleSave}
                   className="flex items-center gap-2 px-4 py-1.5 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
                 >
                   <Save className="w-4 h-4" />
-                  Salvar alteracoes
+                  Save changes
                 </button>
               </>
             )}

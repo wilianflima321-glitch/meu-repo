@@ -136,7 +136,7 @@ export function OnboardingProvider({
         setState(data.onboarding);
       }
     } catch (error) {
-      console.error('Falha ao concluir etapa:', error);
+      console.error('Failed to complete step:', error);
     }
   };
 
@@ -152,7 +152,7 @@ export function OnboardingProvider({
         setState(data.onboarding);
       }
     } catch (error) {
-      console.error('Falha ao concluir tour:', error);
+      console.error('Failed to complete tour:', error);
     }
   };
 
@@ -169,7 +169,7 @@ export function OnboardingProvider({
         setShowWelcome(false);
       }
     } catch (error) {
-      console.error('Falha ao pular onboarding:', error);
+      console.error('Failed to skip onboarding:', error);
     }
   };
 
@@ -235,7 +235,7 @@ export function WelcomeModal({ mission }: { mission?: string }) {
     },
     {
       title: 'Conecte sua IA',
-      description: 'Configure seu provider para respostas reais e rastreáveis. Nada é simulado.',
+      description: 'Configure your provider for real, traceable responses. Nothing is simulated.',
       icon: <Target className="w-12 h-12 text-[var(--aethel-success-light)]" />,
     },
     {
@@ -307,7 +307,7 @@ export function WelcomeModal({ mission }: { mission?: string }) {
             <button type="button"
               onClick={handleNext}
               className={onboardingPrimaryButtonClass}
-              aria-label={isLastStep ? 'Concluir onboarding e comecar' : 'Ir para a proxima etapa do onboarding'}
+              aria-label={isLastStep ? 'Complete onboarding and start' : 'Go to the next onboarding step'}
             >
               {isLastStep ? 'Comecar' : 'Proximo'}
               <ChevronRight className="w-4 h-4" />
@@ -386,7 +386,7 @@ export function OnboardingChecklist() {
       const data = (await res.json()) as SystemHealthReport;
       setHealth(data);
     } catch (error) {
-      setHealthError(error instanceof Error ? error.message : 'Falha ao checar dependências');
+      setHealthError(error instanceof Error ? error.message : 'Failed to check dependencies');
     } finally {
       setHealthLoading(false);
     }

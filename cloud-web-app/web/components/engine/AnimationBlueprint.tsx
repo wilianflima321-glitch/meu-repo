@@ -449,7 +449,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           padding: '12px',
           borderTop: '1px solid var(--aethel-border-primary)',
         }}>
-          <button type="button" aria-label="Salvar animation blueprint"
+          <button type="button" aria-label="Save animation blueprint"
             onClick={() => onSave?.({ states, transitions, variables })}
             style={{
               width: '100%',

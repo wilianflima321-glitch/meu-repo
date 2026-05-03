@@ -137,7 +137,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
               }}
               className="px-3 py-1.5 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] transition-colors"
             >
-              Cancelar
+              Cancel
             </button>
             <button
               type="button"

@@ -443,13 +443,13 @@ export default function ExtensionManager({
           {apiLoading && extensions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               <Loader2 className="w-16 h-16 mb-4 animate-spin text-[var(--aethel-info)]" />
-              <p className="text-lg">Carregando extensões...</p>
+              <p className="text-lg">Loading extensions...</p>
               <p className="text-sm">Buscando no marketplace</p>
             </div>
           ) : /* Error State */ apiError ? (
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               <AlertTriangle className="w-16 h-16 mb-4 text-[var(--aethel-error)]" />
-              <p className="text-lg text-[var(--aethel-error)]">Falha ao carregar extensões</p>
+              <p className="text-lg text-[var(--aethel-error)]">Failed to load extensions</p>
               <p className="text-sm mb-4">{apiError}</p>
               <button type="button" aria-label="Retry loading extensions"
                 onClick={handleRefresh}
@@ -748,7 +748,7 @@ function ExtensionDetalhes({
           {isLoading ? (
             <button type="button" aria-label="Loading extension action" disabled className="flex-1 px-4 py-2 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] rounded">
               <RefreshCw className="w-4 h-4 inline animate-spin mr-2" />
-              Carregando...
+              Loading...
             </button>
           ) : extension.isInstalled ? (
             <>

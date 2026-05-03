@@ -15,7 +15,7 @@ export function DashboardLoadingScreen({ theme: _theme }: DashboardLoadingScreen
         aria-live="polite"
       >
         <p className={`${CANONICAL_TYPOGRAPHY.label} mb-1 text-[var(--aethel-text-primary)]`}>Studio Home</p>
-        Carregando Studio Home...
+        Loading Studio Home...
       </div>
     </div>
   )

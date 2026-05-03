@@ -84,7 +84,7 @@ export function AIChatEconomicsPanel({ projectId, currentRunEstimate }: AIChatEc
   if (isLoading) {
     return (
       <div className="flex h-full min-h-[180px] items-center justify-center p-4 text-[11px] text-[var(--aethel-text-tertiary)]">
-        Carregando economics plane...
+        Loading economics plane...
       </div>
     )
   }

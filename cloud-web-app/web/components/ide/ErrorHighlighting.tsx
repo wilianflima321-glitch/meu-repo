@@ -103,7 +103,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
               }`}
             >
-              Erros {getTypeCount('error')}
+              Errors {getTypeCount('error')}
             </button>
             <button
               type="button"

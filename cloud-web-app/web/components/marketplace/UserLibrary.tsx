@@ -90,31 +90,31 @@ interface Collection {
 
 async function fetchPurchasedAssets(): Promise<LibraryAsset[]> {
     const res = await fetch('/api/marketplace/library/purchased');
-    if (!res.ok) throw new Error('Falha ao carregar compras');
+    if (!res.ok) throw new Error('Failed to load purchases');
     return res.json();
 }
 
 async function fetchFavorites(): Promise<LibraryAsset[]> {
     const res = await fetch('/api/marketplace/library/favorites');
-    if (!res.ok) throw new Error('Falha ao carregar favoritos');
+    if (!res.ok) throw new Error('Failed to load favorites');
     return res.json();
 }
 
 async function fetchDownloadHistory(): Promise<LibraryAsset[]> {
     const res = await fetch('/api/marketplace/library/downloads');
-    if (!res.ok) throw new Error('Falha ao carregar downloads');
+    if (!res.ok) throw new Error('Failed to load downloads');
     return res.json();
 }
 
 async function fetchCollections(): Promise<Collection[]> {
     const res = await fetch('/api/marketplace/collections');
-    if (!res.ok) throw new Error('Falha ao carregar colecoes');
+    if (!res.ok) throw new Error('Failed to load collections');
     return res.json();
 }
 
 async function downloadAsset(assetId: string): Promise<Blob> {
     const res = await fetch(`/api/marketplace/assets/${assetId}/download`);
-    if (!res.ok) throw new Error('Falha no download');
+    if (!res.ok) throw new Error('Download failed');
     return res.blob();
 }
 
@@ -497,7 +497,7 @@ export default function UserLibrary() {
             queryClient.invalidateQueries({ queryKey: ['library-downloads'] });
         },
         onError: () => {
-            toast.error('Falha no download.');
+            toast.error('Download failed.');
         },
     });
 
@@ -730,7 +730,7 @@ export default function UserLibrary() {
                                         />
                                         <DialogFooter>
                                             <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                                                Cancelar
+                                                Cancel
                                             </Button>
                                             <button type="button" onClick={handleCreateCollection}>
                                                 Criar

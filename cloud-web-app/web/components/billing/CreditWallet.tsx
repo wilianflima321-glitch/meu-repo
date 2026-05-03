@@ -201,7 +201,7 @@ function TransactionItem({ transaction }: TransactionItemProps) {
           {isPositive ? '+' : '-'}{Math.abs(transaction.amount)}
         </p>
         <p className={`text-xs ${statusColors[transaction.status]}`}>
-          {transaction.status === 'completed' ? 'Concluido' : transaction.status === 'pending' ? 'Pendente' : 'Falhou'}
+          {transaction.status === 'completed' ? 'Completed' : transaction.status === 'pending' ? 'Pendente' : 'Falhou'}
         </p>
       </div>
     </div>
@@ -328,7 +328,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
 
       if (onPurchase) onPurchase(packageId);
     } catch (err) {
-      console.error('Erro de compra:', err);
+      console.error('Purchase error:', err);
     } finally {
       setIsPurchasing(false);
       setSelectedPackage(null);
@@ -357,7 +357,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
       <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-6 ${className}`}>
         <div className="flex items-center gap-3 text-[var(--aethel-error)]">
           <AlertCircle className="w-5 h-5" />
-          <p>Erro ao carregar carteira</p>
+          <p>Error loading wallet</p>
           <button type="button" onClick={() => refreshWallet()} className="text-sm underline">
             Tentar novamente
           </button>

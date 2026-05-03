@@ -173,7 +173,7 @@ export function ConfirmModal({
   title,
   message,
   confirmText = 'Confirmar',
-  cancelText = 'Cancelar',
+  cancelText = 'Cancel',
   variant = 'info',
   loading = false,
 }: ConfirmModalProps) {

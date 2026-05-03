@@ -338,7 +338,7 @@ function WebhooksTab() {
           <Webhook size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
           <p className="text-[var(--aethel-text-secondary)]">Nenhum webhook configurado</p>
           <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
-            Configure webhooks para receber eventos em tempo real
+            Configure webhooks to receive real-time events
           </p>
         </GlassCard>
       ) : (
@@ -545,7 +545,7 @@ function CreateAPIKeyDialog({
                   onClick={onClose}
                   className="flex-1"
                 >
-                  Cancelar
+                  Cancel
                 </GlassButton>
               </div>
             </GlassCard>
@@ -644,7 +644,7 @@ function CreateWebhookDialog({
                   onClick={onClose}
                   className="flex-1"
                 >
-                  Cancelar
+                  Cancel
                 </GlassButton>
               </div>
             </GlassCard>
@@ -731,7 +731,7 @@ function InviteTeamMemberDialog({ open, onClose }: { open: boolean; onClose: () 
                   onClick={onClose}
                   className="flex-1"
                 >
-                  Cancelar
+                  Cancel
                 </GlassButton>
               </div>
             </GlassCard>

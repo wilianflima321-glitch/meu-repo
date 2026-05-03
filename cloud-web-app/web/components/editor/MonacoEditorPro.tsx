@@ -684,7 +684,7 @@ export function MonacoEditorPro({
           <div className="flex items-center justify-center h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-quaternary)]">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-[var(--aethel-primary)] border-t-transparent rounded-full animate-spin" />
-              Carregando Editor...
+              Loading Editor...
             </div>
           </div>
         }

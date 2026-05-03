@@ -47,7 +47,7 @@ export const BOTTOM_DOCK_ITEMS: ReadonlyArray<BottomDockItemDescriptor> = [
   { id: 'canvas', icon: <Code2 size={16} />, label: 'Visual UI', shortcut: 'Ctrl+Shift+U' },
   { id: 'terminal', icon: <TerminalSquare size={16} />, label: 'Terminal', shortcut: 'Ctrl+`' },
   { id: 'console', icon: <Terminal size={16} />, label: 'Console', shortcut: 'Ctrl+J' },
-  { id: 'diagnostics', icon: <AlertCircle size={16} />, label: 'Erros', shortcut: 'Ctrl+Shift+M' },
+  { id: 'diagnostics', icon: <AlertCircle size={16} />, label: 'Errors', shortcut: 'Ctrl+Shift+M' },
   { id: 'chat', icon: <Sparkles size={16} />, label: 'AI Console', shortcut: 'Ctrl+I' },
 ];
 

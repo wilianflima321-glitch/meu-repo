@@ -37,7 +37,7 @@ export default function SearchReplace() {
       });
 
       if (!response.ok) {
-        throw new Error(`Erro na busca: ${response.status}`);
+        throw new Error(`Search error: ${response.status}`);
       }
 
       const data = await response.json();

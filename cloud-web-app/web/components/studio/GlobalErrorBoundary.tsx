@@ -17,7 +17,7 @@ interface State {
 }
 
 /**
- * Global Error Boundary para o Studio Shell
+ * Global Error Boundary for the Studio Shell
  *
  * Captura erros de renderização e oferece opções de recuperação:
  * - Retry (recarregar componente)
@@ -158,7 +158,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
                   onClick={this.handleReportError}
                   className="w-full px-4 py-2.5 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] font-medium rounded-lg transition-colors text-sm border border-[var(--aethel-border-primary)]"
                 >
-                  Reportar Erro
+                  Report error
                 </button>
               )}
             </div>

@@ -4,7 +4,7 @@ export function WorkbenchEditorLoadingState() {
   return (
     <div className="h-full flex items-center justify-center px-6">
       <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-border-secondary)_72%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-5 py-4 text-sm text-[var(--aethel-text-tertiary)]">
-        Carregando arquivo...
+        Loading file...
       </div>
     </div>
   );

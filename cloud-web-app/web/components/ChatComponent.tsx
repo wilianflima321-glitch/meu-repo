@@ -244,7 +244,7 @@ const ChatComponent: React.FC = () => {
   const copyHistoryFromWorkflow = async () => {
     if (!activeWorkflowId) return;
     if (!connectFromWorkflowId) {
-      pushError('Selecione um trabalho para copiar o histórico.');
+      pushError('Select a job to copy its history.');
       return;
     }
 
@@ -257,7 +257,7 @@ const ChatComponent: React.FC = () => {
       const source = sourceRes?.workflow ?? null;
       const sourceThreadId = source?.chatThreadId ? String(source.chatThreadId) : null;
       if (!sourceThreadId) {
-        pushError('Esse trabalho não tem histórico (thread) para copiar.');
+        pushError('This job has no history thread to copy.');
         return;
       }
 
@@ -267,7 +267,7 @@ const ChatComponent: React.FC = () => {
       const created = await AethelAPIClient.cloneChatThread({ sourceThreadId, title }).catch(() => null);
       const newThreadId = created?.thread?.id ? String(created.thread.id) : null;
       if (!newThreadId) {
-        pushError('Falha ao clonar o histórico.');
+        pushError('Failed to clone the history.');
         return;
       }
 
@@ -284,7 +284,7 @@ const ChatComponent: React.FC = () => {
   const importContextFromWorkflow = async () => {
     if (!activeWorkflowId) return;
     if (!connectFromWorkflowId) {
-      pushError('Selecione um trabalho para importar o contexto.');
+      pushError('Select a job to import its context.');
       return;
     }
 
@@ -292,13 +292,13 @@ const ChatComponent: React.FC = () => {
     const source = sourceRes?.workflow ?? null;
     const ctx = source?.context;
     if (!ctx || typeof ctx !== 'object') {
-      pushError('Esse trabalho não tem contexto salvo para importar.');
+      pushError('This job has no saved context to import.');
       return;
     }
 
     const patch = buildContextPatch(activeWorkflowId, ctx);
     if (!patch) {
-      pushError('Esse trabalho não tem contexto salvo para importar.');
+      pushError('This job has no saved context to import.');
       return;
     }
 
@@ -322,7 +322,7 @@ const ChatComponent: React.FC = () => {
   const mergeFromWorkflow = async () => {
     if (!activeWorkflowId) return;
     if (!connectFromWorkflowId) {
-      pushError('Selecione um trabalho para mesclar.' );
+      pushError('Select a job to merge.' );
       return;
     }
 
@@ -336,7 +336,7 @@ const ChatComponent: React.FC = () => {
       const source = sourceRes?.workflow ?? null;
       const sourceThreadId = source?.chatThreadId ? String(source.chatThreadId) : null;
       if (!sourceThreadId) {
-        pushError('Esse trabalho não tem histórico (thread) para mesclar.' );
+        pushError('This job has no history thread to merge.' );
         return;
       }
 
@@ -354,7 +354,7 @@ const ChatComponent: React.FC = () => {
       }
 
       if (!targetThreadId) {
-        pushError('Não foi possível determinar a thread de destino.' );
+        pushError('Could not determine the destination thread.' );
         return;
       }
 
@@ -390,8 +390,8 @@ const ChatComponent: React.FC = () => {
       message: 'Informe o novo nome do workflow.',
       defaultValue: current?.title || 'Workflow',
       placeholder: 'Nome do workflow',
-      confirmText: 'Salvar',
-      cancelText: 'Cancelar',
+      confirmText: 'Save',
+      cancelText: 'Cancel',
     });
     if (!nextTitle || !nextTitle.trim()) return;
     await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { title: nextTitle.trim() });
@@ -405,7 +405,7 @@ const ChatComponent: React.FC = () => {
       title: 'Arquivar trabalho',
       message: 'Arquivar este trabalho (workflow)?',
       confirmText: 'Arquivar',
-      cancelText: 'Cancelar',
+      cancelText: 'Cancel',
     });
     if (!ok) return;
     await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { archived: true });
@@ -493,7 +493,7 @@ const ChatComponent: React.FC = () => {
     } catch (error) {
       console.error('Chat error:', error);
 
-      let errorMessage = 'Falha ao enviar mensagem.';
+      let errorMessage = 'Failed to send message.';
       if (error instanceof APIError) {
         if (error.status === 401) {
           errorMessage = 'Sessão expirada. Por favor, faça login novamente.';
@@ -502,10 +502,10 @@ const ChatComponent: React.FC = () => {
         } else if (error.status === 429) {
           errorMessage = 'Muitas requisições. Aguarde um momento e tente novamente.';
         } else {
-          errorMessage = `Erro: ${error.message}`;
+          errorMessage = `Error: ${error.message}`;
         }
       } else if (error instanceof Error) {
-        errorMessage = `Erro: ${error.message}`;
+        errorMessage = `Error: ${error.message}`;
       }
 
       const errorMsg: Message = {
@@ -593,11 +593,11 @@ const ChatComponent: React.FC = () => {
     } catch (error) {
       console.error('Stream error:', error);
 
-      let errorMessage = 'Falha ao transmitir mensagem.';
+      let errorMessage = 'Failed to stream message.';
       if (error instanceof APIError) {
-        errorMessage = `Erro ${error.status}: ${error.message}`;
+        errorMessage = `Error ${error.status}: ${error.message}`;
       } else if (error instanceof Error) {
-        errorMessage = `Erro: ${error.message}`;
+        errorMessage = `Error: ${error.message}`;
       }
 
       const errorMsg: Message = {

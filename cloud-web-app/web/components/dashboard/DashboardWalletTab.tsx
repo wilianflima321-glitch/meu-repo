@@ -120,10 +120,10 @@ export function DashboardWalletTab({
           <div className={`${panelClass} space-y-4`}>
             <div>
               <h3 className="text-lg font-semibold">Saldo Atual</h3>
-              {walletLoading && <p className="text-sm text-[var(--aethel-text-secondary)]">Carregando carteira...</p>}
+              {walletLoading && <p className="text-sm text-[var(--aethel-text-secondary)]">Loading wallet...</p>}
               {hasWalletError && (
                 <p className="text-sm text-[var(--aethel-error)]">
-                  Falha ao carregar os dados. Tente novamente.
+                  Failed to load data. Try again.
                 </p>
               )}
               {!walletLoading && !hasWalletError && walletData && (

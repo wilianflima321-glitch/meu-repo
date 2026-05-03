@@ -497,7 +497,7 @@ export function TimeMachineSlider({
         >
           <History className="w-8 h-8 text-[var(--aethel-primary)]" />
         </motion.div>
-        <p className="text-sm text-[var(--aethel-text-tertiary)] mt-3">Carregando histórico...</p>
+        <p className="text-sm text-[var(--aethel-text-tertiary)] mt-3">Loading history...</p>
       </div>
     );
   }

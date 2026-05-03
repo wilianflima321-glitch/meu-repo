@@ -231,7 +231,7 @@ export function WalletStatusWidget({
         onClick={() => mutate()}
         className={`flex items-center gap-1.5 px-2 py-1 text-[var(--aethel-text-tertiary)]
                    hover:text-[var(--aethel-text-tertiary)] transition-colors ${className}`}
-        title="Erro ao carregar saldo. Clique para tentar novamente."
+        title="Error loading balance. Click to try again."
       >
         <AlertTriangle className="w-4 h-4" />
         <span className="text-xs">Offline</span>

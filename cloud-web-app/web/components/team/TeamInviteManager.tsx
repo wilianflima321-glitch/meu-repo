@@ -227,7 +227,7 @@ const InviteForm: React.FC<InviteFormProps> = ({ onInvite, isLoading }) => {
       await onInvite(email, role);
       setEmail('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao enviar convite');
+      setError(err instanceof Error ? err.message : 'Error sending invite');
     }
   };
 
@@ -812,7 +812,7 @@ export const TeamInviteManager: React.FC<TeamInviteProps> = ({
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || 'Erro ao enviar convite');
+        throw new Error(error.message || 'Error sending invite');
       }
 
       const { data } = await res.json();
@@ -830,7 +830,7 @@ export const TeamInviteManager: React.FC<TeamInviteProps> = ({
       body: JSON.stringify({ role, expiresIn: 7 * 24 * 60 * 60 * 1000 }), // 7 days
     });
 
-    if (!res.ok) throw new Error('Erro ao criar link');
+    if (!res.ok) throw new Error('Error creating link');
     mutateLinks();
   }, [projectId, mutateLinks]);
 

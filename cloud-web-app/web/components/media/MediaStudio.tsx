@@ -442,7 +442,7 @@ export default function MediaStudio({
       const ctx = canvas.getContext('2d')
       if (!ctx) throw new Error('Canvas 2D indisponível')
 
-      setExportStatus('Carregando mídia...')
+      setExportStatus('Loading media...')
 
       const rendererClips = timelineToRendererClips(project.clips)
       const imageBitmaps = new Map<string, ImageBitmap>()
@@ -457,7 +457,7 @@ export default function MediaStudio({
         v.playsInline = true
         await new Promise<void>((resolve, reject) => {
           const onLoaded = () => resolve()
-          const onErr = () => reject(new Error('Falha ao carregar vídeo: ' + src))
+          const onErr = () => reject(new Error('Failed to load video: ' + src))
           v.addEventListener('loadedmetadata', onLoaded, { once: true })
           v.addEventListener('error', onErr, { once: true })
         })
@@ -472,7 +472,7 @@ export default function MediaStudio({
         img.src = src
         await new Promise<void>((resolve, reject) => {
           img.onload = () => resolve()
-          img.onerror = () => reject(new Error('Falha ao carregar imagem: ' + src))
+          img.onerror = () => reject(new Error('Failed to load image: ' + src))
         })
         const bitmap = await createImageBitmap(img)
         imageBitmaps.set(src, bitmap)
@@ -644,7 +644,7 @@ export default function MediaStudio({
 
       const blob = await new Promise<Blob>((resolve, reject) => {
         recorder.onstop = () => resolve(new Blob(chunks, { type: chosen }))
-        recorder.onerror = () => reject(new Error('Falha no MediaRecorder'))
+        recorder.onerror = () => reject(new Error('MediaRecorder failed'))
       })
 
       setExportStatus('Finalizando...')
@@ -662,7 +662,7 @@ export default function MediaStudio({
       }
     } catch (err) {
       console.error(err)
-      setExportStatus('Erro no export')
+      setExportStatus('Export error')
     } finally {
       setExporting(false)
       setTimeout(() => setExportStatus(''), 1500)

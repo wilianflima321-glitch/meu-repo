@@ -151,7 +151,7 @@ export function EditorApplyBridgeProvider({
 
     const rawPath = createFilePath.trim()
     if (!rawPath) {
-      setCreateFileError('Informe o caminho do novo arquivo.')
+      setCreateFileError('Enter the new file path.')
       return
     }
 
@@ -165,7 +165,7 @@ export function EditorApplyBridgeProvider({
       resolveCreateFileRequest({ ok: true })
     } catch (error) {
       setCreateFileBusy(false)
-      setCreateFileError(error instanceof Error ? error.message : 'Falha ao criar arquivo.')
+      setCreateFileError(error instanceof Error ? error.message : 'Failed to create file.')
     }
   }, [createFilePath, normalizePath, readFile, resolveCreateFileRequest, writeFile])
 
@@ -231,7 +231,7 @@ export function EditorApplyBridgeProvider({
               onClick={handleCancelCreateFile}
               disabled={createFileBusy}
             >
-              Cancelar
+              Cancel
             </Button>
             <Button
               type="button"

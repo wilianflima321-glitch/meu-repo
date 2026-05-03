@@ -17,7 +17,7 @@ const SHORTCUT_CATEGORIES = [
   {
     title: 'Editor',
     shortcuts: [
-      { keys: ['Ctrl', 'S'], action: 'Salvar arquivo' },
+      { keys: ['Ctrl', 'S'], action: 'Save file' },
       { keys: ['Ctrl', 'Z'], action: 'Desfazer' },
       { keys: ['Ctrl', 'Shift', 'Z'], action: 'Refazer' },
       { keys: ['Ctrl', 'D'], action: 'Selecionar proxima ocorrencia' },

@@ -179,7 +179,7 @@ const LOADING_STEPS: LoadingStep[] = [
   { id: 'init', message: 'Inicializando universo...', duration: 800 },
   { id: 'terrain', message: 'Gerando terreno procedural...', duration: 1200 },
   { id: 'shaders', message: 'Compilando shaders...', duration: 1000 },
-  { id: 'assets', message: 'Carregando assets base...', duration: 1500 },
+  { id: 'assets', message: 'Loading base assets...', duration: 1500 },
   { id: 'ai', message: 'Acordando agentes de IA...', duration: 800 },
   { id: 'physics', message: 'Calibrando motor de fisica...', duration: 600 },
   { id: 'audio', message: 'Sincronizando audio espacial...', duration: 400 },
@@ -278,7 +278,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           }
         }, 1000);
       } catch (err) {
-        setError('Falha ao criar projeto. Tente novamente.');
+        setError('Failed to create project. Tente novamente.');
         setStep('style');
       }
     };
@@ -415,11 +415,11 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
       {/* Footer */}
       <div className="flex items-center justify-between mt-6 pt-4 border-t border-[var(--aethel-border-primary)]">
-        <button type="button" aria-label="Cancelar criacao de novo projeto"
+        <button type="button" aria-label="Cancel new project creation"
           onClick={onCancel}
           className="px-4 py-2 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
         >
-          Cancelar
+          Cancel
         </button>
 
         <div className="flex items-center gap-3">

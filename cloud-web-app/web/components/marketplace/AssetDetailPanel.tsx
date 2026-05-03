@@ -121,7 +121,7 @@ function Loader() {
             <div className="flex flex-col items-center gap-2">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 <span className="text-sm text-muted-foreground">
-                    Carregando {progress.toFixed(0)}%
+                    Loading {progress.toFixed(0)}%
                 </span>
             </div>
         </DreiHtml>
@@ -387,7 +387,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
         queryKey: ['asset', assetId],
         queryFn: async () => {
             const res = await fetch(`/api/marketplace/assets/${assetId}`);
-            if (!res.ok) throw new Error('Falha ao carregar asset');
+            if (!res.ok) throw new Error('Failed to load asset');
             return res.json();
         },
     });
@@ -397,7 +397,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
         queryKey: ['asset-reviews', assetId],
         queryFn: async () => {
             const res = await fetch(`/api/marketplace/assets/${assetId}/reviews`);
-            if (!res.ok) throw new Error('Falha ao carregar avaliacoes');
+            if (!res.ok) throw new Error('Failed to load reviews');
             return res.json();
         },
     });
@@ -410,7 +410,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ assetId }),
             });
-            if (!res.ok) throw new Error('Falha no checkout');
+            if (!res.ok) throw new Error('Checkout failed');
             return res.json();
         },
         onSuccess: (data) => {
@@ -420,7 +420,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
             }
         },
         onError: () => {
-            toast.error('Falha ao iniciar o checkout.');
+            toast.error('Failed to start checkout.');
         },
     });
 
@@ -428,7 +428,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
     const downloadMutation = useMutation({
         mutationFn: async () => {
             const res = await fetch(`/api/marketplace/assets/${assetId}/download`);
-            if (!res.ok) throw new Error('Falha no download');
+            if (!res.ok) throw new Error('Download failed');
             return res.blob();
         },
         onSuccess: (blob) => {
@@ -441,7 +441,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
             toast.success('Baixar iniciado.');
         },
         onError: () => {
-            toast.error('Falha no download.');
+            toast.error('Download failed.');
         },
     });
 
@@ -450,7 +450,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
         mutationFn: async () => {
             const method = isFavorited ? 'DELETE' : 'POST';
             const res = await fetch(`/api/marketplace/favorites/${assetId}`, { method });
-            if (!res.ok) throw new Error('Falha ao atualizar favoritos');
+            if (!res.ok) throw new Error('Failed to update favorites');
         },
         onSuccess: () => {
             setIsFavorited(!isFavorited);

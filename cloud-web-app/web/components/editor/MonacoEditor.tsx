@@ -60,7 +60,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
         .then(async (res) => {
           if (!res.ok) {
             const text = await res.text().catch(() => '');
-              throw new Error(text || `Falha ao ler arquivo (${res.status})`);
+              throw new Error(text || `Failed to read file (${res.status})`);
           }
           return res.json();
         })
@@ -71,7 +71,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
         .catch((err) => {
           console.warn('Could not load file:', err);
           setValue('');
-          setLoadError('Conteudo do arquivo indisponivel. Verifique o acesso canonico da API de arquivos para este projeto.');
+          setLoadError('File content is unavailable. Check the canonical file API access for this project.');
         })
         .finally(() => setLoading(false));
     } else if (initialValue) {
@@ -108,7 +108,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
     <div className="w-full h-full overflow-hidden rounded-md border border-[var(--aethel-border-primary)]">
       {loading ? (
         <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
-          Carregando arquivo...
+          Loading file...
         </div>
       ) : loadError ? (
         <div className="flex h-full items-center justify-center px-6 text-center text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">
@@ -130,7 +130,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
           }}
           loading={
             <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
-              Carregando Editor...
+              Loading Editor...
             </div>
           }
         />

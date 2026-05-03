@@ -566,7 +566,7 @@ function ImportModal({
           justifyContent: 'flex-end',
           gap: '12px',
         }}>
-          <button type="button" aria-label="Cancelar importacao de assets"
+          <button type="button" aria-label="Cancel asset import"
             onClick={onClose}
             style={{
               padding: '8px 24px',

@@ -101,7 +101,7 @@ export function MonacoChatDiffPanel({
           onMount={handleMount}
           loading={
             <div className="flex h-full min-h-[200px] items-center justify-center text-[11px] text-[var(--aethel-text-tertiary)]">
-              Carregando diff do Monaco...
+              Loading Monaco diff...
             </div>
           }
           options={{

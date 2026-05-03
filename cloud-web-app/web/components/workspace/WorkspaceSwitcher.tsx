@@ -47,7 +47,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
       title: 'Remover pasta',
       message: 'Remover esta pasta do workspace?',
       confirmText: 'Remover',
-      cancelText: 'Cancelar',
+      cancelText: 'Cancel',
     });
     if (!shouldRemove) return;
     await workspaceManager.removeWorkspaceFolder(index);

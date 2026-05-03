@@ -242,7 +242,7 @@ export default function PreviewRuntimeToolbar({
     deployReadiness?.canDeploy === false && deployReadiness.message
       ? deployReadiness.message
       : deployReadiness?.canDeploy === false && deployReadiness.missing?.length
-      ? `Configure ${deployReadiness.missing.join(', ')} para publicar.`
+      ? `Configure ${deployReadiness.missing.join(', ')} to publish.`
       : deployStatus === 'ready'
         ? 'Deploy publico pronto para compartilhar.'
         : deployStatusHref

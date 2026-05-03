@@ -162,7 +162,7 @@ async function fetchAssets(
     params.set('sort', filters.sortBy);
 
     const response = await fetch(`/api/marketplace/assets?${params}`);
-    if (!response.ok) throw new Error('Falha ao carregar assets');
+    if (!response.ok) throw new Error('Failed to load assets');
     return response.json();
 }
 
@@ -170,14 +170,14 @@ async function addToFavorites(assetId: string): Promise<void> {
     const response = await fetch(`/api/marketplace/favorites/${assetId}`, {
         method: 'POST',
     });
-    if (!response.ok) throw new Error('Falha ao adicionar aos favoritos');
+    if (!response.ok) throw new Error('Failed to add to favorites');
 }
 
 async function removeFromFavorites(assetId: string): Promise<void> {
     const response = await fetch(`/api/marketplace/favorites/${assetId}`, {
         method: 'DELETE',
     });
-    if (!response.ok) throw new Error('Falha ao remover dos favoritos');
+    if (!response.ok) throw new Error('Failed to remove from favorites');
 }
 
 async function addToCart(assetId: string): Promise<void> {
@@ -186,7 +186,7 @@ async function addToCart(assetId: string): Promise<void> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ assetId }),
     });
-    if (!response.ok) throw new Error('Falha ao adicionar ao carrinho');
+    if (!response.ok) throw new Error('Failed to add to cart');
 }
 
 // ============================================================================
@@ -380,7 +380,7 @@ function AssetCard({
                                     "w-4 h-4 mr-1",
                                     isFavorited && "fill-red-500 text-[var(--aethel-error-light)]"
                                 )} />
-                                {isFavorited ? 'Salvo' : 'Salvar'}
+                                {isFavorited ? 'Salvo' : 'Save'}
                             </Button>
                             {!asset.isFree && (
                                 <Button type="button"
@@ -653,7 +653,7 @@ export default function MarketplaceBrowser() {
             queryClient.invalidateQueries({ queryKey: ['favorites'] });
         },
         onError: () => {
-            toast.error('Falha ao adicionar aos favoritos');
+            toast.error('Failed to add to favorites');
         },
     });
 
@@ -664,7 +664,7 @@ export default function MarketplaceBrowser() {
             queryClient.invalidateQueries({ queryKey: ['cart'] });
         },
         onError: () => {
-            toast.error('Falha ao adicionar ao carrinho');
+            toast.error('Failed to add to cart');
         },
     });
 
@@ -829,7 +829,7 @@ export default function MarketplaceBrowser() {
                                 <p className="text-sm text-muted-foreground">
                                     {data?.total
                                         ? `${data.total.toLocaleString()} assets encontrados`
-                                        : 'Carregando...'}
+                                        : 'Loading...'}
                                 </p>
                             </div>
 
@@ -840,7 +840,7 @@ export default function MarketplaceBrowser() {
                             {isError && (
                                 <div className="text-center py-12">
                                     <p className="text-muted-foreground mb-4">
-                                        Falha ao carregar assets
+                                        Failed to load assets
                                     </p>
                                     <button type="button" onClick={() => refetch()}>
                                         Tentar Novamente

@@ -724,7 +724,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
             >
               Compile
             </button>
-            <button type="button" aria-label="Salvar blueprint"
+            <button type="button" aria-label="Save blueprint"
               onClick={handleSave}
               className="px-4 py-1.5 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded text-sm font-medium"
             >

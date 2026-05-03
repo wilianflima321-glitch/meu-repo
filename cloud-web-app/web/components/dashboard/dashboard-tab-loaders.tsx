@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 
 const TabLoading = () => (
   <div className="mx-6 my-6 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-4 py-4 text-xs text-[var(--aethel-text-secondary)]">
-    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-primary)]">Carregando modulo...</p>
+    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-primary)]">Loading module...</p>
   </div>
 )
 

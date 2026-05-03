@@ -49,7 +49,7 @@ export function WaveformRenderer({
           setIsLoading(false);
         })
         .catch(err => {
-          console.error('Erro ao carregar audio:', err);
+          console.error('Error loading audio:', err);
           setIsLoading(false);
         });
     }
@@ -152,7 +152,7 @@ export function WaveformRenderer({
         className="flex items-center justify-center bg-[var(--aethel-surface-tertiary)] rounded"
         style={{ width, height }}
       >
-        <span className="text-[var(--aethel-text-tertiary)] text-sm">Carregando audio...</span>
+        <span className="text-[var(--aethel-text-tertiary)] text-sm">Loading audio...</span>
       </div>
     );
   }

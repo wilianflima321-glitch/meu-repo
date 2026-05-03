@@ -289,16 +289,16 @@ export function useCheckout() {
         const data = await res.json().catch(() => ({}))
 
         if (!res.ok) {
-          throw new Error(data?.message || data?.error || 'Falha ao iniciar checkout')
+          throw new Error(data?.message || data?.error || 'Failed to start checkout')
         }
 
         if (typeof data?.checkoutUrl === 'string' && data.checkoutUrl) {
           window.location.href = data.checkoutUrl
         } else {
-          throw new Error('URL de checkout nao recebida')
+          throw new Error('Checkout URL was not received')
         }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Falha no checkout'
+        const msg = err instanceof Error ? err.message : 'Checkout failed'
         setError(msg)
       } finally {
         setLoading(false)

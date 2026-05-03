@@ -119,7 +119,7 @@ export function FirstValueGuide({
     sessionSummary.status === 'completed'
       ? sessionSummary.durationMs !== null && sessionSummary.durationMs <= sessionSummary.targetMs
         ? 'Meta atingida'
-        : 'Concluido acima da meta'
+        : 'Completed above target'
       : 'Sessao em andamento'
 
   return (
@@ -244,8 +244,8 @@ export function FirstValueGuide({
           <button type="button" onClick={onCreateProject} className={primaryButtonClass} aria-label="Criar o primeiro projeto">
             Criar projeto
           </button>
-          <button type="button" onClick={onConfigureAI} className={secondaryButtonClass} aria-label="Configurar provedor de inteligencia artificial">
-            Configurar IA
+          <button type="button" onClick={onConfigureAI} className={secondaryButtonClass} aria-label="Configure artificial intelligence provider">
+            Configure AI
           </button>
           <button type="button" onClick={onOpenAIChat} className={secondaryButtonClass} aria-label="Abrir o chat de inteligencia artificial">
             Abrir Chat IA

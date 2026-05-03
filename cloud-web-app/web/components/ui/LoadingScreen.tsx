@@ -9,7 +9,7 @@ interface LoadingScreenProps {
 }
 
 export function LoadingScreen({
-  message = 'Carregando...',
+  message = 'Loading...',
   showLogo = true
 }: LoadingScreenProps) {
   const [progress, setProgress] = useState(0)
@@ -88,7 +88,7 @@ export function LoadingScreen({
 /* ============================================
    Page Loader (for route transitions)
 ============================================ */
-export function PageLoader({ text = 'Carregando página...' }: { text?: string }) {
+export function PageLoader({ text = 'Loading page...' }: { text?: string }) {
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center">
       <div className="relative w-16 h-16 mb-4">

@@ -90,7 +90,7 @@ export function CardSkeleton({ rows = 3 }: { rows?: number }) {
 // --- List Skeleton ---
 export function ListSkeleton({ items = 5 }: { items?: number }) {
   return (
-    <div className="space-y-2" aria-label="Carregando..." role="status">
+    <div className="space-y-2" aria-label="Loading..." role="status">
       {Array.from({ length: items }).map((_, i) => (
         <div key={i} className="flex items-center gap-3 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3">
           <Skeleton className="h-8 w-8 rounded-lg flex-shrink-0" />
@@ -107,7 +107,7 @@ export function ListSkeleton({ items = 5 }: { items?: number }) {
 // --- Dashboard Stats Skeleton ---
 export function StatsSkeleton() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Carregando estatisticas..." role="status">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Loading stats..." role="status">
       {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_35%,transparent)] p-4">
           <Skeleton className="h-3 w-1/2 mb-3" />

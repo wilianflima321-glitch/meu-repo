@@ -24,7 +24,7 @@ const CanonicalPreviewSurface = dynamic(() => import('@/components/preview/Canon
   ssr: false,
   loading: () => (
     <div className="flex h-full min-h-[260px] items-center justify-center rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] px-6 py-8 text-sm text-[var(--aethel-text-secondary)]">
-      Carregando preview do studio...
+      Loading studio preview...
     </div>
   ),
 })

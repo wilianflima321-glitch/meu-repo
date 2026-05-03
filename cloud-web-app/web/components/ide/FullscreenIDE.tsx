@@ -400,7 +400,7 @@ export default function FullscreenIDE() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center px-6 text-sm text-[var(--aethel-text-tertiary)]">
-          Carregando contexto do workspace...
+          Loading workspace context...
         </div>
       }
     >

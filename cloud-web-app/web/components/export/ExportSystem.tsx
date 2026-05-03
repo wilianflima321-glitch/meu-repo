@@ -412,7 +412,7 @@ export function ExportarDialog({
               fontSize: 13
             }}
           >
-            Cancelar
+            Cancel
           </button>
           <button type="button" aria-label="Start export"
             onClick={() => {
@@ -439,10 +439,10 @@ export function ExportarDialog({
 }
 interface ExportarQueuePanelProps {
   jobs: ExportarJob[]
-  onCancelar: (jobId: string) => void
+  onCancel: (jobId: string) => void
   onRemover: (jobId: string) => void
 }
-export function ExportarQueuePanel({ jobs, onCancelar, onRemover }: ExportarQueuePanelProps) {
+export function ExportarQueuePanel({ jobs, onCancel, onRemover }: ExportarQueuePanelProps) {
   if (jobs.length === 0) {
     return (
       <div style={{
@@ -527,13 +527,13 @@ export function ExportarQueuePanel({ jobs, onCancelar, onRemover }: ExportarQueu
           )}
           {job.status === 'failed' && job.error && (
             <div style={{ color: 'var(--aethel-error)', fontSize: 11, marginTop: 4 }}>
-              Erro: {job.error}
+              Error: {job.error}
             </div>
           )}
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             {job.status === 'processing' && (
               <button type="button" aria-label={`Cancel export job ${job.id}`}
-                onClick={() => onCancelar(job.id)}
+                onClick={() => onCancel(job.id)}
                 style={{
                   padding: '4px 12px',
                   background: 'var(--aethel-error)',
@@ -544,7 +544,7 @@ export function ExportarQueuePanel({ jobs, onCancelar, onRemover }: ExportarQueu
                   cursor: 'pointer'
                 }}
               >
-                Cancelar
+                Cancel
               </button>
             )}
             {['completed', 'failed', 'cancelled'].includes(job.status) && (

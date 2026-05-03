@@ -330,7 +330,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
           <button type="button" aria-label={`Configure agent ${agent.name}`}
             onClick={(e) => { e.stopPropagation(); onConfigure() }}
             className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-tertiary)]"
-            title="Configurar"
+            title="Configure"
           >
             <Settings className="w-3 h-3" />
           </button>
@@ -794,7 +794,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
           <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-lg w-full max-w-md p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-[var(--aethel-text-primary)]">
-                Configurar {agents.find(a => a.id === showAgentConfig)?.name}
+                Configure {agents.find(a => a.id === showAgentConfig)?.name}
               </h3>
               <button type="button" aria-label="Close agent configuration modal"
                 onClick={() => setShowAgentConfig(null)}
@@ -852,13 +852,13 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
                 onClick={() => setShowAgentConfig(null)}
                 className="flex-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm text-[var(--aethel-text-secondary)]"
               >
-                Cancelar
+                Cancel
               </button>
               <button type="button" aria-label="Save agent configuration changes"
                 onClick={() => setShowAgentConfig(null)}
                 className="flex-1 px-3 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded text-sm text-[var(--aethel-text-primary)]"
               >
-                Salvar alteracoes
+                Save changes
               </button>
             </div>
           </div>
