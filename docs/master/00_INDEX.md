@@ -40,20 +40,21 @@ Status: CANONICAL ENTRYPOINT
 35. `docs/master/98_PRODUCT_FUNNEL_TELEMETRY_GATE_2026-05-03.md`
 36. `docs/master/99_COMMERCIAL_ACCESS_GATE_2026-05-03.md`
 37. `docs/master/100_ECONOMICS_TRANSPARENCY_GATE_2026-05-03.md`
-38. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
-39. `docs/master/85_EXECUTION_STATUS_MAP_2026-04-22.md`
-40. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
-41. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
-42. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
-43. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
-44. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
-45. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
-46. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
-47. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
-48. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
-49. `AETHEL_INTERFACE_BLUEPRINTS/17_STUDIO_LOCAL.md`
-50. `AETHEL_INTERFACE_BLUEPRINTS/18_DEPTH_MODES_AND_HANDOFFS.md`
-51. `AETHEL_INTERFACE_BLUEPRINTS/19_BEST_IN_MARKET_CLEAN_UX_GUARDRAILS.md`
+38. `docs/master/101_AI_MARGIN_GOVERNANCE_GATE_2026-05-03.md`
+39. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
+40. `docs/master/85_EXECUTION_STATUS_MAP_2026-04-22.md`
+41. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
+42. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
+43. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
+44. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
+45. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
+46. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+47. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+48. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+49. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+50. `AETHEL_INTERFACE_BLUEPRINTS/17_STUDIO_LOCAL.md`
+51. `AETHEL_INTERFACE_BLUEPRINTS/18_DEPTH_MODES_AND_HANDOFFS.md`
+52. `AETHEL_INTERFACE_BLUEPRINTS/19_BEST_IN_MARKET_CLEAN_UX_GUARDRAILS.md`
 
 ## Canonical Interface Layer
 The interface source of truth no longer lives only inside `docs/master`.
@@ -77,6 +78,7 @@ The canonical UI/UX, shell, mode, state, and component contracts now live in:
 - `docs/master/98_PRODUCT_FUNNEL_TELEMETRY_GATE_2026-05-03.md`
 - `docs/master/99_COMMERCIAL_ACCESS_GATE_2026-05-03.md`
 - `docs/master/100_ECONOMICS_TRANSPARENCY_GATE_2026-05-03.md`
+- `docs/master/101_AI_MARGIN_GOVERNANCE_GATE_2026-05-03.md`
 
 Rules:
 - `docs/master/65_*` and `66_*` define product and AI-experience direction.
@@ -150,6 +152,7 @@ Rules:
 | `98_PRODUCT_FUNNEL_TELEMETRY_GATE_2026-05-03.md` | Gate executavel para medir funil publico, auth, pricing, mission intake e deploy sem poluir a interface nem criar eventos falsos | ACTIVE |
 | `99_COMMERCIAL_ACCESS_GATE_2026-05-03.md` | Gate executavel para Free tier, trial de 14 dias, entitlements e billing usage sem paywall falso | ACTIVE |
 | `100_ECONOMICS_TRANSPARENCY_GATE_2026-05-03.md` | Gate executavel para cost transparency no chat, trial state e billing portal self-service | ACTIVE |
+| `101_AI_MARGIN_GOVERNANCE_GATE_2026-05-03.md` | Gate executavel para margem AI no admin financeiro, revenue/cost ratio e protecao de unit economics | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |

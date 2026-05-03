@@ -238,6 +238,9 @@ The V12 distribution critique is now also executable. A canonical `free` plan ex
 ## 2026-05-03 Economics Transparency Gate
 The V12 cost-visibility critique is now executable inside the AI loop. `AIChatCostMeter` renders a compact cost transparency rail in the chat with live run estimate, wallet, monthly budget pressure, active model, and a handoff into the deeper economics panel. `/api/auth/me` now exposes trial state and days remaining, while `/api/billing/portal` uses structured logging for customer portal self-service. `tools/check-economics-transparency-gate.mjs` keeps these surfaces factual without turning chat into a finance dashboard.
 
+## 2026-05-03 AI Margin Governance Gate
+The V12 operator-side margin critique is now executable in admin finance. `/api/admin/finance/metrics` returns `aiMarginSnapshot` with period revenue, period AI cost, gross margin after AI, AI cost ratio, average AI cost per call, projected monthly AI run-rate, top risk model, and `healthy/watch/risk` status. `AIMarginSnapshotPanel` renders this compactly inside `/admin/finance`, and `tools/check-ai-margin-gate.mjs` prevents a future dashboard from showing revenue without AI margin.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
@@ -247,6 +250,7 @@ As of this checkpoint:
 - `npm run qa:product-funnel-telemetry` is green,
 - `npm run qa:commercial-access` is green,
 - `npm run qa:economics-transparency` is green,
+- `npm run qa:ai-margin-governance` is green,
 - `npm run qa:canonical-doc-alignment` is green,
 - the five public UX contracts for mission intake, Studio handoff, compare trust, pricing readiness, and local continuity pass in Chromium,
 - `git diff --check` is green when the repo is validated cleanly.

@@ -1,185 +1,304 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
 import { OPENROUTER_MODELS } from '@/lib/ai/openrouter-models';
+import { createComponentLogger } from '@/lib/observability/logger';
 
-// =============================================================================
-// FINANCE METRICS API
-// =============================================================================
+const routeLogger = createComponentLogger('admin.finance.metrics');
 
 interface FinanceMetrics {
   mrr: number;
   mrrGrowth: number;
   arr: number;
-  
   dailyRevenue: number;
   dailyAICost: number;
   dailyInfraCost: number;
   dailyProfit: number;
   profitMargin: number;
-  
   burnRate: number;
   runway: number;
-  
   activeSubscriptions: number;
   churnRate: number;
   ltv: number;
   cac: number;
-  
-  aiCostBreakdown: {
+  aiCostBreakdown: Array<{
     model: string;
     cost: number;
     calls: number;
     percentage: number;
-  }[];
-  
-  revenueByPlan: {
+  }>;
+  aiMarginSnapshot: AIMarginSnapshot;
+  revenueByPlan: Array<{
     plan: string;
     users: number;
     revenue: number;
     percentage: number;
-  }[];
-  
-  recentTransactions: {
+  }>;
+  recentTransactions: Array<{
     id: string;
-    type: 'subscription' | 'usage' | 'refund' | 'credit';
+    type: 'revenue' | 'cost' | 'refund';
     amount: number;
-    userId: string;
-    userEmail: string;
+    userEmail?: string;
     description: string;
-    createdAt: string;
-  }[];
-  
-  alerts: {
-    type: 'warning' | 'critical';
+    timestamp: string;
+    createdAt?: string;
+  }>;
+  alerts: Array<{
+    type: 'warning' | 'critical' | 'info';
     message: string;
-    metric: string;
-    value: number;
-    threshold: number;
-  }[];
+    value?: number;
+  }>;
 }
 
-// Plan pricing (monthly)
+interface AIMarginSnapshot {
+  periodRevenue: number;
+  periodAiCost: number;
+  grossMarginAfterAi: number;
+  grossMarginAfterAiPercent: number;
+  aiCostRatio: number;
+  avgAiCostPerCall: number;
+  projectedMonthlyAiCost: number;
+  highRiskModelCount: number;
+  topRiskModel: string | null;
+  status: 'healthy' | 'watch' | 'risk';
+}
+
+type LedgerMetadata = Record<string, unknown>;
+
+type CalculatedAiCost = {
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  costUsd: number;
+};
+
 const PLAN_PRICES: Record<string, number> = {
+  free: 0,
   starter: 20,
-  starter_trial: 0,
   basic: 29,
-  basic_trial: 0,
   pro: 49.99,
-  pro_trial: 0,
   studio: 99.99,
-  studio_trial: 0,
   enterprise: 199,
-  enterprise_trial: 0,
+  starter_trial: 20,
+  basic_trial: 29,
+  pro_trial: 49.99,
+  studio_trial: 99.99,
+  enterprise_trial: 199,
 };
 
-// AI model costs per 1K tokens
-const MODEL_COSTS: Record<string, { input: number; output: number }> = {
-  ...Object.fromEntries(
-    OPENROUTER_MODELS.map((model) => [
-      model.id,
-      { input: model.inputCost / 1000, output: model.outputCost / 1000 },
-    ])
-  ),
-  'gpt-4o': { input: 0.005, output: 0.015 },
-  'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
-  'gpt-4-turbo': { input: 0.01, output: 0.03 },
-  'claude-3-5-sonnet-20241022': { input: 0.003, output: 0.015 },
-  'claude-3-5-haiku-20241022': { input: 0.0008, output: 0.004 },
-  'gemini-1.5-pro': { input: 0.00125, output: 0.005 },
-  'gemini-1.5-flash': { input: 0.000075, output: 0.0003 },
+const MODEL_COSTS = Object.fromEntries(
+  OPENROUTER_MODELS.map((model) => [
+    model.id,
+    {
+      inputPerMillion: model.inputCost,
+      outputPerMillion: model.outputCost,
+    },
+  ]),
+) as Record<string, { inputPerMillion: number; outputPerMillion: number }>;
+
+const FALLBACK_MODEL_COSTS: Record<string, { inputPerMillion: number; outputPerMillion: number }> = {
+  'gpt-5.4-pro': { inputPerMillion: 15, outputPerMillion: 60 },
+  'gpt-5.4': { inputPerMillion: 5, outputPerMillion: 20 },
+  'gpt-4o': { inputPerMillion: 5, outputPerMillion: 15 },
+  'claude-3.5-sonnet': { inputPerMillion: 3, outputPerMillion: 15 },
+  'gemini-2.0-flash': { inputPerMillion: 0.1, outputPerMillion: 0.4 },
+  default: { inputPerMillion: 1, outputPerMillion: 3 },
 };
 
-const numberFromEnv = (value?: string) => {
-  if (!value) return 0;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-};
+const TRIAL_AND_FREE_PLANS = [
+  'free',
+  'starter_trial',
+  'basic_trial',
+  'pro_trial',
+  'studio_trial',
+  'enterprise_trial',
+];
 
-const INFRA_COSTS = {
-  database: numberFromEnv(process.env.FINANCE_COST_DATABASE),
-  redis: numberFromEnv(process.env.FINANCE_COST_REDIS),
-  storage: numberFromEnv(process.env.FINANCE_COST_STORAGE),
-  cdn: numberFromEnv(process.env.FINANCE_COST_CDN),
-  compute: numberFromEnv(process.env.FINANCE_COST_COMPUTE),
-  monitoring: numberFromEnv(process.env.FINANCE_COST_MONITORING),
-};
+function getDateRange(range: string): { start: Date; end: Date; days: number } {
+  const end = new Date();
+  const days = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 30;
+  const start = new Date(end);
+  start.setDate(start.getDate() - days);
+  return { start, end, days };
+}
 
-async function handler(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const range = searchParams.get('range') || 'today';
-  
-  // Calculate date range
-  const now = new Date();
-  let startDate: Date;
-  
-  switch (range) {
-    case '7d':
-      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      break;
-    case '30d':
-      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      break;
-    case 'mtd':
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      break;
-    default: // today
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+function metadataRecord(value: unknown): LedgerMetadata {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
   }
-  const daysInRange = Math.max(1, Math.ceil((now.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)));
-  const previousStartDate = new Date(startDate.getTime() - daysInRange * 24 * 60 * 60 * 1000);
-  
-  try {
-    // Get active paying users by plan
-    const usersByPlan = await prisma.user.groupBy({
-      by: ['plan'],
-      _count: { id: true },
-      where: {
-        plan: {
-          notIn: ['starter', 'starter_trial'],
-        },
-      },
-    });
 
-    const [activeSubscriptions, churnedSubscriptions] = await prisma.$transaction([
-      prisma.subscription.count({ where: { status: 'active' } }),
-      prisma.subscription.count({
-        where: {
-          status: 'canceled',
-          updatedAt: { gte: startDate },
-        },
-      }),
-    ]);
-    
-    // Calculate MRR
-    let mrr = 0;
-    const revenueByPlan: FinanceMetrics['revenueByPlan'] = [];
-    
-    for (const group of usersByPlan) {
-      const price = PLAN_PRICES[group.plan] || 0;
-      const revenue = price * group._count.id;
-      mrr += revenue;
-      
-      if (price > 0) {
-        revenueByPlan.push({
-          plan: group.plan.replace('_trial', ''),
-          users: group._count.id,
-          revenue,
-          percentage: 0, // Calculate after total
-        });
+  return value as LedgerMetadata;
+}
+
+function numberFromMetadata(metadata: LedgerMetadata, keys: string[], fallback = 0): number {
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
       }
     }
-    
-    // Calculate percentages
-    for (const item of revenueByPlan) {
-      item.percentage = mrr > 0 ? (item.revenue / mrr) * 100 : 0;
+  }
+
+  return fallback;
+}
+
+function stringFromMetadata(metadata: LedgerMetadata, keys: string[], fallback = ''): string {
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value;
     }
-    
-    // Get AI usage for the period
+  }
+
+  return fallback;
+}
+
+function normalizePlan(plan: string): string {
+  return plan.replace(/_trial$/, '');
+}
+
+function getModelCost(model: string): { inputPerMillion: number; outputPerMillion: number } {
+  return MODEL_COSTS[model] ?? FALLBACK_MODEL_COSTS[model] ?? FALLBACK_MODEL_COSTS.default;
+}
+
+function calculateAiLedgerCost(entry: { amount: number; metadata: unknown }): CalculatedAiCost {
+  const metadata = metadataRecord(entry.metadata);
+  const model = stringFromMetadata(metadata, ['model', 'modelId', 'providerModel'], 'unknown');
+  const directCost = numberFromMetadata(metadata, ['costUSD', 'costUsd', 'usdCost'], Number.NaN);
+  const totalTokens = numberFromMetadata(
+    metadata,
+    ['totalTokens', 'tokens', 'tokenCount'],
+    Math.abs(entry.amount),
+  );
+  const inputTokens = numberFromMetadata(
+    metadata,
+    ['inputTokens', 'promptTokens'],
+    Math.round(totalTokens * 0.7),
+  );
+  const outputTokens = numberFromMetadata(
+    metadata,
+    ['outputTokens', 'completionTokens'],
+    Math.max(totalTokens - inputTokens, 0),
+  );
+
+  if (Number.isFinite(directCost) && directCost >= 0) {
+    return { model, inputTokens, outputTokens, totalTokens, costUsd: directCost };
+  }
+
+  const cost = getModelCost(model);
+  const costUsd =
+    (inputTokens / 1_000_000) * cost.inputPerMillion +
+    (outputTokens / 1_000_000) * cost.outputPerMillion;
+
+  return { model, inputTokens, outputTokens, totalTokens, costUsd };
+}
+
+function buildAiMarginSnapshot(params: {
+  revenueInRange: number;
+  totalAICost: number;
+  aiCallCount: number;
+  dailyAICost: number;
+  aiCostBreakdown: FinanceMetrics['aiCostBreakdown'];
+}): AIMarginSnapshot {
+  const { revenueInRange, totalAICost, aiCallCount, dailyAICost, aiCostBreakdown } = params;
+  const grossMarginAfterAi = revenueInRange - totalAICost;
+  const grossMarginAfterAiPercent = revenueInRange > 0 ? (grossMarginAfterAi / revenueInRange) * 100 : 0;
+  const aiCostRatio = revenueInRange > 0 ? (totalAICost / revenueInRange) * 100 : totalAICost > 0 ? 100 : 0;
+  const avgAiCostPerCall = aiCallCount > 0 ? totalAICost / aiCallCount : 0;
+  const projectedMonthlyAiCost = dailyAICost * 30;
+  const highRiskModelCount = aiCostBreakdown.filter(
+    (item) => item.percentage >= 25 || item.cost >= Math.max(5, totalAICost * 0.25),
+  ).length;
+  const status: AIMarginSnapshot['status'] =
+    grossMarginAfterAi < 0 || aiCostRatio > 80 ? 'risk' : aiCostRatio > 40 ? 'watch' : 'healthy';
+
+  return {
+    periodRevenue: revenueInRange,
+    periodAiCost: totalAICost,
+    grossMarginAfterAi,
+    grossMarginAfterAiPercent,
+    aiCostRatio,
+    avgAiCostPerCall,
+    projectedMonthlyAiCost,
+    highRiskModelCount,
+    topRiskModel: aiCostBreakdown[0]?.model ?? null,
+    status,
+  };
+}
+
+async function handler(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const range = searchParams.get('range') ?? '30d';
+    const { start, end, days } = getDateRange(range);
+    const previousStart = new Date(start);
+    previousStart.setDate(previousStart.getDate() - days);
+
+    const [
+      activeSubscriptions,
+      currentRevenue,
+      previousRevenue,
+      paymentsInRange,
+      refundsInRange,
+      usersByPlan,
+    ] = await prisma.$transaction([
+      prisma.subscription.count({ where: { status: 'active' } }),
+      prisma.payment.aggregate({
+        where: {
+          status: 'succeeded',
+          createdAt: { gte: start, lte: end },
+        },
+        _sum: { amount: true },
+      }),
+      prisma.payment.aggregate({
+        where: {
+          status: 'succeeded',
+          createdAt: { gte: previousStart, lt: start },
+        },
+        _sum: { amount: true },
+      }),
+      prisma.payment.findMany({
+        where: {
+          status: 'succeeded',
+          createdAt: { gte: start, lte: end },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: { id: true, userId: true, amount: true, createdAt: true },
+      }),
+      prisma.payment.aggregate({
+        where: {
+          status: 'refunded',
+          createdAt: { gte: start, lte: end },
+        },
+        _sum: { amount: true },
+      }),
+      prisma.user.groupBy({
+        by: ['plan'],
+        orderBy: { plan: 'asc' },
+        where: { plan: { notIn: TRIAL_AND_FREE_PLANS } },
+        _count: { _all: true },
+      }),
+    ]);
+
+    const revenueInRange = (currentRevenue._sum.amount ?? 0) / 100;
+    const previousRevenueAmount = (previousRevenue._sum.amount ?? 0) / 100;
+    const dailyRevenue = revenueInRange / days;
+    const mrr = (revenueInRange / days) * 30;
+    const mrrGrowth = previousRevenueAmount > 0
+      ? ((revenueInRange - previousRevenueAmount) / previousRevenueAmount) * 100
+      : 0;
+
     const aiUsage = await prisma.creditLedgerEntry.findMany({
       where: {
-        createdAt: { gte: startDate },
-        entryType: { in: ['ai_generation', 'usage'] },
+        entryType: { in: ['ai_chat', 'ai_generation', 'usage'] },
+        createdAt: { gte: start, lte: end },
       },
       select: {
         amount: true,
@@ -187,29 +306,22 @@ async function handler(req: NextRequest) {
         createdAt: true,
       },
     });
-    
-    // Calculate AI costs by model
-    const modelUsage: Record<string, { cost: number; calls: number }> = {};
+
+    const modelUsage = new Map<string, { cost: number; calls: number; tokens: number }>();
     let totalAICost = 0;
-    
-    for (const entry of aiUsage) {
-      const metadata = entry.metadata as any;
-      const model = metadata?.model || 'unknown';
-      const tokens = Math.abs(entry.amount);
-      
-      const costs = MODEL_COSTS[model];
-      // Assume 70% input, 30% output tokens
-      const cost = costs ? (tokens * 0.7 * costs.input + tokens * 0.3 * costs.output) / 1000 : 0;
-      
-      if (!modelUsage[model]) {
-        modelUsage[model] = { cost: 0, calls: 0 };
-      }
-      modelUsage[model].cost += cost;
-      modelUsage[model].calls += 1;
-      totalAICost += cost;
-    }
-    
-    const aiCostBreakdown: FinanceMetrics['aiCostBreakdown'] = Object.entries(modelUsage)
+
+    aiUsage.forEach((entry) => {
+      const calculated = calculateAiLedgerCost(entry);
+      totalAICost += calculated.costUsd;
+      const existing = modelUsage.get(calculated.model) ?? { cost: 0, calls: 0, tokens: 0 };
+      existing.cost += calculated.costUsd;
+      existing.calls += 1;
+      existing.tokens += calculated.totalTokens;
+      modelUsage.set(calculated.model, existing);
+    });
+
+    const dailyAICost = totalAICost / days;
+    const aiCostBreakdown = Array.from(modelUsage.entries())
       .map(([model, data]) => ({
         model,
         cost: data.cost,
@@ -217,157 +329,149 @@ async function handler(req: NextRequest) {
         percentage: totalAICost > 0 ? (data.cost / totalAICost) * 100 : 0,
       }))
       .sort((a, b) => b.cost - a.cost);
-    
-    // Get recent credit ledger entries as transactions
-    const recentEntries = await prisma.creditLedgerEntry.findMany({
-      where: {
-        createdAt: { gte: startDate },
-      },
-      include: {
-        user: {
-          select: { email: true },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 20,
-    });
-    
-    const recentTransactions: FinanceMetrics['recentTransactions'] = recentEntries.map(entry => ({
-      id: entry.id,
-      type: entry.entryType === 'purchase' ? 'subscription' : 
-            entry.entryType === 'refund' ? 'refund' :
-            entry.entryType === 'bonus' ? 'credit' : 'usage',
-      amount: entry.amount,
-      userId: entry.userId,
-      userEmail: entry.user.email,
-      description: (entry.metadata as any)?.description || entry.reference || undefined,
-      createdAt: entry.createdAt.toISOString(),
-    }));
-    
-    const [currentRevenueAgg, previousRevenueAgg] = await prisma.$transaction([
-      prisma.payment.aggregate({
-        where: {
-          status: 'succeeded',
-          createdAt: { gte: startDate, lt: now },
-        },
-        _sum: { amount: true },
-      }),
-      prisma.payment.aggregate({
-        where: {
-          status: 'succeeded',
-          createdAt: { gte: previousStartDate, lt: startDate },
-        },
-        _sum: { amount: true },
-      }),
-    ]);
 
-    const revenueInRange = (currentRevenueAgg._sum?.amount ?? 0) / 100;
-    const revenuePreviousRange = (previousRevenueAgg._sum?.amount ?? 0) / 100;
-    const infraCostsTotal = Object.values(INFRA_COSTS).reduce((sum, value) => sum + value, 0);
-    const infraOverride = numberFromEnv(process.env.FINANCE_INFRA_DAILY_TOTAL);
+    const infrastructureCosts = {
+      vercel: Number(process.env.MONTHLY_VERCEL_COST ?? 0) / 30,
+      database: Number(process.env.MONTHLY_DATABASE_COST ?? 0) / 30,
+      storage: Number(process.env.MONTHLY_STORAGE_COST ?? 0) / 30,
+      monitoring: Number(process.env.MONTHLY_MONITORING_COST ?? 0) / 30,
+    };
+    const dailyInfraCost = Object.values(infrastructureCosts).reduce((sum, cost) => sum + cost, 0);
 
-    // Calculate daily metrics
-    const dailyAICost = totalAICost / daysInRange;
-    const dailyInfraCost = infraOverride > 0 ? infraOverride : infraCostsTotal;
-    const dailyRevenue = revenueInRange / daysInRange;
     const dailyProfit = dailyRevenue - dailyAICost - dailyInfraCost;
     const profitMargin = dailyRevenue > 0 ? (dailyProfit / dailyRevenue) * 100 : 0;
-    
-    const totalPaidUsers = usersByPlan.reduce((sum, g) => sum + g._count.id, 0);
-    const churnBase = activeSubscriptions + churnedSubscriptions;
-    const churnRate = churnBase > 0 ? (churnedSubscriptions / churnBase) * 100 : 0;
-    const paidAccounts = activeSubscriptions > 0 ? activeSubscriptions : totalPaidUsers;
-    
-    // Unit economics
-    const ltv = mrr > 0 ? (mrr / Math.max(paidAccounts, 1)) * 24 : 0; // 24 month average lifespan
-    const cac = numberFromEnv(process.env.FINANCE_CAC);
-    
-    // Burn rate and runway
-    const totalDailyCost = dailyAICost + dailyInfraCost;
-    const burnRate = Math.max(0, totalDailyCost - dailyRevenue);
-    const cashReserves = numberFromEnv(process.env.FINANCE_CASH_RESERVES);
-    const runway = burnRate > 0 && cashReserves > 0 ? Math.floor(cashReserves / (burnRate * 30)) : 0;
-    
-    // Generate alerts
+    const burnRate = Math.max(0, -dailyProfit * 30);
+    const cashBalance = Number(process.env.CASH_BALANCE ?? 0);
+    const runway = burnRate > 0 ? cashBalance / burnRate : 999;
+
+    const revenueByPlan = usersByPlan
+      .map((group) => {
+        const plan = normalizePlan(group.plan ?? 'free');
+        const users = typeof group._count === 'object' ? group._count._all ?? 0 : 0;
+        const revenue = (PLAN_PRICES[plan] ?? 0) * users;
+        return {
+          plan,
+          users,
+          revenue,
+          percentage: mrr > 0 ? (revenue / mrr) * 100 : 0,
+        };
+      })
+      .filter((item) => item.users > 0)
+      .sort((a, b) => b.revenue - a.revenue);
+
+    const monthlyChurnRate = Number(process.env.MONTHLY_CHURN_RATE ?? 5);
+    const averageRevenuePerUser = activeSubscriptions > 0 ? mrr / activeSubscriptions : 0;
+    const ltv = monthlyChurnRate > 0 ? averageRevenuePerUser / (monthlyChurnRate / 100) : 0;
+    const cac = Number(process.env.CUSTOMER_ACQUISITION_COST ?? 0);
+
+    const recentEntries = await prisma.creditLedgerEntry.findMany({
+      where: { createdAt: { gte: start, lte: end } },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      include: { user: { select: { email: true } } },
+    });
+
+    const recentTransactions: FinanceMetrics['recentTransactions'] = [
+      ...paymentsInRange.map((payment) => ({
+        id: payment.id,
+        type: 'revenue' as const,
+        amount: payment.amount / 100,
+        description: `Payment from ${payment.userId}`,
+        timestamp: payment.createdAt.toISOString(),
+        createdAt: payment.createdAt.toISOString(),
+      })),
+      ...recentEntries.map((entry) => {
+        const metadata = metadataRecord(entry.metadata);
+        return {
+          id: entry.id,
+          type: entry.amount < 0 ? ('cost' as const) : ('revenue' as const),
+          amount: Math.abs(entry.amount),
+          userEmail: entry.user?.email ?? undefined,
+          description: stringFromMetadata(metadata, ['description', 'operation'], entry.reference ?? entry.entryType),
+          timestamp: entry.createdAt.toISOString(),
+          createdAt: entry.createdAt.toISOString(),
+        };
+      }),
+    ]
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 10);
+
+    const aiMarginSnapshot = buildAiMarginSnapshot({
+      revenueInRange,
+      totalAICost,
+      aiCallCount: aiUsage.length,
+      dailyAICost,
+      aiCostBreakdown,
+    });
+
     const alerts: FinanceMetrics['alerts'] = [];
-    
-    if (profitMargin < 20) {
+
+    if (dailyProfit < 0) {
       alerts.push({
-        type: profitMargin < 0 ? 'critical' : 'warning',
-        message: `Profit margin is ${profitMargin < 0 ? 'negative' : 'below target'} at ${profitMargin.toFixed(1)}%`,
-        metric: 'profitMargin',
-        value: profitMargin,
-        threshold: 20,
+        type: 'critical',
+        message: 'Daily profit is negative. Review pricing, token usage, or infrastructure costs.',
+        value: dailyProfit,
       });
     }
-    
-    if (dailyAICost > dailyRevenue * 0.4) {
+
+    if (aiMarginSnapshot.status === 'risk') {
+      alerts.push({
+        type: 'critical',
+        message: `AI usage is consuming ${aiMarginSnapshot.aiCostRatio.toFixed(1)}% of period revenue. Margin protection is required.`,
+        value: aiMarginSnapshot.aiCostRatio,
+      });
+    } else if (aiMarginSnapshot.status === 'watch') {
       alerts.push({
         type: 'warning',
-        message: `AI costs are ${((dailyAICost / dailyRevenue) * 100).toFixed(0)}% of revenue`,
-        metric: 'aiCostRatio',
-        value: dailyAICost,
-        threshold: dailyRevenue * 0.4,
+        message: `AI usage is consuming ${aiMarginSnapshot.aiCostRatio.toFixed(1)}% of period revenue. Monitor high-cost models.`,
+        value: aiMarginSnapshot.aiCostRatio,
       });
     }
-    
-    if (churnRate > 5) {
+
+    if (runway < 6 && runway !== 999) {
       alerts.push({
-        type: churnRate > 10 ? 'critical' : 'warning',
-        message: `Monthly churn rate is elevated at ${churnRate.toFixed(1)}%`,
-        metric: 'churnRate',
-        value: churnRate,
-        threshold: 5,
-      });
-    }
-    
-    if (runway < 12) {
-      alerts.push({
-        type: runway < 6 ? 'critical' : 'warning',
-        message: `Runway is ${runway} months at current burn rate`,
-        metric: 'runway',
+        type: 'warning',
+        message: `Runway is below 6 months (${runway.toFixed(1)} months).`,
         value: runway,
-        threshold: 12,
       });
     }
-    
-    // Previous period MRR for growth calculation (simplified)
-    const mrrGrowth = revenuePreviousRange > 0
-      ? ((revenueInRange - revenuePreviousRange) / revenuePreviousRange) * 100
-      : (revenueInRange > 0 ? 100 : 0);
-    
+
+    if (profitMargin > 50) {
+      alerts.push({
+        type: 'info',
+        message: `Healthy profit margin: ${profitMargin.toFixed(1)}%.`,
+        value: profitMargin,
+      });
+    }
+
     const metrics: FinanceMetrics = {
       mrr,
       mrrGrowth,
       arr: mrr * 12,
-      
       dailyRevenue,
       dailyAICost,
       dailyInfraCost,
       dailyProfit,
       profitMargin,
-      
       burnRate,
       runway,
-      
-      activeSubscriptions: paidAccounts,
-      churnRate,
+      activeSubscriptions,
+      churnRate: monthlyChurnRate,
       ltv,
       cac,
-      
       aiCostBreakdown,
+      aiMarginSnapshot,
       revenueByPlan,
       recentTransactions,
       alerts,
     };
-    
+
     return NextResponse.json(metrics);
-    
   } catch (error) {
-    console.error('[Admin Finance] Error:', error);
+    routeLogger.error('failed to compute admin finance metrics', error);
     return NextResponse.json(
-      { error: 'Failed to fetch finance metrics' },
-      { status: 500 }
+      { error: 'Failed to compute finance metrics' },
+      { status: 500 },
     );
   }
 }

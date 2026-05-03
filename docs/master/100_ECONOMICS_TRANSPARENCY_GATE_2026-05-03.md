@@ -63,11 +63,13 @@ Cost transparency must stay visible but quiet:
 
 This gate closes the first user-facing economics gap. Still open:
 
-1. token margin dashboard for admins,
+1. per-user and per-workspace AI margin drilldown for admins,
 2. per-agent cost attribution,
 3. cost forecast before multi-agent web research,
 4. trial-expiration email and notification cadence,
 5. pricing simplification research around Free, Pro, Studio/Team, Enterprise.
+
+Operator-side token margin visibility is now tracked by `101_AI_MARGIN_GOVERNANCE_GATE_2026-05-03.md`.
 
 ## Verdict
 

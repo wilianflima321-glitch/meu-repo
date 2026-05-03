@@ -17,6 +17,7 @@ import {
   Bot,
   PieChart
 } from 'lucide-react';
+import { AIMarginSnapshotPanel, type AIMarginSnapshot } from '@/components/admin/AIMarginSnapshotPanel';
 import { AdminMetricCard } from '@/components/admin/AdminMetricCard';
 
 // =============================================================================
@@ -49,6 +50,8 @@ interface FinanceMetrics {
     percentage: number;
   }[];
 
+  aiMarginSnapshot: AIMarginSnapshot;
+
   revenueByPlan: {
     plan: string;
     users: number;
@@ -58,20 +61,20 @@ interface FinanceMetrics {
 
   recentTransactions: {
     id: string;
-    type: 'subscription' | 'usage' | 'refund' | 'credit';
+    type: 'revenue' | 'cost' | 'refund';
     amount: number;
-    userId: string;
-    userEmail: string;
+    userEmail?: string;
     description: string;
-    createdAt: string;
+    timestamp: string;
+    createdAt?: string;
   }[];
 
   alerts: {
-    type: 'warning' | 'critical';
+    type: 'warning' | 'critical' | 'info';
     message: string;
-    metric: string;
-    value: number;
-    threshold: number;
+    metric?: string;
+    value?: number;
+    threshold?: number;
   }[];
 }
 
@@ -200,17 +203,26 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
             className={`p-3 rounded-lg border ${
               alert.type === 'critical'
                 ? 'bg-[var(--aethel-error)]/10 border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'
+                : alert.type === 'info'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
                 : 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
             }`}
           >
             <p className={`text-sm ${
-              alert.type === 'critical' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-warning)]'
+              alert.type === 'critical'
+                ? 'text-[var(--aethel-error)]'
+                : alert.type === 'info'
+                  ? 'text-[var(--aethel-info)]'
+                  : 'text-[var(--aethel-warning)]'
             }`}>
               {alert.message}
             </p>
-            <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
-              {alert.metric}: {alert.value} (limite: {alert.threshold})
-            </p>
+            {(alert.metric || alert.value !== undefined || alert.threshold !== undefined) && (
+              <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
+                {alert.metric ?? 'value'}: {alert.value ?? '-'}
+                {alert.threshold !== undefined ? ` (limite: ${alert.threshold})` : ''}
+              </p>
+            )}
           </div>
         ))}
       </div>
@@ -220,17 +232,15 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
 
 function TransactionsTable({ transactions }: { transactions: FinanceMetrics['recentTransactions'] }) {
   const typeColors: Record<string, string> = {
-    subscription: 'text-[var(--aethel-success)]',
-    usage: 'text-[var(--aethel-primary-light)]',
+    revenue: 'text-[var(--aethel-success)]',
+    cost: 'text-[var(--aethel-warning)]',
     refund: 'text-[var(--aethel-error)]',
-    credit: 'text-[var(--aethel-info)]'
   };
 
   const typeLabels: Record<string, string> = {
-    subscription: 'assinatura',
-    usage: 'uso',
+    revenue: 'receita',
+    cost: 'custo',
     refund: 'reembolso',
-    credit: 'crédito',
   };
 
   return (
@@ -266,18 +276,18 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
                   </span>
                 </td>
                 <td className="px-4 py-2">
-                  <span className="text-[var(--aethel-text-secondary)]">{tx.userEmail}</span>
+                  <span className="text-[var(--aethel-text-secondary)]">{tx.userEmail ?? 'system'}</span>
                 </td>
                 <td className="px-4 py-2">
                   <span className="text-[var(--aethel-text-tertiary)]">{tx.description}</span>
                 </td>
                 <td className="px-4 py-2 text-right">
-                  <span className={tx.type === 'refund' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-success)]'}>
-                    {tx.type === 'refund' ? '-' : '+'}${Math.abs(tx.amount).toFixed(2)}
+                  <span className={tx.type === 'cost' || tx.type === 'refund' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-success)]'}>
+                    {tx.type === 'cost' || tx.type === 'refund' ? '-' : '+'}${Math.abs(tx.amount).toFixed(2)}
                   </span>
                 </td>
                 <td className="px-4 py-2 text-right text-[var(--aethel-text-tertiary)]">
-                  {new Date(tx.createdAt).toLocaleTimeString()}
+                  {new Date(tx.createdAt ?? tx.timestamp).toLocaleTimeString()}
                 </td>
               </tr>
             ))}
@@ -446,6 +456,8 @@ export default function FinanceDashboard() {
           subValue={`Churn: ${metrics.churnRate.toFixed(1)}%`}
         />
       </div>
+
+      <AIMarginSnapshotPanel snapshot={metrics.aiMarginSnapshot} />
 
       {/* Unit Economics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -167,6 +167,10 @@ const economicsTransparencyConfigured =
   exists('tools/check-economics-transparency-gate.mjs') &&
   exists('docs/master/100_ECONOMICS_TRANSPARENCY_GATE_2026-05-03.md') &&
   packageJson.includes('qa:economics-transparency');
+const aiMarginGovernanceConfigured =
+  exists('tools/check-ai-margin-gate.mjs') &&
+  exists('docs/master/101_AI_MARGIN_GOVERNANCE_GATE_2026-05-03.md') &&
+  packageJson.includes('qa:ai-margin-governance');
 
 const metrics = [
   { id: 'console_calls', label: 'console.log/info/debug in app code', value: consoleCalls.total, target: 50, direction: 'lte' },
@@ -188,6 +192,7 @@ const metrics = [
   { id: 'product_funnel_telemetry', label: 'Product funnel telemetry gate configured', value: productFunnelTelemetryConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'commercial_access', label: 'Commercial access/free trial gate configured', value: commercialAccessConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'economics_transparency', label: 'Chat economics transparency gate configured', value: economicsTransparencyConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'ai_margin_governance', label: 'AI margin governance gate configured', value: aiMarginGovernanceConfigured ? 1 : 0, target: 1, direction: 'eq' },
 ].map((metric) => ({
   ...metric,
   status: statusFor(metric.value, metric.target, metric.direction),
