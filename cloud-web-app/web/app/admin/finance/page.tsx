@@ -17,6 +17,7 @@ import {
   Bot,
   PieChart
 } from 'lucide-react';
+import { AIMarginDrilldownPanel, type AIMarginDrilldown } from '@/components/admin/AIMarginDrilldownPanel';
 import { AIMarginSnapshotPanel, type AIMarginSnapshot } from '@/components/admin/AIMarginSnapshotPanel';
 import { AdminMetricCard } from '@/components/admin/AdminMetricCard';
 
@@ -51,6 +52,7 @@ interface FinanceMetrics {
   }[];
 
   aiMarginSnapshot: AIMarginSnapshot;
+  aiMarginDrilldown: AIMarginDrilldown;
 
   revenueByPlan: {
     plan: string;
@@ -458,6 +460,7 @@ export default function FinanceDashboard() {
       </div>
 
       <AIMarginSnapshotPanel snapshot={metrics.aiMarginSnapshot} />
+      <AIMarginDrilldownPanel drilldown={metrics.aiMarginDrilldown} />
 
       {/* Unit Economics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

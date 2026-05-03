@@ -21,6 +21,7 @@ const prismaMocks = vi.hoisted(() => ({
     payment: {
       aggregate: vi.fn(),
       findMany: vi.fn(),
+      groupBy: vi.fn(),
     },
     user: {
       groupBy: vi.fn(),
@@ -64,18 +65,24 @@ function seedFinanceMocks({ revenueCents = 14_000 } = {}) {
       createdAt: now,
     },
   ])
+  prismaMocks.prisma.payment.groupBy.mockResolvedValue([
+    { userId: 'user-1', _sum: { amount: revenueCents } },
+  ])
   prismaMocks.prisma.user.groupBy.mockResolvedValue([
     { plan: 'pro', _count: { _all: 2 } },
   ])
   prismaMocks.prisma.creditLedgerEntry.findMany
     .mockResolvedValueOnce([
       {
+        userId: 'user-1',
         amount: -1_500_000,
         metadata: {
           model: 'openai/gpt-test',
+          projectId: 'project-1',
           inputTokens: 1_000_000,
           outputTokens: 500_000,
         },
+        user: { email: 'founder@aethel.dev', plan: 'pro' },
         createdAt: now,
       },
     ])
@@ -116,11 +123,24 @@ describe('api/admin/finance/metrics route', () => {
     expect(payload.aiMarginSnapshot.aiCostRatio).toBeCloseTo(5, 5)
     expect(payload.aiMarginSnapshot.projectedMonthlyAiCost).toBeCloseTo(30, 5)
     expect(payload.aiMarginSnapshot.status).toBe('healthy')
+    expect(payload.aiMarginDrilldown.topUsers[0]).toMatchObject({
+      userId: 'user-1',
+      userEmail: 'founder@aethel.dev',
+      plan: 'pro',
+      calls: 1,
+      status: 'healthy',
+    })
+    expect(payload.aiMarginDrilldown.topUsers[0].marginAfterAi).toBeCloseTo(133, 5)
+    expect(payload.aiMarginDrilldown.topWorkspaces[0]).toMatchObject({
+      workspaceId: 'project-1',
+      topModel: 'openai/gpt-test',
+    })
   })
 
   it('raises a risk snapshot when AI cost is above period revenue', async () => {
     prismaMocks.prisma.payment.aggregate.mockReset()
     prismaMocks.prisma.payment.findMany.mockReset()
+    prismaMocks.prisma.payment.groupBy.mockReset()
     prismaMocks.prisma.user.groupBy.mockReset()
     prismaMocks.prisma.creditLedgerEntry.findMany.mockReset()
     seedFinanceMocks({ revenueCents: 100 })

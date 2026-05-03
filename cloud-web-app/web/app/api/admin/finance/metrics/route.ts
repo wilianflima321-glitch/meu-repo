@@ -28,6 +28,7 @@ interface FinanceMetrics {
     percentage: number;
   }>;
   aiMarginSnapshot: AIMarginSnapshot;
+  aiMarginDrilldown: AIMarginDrilldown;
   revenueByPlan: Array<{
     plan: string;
     users: number;
@@ -61,6 +62,31 @@ interface AIMarginSnapshot {
   highRiskModelCount: number;
   topRiskModel: string | null;
   status: 'healthy' | 'watch' | 'risk';
+}
+
+interface AIMarginDrilldown {
+  topUsers: Array<{
+    userId: string;
+    userEmail: string;
+    plan: string;
+    revenue: number;
+    cost: number;
+    marginAfterAi: number;
+    aiCostRatio: number;
+    calls: number;
+    tokens: number;
+    percentage: number;
+    status: AIMarginSnapshot['status'];
+  }>;
+  topWorkspaces: Array<{
+    workspaceId: string;
+    cost: number;
+    calls: number;
+    tokens: number;
+    percentage: number;
+    topModel: string | null;
+    status: AIMarginSnapshot['status'];
+  }>;
 }
 
 type LedgerMetadata = Record<string, unknown>;
@@ -232,6 +258,116 @@ function buildAiMarginSnapshot(params: {
   };
 }
 
+function statusForMargin(revenue: number, cost: number): AIMarginSnapshot['status'] {
+  if (cost <= 0) return 'healthy';
+  if (revenue <= 0) return 'risk';
+  const ratio = (cost / revenue) * 100;
+  if (ratio > 80 || revenue - cost < 0) return 'risk';
+  if (ratio > 40) return 'watch';
+  return 'healthy';
+}
+
+function buildAiMarginDrilldown(params: {
+  aiUsage: Array<{
+    amount: number;
+    metadata: unknown;
+    userId: string;
+    user?: { email: string; plan: string } | null;
+  }>;
+  totalAICost: number;
+  revenueByUserId: Map<string, number>;
+}): AIMarginDrilldown {
+  const { aiUsage, totalAICost, revenueByUserId } = params;
+  const userMap = new Map<string, {
+    userId: string;
+    userEmail: string;
+    plan: string;
+    cost: number;
+    calls: number;
+    tokens: number;
+  }>();
+  const workspaceMap = new Map<string, {
+    workspaceId: string;
+    cost: number;
+    calls: number;
+    tokens: number;
+    models: Map<string, number>;
+  }>();
+
+  aiUsage.forEach((entry) => {
+    const metadata = metadataRecord(entry.metadata);
+    const calculated = calculateAiLedgerCost(entry);
+    const user = userMap.get(entry.userId) ?? {
+      userId: entry.userId,
+      userEmail: entry.user?.email ?? 'unknown',
+      plan: normalizePlan(entry.user?.plan ?? 'free'),
+      cost: 0,
+      calls: 0,
+      tokens: 0,
+    };
+    user.cost += calculated.costUsd;
+    user.calls += 1;
+    user.tokens += calculated.totalTokens;
+    userMap.set(entry.userId, user);
+
+    const workspaceId = stringFromMetadata(
+      metadata,
+      ['projectId', 'workspaceId', 'project_id', 'workspace_id'],
+      'unattributed',
+    );
+    const workspace = workspaceMap.get(workspaceId) ?? {
+      workspaceId,
+      cost: 0,
+      calls: 0,
+      tokens: 0,
+      models: new Map<string, number>(),
+    };
+    workspace.cost += calculated.costUsd;
+    workspace.calls += 1;
+    workspace.tokens += calculated.totalTokens;
+    workspace.models.set(calculated.model, (workspace.models.get(calculated.model) ?? 0) + calculated.costUsd);
+    workspaceMap.set(workspaceId, workspace);
+  });
+
+  const topUsers = Array.from(userMap.values())
+    .map((user) => {
+      const revenue = revenueByUserId.get(user.userId) ?? 0;
+      const marginAfterAi = revenue - user.cost;
+      const aiCostRatio = revenue > 0 ? (user.cost / revenue) * 100 : user.cost > 0 ? 100 : 0;
+      return {
+        ...user,
+        revenue,
+        marginAfterAi,
+        aiCostRatio,
+        percentage: totalAICost > 0 ? (user.cost / totalAICost) * 100 : 0,
+        status: statusForMargin(revenue, user.cost),
+      };
+    })
+    .sort((a, b) => b.cost - a.cost)
+    .slice(0, 5);
+
+  const topWorkspaces = Array.from(workspaceMap.values())
+    .map((workspace) => {
+      const sortedModels = Array.from(workspace.models.entries()).sort((a, b) => b[1] - a[1]);
+      const percentage = totalAICost > 0 ? (workspace.cost / totalAICost) * 100 : 0;
+      const status: AIMarginSnapshot['status'] =
+        percentage > 40 ? 'risk' : percentage > 20 || workspace.workspaceId === 'unattributed' ? 'watch' : 'healthy';
+      return {
+        workspaceId: workspace.workspaceId,
+        cost: workspace.cost,
+        calls: workspace.calls,
+        tokens: workspace.tokens,
+        percentage,
+        topModel: sortedModels[0]?.[0] ?? null,
+        status,
+      };
+    })
+    .sort((a, b) => b.cost - a.cost)
+    .slice(0, 5);
+
+  return { topUsers, topWorkspaces };
+}
+
 async function handler(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -304,8 +440,22 @@ async function handler(req: NextRequest) {
         amount: true,
         metadata: true,
         createdAt: true,
+        userId: true,
+        user: { select: { email: true, plan: true } },
       },
     });
+
+    const revenueByUserGroups = await prisma.payment.groupBy({
+      by: ['userId'],
+      where: {
+        status: 'succeeded',
+        createdAt: { gte: start, lte: end },
+      },
+      _sum: { amount: true },
+    });
+    const revenueByUserId = new Map(
+      revenueByUserGroups.map((group) => [group.userId, (group._sum.amount ?? 0) / 100]),
+    );
 
     const modelUsage = new Map<string, { cost: number; calls: number; tokens: number }>();
     let totalAICost = 0;
@@ -403,6 +553,11 @@ async function handler(req: NextRequest) {
       dailyAICost,
       aiCostBreakdown,
     });
+    const aiMarginDrilldown = buildAiMarginDrilldown({
+      aiUsage,
+      totalAICost,
+      revenueByUserId,
+    });
 
     const alerts: FinanceMetrics['alerts'] = [];
 
@@ -461,6 +616,7 @@ async function handler(req: NextRequest) {
       cac,
       aiCostBreakdown,
       aiMarginSnapshot,
+      aiMarginDrilldown,
       revenueByPlan,
       recentTransactions,
       alerts,

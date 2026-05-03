@@ -96,7 +96,7 @@ Do:
 - continue consolidating `AI -> diff -> review -> apply`,
 - keep evidence and economics near the work,
 - compress AI telemetry into operational rails.
-- keep `AIChatCostMeter` user-facing and `AIMarginSnapshotPanel` operator-facing so token spending is visible without polluting the main flow.
+- keep `AIChatCostMeter` user-facing and `AIMarginSnapshotPanel`/`AIMarginDrilldownPanel` operator-facing so token spending is visible without polluting the main flow.
 
 Do not:
 - grow a second generic chat product inside the Studio.

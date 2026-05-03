@@ -22,12 +22,15 @@ The admin finance dashboard must show, at a glance:
 - Projected monthly AI run-rate.
 - Top risk model and model concentration.
 - Health status: `healthy`, `watch`, or `risk`.
+- Top users by AI cost, including user revenue, AI cost, margin after AI, calls, tokens, and risk status.
+- Top workspaces by AI cost, including cost share, calls, tokens, top model, and unattributed spend risk.
 
 ## Files
 
 - `cloud-web-app/web/app/api/admin/finance/metrics/route.ts`
 - `cloud-web-app/web/app/admin/finance/page.tsx`
 - `cloud-web-app/web/components/admin/AIMarginSnapshotPanel.tsx`
+- `cloud-web-app/web/components/admin/AIMarginDrilldownPanel.tsx`
 - `cloud-web-app/web/__tests__/api/admin-finance-metrics-route.test.ts`
 - `tools/check-ai-margin-gate.mjs`
 - `tools/measure-product-quality.mjs`
@@ -39,6 +42,7 @@ The admin finance dashboard must show, at a glance:
 - Ledger metadata `costUSD` still takes precedence when provider cost is already persisted.
 - Unknown metadata is treated as `unknown`, not `any`.
 - Finance route errors use structured logging through `createComponentLogger`.
+- The drilldown maps AI ledger rows to users and workspaces without exposing a heavy table by default.
 
 ## Validation
 
@@ -59,7 +63,7 @@ npm --prefix cloud-web-app/web test -- __tests__/api/admin-finance-metrics-route
 
 ## Remaining Work
 
-- Add per-user margin drilldown for heavy users.
+- Add per-agent attribution inside each user/workspace drilldown.
 - Add model downgrade recommendations when a workspace crosses `watch` or `risk`.
 - Connect usage thresholds to plan entitlements and agent routing.
 - Add monthly cohort margin charts.
