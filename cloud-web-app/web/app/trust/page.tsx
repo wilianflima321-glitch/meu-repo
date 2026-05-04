@@ -151,6 +151,13 @@ const resources: TrustResource[] = [
     href: '/status',
   },
   {
+    eyebrow: 'Reliability',
+    title: 'Reliability e incident response',
+    description:
+      'Sev 1-3, response targets, limites de uptime e handoff enterprise sem SLA inventado.',
+    href: '/reliability',
+  },
+  {
     eyebrow: 'Disclosure',
     title: 'Security policy',
     description:
@@ -206,6 +213,7 @@ const faqs: TrustFaq[] = [
 const actions: TrustAction[] = [
   { label: 'Ver seguranca', href: '/security', tone: 'primary' },
   { label: 'Ver status', href: '/status' },
+  { label: 'Reliability', href: '/reliability' },
   { label: 'Security policy', href: '/security-policy' },
   { label: 'Compliance', href: '/compliance' },
   { label: 'Falar com vendas', href: '/contact-sales' },

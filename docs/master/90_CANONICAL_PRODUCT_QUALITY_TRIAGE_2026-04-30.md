@@ -253,6 +253,9 @@ The V12 buyer/trust critique is now also protected by a public route and an exec
 ## 2026-05-04 Security Disclosure Safe Harbor Gate
 The responsible-disclosure gap is now more than a footer link. `/security-policy` names `safe harbor`, good-faith coordinated testing, in-scope surfaces, out-of-scope destructive behavior, AI/agent-specific risk, and response targets that are explicitly not contractual SLA or formal bounty promises. `/security-policy`, `/security-acknowledgments`, and `/trust` now link as one public security-review journey. `tools/check-security-disclosure-gate.mjs` protects that contract so the product can accept vulnerability reports without inviting unsafe testing or fake bug-bounty maturity.
 
+## 2026-05-04 Reliability Incident Response Gate
+The V12 reliability/SLO/SLA critique is now protected by a public route and an executable gate. `/reliability` explains public status checks, incident response, Sev 1/Sev 2/Sev 3 grammar, response targets, and enterprise handoff while explicitly stating that no rolling uptime and public incident history are still open gaps. `tools/check-reliability-incident-gate.mjs` prevents fake uptime percentages, five-nines language, guaranteed uptime, hardcoded colors, console usage, and sitemap/footer/trust drift.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
@@ -267,6 +270,7 @@ As of this checkpoint:
 - `npm run qa:user-audit-log` is green,
 - `npm run qa:public-trust-center` is green,
 - `npm run qa:security-disclosure` is green,
+- `npm run qa:reliability-incident` is green,
 - `npm run qa:canonical-doc-alignment` is green,
 - the five public UX contracts for mission intake, Studio handoff, compare trust, pricing readiness, and local continuity pass in Chromium,
 - `git diff --check` is green when the repo is validated cleanly.
@@ -426,6 +430,7 @@ This is the shortest honest list of important open gaps.
 - keep user-facing audit activity redacted, scoped, and visible in security settings.
 - keep the public trust center factual, linked, and free of fake certification or SLO/SLA claims.
 - keep responsible disclosure safe-harbor language explicit and non-destructive before inviting security researchers.
+- keep reliability and incident response factual through `/reliability`, without fake uptime, five-nines language, or contractual SLA claims before evidence and contract.
 
 ### Priority 2
 - viewport dominance,
