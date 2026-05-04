@@ -46,6 +46,7 @@ Do:
 - keep `npm run qa:canonical-doc-alignment` green,
 - run `npm run qa:product-quality-progress` before accepting broad audit claims,
 - keep `npm run qa:auth-email` green before treating signup, verification, or password reset as production-ready,
+- keep `npm run qa:user-audit-log` green before claiming account activity or trust-center readiness,
 - keep `git diff --check` clean,
 - continue isolating build/prerender blockers honestly.
 
@@ -103,6 +104,7 @@ Do not:
 - grow a second generic chat product inside the Studio.
 - show revenue dashboards without AI margin context.
 - let registration succeed as a mock-only email flow without stored verification token, welcome email, and verify-email handoff.
+- expose raw admin audit logs, unmasked IPs, or unfiltered metadata to regular users.
 
 ## P2 Checklist
 ### Buyer And Trust Continuity

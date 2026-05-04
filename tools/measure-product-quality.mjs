@@ -175,6 +175,11 @@ const authEmailConfigured =
   exists('tools/check-auth-email-gate.mjs') &&
   exists('cloud-web-app/web/__tests__/lib/email-system.test.ts') &&
   packageJson.includes('qa:auth-email');
+const userAuditLogConfigured =
+  exists('tools/check-user-audit-log-gate.mjs') &&
+  exists('docs/master/102_USER_TRUST_AUDIT_LOG_GATE_2026-05-03.md') &&
+  exists('cloud-web-app/web/app/api/me/audit-log/route.ts') &&
+  packageJson.includes('qa:user-audit-log');
 
 const metrics = [
   { id: 'console_calls', label: 'console.log/info/debug in app code', value: consoleCalls.total, target: 50, direction: 'lte' },
@@ -198,6 +203,7 @@ const metrics = [
   { id: 'economics_transparency', label: 'Chat economics transparency gate configured', value: economicsTransparencyConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'ai_margin_governance', label: 'AI margin governance gate configured', value: aiMarginGovernanceConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'auth_email', label: 'Auth email verification gate configured', value: authEmailConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'user_audit_log', label: 'User-facing audit log gate configured', value: userAuditLogConfigured ? 1 : 0, target: 1, direction: 'eq' },
 ].map((metric) => ({
   ...metric,
   status: statusFor(metric.value, metric.target, metric.direction),

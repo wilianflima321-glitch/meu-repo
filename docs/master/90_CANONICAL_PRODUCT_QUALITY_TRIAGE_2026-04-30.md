@@ -244,6 +244,9 @@ The V12 operator-side margin critique is now executable in admin finance. `/api/
 ## 2026-05-03 Email/auth transactional readiness
 The V12 email-risk critique is now partially executable instead of remaining a warning. Registration stores a hashed verification token, starts the factual 14-day Starter trial, sends both `welcome` and `verify_email` templates, and returns `emailVerificationRequired` so the client can guide the next step. The email runtime auto-selects Resend when `RESEND_API_KEY` is present, fails explicitly when a real provider lacks a key, and keeps auth/email routes on structured logger instead of direct console calls. `tools/check-auth-email-gate.mjs` protects this path so signup, verification, password reset, and the generic email API do not silently drift back into mock-only production behavior.
 
+## 2026-05-03 User trust audit log gate
+The V12 trust/audit-log critique is now visible to the final user, not only to admins. `/api/me/audit-log` returns account-scoped audit events for actions performed by the user, admin/system events targeting that user, and target-email matches. The response redacts admin identity, masks IP addresses, and exposes only allowlisted metadata. `UserAuditLogPanel` renders this inside the Settings security tab as a compact account activity surface, and `tools/check-user-audit-log-gate.mjs` protects the endpoint/UI/test/docs contract from becoming a raw admin log dump.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
@@ -255,6 +258,7 @@ As of this checkpoint:
 - `npm run qa:economics-transparency` is green,
 - `npm run qa:ai-margin-governance` is green,
 - `npm run qa:auth-email` is green,
+- `npm run qa:user-audit-log` is green,
 - `npm run qa:canonical-doc-alignment` is green,
 - the five public UX contracts for mission intake, Studio handoff, compare trust, pricing readiness, and local continuity pass in Chromium,
 - `git diff --check` is green when the repo is validated cleanly.
@@ -411,6 +415,7 @@ This is the shortest honest list of important open gaps.
 - keep commercial access truthful with Free plus a 14-day trial gate.
 - keep chat economics visible with a compact cost meter and billing portal truth.
 - keep registration email/verification factual through the auth email gate.
+- keep user-facing audit activity redacted, scoped, and visible in security settings.
 
 ### Priority 2
 - viewport dominance,

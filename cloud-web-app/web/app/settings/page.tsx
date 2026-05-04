@@ -5,6 +5,7 @@ import Link from 'next/link'
 import StudioLayout from '@/components/studio/StudioLayout'
 import SettingsUI, { SettingsProvider } from '@/components/settings/SettingsUI'
 import TwoFactorSecurityPanel from '@/components/settings/TwoFactorSecurityPanel'
+import UserAuditLogPanel from '@/components/settings/UserAuditLogPanel'
 
 type Tab = 'editor' | 'profile' | 'security' | 'billing' | 'api'
 
@@ -144,6 +145,7 @@ export default function SettingsPage() {
                 <div className="mt-4">
                   <TwoFactorSecurityPanel />
                 </div>
+                <UserAuditLogPanel />
               </div>
             )}
 
