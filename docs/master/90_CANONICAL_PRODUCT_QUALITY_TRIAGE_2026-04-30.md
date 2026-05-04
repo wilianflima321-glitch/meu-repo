@@ -256,6 +256,9 @@ The responsible-disclosure gap is now more than a footer link. `/security-policy
 ## 2026-05-04 Reliability Incident Response Gate
 The V12 reliability/SLO/SLA critique is now protected by a public route and an executable gate. `/reliability` explains public status checks, incident response, Sev 1/Sev 2/Sev 3 grammar, response targets, and enterprise handoff while explicitly stating that no rolling uptime and public incident history are still open gaps. `tools/check-reliability-incident-gate.mjs` prevents fake uptime percentages, five-nines language, guaranteed uptime, hardcoded colors, console usage, and sitemap/footer/trust drift.
 
+## 2026-05-04 AI Game/Film Production Contract
+The game/film ambition now has an executable anti-drift contract instead of another broad aspiration. `docs/master/106_AI_GAME_FILM_PRODUCTION_CONTRACT_2026-05-04.md` defines the end-to-end spine agents need: Mission Brief, Creative Bible, Technical Bible, Asset Graph, Scene/World Graph, Gameplay Graph, Shot/Film Graph, Validation Graph, Evidence Graph, and Release Graph. `tools/check-ai-game-film-production-contract.mjs` protects the rule that we improve existing anchors, keep game/film depth mode-specific, require license/provenance, playtest/render evidence, human approval, and avoid Unreal parity or autonomous AAA claims without proof.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
@@ -271,6 +274,7 @@ As of this checkpoint:
 - `npm run qa:public-trust-center` is green,
 - `npm run qa:security-disclosure` is green,
 - `npm run qa:reliability-incident` is green,
+- `npm run qa:ai-game-film-production` is green,
 - `npm run qa:canonical-doc-alignment` is green,
 - the five public UX contracts for mission intake, Studio handoff, compare trust, pricing readiness, and local continuity pass in Chromium,
 - `git diff --check` is green when the repo is validated cleanly.
@@ -431,6 +435,7 @@ This is the shortest honest list of important open gaps.
 - keep the public trust center factual, linked, and free of fake certification or SLO/SLA claims.
 - keep responsible disclosure safe-harbor language explicit and non-destructive before inviting security researchers.
 - keep reliability and incident response factual through `/reliability`, without fake uptime, five-nines language, or contractual SLA claims before evidence and contract.
+- keep game/film creation grounded in Project Brain, Mission Ledger, asset/scene/gameplay/shot/validation/evidence graphs, not generic chat or extra top-level UI.
 
 ### Priority 2
 - viewport dominance,

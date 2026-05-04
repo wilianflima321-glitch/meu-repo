@@ -50,6 +50,7 @@ Do:
 - keep `npm run qa:public-trust-center` green before claiming buyer/trust continuity,
 - keep `npm run qa:security-disclosure` green before inviting researchers or referencing responsible disclosure,
 - keep `npm run qa:reliability-incident` green before claiming reliability, incident-response, SLO, or SLA maturity,
+- keep `npm run qa:ai-game-film-production` green before claiming game/film agentic production maturity,
 - keep `git diff --check` clean,
 - continue isolating build/prerender blockers honestly.
 
@@ -58,6 +59,7 @@ Do not:
 - claim certifications, SLO/SLA guarantees, or uptime percentages that do not have live evidence.
 - imply a formal bug bounty, guaranteed reward, or broad safe harbor beyond the published policy.
 - claim fake uptime, five-nines, guaranteed uptime, or contractual SLA before production evidence and an enterprise agreement.
+- claim Unreal parity, autonomous AAA completion, or film-quality final output without asset provenance, validation graph evidence, playtests/renders, and human approval.
 
 ### Mojibake And Text Cleanliness
 Goal:
@@ -149,6 +151,7 @@ Do:
 - use triage to choose default surfaces,
 - keep one shared project model,
 - add validators and review grammar per domain.
+- preserve game/film production as mode-specific depth backed by Project Brain, Mission Ledger, Asset Graph, Scene Graph, Gameplay Graph, Shot Graph, Validation Graph, and Evidence Graph.
 
 Do not:
 - create separate navigation families for every domain.

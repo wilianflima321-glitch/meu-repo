@@ -195,6 +195,11 @@ const reliabilityIncidentConfigured =
   exists('docs/master/105_RELIABILITY_INCIDENT_RESPONSE_GATE_2026-05-04.md') &&
   exists('cloud-web-app/web/app/reliability/page.tsx') &&
   packageJson.includes('qa:reliability-incident');
+const aiGameFilmProductionConfigured =
+  exists('tools/check-ai-game-film-production-contract.mjs') &&
+  exists('docs/master/106_AI_GAME_FILM_PRODUCTION_CONTRACT_2026-05-04.md') &&
+  exists('cloud-web-app/web/__tests__/docs/ai-game-film-production-contract.test.ts') &&
+  packageJson.includes('qa:ai-game-film-production');
 
 const metrics = [
   { id: 'console_calls', label: 'console.log/info/debug in app code', value: consoleCalls.total, target: 50, direction: 'lte' },
@@ -222,6 +227,7 @@ const metrics = [
   { id: 'public_trust_center', label: 'Public trust center gate configured', value: publicTrustCenterConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'security_disclosure', label: 'Security disclosure safe harbor gate configured', value: securityDisclosureConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'reliability_incident', label: 'Reliability incident response gate configured', value: reliabilityIncidentConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'ai_game_film_production', label: 'AI game/film production contract gate configured', value: aiGameFilmProductionConfigured ? 1 : 0, target: 1, direction: 'eq' },
 ].map((metric) => ({
   ...metric,
   status: statusFor(metric.value, metric.target, metric.direction),
