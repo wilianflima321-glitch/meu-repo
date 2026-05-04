@@ -109,6 +109,7 @@ export interface Project {
   name: string
   type: 'code' | 'unreal' | 'web' | string
   status: 'active' | 'paused' | 'completed' | 'planning' | string
+  settings?: Record<string, unknown> | null
 }
 
 export const DEFAULT_SETTINGS: DashboardSettings = {

@@ -22,6 +22,9 @@ import {
 import { analyzeDependencyImpact, type DependencyImpactAnalysis } from '@/lib/server/dependency-impact-guard'
 import { findActiveFullAccessGrant, type FullAccessGrantRecord } from '@/lib/server/full-access-ledger'
 import { runQaGate } from '@/lib/server/qa-gate'
+import { loadAgentHandoffContext } from '@/lib/production/agent-handoff-context'
+import { evaluateAgentApplyScope } from '@/lib/production/agent-scope-enforcement'
+import { acquireAgentSurfaceLocks } from '@/lib/production/agent-surface-locks'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,6 +50,8 @@ type ApplyChangeInput = {
 
 type ApplyBody = ApplyChangeInput & {
   projectId?: string
+  agent?: string
+  enforceAgentScope?: boolean
   approvedHighRisk?: boolean
   changes?: ApplyChangeInput[]
   executionMode?: ApplyExecutionMode
@@ -61,6 +66,7 @@ type PreparedApplyChange = {
   validation: ChangeValidationResult
   projectImpact: DependencyImpactAnalysis
   approvalGrantId?: string
+  lastModified?: string
 }
 
 const HIGH_RISK_PATH_PATTERNS = [
@@ -319,6 +325,10 @@ async function buildPreparedChange(params: {
   }
 
   const currentContent = current.content
+  const lastModified = await fs
+    .stat(absolutePath)
+    .then((stat) => stat.mtime.toISOString())
+    .catch(() => undefined)
   const requestedOriginal = asRawString(params.requested.original)
   const nextDocument = asRawString(params.requested.fullDocument) || asRawString(params.requested.modified)
   if (!nextDocument.trim()) {
@@ -588,6 +598,7 @@ async function buildPreparedChange(params: {
       validation,
       projectImpact,
       approvalGrantId,
+      lastModified,
     },
   }
 }
@@ -631,6 +642,7 @@ export async function POST(request: NextRequest) {
     const projectId = getScopedProjectId(request, body as unknown as Record<string, unknown>)
     const defaultApproval = body.approvedHighRisk === true
     const executionMode = normalizeExecutionMode(body.executionMode)
+    const enforceAgentScope = body.enforceAgentScope === true || typeof body.agent === 'string' || requestedChanges.length > 1
     const fsRuntime = getFileSystemRuntime()
     let cachedFullAccessGrant: FullAccessGrantRecord | null | undefined
     const resolveFullAccessGrant = async () => {
@@ -656,6 +668,56 @@ export async function POST(request: NextRequest) {
       })
       if (!prepared.ok) return prepared.response
       preparedChanges.push(prepared.value)
+    }
+
+    const handoff = await loadAgentHandoffContext({
+      userId: user.userId,
+      projectId,
+      routeKind: 'inline-edit',
+      requestedAgent: body.agent,
+      promptText: requestedChanges.map((change) => `${change.filePath ?? ''}\n${change.language ?? ''}`).join('\n'),
+      filePath: preparedChanges[0]?.virtualPath,
+    })
+    const scopeDecision = evaluateAgentApplyScope({
+      packet: handoff.packet,
+      virtualPaths: preparedChanges.map((change) => change.virtualPath),
+      enforceAgentScope,
+      broadEdit: requestedChanges.length > 1,
+      pathModifiedAt: Object.fromEntries(
+        preparedChanges.map((change) => [change.virtualPath, change.lastModified])
+      ),
+    })
+    if (!scopeDecision.allowed) {
+      await appendChangeRunLedgerEvent({
+        eventType: 'apply_blocked',
+        capability: 'AI_CHANGE_APPLY',
+        userId: user.userId,
+        projectId,
+        filePath: preparedChanges[0]?.virtualPath || 'agent-scope',
+        outcome: 'blocked',
+        metadata: {
+          reason: scopeDecision.code,
+          runId,
+          runSource: RUN_SOURCE,
+          agent: handoff.agent,
+          ...scopeDecision.metadata,
+        },
+      }).catch(() => {})
+
+      return capabilityResponse({
+        error: scopeDecision.code,
+        message: scopeDecision.message,
+        status: scopeDecision.status,
+        capability: CAPABILITY,
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          runId,
+          runSource: RUN_SOURCE,
+          projectId,
+          agent: handoff.agent,
+          ...scopeDecision.metadata,
+        },
+      })
     }
 
     if (executionMode === 'sandbox') {
@@ -714,6 +776,52 @@ export async function POST(request: NextRequest) {
           runId,
           runSource: RUN_SOURCE,
           qaGate,
+        },
+      })
+    }
+
+    const shouldLockSurfaces = enforceAgentScope || requestedChanges.length > 1
+    const surfaceLockDecision = shouldLockSurfaces
+      ? acquireAgentSurfaceLocks({
+          projectId,
+          agent: handoff.agent,
+          ownerUserId: user.userId,
+          paths: preparedChanges.map((change) => change.virtualPath),
+          source: 'apply',
+          reason: 'AI_CHANGE_APPLY',
+          runId,
+        })
+      : null
+
+    if (surfaceLockDecision && !surfaceLockDecision.allowed) {
+      await appendChangeRunLedgerEvent({
+        eventType: 'apply_blocked',
+        capability: 'AI_CHANGE_APPLY',
+        userId: user.userId,
+        projectId,
+        filePath: preparedChanges[0]?.virtualPath || 'agent-surface-lock',
+        outcome: 'blocked',
+        metadata: {
+          reason: surfaceLockDecision.code,
+          runId,
+          runSource: RUN_SOURCE,
+          agent: handoff.agent,
+          ...surfaceLockDecision.metadata,
+        },
+      }).catch(() => {})
+
+      return capabilityResponse({
+        error: surfaceLockDecision.code,
+        message: surfaceLockDecision.message,
+        status: surfaceLockDecision.status,
+        capability: CAPABILITY,
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          runId,
+          runSource: RUN_SOURCE,
+          projectId,
+          agent: handoff.agent,
+          ...surfaceLockDecision.metadata,
         },
       })
     }
@@ -823,6 +931,7 @@ export async function POST(request: NextRequest) {
           dependencyGraphRisk: entry.prepared.projectImpact.risk,
           reverseDependents: entry.prepared.projectImpact.reverseDependents.length,
           fullAccessGrantId: entry.prepared.approvalGrantId,
+          surfaceLockId: surfaceLockDecision?.allowed ? surfaceLockDecision.lock.id : undefined,
         },
       }).catch(() => {})
     }
@@ -842,6 +951,13 @@ export async function POST(request: NextRequest) {
         changeCount: snapshots.length,
         changes: changeSummary,
         rollbackToken: snapshots.length === 1 ? snapshots[0].snapshot.token : undefined,
+        surfaceLock: surfaceLockDecision?.allowed
+          ? {
+              id: surfaceLockDecision.lock.id,
+              expiresAt: surfaceLockDecision.lock.expiresAt,
+              paths: surfaceLockDecision.lock.paths,
+            }
+          : undefined,
       },
     })
   } catch (error) {

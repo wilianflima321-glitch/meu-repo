@@ -863,6 +863,7 @@ async function handleAgentRequest(
       executionContext: {
         userId,
         projectId,
+        enforceAgentScope: Boolean(projectId),
       },
     });
 

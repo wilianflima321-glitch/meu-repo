@@ -1,5 +1,7 @@
 import type { Project } from './aethel-dashboard-model'
 import type { LocalRuntimeConnectionState } from '@/lib/device/local-runtime-bridge'
+import type { AgenticProductionState, ProductionReadinessSummary } from '@/lib/production/agentic-production-state'
+import { buildProductionReadinessSummary } from '@/lib/production/agentic-production-state'
 
 export type ProjectBrainStatus = 'ready' | 'attention' | 'blocked'
 
@@ -31,6 +33,8 @@ type BuildProjectBrainSnapshotInput = {
     connection: LocalRuntimeConnectionState
     executorLabel?: string | null
   }
+  productionState?: AgenticProductionState | null
+  productionPersisted?: boolean
 }
 
 const formatDomain = (project?: Project): string => {
@@ -47,6 +51,9 @@ const formatDomain = (project?: Project): string => {
       return 'Mixed workspace'
   }
 }
+
+const compactSignalValue = (value: string, maxLength = 34): string =>
+  value.length > maxLength ? `${value.slice(0, maxLength - 1).trim()}...` : value
 
 const resolveRuntimeStatus = (
   backendOnline: boolean,
@@ -88,13 +95,33 @@ export const buildDashboardProjectBrainSnapshot = ({
   walletReady,
   connectivityStatus,
   localRuntime,
+  productionState,
+  productionPersisted = false,
 }: BuildProjectBrainSnapshotInput): ProjectBrainSnapshot => {
+  const productionReadiness: ProductionReadinessSummary | null = productionState
+    ? buildProductionReadinessSummary(productionState)
+    : null
+  const productionGraphSignal: ProjectBrainSignal[] = productionReadiness
+    ? [
+        {
+          label: 'Graphs',
+          value: `${productionReadiness.readyGraphCount}/${productionReadiness.totalGraphCount}`,
+          status:
+            productionReadiness.blockedCount > 0
+              ? 'blocked'
+              : productionReadiness.readyGraphCount >= 3
+                ? 'ready'
+                : 'attention',
+        },
+      ]
+    : []
   const signals: ProjectBrainSignal[] = [
     {
       label: 'Mission',
-      value: primaryProject ? primaryProject.name : 'Needs goal',
+      value: compactSignalValue(productionState?.brain.objective || (primaryProject ? primaryProject.name : 'Needs goal')),
       status: primaryProject ? 'ready' : 'attention',
     },
+    ...productionGraphSignal,
     resolveRuntimeStatus(backendOnline, connectivityStatus, localRuntime),
     {
       label: 'AI',
@@ -120,17 +147,31 @@ export const buildDashboardProjectBrainSnapshot = ({
   const continuity: ProjectBrainSignal[] = [
     {
       label: 'Checkpoint',
-      value: primaryProject ? 'Ready' : 'After mission',
-      status: primaryProject ? 'ready' : 'attention',
+      value: productionPersisted ? 'Durable' : productionState ? 'Seed on save' : primaryProject ? 'Ready' : 'After mission',
+      status: productionPersisted ? 'ready' : productionState ? 'attention' : primaryProject ? 'ready' : 'attention',
     },
     {
       label: 'Evidence',
-      value: pendingApprovals > 0 ? 'Review queue' : primaryProject ? 'Collecting' : 'Attach later',
-      status: pendingApprovals > 0 ? 'attention' : primaryProject ? 'ready' : 'attention',
+      value:
+        pendingApprovals > 0
+          ? 'Review queue'
+          : productionReadiness
+            ? `${productionReadiness.evidenceCount} refs`
+            : primaryProject
+              ? 'Collecting'
+              : 'Attach later',
+      status:
+        pendingApprovals > 0
+          ? 'attention'
+          : productionReadiness && productionReadiness.evidenceCount > 0
+            ? 'ready'
+            : primaryProject
+              ? 'attention'
+              : 'attention',
     },
     {
       label: 'Permission',
-      value: 'Gated',
+      value: productionState?.runtimePolicy.requiresHumanApproval === false ? 'Approved lane' : 'Gated',
       status: 'ready',
     },
     {
@@ -160,7 +201,9 @@ export const buildDashboardProjectBrainSnapshot = ({
   const summary = primaryProject
     ? localRuntime?.connection === 'connected'
       ? 'Project Brain keeps mission, runtime, local-native handoff, approvals, budget, and trust state in one compact readout before the deep cockpit opens.'
-      : 'Project Brain keeps the current mission, runtime, approvals, budget, and trust state in one compact readout before the deep cockpit opens.'
+      : productionPersisted
+        ? 'Project Brain is durable project memory for mission, graphs, evidence, runtime, approvals, budget, and the next safe action.'
+        : 'Project Brain keeps the current mission, runtime, approvals, budget, and trust state in one compact readout before the deep cockpit opens.'
     : 'Project Brain will become the durable mission memory once the user chooses what Aethel should build, research, operate, or review.'
 
   return {

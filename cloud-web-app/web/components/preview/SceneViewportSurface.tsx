@@ -9,7 +9,13 @@ import { SceneViewportStage } from './SceneViewportStage';
 import { ViewportWorkbenchShell } from './ViewportWorkbenchShell';
 import { useSceneViewportSurfaceState } from './useSceneViewportSurfaceState';
 
-export default function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic' }) {
+export default function SceneViewportSurface({
+  renderMode,
+  projectId,
+}: {
+  renderMode: 'draft' | 'cinematic';
+  projectId?: string | null;
+}) {
   const viewportState = useSceneViewportSurfaceState();
   const {
     objects,
@@ -53,7 +59,7 @@ export default function SceneViewportSurface({ renderMode }: { renderMode: 'draf
         />
       }
       center={
-        <SceneViewportStage {...viewportState} renderMode={renderMode} />
+        <SceneViewportStage {...viewportState} renderMode={renderMode} projectId={projectId} />
       }
       right={
         <SceneViewportInspector

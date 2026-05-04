@@ -25,6 +25,16 @@ describe('AI game/film production contract', () => {
     expect(contract).toContain('Evidence Graph')
   })
 
+  it('requires repository cartography before GB-scale agent work', () => {
+    expect(contract).toContain('Repository Cartography')
+    expect(contract).toContain('GB-scale')
+    expect(contract).toContain('huggingface-hub')
+    expect(contract).toContain('external-mirror')
+    expect(contract).toContain('mustReadFirst')
+    expect(contract).toContain('doNotInvent')
+    expect(contract).toContain('agentHandoffs')
+  })
+
   it('keeps game and film depth mode-specific instead of adding top-level clutter', () => {
     expect(contract).toContain('No new top-level interface')
     expect(contract).toContain('Web Light')

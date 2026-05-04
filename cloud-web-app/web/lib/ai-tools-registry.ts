@@ -12,11 +12,16 @@
 
 import { prisma } from '@/lib/db';
 import { assertProjectOwnership } from '@/lib/copilot/project-resolver';
+import { loadAgentHandoffContext } from '@/lib/production/agent-handoff-context';
+import { evaluateAgentApplyScope } from '@/lib/production/agent-scope-enforcement';
+import { acquireAgentSurfaceLocks } from '@/lib/production/agent-surface-locks';
 import type { Prisma } from '@prisma/client';
 
 type ToolExecutionContext = {
   userId: string;
   projectId?: string;
+  agent?: string;
+  enforceAgentScope?: boolean;
 };
 
 function getContext(params: Record<string, unknown>): ToolExecutionContext {
@@ -27,10 +32,12 @@ function getContext(params: Record<string, unknown>): ToolExecutionContext {
   const contextRecord = ctx as Record<string, unknown>;
   const userId = String(contextRecord.userId || '').trim();
   const projectId = typeof contextRecord.projectId === 'string' ? contextRecord.projectId.trim() : undefined;
+  const agent = typeof contextRecord.agent === 'string' ? contextRecord.agent.trim() : undefined;
+  const enforceAgentScope = contextRecord.enforceAgentScope === true;
   if (!userId) {
     throw Object.assign(new Error('MISSING_USER'), { code: 'MISSING_USER' });
   }
-  return { userId, projectId };
+  return { userId, projectId, agent, enforceAgentScope };
 }
 
 function getStringParam(params: Record<string, unknown>, key: string, fallback = ''): string {
@@ -78,6 +85,140 @@ function clampContent(content: string, maxChars: number): string {
   const s = String(content ?? '');
   if (s.length <= maxChars) return s;
   return s.slice(0, maxChars);
+}
+
+function shouldEnforceAgentScope(params: Record<string, unknown>, context: ToolExecutionContext): boolean {
+  return params.__aethelAgentScope === true || params.enforceAgentScope === true || context.enforceAgentScope === true;
+}
+
+function requestedAgentForTool(params: Record<string, unknown>, context: ToolExecutionContext): string | undefined {
+  if (typeof params.__aethelAgent === 'string' && params.__aethelAgent.trim()) {
+    return params.__aethelAgent.trim();
+  }
+  if (typeof params.agent === 'string' && params.agent.trim()) {
+    return params.agent.trim();
+  }
+  return context.agent;
+}
+
+function pathsForScopedTool(toolName: string, params: Record<string, unknown>): string[] {
+  if (toolName === 'create_file' || toolName === 'edit_file') {
+    const path = getStringParam(params, 'path').trim();
+    return path ? [path] : [];
+  }
+  return [];
+}
+
+async function loadPathModifiedAt(projectId: string, paths: string[]): Promise<Record<string, Date>> {
+  const entries = await Promise.all(
+    paths.map(async (path) => {
+      const normalized = normalizePath(path);
+      const file = await prisma.file.findFirst({
+        where: { projectId, OR: [{ path: normalized }, { path: normalized.replace(/^\//, '') }] },
+        select: { updatedAt: true },
+      });
+      return file?.updatedAt ? [normalized, file.updatedAt] as const : null;
+    })
+  );
+
+  return entries.reduce((acc, entry) => {
+    if (entry) {
+      acc[entry[0]] = entry[1];
+    }
+    return acc;
+  }, {} as Record<string, Date>);
+}
+
+async function enforceAgentToolScope(
+  toolName: string,
+  params: Record<string, unknown>
+): Promise<ToolResult | null> {
+  const paths = pathsForScopedTool(toolName, params);
+  if (paths.length === 0) return null;
+
+  const context = getContext(params);
+  if (!shouldEnforceAgentScope(params, context)) return null;
+
+  if (!context.projectId) {
+    return {
+      success: false,
+      error: 'AGENT_SCOPE_PROJECT_REQUIRED',
+      data: {
+        message: 'Agent-scoped tool execution requires projectId in __aethelContext.',
+        toolName,
+        paths,
+      },
+    };
+  }
+
+  const agent = requestedAgentForTool(params, context);
+  const pathModifiedAt = await loadPathModifiedAt(context.projectId, paths);
+  const handoff = await loadAgentHandoffContext({
+    userId: context.userId,
+    projectId: context.projectId,
+    routeKind: 'inline-edit',
+    requestedAgent: agent,
+    promptText: `${toolName}\n${paths.join('\n')}`,
+    filePath: paths[0],
+  });
+  const decision = evaluateAgentApplyScope({
+    packet: handoff.packet,
+    virtualPaths: paths,
+    enforceAgentScope: true,
+    broadEdit: paths.length > 1,
+    pathModifiedAt,
+  });
+
+  if (decision.allowed) {
+    const lockDecision = acquireAgentSurfaceLocks({
+      projectId: context.projectId,
+      agent: handoff.agent,
+      ownerUserId: context.userId,
+      paths,
+      source: 'tool',
+      reason: toolName,
+    });
+
+    if (lockDecision.allowed) return null;
+
+    await audit(context.userId, 'ai_tool.surface_locked', context.projectId, {
+      toolName,
+      paths,
+      reason: lockDecision.code,
+      metadata: lockDecision.metadata,
+    });
+
+    return {
+      success: false,
+      error: lockDecision.code,
+      data: {
+        message: lockDecision.message,
+        status: lockDecision.status,
+        toolName,
+        paths,
+        metadata: lockDecision.metadata,
+      },
+    };
+  }
+
+  await audit(context.userId, 'ai_tool.scope_blocked', context.projectId, {
+    toolName,
+    paths,
+    reason: decision.code,
+    metadata: decision.metadata,
+  });
+
+  return {
+    success: false,
+    error: decision.code,
+    data: {
+      message: decision.message,
+      status: decision.status,
+      toolName,
+      paths,
+      metadata: decision.metadata,
+    },
+  };
 }
 
 async function audit(userId: string | null, action: string, resource?: string, metadata?: unknown): Promise<void> {
@@ -183,6 +324,9 @@ class AIToolsRegistry {
           return { success: false, error: `Missing required parameter: ${param.name}` };
         }
       }
+
+      const scopeBlock = await enforceAgentToolScope(name, params);
+      if (scopeBlock) return scopeBlock;
 
       return await tool.execute(params);
     } catch (error) {

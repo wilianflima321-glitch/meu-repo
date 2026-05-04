@@ -102,7 +102,7 @@ export function WorkbenchPreviewPane({
           />
         ) : null}
         {previewMode === 'console' && <ConsoleIntegration />}
-        {previewMode === 'viewport3d' && <CanonicalPreviewSurface variant="scene" renderMode="draft" />}
+        {previewMode === 'viewport3d' && <CanonicalPreviewSurface variant="scene" renderMode="draft" projectId={runtimeSurfaceProps.projectId} />}
         {previewMode === 'canvas' && <CanonicalPreviewSurface variant="canvas" renderMode="draft" />}
         {(previewMode === 'runtime' || previewMode === 'device') && (
           <WorkbenchPreviewRuntimeSurface

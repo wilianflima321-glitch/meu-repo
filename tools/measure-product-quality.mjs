@@ -198,8 +198,28 @@ const reliabilityIncidentConfigured =
 const aiGameFilmProductionConfigured =
   exists('tools/check-ai-game-film-production-contract.mjs') &&
   exists('docs/master/106_AI_GAME_FILM_PRODUCTION_CONTRACT_2026-05-04.md') &&
+  exists('cloud-web-app/web/lib/production/agentic-production-state.ts') &&
+  exists('cloud-web-app/web/lib/production/repository-cartography.ts') &&
+  exists('cloud-web-app/web/app/api/projects/[id]/production-state/route.ts') &&
+  exists('cloud-web-app/web/__tests__/production/agentic-production-state.test.ts') &&
+  exists('cloud-web-app/web/__tests__/production/repository-cartography.test.ts') &&
   exists('cloud-web-app/web/__tests__/docs/ai-game-film-production-contract.test.ts') &&
   packageJson.includes('qa:ai-game-film-production');
+const repositoryCartographyConfigured =
+  exists('cloud-web-app/web/lib/production/repository-cartography.ts') &&
+  exists('cloud-web-app/web/__tests__/production/repository-cartography.test.ts') &&
+  exists('tools/check-ai-game-film-production-contract.mjs');
+const bestInMarketBenchmarkConfigured =
+  exists('tools/check-best-in-market-benchmark.mjs') &&
+  exists('docs/master/107_AETHEL_BEST_IN_MARKET_BENCHMARK_2026-05-04.md') &&
+  exists('cloud-web-app/web/__tests__/docs/best-in-market-benchmark.test.ts') &&
+  packageJson.includes('qa:best-in-market-benchmark');
+const linearBestInMarketBacklogConfigured =
+  exists('tools/check-linear-best-in-market-backlog.mjs') &&
+  exists('docs/master/linear/AETHEL_BEST_IN_MARKET_2026_2027_BACKLOG.linear.json') &&
+  exists('docs/master/linear/AETHEL_BEST_IN_MARKET_2026_2027_LINEAR_BACKLOG.md') &&
+  exists('cloud-web-app/web/__tests__/docs/linear-best-in-market-backlog.test.ts') &&
+  packageJson.includes('qa:linear-best-in-market-backlog');
 
 const metrics = [
   { id: 'console_calls', label: 'console.log/info/debug in app code', value: consoleCalls.total, target: 50, direction: 'lte' },
@@ -228,6 +248,9 @@ const metrics = [
   { id: 'security_disclosure', label: 'Security disclosure safe harbor gate configured', value: securityDisclosureConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'reliability_incident', label: 'Reliability incident response gate configured', value: reliabilityIncidentConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'ai_game_film_production', label: 'AI game/film production contract gate configured', value: aiGameFilmProductionConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'repository_cartography', label: 'Repository cartography for giant AI context configured', value: repositoryCartographyConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'best_in_market_benchmark', label: 'Best-in-market benchmark V14 gate configured', value: bestInMarketBenchmarkConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'linear_best_in_market_backlog', label: 'Linear best-in-market backlog export configured', value: linearBestInMarketBacklogConfigured ? 1 : 0, target: 1, direction: 'eq' },
 ].map((metric) => ({
   ...metric,
   status: statusFor(metric.value, metric.target, metric.direction),

@@ -21,6 +21,9 @@ These are real anchors, not invented surfaces:
 - `cloud-web-app/web/lib/server/asset-quality.ts`
 - `cloud-web-app/web/lib/server/asset-source-policy.ts`
 - `cloud-web-app/web/lib/device/runtime-execution-router.ts`
+- `cloud-web-app/web/lib/production/agentic-production-state.ts`
+- `cloud-web-app/web/lib/production/repository-cartography.ts`
+- `cloud-web-app/web/app/api/projects/[id]/production-state/route.ts`
 - `cloud-web-app/web/components/dashboard/DashboardProjectBrainCard.tsx`
 - `cloud-web-app/web/components/dashboard/DashboardMissionLedgerCard.tsx`
 
@@ -81,6 +84,23 @@ Every serious game/film mission should become these artifacts before autonomous 
 
 10. Release Graph
 - Export target, package/cook/build rules, render queue, deploy/distribution, changelog, known issues, rollback, and support plan.
+
+## Repository Cartography For Giant Context
+AI agents cannot safely work in GB-scale repos, asset packs, scenes, films, and apps by reading a chat transcript or a random folder sample.
+
+Before deep autonomous work, Aethel must build a repository/project cartography manifest that records:
+- file and asset surfaces by domain: app code, API, engine code, game scene, film shot, asset, audio, video, story doc, tests, config, and infra,
+- source kind: local workspace, git, GitHub, `huggingface-hub`, S3, marketplace, user upload, or browser export,
+- context strategy: `direct-read`, `summarize-first`, `index-only`, `external-mirror`, or `manual-review`,
+- duplicate groups by hash or name/size,
+- license/provenance gaps,
+- `mustReadFirst` files that agents load before planning,
+- `doNotInvent` guardrails that prevent demo/prototype drift,
+- `agentHandoffs` so Producer, Research, Asset Librarian, Gameplay, Cinematic, QA, Performance, and Release agents know their ownership boundaries.
+
+Large external sources must use `external-mirror` metadata first. The point is to inspect folder trees, hashes, licenses, readmes, manifests, sizes, thumbnails, and summaries before downloading or editing multi-GB payloads. This applies to Hugging Face datasets/repos, GitHub monorepos, S3 buckets, marketplace packs, and user-uploaded asset libraries.
+
+`cloud-web-app/web/lib/production/repository-cartography.ts` is the first typed implementation of this spine. It merges cartography results back into Project Brain, Mission Ledger, Asset Graph, Scene/World Graph, Gameplay Graph, Shot/Film Graph, Validation Graph, and Evidence Graph without adding a new top-level UI family.
 
 ## AI Agent Roles
 Aethel should not let one generic agent do everything. Multi-agent work needs ownership boundaries:
@@ -146,12 +166,15 @@ P0: Keep this contract executable and anti-drift.
 
 P1: Turn Project Brain into durable production memory.
 - Add persistent project brain records/files for creative bible, technical bible, graphs, constraints, and accepted tradeoffs.
+- 2026-05-04 update: Project Brain now has a durable v1 state shape stored under `Project.settings.aethelProductionState` through `cloud-web-app/web/lib/production/agentic-production-state.ts`.
 
 P2: Turn Mission Ledger into durable production state.
 - Mission states: planned, researching, sourcing_assets, building, validating, needs_approval, blocked, complete, failed.
+- 2026-05-04 update: Mission Ledger entries are part of the same durable production state and preserve owner agent, acceptance checks, evidence refs, rollback plan, cost estimate, and next action.
 
 P3: Asset Graph MVP.
 - Extend current asset quality/source policy with license, source URL, creator, dependency, optimization, thumbnail, and accepted-use metadata.
+- 2026-05-04 update: the first durable graph spine now includes Asset, Scene/World, Gameplay, Shot/Film, Validation, Evidence, and Release graphs with owner agents, evidence refs, blockers, and readiness summary.
 
 P4: Game validation MVP.
 - Objective progression, collision sanity, camera/input smoke, ability/cooldown checks, soft-lock scan, bot playtest transcript, screenshot/video evidence.
@@ -161,6 +184,11 @@ P5: Film validation MVP.
 
 P6: Runtime placement enforcement.
 - Large asset import, render queue, browser operator, and playtest jobs must respect local/cloud/held routing.
+- 2026-05-04 update: the production state includes runtime policy for preferred target, fallback target, local acceleration mode, human approval, and heavy-job concurrency. The API lives at `/api/projects/[id]/production-state`.
+
+P7: Repository Cartography enforcement.
+- Generate a repository/project cartography manifest before agents touch giant repos, asset packs, scenes, timelines, or external sources.
+- 2026-05-04 update: `repository-cartography.ts` now produces `mustReadFirst`, `doNotInvent`, duplicate detection, license/provenance gaps, `external-mirror` routing for GB-scale sources, and `agentHandoffs`, then merges that evidence into durable production state.
 
 ## Red Lines
 - Do not add a dense Unreal cockpit to first-time Web Light.

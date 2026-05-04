@@ -17,6 +17,10 @@ import { AI_INLINE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-co
 import { applyProjectRulesToMessages, loadProjectRulesContext } from '@/lib/server/project-rules'
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
 import { createComponentLogger } from '@/lib/observability/logger'
+import {
+  applyAgentHandoffContextToMessages,
+  loadAgentHandoffContext,
+} from '@/lib/production/agent-handoff-context'
 
 const logger = createComponentLogger('api.ai.complete')
 
@@ -45,6 +49,7 @@ type AICompleteRequestBody = {
   provider?: string
   model?: string
   projectId?: string
+  agent?: string
   maxTokens?: number
   temperature?: number
 }
@@ -223,13 +228,22 @@ export async function POST(req: NextRequest) {
     }
 
     const projectRulesContext = await loadProjectRulesContext({ userId: user.userId, projectId })
-    const messages: Message[] = applyProjectRulesToMessages<Message>(
+    const baseMessages: Message[] = applyProjectRulesToMessages<Message>(
       [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: prompt },
       ],
       projectRulesContext
     )
+    const agentHandoff = await loadAgentHandoffContext({
+      userId: user.userId,
+      projectId,
+      routeKind: 'completion',
+      requestedAgent: readString(body, 'agent'),
+      promptText: prompt,
+      filePath: readString(body, 'filepath'),
+    })
+    const messages = applyAgentHandoffContextToMessages(baseMessages, agentHandoff.context)
 
     const response = await aiService.chat({
       messages,

@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useState } from 'react'
 import { ArrowRight, CheckCircle2, Clock3, Coins, Layers3, ShieldCheck, Sparkles } from 'lucide-react'
 import { APIError } from '@/lib/api'
 import type { ConnectivityResponse, WalletSummary } from '@/lib/api'
@@ -11,8 +12,13 @@ import { useRuntimeCapabilityProfile } from '@/hooks/useRuntimeCapabilityProfile
 import type { Project } from './aethel-dashboard-model'
 import { DashboardMissionLedgerCard } from './DashboardMissionLedgerCard'
 import { DashboardProjectBrainCard } from './DashboardProjectBrainCard'
+import { DashboardRepositoryCartographyCard } from './DashboardRepositoryCartographyCard'
 import { buildDashboardMissionLedgerSnapshot } from './dashboard-mission-ledger'
 import { buildDashboardProjectBrainSnapshot } from './dashboard-project-brain'
+import { buildDashboardRepositoryCartographySnapshot } from './dashboard-repository-cartography'
+import { readAgenticProductionStateFromSettings } from '@/lib/production/agentic-production-state'
+import { readRepositoryContextBudgetExecutionStateFromSettings } from '@/lib/production/repository-context-budget-execution'
+import { readRepositoryCartographyManifestFromSettings } from '@/lib/production/repository-cartography'
 
 type Point3 = {
   x: number
@@ -134,8 +140,13 @@ export function DashboardOverviewTab({
   isGenerating,
 }: DashboardOverviewTabProps) {
   const { profile: deviceProfile, localBridge } = useRuntimeCapabilityProfile()
+  const [cartographyScanState, setCartographyScanState] = useState<'idle' | 'scanning' | 'complete' | 'error'>('idle')
+  const [cartographyScanNote, setCartographyScanNote] = useState<string | null>(null)
   const activeProjects = projects.filter((project) => project.status === 'active')
   const primaryProject = activeProjects[0] ?? projects[0]
+  const productionState = readAgenticProductionStateFromSettings(primaryProject?.settings)
+  const repositoryCartographyManifest = readRepositoryCartographyManifestFromSettings(primaryProject?.settings)
+  const repositoryContextBudgetExecution = readRepositoryContextBudgetExecutionStateFromSettings(primaryProject?.settings)
   const pendingApprovals = livePreviewSuggestions.length
   const agentCount = aiProviderConfigured ? Math.max(2, Math.min(5, activeProjects.length + 2)) : 0
   const runState: Tone = !backendOnline ? 'danger' : pendingApprovals > 0 ? 'warning' : 'positive'
@@ -272,6 +283,8 @@ export function DashboardOverviewTab({
       connection: localBridge.connection,
       executorLabel: localBridge.executorLabel,
     },
+    productionState,
+    productionPersisted: Boolean(productionState),
   })
   const missionLedgerSnapshot = buildDashboardMissionLedgerSnapshot({
     primaryProject,
@@ -280,7 +293,52 @@ export function DashboardOverviewTab({
     pendingApprovals,
     walletReady: Boolean(walletData),
     connectivityStatus: connectivityData?.overall_status,
+    productionState,
+    productionPersisted: Boolean(productionState),
   })
+  const repositoryCartographySnapshot = buildDashboardRepositoryCartographySnapshot({
+    productionState,
+    manifest: repositoryCartographyManifest,
+    contextBudgetExecution: repositoryContextBudgetExecution,
+  })
+
+  const handleScanRepositoryContext = async () => {
+    if (!primaryProject || cartographyScanState === 'scanning') return
+
+    setCartographyScanState('scanning')
+    setCartographyScanNote('Scanning workspace metadata without loading heavy files into chat context.')
+
+    try {
+      const response = await fetch(`/api/projects/${primaryProject.id}/production-state/cartography`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ maxFiles: 5000, maxDepth: 14, maxHashBytes: 8 * 1024 * 1024 }),
+      })
+
+      if (!response.ok) {
+        setCartographyScanState('error')
+        setCartographyScanNote('Workspace scan needs an authenticated editable project workspace.')
+        return
+      }
+
+      const payload = (await response.json()) as {
+        scan?: {
+          files?: number
+          skipped?: unknown[]
+          truncated?: boolean
+        }
+      }
+      const files = payload.scan?.files ?? 0
+      const skipped = Array.isArray(payload.scan?.skipped) ? payload.scan.skipped.length : 0
+      const truncated = payload.scan?.truncated ? ' Truncated at safety limit.' : ''
+
+      setCartographyScanState('complete')
+      setCartographyScanNote(`Mapped ${files} files, skipped ${skipped} unsafe/heavy entries.${truncated}`)
+    } catch {
+      setCartographyScanState('error')
+      setCartographyScanNote('Workspace scan failed safely; no production memory was changed.')
+    }
+  }
 
   const panelClass =
     'overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.76),rgba(8,10,16,0.96))] p-5 shadow-[0_24px_80px_rgba(2,6,23,0.34)] sm:p-6'
@@ -409,6 +467,15 @@ export function DashboardOverviewTab({
         onOpenAiChat={onOpenAiChat}
         onOpenIde={onOpenIde}
         onOpenProjects={onOpenProjects}
+      />
+
+      <DashboardRepositoryCartographyCard
+        snapshot={repositoryCartographySnapshot}
+        onOpenAiChat={onOpenAiChat}
+        onOpenIde={onOpenIde}
+        onScanContext={primaryProject ? handleScanRepositoryContext : undefined}
+        scanNote={cartographyScanNote}
+        scanState={cartographyScanState}
       />
 
       <DeviceRuntimeGuardCard

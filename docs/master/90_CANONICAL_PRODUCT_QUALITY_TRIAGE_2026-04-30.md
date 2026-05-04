@@ -259,6 +259,11 @@ The V12 reliability/SLO/SLA critique is now protected by a public route and an e
 ## 2026-05-04 AI Game/Film Production Contract
 The game/film ambition now has an executable anti-drift contract instead of another broad aspiration. `docs/master/106_AI_GAME_FILM_PRODUCTION_CONTRACT_2026-05-04.md` defines the end-to-end spine agents need: Mission Brief, Creative Bible, Technical Bible, Asset Graph, Scene/World Graph, Gameplay Graph, Shot/Film Graph, Validation Graph, Evidence Graph, and Release Graph. `tools/check-ai-game-film-production-contract.mjs` protects the rule that we improve existing anchors, keep game/film depth mode-specific, require license/provenance, playtest/render evidence, human approval, and avoid Unreal parity or autonomous AAA claims without proof.
 
+## 2026-05-04 Repository Cartography Update
+The next limitation is now represented in code instead of staying as product prose: agents must understand giant repos, scenes, assets, timelines, and external packs before they edit. `cloud-web-app/web/lib/production/repository-cartography.ts` creates a typed manifest for GB-scale work with domain classification, source kind, context strategy, duplicate groups, license/provenance gaps, `mustReadFirst`, `doNotInvent`, `external-mirror`, and `agentHandoffs`.
+
+This matters because the best-market Aethel experience cannot let AI invent missing lore, duplicate assets, ignore licensing, download huge Hugging Face or marketplace packs blindly, or claim game/film quality from partial context. Repository Cartography feeds the same Project Brain, Mission Ledger, and production graphs so the visible Studio can stay clean while the internal agent context becomes much more complete.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
@@ -464,8 +469,290 @@ The product is now clearly moving toward the right category:
 - one progressive depth model,
 - one artifact-first thesis.
 
+## 2026-05-04 Durable Agentic Production State Update
+Project Brain and Mission Ledger are no longer only dashboard read models. `cloud-web-app/web/lib/production/agentic-production-state.ts` defines a durable v1 state stored in `Project.settings.aethelProductionState`.
+
+The state includes Project Brain memory, Mission Ledger entries, Asset Graph, Scene/World Graph, Gameplay Graph, Shot/Film Graph, Validation Graph, Evidence Graph, Release Graph, and runtime policy for local/cloud/held placement.
+
+`/api/projects/[id]/production-state` now reads and patches that state without adding another top-level product surface. Studio Home stays compact: it only surfaces graph coverage, durable checkpoint state, evidence refs, and the next safe action.
+
+Remaining gap: this is the durable spine. The next wave must attach real asset import events, playtest/render evidence, Browser Operator replays, and Studio Local execution probes into this state automatically.
+
 The biggest remaining risk is no longer product imagination.
 It is disciplined closure:
 - platform confidence,
 - operator inevitability,
 - and viewport-grade review authority.
+
+## 2026-05-04 Best-In-Market Benchmark V14 Update
+The reconciled benchmark now lives in `docs/master/107_AETHEL_BEST_IN_MARKET_BENCHMARK_2026-05-04.md`. It treats the external V13 audit as historical input and locks the current measured state before comparing Aethel against Cursor 3, Replit Agent 4, Figma MCP, Manus, Genspark, Unreal UE5, Adobe Firefly/Premiere, and Linear.
+
+The new benchmark is intentionally realistic: copy experience patterns, not inflated technical claims. It names the key Aethel opportunity as a unified web-first production Studio with IDE depth, agent fleet, Project Brain, Mission Ledger, Repository Cartography, viewport/game/film depth, Browser Operator governance, and cloud/local runtime routing.
+
+## 2026-05-04 Linear Best-In-Market Backlog Update
+The V14 benchmark now has a machine-readable Linear backlog export at `docs/master/linear/AETHEL_BEST_IN_MARKET_2026_2027_BACKLOG.linear.json` and a creation playbook at `docs/master/linear/AETHEL_BEST_IN_MARKET_2026_2027_LINEAR_BACKLOG.md`.
+
+Historical note: the first V14 backlog export was created before callable Linear tools were available in this Codex session. That limitation was superseded by the Linear Remote Creation Update below.
+
+This keeps the next execution wave grounded: when Linear access is available, create the project `Aethel Best-In-Market 2026-2027`, create the labels, then create the ten canonical epics and their child issues from the JSON source without rewriting the plan.
+
+## 2026-05-04 Linear Remote Creation Update
+Linear access became available and the canonical V14 backlog was created in the `Aethel meu repo` Linear team.
+
+Project URL: https://linear.app/aethel-meu-repo/project/aethel-best-in-market-2026-2027-640e25cb2dd1
+
+Created:
+- 8 missing labels, reusing `enterprise`, `mobile`, and `design-system`,
+- 10 epic parent issues, `AET-49` through `AET-58`,
+- 35 child issues, `AET-59` through `AET-93`,
+- a sync report at `docs/master/linear/AETHEL_BEST_IN_MARKET_2026_2027_LINEAR_SYNC_REPORT.md`,
+- a creation report comment on `AET-49`.
+
+Execution should start with `AET-61`, `AET-62`, `AET-63`, `AET-66`, and `AET-67` because they make the Repository Cartography, Agent Fleet, and Studio Home spine visible first.
+
+## 2026-05-04 Studio Home Cartography Visibility Update
+The first execution slice after Linear creation is now in code. Studio Home exposes Repository Cartography as a compact card instead of another heavy dashboard: users see context gates, graph coverage, evidence refs, risk state, agent lanes, guardrails, and the next handoff without opening a giant graph UI.
+
+Implemented:
+- `cloud-web-app/web/components/dashboard/dashboard-repository-cartography.ts` converts durable Project Brain/Mission Ledger/cartography state into a small dashboard snapshot.
+- `cloud-web-app/web/components/dashboard/DashboardRepositoryCartographyCard.tsx` renders the snapshot as a low-noise context and Agent Fleet card.
+- `cloud-web-app/web/components/dashboard/DashboardOverviewTab.tsx` connects the card after Project Brain and Mission Ledger, keeping mission, evidence, repository context, runtime, and preview in one clean starting flow.
+- `cloud-web-app/web/lib/production/repository-cartography.ts` now classifies root folders such as `docs/` correctly; this prevents agents from treating root-level story/contract docs as unknown surfaces.
+- `cloud-web-app/web/__tests__/dashboard/dashboard-repository-cartography.test.ts` and `cloud-web-app/web/__tests__/production/repository-cartography.test.ts` protect this behavior.
+
+This advances `AET-61`, `AET-62`, `AET-63`, `AET-66`, and `AET-67`: Aethel is starting to show the internal anti-hallucination spine directly in the initial Studio experience, without adding clutter or pretending Unreal/Adobe parity exists today.
+
+## 2026-05-04 Repository Cartography Scanner Update
+Repository Cartography now has a metadata-safe workspace scanner and a scoped API route instead of only a hand-built manifest contract.
+
+Implemented:
+- `cloud-web-app/web/lib/production/repository-cartography-scanner.ts` walks a workspace with max-file, max-depth, ignore-dir, symlink, hash-size, MIME, size, mtime, and truncation safeguards.
+- The scanner skips heavy build folders such as `node_modules`, `.git`, `.next`, `dist`, `build`, and cache folders.
+- Small files can be hashed for duplicate detection; large files remain metadata-only so agents do not freeze the UI or pour GB payloads into chat context.
+- `cloud-web-app/web/app/api/projects/[id]/production-state/cartography/route.ts` scans the scoped workspace, builds a Repository Cartography manifest, merges it into Project Brain/Mission Ledger/production graphs, and persists it to `Project.settings`.
+- Studio Home now exposes a compact `Scan context` action on the Repository Cartography card, with progress/error/success copy that stays short.
+- `cloud-web-app/web/__tests__/production/repository-cartography-scanner.test.ts` and `cloud-web-app/web/__tests__/api/production-state-cartography-route.test.ts` cover scanner behavior and the permissioned route.
+- `cloud-web-app/web/__tests__/dashboard/DashboardRepositoryCartographyCard.test.tsx` protects the compact scan action from becoming a noisy dashboard surface.
+
+This is still not full source mirror parity. Hugging Face/GitHub/S3/marketplace adapters are the next layer. The important product improvement is that Aethel now has a real path to see big local workspaces bit by bit through metadata and evidence before any agent edits.
+
+## 2026-05-04 Agent Handoff Packet Update
+Repository Cartography is now reusable after the scan instead of being only a response payload.
+
+Implemented:
+- `cloud-web-app/web/lib/production/repository-cartography.ts` persists the latest manifest under `aethelRepositoryCartographyManifest`.
+- `cloud-web-app/web/app/api/projects/[id]/production-state/cartography/route.ts` now saves both the durable production state and the latest cartography manifest.
+- `cloud-web-app/web/lib/production/agent-handoff-packet.ts` creates a factual packet for each agent with mission objective, latest ledger state, runtime policy, manifest id, must-read files, no-invention rules, indexing policy, owned surfaces, critical gaps, duplicate groups, graph evidence, acceptance checks, blockers, and next actions.
+- `cloud-web-app/web/app/api/projects/[id]/production-state/agent-handoff/route.ts` exposes that packet to authenticated project users.
+- Tests now cover manifest persistence, packet generation, safe fallback without a manifest, and the handoff API route.
+
+This is an important best-market foundation: agents can resume long-running work from scoped evidence instead of rereading the whole repository or relying on chat memory. The next gap is enforcement: AI generation/apply routes must request or require these packets before editing large projects.
+
+## 2026-05-04 AI Route Handoff Enforcement Update
+The agent handoff packet is now consumed by core AI routes instead of only existing as a separate API.
+
+Implemented:
+- `cloud-web-app/web/lib/production/agent-handoff-context.ts` loads Project Brain, Mission Ledger, persisted Repository Cartography, and agent handoff packets for a project-scoped AI request.
+- `/api/ai/chat`, `/api/ai/inline-edit`, and `/api/ai/complete` now inject compact handoff context into the system prompt when a `projectId` is present and the project is accessible.
+- The context includes mission objective, latest ledger, runtime policy, must-read files, do-not-invent guardrails, owned surfaces, critical gaps, duplicate risk groups, acceptance evidence, and next actions.
+- Agent inference now routes prompts toward Producer, Software Engineer, Gameplay Engineer, Cinematic Editor, Asset Librarian, QA, Release, or Performance context without adding a new visible interface.
+- `/api/ai/chat` returns lightweight `agentHandoff` metadata so the UI can show when a response was grounded by a manifest.
+
+This closes the first real enforcement gap: agents no longer depend only on chat memory when operating inside a known project. They receive scoped, factual, anti-duplication and anti-hallucination instructions before generating or editing.
+
+Remaining gap: this is prompt enforcement, not a hard blocker yet. The next layer should require a fresh manifest for high-risk broad edits, add stale-manifest warnings after file changes, and attach the same packet to change-apply/background-agent routes.
+
+## 2026-05-04 Parallel Agent Work Contract Update
+Parallel AI work now has a product contract instead of relying on a loose "many agents in chat" pattern.
+
+Implemented:
+- `cloud-web-app/web/lib/production/parallel-agent-work-contract.ts` defines per-agent work lanes, toolbelts, scope locks, parallel safety rules, approval gates, research policy, Browser Operator policy, and required evidence.
+- Agent Handoff Packets now include `workContract`, so every long-running agent knows whether it is orchestration, research, software, gameplay, creative, asset, validation, release, Browser Operator, or performance work.
+- Scope defaults to `read-only` when Repository Cartography is missing and upgrades to `diff-only` only for owned surfaces when a manifest exists.
+- Toolbelts now separate roles clearly: Gameplay gets playtest/viewport tools, Browser Operator gets replay/approval tools, Research gets source-citation and mirror tools, Release gets deployment evidence, and Performance gets runtime routing.
+- AI prompt context now includes the work lane, allowed toolbelt, parallel safety rules, approval requirements, research policy, and Browser Operator policy.
+
+Why this matters:
+- Multiple agents can run in parallel without silently touching the same file, asset, scene, shot, cloud account, or deployment surface.
+- Deep research and Browser Operator work become evidence lanes that feed implementation, not uncontrolled autonomous apply lanes.
+- Large repositories and GB-scale creative projects are handled through manifests, summaries, hashes, thumbnails, metadata mirrors, and scoped ownership instead of dumping everything into context.
+
+Remaining gap: this is a contract and prompt/scope layer. The next wave must enforce it at tool execution time: exclusive file locks, apply-time surface checks, Browser Operator replay storage, and hard blocks for unapproved cloud/account actions.
+
+## 2026-05-04 Apply-Time Agent Scope Enforcement Update
+The parallel work contract now protects the first critical write path.
+
+Implemented:
+- `cloud-web-app/web/lib/production/agent-scope-enforcement.ts` evaluates whether an apply request is allowed under the current Agent Handoff Packet and work contract.
+- `/api/ai/change/apply` now requires Repository Cartography for broad multi-file applies and for explicit agent-scoped applies.
+- Applies are blocked when the packet is blocked, when the agent is read-only, or when target paths are outside the agent's declared owned surfaces.
+- Scope blocks are recorded in the Change Run Ledger before returning to the client.
+- Focused tests cover legacy single-file fallback, missing-manifest broad-edit blocking, owned-surface success, outside-scope blocking, and the apply route pre-QA block.
+
+This is the first server-side guard behind the prompt contract. It means Aethel no longer relies only on model obedience for broad edits: the apply route itself can refuse unsafe multi-file work before QA, write, deploy, or rollback paths run.
+
+Remaining gap: extend the same enforcement to Browser Operator irreversible actions, long-running background agent runs, exclusive surface locks, and stale-manifest checks based on file modification time before allowing high-impact apply.
+
+## 2026-05-04 Agent Tool Scope Enforcement Update
+The scope contract now protects direct AI tool writes, not only the `/api/ai/change/apply` path.
+
+Implemented:
+- `cloud-web-app/web/lib/ai-tools-registry.ts` now checks explicit agent-scoped `create_file` and `edit_file` executions against the current Agent Handoff Packet before the tool writes to project files.
+- Agent-scoped tool execution requires a project-scoped Repository Cartography manifest. Missing manifests return `AGENT_SCOPE_MANIFEST_REQUIRED` before file upsert.
+- Tool writes are blocked when the packet is read-only, blocked, or outside declared owned surfaces, using the same `agent-scope-enforcement` helper as apply.
+- `cloud-web-app/web/lib/ai-agent-system.ts` now forwards agent identity and optional scope enforcement into tool calls.
+- `/api/ai/chat-advanced` and `AICommandCenter` opt project-scoped agent runs into that enforcement without adding new UI.
+- `cloud-web-app/web/__tests__/production/ai-tools-agent-scope.test.ts` covers missing-manifest blocking, owned-surface success, and legacy unscoped single-tool compatibility.
+
+Why this matters:
+- Parallel agents now have a hard write guard on the tool layer, which is the path most likely to create duplicate files or edit the wrong game/film/app surface when a repo is large.
+- The visible product can stay clean and mission-first while the internal agent runtime refuses unsafe writes before they become UI clutter, bad diffs, or false evidence.
+- Legacy single-file tool use remains compatible unless the run explicitly opts into agent scope, so existing flows are not broken while we migrate toward fully scoped agent sessions.
+
+Remaining gap: add exclusive file/surface locks per live agent session, stale manifest gates after file changes, and the same approval enforcement for Browser Operator account/cloud actions.
+
+## 2026-05-04 Agent Fleet Coordinator UX Contract Update
+Parallel agent work now has a coordinator model that matches how users expect senior-led teams to behave: one primary coordinator keeps the mission coherent while specialists work in bounded lanes.
+
+Implemented:
+- `cloud-web-app/web/lib/production/agent-fleet-session.ts` defines durable Agent Fleet preferences and a compact Agent Fleet snapshot.
+- The snapshot includes central coordinator, fleet mode, paused state, composer mode, switcher hint, controls, member lanes, scope mode, owned-surface count, blockers, and next action.
+- Users can keep `Producer Agent` as the default senior coordinator or promote a specialist such as `Gameplay Engineer Agent`, `Cinematic Editor Agent`, or `Software Engineer Agent` for focused work.
+- `cloud-web-app/web/app/api/projects/[id]/production-state/agent-fleet/route.ts` exposes `GET` and `PATCH` for the compact fleet state without adding another heavy dashboard.
+- Viewer collaborators cannot change fleet preferences; owners/editors can switch coordinator, pause/resume, and change mode.
+- `cloud-web-app/web/__tests__/production/agent-fleet-session.test.ts` and `cloud-web-app/web/__tests__/api/production-state-agent-fleet-route.test.ts` cover coordinator-first planning, specialist-as-senior mode, permission checks, and persistence.
+
+Why this matters:
+- Cursor-style parallel agents become understandable: the user talks to one coordinator by default, delegates to specialists only when needed, and reviews evidence instead of juggling noisy independent chats.
+- Manus/Genspark-style broad research stays an evidence lane; it does not silently become an apply lane.
+- Game/film work can promote the right senior agent for the moment without losing Project Brain, Mission Ledger, Repository Cartography, or owned-surface scope.
+
+Remaining gap: wire this snapshot into a compact UI switcher in chat/Agent Mode, add exclusive live locks under each member, and attach cost/output/review state to each agent session.
+
+## 2026-05-04 Agent Fleet Compact Chat UX Update
+The Agent Fleet coordinator is now visible where the user actually works: inside the AI command surface, as a compact control strip instead of a separate noisy dashboard.
+
+Implemented:
+- `cloud-web-app/web/components/ai/AgentFleetCoordinatorStrip.tsx` fetches the project Agent Fleet snapshot and renders coordinator, composer mode, pause/resume, lane status chips, blockers, and next action in a single compact strip.
+- `cloud-web-app/web/components/ai/AICommandCenter.tsx` wires the strip into the command surface when a real `projectId` exists.
+- The strip maps production-grade fleet roles to the closest existing command-center agent so users can promote a senior coordinator or specialist without learning a second chat model.
+- The command center now executes suggestion clicks with the intended agent immediately instead of relying on async state updates.
+- `cloud-web-app/web/__tests__/ai/AgentFleetCoordinatorStrip.test.tsx` covers compact rendering, coordinator promotion, project-context hiding, and production-role mapping.
+
+Why this matters:
+- Users can choose who leads the work, pause the fleet, and switch between coordinator/specialist/review modes without leaving the mission flow.
+- Cursor-style parallel agents become understandable for non-experts: one senior coordinator remains the default, specialists are only promoted for scoped work, and blockers stay visible as compact evidence.
+- The UI stays aligned with Firebase/Gemini/Manus cleanliness: short controls, small status chips, and no giant agent dashboard by default.
+
+Remaining gap: persist live session output/cost/review state per fleet member, add exclusive live locks for each owned surface, and add e2e coverage for `choose coordinator -> delegate specialist -> review evidence -> approve`.
+
+## 2026-05-04 Agent Surface Locks + Stale Manifest Enforcement Update
+Parallel agent work now has two additional hard safety rails for large repos, game worlds, film timelines, and app monorepos.
+
+Implemented:
+- `cloud-web-app/web/lib/production/agent-surface-locks.ts` adds runtime Agent Surface Locks with TTL, nested-path conflict detection, same-owner renewal, and explicit conflict metadata.
+- `cloud-web-app/web/lib/production/agent-handoff-packet.ts` now carries `manifestGeneratedAt` and surface `lastModified` so scoped agents can detect stale Repository Cartography.
+- `cloud-web-app/web/lib/production/agent-scope-enforcement.ts` now blocks stale target paths with `AGENT_SCOPE_STALE_MANIFEST` before apply/tool writes.
+- `/api/ai/change/apply` now passes target mtimes into scope evaluation and acquires surface locks for agent-scoped/broad applies before writing.
+- `cloud-web-app/web/lib/ai-tools-registry.ts` now checks file `updatedAt`, blocks stale scoped tool writes, and acquires surface locks for agent-scoped `create_file` / `edit_file` before DB mutation.
+- Added `cloud-web-app/web/__tests__/production/agent-surface-locks.test.ts` and expanded scope/tool tests for stale manifests and lock conflicts.
+
+Why this matters:
+- Two parallel agents can no longer silently write the same file, scene folder, asset directory, or nested surface in the same runtime window.
+- Agents cannot keep editing from an old Repository Cartography snapshot after a target file changed.
+- Large game/film/app projects move closer to senior-team workflow: map context, own surfaces, lock active work, write only with fresh evidence, then review/approve.
+
+Remaining gap: persist locks in Redis/DB for multi-instance deployments, expose stale/locked state in the compact Agent Fleet strip, and add e2e coverage for `agent A locks surface -> agent B blocked -> rescan -> approval`.
+
+## 2026-05-04 Agent Fleet Lock/Stale Visibility Update
+The compact Agent Fleet UI now reflects the backend safety rails without adding a new dashboard.
+
+Implemented:
+- `cloud-web-app/web/lib/production/agent-surface-locks.ts` now exposes active runtime locks for project-scoped fleet snapshots.
+- `cloud-web-app/web/lib/production/agent-fleet-session.ts` adds `activeLockCount`, `lockedSurfacePreview`, `staleSurfaceCount`, and `staleSurfacePreview` to each fleet member, plus aggregate lock/stale counts on the snapshot.
+- `GET/PATCH /api/projects/[id]/production-state/agent-fleet` includes active lock signals from the current runtime instance.
+- `cloud-web-app/web/components/ai/AgentFleetCoordinatorStrip.tsx` shows compact `locks` and `rescan needed` badges, plus tiny per-agent `L`/`S` chips for locked/stale lanes.
+- Focused tests cover snapshot lock/stale summaries, route lock signals, and compact UI badges.
+
+Why this matters:
+- Users can see when a parallel agent is actively holding a surface or when Repository Cartography must be refreshed before more work.
+- The UX stays clean: one slim fleet strip with badges instead of a dense project-management dashboard.
+- This closes the loop between backend protection and user trust: blocked agents are not mysterious; they are explained as lock/rescan state.
+
+Remaining gap: persist locks across multi-instance deployments and add e2e coverage for lock conflict resolution from the UI.
+
+## 2026-05-04 Repository Context Budget Update
+Repository Cartography now includes an explicit Context Budget so agents can work on GB-scale repos, game projects, film timelines, and external asset/model sources without dumping everything into chat context.
+
+Implemented:
+- `cloud-web-app/web/lib/production/repository-cartography.ts` adds `contextBudget` with bytes by retrieval strategy, estimated chunk count, largest context risks, retrieval batches, and guardrails.
+- Retrieval batches separate canonical direct reads, medium-text summaries, heavy-surface indexes, external metadata mirrors, and manual/license review queues.
+- `cloud-web-app/web/lib/production/agent-handoff-packet.ts` carries the Context Budget into every agent handoff packet.
+- `cloud-web-app/web/lib/production/agent-handoff-context.ts` injects compact budget, retrieval batches, and context-risk surfaces into AI system context before agents act.
+- `cloud-web-app/web/lib/production/parallel-agent-work-contract.ts` adds `context-budget` as a first-class tool and requires agents to follow budget batches before requesting extra files, downloads, or previews.
+- Focused tests cover cartography budget generation, handoff packet propagation, AI context injection, and work-contract rules.
+
+Why this matters:
+- Agents now have an explicit anti-overload plan: read canonical contracts first, summarize medium surfaces, index heavy/binary surfaces, mirror Hugging Face/GitHub/S3 metadata before GB downloads, and hold unapproved media for review.
+- This directly reduces hallucination, duplicate creation, repo confusion, and UI freezes in huge app/game/film projects.
+- The visible UX can remain clean while the internal runtime behaves more like a senior technical producer: choose the right context slice before doing work.
+
+Remaining gap: persist retrieval batch execution state, add source-specific mirrors for Hugging Face/GitHub/S3, and connect batch progress to the compact Agent Fleet/Repository Cartography UI.
+
+## 2026-05-04 Repository Context Budget UI Update
+The Studio Home cartography card now shows how agents will read large projects before they work.
+
+Implemented:
+- `cloud-web-app/web/components/dashboard/dashboard-repository-cartography.ts` now derives a compact `contextBudget` snapshot from the persisted Repository Cartography manifest.
+- `cloud-web-app/web/components/dashboard/DashboardRepositoryCartographyCard.tsx` renders a small `Reading plan` row with Read, Summarize, Index/Mirror, and Review chips.
+- `cloud-web-app/web/components/dashboard/DashboardOverviewTab.tsx` passes the persisted manifest into the snapshot builder so the UI reflects the same budget agents receive in handoff packets.
+- Dashboard tests now cover the compact reading-plan UI and manifest-backed budget summary.
+
+Why this matters:
+- Users can see, in one row, whether the system will read, summarize, index/mirror, or hold surfaces for review before the AI touches a repo/game/film project.
+- This keeps the Firebase-style Studio Home clean while exposing the safety model that prevents agents from getting lost in GB-scale projects.
+
+Remaining gap: make each batch chip open its exact surfaces and execution state once retrieval batch persistence exists.
+
+## 2026-05-04 Repository Context Budget Execution State Update
+Repository Context Budget is now operational, not just descriptive.
+
+Implemented:
+- `cloud-web-app/web/lib/production/repository-context-budget-execution.ts` adds durable execution state for each retrieval batch with status, progress, evidence refs, blockers, manifest identity, and reset/preserve behavior.
+- `POST /api/projects/[id]/production-state/cartography` now persists a fresh Context Budget execution state whenever Repository Cartography is scanned.
+- `GET/PATCH /api/projects/[id]/production-state/context-budget` exposes permissioned batch execution state so agents and UI can mark Read/Summarize/Index/Mirror/Review work as pending, running, complete, or blocked.
+- `GET /api/projects/[id]/production-state/agent-handoff` now returns the persisted Context Budget execution state alongside the handoff packet.
+- AI handoff context now includes `Context budget execution` so agents know which retrieval work has actually happened before they act.
+- Studio Home uses persisted execution state when available, showing compact progress such as `1/4 batches done` and per-batch progress chips.
+
+Why this matters:
+- Agents can no longer treat a plan as completed evidence. Each context retrieval lane has explicit status and evidence.
+- Long game/film/app projects gain memory of what was read, summarized, indexed, mirrored, or blocked, reducing duplicate research, repeated downloads, hallucinated context, and UI freezes.
+- This is the practical bridge from “repo cartography exists” to “parallel agents can work like a coordinated senior team.”
+
+Remaining gap: execute real source-specific retrieval workers for Hugging Face/GitHub/S3/marketplace, then attach generated summaries, thumbnails, manifests, and citations to these batches.
+
+## 2026-05-04 Viewport Gizmo Operation Contract Update
+The viewport gizmo is now treated as an auditable production operation, not only a visual transform handle. `cloud-web-app/web/lib/viewport/gizmo-transform-operation.ts` defines the v1 transform contract with before/after snapshots, deltas, source (`user` or `agent`), snap profile, evidence refs, validation blockers/warnings, and exact rollback targets.
+
+`cloud-web-app/web/components/viewport/AethelViewport3D.tsx` now emits this contract for both direct user gizmo drags and AI text-to-action transforms. This matters for game/film quality because agents can no longer silently move, rotate, or scale scene objects without a reason, validation state, evidence hook, and rollback path. The next step is to attach these operations to Mission Ledger/Evidence Graph with viewport screenshots and optional approval gates for risky transforms.
+
+## 2026-05-04 Viewport Gizmo Persistence Update
+Gizmo operations now have a persistence path into the durable production state. `cloud-web-app/web/lib/production/gizmo-production-state.ts` merges a gizmo operation into Mission Ledger, Scene/World Graph, Evidence Graph, and Validation Graph. Safe user transforms can complete, agent transforms move to review, and unsafe transforms become blocked with their validation blockers preserved.
+
+`POST /api/projects/[id]/production-state/gizmo-transform` now accepts the same operation contract emitted by the viewport, validates/coerces it, enforces project write access, and stores the resulting production state in `Project.settings.aethelProductionState`. This closes a key game/film gap: viewport edits can now become durable, reviewable, rollbackable production memory instead of disposable UI state.
+
+## 2026-05-04 Viewport Gizmo Auto-Persistence Update
+The 3D preview shell now has a client persistence bridge for gizmo operations. `cloud-web-app/web/lib/viewport/gizmo-transform-persistence.ts` builds the authenticated request, injects compact viewport evidence refs, and refuses to fake persistence for `local-project` / non-persisted contexts. `cloud-web-app/web/hooks/useGizmoTransformPersistence.ts` exposes that behavior to the client without adding another visible panel.
+
+`CanonicalPreviewSurface -> SceneViewportSurface -> SceneViewportStage -> AethelViewport3D` now carries an optional `projectId`, and `WorkbenchPreviewPane` passes the real workbench project id into the scene viewport. This means real IDE viewport transforms can flow from gizmo action to Mission Ledger/production graphs through the persistence route while local/dashboard-only previews remain safe and silent instead of claiming durable memory they do not have.
+
+## 2026-05-04 Viewport Gizmo Review Chip Update
+The 3D viewport now exposes a compact gizmo memory chip instead of a new dashboard panel. `cloud-web-app/web/lib/viewport/gizmo-transform-persistence.ts` maps persistence status into a small chip model (`saving`, `saved`, `local-only`, `error`) and `cloud-web-app/web/components/viewport/AethelViewport3D.tsx` renders it near the transform toolbar only when there is something useful to say.
+
+This keeps the Firebase/Gemini-style low-noise surface while still giving professional feedback: users can tell whether a transform was written to Mission Ledger, skipped because the preview is local-only, or failed because the project route rejected it.
+
+## 2026-05-04 Viewport Gizmo Review Packets Update
+Gizmo history can now be read back as compact review packets for agents and UI. `cloud-web-app/web/lib/production/gizmo-review-packets.ts` converts persisted gizmo Mission Ledger entries and their Scene/Evidence/Validation graph nodes into a small status packet: `ready`, `needs-approval`, `needs-evidence`, or `blocked`.
+
+`GET /api/projects/[id]/production-state/gizmo-transform` now returns those packets, a summary, and the current production readiness without mutating project settings. `POST` also returns the latest packet after persistence. This closes the next practical loop for game/film work: agents can inspect recent viewport edits, see whether evidence is missing, know if approval is required, and avoid duplicating or forgetting scene transforms.

@@ -22,6 +22,12 @@ import {
 } from 'lucide-react'
 import TransformGizmoProfessional from '@/components/viewport/gizmos/TransformGizmoProfessional'
 import { sampleTrajectory } from '@/lib/three/physics'
+import { buildGizmoTransformOperation, type GizmoTransformOperation } from '@/lib/viewport/gizmo-transform-operation'
+import {
+  buildGizmoTransformPersistenceChip,
+  type GizmoTransformPersistenceStatus,
+  type GizmoTransformPersistenceChipTone,
+} from '@/lib/viewport/gizmo-transform-persistence'
 
 export type ViewportTransformMode = 'translate' | 'rotate' | 'scale'
 export type ViewportTransformSpace = 'world' | 'local'
@@ -64,6 +70,11 @@ type AethelViewport3DProps = {
   onTransformSpaceChange: (space: ViewportTransformSpace) => void
   onSnapEnabledChange: (enabled: boolean) => void
   onAIAction?: (action: string) => void
+  onGizmoTransformOperation?: (operation: GizmoTransformOperation) => void
+  gizmoMemoryStatus?: GizmoTransformPersistenceStatus
+  gizmoMemoryLabel?: string | null
+  gizmoMemoryError?: string | null
+  gizmoMemoryCanPersist?: boolean
 }
 
 type SceneObjectMeshProps = {
@@ -74,12 +85,20 @@ type SceneObjectMeshProps = {
   transformSpace: ViewportTransformSpace
   snapEnabled: boolean
   onTransformChange: (id: string, patch: Partial<ViewportSceneObject>) => void
+  onTransformOperation?: (operation: GizmoTransformOperation) => void
   onSelect: (id: string, additive: boolean) => void
 }
 
 const iconButton = 'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] p-2 text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]'
 const activeButton = 'inline-flex items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--aethel-primary)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] p-2 text-[var(--aethel-primary-light)] transition hover:brightness-110'
 const panelButton = 'inline-flex items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:border-[var(--aethel-border-secondary)]'
+const memoryChipToneClass: Record<GizmoTransformPersistenceChipTone, string> = {
+  neutral: 'border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.78)] text-[var(--aethel-text-tertiary)]',
+  saving: 'border-[color-mix(in_srgb,var(--aethel-info)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,rgba(7,12,20,0.72))] text-[var(--aethel-info-light)]',
+  success: 'border-[color-mix(in_srgb,var(--aethel-success)_36%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_14%,rgba(7,12,20,0.72))] text-[var(--aethel-success-light)]',
+  warning: 'border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_14%,rgba(7,12,20,0.72))] text-[var(--aethel-warning-light)]',
+  error: 'border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_14%,rgba(7,12,20,0.72))] text-[var(--aethel-error-light)]',
+}
 
 const defaultObjects: ViewportSceneObject[] = [
   {
@@ -241,6 +260,7 @@ function SceneObjectMesh({
   hairHighlightColor,
   hairVolumeIntensity = 0,
   onTransformChange,
+  onTransformOperation,
   onSelect,
 }: SceneObjectMeshProps & {
   visualGlowColor?: THREE.ColorRepresentation
@@ -250,6 +270,7 @@ function SceneObjectMesh({
   hairVolumeIntensity?: number
 }) {
   const groupRef = useRef<THREE.Group>(null)
+  const beforeTransformRef = useRef<ViewportSceneObject | null>(null)
   const displayScale: [number, number, number] = primarySelected
     ? [
         object.scale[0] + hairVolumeIntensity * 0.06,
@@ -265,12 +286,12 @@ function SceneObjectMesh({
       ]
     : object.rotation
 
-  const commitTransform = useCallback(() => {
-    if (!groupRef.current) return
+  const readCommittedTransform = useCallback((): Partial<ViewportSceneObject> | null => {
+    if (!groupRef.current) return null
     const expressionScaleOffset = primarySelected ? hairVolumeIntensity * 0.06 : 0
     const expressionHeightOffset = primarySelected ? facialExpressionIntensity * 0.04 + hairVolumeIntensity * 0.1 : 0
     const expressionRotationOffset = primarySelected ? facialExpressionIntensity * 0.04 : 0
-    onTransformChange(object.id, {
+    return {
       position: [groupRef.current.position.x, groupRef.current.position.y, groupRef.current.position.z],
       rotation: [groupRef.current.rotation.x - expressionRotationOffset, groupRef.current.rotation.y, groupRef.current.rotation.z],
       scale: clampScale([
@@ -278,8 +299,43 @@ function SceneObjectMesh({
         groupRef.current.scale.y - expressionHeightOffset,
         groupRef.current.scale.z - expressionScaleOffset,
       ]),
-    })
-  }, [facialExpressionIntensity, hairVolumeIntensity, object.id, onTransformChange, primarySelected])
+    }
+  }, [facialExpressionIntensity, hairVolumeIntensity, primarySelected])
+
+  const commitTransform = useCallback(() => {
+    const patch = readCommittedTransform()
+    if (!patch) return
+    onTransformChange(object.id, patch)
+  }, [object.id, onTransformChange, readCommittedTransform])
+
+  const handleDragStateChange = useCallback((dragging: boolean) => {
+    if (dragging) {
+      beforeTransformRef.current = object
+      return
+    }
+
+    const beforeObject = beforeTransformRef.current
+    const patch = readCommittedTransform()
+    beforeTransformRef.current = null
+
+    if (!beforeObject || !patch) {
+      return
+    }
+
+    const afterObject: ViewportSceneObject = { ...beforeObject, ...patch }
+    onTransformOperation?.(buildGizmoTransformOperation({
+      objectsBefore: [beforeObject],
+      objectsAfter: [afterObject],
+      mode: transformMode,
+      space: transformSpace,
+      snapEnabled,
+      source: 'user',
+      reason: `Viewport gizmo ${transformMode} on ${object.name}`,
+      evidenceRefs: ['viewport:gizmo-transform'],
+    }))
+
+    onTransformChange(object.id, patch)
+  }, [object, onTransformChange, onTransformOperation, readCommittedTransform, snapEnabled, transformMode, transformSpace])
 
   const body = (
     <group
@@ -326,6 +382,7 @@ function SceneObjectMesh({
       translationSnap={0.5}
       rotationSnapDegrees={15}
       scaleSnap={0.1}
+      onDragStateChange={handleDragStateChange}
       onObjectChange={commitTransform}
     >
       {body}
@@ -351,6 +408,7 @@ function ViewportScene({
   hairVolumeIntensity = 0,
   onObjectsChange,
   onSelectionChange,
+  onGizmoTransformOperation,
 }: Omit<AethelViewport3DProps, 'onTogglePlayTest' | 'onTransformModeChange' | 'onTransformSpaceChange' | 'onSnapEnabledChange' | 'onAIAction'>) {
   const primarySelectedId = selectedIds[0] ?? null
   const selectedObject = objects.find((object) => object.id === primarySelectedId) ?? null
@@ -421,6 +479,7 @@ function ViewportScene({
           hairHighlightColor={selectedIds.includes(object.id) ? hairHighlightColor : undefined}
           hairVolumeIntensity={selectedIds.includes(object.id) ? hairVolumeIntensity : 0}
           onTransformChange={handleTransformChange}
+          onTransformOperation={onGizmoTransformOperation}
           onSelect={handleSelect}
         />
       ))}
@@ -697,17 +756,39 @@ export function AethelViewport3D({
   onTransformSpaceChange,
   onSnapEnabledChange,
   onAIAction,
+  onGizmoTransformOperation,
+  gizmoMemoryStatus = 'idle',
+  gizmoMemoryLabel,
+  gizmoMemoryError,
+  gizmoMemoryCanPersist = false,
 }: AethelViewport3DProps) {
   const [aiCommand, setAiCommand] = useState('move this object 2 up')
   const selectedObject = objects.find((object) => object.id === selectedIds[0]) ?? null
+  const gizmoMemoryChip = buildGizmoTransformPersistenceChip({
+    status: gizmoMemoryStatus,
+    canPersist: gizmoMemoryCanPersist,
+    lastOperationLabel: gizmoMemoryLabel,
+    lastError: gizmoMemoryError,
+  })
 
   const applyAiCommand = useCallback(() => {
     if (!selectedObject) return
     const patch = parseAiViewportCommand(aiCommand, selectedObject)
     if (!patch) return
-    onObjectsChange(objects.map((object) => (object.id === selectedObject.id ? { ...object, ...patch } : object)))
+    const afterObject: ViewportSceneObject = { ...selectedObject, ...patch }
+    onGizmoTransformOperation?.(buildGizmoTransformOperation({
+      objectsBefore: [selectedObject],
+      objectsAfter: [afterObject],
+      mode: Object.prototype.hasOwnProperty.call(patch, 'rotation') ? 'rotate' : Object.prototype.hasOwnProperty.call(patch, 'scale') ? 'scale' : 'translate',
+      space: transformSpace,
+      snapEnabled,
+      source: 'agent',
+      reason: aiCommand,
+      evidenceRefs: ['viewport:ai-command'],
+    }))
+    onObjectsChange(objects.map((object) => (object.id === selectedObject.id ? afterObject : object)))
     onAIAction?.(aiCommand)
-  }, [aiCommand, objects, onAIAction, onObjectsChange, selectedObject])
+  }, [aiCommand, objects, onAIAction, onGizmoTransformOperation, onObjectsChange, selectedObject, snapEnabled, transformSpace])
 
   return (
     <div className="relative h-full min-h-0 w-full overflow-hidden">
@@ -728,6 +809,18 @@ export function AethelViewport3D({
           <Film className="h-4 w-4" />
         </button>
       </div>
+
+      {gizmoMemoryChip.visible ? (
+        <div
+          className={`absolute left-4 top-[58px] z-20 max-w-[360px] rounded-full border px-3 py-2 text-xs shadow-[0_18px_44px_rgba(0,0,0,0.32)] backdrop-blur-md ${memoryChipToneClass[gizmoMemoryChip.tone]}`}
+          role={gizmoMemoryChip.tone === 'error' ? 'alert' : 'status'}
+          aria-live="polite"
+        >
+          <span className="font-semibold">{gizmoMemoryChip.label}</span>
+          <span className="mx-2 text-[var(--aethel-text-quaternary)]">/</span>
+          <span className="text-[var(--aethel-text-secondary)]">{gizmoMemoryChip.detail}</span>
+        </div>
+      ) : null}
 
       <div className="absolute right-4 top-4 z-20 w-[340px] rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.86)] p-3 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-md">
         <div className="flex items-center justify-between gap-2">
@@ -778,6 +871,7 @@ export function AethelViewport3D({
         hairVolumeIntensity={hairVolumeIntensity}
         onObjectsChange={onObjectsChange}
         onSelectionChange={onSelectionChange}
+        onGizmoTransformOperation={onGizmoTransformOperation}
       />
     </div>
   )

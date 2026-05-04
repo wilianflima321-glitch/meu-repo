@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { buildDashboardMissionLedgerSnapshot } from '@/components/dashboard/dashboard-mission-ledger'
+import { buildDefaultAgenticProductionState, mergeAgenticProductionState } from '@/lib/production/agentic-production-state'
 
 describe('dashboard mission ledger', () => {
   it('starts as planned until a concrete mission exists', () => {
@@ -45,5 +46,42 @@ describe('dashboard mission ledger', () => {
     expect(snapshot.state).toBe('needs_approval')
     expect(snapshot.nextAction).toBe('Review approval')
     expect(snapshot.checks).toContainEqual({ label: 'Approval', ready: false })
+  })
+
+  it('uses durable production state for graph coverage and persisted mission memory', () => {
+    const baseState = buildDefaultAgenticProductionState({ projectName: 'Cinematic intro', projectType: 'unreal' })
+    const productionState = mergeAgenticProductionState(baseState, {
+      ledger: [
+        {
+          ...baseState.ledger[0],
+          id: 'shot-review',
+          state: 'needs-approval',
+          evidenceRefs: ['render:shot-001'],
+          nextAction: 'Approve continuity render',
+        },
+      ],
+      graphs: {
+        assetGraph: [{ ...baseState.graphs.assetGraph[0], status: 'ready', evidenceRefs: ['license:hero'] }],
+        shotFilmGraph: [{ ...baseState.graphs.shotFilmGraph[0], status: 'ready', evidenceRefs: ['storyboard:shot-001'] }],
+        validationGraph: [{ ...baseState.graphs.validationGraph[0], status: 'ready', evidenceRefs: ['continuity:shot-001'] }],
+      },
+    })
+
+    const snapshot = buildDashboardMissionLedgerSnapshot({
+      primaryProject: { id: 12, name: 'Cinematic intro', type: 'unreal', status: 'active' },
+      backendOnline: true,
+      aiProviderConfigured: true,
+      pendingApprovals: 0,
+      walletReady: true,
+      connectivityStatus: 'healthy',
+      productionState,
+      productionPersisted: true,
+    })
+
+    expect(snapshot.state).toBe('needs_approval')
+    expect(snapshot.summary).toContain('persists state')
+    expect(snapshot.checks).toContainEqual({ label: 'Graphs', ready: true })
+    expect(snapshot.evidence).toContainEqual({ label: 'Memory', value: 'Durable', ready: true })
+    expect(snapshot.evidence).toContainEqual({ label: 'Production', value: '43% graphs / 3 refs', ready: true })
   })
 })

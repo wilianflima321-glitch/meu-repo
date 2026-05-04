@@ -24,6 +24,10 @@ import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
 import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
 import { applyProjectRulesToMessages, loadProjectRulesContext } from '@/lib/server/project-rules'
+import {
+  applyAgentHandoffContextToMessages,
+  loadAgentHandoffContext,
+} from '@/lib/production/agent-handoff-context'
 
 interface AIChatRequestBody {
   messages?: unknown;
@@ -281,8 +285,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const aiMessages: Message[] = messages
       .map(toAiMessage)
       .filter((message): message is Message => Boolean(message));
+    const agentHandoff = await loadAgentHandoffContext({
+      userId: auth.userId,
+      projectId,
+      routeKind: 'chat',
+      requestedAgent: readString(body.agent),
+      promptText,
+    })
     const projectRulesContext = await loadProjectRulesContext({ userId: auth.userId, projectId })
-    const aiMessagesWithRules = applyProjectRulesToMessages(aiMessages, projectRulesContext)
+    const aiMessagesWithHandoff = applyAgentHandoffContextToMessages(aiMessages, agentHandoff.context)
+    const aiMessagesWithRules = applyProjectRulesToMessages(aiMessagesWithHandoff, projectRulesContext)
 
     const response = await aiService.chat({
       messages: aiMessagesWithRules,
@@ -299,6 +311,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         model: response.model,
         tokensUsed: response.tokensUsed,
         latencyMs: response.latencyMs,
+        agentHandoff: agentHandoff.packet
+          ? {
+              agent: agentHandoff.agent,
+              status: agentHandoff.packet.status,
+              lane: agentHandoff.packet.workContract.lane,
+              scopeMode: agentHandoff.packet.workContract.scopeLock.mode,
+              hasManifest: agentHandoff.hasManifest,
+              manifestId: agentHandoff.packet.cartography.manifestId,
+            }
+          : undefined,
       },
       {
         headers: {

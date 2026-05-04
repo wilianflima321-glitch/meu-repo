@@ -10,6 +10,7 @@ import {
   Agent,
   AgentTask,
 } from '../../lib/ai-agent-system'
+import { AgentFleetCoordinatorStrip } from './AgentFleetCoordinatorStrip'
 
 // ============================================================================
 // TIPOS
@@ -69,6 +70,7 @@ export function AICommandCenter() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [selectedAgent, setSelectedAgent] = useState<string>('universal')
+  const [projectId, setProjectId] = useState<string>('default')
   const [isProcessing, setIsProcessing] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(true)
   const [activeExecution, setActiveExecution] = useState<AgentExecution | null>(null)
@@ -80,6 +82,10 @@ export function AICommandCenter() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    setProjectId(resolveProjectId())
+  }, [])
 
   // Mensagem de boas-vindas
   useEffect(() => {
@@ -97,11 +103,12 @@ export function AICommandCenter() {
   }, [messages.length])
 
   const processCommand = useCallback(
-    async (command: string) => {
+    async (command: string, agentOverride?: string) => {
       if (!command.trim() || isProcessing) return
 
       setShowSuggestions(false)
       setIsProcessing(true)
+      const executionAgent = agentOverride ?? selectedAgent
 
       const userMessage: Message = {
         id: `user-${Date.now()}`,
@@ -123,13 +130,14 @@ export function AICommandCenter() {
       setMessages((prev) => [...prev, assistantMessage])
 
       try {
-        const executor = new AgentExecutor(selectedAgent)
+        const executor = new AgentExecutor(executionAgent)
         const task: AgentTask = {
           id: `task-${Date.now()}`,
           description: command,
           executionContext: {
             userId: resolveUserId(),
-            projectId: resolveProjectId(),
+            projectId,
+            enforceAgentScope: projectId !== 'default',
           },
         }
 
@@ -155,7 +163,7 @@ export function AICommandCenter() {
         setIsProcessing(false)
       }
     },
-    [selectedAgent, isProcessing]
+    [selectedAgent, isProcessing, projectId]
   )
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -172,7 +180,7 @@ export function AICommandCenter() {
 
   const handleSuggestion = (suggestion: CommandSuggestion) => {
     setSelectedAgent(suggestion.agentId)
-    processCommand(suggestion.command)
+    processCommand(suggestion.command, suggestion.agentId)
   }
 
   const agentList = Object.values(AGENTS)
@@ -227,6 +235,12 @@ export function AICommandCenter() {
           )}
         </div>
       </div>
+
+      <AgentFleetCoordinatorStrip
+        projectId={projectId}
+        selectedAgentId={selectedAgent}
+        onSelectAgentId={setSelectedAgent}
+      />
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">

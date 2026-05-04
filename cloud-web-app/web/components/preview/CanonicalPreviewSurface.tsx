@@ -35,6 +35,7 @@ type CanonicalLiveProps = {
 type CanonicalSceneProps = {
   variant: 'scene';
   renderMode?: 'draft' | 'cinematic';
+  projectId?: string | null;
 };
 
 type CanonicalCanvasProps = {
@@ -78,7 +79,7 @@ export default function CanonicalPreviewSurface(props: CanonicalPreviewSurfacePr
   }
 
   if (props.variant === 'scene') {
-    return <SceneViewportSurface renderMode={props.renderMode ?? 'draft'} />;
+    return <SceneViewportSurface renderMode={props.renderMode ?? 'draft'} projectId={props.projectId} />;
   }
 
   if (props.variant === 'canvas') {

@@ -79,6 +79,8 @@ export interface AgentTask {
   executionContext?: {
     userId: string;
     projectId?: string;
+    agent?: string;
+    enforceAgentScope?: boolean;
   };
   constraints?: string[];
   expectedOutput?: string;
@@ -257,9 +259,16 @@ export class AgentExecutor {
 
         // Executar ação se houver
         if (response.action) {
+          const executionContext = task.executionContext
+            ? {
+                ...task.executionContext,
+                agent: task.executionContext.agent ?? this.agent.name,
+              }
+            : undefined;
           const enrichedParams: Record<string, unknown> = {
             ...(response.action.params && typeof response.action.params === 'object' ? response.action.params : {}),
-            ...(task.executionContext ? { __aethelContext: task.executionContext } : {}),
+            ...(executionContext ? { __aethelContext: executionContext } : {}),
+            ...(executionContext?.enforceAgentScope ? { __aethelAgentScope: true } : {}),
           };
 
           const result = await aiTools.execute(response.action.tool, enrichedParams);

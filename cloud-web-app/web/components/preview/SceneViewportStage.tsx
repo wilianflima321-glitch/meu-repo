@@ -1,6 +1,7 @@
 'use client';
 
 import { AethelViewport3D } from '@/components/viewport/AethelViewport3D';
+import { useGizmoTransformPersistence } from '@/hooks/useGizmoTransformPersistence';
 
 import SceneViewportWorkflowDrawer from './SceneViewportWorkflowDrawer';
 import type { useSceneViewportSurfaceState } from './useSceneViewportSurfaceState';
@@ -38,6 +39,7 @@ type SceneViewportStageProps = Pick<
   | 'handleVisualScriptChange'
 > & {
   renderMode: 'draft' | 'cinematic';
+  projectId?: string | null;
 };
 
 export function SceneViewportStage({
@@ -71,7 +73,10 @@ export function SceneViewportStage({
   setVfxGraph,
   handleVisualScriptChange,
   renderMode,
+  projectId,
 }: SceneViewportStageProps) {
+  const gizmoPersistence = useGizmoTransformPersistence(projectId);
+
   return (
     <div className="relative h-full">
       <AethelViewport3D
@@ -98,6 +103,13 @@ export function SceneViewportStage({
         onTransformSpaceChange={setTransformSpace}
         onSnapEnabledChange={setSnapEnabled}
         onAIAction={() => undefined}
+        onGizmoTransformOperation={(operation) => {
+          void gizmoPersistence.persistOperation(operation)
+        }}
+        gizmoMemoryStatus={gizmoPersistence.status}
+        gizmoMemoryLabel={gizmoPersistence.lastOperationLabel}
+        gizmoMemoryError={gizmoPersistence.lastError}
+        gizmoMemoryCanPersist={gizmoPersistence.canPersist}
       />
       {workflowTool ? (
         <SceneViewportWorkflowDrawer

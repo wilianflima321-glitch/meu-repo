@@ -17,6 +17,10 @@ import { AI_INLINE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-co
 import { applyProjectRulesToMessages, loadProjectRulesContext } from '@/lib/server/project-rules'
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
 import { createComponentLogger } from '@/lib/observability/logger'
+import {
+  applyAgentHandoffContextToMessages,
+  loadAgentHandoffContext,
+} from '@/lib/production/agent-handoff-context'
 
 const logger = createComponentLogger('api.ai.inline-edit')
 
@@ -38,6 +42,7 @@ type InlineEditBody = {
   language?: string
   filePath?: string
   projectId?: string
+  agent?: string
   context?: InlineEditContext
   provider?: string
   model?: string
@@ -169,13 +174,22 @@ export async function POST(req: NextRequest) {
     }
 
     const projectRulesContext = await loadProjectRulesContext({ userId: user.userId, projectId })
-    const messages: Message[] = applyProjectRulesToMessages<Message>(
+    const baseMessages: Message[] = applyProjectRulesToMessages<Message>(
       [
         { role: 'system', content: INLINE_EDIT_SYSTEM_PROMPT },
         { role: 'user', content: userPrompt },
       ],
       projectRulesContext
     )
+    const agentHandoff = await loadAgentHandoffContext({
+      userId: user.userId,
+      projectId,
+      routeKind: 'inline-edit',
+      requestedAgent: body.agent,
+      promptText: `${instruction}\n${code.slice(0, 2_000)}`,
+      filePath,
+    })
+    const messages = applyAgentHandoffContextToMessages(baseMessages, agentHandoff.context)
 
     const result = await aiService.chat({
       messages,
