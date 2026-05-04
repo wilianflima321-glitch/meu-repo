@@ -24,6 +24,7 @@ The admin finance dashboard must show, at a glance:
 - Health status: `healthy`, `watch`, or `risk`.
 - Top users by AI cost, including user revenue, AI cost, margin after AI, calls, tokens, and risk status.
 - Top workspaces by AI cost, including cost share, calls, tokens, top model, and unattributed spend risk.
+- Operator next actions with priority, scope, rationale, concrete action, and expected impact.
 
 ## Files
 
@@ -31,6 +32,7 @@ The admin finance dashboard must show, at a glance:
 - `cloud-web-app/web/app/admin/finance/page.tsx`
 - `cloud-web-app/web/components/admin/AIMarginSnapshotPanel.tsx`
 - `cloud-web-app/web/components/admin/AIMarginDrilldownPanel.tsx`
+- `cloud-web-app/web/components/admin/AIMarginRecommendationsPanel.tsx`
 - `cloud-web-app/web/__tests__/api/admin-finance-metrics-route.test.ts`
 - `tools/check-ai-margin-gate.mjs`
 - `tools/measure-product-quality.mjs`
@@ -43,6 +45,7 @@ The admin finance dashboard must show, at a glance:
 - Unknown metadata is treated as `unknown`, not `any`.
 - Finance route errors use structured logging through `createComponentLogger`.
 - The drilldown maps AI ledger rows to users and workspaces without exposing a heavy table by default.
+- Recommendations translate margin risk into operator actions: budget caps, model routing, metadata repair, and plan review.
 
 ## Validation
 
@@ -64,6 +67,6 @@ npm --prefix cloud-web-app/web test -- __tests__/api/admin-finance-metrics-route
 ## Remaining Work
 
 - Add per-agent attribution inside each user/workspace drilldown.
-- Add model downgrade recommendations when a workspace crosses `watch` or `risk`.
+- Connect recommendations to actual admin actions once budget and model-routing mutations exist.
 - Connect usage thresholds to plan entitlements and agent routing.
 - Add monthly cohort margin charts.

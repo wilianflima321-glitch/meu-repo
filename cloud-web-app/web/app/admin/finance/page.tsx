@@ -18,6 +18,7 @@ import {
   PieChart
 } from 'lucide-react';
 import { AIMarginDrilldownPanel, type AIMarginDrilldown } from '@/components/admin/AIMarginDrilldownPanel';
+import { AIMarginRecommendationsPanel, type AIMarginRecommendation } from '@/components/admin/AIMarginRecommendationsPanel';
 import { AIMarginSnapshotPanel, type AIMarginSnapshot } from '@/components/admin/AIMarginSnapshotPanel';
 import { AdminMetricCard } from '@/components/admin/AdminMetricCard';
 
@@ -53,6 +54,7 @@ interface FinanceMetrics {
 
   aiMarginSnapshot: AIMarginSnapshot;
   aiMarginDrilldown: AIMarginDrilldown;
+  aiMarginRecommendations: AIMarginRecommendation[];
 
   revenueByPlan: {
     plan: string;
@@ -460,6 +462,7 @@ export default function FinanceDashboard() {
       </div>
 
       <AIMarginSnapshotPanel snapshot={metrics.aiMarginSnapshot} />
+      <AIMarginRecommendationsPanel recommendations={metrics.aiMarginRecommendations} />
       <AIMarginDrilldownPanel drilldown={metrics.aiMarginDrilldown} />
 
       {/* Unit Economics */}

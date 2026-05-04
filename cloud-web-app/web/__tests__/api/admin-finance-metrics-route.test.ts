@@ -135,6 +135,8 @@ describe('api/admin/finance/metrics route', () => {
       workspaceId: 'project-1',
       topModel: 'openai/gpt-test',
     })
+    expect(payload.aiMarginRecommendations.some((item: { scope: string }) => item.scope === 'model')).toBe(true)
+    expect(payload.aiMarginRecommendations.some((item: { scope: string }) => item.scope === 'workspace')).toBe(true)
   })
 
   it('raises a risk snapshot when AI cost is above period revenue', async () => {
@@ -152,5 +154,9 @@ describe('api/admin/finance/metrics route', () => {
     expect(payload.aiMarginSnapshot.status).toBe('risk')
     expect(payload.aiMarginSnapshot.grossMarginAfterAi).toBeLessThan(0)
     expect(payload.alerts.some((alert: { message: string }) => alert.message.includes('AI usage is consuming'))).toBe(true)
+    expect(payload.aiMarginRecommendations[0]).toMatchObject({
+      priority: 'critical',
+      scope: 'global',
+    })
   })
 })

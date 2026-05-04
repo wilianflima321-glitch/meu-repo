@@ -29,6 +29,7 @@ interface FinanceMetrics {
   }>;
   aiMarginSnapshot: AIMarginSnapshot;
   aiMarginDrilldown: AIMarginDrilldown;
+  aiMarginRecommendations: AIMarginRecommendation[];
   revenueByPlan: Array<{
     plan: string;
     users: number;
@@ -87,6 +88,17 @@ interface AIMarginDrilldown {
     topModel: string | null;
     status: AIMarginSnapshot['status'];
   }>;
+}
+
+interface AIMarginRecommendation {
+  id: string;
+  priority: 'critical' | 'warning' | 'info';
+  scope: 'global' | 'user' | 'workspace' | 'model';
+  target: string;
+  title: string;
+  rationale: string;
+  action: string;
+  expectedImpact: string;
 }
 
 type LedgerMetadata = Record<string, unknown>;
@@ -368,6 +380,112 @@ function buildAiMarginDrilldown(params: {
   return { topUsers, topWorkspaces };
 }
 
+function buildAiMarginRecommendations(params: {
+  snapshot: AIMarginSnapshot;
+  drilldown: AIMarginDrilldown;
+  aiCostBreakdown: FinanceMetrics['aiCostBreakdown'];
+}): AIMarginRecommendation[] {
+  const { snapshot, drilldown, aiCostBreakdown } = params;
+  const recommendations: AIMarginRecommendation[] = [];
+
+  if (snapshot.status === 'risk') {
+    recommendations.push({
+      id: 'global-ai-margin-risk',
+      priority: 'critical',
+      scope: 'global',
+      target: 'AI margin',
+      title: 'Protect AI gross margin now',
+      rationale: `AI cost is consuming ${snapshot.aiCostRatio.toFixed(1)}% of period revenue.`,
+      action: 'Apply a temporary workspace budget cap and route routine work to budget models until margin recovers.',
+      expectedImpact: 'Stops negative-margin agent waves before they scale across the platform.',
+    });
+  } else if (snapshot.status === 'watch') {
+    recommendations.push({
+      id: 'global-ai-margin-watch',
+      priority: 'warning',
+      scope: 'global',
+      target: 'AI margin',
+      title: 'Watch AI cost pressure',
+      rationale: `AI cost is above the 40% watch threshold at ${snapshot.aiCostRatio.toFixed(1)}%.`,
+      action: 'Review high-cost users and workspaces before raising paid-plan limits.',
+      expectedImpact: 'Keeps free/trial growth from hiding token-cost leakage.',
+    });
+  }
+
+  const topRiskUser = drilldown.topUsers.find((user) => user.status === 'risk' || user.status === 'watch');
+  if (topRiskUser) {
+    recommendations.push({
+      id: `user-margin-${topRiskUser.userId}`,
+      priority: topRiskUser.status === 'risk' ? 'critical' : 'warning',
+      scope: 'user',
+      target: topRiskUser.userEmail,
+      title: 'Review user AI economics',
+      rationale: `${topRiskUser.userEmail} consumed ${topRiskUser.aiCostRatio.toFixed(1)}% of recognized user revenue in AI cost.`,
+      action: 'Check plan fit, daily budget, and whether this user should move to Studio/Enterprise usage governance.',
+      expectedImpact: 'Prevents one power user from turning a healthy plan into a negative-margin account.',
+    });
+  }
+
+  const unattributedWorkspace = drilldown.topWorkspaces.find((workspace) => workspace.workspaceId === 'unattributed');
+  if (unattributedWorkspace) {
+    recommendations.push({
+      id: 'workspace-unattributed-ai-cost',
+      priority: 'warning',
+      scope: 'workspace',
+      target: 'unattributed',
+      title: 'Fix AI cost attribution',
+      rationale: `${unattributedWorkspace.percentage.toFixed(1)}% of AI spend has no project/workspace metadata.`,
+      action: 'Require projectId/workspaceId metadata on every AI ledger write before launching broader agent automation.',
+      expectedImpact: 'Makes billing, support, and agent governance auditable per workspace.',
+    });
+  }
+
+  const concentratedWorkspace = drilldown.topWorkspaces.find(
+    (workspace) => workspace.workspaceId !== 'unattributed' && workspace.status !== 'healthy',
+  );
+  if (concentratedWorkspace) {
+    recommendations.push({
+      id: `workspace-margin-${concentratedWorkspace.workspaceId}`,
+      priority: concentratedWorkspace.status === 'risk' ? 'critical' : 'warning',
+      scope: 'workspace',
+      target: concentratedWorkspace.workspaceId,
+      title: 'Add workspace budget guardrail',
+      rationale: `${concentratedWorkspace.workspaceId} represents ${concentratedWorkspace.percentage.toFixed(1)}% of AI spend in this range.`,
+      action: 'Set a workspace-level budget warning and review whether long-running agents need approval gates.',
+      expectedImpact: 'Protects collaborative projects from silent high-cost agent loops.',
+    });
+  }
+
+  const dominantModel = aiCostBreakdown[0];
+  if (dominantModel && dominantModel.percentage > 40) {
+    recommendations.push({
+      id: `model-concentration-${dominantModel.model}`,
+      priority: dominantModel.percentage > 70 ? 'critical' : 'warning',
+      scope: 'model',
+      target: dominantModel.model,
+      title: 'Reduce model concentration risk',
+      rationale: `${dominantModel.model} accounts for ${dominantModel.percentage.toFixed(1)}% of AI cost.`,
+      action: 'Introduce model-routing policy: premium models for review/complex tasks, budget models for routine edits and summaries.',
+      expectedImpact: 'Cuts token spend without weakening high-value agent work.',
+    });
+  }
+
+  if (recommendations.length === 0) {
+    recommendations.push({
+      id: 'ai-margin-healthy',
+      priority: 'info',
+      scope: 'global',
+      target: 'AI margin',
+      title: 'AI margin is healthy',
+      rationale: 'No user, workspace, or model is currently breaching margin thresholds.',
+      action: 'Keep monitoring before increasing free/trial limits or raising default model quality.',
+      expectedImpact: 'Maintains confidence while product usage grows.',
+    });
+  }
+
+  return recommendations.slice(0, 5);
+}
+
 async function handler(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -558,6 +676,11 @@ async function handler(req: NextRequest) {
       totalAICost,
       revenueByUserId,
     });
+    const aiMarginRecommendations = buildAiMarginRecommendations({
+      snapshot: aiMarginSnapshot,
+      drilldown: aiMarginDrilldown,
+      aiCostBreakdown,
+    });
 
     const alerts: FinanceMetrics['alerts'] = [];
 
@@ -617,6 +740,7 @@ async function handler(req: NextRequest) {
       aiCostBreakdown,
       aiMarginSnapshot,
       aiMarginDrilldown,
+      aiMarginRecommendations,
       revenueByPlan,
       recentTransactions,
       alerts,
