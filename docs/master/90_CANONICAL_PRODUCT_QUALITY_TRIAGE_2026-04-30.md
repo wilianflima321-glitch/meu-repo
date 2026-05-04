@@ -247,6 +247,9 @@ The V12 email-risk critique is now partially executable instead of remaining a w
 ## 2026-05-03 User trust audit log gate
 The V12 trust/audit-log critique is now visible to the final user, not only to admins. `/api/me/audit-log` returns account-scoped audit events for actions performed by the user, admin/system events targeting that user, and target-email matches. The response redacts admin identity, masks IP addresses, and exposes only allowlisted metadata. `UserAuditLogPanel` renders this inside the Settings security tab as a compact account activity surface, and `tools/check-user-audit-log-gate.mjs` protects the endpoint/UI/test/docs contract from becoming a raw admin log dump.
 
+## 2026-05-04 Public Trust Center Gate
+The V12 buyer/trust critique is now also protected by a public route and an executable gate. `/trust` is the single due-diligence map for security, compliance, status, privacy, terms, responsible disclosure, and contact-sales handoff. It links into `/security`, `/security-policy`, `/compliance`, `/status`, `/privacy`, and `/terms` without adding more noise to the first-use Studio flow. `tools/check-public-trust-center-gate.mjs` prevents fake certification language, invented uptime, hardcoded colors, console usage, and footer/nav/sitemap drift. The page uses `SOC 2 preparation`, `responsible disclosure`, and `audit activity` language deliberately so the product can earn trust without overclaiming.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
@@ -259,6 +262,7 @@ As of this checkpoint:
 - `npm run qa:ai-margin-governance` is green,
 - `npm run qa:auth-email` is green,
 - `npm run qa:user-audit-log` is green,
+- `npm run qa:public-trust-center` is green,
 - `npm run qa:canonical-doc-alignment` is green,
 - the five public UX contracts for mission intake, Studio handoff, compare trust, pricing readiness, and local continuity pass in Chromium,
 - `git diff --check` is green when the repo is validated cleanly.
@@ -416,6 +420,7 @@ This is the shortest honest list of important open gaps.
 - keep chat economics visible with a compact cost meter and billing portal truth.
 - keep registration email/verification factual through the auth email gate.
 - keep user-facing audit activity redacted, scoped, and visible in security settings.
+- keep the public trust center factual, linked, and free of fake certification or SLO/SLA claims.
 
 ### Priority 2
 - viewport dominance,

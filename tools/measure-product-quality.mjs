@@ -180,6 +180,11 @@ const userAuditLogConfigured =
   exists('docs/master/102_USER_TRUST_AUDIT_LOG_GATE_2026-05-03.md') &&
   exists('cloud-web-app/web/app/api/me/audit-log/route.ts') &&
   packageJson.includes('qa:user-audit-log');
+const publicTrustCenterConfigured =
+  exists('tools/check-public-trust-center-gate.mjs') &&
+  exists('docs/master/103_PUBLIC_TRUST_CENTER_GATE_2026-05-04.md') &&
+  exists('cloud-web-app/web/app/trust/page.tsx') &&
+  packageJson.includes('qa:public-trust-center');
 
 const metrics = [
   { id: 'console_calls', label: 'console.log/info/debug in app code', value: consoleCalls.total, target: 50, direction: 'lte' },
@@ -204,6 +209,7 @@ const metrics = [
   { id: 'ai_margin_governance', label: 'AI margin governance gate configured', value: aiMarginGovernanceConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'auth_email', label: 'Auth email verification gate configured', value: authEmailConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'user_audit_log', label: 'User-facing audit log gate configured', value: userAuditLogConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'public_trust_center', label: 'Public trust center gate configured', value: publicTrustCenterConfigured ? 1 : 0, target: 1, direction: 'eq' },
 ].map((metric) => ({
   ...metric,
   status: statusFor(metric.value, metric.target, metric.direction),
