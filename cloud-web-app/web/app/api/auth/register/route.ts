@@ -1,13 +1,80 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
 import { generateTokenWithRole } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { emailService, type EmailResult } from '@/lib/email-system';
 
 export const dynamic = 'force-dynamic';
 
 const routeLogger = createComponentLogger('api.auth.register');
+
+function buildAppUrl(path: string): string {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  return `${baseUrl.replace(/\/$/, '')}${path}`;
+}
+
+function createHashedToken(): { token: string; hash: string } {
+  const token = crypto.randomBytes(32).toString('hex');
+  const hash = crypto.createHash('sha256').update(token).digest('hex');
+  return { token, hash };
+}
+
+async function sendRegistrationEmails(params: {
+  email: string;
+  name: string;
+  verifyUrl: string;
+}): Promise<void> {
+  const { email, name, verifyUrl } = params;
+  const dashboardUrl = buildAppUrl('/dashboard');
+  const docsUrl = buildAppUrl('/docs');
+
+  const deliveries = await Promise.allSettled<EmailResult>([
+    emailService.sendTemplate(
+      'welcome',
+      { email, name },
+      {
+        name,
+        dashboardUrl,
+        docsUrl,
+      },
+      { tags: ['auth', 'welcome'] },
+    ),
+    emailService.sendTemplate(
+      'verify_email',
+      { email, name },
+      {
+        name,
+        verifyUrl,
+        expiryHours: 24,
+      },
+      { tags: ['auth', 'verify-email'] },
+    ),
+  ]);
+
+  deliveries.forEach((delivery, index) => {
+    const template = index === 0 ? 'welcome' : 'verify_email';
+    if (delivery.status === 'rejected') {
+      routeLogger.warn('registration.email.delivery.rejected', {
+        template,
+        email,
+        error: delivery.reason instanceof Error ? delivery.reason.message : String(delivery.reason),
+      });
+      return;
+    }
+
+    if (!delivery.value.success) {
+      routeLogger.warn('registration.email.delivery.failed', {
+        template,
+        email,
+        provider: delivery.value.provider,
+        error: delivery.value.error,
+      });
+    }
+  });
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,6 +105,8 @@ export async function POST(req: NextRequest) {
 
     // New users start with a factual 14-day Starter trial, then fall back to Free.
     const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+    const verification = createHashedToken();
+    const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const user = await prisma.user.create({
       data: {
         email,
@@ -45,7 +114,20 @@ export async function POST(req: NextRequest) {
         name: name || null,
         plan: 'starter_trial',
         trialEndsAt,
+        verificationToken: verification.hash,
+        verificationTokenExpiry,
       },
+    });
+
+    const displayName = user.name || user.email.split('@')[0] || 'builder';
+    const verifyUrl = buildAppUrl(
+      `/verify-email?token=${verification.token}&email=${encodeURIComponent(user.email)}`,
+    );
+
+    await sendRegistrationEmails({
+      email: user.email,
+      name: displayName,
+      verifyUrl,
     });
 
     // Generate JWT token (real-or-fail). JWT-only (no server sessions).
@@ -59,7 +141,10 @@ export async function POST(req: NextRequest) {
         email: user.email,
         name: user.name,
         plan: user.plan,
+        trialEndsAt: trialEndsAt.toISOString(),
+        emailVerified: user.emailVerified,
       },
+      emailVerificationRequired: true,
     }, { status: 201 });
 
     // Set cookie for middleware (mesmo comportamento do login)

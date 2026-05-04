@@ -9,8 +9,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+const routeLogger = createComponentLogger('api.email');
 
 // Importação dinâmica do sistema de email (evita erros no build)
 async function getEmailService() {
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Failed to send email:', error);
+    routeLogger.error('email.send.failed', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

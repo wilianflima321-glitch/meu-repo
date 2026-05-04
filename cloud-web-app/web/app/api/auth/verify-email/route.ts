@@ -3,8 +3,10 @@ import { prisma } from '@/lib/db';
 import * as crypto from 'crypto';
 import { emailService } from '@/lib/email-system';
 import { verifyToken } from '@/lib/auth-server';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+const routeLogger = createComponentLogger('api.auth.verify-email');
 
 /**
  * POST /api/auth/verify-email
@@ -59,7 +61,7 @@ export async function POST(req: NextRequest) {
       message: 'Email verified successfully!',
     });
   } catch (error) {
-    console.error('Email verification error:', error);
+    routeLogger.error('email_verification.failed', error);
     return NextResponse.json(
       { error: 'An error occurred. Please try again.' },
       { status: 500 }
@@ -104,7 +106,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    if ((user as any).emailVerified) {
+    if (user.emailVerified) {
       return NextResponse.json({
         message: 'Email is already verified',
       });
@@ -145,7 +147,7 @@ export async function GET(req: NextRequest) {
       message: 'Verification email sent!',
     });
   } catch (error) {
-    console.error('Resend verification error:', error);
+    routeLogger.error('verification_resend.failed', error);
     return NextResponse.json(
       { error: 'An error occurred. Please try again.' },
       { status: 500 }

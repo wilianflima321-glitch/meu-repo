@@ -598,8 +598,17 @@ export class EmailService {
   private processing = false;
   
   private constructor() {
-    this.provider = (process.env.EMAIL_PROVIDER as EmailProvider) || 'mock';
-    this.apiKey = process.env.EMAIL_API_KEY;
+    const configuredProvider = process.env.EMAIL_PROVIDER as EmailProvider | undefined;
+    const resendKey = process.env.RESEND_API_KEY || process.env.EMAIL_API_KEY;
+    const sendGridKey = process.env.SENDGRID_API_KEY || process.env.EMAIL_API_KEY;
+
+    this.provider = configuredProvider || (resendKey ? 'resend' : 'mock');
+    this.apiKey =
+      this.provider === 'resend'
+        ? resendKey
+        : this.provider === 'sendgrid'
+          ? sendGridKey
+          : process.env.EMAIL_API_KEY;
     this.fromAddress = {
       email: process.env.EMAIL_FROM || 'noreply@aethel.dev',
       name: 'Aethel Engine',
@@ -675,6 +684,10 @@ export class EmailService {
     const recipients = this.normalizeRecipients(email.to);
     
     try {
+      if (this.provider !== 'mock' && !this.apiKey) {
+        throw new Error(`Email provider "${this.provider}" is configured without an API key`);
+      }
+
       switch (this.provider) {
         case 'sendgrid':
           return await this.sendViaSendGrid(email, recipients);
@@ -688,7 +701,7 @@ export class EmailService {
           return this.mockSend(email, recipients);
       }
     } catch (error) {
-      console.error('[Email] Send failed:', error);
+      log.error('[Email] Send failed', error);
       return {
         id: `error_${Date.now()}`,
         success: false,

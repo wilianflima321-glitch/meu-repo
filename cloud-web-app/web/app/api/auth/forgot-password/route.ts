@@ -4,6 +4,7 @@ import * as crypto from 'crypto';
 import { emailService } from '@/lib/email-system';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,7 @@ type RateLimitResult = {
 
 const FORGOT_PASSWORD_RATE_LIMIT = 3
 const FORGOT_PASSWORD_WINDOW_MS = 60 * 60 * 1000
+const routeLogger = createComponentLogger('api.auth.forgot-password')
 
 let upstashLimiter: Ratelimit | null | undefined
 
@@ -150,7 +152,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user uses OAuth (no password to reset)
-    if ((user as any).oauthProvider && !user.password) {
+    if (user.oauthProvider && !user.password) {
       return successResponse;
     }
 
@@ -186,13 +188,13 @@ export async function POST(req: NextRequest) {
         }
       );
     } catch (emailError) {
-      console.error('Failed to send reset email:', emailError);
+      routeLogger.warn('password_reset.email.failed', emailError);
       // Still return success to not reveal email existence
     }
 
     return successResponse;
   } catch (error) {
-    console.error('Forgot password error:', error);
+    routeLogger.error('forgot_password.failed', error);
     return NextResponse.json(
       { error: 'An error occurred. Please try again.' },
       { status: 500 }
