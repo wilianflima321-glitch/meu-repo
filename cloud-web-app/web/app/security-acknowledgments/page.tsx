@@ -44,7 +44,7 @@ export default function SecurityAcknowledgmentsPage() {
       calloutDescription="Use a security policy e o trust center como rota principal. Se a conversa tambem envolver rollout enterprise, procurement ou requisitos de buyer, siga para compliance e contact-sales depois da triagem inicial."
       calloutLinks={[
         { label: 'Security policy', href: '/security-policy' },
-        { label: 'Trust center', href: '/security' },
+        { label: 'Trust center', href: '/trust' },
         { label: 'Compliance', href: '/compliance' },
         { label: 'Contact sales', href: '/contact-sales' },
       ]}

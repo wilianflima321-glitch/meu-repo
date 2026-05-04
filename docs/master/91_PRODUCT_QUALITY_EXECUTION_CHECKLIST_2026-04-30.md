@@ -48,12 +48,14 @@ Do:
 - keep `npm run qa:auth-email` green before treating signup, verification, or password reset as production-ready,
 - keep `npm run qa:user-audit-log` green before claiming account activity or trust-center readiness,
 - keep `npm run qa:public-trust-center` green before claiming buyer/trust continuity,
+- keep `npm run qa:security-disclosure` green before inviting researchers or referencing responsible disclosure,
 - keep `git diff --check` clean,
 - continue isolating build/prerender blockers honestly.
 
 Do not:
 - claim full platform confidence from UX-only improvements.
 - claim certifications, SLO/SLA guarantees, or uptime percentages that do not have live evidence.
+- imply a formal bug bounty, guaranteed reward, or broad safe harbor beyond the published policy.
 
 ### Mojibake And Text Cleanliness
 Goal:
@@ -118,10 +120,12 @@ Do:
 - improve docs search and procurement path,
 - keep claims grounded in real capabilities.
 - keep `/trust` as the single public due-diligence map for security, compliance, status, privacy, terms, and responsible disclosure.
+- keep `/security-policy` specific about safe harbor, in-scope surfaces, out-of-scope behavior, and AI-agent testing limits.
 
 Do not:
 - add fake customer proof or inflated compliance language.
 - scatter buyer-proof links across new navigation families when the trust center can stay compact.
+- invite destructive security testing, third-party data access, or public disclosure before coordinated triage.
 
 ### Studio Local
 Goal:

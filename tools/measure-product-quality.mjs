@@ -185,6 +185,11 @@ const publicTrustCenterConfigured =
   exists('docs/master/103_PUBLIC_TRUST_CENTER_GATE_2026-05-04.md') &&
   exists('cloud-web-app/web/app/trust/page.tsx') &&
   packageJson.includes('qa:public-trust-center');
+const securityDisclosureConfigured =
+  exists('tools/check-security-disclosure-gate.mjs') &&
+  exists('docs/master/104_SECURITY_DISCLOSURE_SAFE_HARBOR_GATE_2026-05-04.md') &&
+  exists('cloud-web-app/web/app/security-policy/page.tsx') &&
+  packageJson.includes('qa:security-disclosure');
 
 const metrics = [
   { id: 'console_calls', label: 'console.log/info/debug in app code', value: consoleCalls.total, target: 50, direction: 'lte' },
@@ -210,6 +215,7 @@ const metrics = [
   { id: 'auth_email', label: 'Auth email verification gate configured', value: authEmailConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'user_audit_log', label: 'User-facing audit log gate configured', value: userAuditLogConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'public_trust_center', label: 'Public trust center gate configured', value: publicTrustCenterConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'security_disclosure', label: 'Security disclosure safe harbor gate configured', value: securityDisclosureConfigured ? 1 : 0, target: 1, direction: 'eq' },
 ].map((metric) => ({
   ...metric,
   status: statusFor(metric.value, metric.target, metric.direction),

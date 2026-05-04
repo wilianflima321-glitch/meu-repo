@@ -158,6 +158,13 @@ const resources: TrustResource[] = [
     href: '/security-policy',
   },
   {
+    eyebrow: 'Acknowledgments',
+    title: 'Security acknowledgments',
+    description:
+      'Reconhecimento publico apenas quando houver pesquisa coordenada e validada.',
+    href: '/security-acknowledgments',
+  },
+  {
     eyebrow: 'Privacy',
     title: 'Privacidade',
     description:
