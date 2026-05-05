@@ -6,6 +6,7 @@ import { generateTokenWithRole } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { createComponentLogger } from '@/lib/observability/logger';
 import { emailService, type EmailResult } from '@/lib/email-system';
+import { enforceTurnstile } from '@/lib/server/turnstile-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,11 @@ function createHashedToken(): { token: string; hash: string } {
   const token = crypto.randomBytes(32).toString('hex');
   const hash = crypto.createHash('sha256').update(token).digest('hex');
   return { token, hash };
+}
+
+function readStringField(body: Record<string, unknown>, key: string): string {
+  const value = body[key];
+  return typeof value === 'string' ? value.trim() : '';
 }
 
 async function sendRegistrationEmails(params: {
@@ -78,7 +84,13 @@ async function sendRegistrationEmails(params: {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name } = await req.json();
+    const body = (await req.json()) as Record<string, unknown>;
+    const turnstile = await enforceTurnstile(req, body, 'register');
+    if (!turnstile.ok) return turnstile.response;
+
+    const email = readStringField(body, 'email').toLowerCase();
+    const password = readStringField(body, 'password');
+    const name = readStringField(body, 'name');
 
     // Validate input
     if (!email || !password) {

@@ -761,3 +761,11 @@ Gizmo history can now be read back as compact review packets for agents and UI. 
 The expensive creative generation routes now have a plan-aware hard cap before provider execution. `cloud-web-app/web/lib/server/ai-expensive-generation-guard.ts` estimates media-generation cost for image, 3D, music, and voice jobs, requires a plan with the `creative` domain, consumes metered usage before the provider call, and returns compact quota headers for UI transparency.
 
 The guarded routes are `cloud-web-app/web/app/api/ai/image/generate/route.ts`, `cloud-web-app/web/app/api/ai/3d/generate/route.ts`, `cloud-web-app/web/app/api/ai/music/generate/route.ts`, and `cloud-web-app/web/app/api/ai/voice/generate/route.ts`. This directly closes the audit risk where trial/free users could hit high-cost media providers with only IP rate limits. Free/basic users now receive an explicit upgrade response instead of burning provider cost.
+
+## 2026-05-05 - Auth abuse prevention gate
+
+- Status: implemented as a product-quality guard, not a visual promise.
+- What changed: login and register now pass through server-side Cloudflare Turnstile verification when `CLOUDFLARE_TURNSTILE_SECRET_KEY` (or compatible secret env) is configured.
+- Safety behavior: local/dev remains unblocked when no secret exists; `AETHEL_REQUIRE_TURNSTILE=true` fails closed if the secret is missing.
+- Why it matters: this closes a P0 trial-farm/brute-force gap from the repo audit while keeping the Studio onboarding clean and low-friction.
+- Validation: `qa:auth-abuse-prevention`, focused Turnstile tests, and the product quality progress gate.

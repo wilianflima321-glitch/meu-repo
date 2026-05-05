@@ -3,12 +3,26 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { generateTokenWithRole } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+import { enforceTurnstile } from '@/lib/server/turnstile-guard';
 
 export const dynamic = 'force-dynamic';
 
+const routeLogger = createComponentLogger('api.auth.login');
+
+function readStringField(body: Record<string, unknown>, key: string): string {
+  const value = body[key];
+  return typeof value === 'string' ? value.trim() : '';
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const body = (await req.json()) as Record<string, unknown>;
+    const turnstile = await enforceTurnstile(req, body, 'login');
+    if (!turnstile.ok) return turnstile.response;
+
+    const email = readStringField(body, 'email').toLowerCase();
+    const password = readStringField(body, 'password');
 
     // Validate input
     if (!email || !password) {
@@ -40,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate JWT token (real-or-fail). JWT-only (no server sessions).
-    const token = generateTokenWithRole(user.id, user.email, (user as any).role || 'user', user.plan || undefined);
+    const token = generateTokenWithRole(user.id, user.email, user.role || 'user', user.plan || undefined);
 
     // Return user data (without password)
     const response = NextResponse.json({
@@ -64,7 +78,7 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error('Login error:', error);
+    routeLogger.error('Login error', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

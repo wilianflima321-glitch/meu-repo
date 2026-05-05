@@ -175,6 +175,11 @@ const authEmailConfigured =
   exists('tools/check-auth-email-gate.mjs') &&
   exists('cloud-web-app/web/__tests__/lib/email-system.test.ts') &&
   packageJson.includes('qa:auth-email');
+const authAbusePreventionConfigured =
+  exists('tools/check-auth-abuse-prevention-gate.mjs') &&
+  exists('cloud-web-app/web/lib/server/turnstile-guard.ts') &&
+  exists('cloud-web-app/web/__tests__/server/turnstile-guard.test.ts') &&
+  packageJson.includes('qa:auth-abuse-prevention');
 const userAuditLogConfigured =
   exists('tools/check-user-audit-log-gate.mjs') &&
   exists('docs/master/102_USER_TRUST_AUDIT_LOG_GATE_2026-05-03.md') &&
@@ -243,6 +248,7 @@ const metrics = [
   { id: 'economics_transparency', label: 'Chat economics transparency gate configured', value: economicsTransparencyConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'ai_margin_governance', label: 'AI margin governance gate configured', value: aiMarginGovernanceConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'auth_email', label: 'Auth email verification gate configured', value: authEmailConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'auth_abuse_prevention', label: 'Auth abuse prevention Turnstile gate configured', value: authAbusePreventionConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'user_audit_log', label: 'User-facing audit log gate configured', value: userAuditLogConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'public_trust_center', label: 'Public trust center gate configured', value: publicTrustCenterConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'security_disclosure', label: 'Security disclosure safe harbor gate configured', value: securityDisclosureConfigured ? 1 : 0, target: 1, direction: 'eq' },

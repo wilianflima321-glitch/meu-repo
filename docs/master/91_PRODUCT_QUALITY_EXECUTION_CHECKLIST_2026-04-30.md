@@ -597,3 +597,11 @@ Next:
 - add Turnstile/signup abuse checks,
 - add BannedIp/BannedDevice enforcement,
 - migrate remaining AI routes to one shared metering style instead of mixed legacy quota helpers.
+
+## 2026-05-05 - Auth Abuse Prevention Execution
+
+- [x] Add server-side Turnstile guard for login/register without blocking local development.
+- [x] Keep failures explicit: `TURNSTILE_REQUIRED`, `TURNSTILE_FAILED`, `TURNSTILE_NOT_CONFIGURED`, `TURNSTILE_UNAVAILABLE`.
+- [x] Remove remaining auth route `console.error` and unsafe role `any` cast.
+- [x] Add `qa:auth-abuse-prevention` to the product quality progress gate.
+- [x] Add focused tests for token aliases, missing token, provider failure and client IP forwarding.
