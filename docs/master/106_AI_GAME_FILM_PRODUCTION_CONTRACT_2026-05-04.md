@@ -211,3 +211,14 @@ The advantage is the unified AI production OS:
 - and gives the user evidence, approval, rollback, and confidence at every step.
 
 That is the path to best-in-market quality without UI pollution or fake AAA claims.
+
+## 2026-05-05 Expensive Creative Generation Guard
+Aethel must not let game/film media routes burn provider cost without plan-aware controls. `cloud-web-app/web/lib/server/ai-expensive-generation-guard.ts` is now the canonical guard for image, 3D, music, and voice generation. It estimates a budget-equivalent cost, requires creative-plan access, consumes metered usage before provider execution, and emits compact cost headers for UI transparency.
+
+Required guarded routes:
+- `cloud-web-app/web/app/api/ai/image/generate/route.ts`
+- `cloud-web-app/web/app/api/ai/3d/generate/route.ts`
+- `cloud-web-app/web/app/api/ai/music/generate/route.ts`
+- `cloud-web-app/web/app/api/ai/voice/generate/route.ts`
+
+This does not claim professional media generation is complete; it closes the cost-abuse gap while preserving the larger roadmap for evidence, provenance, render queues, and asset graph approvals.

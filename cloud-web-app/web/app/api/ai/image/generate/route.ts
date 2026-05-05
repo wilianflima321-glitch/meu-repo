@@ -20,6 +20,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import OpenAI from 'openai';
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import { enforceExpensiveAiGenerationUsage } from '@/lib/server/ai-expensive-generation-guard'
 
 const log = createComponentLogger('api/ai/image/generate/route')
 
@@ -272,6 +273,16 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const usageGuard = await enforceExpensiveAiGenerationUsage({
+      userId: user.userId,
+      route: '/api/ai/image/generate',
+      kind: 'image',
+      prompt,
+      units: n,
+      quality,
+    })
+    if (usageGuard.response) return usageGuard.response
+
     // Generate based on provider
     let images: { url: string; revisedPrompt?: string }[];
 
@@ -303,11 +314,12 @@ export async function POST(req: NextRequest) {
         style,
         quality,
         generatedAt: new Date().toISOString(),
+        estimatedCostTokens: usageGuard.estimatedCostTokens,
       },
-    });
+    }, { headers: usageGuard.headers });
 
   } catch (error) {
-    console.error('[Image API] Error:', error);
+    log.error('image_generation.failed', error);
     
     const message = error instanceof Error ? error.message : 'Generation failed';
     

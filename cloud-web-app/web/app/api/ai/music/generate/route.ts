@@ -17,6 +17,7 @@ import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { checkRateLimit } from '@/lib/rate-limit';
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import { enforceExpensiveAiGenerationUsage } from '@/lib/server/ai-expensive-generation-guard'
 
 const log = createComponentLogger('api/ai/music/generate/route')
 
@@ -301,6 +302,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const usageGuard = await enforceExpensiveAiGenerationUsage({
+      userId: user.userId,
+      route: '/api/ai/music/generate',
+      kind: 'music',
+      prompt,
+      units: duration,
+      quality: provider,
+    })
+    if (usageGuard.response) return usageGuard.response
+
     log.info(`[Music API] Generating with ${provider}: "${prompt.substring(0, 50)}..."`);
 
     // Generate based on provider
@@ -336,12 +347,13 @@ export async function POST(req: NextRequest) {
         mood,
         duration,
         instrumental,
+        estimatedCostTokens: usageGuard.estimatedCostTokens,
         createdAt: new Date().toISOString(),
       },
-    });
+    }, { headers: usageGuard.headers });
 
   } catch (error) {
-    console.error('[Music API] Error:', error);
+    log.error('music_generation.failed', error);
     const message = error instanceof Error ? error.message : 'Generation failed';
     return NextResponse.json({ error: message }, { status: 500 });
   }

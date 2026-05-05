@@ -756,3 +756,8 @@ This keeps the Firebase/Gemini-style low-noise surface while still giving profes
 Gizmo history can now be read back as compact review packets for agents and UI. `cloud-web-app/web/lib/production/gizmo-review-packets.ts` converts persisted gizmo Mission Ledger entries and their Scene/Evidence/Validation graph nodes into a small status packet: `ready`, `needs-approval`, `needs-evidence`, or `blocked`.
 
 `GET /api/projects/[id]/production-state/gizmo-transform` now returns those packets, a summary, and the current production readiness without mutating project settings. `POST` also returns the latest packet after persistence. This closes the next practical loop for game/film work: agents can inspect recent viewport edits, see whether evidence is missing, know if approval is required, and avoid duplicating or forgetting scene transforms.
+
+## 2026-05-05 Expensive AI Generation Guard Update
+The expensive creative generation routes now have a plan-aware hard cap before provider execution. `cloud-web-app/web/lib/server/ai-expensive-generation-guard.ts` estimates media-generation cost for image, 3D, music, and voice jobs, requires a plan with the `creative` domain, consumes metered usage before the provider call, and returns compact quota headers for UI transparency.
+
+The guarded routes are `cloud-web-app/web/app/api/ai/image/generate/route.ts`, `cloud-web-app/web/app/api/ai/3d/generate/route.ts`, `cloud-web-app/web/app/api/ai/music/generate/route.ts`, and `cloud-web-app/web/app/api/ai/voice/generate/route.ts`. This directly closes the audit risk where trial/free users could hit high-cost media providers with only IP rate limits. Free/basic users now receive an explicit upgrade response instead of burning provider cost.

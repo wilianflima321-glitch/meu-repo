@@ -19,6 +19,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import OpenAI from 'openai';
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import { enforceExpensiveAiGenerationUsage } from '@/lib/server/ai-expensive-generation-guard'
 
 const log = createComponentLogger('api/ai/voice/generate/route')
 
@@ -258,6 +259,16 @@ export async function POST(req: NextRequest) {
     // Get default voice for provider
     const defaultVoice = voice || providerConfig.voices[0];
 
+    const usageGuard = await enforceExpensiveAiGenerationUsage({
+      userId: user.userId,
+      route: '/api/ai/voice/generate',
+      kind: 'voice',
+      prompt: text,
+      units: text.length,
+      quality: provider,
+    })
+    if (usageGuard.response) return usageGuard.response
+
     log.info(`[Voice API] Generating with ${provider}: "${text.substring(0, 50)}..."`);
 
     // Generate based on provider
@@ -297,12 +308,13 @@ export async function POST(req: NextRequest) {
         voice: defaultVoice,
         emotion,
         speed,
+        estimatedCostTokens: usageGuard.estimatedCostTokens,
         generatedAt: new Date().toISOString(),
       },
-    });
+    }, { headers: usageGuard.headers });
 
   } catch (error) {
-    console.error('[Voice API] Error:', error);
+    log.error('voice_generation.failed', error);
     const message = error instanceof Error ? error.message : 'Generation failed';
     return NextResponse.json({ error: message }, { status: 500 });
   }

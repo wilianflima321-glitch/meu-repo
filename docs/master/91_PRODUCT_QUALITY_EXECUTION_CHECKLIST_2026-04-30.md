@@ -584,3 +584,16 @@ Next:
 - capture real viewport screenshot/clip evidence refs,
 - add rollback/replay affordances using the fetched review packet,
 - batch rapid drag passes into one clean Mission Ledger entry.
+
+## 2026-05-05 Expensive AI Generation Guard
+Done in this wave:
+- Added `cloud-web-app/web/lib/server/ai-expensive-generation-guard.ts` for image/3D/music/voice cost estimation, plan-domain checks, metered usage consumption, and quota headers.
+- Wired the guard into image, 3D, music, and voice generation routes before provider calls.
+- Replaced touched route console failure paths with structured logger errors.
+- Added `cloud-web-app/web/__tests__/server/ai-expensive-generation-guard.test.ts`.
+- Extended `tools/check-ai-game-film-production-contract.mjs` so the guard cannot be removed silently.
+
+Next:
+- add Turnstile/signup abuse checks,
+- add BannedIp/BannedDevice enforcement,
+- migrate remaining AI routes to one shared metering style instead of mixed legacy quota helpers.

@@ -19,6 +19,8 @@ const testPath = 'cloud-web-app/web/__tests__/docs/ai-game-film-production-contr
 const productionStateTestPath = 'cloud-web-app/web/__tests__/production/agentic-production-state.test.ts'
 const repositoryCartographyPath = 'cloud-web-app/web/lib/production/repository-cartography.ts'
 const repositoryCartographyTestPath = 'cloud-web-app/web/__tests__/production/repository-cartography.test.ts'
+const expensiveGenerationGuardPath = 'cloud-web-app/web/lib/server/ai-expensive-generation-guard.ts'
+const expensiveGenerationGuardTestPath = 'cloud-web-app/web/__tests__/server/ai-expensive-generation-guard.test.ts'
 
 const anchors = [
   'docs/master/93_UNREAL_AGENTIC_PRODUCT_GAP_MAP_2026-05-01.md',
@@ -29,6 +31,7 @@ const anchors = [
   'cloud-web-app/web/components/assets/ContentBrowserConnected.tsx',
   'cloud-web-app/web/lib/server/asset-quality.ts',
   'cloud-web-app/web/lib/server/asset-source-policy.ts',
+  expensiveGenerationGuardPath,
   'cloud-web-app/web/lib/device/runtime-execution-router.ts',
   'cloud-web-app/web/lib/production/agentic-production-state.ts',
   repositoryCartographyPath,
@@ -46,6 +49,7 @@ for (const path of [
   testPath,
   productionStateTestPath,
   repositoryCartographyTestPath,
+  expensiveGenerationGuardTestPath,
   ...anchors,
 ]) {
   assert(existsSync(path), `${path} exists`)
@@ -66,6 +70,8 @@ const productionStateRoute = existsSync('cloud-web-app/web/app/api/projects/[id]
 const productionStateTest = existsSync(productionStateTestPath) ? read(productionStateTestPath) : ''
 const repositoryCartography = existsSync(repositoryCartographyPath) ? read(repositoryCartographyPath) : ''
 const repositoryCartographyTest = existsSync(repositoryCartographyTestPath) ? read(repositoryCartographyTestPath) : ''
+const expensiveGenerationGuard = existsSync(expensiveGenerationGuardPath) ? read(expensiveGenerationGuardPath) : ''
+const expensiveGenerationGuardTest = existsSync(expensiveGenerationGuardTestPath) ? read(expensiveGenerationGuardTestPath) : ''
 
 for (const phrase of [
   'AI Game/Film Production Contract',
@@ -156,6 +162,33 @@ assert(
     repositoryCartographyTest.includes('duplicate') &&
     repositoryCartographyTest.includes('Project Brain'),
   'repository cartography tests cover external GB sources, duplicates, and durable production merge'
+)
+
+for (const phrase of [
+  'estimateExpensiveAiGenerationCost',
+  'GENERATION_PLAN_REQUIRED',
+  'GENERATION_TOO_EXPENSIVE_FOR_PLAN',
+  'consumeMeteredUsage',
+  'X-Aethel-Estimated-Cost-Tokens',
+]) {
+  assert(expensiveGenerationGuard.includes(phrase), `expensive generation guard includes "${phrase}"`)
+}
+
+for (const route of [
+  'cloud-web-app/web/app/api/ai/image/generate/route.ts',
+  'cloud-web-app/web/app/api/ai/3d/generate/route.ts',
+  'cloud-web-app/web/app/api/ai/music/generate/route.ts',
+  'cloud-web-app/web/app/api/ai/voice/generate/route.ts',
+]) {
+  const source = existsSync(route) ? read(route) : ''
+  assert(source.includes('enforceExpensiveAiGenerationUsage'), `${route} enforces expensive generation usage before provider execution`)
+  assert(source.includes('estimatedCostTokens'), `${route} returns estimated media generation cost metadata`)
+}
+
+assert(
+  expensiveGenerationGuardTest.includes('block free-plan abuse') &&
+    expensiveGenerationGuardTest.includes('X-Aethel-Estimated-Cost-Tokens'),
+  'expensive generation guard tests cover abuse blocking and cost transparency headers'
 )
 
 const failed = checks.filter((check) => !check.ok)

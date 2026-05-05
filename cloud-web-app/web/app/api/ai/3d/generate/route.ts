@@ -17,6 +17,7 @@ import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { checkRateLimit } from '@/lib/rate-limit';
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import { enforceExpensiveAiGenerationUsage } from '@/lib/server/ai-expensive-generation-guard'
 
 const log = createComponentLogger('api/ai/3d/generate/route')
 
@@ -339,6 +340,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const usageGuard = await enforceExpensiveAiGenerationUsage({
+      userId: user.userId,
+      route: '/api/ai/3d/generate',
+      kind: 'model3d',
+      prompt: prompt || imageUrl || imageBase64?.slice(0, 1024),
+      quality,
+    })
+    if (usageGuard.response) return usageGuard.response
+
     log.info(`[3D API] Generating with ${provider} (${mode}): "${prompt?.substring(0, 50) || 'image'}..."`);
 
     // Generate based on provider and mode
@@ -382,12 +392,13 @@ export async function POST(req: NextRequest) {
         prompt: prompt?.substring(0, 100),
         style,
         quality,
+        estimatedCostTokens: usageGuard.estimatedCostTokens,
         createdAt: new Date().toISOString(),
       },
-    });
+    }, { headers: usageGuard.headers });
 
   } catch (error) {
-    console.error('[3D API] Error:', error);
+    log.error('model3d_generation.failed', error);
     const message = error instanceof Error ? error.message : 'Generation failed';
     return NextResponse.json({ error: message }, { status: 500 });
   }
