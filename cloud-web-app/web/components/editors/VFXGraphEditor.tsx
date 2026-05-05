@@ -64,7 +64,7 @@ const NODE_TEMPLATES: Record<string, Omit<VFXNode, 'id' | 'position'>> = {
       { id: 'gradient', name: 'Gradient', type: 'gradient' }
     ],
     outputs: [{ id: 'out', name: 'Output', type: 'particle-stream' }],
-    properties: { gradient: [{ t: 0, color: '#ffffff' }, { t: 1, color: '#ff0000' }] }
+    properties: { gradient: [{ t: 0, color: 'rgb(255 255 255)' }, { t: 1, color: 'rgb(255 0 0)' }] }
   },
   'size-over-life': {
     type: 'module',

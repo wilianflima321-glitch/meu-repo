@@ -322,8 +322,14 @@ export function useSecureUpload(options: UseSecureUploadOptions = {}): UseSecure
       onComplete?.(result);
       return result;
 
-    } catch (error: any) {
-      const errorMessage = error.name === 'AbortError' ? 'Upload cancelled' : error.message;
+    } catch (error: unknown) {
+      const errorName = error instanceof Error ? error.name : '';
+      const errorMessage =
+        errorName === 'AbortError'
+          ? 'Upload cancelled'
+          : error instanceof Error
+            ? error.message
+            : 'Upload failed';
       updateProgress(fileId, { status: 'error', error: errorMessage });
       
       const result: UploadResult = { success: false, error: errorMessage };

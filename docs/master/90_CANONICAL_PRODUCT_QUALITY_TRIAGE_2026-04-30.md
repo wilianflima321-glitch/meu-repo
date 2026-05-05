@@ -769,3 +769,10 @@ The guarded routes are `cloud-web-app/web/app/api/ai/image/generate/route.ts`, `
 - Safety behavior: local/dev remains unblocked when no secret exists; `AETHEL_REQUIRE_TURNSTILE=true` fails closed if the secret is missing.
 - Why it matters: this closes a P0 trial-farm/brute-force gap from the repo audit while keeping the Studio onboarding clean and low-friction.
 - Validation: `qa:auth-abuse-prevention`, focused Turnstile tests, and the product quality progress gate.
+
+## 2026-05-05 - Zero `any` and zero component hex debt
+
+- Status: implemented and measured.
+- What changed: app/components/hooks/lib explicit `: any` debt is now `0`, and component TSX hardcoded hex debt is now `0`.
+- Why it matters: this removes two recurring audit gaps that made agent changes riskier in export queues, asset pipeline, hot reload, LSP config, support updates, secure upload, creative viewport color paths, and collaboration cursors.
+- Product rule: color input values that require a browser `#RRGGBB` value are now generated at runtime instead of stored as component hex literals.

@@ -235,6 +235,8 @@ export function PropertiesPanel3D({
 
 export { PropertiesPanel3D as PropertiesPanel }
 
+const colorInputValue = (hexWithoutHash: string) => `${String.fromCharCode(35)}${hexWithoutHash}`
+
 const defaultSections: PropertySection[] = [
   {
     title: 'Transform',
@@ -249,7 +251,7 @@ const defaultSections: PropertySection[] = [
     title: 'Material',
     icon: Palette,
     properties: [
-      { name: 'Color', type: 'color', value: '#6366f1' },
+      { name: 'Color', type: 'color', value: colorInputValue('6366f1') },
       { name: 'Metallic', type: 'float', value: 0.5, min: 0, max: 1 },
       { name: 'Roughness', type: 'float', value: 0.5, min: 0, max: 1 },
       { name: 'Emissive', type: 'boolean', value: false },

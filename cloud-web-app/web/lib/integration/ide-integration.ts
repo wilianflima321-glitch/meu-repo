@@ -19,6 +19,12 @@ import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('integration/ide-integration')
 
+interface LSPRuntimeConfig {
+  language: string;
+  command: string;
+  args: string[];
+}
+
 export interface IDEConfig {
   workspaceRoot: string;
   userId: string;
@@ -260,8 +266,8 @@ export class IDEIntegration {
   /**
    * Get LSP config for language
    */
-  private getLSPConfig(language: string): any {
-    const configs: Record<string, any> = {
+  private getLSPConfig(language: string): LSPRuntimeConfig {
+    const configs: Record<string, LSPRuntimeConfig> = {
       typescript: {
         language: 'typescript',
         command: 'typescript-language-server',

@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { createServer, Server as HttpServer, IncomingMessage } from 'http';
+import { createServer, Server as HttpServer, IncomingMessage, ServerResponse } from 'http';
 import { WebSocketServer, WebSocket, RawData } from 'ws';
 import { watch, FSWatcher, WatchOptions } from 'chokidar';
 import { createHash } from 'crypto';
@@ -801,7 +801,7 @@ export class HotReloadServer extends EventEmitter {
   private generateBuildId(): string {
     return `build-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
   }
-  private handleHttpRequest(req: IncomingMessage, res: any): void {
+  private handleHttpRequest(req: IncomingMessage, res: ServerResponse): void {
     const url = parseUrl(req.url || '', true);
     if (url.pathname === '/health') {
       res.writeHead(200, { 'Content-Type': 'application/json' });

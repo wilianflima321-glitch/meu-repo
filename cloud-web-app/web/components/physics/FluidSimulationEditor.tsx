@@ -104,7 +104,7 @@ export default function FluidSimulationEditor({
     stiffness: 200,
     particleRadius: 0.05,
     smoothingRadius: 0.2,
-    color: '#3b82f6',
+    color: 'rgb(59 130 246)',
     opacity: 0.7,
     gravity: { x: 0, y: -9.81, z: 0 },
     boundarySize: { x: 3, y: 3, z: 3 },

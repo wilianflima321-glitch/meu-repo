@@ -60,9 +60,9 @@ export const Minimap: React.FC<MinimapProps> = ({
     const lineHeight = height / totalLines;
 
     // Clear canvas
-    const surface = getVar('--aethel-surface-tertiary', '#1e1e1e');
-    const textPrimary = getVar('--aethel-text-primary', '#ffffff');
-    const textSecondary = getVar('--aethel-text-secondary', '#d4d4d4');
+    const surface = getVar('--aethel-surface-tertiary', 'rgb(30 30 30)');
+    const textPrimary = getVar('--aethel-text-primary', 'rgb(255 255 255)');
+    const textSecondary = getVar('--aethel-text-secondary', 'rgb(212 212 212)');
 
     ctx.fillStyle = surface;
     ctx.fillRect(0, 0, width, height);

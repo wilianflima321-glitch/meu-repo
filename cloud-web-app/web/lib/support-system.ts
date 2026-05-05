@@ -11,6 +11,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { Resend } from 'resend';
+import type { Prisma } from '@prisma/client';
 
 // ============================================================================
 // CONFIGURATION
@@ -50,7 +51,7 @@ export interface SupportTicket {
   status: TicketStatus;
   channel: 'email' | 'chat' | 'web';
   assignedTo?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
   resolvedAt?: Date;
@@ -176,7 +177,7 @@ export async function updateTicketStatus(
   status: TicketStatus,
   agentId?: string
 ): Promise<SupportTicket> {
-  const data: any = {
+  const data: Prisma.SupportTicketUpdateInput = {
     status,
     updatedAt: new Date(),
   };

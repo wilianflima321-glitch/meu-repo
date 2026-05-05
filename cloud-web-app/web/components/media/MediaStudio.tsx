@@ -595,7 +595,7 @@ export default function MediaStudio({
           ctx.save()
           ctx.filter = 'none'
           ctx.globalAlpha = 1
-          ctx.fillStyle = '#000000'
+          ctx.fillStyle = 'rgb(0 0 0)'
           ctx.fillRect(0, 0, width, height)
 
           const active = project.clips

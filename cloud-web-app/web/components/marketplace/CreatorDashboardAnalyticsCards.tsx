@@ -89,8 +89,8 @@ export function RevenueChartCard({
                             <AreaChart data={data}>
                                 <defs>
                                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="hsl(var(--aethel-primary))" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="hsl(var(--aethel-primary))" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -118,7 +118,7 @@ export function RevenueChartCard({
                                 <Area
                                     type="monotone"
                                     dataKey="revenue"
-                                    stroke="#3b82f6"
+                                    stroke="hsl(var(--aethel-primary))"
                                     strokeWidth={2}
                                     fillOpacity={1}
                                     fill="url(#colorRevenue)"
@@ -253,7 +253,7 @@ export function DownloadTrendChartCard({
                                 />
                                 <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                                 <Tooltip contentStyle={chartTooltipStyle} />
-                                <Bar dataKey="downloads" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="downloads" fill="hsl(var(--aethel-primary))" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

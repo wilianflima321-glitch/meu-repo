@@ -534,7 +534,7 @@ const FaceMesh: React.FC<FacePreview3DProps> = ({ blendShapes }) => {
   return (
     <mesh ref={meshRef} geometry={geometry}>
       <meshStandardMaterial
-        color="#e2a98f"
+        color="rgb(226 169 143)"
         roughness={0.7}
         metalness={0.1}
       />

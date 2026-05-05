@@ -100,6 +100,10 @@ export class KeyboardManager {
 // Singleton instance
 let keyboardManagerInstance: KeyboardManager | null = null;
 
+export interface ShortcutRouter {
+  push(path: string): void;
+}
+
 export function getKeyboardManager(): KeyboardManager {
   if (!keyboardManagerInstance) {
     keyboardManagerInstance = new KeyboardManager();
@@ -112,7 +116,7 @@ export function resetKeyboardManager(): void {
 }
 
 // Default IDE shortcuts
-export function registerDefaultShortcuts(manager: KeyboardManager, router: any): void {
+export function registerDefaultShortcuts(manager: KeyboardManager, router: ShortcutRouter): void {
   // Command Palette
   manager.register({
     key: 'k',

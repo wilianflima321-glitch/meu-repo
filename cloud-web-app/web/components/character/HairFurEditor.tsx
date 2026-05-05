@@ -60,7 +60,7 @@ function HeadMesh() {
   return (
     <mesh position={[0, 0.3, 0]}>
       <sphereGeometry args={[0.5, 32, 32]} />
-      <meshStandardMaterial color="#e8d5c4" roughness={0.8} metalness={0.1} />
+      <meshStandardMaterial color="rgb(232 213 196)" roughness={0.8} metalness={0.1} />
     </mesh>
   );
 }
@@ -85,10 +85,10 @@ function BrushPreview({ brush, active }: BrushPreviewProps) {
   });
   if (!active) return null;
   const brushColors: Record<BrushTool, string> = {
-    comb: '#3b82f6',
-    cut: '#ef4444',
-    add: '#22c55e',
-    length: '#f59e0b',
+    comb: 'rgb(59 130 246)',
+    cut: 'rgb(239 68 68)',
+    add: 'rgb(34 197 94)',
+    length: 'rgb(245 158 11)',
   };
   return (
     <mesh ref={meshRef} position={position}>
@@ -128,7 +128,7 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
   );
   const addStop = useCallback(() => {
     const newPosition = gradient.length > 0 ? (gradient[gradient.length - 1].position + 1) / 2 : 0.5;
-    const newGradient = [...gradient, { position: newPosition, color: '#8b5a2b' }];
+    const newGradient = [...gradient, { position: newPosition, color: rgbToHex(139, 90, 43) }];
     newGradient.sort((a, b) => a.position - b.position);
     onChange(newGradient);
   }, [gradient, onChange]);
@@ -395,7 +395,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
           <ambientLight intensity={0.4} />
           <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow />
           <directionalLight position={[-3, 3, -3]} intensity={0.3} />
-          <pointLight position={[0, 2, 0]} intensity={0.5} color="#fff5e6" />
+          <pointLight position={[0, 2, 0]} intensity={0.5} color="rgb(255 245 230)" />
           <HeadMesh />
           <HairStrands3D
             strandCount={strandCount}
@@ -419,7 +419,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
               }
             }}
           />
-          <gridHelper args={[10, 10, '#1f2933', '#141a24']} position={[0, -0.5, 0]} />
+          <gridHelper args={[10, 10, 'rgb(31 41 51)', 'rgb(20 26 36)']} position={[0, -0.5, 0]} />
         </Canvas>
         {/* Viewport Overlay - Stats */}
         <div className="absolute top-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] backdrop-blur-sm rounded-lg p-3 text-sm space-y-1">

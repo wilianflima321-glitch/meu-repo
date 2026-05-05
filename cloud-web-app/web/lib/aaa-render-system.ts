@@ -34,6 +34,11 @@ export interface RenderPipelineConfig {
   outputColorSpace: THREE.ColorSpace;
 }
 
+interface EffectComposerLike {
+  render(): void;
+  setSize(width: number, height: number): void;
+}
+
 export const DEFAULT_PIPELINE_CONFIG: RenderPipelineConfig = {
   type: 'forwardPlus',
   hdr: true,
@@ -578,7 +583,7 @@ export class AAARenderSystem {
   private velocityTarget?: THREE.WebGLRenderTarget;
   
   // Post-processing composer
-  private composer?: any; // EffectComposer from postprocessing
+  private composer?: EffectComposerLike; // EffectComposer from postprocessing
   
   // Light probes for GI
   private lightProbes: THREE.LightProbe[] = [];

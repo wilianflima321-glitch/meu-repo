@@ -7,17 +7,20 @@
  * pois as listas/filas precisam de chaves estáveis e compartilhadas por workers.
  */
 
-let clientPromise: Promise<any> | null = null;
+import type Redis from 'ioredis';
 
-async function loadIORedis(): Promise<any> {
+let clientPromise: Promise<Redis> | null = null;
+
+async function loadIORedis(): Promise<typeof Redis> {
   try {
-    return await eval('import("ioredis")').then((m: any) => m.default || m);
+    const loadModule = new Function('return import("ioredis")') as () => Promise<typeof import('ioredis')>;
+    return (await loadModule()).default;
   } catch {
     throw new Error('Missing dependency: ioredis. Install with `npm i ioredis` (cloud-web-app/web).');
   }
 }
 
-export async function getQueueRedis(): Promise<any> {
+export async function getQueueRedis(): Promise<Redis> {
   if (clientPromise) return clientPromise;
 
   clientPromise = (async () => {

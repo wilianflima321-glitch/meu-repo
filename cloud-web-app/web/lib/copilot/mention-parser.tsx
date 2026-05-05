@@ -246,7 +246,7 @@ export class MentionSuggestionProvider {
   private functions: string[] = []
   private symbols: string[] = []
   
-  constructor(workspace?: any) {
+  constructor(_workspace?: unknown) {
     // Initialize from workspace
     this.loadWorkspaceIndex()
   }

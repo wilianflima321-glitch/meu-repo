@@ -7,9 +7,15 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import type { Prisma } from '@prisma/client';
 import { verifyToken } from '@/lib/auth-server';
 import { checkProjectAccess } from '@/lib/project-access';
 import { getQueueRedis } from '@/lib/redis-queue';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api.projects.export.retry');
+
+type RetryQueuePayload = Record<string, unknown>;
 
 export async function POST(
   request: NextRequest,
@@ -59,28 +65,30 @@ export async function POST(
       );
     }
 
+    const retryData = {
+      status: 'queued',
+      progress: 0,
+      currentStep: 'Queued (manual retry)',
+      error: null,
+      startedAt: null,
+      completedAt: null,
+      downloadUrl: null,
+      downloadExpiresAt: null,
+      fileSize: null,
+    } satisfies Prisma.ExportJobUpdateInput;
+
     await prisma.exportJob.update({
       where: { id: exportId },
-      data: {
-        status: 'queued',
-        progress: 0,
-        currentStep: 'Queued (manual retry)',
-        error: null,
-        startedAt: null,
-        completedAt: null,
-        downloadUrl: null,
-        downloadExpiresAt: null,
-        fileSize: null,
-      } as any,
+      data: retryData,
     });
 
     const redis = await getQueueRedis();
 
     // Reseta estado no Redis (mantém logs se existirem, mas zera attempts).
-    let existing: any = null;
+    let existing: RetryQueuePayload | null = null;
     try {
       const raw = await redis.get(`export:${exportId}`);
-      if (raw) existing = JSON.parse(raw);
+      if (raw) existing = JSON.parse(raw) as RetryQueuePayload;
     } catch {
       existing = null;
     }
@@ -126,7 +134,7 @@ export async function POST(
       statusUrl: `/api/projects/${projectId}/export/${exportId}`,
     });
   } catch (error) {
-    console.error('Export retry error:', error);
+    routeLogger.error('Export retry error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

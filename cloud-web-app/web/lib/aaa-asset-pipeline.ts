@@ -61,6 +61,11 @@ export type MeshFormat =
   | 'ply'
   | 'stl';
 
+interface GLTFLike {
+  scene: THREE.Object3D;
+  animations?: THREE.AnimationClip[];
+}
+
 export interface AssetMetadata {
   id: string;
   name: string;
@@ -394,7 +399,7 @@ export class AssetImporter {
     });
   }
   
-  private async processGLTFScene(gltf: any, options: ImportOptions): Promise<MeshAsset> {
+  private async processGLTFScene(gltf: GLTFLike, options: ImportOptions): Promise<MeshAsset> {
     const scene = gltf.scene;
     let totalTriangles = 0;
     let totalVertices = 0;
@@ -469,7 +474,7 @@ export class AssetImporter {
         hasUV0: true,
         hasUV1: false,
         hasVertexColors: false,
-        hasSkinning: gltf.animations?.length > 0,
+        hasSkinning: (gltf.animations?.length ?? 0) > 0,
         hasMorphTargets: false,
         boundingBox: bbox,
         boundingSphere: bsphere,

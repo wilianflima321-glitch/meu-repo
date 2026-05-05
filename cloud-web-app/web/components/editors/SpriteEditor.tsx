@@ -289,9 +289,9 @@ export default function SpriteEditor() {
       return `rgba(255, 255, 255, ${alpha})`
     }
 
-    const gridDark = getVar('--aethel-surface-tertiary', '#2a2a2a')
-    const gridLight = getVar('--aethel-surface-quaternary', '#3a3a3a')
-    const gridStroke = getVar('--aethel-text-primary', '#ffffff')
+    const gridDark = getVar('--aethel-surface-tertiary', 'rgb(42 42 42)')
+    const gridLight = getVar('--aethel-surface-quaternary', 'rgb(58 58 58)')
+    const gridStroke = getVar('--aethel-text-primary', 'rgb(255 255 255)')
 
     // Clear
     ctx.clearRect(0, 0, canvas.width, canvas.height)

@@ -14,8 +14,8 @@ describe('Best-In-Market Benchmark V14', () => {
   it('reconciles the stale V13 baseline with current repo quality metrics', () => {
     expect(benchmark).toContain('external V13 audit is treated as historical input')
     expect(benchmark).toContain('`console.log/info/debug`: 0')
-    expect(benchmark).toContain('hardcoded hex in component TSX: 37')
-    expect(benchmark).toContain('explicit `: any` in app code: 13')
+    expect(benchmark).toContain('hardcoded hex in component TSX: 0')
+    expect(benchmark).toContain('explicit `: any` in app code: 0')
     expect(benchmark).toContain('component files over 1000 lines: 0')
     expect(benchmark).toContain('unit/spec tests: 87')
     expect(benchmark).toContain('Repository Cartography: present')

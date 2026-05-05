@@ -10,6 +10,7 @@ import { EventEmitter } from 'events';
 import { createRequire } from 'module';
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import type { Stats } from 'fs';
 
 const require = createRequire(import.meta.url);
 const { getWebSocketServer } = require('./websocket-server.ts') as typeof import('./websocket-server');
@@ -253,7 +254,7 @@ export class FileWatcherManager extends EventEmitter {
   private setupWatcherEvents(workspace: WatchedWorkspace): void {
     const { watcher, id: workspaceId } = workspace;
     
-    const createEvent = (type: FileChangeEvent['type'], filePath: string, stats?: any): FileChangeEvent => ({
+    const createEvent = (type: FileChangeEvent['type'], filePath: string, stats?: Stats): FileChangeEvent => ({
       type,
       path: filePath,
       workspaceId,

@@ -8,8 +8,8 @@ This document replaces broad aspiration with a realistic 2026-2027 benchmark. Th
 
 The current factual baseline is:
 - `console.log/info/debug`: 0
-- hardcoded hex in component TSX: 37
-- explicit `: any` in app code: 13
+- hardcoded hex in component TSX: 0
+- explicit `: any` in app code: 0
 - component files over 1000 lines: 0
 - unit/spec tests: 87
 - e2e specs: 15

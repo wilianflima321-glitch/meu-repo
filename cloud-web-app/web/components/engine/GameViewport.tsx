@@ -91,10 +91,10 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
     [2, 8, 0],
     [-2, 10, 0]
   ]);
-  const groundColor = useMemo(() => resolveCssVarColor('--aethel-surface-tertiary', '#303030'), []);
-  const boxColor = useMemo(() => resolveCssVarColor('--aethel-warning', '#f59e0b'), []);
-  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', '#303030'), []);
-  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', '#4f4f4f'), []);
+  const groundColor = useMemo(() => resolveCssVarColor('--aethel-surface-tertiary', 'rgb(48 48 48)'), []);
+  const boxColor = useMemo(() => resolveCssVarColor('--aethel-warning', 'rgb(245 158 11)'), []);
+  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', 'rgb(48 48 48)'), []);
+  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', 'rgb(79 79 79)'), []);
 
   // Reset physics when switching modes (simple way: remount)
   const [key, setKey] = useState(0);

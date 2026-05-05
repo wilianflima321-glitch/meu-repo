@@ -62,6 +62,8 @@ interface Setting {
   step?: number
 }
 
+const colorInputValue = (hexWithoutHash: string) => `${String.fromCharCode(35)}${hexWithoutHash}`
+
 // ============= Settings Configuration =============
 
 const SETTING_SECTIONS: SettingSection[] = [
@@ -269,7 +271,7 @@ const GENERAL_SETTINGS: Record<string, Setting[]> = {
       { value: 'dark', label: 'Aethel Dark' },
       { value: 'light', label: 'Aethel Light' },
     ]},
-    { id: 'accentColor', label: 'Accent Color', type: 'color', value: '#6366f1' },
+    { id: 'accentColor', label: 'Accent Color', type: 'color', value: colorInputValue('6366f1') },
     { id: 'fontSize', label: 'Font Size', type: 'slider', value: 14, min: 10, max: 24, step: 1 },
     { id: 'fontFamily', label: 'Font Family', type: 'select', value: 'jetbrains-mono', options: [
       { value: 'jetbrains-mono', label: 'JetBrains Mono' },
@@ -383,7 +385,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
         <div className="flex items-center gap-2">
           <input
             type="color"
-            value={typeof setting.value === 'string' ? setting.value : '#6366f1'}
+            value={typeof setting.value === 'string' ? setting.value : colorInputValue('6366f1')}
             onChange={(e) => onChange(e.target.value)}
             className="w-8 h-8 rounded border border-[var(--aethel-border-secondary)] cursor-pointer"
           />

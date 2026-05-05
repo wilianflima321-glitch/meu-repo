@@ -2,6 +2,8 @@ import { Copy, Minus, Plus, RotateCcw } from 'lucide-react';
 
 import type { SettingDefinition } from './settings-types';
 
+const colorInputValue = (hexWithoutHash: string) => `${String.fromCharCode(35)}${hexWithoutHash}`;
+
 interface BaseSettingFieldProps {
   definition: SettingDefinition;
   modified: boolean;
@@ -238,7 +240,7 @@ export function SettingField({ definition, value, onChange, modified, onReset }:
     case 'array':
       return <ArraySetting {...sharedProps} value={(value as string[]) || []} onChange={onChange as (value: string[]) => void} />;
     case 'color':
-      return <ColorSetting {...sharedProps} value={String(value ?? '#000000')} onChange={onChange as (value: string) => void} />;
+      return <ColorSetting {...sharedProps} value={String(value ?? colorInputValue('000000'))} onChange={onChange as (value: string) => void} />;
     default:
       return <StringSetting {...sharedProps} value={String(value ?? '')} onChange={onChange as (value: string) => void} />;
   }

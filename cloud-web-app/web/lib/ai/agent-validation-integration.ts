@@ -8,13 +8,31 @@
  */
 
 import { CodeValidator, ValidationResult, formatErrorsForAI, generateFixInstructions } from './code-validator';
-import { AutonomousAgent, AgentStep, ToolCall } from './agent-mode';
+import { AutonomousAgent, AgentAction, AgentStep, ToolCall } from './agent-mode';
 import { aiService } from '@/lib/ai-service';
 import { EventEmitter } from 'events';
 
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('ai/agent-validation-integration')
+
+type WritableAgentTool = 'write_file' | 'edit_file' | 'create_file';
+
+interface AgentToolExecutionResult {
+  validationErrors?: ValidationResult['errors'];
+  validationWarnings?: ValidationResult['warnings'];
+  fixedContent?: string;
+  fixAttempts?: number;
+  [key: string]: unknown;
+}
+
+interface AgentWithToolExecutor {
+  executeToolCall(taskId: string, action: AgentAction): Promise<AgentToolExecutionResult>;
+}
+
+function isWritableTool(tool: unknown): tool is WritableAgentTool {
+  return tool === 'write_file' || tool === 'edit_file' || tool === 'create_file';
+}
 
 // ============================================================================
 // CONFIGURATION
@@ -343,21 +361,20 @@ export function createValidatedAgent(
   const middleware = new AgentCodeValidationMiddleware(config);
 
   // Intercept tool execution
-  const originalExecuteTool = (agent as any).executeToolCall.bind(agent);
+  const executableAgent = agent as unknown as AgentWithToolExecutor;
+  const originalExecuteTool = executableAgent.executeToolCall.bind(executableAgent);
 
-  (agent as any).executeToolCall = async function (taskId: string, action: any) {
+  executableAgent.executeToolCall = async function (taskId: string, action: AgentAction) {
     const result = await originalExecuteTool(taskId, action);
+    const path = typeof action.input?.path === 'string' ? action.input.path : null;
+    const content = typeof action.input?.content === 'string' ? action.input.content : null;
 
     // If it's a file write operation, validate
-    if (
-      ['write_file', 'edit_file', 'create_file'].includes(action.tool) &&
-      action.input?.path &&
-      action.input?.content
-    ) {
+    if (isWritableTool(action.tool) && path && content) {
       const validation = await middleware.interceptWrite(
-        action.tool as any,
-        action.input.path,
-        action.input.content,
+        action.tool,
+        path,
+        content,
         agent
       );
 

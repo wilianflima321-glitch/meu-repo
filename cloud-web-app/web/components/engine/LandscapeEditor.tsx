@@ -395,9 +395,9 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
     resolution: 129,
     maxHeight: 50,
     layers: [
-      { id: '1', name: 'Grass', texture: '', tiling: 10, color: '#4a7c4f', blendWeight: 1, minSlope: 0, maxSlope: 0.3, minHeight: 0, maxHeight: 0.3 },
-      { id: '2', name: 'Rock', texture: '', tiling: 5, color: '#6b6b6b', blendWeight: 1, minSlope: 0.3, maxSlope: 1, minHeight: 0.3, maxHeight: 0.7 },
-      { id: '3', name: 'Snow', texture: '', tiling: 8, color: '#e8e8e8', blendWeight: 1, minSlope: 0, maxSlope: 0.5, minHeight: 0.7, maxHeight: 1 },
+      { id: '1', name: 'Grass', texture: '', tiling: 10, color: 'rgb(74 124 79)', blendWeight: 1, minSlope: 0, maxSlope: 0.3, minHeight: 0, maxHeight: 0.3 },
+      { id: '2', name: 'Rock', texture: '', tiling: 5, color: 'rgb(107 107 107)', blendWeight: 1, minSlope: 0.3, maxSlope: 1, minHeight: 0.3, maxHeight: 0.7 },
+      { id: '3', name: 'Snow', texture: '', tiling: 8, color: 'rgb(232 232 232)', blendWeight: 1, minSlope: 0, maxSlope: 0.5, minHeight: 0.7, maxHeight: 1 },
     ],
     foliage: [],
   });

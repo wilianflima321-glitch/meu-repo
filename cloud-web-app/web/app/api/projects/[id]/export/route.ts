@@ -14,11 +14,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
+import type { Prisma } from '@prisma/client';
 import { verifyToken } from '@/lib/auth-server';
 import { getQueueRedis } from '@/lib/redis-queue';
 import { nanoid } from 'nanoid';
 import { checkProjectAccess } from '@/lib/project-access';
 import { deductBuildMinutes } from '@/lib/build-minutes';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api.projects.export');
 
 // ============================================================================
 // SCHEMAS
@@ -77,7 +81,7 @@ export interface ExportJob {
   userId: string;
   platform: ExportPlatform;
   configuration: ExportConfiguration;
-  options: Record<string, any>;
+  options: Prisma.JsonObject;
   status: 'queued' | 'preparing' | 'building' | 'packaging' | 'uploading' | 'completed' | 'failed';
   progress: number;
   currentStep: string;
@@ -315,7 +319,7 @@ export async function GET(
     });
 
     // Adiciona dados do Redis para exports ativos
-    let redis: any = null;
+    let redis: Awaited<ReturnType<typeof getQueueRedis>> | null = null;
     try {
       redis = await getQueueRedis();
     } catch {
@@ -346,7 +350,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('List exports error:', error);
+    routeLogger.error('List exports error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

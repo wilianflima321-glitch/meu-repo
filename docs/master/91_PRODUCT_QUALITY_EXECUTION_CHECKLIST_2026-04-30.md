@@ -605,3 +605,10 @@ Next:
 - [x] Remove remaining auth route `console.error` and unsafe role `any` cast.
 - [x] Add `qa:auth-abuse-prevention` to the product quality progress gate.
 - [x] Add focused tests for token aliases, missing token, provider failure and client IP forwarding.
+
+## 2026-05-05 - Type/Token Debt Execution
+
+- [x] Replace remaining app-code explicit `: any` with typed route payloads, Redis queue types, LSP config types, filesystem stats, upload error handling, and agent tool executor contracts.
+- [x] Replace remaining component TSX hardcoded hex literals with CSS variables, rgb strings, or runtime color-input values.
+- [x] Update V14 benchmark truth from `37 hex / 13 any` to `0 hex / 0 any`.
+- [x] Re-run product quality measurement and confirm empty `hexInTsx` and `anyTypes` top lists.
