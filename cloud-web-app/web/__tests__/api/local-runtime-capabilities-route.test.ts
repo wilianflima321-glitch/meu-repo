@@ -130,4 +130,76 @@ describe('api/runtime/local-capabilities route', () => {
       })
     )
   })
+
+  it('accepts Studio Local Runtime Kernel probe payloads', async () => {
+    storeMocks.saveLocalRuntimeCapabilitySnapshot.mockImplementation(async (input: {
+      userId: string
+      deviceId: string
+      deviceLabel?: string | null
+      source?: string
+      report: Record<string, unknown>
+    }) => ({
+      userId: input.userId,
+      deviceId: input.deviceId,
+      deviceLabel: input.deviceLabel,
+      source: input.source,
+      syncedAt: '2026-05-05T14:05:00.000Z',
+      report: input.report,
+    }))
+
+    const request = new NextRequest('http://localhost:3000/api/runtime/local-capabilities', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        deviceId: 'studio-local-device',
+        source: 'api-sync',
+        report: {
+          version: 1,
+          generatedAt: '2026-05-04T14:04:00.000Z',
+          deviceId: 'studio-local-device',
+          os: 'Windows_NT',
+          arch: 'x64',
+          cpuLogicalCores: 12,
+          totalMemoryMb: 32768,
+          availableMemoryMb: 24576,
+          storageFreeMb: 262144,
+          gpuAvailable: true,
+          gpuName: 'RTX Studio GPU',
+          webGpuAvailable: true,
+          webNnAvailable: false,
+          npuAvailable: true,
+          windowsMlAvailable: true,
+          directMlAvailable: true,
+          onnxRuntimeAvailable: true,
+          ffmpegAvailable: true,
+          rapierAvailable: true,
+          browserAutomationAvailable: true,
+          thermalState: 'nominal',
+          storagePressure: 'ok',
+          preferredExecutor: 'local-native',
+          signature: 'probe-signature',
+        },
+      }),
+    })
+
+    const response = await POST(request)
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.ok).toBe(true)
+    expect(storeMocks.saveLocalRuntimeCapabilitySnapshot).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-1',
+        deviceId: 'studio-local-device',
+        source: 'api-sync',
+        report: expect.objectContaining({
+          hostKind: 'native-daemon',
+          transport: 'api-sync',
+          preferredExecutor: 'local-native',
+          maxLocalAgents: 4,
+          localModelPolicy: 'allow-small-models',
+        }),
+      })
+    )
+  })
 })

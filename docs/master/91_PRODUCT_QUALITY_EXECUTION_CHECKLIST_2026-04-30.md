@@ -619,3 +619,14 @@ Next:
 - [x] Remove profile route `as any` role compatibility casts now that `User.role` is canonical in Prisma.
 - [x] Extend `qa:auth-abuse-prevention` so every `cloud-web-app/web/app/api/auth/**/route.ts` is scanned for direct `console.*` regression.
 - [x] Keep auth UX unchanged: no new screens, no noisy prompts, only safer observability and typed user profile output.
+
+## 2026-05-05 - Studio Local Runtime Kernel Execution
+
+- [x] Create `apps/studio-local` as the Tauri + Rust local Studio anchor.
+- [x] Create `packages/runtime-contracts` with probe, runtime target, job lane, job request, job status, evidence, approval, and cloud sync contracts.
+- [x] Replace root desktop scripts that skipped missing desktop app with real Studio Local scripts.
+- [x] Add Rust runtime modules for contracts, probe, policy, jobs, and daemon endpoint handlers.
+- [x] Add `qa:studio-local-runtime` and wire it into product quality progress.
+- [ ] Install Rust/Tauri toolchain in the target dev environment and run `npm --prefix apps/studio-local run test`.
+- [ ] Replace placeholder probe signals with OS-native hardware/runtime detection.
+- [ ] Wire local job execution into cloud job APIs and Mission Ledger evidence persistence.

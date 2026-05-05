@@ -54,8 +54,8 @@
     "test:web": "npm --prefix cloud-web-app/web test",
     "test:web:fast": "npm --prefix cloud-web-app/web run test:fast",
     "test:web:changed": "npm --prefix cloud-web-app/web run test:changed",
-    "desktop:dev": "node -e \"console.warn('desktop-app not present in this repo snapshot; skipping')\"",
-    "desktop:build": "node -e \"console.warn('desktop-app not present in this repo snapshot; skipping')\"",
+    "desktop:dev": "npm --prefix apps/studio-local run dev",
+    "desktop:build": "npm --prefix apps/studio-local run build",
     "portal:dev": "npm --prefix cloud-web-app/web run dev",
     "portal:start": "npm --prefix cloud-web-app/web run start",
     "portal:build": "npm --prefix cloud-web-app/web run build",
@@ -74,7 +74,7 @@
     "qa:enterprise-gate": "npm --prefix cloud-web-app/web run qa:enterprise-gate",
     "qa:enterprise-release-gate": "npm --prefix cloud-web-app/web run qa:enterprise-release-gate",
     "qa:design-system-consistency": "node tools/check-design-system-consistency.mjs",
-    "qa:product-quality-progress": "node tools/check-product-experience-cohesion.mjs && node tools/check-core-experience-routes.mjs && node tools/check-product-funnel-telemetry.mjs && node tools/check-commercial-access-gate.mjs && node tools/check-economics-transparency-gate.mjs && node tools/check-ai-margin-gate.mjs && node tools/check-auth-email-gate.mjs && node tools/check-auth-abuse-prevention-gate.mjs && node tools/check-user-audit-log-gate.mjs && node tools/check-public-trust-center-gate.mjs && node tools/check-security-disclosure-gate.mjs && node tools/check-reliability-incident-gate.mjs && node tools/check-ai-game-film-production-contract.mjs && node tools/check-best-in-market-benchmark.mjs && node tools/check-linear-best-in-market-backlog.mjs && node tools/measure-product-quality.mjs",
+    "qa:product-quality-progress": "node tools/check-product-experience-cohesion.mjs && node tools/check-core-experience-routes.mjs && node tools/check-product-funnel-telemetry.mjs && node tools/check-commercial-access-gate.mjs && node tools/check-economics-transparency-gate.mjs && node tools/check-ai-margin-gate.mjs && node tools/check-auth-email-gate.mjs && node tools/check-auth-abuse-prevention-gate.mjs && node tools/check-user-audit-log-gate.mjs && node tools/check-public-trust-center-gate.mjs && node tools/check-security-disclosure-gate.mjs && node tools/check-reliability-incident-gate.mjs && node tools/check-ai-game-film-production-contract.mjs && node tools/check-best-in-market-benchmark.mjs && node tools/check-linear-best-in-market-backlog.mjs && node tools/check-studio-local-runtime-gate.mjs && node tools/measure-product-quality.mjs",
     "qa:product-experience-cohesion": "node tools/check-product-experience-cohesion.mjs",
     "qa:core-experience-routes": "node tools/check-core-experience-routes.mjs",
     "qa:product-funnel-telemetry": "node tools/check-product-funnel-telemetry.mjs",
@@ -91,7 +91,9 @@
     "qa:best-in-market-benchmark": "node tools/check-best-in-market-benchmark.mjs",
     "qa:linear-best-in-market-backlog": "node tools/check-linear-best-in-market-backlog.mjs",
     "linear:best-in-market:dry-run": "node tools/linear-create-best-in-market-backlog.mjs",
-    "linear:best-in-market:create": "node tools/linear-create-best-in-market-backlog.mjs --execute --create-labels"
+    "linear:best-in-market:create": "node tools/linear-create-best-in-market-backlog.mjs --execute --create-labels",
+    "desktop:test": "npm --prefix apps/studio-local run test",
+    "qa:studio-local-runtime": "node tools/check-studio-local-runtime-gate.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",

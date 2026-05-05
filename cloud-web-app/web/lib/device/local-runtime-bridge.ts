@@ -12,9 +12,9 @@ export const LOCAL_RUNTIME_CAPABILITY_REQUEST_EVENT = 'aethel:request-studio-loc
 export const LOCAL_RUNTIME_STALE_MS = 5 * 60 * 1000
 
 export type LocalRuntimeHostKind = 'desktop-app' | 'native-daemon' | 'native-worker' | 'unknown'
-export type LocalRuntimeTransport = 'custom-event' | 'postmessage' | 'storage-sync' | 'unknown'
+export type LocalRuntimeTransport = 'custom-event' | 'postmessage' | 'storage-sync' | 'api-sync' | 'unknown'
 export type LocalRuntimeOperatingSystem = 'windows' | 'macos' | 'linux' | 'unknown'
-export type LocalRuntimePreferredExecutor = 'local-native' | 'local-worker' | 'cloud-sandbox'
+export type LocalRuntimePreferredExecutor = 'local-native' | 'local-worker' | 'cloud-sandbox' | 'held'
 export type LocalRuntimeThermalState = 'nominal' | 'elevated' | 'critical' | 'unknown'
 export type LocalRuntimeConnectionState = 'missing' | 'connected' | 'stale'
 
@@ -84,6 +84,127 @@ function asBoolean(value: unknown): boolean | undefined {
   return typeof value === 'boolean' ? value : undefined
 }
 
+function asNumberOrNull(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function normalizeRuntimeOperatingSystem(value: unknown): LocalRuntimeOperatingSystem {
+  if (typeof value !== 'string') return 'unknown'
+  const normalized = value.toLowerCase()
+  if (normalized.includes('windows') || normalized === 'win32') return 'windows'
+  if (normalized.includes('mac') || normalized.includes('darwin')) return 'macos'
+  if (normalized.includes('linux')) return 'linux'
+  return 'unknown'
+}
+
+function normalizeRuntimeThermalState(value: unknown): LocalRuntimeThermalState {
+  const thermal = asEnum(value, ['nominal', 'warm', 'elevated', 'critical', 'unknown'] as const)
+  if (thermal === 'warm' || thermal === 'elevated') return 'elevated'
+  return thermal ?? 'unknown'
+}
+
+function normalizeRuntimePreferredExecutor(
+  value: unknown,
+  thermalState: LocalRuntimeThermalState,
+  storagePressure?: unknown
+): LocalRuntimePreferredExecutor | undefined {
+  if (thermalState === 'critical' || storagePressure === 'critical') return 'held'
+  return asEnum(value, ['local-native', 'local-worker', 'cloud-sandbox', 'held'] as const)
+}
+
+function pickMaxLocalAgents(params: {
+  preferredExecutor?: LocalRuntimePreferredExecutor
+  cpuCores?: number
+  memoryGb?: number
+}): number | undefined {
+  if (params.preferredExecutor === 'held') return 0
+  if (params.preferredExecutor === 'cloud-sandbox') return 1
+
+  const cores = params.cpuCores ?? 0
+  const memory = params.memoryGb ?? 0
+  if (params.preferredExecutor === 'local-native' && cores >= 8 && memory >= 16) return 4
+  if (params.preferredExecutor === 'local-native' && cores >= 6 && memory >= 8) return 3
+  if (params.preferredExecutor === 'local-worker' && cores >= 4 && memory >= 6) return 2
+  return undefined
+}
+
+function pickViewportQuality(params: {
+  preferredExecutor?: LocalRuntimePreferredExecutor
+  gpuComputeAvailable?: boolean
+  memoryGb?: number
+}): DeviceRuntimePolicy['viewportQuality'] | undefined {
+  if (params.preferredExecutor === 'held') return 'low'
+  if (!params.gpuComputeAvailable) return undefined
+  if (params.preferredExecutor === 'local-native' && (params.memoryGb ?? 0) >= 16) return 'ultra'
+  if (params.preferredExecutor === 'local-native') return 'high'
+  return 'medium'
+}
+
+function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): LocalRuntimeCapabilityReport | null {
+  const generatedAt =
+    typeof candidate.generatedAt === 'string' && !Number.isNaN(Date.parse(candidate.generatedAt))
+      ? candidate.generatedAt
+      : null
+
+  if (!generatedAt) return null
+
+  const totalMemoryMb = asNumberOrNull(candidate.totalMemoryMb)
+  const availableMemoryMb = asNumberOrNull(candidate.availableMemoryMb)
+  const storageFreeMb = asNumberOrNull(candidate.storageFreeMb)
+  const cpuCores = asPositiveNumber(candidate.cpuLogicalCores)
+  const memoryGb = totalMemoryMb !== null ? Math.round((totalMemoryMb / 1024) * 10) / 10 : undefined
+  const freeStorageGb = storageFreeMb !== null ? Math.round((storageFreeMb / 1024) * 10) / 10 : undefined
+  const thermalState = normalizeRuntimeThermalState(candidate.thermalState)
+  const preferredExecutor = normalizeRuntimePreferredExecutor(
+    candidate.preferredExecutor,
+    thermalState,
+    candidate.storagePressure
+  )
+  const npuAvailable = asBoolean(candidate.npuAvailable) ?? asBoolean(candidate.windowsMlAvailable) ?? false
+  const gpuComputeAvailable =
+    asBoolean(candidate.gpuAvailable) ??
+    asBoolean(candidate.webGpuAvailable) ??
+    asBoolean(candidate.directMlAvailable) ??
+    false
+  const maxLocalAgents = pickMaxLocalAgents({
+    preferredExecutor,
+    cpuCores,
+    memoryGb: availableMemoryMb !== null ? Math.round((availableMemoryMb / 1024) * 10) / 10 : memoryGb,
+  })
+
+  return {
+    version: 1,
+    hostKind: 'native-daemon',
+    transport: 'api-sync',
+    os: normalizeRuntimeOperatingSystem(candidate.os),
+    receivedAt: generatedAt,
+    appVersion: `contract-v${candidate.version ?? 1}`,
+    machineName: null,
+    cpuCores,
+    memoryGb,
+    freeStorageGb,
+    gpuComputeAvailable,
+    npuAvailable,
+    npuName: npuAvailable ? asStringOrNull(candidate.gpuName) ?? null : null,
+    directMlAvailable: asBoolean(candidate.directMlAvailable),
+    onnxRuntimeAvailable: asBoolean(candidate.onnxRuntimeAvailable),
+    maxLocalAgents,
+    preferredExecutor,
+    recommendedViewportQuality: pickViewportQuality({
+      preferredExecutor,
+      gpuComputeAvailable,
+      memoryGb,
+    }),
+    localModelPolicy: npuAvailable
+      ? 'allow-small-models'
+      : preferredExecutor === 'local-native'
+        ? 'prefer-cloud-heavy-models'
+        : 'cloud-only',
+    supportsPersistentMemory: freeStorageGb !== undefined ? freeStorageGb >= 2 : undefined,
+    thermalState,
+  }
+}
+
 export function sanitizeLocalRuntimeCapabilityReport(
   value: unknown
 ): LocalRuntimeCapabilityReport | null {
@@ -92,6 +213,10 @@ export function sanitizeLocalRuntimeCapabilityReport(
   }
 
   const candidate = value as Record<string, unknown>
+  if (typeof candidate.generatedAt === 'string' || 'cpuLogicalCores' in candidate) {
+    return normalizeStudioLocalProbeReport(candidate)
+  }
+
   const receivedAt =
     typeof candidate.receivedAt === 'string' && !Number.isNaN(Date.parse(candidate.receivedAt))
       ? candidate.receivedAt
@@ -104,7 +229,7 @@ export function sanitizeLocalRuntimeCapabilityReport(
   return {
     version: 1,
     hostKind: asEnum(candidate.hostKind, ['desktop-app', 'native-daemon', 'native-worker', 'unknown']) ?? 'unknown',
-    transport: asEnum(candidate.transport, ['custom-event', 'postmessage', 'storage-sync', 'unknown']) ?? 'unknown',
+    transport: asEnum(candidate.transport, ['custom-event', 'postmessage', 'storage-sync', 'api-sync', 'unknown']) ?? 'unknown',
     os: asEnum(candidate.os, ['windows', 'macos', 'linux', 'unknown']) ?? 'unknown',
     receivedAt,
     appVersion: asStringOrNull(candidate.appVersion) ?? null,
@@ -119,7 +244,7 @@ export function sanitizeLocalRuntimeCapabilityReport(
     onnxRuntimeAvailable: asBoolean(candidate.onnxRuntimeAvailable),
     maxLocalAgents: asPositiveNumber(candidate.maxLocalAgents),
     preferredExecutor:
-      asEnum(candidate.preferredExecutor, ['local-native', 'local-worker', 'cloud-sandbox']) ?? undefined,
+      asEnum(candidate.preferredExecutor, ['local-native', 'local-worker', 'cloud-sandbox', 'held']) ?? undefined,
     recommendedViewportQuality: asEnum(candidate.recommendedViewportQuality, ['low', 'medium', 'high', 'ultra']),
     localModelPolicy: asEnum(candidate.localModelPolicy, [
       'allow-small-models',
@@ -148,6 +273,8 @@ function describeExecutor(preferredExecutor?: LocalRuntimePreferredExecutor): st
       return 'Local worker'
     case 'cloud-sandbox':
       return 'Cloud sandbox'
+    case 'held':
+      return 'Held safely'
     default:
       return 'Browser shell'
   }
@@ -182,6 +309,10 @@ function buildLocalRuntimeSummary(
 
   if (report.thermalState === 'critical') {
     return 'Studio Local reported critical thermal pressure, so Aethel should fall back to isolated cloud lanes until the device cools down.'
+  }
+
+  if (report.preferredExecutor === 'held') {
+    return 'Studio Local is connected but holding native work because the device reported unsafe capacity, thermal, or storage pressure.'
   }
 
   if (report.preferredExecutor === 'local-native') {
@@ -233,7 +364,9 @@ export function buildLocalRuntimeBridgeState(
 ): LocalRuntimeBridgeState {
   const connection = getLocalRuntimeConnectionState(report, now)
   const ageMs = report ? Math.max(0, now - Date.parse(report.receivedAt)) : null
-  const canUseNativeAcceleration = Boolean(report && (report.npuAvailable || report.gpuComputeAvailable))
+  const canUseNativeAcceleration = Boolean(
+    report && report.preferredExecutor !== 'held' && (report.npuAvailable || report.gpuComputeAvailable)
+  )
 
   return {
     connection,
@@ -273,7 +406,7 @@ export function mergeDeviceCapabilityProfileWithLocalRuntime(
     return baseProfile
   }
 
-  if (report.thermalState === 'critical') {
+  if (report.thermalState === 'critical' || report.preferredExecutor === 'held') {
     return {
       ...baseProfile,
       policy: {
@@ -291,10 +424,14 @@ export function mergeDeviceCapabilityProfileWithLocalRuntime(
             : baseProfile.policy.memoryPolicy,
         backgroundTaskBudget: 'limited',
         safetySummary:
-          'Studio Local reported critical thermal pressure, so Aethel is pushing heavy work back to isolated lanes.',
+          report.preferredExecutor === 'held'
+            ? 'Studio Local intentionally held native execution, so Aethel is protecting the user session and routing heavy work away from the device.'
+            : 'Studio Local reported critical thermal pressure, so Aethel is pushing heavy work back to isolated lanes.',
         recommendations: [
-          'Pause local heavy inference, indexing, and viewport bursts until the native runtime cools down.',
-          'Keep browser operator, builds, and exports in cloud or sandbox lanes while thermal pressure is elevated.',
+          report.preferredExecutor === 'held'
+            ? 'Keep local heavy inference, indexing, and render jobs paused until a fresh probe clears the blocker.'
+            : 'Pause local heavy inference, indexing, and viewport bursts until the native runtime cools down.',
+          'Keep browser operator, builds, and exports in cloud or sandbox lanes while local safety is degraded.',
           'Refresh the local capability probe before scaling agents back up.',
         ],
       },

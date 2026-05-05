@@ -1,0 +1,11 @@
+﻿{
+  "name": "@aethel/studio-local",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node ./tools/check-studio-local-prereqs.mjs --mode dev && npx tauri dev",
+    "build": "node ./tools/check-studio-local-prereqs.mjs --mode build && npx tauri build",
+    "test": "node ./tools/check-studio-local-prereqs.mjs --mode test && cargo test --manifest-path src-tauri/Cargo.toml"
+  }
+}

@@ -777,3 +777,11 @@ The guarded routes are `cloud-web-app/web/app/api/ai/image/generate/route.ts`, `
 - What changed: app/components/hooks/lib explicit `: any` debt is now `0`, and component TSX hardcoded hex debt is now `0`.
 - Why it matters: this removes two recurring audit gaps that made agent changes riskier in export queues, asset pipeline, hot reload, LSP config, support updates, secure upload, creative viewport color paths, and collaboration cursors.
 - Product rule: color input values that require a browser `#RRGGBB` value are now generated at runtime instead of stored as component hex literals.
+
+## 2026-05-05 - Studio Local Runtime Kernel
+
+- Status: implemented as a first executable kernel contract, not a fake desktop claim.
+- What changed: `apps/studio-local` now exists as the Tauri + Rust Studio Local shell, `packages/runtime-contracts` defines the shared local/cloud job/probe contract, and root desktop scripts no longer skip a missing app.
+- Runtime truth: the first kernel exposes health, probe, jobs, job cancel, and cloud sync endpoints as Rust contract code; native OS probes are still the next block, not claimed as complete.
+- Why it matters: this is the foundation for heavy game/film/app/agent work without freezing the web shell and without pretending the browser is Unreal.
+- Validation: `qa:studio-local-runtime` and product quality progress gate.

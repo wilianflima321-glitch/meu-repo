@@ -37,6 +37,91 @@ describe('local runtime bridge', () => {
     })
   })
 
+  it('normalizes Studio Local Runtime Kernel probe contracts', () => {
+    expect(
+      sanitizeLocalRuntimeCapabilityReport({
+        version: 1,
+        generatedAt: '2026-05-05T14:00:00.000Z',
+        deviceId: 'studio-local-device',
+        os: 'Windows_NT',
+        arch: 'x64',
+        cpuLogicalCores: 12,
+        totalMemoryMb: 32768,
+        availableMemoryMb: 24576,
+        storageFreeMb: 262144,
+        gpuAvailable: true,
+        gpuName: 'RTX Studio GPU',
+        webGpuAvailable: true,
+        webNnAvailable: false,
+        npuAvailable: true,
+        windowsMlAvailable: true,
+        directMlAvailable: true,
+        onnxRuntimeAvailable: true,
+        ffmpegAvailable: true,
+        rapierAvailable: true,
+        browserAutomationAvailable: true,
+        thermalState: 'nominal',
+        storagePressure: 'ok',
+        preferredExecutor: 'local-native',
+        signature: 'probe-signature',
+      })
+    ).toMatchObject({
+      hostKind: 'native-daemon',
+      transport: 'api-sync',
+      os: 'windows',
+      receivedAt: '2026-05-05T14:00:00.000Z',
+      cpuCores: 12,
+      memoryGb: 32,
+      freeStorageGb: 256,
+      gpuComputeAvailable: true,
+      npuAvailable: true,
+      preferredExecutor: 'local-native',
+      maxLocalAgents: 4,
+      recommendedViewportQuality: 'ultra',
+      localModelPolicy: 'allow-small-models',
+      supportsPersistentMemory: true,
+    })
+  })
+
+  it('holds Studio Local probes when thermal or storage safety is degraded', () => {
+    const report = sanitizeLocalRuntimeCapabilityReport({
+      version: 1,
+      generatedAt: '2026-05-05T14:00:00.000Z',
+      os: 'linux',
+      arch: 'x64',
+      cpuLogicalCores: 8,
+      totalMemoryMb: 16384,
+      availableMemoryMb: 8192,
+      storageFreeMb: 512,
+      gpuAvailable: true,
+      webGpuAvailable: true,
+      webNnAvailable: false,
+      npuAvailable: false,
+      windowsMlAvailable: false,
+      directMlAvailable: false,
+      onnxRuntimeAvailable: false,
+      ffmpegAvailable: true,
+      rapierAvailable: true,
+      browserAutomationAvailable: false,
+      thermalState: 'critical',
+      storagePressure: 'critical',
+      preferredExecutor: 'local-native',
+      signature: 'probe-signature',
+    })
+
+    const bridge = buildLocalRuntimeBridgeState(report, Date.parse('2026-05-05T14:01:00.000Z'))
+    const merged = mergeDeviceCapabilityProfileWithLocalRuntime(browserOnlyProfile, report, Date.parse('2026-05-05T14:01:00.000Z'))
+
+    expect(report).toMatchObject({
+      preferredExecutor: 'held',
+      thermalState: 'critical',
+      maxLocalAgents: 0,
+      recommendedViewportQuality: 'low',
+    })
+    expect(bridge.canUseNativeAcceleration).toBe(false)
+    expect(merged.policy.mode).toBe('cloud-isolated')
+  })
+
   it('elevates the runtime policy when the native bridge is healthy', () => {
     const report = sanitizeLocalRuntimeCapabilityReport({
       receivedAt: '2026-05-02T16:00:00.000Z',

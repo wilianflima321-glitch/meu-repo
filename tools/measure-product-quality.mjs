@@ -225,6 +225,13 @@ const linearBestInMarketBacklogConfigured =
   exists('docs/master/linear/AETHEL_BEST_IN_MARKET_2026_2027_LINEAR_BACKLOG.md') &&
   exists('cloud-web-app/web/__tests__/docs/linear-best-in-market-backlog.test.ts') &&
   packageJson.includes('qa:linear-best-in-market-backlog');
+const studioLocalRuntimeConfigured =
+  exists('tools/check-studio-local-runtime-gate.mjs') &&
+  exists('docs/master/108_STUDIO_LOCAL_RUNTIME_KERNEL_2026-05-05.md') &&
+  exists('apps/studio-local/src-tauri/Cargo.toml') &&
+  exists('apps/studio-local/src-tauri/src/lib.rs') &&
+  exists('packages/runtime-contracts/src/index.ts') &&
+  packageJson.includes('qa:studio-local-runtime');
 
 const metrics = [
   { id: 'console_calls', label: 'console.log/info/debug in app code', value: consoleCalls.total, target: 50, direction: 'lte' },
@@ -257,6 +264,7 @@ const metrics = [
   { id: 'repository_cartography', label: 'Repository cartography for giant AI context configured', value: repositoryCartographyConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'best_in_market_benchmark', label: 'Best-in-market benchmark V14 gate configured', value: bestInMarketBenchmarkConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'linear_best_in_market_backlog', label: 'Linear best-in-market backlog export configured', value: linearBestInMarketBacklogConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'studio_local_runtime', label: 'Studio Local runtime kernel configured', value: studioLocalRuntimeConfigured ? 1 : 0, target: 1, direction: 'eq' },
 ].map((metric) => ({
   ...metric,
   status: statusFor(metric.value, metric.target, metric.direction),

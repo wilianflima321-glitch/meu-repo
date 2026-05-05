@@ -1,0 +1,32 @@
+﻿{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Aethel Studio Local",
+  "version": "0.1.0",
+  "identifier": "dev.aethel.studio.local",
+  "build": {
+    "beforeDevCommand": "npm --prefix ../../cloud-web-app/web run dev",
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "../src"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Aethel Studio Local",
+        "width": 1440,
+        "height": 960,
+        "minWidth": 960,
+        "minHeight": 640
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "DeveloperTool",
+    "shortDescription": "Native runtime shell for Aethel Studio",
+    "longDescription": "Aethel Studio Local provides native runtime probes, job lanes, and local/cloud execution routing for large AI, game, film, app, and browser-operator work."
+  }
+}

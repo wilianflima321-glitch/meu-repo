@@ -34,7 +34,9 @@ import {
 } from '@/lib/production/repository-cartography'
 import { acquireAgentSurfaceLocks, clearAgentSurfaceLocksForTests } from '@/lib/production/agent-surface-locks'
 
-const now = '2026-05-04T22:30:00.000Z'
+const nowMs = Date.now() - 60_000
+const now = new Date(nowMs).toISOString()
+const afterManifest = new Date(nowMs + 15 * 60 * 1000).toISOString()
 
 function buildGameplayPacket() {
   const manifest = buildRepositoryCartographyManifest({
@@ -145,7 +147,7 @@ describe('ai tools agent scope enforcement', () => {
   it('blocks scoped write tools when cartography is stale for the target file', async () => {
     const packet = buildGameplayPacket()
     dbMocks.prisma.file.findFirst.mockResolvedValueOnce({
-      updatedAt: new Date('2026-05-04T22:45:00.000Z'),
+      updatedAt: new Date(afterManifest),
     })
     handoffMocks.loadAgentHandoffContext.mockResolvedValue({
       agent: 'Gameplay Engineer Agent',
@@ -180,7 +182,7 @@ describe('ai tools agent scope enforcement', () => {
       paths: ['src/game/combat/BossController.ts'],
       source: 'session',
       reason: 'parallel viewport work',
-      now: '2026-05-04T22:30:00.000Z',
+      now,
     })
     handoffMocks.loadAgentHandoffContext.mockResolvedValue({
       agent: 'Gameplay Engineer Agent',

@@ -46,7 +46,7 @@ vi.mock('@/lib/observability/logger', () => ({
 
 import { GET, PATCH } from '@/app/api/projects/[id]/production-state/agent-fleet/route'
 
-const now = '2026-05-04T23:20:00.000Z'
+const now = new Date(Date.now() - 60_000).toISOString()
 
 function buildProjectSettings() {
   const manifest = buildRepositoryCartographyManifest({
