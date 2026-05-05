@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+
+const routeLogger = createComponentLogger('api.auth.profile');
 
 export async function GET(req: NextRequest) {
   try {
@@ -22,8 +25,7 @@ export async function GET(req: NextRequest) {
         emailVerified: true,
         mfaEnabled: true,
         twoFactorEnabled: true,
-        // Em alguns schemas, role existe; manter compatibilidade.
-        role: true as any,
+        role: true,
         userPreferences: {
           select: {
             language: true,
@@ -63,11 +65,11 @@ export async function GET(req: NextRequest) {
           push: user.userPreferences?.chatNotifications ?? false,
           marketing: (prefs.marketing as boolean) ?? false,
         },
-        role: (user as any).role ?? undefined,
+        role: user.role ?? undefined,
       },
     });
   } catch (error) {
-    console.error('Profile error:', error);
+    routeLogger.error('Profile error', error);
 
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
@@ -144,7 +146,7 @@ export async function PATCH(req: NextRequest) {
         emailVerified: true,
         mfaEnabled: true,
         twoFactorEnabled: true,
-        role: true as any,
+        role: true,
         userPreferences: {
           select: {
             language: true,
@@ -181,11 +183,11 @@ export async function PATCH(req: NextRequest) {
           push: updated.userPreferences?.chatNotifications ?? false,
           marketing: (prefs.marketing as boolean) ?? false,
         },
-        role: (updated as any).role ?? undefined,
+        role: updated.role ?? undefined,
       },
     });
   } catch (error) {
-    console.error('Profile update error:', error);
+    routeLogger.error('Profile update error', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

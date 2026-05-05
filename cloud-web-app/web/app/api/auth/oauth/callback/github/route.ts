@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const routeLogger = createComponentLogger('api.auth.oauth.github.callback')
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -51,7 +54,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.redirect(redirectUrl)
   } catch (error) {
-    console.error('GitHub OAuth error:', error)
+    routeLogger.error('GitHub OAuth error', error)
     return NextResponse.redirect(new URL('/login?error=server_error', request.url))
   }
 }

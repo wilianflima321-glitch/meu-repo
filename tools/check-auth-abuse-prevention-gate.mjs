@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 
 const checks = [];
 
@@ -10,12 +10,35 @@ function assert(condition, message) {
   checks.push({ ok: Boolean(condition), message });
 }
 
+function listFiles(dir, predicate) {
+  if (!existsSync(dir)) return [];
+
+  const entries = readdirSync(dir, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const path = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) {
+      files.push(...listFiles(path, predicate));
+      continue;
+    }
+
+    if (entry.isFile() && predicate(path)) {
+      files.push(path);
+    }
+  }
+
+  return files;
+}
+
 const guardPath = 'cloud-web-app/web/lib/server/turnstile-guard.ts';
 const guardTestPath = 'cloud-web-app/web/__tests__/server/turnstile-guard.test.ts';
 const loginRoutePath = 'cloud-web-app/web/app/api/auth/login/route.ts';
 const registerRoutePath = 'cloud-web-app/web/app/api/auth/register/route.ts';
 const triageDocPath = 'docs/master/90_CANONICAL_PRODUCT_QUALITY_TRIAGE_2026-04-30.md';
 const checklistDocPath = 'docs/master/91_PRODUCT_QUALITY_EXECUTION_CHECKLIST_2026-04-30.md';
+const authRoutesDir = 'cloud-web-app/web/app/api/auth';
+const authRoutePaths = listFiles(authRoutesDir, (path) => path.endsWith('/route.ts'));
 
 for (const path of [
   guardPath,
@@ -34,6 +57,8 @@ const loginRoute = existsSync(loginRoutePath) ? read(loginRoutePath) : '';
 const registerRoute = existsSync(registerRoutePath) ? read(registerRoutePath) : '';
 const triageDoc = existsSync(triageDocPath) ? read(triageDocPath) : '';
 const checklistDoc = existsSync(checklistDocPath) ? read(checklistDocPath) : '';
+
+assert(authRoutePaths.length >= 20, 'auth route inventory is broad enough for regression scanning');
 
 for (const phrase of [
   'TURNSTILE_RESPONSE_KEYS',
@@ -55,7 +80,13 @@ for (const [label, source] of [
   assert(!/console\.(log|warn|error|info|debug)\(/.test(source), `${label} has no direct console usage`);
 }
 
+for (const path of authRoutePaths) {
+  const route = read(path);
+  assert(!/console\.(log|warn|error|info|debug)\(/.test(route), `${path} has no direct console usage`);
+}
+
 assert(!loginRoute.includes('(user as any).role'), 'login route removed unsafe role any-cast');
+assert(!read('cloud-web-app/web/app/api/auth/profile/route.ts').includes('as any'), 'profile route has no unsafe any-casts');
 assert(guardTest.includes('turnstileToken'), 'turnstile tests cover request body token alias');
 assert(guardTest.includes('not_configured'), 'turnstile tests cover local dev bypass when not configured');
 assert(guardTest.includes('TURNSTILE_REQUIRED'), 'turnstile tests cover missing token denial');

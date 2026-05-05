@@ -769,6 +769,7 @@ The guarded routes are `cloud-web-app/web/app/api/ai/image/generate/route.ts`, `
 - Safety behavior: local/dev remains unblocked when no secret exists; `AETHEL_REQUIRE_TURNSTILE=true` fails closed if the secret is missing.
 - Why it matters: this closes a P0 trial-farm/brute-force gap from the repo audit while keeping the Studio onboarding clean and low-friction.
 - Validation: `qa:auth-abuse-prevention`, focused Turnstile tests, and the product quality progress gate.
+- 2026-05-05 hardening pass: the gate now inventories every `cloud-web-app/web/app/api/auth/**/route.ts`, rejects direct `console.*` usage across auth, and protects the profile route from unsafe `any` casts while preserving typed `role` exposure.
 
 ## 2026-05-05 - Zero `any` and zero component hex debt
 

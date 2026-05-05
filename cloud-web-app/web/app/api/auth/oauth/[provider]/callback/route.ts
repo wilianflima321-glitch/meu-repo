@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { generateTokenWithRole } from '@/lib/auth-server';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 /**
  * OAuth Callback Handler
@@ -36,6 +37,8 @@ const OAUTH_PROVIDERS = {
 } as const;
 
 type Provider = keyof typeof OAUTH_PROVIDERS;
+
+const routeLogger = createComponentLogger('api.auth.oauth.callback');
 
 interface OAuthUserInfo {
   email: string;
@@ -174,7 +177,7 @@ export async function GET(
 
   // Handle OAuth errors
   if (error) {
-    console.error(`OAuth error from ${provider}:`, error);
+    routeLogger.warn('OAuth provider returned an error', { provider, error });
     return NextResponse.redirect(new URL(`/login?error=${error}`, req.url));
   }
 
@@ -221,14 +224,14 @@ export async function GET(
       });
     } else {
       // Update OAuth info if not set
-      if (!(user as any).oauthProvider) {
+      if (!user.oauthProvider) {
         await prisma.user.update({
           where: { id: user.id },
           data: {
             oauthProvider: provider,
             oauthProviderId: userInfo.providerId,
             emailVerified: true,
-            avatar: userInfo.avatar || (user as any).avatar,
+            avatar: userInfo.avatar || user.avatar,
           },
         });
       }
@@ -238,8 +241,8 @@ export async function GET(
     const token = generateTokenWithRole(
       user.id,
       user.email,
-      (user as any).role || 'user',
-      (user as any).plan || undefined
+      user.role || 'user',
+      user.plan || undefined
     );
 
     // Redirect to dashboard with token cookie
@@ -258,7 +261,7 @@ export async function GET(
 
     return response;
   } catch (err) {
-    console.error(`OAuth callback error for ${provider}:`, err);
+    routeLogger.error('OAuth callback error', err, { provider });
     return NextResponse.redirect(
       new URL('/login?error=oauth_failed', req.url)
     );

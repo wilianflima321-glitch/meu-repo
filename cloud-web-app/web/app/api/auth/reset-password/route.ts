@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+
+const routeLogger = createComponentLogger('api.auth.reset-password');
 
 /**
  * POST /api/auth/reset-password
@@ -72,10 +76,9 @@ export async function POST(req: NextRequest) {
       message: 'Password has been reset successfully. Please log in with your new password.',
     });
   } catch (error) {
-    console.error('Reset password error:', error);
-    return NextResponse.json(
-      { error: 'An error occurred. Please try again.' },
-      { status: 500 }
-    );
+    routeLogger.error('Reset password error', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
   }
 }

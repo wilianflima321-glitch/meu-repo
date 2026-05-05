@@ -612,3 +612,10 @@ Next:
 - [x] Replace remaining component TSX hardcoded hex literals with CSS variables, rgb strings, or runtime color-input values.
 - [x] Update V14 benchmark truth from `37 hex / 13 any` to `0 hex / 0 any`.
 - [x] Re-run product quality measurement and confirm empty `hexInTsx` and `anyTypes` top lists.
+
+## 2026-05-05 - Auth Structured Logging Hardening
+
+- [x] Replace direct auth-route `console.error` calls with `createComponentLogger` children for delete-account, profile, reset-password, OAuth provider callback, GitHub callback, and Google callback.
+- [x] Remove profile route `as any` role compatibility casts now that `User.role` is canonical in Prisma.
+- [x] Extend `qa:auth-abuse-prevention` so every `cloud-web-app/web/app/api/auth/**/route.ts` is scanned for direct `console.*` regression.
+- [x] Keep auth UX unchanged: no new screens, no noisy prompts, only safer observability and typed user profile output.

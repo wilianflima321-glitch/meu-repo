@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const routeLogger = createComponentLogger('api.auth.oauth.google.callback')
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -52,7 +55,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.redirect(redirectUrl)
   } catch (error) {
-    console.error('Google OAuth error:', error)
+    routeLogger.error('Google OAuth error', error)
     return NextResponse.redirect(new URL('/login?error=server_error', request.url))
   }
 }
