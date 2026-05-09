@@ -24,6 +24,8 @@ const expensiveGenerationGuardTestPath = 'cloud-web-app/web/__tests__/server/ai-
 const agentSurfaceLocksPath = 'cloud-web-app/web/lib/production/agent-surface-locks.ts'
 const agentSurfaceLocksTestPath = 'cloud-web-app/web/__tests__/production/agent-surface-locks.test.ts'
 const agentFleetSessionPath = 'cloud-web-app/web/lib/production/agent-fleet-session.ts'
+const agentLocksRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/agent-locks/route.ts'
+const agentLocksRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-agent-locks-route.test.ts'
 
 const anchors = [
   'docs/master/93_UNREAL_AGENTIC_PRODUCT_GAP_MAP_2026-05-01.md',
@@ -56,6 +58,8 @@ for (const path of [
   agentSurfaceLocksPath,
   agentSurfaceLocksTestPath,
   agentFleetSessionPath,
+  agentLocksRoutePath,
+  agentLocksRouteTestPath,
   ...anchors,
 ]) {
   assert(existsSync(path), `${path} exists`)
@@ -81,6 +85,8 @@ const expensiveGenerationGuardTest = existsSync(expensiveGenerationGuardTestPath
 const agentSurfaceLocks = existsSync(agentSurfaceLocksPath) ? read(agentSurfaceLocksPath) : ''
 const agentSurfaceLocksTest = existsSync(agentSurfaceLocksTestPath) ? read(agentSurfaceLocksTestPath) : ''
 const agentFleetSession = existsSync(agentFleetSessionPath) ? read(agentFleetSessionPath) : ''
+const agentLocksRoute = existsSync(agentLocksRoutePath) ? read(agentLocksRoutePath) : ''
+const agentLocksRouteTest = existsSync(agentLocksRouteTestPath) ? read(agentLocksRouteTestPath) : ''
 
 for (const phrase of [
   'AI Game/Film Production Contract',
@@ -219,6 +225,19 @@ assert(
   'agent surface lock tests cover preview-only conflict checks and Producer ownership snapshots'
 )
 assert(agentFleetSession.includes('lockCoordination'), 'agent fleet snapshot exposes lockCoordination for the senior coordinator')
+for (const phrase of [
+  'previewAgentSurfaceLockRequest',
+  'acquireAgentSurfaceLocks',
+  'releaseAgentSurfaceLock',
+  'buildAgentSurfaceLockSnapshot',
+]) {
+  assert(agentLocksRoute.includes(phrase), `agent locks route includes "${phrase}"`)
+}
+assert(
+  agentLocksRouteTest.includes('previews conflicts without mutating existing locks') &&
+    agentLocksRouteTest.includes('acquires and releases a lock for editor agents'),
+  'agent locks route tests cover preview, acquire, and release behavior'
+)
 
 const failed = checks.filter((check) => !check.ok)
 if (failed.length > 0) {

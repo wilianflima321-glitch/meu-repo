@@ -234,5 +234,6 @@ Current contract:
 - `previewAgentSurfaceLockRequest` lets the Producer/Senior Agent check conflicts before launching another worker.
 - `buildAgentSurfaceLockSnapshot` returns a Producer-ready ownership view with active owners, locked paths, expiring locks, arbitration requirement, and next action.
 - Agent Fleet snapshots now expose `lockCoordination` so the UI and central agent can keep chat, specialists, and evidence review aligned without adding visual noise.
+- `cloud-web-app/web/app/api/projects/[id]/production-state/agent-locks/route.ts` exposes the same contract over authenticated project APIs: `GET` for snapshot, `POST action=preview` for no-mutation conflict checks, `POST action=acquire` for editor/owner lock ownership, and `POST action=release` for cleanup after evidence is recorded.
 
 This is the minimum coordination substrate needed before Aethel can safely run Cursor-style parallel agents on game, film, app, browser, research, and release work. It also supports the product rule that agents must not edit the same ownership area blindly.
