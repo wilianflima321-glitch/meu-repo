@@ -41,6 +41,8 @@ const tauriConfig = existsSync('apps/studio-local/src-tauri/tauri.conf.json') ? 
 const rustContracts = existsSync('apps/studio-local/src-tauri/src/contracts.rs') ? read('apps/studio-local/src-tauri/src/contracts.rs') : ''
 const rustPolicy = existsSync('apps/studio-local/src-tauri/src/policy.rs') ? read('apps/studio-local/src-tauri/src/policy.rs') : ''
 const rustDaemon = existsSync('apps/studio-local/src-tauri/src/daemon.rs') ? read('apps/studio-local/src-tauri/src/daemon.rs') : ''
+const rustJobs = existsSync('apps/studio-local/src-tauri/src/jobs.rs') ? read('apps/studio-local/src-tauri/src/jobs.rs') : ''
+const rustLib = existsSync('apps/studio-local/src-tauri/src/lib.rs') ? read('apps/studio-local/src-tauri/src/lib.rs') : ''
 const localRuntimeBridge = existsSync('cloud-web-app/web/lib/device/local-runtime-bridge.ts')
   ? read('cloud-web-app/web/lib/device/local-runtime-bridge.ts')
   : ''
@@ -128,6 +130,24 @@ for (const phrase of [
 }
 
 for (const phrase of [
+  'RuntimeJobStoreSnapshot',
+  'from_persistence_path',
+  'recover_from_disk',
+  'RECOVERED_JOB_BLOCKER',
+  'persist_snapshot',
+  'last_persistence_error',
+]) {
+  assert(rustJobs.includes(phrase), `Rust job store includes crash recovery primitive ${phrase}`)
+}
+
+for (const phrase of [
+  'persisted_running_jobs_recover_as_held_after_restart',
+  'persisted_cancelled_jobs_stay_cancelled_after_restart',
+]) {
+  assert(rustLib.includes(phrase), `Rust tests cover persisted job recovery ${phrase}`)
+}
+
+for (const phrase of [
   'normalizeStudioLocalProbeReport',
   'generatedAt',
   'cpuLogicalCores',
@@ -175,6 +195,7 @@ for (const phrase of [
   'Tauri + Rust',
   'Runtime Kernel',
   'signed cloud sync',
+  'job crash recovery',
   'local-native',
   'cloud-sandbox',
   'held',

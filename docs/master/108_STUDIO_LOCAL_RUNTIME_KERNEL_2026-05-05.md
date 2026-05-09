@@ -108,3 +108,24 @@ Acceptance evidence:
 - `cloud-web-app/web/app/api/runtime/local-capabilities/route.ts` rejects unsigned or stale signed `api-sync` probes when the secret is configured.
 - `cloud-web-app/web/__tests__/server/studio-local-sync-signature.test.ts` covers stable payloads, valid signatures, stale signatures, and tampered payloads.
 - `cloud-web-app/web/__tests__/api/local-runtime-capabilities-route.test.ts` covers unsigned rejection and signed acceptance.
+
+## 2026-05-09 Job Crash Recovery
+
+Studio Local now has a durable job store primitive for native runtime lanes. `RuntimeJobStore` can persist a compact JSON snapshot to disk and recover it after a restart without pretending interrupted work is complete.
+
+Recovery policy:
+
+- `Queued`, `Running`, and `NeedsApproval` jobs recover as `Held` with a blocker that requires user or cloud confirmation before resuming.
+- `Cancelled`, `Complete`, and `Failed` jobs keep their terminal state.
+- Compact logs, evidence references, rollback plans, allowed paths, denied paths, and Mission Ledger references in the request are preserved with the recovered job.
+- Persistence errors are captured via `last_persistence_error()` so the shell/cloud bridge can surface them instead of fake-successing.
+
+This is not a full render/build executor yet. It is the crash-safe substrate needed before long-running `asset-import`, `viewport-render`, `build-export`, `browser-operator`, `playtest`, and `render-queue` jobs can be trusted for professional game, film, and app work.
+
+Acceptance evidence:
+
+- `apps/studio-local/src-tauri/src/jobs.rs` defines `RuntimeJobStoreSnapshot`, `from_persistence_path`, `recover_from_disk`, and `persist_snapshot`.
+- `apps/studio-local/src-tauri/src/lib.rs` includes tests for interrupted jobs recovering as `Held` and cancelled jobs staying cancelled.
+- `tools/check-studio-local-runtime-gate.mjs` fails if the crash recovery primitives or tests are removed.
+
+Gate phrase: job crash recovery.

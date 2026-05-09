@@ -6,7 +6,11 @@ pub mod probe;
 
 #[cfg(test)]
 mod tests {
-    use crate::contracts::{RuntimeExecutionTarget, RuntimeJobLane, StoragePressure, ThermalState};
+    use std::fs;
+    use std::path::PathBuf;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    use crate::contracts::{RuntimeExecutionTarget, RuntimeJobLane, RuntimeJobState, StoragePressure, ThermalState};
     use crate::jobs::{RuntimeJobRequest, RuntimeJobStore};
     use crate::policy::resolve_runtime_target;
     use crate::probe::build_probe_from_signals;
@@ -44,4 +48,56 @@ mod tests {
         assert_eq!(status.target, RuntimeExecutionTarget::Held);
         assert!(status.blocker.is_some());
     }
+
+    fn temp_snapshot_path(test_name: &str) -> PathBuf {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|duration| duration.as_nanos())
+            .unwrap_or(0);
+        std::env::temp_dir().join(format!("aethel-studio-local-{test_name}-{nonce}.json"))
+    }
+
+    #[test]
+    fn persisted_running_jobs_recover_as_held_after_restart() {
+        let path = temp_snapshot_path("recover-running");
+        let job_id = {
+            let probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+            let decision = resolve_runtime_target(&probe, RuntimeJobLane::MemoryIndexing);
+            let mut store = RuntimeJobStore::from_persistence_path(&path).expect("create persistent job store");
+            let status = store.create(RuntimeJobRequest::fixture(RuntimeJobLane::MemoryIndexing), decision);
+            assert_eq!(status.state, RuntimeJobState::Running);
+            assert!(path.exists());
+            status.id
+        };
+
+        let recovered = RuntimeJobStore::from_persistence_path(&path).expect("recover persistent job store");
+        let status = recovered.get(&job_id).expect("recovered job exists");
+        assert_eq!(status.state, RuntimeJobState::Held);
+        assert!(status.blocker.as_deref().unwrap_or_default().contains("Recovered after Studio Local restart"));
+        assert!(status.compact_log.iter().any(|line| line.contains("Recovered after Studio Local restart")));
+        assert!(recovered.last_persistence_error().is_none());
+
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn persisted_cancelled_jobs_stay_cancelled_after_restart() {
+        let path = temp_snapshot_path("recover-cancelled");
+        let job_id = {
+            let probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+            let decision = resolve_runtime_target(&probe, RuntimeJobLane::MemoryIndexing);
+            let mut store = RuntimeJobStore::from_persistence_path(&path).expect("create persistent job store");
+            let status = store.create(RuntimeJobRequest::fixture(RuntimeJobLane::MemoryIndexing), decision);
+            store.cancel(&status.id).expect("cancel job");
+            status.id
+        };
+
+        let recovered = RuntimeJobStore::from_persistence_path(&path).expect("recover persistent job store");
+        let status = recovered.get(&job_id).expect("recovered job exists");
+        assert_eq!(status.state, RuntimeJobState::Cancelled);
+        assert!(!status.compact_log.iter().any(|line| line.contains("Recovered after Studio Local restart")));
+
+        let _ = fs::remove_file(path);
+    }
+
 }
