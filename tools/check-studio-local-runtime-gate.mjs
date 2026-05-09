@@ -54,6 +54,7 @@ const syncSignatureTest = existsSync('cloud-web-app/web/__tests__/server/studio-
   ? read('cloud-web-app/web/__tests__/server/studio-local-sync-signature.test.ts')
   : ''
 const doc = existsSync('docs/master/108_STUDIO_LOCAL_RUNTIME_KERNEL_2026-05-05.md') ? read('docs/master/108_STUDIO_LOCAL_RUNTIME_KERNEL_2026-05-05.md') : ''
+const envExample = existsSync('.env.example') ? read('.env.example') : ''
 
 for (const phrase of [
   'desktop:dev',
@@ -167,6 +168,8 @@ for (const phrase of [
 ]) {
   assert(syncSignatureTest.includes(phrase), `Studio Local sync signature test covers ${phrase}`)
 }
+
+assert(envExample.includes('AETHEL_STUDIO_LOCAL_SYNC_SECRET'), 'env example documents Studio Local sync secret')
 
 for (const phrase of [
   'Tauri + Rust',
