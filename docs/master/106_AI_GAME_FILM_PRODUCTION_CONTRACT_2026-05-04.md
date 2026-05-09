@@ -222,3 +222,17 @@ Required guarded routes:
 - `cloud-web-app/web/app/api/ai/voice/generate/route.ts`
 
 This does not claim professional media generation is complete; it closes the cost-abuse gap while preserving the larger roadmap for evidence, provenance, render queues, and asset graph approvals.
+
+
+## 2026-05-09 Parallel Agent Scope Lock Update
+
+Aethel now has a concrete scope-lock primitive for parallel agents in `cloud-web-app/web/lib/production/agent-surface-locks.ts`. This does not make agents autonomous by itself; it prevents low-quality parallel work by forcing every write-capable agent to acquire or preview ownership before touching a file, folder, asset, scene, shot, or test surface.
+
+Current contract:
+
+- `acquireAgentSurfaceLocks` blocks overlapping or nested surfaces with `AGENT_SURFACE_LOCKED` instead of letting two agents silently collide.
+- `previewAgentSurfaceLockRequest` lets the Producer/Senior Agent check conflicts before launching another worker.
+- `buildAgentSurfaceLockSnapshot` returns a Producer-ready ownership view with active owners, locked paths, expiring locks, arbitration requirement, and next action.
+- Agent Fleet snapshots now expose `lockCoordination` so the UI and central agent can keep chat, specialists, and evidence review aligned without adding visual noise.
+
+This is the minimum coordination substrate needed before Aethel can safely run Cursor-style parallel agents on game, film, app, browser, research, and release work. It also supports the product rule that agents must not edit the same ownership area blindly.

@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import {
   acquireAgentSurfaceLocks,
+  buildAgentSurfaceLockSnapshot,
   clearAgentSurfaceLocksForTests,
+  listActiveAgentSurfaceLocks,
+  previewAgentSurfaceLockRequest,
 } from '@/lib/production/agent-surface-locks'
 
 describe('agent surface locks', () => {
@@ -118,5 +121,77 @@ describe('agent surface locks', () => {
 
     expect(blocked.allowed).toBe(false)
     expect(blocked.allowed ? '' : blocked.code).toBe('AGENT_SURFACE_LOCKED')
+  })
+
+  it('previews conflicts without acquiring a new lock', () => {
+    acquireAgentSurfaceLocks({
+      projectId: 'project-1',
+      agent: 'Gameplay Engineer Agent',
+      ownerUserId: 'user-1',
+      paths: ['src/game/combat'],
+      source: 'session',
+      reason: 'combat pass',
+      now: '2026-05-04T22:00:00.000Z',
+    })
+
+    const preview = previewAgentSurfaceLockRequest({
+      projectId: 'project-1',
+      agent: 'Technical Artist Agent',
+      ownerUserId: 'user-2',
+      paths: ['src/game/combat/BossController.ts'],
+      now: '2026-05-04T22:01:00.000Z',
+    })
+
+    expect(preview.allowed).toBe(false)
+    expect(preview.conflicts).toEqual([
+      expect.objectContaining({
+        blockingAgent: 'Gameplay Engineer Agent',
+        blockingPaths: ['src/game/combat'],
+        requestedPaths: ['src/game/combat/BossController.ts'],
+      }),
+    ])
+    expect(preview.nextAction).toContain('Producer Agent')
+    expect(listActiveAgentSurfaceLocks({ projectId: 'project-1', now: '2026-05-04T22:01:00.000Z' })).toHaveLength(1)
+  })
+
+  it('builds a Producer-ready ownership snapshot for active scope locks', () => {
+    acquireAgentSurfaceLocks({
+      projectId: 'project-1',
+      agent: 'Gameplay Engineer Agent',
+      ownerUserId: 'user-1',
+      paths: ['src/game/combat/BossController.ts'],
+      source: 'session',
+      reason: 'combat pass',
+      now: '2026-05-04T22:00:00.000Z',
+      ttlMs: 90_000,
+    })
+    acquireAgentSurfaceLocks({
+      projectId: 'project-1',
+      agent: 'QA Agent',
+      ownerUserId: 'user-2',
+      paths: ['tests/playtest/boss.spec.ts'],
+      source: 'session',
+      reason: 'playtest pass',
+      now: '2026-05-04T22:00:10.000Z',
+      ttlMs: 300_000,
+    })
+
+    const snapshot = buildAgentSurfaceLockSnapshot({
+      projectId: 'project-1',
+      now: '2026-05-04T22:00:30.000Z',
+      expiringSoonMs: 120_000,
+    })
+
+    expect(snapshot.activeLockCount).toBe(2)
+    expect(snapshot.lockedPathCount).toBe(2)
+    expect(snapshot.expiringSoonCount).toBe(1)
+    expect(snapshot.arbitrationRequired).toBe(true)
+    expect(snapshot.owners).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ agent: 'Gameplay Engineer Agent', paths: ['src/game/combat/BossController.ts'] }),
+        expect.objectContaining({ agent: 'QA Agent', paths: ['tests/playtest/boss.spec.ts'] }),
+      ])
+    )
+    expect(snapshot.nextAction).toContain('Producer Agent')
   })
 })

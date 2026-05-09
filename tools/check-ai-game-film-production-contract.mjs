@@ -21,6 +21,9 @@ const repositoryCartographyPath = 'cloud-web-app/web/lib/production/repository-c
 const repositoryCartographyTestPath = 'cloud-web-app/web/__tests__/production/repository-cartography.test.ts'
 const expensiveGenerationGuardPath = 'cloud-web-app/web/lib/server/ai-expensive-generation-guard.ts'
 const expensiveGenerationGuardTestPath = 'cloud-web-app/web/__tests__/server/ai-expensive-generation-guard.test.ts'
+const agentSurfaceLocksPath = 'cloud-web-app/web/lib/production/agent-surface-locks.ts'
+const agentSurfaceLocksTestPath = 'cloud-web-app/web/__tests__/production/agent-surface-locks.test.ts'
+const agentFleetSessionPath = 'cloud-web-app/web/lib/production/agent-fleet-session.ts'
 
 const anchors = [
   'docs/master/93_UNREAL_AGENTIC_PRODUCT_GAP_MAP_2026-05-01.md',
@@ -50,6 +53,9 @@ for (const path of [
   productionStateTestPath,
   repositoryCartographyTestPath,
   expensiveGenerationGuardTestPath,
+  agentSurfaceLocksPath,
+  agentSurfaceLocksTestPath,
+  agentFleetSessionPath,
   ...anchors,
 ]) {
   assert(existsSync(path), `${path} exists`)
@@ -72,6 +78,9 @@ const repositoryCartography = existsSync(repositoryCartographyPath) ? read(repos
 const repositoryCartographyTest = existsSync(repositoryCartographyTestPath) ? read(repositoryCartographyTestPath) : ''
 const expensiveGenerationGuard = existsSync(expensiveGenerationGuardPath) ? read(expensiveGenerationGuardPath) : ''
 const expensiveGenerationGuardTest = existsSync(expensiveGenerationGuardTestPath) ? read(expensiveGenerationGuardTestPath) : ''
+const agentSurfaceLocks = existsSync(agentSurfaceLocksPath) ? read(agentSurfaceLocksPath) : ''
+const agentSurfaceLocksTest = existsSync(agentSurfaceLocksTestPath) ? read(agentSurfaceLocksTestPath) : ''
+const agentFleetSession = existsSync(agentFleetSessionPath) ? read(agentFleetSessionPath) : ''
 
 for (const phrase of [
   'AI Game/Film Production Contract',
@@ -102,6 +111,9 @@ for (const phrase of [
   'GB-scale',
   'mustReadFirst',
   'doNotInvent',
+  'Parallel Agent Scope Lock Update',
+  'previewAgentSurfaceLockRequest',
+  'buildAgentSurfaceLockSnapshot',
 ]) {
   assert(contract.includes(phrase), `contract includes "${phrase}"`)
 }
@@ -190,6 +202,23 @@ assert(
     expensiveGenerationGuardTest.includes('X-Aethel-Estimated-Cost-Tokens'),
   'expensive generation guard tests cover abuse blocking and cost transparency headers'
 )
+
+for (const phrase of [
+  'acquireAgentSurfaceLocks',
+  'previewAgentSurfaceLockRequest',
+  'buildAgentSurfaceLockSnapshot',
+  'AGENT_SURFACE_LOCKED',
+  'arbitrationRequired',
+]) {
+  assert(agentSurfaceLocks.includes(phrase), `agent surface locks include "${phrase}"`)
+}
+
+assert(
+  agentSurfaceLocksTest.includes('previews conflicts without acquiring a new lock') &&
+    agentSurfaceLocksTest.includes('Producer-ready ownership snapshot'),
+  'agent surface lock tests cover preview-only conflict checks and Producer ownership snapshots'
+)
+assert(agentFleetSession.includes('lockCoordination'), 'agent fleet snapshot exposes lockCoordination for the senior coordinator')
 
 const failed = checks.filter((check) => !check.ok)
 if (failed.length > 0) {

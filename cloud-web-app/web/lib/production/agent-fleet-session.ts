@@ -2,7 +2,7 @@ import type { AgenticProductionState } from './agentic-production-state'
 import { buildAgentHandoffPacket, type AgentHandoffPacketStatus } from './agent-handoff-packet'
 import type { AgentWorkLane, AgentScopeMode } from './parallel-agent-work-contract'
 import type { RepositoryCartographyManifest } from './repository-cartography'
-import type { AgentSurfaceLock } from './agent-surface-locks'
+import { buildAgentSurfaceLockSnapshot, type AgentSurfaceLock, type AgentSurfaceLockSnapshot } from './agent-surface-locks'
 
 export const AGENT_FLEET_SETTINGS_KEY = 'aethelAgentFleetPreferences'
 
@@ -54,6 +54,7 @@ export interface AgentFleetSnapshot {
   blockers: string[]
   activeLockCount: number
   staleSurfaceCount: number
+  lockCoordination: AgentSurfaceLockSnapshot
   nextAction: string
 }
 
@@ -335,7 +336,12 @@ export function buildAgentFleetSnapshot(input: {
     .slice(0, 12)
 
   const blockers = unique(members.flatMap((member) => member.blockedUntil)).slice(0, 8)
-  const activeLockCount = unique((input.activeLocks ?? []).map((lock) => lock.id)).length
+  const lockCoordination = buildAgentSurfaceLockSnapshot({
+    projectId: input.projectId,
+    locks: input.activeLocks ?? [],
+    now: input.now,
+  })
+  const activeLockCount = lockCoordination.activeLockCount
   const staleSurfaceCount = unique(members.flatMap((member) => member.staleSurfacePreview)).length
   const readyCount = members.filter((member) => member.status === 'ready').length
   const blockedCount = members.filter((member) => member.status === 'blocked').length
@@ -372,6 +378,7 @@ export function buildAgentFleetSnapshot(input: {
     blockers,
     activeLockCount,
     staleSurfaceCount,
+    lockCoordination,
     nextAction:
       central?.nextAction ??
       input.state.ledger[0]?.nextAction ??

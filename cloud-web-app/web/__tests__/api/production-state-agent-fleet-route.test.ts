@@ -114,6 +114,19 @@ describe('api/projects/[id]/production-state/agent-fleet route', () => {
 
     expect(response.status).toBe(200)
     expect(payload.snapshot.activeLockCount).toBe(1)
+    expect(payload.snapshot.lockCoordination).toEqual(
+      expect.objectContaining({
+        activeLockCount: 1,
+        lockedPathCount: 1,
+        arbitrationRequired: false,
+        owners: [
+          expect.objectContaining({
+            agent: 'Gameplay Engineer Agent',
+            paths: ['src/game/combat/BossController.ts'],
+          }),
+        ],
+      })
+    )
     expect(payload.snapshot.members).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

@@ -26,6 +26,37 @@ export type AgentSurfaceLockDecision =
       metadata: Record<string, unknown>
     }
 
+export interface AgentSurfaceLockConflictPreview {
+  lockId: string
+  agent: string
+  paths: string[]
+  blockingAgent: string
+  blockingOwnerUserId: string
+  blockingPaths: string[]
+  requestedPaths: string[]
+  expiresAt: string
+  source: AgentSurfaceLockSource
+}
+
+export interface AgentSurfaceLockOwnerSnapshot {
+  agent: string
+  ownerUserId: string
+  lockCount: number
+  paths: string[]
+  expiresAt: string
+}
+
+export interface AgentSurfaceLockSnapshot {
+  projectId: string
+  generatedAt: string
+  activeLockCount: number
+  lockedPathCount: number
+  owners: AgentSurfaceLockOwnerSnapshot[]
+  expiringSoonCount: number
+  arbitrationRequired: boolean
+  nextAction: string
+}
+
 const DEFAULT_LOCK_TTL_MS = 15 * 60 * 1000
 const locks = new Map<string, AgentSurfaceLock>()
 
@@ -85,6 +116,56 @@ function findConflictingLocks(input: {
   return Array.from(conflicts.values())
 }
 
+
+function toConflictPreview(paths: string[], conflicts: AgentSurfaceLock[]): AgentSurfaceLockConflictPreview[] {
+  return conflicts.map((lock) => ({
+    lockId: lock.id,
+    agent: lock.agent,
+    paths: lock.paths,
+    blockingAgent: lock.agent,
+    blockingOwnerUserId: lock.ownerUserId,
+    blockingPaths: lock.paths,
+    requestedPaths: paths,
+    expiresAt: lock.expiresAt,
+    source: lock.source,
+  }))
+}
+
+export function previewAgentSurfaceLockRequest(input: {
+  projectId: string
+  agent: string
+  ownerUserId: string
+  paths: string[]
+  now?: string
+}): {
+  allowed: boolean
+  paths: string[]
+  conflicts: AgentSurfaceLockConflictPreview[]
+  nextAction: string
+} {
+  const paths = unique(input.paths)
+  const nowMs = input.now ? Date.parse(input.now) : Date.now()
+  const safeNowMs = Number.isFinite(nowMs) ? nowMs : Date.now()
+  pruneExpiredLocks(safeNowMs)
+  const conflicts = findConflictingLocks({
+    projectId: input.projectId,
+    agent: input.agent,
+    ownerUserId: input.ownerUserId,
+    paths,
+    nowMs: safeNowMs,
+  })
+  const previews = toConflictPreview(paths, conflicts)
+  return {
+    allowed: previews.length === 0,
+    paths,
+    conflicts: previews,
+    nextAction:
+      previews.length === 0
+        ? 'Safe to acquire scope lock before the agent writes.'
+        : 'Escalate to Producer Agent for arbitration before running this agent in parallel.',
+  }
+}
+
 export function acquireAgentSurfaceLocks(input: {
   projectId: string
   agent: string
@@ -134,14 +215,7 @@ export function acquireAgentSurfaceLocks(input: {
         projectId: input.projectId,
         agent: input.agent,
         paths,
-        conflicts: conflicts.map((lock) => ({
-          id: lock.id,
-          agent: lock.agent,
-          ownerUserId: lock.ownerUserId,
-          paths: lock.paths,
-          expiresAt: lock.expiresAt,
-          source: lock.source,
-        })),
+        conflicts: toConflictPreview(paths, conflicts),
       },
     }
   }
@@ -193,6 +267,56 @@ export function listActiveAgentSurfaceLocks(input?: { projectId?: string; now?: 
   }
 
   return Array.from(uniqueLocks.values()).sort((a, b) => a.expiresAt.localeCompare(b.expiresAt))
+}
+
+export function buildAgentSurfaceLockSnapshot(input: {
+  projectId: string
+  locks?: AgentSurfaceLock[]
+  now?: string
+  expiringSoonMs?: number
+}): AgentSurfaceLockSnapshot {
+  const nowMs = input.now ? Date.parse(input.now) : Date.now()
+  const safeNowMs = Number.isFinite(nowMs) ? nowMs : Date.now()
+  const locks = (input.locks ?? listActiveAgentSurfaceLocks({ projectId: input.projectId, now: nowIso(safeNowMs) })).filter(
+    (lock) => lock.projectId === input.projectId && !isExpired(lock, safeNowMs)
+  )
+  const owners = new Map<string, AgentSurfaceLockOwnerSnapshot>()
+
+  for (const lock of locks) {
+    const key = `${lock.agent}:${lock.ownerUserId}`
+    const current = owners.get(key) ?? {
+      agent: lock.agent,
+      ownerUserId: lock.ownerUserId,
+      lockCount: 0,
+      paths: [],
+      expiresAt: lock.expiresAt,
+    }
+    current.lockCount += 1
+    current.paths = unique([...current.paths, ...lock.paths]).slice(0, 12)
+    current.expiresAt = current.expiresAt < lock.expiresAt ? current.expiresAt : lock.expiresAt
+    owners.set(key, current)
+  }
+
+  const expiringSoonMs = input.expiringSoonMs ?? 2 * 60 * 1000
+  const expiringSoonCount = locks.filter((lock) => Date.parse(lock.expiresAt) - safeNowMs <= expiringSoonMs).length
+  const lockedPathCount = unique(locks.flatMap((lock) => lock.paths)).length
+  const arbitrationRequired = locks.length > 0 && owners.size > 1
+
+  return {
+    projectId: input.projectId,
+    generatedAt: nowIso(safeNowMs),
+    activeLockCount: unique(locks.map((lock) => lock.id)).length,
+    lockedPathCount,
+    owners: Array.from(owners.values()).sort((a, b) => b.lockCount - a.lockCount || a.agent.localeCompare(b.agent)),
+    expiringSoonCount,
+    arbitrationRequired,
+    nextAction:
+      locks.length === 0
+        ? 'No active scope locks. Producer Agent can delegate after Repository Cartography confirms ownership.'
+        : arbitrationRequired
+          ? 'Producer Agent must arbitrate overlapping or adjacent work before approving parallel writes.'
+          : 'Keep the current agent inside its locked surfaces and renew or release after evidence is recorded.',
+  }
 }
 
 export function clearAgentSurfaceLocksForTests(): void {
