@@ -129,9 +129,22 @@ export interface RuntimeCloudSyncPayload {
   version: typeof STUDIO_LOCAL_CONTRACT_VERSION
   accountId: string
   projectId: string
+  deviceId: string
   probe: LocalRuntimeProbeReport
   jobs: RuntimeJobStatus[]
   missionLedgerRefs: string[]
+  signedAt?: string
+  nonce?: string
+  signature?: string
+}
+
+export interface RuntimeCloudSyncSigningPayload {
+  version: typeof STUDIO_LOCAL_CONTRACT_VERSION
+  userId: string
+  deviceId: string
+  signedAt: string
+  nonce: string
+  report: LocalRuntimeProbeReport
 }
 
 export function isRuntimeJobLane(value: string): value is RuntimeJobLane {
@@ -148,6 +161,27 @@ export function isHeavyRuntimeJobLane(lane: RuntimeJobLane): boolean {
 
 export function requiresHumanApprovalForLane(lane: RuntimeJobLane): boolean {
   return lane === 'browser-operator' || lane === 'build-export' || lane === 'render-queue'
+}
+
+function stableJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(stableJsonValue)
+  }
+
+  if (!value || typeof value !== 'object') {
+    return value === undefined ? null : value
+  }
+
+  const source = value as Record<string, unknown>
+  const sorted: Record<string, unknown> = {}
+  for (const key of Object.keys(source).sort()) {
+    sorted[key] = stableJsonValue(source[key])
+  }
+  return sorted
+}
+
+export function buildRuntimeCloudSyncSigningPayload(input: RuntimeCloudSyncSigningPayload): string {
+  return JSON.stringify(stableJsonValue(input))
 }
 
 export function resolveSafeRuntimeTarget(input: {

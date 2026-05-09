@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
 const authMocks = vi.hoisted(() => ({
@@ -14,11 +14,59 @@ vi.mock('@/lib/auth-server', () => authMocks)
 vi.mock('@/lib/server/local-runtime-capability-store', () => storeMocks)
 
 import { GET, POST } from '@/app/api/runtime/local-capabilities/route'
+import {
+  signStudioLocalSyncPayload,
+  STUDIO_LOCAL_SYNC_SIGNATURE_SECRET_ENV,
+} from '@/lib/server/studio-local-sync-signature'
+
+const originalStudioLocalSyncSecret = process.env[STUDIO_LOCAL_SYNC_SIGNATURE_SECRET_ENV]
+
+function buildStudioLocalProbe(generatedAt = '2026-05-04T14:04:00.000Z') {
+  return {
+    version: 1,
+    generatedAt,
+    deviceId: 'studio-local-device',
+    os: 'Windows_NT',
+    arch: 'x64',
+    cpuLogicalCores: 12,
+    totalMemoryMb: 32768,
+    availableMemoryMb: 24576,
+    storageFreeMb: 262144,
+    gpuAvailable: true,
+    gpuName: 'RTX Studio GPU',
+    webGpuAvailable: true,
+    webNnAvailable: false,
+    npuAvailable: true,
+    windowsMlAvailable: true,
+    directMlAvailable: true,
+    onnxRuntimeAvailable: true,
+    ffmpegAvailable: true,
+    rapierAvailable: true,
+    browserAutomationAvailable: true,
+    thermalState: 'nominal',
+    storagePressure: 'ok',
+    preferredExecutor: 'local-native',
+    signature: 'probe-signature',
+  }
+}
 
 describe('api/runtime/local-capabilities route', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    if (originalStudioLocalSyncSecret === undefined) {
+      delete process.env[STUDIO_LOCAL_SYNC_SIGNATURE_SECRET_ENV]
+    } else {
+      process.env[STUDIO_LOCAL_SYNC_SIGNATURE_SECRET_ENV] = originalStudioLocalSyncSecret
+    }
     authMocks.requireAuth.mockReturnValue({ userId: 'user-1' })
+  })
+
+  afterEach(() => {
+    if (originalStudioLocalSyncSecret === undefined) {
+      delete process.env[STUDIO_LOCAL_SYNC_SIGNATURE_SECRET_ENV]
+    } else {
+      process.env[STUDIO_LOCAL_SYNC_SIGNATURE_SECRET_ENV] = originalStudioLocalSyncSecret
+    }
   })
 
   it('returns 401 when reading without authentication', async () => {
@@ -153,32 +201,7 @@ describe('api/runtime/local-capabilities route', () => {
       body: JSON.stringify({
         deviceId: 'studio-local-device',
         source: 'api-sync',
-        report: {
-          version: 1,
-          generatedAt: '2026-05-04T14:04:00.000Z',
-          deviceId: 'studio-local-device',
-          os: 'Windows_NT',
-          arch: 'x64',
-          cpuLogicalCores: 12,
-          totalMemoryMb: 32768,
-          availableMemoryMb: 24576,
-          storageFreeMb: 262144,
-          gpuAvailable: true,
-          gpuName: 'RTX Studio GPU',
-          webGpuAvailable: true,
-          webNnAvailable: false,
-          npuAvailable: true,
-          windowsMlAvailable: true,
-          directMlAvailable: true,
-          onnxRuntimeAvailable: true,
-          ffmpegAvailable: true,
-          rapierAvailable: true,
-          browserAutomationAvailable: true,
-          thermalState: 'nominal',
-          storagePressure: 'ok',
-          preferredExecutor: 'local-native',
-          signature: 'probe-signature',
-        },
+        report: buildStudioLocalProbe(),
       }),
     })
 
@@ -198,6 +221,85 @@ describe('api/runtime/local-capabilities route', () => {
           preferredExecutor: 'local-native',
           maxLocalAgents: 4,
           localModelPolicy: 'allow-small-models',
+        }),
+      })
+    )
+  })
+
+  it('rejects unsigned Studio Local api-sync probes when sync signing is configured', async () => {
+    process.env[STUDIO_LOCAL_SYNC_SIGNATURE_SECRET_ENV] = 'test-secret'
+    const request = new NextRequest('http://localhost:3000/api/runtime/local-capabilities', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        deviceId: 'studio-local-device',
+        source: 'api-sync',
+        report: buildStudioLocalProbe(new Date().toISOString()),
+      }),
+    })
+
+    const response = await POST(request)
+    const payload = await response.json()
+
+    expect(response.status).toBe(401)
+    expect(payload.error).toBe('STUDIO_LOCAL_SYNC_SIGNATURE_REQUIRED')
+    expect(storeMocks.saveLocalRuntimeCapabilitySnapshot).not.toHaveBeenCalled()
+  })
+
+  it('accepts signed Studio Local api-sync probes when sync signing is configured', async () => {
+    process.env[STUDIO_LOCAL_SYNC_SIGNATURE_SECRET_ENV] = 'test-secret'
+    storeMocks.saveLocalRuntimeCapabilitySnapshot.mockImplementation(async (input: {
+      userId: string
+      deviceId: string
+      deviceLabel?: string | null
+      source?: string
+      report: Record<string, unknown>
+    }) => ({
+      userId: input.userId,
+      deviceId: input.deviceId,
+      deviceLabel: input.deviceLabel,
+      source: input.source,
+      syncedAt: new Date().toISOString(),
+      report: input.report,
+    }))
+
+    const signedAt = new Date().toISOString()
+    const nonce = 'nonce-123456'
+    const report = buildStudioLocalProbe(signedAt)
+    const signature = signStudioLocalSyncPayload(
+      {
+        userId: 'user-1',
+        deviceId: 'studio-local-device',
+        signedAt,
+        nonce,
+        report,
+      },
+      'test-secret'
+    )
+    const request = new NextRequest('http://localhost:3000/api/runtime/local-capabilities', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        deviceId: 'studio-local-device',
+        source: 'api-sync',
+        signedAt,
+        nonce,
+        signature,
+        report,
+      }),
+    })
+
+    const response = await POST(request)
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.syncSignature).toEqual({ required: true, verified: true })
+    expect(storeMocks.saveLocalRuntimeCapabilitySnapshot).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: 'api-sync',
+        report: expect.objectContaining({
+          preferredExecutor: 'local-native',
+          maxLocalAgents: 4,
         }),
       })
     )

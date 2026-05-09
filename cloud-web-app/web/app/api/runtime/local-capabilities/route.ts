@@ -8,6 +8,10 @@ import {
   saveLocalRuntimeCapabilitySnapshot,
   type LocalRuntimeCapabilitySource,
 } from '@/lib/server/local-runtime-capability-store'
+import {
+  shouldRequireStudioLocalSyncSignature,
+  verifyStudioLocalSyncSignature,
+} from '@/lib/server/studio-local-sync-signature'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +20,9 @@ const localCapabilityPayloadSchema = z.object({
   deviceLabel: z.string().trim().max(120).nullish(),
   source: z.enum(['native-bridge', 'api-sync']).optional(),
   report: z.unknown(),
+  signedAt: z.string().trim().min(1).max(80).optional(),
+  nonce: z.string().trim().min(8).max(160).optional(),
+  signature: z.string().trim().min(32).max(160).optional(),
 })
 
 function buildUnauthorizedResponse() {
@@ -75,6 +82,26 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  const source = parsed.data.source ?? 'native-bridge'
+  const signatureResult = verifyStudioLocalSyncSignature({
+    payload: {
+      userId: user.userId,
+      deviceId: parsed.data.deviceId,
+      signedAt: parsed.data.signedAt ?? '',
+      nonce: parsed.data.nonce ?? '',
+      report: parsed.data.report,
+    },
+    signature: parsed.data.signature,
+    required: shouldRequireStudioLocalSyncSignature({
+      source,
+      report: parsed.data.report,
+    }),
+  })
+
+  if (!signatureResult.ok) {
+    return NextResponse.json({ error: signatureResult.code }, { status: signatureResult.status })
+  }
+
   const report = sanitizeLocalRuntimeCapabilityReport(parsed.data.report)
   if (!report) {
     return NextResponse.json({ error: 'INVALID_LOCAL_RUNTIME_REPORT' }, { status: 400 })
@@ -89,12 +116,16 @@ export async function POST(request: NextRequest) {
       userId: user.userId,
       deviceId: parsed.data.deviceId,
       deviceLabel: parsed.data.deviceLabel ?? report.machineName ?? null,
-      source: (parsed.data.source ?? 'native-bridge') as LocalRuntimeCapabilitySource,
+      source: source as LocalRuntimeCapabilitySource,
       report,
     })
 
     return NextResponse.json({
       ok: true,
+      syncSignature: {
+        required: signatureResult.required,
+        verified: signatureResult.verified,
+      },
       ...buildSnapshotResponse(snapshot),
     })
   } catch (error) {

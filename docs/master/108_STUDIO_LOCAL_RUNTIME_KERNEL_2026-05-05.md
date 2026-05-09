@@ -95,3 +95,16 @@ Additional test coverage:
 - `cloud-web-app/web/__tests__/device/local-runtime-bridge.test.ts` validates strong native probes and degraded `held` probes.
 - `cloud-web-app/web/__tests__/api/local-runtime-capabilities-route.test.ts` validates API sync of the Runtime Kernel payload.
 - `tools/check-studio-local-runtime-gate.mjs` now fails if the cloud bridge stops recognizing Studio Local probe fields.
+
+## 2026-05-09 Signed Cloud Sync
+
+Studio Local sync now has a signed cloud sync contract for `api-sync` probes. When `AETHEL_STUDIO_LOCAL_SYNC_SECRET` is configured, `/api/runtime/local-capabilities` requires a fresh HMAC signature over the user id, device id, nonce, signed timestamp, and raw probe payload before accepting Studio Local Runtime Kernel reports.
+
+This closes an important trust gap: the cloud Studio can keep accepting unsigned legacy browser/native bridge reports in development, but production can require signed local runtime evidence before using `local-native`, `cloud-sandbox`, or `held` routing decisions.
+
+Acceptance evidence:
+
+- `cloud-web-app/web/lib/server/studio-local-sync-signature.ts` defines deterministic payload signing and verification.
+- `cloud-web-app/web/app/api/runtime/local-capabilities/route.ts` rejects unsigned or stale signed `api-sync` probes when the secret is configured.
+- `cloud-web-app/web/__tests__/server/studio-local-sync-signature.test.ts` covers stable payloads, valid signatures, stale signatures, and tampered payloads.
+- `cloud-web-app/web/__tests__/api/local-runtime-capabilities-route.test.ts` covers unsigned rejection and signed acceptance.

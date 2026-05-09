@@ -24,6 +24,8 @@ const requiredFiles = [
   'apps/studio-local/src-tauri/src/daemon.rs',
   'packages/runtime-contracts/package.json',
   'packages/runtime-contracts/src/index.ts',
+  'cloud-web-app/web/lib/server/studio-local-sync-signature.ts',
+  'cloud-web-app/web/__tests__/server/studio-local-sync-signature.test.ts',
   'docs/master/108_STUDIO_LOCAL_RUNTIME_KERNEL_2026-05-05.md',
 ]
 
@@ -44,6 +46,12 @@ const localRuntimeBridge = existsSync('cloud-web-app/web/lib/device/local-runtim
   : ''
 const localRuntimeRouteTest = existsSync('cloud-web-app/web/__tests__/api/local-runtime-capabilities-route.test.ts')
   ? read('cloud-web-app/web/__tests__/api/local-runtime-capabilities-route.test.ts')
+  : ''
+const syncSignature = existsSync('cloud-web-app/web/lib/server/studio-local-sync-signature.ts')
+  ? read('cloud-web-app/web/lib/server/studio-local-sync-signature.ts')
+  : ''
+const syncSignatureTest = existsSync('cloud-web-app/web/__tests__/server/studio-local-sync-signature.test.ts')
+  ? read('cloud-web-app/web/__tests__/server/studio-local-sync-signature.test.ts')
   : ''
 const doc = existsSync('docs/master/108_STUDIO_LOCAL_RUNTIME_KERNEL_2026-05-05.md') ? read('docs/master/108_STUDIO_LOCAL_RUNTIME_KERNEL_2026-05-05.md') : ''
 
@@ -69,6 +77,8 @@ for (const phrase of [
   'LocalRuntimeProbeReport',
   'RuntimeJobRequest',
   'RuntimeJobStatus',
+  'RuntimeCloudSyncSigningPayload',
+  'buildRuntimeCloudSyncSigningPayload',
   'ai-local-inference',
   'memory-indexing',
   'asset-import',
@@ -130,6 +140,8 @@ for (const phrase of [
 
 for (const phrase of [
   'accepts Studio Local Runtime Kernel probe payloads',
+  'rejects unsigned Studio Local api-sync probes',
+  'accepts signed Studio Local api-sync probes',
   'studio-local-device',
   'preferredExecutor',
   'maxLocalAgents',
@@ -138,8 +150,28 @@ for (const phrase of [
 }
 
 for (const phrase of [
+  'AETHEL_STUDIO_LOCAL_SYNC_SECRET',
+  'buildStudioLocalSyncSigningPayload',
+  'verifyStudioLocalSyncSignature',
+  'timingSafeEqual',
+  'STUDIO_LOCAL_SYNC_SIGNATURE_STALE',
+  'STUDIO_LOCAL_SYNC_SIGNATURE_INVALID',
+]) {
+  assert(syncSignature.includes(phrase), `Studio Local sync signature helper includes ${phrase}`)
+}
+
+for (const phrase of [
+  'signs and verifies a fresh Studio Local sync payload',
+  'rejects stale or tampered signatures',
+  'stableStringifyStudioLocalSync',
+]) {
+  assert(syncSignatureTest.includes(phrase), `Studio Local sync signature test covers ${phrase}`)
+}
+
+for (const phrase of [
   'Tauri + Rust',
   'Runtime Kernel',
+  'signed cloud sync',
   'local-native',
   'cloud-sandbox',
   'held',
