@@ -392,6 +392,13 @@ export class CollaborationSession {
     updateSelection(selection: SelectionRange | null): void {
         this.awareness?.setLocalStateField('selection', selection);
     }
+
+    /**
+     * Expose awareness for native editor bindings such as y-monaco.
+     */
+    getAwareness(): Awareness | null {
+        return this.awareness;
+    }
     
     /**
      * Get local client ID
@@ -719,6 +726,7 @@ export interface UseCollaborationResult {
 }
 
 export function useYjsCollaboration(options: UseCollaborationOptions): UseCollaborationResult {
+    const [session, setSession] = useState<CollaborationSession | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [isSynced, setIsSynced] = useState(false);
     const [users, setUsers] = useState<UserInfo[]>([]);
@@ -727,7 +735,7 @@ export function useYjsCollaboration(options: UseCollaborationOptions): UseCollab
     
     useEffect(() => {
         // Create session
-        sessionRef.current = new CollaborationSession({
+        const nextSession = new CollaborationSession({
             documentName: options.documentName,
             serverUrl: options.serverUrl,
             user: {
@@ -743,10 +751,13 @@ export function useYjsCollaboration(options: UseCollaborationOptions): UseCollab
                 setUsers(Array.from(userMap.values()));
             }
         });
+        sessionRef.current = nextSession;
+        setSession(nextSession);
         
         return () => {
             sessionRef.current?.destroy();
             sessionRef.current = null;
+            setSession(null);
         };
     }, [options.documentName, options.serverUrl, options.userId, options.userName, options.userColor]);
     
@@ -775,7 +786,7 @@ export function useYjsCollaboration(options: UseCollaborationOptions): UseCollab
     }, []);
     
     return {
-        session: sessionRef.current,
+        session,
         isConnected,
         isSynced,
         users,

@@ -23,6 +23,7 @@ import type {
   InlineApplyResult,
 } from '@/components/ide/fullscreen/types';
 import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
+import type { CollaborationSession } from '@/lib/yjs-collaboration';
 
 type EditorInstanceRef = MutableRefObject<monacoEditor.editor.IStandaloneCodeEditor | null>;
 
@@ -45,6 +46,8 @@ export type WorkbenchEditorPaneProps = {
   showDiagnostics: boolean;
   fullAccessActive: boolean;
   collaborationConnected: boolean;
+  collaborationSession: CollaborationSession | null;
+  collaborationNativeBindingEnabled: boolean;
   collaborationStatus: WorkbenchCollaborationStatus;
   collaborationPeers: RemotePeer[];
   primaryEditorRef: EditorInstanceRef;
@@ -106,6 +109,8 @@ export function WorkbenchEditorPane({
   showDiagnostics,
   fullAccessActive,
   collaborationConnected,
+  collaborationSession,
+  collaborationNativeBindingEnabled,
   collaborationStatus,
   collaborationPeers,
   primaryEditorRef,
@@ -197,6 +202,8 @@ export function WorkbenchEditorPane({
               fileError={fileError}
               fullAccessActive={fullAccessActive}
               collaborationPeers={collaborationPeers}
+              collaborationSession={collaborationSession}
+              collaborationNativeBindingEnabled={collaborationNativeBindingEnabled}
               projectId={inlineEditProjectId}
               primaryEditorRef={primaryEditorRef}
               secondaryEditorRef={secondaryEditorRef}

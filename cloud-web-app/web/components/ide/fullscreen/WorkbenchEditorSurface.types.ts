@@ -6,6 +6,7 @@ import type * as monacoEditor from 'monaco-editor';
 import type { Diagnostic as MonacoDiagnostic } from '@/components/editor/MonacoEditorPro';
 import type { EditorGroup, SplitDirection } from '@/components/editor/SplitEditor';
 import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
+import type { CollaborationSession } from '@/lib/yjs-collaboration';
 
 import type {
   ActiveFileState,
@@ -36,6 +37,8 @@ export type WorkbenchEditorCanvasSharedProps = {
   projectId?: string;
   fullAccessActive: boolean;
   collaborationPeers: RemotePeer[];
+  collaborationSession: CollaborationSession | null;
+  collaborationNativeBindingEnabled: boolean;
   primaryEditorRef: EditorInstanceRef;
   secondaryEditorRef: EditorInstanceRef;
   editorRef: EditorInstanceRef;

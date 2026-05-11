@@ -26,6 +26,42 @@ const agentSurfaceLocksTestPath = 'cloud-web-app/web/__tests__/production/agent-
 const agentFleetSessionPath = 'cloud-web-app/web/lib/production/agent-fleet-session.ts'
 const agentLocksRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/agent-locks/route.ts'
 const agentLocksRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-agent-locks-route.test.ts'
+const creativeStudioRoutesPath = 'cloud-web-app/web/app/studio/creative-studio-routes.ts'
+const creativeStudioShellPath = 'cloud-web-app/web/app/studio/CreativeStudioShell.tsx'
+const creativeStudioRouteContractTestPath = 'cloud-web-app/web/__tests__/app/creative-studio-route-contract.test.ts'
+
+const creativeStudioPages = [
+  {
+    href: '/studio/level',
+    path: 'cloud-web-app/web/app/studio/level/page.tsx',
+    component: '@/components/engine/LevelEditor',
+  },
+  {
+    href: '/studio/scene',
+    path: 'cloud-web-app/web/app/studio/scene/page.tsx',
+    component: '@/components/scene-editor/SceneEditor',
+  },
+  {
+    href: '/studio/material',
+    path: 'cloud-web-app/web/app/studio/material/page.tsx',
+    component: '@/components/materials/MaterialEditor',
+  },
+  {
+    href: '/studio/animation',
+    path: 'cloud-web-app/web/app/studio/animation/page.tsx',
+    component: '@/components/engine/AnimationBlueprint',
+  },
+  {
+    href: '/studio/vfx',
+    path: 'cloud-web-app/web/app/studio/vfx/page.tsx',
+    component: '@/components/engine/NiagaraVFX',
+  },
+  {
+    href: '/studio/audio',
+    path: 'cloud-web-app/web/app/studio/audio/page.tsx',
+    component: '@/components/audio/SoundCueEditor',
+  },
+]
 
 const anchors = [
   'docs/master/93_UNREAL_AGENTIC_PRODUCT_GAP_MAP_2026-05-01.md',
@@ -60,6 +96,13 @@ for (const path of [
   agentFleetSessionPath,
   agentLocksRoutePath,
   agentLocksRouteTestPath,
+  creativeStudioRoutesPath,
+  creativeStudioShellPath,
+  creativeStudioRouteContractTestPath,
+  'cloud-web-app/web/app/studio/page.tsx',
+  'cloud-web-app/web/app/studio/film/page.tsx',
+  'cloud-web-app/web/app/studio/film/FilmStudioClient.tsx',
+  ...creativeStudioPages.map((page) => page.path),
   ...anchors,
 ]) {
   assert(existsSync(path), `${path} exists`)
@@ -87,6 +130,15 @@ const agentSurfaceLocksTest = existsSync(agentSurfaceLocksTestPath) ? read(agent
 const agentFleetSession = existsSync(agentFleetSessionPath) ? read(agentFleetSessionPath) : ''
 const agentLocksRoute = existsSync(agentLocksRoutePath) ? read(agentLocksRoutePath) : ''
 const agentLocksRouteTest = existsSync(agentLocksRouteTestPath) ? read(agentLocksRouteTestPath) : ''
+const creativeStudioRoutes = existsSync(creativeStudioRoutesPath) ? read(creativeStudioRoutesPath) : ''
+const creativeStudioShell = existsSync(creativeStudioShellPath) ? read(creativeStudioShellPath) : ''
+const creativeStudioRouteContractTest = existsSync(creativeStudioRouteContractTestPath) ? read(creativeStudioRouteContractTestPath) : ''
+const creativeStudioHub = existsSync('cloud-web-app/web/app/studio/page.tsx')
+  ? read('cloud-web-app/web/app/studio/page.tsx')
+  : ''
+const filmStudioClient = existsSync('cloud-web-app/web/app/studio/film/FilmStudioClient.tsx')
+  ? read('cloud-web-app/web/app/studio/film/FilmStudioClient.tsx')
+  : ''
 
 for (const phrase of [
   'AI Game/Film Production Contract',
@@ -237,6 +289,40 @@ assert(
   agentLocksRouteTest.includes('previews conflicts without mutating existing locks') &&
     agentLocksRouteTest.includes('acquires and releases a lock for editor agents'),
   'agent locks route tests cover preview, acquire, and release behavior'
+)
+
+for (const page of creativeStudioPages) {
+  const pageSource = existsSync(page.path) ? read(page.path) : ''
+  assert(creativeStudioRoutes.includes(`href: '${page.href}'`), `creative studio route registry exposes ${page.href}`)
+  assert(pageSource.includes(page.component), `${page.path} dynamically imports ${page.component}`)
+  assert(pageSource.includes('CreativeStudioShell'), `${page.path} uses the canonical CreativeStudioShell`)
+}
+
+for (const phrase of [
+  'Progressive creative depth',
+  'Level Studio',
+  'Scene Studio',
+  'Material Studio',
+  'Animation Studio',
+  'VFX Studio',
+  'Film Studio',
+  'Audio Studio',
+]) {
+  assert(
+    creativeStudioRoutes.includes(phrase) ||
+      creativeStudioShell.includes(phrase) ||
+      creativeStudioHub.includes(phrase),
+    `creative studio includes "${phrase}"`,
+  )
+}
+
+assert(filmStudioClient.includes('@/components/nexus/DirectorMode'), 'film studio wires DirectorMode')
+assert(filmStudioClient.includes('@/components/video/VideoTimelineEditor'), 'film studio wires VideoTimelineEditor')
+assert(
+  creativeStudioRouteContractTest.includes('/studio/level') &&
+    creativeStudioRouteContractTest.includes('/studio/film') &&
+    creativeStudioRouteContractTest.includes('/studio/audio'),
+  'creative studio contract test protects game, film, and audio routes'
 )
 
 const failed = checks.filter((check) => !check.ok)

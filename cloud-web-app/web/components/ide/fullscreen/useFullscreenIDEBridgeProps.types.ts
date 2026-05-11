@@ -68,6 +68,8 @@ export type UseFullscreenIDEBridgePropsArgs = {
   showDiagnostics: boolean;
   fullAccessActiveGrant: unknown;
   collaborationConnected: boolean;
+  collaborationSession: WorkbenchEditorPaneProps['collaborationSession'];
+  collaborationNativeBindingEnabled: boolean;
   collaborationStatus: WorkbenchCollaborationStatus;
   editorPeers: RemotePeer[];
   setSplitActivePane: WorkbenchEditorPaneProps['setSplitActivePane'];

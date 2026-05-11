@@ -1,8 +1,12 @@
 'use client';
 
+import { useState } from 'react';
+import type * as monacoEditor from 'monaco-editor';
+
 import MonacoEditorPro, {
 } from '@/components/editor/MonacoEditorPro';
 import RemoteCursorLayer from '@/components/collaboration/RemoteCursorLayer';
+import useNativeMonacoYjsBinding from '@/components/ide/fullscreen/useNativeMonacoYjsBinding';
 
 import type {
   ActiveFileState,
@@ -21,6 +25,8 @@ export default function WorkbenchEditorCanvas({
   projectId,
   fullAccessActive,
   collaborationPeers,
+  collaborationSession,
+  collaborationNativeBindingEnabled,
   primaryEditorRef,
   secondaryEditorRef,
   editorRef,
@@ -43,6 +49,15 @@ export default function WorkbenchEditorCanvas({
   const activeRef = isSecondary ? secondaryEditorRef : primaryEditorRef;
   const setDiagnostics = isSecondary ? setSecondaryEditorDiagnostics : setEditorDiagnostics;
   const setDocumentSymbols = isSecondary ? setSecondaryEditorDocumentSymbols : setEditorDocumentSymbols;
+  const [mountedEditor, setMountedEditor] = useState<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
+
+  useNativeMonacoYjsBinding({
+    enabled: collaborationNativeBindingEnabled,
+    session: collaborationSession,
+    editor: mountedEditor,
+    filePath: fileState.path,
+    initialValue: fileState.content,
+  });
 
   return (
     <div
@@ -61,6 +76,7 @@ export default function WorkbenchEditorCanvas({
         onMount={(editor) => {
           activeRef.current = editor;
           editorRef.current = editor;
+          setMountedEditor(editor);
         }}
         onAiApplyResult={onInlineApplyResult}
         onRequestFullAccess={onRequestFullAccess}

@@ -112,6 +112,7 @@ export function useWorkbenchRealtimeCollaboration({
   const documentName = collaborationEnabled ? `project:${projectId}:workbench` : 'disabled';
 
   const {
+    session,
     isConnected,
     isSynced,
     users,
@@ -324,8 +325,10 @@ export function useWorkbenchRealtimeCollaboration({
 
   return {
     collaborationEnabled,
+    collaborationSession: session,
     collaborationConnected: isConnected,
     collaborationSynced: isSynced,
+    collaborationNativeBindingEnabled: Boolean(collaborationEnabled && isConnected && isSynced && session),
     collaborationError: error,
     collaborationStatus,
     editorPeers,

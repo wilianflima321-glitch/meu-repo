@@ -211,7 +211,9 @@ function IDEContent() {
 
   const {
     collaborationStatus,
+    collaborationSession,
     collaborationConnected,
+    collaborationNativeBindingEnabled,
     editorPeers,
     broadcastCursor,
     broadcastSelection,
@@ -328,6 +330,8 @@ function IDEContent() {
     showDiagnostics,
     fullAccessActiveGrant,
     collaborationConnected,
+    collaborationSession,
+    collaborationNativeBindingEnabled,
     collaborationStatus,
     editorPeers,
     setSplitActivePane,
