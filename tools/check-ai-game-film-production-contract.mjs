@@ -53,6 +53,7 @@ const viewportRenderWorkerPath = 'cloud-web-app/web/lib/workers/viewport-render-
 const viewportRenderWorkerRunnerPath = 'cloud-web-app/web/server/workers/viewport-render-worker.ts'
 const viewportRenderBackendRoutePath = 'cloud-web-app/web/app/api/runtime/viewport/render/route.ts'
 const viewportRenderArtifactAccessPath = 'cloud-web-app/web/lib/viewport/viewport-render-artifact-access.ts'
+const viewportRenderEvidenceOwnershipPath = 'cloud-web-app/web/lib/viewport/viewport-render-evidence-ownership.ts'
 const renderJobRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/render-job/route.ts'
 const renderOutputEvidenceRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/render-job/evidence/route.ts'
 const renderArtifactRoutePath =
@@ -166,6 +167,7 @@ for (const path of [
   viewportRenderWorkerRunnerPath,
   viewportRenderBackendRoutePath,
   viewportRenderArtifactAccessPath,
+  viewportRenderEvidenceOwnershipPath,
   renderJobRoutePath,
   renderOutputEvidenceRoutePath,
   renderArtifactRoutePath,
@@ -245,6 +247,9 @@ const viewportRenderWorkerRunner = existsSync(viewportRenderWorkerRunnerPath) ? 
 const viewportRenderBackendRoute = existsSync(viewportRenderBackendRoutePath) ? read(viewportRenderBackendRoutePath) : ''
 const viewportRenderArtifactAccess = existsSync(viewportRenderArtifactAccessPath)
   ? read(viewportRenderArtifactAccessPath)
+  : ''
+const viewportRenderEvidenceOwnership = existsSync(viewportRenderEvidenceOwnershipPath)
+  ? read(viewportRenderEvidenceOwnershipPath)
   : ''
 const renderJobRoute = existsSync(renderJobRoutePath) ? read(renderJobRoutePath) : ''
 const renderOutputEvidenceRoute = existsSync(renderOutputEvidenceRoutePath) ? read(renderOutputEvidenceRoutePath) : ''
@@ -677,9 +682,20 @@ assert(
   renderOutputEvidenceRoute.includes('coerceViewportRenderOutputEvidence') &&
     renderOutputEvidenceRoute.includes('mergeViewportRenderOutputEvidenceIntoProductionState') &&
     renderOutputEvidenceRoute.includes('withViewportRenderEvidenceArtifactAccess') &&
+    renderOutputEvidenceRoute.includes('validateViewportRenderEvidenceArtifactOwnership') &&
+    viewportRenderEvidenceOwnership.includes('resolveViewportRenderArtifactUrl') &&
+    viewportRenderEvidenceOwnership.includes('ARTIFACT_PROJECT_MISMATCH') &&
+    viewportRenderEvidenceOwnership.includes('Render artifact does not belong to this project') &&
     renderOutputEvidenceRoute.includes('releaseReady: false') &&
     renderOutputEvidenceRoute.includes('Human approval'),
-  'render output evidence route attaches media evidence, returns project-authenticated artifact access, and avoids auto-release'
+  'render output evidence route attaches media evidence, validates artifact ownership, returns project-authenticated artifact access, and avoids auto-release'
+)
+assert(
+  viewportRenderEvidenceOwnership.includes('validateViewportRenderEvidenceArtifactOwnership') &&
+    renderOutputEvidencePersistence.includes('persistence_artifact_ownership_rejected') &&
+    viewportRenderWorker.includes('Renderer backend returned unsafe artifact evidence') &&
+    viewportRenderWorkerTest.includes('references another project internal artifact'),
+  'render output evidence ownership validation is shared by API, persistence, and render worker paths'
 )
 assert(
   sceneViewportState.includes('useViewportExport') &&
@@ -715,7 +731,9 @@ assert(
     renderJobRouteTest.includes('payload.queued).toBe(false') &&
     renderJobRouteTest.includes('render:viewport') &&
     renderOutputEvidenceRouteTest.includes('releaseReady).toBe(false') &&
-    renderOutputEvidenceRouteTest.includes('project-authenticated-proxy'),
+    renderOutputEvidenceRouteTest.includes('project-authenticated-proxy') &&
+    renderOutputEvidenceRouteTest.includes('belong to another project') &&
+    renderOutputEvidenceRouteTest.includes('malformed internal render artifact URLs'),
   'render job tests cover contract, persistence, queue routing, worker execution, output evidence, production merge, and no-fake behavior'
 )
 assert(

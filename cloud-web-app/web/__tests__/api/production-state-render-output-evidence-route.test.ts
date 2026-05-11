@@ -36,7 +36,14 @@ vi.mock('@/lib/observability/logger', () => ({
 
 import { POST } from '@/app/api/projects/[id]/production-state/render-job/evidence/route'
 
-function buildEvidence() {
+function buildEvidence(overrides: Partial<ReturnType<typeof buildEvidenceShape>> = {}) {
+  return {
+    ...buildEvidenceShape(),
+    ...overrides,
+  }
+}
+
+function buildEvidenceShape() {
   return {
     contractId: 'render-final-shot',
     jobId: 'queue-render-1',
@@ -145,6 +152,56 @@ describe('api/projects/[id]/production-state/render-job/evidence route', () => {
 
     expect(response.status).toBe(400)
     expect(payload).toEqual({ error: 'Invalid viewport render output evidence' })
+    expect(prismaMocks.prisma.project.update).not.toHaveBeenCalled()
+  })
+
+  it('rejects internal render artifacts that belong to another project before persistence', async () => {
+    const evidence = buildEvidence({
+      artifacts: [
+        {
+          kind: 'license-report',
+          url: 'aethel-artifact://viewport-render/other-project/render-final-shot/license-report.json',
+        },
+      ],
+    })
+
+    const response = await POST(
+      new NextRequest('http://localhost:3000/api/projects/project-1/production-state/render-job/evidence', {
+        method: 'POST',
+        body: JSON.stringify({ evidence }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      { params: { id: 'project-1' } },
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(403)
+    expect(payload).toEqual({ error: 'Render artifact does not belong to this project' })
+    expect(prismaMocks.prisma.project.update).not.toHaveBeenCalled()
+  })
+
+  it('rejects malformed internal render artifact URLs before persistence', async () => {
+    const evidence = buildEvidence({
+      artifacts: [
+        {
+          kind: 'validation-report',
+          url: 'aethel-artifact://viewport-render/project-1/render-final-shot/..%2Fsecret.json',
+        },
+      ],
+    })
+
+    const response = await POST(
+      new NextRequest('http://localhost:3000/api/projects/project-1/production-state/render-job/evidence', {
+        method: 'POST',
+        body: JSON.stringify({ evidence }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      { params: { id: 'project-1' } },
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.error).toBe('INVALID_ARTIFACT_URL')
     expect(prismaMocks.prisma.project.update).not.toHaveBeenCalled()
   })
 })

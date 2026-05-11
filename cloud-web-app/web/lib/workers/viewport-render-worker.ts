@@ -26,6 +26,7 @@ import {
   type ViewportRenderQueuePayload,
   type ViewportRenderRuntimeRoute,
 } from '@/lib/viewport/viewport-render-queue'
+import { validateViewportRenderEvidenceArtifactOwnership } from '@/lib/viewport/viewport-render-evidence-ownership'
 
 const logger = createComponentLogger('workers.viewport-render')
 
@@ -251,6 +252,24 @@ export async function executeViewportRenderQueuePayload(
     try {
       const evidence = await requestExternalRenderEvidence(payload, options)
       if (evidence) {
+        const artifactOwnership = validateViewportRenderEvidenceArtifactOwnership({
+          evidence,
+          projectId: payload.projectId,
+        })
+        if (!artifactOwnership.ok) {
+          return {
+            status: 'blocked',
+            jobId,
+            projectId: payload.projectId,
+            contractId: evidence.contractId,
+            renderer: 'external-backend',
+            blockers: [`Renderer backend returned unsafe artifact evidence: ${artifactOwnership.message}`],
+            notes: [
+              'Renderer backend evidence was rejected before persistence because an internal artifact reference failed project ownership validation.',
+            ],
+          }
+        }
+
         return {
           status: validationPassed(evidence.validation) ? 'completed' : 'blocked',
           jobId,

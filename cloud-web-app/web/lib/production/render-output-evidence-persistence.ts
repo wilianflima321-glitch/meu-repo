@@ -14,12 +14,14 @@ import {
   mergeViewportRenderOutputEvidenceIntoProductionState,
   type ViewportRenderOutputEvidence,
 } from '@/lib/production/render-output-evidence'
+import { validateViewportRenderEvidenceArtifactOwnership } from '@/lib/viewport/viewport-render-evidence-ownership'
 
 const logger = createComponentLogger('production.render-output-evidence-persistence')
 
 export interface ViewportRenderEvidencePersistenceResult {
   persisted: boolean
-  reason?: 'PROJECT_NOT_FOUND'
+  reason?: 'PROJECT_NOT_FOUND' | 'ARTIFACT_PROJECT_MISMATCH' | 'INVALID_ARTIFACT_URL' | 'ARTIFACT_NOT_FOUND'
+  message?: string
   state?: AgenticProductionState
   readiness?: ProductionReadinessSummary
 }
@@ -28,6 +30,25 @@ export async function persistViewportRenderOutputEvidenceForProject(input: {
   projectId: string
   evidence: ViewportRenderOutputEvidence
 }): Promise<ViewportRenderEvidencePersistenceResult> {
+  const artifactOwnership = validateViewportRenderEvidenceArtifactOwnership({
+    evidence: input.evidence,
+    projectId: input.projectId,
+  })
+  if (!artifactOwnership.ok) {
+    logger.warn('render_output_evidence.persistence_artifact_ownership_rejected', {
+      code: artifactOwnership.code,
+      projectId: artifactOwnership.expectedProjectId,
+      artifactProjectId: artifactOwnership.artifactProjectId,
+      contractId: artifactOwnership.contractId,
+      artifactKind: artifactOwnership.artifactKind,
+    })
+    return {
+      persisted: false,
+      reason: artifactOwnership.code,
+      message: artifactOwnership.message,
+    }
+  }
+
   const project = await prisma.project.findUnique({
     where: { id: input.projectId },
     select: {

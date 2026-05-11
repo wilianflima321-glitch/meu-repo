@@ -129,6 +129,44 @@ describe('viewport render worker', () => {
     expect(result.notes.join(' ')).toContain('Human release approval is still required')
   })
 
+  it('blocks renderer backend evidence that references another project internal artifact', async () => {
+    const payload = buildPayload()
+    const fetcher = async () => new Response(JSON.stringify({
+      evidence: {
+        contractId: payload.metadata.renderContract.id,
+        projectId: payload.projectId,
+        jobId: 'job-render-cross-project',
+        quality: 'review',
+        runtimeTarget: 'cloud-sandbox',
+        capturedAt: '2026-05-11T15:06:00.000Z',
+        artifacts: [
+          {
+            kind: 'validation-report',
+            url: 'aethel-artifact://viewport-render/other-project/render-worker-review/validation-report.json',
+          },
+        ],
+        validation: {
+          playbackOk: true,
+          performanceOk: true,
+          licenseOk: true,
+          continuityOk: true,
+        },
+        notes: ['Renderer attempted to return an internal artifact from another project.'],
+      },
+    }))
+
+    const result = await executeViewportRenderQueuePayload(payload, {
+      fetcher,
+      rendererEndpoint: 'https://renderer.example.test',
+      persistEvidence: false,
+    }, 'job-render-cross-project')
+
+    expect(result.status).toBe('blocked')
+    expect(result.renderer).toBe('external-backend')
+    expect(result.evidence).toBeUndefined()
+    expect(result.blockers.join(' ')).toContain('does not belong to this project')
+  })
+
   it('skips unrelated export jobs and keeps the export queue shared safely', async () => {
     const result = await processViewportRenderQueueJob({
       id: 'export-job-1',

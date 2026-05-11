@@ -15,8 +15,13 @@ import {
 import {
   coerceViewportRenderOutputEvidence,
   mergeViewportRenderOutputEvidenceIntoProductionState,
+  type ViewportRenderOutputEvidence,
 } from '@/lib/production/render-output-evidence'
 import { withViewportRenderEvidenceArtifactAccess } from '@/lib/viewport/viewport-render-artifact-access'
+import {
+  validateViewportRenderEvidenceArtifactOwnership,
+  type ViewportRenderEvidenceArtifactOwnershipResult,
+} from '@/lib/viewport/viewport-render-evidence-ownership'
 
 const logger = createComponentLogger('api.projects.production-state.render-job.evidence')
 
@@ -65,6 +70,35 @@ function readStateForProject(project: NonNullable<Awaited<ReturnType<typeof load
   )
 }
 
+function artifactOwnershipErrorToResponse(
+  result: Exclude<ViewportRenderEvidenceArtifactOwnershipResult, { ok: true }>,
+  userId: string,
+): NextResponse {
+  logger.warn('render_output_evidence.artifact_ownership_rejected', {
+    userId,
+    code: result.code,
+    projectId: result.expectedProjectId,
+    artifactProjectId: result.artifactProjectId,
+    contractId: result.contractId,
+    artifactKind: result.artifactKind,
+  })
+
+  if (result.code === 'ARTIFACT_PROJECT_MISMATCH') {
+    return NextResponse.json({ error: result.message }, { status: result.status })
+  }
+
+  return NextResponse.json({ error: result.code, message: result.message }, { status: result.status })
+}
+
+function validateViewportRenderEvidenceArtifactOwnershipForRequest(input: {
+  evidence: ViewportRenderOutputEvidence
+  projectId: string
+  userId: string
+}): NextResponse | null {
+  const result = validateViewportRenderEvidenceArtifactOwnership(input)
+  return result.ok ? null : artifactOwnershipErrorToResponse(result, input.userId)
+}
+
 export async function POST(request: NextRequest, { params }: RouteContext) {
   try {
     const user = requireAuth(request)
@@ -83,6 +117,13 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     if (!evidence) {
       return NextResponse.json({ error: 'Invalid viewport render output evidence' }, { status: 400 })
     }
+
+    const artifactOwnershipError = validateViewportRenderEvidenceArtifactOwnershipForRequest({
+      evidence,
+      projectId: project.id,
+      userId: user.userId,
+    })
+    if (artifactOwnershipError) return artifactOwnershipError
 
     const projectEvidence = {
       ...evidence,
