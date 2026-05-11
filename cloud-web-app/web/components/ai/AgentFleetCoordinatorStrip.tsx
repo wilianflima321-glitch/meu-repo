@@ -21,6 +21,25 @@ type AgentFleetMemberSnapshot = {
   nextAction: string
 }
 
+type AgentSurfaceLockOwnerSnapshot = {
+  agent: string
+  ownerUserId: string
+  lockCount: number
+  paths: string[]
+  expiresAt: string
+}
+
+type AgentSurfaceLockSnapshot = {
+  projectId: string
+  generatedAt: string
+  activeLockCount: number
+  lockedPathCount: number
+  owners: AgentSurfaceLockOwnerSnapshot[]
+  expiringSoonCount: number
+  arbitrationRequired: boolean
+  nextAction: string
+}
+
 type AgentFleetSnapshot = {
   mode: AgentFleetMode
   paused: boolean
@@ -35,11 +54,27 @@ type AgentFleetSnapshot = {
   blockers: string[]
   activeLockCount: number
   staleSurfaceCount: number
+  lockCoordination: AgentSurfaceLockSnapshot
   nextAction: string
 }
 
 type AgentFleetApiResponse = {
   snapshot: AgentFleetSnapshot
+}
+
+type AgentSurfaceLock = {
+  id: string
+  agent: string
+  ownerUserId: string
+  paths: string[]
+  source: 'apply' | 'tool' | 'session'
+  reason: string
+  expiresAt: string
+}
+
+type AgentLocksApiResponse = {
+  locks: AgentSurfaceLock[]
+  snapshot: AgentSurfaceLockSnapshot
 }
 
 interface AgentFleetCoordinatorStripProps {
@@ -83,6 +118,10 @@ function uniqueNames(names: string[]): string[] {
   return Array.from(new Set(names))
 }
 
+function formatLockCount(count: number): string {
+  return `${count} lock${count === 1 ? '' : 's'}`
+}
+
 async function fetchFleetSnapshot(projectId: string): Promise<AgentFleetSnapshot> {
   const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/production-state/agent-fleet`, {
     method: 'GET',
@@ -95,6 +134,19 @@ async function fetchFleetSnapshot(projectId: string): Promise<AgentFleetSnapshot
 
   const payload = (await response.json()) as AgentFleetApiResponse
   return payload.snapshot
+}
+
+async function fetchAgentLocks(projectId: string): Promise<AgentLocksApiResponse> {
+  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/production-state/agent-locks`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+  })
+
+  if (!response.ok) {
+    throw new Error(`agent-locks:${response.status}`)
+  }
+
+  return (await response.json()) as AgentLocksApiResponse
 }
 
 async function patchFleetSnapshot(projectId: string, patch: Partial<Pick<AgentFleetSnapshot, 'centralAgent' | 'mode' | 'paused'>>) {
@@ -122,18 +174,26 @@ export function AgentFleetCoordinatorStrip({
   className,
 }: AgentFleetCoordinatorStripProps) {
   const [snapshot, setSnapshot] = useState<AgentFleetSnapshot | null>(null)
+  const [lockPayload, setLockPayload] = useState<AgentLocksApiResponse | null>(null)
+  const [isLockPanelOpen, setIsLockPanelOpen] = useState(false)
+  const [isLoadingLocks, setIsLoadingLocks] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isUnavailable, setIsUnavailable] = useState(false)
+  const [lockError, setLockError] = useState(false)
   const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   useEffect(() => {
     if (!canRenderFleet(projectId)) {
       setSnapshot(null)
+      setLockPayload(null)
+      setIsLockPanelOpen(false)
       return
     }
 
     let active = true
     setIsUnavailable(false)
+    setLockPayload(null)
+    setLockError(false)
 
     fetchFleetSnapshot(projectId)
       .then((next) => {
@@ -145,6 +205,21 @@ export function AgentFleetCoordinatorStrip({
 
     return () => {
       active = false
+    }
+  }, [projectId])
+
+  const loadLocks = useCallback(async () => {
+    if (!canRenderFleet(projectId)) return
+    setIsLoadingLocks(true)
+    setLockError(false)
+
+    try {
+      const next = await fetchAgentLocks(projectId)
+      setLockPayload(next)
+    } catch {
+      setLockError(true)
+    } finally {
+      setIsLoadingLocks(false)
     }
   }, [projectId])
 
@@ -203,6 +278,8 @@ export function AgentFleetCoordinatorStrip({
     return members.findIndex((candidate) => candidate.agent === member.agent) === index
   }).slice(0, 5)
   const coordinatorOptions = uniqueNames(snapshot.members.map((member) => member.agent))
+  const lockCoordination = lockPayload?.snapshot ?? snapshot.lockCoordination
+  const lockOwners = lockCoordination.owners.slice(0, 4)
 
   return (
     <div
@@ -303,9 +380,19 @@ export function AgentFleetCoordinatorStrip({
           </span>
         )}
         {snapshot.activeLockCount > 0 && (
-          <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2 py-0.5 text-[var(--aethel-info-light)]">
-            {snapshot.activeLockCount} locks
-          </span>
+          <button
+            type="button"
+            onClick={() => {
+              const next = !isLockPanelOpen
+              setIsLockPanelOpen(next)
+              if (next) void loadLocks()
+            }}
+            className={`rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2 py-0.5 text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] ${focusClass}`}
+            aria-expanded={isLockPanelOpen}
+            aria-controls="agent-scope-lock-details"
+          >
+            {formatLockCount(snapshot.activeLockCount)}
+          </button>
         )}
         {snapshot.staleSurfaceCount > 0 && (
           <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-2 py-0.5 text-[var(--aethel-warning-light)]">
@@ -313,6 +400,60 @@ export function AgentFleetCoordinatorStrip({
           </span>
         )}
       </div>
+
+      {isLockPanelOpen && (
+        <div
+          id="agent-scope-lock-details"
+          className="mt-2 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] p-3 text-[11px] text-[var(--aethel-text-tertiary)]"
+          aria-label="Agent scope lock details"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-semibold text-[var(--aethel-text-secondary)]">
+              {lockCoordination.arbitrationRequired ? 'Producer arbitration needed' : 'Scoped ownership active'}
+            </span>
+            <span className="text-[var(--aethel-text-quaternary)]">
+              {lockCoordination.lockedPathCount} surfaces / {formatLockCount(lockCoordination.activeLockCount)}
+            </span>
+            {lockCoordination.expiringSoonCount > 0 && (
+              <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_14%,transparent)] px-2 py-0.5 text-[var(--aethel-warning-light)]">
+                {lockCoordination.expiringSoonCount} expiring soon
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => void loadLocks()}
+              className={`ml-auto rounded-lg border border-[var(--aethel-border-primary)] px-2 py-1 text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-primary)] ${focusClass}`}
+              disabled={isLoadingLocks}
+            >
+              {isLoadingLocks ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
+
+          <p className="mt-2 text-[var(--aethel-text-quaternary)]">{lockCoordination.nextAction}</p>
+
+          {lockError && (
+            <p className="mt-2 text-[var(--aethel-warning-light)]">
+              Lock details are temporarily unavailable. The fleet snapshot is still safe to use.
+            </p>
+          )}
+
+          {lockOwners.length > 0 && (
+            <div className="mt-2 grid gap-2 md:grid-cols-2">
+              {lockOwners.map((owner) => (
+                <div key={`${owner.agent}:${owner.ownerUserId}`} className="rounded-lg border border-[var(--aethel-border-primary)] px-2 py-1.5">
+                  <div className="flex items-center justify-between gap-2 text-[var(--aethel-text-secondary)]">
+                    <span className="truncate font-medium">{owner.agent}</span>
+                    <span className="shrink-0 text-[var(--aethel-text-quaternary)]">{formatLockCount(owner.lockCount)}</span>
+                  </div>
+                  <div className="mt-1 truncate text-[var(--aethel-text-quaternary)]">
+                    {owner.paths.length > 0 ? owner.paths.join(', ') : 'No path preview'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
@@ -68,7 +68,59 @@ function fleetPayload(centralAgent = 'Producer Agent', mode = 'coordinator-first
       blockers: ['Cartography scope approval required.'],
       activeLockCount: 1,
       staleSurfaceCount: 1,
+      lockCoordination: {
+        projectId: 'project-1',
+        generatedAt: '2026-05-11T10:00:00.000Z',
+        activeLockCount: 1,
+        lockedPathCount: 1,
+        owners: [
+          {
+            agent: 'Producer Agent',
+            ownerUserId: 'user-1',
+            lockCount: 1,
+            paths: ['src/game/combat/BossController.ts'],
+            expiresAt: '2026-05-11T10:15:00.000Z',
+          },
+        ],
+        expiringSoonCount: 0,
+        arbitrationRequired: false,
+        nextAction: 'Keep the current agent inside its locked surfaces and renew or release after evidence is recorded.',
+      },
       nextAction: 'Review Mission Ledger evidence.',
+    },
+  }
+}
+
+function lockPayload() {
+  return {
+    locks: [
+      {
+        id: 'lock-1',
+        agent: 'Gameplay Engineer Agent',
+        ownerUserId: 'user-1',
+        paths: ['src/game/combat/BossController.ts'],
+        source: 'session',
+        reason: 'combat pass',
+        expiresAt: '2026-05-11T10:15:00.000Z',
+      },
+    ],
+    snapshot: {
+      projectId: 'project-1',
+      generatedAt: '2026-05-11T10:01:00.000Z',
+      activeLockCount: 1,
+      lockedPathCount: 1,
+      owners: [
+        {
+          agent: 'Gameplay Engineer Agent',
+          ownerUserId: 'user-1',
+          lockCount: 1,
+          paths: ['src/game/combat/BossController.ts'],
+          expiresAt: '2026-05-11T10:15:00.000Z',
+        },
+      ],
+      expiringSoonCount: 0,
+      arbitrationRequired: false,
+      nextAction: 'Keep the current agent inside its locked surfaces and renew or release after evidence is recorded.',
     },
   }
 }
@@ -96,7 +148,7 @@ describe('AgentFleetCoordinatorStrip', () => {
     expect(screen.getByRole('combobox', { name: 'Choose senior coordinator agent' })).toHaveValue('Producer Agent')
     expect(screen.getByRole('combobox', { name: 'Choose composer mode' })).toHaveValue('coordinator-first')
     expect(screen.getByText('1 blockers')).toBeInTheDocument()
-    expect(screen.getByText('1 locks')).toBeInTheDocument()
+    expect(screen.getByText('1 lock')).toBeInTheDocument()
     expect(screen.getByText('rescan needed')).toBeInTheDocument()
 
     await waitFor(() => expect(onSelectAgentId).toHaveBeenCalledWith('universal'))
@@ -127,6 +179,38 @@ describe('AgentFleetCoordinatorStrip', () => {
     const patchInit = fetchMock.mock.calls[1]?.[1] as RequestInit
     expect(patchInit.method).toBe('PATCH')
     expect(patchInit.body).toBe(JSON.stringify({ centralAgent: 'Technical Artist Agent' }))
+  })
+
+  it('opens compact scope lock details on demand without cluttering the default strip', async () => {
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.includes('/agent-locks')) return responseJson(lockPayload())
+      return responseJson(fleetPayload())
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(
+      <AgentFleetCoordinatorStrip
+        projectId="project-1"
+        selectedAgentId="universal"
+        onSelectAgentId={vi.fn()}
+      />
+    )
+
+    expect(await screen.findByText('1 lock')).toBeInTheDocument()
+    expect(screen.queryByLabelText('Agent scope lock details')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '1 lock' }))
+
+    const details = await screen.findByLabelText('Agent scope lock details')
+    expect(details).toBeInTheDocument()
+    expect(screen.getByText('Scoped ownership active')).toBeInTheDocument()
+    expect(within(details).getByText('Gameplay Engineer Agent')).toBeInTheDocument()
+    expect(within(details).getByText('src/game/combat/BossController.ts')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/projects/project-1/production-state/agent-locks',
+      expect.objectContaining({ method: 'GET' })
+    )
   })
 
   it('does not render or fetch when there is no real project context', () => {
