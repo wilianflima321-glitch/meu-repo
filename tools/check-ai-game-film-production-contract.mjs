@@ -52,18 +52,24 @@ const renderOutputEvidencePersistencePath = 'cloud-web-app/web/lib/production/re
 const viewportRenderWorkerPath = 'cloud-web-app/web/lib/workers/viewport-render-worker.ts'
 const viewportRenderWorkerRunnerPath = 'cloud-web-app/web/server/workers/viewport-render-worker.ts'
 const viewportRenderBackendRoutePath = 'cloud-web-app/web/app/api/runtime/viewport/render/route.ts'
+const viewportRenderArtifactAccessPath = 'cloud-web-app/web/lib/viewport/viewport-render-artifact-access.ts'
 const renderJobRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/render-job/route.ts'
 const renderOutputEvidenceRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/render-job/evidence/route.ts'
+const renderArtifactRoutePath =
+  'cloud-web-app/web/app/api/projects/[id]/production-state/render-job/artifact/route.ts'
 const viewportRenderContractTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-contract.test.ts'
 const viewportRenderPersistenceTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-persistence.test.ts'
 const viewportRenderQueueTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-queue.test.ts'
 const viewportRenderBackendTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-backend.test.ts'
+const viewportRenderArtifactAccessTestPath =
+  'cloud-web-app/web/__tests__/viewport/viewport-render-artifact-access.test.ts'
 const renderJobProductionStateTestPath = 'cloud-web-app/web/__tests__/production/render-job-production-state.test.ts'
 const renderOutputEvidenceTestPath = 'cloud-web-app/web/__tests__/production/render-output-evidence.test.ts'
 const viewportRenderWorkerTestPath = 'cloud-web-app/web/__tests__/workers/viewport-render-worker.test.ts'
 const viewportRenderBackendRouteTestPath = 'cloud-web-app/web/__tests__/api/runtime-viewport-render-route.test.ts'
 const renderJobRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-render-job-route.test.ts'
 const renderOutputEvidenceRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-render-output-evidence-route.test.ts'
+const renderArtifactRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-render-artifact-route.test.ts'
 const viewportProfessionalControlsTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-professional-controls-contract.test.ts'
 const sceneViewportStatePath = 'cloud-web-app/web/components/preview/useSceneViewportSurfaceState.ts'
 const sceneViewportStagePath = 'cloud-web-app/web/components/preview/SceneViewportStage.tsx'
@@ -159,18 +165,22 @@ for (const path of [
   viewportRenderWorkerPath,
   viewportRenderWorkerRunnerPath,
   viewportRenderBackendRoutePath,
+  viewportRenderArtifactAccessPath,
   renderJobRoutePath,
   renderOutputEvidenceRoutePath,
+  renderArtifactRoutePath,
   viewportRenderContractTestPath,
   viewportRenderPersistenceTestPath,
   viewportRenderQueueTestPath,
   viewportRenderBackendTestPath,
+  viewportRenderArtifactAccessTestPath,
   renderJobProductionStateTestPath,
   renderOutputEvidenceTestPath,
   viewportRenderWorkerTestPath,
   viewportRenderBackendRouteTestPath,
   renderJobRouteTestPath,
   renderOutputEvidenceRouteTestPath,
+  renderArtifactRouteTestPath,
   viewportProfessionalControlsTestPath,
   sceneViewportStatePath,
   sceneViewportStagePath,
@@ -233,18 +243,26 @@ const renderOutputEvidencePersistence = existsSync(renderOutputEvidencePersisten
 const viewportRenderWorker = existsSync(viewportRenderWorkerPath) ? read(viewportRenderWorkerPath) : ''
 const viewportRenderWorkerRunner = existsSync(viewportRenderWorkerRunnerPath) ? read(viewportRenderWorkerRunnerPath) : ''
 const viewportRenderBackendRoute = existsSync(viewportRenderBackendRoutePath) ? read(viewportRenderBackendRoutePath) : ''
+const viewportRenderArtifactAccess = existsSync(viewportRenderArtifactAccessPath)
+  ? read(viewportRenderArtifactAccessPath)
+  : ''
 const renderJobRoute = existsSync(renderJobRoutePath) ? read(renderJobRoutePath) : ''
 const renderOutputEvidenceRoute = existsSync(renderOutputEvidenceRoutePath) ? read(renderOutputEvidenceRoutePath) : ''
+const renderArtifactRoute = existsSync(renderArtifactRoutePath) ? read(renderArtifactRoutePath) : ''
 const viewportRenderContractTest = existsSync(viewportRenderContractTestPath) ? read(viewportRenderContractTestPath) : ''
 const viewportRenderPersistenceTest = existsSync(viewportRenderPersistenceTestPath) ? read(viewportRenderPersistenceTestPath) : ''
 const viewportRenderQueueTest = existsSync(viewportRenderQueueTestPath) ? read(viewportRenderQueueTestPath) : ''
 const viewportRenderBackendTest = existsSync(viewportRenderBackendTestPath) ? read(viewportRenderBackendTestPath) : ''
+const viewportRenderArtifactAccessTest = existsSync(viewportRenderArtifactAccessTestPath)
+  ? read(viewportRenderArtifactAccessTestPath)
+  : ''
 const renderJobProductionStateTest = existsSync(renderJobProductionStateTestPath) ? read(renderJobProductionStateTestPath) : ''
 const renderOutputEvidenceTest = existsSync(renderOutputEvidenceTestPath) ? read(renderOutputEvidenceTestPath) : ''
 const viewportRenderWorkerTest = existsSync(viewportRenderWorkerTestPath) ? read(viewportRenderWorkerTestPath) : ''
 const viewportRenderBackendRouteTest = existsSync(viewportRenderBackendRouteTestPath) ? read(viewportRenderBackendRouteTestPath) : ''
 const renderJobRouteTest = existsSync(renderJobRouteTestPath) ? read(renderJobRouteTestPath) : ''
 const renderOutputEvidenceRouteTest = existsSync(renderOutputEvidenceRouteTestPath) ? read(renderOutputEvidenceRouteTestPath) : ''
+const renderArtifactRouteTest = existsSync(renderArtifactRouteTestPath) ? read(renderArtifactRouteTestPath) : ''
 const viewportProfessionalControlsTest = existsSync(viewportProfessionalControlsTestPath) ? read(viewportProfessionalControlsTestPath) : ''
 const sceneViewportState = existsSync(sceneViewportStatePath) ? read(sceneViewportStatePath) : ''
 const sceneViewportStage = existsSync(sceneViewportStagePath) ? read(sceneViewportStagePath) : ''
@@ -622,6 +640,21 @@ assert(
   'viewport render backend API is token-protected, artifact-readable, capability-aware, and never auto-releases'
 )
 assert(
+  viewportRenderArtifactAccess.includes('buildViewportRenderArtifactAccessUrl') &&
+    viewportRenderArtifactAccess.includes('withViewportRenderArtifactAccess') &&
+    viewportRenderArtifactAccess.includes('project-authenticated-proxy') &&
+    viewportRenderArtifactAccess.includes('/production-state/render-job/artifact'),
+  'viewport render artifact access maps internal renderer URLs to project-authenticated proxy URLs'
+)
+assert(
+  renderArtifactRoute.includes('readViewportRenderArtifact') &&
+    renderArtifactRoute.includes('resolveViewportRenderArtifactUrl') &&
+    renderArtifactRoute.includes('Render artifact does not belong to this project') &&
+    renderArtifactRoute.includes('private, no-store') &&
+    renderArtifactRoute.includes('content-disposition'),
+  'render artifact route serves internal render outputs only through project auth, ownership checks, and private cache headers'
+)
+assert(
   webPackageJson.includes('worker:viewport-render') &&
     webPackageJson.includes('worker:all') &&
     webPackageJson.includes('server/workers/viewport-render-worker.ts'),
@@ -666,6 +699,8 @@ assert(
     viewportRenderBackendTest.includes('produces concrete draft preview artifacts') &&
     viewportRenderBackendTest.includes('does not pretend review MP4 or final video exists') &&
     viewportRenderBackendTest.includes('resolves artifact URLs without allowing path traversal') &&
+    viewportRenderArtifactAccessTest.includes('project-authenticated access URLs') &&
+    viewportRenderArtifactAccessTest.includes('external media URLs') &&
     renderJobProductionStateTest.includes('Release Agent') &&
     renderOutputEvidenceTest.includes('Human review must approve media evidence before release') &&
     viewportRenderWorkerTest.includes('does not fake media output') &&
@@ -678,6 +713,12 @@ assert(
     renderJobRouteTest.includes('render:viewport') &&
     renderOutputEvidenceRouteTest.includes('releaseReady).toBe(false'),
   'render job tests cover contract, persistence, queue routing, worker execution, output evidence, production merge, and no-fake behavior'
+)
+assert(
+  renderArtifactRouteTest.includes('serves a project-owned render artifact') &&
+    renderArtifactRouteTest.includes('blocks artifacts that belong to a different project') &&
+    renderArtifactRouteTest.includes('rejects malformed artifact URLs'),
+  'render artifact route tests cover project-owned access, cross-project denial, and malformed artifact URLs'
 )
 
 const failed = checks.filter((check) => !check.ok)
