@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import CreativeStudioShell from './CreativeStudioShell'
 import { CREATIVE_STUDIO_ROUTES } from './creative-studio-routes'
+import StudioMissionControl from './StudioMissionControl'
 
 const DOMAIN_LABELS = {
   world: 'Game and world',
@@ -28,6 +29,8 @@ export default function CreativeStudioPage() {
               The hub keeps the product calm for beginners, while giving agents and advanced users direct entry into the editors that were previously hidden behind legacy routes.
             </p>
           </div>
+
+          <StudioMissionControl />
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {CREATIVE_STUDIO_ROUTES.map((route) => (

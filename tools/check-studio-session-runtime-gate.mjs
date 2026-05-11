@@ -17,8 +17,11 @@ const requiredFiles = [
   'cloud-web-app/web/app/api/studio/session/[id]/stop/route.ts',
   'cloud-web-app/web/app/api/studio/tasks/run-wave/route.ts',
   'cloud-web-app/web/app/api/studio/tasks/[id]/rollback/route.ts',
+  'cloud-web-app/web/app/studio/StudioMissionControl.tsx',
+  'cloud-web-app/web/app/studio/page.tsx',
   'cloud-web-app/web/__tests__/server/studio-session-store.test.ts',
   'cloud-web-app/web/__tests__/api/studio-session-runtime-routes.test.ts',
+  'cloud-web-app/web/__tests__/app/StudioMissionControl.test.tsx',
   'docs/master/111_STUDIO_SESSION_RUNTIME_2026-05-11.md',
 ]
 
@@ -30,9 +33,12 @@ const getRoute = existsSync(requiredFiles[2]) ? read(requiredFiles[2]) : ''
 const stopRoute = existsSync(requiredFiles[3]) ? read(requiredFiles[3]) : ''
 const runWaveRoute = existsSync(requiredFiles[4]) ? read(requiredFiles[4]) : ''
 const rollbackRoute = existsSync(requiredFiles[5]) ? read(requiredFiles[5]) : ''
-const storeTest = existsSync(requiredFiles[6]) ? read(requiredFiles[6]) : ''
-const apiTest = existsSync(requiredFiles[7]) ? read(requiredFiles[7]) : ''
-const doc = existsSync(requiredFiles[8]) ? read(requiredFiles[8]) : ''
+const missionControl = existsSync(requiredFiles[6]) ? read(requiredFiles[6]) : ''
+const studioPage = existsSync(requiredFiles[7]) ? read(requiredFiles[7]) : ''
+const storeTest = existsSync(requiredFiles[8]) ? read(requiredFiles[8]) : ''
+const apiTest = existsSync(requiredFiles[9]) ? read(requiredFiles[9]) : ''
+const missionControlTest = existsSync(requiredFiles[10]) ? read(requiredFiles[10]) : ''
+const doc = existsSync(requiredFiles[11]) ? read(requiredFiles[11]) : ''
 const packageJson = read('package.json')
 const quality = read('tools/measure-product-quality.mjs')
 
@@ -69,6 +75,19 @@ for (const phrase of ['/api/ai/change/rollback', 'MISSING_ROLLBACK_REFERENCE', '
 }
 
 for (const phrase of [
+  'Mission Control',
+  '/api/studio/session/start',
+  '/api/studio/tasks/run-wave',
+  '/api/studio/session/${encodeURIComponent(session.id)}/stop',
+  'Run 3-agent wave',
+  'Pause session',
+]) {
+  assert(missionControl.includes(phrase), `mission control UI includes ${phrase}`)
+}
+
+assert(studioPage.includes('StudioMissionControl'), 'Creative Studio page renders StudioMissionControl')
+
+for (const phrase of [
   'creates, loads, attaches tasks, and stops a durable Studio session',
   'operator pause',
 ]) {
@@ -81,6 +100,15 @@ for (const phrase of [
   'STUDIO_SESSION_STOPPED',
 ]) {
   assert(apiTest.includes(phrase), `api test covers ${phrase}`)
+}
+
+for (const phrase of [
+  'starts a durable session, runs a compact agent wave, and pauses the session',
+  'Studio session is active.',
+  'Planned 3 coordinated task(s).',
+  'Studio session paused.',
+]) {
+  assert(missionControlTest.includes(phrase), `mission control test covers ${phrase}`)
 }
 
 for (const phrase of [
