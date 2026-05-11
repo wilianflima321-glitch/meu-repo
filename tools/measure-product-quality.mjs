@@ -220,6 +220,12 @@ const heavyRenderRuntimeSafetyConfigured =
   exists('cloud-web-app/web/lib/viewport/viewport-render-readiness.ts') &&
   exists('cloud-web-app/web/__tests__/viewport/viewport-render-readiness.test.ts') &&
   packageJson.includes('qa:heavy-render-runtime-safety');
+const studioSessionRuntimeConfigured =
+  exists('tools/check-studio-session-runtime-gate.mjs') &&
+  exists('docs/master/111_STUDIO_SESSION_RUNTIME_2026-05-11.md') &&
+  exists('cloud-web-app/web/lib/server/studio-session-store.ts') &&
+  exists('cloud-web-app/web/__tests__/api/studio-session-runtime-routes.test.ts') &&
+  packageJson.includes('qa:studio-session-runtime');
 const repositoryCartographyConfigured =
   exists('cloud-web-app/web/lib/production/repository-cartography.ts') &&
   exists('cloud-web-app/web/__tests__/production/repository-cartography.test.ts') &&
@@ -273,6 +279,7 @@ const metrics = [
   { id: 'reliability_incident', label: 'Reliability incident response gate configured', value: reliabilityIncidentConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'ai_game_film_production', label: 'AI game/film production contract gate configured', value: aiGameFilmProductionConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'heavy_render_runtime_safety', label: 'Heavy render runtime safety gate configured', value: heavyRenderRuntimeSafetyConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'studio_session_runtime', label: 'Studio session runtime gate configured', value: studioSessionRuntimeConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'repository_cartography', label: 'Repository cartography for giant AI context configured', value: repositoryCartographyConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'best_in_market_benchmark', label: 'Best-in-market benchmark V14 gate configured', value: bestInMarketBenchmarkConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'linear_best_in_market_backlog', label: 'Linear best-in-market backlog export configured', value: linearBestInMarketBacklogConfigured ? 1 : 0, target: 1, direction: 'eq' },
