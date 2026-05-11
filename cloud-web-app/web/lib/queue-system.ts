@@ -141,6 +141,7 @@ export type JobType =
   | 'email:welcome'
   | 'email:password-reset'
   | 'email:invoice'
+  | 'render:viewport'
   | 'export:project'
   | 'export:game'
   | 'asset:process'

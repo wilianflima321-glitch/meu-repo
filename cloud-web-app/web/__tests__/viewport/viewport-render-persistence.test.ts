@@ -34,12 +34,42 @@ function buildContract() {
 
 describe('viewport render persistence', () => {
   it('builds authenticated render-job persistence requests for durable production state', () => {
-    const request = buildViewportRenderJobPersistenceRequest('project-1', buildContract(), 'token-1')
+    const request = buildViewportRenderJobPersistenceRequest('project-1', buildContract(), 'token-1', true)
 
     expect(request.url).toBe('/api/projects/project-1/production-state/render-job')
     expect(request.init.method).toBe('POST')
     expect(request.init.headers).toMatchObject({ Authorization: 'Bearer token-1' })
+    expect(String(request.init.body)).toContain('"enqueue":true')
     expect(String(request.init.body)).toContain('viewport:render-job:render-game-review')
+  })
+
+  it('surfaces queue status without claiming completed render evidence', async () => {
+    const fetcher = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 202,
+      json: async () => ({
+        queued: true,
+        queue: {
+          status: 'queued',
+          jobId: 'queue-render-1',
+          message: 'Render job queued. Output media evidence is still required before release approval.',
+        },
+      }),
+    })
+
+    const result = await persistViewportRenderJob({
+      projectId: 'project-1',
+      contract: buildContract(),
+      enqueue: true,
+      fetcher,
+    })
+
+    expect(result).toMatchObject({
+      ok: true,
+      queued: true,
+      queueStatus: 'queued',
+      jobId: 'queue-render-1',
+    })
   })
 
   it('skips local-only projects instead of pretending render evidence was persisted', async () => {

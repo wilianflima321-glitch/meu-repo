@@ -19,7 +19,10 @@ export function useViewportRenderJobPersistence(projectId?: string | null) {
   const [status, setStatus] = useState<ViewportRenderJobPersistenceStatus>('idle')
   const [lastError, setLastError] = useState<string | null>(null)
 
-  const persistContract = useCallback(async (contract: ViewportRenderJobContract): Promise<ViewportRenderJobPersistenceResult> => {
+  const persistContract = useCallback(async (
+    contract: ViewportRenderJobContract,
+    options: { enqueue?: boolean } = {},
+  ): Promise<ViewportRenderJobPersistenceResult> => {
     if (!canPersistViewportRenderJob(projectId)) {
       setStatus('skipped')
       setLastError(null)
@@ -32,6 +35,7 @@ export function useViewportRenderJobPersistence(projectId?: string | null) {
       projectId,
       contract,
       token: getBrowserToken(),
+      enqueue: options.enqueue,
     })
 
     if (result.ok) {

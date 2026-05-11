@@ -28,9 +28,20 @@ const prismaMocks = vi.hoisted(() => ({
   },
 }))
 
+const queueMocks = vi.hoisted(() => ({
+  QUEUE_NAMES: {
+    EXPORT: 'aethel:export',
+  },
+  queueManager: {
+    addJob: vi.fn(),
+    isAvailable: vi.fn(),
+  },
+}))
+
 vi.mock('@/lib/auth-server', () => authMocks)
 vi.mock('@/lib/entitlements', () => entitlementMocks)
 vi.mock('@/lib/db', () => prismaMocks)
+vi.mock('@/lib/queue-system', () => queueMocks)
 vi.mock('@/lib/observability/logger', () => ({
   createComponentLogger: vi.fn(() => loggerMocks),
 }))
@@ -76,6 +87,8 @@ describe('api/projects/[id]/production-state/render-job route', () => {
       members: [],
     })
     prismaMocks.prisma.project.update.mockResolvedValue({ id: 'project-1' })
+    queueMocks.queueManager.isAvailable.mockResolvedValue(true)
+    queueMocks.queueManager.addJob.mockResolvedValue({ id: 'queue-render-1' })
   })
 
   it('persists viewport render contracts into durable production state without faking queue completion', async () => {
@@ -116,6 +129,86 @@ describe('api/projects/[id]/production-state/render-job route', () => {
         }),
       }),
     )
+    expect(queueMocks.queueManager.addJob).not.toHaveBeenCalled()
+  })
+
+  it('queues render execution when explicitly requested while preserving evidence gates', async () => {
+    const response = await POST(
+      new NextRequest('http://localhost:3000/api/projects/project-1/production-state/render-job', {
+        method: 'POST',
+        body: JSON.stringify({
+          contract: buildContract(),
+          enqueue: true,
+          runtimeRoute: {
+            lane: 'viewport-render',
+            canStart: true,
+            target: 'cloud-sandbox',
+            preferredPlacement: 'cloud-sandbox',
+            safety: 'needs-confirmation',
+            requiresConfirmation: true,
+            reason: 'Final render approved for isolated cloud queue.',
+          },
+        }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      { params: { id: 'project-1' } },
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(202)
+    expect(payload.queued).toBe(true)
+    expect(payload.queue).toMatchObject({
+      status: 'queued',
+      jobId: 'queue-render-1',
+    })
+    expect(queueMocks.queueManager.addJob).toHaveBeenCalledWith(
+      'aethel:export',
+      'render:viewport',
+      expect.objectContaining({
+        projectId: 'project-1',
+        projectName: 'Boss cinematic',
+        runtimeTarget: 'cloud-sandbox',
+        metadata: expect.objectContaining({
+          source: 'viewport-render-contract',
+          expectedOutputs: expect.arrayContaining(['final-video', 'performance-report']),
+          executionPlan: expect.objectContaining({
+            isolation: 'outside-browser-main-thread',
+            lane: 'viewport-render',
+          }),
+        }),
+      }),
+      { priority: 7, jobId: 'render-boss-final' },
+    )
+  })
+
+  it('persists but does not enqueue when runtime route is held', async () => {
+    const response = await POST(
+      new NextRequest('http://localhost:3000/api/projects/project-1/production-state/render-job', {
+        method: 'POST',
+        body: JSON.stringify({
+          contract: buildContract(),
+          enqueue: true,
+          runtimeRoute: {
+            target: 'held',
+            canStart: false,
+            safety: 'held',
+            reason: 'Thermal pressure is critical.',
+          },
+        }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      { params: { id: 'project-1' } },
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.persisted).toBe(true)
+    expect(payload.queued).toBe(false)
+    expect(payload.queue).toMatchObject({
+      status: 'held',
+      message: 'Thermal pressure is critical.',
+    })
+    expect(queueMocks.queueManager.addJob).not.toHaveBeenCalled()
   })
 
   it('rejects malformed render contracts before mutating project settings', async () => {

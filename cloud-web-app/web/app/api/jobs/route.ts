@@ -210,6 +210,7 @@ function mapStatus(state: string): JobStatus {
 }
 
 function mapType(jobName: string): JobType {
+  if (jobName === 'render:viewport') return 'render';
   if (jobName.startsWith('asset:')) return 'import';
   if (jobName === 'export:project' || jobName === 'export:game') return 'export';
   if (jobName.startsWith('ai:')) return 'build';
@@ -245,9 +246,10 @@ function toApiJob(snapshot: QueueJobSnapshot): ApiJob {
 function mapJobTypeToQueue(type: JobType): { queueName: string; jobType: QueueJobType; priority?: number } {
   switch (type) {
     case 'build':
-    case 'render':
     case 'export':
       return { queueName: QUEUE_NAMES.EXPORT, jobType: 'export:project', priority: 5 };
+    case 'render':
+      return { queueName: QUEUE_NAMES.EXPORT, jobType: 'render:viewport', priority: 6 };
     case 'import':
     case 'compress':
     case 'upload':

@@ -131,11 +131,15 @@ export function useViewportExport({
     };
 
     setExportStatus(`${contract.profile.label} contract staged`);
-    const result = await renderPersistence.persistContract(contract);
+    const result = await renderPersistence.persistContract(contract, { enqueue: true });
     downloadViewportManifest(payload, creativeMode);
 
     if (result.ok) {
-      setExportStatus(`${contract.profile.label} saved to Mission Ledger`);
+      if (result.queued) {
+        setExportStatus(`${contract.profile.label} queued - evidence required`);
+        return;
+      }
+      setExportStatus(`${contract.profile.label} saved - ${result.message ?? 'queue not started'}`);
       return;
     }
 

@@ -40,13 +40,19 @@ const assetImportProductionStateTestPath = 'cloud-web-app/web/__tests__/producti
 const assetImportRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-asset-import-route.test.ts'
 const viewportRenderContractPath = 'cloud-web-app/web/lib/viewport/viewport-render-contract.ts'
 const viewportRenderPersistencePath = 'cloud-web-app/web/lib/viewport/viewport-render-persistence.ts'
+const viewportRenderQueuePath = 'cloud-web-app/web/lib/viewport/viewport-render-queue.ts'
 const viewportRenderHookPath = 'cloud-web-app/web/hooks/useViewportRenderJobPersistence.ts'
 const renderJobProductionStatePath = 'cloud-web-app/web/lib/production/render-job-production-state.ts'
+const renderOutputEvidencePath = 'cloud-web-app/web/lib/production/render-output-evidence.ts'
 const renderJobRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/render-job/route.ts'
+const renderOutputEvidenceRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/render-job/evidence/route.ts'
 const viewportRenderContractTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-contract.test.ts'
 const viewportRenderPersistenceTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-persistence.test.ts'
+const viewportRenderQueueTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-queue.test.ts'
 const renderJobProductionStateTestPath = 'cloud-web-app/web/__tests__/production/render-job-production-state.test.ts'
+const renderOutputEvidenceTestPath = 'cloud-web-app/web/__tests__/production/render-output-evidence.test.ts'
 const renderJobRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-render-job-route.test.ts'
+const renderOutputEvidenceRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-render-output-evidence-route.test.ts'
 const viewportProfessionalControlsTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-professional-controls-contract.test.ts'
 const sceneViewportStatePath = 'cloud-web-app/web/components/preview/useSceneViewportSurfaceState.ts'
 const sceneViewportStagePath = 'cloud-web-app/web/components/preview/SceneViewportStage.tsx'
@@ -133,13 +139,19 @@ for (const path of [
   assetImportRouteTestPath,
   viewportRenderContractPath,
   viewportRenderPersistencePath,
+  viewportRenderQueuePath,
   viewportRenderHookPath,
   renderJobProductionStatePath,
+  renderOutputEvidencePath,
   renderJobRoutePath,
+  renderOutputEvidenceRoutePath,
   viewportRenderContractTestPath,
   viewportRenderPersistenceTestPath,
+  viewportRenderQueueTestPath,
   renderJobProductionStateTestPath,
+  renderOutputEvidenceTestPath,
   renderJobRouteTestPath,
+  renderOutputEvidenceRouteTestPath,
   viewportProfessionalControlsTestPath,
   sceneViewportStatePath,
   sceneViewportStagePath,
@@ -190,13 +202,19 @@ const assetImportProductionStateTest = existsSync(assetImportProductionStateTest
 const assetImportRouteTest = existsSync(assetImportRouteTestPath) ? read(assetImportRouteTestPath) : ''
 const viewportRenderContract = existsSync(viewportRenderContractPath) ? read(viewportRenderContractPath) : ''
 const viewportRenderPersistence = existsSync(viewportRenderPersistencePath) ? read(viewportRenderPersistencePath) : ''
+const viewportRenderQueue = existsSync(viewportRenderQueuePath) ? read(viewportRenderQueuePath) : ''
 const viewportRenderHook = existsSync(viewportRenderHookPath) ? read(viewportRenderHookPath) : ''
 const renderJobProductionState = existsSync(renderJobProductionStatePath) ? read(renderJobProductionStatePath) : ''
+const renderOutputEvidence = existsSync(renderOutputEvidencePath) ? read(renderOutputEvidencePath) : ''
 const renderJobRoute = existsSync(renderJobRoutePath) ? read(renderJobRoutePath) : ''
+const renderOutputEvidenceRoute = existsSync(renderOutputEvidenceRoutePath) ? read(renderOutputEvidenceRoutePath) : ''
 const viewportRenderContractTest = existsSync(viewportRenderContractTestPath) ? read(viewportRenderContractTestPath) : ''
 const viewportRenderPersistenceTest = existsSync(viewportRenderPersistenceTestPath) ? read(viewportRenderPersistenceTestPath) : ''
+const viewportRenderQueueTest = existsSync(viewportRenderQueueTestPath) ? read(viewportRenderQueueTestPath) : ''
 const renderJobProductionStateTest = existsSync(renderJobProductionStateTestPath) ? read(renderJobProductionStateTestPath) : ''
+const renderOutputEvidenceTest = existsSync(renderOutputEvidenceTestPath) ? read(renderOutputEvidenceTestPath) : ''
 const renderJobRouteTest = existsSync(renderJobRouteTestPath) ? read(renderJobRouteTestPath) : ''
+const renderOutputEvidenceRouteTest = existsSync(renderOutputEvidenceRouteTestPath) ? read(renderOutputEvidenceRouteTestPath) : ''
 const viewportProfessionalControlsTest = existsSync(viewportProfessionalControlsTestPath) ? read(viewportProfessionalControlsTestPath) : ''
 const sceneViewportState = existsSync(sceneViewportStatePath) ? read(sceneViewportStatePath) : ''
 const sceneViewportStage = existsSync(sceneViewportStagePath) ? read(sceneViewportStagePath) : ''
@@ -488,8 +506,18 @@ for (const phrase of [
   'persistViewportRenderJob',
   '/production-state/render-job',
   'viewport:render-job',
+  'enqueue',
 ]) {
   assert(viewportRenderPersistence.includes(phrase), `viewport render persistence includes "${phrase}"`)
+}
+for (const phrase of [
+  'ViewportRenderQueuePayload',
+  'render:viewport',
+  'outside-browser-main-thread',
+  'shouldHoldViewportRenderRuntimeRoute',
+  'buildViewportRenderQueuePayload',
+]) {
+  assert(viewportRenderQueue.includes(phrase), `viewport render queue includes "${phrase}"`)
 }
 assert(viewportRenderHook.includes('useViewportRenderJobPersistence'), 'viewport render persistence hook is available to client surfaces')
 for (const phrase of [
@@ -501,12 +529,30 @@ for (const phrase of [
 ]) {
   assert(renderJobProductionState.includes(phrase), `render job production state includes "${phrase}"`)
 }
+for (const phrase of [
+  'ViewportRenderOutputEvidence',
+  'mergeViewportRenderOutputEvidenceIntoProductionState',
+  'Human approval required before release',
+  'Performance QA Agent',
+  'Render Queue Agent',
+  'Release Agent',
+]) {
+  assert(renderOutputEvidence.includes(phrase), `render output evidence includes "${phrase}"`)
+}
 assert(
   renderJobRoute.includes('coerceViewportRenderJobContract') &&
     renderJobRoute.includes('mergeViewportRenderJobIntoProductionState') &&
-    renderJobRoute.includes('queued: false') &&
+    renderJobRoute.includes('VIEWPORT_RENDER_QUEUE_JOB_TYPE') &&
+    renderJobRoute.includes('queue.queued') &&
     renderJobRoute.includes('writeAgenticProductionStateToSettings'),
-  'render job route persists render contracts without pretending queue completion'
+  'render job route persists render contracts and only reports queue truth'
+)
+assert(
+  renderOutputEvidenceRoute.includes('coerceViewportRenderOutputEvidence') &&
+    renderOutputEvidenceRoute.includes('mergeViewportRenderOutputEvidenceIntoProductionState') &&
+    renderOutputEvidenceRoute.includes('releaseReady: false') &&
+    renderOutputEvidenceRoute.includes('Human approval'),
+  'render output evidence route attaches media evidence without auto-release'
 )
 assert(
   sceneViewportState.includes('useViewportExport') &&
@@ -524,9 +570,13 @@ assert(
 assert(
   viewportRenderContractTest.includes('cost') &&
     viewportRenderPersistenceTest.includes('durable production state') &&
+    viewportRenderQueueTest.includes('outside-browser-main-thread') &&
     renderJobProductionStateTest.includes('Release Agent') &&
-    renderJobRouteTest.includes('payload.queued).toBe(false'),
-  'render job tests cover contract, persistence, production merge, and no-fake queue behavior'
+    renderOutputEvidenceTest.includes('Human review must approve media evidence before release') &&
+    renderJobRouteTest.includes('payload.queued).toBe(false') &&
+    renderJobRouteTest.includes('render:viewport') &&
+    renderOutputEvidenceRouteTest.includes('releaseReady).toBe(false'),
+  'render job tests cover contract, persistence, queue routing, output evidence, production merge, and no-fake behavior'
 )
 
 const failed = checks.filter((check) => !check.ok)

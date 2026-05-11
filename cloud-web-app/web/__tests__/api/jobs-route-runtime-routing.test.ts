@@ -114,6 +114,36 @@ describe('api/jobs runtime routing', () => {
     expect(queueMocks.queueManager.addJob).not.toHaveBeenCalled()
   })
 
+  it('routes viewport render jobs to the dedicated render queue job type', async () => {
+    const req = new NextRequest('http://localhost:3000/api/jobs', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        type: 'render',
+        projectId: 'project-render',
+        metadata: { source: 'viewport-render-contract' },
+      }),
+    })
+
+    const response = await POST(req)
+    const payload = await response.json()
+
+    expect(response.status).toBe(202)
+    expect(payload.job.type).toBe('render')
+    expect(queueMocks.queueManager.addJob).toHaveBeenCalledWith(
+      'aethel:export',
+      'render:viewport',
+      expect.objectContaining({
+        projectId: 'project-render',
+        runtimeRoute: expect.objectContaining({
+          lane: 'viewport-render',
+          target: 'cloud-sandbox',
+        }),
+      }),
+      { priority: 6 },
+    )
+  })
+
   it('returns persisted execution targets when listing queue jobs', async () => {
     queueMocks.queueManager.listJobs.mockResolvedValue([
       {
