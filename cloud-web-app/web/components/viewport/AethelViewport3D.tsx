@@ -1,6 +1,7 @@
 ﻿'use client'
 
-import { Suspense, useCallback, useMemo, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { DragEvent } from 'react'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
 import { Environment, GizmoHelper, GizmoViewport, Grid, Html as DreiHtml, Line, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
@@ -28,6 +29,10 @@ import {
   type GizmoTransformPersistenceStatus,
   type GizmoTransformPersistenceChipTone,
 } from '@/lib/viewport/gizmo-transform-persistence'
+import {
+  formatViewportAssetSize,
+  type ViewportAssetImportMetadata,
+} from '@/lib/viewport/viewport-asset-import'
 
 export type ViewportTransformMode = 'translate' | 'rotate' | 'scale'
 export type ViewportTransformSpace = 'world' | 'local'
@@ -44,6 +49,7 @@ export type ViewportSceneObject = {
   scale: [number, number, number]
   locked?: boolean
   visible?: boolean
+  asset?: ViewportAssetImportMetadata
 }
 
 type AethelViewport3DProps = {
@@ -75,6 +81,8 @@ type AethelViewport3DProps = {
   gizmoMemoryLabel?: string | null
   gizmoMemoryError?: string | null
   gizmoMemoryCanPersist?: boolean
+  assetImportStatus?: string
+  onImportAssets?: (files: File[]) => void
 }
 
 type SceneObjectMeshProps = {
@@ -133,6 +141,12 @@ const defaultObjects: ViewportSceneObject[] = [
     visible: true,
   },
 ]
+
+function isEditableKeyboardTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  const tagName = target.tagName.toLowerCase()
+  return target.isContentEditable || tagName === 'input' || tagName === 'textarea' || tagName === 'select'
+}
 
 function clampScale(scale: [number, number, number]): [number, number, number] {
   return [
@@ -366,6 +380,7 @@ function SceneObjectMesh({
         <DreiHtml position={[0, 0.95, 0]} center>
           <div className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[rgba(6,10,18,0.84)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-primary)] shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
             {object.name}
+            {object.asset ? <span className="ml-1 text-[var(--aethel-text-tertiary)]">.{object.asset.format}</span> : null}
           </div>
         </DreiHtml>
       ) : null}
@@ -533,6 +548,11 @@ export function SceneViewportOutliner({
                 >
                   <Icon className="h-4 w-4" />
                   <span className="truncate">{object.name}</span>
+                  {object.asset ? (
+                    <span className="rounded-full border border-[var(--aethel-border-subtle)] px-1.5 py-0.5 text-[9px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+                      {object.asset.format}
+                    </span>
+                  ) : null}
                 </button>
                 <button
                   type="button"
@@ -720,6 +740,15 @@ export function SceneViewportInspector({
                 <p className="mb-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">Scale</p>
                 <p>{selectedObject.scale.map(formatter).join(' · ')}</p>
               </div>
+              {selectedObject.asset ? (
+                <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
+                  <p className="mb-2 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">Asset Intake</p>
+                  <p className="font-medium text-[var(--aethel-text-primary)]">{selectedObject.asset.fileName}</p>
+                  <p className="mt-1">{selectedObject.asset.format.toUpperCase()} · {formatViewportAssetSize(selectedObject.asset.sizeBytes)}</p>
+                  <p className="mt-1">License: <span className="font-medium text-[var(--aethel-warning-light)]">{selectedObject.asset.licenseStatus}</span></p>
+                  <p className="mt-1 truncate text-[var(--aethel-text-quaternary)]">{selectedObject.asset.evidenceRef}</p>
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-[var(--aethel-border-subtle)] px-4 py-6 text-center text-xs text-[var(--aethel-text-quaternary)]">
@@ -761,8 +790,11 @@ export function AethelViewport3D({
   gizmoMemoryLabel,
   gizmoMemoryError,
   gizmoMemoryCanPersist = false,
+  assetImportStatus = 'Drop GLTF, GLB, FBX, OBJ, USD or USDZ assets',
+  onImportAssets,
 }: AethelViewport3DProps) {
   const [aiCommand, setAiCommand] = useState('move this object 2 up')
+  const [assetDragActive, setAssetDragActive] = useState(false)
   const selectedObject = objects.find((object) => object.id === selectedIds[0]) ?? null
   const gizmoMemoryChip = buildGizmoTransformPersistenceChip({
     status: gizmoMemoryStatus,
@@ -790,8 +822,61 @@ export function AethelViewport3D({
     onAIAction?.(aiCommand)
   }, [aiCommand, objects, onAIAction, onGizmoTransformOperation, onObjectsChange, selectedObject, snapEnabled, transformSpace])
 
+  const handleAssetDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
+    if (!onImportAssets) return
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+    setAssetDragActive(true)
+  }, [onImportAssets])
+
+  const handleAssetDragLeave = useCallback((event: DragEvent<HTMLDivElement>) => {
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) return
+    setAssetDragActive(false)
+  }, [])
+
+  const handleAssetDrop = useCallback((event: DragEvent<HTMLDivElement>) => {
+    if (!onImportAssets) return
+    event.preventDefault()
+    setAssetDragActive(false)
+    const files = Array.from(event.dataTransfer.files)
+    if (files.length > 0) onImportAssets(files)
+  }, [onImportAssets])
+
+  useEffect(() => {
+    function handleViewportHotkeys(event: KeyboardEvent) {
+      if (event.metaKey || event.ctrlKey || event.altKey || isEditableKeyboardTarget(event.target)) return
+      if (event.code === 'KeyW') {
+        event.preventDefault()
+        onTransformModeChange('translate')
+        return
+      }
+      if (event.code === 'KeyE') {
+        event.preventDefault()
+        onTransformModeChange('rotate')
+        return
+      }
+      if (event.code === 'KeyR') {
+        event.preventDefault()
+        onTransformModeChange('scale')
+        return
+      }
+      if (event.code === 'Escape') {
+        event.preventDefault()
+        onSelectionChange([])
+      }
+    }
+
+    window.addEventListener('keydown', handleViewportHotkeys)
+    return () => window.removeEventListener('keydown', handleViewportHotkeys)
+  }, [onSelectionChange, onTransformModeChange])
+
   return (
-    <div className="relative h-full min-h-0 w-full overflow-hidden">
+    <div
+      className="relative h-full min-h-0 w-full overflow-hidden"
+      onDragOver={handleAssetDragOver}
+      onDragLeave={handleAssetDragLeave}
+      onDrop={handleAssetDrop}
+    >
       <div className="absolute left-4 top-4 z-20 flex flex-wrap items-center gap-2">
         <button type="button" aria-label="Ativar modo mover" onClick={() => onTransformModeChange('translate')} className={transformMode === 'translate' ? activeButton : iconButton}>
           <Move3D className="h-4 w-4" />
@@ -850,8 +935,20 @@ export function AethelViewport3D({
             Apply
           </button>
         </div>
-        <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">Multi-select já funciona via Shift+Click. O gizmo principal ancora no primeiro item selecionado.</p>
+        <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">Shift+Click seleciona vários. W/E/R trocam mover, rotacionar e escalar. Esc limpa seleção.</p>
+          <div className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
+            <span className="font-medium text-[var(--aethel-text-primary)]">Asset intake:</span> {assetImportStatus}
+          </div>
       </div>
+
+      {assetDragActive ? (
+        <div className="pointer-events-none absolute inset-4 z-30 grid place-items-center rounded-3xl border border-dashed border-[color-mix(in_srgb,var(--aethel-primary)_56%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_72%,transparent)] shadow-[inset_0_0_80px_rgba(0,0,0,0.42)] backdrop-blur-md">
+          <div className="max-w-sm rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.9)] px-5 py-4 text-center">
+            <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Drop assets into the Scene Graph</p>
+            <p className="mt-2 text-xs text-[var(--aethel-text-tertiary)]">Aethel will create preview objects, attach provenance evidence, and hold license review before release.</p>
+          </div>
+        </div>
+      ) : null}
 
       <ViewportScene
         objects={objects.length > 0 ? objects : defaultObjects}

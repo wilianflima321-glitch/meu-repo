@@ -11,6 +11,11 @@ import {
   type ViewportTransformMode,
   type ViewportTransformSpace,
 } from '@/components/viewport/AethelViewport3D';
+import {
+  buildViewportImportedObjects,
+  VIEWPORT_ASSET_IMPORT_EXTENSIONS,
+  formatViewportAssetSize,
+} from '@/lib/viewport/viewport-asset-import';
 
 import {
   cloneViewportObject,
@@ -40,6 +45,9 @@ export function useSceneViewportSurfaceState() {
   const [visualScript, setVisualScript] = useState<VisualScript>(INITIAL_VIEWPORT_VISUAL_SCRIPT);
   const [vfxGraph, setVfxGraph] = useState<VFXGraph | null>(null);
   const [selectedAbility, setSelectedAbility] = useState<GameplayAbilitySpec | null>(null);
+  const [assetImportStatus, setAssetImportStatus] = useState(
+    `Ready for ${VIEWPORT_ASSET_IMPORT_EXTENSIONS.map((extension) => extension.toUpperCase()).join(', ')} assets`
+  );
   const visualScriptAnchorRef = useRef<ViewportSceneObject | null>(
     cloneViewportObject(viewportSeedObjects[0])
   );
@@ -89,6 +97,30 @@ export function useSceneViewportSurfaceState() {
     setHairVolumeIntensity(density);
   }, []);
 
+  const handleImportViewportAssets = useCallback((files: File[]) => {
+    const importedAt = new Date().toISOString();
+    const importedObjects = buildViewportImportedObjects({
+      existingCount: objects.length,
+      files: files.map((file) => ({
+        fileName: file.name,
+        sizeBytes: file.size,
+      })),
+      importedAt,
+    });
+
+    if (importedObjects.length === 0) {
+      setAssetImportStatus('No supported assets detected. Use GLTF, GLB, FBX, OBJ, USD or USDZ.');
+      return;
+    }
+
+    setObjects([...objects, ...importedObjects]);
+    setSelectedIds(importedObjects.map((object) => object.id));
+    const totalBytes = importedObjects.reduce((sum, object) => sum + (object.asset?.sizeBytes ?? 0), 0);
+    setAssetImportStatus(
+      `${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} staged · ${formatViewportAssetSize(totalBytes)} · license review required`
+    );
+  }, [objects]);
+
   const activeWorkflowLabel = getViewportWorkflowLabel(workflowTool);
   const { exportStatus, handleExportViewport } = useViewportExport({
     activeWorkflowLabel,
@@ -137,11 +169,13 @@ export function useSceneViewportSurfaceState() {
     selectedAbility,
     setSelectedAbility,
     selectedObject,
+    assetImportStatus,
     vfxGlowIntensity,
     abilityAccent,
     activeWorkflowLabel,
     exportStatus,
     handleExportViewport,
+    handleImportViewportAssets,
     handleVisualScriptChange,
     handleFacialMetricsChange,
     handleHairSignatureChange,

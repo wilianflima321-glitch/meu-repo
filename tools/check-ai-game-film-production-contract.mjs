@@ -29,6 +29,12 @@ const agentLocksRouteTestPath = 'cloud-web-app/web/__tests__/api/production-stat
 const creativeStudioRoutesPath = 'cloud-web-app/web/app/studio/creative-studio-routes.ts'
 const creativeStudioShellPath = 'cloud-web-app/web/app/studio/CreativeStudioShell.tsx'
 const creativeStudioRouteContractTestPath = 'cloud-web-app/web/__tests__/app/creative-studio-route-contract.test.ts'
+const viewportAssetImportPath = 'cloud-web-app/web/lib/viewport/viewport-asset-import.ts'
+const viewportAssetImportTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-asset-import.test.ts'
+const viewportProfessionalControlsTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-professional-controls-contract.test.ts'
+const sceneViewportStatePath = 'cloud-web-app/web/components/preview/useSceneViewportSurfaceState.ts'
+const sceneViewportStagePath = 'cloud-web-app/web/components/preview/SceneViewportStage.tsx'
+const aethelViewportPath = 'cloud-web-app/web/components/viewport/AethelViewport3D.tsx'
 
 const creativeStudioPages = [
   {
@@ -99,6 +105,12 @@ for (const path of [
   creativeStudioRoutesPath,
   creativeStudioShellPath,
   creativeStudioRouteContractTestPath,
+  viewportAssetImportPath,
+  viewportAssetImportTestPath,
+  viewportProfessionalControlsTestPath,
+  sceneViewportStatePath,
+  sceneViewportStagePath,
+  aethelViewportPath,
   'cloud-web-app/web/app/studio/page.tsx',
   'cloud-web-app/web/app/studio/film/page.tsx',
   'cloud-web-app/web/app/studio/film/FilmStudioClient.tsx',
@@ -133,6 +145,12 @@ const agentLocksRouteTest = existsSync(agentLocksRouteTestPath) ? read(agentLock
 const creativeStudioRoutes = existsSync(creativeStudioRoutesPath) ? read(creativeStudioRoutesPath) : ''
 const creativeStudioShell = existsSync(creativeStudioShellPath) ? read(creativeStudioShellPath) : ''
 const creativeStudioRouteContractTest = existsSync(creativeStudioRouteContractTestPath) ? read(creativeStudioRouteContractTestPath) : ''
+const viewportAssetImport = existsSync(viewportAssetImportPath) ? read(viewportAssetImportPath) : ''
+const viewportAssetImportTest = existsSync(viewportAssetImportTestPath) ? read(viewportAssetImportTestPath) : ''
+const viewportProfessionalControlsTest = existsSync(viewportProfessionalControlsTestPath) ? read(viewportProfessionalControlsTestPath) : ''
+const sceneViewportState = existsSync(sceneViewportStatePath) ? read(sceneViewportStatePath) : ''
+const sceneViewportStage = existsSync(sceneViewportStagePath) ? read(sceneViewportStagePath) : ''
+const aethelViewport = existsSync(aethelViewportPath) ? read(aethelViewportPath) : ''
 const creativeStudioHub = existsSync('cloud-web-app/web/app/studio/page.tsx')
   ? read('cloud-web-app/web/app/studio/page.tsx')
   : ''
@@ -323,6 +341,44 @@ assert(
     creativeStudioRouteContractTest.includes('/studio/film') &&
     creativeStudioRouteContractTest.includes('/studio/audio'),
   'creative studio contract test protects game, film, and audio routes'
+)
+
+for (const phrase of [
+  'ViewportAssetImportMetadata',
+  'VIEWPORT_ASSET_IMPORT_EXTENSIONS',
+  'licenseStatus',
+  'qualityGate',
+  'evidenceRef',
+  'buildViewportImportedObjects',
+]) {
+  assert(viewportAssetImport.includes(phrase), `viewport asset import includes "${phrase}"`)
+}
+
+assert(
+  viewportAssetImport.includes("'glb'") &&
+    viewportAssetImport.includes("'fbx'") &&
+    viewportAssetImport.includes("'usd'"),
+  'viewport asset import supports GLB, FBX, and USD-family assets'
+)
+assert(
+  viewportAssetImportTest.includes('license review metadata') &&
+    viewportAssetImportTest.includes('arbitrary files'),
+  'viewport asset import tests protect provenance, license review, and unsupported file behavior'
+)
+assert(sceneViewportState.includes('handleImportViewportAssets'), 'scene viewport state wires asset import handler')
+assert(sceneViewportStage.includes('onImportAssets={handleImportViewportAssets}'), 'scene viewport stage passes asset import to AethelViewport3D')
+assert(
+  aethelViewport.includes('onDrop={handleAssetDrop}') &&
+    aethelViewport.includes('Asset intake') &&
+    aethelViewport.includes('license review'),
+  'AethelViewport3D exposes drag-drop asset intake without a new dashboard surface'
+)
+assert(
+  viewportProfessionalControlsTest.includes('KeyW') &&
+    viewportProfessionalControlsTest.includes('KeyE') &&
+    viewportProfessionalControlsTest.includes('KeyR') &&
+    viewportProfessionalControlsTest.includes('Escape'),
+  'viewport professional controls test protects W/E/R and Escape editor hotkeys'
 )
 
 const failed = checks.filter((check) => !check.ok)

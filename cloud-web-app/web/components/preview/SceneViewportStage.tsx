@@ -37,6 +37,8 @@ type SceneViewportStageProps = Pick<
   | 'handleHairSignatureChange'
   | 'setVfxGraph'
   | 'handleVisualScriptChange'
+  | 'assetImportStatus'
+  | 'handleImportViewportAssets'
 > & {
   renderMode: 'draft' | 'cinematic';
   projectId?: string | null;
@@ -72,6 +74,8 @@ export function SceneViewportStage({
   handleHairSignatureChange,
   setVfxGraph,
   handleVisualScriptChange,
+  assetImportStatus,
+  handleImportViewportAssets,
   renderMode,
   projectId,
 }: SceneViewportStageProps) {
@@ -110,6 +114,8 @@ export function SceneViewportStage({
         gizmoMemoryLabel={gizmoPersistence.lastOperationLabel}
         gizmoMemoryError={gizmoPersistence.lastError}
         gizmoMemoryCanPersist={gizmoPersistence.canPersist}
+        assetImportStatus={assetImportStatus}
+        onImportAssets={handleImportViewportAssets}
       />
       {workflowTool ? (
         <SceneViewportWorkflowDrawer
