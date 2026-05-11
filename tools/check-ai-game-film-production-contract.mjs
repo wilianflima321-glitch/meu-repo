@@ -44,6 +44,7 @@ const assetImportRouteTestPath = 'cloud-web-app/web/__tests__/api/production-sta
 const viewportRenderContractPath = 'cloud-web-app/web/lib/viewport/viewport-render-contract.ts'
 const viewportRenderPersistencePath = 'cloud-web-app/web/lib/viewport/viewport-render-persistence.ts'
 const viewportRenderQueuePath = 'cloud-web-app/web/lib/viewport/viewport-render-queue.ts'
+const viewportRenderReadinessPath = 'cloud-web-app/web/lib/viewport/viewport-render-readiness.ts'
 const viewportRenderBackendPath = 'cloud-web-app/web/lib/viewport/viewport-render-backend.ts'
 const viewportRenderHookPath = 'cloud-web-app/web/hooks/useViewportRenderJobPersistence.ts'
 const renderJobProductionStatePath = 'cloud-web-app/web/lib/production/render-job-production-state.ts'
@@ -61,6 +62,7 @@ const renderArtifactRoutePath =
 const viewportRenderContractTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-contract.test.ts'
 const viewportRenderPersistenceTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-persistence.test.ts'
 const viewportRenderQueueTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-queue.test.ts'
+const viewportRenderReadinessTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-readiness.test.ts'
 const viewportRenderBackendTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-backend.test.ts'
 const viewportRenderArtifactAccessTestPath =
   'cloud-web-app/web/__tests__/viewport/viewport-render-artifact-access.test.ts'
@@ -158,6 +160,7 @@ for (const path of [
   viewportRenderContractPath,
   viewportRenderPersistencePath,
   viewportRenderQueuePath,
+  viewportRenderReadinessPath,
   viewportRenderBackendPath,
   viewportRenderHookPath,
   renderJobProductionStatePath,
@@ -174,6 +177,7 @@ for (const path of [
   viewportRenderContractTestPath,
   viewportRenderPersistenceTestPath,
   viewportRenderQueueTestPath,
+  viewportRenderReadinessTestPath,
   viewportRenderBackendTestPath,
   viewportRenderArtifactAccessTestPath,
   renderJobProductionStateTestPath,
@@ -237,6 +241,7 @@ const assetImportRouteTest = existsSync(assetImportRouteTestPath) ? read(assetIm
 const viewportRenderContract = existsSync(viewportRenderContractPath) ? read(viewportRenderContractPath) : ''
 const viewportRenderPersistence = existsSync(viewportRenderPersistencePath) ? read(viewportRenderPersistencePath) : ''
 const viewportRenderQueue = existsSync(viewportRenderQueuePath) ? read(viewportRenderQueuePath) : ''
+const viewportRenderReadiness = existsSync(viewportRenderReadinessPath) ? read(viewportRenderReadinessPath) : ''
 const viewportRenderBackend = existsSync(viewportRenderBackendPath) ? read(viewportRenderBackendPath) : ''
 const viewportRenderHook = existsSync(viewportRenderHookPath) ? read(viewportRenderHookPath) : ''
 const renderJobProductionState = existsSync(renderJobProductionStatePath) ? read(renderJobProductionStatePath) : ''
@@ -257,6 +262,7 @@ const renderArtifactRoute = existsSync(renderArtifactRoutePath) ? read(renderArt
 const viewportRenderContractTest = existsSync(viewportRenderContractTestPath) ? read(viewportRenderContractTestPath) : ''
 const viewportRenderPersistenceTest = existsSync(viewportRenderPersistenceTestPath) ? read(viewportRenderPersistenceTestPath) : ''
 const viewportRenderQueueTest = existsSync(viewportRenderQueueTestPath) ? read(viewportRenderQueueTestPath) : ''
+const viewportRenderReadinessTest = existsSync(viewportRenderReadinessTestPath) ? read(viewportRenderReadinessTestPath) : ''
 const viewportRenderBackendTest = existsSync(viewportRenderBackendTestPath) ? read(viewportRenderBackendTestPath) : ''
 const viewportRenderArtifactAccessTest = existsSync(viewportRenderArtifactAccessTestPath)
   ? read(viewportRenderArtifactAccessTestPath)
@@ -573,9 +579,20 @@ for (const phrase of [
   assert(viewportRenderQueue.includes(phrase), `viewport render queue includes "${phrase}"`)
 }
 for (const phrase of [
+  'ViewportRenderReadinessReport',
+  'estimateViewportRenderResources',
+  'estimatedMemoryMb',
+  'estimatedVramMb',
+  'recommendedLane',
+  'Review/final viewport renders must not run on the browser main thread.',
+]) {
+  assert(viewportRenderReadiness.includes(phrase), `viewport render readiness includes "${phrase}"`)
+}
+for (const phrase of [
   'renderViewportBackendArtifacts',
   'coerceViewportRenderBackendRequest',
   'buildViewportRenderBackendCapabilities',
+  'buildViewportRenderReadinessReport',
   'resolveViewportRenderArtifactUrl',
   'readViewportRenderArtifact',
   'aethel-internal-scene-preview',
@@ -585,6 +602,7 @@ for (const phrase of [
   'performance-report.json',
   'license-report.json',
   'validation-report.json',
+  'Render readiness:',
   'does not mint new marketplace rights',
   'Media outputs still require a real FFmpeg/native/cloud renderer',
 ]) {
@@ -711,9 +729,10 @@ assert(
   'timeline overlay exposes compact render quality controls without a new dashboard'
 )
 assert(
-  viewportRenderContractTest.includes('cost') &&
+    viewportRenderContractTest.includes('cost') &&
     viewportRenderPersistenceTest.includes('durable production state') &&
     viewportRenderQueueTest.includes('outside-browser-main-thread') &&
+    viewportRenderReadinessTest.includes('routes final browser-worker pressure to cloud/native') &&
     viewportRenderBackendTest.includes('produces concrete draft preview artifacts') &&
     viewportRenderBackendTest.includes('does not pretend review MP4 or final video exists') &&
     viewportRenderBackendTest.includes('resolves artifact URLs without allowing path traversal') &&

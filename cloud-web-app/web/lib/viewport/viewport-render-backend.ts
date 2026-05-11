@@ -12,6 +12,10 @@ import {
   VIEWPORT_RENDER_QUEUE_JOB_TYPE,
   type ViewportRenderQueuePayload,
 } from '@/lib/viewport/viewport-render-queue'
+import {
+  buildViewportRenderReadinessReport,
+  type ViewportRenderReadinessReport,
+} from '@/lib/viewport/viewport-render-readiness'
 
 export interface ViewportRenderBackendRequest {
   jobType: typeof VIEWPORT_RENDER_QUEUE_JOB_TYPE
@@ -32,6 +36,7 @@ export interface ViewportRenderBackendResult {
     artifactRoot: string
     producedKinds: string[]
     blockedKinds: string[]
+    readiness: ViewportRenderReadinessReport
     releaseReady: false
   }
 }
@@ -335,12 +340,19 @@ function expectedMissingMediaKinds(payload: ViewportRenderQueuePayload): string[
   return expected.filter((kind) => kind === 'review-mp4' || kind === 'final-video' || kind === 'audio-mix')
 }
 
-function buildValidation(payload: ViewportRenderQueuePayload, blockedKinds: string[]): ViewportRenderOutputValidation {
+function buildValidation(
+  payload: ViewportRenderQueuePayload,
+  blockedKinds: string[],
+  readiness: ViewportRenderReadinessReport,
+): ViewportRenderOutputValidation {
   const contract = payload.metadata.renderContract
   const hasBlockingMedia = blockedKinds.length > 0
   return {
-    playbackOk: !hasBlockingMedia && (contract.quality === 'draft' || payload.metadata.expectedOutputs.includes('proxy-preview')),
-    performanceOk: !hasBlockingMedia || contract.quality !== 'final',
+    playbackOk:
+      !readiness.shouldHold &&
+      !hasBlockingMedia &&
+      (contract.quality === 'draft' || payload.metadata.expectedOutputs.includes('proxy-preview')),
+    performanceOk: !readiness.shouldHold && (!hasBlockingMedia || contract.quality !== 'final'),
     licenseOk: true,
     continuityOk: true,
   }
@@ -359,6 +371,7 @@ export async function renderViewportBackendArtifacts(
   const artifactRoot = options.artifactRoot ?? getDefaultArtifactRoot()
   const capturedAt = options.capturedAt ?? new Date().toISOString()
   const blockedKinds = expectedMissingMediaKinds(payload)
+  const readiness = buildViewportRenderReadinessReport(payload)
 
   const manifest = await writeArtifact({
     artifactRoot,
@@ -376,6 +389,7 @@ export async function renderViewportBackendArtifacts(
       contract,
       runtimeRoute: payload.runtimeRoute,
       executionPlan: payload.metadata.executionPlan,
+      readiness,
       expectedOutputs: payload.metadata.expectedOutputs,
       blockedKinds,
       releaseReady: false,
@@ -423,6 +437,7 @@ export async function renderViewportBackendArtifacts(
         fps: contract.profile.fps,
         maxDurationSeconds: contract.profile.maxDurationSeconds,
       },
+      readiness,
       verdict: blockedKinds.length > 0 ? 'media-backend-required' : 'draft-preview-ready',
     }),
   }))
@@ -441,7 +456,7 @@ export async function renderViewportBackendArtifacts(
     }),
   }))
 
-  const validation = buildValidation(payload, blockedKinds)
+  const validation = buildValidation(payload, blockedKinds, readiness)
   artifacts.push(await writeArtifact({
     artifactRoot,
     projectId: payload.projectId,
@@ -452,9 +467,11 @@ export async function renderViewportBackendArtifacts(
       capturedAt,
       validation,
       blockedKinds,
+      readiness,
       releaseReady: false,
       notes: [
         'Aethel internal renderer produced real scene preview artifacts.',
+        `Render readiness: ${readiness.severity}. ${readiness.reasons.join(' ')}`,
         ...(blockedKinds.length > 0
           ? [`Missing media outputs: ${blockedKinds.join(', ')}. Configure FFmpeg, Studio Local native render, or cloud render for final playback evidence.`]
           : ['Draft proxy preview is available. Human review is still recommended before promoting quality.']),
@@ -483,6 +500,7 @@ export async function renderViewportBackendArtifacts(
       artifactRoot,
       producedKinds: artifacts.map((artifact) => artifact.kind),
       blockedKinds,
+      readiness,
       releaseReady: false,
     },
   }

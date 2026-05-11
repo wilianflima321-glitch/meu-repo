@@ -97,6 +97,17 @@ describe('viewport render backend', () => {
         'utf8',
       )
       expect(thumbnail).toContain('Aethel internal scene preview')
+
+      const performanceReport = JSON.parse(await readFile(
+        path.join(artifactRoot, 'viewport-renders', 'project-render-backend', 'render-backend-draft', 'performance-report.json'),
+        'utf8',
+      ))
+      expect(performanceReport.readiness).toMatchObject({
+        severity: 'ready',
+        shouldHold: false,
+        runtimeTarget: 'local-worker',
+      })
+      expect(performanceReport.readiness.estimatedMemoryMb).toBeGreaterThan(0)
     } finally {
       await rm(artifactRoot, { recursive: true, force: true })
     }
@@ -116,6 +127,7 @@ describe('viewport render backend', () => {
       })
 
       expect(result.renderer.blockedKinds).toEqual(['review-mp4'])
+      expect(result.renderer.readiness.severity).not.toBe('held')
       expect(result.evidence.artifacts.some((artifact) => artifact.kind === 'review-mp4')).toBe(false)
       expect(result.evidence.validation.playbackOk).toBe(false)
       expect(result.evidence.notes.join(' ')).toContain('Media outputs still require a real FFmpeg/native/cloud renderer')
