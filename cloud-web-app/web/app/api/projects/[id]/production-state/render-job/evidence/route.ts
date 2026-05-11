@@ -16,6 +16,7 @@ import {
   coerceViewportRenderOutputEvidence,
   mergeViewportRenderOutputEvidenceIntoProductionState,
 } from '@/lib/production/render-output-evidence'
+import { withViewportRenderEvidenceArtifactAccess } from '@/lib/viewport/viewport-render-artifact-access'
 
 const logger = createComponentLogger('api.projects.production-state.render-job.evidence')
 
@@ -83,11 +84,12 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Invalid viewport render output evidence' }, { status: 400 })
     }
 
-    const currentState = readStateForProject(project)
-    const state = mergeViewportRenderOutputEvidenceIntoProductionState(currentState, {
+    const projectEvidence = {
       ...evidence,
       projectId: project.id,
-    })
+    }
+    const currentState = readStateForProject(project)
+    const state = mergeViewportRenderOutputEvidenceIntoProductionState(currentState, projectEvidence)
     const settings = writeAgenticProductionStateToSettings(project.settings, state)
     const readiness = buildProductionReadinessSummary(state)
 
@@ -109,10 +111,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     })
 
     return NextResponse.json({
-      evidence: {
-        ...evidence,
-        projectId: project.id,
-      },
+      evidence: withViewportRenderEvidenceArtifactAccess(projectEvidence, project.id),
       state,
       readiness,
       persisted: true,

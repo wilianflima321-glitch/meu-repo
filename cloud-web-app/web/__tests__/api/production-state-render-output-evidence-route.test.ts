@@ -46,7 +46,10 @@ function buildEvidence() {
     artifacts: [
       { kind: 'final-video', url: 's3://renders/final.mp4', sizeBytes: 2048, durationSeconds: 12 },
       { kind: 'performance-report', url: 's3://renders/perf.json' },
-      { kind: 'license-report', url: 's3://renders/license.json' },
+      {
+        kind: 'license-report',
+        url: 'aethel-artifact://viewport-render/project-1/render-final-shot/license-report.json',
+      },
     ],
     validation: {
       playbackOk: true,
@@ -88,6 +91,24 @@ describe('api/projects/[id]/production-state/render-job/evidence route', () => {
     expect(payload.persisted).toBe(true)
     expect(payload.releaseReady).toBe(false)
     expect(payload.releaseNote).toContain('Human approval')
+    expect(payload.evidence.artifacts).toEqual([
+      expect.objectContaining({
+        url: 's3://renders/final.mp4',
+        accessUrl: 's3://renders/final.mp4',
+        accessMode: 'direct-url',
+      }),
+      expect.objectContaining({
+        url: 's3://renders/perf.json',
+        accessUrl: 's3://renders/perf.json',
+        accessMode: 'direct-url',
+      }),
+      expect.objectContaining({
+        url: 'aethel-artifact://viewport-render/project-1/render-final-shot/license-report.json',
+        accessUrl:
+          '/api/projects/project-1/production-state/render-job/artifact?artifactUrl=aethel-artifact%3A%2F%2Fviewport-render%2Fproject-1%2Frender-final-shot%2Flicense-report.json',
+        accessMode: 'project-authenticated-proxy',
+      }),
+    ])
     expect(payload.state.graphs.releaseGraph[0]).toMatchObject({
       id: 'render-release-render-final-shot',
       status: 'needs-review',

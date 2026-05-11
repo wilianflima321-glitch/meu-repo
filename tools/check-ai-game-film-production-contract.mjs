@@ -643,6 +643,7 @@ assert(
   viewportRenderArtifactAccess.includes('buildViewportRenderArtifactAccessUrl') &&
     viewportRenderArtifactAccess.includes('withViewportRenderArtifactAccess') &&
     viewportRenderArtifactAccess.includes('project-authenticated-proxy') &&
+    viewportRenderArtifactAccess.includes('requires a projectId') &&
     viewportRenderArtifactAccess.includes('/production-state/render-job/artifact'),
   'viewport render artifact access maps internal renderer URLs to project-authenticated proxy URLs'
 )
@@ -675,9 +676,10 @@ assert(
 assert(
   renderOutputEvidenceRoute.includes('coerceViewportRenderOutputEvidence') &&
     renderOutputEvidenceRoute.includes('mergeViewportRenderOutputEvidenceIntoProductionState') &&
+    renderOutputEvidenceRoute.includes('withViewportRenderEvidenceArtifactAccess') &&
     renderOutputEvidenceRoute.includes('releaseReady: false') &&
     renderOutputEvidenceRoute.includes('Human approval'),
-  'render output evidence route attaches media evidence without auto-release'
+  'render output evidence route attaches media evidence, returns project-authenticated artifact access, and avoids auto-release'
 )
 assert(
   sceneViewportState.includes('useViewportExport') &&
@@ -701,6 +703,7 @@ assert(
     viewportRenderBackendTest.includes('resolves artifact URLs without allowing path traversal') &&
     viewportRenderArtifactAccessTest.includes('project-authenticated access URLs') &&
     viewportRenderArtifactAccessTest.includes('external media URLs') &&
+    viewportRenderArtifactAccessTest.includes('without project context') &&
     renderJobProductionStateTest.includes('Release Agent') &&
     renderOutputEvidenceTest.includes('Human review must approve media evidence before release') &&
     viewportRenderWorkerTest.includes('does not fake media output') &&
@@ -711,7 +714,8 @@ assert(
     viewportRenderBackendRouteTest.includes('rejects artifact traversal attempts') &&
     renderJobRouteTest.includes('payload.queued).toBe(false') &&
     renderJobRouteTest.includes('render:viewport') &&
-    renderOutputEvidenceRouteTest.includes('releaseReady).toBe(false'),
+    renderOutputEvidenceRouteTest.includes('releaseReady).toBe(false') &&
+    renderOutputEvidenceRouteTest.includes('project-authenticated-proxy'),
   'render job tests cover contract, persistence, queue routing, worker execution, output evidence, production merge, and no-fake behavior'
 )
 assert(

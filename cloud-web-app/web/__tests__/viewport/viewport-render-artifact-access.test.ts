@@ -36,4 +36,13 @@ describe('viewport render artifact access helpers', () => {
       accessMode: 'direct-url',
     })
   })
+
+  it('fails loudly when internal render artifact access is requested without project context', () => {
+    expect(() =>
+      withViewportRenderArtifactAccess({
+        kind: 'thumbnail',
+        url: 'aethel-artifact://viewport-render/project-1/render-1/thumbnail.svg',
+      }, ''),
+    ).toThrow('requires a projectId')
+  })
 })

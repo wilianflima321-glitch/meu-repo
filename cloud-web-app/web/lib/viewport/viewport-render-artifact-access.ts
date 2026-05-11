@@ -20,6 +20,10 @@ export function buildViewportRenderArtifactAccessUrl(input: {
   projectId: string
   artifactUrl: string
 }): string {
+  if (input.projectId.trim().length === 0) {
+    throw new Error('Viewport render artifact access requires a projectId')
+  }
+
   const projectId = encodeURIComponent(input.projectId)
   const artifactUrl = encodeURIComponent(input.artifactUrl)
   return `/api/projects/${projectId}/production-state/render-job/artifact?artifactUrl=${artifactUrl}`
@@ -49,7 +53,7 @@ export function withViewportRenderArtifactAccess(
 
 export function withViewportRenderEvidenceArtifactAccess(
   evidence: ViewportRenderOutputEvidence,
-  projectId = evidence.projectId ?? '',
+  projectId: string,
 ): ViewportRenderOutputEvidenceWithAccess {
   return {
     ...evidence,
