@@ -10,6 +10,8 @@
     "runtime": "cross-env RUNTIME_PORT=3001 ts-node --transpile-only lib/server/bootstrap.ts",
     "runtime:dev": "cross-env RUNTIME_PORT=3001 nodemon --exec ts-node --transpile-only lib/server/bootstrap.ts",
     "worker:build-queue": "ts-node --transpile-only server/workers/build-queue-worker.ts",
+    "worker:viewport-render": "ts-node --transpile-only server/workers/viewport-render-worker.ts",
+    "worker:all": "concurrently \"npm run worker:build-queue\" \"npm run worker:viewport-render\"",
     "build": "cross-env NODE_ENV=production next build --experimental-build-mode compile",
     "build:prerender-probe": "cross-env NODE_ENV=production next build",
     "build:analyze": "cross-env NODE_ENV=production ANALYZE=1 next build --experimental-build-mode compile",

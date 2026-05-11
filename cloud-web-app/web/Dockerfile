@@ -108,7 +108,7 @@ RUN addgroup --system --gid 1001 aethel && \
 
 USER aethel
 
-CMD ["npm", "run", "worker:build-queue"]
+CMD ["npm", "run", "worker:all"]
 
 # ========================================
 # Stage 4: Web Application (Production)

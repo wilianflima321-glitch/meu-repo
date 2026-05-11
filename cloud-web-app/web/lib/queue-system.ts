@@ -23,7 +23,7 @@ const log = createComponentLogger('queue-system')
 // LAZY LOAD - Dependências opcionais
 // ============================================================================
 
-interface QueueJobAdapter {
+export interface QueueJobAdapter {
   id?: string | number;
   name: string;
   data: unknown;
@@ -59,7 +59,7 @@ interface QueueEventsAdapter {
   close: () => Promise<void>;
 }
 
-interface WorkerAdapter {
+export interface WorkerAdapter {
   on: (event: string, listener: (job: QueueJobAdapter | undefined, err?: Error) => void) => void;
   close: () => Promise<void>;
 }

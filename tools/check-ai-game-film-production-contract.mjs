@@ -14,6 +14,8 @@ const contractPath = 'docs/master/106_AI_GAME_FILM_PRODUCTION_CONTRACT_2026-05-0
 const triagePath = 'docs/master/90_CANONICAL_PRODUCT_QUALITY_TRIAGE_2026-04-30.md'
 const checklistPath = 'docs/master/91_PRODUCT_QUALITY_EXECUTION_CHECKLIST_2026-04-30.md'
 const packagePath = 'package.json'
+const webPackagePath = 'cloud-web-app/web/package.json'
+const webDockerfilePath = 'cloud-web-app/web/Dockerfile'
 const measurePath = 'tools/measure-product-quality.mjs'
 const testPath = 'cloud-web-app/web/__tests__/docs/ai-game-film-production-contract.test.ts'
 const productionStateTestPath = 'cloud-web-app/web/__tests__/production/agentic-production-state.test.ts'
@@ -44,6 +46,9 @@ const viewportRenderQueuePath = 'cloud-web-app/web/lib/viewport/viewport-render-
 const viewportRenderHookPath = 'cloud-web-app/web/hooks/useViewportRenderJobPersistence.ts'
 const renderJobProductionStatePath = 'cloud-web-app/web/lib/production/render-job-production-state.ts'
 const renderOutputEvidencePath = 'cloud-web-app/web/lib/production/render-output-evidence.ts'
+const renderOutputEvidencePersistencePath = 'cloud-web-app/web/lib/production/render-output-evidence-persistence.ts'
+const viewportRenderWorkerPath = 'cloud-web-app/web/lib/workers/viewport-render-worker.ts'
+const viewportRenderWorkerRunnerPath = 'cloud-web-app/web/server/workers/viewport-render-worker.ts'
 const renderJobRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/render-job/route.ts'
 const renderOutputEvidenceRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/render-job/evidence/route.ts'
 const viewportRenderContractTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-contract.test.ts'
@@ -51,6 +56,7 @@ const viewportRenderPersistenceTestPath = 'cloud-web-app/web/__tests__/viewport/
 const viewportRenderQueueTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-queue.test.ts'
 const renderJobProductionStateTestPath = 'cloud-web-app/web/__tests__/production/render-job-production-state.test.ts'
 const renderOutputEvidenceTestPath = 'cloud-web-app/web/__tests__/production/render-output-evidence.test.ts'
+const viewportRenderWorkerTestPath = 'cloud-web-app/web/__tests__/workers/viewport-render-worker.test.ts'
 const renderJobRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-render-job-route.test.ts'
 const renderOutputEvidenceRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-render-output-evidence-route.test.ts'
 const viewportProfessionalControlsTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-professional-controls-contract.test.ts'
@@ -143,6 +149,9 @@ for (const path of [
   viewportRenderHookPath,
   renderJobProductionStatePath,
   renderOutputEvidencePath,
+  renderOutputEvidencePersistencePath,
+  viewportRenderWorkerPath,
+  viewportRenderWorkerRunnerPath,
   renderJobRoutePath,
   renderOutputEvidenceRoutePath,
   viewportRenderContractTestPath,
@@ -150,6 +159,7 @@ for (const path of [
   viewportRenderQueueTestPath,
   renderJobProductionStateTestPath,
   renderOutputEvidenceTestPath,
+  viewportRenderWorkerTestPath,
   renderJobRouteTestPath,
   renderOutputEvidenceRouteTestPath,
   viewportProfessionalControlsTestPath,
@@ -170,6 +180,8 @@ const contract = existsSync(contractPath) ? read(contractPath) : ''
 const triage = existsSync(triagePath) ? read(triagePath) : ''
 const checklist = existsSync(checklistPath) ? read(checklistPath) : ''
 const packageJson = existsSync(packagePath) ? read(packagePath) : ''
+const webPackageJson = existsSync(webPackagePath) ? read(webPackagePath) : ''
+const webDockerfile = existsSync(webDockerfilePath) ? read(webDockerfilePath) : ''
 const measure = existsSync(measurePath) ? read(measurePath) : ''
 const test = existsSync(testPath) ? read(testPath) : ''
 const productionState = existsSync('cloud-web-app/web/lib/production/agentic-production-state.ts')
@@ -206,6 +218,9 @@ const viewportRenderQueue = existsSync(viewportRenderQueuePath) ? read(viewportR
 const viewportRenderHook = existsSync(viewportRenderHookPath) ? read(viewportRenderHookPath) : ''
 const renderJobProductionState = existsSync(renderJobProductionStatePath) ? read(renderJobProductionStatePath) : ''
 const renderOutputEvidence = existsSync(renderOutputEvidencePath) ? read(renderOutputEvidencePath) : ''
+const renderOutputEvidencePersistence = existsSync(renderOutputEvidencePersistencePath) ? read(renderOutputEvidencePersistencePath) : ''
+const viewportRenderWorker = existsSync(viewportRenderWorkerPath) ? read(viewportRenderWorkerPath) : ''
+const viewportRenderWorkerRunner = existsSync(viewportRenderWorkerRunnerPath) ? read(viewportRenderWorkerRunnerPath) : ''
 const renderJobRoute = existsSync(renderJobRoutePath) ? read(renderJobRoutePath) : ''
 const renderOutputEvidenceRoute = existsSync(renderOutputEvidenceRoutePath) ? read(renderOutputEvidenceRoutePath) : ''
 const viewportRenderContractTest = existsSync(viewportRenderContractTestPath) ? read(viewportRenderContractTestPath) : ''
@@ -213,6 +228,7 @@ const viewportRenderPersistenceTest = existsSync(viewportRenderPersistenceTestPa
 const viewportRenderQueueTest = existsSync(viewportRenderQueueTestPath) ? read(viewportRenderQueueTestPath) : ''
 const renderJobProductionStateTest = existsSync(renderJobProductionStateTestPath) ? read(renderJobProductionStateTestPath) : ''
 const renderOutputEvidenceTest = existsSync(renderOutputEvidenceTestPath) ? read(renderOutputEvidenceTestPath) : ''
+const viewportRenderWorkerTest = existsSync(viewportRenderWorkerTestPath) ? read(viewportRenderWorkerTestPath) : ''
 const renderJobRouteTest = existsSync(renderJobRouteTestPath) ? read(renderJobRouteTestPath) : ''
 const renderOutputEvidenceRouteTest = existsSync(renderOutputEvidenceRouteTestPath) ? read(renderOutputEvidenceRouteTestPath) : ''
 const viewportProfessionalControlsTest = existsSync(viewportProfessionalControlsTestPath) ? read(viewportProfessionalControlsTestPath) : ''
@@ -539,6 +555,38 @@ for (const phrase of [
 ]) {
   assert(renderOutputEvidence.includes(phrase), `render output evidence includes "${phrase}"`)
 }
+for (const phrase of [
+  'persistViewportRenderOutputEvidenceForProject',
+  'mergeViewportRenderOutputEvidenceIntoProductionState',
+  'writeAgenticProductionStateToSettings',
+  'render_output_evidence.persisted_by_worker',
+]) {
+  assert(renderOutputEvidencePersistence.includes(phrase), `render output evidence persistence includes "${phrase}"`)
+}
+for (const phrase of [
+  'registerViewportRenderWorker',
+  'processViewportRenderQueueJob',
+  'executeViewportRenderQueuePayload',
+  'AETHEL_RENDER_BACKEND_ENDPOINT',
+  'No media artifact was fabricated',
+  'manifest-only',
+  'persistViewportRenderOutputEvidenceForProject',
+  'VIEWPORT_RENDER_QUEUE_JOB_TYPE',
+]) {
+  assert(viewportRenderWorker.includes(phrase), `viewport render worker includes "${phrase}"`)
+}
+assert(
+  viewportRenderWorkerRunner.includes('registerViewportRenderWorker') &&
+    viewportRenderWorkerRunner.includes('VIEWPORT_RENDER_WORKER_CONCURRENCY'),
+  'viewport render worker runner starts the dedicated render worker with configurable concurrency'
+)
+assert(
+  webPackageJson.includes('worker:viewport-render') &&
+    webPackageJson.includes('worker:all') &&
+    webPackageJson.includes('server/workers/viewport-render-worker.ts'),
+  'web package exposes viewport render worker scripts'
+)
+assert(webDockerfile.includes('worker:all'), 'worker Docker image starts export and viewport render workers together')
 assert(
   renderJobRoute.includes('coerceViewportRenderJobContract') &&
     renderJobRoute.includes('mergeViewportRenderJobIntoProductionState') &&
@@ -573,10 +621,12 @@ assert(
     viewportRenderQueueTest.includes('outside-browser-main-thread') &&
     renderJobProductionStateTest.includes('Release Agent') &&
     renderOutputEvidenceTest.includes('Human review must approve media evidence before release') &&
+    viewportRenderWorkerTest.includes('does not fake media output') &&
+    viewportRenderWorkerTest.includes('real renderer backend evidence') &&
     renderJobRouteTest.includes('payload.queued).toBe(false') &&
     renderJobRouteTest.includes('render:viewport') &&
     renderOutputEvidenceRouteTest.includes('releaseReady).toBe(false'),
-  'render job tests cover contract, persistence, queue routing, output evidence, production merge, and no-fake behavior'
+  'render job tests cover contract, persistence, queue routing, worker execution, output evidence, production merge, and no-fake behavior'
 )
 
 const failed = checks.filter((check) => !check.ok)
