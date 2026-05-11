@@ -1,6 +1,8 @@
 import {
   buildViewportAssetEvidenceRef,
+  buildViewportAssetImportBatch,
   buildViewportImportedObjects,
+  coerceViewportAssetImportBatch,
   formatViewportAssetSize,
   getViewportAssetImportFormat,
 } from '@/lib/viewport/viewport-asset-import'
@@ -49,5 +51,36 @@ describe('viewport asset import intake', () => {
     expect(formatViewportAssetSize(1536)).toBe('1.5 KB')
     expect(formatViewportAssetSize(6_291_456)).toBe('6.0 MB')
     expect(buildViewportAssetEvidenceRef('My Hero Asset!.glb', 't')).toBe('asset-import:my-hero-asset-.glb:t')
+  })
+
+  it('builds and coerces durable asset import batches for the Asset Graph', () => {
+    const objects = buildViewportImportedObjects({
+      existingCount: 0,
+      importedAt: '2026-05-11T10:00:00.000Z',
+      files: [{ fileName: 'Arena.usd', sizeBytes: 8192 }],
+    })
+    const batch = buildViewportAssetImportBatch(objects, {
+      id: 'batch-1',
+      projectId: 'project-1',
+      importedAt: '2026-05-11T10:00:00.000Z',
+    })
+
+    expect(batch).toMatchObject({
+      id: 'batch-1',
+      projectId: 'project-1',
+      source: 'viewport-drop',
+      assets: [
+        expect.objectContaining({
+          objectName: 'Arena',
+          metadata: expect.objectContaining({ format: 'usd' }),
+        }),
+      ],
+    })
+    expect(batch.evidenceRefs).toEqual([
+      'viewport:asset-import:batch-1',
+      'asset-import:arena.usd:2026-05-11T10:00:00.000Z',
+    ])
+    expect(coerceViewportAssetImportBatch({ batch })?.assets[0]?.metadata.fileName).toBe('Arena.usd')
+    expect(coerceViewportAssetImportBatch({ batch: { assets: [] } })).toBeNull()
   })
 })

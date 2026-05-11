@@ -16,7 +16,7 @@ export default function SceneViewportSurface({
   renderMode: 'draft' | 'cinematic';
   projectId?: string | null;
 }) {
-  const viewportState = useSceneViewportSurfaceState();
+  const viewportState = useSceneViewportSurfaceState(projectId);
   const {
     objects,
     selectedIds,

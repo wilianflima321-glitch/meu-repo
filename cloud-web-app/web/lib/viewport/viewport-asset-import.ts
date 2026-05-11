@@ -19,6 +19,27 @@ export type ViewportAssetImportFile = {
   sizeBytes: number
 }
 
+export type ViewportAssetImportRecord = {
+  objectId: string
+  objectName: string
+  metadata: ViewportAssetImportMetadata
+}
+
+export type ViewportAssetImportBatch = {
+  id: string
+  projectId?: string | null
+  importedAt: string
+  source: 'viewport-drop'
+  assets: ViewportAssetImportRecord[]
+  evidenceRefs: string[]
+}
+
+export type ViewportAssetImportBatchObject = {
+  id: string
+  name: string
+  asset?: ViewportAssetImportMetadata
+}
+
 export const VIEWPORT_ASSET_IMPORT_EXTENSIONS: readonly ViewportAssetImportFormat[] = [
   'glb',
   'gltf',
@@ -132,4 +153,106 @@ export function buildViewportImportedObjects({
     if (object) imported.push(object)
   }
   return imported
+}
+
+function unique(values: string[]): string[] {
+  return Array.from(new Set(values.filter((value) => value.trim().length > 0)))
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+function pickString(value: unknown, fallback: string): string {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : fallback
+}
+
+function pickNumber(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
+
+function pickEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+  return typeof value === 'string' && allowed.includes(value as T) ? (value as T) : fallback
+}
+
+export function buildViewportAssetImportBatch(
+  objects: readonly ViewportAssetImportBatchObject[],
+  options: {
+    projectId?: string | null
+    importedAt?: string
+    id?: string
+  } = {},
+): ViewportAssetImportBatch {
+  const importedAt = options.importedAt ?? new Date().toISOString()
+  const assets = objects
+    .filter((object): object is ViewportAssetImportBatchObject & { asset: ViewportAssetImportMetadata } => Boolean(object.asset))
+    .map((object) => ({
+      objectId: object.id,
+      objectName: object.name,
+      metadata: object.asset,
+    }))
+
+  return {
+    id: options.id ?? `viewport-asset-import-${importedAt}`,
+    projectId: options.projectId,
+    importedAt,
+    source: 'viewport-drop',
+    assets,
+    evidenceRefs: unique([
+      `viewport:asset-import:${options.id ?? importedAt}`,
+      ...assets.map((asset) => asset.metadata.evidenceRef),
+    ]),
+  }
+}
+
+export function coerceViewportAssetImportMetadata(input: unknown): ViewportAssetImportMetadata | null {
+  if (!isRecord(input)) return null
+  const fileName = pickString(input.fileName, '')
+  const format = pickEnum(input.format, VIEWPORT_ASSET_IMPORT_EXTENSIONS, 'glb')
+  const sizeBytes = Math.max(0, pickNumber(input.sizeBytes, 0))
+  const importedAt = pickString(input.importedAt, new Date().toISOString())
+  const evidenceRef = pickString(input.evidenceRef, buildViewportAssetEvidenceRef(fileName || 'asset', importedAt))
+  if (!fileName) return null
+  return {
+    fileName,
+    format,
+    sizeBytes,
+    source: 'drag-drop',
+    importedAt,
+    licenseStatus: pickEnum(input.licenseStatus, ['needs-review', 'approved', 'blocked'] as const, 'needs-review'),
+    qualityGate: pickEnum(input.qualityGate, ['raw-intake', 'preview-ready'] as const, 'raw-intake'),
+    evidenceRef,
+  }
+}
+
+export function coerceViewportAssetImportBatch(input: unknown): ViewportAssetImportBatch | null {
+  const candidate = isRecord(input) && isRecord(input.batch) ? input.batch : input
+  if (!isRecord(candidate)) return null
+  const assetsInput = Array.isArray(candidate.assets) ? candidate.assets : []
+  const importedAt = pickString(candidate.importedAt, new Date().toISOString())
+  const assets = assetsInput
+    .map((asset): ViewportAssetImportRecord | null => {
+      if (!isRecord(asset)) return null
+      const metadata = coerceViewportAssetImportMetadata(asset.metadata)
+      if (!metadata) return null
+      return {
+        objectId: pickString(asset.objectId, `asset-${metadata.evidenceRef}`),
+        objectName: pickString(asset.objectName, metadata.fileName.replace(/\.[^.]+$/, '') || metadata.fileName),
+        metadata,
+      }
+    })
+    .filter((asset): asset is ViewportAssetImportRecord => Boolean(asset))
+
+  if (assets.length === 0) return null
+  return {
+    id: pickString(candidate.id, `viewport-asset-import-${importedAt}`),
+    projectId: typeof candidate.projectId === 'string' ? candidate.projectId : null,
+    importedAt,
+    source: 'viewport-drop',
+    assets,
+    evidenceRefs: unique([
+      ...(Array.isArray(candidate.evidenceRefs) ? candidate.evidenceRefs.filter((item): item is string => typeof item === 'string') : []),
+      ...assets.map((asset) => asset.metadata.evidenceRef),
+    ]),
+  }
 }

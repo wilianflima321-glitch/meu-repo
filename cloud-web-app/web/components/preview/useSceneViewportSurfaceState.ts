@@ -12,10 +12,12 @@ import {
   type ViewportTransformSpace,
 } from '@/components/viewport/AethelViewport3D';
 import {
+  buildViewportAssetImportBatch,
   buildViewportImportedObjects,
   VIEWPORT_ASSET_IMPORT_EXTENSIONS,
   formatViewportAssetSize,
 } from '@/lib/viewport/viewport-asset-import';
+import { useViewportAssetImportPersistence } from '@/hooks/useViewportAssetImportPersistence';
 
 import {
   cloneViewportObject,
@@ -28,7 +30,7 @@ import { getViewportWorkflowLabel, type ViewportWorkflowTool } from './SceneView
 import { useSceneViewportPlayback } from './useSceneViewportPlayback';
 import { useViewportExport } from './useViewportExport';
 
-export function useSceneViewportSurfaceState() {
+export function useSceneViewportSurfaceState(projectId?: string | null) {
   const [objects, setObjects] = useState<ViewportSceneObject[]>(viewportSeedObjects);
   const [selectedIds, setSelectedIds] = useState<string[]>(
     [viewportSeedObjects[0]?.id].filter(Boolean) as string[]
@@ -48,6 +50,7 @@ export function useSceneViewportSurfaceState() {
   const [assetImportStatus, setAssetImportStatus] = useState(
     `Ready for ${VIEWPORT_ASSET_IMPORT_EXTENSIONS.map((extension) => extension.toUpperCase()).join(', ')} assets`
   );
+  const assetImportPersistence = useViewportAssetImportPersistence(projectId);
   const visualScriptAnchorRef = useRef<ViewportSceneObject | null>(
     cloneViewportObject(viewportSeedObjects[0])
   );
@@ -116,10 +119,18 @@ export function useSceneViewportSurfaceState() {
     setObjects([...objects, ...importedObjects]);
     setSelectedIds(importedObjects.map((object) => object.id));
     const totalBytes = importedObjects.reduce((sum, object) => sum + (object.asset?.sizeBytes ?? 0), 0);
+    const batch = buildViewportAssetImportBatch(importedObjects, { projectId, importedAt });
     setAssetImportStatus(
       `${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} staged · ${formatViewportAssetSize(totalBytes)} · license review required`
     );
-  }, [objects]);
+    void assetImportPersistence.persistBatch(batch).then((result) => {
+      if (result.ok) {
+        setAssetImportStatus(`${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} saved to Asset Graph · license review required`);
+        return;
+      }
+      setAssetImportStatus(`${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} staged locally · ${result.error}`);
+    });
+  }, [assetImportPersistence, objects, projectId]);
 
   const activeWorkflowLabel = getViewportWorkflowLabel(workflowTool);
   const { exportStatus, handleExportViewport } = useViewportExport({

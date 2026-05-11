@@ -22,6 +22,11 @@ import {
   Wand2,
 } from 'lucide-react'
 import TransformGizmoProfessional from '@/components/viewport/gizmos/TransformGizmoProfessional'
+import {
+  CameraPresetApplier,
+  VIEWPORT_CAMERA_PRESETS,
+  type ViewportCameraPreset,
+} from '@/components/viewport/ViewportCameraPresetApplier'
 import { sampleTrajectory } from '@/lib/three/physics'
 import { buildGizmoTransformOperation, type GizmoTransformOperation } from '@/lib/viewport/gizmo-transform-operation'
 import {
@@ -33,6 +38,7 @@ import {
   formatViewportAssetSize,
   type ViewportAssetImportMetadata,
 } from '@/lib/viewport/viewport-asset-import'
+import { isEditableViewportKeyboardTarget } from '@/lib/viewport/viewport-keyboard-targets'
 
 export type ViewportTransformMode = 'translate' | 'rotate' | 'scale'
 export type ViewportTransformSpace = 'world' | 'local'
@@ -100,6 +106,7 @@ type SceneObjectMeshProps = {
 const iconButton = 'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] p-2 text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]'
 const activeButton = 'inline-flex items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--aethel-primary)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] p-2 text-[var(--aethel-primary-light)] transition hover:brightness-110'
 const panelButton = 'inline-flex items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:border-[var(--aethel-border-secondary)]'
+const compactTextButton = 'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-2.5 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]'
 const memoryChipToneClass: Record<GizmoTransformPersistenceChipTone, string> = {
   neutral: 'border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.78)] text-[var(--aethel-text-tertiary)]',
   saving: 'border-[color-mix(in_srgb,var(--aethel-info)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,rgba(7,12,20,0.72))] text-[var(--aethel-info-light)]',
@@ -141,12 +148,6 @@ const defaultObjects: ViewportSceneObject[] = [
     visible: true,
   },
 ]
-
-function isEditableKeyboardTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false
-  const tagName = target.tagName.toLowerCase()
-  return target.isContentEditable || tagName === 'input' || tagName === 'textarea' || tagName === 'select'
-}
 
 function clampScale(scale: [number, number, number]): [number, number, number] {
   return [
@@ -424,7 +425,10 @@ function ViewportScene({
   onObjectsChange,
   onSelectionChange,
   onGizmoTransformOperation,
-}: Omit<AethelViewport3DProps, 'onTogglePlayTest' | 'onTransformModeChange' | 'onTransformSpaceChange' | 'onSnapEnabledChange' | 'onAIAction'>) {
+  cameraPreset,
+}: Omit<AethelViewport3DProps, 'onTogglePlayTest' | 'onTransformModeChange' | 'onTransformSpaceChange' | 'onSnapEnabledChange' | 'onAIAction'> & {
+  cameraPreset: ViewportCameraPreset
+}) {
   const primarySelectedId = selectedIds[0] ?? null
   const selectedObject = objects.find((object) => object.id === primarySelectedId) ?? null
 
@@ -459,6 +463,7 @@ function ViewportScene({
       onPointerMissed={() => onSelectionChange([])}
       className="h-full w-full"
     >
+      <CameraPresetApplier preset={cameraPreset} />
       <color attach="background" args={[renderMode === 'cinematic' ? 0x070b12 : 0x0b1220]} />
       <fog attach="fog" args={[renderMode === 'cinematic' ? 0x070b12 : 0x0b1220, 10, 22]} />
       <ambientLight intensity={renderMode === 'cinematic' ? 0.45 : 0.72} />
@@ -795,6 +800,7 @@ export function AethelViewport3D({
 }: AethelViewport3DProps) {
   const [aiCommand, setAiCommand] = useState('move this object 2 up')
   const [assetDragActive, setAssetDragActive] = useState(false)
+  const [cameraPreset, setCameraPreset] = useState<ViewportCameraPreset>('perspective')
   const selectedObject = objects.find((object) => object.id === selectedIds[0]) ?? null
   const gizmoMemoryChip = buildGizmoTransformPersistenceChip({
     status: gizmoMemoryStatus,
@@ -844,7 +850,7 @@ export function AethelViewport3D({
 
   useEffect(() => {
     function handleViewportHotkeys(event: KeyboardEvent) {
-      if (event.metaKey || event.ctrlKey || event.altKey || isEditableKeyboardTarget(event.target)) return
+      if (event.metaKey || event.ctrlKey || event.altKey || isEditableViewportKeyboardTarget(event.target)) return
       if (event.code === 'KeyW') {
         event.preventDefault()
         onTransformModeChange('translate')
@@ -893,6 +899,18 @@ export function AethelViewport3D({
         <button type="button" aria-label={`Trocar para espaço ${transformSpace === 'world' ? 'local' : 'world'}`} onClick={() => onTransformSpaceChange(transformSpace === 'world' ? 'local' : 'world')} className={transformSpace === 'local' ? activeButton : iconButton}>
           <Film className="h-4 w-4" />
         </button>
+        <span className="mx-1 h-6 w-px bg-[var(--aethel-border-subtle)]" aria-hidden />
+        {VIEWPORT_CAMERA_PRESETS.map((preset) => (
+          <button
+            key={preset.id}
+            type="button"
+            aria-label={`Ativar câmera ${preset.label}`}
+            onClick={() => setCameraPreset(preset.id)}
+            className={cameraPreset === preset.id ? activeButton : compactTextButton}
+          >
+            {preset.id === 'perspective' ? <Camera className="h-4 w-4" /> : preset.label}
+          </button>
+        ))}
       </div>
 
       {gizmoMemoryChip.visible ? (
@@ -935,7 +953,7 @@ export function AethelViewport3D({
             Apply
           </button>
         </div>
-        <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">Shift+Click seleciona vários. W/E/R trocam mover, rotacionar e escalar. Esc limpa seleção.</p>
+        <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">Shift+Click seleciona vários. W/E/R trocam gizmo. Esc limpa seleção. Use Top/Front/Side para revisar proporção.</p>
           <div className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
             <span className="font-medium text-[var(--aethel-text-primary)]">Asset intake:</span> {assetImportStatus}
           </div>
@@ -969,6 +987,7 @@ export function AethelViewport3D({
         onObjectsChange={onObjectsChange}
         onSelectionChange={onSelectionChange}
         onGizmoTransformOperation={onGizmoTransformOperation}
+        cameraPreset={cameraPreset}
       />
     </div>
   )

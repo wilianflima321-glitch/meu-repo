@@ -30,7 +30,14 @@ const creativeStudioRoutesPath = 'cloud-web-app/web/app/studio/creative-studio-r
 const creativeStudioShellPath = 'cloud-web-app/web/app/studio/CreativeStudioShell.tsx'
 const creativeStudioRouteContractTestPath = 'cloud-web-app/web/__tests__/app/creative-studio-route-contract.test.ts'
 const viewportAssetImportPath = 'cloud-web-app/web/lib/viewport/viewport-asset-import.ts'
+const viewportAssetImportPersistencePath = 'cloud-web-app/web/lib/viewport/viewport-asset-import-persistence.ts'
+const viewportAssetImportHookPath = 'cloud-web-app/web/hooks/useViewportAssetImportPersistence.ts'
+const assetImportProductionStatePath = 'cloud-web-app/web/lib/production/asset-import-production-state.ts'
+const assetImportRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/asset-import/route.ts'
 const viewportAssetImportTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-asset-import.test.ts'
+const viewportAssetImportPersistenceTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-asset-import-persistence.test.ts'
+const assetImportProductionStateTestPath = 'cloud-web-app/web/__tests__/production/asset-import-production-state.test.ts'
+const assetImportRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-asset-import-route.test.ts'
 const viewportProfessionalControlsTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-professional-controls-contract.test.ts'
 const sceneViewportStatePath = 'cloud-web-app/web/components/preview/useSceneViewportSurfaceState.ts'
 const sceneViewportStagePath = 'cloud-web-app/web/components/preview/SceneViewportStage.tsx'
@@ -106,7 +113,14 @@ for (const path of [
   creativeStudioShellPath,
   creativeStudioRouteContractTestPath,
   viewportAssetImportPath,
+  viewportAssetImportPersistencePath,
+  viewportAssetImportHookPath,
+  assetImportProductionStatePath,
+  assetImportRoutePath,
   viewportAssetImportTestPath,
+  viewportAssetImportPersistenceTestPath,
+  assetImportProductionStateTestPath,
+  assetImportRouteTestPath,
   viewportProfessionalControlsTestPath,
   sceneViewportStatePath,
   sceneViewportStagePath,
@@ -146,7 +160,14 @@ const creativeStudioRoutes = existsSync(creativeStudioRoutesPath) ? read(creativ
 const creativeStudioShell = existsSync(creativeStudioShellPath) ? read(creativeStudioShellPath) : ''
 const creativeStudioRouteContractTest = existsSync(creativeStudioRouteContractTestPath) ? read(creativeStudioRouteContractTestPath) : ''
 const viewportAssetImport = existsSync(viewportAssetImportPath) ? read(viewportAssetImportPath) : ''
+const viewportAssetImportPersistence = existsSync(viewportAssetImportPersistencePath) ? read(viewportAssetImportPersistencePath) : ''
+const viewportAssetImportHook = existsSync(viewportAssetImportHookPath) ? read(viewportAssetImportHookPath) : ''
+const assetImportProductionState = existsSync(assetImportProductionStatePath) ? read(assetImportProductionStatePath) : ''
+const assetImportRoute = existsSync(assetImportRoutePath) ? read(assetImportRoutePath) : ''
 const viewportAssetImportTest = existsSync(viewportAssetImportTestPath) ? read(viewportAssetImportTestPath) : ''
+const viewportAssetImportPersistenceTest = existsSync(viewportAssetImportPersistenceTestPath) ? read(viewportAssetImportPersistenceTestPath) : ''
+const assetImportProductionStateTest = existsSync(assetImportProductionStateTestPath) ? read(assetImportProductionStateTestPath) : ''
+const assetImportRouteTest = existsSync(assetImportRouteTestPath) ? read(assetImportRouteTestPath) : ''
 const viewportProfessionalControlsTest = existsSync(viewportProfessionalControlsTestPath) ? read(viewportProfessionalControlsTestPath) : ''
 const sceneViewportState = existsSync(sceneViewportStatePath) ? read(sceneViewportStatePath) : ''
 const sceneViewportStage = existsSync(sceneViewportStagePath) ? read(sceneViewportStagePath) : ''
@@ -350,6 +371,8 @@ for (const phrase of [
   'qualityGate',
   'evidenceRef',
   'buildViewportImportedObjects',
+  'buildViewportAssetImportBatch',
+  'coerceViewportAssetImportBatch',
 ]) {
   assert(viewportAssetImport.includes(phrase), `viewport asset import includes "${phrase}"`)
 }
@@ -366,6 +389,7 @@ assert(
   'viewport asset import tests protect provenance, license review, and unsupported file behavior'
 )
 assert(sceneViewportState.includes('handleImportViewportAssets'), 'scene viewport state wires asset import handler')
+assert(sceneViewportState.includes('useViewportAssetImportPersistence'), 'scene viewport state persists asset import when project context exists')
 assert(sceneViewportStage.includes('onImportAssets={handleImportViewportAssets}'), 'scene viewport stage passes asset import to AethelViewport3D')
 assert(
   aethelViewport.includes('onDrop={handleAssetDrop}') &&
@@ -379,6 +403,41 @@ assert(
     viewportProfessionalControlsTest.includes('KeyR') &&
     viewportProfessionalControlsTest.includes('Escape'),
   'viewport professional controls test protects W/E/R and Escape editor hotkeys'
+)
+assert(
+  viewportProfessionalControlsTest.includes('CameraPresetApplier') &&
+    viewportProfessionalControlsTest.includes('top: [0, 8.5, 0.001]') &&
+    viewportProfessionalControlsTest.includes('front: [0, 1.6, 7.2]') &&
+    viewportProfessionalControlsTest.includes('side: [7.2, 1.6, 0]'),
+  'viewport professional controls test protects camera presets for scene review'
+)
+for (const phrase of [
+  'persistViewportAssetImportBatch',
+  '/production-state/asset-import',
+  'viewport:asset-import',
+]) {
+  assert(viewportAssetImportPersistence.includes(phrase), `viewport asset import persistence includes "${phrase}"`)
+}
+assert(viewportAssetImportHook.includes('useViewportAssetImportPersistence'), 'viewport asset import persistence hook is available to client surfaces')
+for (const phrase of [
+  'mergeViewportAssetImportIntoProductionState',
+  'Asset Librarian Agent',
+  'License/provenance review required before release',
+  'Asset quality gate is raw intake',
+]) {
+  assert(assetImportProductionState.includes(phrase), `asset import production state includes "${phrase}"`)
+}
+assert(
+  assetImportRoute.includes('coerceViewportAssetImportBatch') &&
+    assetImportRoute.includes('mergeViewportAssetImportIntoProductionState') &&
+    assetImportRoute.includes('writeAgenticProductionStateToSettings'),
+  'asset import route persists viewport imports into durable production state'
+)
+assert(
+  viewportAssetImportPersistenceTest.includes('durable production state') &&
+    assetImportProductionStateTest.includes('Asset Graph') &&
+    assetImportRouteTest.includes('production-state/asset-import'),
+  'asset import tests cover persistence client, production merge, and API route'
 )
 
 const failed = checks.filter((check) => !check.ok)
