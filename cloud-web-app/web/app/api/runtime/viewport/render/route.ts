@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { createComponentLogger } from '@/lib/observability/logger'
 import {
+  buildViewportRenderBackendCapabilities,
   coerceViewportRenderBackendRequest,
+  readViewportRenderArtifact,
   renderViewportBackendArtifacts,
+  ViewportRenderArtifactReadError,
 } from '@/lib/viewport/viewport-render-backend'
 
 const logger = createComponentLogger('api.runtime.viewport.render')
@@ -23,7 +26,7 @@ function getBearerToken(request: NextRequest): string | null {
   return token.length > 0 ? token : null
 }
 
-export async function POST(request: NextRequest) {
+function authorizeRendererRequest(request: NextRequest): NextResponse | null {
   const expectedToken = getRendererToken()
   if (!expectedToken) {
     logger.warn('viewport_render_backend.token_missing')
@@ -39,6 +42,13 @@ export async function POST(request: NextRequest) {
   if (getBearerToken(request) !== expectedToken) {
     return NextResponse.json({ error: 'UNAUTHORIZED_RENDER_BACKEND' }, { status: 401 })
   }
+
+  return null
+}
+
+export async function POST(request: NextRequest) {
+  const authError = authorizeRendererRequest(request)
+  if (authError) return authError
 
   const parsed = coerceViewportRenderBackendRequest(await request.json().catch(() => null))
   if (!parsed) {
@@ -60,4 +70,40 @@ export async function POST(request: NextRequest) {
     releaseReady: false,
     releaseNote: 'Internal render evidence was generated. Final release still requires human approval.',
   })
+}
+
+export async function GET(request: NextRequest) {
+  const authError = authorizeRendererRequest(request)
+  if (authError) return authError
+
+  const artifactUrl = request.nextUrl.searchParams.get('artifactUrl')
+  if (!artifactUrl) {
+    return NextResponse.json(buildViewportRenderBackendCapabilities())
+  }
+
+  try {
+    const artifact = await readViewportRenderArtifact(artifactUrl)
+    logger.info('viewport_render_backend.artifact_served', {
+      projectId: artifact.projectId,
+      contractId: artifact.contractId,
+      fileName: artifact.fileName,
+    })
+
+    const responseBody = new ArrayBuffer(artifact.body.byteLength)
+    new Uint8Array(responseBody).set(artifact.body)
+
+    return new NextResponse(responseBody, {
+      headers: {
+        'content-type': artifact.contentType,
+        'cache-control': 'no-store',
+        'x-aethel-artifact-kind': artifact.fileName,
+      },
+    })
+  } catch (error) {
+    if (error instanceof ViewportRenderArtifactReadError) {
+      return NextResponse.json({ error: error.code, message: error.message }, { status: error.status })
+    }
+    logger.error('viewport_render_backend.artifact_failed', { err: error })
+    return NextResponse.json({ error: 'ARTIFACT_READ_FAILED' }, { status: 500 })
+  }
 }

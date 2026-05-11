@@ -13,6 +13,8 @@ import {
 import {
   coerceViewportRenderBackendRequest,
   renderViewportBackendArtifacts,
+  resolveViewportRenderArtifactUrl,
+  ViewportRenderArtifactReadError,
 } from '@/lib/viewport/viewport-render-backend'
 
 function buildPayload(quality: 'draft' | 'review' | 'final' = 'draft') {
@@ -120,5 +122,19 @@ describe('viewport render backend', () => {
     } finally {
       await rm(artifactRoot, { recursive: true, force: true })
     }
+  })
+
+  it('resolves artifact URLs without allowing path traversal', () => {
+    const resolved = resolveViewportRenderArtifactUrl(
+      'aethel-artifact://viewport-render/project-one/render-one/thumbnail.svg',
+      '/tmp/aethel-artifacts',
+    )
+
+    expect(resolved.filePath).toContain('viewport-renders')
+    expect(resolved.contentType).toBe('image/svg+xml; charset=utf-8')
+    expect(() => resolveViewportRenderArtifactUrl(
+      'aethel-artifact://viewport-render/project-one/render-one/..%2Fsecret.json',
+      '/tmp/aethel-artifacts',
+    )).toThrow(ViewportRenderArtifactReadError)
   })
 })

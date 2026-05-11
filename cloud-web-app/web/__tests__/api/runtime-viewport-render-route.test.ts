@@ -5,7 +5,7 @@ import path from 'node:path'
 import { NextRequest } from 'next/server'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { POST } from '@/app/api/runtime/viewport/render/route'
+import { GET, POST } from '@/app/api/runtime/viewport/render/route'
 import { buildViewportRenderJobContract } from '@/lib/viewport/viewport-render-contract'
 import {
   buildDefaultViewportRenderRuntimeRoute,
@@ -75,6 +75,21 @@ function buildRequest(headers: Record<string, string> = {}) {
   })
 }
 
+function buildGetRequest(input: {
+  token?: string
+  artifactUrl?: string
+} = {}) {
+  const url = new URL('http://localhost/api/runtime/viewport/render')
+  if (input.artifactUrl) {
+    url.searchParams.set('artifactUrl', input.artifactUrl)
+  }
+
+  return new NextRequest(url, {
+    method: 'GET',
+    headers: input.token ? { authorization: `Bearer ${input.token}` } : undefined,
+  })
+}
+
 afterEach(() => {
   restoreEnv('AETHEL_RENDER_BACKEND_TOKEN', ORIGINAL_TOKEN)
   restoreEnv('AETHEL_INTERNAL_API_TOKEN', ORIGINAL_INTERNAL_TOKEN)
@@ -117,5 +132,47 @@ describe('/api/runtime/viewport/render', () => {
     } finally {
       await rm(artifactRoot, { recursive: true, force: true })
     }
+  })
+
+  it('serves generated artifacts behind the same internal token', async () => {
+    const artifactRoot = await mkdtemp(path.join(os.tmpdir(), 'aethel-api-render-'))
+    process.env.AETHEL_RENDER_BACKEND_TOKEN = 'render-secret'
+    process.env.AETHEL_RENDER_ARTIFACT_ROOT = artifactRoot
+
+    try {
+      const renderResponse = await POST(buildRequest({ authorization: 'Bearer render-secret' }))
+      const renderPayload = await renderResponse.json()
+      const thumbnail = renderPayload.evidence.artifacts.find((artifact: { kind: string }) => artifact.kind === 'thumbnail')
+
+      const capabilitiesResponse = await GET(buildGetRequest({ token: 'render-secret' }))
+      const capabilities = await capabilitiesResponse.json()
+      expect(capabilities.supports.proxyPreview).toBe(true)
+      expect(capabilities.supports.finalVideo).toBe(false)
+
+      const artifactResponse = await GET(buildGetRequest({
+        token: 'render-secret',
+        artifactUrl: thumbnail.url,
+      }))
+      const body = await artifactResponse.text()
+
+      expect(artifactResponse.status).toBe(200)
+      expect(artifactResponse.headers.get('content-type')).toContain('image/svg+xml')
+      expect(body).toContain('Aethel internal scene preview')
+    } finally {
+      await rm(artifactRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects artifact traversal attempts before reading from disk', async () => {
+    process.env.AETHEL_RENDER_BACKEND_TOKEN = 'render-secret'
+
+    const response = await GET(buildGetRequest({
+      token: 'render-secret',
+      artifactUrl: 'aethel-artifact://viewport-render/project/render/..%2Fsecret.json',
+    }))
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.error).toBe('INVALID_ARTIFACT_URL')
   })
 })

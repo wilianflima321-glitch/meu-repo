@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import {
@@ -34,6 +34,52 @@ export interface ViewportRenderBackendResult {
     blockedKinds: string[]
     releaseReady: false
   }
+}
+
+export interface ViewportRenderBackendCapabilities {
+  renderer: 'aethel-internal-scene-preview'
+  artifactScheme: 'aethel-artifact://viewport-render'
+  artifactRetrieval: 'token-protected-get'
+  releaseReady: false
+  supports: {
+    manifest: true
+    thumbnail: true
+    proxyPreview: true
+    performanceReport: true
+    licenseReport: true
+    validationReport: true
+    reviewMp4: false
+    finalVideo: false
+    audioMix: false
+  }
+  safety: {
+    neverAutoRelease: true
+    requiresHumanApproval: true
+    doesNotMintMarketplaceRights: true
+    missingMediaRequiresNativeOrCloudRenderer: true
+  }
+}
+
+export class ViewportRenderArtifactReadError extends Error {
+  constructor(
+    message: string,
+    public readonly code: 'INVALID_ARTIFACT_URL' | 'ARTIFACT_NOT_FOUND',
+    public readonly status: 400 | 404,
+  ) {
+    super(message)
+  }
+}
+
+export interface ResolvedViewportRenderArtifact {
+  projectId: string
+  contractId: string
+  fileName: string
+  filePath: string
+  contentType: string
+}
+
+export interface ViewportRenderArtifactReadResult extends ResolvedViewportRenderArtifact {
+  body: Buffer
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -71,8 +117,141 @@ function getDefaultArtifactRoot(): string {
   return process.env.AETHEL_RENDER_ARTIFACT_ROOT || path.join(process.cwd(), '.aethel', 'runtime-artifacts')
 }
 
+export function buildViewportRenderBackendCapabilities(): ViewportRenderBackendCapabilities {
+  return {
+    renderer: 'aethel-internal-scene-preview',
+    artifactScheme: 'aethel-artifact://viewport-render',
+    artifactRetrieval: 'token-protected-get',
+    releaseReady: false,
+    supports: {
+      manifest: true,
+      thumbnail: true,
+      proxyPreview: true,
+      performanceReport: true,
+      licenseReport: true,
+      validationReport: true,
+      reviewMp4: false,
+      finalVideo: false,
+      audioMix: false,
+    },
+    safety: {
+      neverAutoRelease: true,
+      requiresHumanApproval: true,
+      doesNotMintMarketplaceRights: true,
+      missingMediaRequiresNativeOrCloudRenderer: true,
+    },
+  }
+}
+
 function buildArtifactUrl(projectId: string, contractId: string, fileName: string): string {
   return `aethel-artifact://viewport-render/${encodeURIComponent(projectId)}/${encodeURIComponent(contractId)}/${encodeURIComponent(fileName)}`
+}
+
+function contentTypeForArtifact(fileName: string): string {
+  if (fileName.endsWith('.svg')) return 'image/svg+xml; charset=utf-8'
+  if (fileName.endsWith('.json')) return 'application/json; charset=utf-8'
+  if (fileName.endsWith('.mp4')) return 'video/mp4'
+  if (fileName.endsWith('.webm')) return 'video/webm'
+  if (fileName.endsWith('.wav')) return 'audio/wav'
+  if (fileName.endsWith('.mp3')) return 'audio/mpeg'
+  return 'application/octet-stream'
+}
+
+function decodeArtifactSegment(value: string): string | null {
+  try {
+    const decoded = decodeURIComponent(value)
+    if (
+      decoded.trim().length === 0 ||
+      decoded.includes('..') ||
+      decoded.includes('/') ||
+      decoded.includes('\\')
+    ) {
+      return null
+    }
+    return decoded
+  } catch {
+    return null
+  }
+}
+
+function isSafeArtifactFileName(fileName: string): boolean {
+  return /^[a-zA-Z0-9._-]+$/.test(fileName) &&
+    !fileName.includes('..') &&
+    (
+      fileName.endsWith('.json') ||
+      fileName.endsWith('.svg') ||
+      fileName.endsWith('.mp4') ||
+      fileName.endsWith('.webm') ||
+      fileName.endsWith('.wav') ||
+      fileName.endsWith('.mp3')
+    )
+}
+
+function safeArtifactPath(artifactRoot: string, projectId: string, contractId: string, fileName: string): string {
+  const root = path.resolve(artifactRoot)
+  const filePath = path.resolve(
+    root,
+    'viewport-renders',
+    normalizePathSegment(projectId),
+    normalizePathSegment(contractId),
+    normalizePathSegment(fileName),
+  )
+  const relative = path.relative(root, filePath)
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new ViewportRenderArtifactReadError('Artifact path escapes the render artifact root.', 'INVALID_ARTIFACT_URL', 400)
+  }
+  return filePath
+}
+
+export function resolveViewportRenderArtifactUrl(
+  artifactUrl: string,
+  artifactRoot = getDefaultArtifactRoot(),
+): ResolvedViewportRenderArtifact {
+  let parsed: URL
+  try {
+    parsed = new URL(artifactUrl)
+  } catch {
+    throw new ViewportRenderArtifactReadError('Artifact URL is not parseable.', 'INVALID_ARTIFACT_URL', 400)
+  }
+
+  if (parsed.protocol !== 'aethel-artifact:' || parsed.hostname !== 'viewport-render') {
+    throw new ViewportRenderArtifactReadError('Artifact URL must use the viewport render artifact scheme.', 'INVALID_ARTIFACT_URL', 400)
+  }
+
+  const segments = parsed.pathname.split('/').filter(Boolean)
+  if (segments.length !== 3) {
+    throw new ViewportRenderArtifactReadError('Artifact URL must include project, contract, and file segments.', 'INVALID_ARTIFACT_URL', 400)
+  }
+
+  const projectId = decodeArtifactSegment(segments[0])
+  const contractId = decodeArtifactSegment(segments[1])
+  const fileName = decodeArtifactSegment(segments[2])
+  if (!projectId || !contractId || !fileName || !isSafeArtifactFileName(fileName)) {
+    throw new ViewportRenderArtifactReadError('Artifact URL contains unsafe path segments.', 'INVALID_ARTIFACT_URL', 400)
+  }
+
+  return {
+    projectId,
+    contractId,
+    fileName,
+    filePath: safeArtifactPath(artifactRoot, projectId, contractId, fileName),
+    contentType: contentTypeForArtifact(fileName),
+  }
+}
+
+export async function readViewportRenderArtifact(
+  artifactUrl: string,
+  artifactRoot = getDefaultArtifactRoot(),
+): Promise<ViewportRenderArtifactReadResult> {
+  const resolved = resolveViewportRenderArtifactUrl(artifactUrl, artifactRoot)
+  try {
+    return {
+      ...resolved,
+      body: await readFile(resolved.filePath),
+    }
+  } catch {
+    throw new ViewportRenderArtifactReadError('Viewport render artifact was not found on this runtime.', 'ARTIFACT_NOT_FOUND', 404)
+  }
 }
 
 async function writeArtifact(input: {

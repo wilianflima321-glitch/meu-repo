@@ -552,7 +552,11 @@ for (const phrase of [
 for (const phrase of [
   'renderViewportBackendArtifacts',
   'coerceViewportRenderBackendRequest',
+  'buildViewportRenderBackendCapabilities',
+  'resolveViewportRenderArtifactUrl',
+  'readViewportRenderArtifact',
   'aethel-internal-scene-preview',
+  'aethel-artifact://viewport-render',
   'thumbnail.svg',
   'proxy-preview.svg',
   'performance-report.json',
@@ -611,9 +615,11 @@ assert(
 assert(
   viewportRenderBackendRoute.includes('AETHEL_RENDER_BACKEND_TOKEN') &&
     viewportRenderBackendRoute.includes('renderViewportBackendArtifacts') &&
+    viewportRenderBackendRoute.includes('readViewportRenderArtifact') &&
+    viewportRenderBackendRoute.includes('buildViewportRenderBackendCapabilities') &&
     viewportRenderBackendRoute.includes('releaseReady: false') &&
     viewportRenderBackendRoute.includes('UNAUTHORIZED_RENDER_BACKEND'),
-  'viewport render backend API is token-protected and never auto-releases'
+  'viewport render backend API is token-protected, artifact-readable, capability-aware, and never auto-releases'
 )
 assert(
   webPackageJson.includes('worker:viewport-render') &&
@@ -659,12 +665,15 @@ assert(
     viewportRenderQueueTest.includes('outside-browser-main-thread') &&
     viewportRenderBackendTest.includes('produces concrete draft preview artifacts') &&
     viewportRenderBackendTest.includes('does not pretend review MP4 or final video exists') &&
+    viewportRenderBackendTest.includes('resolves artifact URLs without allowing path traversal') &&
     renderJobProductionStateTest.includes('Release Agent') &&
     renderOutputEvidenceTest.includes('Human review must approve media evidence before release') &&
     viewportRenderWorkerTest.includes('does not fake media output') &&
     viewportRenderWorkerTest.includes('real renderer backend evidence') &&
     viewportRenderBackendRouteTest.includes('RENDER_BACKEND_TOKEN_NOT_CONFIGURED') &&
     viewportRenderBackendRouteTest.includes('never auto-releases') &&
+    viewportRenderBackendRouteTest.includes('serves generated artifacts behind the same internal token') &&
+    viewportRenderBackendRouteTest.includes('rejects artifact traversal attempts') &&
     renderJobRouteTest.includes('payload.queued).toBe(false') &&
     renderJobRouteTest.includes('render:viewport') &&
     renderOutputEvidenceRouteTest.includes('releaseReady).toBe(false'),
