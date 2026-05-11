@@ -1,6 +1,7 @@
 'use client'
 
 import { Download, Film, Gamepad2, Pause, Play, SkipBack, SkipForward } from 'lucide-react'
+import type { ViewportRenderQuality } from '@/lib/viewport/viewport-render-contract'
 
 export type ViewportTimelineMode = 'game' | 'film'
 
@@ -12,10 +13,12 @@ type TimelineOverlayProps = {
   activeWorkflowLabel: string
   selectedObjectName?: string | null
   statusLabel?: string
+  renderQuality: ViewportRenderQuality
   onModeChange: (mode: ViewportTimelineMode) => void
+  onRenderQualityChange: (quality: ViewportRenderQuality) => void
   onTimeChange: (time: number) => void
   onTogglePlay: () => void
-  onExport: () => void
+  onExport: () => void | Promise<void>
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -30,7 +33,9 @@ export default function TimelineOverlay({
   activeWorkflowLabel,
   selectedObjectName,
   statusLabel,
+  renderQuality,
   onModeChange,
+  onRenderQualityChange,
   onTimeChange,
   onTogglePlay,
   onExport,
@@ -101,6 +106,23 @@ export default function TimelineOverlay({
         </div>
 
         <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-1 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-1 lg:flex">
+            {(['draft', 'review', 'final'] as const).map((quality) => (
+              <button
+                key={quality}
+                type="button"
+                aria-label={`Set viewport render quality to ${quality}`}
+                onClick={() => onRenderQualityChange(quality)}
+                className={`rounded-xl px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] transition ${
+                  renderQuality === quality
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)]'
+                    : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]'
+                }`}
+              >
+                {quality}
+              </button>
+            ))}
+          </div>
           <div className="hidden items-center gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)] md:flex">
             <span>{activeWorkflowLabel}</span>
             {selectedObjectName ? <span className="text-[var(--aethel-text-primary)]">{selectedObjectName}</span> : null}
@@ -109,7 +131,9 @@ export default function TimelineOverlay({
           <button
             type="button"
             aria-label={mode === 'film' ? 'Renderizar preview de filme do viewport' : 'Exportar clip de jogo do viewport'}
-            onClick={onExport}
+            onClick={() => {
+              void onExport()
+            }}
             className="inline-flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-primary)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_16%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:brightness-110"
           >
             <Download className="h-3.5 w-3.5" />

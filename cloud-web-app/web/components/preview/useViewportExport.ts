@@ -6,6 +6,12 @@ import type {
   ViewportCreativeMode,
   ViewportSceneObject,
 } from '@/components/viewport/AethelViewport3D';
+import { useViewportRenderJobPersistence } from '@/hooks/useViewportRenderJobPersistence';
+import {
+  buildViewportRenderJobContract,
+  type ViewportRenderQuality,
+  type ViewportRenderSurfaceMode,
+} from '@/lib/viewport/viewport-render-contract';
 
 type UseViewportExportParams = {
   activeWorkflowLabel: string;
@@ -27,7 +33,19 @@ type UseViewportExportParams = {
   vfxGraph: VFXGraph | null;
   visualScriptEdgeCount: number;
   visualScriptNodeCount: number;
+  projectId?: string | null;
+  renderMode: ViewportRenderSurfaceMode;
 };
+
+function downloadViewportManifest(payload: unknown, mode: ViewportCreativeMode) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `aethel-${mode}-viewport-render-contract.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
 
 export function useViewportExport({
   activeWorkflowLabel,
@@ -46,13 +64,47 @@ export function useViewportExport({
   vfxGraph,
   visualScriptEdgeCount,
   visualScriptNodeCount,
+  projectId,
+  renderMode,
 }: UseViewportExportParams) {
   const [exportStatus, setExportStatus] = useState('Viewport ready');
+  const [renderQuality, setRenderQuality] = useState<ViewportRenderQuality>('draft');
+  const renderPersistence = useViewportRenderJobPersistence(projectId);
 
-  const handleExportViewport = useCallback(() => {
+  const handleExportViewport = useCallback(async () => {
+    const assetFormats = objects.reduce<string[]>((formats, object) => {
+      if (object.asset) formats.push(object.asset.format);
+      return formats;
+    }, []);
+    const assetCount = objects.filter((object) => object.asset).length;
+    const contract = buildViewportRenderJobContract({
+      projectId,
+      mode: creativeMode,
+      renderMode,
+      quality: renderQuality,
+      selectedObjectId: selectedObject?.id ?? null,
+      selectedObjectName: selectedObject?.name ?? null,
+      timeline: {
+        currentTime: timelineTime,
+        duration: timelineDuration,
+        isPlaying,
+      },
+      scene: {
+        objectCount: objects.length,
+        assetCount,
+        selectedObjectId: selectedObject?.id ?? null,
+        selectedObjectName: selectedObject?.name ?? null,
+        assetFormats,
+        visualScriptNodes: visualScriptNodeCount,
+        visualScriptEdges: visualScriptEdgeCount,
+        vfxNodes: vfxGraph?.nodes.length ?? 0,
+        vfxConnections: vfxGraph?.connections.length ?? 0,
+      },
+    });
     const payload = {
       mode: creativeMode,
       exportedAt: new Date().toISOString(),
+      renderContract: contract,
       selectedObjectId: selectedObject?.id ?? null,
       selectedObjectName: selectedObject?.name ?? null,
       timeline: {
@@ -78,15 +130,16 @@ export function useViewportExport({
       objects,
     };
 
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `aethel-${creativeMode}-viewport-export.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+    setExportStatus(`${contract.profile.label} contract staged`);
+    const result = await renderPersistence.persistContract(contract);
+    downloadViewportManifest(payload, creativeMode);
 
-    setExportStatus(creativeMode === 'film' ? 'Film export downloaded' : 'Game clip manifest downloaded');
+    if (result.ok) {
+      setExportStatus(`${contract.profile.label} saved to Mission Ledger`);
+      return;
+    }
+
+    setExportStatus(`${contract.profile.label} downloaded locally - ${result.error}`);
   }, [
     activeWorkflowLabel,
     creativeMode,
@@ -97,6 +150,10 @@ export function useViewportExport({
     hairVolumeIntensity,
     isPlaying,
     objects,
+    projectId,
+    renderMode,
+    renderPersistence,
+    renderQuality,
     selectedAbilityName,
     selectedObject,
     timelineDuration,
@@ -108,6 +165,8 @@ export function useViewportExport({
 
   return {
     exportStatus,
+    renderQuality,
+    setRenderQuality,
     handleExportViewport,
   };
 }

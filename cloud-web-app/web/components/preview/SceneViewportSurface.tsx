@@ -16,7 +16,7 @@ export default function SceneViewportSurface({
   renderMode: 'draft' | 'cinematic';
   projectId?: string | null;
 }) {
-  const viewportState = useSceneViewportSurfaceState(projectId);
+  const viewportState = useSceneViewportSurfaceState(projectId, renderMode);
   const {
     objects,
     selectedIds,
@@ -40,6 +40,8 @@ export default function SceneViewportSurface({
     visualScript,
     activeWorkflowLabel,
     exportStatus,
+    renderQuality,
+    setRenderQuality,
     handleExportViewport,
     openWorkflowTool,
     handleTogglePlay,
@@ -93,7 +95,9 @@ export default function SceneViewportSurface({
           activeWorkflowLabel={activeWorkflowLabel}
           selectedObjectName={selectedObject?.name ?? null}
           statusLabel={exportStatus}
+          renderQuality={renderQuality}
           onModeChange={setCreativeMode}
+          onRenderQualityChange={setRenderQuality}
           onTimeChange={setTimelineTime}
           onTogglePlay={handleTogglePlay}
           onExport={handleExportViewport}

@@ -38,10 +38,20 @@ const viewportAssetImportTestPath = 'cloud-web-app/web/__tests__/viewport/viewpo
 const viewportAssetImportPersistenceTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-asset-import-persistence.test.ts'
 const assetImportProductionStateTestPath = 'cloud-web-app/web/__tests__/production/asset-import-production-state.test.ts'
 const assetImportRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-asset-import-route.test.ts'
+const viewportRenderContractPath = 'cloud-web-app/web/lib/viewport/viewport-render-contract.ts'
+const viewportRenderPersistencePath = 'cloud-web-app/web/lib/viewport/viewport-render-persistence.ts'
+const viewportRenderHookPath = 'cloud-web-app/web/hooks/useViewportRenderJobPersistence.ts'
+const renderJobProductionStatePath = 'cloud-web-app/web/lib/production/render-job-production-state.ts'
+const renderJobRoutePath = 'cloud-web-app/web/app/api/projects/[id]/production-state/render-job/route.ts'
+const viewportRenderContractTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-contract.test.ts'
+const viewportRenderPersistenceTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-render-persistence.test.ts'
+const renderJobProductionStateTestPath = 'cloud-web-app/web/__tests__/production/render-job-production-state.test.ts'
+const renderJobRouteTestPath = 'cloud-web-app/web/__tests__/api/production-state-render-job-route.test.ts'
 const viewportProfessionalControlsTestPath = 'cloud-web-app/web/__tests__/viewport/viewport-professional-controls-contract.test.ts'
 const sceneViewportStatePath = 'cloud-web-app/web/components/preview/useSceneViewportSurfaceState.ts'
 const sceneViewportStagePath = 'cloud-web-app/web/components/preview/SceneViewportStage.tsx'
 const aethelViewportPath = 'cloud-web-app/web/components/viewport/AethelViewport3D.tsx'
+const timelineOverlayPath = 'cloud-web-app/web/components/viewport/TimelineOverlay.tsx'
 
 const creativeStudioPages = [
   {
@@ -121,10 +131,20 @@ for (const path of [
   viewportAssetImportPersistenceTestPath,
   assetImportProductionStateTestPath,
   assetImportRouteTestPath,
+  viewportRenderContractPath,
+  viewportRenderPersistencePath,
+  viewportRenderHookPath,
+  renderJobProductionStatePath,
+  renderJobRoutePath,
+  viewportRenderContractTestPath,
+  viewportRenderPersistenceTestPath,
+  renderJobProductionStateTestPath,
+  renderJobRouteTestPath,
   viewportProfessionalControlsTestPath,
   sceneViewportStatePath,
   sceneViewportStagePath,
   aethelViewportPath,
+  timelineOverlayPath,
   'cloud-web-app/web/app/studio/page.tsx',
   'cloud-web-app/web/app/studio/film/page.tsx',
   'cloud-web-app/web/app/studio/film/FilmStudioClient.tsx',
@@ -168,10 +188,20 @@ const viewportAssetImportTest = existsSync(viewportAssetImportTestPath) ? read(v
 const viewportAssetImportPersistenceTest = existsSync(viewportAssetImportPersistenceTestPath) ? read(viewportAssetImportPersistenceTestPath) : ''
 const assetImportProductionStateTest = existsSync(assetImportProductionStateTestPath) ? read(assetImportProductionStateTestPath) : ''
 const assetImportRouteTest = existsSync(assetImportRouteTestPath) ? read(assetImportRouteTestPath) : ''
+const viewportRenderContract = existsSync(viewportRenderContractPath) ? read(viewportRenderContractPath) : ''
+const viewportRenderPersistence = existsSync(viewportRenderPersistencePath) ? read(viewportRenderPersistencePath) : ''
+const viewportRenderHook = existsSync(viewportRenderHookPath) ? read(viewportRenderHookPath) : ''
+const renderJobProductionState = existsSync(renderJobProductionStatePath) ? read(renderJobProductionStatePath) : ''
+const renderJobRoute = existsSync(renderJobRoutePath) ? read(renderJobRoutePath) : ''
+const viewportRenderContractTest = existsSync(viewportRenderContractTestPath) ? read(viewportRenderContractTestPath) : ''
+const viewportRenderPersistenceTest = existsSync(viewportRenderPersistenceTestPath) ? read(viewportRenderPersistenceTestPath) : ''
+const renderJobProductionStateTest = existsSync(renderJobProductionStateTestPath) ? read(renderJobProductionStateTestPath) : ''
+const renderJobRouteTest = existsSync(renderJobRouteTestPath) ? read(renderJobRouteTestPath) : ''
 const viewportProfessionalControlsTest = existsSync(viewportProfessionalControlsTestPath) ? read(viewportProfessionalControlsTestPath) : ''
 const sceneViewportState = existsSync(sceneViewportStatePath) ? read(sceneViewportStatePath) : ''
 const sceneViewportStage = existsSync(sceneViewportStagePath) ? read(sceneViewportStagePath) : ''
 const aethelViewport = existsSync(aethelViewportPath) ? read(aethelViewportPath) : ''
+const timelineOverlay = existsSync(timelineOverlayPath) ? read(timelineOverlayPath) : ''
 const creativeStudioHub = existsSync('cloud-web-app/web/app/studio/page.tsx')
   ? read('cloud-web-app/web/app/studio/page.tsx')
   : ''
@@ -438,6 +468,65 @@ assert(
     assetImportProductionStateTest.includes('Asset Graph') &&
     assetImportRouteTest.includes('production-state/asset-import'),
   'asset import tests cover persistence client, production merge, and API route'
+)
+
+for (const phrase of [
+  'ViewportRenderJobContract',
+  'VIEWPORT_RENDER_QUALITY_PROFILES',
+  'draft',
+  'review',
+  'final',
+  'local-worker',
+  'cloud-sandbox',
+  'Render runs outside the browser main thread',
+  'estimateViewportRenderCostUsd',
+  'coerceViewportRenderJobContract',
+]) {
+  assert(viewportRenderContract.includes(phrase), `viewport render contract includes "${phrase}"`)
+}
+for (const phrase of [
+  'persistViewportRenderJob',
+  '/production-state/render-job',
+  'viewport:render-job',
+]) {
+  assert(viewportRenderPersistence.includes(phrase), `viewport render persistence includes "${phrase}"`)
+}
+assert(viewportRenderHook.includes('useViewportRenderJobPersistence'), 'viewport render persistence hook is available to client surfaces')
+for (const phrase of [
+  'mergeViewportRenderJobIntoProductionState',
+  'Rendered media evidence is required before release approval',
+  'Performance QA Agent',
+  'Release Agent',
+  'Heavy viewport renders must run through',
+]) {
+  assert(renderJobProductionState.includes(phrase), `render job production state includes "${phrase}"`)
+}
+assert(
+  renderJobRoute.includes('coerceViewportRenderJobContract') &&
+    renderJobRoute.includes('mergeViewportRenderJobIntoProductionState') &&
+    renderJobRoute.includes('queued: false') &&
+    renderJobRoute.includes('writeAgenticProductionStateToSettings'),
+  'render job route persists render contracts without pretending queue completion'
+)
+assert(
+  sceneViewportState.includes('useViewportExport') &&
+    sceneViewportState.includes('renderQuality') &&
+    sceneViewportState.includes('setRenderQuality') &&
+    sceneViewportState.includes('renderMode'),
+  'scene viewport state wires render quality and render mode into export contract'
+)
+assert(
+  timelineOverlay.includes('renderQuality') &&
+    timelineOverlay.includes('onRenderQualityChange') &&
+    timelineOverlay.includes("'draft', 'review', 'final'"),
+  'timeline overlay exposes compact render quality controls without a new dashboard'
+)
+assert(
+  viewportRenderContractTest.includes('cost') &&
+    viewportRenderPersistenceTest.includes('durable production state') &&
+    renderJobProductionStateTest.includes('Release Agent') &&
+    renderJobRouteTest.includes('payload.queued).toBe(false'),
+  'render job tests cover contract, persistence, production merge, and no-fake queue behavior'
 )
 
 const failed = checks.filter((check) => !check.ok)

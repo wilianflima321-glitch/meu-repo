@@ -30,7 +30,7 @@ import { getViewportWorkflowLabel, type ViewportWorkflowTool } from './SceneView
 import { useSceneViewportPlayback } from './useSceneViewportPlayback';
 import { useViewportExport } from './useViewportExport';
 
-export function useSceneViewportSurfaceState(projectId?: string | null) {
+export function useSceneViewportSurfaceState(projectId?: string | null, renderMode: 'draft' | 'cinematic' = 'draft') {
   const [objects, setObjects] = useState<ViewportSceneObject[]>(viewportSeedObjects);
   const [selectedIds, setSelectedIds] = useState<string[]>(
     [viewportSeedObjects[0]?.id].filter(Boolean) as string[]
@@ -121,19 +121,19 @@ export function useSceneViewportSurfaceState(projectId?: string | null) {
     const totalBytes = importedObjects.reduce((sum, object) => sum + (object.asset?.sizeBytes ?? 0), 0);
     const batch = buildViewportAssetImportBatch(importedObjects, { projectId, importedAt });
     setAssetImportStatus(
-      `${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} staged · ${formatViewportAssetSize(totalBytes)} · license review required`
+      `${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} staged - ${formatViewportAssetSize(totalBytes)} - license review required`
     );
     void assetImportPersistence.persistBatch(batch).then((result) => {
       if (result.ok) {
-        setAssetImportStatus(`${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} saved to Asset Graph · license review required`);
+        setAssetImportStatus(`${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} saved to Asset Graph - license review required`);
         return;
       }
-      setAssetImportStatus(`${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} staged locally · ${result.error}`);
+      setAssetImportStatus(`${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} staged locally - ${result.error}`);
     });
   }, [assetImportPersistence, objects, projectId]);
 
   const activeWorkflowLabel = getViewportWorkflowLabel(workflowTool);
-  const { exportStatus, handleExportViewport } = useViewportExport({
+  const { exportStatus, renderQuality, setRenderQuality, handleExportViewport } = useViewportExport({
     activeWorkflowLabel,
     creativeMode: playback.creativeMode,
     facialBlendShapeCount,
@@ -152,6 +152,8 @@ export function useSceneViewportSurfaceState(projectId?: string | null) {
     vfxGraph,
     visualScriptEdgeCount: visualScript.edges.length,
     visualScriptNodeCount: visualScript.nodes.length,
+    projectId,
+    renderMode,
   });
 
   return {
@@ -185,6 +187,8 @@ export function useSceneViewportSurfaceState(projectId?: string | null) {
     abilityAccent,
     activeWorkflowLabel,
     exportStatus,
+    renderQuality,
+    setRenderQuality,
     handleExportViewport,
     handleImportViewportAssets,
     handleVisualScriptChange,
