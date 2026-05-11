@@ -46,7 +46,7 @@ export function DashboardHeader({
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] md:hidden"
             aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
             aria-expanded={sidebarOpen}
             aria-controls="dashboard-sidebar"
@@ -75,7 +75,7 @@ export function DashboardHeader({
                 Aethel Studio
               </h1>
               <p className="hidden text-xs text-[var(--aethel-text-secondary)] sm:block">
-                Operacao, IA, preview, billing e governanca em uma superficie unica.
+                Operations, AI, preview, billing, and governance in one focused surface.
               </p>
             </div>
           </div>
@@ -102,7 +102,7 @@ export function DashboardHeader({
                 : 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
             }`}
           >
-            IA {aiProviderConfigured ? 'configurada' : 'pendente'}
+            AI {aiProviderConfigured ? 'configured' : 'pending'}
           </div>
 
           <div
@@ -112,7 +112,7 @@ export function DashboardHeader({
                 : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-secondary)]'
             }`}
           >
-            {fullAccessActive ? `Full Access${fullAccessExpiryLabel ? ` ate ${fullAccessExpiryLabel}` : ''}` : 'Guardrails ativos'}
+            {fullAccessActive ? `Full Access${fullAccessExpiryLabel ? ` until ${fullAccessExpiryLabel}` : ''}` : 'Guardrails active'}
           </div>
         </div>
 
@@ -120,15 +120,15 @@ export function DashboardHeader({
           <button
             type="button"
             onClick={onResetDashboard}
-            className="hidden rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] lg:inline-flex"
+            className="hidden min-h-10 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] lg:inline-flex"
           >
-            Redefinir painel
+            Reset view
           </button>
 
           <button
             type="button"
             onClick={onToggleTheme}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
             aria-label="Toggle theme"
           >
             {theme === 'dark' ? (
@@ -146,7 +146,7 @@ export function DashboardHeader({
             <button
               type="button"
               onClick={onOpenProviderSettings}
-              className="hidden rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-warning-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] lg:inline-flex"
+              className="hidden min-h-10 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-warning-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] lg:inline-flex"
               title="Configure at least one provider to unlock AI chat"
             >
               Configure AI
@@ -157,29 +157,29 @@ export function DashboardHeader({
             type="button"
             onClick={onToggleFullAccess}
             disabled={fullAccessBusy}
-            className={`hidden rounded-xl border px-3 py-2 text-xs font-medium transition disabled:opacity-60 lg:inline-flex ${
+            className={`hidden min-h-10 rounded-xl border px-3 py-2 text-xs font-medium transition disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] lg:inline-flex ${
               fullAccessActive
                 ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]'
                 : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]'
             }`}
             title={
               fullAccessActive
-                ? `Acesso total ativo${fullAccessExpiryLabel ? ` ate ${fullAccessExpiryLabel}` : ''}. Clique para revogar.`
-                : 'Habilitar acesso total temporario auditado.'
+                ? `Full Access active${fullAccessExpiryLabel ? ` until ${fullAccessExpiryLabel}` : ''}. Click to revoke.`
+                : 'Enable temporary audited full access.'
             }
           >
-            {fullAccessBusy ? 'Aguarde...' : fullAccessActive ? 'Revogar Full Access' : 'Habilitar Full Access'}
+            {fullAccessBusy ? 'Working...' : fullAccessActive ? 'Revoke Full Access' : 'Enable Full Access'}
           </button>
 
           <button
             type="button"
             onClick={onOpenIde}
-            className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2.5 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_16px_40px_rgba(56,189,248,0.24)] transition hover:brightness-110"
+            className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2.5 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_16px_40px_rgba(56,189,248,0.24)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            <span className="hidden sm:inline">Abrir IDE</span>
+            <span className="hidden sm:inline">Open IDE</span>
             <span className="sm:hidden">IDE</span>
           </button>
         </div>

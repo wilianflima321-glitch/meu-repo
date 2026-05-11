@@ -34,7 +34,8 @@ export default function CreativeStudioPage() {
               <Link
                 key={route.href}
                 href={route.href}
-                className="group rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] p-5 shadow-[0_20px_80px_rgba(0,0,0,0.22)] transition-all hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--aethel-primary)_48%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)]"
+                className="group flex h-full flex-col rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] p-5 shadow-[0_20px_80px_rgba(0,0,0,0.22)] transition-all hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--aethel-primary)_48%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                aria-label={`Open ${route.label}`}
               >
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <span className="rounded-full border border-[var(--aethel-border-secondary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
@@ -47,9 +48,17 @@ export default function CreativeStudioPage() {
                 <h3 className="text-xl font-semibold text-[var(--aethel-text-primary)] transition-colors group-hover:text-[var(--aethel-primary-light)]">
                   {route.label}
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+                <p className="mt-2 flex-1 text-sm leading-6 text-[var(--aethel-text-secondary)]">
                   {route.description}
                 </p>
+                <div className="mt-5 flex items-center justify-between border-t border-[var(--aethel-border-subtle)] pt-4">
+                  <span className="text-xs font-semibold text-[var(--aethel-primary-light)]">
+                    Open editor
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                    {route.shortLabel}
+                  </span>
+                </div>
               </Link>
             ))}
           </div>

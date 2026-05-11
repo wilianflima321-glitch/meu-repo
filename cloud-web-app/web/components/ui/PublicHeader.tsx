@@ -3,21 +3,21 @@ import Image from 'next/image'
 import { PUBLIC_NAV_LINKS } from '@/lib/navigation/surfaces'
 
 const headerGhostLinkClass =
-  'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)]'
+  'inline-flex min-h-10 items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]'
 
 const headerPrimaryLinkClass =
-  'inline-flex items-center justify-center rounded-xl bg-[var(--aethel-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] transition-colors hover:bg-[var(--aethel-primary-dark)]'
+  'inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] transition-colors hover:bg-[var(--aethel-primary-dark)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]'
 
 export default function PublicHeader() {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-2xl shadow-xl shadow-black/10">
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Navegacao principal">
+        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Primary navigation">
           <div className="flex items-center gap-3">
             <Link
               href="/"
               className="group flex items-center gap-2.5"
-              aria-label="Aethel Engine - Pagina inicial"
+              aria-label="Aethel Engine - Home"
               data-analytics-category="user"
               data-analytics-action="cta_click"
               data-analytics-label="public_header_logo"
@@ -41,7 +41,7 @@ export default function PublicHeader() {
             </Link>
             <div className="hidden xl:flex items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">
               <span className="inline-flex h-2 w-2 rounded-full bg-[var(--aethel-success)]" />
-              Apps + Pesquisa
+              Apps + Research
             </div>
           </div>
 
@@ -50,7 +50,7 @@ export default function PublicHeader() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                className="inline-flex min-h-10 items-center rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 data-analytics-category="user"
                 data-analytics-action="cta_click"
                 data-analytics-label={`public_nav:${link.href}`}
@@ -70,7 +70,7 @@ export default function PublicHeader() {
               data-analytics-label="header_contact_sales"
               data-analytics-source="public-header"
             >
-              Falar com vendas
+              Talk to sales
             </Link>
             <Link
               href="/login"
@@ -80,7 +80,7 @@ export default function PublicHeader() {
               data-analytics-label="header_login"
               data-analytics-source="public-header"
             >
-              Entrar
+              Sign in
             </Link>
             <Link
               href="/dashboard?onboarding=1&source=header"
@@ -90,13 +90,13 @@ export default function PublicHeader() {
               data-analytics-label="header_start_free"
               data-analytics-source="public-header"
             >
-              Comecar gratis
+              Start free
             </Link>
           </div>
 
           <details className="group relative md:hidden">
-            <summary className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] marker:hidden">
-              <span className="sr-only">Abrir menu</span>
+            <summary className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] marker:hidden">
+              <span className="sr-only">Open menu</span>
               <svg className="h-5 w-5 group-open:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
@@ -111,7 +111,7 @@ export default function PublicHeader() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="block rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                    className="block min-h-11 rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
                     data-analytics-category="user"
                     data-analytics-action="cta_click"
                     data-analytics-label={`mobile_public_nav:${link.href}`}
@@ -125,13 +125,13 @@ export default function PublicHeader() {
               <div className="grid gap-2">
                 <Link
                   href="/contact-sales"
-                  className="rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                  className="min-h-11 rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
                   data-analytics-category="user"
                   data-analytics-action="contact_sales_start"
                   data-analytics-label="mobile_header_contact_sales"
                   data-analytics-source="public-header-mobile"
                 >
-                  Falar com vendas
+                  Talk to sales
                 </Link>
                 <Link
                   href="/login"
@@ -141,7 +141,7 @@ export default function PublicHeader() {
                   data-analytics-label="mobile_header_login"
                   data-analytics-source="public-header-mobile"
                 >
-                  Entrar
+                  Sign in
                 </Link>
                 <Link
                   href="/dashboard?onboarding=1&source=header-mobile"
@@ -151,7 +151,7 @@ export default function PublicHeader() {
                   data-analytics-label="mobile_header_start_free"
                   data-analytics-source="public-header-mobile"
                 >
-                  Comecar gratis
+                  Start free
                 </Link>
               </div>
             </div>

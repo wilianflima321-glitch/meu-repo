@@ -71,11 +71,11 @@ const variantClasses: Record<string, string> = {
 
 const sizeClasses: Record<string, string> = {
   xs: 'px-2.5 py-1 text-xs gap-1 min-h-[28px]',
-  sm: 'px-3 py-1.5 text-xs gap-1.5 min-h-[32px]',
-  md: 'px-4 py-2 text-sm gap-2 min-h-[38px]',
+  sm: 'px-3 py-1.5 text-xs gap-1.5 min-h-[36px]',
+  md: 'px-4 py-2 text-sm gap-2 min-h-[40px]',
   lg: 'px-5 py-2.5 text-base gap-2 min-h-[44px]',
   xl: 'px-6 py-3 text-base gap-2.5 min-h-[52px]',
-  icon: 'p-2 aspect-square min-h-[38px]',
+  icon: 'p-2 aspect-square min-h-[40px]',
 }
 
 const iconSizes: Record<string, string> = {
@@ -113,7 +113,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const computedClassName = `
       inline-flex items-center justify-center
       ${roundedClass}
-      transition-all duration-200 ease-out
+      motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-out
       transform active:scale-[0.98]
       focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
       disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none
@@ -142,7 +142,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {loading ? (
           <>
             <Loader2 className={`animate-spin ${iconSizes[size]}`} />
-            {size !== 'icon' && <span className="ml-1">Aguarde...</span>}
+            {size !== 'icon' && <span className="ml-1">Working...</span>}
           </>
         ) : (
           <>

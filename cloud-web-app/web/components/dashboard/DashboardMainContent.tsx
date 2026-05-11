@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import type { ComponentProps, ReactNode } from 'react'
+import { useId, type ComponentProps, type ReactNode } from 'react'
 import dynamic from 'next/dynamic'
 import { Blocks, CloudCog, CreditCard, Download, PanelTopOpen, ShieldCheck, Sparkles } from 'lucide-react'
 import { CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
@@ -31,7 +31,7 @@ const DashboardOverviewTab = dynamic(
     ssr: false,
     loading: () => (
       <div className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-4 py-4 text-sm text-[var(--aethel-text-secondary)]">
-        Preparando overview do studio...
+        Preparing Studio overview...
       </div>
     ),
   }
@@ -74,16 +74,23 @@ type SurfaceFrameProps = {
 }
 
 function SurfaceFrame({ eyebrow, title, description, icon, children }: SurfaceFrameProps) {
+  const headingId = useId()
+
   return (
     <div className="space-y-4">
-      <section className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.72),rgba(8,10,16,0.94))] px-5 py-5 shadow-[0_20px_70px_rgba(2,6,23,0.26)] sm:px-6">
+      <section
+        className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.72),rgba(8,10,16,0.94))] px-5 py-5 shadow-[0_20px_70px_rgba(2,6,23,0.26)] sm:px-6"
+        aria-labelledby={headingId}
+      >
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">{eyebrow}</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--aethel-text-primary)]">{title}</h2>
+            <h2 id={headingId} className="mt-2 text-2xl font-semibold tracking-tight text-[var(--aethel-text-primary)]">
+              {title}
+            </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--aethel-text-secondary)]">{description}</p>
           </div>
-          <div className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] p-3 text-[var(--aethel-info-light)]">
+          <div className="shrink-0 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] p-3 text-[var(--aethel-info-light)]">
             {icon}
           </div>
         </div>
@@ -198,7 +205,7 @@ export function DashboardMainContent({
                 aria-live="polite"
               >
                 <p className={`${CANONICAL_TYPOGRAPHY.label} mb-1 text-[var(--aethel-text-primary)]`}>Billing</p>
-                Processando plano {subscribingPlan}...
+                Processing {subscribingPlan} plan...
               </div>
             )}
           </div>

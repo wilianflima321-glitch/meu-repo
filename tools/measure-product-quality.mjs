@@ -151,6 +151,10 @@ const productExperienceCohesionConfigured =
   exists('tools/check-product-experience-cohesion.mjs') &&
   exists('docs/master/96_PRODUCT_EXPERIENCE_COHESION_GATE_2026-05-03.md') &&
   packageJson.includes('qa:product-experience-cohesion');
+const interfaceQualityConfigured =
+  exists('tools/check-interface-quality-gate.mjs') &&
+  exists('docs/master/109_INTERFACE_QUALITY_TRIAGE_2026-05-11.md') &&
+  packageJson.includes('qa:interface-quality');
 const coreExperienceRoutesConfigured =
   exists('tools/check-core-experience-routes.mjs') &&
   exists('docs/master/97_CORE_EXPERIENCE_ROUTE_CONTRACT_2026-05-03.md') &&
@@ -249,6 +253,7 @@ const metrics = [
   { id: 'jest_coverage', label: 'Jest coverage ratchet configured', value: jestCoverageEnabled ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'deploy_ui', label: 'Deploy UI wired to /api/deploy', value: deployUiPresent ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'product_experience_cohesion', label: 'Product experience cohesion gate configured', value: productExperienceCohesionConfigured ? 1 : 0, target: 1, direction: 'eq' },
+  { id: 'interface_quality_gate', label: 'Interface quality triage gate configured', value: interfaceQualityConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'core_experience_routes', label: 'Core experience route contract configured', value: coreExperienceRoutesConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'product_funnel_telemetry', label: 'Product funnel telemetry gate configured', value: productFunnelTelemetryConfigured ? 1 : 0, target: 1, direction: 'eq' },
   { id: 'commercial_access', label: 'Commercial access/free trial gate configured', value: commercialAccessConfigured ? 1 : 0, target: 1, direction: 'eq' },

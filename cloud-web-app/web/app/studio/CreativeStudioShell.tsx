@@ -16,8 +16,8 @@ interface CreativeStudioShellProps {
 
 function topLinkClass(active: boolean): string {
   return active
-    ? 'rounded-md border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--aethel-info-light)]'
-    : 'rounded-md border border-transparent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)]'
+    ? 'inline-flex min-h-9 shrink-0 items-center whitespace-nowrap rounded-md border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--aethel-info-light)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]'
+    : 'inline-flex min-h-9 shrink-0 items-center whitespace-nowrap rounded-md border border-transparent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]'
 }
 
 function creativeTabClass(active: boolean): string {
@@ -52,13 +52,13 @@ export default function CreativeStudioShell({
     <div className="flex items-center gap-2">
       <Link
         href="/ide"
-        className="rounded-lg border border-[var(--aethel-border-primary)] px-3 py-1.5 text-xs font-semibold text-[var(--aethel-text-secondary)] transition-colors hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-secondary)]"
+        className="inline-flex min-h-10 items-center rounded-lg border border-[var(--aethel-border-primary)] px-3 py-1.5 text-xs font-semibold text-[var(--aethel-text-secondary)] transition-colors hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
       >
         Open IDE
       </Link>
       <Link
         href="/nexus"
-        className="rounded-lg bg-[var(--aethel-primary-dark)] px-3 py-1.5 text-xs font-semibold text-[var(--aethel-text-primary)] transition-colors hover:bg-[var(--aethel-primary)]"
+        className="inline-flex min-h-10 items-center rounded-lg bg-[var(--aethel-primary-dark)] px-3 py-1.5 text-xs font-semibold text-[var(--aethel-text-primary)] transition-colors hover:bg-[var(--aethel-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
       >
         Operator
       </Link>
@@ -74,29 +74,45 @@ export default function CreativeStudioShell({
       maxWidth="full"
       className="flex h-[calc(100vh-116px)] flex-col overflow-hidden"
     >
-      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-4 py-2 lg:px-6">
+      <nav
+        className="flex min-h-12 items-center gap-2 overflow-x-auto border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-4 py-2 lg:px-6"
+        aria-label="Studio primary surfaces"
+      >
         {STUDIO_PRIMARY_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} className={topLinkClass(isNavLinkActive(pathname, link))}>
+          <Link
+            key={link.href}
+            href={link.href}
+            className={topLinkClass(isNavLinkActive(pathname, link))}
+            aria-current={isNavLinkActive(pathname, link) ? 'page' : undefined}
+          >
             {link.label}
           </Link>
         ))}
-      </div>
+      </nav>
 
-      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_48%,transparent)] px-4 py-2 lg:px-6">
-        <Link href="/studio" className={`${creativeTabClass(pathname === '/studio')} rounded-lg border px-3 py-1.5 text-xs font-semibold`}>
+      <nav
+        className="flex min-h-12 items-center gap-2 overflow-x-auto border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_48%,transparent)] px-4 py-2 lg:px-6"
+        aria-label="Creative studio modes"
+      >
+        <Link
+          href="/studio"
+          className={`${creativeTabClass(pathname === '/studio')} inline-flex min-h-10 shrink-0 items-center whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]`}
+          aria-current={pathname === '/studio' ? 'page' : undefined}
+        >
           Creative Hub
         </Link>
         {CREATIVE_STUDIO_ROUTES.map((route) => (
           <Link
             key={route.href}
             href={route.href}
-            className={`${creativeTabClass(currentHref === route.href || pathname === route.href)} rounded-lg border px-3 py-1.5 text-xs font-semibold`}
+            className={`${creativeTabClass(currentHref === route.href || pathname === route.href)} inline-flex min-h-10 shrink-0 items-center whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]`}
             title={route.description}
+            aria-current={currentHref === route.href || pathname === route.href ? 'page' : undefined}
           >
             {route.shortLabel}
           </Link>
         ))}
-      </div>
+      </nav>
 
       <section className="min-h-0 flex-1 overflow-hidden">
         {children}
