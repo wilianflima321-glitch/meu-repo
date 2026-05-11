@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { analytics } from '@/lib/analytics'
 
 type StudioSessionStatus = 'active' | 'stopped'
@@ -41,6 +41,11 @@ const RUNTIME_OPTIONS = [
   { value: 'held', label: 'Hold for review' },
 ] as const
 
+const STUDIO_SESSION_STORAGE_KEY = 'aethel:last-studio-session-id'
+
+type StudioMode = (typeof MODE_OPTIONS)[number]['value']
+type RuntimeTarget = (typeof RUNTIME_OPTIONS)[number]['value']
+
 function statusClass(status?: StudioSessionStatus): string {
   if (status === 'active') {
     return 'border-[color-mix(in_srgb,var(--aethel-success)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] text-[var(--aethel-success-light)]'
@@ -61,15 +66,54 @@ async function parseResponse<T>(response: Response): Promise<T> {
 
 export default function StudioMissionControl() {
   const [mission, setMission] = useState('Coordinate a playable scene, evidence, and release checklist.')
-  const [mode, setMode] = useState<(typeof MODE_OPTIONS)[number]['value']>('game')
-  const [runtimeTarget, setRuntimeTarget] = useState<(typeof RUNTIME_OPTIONS)[number]['value']>('cloud-sandbox')
+  const [mode, setMode] = useState<StudioMode>('game')
+  const [runtimeTarget, setRuntimeTarget] = useState<RuntimeTarget>('cloud-sandbox')
   const [session, setSession] = useState<StudioSessionRecord | null>(null)
   const [wave, setWave] = useState<TaskWaveResponse | null>(null)
-  const [busy, setBusy] = useState<'start' | 'wave' | 'stop' | null>(null)
+  const [busy, setBusy] = useState<'resume' | 'start' | 'wave' | 'stop' | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
 
   const canRunWave = session?.status === 'active'
   const compactSessionId = useMemo(() => (session ? session.id.replace(/^studio_/, '').slice(0, 12) : 'none'), [session])
+
+  const applySessionRecord = useCallback((record: StudioSessionRecord) => {
+    setSession(record)
+    setMission(record.mission)
+    setMode(record.mode as StudioMode)
+    setRuntimeTarget(record.runtimeTarget as RuntimeTarget)
+    window.localStorage.setItem(STUDIO_SESSION_STORAGE_KEY, record.id)
+  }, [])
+
+  useEffect(() => {
+    const sessionId = window.localStorage.getItem(STUDIO_SESSION_STORAGE_KEY)
+    if (!sessionId) return
+
+    let isMounted = true
+    setBusy('resume')
+
+    fetch(`/api/studio/session/${encodeURIComponent(sessionId)}`)
+      .then((response) => parseResponse<{ session: StudioSessionRecord }>(response))
+      .then((payload) => {
+        if (!isMounted) return
+        applySessionRecord(payload.session)
+        setNotice(payload.session.status === 'active' ? 'Resumed active Studio session.' : 'Loaded last Studio session.')
+      })
+      .catch(() => {
+        window.localStorage.removeItem(STUDIO_SESSION_STORAGE_KEY)
+        if (isMounted) {
+          setNotice('Previous Studio session could not be resumed.')
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setBusy(null)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [applySessionRecord])
 
   async function startSession() {
     setBusy('start')
@@ -86,7 +130,7 @@ export default function StudioMissionControl() {
           body: JSON.stringify({ mission, mode, runtimeTarget }),
         })
       )
-      setSession(payload.session)
+      applySessionRecord(payload.session)
       setWave(null)
       setNotice('Studio session is active.')
     } catch (error) {
@@ -124,7 +168,7 @@ export default function StudioMissionControl() {
       const refreshed = await parseResponse<{ session: StudioSessionRecord }>(
         await fetch(`/api/studio/session/${encodeURIComponent(session.id)}`)
       )
-      setSession(refreshed.session)
+      applySessionRecord(refreshed.session)
       setNotice(`Planned ${payload.taskCount ?? 0} coordinated task(s).`)
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Could not run Studio task wave.')
@@ -145,7 +189,7 @@ export default function StudioMissionControl() {
           body: JSON.stringify({ reason: 'Paused from Creative Studio mission control.' }),
         })
       )
-      setSession(payload.session)
+      applySessionRecord(payload.session)
       setNotice('Studio session paused.')
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Could not stop Studio session.')
@@ -178,7 +222,7 @@ export default function StudioMissionControl() {
           <div className="mt-3 flex flex-wrap gap-2">
             <select
               value={mode}
-              onChange={(event) => setMode(event.target.value as typeof mode)}
+              onChange={(event) => setMode(event.target.value as StudioMode)}
               className="min-h-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-secondary)]"
               aria-label="Studio mode"
             >
@@ -190,7 +234,7 @@ export default function StudioMissionControl() {
             </select>
             <select
               value={runtimeTarget}
-              onChange={(event) => setRuntimeTarget(event.target.value as typeof runtimeTarget)}
+              onChange={(event) => setRuntimeTarget(event.target.value as RuntimeTarget)}
               className="min-h-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-secondary)]"
               aria-label="Runtime target"
             >
@@ -226,7 +270,7 @@ export default function StudioMissionControl() {
               disabled={busy !== null || !mission.trim()}
               className="min-h-11 rounded-xl bg-[var(--aethel-primary-dark)] px-4 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:bg-[var(--aethel-primary)] disabled:cursor-not-allowed disabled:opacity-55"
             >
-              {busy === 'start' ? 'Starting...' : session ? 'Restart session' : 'Start session'}
+              {busy === 'resume' ? 'Resuming...' : busy === 'start' ? 'Starting...' : session ? 'Restart session' : 'Start session'}
             </button>
             <button
               type="button"

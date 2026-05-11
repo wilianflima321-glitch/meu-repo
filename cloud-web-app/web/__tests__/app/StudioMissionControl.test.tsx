@@ -14,6 +14,7 @@ const originalFetch = global.fetch
 describe('StudioMissionControl', () => {
   afterEach(() => {
     global.fetch = originalFetch
+    window.localStorage.clear()
     vi.restoreAllMocks()
   })
 
@@ -90,5 +91,39 @@ describe('StudioMissionControl', () => {
     fireEvent.click(screen.getByRole('button', { name: /pause session/i }))
     await waitFor(() => expect(screen.getByText('Studio session paused.')).toBeInTheDocument())
     expect(screen.getByText('stopped')).toBeInTheDocument()
+  })
+
+  it('resumes the last durable Studio session after a refresh', async () => {
+    window.localStorage.setItem('aethel:last-studio-session-id', 'studio_session_resume')
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url === '/api/studio/session/studio_session_resume') {
+        return Response.json({
+          session: {
+            id: 'studio_session_resume',
+            title: 'Resume playable scene',
+            mission: 'Resume playable scene with QA evidence.',
+            mode: 'game',
+            status: 'active',
+            runtimeTarget: 'local-worker',
+            activeTaskIds: ['task-resume'],
+            evidenceRefs: ['mission-ledger://studio_session_resume/task-resume'],
+          },
+        })
+      }
+      return Response.json({ error: 'NOT_FOUND' }, { status: 404 })
+    })
+
+    global.fetch = fetchMock as typeof fetch
+
+    render(<StudioMissionControl />)
+
+    await waitFor(() => expect(screen.getByText('Resumed active Studio session.')).toBeInTheDocument())
+    expect(fetchMock).toHaveBeenCalledWith('/api/studio/session/studio_session_resume')
+    expect(screen.getByLabelText('What should the Studio coordinate?')).toHaveValue(
+      'Resume playable scene with QA evidence.'
+    )
+    expect(screen.getByLabelText('Runtime target')).toHaveValue('local-worker')
+    expect(screen.getByText('active')).toBeInTheDocument()
   })
 })

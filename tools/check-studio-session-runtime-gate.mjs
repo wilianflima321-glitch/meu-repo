@@ -79,6 +79,9 @@ for (const phrase of [
   '/api/studio/session/start',
   '/api/studio/tasks/run-wave',
   '/api/studio/session/${encodeURIComponent(session.id)}/stop',
+  'aethel:last-studio-session-id',
+  'Resumed active Studio session.',
+  'Previous Studio session could not be resumed.',
   'Run 3-agent wave',
   'Pause session',
 ]) {
@@ -104,7 +107,9 @@ for (const phrase of [
 
 for (const phrase of [
   'starts a durable session, runs a compact agent wave, and pauses the session',
+  'resumes the last durable Studio session after a refresh',
   'Studio session is active.',
+  'Resumed active Studio session.',
   'Planned 3 coordinated task(s).',
   'Studio session paused.',
 ]) {
