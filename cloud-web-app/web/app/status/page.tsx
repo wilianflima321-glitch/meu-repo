@@ -113,11 +113,11 @@ export default function StatusPage() {
               </div>
               <p className="mt-3 text-sm leading-6 opacity-85">{overallDescription}</p>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[22px] border border-current/15 bg-black/5 px-4 py-3">
+                <div className="rounded-[22px] border border-current/15 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_8%,transparent)] px-4 py-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-70">Leitura cliente</p>
                   <p className="mt-2 text-sm leading-6 opacity-90">{coverageSummary.customerImpact}</p>
                 </div>
-                <div className="rounded-[22px] border border-current/15 bg-black/5 px-4 py-3">
+                <div className="rounded-[22px] border border-current/15 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_8%,transparent)] px-4 py-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-70">Cadencia</p>
                   <p className="mt-2 text-sm leading-6 opacity-90">
                     {isLoading

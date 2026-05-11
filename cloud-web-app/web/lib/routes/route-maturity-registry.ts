@@ -39,6 +39,10 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/admin', maturity: 'BETA', label: 'Admin Panel', notes: 'Precisa convergir visual com Studio' },
   { path: '/marketplace', maturity: 'BETA', label: 'Marketplace', notes: 'Parcialmente funcional' },
   { path: '/team', maturity: 'BETA', label: 'Team Management' },
+  { path: '/studio', maturity: 'BETA', label: 'Creative Studio', notes: 'Mission-first creative hub for game, film, VFX, material, animation, and audio routes' },
+  { path: '/studio/level', maturity: 'BETA', label: 'Level Studio', notes: 'Wires the existing LevelEditor into the canonical Studio shell' },
+  { path: '/studio/scene', maturity: 'BETA', label: 'Scene Studio', notes: 'Wires the existing SceneEditor into the canonical Studio shell' },
+  { path: '/studio/material', maturity: 'BETA', label: 'Material Studio', notes: 'Wires the existing MaterialEditor into the canonical Studio shell' },
 
   // ALPHA - Core functionality works but incomplete
   { path: '/nexus', maturity: 'ALPHA', label: 'Nexus 3D Viewport', notes: 'Sem selecao, gizmos, hierarquia' },
@@ -47,6 +51,10 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/terminal', maturity: 'ALPHA', label: 'Terminal' },
   { path: '/git', maturity: 'ALPHA', label: 'Git Panel' },
   { path: '/testing', maturity: 'ALPHA', label: 'Test Runner' },
+  { path: '/studio/animation', maturity: 'ALPHA', label: 'Animation Studio', notes: 'Wires the existing AnimationBlueprint into the canonical Studio shell' },
+  { path: '/studio/vfx', maturity: 'ALPHA', label: 'VFX Studio', notes: 'Wires the existing NiagaraVFX editor into the canonical Studio shell' },
+  { path: '/studio/film', maturity: 'ALPHA', label: 'Film Studio', notes: 'Wires DirectorMode and VideoTimelineEditor into one progressive film surface' },
+  { path: '/studio/audio', maturity: 'ALPHA', label: 'Audio Studio', notes: 'Wires SoundCueEditor into the canonical Studio shell' },
 
   // PROTOTYPE - Shell exists but minimal functionality
   { path: '/debugger', maturity: 'PROTOTYPE', label: 'Debugger', notes: 'Sem conexao DAP real' },
@@ -99,7 +107,7 @@ export function getMaturityBadge(maturity: MaturityLevel): { label: string; colo
     GA: { label: '', color: '' },
     BETA: { label: 'Beta', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
     ALPHA: { label: 'Alpha', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-    PROTOTYPE: { label: 'Protótipo', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+    PROTOTYPE: { label: 'Prototype', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
     ASPIRATIONAL: { label: 'Labs', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
   };
   return badges[maturity];

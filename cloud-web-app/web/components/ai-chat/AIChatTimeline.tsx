@@ -88,7 +88,7 @@ export function AIChatTimeline({ activeThreadTitle, hasHistory, items, onOpenHis
                 className={`rounded-2xl border px-3 py-1.5 ${tone.className}`}
               >
                 <div className="flex items-start gap-2">
-                  <span className="mt-0.5 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-current/20 bg-black/10">
+                  <span className="mt-0.5 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-current/20 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_10%,transparent)]">
                     <Icon className="h-3 w-3" />
                   </span>
                   <div className="min-w-0 flex-1">

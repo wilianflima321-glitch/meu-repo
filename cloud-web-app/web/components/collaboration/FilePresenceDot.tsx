@@ -33,7 +33,7 @@ export function FilePresenceDot({
       {visiblePeers.map((peer) => (
         <span
           key={peer.clientId}
-          className="inline-flex h-4 w-4 items-center justify-center overflow-hidden rounded-full border border-[var(--aethel-surface-primary)] text-[8px] font-semibold uppercase tracking-[0.08em] text-white shadow-[0_4px_10px_-8px_rgba(15,23,42,0.9)]"
+          className="inline-flex h-4 w-4 items-center justify-center overflow-hidden rounded-full border border-[var(--aethel-surface-primary)] text-[8px] font-semibold uppercase tracking-[0.08em] text-[var(--aethel-text-primary)] shadow-[0_4px_10px_-8px_rgba(15,23,42,0.9)]"
           style={{ background: peer.color }}
         >
           {peer.avatar ? (

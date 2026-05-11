@@ -33,11 +33,11 @@ interface StudioLayoutProps {
 }
 
 const STUDIO_MOBILE_NAV_ITEMS: MobileNavItem[] = [
-  { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, matchPaths: ['/dashboard'] },
+  { href: '/dashboard', label: 'Mission', icon: LayoutDashboard, matchPaths: ['/dashboard'] },
   { href: '/ide', label: 'IDE', icon: Code, matchPaths: ['/ide'] },
   { href: '/nexus', label: 'Nexus', icon: MessageSquare, matchPaths: ['/nexus'] },
-  { href: '/billing', label: 'Faturamento', icon: CreditCard, matchPaths: ['/billing'] },
-  { href: '/settings', label: 'Ajustes', icon: Settings, matchPaths: ['/settings'] },
+  { href: '/billing', label: 'Billing', icon: CreditCard, matchPaths: ['/billing'] },
+  { href: '/settings', label: 'Settings', icon: Settings, matchPaths: ['/settings'] },
 ]
 
 const STUDIO_MAX_WIDTH_CLASSES: Record<ResponsiveMaxWidth, string> = {
