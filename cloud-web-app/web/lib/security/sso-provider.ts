@@ -61,6 +61,7 @@ export interface SSOReadiness {
     missing?: string[];
   }[];
   samlConfigured: boolean;
+  scimConfigured: boolean;
 }
 
 // ============================================================================
@@ -154,11 +155,13 @@ export function getConfiguredProviders(): SSOReadiness {
     process.env.SAML_SSO_URL &&
     process.env.SAML_CERTIFICATE
   );
+  const scimConfigured = !!(process.env.AETHEL_SCIM_BEARER_TOKEN || process.env.SCIM_BEARER_TOKEN);
 
   return {
-    configured: providers.some((p) => p.configured) || samlConfigured,
+    configured: providers.some((p) => p.configured) || samlConfigured || scimConfigured,
     providers,
     samlConfigured,
+    scimConfigured,
   };
 }
 

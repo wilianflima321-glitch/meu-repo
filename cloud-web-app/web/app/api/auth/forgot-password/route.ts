@@ -151,6 +151,12 @@ export async function POST(req: NextRequest) {
       return successResponse;
     }
 
+    // Enterprise-provisioned users must recover access through their IdP/SCIM admin.
+    if (user.oauthProvider === 'scim') {
+      routeLogger.warn('password_reset.blocked_for_scim_user', { userId: user.id });
+      return successResponse;
+    }
+
     // Check if user uses OAuth (no password to reset)
     if (user.oauthProvider && !user.password) {
       return successResponse;

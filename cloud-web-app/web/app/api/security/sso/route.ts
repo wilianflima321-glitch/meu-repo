@@ -23,7 +23,8 @@ export async function GET() {
       missingCount: p.missing?.length || 0,
     })),
     samlConfigured: readiness.samlConfigured,
-    supportedProtocols: ['oidc', 'saml'],
+    scimConfigured: readiness.scimConfigured,
+    supportedProtocols: ['oidc', 'saml', 'scim'],
     supportedProviders: ['google', 'github', 'microsoft', 'okta', 'auth0', 'custom-oidc'],
   });
 }

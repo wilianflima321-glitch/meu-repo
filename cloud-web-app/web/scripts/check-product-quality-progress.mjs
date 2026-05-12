@@ -86,6 +86,15 @@ requirePattern('components/marketplace/CreatorDashboardTabPanels.tsx', /\/api\/m
 requireFile('prisma/migrations/20260512032000_marketplace_creator_connect/migration.sql', 'creator payout state must have a migration')
 requirePattern('app/api/billing/webhook/route.ts', /account\.updated/, 'Stripe webhook must synchronize Connect account status')
 requirePattern('app/api/billing/webhook/route.ts', /syncCreatorPayoutAccountStatus/, 'Stripe webhook must update creator payout readiness')
+requireFile('lib/security/scim.ts', 'enterprise provisioning must have a SCIM contract')
+requireFile('app/api/auth/scim/v2/ServiceProviderConfig/route.ts', 'SCIM service provider config must exist')
+requireFile('app/api/auth/scim/v2/Users/route.ts', 'SCIM user collection endpoint must exist')
+requireFile('app/api/auth/scim/v2/Users/[id]/route.ts', 'SCIM user lifecycle endpoint must exist')
+requirePattern('app/api/security/sso/route.ts', /scimConfigured/, 'SSO readiness must expose SCIM readiness')
+requireFile('scripts/check-mobile-pwa-readiness.mjs', 'mobile/PWA readiness gate must exist')
+requirePattern('package.json', /qa:mobile-pwa-readiness/, 'enterprise gate must include mobile/PWA readiness')
+requirePattern('lighthouserc.js', /'categories:pwa'/, 'Lighthouse must assert PWA readiness')
+requireFile('app/offline/page.tsx', 'offline route must exist for installable/mobile experience')
 
 const sourceFiles = walk(
   ROOT,
