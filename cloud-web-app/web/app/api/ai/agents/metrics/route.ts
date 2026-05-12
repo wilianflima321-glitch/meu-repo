@@ -1,30 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
-import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
+import { buildAgentMetrics, buildAgentOverview } from '@/lib/server/agent-observability'
+import { listAgentSnapshots } from '@/lib/server/agent-store'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    requireAuth(request)
-    const blocked = blockIfSimulationDisabled({
-      capability: 'AI_AGENTS_METRICS',
-      reason: 'CAPABILITY_NOT_IMPLEMENTED',
-      message: 'Agent metrics require real runtime implementation.',
-    })
-    if (blocked) return blocked
+    const auth = requireAuth(request)
+    const snapshots = await listAgentSnapshots(auth.userId)
+    const overview = buildAgentOverview(snapshots, 100)
+    const metrics = buildAgentMetrics(overview)
+
     return NextResponse.json({
-      totalAgents: 0,
-      activeAgents: 0,
-      totalExecutions: 0,
-      successRate: 0,
-      totalTokensUsed: 0,
-      totalCost: 0,
-      avgExecutionTime: 0,
-      errorsToday: 0,
+      ...metrics,
       capability: 'AI_AGENTS_METRICS',
-      capabilityStatus: 'PARTIAL',
-      message: 'Metrics API is active with baseline telemetry only.',
+      capabilityStatus: 'READY',
+      retention: 'local-agent-store',
+      measurementNote: 'Execution counts are persisted; token and cost metering are intentionally marked unmetered until ledger integration.',
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {

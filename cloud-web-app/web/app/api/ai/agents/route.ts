@@ -1,23 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
-import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
+import { buildAgentOverview, parseAgentLimit } from '@/lib/server/agent-observability'
+import { listAgentSnapshots } from '@/lib/server/agent-store'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    requireAuth(request)
-    const blocked = blockIfSimulationDisabled({
-      capability: 'AI_AGENTS_OVERVIEW',
-      reason: 'CAPABILITY_NOT_IMPLEMENTED',
-      message: 'AI agents overview requires real runtime implementation.',
-    })
-    if (blocked) return blocked
+    const auth = requireAuth(request)
+    const limit = parseAgentLimit(request.nextUrl.searchParams.get('limit'), 25)
+    const snapshots = await listAgentSnapshots(auth.userId)
+    const overview = buildAgentOverview(snapshots, limit)
+
     return NextResponse.json({
-      agents: [],
+      ...overview,
       capability: 'AI_AGENTS_OVERVIEW',
-      capabilityStatus: 'PARTIAL',
-      message: 'Agent dashboard surface is active with empty baseline dataset.',
+      capabilityStatus: 'READY',
+      retention: 'local-agent-store',
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {

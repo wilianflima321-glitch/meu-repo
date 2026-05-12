@@ -1,23 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
-import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
+import { buildAgentOverview, parseAgentLimit } from '@/lib/server/agent-observability'
+import { listAgentSnapshots } from '@/lib/server/agent-store'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    requireAuth(request)
-    const blocked = blockIfSimulationDisabled({
-      capability: 'AI_AGENTS_EXECUTIONS',
-      reason: 'CAPABILITY_NOT_IMPLEMENTED',
-      message: 'Agent executions require real runtime implementation.',
-    })
-    if (blocked) return blocked
+    const auth = requireAuth(request)
+    const limit = parseAgentLimit(request.nextUrl.searchParams.get('limit'), 50)
+    const snapshots = await listAgentSnapshots(auth.userId)
+    const overview = buildAgentOverview(snapshots, limit)
+
     return NextResponse.json({
-      executions: [],
+      executions: overview.executions,
+      summary: overview.summary,
       capability: 'AI_AGENTS_EXECUTIONS',
-      capabilityStatus: 'PARTIAL',
-      message: 'Execution history API is running with baseline retention only.',
+      capabilityStatus: 'READY',
+      retention: 'local-agent-store',
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {

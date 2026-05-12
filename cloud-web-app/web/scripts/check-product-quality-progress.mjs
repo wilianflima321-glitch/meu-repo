@@ -112,6 +112,11 @@ requirePattern('lib/observability/tracing.ts', /traceparent/, 'observability mus
 requireFile('app/api/observability/readiness/route.ts', 'observability readiness endpoint must exist')
 requirePattern('app/api/observability/readiness/route.ts', /drainsConfigured/, 'observability readiness must expose drain configuration state')
 requirePattern('package.json', /qa:observability-readiness/, 'enterprise gate must include observability readiness')
+requireFile('lib/server/agent-observability.ts', 'agent observability must summarize persisted agent runtime state')
+requirePattern('app/api/ai/agents/route.ts', /listAgentSnapshots/, 'agent overview must use persisted agent snapshots')
+requirePattern('app/api/ai/agents/executions/route.ts', /listAgentSnapshots/, 'agent executions must use persisted agent snapshots')
+requirePattern('app/api/ai/agents/metrics/route.ts', /buildAgentMetrics/, 'agent metrics must be derived from persisted agent snapshots')
+requirePattern('package.json', /qa:agent-observability/, 'enterprise gate must include agent observability')
 
 const sourceFiles = walk(
   ROOT,
