@@ -88,7 +88,9 @@ function formatLanguageLabel(language?: string | null) {
 
 function formatSidebarLabel(sidebarTab: SidebarTab | undefined, panelState?: PanelState) {
   if (!panelState?.sidebar.open || !sidebarTab) return null;
-  return sidebarTab === 'git' ? 'Git' : 'Arquivos';
+  if (sidebarTab === 'git') return 'Git';
+  if (sidebarTab === 'research') return 'Research';
+  return 'Files';
 }
 
 function formatPreviewLabel(previewMode: PreviewMode | undefined, panelState?: PanelState) {
@@ -386,7 +388,14 @@ export function StatusBar({
 
     if (sidebarLabel) {
       items.push({
-        icon: activeSidebarTab === 'git' ? <GitBranch size={12} /> : <FolderTree size={12} />,
+        icon:
+          activeSidebarTab === 'git' ? (
+            <GitBranch size={12} />
+          ) : activeSidebarTab === 'research' ? (
+            <Sparkles size={12} />
+          ) : (
+            <FolderTree size={12} />
+          ),
         label: sidebarLabel,
       });
     }

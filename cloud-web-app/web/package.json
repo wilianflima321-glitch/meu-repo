@@ -34,7 +34,7 @@
     "qa:mojibake": "node scripts/scan-mojibake.mjs",
     "qa:interface-critical": "node scripts/interface-critical-scan.mjs",
     "qa:interface-gate": "node scripts/interface-critical-gate.mjs",
-    "qa:enterprise-gate": "npm run qa:interface-gate && npm run qa:canonical-components && npm run qa:route-contracts && npm run qa:no-fake-success && npm run qa:wcag-critical && npm run qa:dashboard-shell && npm run qa:billing-runtime-readiness && npm run qa:preview-runtime-readiness && npm run qa:mojibake && npm run lint && npm run typecheck",
+    "qa:enterprise-gate": "npm run qa:interface-gate && npm run qa:canonical-components && npm run qa:route-contracts && npm run qa:product-quality-progress && npm run qa:ai-game-film-production && npm run qa:no-fake-success && npm run qa:wcag-critical && npm run qa:dashboard-shell && npm run qa:billing-runtime-readiness && npm run qa:preview-runtime-readiness && npm run qa:mojibake && npm run lint && npm run typecheck",
     "qa:enterprise-release-gate": "npm run qa:enterprise-gate && npm run build",
     "docs:routes-inventory": "node scripts/generate-routes-inventory.mjs",
     "db:generate": "prisma generate",
@@ -45,7 +45,9 @@
     "postinstall": "prisma generate && node scripts/fix-prisma-client.cjs",
     "qa:preview-runtime-readiness": "node scripts/check-preview-runtime-readiness.mjs",
     "storybook": "cross-env STORYBOOK_DISABLE_TELEMETRY=1 STORYBOOK_DISABLE_UPDATE_CHECK=1 storybook dev -p 6006",
-    "storybook:build": "cross-env STORYBOOK_DISABLE_TELEMETRY=1 STORYBOOK_DISABLE_UPDATE_CHECK=1 storybook build"
+    "storybook:build": "cross-env STORYBOOK_DISABLE_TELEMETRY=1 STORYBOOK_DISABLE_UPDATE_CHECK=1 storybook build",
+    "qa:product-quality-progress": "node scripts/check-product-quality-progress.mjs",
+    "qa:ai-game-film-production": "node scripts/check-ai-game-film-production.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",

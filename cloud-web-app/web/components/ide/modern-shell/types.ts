@@ -5,7 +5,7 @@ export interface PanelState {
   chat: { open: boolean; size: number };
 }
 
-export type SidebarTab = 'explorer' | 'git';
+export type SidebarTab = 'explorer' | 'git' | 'research';
 
 export type BottomPanelMode = 'chat' | 'terminal';
 

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 
 import FileExplorerPro from '@/components/ide/FileExplorerPro';
 import { GitIntegration } from '@/components/ide/GitIntegration';
+import AethelResearch from '@/components/nexus/AethelResearch';
 import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 import {
   describeWorkbenchEntryProfile,
@@ -83,7 +84,7 @@ export function WorkbenchSidebar({
               : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
           }`}
         >
-          Arquivos
+          Files
         </button>
         <button
           type="button"
@@ -96,12 +97,25 @@ export function WorkbenchSidebar({
         >
           Git
         </button>
+        <button
+          type="button"
+          onClick={() => onSidebarTabChange('research')}
+          className={`flex-1 rounded-lg px-2.5 py-1.5 min-h-8 text-[10px] font-medium transition-colors ${
+            sidebarTab === 'research'
+              ? 'bg-[color-mix(in_srgb,var(--aethel-success)_16%,transparent)] text-[var(--aethel-success)]'
+              : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+          }`}
+        >
+          Research
+        </button>
       </div>
       <div className="flex-1 min-h-0">
         {sidebarTab === 'explorer' ? (
           <FileExplorerPro onFileSelect={onFileSelect} collaborationPeers={collaborationPeers} />
-        ) : (
+        ) : sidebarTab === 'git' ? (
           <GitIntegration />
+        ) : (
+          <AethelResearch />
         )}
       </div>
     </div>
