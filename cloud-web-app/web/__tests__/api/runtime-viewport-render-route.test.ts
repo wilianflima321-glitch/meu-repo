@@ -114,6 +114,7 @@ describe('/api/runtime/viewport/render', () => {
     const response = await POST(buildRequest({ authorization: 'Bearer wrong-token' }))
 
     expect(response.status).toBe(401)
+    expect(response.headers.get('x-aethel-trace-id')).toMatch(/^[0-9a-f]{32}$/)
   })
 
   it('returns render evidence and never auto-releases', async () => {
@@ -126,6 +127,7 @@ describe('/api/runtime/viewport/render', () => {
       const payload = await response.json()
 
       expect(response.status).toBe(200)
+      expect(response.headers.get('traceparent')).toMatch(/^00-[0-9a-f]{32}-[0-9a-f]{16}-0[01]$/)
       expect(payload.evidence.validation.playbackOk).toBe(true)
       expect(payload.renderer.producedKinds).toContain('thumbnail')
       expect(payload.releaseReady).toBe(false)
@@ -148,6 +150,7 @@ describe('/api/runtime/viewport/render', () => {
       const capabilities = await capabilitiesResponse.json()
       expect(capabilities.supports.proxyPreview).toBe(true)
       expect(capabilities.supports.finalVideo).toBe(false)
+      expect(capabilitiesResponse.headers.get('x-aethel-trace-id')).toMatch(/^[0-9a-f]{32}$/)
 
       const artifactResponse = await GET(buildGetRequest({
         token: 'render-secret',
@@ -157,6 +160,7 @@ describe('/api/runtime/viewport/render', () => {
 
       expect(artifactResponse.status).toBe(200)
       expect(artifactResponse.headers.get('content-type')).toContain('image/svg+xml')
+      expect(artifactResponse.headers.get('traceparent')).toMatch(/^00-[0-9a-f]{32}-[0-9a-f]{16}-0[01]$/)
       expect(body).toContain('Aethel internal scene preview')
     } finally {
       await rm(artifactRoot, { recursive: true, force: true })

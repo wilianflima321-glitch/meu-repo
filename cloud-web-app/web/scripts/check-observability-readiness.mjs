@@ -47,8 +47,23 @@ requirePattern('app/api/observability/readiness/route.ts', /runtime = 'nodejs'/,
 requirePattern('app/api/observability/readiness/route.ts', /drainsConfigured/, 'readiness must expose log drain or OTLP configuration state')
 requirePattern('app/api/observability/readiness/route.ts', /sentryConfigured/, 'readiness must expose Sentry configuration state')
 requirePattern('app/api/observability/readiness/route.ts', /traceHeaders/, 'readiness response must include trace headers')
+requirePattern(
+  'app/api/runtime/viewport/render/route.ts',
+  /withTraceSpan/,
+  'heavy viewport render endpoint must be traceable for incident review and mission evidence'
+)
+requirePattern(
+  'app/api/runtime/viewport/render/route.ts',
+  /x-aethel-trace-id|traceHeaders/,
+  'heavy viewport render endpoint must return support-friendly trace headers'
+)
 
 requireFile('__tests__/server/tracing.test.ts', 'trace helper tests must prevent silent regressions')
+requirePattern(
+  '__tests__/api/runtime-viewport-render-route.test.ts',
+  /x-aethel-trace-id/,
+  'viewport render route tests must assert trace propagation'
+)
 
 if (failures.length) {
   console.error('[observability-readiness] FAIL')

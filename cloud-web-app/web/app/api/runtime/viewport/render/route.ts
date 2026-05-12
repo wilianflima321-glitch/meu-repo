@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import { traceHeaders, withTraceSpan, type TraceContext } from '@/lib/observability/tracing'
 import {
   buildViewportRenderBackendCapabilities,
   coerceViewportRenderBackendRequest,
@@ -47,63 +48,102 @@ function authorizeRendererRequest(request: NextRequest): NextResponse | null {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = authorizeRendererRequest(request)
-  if (authError) return authError
+  const parent = request.headers.get('traceparent')
 
-  const parsed = coerceViewportRenderBackendRequest(await request.json().catch(() => null))
-  if (!parsed) {
-    return NextResponse.json({ error: 'INVALID_VIEWPORT_RENDER_BACKEND_REQUEST' }, { status: 400 })
-  }
+  return withTraceSpan(
+    'api.runtime.viewport.render.post',
+    async (span) => {
+      const authError = authorizeRendererRequest(request)
+      if (authError) return attachTraceHeaders(authError, span.context)
 
-  const result = await renderViewportBackendArtifacts(parsed)
+      const parsed = coerceViewportRenderBackendRequest(await request.json().catch(() => null))
+      if (!parsed) {
+        return tracedJson({ error: 'INVALID_VIEWPORT_RENDER_BACKEND_REQUEST' }, span.context, { status: 400 })
+      }
 
-  logger.info('viewport_render_backend.completed', {
-    projectId: parsed.payload.projectId,
-    contractId: parsed.payload.metadata.renderContract.id,
-    quality: parsed.payload.metadata.renderContract.quality,
-    producedKinds: result.renderer.producedKinds,
-    blockedKinds: result.renderer.blockedKinds,
-  })
+      const result = await renderViewportBackendArtifacts(parsed)
 
-  return NextResponse.json({
-    ...result,
-    releaseReady: false,
-    releaseNote: 'Internal render evidence was generated. Final release still requires human approval.',
-  })
+      logger.info('viewport_render_backend.completed', {
+        projectId: parsed.payload.projectId,
+        contractId: parsed.payload.metadata.renderContract.id,
+        quality: parsed.payload.metadata.renderContract.quality,
+        producedKinds: result.renderer.producedKinds,
+        blockedKinds: result.renderer.blockedKinds,
+        traceId: span.context.traceId,
+      })
+
+      return tracedJson(
+        {
+          ...result,
+          releaseReady: false,
+          releaseNote: 'Internal render evidence was generated. Final release still requires human approval.',
+        },
+        span.context,
+      )
+    },
+    { parent, attributes: { route: '/api/runtime/viewport/render', method: 'POST', lane: 'viewport-render' } },
+  )
 }
 
 export async function GET(request: NextRequest) {
-  const authError = authorizeRendererRequest(request)
-  if (authError) return authError
+  const parent = request.headers.get('traceparent')
 
-  const artifactUrl = request.nextUrl.searchParams.get('artifactUrl')
-  if (!artifactUrl) {
-    return NextResponse.json(buildViewportRenderBackendCapabilities())
+  return withTraceSpan(
+    'api.runtime.viewport.render.get',
+    async (span) => {
+      const authError = authorizeRendererRequest(request)
+      if (authError) return attachTraceHeaders(authError, span.context)
+
+      const artifactUrl = request.nextUrl.searchParams.get('artifactUrl')
+      if (!artifactUrl) {
+        return tracedJson(buildViewportRenderBackendCapabilities(), span.context)
+      }
+
+      try {
+        const artifact = await readViewportRenderArtifact(artifactUrl)
+        logger.info('viewport_render_backend.artifact_served', {
+          projectId: artifact.projectId,
+          contractId: artifact.contractId,
+          fileName: artifact.fileName,
+          traceId: span.context.traceId,
+        })
+
+        const responseBody = new ArrayBuffer(artifact.body.byteLength)
+        new Uint8Array(responseBody).set(artifact.body)
+
+        return new NextResponse(responseBody, {
+          headers: {
+            'content-type': artifact.contentType,
+            'cache-control': 'no-store',
+            'x-aethel-artifact-kind': artifact.fileName,
+            ...traceHeaders(span.context),
+          },
+        })
+      } catch (error) {
+        if (error instanceof ViewportRenderArtifactReadError) {
+          return tracedJson({ error: error.code, message: error.message }, span.context, { status: error.status })
+        }
+        logger.error('viewport_render_backend.artifact_failed', { err: error, traceId: span.context.traceId })
+        return tracedJson({ error: 'ARTIFACT_READ_FAILED' }, span.context, { status: 500 })
+      }
+    },
+    { parent, attributes: { route: '/api/runtime/viewport/render', method: 'GET', lane: 'viewport-render' } },
+  )
+}
+
+function tracedJson(body: unknown, context: TraceContext, init?: ResponseInit) {
+  return NextResponse.json(body, {
+    ...init,
+    headers: {
+      ...Object.fromEntries(new Headers(init?.headers).entries()),
+      ...traceHeaders(context),
+    },
+  })
+}
+
+function attachTraceHeaders(response: NextResponse, context: TraceContext) {
+  for (const [key, value] of Object.entries(traceHeaders(context))) {
+    response.headers.set(key, value)
   }
-
-  try {
-    const artifact = await readViewportRenderArtifact(artifactUrl)
-    logger.info('viewport_render_backend.artifact_served', {
-      projectId: artifact.projectId,
-      contractId: artifact.contractId,
-      fileName: artifact.fileName,
-    })
-
-    const responseBody = new ArrayBuffer(artifact.body.byteLength)
-    new Uint8Array(responseBody).set(artifact.body)
-
-    return new NextResponse(responseBody, {
-      headers: {
-        'content-type': artifact.contentType,
-        'cache-control': 'no-store',
-        'x-aethel-artifact-kind': artifact.fileName,
-      },
-    })
-  } catch (error) {
-    if (error instanceof ViewportRenderArtifactReadError) {
-      return NextResponse.json({ error: error.code, message: error.message }, { status: error.status })
-    }
-    logger.error('viewport_render_backend.artifact_failed', { err: error })
-    return NextResponse.json({ error: 'ARTIFACT_READ_FAILED' }, { status: 500 })
-  }
+  return response
 }
