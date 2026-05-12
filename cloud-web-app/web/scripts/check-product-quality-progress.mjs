@@ -122,6 +122,13 @@ requirePattern('lib/production/research-intelligence-bridge.ts', /huggingface-hu
 requirePattern('lib/production/research-intelligence-bridge.ts', /browser-operator/, 'research intelligence must support browser operator replay requirements')
 requireFile('app/api/projects/[id]/production-state/research-intelligence/route.ts', 'research intelligence must have a production-state API route')
 requirePattern('package.json', /qa:research-intelligence/, 'enterprise gate must include research intelligence')
+requireFile('lib/production/agent-read-receipts.ts', 'agents must have read receipts before high-trust apply')
+requirePattern('lib/production/agent-read-receipts.ts', /evaluateAgentReadinessForApply/, 'read receipts must gate agent apply readiness')
+requirePattern('lib/production/agent-read-receipts.ts', /repository-cartography/, 'read receipts must force Repository Cartography acknowledgement')
+requirePattern('lib/production/agent-read-receipts.ts', /research-intelligence/, 'read receipts must force Research Intelligence acknowledgement')
+requireFile('app/api/projects/[id]/production-state/read-receipts/route.ts', 'read receipts must have a production-state API route')
+requirePattern('app/api/ai/change/apply/route.ts', /enforceReadReceipts/, 'AI apply must support read receipt enforcement')
+requirePattern('package.json', /qa:agent-read-receipts/, 'enterprise gate must include agent read receipts')
 
 const sourceFiles = walk(
   ROOT,

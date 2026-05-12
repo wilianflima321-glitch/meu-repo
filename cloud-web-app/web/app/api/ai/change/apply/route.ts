@@ -25,6 +25,12 @@ import { runQaGate } from '@/lib/server/qa-gate'
 import { loadAgentHandoffContext } from '@/lib/production/agent-handoff-context'
 import { evaluateAgentApplyScope } from '@/lib/production/agent-scope-enforcement'
 import { acquireAgentSurfaceLocks } from '@/lib/production/agent-surface-locks'
+import {
+  evaluateAgentReadinessForApply,
+  readAgentReadReceiptStateFromSettings,
+} from '@/lib/production/agent-read-receipts'
+import { readRepositoryCartographyManifestFromSettings } from '@/lib/production/repository-cartography'
+import { readResearchIntelligencePacketFromSettings } from '@/lib/production/research-intelligence-bridge'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,6 +58,7 @@ type ApplyBody = ApplyChangeInput & {
   projectId?: string
   agent?: string
   enforceAgentScope?: boolean
+  enforceReadReceipts?: boolean
   approvedHighRisk?: boolean
   changes?: ApplyChangeInput[]
   executionMode?: ApplyExecutionMode
@@ -720,6 +727,59 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    const readReceiptDecision = body.enforceReadReceipts === true
+      ? await (async () => {
+          const { prisma } = await import('@/lib/db')
+          const project = await prisma.project.findFirst({
+            where: {
+              id: projectId,
+              OR: [{ userId: user.userId }, { members: { some: { userId: user.userId } } }],
+            },
+            select: { settings: true },
+          })
+
+          return evaluateAgentReadinessForApply({
+            agent: handoff.agent,
+            targetPaths: preparedChanges.map((change) => change.virtualPath),
+            enforceReadReceipts: true,
+            manifest: readRepositoryCartographyManifestFromSettings(project?.settings),
+            researchPacket: readResearchIntelligencePacketFromSettings(project?.settings),
+            receiptState: readAgentReadReceiptStateFromSettings(project?.settings),
+          })
+        })()
+      : null
+
+    if (readReceiptDecision && !readReceiptDecision.allowed) {
+      await appendChangeRunLedgerEvent({
+        eventType: 'apply_blocked',
+        capability: 'AI_CHANGE_APPLY',
+        userId: user.userId,
+        projectId,
+        filePath: preparedChanges[0]?.virtualPath || 'agent-read-receipts',
+        outcome: 'blocked',
+        metadata: {
+          reason: readReceiptDecision.code,
+          runId,
+          runSource: RUN_SOURCE,
+          ...readReceiptDecision.metadata,
+        },
+      }).catch(() => {})
+
+      return capabilityResponse({
+        error: readReceiptDecision.code,
+        message: readReceiptDecision.message,
+        status: readReceiptDecision.status,
+        capability: CAPABILITY,
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          runId,
+          runSource: RUN_SOURCE,
+          projectId,
+          ...readReceiptDecision.metadata,
+        },
+      })
+    }
+
     if (executionMode === 'sandbox') {
       await appendChangeRunLedgerEvent({
         eventType: 'apply_blocked',
@@ -931,6 +991,7 @@ export async function POST(request: NextRequest) {
           dependencyGraphRisk: entry.prepared.projectImpact.risk,
           reverseDependents: entry.prepared.projectImpact.reverseDependents.length,
           fullAccessGrantId: entry.prepared.approvalGrantId,
+          readReceiptIds: readReceiptDecision?.allowed ? readReceiptDecision.metadata.acceptedReceiptIds : undefined,
           surfaceLockId: surfaceLockDecision?.allowed ? surfaceLockDecision.lock.id : undefined,
         },
       }).catch(() => {})
@@ -951,6 +1012,12 @@ export async function POST(request: NextRequest) {
         changeCount: snapshots.length,
         changes: changeSummary,
         rollbackToken: snapshots.length === 1 ? snapshots[0].snapshot.token : undefined,
+        readReceipts: readReceiptDecision?.allowed
+          ? {
+              enforcement: readReceiptDecision.enforcement,
+              acceptedReceiptIds: readReceiptDecision.metadata.acceptedReceiptIds,
+            }
+          : undefined,
         surfaceLock: surfaceLockDecision?.allowed
           ? {
               id: surfaceLockDecision.lock.id,
