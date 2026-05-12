@@ -71,6 +71,14 @@ requirePattern('components/ide/GlobalCommandSurface.tsx', /KeyboardShortcutsDial
 requirePattern('components/ide/GlobalCommandSurface.tsx', /event\.key === '\?'/, 'question-mark shortcut must open help')
 requirePattern('components/ide/fullscreen/types.ts', /'research'/, 'Workbench sidebar must expose a research tab')
 requirePattern('components/ide/fullscreen/WorkbenchSidebar.tsx', /AethelResearch/, 'agentic research must be available inside the IDE sidebar')
+requirePattern('components/editor/MonacoEditorPro.tsx', /InlineAIChat/, 'Monaco must expose the inline AI chat surface')
+requirePattern('components/editor/MonacoEditorPro.actions.ts', /aethel\.inlineChat/, 'Monaco must register a dedicated inline chat action')
+requirePattern('components/editor/MonacoEditorPro.actions.ts', /KeyCode\.KeyL/, 'Inline chat must use Cmd/Ctrl+L for Cursor-grade local flow')
+requireFile('lib/project-scaffolds.ts', 'onboarding must have reusable real scaffold definitions')
+requirePattern('lib/project-scaffolds.ts', /game-3d/, 'game onboarding scaffold must exist')
+requirePattern('lib/project-scaffolds.ts', /film-story/, 'film onboarding scaffold must exist')
+requireFile('app/api/onboarding/scaffold/[templateId]/route.ts', 'onboarding must create real scaffolded projects')
+requirePattern('app/api/onboarding/scaffold/[templateId]/route.ts', /files:\s*{\s*create:/s, 'scaffold route must persist seed files')
 
 const sourceFiles = walk(
   ROOT,

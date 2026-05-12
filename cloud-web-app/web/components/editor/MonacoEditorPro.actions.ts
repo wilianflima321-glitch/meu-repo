@@ -16,6 +16,7 @@ export type MonacoEditorActionConfig = {
   language: string;
   path?: string;
   onSave?: (value: string) => void;
+  onOpenInlineChat?: () => void;
   openInlineEdit: OpenInlineEditFn;
   readOnly: boolean;
 };
@@ -138,6 +139,17 @@ export function registerMonacoEditorActions(
         }
 
         config.openInlineEdit('', config.language, config.path);
+      },
+    });
+  }
+
+  if (config.onOpenInlineChat) {
+    editor.addAction({
+      id: 'aethel.inlineChat',
+      label: 'Inline AI Chat',
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL],
+      run: () => {
+        config.onOpenInlineChat?.();
       },
     });
   }

@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useRef, useCallback, useEffect, useState } from 'react';
+import React, { useRef, useCallback, useEffect, useMemo, useState } from 'react';
 import Editor, { OnMount, Monaco } from '@monaco-editor/react';
 import type * as monacoEditor from 'monaco-editor';
 import { useInlineEdit, InlineEditModal } from './InlineEditModal';
+import InlineAIChat from '@/components/ide/InlineAIChat';
 import {
   configureMonacoEditor,
   registerMonacoEditorActions,
@@ -173,6 +174,18 @@ export function MonacoEditorPro({
     message: string;
   } | null>(null);
   const [inlineEditNeedsFullAccess, setInlineEditNeedsFullAccess] = useState(false);
+  const [inlineChatOpen, setInlineChatOpen] = useState(false);
+
+  const inlineChatActiveFile = useMemo(() => ({
+    path: path || 'untitled',
+    language,
+    content: editorRef.current?.getValue() ?? value ?? defaultValue ?? '',
+  }), [defaultValue, language, path, value]);
+
+  const inlineChatProjectContext = useMemo(() => ({
+    name: projectId ? `Project ${projectId}` : 'Aethel workspace',
+    files: path ? [path] : [],
+  }), [path, projectId]);
 
   const mapMarkersToDiagnostics = useCallback((markers: monacoEditor.editor.IMarker[]) => {
     return markers.map((marker) => ({
@@ -250,6 +263,7 @@ export function MonacoEditorPro({
       enableAISuggestions,
       enableInlineEdit,
       language,
+      onOpenInlineChat: () => setInlineChatOpen(true),
       onSave,
       openInlineEdit,
       path,
@@ -702,6 +716,20 @@ export function MonacoEditorPro({
           projectId={projectId}
           cursorPosition={selection.position}
         />
+      )}
+
+      {inlineChatOpen && (
+        <div
+          className="absolute bottom-4 right-4 z-40 h-[min(720px,calc(100%-2rem))] w-[min(560px,calc(100%-2rem))] overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] shadow-[0_28px_96px_rgba(0,0,0,0.55)]"
+          role="dialog"
+          aria-label="Inline AI Chat"
+        >
+          <InlineAIChat
+            activeFile={inlineChatActiveFile}
+            projectContext={inlineChatProjectContext}
+            onClose={() => setInlineChatOpen(false)}
+          />
+        </div>
       )}
 
       {/* CSS for decorations */}

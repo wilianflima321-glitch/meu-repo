@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import type { DragEvent } from 'react'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
 import { Environment, GizmoHelper, GizmoViewport, Grid, Html as DreiHtml, Line, OrbitControls } from '@react-three/drei'
+import { EffectComposer, Outline, Select, Selection } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import {
   Box,
@@ -353,39 +354,41 @@ function SceneObjectMesh({
   }, [object, onTransformChange, onTransformOperation, readCommittedTransform, snapEnabled, transformMode, transformSpace])
 
   const body = (
-    <group
-      ref={groupRef}
-      position={object.position}
-      rotation={displayRotation}
-      scale={displayScale}
-      visible={object.visible !== false}
-      onClick={(event: ThreeEvent<MouseEvent>) => {
-        event.stopPropagation()
-        onSelect(object.id, event.nativeEvent.shiftKey)
-      }}
-    >
-      <GeometryForObject object={object} isSelected={isSelected} />
-      {visualGlowIntensity && visualGlowIntensity > 0 ? (
-        <mesh scale={[1.08, 1.08, 1.08]}>
-          <sphereGeometry args={[0.95, 20, 20]} />
-          <meshBasicMaterial color={visualGlowColor ?? 0x60a5fa} transparent opacity={Math.min(0.18, visualGlowIntensity * 0.08)} />
-        </mesh>
-      ) : null}
-      {primarySelected && hairVolumeIntensity > 0 ? (
-        <mesh position={[0, 0.72 + hairVolumeIntensity * 0.08, 0]} scale={[1 + hairVolumeIntensity * 0.12, 0.18 + hairVolumeIntensity * 0.06, 1 + hairVolumeIntensity * 0.12]}>
-          <sphereGeometry args={[0.5, 24, 24]} />
-          <meshBasicMaterial color={hairHighlightColor ?? 0x6b3d22} transparent opacity={0.22} />
-        </mesh>
-      ) : null}
-      {isSelected ? (
-        <DreiHtml position={[0, 0.95, 0]} center>
-          <div className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[rgba(6,10,18,0.84)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-primary)] shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
-            {object.name}
-            {object.asset ? <span className="ml-1 text-[var(--aethel-text-tertiary)]">.{object.asset.format}</span> : null}
-          </div>
-        </DreiHtml>
-      ) : null}
-    </group>
+    <Select enabled={isSelected}>
+      <group
+        ref={groupRef}
+        position={object.position}
+        rotation={displayRotation}
+        scale={displayScale}
+        visible={object.visible !== false}
+        onClick={(event: ThreeEvent<MouseEvent>) => {
+          event.stopPropagation()
+          onSelect(object.id, event.nativeEvent.shiftKey)
+        }}
+      >
+        <GeometryForObject object={object} isSelected={isSelected} />
+        {visualGlowIntensity && visualGlowIntensity > 0 ? (
+          <mesh scale={[1.08, 1.08, 1.08]}>
+            <sphereGeometry args={[0.95, 20, 20]} />
+            <meshBasicMaterial color={visualGlowColor ?? 0x60a5fa} transparent opacity={Math.min(0.18, visualGlowIntensity * 0.08)} />
+          </mesh>
+        ) : null}
+        {primarySelected && hairVolumeIntensity > 0 ? (
+          <mesh position={[0, 0.72 + hairVolumeIntensity * 0.08, 0]} scale={[1 + hairVolumeIntensity * 0.12, 0.18 + hairVolumeIntensity * 0.06, 1 + hairVolumeIntensity * 0.12]}>
+            <sphereGeometry args={[0.5, 24, 24]} />
+            <meshBasicMaterial color={hairHighlightColor ?? 0x6b3d22} transparent opacity={0.22} />
+          </mesh>
+        ) : null}
+        {isSelected ? (
+          <DreiHtml position={[0, 0.95, 0]} center>
+            <div className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[rgba(6,10,18,0.84)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-primary)] shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+              {object.name}
+              {object.asset ? <span className="ml-1 text-[var(--aethel-text-tertiary)]">.{object.asset.format}</span> : null}
+            </div>
+          </DreiHtml>
+        ) : null}
+      </group>
+    </Select>
   )
 
   if (!primarySelected || object.locked) return body
@@ -484,25 +487,37 @@ function ViewportScene({
         <meshStandardMaterial color={0x111827} roughness={0.92} metalness={0.08} />
       </mesh>
 
-      {objects.map((object) => (
-        <SceneObjectMesh
-          key={object.id}
-          object={object}
-          isSelected={selectedIds.includes(object.id)}
-          primarySelected={primarySelectedId === object.id}
-          transformMode={transformMode}
-          transformSpace={transformSpace}
-          snapEnabled={snapEnabled}
-          visualGlowColor={selectedIds.includes(object.id) ? abilityAccentColor ?? 0x60a5fa : undefined}
-          visualGlowIntensity={selectedIds.includes(object.id) ? vfxGlowIntensity + cinematicGlowIntensity : 0}
-          facialExpressionIntensity={selectedIds.includes(object.id) ? facialExpressionIntensity : 0}
-          hairHighlightColor={selectedIds.includes(object.id) ? hairHighlightColor : undefined}
-          hairVolumeIntensity={selectedIds.includes(object.id) ? hairVolumeIntensity : 0}
-          onTransformChange={handleTransformChange}
-          onTransformOperation={onGizmoTransformOperation}
-          onSelect={handleSelect}
-        />
-      ))}
+      <Selection>
+        {objects.map((object) => (
+          <SceneObjectMesh
+            key={object.id}
+            object={object}
+            isSelected={selectedIds.includes(object.id)}
+            primarySelected={primarySelectedId === object.id}
+            transformMode={transformMode}
+            transformSpace={transformSpace}
+            snapEnabled={snapEnabled}
+            visualGlowColor={selectedIds.includes(object.id) ? abilityAccentColor ?? 0x60a5fa : undefined}
+            visualGlowIntensity={selectedIds.includes(object.id) ? vfxGlowIntensity + cinematicGlowIntensity : 0}
+            facialExpressionIntensity={selectedIds.includes(object.id) ? facialExpressionIntensity : 0}
+            hairHighlightColor={selectedIds.includes(object.id) ? hairHighlightColor : undefined}
+            hairVolumeIntensity={selectedIds.includes(object.id) ? hairVolumeIntensity : 0}
+            onTransformChange={handleTransformChange}
+            onTransformOperation={onGizmoTransformOperation}
+            onSelect={handleSelect}
+          />
+        ))}
+
+        <EffectComposer autoClear={false} multisampling={4}>
+          <Outline
+            blur
+            edgeStrength={2.6}
+            pulseSpeed={0.35}
+            visibleEdgeColor={0x7dd3fc}
+            hiddenEdgeColor={0x1d4ed8}
+          />
+        </EffectComposer>
+      </Selection>
 
       {trajectoryPoints.length > 1 ? <Line points={trajectoryPoints} color={creativeMode === 'film' ? 0xf59e0b : 0x38bdf8} lineWidth={2.2} dashed dashSize={0.2} gapSize={0.12} /> : null}
 
