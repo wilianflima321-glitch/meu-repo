@@ -117,6 +117,11 @@ requirePattern('app/api/ai/agents/route.ts', /listAgentSnapshots/, 'agent overvi
 requirePattern('app/api/ai/agents/executions/route.ts', /listAgentSnapshots/, 'agent executions must use persisted agent snapshots')
 requirePattern('app/api/ai/agents/metrics/route.ts', /buildAgentMetrics/, 'agent metrics must be derived from persisted agent snapshots')
 requirePattern('package.json', /qa:agent-observability/, 'enterprise gate must include agent observability')
+requireFile('lib/production/research-intelligence-bridge.ts', 'external research must bridge into repository cartography and Mission Ledger')
+requirePattern('lib/production/research-intelligence-bridge.ts', /huggingface-hub/, 'research intelligence must support Hugging Face metadata-first sources')
+requirePattern('lib/production/research-intelligence-bridge.ts', /browser-operator/, 'research intelligence must support browser operator replay requirements')
+requireFile('app/api/projects/[id]/production-state/research-intelligence/route.ts', 'research intelligence must have a production-state API route')
+requirePattern('package.json', /qa:research-intelligence/, 'enterprise gate must include research intelligence')
 
 const sourceFiles = walk(
   ROOT,
