@@ -33,6 +33,7 @@ import {
   Database,
 } from 'lucide-react'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
+import { ADMIN_CONSOLIDATED_SECTIONS } from '@/lib/admin/admin-consolidation'
 import { Badge } from '@/components/ui/Badge'
 import StudioRuntimeProviders from '@/components/providers/StudioRuntimeProviders'
 
@@ -64,66 +65,52 @@ interface NavGroup {
   items: { title: string; href: string; icon: React.ElementType; badge?: string }[]
 }
 
-const navGroups: NavGroup[] = [
-  {
-    label: 'Visão Geral',
-    icon: LayoutDashboard,
-    items: [
-      { title: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-      { title: 'Financeiro', href: '/admin/finance', icon: CreditCard, badge: 'MRR' },
-      { title: 'Analíticos', href: '/admin/analytics', icon: TrendingUp },
-    ],
-  },
-  {
-    label: 'Usuários & Acesso',
-    icon: Users,
-    items: [
-      { title: 'Usuários', href: '/admin/users', icon: Users },
-      { title: 'Funções', href: '/admin/roles', icon: Lock },
-      { title: 'Assinaturas', href: '/admin/subscriptions', icon: CreditCard },
-      { title: 'Onboarding', href: '/admin/onboarding', icon: Zap },
-    ],
-  },
-  {
-    label: 'IA & Automação',
-    icon: Brain,
-    items: [
-      { title: 'Monitor IA', href: '/admin/ai-monitor', icon: Brain, badge: 'Ao vivo' },
-      { title: 'Agentes', href: '/admin/ai-agents', icon: Boxes },
-      { title: 'Fine-tuning', href: '/admin/fine-tuning', icon: Gauge },
-      { title: 'Automação', href: '/admin/automation', icon: Zap },
-    ],
-  },
-  {
-    label: 'Infraestrutura',
-    icon: Server,
-    items: [
-      { title: 'Infraestrutura', href: '/admin/infrastructure', icon: Server },
-      { title: 'Monitoramento', href: '/admin/monitoring', icon: Activity },
-      { title: 'Feature Flags', href: '/admin/feature-flags', icon: Flag },
-      { title: 'Backup', href: '/admin/backup', icon: Database },
-    ],
-  },
-  {
-    label: 'Conteúdo & Segurança',
-    icon: Shield,
-    items: [
-      { title: 'Moderação', href: '/admin/moderation', icon: Shield },
-      { title: 'Segurança', href: '/admin/security', icon: Lock },
-      { title: 'Compliance', href: '/admin/compliance', icon: FileText },
-      { title: 'Feedback', href: '/admin/feedback', icon: MessageSquare },
-    ],
-  },
-  {
-    label: 'Configurações',
-    icon: Settings,
-    items: [
-      { title: 'IDE Settings', href: '/admin/ide-settings', icon: Settings },
-      { title: 'APIs', href: '/admin/apis', icon: Package },
-      { title: 'Marketplace', href: '/admin/marketplace', icon: Boxes },
-    ],
-  },
-]
+const sectionIconById = {
+  users: Users,
+  billing: CreditCard,
+  ops: Server,
+  security: Shield,
+  ai: Brain,
+  marketplace: Boxes,
+} satisfies Record<string, React.ElementType>
+
+const routeIconByHref: Record<string, React.ElementType> = {
+  '/admin/users': Users,
+  '/admin/roles': Lock,
+  '/admin/support': MessageSquare,
+  '/admin/onboarding': Zap,
+  '/admin/finance': TrendingUp,
+  '/admin/payments': CreditCard,
+  '/admin/subscriptions': CreditCard,
+  '/admin/cost-optimization': Gauge,
+  '/admin/monitoring': Activity,
+  '/admin/infrastructure': Server,
+  '/admin/deploy': Package,
+  '/admin/emergency': AlertTriangle,
+  '/admin/security': Lock,
+  '/admin/audit-logs': FileText,
+  '/admin/compliance': FileText,
+  '/admin/rate-limiting': Gauge,
+  '/admin/ai-monitor': Brain,
+  '/admin/ai-agents': Boxes,
+  '/admin/fine-tuning': Gauge,
+  '/admin/indexing': Database,
+  '/admin/marketplace': Boxes,
+  '/admin/feature-flags': Flag,
+  '/admin/ide-settings': Settings,
+  '/admin/apis': Package,
+}
+
+const navGroups: NavGroup[] = ADMIN_CONSOLIDATED_SECTIONS.map((section) => ({
+  label: section.label,
+  icon: sectionIconById[section.id],
+  items: section.primaryLinks.map((link) => ({
+    title: link.label,
+    href: link.href,
+    icon: routeIconByHref[link.href] || sectionIconById[section.id],
+    badge: link.badge,
+  })),
+}))
 
 /* ---------- Reusable Components ---------- */
 

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import { API_BASE } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { ADMIN_CONSOLIDATED_SECTIONS } from '@/lib/admin/admin-consolidation';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 
 type UserRow = {
@@ -86,6 +87,47 @@ export default function Admin() {
         <Stat title='Pro' value={proCount} tone='sky' />
         <Stat title='Free' value={freeCount} tone='slate' />
       </div>
+
+      <section className='mb-8 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]'>
+        <div className='mb-4 flex flex-col gap-1 md:flex-row md:items-end md:justify-between'>
+          <div>
+            <p className='text-xs uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]'>Admin consolidation</p>
+            <h2 className='text-lg font-semibold text-[var(--aethel-text-primary)]'>6 operating areas, all legacy routes covered</h2>
+          </div>
+          <p className='text-xs text-[var(--aethel-text-tertiary)]'>
+            {ADMIN_CONSOLIDATED_SECTIONS.reduce((total, section) => total + section.routes.length, 0)} routes mapped
+          </p>
+        </div>
+        <div className='grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3'>
+          {ADMIN_CONSOLIDATED_SECTIONS.map((section) => (
+            <article
+              key={section.id}
+              className='rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-4'
+            >
+              <div className='flex items-start justify-between gap-3'>
+                <div>
+                  <h3 className='text-sm font-semibold text-[var(--aethel-text-primary)]'>{section.label}</h3>
+                  <p className='mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]'>{section.description}</p>
+                </div>
+                <span className='rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]'>
+                  {section.routes.length} routes
+                </span>
+              </div>
+              <div className='mt-4 flex flex-wrap gap-2'>
+                {section.primaryLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className='rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]'
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
       <div className='mb-8 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] shadow-[0_18px_45px_rgba(0,0,0,0.35)]'>
         <div className='flex items-center justify-between border-b border-[var(--aethel-border-subtle)] px-4 py-3'>

@@ -34,7 +34,7 @@
     "qa:mojibake": "node scripts/scan-mojibake.mjs",
     "qa:interface-critical": "node scripts/interface-critical-scan.mjs",
     "qa:interface-gate": "node scripts/interface-critical-gate.mjs",
-    "qa:enterprise-gate": "npm run qa:interface-gate && npm run qa:canonical-components && npm run qa:route-contracts && npm run qa:product-quality-progress && npm run qa:i18n-progress && npm run qa:ai-game-film-production && npm run qa:no-fake-success && npm run qa:wcag-critical && npm run qa:dashboard-shell && npm run qa:billing-runtime-readiness && npm run qa:mobile-pwa-readiness && npm run qa:observability-readiness && npm run qa:preview-runtime-readiness && npm run qa:mojibake && npm run lint && npm run typecheck",
+    "qa:enterprise-gate": "npm run qa:interface-gate && npm run qa:canonical-components && npm run qa:route-contracts && npm run qa:product-quality-progress && npm run qa:i18n-progress && npm run qa:ai-game-film-production && npm run qa:no-fake-success && npm run qa:wcag-critical && npm run qa:dashboard-shell && npm run qa:admin-consolidation && npm run qa:billing-runtime-readiness && npm run qa:mobile-pwa-readiness && npm run qa:observability-readiness && npm run qa:preview-runtime-readiness && npm run qa:mojibake && npm run lint && npm run typecheck",
     "qa:enterprise-release-gate": "npm run qa:enterprise-gate && npm run build",
     "docs:routes-inventory": "node scripts/generate-routes-inventory.mjs",
     "db:generate": "prisma generate",
@@ -50,7 +50,8 @@
     "qa:ai-game-film-production": "node scripts/check-ai-game-film-production.mjs",
     "qa:i18n-progress": "node scripts/check-i18n-progress.mjs",
     "qa:mobile-pwa-readiness": "node scripts/check-mobile-pwa-readiness.mjs",
-    "qa:observability-readiness": "node scripts/check-observability-readiness.mjs"
+    "qa:observability-readiness": "node scripts/check-observability-readiness.mjs",
+    "qa:admin-consolidation": "node scripts/check-admin-consolidation.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
