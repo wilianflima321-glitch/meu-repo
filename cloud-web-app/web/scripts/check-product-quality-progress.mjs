@@ -79,6 +79,13 @@ requirePattern('lib/project-scaffolds.ts', /game-3d/, 'game onboarding scaffold 
 requirePattern('lib/project-scaffolds.ts', /film-story/, 'film onboarding scaffold must exist')
 requireFile('app/api/onboarding/scaffold/[templateId]/route.ts', 'onboarding must create real scaffolded projects')
 requirePattern('app/api/onboarding/scaffold/[templateId]/route.ts', /files:\s*{\s*create:/s, 'scaffold route must persist seed files')
+requireFile('lib/server/stripe-connect.ts', 'marketplace must have Stripe Connect payout helpers')
+requireFile('app/api/marketplace/creator/connect/route.ts', 'creator payouts must expose a Connect onboarding API')
+requirePattern('components/marketplace/CreatorDashboardTabPanels.tsx', /CreatorPayoutConnectCard/, 'creator dashboard must surface payout onboarding')
+requirePattern('components/marketplace/CreatorDashboardTabPanels.tsx', /\/api\/marketplace\/creator\/connect/, 'creator dashboard must call the payout onboarding API')
+requireFile('prisma/migrations/20260512032000_marketplace_creator_connect/migration.sql', 'creator payout state must have a migration')
+requirePattern('app/api/billing/webhook/route.ts', /account\.updated/, 'Stripe webhook must synchronize Connect account status')
+requirePattern('app/api/billing/webhook/route.ts', /syncCreatorPayoutAccountStatus/, 'Stripe webhook must update creator payout readiness')
 
 const sourceFiles = walk(
   ROOT,

@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { TabContent } from '@/components/ui/Tabs';
@@ -187,6 +188,131 @@ function PayoutMetricCard({
     );
 }
 
+type CreatorConnectStatus = {
+    configured: boolean;
+    connected: boolean;
+    chargesEnabled: boolean;
+    payoutsEnabled: boolean;
+    detailsSubmitted: boolean;
+    stripeAccountId: string | null;
+    defaultCurrency: string | null;
+    country: string | null;
+    onboardingUrl?: string;
+};
+
+function CreatorPayoutConnectCard() {
+    const [status, setStatus] = useState<CreatorConnectStatus | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isStarting, setIsStarting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const loadStatus = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await fetch('/api/marketplace/creator/connect', { cache: 'no-store' });
+            if (!response.ok) throw new Error(`Status ${response.status}`);
+            setStatus((await response.json()) as CreatorConnectStatus);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load creator payout status');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        void loadStatus();
+    }, [loadStatus]);
+
+    const startOnboarding = useCallback(async () => {
+        setIsStarting(true);
+        setError(null);
+        try {
+            const response = await fetch('/api/marketplace/creator/connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ country: status?.country || 'US' }),
+            });
+            const payload = (await response.json().catch(() => ({}))) as CreatorConnectStatus;
+            if (!response.ok || !payload.onboardingUrl) {
+                throw new Error('Stripe Connect onboarding is not ready yet.');
+            }
+            window.location.href = payload.onboardingUrl;
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to start Stripe Connect onboarding');
+        } finally {
+            setIsStarting(false);
+        }
+    }, [status?.country]);
+
+    const statusLabel = isLoading
+        ? 'Carregando'
+        : status?.payoutsEnabled
+            ? 'Payouts ativos'
+            : status?.detailsSubmitted
+                ? 'Em revisao Stripe'
+                : status?.connected
+                    ? 'Onboarding pendente'
+                    : 'Nao conectado';
+
+    return (
+        <Card className="col-span-3">
+            <CardHeader className="flex flex-row items-start justify-between gap-4">
+                <div>
+                    <CardTitle>Stripe Connect creator payouts</CardTitle>
+                    <CardDescription>
+                        Habilita o caminho real creator - venda - saldo - payout, sem prometer receita antes do onboarding.
+                    </CardDescription>
+                </div>
+                <Badge variant={status?.payoutsEnabled ? 'success' : 'secondary'} className="whitespace-nowrap text-[10px]">
+                    {statusLabel}
+                </Badge>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+                    <div className="rounded-lg border border-border p-3">
+                        <p className="text-xs text-muted-foreground">Account</p>
+                        <p className="mt-1 truncate font-mono text-xs">{status?.stripeAccountId || 'not connected'}</p>
+                    </div>
+                    <div className="rounded-lg border border-border p-3">
+                        <p className="text-xs text-muted-foreground">Charges</p>
+                        <p className="mt-1 text-sm font-semibold">{status?.chargesEnabled ? 'Enabled' : 'Pending'}</p>
+                    </div>
+                    <div className="rounded-lg border border-border p-3">
+                        <p className="text-xs text-muted-foreground">Payouts</p>
+                        <p className="mt-1 text-sm font-semibold">{status?.payoutsEnabled ? 'Enabled' : 'Pending'}</p>
+                    </div>
+                    <div className="rounded-lg border border-border p-3">
+                        <p className="text-xs text-muted-foreground">Currency</p>
+                        <p className="mt-1 text-sm font-semibold">{status?.defaultCurrency?.toUpperCase() || 'USD'}</p>
+                    </div>
+                </div>
+
+                {error ? (
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                        {error}
+                    </div>
+                ) : null}
+
+                {!status?.configured ? (
+                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+                        Configure STRIPE_SECRET_KEY antes de liberar onboarding de creators.
+                    </div>
+                ) : null}
+
+                <button
+                    type="button"
+                    onClick={startOnboarding}
+                    disabled={!status?.configured || isStarting}
+                    className="rounded-lg border border-border bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    {status?.connected ? 'Continuar onboarding Stripe' : 'Conectar Stripe Express'}
+                </button>
+            </CardContent>
+        </Card>
+    );
+}
+
 function PayoutsPanel({ controller }: { controller: CreatorDashboardController }) {
     const {
         estimatedAvailableBalance,
@@ -197,6 +323,7 @@ function PayoutsPanel({ controller }: { controller: CreatorDashboardController }
     return (
         <TabContent value="payouts" className="m-0 p-6">
             <div className="grid grid-cols-3 gap-6">
+                <CreatorPayoutConnectCard />
                 <PayoutMetricCard
                     title="Saldo disponivel (estimado)"
                     amount={estimatedAvailableBalance}

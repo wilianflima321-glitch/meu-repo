@@ -9,6 +9,8 @@ import Stripe from 'stripe';
 import { requireEnv } from '@/lib/env';
 import { getStripe } from '@/lib/stripe';
 import { billingRuntimeCapabilityResponse, getBillingRuntimeState } from '@/lib/server/billing-runtime';
+import { syncCreatorPayoutAccountStatus } from '@/lib/server/stripe-connect';
+import { logger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -141,6 +143,17 @@ export async function POST(req: NextRequest) {
         break;
       }
 
+      case 'account.updated': {
+        const account = event.data.object as Stripe.Account;
+        const synced = await syncCreatorPayoutAccountStatus(account);
+        logger.info('stripe.connect.account.updated', {
+          component: 'billing-webhook',
+          stripeAccountId: account.id,
+          synced: Boolean(synced),
+        });
+        break;
+      }
+
       default:
         // Eventos não necessários ainda
         break;
@@ -148,9 +161,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook error:', error);
+    logger.error('stripe.webhook.failed', error, { component: 'billing-webhook' });
 
-    if ((error as any)?.code === 'ENV_NOT_SET') {
+    if ((error as { code?: string })?.code === 'ENV_NOT_SET') {
       return NextResponse.json(
         { error: 'STRIPE_NOT_CONFIGURED', message: (error as Error).message },
         { status: 503 }
