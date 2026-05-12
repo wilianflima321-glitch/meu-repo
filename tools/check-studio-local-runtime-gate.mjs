@@ -82,6 +82,9 @@ for (const phrase of [
   'RuntimeJobStatus',
   'RuntimeCloudSyncSigningPayload',
   'buildRuntimeCloudSyncSigningPayload',
+  'NATIVE_GRAPHICS_BACKENDS',
+  'NATIVE_AI_EXECUTION_PROVIDERS',
+  'LOCAL_RUNTIME_TOOLCHAIN_FEATURES',
   'ai-local-inference',
   'memory-indexing',
   'asset-import',
@@ -102,6 +105,9 @@ for (const phrase of [
   'RuntimeJobRequest',
   'RuntimeJobStatus',
   'RuntimeExecutionTarget',
+  'NativeGraphicsBackend',
+  'NativeAiExecutionProvider',
+  'LocalRuntimeToolchainFeature',
   'ThermalState',
   'StoragePressure',
 ]) {
@@ -111,6 +117,12 @@ for (const phrase of [
 for (const phrase of [
   'ThermalState::Critical',
   'StoragePressure::Critical',
+  'AiLocalInference',
+  'ViewportRender',
+  'RenderQueue',
+  'BrowserOperator',
+  'has_native_graphics',
+  'has_ai_execution_provider',
   'CloudSandbox',
   'LocalNative',
   'requires_human_approval',
@@ -143,6 +155,10 @@ for (const phrase of [
 for (const phrase of [
   'persisted_running_jobs_recover_as_held_after_restart',
   'persisted_cancelled_jobs_stay_cancelled_after_restart',
+  'render_queue_without_ffmpeg_routes_to_cloud_sandbox',
+  'ai_local_inference_without_execution_provider_routes_to_cloud_sandbox',
+  'viewport_render_without_native_graphics_routes_to_cloud_sandbox',
+  'browser_operator_without_browser_runtime_routes_to_approved_sandbox',
 ]) {
   assert(rustLib.includes(phrase), `Rust tests cover persisted job recovery ${phrase}`)
 }
@@ -152,6 +168,9 @@ for (const phrase of [
   'generatedAt',
   'cpuLogicalCores',
   'storagePressure',
+  'nativeGraphicsBackends',
+  'aiExecutionProviders',
+  'localToolchain',
   "'held'",
   'native-daemon',
   'api-sync',
@@ -203,6 +222,10 @@ for (const phrase of [
   'Mission Ledger',
   'Repository Cartography',
   'Browser Operator',
+  'Native Capability Matrix',
+  'wgpu',
+  'FFmpeg',
+  'ONNX Runtime',
   'Unreal parity',
 ]) {
   assert(doc.includes(phrase), `Studio Local doc includes ${phrase}`)

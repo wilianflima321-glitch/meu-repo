@@ -129,3 +129,35 @@ Acceptance evidence:
 - `tools/check-studio-local-runtime-gate.mjs` fails if the crash recovery primitives or tests are removed.
 
 Gate phrase: job crash recovery.
+
+## 2026-05-12 Native Capability Matrix
+
+Studio Local now records a lane-aware Native Capability Matrix instead of treating GPU/NPU as one generic boolean. This is the next step toward a real internal spine for large apps, games, films, local AI, and Browser Operator work without changing the clean product interface.
+
+New probe dimensions:
+
+- `nativeGraphicsBackends`: `vulkan`, `directx12`, `metal`, `webgpu`, or `opengl`.
+- `aiExecutionProviders`: `cpu`, `cuda`, `tensorrt`, `directml`, `coreml`, `openvino`, `qnn`, `xnnpack`, `webgpu`, or `webnn`.
+- `localToolchain`: `ffmpeg`, `ffprobe`, `rapier`, `browser-automation`, `asset-optimizer`, or `shader-compiler`.
+
+Runtime policy now gates work by lane:
+
+- `ai-local-inference` falls back to `cloud-sandbox` when no ONNX Runtime, DirectML, CoreML, CUDA, WebNN, or equivalent provider is confirmed.
+- `viewport-render` falls back when no native graphics backend is confirmed. The target implementation path is `wgpu`, because it can sit above Vulkan, DirectX 12, Metal, OpenGL, WebGPU, and WebGL2 without creating four separate renderer cores.
+- `render-queue` falls back when FFmpeg is not confirmed locally.
+- `browser-operator` falls back to an approved sandbox when local browser automation is missing.
+- critical thermal or storage pressure still returns `held` before any lane-specific optimism.
+
+This does not claim Unreal parity. Unreal still owns Nanite/Lumen-grade renderer depth. The Aethel spine is different: route the right job to the right local/cloud executor, preserve Mission Ledger evidence, and prevent agents from pretending a weak device can perform AAA-scale work.
+
+Acceptance evidence:
+
+- `apps/studio-local/src-tauri/src/contracts.rs` defines `NativeGraphicsBackend`, `NativeAiExecutionProvider`, and `LocalRuntimeToolchainFeature`.
+- `apps/studio-local/src-tauri/src/probe.rs` populates the capability matrix from explicit Studio Local env signals and available local tools.
+- `apps/studio-local/src-tauri/src/policy.rs` performs lane-specific fallback for AI inference, viewport render, render queue, and Browser Operator.
+- `packages/runtime-contracts/src/index.ts` mirrors the same capability vocabulary for web, workers, and cloud sync.
+- `cloud-web-app/web/lib/device/local-runtime-bridge.ts` preserves these fields when normalizing Studio Local probes.
+- `apps/studio-local/src-tauri/src/lib.rs` includes policy tests for missing FFmpeg, AI execution provider, graphics backend, and browser automation.
+- `tools/check-studio-local-runtime-gate.mjs` fails if the capability matrix is removed.
+
+Gate phrase: Native Capability Matrix.

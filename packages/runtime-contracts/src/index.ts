@@ -47,6 +47,33 @@ export type RuntimeSafetyLevel = 'ready' | 'fallback' | 'held' | 'needs-confirma
 export type ThermalState = 'unknown' | 'nominal' | 'warm' | 'critical'
 export type StoragePressure = 'unknown' | 'ok' | 'low-space' | 'critical'
 
+export const NATIVE_GRAPHICS_BACKENDS = ['vulkan', 'directx12', 'metal', 'webgpu', 'opengl'] as const
+export type NativeGraphicsBackend = (typeof NATIVE_GRAPHICS_BACKENDS)[number]
+
+export const NATIVE_AI_EXECUTION_PROVIDERS = [
+  'cpu',
+  'cuda',
+  'tensorrt',
+  'directml',
+  'coreml',
+  'openvino',
+  'qnn',
+  'xnnpack',
+  'webgpu',
+  'webnn',
+] as const
+export type NativeAiExecutionProvider = (typeof NATIVE_AI_EXECUTION_PROVIDERS)[number]
+
+export const LOCAL_RUNTIME_TOOLCHAIN_FEATURES = [
+  'ffmpeg',
+  'ffprobe',
+  'rapier',
+  'browser-automation',
+  'asset-optimizer',
+  'shader-compiler',
+] as const
+export type LocalRuntimeToolchainFeature = (typeof LOCAL_RUNTIME_TOOLCHAIN_FEATURES)[number]
+
 export interface LocalRuntimeProbeReport {
   version: typeof STUDIO_LOCAL_CONTRACT_VERSION
   generatedAt: string
@@ -68,6 +95,9 @@ export interface LocalRuntimeProbeReport {
   ffmpegAvailable: boolean
   rapierAvailable: boolean
   browserAutomationAvailable: boolean
+  nativeGraphicsBackends?: NativeGraphicsBackend[]
+  aiExecutionProviders?: NativeAiExecutionProvider[]
+  localToolchain?: LocalRuntimeToolchainFeature[]
   thermalState: ThermalState
   storagePressure: StoragePressure
   preferredExecutor: RuntimeExecutionTarget
@@ -191,6 +221,14 @@ export function resolveSafeRuntimeTarget(input: {
     | 'preferredExecutor'
     | 'npuAvailable'
     | 'gpuAvailable'
+    | 'webGpuAvailable'
+    | 'webNnAvailable'
+    | 'directMlAvailable'
+    | 'onnxRuntimeAvailable'
+    | 'ffmpegAvailable'
+    | 'browserAutomationAvailable'
+    | 'nativeGraphicsBackends'
+    | 'aiExecutionProviders'
     | 'thermalState'
     | 'storagePressure'
     | 'availableMemoryMb'
@@ -204,7 +242,33 @@ export function resolveSafeRuntimeTarget(input: {
     return 'local-worker'
   }
 
-  if (input.probe.preferredExecutor === 'local-native' && (input.probe.npuAvailable || input.probe.gpuAvailable)) {
+  const hasNativeGraphics =
+    input.probe.gpuAvailable ||
+    input.probe.webGpuAvailable ||
+    Boolean(input.probe.nativeGraphicsBackends?.length)
+  const hasAiExecutionProvider =
+    input.probe.onnxRuntimeAvailable ||
+    input.probe.directMlAvailable ||
+    input.probe.webNnAvailable ||
+    Boolean(input.probe.aiExecutionProviders?.length)
+
+  if (input.lane === 'ai-local-inference' && !hasAiExecutionProvider) {
+    return 'cloud-sandbox'
+  }
+
+  if (input.lane === 'viewport-render' && !hasNativeGraphics) {
+    return 'cloud-sandbox'
+  }
+
+  if (input.lane === 'render-queue' && !input.probe.ffmpegAvailable) {
+    return 'cloud-sandbox'
+  }
+
+  if (input.lane === 'browser-operator' && !input.probe.browserAutomationAvailable) {
+    return 'cloud-sandbox'
+  }
+
+  if (input.probe.preferredExecutor === 'local-native' && (hasNativeGraphics || hasAiExecutionProvider)) {
     return 'local-native'
   }
 

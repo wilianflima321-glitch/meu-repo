@@ -60,6 +60,9 @@ describe('local runtime bridge', () => {
         ffmpegAvailable: true,
         rapierAvailable: true,
         browserAutomationAvailable: true,
+        nativeGraphicsBackends: ['directx12', 'vulkan'],
+        aiExecutionProviders: ['directml', 'cpu'],
+        localToolchain: ['ffmpeg', 'ffprobe', 'rapier', 'browser-automation'],
         thermalState: 'nominal',
         storagePressure: 'ok',
         preferredExecutor: 'local-native',
@@ -80,6 +83,9 @@ describe('local runtime bridge', () => {
       recommendedViewportQuality: 'ultra',
       localModelPolicy: 'allow-small-models',
       supportsPersistentMemory: true,
+      nativeGraphicsBackends: ['directx12', 'vulkan'],
+      aiExecutionProviders: ['directml', 'cpu'],
+      localToolchain: ['ffmpeg', 'ffprobe', 'rapier', 'browser-automation'],
     })
   })
 

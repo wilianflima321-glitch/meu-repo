@@ -40,6 +40,59 @@ mod tests {
     }
 
     #[test]
+    fn render_queue_without_ffmpeg_routes_to_cloud_sandbox() {
+        let mut probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        probe.ffmpeg_available = false;
+        probe.local_toolchain.retain(|feature| feature.as_str() != "ffmpeg");
+
+        let decision = resolve_runtime_target(&probe, RuntimeJobLane::RenderQueue);
+
+        assert_eq!(decision.target, RuntimeExecutionTarget::CloudSandbox);
+        assert!(decision.requires_human_approval);
+        assert!(decision.reason.contains("FFmpeg"));
+    }
+
+    #[test]
+    fn ai_local_inference_without_execution_provider_routes_to_cloud_sandbox() {
+        let mut probe = build_probe_from_signals("test-device", false, false, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        probe.onnx_runtime_available = false;
+        probe.direct_ml_available = false;
+        probe.web_nn_available = false;
+        probe.ai_execution_providers.clear();
+
+        let decision = resolve_runtime_target(&probe, RuntimeJobLane::AiLocalInference);
+
+        assert_eq!(decision.target, RuntimeExecutionTarget::CloudSandbox);
+        assert!(decision.reason.contains("AI execution provider"));
+    }
+
+    #[test]
+    fn viewport_render_without_native_graphics_routes_to_cloud_sandbox() {
+        let mut probe = build_probe_from_signals("test-device", false, false, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        probe.gpu_available = false;
+        probe.web_gpu_available = false;
+        probe.native_graphics_backends.clear();
+
+        let decision = resolve_runtime_target(&probe, RuntimeJobLane::ViewportRender);
+
+        assert_eq!(decision.target, RuntimeExecutionTarget::CloudSandbox);
+        assert!(decision.reason.contains("native graphics backend"));
+    }
+
+    #[test]
+    fn browser_operator_without_browser_runtime_routes_to_approved_sandbox() {
+        let mut probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        probe.browser_automation_available = false;
+        probe.local_toolchain.retain(|feature| feature.as_str() != "browser-automation");
+
+        let decision = resolve_runtime_target(&probe, RuntimeJobLane::BrowserOperator);
+
+        assert_eq!(decision.target, RuntimeExecutionTarget::CloudSandbox);
+        assert!(decision.requires_human_approval);
+        assert!(decision.reason.contains("browser automation"));
+    }
+
+    #[test]
     fn held_job_is_stored_with_blocker() {
         let probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Critical, StoragePressure::Ok);
         let decision = resolve_runtime_target(&probe, RuntimeJobLane::BrowserOperator);

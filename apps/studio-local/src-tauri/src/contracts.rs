@@ -76,6 +76,81 @@ pub enum StoragePressure {
     Critical,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum NativeGraphicsBackend {
+    Vulkan,
+    DirectX12,
+    Metal,
+    WebGpu,
+    OpenGl,
+}
+
+impl NativeGraphicsBackend {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Vulkan => "vulkan",
+            Self::DirectX12 => "directx12",
+            Self::Metal => "metal",
+            Self::WebGpu => "webgpu",
+            Self::OpenGl => "opengl",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum NativeAiExecutionProvider {
+    Cpu,
+    Cuda,
+    TensorRt,
+    DirectMl,
+    CoreMl,
+    OpenVino,
+    Qnn,
+    Xnnpack,
+    WebGpu,
+    WebNn,
+}
+
+impl NativeAiExecutionProvider {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Cpu => "cpu",
+            Self::Cuda => "cuda",
+            Self::TensorRt => "tensorrt",
+            Self::DirectMl => "directml",
+            Self::CoreMl => "coreml",
+            Self::OpenVino => "openvino",
+            Self::Qnn => "qnn",
+            Self::Xnnpack => "xnnpack",
+            Self::WebGpu => "webgpu",
+            Self::WebNn => "webnn",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum LocalRuntimeToolchainFeature {
+    Ffmpeg,
+    Ffprobe,
+    Rapier,
+    BrowserAutomation,
+    AssetOptimizer,
+    ShaderCompiler,
+}
+
+impl LocalRuntimeToolchainFeature {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ffmpeg => "ffmpeg",
+            Self::Ffprobe => "ffprobe",
+            Self::Rapier => "rapier",
+            Self::BrowserAutomation => "browser-automation",
+            Self::AssetOptimizer => "asset-optimizer",
+            Self::ShaderCompiler => "shader-compiler",
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LocalRuntimeProbeReport {
     pub version: u8,
@@ -98,6 +173,9 @@ pub struct LocalRuntimeProbeReport {
     pub ffmpeg_available: bool,
     pub rapier_available: bool,
     pub browser_automation_available: bool,
+    pub native_graphics_backends: Vec<NativeGraphicsBackend>,
+    pub ai_execution_providers: Vec<NativeAiExecutionProvider>,
+    pub local_toolchain: Vec<LocalRuntimeToolchainFeature>,
     pub thermal_state: ThermalState,
     pub storage_pressure: StoragePressure,
     pub preferred_executor: RuntimeExecutionTarget,

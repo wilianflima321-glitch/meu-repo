@@ -17,6 +17,25 @@ export type LocalRuntimeOperatingSystem = 'windows' | 'macos' | 'linux' | 'unkno
 export type LocalRuntimePreferredExecutor = 'local-native' | 'local-worker' | 'cloud-sandbox' | 'held'
 export type LocalRuntimeThermalState = 'nominal' | 'elevated' | 'critical' | 'unknown'
 export type LocalRuntimeConnectionState = 'missing' | 'connected' | 'stale'
+export type LocalRuntimeGraphicsBackend = 'vulkan' | 'directx12' | 'metal' | 'webgpu' | 'opengl'
+export type LocalRuntimeAiExecutionProvider =
+  | 'cpu'
+  | 'cuda'
+  | 'tensorrt'
+  | 'directml'
+  | 'coreml'
+  | 'openvino'
+  | 'qnn'
+  | 'xnnpack'
+  | 'webgpu'
+  | 'webnn'
+export type LocalRuntimeToolchainFeature =
+  | 'ffmpeg'
+  | 'ffprobe'
+  | 'rapier'
+  | 'browser-automation'
+  | 'asset-optimizer'
+  | 'shader-compiler'
 
 export interface LocalRuntimeCapabilityReport {
   version: 1
@@ -34,6 +53,9 @@ export interface LocalRuntimeCapabilityReport {
   npuName?: string | null
   directMlAvailable?: boolean
   onnxRuntimeAvailable?: boolean
+  nativeGraphicsBackends?: LocalRuntimeGraphicsBackend[]
+  aiExecutionProviders?: LocalRuntimeAiExecutionProvider[]
+  localToolchain?: LocalRuntimeToolchainFeature[]
   maxLocalAgents?: number
   preferredExecutor?: LocalRuntimePreferredExecutor
   recommendedViewportQuality?: DeviceRuntimePolicy['viewportQuality']
@@ -82,6 +104,12 @@ function asEnum<T extends string>(value: unknown, allowed: readonly T[]): T | un
 
 function asBoolean(value: unknown): boolean | undefined {
   return typeof value === 'boolean' ? value : undefined
+}
+
+function asEnumArray<T extends string>(value: unknown, allowed: readonly T[]): T[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  const result = value.filter((entry): entry is T => typeof entry === 'string' && allowed.includes(entry as T))
+  return result.length > 0 ? Array.from(new Set(result)) : undefined
 }
 
 function asNumberOrNull(value: unknown): number | null {
@@ -161,11 +189,39 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     candidate.storagePressure
   )
   const npuAvailable = asBoolean(candidate.npuAvailable) ?? asBoolean(candidate.windowsMlAvailable) ?? false
-  const gpuComputeAvailable =
+  const nativeGraphicsBackends = asEnumArray(candidate.nativeGraphicsBackends, [
+    'vulkan',
+    'directx12',
+    'metal',
+    'webgpu',
+    'opengl',
+  ] as const)
+  const aiExecutionProviders = asEnumArray(candidate.aiExecutionProviders, [
+    'cpu',
+    'cuda',
+    'tensorrt',
+    'directml',
+    'coreml',
+    'openvino',
+    'qnn',
+    'xnnpack',
+    'webgpu',
+    'webnn',
+  ] as const)
+  const localToolchain = asEnumArray(candidate.localToolchain, [
+    'ffmpeg',
+    'ffprobe',
+    'rapier',
+    'browser-automation',
+    'asset-optimizer',
+    'shader-compiler',
+  ] as const)
+  const gpuComputeAvailable = (
     asBoolean(candidate.gpuAvailable) ??
     asBoolean(candidate.webGpuAvailable) ??
     asBoolean(candidate.directMlAvailable) ??
-    false
+    Boolean(nativeGraphicsBackends?.length)
+  ) || false
   const maxLocalAgents = pickMaxLocalAgents({
     preferredExecutor,
     cpuCores,
@@ -188,6 +244,9 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     npuName: npuAvailable ? asStringOrNull(candidate.gpuName) ?? null : null,
     directMlAvailable: asBoolean(candidate.directMlAvailable),
     onnxRuntimeAvailable: asBoolean(candidate.onnxRuntimeAvailable),
+    nativeGraphicsBackends,
+    aiExecutionProviders,
+    localToolchain,
     maxLocalAgents,
     preferredExecutor,
     recommendedViewportQuality: pickViewportQuality({
@@ -242,6 +301,33 @@ export function sanitizeLocalRuntimeCapabilityReport(
     npuName: asStringOrNull(candidate.npuName) ?? null,
     directMlAvailable: asBoolean(candidate.directMlAvailable),
     onnxRuntimeAvailable: asBoolean(candidate.onnxRuntimeAvailable),
+    nativeGraphicsBackends: asEnumArray(candidate.nativeGraphicsBackends, [
+      'vulkan',
+      'directx12',
+      'metal',
+      'webgpu',
+      'opengl',
+    ] as const),
+    aiExecutionProviders: asEnumArray(candidate.aiExecutionProviders, [
+      'cpu',
+      'cuda',
+      'tensorrt',
+      'directml',
+      'coreml',
+      'openvino',
+      'qnn',
+      'xnnpack',
+      'webgpu',
+      'webnn',
+    ] as const),
+    localToolchain: asEnumArray(candidate.localToolchain, [
+      'ffmpeg',
+      'ffprobe',
+      'rapier',
+      'browser-automation',
+      'asset-optimizer',
+      'shader-compiler',
+    ] as const),
     maxLocalAgents: asPositiveNumber(candidate.maxLocalAgents),
     preferredExecutor:
       asEnum(candidate.preferredExecutor, ['local-native', 'local-worker', 'cloud-sandbox', 'held']) ?? undefined,
