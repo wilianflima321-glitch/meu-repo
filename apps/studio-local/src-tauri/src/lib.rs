@@ -3,6 +3,7 @@ pub mod daemon;
 pub mod jobs;
 pub mod policy;
 pub mod probe;
+pub mod sidecars;
 
 #[cfg(test)]
 mod tests {
@@ -14,6 +15,7 @@ mod tests {
     use crate::jobs::{RuntimeJobRequest, RuntimeJobStore};
     use crate::policy::resolve_runtime_target;
     use crate::probe::build_probe_from_signals;
+    use crate::sidecars::{build_sidecar_capability_manifest, missing_required_sidecars};
 
     #[test]
     fn strong_device_routes_heavy_jobs_to_local_native() {
@@ -90,6 +92,43 @@ mod tests {
         assert_eq!(decision.target, RuntimeExecutionTarget::CloudSandbox);
         assert!(decision.requires_human_approval);
         assert!(decision.reason.contains("browser automation"));
+    }
+
+    #[test]
+    fn sidecar_manifest_reports_renderer_and_physics_capabilities() {
+        let probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        let manifest = build_sidecar_capability_manifest(&probe);
+
+        assert!(manifest.iter().any(|entry| entry.kind.as_str() == "wgpu-renderer" && entry.available));
+        assert!(manifest.iter().any(|entry| entry.kind.as_str() == "rapier-physics" && entry.available));
+    }
+
+    #[test]
+    fn playtest_missing_renderer_sidecar_falls_back_to_cloud() {
+        let mut probe = build_probe_from_signals("test-device", false, false, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        probe.gpu_available = false;
+        probe.web_gpu_available = false;
+        probe.native_graphics_backends.clear();
+
+        let missing = missing_required_sidecars(&probe, RuntimeJobLane::Playtest);
+        let decision = resolve_runtime_target(&probe, RuntimeJobLane::Playtest);
+
+        assert!(missing.iter().any(|kind| kind.as_str() == "wgpu-renderer"));
+        assert_eq!(decision.target, RuntimeExecutionTarget::CloudSandbox);
+        assert!(decision.reason.contains("sidecars"));
+    }
+
+    #[test]
+    fn asset_import_requires_optimizer_and_media_probe_sidecars() {
+        let mut probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        probe.local_toolchain.clear();
+
+        let missing = missing_required_sidecars(&probe, RuntimeJobLane::AssetImport);
+        let decision = resolve_runtime_target(&probe, RuntimeJobLane::AssetImport);
+
+        assert!(missing.iter().any(|kind| kind.as_str() == "asset-optimizer"));
+        assert!(missing.iter().any(|kind| kind.as_str() == "ffprobe"));
+        assert_eq!(decision.target, RuntimeExecutionTarget::CloudSandbox);
     }
 
     #[test]

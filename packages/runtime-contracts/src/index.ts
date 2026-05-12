@@ -74,6 +74,25 @@ export const LOCAL_RUNTIME_TOOLCHAIN_FEATURES = [
 ] as const
 export type LocalRuntimeToolchainFeature = (typeof LOCAL_RUNTIME_TOOLCHAIN_FEATURES)[number]
 
+export const RUNTIME_SIDECAR_KINDS = [
+  'wgpu-renderer',
+  'ffmpeg',
+  'ffprobe',
+  'onnx-runtime',
+  'browser-operator',
+  'asset-optimizer',
+  'shader-compiler',
+  'rapier-physics',
+] as const
+export type RuntimeSidecarKind = (typeof RUNTIME_SIDECAR_KINDS)[number]
+
+export interface RuntimeSidecarCapability {
+  kind: RuntimeSidecarKind
+  label: string
+  available: boolean
+  reason: string
+}
+
 export interface LocalRuntimeProbeReport {
   version: typeof STUDIO_LOCAL_CONTRACT_VERSION
   generatedAt: string
@@ -193,6 +212,110 @@ export function requiresHumanApprovalForLane(lane: RuntimeJobLane): boolean {
   return lane === 'browser-operator' || lane === 'build-export' || lane === 'render-queue'
 }
 
+export const RUNTIME_LANE_SIDECAR_REQUIREMENTS: Record<RuntimeJobLane, RuntimeSidecarKind[]> = {
+  'ai-local-inference': ['onnx-runtime'],
+  'memory-indexing': [],
+  'asset-import': ['asset-optimizer', 'ffprobe'],
+  'viewport-render': ['wgpu-renderer', 'shader-compiler', 'rapier-physics'],
+  'build-export': ['asset-optimizer'],
+  'browser-operator': ['browser-operator'],
+  'file-sync': [],
+  playtest: ['wgpu-renderer', 'rapier-physics'],
+  'render-queue': ['ffmpeg', 'ffprobe'],
+}
+
+const SIDECAR_LABELS: Record<RuntimeSidecarKind, string> = {
+  'wgpu-renderer': 'Native renderer',
+  ffmpeg: 'FFmpeg encoder',
+  ffprobe: 'Media probe',
+  'onnx-runtime': 'ONNX Runtime',
+  'browser-operator': 'Browser operator runtime',
+  'asset-optimizer': 'Asset optimizer',
+  'shader-compiler': 'Shader compiler',
+  'rapier-physics': 'Rapier physics',
+}
+
+function hasToolchainFeature(
+  probe: Pick<
+    LocalRuntimeProbeReport,
+    | 'ffmpegAvailable'
+    | 'rapierAvailable'
+    | 'browserAutomationAvailable'
+    | 'localToolchain'
+  >,
+  feature: LocalRuntimeToolchainFeature
+): boolean {
+  if (feature === 'ffmpeg' && probe.ffmpegAvailable) {
+    return true
+  }
+  if (feature === 'rapier' && probe.rapierAvailable) {
+    return true
+  }
+  if (feature === 'browser-automation' && probe.browserAutomationAvailable) {
+    return true
+  }
+  return Boolean(probe.localToolchain?.includes(feature))
+}
+
+export function hasRuntimeSidecarCapability(
+  probe: Pick<
+    LocalRuntimeProbeReport,
+    | 'gpuAvailable'
+    | 'webGpuAvailable'
+    | 'nativeGraphicsBackends'
+    | 'onnxRuntimeAvailable'
+    | 'aiExecutionProviders'
+    | 'ffmpegAvailable'
+    | 'rapierAvailable'
+    | 'browserAutomationAvailable'
+    | 'localToolchain'
+  >,
+  kind: RuntimeSidecarKind
+): boolean {
+  switch (kind) {
+    case 'wgpu-renderer':
+      return probe.gpuAvailable || probe.webGpuAvailable || Boolean(probe.nativeGraphicsBackends?.length)
+    case 'ffmpeg':
+      return hasToolchainFeature(probe, 'ffmpeg')
+    case 'ffprobe':
+      return hasToolchainFeature(probe, 'ffprobe')
+    case 'onnx-runtime':
+      return probe.onnxRuntimeAvailable || Boolean(probe.aiExecutionProviders?.length)
+    case 'browser-operator':
+      return hasToolchainFeature(probe, 'browser-automation')
+    case 'asset-optimizer':
+      return hasToolchainFeature(probe, 'asset-optimizer')
+    case 'shader-compiler':
+      return hasToolchainFeature(probe, 'shader-compiler')
+    case 'rapier-physics':
+      return hasToolchainFeature(probe, 'rapier')
+  }
+}
+
+export function buildRuntimeSidecarManifest(
+  probe: Parameters<typeof hasRuntimeSidecarCapability>[0]
+): RuntimeSidecarCapability[] {
+  return RUNTIME_SIDECAR_KINDS.map((kind) => {
+    const available = hasRuntimeSidecarCapability(probe, kind)
+    const label = SIDECAR_LABELS[kind]
+    return {
+      kind,
+      label,
+      available,
+      reason: available
+        ? `${label} is available for local execution.`
+        : `${label} was not confirmed by the Studio Local probe.`,
+    }
+  })
+}
+
+export function missingRuntimeSidecarsForLane(
+  probe: Parameters<typeof hasRuntimeSidecarCapability>[0],
+  lane: RuntimeJobLane
+): RuntimeSidecarKind[] {
+  return RUNTIME_LANE_SIDECAR_REQUIREMENTS[lane].filter((kind) => !hasRuntimeSidecarCapability(probe, kind))
+}
+
 function stableJsonValue(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map(stableJsonValue)
@@ -226,9 +349,11 @@ export function resolveSafeRuntimeTarget(input: {
     | 'directMlAvailable'
     | 'onnxRuntimeAvailable'
     | 'ffmpegAvailable'
+    | 'rapierAvailable'
     | 'browserAutomationAvailable'
     | 'nativeGraphicsBackends'
     | 'aiExecutionProviders'
+    | 'localToolchain'
     | 'thermalState'
     | 'storagePressure'
     | 'availableMemoryMb'
@@ -265,6 +390,13 @@ export function resolveSafeRuntimeTarget(input: {
   }
 
   if (input.lane === 'browser-operator' && !input.probe.browserAutomationAvailable) {
+    return 'cloud-sandbox'
+  }
+
+  if (
+    (input.lane === 'asset-import' || input.lane === 'build-export' || input.lane === 'playtest') &&
+    missingRuntimeSidecarsForLane(input.probe, input.lane).length > 0
+  ) {
     return 'cloud-sandbox'
   }
 

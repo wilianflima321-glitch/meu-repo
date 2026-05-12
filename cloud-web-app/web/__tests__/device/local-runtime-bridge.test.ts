@@ -83,6 +83,7 @@ describe('local runtime bridge', () => {
       recommendedViewportQuality: 'ultra',
       localModelPolicy: 'allow-small-models',
       supportsPersistentMemory: true,
+      rapierAvailable: true,
       nativeGraphicsBackends: ['directx12', 'vulkan'],
       aiExecutionProviders: ['directml', 'cpu'],
       localToolchain: ['ffmpeg', 'ffprobe', 'rapier', 'browser-automation'],

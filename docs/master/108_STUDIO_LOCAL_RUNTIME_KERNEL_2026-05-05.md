@@ -161,3 +161,30 @@ Acceptance evidence:
 - `tools/check-studio-local-runtime-gate.mjs` fails if the capability matrix is removed.
 
 Gate phrase: Native Capability Matrix.
+
+
+## 2026-05-12 Sidecar Execution Manifest
+
+Studio Local now has an explicit Sidecar Execution Manifest so heavy lanes cannot pretend to run locally without the required native base.
+
+| Lane | Required local sidecars | Fallback rule |
+| --- | --- | --- |
+| `ai-local-inference` | ONNX Runtime / provider bridge | If no execution provider is confirmed, route to `cloud-sandbox`. |
+| `viewport-render` | wgpu renderer, shader compiler, Rapier physics | If the renderer stack is incomplete, keep the web shell responsive and isolate heavy work. |
+| `asset-import` | asset optimizer, ffprobe | If optimizer/probe tooling is missing, process assets in cloud sandbox with evidence. |
+| `render-queue` | FFmpeg, ffprobe | If local encode/probe tooling is missing, route render queue encoding to cloud. |
+| `browser-operator` | isolated browser automation runtime | If unavailable locally, require approval and use a sandbox. |
+| `playtest` | wgpu renderer, Rapier physics | If local simulation/render cannot be proven safe, use cloud sandbox. |
+| `build-export` | asset optimizer | If export tooling is incomplete, route to isolated execution. |
+
+This is the internal guardrail that keeps the product honest: the user sees a clean Studio, but the runtime knows whether a job belongs on the device, in a worker, in a native sidecar, or in cloud isolation.
+
+Acceptance evidence:
+
+- `apps/studio-local/src-tauri/src/contracts.rs` defines `RuntimeSidecarKind` and `RuntimeSidecarCapability`.
+- `apps/studio-local/src-tauri/src/sidecars.rs` maps each heavy lane to required sidecars.
+- `apps/studio-local/src-tauri/src/policy.rs` routes missing sidecar lanes to `cloud-sandbox`.
+- `packages/runtime-contracts/src/index.ts` exposes `RUNTIME_SIDECAR_KINDS`, `RUNTIME_LANE_SIDECAR_REQUIREMENTS`, `buildRuntimeSidecarManifest`, and `missingRuntimeSidecarsForLane`.
+- `tools/check-studio-local-runtime-gate.mjs` blocks regressions in the sidecar manifest.
+
+Gate phrase: Sidecar Execution Manifest.

@@ -53,6 +53,7 @@ export interface LocalRuntimeCapabilityReport {
   npuName?: string | null
   directMlAvailable?: boolean
   onnxRuntimeAvailable?: boolean
+  rapierAvailable?: boolean
   nativeGraphicsBackends?: LocalRuntimeGraphicsBackend[]
   aiExecutionProviders?: LocalRuntimeAiExecutionProvider[]
   localToolchain?: LocalRuntimeToolchainFeature[]
@@ -244,6 +245,7 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     npuName: npuAvailable ? asStringOrNull(candidate.gpuName) ?? null : null,
     directMlAvailable: asBoolean(candidate.directMlAvailable),
     onnxRuntimeAvailable: asBoolean(candidate.onnxRuntimeAvailable),
+    rapierAvailable: asBoolean(candidate.rapierAvailable),
     nativeGraphicsBackends,
     aiExecutionProviders,
     localToolchain,
@@ -301,6 +303,7 @@ export function sanitizeLocalRuntimeCapabilityReport(
     npuName: asStringOrNull(candidate.npuName) ?? null,
     directMlAvailable: asBoolean(candidate.directMlAvailable),
     onnxRuntimeAvailable: asBoolean(candidate.onnxRuntimeAvailable),
+    rapierAvailable: asBoolean(candidate.rapierAvailable),
     nativeGraphicsBackends: asEnumArray(candidate.nativeGraphicsBackends, [
       'vulkan',
       'directx12',

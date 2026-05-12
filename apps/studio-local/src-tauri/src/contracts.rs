@@ -151,6 +151,54 @@ impl LocalRuntimeToolchainFeature {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum RuntimeSidecarKind {
+    WgpuRenderer,
+    Ffmpeg,
+    Ffprobe,
+    OnnxRuntime,
+    BrowserOperator,
+    AssetOptimizer,
+    ShaderCompiler,
+    RapierPhysics,
+}
+
+impl RuntimeSidecarKind {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::WgpuRenderer => "wgpu-renderer",
+            Self::Ffmpeg => "ffmpeg",
+            Self::Ffprobe => "ffprobe",
+            Self::OnnxRuntime => "onnx-runtime",
+            Self::BrowserOperator => "browser-operator",
+            Self::AssetOptimizer => "asset-optimizer",
+            Self::ShaderCompiler => "shader-compiler",
+            Self::RapierPhysics => "rapier-physics",
+        }
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::WgpuRenderer => "Native renderer",
+            Self::Ffmpeg => "FFmpeg encoder",
+            Self::Ffprobe => "Media probe",
+            Self::OnnxRuntime => "ONNX Runtime",
+            Self::BrowserOperator => "Browser operator runtime",
+            Self::AssetOptimizer => "Asset optimizer",
+            Self::ShaderCompiler => "Shader compiler",
+            Self::RapierPhysics => "Rapier physics",
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RuntimeSidecarCapability {
+    pub kind: RuntimeSidecarKind,
+    pub label: String,
+    pub available: bool,
+    pub reason: String,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LocalRuntimeProbeReport {
     pub version: u8,

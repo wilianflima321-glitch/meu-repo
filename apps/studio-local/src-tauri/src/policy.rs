@@ -1,7 +1,8 @@
-﻿use crate::contracts::{
+use crate::contracts::{
     LocalRuntimeProbeReport, RuntimeExecutionDecision, RuntimeExecutionTarget, RuntimeJobLane,
     StoragePressure, ThermalState,
 };
+use crate::sidecars::{missing_required_sidecars, sidecar_names};
 
 fn has_native_graphics(probe: &LocalRuntimeProbeReport) -> bool {
     probe.gpu_available || probe.web_gpu_available || !probe.native_graphics_backends.is_empty()
@@ -62,6 +63,26 @@ pub fn resolve_runtime_target(
             can_start: true,
             requires_human_approval: true,
             reason: "No local browser automation runtime was confirmed; route browser operator work to an approved sandbox.".to_string(),
+        };
+    }
+
+    let missing_sidecars = missing_required_sidecars(probe, lane);
+    if !missing_sidecars.is_empty()
+        && matches!(
+            lane,
+            RuntimeJobLane::AssetImport | RuntimeJobLane::BuildExport | RuntimeJobLane::Playtest
+        )
+    {
+        return RuntimeExecutionDecision {
+            lane,
+            target: RuntimeExecutionTarget::CloudSandbox,
+            can_start: true,
+            requires_human_approval: lane.requires_human_approval(),
+            reason: format!(
+                "Missing required local sidecars for {}: {}; route work to cloud sandbox with evidence.",
+                lane.as_str(),
+                sidecar_names(&missing_sidecars)
+            ),
         };
     }
 

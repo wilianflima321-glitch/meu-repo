@@ -20,6 +20,7 @@ const requiredFiles = [
   'apps/studio-local/src-tauri/src/contracts.rs',
   'apps/studio-local/src-tauri/src/probe.rs',
   'apps/studio-local/src-tauri/src/policy.rs',
+  'apps/studio-local/src-tauri/src/sidecars.rs',
   'apps/studio-local/src-tauri/src/jobs.rs',
   'apps/studio-local/src-tauri/src/daemon.rs',
   'packages/runtime-contracts/package.json',
@@ -40,6 +41,7 @@ const cargo = existsSync('apps/studio-local/src-tauri/Cargo.toml') ? read('apps/
 const tauriConfig = existsSync('apps/studio-local/src-tauri/tauri.conf.json') ? read('apps/studio-local/src-tauri/tauri.conf.json') : ''
 const rustContracts = existsSync('apps/studio-local/src-tauri/src/contracts.rs') ? read('apps/studio-local/src-tauri/src/contracts.rs') : ''
 const rustPolicy = existsSync('apps/studio-local/src-tauri/src/policy.rs') ? read('apps/studio-local/src-tauri/src/policy.rs') : ''
+const rustSidecars = existsSync('apps/studio-local/src-tauri/src/sidecars.rs') ? read('apps/studio-local/src-tauri/src/sidecars.rs') : ''
 const rustDaemon = existsSync('apps/studio-local/src-tauri/src/daemon.rs') ? read('apps/studio-local/src-tauri/src/daemon.rs') : ''
 const rustJobs = existsSync('apps/studio-local/src-tauri/src/jobs.rs') ? read('apps/studio-local/src-tauri/src/jobs.rs') : ''
 const rustLib = existsSync('apps/studio-local/src-tauri/src/lib.rs') ? read('apps/studio-local/src-tauri/src/lib.rs') : ''
@@ -85,6 +87,11 @@ for (const phrase of [
   'NATIVE_GRAPHICS_BACKENDS',
   'NATIVE_AI_EXECUTION_PROVIDERS',
   'LOCAL_RUNTIME_TOOLCHAIN_FEATURES',
+  'RUNTIME_SIDECAR_KINDS',
+  'RuntimeSidecarCapability',
+  'RUNTIME_LANE_SIDECAR_REQUIREMENTS',
+  'buildRuntimeSidecarManifest',
+  'missingRuntimeSidecarsForLane',
   'ai-local-inference',
   'memory-indexing',
   'asset-import',
@@ -108,6 +115,8 @@ for (const phrase of [
   'NativeGraphicsBackend',
   'NativeAiExecutionProvider',
   'LocalRuntimeToolchainFeature',
+  'RuntimeSidecarKind',
+  'RuntimeSidecarCapability',
   'ThermalState',
   'StoragePressure',
 ]) {
@@ -123,11 +132,28 @@ for (const phrase of [
   'BrowserOperator',
   'has_native_graphics',
   'has_ai_execution_provider',
+  'missing_required_sidecars',
+  'sidecar_names',
   'CloudSandbox',
   'LocalNative',
   'requires_human_approval',
 ]) {
   assert(rustPolicy.includes(phrase), `Rust policy includes ${phrase}`)
+}
+
+for (const phrase of [
+  'required_sidecars_for_lane',
+  'build_sidecar_capability_manifest',
+  'missing_required_sidecars',
+  'RuntimeSidecarKind::WgpuRenderer',
+  'RuntimeSidecarKind::Ffmpeg',
+  'RuntimeSidecarKind::OnnxRuntime',
+  'RuntimeSidecarKind::BrowserOperator',
+  'RuntimeSidecarKind::AssetOptimizer',
+  'RuntimeSidecarKind::ShaderCompiler',
+  'RuntimeSidecarKind::RapierPhysics',
+]) {
+  assert(rustSidecars.includes(phrase), `Rust sidecar manifest includes ${phrase}`)
 }
 
 for (const phrase of [
@@ -159,6 +185,9 @@ for (const phrase of [
   'ai_local_inference_without_execution_provider_routes_to_cloud_sandbox',
   'viewport_render_without_native_graphics_routes_to_cloud_sandbox',
   'browser_operator_without_browser_runtime_routes_to_approved_sandbox',
+  'sidecar_manifest_reports_renderer_and_physics_capabilities',
+  'playtest_missing_renderer_sidecar_falls_back_to_cloud',
+  'asset_import_requires_optimizer_and_media_probe_sidecars',
 ]) {
   assert(rustLib.includes(phrase), `Rust tests cover persisted job recovery ${phrase}`)
 }
@@ -223,6 +252,7 @@ for (const phrase of [
   'Repository Cartography',
   'Browser Operator',
   'Native Capability Matrix',
+  'Sidecar Execution Manifest',
   'wgpu',
   'FFmpeg',
   'ONNX Runtime',
