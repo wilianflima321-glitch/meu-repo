@@ -95,6 +95,13 @@ requireFile('scripts/check-mobile-pwa-readiness.mjs', 'mobile/PWA readiness gate
 requirePattern('package.json', /qa:mobile-pwa-readiness/, 'enterprise gate must include mobile/PWA readiness')
 requirePattern('lighthouserc.js', /'categories:pwa'/, 'Lighthouse must assert PWA readiness')
 requireFile('app/offline/page.tsx', 'offline route must exist for installable/mobile experience')
+requireFile('instrumentation.ts', 'Next.js instrumentation must initialize observability')
+requireFile('lib/observability/tracing.ts', 'trace propagation helpers must exist')
+requirePattern('lib/observability/tracing.ts', /withTraceSpan/, 'observability must expose span wrappers for long-running jobs')
+requirePattern('lib/observability/tracing.ts', /traceparent/, 'observability must propagate W3C traceparent across jobs and APIs')
+requireFile('app/api/observability/readiness/route.ts', 'observability readiness endpoint must exist')
+requirePattern('app/api/observability/readiness/route.ts', /drainsConfigured/, 'observability readiness must expose drain configuration state')
+requirePattern('package.json', /qa:observability-readiness/, 'enterprise gate must include observability readiness')
 
 const sourceFiles = walk(
   ROOT,
