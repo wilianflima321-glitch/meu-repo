@@ -7,6 +7,8 @@
  * @see docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md (P2: Security)
  */
 
+import { getSamlReadiness } from '@/lib/security/saml';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -62,6 +64,10 @@ export interface SSOReadiness {
   }[];
   samlConfigured: boolean;
   scimConfigured: boolean;
+  samlMetadataUrl: string;
+  samlLoginUrl: string;
+  samlAcsUrl: string;
+  samlRequestSigningConfigured: boolean;
 }
 
 // ============================================================================
@@ -150,18 +156,18 @@ export function getConfiguredProviders(): SSOReadiness {
     ].filter(Boolean),
   });
 
-  const samlConfigured = !!(
-    process.env.SAML_ENTITY_ID &&
-    process.env.SAML_SSO_URL &&
-    process.env.SAML_CERTIFICATE
-  );
+  const saml = getSamlReadiness();
   const scimConfigured = !!(process.env.AETHEL_SCIM_BEARER_TOKEN || process.env.SCIM_BEARER_TOKEN);
 
   return {
-    configured: providers.some((p) => p.configured) || samlConfigured || scimConfigured,
+    configured: providers.some((p) => p.configured) || saml.configured || scimConfigured,
     providers,
-    samlConfigured,
+    samlConfigured: saml.configured,
     scimConfigured,
+    samlMetadataUrl: saml.metadataUrl,
+    samlLoginUrl: saml.loginUrl,
+    samlAcsUrl: saml.acsUrl,
+    samlRequestSigningConfigured: saml.requestSigningConfigured,
   };
 }
 
