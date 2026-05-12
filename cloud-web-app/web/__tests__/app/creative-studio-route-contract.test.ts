@@ -16,13 +16,23 @@ function pagePathFor(href: string) {
 }
 
 describe('creative studio route contract', () => {
-  it('surfaces the previously hidden game, film, VFX, material, animation, and audio editors', () => {
+  it('surfaces the previously hidden game, film, VFX, material, animation, terrain, physics, character, and audio editors', () => {
     expect(CREATIVE_STUDIO_ROUTE_HREFS).toEqual([
       '/studio/level',
       '/studio/scene',
       '/studio/material',
       '/studio/animation',
       '/studio/vfx',
+      '/studio/terrain',
+      '/studio/landscape',
+      '/studio/cloth',
+      '/studio/facial',
+      '/studio/fluid',
+      '/studio/foliage',
+      '/studio/hair',
+      '/studio/rig',
+      '/studio/water',
+      '/studio/sprite',
       '/studio/film',
       '/studio/audio',
     ])

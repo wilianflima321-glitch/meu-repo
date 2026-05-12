@@ -44,6 +44,9 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/studio/scene', maturity: 'BETA', label: 'Scene Studio', notes: 'Wires the existing SceneEditor into the canonical Studio shell' },
   { path: '/studio/material', maturity: 'BETA', label: 'Material Studio', notes: 'Wires the existing MaterialEditor into the canonical Studio shell' },
 
+  { path: '/studio/terrain', maturity: 'BETA', label: 'Terrain Studio', notes: 'Wires TerrainSculptingEditor into the canonical Studio shell' },
+  { path: '/studio/landscape', maturity: 'BETA', label: 'Landscape Studio', notes: 'Wires LandscapeEditor into the canonical Studio shell' },
+
   // ALPHA - Core functionality works but incomplete
   { path: '/nexus', maturity: 'ALPHA', label: 'Nexus 3D Viewport', notes: 'Sem selecao, gizmos, hierarquia' },
   { path: '/preview', maturity: 'ALPHA', label: 'Live Preview', notes: 'Sem HMR confiavel' },
@@ -55,6 +58,15 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/studio/vfx', maturity: 'ALPHA', label: 'VFX Studio', notes: 'Wires the existing NiagaraVFX editor into the canonical Studio shell' },
   { path: '/studio/film', maturity: 'ALPHA', label: 'Film Studio', notes: 'Wires DirectorMode and VideoTimelineEditor into one progressive film surface' },
   { path: '/studio/audio', maturity: 'ALPHA', label: 'Audio Studio', notes: 'Wires SoundCueEditor into the canonical Studio shell' },
+
+  { path: '/studio/cloth', maturity: 'ALPHA', label: 'Cloth Studio', notes: 'Wires ClothSimulationEditor into the canonical Studio shell' },
+  { path: '/studio/facial', maturity: 'ALPHA', label: 'Facial Studio', notes: 'Wires FacialAnimationEditor into the canonical Studio shell' },
+  { path: '/studio/fluid', maturity: 'ALPHA', label: 'Fluid Studio', notes: 'Wires FluidSimulationEditor into the canonical Studio shell' },
+  { path: '/studio/foliage', maturity: 'ALPHA', label: 'Foliage Studio', notes: 'Wires FoliagePainter into the canonical Studio shell' },
+  { path: '/studio/hair', maturity: 'ALPHA', label: 'Hair & Fur Studio', notes: 'Wires HairFurEditor into the canonical Studio shell' },
+  { path: '/studio/rig', maturity: 'ALPHA', label: 'Control Rig Studio', notes: 'Wires ControlRigEditor into the canonical Studio shell' },
+  { path: '/studio/water', maturity: 'ALPHA', label: 'Water Studio', notes: 'Wires WaterEditor into the canonical Studio shell' },
+  { path: '/studio/sprite', maturity: 'ALPHA', label: 'Sprite Studio', notes: 'Wires SpriteEditor into the canonical Studio shell' },
 
   // PROTOTYPE - Shell exists but minimal functionality
   { path: '/debugger', maturity: 'PROTOTYPE', label: 'Debugger', notes: 'Sem conexao DAP real' },
