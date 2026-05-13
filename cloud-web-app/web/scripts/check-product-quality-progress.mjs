@@ -131,6 +131,12 @@ requirePattern('app/api/ai/change/apply/route.ts', /enforceReadReceipts/, 'AI ap
 requirePattern('components/ai/AgentFleetCoordinatorStrip.tsx', /Agent read receipt details/, 'read receipts must be visible in Agent Fleet UX')
 requirePattern('components/ai/AgentFleetCoordinatorStrip.tsx', /Acknowledge context/, 'Agent Fleet must let coordinators acknowledge cartography/research context')
 requirePattern('package.json', /qa:agent-read-receipts/, 'enterprise gate must include agent read receipts')
+requireFile('lib/production/agent-tool-bus.ts', 'internal spine must expose a canonical Agent Tool Bus')
+requireFile('lib/production/multi-resolution-project-memory.ts', 'internal spine must expose multi-resolution project memory')
+requireFile('lib/production/task-evidence-ledger.ts', 'internal spine must expose task evidence ledgers')
+requireFile('lib/production/browser-operator-safety.ts', 'internal spine must expose Browser Operator safety policy')
+requireFile('lib/production/high-risk-action-firewall.ts', 'internal spine must block high-risk autonomous actions')
+requirePattern('package.json', /qa:internal-spine/, 'enterprise gate must include internal spine QA')
 
 const sourceFiles = walk(
   ROOT,
