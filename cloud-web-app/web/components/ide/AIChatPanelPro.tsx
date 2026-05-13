@@ -113,6 +113,7 @@ export default function AIChatPanelPro({
     inputRef,
     insertQuickMention,
     isRecording,
+    isTranscribing,
     mentionState,
     removeAttachment,
     stopRecording,
@@ -344,6 +345,7 @@ export default function AIChatPanelPro({
           imageInputRef={imageInputRef}
           supportsVision={Boolean(resolvedModel.supportsVision)}
           isRecording={isRecording}
+          isTranscribing={isTranscribing}
           transcript={transcript}
           voiceError={voiceError}
           onStopRecording={stopRecording}

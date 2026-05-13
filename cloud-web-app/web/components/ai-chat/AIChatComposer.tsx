@@ -1,7 +1,7 @@
 'use client'
 
 import type { ChangeEvent, FormEvent, KeyboardEvent, Ref } from 'react'
-import { AlertTriangle, ImageIcon, Mic, MicOff, Paperclip, Send, StopCircle } from 'lucide-react'
+import { AlertTriangle, ImageIcon, Loader2, Mic, MicOff, Paperclip, Send, StopCircle } from 'lucide-react'
 import { CodebaseContextPanel, MentionContextPanel } from '@/components/ide/AIChatContextPanels'
 import { AttachmentPreview } from '@/components/ide/AIChatPanelChrome'
 import type {
@@ -45,6 +45,7 @@ interface AIChatComposerProps {
   imageInputRef: Ref<HTMLInputElement>
   supportsVision: boolean
   isRecording: boolean
+  isTranscribing: boolean
   transcript: string
   voiceError?: string | null
   onStopRecording: () => void
@@ -80,6 +81,7 @@ export function AIChatComposer({
   imageInputRef,
   supportsVision,
   isRecording,
+  isTranscribing,
   transcript,
   voiceError,
   onStopRecording,
@@ -131,6 +133,13 @@ export function AIChatComposer({
         </div>
       )}
 
+      {isTranscribing && !isRecording && (
+        <div className="mb-3 flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 py-2 text-xs text-[var(--aethel-info-light)]" role="status" aria-live="polite">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <span>Transcrevendo audio com fallback seguro do servidor...</span>
+        </div>
+      )}
+
       {voiceError && (
         <div className="mb-3 flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-2 text-xs text-[var(--aethel-warning)]" role="alert" aria-live="polite">
           <AlertTriangle className="h-3.5 w-3.5" />
@@ -176,14 +185,15 @@ export function AIChatComposer({
             type="button"
             aria-label={isRecording ? 'Parar gravacao por voz' : 'Iniciar gravacao por voz'}
             onClick={onToggleVoice}
+            disabled={isTranscribing}
             className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${
               isRecording
                 ? 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'
+                : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] disabled:cursor-wait disabled:opacity-60'
             }`}
             title={isRecording ? 'Parar gravacao' : 'Entrada de voz'}
           >
-            {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            {isTranscribing ? <Loader2 className="h-4 w-4 animate-spin" /> : isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </button>
         </div>
 

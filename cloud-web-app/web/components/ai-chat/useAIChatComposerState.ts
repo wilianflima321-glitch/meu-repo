@@ -57,6 +57,7 @@ export function useAIChatComposerState({
 
   const {
     isRecording,
+    isTranscribing,
     transcript,
     voiceError,
     startRecording,
@@ -209,6 +210,7 @@ export function useAIChatComposerState({
     inputRef,
     insertQuickMention,
     isRecording,
+    isTranscribing,
     mentionContextPreview,
     mentionState,
     removeAttachment,
