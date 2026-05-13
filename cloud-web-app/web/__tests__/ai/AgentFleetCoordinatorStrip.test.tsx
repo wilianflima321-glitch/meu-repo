@@ -125,6 +125,54 @@ function lockPayload() {
   }
 }
 
+function readReceiptsPayload(allowed = false) {
+  return {
+    readiness: {
+      allowed,
+      enforcement: allowed ? 'passed' : undefined,
+      code: allowed ? undefined : 'AGENT_READ_RECEIPTS_CARTOGRAPHY_UNREAD',
+      status: allowed ? undefined : 428,
+      message: allowed
+        ? 'Agent has acknowledged production context.'
+        : 'Agent must acknowledge Repository Cartography and Research Intelligence before apply.',
+      metadata: {
+        agent: 'Producer Agent',
+        targetPaths: [],
+        manifestId: 'repo-cartography-project-1-2026-05-12',
+        researchPacketId: 'research-intelligence-project-1',
+        missing: allowed
+          ? []
+          : [
+              'repository-cartography:repo-cartography-project-1-2026-05-12',
+              'research-intelligence:research-intelligence-project-1',
+            ],
+        stale: [],
+        acceptedReceiptIds: allowed ? ['cartography-read', 'research-read'] : [],
+        blockers: [],
+      },
+    },
+    persisted: allowed,
+  }
+}
+
+function mockFleetFetch({
+  fleet = fleetPayload(),
+  locks = lockPayload(),
+  read = readReceiptsPayload(),
+  patchFleet = fleetPayload('Technical Artist Agent', 'selected-agent'),
+} = {}) {
+  return vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input)
+    if (url.includes('/read-receipts')) {
+      if (init?.method === 'POST') return responseJson(readReceiptsPayload(true))
+      return responseJson(read)
+    }
+    if (url.includes('/agent-locks')) return responseJson(locks)
+    if (init?.method === 'PATCH') return responseJson(patchFleet)
+    return responseJson(fleet)
+  })
+}
+
 afterEach(() => {
   vi.unstubAllGlobals()
 })
@@ -132,7 +180,7 @@ afterEach(() => {
 describe('AgentFleetCoordinatorStrip', () => {
   it('keeps the fleet controls compact and coordinator-first', async () => {
     const onSelectAgentId = vi.fn()
-    const fetchMock = vi.fn(() => responseJson(fleetPayload()))
+    const fetchMock = mockFleetFetch()
     vi.stubGlobal('fetch', fetchMock)
 
     render(
@@ -150,16 +198,14 @@ describe('AgentFleetCoordinatorStrip', () => {
     expect(screen.getByText('1 blockers')).toBeInTheDocument()
     expect(screen.getByText('1 lock')).toBeInTheDocument()
     expect(screen.getByText('rescan needed')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Context unread' })).toBeInTheDocument()
 
     await waitFor(() => expect(onSelectAgentId).toHaveBeenCalledWith('universal'))
   })
 
   it('promotes a specialist to coordinator and maps it to the closest command agent', async () => {
     const onSelectAgentId = vi.fn()
-    const fetchMock = vi
-      .fn()
-      .mockImplementationOnce(() => responseJson(fleetPayload()))
-      .mockImplementationOnce(() => responseJson(fleetPayload('Technical Artist Agent', 'selected-agent')))
+    const fetchMock = mockFleetFetch()
     vi.stubGlobal('fetch', fetchMock)
 
     render(
@@ -174,19 +220,17 @@ describe('AgentFleetCoordinatorStrip', () => {
     fireEvent.change(coordinator, { target: { value: 'Technical Artist Agent' } })
 
     await waitFor(() => expect(onSelectAgentId).toHaveBeenCalledWith('artist'))
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PATCH')).toBe(true)
+    })
 
-    const patchInit = fetchMock.mock.calls[1]?.[1] as RequestInit
+    const patchInit = fetchMock.mock.calls.find(([, init]) => init?.method === 'PATCH')?.[1] as RequestInit
     expect(patchInit.method).toBe('PATCH')
     expect(patchInit.body).toBe(JSON.stringify({ centralAgent: 'Technical Artist Agent' }))
   })
 
   it('opens compact scope lock details on demand without cluttering the default strip', async () => {
-    const fetchMock = vi.fn((input: RequestInfo | URL) => {
-      const url = String(input)
-      if (url.includes('/agent-locks')) return responseJson(lockPayload())
-      return responseJson(fleetPayload())
-    })
+    const fetchMock = mockFleetFetch()
     vi.stubGlobal('fetch', fetchMock)
 
     render(
@@ -211,6 +255,49 @@ describe('AgentFleetCoordinatorStrip', () => {
       '/api/projects/project-1/production-state/agent-locks',
       expect.objectContaining({ method: 'GET' })
     )
+  })
+
+  it('surfaces production context read receipts and lets the coordinator acknowledge them', async () => {
+    const fetchMock = mockFleetFetch()
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(
+      <AgentFleetCoordinatorStrip
+        projectId="project-1"
+        selectedAgentId="universal"
+        onSelectAgentId={vi.fn()}
+      />
+    )
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Context unread' }))
+
+    const details = await screen.findByLabelText('Agent read receipt details')
+    expect(within(details).getByText('Context receipts needed')).toBeInTheDocument()
+    expect(within(details).getByText('repository-cartography:repo-cartography-project-1-2026-05-12')).toBeInTheDocument()
+    expect(within(details).getByText('research-intelligence:research-intelligence-project-1')).toBeInTheDocument()
+
+    fireEvent.click(within(details).getByRole('button', { name: 'Acknowledge context' }))
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Context read' })).toBeInTheDocument())
+
+    const postCall = fetchMock.mock.calls.find(
+      ([input, init]) => String(input).includes('/read-receipts') && init?.method === 'POST'
+    )
+    expect(postCall).toBeTruthy()
+    expect(JSON.parse(String(postCall?.[1]?.body))).toMatchObject({
+      agent: 'Producer Agent',
+      enforceReadReceipts: true,
+      receipts: [
+        {
+          kind: 'repository-cartography',
+          ref: 'repo-cartography-project-1-2026-05-12',
+        },
+        {
+          kind: 'research-intelligence',
+          ref: 'research-intelligence-project-1',
+        },
+      ],
+    })
   })
 
   it('does not render or fetch when there is no real project context', () => {

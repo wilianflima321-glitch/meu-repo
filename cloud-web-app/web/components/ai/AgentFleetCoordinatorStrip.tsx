@@ -77,6 +77,32 @@ type AgentLocksApiResponse = {
   snapshot: AgentSurfaceLockSnapshot
 }
 
+type AgentReadReceiptKind = 'repository-cartography' | 'research-intelligence'
+
+type AgentReadinessDecision = {
+  allowed: boolean
+  enforcement?: 'skipped' | 'passed'
+  reason?: string
+  code?: string
+  status?: number
+  message?: string
+  metadata: {
+    agent: string
+    targetPaths: string[]
+    manifestId: string | null
+    researchPacketId: string | null
+    missing: string[]
+    stale: string[]
+    acceptedReceiptIds: string[]
+    blockers: string[]
+  }
+}
+
+type AgentReadReceiptsApiResponse = {
+  readiness: AgentReadinessDecision
+  persisted?: boolean
+}
+
 interface AgentFleetCoordinatorStripProps {
   projectId: string
   selectedAgentId: string
@@ -122,6 +148,23 @@ function formatLockCount(count: number): string {
   return `${count} lock${count === 1 ? '' : 's'}`
 }
 
+function readReceiptLabel(readiness: AgentReadinessDecision | null): string {
+  if (!readiness) return 'Context...'
+  if (readiness.allowed) return 'Context read'
+  if (readiness.code === 'AGENT_READ_RECEIPTS_RESEARCH_BLOCKED') return 'Research blocked'
+  if (!readiness.metadata.manifestId) return 'Cartography needed'
+  return 'Context unread'
+}
+
+function readReceiptTone(readiness: AgentReadinessDecision | null): string {
+  if (!readiness) return 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-tertiary)]'
+  if (readiness.allowed) return 'bg-[color-mix(in_srgb,var(--aethel-success)_14%,transparent)] text-[var(--aethel-success-light)]'
+  if (readiness.code === 'AGENT_READ_RECEIPTS_RESEARCH_BLOCKED') {
+    return 'bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)] text-[var(--aethel-error-light)]'
+  }
+  return 'bg-[color-mix(in_srgb,var(--aethel-warning)_14%,transparent)] text-[var(--aethel-warning-light)]'
+}
+
 async function fetchFleetSnapshot(projectId: string): Promise<AgentFleetSnapshot> {
   const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/production-state/agent-fleet`, {
     method: 'GET',
@@ -147,6 +190,82 @@ async function fetchAgentLocks(projectId: string): Promise<AgentLocksApiResponse
   }
 
   return (await response.json()) as AgentLocksApiResponse
+}
+
+async function fetchReadReceipts(projectId: string, agent: string): Promise<AgentReadinessDecision> {
+  const params = new URLSearchParams({
+    agent,
+    enforceReadReceipts: 'true',
+  })
+  const response = await fetch(
+    `/api/projects/${encodeURIComponent(projectId)}/production-state/read-receipts?${params.toString()}`,
+    {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error(`agent-read-receipts:${response.status}`)
+  }
+
+  const payload = (await response.json()) as AgentReadReceiptsApiResponse
+  return payload.readiness
+}
+
+async function acknowledgeReadReceipts(projectId: string, readiness: AgentReadinessDecision): Promise<AgentReadinessDecision> {
+  const receipts: Array<{
+    agent: string
+    kind: AgentReadReceiptKind
+    ref: string
+    readAt: string
+    evidenceRefs: string[]
+    note: string
+  }> = []
+  const readAt = new Date().toISOString()
+  const agent = readiness.metadata.agent
+
+  if (readiness.metadata.manifestId) {
+    receipts.push({
+      agent,
+      kind: 'repository-cartography',
+      ref: readiness.metadata.manifestId,
+      readAt,
+      evidenceRefs: ['agent-fleet:context-receipts'],
+      note: 'Coordinator acknowledged Repository Cartography from Agent Fleet.',
+    })
+  }
+
+  if (readiness.metadata.researchPacketId) {
+    receipts.push({
+      agent,
+      kind: 'research-intelligence',
+      ref: readiness.metadata.researchPacketId,
+      readAt,
+      evidenceRefs: ['agent-fleet:context-receipts'],
+      note: 'Coordinator acknowledged Research Intelligence from Agent Fleet.',
+    })
+  }
+
+  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/production-state/read-receipts`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      agent,
+      enforceReadReceipts: true,
+      receipts,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`agent-read-receipts.patch:${response.status}`)
+  }
+
+  const payload = (await response.json()) as AgentReadReceiptsApiResponse
+  return payload.readiness
 }
 
 async function patchFleetSnapshot(projectId: string, patch: Partial<Pick<AgentFleetSnapshot, 'centralAgent' | 'mode' | 'paused'>>) {
@@ -175,18 +294,24 @@ export function AgentFleetCoordinatorStrip({
 }: AgentFleetCoordinatorStripProps) {
   const [snapshot, setSnapshot] = useState<AgentFleetSnapshot | null>(null)
   const [lockPayload, setLockPayload] = useState<AgentLocksApiResponse | null>(null)
+  const [readiness, setReadiness] = useState<AgentReadinessDecision | null>(null)
   const [isLockPanelOpen, setIsLockPanelOpen] = useState(false)
+  const [isReadinessPanelOpen, setIsReadinessPanelOpen] = useState(false)
   const [isLoadingLocks, setIsLoadingLocks] = useState(false)
+  const [isAcknowledgingReadiness, setIsAcknowledgingReadiness] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isUnavailable, setIsUnavailable] = useState(false)
   const [lockError, setLockError] = useState(false)
+  const [readinessError, setReadinessError] = useState(false)
   const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   useEffect(() => {
     if (!canRenderFleet(projectId)) {
       setSnapshot(null)
       setLockPayload(null)
+      setReadiness(null)
       setIsLockPanelOpen(false)
+      setIsReadinessPanelOpen(false)
       return
     }
 
@@ -194,10 +319,20 @@ export function AgentFleetCoordinatorStrip({
     setIsUnavailable(false)
     setLockPayload(null)
     setLockError(false)
+    setReadiness(null)
+    setReadinessError(false)
 
     fetchFleetSnapshot(projectId)
       .then((next) => {
-        if (active) setSnapshot(next)
+        if (!active) return
+        setSnapshot(next)
+        fetchReadReceipts(projectId, next.centralAgent)
+          .then((nextReadiness) => {
+            if (active) setReadiness(nextReadiness)
+          })
+          .catch(() => {
+            if (active) setReadinessError(true)
+          })
       })
       .catch(() => {
         if (active) setIsUnavailable(true)
@@ -223,6 +358,17 @@ export function AgentFleetCoordinatorStrip({
     }
   }, [projectId])
 
+  const refreshReadiness = useCallback(async (agent: string) => {
+    if (!canRenderFleet(projectId)) return
+    setReadinessError(false)
+    try {
+      const next = await fetchReadReceipts(projectId, agent)
+      setReadiness(next)
+    } catch {
+      setReadinessError(true)
+    }
+  }, [projectId])
+
   const centralCommandAgent = useMemo(
     () => (snapshot ? mapFleetAgentToCommandAgentId(snapshot.centralAgent) : selectedAgentId),
     [selectedAgentId, snapshot]
@@ -245,6 +391,7 @@ export function AgentFleetCoordinatorStrip({
         const next = await patchFleetSnapshot(projectId, patch)
         setSnapshot(next)
         setIsUnavailable(false)
+        if (patch.centralAgent) void refreshReadiness(patch.centralAgent)
       } catch {
         setSnapshot(previous)
         setIsUnavailable(true)
@@ -252,8 +399,23 @@ export function AgentFleetCoordinatorStrip({
         setIsUpdating(false)
       }
     },
-    [projectId, snapshot]
+    [projectId, refreshReadiness, snapshot]
   )
+
+  const acknowledgeContext = useCallback(async () => {
+    if (!readiness || !snapshot || !canRenderFleet(projectId)) return
+    setIsAcknowledgingReadiness(true)
+    setReadinessError(false)
+
+    try {
+      const next = await acknowledgeReadReceipts(projectId, readiness)
+      setReadiness(next)
+    } catch {
+      setReadinessError(true)
+    } finally {
+      setIsAcknowledgingReadiness(false)
+    }
+  }, [projectId, readiness, snapshot])
 
   if (!canRenderFleet(projectId) || (!snapshot && !isUnavailable)) {
     return null
@@ -394,12 +556,92 @@ export function AgentFleetCoordinatorStrip({
             {formatLockCount(snapshot.activeLockCount)}
           </button>
         )}
+        <button
+          type="button"
+          onClick={() => setIsReadinessPanelOpen((value) => !value)}
+          className={cn(
+            `rounded-full px-2 py-0.5 hover:bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] ${focusClass}`,
+            readReceiptTone(readiness)
+          )}
+          aria-expanded={isReadinessPanelOpen}
+          aria-controls="agent-read-receipt-details"
+        >
+          {readReceiptLabel(readiness)}
+        </button>
         {snapshot.staleSurfaceCount > 0 && (
           <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-2 py-0.5 text-[var(--aethel-warning-light)]">
             rescan needed
           </span>
         )}
       </div>
+
+      {isReadinessPanelOpen && (
+        <div
+          id="agent-read-receipt-details"
+          className="mt-2 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] p-3 text-[11px] text-[var(--aethel-text-tertiary)]"
+          aria-label="Agent read receipt details"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-semibold text-[var(--aethel-text-secondary)]">
+              {readiness?.allowed ? 'Context receipts accepted' : 'Context receipts needed'}
+            </span>
+            {readiness?.metadata.acceptedReceiptIds.length ? (
+              <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_14%,transparent)] px-2 py-0.5 text-[var(--aethel-success-light)]">
+                {readiness.metadata.acceptedReceiptIds.length} receipts
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => void refreshReadiness(snapshot.centralAgent)}
+              className={`ml-auto rounded-lg border border-[var(--aethel-border-primary)] px-2 py-1 text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-primary)] ${focusClass}`}
+            >
+              Refresh
+            </button>
+          </div>
+
+          <p className="mt-2 text-[var(--aethel-text-quaternary)]">
+            {readiness?.allowed
+              ? 'This coordinator has acknowledged the current cartography and research packet. Target file receipts are still checked at apply time.'
+              : readiness?.message ?? 'Readiness is loading. Agents should stay in planning mode until context is acknowledged.'}
+          </p>
+
+          {readiness?.metadata.missing.length ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {readiness.metadata.missing.slice(0, 4).map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_28%,transparent)] px-2 py-0.5 text-[var(--aethel-warning-light)]"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          {readiness?.metadata.blockers.length ? (
+            <div className="mt-2 text-[var(--aethel-error-light)]">
+              {readiness.metadata.blockers.slice(0, 2).join(' / ')}
+            </div>
+          ) : null}
+
+          {readinessError && (
+            <p className="mt-2 text-[var(--aethel-warning-light)]">
+              Read receipt readiness is temporarily unavailable. Apply gates still enforce server-side protection.
+            </p>
+          )}
+
+          {readiness && !readiness.allowed && readiness.metadata.manifestId && readiness.code !== 'AGENT_READ_RECEIPTS_RESEARCH_BLOCKED' && (
+            <button
+              type="button"
+              onClick={() => void acknowledgeContext()}
+              className={`mt-3 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 py-1.5 text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] ${focusClass}`}
+              disabled={isAcknowledgingReadiness}
+            >
+              {isAcknowledgingReadiness ? 'Acknowledging...' : 'Acknowledge context'}
+            </button>
+          )}
+        </div>
+      )}
 
       {isLockPanelOpen && (
         <div

@@ -51,6 +51,10 @@ requirePattern('__tests__/production/agent-read-receipts.test.ts', /AGENT_READ_R
 requirePattern('__tests__/production/agent-read-receipts.test.ts', /Producer Agent/, 'tests must cover coordinator delegated receipts')
 requireFile('__tests__/api/production-state-read-receipts-route.test.ts', 'API tests must cover read receipt persistence')
 requirePattern('__tests__/api/ai-change-apply-agent-scope-route.test.ts', /enforceReadReceipts/, 'apply tests must cover read receipt enforcement')
+requirePattern('components/ai/AgentFleetCoordinatorStrip.tsx', /fetchReadReceipts/, 'Agent Fleet must surface read receipt readiness')
+requirePattern('components/ai/AgentFleetCoordinatorStrip.tsx', /Agent read receipt details/, 'Agent Fleet must expose compact read receipt evidence')
+requirePattern('components/ai/AgentFleetCoordinatorStrip.tsx', /Acknowledge context/, 'Coordinator must be able to acknowledge context receipts from the fleet strip')
+requirePattern('__tests__/ai/AgentFleetCoordinatorStrip.test.tsx', /Acknowledge context/, 'Agent Fleet tests must cover read receipt acknowledgement')
 
 requirePattern('package.json', /qa:agent-read-receipts/, 'package scripts must expose read receipt QA')
 requirePattern('package.json', /qa:enterprise-gate[\s\S]*qa:agent-read-receipts/, 'enterprise gate must include read receipt QA')

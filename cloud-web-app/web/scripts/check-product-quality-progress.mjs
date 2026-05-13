@@ -128,6 +128,8 @@ requirePattern('lib/production/agent-read-receipts.ts', /repository-cartography/
 requirePattern('lib/production/agent-read-receipts.ts', /research-intelligence/, 'read receipts must force Research Intelligence acknowledgement')
 requireFile('app/api/projects/[id]/production-state/read-receipts/route.ts', 'read receipts must have a production-state API route')
 requirePattern('app/api/ai/change/apply/route.ts', /enforceReadReceipts/, 'AI apply must support read receipt enforcement')
+requirePattern('components/ai/AgentFleetCoordinatorStrip.tsx', /Agent read receipt details/, 'read receipts must be visible in Agent Fleet UX')
+requirePattern('components/ai/AgentFleetCoordinatorStrip.tsx', /Acknowledge context/, 'Agent Fleet must let coordinators acknowledge cartography/research context')
 requirePattern('package.json', /qa:agent-read-receipts/, 'enterprise gate must include agent read receipts')
 
 const sourceFiles = walk(
