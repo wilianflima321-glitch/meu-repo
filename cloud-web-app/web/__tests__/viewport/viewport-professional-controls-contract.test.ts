@@ -5,6 +5,16 @@ describe('viewport professional controls contract', () => {
   const chromeSource = readFileSync('components/viewport/ViewportChrome.tsx', 'utf8')
   const sceneSource = readFileSync('components/viewport/ViewportSceneCanvas.tsx', 'utf8')
   const cameraPresetSource = readFileSync('components/viewport/ViewportCameraPresetApplier.tsx', 'utf8')
+  const inspectorSource = readFileSync('components/viewport/SceneViewportInspector.tsx', 'utf8')
+  const outlinerSource = readFileSync('components/viewport/SceneViewportOutliner.tsx', 'utf8')
+
+  it('keeps AethelViewport3D as a slim orchestrator instead of a god component', () => {
+    expect(source.split(/\r?\n/).length).toBeLessThanOrEqual(350)
+    expect(source).toContain('SceneViewportInspector')
+    expect(source).toContain('SceneViewportOutliner')
+    expect(inspectorSource).toContain('Pivot & Constraints')
+    expect(outlinerSource).toContain('Hierarchy')
+  })
 
   it('keeps DCC-grade transform hotkeys without hijacking editable fields', () => {
     expect(source).toContain('isEditableViewportKeyboardTarget')
