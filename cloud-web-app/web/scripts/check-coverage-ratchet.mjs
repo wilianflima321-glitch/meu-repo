@@ -19,8 +19,8 @@ function requireThresholds(relativePath) {
   for (const metric of ['statements', 'branches', 'functions', 'lines']) {
     requirePattern(
       relativePath,
-      new RegExp(`${metric}:\\s*(3[0-9]|[4-9][0-9]|100)\\b`),
-      `${metric} coverage threshold must be at least 30%`
+      new RegExp(`${metric}:\\s*(7[0-9]|8[0-9]|9[0-9]|100)\\b`),
+      `${metric} coverage threshold must be at least 70%`
     )
   }
 }
@@ -44,4 +44,4 @@ if (failures.length) {
   process.exit(1)
 }
 
-console.log(`[coverage-ratchet] PASS vitest=${vitest} coverage=${coverage} thresholds>=30`)
+console.log(`[coverage-ratchet] PASS vitest=${vitest} coverage=${coverage} thresholds>=70`)

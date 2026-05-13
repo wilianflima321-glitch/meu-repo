@@ -48,7 +48,7 @@ const config: Config = {
   ],
   
   // Coverage configuration — Round 81 enables coverage with progressive
-  // thresholds so every PR nudges the codebase toward the 70% target without
+  // thresholds so every PR nudges the codebase toward the 70% floor without
   // failing the current green build. Ratchet these numbers up as new tests land.
   collectCoverage: process.env.CI === 'true' || process.env.COVERAGE === '1',
   coverageProvider: 'v8',
@@ -104,13 +104,13 @@ const config: Config = {
     '!**/__tests__/**',
   ],
   coverageThreshold: {
-    // Global floor — starts low (matches today's reality on the focused scope)
+    // Global floor — now enforces the 70% market-grade floor on the focused scope
     // and ratchets up each round. Do NOT lower these numbers.
     global: {
-      statements: 30,
-      branches: 30,
-      functions: 30,
-      lines: 30,
+      statements: 70,
+      branches: 70,
+      functions: 70,
+      lines: 70,
     },
     // Per-file ratchets for modules we already cover well.
     './components/ai-chat/chat-utils.ts': {

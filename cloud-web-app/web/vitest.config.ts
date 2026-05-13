@@ -3,7 +3,7 @@
  *
  * Configures test environment with jsdom for DOM APIs.
  *
- * Round 82: keeps coverage executable with a focused 30% ratchet over tested
+ * Round 82: keeps coverage executable with a focused 70% ratchet over tested
  * production contracts, viewport modules, and canonical UI helpers.
  * primitives whose tests are already green — the goal is to ratchet
  * coverage up each round without hiding behind a broken coverage command.
@@ -87,10 +87,10 @@ export default defineConfig({
       ],
       // Progressive thresholds — ratchet up each round. Do NOT lower these numbers.
       thresholds: {
-        statements: 30,
-        branches: 30,
-        functions: 30,
-        lines: 30,
+        statements: 70,
+        branches: 70,
+        functions: 70,
+        lines: 70,
         // Per-file ratchets for modules already well-covered.
         'components/ai-chat/chat-utils.ts': {
           statements: 90,
