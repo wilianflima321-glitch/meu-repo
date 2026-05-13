@@ -338,7 +338,12 @@ export function evaluateAgentToolInvocation(invocation: AgentToolInvocation): Ag
     blockers.push(`${invocation.mode} mode cannot use ${toolDefinition.label}.`)
   }
   if (toolDefinition.approval === 'review') requiredApprovals.push('review approval')
-  if (toolDefinition.approval === 'explicit-human') requiredApprovals.push('explicit human approval')
+  if (toolDefinition.approval === 'explicit-human') {
+    requiredApprovals.push('explicit human approval')
+    if (!invocation.approvalToken) {
+      blockers.push(`${toolDefinition.label} requires an explicit human approval token before execution.`)
+    }
+  }
   if (toolDefinition.requiresReplay) requiredEvidence.push('replay evidence')
   if (toolDefinition.requiresRollback) requiredEvidence.push('rollback plan')
   if (toolDefinition.costClass !== 'free' && typeof invocation.maxCostUsd !== 'number') {
@@ -383,7 +388,7 @@ export function evaluateAgentToolInvocation(invocation: AgentToolInvocation): Ag
     warnings.push(...browserDecision.warnings)
   }
 
-  const runtimeTarget = blockers.length > 0 || toolDefinition.approval === 'explicit-human'
+  const runtimeTarget = blockers.length > 0
     ? 'human-held'
     : pickRuntime(toolDefinition, invocation.requestedRuntime)
   const status = blockers.length > 0 ? 'held' : 'allowed'

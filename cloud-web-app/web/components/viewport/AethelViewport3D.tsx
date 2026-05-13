@@ -36,6 +36,13 @@ import {
   type GizmoTransformPersistenceChipTone,
 } from '@/lib/viewport/gizmo-transform-persistence'
 import {
+  buildGizmoEliteControlState,
+  buildGizmoInspectorSummary,
+  canApplyGizmoEliteControl,
+  type GizmoAxisPlaneConstraint,
+  type GizmoPivotMode,
+} from '@/lib/viewport/gizmo-elite-controls'
+import {
   formatViewportAssetSize,
   type ViewportAssetImportMetadata,
 } from '@/lib/viewport/viewport-asset-import'
@@ -84,6 +91,10 @@ type AethelViewport3DProps = {
   onSnapEnabledChange: (enabled: boolean) => void
   onAIAction?: (action: string) => void
   onGizmoTransformOperation?: (operation: GizmoTransformOperation) => void
+  gizmoConstraint?: GizmoAxisPlaneConstraint
+  gizmoPivotMode?: GizmoPivotMode
+  onGizmoConstraintChange?: (constraint: GizmoAxisPlaneConstraint) => void
+  onGizmoPivotModeChange?: (pivotMode: GizmoPivotMode) => void
   gizmoMemoryStatus?: GizmoTransformPersistenceStatus
   gizmoMemoryLabel?: string | null
   gizmoMemoryError?: string | null
@@ -98,6 +109,8 @@ type SceneObjectMeshProps = {
   primarySelected: boolean
   transformMode: ViewportTransformMode
   transformSpace: ViewportTransformSpace
+  gizmoConstraint: GizmoAxisPlaneConstraint
+  gizmoPivotMode: GizmoPivotMode
   snapEnabled: boolean
   onTransformChange: (id: string, patch: Partial<ViewportSceneObject>) => void
   onTransformOperation?: (operation: GizmoTransformOperation) => void
@@ -269,6 +282,8 @@ function SceneObjectMesh({
   primarySelected,
   transformMode,
   transformSpace,
+  gizmoConstraint,
+  gizmoPivotMode,
   snapEnabled,
   visualGlowColor,
   visualGlowIntensity,
@@ -397,6 +412,8 @@ function SceneObjectMesh({
     <TransformGizmoProfessional
       mode={transformMode}
       space={transformSpace}
+      constraint={gizmoConstraint}
+      pivotMode={gizmoPivotMode}
       snapEnabled={snapEnabled}
       translationSnap={0.5}
       rotationSnapDegrees={15}
@@ -414,6 +431,8 @@ function ViewportScene({
   selectedIds,
   transformMode,
   transformSpace,
+  gizmoConstraint,
+  gizmoPivotMode,
   snapEnabled,
   creativeMode,
   renderMode = 'draft',
@@ -431,6 +450,8 @@ function ViewportScene({
   cameraPreset,
 }: Omit<AethelViewport3DProps, 'onTogglePlayTest' | 'onTransformModeChange' | 'onTransformSpaceChange' | 'onSnapEnabledChange' | 'onAIAction'> & {
   cameraPreset: ViewportCameraPreset
+  gizmoConstraint: GizmoAxisPlaneConstraint
+  gizmoPivotMode: GizmoPivotMode
 }) {
   const primarySelectedId = selectedIds[0] ?? null
   const selectedObject = objects.find((object) => object.id === primarySelectedId) ?? null
@@ -496,6 +517,8 @@ function ViewportScene({
             primarySelected={primarySelectedId === object.id}
             transformMode={transformMode}
             transformSpace={transformSpace}
+            gizmoConstraint={gizmoConstraint}
+            gizmoPivotMode={gizmoPivotMode}
             snapEnabled={snapEnabled}
             visualGlowColor={selectedIds.includes(object.id) ? abilityAccentColor ?? 0x60a5fa : undefined}
             visualGlowIntensity={selectedIds.includes(object.id) ? vfxGlowIntensity + cinematicGlowIntensity : 0}
@@ -593,8 +616,11 @@ export function SceneViewportOutliner({
 
 export function SceneViewportInspector({
   selectedObject,
+  selectedIds,
   transformMode,
   transformSpace,
+  gizmoConstraint,
+  gizmoPivotMode,
   snapEnabled,
   isPlaying,
   facialBlendShapeCount,
@@ -609,12 +635,17 @@ export function SceneViewportInspector({
   onOpenAbilityEditor,
   onTransformModeChange,
   onTransformSpaceChange,
+  onGizmoConstraintChange,
+  onGizmoPivotModeChange,
   onSnapEnabledChange,
   onTogglePlayTest,
 }: {
   selectedObject: ViewportSceneObject | null
+  selectedIds: string[]
   transformMode: ViewportTransformMode
   transformSpace: ViewportTransformSpace
+  gizmoConstraint: GizmoAxisPlaneConstraint
+  gizmoPivotMode: GizmoPivotMode
   snapEnabled: boolean
   isPlaying: boolean
   facialBlendShapeCount: number
@@ -629,10 +660,28 @@ export function SceneViewportInspector({
   onOpenAbilityEditor: () => void
   onTransformModeChange: (mode: ViewportTransformMode) => void
   onTransformSpaceChange: (space: ViewportTransformSpace) => void
+  onGizmoConstraintChange: (constraint: GizmoAxisPlaneConstraint) => void
+  onGizmoPivotModeChange: (pivotMode: GizmoPivotMode) => void
   onSnapEnabledChange: (enabled: boolean) => void
   onTogglePlayTest: () => void
 }) {
   const formatter = useCallback((value: number) => value.toFixed(2), [])
+  const eliteState = buildGizmoEliteControlState({
+    mode: transformMode,
+    space: transformSpace,
+    pivotMode: gizmoPivotMode,
+    constraint: gizmoConstraint,
+    selectedObjectIds: selectedIds,
+    activeObjectId: selectedObject?.id ?? null,
+    lockedObjectIds: selectedObject?.locked ? [selectedObject.id] : [],
+    source: 'user',
+  })
+  const eliteSummary = buildGizmoInspectorSummary(eliteState)
+  const summaryToneClass = {
+    ready: 'border-[color-mix(in_srgb,var(--aethel-success)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] text-[var(--aethel-success-light)]',
+    warning: 'border-[color-mix(in_srgb,var(--aethel-warning)_38%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]',
+    blocked: 'border-[color-mix(in_srgb,var(--aethel-error)_38%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]',
+  } satisfies Record<typeof eliteSummary.tone, string>
 
   return (
     <div className="flex h-full flex-col bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)]">
@@ -688,6 +737,55 @@ export function SceneViewportInspector({
               {snapEnabled ? 'Snap 0.5' : 'Free'}
             </button>
           </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Pivot & Constraints</p>
+          <div className={`rounded-2xl border p-3 text-xs ${summaryToneClass[eliteSummary.tone]}`} role={eliteSummary.tone === 'blocked' ? 'alert' : 'status'}>
+            <p className="font-semibold">{eliteSummary.title}</p>
+            <p className="mt-1 text-[var(--aethel-text-secondary)]">{eliteSummary.detail}</p>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {eliteSummary.chips.map((chip) => (
+                <span key={chip} className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-2 py-1 text-[10px] uppercase tracking-[0.08em] text-[var(--aethel-text-tertiary)]">
+                  {chip}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="mt-2 grid grid-cols-4 gap-1">
+            {(['free', 'x', 'y', 'z', 'xy', 'xz', 'yz', 'screen'] as const).map((constraint) => (
+              <button
+                key={constraint}
+                type="button"
+                aria-label={`Usar constraint ${constraint}`}
+                onClick={() => onGizmoConstraintChange(constraint)}
+                className={gizmoConstraint === constraint ? activeButton : compactTextButton}
+              >
+                {constraint.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {([
+              ['median', 'Median'],
+              ['active-object', 'Active'],
+              ['individual-origins', 'Individual'],
+              ['world-origin', 'World 0'],
+            ] as const).map(([pivotMode, label]) => (
+              <button
+                key={pivotMode}
+                type="button"
+                aria-label={`Usar pivot ${label}`}
+                onClick={() => onGizmoPivotModeChange(pivotMode)}
+                className={gizmoPivotMode === pivotMode ? activeButton : compactTextButton}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] text-[var(--aethel-text-quaternary)]">
+            {canApplyGizmoEliteControl(eliteState) ? 'Ready for transform evidence.' : 'Held until blockers are resolved.'}
+          </p>
         </div>
 
         <div>
@@ -806,6 +904,10 @@ export function AethelViewport3D({
   onSnapEnabledChange,
   onAIAction,
   onGizmoTransformOperation,
+  gizmoConstraint: controlledGizmoConstraint,
+  gizmoPivotMode: controlledGizmoPivotMode,
+  onGizmoConstraintChange,
+  onGizmoPivotModeChange,
   gizmoMemoryStatus = 'idle',
   gizmoMemoryLabel,
   gizmoMemoryError,
@@ -816,7 +918,30 @@ export function AethelViewport3D({
   const [aiCommand, setAiCommand] = useState('move this object 2 up')
   const [assetDragActive, setAssetDragActive] = useState(false)
   const [cameraPreset, setCameraPreset] = useState<ViewportCameraPreset>('perspective')
+  const [localGizmoConstraint, setLocalGizmoConstraint] = useState<GizmoAxisPlaneConstraint>('free')
+  const [localGizmoPivotMode, setLocalGizmoPivotMode] = useState<GizmoPivotMode>('median')
+  const gizmoConstraint = controlledGizmoConstraint ?? localGizmoConstraint
+  const gizmoPivotMode = controlledGizmoPivotMode ?? localGizmoPivotMode
+  const commitGizmoConstraint = useCallback((constraint: GizmoAxisPlaneConstraint) => {
+    setLocalGizmoConstraint(constraint)
+    onGizmoConstraintChange?.(constraint)
+  }, [onGizmoConstraintChange])
+  const commitGizmoPivotMode = useCallback((pivotMode: GizmoPivotMode) => {
+    setLocalGizmoPivotMode(pivotMode)
+    onGizmoPivotModeChange?.(pivotMode)
+  }, [onGizmoPivotModeChange])
   const selectedObject = objects.find((object) => object.id === selectedIds[0]) ?? null
+  const topGizmoState = buildGizmoEliteControlState({
+    mode: transformMode,
+    space: transformSpace,
+    pivotMode: gizmoPivotMode,
+    constraint: gizmoConstraint,
+    selectedObjectIds: selectedIds,
+    activeObjectId: selectedObject?.id ?? null,
+    lockedObjectIds: objects.filter((object) => selectedIds.includes(object.id) && object.locked).map((object) => object.id),
+    source: 'user',
+  })
+  const topGizmoSummary = buildGizmoInspectorSummary(topGizmoState)
   const gizmoMemoryChip = buildGizmoTransformPersistenceChip({
     status: gizmoMemoryStatus,
     canPersist: gizmoMemoryCanPersist,
@@ -881,6 +1006,26 @@ export function AethelViewport3D({
         onTransformModeChange('scale')
         return
       }
+      if (event.code === 'KeyX') {
+        event.preventDefault()
+        commitGizmoConstraint(gizmoConstraint === 'x' ? 'free' : 'x')
+        return
+      }
+      if (event.code === 'KeyY') {
+        event.preventDefault()
+        commitGizmoConstraint(gizmoConstraint === 'y' ? 'free' : 'y')
+        return
+      }
+      if (event.code === 'KeyZ') {
+        event.preventDefault()
+        commitGizmoConstraint(gizmoConstraint === 'z' ? 'free' : 'z')
+        return
+      }
+      if (event.code === 'KeyG') {
+        event.preventDefault()
+        commitGizmoPivotMode(gizmoPivotMode === 'median' ? 'active-object' : 'median')
+        return
+      }
       if (event.code === 'Escape') {
         event.preventDefault()
         onSelectionChange([])
@@ -889,7 +1034,7 @@ export function AethelViewport3D({
 
     window.addEventListener('keydown', handleViewportHotkeys)
     return () => window.removeEventListener('keydown', handleViewportHotkeys)
-  }, [onSelectionChange, onTransformModeChange])
+  }, [commitGizmoConstraint, commitGizmoPivotMode, gizmoConstraint, gizmoPivotMode, onSelectionChange, onTransformModeChange])
 
   return (
     <div
@@ -926,6 +1071,12 @@ export function AethelViewport3D({
             {preset.id === 'perspective' ? <Camera className="h-4 w-4" /> : preset.label}
           </button>
         ))}
+        <span
+          className="rounded-full border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.72)] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--aethel-text-tertiary)]"
+          title={topGizmoSummary.detail}
+        >
+          {topGizmoSummary.chips.slice(2, 4).join(' / ')}
+        </span>
       </div>
 
       {gizmoMemoryChip.visible ? (
@@ -968,7 +1119,7 @@ export function AethelViewport3D({
             Apply
           </button>
         </div>
-        <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">Shift+Click seleciona vários. W/E/R trocam gizmo. Esc limpa seleção. Use Top/Front/Side para revisar proporção.</p>
+        <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">Shift+Click seleciona vários. W/E/R trocam gizmo. X/Y/Z travam eixos. G alterna pivot. Esc limpa seleção. Use Top/Front/Side para revisar proporção.</p>
           <div className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
             <span className="font-medium text-[var(--aethel-text-primary)]">Asset intake:</span> {assetImportStatus}
           </div>
@@ -988,6 +1139,8 @@ export function AethelViewport3D({
         selectedIds={selectedIds}
         transformMode={transformMode}
         transformSpace={transformSpace}
+        gizmoConstraint={gizmoConstraint}
+        gizmoPivotMode={gizmoPivotMode}
         snapEnabled={snapEnabled}
         creativeMode={creativeMode}
         renderMode={renderMode}

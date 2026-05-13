@@ -50,6 +50,21 @@ export interface GizmoUndoVisualPacket {
   requiresReview: boolean
 }
 
+export interface GizmoConstraintAxes {
+  showX: boolean
+  showY: boolean
+  showZ: boolean
+  label: string
+  hint: string
+}
+
+export interface GizmoInspectorSummary {
+  tone: 'ready' | 'warning' | 'blocked'
+  title: string
+  detail: string
+  chips: string[]
+}
+
 const DEFAULT_SNAP: GizmoEliteSnapSettings = {
   enabled: true,
   translateStep: 0.25,
@@ -65,6 +80,42 @@ function isConstraintCompatible(mode: GizmoEliteMode, constraint: GizmoAxisPlane
   if (constraint === 'free') return true
   if (mode === 'rotate') return constraint === 'x' || constraint === 'y' || constraint === 'z' || constraint === 'screen'
   return true
+}
+
+export function getGizmoConstraintAxes(constraint: GizmoAxisPlaneConstraint): GizmoConstraintAxes {
+  switch (constraint) {
+    case 'x':
+      return { showX: true, showY: false, showZ: false, label: 'X', hint: 'Constrain transform to the X axis.' }
+    case 'y':
+      return { showX: false, showY: true, showZ: false, label: 'Y', hint: 'Constrain transform to the Y axis.' }
+    case 'z':
+      return { showX: false, showY: false, showZ: true, label: 'Z', hint: 'Constrain transform to the Z axis.' }
+    case 'xy':
+      return { showX: true, showY: true, showZ: false, label: 'XY', hint: 'Constrain transform to the XY plane.' }
+    case 'xz':
+      return { showX: true, showY: false, showZ: true, label: 'XZ', hint: 'Constrain transform to the XZ plane.' }
+    case 'yz':
+      return { showX: false, showY: true, showZ: true, label: 'YZ', hint: 'Constrain transform to the YZ plane.' }
+    case 'screen':
+      return { showX: true, showY: true, showZ: true, label: 'Screen', hint: 'Use camera-facing screen-space manipulation.' }
+    case 'free':
+    default:
+      return { showX: true, showY: true, showZ: true, label: 'Free', hint: 'All transform handles are available.' }
+  }
+}
+
+export function getGizmoPivotLabel(pivotMode: GizmoPivotMode): string {
+  switch (pivotMode) {
+    case 'active-object':
+      return 'Active object'
+    case 'individual-origins':
+      return 'Individual origins'
+    case 'world-origin':
+      return 'World origin'
+    case 'median':
+    default:
+      return 'Median'
+  }
 }
 
 function buildOutlineModes(input: GizmoEliteControlInput, blockers: string[]): GizmoOutlineMode[] {
@@ -140,5 +191,43 @@ export function buildGizmoUndoVisualPacket(input: {
     rollbackLabel: `Rollback ${selectedObjectIds.length} object${selectedObjectIds.length === 1 ? '' : 's'}`,
     timelineLabel: `Gizmo operation ${input.operationId} (${selectedObjectIds.length} selected)`,
     requiresReview: input.source === 'agent' || selectedObjectIds.length > 1,
+  }
+}
+
+export function buildGizmoInspectorSummary(state: GizmoEliteControlState): GizmoInspectorSummary {
+  const constraint = getGizmoConstraintAxes(state.constraint)
+  const pivot = getGizmoPivotLabel(state.pivotMode)
+  const chips = [
+    `${state.mode}`,
+    state.space,
+    `Pivot: ${pivot}`,
+    `Constraint: ${constraint.label}`,
+    state.snap.enabled ? `Snap ${state.snap.translateStep}/${state.snap.rotateStepDegrees}/${state.snap.scaleStep}` : 'Freehand',
+    `${state.selectedObjectIds.length} selected`,
+  ]
+
+  if (state.blockers.length > 0) {
+    return {
+      tone: 'blocked',
+      title: 'Gizmo held',
+      detail: state.blockers[0],
+      chips,
+    }
+  }
+
+  if (state.warnings.length > 0) {
+    return {
+      tone: 'warning',
+      title: 'Gizmo needs review',
+      detail: state.warnings[0],
+      chips,
+    }
+  }
+
+  return {
+    tone: 'ready',
+    title: 'Gizmo ready',
+    detail: `${constraint.hint} Undo preview and inspector refresh are required before final evidence.`,
+    chips,
   }
 }

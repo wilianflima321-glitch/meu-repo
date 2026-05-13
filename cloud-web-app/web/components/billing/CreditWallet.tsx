@@ -70,6 +70,14 @@ interface CreditWalletProps {
   className?: string;
 }
 
+type CreditWalletTabId = 'overview' | 'history' | 'purchase';
+
+const CREDIT_WALLET_TABS: Array<{ id: CreditWalletTabId; label: string; icon: React.ReactNode }> = [
+  { id: 'overview', label: 'Resumo', icon: <Coins className="w-4 h-4" /> },
+  { id: 'history', label: 'Historico', icon: <Clock className="w-4 h-4" /> },
+  { id: 'purchase', label: 'Comprar', icon: <CreditCard className="w-4 h-4" /> },
+];
+
 // ============================================================================
 // PACOTES DE CREDITOS
 // ============================================================================
@@ -278,7 +286,7 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
 // ============================================================================
 
 export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'purchase'>('overview');
+  const [activeTab, setActiveTab] = useState<CreditWalletTabId>('overview');
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
 
@@ -391,14 +399,10 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
 
       {/* Tabs */}
       <div className="flex border-b border-[var(--aethel-border-primary)]">
-        {[
-          { id: 'overview', label: 'Resumo', icon: <Coins className="w-4 h-4" /> },
-          { id: 'history', label: 'Historico', icon: <Clock className="w-4 h-4" /> },
-          { id: 'purchase', label: 'Comprar', icon: <CreditCard className="w-4 h-4" /> },
-        ].map((tab) => (
+        {CREDIT_WALLET_TABS.map((tab) => (
           <button type="button" aria-label={`Abrir aba ${tab.label.toLowerCase()} da carteira`}
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id)}
             className={`
               flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors
               ${activeTab === tab.id

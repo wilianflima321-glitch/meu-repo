@@ -2,6 +2,7 @@
 
 import { AethelViewport3D } from '@/components/viewport/AethelViewport3D';
 import { useGizmoTransformPersistence } from '@/hooks/useGizmoTransformPersistence';
+import type { GizmoAxisPlaneConstraint, GizmoPivotMode } from '@/lib/viewport/gizmo-elite-controls';
 
 import SceneViewportWorkflowDrawer from './SceneViewportWorkflowDrawer';
 import type { useSceneViewportSurfaceState } from './useSceneViewportSurfaceState';
@@ -42,6 +43,10 @@ type SceneViewportStageProps = Pick<
 > & {
   renderMode: 'draft' | 'cinematic';
   projectId?: string | null;
+  gizmoConstraint: GizmoAxisPlaneConstraint;
+  gizmoPivotMode: GizmoPivotMode;
+  onGizmoConstraintChange: (constraint: GizmoAxisPlaneConstraint) => void;
+  onGizmoPivotModeChange: (pivotMode: GizmoPivotMode) => void;
 };
 
 export function SceneViewportStage({
@@ -78,6 +83,10 @@ export function SceneViewportStage({
   handleImportViewportAssets,
   renderMode,
   projectId,
+  gizmoConstraint,
+  gizmoPivotMode,
+  onGizmoConstraintChange,
+  onGizmoPivotModeChange,
 }: SceneViewportStageProps) {
   const gizmoPersistence = useGizmoTransformPersistence(projectId);
 
@@ -110,6 +119,10 @@ export function SceneViewportStage({
         onGizmoTransformOperation={(operation) => {
           void gizmoPersistence.persistOperation(operation)
         }}
+        gizmoConstraint={gizmoConstraint}
+        gizmoPivotMode={gizmoPivotMode}
+        onGizmoConstraintChange={onGizmoConstraintChange}
+        onGizmoPivotModeChange={onGizmoPivotModeChange}
         gizmoMemoryStatus={gizmoPersistence.status}
         gizmoMemoryLabel={gizmoPersistence.lastOperationLabel}
         gizmoMemoryError={gizmoPersistence.lastError}

@@ -8,6 +8,17 @@ export interface HairFurEditorProps {
   characterId: string;
   onHairUpdate?: (hairData: HairData) => void;
 }
+
+type HairEditorTabId = 'general' | 'style' | 'physics' | 'lod' | 'brush';
+
+const HAIR_EDITOR_TABS: Array<{ id: HairEditorTabId; label: string }> = [
+  { id: 'general', label: 'Geral' },
+  { id: 'style', label: 'Estilo' },
+  { id: 'physics', label: 'Fisica' },
+  { id: 'lod', label: 'LOD' },
+  { id: 'brush', label: 'Brush' },
+];
+
 interface HairStrands3DProps {
   strandCount: number;
   regions: HairRegion[];
@@ -17,6 +28,15 @@ interface HairStrands3DProps {
   physics: PhysicsSettings;
   animatePhysics: boolean;
 }
+
+function readOrbitDistance(target: unknown, fallback = 3): number {
+  if (!target || typeof target !== 'object') return fallback;
+  const candidate = (target as { getDistance?: () => unknown }).getDistance;
+  if (typeof candidate !== 'function') return fallback;
+  const distance = candidate();
+  return typeof distance === 'number' && Number.isFinite(distance) ? distance : fallback;
+}
+
 function HairStrands3D({
   strandCount,
   regions,
@@ -316,7 +336,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
   });
   const [brushActive, setBrushActive] = useState(false);
   const [animatePhysics, setAnimatePhysics] = useState(true);
-  const [activeTab, setActiveTab] = useState<'general' | 'style' | 'physics' | 'lod' | 'brush'>('general');
+  const [activeTab, setActiveTab] = useState<HairEditorTabId>('general');
   const [cameraDistance, setCameraDistance] = useState(3);
   const applyPreset = useCallback((presetName: HairPreset) => {
     setPreset(presetName);
@@ -414,8 +434,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
             maxDistance={10}
             onChange={(e) => {
               if (e?.target) {
-                const dist = (e.target as any).getDistance?.() || 3;
-                setCameraDistance(dist);
+                setCameraDistance(readOrbitDistance(e.target));
               }
             }}
           />
@@ -486,16 +505,10 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
         </div>
         {/* Tab Navigation */}
         <div className="flex border-b border-[var(--aethel-border-primary)]">
-          {[
-            { id: 'general', label: 'Geral' },
-            { id: 'style', label: 'Estilo' },
-            { id: 'physics', label: 'Fisica' },
-            { id: 'lod', label: 'LOD' },
-            { id: 'brush', label: 'Brush' },
-          ].map((tab) => (
+          {HAIR_EDITOR_TABS.map((tab) => (
             <button type="button" aria-label={`Abrir aba ${tab.label.toLowerCase()} do editor de cabelo`}
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id)}
               className={`flex-1 px-3 py-2.5 text-sm font-medium transition-all ${
                 activeTab === tab.id
                   ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)] border-b-2 border-[var(--aethel-info)]'

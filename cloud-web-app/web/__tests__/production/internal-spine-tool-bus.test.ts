@@ -39,6 +39,26 @@ describe('internal spine tool bus and safety firewall', () => {
     expect(decision.requiredEvidence).toEqual(expect.arrayContaining(['browser replay', 'DOM snapshot', 'approval record']))
   })
 
+  it('routes explicit-human tools to execution only after approval and preview evidence exist', () => {
+    const decision = evaluateAgentToolInvocation({
+      toolId: 'deployment',
+      mode: 'Release',
+      projectId: 'project-1',
+      intent: 'Deploy release to production after approved preview',
+      targetUrl: 'https://aethel.example.com/deployments/preview-42',
+      maxCostUsd: 8,
+      requestedRuntime: 'cloud-sandbox',
+      approvalToken: 'human-approval:release-manager:42',
+      evidenceRefs: ['dry-run:deploy-preview', 'rollback:plan', 'replay:release-approval'],
+    })
+
+    expect(decision.allowed).toBe(true)
+    expect(decision.status).toBe('allowed')
+    expect(decision.runtimeTarget).toBe('cloud-sandbox')
+    expect(decision.requiredApprovals).toContain('explicit human approval')
+    expect(decision.requiredEvidence).toEqual(expect.arrayContaining(['deploy preview', 'rollback plan', 'replay evidence']))
+  })
+
   it('blocks prompt injection found during browser navigation instead of treating the page as instructions', () => {
     const decision = evaluateBrowserOperatorPolicy({
       targetUrl: 'https://app.example.com/admin',

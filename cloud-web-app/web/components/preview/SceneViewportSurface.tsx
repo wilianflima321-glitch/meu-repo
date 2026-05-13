@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import TimelineOverlay from '@/components/viewport/TimelineOverlay';
 import {
   SceneViewportInspector,
   SceneViewportOutliner,
 } from '@/components/viewport/AethelViewport3D';
+import type { GizmoAxisPlaneConstraint, GizmoPivotMode } from '@/lib/viewport/gizmo-elite-controls';
 import { SceneViewportStage } from './SceneViewportStage';
 import { ViewportWorkbenchShell } from './ViewportWorkbenchShell';
 import { useSceneViewportSurfaceState } from './useSceneViewportSurfaceState';
@@ -17,6 +19,8 @@ export default function SceneViewportSurface({
   projectId?: string | null;
 }) {
   const viewportState = useSceneViewportSurfaceState(projectId, renderMode);
+  const [gizmoConstraint, setGizmoConstraint] = useState<GizmoAxisPlaneConstraint>('free');
+  const [gizmoPivotMode, setGizmoPivotMode] = useState<GizmoPivotMode>('median');
   const {
     objects,
     selectedIds,
@@ -61,13 +65,24 @@ export default function SceneViewportSurface({
         />
       }
       center={
-        <SceneViewportStage {...viewportState} renderMode={renderMode} projectId={projectId} />
+        <SceneViewportStage
+          {...viewportState}
+          renderMode={renderMode}
+          projectId={projectId}
+          gizmoConstraint={gizmoConstraint}
+          gizmoPivotMode={gizmoPivotMode}
+          onGizmoConstraintChange={setGizmoConstraint}
+          onGizmoPivotModeChange={setGizmoPivotMode}
+        />
       }
       right={
         <SceneViewportInspector
           selectedObject={selectedObject}
+          selectedIds={selectedIds}
           transformMode={transformMode}
           transformSpace={transformSpace}
+          gizmoConstraint={gizmoConstraint}
+          gizmoPivotMode={gizmoPivotMode}
           snapEnabled={snapEnabled}
           isPlaying={isPlaying}
           facialBlendShapeCount={facialBlendShapeCount}
@@ -82,6 +97,8 @@ export default function SceneViewportSurface({
           onOpenAbilityEditor={() => openWorkflowTool('ability')}
           onTransformModeChange={setTransformMode}
           onTransformSpaceChange={setTransformSpace}
+          onGizmoConstraintChange={setGizmoConstraint}
+          onGizmoPivotModeChange={setGizmoPivotMode}
           onSnapEnabledChange={setSnapEnabled}
           onTogglePlayTest={handleTogglePlay}
         />

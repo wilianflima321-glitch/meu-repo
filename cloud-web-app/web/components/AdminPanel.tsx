@@ -40,6 +40,16 @@ interface AdminStats {
   error_rate: number
 }
 
+type AdminTabId = 'overview' | 'users' | 'credits' | 'financial' | 'system'
+
+const adminTabs: Array<{ id: AdminTabId; label: string }> = [
+  { id: 'overview', label: 'Visao geral' },
+  { id: 'users', label: 'Usuarios' },
+  { id: 'credits', label: 'Creditos' },
+  { id: 'financial', label: 'Financeiro' },
+  { id: 'system', label: 'Sistema' },
+]
+
 const API_BASE_URL = API_BASE
 
 const fetcher = (url: string) => {
@@ -55,7 +65,7 @@ const INPUT_CLASS = `rounded-xl border border-[var(--aethel-border-primary)] bg-
 export default function AdminPanel() {
   const toast = useToast()
   const recentTransactions: CreditTransaction[] = []
-  const [activeAdminTab, setActiveAdminTab] = useState<'overview' | 'users' | 'credits' | 'financial' | 'system'>('overview')
+  const [activeAdminTab, setActiveAdminTab] = useState<AdminTabId>('overview')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showUserModal, setShowUserModal] = useState(false)
   const [userSearch, setUserSearch] = useState('')
@@ -166,16 +176,10 @@ export default function AdminPanel() {
       {/* Admin Navigation */}
       <div className="mx-auto max-w-3xl rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] p-2 shadow-[0_18px_48px_rgba(2,6,23,0.18)]">
         <div className="flex gap-2">
-          {[
-            { id: 'overview', label: 'Visao geral', icon: '' },
-            { id: 'users', label: 'Usuarios', icon: '' },
-            { id: 'credits', label: 'Creditos', icon: '' },
-            { id: 'financial', label: 'Financeiro', icon: '' },
-            { id: 'system', label: 'Sistema', icon: '' }
-          ].map((tab) => (
+          {adminTabs.map((tab) => (
             <button type="button" aria-label={`Abrir aba administrativa ${tab.label}`}
               key={tab.id}
-              onClick={() => setActiveAdminTab(tab.id as any)}
+              onClick={() => setActiveAdminTab(tab.id)}
               className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${CANONICAL_MOTION} ${CANONICAL_FOCUS} ${
                 activeAdminTab === tab.id
                   ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] shadow-[0_12px_28px_rgba(79,70,229,0.22)]'
