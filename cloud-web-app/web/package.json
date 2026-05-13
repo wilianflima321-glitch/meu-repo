@@ -34,7 +34,7 @@
     "qa:mojibake": "node scripts/scan-mojibake.mjs",
     "qa:interface-critical": "node scripts/interface-critical-scan.mjs",
     "qa:interface-gate": "node scripts/interface-critical-gate.mjs",
-    "qa:enterprise-gate": "npm run qa:interface-gate && npm run qa:canonical-components && npm run qa:route-contracts && npm run qa:agent-observability && npm run qa:research-intelligence && npm run qa:agent-read-receipts && npm run qa:enterprise-identity && npm run qa:internal-spine && npm run qa:coverage-ratchet && npm run qa:console-ratchet && npm run qa:product-quality-progress && npm run qa:large-file-risk && npm run qa:i18n-progress && npm run qa:ai-game-film-production && npm run qa:no-fake-success && npm run qa:wcag-critical && npm run qa:dashboard-shell && npm run qa:admin-consolidation && npm run qa:billing-runtime-readiness && npm run qa:mobile-pwa-readiness && npm run qa:observability-readiness && npm run qa:preview-runtime-readiness && npm run qa:mojibake && npm run lint && npm run typecheck",
+    "qa:enterprise-gate": "npm run qa:interface-gate && npm run qa:canonical-components && npm run qa:route-contracts && npm run qa:agent-observability && npm run qa:research-intelligence && npm run qa:agent-read-receipts && npm run qa:enterprise-identity && npm run qa:internal-spine && npm run qa:agent-orchestrator-scale && npm run qa:coverage-ratchet && npm run qa:console-ratchet && npm run qa:product-quality-progress && npm run qa:large-file-risk && npm run qa:i18n-progress && npm run qa:ai-game-film-production && npm run qa:no-fake-success && npm run qa:wcag-critical && npm run qa:dashboard-shell && npm run qa:admin-consolidation && npm run qa:billing-runtime-readiness && npm run qa:mobile-pwa-readiness && npm run qa:observability-readiness && npm run qa:preview-runtime-readiness && npm run qa:mojibake && npm run lint && npm run typecheck",
     "qa:enterprise-release-gate": "npm run qa:enterprise-gate && npm run build",
     "docs:routes-inventory": "node scripts/generate-routes-inventory.mjs",
     "db:generate": "prisma generate",
@@ -59,7 +59,8 @@
     "qa:coverage-ratchet": "node scripts/check-coverage-ratchet.mjs",
     "qa:console-ratchet": "node scripts/check-console-ratchet.mjs",
     "qa:enterprise-identity": "node scripts/check-enterprise-identity-readiness.mjs",
-    "qa:large-file-risk": "node scripts/check-large-file-risk.mjs"
+    "qa:large-file-risk": "node scripts/check-large-file-risk.mjs",
+    "qa:agent-orchestrator-scale": "node scripts/check-agent-orchestrator-scale.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",

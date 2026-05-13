@@ -6,6 +6,13 @@ import type {
   SpeechRecognitionInstance,
 } from '../ide/AIChatPanelPro.types';
 
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
+
+type WindowWithSpeechRecognition = Window & {
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
+};
+
 /**
  * Voice-recording hook extracted from AIChatPanelPro.
  * Wraps MediaRecorder + SpeechRecognition + transcription flags.
@@ -23,10 +30,11 @@ export function useVoiceRecording() {
   const startRecording = useCallback(async () => {
     try {
       setVoiceError(null);
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognitionAPI =
-          (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-        recognitionRef.current = new SpeechRecognitionAPI() as SpeechRecognitionInstance;
+      const speechWindow = window as WindowWithSpeechRecognition;
+      const SpeechRecognitionAPI =
+        speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
+      if (SpeechRecognitionAPI) {
+        recognitionRef.current = new SpeechRecognitionAPI();
         recognitionRef.current.continuous = true;
         recognitionRef.current.interimResults = true;
         recognitionRef.current.lang = 'pt-BR';
@@ -44,7 +52,7 @@ export function useVoiceRecording() {
           setTranscript(finalTranscript || interimTranscript);
         };
         recognitionRef.current.onerror = () => {
-          setVoiceError('Falha ao transcrever. Verifique permissão do microfone.');
+          setVoiceError('Falha ao transcrever. Verifique a permissao do microfone.');
         };
         recognitionRef.current.start();
       }
@@ -65,7 +73,7 @@ export function useVoiceRecording() {
       setIsRecording(true);
     } catch (error) {
       // Surface the error visually; don't leak raw console noise.
-      setVoiceError('Não foi possível iniciar a captura de voz. Verifique as permissões do navegador.');
+      setVoiceError('Nao foi possivel iniciar a captura de voz. Verifique as permissoes do navegador.');
     }
   }, []);
 

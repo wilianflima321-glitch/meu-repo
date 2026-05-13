@@ -55,6 +55,7 @@ export default defineConfig({
         'components/ide/fullscreen/workbench-entry-triage.ts',
         'components/ide/fullscreen/workbench-helpers.ts',
         'components/ui/ThemeToggle.tsx',
+        'lib/agent-orchestrator.ts',
         'lib/observability/logger.ts',
         'lib/production/agent-tool-bus.ts',
         'lib/production/browser-operator-safety.ts',

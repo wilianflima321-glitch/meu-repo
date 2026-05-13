@@ -2,6 +2,12 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { AlertCircle, CheckCircle, Loader2, Send, Square, Zap } from 'lucide-react'
+import {
+  AGENT_ROLE_PROFILES,
+  DEFAULT_AGENT_SET,
+  SUPPORTED_AGENT_TYPES,
+  type AgentType,
+} from '@/lib/agent-orchestrator'
 
 interface AgentStreamMessage {
   agentId: string
@@ -79,7 +85,7 @@ export default function MultiAgentOrchestrator() {
   const [prompt, setPrompt] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const [messages, setMessages] = useState<AgentStreamMessage[]>([])
-  const [selectedAgents, setSelectedAgents] = useState(['architect', 'designer', 'engineer'])
+  const [selectedAgents, setSelectedAgents] = useState<AgentType[]>([...DEFAULT_AGENT_SET])
   const [streamError, setStreamError] = useState<string | null>(null)
   const [runtimeMode, setRuntimeMode] = useState<'heuristic' | 'provider-backed' | 'unknown'>('unknown')
   const [runtimeDisclaimer, setRuntimeDisclaimer] = useState<string | null>(null)
@@ -87,12 +93,25 @@ export default function MultiAgentOrchestrator() {
   const [executionMode, setExecutionMode] = useState<'heuristic' | 'provider-backed'>('heuristic')
   const abortControllerRef = useRef<AbortController | null>(null)
 
-  const agentOptions = [
-    { id: 'architect', label: 'Arquiteto' },
-    { id: 'designer', label: 'Designer' },
-    { id: 'engineer', label: 'Engenheiro' },
-    { id: 'qa', label: 'QA' },
-    { id: 'researcher', label: 'Pesquisador' },
+  const agentOptions = SUPPORTED_AGENT_TYPES.map((id) => ({
+    id,
+    label: AGENT_ROLE_PROFILES[id].name,
+  }))
+
+  const presetAgentSets: Array<{ label: string; agents: AgentType[] }> = [
+    { label: 'Core', agents: [...DEFAULT_AGENT_SET] },
+    {
+      label: 'Research',
+      agents: ['researcher', 'fact-checker', 'summarizer', 'paper-reader', 'dataset-scout', 'huggingface-curator', 'github-cartographer'],
+    },
+    {
+      label: 'Creative',
+      agents: ['game-designer', 'gameplay-engineer', 'cinematic-director', 'audio-composer', 'asset-pipeline', 'qa'],
+    },
+    {
+      label: 'Release',
+      agents: ['architect', 'security-auditor', 'performance-engineer', 'cost-governor', 'release-manager', 'devops-operator'],
+    },
   ]
 
   const stopStream = () => {
@@ -288,6 +307,27 @@ export default function MultiAgentOrchestrator() {
 
       <div className="space-y-2">
         <label className="text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-quaternary)]">Selecionar agentes</label>
+        <div className="flex flex-wrap gap-2">
+          {presetAgentSets.map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => setSelectedAgents(preset.agents)}
+              className="rounded-full border border-[var(--aethel-border-primary)]/50 bg-[var(--aethel-surface-tertiary)]/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]"
+              disabled={isStreaming}
+            >
+              {preset.label}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setSelectedAgents(SUPPORTED_AGENT_TYPES)}
+            className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--aethel-info-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)]"
+            disabled={isStreaming}
+          >
+            Full fleet ({SUPPORTED_AGENT_TYPES.length})
+          </button>
+        </div>
         <div className="flex flex-wrap gap-2">
           {agentOptions.map((agent) => (
             <button

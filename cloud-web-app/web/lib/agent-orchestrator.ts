@@ -3,8 +3,173 @@
  * Streams parallel agent messages with explicit cancellation semantics.
  */
 
-export const SUPPORTED_AGENT_TYPES = ['architect', 'designer', 'engineer', 'qa', 'researcher'] as const
-export type AgentType = (typeof SUPPORTED_AGENT_TYPES)[number]
+export const AGENT_ROLE_PROFILES = {
+  architect: {
+    name: 'Architect',
+    role: 'System decomposition and risk mapping',
+    scope: 'Defines decomposition, contracts, and sequencing only.',
+    guidance: (taskHint: string) => `Plan: decompose "${taskHint}" into small steps, define contracts first, then sequence implementation with rollback points.`,
+  },
+  designer: {
+    name: 'Designer',
+    role: 'UX, interaction, and visual consistency',
+    scope: 'Owns UX states, accessibility, and interaction consistency only.',
+    guidance: () => 'UX: enforce explicit loading/error/empty states, keyboard-first behavior, and remove misleading CTAs from partial capabilities.',
+  },
+  engineer: {
+    name: 'Engineer',
+    role: 'Implementation, runtime, and performance',
+    scope: 'Implements scoped code changes only (no autonomous apply).',
+    guidance: () => 'Execution: implement minimal diff with stable interfaces, add runtime guards, and keep performance impact measurable.',
+  },
+  qa: {
+    name: 'QA',
+    role: 'Validation strategy and regression prevention',
+    scope: 'Validates deterministic checks and regression risk only.',
+    guidance: () => 'Validation: check route contracts, no-fake-success behavior, and edge cases (invalid input, cancellation, rate limits).',
+  },
+  researcher: {
+    name: 'Researcher',
+    role: 'Evidence, assumptions, and gap analysis',
+    scope: 'Verifies evidence/assumptions and flags unsupported claims only.',
+    guidance: () => 'Evidence: mark assumptions explicitly, separate verified facts from hypotheses, and avoid unsupported production claims.',
+  },
+  'browser-operator': {
+    name: 'Browser Operator',
+    role: 'Safe browser navigation with replay and approvals',
+    scope: 'Navigates allowed web surfaces with replay evidence; never handles login, purchase, deploy, or account changes without approval.',
+    guidance: () => 'Browser: collect DOM snapshots, screenshots, and replay notes; pause for login/payment/deploy/destructive actions.',
+  },
+  'fact-checker': {
+    name: 'Fact Checker',
+    role: 'Citation verification and contradiction detection',
+    scope: 'Checks claims against cited sources and repository evidence only.',
+    guidance: () => 'Fact-check: separate confirmed claims, stale claims, conflicts, and claims that need primary-source citation.',
+  },
+  summarizer: {
+    name: 'Summarizer',
+    role: 'Compression of large evidence packs',
+    scope: 'Compresses read receipts into concise summaries without losing blockers or uncertainty.',
+    guidance: () => 'Summary: preserve blockers, decisions, source IDs, and next actions while reducing context footprint.',
+  },
+  'competitor-tracker': {
+    name: 'Competitor Tracker',
+    role: 'Market comparison and product gap tracking',
+    scope: 'Compares public capabilities and explicitly avoids copying unverified technical claims.',
+    guidance: () => 'Market: compare experience patterns separately from technical parity claims and flag red lines.',
+  },
+  'paper-reader': {
+    name: 'Paper Reader',
+    role: 'Research paper and technical document review',
+    scope: 'Reads papers/docs and extracts methods, limits, datasets, and reproducibility concerns.',
+    guidance: () => 'Paper: extract method, assumptions, benchmark setup, licenses, and what is safe to implement.',
+  },
+  'dataset-scout': {
+    name: 'Dataset Scout',
+    role: 'Dataset discovery and licensing triage',
+    scope: 'Finds datasets and records license, size, splits, safety notes, and metadata-first download plans.',
+    guidance: () => 'Dataset: never download blindly; record license, size, splits, card metadata, and cache plan first.',
+  },
+  'huggingface-curator': {
+    name: 'Hugging Face Curator',
+    role: 'HF model/dataset metadata and license review',
+    scope: 'Mirrors Hugging Face metadata before any large model, dataset, or Space download.',
+    guidance: () => 'HF: inspect model card, dataset card, files, revisions, license, size, and local/cloud cache requirements.',
+  },
+  'github-cartographer': {
+    name: 'GitHub Cartographer',
+    role: 'Repository topology and ownership mapping',
+    scope: 'Builds repository maps, manifests, ownership, entrypoints, and risk areas before edits.',
+    guidance: () => 'Repo: map tree, manifests, owners, tests, generated files, large folders, and read receipts before applying changes.',
+  },
+  'security-auditor': {
+    name: 'Security Auditor',
+    role: 'Threat modeling and sensitive action review',
+    scope: 'Reviews auth, secrets, browser actions, high-risk workflows, and abuse paths only.',
+    guidance: () => 'Security: identify trust boundaries, sensitive actions, missing approvals, abuse paths, and audit evidence.',
+  },
+  'performance-engineer': {
+    name: 'Performance Engineer',
+    role: 'Runtime, memory, bundle, and latency optimization',
+    scope: 'Optimizes measurable performance with before/after evidence and no UX regressions.',
+    guidance: () => 'Performance: measure first, reduce main-thread work, preserve cancellation, and document before/after metrics.',
+  },
+  'release-manager': {
+    name: 'Release Manager',
+    role: 'Launch readiness and rollback planning',
+    scope: 'Coordinates release gates, rollout notes, rollback plan, and customer-facing risk language.',
+    guidance: () => 'Release: require tests, build, observability, rollback, known risks, and support notes before ship.',
+  },
+  'devops-operator': {
+    name: 'DevOps Operator',
+    role: 'CI/CD, infrastructure, and deployment safety',
+    scope: 'Works on CI, deployment, environment, and observability changes with approval for production actions.',
+    guidance: () => 'DevOps: validate config, secrets boundaries, deployment gates, and never deploy production without explicit approval.',
+  },
+  'game-designer': {
+    name: 'Game Designer',
+    role: 'Gameplay loops, feel, and player experience',
+    scope: 'Designs mechanics, loops, progression, and playtest evidence without touching unrelated app surfaces.',
+    guidance: () => 'Game: define core loop, constraints, player feedback, failure states, and playtest evidence before done.',
+  },
+  'gameplay-engineer': {
+    name: 'Gameplay Engineer',
+    role: 'Physics, controls, entities, and simulation logic',
+    scope: 'Implements scoped gameplay/runtime systems with deterministic validation and rollback.',
+    guidance: () => 'Gameplay: wire physics/controls/entities in small slices with testable behavior and performance limits.',
+  },
+  'cinematic-director': {
+    name: 'Cinematic Director',
+    role: 'Shots, continuity, timeline, and render evidence',
+    scope: 'Plans film/story sequences, continuity, shots, render checks, and evidence gates.',
+    guidance: () => 'Film: map shots, continuity, audio/visual beats, review gates, and render evidence before final.',
+  },
+  'audio-composer': {
+    name: 'Audio Composer',
+    role: 'Music, voice, spatial audio, and sound cues',
+    scope: 'Works on sound/music/voice plans and audio pipeline evidence only.',
+    guidance: () => 'Audio: define mood, cues, stems, licensing, loudness, spatial needs, and preview/export evidence.',
+  },
+  'asset-pipeline': {
+    name: 'Asset Pipeline',
+    role: 'Import, thumbnails, proxies, licenses, and optimization',
+    scope: 'Handles asset metadata, proxy generation, license status, and optimization plans.',
+    guidance: () => 'Assets: require file metadata, license, thumbnail/proxy, size budget, and validation before release use.',
+  },
+  'ux-researcher': {
+    name: 'UX Researcher',
+    role: 'User workflow diagnosis and usability risks',
+    scope: 'Reviews journeys, friction, discoverability, and user trust without adding visual noise.',
+    guidance: () => 'UX research: identify user intent, friction, trust breaks, task time, and compact evidence surfaces.',
+  },
+  translator: {
+    name: 'Translator',
+    role: 'Localization quality and terminology consistency',
+    scope: 'Reviews i18n coverage, terminology, mojibake, locale tone, and accessibility labels.',
+    guidance: () => 'Localization: keep terms consistent, avoid mojibake, preserve UI space, and flag untranslated hardcoded copy.',
+  },
+  'documentation-writer': {
+    name: 'Documentation Writer',
+    role: 'Docs, changelog, acceptance criteria, and operator notes',
+    scope: 'Writes accurate docs from implemented evidence and explicitly marks partial capabilities.',
+    guidance: () => 'Docs: document what exists, what is partial, tests run, limitations, and next operator steps.',
+  },
+  'cost-governor': {
+    name: 'Cost Governor',
+    role: 'Token, runtime, provider, and margin control',
+    scope: 'Tracks cost budgets, provider usage, quotas, and safe degradation paths.',
+    guidance: () => 'Cost: estimate tokens/runtime/storage, enforce caps, and propose local/cloud fallback by budget.',
+  },
+  'legal-reviewer': {
+    name: 'Legal Reviewer',
+    role: 'Licensing, policy, and compliance wording review',
+    scope: 'Flags legal/compliance risk and never gives final legal advice without human review.',
+    guidance: () => 'Legal: flag license, privacy, procurement, safety, and compliance risks; require human counsel for final decisions.',
+  },
+} as const
+
+export type AgentType = keyof typeof AGENT_ROLE_PROFILES
+export const SUPPORTED_AGENT_TYPES = Object.keys(AGENT_ROLE_PROFILES) as AgentType[]
 export const DEFAULT_AGENT_SET: AgentType[] = ['architect', 'designer', 'engineer']
 export const ORCHESTRATOR_EXECUTION_MODE = 'heuristic'
 export const ORCHESTRATOR_CAPABILITY_STATUS = 'PARTIAL'
@@ -20,24 +185,11 @@ export type CoordinationPolicy = {
 export const ORCHESTRATOR_COORDINATION_POLICY: CoordinationPolicy = {
   nonOverlappingScopes: true,
   applyGate: 'reviewer_required',
-  executionOrder: ['architect', 'designer', 'engineer', 'qa', 'researcher'],
+  executionOrder: SUPPORTED_AGENT_TYPES,
 }
 
 export function buildRoleScope(agent: AgentType): string {
-  switch (agent) {
-    case 'architect':
-      return 'Defines decomposition, contracts, and sequencing only.'
-    case 'designer':
-      return 'Owns UX states, accessibility, and interaction consistency only.'
-    case 'engineer':
-      return 'Implements scoped code changes only (no autonomous apply).'
-    case 'qa':
-      return 'Validates deterministic checks and regression risk only.'
-    case 'researcher':
-      return 'Verifies evidence/assumptions and flags unsupported claims only.'
-    default:
-      return 'Scoped execution role.'
-  }
+  return AGENT_ROLE_PROFILES[agent]?.scope ?? 'Scoped execution role.'
 }
 
 export interface Agent {
@@ -122,16 +274,15 @@ export class AgentOrchestrator {
   }
 
   private initializeAgents(): void {
-    const agentDefinitions: Agent[] = [
-      { id: 'architect-001', type: 'architect', name: 'Architect', role: 'System decomposition and risk mapping', status: 'idle' },
-      { id: 'designer-001', type: 'designer', name: 'Designer', role: 'UX, interaction, and visual consistency', status: 'idle' },
-      { id: 'engineer-001', type: 'engineer', name: 'Engineer', role: 'Implementation, runtime, and performance', status: 'idle' },
-      { id: 'qa-001', type: 'qa', name: 'QA', role: 'Validation strategy and regression prevention', status: 'idle' },
-      { id: 'researcher-001', type: 'researcher', name: 'Researcher', role: 'Evidence, assumptions, and gap analysis', status: 'idle' },
-    ]
-
-    for (const agent of agentDefinitions) {
-      this.agents.set(agent.id, agent)
+    for (const type of SUPPORTED_AGENT_TYPES) {
+      const profile = AGENT_ROLE_PROFILES[type]
+      this.agents.set(`${type}-001`, {
+        id: `${type}-001`,
+        type,
+        name: profile.name,
+        role: profile.role,
+        status: 'idle',
+      })
     }
   }
 
@@ -234,18 +385,8 @@ export class AgentOrchestrator {
   private generateAgentResponse(agentType: AgentType, prompt: string, priority: OrchestrationTask['priority']): string {
     const taskHint = truncate(prompt, 120)
 
-    const baseByRole: Record<AgentType, string> = {
-      architect:
-        `Plan: decompose "${taskHint}" into small steps, define contracts first, then sequence implementation with rollback points.`,
-      designer:
-        'UX: enforce explicit loading/error/empty states, keyboard-first behavior, and remove misleading CTAs from partial capabilities.',
-      engineer:
-        'Execution: implement minimal diff with stable interfaces, add runtime guards, and keep performance impact measurable.',
-      qa:
-        'Validation: check route contracts, no-fake-success behavior, and edge cases (invalid input, cancellation, rate limits).',
-      researcher:
-        'Evidence: mark assumptions explicitly, separate verified facts from hypotheses, and avoid unsupported production claims.',
-    }
+    const profile = AGENT_ROLE_PROFILES[agentType]
+    const base = profile.guidance(taskHint)
 
     const priorityHint =
       priority === 'high'
@@ -254,7 +395,7 @@ export class AgentOrchestrator {
           ? 'Priority=low: focus on safe incremental closure.'
           : 'Priority=normal: balance reliability and speed.'
 
-    return `${baseByRole[agentType]} ${priorityHint} ${ORCHESTRATOR_DISCLAIMER}`
+    return `${base} ${priorityHint} ${ORCHESTRATOR_DISCLAIMER}`
   }
 
   getAgentStatus(): Agent[] {
