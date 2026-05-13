@@ -10,11 +10,11 @@ import type { RawData } from 'ws';
 import { EventEmitter } from 'events';
 import { createServer, IncomingMessage, Server as HttpServer } from 'http';
 import { createRequire } from 'module';
-import { parse as parseUrl } from 'url';
 import jwt from 'jsonwebtoken';
 import * as Y from 'yjs';
 
 import type { TerminalPtyManager, TerminalSessionConfig } from './terminal-pty-runtime';
+import type { ParsedWebSocketUrl } from './websocket-runtime-codecs';
 import type {
   ConnectionInfo,
   ConnectionType,
@@ -33,11 +33,11 @@ const { createComponentLogger } = require('../observability/logger.ts') as typeo
 const { getTerminalPtyManager } = require('./terminal-pty-runtime.ts') as typeof import('./terminal-pty-runtime');
 const { WS_MESSAGE_TYPES } = require('./websocket-runtime-contracts.ts') as typeof import('./websocket-runtime-contracts');
 const {
-  asParsedQuery,
   asTerminalPayload,
   asWsRecord,
   normalizeMessageType,
   normalizePath,
+  parseWebSocketRequestUrl,
   readNumber,
   readString,
   readStringArray,
@@ -128,7 +128,7 @@ export class AethelWebSocketServer extends EventEmitter {
 
     return new Promise((resolve, reject) => {
       this.httpServer = createServer((req, res) => {
-        const url = parseUrl(req.url || '/', true);
+        const url = parseWebSocketRequestUrl(req.url || '/');
         const pathname = normalizePath(url.pathname);
 
         if (pathname === '/' || pathname === '/health') {
@@ -206,9 +206,9 @@ export class AethelWebSocketServer extends EventEmitter {
   // ==========================================================================
 
   private handleConnection(ws: WebSocket, request: IncomingMessage): void {
-    const parsedUrl = parseUrl(request.url || '/', true);
-    const pathname = normalizePath(parsedUrl.pathname);
-    const query = asParsedQuery(parsedUrl.query);
+    const parsedUrl = parseWebSocketRequestUrl(request.url || '/');
+    const pathname = parsedUrl.pathname;
+    const query = parsedUrl.query;
 
     if (isHttpOnlyPath(pathname)) {
       this.sendRaw(ws, { type: 'error', error: 'Use HTTP for this path.' });
@@ -320,11 +320,11 @@ export class AethelWebSocketServer extends EventEmitter {
   private handleModernConnection(
     ws: WebSocket,
     request: IncomingMessage,
-    parsedUrl: ReturnType<typeof parseUrl>,
+    parsedUrl: ParsedWebSocketUrl,
     info: ConnectionInfo
   ): void {
     const clientId = this.generateClientId();
-    const query = asParsedQuery(parsedUrl.query);
+    const query = parsedUrl.query;
     const client: WsClient = {
       id: clientId,
       userId: info.userId || '',

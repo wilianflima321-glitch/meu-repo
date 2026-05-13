@@ -5,6 +5,7 @@ import {
   asWsRecord,
   normalizeMessageType,
   normalizePath,
+  parseWebSocketRequestUrl,
   readNumber,
   readString,
   readStringArray,
@@ -62,6 +63,16 @@ describe('websocket runtime codecs', () => {
     expect(Array.from(toUint8Array(Buffer.from('ok')) ?? [])).toEqual([111, 107]);
     expect(Array.from(toUint8Array([Buffer.from('o'), Buffer.from('k')]) ?? [])).toEqual([111, 107]);
     expect(toUint8Array({ bad: true } as never)).toBeNull();
+  });
+
+  it('parses request URLs with WHATWG semantics and repeated query params', () => {
+    const parsed = parseWebSocketRequestUrl('/ws/session%201/?sessionId=s1&tag=a&tag=b&userId=u1');
+
+    expect(parsed.pathname).toBe('/ws/session%201');
+    expect(parsed.query.sessionId).toBe('s1');
+    expect(parsed.query.userId).toBe('u1');
+    expect(parsed.query.tag).toEqual(['a', 'b']);
+    expect(parseWebSocketRequestUrl(null).pathname).toBe('/');
   });
 });
 

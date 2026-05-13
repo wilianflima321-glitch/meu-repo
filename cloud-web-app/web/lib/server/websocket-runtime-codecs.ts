@@ -1,12 +1,16 @@
 import type { RawData } from 'ws';
 import { createRequire } from 'module';
 import type { ParsedUrlQuery } from 'querystring';
-import type { parse as parseUrl } from 'url';
 
 import type { TerminalRuntimePayload, WsRecord } from './websocket-runtime-contracts';
 
 const require = createRequire(import.meta.url);
 const { WS_MESSAGE_TYPES } = require('./websocket-runtime-contracts.ts') as typeof import('./websocket-runtime-contracts');
+
+export interface ParsedWebSocketUrl {
+  pathname: string
+  query: ParsedUrlQuery
+}
 
 export function resolvePort(explicit?: number): number {
   if (typeof explicit === 'number' && Number.isFinite(explicit)) {
@@ -38,8 +42,33 @@ export function normalizePath(pathname?: string | null): string {
   return pathname;
 }
 
-export function asParsedQuery(query: ReturnType<typeof parseUrl>['query']): ParsedUrlQuery {
-  return query && typeof query === 'object' ? query : {};
+export function asParsedQuery(query: unknown): ParsedUrlQuery {
+  return query && typeof query === 'object' ? (query as ParsedUrlQuery) : {};
+}
+
+export function parseWebSocketRequestUrl(requestUrl?: string | null): ParsedWebSocketUrl {
+  const parsed = new URL(requestUrl || '/', 'ws://aethel.local');
+  const query: ParsedUrlQuery = {};
+
+  for (const [key, value] of parsed.searchParams.entries()) {
+    const existing = query[key];
+    if (existing === undefined) {
+      query[key] = value;
+      continue;
+    }
+
+    if (Array.isArray(existing)) {
+      existing.push(value);
+      continue;
+    }
+
+    query[key] = [existing, value];
+  }
+
+  return {
+    pathname: normalizePath(parsed.pathname),
+    query,
+  };
 }
 
 export function asWsRecord(value: unknown): WsRecord {

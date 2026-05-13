@@ -6,7 +6,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 71
+- Large source files: 70
 - P0 files: 0
 - P1 low-import large modules: 57
 - Hard ceiling: 1800 lines
@@ -22,7 +22,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 - `agent-spine`: 1
 - `mcp-tooling`: 1
 - `ui-runtime`: 1
-- `ui-surface`: 1
 
 ## Owner Decisions
 
@@ -83,7 +82,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/postprocessing/post-processing-system.ts` | 1181 | creative-runtime | P1 low-import large module | 0 |
 | `lib/networking/multiplayer-system.tsx` | 1171 | creative-runtime | P1 low-import large module | 0 |
 | `lib/hot-reload-system.ts` | 1166 | foundation-runtime | P1 low-import large module | 0 |
-| `components/viewport/AethelViewport3D.tsx` | 1165 | ui-surface | P2 tracked large module | 10 |
 | `lib/advanced-input-system.ts` | 1164 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/state/game-state-manager.tsx` | 1161 | creative-runtime | P1 low-import large module | 0 |
 | `lib/world/world-streaming.tsx` | 1161 | creative-runtime | P1 low-import large module | 0 |
@@ -144,7 +142,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 2. `lib/server/extension-host-runtime.ts`: split manifest validation, sandbox lifecycle, capability resolution, and process supervision.
 3. `lib/pixel-streaming.ts`: split signaling, session lifecycle, codec policy, and cloud GPU provider adapters.
 4. `lib/mcp/aethel-mcp-server.ts`: split tool definitions, auth policy, handlers, and response schemas.
-5. `components/viewport/AethelViewport3D.tsx`: continue extracting toolbar, AI command card, drag-drop overlay, and scene canvas after the gizmo state is stable.
+5. `components/viewport/AethelViewport3D.tsx`: keep as the viewport orchestrator; next extraction should target inspector/outliner only if they cross the UI ceiling.
 6. `app/api/ai/chat-advanced/route.ts` and `app/api/ai/change/apply/route.ts`: move policy and apply orchestration into tested production modules.
 
 ## Validation
