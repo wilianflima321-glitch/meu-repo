@@ -10,73 +10,60 @@ import type { RawData } from 'ws';
 import { EventEmitter } from 'events';
 import { createServer, IncomingMessage, Server as HttpServer } from 'http';
 import { createRequire } from 'module';
-import { dirname, join } from 'path';
-import { pathToFileURL } from 'url';
-import type { ParsedUrlQuery } from 'querystring';
 import { parse as parseUrl } from 'url';
 import jwt from 'jsonwebtoken';
 import * as Y from 'yjs';
 
 import type { TerminalPtyManager, TerminalSessionConfig } from './terminal-pty-runtime';
+import type {
+  ConnectionInfo,
+  ConnectionType,
+  DecodedAuthPayload,
+  LegacyExportState,
+  WsChannel,
+  WsClient,
+  WsMessage,
+  WsMetadata,
+  WsRecord,
+} from './websocket-runtime-contracts';
 
 const require = createRequire(import.meta.url);
 const { getQueueRedis } = require('../redis-queue.ts') as typeof import('../redis-queue');
 const { createComponentLogger } = require('../observability/logger.ts') as typeof import('../observability/logger');
 const { getTerminalPtyManager } = require('./terminal-pty-runtime.ts') as typeof import('./terminal-pty-runtime');
+const { WS_MESSAGE_TYPES } = require('./websocket-runtime-contracts.ts') as typeof import('./websocket-runtime-contracts');
+const {
+  asParsedQuery,
+  asTerminalPayload,
+  asWsRecord,
+  normalizeMessageType,
+  normalizePath,
+  readNumber,
+  readString,
+  readStringArray,
+  readStringMap,
+  resolveHost,
+  resolvePort,
+  toUint8Array,
+} = require('./websocket-runtime-codecs.ts') as typeof import('./websocket-runtime-codecs');
+const {
+  isHttpOnlyPath,
+  isLegacyAiPath,
+  isLegacyCollaborationPath,
+  isLegacyDapPath,
+  isLegacyExportPath,
+  isLegacyLspPath,
+  isLegacyTerminalPath,
+  isModernRuntimePath,
+  resolveCollaborationRoomName,
+  resolveConnectionType,
+} = require('./websocket-runtime-routing.ts') as typeof import('./websocket-runtime-routing');
+const { getYWebsocketSetup, initYWebsocket } = require('./websocket-yjs-bootstrap.ts') as typeof import('./websocket-yjs-bootstrap');
 
 const log = createComponentLogger('server/websocket-server');
 
-// ============================================================================
-// Legacy collaboration bootstrap
-// ============================================================================
-
-type WsRecord = Record<string, unknown>;
-type WsMetadata = Record<string, unknown>;
-
-let setupWSConnection: ((conn: WebSocket, req: IncomingMessage, options?: WsRecord) => void) | null = null;
-let yWebsocketInitPromise: Promise<void> | null = null;
-
-async function importNodeModuleRuntimeOnly<T>(specifier: string): Promise<T> {
-  const importer = new Function('resolvedSpecifier', 'return import(resolvedSpecifier)') as (
-    resolvedSpecifier: string
-  ) => Promise<T>;
-  return importer(specifier);
-}
-
-async function initYWebsocket(): Promise<void> {
-  if (yWebsocketInitPromise) {
-    await yWebsocketInitPromise;
-    return;
-  }
-
-  yWebsocketInitPromise = (async () => {
-    try {
-      const utilsPath = join(dirname(require.resolve('y-websocket/package.json')), 'bin', 'utils.cjs');
-      const utils = await importNodeModuleRuntimeOnly<{
-        setupWSConnection?: typeof setupWSConnection;
-        default?: { setupWSConnection?: typeof setupWSConnection };
-      }>(pathToFileURL(utilsPath).href).catch(() => null);
-      const setup = utils?.setupWSConnection || utils?.default?.setupWSConnection;
-      if (setup) {
-        setupWSConnection = setup as typeof setupWSConnection;
-        log.info('[Y-WebSocket] Loaded y-websocket/bin/utils.cjs');
-        return;
-      }
-
-      const yWebsocketModule = await import('y-websocket').catch(() => null);
-      if (yWebsocketModule) {
-        log.info('[Y-WebSocket] Loaded y-websocket module without direct setup helper');
-        return;
-      }
-
-      log.warn('[Y-WebSocket] Unable to load y-websocket helpers, using fallback sync');
-    } catch (error) {
-      log.warn('[Y-WebSocket] Init error', error);
-    }
-  })();
-
-  await yWebsocketInitPromise;
-}
+export { WS_MESSAGE_TYPES };
+export type { WsClient, WsChannel, WsMessage } from './websocket-runtime-contracts';
 
 // ============================================================================
 // Compatibility event bus
@@ -99,225 +86,6 @@ class ServiceEventBus extends EventEmitter {
 }
 
 export const eventBus = ServiceEventBus.getInstance();
-
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface WsMessage {
-  type: string;
-  channel: string;
-  payload: unknown;
-  timestamp?: number;
-}
-
-export interface WsClient {
-  id: string;
-  userId: string;
-  ws: WebSocket;
-  channels: Set<string>;
-  connectedAt: number;
-  lastPing: number;
-  isAlive: boolean;
-  metadata: WsMetadata;
-}
-
-export interface WsChannel {
-  name: string;
-  clients: Set<string>;
-  type: 'terminal' | 'collaboration' | 'filewatcher' | 'general';
-  metadata: WsMetadata;
-}
-
-type ConnectionType = 'collaboration' | 'terminal' | 'lsp' | 'ai' | 'dap' | 'export' | 'general';
-
-interface ConnectionInfo {
-  id: string;
-  type: ConnectionType;
-  path: string;
-  mode: 'modern' | 'legacy';
-  userId?: string;
-  sessionId?: string;
-  createdAt: number;
-  clientId?: string;
-}
-
-interface DecodedAuthPayload {
-  userId: string;
-  email?: string;
-  role?: string;
-}
-
-interface LegacyExportState {
-  raw: string | null;
-  pollMs: number;
-}
-
-interface TerminalRuntimePayload {
-  sessionId: string;
-  [key: string]: unknown;
-}
-
-// ============================================================================
-// Message types
-// ============================================================================
-
-export const WS_MESSAGE_TYPES = {
-  AUTH: 'auth',
-  AUTH_SUCCESS: 'auth_success',
-  AUTH_ERROR: 'auth_error',
-  PING: 'ping',
-  PONG: 'pong',
-
-  SUBSCRIBE: 'subscribe',
-  UNSUBSCRIBE: 'unsubscribe',
-  SUBSCRIBED: 'subscribed',
-  UNSUBSCRIBED: 'unsubscribed',
-
-  TERMINAL_CREATE: 'terminal:create',
-  TERMINAL_CREATED: 'terminal:created',
-  TERMINAL_DATA: 'terminal:data',
-  TERMINAL_INPUT: 'terminal:input',
-  TERMINAL_RESIZE: 'terminal:resize',
-  TERMINAL_KILL: 'terminal:kill',
-  TERMINAL_EXIT: 'terminal:exit',
-  TERMINAL_ERROR: 'terminal:error',
-
-  COLLAB_JOIN: 'collab:join',
-  COLLAB_LEAVE: 'collab:leave',
-  COLLAB_SYNC: 'collab:sync',
-  COLLAB_OPERATION: 'collab:operation',
-  COLLAB_CURSOR: 'collab:cursor',
-  COLLAB_SELECTION: 'collab:selection',
-  COLLAB_AWARENESS: 'collab:awareness',
-  COLLAB_CHAT: 'collab:chat',
-
-  FILE_CHANGED: 'file:changed',
-  FILE_CREATED: 'file:created',
-  FILE_DELETED: 'file:deleted',
-  FILE_RENAMED: 'file:renamed',
-
-  ERROR: 'error',
-  BROADCAST: 'broadcast',
-} as const;
-
-const HTTP_ONLY_PATHS = new Set(['/health', '/stats', '/metrics']);
-const MODERN_RUNTIME_PATHS = new Set(['/', '/ws']);
-const RESERVED_WS_PREFIXES = ['/export', '/terminal', '/lsp', '/ai', '/dap'];
-const COLLAB_PREFIXES = ['/collaboration/', '/ws/'];
-
-function resolvePort(explicit?: number): number {
-  if (typeof explicit === 'number' && Number.isFinite(explicit)) {
-    return explicit;
-  }
-
-  const rawPort =
-    process.env.WS_PORT ||
-    process.env.AETHEL_WS_PORT ||
-    process.env.RUNTIME_PORT ||
-    '3001';
-  const parsed = Number.parseInt(rawPort, 10);
-  return Number.isFinite(parsed) ? parsed : 3001;
-}
-
-function resolveHost(): string {
-  return process.env.WS_HOST || process.env.AETHEL_WS_HOST || '0.0.0.0';
-}
-
-function normalizePath(pathname?: string | null): string {
-  if (!pathname || pathname.trim() === '') {
-    return '/';
-  }
-
-  if (pathname.length > 1 && pathname.endsWith('/')) {
-    return pathname.slice(0, -1);
-  }
-
-  return pathname;
-}
-
-function asParsedQuery(query: ReturnType<typeof parseUrl>['query']): ParsedUrlQuery {
-  return query && typeof query === 'object' ? query : {};
-}
-
-function asWsRecord(value: unknown): WsRecord {
-  return value && typeof value === 'object' && !Array.isArray(value) ? (value as WsRecord) : {};
-}
-
-function readString(value: unknown): string | undefined {
-  return typeof value === 'string' ? value : undefined;
-}
-
-function readNumber(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
-}
-
-function readStringArray(value: unknown): string[] | undefined {
-  return Array.isArray(value) && value.every((item) => typeof item === 'string') ? value : undefined;
-}
-
-function readStringMap(value: unknown): Record<string, string> | undefined {
-  if (value == null) {
-    return undefined;
-  }
-
-  const record = asWsRecord(value);
-  const entries = Object.entries(record);
-  if (!entries.every(([, entryValue]) => typeof entryValue === 'string')) {
-    return undefined;
-  }
-
-  return Object.fromEntries(entries) as Record<string, string>;
-}
-
-function asTerminalPayload(value: unknown): TerminalRuntimePayload | null {
-  const record = asWsRecord(value);
-  const sessionId = readString(record.sessionId);
-  return sessionId ? ({ ...record, sessionId } as TerminalRuntimePayload) : null;
-}
-
-function normalizeMessageType(type: unknown): string {
-  if (typeof type !== 'string') {
-    return '';
-  }
-
-  switch (type.trim().toUpperCase()) {
-    case 'AUTH':
-      return WS_MESSAGE_TYPES.AUTH;
-    case 'PING':
-      return WS_MESSAGE_TYPES.PING;
-    case 'PONG':
-      return WS_MESSAGE_TYPES.PONG;
-    case 'SUBSCRIBE':
-      return WS_MESSAGE_TYPES.SUBSCRIBE;
-    case 'UNSUBSCRIBE':
-      return WS_MESSAGE_TYPES.UNSUBSCRIBE;
-    case 'REQUEST':
-      return 'request';
-    default:
-      return type.trim();
-  }
-}
-
-function toUint8Array(data: RawData): Uint8Array | null {
-  if (typeof data === 'string') {
-    return Uint8Array.from(Buffer.from(data));
-  }
-
-  if (Array.isArray(data)) {
-    return Uint8Array.from(Buffer.concat(data));
-  }
-
-  if (data instanceof ArrayBuffer) {
-    return new Uint8Array(data);
-  }
-
-  if (ArrayBuffer.isView(data)) {
-    return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-  }
-
-  return null;
-}
 
 // ============================================================================
 // WebSocket server manager
@@ -442,7 +210,7 @@ export class AethelWebSocketServer extends EventEmitter {
     const pathname = normalizePath(parsedUrl.pathname);
     const query = asParsedQuery(parsedUrl.query);
 
-    if (HTTP_ONLY_PATHS.has(pathname)) {
+    if (isHttpOnlyPath(pathname)) {
       this.sendRaw(ws, { type: 'error', error: 'Use HTTP for this path.' });
       ws.close(1008, 'Unsupported WebSocket path');
       return;
@@ -450,9 +218,9 @@ export class AethelWebSocketServer extends EventEmitter {
 
     const info: ConnectionInfo = {
       id: this.generateConnectionId(),
-      type: this.resolveConnectionType(pathname),
+      type: resolveConnectionType(pathname),
       path: pathname,
-      mode: this.isModernRuntimePath(pathname) ? 'modern' : 'legacy',
+      mode: isModernRuntimePath(pathname) ? 'modern' : 'legacy',
       userId: typeof query.userId === 'string' ? query.userId : undefined,
       sessionId: typeof query.sessionId === 'string' ? query.sessionId : undefined,
       createdAt: Date.now(),
@@ -472,37 +240,37 @@ export class AethelWebSocketServer extends EventEmitter {
       }
     );
 
-    if (this.isModernRuntimePath(pathname)) {
+    if (isModernRuntimePath(pathname)) {
       this.handleModernConnection(ws, request, parsedUrl, info);
       return;
     }
 
-    if (this.isLegacyExportPath(pathname)) {
+    if (isLegacyExportPath(pathname)) {
       void this.handleExportConnection(ws, pathname);
       return;
     }
 
-    if (this.isLegacyTerminalPath(pathname)) {
+    if (isLegacyTerminalPath(pathname)) {
       this.handleLegacyTerminalConnection(ws, info);
       return;
     }
 
-    if (this.isLegacyLspPath(pathname)) {
+    if (isLegacyLspPath(pathname)) {
       this.handleLegacyLspConnection(ws, info);
       return;
     }
 
-    if (this.isLegacyAiPath(pathname)) {
+    if (isLegacyAiPath(pathname)) {
       this.handleLegacyAiConnection(ws);
       return;
     }
 
-    if (this.isLegacyDapPath(pathname)) {
+    if (isLegacyDapPath(pathname)) {
       this.handleLegacyDapConnection(ws);
       return;
     }
 
-    if (this.isLegacyCollaborationPath(pathname)) {
+    if (isLegacyCollaborationPath(pathname)) {
       this.handleLegacyCollaborationConnection(ws, request, pathname);
       return;
     }
@@ -544,75 +312,6 @@ export class AethelWebSocketServer extends EventEmitter {
     this.emit('clientError', { connectionId: info?.id, clientId: info?.clientId, error });
   }
 
-  private isModernRuntimePath(pathname: string): boolean {
-    return MODERN_RUNTIME_PATHS.has(pathname);
-  }
-
-  private isLegacyExportPath(pathname: string): boolean {
-    return pathname === '/export' || pathname.startsWith('/export/');
-  }
-
-  private isLegacyTerminalPath(pathname: string): boolean {
-    return pathname === '/terminal' || pathname.startsWith('/terminal/');
-  }
-
-  private isLegacyLspPath(pathname: string): boolean {
-    return pathname === '/lsp' || pathname.startsWith('/lsp/');
-  }
-
-  private isLegacyAiPath(pathname: string): boolean {
-    return pathname === '/ai' || pathname.startsWith('/ai/');
-  }
-
-  private isLegacyDapPath(pathname: string): boolean {
-    return pathname === '/dap' || pathname.startsWith('/dap/');
-  }
-
-  private isLegacyCollaborationPath(pathname: string): boolean {
-    if (pathname === '/collaboration' || pathname === '/ws') {
-      return true;
-    }
-
-    if (COLLAB_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
-      return true;
-    }
-
-    if (pathname === '/') {
-      return false;
-    }
-
-    if (RESERVED_WS_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
-      return false;
-    }
-
-    return !HTTP_ONLY_PATHS.has(pathname);
-  }
-
-  private resolveConnectionType(pathname: string): ConnectionType {
-    if (this.isLegacyExportPath(pathname)) return 'export';
-    if (this.isLegacyTerminalPath(pathname)) return 'terminal';
-    if (this.isLegacyLspPath(pathname)) return 'lsp';
-    if (this.isLegacyAiPath(pathname)) return 'ai';
-    if (this.isLegacyDapPath(pathname)) return 'dap';
-    if (this.isLegacyCollaborationPath(pathname) && !this.isModernRuntimePath(pathname)) return 'collaboration';
-    return 'general';
-  }
-
-  private resolveCollaborationRoomName(pathname: string): string {
-    if (pathname === '/collaboration' || pathname === '/ws') {
-      return 'default';
-    }
-
-    if (pathname.startsWith('/collaboration/')) {
-      return decodeURIComponent(pathname.slice('/collaboration/'.length)) || 'default';
-    }
-
-    if (pathname.startsWith('/ws/')) {
-      return decodeURIComponent(pathname.slice('/ws/'.length)) || 'default';
-    }
-
-    return decodeURIComponent(pathname.replace(/^\/+/, '')) || 'default';
-  }
 
   // ==========================================================================
   // Modern runtime protocol
@@ -1274,11 +973,12 @@ export class AethelWebSocketServer extends EventEmitter {
   }
 
   private handleLegacyCollaborationConnection(ws: WebSocket, request: IncomingMessage, pathname: string): void {
-    const roomName = this.resolveCollaborationRoomName(pathname);
+    const roomName = resolveCollaborationRoomName(pathname);
     log.info(`[Collaboration] Client joining room: ${roomName}`);
 
-    if (setupWSConnection) {
-      setupWSConnection(ws, request, {
+    const yjsSetupConnection = getYWebsocketSetup();
+    if (yjsSetupConnection) {
+      yjsSetupConnection(ws, request, {
         docName: roomName,
         gc: true,
       });

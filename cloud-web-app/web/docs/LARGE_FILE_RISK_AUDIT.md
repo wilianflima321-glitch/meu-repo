@@ -7,7 +7,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 ## Executive Summary
 
 - Large source files: 71
-- P0 files: 1
+- P0 files: 0
 - P1 low-import large modules: 57
 - Hard ceiling: 1800 lines
 - UI ceiling: 1200 lines
@@ -36,7 +36,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Lines | Category | Risk | Import hints | Recommendation |
 | --- | ---: | --- | --- | ---: | --- |
-| `lib/server/websocket-server.ts` | 1744 | server-runtime | P0 runtime monolith | 3 | Extract protocol, persistence, lifecycle, and telemetry modules with contract tests. |
 | `lib/level-serialization.ts` | 1227 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
 | `lib/dialogue-cutscene-system.ts` | 1201 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
 | `lib/cutscene/cutscene-system.tsx` | 1195 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
@@ -61,12 +60,13 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/save/save-manager.tsx` | 1144 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
 | `lib/onboarding-system.ts` | 1137 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
 | `lib/particles/advanced-particle-system.ts` | 1132 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
+| `lib/debug/debug-console.tsx` | 1112 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
 
 ## Full Inventory
 
 | File | Lines | Category | Risk | Import hints |
 | --- | ---: | --- | --- | ---: |
-| `lib/server/websocket-server.ts` | 1744 | server-runtime | P0 runtime monolith | 3 |
+| `lib/server/websocket-server.ts` | 1444 | server-runtime | P2 tracked large module | 3 |
 | `lib/server/extension-host-runtime.ts` | 1306 | server-runtime | P2 tracked large module | 1 |
 | `lib/pixel-streaming.ts` | 1245 | foundation-runtime | P2 tracked large module | 2 |
 | `lib/level-serialization.ts` | 1227 | foundation-runtime | P1 low-import large module | 0 |
