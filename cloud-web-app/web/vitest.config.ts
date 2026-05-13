@@ -57,6 +57,7 @@ export default defineConfig({
         'components/ui/ThemeToggle.tsx',
         'lib/agent-orchestrator.ts',
         'lib/observability/logger.ts',
+        'lib/server/magic-link.ts',
         'lib/production/agent-tool-bus.ts',
         'lib/production/browser-operator-safety.ts',
         'lib/production/high-risk-action-firewall.ts',

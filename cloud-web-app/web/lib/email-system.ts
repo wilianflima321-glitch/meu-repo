@@ -27,6 +27,7 @@ export type EmailTemplate =
   // Auth
   | 'welcome'
   | 'verify_email'
+  | 'magic_link'
   | 'password_reset'
   | 'password_changed'
   | 'login_alert'
@@ -196,7 +197,21 @@ export const EmailTemplates: Record<EmailTemplate, TemplateConfig> = {
       <p><em>Este link expira em 24 horas.</em></p>
     `, data),
   },
-  
+  magic_link: {
+    subject: 'Your Aethel sign-in link',
+    html: (data) => wrapInLayout(`
+      <h2>Sign in to Aethel</h2>
+      <p>Use this secure one-time link to continue your work in Aethel Studio.</p>
+      <p style="text-align: center; margin: 30px 0;">
+        <a href="${data.magicLinkUrl}" class="button">Sign in to Aethel</a>
+      </p>
+      <p>This link expires in ${data.expiryMinutes || 15} minutes and can be used once.</p>
+      <p>If you did not request this email, you can safely ignore it.</p>
+    `, data),
+    text: (data) =>
+      `Sign in to Aethel: ${data.magicLinkUrl}\n\nThis link expires in ${data.expiryMinutes || 15} minutes and can be used once.`,
+  },
+
   password_reset: {
     subject: 'Redefinição de Senha - Aethel Engine',
     html: (data) => wrapInLayout(`
