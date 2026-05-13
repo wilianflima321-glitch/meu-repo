@@ -77,6 +77,8 @@
     "@react-three/fiber": "8.15",
     "@react-three/postprocessing": "^2.19.1",
     "@sentry/nextjs": "^8.47.0",
+    "@simplewebauthn/browser": "^13.3.0",
+    "@simplewebauthn/server": "^13.3.0",
     "@tailwindcss/postcss": "^4.1.13",
     "@tanstack/react-query": "^5.66.0",
     "@testing-library/dom": "^10.4.1",

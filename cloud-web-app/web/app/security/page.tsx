@@ -102,14 +102,14 @@ const sections: TrustSection[] = [
       },
       {
         eyebrow: 'Credenciais modernas',
-        title: 'Passkeys continuam como proximo passo',
-        tone: 'planned',
+        title: 'Passkeys em rollout tecnico governado',
+        tone: 'partial',
         description:
-          'O proprio painel de seguranca ja assume passkeys como passo seguinte, nao como capacidade entregue agora.',
+          'O produto agora tem API, storage e painel de registro de passkeys. Ainda tratamos como rollout tecnico ate recovery, docs e suporte enterprise ficarem completos.',
         bullets: [
-          'O caminho atual de hardening principal e TOTP.',
-          'Nao ha copy publica aqui fingindo passwordless completo.',
-          'Quando chegar, precisa entrar com UX, recovery e suporte consistentes.',
+          'Tokens WebAuthn usam challenge curto, one-time e credential public-key server-side.',
+          'O painel de Settings ja permite registrar passkey quando o navegador/dispositivo suporta.',
+          'Ainda falta pacote completo de recovery e docs de suporte antes de chamar GA enterprise.',
         ],
       },
       {
@@ -133,6 +133,11 @@ const faqs: TrustFaq[] = [
     question: 'O Aethel ja tem MFA de verdade?',
     answer:
       'Sim. O produto ja tem fluxo de TOTP com autenticador, QR code, setup manual, backup codes e manutencao da seguranca da conta.',
+  },
+  {
+    question: 'Passkeys ja existem no produto?',
+    answer:
+      'Sim, em rollout tecnico: ha rotas WebAuthn, storage versionado, painel de registro e gate de QA. Ainda nao chamamos isso de GA enterprise ate fechar recovery e documentacao operacional.',
   },
   {
     question: 'SSO / SAML ja esta pronto para compra self-serve?',
@@ -196,11 +201,12 @@ export default function SecurityPage() {
       badge="Trust Center"
       heroIcon={LockKeyhole}
       title="Seguranca publica com copy honesta, pronta para conversa enterprise sem fantasia."
-      description="O Aethel ja entrega MFA de conta, status publico baseado em checks reais e sinais internos de governanca. Ainda nao tratamos SSO/SAML, passkeys ou certificacoes formais como se ja fossem rollout concluido."
+      description="O Aethel ja entrega MFA de conta, passkeys em rollout tecnico, status publico baseado em checks reais e sinais internos de governanca. Ainda nao tratamos SSO/SAML ou certificacoes formais como se ja fossem rollout concluido."
       summaryTitle="O que esta valendo hoje"
       summaryBody="Use esta pagina para entender a postura atual do produto: capacidade de hardening ja entregue, sinais operacionais publicos e os limites que ainda preferimos declarar em voz alta."
       summaryPoints={[
         'MFA/TOTP com backup codes ja esta no produto.',
+        'Passkeys agora tem API, migration e painel de registro em Settings.',
         'Status publico mede endpoints reais, nao um uptime decorativo.',
         'SSO/SAML segue como readiness + roadmap, nao como promessa GA.',
         'Buyers agora podem comecar por um pack publico de procurement antes da conversa assistida.',

@@ -4,7 +4,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  AlertTriangle,
   CheckCircle2,
   Copy,
   KeyRound,
@@ -15,6 +14,7 @@ import {
   Smartphone,
 } from 'lucide-react'
 import { createComponentLogger } from '@/lib/observability/logger';
+import PasskeysPanel from './PasskeysPanel'
 
 type TwoFactorStatus = {
   twoFactorEnabled: boolean
@@ -409,10 +409,12 @@ export default function TwoFactorSecurityPanel({
             Backup codes regeneraveis
           </span>
           <span className="inline-flex items-center gap-1">
-            <AlertTriangle className="h-3.5 w-3.5 text-[var(--aethel-warning)]" />
-            Passkeys e SSO ainda sao proximos passos
+            <CheckCircle2 className="h-3.5 w-3.5 text-[var(--aethel-success)]" />
+            Passkeys em rollout tecnico
           </span>
         </div>
+
+        {variant === 'settings' && <PasskeysPanel />}
 
         {variant === 'settings' && (
           <div className="mt-4 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3 text-sm text-[var(--aethel-text-secondary)]">

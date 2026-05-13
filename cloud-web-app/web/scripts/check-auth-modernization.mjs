@@ -50,10 +50,33 @@ requireFile('__tests__/server/magic-link.test.ts', 'magic-link server contract n
 requirePattern('__tests__/server/magic-link.test.ts', /one-time sign-in email/, 'tests must cover issuing the email')
 requirePattern('__tests__/server/magic-link.test.ts', /rejects invalid, expired, and used tokens/, 'tests must cover invalid token states')
 
+requireFile('lib/server/webauthn-passkeys.ts', 'passkeys need a WebAuthn server contract')
+requirePattern('lib/server/webauthn-passkeys.ts', /generateRegistrationOptions/, 'passkeys must generate registration options')
+requirePattern('lib/server/webauthn-passkeys.ts', /verifyRegistrationResponse/, 'passkeys must verify registration responses')
+requirePattern('lib/server/webauthn-passkeys.ts', /verifyAuthenticationResponse/, 'passkeys must verify authentication responses')
+requirePattern('lib/server/webauthn-passkeys.ts', /auth_webauthn_credentials/, 'passkeys must persist public-key credentials')
+requirePattern('lib/server/webauthn-passkeys.ts', /auth_webauthn_challenges/, 'passkeys must persist short-lived challenges')
+
+for (const route of [
+  'app/api/auth/webauthn/register/options/route.ts',
+  'app/api/auth/webauthn/register/verify/route.ts',
+  'app/api/auth/webauthn/authenticate/options/route.ts',
+  'app/api/auth/webauthn/authenticate/verify/route.ts',
+]) {
+  requireFile(route, 'WebAuthn passkey route must exist')
+}
+
+requireFile('components/settings/PasskeysPanel.tsx', 'Settings must expose passkey registration')
+requirePattern('components/settings/PasskeysPanel.tsx', /startRegistration/, 'PasskeysPanel must invoke browser WebAuthn registration')
+requirePattern('components/settings/TwoFactorSecurityPanel.tsx', /PasskeysPanel/, 'security settings must embed passkey registration')
+requireFile('prisma/migrations/20260513114500_webauthn_passkeys/migration.sql', 'passkey storage must be versioned')
+requirePattern('prisma/migrations/20260513114500_webauthn_passkeys/migration.sql', /public_key TEXT NOT NULL/, 'passkey public keys must be persisted')
+requirePattern('app/security/page.tsx', /Passkeys em rollout tecnico/, 'public security copy must reflect passkey rollout honestly')
+
 if (failures.length) {
   console.error('[auth-modernization] FAIL')
   for (const failure of failures) console.error(`- ${failure}`)
   process.exit(1)
 }
 
-console.log('[auth-modernization] PASS magic-link login is one-time, hashed, bot-guarded, and tested')
+console.log('[auth-modernization] PASS magic-link and WebAuthn passkeys are governed, versioned, wired, and tested')
