@@ -1,7 +1,7 @@
 'use client'
 
 import * as Sentry from '@sentry/browser'
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 
 const logger = createComponentLogger('sentry-browser')
 

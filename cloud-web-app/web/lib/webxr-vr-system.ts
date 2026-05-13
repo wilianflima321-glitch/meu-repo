@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * WEBXR / VR SYSTEM - Aethel Engine
  * 
@@ -843,7 +844,7 @@ export class WebXRSystem {
     this.scene = scene;
     this.renderer = renderer;
     if (!navigator.xr) {
-      console.error('WebXR not supported');
+      logger.error('WebXR not supported');
       return false;
     }
     try {
@@ -863,7 +864,7 @@ export class WebXRSystem {
       this.onSessionStart?.();
       return true;
     } catch (error) {
-      console.error('Failed to start XR session:', error);
+      logger.error('Failed to start XR session:', error);
       return false;
     }
   }

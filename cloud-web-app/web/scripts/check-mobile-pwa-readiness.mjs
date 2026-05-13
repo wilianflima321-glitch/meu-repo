@@ -51,6 +51,11 @@ requireFile('../../.github/workflows/lighthouse-ci.yml', 'Lighthouse workflow mu
 requireFile('lighthouserc.js', 'Lighthouse config must exist')
 requirePattern('lighthouserc.js', /'categories:pwa'/, 'Lighthouse must assert the PWA category')
 requirePattern('lighthouserc.js', /minScore:\s*0\.8/, 'PWA threshold must be explicit')
+requireFile('lib/mobile/mobile-companion-contract.ts', 'mobile companion must have a control-plane contract')
+requirePattern('lib/mobile/mobile-companion-contract.ts', /control-plane/, 'mobile companion must not pretend to be a heavy IDE')
+requirePattern('lib/mobile/mobile-companion-contract.ts', /render-queue/, 'mobile companion must block heavy render lanes')
+requirePattern('lib/mobile/mobile-companion-contract.ts', /approve-task/, 'mobile companion must support approval workflows')
+requireFile('__tests__/mobile/mobile-companion-contract.test.ts', 'mobile companion contract tests must exist')
 
 if (exists('public/manifest.json')) {
   const manifest = JSON.parse(read('public/manifest.json'))

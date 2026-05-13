@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * LOCALIZATION SYSTEM - Aethel Engine
  * 
@@ -298,7 +299,7 @@ export class LocalizationManager {
   
   setLocale(code: string): boolean {
     if (!this.locales.has(code)) {
-      console.warn(`Locale '${code}' not registered`);
+      logger.warn(`Locale '${code}' not registered`);
       return false;
     }
     
@@ -386,7 +387,7 @@ export class LocalizationManager {
       if (this.missingKeyHandler) {
         return this.missingKeyHandler(key, this.currentLocale);
       }
-      console.warn(`Missing translation: '${key}' for locale '${this.currentLocale}'`);
+      logger.warn(`Missing translation: '${key}' for locale '${this.currentLocale}'`);
       return key;
     }
     
@@ -407,7 +408,7 @@ export class LocalizationManager {
     const entry = this.getTranslationEntry(key, this.currentLocale);
     
     if (!entry) {
-      console.warn(`Missing translation: '${key}' for locale '${this.currentLocale}'`);
+      logger.warn(`Missing translation: '${key}' for locale '${this.currentLocale}'`);
       return key;
     }
     

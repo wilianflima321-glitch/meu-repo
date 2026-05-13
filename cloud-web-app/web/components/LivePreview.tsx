@@ -1,9 +1,9 @@
+'use client';
+
 /**
  * @deprecated Product-facing preview should go through
  * `@/components/preview/CanonicalPreviewSurface`.
  */
-'use client'
-
 import { useState, useRef, useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'

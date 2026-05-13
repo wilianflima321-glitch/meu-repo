@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Sistema de Onboarding e Tutorial - Aethel Engine
  * 
@@ -989,7 +990,7 @@ export class OnboardingManager {
         body: JSON.stringify(progress),
       });
     } catch (e) {
-      console.error('[Onboarding] Failed to save progress:', e);
+      logger.error('[Onboarding] Failed to save progress:', e);
     }
   }
 }

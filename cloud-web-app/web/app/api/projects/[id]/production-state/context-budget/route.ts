@@ -5,7 +5,7 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { requireAuth } from '@/lib/auth-server'
 import { prisma } from '@/lib/db'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 import {
   buildRepositoryContextBudgetExecutionState,
   mergeRepositoryContextBudgetExecutionPatch,

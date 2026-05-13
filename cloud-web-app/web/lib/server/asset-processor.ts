@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 import { NextRequest, NextResponse } from 'next/server'
 import { buildAssetQualityReport, type AssetQualityReport } from '@/lib/server/asset-quality'
 
@@ -151,7 +152,7 @@ export async function handleAssetUpload(req: NextRequest): Promise<NextResponse>
       message: processed.optimized ? 'Asset processed successfully' : 'Asset uploaded (optimization unavailable)',
     })
   } catch (error) {
-    console.error('Asset upload failed', error)
+    logger.error('Asset upload failed', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

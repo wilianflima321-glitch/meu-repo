@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * AETHEL ENGINE - YJS COLLABORATION MODULE
  * ========================================
@@ -11,14 +13,11 @@
  * - WebSocket e WebRTC providers
  * - Awareness (cursores, seleção, etc.)
  */
-
-'use client';
-
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { Awareness } from 'y-protocols/awareness';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('yjs-collaboration')
 
@@ -444,14 +443,14 @@ export class CollaborationSession {
         
         const objMap = this.sceneMap.get(objectId);
         if (!objMap) {
-            console.warn(`Object not found: ${objectId}`);
+            logger.warn(`Object not found: ${objectId}`);
             return;
         }
         
         // Check if object is locked by another user
         const lockedBy = objMap.get('lockedBy');
         if (lockedBy && lockedBy !== this.config.user.id) {
-            console.warn(`Object ${objectId} is locked by ${lockedBy}`);
+            logger.warn(`Object ${objectId} is locked by ${lockedBy}`);
             return;
         }
         
@@ -475,7 +474,7 @@ export class CollaborationSession {
         // Check if object is locked
         const lockedBy = objMap.get('lockedBy');
         if (lockedBy && lockedBy !== this.config.user.id) {
-            console.warn(`Object ${objectId} is locked by ${lockedBy}`);
+            logger.warn(`Object ${objectId} is locked by ${lockedBy}`);
             return;
         }
         

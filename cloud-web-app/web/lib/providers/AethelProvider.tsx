@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * AethelProvider - Provider Centralizado do Aethel Engine
  * 
@@ -11,9 +13,6 @@
  * 
  * @module lib/providers/AethelProvider
  */
-
-'use client';
-
 import React, { 
   createContext, 
   useContext, 

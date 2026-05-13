@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * AETHEL ENGINE - User Library Component
  *
@@ -7,9 +9,6 @@
  * - Historico de downloads
  * - Colecoes
  */
-
-'use client';
-
 import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

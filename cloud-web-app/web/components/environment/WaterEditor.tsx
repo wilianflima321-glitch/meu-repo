@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * WATER EDITOR - Aethel Engine
  *
@@ -15,9 +17,6 @@
  * - Shore blend
  * - Reflexao/refraction
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { Canvas, useFrame, extend } from '@react-three/fiber';
 import {

@@ -1,12 +1,12 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * Debug Process Attach UI
  *
  * Interface para selecionar e anexar debugger a processos.
  * Suporta multiplos tipos: Game, Server, Editor, Worker.
  */
-
-'use client';
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Bug,
@@ -460,7 +460,7 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
       const list = Array.isArray(data?.processes) ? data.processes : [];
       setLocalProcesses(list);
     } catch (error) {
-      console.error('Failed to refresh processes:', error);
+      logger.error('Failed to refresh processes:', error);
       setLocalProcesses([]);
     } finally {
       setLocalRefreshing(false);
@@ -533,7 +533,7 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
       });
       await refreshProcesses();
     } catch (error) {
-      console.error('Quick connect failed:', error);
+      logger.error('Quick connect failed:', error);
     }
   };
 

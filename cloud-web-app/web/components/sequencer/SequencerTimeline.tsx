@@ -1,12 +1,11 @@
+'use client';
+
 /**
  * Sequencer Timeline Editor - Editor de Timeline Cinematico
  *
  * Interface estilo Premiere/After Effects para edicao de sequencias cinematicas.
  * Conecta ao SequencerRuntime para reproducao em tempo real.
  */
-
-'use client';
-
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   Play,

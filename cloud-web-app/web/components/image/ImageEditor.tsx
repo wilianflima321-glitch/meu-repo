@@ -1,11 +1,10 @@
+'use client';
+
 /**
  * Image Editor - Editor de imagem REAL com Canvas
  *
  * Suporta layers, blend modes, brushes basicos.
  */
-
-'use client';
-
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 
 // ============================================================================

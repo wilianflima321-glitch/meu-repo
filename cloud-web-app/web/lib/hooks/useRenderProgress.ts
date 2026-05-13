@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * useRenderProgress Hook
  * 
@@ -161,7 +162,7 @@ export function useRenderProgress(options: UseRenderProgressOptions = {}): UseRe
 
     ws.connect().catch((err) => {
       setError('Não foi possível conectar ao servidor de renderização');
-      console.error('WebSocket connection failed:', err);
+      logger.error('WebSocket connection failed:', err);
     });
 
     return () => {
@@ -311,7 +312,7 @@ export function useRenderProgress(options: UseRenderProgressOptions = {}): UseRe
         throw new Error('Falha ao cancelar renderização');
       }
     } catch (err) {
-      console.error('Cancel job error:', err);
+      logger.error('Cancel job error:', err);
       throw err;
     }
   }, []);

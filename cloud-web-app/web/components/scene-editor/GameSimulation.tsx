@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 import React, { useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -90,7 +91,7 @@ export function GameSimulation({ objects }: GameSimulationProps) {
         bodyMap.current.set(obj.id, body);
 
     } catch (e) {
-        console.error("Failed to create body for", obj.name, e);
+        logger.error("Failed to create body for", obj.name, e);
     }
   }
 

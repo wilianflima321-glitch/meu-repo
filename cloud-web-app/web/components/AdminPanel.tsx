@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 import React, { useState } from 'react'
 import useSWR from 'swr'
 import { Users, CreditCard, DollarSign, Activity, Settings, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
@@ -99,7 +100,7 @@ export default function AdminPanel() {
       toast.success(`Creditos ajustados com sucesso. Novo saldo: $${result.new_balance}`)
       mutateUsers() // Refresh user data
     } catch (error) {
-      console.error('Error adjusting credits:', error)
+      logger.error('Error adjusting credits:', error)
       toast.error('Failed to adjust credits')
     }
   }
@@ -117,7 +118,7 @@ export default function AdminPanel() {
       toast.success('Usuario suspenso com sucesso')
       mutateUsers() // Refresh user data
     } catch (error) {
-      console.error('Error suspending user:', error)
+      logger.error('Error suspending user:', error)
       toast.error('Failed to suspend user')
     }
   }
@@ -135,7 +136,7 @@ export default function AdminPanel() {
       toast.success('Usuario ativado com sucesso')
       mutateUsers() // Refresh user data
     } catch (error) {
-      console.error('Error activating user:', error)
+      logger.error('Error activating user:', error)
       toast.error('Failed to activate user')
     }
   }

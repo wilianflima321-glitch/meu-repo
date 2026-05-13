@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * RBAC System - Role-Based Access Control para Admin Ops
  * 
@@ -391,7 +392,7 @@ export async function logAdminAction(entry: AuditLogEntry): Promise<void> {
       },
     });
   } catch (error) {
-    console.error('[RBAC] Failed to log admin action:', error);
+    logger.error('[RBAC] Failed to log admin action:', error);
   }
 }
 
@@ -431,7 +432,7 @@ export async function applyShadowBan(
     
     return true;
   } catch (error) {
-    console.error('[RBAC] Failed to apply shadow ban:', error);
+    logger.error('[RBAC] Failed to apply shadow ban:', error);
     return false;
   }
 }
@@ -462,7 +463,7 @@ export async function removeShadowBan(userId: string, adminId: string): Promise<
     
     return true;
   } catch (error) {
-    console.error('[RBAC] Failed to remove shadow ban:', error);
+    logger.error('[RBAC] Failed to remove shadow ban:', error);
     return false;
   }
 }

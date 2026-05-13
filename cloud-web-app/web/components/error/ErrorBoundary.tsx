@@ -1,12 +1,11 @@
+'use client';
+
 /**
  * Aethel Engine - Global Error Boundary
  *
  * Professional error handling with recovery, reporting, and user-friendly UI.
  * Captures React errors, async errors, and provides graceful degradation.
  */
-
-'use client';
-
 import React, {
   Component,
   createContext,

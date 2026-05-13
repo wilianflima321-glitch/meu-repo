@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('search/search-manager')
 
@@ -268,7 +268,7 @@ export class SearchManager {
           }
         }
       } catch (error) {
-        console.warn(`[Search Manager] Failed to search ${file}:`, error);
+        logger.warn(`[Search Manager] Failed to search ${file}:`, error);
       }
     }
 
@@ -371,7 +371,7 @@ export class SearchManager {
         this.searchHistory = JSON.parse(stored);
       }
     } catch (error) {
-      console.error('[Search Manager] Failed to load history:', error);
+      logger.error('[Search Manager] Failed to load history:', error);
     }
   }
 
@@ -382,7 +382,7 @@ export class SearchManager {
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.searchHistory));
     } catch (error) {
-      console.error('[Search Manager] Failed to save history:', error);
+      logger.error('[Search Manager] Failed to save history:', error);
     }
   }
 }

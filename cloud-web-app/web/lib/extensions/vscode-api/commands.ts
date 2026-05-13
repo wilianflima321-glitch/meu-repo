@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('extensions/vscode-api/commands')
 
@@ -26,7 +26,7 @@ class CommandsAPI {
    */
   registerCommand(command: string, callback: CommandCallback): { dispose: () => void } {
     if (this.commands.has(command)) {
-      console.warn(`[Commands] Command '${command}' is already registered`);
+      logger.warn(`[Commands] Command '${command}' is already registered`);
     }
 
     this.commands.set(command, callback);
@@ -64,7 +64,7 @@ class CommandsAPI {
         return result as T;
       }
 
-      console.warn(`[Commands] Command '${command}' not found`);
+      logger.warn(`[Commands] Command '${command}' not found`);
       return undefined;
     }
 
@@ -73,7 +73,7 @@ class CommandsAPI {
       this.recordCommandExecution(command);
       return result as T;
     } catch (error) {
-      console.error(`[Commands] Error executing command '${command}':`, error);
+      logger.error(`[Commands] Error executing command '${command}':`, error);
       throw error;
     }
   }

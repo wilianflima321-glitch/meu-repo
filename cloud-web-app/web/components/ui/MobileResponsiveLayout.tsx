@@ -1,11 +1,10 @@
+'use client';
+
 /**
  * Mobile Responsive Layout Components
  * Provides responsive shells for dashboard, landing, and IDE entry surfaces.
  * Ensures WCAG 2.2 AA compliance with touch targets >= 44px and readable text.
  */
-
-'use client'
-
 import { useState, useCallback, useEffect, type ReactNode } from 'react'
 import Link from 'next/link'
 import {

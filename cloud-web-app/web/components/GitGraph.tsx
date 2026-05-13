@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getGitClient, GitCommit } from '@/lib/git/git-client';
 
@@ -30,7 +31,7 @@ export default function GitGraph() {
       const log = await gitClient.log(100);
       setCommits(log);
     } catch (error) {
-      console.error('Failed to load commits:', error);
+      logger.error('Failed to load commits:', error);
     } finally {
       setLoading(false);
     }

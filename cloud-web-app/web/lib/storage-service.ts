@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('storage-service')
 
@@ -60,9 +60,9 @@ async function loadS3Module(): Promise<S3Module> {
   } catch (error) {
     const message = 'STORAGE_SDK_NOT_AVAILABLE: instale @aws-sdk/client-s3 e configure S3/MINIO para usar storage real.';
     if (process.env.NODE_ENV === 'production') {
-      console.error(`[Storage] ❌ ${message}`);
+      logger.error(`[Storage] ❌ ${message}`);
     } else {
-      console.warn(`[Storage] ⚠️ ${message}`);
+      logger.warn(`[Storage] ⚠️ ${message}`);
     }
     throw Object.assign(new Error(message), { code: 'STORAGE_SDK_NOT_AVAILABLE' });
   }

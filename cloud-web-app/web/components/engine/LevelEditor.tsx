@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Level Editor Integrado - Editor de Níveis Profissional
  *
@@ -11,9 +13,6 @@
  * - Play Mode com Physics real
  * - Undo/Redo (em desenvolvimento)
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
@@ -52,7 +51,7 @@ import {
   type ViewportMode,
 } from './level-editor-core';
 import { DetailsPanelMini, OutlinerMini, Toolbar } from './LevelEditorPanels';
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('LevelEditor')
 
@@ -580,7 +579,7 @@ export default function LevelEditor() {
           setObjects(data.objects || defaultObjects);
           return;
         } catch (e) {
-          console.warn('Failed to parse cached level');
+          logger.warn('Failed to parse cached level');
         }
       }
 

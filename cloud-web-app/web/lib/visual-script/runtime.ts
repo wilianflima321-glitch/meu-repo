@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Visual Script Runtime - Executor Real de Blueprints
  * 
@@ -7,12 +9,9 @@
  * 
  * @module lib/visual-script/runtime
  */
-
-'use client';
-
 import { EventEmitter } from 'events';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('visual-script/runtime')
 
@@ -738,7 +737,7 @@ export class VisualScriptRuntime extends EventEmitter {
   // Start execution
   start(): void {
     if (!this.script) {
-      console.error('No script loaded');
+      logger.error('No script loaded');
       return;
     }
     
@@ -842,13 +841,13 @@ export class VisualScriptRuntime extends EventEmitter {
   async executeNode(nodeId: string): Promise<void> {
     const node = this.nodeMap.get(nodeId);
     if (!node) {
-      console.error(`Node not found: ${nodeId}`);
+      logger.error(`Node not found: ${nodeId}`);
       return;
     }
     
     const executor = nodeExecutors.get(node.type);
     if (!executor) {
-      console.error(`No executor for node type: ${node.type}`);
+      logger.error(`No executor for node type: ${node.type}`);
       return;
     }
     
@@ -875,7 +874,7 @@ export class VisualScriptRuntime extends EventEmitter {
         await this.executeFromPort(nodeId, result.nextExec);
       }
     } catch (error) {
-      console.error(`Error executing node ${nodeId}:`, error);
+      logger.error(`Error executing node ${nodeId}:`, error);
       this.emit('node:error', { nodeId, error });
     }
     

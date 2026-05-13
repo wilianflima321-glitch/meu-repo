@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 /**
  * Aethel Engine - Breadcrumbs Navigation
  *
@@ -453,7 +454,7 @@ export default function Breadcrumbs({
       const contents = await onListFolder(path);
       setFolderContents(prev => new Map(prev).set(path, contents));
     } catch (error) {
-      console.error('Failed to list folder:', error);
+      logger.error('Failed to list folder:', error);
     }
   }, [folderContents, onListFolder]);
 

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Aethel Engine - Server Bootstrap
  * 
@@ -136,7 +137,7 @@ export async function bootstrap(config: ServerConfig = {}): Promise<void> {
     log.info('\n  Press Ctrl+C to stop the server.\n');
     
   } catch (error) {
-    console.error('\n❌ Failed to start server:', error);
+    logger.error('\n❌ Failed to start server:', error);
     await shutdown();
     throw error;
   }
@@ -224,13 +225,13 @@ function setupProcessHandlers(): void {
   
   // Handle uncaught exceptions
   process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error);
+    logger.error('Uncaught Exception:', error);
     shutdown().then(() => process.exit(1));
   });
   
   // Handle unhandled promise rejections
   process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
   });
 }
 
@@ -245,7 +246,7 @@ if (isDirectRun) {
   setupProcessHandlers();
   
   bootstrap().catch((error) => {
-    console.error('Bootstrap failed:', error);
+    logger.error('Bootstrap failed:', error);
     process.exit(1);
   });
 }

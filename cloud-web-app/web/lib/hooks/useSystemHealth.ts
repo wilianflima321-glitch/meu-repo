@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * useSystemHealth Hook
  * 
@@ -277,7 +278,7 @@ export function useSystemHealth(options: UseSystemHealthOptions = {}): UseSystem
 
     ws.connect().catch((err) => {
       setError('Não foi possível conectar ao servidor de monitoramento');
-      console.error('WebSocket connection failed:', err);
+      logger.error('WebSocket connection failed:', err);
     });
 
     return () => {
@@ -368,7 +369,7 @@ export function useSystemHealth(options: UseSystemHealthOptions = {}): UseSystem
           setStatus(calculateStatus(parsed));
         })
         .catch(err => {
-          console.error('Health check failed:', err);
+          logger.error('Health check failed:', err);
           setError('Falha ao obter status do sistema');
         });
     }

@@ -20,7 +20,7 @@
 import { EventEmitter } from 'events';
 import { createClient, RedisClientType } from 'redis';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('server/redis-pubsub-adapter')
 
@@ -84,7 +84,7 @@ export class RedisPubSubAdapter extends EventEmitter {
       log.info(`[RedisPubSub] Connected to ${this.redisUrl} as ${this.serverId}`);
       this.emit('connected');
     } catch (error) {
-      console.error('[RedisPubSub] Connection failed:', error);
+      logger.error('[RedisPubSub] Connection failed:', error);
       throw error;
     }
   }
@@ -131,7 +131,7 @@ export class RedisPubSubAdapter extends EventEmitter {
           timestamp: parsed.timestamp,
         });
       } catch (error) {
-        console.error('[RedisPubSub] Failed to parse message:', error);
+        logger.error('[RedisPubSub] Failed to parse message:', error);
       }
     });
 

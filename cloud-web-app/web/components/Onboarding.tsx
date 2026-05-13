@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 /**
  * Onboarding Components - Aethel Engine
  *
@@ -136,7 +137,7 @@ export function OnboardingProvider({
         setState(data.onboarding);
       }
     } catch (error) {
-      console.error('Failed to complete step:', error);
+      logger.error('Failed to complete step:', error);
     }
   };
 
@@ -152,7 +153,7 @@ export function OnboardingProvider({
         setState(data.onboarding);
       }
     } catch (error) {
-      console.error('Failed to complete tour:', error);
+      logger.error('Failed to complete tour:', error);
     }
   };
 
@@ -169,7 +170,7 @@ export function OnboardingProvider({
         setShowWelcome(false);
       }
     } catch (error) {
-      console.error('Failed to skip onboarding:', error);
+      logger.error('Failed to skip onboarding:', error);
     }
   };
 

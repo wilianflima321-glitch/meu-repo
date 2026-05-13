@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('plugin-system')
 
@@ -210,7 +210,7 @@ class PluginManager {
             // }
             log.info(`Plugin ${plugin.id} activated`);
           } catch (error) {
-            console.error(`Failed to activate plugin ${plugin.id}:`, error);
+            logger.error(`Failed to activate plugin ${plugin.id}:`, error);
             throw error;
           }
         }
@@ -376,7 +376,7 @@ class PluginManager {
       try {
         listener(...args);
       } catch (error) {
-        console.error(`Event listener error for ${event}:`, error);
+        logger.error(`Event listener error for ${event}:`, error);
       }
     });
   }
@@ -397,7 +397,7 @@ class PluginManager {
       extensionPath: `/plugins/${plugin.id}`,
       extensionUri: `aethel://plugins/${plugin.id}`,
       log: (message) => log.info(`[${plugin.id}] ${message}`),
-      logError: (message, error) => console.error(`[${plugin.id}] ${message}`, error),
+      logError: (message, error) => logger.error(`[${plugin.id}] ${message}`, error),
     };
   }
 

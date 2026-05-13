@@ -1,3 +1,6 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * CreditWallet - UI Completa de Carteira de creditos
  *
@@ -6,9 +9,6 @@
  *
  * @see ALINHAMENTO_PLANO_NEGOCIO_E_CUSTOS_2026.md - Seção 4
  */
-
-'use client';
-
 import React, { useState, useCallback } from 'react';
 import useSWR from 'swr';
 import {
@@ -328,7 +328,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
 
       if (onPurchase) onPurchase(packageId);
     } catch (err) {
-      console.error('Purchase error:', err);
+      logger.error('Purchase error:', err);
     } finally {
       setIsPurchasing(false);
       setSelectedPackage(null);

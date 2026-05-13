@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * PremiumLock Component - Paywall para Features Premium
  *
@@ -14,7 +16,6 @@
  * - Beneficios do upgrade
  * - CTA para pagina de pricing
  */
-'use client';
 import React, { useState, useEffect, ReactNode } from 'react';
 import { Lock, Sparkles, ArrowRight, X, Crown, Zap, Shield, Rocket } from 'lucide-react';
 import useSWR from 'swr';

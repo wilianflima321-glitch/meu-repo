@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * AETHEL ENGINE - Pixel Streaming System
  * 
@@ -426,7 +427,7 @@ export class PixelStreamingClient {
         };
         
         this.dataChannel.onerror = (error) => {
-            console.error('[PixelStreaming] Data channel error:', error);
+            logger.error('[PixelStreaming] Data channel error:', error);
         };
     }
     
@@ -518,7 +519,7 @@ export class PixelStreamingClient {
             
             // Start playback
             this.videoElement.play().catch(err => {
-                console.error('[PixelStreaming] Video playback failed:', err);
+                logger.error('[PixelStreaming] Video playback failed:', err);
             });
             
         } else if (track.kind === 'audio' && this.config.audioEnabled) {
@@ -529,7 +530,7 @@ export class PixelStreamingClient {
             
             this.audioElement.srcObject = new MediaStream([track]);
             this.audioElement.play().catch(err => {
-                console.error('[PixelStreaming] Audio playback failed:', err);
+                logger.error('[PixelStreaming] Audio playback failed:', err);
             });
         }
     }
@@ -589,12 +590,12 @@ export class PixelStreamingClient {
                     break;
             }
         } catch (error) {
-            console.error('[PixelStreaming] Failed to parse signaling message:', error);
+            logger.error('[PixelStreaming] Failed to parse signaling message:', error);
         }
     }
     
     private onSignalingError(error: Event): void {
-        console.error('[PixelStreaming] Signaling error:', error);
+        logger.error('[PixelStreaming] Signaling error:', error);
         this.emitEvent('error', { message: 'Signaling connection error' });
     }
     
@@ -737,7 +738,7 @@ export class PixelStreamingClient {
             this.latencyEstimator.recordSend(performance.now());
             
         } catch (error) {
-            console.error('[PixelStreaming] Failed to send input:', error);
+            logger.error('[PixelStreaming] Failed to send input:', error);
         }
         
         this.inputBuffer = [];
@@ -848,7 +849,7 @@ export class PixelStreamingClient {
             this.emitEvent('stats-update', this.stats);
             
         } catch (error) {
-            console.error('[PixelStreaming] Failed to collect stats:', error);
+            logger.error('[PixelStreaming] Failed to collect stats:', error);
         }
     }
     
@@ -930,7 +931,7 @@ export class PixelStreamingClient {
             
             setTimeout(() => {
                 this.connect().catch(err => {
-                    console.error('[PixelStreaming] Reconnect failed:', err);
+                    logger.error('[PixelStreaming] Reconnect failed:', err);
                 });
             }, delay);
         } else {
@@ -1037,7 +1038,7 @@ export class PixelStreamingClient {
             try {
                 callback(event);
             } catch (error) {
-                console.error('[PixelStreaming] Event handler error:', error);
+                logger.error('[PixelStreaming] Event handler error:', error);
             }
         });
     }

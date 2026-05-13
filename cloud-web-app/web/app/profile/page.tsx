@@ -26,7 +26,7 @@ import { AethelAPIClient } from '@/lib/api'
 import { isAuthenticated, logout } from '@/lib/auth'
 import StudioLayout from '@/components/studio/StudioLayout'
 import TwoFactorSecurityPanel from '@/components/settings/TwoFactorSecurityPanel'
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // ============================================================================
 // Types

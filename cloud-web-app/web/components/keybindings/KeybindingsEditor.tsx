@@ -260,7 +260,7 @@ export default function KeybindingsEditor({
         })
         setKeybindings(loadedBindings)
       } catch (e) {
-        console.error('Failed to parse saved keybindings:', e)
+        logger.error('Failed to parse saved keybindings:', e)
       }
     }
 
@@ -752,7 +752,7 @@ export function useKeybindings(customBindings?: Keybinding[]) {
   return { keybindings, getKeybinding, executeCommand }
 }
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('KeybindingsEditor')
 

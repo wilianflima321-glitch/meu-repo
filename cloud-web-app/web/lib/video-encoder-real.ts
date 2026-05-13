@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Video Encoder REAL - Encoding de Vídeo com WebCodecs
  * 
@@ -71,7 +72,7 @@ export class VideoEncoderReal {
   
   async initialize(): Promise<boolean> {
     if (typeof VideoEncoder === 'undefined') {
-      console.error('WebCodecs not supported in this browser');
+      logger.error('WebCodecs not supported in this browser');
       return false;
     }
     
@@ -85,7 +86,7 @@ export class VideoEncoderReal {
     });
     
     if (!support.supported) {
-      console.error('Codec not supported:', this.config.codec);
+      logger.error('Codec not supported:', this.config.codec);
       return false;
     }
     
@@ -121,7 +122,7 @@ export class VideoEncoderReal {
   }
   
   private handleError(error: DOMException): void {
-    console.error('Video encoder error:', error);
+    logger.error('Video encoder error:', error);
     this.isEncoding = false;
   }
   
@@ -212,7 +213,7 @@ export class AudioEncoderReal {
   
   async initialize(): Promise<boolean> {
     if (typeof AudioEncoder === 'undefined') {
-      console.error('WebCodecs Audio not supported');
+      logger.error('WebCodecs Audio not supported');
       return false;
     }
     
@@ -227,7 +228,7 @@ export class AudioEncoderReal {
     });
     
     if (!support.supported) {
-      console.error('Audio codec not supported:', this.config.codec);
+      logger.error('Audio codec not supported:', this.config.codec);
       return false;
     }
     
@@ -259,7 +260,7 @@ export class AudioEncoderReal {
   }
   
   private handleError(error: DOMException): void {
-    console.error('Audio encoder error:', error);
+    logger.error('Audio encoder error:', error);
     this.isEncoding = false;
   }
   

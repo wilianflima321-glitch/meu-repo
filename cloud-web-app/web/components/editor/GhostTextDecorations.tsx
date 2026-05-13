@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 /**
  * Ghost Text Decorations Component
  *
@@ -249,7 +250,7 @@ export function GhostTextDecorations({
         clearDecorations();
       }
     } catch (error) {
-      console.error('Error fetching ghost text:', error);
+      logger.error('Error fetching ghost text:', error);
       clearDecorations();
     }
   }, [enabled, monacoEditor, language, filePath, showGhostText, clearDecorations]);

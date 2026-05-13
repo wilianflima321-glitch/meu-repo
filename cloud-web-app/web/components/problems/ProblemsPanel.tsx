@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Problems Panel Component
  * Displays diagnostics and errors from LSP
@@ -59,7 +60,7 @@ export const ProblemsPanel: React.FC = () => {
         await problemsManager.applyQuickFix(fixes[0]);
       }
     } catch (error) {
-      console.error('Quick fix failed:', error);
+      logger.error('Quick fix failed:', error);
     }
   }, [problemsManager]);
 

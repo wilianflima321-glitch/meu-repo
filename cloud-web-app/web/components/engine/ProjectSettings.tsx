@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Project Settings UI - Configurações do Projeto
  *
@@ -6,9 +8,6 @@
  *
  * NÃO É MOCK - Sistema real e funcional!
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { useToast } from '@/components/ui/Toast';
 import { createComponentLogger } from '@/lib/observability/logger'

@@ -1,11 +1,10 @@
+'use client';
+
 /**
  * Billing Integration Components
  * Complete Stripe billing flow: plan selection, checkout, portal, quota enforcement.
  * Designed to work with both live and test Stripe environments.
  */
-
-'use client'
-
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {

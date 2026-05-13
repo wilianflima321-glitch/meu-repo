@@ -1,12 +1,11 @@
+'use client';
+
 /**
  * Content Browser Component - Navegador de Assets
  *
  * Interface profissional para gerenciar e visualizar assets do projeto.
  * Suporta drag-and-drop para o viewport 3D.
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Search, Grid, List, ChevronRight, Upload, Plus, RefreshCw, Package } from 'lucide-react';
 import AssetPreviewPanel from './AssetPreviewPanel';

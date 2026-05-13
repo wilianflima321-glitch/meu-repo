@@ -1,10 +1,10 @@
+'use client';
+
 /**
  * @deprecated Use canonical equivalent from @/components/ui/ instead.
  * Migration guide: cloud-web-app/web/components/COMPONENT_CONSOLIDATION_MAP.md
  * Source: docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md
  */
-'use client';
-
 /**
  * @deprecated Sem referências na app Next actual. Use o toast/banner do dashboard ou integre `NotificationSystem` quando for o caso.
  */

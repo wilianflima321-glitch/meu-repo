@@ -1,12 +1,11 @@
+'use client';
+
 /**
  * Team Invite Manager Component
  *
  * Interface profissional para convidar e gerenciar
  * membros de projeto/equipe.
  */
-
-'use client';
-
 import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import useSWR from 'swr';

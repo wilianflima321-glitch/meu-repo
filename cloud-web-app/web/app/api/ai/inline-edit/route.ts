@@ -16,7 +16,7 @@ import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
 import { AI_INLINE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { applyProjectRulesToMessages, loadProjectRulesContext } from '@/lib/server/project-rules'
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 import {
   applyAgentHandoffContextToMessages,
   loadAgentHandoffContext,

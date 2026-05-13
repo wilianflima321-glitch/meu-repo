@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Haptics/Rumble System - Sistema de Vibração e Feedback Tátil
  * 
@@ -393,7 +394,7 @@ export class HapticsSystem extends EventEmitter {
     
     const effect = this.effects.get(effectId);
     if (!effect) {
-      console.warn(`Haptic effect not found: ${effectId}`);
+      logger.warn(`Haptic effect not found: ${effectId}`);
       return null;
     }
     

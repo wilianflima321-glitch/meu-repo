@@ -1,3 +1,6 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * Interactive Tour System - Tour Interativo Guiado
  *
@@ -6,9 +9,6 @@
  *
  * @module components/onboarding/InteractiveTour
  */
-
-'use client';
-
 import React, {
   useState,
   useEffect,
@@ -226,7 +226,7 @@ function TourOverlay() {
           target.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       } else {
-        console.warn(`Tour target not found: ${currentStep.target}`);
+        logger.warn(`Tour target not found: ${currentStep.target}`);
         setTargetRect(null);
       }
     };

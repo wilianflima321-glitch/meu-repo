@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Animation System - Sistema de Animação Completo
  * 
@@ -242,7 +243,7 @@ export class AnimationPlayer extends EventEmitter {
   }): void {
     const clip = this.clips.get(clipId);
     if (!clip) {
-      console.warn(`Animation clip not found: ${clipId}`);
+      logger.warn(`Animation clip not found: ${clipId}`);
       return;
     }
     

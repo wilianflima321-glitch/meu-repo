@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Sistema de Backup e Recovery - Aethel Engine
  * 
@@ -168,7 +169,7 @@ export class BackupManager {
     this.backups.set(id, backup);
     
     // Inicia processo de backup async
-    this.processBackup(backup, options).catch(console.error);
+    this.processBackup(backup, options).catch((error) => logger.error(error));
     
     return backup;
   }
@@ -220,7 +221,7 @@ export class BackupManager {
       
     } catch (error) {
       backup.status = 'failed';
-      console.error('[Backup] Failed:', error);
+      logger.error('[Backup] Failed:', error);
       throw error;
     }
   }

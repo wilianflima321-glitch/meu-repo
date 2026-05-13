@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * TimeMachineSlider - Slider Visual de Histórico Git
  *
@@ -10,9 +12,6 @@
  *
  * @module components/vcs/TimeMachineSlider
  */
-
-'use client';
-
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';

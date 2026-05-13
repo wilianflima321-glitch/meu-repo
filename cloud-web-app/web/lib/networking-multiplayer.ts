@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('networking-multiplayer')
 
@@ -448,7 +448,7 @@ export class RollbackNetcode {
   rollback(toFrame: number): Map<string, PlayerState> | null {
     const targetState = this.stateHistory.find(s => s.frame === toFrame);
     if (!targetState) {
-      console.warn(`Cannot rollback to frame ${toFrame}: state not found`);
+      logger.warn(`Cannot rollback to frame ${toFrame}: state not found`);
       return null;
     }
     let currentStates = new Map(targetState.state);
@@ -591,7 +591,7 @@ export class NetworkClient {
   }
   send(type: MessageType, payload: unknown): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('WebSocket not connected');
+      logger.warn('WebSocket not connected');
       return;
     }
     const message: NetworkMessage = {

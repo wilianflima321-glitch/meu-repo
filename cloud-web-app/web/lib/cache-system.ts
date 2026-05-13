@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('cache-system')
 
@@ -866,7 +866,7 @@ export class PerformanceMonitor {
   measure(name: string, startMark?: string): number {
     const start = startMark ? this.marks.get(startMark) : this.marks.get(name);
     if (start === undefined) {
-      console.warn(`[Performance] Mark "${startMark || name}" not found`);
+      logger.warn(`[Performance] Mark "${startMark || name}" not found`);
       return 0;
     }
     

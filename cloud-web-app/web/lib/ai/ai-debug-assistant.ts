@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * AI Debug Assistant
  * Provides intelligent debugging assistance using Chat Orchestrator
@@ -54,7 +55,7 @@ export class AIDebugAssistant {
 
       return analysis;
     } catch (error) {
-      console.error('[AI Debug Assistant] Error analyzing stopped state:', error);
+      logger.error('[AI Debug Assistant] Error analyzing stopped state:', error);
       return this.getEmptyAnalysis();
     }
   }
@@ -82,7 +83,7 @@ export class AIDebugAssistant {
 
       return this.parseVariableExplanation(variable, response);
     } catch (error) {
-      console.error('[AI Debug Assistant] Error explaining variable:', error);
+      logger.error('[AI Debug Assistant] Error explaining variable:', error);
       return {
         variable: variable.name,
         explanation: 'Unable to generate explanation',
@@ -116,7 +117,7 @@ export class AIDebugAssistant {
 
       return this.parseBreakpointSuggestions(response);
     } catch (error) {
-      console.error('[AI Debug Assistant] Error suggesting breakpoints:', error);
+      logger.error('[AI Debug Assistant] Error suggesting breakpoints:', error);
       return [];
     }
   }
@@ -147,7 +148,7 @@ export class AIDebugAssistant {
 
       return this.parseWatchExpressions(response);
     } catch (error) {
-      console.error('[AI Debug Assistant] Error suggesting watch expressions:', error);
+      logger.error('[AI Debug Assistant] Error suggesting watch expressions:', error);
       return [];
     }
   }
@@ -180,7 +181,7 @@ export class AIDebugAssistant {
 
       return this.parseExceptionAnalysis(response);
     } catch (error) {
-      console.error('[AI Debug Assistant] Error analyzing exception:', error);
+      logger.error('[AI Debug Assistant] Error analyzing exception:', error);
       return this.getEmptyAnalysis();
     }
   }
@@ -210,7 +211,7 @@ export class AIDebugAssistant {
 
       return response;
     } catch (error) {
-      console.error('[AI Debug Assistant] Error comparing values:', error);
+      logger.error('[AI Debug Assistant] Error comparing values:', error);
       return 'Unable to compare values';
     }
   }
@@ -299,7 +300,7 @@ export class AIDebugAssistant {
         const variables = await adapter.variables(scope.variablesReference);
         allVariables.push(...variables);
       } catch (error) {
-        console.error('[AI Debug Assistant] Error getting variables:', error);
+        logger.error('[AI Debug Assistant] Error getting variables:', error);
       }
     }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 import { traceHeaders, withTraceSpan, type TraceContext } from '@/lib/observability/tracing'
 import {
   buildViewportRenderBackendCapabilities,

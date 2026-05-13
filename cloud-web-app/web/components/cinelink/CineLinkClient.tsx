@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * CineLink - Virtual Camera System
  *
@@ -10,9 +12,6 @@
  *
  * @module CineLink
  */
-
-'use client';
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
 
@@ -34,7 +33,7 @@ import {
   RotateCcw,
   Move3d
 } from 'lucide-react';
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('CineLinkClient')
 
@@ -258,7 +257,7 @@ export function CineLinkClient({
           const message: CineLinkMessage = JSON.parse(event.data);
           handleMessage(message);
         } catch (e) {
-          console.error('[CineLink] Invalid message:', e);
+          logger.error('[CineLink] Invalid message:', e);
         }
       };
 
@@ -274,12 +273,12 @@ export function CineLinkClient({
       };
 
       ws.onerror = (error) => {
-        console.error('[CineLink] Error:', error);
+        logger.error('[CineLink] Error:', error);
       };
 
       wsRef.current = ws;
     } catch (error) {
-      console.error('[CineLink] Connection failed:', error);
+      logger.error('[CineLink] Connection failed:', error);
     }
   }, [connectionUrl, handleMessage, onConnectionChange]);
 
@@ -346,7 +345,7 @@ export function CineLinkClient({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (e) {
-      console.error('Failed to copy:', e);
+      logger.error('Failed to copy:', e);
     }
   };
 

@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('dap-client')
 
@@ -197,7 +197,7 @@ export class DapClient extends EventEmitter {
       };
 
       this.ws.onerror = (error) => {
-        console.error('[DAP Client] WebSocket error:', error);
+        logger.error('[DAP Client] WebSocket error:', error);
         reject(new Error('Failed to connect to debug server'));
       };
 
@@ -222,7 +222,7 @@ export class DapClient extends EventEmitter {
         try {
           await this.connect();
         } catch (error) {
-          console.error('[DAP Client] Reconnect failed:', error);
+          logger.error('[DAP Client] Reconnect failed:', error);
         }
       }, delay);
     }

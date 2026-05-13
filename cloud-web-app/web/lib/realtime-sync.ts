@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events'
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('realtime-sync')
 
@@ -159,7 +159,7 @@ export class RealtimeSyncManager extends EventEmitter {
    */
   async connect(userId: string): Promise<void> {
     if (this.isConnected) {
-      console.warn('[RealtimeSync] Já conectado')
+      logger.warn('[RealtimeSync] Já conectado')
       return
     }
 
@@ -193,7 +193,7 @@ export class RealtimeSyncManager extends EventEmitter {
     if (!this.isConnected) {
       // Adicionar à fila se desconectado
       this.eventQueue.push(event)
-      console.warn('[RealtimeSync] Desconectado, adicionando à fila', type)
+      logger.warn('[RealtimeSync] Desconectado, adicionando à fila', type)
       return
     }
 
@@ -216,7 +216,7 @@ export class RealtimeSyncManager extends EventEmitter {
    */
   private async tryReconnect(): Promise<void> {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('[RealtimeSync] Máximo de tentativas de reconexão atingido')
+      logger.error('[RealtimeSync] Máximo de tentativas de reconexão atingido')
       this.emit('reconnect:failed')
       return
     }

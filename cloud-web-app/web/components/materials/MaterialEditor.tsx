@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Material Editor - Sistema de Materiais PBR Completo
  *
@@ -6,9 +8,6 @@
  *
  * NÃO É MOCK - Funciona de verdade com Three.js!
  */
-
-'use client';
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   ReactFlow,

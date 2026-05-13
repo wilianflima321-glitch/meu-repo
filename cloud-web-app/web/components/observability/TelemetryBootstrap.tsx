@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 
 const logger = createComponentLogger('telemetry-bootstrap')
 

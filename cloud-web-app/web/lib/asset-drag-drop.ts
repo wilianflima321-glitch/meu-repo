@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Asset Drag-Drop Integration
  * 
@@ -372,7 +373,7 @@ export class SceneAssetIntegration {
       objects.forEach(obj => this.sceneObjects.set(obj.id, obj));
       this.notifyListeners();
     } catch (err) {
-      console.error('Failed to deserialize scene:', err);
+      logger.error('Failed to deserialize scene:', err);
     }
   }
 }

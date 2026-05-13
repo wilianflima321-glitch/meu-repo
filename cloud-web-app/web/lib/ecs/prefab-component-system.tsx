@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Prefab & Component System - Sistema de Prefabs e Componentes
  * 
@@ -224,7 +225,7 @@ export class ComponentRegistry {
   createComponent<T extends ComponentData>(type: ComponentType): Component<T> | null {
     const definition = this.definitions.get(type);
     if (!definition) {
-      console.warn(`Component type not registered: ${type}`);
+      logger.warn(`Component type not registered: ${type}`);
       return null;
     }
     
@@ -555,7 +556,7 @@ export class EntityManager extends EventEmitter {
   
   attachComponent<T extends ComponentData>(entity: Entity, component: Component<T>): void {
     if (entity.components.has(component.type)) {
-      console.warn(`Entity already has component: ${component.type}`);
+      logger.warn(`Entity already has component: ${component.type}`);
       return;
     }
     
@@ -673,7 +674,7 @@ export class PrefabManager extends EventEmitter {
   updatePrefab(prefabId: string, entity: Entity): void {
     const prefab = this.prefabs.get(prefabId);
     if (!prefab) {
-      console.warn(`Prefab not found: ${prefabId}`);
+      logger.warn(`Prefab not found: ${prefabId}`);
       return;
     }
     
@@ -708,7 +709,7 @@ export class PrefabManager extends EventEmitter {
   ): Entity | null {
     const prefab = this.prefabs.get(prefabId);
     if (!prefab) {
-      console.warn(`Prefab not found: ${prefabId}`);
+      logger.warn(`Prefab not found: ${prefabId}`);
       return null;
     }
     
@@ -963,7 +964,7 @@ export class PrefabManager extends EventEmitter {
       
       return prefab;
     } catch (error) {
-      console.error('Failed to import prefab:', error);
+      logger.error('Failed to import prefab:', error);
       return null;
     }
   }

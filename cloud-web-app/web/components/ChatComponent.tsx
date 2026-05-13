@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 // ChatComponent.tsx: Interface de chat integrada com backend API
 import React, { useState, useRef, useEffect } from 'react';
 import { AethelAPIClient, APIError } from '@/lib/api';
@@ -186,7 +187,7 @@ const ChatComponent: React.FC = () => {
 
         await loadThreadMessages(threadId);
       } catch (e) {
-        console.warn('Failed to restore chat', e);
+        logger.warn('Failed to restore chat', e);
       }
     })();
 
@@ -491,7 +492,7 @@ const ChatComponent: React.FC = () => {
         }).catch(() => null);
       }
     } catch (error) {
-      console.error('Chat error:', error);
+      logger.error('Chat error:', error);
 
       let errorMessage = 'Failed to send message.';
       if (error instanceof APIError) {
@@ -591,7 +592,7 @@ const ChatComponent: React.FC = () => {
         }).catch(() => null);
       }
     } catch (error) {
-      console.error('Stream error:', error);
+      logger.error('Stream error:', error);
 
       let errorMessage = 'Failed to stream message.';
       if (error instanceof APIError) {

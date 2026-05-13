@@ -7,7 +7,7 @@
 
 import * as monaco from 'monaco-editor';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('monaco-lsp-http')
 
@@ -139,20 +139,20 @@ async function sendLspRequest<T>(
     });
 
     if (!response.ok) {
-      console.warn(`[LSP HTTP] Request failed: ${response.status}`);
+      logger.warn(`[LSP HTTP] Request failed: ${response.status}`);
       return null;
     }
 
     const data: LspResponse<T> = await response.json();
     
     if (data.error) {
-      console.warn(`[LSP HTTP] Error:`, data.error);
+      logger.warn(`[LSP HTTP] Error:`, data.error);
       return null;
     }
 
     return data.result ?? null;
   } catch (error) {
-    console.error('[LSP HTTP] Request error:', error);
+    logger.error('[LSP HTTP] Request error:', error);
     return null;
   }
 }
@@ -201,7 +201,7 @@ async function ensureInitialized(language: string, documentUri: string): Promise
     }
     return false;
   } catch (error) {
-    console.error('[LSP HTTP] Initialize failed:', error);
+    logger.error('[LSP HTTP] Initialize failed:', error);
     return false;
   }
 }

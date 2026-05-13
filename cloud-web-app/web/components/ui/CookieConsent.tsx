@@ -1,10 +1,9 @@
+'use client';
+
 /**
  * CookieConsent - GDPR-compliant cookie consent banner
  * Appears on first visit, remembers preference in localStorage.
  */
-
-'use client'
-
 import { useState, useEffect } from 'react'
 import { X, Cookie, Shield } from 'lucide-react'
 

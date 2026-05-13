@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Foliage System - Sistema de Vegetação
  * 
@@ -256,7 +257,7 @@ export class InstancedFoliageMesh {
     scale: THREE.Vector3
   ): number {
     if (this.activeInstances >= this.maxInstances) {
-      console.warn('Max instances reached');
+      logger.warn('Max instances reached');
       return -1;
     }
     

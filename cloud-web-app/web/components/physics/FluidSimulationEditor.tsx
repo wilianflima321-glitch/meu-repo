@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * FLUID SIMULATION EDITOR - Aethel Engine
  *
@@ -16,9 +18,6 @@
  * - Bake to mesh option
  * - Export para runtime format
  */
-
-'use client';
-
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import {
@@ -69,7 +68,7 @@ import {
   type FluidToolType,
 } from './fluid-simulation-core';
 import { BoundaryBox, CollapsibleSection, ColorPicker, FlowArrows, FluidParticles3D, SimulationStats, Slider, Toolbar, Vector3Input } from './FluidSimulationPanels';
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('FluidSimulationEditor')
 
@@ -231,7 +230,7 @@ export default function FluidSimulationEditor({
             setParams((prev) => ({ ...prev, ...data.params }));
           }
         } catch (err) {
-          console.error('Failed to import fluid config:', err);
+          logger.error('Failed to import fluid config:', err);
         }
       };
       reader.readAsText(file);

@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 
 const logger = createComponentLogger('advanced-config')
 

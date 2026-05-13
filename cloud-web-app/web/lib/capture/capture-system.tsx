@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 // Capture system for screenshots/video/gif with replay and gallery support.
 
 import { EventEmitter } from 'events';
@@ -230,7 +231,7 @@ export class CaptureSystem extends EventEmitter {
   
   async captureScreenshot(options: ScreenshotOptions = {}): Promise<CapturedMedia | null> {
     if (!this.canvas) {
-      console.error('CaptureSystem: No canvas set');
+      logger.error('CaptureSystem: No canvas set');
       return null;
     }
     
@@ -290,7 +291,7 @@ export class CaptureSystem extends EventEmitter {
       return media;
       
     } catch (error) {
-      console.error('Screenshot capture failed:', error);
+      logger.error('Screenshot capture failed:', error);
       this.emit('captureError', error);
       return null;
     }
@@ -443,12 +444,12 @@ export class CaptureSystem extends EventEmitter {
   
   async startRecording(options: VideoRecordingOptions = {}): Promise<boolean> {
     if (this.state !== 'idle') {
-      console.warn('Already recording');
+      logger.warn('Already recording');
       return false;
     }
     
     if (!this.canvas) {
-      console.error('CaptureSystem: No canvas set');
+      logger.error('CaptureSystem: No canvas set');
       return false;
     }
     
@@ -477,7 +478,7 @@ export class CaptureSystem extends EventEmitter {
       const mimeType = format === 'mp4' ? 'video/mp4' : 'video/webm;codecs=vp9';
       
       if (!MediaRecorder.isTypeSupported(mimeType)) {
-        console.warn(`${mimeType} not supported, falling back to webm`);
+        logger.warn(`${mimeType} not supported, falling back to webm`);
       }
       
       this.mediaRecorder = new MediaRecorder(stream, {
@@ -515,7 +516,7 @@ export class CaptureSystem extends EventEmitter {
       return true;
       
     } catch (error) {
-      console.error('Failed to start recording:', error);
+      logger.error('Failed to start recording:', error);
       this.emit('recordingError', error);
       return false;
     }
@@ -583,7 +584,7 @@ export class CaptureSystem extends EventEmitter {
       return media;
       
     } catch (error) {
-      console.error('Failed to finalize recording:', error);
+      logger.error('Failed to finalize recording:', error);
       this.state = 'idle';
       this.emit('recordingError', error);
       return null;
@@ -621,7 +622,7 @@ export class CaptureSystem extends EventEmitter {
       
       return null;
     } catch (error) {
-      console.warn('Failed to get audio stream:', error);
+      logger.warn('Failed to get audio stream:', error);
       return null;
     }
   }
@@ -849,7 +850,7 @@ export class CaptureSystem extends EventEmitter {
     if (!media) return false;
     
     if (!navigator.share) {
-      console.warn('Web Share API not supported');
+      logger.warn('Web Share API not supported');
       return false;
     }
     
@@ -864,7 +865,7 @@ export class CaptureSystem extends EventEmitter {
       this.emit('mediaShare', media);
       return true;
     } catch (error) {
-      console.error('Share failed:', error);
+      logger.error('Share failed:', error);
       return false;
     }
   }
@@ -879,7 +880,7 @@ export class CaptureSystem extends EventEmitter {
       this.emit('mediaCopy', media);
       return true;
     } catch (error) {
-      console.error('Copy to clipboard failed:', error);
+      logger.error('Copy to clipboard failed:', error);
       return false;
     }
   }

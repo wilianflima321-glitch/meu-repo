@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('hot-reload-system')
 
@@ -123,7 +123,7 @@ export class FileWatcher {
           const data = JSON.parse(event.data);
           this.handleServerMessage(data);
         } catch (e) {
-          console.error('[HotReload] Failed to parse message:', e);
+          logger.error('[HotReload] Failed to parse message:', e);
         }
       };
       
@@ -133,11 +133,11 @@ export class FileWatcher {
       };
       
       this.ws.onerror = (error) => {
-        console.error('[HotReload] WebSocket error:', error);
+        logger.error('[HotReload] WebSocket error:', error);
       };
       
     } catch (error) {
-      console.error('[HotReload] Failed to connect:', error);
+      logger.error('[HotReload] Failed to connect:', error);
       this.attemptReconnect(serverUrl);
     }
   }
@@ -145,7 +145,7 @@ export class FileWatcher {
   private attemptReconnect(serverUrl: string): void {
     if (!this.config.autoReconnect) return;
     if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
-      console.error('[HotReload] Max reconnect attempts reached');
+      logger.error('[HotReload] Max reconnect attempts reached');
       return;
     }
     
@@ -482,13 +482,13 @@ export class ScriptReloader {
           resolve(true);
         };
         script.onerror = (e) => {
-          console.error(`[HotReload] Failed to reload script: ${path}`, e);
+          logger.error(`[HotReload] Failed to reload script: ${path}`, e);
           reject(e);
         };
         document.head.appendChild(script);
       });
     } catch (error) {
-      console.error(`[HotReload] Script reload error:`, error);
+      logger.error(`[HotReload] Script reload error:`, error);
       return false;
     }
   }
@@ -537,7 +537,7 @@ export class AssetReloader {
         resolve(img);
       };
       img.onerror = () => {
-        console.error(`[HotReload] Failed to reload texture: ${path}`);
+        logger.error(`[HotReload] Failed to reload texture: ${path}`);
         resolve(null);
       };
       img.src = `${path}?t=${Date.now()}`;
@@ -558,7 +558,7 @@ export class AssetReloader {
       this.notifyHandlers('json', path, data);
       return data;
     } catch (error) {
-      console.error(`[HotReload] Failed to reload JSON: ${path}`, error);
+      logger.error(`[HotReload] Failed to reload JSON: ${path}`, error);
       return null;
     }
   }
@@ -579,7 +579,7 @@ export class AssetReloader {
       this.notifyHandlers('audio', path, audioBuffer);
       return audioBuffer;
     } catch (error) {
-      console.error(`[HotReload] Failed to reload audio: ${path}`, error);
+      logger.error(`[HotReload] Failed to reload audio: ${path}`, error);
       return null;
     }
   }
@@ -599,7 +599,7 @@ export class AssetReloader {
       this.notifyHandlers('gltf', path, data);
       return data;
     } catch (error) {
-      console.error(`[HotReload] Failed to reload GLTF: ${path}`, error);
+      logger.error(`[HotReload] Failed to reload GLTF: ${path}`, error);
       return null;
     }
   }
@@ -659,7 +659,7 @@ export class ShaderReloader {
       
       // Validate shader syntax (basic check)
       if (!this.validateShader(source)) {
-        console.error(`[HotReload] Invalid shader syntax: ${path}`);
+        logger.error(`[HotReload] Invalid shader syntax: ${path}`);
         return false;
       }
       
@@ -674,7 +674,7 @@ export class ShaderReloader {
       log.info(`[HotReload] Shader reloaded: ${path}`);
       return true;
     } catch (error) {
-      console.error(`[HotReload] Failed to reload shader:`, error);
+      logger.error(`[HotReload] Failed to reload shader:`, error);
       return false;
     }
   }

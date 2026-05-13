@@ -1,11 +1,10 @@
+'use client';
+
 /**
  * Advanced Settings Panel - RBAC, Webhooks, API Keys
  *
  * Painel de configurações avançadas com L5 design
  */
-
-'use client'
-
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {

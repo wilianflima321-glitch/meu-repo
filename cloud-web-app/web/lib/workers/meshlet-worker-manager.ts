@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * AETHEL ENGINE - Meshlet Worker Manager
  * =======================================
@@ -104,7 +105,7 @@ export class MeshletWorkerManager extends EventEmitter {
   
   private initWorker(): void {
     if (typeof Worker === 'undefined') {
-      console.warn('Web Workers not supported');
+      logger.warn('Web Workers not supported');
       return;
     }
     
@@ -146,7 +147,7 @@ export class MeshletWorkerManager extends EventEmitter {
     };
     
     this.worker.onerror = (error) => {
-      console.error('Meshlet worker error:', error);
+      logger.error('Meshlet worker error:', error);
       this.emit('error', { error: error.message });
     };
   }

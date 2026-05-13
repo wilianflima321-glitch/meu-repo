@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * AI Credit Wallet Middleware
  * 
@@ -317,7 +318,7 @@ export async function settleCredits(
   });
 
   if (!reservation) {
-    console.warn(`Reservation ${reservationId} not found`);
+    logger.warn(`Reservation ${reservationId} not found`);
     return;
   }
 

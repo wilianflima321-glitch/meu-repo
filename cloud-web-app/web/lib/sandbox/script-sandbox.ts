@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Script Sandbox - Isolamento de Execução de Scripts
  * 
@@ -271,7 +272,7 @@ export class ScriptSandbox {
         };
 
         this.worker.onerror = (error) => {
-          console.error('[Sandbox] Worker error:', error);
+          logger.error('[Sandbox] Worker error:', error);
           if (!this.isReady) {
             finalizeError('Failed to initialize sandbox worker');
             return;

@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Aethel Engine - Entry Point
  * 
@@ -11,9 +13,6 @@
  * 
  * @module lib/engine/aethel-engine
  */
-
-'use client';
-
 import React, { createContext, useContext, useRef, useEffect, useState, type ReactNode } from 'react';
 import { EventEmitter } from 'events';
 

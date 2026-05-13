@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * AETHEL ENGINE - AUDIO ENGINE
  * ============================
@@ -15,12 +17,9 @@
  * - Playlist e queue system
  * - Ducking automático para diálogos
  */
-
-'use client';
-
 import { Howl, Howler } from 'howler';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('audio-engine')
 
@@ -143,7 +142,7 @@ class AethelAudioEngine {
             document.addEventListener('click', resumeAudio);
             document.addEventListener('keydown', resumeAudio);
         } catch (err) {
-            console.warn('Web Audio API not available:', err);
+            logger.warn('Web Audio API not available:', err);
         }
     }
     

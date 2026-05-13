@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getUserFromRequest } from '@/lib/auth-server'
 import { twoFactorService } from '@/lib/security/two-factor-auth'
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 
 const logger = createComponentLogger('api.auth.2fa.backup-codes')
 

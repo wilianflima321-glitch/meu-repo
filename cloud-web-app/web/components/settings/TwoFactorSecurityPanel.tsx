@@ -14,7 +14,7 @@ import {
   ShieldOff,
   Smartphone,
 } from 'lucide-react'
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 
 type TwoFactorStatus = {
   twoFactorEnabled: boolean

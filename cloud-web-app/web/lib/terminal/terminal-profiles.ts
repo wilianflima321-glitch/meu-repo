@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('terminal/terminal-profiles')
 
@@ -317,7 +317,7 @@ export class TerminalProfileManager {
       this.saveProfiles();
       log.info(`[Terminal Profiles] Imported ${profiles.length} profiles`);
     } catch (error) {
-      console.error('[Terminal Profiles] Failed to import profiles:', error);
+      logger.error('[Terminal Profiles] Failed to import profiles:', error);
       throw error;
     }
   }
@@ -336,7 +336,7 @@ export class TerminalProfileManager {
         log.info(`[Terminal Profiles] Loaded ${profiles.length} profiles`);
       }
     } catch (error) {
-      console.error('[Terminal Profiles] Failed to load profiles:', error);
+      logger.error('[Terminal Profiles] Failed to load profiles:', error);
     }
   }
 
@@ -348,7 +348,7 @@ export class TerminalProfileManager {
       const profiles = Array.from(this.profiles.values());
       localStorage.setItem(this.STORAGE_KEY_PROFILES, JSON.stringify(profiles));
     } catch (error) {
-      console.error('[Terminal Profiles] Failed to save profiles:', error);
+      logger.error('[Terminal Profiles] Failed to save profiles:', error);
     }
   }
 
@@ -366,7 +366,7 @@ export class TerminalProfileManager {
         log.info(`[Terminal Profiles] Loaded ${sessions.length} sessions`);
       }
     } catch (error) {
-      console.error('[Terminal Profiles] Failed to load sessions:', error);
+      logger.error('[Terminal Profiles] Failed to load sessions:', error);
     }
   }
 
@@ -378,7 +378,7 @@ export class TerminalProfileManager {
       const sessions = Array.from(this.sessions.values());
       localStorage.setItem(this.STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
     } catch (error) {
-      console.error('[Terminal Profiles] Failed to save sessions:', error);
+      logger.error('[Terminal Profiles] Failed to save sessions:', error);
     }
   }
 

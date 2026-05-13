@@ -1,10 +1,9 @@
+'use client';
+
 /**
  * Aethel Toast System - Unified Notifications
  * Modern toast notifications with auto-dismiss and stacking
  */
-
-'use client';
-
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { tokens } from '@/lib/design-tokens';
 

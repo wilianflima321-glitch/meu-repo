@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('redis-cache')
 
@@ -61,7 +61,7 @@ async function loadIORedis(): Promise<IORedisConstructor | null> {
     });
     return IORedisModule;
   } catch {
-    console.warn('[RedisCache] ioredis not installed. Using in-memory fallback.');
+    logger.warn('[RedisCache] ioredis not installed. Using in-memory fallback.');
     return null;
   }
 }
@@ -254,7 +254,7 @@ class RedisCache {
       });
       
       this.redis.on('error', (error: Error) => {
-        console.error('[RedisCache] Redis error:', error.message);
+        logger.error('[RedisCache] Redis error:', error.message);
         this.isConnected = false;
         this.stats.isRedisConnected = false;
       });
@@ -267,11 +267,11 @@ class RedisCache {
       
       // Tenta conectar
       await this.redis.connect().catch((err: Error) => {
-        console.error('[RedisCache] Failed to connect:', err.message);
+        logger.error('[RedisCache] Failed to connect:', err.message);
       });
       
     } catch (error) {
-      console.error('[RedisCache] Failed to initialize:', error);
+      logger.error('[RedisCache] Failed to initialize:', error);
     }
   }
   
@@ -300,7 +300,7 @@ class RedisCache {
       
     } catch (error) {
       this.stats.misses++;
-      console.error('[RedisCache] Get error:', error);
+      logger.error('[RedisCache] Get error:', error);
       return null;
     }
   }
@@ -332,7 +332,7 @@ class RedisCache {
       return true;
       
     } catch (error) {
-      console.error('[RedisCache] Set error:', error);
+      logger.error('[RedisCache] Set error:', error);
       return false;
     }
   }
@@ -354,7 +354,7 @@ class RedisCache {
       return true;
       
     } catch (error) {
-      console.error('[RedisCache] Delete error:', error);
+      logger.error('[RedisCache] Delete error:', error);
       return false;
     }
   }
@@ -387,7 +387,7 @@ class RedisCache {
       return count;
       
     } catch (error) {
-      console.error('[RedisCache] DeletePattern error:', error);
+      logger.error('[RedisCache] DeletePattern error:', error);
       return 0;
     }
   }
@@ -413,7 +413,7 @@ class RedisCache {
       this.fallbackSortedSets.set(key, items);
       return 1;
     } catch (error) {
-      console.error('[RedisCache] ZADD error:', error);
+      logger.error('[RedisCache] ZADD error:', error);
       return 0;
     }
   }
@@ -433,7 +433,7 @@ class RedisCache {
       const sorted = [...items].sort((a, b) => b.score - a.score);
       return sorted.slice(start, stop + 1).map((item) => item.value);
     } catch (error) {
-      console.error('[RedisCache] ZREVRANGE error:', error);
+      logger.error('[RedisCache] ZREVRANGE error:', error);
       return [];
     }
   }
@@ -451,7 +451,7 @@ class RedisCache {
 
       return (this.fallbackSortedSets.get(key) || []).length;
     } catch (error) {
-      console.error('[RedisCache] ZCARD error:', error);
+      logger.error('[RedisCache] ZCARD error:', error);
       return 0;
     }
   }
@@ -471,7 +471,7 @@ class RedisCache {
       }
       return 0;
     } catch (error) {
-      console.error('[RedisCache] InvalidateTag error:', error);
+      logger.error('[RedisCache] InvalidateTag error:', error);
       return 0;
     }
   }
@@ -529,7 +529,7 @@ class RedisCache {
       return value;
       
     } catch (error) {
-      console.error('[RedisCache] Increment error:', error);
+      logger.error('[RedisCache] Increment error:', error);
       return 0;
     }
   }
@@ -564,7 +564,7 @@ class RedisCache {
       
       log.info('[RedisCache] Cache flushed');
     } catch (error) {
-      console.error('[RedisCache] Flush error:', error);
+      logger.error('[RedisCache] Flush error:', error);
     }
   }
   

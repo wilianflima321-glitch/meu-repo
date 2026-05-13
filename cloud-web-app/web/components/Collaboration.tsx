@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 /**
  * Collaboration Components - Aethel Engine
  *
@@ -124,7 +125,7 @@ export function CollaborationProvider({
           const message = JSON.parse(event.data);
           handleMessage(message);
         } catch (e) {
-          console.error('Failed to parse message:', e);
+          logger.error('Failed to parse message:', e);
         }
       };
 
@@ -134,10 +135,10 @@ export function CollaborationProvider({
       };
 
       ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        logger.error('WebSocket error:', error);
       };
     } catch (error) {
-      console.error('Failed to connect:', error);
+      logger.error('Failed to connect:', error);
     }
   };
 

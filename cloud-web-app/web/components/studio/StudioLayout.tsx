@@ -1,11 +1,10 @@
+'use client';
+
 /**
  * StudioLayout - Shared layout for all studio surfaces
  * Eliminates duplicate Shell/Header patterns across /billing, /settings, /profile, etc.
  * Provides consistent navigation, spacing, and responsive behavior.
  */
-
-'use client'
-
 import type { ReactNode } from 'react'
 import { Code, CreditCard, LayoutDashboard, MessageSquare, Settings } from 'lucide-react'
 import StudioGlobalNav from './StudioGlobalNav'

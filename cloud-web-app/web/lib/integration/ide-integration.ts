@@ -15,7 +15,7 @@ import { getTerminalManager } from '../terminal/terminal-manager';
 import { getSettingsManager } from '../settings/settings-manager';
 import { getKeybindingManager } from '../keybindings/keybinding-manager';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('integration/ide-integration')
 
@@ -61,7 +61,7 @@ export class IDEIntegration {
    */
   async initialize(): Promise<void> {
     if (this.initialized) {
-      console.warn('[IDE Integration] Already initialized');
+      logger.warn('[IDE Integration] Already initialized');
       return;
     }
 
@@ -84,7 +84,7 @@ export class IDEIntegration {
       this.initialized = true;
       log.info('[IDE Integration] Initialization complete');
     } catch (error) {
-      console.error('[IDE Integration] Initialization failed:', error);
+      logger.error('[IDE Integration] Initialization failed:', error);
       throw error;
     }
   }
@@ -145,7 +145,7 @@ export class IDEIntegration {
       const sessionId = await this.terminalManager.createSession('bash', this.config.workspaceRoot, '/bin/bash');
       log.info(`[IDE Integration] Created default terminal: ${sessionId}`);
     } catch (error) {
-      console.warn('[IDE Integration] Terminal not available:', error);
+      logger.warn('[IDE Integration] Terminal not available:', error);
     }
   }
 
@@ -159,7 +159,7 @@ export class IDEIntegration {
       const status = await this.gitManager.getStatus();
       log.info(`[IDE Integration] Git status: ${status.files.length} changes`);
     } catch (error) {
-      console.warn('[IDE Integration] Git not available:', error);
+      logger.warn('[IDE Integration] Git not available:', error);
     }
   }
 
@@ -186,7 +186,7 @@ export class IDEIntegration {
         await this.lspClient.initialized(language);
         log.info(`[IDE Integration] Started LSP for ${language}`);
       } catch (error) {
-        console.warn(`[IDE Integration] Failed to start LSP for ${language}:`, error);
+        logger.warn(`[IDE Integration] Failed to start LSP for ${language}:`, error);
       }
     }
   }
@@ -214,7 +214,7 @@ export class IDEIntegration {
         const modelInfo = await this.aiClient.getModelInfo();
         log.info(`[IDE Integration] AI model: ${modelInfo.name}`);
       } catch (error) {
-        console.warn('[IDE Integration] AI not available:', error);
+        logger.warn('[IDE Integration] AI not available:', error);
       }
     } else {
       log.info('[IDE Integration] AI disabled by config');
@@ -233,7 +233,7 @@ export class IDEIntegration {
       const tasks = this.taskManager.getTasks();
       log.info(`[IDE Integration] Detected ${tasks.length} tasks`);
     } catch (error) {
-      console.warn('[IDE Integration] Tasks not available:', error);
+      logger.warn('[IDE Integration] Tasks not available:', error);
     }
   }
 
@@ -259,7 +259,7 @@ export class IDEIntegration {
       const extensions = this.extensionHost.getExtensions();
       log.info(`[IDE Integration] Loaded ${extensions.length} extensions`);
     } catch (error) {
-      console.warn('[IDE Integration] Extensions not available:', error);
+      logger.warn('[IDE Integration] Extensions not available:', error);
     }
   }
 
@@ -314,7 +314,7 @@ export class IDEIntegration {
       this.initialized = false;
       log.info('[IDE Integration] Shutdown complete');
     } catch (error) {
-      console.error('[IDE Integration] Shutdown failed:', error);
+      logger.error('[IDE Integration] Shutdown failed:', error);
       throw error;
     }
   }

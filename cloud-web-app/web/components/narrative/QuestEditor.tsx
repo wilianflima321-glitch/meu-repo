@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * QUEST EDITOR - Aethel Engine
  *
@@ -16,9 +18,6 @@
  * - Journal integration
  * - Real-time preview
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   ReactFlow,

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 import type { ClipEffect, TimelineClip } from '../../lib/video-encoder-real'
 import type { TimelineTrack, VideoClip } from '../video/VideoTimeline'
 
@@ -77,7 +78,7 @@ export async function computeAudioPeaksFromUrl(audioUrl: string, peakCount: numb
 
     return peaks
   } catch (err) {
-    console.error('Falha ao calcular peaks de áudio:', err)
+    logger.error('Falha ao calcular peaks de áudio:', err)
     return null
   }
 }

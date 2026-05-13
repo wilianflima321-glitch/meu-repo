@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 /**
  * Extension Manager Panel
  *
@@ -123,7 +124,7 @@ export function ExtensionManagerPanel({
       });
       setMarketplaceExtensions(result.extensions);
     } catch (error) {
-      console.error('Marketplace search error:', error);
+      logger.error('Marketplace search error:', error);
     } finally {
       setLoading(false);
     }
@@ -160,7 +161,7 @@ export function ExtensionManagerPanel({
       // Refresh installed list
       setInstalledExtensions(extensionHost.getAllExtensions());
     } catch (error) {
-      console.error('Install error:', error);
+      logger.error('Install error:', error);
     } finally {
       setInstalling(prev => {
         const next = new Set(prev);
@@ -175,7 +176,7 @@ export function ExtensionManagerPanel({
       await extensionHost.unloadExtension(id);
       onExtensionUninstall?.(id);
     } catch (error) {
-      console.error('Uninstall error:', error);
+      logger.error('Uninstall error:', error);
     }
   }, [onExtensionUninstall]);
 
@@ -183,7 +184,7 @@ export function ExtensionManagerPanel({
     try {
       await extensionHost.activateExtension(id);
     } catch (error) {
-      console.error('Activation error:', error);
+      logger.error('Activation error:', error);
     }
   }, []);
 
@@ -191,7 +192,7 @@ export function ExtensionManagerPanel({
     try {
       await extensionHost.deactivateExtension(id);
     } catch (error) {
-      console.error('Deactivation error:', error);
+      logger.error('Deactivation error:', error);
     }
   }, []);
 

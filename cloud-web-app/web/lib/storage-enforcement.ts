@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Storage Enforcement - Sistema Real de Controle de Armazenamento
  * 
@@ -313,7 +314,7 @@ export async function storageQuotaMiddleware(
     
     return { proceed: true };
   } catch (error) {
-    console.error('[StorageQuota] Error:', error);
+    logger.error('[StorageQuota] Error:', error);
     // Em caso de erro, permitir (fail open) mas logar
     return { proceed: true };
   }

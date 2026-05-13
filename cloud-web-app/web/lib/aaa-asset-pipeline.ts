@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * AAA ASSET PIPELINE - Sistema de Assets para Jogos AAA e Filmes
  * 
@@ -1092,7 +1093,7 @@ export class AssetStreamer {
         await this.loadAsset(assetId);
         this.loadedAssets.add(assetId);
       } catch (error) {
-        console.error(`Failed to load asset ${assetId}:`, error);
+        logger.error(`Failed to load asset ${assetId}:`, error);
       } finally {
         this.loadingAssets.delete(assetId);
       }

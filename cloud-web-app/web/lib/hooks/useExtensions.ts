@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Aethel Engine - useExtensions Hook
  * 
@@ -219,7 +220,7 @@ export function useExtensions(options: UseExtensionsOptions = {}): UseExtensions
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch extensions';
       setError(message);
-      console.error('useExtensions error:', err);
+      logger.error('useExtensions error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -254,7 +255,7 @@ export function useExtensions(options: UseExtensionsOptions = {}): UseExtensions
 
       return true;
     } catch (err) {
-      console.error('Failed to install extension:', err);
+      logger.error('Failed to install extension:', err);
       return false;
     }
   }, []);
@@ -278,7 +279,7 @@ export function useExtensions(options: UseExtensionsOptions = {}): UseExtensions
 
       return true;
     } catch (err) {
-      console.error('Failed to uninstall extension:', err);
+      logger.error('Failed to uninstall extension:', err);
       return false;
     }
   }, []);
@@ -312,7 +313,7 @@ export function useExtensions(options: UseExtensionsOptions = {}): UseExtensions
       const data = await fetchFromApi<ApiExtension>(`/api/marketplace?${params}`);
       return mapApiExtension(data);
     } catch (err) {
-      console.error('Failed to get extension details:', err);
+      logger.error('Failed to get extension details:', err);
       return null;
     }
   }, []);
@@ -324,7 +325,7 @@ export function useExtensions(options: UseExtensionsOptions = {}): UseExtensions
       const data = await fetchFromApi<MarketplaceExtensionsResponse>(`/api/marketplace?${params}`);
       return (data.extensions || []).map(mapApiExtension);
     } catch (err) {
-      console.error('Failed to check updates:', err);
+      logger.error('Failed to check updates:', err);
       return [];
     }
   }, []);

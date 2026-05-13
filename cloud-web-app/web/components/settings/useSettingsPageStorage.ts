@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { DEFAULT_SETTINGS } from './SettingsPageData'
@@ -21,7 +22,7 @@ export function useSettingsPageStorage() {
     try {
       setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) })
     } catch (error) {
-      console.error('Failed to load settings:', error)
+      logger.error('Failed to load settings:', error)
     }
   }, [])
 

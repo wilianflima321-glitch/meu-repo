@@ -14,7 +14,7 @@ import { prisma } from './db';
 import { EventEmitter } from 'events';
 import { EMERGENCY_FALLBACK_MODEL_ID, OPENROUTER_MODELS } from './ai/openrouter-models';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('emergency-mode')
 
@@ -416,7 +416,7 @@ class EmergencyController extends EventEmitter {
       return metrics;
       
     } catch (error) {
-      console.error('[EmergencyController] Failed to update metrics:', error);
+      logger.error('[EmergencyController] Failed to update metrics:', error);
       return this.state.metrics;
     }
   }
@@ -505,7 +505,7 @@ class EmergencyController extends EventEmitter {
         },
       });
     } catch (error) {
-      console.error('[EmergencyController] Failed to log action:', error);
+      logger.error('[EmergencyController] Failed to log action:', error);
     }
   }
   
@@ -530,7 +530,7 @@ class EmergencyController extends EventEmitter {
           }),
         });
       } catch (error) {
-        console.error('[EmergencyController] Failed to send webhook:', error);
+        logger.error('[EmergencyController] Failed to send webhook:', error);
       }
     }
     
@@ -578,7 +578,7 @@ class EmergencyController extends EventEmitter {
         },
       });
     } catch (error) {
-      console.error('[EmergencyController] Failed to track usage:', error);
+      logger.error('[EmergencyController] Failed to track usage:', error);
     }
     
     // Atualiza métricas (invalidando cache)

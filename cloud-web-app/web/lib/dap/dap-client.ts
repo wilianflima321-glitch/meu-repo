@@ -7,7 +7,7 @@ import { DAPAdapterBase } from './dap-adapter-base';
 import { createNodeJSDAPAdapter } from './adapters/nodejs-dap';
 import { createPythonDAPAdapter } from './adapters/python-dap';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('dap/dap-client')
 
@@ -140,7 +140,7 @@ export class DAPClient {
       // Start event polling
       this.startEventPolling();
     } catch (error) {
-      console.error(`Failed to initialize DAP client for ${this.config.type}:`, error);
+      logger.error(`Failed to initialize DAP client for ${this.config.type}:`, error);
       throw error;
     }
   }
@@ -257,7 +257,7 @@ export class DAPClient {
       this.sessionId = null;
       log.info(`DAP client disconnected for ${this.config.type}`);
     } catch (error) {
-      console.error(`Failed to disconnect DAP client for ${this.config.type}:`, error);
+      logger.error(`Failed to disconnect DAP client for ${this.config.type}:`, error);
     }
   }
 
@@ -350,7 +350,7 @@ export class DAPClient {
           }
         }
       } catch (error) {
-        console.error('Failed to poll debug events:', error);
+        logger.error('Failed to poll debug events:', error);
       }
 
       // Poll every 500ms
@@ -369,7 +369,7 @@ export class DAPClient {
         try {
           listener(event);
         } catch (error) {
-          console.error('Error in event listener:', error);
+          logger.error('Error in event listener:', error);
         }
       }
     }
@@ -381,7 +381,7 @@ export class DAPClient {
         try {
           listener(event);
         } catch (error) {
-          console.error('Error in event listener:', error);
+          logger.error('Error in event listener:', error);
         }
       }
     }

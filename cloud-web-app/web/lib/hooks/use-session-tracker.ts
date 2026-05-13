@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 import { useEffect, useRef, useCallback, ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname';
@@ -84,7 +85,7 @@ export function useSessionTracker(options: SessionTrackerOptions = {}) {
       aiMetricsRef.current = { calls: 0, tokens: 0, cost: 0 };
       
     } catch (error) {
-      console.error('Session ping failed:', error);
+      logger.error('Session ping failed:', error);
     }
   }, [user, token, projectId, projectName, pathname]);
   

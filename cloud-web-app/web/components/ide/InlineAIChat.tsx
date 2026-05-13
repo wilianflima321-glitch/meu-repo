@@ -1,9 +1,9 @@
+'use client';
+
 /**
  * Inline AI Chat - Context-aware chat integration for the editor
  * Productized to separate session logic from rendering and clarify operator affordances.
  */
-
-'use client'
 
 import React, { useEffect, useId } from 'react'
 import { useEditorApplyBridge } from '@/components/ide/EditorApplyBridgeContext'

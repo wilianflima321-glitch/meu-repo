@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('lsp/lsp-client')
 
@@ -242,7 +242,7 @@ export class LSPClient {
       await this.sendNotification('initialized', {});
       log.info(`LSP client initialized for ${this.config.language}`);
     } catch (error) {
-      console.error(`Failed to initialize LSP client for ${this.config.language}:`, error);
+      logger.error(`Failed to initialize LSP client for ${this.config.language}:`, error);
       throw error;
     }
   }
@@ -258,7 +258,7 @@ export class LSPClient {
       this.initialized = false;
       log.info(`LSP client shut down for ${this.config.language}`);
     } catch (error) {
-      console.error(`Failed to shutdown LSP client for ${this.config.language}:`, error);
+      logger.error(`Failed to shutdown LSP client for ${this.config.language}:`, error);
     }
   }
 

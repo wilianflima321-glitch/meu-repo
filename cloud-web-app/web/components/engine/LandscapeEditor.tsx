@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Landscape/Terrain Editor - Editor de Terrenos Profissional
  *
@@ -6,9 +8,6 @@
  *
  * NÃO É MOCK - Sistema real com Three.js!
  */
-
-'use client';
-
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Canvas, useThree, useFrame, ThreeEvent } from '@react-three/fiber';
 import { OrbitControls, GizmoHelper, GizmoViewport, Grid } from '@react-three/drei';

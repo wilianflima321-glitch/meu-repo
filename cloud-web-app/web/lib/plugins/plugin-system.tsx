@@ -17,7 +17,7 @@
 
 import { EventEmitter } from 'events';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('plugins/plugin-system')
 
@@ -494,10 +494,10 @@ export class PluginLoader extends EventEmitter {
         const prefix = `[${pluginId}]`;
         switch (level) {
           case 'warn':
-            console.warn(prefix, message);
+            logger.warn(prefix, message);
             break;
           case 'error':
-            console.error(prefix, message);
+            logger.error(prefix, message);
             break;
           default:
             log.info(prefix, message);
@@ -559,7 +559,7 @@ export class PluginLoader extends EventEmitter {
       try {
         results.push(callback(...args));
       } catch (error) {
-        console.error(`Hook ${name} error:`, error);
+        logger.error(`Hook ${name} error:`, error);
       }
     }
     
@@ -578,7 +578,7 @@ export class PluginLoader extends EventEmitter {
       
       if (!plugin) {
         if (dep.optional) {
-          console.warn(`Optional dependency ${dep.id} not found for ${manifest.id}`);
+          logger.warn(`Optional dependency ${dep.id} not found for ${manifest.id}`);
           continue;
         }
         throw new Error(`Missing dependency: ${dep.id}`);
@@ -755,7 +755,7 @@ export class PluginLoader extends EventEmitter {
   }
   
   dispose(): void {
-    this.unloadAll().catch(console.error);
+    this.unloadAll().catch((error) => logger.error(error));
     this.plugins.clear();
     this.hooks.clear();
     this.hookOwners.clear();

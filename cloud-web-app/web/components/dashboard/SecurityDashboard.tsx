@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 /**
  * AETHEL ENGINE - Security Dashboard
  * =====================================
@@ -670,7 +671,7 @@ export function SecurityDashboard({
         });
       }
     } catch (err) {
-      console.error('Failed to fetch security data:', err);
+      logger.error('Failed to fetch security data:', err);
       setError(err instanceof Error ? err.message : 'Unknown error fetching security data');
     } finally {
       setIsLoading(false);

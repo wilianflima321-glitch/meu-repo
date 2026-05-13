@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * VIRTUAL TEXTURE SYSTEM - Aethel Engine
  * 
@@ -779,7 +780,7 @@ export class VirtualTextureSystem {
       }
       
     } catch (error) {
-      console.error(`Failed to load tile ${key}:`, error);
+      logger.error(`Failed to load tile ${key}:`, error);
     } finally {
       this.pendingLoads.delete(key);
     }

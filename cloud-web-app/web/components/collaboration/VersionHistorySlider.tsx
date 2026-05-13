@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * VersionHistorySlider - Componente de Viagem no Tempo para Versões
  *
@@ -6,9 +8,6 @@
  *
  * @module components/collaboration/VersionHistorySlider
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';

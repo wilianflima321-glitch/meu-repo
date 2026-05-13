@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Sistema de Suporte Completo - Chat + Email
  * 
@@ -248,7 +249,7 @@ export async function getTicketMessages(ticketId: string): Promise<SupportMessag
  */
 async function sendTicketConfirmation(ticket: SupportTicket): Promise<void> {
   if (!process.env.RESEND_API_KEY) {
-    console.warn('[Support] Resend not configured, skipping email');
+    logger.warn('[Support] Resend not configured, skipping email');
     return;
   }
 
@@ -309,7 +310,7 @@ async function sendTicketConfirmation(ticket: SupportTicket): Promise<void> {
       `,
     });
   } catch (error) {
-    console.error('[Support] Failed to send confirmation email:', error);
+    logger.error('[Support] Failed to send confirmation email:', error);
   }
 }
 
@@ -363,7 +364,7 @@ async function sendReplyNotificationToUser(
       `,
     });
   } catch (error) {
-    console.error('[Support] Failed to send reply notification:', error);
+    logger.error('[Support] Failed to send reply notification:', error);
   }
 }
 
@@ -416,7 +417,7 @@ async function sendResolutionNotification(ticket: SupportTicket): Promise<void> 
       `,
     });
   } catch (error) {
-    console.error('[Support] Failed to send resolution notification:', error);
+    logger.error('[Support] Failed to send resolution notification:', error);
   }
 }
 
@@ -465,7 +466,7 @@ async function notifyTeam(ticket: SupportTicket, newMessage?: string): Promise<v
         }),
       });
     } catch (error) {
-      console.error('[Support] Failed to notify Slack:', error);
+      logger.error('[Support] Failed to notify Slack:', error);
     }
   }
 }

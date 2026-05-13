@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * DirectorNotePanel - Painel de Crítica Artística da IA
  *
@@ -10,9 +12,6 @@
  *
  * @module components/ai/DirectorNotePanel
  */
-
-'use client';
-
 import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';

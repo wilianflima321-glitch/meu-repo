@@ -1,3 +1,6 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * AETHEL ENGINE - Audio Preview System
  *
@@ -9,9 +12,6 @@
  * - Keyboard shortcuts
  * - Mini player for asset cards
  */
-
-'use client';
-
 import React, {
     useState,
     useRef,
@@ -296,7 +296,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
                 const buffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
                 setAudioBuffer(buffer);
             } catch (err) {
-                console.warn('Failed to load waveform:', err);
+                logger.warn('Failed to load waveform:', err);
             }
         };
 

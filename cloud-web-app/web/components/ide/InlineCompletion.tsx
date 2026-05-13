@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/observability/logger';
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Sparkles, X, Check, Keyboard } from 'lucide-react'
 import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_BUDGET_OPTIONS } from '@/lib/ai/openrouter-models'
@@ -137,7 +138,7 @@ class GhostTextProvider {
       if ((error as Error).name === 'AbortError') {
         return null
       }
-      console.error('Ghost text error:', error)
+      logger.error('Ghost text error:', error)
       return null
     }
   }

@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('terminal/task-detector')
 
@@ -107,7 +107,7 @@ export class NPMTaskDetector implements TaskDetector {
 
       return tasks;
     } catch (error) {
-      console.error('[NPM Detector] Error detecting tasks:', error);
+      logger.error('[NPM Detector] Error detecting tasks:', error);
       return [];
     }
   }
@@ -189,7 +189,7 @@ export class MavenTaskDetector implements TaskDetector {
 
       return tasks;
     } catch (error) {
-      console.error('[Maven Detector] Error detecting tasks:', error);
+      logger.error('[Maven Detector] Error detecting tasks:', error);
       return [];
     }
   }
@@ -255,7 +255,7 @@ export class GradleTaskDetector implements TaskDetector {
 
       return tasks;
     } catch (error) {
-      console.error('[Gradle Detector] Error detecting tasks:', error);
+      logger.error('[Gradle Detector] Error detecting tasks:', error);
       return [];
     }
   }
@@ -354,7 +354,7 @@ export class GoTaskDetector implements TaskDetector {
 
       return tasks;
     } catch (error) {
-      console.error('[Go Detector] Error detecting tasks:', error);
+      logger.error('[Go Detector] Error detecting tasks:', error);
       return [];
     }
   }
@@ -448,7 +448,7 @@ export class CargoTaskDetector implements TaskDetector {
 
       return tasks;
     } catch (error) {
-      console.error('[Cargo Detector] Error detecting tasks:', error);
+      logger.error('[Cargo Detector] Error detecting tasks:', error);
       return [];
     }
   }
@@ -509,7 +509,7 @@ export class MakefileTaskDetector implements TaskDetector {
 
       return tasks;
     } catch (error) {
-      console.error('[Makefile Detector] Error detecting tasks:', error);
+      logger.error('[Makefile Detector] Error detecting tasks:', error);
       return [];
     }
   }
@@ -589,7 +589,7 @@ export class PythonTaskDetector implements TaskDetector {
 
       return tasks;
     } catch (error) {
-      console.error('[Python Detector] Error detecting tasks:', error);
+      logger.error('[Python Detector] Error detecting tasks:', error);
       return [];
     }
   }
@@ -638,7 +638,7 @@ export class TaskDetectionManager {
           log.info(`[Task Detection] Found ${tasks.length} ${detector.name} tasks`);
         }
       } catch (error) {
-        console.error(`[Task Detection] Error with ${detector.name} detector:`, error);
+        logger.error(`[Task Detection] Error with ${detector.name} detector:`, error);
       }
     }
 

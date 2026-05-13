@@ -1,3 +1,6 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * WalletStatusWidget - Widget Compacto de Saldo na StatusBar
  *
@@ -9,9 +12,6 @@
  *
  * @module components/billing/WalletStatusWidget
  */
-
-'use client';
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import useSWR from 'swr';
 import {
@@ -94,7 +94,7 @@ function useWebSocketBalance() {
             setBalance(data.balance);
           }
         } catch (e) {
-          console.error('Error parsing WS message:', e);
+          logger.error('Error parsing WS message:', e);
         }
       };
 

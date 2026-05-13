@@ -1,3 +1,6 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * AIThinkingPanel - Painel Visual de "Cadeia de Pensamento" da IA
  *
@@ -10,9 +13,6 @@
  *
  * @module components/ai/AIThinkingPanel
  */
-
-'use client';
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import {
@@ -203,7 +203,7 @@ function useThinkingStream(sessionId?: string) {
             setIsStreaming(false);
           }
         } catch (e) {
-          console.error('Error parsing thinking stream:', e);
+          logger.error('Error parsing thinking stream:', e);
         }
       };
 

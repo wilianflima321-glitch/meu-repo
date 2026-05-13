@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * AETHEL ENGINE - RENDER PROGRESS COMPONENT
  * =========================================
@@ -5,9 +7,6 @@
  * Componente para exibir progresso de renderização em tempo real
  * com suporte a múltiplos jobs, thumbnails e estimativa de tempo.
  */
-
-'use client';
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import NextImage from 'next/image';
 import {

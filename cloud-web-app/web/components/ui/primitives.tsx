@@ -1,10 +1,9 @@
+'use client';
+
 /**
  * Aethel UI Primitives
  * Low-level UI components using unified design tokens
  */
-
-'use client';
-
 import React from 'react';
 import { tokens, gradients, presets } from '@/lib/design-tokens';
 

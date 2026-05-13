@@ -1,10 +1,9 @@
+'use client';
+
 /**
  * Behavior Tree Editor - Visual AI Behavior Editor
  * Connects to lib/behavior-tree.ts
  */
-
-'use client';
-
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 
 // Types

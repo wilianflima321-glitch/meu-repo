@@ -7,7 +7,7 @@
 
 import * as monaco from 'monaco-editor';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('monaco-lsp-bridge')
 
@@ -153,7 +153,7 @@ export class MonacoLspBridge {
       };
 
       this.ws.onerror = (error) => {
-        console.error('[LSP Bridge] WebSocket error:', error);
+        logger.error('[LSP Bridge] WebSocket error:', error);
         reject(new Error('Failed to connect to LSP server'));
       };
 
@@ -181,7 +181,7 @@ export class MonacoLspBridge {
             await this.didOpen(uri, doc.languageId, ''); // Need to get content from Monaco
           }
         } catch (error) {
-          console.error('[LSP Bridge] Reconnect failed:', error);
+          logger.error('[LSP Bridge] Reconnect failed:', error);
         }
       }, delay);
     }
@@ -288,7 +288,7 @@ export class MonacoLspBridge {
    */
   private sendNotification(method: string, params: unknown): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('[LSP Bridge] Cannot send notification, not connected');
+      logger.warn('[LSP Bridge] Cannot send notification, not connected');
       return;
     }
 
@@ -505,7 +505,7 @@ export class MonacoLspBridge {
         suggestions: items.map(item => this.convertCompletionItem(item, model, position)),
       };
     } catch (error) {
-      console.error('[LSP Bridge] Completion error:', error);
+      logger.error('[LSP Bridge] Completion error:', error);
       return null;
     }
   }
@@ -587,7 +587,7 @@ export class MonacoLspBridge {
         range: result.range ? this.convertRange(result.range) : undefined,
       };
     } catch (error) {
-      console.error('[LSP Bridge] Hover error:', error);
+      logger.error('[LSP Bridge] Hover error:', error);
       return null;
     }
   }
@@ -614,7 +614,7 @@ export class MonacoLspBridge {
         range: this.convertRange(loc.range),
       }));
     } catch (error) {
-      console.error('[LSP Bridge] Definition error:', error);
+      logger.error('[LSP Bridge] Definition error:', error);
       return null;
     }
   }
@@ -642,7 +642,7 @@ export class MonacoLspBridge {
         range: this.convertRange(loc.range),
       }));
     } catch (error) {
-      console.error('[LSP Bridge] References error:', error);
+      logger.error('[LSP Bridge] References error:', error);
       return null;
     }
   }
@@ -685,7 +685,7 @@ export class MonacoLspBridge {
         dispose: () => {},
       };
     } catch (error) {
-      console.error('[LSP Bridge] Signature help error:', error);
+      logger.error('[LSP Bridge] Signature help error:', error);
       return null;
     }
   }
@@ -714,7 +714,7 @@ export class MonacoLspBridge {
         text: edit.newText,
       }));
     } catch (error) {
-      console.error('[LSP Bridge] Formatting error:', error);
+      logger.error('[LSP Bridge] Formatting error:', error);
       return null;
     }
   }
@@ -775,7 +775,7 @@ export class MonacoLspBridge {
 
       return { edits };
     } catch (error) {
-      console.error('[LSP Bridge] Rename error:', error);
+      logger.error('[LSP Bridge] Rename error:', error);
       return null;
     }
   }

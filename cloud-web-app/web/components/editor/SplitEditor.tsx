@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Aethel IDE - Split Editor Component
  *
@@ -5,9 +7,6 @@
  * Suporta multiplos grupos de editores, drag & drop de tabs,
  * e redimensionamento de paineis.
  */
-
-'use client';
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   X,

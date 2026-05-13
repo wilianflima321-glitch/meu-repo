@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('ai-audio-engine')
 
@@ -429,7 +429,7 @@ export class AIEmotionalAudioSystem {
       buffer = await this.loadAudioBuffer(stem.audioUrl);
     }
     if (!buffer) {
-      console.warn(`[AIEmotionalAudio] No audio for stem: ${stem.id}`);
+      logger.warn(`[AIEmotionalAudio] No audio for stem: ${stem.id}`);
       return;
     }
     const source = this.audioContext.createBufferSource();
@@ -773,7 +773,7 @@ export class AIEmotionalAudioSystem {
       buffer = layer.audioBuffer;
     }
     if (!buffer) {
-      console.warn(`[AIEmotionalAudio] No audio for ambient layer: ${layer.id}`);
+      logger.warn(`[AIEmotionalAudio] No audio for ambient layer: ${layer.id}`);
       return;
     }
     const source = this.audioContext.createBufferSource();

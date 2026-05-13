@@ -1,12 +1,12 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * Waveform Renderer - Renderizacao REAL de Audio Waveform
  *
  * Usa Canvas 2D para renderizar waveform de audio.
  * Funciona com Web Audio API.
  */
-
-'use client';
-
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 
 interface WaveformProps {
@@ -49,7 +49,7 @@ export function WaveformRenderer({
           setIsLoading(false);
         })
         .catch(err => {
-          console.error('Error loading audio:', err);
+          logger.error('Error loading audio:', err);
           setIsLoading(false);
         });
     }

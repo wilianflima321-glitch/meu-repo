@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Games & Films Module - Alpha Honest
  *
@@ -5,9 +7,6 @@
  * Status: Alpha (Funcional, Configurações Básicas)
  * Padrão: L5 Design, Real Integration
  */
-
-'use client'
-
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {

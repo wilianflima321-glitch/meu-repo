@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * AETHEL ENGINE - HEALTH DASHBOARD COMPONENT
  * ==========================================
@@ -5,9 +7,6 @@
  * Dashboard em tempo real mostrando saude do sistema,
  * uso de recursos e metricas de performance.
  */
-
-'use client'
-
 import React, { useState, useEffect } from 'react'
 import {
   Activity,

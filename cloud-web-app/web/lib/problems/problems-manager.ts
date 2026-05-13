@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('problems/problems-manager')
 
@@ -215,7 +215,7 @@ export class ProblemsManager {
       this.quickFixes.set(key, fixes);
       return fixes;
     } catch (error) {
-      console.error('[Problems] Failed to get quick fixes:', error);
+      logger.error('[Problems] Failed to get quick fixes:', error);
       return [];
     }
   }

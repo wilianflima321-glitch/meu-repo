@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Consent Manager
  * Manages user consent for expensive/risky operations with cost/time/risk assessment
@@ -348,7 +349,7 @@ export class ConsentManager {
         })
       });
     } catch (error) {
-      console.error('Failed to emit consent event:', error);
+      logger.error('Failed to emit consent event:', error);
     }
   }
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Workspace API Service
  * Complete workspace management for the Aethel Engine IDE
@@ -524,7 +525,7 @@ export class WorkspaceService extends EventEmitter {
             try {
               callback(event);
             } catch (error) {
-              console.error('Watcher callback error:', error);
+              logger.error('Watcher callback error:', error);
             }
           }
         }, this.debounceDelay);

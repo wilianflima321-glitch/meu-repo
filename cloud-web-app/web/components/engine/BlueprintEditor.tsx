@@ -40,7 +40,7 @@ import {
   getBlueprintManager,
 } from '@/lib/blueprint-system';
 import { useToast } from '@/components/ui/Toast';
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('BlueprintEditor')
 
@@ -534,7 +534,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
 
     // Check type compatibility
     if (sourcePin.type !== targetPin.type) {
-      console.warn('Incompatible pin types');
+      logger.warn('Incompatible pin types');
       return;
     }
 

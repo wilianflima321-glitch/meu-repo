@@ -12,7 +12,7 @@ import { AutonomousAgent, AgentAction, AgentStep, ToolCall } from './agent-mode'
 import { aiService } from '@/lib/ai-service';
 import { EventEmitter } from 'events';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('ai/agent-validation-integration')
 
@@ -273,7 +273,7 @@ CÓDIGO CORRIGIDO:`;
 
       return null;
     } catch (error) {
-      console.error('[CodeValidation] AI fix failed:', error);
+      logger.error('[CodeValidation] AI fix failed:', error);
       return null;
     }
   }

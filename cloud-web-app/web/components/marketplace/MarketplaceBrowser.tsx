@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * AETHEL ENGINE - Marketplace Browser Component
  *
@@ -8,9 +10,6 @@
  * - Asset previews
  * - Purchase flow integration
  */
-
-'use client';
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

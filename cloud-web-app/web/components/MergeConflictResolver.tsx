@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getGitClient, GitConflict } from '@/lib/git/git-client';
 
@@ -35,7 +36,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
         setManualContent('');
       }
     } catch (error) {
-      console.error('Failed to load conflict:', error);
+      logger.error('Failed to load conflict:', error);
     } finally {
       setLoading(false);
     }
@@ -102,7 +103,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
       });
       window.dispatchEvent(event);
     } catch (error) {
-      console.error('Failed to resolve conflict:', error);
+      logger.error('Failed to resolve conflict:', error);
     }
   };
 

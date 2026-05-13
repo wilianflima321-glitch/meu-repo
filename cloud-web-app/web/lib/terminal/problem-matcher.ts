@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('terminal/problem-matcher')
 
@@ -280,7 +280,7 @@ export class ProblemMatcherRegistry {
   parse(output: string, matcherName: string, workspaceRoot?: string): Problem[] {
     const matcher = this.get(matcherName);
     if (!matcher) {
-      console.warn(`[Problem Matcher] Matcher not found: ${matcherName}`);
+      logger.warn(`[Problem Matcher] Matcher not found: ${matcherName}`);
       return [];
     }
 

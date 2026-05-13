@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * AI Agent System - Sistema de Agentes IA
  * 
@@ -289,7 +290,7 @@ export class AgentExecutor {
 
           // Verificar se falhou
           if (!result.success) {
-            console.warn(`Tool ${response.action.tool} failed:`, result.error);
+            logger.warn(`Tool ${response.action.tool} failed:`, result.error);
           }
         } else {
           // Apenas pensamento, sem ação

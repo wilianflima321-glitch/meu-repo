@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Research Agent Premium - Citations, Live Retrieval, Export
  *
@@ -94,7 +95,7 @@ async function searchTavily(
     });
 
     if (!res.ok) {
-      console.error(`Tavily search failed: ${res.status}`);
+      logger.error(`Tavily search failed: ${res.status}`);
       return [];
     }
 
@@ -112,7 +113,7 @@ async function searchTavily(
       retrievedAt: new Date().toISOString(),
     }));
   } catch (err) {
-    console.error('Tavily search error:', err);
+    logger.error('Tavily search error:', err);
     return [];
   }
 }
@@ -149,7 +150,7 @@ async function searchPerplexity(
     });
 
     if (!res.ok) {
-      console.error(`Perplexity search failed: ${res.status}`);
+      logger.error(`Perplexity search failed: ${res.status}`);
       return { answer: '', citations: [] };
     }
 
@@ -170,7 +171,7 @@ async function searchPerplexity(
 
     return { answer, citations };
   } catch (err) {
-    console.error('Perplexity search error:', err);
+    logger.error('Perplexity search error:', err);
     return { answer: '', citations: [] };
   }
 }

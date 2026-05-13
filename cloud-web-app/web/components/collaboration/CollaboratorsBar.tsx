@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * CollaboratorsBar
  *
@@ -12,9 +14,6 @@
  *   - `aria-label` on each avatar reveals the peer name and status.
  *   - Tooltip on hover echoes the name for sighted users.
  */
-
-'use client'
-
 import React from 'react'
 import type { RemotePeer } from '@/hooks/useCollaborationAwareness'
 

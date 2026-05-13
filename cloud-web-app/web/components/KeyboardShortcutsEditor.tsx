@@ -1,10 +1,9 @@
+'use client';
+
 /**
  * Keyboard Shortcuts Editor
  * Professional UI for viewing and customizing keyboard shortcuts
  */
-
-'use client';
-
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
 

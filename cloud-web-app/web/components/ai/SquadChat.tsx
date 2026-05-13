@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * SquadChat - AI Squad com Visualização de Steps
  *
@@ -11,9 +13,6 @@
  *
  * @see DETALHAMENTO_UX_STRATEGY_2026.md - Seção 4
  */
-
-'use client';
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Send,

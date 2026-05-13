@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * DevTools Provider - Development Tools System
  * 
@@ -7,9 +9,6 @@
  * 
  * @module lib/debug/devtools-provider
  */
-
-'use client';
-
 import React, {
   createContext,
   useContext,

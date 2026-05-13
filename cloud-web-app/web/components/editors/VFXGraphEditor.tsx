@@ -1,10 +1,9 @@
+'use client';
+
 /**
  * VFX Graph Editor - Node-based Visual Effects Editor
  * Connects to lib/vfx-graph-editor.ts
  */
-
-'use client';
-
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 
 // Types

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * AI Web Tools - Ferramentas de Web Research para IA
  * 
@@ -251,7 +252,7 @@ async function webSearch(query: string, numResults: number = 5): Promise<SearchR
     try {
       return await searchTavily(query, numResults);
     } catch (e) {
-      console.warn('[WebSearch] Tavily falhou, tentando alternativa:', e);
+      logger.warn('[WebSearch] Tavily falhou, tentando alternativa:', e);
     }
   }
   
@@ -260,7 +261,7 @@ async function webSearch(query: string, numResults: number = 5): Promise<SearchR
     try {
       return await searchSerper(query, numResults);
     } catch (e) {
-      console.warn('[WebSearch] Serper falhou, tentando DuckDuckGo:', e);
+      logger.warn('[WebSearch] Serper falhou, tentando DuckDuckGo:', e);
     }
   }
   
@@ -268,7 +269,7 @@ async function webSearch(query: string, numResults: number = 5): Promise<SearchR
   try {
     return await searchDuckDuckGo(query, numResults);
   } catch (e) {
-    console.error('[WebSearch] Todas as fontes falharam:', e);
+    logger.error('[WebSearch] Todas as fontes falharam:', e);
     throw new Error('Não foi possível realizar a busca. Verifique sua conexão.');
   }
 }
@@ -306,7 +307,7 @@ async function fetchUrl(url: string): Promise<WebPageContent> {
       };
     }
   } catch (e) {
-    console.warn('[FetchUrl] Jina Reader falhou, fazendo fetch direto:', e);
+    logger.warn('[FetchUrl] Jina Reader falhou, fazendo fetch direto:', e);
   }
   
   // Fallback: fetch direto
@@ -444,7 +445,7 @@ async function searchDocs(query: string, source: string): Promise<SearchResult[]
         }));
       }
     } catch (e) {
-      console.warn('[SearchDocs] MDN API falhou:', e);
+      logger.warn('[SearchDocs] MDN API falhou:', e);
     }
   }
   

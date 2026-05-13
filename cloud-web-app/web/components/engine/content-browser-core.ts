@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
@@ -271,7 +272,7 @@ export class AssetLoader {
         return await this.thumbnailGenerator.generateTextureThumbnail(loaded as THREE.Texture);
       }
     } catch (e) {
-      console.error('Failed to generate thumbnail:', e);
+      logger.error('Failed to generate thumbnail:', e);
     }
     
     return undefined;

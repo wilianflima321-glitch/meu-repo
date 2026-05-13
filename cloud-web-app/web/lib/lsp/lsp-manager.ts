@@ -9,7 +9,7 @@ import { createPythonLSPServer } from './servers/python-lsp';
 import { createTypeScriptLSPServer } from './servers/typescript-lsp';
 import { createGoLSPServer } from './servers/go-lsp';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('lsp/lsp-manager')
 
@@ -55,7 +55,7 @@ export class LSPManager {
         server = createGoLSPServer(this.rootPath);
         break;
       default:
-        console.warn(`[LSP Manager] No LSP server available for ${language}`);
+        logger.warn(`[LSP Manager] No LSP server available for ${language}`);
         return null;
     }
 
@@ -103,14 +103,14 @@ export class LSPManager {
       });
 
       server.on('error', (error: unknown) => {
-        console.error(`[LSP] Error in ${language} server:`, error);
+        logger.error(`[LSP] Error in ${language} server:`, error);
       });
 
       this.servers.set(language, server);
       log.info(`[LSP Manager] Server for ${language} started`);
       return server;
     } catch (error) {
-      console.error(`[LSP Manager] Failed to initialize ${language} server:`, error);
+      logger.error(`[LSP Manager] Failed to initialize ${language} server:`, error);
       return null;
     }
   }

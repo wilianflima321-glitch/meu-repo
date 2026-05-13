@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * DIALOGUE EDITOR - Aethel Engine
  *
@@ -14,9 +16,6 @@
  * - Real-time preview
  * - Exportar to runtime format
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   ReactFlow,

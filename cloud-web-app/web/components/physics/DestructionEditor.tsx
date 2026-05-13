@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * DESTRUCTION EDITOR - Aethel Engine
  *
@@ -14,9 +16,6 @@
  * - VFX/SFX triggers
  * - Export para runtime
  */
-
-'use client';
-
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree, ThreeEvent } from '@react-three/fiber';
 import {

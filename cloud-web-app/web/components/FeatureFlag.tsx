@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 /**
  * Feature Flag Component - Aethel Engine
  *
@@ -158,7 +159,7 @@ export function FeatureFlagAdmin() {
         prev.map(f => f.key === key ? { ...f, enabled: !f.enabled } : f)
       );
     } catch (error) {
-      console.error('Failed to toggle flag:', error);
+      logger.error('Failed to toggle flag:', error);
     }
   };
 

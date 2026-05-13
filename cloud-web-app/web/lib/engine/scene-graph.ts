@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * SCENE GRAPH SYSTEM - Aethel Engine
  * 
@@ -882,7 +883,7 @@ export class SceneManager extends EventEmitter {
   loadScene(sceneId: string): void {
     const scene = this._scenes.get(sceneId);
     if (!scene) {
-      console.error(`Scene ${sceneId} not found`);
+      logger.error(`Scene ${sceneId} not found`);
       return;
     }
     this._loadingScene = scene;

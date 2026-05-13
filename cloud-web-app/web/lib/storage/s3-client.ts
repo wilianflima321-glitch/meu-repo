@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * S3 Client Helper - Lazy Loading
  * 
@@ -66,7 +67,7 @@ export async function getS3Client(): Promise<S3ClientLike | null> {
   
   // Verifica se as credenciais estão configuradas
   if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-    console.warn('[S3] AWS credentials not configured - S3 features disabled');
+    logger.warn('[S3] AWS credentials not configured - S3 features disabled');
     return null;
   }
   
@@ -87,7 +88,7 @@ export async function getS3Client(): Promise<S3ClientLike | null> {
     loadSuccessful = true;
     return s3ClientInstance;
   } catch (error) {
-    console.warn('[S3] AWS SDK not available - S3 features disabled');
+    logger.warn('[S3] AWS SDK not available - S3 features disabled');
     return null;
   }
 }
@@ -138,7 +139,7 @@ export async function getPresigner(): Promise<S3PresignerModule | null> {
     presignerModule = presigner;
     return presigner;
   } catch {
-    console.warn('[S3] Presigner not available');
+    logger.warn('[S3] Presigner not available');
     return null;
   }
 }
@@ -182,7 +183,7 @@ export async function generateDownloadUrl(
     
     return await presigner.getSignedUrl(client, command, { expiresIn });
   } catch (error) {
-    console.error('[S3] Failed to generate download URL:', error);
+    logger.error('[S3] Failed to generate download URL:', error);
     return null;
   }
 }
@@ -219,7 +220,7 @@ export async function generateUploadUrl(
     
     return await presigner.getSignedUrl(client, command, { expiresIn });
   } catch (error) {
-    console.error('[S3] Failed to generate upload URL:', error);
+    logger.error('[S3] Failed to generate upload URL:', error);
     return null;
   }
 }
@@ -247,7 +248,7 @@ export async function putObject(
     const size = typeof body === 'string' ? Buffer.byteLength(body) : body.byteLength;
     return { ok: true, size };
   } catch (error) {
-    console.error('[S3] Failed to put object:', error);
+    logger.error('[S3] Failed to put object:', error);
     return { ok: false };
   }
 }
@@ -299,7 +300,7 @@ export async function deleteObject(key: string): Promise<boolean> {
     await client.send(command);
     return true;
   } catch (error) {
-    console.error('[S3] Failed to delete object:', error);
+    logger.error('[S3] Failed to delete object:', error);
     return false;
   }
 }
@@ -324,7 +325,7 @@ export async function copyObject(sourceKey: string, destinationKey: string): Pro
     await client.send(command);
     return true;
   } catch (error) {
-    console.error('[S3] Failed to copy object:', error);
+    logger.error('[S3] Failed to copy object:', error);
     return false;
   }
 }

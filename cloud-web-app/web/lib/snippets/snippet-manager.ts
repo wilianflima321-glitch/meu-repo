@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('snippets/snippet-manager')
 
@@ -486,7 +486,7 @@ export class SnippetManager {
         log.info('[Snippet Manager] Loaded user snippets');
       }
     } catch (error) {
-      console.error('[Snippet Manager] Failed to load user snippets:', error);
+      logger.error('[Snippet Manager] Failed to load user snippets:', error);
     }
   }
 
@@ -509,7 +509,7 @@ export class SnippetManager {
       
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(userSnippets));
     } catch (error) {
-      console.error('[Snippet Manager] Failed to save user snippets:', error);
+      logger.error('[Snippet Manager] Failed to save user snippets:', error);
     }
   }
 
@@ -544,7 +544,7 @@ export class SnippetManager {
       
       log.info('[Snippet Manager] Imported snippets');
     } catch (error) {
-      console.error('[Snippet Manager] Failed to import snippets:', error);
+      logger.error('[Snippet Manager] Failed to import snippets:', error);
       throw error;
     }
   }

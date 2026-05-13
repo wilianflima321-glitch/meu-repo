@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, Clock3, RefreshCw, ShieldCheck, UserCheck } from 'lucide-react'
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 
 type AuditActor = 'you' | 'aethel_operator' | 'system'
 

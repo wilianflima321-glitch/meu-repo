@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * AI Test Generator
  * Generates comprehensive tests using Chat Orchestrator
@@ -46,7 +47,7 @@ export class AITestGenerator {
 
       return this.parseGeneratedTests(response, filePath, options.framework);
     } catch (error) {
-      console.error('[AI Test Generator] Error generating tests:', error);
+      logger.error('[AI Test Generator] Error generating tests:', error);
       throw error;
     }
   }
@@ -81,7 +82,7 @@ export class AITestGenerator {
 
       return this.parseGeneratedTests(response, filePath, options.framework);
     } catch (error) {
-      console.error('[AI Test Generator] Error generating coverage tests:', error);
+      logger.error('[AI Test Generator] Error generating coverage tests:', error);
       throw error;
     }
   }
@@ -114,7 +115,7 @@ export class AITestGenerator {
 
       return this.extractCodeFromResponse(response, language);
     } catch (error) {
-      console.error('[AI Test Generator] Error generating function tests:', error);
+      logger.error('[AI Test Generator] Error generating function tests:', error);
       throw error;
     }
   }
@@ -145,7 +146,7 @@ export class AITestGenerator {
 
       return this.parseTestSuggestions(response);
     } catch (error) {
-      console.error('[AI Test Generator] Error suggesting tests:', error);
+      logger.error('[AI Test Generator] Error suggesting tests:', error);
       return [];
     }
   }
@@ -172,7 +173,7 @@ export class AITestGenerator {
 
       return this.parseTestData(response);
     } catch (error) {
-      console.error('[AI Test Generator] Error generating test data:', error);
+      logger.error('[AI Test Generator] Error generating test data:', error);
       return [];
     }
   }
@@ -208,7 +209,7 @@ export class AITestGenerator {
 
       return this.parseQualityAnalysis(response);
     } catch (error) {
-      console.error('[AI Test Generator] Error analyzing test quality:', error);
+      logger.error('[AI Test Generator] Error analyzing test quality:', error);
       return {
         score: 0,
         strengths: [],
@@ -425,7 +426,7 @@ export class AITestGenerator {
         return JSON.parse(jsonMatch[0]);
       }
     } catch (error) {
-      console.error('[AI Test Generator] Error parsing test data:', error);
+      logger.error('[AI Test Generator] Error parsing test data:', error);
     }
     return [];
   }

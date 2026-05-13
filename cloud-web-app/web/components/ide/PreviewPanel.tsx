@@ -1,9 +1,9 @@
+'use client';
+
 /**
  * @deprecated Product-facing preview should flow through
  * `@/components/preview/CanonicalPreviewSurface`.
  */
-'use client'
-
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Codicon from './Codicon'

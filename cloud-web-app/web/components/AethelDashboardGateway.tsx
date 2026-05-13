@@ -1,10 +1,10 @@
+'use client';
+
 /**
  * @deprecated Route-level dashboard entry should use
  * `@/components/dashboard/DashboardPageClient`.
  * This gateway wrapper remains only for compatibility.
  */
-'use client'
-
 /**
  * @deprecated The dashboard route now mounts `DashboardPageClient` directly.
  * Keep this file only for backward-compatible imports while references are removed.

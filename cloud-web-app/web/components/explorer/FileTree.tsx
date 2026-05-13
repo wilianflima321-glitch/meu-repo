@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * File Tree Component
  * Displays file system tree with drag & drop support
@@ -97,7 +98,7 @@ export const FileTree: React.FC<FileTreeProps> = ({ onFileSelect, onFileOpen }) 
       await explorerManager.moveFiles([draggedPath], targetPath);
       setRoot(explorerManager.getRoot());
     } catch (error) {
-      console.error('Move failed:', error);
+      logger.error('Move failed:', error);
     }
 
     setDraggedPath(null);
@@ -249,7 +250,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
       await explorerManager.paste(path);
       onAction();
     } catch (error) {
-      console.error('Paste failed:', error);
+      logger.error('Paste failed:', error);
     }
   };
 
@@ -265,7 +266,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
       await explorerManager.deleteFiles([path]);
       onAction();
     } catch (error) {
-      console.error('Failed to delete:', error);
+      logger.error('Failed to delete:', error);
     }
   };
 

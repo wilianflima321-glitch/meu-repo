@@ -1,11 +1,10 @@
+'use client';
+
 /**
  * Admin Monitoring Dashboard
  * /admin/monitoring - Observabilidade de infraestrutura
  * Exibe taxa de erros, latencia, usuarios ativos e status dos health checks.
  */
-
-'use client'
-
 import { useCallback, useEffect, useState } from 'react'
 import { Activity, AlertTriangle, Clock, Shield } from 'lucide-react'
 import { getToken } from '@/lib/auth'

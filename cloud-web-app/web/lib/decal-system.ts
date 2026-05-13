@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Decal System - Sistema de Decalques
  * 
@@ -428,7 +429,7 @@ export class DecalManager {
   ): DecalInstance | null {
     const config = this.defaultConfigs.get(type);
     if (!config) {
-      console.warn(`Unknown decal type: ${type}`);
+      logger.warn(`Unknown decal type: ${type}`);
       return null;
     }
     

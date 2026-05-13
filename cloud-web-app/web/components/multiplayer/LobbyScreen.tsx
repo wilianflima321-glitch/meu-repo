@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 /**
  * AETHEL ENGINE - Multiplayer Lobby Screen
  *
@@ -498,7 +499,7 @@ export default function LobbyScreen({
       });
     } catch (error) {
       // Continue with local state update even if API fails
-      console.error('Failed to notify server about exit:', error);
+      logger.error('Failed to notify server about exit:', error);
     }
 
     const lobbyName = currentLobby.name;

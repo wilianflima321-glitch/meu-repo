@@ -1,11 +1,11 @@
+'use client';
+
 /**
  * Aethel Engine - Accessibility (a11y) Utilities
  * 
  * Comprehensive accessibility system with focus management, announcements,
  * keyboard navigation, and screen reader support.
  */
-
-'use client'
 
 import {
   createContext,

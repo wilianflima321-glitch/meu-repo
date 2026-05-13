@@ -1,10 +1,9 @@
+'use client';
+
 /**
  * Mobile Navigation & Gestures
  * Addresses UX analysis finding: Mobile UI not adapted, needs gestures
  */
-
-'use client';
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { tokens } from '@/lib/design-tokens';
 import { useToastActions } from '@/components/ui/toast-system';

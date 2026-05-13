@@ -18,7 +18,7 @@ import { promisify } from 'util';
 import { EventEmitter } from 'events';
 import { randomBytes } from 'crypto';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('server/sandbox-manager')
 
@@ -98,7 +98,7 @@ class DockerSandboxManager extends EventEmitter {
       log.info('[Sandbox] Docker daemon is available');
     } catch (error) {
       this.isAvailable = false;
-      console.warn('[Sandbox] Docker not available, falling back to direct execution');
+      logger.warn('[Sandbox] Docker not available, falling back to direct execution');
     }
   }
 
@@ -219,12 +219,12 @@ class DockerSandboxManager extends EventEmitter {
 
       // Set timeout to destroy container
       setTimeout(() => {
-        this.destroySandbox(sessionId).catch(console.error);
+        this.destroySandbox(sessionId).catch((error) => logger.error(error));
       }, (config.timeout || limits.timeout) * 1000);
 
       return session;
     } catch (error) {
-      console.error('[Sandbox] Failed to create container:', error);
+      logger.error('[Sandbox] Failed to create container:', error);
       throw new Error('Failed to create sandbox container');
     }
   }
@@ -324,7 +324,7 @@ class DockerSandboxManager extends EventEmitter {
       ], { timeout: 5000 });
     } catch (error) {
       // Resize is best-effort, don't throw
-      console.warn('[Sandbox] Failed to resize terminal:', error);
+      logger.warn('[Sandbox] Failed to resize terminal:', error);
     }
   }
 
@@ -351,7 +351,7 @@ class DockerSandboxManager extends EventEmitter {
       });
     } catch (error) {
       // Container might already be stopped
-      console.warn('[Sandbox] Container already stopped:', session.containerName);
+      logger.warn('[Sandbox] Container already stopped:', session.containerName);
     }
 
     // Update tracking
@@ -420,7 +420,7 @@ class DockerSandboxManager extends EventEmitter {
           }
         }
       } catch (error) {
-        console.error('[Sandbox] Cleanup error:', error);
+        logger.error('[Sandbox] Cleanup error:', error);
       }
     }, CLEANUP_INTERVAL);
   }

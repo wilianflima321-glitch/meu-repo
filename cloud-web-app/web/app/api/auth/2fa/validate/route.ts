@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { twoFactorService } from '@/lib/security/two-factor-auth'
 import { prisma } from '@/lib/db'
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 
 const logger = createComponentLogger('api.auth.2fa.validate')
 

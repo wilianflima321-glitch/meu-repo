@@ -1,12 +1,12 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * AETHEL ENGINE - WebTransport React Hook
  * ========================================
  * 
  * React hook for using WebTransport with automatic state management.
  */
-
-'use client';
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   UnifiedTransportClient,
@@ -127,7 +127,7 @@ export function useTransport(options: UseTransportOptions): UseTransportResult {
     
     // Auto-connect if enabled
     if (currentOptions.autoConnect !== false) {
-      client.connect().catch(console.error);
+      client.connect().catch((error) => logger.error(error));
     }
     
     // Stats polling

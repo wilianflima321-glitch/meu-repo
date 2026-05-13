@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Asset Importer - Sistema de Importação de Assets
  * 
@@ -621,7 +622,7 @@ export class AssetImporter {
         
         results.push(asset);
       } catch (error) {
-        console.error(`Failed to import ${file.name}:`, error);
+        logger.error(`Failed to import ${file.name}:`, error);
         this.emitProgress({
           loaded: i,
           total: fileArray.length,

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Aethel AI Ghost Text - Inline Completions
  * 
@@ -154,7 +155,7 @@ export class GhostTextProvider {
       if ((error as any).name === 'AbortError') {
         return [];
       }
-      console.error('Ghost text error:', error);
+      logger.error('Ghost text error:', error);
       return [];
     } finally {
       this.pendingRequest = null;

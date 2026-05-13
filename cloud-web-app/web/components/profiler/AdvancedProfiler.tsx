@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * ADVANCED PROFILER - Aethel Engine
  *
@@ -14,9 +16,6 @@
  * - Physics stats
  * - Custom markers
  */
-
-'use client';
-
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   categoryColors,

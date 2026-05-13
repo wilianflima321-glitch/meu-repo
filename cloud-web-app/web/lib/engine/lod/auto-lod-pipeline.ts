@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Auto-LOD Pipeline - Sistema de Geração Automática de Níveis de Detalhe
  * 
@@ -562,7 +563,7 @@ export class AutoLODPipeline {
         
         lodMeshes.set(level.level, simplifiedGeometry);
       } catch (error) {
-        console.warn(`Failed to generate LOD ${level.level}:`, error);
+        logger.warn(`Failed to generate LOD ${level.level}:`, error);
         // Usar LOD anterior ou original
         const fallback = lodMeshes.get(level.level - 1) || geometry;
         lodMeshes.set(level.level, fallback.clone());

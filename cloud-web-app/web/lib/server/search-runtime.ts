@@ -20,7 +20,7 @@ import * as path from 'path';
 import { EventEmitter } from 'events';
 import { resolveWorkspaceRoot } from './workspace-path';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('server/search-runtime')
 
@@ -344,7 +344,7 @@ export class SearchRuntime extends EventEmitter {
       rg.stderr.on('data', (data: Buffer) => {
         const error = data.toString();
         if (!error.includes('No files were searched')) {
-          console.warn('[SearchRuntime] ripgrep warning:', error);
+          logger.warn('[SearchRuntime] ripgrep warning:', error);
         }
       });
       

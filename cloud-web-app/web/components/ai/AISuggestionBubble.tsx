@@ -1,3 +1,6 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * AISuggestionBubble - Bolhas de Sugestão Proativa da IA
  *
@@ -10,9 +13,6 @@
  *
  * @module components/ai/AISuggestionBubble
  */
-
-'use client';
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import {
@@ -707,7 +707,7 @@ export function AISuggestionBubbleAuto() {
 
       setSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
     } catch (e) {
-      console.error('Failed to apply suggestion:', e);
+      logger.error('Failed to apply suggestion:', e);
       throw e;
     }
   }, []);

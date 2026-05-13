@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/observability/logger';
 import React, { useState, useEffect } from 'react'
 import { Settings, FolderOpen, Check, X, AlertTriangle, RefreshCw, Save, Trash2 } from 'lucide-react'
 
@@ -44,7 +45,7 @@ function loadSettings(): SettingsState {
       return JSON.parse(stored)
     }
   } catch {
-    console.warn('Failed to load settings from localStorage')
+    logger.warn('Failed to load settings from localStorage')
   }
 
   return getDefaultSettings()
@@ -56,7 +57,7 @@ function saveSettings(settings: SettingsState): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
   } catch {
-    console.error('Failed to save settings to localStorage')
+    logger.error('Failed to save settings to localStorage')
   }
 }
 

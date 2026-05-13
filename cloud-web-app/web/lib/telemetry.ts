@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('telemetry')
 
@@ -376,7 +376,7 @@ export class TelemetryManager {
       })
       this.clearQueue()
     } catch (error) {
-      console.error('[Telemetry] Falha ao enviar fila:', error)
+      logger.error('[Telemetry] Falha ao enviar fila:', error)
     }
   }
 }

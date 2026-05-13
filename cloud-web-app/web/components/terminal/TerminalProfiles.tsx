@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Terminal Profiles Configuration
  *
@@ -7,9 +9,6 @@
  * - Git: Operações git
  * - Shell: Terminal geral
  */
-
-'use client';
-
 import React, { useState, useCallback } from 'react';
 import {
   Terminal,

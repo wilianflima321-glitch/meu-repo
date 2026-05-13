@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('engine/audio-manager')
 
@@ -209,14 +209,14 @@ export class AudioSource extends EventEmitter {
         this.play();
       }
     } catch (error) {
-      console.error(`[Audio] Failed to load ${url}:`, error);
+      logger.error(`[Audio] Failed to load ${url}:`, error);
       this.emit('error', error);
     }
   }
 
   play(offset = 0): void {
     if (!this.buffer) {
-      console.warn('[Audio] No buffer loaded');
+      logger.warn('[Audio] No buffer loaded');
       return;
     }
     
@@ -660,7 +660,7 @@ export class AudioManager extends EventEmitter {
       
       log.info('[Audio] System initialized');
     } catch (error) {
-      console.error('[Audio] Failed to initialize:', error);
+      logger.error('[Audio] Failed to initialize:', error);
       throw error;
     }
   }

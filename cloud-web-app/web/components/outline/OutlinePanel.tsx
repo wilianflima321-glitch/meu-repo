@@ -1,12 +1,11 @@
+'use client';
+
 /**
  * Aethel IDE - Outline Panel
  *
  * Painel profissional de outline/symbols similar ao VS Code.
  * Mostra hierarquia de símbolos do arquivo atual (classes, funções, variáveis, etc.)
  */
-
-'use client';
-
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   ChevronRight,

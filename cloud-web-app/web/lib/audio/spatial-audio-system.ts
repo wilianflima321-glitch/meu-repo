@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Spatial Audio System - Sistema de Áudio 3D Espacial
  * 
@@ -180,7 +181,7 @@ export class SpatialAudioManager extends EventEmitter {
       
       this.emit('initialized');
     } catch (error) {
-      console.error('Failed to initialize audio context:', error);
+      logger.error('Failed to initialize audio context:', error);
       throw error;
     }
   }
@@ -263,7 +264,7 @@ export class SpatialAudioManager extends EventEmitter {
     
     const clip = this.clips.get(clipId);
     if (!clip) {
-      console.warn(`Audio clip not found: ${clipId}`);
+      logger.warn(`Audio clip not found: ${clipId}`);
       return null;
     }
     

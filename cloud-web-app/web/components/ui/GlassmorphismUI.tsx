@@ -1,12 +1,11 @@
+'use client';
+
 /**
  * Glassmorphism UI Components - Nível Studio L5
  *
  * Componentes com efeitos de vidro, glows dinâmicos e transições de elite
  * Inspirado em: Vercel, Linear, Cursor, Figma
  */
-
-'use client'
-
 import React, { ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 

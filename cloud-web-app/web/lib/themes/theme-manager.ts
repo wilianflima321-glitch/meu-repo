@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('themes/theme-manager')
 
@@ -368,7 +368,7 @@ export class ThemeManager {
       const theme = JSON.parse(json) as ColorTheme;
       this.createCustomTheme(theme);
     } catch (error) {
-      console.error('[Theme Manager] Failed to import theme:', error);
+      logger.error('[Theme Manager] Failed to import theme:', error);
       throw error;
     }
   }
@@ -441,7 +441,7 @@ export class ThemeManager {
         log.info(`[Theme Manager] Loaded ${themes.length} custom themes`);
       }
     } catch (error) {
-      console.error('[Theme Manager] Failed to load custom themes:', error);
+      logger.error('[Theme Manager] Failed to load custom themes:', error);
     }
   }
 
@@ -453,7 +453,7 @@ export class ThemeManager {
       const themes = Array.from(this.customThemes.values());
       localStorage.setItem(this.STORAGE_KEY_CUSTOM_THEMES, JSON.stringify(themes));
     } catch (error) {
-      console.error('[Theme Manager] Failed to save custom themes:', error);
+      logger.error('[Theme Manager] Failed to save custom themes:', error);
     }
   }
 
@@ -478,7 +478,7 @@ export class ThemeManager {
         }
       }
     } catch (error) {
-      console.error('[Theme Manager] Failed to load current theme:', error);
+      logger.error('[Theme Manager] Failed to load current theme:', error);
     }
   }
 
@@ -489,7 +489,7 @@ export class ThemeManager {
     try {
       localStorage.setItem(this.STORAGE_KEY_THEME, this.currentTheme.id);
     } catch (error) {
-      console.error('[Theme Manager] Failed to save current theme:', error);
+      logger.error('[Theme Manager] Failed to save current theme:', error);
     }
   }
 
@@ -500,7 +500,7 @@ export class ThemeManager {
     try {
       localStorage.setItem(this.STORAGE_KEY_ICON_THEME, this.currentIconTheme.id);
     } catch (error) {
-      console.error('[Theme Manager] Failed to save current icon theme:', error);
+      logger.error('[Theme Manager] Failed to save current icon theme:', error);
     }
   }
 

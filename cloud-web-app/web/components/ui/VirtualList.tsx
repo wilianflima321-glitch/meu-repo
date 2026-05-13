@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Aethel IDE - Virtualized List Component
  *
@@ -5,9 +7,6 @@
  * milhares de itens sem degradação de performance.
  * Similar ao que VS Code usa para file explorer e search results.
  */
-
-'use client';
-
 import React, {
   useRef,
   useState,

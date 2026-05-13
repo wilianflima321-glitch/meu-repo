@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 // Extension host runtime with worker isolation and sandboxed extension execution.
 
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
@@ -884,7 +885,7 @@ export class ExtensionHostRuntime extends EventEmitter {
       try {
         dispose();
       } catch (error) {
-        console.error(`Error disposing ${extensionId}:`, error);
+        logger.error(`Error disposing ${extensionId}:`, error);
       }
     }
     this.disposables.set(extensionId, []);

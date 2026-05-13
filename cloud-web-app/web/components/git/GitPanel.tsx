@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 /**
  * Git Panel Component
  *
@@ -408,7 +409,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
       setStashes(newStashes);
       setCurrentBranch(branch);
     } catch (error) {
-        console.error('Failed to refresh Git:', error);
+        logger.error('Failed to refresh Git:', error);
     }
     setIsLoading(false);
   }, [gitService]);

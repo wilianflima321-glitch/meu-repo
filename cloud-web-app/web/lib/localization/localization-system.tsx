@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Localization System - Sistema de Internacionalização (i18n)
  * 
@@ -383,7 +384,7 @@ export class LocalizationManager extends EventEmitter {
         translations: data,
       }, namespace);
     } catch (error) {
-      console.error(`Failed to load translations from ${url}:`, error);
+      logger.error(`Failed to load translations from ${url}:`, error);
       throw error;
     }
   }
@@ -516,7 +517,7 @@ export class LocalizationManager extends EventEmitter {
       this.missingKeys.add(fullKey);
       
       if (this.debugMode) {
-        console.warn(`Missing translation: ${fullKey} (${this.currentLocale})`);
+        logger.warn(`Missing translation: ${fullKey} (${this.currentLocale})`);
       }
       
       this.emit('missingTranslation', { key, namespace, locale: this.currentLocale });

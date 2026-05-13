@@ -1,12 +1,11 @@
+'use client';
+
 /**
  * Aethel IDE - Design System UI Components
  *
  * Componentes profissionais do design system baseados no VS Code.
  * Todos com acessibilidade, temas e comportamentos consistentes.
  */
-
-'use client';
-
 import React, {
   forwardRef,
   useState,

@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * AETHEL ENGINE - Asset Detail Panel
  *
@@ -8,9 +10,6 @@
  * - Reviews section
  * - Related assets
  */
-
-'use client';
-
 import React, { useState, useRef, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

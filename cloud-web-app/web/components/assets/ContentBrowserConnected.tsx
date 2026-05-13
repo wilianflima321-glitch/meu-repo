@@ -1,3 +1,6 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * Content Browser Connected - Real Data Integration
  *
@@ -11,9 +14,6 @@
  * - Optimistic updates
  * - Error handling with toast notifications
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import ContentBrowser, { Asset, AssetFolder, AssetType } from './ContentBrowser';
@@ -113,7 +113,7 @@ function ModelPreview({ url }: { url: string }) {
       },
       undefined,
       (error) => {
-        console.error('Failed to load model preview:', error);
+        logger.error('Failed to load model preview:', error);
       }
     );
 

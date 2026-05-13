@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Settings Manager
  * Manages workspace and user settings with persistence
@@ -163,7 +164,7 @@ export class SettingsManager {
         this.workspaceSettings = JSON.parse(workspaceSettingsStr);
       }
     } catch (error) {
-      console.error('Failed to load settings:', error);
+      logger.error('Failed to load settings:', error);
     }
   }
 
@@ -171,7 +172,7 @@ export class SettingsManager {
     try {
       localStorage.setItem('user-settings', JSON.stringify(this.userSettings));
     } catch (error) {
-      console.error('Failed to save user settings:', error);
+      logger.error('Failed to save user settings:', error);
     }
   }
 
@@ -179,7 +180,7 @@ export class SettingsManager {
     try {
       localStorage.setItem('workspace-settings', JSON.stringify(this.workspaceSettings));
     } catch (error) {
-      console.error('Failed to save workspace settings:', error);
+      logger.error('Failed to save workspace settings:', error);
     }
   }
 
@@ -287,7 +288,7 @@ export class SettingsManager {
         try {
           listener(value);
         } catch (error) {
-          console.error('Error in settings listener:', error);
+          logger.error('Error in settings listener:', error);
         }
       }
     }
@@ -299,7 +300,7 @@ export class SettingsManager {
         try {
           listener({ path, value });
         } catch (error) {
-          console.error('Error in settings listener:', error);
+          logger.error('Error in settings listener:', error);
         }
       }
     }
@@ -313,7 +314,7 @@ export class SettingsManager {
         try {
           listener(value);
         } catch (error) {
-          console.error('Error in settings listener:', error);
+          logger.error('Error in settings listener:', error);
         }
       }
     }
@@ -401,7 +402,7 @@ export class SettingsManager {
       
       this.notifyAllListeners();
     } catch (error) {
-      console.error('Failed to import settings:', error);
+      logger.error('Failed to import settings:', error);
       throw error;
     }
   }

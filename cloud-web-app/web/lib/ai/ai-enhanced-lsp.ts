@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * AI-Enhanced LSP
  * Integrates Chat Orchestrator with LSP for intelligent code assistance
@@ -68,7 +69,7 @@ export class AIEnhancedLSP {
       // 3. Merge and rank
       return this.mergeCompletions(lspCompletions, aiSuggestions);
     } catch (error) {
-      console.error('[AI-Enhanced LSP] Error getting completions:', error);
+      logger.error('[AI-Enhanced LSP] Error getting completions:', error);
       // Fallback to LSP only
       const lspServer = await this.lspManager.getClient(language);
       return lspServer ? await lspServer.completion(uri, position) : [];
@@ -107,7 +108,7 @@ export class AIEnhancedLSP {
         range: lspHover.range,
       };
     } catch (error) {
-      console.error('[AI-Enhanced LSP] Error getting hover:', error);
+      logger.error('[AI-Enhanced LSP] Error getting hover:', error);
       const lspServer = await this.lspManager.getClient(language);
       return lspServer ? await lspServer.hover(uri, position) : null;
     }
@@ -140,7 +141,7 @@ export class AIEnhancedLSP {
         ...aiActions,
       ];
     } catch (error) {
-      console.error('[AI-Enhanced LSP] Error getting code actions:', error);
+      logger.error('[AI-Enhanced LSP] Error getting code actions:', error);
       const lspServer = await this.lspManager.getClient(language);
       const lspActions = lspServer 
         ? await lspServer.codeAction(uri, range, context)
@@ -179,7 +180,7 @@ export class AIEnhancedLSP {
       const data = await response.json() as AIResponsePayload;
       return this.parseAICompletions(stringFromUnknown(data.response));
     } catch (error) {
-      console.error('[AI-Enhanced LSP] Error getting AI completions:', error);
+      logger.error('[AI-Enhanced LSP] Error getting AI completions:', error);
       return [];
     }
   }
@@ -212,7 +213,7 @@ export class AIEnhancedLSP {
       const data = await response.json() as AIResponsePayload;
       return stringFromUnknown(data.response);
     } catch (error) {
-      console.error('[AI-Enhanced LSP] Error getting AI explanation:', error);
+      logger.error('[AI-Enhanced LSP] Error getting AI explanation:', error);
       return '';
     }
   }
@@ -247,7 +248,7 @@ export class AIEnhancedLSP {
       const data = await response.json() as AIResponsePayload;
       return this.parseAICodeActions(stringFromUnknown(data.response));
     } catch (error) {
-      console.error('[AI-Enhanced LSP] Error getting AI code actions:', error);
+      logger.error('[AI-Enhanced LSP] Error getting AI code actions:', error);
       return [];
     }
   }
@@ -308,7 +309,7 @@ export class AIEnhancedLSP {
         };
       });
     } catch (error) {
-      console.error('[AI-Enhanced LSP] Error parsing AI completions:', error);
+      logger.error('[AI-Enhanced LSP] Error parsing AI completions:', error);
       return [];
     }
   }
@@ -356,7 +357,7 @@ export class AIEnhancedLSP {
 
       return suggestions;
     } catch (error) {
-      console.error('[AI-Enhanced LSP] Error parsing AI code actions:', error);
+      logger.error('[AI-Enhanced LSP] Error parsing AI code actions:', error);
       return [];
     }
   }

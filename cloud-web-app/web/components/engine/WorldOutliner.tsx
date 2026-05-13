@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * World Outliner - Hierarquia de Objetos da Cena
  *
@@ -6,9 +8,6 @@
  *
  * NAO E MOCK - Sistema real e funcional!
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { OutlinerContextMenu, OutlinerFilterBar, TreeItem } from './WorldOutlinerParts';

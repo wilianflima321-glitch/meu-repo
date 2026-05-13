@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/observability/logger';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import {
   GitBranch,
@@ -248,7 +249,7 @@ export default function GitPanelPro({
       setBehind(status.behind)
     } catch (err) {
       setError('Failed to load Git status')
-      console.error('Error fetching Git status:', err)
+      logger.error('Error fetching Git status:', err)
     } finally {
       setLoading(false)
     }
@@ -265,7 +266,7 @@ export default function GitPanelPro({
         upstream: b.upstream,
       })))
     } catch (err) {
-      console.error('Error fetching branches:', err)
+      logger.error('Error fetching branches:', err)
     }
   }, [gitClient])
 
@@ -280,7 +281,7 @@ export default function GitPanelPro({
         date: new Date(c.date),
       })))
     } catch (err) {
-      console.error('Error fetching commits:', err)
+      logger.error('Error fetching commits:', err)
     }
   }, [gitClient])
 
@@ -301,7 +302,7 @@ export default function GitPanelPro({
       await gitClient.add([path])
       await fetchStatus()
     } catch (err) {
-      console.error('Error staging file:', err)
+      logger.error('Error staging file:', err)
     }
   }
 
@@ -310,7 +311,7 @@ export default function GitPanelPro({
       await gitClient.reset([path])
       await fetchStatus()
     } catch (err) {
-      console.error('Error unstaging file:', err)
+      logger.error('Error unstaging file:', err)
     }
   }
 
@@ -319,7 +320,7 @@ export default function GitPanelPro({
       await gitClient.add(['.'])
       await fetchStatus()
     } catch (err) {
-      console.error('Error staging all files:', err)
+      logger.error('Error staging all files:', err)
     }
   }
 
@@ -328,7 +329,7 @@ export default function GitPanelPro({
       await gitClient.reset(['.'])
       await fetchStatus()
     } catch (err) {
-      console.error('Error unstaging all files:', err)
+      logger.error('Error unstaging all files:', err)
     }
   }
 
@@ -340,7 +341,7 @@ export default function GitPanelPro({
       await fetchStatus()
       await fetchCommits()
     } catch (err) {
-      console.error('Error committing:', err)
+      logger.error('Error committing:', err)
     }
   }, [commitMessage, gitClient, fetchStatus, fetchCommits])
 
@@ -362,7 +363,7 @@ export default function GitPanelPro({
         await gitClient.push()
         await fetchStatus()
       } catch (err) {
-        console.error('Error pushing:', err)
+        logger.error('Error pushing:', err)
       }
     }
   }
@@ -373,7 +374,7 @@ export default function GitPanelPro({
       await fetchStatus()
       await fetchCommits()
     } catch (err) {
-      console.error('Error pulling:', err)
+      logger.error('Error pulling:', err)
     }
   }
 
@@ -382,7 +383,7 @@ export default function GitPanelPro({
       await gitClient.fetch()
       await fetchStatus()
     } catch (err) {
-      console.error('Error fetching:', err)
+      logger.error('Error fetching:', err)
     }
   }
 
@@ -393,7 +394,7 @@ export default function GitPanelPro({
       await fetchBranches()
       setShowBranches(false)
     } catch (err) {
-      console.error('Error switching branch:', err)
+      logger.error('Error switching branch:', err)
     }
   }
 
@@ -402,7 +403,7 @@ export default function GitPanelPro({
       await gitClient.discardChanges([path])
       await fetchStatus()
     } catch (err) {
-      console.error('Error discarding changes:', err)
+      logger.error('Error discarding changes:', err)
     }
   }
 

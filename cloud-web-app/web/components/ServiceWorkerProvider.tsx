@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Service Worker Provider Component
  *
@@ -6,9 +8,6 @@
  *
  * @module components/ServiceWorkerProvider
  */
-
-'use client';
-
 import { createContext, useContext, ReactNode, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useServiceWorker, type UseServiceWorkerReturn } from '../hooks/useServiceWorker';

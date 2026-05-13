@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs'
 import { getUserFromRequest } from '@/lib/auth-server'
 import { twoFactorService } from '@/lib/security/two-factor-auth'
 import { prisma } from '@/lib/db'
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 
 const logger = createComponentLogger('api.auth.2fa.disable')
 

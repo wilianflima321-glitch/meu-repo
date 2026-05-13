@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Usage Dashboard - Visualização de Consumo de Recursos
  *
@@ -9,9 +11,6 @@
  *
  * @module components/billing/UsageDashboard
  */
-
-'use client';
-
 import React, { useMemo } from 'react';
 import useSWR from 'swr';
 import {

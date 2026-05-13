@@ -32,7 +32,7 @@ import { buildMentionContextBlock } from '@/lib/server/mention-context'
 import { loadProjectRulesContext } from '@/lib/server/project-rules'
 import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models';
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // Importa web tools para registro
 import '@/lib/ai-web-tools';

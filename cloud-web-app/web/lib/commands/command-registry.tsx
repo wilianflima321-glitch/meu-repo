@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Command Registry - Sistema de Registro de Comandos
  * 
@@ -6,9 +8,6 @@
  * 
  * @module lib/commands/command-registry
  */
-
-'use client';
-
 import { createContext, useContext, useCallback, useMemo, useState, useEffect, type ReactNode } from 'react';
 import { createComponentLogger } from '@/lib/observability/logger';
 

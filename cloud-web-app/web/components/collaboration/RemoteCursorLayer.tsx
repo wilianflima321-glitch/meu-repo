@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * RemoteCursorLayer
  *
@@ -15,9 +17,6 @@
  * Performance: cursors are rendered with CSS transforms (GPU friendly) and
  * React `key={clientId}` keeps reconciliation O(n).
  */
-
-'use client'
-
 import React from 'react'
 import type { RemotePeer } from '@/hooks/useCollaborationAwareness'
 

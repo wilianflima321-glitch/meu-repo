@@ -16,7 +16,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { emergencyController, MODEL_CONFIGS } from './emergency-mode';
 import { DEFAULT_OPENROUTER_MODEL_ID, EMERGENCY_FALLBACK_MODEL_ID, OPENROUTER_MODELS } from './ai/openrouter-models';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('ai-service')
 
@@ -219,7 +219,7 @@ class AIService {
         model = cheapModel;
         provider = parseModelSelection(cheapModel).provider || (this.openrouter ? 'openrouter' : 'openai');
         wasDowngraded = true;
-        console.warn(`[AIService] Emergency downgrade: ${originalModel} -> ${model}`);
+        logger.warn(`[AIService] Emergency downgrade: ${originalModel} -> ${model}`);
       } else if (emergencyCheck.model && emergencyCheck.model !== model) {
         // Emergency mode sugeriu outro modelo
         originalModel = model;
@@ -276,7 +276,7 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
       return response;
       
     } catch (error) {
-      console.error(`[AIService] Erro com provider ${provider}:`, error);
+      logger.error(`[AIService] Erro com provider ${provider}:`, error);
       
       // Fallback para outro provider
       const availableProviders = this.getAvailableProviders().filter(p => p !== provider);

@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * NewProjectWizard - Experiencia de Onboarding "Time-to-Fun"
  *
@@ -12,9 +14,6 @@
  *
  * @see DETALHAMENTO_UX_STRATEGY_2026.md - Secao 1
  */
-
-'use client';
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';

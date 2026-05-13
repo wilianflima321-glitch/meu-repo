@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Jest Test Adapter
  * Provides test discovery, execution, and coverage for Jest
@@ -51,7 +52,7 @@ export class JestAdapter extends TestAdapterBase {
 
       return this.buildTestTree(allTests);
     } catch (error) {
-      console.error('[Jest Adapter] Error discovering tests:', error);
+      logger.error('[Jest Adapter] Error discovering tests:', error);
       return this.getMockTests();
     }
   }
@@ -99,7 +100,7 @@ export class JestAdapter extends TestAdapterBase {
         ...summary,
       };
     } catch (error) {
-      console.error('[Jest Adapter] Error running tests:', error);
+      logger.error('[Jest Adapter] Error running tests:', error);
       return this.getMockTestRun(tests, startTime);
     }
   }
@@ -116,7 +117,7 @@ export class JestAdapter extends TestAdapterBase {
 
       return this.parseCoverageData(coverage);
     } catch (error) {
-      console.error('[Jest Adapter] Error getting coverage:', error);
+      logger.error('[Jest Adapter] Error getting coverage:', error);
       return this.getMockCoverage();
     }
   }

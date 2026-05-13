@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Aethel Engine - File Watcher Runtime
  * 
@@ -162,7 +163,7 @@ export class FileWatcherManager extends EventEmitter {
         await fs.access(p);
         validPaths.push(p);
       } catch {
-        console.warn(`Path not accessible, skipping: ${p}`);
+        logger.warn(`Path not accessible, skipping: ${p}`);
       }
     }
     
@@ -290,7 +291,7 @@ export class FileWatcherManager extends EventEmitter {
     
     // Error handling
     watcher.on('error', (error) => {
-      console.error(`Watcher error for ${workspaceId}:`, error);
+      logger.error(`Watcher error for ${workspaceId}:`, error);
       this.emit('watcherError', { workspaceId, error });
     });
   }

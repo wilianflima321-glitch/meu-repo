@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Test Manager
  * Manages test discovery, execution, and coverage
@@ -86,7 +87,7 @@ export class TestManager {
           this.indexTestItem(test);
         }
       } catch (error) {
-        console.error(`Failed to discover tests with ${adapter.id}:`, error);
+        logger.error(`Failed to discover tests with ${adapter.id}:`, error);
       }
     }
 
@@ -130,7 +131,7 @@ export class TestManager {
           run.results.set(testId, result);
         }
       } catch (error) {
-        console.error(`Failed to run tests with ${adapterId}:`, error);
+        logger.error(`Failed to run tests with ${adapterId}:`, error);
       }
     }
 
@@ -174,7 +175,7 @@ export class TestManager {
           this.coverage.set(cov.uri, cov);
         }
       } catch (error) {
-        console.error(`Failed to get coverage from ${adapter.id}:`, error);
+        logger.error(`Failed to get coverage from ${adapter.id}:`, error);
       }
     }
 

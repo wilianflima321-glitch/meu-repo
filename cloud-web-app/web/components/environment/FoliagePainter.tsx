@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * FOLIAGE PAINTER - Aethel Engine
  *
@@ -14,9 +16,6 @@
  * - Collision generation
  * - Exportar para runtime
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import {

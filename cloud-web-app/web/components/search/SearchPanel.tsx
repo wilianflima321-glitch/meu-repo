@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { getSearchManager, SearchOptions, SearchResult } from '../../lib/search/search-manager';
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('SearchPanel')
 
@@ -49,7 +49,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
       const searchResults = await searchManager.search(searchOptions);
       setResults(searchResults);
     } catch (error) {
-      console.error('Search failed:', error);
+      logger.error('Search failed:', error);
     } finally {
       setIsSearching(false);
     }
@@ -62,7 +62,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
       // Refresh search results
       await handleSearch();
     } catch (error) {
-      console.error('Replace failed:', error);
+      logger.error('Replace failed:', error);
     }
   }, [replacement, searchManager, handleSearch]);
 
@@ -76,7 +76,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
       // Refresh search results
       await handleSearch();
     } catch (error) {
-      console.error('Replace all failed:', error);
+      logger.error('Replace all failed:', error);
     }
   }, [results, replacement, searchManager, handleSearch]);
 

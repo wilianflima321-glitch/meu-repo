@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * AETHEL ENGINE - Pixel Streaming React Component
  *
@@ -6,9 +8,6 @@
  *
  * @version 2.0.0
  */
-
-'use client';
-
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import {
     usePixelStreaming,

@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 import { useState } from 'react';
 import { ConsentRequest, ConsentResponse } from '@/lib/consent/consent-manager';
 
@@ -26,7 +27,7 @@ export default function ConsentDialog({
       await onApprove(chargeId);
       onClose();
     } catch (error) {
-      console.error('Failed to approve consent:', error);
+      logger.error('Failed to approve consent:', error);
     } finally {
       setIsProcessing(false);
     }
@@ -38,7 +39,7 @@ export default function ConsentDialog({
       await onReject(chargeId);
       onClose();
     } catch (error) {
-      console.error('Failed to reject consent:', error);
+      logger.error('Failed to reject consent:', error);
     } finally {
       setIsProcessing(false);
     }

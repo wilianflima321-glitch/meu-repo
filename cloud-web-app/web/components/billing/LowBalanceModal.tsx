@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * LowBalanceModal - Modal Não-Intrusivo de Saldo Baixo
  *
@@ -9,9 +11,6 @@
  *
  * @module components/billing/LowBalanceModal
  */
-
-'use client';
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {

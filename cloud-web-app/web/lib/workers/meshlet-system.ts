@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Meshlet System Integration
  * Connects the Web Worker to the main application
@@ -104,7 +105,7 @@ class MeshletSystem {
       };
 
       this.worker.onerror = (error) => {
-        console.error('[MeshletSystem] Worker error:', error);
+        logger.error('[MeshletSystem] Worker error:', error);
         // Reject all pending requests
         for (const [key, pending] of this.pendingRequests) {
           pending.reject(new Error(`Worker error: ${error.message}`));
@@ -112,7 +113,7 @@ class MeshletSystem {
         this.pendingRequests.clear();
       };
     } catch (error) {
-      console.warn('[MeshletSystem] Failed to initialize worker, falling back to main thread');
+      logger.warn('[MeshletSystem] Failed to initialize worker, falling back to main thread');
       this.worker = null;
     }
   }
@@ -127,7 +128,7 @@ class MeshletSystem {
   ): Promise<MeshletBuildResult> {
     if (!this.worker) {
       // Fallback: return simple placeholder
-      console.warn('[MeshletSystem] Worker not available, using fallback');
+      logger.warn('[MeshletSystem] Worker not available, using fallback');
       return {
         meshlets: [],
         lodTree: [],

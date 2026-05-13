@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('server/lsp-runtime')
 
@@ -289,7 +289,7 @@ export async function getOrCreateLspSession(opts: {
   });
 
   child.on('error', (err) => {
-    console.error(`[LSP] ${language} server error:`, err);
+    logger.error(`[LSP] ${language} server error:`, err);
   });
 
   child.stderr?.on('data', (data: Buffer) => {

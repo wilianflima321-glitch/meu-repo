@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * CONTROL RIG EDITOR - Aethel Engine
  *
@@ -13,9 +15,6 @@
  * - Space switching
  * - Export para runtime
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {

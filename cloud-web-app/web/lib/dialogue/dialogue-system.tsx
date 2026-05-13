@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Dialogue System - Sistema de Diálogos para Jogos
  * 
@@ -227,7 +228,7 @@ export class ConditionEvaluator {
         if (customEvaluator) {
           return customEvaluator(condition);
         }
-        console.warn(`Unknown condition type: ${condition.type}`);
+        logger.warn(`Unknown condition type: ${condition.type}`);
         return true;
     }
   }
@@ -420,7 +421,7 @@ export class DialogueManager extends EventEmitter {
   startConversation(conversationId: string, startNodeOverride?: string): boolean {
     const conversation = this.conversations.get(conversationId);
     if (!conversation) {
-      console.error(`Conversation not found: ${conversationId}`);
+      logger.error(`Conversation not found: ${conversationId}`);
       return false;
     }
     

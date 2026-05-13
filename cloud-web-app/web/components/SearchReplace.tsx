@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/observability/logger';
 import React, { useState } from 'react';
 
 interface SearchResult {
@@ -67,7 +68,7 @@ export default function SearchReplace() {
       // Refresh search
       handleSearch();
     } catch (error) {
-      console.error('Replace failed');
+      logger.error('Replace failed');
     }
   };
 

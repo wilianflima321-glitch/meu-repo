@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * AI Git Integration
  * AI-powered git operations using Chat Orchestrator
@@ -52,7 +53,7 @@ export class AIGitIntegration {
 
       return this.parseCommitSuggestions(response);
     } catch (error) {
-      console.error('[AI Git] Error generating commit message:', error);
+      logger.error('[AI Git] Error generating commit message:', error);
       return [];
     }
   }
@@ -72,7 +73,7 @@ export class AIGitIntegration {
 
       return response.split(',').map(s => s.trim()).filter(s => s);
     } catch (error) {
-      console.error('[AI Git] Error suggesting scope:', error);
+      logger.error('[AI Git] Error suggesting scope:', error);
       return [];
     }
   }
@@ -109,7 +110,7 @@ export class AIGitIntegration {
 
       return this.parseConflictResolution(response);
     } catch (error) {
-      console.error('[AI Git] Error resolving conflict:', error);
+      logger.error('[AI Git] Error resolving conflict:', error);
       return {
         resolvedCode: current,
         explanation: 'Failed to resolve conflict',
@@ -146,7 +147,7 @@ export class AIGitIntegration {
 
       return this.parseReviewComments(response);
     } catch (error) {
-      console.error('[AI Git] Error reviewing changes:', error);
+      logger.error('[AI Git] Error reviewing changes:', error);
       return [];
     }
   }
@@ -180,7 +181,7 @@ export class AIGitIntegration {
 
       return this.parsePRDescription(response);
     } catch (error) {
-      console.error('[AI Git] Error generating PR description:', error);
+      logger.error('[AI Git] Error generating PR description:', error);
       return {
         title: 'Update',
         description: 'Changes made',
@@ -214,7 +215,7 @@ export class AIGitIntegration {
 
       return this.parseHistoryAnalysis(response);
     } catch (error) {
-      console.error('[AI Git] Error analyzing history:', error);
+      logger.error('[AI Git] Error analyzing history:', error);
       return {
         patterns: [],
         suggestions: [],
@@ -241,7 +242,7 @@ export class AIGitIntegration {
 
       return response.split('\n').map(s => s.trim()).filter(s => s).slice(0, 3);
     } catch (error) {
-      console.error('[AI Git] Error suggesting branch name:', error);
+      logger.error('[AI Git] Error suggesting branch name:', error);
       return [];
     }
   }
@@ -267,7 +268,7 @@ export class AIGitIntegration {
 
       return response;
     } catch (error) {
-      console.error('[AI Git] Error explaining commit:', error);
+      logger.error('[AI Git] Error explaining commit:', error);
       return 'Unable to explain commit';
     }
   }
@@ -333,7 +334,7 @@ export class AIGitIntegration {
         }));
       }
     } catch (error) {
-      console.error('[AI Git] Error parsing commit suggestions:', error);
+      logger.error('[AI Git] Error parsing commit suggestions:', error);
     }
 
     // Fallback: extract from text
@@ -387,7 +388,7 @@ export class AIGitIntegration {
         return JSON.parse(jsonMatch[0]);
       }
     } catch (error) {
-      console.error('[AI Git] Error parsing review comments:', error);
+      logger.error('[AI Git] Error parsing review comments:', error);
     }
     return [];
   }

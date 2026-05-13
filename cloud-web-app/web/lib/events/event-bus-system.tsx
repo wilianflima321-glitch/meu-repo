@@ -16,7 +16,7 @@
 
 import { EventEmitter } from 'events';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('events/event-bus-system')
 
@@ -316,7 +316,7 @@ export class EventBus extends EventEmitter {
   }
   
   private handleError(error: unknown, event: EventData, sub: EventSubscription): void {
-    console.error(`[EventBus] Error in handler for ${event.type}:`, error);
+    logger.error(`[EventBus] Error in handler for ${event.type}:`, error);
     
     this.emit('error', { error, event, subscription: sub });
     

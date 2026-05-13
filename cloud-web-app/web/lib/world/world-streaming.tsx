@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * World Streaming & LOD System - Sistema de Streaming de Mundo e Níveis de Detalhe
  * 
@@ -568,7 +569,7 @@ export class WorldStreamingSystem extends EventEmitter {
     
     const elapsed = performance.now() - startTime;
     if (elapsed > this.config.updateInterval * 0.5) {
-      console.warn(`WorldStreaming update took ${elapsed.toFixed(2)}ms`);
+      logger.warn(`WorldStreaming update took ${elapsed.toFixed(2)}ms`);
     }
     
     this.emit('update', this.stats);
@@ -731,7 +732,7 @@ export class WorldStreamingSystem extends EventEmitter {
       
     } catch (error) {
       chunk.state = 'error';
-      console.error(`Failed to load chunk ${chunk.id}:`, error);
+      logger.error(`Failed to load chunk ${chunk.id}:`, error);
       this.emit('chunkLoadError', { chunk, error });
     }
     

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Networking & Multiplayer System - Sistema de Rede e Multiplayer
  * 
@@ -166,7 +167,7 @@ export class WebSocketTransport implements NetworkTransport {
             this.messageCallback?.(message);
           }
         } catch {
-          console.error('Failed to parse network message');
+          logger.error('Failed to parse network message');
         }
       };
     });

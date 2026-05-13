@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Pytest Test Adapter
  * Provides test discovery, execution, and coverage for Pytest
@@ -51,7 +52,7 @@ export class PytestAdapter extends TestAdapterBase {
 
       return this.buildTestTree(allTests);
     } catch (error) {
-      console.error('[Pytest Adapter] Error discovering tests:', error);
+      logger.error('[Pytest Adapter] Error discovering tests:', error);
       return this.getMockTests();
     }
   }
@@ -103,7 +104,7 @@ export class PytestAdapter extends TestAdapterBase {
         ...summary,
       };
     } catch (error) {
-      console.error('[Pytest Adapter] Error running tests:', error);
+      logger.error('[Pytest Adapter] Error running tests:', error);
       return this.getMockTestRun(tests, startTime);
     }
   }
@@ -120,7 +121,7 @@ export class PytestAdapter extends TestAdapterBase {
 
       return this.parseCoverageData(coverage);
     } catch (error) {
-      console.error('[Pytest Adapter] Error getting coverage:', error);
+      logger.error('[Pytest Adapter] Error getting coverage:', error);
       return this.getMockCoverage();
     }
   }

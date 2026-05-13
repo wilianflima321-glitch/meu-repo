@@ -6,7 +6,7 @@ import { createHash } from 'crypto';
 import { readFile, stat } from 'fs/promises';
 import { extname, relative, resolve, normalize } from 'path';
 import { parse as parseUrl } from 'url';
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('hot-reload/hot-reload-server')
 
@@ -259,12 +259,12 @@ class Logger {
   }
   warn(message: string, ...args: unknown[]): void {
     if (this.shouldLog('warn')) {
-      console.warn(this.formatMessage('warn', message), ...args);
+      logger.warn(this.formatMessage('warn', message), ...args);
     }
   }
   error(message: string, ...args: unknown[]): void {
     if (this.shouldLog('error')) {
-      console.error(this.formatMessage('error', message), ...args);
+      logger.error(this.formatMessage('error', message), ...args);
     }
   }
 }
@@ -854,10 +854,10 @@ export class HotReloadServer extends EventEmitter {
           this.attemptReconnect();
         };
         this.socket.onerror = (error) => {
-          console.error('[HMR] WebSocket error:', error);
+          logger.error('[HMR] WebSocket error:', error);
         };
       } catch (error) {
-        console.error('[HMR] Failed to connect:', error);
+        logger.error('[HMR] Failed to connect:', error);
         this.attemptReconnect();
       }
     },
@@ -944,7 +944,7 @@ export class HotReloadServer extends EventEmitter {
             log.info('[HMR] Module updated:', file.path);
             this.send({ type: 'hmr-accept', path: file.path });
           } catch (error) {
-            console.error('[HMR] Module update failed:', file.path, error);
+            logger.error('[HMR] Module update failed:', file.path, error);
             this.send({ type: 'hmr-decline', path: file.path });
             reloadNeeded = true;
           }

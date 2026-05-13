@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('notifications-system')
 
@@ -229,7 +229,7 @@ export class NotificationManager {
           const notification = JSON.parse(event.data) as Notification;
           this.addNotification(notification);
         } catch (e) {
-          console.error('[Notifications] Failed to parse message:', e);
+          logger.error('[Notifications] Failed to parse message:', e);
         }
       };
       
@@ -239,10 +239,10 @@ export class NotificationManager {
       };
       
       this.ws.onerror = (error) => {
-        console.error('[Notifications] WebSocket error:', error);
+        logger.error('[Notifications] WebSocket error:', error);
       };
     } catch (error) {
-      console.error('[Notifications] Failed to connect:', error);
+      logger.error('[Notifications] Failed to connect:', error);
     }
   }
   
@@ -453,7 +453,7 @@ export class NotificationManager {
           this.notifications = JSON.parse(stored);
         }
       } catch (e) {
-        console.error('[Notifications] Failed to load from storage:', e);
+        logger.error('[Notifications] Failed to load from storage:', e);
       }
     }
   }

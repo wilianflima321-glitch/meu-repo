@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Sistema de Feature Flags - Aethel Engine
  * 
@@ -299,7 +300,7 @@ export class FeatureFlagService {
         this.notifyListeners();
       }
     } catch (e) {
-      console.error('[FeatureFlags] Sync failed:', e);
+      logger.error('[FeatureFlags] Sync failed:', e);
     }
   }
   
@@ -761,7 +762,7 @@ export class ExperimentService {
           value,
           timestamp: new Date(),
         }),
-      }).catch(console.error);
+      }).catch((error) => logger.error(error));
     }
   }
 }

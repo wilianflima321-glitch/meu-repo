@@ -2,7 +2,7 @@
 import { EventEmitter } from 'events';
 
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('settings/settings-system')
 
@@ -818,7 +818,7 @@ export class SettingsManager extends EventEmitter {
       localStorage.setItem(this.config.storageKey, JSON.stringify(data));
       this.emit('saved');
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      logger.error('Failed to save settings:', error);
       this.emit('saveError', error);
     }
   }
@@ -844,7 +844,7 @@ export class SettingsManager extends EventEmitter {
       
       this.emit('loaded');
     } catch (error) {
-      console.error('Failed to load settings:', error);
+      logger.error('Failed to load settings:', error);
       this.emit('loadError', error);
     }
   }
@@ -920,7 +920,7 @@ export class SettingsManager extends EventEmitter {
       this.emit('imported');
       this.emit('changed', this.settings);
     } catch (error) {
-      console.error('Failed to import settings:', error);
+      logger.error('Failed to import settings:', error);
       throw new Error('Invalid settings data');
     }
   }

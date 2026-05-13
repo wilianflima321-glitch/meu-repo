@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('workspace/workspace-manager')
 
@@ -254,7 +254,7 @@ export class WorkspaceManager {
       const stored = localStorage.getItem(this.STORAGE_KEY_RECENT);
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.error('[Workspace] Failed to load recent workspaces:', error);
+      logger.error('[Workspace] Failed to load recent workspaces:', error);
       return [];
     }
   }
@@ -279,7 +279,7 @@ export class WorkspaceManager {
 
       localStorage.setItem(this.STORAGE_KEY_RECENT, JSON.stringify(recent));
     } catch (error) {
-      console.error('[Workspace] Failed to save recent workspace:', error);
+      logger.error('[Workspace] Failed to save recent workspace:', error);
     }
   }
 
@@ -364,7 +364,7 @@ export class WorkspaceManager {
         }];
       }
     } catch (error) {
-      console.warn('[Workspace] Failed to load configuration:', error);
+      logger.warn('[Workspace] Failed to load configuration:', error);
       
       // Fallback to single folder
       this.folders = [{
@@ -395,7 +395,7 @@ export class WorkspaceManager {
         }),
       });
     } catch (error) {
-      console.error('[Workspace] Failed to save configuration:', error);
+      logger.error('[Workspace] Failed to save configuration:', error);
     }
   }
 
@@ -410,7 +410,7 @@ export class WorkspaceManager {
         this.trusted = trustedWorkspaces.includes(workspaceUri);
       }
     } catch (error) {
-      console.error('[Workspace] Failed to load trust status:', error);
+      logger.error('[Workspace] Failed to load trust status:', error);
     }
   }
 
@@ -436,7 +436,7 @@ export class WorkspaceManager {
 
       localStorage.setItem(this.STORAGE_KEY_TRUST, JSON.stringify(trustedWorkspaces));
     } catch (error) {
-      console.error('[Workspace] Failed to save trust status:', error);
+      logger.error('[Workspace] Failed to save trust status:', error);
     }
   }
 

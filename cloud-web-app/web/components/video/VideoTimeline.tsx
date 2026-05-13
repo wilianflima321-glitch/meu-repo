@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Video Timeline - Timeline PROFISSIONAL de edição de vídeo
  *
@@ -7,9 +9,6 @@
  *
  * Nível: Adobe Premiere Pro / DaVinci Resolve
  */
-
-'use client';
-
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 
 // ============================================================================

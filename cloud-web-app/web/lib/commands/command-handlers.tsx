@@ -1,3 +1,6 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * Command Handlers - Implementações Reais dos Comandos
  * 
@@ -6,9 +9,6 @@
  * 
  * @module lib/commands/command-handlers
  */
-
-'use client';
-
 import { useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCommandRegistry, type CommandDefinition } from './command-registry';
@@ -64,7 +64,7 @@ class ClipboardService {
       }
       return true;
     } catch (error) {
-      console.error('Clipboard copy failed:', error);
+      logger.error('Clipboard copy failed:', error);
       this.internalClipboard = data;
       return false;
     }
@@ -74,7 +74,7 @@ class ClipboardService {
     try {
       return await navigator.clipboard.readText();
     } catch (error) {
-      console.error('Clipboard paste failed:', error);
+      logger.error('Clipboard paste failed:', error);
       return '';
     }
   }
@@ -132,7 +132,7 @@ class UndoRedoManager {
       this.notifyListeners();
       return true;
     } catch (error) {
-      console.error('Undo failed:', error);
+      logger.error('Undo failed:', error);
       this.undoStack.push(action); // Restore if failed
       return false;
     }
@@ -148,7 +148,7 @@ class UndoRedoManager {
       this.notifyListeners();
       return true;
     } catch (error) {
-      console.error('Redo failed:', error);
+      logger.error('Redo failed:', error);
       this.redoStack.push(action); // Restore if failed
       return false;
     }
@@ -261,7 +261,7 @@ class FileOperations {
         return true;
       }
     } catch (error) {
-      console.error('Save dialog failed:', error);
+      logger.error('Save dialog failed:', error);
       return false;
     }
   }
@@ -291,7 +291,7 @@ class FileOperations {
       try {
         await this.saveToStorage(uri, content);
       } catch (error) {
-        console.error(`Auto-save failed for ${uri}:`, error);
+        logger.error(`Auto-save failed for ${uri}:`, error);
       }
     }
   }
@@ -611,7 +611,7 @@ class CommandEventBus {
       try {
         return Promise.resolve(callback(data));
       } catch (error) {
-        console.error(`Error in event handler for ${event}:`, error);
+        logger.error(`Error in event handler for ${event}:`, error);
         return Promise.resolve();
       }
     });

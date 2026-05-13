@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/observability/logger';
 /**
  * AETHEL ENGINE - Storage Quota Manager
  *
@@ -187,7 +188,7 @@ export function StorageQuotaManager({
         }
       }
     } catch (error) {
-      console.error('Storage estimation failed:', error)
+      logger.error('Storage estimation failed:', error)
     }
 
     return {
@@ -241,7 +242,7 @@ export function StorageQuotaManager({
         })
       }
     } catch (error) {
-      console.error('Cache analysis failed:', error)
+      logger.error('Cache analysis failed:', error)
     }
 
     return entries.sort((a, b) => b.size - a.size)
@@ -259,7 +260,7 @@ export function StorageQuotaManager({
         return result
       }
     } catch (error) {
-      console.error('Persistence request failed:', error)
+      logger.error('Persistence request failed:', error)
     }
     return false
   }, [])
@@ -286,7 +287,7 @@ export function StorageQuotaManager({
 
       onCleanupComplete?.(freedBytes)
     } catch (error) {
-      console.error('Cache cleanup failed:', error)
+      logger.error('Cache cleanup failed:', error)
     } finally {
       setIsClearing(false)
     }
@@ -311,7 +312,7 @@ export function StorageQuotaManager({
 
       onCleanupComplete?.(freedBytes)
     } catch (error) {
-      console.error('Clear all cache failed:', error)
+      logger.error('Clear all cache failed:', error)
     } finally {
       setIsClearing(false)
     }

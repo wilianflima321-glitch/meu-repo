@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('explorer/quick-open')
 
@@ -231,7 +231,7 @@ export class QuickOpen {
         this.recentFiles = JSON.parse(stored);
       }
     } catch (error) {
-      console.error('[Quick Open] Failed to load recent files:', error);
+      logger.error('[Quick Open] Failed to load recent files:', error);
     }
   }
 
@@ -242,7 +242,7 @@ export class QuickOpen {
     try {
       localStorage.setItem('quick-open-recent', JSON.stringify(this.recentFiles));
     } catch (error) {
-      console.error('[Quick Open] Failed to save recent files:', error);
+      logger.error('[Quick Open] Failed to save recent files:', error);
     }
   }
 

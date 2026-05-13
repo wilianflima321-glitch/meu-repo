@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Code Validator - Validação Automática de Código Gerado por IA
  * 
@@ -87,7 +88,7 @@ export class CodeValidator {
       await fs.access(eslintPath);
       this.eslintPath = eslintPath;
     } catch {
-      console.warn('[CodeValidator] ESLint not found in node_modules');
+      logger.warn('[CodeValidator] ESLint not found in node_modules');
     }
     
     // Find TypeScript
@@ -96,7 +97,7 @@ export class CodeValidator {
       await fs.access(tscPath);
       this.tscPath = tscPath;
     } catch {
-      console.warn('[CodeValidator] TypeScript not found in node_modules');
+      logger.warn('[CodeValidator] TypeScript not found in node_modules');
     }
   }
 
@@ -356,7 +357,7 @@ export class CodeValidator {
             }
           }
         } catch {
-          console.error('[CodeValidator] Failed to parse ESLint output');
+          logger.error('[CodeValidator] Failed to parse ESLint output');
         }
       }
     }

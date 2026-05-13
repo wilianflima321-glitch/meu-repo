@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Aethel Engine - Terminal WebSocket Hook
  * 
@@ -226,7 +227,7 @@ export function useTerminal(options: UseTerminalOptions = {}): UseTerminalReturn
           });
         }
       } catch (error) {
-        console.error('WebSocket connection failed:', error);
+        logger.error('WebSocket connection failed:', error);
         onError?.('Failed to connect to terminal server');
       }
     };

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Aethel RAG Vector Store
  * 
@@ -210,14 +211,14 @@ export class VectorStore {
         if (process.env.OPENAI_API_KEY) {
           return new OpenAIEmbeddings();
         }
-        console.warn('OpenAI API key not found, falling back to local embeddings');
+        logger.warn('OpenAI API key not found, falling back to local embeddings');
         return new LocalEmbeddings();
         
       case 'voyage':
         if (process.env.VOYAGE_API_KEY) {
           return new VoyageEmbeddings();
         }
-        console.warn('Voyage API key not found, falling back to local embeddings');
+        logger.warn('Voyage API key not found, falling back to local embeddings');
         return new LocalEmbeddings();
         
       default:

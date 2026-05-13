@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Post-Process Volume System
  * 
@@ -346,7 +347,7 @@ export class PostProcessVolumeManager {
   applyPreset(presetName: string, volumeId?: string): void {
     const preset = POST_PROCESS_PRESETS[presetName];
     if (!preset) {
-      console.warn(`Unknown preset: ${presetName}`);
+      logger.warn(`Unknown preset: ${presetName}`);
       return;
     }
     

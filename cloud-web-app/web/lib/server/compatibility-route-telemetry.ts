@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 import type { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
 
@@ -162,7 +163,7 @@ function queuePersistSnapshot() {
       await persistMetricsSnapshot(snapshot)
     })
     .catch((error) => {
-      console.warn('[compat-route] persist failed:', error instanceof Error ? error.message : String(error))
+      logger.warn('[compat-route] persist failed:', error instanceof Error ? error.message : String(error))
     })
 }
 
@@ -201,7 +202,7 @@ export function trackCompatibilityRouteHit(params: {
   queuePersistSnapshot()
 
   const ua = request.headers.get('user-agent') || 'unknown'
-  console.warn(
+  logger.warn(
     `[compat-route] status=${status} route=${route} replacement=${replacement} hits=${store[key].hits} ua=${ua.slice(0, 60)}`
   )
 
@@ -228,7 +229,7 @@ export async function getCompatibilityRouteMetrics(): Promise<CompatibilityRoute
       mergeMetric(merged, metric)
     }
   } catch (error) {
-    console.warn('[compat-route] read persisted metrics failed:', error instanceof Error ? error.message : String(error))
+    logger.warn('[compat-route] read persisted metrics failed:', error instanceof Error ? error.message : String(error))
   }
 
   // Ensure known deprecated routes appear even with zero hits, so cutoff dashboards remain actionable.

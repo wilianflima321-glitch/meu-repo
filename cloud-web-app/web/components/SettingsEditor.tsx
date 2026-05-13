@@ -1,10 +1,10 @@
+'use client';
+
+import { logger } from '@/lib/observability/logger';
 /**
  * Settings Editor Component
  * Professional settings UI with search, categories, and live preview
  */
-
-'use client'
-
 import { useState, useEffect, useMemo } from 'react'
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs'
 
@@ -331,7 +331,7 @@ export default function SettingsEditor() {
       try {
         setSettings(JSON.parse(stored))
       } catch (error) {
-        console.error('Failed to load settings:', error)
+        logger.error('Failed to load settings:', error)
       }
     }
   }, [])

@@ -7,12 +7,14 @@
  */
 
 import { NextResponse } from 'next/server';
+import { buildEnterpriseIdentityReadiness } from '@/lib/security/enterprise-identity-readiness';
 import { getConfiguredProviders } from '@/lib/security/sso-provider';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const readiness = getConfiguredProviders();
+  const enterpriseIdentity = buildEnterpriseIdentityReadiness();
 
   return NextResponse.json({
     configured: readiness.configured,
@@ -28,6 +30,7 @@ export async function GET() {
     samlAcsUrl: readiness.samlAcsUrl,
     samlRequestSigningConfigured: readiness.samlRequestSigningConfigured,
     scimConfigured: readiness.scimConfigured,
+    enterpriseIdentity,
     supportedProtocols: ['oidc', 'saml', 'scim'],
     supportedProviders: ['google', 'github', 'microsoft', 'okta', 'auth0', 'custom-oidc'],
   });

@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * SOUND CUE NODE EDITOR - Aethel Engine
  *
@@ -14,9 +16,6 @@
  * - Attenuation visualization
  * - Parameter binding
  */
-
-'use client';
-
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   ReactFlow,

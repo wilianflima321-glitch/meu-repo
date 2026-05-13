@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/observability/logger';
 import React, { Component, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import Link from 'next/link'
@@ -43,7 +44,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log para console em dev
-    console.error('Global Error Boundary caught:', error, errorInfo)
+    logger.error('Global Error Boundary caught:', error, errorInfo)
 
     // Incrementar contador de erros
     const errorCount = (this.state?.errorCount ?? 0) + 1
@@ -67,7 +68,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
 
     // Se muitos erros, sugerir reload completo
     if (errorCount > 3) {
-      console.warn('Múltiplos erros detectados. Sugerindo reload completo.')
+      logger.warn('Múltiplos erros detectados. Sugerindo reload completo.')
     }
   }
 

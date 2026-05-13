@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client'
 
 import { prisma } from '@/lib/db'
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 import {
   buildDefaultAgenticProductionState,
   buildProductionReadinessSummary,

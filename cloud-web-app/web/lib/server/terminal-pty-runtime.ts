@@ -98,7 +98,7 @@ async function resolveShell(shellPath?: string): Promise<{ shell: string; args: 
     await fs.access(shellPath);
     return { shell: shellPath, args: [] };
   } catch {
-    console.warn(`Shell not found: ${shellPath}, using default`);
+    log.warn(`Shell not found: ${shellPath}, using default`);
     return getDefaultShell();
   }
 }
@@ -249,7 +249,7 @@ export class TerminalPtyManager extends EventEmitter {
       session.pty.kill();
       session.isAlive = false;
     } catch (error) {
-      console.error(`Failed to kill session ${sessionId}:`, error);
+      log.error(`Failed to kill session ${sessionId}:`, error);
     }
     
     this.sessions.delete(sessionId);
@@ -271,7 +271,7 @@ export class TerminalPtyManager extends EventEmitter {
       session.lastActivity = Date.now();
       return true;
     } catch (error) {
-      console.error(`Write failed for session ${sessionId}:`, error);
+      log.error(`Write failed for session ${sessionId}:`, error);
       return false;
     }
   }
@@ -285,7 +285,7 @@ export class TerminalPtyManager extends EventEmitter {
       this.emit('resized', { sessionId, cols, rows } as TerminalResize);
       return true;
     } catch (error) {
-      console.error(`Resize failed for session ${sessionId}:`, error);
+      log.error(`Resize failed for session ${sessionId}:`, error);
       return false;
     }
   }
@@ -332,7 +332,7 @@ export class TerminalPtyManager extends EventEmitter {
       }
       return true;
     } catch (error) {
-      console.error(`Signal failed for session ${sessionId}:`, error);
+      log.error(`Signal failed for session ${sessionId}:`, error);
       return false;
     }
   }

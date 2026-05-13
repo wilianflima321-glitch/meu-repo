@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * RBAC Middleware for Aethel Engine
  * Protects critical admin and billing routes
@@ -60,7 +61,7 @@ export async function verifyToken(token: string): Promise<DecodedToken | null> {
       exp: typeof payload.exp === 'number' ? payload.exp : 0,
     }
   } catch (error) {
-    console.error('Token verification failed:', error)
+    logger.error('Token verification failed:', error)
     return null
   }
 }

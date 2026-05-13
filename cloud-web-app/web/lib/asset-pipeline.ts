@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Asset Pipeline Manager - Gerenciador de Assets
  * 
@@ -723,7 +724,7 @@ export class AssetPipeline {
 
         processed += 1;
       } catch (error) {
-        console.warn('Auto-LOD generation failed:', error);
+        logger.warn('Auto-LOD generation failed:', error);
       }
     }
   }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * Quest System - Sistema de Quests/Missões
  * 
@@ -201,12 +202,12 @@ export class QuestManager extends EventEmitter {
     if (!instance) return false;
     
     if (instance.state !== 'available') {
-      console.warn(`Quest ${questId} is not available (state: ${instance.state})`);
+      logger.warn(`Quest ${questId} is not available (state: ${instance.state})`);
       return false;
     }
     
     if (this.activeQuestIds.size >= this.maxActiveQuests) {
-      console.warn('Maximum active quests reached');
+      logger.warn('Maximum active quests reached');
       return false;
     }
     
@@ -286,7 +287,7 @@ export class QuestManager extends EventEmitter {
     for (const [objId, progress] of instance.objectiveProgress) {
       const objDef = instance.definition.objectives.find((o) => o.id === objId);
       if (objDef && !objDef.optional && !progress.completed) {
-        console.warn(`Quest ${questId} has incomplete required objective: ${objId}`);
+        logger.warn(`Quest ${questId} has incomplete required objective: ${objId}`);
         return false;
       }
     }

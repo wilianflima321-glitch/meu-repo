@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('terminal/terminal-manager')
 
@@ -221,7 +221,7 @@ export class TerminalManager {
         }
       }
     } catch (error) {
-      console.error('Failed to load tasks:', error);
+      logger.error('Failed to load tasks:', error);
     }
   }
 
@@ -313,7 +313,7 @@ export class TerminalManager {
         }
       }
     } catch (error) {
-      console.error('Failed to load launch configurations:', error);
+      logger.error('Failed to load launch configurations:', error);
     }
   }
 

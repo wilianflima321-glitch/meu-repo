@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 /**
  * CSRF Protection Middleware
  * 
@@ -258,7 +259,7 @@ export function useCSRF() {
       const data = await response.json();
       setToken(data.token);
     } catch (error) {
-      console.error('Failed to fetch CSRF token:', error);
+      logger.error('Failed to fetch CSRF token:', error);
     } finally {
       setLoading(false);
     }

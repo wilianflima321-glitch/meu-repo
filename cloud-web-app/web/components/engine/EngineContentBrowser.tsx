@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Content Browser - Gerenciador de Assets Profissional
  *
@@ -6,9 +8,6 @@
  *
  * NÃO É MOCK - Sistema real e funcional!
  */
-
-'use client';
-
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { openConfirmDialog, openPromptDialog } from '@/lib/ui/non-blocking-dialogs';

@@ -13,7 +13,7 @@
 
 import * as monaco from 'monaco-editor';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('ai/inline-completion')
 
@@ -169,7 +169,7 @@ export class InlineCompletionProvider implements monaco.languages.InlineCompleti
           }
         } catch (error) {
           if ((error as Error).name !== 'AbortError') {
-            console.error('[Inline Completion] Error:', error);
+            logger.error('[Inline Completion] Error:', error);
           }
           resolve(null);
         }

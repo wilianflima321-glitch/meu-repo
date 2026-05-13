@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 import React, { useState, useEffect } from 'react';
 import Editor, { OnMount, OnChange } from '@monaco-editor/react';
 
@@ -69,7 +70,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
           setValue(content);
         })
         .catch((err) => {
-          console.warn('Could not load file:', err);
+          logger.warn('Could not load file:', err);
           setValue('');
           setLoadError('File content is unavailable. Check the canonical file API access for this project.');
         })

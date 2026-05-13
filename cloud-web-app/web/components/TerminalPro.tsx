@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/observability/logger';
 import { useState, useRef, useEffect, useCallback, type KeyboardEvent } from 'react'
 import {
   Terminal as TerminalIcon,
@@ -99,7 +100,7 @@ export default function Terminal({
           timestamp: new Date(h.timestamp)
         })))
       } catch (e) {
-        console.warn('Failed to parse terminal history')
+        logger.warn('Failed to parse terminal history')
       }
     }
   }, [])

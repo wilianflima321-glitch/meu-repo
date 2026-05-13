@@ -1,3 +1,4 @@
+import { logger } from '@/lib/observability/logger';
 
 import { EventEmitter } from 'events';
 
@@ -419,7 +420,7 @@ export class SaveManager extends EventEmitter {
       
       this.emit('savesLoaded', this.slots);
     } catch (error) {
-      console.error('Failed to load save index:', error);
+      logger.error('Failed to load save index:', error);
     }
   }
   
@@ -452,7 +453,7 @@ export class SaveManager extends EventEmitter {
       try {
         custom[key] = provider();
       } catch (error) {
-        console.warn(`State provider ${key} failed:`, error);
+        logger.warn(`State provider ${key} failed:`, error);
       }
     }
     
@@ -617,7 +618,7 @@ export class SaveManager extends EventEmitter {
         try {
           await this.cloudProvider.upload(saveData);
         } catch (cloudError) {
-          console.warn('Cloud sync failed:', cloudError);
+          logger.warn('Cloud sync failed:', cloudError);
           this.emit('cloudSyncFailed', cloudError);
         }
       }
@@ -656,7 +657,7 @@ export class SaveManager extends EventEmitter {
       this.lastAutosave = Date.now();
       return result;
     } catch (error) {
-      console.error('Autosave failed:', error);
+      logger.error('Autosave failed:', error);
       return null;
     }
   }
@@ -728,13 +729,13 @@ export class SaveManager extends EventEmitter {
             this.config.saveVersion
           );
         } else {
-          console.warn('No migration path available, loading as-is');
+          logger.warn('No migration path available, loading as-is');
         }
       }
       
       const checksum = SaveValidator.generateChecksum(state);
       if (checksum !== slot.metadata.checksum) {
-        console.warn('Checksum mismatch, save may be corrupted');
+        logger.warn('Checksum mismatch, save may be corrupted');
         this.emit('checksumMismatch', { slotIndex, expected: slot.metadata.checksum, actual: checksum });
       }
       
@@ -782,7 +783,7 @@ export class SaveManager extends EventEmitter {
       try {
         await this.cloudProvider.delete(slot.metadata.id);
       } catch (error) {
-        console.warn('Cloud delete failed:', error);
+        logger.warn('Cloud delete failed:', error);
       }
     }
     

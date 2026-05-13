@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/observability/logger';
 import React, { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react'
 import { VideoTimeline, type VideoClip } from '../video/VideoTimeline'
 import type { ClipEffect } from '../../lib/video-encoder-real'
@@ -661,7 +662,7 @@ export default function MediaStudio({
       } catch {
       }
     } catch (err) {
-      console.error(err)
+      logger.error(err)
       setExportStatus('Export error')
     } finally {
       setExporting(false)

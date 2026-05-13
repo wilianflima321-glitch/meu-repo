@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const ROOT = process.cwd()
-const MAX_WARN_ERROR = 443
+const MAX_WARN_ERROR = 0
 const failures = []
 
 function walk(dir, out = []) {

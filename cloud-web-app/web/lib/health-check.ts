@@ -1,4 +1,4 @@
-import { createComponentLogger } from '@/lib/observability/logger'
+import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('health-check')
 
@@ -571,7 +571,7 @@ export class HealthCheckService {
       try {
         callback(alert);
       } catch (e) {
-        console.error('[HealthCheck] Alert callback error:', e);
+        logger.error('[HealthCheck] Alert callback error:', e);
       }
     });
     
@@ -592,7 +592,7 @@ export class HealthCheckService {
           body: JSON.stringify(alert),
         });
       } catch (e) {
-        console.error('[HealthCheck] Failed to send alert webhook:', e);
+        logger.error('[HealthCheck] Failed to send alert webhook:', e);
       }
     }
     
