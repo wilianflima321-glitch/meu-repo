@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   buildMultiResolutionProjectMemory,
+  planGbScaleProjectIndexing,
   planProjectMemoryRetrieval,
 } from '@/lib/production/multi-resolution-project-memory'
 import { buildRepositoryCartographyManifest, type RepositoryArtifactInput } from '@/lib/production/repository-cartography'
@@ -81,5 +82,59 @@ describe('multi-resolution project memory', () => {
     expect(plan.estimatedTokens).toBeLessThanOrEqual(16_000)
     expect(plan.metadataRefs.join(' ')).toContain('hero.glb')
     expect(plan.nextAction).toMatch(/read receipts|human\/license/)
+  })
+
+  it('routes GB-scale memory through workers, cloud, metadata, or held lanes without blocking UI', () => {
+    const manifest = buildRepositoryCartographyManifest({
+      projectId: 'aaa-slice',
+      generatedAt,
+      artifacts: artifacts(),
+    })
+    const memory = buildMultiResolutionProjectMemory({ manifest, generatedAt })
+    const plan = planGbScaleProjectIndexing({
+      memory,
+      allowCloudIndexing: true,
+      runtime: {
+        availableRamBytes: 24_000_000_000,
+        availableDiskBytes: 800_000_000_000,
+        thermalState: 'nominal',
+        cpuLoadPercent: 22,
+        localCacheBytes: 0,
+        webGpuAvailable: true,
+        browserOperatorReplayAvailable: true,
+      },
+    })
+
+    expect(plan.canRunOnUiThread).toBe(false)
+    expect(plan.metadataOnlyRefs.join(' ')).toContain('huggingface.co')
+    expect(plan.shardPlans.some((shard) => shard.cacheTier === 'metadata-only')).toBe(true)
+    expect(plan.shardPlans.every((shard) => shard.lane !== 'ui-safe' || shard.estimatedBytes <= 256_000)).toBe(true)
+    expect(plan.shardPlans.some((shard) => ['local-worker', 'local-sidecar', 'cloud-indexer', 'human-review'].includes(shard.lane))).toBe(true)
+  })
+
+  it('holds or cloud-routes indexing when local runtime is weak', () => {
+    const manifest = buildRepositoryCartographyManifest({
+      projectId: 'aaa-slice',
+      generatedAt,
+      artifacts: artifacts(),
+    })
+    const memory = buildMultiResolutionProjectMemory({ manifest, generatedAt })
+    const plan = planGbScaleProjectIndexing({
+      memory,
+      allowCloudIndexing: false,
+      runtime: {
+        availableRamBytes: 768_000_000,
+        availableDiskBytes: 600_000_000,
+        thermalState: 'critical',
+        cpuLoadPercent: 95,
+        localCacheBytes: 0,
+        webGpuAvailable: false,
+        browserOperatorReplayAvailable: false,
+      },
+    })
+
+    expect(plan.heldBytes).toBeGreaterThan(0)
+    expect(plan.blockers.join(' ')).toContain('held')
+    expect(plan.nextAction).toContain('Pause apply')
   })
 })

@@ -57,27 +57,19 @@ export type ActiveTab =
   | 'overview'
   | 'projects'
   | 'ai-chat'
-  | 'agent-canvas'
   | 'content-creation'
   | 'unreal'
   | 'wallet'
   | 'billing'
   | 'connectivity'
   | 'templates'
-  | 'use-cases'
-  | 'download'
-  | 'admin'
 
 export const MISSION_CONTROL_TABS = ['overview', 'ai-chat', 'projects'] as const satisfies readonly ActiveTab[]
 export const OPERATIONS_TABS = ['billing', 'wallet', 'connectivity'] as const satisfies readonly ActiveTab[]
 export const EXPLORE_TABS = [
-  'agent-canvas',
   'templates',
-  'use-cases',
   'content-creation',
   'unreal',
-  'download',
-  'admin',
 ] as const satisfies readonly ActiveTab[]
 
 export const DASHBOARD_TAB_GROUPS = {
@@ -215,8 +207,8 @@ export const resolveStoredSessions = (raw: string | null): SessionEntry[] => {
       .map(sanitizeSessionEntry)
       .filter((session): session is SessionEntry => session !== null)
       .slice(0, 10)
-  } catch (error) {
-    console.warn('Failed to parse stored sessions', error)
+  } catch {
+    // Corrupt local state should not break dashboard boot.
     return []
   }
 }
@@ -235,8 +227,8 @@ export const resolveStoredSettings = (raw: string | null): DashboardSettings => 
       autoSave: coerceBoolean(parsed.autoSave, DEFAULT_SETTINGS.autoSave),
       notifications: coerceBoolean(parsed.notifications, DEFAULT_SETTINGS.notifications),
     }
-  } catch (error) {
-    console.warn('Failed to parse stored settings', error)
+  } catch {
+    // Corrupt local settings should not break dashboard boot.
     return { ...DEFAULT_SETTINGS }
   }
 }
@@ -261,8 +253,8 @@ export const resolveStoredChatHistory = (raw: string | null): ChatMessage[] => {
       .filter(isChatMessage)
       .map((message) => ({ role: message.role, content: message.content } as ChatMessage))
       .slice(-200)
-  } catch (error) {
-    console.warn('Failed to parse stored chat history', error)
+  } catch {
+    // Corrupt chat cache should not block a fresh session.
     return []
   }
 }
@@ -276,7 +268,7 @@ export const clearStoredDashboardState = () => {
     window.localStorage.removeItem(STORAGE_KEYS.settings)
     window.localStorage.removeItem(STORAGE_KEYS.activeTab)
     window.localStorage.removeItem(STORAGE_KEYS.chatHistory)
-  } catch (error) {
-    console.warn('Failed to clear stored dashboard state', error)
+  } catch {
+    // Storage may be unavailable in restricted browser contexts.
   }
 }

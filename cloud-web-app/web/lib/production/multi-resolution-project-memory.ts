@@ -22,6 +22,22 @@ export type ProjectMemoryLoadStrategy =
   | 'metadata-only'
   | 'human-review'
 
+export type ProjectMemoryCacheTier =
+  | 'local-hot'
+  | 'local-warm'
+  | 'cloud-cold'
+  | 'metadata-only'
+  | 'held'
+
+export type ProjectMemoryIndexingLane =
+  | 'ui-safe'
+  | 'local-worker'
+  | 'local-sidecar'
+  | 'cloud-indexer'
+  | 'human-review'
+
+export type ProjectMemoryThermalState = 'nominal' | 'warm' | 'hot' | 'critical' | 'unknown'
+
 export interface ProjectMemoryShard {
   id: string
   layer: ProjectMemoryLayer
@@ -56,6 +72,42 @@ export interface ProjectMemoryRetrievalPlan {
   metadataRefs: string[]
   heldRefs: string[]
   estimatedTokens: number
+  blockers: string[]
+  nextAction: string
+}
+
+export interface ProjectMemoryRuntimeProbe {
+  availableRamBytes: number
+  availableDiskBytes: number
+  thermalState: ProjectMemoryThermalState
+  cpuLoadPercent: number
+  localCacheBytes: number
+  webGpuAvailable: boolean
+  browserOperatorReplayAvailable: boolean
+  signedAt?: string
+}
+
+export interface ProjectMemoryIndexingShardPlan {
+  shardId: string
+  layer: ProjectMemoryLayer
+  cacheTier: ProjectMemoryCacheTier
+  lane: ProjectMemoryIndexingLane
+  estimatedBytes: number
+  estimatedTokens: number
+  requiresReadReceipt: boolean
+  requiresReplay: boolean
+  reasons: string[]
+}
+
+export interface GbScaleProjectIndexingPlan {
+  projectId: string
+  totalBytes: number
+  canRunOnUiThread: false
+  localBytesPlanned: number
+  cloudBytesPlanned: number
+  heldBytes: number
+  metadataOnlyRefs: string[]
+  shardPlans: ProjectMemoryIndexingShardPlan[]
   blockers: string[]
   nextAction: string
 }
@@ -281,5 +333,149 @@ export function planProjectMemoryRetrieval(input: {
       chosen.some((shard) => shard.strategy === 'human-review')
         ? 'Collect human/license review before generation or apply.'
         : 'Create read receipts for selected shards before apply.',
+  }
+}
+
+function isRuntimeConstrained(runtime: ProjectMemoryRuntimeProbe): boolean {
+  return (
+    runtime.thermalState === 'critical' ||
+    runtime.cpuLoadPercent >= 92 ||
+    runtime.availableRamBytes < 1_500_000_000 ||
+    runtime.availableDiskBytes < 2_000_000_000
+  )
+}
+
+function hasExternalReplayRequirement(shard: ProjectMemoryShard): boolean {
+  return shard.layer === 'external-research' || shard.sourceRefs.some((ref) => /browser|http|huggingface|github/i.test(ref))
+}
+
+function chooseIndexingLane(input: {
+  shard: ProjectMemoryShard
+  runtime: ProjectMemoryRuntimeProbe
+  allowCloud: boolean
+  maxLocalHotBytes: number
+  maxLocalWarmBytes: number
+}): Pick<ProjectMemoryIndexingShardPlan, 'cacheTier' | 'lane' | 'reasons'> {
+  const { shard, runtime, allowCloud, maxLocalHotBytes, maxLocalWarmBytes } = input
+  const reasons: string[] = []
+
+  if (shard.strategy === 'human-review') {
+    return {
+      cacheTier: 'held',
+      lane: 'human-review',
+      reasons: ['Shard requires human or license review before indexing.'],
+    }
+  }
+
+  if (isRuntimeConstrained(runtime)) {
+    reasons.push('Local runtime is constrained by RAM, CPU, disk, or thermal state.')
+    if (allowCloud && shard.strategy !== 'metadata-only') {
+      return { cacheTier: 'cloud-cold', lane: 'cloud-indexer', reasons }
+    }
+    return { cacheTier: 'held', lane: 'human-review', reasons }
+  }
+
+  if (shard.strategy === 'metadata-only' || shard.layer === 'asset-metadata') {
+    return {
+      cacheTier: 'metadata-only',
+      lane: 'local-worker',
+      reasons: ['Large/external assets stay metadata-first until license, thumbnail, and provenance are validated.'],
+    }
+  }
+
+  if (shard.byteBudget <= maxLocalHotBytes && runtime.localCacheBytes + shard.byteBudget <= maxLocalWarmBytes) {
+    return {
+      cacheTier: 'local-hot',
+      lane: shard.byteBudget < 256_000 ? 'ui-safe' : 'local-worker',
+      reasons: ['Shard fits the hot local memory budget.'],
+    }
+  }
+
+  if (shard.byteBudget <= maxLocalWarmBytes) {
+    return {
+      cacheTier: 'local-warm',
+      lane: 'local-sidecar',
+      reasons: ['Shard is too large for model context but safe for sidecar indexing.'],
+    }
+  }
+
+  if (allowCloud) {
+    return {
+      cacheTier: 'cloud-cold',
+      lane: 'cloud-indexer',
+      reasons: ['Shard exceeds local cache budget and is routed to cloud indexing.'],
+    }
+  }
+
+  return {
+    cacheTier: 'held',
+    lane: 'human-review',
+    reasons: ['Shard exceeds local cache budget and cloud indexing is disabled.'],
+  }
+}
+
+export function planGbScaleProjectIndexing(input: {
+  memory: MultiResolutionProjectMemory
+  runtime: ProjectMemoryRuntimeProbe
+  maxLocalHotBytes?: number
+  maxLocalWarmBytes?: number
+  allowCloudIndexing: boolean
+}): GbScaleProjectIndexingPlan {
+  const maxLocalHotBytes = input.maxLocalHotBytes ?? 2_000_000
+  const maxLocalWarmBytes = input.maxLocalWarmBytes ?? 512_000_000
+
+  const shardPlans = input.memory.shards.map((shard) => {
+    const placement = chooseIndexingLane({
+      shard,
+      runtime: input.runtime,
+      allowCloud: input.allowCloudIndexing,
+      maxLocalHotBytes,
+      maxLocalWarmBytes,
+    })
+    return {
+      shardId: shard.id,
+      layer: shard.layer,
+      cacheTier: placement.cacheTier,
+      lane: placement.lane,
+      estimatedBytes: shard.byteBudget,
+      estimatedTokens: shard.estimatedTokenBudget,
+      requiresReadReceipt: shard.requiresReadReceipt,
+      requiresReplay: hasExternalReplayRequirement(shard),
+      reasons: placement.reasons,
+    } satisfies ProjectMemoryIndexingShardPlan
+  })
+
+  const localBytesPlanned = shardPlans
+    .filter((plan) => plan.cacheTier === 'local-hot' || plan.cacheTier === 'local-warm')
+    .reduce((sum, plan) => sum + plan.estimatedBytes, 0)
+  const cloudBytesPlanned = shardPlans
+    .filter((plan) => plan.cacheTier === 'cloud-cold')
+    .reduce((sum, plan) => sum + plan.estimatedBytes, 0)
+  const heldBytes = shardPlans
+    .filter((plan) => plan.cacheTier === 'held')
+    .reduce((sum, plan) => sum + plan.estimatedBytes, 0)
+  const blockers = [
+    ...input.memory.shards.flatMap((shard) => shard.blockers),
+    ...shardPlans
+      .filter((plan) => plan.cacheTier === 'held')
+      .map((plan) => `${plan.shardId} is held until local resources, cloud indexing, or human review are available.`),
+  ]
+
+  return {
+    projectId: input.memory.projectId,
+    totalBytes: input.memory.totalBytes,
+    canRunOnUiThread: false,
+    localBytesPlanned,
+    cloudBytesPlanned,
+    heldBytes,
+    metadataOnlyRefs: input.memory.shards
+      .filter((shard) => shard.strategy === 'metadata-only' || shard.layer === 'asset-metadata')
+      .flatMap((shard) => shard.sourceRefs),
+    shardPlans,
+    blockers,
+    nextAction:
+      heldBytes > 0
+        ? 'Pause apply; resolve held shards with cloud indexing, local sidecar capacity, or human review.'
+        : 'Index selected shards in workers/sidecar and create read receipts before any agent apply.',
   }
 }

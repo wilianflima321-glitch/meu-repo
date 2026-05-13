@@ -52,7 +52,6 @@ import type {
   Project,
   SessionFilter,
   ToastType,
-  UseCase,
   WorkflowTemplate,
 } from './aethel-dashboard-model'
 import { STORAGE_KEYS, clearStoredDashboardState } from './aethel-dashboard-model'
@@ -67,7 +66,6 @@ export type DashboardActionsInput = {
   showToastMessage: (message: string, type?: ToastType) => void
   persistCopilotScope: (workflowId: string | null, threadId: string | null) => void
   navigateToIdeWithContext: (source: string, entry: string) => void
-  startDownload: (platform: string) => void
   chatAbortRef: React.MutableRefObject<AbortController | null>
   hasToken: boolean
   aiProviderGate: { setupUrl?: string } | null
@@ -83,7 +81,6 @@ export type DashboardActionsInput = {
   isGenerating: boolean
   selectedPreviewPoint: Point3 | null
   workflowTemplates: WorkflowTemplate[]
-  useCases: UseCase[]
   projects: Project[]
   newProjectName: string
   newProjectType: Project['type']
@@ -135,7 +132,6 @@ export function useDashboardActions({
   showToastMessage,
   persistCopilotScope,
   navigateToIdeWithContext,
-  startDownload,
   chatAbortRef,
   hasToken,
   aiProviderGate,
@@ -151,7 +147,6 @@ export function useDashboardActions({
   isGenerating,
   selectedPreviewPoint,
   workflowTemplates,
-  useCases,
   projects,
   newProjectName,
   newProjectType,
@@ -404,11 +399,6 @@ export function useDashboardActions({
     showToastMessage('Diretriz enviada para o Chat IA.', 'success')
   }, [setChatMessage, setActiveTab, showToastMessage])
 
-  const handleDownload = useCallback((platform: string) => {
-    startDownload(platform)
-    showToastMessage(`Download iniciado para ${platform}.`, 'info')
-  }, [startDownload, showToastMessage])
-
   const handleSubscribe = useCallback(async (planId: string, interval: 'month' | 'year' = 'month') => {
     setSubscribingPlan(planId)
     setSubscribeError(null)
@@ -600,14 +590,6 @@ export function useDashboardActions({
     handleDismissOnboardingWizard('skip')
     persistOnboardingProgress('skip')
   }, [handleDismissOnboardingWizard, persistOnboardingProgress])
-
-  const handleUseCaseSelect = useCallback((useCaseId: string) => {
-    const selected = useCases.find((item) => item.id === useCaseId)
-    if (!selected) return
-    setChatMessage(`Iniciar caso de uso "${selected.name}" focando em: ${selected.features.join(', ')}.`)
-    setActiveTab('ai-chat')
-    showToastMessage(`Caso de uso "${selected.name}" preparado.`, 'success')
-  }, [useCases, setChatMessage, setActiveTab, showToastMessage])
 
   const handleCreateWorkflow = useCallback(() => {
     void (async () => {
@@ -940,7 +922,6 @@ export function useDashboardActions({
     handleDeleteProject,
     handleProjectVersionChange,
     handleApplyDirectorNote,
-    handleDownload,
     handleSubscribe,
     handleManageSubscription,
     handlePurchase,
@@ -951,7 +932,6 @@ export function useDashboardActions({
     handleDismissOnboardingWizard,
     handleOnboardingComplete,
     handleOnboardingSkip,
-    handleUseCaseSelect,
     handleCreateWorkflow,
     handleSelectWorkflow,
     handleRenameWorkflow,

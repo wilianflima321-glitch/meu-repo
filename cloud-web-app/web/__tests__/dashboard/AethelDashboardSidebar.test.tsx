@@ -29,15 +29,16 @@ describe('AethelDashboardSidebar', () => {
     expect(screen.getByText('Projects')).toBeInTheDocument()
 
     expect(screen.queryByText('Billing')).not.toBeInTheDocument()
-    expect(screen.queryByText('Studio Local')).not.toBeInTheDocument()
+    expect(screen.queryByText('Content creation')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /operations/i }))
     expect(screen.getByText('Billing')).toBeInTheDocument()
     expect(screen.getByText('Wallet')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /explore/i }))
-    expect(screen.getByText('Studio Local')).toBeInTheDocument()
-    expect(screen.getByText('Agent Canvas')).toBeInTheDocument()
+    expect(screen.getByText('Templates')).toBeInTheDocument()
+    expect(screen.getByText('Content creation')).toBeInTheDocument()
+    expect(screen.getByText('Unreal')).toBeInTheDocument()
   })
 
   it('shows a visible studio depth action', () => {

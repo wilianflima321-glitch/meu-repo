@@ -11,14 +11,12 @@ interface DashboardLayoutProps {
   children: ReactNode
   activeTab: DashboardTab
   onTabChange: (tab: DashboardTab) => void
-  isAdmin?: boolean
 }
 
 export function DashboardLayout({
   children,
   activeTab,
   onTabChange,
-  isAdmin = false,
 }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
@@ -34,7 +32,6 @@ export function DashboardLayout({
         <DashboardSidebar
           activeTab={activeTab}
           onTabChange={onTabChange}
-          isAdmin={isAdmin}
           collapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         />

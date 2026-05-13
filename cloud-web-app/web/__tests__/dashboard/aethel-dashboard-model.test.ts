@@ -12,8 +12,11 @@ describe('aethel dashboard model', () => {
   it('keeps mission control tabs focused before support and explore surfaces', () => {
     expect(MISSION_CONTROL_TABS).toEqual(['overview', 'ai-chat', 'projects'])
     expect(OPERATIONS_TABS).toEqual(['billing', 'wallet', 'connectivity'])
-    expect(EXPLORE_TABS).toContain('download')
-    expect(EXPLORE_TABS).toContain('agent-canvas')
+    expect(EXPLORE_TABS).toEqual(['templates', 'content-creation', 'unreal'])
+    expect(DASHBOARD_TABS).not.toContain('download')
+    expect(DASHBOARD_TABS).not.toContain('agent-canvas')
+    expect(DASHBOARD_TABS).not.toContain('use-cases')
+    expect(DASHBOARD_TABS).not.toContain('admin')
   })
 
   it('keeps tab groups aligned with the full dashboard taxonomy', () => {

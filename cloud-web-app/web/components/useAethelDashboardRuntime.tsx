@@ -13,7 +13,6 @@ import {
   fetchAiProviderStatus,
 } from '@/lib/ai-provider-status-client'
 import { isAuthenticated } from '@/lib/auth'
-import { useAssetDownload } from '@/hooks/useAethelGateway'
 import {
   type ToastType,
   STORAGE_KEYS,
@@ -64,7 +63,6 @@ export function useAethelDashboardRuntime() {
   const { mission: entryMission, source: entrySource, dismissEntryIntent } = useDashboardEntryIntent()
   const {
     workflowTemplates,
-    useCases,
     showToast,
     setShowToast,
     sessionHistory,
@@ -153,8 +151,6 @@ export function useAethelDashboardRuntime() {
     authReady,
     setAuthReady,
   } = useDashboardUiState()
-
-  const { startDownload } = useAssetDownload()
 
   const walletKey = hasToken ? WALLET_KEY : null
   const currentPlanKey = hasToken ? CURRENT_PLAN_KEY : null
@@ -323,7 +319,6 @@ export function useAethelDashboardRuntime() {
     handleDeleteProject,
     handleProjectVersionChange,
     handleApplyDirectorNote,
-    handleDownload,
     handleSubscribe,
     handleManageSubscription,
     handlePurchase,
@@ -333,7 +328,6 @@ export function useAethelDashboardRuntime() {
     handleTemplateSelect,
     handleOnboardingComplete,
     handleOnboardingSkip,
-    handleUseCaseSelect,
     handleCreateWorkflow,
     handleSelectWorkflow,
     handleRenameWorkflow,
@@ -350,7 +344,6 @@ export function useAethelDashboardRuntime() {
     showToastMessage,
     persistCopilotScope,
     navigateToIdeWithContext,
-    startDownload,
     chatAbortRef,
     hasToken,
     aiProviderGate,
@@ -366,7 +359,6 @@ export function useAethelDashboardRuntime() {
     isGenerating,
     selectedPreviewPoint,
     workflowTemplates,
-    useCases,
     projects,
     newProjectName,
     newProjectType,
@@ -664,10 +656,7 @@ export function useAethelDashboardRuntime() {
       formatConnectivityStatus: formatConnectivityStatusLabel,
     },
     workflowTemplates,
-    useCases,
-    onDownload: handleDownload,
     onTemplateSelect: handleTemplateSelect,
-    onUseCaseSelect: handleUseCaseSelect,
   }
 
   const dashboardShellProps = {

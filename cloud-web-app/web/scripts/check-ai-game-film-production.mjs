@@ -106,6 +106,7 @@ const viewportRuntimeFiles = [
   'lib/workers/viewport-render-worker.ts',
   'lib/viewport/gizmo-transform-operation.ts',
   'lib/viewport/gizmo-transform-persistence.ts',
+  'lib/viewport/gizmo-elite-controls.ts',
   'app/api/runtime/viewport/render/route.ts',
 ]
 for (const runtimeFile of viewportRuntimeFiles) requireFile(runtimeFile, 'viewport render pipeline contract')
@@ -120,6 +121,9 @@ requirePattern('app/studio/CreativeStudioShell.tsx', /CreativeStudioShell/, 'cre
 requirePattern('components/viewport/AethelViewport3D.tsx', /EffectComposer/, 'viewport must use post-processing for professional selection feedback')
 requirePattern('components/viewport/AethelViewport3D.tsx', /<Outline/, 'viewport must render selected objects with outline evidence')
 requirePattern('components/viewport/AethelViewport3D.tsx', /<Selection>/, 'viewport selected-object outline must be selection-aware')
+requirePattern('lib/viewport/gizmo-elite-controls.ts', /GizmoPivotMode/, 'gizmo controls must define pivot modes')
+requirePattern('lib/viewport/gizmo-elite-controls.ts', /GizmoAxisPlaneConstraint/, 'gizmo controls must define axis-plane constraints')
+requirePattern('lib/viewport/gizmo-elite-controls.ts', /buildGizmoUndoVisualPacket/, 'gizmo controls must expose undo visual packets')
 requirePattern('lib/production/agentic-production-state.ts', /assetGraph/, 'production state must retain Asset Graph')
 requirePattern('lib/production/agentic-production-state.ts', /shotFilmGraph/, 'production state must retain Shot/Film Graph')
 requirePattern('lib/production/repository-cartography.ts', /RepositoryCartography/, 'large repo cartography must remain available')

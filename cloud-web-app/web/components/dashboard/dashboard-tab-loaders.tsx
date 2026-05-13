@@ -17,8 +17,4 @@ export const DashboardUnrealTab = dynamic(
   { ssr: false, loading: TabLoading }
 )
 export const BillingTab = dynamic(() => import('./tabs/BillingTab'), { ssr: false, loading: TabLoading })
-export const DownloadTab = dynamic(() => import('./tabs/DownloadTab'), { ssr: false, loading: TabLoading })
 export const TemplatesTab = dynamic(() => import('./tabs/TemplatesTab'), { ssr: false, loading: TabLoading })
-export const UseCasesTab = dynamic(() => import('./tabs/UseCasesTab'), { ssr: false, loading: TabLoading })
-export const AdminTab = dynamic(() => import('./tabs/AdminTab'), { ssr: false, loading: TabLoading })
-export const AgentCanvasTab = dynamic(() => import('./tabs/AgentCanvasTab'), { ssr: false, loading: TabLoading })

@@ -133,10 +133,15 @@ requirePattern('components/ai/AgentFleetCoordinatorStrip.tsx', /Acknowledge cont
 requirePattern('package.json', /qa:agent-read-receipts/, 'enterprise gate must include agent read receipts')
 requireFile('lib/production/agent-tool-bus.ts', 'internal spine must expose a canonical Agent Tool Bus')
 requireFile('lib/production/multi-resolution-project-memory.ts', 'internal spine must expose multi-resolution project memory')
+requirePattern('lib/production/multi-resolution-project-memory.ts', /planGbScaleProjectIndexing/, 'multi-resolution memory must plan GB-scale indexing without UI thread work')
 requireFile('lib/production/task-evidence-ledger.ts', 'internal spine must expose task evidence ledgers')
 requireFile('lib/production/browser-operator-safety.ts', 'internal spine must expose Browser Operator safety policy')
 requireFile('lib/production/high-risk-action-firewall.ts', 'internal spine must block high-risk autonomous actions')
+requireFile('lib/production/engine-module-integration-plan.ts', 'dead/low-import engine modules must have wire-or-retire decisions')
+requirePattern('lib/production/engine-module-integration-plan.ts', /validateEngineModuleIntegrationPlan/, 'engine module decisions must be testable')
 requirePattern('package.json', /qa:internal-spine/, 'enterprise gate must include internal spine QA')
+requirePattern('package.json', /qa:coverage-ratchet/, 'enterprise gate must include coverage ratchet QA')
+requirePattern('package.json', /qa:console-ratchet/, 'enterprise gate must include console debt ratchet QA')
 
 const sourceFiles = walk(
   ROOT,

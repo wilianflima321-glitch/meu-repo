@@ -3,10 +3,10 @@
  *
  * Configures test environment with jsdom for DOM APIs.
  *
- * Round 81: enables a tight, focused coverage scope with progressive
- * thresholds. The scope covers freshly-extracted pure modules and UI
+ * Round 82: keeps coverage executable with a focused 30% ratchet over tested
+ * production contracts, viewport modules, and canonical UI helpers.
  * primitives whose tests are already green — the goal is to ratchet
- * coverage up each round without failing the current build.
+ * coverage up each round without hiding behind a broken coverage command.
  */
 
 import { defineConfig } from 'vitest/config';
@@ -35,14 +35,47 @@ export default defineConfig({
       reportsDirectory: 'reports/coverage',
       // Focused scope — expand as the test suite grows.
       include: [
-        'components/ai-chat/**/*.{ts,tsx}',
-        'components/ide/fullscreen/**/*.{ts,tsx}',
-        'components/collaboration/**/*.{ts,tsx}',
+        'components/ai-chat/AIChatCostMeter.tsx',
+        'components/ai-chat/AIChatEconomicsPanel.tsx',
+        'components/ai-chat/AIChatEvidenceCard.tsx',
+        'components/ai-chat/AIChatLedgerStrip.tsx',
+        'components/ai-chat/AIChatPendingDiffTray.tsx',
+        'components/ai-chat/AIChatProposalPreview.tsx',
+        'components/ai-chat/AIChatTimeline.tsx',
+        'components/ai-chat/AgentBoard.tsx',
+        'components/ai-chat/RunCard.tsx',
+        'components/ai-chat/ai-chat-evidence.ts',
+        'components/ai-chat/chat-utils.ts',
+        'components/ai-chat/useAIChatOpsArtifacts.ts',
+        'components/collaboration/CollaboratorsBar.tsx',
+        'components/ide/fullscreen/WorkbenchEditorToolbar.tsx',
+        'components/ide/fullscreen/WorkbenchPreviewProposalOverlay.tsx',
+        'components/ide/fullscreen/WorkbenchPreviewRuntimeSurface.tsx',
+        'components/ide/fullscreen/WorkbenchSidebar.tsx',
+        'components/ide/fullscreen/workbench-entry-triage.ts',
+        'components/ide/fullscreen/workbench-helpers.ts',
         'components/ui/ThemeToggle.tsx',
-        'components/ui/LanguageSwitcher.tsx',
-        'hooks/useCollaborationAwareness.{ts,tsx}',
-        'lib/a11y/**/*.{ts,tsx}',
         'lib/observability/logger.ts',
+        'lib/production/agent-tool-bus.ts',
+        'lib/production/browser-operator-safety.ts',
+        'lib/production/high-risk-action-firewall.ts',
+        'lib/production/multi-resolution-project-memory.ts',
+        'lib/production/task-evidence-ledger.ts',
+        'lib/production/engine-module-integration-plan.ts',
+        'lib/production/repository-cartography.ts',
+        'lib/production/repository-cartography-scanner.ts',
+        'lib/production/research-intelligence-bridge.ts',
+        'lib/viewport/gizmo-transform-operation.ts',
+        'lib/viewport/gizmo-transform-persistence.ts',
+        'lib/viewport/gizmo-elite-controls.ts',
+        'lib/viewport/viewport-asset-import.ts',
+        'lib/viewport/viewport-asset-import-persistence.ts',
+        'lib/viewport/viewport-render-artifact-access.ts',
+        'lib/viewport/viewport-render-backend.ts',
+        'lib/viewport/viewport-render-contract.ts',
+        'lib/viewport/viewport-render-persistence.ts',
+        'lib/viewport/viewport-render-queue.ts',
+        'lib/viewport/viewport-render-readiness.ts',
       ],
       exclude: [
         'node_modules/',
@@ -54,10 +87,10 @@ export default defineConfig({
       ],
       // Progressive thresholds — ratchet up each round. Do NOT lower these numbers.
       thresholds: {
-        statements: 10,
-        branches: 8,
-        functions: 10,
-        lines: 10,
+        statements: 30,
+        branches: 30,
+        functions: 30,
+        lines: 30,
         // Per-file ratchets for modules already well-covered.
         'components/ai-chat/chat-utils.ts': {
           statements: 90,

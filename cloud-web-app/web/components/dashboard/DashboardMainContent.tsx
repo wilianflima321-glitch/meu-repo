@@ -2,7 +2,7 @@
 
 import { useId, type ComponentProps, type ReactNode } from 'react'
 import dynamic from 'next/dynamic'
-import { Blocks, CloudCog, CreditCard, Download, PanelTopOpen, ShieldCheck, Sparkles } from 'lucide-react'
+import { Blocks, CloudCog, CreditCard, PanelTopOpen, ShieldCheck, Sparkles } from 'lucide-react'
 import { CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 import { FirstValueGuide } from './FirstValueGuide'
@@ -16,13 +16,9 @@ import {
   DashboardContentCreationTab,
   DashboardUnrealTab,
   BillingTab,
-  DownloadTab,
   TemplatesTab,
-  UseCasesTab,
-  AdminTab,
-  AgentCanvasTab,
 } from './dashboard-tab-loaders'
-import type { ActiveTab, UseCase, WorkflowTemplate } from './aethel-dashboard-model'
+import type { ActiveTab, WorkflowTemplate } from './aethel-dashboard-model'
 
 type BillingTabProps = ComponentProps<typeof BillingTab>
 const DashboardOverviewTab = dynamic(
@@ -59,10 +55,7 @@ type DashboardMainContentProps = {
   subscribingPlan: string | null
   connectivityProps: ComponentProps<typeof DashboardConnectivityTab>
   workflowTemplates: WorkflowTemplate[]
-  useCases: UseCase[]
-  onDownload: (artifactId: string) => void
   onTemplateSelect: (templateId: string) => void
-  onUseCaseSelect: (useCaseId: string) => void
 }
 
 type SurfaceFrameProps = {
@@ -122,10 +115,7 @@ export function DashboardMainContent({
   subscribingPlan,
   connectivityProps,
   workflowTemplates,
-  useCases,
-  onDownload,
   onTemplateSelect,
-  onUseCaseSelect,
 }: DashboardMainContentProps) {
   return (
     <div className="mx-auto w-full max-w-[1600px] space-y-4 px-4 py-3 sm:px-5 lg:px-6 lg:py-5">
@@ -245,17 +235,6 @@ export function DashboardMainContent({
         </SurfaceFrame>
       )}
 
-      {activeTab === 'download' && (
-        <SurfaceFrame
-          eyebrow="Studio Local"
-          title="Download the same Studio, just deeper"
-          description="Local depth is a power unlock for files, runtime, performance and device-native workflows — not a separate product identity."
-          icon={<Download className="h-5 w-5" />}
-        >
-          <DownloadTab onDownload={onDownload} />
-        </SurfaceFrame>
-      )}
-
       {activeTab === 'templates' && (
         <SurfaceFrame
           eyebrow="Templates"
@@ -267,38 +246,6 @@ export function DashboardMainContent({
         </SurfaceFrame>
       )}
 
-      {activeTab === 'use-cases' && (
-        <SurfaceFrame
-          eyebrow="Use cases"
-          title="Explore proven paths when you want inspiration, not during mission intake"
-          description="Examples and patterns help orientation, but they stay in a secondary lane so the product does not collapse into a generic gallery."
-          icon={<Blocks className="h-5 w-5" />}
-        >
-          <UseCasesTab useCases={useCases} onSelect={onUseCaseSelect} />
-        </SurfaceFrame>
-      )}
-
-      {activeTab === 'admin' && (
-        <SurfaceFrame
-          eyebrow="Admin"
-          title="Operational controls stay available without dominating the product"
-          description="Admin is important, but it should never define the emotional center of the user experience."
-          icon={<ShieldCheck className="h-5 w-5" />}
-        >
-          <AdminTab />
-        </SurfaceFrame>
-      )}
-
-      {activeTab === 'agent-canvas' && (
-        <SurfaceFrame
-          eyebrow="Agent Canvas"
-          title="Explore orchestration without hijacking the primary mission path"
-          description="Agent graph work stays accessible for advanced flows while Studio Home continues to privilege clear next steps and continuity."
-          icon={<Sparkles className="h-5 w-5" />}
-        >
-          <AgentCanvasTab />
-        </SurfaceFrame>
-      )}
     </div>
   )
 }
