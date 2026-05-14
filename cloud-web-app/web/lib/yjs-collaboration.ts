@@ -398,6 +398,24 @@ export class CollaborationSession {
     getAwareness(): Awareness | null {
         return this.awareness;
     }
+
+    /**
+     * Expose a named Y.Map for collaborative side-channel data such as inline
+     * review comments. Callers must own their map key namespace.
+     */
+    getSharedMap<T = unknown>(name: string): Y.Map<T> {
+        return this.doc.getMap<T>(name);
+    }
+
+    /**
+     * Return the local user metadata for features that need author attribution.
+     */
+    getLocalUser(): { id: string; name: string } {
+        return {
+            id: this.config.user.id,
+            name: this.config.user.name,
+        };
+    }
     
     /**
      * Get local client ID

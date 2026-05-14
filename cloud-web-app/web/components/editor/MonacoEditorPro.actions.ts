@@ -43,6 +43,7 @@ export function configureMonacoEditor(
     lineNumbers: config.lineNumbers,
     wordWrap: config.wordWrap,
     readOnly: config.readOnly,
+    glyphMargin: true,
     cursorBlinking: 'smooth',
     cursorSmoothCaretAnimation: 'on',
     smoothScrolling: true,

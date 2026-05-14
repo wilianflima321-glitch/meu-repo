@@ -72,6 +72,7 @@ export default function WorkbenchEditorCanvas({
         path={fileState.path}
         value={fileState.content}
         language={fileState.language}
+        collaborationSession={collaborationSession}
         fullAccessActive={fullAccessActive}
         onMount={(editor) => {
           activeRef.current = editor;
