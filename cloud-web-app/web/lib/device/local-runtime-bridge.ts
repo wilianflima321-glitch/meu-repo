@@ -36,6 +36,27 @@ export type LocalRuntimeToolchainFeature =
   | 'browser-automation'
   | 'asset-optimizer'
   | 'shader-compiler'
+  | 'meshoptimizer'
+  | 'ktx-software'
+  | 'basisu'
+  | 'openusd'
+  | 'blender-headless'
+
+export type LocalRuntimeRendererBackend =
+  | 'wgpu-native'
+  | 'dawn-native'
+  | 'three-webgpu'
+  | 'three-webgl'
+  | 'software-raster'
+export type LocalRuntimeAssetTool =
+  | 'gltf-transform'
+  | 'meshoptimizer'
+  | 'ktx-software'
+  | 'basisu'
+  | 'openusd'
+  | 'blender-headless'
+export type LocalRuntimeMediaTool = 'ffmpeg' | 'ffprobe'
+export type LocalRuntimeShaderTool = 'naga' | 'wgsl-validator' | 'shaderc' | 'dxc'
 
 export interface LocalRuntimeCapabilityReport {
   version: 1
@@ -57,6 +78,15 @@ export interface LocalRuntimeCapabilityReport {
   nativeGraphicsBackends?: LocalRuntimeGraphicsBackend[]
   aiExecutionProviders?: LocalRuntimeAiExecutionProvider[]
   localToolchain?: LocalRuntimeToolchainFeature[]
+  rendererBackends?: LocalRuntimeRendererBackend[]
+  assetTools?: LocalRuntimeAssetTool[]
+  mediaTools?: LocalRuntimeMediaTool[]
+  shaderTools?: LocalRuntimeShaderTool[]
+  toolVersions?: Record<string, string>
+  toolDigests?: Record<string, string>
+  maxVramMb?: number
+  maxTextureSize?: number
+  supportsOffscreenRender?: boolean
   maxLocalAgents?: number
   preferredExecutor?: LocalRuntimePreferredExecutor
   recommendedViewportQuality?: DeviceRuntimePolicy['viewportQuality']
@@ -115,6 +145,13 @@ function asEnumArray<T extends string>(value: unknown, allowed: readonly T[]): T
 
 function asNumberOrNull(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function asStringRecord(value: unknown): Record<string, string> | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined
+  const entries = Object.entries(value as Record<string, unknown>)
+    .filter((entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1].trim().length > 0)
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined
 }
 
 function normalizeRuntimeOperatingSystem(value: unknown): LocalRuntimeOperatingSystem {
@@ -216,7 +253,29 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     'browser-automation',
     'asset-optimizer',
     'shader-compiler',
+    'meshoptimizer',
+    'ktx-software',
+    'basisu',
+    'openusd',
+    'blender-headless',
   ] as const)
+  const rendererBackends = asEnumArray(candidate.rendererBackends, [
+    'wgpu-native',
+    'dawn-native',
+    'three-webgpu',
+    'three-webgl',
+    'software-raster',
+  ] as const)
+  const assetTools = asEnumArray(candidate.assetTools, [
+    'gltf-transform',
+    'meshoptimizer',
+    'ktx-software',
+    'basisu',
+    'openusd',
+    'blender-headless',
+  ] as const)
+  const mediaTools = asEnumArray(candidate.mediaTools, ['ffmpeg', 'ffprobe'] as const)
+  const shaderTools = asEnumArray(candidate.shaderTools, ['naga', 'wgsl-validator', 'shaderc', 'dxc'] as const)
   const gpuComputeAvailable = (
     asBoolean(candidate.gpuAvailable) ??
     asBoolean(candidate.webGpuAvailable) ??
@@ -249,6 +308,15 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     nativeGraphicsBackends,
     aiExecutionProviders,
     localToolchain,
+    rendererBackends: rendererBackends ?? (nativeGraphicsBackends?.length ? ['wgpu-native'] : undefined),
+    assetTools,
+    mediaTools,
+    shaderTools,
+    toolVersions: asStringRecord(candidate.toolVersions),
+    toolDigests: asStringRecord(candidate.toolDigests),
+    maxVramMb: asPositiveNumber(candidate.maxVramMb),
+    maxTextureSize: asPositiveNumber(candidate.maxTextureSize),
+    supportsOffscreenRender: asBoolean(candidate.supportsOffscreenRender),
     maxLocalAgents,
     preferredExecutor,
     recommendedViewportQuality: pickViewportQuality({
@@ -330,7 +398,34 @@ export function sanitizeLocalRuntimeCapabilityReport(
       'browser-automation',
       'asset-optimizer',
       'shader-compiler',
+      'meshoptimizer',
+      'ktx-software',
+      'basisu',
+      'openusd',
+      'blender-headless',
     ] as const),
+    rendererBackends: asEnumArray(candidate.rendererBackends, [
+      'wgpu-native',
+      'dawn-native',
+      'three-webgpu',
+      'three-webgl',
+      'software-raster',
+    ] as const),
+    assetTools: asEnumArray(candidate.assetTools, [
+      'gltf-transform',
+      'meshoptimizer',
+      'ktx-software',
+      'basisu',
+      'openusd',
+      'blender-headless',
+    ] as const),
+    mediaTools: asEnumArray(candidate.mediaTools, ['ffmpeg', 'ffprobe'] as const),
+    shaderTools: asEnumArray(candidate.shaderTools, ['naga', 'wgsl-validator', 'shaderc', 'dxc'] as const),
+    toolVersions: asStringRecord(candidate.toolVersions),
+    toolDigests: asStringRecord(candidate.toolDigests),
+    maxVramMb: asPositiveNumber(candidate.maxVramMb),
+    maxTextureSize: asPositiveNumber(candidate.maxTextureSize),
+    supportsOffscreenRender: asBoolean(candidate.supportsOffscreenRender),
     maxLocalAgents: asPositiveNumber(candidate.maxLocalAgents),
     preferredExecutor:
       asEnum(candidate.preferredExecutor, ['local-native', 'local-worker', 'cloud-sandbox', 'held']) ?? undefined,

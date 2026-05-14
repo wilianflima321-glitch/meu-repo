@@ -16,6 +16,7 @@ import {
   buildViewportRenderReadinessReport,
   type ViewportRenderReadinessReport,
 } from '@/lib/viewport/viewport-render-readiness'
+import { buildRuntimeEngineToolchainSnapshot } from '@/lib/runtime/runtime-engine-spine'
 
 export interface ViewportRenderBackendRequest {
   jobType: typeof VIEWPORT_RENDER_QUEUE_JOB_TYPE
@@ -46,6 +47,14 @@ export interface ViewportRenderBackendCapabilities {
   artifactScheme: 'aethel-artifact://viewport-render'
   artifactRetrieval: 'token-protected-get'
   releaseReady: false
+  runtimeEngine: {
+    contract: 'hybrid-wgpu-v1'
+    targets: ['browser-preview', 'local-native', 'cloud-sandbox', 'held']
+    browserRole: 'preview-only'
+    nativeBackbone: 'wgpu'
+    automaticDownloads: false
+    toolchain: ReturnType<typeof buildRuntimeEngineToolchainSnapshot>
+  }
   supports: {
     manifest: true
     thumbnail: true
@@ -128,6 +137,14 @@ export function buildViewportRenderBackendCapabilities(): ViewportRenderBackendC
     artifactScheme: 'aethel-artifact://viewport-render',
     artifactRetrieval: 'token-protected-get',
     releaseReady: false,
+    runtimeEngine: {
+      contract: 'hybrid-wgpu-v1',
+      targets: ['browser-preview', 'local-native', 'cloud-sandbox', 'held'],
+      browserRole: 'preview-only',
+      nativeBackbone: 'wgpu',
+      automaticDownloads: false,
+      toolchain: buildRuntimeEngineToolchainSnapshot(),
+    },
     supports: {
       manifest: true,
       thumbnail: true,

@@ -19,7 +19,7 @@ describe('internal spine tool bus and safety firewall', () => {
     expect(snapshot.explicitApprovalTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
     expect(snapshot.idempotencyRequiredTools).toEqual(expect.arrayContaining(['diff-proposal', 'deployment']))
     expect(snapshot.readReceiptRequiredTools).toEqual(expect.arrayContaining(['repository-cartography', 'diff-proposal']))
-    expect(snapshot.scopeLockedTools).toEqual(expect.arrayContaining(['diff-proposal', 'render-queue', 'deployment']))
+    expect(snapshot.scopeLockedTools).toEqual(expect.arrayContaining(['diff-proposal', 'render-queue', 'render-submit', 'deployment']))
     expect(snapshot.rollbackRequiredTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
     expect(snapshot.writeScopedTools).toEqual(expect.arrayContaining(['mission-ledger', 'diff-proposal', 'render-queue']))
     expect(tools.find((tool) => tool.id === 'huggingface-mirror')?.requiredEvidence.join(' ')).toContain('metadata-first')
@@ -103,6 +103,24 @@ describe('internal spine tool bus and safety firewall', () => {
     expect(decision.allowed).toBe(false)
     expect(decision.blockers.join(' ')).toContain('maxPayloadBytes')
     expect(decision.runtimeTarget).toBe('human-held')
+  })
+
+  it('holds render-submit until the runtime engine contract has receipts, scope, rollback, and budget', () => {
+    const decision = evaluateAgentToolInvocation({
+      toolId: 'render-submit',
+      mode: 'Creative',
+      projectId: 'project-1',
+      intent: 'Submit final cinematic render to the runtime engine',
+      payloadBytes: 512_000,
+    })
+
+    expect(decision.allowed).toBe(false)
+    expect(decision.blockers.join(' ')).toContain('idempotency key')
+    expect(decision.blockers.join(' ')).toContain('read receipts')
+    expect(decision.blockers.join(' ')).toContain('scope lock')
+    expect(decision.blockers.join(' ')).toContain('rollback evidence')
+    expect(decision.blockers.join(' ')).toContain('maxCostUsd')
+    expect(decision.requiredEvidence).toEqual(expect.arrayContaining(['render backend contract', 'runtime budget', 'asset graph', 'validation graph']))
   })
 
   it('blocks prompt injection found during browser navigation instead of treating the page as instructions', () => {

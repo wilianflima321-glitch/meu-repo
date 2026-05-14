@@ -37,6 +37,11 @@ export type AgentWorkTool =
   | 'viewport-capture'
   | 'playtest-runner'
   | 'render-queue'
+  | 'renderer-probe'
+  | 'asset-optimize'
+  | 'shader-compile'
+  | 'render-submit'
+  | 'render-validate'
   | 'deployment'
   | 'runtime-router'
   | 'cost-meter'
@@ -141,17 +146,17 @@ function baseToolsForLane(lane: AgentWorkLane): AgentWorkTool[] {
     case 'software':
       return [...base, 'diff-proposal', 'test-runner']
     case 'gameplay':
-      return [...base, 'diff-proposal', 'test-runner', 'playtest-runner', 'viewport-capture']
+      return [...base, 'diff-proposal', 'test-runner', 'playtest-runner', 'viewport-capture', 'renderer-probe', 'render-submit']
     case 'creative':
-      return [...base, 'diff-proposal', 'viewport-capture', 'render-queue', 'asset-metadata']
+      return [...base, 'diff-proposal', 'viewport-capture', 'render-queue', 'renderer-probe', 'asset-optimize', 'shader-compile', 'render-submit', 'asset-metadata']
     case 'asset':
-      return [...base, 'asset-metadata', 'license-check', 'github-mirror', 'huggingface-mirror']
+      return [...base, 'asset-metadata', 'asset-optimize', 'license-check', 'github-mirror', 'huggingface-mirror']
     case 'validation':
-      return [...base, 'test-runner', 'playtest-runner', 'viewport-capture', 'source-citation']
+      return [...base, 'test-runner', 'playtest-runner', 'viewport-capture', 'render-validate', 'source-citation']
     case 'performance':
-      return [...base, 'runtime-router', 'test-runner', 'viewport-capture']
+      return [...base, 'runtime-router', 'renderer-probe', 'shader-compile', 'test-runner', 'viewport-capture']
     case 'release':
-      return [...base, 'deployment', 'test-runner', 'browser-replay']
+      return [...base, 'deployment', 'render-submit', 'render-validate', 'test-runner', 'browser-replay']
     case 'orchestration':
     default:
       return [...base, 'deep-research', 'source-citation']
