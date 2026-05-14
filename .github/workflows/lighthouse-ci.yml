@@ -43,3 +43,10 @@ jobs:
           NEXT_TELEMETRY_DISABLED: '1'
           CI: '1'
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_TOKEN }}
+
+      - name: Run dedicated PWA Lighthouse gate
+        run: npx @lhci/cli@0.13.x autorun --config=lighthouserc.pwa.js
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+          CI: '1'
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_TOKEN }}
