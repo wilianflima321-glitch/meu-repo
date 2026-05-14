@@ -11,9 +11,9 @@ export function AIChatEvidencePanel({ latestArtifact }: AIChatEvidencePanelProps
     return (
       <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 p-4 text-center text-[11px] text-[var(--aethel-text-tertiary)]">
         <SearchCheck className="h-5 w-5 text-[var(--aethel-text-quaternary)]" />
-        <p>Nenhuma capsula de evidencia disponivel.</p>
+        <p>No evidence capsule available.</p>
         <p className="max-w-[240px] text-[var(--aethel-text-quaternary)]">
-          Quando a IA responder com trace ou quando um handoff de pesquisa entrar no cockpit, a evidencia aparece aqui.
+          When AI responds with a trace or a research handoff enters the cockpit, evidence appears here.
         </p>
       </div>
     )
@@ -26,7 +26,7 @@ export function AIChatEvidencePanel({ latestArtifact }: AIChatEvidencePanelProps
           Evidence workflow
         </div>
         <p className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
-          Proveniencia e sinais de confianca da resposta mais recente.
+          Provenance and confidence signals for the latest response.
         </p>
       </div>
 

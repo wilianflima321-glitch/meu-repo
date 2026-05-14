@@ -20,10 +20,10 @@ export function SceneViewportOutliner({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Hierarchy</p>
-            <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">Cena, câmeras e luzes conectadas ao viewport.</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">Scene, cameras, and lights connected to the viewport.</p>
           </div>
           <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
-            {objects.length} itens
+            {objects.length} items
           </span>
         </div>
       </div>
@@ -36,7 +36,7 @@ export function SceneViewportOutliner({
               <div className={`flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition ${active ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_16%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_55%,transparent)]'}`}>
                 <button
                   type="button"
-                  aria-label={`Selecionar ${object.name}`}
+                  aria-label={`Select ${object.name}`}
                   onClick={() => onSelectionChange([object.id])}
                   className="flex min-w-0 flex-1 items-center gap-2 text-left"
                 >
@@ -50,7 +50,7 @@ export function SceneViewportOutliner({
                 </button>
                 <button
                   type="button"
-                  aria-label={`${object.visible === false ? 'Mostrar' : 'Ocultar'} ${object.name}`}
+                  aria-label={`${object.visible === false ? 'Show' : 'Hide'} ${object.name}`}
                   onClick={() => onObjectsChange(objects.map((item) => item.id === object.id ? { ...item, visible: item.visible === false } : item))}
                   className="rounded-md p-1 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_75%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 >

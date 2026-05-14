@@ -46,7 +46,7 @@ export function LiveConversationPanel({ isWorking, onInterrupt, onSendMessage }:
             }`}
           />
           <span className="text-xs font-medium text-[var(--aethel-text-secondary)]">
-            {isWorking ? 'IA trabalhando' : 'Aguardando'}
+            {isWorking ? 'AI working' : 'Waiting'}
           </span>
         </div>
         {isWorking && (
@@ -54,10 +54,10 @@ export function LiveConversationPanel({ isWorking, onInterrupt, onSendMessage }:
             type="button"
             onClick={onInterrupt}
             className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] text-[11px] font-medium text-[var(--aethel-error)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_22%,transparent)]"
-            aria-label="Interromper trabalho da IA"
+            aria-label="Interrupt AI work"
           >
             <StopCircle className="w-3 h-3" />
-            Interromper
+            Interrupt
           </button>
         )}
       </div>
@@ -69,10 +69,10 @@ export function LiveConversationPanel({ isWorking, onInterrupt, onSendMessage }:
             <textarea
               value={liveInput}
               onChange={(e) => setLiveInput(e.target.value)}
-              placeholder="Converse enquanto a IA trabalha..."
+              placeholder="Chat while AI works..."
               className="w-full min-h-[60px] max-h-[120px] px-3 py-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] resize-none focus:outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)] focus:ring-1 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
               rows={2}
-              aria-label="Mensagem de conversação ao vivo"
+              aria-label="Live conversation message"
             />
           </div>
           <div className="flex items-center gap-1 pb-0.5">
@@ -83,16 +83,16 @@ export function LiveConversationPanel({ isWorking, onInterrupt, onSendMessage }:
                   ? 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'
               }`}
-              title={isLiveSpeaking ? 'Parar fala' : 'Falar resposta'}
-              aria-label={isLiveSpeaking ? 'Parar fala' : 'Falar resposta'}
+              title={isLiveSpeaking ? 'Stop speaking' : 'Speak response'}
+              aria-label={isLiveSpeaking ? 'Stop speaking' : 'Speak response'}
             >
               {isLiveSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
             <button
               type="button"
               className="rounded p-2 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] transition-colors"
-              title="Anexar arquivo"
-              aria-label="Anexar arquivo"
+              title="Attach file"
+              aria-label="Attach file"
             >
               <Paperclip className="w-4 h-4" />
             </button>
@@ -100,7 +100,7 @@ export function LiveConversationPanel({ isWorking, onInterrupt, onSendMessage }:
               type="submit"
               disabled={!liveInput.trim()}
               className="rounded-lg bg-[var(--aethel-primary)] px-3 py-2 text-sm font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Enviar mensagem ao vivo"
+              aria-label="Send live message"
             >
               <Send className="w-4 h-4" />
             </button>
@@ -112,10 +112,10 @@ export function LiveConversationPanel({ isWorking, onInterrupt, onSendMessage }:
       <div className="px-3 pb-3">
         <div className="flex items-center gap-2 overflow-x-auto">
           {[
-            { label: 'Continuar', icon: Sparkles },
-            { label: 'Corrigir', icon: Bug },
-            { label: 'Explorar', icon: Lightbulb },
-            { label: 'Refinar', icon: Wand2 },
+            { label: 'Continue', icon: Sparkles },
+            { label: 'Fix', icon: Bug },
+            { label: 'Explore', icon: Lightbulb },
+            { label: 'Refine', icon: Wand2 },
           ].map((action) => (
             <button
               key={action.label}

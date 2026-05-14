@@ -31,7 +31,7 @@ export function useMessageBubbleCopyActions(onCopy: CopyHandler) {
         toast.success(title, description)
         scheduleReset()
       } catch {
-        toast.error('Falha ao copiar', 'Nao foi possivel enviar o conteudo para a area de transferencia.')
+        toast.error('Copy failed', 'Could not send the content to the clipboard.')
       }
     },
     [onCopy, scheduleReset, toast]
@@ -49,8 +49,8 @@ export function useMessageBubbleCopyActions(onCopy: CopyHandler) {
     copiedCode: copiedScope === 'code',
     copiedMessage: copiedScope === 'message',
     copyCode: (content: string) =>
-      runCopy(content, 'code', 'Codigo copiado', 'O bloco foi enviado para a area de transferencia.'),
+      runCopy(content, 'code', 'Code copied', 'The block was sent to the clipboard.'),
     copyMessage: (content: string) =>
-      runCopy(content, 'message', 'Resposta copiada', 'A resposta foi enviada para a area de transferencia.'),
+      runCopy(content, 'message', 'Response copied', 'The response was sent to the clipboard.'),
   }
 }

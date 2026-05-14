@@ -46,10 +46,10 @@ export function AIChatTimeline({ activeThreadTitle, hasHistory, items, onOpenHis
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className="inline-flex items-center rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
-            Timeline operacional
+            Operational timeline
           </span>
           <div className="min-w-0 truncate text-[11px] text-[var(--aethel-text-tertiary)]">
-            {activeThreadTitle ? `Thread em foco: ${activeThreadTitle}` : 'Retome o fluxo certo sem recontar o contexto inteiro.'}
+            {activeThreadTitle ? `Focused thread: ${activeThreadTitle}` : 'Resume the right flow without restating the whole context.'}
           </div>
         </div>
 
@@ -60,7 +60,7 @@ export function AIChatTimeline({ activeThreadTitle, hasHistory, items, onOpenHis
               onClick={() => setIsExpanded((current) => !current)}
               className="inline-flex items-center gap-1.5 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
-              {isExpanded ? 'Ocultar detalhes' : 'Ver detalhes'}
+              {isExpanded ? 'Hide details' : 'View details'}
             </button>
           ) : null}
 
@@ -71,7 +71,7 @@ export function AIChatTimeline({ activeThreadTitle, hasHistory, items, onOpenHis
               className="inline-flex items-center gap-1.5 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
               <History className="h-3.5 w-3.5" />
-              Abrir historico
+              Open history
             </button>
           )}
         </div>
@@ -106,7 +106,7 @@ export function AIChatTimeline({ activeThreadTitle, hasHistory, items, onOpenHis
           })}
           {hiddenCount > 0 ? (
             <div className="px-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
-              +{hiddenCount} eventos adicionais no historico completo
+              +{hiddenCount} additional events in full history
             </div>
           ) : null}
         </div>

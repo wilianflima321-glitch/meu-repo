@@ -39,11 +39,11 @@ function renderResearchCard(artifact: Extract<AIChatEvidenceArtifact, { kind: 'r
 
       <div className="mt-3 flex flex-wrap gap-2 text-[10px] text-[var(--aethel-text-tertiary)]">
         <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5">
-          {artifact.sources.length} fontes
+          {artifact.sources.length} sources
         </span>
         {typeof artifact.averageCredibility === 'number' && (
           <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5">
-            credibilidade media {Math.round(artifact.averageCredibility * 100)}%
+            average credibility {Math.round(artifact.averageCredibility * 100)}%
           </span>
         )}
       </div>
@@ -97,13 +97,13 @@ function renderTraceCard(artifact: Extract<AIChatEvidenceArtifact, { kind: 'trac
 
       <div className="mt-3 flex flex-wrap gap-2 text-[10px] text-[var(--aethel-text-tertiary)]">
         <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5">
-          {artifact.evidence.length} evidencias
+          {artifact.evidence.length} evidence items
         </span>
         <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5">
           {artifact.toolRuns.length} tools
         </span>
         <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5">
-          {artifact.riskChecks.length} riscos
+          {artifact.riskChecks.length} risks
         </span>
       </div>
 
@@ -112,22 +112,22 @@ function renderTraceCard(artifact: Extract<AIChatEvidenceArtifact, { kind: 'trac
           <div className="rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] px-3 py-2">
             <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">Provider</div>
             <div className="mt-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">
-              {artifact.telemetry.provider || 'Nao informado'}
+              {artifact.telemetry.provider || 'Not reported'}
             </div>
           </div>
           <div className="rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] px-3 py-2">
-            <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">Modelo</div>
+            <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">Model</div>
             <div className="mt-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">
-              {artifact.telemetry.model || 'Nao informado'}
+              {artifact.telemetry.model || 'Not reported'}
             </div>
           </div>
           <div className="rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] px-3 py-2">
             <div className="flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
               <Gauge className="h-3 w-3" />
-              Telemetria
+              Telemetry
             </div>
             <div className="mt-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">
-              {typeof artifact.telemetry.tokensUsed === 'number' ? `${artifact.telemetry.tokensUsed} tok` : 'sem tokens'}
+              {typeof artifact.telemetry.tokensUsed === 'number' ? `${artifact.telemetry.tokensUsed} tok` : 'no tokens'}
               {typeof artifact.telemetry.latencyMs === 'number' ? ` - ${artifact.telemetry.latencyMs} ms` : ''}
             </div>
           </div>
@@ -138,7 +138,7 @@ function renderTraceCard(artifact: Extract<AIChatEvidenceArtifact, { kind: 'trac
         <div className="mt-3">
           <div className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
             <BookOpenText className="h-3.5 w-3.5" />
-            Evidencias
+            Evidence
           </div>
           <div className="mt-2 space-y-2">
             {visibleEvidence.map((item, index) => (
@@ -162,7 +162,7 @@ function renderTraceCard(artifact: Extract<AIChatEvidenceArtifact, { kind: 'trac
             <div>
               <div className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                Riscos
+                Risks
               </div>
               <div className="mt-2 space-y-2">
                 {visibleRisks.map((risk, index) => (

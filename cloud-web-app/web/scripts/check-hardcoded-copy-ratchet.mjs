@@ -7,7 +7,7 @@ const ROOT = process.cwd();
 const COMPONENTS_DIR = path.join(ROOT, 'components');
 // Baseline ratchet from V16.1. Lower this number as strings move into locale
 // catalogs; never raise it without intentionally accepting new product-copy debt.
-const MAX_COMPONENT_PT_COPY = 867;
+const MAX_COMPONENT_PT_COPY = 801;
 
 const PORTUGUESE_COPY_PATTERNS = [
   /[áéíóúàâêôãõçÁÉÍÓÚÀÂÊÔÃÕÇ]/,

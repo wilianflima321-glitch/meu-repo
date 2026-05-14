@@ -49,7 +49,7 @@ export function AIChatContextStrip({
           className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${MODE_TONE_CLASSES[consoleMode]}`}
         >
           {modeDefinition?.icon ? <modeDefinition.icon className="h-3.5 w-3.5" /> : <Brain className="h-3.5 w-3.5" />}
-          Modo {modeDefinition?.label ?? consoleMode}
+          Mode {modeDefinition?.label ?? consoleMode}
         </span>
 
         <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)]">
@@ -59,23 +59,23 @@ export function AIChatContextStrip({
 
         <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)]">
           <Brain className="h-3.5 w-3.5" />
-          {agentCount} {agentCount === 1 ? 'agente' : 'agentes'}
+          {agentCount} {agentCount === 1 ? 'agent' : 'agents'}
         </span>
 
         <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)]">
           {isAIWorking ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Radio className="h-3.5 w-3.5" />}
-          {isAIWorking ? 'IA trabalhando' : 'Pronto para responder'}
+          {isAIWorking ? 'AI working' : 'Ready to answer'}
         </span>
         {summarizedGoal ? (
           <span className="inline-flex min-h-[28px] max-w-full items-center gap-1.5 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)]">
             <Target className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className="truncate">Objetivo: {summarizedGoal}</span>
+            <span className="truncate">Goal: {summarizedGoal}</span>
           </span>
         ) : null}
 
         {helperLabel ? (
           <span className="inline-flex min-h-[28px] max-w-full items-center gap-1.5 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_58%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-tertiary)]">
-            <span className="truncate">Contexto: {helperLabel}</span>
+            <span className="truncate">Context: {helperLabel}</span>
           </span>
         ) : null}
       </div>

@@ -83,7 +83,7 @@ export function AIChatHeader({
                 : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]'
             }`}
             title={mode.description}
-            aria-label={`Modo ${mode.label}: ${mode.description}`}
+            aria-label={`Mode ${mode.label}: ${mode.description}`}
             aria-pressed={consoleMode === mode.id}
           >
             <mode.icon className="h-3.5 w-3.5" />
@@ -97,14 +97,14 @@ export function AIChatHeader({
           {hasHistory && (
             <button
               type="button"
-              aria-label="Alternar historico do chat"
+              aria-label="Toggle chat history"
               onClick={onToggleHistorySidebar}
               className={`rounded p-1.5 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${
                 showHistorySidebar
                   ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)] text-[var(--aethel-info)]'
                   : 'text-[var(--aethel-text-tertiary)]'
               }`}
-              title="Historico do chat"
+              title="Chat history"
             >
               <History className="h-4 w-4" />
             </button>
@@ -115,7 +115,7 @@ export function AIChatHeader({
               <div className="relative">
                 <button
                   type="button"
-                  aria-label="Abrir seletor de modelo de IA"
+                  aria-label="Open AI model selector"
                   onClick={onToggleModelSelector}
                   aria-expanded={showModelSelector}
                   className="flex items-center gap-2 rounded px-2 py-1 text-sm transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
@@ -132,7 +132,7 @@ export function AIChatHeader({
                       {models.map((model) => (
                         <button
                           type="button"
-                          aria-label={`Selecionar modelo ${model.name}`}
+                          aria-label={`Select model ${model.name}`}
                           key={model.id}
                           onClick={() => {
                             onModelChange?.(model.id)
@@ -166,12 +166,12 @@ export function AIChatHeader({
                               )}
                               {model.supportsVision && (
                                 <span className="rounded bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] px-1.5 py-0.5 text-[10px] text-[var(--aethel-info-light)]">
-                                  Visao
+                                  Vision
                                 </span>
                               )}
                               {model.supportsVoice && (
                                 <span className="rounded bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] px-1.5 py-0.5 text-[10px] text-[var(--aethel-success)]">
-                                  Voz
+                                  Voice
                                 </span>
                               )}
                             </div>
@@ -182,7 +182,7 @@ export function AIChatHeader({
                             )}
                             {model.inputCost !== undefined && model.outputCost !== undefined && (
                               <span className="text-[11px] text-[var(--aethel-text-quaternary)]">
-                                {formatCost(model.inputCost)}/{formatCost(model.outputCost)} por 1M
+                                {formatCost(model.inputCost)}/{formatCost(model.outputCost)} per 1M
                               </span>
                             )}
                           </div>
@@ -202,26 +202,26 @@ export function AIChatHeader({
                     {modelTierLabel}
                   </span>
                   {inputCostLabel && outputCostLabel && (
-                    <span>{inputCostLabel}/{outputCostLabel} por 1M</span>
+                    <span>{inputCostLabel}/{outputCostLabel} per 1M</span>
                   )}
                   {agentCount > 1 && (
-                    <span className="text-[var(--aethel-text-quaternary)]">x{agentCount} agentes</span>
+                    <span className="text-[var(--aethel-text-quaternary)]">x{agentCount} agents</span>
                   )}
                 </div>
               ) : (
                 <div className="mt-0.5 text-[11px] text-[var(--aethel-text-quaternary)]">
-                  Modo basico
+                  Basic mode
                 </div>
               )}
             </div>
 
             {showAdvancedControls && (
               <div className="flex items-center gap-1">
-                <span className="text-[11px] text-[var(--aethel-text-quaternary)]">Agentes</span>
+                <span className="text-[11px] text-[var(--aethel-text-quaternary)]">Agents</span>
                 {[1, 2, 3].map((count) => (
                   <button
                     type="button"
-                    aria-label={`Definir quantidade de agentes: ${count}`}
+                    aria-label={`Set agent count: ${count}`}
                     key={count}
                     onClick={() => onAgentCountChange(count)}
                     className={`rounded border px-2 py-0.5 text-[11px] ${
@@ -244,14 +244,14 @@ export function AIChatHeader({
               {selectedModel.supportsVoice && onToggleLiveMode && (
                 <button
                   type="button"
-                  aria-label={isLiveMode ? 'Sair do modo ao vivo' : 'Entrar no modo ao vivo'}
+                  aria-label={isLiveMode ? 'Exit live mode' : 'Enter live mode'}
                   onClick={onToggleLiveMode}
                   className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${
                     isLiveMode
                       ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
                       : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'
                   }`}
-                  title={isLiveMode ? 'Sair do modo ao vivo' : 'Entrar no modo ao vivo'}
+                  title={isLiveMode ? 'Exit live mode' : 'Enter live mode'}
                 >
                   <Radio className="h-4 w-4" />
                 </button>
@@ -259,14 +259,14 @@ export function AIChatHeader({
 
               <button
                 type="button"
-                aria-label={isSpeaking ? 'Parar leitura' : 'Ler ultima resposta'}
+                aria-label={isSpeaking ? 'Stop reading' : 'Read latest response'}
                 onClick={onToggleSpeaking}
                 className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${
                   isSpeaking
                     ? 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
                     : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'
                 }`}
-                title={isSpeaking ? 'Parar leitura' : 'Ler ultima resposta'}
+                title={isSpeaking ? 'Stop reading' : 'Read latest response'}
               >
                 {isSpeaking ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </button>
@@ -275,24 +275,24 @@ export function AIChatHeader({
 
           <button
             type="button"
-            aria-label="Limpar chat"
+            aria-label="Clear chat"
             onClick={onClearChat}
             className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-            title="Limpar chat"
+            title="Clear chat"
           >
             <Trash2 className="h-4 w-4" />
           </button>
 
           <button
             type="button"
-            aria-label={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
+            aria-label={showAdvancedControls ? 'Hide advanced controls' : 'Show advanced controls'}
             onClick={onToggleAdvancedControls}
             className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${
               showAdvancedControls
                 ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'
             }`}
-            title={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
+            title={showAdvancedControls ? 'Hide advanced controls' : 'Show advanced controls'}
             aria-pressed={showAdvancedControls}
           >
             <Settings className="h-4 w-4" />

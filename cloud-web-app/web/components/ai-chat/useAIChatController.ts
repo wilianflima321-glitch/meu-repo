@@ -32,20 +32,20 @@ function formatAiErrorForUser(err: unknown): string {
   if (err instanceof AdvancedChatRequestError) {
     switch (err.code) {
       case 'AI_PROVIDER_NOT_CONFIGURED':
-        return 'IA nao configurada. Conecte um provedor para continuar.'
+        return 'AI is not configured. Connect a provider to continue.'
       case 'DEMO_LIMIT_REACHED':
-        return 'Limite da demo atingido. Ative um provedor para continuar.'
+        return 'Demo limit reached. Enable a provider to continue.'
       case 'MENTION_NOT_SUPPORTED':
-        return 'Esse tipo de mention ainda nao e suportado.'
+        return 'This mention type is not supported yet.'
       case 'MODEL_NOT_AVAILABLE':
-        return 'Modelo indisponivel no momento. Tente outro perfil.'
+        return 'Model unavailable right now. Try another profile.'
       default:
-        return err.message || 'Falha na requisicao de IA.'
+        return err.message || 'AI request failed.'
     }
   }
 
   if (err instanceof Error) return err.message
-  return 'Falha na requisicao de IA.'
+  return 'AI request failed.'
 }
 
 function extractContent(raw: string): string {
@@ -76,10 +76,10 @@ function applyConsoleModeBias(message: string, consoleMode: AIChatConsoleMode | 
   if (!consoleMode || consoleMode === 'ask') return message
 
   const prefixes: Record<Exclude<AIChatConsoleMode, 'ask'>, string> = {
-    plan: 'Modo planejar: estruture a resposta em etapas, riscos e proximos passos.',
-    execute: 'Modo executar: priorize passos acionaveis, diff/apply e ordem de execucao.',
-    review: 'Modo revisar: procure riscos, regressao, testes faltando e pontos frageis.',
-    live: 'Modo ao vivo: responda de forma curta, orientada ao estado atual e ao proximo movimento.',
+    plan: 'Plan mode: structure the response into steps, risks, and next actions.',
+    execute: 'Execute mode: prioritize actionable steps, diff/apply, and execution order.',
+    review: 'Review mode: look for risks, regressions, missing tests, and weak points.',
+    live: 'Live mode: answer briefly, oriented to the current state and the next move.',
   }
 
   return `${prefixes[consoleMode]}\n\n${message}`

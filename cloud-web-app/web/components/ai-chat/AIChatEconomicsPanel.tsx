@@ -19,7 +19,7 @@ function formatUsd(value: number) {
 }
 
 function formatCredits(value: number) {
-  return new Intl.NumberFormat('pt-BR').format(value)
+  return new Intl.NumberFormat('en-US').format(value)
 }
 
 function meterTone(status: StudioCostLive['budget']['hourly']['status']) {
@@ -93,9 +93,9 @@ export function AIChatEconomicsPanel({ projectId, currentRunEstimate }: AIChatEc
     return (
       <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 p-4 text-center text-[11px] text-[var(--aethel-text-tertiary)]">
         <AlertTriangle className="h-5 w-5 text-[var(--aethel-warning-light)]" />
-        <p>Economics plane indisponivel.</p>
+        <p>Economics plane unavailable.</p>
         <p className="max-w-[240px] text-[var(--aethel-text-quaternary)]">
-          Nao foi possivel carregar custo ao vivo, wallet e readiness de billing nesta superficie.
+          Could not load live cost, wallet, and billing readiness for this surface.
         </p>
       </div>
     )
@@ -117,7 +117,7 @@ export function AIChatEconomicsPanel({ projectId, currentRunEstimate }: AIChatEc
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.16em]">Economics plane</div>
               <p className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-secondary)]">
-                Wallet, budget e readiness antes de liberar a proxima wave.
+                Wallet, budget, and readiness before releasing the next wave.
               </p>
             </div>
           </div>
@@ -139,8 +139,8 @@ export function AIChatEconomicsPanel({ projectId, currentRunEstimate }: AIChatEc
             </div>
             <p className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">
               {data.wallet.lowBalance
-                ? `Baixo saldo abaixo de ${formatCredits(data.wallet.lowBalanceThreshold)} creditos.`
-                : 'Saldo saudavel para novas execucoes.'}
+                ? `Low balance below ${formatCredits(data.wallet.lowBalanceThreshold)} credits.`
+                : 'Healthy balance for new executions.'}
             </p>
           </div>
 
@@ -153,7 +153,7 @@ export function AIChatEconomicsPanel({ projectId, currentRunEstimate }: AIChatEc
               {typeof currentRunEstimate === 'number' ? formatUsd(currentRunEstimate) : '--'}
             </div>
             <p className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">
-              Media atual por request: {formatUsd(data.metrics.avgCostPerRequestUsd)}.
+              Current average per request: {formatUsd(data.metrics.avgCostPerRequestUsd)}.
             </p>
           </div>
         </div>

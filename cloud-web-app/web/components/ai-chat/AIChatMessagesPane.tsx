@@ -51,7 +51,7 @@ export function AIChatMessagesPane({
           {supportsVoice && (
             <p className="mb-4 flex items-center gap-1 text-xs text-[var(--aethel-info-light)]">
               <Radio className="h-3 w-3" />
-              Este modelo suporta modo ao vivo para voz em tempo real
+              This model supports live mode for real-time voice
             </p>
           )}
           {showAdvancedControls ? (
@@ -59,7 +59,7 @@ export function AIChatMessagesPane({
               {modePreset.quickPrompts.map(({ icon: Icon, label, prompt }) => (
                 <button
                   type="button"
-                  aria-label={`Usar prompt rapido ${label}`}
+                  aria-label={`Use quick prompt ${label}`}
                   key={label}
                   onClick={() => onQuickPrompt(prompt)}
                   className="flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
@@ -72,11 +72,11 @@ export function AIChatMessagesPane({
           ) : (
             <button
               type="button"
-              aria-label="Mostrar atalhos avancados"
+              aria-label="Show advanced shortcuts"
               onClick={onEnableAdvancedControls}
               className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
             >
-              Mostrar atalhos avancados
+              Show advanced shortcuts
             </button>
           )}
         </div>

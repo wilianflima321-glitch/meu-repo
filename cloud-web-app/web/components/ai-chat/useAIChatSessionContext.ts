@@ -53,14 +53,14 @@ export function useAIChatSessionContext({
         {
           id: `system-research-${Date.now()}`,
           role: 'system',
-          content: `Contexto de pesquisa importado do Nexus.\n\n${contextPrompt}`,
+          content: `Research context imported from Nexus.\n\n${contextPrompt}`,
           timestamp: new Date(),
         },
         {
           id: `assistant-research-${Date.now() + 1}`,
           role: 'assistant',
           content:
-            'Handoff de pesquisa carregado. Envie sua proxima mensagem para transformar isso em passos de implementacao. Dica: use @studio @web para uma analise multiagente mais profunda.',
+            'Research handoff loaded. Send your next message to turn it into implementation steps. Tip: use @studio @web for a deeper multi-agent analysis.',
           timestamp: new Date(),
           model: currentModel,
           researchArtifact,

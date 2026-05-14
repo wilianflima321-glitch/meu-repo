@@ -49,7 +49,7 @@ export default function TimelineOverlay({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            aria-label={isPlaying ? 'Pausar timeline do viewport' : 'Reproduzir timeline do viewport'}
+            aria-label={isPlaying ? 'Pause viewport timeline' : 'Play viewport timeline'}
             onClick={onTogglePlay}
             className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition ${
               isPlaying
@@ -61,7 +61,7 @@ export default function TimelineOverlay({
           </button>
           <button
             type="button"
-            aria-label="Voltar timeline para o inicio"
+            aria-label="Rewind timeline to start"
             onClick={() => onTimeChange(0)}
             className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
           >
@@ -69,7 +69,7 @@ export default function TimelineOverlay({
           </button>
           <button
             type="button"
-            aria-label="Avancar timeline para o final"
+            aria-label="Advance timeline to end"
             onClick={() => onTimeChange(duration)}
             className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
           >
@@ -78,7 +78,7 @@ export default function TimelineOverlay({
           <div className="ml-2 flex items-center gap-1 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-1">
             <button
               type="button"
-              aria-label="Ativar modo game para o viewport"
+              aria-label="Activate game mode for the viewport"
               onClick={() => onModeChange('game')}
               className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition ${
                 mode === 'game'
@@ -91,7 +91,7 @@ export default function TimelineOverlay({
             </button>
             <button
               type="button"
-              aria-label="Ativar modo film para o viewport"
+              aria-label="Activate film mode for the viewport"
               onClick={() => onModeChange('film')}
               className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition ${
                 mode === 'film'
@@ -130,7 +130,7 @@ export default function TimelineOverlay({
           </div>
           <button
             type="button"
-            aria-label={mode === 'film' ? 'Renderizar preview de filme do viewport' : 'Exportar clip de jogo do viewport'}
+            aria-label={mode === 'film' ? 'Render viewport film preview' : 'Export viewport game clip'}
             onClick={() => {
               void onExport()
             }}
@@ -156,7 +156,7 @@ export default function TimelineOverlay({
             max={duration}
             step={0.05}
             value={currentTime}
-            aria-label="Controlar playhead da timeline do viewport"
+            aria-label="Control the viewport timeline playhead"
             onChange={(event) => onTimeChange(Number(event.target.value))}
             className="relative h-8 w-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:mt-[-6px] [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-[var(--aethel-primary-light)] [&::-webkit-slider-thumb]:bg-[var(--aethel-primary)]"
           />

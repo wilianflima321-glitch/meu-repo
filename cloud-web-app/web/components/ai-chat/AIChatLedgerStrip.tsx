@@ -56,9 +56,9 @@ export function AIChatLedgerStrip({
     latestEvidence?.kind === 'trace'
       ? `${latestEvidence.toolRuns.length} tools - ${latestEvidence.riskChecks.length} risks`
       : latestEvidence?.kind === 'research'
-        ? `${latestEvidence.sources.length} fontes`
+        ? `${latestEvidence.sources.length} sources`
         : null
-  const executionSummary = `${agentCount} ${agentCount === 1 ? 'agente' : 'agentes'} - modo ${consoleMode}`
+  const executionSummary = `${agentCount} ${agentCount === 1 ? 'agent' : 'agents'} - ${consoleMode} mode`
 
   return (
     <section className="border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_66%,transparent)] px-4 py-2">
@@ -70,7 +70,7 @@ export function AIChatLedgerStrip({
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[var(--aethel-text-secondary)]">
             <Radio className={`h-3.5 w-3.5 ${isAIWorking ? 'animate-pulse text-[var(--aethel-success)]' : ''}`} />
-            {isAIWorking ? 'Execucao ativa' : 'Pronto'}
+            {isAIWorking ? 'Active execution' : 'Ready'}
           </span>
           <span className="truncate text-[11px] text-[var(--aethel-text-tertiary)]">{executionSummary}</span>
         </div>
@@ -84,7 +84,7 @@ export function AIChatLedgerStrip({
             >
               <Code2 className="h-3.5 w-3.5" />
               Review {diffSummary.fileName}
-              <span className="text-[var(--aethel-text-tertiary)]">- {diffSummary.changedLines} linhas</span>
+              <span className="text-[var(--aethel-text-tertiary)]">- {diffSummary.changedLines} lines</span>
             </button>
           ) : null}
 

@@ -49,16 +49,16 @@ export function ViewportTopToolbar({
 }) {
   return (
     <div className="absolute left-4 top-4 z-20 flex flex-wrap items-center gap-2">
-      <button type="button" aria-label="Ativar modo mover" onClick={() => onTransformModeChange('translate')} className={transformMode === 'translate' ? activeButton : iconButton}>
+      <button type="button" aria-label="Activate move mode" onClick={() => onTransformModeChange('translate')} className={transformMode === 'translate' ? activeButton : iconButton}>
         <Move3D className="h-4 w-4" />
       </button>
-      <button type="button" aria-label="Ativar modo rotacionar" onClick={() => onTransformModeChange('rotate')} className={transformMode === 'rotate' ? activeButton : iconButton}>
+      <button type="button" aria-label="Activate rotate mode" onClick={() => onTransformModeChange('rotate')} className={transformMode === 'rotate' ? activeButton : iconButton}>
         <RotateCw className="h-4 w-4" />
       </button>
-      <button type="button" aria-label="Ativar modo escalar" onClick={() => onTransformModeChange('scale')} className={transformMode === 'scale' ? activeButton : iconButton}>
+      <button type="button" aria-label="Activate scale mode" onClick={() => onTransformModeChange('scale')} className={transformMode === 'scale' ? activeButton : iconButton}>
         <Scale3D className="h-4 w-4" />
       </button>
-      <button type="button" aria-label={`${snapEnabled ? 'Desativar' : 'Ativar'} snapping ao grid`} onClick={() => onSnapEnabledChange(!snapEnabled)} className={snapEnabled ? activeButton : iconButton}>
+      <button type="button" aria-label={`${snapEnabled ? 'Disable' : 'Enable'} grid snapping`} onClick={() => onSnapEnabledChange(!snapEnabled)} className={snapEnabled ? activeButton : iconButton}>
         <Target className="h-4 w-4" />
       </button>
       <button type="button" aria-label={`Trocar para espaço ${transformSpace === 'world' ? 'local' : 'world'}`} onClick={() => onTransformSpaceChange(transformSpace === 'world' ? 'local' : 'world')} className={transformSpace === 'local' ? activeButton : iconButton}>
@@ -69,7 +69,7 @@ export function ViewportTopToolbar({
         <button
           key={preset.id}
           type="button"
-          aria-label={`Ativar câmera ${preset.label}`}
+          aria-label={`Activate ${preset.label} camera`}
           onClick={() => onCameraPresetChange(preset.id)}
           className={cameraPreset === preset.id ? activeButton : compactTextButton}
         >
@@ -135,13 +135,13 @@ export function ViewportAICommandPanel({
       <div className="flex items-center justify-between gap-2">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Informative AI</p>
-          <p className="mt-1 text-sm font-medium text-[var(--aethel-text-primary)]">Aplique comandos diretamente no gizmo</p>
+          <p className="mt-1 text-sm font-medium text-[var(--aethel-text-primary)]">Apply commands directly to the gizmo</p>
           <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">
             {creativeMode === 'film' ? 'Film mode prioriza timing, glow cinematográfico e render rápido.' : 'Game mode prioriza play test, lógica visual e iteração de abilities.'}
-            {abilityLabel ? ` Ability ativa: ${abilityLabel}.` : ''}
+            {abilityLabel ? ` Active ability: ${abilityLabel}.` : ''}
           </p>
         </div>
-        <button type="button" aria-label={isPlaying ? 'Parar play test do viewport' : 'Executar play test do viewport'} onClick={onTogglePlayTest} className={panelButton}>
+        <button type="button" aria-label={isPlaying ? 'Stop viewport play test' : 'Run viewport play test'} onClick={onTogglePlayTest} className={panelButton}>
           <Sparkles className="h-4 w-4" />
           {isPlaying ? 'Stop' : 'Play'}
         </button>
@@ -151,10 +151,10 @@ export function ViewportAICommandPanel({
           type="text"
           value={aiCommand}
           onChange={(event) => onAiCommandChange(event.target.value)}
-          aria-label="Comando de IA para transformar objeto selecionado"
+          aria-label="AI command for the selected object"
           className="flex-1 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] outline-none"
         />
-        <button type="button" aria-label="Aplicar comando de IA ao objeto selecionado" onClick={onApplyAiCommand} className={panelButton}>
+        <button type="button" aria-label="Apply AI command to the selected object" onClick={onApplyAiCommand} className={panelButton}>
           <Wand2 className="h-4 w-4" />
           Apply
         </button>

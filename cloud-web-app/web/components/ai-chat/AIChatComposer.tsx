@@ -121,14 +121,14 @@ export function AIChatComposer({
       {isRecording && (
         <div className="mb-3 flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2" role="status" aria-live="polite">
           <div className="h-2 w-2 animate-pulse rounded-full bg-[var(--aethel-error)]" />
-          <span className="flex-1 text-sm text-[var(--aethel-error)]">Gravando... {transcript && `"${transcript}"`}</span>
+          <span className="flex-1 text-sm text-[var(--aethel-error)]">Recording... {transcript && `"${transcript}"`}</span>
           <button
             type="button"
-            aria-label="Parar gravacao de voz"
+            aria-label="Stop voice recording"
             onClick={onStopRecording}
             className="rounded px-2 py-1 text-xs text-[var(--aethel-error)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
           >
-            Parar
+            Stop
           </button>
         </div>
       )}
@@ -136,7 +136,7 @@ export function AIChatComposer({
       {isTranscribing && !isRecording && (
         <div className="mb-3 flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 py-2 text-xs text-[var(--aethel-info-light)]" role="status" aria-live="polite">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          <span>Transcrevendo audio com fallback seguro do servidor...</span>
+          <span>Transcribing audio with safe server fallback...</span>
         </div>
       )}
 
@@ -146,11 +146,11 @@ export function AIChatComposer({
           <span className="flex-1">{voiceError}</span>
           <button
             type="button"
-            aria-label="Fechar erro de voz"
+            aria-label="Dismiss voice error"
             onClick={onClearVoiceError}
             className="rounded px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
           >
-            Fechar
+            Dismiss
           </button>
         </div>
       )}
@@ -160,10 +160,10 @@ export function AIChatComposer({
           {allowAttachments && (
             <button
               type="button"
-              aria-label="Anexar arquivo"
+              aria-label="Attach file"
               onClick={onFileAttach}
               className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-              title="Anexar arquivo"
+              title="Attach file"
             >
               <Paperclip className="h-4 w-4" />
             </button>
@@ -172,10 +172,10 @@ export function AIChatComposer({
           {allowAttachments && supportsVision && (
             <button
               type="button"
-              aria-label="Anexar imagem"
+              aria-label="Attach image"
               onClick={onImageAttach}
               className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-              title="Anexar imagem"
+              title="Attach image"
             >
               <ImageIcon className="h-4 w-4" />
             </button>
@@ -183,7 +183,7 @@ export function AIChatComposer({
 
           <button
             type="button"
-            aria-label={isRecording ? 'Parar gravacao por voz' : 'Iniciar gravacao por voz'}
+            aria-label={isRecording ? 'Stop voice recording' : 'Start voice recording'}
             onClick={onToggleVoice}
             disabled={isTranscribing}
             className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${
@@ -191,7 +191,7 @@ export function AIChatComposer({
                 ? 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] disabled:cursor-wait disabled:opacity-60'
             }`}
-            title={isRecording ? 'Parar gravacao' : 'Entrada de voz'}
+            title={isRecording ? 'Stop recording' : 'Voice input'}
           >
             {isTranscribing ? <Loader2 className="h-4 w-4 animate-spin" /> : isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </button>
@@ -213,10 +213,10 @@ export function AIChatComposer({
             value={input}
             onChange={(event) => onInputChange(event.target.value, event.target.selectionStart ?? event.target.value.length)}
             onKeyDown={onKeyDown}
-            placeholder={isRecording ? 'Ouvindo...' : modePreset.placeholder}
+            placeholder={isRecording ? 'Listening...' : modePreset.placeholder}
             disabled={isLoading}
             aria-controls="mention-suggestions-list"
-            aria-label="Mensagem do chat"
+            aria-label="Chat message"
             className="min-h-[44px] max-h-[200px] w-full resize-none rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-4 py-2.5 pr-12 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             rows={1}
           />
@@ -230,8 +230,8 @@ export function AIChatComposer({
                 ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110'
                 : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
             }`}
-            aria-label={isLoading ? 'Parar resposta' : modePreset.submitLabel}
-            title={isLoading ? 'Parar resposta' : modePreset.submitLabel}
+            aria-label={isLoading ? 'Stop resposta' : modePreset.submitLabel}
+            title={isLoading ? 'Stop resposta' : modePreset.submitLabel}
           >
             {isLoading ? <StopCircle className="h-4 w-4" /> : <Send className="h-4 w-4" />}
           </button>

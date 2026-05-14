@@ -33,10 +33,10 @@ function summarizeMessage(content: string) {
 function buildTimelineItem(message: Message): AIChatTimelineItem {
   const title =
     message.role === 'user'
-      ? 'Voce pediu'
+      ? 'You asked'
       : message.role === 'assistant'
-        ? 'IA respondeu'
-        : 'Sistema'
+        ? 'AI answered'
+        : 'System'
 
   return {
     id: message.id,
@@ -70,16 +70,16 @@ export function useAIChatHistoryMode({
       recentMessages.push({
         id: `live-${liveStatus}`,
         tone: 'live',
-        title: 'Modo ao vivo',
+        title: 'Live mode',
         summary:
           liveStatus === 'listening'
-            ? 'Ouvindo a conversa em tempo real.'
+            ? 'Listening to the live conversation.'
             : liveStatus === 'thinking'
-              ? 'Processando a interacao ao vivo.'
+              ? 'Processing the live interaction.'
               : liveStatus === 'speaking'
-                ? 'Respondendo em voz neste momento.'
-                : 'Pronto para uma nova interacao ao vivo.',
-        meta: 'agora',
+                ? 'Speaking the response now.'
+                : 'Ready for a new live interaction.',
+        meta: 'now',
       })
     }
 

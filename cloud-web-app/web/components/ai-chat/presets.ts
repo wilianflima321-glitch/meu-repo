@@ -58,14 +58,14 @@ export interface AIChatModePreset {
 }
 
 export const QUICK_PROMPTS: QuickPromptDefinition[] = [
-  { icon: Brain, label: 'Explicar erro', prompt: 'Explique este erro e como corrigir:' },
-  { icon: Bug, label: 'Corrigir arquivo', prompt: 'Corrija problemas neste arquivo:' },
-  { icon: Zap, label: 'Otimizar', prompt: 'Otimize este codigo para desempenho:' },
-  { icon: Wand2, label: 'Refatorar', prompt: 'Refatore este codigo:' },
-  { icon: Layers, label: 'Gerar testes', prompt: 'Gere testes unitarios para:' },
-  { icon: Code, label: 'Explicar codigo', prompt: 'Explique este codigo:' },
-  { icon: Lightbulb, label: 'Melhorar UX', prompt: 'Sugira melhorias de UX para:' },
-  { icon: Terminal, label: 'Gerar modulo', prompt: 'Gere um modulo para:' },
+  { icon: Brain, label: 'Explain error', prompt: 'Explain this error and how to fix it:' },
+  { icon: Bug, label: 'Fix file', prompt: 'Fix issues in this file:' },
+  { icon: Zap, label: 'Optimize', prompt: 'Optimize this code for performance:' },
+  { icon: Wand2, label: 'Refactor', prompt: 'Refactor this code:' },
+  { icon: Layers, label: 'Generate tests', prompt: 'Generate unit tests for:' },
+  { icon: Code, label: 'Explain code', prompt: 'Explain this code:' },
+  { icon: Lightbulb, label: 'Improve UX', prompt: 'Suggest UX improvements for:' },
+  { icon: Terminal, label: 'Generate module', prompt: 'Generate a module for:' },
 ]
 
 export const QUICK_MENTIONS: QuickMentionDefinition[] = [
@@ -76,46 +76,46 @@ export const QUICK_MENTIONS: QuickMentionDefinition[] = [
 ]
 
 export const CONSOLE_MODES: AIChatConsoleModeDefinition[] = [
-  { id: 'ask', label: 'Perguntar', icon: MessageSquare, description: 'Perguntas rapidas' },
-  { id: 'plan', label: 'Planejar', icon: Layers, description: 'Planejar tarefas' },
-  { id: 'execute', label: 'Executar', icon: Play, description: 'Executar plano' },
-  { id: 'review', label: 'Revisar', icon: Check, description: 'Revisar mudancas' },
-  { id: 'live', label: 'Ao vivo', icon: Radio, description: 'Conversacao ao vivo' },
+  { id: 'ask', label: 'Ask', icon: MessageSquare, description: 'Quick questions' },
+  { id: 'plan', label: 'Plan', icon: Layers, description: 'Plan tasks' },
+  { id: 'execute', label: 'Execute', icon: Play, description: 'Execute plan' },
+  { id: 'review', label: 'Review', icon: Check, description: 'Review changes' },
+  { id: 'live', label: 'Live', icon: Radio, description: 'Live conversation' },
 ]
 
 export const OPS_TABS: AIChatOpsTabDefinition[] = [
-  { id: 'memory', label: 'Memoria', icon: Brain },
+  { id: 'memory', label: 'Memory', icon: Brain },
   { id: 'rules', label: 'Rules', icon: ScrollText },
   { id: 'evidence', label: 'Evidence', icon: SearchCheck },
   { id: 'economics', label: 'Economics', icon: DollarSign },
-  { id: 'approval', label: 'Aprovacao', icon: Check },
+  { id: 'approval', label: 'Approval', icon: Check },
   { id: 'diff', label: 'Diff', icon: Code },
-  { id: 'execution', label: 'Execucao', icon: ClipboardList },
+  { id: 'execution', label: 'Execution', icon: ClipboardList },
 ]
 
 export const MODE_PRESETS: Record<AIChatConsoleMode, AIChatModePreset> = {
   ask: {
-    placeholder: 'Pergunte para a IA sobre o seu codigo, erro ou arquitetura...',
-    helper: 'Melhor para perguntas rápidas, explicações e desbloqueios pontuais.',
-    submitLabel: 'Enviar pergunta',
-    emptyStateTitle: 'Pergunte e destrave rapido',
+    placeholder: 'Ask AI about your code, error, or architecture...',
+    helper: 'Best for quick questions, explanations, and focused unblocking.',
+    submitLabel: 'Send question',
+    emptyStateTitle: 'Ask and unblock quickly',
     emptyStateDescription:
-      'Use perguntas diretas para explicar código, investigar um erro ou entender o próximo passo sem sair do artefato.',
+      'Use direct questions to explain code, investigate an error, or understand the next step without leaving the artifact.',
     quickPrompts: QUICK_PROMPTS,
     quickMentions: QUICK_MENTIONS,
   },
   plan: {
-    placeholder: 'Descreva o objetivo e eu monto um plano claro com etapas, riscos e ordem de execução...',
-    helper: 'Melhor para transformar uma meta em etapas, riscos, dependências e ordem de ataque.',
-    submitLabel: 'Gerar plano',
-    emptyStateTitle: 'Monte um plano antes de agir',
+    placeholder: 'Describe the goal and I will build a clear plan with steps, risks, and execution order...',
+    helper: 'Best for turning a goal into steps, risks, dependencies, and attack order.',
+    submitLabel: 'Generate plan',
+    emptyStateTitle: 'Build a plan before acting',
     emptyStateDescription:
-      'Peça uma sequência de execução, riscos e prioridades para evitar retrabalho antes de começar a editar.',
+      'Ask for execution sequence, risks, and priorities to avoid rework before editing.',
     quickPrompts: [
-      { icon: Layers, label: 'Quebrar em etapas', prompt: 'Quebre este objetivo em etapas executáveis com prioridades:' },
-      { icon: ClipboardList, label: 'Mapear riscos', prompt: 'Mapeie riscos, dependências e mitigação para:' },
-      { icon: Brain, label: 'Plano técnico', prompt: 'Proponha um plano técnico enxuto para:' },
-      { icon: Lightbulb, label: 'Próximos passos', prompt: 'Liste os próximos passos mais valiosos para:' },
+      { icon: Layers, label: 'Break into steps', prompt: 'Break this goal into executable steps with priorities:' },
+      { icon: ClipboardList, label: 'Map risks', prompt: 'Map risks, dependencies, and mitigations for:' },
+      { icon: Brain, label: 'Technical plan', prompt: 'Propose a lean technical plan for:' },
+      { icon: Lightbulb, label: 'Next steps', prompt: 'List the most valuable next steps for:' },
     ],
     quickMentions: [
       { label: '@codebase', value: '@codebase ' },
@@ -125,17 +125,17 @@ export const MODE_PRESETS: Record<AIChatConsoleMode, AIChatModePreset> = {
     ],
   },
   execute: {
-    placeholder: 'Descreva a mudança e eu foco em passos acionáveis, diff/apply e execução...',
-    helper: 'Melhor para transformar um plano em ações concretas no editor e no runtime.',
-    submitLabel: 'Executar',
-    emptyStateTitle: 'Saia do plano e entre em execução',
+    placeholder: 'Describe the change and I will focus on actionable steps, diff/apply, and execution...',
+    helper: 'Best for turning a plan into concrete editor and runtime actions.',
+    submitLabel: 'Execute',
+    emptyStateTitle: 'Move from plan to execution',
     emptyStateDescription:
-      'Use este modo quando quiser instruções acionáveis, snippets, diffs ou apply orientado ao artefato atual.',
+      'Use this mode when you want actionable instructions, snippets, diffs, or apply steps oriented to the current artifact.',
     quickPrompts: [
-      { icon: Play, label: 'Executar plano', prompt: 'Execute este plano em passos concretos e indique o primeiro diff:' },
-      { icon: Terminal, label: 'Preparar diff', prompt: 'Prepare a mudança com foco em diff/apply para:' },
-      { icon: Wand2, label: 'Implementar', prompt: 'Implemente esta melhoria com passos claros e objetivos:' },
-      { icon: Zap, label: 'Destravar agora', prompt: 'Qual é a ação mais imediata para destravar isto agora?' },
+      { icon: Play, label: 'Execute plan', prompt: 'Execute this plan in concrete steps and identify the first diff:' },
+      { icon: Terminal, label: 'Prepare diff', prompt: 'Prepare the change with diff/apply focus for:' },
+      { icon: Wand2, label: 'Implement', prompt: 'Implement this improvement with clear, focused steps:' },
+      { icon: Zap, label: 'Unblock now', prompt: 'What is the most immediate action to unblock this now?' },
     ],
     quickMentions: [
       { label: '@git:diff', value: '@git:diff ' },
@@ -145,17 +145,17 @@ export const MODE_PRESETS: Record<AIChatConsoleMode, AIChatModePreset> = {
     ],
   },
   review: {
-    placeholder: 'Cole o diff, erro ou arquivo e eu reviso riscos, regressões e testes faltando...',
-    helper: 'Melhor para revisar mudanças com foco em risco, regressão e qualidade final.',
-    submitLabel: 'Revisar',
-    emptyStateTitle: 'Revisão crítica sem perder o contexto',
+    placeholder: 'Paste the diff, error, or file and I will review risks, regressions, and missing tests...',
+    helper: 'Best for reviewing changes with focus on risk, regressions, and final quality.',
+    submitLabel: 'Review',
+    emptyStateTitle: 'Critical review without losing context',
     emptyStateDescription:
-      'Peça uma revisão objetiva de mudanças, cobertura, regressões e sinais de risco antes de seguir.',
+      'Ask for an objective review of changes, coverage, regressions, and risk signals before moving on.',
     quickPrompts: [
-      { icon: Check, label: 'Revisar diff', prompt: 'Revise criticamente este diff e aponte riscos concretos:' },
-      { icon: Bug, label: 'Caçar regressões', prompt: 'Quais regressões ou efeitos colaterais devo esperar em:' },
-      { icon: Layers, label: 'Validar testes', prompt: 'Quais testes estão faltando para blindar esta mudança?' },
-      { icon: Code, label: 'Revisão técnica', prompt: 'Faça uma revisão técnica honesta deste código:' },
+      { icon: Check, label: 'Review diff', prompt: 'Critically review this diff and identify concrete risks:' },
+      { icon: Bug, label: 'Hunt regressions', prompt: 'Which regressions or side effects should I expect in:' },
+      { icon: Layers, label: 'Validate tests', prompt: 'Which tests are missing to protect this change?' },
+      { icon: Code, label: 'Technical review', prompt: 'Give an honest technical review of this code:' },
     ],
     quickMentions: [
       { label: '@git:diff', value: '@git:diff ' },
@@ -165,17 +165,17 @@ export const MODE_PRESETS: Record<AIChatConsoleMode, AIChatModePreset> = {
     ],
   },
   live: {
-    placeholder: 'Converse enquanto a IA trabalha, peça interrupções ou redirecione o próximo passo...',
-    helper: 'Melhor para acompanhamento em tempo real, redirecionamentos rápidos e iteração curta.',
-    submitLabel: 'Enviar ao vivo',
-    emptyStateTitle: 'Acompanhe a execução em tempo real',
+    placeholder: 'Chat while AI works, request interruptions, or redirect the next step...',
+    helper: 'Best for real-time follow-up, quick redirects, and short iteration.',
+    submitLabel: 'Send live',
+    emptyStateTitle: 'Follow execution in real time',
     emptyStateDescription:
-      'Use este modo para intervir no fluxo, mudar direção rápido e manter a IA sincronizada com o momento atual.',
+      'Use this mode to intervene in the flow, change direction quickly, and keep AI synced with the current moment.',
     quickPrompts: [
-      { icon: Radio, label: 'Resumir status', prompt: 'Resuma o status atual em uma linha e proponha o próximo passo:' },
-      { icon: Play, label: 'Continuar', prompt: 'Continue a partir daqui sem repetir contexto já resolvido:' },
-      { icon: Wand2, label: 'Refinar resposta', prompt: 'Refine a resposta anterior de forma mais objetiva:' },
-      { icon: Terminal, label: 'Destravar runtime', prompt: 'Que verificação rápida eu devo fazer agora neste runtime?' },
+      { icon: Radio, label: 'Summarize status', prompt: 'Summarize current status in one line and propose the next step:' },
+      { icon: Play, label: 'Continue', prompt: 'Continue from here without repeating already resolved context:' },
+      { icon: Wand2, label: 'Refine answer', prompt: 'Refine the previous answer more objectively:' },
+      { icon: Terminal, label: 'Unblock runtime', prompt: 'Which quick check should I run now in this runtime?' },
     ],
     quickMentions: [
       { label: '@terminal', value: '@terminal ' },

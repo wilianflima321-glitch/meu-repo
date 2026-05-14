@@ -17,12 +17,12 @@ export interface RunCardProps {
 export function RunCard({ status, duration, cost, model, onInterrupt }: RunCardProps) {
   const statusConfig = {
     idle: {
-      label: 'Aguardando',
+      label: 'Waiting',
       color: 'text-[var(--aethel-text-quaternary)]',
       bgColor: 'bg-[var(--aethel-surface-tertiary)]',
     },
     running: {
-      label: 'Executando',
+      label: 'Running',
       color: 'text-[var(--aethel-info-light)]',
       bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]',
     },
@@ -32,7 +32,7 @@ export function RunCard({ status, duration, cost, model, onInterrupt }: RunCardP
       bgColor: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]',
     },
     failed: {
-      label: 'Falhou',
+      label: 'Failed',
       color: 'text-[var(--aethel-error-light)]',
       bgColor: 'bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]',
     },
@@ -63,10 +63,10 @@ export function RunCard({ status, duration, cost, model, onInterrupt }: RunCardP
             type="button"
             onClick={onInterrupt}
             className="flex items-center gap-1 px-2 py-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] text-[10px] font-medium text-[var(--aethel-error)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_22%,transparent)]"
-            aria-label="Interromper operação"
+            aria-label="Interrupt operação"
           >
             <StopCircle className="w-3 h-3" />
-            Interromper
+            Interrupt
           </button>
         )}
       </div>

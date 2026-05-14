@@ -49,7 +49,7 @@ export function useAIChatProjectRules(projectId?: string) {
       })
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        setError(payload?.message || payload?.error || 'Falha ao carregar regras do projeto.')
+        setError(payload?.message || payload?.error || 'Failed to load project rules.')
         return
       }
 
@@ -62,7 +62,7 @@ export function useAIChatProjectRules(projectId?: string) {
       setSourcePath(typeof rules.sourcePath === 'string' ? rules.sourcePath : null)
       setHasRules(Boolean(rules.hasRules))
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Falha ao carregar regras do projeto.')
+      setError(requestError instanceof Error ? requestError.message : 'Failed to load project rules.')
     } finally {
       setIsLoading(false)
     }
@@ -86,7 +86,7 @@ export function useAIChatProjectRules(projectId?: string) {
       })
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        setError(payload?.message || payload?.error || 'Falha ao salvar regras do projeto.')
+        setError(payload?.message || payload?.error || 'Failed to save project rules.')
         return false
       }
 
@@ -100,7 +100,7 @@ export function useAIChatProjectRules(projectId?: string) {
       setHasRules(Boolean(rules.hasRules))
       return true
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Falha ao salvar regras do projeto.')
+      setError(requestError instanceof Error ? requestError.message : 'Failed to save project rules.')
       return false
     } finally {
       setIsSaving(false)

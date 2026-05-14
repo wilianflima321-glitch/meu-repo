@@ -62,12 +62,12 @@ export function AgentBoard({ agents, onAgentClick }: AgentBoardProps) {
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-[var(--aethel-info-light)]" />
-          <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">Operacao multiagente</span>
-          <span className="text-xs text-[var(--aethel-text-tertiary)]">{agents.length} agentes</span>
+          <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">Multi-agent operation</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">{agents.length} agents</span>
         </div>
         {hasPartialTelemetry && (
           <span className="rounded-full border border-[var(--aethel-border-secondary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-tertiary)]">
-            Telemetria parcial
+            Partial telemetry
           </span>
         )}
       </div>
@@ -113,7 +113,7 @@ export function AgentBoard({ agents, onAgentClick }: AgentBoardProps) {
                       )}
                     </>
                   ) : (
-                    <div className="text-[10px] text-[var(--aethel-text-tertiary)]">Sem telemetria detalhada</div>
+                    <div className="text-[10px] text-[var(--aethel-text-tertiary)]">No detailed telemetry</div>
                   )}
                 </div>
               </div>
@@ -122,7 +122,7 @@ export function AgentBoard({ agents, onAgentClick }: AgentBoardProps) {
 
               {agent.dependency && (
                 <div className="mb-2 text-[10px] text-[var(--aethel-text-quaternary)]">
-                  Depende de: {agent.dependency}
+                  Depends on: {agent.dependency}
                 </div>
               )}
 
@@ -145,7 +145,7 @@ export function AgentBoard({ agents, onAgentClick }: AgentBoardProps) {
                 </>
               ) : (
                 <div className="text-[10px] text-[var(--aethel-text-quaternary)]">
-                  Telemetria por agente ainda nao disponivel nesta execucao.
+                  Per-agent telemetry is not available for this execution yet.
                 </div>
               )}
             </div>

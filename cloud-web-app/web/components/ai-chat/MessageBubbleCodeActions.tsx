@@ -24,37 +24,37 @@ function actionButtonClass(enabled: boolean) {
 
 function describeBridgeSuccess(actionLabel: string) {
   switch (actionLabel) {
-    case 'Aplicar no editor':
+    case 'Apply in editor':
       return {
-        title: 'Snippet aplicado',
-        description: 'O trecho foi enviado para o editor ativo.',
+        title: 'Snippet applied',
+        description: 'The snippet was sent to the active editor.',
       }
-    case 'Abrir diff':
+    case 'Open diff':
       return {
-        title: 'Diff preparado',
-        description: 'A previa antes/depois ja esta no painel lateral.',
+        title: 'Diff prepared',
+        description: 'The before/after preview is ready in the side panel.',
       }
-    case 'Criar arquivo':
+    case 'Create file':
       return {
-        title: 'Arquivo criado',
-        description: 'O snippet foi salvo e aberto no workbench.',
+        title: 'File created',
+        description: 'The snippet was saved and opened in the workbench.',
       }
-    case 'Inserir selecao':
+    case 'Insert selection':
       return {
-        title: 'Snippet inserido',
-        description: 'O trecho foi inserido no cursor atual.',
+        title: 'Snippet inserted',
+        description: 'The snippet was inserted at the current cursor.',
       }
     default:
       return {
-        title: 'Acao concluida',
-        description: 'A alteracao foi aplicada com sucesso.',
+        title: 'Action completed',
+        description: 'The change was applied successfully.',
       }
   }
 }
 
 function describeBridgeFailure(actionLabel: string, result: Extract<ApplyBridgeResult, { ok: false }>) {
   return {
-    title: `${actionLabel} indisponivel`,
+    title: `${actionLabel} unavailable`,
     description: result.message,
   }
 }
@@ -68,8 +68,8 @@ async function runBridgeAction(
 ) {
   if (!enabled) {
     notify.warning(
-      `${actionLabel} indisponivel`,
-      bridge ? 'Abra um arquivo no editor para continuar.' : 'Essa acao aparece dentro do workbench (/ide).'
+      `${actionLabel} unavailable`,
+      bridge ? 'Open a file in the editor to continue.' : 'This action is available inside the workbench (/ide).'
     )
     return
   }
@@ -101,13 +101,13 @@ export function MessageBubbleCodeActions({
         type="button"
         onClick={() => {
           onCopy(code)
-          toast.success('Codigo copiado', 'O bloco foi enviado para a area de transferencia.')
+          toast.success('Code copied', 'The block was sent to the clipboard.')
         }}
         className="flex items-center gap-1 rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]"
-        title="Copiar codigo"
+        title="Copy code"
       >
         <Copy className="h-3.5 w-3.5" />
-        {copied ? 'Copiado' : 'Copiar'}
+        {copied ? 'Copied' : 'Copy'}
       </button>
 
       <button
@@ -117,21 +117,21 @@ export function MessageBubbleCodeActions({
         title={
           editorBridge
             ? hasActiveFile
-              ? 'Substitui a selecao ou insere no cursor'
-              : 'Abra um arquivo no editor'
-            : 'Disponivel no workbench (/ide)'
+              ? 'Replaces the selection or inserts at the cursor'
+              : 'Open a file in the editor'
+            : 'Available in the workbench (/ide)'
         }
         onClick={() =>
           void runBridgeAction(
             editorBridge,
             hasActiveFile,
-            'Aplicar no editor',
+            'Apply in editor',
             () => editorBridge!.applySnippetToEditor(code),
             toast
           )
         }
       >
-        Aplicar no editor
+        Apply in editor
       </button>
 
       <button
@@ -141,39 +141,39 @@ export function MessageBubbleCodeActions({
         title={
           editorBridge
             ? hasActiveFile
-              ? 'Abre o painel lateral com previa antes/depois'
-              : 'Abra um arquivo no editor'
-            : 'Disponivel no workbench (/ide)'
+              ? 'Opens the side panel with before/after preview'
+              : 'Open a file in the editor'
+            : 'Available in the workbench (/ide)'
         }
         onClick={() =>
           void runBridgeAction(
             editorBridge,
             hasActiveFile,
-            'Abrir diff',
+            'Open diff',
             () => editorBridge!.stageDiffForActiveFile(code),
             toast
           )
         }
       >
-        Abrir diff
+        Open diff
       </button>
 
       <button
         type="button"
         disabled={!hasBridge}
         className={actionButtonClass(hasBridge)}
-        title={editorBridge ? 'Cria arquivo via API e abre no editor' : 'Disponivel no workbench (/ide)'}
+        title={editorBridge ? 'Creates a file through the API and opens it in the editor' : 'Available in the workbench (/ide)'}
         onClick={() =>
           void runBridgeAction(
             editorBridge,
             hasBridge,
-            'Criar arquivo',
+            'Create file',
             () => editorBridge!.createFileFromSnippet(code),
             toast
           )
         }
       >
-        Criar arquivo
+        Create file
       </button>
 
       <button
@@ -183,25 +183,25 @@ export function MessageBubbleCodeActions({
         title={
           editorBridge
             ? hasActiveFile
-              ? 'Insere no cursor sem substituir selecao'
-              : 'Abra um arquivo no editor'
-            : 'Disponivel no workbench (/ide)'
+              ? 'Inserts at the cursor without replacing selection'
+              : 'Open a file in the editor'
+            : 'Available in the workbench (/ide)'
         }
         onClick={() =>
           void runBridgeAction(
             editorBridge,
             hasActiveFile,
-            'Inserir selecao',
+            'Insert selection',
             () => editorBridge!.insertSnippetAtCursor(code),
             toast
           )
         }
       >
-        Inserir selecao
+        Insert selection
       </button>
 
       <span className="ml-auto text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
-        {editorBridge ? 'Ponte editor ativa' : 'Workbench: /ide'}
+        {editorBridge ? 'Editor bridge active' : 'Workbench: /ide'}
       </span>
     </div>
   )

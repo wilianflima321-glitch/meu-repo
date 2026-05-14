@@ -54,11 +54,11 @@ export function useVoiceRecording() {
       }
 
       if (!transcriptRef.current.trim() && response.status !== 503) {
-        setVoiceError(payload?.message || payload?.error || 'Nao foi possivel transcrever o audio.');
+        setVoiceError(payload?.message || payload?.error || 'Could not transcribe the audio.');
       }
     } catch {
       if (!transcriptRef.current.trim()) {
-        setVoiceError('Nao foi possivel enviar o audio para transcricao segura.');
+        setVoiceError('Could not send the audio for secure transcription.');
       }
     } finally {
       setIsTranscribing(false);
@@ -90,7 +90,7 @@ export function useVoiceRecording() {
           updateTranscript(finalTranscript || interimTranscript);
         };
         recognitionRef.current.onerror = () => {
-          setVoiceError('Falha ao transcrever. Verifique a permissao do microfone.');
+          setVoiceError('Transcription failed. Check microphone permission.');
         };
         recognitionRef.current.start();
       }
@@ -113,7 +113,7 @@ export function useVoiceRecording() {
     } catch (error) {
       // Surface the error visually; don't leak raw console noise.
       recognitionRef.current?.stop();
-      setVoiceError('Nao foi possivel iniciar a captura de voz. Verifique as permissoes do navegador.');
+      setVoiceError('Could not start voice capture. Check browser permissions.');
     }
   }, [transcribeBlobFallback, updateTranscript]);
 

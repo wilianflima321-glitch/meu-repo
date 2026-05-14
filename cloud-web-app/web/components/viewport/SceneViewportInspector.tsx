@@ -107,8 +107,8 @@ export function SceneViewportInspector({
     <div className="flex h-full flex-col bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)]">
       <div className="border-b border-[var(--aethel-border-primary)] px-4 py-3">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Inspector</p>
-        <h3 className="mt-2 text-sm font-semibold text-[var(--aethel-text-primary)]">{selectedObject?.name ?? 'Nenhum objeto selecionado'}</h3>
-        <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">Transform, snapping e play test conectados ao viewport soberano.</p>
+        <h3 className="mt-2 text-sm font-semibold text-[var(--aethel-text-primary)]">{selectedObject?.name ?? 'No object selected'}</h3>
+        <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">Transform, snapping, and play test connected to the sovereign viewport.</p>
       </div>
       <div className="flex-1 space-y-4 overflow-auto px-4 py-4">
         <div>
@@ -124,7 +124,7 @@ export function SceneViewportInspector({
                 <button
                   key={item.id}
                   type="button"
-                  aria-label={`Ativar modo ${item.label}`}
+                  aria-label={`Activate ${item.label} mode`}
                   onClick={() => onTransformModeChange(item.id)}
                   className={transformMode === item.id ? activeButton : iconButton}
                 >
@@ -149,7 +149,7 @@ export function SceneViewportInspector({
             </button>
             <button
               type="button"
-              aria-label={`${snapEnabled ? 'Desativar' : 'Ativar'} snapping`}
+              aria-label={`${snapEnabled ? 'Disable' : 'Enable'} snapping`}
               onClick={() => onSnapEnabledChange(!snapEnabled)}
               className={panelButton}
             >
@@ -177,7 +177,7 @@ export function SceneViewportInspector({
               <button
                 key={constraint}
                 type="button"
-                aria-label={`Usar constraint ${constraint}`}
+                aria-label={`Use ${constraint} constraint`}
                 onClick={() => onGizmoConstraintChange(constraint)}
                 className={gizmoConstraint === constraint ? activeButton : compactTextButton}
               >
@@ -195,7 +195,7 @@ export function SceneViewportInspector({
               <button
                 key={pivotMode}
                 type="button"
-                aria-label={`Usar pivot ${label}`}
+                aria-label={`Use ${label} pivot`}
                 onClick={() => onGizmoPivotModeChange(pivotMode)}
                 className={gizmoPivotMode === pivotMode ? activeButton : compactTextButton}
               >
@@ -211,7 +211,7 @@ export function SceneViewportInspector({
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">AI + Simulation</p>
           <div className="space-y-2">
-            <button type="button" aria-label="Executar play test" onClick={onTogglePlayTest} className={panelButton}>
+            <button type="button" aria-label="Run play test" onClick={onTogglePlayTest} className={panelButton}>
               <Wand2 className="h-4 w-4" />
               {isPlaying ? 'Stop Play Test' : 'Play Test'}
             </button>
@@ -225,39 +225,39 @@ export function SceneViewportInspector({
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Character Tools</p>
           <div className="grid grid-cols-2 gap-2">
-            <button type="button" aria-label="Abrir editor facial contextual" onClick={onOpenFacialEditor} className={panelButton}>
+            <button type="button" aria-label="Open contextual facial editor" onClick={onOpenFacialEditor} className={panelButton}>
               <Sparkles className="h-4 w-4" />
               Facial
             </button>
-            <button type="button" aria-label="Abrir editor de cabelo contextual" onClick={onOpenHairEditor} className={panelButton}>
+            <button type="button" aria-label="Open contextual hair editor" onClick={onOpenHairEditor} className={panelButton}>
               <Box className="h-4 w-4" />
               Hair
             </button>
           </div>
           <div className="mt-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-3 text-xs text-[var(--aethel-text-secondary)]">
-            <p>Blend shapes ativos: <span className="font-medium text-[var(--aethel-text-primary)]">{facialBlendShapeCount}</span></p>
-            <p className="mt-1">Preset de hair: <span className="font-medium text-[var(--aethel-text-primary)]">{hairPresetLabel}</span></p>
+            <p>Active blend shapes: <span className="font-medium text-[var(--aethel-text-primary)]">{facialBlendShapeCount}</span></p>
+            <p className="mt-1">Hair preset: <span className="font-medium text-[var(--aethel-text-primary)]">{hairPresetLabel}</span></p>
           </div>
         </div>
 
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Workflow Tools</p>
           <div className="grid grid-cols-1 gap-2">
-            <button type="button" aria-label="Abrir editor de visual script contextual" onClick={onOpenVisualScript} className={panelButton}>
+            <button type="button" aria-label="Open contextual visual script editor" onClick={onOpenVisualScript} className={panelButton}>
               <GitBranch className="h-4 w-4" />
               Visual Script
             </button>
-            <button type="button" aria-label="Abrir editor de VFX graph contextual" onClick={onOpenVfxGraph} className={panelButton}>
+            <button type="button" aria-label="Open contextual VFX graph editor" onClick={onOpenVfxGraph} className={panelButton}>
               <Flame className="h-4 w-4" />
               VFX Graph
             </button>
-            <button type="button" aria-label="Abrir editor de abilities contextual" onClick={onOpenAbilityEditor} className={panelButton}>
+            <button type="button" aria-label="Open contextual ability editor" onClick={onOpenAbilityEditor} className={panelButton}>
               <Shield className="h-4 w-4" />
               Ability Editor
             </button>
           </div>
           <div className="mt-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-3 text-xs text-[var(--aethel-text-secondary)]">
-            <p>Workflow ativo: <span className="font-medium text-[var(--aethel-text-primary)]">{activeWorkflowLabel}</span></p>
+            <p>Active workflow: <span className="font-medium text-[var(--aethel-text-primary)]">{activeWorkflowLabel}</span></p>
             <p className="mt-1">Visual Script: <span className="font-medium text-[var(--aethel-text-primary)]">{visualScriptNodeCount}</span> nós · <span className="font-medium text-[var(--aethel-text-primary)]">{visualScriptEdgeCount}</span> edges</p>
           </div>
         </div>
@@ -290,7 +290,7 @@ export function SceneViewportInspector({
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-[var(--aethel-border-subtle)] px-4 py-6 text-center text-xs text-[var(--aethel-text-quaternary)]">
-              Selecione um objeto no viewport ou na hierarchy para editar com gizmo profissional.
+              Select an object in the viewport or hierarchy to edit with the professional gizmo.
             </div>
           )}
         </div>

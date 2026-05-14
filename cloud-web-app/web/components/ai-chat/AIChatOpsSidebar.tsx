@@ -18,7 +18,7 @@ const MonacoChatDiffPanel = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex h-64 items-center justify-center text-[11px] text-[var(--aethel-text-tertiary)]">
-        A carregar comparador Monaco...
+        Loading Monaco comparator...
       </div>
     ),
   }
@@ -156,9 +156,9 @@ export function AIChatOpsSidebar({
             />
           ) : (
             <div className="flex h-full min-h-[160px] flex-col items-center justify-center gap-2 p-4 text-center text-[11px] text-[var(--aethel-text-tertiary)]">
-              <p>Nenhum diff pendente.</p>
+              <p>No pending diff.</p>
               <p className="max-w-[240px] text-[var(--aethel-text-quaternary)]">
-                Use &quot;Abrir diff&quot; em um bloco de codigo da assistente.
+                Use &quot;Open diff&quot; on an assistant code block.
               </p>
             </div>
           ))}
