@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest'
 
 import {
   ENGINE_MODULE_ADAPTERS,
+  createCharacterRigAdapterSummary,
+  createEngineModuleEvidencePacket,
+  createParticleAdapterSummary,
+  createPostProcessingAdapterSummary,
   createSequencerAdapterSummary,
+  createWorldStreamingAdapterSummary,
+  listEngineModuleEvidencePackets,
   validateEngineModuleAdapters,
 } from '@/lib/production/engine-module-adapters'
 import {
@@ -52,5 +58,28 @@ describe('engine module integration plan', () => {
     )
     expect(ENGINE_MODULE_ADAPTERS.every((adapter) => adapter.evidenceSignals.length >= 2)).toBe(true)
     expect(createSequencerAdapterSummary().easingKeys).toContain('linear')
+  })
+
+  it('exposes lightweight summaries for every wired engine runtime', () => {
+    expect(createPostProcessingAdapterSummary().base.tonemapping).toBe('aces')
+    expect(createParticleAdapterSummary().realtime.blendMode).toBe('additive')
+    expect(createCharacterRigAdapterSummary().behaviorTreeContract).toBe('tick')
+    expect(createWorldStreamingAdapterSummary().memoryBudgetSignal).toBe('memoryBudgetMB')
+
+    const packets = listEngineModuleEvidencePackets()
+    expect(packets).toHaveLength(ENGINE_MODULE_ADAPTERS.length)
+    expect(packets.every((packet) => packet.summaryKeys.length > 0)).toBe(true)
+    expect(packets.find((packet) => packet.ownerSurface === '/studio/vfx')?.evidenceSignals).toContain('emitter-shape')
+  })
+
+  it('keeps evidence packets immutable from adapter source definitions', () => {
+    const adapter = ENGINE_MODULE_ADAPTERS[0]
+    const packet = createEngineModuleEvidencePacket(adapter)
+
+    packet.exportedContracts.push('MutatedContract')
+    packet.evidenceSignals.push('mutated-signal')
+
+    expect(adapter.exportedContracts).not.toContain('MutatedContract')
+    expect(adapter.evidenceSignals).not.toContain('mutated-signal')
   })
 })

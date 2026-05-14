@@ -30,6 +30,16 @@ export interface EngineModuleAdapter {
   evidenceSignals: string[];
 }
 
+export interface EngineModuleEvidencePacket {
+  modulePath: string;
+  ownerSurface: EngineModuleAdapterSurface;
+  contractKind: string;
+  runtimeBoundary: EngineModuleRuntimeBoundary;
+  exportedContracts: string[];
+  evidenceSignals: string[];
+  summaryKeys: string[];
+}
+
 export interface SequencerAdapterSummary {
   sequence: SequenceConfig;
   trackTypes: TrackType[];
@@ -137,6 +147,89 @@ export function createSequencerAdapterSummary(): SequencerAdapterSummary {
   };
 }
 
+export function createPostProcessingAdapterSummary(): PostProcessingAdapterSummary {
+  return {
+    base: {
+      enabled: true,
+      antialiasing: 'taa',
+      tonemapping: 'aces',
+      exposure: 1,
+    },
+    bloom: {
+      enabled: true,
+      intensity: 0.35,
+      threshold: 0.82,
+      radius: 0.56,
+    },
+    colorGrading: {
+      enabled: true,
+      contrast: 1.05,
+      saturation: 1.08,
+      lutIntensity: 0.4,
+    },
+  };
+}
+
+export function createParticleAdapterSummary(): ParticleAdapterSummary {
+  return {
+    advanced: {
+      id: 'studio-vfx-default',
+      name: 'Studio VFX Default',
+      duration: 4,
+      looping: true,
+      maxParticles: 12000,
+    },
+    realtime: {
+      maxParticles: 12000,
+      emissionRate: 900,
+      blendMode: 'additive',
+      worldSpace: true,
+    },
+  };
+}
+
+export function createCharacterRigAdapterSummary(): CharacterRigAdapterSummary {
+  return {
+    rigContract: 'controls',
+    facialContract: 'enableLipSync',
+    behaviorTreeContract: 'tick',
+  };
+}
+
+export function createWorldStreamingAdapterSummary(): WorldStreamingAdapterSummary {
+  return {
+    streamingContract: 'maxLoadedChunks',
+    memoryBudgetSignal: 'memoryBudgetMB',
+  };
+}
+
+const SUMMARY_KEYS_BY_CONTRACT_KIND: Record<string, () => string[]> = {
+  'shot-sequence-summary': () => Object.keys(createSequencerAdapterSummary()),
+  'viewport-quality-preset': () => Object.keys(createPostProcessingAdapterSummary()),
+  'vfx-particle-preset': () => Object.keys(createParticleAdapterSummary()),
+  'gpu-particle-runtime': () => Object.keys(createParticleAdapterSummary().realtime),
+  'gameplay-validation-graph': () => Object.keys(createCharacterRigAdapterSummary()),
+  'world-partition-summary': () => Object.keys(createWorldStreamingAdapterSummary()),
+  'character-rig-validation': () => Object.keys(createCharacterRigAdapterSummary()),
+  'facial-animation-review': () => Object.keys(createCharacterRigAdapterSummary()),
+};
+
+export function createEngineModuleEvidencePacket(adapter: EngineModuleAdapter): EngineModuleEvidencePacket {
+  return {
+    modulePath: adapter.modulePath,
+    ownerSurface: adapter.ownerSurface,
+    contractKind: adapter.contractKind,
+    runtimeBoundary: adapter.runtimeBoundary,
+    exportedContracts: [...adapter.exportedContracts],
+    evidenceSignals: [...adapter.evidenceSignals],
+    summaryKeys: SUMMARY_KEYS_BY_CONTRACT_KIND[adapter.contractKind]?.() ?? [],
+  };
+}
+
+export function listEngineModuleEvidencePackets(surface?: EngineModuleAdapterSurface): EngineModuleEvidencePacket[] {
+  return listEngineModuleAdapters(surface).map(createEngineModuleEvidencePacket);
+}
+
 export function listEngineModuleAdapters(surface?: EngineModuleAdapterSurface): EngineModuleAdapter[] {
   return surface
     ? ENGINE_MODULE_ADAPTERS.filter((adapter) => adapter.ownerSurface === surface)
@@ -153,6 +246,9 @@ export function validateEngineModuleAdapters(adapters: EngineModuleAdapter[] = E
     if (!adapter.ownerSurface.startsWith('/studio/')) failures.push(`${adapter.modulePath}: missing Studio owner`);
     if (adapter.exportedContracts.length < 2) failures.push(`${adapter.modulePath}: needs exported contracts`);
     if (adapter.evidenceSignals.length < 2) failures.push(`${adapter.modulePath}: needs evidence signals`);
+    if (createEngineModuleEvidencePacket(adapter).summaryKeys.length === 0) {
+      failures.push(`${adapter.modulePath}: missing summary adapter`);
+    }
   }
 
   return failures;
