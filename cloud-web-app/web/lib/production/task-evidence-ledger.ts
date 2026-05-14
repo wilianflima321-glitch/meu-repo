@@ -14,6 +14,9 @@ export type TaskEvidenceKind =
   | 'cost'
   | 'approval'
   | 'rollback'
+  | 'scope-lock'
+  | 'idempotency'
+  | 'runtime-budget'
   | 'artifact'
 
 export interface TaskEvidenceEvent {
@@ -55,6 +58,9 @@ const KIND_BY_REQUIREMENT: Array<[RegExp, TaskEvidenceKind]> = [
   [/cost|budget/i, 'cost'],
   [/approval/i, 'approval'],
   [/rollback/i, 'rollback'],
+  [/scope lock/i, 'scope-lock'],
+  [/idempotency/i, 'idempotency'],
+  [/runtime|payload/i, 'runtime-budget'],
   [/artifact|render|preview/i, 'artifact'],
 ]
 

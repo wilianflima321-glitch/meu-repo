@@ -17,7 +17,13 @@ describe('internal spine tool bus and safety firewall', () => {
     expect(snapshot.criticalTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
     expect(snapshot.replayRequiredTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
     expect(snapshot.explicitApprovalTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
+    expect(snapshot.idempotencyRequiredTools).toEqual(expect.arrayContaining(['diff-proposal', 'deployment']))
+    expect(snapshot.readReceiptRequiredTools).toEqual(expect.arrayContaining(['repository-cartography', 'diff-proposal']))
+    expect(snapshot.scopeLockedTools).toEqual(expect.arrayContaining(['diff-proposal', 'render-queue', 'deployment']))
+    expect(snapshot.rollbackRequiredTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
+    expect(snapshot.writeScopedTools).toEqual(expect.arrayContaining(['mission-ledger', 'diff-proposal', 'render-queue']))
     expect(tools.find((tool) => tool.id === 'huggingface-mirror')?.requiredEvidence.join(' ')).toContain('metadata-first')
+    expect(tools.find((tool) => tool.id === 'deployment')?.rollbackStrategy).toBe('deployment-rollback')
   })
 
   it('holds browser operator actions until replay, DOM, screenshot, pause control, and human approval exist', () => {
@@ -49,6 +55,10 @@ describe('internal spine tool bus and safety firewall', () => {
       maxCostUsd: 8,
       requestedRuntime: 'cloud-sandbox',
       approvalToken: 'human-approval:release-manager:42',
+      idempotencyKey: 'deploy-preview-42',
+      readReceiptRefs: ['read-receipt:release-plan'],
+      scopeLockRef: 'scope-lock:release-surface',
+      rollbackRef: 'rollback:plan',
       evidenceRefs: ['dry-run:deploy-preview', 'rollback:plan', 'replay:release-approval'],
     })
 
@@ -57,6 +67,42 @@ describe('internal spine tool bus and safety firewall', () => {
     expect(decision.runtimeTarget).toBe('cloud-sandbox')
     expect(decision.requiredApprovals).toContain('explicit human approval')
     expect(decision.requiredEvidence).toEqual(expect.arrayContaining(['deploy preview', 'rollback plan', 'replay evidence']))
+  })
+
+  it('holds write tools until idempotency, read receipts, scope locks, rollback, and budget are present', () => {
+    const decision = evaluateAgentToolInvocation({
+      toolId: 'diff-proposal',
+      mode: 'Builder',
+      projectId: 'project-1',
+      intent: 'Patch the billing service implementation',
+      payloadBytes: 128_000,
+    })
+
+    expect(decision.allowed).toBe(false)
+    expect(decision.sandboxPolicy).toBe('write-scoped')
+    expect(decision.rollbackStrategy).toBe('diff-revert')
+    expect(decision.blockers.join(' ')).toContain('idempotency key')
+    expect(decision.blockers.join(' ')).toContain('read receipts')
+    expect(decision.blockers.join(' ')).toContain('scope lock')
+    expect(decision.blockers.join(' ')).toContain('rollback evidence')
+    expect(decision.blockers.join(' ')).toContain('maxCostUsd')
+  })
+
+  it('blocks oversized payloads before local or cloud execution can freeze the workspace', () => {
+    const decision = evaluateAgentToolInvocation({
+      toolId: 'huggingface-mirror',
+      mode: 'Creative',
+      projectId: 'project-1',
+      intent: 'Mirror a huge model repository into the project brain',
+      maxCostUsd: 2,
+      payloadBytes: 80 * 1024 * 1024,
+      readReceiptRefs: ['read-receipt:hf-card'],
+      evidenceRefs: ['metadata-first scan', 'license summary'],
+    })
+
+    expect(decision.allowed).toBe(false)
+    expect(decision.blockers.join(' ')).toContain('maxPayloadBytes')
+    expect(decision.runtimeTarget).toBe('human-held')
   })
 
   it('blocks prompt injection found during browser navigation instead of treating the page as instructions', () => {

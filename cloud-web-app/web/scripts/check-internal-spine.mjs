@@ -33,6 +33,12 @@ requirePattern('lib/production/agent-tool-bus.ts', /evaluateAgentToolInvocation/
 requirePattern('lib/production/agent-tool-bus.ts', /browser-operator/, 'browser automation must be a governed tool')
 requirePattern('lib/production/agent-tool-bus.ts', /explicit-human/, 'high-risk tools must require explicit human approval')
 requirePattern('lib/production/agent-tool-bus.ts', /huggingface-mirror/, 'external AI asset/repo sources must be modeled as metadata-first tools')
+requirePattern('lib/production/agent-tool-bus.ts', /requiresIdempotencyKey/, 'mutating or replayable tools must require idempotency keys')
+requirePattern('lib/production/agent-tool-bus.ts', /requiresReadReceipts/, 'agents must prove what they read before writes and research-heavy actions')
+requirePattern('lib/production/agent-tool-bus.ts', /requiresScopeLock/, 'write tools must require scoped ownership locks')
+requirePattern('lib/production/agent-tool-bus.ts', /maxPayloadBytes/, 'heavy tools must cap payload size before local/cloud execution')
+requirePattern('lib/production/agent-tool-bus.ts', /rollbackStrategy/, 'mutating tools must declare rollback strategy')
+requirePattern('lib/production/agent-tool-bus.ts', /sandboxPolicy/, 'every tool must declare its sandbox policy')
 
 requireFile('lib/production/high-risk-action-firewall.ts', 'high-risk actions need a safety firewall')
 requirePattern('lib/production/high-risk-action-firewall.ts', /investment/, 'investment-like actions must be classified')
@@ -57,6 +63,9 @@ requirePattern('lib/production/task-evidence-ledger.ts', /rollback/, 'ledger mus
 
 requireFile('__tests__/production/internal-spine-tool-bus.test.ts', 'internal spine tool bus tests must exist')
 requirePattern('__tests__/production/internal-spine-tool-bus.test.ts', /investment-like actions/, 'tests must cover investment/firewall risk')
+requirePattern('__tests__/production/internal-spine-tool-bus.test.ts', /scope locks/, 'tests must cover scope-lock enforcement')
+requirePattern('__tests__/production/internal-spine-tool-bus.test.ts', /idempotency/, 'tests must cover idempotency enforcement')
+requirePattern('__tests__/production/internal-spine-tool-bus.test.ts', /maxPayloadBytes/, 'tests must cover payload budget enforcement')
 requireFile('__tests__/production/multi-resolution-project-memory.test.ts', 'multi-resolution memory tests must exist')
 requirePattern('__tests__/production/multi-resolution-project-memory.test.ts', /GB-scale repository/, 'tests must cover huge repo memory policy')
 requireFile('__tests__/production/task-evidence-ledger.test.ts', 'task evidence ledger tests must exist')

@@ -21,6 +21,18 @@ export type AgentToolRuntimeTarget =
 export type AgentToolRisk = 'low' | 'medium' | 'high' | 'critical'
 export type AgentToolApproval = 'none' | 'review' | 'explicit-human'
 export type AgentToolCostClass = 'free' | 'metered-low' | 'metered-medium' | 'metered-high'
+export type AgentToolRollbackStrategy =
+  | 'none'
+  | 'diff-revert'
+  | 'artifact-delete'
+  | 'deployment-rollback'
+  | 'human-recovery'
+export type AgentToolSandboxPolicy =
+  | 'read-only'
+  | 'write-scoped'
+  | 'network-allowed'
+  | 'browser-held'
+  | 'release-held'
 
 export interface AgentToolPermissions {
   readProject: boolean
@@ -44,9 +56,15 @@ export interface AgentToolDefinition {
   approval: AgentToolApproval
   costClass: AgentToolCostClass
   defaultTimeoutMs: number
+  maxPayloadBytes: number
   permissions: AgentToolPermissions
+  sandboxPolicy: AgentToolSandboxPolicy
+  rollbackStrategy: AgentToolRollbackStrategy
   requiresReplay: boolean
   requiresRollback: boolean
+  requiresIdempotencyKey: boolean
+  requiresReadReceipts: boolean
+  requiresScopeLock: boolean
   requiredEvidence: string[]
 }
 
@@ -59,6 +77,11 @@ export interface AgentToolInvocation {
   targetPaths?: string[]
   requestedRuntime?: AgentToolRuntimeTarget
   maxCostUsd?: number | null
+  payloadBytes?: number | null
+  idempotencyKey?: string | null
+  readReceiptRefs?: string[]
+  scopeLockRef?: string | null
+  rollbackRef?: string | null
   evidenceRefs?: string[]
   approvalToken?: string | null
   allowedDomains?: string[]
@@ -71,12 +94,17 @@ export interface AgentToolBusDecision {
   tool: AgentToolDefinition
   runtimeTarget: AgentToolRuntimeTarget
   risk: AgentToolRisk
+  sandboxPolicy: AgentToolSandboxPolicy
+  rollbackStrategy: AgentToolRollbackStrategy
   timeoutMs: number
   requiredApprovals: string[]
   requiredEvidence: string[]
   blockers: string[]
   warnings: string[]
 }
+
+const KB = 1024
+const MB = KB * KB
 
 const basePermissions: AgentToolPermissions = {
   readProject: true,
@@ -101,6 +129,22 @@ function tool(
   return { id, ...patch }
 }
 
+function evidenceIncludes(invocation: AgentToolInvocation, pattern: RegExp): boolean {
+  return invocation.evidenceRefs?.some((ref) => pattern.test(ref)) ?? false
+}
+
+function hasReadReceipt(invocation: AgentToolInvocation): boolean {
+  return (invocation.readReceiptRefs?.length ?? 0) > 0 || evidenceIncludes(invocation, /read[-_ ]?receipt/i)
+}
+
+function hasScopeLock(invocation: AgentToolInvocation): boolean {
+  return Boolean(invocation.scopeLockRef) || evidenceIncludes(invocation, /(scope[-_ ]?lock|surface[-_ ]?lock|lock:)/i)
+}
+
+function hasRollbackEvidence(invocation: AgentToolInvocation): boolean {
+  return Boolean(invocation.rollbackRef) || evidenceIncludes(invocation, /rollback/i)
+}
+
 export function getCanonicalAgentTools(): AgentToolDefinition[] {
   return [
     tool('project-brain', {
@@ -112,9 +156,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'none',
       costClass: 'free',
       defaultTimeoutMs: 15_000,
+      maxPayloadBytes: 1 * MB,
       permissions: permissions(),
+      sandboxPolicy: 'read-only',
+      rollbackStrategy: 'none',
       requiresReplay: false,
       requiresRollback: false,
+      requiresIdempotencyKey: false,
+      requiresReadReceipts: false,
+      requiresScopeLock: false,
       requiredEvidence: ['brain read receipt'],
     }),
     tool('mission-ledger', {
@@ -126,9 +176,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'none',
       costClass: 'free',
       defaultTimeoutMs: 15_000,
-      permissions: permissions(),
+      maxPayloadBytes: 512 * KB,
+      permissions: permissions({ writeProject: true }),
+      sandboxPolicy: 'write-scoped',
+      rollbackStrategy: 'none',
       requiresReplay: false,
       requiresRollback: false,
+      requiresIdempotencyKey: true,
+      requiresReadReceipts: false,
+      requiresScopeLock: false,
       requiredEvidence: ['ledger event'],
     }),
     tool('repository-cartography', {
@@ -140,9 +196,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'review',
       costClass: 'metered-low',
       defaultTimeoutMs: 120_000,
+      maxPayloadBytes: 50 * MB,
       permissions: permissions({ externalNetwork: true }),
+      sandboxPolicy: 'network-allowed',
+      rollbackStrategy: 'none',
       requiresReplay: false,
       requiresRollback: false,
+      requiresIdempotencyKey: false,
+      requiresReadReceipts: true,
+      requiresScopeLock: false,
       requiredEvidence: ['cartography manifest', 'context budget'],
     }),
     tool('context-budget', {
@@ -154,9 +216,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'none',
       costClass: 'free',
       defaultTimeoutMs: 20_000,
+      maxPayloadBytes: 5 * MB,
       permissions: permissions(),
+      sandboxPolicy: 'read-only',
+      rollbackStrategy: 'none',
       requiresReplay: false,
       requiresRollback: false,
+      requiresIdempotencyKey: false,
+      requiresReadReceipts: true,
+      requiresScopeLock: false,
       requiredEvidence: ['retrieval plan'],
     }),
     tool('file-read', {
@@ -168,9 +236,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'none',
       costClass: 'free',
       defaultTimeoutMs: 20_000,
+      maxPayloadBytes: 10 * MB,
       permissions: permissions(),
+      sandboxPolicy: 'read-only',
+      rollbackStrategy: 'none',
       requiresReplay: false,
       requiresRollback: false,
+      requiresIdempotencyKey: false,
+      requiresReadReceipts: true,
+      requiresScopeLock: false,
       requiredEvidence: ['file read receipt'],
     }),
     tool('diff-proposal', {
@@ -182,9 +256,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'review',
       costClass: 'metered-low',
       defaultTimeoutMs: 60_000,
+      maxPayloadBytes: 5 * MB,
       permissions: permissions({ writeProject: true }),
+      sandboxPolicy: 'write-scoped',
+      rollbackStrategy: 'diff-revert',
       requiresReplay: false,
       requiresRollback: true,
+      requiresIdempotencyKey: true,
+      requiresReadReceipts: true,
+      requiresScopeLock: true,
       requiredEvidence: ['diff', 'rollback plan', 'read receipts'],
     }),
     tool('test-runner', {
@@ -196,9 +276,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'none',
       costClass: 'metered-low',
       defaultTimeoutMs: 180_000,
+      maxPayloadBytes: 2 * MB,
       permissions: permissions(),
+      sandboxPolicy: 'read-only',
+      rollbackStrategy: 'none',
       requiresReplay: false,
       requiresRollback: false,
+      requiresIdempotencyKey: true,
+      requiresReadReceipts: false,
+      requiresScopeLock: false,
       requiredEvidence: ['test output'],
     }),
     tool('deep-research', {
@@ -210,9 +296,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'review',
       costClass: 'metered-medium',
       defaultTimeoutMs: 180_000,
+      maxPayloadBytes: 10 * MB,
       permissions: permissions({ externalNetwork: true }),
+      sandboxPolicy: 'network-allowed',
+      rollbackStrategy: 'none',
       requiresReplay: false,
       requiresRollback: false,
+      requiresIdempotencyKey: false,
+      requiresReadReceipts: true,
+      requiresScopeLock: false,
       requiredEvidence: ['source citations', 'research packet'],
     }),
     tool('github-mirror', {
@@ -224,9 +316,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'review',
       costClass: 'metered-low',
       defaultTimeoutMs: 120_000,
+      maxPayloadBytes: 20 * MB,
       permissions: permissions({ externalNetwork: true }),
+      sandboxPolicy: 'network-allowed',
+      rollbackStrategy: 'none',
       requiresReplay: false,
       requiresRollback: false,
+      requiresIdempotencyKey: false,
+      requiresReadReceipts: true,
+      requiresScopeLock: false,
       requiredEvidence: ['metadata manifest', 'license summary'],
     }),
     tool('huggingface-mirror', {
@@ -238,9 +336,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'review',
       costClass: 'metered-medium',
       defaultTimeoutMs: 240_000,
+      maxPayloadBytes: 50 * MB,
       permissions: permissions({ externalNetwork: true }),
+      sandboxPolicy: 'network-allowed',
+      rollbackStrategy: 'none',
       requiresReplay: false,
       requiresRollback: false,
+      requiresIdempotencyKey: false,
+      requiresReadReceipts: true,
+      requiresScopeLock: false,
       requiredEvidence: ['metadata-first scan', 'license summary', 'download budget'],
     }),
     tool('browser-operator', {
@@ -252,9 +356,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'explicit-human',
       costClass: 'metered-medium',
       defaultTimeoutMs: 180_000,
+      maxPayloadBytes: 5 * MB,
       permissions: permissions({ externalNetwork: true, browserControl: true, userAccount: true, secrets: true }),
+      sandboxPolicy: 'browser-held',
+      rollbackStrategy: 'human-recovery',
       requiresReplay: true,
       requiresRollback: true,
+      requiresIdempotencyKey: true,
+      requiresReadReceipts: false,
+      requiresScopeLock: false,
       requiredEvidence: ['browser replay', 'screenshot', 'DOM snapshot', 'approval record'],
     }),
     tool('render-queue', {
@@ -266,10 +376,16 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'review',
       costClass: 'metered-high',
       defaultTimeoutMs: 300_000,
-      permissions: permissions(),
+      maxPayloadBytes: 20 * MB,
+      permissions: permissions({ writeProject: true }),
+      sandboxPolicy: 'write-scoped',
+      rollbackStrategy: 'artifact-delete',
       requiresReplay: false,
-      requiresRollback: false,
-      requiredEvidence: ['render contract', 'artifact links', 'performance report'],
+      requiresRollback: true,
+      requiresIdempotencyKey: true,
+      requiresReadReceipts: true,
+      requiresScopeLock: true,
+      requiredEvidence: ['render contract', 'artifact links', 'performance report', 'rollback plan'],
     }),
     tool('deployment', {
       label: 'Deployment',
@@ -280,9 +396,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'explicit-human',
       costClass: 'metered-low',
       defaultTimeoutMs: 240_000,
+      maxPayloadBytes: 5 * MB,
       permissions: permissions({ externalNetwork: true, deployment: true, writeProject: true }),
+      sandboxPolicy: 'release-held',
+      rollbackStrategy: 'deployment-rollback',
       requiresReplay: true,
       requiresRollback: true,
+      requiresIdempotencyKey: true,
+      requiresReadReceipts: true,
+      requiresScopeLock: true,
       requiredEvidence: ['build result', 'deploy preview', 'approval record', 'rollback plan'],
     }),
     tool('human-approval', {
@@ -294,9 +416,15 @@ export function getCanonicalAgentTools(): AgentToolDefinition[] {
       approval: 'none',
       costClass: 'free',
       defaultTimeoutMs: 86_400_000,
+      maxPayloadBytes: 128 * KB,
       permissions: permissions(),
+      sandboxPolicy: 'read-only',
+      rollbackStrategy: 'none',
       requiresReplay: false,
       requiresRollback: false,
+      requiresIdempotencyKey: true,
+      requiresReadReceipts: false,
+      requiresScopeLock: false,
       requiredEvidence: ['approval record'],
     }),
   ]
@@ -321,6 +449,8 @@ export function evaluateAgentToolInvocation(invocation: AgentToolInvocation): Ag
       tool: fallback,
       runtimeTarget: 'human-held',
       risk: 'critical',
+      sandboxPolicy: 'read-only',
+      rollbackStrategy: 'human-recovery',
       timeoutMs: 0,
       requiredApprovals: ['tool registry review'],
       requiredEvidence: ['unknown tool request'],
@@ -337,6 +467,12 @@ export function evaluateAgentToolInvocation(invocation: AgentToolInvocation): Ag
   if (!toolDefinition.allowedModes.includes(invocation.mode)) {
     blockers.push(`${invocation.mode} mode cannot use ${toolDefinition.label}.`)
   }
+  if (invocation.requestedRuntime && !toolDefinition.runtimeTargets.includes(invocation.requestedRuntime)) {
+    blockers.push(`${toolDefinition.label} cannot run on requested runtime ${invocation.requestedRuntime}.`)
+  }
+  if (typeof invocation.payloadBytes === 'number' && invocation.payloadBytes > toolDefinition.maxPayloadBytes) {
+    blockers.push(`${toolDefinition.label} payload exceeds maxPayloadBytes (${invocation.payloadBytes} > ${toolDefinition.maxPayloadBytes}).`)
+  }
   if (toolDefinition.approval === 'review') requiredApprovals.push('review approval')
   if (toolDefinition.approval === 'explicit-human') {
     requiredApprovals.push('explicit human approval')
@@ -346,6 +482,27 @@ export function evaluateAgentToolInvocation(invocation: AgentToolInvocation): Ag
   }
   if (toolDefinition.requiresReplay) requiredEvidence.push('replay evidence')
   if (toolDefinition.requiresRollback) requiredEvidence.push('rollback plan')
+  if (toolDefinition.requiresIdempotencyKey) {
+    requiredEvidence.push('idempotency key')
+    if (!invocation.idempotencyKey) {
+      blockers.push(`${toolDefinition.label} requires an idempotency key for replay-safe execution.`)
+    }
+  }
+  if (toolDefinition.requiresReadReceipts) {
+    requiredEvidence.push('read receipts')
+    if (!hasReadReceipt(invocation)) {
+      blockers.push(`${toolDefinition.label} requires read receipts before execution.`)
+    }
+  }
+  if (toolDefinition.requiresScopeLock) {
+    requiredEvidence.push('scope lock')
+    if (!hasScopeLock(invocation)) {
+      blockers.push(`${toolDefinition.label} requires a scope lock before execution.`)
+    }
+  }
+  if (toolDefinition.requiresRollback && !hasRollbackEvidence(invocation)) {
+    blockers.push(`${toolDefinition.label} requires rollback evidence before execution.`)
+  }
   if (toolDefinition.costClass !== 'free' && typeof invocation.maxCostUsd !== 'number') {
     blockers.push(`${toolDefinition.label} requires a maxCostUsd budget.`)
   }
@@ -356,9 +513,9 @@ export function evaluateAgentToolInvocation(invocation: AgentToolInvocation): Ag
     amountUsd: invocation.maxCostUsd,
     hasExplicitHumanApproval: Boolean(invocation.approvalToken),
     approvalToken: invocation.approvalToken,
-    hasReplayEvidence: invocation.evidenceRefs?.some((ref) => ref.includes('replay')) ?? false,
-    hasDryRunEvidence: invocation.evidenceRefs?.some((ref) => ref.includes('preview') || ref.includes('dry-run')) ?? false,
-    hasRollbackPlan: invocation.evidenceRefs?.some((ref) => ref.includes('rollback')) ?? false,
+    hasReplayEvidence: evidenceIncludes(invocation, /replay/i),
+    hasDryRunEvidence: evidenceIncludes(invocation, /(preview|dry-run)/i),
+    hasRollbackPlan: hasRollbackEvidence(invocation),
     hasSpendingLimit: typeof invocation.maxCostUsd === 'number',
   })
 
@@ -373,10 +530,10 @@ export function evaluateAgentToolInvocation(invocation: AgentToolInvocation): Ag
     const browserDecision = evaluateBrowserOperatorPolicy({
       targetUrl: invocation.targetUrl ?? '',
       intendedAction: invocation.intent,
-      hasReplayCapture: invocation.evidenceRefs?.some((ref) => ref.includes('replay')) ?? false,
-      hasScreenshotCapture: invocation.evidenceRefs?.some((ref) => ref.includes('screenshot')) ?? false,
-      hasDomSnapshot: invocation.evidenceRefs?.some((ref) => ref.includes('dom')) ?? false,
-      hasPauseControl: invocation.evidenceRefs?.some((ref) => ref.includes('pause')) ?? false,
+      hasReplayCapture: evidenceIncludes(invocation, /replay/i),
+      hasScreenshotCapture: evidenceIncludes(invocation, /screenshot/i),
+      hasDomSnapshot: evidenceIncludes(invocation, /dom/i),
+      hasPauseControl: evidenceIncludes(invocation, /pause/i),
       hasHumanApproval: Boolean(invocation.approvalToken),
       approvalToken: invocation.approvalToken,
       allowedDomains: invocation.allowedDomains,
@@ -399,6 +556,8 @@ export function evaluateAgentToolInvocation(invocation: AgentToolInvocation): Ag
     tool: toolDefinition,
     runtimeTarget,
     risk: toolDefinition.risk,
+    sandboxPolicy: toolDefinition.sandboxPolicy,
+    rollbackStrategy: toolDefinition.rollbackStrategy,
     timeoutMs: toolDefinition.defaultTimeoutMs,
     requiredApprovals: Array.from(new Set(requiredApprovals)),
     requiredEvidence: Array.from(new Set(requiredEvidence)),
@@ -416,5 +575,10 @@ export function buildAgentToolBusSnapshot() {
     criticalTools: tools.filter((toolDefinition) => toolDefinition.risk === 'critical').map((toolDefinition) => toolDefinition.id),
     replayRequiredTools: tools.filter((toolDefinition) => toolDefinition.requiresReplay).map((toolDefinition) => toolDefinition.id),
     explicitApprovalTools: tools.filter((toolDefinition) => toolDefinition.approval === 'explicit-human').map((toolDefinition) => toolDefinition.id),
+    idempotencyRequiredTools: tools.filter((toolDefinition) => toolDefinition.requiresIdempotencyKey).map((toolDefinition) => toolDefinition.id),
+    readReceiptRequiredTools: tools.filter((toolDefinition) => toolDefinition.requiresReadReceipts).map((toolDefinition) => toolDefinition.id),
+    scopeLockedTools: tools.filter((toolDefinition) => toolDefinition.requiresScopeLock).map((toolDefinition) => toolDefinition.id),
+    rollbackRequiredTools: tools.filter((toolDefinition) => toolDefinition.requiresRollback).map((toolDefinition) => toolDefinition.id),
+    writeScopedTools: tools.filter((toolDefinition) => toolDefinition.sandboxPolicy === 'write-scoped').map((toolDefinition) => toolDefinition.id),
   }
 }
