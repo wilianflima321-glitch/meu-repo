@@ -66,9 +66,29 @@ requirePattern(
   'contract must merge into Project Brain / production graphs'
 )
 requirePattern(
+  'app/api/projects/[id]/production-state/game-spine/route.ts',
+  /mergeGameProductionSpineIntoProductionState/,
+  'agents need an API route to persist the game production spine'
+)
+requirePattern(
+  'app/api/projects/[id]/production-state/game-spine/route.ts',
+  /collectApprovedEvidenceRefs/,
+  'route readiness must not count placeholder required evidence as approved evidence'
+)
+requirePattern(
+  'app/api/projects/[id]/production-state/game-spine/route.ts',
+  /Forbidden/,
+  'route must enforce write permissions before mutating Project Brain'
+)
+requirePattern(
   '__tests__/production/game-production-spine.test.ts',
   /holds readiness until every graph has evidence/,
   'readiness tests must prevent fake done status'
+)
+requirePattern(
+  '__tests__/api/production-state-game-spine-route.test.ts',
+  /keeps release blocked/,
+  'API tests must prove the route persists without fake release readiness'
 )
 requirePattern(
   '__tests__/production/game-production-spine.test.ts',
