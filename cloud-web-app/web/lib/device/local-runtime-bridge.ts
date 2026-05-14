@@ -41,6 +41,7 @@ export type LocalRuntimeToolchainFeature =
   | 'basisu'
   | 'openusd'
   | 'blender-headless'
+  | 'wgpu-native'
 
 export type LocalRuntimeRendererBackend =
   | 'wgpu-native'
@@ -143,6 +144,28 @@ function asEnumArray<T extends string>(value: unknown, allowed: readonly T[]): T
   return result.length > 0 ? Array.from(new Set(result)) : undefined
 }
 
+function readAlias(source: Record<string, unknown>, ...keys: string[]): unknown {
+  for (const key of keys) {
+    if (key in source) return source[key]
+  }
+  return undefined
+}
+
+function asEnumArrayWithAliases<T extends string>(
+  value: unknown,
+  allowed: readonly T[],
+  aliases: Record<string, T>
+): T[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  const result = value
+    .map((entry) => {
+      if (typeof entry !== 'string') return null
+      return aliases[entry] ?? aliases[entry.toLowerCase()] ?? (allowed.includes(entry as T) ? entry as T : null)
+    })
+    .filter((entry): entry is T => Boolean(entry))
+  return result.length > 0 ? Array.from(new Set(result)) : undefined
+}
+
 function asNumberOrNull(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
 }
@@ -164,9 +187,15 @@ function normalizeRuntimeOperatingSystem(value: unknown): LocalRuntimeOperatingS
 }
 
 function normalizeRuntimeThermalState(value: unknown): LocalRuntimeThermalState {
-  const thermal = asEnum(value, ['nominal', 'warm', 'elevated', 'critical', 'unknown'] as const)
+  const normalized = typeof value === 'string' ? value.trim().toLowerCase() : value
+  const thermal = asEnum(normalized, ['nominal', 'warm', 'elevated', 'critical', 'unknown'] as const)
   if (thermal === 'warm' || thermal === 'elevated') return 'elevated'
   return thermal ?? 'unknown'
+}
+
+function normalizeSerializedToken(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined
+  return value.trim().replace(/_/g, '-').replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
 }
 
 function normalizeRuntimePreferredExecutor(
@@ -174,8 +203,9 @@ function normalizeRuntimePreferredExecutor(
   thermalState: LocalRuntimeThermalState,
   storagePressure?: unknown
 ): LocalRuntimePreferredExecutor | undefined {
-  if (thermalState === 'critical' || storagePressure === 'critical') return 'held'
-  return asEnum(value, ['local-native', 'local-worker', 'cloud-sandbox', 'held'] as const)
+  const normalizedStoragePressure = normalizeSerializedToken(storagePressure)
+  if (thermalState === 'critical' || normalizedStoragePressure === 'critical') return 'held'
+  return asEnum(normalizeSerializedToken(value), ['local-native', 'local-worker', 'cloud-sandbox', 'held'] as const)
 }
 
 function pickMaxLocalAgents(params: {
@@ -207,34 +237,43 @@ function pickViewportQuality(params: {
 }
 
 function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): LocalRuntimeCapabilityReport | null {
+  const rawGeneratedAt = readAlias(candidate, 'generatedAt', 'generated_at')
   const generatedAt =
-    typeof candidate.generatedAt === 'string' && !Number.isNaN(Date.parse(candidate.generatedAt))
-      ? candidate.generatedAt
-      : null
+    typeof rawGeneratedAt === 'string' && !Number.isNaN(Date.parse(rawGeneratedAt))
+      ? rawGeneratedAt
+      : typeof rawGeneratedAt === 'string' && /^\d+$/.test(rawGeneratedAt)
+        ? new Date(Number(rawGeneratedAt)).toISOString()
+        : null
 
   if (!generatedAt) return null
 
-  const totalMemoryMb = asNumberOrNull(candidate.totalMemoryMb)
-  const availableMemoryMb = asNumberOrNull(candidate.availableMemoryMb)
-  const storageFreeMb = asNumberOrNull(candidate.storageFreeMb)
-  const cpuCores = asPositiveNumber(candidate.cpuLogicalCores)
+  const totalMemoryMb = asNumberOrNull(readAlias(candidate, 'totalMemoryMb', 'total_memory_mb'))
+  const availableMemoryMb = asNumberOrNull(readAlias(candidate, 'availableMemoryMb', 'available_memory_mb'))
+  const storageFreeMb = asNumberOrNull(readAlias(candidate, 'storageFreeMb', 'storage_free_mb'))
+  const cpuCores = asPositiveNumber(readAlias(candidate, 'cpuLogicalCores', 'cpu_logical_cores'))
   const memoryGb = totalMemoryMb !== null ? Math.round((totalMemoryMb / 1024) * 10) / 10 : undefined
   const freeStorageGb = storageFreeMb !== null ? Math.round((storageFreeMb / 1024) * 10) / 10 : undefined
-  const thermalState = normalizeRuntimeThermalState(candidate.thermalState)
+  const thermalState = normalizeRuntimeThermalState(readAlias(candidate, 'thermalState', 'thermal_state'))
   const preferredExecutor = normalizeRuntimePreferredExecutor(
-    candidate.preferredExecutor,
+    readAlias(candidate, 'preferredExecutor', 'preferred_executor'),
     thermalState,
-    candidate.storagePressure
+    readAlias(candidate, 'storagePressure', 'storage_pressure')
   )
-  const npuAvailable = asBoolean(candidate.npuAvailable) ?? asBoolean(candidate.windowsMlAvailable) ?? false
-  const nativeGraphicsBackends = asEnumArray(candidate.nativeGraphicsBackends, [
+  const npuAvailable = asBoolean(readAlias(candidate, 'npuAvailable', 'npu_available')) ?? asBoolean(readAlias(candidate, 'windowsMlAvailable', 'windows_ml_available')) ?? false
+  const nativeGraphicsBackends = asEnumArrayWithAliases(readAlias(candidate, 'nativeGraphicsBackends', 'native_graphics_backends'), [
     'vulkan',
     'directx12',
     'metal',
     'webgpu',
     'opengl',
-  ] as const)
-  const aiExecutionProviders = asEnumArray(candidate.aiExecutionProviders, [
+  ] as const, {
+    Vulkan: 'vulkan',
+    DirectX12: 'directx12',
+    Metal: 'metal',
+    WebGpu: 'webgpu',
+    OpenGl: 'opengl',
+  })
+  const aiExecutionProviders = asEnumArrayWithAliases(readAlias(candidate, 'aiExecutionProviders', 'ai_execution_providers'), [
     'cpu',
     'cuda',
     'tensorrt',
@@ -245,8 +284,19 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     'xnnpack',
     'webgpu',
     'webnn',
-  ] as const)
-  const localToolchain = asEnumArray(candidate.localToolchain, [
+  ] as const, {
+    Cpu: 'cpu',
+    Cuda: 'cuda',
+    TensorRt: 'tensorrt',
+    DirectMl: 'directml',
+    CoreMl: 'coreml',
+    OpenVino: 'openvino',
+    Qnn: 'qnn',
+    Xnnpack: 'xnnpack',
+    WebGpu: 'webgpu',
+    WebNn: 'webnn',
+  })
+  const localToolchain = asEnumArrayWithAliases(readAlias(candidate, 'localToolchain', 'local_toolchain'), [
     'ffmpeg',
     'ffprobe',
     'rapier',
@@ -258,28 +308,63 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     'basisu',
     'openusd',
     'blender-headless',
-  ] as const)
-  const rendererBackends = asEnumArray(candidate.rendererBackends, [
+    'wgpu-native',
+  ] as const, {
+    Ffmpeg: 'ffmpeg',
+    Ffprobe: 'ffprobe',
+    Rapier: 'rapier',
+    BrowserAutomation: 'browser-automation',
+    AssetOptimizer: 'asset-optimizer',
+    ShaderCompiler: 'shader-compiler',
+    Meshoptimizer: 'meshoptimizer',
+    KtxSoftware: 'ktx-software',
+    Basisu: 'basisu',
+    OpenUsd: 'openusd',
+    BlenderHeadless: 'blender-headless',
+    WgpuNative: 'wgpu-native',
+  })
+  const rendererBackends = asEnumArrayWithAliases(readAlias(candidate, 'rendererBackends', 'renderer_backends'), [
     'wgpu-native',
     'dawn-native',
     'three-webgpu',
     'three-webgl',
     'software-raster',
-  ] as const)
-  const assetTools = asEnumArray(candidate.assetTools, [
+  ] as const, {
+    WgpuNative: 'wgpu-native',
+    DawnNative: 'dawn-native',
+    ThreeWebGpu: 'three-webgpu',
+    ThreeWebGl: 'three-webgl',
+    SoftwareRaster: 'software-raster',
+  })
+  const assetTools = asEnumArrayWithAliases(readAlias(candidate, 'assetTools', 'asset_tools'), [
     'gltf-transform',
     'meshoptimizer',
     'ktx-software',
     'basisu',
     'openusd',
     'blender-headless',
-  ] as const)
-  const mediaTools = asEnumArray(candidate.mediaTools, ['ffmpeg', 'ffprobe'] as const)
-  const shaderTools = asEnumArray(candidate.shaderTools, ['naga', 'wgsl-validator', 'shaderc', 'dxc'] as const)
+  ] as const, {
+    GltfTransform: 'gltf-transform',
+    Meshoptimizer: 'meshoptimizer',
+    KtxSoftware: 'ktx-software',
+    Basisu: 'basisu',
+    OpenUsd: 'openusd',
+    BlenderHeadless: 'blender-headless',
+  })
+  const mediaTools = asEnumArrayWithAliases(readAlias(candidate, 'mediaTools', 'media_tools'), ['ffmpeg', 'ffprobe'] as const, {
+    Ffmpeg: 'ffmpeg',
+    Ffprobe: 'ffprobe',
+  })
+  const shaderTools = asEnumArrayWithAliases(readAlias(candidate, 'shaderTools', 'shader_tools'), ['naga', 'wgsl-validator', 'shaderc', 'dxc'] as const, {
+    Naga: 'naga',
+    WgslValidator: 'wgsl-validator',
+    Shaderc: 'shaderc',
+    Dxc: 'dxc',
+  })
   const gpuComputeAvailable = (
-    asBoolean(candidate.gpuAvailable) ??
-    asBoolean(candidate.webGpuAvailable) ??
-    asBoolean(candidate.directMlAvailable) ??
+    asBoolean(readAlias(candidate, 'gpuAvailable', 'gpu_available')) ??
+    asBoolean(readAlias(candidate, 'webGpuAvailable', 'web_gpu_available')) ??
+    asBoolean(readAlias(candidate, 'directMlAvailable', 'direct_ml_available')) ??
     Boolean(nativeGraphicsBackends?.length)
   ) || false
   const maxLocalAgents = pickMaxLocalAgents({
@@ -301,10 +386,10 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     freeStorageGb,
     gpuComputeAvailable,
     npuAvailable,
-    npuName: npuAvailable ? asStringOrNull(candidate.gpuName) ?? null : null,
-    directMlAvailable: asBoolean(candidate.directMlAvailable),
-    onnxRuntimeAvailable: asBoolean(candidate.onnxRuntimeAvailable),
-    rapierAvailable: asBoolean(candidate.rapierAvailable),
+    npuName: npuAvailable ? asStringOrNull(readAlias(candidate, 'gpuName', 'gpu_name')) ?? null : null,
+    directMlAvailable: asBoolean(readAlias(candidate, 'directMlAvailable', 'direct_ml_available')),
+    onnxRuntimeAvailable: asBoolean(readAlias(candidate, 'onnxRuntimeAvailable', 'onnx_runtime_available')),
+    rapierAvailable: asBoolean(readAlias(candidate, 'rapierAvailable', 'rapier_available')),
     nativeGraphicsBackends,
     aiExecutionProviders,
     localToolchain,
@@ -312,11 +397,11 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     assetTools,
     mediaTools,
     shaderTools,
-    toolVersions: asStringRecord(candidate.toolVersions),
-    toolDigests: asStringRecord(candidate.toolDigests),
-    maxVramMb: asPositiveNumber(candidate.maxVramMb),
-    maxTextureSize: asPositiveNumber(candidate.maxTextureSize),
-    supportsOffscreenRender: asBoolean(candidate.supportsOffscreenRender),
+    toolVersions: asStringRecord(readAlias(candidate, 'toolVersions', 'tool_versions')),
+    toolDigests: asStringRecord(readAlias(candidate, 'toolDigests', 'tool_digests')),
+    maxVramMb: asPositiveNumber(readAlias(candidate, 'maxVramMb', 'max_vram_mb')),
+    maxTextureSize: asPositiveNumber(readAlias(candidate, 'maxTextureSize', 'max_texture_size')),
+    supportsOffscreenRender: asBoolean(readAlias(candidate, 'supportsOffscreenRender', 'supports_offscreen_render')),
     maxLocalAgents,
     preferredExecutor,
     recommendedViewportQuality: pickViewportQuality({
@@ -342,7 +427,7 @@ export function sanitizeLocalRuntimeCapabilityReport(
   }
 
   const candidate = value as Record<string, unknown>
-  if (typeof candidate.generatedAt === 'string' || 'cpuLogicalCores' in candidate) {
+  if (typeof candidate.generatedAt === 'string' || typeof candidate.generated_at === 'string' || 'cpuLogicalCores' in candidate || 'cpu_logical_cores' in candidate) {
     return normalizeStudioLocalProbeReport(candidate)
   }
 
@@ -403,6 +488,7 @@ export function sanitizeLocalRuntimeCapabilityReport(
       'basisu',
       'openusd',
       'blender-headless',
+      'wgpu-native',
     ] as const),
     rendererBackends: asEnumArray(candidate.rendererBackends, [
       'wgpu-native',

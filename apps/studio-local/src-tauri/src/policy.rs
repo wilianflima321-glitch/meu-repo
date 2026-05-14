@@ -5,7 +5,8 @@ use crate::contracts::{
 use crate::sidecars::{missing_required_sidecars, sidecar_names};
 
 fn has_native_graphics(probe: &LocalRuntimeProbeReport) -> bool {
-    probe.gpu_available || probe.web_gpu_available || !probe.native_graphics_backends.is_empty()
+    probe.supports_offscreen_render
+        && (probe.gpu_available || probe.web_gpu_available || !probe.native_graphics_backends.is_empty())
 }
 
 fn has_ai_execution_provider(probe: &LocalRuntimeProbeReport) -> bool {

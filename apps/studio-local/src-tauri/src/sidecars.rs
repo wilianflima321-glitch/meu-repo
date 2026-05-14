@@ -1,6 +1,7 @@
 use crate::contracts::{
-    LocalRuntimeProbeReport, LocalRuntimeToolchainFeature, RuntimeJobLane,
-    RuntimeSidecarCapability, RuntimeSidecarKind,
+    LocalRuntimeAssetTool, LocalRuntimeMediaTool, LocalRuntimeProbeReport,
+    LocalRuntimeRendererBackend, LocalRuntimeShaderTool, LocalRuntimeToolchainFeature,
+    RuntimeJobLane, RuntimeSidecarCapability, RuntimeSidecarKind,
 };
 
 fn has_toolchain_feature(probe: &LocalRuntimeProbeReport, feature: LocalRuntimeToolchainFeature) -> bool {
@@ -10,16 +11,32 @@ fn has_toolchain_feature(probe: &LocalRuntimeProbeReport, feature: LocalRuntimeT
 fn sidecar_available(probe: &LocalRuntimeProbeReport, kind: RuntimeSidecarKind) -> bool {
     match kind {
         RuntimeSidecarKind::WgpuRenderer => {
-            probe.gpu_available || probe.web_gpu_available || !probe.native_graphics_backends.is_empty()
+            probe.supports_offscreen_render
+                && probe.renderer_backends.contains(&LocalRuntimeRendererBackend::WgpuNative)
         }
-        RuntimeSidecarKind::Ffmpeg => probe.ffmpeg_available || has_toolchain_feature(probe, LocalRuntimeToolchainFeature::Ffmpeg),
-        RuntimeSidecarKind::Ffprobe => has_toolchain_feature(probe, LocalRuntimeToolchainFeature::Ffprobe),
+        RuntimeSidecarKind::Ffmpeg => {
+            probe.ffmpeg_available
+                || has_toolchain_feature(probe, LocalRuntimeToolchainFeature::Ffmpeg)
+                || probe.media_tools.contains(&LocalRuntimeMediaTool::Ffmpeg)
+        }
+        RuntimeSidecarKind::Ffprobe => {
+            has_toolchain_feature(probe, LocalRuntimeToolchainFeature::Ffprobe)
+                || probe.media_tools.contains(&LocalRuntimeMediaTool::Ffprobe)
+        }
         RuntimeSidecarKind::OnnxRuntime => probe.onnx_runtime_available || !probe.ai_execution_providers.is_empty(),
         RuntimeSidecarKind::BrowserOperator => {
             probe.browser_automation_available || has_toolchain_feature(probe, LocalRuntimeToolchainFeature::BrowserAutomation)
         }
-        RuntimeSidecarKind::AssetOptimizer => has_toolchain_feature(probe, LocalRuntimeToolchainFeature::AssetOptimizer),
-        RuntimeSidecarKind::ShaderCompiler => has_toolchain_feature(probe, LocalRuntimeToolchainFeature::ShaderCompiler),
+        RuntimeSidecarKind::AssetOptimizer => {
+            has_toolchain_feature(probe, LocalRuntimeToolchainFeature::AssetOptimizer)
+                || probe.asset_tools.contains(&LocalRuntimeAssetTool::GltfTransform)
+                || probe.asset_tools.contains(&LocalRuntimeAssetTool::Meshoptimizer)
+        }
+        RuntimeSidecarKind::ShaderCompiler => {
+            has_toolchain_feature(probe, LocalRuntimeToolchainFeature::ShaderCompiler)
+                || !probe.shader_tools.is_empty()
+                || probe.shader_tools.contains(&LocalRuntimeShaderTool::Naga)
+        }
         RuntimeSidecarKind::RapierPhysics => probe.rapier_available || has_toolchain_feature(probe, LocalRuntimeToolchainFeature::Rapier),
     }
 }

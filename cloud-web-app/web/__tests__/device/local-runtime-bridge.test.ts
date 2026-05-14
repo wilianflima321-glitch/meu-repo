@@ -90,6 +90,71 @@ describe('local runtime bridge', () => {
     })
   })
 
+  it('normalizes Rust Studio Local snake_case probes without losing runtime engine evidence', () => {
+    const receivedAt = new Date(1714917600000).toISOString()
+
+    expect(
+      sanitizeLocalRuntimeCapabilityReport({
+        version: 1,
+        generated_at: '1714917600000',
+        device_id: 'studio-local-rust-device',
+        os: 'Windows_NT',
+        arch: 'x64',
+        cpu_logical_cores: 16,
+        total_memory_mb: 32768,
+        available_memory_mb: 24576,
+        storage_free_mb: 262144,
+        gpu_available: true,
+        web_gpu_available: false,
+        npu_available: false,
+        direct_ml_available: true,
+        onnx_runtime_available: true,
+        rapier_available: true,
+        native_graphics_backends: ['DirectX12', 'Vulkan'],
+        ai_execution_providers: ['DirectMl', 'Cpu'],
+        local_toolchain: ['Ffmpeg', 'Ffprobe', 'AssetOptimizer', 'ShaderCompiler', 'WgpuNative'],
+        renderer_backends: ['WgpuNative'],
+        asset_tools: ['GltfTransform', 'Meshoptimizer', 'KtxSoftware', 'OpenUsd'],
+        media_tools: ['Ffmpeg', 'Ffprobe'],
+        shader_tools: ['Naga', 'Dxc'],
+        tool_versions: { ffmpeg: 'ffmpeg version 7.1', naga: 'naga 0.20.0' },
+        tool_digests: { ffmpeg: 'sha256-ffmpeg' },
+        max_vram_mb: 8192,
+        max_texture_size: 16384,
+        supports_offscreen_render: true,
+        thermal_state: 'Nominal',
+        storage_pressure: 'Ok',
+        preferred_executor: 'LocalNative',
+        signature: 'rust-probe-signature',
+      })
+    ).toMatchObject({
+      hostKind: 'native-daemon',
+      transport: 'api-sync',
+      os: 'windows',
+      receivedAt,
+      cpuCores: 16,
+      memoryGb: 32,
+      freeStorageGb: 256,
+      gpuComputeAvailable: true,
+      preferredExecutor: 'local-native',
+      maxLocalAgents: 4,
+      recommendedViewportQuality: 'ultra',
+      nativeGraphicsBackends: ['directx12', 'vulkan'],
+      aiExecutionProviders: ['directml', 'cpu'],
+      localToolchain: ['ffmpeg', 'ffprobe', 'asset-optimizer', 'shader-compiler', 'wgpu-native'],
+      rendererBackends: ['wgpu-native'],
+      assetTools: ['gltf-transform', 'meshoptimizer', 'ktx-software', 'openusd'],
+      mediaTools: ['ffmpeg', 'ffprobe'],
+      shaderTools: ['naga', 'dxc'],
+      toolVersions: { ffmpeg: 'ffmpeg version 7.1', naga: 'naga 0.20.0' },
+      toolDigests: { ffmpeg: 'sha256-ffmpeg' },
+      maxVramMb: 8192,
+      maxTextureSize: 16384,
+      supportsOffscreenRender: true,
+      thermalState: 'nominal',
+    })
+  })
+
   it('holds Studio Local probes when thermal or storage safety is degraded', () => {
     const report = sanitizeLocalRuntimeCapabilityReport({
       version: 1,

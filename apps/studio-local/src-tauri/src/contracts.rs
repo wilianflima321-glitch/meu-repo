@@ -1,4 +1,6 @@
-﻿use serde::{Deserialize, Serialize};
+﻿use std::collections::BTreeMap;
+
+use serde::{Deserialize, Serialize};
 
 pub const STUDIO_LOCAL_CONTRACT_VERSION: u8 = 1;
 
@@ -136,6 +138,12 @@ pub enum LocalRuntimeToolchainFeature {
     BrowserAutomation,
     AssetOptimizer,
     ShaderCompiler,
+    Meshoptimizer,
+    KtxSoftware,
+    Basisu,
+    OpenUsd,
+    BlenderHeadless,
+    WgpuNative,
 }
 
 impl LocalRuntimeToolchainFeature {
@@ -147,6 +155,90 @@ impl LocalRuntimeToolchainFeature {
             Self::BrowserAutomation => "browser-automation",
             Self::AssetOptimizer => "asset-optimizer",
             Self::ShaderCompiler => "shader-compiler",
+            Self::Meshoptimizer => "meshoptimizer",
+            Self::KtxSoftware => "ktx-software",
+            Self::Basisu => "basisu",
+            Self::OpenUsd => "openusd",
+            Self::BlenderHeadless => "blender-headless",
+            Self::WgpuNative => "wgpu-native",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum LocalRuntimeRendererBackend {
+    WgpuNative,
+    DawnNative,
+    ThreeWebGpu,
+    ThreeWebGl,
+    SoftwareRaster,
+}
+
+impl LocalRuntimeRendererBackend {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::WgpuNative => "wgpu-native",
+            Self::DawnNative => "dawn-native",
+            Self::ThreeWebGpu => "three-webgpu",
+            Self::ThreeWebGl => "three-webgl",
+            Self::SoftwareRaster => "software-raster",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum LocalRuntimeAssetTool {
+    GltfTransform,
+    Meshoptimizer,
+    KtxSoftware,
+    Basisu,
+    OpenUsd,
+    BlenderHeadless,
+}
+
+impl LocalRuntimeAssetTool {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::GltfTransform => "gltf-transform",
+            Self::Meshoptimizer => "meshoptimizer",
+            Self::KtxSoftware => "ktx-software",
+            Self::Basisu => "basisu",
+            Self::OpenUsd => "openusd",
+            Self::BlenderHeadless => "blender-headless",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum LocalRuntimeMediaTool {
+    Ffmpeg,
+    Ffprobe,
+}
+
+impl LocalRuntimeMediaTool {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ffmpeg => "ffmpeg",
+            Self::Ffprobe => "ffprobe",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum LocalRuntimeShaderTool {
+    Naga,
+    WgslValidator,
+    Shaderc,
+    Dxc,
+}
+
+impl LocalRuntimeShaderTool {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Naga => "naga",
+            Self::WgslValidator => "wgsl-validator",
+            Self::Shaderc => "shaderc",
+            Self::Dxc => "dxc",
         }
     }
 }
@@ -224,6 +316,15 @@ pub struct LocalRuntimeProbeReport {
     pub native_graphics_backends: Vec<NativeGraphicsBackend>,
     pub ai_execution_providers: Vec<NativeAiExecutionProvider>,
     pub local_toolchain: Vec<LocalRuntimeToolchainFeature>,
+    pub renderer_backends: Vec<LocalRuntimeRendererBackend>,
+    pub asset_tools: Vec<LocalRuntimeAssetTool>,
+    pub media_tools: Vec<LocalRuntimeMediaTool>,
+    pub shader_tools: Vec<LocalRuntimeShaderTool>,
+    pub tool_versions: BTreeMap<String, String>,
+    pub tool_digests: BTreeMap<String, String>,
+    pub max_vram_mb: Option<u64>,
+    pub max_texture_size: Option<u32>,
+    pub supports_offscreen_render: bool,
     pub thermal_state: ThermalState,
     pub storage_pressure: StoragePressure,
     pub preferred_executor: RuntimeExecutionTarget,

@@ -1,20 +1,33 @@
-﻿use std::env;
+﻿use std::collections::BTreeMap;
+use std::env;
 use std::process::Command;
 use std::thread;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::contracts::{
-    LocalRuntimeProbeReport, LocalRuntimeToolchainFeature, NativeAiExecutionProvider,
-    NativeGraphicsBackend, RuntimeExecutionTarget, StoragePressure, ThermalState,
-    STUDIO_LOCAL_CONTRACT_VERSION,
+    LocalRuntimeAssetTool, LocalRuntimeMediaTool, LocalRuntimeProbeReport,
+    LocalRuntimeRendererBackend, LocalRuntimeShaderTool, LocalRuntimeToolchainFeature,
+    NativeAiExecutionProvider, NativeGraphicsBackend, RuntimeExecutionTarget,
+    StoragePressure, ThermalState, STUDIO_LOCAL_CONTRACT_VERSION,
 };
 
+fn command_output(command: &str, arg: &str) -> Option<String> {
+    let output = Command::new(command).arg(arg).output().ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+    let combined = if stdout.is_empty() { stderr } else { stdout };
+    combined.lines().next().map(|line| line.trim().to_string()).filter(|line| !line.is_empty())
+}
+
 fn command_exists(command: &str) -> bool {
-    Command::new(command)
-        .arg("--version")
-        .output()
-        .map(|output| output.status.success())
-        .unwrap_or(false)
+    command_output(command, "--version").is_some()
+}
+
+fn command_exists_any(commands: &[&str]) -> bool {
+    commands.iter().any(|command| command_exists(command))
 }
 
 fn now_millis() -> u128 {
@@ -73,8 +86,14 @@ fn parse_toolchain_feature(value: &str) -> Option<LocalRuntimeToolchainFeature> 
         "ffprobe" => Some(LocalRuntimeToolchainFeature::Ffprobe),
         "rapier" => Some(LocalRuntimeToolchainFeature::Rapier),
         "browser-automation" | "browser" | "chrome" | "chromium" => Some(LocalRuntimeToolchainFeature::BrowserAutomation),
-        "asset-optimizer" | "asset" | "meshopt" | "gltf-transform" => Some(LocalRuntimeToolchainFeature::AssetOptimizer),
-        "shader-compiler" | "shader" | "dxc" | "naga" => Some(LocalRuntimeToolchainFeature::ShaderCompiler),
+        "asset-optimizer" | "asset" => Some(LocalRuntimeToolchainFeature::AssetOptimizer),
+        "shader-compiler" | "shader" => Some(LocalRuntimeToolchainFeature::ShaderCompiler),
+        "meshoptimizer" | "meshopt" => Some(LocalRuntimeToolchainFeature::Meshoptimizer),
+        "ktx-software" | "ktx" | "toktx" => Some(LocalRuntimeToolchainFeature::KtxSoftware),
+        "basisu" | "basis" => Some(LocalRuntimeToolchainFeature::Basisu),
+        "openusd" | "usd" | "usdcat" => Some(LocalRuntimeToolchainFeature::OpenUsd),
+        "blender-headless" | "blender" => Some(LocalRuntimeToolchainFeature::BlenderHeadless),
+        "wgpu-native" | "wgpu" => Some(LocalRuntimeToolchainFeature::WgpuNative),
         _ => None,
     }
 }
@@ -155,7 +174,113 @@ fn default_toolchain(
         push_unique(&mut toolchain, LocalRuntimeToolchainFeature::BrowserAutomation);
     }
 
+    if command_exists("gltf-transform") {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::AssetOptimizer);
+    }
+    if command_exists_any(&["meshopt", "meshoptimizer"]) {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::Meshoptimizer);
+    }
+    if command_exists("toktx") {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::KtxSoftware);
+    }
+    if command_exists("basisu") {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::Basisu);
+    }
+    if command_exists("usdcat") {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::OpenUsd);
+    }
+    if command_exists("blender") {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::BlenderHeadless);
+    }
+
     toolchain
+}
+
+fn default_renderer_backends(native_graphics_backends: &[NativeGraphicsBackend]) -> Vec<LocalRuntimeRendererBackend> {
+    if native_graphics_backends.is_empty() {
+        Vec::new()
+    } else {
+        vec![LocalRuntimeRendererBackend::WgpuNative]
+    }
+}
+
+fn default_asset_tools() -> Vec<LocalRuntimeAssetTool> {
+    let mut tools = Vec::new();
+    if command_exists("gltf-transform") {
+        tools.push(LocalRuntimeAssetTool::GltfTransform);
+    }
+    if command_exists_any(&["meshopt", "meshoptimizer"]) {
+        tools.push(LocalRuntimeAssetTool::Meshoptimizer);
+    }
+    if command_exists("toktx") {
+        tools.push(LocalRuntimeAssetTool::KtxSoftware);
+    }
+    if command_exists("basisu") {
+        tools.push(LocalRuntimeAssetTool::Basisu);
+    }
+    if command_exists("usdcat") {
+        tools.push(LocalRuntimeAssetTool::OpenUsd);
+    }
+    if command_exists("blender") {
+        tools.push(LocalRuntimeAssetTool::BlenderHeadless);
+    }
+    tools
+}
+
+fn default_media_tools(ffmpeg_available: bool) -> Vec<LocalRuntimeMediaTool> {
+    let mut tools = Vec::new();
+    if ffmpeg_available {
+        tools.push(LocalRuntimeMediaTool::Ffmpeg);
+    }
+    if command_exists("ffprobe") {
+        tools.push(LocalRuntimeMediaTool::Ffprobe);
+    }
+    tools
+}
+
+fn default_shader_tools() -> Vec<LocalRuntimeShaderTool> {
+    let mut tools = Vec::new();
+    if command_exists("naga") {
+        tools.push(LocalRuntimeShaderTool::Naga);
+    }
+    if command_exists("wgsl-validator") {
+        tools.push(LocalRuntimeShaderTool::WgslValidator);
+    }
+    if command_exists("shaderc") {
+        tools.push(LocalRuntimeShaderTool::Shaderc);
+    }
+    if command_exists("dxc") {
+        tools.push(LocalRuntimeShaderTool::Dxc);
+    }
+    tools
+}
+
+fn tool_versions() -> BTreeMap<String, String> {
+    [
+        ("ffmpeg", "--version"),
+        ("ffprobe", "--version"),
+        ("gltf-transform", "--version"),
+        ("meshopt", "--version"),
+        ("toktx", "--version"),
+        ("basisu", "--version"),
+        ("usdcat", "--help"),
+        ("blender", "--version"),
+        ("naga", "--version"),
+        ("wgsl-validator", "--version"),
+        ("shaderc", "--version"),
+        ("dxc", "--version"),
+    ]
+    .iter()
+    .filter_map(|(command, arg)| command_output(command, arg).map(|version| ((*command).to_string(), version)))
+    .collect()
+}
+
+fn parse_env_u64(name: &str) -> Option<u64> {
+    env::var(name).ok().and_then(|value| value.parse::<u64>().ok()).filter(|value| *value > 0)
+}
+
+fn parse_env_u32(name: &str) -> Option<u32> {
+    env::var(name).ok().and_then(|value| value.parse::<u32>().ok()).filter(|value| *value > 0)
 }
 
 pub fn build_probe_from_signals(
@@ -172,8 +297,13 @@ pub fn build_probe_from_signals(
     let rapier_available = true;
     let browser_automation_available = command_exists("chrome") || command_exists("chromium") || command_exists("msedge");
     let native_graphics_backends = default_graphics_backends(gpu_available);
+    let renderer_backends = default_renderer_backends(&native_graphics_backends);
+    let supports_offscreen_render = !renderer_backends.is_empty() && thermal_state != ThermalState::Critical;
     let ai_execution_providers = default_ai_execution_providers(gpu_available, npu_available, onnx_runtime_available);
-    let local_toolchain = default_toolchain(ffmpeg_available, rapier_available, browser_automation_available);
+    let mut local_toolchain = default_toolchain(ffmpeg_available, rapier_available, browser_automation_available);
+    if !renderer_backends.is_empty() {
+        push_unique(&mut local_toolchain, LocalRuntimeToolchainFeature::WgpuNative);
+    }
     let preferred_executor = if thermal_state == ThermalState::Critical || storage_pressure == StoragePressure::Critical {
         RuntimeExecutionTarget::Held
     } else if !native_graphics_backends.is_empty() || !ai_execution_providers.is_empty() {
@@ -208,6 +338,15 @@ pub fn build_probe_from_signals(
         native_graphics_backends,
         ai_execution_providers,
         local_toolchain,
+        renderer_backends,
+        asset_tools: default_asset_tools(),
+        media_tools: default_media_tools(ffmpeg_available),
+        shader_tools: default_shader_tools(),
+        tool_versions: tool_versions(),
+        tool_digests: BTreeMap::new(),
+        max_vram_mb: parse_env_u64("AETHEL_LOCAL_MAX_VRAM_MB"),
+        max_texture_size: parse_env_u32("AETHEL_LOCAL_MAX_TEXTURE_SIZE"),
+        supports_offscreen_render,
         thermal_state,
         storage_pressure,
         preferred_executor,
