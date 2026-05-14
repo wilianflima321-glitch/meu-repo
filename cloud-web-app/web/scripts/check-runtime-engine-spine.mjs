@@ -40,6 +40,20 @@ requirePattern('lib/runtime/runtime-engine-spine.ts', /neverMainThread: true/, '
 requirePattern('lib/runtime/runtime-engine-spine.ts', /manifest-only output cannot be marked done/, 'final renders without backend must remain held')
 requirePattern('lib/runtime/runtime-engine-spine.ts', /metadata.*license.*thumbnail/s, 'asset pipeline must require metadata, license, and thumbnail evidence')
 
+requireFile('lib/runtime/runtime-renderer-adapter.ts', 'renderer backend responses must be schema validated')
+requirePattern('lib/runtime/runtime-renderer-adapter.ts', /schemaVersion: 1/, 'renderer backend must use a versioned schema')
+requirePattern('lib/runtime/runtime-renderer-adapter.ts', /performanceReport/, 'renderer backend must require performance reports')
+requirePattern('lib/runtime/runtime-renderer-adapter.ts', /validationReport/, 'renderer backend must require validation reports')
+requirePattern('lib/runtime/runtime-renderer-adapter.ts', /performance-report/, 'renderer evidence must include performance-report artifacts')
+requirePattern('lib/runtime/runtime-renderer-adapter.ts', /validation-report/, 'renderer evidence must include validation-report artifacts')
+
+requireFile('lib/runtime/local-wgpu-sidecar.ts', 'local wgpu sidecar contract skeleton must exist')
+requirePattern('lib/runtime/local-wgpu-sidecar.ts', /aethel\.wgpu\.probe/, 'sidecar must expose a bounded probe request')
+requirePattern('lib/runtime/local-wgpu-sidecar.ts', /aethel\.wgpu\.render/, 'sidecar must expose a render request contract')
+requirePattern('lib/runtime/local-wgpu-sidecar.ts', /noDownloads: true/, 'sidecar contracts must not download tools')
+requirePattern('lib/runtime/local-wgpu-sidecar.ts', /noMainThread: true/, 'sidecar contracts must stay off the browser main thread')
+requirePattern('lib/runtime/local-wgpu-sidecar.ts', /supportsOffscreenRender/, 'sidecar probe must report offscreen render support')
+
 requireFile('lib/device/local-runtime-bridge.ts', 'local runtime report must expose native toolchain capabilities')
 requirePattern('lib/device/local-runtime-bridge.ts', /rendererBackends/, 'local runtime must report renderer backends')
 requirePattern('lib/device/local-runtime-bridge.ts', /assetTools/, 'local runtime must report asset tools')
@@ -69,13 +83,28 @@ requirePattern('lib/viewport/viewport-render-backend.ts', /automaticDownloads: f
 
 requireFile('lib/workers/viewport-render-worker.ts', 'viewport worker must not fake final media')
 requirePattern('lib/workers/viewport-render-worker.ts', /AETHEL_RENDER_BACKEND_ENDPOINT is not configured/, 'missing backend must be explicit')
+requirePattern('lib/workers/viewport-render-worker.ts', /buildRuntimeRendererRequestEnvelope/, 'worker must send the runtime renderer request envelope')
+requirePattern('lib/workers/viewport-render-worker.ts', /coerceRuntimeRendererEvidenceEnvelope/, 'worker must schema-validate renderer evidence')
 requirePattern('lib/workers/viewport-render-worker.ts', /playbackOk: false/, 'manifest-only evidence must not pass playback')
 requirePattern('lib/workers/viewport-render-worker.ts', /No media artifact was fabricated/, 'worker must state that it did not fabricate media')
+
+requireFile('lib/device/runtime-lane-scheduler.ts', 'runtime lane scheduler must keep heavy jobs off the UI thread')
+if (exists('lib/device/runtime-lane-scheduler.ts')) {
+  const scheduler = read('lib/device/runtime-lane-scheduler.ts')
+  if (/budget\('viewport-render'[^)]*'local-main-safe'/.test(scheduler)) {
+    failures.push('lib/device/runtime-lane-scheduler.ts: viewport-render must not be scheduled on local-main-safe')
+  }
+}
+requirePattern('lib/device/runtime-execution-router.ts', /cannot run on the browser main thread/, 'runtime router must block legacy heavy local-main-safe routes')
 
 requireFile('__tests__/runtime/runtime-engine-spine.test.ts', 'runtime engine spine tests must exist')
 requirePattern('__tests__/runtime/runtime-engine-spine.test.ts', /final renders when no native or cloud renderer/, 'tests must hold final render without backend')
 requirePattern('__tests__/runtime/runtime-engine-spine.test.ts', /weak devices/, 'tests must cover weak-device routing')
 requirePattern('__tests__/runtime/runtime-engine-spine.test.ts', /metadata-first asset preflight/, 'tests must cover large asset preflight')
+requireFile('__tests__/runtime/runtime-renderer-adapter.test.ts', 'renderer adapter tests must exist')
+requirePattern('__tests__/runtime/runtime-renderer-adapter.test.ts', /rejects legacy renderer evidence/, 'tests must reject legacy renderer evidence')
+requireFile('__tests__/runtime/local-wgpu-sidecar.test.ts', 'local wgpu sidecar tests must exist')
+requirePattern('__tests__/runtime/local-wgpu-sidecar.test.ts', /no-download probe request/, 'tests must cover bounded no-download sidecar probes')
 
 requirePattern('package.json', /qa:runtime-engine-spine/, 'package scripts must expose runtime engine spine QA')
 requirePattern('package.json', /qa:enterprise-gate[\s\S]*qa:runtime-engine-spine/, 'enterprise gate must include runtime engine spine QA')

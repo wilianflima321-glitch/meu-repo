@@ -85,4 +85,20 @@ describe('runtime execution router', () => {
     expect(route.target).toBe('held')
     expect(route.safety).toBe('held')
   })
+
+  it('reroutes heavy lanes away from local-main-safe placement', () => {
+    const route = resolveRuntimeExecutionRoute({
+      profile: strongProfile,
+      decision: decision({
+        lane: 'viewport-render',
+        placement: 'local-main-safe',
+        reason: 'Legacy route attempted to run viewport render on the main thread.',
+      }),
+    })
+
+    expect(route.canStart).toBe(true)
+    expect(route.target).toBe('cloud-sandbox')
+    expect(route.safety).toBe('fallback')
+    expect(route.reason).toContain('cannot run on the browser main thread')
+  })
 })

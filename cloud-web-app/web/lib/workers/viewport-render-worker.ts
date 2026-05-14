@@ -9,11 +9,14 @@ import {
 } from '@/lib/production/render-output-evidence-persistence'
 import {
   buildViewportRenderEvidenceFromContract,
-  coerceViewportRenderOutputEvidence,
   type ViewportRenderOutputArtifact,
   type ViewportRenderOutputEvidence,
   type ViewportRenderOutputValidation,
 } from '@/lib/production/render-output-evidence'
+import {
+  buildRuntimeRendererRequestEnvelope,
+  coerceRuntimeRendererEvidenceEnvelope,
+} from '@/lib/runtime/runtime-renderer-adapter'
 import {
   QUEUE_NAMES,
   queueManager,
@@ -143,24 +146,19 @@ async function requestExternalRenderEvidence(
         ? { authorization: `Bearer ${options.rendererToken ?? process.env.AETHEL_RENDER_BACKEND_TOKEN}` }
         : {}),
     },
-    body: JSON.stringify({
-      jobType: VIEWPORT_RENDER_QUEUE_JOB_TYPE,
-      payload,
-      evidencePolicy: {
-        requirePlayback: true,
-        requirePerformance: true,
-        requireLicense: true,
-        requireContinuity: true,
-        neverAutoRelease: true,
-      },
-    }),
+    body: JSON.stringify(buildRuntimeRendererRequestEnvelope(payload)),
   })
 
   if (!response.ok) {
     throw new Error(`Renderer backend rejected viewport render (${response.status})`)
   }
 
-  return coerceViewportRenderOutputEvidence(await response.json())
+  const envelope = coerceRuntimeRendererEvidenceEnvelope(await response.json(), payload)
+  if (!envelope.ok) {
+    throw new Error(`Renderer backend response failed runtime engine schema: ${envelope.blockers.join(' ')}`)
+  }
+
+  return envelope.evidence
 }
 
 async function buildManifestOnlyEvidence(

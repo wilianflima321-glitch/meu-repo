@@ -84,38 +84,87 @@ describe('viewport render worker', () => {
 
   it('accepts real renderer backend evidence without auto-release', async () => {
     const payload = buildPayload()
-    const fetcher = async () => new Response(JSON.stringify({
-      evidence: {
-        contractId: payload.metadata.renderContract.id,
-        projectId: payload.projectId,
-        jobId: 'job-render-2',
-        quality: 'review',
-        runtimeTarget: 'cloud-sandbox',
-        capturedAt: '2026-05-11T15:05:00.000Z',
-        artifacts: [
-          {
-            kind: 'review-mp4',
-            url: 'https://renders.example.test/project-render-worker/review.mp4',
-            sizeBytes: 1024,
-            durationSeconds: 18,
-            checksum: 'sha256-review',
-          },
-          {
-            kind: 'validation-report',
-            url: 'https://renders.example.test/project-render-worker/validation.json',
-            sizeBytes: 512,
-            checksum: 'sha256-validation',
-          },
-        ],
-        validation: {
-          playbackOk: true,
-          performanceOk: true,
-          licenseOk: true,
-          continuityOk: true,
+    const fetcher = async (_url: string, init?: RequestInit) => {
+      expect(JSON.parse(String(init?.body))).toMatchObject({
+        schemaVersion: 1,
+        runtimeEngine: {
+          contract: 'hybrid-wgpu-v1',
+          browserRole: 'preview-only',
+          neverMainThread: true,
         },
-        notes: ['Renderer produced review evidence; human approval remains required.'],
-      },
-    }))
+        evidencePolicy: {
+          requirePerformanceReportArtifact: true,
+          requireValidationReportArtifact: true,
+          neverAutoRelease: true,
+        },
+      })
+
+      return new Response(JSON.stringify({
+        runtimeEngine: {
+          schemaVersion: 1,
+          backendId: 'cloud-renderer-test',
+          backendKind: 'cloud-renderer',
+          target: 'cloud-sandbox',
+          contractId: payload.metadata.renderContract.id,
+          projectId: payload.projectId,
+          jobId: 'job-render-2',
+          finishedAt: '2026-05-11T15:05:00.000Z',
+          performanceReport: {
+            renderTimeMs: 4_200,
+            frameCount: 540,
+            averageFps: 30,
+            peakMemoryMb: 768,
+            peakVramMb: 1024,
+            toolchainDigests: { ffmpeg: 'sha256-ffmpeg' },
+          },
+          validationReport: {
+            playbackOk: true,
+            performanceOk: true,
+            licenseOk: true,
+            continuityOk: true,
+            artifactOwnershipChecked: true,
+            shaderCompileOk: true,
+            assetBudgetOk: true,
+          },
+          evidence: {
+            contractId: payload.metadata.renderContract.id,
+            projectId: payload.projectId,
+            jobId: 'job-render-2',
+            quality: 'review',
+            runtimeTarget: 'cloud-sandbox',
+            capturedAt: '2026-05-11T15:05:00.000Z',
+            artifacts: [
+              {
+                kind: 'review-mp4',
+                url: 'https://renders.example.test/project-render-worker/review.mp4',
+                sizeBytes: 1024,
+                durationSeconds: 18,
+                checksum: 'sha256-review',
+              },
+              {
+                kind: 'performance-report',
+                url: 'https://renders.example.test/project-render-worker/performance.json',
+                sizeBytes: 512,
+                checksum: 'sha256-performance',
+              },
+              {
+                kind: 'validation-report',
+                url: 'https://renders.example.test/project-render-worker/validation.json',
+                sizeBytes: 512,
+                checksum: 'sha256-validation',
+              },
+            ],
+            validation: {
+              playbackOk: true,
+              performanceOk: true,
+              licenseOk: true,
+              continuityOk: true,
+            },
+            notes: ['Renderer produced review evidence; human approval remains required.'],
+          },
+        },
+      }))
+    }
 
     const result = await executeViewportRenderQueuePayload(payload, {
       fetcher,
@@ -132,26 +181,54 @@ describe('viewport render worker', () => {
   it('blocks renderer backend evidence that references another project internal artifact', async () => {
     const payload = buildPayload()
     const fetcher = async () => new Response(JSON.stringify({
-      evidence: {
+      runtimeEngine: {
+        schemaVersion: 1,
+        backendId: 'cloud-renderer-test',
+        backendKind: 'cloud-renderer',
+        target: 'cloud-sandbox',
         contractId: payload.metadata.renderContract.id,
         projectId: payload.projectId,
         jobId: 'job-render-cross-project',
-        quality: 'review',
-        runtimeTarget: 'cloud-sandbox',
-        capturedAt: '2026-05-11T15:06:00.000Z',
-        artifacts: [
-          {
-            kind: 'validation-report',
-            url: 'aethel-artifact://viewport-render/other-project/render-worker-review/validation-report.json',
-          },
-        ],
-        validation: {
+        finishedAt: '2026-05-11T15:06:00.000Z',
+        performanceReport: {
+          renderTimeMs: 4_200,
+          frameCount: 540,
+          averageFps: 30,
+          peakMemoryMb: 768,
+          toolchainDigests: { ffmpeg: 'sha256-ffmpeg' },
+        },
+        validationReport: {
           playbackOk: true,
           performanceOk: true,
           licenseOk: true,
           continuityOk: true,
+          artifactOwnershipChecked: true,
         },
-        notes: ['Renderer attempted to return an internal artifact from another project.'],
+        evidence: {
+          contractId: payload.metadata.renderContract.id,
+          projectId: payload.projectId,
+          jobId: 'job-render-cross-project',
+          quality: 'review',
+          runtimeTarget: 'cloud-sandbox',
+          capturedAt: '2026-05-11T15:06:00.000Z',
+          artifacts: [
+            {
+              kind: 'performance-report',
+              url: 'https://renders.example.test/project-render-worker/performance.json',
+            },
+            {
+              kind: 'validation-report',
+              url: 'aethel-artifact://viewport-render/other-project/render-worker-review/validation-report.json',
+            },
+          ],
+          validation: {
+            playbackOk: true,
+            performanceOk: true,
+            licenseOk: true,
+            continuityOk: true,
+          },
+          notes: ['Renderer attempted to return an internal artifact from another project.'],
+        },
       },
     }))
 

@@ -84,7 +84,7 @@ export function buildRuntimeLaneBudgets(policy: DeviceRuntimePolicy): RuntimeLan
       return [
         budget('ai-agents', 1, 'cloud-sandbox', { maxQueueDepth: 4 }),
         budget('browser-operator', 1, 'cloud-sandbox', { requiresConfirmation: true, maxQueueDepth: 2 }),
-        budget('viewport-render', 1, 'local-main-safe', { maxQueueDepth: 2 }),
+        budget('viewport-render', 1, 'cloud-sandbox', { maxQueueDepth: 2 }),
         budget('build-export', 1, 'cloud-sandbox', { maxQueueDepth: 2 }),
         budget('memory-indexing', 1, 'cloud-sandbox', { pauseWhenUserActive: true, maxQueueDepth: 2 }),
         budget('file-sync', 1, 'local-worker', { maxQueueDepth: 3 }),
@@ -94,7 +94,7 @@ export function buildRuntimeLaneBudgets(policy: DeviceRuntimePolicy): RuntimeLan
       return [
         budget('ai-agents', 1, 'cloud-sandbox', { maxQueueDepth: 2 }),
         budget('browser-operator', 1, 'cloud-sandbox', { requiresConfirmation: true, maxQueueDepth: 1 }),
-        budget('viewport-render', 1, 'local-main-safe', { pauseWhenUserActive: false, maxQueueDepth: 1 }),
+        budget('viewport-render', 1, 'cloud-sandbox', { pauseWhenUserActive: false, maxQueueDepth: 1 }),
         budget('build-export', 1, 'cloud-sandbox', { maxQueueDepth: 1 }),
         budget('memory-indexing', 0, 'cloud-sandbox', { pauseWhenUserActive: true, maxQueueDepth: 1 }),
         budget('file-sync', 1, 'local-worker', { maxQueueDepth: 2 }),

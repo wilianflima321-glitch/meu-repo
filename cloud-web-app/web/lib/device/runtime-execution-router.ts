@@ -54,6 +54,8 @@ function buildReadyRoute(input: {
   }
 }
 
+const HEAVY_RUNTIME_LANES = new Set(['browser-operator', 'viewport-render', 'build-export', 'memory-indexing'])
+
 export function resolveRuntimeExecutionRoute(input: {
   profile: DeviceCapabilityProfile
   decision: RuntimeLaneDecision
@@ -76,6 +78,18 @@ export function resolveRuntimeExecutionRoute(input: {
       detail: decision.reason,
       nativeBridge: bridgeConnection,
     }
+  }
+
+  if (decision.placement === 'local-main-safe' && HEAVY_RUNTIME_LANES.has(decision.lane)) {
+    return buildReadyRoute({
+      decision,
+      target: 'cloud-sandbox',
+      safety: 'fallback',
+      bridgeConnection,
+      reason: `${decision.lane.replace(/-/g, ' ')} cannot run on the browser main thread; Aethel will use isolated execution instead.`,
+      detail:
+        'Runtime Engine Spine policy keeps render, build, memory indexing, and browser automation outside the UI thread.',
+    })
   }
 
   if (decision.placement === 'cloud-sandbox' || decision.placement === 'local-main-safe') {
