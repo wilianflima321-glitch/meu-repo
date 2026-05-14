@@ -96,7 +96,9 @@
     "qa:studio-local-runtime": "node tools/check-studio-local-runtime-gate.mjs",
     "qa:interface-quality": "node tools/check-interface-quality-gate.mjs",
     "qa:heavy-render-runtime-safety": "node tools/check-heavy-render-runtime-safety.mjs",
-    "qa:studio-session-runtime": "node tools/check-studio-session-runtime-gate.mjs"
+    "qa:studio-session-runtime": "node tools/check-studio-session-runtime-gate.mjs",
+    "cli:help": "node packages/aethel-cli/src/index.mjs --help",
+    "qa:ecosystem-skeletons": "node tools/check-ecosystem-skeletons.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
