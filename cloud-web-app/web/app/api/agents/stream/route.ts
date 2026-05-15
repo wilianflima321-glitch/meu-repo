@@ -23,6 +23,7 @@ import {
 } from '@/lib/metering'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { loadProjectRulesContext } from '@/lib/server/project-rules'
+import { planAgentWorkforceForMission } from '@/lib/production/agent-workforce-topology'
 
 export const runtime = 'nodejs'
 
@@ -76,6 +77,24 @@ function getAvailableModes(): Array<'heuristic' | 'provider-backed'> {
   const providers = aiService.getAvailableProviders()
   if (providers.length > 0) return ['heuristic', 'provider-backed']
   return ['heuristic']
+}
+
+function includesAny(input: string, patterns: RegExp[]): boolean {
+  return patterns.some((pattern) => pattern.test(input))
+}
+
+function buildWorkforcePlan(prompt: string, selectedAgentCount: number, maxAgentsForPlan: number) {
+  const text = prompt.toLowerCase()
+  return planAgentWorkforceForMission({
+    mission: prompt,
+    itemCount: selectedAgentCount,
+    planConcurrencyLimit: maxAgentsForPlan,
+    requiresBrowser: includesAny(text, [/browser/, /chrome/, /login/, /checkout/, /navigate/, /site/, /website/]),
+    requiresWrites: includesAny(text, [/write/, /edit/, /implement/, /fix/, /build/, /create/, /refactor/, /delete/, /apply/]),
+    requiresRelease: includesAny(text, [/deploy/, /release/, /publish/, /production/, /rollback/, /ship/]),
+    requiresExternalAccounts: includesAny(text, [/account/, /billing/, /stripe/, /github/, /hugging face/, /vercel/, /brokerage/, /bank/]),
+    requiresHeavyRuntime: includesAny(text, [/render/, /shader/, /asset/, /indexing/, /viewport/, /game/, /film/, /video/, /build/]),
+  })
 }
 
 function buildProviderBackedMessages(
@@ -188,6 +207,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const selectedAgents = filteredByPlan.slice(0, maxAgentsForPlan)
+    const workforcePlan = buildWorkforcePlan(prompt, selectedAgents.length, maxAgentsForPlan)
     const task: OrchestrationTask = {
       id: `task-${Date.now()}`,
       prompt: projectRulesContext ? `${prompt}\n\n${projectRulesContext}` : prompt,
@@ -262,6 +282,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                       scope: buildRoleScope(agent),
                     })),
                   },
+                  workforcePlan,
                   providers: availableProviders,
                   timestamp: Date.now(),
                 })}\n\n`
@@ -407,6 +428,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                     scope: buildRoleScope(agent),
                   })),
                 },
+                workforcePlan,
                 timestamp: Date.now(),
               })}\n\n`
             )
