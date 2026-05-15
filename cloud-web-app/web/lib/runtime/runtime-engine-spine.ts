@@ -13,6 +13,7 @@ export type RuntimeEngineToolCategory =
   | 'navmesh'
   | 'physics'
   | 'animation'
+  | 'native-build'
   | 'export'
 export type RuntimeEngineToolchainStatus = 'optional' | 'required-for-final' | 'detected' | 'missing'
 export type RuntimeEngineAssetStage =
@@ -226,6 +227,36 @@ export const RUNTIME_ENGINE_TOOLCHAIN_REGISTRY: RuntimeEngineToolchainEntry[] = 
     downloadPolicy: 'manual-consent-only',
     status: 'optional',
     provides: ['rigid-body-physics', 'collider-validation', 'playtest-physics-replay'],
+  },
+  {
+    id: 'zig-toolchain',
+    label: 'Zig native build toolchain',
+    category: 'native-build',
+    executable: 'zig',
+    homepage: 'https://ziglang.org/',
+    license: 'MIT',
+    licenseUrl: 'https://github.com/ziglang/zig/blob/master/LICENSE',
+    probe: { command: 'zig', args: ['version'], expectedExitCode: 0 },
+    versionArgs: ['version'],
+    checksumPolicy: 'sha256-required-before-execution',
+    downloadPolicy: 'manual-consent-only',
+    status: 'optional',
+    provides: ['native-adapter-build', 'cross-compile', 'c-cpp-toolchain'],
+  },
+  {
+    id: 'zig-c-compiler',
+    label: 'Zig cc / c++ compiler wrapper',
+    category: 'native-build',
+    executable: 'zig-cc',
+    homepage: 'https://ziglang.org/',
+    license: 'MIT',
+    licenseUrl: 'https://github.com/ziglang/zig/blob/master/LICENSE',
+    probe: { command: 'zig-cc', args: ['--version'], expectedExitCode: 0 },
+    versionArgs: ['--version'],
+    checksumPolicy: 'sha256-required-before-execution',
+    downloadPolicy: 'manual-consent-only',
+    status: 'optional',
+    provides: ['c-adapter-build', 'cpp-adapter-build', 'native-runtime-smoke-tests'],
   },
   {
     id: 'ozz-animation',
@@ -509,11 +540,11 @@ export function buildGameRuntimeToolchainPlan(input: {
     requiredEvidence.push('physics replay', 'collider validation report')
   }
   if (input.requiresAnimationRuntime) {
-    requiredTools.push('ozz-animation')
+    requiredTools.push('ozz-animation', 'zig-toolchain', 'zig-c-compiler')
     requiredEvidence.push('skeleton retarget report', 'animation clip validation')
   }
-  if (exportTargets.includes('unreal')) requiredTools.push('unreal-export-bridge')
-  if (exportTargets.includes('unity')) requiredTools.push('unity-export-bridge')
+  if (exportTargets.includes('unreal')) requiredTools.push('unreal-export-bridge', 'zig-toolchain')
+  if (exportTargets.includes('unity')) requiredTools.push('unity-export-bridge', 'zig-toolchain')
   if (exportTargets.includes('godot')) requiredTools.push('godot-export-bridge')
 
   if (exportTargets.length > 0 && !input.hasUserConsentForExternalEngineBridge) {

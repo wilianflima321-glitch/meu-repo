@@ -37,6 +37,10 @@ fn sidecar_available(probe: &LocalRuntimeProbeReport, kind: RuntimeSidecarKind) 
                 || !probe.shader_tools.is_empty()
                 || probe.shader_tools.contains(&LocalRuntimeShaderTool::Naga)
         }
+        RuntimeSidecarKind::NativeCompiler => {
+            has_toolchain_feature(probe, LocalRuntimeToolchainFeature::ZigToolchain)
+                || has_toolchain_feature(probe, LocalRuntimeToolchainFeature::ZigCCompiler)
+        }
         RuntimeSidecarKind::RapierPhysics => probe.rapier_available || has_toolchain_feature(probe, LocalRuntimeToolchainFeature::Rapier),
     }
 }
@@ -68,6 +72,7 @@ pub fn build_sidecar_capability_manifest(probe: &LocalRuntimeProbeReport) -> Vec
         RuntimeSidecarKind::BrowserOperator,
         RuntimeSidecarKind::AssetOptimizer,
         RuntimeSidecarKind::ShaderCompiler,
+        RuntimeSidecarKind::NativeCompiler,
         RuntimeSidecarKind::RapierPhysics,
     ]
     .iter()

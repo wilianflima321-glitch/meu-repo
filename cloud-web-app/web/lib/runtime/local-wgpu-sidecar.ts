@@ -131,6 +131,8 @@ const TOOLCHAIN = [
   'blender-headless',
   'wgpu-native',
   'recast-detour',
+  'zig-toolchain',
+  'zig-c-compiler',
   'ozz-animation',
   'unreal-export-bridge',
   'unity-export-bridge',

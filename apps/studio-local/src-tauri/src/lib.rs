@@ -152,6 +152,8 @@ mod tests {
                 | LocalRuntimeToolchainFeature::BlenderHeadless
                 | LocalRuntimeToolchainFeature::WgpuNative
                 | LocalRuntimeToolchainFeature::RecastDetour
+                | LocalRuntimeToolchainFeature::ZigToolchain
+                | LocalRuntimeToolchainFeature::ZigCCompiler
                 | LocalRuntimeToolchainFeature::OzzAnimation
                 | LocalRuntimeToolchainFeature::UnrealExportBridge
                 | LocalRuntimeToolchainFeature::UnityExportBridge

@@ -95,6 +95,8 @@ fn parse_toolchain_feature(value: &str) -> Option<LocalRuntimeToolchainFeature> 
         "blender-headless" | "blender" => Some(LocalRuntimeToolchainFeature::BlenderHeadless),
         "wgpu-native" | "wgpu" => Some(LocalRuntimeToolchainFeature::WgpuNative),
         "recast-detour" | "recast" | "detour" | "recast-cli" => Some(LocalRuntimeToolchainFeature::RecastDetour),
+        "zig-toolchain" | "zig" => Some(LocalRuntimeToolchainFeature::ZigToolchain),
+        "zig-c-compiler" | "zig-cc" | "zig-cxx" => Some(LocalRuntimeToolchainFeature::ZigCCompiler),
         "ozz-animation" | "ozz" | "ozz-animation-adapter" => Some(LocalRuntimeToolchainFeature::OzzAnimation),
         "unreal-export-bridge" | "unreal" | "aethel-unreal-bridge" => Some(LocalRuntimeToolchainFeature::UnrealExportBridge),
         "unity-export-bridge" | "unity" | "aethel-unity-bridge" => Some(LocalRuntimeToolchainFeature::UnityExportBridge),
@@ -200,6 +202,12 @@ fn default_toolchain(
     if command_exists("recast-cli") {
         push_unique(&mut toolchain, LocalRuntimeToolchainFeature::RecastDetour);
     }
+    if command_exists("zig") {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::ZigToolchain);
+    }
+    if command_exists_any(&["zig-cc", "zig-cxx"]) {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::ZigCCompiler);
+    }
     if command_exists("ozz-animation-adapter") {
         push_unique(&mut toolchain, LocalRuntimeToolchainFeature::OzzAnimation);
     }
@@ -302,6 +310,8 @@ fn tool_versions() -> BTreeMap<String, String> {
         ("usdcat", "--help"),
         ("blender", "--version"),
         ("recast-cli", "--version"),
+        ("zig", "version"),
+        ("zig-cc", "--version"),
         ("ozz-animation-adapter", "--version"),
         ("aethel-unreal-bridge", "--version"),
         ("aethel-unity-bridge", "--version"),

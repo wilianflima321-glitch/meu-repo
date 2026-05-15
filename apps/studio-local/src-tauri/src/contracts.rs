@@ -145,6 +145,8 @@ pub enum LocalRuntimeToolchainFeature {
     BlenderHeadless,
     WgpuNative,
     RecastDetour,
+    ZigToolchain,
+    ZigCCompiler,
     OzzAnimation,
     UnrealExportBridge,
     UnityExportBridge,
@@ -167,6 +169,8 @@ impl LocalRuntimeToolchainFeature {
             Self::BlenderHeadless => "blender-headless",
             Self::WgpuNative => "wgpu-native",
             Self::RecastDetour => "recast-detour",
+            Self::ZigToolchain => "zig-toolchain",
+            Self::ZigCCompiler => "zig-c-compiler",
             Self::OzzAnimation => "ozz-animation",
             Self::UnrealExportBridge => "unreal-export-bridge",
             Self::UnityExportBridge => "unity-export-bridge",
@@ -272,6 +276,7 @@ pub enum RuntimeSidecarKind {
     BrowserOperator,
     AssetOptimizer,
     ShaderCompiler,
+    NativeCompiler,
     RapierPhysics,
 }
 
@@ -285,6 +290,7 @@ impl RuntimeSidecarKind {
             Self::BrowserOperator => "browser-operator",
             Self::AssetOptimizer => "asset-optimizer",
             Self::ShaderCompiler => "shader-compiler",
+            Self::NativeCompiler => "native-compiler",
             Self::RapierPhysics => "rapier-physics",
         }
     }
@@ -298,6 +304,7 @@ impl RuntimeSidecarKind {
             Self::BrowserOperator => "Browser operator runtime",
             Self::AssetOptimizer => "Asset optimizer",
             Self::ShaderCompiler => "Shader compiler",
+            Self::NativeCompiler => "Native C/C++ compiler",
             Self::RapierPhysics => "Rapier physics",
         }
     }

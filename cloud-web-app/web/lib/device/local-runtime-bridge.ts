@@ -43,6 +43,8 @@ export type LocalRuntimeToolchainFeature =
   | 'blender-headless'
   | 'wgpu-native'
   | 'recast-detour'
+  | 'zig-toolchain'
+  | 'zig-c-compiler'
   | 'ozz-animation'
   | 'unreal-export-bridge'
   | 'unity-export-bridge'
@@ -320,6 +322,8 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     'blender-headless',
     'wgpu-native',
     'recast-detour',
+    'zig-toolchain',
+    'zig-c-compiler',
     'ozz-animation',
     'unreal-export-bridge',
     'unity-export-bridge',
@@ -338,6 +342,8 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     BlenderHeadless: 'blender-headless',
     WgpuNative: 'wgpu-native',
     RecastDetour: 'recast-detour',
+    ZigToolchain: 'zig-toolchain',
+    ZigCCompiler: 'zig-c-compiler',
     OzzAnimation: 'ozz-animation',
     UnrealExportBridge: 'unreal-export-bridge',
     UnityExportBridge: 'unity-export-bridge',
@@ -520,6 +526,8 @@ export function sanitizeLocalRuntimeCapabilityReport(
       'blender-headless',
       'wgpu-native',
       'recast-detour',
+      'zig-toolchain',
+      'zig-c-compiler',
       'ozz-animation',
       'unreal-export-bridge',
       'unity-export-bridge',

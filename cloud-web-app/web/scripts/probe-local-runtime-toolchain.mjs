@@ -145,9 +145,10 @@ const probes = TOOLS.map(probe)
 const ready = probes.filter((entry) => entry.status === 'ready').length
 const held = probes.filter((entry) => entry.status === 'held' || entry.status === 'source-only').length
 const missing = probes.filter((entry) => entry.status === 'missing').length
+const review = probes.filter((entry) => entry.status === 'review').length
 
 fs.mkdirSync(REPORT_DIR, { recursive: true })
-fs.writeFileSync(JSON_PATH, JSON.stringify({ generatedAt, ready, held, missing, tools: probes }, null, 2))
+fs.writeFileSync(JSON_PATH, JSON.stringify({ generatedAt, ready, held, missing, review, tools: probes }, null, 2))
 
 const rows = probes.map((entry) => {
   const version = (entry.version ?? '-').replace(/\|/g, '\\|')
@@ -162,6 +163,7 @@ fs.writeFileSync(REPORT_PATH, `# Runtime Toolchain Local Install Report
 - Ready: \`${ready}\`
 - Held/source-only: \`${held}\`
 - Missing: \`${missing}\`
+- Review: \`${review}\`
 
 | Tool | Status | Command | Version/probe | Note |
 | --- | --- | --- | --- | --- |
@@ -172,7 +174,13 @@ ${rows.join('\n')}
 - No external engine bridge is considered ready until the user installs the target engine and accepts its license.
 - Heavy render, asset processing, shader compile, indexing, and browser automation must remain sidecar/cloud/held, never browser main-thread.
 - Tool downloads must remain consented and checksum-governed before production execution.
+- This local readiness probe fails when a governed tool is missing or returns a review/error probe; explicit held/source-only bridge states are allowed only when they document consent, source-only, or license blockers.
 `)
 
-console.log(`[local-runtime-toolchain] ready=${ready} held=${held} missing=${missing}`)
+console.log(`[local-runtime-toolchain] ready=${ready} held=${held} missing=${missing} review=${review}`)
 console.log(`[local-runtime-toolchain] report=${REPORT_PATH}`)
+
+if (missing > 0 || review > 0) {
+  console.error('[local-runtime-toolchain] FAIL: missing/review tools must be installed, fixed, or explicitly modeled as held/source-only.')
+  process.exit(1)
+}
