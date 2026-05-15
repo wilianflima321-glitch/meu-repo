@@ -124,6 +124,11 @@ mod tests {
                 | LocalRuntimeAssetTool::Basisu
                 | LocalRuntimeAssetTool::OpenUsd
                 | LocalRuntimeAssetTool::BlenderHeadless
+                | LocalRuntimeAssetTool::RecastDetour
+                | LocalRuntimeAssetTool::OzzAnimation
+                | LocalRuntimeAssetTool::UnrealExportBridge
+                | LocalRuntimeAssetTool::UnityExportBridge
+                | LocalRuntimeAssetTool::GodotExportBridge
         )));
         assert!(probe.shader_tools.iter().all(|tool| matches!(
             tool,
@@ -146,6 +151,11 @@ mod tests {
                 | LocalRuntimeToolchainFeature::OpenUsd
                 | LocalRuntimeToolchainFeature::BlenderHeadless
                 | LocalRuntimeToolchainFeature::WgpuNative
+                | LocalRuntimeToolchainFeature::RecastDetour
+                | LocalRuntimeToolchainFeature::OzzAnimation
+                | LocalRuntimeToolchainFeature::UnrealExportBridge
+                | LocalRuntimeToolchainFeature::UnityExportBridge
+                | LocalRuntimeToolchainFeature::GodotExportBridge
         )));
     }
 

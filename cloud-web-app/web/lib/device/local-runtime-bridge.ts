@@ -42,6 +42,11 @@ export type LocalRuntimeToolchainFeature =
   | 'openusd'
   | 'blender-headless'
   | 'wgpu-native'
+  | 'recast-detour'
+  | 'ozz-animation'
+  | 'unreal-export-bridge'
+  | 'unity-export-bridge'
+  | 'godot-export-bridge'
 
 export type LocalRuntimeRendererBackend =
   | 'wgpu-native'
@@ -56,6 +61,11 @@ export type LocalRuntimeAssetTool =
   | 'basisu'
   | 'openusd'
   | 'blender-headless'
+  | 'recast-detour'
+  | 'ozz-animation'
+  | 'unreal-export-bridge'
+  | 'unity-export-bridge'
+  | 'godot-export-bridge'
 export type LocalRuntimeMediaTool = 'ffmpeg' | 'ffprobe'
 export type LocalRuntimeShaderTool = 'naga' | 'wgsl-validator' | 'shaderc' | 'dxc'
 
@@ -309,6 +319,11 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     'openusd',
     'blender-headless',
     'wgpu-native',
+    'recast-detour',
+    'ozz-animation',
+    'unreal-export-bridge',
+    'unity-export-bridge',
+    'godot-export-bridge',
   ] as const, {
     Ffmpeg: 'ffmpeg',
     Ffprobe: 'ffprobe',
@@ -322,6 +337,11 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     OpenUsd: 'openusd',
     BlenderHeadless: 'blender-headless',
     WgpuNative: 'wgpu-native',
+    RecastDetour: 'recast-detour',
+    OzzAnimation: 'ozz-animation',
+    UnrealExportBridge: 'unreal-export-bridge',
+    UnityExportBridge: 'unity-export-bridge',
+    GodotExportBridge: 'godot-export-bridge',
   })
   const rendererBackends = asEnumArrayWithAliases(readAlias(candidate, 'rendererBackends', 'renderer_backends'), [
     'wgpu-native',
@@ -343,6 +363,11 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     'basisu',
     'openusd',
     'blender-headless',
+    'recast-detour',
+    'ozz-animation',
+    'unreal-export-bridge',
+    'unity-export-bridge',
+    'godot-export-bridge',
   ] as const, {
     GltfTransform: 'gltf-transform',
     Meshoptimizer: 'meshoptimizer',
@@ -350,6 +375,11 @@ function normalizeStudioLocalProbeReport(candidate: Record<string, unknown>): Lo
     Basisu: 'basisu',
     OpenUsd: 'openusd',
     BlenderHeadless: 'blender-headless',
+    RecastDetour: 'recast-detour',
+    OzzAnimation: 'ozz-animation',
+    UnrealExportBridge: 'unreal-export-bridge',
+    UnityExportBridge: 'unity-export-bridge',
+    GodotExportBridge: 'godot-export-bridge',
   })
   const mediaTools = asEnumArrayWithAliases(readAlias(candidate, 'mediaTools', 'media_tools'), ['ffmpeg', 'ffprobe'] as const, {
     Ffmpeg: 'ffmpeg',
@@ -489,6 +519,11 @@ export function sanitizeLocalRuntimeCapabilityReport(
       'openusd',
       'blender-headless',
       'wgpu-native',
+      'recast-detour',
+      'ozz-animation',
+      'unreal-export-bridge',
+      'unity-export-bridge',
+      'godot-export-bridge',
     ] as const),
     rendererBackends: asEnumArray(candidate.rendererBackends, [
       'wgpu-native',
@@ -504,6 +539,11 @@ export function sanitizeLocalRuntimeCapabilityReport(
       'basisu',
       'openusd',
       'blender-headless',
+      'recast-detour',
+      'ozz-animation',
+      'unreal-export-bridge',
+      'unity-export-bridge',
+      'godot-export-bridge',
     ] as const),
     mediaTools: asEnumArray(candidate.mediaTools, ['ffmpeg', 'ffprobe'] as const),
     shaderTools: asEnumArray(candidate.shaderTools, ['naga', 'wgsl-validator', 'shaderc', 'dxc'] as const),

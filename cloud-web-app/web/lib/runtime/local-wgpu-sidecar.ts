@@ -102,7 +102,19 @@ function enumArray<T extends string>(value: unknown, allowed: readonly T[]): T[]
 
 const GRAPHICS_BACKENDS = ['vulkan', 'directx12', 'metal', 'webgpu', 'opengl'] as const
 const RENDERER_BACKENDS = ['wgpu-native', 'dawn-native', 'three-webgpu', 'three-webgl', 'software-raster'] as const
-const ASSET_TOOLS = ['gltf-transform', 'meshoptimizer', 'ktx-software', 'basisu', 'openusd', 'blender-headless'] as const
+const ASSET_TOOLS = [
+  'gltf-transform',
+  'meshoptimizer',
+  'ktx-software',
+  'basisu',
+  'openusd',
+  'blender-headless',
+  'recast-detour',
+  'ozz-animation',
+  'unreal-export-bridge',
+  'unity-export-bridge',
+  'godot-export-bridge',
+] as const
 const MEDIA_TOOLS = ['ffmpeg', 'ffprobe'] as const
 const SHADER_TOOLS = ['naga', 'wgsl-validator', 'shaderc', 'dxc'] as const
 const TOOLCHAIN = [
@@ -117,6 +129,12 @@ const TOOLCHAIN = [
   'basisu',
   'openusd',
   'blender-headless',
+  'wgpu-native',
+  'recast-detour',
+  'ozz-animation',
+  'unreal-export-bridge',
+  'unity-export-bridge',
+  'godot-export-bridge',
 ] as const
 
 export function buildLocalWgpuSidecarProbeRequest(now = new Date().toISOString()): LocalWgpuSidecarProbeRequest {

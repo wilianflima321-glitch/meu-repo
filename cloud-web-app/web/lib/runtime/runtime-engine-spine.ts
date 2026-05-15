@@ -4,7 +4,16 @@ import type { ViewportRenderJobContract } from '@/lib/viewport/viewport-render-c
 export type RuntimeEngineExecutionTarget = 'browser-preview' | 'local-native' | 'cloud-sandbox' | 'held'
 export type RuntimeEngineBackendKind = 'three-r3f-preview' | 'three-webgpu-preview' | 'wgpu-native' | 'cloud-renderer' | 'none'
 export type RuntimeEngineStatus = 'ready' | 'review' | 'fallback' | 'held'
-export type RuntimeEngineToolCategory = 'asset' | 'media' | 'shader' | 'renderer' | 'dcc'
+export type RuntimeEngineToolCategory =
+  | 'asset'
+  | 'media'
+  | 'shader'
+  | 'renderer'
+  | 'dcc'
+  | 'navmesh'
+  | 'physics'
+  | 'animation'
+  | 'export'
 export type RuntimeEngineToolchainStatus = 'optional' | 'required-for-final' | 'detected' | 'missing'
 export type RuntimeEngineAssetStage =
   | 'metadata'
@@ -81,6 +90,18 @@ export interface RuntimeBudgetGateDecision {
   canStart: boolean
   target: RuntimeEngineExecutionTarget
   status: RuntimeEngineStatus
+  blockers: string[]
+  notes: string[]
+}
+
+export type RuntimeEngineExportTarget = 'unreal' | 'unity' | 'godot' | 'web'
+
+export interface GameRuntimeToolchainPlan {
+  version: 1
+  requiredTools: string[]
+  optionalTools: string[]
+  exportTargets: RuntimeEngineExportTarget[]
+  requiredEvidence: string[]
   blockers: string[]
   notes: string[]
 }
@@ -175,6 +196,96 @@ export const RUNTIME_ENGINE_TOOLCHAIN_REGISTRY: RuntimeEngineToolchainEntry[] = 
     downloadPolicy: 'manual-consent-only',
     status: 'optional',
     provides: ['offline-render', 'thumbnail-render', 'asset-convert'],
+  },
+  {
+    id: 'recast-detour',
+    label: 'Recast / Detour navmesh adapter',
+    category: 'navmesh',
+    executable: 'recast-cli',
+    homepage: 'https://github.com/recastnavigation/recastnavigation',
+    license: 'Zlib',
+    licenseUrl: 'https://github.com/recastnavigation/recastnavigation/blob/main/License.txt',
+    probe: { command: 'recast-cli', args: ['--version'], expectedExitCode: 0 },
+    versionArgs: ['--version'],
+    checksumPolicy: 'sha256-required-before-execution',
+    downloadPolicy: 'manual-consent-only',
+    status: 'optional',
+    provides: ['navmesh-build', 'pathfinding-query', 'crowd-navigation'],
+  },
+  {
+    id: 'rapier-physics',
+    label: 'Rapier physics adapter',
+    category: 'physics',
+    executable: 'rapier',
+    homepage: 'https://rapier.rs/',
+    license: 'Apache-2.0',
+    licenseUrl: 'https://github.com/dimforge/rapier/blob/master/LICENSE',
+    probe: { command: 'rapier', args: ['--version'], expectedExitCode: 0 },
+    versionArgs: ['--version'],
+    checksumPolicy: 'sha256-required-before-execution',
+    downloadPolicy: 'manual-consent-only',
+    status: 'optional',
+    provides: ['rigid-body-physics', 'collider-validation', 'playtest-physics-replay'],
+  },
+  {
+    id: 'ozz-animation',
+    label: 'Ozz Animation runtime adapter',
+    category: 'animation',
+    executable: 'ozz-animation-adapter',
+    homepage: 'https://github.com/guillaumeblanc/ozz-animation',
+    license: 'MIT',
+    licenseUrl: 'https://github.com/guillaumeblanc/ozz-animation/blob/master/LICENSE.md',
+    probe: { command: 'ozz-animation-adapter', args: ['--version'], expectedExitCode: 0 },
+    versionArgs: ['--version'],
+    checksumPolicy: 'sha256-required-before-execution',
+    downloadPolicy: 'manual-consent-only',
+    status: 'optional',
+    provides: ['skeleton-runtime', 'animation-retarget', 'clip-validation'],
+  },
+  {
+    id: 'unreal-export-bridge',
+    label: 'Unreal export bridge',
+    category: 'export',
+    executable: 'aethel-unreal-bridge',
+    homepage: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/exporting-unreal-engine-content-to-gltf',
+    license: 'Engine/EULA dependent',
+    licenseUrl: 'https://www.unrealengine.com/en-US/eula/unreal',
+    probe: { command: 'aethel-unreal-bridge', args: ['--version'], expectedExitCode: 0 },
+    versionArgs: ['--version'],
+    checksumPolicy: 'sha256-required-before-execution',
+    downloadPolicy: 'manual-consent-only',
+    status: 'optional',
+    provides: ['unreal-gltf-export', 'unreal-python-bridge', 'unreal-import-manifest'],
+  },
+  {
+    id: 'unity-export-bridge',
+    label: 'Unity export bridge',
+    category: 'export',
+    executable: 'aethel-unity-bridge',
+    homepage: 'https://github.com/atteneder/glTFast',
+    license: 'Apache-2.0 bridge / Unity license dependent',
+    licenseUrl: 'https://github.com/atteneder/glTFast/blob/main/LICENSE.md',
+    probe: { command: 'aethel-unity-bridge', args: ['--version'], expectedExitCode: 0 },
+    versionArgs: ['--version'],
+    checksumPolicy: 'sha256-required-before-execution',
+    downloadPolicy: 'manual-consent-only',
+    status: 'optional',
+    provides: ['unity-gltf-export', 'unity-import-manifest', 'material-variant-report'],
+  },
+  {
+    id: 'godot-export-bridge',
+    label: 'Godot export bridge',
+    category: 'export',
+    executable: 'godot',
+    homepage: 'https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/exporting_3d_scenes.html',
+    license: 'MIT',
+    licenseUrl: 'https://github.com/godotengine/godot/blob/master/LICENSE.txt',
+    probe: { command: 'godot', args: ['--version'], expectedExitCode: 0 },
+    versionArgs: ['--version'],
+    checksumPolicy: 'sha256-required-before-execution',
+    downloadPolicy: 'manual-consent-only',
+    status: 'optional',
+    provides: ['godot-glb-export', 'godot-import-manifest', 'scene-roundtrip-check'],
   },
 ]
 
@@ -361,6 +472,60 @@ export function evaluateRuntimeBudgetGate(input: RuntimeBudgetGateInput): Runtim
     canStart: blockers.length === 0,
     target,
     status: blockers.length > 0 ? 'held' : 'ready',
+    blockers: unique(blockers),
+    notes,
+  }
+}
+
+export function buildGameRuntimeToolchainPlan(input: {
+  requiresNavmesh?: boolean
+  requiresPhysics?: boolean
+  requiresAnimationRuntime?: boolean
+  exportTargets?: RuntimeEngineExportTarget[]
+  hasUserConsentForExternalEngineBridge?: boolean
+}): GameRuntimeToolchainPlan {
+  const requiredTools = ['gltf-transform', 'meshoptimizer', 'ktx-software-basisu']
+  const optionalTools = ['blender-headless', 'openusd-tools']
+  const requiredEvidence = [
+    'toolchain license review',
+    'sha256 digest before execution',
+    'manual consent receipt',
+    'asset graph',
+    'validation graph',
+  ]
+  const blockers: string[] = []
+  const notes = [
+    'Toolchain adapters are optional and never downloaded automatically.',
+    'Browser preview remains separate from native/cloud final production jobs.',
+  ]
+  const exportTargets = unique(input.exportTargets ?? [])
+
+  if (input.requiresNavmesh) {
+    requiredTools.push('recast-detour')
+    requiredEvidence.push('navmesh bake report', 'navigation validation replay')
+  }
+  if (input.requiresPhysics) {
+    requiredTools.push('rapier-physics')
+    requiredEvidence.push('physics replay', 'collider validation report')
+  }
+  if (input.requiresAnimationRuntime) {
+    requiredTools.push('ozz-animation')
+    requiredEvidence.push('skeleton retarget report', 'animation clip validation')
+  }
+  if (exportTargets.includes('unreal')) requiredTools.push('unreal-export-bridge')
+  if (exportTargets.includes('unity')) requiredTools.push('unity-export-bridge')
+  if (exportTargets.includes('godot')) requiredTools.push('godot-export-bridge')
+
+  if (exportTargets.length > 0 && !input.hasUserConsentForExternalEngineBridge) {
+    blockers.push('External engine export bridges require explicit user consent and target-engine license confirmation.')
+  }
+
+  return {
+    version: 1,
+    requiredTools: unique(requiredTools),
+    optionalTools: unique(optionalTools),
+    exportTargets,
+    requiredEvidence: unique(requiredEvidence),
     blockers: unique(blockers),
     notes,
   }

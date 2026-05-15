@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   RUNTIME_ENGINE_TOOLCHAIN_REGISTRY,
   buildAssetPipelineContract,
+  buildGameRuntimeToolchainPlan,
   buildRenderBackendContract,
   evaluateRuntimeBudgetGate,
   validateRuntimeEngineToolchainRegistry,
@@ -123,7 +124,20 @@ describe('runtime engine spine', () => {
   it('keeps curated optional tools license, probe, checksum, and consent governed', () => {
     expect(validateRuntimeEngineToolchainRegistry()).toEqual([])
     expect(RUNTIME_ENGINE_TOOLCHAIN_REGISTRY.map((tool) => tool.id)).toEqual(
-      expect.arrayContaining(['gltf-transform', 'meshoptimizer', 'ktx-software-basisu', 'ffmpeg', 'openusd-tools', 'blender-headless'])
+      expect.arrayContaining([
+        'gltf-transform',
+        'meshoptimizer',
+        'ktx-software-basisu',
+        'ffmpeg',
+        'openusd-tools',
+        'blender-headless',
+        'recast-detour',
+        'rapier-physics',
+        'ozz-animation',
+        'unreal-export-bridge',
+        'unity-export-bridge',
+        'godot-export-bridge',
+      ])
     )
     for (const tool of RUNTIME_ENGINE_TOOLCHAIN_REGISTRY) {
       expect(tool.downloadPolicy).toBe('manual-consent-only')
@@ -131,5 +145,37 @@ describe('runtime engine spine', () => {
       expect(tool.licenseUrl).toMatch(/^https:\/\//)
       expect(tool.probe.command.length).toBeGreaterThan(0)
     }
+  })
+
+  it('plans optional game runtime toolchains for navmesh, physics, animation, and engine export bridges', () => {
+    const held = buildGameRuntimeToolchainPlan({
+      requiresNavmesh: true,
+      requiresPhysics: true,
+      requiresAnimationRuntime: true,
+      exportTargets: ['unreal', 'unity', 'godot'],
+      hasUserConsentForExternalEngineBridge: false,
+    })
+
+    expect(held.requiredTools).toEqual(
+      expect.arrayContaining([
+        'recast-detour',
+        'rapier-physics',
+        'ozz-animation',
+        'unreal-export-bridge',
+        'unity-export-bridge',
+        'godot-export-bridge',
+      ])
+    )
+    expect(held.requiredEvidence).toEqual(
+      expect.arrayContaining(['manual consent receipt', 'navmesh bake report', 'physics replay', 'skeleton retarget report'])
+    )
+    expect(held.blockers.join(' ')).toContain('External engine export bridges require explicit user consent')
+
+    const approved = buildGameRuntimeToolchainPlan({
+      requiresNavmesh: true,
+      exportTargets: ['godot'],
+      hasUserConsentForExternalEngineBridge: true,
+    })
+    expect(approved.blockers).toEqual([])
   })
 })

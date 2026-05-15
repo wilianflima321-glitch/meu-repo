@@ -144,6 +144,11 @@ pub enum LocalRuntimeToolchainFeature {
     OpenUsd,
     BlenderHeadless,
     WgpuNative,
+    RecastDetour,
+    OzzAnimation,
+    UnrealExportBridge,
+    UnityExportBridge,
+    GodotExportBridge,
 }
 
 impl LocalRuntimeToolchainFeature {
@@ -161,6 +166,11 @@ impl LocalRuntimeToolchainFeature {
             Self::OpenUsd => "openusd",
             Self::BlenderHeadless => "blender-headless",
             Self::WgpuNative => "wgpu-native",
+            Self::RecastDetour => "recast-detour",
+            Self::OzzAnimation => "ozz-animation",
+            Self::UnrealExportBridge => "unreal-export-bridge",
+            Self::UnityExportBridge => "unity-export-bridge",
+            Self::GodotExportBridge => "godot-export-bridge",
         }
     }
 }
@@ -194,6 +204,11 @@ pub enum LocalRuntimeAssetTool {
     Basisu,
     OpenUsd,
     BlenderHeadless,
+    RecastDetour,
+    OzzAnimation,
+    UnrealExportBridge,
+    UnityExportBridge,
+    GodotExportBridge,
 }
 
 impl LocalRuntimeAssetTool {
@@ -205,6 +220,11 @@ impl LocalRuntimeAssetTool {
             Self::Basisu => "basisu",
             Self::OpenUsd => "openusd",
             Self::BlenderHeadless => "blender-headless",
+            Self::RecastDetour => "recast-detour",
+            Self::OzzAnimation => "ozz-animation",
+            Self::UnrealExportBridge => "unreal-export-bridge",
+            Self::UnityExportBridge => "unity-export-bridge",
+            Self::GodotExportBridge => "godot-export-bridge",
         }
     }
 }

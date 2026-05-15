@@ -94,6 +94,11 @@ fn parse_toolchain_feature(value: &str) -> Option<LocalRuntimeToolchainFeature> 
         "openusd" | "usd" | "usdcat" => Some(LocalRuntimeToolchainFeature::OpenUsd),
         "blender-headless" | "blender" => Some(LocalRuntimeToolchainFeature::BlenderHeadless),
         "wgpu-native" | "wgpu" => Some(LocalRuntimeToolchainFeature::WgpuNative),
+        "recast-detour" | "recast" | "detour" | "recast-cli" => Some(LocalRuntimeToolchainFeature::RecastDetour),
+        "ozz-animation" | "ozz" | "ozz-animation-adapter" => Some(LocalRuntimeToolchainFeature::OzzAnimation),
+        "unreal-export-bridge" | "unreal" | "aethel-unreal-bridge" => Some(LocalRuntimeToolchainFeature::UnrealExportBridge),
+        "unity-export-bridge" | "unity" | "aethel-unity-bridge" => Some(LocalRuntimeToolchainFeature::UnityExportBridge),
+        "godot-export-bridge" | "godot" => Some(LocalRuntimeToolchainFeature::GodotExportBridge),
         _ => None,
     }
 }
@@ -192,6 +197,21 @@ fn default_toolchain(
     if command_exists("blender") {
         push_unique(&mut toolchain, LocalRuntimeToolchainFeature::BlenderHeadless);
     }
+    if command_exists("recast-cli") {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::RecastDetour);
+    }
+    if command_exists("ozz-animation-adapter") {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::OzzAnimation);
+    }
+    if command_exists("aethel-unreal-bridge") {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::UnrealExportBridge);
+    }
+    if command_exists("aethel-unity-bridge") {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::UnityExportBridge);
+    }
+    if command_exists("godot") {
+        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::GodotExportBridge);
+    }
 
     toolchain
 }
@@ -223,6 +243,21 @@ fn default_asset_tools() -> Vec<LocalRuntimeAssetTool> {
     }
     if command_exists("blender") {
         tools.push(LocalRuntimeAssetTool::BlenderHeadless);
+    }
+    if command_exists("recast-cli") {
+        tools.push(LocalRuntimeAssetTool::RecastDetour);
+    }
+    if command_exists("ozz-animation-adapter") {
+        tools.push(LocalRuntimeAssetTool::OzzAnimation);
+    }
+    if command_exists("aethel-unreal-bridge") {
+        tools.push(LocalRuntimeAssetTool::UnrealExportBridge);
+    }
+    if command_exists("aethel-unity-bridge") {
+        tools.push(LocalRuntimeAssetTool::UnityExportBridge);
+    }
+    if command_exists("godot") {
+        tools.push(LocalRuntimeAssetTool::GodotExportBridge);
     }
     tools
 }
@@ -265,6 +300,11 @@ fn tool_versions() -> BTreeMap<String, String> {
         ("basisu", "--version"),
         ("usdcat", "--help"),
         ("blender", "--version"),
+        ("recast-cli", "--version"),
+        ("ozz-animation-adapter", "--version"),
+        ("aethel-unreal-bridge", "--version"),
+        ("aethel-unity-bridge", "--version"),
+        ("godot", "--version"),
         ("naga", "--version"),
         ("wgsl-validator", "--version"),
         ("shaderc", "--version"),
