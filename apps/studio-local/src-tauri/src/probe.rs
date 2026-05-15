@@ -182,7 +182,7 @@ fn default_toolchain(
     if command_exists("gltf-transform") {
         push_unique(&mut toolchain, LocalRuntimeToolchainFeature::AssetOptimizer);
     }
-    if command_exists_any(&["meshopt", "meshoptimizer"]) {
+    if command_exists_any(&["meshopt", "meshoptimizer", "gltfpack"]) {
         push_unique(&mut toolchain, LocalRuntimeToolchainFeature::Meshoptimizer);
     }
     if command_exists("toktx") {
@@ -229,7 +229,7 @@ fn default_asset_tools() -> Vec<LocalRuntimeAssetTool> {
     if command_exists("gltf-transform") {
         tools.push(LocalRuntimeAssetTool::GltfTransform);
     }
-    if command_exists_any(&["meshopt", "meshoptimizer"]) {
+    if command_exists_any(&["meshopt", "meshoptimizer", "gltfpack"]) {
         tools.push(LocalRuntimeAssetTool::Meshoptimizer);
     }
     if command_exists("toktx") {
@@ -296,6 +296,7 @@ fn tool_versions() -> BTreeMap<String, String> {
         ("ffprobe", "--version"),
         ("gltf-transform", "--version"),
         ("meshopt", "--version"),
+        ("gltfpack", "-v"),
         ("toktx", "--version"),
         ("basisu", "--version"),
         ("usdcat", "--help"),

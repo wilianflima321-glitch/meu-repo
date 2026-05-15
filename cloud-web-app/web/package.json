@@ -66,7 +66,8 @@
     "qa:engine-module-adapters": "node scripts/check-engine-module-adapters.mjs",
     "qa:runtime-engine-spine": "node scripts/check-runtime-engine-spine.mjs",
     "qa:game-production-spine": "node scripts/check-game-production-spine.mjs",
-    "qa:agent-workforce-topology": "node scripts/check-agent-workforce-topology.mjs"
+    "qa:agent-workforce-topology": "node scripts/check-agent-workforce-topology.mjs",
+    "qa:local-runtime-toolchain": "node scripts/probe-local-runtime-toolchain.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
