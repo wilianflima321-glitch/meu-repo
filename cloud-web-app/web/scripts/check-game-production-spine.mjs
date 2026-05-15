@@ -81,9 +81,44 @@ requirePattern(
   'route must enforce write permissions before mutating Project Brain'
 )
 requirePattern(
+  'lib/production/game-playtest-evidence.ts',
+  /humanFeelReviewOk/,
+  'playtest evidence must include human feel review, not only automated metrics'
+)
+requirePattern(
+  'lib/production/game-playtest-evidence.ts',
+  /performance-trace/,
+  'playtest evidence must require performance traces'
+)
+requirePattern(
+  'lib/production/game-playtest-evidence.ts',
+  /bug-report/,
+  'playtest evidence must require bug ledger artifacts'
+)
+requirePattern(
+  'app/api/projects/[id]/production-state/game-spine/playtest/route.ts',
+  /Playtest artifact does not belong to this project/,
+  'playtest route must validate internal artifact ownership'
+)
+requirePattern(
+  'app/api/projects/[id]/production-state/game-spine/playtest/route.ts',
+  /releaseReady:\s*false/,
+  'playtest evidence must never auto-release games'
+)
+requirePattern(
   '__tests__/production/game-production-spine.test.ts',
   /holds readiness until every graph has evidence/,
   'readiness tests must prevent fake done status'
+)
+requirePattern(
+  '__tests__/production/game-playtest-evidence.test.ts',
+  /never release-ready/,
+  'playtest tests must prove human-held release behavior'
+)
+requirePattern(
+  '__tests__/api/production-state-game-playtest-route.test.ts',
+  /rejects internal playtest artifacts from another project/,
+  'API tests must cover playtest artifact ownership'
 )
 requirePattern(
   '__tests__/api/production-state-game-spine-route.test.ts',
