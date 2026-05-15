@@ -52,6 +52,8 @@ const TOOLS = [
   { id: 'godot-export-bridge', command: 'godot', args: ['--version'], lane: 'external-engine' },
   { id: 'cmake', command: 'cmake', args: ['--version'], lane: 'native-build' },
   { id: 'ninja', command: 'ninja', args: ['--version'], lane: 'native-build' },
+  { id: 'zig-toolchain', command: 'zig', args: ['version'], lane: 'native-build' },
+  { id: 'zig-c-compiler', command: 'zig-cc', args: ['--version'], lane: 'native-build' },
   { id: 'rust-cargo', command: 'cargo', args: ['--version'], lane: 'native-sidecar' },
   { id: 'rustc', command: 'rustc', args: ['--version'], lane: 'native-sidecar' },
   { id: 'recast-detour', command: 'recast-cli', args: ['--version'], lane: 'navmesh' },
