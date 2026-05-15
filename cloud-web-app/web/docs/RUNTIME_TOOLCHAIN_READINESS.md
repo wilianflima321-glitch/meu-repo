@@ -32,6 +32,7 @@ Held does not mean broken. It means Aethel can plan, validate, and produce block
 - No optional tool is downloaded silently.
 - Every executable tool needs a probe command, license, checksum policy, and manual-consent policy before production use.
 - Heavy render, shader compile, asset optimization, indexing, browser automation, and playtest jobs must never run on the browser main thread.
+- Build/export jobs require both an asset optimizer and a native compiler sidecar before running locally.
 - Manifest-only render output cannot become `done`; it remains `held` until native or cloud evidence exists.
 - Weak devices route heavy jobs to `cloud-sandbox` or `held`.
 
@@ -40,4 +41,3 @@ Held does not mean broken. It means Aethel can plan, validate, and produce block
 - `npm run qa:runtime-engine-spine` validates the contracts, sidecar model, and runtime safety policy.
 - `npm run qa:local-runtime-toolchain` probes this machine and fails if any governed tool is missing or returns a review/error state.
 - `npm run typecheck` keeps the TypeScript bridge aligned with the Rust Studio Local contract.
-

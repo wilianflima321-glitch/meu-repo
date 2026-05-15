@@ -95,6 +95,7 @@ requirePattern(studioLocalProbe, /ozz-animation-adapter/, 'Studio Local probe mu
 requirePattern(studioLocalProbe, /aethel-unreal-bridge/, 'Studio Local probe must detect Unreal export bridge support')
 requirePattern(studioLocalProbe, /aethel-unity-bridge/, 'Studio Local probe must detect Unity export bridge support')
 requirePattern(studioLocalProbe, /godot/, 'Studio Local probe must detect Godot export support')
+requirePattern('../../apps/studio-local/src-tauri/src/sidecars.rs', /BuildExport[\s\S]*NativeCompiler/, 'build/export lane must require native compiler sidecar when running locally')
 
 requireFile('lib/production/agent-tool-bus.ts', 'agent tool bus must govern runtime engine tools')
 for (const tool of ['renderer-probe', 'asset-optimize', 'shader-compile', 'render-submit', 'render-validate']) {

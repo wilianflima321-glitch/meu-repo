@@ -55,7 +55,7 @@ pub fn required_sidecars_for_lane(lane: RuntimeJobLane) -> Vec<RuntimeSidecarKin
             RuntimeSidecarKind::ShaderCompiler,
             RuntimeSidecarKind::RapierPhysics,
         ],
-        RuntimeJobLane::BuildExport => vec![RuntimeSidecarKind::AssetOptimizer],
+        RuntimeJobLane::BuildExport => vec![RuntimeSidecarKind::AssetOptimizer, RuntimeSidecarKind::NativeCompiler],
         RuntimeJobLane::BrowserOperator => vec![RuntimeSidecarKind::BrowserOperator],
         RuntimeJobLane::FileSync => Vec::new(),
         RuntimeJobLane::Playtest => vec![RuntimeSidecarKind::WgpuRenderer, RuntimeSidecarKind::RapierPhysics],

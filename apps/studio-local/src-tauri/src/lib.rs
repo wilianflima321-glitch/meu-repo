@@ -230,6 +230,24 @@ mod tests {
     }
 
     #[test]
+    fn build_export_requires_native_compiler_sidecar() {
+        let mut probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        probe.local_toolchain.retain(|feature| {
+            !matches!(
+                feature,
+                LocalRuntimeToolchainFeature::ZigToolchain | LocalRuntimeToolchainFeature::ZigCCompiler
+            )
+        });
+
+        let missing = missing_required_sidecars(&probe, RuntimeJobLane::BuildExport);
+        let decision = resolve_runtime_target(&probe, RuntimeJobLane::BuildExport);
+
+        assert!(missing.iter().any(|kind| kind.as_str() == "native-compiler"));
+        assert_eq!(decision.target, RuntimeExecutionTarget::CloudSandbox);
+        assert!(decision.reason.contains("native-compiler"));
+    }
+
+    #[test]
     fn held_job_is_stored_with_blocker() {
         let probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Critical, StoragePressure::Ok);
         let decision = resolve_runtime_target(&probe, RuntimeJobLane::BrowserOperator);
