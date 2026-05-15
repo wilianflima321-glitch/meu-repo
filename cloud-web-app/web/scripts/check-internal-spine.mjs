@@ -40,6 +40,18 @@ requirePattern('lib/production/agent-tool-bus.ts', /maxPayloadBytes/, 'heavy too
 requirePattern('lib/production/agent-tool-bus.ts', /rollbackStrategy/, 'mutating tools must declare rollback strategy')
 requirePattern('lib/production/agent-tool-bus.ts', /sandboxPolicy/, 'every tool must declare its sandbox policy')
 
+if (exists('lib/production/agent-tool-bus.ts') && exists('lib/production/parallel-agent-work-contract.ts')) {
+  const toolBus = read('lib/production/agent-tool-bus.ts')
+  const workContract = read('lib/production/parallel-agent-work-contract.ts')
+  const canonicalToolIds = new Set([...toolBus.matchAll(/tool\('([^']+)'/g)].map((match) => match[1]))
+  const toolTypeBlock = workContract.match(/export type AgentWorkTool =([\s\S]*?)\n\nexport type AgentScopeMode/)?.[1] ?? ''
+  const declaredToolIds = [...toolTypeBlock.matchAll(/'([^']+)'/g)].map((match) => match[1])
+  const missingCanonicalTools = declaredToolIds.filter((toolId) => !canonicalToolIds.has(toolId))
+  if (missingCanonicalTools.length > 0) {
+    failures.push(`lib/production/agent-tool-bus.ts: missing canonical contracts for ${missingCanonicalTools.join(', ')}`)
+  }
+}
+
 requireFile('lib/production/high-risk-action-firewall.ts', 'high-risk actions need a safety firewall')
 requirePattern('lib/production/high-risk-action-firewall.ts', /investment/, 'investment-like actions must be classified')
 requirePattern('lib/production/high-risk-action-firewall.ts', /signed human approval/, 'financial actions must require signed human approval')

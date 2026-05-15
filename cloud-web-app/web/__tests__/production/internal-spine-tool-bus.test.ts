@@ -5,15 +5,18 @@ import {
   evaluateAgentToolInvocation,
   getCanonicalAgentTools,
 } from '@/lib/production/agent-tool-bus'
+import { buildDefaultAgenticProductionState } from '@/lib/production/agentic-production-state'
 import { evaluateBrowserOperatorPolicy } from '@/lib/production/browser-operator-safety'
 import { evaluateHighRiskAction } from '@/lib/production/high-risk-action-firewall'
+import { buildParallelAgentWorkContract } from '@/lib/production/parallel-agent-work-contract'
+import { buildRepositoryCartographyManifest } from '@/lib/production/repository-cartography'
 
 describe('internal spine tool bus and safety firewall', () => {
   it('keeps every agent tool behind a canonical runtime, risk, evidence, and approval contract', () => {
     const tools = getCanonicalAgentTools()
     const snapshot = buildAgentToolBusSnapshot()
 
-    expect(tools.length).toBeGreaterThanOrEqual(12)
+    expect(tools.length).toBeGreaterThanOrEqual(28)
     expect(snapshot.criticalTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
     expect(snapshot.replayRequiredTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
     expect(snapshot.explicitApprovalTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
@@ -23,7 +26,63 @@ describe('internal spine tool bus and safety firewall', () => {
     expect(snapshot.rollbackRequiredTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
     expect(snapshot.writeScopedTools).toEqual(expect.arrayContaining(['mission-ledger', 'diff-proposal', 'render-queue']))
     expect(tools.find((tool) => tool.id === 'huggingface-mirror')?.requiredEvidence.join(' ')).toContain('metadata-first')
+    expect(tools.map((tool) => tool.id)).toEqual(
+      expect.arrayContaining([
+        'code-search',
+        'source-citation',
+        'browser-replay',
+        'asset-metadata',
+        'license-check',
+        'viewport-capture',
+        'playtest-runner',
+        'runtime-router',
+        'cost-meter',
+      ])
+    )
     expect(tools.find((tool) => tool.id === 'deployment')?.rollbackStrategy).toBe('deployment-rollback')
+  })
+
+  it('keeps every parallel-agent allowed tool governed by the canonical tool bus', () => {
+    const canonicalIds = new Set(getCanonicalAgentTools().map((tool) => tool.id))
+    const manifest = buildRepositoryCartographyManifest({
+      projectId: 'tool-bus-parity',
+      generatedAt: '2026-05-15T08:00:00.000Z',
+      artifacts: [{ path: 'src/game/level.ts', sizeBytes: 1024 }],
+    })
+    const surface = manifest.surfaces[0]
+    const agents = [
+      'Producer Agent',
+      'Research Agent',
+      'Software Engineer Agent',
+      'Asset Librarian Agent',
+      'Technical Artist Agent',
+      'Gameplay Engineer Agent',
+      'Cinematic Editor Agent',
+      'Story Agent',
+      'QA Agent',
+      'Performance Agent',
+      'Release Agent',
+      'Browser Operator Agent',
+    ]
+
+    const allowedToolIds = new Set(
+      agents.flatMap((agent) =>
+        buildParallelAgentWorkContract({
+          agent,
+          state: buildDefaultAgenticProductionState({
+            projectName: 'Tool bus parity',
+            projectType: 'game',
+            now: '2026-05-15T08:00:00.000Z',
+          }),
+          manifest,
+          ownedSurfaces: surface ? [surface] : [],
+          criticalGaps: [],
+        }).allowedTools
+      )
+    )
+
+    const missing = Array.from(allowedToolIds).filter((toolId) => !canonicalIds.has(toolId))
+    expect(missing).toEqual([])
   })
 
   it('holds browser operator actions until replay, DOM, screenshot, pause control, and human approval exist', () => {
