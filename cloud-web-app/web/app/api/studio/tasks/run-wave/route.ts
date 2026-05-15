@@ -4,6 +4,7 @@ import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { apiErrorToResponse } from '@/lib/api-errors'
 import { buildBaselineSteps, createTask } from '@/lib/server/task-store'
 import { attachStudioSessionTask, loadStudioSession } from '@/lib/server/studio-session-store'
+import { buildStudioTaskWorkforcePlan } from '@/lib/server/studio-workforce-planning'
 
 type WaveAgent = {
   id?: string
@@ -51,6 +52,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'STUDIO_SESSION_STOPPED' }, { status: 409 })
     }
 
+    const workforcePlan = buildStudioTaskWorkforcePlan({
+      goal,
+      agentCount: agents.length,
+      planConcurrencyLimit: MAX_WAVE_AGENTS,
+    })
+    if (workforcePlan.executionMode === 'human-held') {
+      return NextResponse.json({
+        status: 'held',
+        error: 'WORKFORCE_HUMAN_APPROVAL_REQUIRED',
+        message: 'This task wave is held until explicit human approval is recorded.',
+        sessionId: session?.id,
+        taskCount: 0,
+        tasks: [],
+        maxWaveAgents: MAX_WAVE_AGENTS,
+        workforcePlan,
+      }, { status: 423 })
+    }
+
     const tasks = []
     for (let index = 0; index < agents.length; index += 1) {
       const task = await createTask({
@@ -58,6 +77,13 @@ export async function POST(request: NextRequest) {
         projectId: typeof body.projectId === 'string' ? body.projectId : session?.projectId,
         goal: normalizeAgentGoal(agents[index], goal, index),
         steps: buildBaselineSteps(),
+        planning: {
+          workforcePlan,
+          wave: {
+            index,
+            totalAgents: agents.length,
+          },
+        },
       })
       tasks.push(task)
       if (session) {
@@ -71,6 +97,7 @@ export async function POST(request: NextRequest) {
       taskCount: tasks.length,
       tasks,
       maxWaveAgents: MAX_WAVE_AGENTS,
+      workforcePlan,
     })
   } catch (error) {
     const mapped = apiErrorToResponse(error)

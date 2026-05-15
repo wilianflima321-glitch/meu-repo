@@ -30,6 +30,7 @@ export interface TaskRecord {
   status: TaskStatus
   steps: TaskStep[]
   logs: TaskLogEntry[]
+  planning?: Record<string, unknown>
   result?: Record<string, unknown>
   error?: string
   createdAt: string
@@ -41,6 +42,8 @@ type CreateTaskInput = {
   projectId?: string
   goal: string
   steps: TaskStep[]
+  status?: TaskStatus
+  planning?: Record<string, unknown>
 }
 
 const TASK_ROOT = process.env.AETHEL_TASK_ROOT
@@ -75,15 +78,17 @@ export async function createTask(input: CreateTaskInput): Promise<TaskRecord> {
     userId: input.userId,
     projectId: input.projectId,
     goal: input.goal,
-    status: 'planned',
+    status: input.status ?? 'planned',
     steps: input.steps,
     logs: [
       {
         timestamp,
         level: 'info',
         message: 'Task created.',
+        metadata: input.planning ? { planning: input.planning } : undefined,
       },
     ],
+    planning: input.planning,
     createdAt: timestamp,
     updatedAt: timestamp,
   }

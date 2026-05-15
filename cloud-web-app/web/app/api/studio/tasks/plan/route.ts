@@ -5,6 +5,7 @@ import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { apiErrorToResponse } from '@/lib/api-errors'
 import { buildBaselineSteps, createTask } from '@/lib/server/task-store'
+import { buildStudioTaskWorkforcePlan } from '@/lib/server/studio-workforce-planning'
 
 type PlanBody = {
   goal?: string
@@ -40,21 +41,28 @@ export async function POST(request: NextRequest) {
             status: 'pending' as const,
           }))
         : buildBaselineSteps()
+    const workforcePlan = buildStudioTaskWorkforcePlan({ goal })
 
     const task = await createTask({
       userId: user.userId,
       projectId: typeof body.projectId === 'string' ? body.projectId : undefined,
       goal,
       steps,
+      status: workforcePlan.executionMode === 'human-held' ? 'blocked' : 'planned',
+      planning: {
+        workforcePlan,
+      },
     })
 
     return capabilityResponse({
       error: 'NONE',
-      message: 'Task plan created.',
+      message: workforcePlan.executionMode === 'human-held'
+        ? 'Task plan created and held for human approval.'
+        : 'Task plan created.',
       status: 200,
       capability: 'STUDIO_TASK_PLAN',
       capabilityStatus: 'IMPLEMENTED',
-      metadata: { task },
+      metadata: { task, workforcePlan },
     })
   } catch (error) {
     const mapped = apiErrorToResponse(error)
