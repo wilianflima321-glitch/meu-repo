@@ -54,11 +54,11 @@ export const ENGINE_SPINE_MODULES: EngineSpineModule[] = [
     modulePath: 'lib/pixel-streaming.ts',
     targetSurface: 'Viewport Cloud Stream',
     userValue: 'Unreal/cloud GPU review becomes an optional, cost-aware lane instead of a default browser burden.',
-    nextAction: 'Keep Cloud Stream behind explicit user selection and a governed signaling URL.',
+    nextAction: 'Keep Cloud Stream behind explicit user selection and maintain the split signaling/session/codec/cost boundaries.',
     limitation: 'Cloud stream is not free: show cost/status and never promise Unreal quality without a configured backend.',
     loadStrategy: 'dynamic-client-only',
     estimatedLoc: 1244,
-    risk: 'high',
+    risk: 'medium',
   },
   {
     id: 'studio-local-runtime',

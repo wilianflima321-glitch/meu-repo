@@ -9,11 +9,8 @@
  * @version 2.0.0
  */
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
-import {
-    usePixelStreaming,
-    PixelStreamingConfig,
-    StreamingStats
-} from '@/lib/pixel-streaming';
+import { usePixelStreaming } from '@/lib/pixel-streaming';
+import type { PixelStreamingConfig, StreamingStats } from '@/lib/pixel-streaming';
 import { cn } from '@/lib/utils';
 import {
     Play,
