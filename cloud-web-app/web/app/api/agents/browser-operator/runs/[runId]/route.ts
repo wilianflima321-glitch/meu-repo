@@ -12,7 +12,7 @@ import {
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const actions = new Set<BrowserOperatorAction>(['pause', 'resume', 'approve', 'cancel', 'complete'])
+const actions = new Set<BrowserOperatorAction>(['pause', 'resume', 'takeover', 'approve', 'cancel', 'complete'])
 
 export async function GET(request: NextRequest, { params }: { params: { runId: string } }) {
   try {

@@ -41,6 +41,7 @@ requireFile('lib/admin/admin-consolidation.ts', 'admin route consolidation regis
 requirePattern('app/admin/admin-ops-layout-client.tsx', /ADMIN_CONSOLIDATED_SECTIONS/, 'sidebar must read the 6-section registry')
 requirePattern('app/admin/admin-ops-layout-client.tsx', /findAdminSectionForRoute/, 'admin shell breadcrumb must resolve consolidated ownership')
 requirePattern('app/admin/admin-ops-layout-client.tsx', /Command center/, 'admin shell must expose the consolidated command center')
+requirePattern('app/admin/admin-ops-layout-client.tsx', /Legacy map/, 'admin shell must hide legacy route sprawl behind an explicit compatibility disclosure')
 requirePattern('app/admin/page.tsx', /Admin consolidation/, 'admin home must explain the consolidated operating model')
 requirePattern('app/admin/page.tsx', /Operator-first areas/, 'admin home must frame sections around operator intent')
 requirePattern('lib/admin/admin-consolidation.ts', /ADMIN_ROUTE_LABELS/, 'all legacy admin routes need professional labels')

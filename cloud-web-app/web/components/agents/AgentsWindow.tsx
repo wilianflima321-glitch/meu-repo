@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Activity, AlertTriangle, Bot, CheckCircle2, Lock, Pause, Play, RefreshCw, ShieldCheck } from 'lucide-react'
 import useSWR from 'swr'
 
@@ -43,6 +43,19 @@ type AgentFleetSnapshot = {
 
 type AgentFleetResponse = {
   snapshot: AgentFleetSnapshot
+}
+
+type BrowserOperatorRunSummary = {
+  runId: string
+  mission: string
+  status: string
+  updatedAt: string
+  stepCount: number
+  timelineHash: string
+}
+
+type BrowserOperatorRunsResponse = {
+  runs: BrowserOperatorRunSummary[]
 }
 
 type AgentsWindowProps = {
@@ -93,6 +106,20 @@ async function patchAgentFleet(projectId: string, patch: Partial<Pick<AgentFleet
 
   const payload = (await response.json()) as AgentFleetResponse
   return payload.snapshot
+}
+
+async function fetchBrowserOperatorRuns(projectId: string): Promise<BrowserOperatorRunSummary[]> {
+  const response = await fetch(`/api/agents/browser-operator/runs?projectId=${encodeURIComponent(projectId)}&limit=8`, {
+    headers: { Accept: 'application/json' },
+    cache: 'no-store',
+  })
+
+  if (!response.ok) {
+    throw new Error(`browser-operator-runs:${response.status}`)
+  }
+
+  const payload = (await response.json()) as BrowserOperatorRunsResponse
+  return payload.runs
 }
 
 function groupMembers(members: AgentFleetMemberSnapshot[]) {
@@ -157,9 +184,29 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
       revalidateOnFocus: false,
     },
   )
+  const {
+    data: replayRuns,
+    error: replayRunsError,
+    isLoading: replayRunsLoading,
+    mutate: refreshReplayRuns,
+  } = useSWR(
+    currentProjectId ? ['browser-operator-runs', currentProjectId] : null,
+    () => fetchBrowserOperatorRuns(currentProjectId as string),
+    {
+      refreshInterval: activeView === 'replay' ? 10000 : 30000,
+      revalidateOnFocus: false,
+    },
+  )
 
   const grouped = useMemo(() => groupMembers(data?.members ?? []), [data])
   const topMembers = useMemo(() => (data?.members ?? []).slice(0, 8), [data])
+  const latestReplayRun = replayRuns?.[0]
+
+  useEffect(() => {
+    if (!replayRunId && latestReplayRun?.runId) {
+      setReplayRunId(latestReplayRun.runId)
+    }
+  }, [latestReplayRun?.runId, replayRunId])
 
   const togglePause = useCallback(async () => {
     if (!currentProjectId || !data) return
@@ -255,21 +302,58 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
             <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Browser Operator Replay</p>
             <h3 className="mt-1 text-base font-semibold text-[var(--aethel-text-primary)]">Evidence-first autonomous browsing</h3>
             <p className="mt-1 max-w-2xl text-xs leading-5 text-[var(--aethel-text-secondary)]">
-              Paste a recorded run id to inspect screenshots, policy blockers, approvals, and replay evidence before trusting autonomous browser work.
+              Aethel loads the latest Browser Operator run for this project first, then lets operators inspect screenshots, policy blockers, approvals, and replay evidence before trusting autonomous browser work.
             </p>
-            <label className="mt-4 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]" htmlFor="browser-replay-run-id">
-              Run id
-            </label>
-            <input
-              id="browser-replay-run-id"
-              value={replayRunId}
-              onChange={(event) => setReplayRunId(event.target.value.trim())}
-              placeholder="bor_..."
-              className={cn(
-                'mt-2 w-full rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)]',
-                focusClass,
-              )}
-            />
+            <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]" htmlFor="browser-replay-run-id">
+                  Run id
+                </label>
+                <input
+                  id="browser-replay-run-id"
+                  value={replayRunId}
+                  onChange={(event) => setReplayRunId(event.target.value.trim())}
+                  placeholder={replayRunsLoading ? 'Loading latest run...' : 'bor_...'}
+                  className={cn(
+                    'mt-2 w-full rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)]',
+                    focusClass,
+                  )}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => void refreshReplayRuns()}
+                className={cn('self-end rounded-xl border border-[var(--aethel-border-primary)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]', focusClass)}
+              >
+                Refresh runs
+              </button>
+            </div>
+            {replayRuns && replayRuns.length > 0 ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {replayRuns.slice(0, 4).map((run) => (
+                  <button
+                    key={run.runId}
+                    type="button"
+                    onClick={() => setReplayRunId(run.runId)}
+                    className={cn(
+                      'rounded-full border px-3 py-1.5 text-[11px] transition',
+                      focusClass,
+                      replayRunId === run.runId
+                        ? 'border-[color-mix(in_srgb,var(--aethel-info)_38%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+                        : 'border-[var(--aethel-border-subtle)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]',
+                    )}
+                    title={`${run.mission} - ${run.stepCount} steps`}
+                  >
+                    {run.status} · {run.stepCount} steps · {run.timelineHash.slice(0, 8)}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            {replayRunsError ? (
+              <p className="mt-3 text-xs text-[var(--aethel-warning-light)]">
+                Recent runs could not be listed. Manual run id lookup still works.
+              </p>
+            ) : null}
           </div>
 
           {replayRunId ? (

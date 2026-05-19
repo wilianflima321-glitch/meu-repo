@@ -82,6 +82,9 @@ requirePattern('lib/device/local-runtime-bridge.ts', /shaderTools/, 'local runti
 requirePattern('lib/device/local-runtime-bridge.ts', /toolVersions/, 'local runtime must report tool versions')
 requirePattern('lib/device/local-runtime-bridge.ts', /toolDigests/, 'local runtime must report tool digests')
 requirePattern('lib/device/local-runtime-bridge.ts', /supportsOffscreenRender/, 'local runtime must report offscreen render support')
+requireFile('components/studio/StudioLocalRuntimeCapsule.tsx', 'Studio must expose local runtime capability state to end users')
+requirePattern('components/studio/StudioLocalRuntimeCapsule.tsx', /LOCAL_RUNTIME_CAPABILITY_REQUEST_EVENT/, 'Studio Local capsule must request fresh native capability probes')
+requirePattern('app/studio/StudioMissionControl.tsx', /StudioLocalRuntimeCapsule/, 'Studio Mission Control must show the local runtime capsule')
 
 const studioLocalContracts = '../../apps/studio-local/src-tauri/src/contracts.rs'
 const studioLocalProbe = '../../apps/studio-local/src-tauri/src/probe.rs'
@@ -120,6 +123,9 @@ requireFile('lib/viewport/viewport-render-backend.ts', 'viewport render endpoint
 requirePattern('lib/viewport/viewport-render-backend.ts', /hybrid-wgpu-v1/, 'viewport backend capabilities must expose the hybrid wgpu contract')
 requirePattern('lib/viewport/viewport-render-backend.ts', /preview-only/, 'browser renderer must be preview-only')
 requirePattern('lib/viewport/viewport-render-backend.ts', /automaticDownloads: false/, 'runtime backend must not auto-download tools')
+requirePattern('components/viewport/AethelViewport3D.tsx', /Cloud Stream/, 'viewport must expose an honest cloud streaming target')
+requirePattern('components/viewport/AethelViewport3D.tsx', /NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL/, 'cloud streaming target must stay held until a governed signaling URL is configured')
+requirePattern('components/viewport/AethelViewport3D.tsx', /PixelStreamView/, 'viewport must lazy-load the Pixel Streaming surface')
 
 requireFile('lib/workers/viewport-render-worker.ts', 'viewport worker must not fake final media')
 requirePattern('lib/workers/viewport-render-worker.ts', /AETHEL_RENDER_BACKEND_ENDPOINT is not configured/, 'missing backend must be explicit')

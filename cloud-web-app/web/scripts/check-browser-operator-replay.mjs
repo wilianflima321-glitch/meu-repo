@@ -36,12 +36,17 @@ requirePattern('lib/server/browser-operator-recorder.ts', /approval-required/, '
 requireFile('app/api/agents/browser-operator/runs/[runId]/route.ts', 'Browser Operator replay API must exist')
 requirePattern('app/api/agents/browser-operator/runs/[runId]/route.ts', /requireAuth/, 'replay API must require authentication')
 requirePattern('app/api/agents/browser-operator/runs/[runId]/route.ts', /pause|resume|approve|cancel/, 'replay API must expose pause/resume/approve/cancel actions')
+requireFile('app/api/agents/browser-operator/runs/route.ts', 'Browser Operator replay list API must exist so the UI can load latest project evidence')
+requirePattern('app/api/agents/browser-operator/runs/route.ts', /projectId/, 'replay list API must filter recent runs by project')
+requirePattern('lib/server/browser-operator-recorder.ts', /listBrowserOperatorRuns/, 'recorder must expose recent runs for replay discovery')
 
 requireFile('components/agents/BrowserOperatorReplay.tsx', 'Browser Operator replay UI must exist')
 requirePattern('components/agents/BrowserOperatorReplay.tsx', /Pause/, 'replay UI must expose pause control')
+requirePattern('components/agents/BrowserOperatorReplay.tsx', /Take over/, 'replay UI must expose takeover control')
 requirePattern('components/agents/BrowserOperatorReplay.tsx', /Approve/, 'replay UI must expose approval control')
 requirePattern('components/agents/BrowserOperatorReplay.tsx', /Evidence/, 'replay UI must show evidence refs')
 requirePattern('components/agents/BrowserOperatorReplay.tsx', /Blockers/, 'replay UI must show policy blockers')
+requirePattern('components/agents/AgentsWindow.tsx', /fetchBrowserOperatorRuns/, 'AgentsWindow must discover recent Browser Operator runs instead of requiring manual run IDs only')
 
 requireFile('__tests__/server/browser-operator-recorder.test.ts', 'Browser Operator recorder tests must exist')
 requirePattern('__tests__/server/browser-operator-recorder.test.ts', /holds high-risk browser actions until approval/, 'tests must cover approval holds')

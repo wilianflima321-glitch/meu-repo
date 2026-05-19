@@ -240,18 +240,23 @@ export default function LoginPageV2() {
                     {isMagicLinkSubmitting ? 'Sending magic link...' : 'Send magic link'}
                   </button>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <label htmlFor="password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Password</label>
-                    <Link href="/forgot-password" className="text-xs font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)]">Forgot password?</Link>
-                  </div>
-                  <input id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none transition placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="Enter your password" />
-                </div>
                 {formError ? <div id="login-form-error" className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)]" role="alert" aria-live="polite">{formError}</div> : null}
                 {authNotice ? <div id="login-form-notice" className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-success)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-success-light)]" role="status" aria-live="polite">{authNotice}</div> : null}
-                <button type="submit" disabled={isSubmitting || isHumanVerificationPending} className="h-12 w-full rounded-2xl bg-[var(--aethel-info)] text-sm font-semibold text-slate-950 transition hover:bg-[var(--aethel-info-light)] disabled:cursor-not-allowed disabled:opacity-60">
-                  {isSubmitting ? 'Signing in...' : 'Use password fallback'}
-                </button>
+                <details className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/35 p-3">
+                  <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-secondary)]">
+                    Use password fallback
+                  </summary>
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <label htmlFor="password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Password</label>
+                      <Link href="/forgot-password" className="text-xs font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)]">Forgot password?</Link>
+                    </div>
+                    <input id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none transition placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="Enter your password" />
+                  </div>
+                  <button type="submit" disabled={isSubmitting || isHumanVerificationPending} className="mt-3 h-12 w-full rounded-2xl bg-[var(--aethel-info)] text-sm font-semibold text-slate-950 transition hover:bg-[var(--aethel-info-light)] disabled:cursor-not-allowed disabled:opacity-60">
+                    {isSubmitting ? 'Signing in...' : 'Continue with password'}
+                  </button>
+                </details>
               </form>
 
               <div className="my-5 flex items-center gap-3"><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /><span className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">or</span><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /></div>

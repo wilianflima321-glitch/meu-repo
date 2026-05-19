@@ -38,26 +38,26 @@ const START_MODES = [
   },
 ]
 
-const RECENT_MISSIONS = [
+const OPERATION_SIGNALS = [
   {
-    title: 'Fix failing deployment',
-    state: 'Ready for review',
-    detail: 'Preview published and waiting for approval.',
-    href: '/dashboard?tab=overview&source=resume-review',
+    title: 'Agent replay cockpit',
+    state: 'Visible',
+    detail: 'Browser Operator runs expose timeline, approvals, blockers, and evidence refs.',
+    href: '/ide?panel=agents&view=replay',
     tone: 'success',
   },
   {
-    title: 'Launch marketing site',
-    state: 'In progress',
-    detail: 'Active plan with studio and agents running.',
-    href: '/dashboard?tab=overview&source=resume-launch',
+    title: 'Cost transparency',
+    state: 'Live',
+    detail: 'Dashboard and IDE surfaces show spend posture instead of hiding agent cost.',
+    href: '/dashboard?tab=overview&source=cost-visibility',
     tone: 'info',
   },
   {
-    title: 'Research competitor matrix',
-    state: 'Blocked',
-    detail: 'Connect one source before continuing.',
-    href: '/dashboard?tab=overview&source=resume-research',
+    title: 'Studio Local bridge',
+    state: 'Beta',
+    detail: 'Native runtime capability is disclosed before heavy work moves off the browser.',
+    href: '/download',
     tone: 'warning',
   },
 ] as const
@@ -98,14 +98,14 @@ export default function LandingPageV3() {
             <div className="rounded-[36px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(8,10,16,0.92),rgba(15,23,42,0.84))] p-6 shadow-[0_28px_100px_rgba(2,6,23,0.42)] sm:p-8 lg:p-10">
               <div className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--aethel-info-light)]">
                 <Sparkles className="h-3.5 w-3.5" />
-                Agent OS
+                AI Workforce IDE
               </div>
 
               <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight text-[var(--aethel-text-primary)] sm:text-5xl lg:text-[3.75rem] lg:leading-[1.04]">
-                Ask Aethel to build, research, fix or operate anything.
+                The AI workforce for builders who need evidence, not hype.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--aethel-text-secondary)] sm:text-base">
-                Start with a clear mission. Continue in Mission Control. Go deeper in Studio only when the work calls for it.
+                Start with one mission. Aethel coordinates agents, cost, replay, Studio Cloud, and Studio Local while work stays inspectable from idea to artifact.
               </p>
 
               <LandingMissionBox />
@@ -115,13 +115,13 @@ export default function LandingPageV3() {
                   href="/dashboard?onboarding=1&source=landing-primary-cta"
                   className="inline-flex items-center justify-center rounded-2xl bg-[var(--aethel-primary)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:brightness-110"
                 >
-                  Start in Mission Control
+                  Start free in Mission Control
                 </Link>
                 <Link
-                  href="/ide"
+                  href="/honest-status"
                   className="inline-flex items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
                 >
-                  Open Studio
+                  See what is ready today
                 </Link>
               </div>
 
@@ -147,14 +147,14 @@ export default function LandingPageV3() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-                      Continue mission
+                      Product proof
                     </p>
-                    <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">Resume without explaining everything again</p>
+                    <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">No black-box automation claims</p>
                   </div>
                   <Clock3 className="h-4 w-4 text-[var(--aethel-text-quaternary)]" />
                 </div>
                 <div className="mt-4 space-y-3">
-                  {RECENT_MISSIONS.map((mission) => (
+                  {OPERATION_SIGNALS.map((mission) => (
                     <Link
                       key={mission.title}
                       href={mission.href}
@@ -214,7 +214,7 @@ export default function LandingPageV3() {
                   <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Choose an entry mode, not a wall of features.</h2>
                 </div>
                 <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_66%,transparent)] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">
-                  6 modos
+                  6 modes
                 </span>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import type { DragEvent } from 'react'
+import dynamic from 'next/dynamic'
 import {
   ViewportAICommandPanel,
   ViewportAssetDropOverlay,
@@ -30,9 +31,19 @@ import { isEditableViewportKeyboardTarget } from '@/lib/viewport/viewport-keyboa
 import { parseAiViewportCommand } from '@/components/viewport/viewportAiCommand'
 import { useRenderPipeline } from '@/lib/hooks/useRenderPipeline'
 
+const PixelStreamView = dynamic(() => import('@/components/streaming/pixel-stream-view'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)] text-sm text-[var(--aethel-text-secondary)]">
+      Preparing cloud stream surface...
+    </div>
+  ),
+})
+
 export type ViewportTransformMode = 'translate' | 'rotate' | 'scale'
 export type ViewportTransformSpace = 'world' | 'local'
 export type ViewportCreativeMode = 'game' | 'film'
+type ViewportRenderTarget = 'browser' | 'local' | 'cloud'
 
 export type ViewportSceneObject = {
   id: string
@@ -164,6 +175,8 @@ export function AethelViewport3D({
   const [localGizmoConstraint, setLocalGizmoConstraint] = useState<GizmoAxisPlaneConstraint>('free')
   const [localGizmoPivotMode, setLocalGizmoPivotMode] = useState<GizmoPivotMode>('median')
   const [webGpuAvailable, setWebGpuAvailable] = useState(false)
+  const [renderTarget, setRenderTarget] = useState<ViewportRenderTarget>('browser')
+  const pixelStreamUrl = process.env.NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL
   const renderPipeline = useRenderPipeline({
     initialQuality: renderMode === 'cinematic' ? 'high' : 'medium',
     customPipeline: {
@@ -335,8 +348,34 @@ export function AethelViewport3D({
           </span>
         </div>
         <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-quaternary)]">
-          Browser preview now declares the AAA pipeline target; Studio Local and Pixel Streaming can take over for heavy scenes.
+          {renderTarget === 'browser'
+            ? 'Browser preview declares the AAA pipeline target with WebGPU detection and WebGL fallback.'
+            : renderTarget === 'local'
+              ? 'Studio Local is the preferred native lane for heavy scenes when the capability bridge is connected.'
+              : pixelStreamUrl
+                ? 'Cloud Stream uses the Pixel Streaming surface and should be reserved for final review or client demos.'
+                : 'Cloud Stream is held until NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL points at a governed signaling server.'}
         </p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {([
+            ['browser', 'Browser'],
+            ['local', 'Local'],
+            ['cloud', 'Cloud Stream'],
+          ] as const).map(([target, label]) => (
+            <button
+              key={target}
+              type="button"
+              onClick={() => setRenderTarget(target)}
+              className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition ${
+                renderTarget === target
+                  ? 'border-[color-mix(in_srgb,var(--aethel-info)_36%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)] text-[var(--aethel-info-light)]'
+                  : 'border-[var(--aethel-border-subtle)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <ViewportAICommandPanel
@@ -352,29 +391,47 @@ export function AethelViewport3D({
 
       <ViewportAssetDropOverlay active={assetDragActive} />
 
-      <ViewportScene
-        objects={objects.length > 0 ? objects : defaultObjects}
-        selectedIds={selectedIds}
-        transformMode={transformMode}
-        transformSpace={transformSpace}
-        gizmoConstraint={gizmoConstraint}
-        gizmoPivotMode={gizmoPivotMode}
-        snapEnabled={snapEnabled}
-        creativeMode={creativeMode}
-        renderMode={renderMode}
-        isPlaying={isPlaying}
-        currentTime={currentTime}
-        duration={duration}
-        vfxGlowIntensity={vfxGlowIntensity}
-        abilityAccentColor={abilityAccentColor}
-        facialExpressionIntensity={facialExpressionIntensity}
-        hairHighlightColor={hairHighlightColor}
-        hairVolumeIntensity={hairVolumeIntensity}
-        onObjectsChange={onObjectsChange}
-        onSelectionChange={onSelectionChange}
-        onGizmoTransformOperation={onGizmoTransformOperation}
-        cameraPreset={cameraPreset}
-      />
+      {renderTarget === 'cloud' && pixelStreamUrl ? (
+        <PixelStreamView
+          serverUrl={pixelStreamUrl}
+          showStats
+          showControls
+          className="h-full w-full"
+        />
+      ) : renderTarget === 'cloud' ? (
+        <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)] p-6 text-center">
+          <div className="max-w-md rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_35%,transparent)] p-5">
+            <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Cloud Stream is not configured yet</p>
+            <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">
+              Add a governed Pixel Streaming signaling URL before Aethel offers Unreal-quality cloud review in the viewport.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <ViewportScene
+          objects={objects.length > 0 ? objects : defaultObjects}
+          selectedIds={selectedIds}
+          transformMode={transformMode}
+          transformSpace={transformSpace}
+          gizmoConstraint={gizmoConstraint}
+          gizmoPivotMode={gizmoPivotMode}
+          snapEnabled={snapEnabled}
+          creativeMode={creativeMode}
+          renderMode={renderMode}
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          duration={duration}
+          vfxGlowIntensity={vfxGlowIntensity}
+          abilityAccentColor={abilityAccentColor}
+          facialExpressionIntensity={facialExpressionIntensity}
+          hairHighlightColor={hairHighlightColor}
+          hairVolumeIntensity={hairVolumeIntensity}
+          onObjectsChange={onObjectsChange}
+          onSelectionChange={onSelectionChange}
+          onGizmoTransformOperation={onGizmoTransformOperation}
+          cameraPreset={cameraPreset}
+        />
+      )}
     </div>
   )
 }

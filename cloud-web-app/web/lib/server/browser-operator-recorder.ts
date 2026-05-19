@@ -60,7 +60,7 @@ export type RecordBrowserOperatorStepInput = {
   amountUsd?: number | null
 }
 
-export type BrowserOperatorAction = 'pause' | 'resume' | 'approve' | 'cancel' | 'complete'
+export type BrowserOperatorAction = 'pause' | 'resume' | 'takeover' | 'approve' | 'cancel' | 'complete'
 
 const runs = new Map<string, BrowserOperatorRun>()
 
@@ -160,11 +160,20 @@ export function getBrowserOperatorRun(runId: string): BrowserOperatorRun | null 
   return runs.get(runId) ?? null
 }
 
+export function listBrowserOperatorRuns(options: { projectId?: string; limit?: number } = {}): BrowserOperatorRun[] {
+  const limit = Math.max(1, Math.min(options.limit ?? 10, 50))
+  return Array.from(runs.values())
+    .filter((run) => !options.projectId || run.projectId === options.projectId)
+    .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
+    .slice(0, limit)
+}
+
 export function applyBrowserOperatorAction(runId: string, action: BrowserOperatorAction): BrowserOperatorRun | null {
   const run = runs.get(runId)
   if (!run) return null
 
   if (action === 'pause') run.status = 'paused'
+  if (action === 'takeover') run.status = 'paused'
   if (action === 'resume') run.status = 'running'
   if (action === 'cancel') run.status = 'cancelled'
   if (action === 'complete') run.status = 'completed'

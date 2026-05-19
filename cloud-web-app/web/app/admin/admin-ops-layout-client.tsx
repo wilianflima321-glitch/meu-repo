@@ -70,6 +70,8 @@ interface NavGroup {
   routeCount: number
   icon: React.ElementType
   items: { title: string; href: string; icon: React.ElementType; badge?: string }[]
+  primaryItems: { title: string; href: string; icon: React.ElementType; badge?: string }[]
+  legacyItems: { title: string; href: string; icon: React.ElementType; badge?: string }[]
 }
 
 const sectionIconById = {
@@ -145,6 +147,19 @@ const navGroups: NavGroup[] = ADMIN_CONSOLIDATED_SECTIONS.map((section) => ({
     icon: routeIconByHref[route] || sectionIconById[section.id],
     badge: section.primaryLinks.find((link) => link.href === route)?.badge,
   })),
+  primaryItems: section.primaryLinks.map((link) => ({
+    title: link.label,
+    href: link.href,
+    icon: routeIconByHref[link.href] || sectionIconById[section.id],
+    badge: link.badge,
+  })),
+  legacyItems: section.routes
+    .filter((route) => route !== section.href && !section.primaryLinks.some((link) => link.href === route))
+    .map((route) => ({
+      title: getAdminRouteLabel(route),
+      href: route,
+      icon: routeIconByHref[route] || sectionIconById[section.id],
+    })),
 }))
 
 const adminCoverage = getAdminRouteCoverage()
@@ -199,40 +214,43 @@ function QuickStatPill({
 
 function NavGroupSection({ group, isCollapsed }: { group: NavGroup; isCollapsed?: boolean }) {
   const pathname = useBrowserPathname()
-  const hasActiveChild = group.items.some((item) => pathname === item.href)
+  const hasActiveChild = pathname === group.href || group.items.some((item) => pathname === item.href)
   const [open, setOpen] = useState(hasActiveChild)
+  const activeLegacyItem = group.legacyItems.find((item) => pathname === item.href)
 
   return (
     <div className="mb-1">
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
+      <div
         className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-wider transition-colors ${
           hasActiveChild
             ? 'bg-[var(--aethel-primary)]/10 text-[var(--aethel-info-light)]'
             : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
         }`}
-        aria-expanded={open}
-        aria-label={`${group.label}: ${group.description}`}
       >
-        <span className="flex items-center gap-2">
+        <Link href={group.href} className="flex min-w-0 items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]">
           <group.icon className="h-3 w-3" />
           {!isCollapsed && group.label}
-        </span>
+        </Link>
         {!isCollapsed && (
-          <span className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setOpen((prev) => !prev)}
+            className="flex items-center gap-1.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
+            aria-expanded={open}
+            aria-label={`${group.label}: ${group.description}`}
+          >
             <span className="rounded-full border border-[var(--aethel-border-subtle)] px-1.5 py-0.5 text-[10px] normal-case tracking-normal text-[var(--aethel-text-tertiary)]">
-              {group.routeCount}
+              {group.primaryItems.length}
             </span>
             <ChevronRight
               className={`h-3 w-3 transition-transform duration-150 ${open ? 'rotate-90' : ''}`}
             />
-          </span>
+          </button>
         )}
-      </button>
+      </div>
       {open && !isCollapsed && (
         <nav className="ml-3 mt-1 space-y-0.5 border-l border-[var(--aethel-border-subtle)] pl-2">
-          {group.items.map((item) => {
+          {group.primaryItems.map((item) => {
             const isActive = pathname === item.href
             return (
               <Link
@@ -256,6 +274,37 @@ function NavGroupSection({ group, isCollapsed }: { group: NavGroup; isCollapsed?
               </Link>
             )
           })}
+          {activeLegacyItem && (
+            <Link
+              href={activeLegacyItem.href}
+              className="flex items-center justify-between rounded-lg border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/10 px-2.5 py-1.5 text-xs text-[var(--aethel-info-light)]"
+            >
+              <span className="flex items-center gap-2">
+                <activeLegacyItem.icon className="h-3.5 w-3.5" />
+                {activeLegacyItem.title}
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Legacy</span>
+            </Link>
+          )}
+          {group.legacyItems.length > 0 && (
+            <details className="rounded-lg px-2 py-1">
+              <summary className="cursor-pointer text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+                Legacy map ({group.legacyItems.length})
+              </summary>
+              <div className="mt-1 space-y-0.5">
+                {group.legacyItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-2 rounded-md px-2 py-1 text-[11px] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]"
+                  >
+                    <item.icon className="h-3 w-3" />
+                    {item.title}
+                  </Link>
+                ))}
+              </div>
+            </details>
+          )}
         </nav>
       )}
     </div>

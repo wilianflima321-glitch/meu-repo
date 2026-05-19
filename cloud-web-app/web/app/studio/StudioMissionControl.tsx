@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { StudioLocalRuntimeCapsule } from '@/components/studio/StudioLocalRuntimeCapsule'
 import { analytics } from '@/lib/analytics'
 
 type StudioSessionStatus = 'active' | 'stopped'
@@ -289,6 +290,8 @@ export default function StudioMissionControl() {
               {busy === 'stop' ? 'Pausing...' : 'Pause session'}
             </button>
           </div>
+
+          <StudioLocalRuntimeCapsule />
 
           {notice && (
             <p className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_45%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">

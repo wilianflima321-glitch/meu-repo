@@ -108,6 +108,9 @@ export function BrowserOperatorReplay({ runId }: { runId: string }) {
           <button type="button" onClick={() => applyAction('resume')} className="rounded-lg border border-[var(--aethel-border-subtle)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]">
             <Play className="mr-1 inline h-3.5 w-3.5" /> Resume
           </button>
+          <button type="button" onClick={() => applyAction('takeover')} className="rounded-lg border border-[var(--aethel-border-subtle)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]">
+            <Hand className="mr-1 inline h-3.5 w-3.5" /> Take over
+          </button>
           <button type="button" onClick={() => applyAction('approve')} disabled={!current?.requiresApproval} className="rounded-lg border border-[var(--aethel-border-subtle)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] disabled:opacity-40">
             <Check className="mr-1 inline h-3.5 w-3.5" /> Approve
           </button>

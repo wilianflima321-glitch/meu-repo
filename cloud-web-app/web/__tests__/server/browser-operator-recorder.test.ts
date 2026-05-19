@@ -4,6 +4,7 @@ import {
   applyBrowserOperatorAction,
   clearBrowserOperatorRunsForTests,
   getBrowserOperatorRun,
+  listBrowserOperatorRuns,
   recordBrowserOperatorStep,
 } from '@/lib/server/browser-operator-recorder'
 
@@ -54,7 +55,7 @@ describe('browser operator recorder', () => {
     expect(approved?.steps[0].approved).toBe(true)
   })
 
-  it('supports pause, resume, cancel, and replay lookup', () => {
+  it('supports pause, takeover, resume, cancel, and replay lookup', () => {
     recordBrowserOperatorStep({
       runId: 'run_003',
       actorId: 'user_001',
@@ -67,8 +68,36 @@ describe('browser operator recorder', () => {
     })
 
     expect(applyBrowserOperatorAction('run_003', 'pause')?.status).toBe('paused')
+    expect(applyBrowserOperatorAction('run_003', 'takeover')?.status).toBe('paused')
     expect(applyBrowserOperatorAction('run_003', 'resume')?.status).toBe('running')
     expect(applyBrowserOperatorAction('run_003', 'cancel')?.status).toBe('cancelled')
     expect(getBrowserOperatorRun('run_003')?.steps).toHaveLength(1)
+  })
+
+  it('lists recent replay runs by project for cockpit discovery', () => {
+    recordBrowserOperatorStep({
+      runId: 'run_project_a',
+      projectId: 'project-a',
+      actorId: 'user_001',
+      mission: 'Audit competitor pricing',
+      tool: 'browser:navigate',
+      targetUrl: 'https://example.com/pricing',
+      intent: 'read pricing',
+      domSnapshot: '<main>pricing</main>',
+    })
+    recordBrowserOperatorStep({
+      runId: 'run_project_b',
+      projectId: 'project-b',
+      actorId: 'user_001',
+      mission: 'Audit docs',
+      tool: 'browser:navigate',
+      targetUrl: 'https://example.com/docs',
+      intent: 'read docs',
+      domSnapshot: '<main>docs</main>',
+    })
+
+    const projectRuns = listBrowserOperatorRuns({ projectId: 'project-a' })
+    expect(projectRuns.map((run) => run.runId)).toEqual(['run_project_a'])
+    expect(listBrowserOperatorRuns({ limit: 1 })).toHaveLength(1)
   })
 })
