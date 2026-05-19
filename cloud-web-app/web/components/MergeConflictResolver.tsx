@@ -177,7 +177,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
       {/* Resolution Options */}
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm rounded-lg p-4 mb-6">
         <div className="flex gap-4">
-          <button type="button" aria-label="Resolver conflito mantendo suas alterações"
+          <button type="button" aria-label="Resolve conflict by keeping your changes"
             onClick={() => setResolution('ours')}
             className={`flex-1 px-4 py-3 rounded-lg transition-colors ${
               resolution === 'ours'
@@ -189,7 +189,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
             <div className="text-xs opacity-75">Keep your changes</div>
           </button>
 
-          <button type="button" aria-label="Resolver conflito usando alterações remotas"
+          <button type="button" aria-label="Resolve conflict using remote changes"
             onClick={() => setResolution('theirs')}
             className={`flex-1 px-4 py-3 rounded-lg transition-colors ${
               resolution === 'theirs'
@@ -326,7 +326,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
         >
           Mark as Resolved
         </button>
-        <button type="button" aria-label="Voltar da resolução de conflito"
+        <button type="button" aria-label="Back da resolution de conflito"
           onClick={() => window.history.back()}
           className="px-6 py-3 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"
         >

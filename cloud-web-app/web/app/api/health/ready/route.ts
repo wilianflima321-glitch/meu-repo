@@ -5,6 +5,9 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/health/ready/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +22,7 @@ export async function GET() {
     await prisma.$queryRaw`SELECT 1`;
     checks.database = true;
   } catch (error) {
-    console.error('[Health] Database check failed:', error);
+    routeLogger.error('[Health] Database check failed:', error);
   }
 
   const allHealthy = checks.database;

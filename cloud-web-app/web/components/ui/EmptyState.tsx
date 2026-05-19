@@ -78,10 +78,10 @@ export function EmptyProjects({ onCreate }: { onCreate: () => void }) {
   return (
     <EmptyState
       icon={<FolderOpen className="h-12 w-12" />}
-      title="Nenhum projeto ainda"
-      description="Crie seu primeiro projeto para comecar a desenvolver com IA."
+      title="No project yet"
+      description="Create your first project para comecar a desenvolver com IA."
       action={{
-        label: 'Criar Projeto',
+        label: 'Create project',
         onClick: onCreate,
         icon: <Sparkles className="h-4 w-4" />,
       }}
@@ -93,7 +93,7 @@ export function EmptySearch({ query }: { query: string }) {
   return (
     <EmptyState
       icon={<Search className="h-12 w-12" />}
-      title="Nenhum resultado encontrado"
+      title="No resultado encontrado"
       description={`Nao encontramos resultados para "${query}". Tente usar termos diferentes.`}
     />
   )
@@ -117,10 +117,10 @@ export function EmptyWorkflows({ onCreate }: { onCreate: () => void }) {
   return (
     <EmptyState
       icon={<FileText className="h-12 w-12" />}
-      title="Nenhum workflow criado"
+      title="No workflow criado"
       description="Workflows ajudam a organizar tarefas complexas com multiplos agentes de IA."
       action={{
-        label: 'Criar Workflow',
+        label: 'Create Workflow',
         onClick: onCreate,
       }}
     />

@@ -37,9 +37,9 @@ export function WorkbenchEntryNotice({ notice, onDismiss }: WorkbenchEntryNotice
         type="button"
         onClick={onDismiss}
         className="min-h-[36px] rounded-lg border border-[var(--aethel-border-primary)] px-3 py-2 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)]"
-        aria-label="Fechar aviso do workbench"
+        aria-label="Close workbench notice"
       >
-        Fechar
+        Close
       </button>
     </div>
   );

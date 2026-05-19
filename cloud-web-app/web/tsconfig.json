@@ -39,6 +39,7 @@
   ],
   "exclude": [
     "node_modules",
+    "tailwind.config.ts",
     "lib/build/build-pipeline.ts",
     "tests/e2e/**/*",
     "__tests__/**/*"

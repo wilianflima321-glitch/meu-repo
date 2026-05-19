@@ -17,24 +17,24 @@ export async function POST(request: NextRequest) {
 
     if (!sessionId) {
       return NextResponse.json(
-        { error: 'sessionId é obrigatório' },
+        { error: 'sessionId is required' },
         { status: 400 }
       );
     }
 
     // Em produção, isso enviaria comando para encerrar o processo PTY
     // Por enquanto, apenas logamos e retornamos sucesso
-    log.info(`[terminal/close] Fechando sessão ${sessionId} para usuário ${user.userId}`);
+    log.info(`[terminal/close] Closing session ${sessionId} for user ${user.userId}`);
 
     return NextResponse.json({
       success: true,
       sessionId,
-      message: 'Sessão de terminal encerrada',
+      message: 'Terminal session closed',
     });
   } catch (error) {
-    console.error('[terminal/close] Error:', error);
+    log.error('[terminal/close] Error', error);
     return NextResponse.json(
-      { error: 'Falha ao fechar terminal' },
+      { error: 'Failed to close terminal' },
       { status: 500 }
     );
   }

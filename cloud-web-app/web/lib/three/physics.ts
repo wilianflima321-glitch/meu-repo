@@ -1,4 +1,4 @@
-﻿export type TrajectoryPoint = {
+export type TrajectoryPoint = {
   t: number
   x: number
   y: number

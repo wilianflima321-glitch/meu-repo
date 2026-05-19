@@ -32,18 +32,31 @@ function listAdminRoutes() {
   return fs
     .readdirSync(adminRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
+    .filter((entry) => !entry.name.startsWith('_'))
     .map((entry) => `/admin/${entry.name}`)
     .sort()
 }
 
 requireFile('lib/admin/admin-consolidation.ts', 'admin route consolidation registry must exist')
 requirePattern('app/admin/admin-ops-layout-client.tsx', /ADMIN_CONSOLIDATED_SECTIONS/, 'sidebar must read the 6-section registry')
+requirePattern('app/admin/admin-ops-layout-client.tsx', /findAdminSectionForRoute/, 'admin shell breadcrumb must resolve consolidated ownership')
+requirePattern('app/admin/admin-ops-layout-client.tsx', /Command center/, 'admin shell must expose the consolidated command center')
 requirePattern('app/admin/page.tsx', /Admin consolidation/, 'admin home must explain the consolidated operating model')
+requirePattern('app/admin/page.tsx', /Operator-first areas/, 'admin home must frame sections around operator intent')
+requirePattern('lib/admin/admin-consolidation.ts', /ADMIN_ROUTE_LABELS/, 'all legacy admin routes need professional labels')
+requirePattern('lib/admin/admin-consolidation.ts', /operatorQuestion/, 'each section must explain the operator question it answers')
 
 const registry = read('lib/admin/admin-consolidation.ts')
 const sectionCount = (registry.match(/id:\s*'/g) || []).length
 if (sectionCount !== 6) {
   failures.push(`lib/admin/admin-consolidation.ts: expected exactly 6 admin sections, found ${sectionCount}`)
+}
+
+const requiredSectionIds = ['people', 'money', 'ai', 'platform', 'trust', 'product']
+for (const id of requiredSectionIds) {
+  if (!registry.includes(`id: '${id}'`)) {
+    failures.push(`lib/admin/admin-consolidation.ts: missing V18 operating section id '${id}'`)
+  }
 }
 
 const routes = listAdminRoutes()

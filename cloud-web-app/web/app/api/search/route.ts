@@ -4,6 +4,9 @@ import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { getSearchRuntime } from '@/lib/server/search-runtime';
 import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const log = createComponentLogger('api/search/route');
 
 /**
  * POST /api/search - Text Search in Workspace
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Search failed:', error);
+    log.error('Search failed', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
@@ -130,7 +133,7 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('File search failed:', error);
+    log.error('File search failed', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

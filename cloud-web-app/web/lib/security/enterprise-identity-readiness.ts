@@ -1,4 +1,4 @@
-﻿import { getSamlReadiness, type SamlReadiness } from '@/lib/security/saml'
+import { getSamlReadiness, type SamlReadiness } from '@/lib/security/saml'
 import { isScimConfigured } from '@/lib/security/scim'
 
 export type EnterpriseIdentityProtocol = 'saml' | 'scim'

@@ -8,6 +8,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/analytics/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -74,7 +77,7 @@ export async function GET(request: NextRequest) {
       generatedAt: new Date(),
     });
   } catch (error) {
-    console.error('Failed to get analytics:', error);
+    routeLogger.error('Failed to get analytics:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -109,7 +112,7 @@ export async function POST(request: NextRequest) {
       tracked: true,
     });
   } catch (error) {
-    console.error('Failed to track event:', error);
+    routeLogger.error('Failed to track event:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

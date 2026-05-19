@@ -284,7 +284,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           borderRadius: '6px',
           border: '1px solid var(--aethel-border-primary)',
         }}>
-          <button type="button" aria-label="Adicionar estado ao animation blueprint"
+          <button type="button" aria-label="Add estado ao animation blueprint"
             onClick={() => handleAddState('state')}
             style={{
               padding: '6px 12px',
@@ -298,7 +298,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           >
             🎭 Add State
           </button>
-          <button type="button" aria-label="Adicionar conduit ao animation blueprint"
+          <button type="button" aria-label="Add conduit ao animation blueprint"
             onClick={() => handleAddState('conduit')}
             style={{
               padding: '6px 12px',
@@ -312,7 +312,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           >
             ⚡ Add Conduit
           </button>
-          <button type="button" aria-label="Adicionar blend state ao animation blueprint"
+          <button type="button" aria-label="Add blend state ao animation blueprint"
             onClick={() => handleAddState('blend')}
             style={{
               padding: '6px 12px',
@@ -327,7 +327,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
             🔀 Add Blend
           </button>
           {(selectedState || selectedTransition) && (
-            <button type="button" aria-label="Excluir item selecionado do animation blueprint"
+            <button type="button" aria-label="Delete selected item from animation blueprint"
               onClick={handleDeleteSelected}
               style={{
                 padding: '6px 12px',

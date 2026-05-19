@@ -11,6 +11,8 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 import { createComponentLogger } from '@/lib/observability/logger'
 
+const routeLogger = createComponentLogger('api/ai/suggestions/feedback/route');
+
 const log = createComponentLogger('api/ai/suggestions/feedback/route')
 
 export const dynamic = 'force-dynamic';
@@ -57,7 +59,7 @@ export async function POST(req: NextRequest) {
       message: 'Feedback recorded',
     });
   } catch (error) {
-    console.error('Suggestion feedback error:', error);
+    routeLogger.error('Suggestion feedback error:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -84,7 +86,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(stats);
   } catch (error) {
-    console.error('Suggestion feedback GET error:', error);
+    routeLogger.error('Suggestion feedback GET error:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

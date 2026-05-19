@@ -57,7 +57,7 @@ export const ProjectsDashboardCreateModal: React.FC<CreateProjectModalProps> = (
       >
         <div style={{ padding: '24px' }}>
           <h2 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 600, color: colors.text }}>
-            Novo Projeto
+            New project
           </h2>
           <p style={{ margin: 0, fontSize: '13px', color: colors.textMuted }}>
             Configure your new development project.
@@ -67,13 +67,13 @@ export const ProjectsDashboardCreateModal: React.FC<CreateProjectModalProps> = (
         <form onSubmit={handleSubmit} style={{ padding: '0 24px 24px' }}>
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: colors.text }}>
-              Nome do Projeto
+              Project name
             </label>
             <input
               type="text"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="Meu Projeto Incrivel"
+              placeholder="My Amazing Project"
               style={{
                 width: '100%',
                 padding: '10px 12px',
@@ -90,14 +90,14 @@ export const ProjectsDashboardCreateModal: React.FC<CreateProjectModalProps> = (
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: colors.text }}>
-              Tipo de Projeto
+              Project type
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
               {projectTypeOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
-                  aria-label={`Selecionar tipo de projeto ${option.label}`}
+                  aria-label={`Select project type ${option.label}`}
                   onClick={() => setType(option.value)}
                   style={{
                     display: 'flex',
@@ -128,7 +128,7 @@ export const ProjectsDashboardCreateModal: React.FC<CreateProjectModalProps> = (
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="Uma breve descricao do projeto..."
+              placeholder="A short project description..."
               rows={3}
               style={{
                 width: '100%',
@@ -163,7 +163,7 @@ export const ProjectsDashboardCreateModal: React.FC<CreateProjectModalProps> = (
             </button>
             <button
               type="submit"
-              aria-label="Criar projeto"
+              aria-label="Create project"
               disabled={!name.trim()}
               style={{
                 padding: '10px 20px',
@@ -176,7 +176,7 @@ export const ProjectsDashboardCreateModal: React.FC<CreateProjectModalProps> = (
                 cursor: !name.trim() ? 'not-allowed' : 'pointer',
               }}
             >
-              Criar Projeto
+              Create project
             </button>
           </div>
         </form>

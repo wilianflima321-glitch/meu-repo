@@ -244,7 +244,7 @@ export default function PreviewRuntimeToolbar({
       : deployReadiness?.canDeploy === false && deployReadiness.missing?.length
       ? `Configure ${deployReadiness.missing.join(', ')} to publish.`
       : deployStatus === 'ready'
-        ? 'Deploy publico pronto para compartilhar.'
+        ? 'Public deploy ready to share.'
         : deployStatusHref
           ? 'Status do deploy acompanhado na mesma lane.'
           : 'Publique quando precisar validar share e parity fora do runtime local.'
@@ -312,7 +312,7 @@ export default function PreviewRuntimeToolbar({
               <div className="mt-1 text-[10px] leading-4 text-[var(--aethel-text-tertiary)]">
                 {previewRuntimeUrl
                   ? 'Valide health, mantenha o sync e promova a mesma lane para review sem perder contexto.'
-                  : 'Use a acao recomendada para descobrir ou provisionar parity real quando o artefato pedir rede, device ou deploy.'}
+                  : 'Use the recommended action to discover or provision real parity when the artifact needs network, device, or deploy.'}
               </div>
               {runtimeLaneHint ? (
                 <div className="mt-1 text-[10px] leading-4 text-[var(--aethel-text-tertiary)]">

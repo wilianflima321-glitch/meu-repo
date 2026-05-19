@@ -23,21 +23,21 @@ export function CodebaseContextPanel({
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
           <div className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--aethel-info-light)]">
-            Contexto de codebase
+            Codebase context
           </div>
           <div className="text-[11px] text-[var(--aethel-text-tertiary)]">
             {preview.loading
-              ? 'Analisando o escopo atual...'
-              : `Origem: ${preview.source || 'cache-local-persistente'}${preview.scope ? ` | escopo=${preview.scope}` : ''}`}
+              ? 'Analyzing o escopo atual...'
+              : `Source: ${preview.source || 'persistent-local-cache'}${preview.scope ? ` | scope=${preview.scope}` : ''}`}
           </div>
           {preview.stats && (
             <div className="mt-1 text-[10px] text-[var(--aethel-text-quaternary)]">
-              {preview.stats.filesIndexed} arquivos | {preview.stats.chunksIndexed} blocos | reutilizados {preview.stats.reusedFiles} | alterados {preview.stats.changedFiles} | indexado as {new Date(preview.stats.indexedAt).toLocaleTimeString()}
+              {preview.stats.filesIndexed} files | {preview.stats.chunksIndexed} chunks | reused {preview.stats.reusedFiles} | changed {preview.stats.changedFiles} | indexed at {new Date(preview.stats.indexedAt).toLocaleTimeString()}
             </div>
           )}
           {preview.incrementalReindex && (
             <div className="mt-1 text-[10px] text-[var(--aethel-success)]">
-              reindexacao local incremental ativa
+              Incremental local reindexing active
             </div>
           )}
         </div>
@@ -51,10 +51,10 @@ export function CodebaseContextPanel({
             type="button"
             onClick={onRefresh}
             disabled={preview.loading}
-            aria-label="Atualizar o contexto do codebase"
+            aria-label="Refresh codebase context"
             className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {preview.loading ? 'Atualizando...' : 'Atualizar contexto'}
+            {preview.loading ? 'Refreshing...' : 'Refresh context'}
           </button>
         </div>
       </div>
@@ -65,7 +65,7 @@ export function CodebaseContextPanel({
       )}
       {!preview.error && preview.results.length === 0 && !preview.loading && (
         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-tertiary)]">
-          Nenhuma correspondencia semantica encontrada para este prompt ate agora.
+          No correspondencia semantica encontrada para este prompt ate agora.
         </div>
       )}
       <div className="space-y-2">
@@ -78,18 +78,18 @@ export function CodebaseContextPanel({
                 <button
                   type="button"
                   onClick={() => onCopy(result.filePath)}
-                  aria-label={`Copiar caminho do arquivo ${result.filePath}`}
+                  aria-label={`Copy file path ${result.filePath}`}
                   className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 >
-                  Copiar caminho
+                  Copy path
                 </button>
                 <button
                   type="button"
                   onClick={() => onOpenResult(result.filePath, result.startLine, result.endLine)}
-                  aria-label={`Abrir o arquivo ${result.filePath} no trecho sugerido`}
+                  aria-label={`Open file ${result.filePath} at the suggested excerpt`}
                   className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 >
-                  Abrir
+                  Open
                 </button>
               </div>
             </div>
@@ -100,10 +100,10 @@ export function CodebaseContextPanel({
               <button
                 type="button"
                 onClick={() => onCopy(result.excerpt)}
-                aria-label="Copiar trecho de contexto retornado"
+                aria-label="Copy returned context excerpt"
                 className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-tertiary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
               >
-                Copiar trecho
+                Copy excerpt
               </button>
             </div>
           </div>
@@ -133,10 +133,10 @@ export function MentionContextPanel({
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
           <div className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--aethel-info-light)]">
-            Contexto por mencoes
+            Mention context
           </div>
           <div className="text-[11px] text-[var(--aethel-text-tertiary)]">
-            {preview.loading ? 'Resolvendo o contexto explicito das mencoes...' : 'Previa do contexto fora do codebase que sera enviado.'}
+            {preview.loading ? 'Resolving explicit mention context...' : 'Preview of off-codebase context that will be sent.'}
           </div>
         </div>
       </div>
@@ -157,19 +157,19 @@ export function MentionContextPanel({
                   <button
                     type="button"
                     onClick={() => onOpenFileBlock(block)}
-                    aria-label={`Abrir contexto citado ${block.tag}`}
+                    aria-label={`Open cited context ${block.tag}`}
                     className="rounded border border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-primary-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                   >
-                    Abrir
+                    Open
                   </button>
                 ) : null}
                 <button
                   type="button"
                   onClick={() => onCopy(block.content)}
-                  aria-label={`Copiar conteudo do bloco ${block.tag}`}
+                  aria-label={`Copy content from block ${block.tag}`}
                   className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 >
-                  Copiar
+                  Copy
                 </button>
               </div>
             </div>

@@ -18,14 +18,14 @@ export default function RolesPage() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/roles');
-      if (!res.ok) throw new Error('Falha ao carregar funções');
+      if (!res.ok) throw new Error('Failed to load roles');
       const data = await res.json();
       setRoles(Array.isArray(data?.roles) ? data.roles : []);
       setAdminRoles(Array.isArray(data?.adminRoles) ? data.adminRoles : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar funções');
+      setError(err instanceof Error ? err.message : 'Error loading roles');
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,7 @@ export default function RolesPage() {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Funções e permissões detalhadas</h1>
+          <h1 className="text-2xl font-bold">Detailed roles and permissions</h1>
           {lastUpdated && (
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
@@ -75,7 +75,7 @@ export default function RolesPage() {
       />
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Distribuição de funções</h2>
+        <h2 className="text-lg font-semibold mb-4">Distribution de roles</h2>
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
@@ -85,13 +85,13 @@ export default function RolesPage() {
         ) : error ? (
           <p className="text-sm text-[var(--aethel-error)]">{error}</p>
         ) : roles.length === 0 ? (
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhuma função encontrada.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">No role found.</p>
         ) : (
           <ul>
             {roles.map((role) => (
               <li key={role.role || 'unknown'} className="p-3 border-b flex justify-between">
-                <span>{role.role || 'sem função'}</span>
-                <span className="text-sm text-[var(--aethel-text-secondary)]">{role.count} usuários</span>
+                <span>{role.role || 'no role'}</span>
+                <span className="text-sm text-[var(--aethel-text-secondary)]">{role.count} users</span>
               </li>
             ))}
           </ul>
@@ -99,7 +99,7 @@ export default function RolesPage() {
       </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Funções administrativas</h2>
+        <h2 className="text-lg font-semibold mb-4">Administrative roles</h2>
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 2 }).map((_, index) => (
@@ -107,13 +107,13 @@ export default function RolesPage() {
             ))}
           </div>
         ) : adminRoles.length === 0 ? (
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhuma função administrativa definida.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">No administrative role defined.</p>
         ) : (
           <ul>
             {adminRoles.map((role) => (
               <li key={role.role || 'admin-unknown'} className="p-3 border-b flex justify-between">
-                <span>{role.role || 'sem função administrativa'}</span>
-                <span className="text-sm text-[var(--aethel-text-secondary)]">{role.count} usuários</span>
+                <span>{role.role || 'no role administrativa'}</span>
+                <span className="text-sm text-[var(--aethel-text-secondary)]">{role.count} users</span>
               </li>
             ))}
           </ul>

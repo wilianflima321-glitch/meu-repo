@@ -3,6 +3,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/marketplace/install/route');
 
 interface InstallRequest {
   extensionId: string;
@@ -102,7 +105,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Extension installation failed:', error);
+    routeLogger.error('Extension installation failed:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

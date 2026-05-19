@@ -81,7 +81,7 @@ export function EnhancedDashboardSidebar({
         collapsed ? 'w-16' : 'w-60'
       } ${className}`}
       role="navigation"
-      aria-label="Sidebar de navegacao"
+      aria-label="Navigation sidebar"
     >
       {/* Header */}
       <div className={`flex h-14 items-center border-b border-[var(--aethel-border-subtle)] ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>

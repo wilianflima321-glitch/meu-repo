@@ -28,13 +28,13 @@ function ForgotPasswordContent() {
       const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        setError(data.error || 'Falha ao enviar email de redefinicao')
+        setError(data.error || 'Failed to send reset email')
         return
       }
 
       setIsSuccess(true)
     } catch {
-      setError('Erro de rede. Tente novamente.')
+      setError('Network error. Try again.')
     } finally {
       setIsLoading(false)
     }
@@ -56,21 +56,21 @@ function ForgotPasswordContent() {
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
                 <CheckCircle className="h-8 w-8 text-[var(--aethel-success)]" />
               </div>
-              <h1 className="text-2xl font-bold">Verifique seu email</h1>
+              <h1 className="text-2xl font-bold">Check your email</h1>
               <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">
-                Se existir uma conta com{' '}
-                <span className="text-[var(--aethel-text-primary)]">{email}</span>, voce recebera
-                um link de redefinicao em instantes.
+                If an account exists for{' '}
+                <span className="text-[var(--aethel-text-primary)]">{email}</span>, you will receive
+                a reset link shortly.
               </p>
               <p className="mt-3 text-xs text-[var(--aethel-text-tertiary)]">
-                Nao encontrou? Verifique sua caixa de spam.
+                Nothing arrived? Check your spam folder.
               </p>
               <Link
                 href="/login"
                 className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-6 rounded-xl px-5 py-2 text-sm font-semibold"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Voltar para o login
+                Back to sign in
               </Link>
             </div>
           ) : (
@@ -79,9 +79,9 @@ function ForgotPasswordContent() {
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_20%,transparent),color-mix(in_srgb,var(--aethel-info)_20%,transparent))]">
                   <Mail className="h-8 w-8 text-[var(--aethel-primary-light)]" />
                 </div>
-                <h1 className="text-2xl font-bold">Esqueceu a senha?</h1>
+                <h1 className="text-2xl font-bold">Forgot your password?</h1>
                 <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
-                  Vamos enviar as instrucoes para redefinir sua senha.
+                  We will send instructions to reset your password.
                 </p>
               </div>
 
@@ -103,7 +103,7 @@ function ForgotPasswordContent() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
+                  placeholder="you@example.com"
                   required
                   className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
                 />
@@ -117,10 +117,10 @@ function ForgotPasswordContent() {
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Enviando...
+                    Sending...
                   </>
                 ) : (
-                  'Enviar link de redefinicao'
+                  'Send reset link'
                 )}
               </button>
 
@@ -129,7 +129,7 @@ function ForgotPasswordContent() {
                 className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] w-full rounded-xl px-4 py-2 text-sm font-semibold"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Voltar para o login
+                Back to sign in
               </Link>
             </form>
           )}

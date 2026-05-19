@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { apiInternalError } from '@/lib/api-errors'
 import { createComponentLogger } from '@/lib/observability/logger'

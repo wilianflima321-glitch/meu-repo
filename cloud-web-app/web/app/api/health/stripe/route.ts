@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getBillingRuntimeState } from '@/lib/server/billing-runtime'
 
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/health/stripe/route');
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
@@ -29,7 +32,7 @@ export async function GET() {
       { status: healthy ? 200 : 503 }
     )
   } catch (error) {
-    console.error('[health/stripe] failed:', error)
+    routeLogger.error('[health/stripe] failed:', error)
     return NextResponse.json(
       {
         healthy: false,

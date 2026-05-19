@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { requireAuth } from '@/lib/auth-server'

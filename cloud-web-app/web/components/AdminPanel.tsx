@@ -43,9 +43,9 @@ interface AdminStats {
 type AdminTabId = 'overview' | 'users' | 'credits' | 'financial' | 'system'
 
 const adminTabs: Array<{ id: AdminTabId; label: string }> = [
-  { id: 'overview', label: 'Visao geral' },
-  { id: 'users', label: 'Usuarios' },
-  { id: 'credits', label: 'Creditos' },
+  { id: 'overview', label: 'Overview' },
+  { id: 'users', label: 'Users' },
+  { id: 'credits', label: 'Credits' },
   { id: 'financial', label: 'Financeiro' },
   { id: 'system', label: 'Sistema' },
 ]
@@ -107,7 +107,7 @@ export default function AdminPanel() {
       if (!response.ok) throw new Error('Failed to adjust credits')
 
       const result = await response.json()
-      toast.success(`Creditos ajustados com sucesso. Novo saldo: $${result.new_balance}`)
+      toast.success(`Credits ajustados com sucesso. Novo saldo: $${result.new_balance}`)
       mutateUsers() // Refresh user data
     } catch (error) {
       logger.error('Error adjusting credits:', error)
@@ -125,7 +125,7 @@ export default function AdminPanel() {
 
       if (!response.ok) throw new Error('Failed to suspend user')
 
-      toast.success('Usuario suspenso com sucesso')
+      toast.success('User suspended successfully')
       mutateUsers() // Refresh user data
     } catch (error) {
       logger.error('Error suspending user:', error)
@@ -143,7 +143,7 @@ export default function AdminPanel() {
 
       if (!response.ok) throw new Error('Failed to activate user')
 
-      toast.success('Usuario ativado com sucesso')
+      toast.success('User activated successfully')
       mutateUsers() // Refresh user data
     } catch (error) {
       logger.error('Error activating user:', error)
@@ -157,17 +157,17 @@ export default function AdminPanel() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Admin Studio</p>
-            <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Painel administrativo</h2>
+            <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Admin panel</h2>
             <p className="mt-1 text-sm text-[var(--aethel-text-tertiary)]">
-              Controle usuarios, creditos, planos e indicadores do sistema.
+              Control users, credits, plans, and system indicators.
             </p>
           </div>
           <div className="hidden md:flex items-center gap-2">
             <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)]">
-              Acesso restrito
+              Restricted access
             </span>
             <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-3 py-1 text-xs text-[var(--aethel-success-light)]">
-              Auditoria ativa
+              Audit active
             </span>
           </div>
         </div>
@@ -177,7 +177,7 @@ export default function AdminPanel() {
       <div className="mx-auto max-w-3xl rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] p-2 shadow-[0_18px_48px_rgba(2,6,23,0.18)]">
         <div className="flex gap-2">
           {adminTabs.map((tab) => (
-            <button type="button" aria-label={`Abrir aba administrativa ${tab.label}`}
+            <button type="button" aria-label={`Open admin tab ${tab.label}`}
               key={tab.id}
               onClick={() => setActiveAdminTab(tab.id)}
               className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${CANONICAL_MOTION} ${CANONICAL_FOCUS} ${
@@ -199,9 +199,9 @@ export default function AdminPanel() {
             <div className={PANEL_CLASS}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">Total de Usuarios</h3>
+                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">Total de Users</h3>
                   <p className="text-2xl font-bold text-[var(--aethel-text-primary)]">{currentStats.total_users.toLocaleString()}</p>
-                  <p className="text-xs text-[var(--aethel-success-light)] mt-1">Ativos: {currentStats.active_users}</p>
+                  <p className="text-xs text-[var(--aethel-success-light)] mt-1">Active: {currentStats.active_users}</p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]">
                   <Users className="w-6 h-6 text-[var(--aethel-info-light)]" />
@@ -212,9 +212,9 @@ export default function AdminPanel() {
             <div className={PANEL_CLASS}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">Total de Creditos</h3>
+                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">Total de Credits</h3>
                   <p className="text-2xl font-bold text-[var(--aethel-text-primary)]">${currentStats.total_credits.toFixed(2)}</p>
-                  <p className="text-xs text-[var(--aethel-success-light)] mt-1">Todos os usuarios</p>
+                  <p className="text-xs text-[var(--aethel-success-light)] mt-1">All users</p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]">
                   <CreditCard className="w-6 h-6 text-[var(--aethel-success-light)]" />
@@ -225,9 +225,9 @@ export default function AdminPanel() {
             <div className={PANEL_CLASS}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">Receita Mensal</h3>
+                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">Monthly Revenue</h3>
                   <p className="text-2xl font-bold text-[var(--aethel-text-primary)]">${currentStats.monthly_revenue.toFixed(2)}</p>
-                  <p className="text-xs text-[var(--aethel-warning-light)] mt-1">Este mes</p>
+                  <p className="text-xs text-[var(--aethel-warning-light)] mt-1">This month</p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]">
                   <DollarSign className="w-6 h-6 text-[var(--aethel-warning-light)]" />
@@ -238,9 +238,9 @@ export default function AdminPanel() {
             <div className={PANEL_CLASS}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">Chamadas API Hoje</h3>
+                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">API Calls Today</h3>
                   <p className="text-2xl font-bold text-[var(--aethel-text-primary)]">{currentStats.api_calls_today.toLocaleString()}</p>
-                  <p className="text-xs text-[var(--aethel-info-light)] mt-1">Sessoes ativas: {currentStats.active_sessions}</p>
+                  <p className="text-xs text-[var(--aethel-info-light)] mt-1">Active sessions: {currentStats.active_sessions}</p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]">
                   <Activity className="w-6 h-6 text-[var(--aethel-info-light)]" />
@@ -251,9 +251,9 @@ export default function AdminPanel() {
 
           {/* Recent Activity */}
           <div className={PANEL_CLASS}>
-            <h3 className={`${CANONICAL_TYPOGRAPHY.h2} mb-4`}>Atividade Recente</h3>
+            <h3 className={`${CANONICAL_TYPOGRAPHY.h2} mb-4`}>Recent Activity</h3>
             {recentTransactions.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-6 py-12 text-center text-sm text-[var(--aethel-text-secondary)]">Nenhuma atividade recente.</div>
+              <div className="rounded-2xl border border-dashed border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-6 py-12 text-center text-sm text-[var(--aethel-text-secondary)]">No recent activity.</div>
             ) : (
               <div className="space-y-4">
                 {recentTransactions.map((transaction) => (
@@ -301,13 +301,13 @@ export default function AdminPanel() {
             <div className="flex gap-4">
               <input
                 type="text"
-                placeholder="Buscar usuarios..."
+                placeholder="Search usuarios..."
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
                 className={`${INPUT_CLASS} w-64`}
-                aria-label="Buscar usuarios"
+                aria-label="Search usuarios"
               />
-              <button type="button" aria-label="Criar novo usuario" className={BUTTON_PRIMARY_CLASS}>Novo usuario</button>
+              <button type="button" aria-label="Create novo usuario" className={BUTTON_PRIMARY_CLASS}>Novo usuario</button>
             </div>
           </div>
 
@@ -316,8 +316,8 @@ export default function AdminPanel() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[var(--aethel-border-primary)]">
-                    <th className="text-left py-3 px-4">Usuario</th>
-                    <th className="text-left py-3 px-4">Creditos</th>
+                    <th className="text-left py-3 px-4">User</th>
+                    <th className="text-left py-3 px-4">Credits</th>
                     <th className="text-left py-3 px-4">Status</th>
                     <th className="text-left py-3 px-4">Admin</th>
                     <th className="text-left py-3 px-4">Criado</th>
@@ -342,7 +342,7 @@ export default function AdminPanel() {
                           user.is_active ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]' :
                           'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
                         }`}>
-                          {user.is_active ? 'Ativo' : 'Suspenso'}
+                          {user.is_active ? 'Active' : 'Suspended'}
                         </span>
                       </td>
                       <td className="py-3 px-4">
@@ -357,13 +357,13 @@ export default function AdminPanel() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex gap-2">
-                          <button type="button" aria-label={`Adicionar creditos para ${user.email}`}
+                          <button type="button" aria-label={`Add creditos para ${user.email}`}
                             onClick={async () => {
                               const amount = await openPromptDialog({
-                                title: 'Adicionar creditos',
+                                title: 'Add creditos',
                                 message: 'Digite os creditos a adicionar:',
                                 placeholder: '100',
-                                confirmText: 'Adicionar',
+                                confirmText: 'Add',
                                 cancelText: 'Cancel',
                               });
                               if (!amount) return;
@@ -376,7 +376,7 @@ export default function AdminPanel() {
                             }}
                             className={BUTTON_SECONDARY_CLASS}
                           >
-                            Adicionar Creditos
+                            Add Credits
                           </button>
                           {user.is_active ? (
                             <button type="button" aria-label={`Suspender usuario ${user.email}`}
@@ -401,7 +401,7 @@ export default function AdminPanel() {
               </table>
             </div>
 
-            {/* Pagination */}
+            {/* Pagetion */}
             <div className="mt-4 flex items-center justify-between">
               <span className="text-sm text-[var(--aethel-text-tertiary)]">
                 Mostrando {users.length} de {totalUsers} usuarios
@@ -412,10 +412,10 @@ export default function AdminPanel() {
                   disabled={userPage === 1}
                   className={BUTTON_SECONDARY_CLASS}
                 >
-                  Anterior
+                  Previous
                 </button>
                 <span className="px-3 py-1 text-sm text-[var(--aethel-text-tertiary)]">
-                  Pagina {userPage}
+                  Page {userPage}
                 </span>
                 <button type="button" aria-label="Ir para a proxima pagina de usuarios"
                   onClick={() => setUserPage(userPage + 1)}
@@ -439,33 +439,33 @@ export default function AdminPanel() {
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className={PANEL_CLASS}>
-              <h4 className="text-lg font-semibold mb-4">Alocacao de Creditos</h4>
+              <h4 className="text-lg font-semibold mb-4">Alocacao de Credits</h4>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">E-mail do Usuario</label>
+                  <label className="block text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">E-mail do User</label>
                   <input type="email" className={INPUT_CLASS} placeholder="usuario@exemplo.com" aria-label="E-mail do usuario para alocacao de creditos" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Creditos a Adicionar</label>
+                  <label className="block text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Credits a Add</label>
                   <input type="number" className={INPUT_CLASS} placeholder="1000" aria-label="Quantidade de creditos a adicionar" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Motivo</label>
                   <textarea className={`${INPUT_CLASS} h-20`} placeholder="Motivo para alocacao de creditos" aria-label="Motivo para alocacao de creditos" />
                 </div>
-                <button type="button" aria-label="Adicionar creditos manualmente" className={`${BUTTON_PRIMARY_CLASS} w-full`}>Adicionar Creditos</button>
+                <button type="button" aria-label="Add creditos manualmente" className={`${BUTTON_PRIMARY_CLASS} w-full`}>Add Credits</button>
               </div>
             </div>
 
             <div className={PANEL_CLASS}>
-              <h4 className="text-lg font-semibold mb-4">Analise de Creditos</h4>
+              <h4 className="text-lg font-semibold mb-4">Analise de Credits</h4>
               <div className="space-y-4">
                 <div className="flex items-center justify-between rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
-                  <span className="text-sm">Media de Creditos por Usuario</span>
+                  <span className="text-sm">Media de Credits por User</span>
                   <span className="font-semibold">1,247</span>
                 </div>
                 <div className="flex items-center justify-between rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
-                  <span className="text-sm">Creditos Usados Hoje</span>
+                  <span className="text-sm">Credits Usados Hoje</span>
                   <span className="font-semibold">45,231</span>
                 </div>
                 <div className="flex items-center justify-between rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
@@ -477,12 +477,12 @@ export default function AdminPanel() {
           </div>
 
           <div className={PANEL_CLASS}>
-            <h4 className="text-lg font-semibold mb-4">Transacoes de Creditos Recentes</h4>
+            <h4 className="text-lg font-semibold mb-4">Transacoes de Credits Recentes</h4>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[var(--aethel-border-primary)]">
-                    <th className="text-left py-3 px-4">Usuario</th>
+                    <th className="text-left py-3 px-4">User</th>
                     <th className="text-left py-3 px-4">Tipo</th>
                     <th className="text-left py-3 px-4">Valor</th>
                     <th className="text-left py-3 px-4">Descricao</th>
@@ -493,7 +493,7 @@ export default function AdminPanel() {
                   {recentTransactions.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="py-6 text-center text-[var(--aethel-text-tertiary)]">
-                        Nenhuma transacao registrada.
+                        No transacao registrada.
                       </td>
                     </tr>
                   ) : (
@@ -580,8 +580,8 @@ export default function AdminPanel() {
               <h4 className="text-lg font-semibold mb-4">Pagamentos Failuredos</h4>
               <div className="text-center">
                 <div className="text-3xl font-bold text-[var(--aethel-error-light)] mb-2">2.3%</div>
-                <p className="text-sm text-[var(--aethel-text-tertiary)]">Taxa de falha este mes</p>
-                <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">127 falharam de 5.421 tentativas</p>
+                <p className="text-sm text-[var(--aethel-text-tertiary)]">Taxa de failure este mes</p>
+                <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">127 failureram de 5.421 tentactives</p>
               </div>
             </div>
           </div>
@@ -592,7 +592,7 @@ export default function AdminPanel() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[var(--aethel-border-primary)]">
-                    <th className="text-left py-3 px-4">Usuario</th>
+                    <th className="text-left py-3 px-4">User</th>
                     <th className="text-left py-3 px-4">Plano</th>
                     <th className="text-left py-3 px-4">Valor</th>
                     <th className="text-left py-3 px-4">Status</th>
@@ -633,7 +633,7 @@ export default function AdminPanel() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className={CANONICAL_TYPOGRAPHY.h2}>Gestao do sistema</h3>
-            <button type="button" aria-label="Abrir configuracoes do sistema" className={BUTTON_PRIMARY_CLASS}>Configuracoes do sistema</button>
+            <button type="button" aria-label="Open system settings" className={BUTTON_PRIMARY_CLASS}>System settings</button>
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

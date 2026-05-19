@@ -115,14 +115,14 @@ export async function POST(req: NextRequest) {
 
     if (!source) {
       return NextResponse.json(
-        { error: 'THREAD_NOT_FOUND', message: 'Thread de origem não encontrada.' },
+        { error: 'THREAD_NOT_FOUND', message: 'Source thread not found.' },
         { status: 404 }
       );
     }
 
     if (!target) {
       return NextResponse.json(
-        { error: 'THREAD_NOT_FOUND', message: 'Thread de destino não encontrada.' },
+        { error: 'THREAD_NOT_FOUND', message: 'Destination thread not found.' },
         { status: 404 }
       );
     }

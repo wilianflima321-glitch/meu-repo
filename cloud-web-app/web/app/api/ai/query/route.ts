@@ -5,6 +5,9 @@ import { prisma } from '@/lib/db';
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits';
 import { AITraceSummary, createAITraceId } from '@/lib/ai-internal-trace';
 import { persistAITrace } from '@/lib/ai-trace-store';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api.ai.query');
 
 /**
  * AI Query API - Conexão REAL com LLMs
@@ -96,7 +99,7 @@ export async function POST(req: NextRequest) {
     try {
       await recordTokenUsage(user.userId, response.tokensUsed);
     } catch (dbError) {
-      console.warn('[AI Query] Falha ao registrar uso:', dbError);
+      routeLogger.warn('[AI Query] Failed to record usage', dbError);
       // Não falhar a request por causa de erro de tracking
     }
 
@@ -126,7 +129,7 @@ export async function POST(req: NextRequest) {
       userId: user.userId,
       trace: traceSummary,
       kind: 'query',
-    }).catch((err) => console.warn('[AI Trace] Falha ao persistir trace:', err));
+    }).catch((err) => routeLogger.warn('[AI Trace] Failed to persist trace', err));
 
     return NextResponse.json({
       answer: response.content,
@@ -140,14 +143,14 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('AI Query Error:', error);
+    routeLogger.error('AI Query Error', error);
     
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
     // Erro específico de provider
-    if (error instanceof Error && error.message.includes('não configurado')) {
+    if (error instanceof Error && error.message.includes('not configured')) {
       return NextResponse.json({
         error: 'PROVIDER_NOT_CONFIGURED',
         message: error.message,
@@ -157,7 +160,7 @@ export async function POST(req: NextRequest) {
     
     return NextResponse.json({ 
       error: 'AI_ERROR',
-      message: error instanceof Error ? error.message : 'Erro interno ao processar IA'
+      message: error instanceof Error ? error.message : 'Internal error while processing AI'
     }, { status: 500 });
   }
 }

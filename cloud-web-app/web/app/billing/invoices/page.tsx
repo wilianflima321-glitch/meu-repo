@@ -1,122 +1,16 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, ArrowLeft, ExternalLink, FileText, RefreshCcw } from 'lucide-react'
-import { AethelAPIClient, APIError, type BillingReadiness } from '@/lib/api'
-
-interface Invoice {
-  id: string
-  number: string | null
-  status: string
-  amount: number
-  currency: string
-  created: number
-  pdfUrl: string | null
-  hostedUrl: string | null
-}
-
-interface Subscription {
-  id: string
-  status: string
-  currentPeriodEnd: number
-  cancelAtPeriodEnd: boolean
-  cancelAt: number | null
-}
-
-interface PaymentMethod {
-  id: string
-  brand?: string
-  last4?: string
-  expMonth?: number
-  expYear?: number
-  isDefault: boolean
-}
-
-interface BillingData {
-  hasSubscription: boolean
-  plan: string
-  subscription: Subscription | null
-  trial: {
-    endsAt: string
-    isActive: boolean
-    daysRemaining: number
-  } | null
-  invoices: Invoice[]
-  paymentMethods: PaymentMethod[]
-  canAccessPortal: boolean
-}
-
-const statusStyles: Record<string, string> = {
-  paid: 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)] border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]',
-  open: 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]',
-  draft: 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_40%,transparent)] text-[var(--aethel-text-secondary)] border border-[var(--aethel-border-secondary)]',
-  uncollectible: 'bg-[var(--aethel-error)]/15 text-[var(--aethel-error-light)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]',
-  void: 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_40%,transparent)] text-[var(--aethel-text-secondary)] border border-[var(--aethel-border-secondary)]',
-  active: 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)] border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]',
-  trialing: 'bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] text-[var(--aethel-info)] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]',
-  canceled: 'bg-[var(--aethel-error)]/15 text-[var(--aethel-error-light)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]',
-  incomplete: 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]',
-}
-
-const statusLabels: Record<string, string> = {
-  paid: 'Pago',
-  open: 'Em aberto',
-  draft: 'Rascunho',
-  uncollectible: 'Incobravel',
-  void: 'Cancelado',
-  active: 'Ativo',
-  trialing: 'Em teste',
-  canceled: 'Cancelado',
-  incomplete: 'Incompleto',
-}
-
-function formatCurrency(amount: number, currency: string) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: currency.toUpperCase(),
-  }).format(amount / 100)
-}
-
-function formatUnixDate(timestamp: number) {
-  return new Date(timestamp * 1000).toLocaleDateString('pt-BR', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-  })
-}
-
-function formatIsoDate(value: string) {
-  return new Date(value).toLocaleDateString('pt-BR', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-  })
-}
-
-function getErrorMessage(error: unknown) {
-  if (error instanceof APIError) {
-    const code =
-      typeof error.data === 'object' && error.data && 'error' in error.data
-        ? String((error.data as { error?: unknown }).error ?? '')
-        : ''
-    if (code === 'PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE') {
-      return 'Runtime de billing ainda parcial. Configure checkout, portal e webhook antes de tratar billing como ativo.'
-    }
-    return error.message
-  }
-  if (error instanceof Error) return error.message
-  return 'Falha ao carregar dados de faturamento.'
-}
-
-function StatusPill({ status }: { status: string }) {
-  return (
-    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${statusStyles[status] || statusStyles.draft}`}>
-      {statusLabels[status] || status}
-    </span>
-  )
-}
+import { AethelAPIClient, type BillingReadiness } from '@/lib/api'
+import { BillingErrorAlert } from './_components/BillingErrorAlert'
+import { BillingInvoicesHeader } from './_components/BillingInvoicesHeader'
+import { BillingInvoicesTable } from './_components/BillingInvoicesTable'
+import { BillingPaymentMethods } from './_components/BillingPaymentMethods'
+import { BillingReadinessCard } from './_components/BillingReadinessCard'
+import { BillingSubscriptionCard } from './_components/BillingSubscriptionCard'
+import type { BillingData } from './_components/billing-invoices-types'
+import { formatUnixDate, getErrorMessage } from './_components/billing-invoices-utils'
 
 export default function InvoicesPage() {
   const router = useRouter()
@@ -134,10 +28,7 @@ export default function InvoicesPage() {
         fetch('/api/billing/portal', { cache: 'no-store' }).then(async (res) => {
           const payload = await res.json().catch(() => null)
           if (!res.ok) {
-            const message =
-              (payload && typeof payload === 'object' && ('message' in payload || 'error' in payload)
-                ? String((payload as { message?: unknown; error?: unknown }).message || (payload as { error?: unknown }).error)
-                : null) || `HTTP ${res.status}`
+            const message = (payload && typeof payload === 'object' && ('message' in payload || 'error' in payload) ? String((payload as { message?: unknown; error?: unknown }).message || (payload as { error?: unknown }).error) : null) || `HTTP ${res.status}`
             throw new Error(message)
           }
           return payload as BillingData
@@ -167,7 +58,7 @@ export default function InvoicesPage() {
         window.location.href = result.url
         return
       }
-      throw new Error('URL do portal de faturamento nao retornada.')
+      throw new Error('Billing portal URL was not returned.')
     } catch (nextError) {
       setError(getErrorMessage(nextError))
     } finally {
@@ -175,19 +66,16 @@ export default function InvoicesPage() {
     }
   }, [])
 
-  const missingEnv = readiness?.stripe?.missingEnv ?? []
   const subscriptionPeriodLabel = useMemo(() => {
     if (!billingData?.subscription) return null
-    if (billingData.subscription.cancelAtPeriodEnd) {
-      return `Cancela em ${formatUnixDate(billingData.subscription.currentPeriodEnd)}`
-    }
-    return `Proxima cobranca: ${formatUnixDate(billingData.subscription.currentPeriodEnd)}`
+    if (billingData.subscription.cancelAtPeriodEnd) return `Cancels on ${formatUnixDate(billingData.subscription.currentPeriodEnd)}`
+    return `Next billing: ${formatUnixDate(billingData.subscription.currentPeriodEnd)}`
   }, [billingData?.subscription])
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] flex items-center justify-center">
-        <div className="text-sm text-[var(--aethel-text-secondary)]">Carregando dados de faturamento...</div>
+      <div className="flex min-h-screen items-center justify-center bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
+        <div className="text-sm text-[var(--aethel-text-secondary)]">Loading billing data...</div>
       </div>
     )
   }
@@ -195,201 +83,13 @@ export default function InvoicesPage() {
   return (
     <main className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold">Faturas e faturamento</h1>
-            <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
-              As superficies de faturamento agora refletem a prontidao do runtime. Nao assuma checkout ou portal ativos se a prontidao nao estiver verde.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => void load()}
-              className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]"
-            >
-              <RefreshCcw className="h-4 w-4" />
-              Atualizar
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push('/billing')}
-              className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar ao faturamento
-            </button>
-          </div>
-        </div>
-
-        {error && (
-          <div className="mb-6 rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/10 p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 text-[var(--aethel-error-light)]" />
-              <div>
-                <p className="text-sm font-medium text-[var(--aethel-error-light)]">Nao foi possivel carregar dados de faturamento</p>
-                <p className="mt-1 text-sm text-[var(--aethel-error-light)]/80">{error}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {readiness && (
-          <div className="mb-6 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]/70 p-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusPill status={readiness.checkoutReady ? 'active' : 'incomplete'} />
-              <span className="text-sm text-[var(--aethel-text-secondary)]">
-                checkout {readiness.checkoutReady ? 'pronto' : 'parcial'}
-              </span>
-              <StatusPill status={readiness.portalReady ? 'active' : 'incomplete'} />
-              <span className="text-sm text-[var(--aethel-text-secondary)]">
-                portal {readiness.portalReady ? 'pronto' : 'parcial'}
-              </span>
-              <StatusPill status={readiness.webhookReady ? 'active' : 'incomplete'} />
-              <span className="text-sm text-[var(--aethel-text-secondary)]">
-                webhook {readiness.webhookReady ? 'pronto' : 'parcial'}
-              </span>
-            </div>
-            {readiness.provider ? (
-              <p className="mt-3 text-xs text-[var(--aethel-text-secondary)]">
-                provider={readiness.provider.label}
-                {readiness.provider.webhookPath ? ` | webhook ${readiness.provider.webhookPath}` : ''}
-                {readiness.stripe
-                  ? ` | publishable=${String(readiness.stripe.publishableKeyConfigured)} | prices=${readiness.stripe.configuredPriceCount}/${readiness.stripe.requiredPriceCount}`
-                  : ''}
-              </p>
-            ) : null}
-            {missingEnv.length > 0 && (
-              <p className="mt-3 text-xs text-[var(--aethel-text-secondary)]">
-                Variaveis Stripe ausentes: {missingEnv.join(', ')}.
-              </p>
-            )}
-          </div>
-        )}
-
-        {billingData?.subscription && (
-          <section className="mb-6 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-sm text-[var(--aethel-text-secondary)]">Plano atual</p>
-                <h2 className="mt-1 text-xl font-semibold">{billingData.plan}</h2>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <StatusPill status={billingData.subscription.status} />
-                  {subscriptionPeriodLabel && <span className="text-sm text-[var(--aethel-text-secondary)]">{subscriptionPeriodLabel}</span>}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => void openPortal()}
-                disabled={portalLoading || readiness?.portalReady === false}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--aethel-primary-dark)] px-4 py-2 text-sm text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary)] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {portalLoading ? 'Abrindo...' : readiness?.portalReady === false ? 'Portal indisponivel' : 'Gerenciar assinatura'}
-              </button>
-            </div>
-          </section>
-        )}
-
-        {billingData?.trial?.isActive && (
-          <section className="mb-6 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] p-4 text-sm text-[var(--aethel-info-light)]">
-            Trial ativo. {billingData.trial.daysRemaining} dias restantes. Termina em {formatIsoDate(billingData.trial.endsAt)}.
-          </section>
-        )}
-
-        {billingData?.paymentMethods && billingData.paymentMethods.length > 0 && (
-          <section className="mb-6 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold">Formas de pagamento</h2>
-                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Formas de pagamento registradas no Stripe para este cliente.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => void openPortal()}
-                disabled={portalLoading || readiness?.portalReady === false}
-                className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary-light)] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Atualizar no portal
-              </button>
-            </div>
-            <div className="mt-4 space-y-3">
-              {billingData.paymentMethods.map((pm) => (
-                <div key={pm.id} className="flex items-center justify-between rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/70 px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
-                      {(pm.brand || 'card').toUpperCase()} termina em {pm.last4 || '----'}
-                    </p>
-                    <p className="text-xs text-[var(--aethel-text-secondary)]">
-                      Expira {String(pm.expMonth || '').padStart(2, '0')}/{pm.expYear || '----'}
-                    </p>
-                  </div>
-                  {pm.isDefault && <StatusPill status="active" />}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <section className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]">
-          <div className="border-b border-[var(--aethel-border-primary)] px-6 py-4">
-            <h2 className="text-lg font-semibold">Historico de faturas</h2>
-          </div>
-          {billingData?.invoices && billingData.invoices.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-[var(--aethel-border-primary)]">
-                <thead className="bg-[var(--aethel-surface-primary)]/60">
-                  <tr className="text-left text-xs uppercase tracking-wide text-[var(--aethel-text-secondary)]">
-                    <th className="px-6 py-3">Fatura</th>
-                    <th className="px-6 py-3">Data</th>
-                    <th className="px-6 py-3">Valor</th>
-                    <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3 text-right">Acoes</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--aethel-border-primary)]">
-                  {billingData.invoices.map((invoice) => (
-                    <tr key={invoice.id} className="hover:bg-[var(--aethel-surface-primary)]/60">
-                      <td className="px-6 py-4 text-sm text-[var(--aethel-text-primary)]">{invoice.number || invoice.id.slice(-8)}</td>
-                      <td className="px-6 py-4 text-sm text-[var(--aethel-text-secondary)]">{formatUnixDate(invoice.created)}</td>
-                      <td className="px-6 py-4 text-sm text-[var(--aethel-text-primary)]">{formatCurrency(invoice.amount, invoice.currency)}</td>
-                      <td className="px-6 py-4"><StatusPill status={invoice.status} /></td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-3 text-sm">
-                          {invoice.hostedUrl && (
-                            <a href={invoice.hostedUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary-light)]">
-                              Ver
-                              <ExternalLink className="h-3.5 w-3.5" />
-                            </a>
-                          )}
-                          {invoice.pdfUrl && (
-                            <a href={invoice.pdfUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]">
-                              PDF
-                              <FileText className="h-3.5 w-3.5" />
-                            </a>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="px-6 py-12 text-center">
-              <FileText className="mx-auto h-10 w-10 text-[var(--aethel-text-tertiary)]" />
-              <h3 className="mt-4 text-sm font-medium text-[var(--aethel-text-primary)]">Nenhuma fatura ainda</h3>
-              <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">As faturas aparecem aqui apos o primeiro ciclo de cobranca concluido.</p>
-            </div>
-          )}
-        </section>
-
-        <div className="mt-6 text-center">
-          <Link href="/billing" className="text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]">
-            Voltar ao workspace de faturamento
-          </Link>
-        </div>
+        <BillingInvoicesHeader onRefresh={() => void load()} onBack={() => router.push('/billing')} />
+        <BillingErrorAlert error={error} />
+        <BillingReadinessCard readiness={readiness} />
+        <BillingSubscriptionCard billingData={billingData} readiness={readiness} portalLoading={portalLoading} onOpenPortal={() => void openPortal()} subscriptionPeriodLabel={subscriptionPeriodLabel} />
+        <BillingPaymentMethods billingData={billingData} readiness={readiness} portalLoading={portalLoading} onOpenPortal={() => void openPortal()} />
+        <BillingInvoicesTable billingData={billingData} />
       </div>
     </main>
   )
 }
-

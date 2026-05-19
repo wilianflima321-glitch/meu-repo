@@ -10,6 +10,7 @@ const log = createComponentLogger('api/lsp/notification/route')
 
 interface LSPNotification {
   language: string;
+
   method: string;
   params: unknown;
 }
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
     session.rpc.sendNotification(method, params ?? {});
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('LSP notification failed:', error);
+    log.error('LSP notification failed:', error);
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
     const code = (error as any)?.code;

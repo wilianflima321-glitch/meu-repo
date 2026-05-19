@@ -57,10 +57,10 @@ export const LIFECYCLE_LABELS: Record<PreviewLifecycleState, string> = {
   idle: 'Aguardando preview',
   provisioning: 'Iniciando sandbox...',
   warming: 'Aquecendo runtime...',
-  syncing: 'Sincronizando arquivos do projeto...',
+  syncing: 'Syncing project files...',
   healthy: 'Preview em execucao',
   degraded: 'Preview degradado',
-  failed: 'Falha no preview',
+  failed: 'Failure no preview',
   offline: 'Preview offline',
 };
 

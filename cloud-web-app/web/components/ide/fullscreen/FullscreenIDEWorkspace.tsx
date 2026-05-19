@@ -5,6 +5,7 @@ import type { ReactNode, RefObject } from 'react';
 
 import AIChatPanelContainer from '@/components/ide/AIChatPanelContainer';
 import CommandPaletteProvider, { type FileItem } from '@/components/ide/CommandPalette';
+import CostMeter from '@/components/cost/CostMeter';
 import { EditorApplyBridgeProvider } from '@/components/ide/EditorApplyBridgeContext';
 import { IdeWorkbenchCommandExtras } from '@/components/ide/IdeWorkbenchCommandExtras';
 import { ModernIDEShell } from '@/components/ide/ModernIDEShell';
@@ -133,10 +134,15 @@ export function FullscreenIDEWorkspace({
         >
           <ModernIDEShell
             projectId={projectId}
-            projectName={`Projeto ${projectId}`}
+            projectName={`Project ${projectId}`}
             activeFileName={activeFile?.path}
             statusBarProps={statusBarProps}
-            headerExtras={headerExtras}
+            headerExtras={(
+              <>
+                <CostMeter projectId={projectId} />
+                {headerExtras}
+              </>
+            )}
             banner={banner}
             panelState={panelState}
             activeBottomPanel={activeBottomPanel}

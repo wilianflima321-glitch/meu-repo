@@ -144,7 +144,7 @@ export function Outliner3D({
         <button
           type="button"
           className="p-1 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-          title="Adicionar objeto"
+          title="Add objeto"
         >
           <Box className="w-3.5 h-3.5" />
         </button>

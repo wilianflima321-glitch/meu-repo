@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/compliance/route');
 
 // =============================================================================
 // COMPLIANCE ADMIN API (Derived from audit log)
@@ -40,7 +43,7 @@ async function getHandler(_req: NextRequest) {
 
     return NextResponse.json({ policies });
   } catch (error) {
-    console.error('[Admin Compliance] Error:', error);
+    routeLogger.error('[Admin Compliance] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch compliance' }, { status: 500 });
   }
 }

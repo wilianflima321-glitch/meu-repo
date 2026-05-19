@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // =============================================================================
 // AI TRAINING ADMIN API
 // =============================================================================
+
+const log = createComponentLogger('api/admin/ai/training/route');
 
 export const GET = withAdminAuth(
   async () => {
@@ -13,7 +16,7 @@ export const GET = withAdminAuth(
       const items = await aiTrainingJob.findMany({ orderBy: { createdAt: 'desc' } });
       return NextResponse.json({ items });
     } catch (error) {
-      console.error('[Admin AI Training] Error:', error);
+      log.error('[Admin AI Training] Error', error);
       return NextResponse.json({ error: 'Failed to fetch training jobs' }, { status: 500 });
     }
   },
@@ -32,7 +35,7 @@ export const POST = withAdminAuth(
       };
 
       if (!model) {
-        return NextResponse.json({ error: 'Modelo obrigatório' }, { status: 400 });
+        return NextResponse.json({ error: 'Model is required' }, { status: 400 });
       }
 
       const aiTrainingJob = (prisma as any).aiTrainingJob;
@@ -63,7 +66,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ item: job });
     } catch (error) {
-      console.error('[Admin AI Training] Error:', error);
+      log.error('[Admin AI Training] Error', error);
       return NextResponse.json({ error: 'Failed to create training job' }, { status: 500 });
     }
   },
@@ -82,7 +85,7 @@ export const PATCH = withAdminAuth(
       };
 
       if (!id) {
-        return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 });
+        return NextResponse.json({ error: 'ID is required' }, { status: 400 });
       }
 
       const aiTrainingJob = (prisma as any).aiTrainingJob;
@@ -110,7 +113,7 @@ export const PATCH = withAdminAuth(
 
       return NextResponse.json({ item: job });
     } catch (error) {
-      console.error('[Admin AI Training] Error:', error);
+      log.error('[Admin AI Training] Error', error);
       return NextResponse.json({ error: 'Failed to update training job' }, { status: 500 });
     }
   },

@@ -246,14 +246,14 @@ function CreatorPayoutConnectCard() {
     }, [status?.country]);
 
     const statusLabel = isLoading
-        ? 'Carregando'
+        ? 'Loading'
         : status?.payoutsEnabled
-            ? 'Payouts ativos'
+            ? 'Payouts active'
             : status?.detailsSubmitted
-                ? 'Em revisao Stripe'
+                ? 'Under Stripe review'
                 : status?.connected
-                    ? 'Onboarding pendente'
-                    : 'Nao conectado';
+                    ? 'Onboarding pending'
+                    : 'Not connected';
 
     return (
         <Card className="col-span-3">
@@ -261,7 +261,7 @@ function CreatorPayoutConnectCard() {
                 <div>
                     <CardTitle>Stripe Connect creator payouts</CardTitle>
                     <CardDescription>
-                        Habilita o caminho real creator - venda - saldo - payout, sem prometer receita antes do onboarding.
+                        Enables the real creator-to-sale-to-balance-to-payout path without promising revenue before onboarding.
                     </CardDescription>
                 </div>
                 <Badge variant={status?.payoutsEnabled ? 'success' : 'secondary'} className="whitespace-nowrap text-[10px]">

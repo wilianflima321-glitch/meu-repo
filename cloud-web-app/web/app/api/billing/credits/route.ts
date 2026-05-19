@@ -7,6 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const log = createComponentLogger('api/billing/credits/route');
 
 interface CreditData {
   available: number;
@@ -43,9 +46,9 @@ export async function GET(request: NextRequest) {
       lastUpdated: credits.lastUpdated,
     });
   } catch (error) {
-    console.error('Erro ao buscar créditos:', error);
+    log.error('Error fetching credits', error);
     return NextResponse.json(
-      { error: 'Falha ao buscar créditos' },
+      { error: 'Failed to fetch credits' },
       { status: 500 }
     );
   }
@@ -72,7 +75,7 @@ export async function POST(request: NextRequest) {
       case 'use':
         if (amount > userCredits[userId].available) {
           return NextResponse.json(
-            { error: 'Créditos insuficientes' },
+            { error: 'Insufficient credits' },
             { status: 400 }
           );
         }
@@ -92,7 +95,7 @@ export async function POST(request: NextRequest) {
 
       default:
         return NextResponse.json(
-          { error: 'Ação inválida' },
+          { error: 'Invalid action' },
           { status: 400 }
         );
     }
@@ -104,9 +107,9 @@ export async function POST(request: NextRequest) {
       credits: userCredits[userId],
     });
   } catch (error) {
-    console.error('Erro ao atualizar créditos:', error);
+    log.error('Error updating credits', error);
     return NextResponse.json(
-      { error: 'Falha ao atualizar créditos' },
+      { error: 'Failed to update credits' },
       { status: 500 }
     );
   }

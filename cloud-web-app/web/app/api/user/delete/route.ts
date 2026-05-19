@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/user/delete/route');
 
 export const dynamic = 'force-dynamic'
 
@@ -47,7 +50,7 @@ export async function POST(req: NextRequest) {
           await stripe.subscriptions.cancel(sub.id)
         }
       } catch (err) {
-        console.warn('[user/delete] Stripe cleanup failed (non-blocking):', err)
+        routeLogger.warn('[user/delete] Stripe cleanup failed (non-blocking):', err)
       }
     }
 
@@ -76,7 +79,7 @@ export async function POST(req: NextRequest) {
       deletedAt: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('[user/delete] Error:', error)
+    routeLogger.error('[user/delete] Error:', error)
     return NextResponse.json({ error: 'Deletion failed' }, { status: 500 })
   }
 }

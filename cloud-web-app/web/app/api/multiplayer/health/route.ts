@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import cache from '@/lib/redis-cache'
 import { capabilityResponse } from '@/lib/server/capability-response'
 
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/multiplayer/health/route');
 export const dynamic = 'force-dynamic'
 
 function hasRedisConfig(): boolean {
@@ -59,7 +62,7 @@ export async function GET() {
       }
     )
   } catch (error) {
-    console.error('Multiplayer health check failed:', error)
+    routeLogger.error('Multiplayer health check failed:', error)
     return capabilityResponse({
       error: 'MULTIPLAYER_HEALTH_CHECK_FAILED',
       message: 'Failed to verify multiplayer runtime health.',

@@ -142,7 +142,7 @@ function buildDiagnosticsMetrics(activeDiagnostics: MonacoDiagnostic[]): StatusM
   if (counts.errors > 0) {
     metrics.push({
       icon: <AlertCircle size={12} style={{ color: STATUS_ERROR }} />,
-      label: `${counts.errors} erro${counts.errors === 1 ? '' : 's'}`,
+      label: `${counts.errors} error${counts.errors === 1 ? '' : 's'}`,
     });
   }
 
@@ -170,7 +170,7 @@ function buildDiagnosticsMetrics(activeDiagnostics: MonacoDiagnostic[]): StatusM
   return [
     {
       icon: <CheckCircle size={12} style={{ color: STATUS_SUCCESS }} />,
-      label: 'Arquivo limpo',
+      label: 'Clean file',
     },
   ];
 }
@@ -203,7 +203,7 @@ function buildRuntimeMetric(
       icon: <Clock size={12} />,
       label:
         runtimeReadinessStatus === 'ready'
-          ? 'Runtime pronto'
+          ? 'Runtime ready'
           : runtimeReadinessStatus === 'partial'
             ? 'Runtime parcial'
             : 'Inline fallback',
@@ -214,7 +214,7 @@ function buildRuntimeMetric(
     icon: <AlertCircle size={12} style={{ color: STATUS_ERROR }} />,
     label:
       runtimeHealth.status === 'unhealthy'
-        ? 'Runtime com erro'
+        ? 'Runtime error'
         : runtimeHealth.status === 'invalid'
           ? 'Runtime invalido'
           : 'Runtime offline',
@@ -243,7 +243,7 @@ function buildSourceControlMetrics(sourceControl?: ShellSourceControlTruth | nul
     return [
       {
         icon: <AlertCircle size={12} style={{ color: STATUS_WARNING }} />,
-        label: 'Git indisponivel',
+        label: 'Git unavailable',
       },
     ];
   }
@@ -284,7 +284,7 @@ function buildSourceControlMetrics(sourceControl?: ShellSourceControlTruth | nul
 
     metrics.push({
       icon: <AlertCircle size={12} style={{ color: STATUS_WARNING }} />,
-      label: parts.length > 0 ? parts.join(' · ') : `${sourceControl.changedCount} mudanca${sourceControl.changedCount === 1 ? '' : 's'}`,
+      label: parts.length > 0 ? parts.join(' · ') : `${sourceControl.changedCount} change${sourceControl.changedCount === 1 ? '' : 's'}`,
     });
     return metrics;
   }

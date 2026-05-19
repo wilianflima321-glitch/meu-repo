@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/jobs/[id]/retry/route');
 
 function isUnauthorizedError(error: unknown): boolean {
   return error instanceof Error && error.message === 'Unauthorized';
@@ -67,9 +70,9 @@ export async function POST(
         { status: 503 }
       );
     }
-    console.error('Erro ao retry job:', error);
+    routeLogger.error('Error retrying job:', error);
     return NextResponse.json(
-      { error: 'Falha ao retry job' },
+      { error: 'Failed to retry job' },
       { status: 500 }
     );
   }

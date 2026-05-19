@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/subscriptions/route');
 
 // =============================================================================
 // SUBSCRIPTIONS ADMIN API
@@ -67,7 +70,7 @@ async function getHandler(_req: NextRequest) {
 
     return NextResponse.json({ plans, totals });
   } catch (error) {
-    console.error('[Admin Subscriptions] Error:', error);
+    routeLogger.error('[Admin Subscriptions] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch subscriptions' }, { status: 500 });
   }
 }

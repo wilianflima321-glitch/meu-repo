@@ -99,16 +99,16 @@ export const ProjectsDashboardHeader: React.FC<{
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
       <div>
         <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: 600, color: colors.text }}>
-          Meus Projetos
+          My projects
         </h1>
         <p style={{ margin: 0, fontSize: '14px', color: colors.textMuted }}>
-          Gerencie seus projetos, acompanhe sinais de uso e entre no workbench mais rapido.
+          Manage your projects, track usage signals, and enter the workbench faster.
         </p>
       </div>
 
       <button
         type="button"
-        aria-label="Abrir modal de novo projeto"
+        aria-label="Open new project modal"
         onClick={onCreateProject}
         style={{
           display: 'flex',
@@ -128,7 +128,7 @@ export const ProjectsDashboardHeader: React.FC<{
         onMouseLeave={(event) => (event.currentTarget.style.background = colors.primary)}
       >
         <Plus size={18} />
-        Novo Projeto
+        New project
       </button>
     </div>
   </div>

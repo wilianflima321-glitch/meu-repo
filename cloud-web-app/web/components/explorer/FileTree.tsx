@@ -256,9 +256,9 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
 
   const handleDelete = async () => {
     const shouldDelete = await openConfirmDialog({
-      title: 'Excluir item',
-      message: `Excluir ${path}?`,
-      confirmText: 'Excluir',
+      title: 'Delete item',
+      message: `Delete ${path}?`,
+      confirmText: 'Delete',
       cancelText: 'Cancel',
     });
     if (!shouldDelete) return;
@@ -291,7 +291,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
       <div className="menu-item" onClick={handlePaste}>Paste</div>
       <div className="menu-separator" />
       <div className="menu-item" onClick={handleRename}>Rename</div>
-      <div className="menu-item danger" onClick={handleDelete}>Excluir</div>
+      <div className="menu-item danger" onClick={handleDelete}>Delete</div>
 
       <style jsx>{`
         .context-menu {

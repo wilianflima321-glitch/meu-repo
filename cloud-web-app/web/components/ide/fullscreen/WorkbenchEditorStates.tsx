@@ -23,7 +23,7 @@ export function WorkbenchEditorErrorState({ error }: { error: string }) {
 export function WorkbenchEditorEmptyState() {
   return (
     <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">
-      Selecione um arquivo para iniciar a edicao.
+      Select a file to start editing.
     </div>
   );
 }
@@ -31,7 +31,7 @@ export function WorkbenchEditorEmptyState() {
 export function WorkbenchEmptyEditorGroupState() {
   return (
     <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
-      Nenhum arquivo aberto neste grupo.
+      No file open in this group.
     </div>
   );
 }

@@ -1,597 +1,41 @@
-'use client';
-import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { Canvas, useFrame, useThree, ThreeEvent } from '@react-three/fiber';
+"use client";
+import React, { useState, useCallback, useEffect } from "react";
+import { Canvas } from "@react-three/fiber";
+import { Stats } from "@react-three/drei";
+import { createComponentLogger } from "@/lib/observability/logger";
+import { BrushSettingsPanel } from "./TerrainBrushSettingsPanel";
 import {
-  OrbitControls,
-  Grid,
-  Environment,
-  Stats,
-  GizmoHelper,
-  GizmoViewport,
-} from '@react-three/drei';
-import * as THREE from 'three';
-import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
-import { createComponentLogger } from '@/lib/observability/logger'
-import { BrushSettingsPanel } from './TerrainBrushSettingsPanel';
-import { toolCategories } from './terrain-sculpting-models';
-import type { BrushFalloff, BrushSettings, ErosionSettings, FoliageInstance, TerrainData, TerrainLayer, TerrainSettings, TerrainToolType } from './terrain-sculpting-models';
+  ErosionPanel,
+  LayersPanel,
+  Toolbar,
+  ViewportScene,
+} from "./TerrainSculptingEditor.parts";
+import type {
+  BrushFalloff,
+  BrushSettings,
+  ErosionSettings,
+  FoliageInstance,
+  TerrainData,
+  TerrainLayer,
+  TerrainSettings,
+  TerrainToolType,
+} from "./terrain-sculpting-models";
 
-export type { BrushFalloff, BrushSettings, BrushShape, ErosionSettings, FoliageInstance, FoliageType, TerrainData, TerrainLayer, TerrainSettings, TerrainToolType } from './terrain-sculpting-models';
+export type {
+  BrushFalloff,
+  BrushSettings,
+  BrushShape,
+  ErosionSettings,
+  FoliageInstance,
+  FoliageType,
+  TerrainData,
+  TerrainLayer,
+  TerrainSettings,
+  TerrainToolType,
+} from "./terrain-sculpting-models";
 
-const log = createComponentLogger('TerrainSculptingEditor')
+const log = createComponentLogger("TerrainSculptingEditor");
 
-
-interface BrushPreviewProps {
-  position: THREE.Vector3 | null;
-  settings: BrushSettings;
-  color: string;
-}
-function BrushPreview({ position, settings, color }: BrushPreviewProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  useFrame(() => {
-    if (meshRef.current && position) {
-      meshRef.current.position.copy(position);
-      meshRef.current.position.y += 0.1; // Slight offset
-    }
-  });
-  if (!position) return null;
-  return (
-    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, THREE.MathUtils.degToRad(settings.rotation)]}>
-      {settings.shape === 'circle' ? (
-        <ringGeometry args={[settings.size * 0.95, settings.size, 64]} />
-      ) : (
-        <planeGeometry args={[settings.size * 2, settings.size * 2]} />
-      )}
-      <meshBasicMaterial color={color} transparent opacity={0.5} side={THREE.DoubleSide} />
-    </mesh>
-  );
-}
-interface TerrainMeshProps {
-  data: TerrainData;
-  settings: TerrainSettings;
-  layers: TerrainLayer[];
-  onBrushStart: (position: THREE.Vector3, uv: THREE.Vector2) => void;
-  onBrushMove: (position: THREE.Vector3, uv: THREE.Vector2) => void;
-  onBrushEnd: () => void;
-  brushPosition: THREE.Vector3 | null;
-  setBrushPosition: (pos: THREE.Vector3 | null) => void;
-}
-function TerrainMesh({
-  data,
-  settings,
-  layers,
-  onBrushStart,
-  onBrushMove,
-  onBrushEnd,
-  brushPosition,
-  setBrushPosition,
-}: TerrainMeshProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const geometryRef = useRef<THREE.PlaneGeometry | null>(null);
-  const [isPainting, setIsPainting] = useState(false);
-  const terrainColor = useMemo(
-    () => resolveCssVarColor('--aethel-success', 'rgb(74, 124, 89)'),
-    []
-  );
-  const geometry = useMemo(() => {
-    const geo = new THREE.PlaneGeometry(
-      settings.size.x,
-      settings.size.y,
-      data.resolution - 1,
-      data.resolution - 1
-    );
-    geo.rotateX(-Math.PI / 2);
-    const positions = geo.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < positions.count; i++) {
-      const height = data.heightmap[i] * settings.maxHeight;
-      positions.setY(i, height);
-    }
-    positions.needsUpdate = true;
-    geo.computeVertexNormals();
-    geometryRef.current = geo;
-    return geo;
-  }, [data.heightmap, data.resolution, settings]);
-  const material = useMemo(() => {
-    return new THREE.MeshStandardMaterial({
-      color: terrainColor,
-      roughness: 0.8,
-      metalness: 0.1,
-      wireframe: false,
-    });
-  }, [terrainColor]);
-  const handlePointerDown = useCallback((e: ThreeEvent<PointerEvent>) => {
-    e.stopPropagation();
-    if (e.point && e.uv) {
-      setIsPainting(true);
-      onBrushStart(e.point, e.uv);
-    }
-  }, [onBrushStart]);
-  const handlePointerMove = useCallback((e: ThreeEvent<PointerEvent>) => {
-    if (e.point) {
-      setBrushPosition(e.point.clone());
-      if (isPainting && e.uv) {
-        onBrushMove(e.point, e.uv);
-      }
-    }
-  }, [isPainting, onBrushMove, setBrushPosition]);
-  const handlePointerUp = useCallback(() => {
-    setIsPainting(false);
-    onBrushEnd();
-  }, [onBrushEnd]);
-  const handlePointerLeave = useCallback(() => {
-    setBrushPosition(null);
-    if (isPainting) {
-      setIsPainting(false);
-      onBrushEnd();
-    }
-  }, [isPainting, onBrushEnd, setBrushPosition]);
-  return (
-    <mesh
-      ref={meshRef}
-      geometry={geometry}
-      material={material}
-      onPointerDown={handlePointerDown as never}
-      onPointerMove={handlePointerMove as never}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerLeave}
-      castShadow={settings.castShadows}
-      receiveShadow={settings.receiveShadows}
-    />
-  );
-}
-interface ToolbarProps {
-  selectedTool: TerrainToolType;
-  onToolChange: (tool: TerrainToolType) => void;
-}
-function Toolbar({ selectedTool, onToolChange }: ToolbarProps) {
-  return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '16px',
-      padding: '12px',
-      background: 'var(--aethel-surface-primary)',
-      borderRadius: '8px',
-    }}>
-      {toolCategories.map(category => (
-        <div key={category.name}>
-          <h4 style={{ color: 'var(--aethel-text-quaternary)', fontSize: '11px', marginBottom: '8px', textTransform: 'uppercase' }}>
-            {category.name}
-          </h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-            {category.tools.map(tool => (
-              <button type="button"
-                key={tool.id}
-                onClick={() => onToolChange(tool.id as TerrainToolType)}
-                title={tool.label}
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  background: selectedTool === tool.id ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
-                  border: selectedTool === tool.id ? '2px solid var(--aethel-primary-light)' : '1px solid var(--aethel-border-primary)',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {tool.icon}
-              </button>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-interface LayersPanelProps {
-  layers: TerrainLayer[];
-  selectedLayer: string | null;
-  onSelect: (id: string) => void;
-  onAdd: () => void;
-  onRemove: (id: string) => void;
-  onUpdate: (layer: TerrainLayer) => void;
-}
-function LayersPanel({ layers, selectedLayer, onSelect, onAdd, onRemove, onUpdate }: LayersPanelProps) {
-  return (
-    <div style={{
-      padding: '12px',
-      background: 'var(--aethel-surface-primary)',
-      borderRadius: '8px',
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <h3 style={{ color: 'white', fontSize: '14px' }}>Terrain Layers</h3>
-        <button type="button"
-          onClick={onAdd}
-          style={{
-            background: 'var(--aethel-primary)',
-            border: 'none',
-            borderRadius: '4px',
-            padding: '4px 8px',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '11px',
-          }}
-        >
-          + Add
-        </button>
-      </div>
-      <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-        {layers.map((layer, index) => (
-          <div
-            key={layer.id}
-            onClick={() => onSelect(layer.id)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px',
-              background: selectedLayer === layer.id ? 'color-mix(in_srgb,var(--aethel-primary)_20%,var(--aethel-surface-tertiary))' : 'var(--aethel-surface-tertiary)',
-              border: selectedLayer === layer.id ? '1px solid var(--aethel-primary)' : '1px solid transparent',
-              borderRadius: '4px',
-              marginBottom: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            {/* Layer preview */}
-            <div style={{
-              width: '32px',
-              height: '32px',
-              background: `linear-gradient(135deg, var(--aethel-success), color-mix(in_srgb,var(--aethel-success)_60%,var(--aethel-surface-primary)))`,
-              borderRadius: '4px',
-              flexShrink: 0,
-            }} />
-            {/* Layer info */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ color: 'white', fontSize: '12px', fontWeight: 500 }}>
-                {layer.name}
-              </div>
-              <div style={{ color: 'var(--aethel-text-quaternary)', fontSize: '10px' }}>
-                Tiling: {layer.tiling.x}x{layer.tiling.y}
-              </div>
-            </div>
-            {/* Index */}
-            <div style={{
-              width: '20px',
-              height: '20px',
-              background: 'var(--aethel-border-primary)',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--aethel-text-tertiary)',
-              fontSize: '10px',
-            }}>
-              {index + 1}
-            </div>
-            {/* Delete */}
-            <button type="button"
-              onClick={(e) => { e.stopPropagation(); onRemove(layer.id); }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--aethel-error)',
-                cursor: 'pointer',
-                fontSize: '14px',
-              }}
-            >
-              ×
-            </button>
-          </div>
-        ))}
-      </div>
-      {/* Layer settings for selected */}
-      {selectedLayer && (() => {
-        const layer = layers.find(l => l.id === selectedLayer);
-        if (!layer) return null;
-        return (
-          <div style={{ marginTop: '12px', padding: '12px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px' }}>
-            <div style={{ marginBottom: '8px' }}>
-              <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
-                Height Blend
-              </label>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.01}
-                value={layer.heightBlend}
-                onChange={(e) => onUpdate({ ...layer, heightBlend: parseFloat(e.target.value) })}
-                style={{ width: '100%' }}
-              />
-            </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
-                  Tiling X
-                </label>
-                <input
-                  type="number"
-                  value={layer.tiling.x}
-                  onChange={(e) => onUpdate({ ...layer, tiling: { ...layer.tiling, x: parseFloat(e.target.value) } })}
-                  style={{
-                    width: '100%',
-                    background: 'var(--aethel-surface-primary)',
-                    border: '1px solid var(--aethel-border-primary)',
-                    borderRadius: '4px',
-                    padding: '4px',
-                    color: 'white',
-                    fontSize: '11px',
-                  }}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
-                  Tiling Y
-                </label>
-                <input
-                  type="number"
-                  value={layer.tiling.y}
-                  onChange={(e) => onUpdate({ ...layer, tiling: { ...layer.tiling, y: parseFloat(e.target.value) } })}
-                  style={{
-                    width: '100%',
-                    background: 'var(--aethel-surface-primary)',
-                    border: '1px solid var(--aethel-border-primary)',
-                    borderRadius: '4px',
-                    padding: '4px',
-                    color: 'white',
-                    fontSize: '11px',
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-    </div>
-  );
-}
-interface ErosionPanelProps {
-  settings: ErosionSettings;
-  onChange: (settings: ErosionSettings) => void;
-  onApply: () => void;
-}
-function ErosionPanel({ settings, onChange, onApply }: ErosionPanelProps) {
-  const update = <K extends keyof ErosionSettings>(key: K, value: ErosionSettings[K]) => {
-    onChange({ ...settings, [key]: value });
-  };
-  return (
-    <div style={{
-      padding: '12px',
-      background: 'var(--aethel-surface-primary)',
-      borderRadius: '8px',
-    }}>
-      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Erosion Settings</h3>
-      {/* Type */}
-      <div style={{ marginBottom: '12px' }}>
-        <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
-          Type
-        </label>
-        <select
-          value={settings.type}
-          onChange={(e) => update('type', e.target.value as ErosionSettings['type'])}
-          style={{
-            width: '100%',
-            background: 'var(--aethel-surface-tertiary)',
-            border: '1px solid var(--aethel-border-primary)',
-            borderRadius: '4px',
-            padding: '6px',
-            color: 'white',
-            fontSize: '12px',
-          }}
-        >
-          <option value="hydraulic">Hydraulic (Water)</option>
-          <option value="thermal">Thermal (Gravity)</option>
-          <option value="wind">Wind</option>
-        </select>
-      </div>
-      {/* Iterations */}
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Iterations</label>
-          <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '11px' }}>{settings.iterations}</span>
-        </div>
-        <input
-          type="range"
-          min={1}
-          max={500}
-          step={1}
-          value={settings.iterations}
-          onChange={(e) => update('iterations', parseInt(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
-      {/* Strength */}
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Strength</label>
-          <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '11px' }}>{(settings.strength * 100).toFixed(0)}%</span>
-        </div>
-        <input
-          type="range"
-          min={0}
-          max={1}
-          step={0.01}
-          value={settings.strength}
-          onChange={(e) => update('strength', parseFloat(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
-      {/* Type-specific settings */}
-      {settings.type === 'hydraulic' && (
-        <>
-          <div style={{ marginBottom: '8px' }}>
-            <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
-              Rain Amount
-            </label>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={settings.rainAmount ?? 0.5}
-              onChange={(e) => update('rainAmount', parseFloat(e.target.value))}
-              style={{ width: '100%' }}
-            />
-          </div>
-          <div style={{ marginBottom: '8px' }}>
-            <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
-              Sediment Capacity
-            </label>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={settings.sedimentCapacity ?? 0.5}
-              onChange={(e) => update('sedimentCapacity', parseFloat(e.target.value))}
-              style={{ width: '100%' }}
-            />
-          </div>
-        </>
-      )}
-      {settings.type === 'thermal' && (
-        <div style={{ marginBottom: '8px' }}>
-          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
-            Talus Angle: {settings.talusAngle ?? 45}°
-          </label>
-          <input
-            type="range"
-            min={0}
-            max={90}
-            step={1}
-            value={settings.talusAngle ?? 45}
-            onChange={(e) => update('talusAngle', parseFloat(e.target.value))}
-            style={{ width: '100%' }}
-          />
-        </div>
-      )}
-      <button type="button"
-        onClick={onApply}
-        style={{
-          width: '100%',
-          background: 'var(--aethel-primary)',
-          border: 'none',
-          borderRadius: '6px',
-          padding: '10px',
-          color: 'white',
-          cursor: 'pointer',
-          fontSize: '13px',
-          marginTop: '8px',
-        }}
-      >
-        Apply Erosion
-      </button>
-    </div>
-  );
-}
-interface ViewportSceneProps {
-  terrainData: TerrainData;
-  terrainSettings: TerrainSettings;
-  layers: TerrainLayer[];
-  selectedTool: TerrainToolType;
-  brushSettings: BrushSettings;
-  onApplyBrush: (x: number, z: number) => void;
-}
-function ViewportScene({
-  terrainData,
-  terrainSettings,
-  layers,
-  selectedTool,
-  brushSettings,
-  onApplyBrush,
-}: ViewportSceneProps) {
-  const [brushPosition, setBrushPosition] = useState<THREE.Vector3 | null>(null);
-  const gridCellColor = useMemo(
-    () => resolveCssVarColor('--aethel-border-primary', 'rgb(55, 65, 81)'),
-    []
-  );
-  const gridSectionColor = useMemo(
-    () => resolveCssVarColor('--aethel-border-secondary', 'rgb(71, 85, 105)'),
-    []
-  );
-  const brushPalette = useMemo(() => ({
-    success: resolveCssVarColor('--aethel-success', 'rgb(34, 197, 94)'),
-    error: resolveCssVarColor('--aethel-error', 'rgb(239, 68, 68)'),
-    primary: resolveCssVarColor('--aethel-primary', 'rgb(59, 130, 246)'),
-    warning: resolveCssVarColor('--aethel-warning', 'rgb(245, 158, 11)'),
-    muted: resolveCssVarColor('--aethel-text-quaternary', 'rgb(100, 116, 139)'),
-  }), []);
-  const getBrushColor = () => {
-    if (selectedTool.startsWith('sculpt_raise')) return brushPalette.success;
-    if (selectedTool.startsWith('sculpt_lower')) return brushPalette.error;
-    if (selectedTool.startsWith('sculpt_smooth')) return brushPalette.primary;
-    if (selectedTool.startsWith('paint')) return brushPalette.warning;
-    if (selectedTool.startsWith('foliage')) return brushPalette.success;
-    return brushPalette.muted;
-  };
-  const handleBrushStart = useCallback((position: THREE.Vector3, _uv: THREE.Vector2) => {
-    onApplyBrush(position.x, position.z);
-  }, [onApplyBrush]);
-  const handleBrushMove = useCallback((position: THREE.Vector3, _uv: THREE.Vector2) => {
-    onApplyBrush(position.x, position.z);
-  }, [onApplyBrush]);
-  const handleBrushEnd = useCallback(() => {
-  }, []);
-  return (
-    <>
-      {/* Lighting */}
-      <ambientLight intensity={0.4} />
-      <directionalLight
-        position={[50, 100, 50]}
-        intensity={1}
-        castShadow
-        shadow-mapSize={[2048, 2048]}
-      />
-      {/* Environment */}
-      <Environment preset="sunset" />
-      {/* Grid */}
-      <Grid
-        args={[100, 100]}
-        position={[0, 0.01, 0]}
-        cellSize={1}
-        cellThickness={0.5}
-        cellColor={gridCellColor}
-        sectionSize={10}
-        sectionThickness={1}
-        sectionColor={gridSectionColor}
-        fadeDistance={100}
-        fadeStrength={1}
-      />
-      {/* Terrain */}
-      <TerrainMesh
-        data={terrainData}
-        settings={terrainSettings}
-        layers={layers}
-        onBrushStart={handleBrushStart}
-        onBrushMove={handleBrushMove}
-        onBrushEnd={handleBrushEnd}
-        brushPosition={brushPosition}
-        setBrushPosition={setBrushPosition}
-      />
-      {/* Brush preview */}
-      <BrushPreview
-        position={brushPosition}
-        settings={brushSettings}
-        color={getBrushColor()}
-      />
-      {/* Camera controls */}
-      <OrbitControls
-        makeDefault
-        enablePan
-        enableZoom
-        enableRotate
-        maxPolarAngle={Math.PI / 2.1}
-      />
-      {/* Gizmo */}
-      <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
-        <GizmoViewport labelColor="white" />
-      </GizmoHelper>
-    </>
-  );
-}
 export interface TerrainSculptingEditorProps {
   initialData?: TerrainData;
   initialSettings?: TerrainSettings;
@@ -602,16 +46,18 @@ export function TerrainSculptingEditor({
   initialSettings,
   onChange,
 }: TerrainSculptingEditorProps) {
-  const [terrainSettings] = useState<TerrainSettings>(initialSettings || {
-    resolution: 257,
-    size: { x: 100, y: 100, z: 50 },
-    maxHeight: 50,
-    lodLevels: 4,
-    streamingEnabled: true,
-    tessellation: true,
-    castShadows: true,
-    receiveShadows: true,
-  });
+  const [terrainSettings] = useState<TerrainSettings>(
+    initialSettings || {
+      resolution: 257,
+      size: { x: 100, y: 100, z: 50 },
+      maxHeight: 50,
+      lodLevels: 4,
+      streamingEnabled: true,
+      tessellation: true,
+      castShadows: true,
+      receiveShadows: true,
+    },
+  );
   const [terrainData, setTerrainData] = useState<TerrainData>(() => {
     if (initialData) return initialData;
     const resolution = terrainSettings.resolution;
@@ -635,51 +81,52 @@ export function TerrainSculptingEditor({
       resolution,
     };
   });
-  const [selectedTool, setSelectedTool] = useState<TerrainToolType>('sculpt_raise');
+  const [selectedTool, setSelectedTool] =
+    useState<TerrainToolType>("sculpt_raise");
   const [brushSettings, setBrushSettings] = useState<BrushSettings>({
     size: 5,
     strength: 0.3,
-    falloff: 'smooth',
-    shape: 'circle',
+    falloff: "smooth",
+    shape: "circle",
     rotation: 0,
     spacing: 0.25,
     jitter: 0,
   });
   const [layers, setLayers] = useState<TerrainLayer[]>([
     {
-      id: 'grass',
-      name: 'Grass',
-      diffuseTexture: '/textures/grass_diffuse.jpg',
-      normalTexture: '/textures/grass_normal.jpg',
+      id: "grass",
+      name: "Grass",
+      diffuseTexture: "/textures/grass_diffuse.jpg",
+      normalTexture: "/textures/grass_normal.jpg",
       tiling: { x: 10, y: 10 },
       heightBlend: 0.5,
       metallic: 0,
       roughness: 0.8,
     },
     {
-      id: 'dirt',
-      name: 'Dirt',
-      diffuseTexture: '/textures/dirt_diffuse.jpg',
-      normalTexture: '/textures/dirt_normal.jpg',
+      id: "dirt",
+      name: "Dirt",
+      diffuseTexture: "/textures/dirt_diffuse.jpg",
+      normalTexture: "/textures/dirt_normal.jpg",
       tiling: { x: 8, y: 8 },
       heightBlend: 0.3,
       metallic: 0,
       roughness: 0.9,
     },
     {
-      id: 'rock',
-      name: 'Rock',
-      diffuseTexture: '/textures/rock_diffuse.jpg',
-      normalTexture: '/textures/rock_normal.jpg',
+      id: "rock",
+      name: "Rock",
+      diffuseTexture: "/textures/rock_diffuse.jpg",
+      normalTexture: "/textures/rock_normal.jpg",
       tiling: { x: 4, y: 4 },
       heightBlend: 0.7,
       metallic: 0.1,
       roughness: 0.7,
     },
   ]);
-  const [selectedLayer, setSelectedLayer] = useState<string | null>('grass');
+  const [selectedLayer, setSelectedLayer] = useState<string | null>("grass");
   const [erosionSettings, setErosionSettings] = useState<ErosionSettings>({
-    type: 'hydraulic',
+    type: "hydraulic",
     iterations: 50,
     strength: 0.5,
     rainAmount: 0.5,
@@ -689,104 +136,139 @@ export function TerrainSculptingEditor({
   });
   const [showErosion, setShowErosion] = useState(false);
   const [showStats, setShowStats] = useState(true);
-  const applyBrush = useCallback((worldX: number, worldZ: number) => {
-    const resolution = terrainData.resolution;
-    const { size } = terrainSettings;
-    const hx = ((worldX / size.x) + 0.5) * (resolution - 1);
-    const hz = ((worldZ / size.y) + 0.5) * (resolution - 1);
-    const brushRadius = (brushSettings.size / size.x) * resolution;
-    let effect: (height: number, distance: number) => number;
-    switch (selectedTool) {
-      case 'sculpt_raise':
-        effect = (h, d) => h + brushSettings.strength * getFalloff(d, brushRadius, brushSettings.falloff) * 0.01;
-        break;
-      case 'sculpt_lower':
-        effect = (h, d) => h - brushSettings.strength * getFalloff(d, brushRadius, brushSettings.falloff) * 0.01;
-        break;
-      case 'sculpt_smooth':
-        effect = (h, _d) => h; // Smooth is handled separately
-        break;
-      case 'sculpt_flatten':
-        effect = (h, d) => {
-          const centerHeight = terrainData.heightmap[Math.floor(hz) * resolution + Math.floor(hx)];
-          const t = getFalloff(d, brushRadius, brushSettings.falloff) * brushSettings.strength;
-          return h + (centerHeight - h) * t;
-        };
-        break;
-      default:
-        effect = (h) => h;
-    }
-    setTerrainData(prev => {
-      const newHeightmap = new Float32Array(prev.heightmap);
-      const minX = Math.max(0, Math.floor(hx - brushRadius));
-      const maxX = Math.min(resolution - 1, Math.ceil(hx + brushRadius));
-      const minZ = Math.max(0, Math.floor(hz - brushRadius));
-      const maxZ = Math.min(resolution - 1, Math.ceil(hz + brushRadius));
-      for (let z = minZ; z <= maxZ; z++) {
-        for (let x = minX; x <= maxX; x++) {
-          const dx = x - hx;
-          const dz = z - hz;
-          const distance = Math.sqrt(dx * dx + dz * dz);
-          if (distance <= brushRadius) {
-            const idx = z * resolution + x;
-            const currentHeight = newHeightmap[idx];
-            newHeightmap[idx] = Math.max(0, Math.min(1, effect(currentHeight, distance)));
+  const applyBrush = useCallback(
+    (worldX: number, worldZ: number) => {
+      const resolution = terrainData.resolution;
+      const { size } = terrainSettings;
+      const hx = (worldX / size.x + 0.5) * (resolution - 1);
+      const hz = (worldZ / size.y + 0.5) * (resolution - 1);
+      const brushRadius = (brushSettings.size / size.x) * resolution;
+      let effect: (height: number, distance: number) => number;
+      switch (selectedTool) {
+        case "sculpt_raise":
+          effect = (h, d) =>
+            h +
+            brushSettings.strength *
+              getFalloff(d, brushRadius, brushSettings.falloff) *
+              0.01;
+          break;
+        case "sculpt_lower":
+          effect = (h, d) =>
+            h -
+            brushSettings.strength *
+              getFalloff(d, brushRadius, brushSettings.falloff) *
+              0.01;
+          break;
+        case "sculpt_smooth":
+          effect = (h, _d) => h; // Smooth is handled separately
+          break;
+        case "sculpt_flatten":
+          effect = (h, d) => {
+            const centerHeight =
+              terrainData.heightmap[
+                Math.floor(hz) * resolution + Math.floor(hx)
+              ];
+            const t =
+              getFalloff(d, brushRadius, brushSettings.falloff) *
+              brushSettings.strength;
+            return h + (centerHeight - h) * t;
+          };
+          break;
+        default:
+          effect = (h) => h;
+      }
+      setTerrainData((prev) => {
+        const newHeightmap = new Float32Array(prev.heightmap);
+        const minX = Math.max(0, Math.floor(hx - brushRadius));
+        const maxX = Math.min(resolution - 1, Math.ceil(hx + brushRadius));
+        const minZ = Math.max(0, Math.floor(hz - brushRadius));
+        const maxZ = Math.min(resolution - 1, Math.ceil(hz + brushRadius));
+        for (let z = minZ; z <= maxZ; z++) {
+          for (let x = minX; x <= maxX; x++) {
+            const dx = x - hx;
+            const dz = z - hz;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+            if (distance <= brushRadius) {
+              const idx = z * resolution + x;
+              const currentHeight = newHeightmap[idx];
+              newHeightmap[idx] = Math.max(
+                0,
+                Math.min(1, effect(currentHeight, distance)),
+              );
+            }
           }
         }
-      }
-      return { ...prev, heightmap: newHeightmap };
-    });
-  }, [terrainData, terrainSettings, brushSettings, selectedTool]);
-  const getFalloff = (distance: number, radius: number, type: BrushFalloff): number => {
+        return { ...prev, heightmap: newHeightmap };
+      });
+    },
+    [terrainData, terrainSettings, brushSettings, selectedTool],
+  );
+  const getFalloff = (
+    distance: number,
+    radius: number,
+    type: BrushFalloff,
+  ): number => {
     const t = Math.max(0, 1 - distance / radius);
     switch (type) {
-      case 'linear': return t;
-      case 'smooth': return t * t * (3 - 2 * t); // Smoothstep
-      case 'spherical': return Math.sqrt(1 - (1 - t) * (1 - t));
-      case 'tip': return t * t * t * t;
-      case 'constant': return 1;
-      default: return t;
+      case "linear":
+        return t;
+      case "smooth":
+        return t * t * (3 - 2 * t); // Smoothstep
+      case "spherical":
+        return Math.sqrt(1 - (1 - t) * (1 - t));
+      case "tip":
+        return t * t * t * t;
+      case "constant":
+        return 1;
+      default:
+        return t;
     }
   };
   const applyErosion = useCallback(() => {
-    log.info('Applying erosion:', erosionSettings);
+    log.info("Applying erosion:", erosionSettings);
   }, [erosionSettings]);
   const addLayer = () => {
     const newLayer: TerrainLayer = {
       id: crypto.randomUUID(),
       name: `Layer ${layers.length + 1}`,
-      diffuseTexture: '',
+      diffuseTexture: "",
       tiling: { x: 10, y: 10 },
       heightBlend: 0.5,
       metallic: 0,
       roughness: 0.8,
     };
-    setLayers(prev => [...prev, newLayer]);
+    setLayers((prev) => [...prev, newLayer]);
   };
   useEffect(() => {
     onChange?.(terrainData);
   }, [terrainData, onChange]);
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', background: 'var(--aethel-surface-primary)' }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        background: "var(--aethel-surface-primary)",
+      }}
+    >
       {/* Left sidebar - Tools */}
-      <div style={{
-        width: '200px',
-        borderRight: '1px solid var(--aethel-border-primary)',
-        padding: '12px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-        overflowY: 'auto',
-      }}>
-        <Toolbar
-          selectedTool={selectedTool}
-          onToolChange={setSelectedTool}
-        />
+      <div
+        style={{
+          width: "200px",
+          borderRight: "1px solid var(--aethel-border-primary)",
+          padding: "12px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+          overflowY: "auto",
+        }}
+      >
+        <Toolbar selectedTool={selectedTool} onToolChange={setSelectedTool} />
         <BrushSettingsPanel
           settings={brushSettings}
           onChange={setBrushSettings}
         />
-        {selectedTool === 'sculpt_erosion' && (
+        {selectedTool === "sculpt_erosion" && (
           <ErosionPanel
             settings={erosionSettings}
             onChange={setErosionSettings}
@@ -795,11 +277,11 @@ export function TerrainSculptingEditor({
         )}
       </div>
       {/* Main viewport */}
-      <div style={{ flex: 1, position: 'relative' }}>
+      <div style={{ flex: 1, position: "relative" }}>
         <Canvas
           shadows
           camera={{ position: [50, 50, 50], fov: 50 }}
-          style={{ background: 'var(--aethel-surface-tertiary)' }}
+          style={{ background: "var(--aethel-surface-tertiary)" }}
         >
           <ViewportScene
             terrainData={terrainData}
@@ -812,119 +294,170 @@ export function TerrainSculptingEditor({
           {showStats && <Stats />}
         </Canvas>
         {/* Top toolbar */}
-        <div style={{
-          position: 'absolute',
-          top: '12px',
-          left: '12px',
-          display: 'flex',
-          gap: '8px',
-        }}>
-          <button type="button"
-            onClick={() => setShowStats(s => !s)}
+        <div
+          style={{
+            position: "absolute",
+            top: "12px",
+            left: "12px",
+            display: "flex",
+            gap: "8px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setShowStats((s) => !s)}
             style={{
-              background: showStats ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
-              border: '1px solid var(--aethel-border-primary)',
-              borderRadius: '4px',
-              padding: '6px 12px',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '12px',
+              background: showStats
+                ? "var(--aethel-primary)"
+                : "var(--aethel-surface-tertiary)",
+              border: "1px solid var(--aethel-border-primary)",
+              borderRadius: "4px",
+              padding: "6px 12px",
+              color: "white",
+              cursor: "pointer",
+              fontSize: "12px",
             }}
           >
             📊 Stats
           </button>
-          <button type="button"
-            onClick={() => setShowErosion(s => !s)}
+          <button
+            type="button"
+            onClick={() => setShowErosion((s) => !s)}
             style={{
-              background: showErosion ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
-              border: '1px solid var(--aethel-border-primary)',
-              borderRadius: '4px',
-              padding: '6px 12px',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '12px',
+              background: showErosion
+                ? "var(--aethel-primary)"
+                : "var(--aethel-surface-tertiary)",
+              border: "1px solid var(--aethel-border-primary)",
+              borderRadius: "4px",
+              padding: "6px 12px",
+              color: "white",
+              cursor: "pointer",
+              fontSize: "12px",
             }}
           >
             💧 Erosion Panel
           </button>
         </div>
         {/* Status bar */}
-        <div style={{
-          position: 'absolute',
-          bottom: '12px',
-          left: '12px',
-          background: 'var(--aethel-surface-tertiary)',
-          padding: '8px 12px',
-          borderRadius: '6px',
-          color: 'var(--aethel-text-tertiary)',
-          fontSize: '11px',
-          display: 'flex',
-          gap: '16px',
-        }}>
-          <span>Resolution: {terrainData.resolution}x{terrainData.resolution}</span>
-          <span>Size: {terrainSettings.size.x}m x {terrainSettings.size.y}m</span>
+        <div
+          style={{
+            position: "absolute",
+            bottom: "12px",
+            left: "12px",
+            background: "var(--aethel-surface-tertiary)",
+            padding: "8px 12px",
+            borderRadius: "6px",
+            color: "var(--aethel-text-tertiary)",
+            fontSize: "11px",
+            display: "flex",
+            gap: "16px",
+          }}
+        >
+          <span>
+            Resolution: {terrainData.resolution}x{terrainData.resolution}
+          </span>
+          <span>
+            Size: {terrainSettings.size.x}m x {terrainSettings.size.y}m
+          </span>
           <span>Max Height: {terrainSettings.maxHeight}m</span>
           <span>Layers: {layers.length}</span>
         </div>
       </div>
       {/* Right sidebar - Layers */}
-      <div style={{
-        width: '260px',
-        borderLeft: '1px solid var(--aethel-border-primary)',
-        padding: '12px',
-        overflowY: 'auto',
-      }}>
+      <div
+        style={{
+          width: "260px",
+          borderLeft: "1px solid var(--aethel-border-primary)",
+          padding: "12px",
+          overflowY: "auto",
+        }}
+      >
         <LayersPanel
           layers={layers}
           selectedLayer={selectedLayer}
           onSelect={setSelectedLayer}
           onAdd={addLayer}
-          onRemove={(id) => setLayers(prev => prev.filter(l => l.id !== id))}
-          onUpdate={(layer) => setLayers(prev => prev.map(l => l.id === layer.id ? layer : l))}
+          onRemove={(id) =>
+            setLayers((prev) => prev.filter((l) => l.id !== id))
+          }
+          onUpdate={(layer) =>
+            setLayers((prev) =>
+              prev.map((l) => (l.id === layer.id ? layer : l)),
+            )
+          }
         />
         {/* Terrain info */}
-        <div style={{
-          marginTop: '16px',
-          padding: '12px',
-          background: 'var(--aethel-surface-primary)',
-          borderRadius: '8px',
-        }}>
-          <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Terrain Settings</h3>
-          <div style={{ fontSize: '12px', color: 'var(--aethel-text-tertiary)' }}>
-            <div style={{ marginBottom: '8px' }}>
-              <span style={{ color: 'var(--aethel-text-quaternary)' }}>Resolution:</span> {terrainData.resolution}²
+        <div
+          style={{
+            marginTop: "16px",
+            padding: "12px",
+            background: "var(--aethel-surface-primary)",
+            borderRadius: "8px",
+          }}
+        >
+          <h3
+            style={{ color: "white", fontSize: "14px", marginBottom: "12px" }}
+          >
+            Terrain Settings
+          </h3>
+          <div
+            style={{ fontSize: "12px", color: "var(--aethel-text-tertiary)" }}
+          >
+            <div style={{ marginBottom: "8px" }}>
+              <span style={{ color: "var(--aethel-text-quaternary)" }}>
+                Resolution:
+              </span>{" "}
+              {terrainData.resolution}²
             </div>
-            <div style={{ marginBottom: '8px' }}>
-              <span style={{ color: 'var(--aethel-text-quaternary)' }}>Vertices:</span> {(terrainData.resolution * terrainData.resolution).toLocaleString()}
+            <div style={{ marginBottom: "8px" }}>
+              <span style={{ color: "var(--aethel-text-quaternary)" }}>
+                Vertices:
+              </span>{" "}
+              {(
+                terrainData.resolution * terrainData.resolution
+              ).toLocaleString()}
             </div>
-            <div style={{ marginBottom: '8px' }}>
-              <span style={{ color: 'var(--aethel-text-quaternary)' }}>LOD Levels:</span> {terrainSettings.lodLevels}
+            <div style={{ marginBottom: "8px" }}>
+              <span style={{ color: "var(--aethel-text-quaternary)" }}>
+                LOD Levels:
+              </span>{" "}
+              {terrainSettings.lodLevels}
             </div>
             <div>
-              <span style={{ color: 'var(--aethel-text-quaternary)' }}>Streaming:</span>{' '}
-              <span style={{ color: terrainSettings.streamingEnabled ? 'var(--aethel-success)' : 'var(--aethel-error)' }}>
-                {terrainSettings.streamingEnabled ? 'Enabled' : 'Disabled'}
+              <span style={{ color: "var(--aethel-text-quaternary)" }}>
+                Streaming:
+              </span>{" "}
+              <span
+                style={{
+                  color: terrainSettings.streamingEnabled
+                    ? "var(--aethel-success)"
+                    : "var(--aethel-error)",
+                }}
+              >
+                {terrainSettings.streamingEnabled ? "Enabled" : "Disabled"}
               </span>
             </div>
           </div>
         </div>
         {/* Import/Export */}
-        <div style={{
-          marginTop: '16px',
-          display: 'flex',
-          gap: '8px',
-        }}>
+        <div
+          style={{
+            marginTop: "16px",
+            display: "flex",
+            gap: "8px",
+          }}
+        >
           <button
             type="button"
             style={{
               flex: 1,
-              background: 'var(--aethel-surface-tertiary)',
-              border: '1px solid var(--aethel-border-primary)',
-              borderRadius: '6px',
-              padding: '10px',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '12px',
+              background: "var(--aethel-surface-tertiary)",
+              border: "1px solid var(--aethel-border-primary)",
+              borderRadius: "6px",
+              padding: "10px",
+              color: "white",
+              cursor: "pointer",
+              fontSize: "12px",
             }}
           >
             📥 Import
@@ -933,13 +466,13 @@ export function TerrainSculptingEditor({
             type="button"
             style={{
               flex: 1,
-              background: 'var(--aethel-surface-tertiary)',
-              border: '1px solid var(--aethel-border-primary)',
-              borderRadius: '6px',
-              padding: '10px',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '12px',
+              background: "var(--aethel-surface-tertiary)",
+              border: "1px solid var(--aethel-border-primary)",
+              borderRadius: "6px",
+              padding: "10px",
+              color: "white",
+              cursor: "pointer",
+              fontSize: "12px",
             }}
           >
             📤 Export

@@ -41,9 +41,9 @@ const COMMAND_SUGGESTIONS: CommandSuggestion[] = [
   { command: 'Crie um script de movimento WASD', description: 'Cria script de controle de personagem', agentId: 'coder' },
   { command: 'Gere musica de fundo ambiente', description: 'Cria trilha sonora', agentId: 'sound-designer' },
   { command: 'Crie um level de teste', description: 'Gera level basico para prototipo', agentId: 'game-designer' },
-  { command: 'Analise a arquitetura do projeto', description: 'Revisa estrutura e sugere melhorias', agentId: 'architect' },
+  { command: 'Analyze the project architecture', description: 'Reviews structure and suggests improvements', agentId: 'architect' },
   { command: 'Crie um inimigo com IA basica', description: 'Cria personagem com comportamento', agentId: 'universal' },
-  { command: 'Otimize o codigo do projeto', description: 'Analisa e melhora performance', agentId: 'coder' },
+  { command: 'Optimize the project code', description: 'Analyzes and improves performance', agentId: 'coder' },
 ]
 
 function resolveUserId(): string {
@@ -95,7 +95,7 @@ export function AICommandCenter() {
           id: 'welcome',
           role: 'system',
           content:
-            'Bem-vindo a Central de Comandos de IA. Sou o assistente do Aethel Engine. Posso ajudar a criar assets, scripts, texturas, sons, analisar codigo e projetar mecanicas. Selecione um agente especializado ou use o agente universal para tarefas complexas.',
+            'Welcome a Central de Comandos de IA. Sou o assistente do Aethel Engine. Posso ajudar a criar assets, scripts, texturas, sons, analisar codigo e projetar mecanicas. Selecione um agente especializado ou use o agente universal para tarefas complexas.',
           timestamp: new Date(),
         },
       ])
@@ -455,7 +455,7 @@ function StepCard({ step, index }: { step: AgentStep; index: number }) {
         </div>
         {step.result?.success !== undefined && (
           <span className={`text-xs ${step.result.success ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-error-light)]'}`}>
-            {step.result.success ? 'ok' : 'falha'}
+            {step.result.success ? 'ok' : 'failure'}
           </span>
         )}
       </div>
@@ -484,7 +484,7 @@ function formatExecutionResult(execution: AgentExecution): string {
     completed: 'concluida',
     running: 'em execucao',
     pending: 'pendente',
-    failed: 'falhou',
+    failed: 'failed',
   }
 
   const statusLine = execution.status === 'completed'

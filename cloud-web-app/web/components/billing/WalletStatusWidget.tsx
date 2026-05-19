@@ -4,7 +4,7 @@ import { logger } from '@/lib/observability/logger';
 /**
  * WalletStatusWidget - Widget Compacto de Saldo na StatusBar
  *
- * Exibe saldo de créditos de forma compacta na StatusBar.
+ * Exibe saldo de credits compactly in the StatusBar.
  * Expande para mostrar detalhes ao clicar.
  * Integra via WebSocket para atualizações em tempo real.
  *
@@ -124,7 +124,7 @@ function formatCredits(amount: number): string {
   if (amount >= 1000) {
     return `${(amount / 1000).toFixed(1)}K`;
   }
-  return amount.toLocaleString('pt-BR');
+  return amount.toLocaleString('en-US');
 }
 
 function getBalanceColor(available: number, limit: number): string {
@@ -302,11 +302,11 @@ export function WalletStatusWidget({
           {/* Header */}
           <div className="p-3 border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Carteira</span>
-              <button type="button" aria-label="Atualizar dados da carteira"
+              <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Wallet</span>
+              <button type="button" aria-label="Refresh wallet data"
                 onClick={() => mutate()}
                 className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
-                title="Atualizar"
+                title="Refresh"
               >
                 <RefreshCw className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
               </button>
@@ -315,16 +315,16 @@ export function WalletStatusWidget({
             {/* Balance display */}
             <div className="flex items-baseline gap-1">
               <span className={`text-2xl font-bold ${balanceColor}`}>
-                {wallet.available.toLocaleString('pt-BR')}
+                {wallet.available.toLocaleString('en-US')}
               </span>
-              <span className="text-sm text-[var(--aethel-text-tertiary)]">créditos</span>
+              <span className="text-sm text-[var(--aethel-text-tertiary)]">credits</span>
             </div>
 
             {/* Reserved indicator */}
             {wallet.reserved > 0 && (
               <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
                 <Clock className="w-3 h-3 inline mr-1" />
-                {wallet.reserved.toLocaleString('pt-BR')} reservados
+                {wallet.reserved.toLocaleString('en-US')} reserved
               </p>
             )}
           </div>
@@ -332,7 +332,7 @@ export function WalletStatusWidget({
           {/* Usage bar */}
           <div className="p-3 border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-[var(--aethel-text-tertiary)]">Uso mensal</span>
+              <span className="text-[var(--aethel-text-tertiary)]">Monthly usage</span>
               <span className="text-[var(--aethel-text-secondary)]">{usagePercent}%</span>
             </div>
             <div className="h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
@@ -345,14 +345,14 @@ export function WalletStatusWidget({
               />
             </div>
             <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
-              {wallet.monthlyUsage.toLocaleString('pt-BR')} / {wallet.monthlyLimit.toLocaleString('pt-BR')}
+              {wallet.monthlyUsage.toLocaleString('en-US')} / {wallet.monthlyLimit.toLocaleString('en-US')}
             </p>
           </div>
 
           {/* Recent transactions */}
           {transactions && transactions.length > 0 && (
             <div className="p-3 border-b border-[var(--aethel-border-primary)]">
-              <p className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Histórico recente</p>
+              <p className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Recent history</p>
               <div className="space-y-1.5">
                 {transactions.map((tx) => (
                   <div key={tx.id} className="flex items-center justify-between text-xs">
@@ -361,7 +361,7 @@ export function WalletStatusWidget({
                     </span>
                     <span className={tx.amount < 0 ? 'text-[var(--aethel-error-light)]' : 'text-[var(--aethel-success-light)]'}>
                       {tx.amount < 0 ? '' : '+'}
-                      {tx.amount.toLocaleString('pt-BR')}
+                      {tx.amount.toLocaleString('en-US')}
                     </span>
                   </div>
                 ))}
@@ -375,9 +375,9 @@ export function WalletStatusWidget({
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-[var(--aethel-error-light)] flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm text-[var(--aethel-error-light)] font-medium">Saldo baixo</p>
+                  <p className="text-sm text-[var(--aethel-error-light)] font-medium">Low balance</p>
                   <p className="text-xs text-[var(--aethel-error-light)] mt-0.5">
-                    Recarregue para continuar usando IA e renderização
+                    Top up to keep using AI and rendering
                   </p>
                 </div>
               </div>
@@ -386,7 +386,7 @@ export function WalletStatusWidget({
 
           {/* Actions */}
           <div className="p-3 flex gap-2">
-            <button type="button" aria-label="Recarregar creditos pela carteira"
+            <button type="button" aria-label="Reload credits from wallet"
               onClick={() => {
                 setIsExpanded(false);
                 onRecharge?.();
@@ -396,9 +396,9 @@ export function WalletStatusWidget({
                        text-sm font-medium transition-colors hover:brightness-110"
             >
               <CreditCard className="w-4 h-4" />
-              Recarregar
+              Reload
             </button>
-            <button type="button" aria-label="Abrir detalhes da carteira"
+            <button type="button" aria-label="Open wallet details"
               onClick={() => {
                 setIsExpanded(false);
                 onOpenWallet?.();
@@ -407,7 +407,7 @@ export function WalletStatusWidget({
                        bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] rounded-md
                        text-sm text-[var(--aethel-text-secondary)] transition-colors"
             >
-              Ver Detalhes
+              View details
               <ExternalLink className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -430,10 +430,10 @@ export function WalletStatusWidget({
               <AlertTriangle className="w-5 h-5 text-[var(--aethel-error-light)]" />
             </div>
             <div>
-              <h4 className="font-medium text-[var(--aethel-text-primary)]">Créditos acabando</h4>
+              <h4 className="font-medium text-[var(--aethel-text-primary)]">Credits running low</h4>
               <p className="text-sm text-[var(--aethel-text-tertiary)] mt-1">
-                Restam apenas {wallet.available.toLocaleString('pt-BR')} créditos.
-                Recarregue para continuar criando.
+                Only {wallet.available.toLocaleString('en-US')} credits remain.
+                Top up to keep creating.
               </p>
               <div className="flex gap-2 mt-3">
                 <button type="button" aria-label="Abrir recarga imediata de creditos"
@@ -444,7 +444,7 @@ export function WalletStatusWidget({
                   className="px-3 py-1.5 bg-[var(--aethel-accent)]
                            rounded text-sm font-medium transition-colors hover:brightness-110"
                 >
-                  Recarregar agora
+                  Reload agora
                 </button>
                 <button type="button" aria-label="Fechar alerta e decidir depois"
                   onClick={() => setShowLowBalanceAlert(false)}

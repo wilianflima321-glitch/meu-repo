@@ -4,10 +4,10 @@
  * Usage Dashboard - Visualização de Consumo de Recursos
  *
  * Mostra ao usuário seu consumo atual de:
- * - Tokens de IA
+ * - AI tokens
  * - Storage
- * - Minutos de build
- * - Horas de GPU
+ * - Build minutes
+ * - GPU hours
  *
  * @module components/billing/UsageDashboard
  */
@@ -84,63 +84,63 @@ export function UsageDashboard() {
     return [
       {
         id: 'ai-tokens',
-        name: 'Tokens de IA',
+        name: 'AI tokens',
         used: usage.usage.aiTokens.used,
         limit: usage.usage.aiTokens.limit,
         unit: 'tokens',
         icon: <Sparkles className="w-5 h-5" />,
         color: 'indigo',
-        details: 'Usado em chat, geração de código e assets',
+        details: 'Used in chat, code generation, and assets',
       },
       {
         id: 'storage',
-        name: 'Armazenamento',
+        name: 'Storage',
         used: usage.usage.storage.used,
         limit: usage.usage.storage.limit,
         unit: 'MB',
         icon: <HardDrive className="w-5 h-5" />,
         color: 'blue',
-        details: 'Arquivos, assets e backups',
+        details: 'Files, assets, and backups',
       },
       {
         id: 'build-minutes',
-        name: 'Minutos de build',
+        name: 'Build minutes',
         used: usage.usage.buildMinutes.used,
         limit: usage.usage.buildMinutes.limit,
         unit: 'min',
         icon: <Clock className="w-5 h-5" />,
         color: 'green',
-        details: 'Compilação e deploy',
+        details: 'Build and deploy',
       },
       {
         id: 'gpu-hours',
-        name: 'Horas de GPU',
+        name: 'GPU hours',
         used: usage.usage.gpuHours.used,
         limit: usage.usage.gpuHours.limit,
         unit: 'h',
         icon: <Cpu className="w-5 h-5" />,
         color: 'purple',
-        details: 'Renderização e inferencias de IA',
+        details: 'Rendering and AI inference',
       },
       {
-        id: 'api-chamadas',
-        name: 'Chamadas de API',
+        id: 'api-calls',
+        name: 'API calls',
         used: usage.usage.apiCalls.used,
         limit: usage.usage.apiCalls.limit,
-        unit: 'chamadas',
+        unit: 'calls',
         icon: <Activity className="w-5 h-5" />,
         color: 'amber',
-        details: 'Chamadas de API externas',
+        details: 'API calls externas',
       },
       {
         id: 'collaborators',
-        name: 'Colaboradores',
+        name: 'Collaborators',
         used: usage.usage.collaborators.used,
         limit: usage.usage.collaborators.limit,
-        unit: 'pessoas',
+        unit: 'people',
         icon: <Server className="w-5 h-5" />,
         color: 'cyan',
-        details: 'Membros da equipe',
+        details: 'Team members',
       },
     ];
   }, [usage]);
@@ -162,18 +162,18 @@ export function UsageDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Seu consumo</h2>
+          <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Your usage</h2>
           <p className="text-sm text-[var(--aethel-text-tertiary)]">
-            Plano <span className="text-[var(--aethel-info)] font-medium">{usage.plan.name}</span> -
-            Renova em {daysUntilRenewal} dias
+            Plan <span className="text-[var(--aethel-info)] font-medium">{usage.plan.name}</span> -
+            Renews in {daysUntilRenewal} days
           </p>
         </div>
         <button
           type="button"
-          aria-label="Fazer upgrade do plano a partir do dashboard de uso"
+          aria-label="Upgrade plan from the usage dashboard"
           className="px-4 py-2 text-sm bg-[var(--aethel-info)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] text-[var(--aethel-text-primary)] rounded-lg font-medium transition-colors"
         >
-          Fazer upgrade
+          Upgrade
         </button>
       </div>
 
@@ -188,7 +188,7 @@ export function UsageDashboard() {
       <div className="bg-[var(--aethel-surface-secondary)] rounded-xl p-6 border border-[var(--aethel-border-primary)]">
         <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-[var(--aethel-info)]" />
-          Consumo dos últimos 30 dias
+          Usage over the last 30 days
         </h3>
         <UsageChart history={usage.history} />
       </div>
@@ -198,9 +198,9 @@ export function UsageDashboard() {
         <div className="bg-[var(--aethel-warning)]/10 border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] rounded-lg p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-[var(--aethel-warning-light)] flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-[var(--aethel-warning-light)] font-medium">Atenção ao consumo</p>
+            <p className="text-[var(--aethel-warning-light)] font-medium">Usage attention</p>
             <p className="text-sm text-[var(--aethel-warning-light)]/70">
-              Alguns recursos estão próximos do limite. Considere fazer upgrade para evitar interrupções.
+              Some resources are near their limit. Consider upgrading to avoid interruptions.
             </p>
           </div>
         </div>
@@ -252,7 +252,7 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
         </div>
         {isCritical && (
           <span className="px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs rounded-full font-medium">
-            Crítico
+            Critical
           </span>
         )}
         {isWarning && !isCritical && (
@@ -287,10 +287,10 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
         <span className={`${
           isCritical ? 'text-[var(--aethel-error-light)]' : isWarning ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-text-tertiary)]'
         }`}>
-          {percentage.toFixed(1)}% usado
+          {percentage.toFixed(1)}% used
         </span>
         <span className="text-[var(--aethel-text-quaternary)]">
-          {formatNumber(metric.limit - metric.used)} {metric.unit} restantes
+          {formatNumber(metric.limit - metric.used)} {metric.unit} remaining
         </span>
       </div>
     </div>
@@ -348,13 +348,13 @@ function UsageError() {
         Error loading usage data
       </h3>
       <p className="text-[var(--aethel-text-tertiary)] mb-4">
-        Não foi possível carregar seus dados de consumo. Tente novamente.
+        Could not load your usage data. Try again.
       </p>
-      <button type="button" aria-label="Recarregar pagina de uso"
+      <button type="button" aria-label="Reload usage page"
         onClick={() => window.location.reload()}
         className="px-4 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"
       >
-        Recarregar
+        Reload
       </button>
     </div>
   );

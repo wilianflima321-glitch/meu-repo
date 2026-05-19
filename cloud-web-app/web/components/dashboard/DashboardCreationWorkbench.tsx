@@ -627,7 +627,7 @@ export default function DashboardCreationWorkbench({
         <aside className="overflow-y-auto border-r border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] p-3">
           <h3 className="text-xs uppercase tracking-wider text-[var(--aethel-text-tertiary)] mb-2">Project Graph</h3>
           <div className="space-y-2 text-xs">
-            <button type="button" aria-label="Selecionar raiz do projeto" onClick={() => selectEntity(null)} className="w-full text-left px-2 py-1 rounded bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]">
+            <button type="button" aria-label="Select project root" onClick={() => selectEntity(null)} className="w-full text-left px-2 py-1 rounded bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]">
               Root - {graph.name}
             </button>
             <div className="px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] border border-[var(--aethel-border-primary)]">Assets - {graph.assets.length}</div>
@@ -674,12 +674,12 @@ export default function DashboardCreationWorkbench({
           <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-3 py-2">
             <div className="flex items-center gap-2">
               <span className="mr-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">{surfaceLabel}</span>
-              <button type="button" onClick={() => setCenterPanel('scene')} className={panelToggleClass(centerPanel === 'scene')} aria-label="Abrir painel de cena">Scene</button>
-              <button type="button" onClick={() => setCenterPanel('timeline')} className={panelToggleClass(centerPanel === 'timeline')} aria-label="Abrir painel de timeline">Timeline</button>
-              <button type="button" onClick={() => setCenterPanel('preview')} className={panelToggleClass(centerPanel === 'preview')} aria-label="Abrir painel de preview">Preview</button>
+              <button type="button" onClick={() => setCenterPanel('scene')} className={panelToggleClass(centerPanel === 'scene')} aria-label="Open scene panel">Scene</button>
+              <button type="button" onClick={() => setCenterPanel('timeline')} className={panelToggleClass(centerPanel === 'timeline')} aria-label="Open timeline panel">Timeline</button>
+              <button type="button" onClick={() => setCenterPanel('preview')} className={panelToggleClass(centerPanel === 'preview')} aria-label="Open preview panel">Preview</button>
             </div>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setRuntimeMode('interactive')} className={modeButtonClass(runtimeMode === 'interactive', 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_16%,transparent)] text-[var(--aethel-text-primary)]')} aria-label="Alternar para modo interativo">Interactive</button>
+              <button type="button" onClick={() => setRuntimeMode('interactive')} className={modeButtonClass(runtimeMode === 'interactive', 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_16%,transparent)] text-[var(--aethel-text-primary)]')} aria-label="Alternar para modo interactive">Interactive</button>
               <button type="button" onClick={() => setRuntimeMode('render')} className={modeButtonClass(runtimeMode === 'render', 'border-[var(--aethel-info)] bg-[color-mix(in_srgb,var(--aethel-info)_16%,transparent)] text-[var(--aethel-text-primary)]')} aria-label="Alternar para modo render">Render</button>
             </div>
           </div>
@@ -713,9 +713,9 @@ export default function DashboardCreationWorkbench({
 
         <aside className="overflow-y-auto border-l border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] p-3">
           <div className="flex items-center gap-2 mb-3">
-            <button type="button" onClick={() => setRightPanel('jobs')} className={panelToggleClass(rightPanel === 'jobs')} aria-label="Abrir painel de jobs de IA">AI Jobs</button>
-            <button type="button" onClick={() => setRightPanel('audio-policy')} className={panelToggleClass(rightPanel === 'audio-policy')} aria-label="Abrir painel de politica de audio">Audio Policy</button>
-            <button type="button" onClick={() => setRightPanel('inspector')} className={panelToggleClass(rightPanel === 'inspector')} aria-label="Abrir painel inspetor">Inspector</button>
+            <button type="button" onClick={() => setRightPanel('jobs')} className={panelToggleClass(rightPanel === 'jobs')} aria-label="Open AI jobs panel">AI Jobs</button>
+            <button type="button" onClick={() => setRightPanel('audio-policy')} className={panelToggleClass(rightPanel === 'audio-policy')} aria-label="Open audio policy panel">Audio Policy</button>
+            <button type="button" onClick={() => setRightPanel('inspector')} className={panelToggleClass(rightPanel === 'inspector')} aria-label="Open inspector panel">Inspector</button>
           </div>
           {error && <div className="mb-2 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-3 py-2 text-xs text-[var(--aethel-error)]">{error}</div>}
           {notice && <div className="mb-2 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-2 text-xs text-[var(--aethel-info-light)]">{notice}</div>}
@@ -785,12 +785,12 @@ export default function DashboardCreationWorkbench({
                   <div className="text-[var(--aethel-text-tertiary)]">version: {selectedAsset.version}</div>
                   <div className="mt-3 flex gap-2">
                     {(selectedAsset.kind === 'audio' || selectedAsset.kind === 'video') && (
-                      <button type="button" aria-label={`Importar ${selectedAsset.name} para a timeline`} onClick={() => importAsset(selectedAsset)} className="rounded bg-[var(--aethel-primary-dark)] px-2 py-1 text-[11px]">
+                      <button type="button" aria-label={`Import ${selectedAsset.name} to the timeline`} onClick={() => importAsset(selectedAsset)} className="rounded bg-[var(--aethel-primary-dark)] px-2 py-1 text-[11px]">
                         Import to Timeline
                       </button>
                     )}
                     {selectedAsset.url && (
-                      <button type="button" aria-label={`Baixar asset ${selectedAsset.name}`} onClick={() => downloadAsset(selectedAsset)} className="rounded border border-[var(--aethel-border-primary)] px-2 py-1 text-[11px]">
+                      <button type="button" aria-label={`Download asset ${selectedAsset.name}`} onClick={() => downloadAsset(selectedAsset)} className="rounded border border-[var(--aethel-border-primary)] px-2 py-1 text-[11px]">
                         Download
                       </button>
                     )}

@@ -3,7 +3,7 @@ import DashboardPageClient from '../../components/dashboard/DashboardPageClient'
 
 export const metadata = {
   title: 'Aethel Studio - Dashboard',
-  description: 'Studio Home da plataforma Aethel Engine.',
+  description: 'Studio Home for the Aethel Engine platform.',
 }
 
 /**
@@ -20,8 +20,8 @@ function DashboardHydrationFallback() {
       aria-busy="true"
       className="flex min-h-screen items-center justify-center bg-[var(--aethel-bg)] px-6 text-sm text-[var(--aethel-text-tertiary)]"
     >
-      <span className="sr-only">Carregando Studio Home...</span>
-      <span aria-hidden="true">Carregando Studio Home...</span>
+      <span className="sr-only">Loading Studio Home...</span>
+      <span aria-hidden="true">Loading Studio Home...</span>
     </div>
   )
 }

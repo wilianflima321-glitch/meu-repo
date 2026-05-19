@@ -5,6 +5,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/tasks/detect/route');
 
 interface DetectTasksRequest {
   workspaceRoot: string;
@@ -272,7 +275,7 @@ export async function POST(request: NextRequest) {
       tasks: detectedTasks
     });
   } catch (error) {
-    console.error('Failed to detect tasks:', error);
+    routeLogger.error('Failed to detect tasks:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return NextResponse.json(

@@ -35,29 +35,29 @@ function buildContextDetailItems(
 ) {
   return [
     {
-      label: 'Arquivo',
-      value: activeFile?.path ?? 'Nenhum arquivo aberto',
+      label: 'File',
+      value: activeFile?.path ?? 'No file open',
     },
     {
       label: 'Linguagem',
-      value: activeFile?.language ?? 'Sem linguagem ativa',
+      value: activeFile?.language ?? 'Sem linguagem active',
     },
     {
       label: 'Tamanho',
       value: activeFile ? `${activeFile.content.length} caracteres` : 'Sem buffer anexado',
     },
     {
-      label: 'Projeto',
+      label: 'Project',
       value: projectContext
-        ? `${projectContext.name} - ${projectContext.files.length} arquivos`
-        : 'Sem projeto anexado',
+        ? `${projectContext.name} - ${projectContext.files.length} files`
+        : 'No project attached',
     },
     {
       label: 'Saida do operador',
-      value: 'Explicacao, revisao e blocos de codigo aplicaveis',
+      value: 'Explanation, review, and applicable code blocks',
     },
     {
-      label: 'Aplicacao',
+      label: 'Application',
       value: 'Sempre manual e explicita pelo botao Aplicar',
     },
   ]
@@ -89,7 +89,7 @@ export function InlineAIContextPanel({
           letterSpacing: '0.08em',
         }}
       >
-        Contexto ativo
+        Active context
       </div>
 
       <div
@@ -193,9 +193,9 @@ export function InlineAIStatusCard({
             }}
           >
             {activeFile && <ContextBadge label={getInlineAIFileName(activeFile.path)} icon={<FileText size={12} />} />}
-            {projectContext && <ContextBadge label={`${projectContext.files.length} arquivos`} icon={<Sparkles size={12} />} />}
+            {projectContext && <ContextBadge label={`${projectContext.files.length} files`} icon={<Sparkles size={12} />} />}
             <ContextBadge
-              label={summary.canApplyDirectly ? 'Aplicacao manual pronta' : 'Modo consulta'}
+              label={summary.canApplyDirectly ? 'Manual application ready' : 'Modo consulta'}
               icon={<Check size={12} />}
               accent={summary.canApplyDirectly ? ACCENT_SUCCESS : TEXT_SECONDARY}
             />

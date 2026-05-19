@@ -16,21 +16,21 @@ function DashboardRoutingNoticeInner() {
 
     if (code === 'labs-hidden') {
       return {
-        title: 'Laboratorio indisponivel neste ambiente',
-        body: 'Rotas experimentais ficam ocultas em producao. Para uso interno, defina NEXT_PUBLIC_SHOW_ASPIRATIONAL_ROUTES=true. O Studio e o /ide continuam a ser os caminhos suportados.',
+        title: 'Lab unavailable in this environment',
+        body: 'Experimental routes stay hidden in production. For internal use, set NEXT_PUBLIC_SHOW_ASPIRATIONAL_ROUTES=true. Studio and /ide remain the supported paths.',
       }
     }
 
     if (code === 'design-demo-dev-only') {
       return {
         title: 'Demo do design system',
-        body: 'Esta rota so fica disponivel em desenvolvimento. Em producao, use os tokens --aethel-* nas aplicacoes reais.',
+        body: 'This route is only available in development. In production, use the --aethel-* tokens in real applications.',
       }
     }
 
     return {
-      title: 'Redirecionamento',
-      body: 'Voce foi encaminhado para o dashboard.',
+      title: 'Redirected',
+      body: 'You were routed back to the dashboard.',
     }
   }, [code])
 
@@ -62,7 +62,7 @@ function DashboardRoutingNoticeInner() {
           type="button"
           onClick={dismiss}
           className="shrink-0 rounded-lg border border-[var(--aethel-border-secondary)] p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
-          aria-label="Fechar aviso"
+          aria-label="Close notice"
         >
           <X className="h-4 w-4" />
         </button>

@@ -177,10 +177,10 @@ export function useWorkbenchRealtimeCollaboration({
 
     if (!collaborationEnabled) {
       const detail = !hasToken
-        ? 'Entre com sua conta para sincronizar cursores e presenca.'
+        ? 'Sign in to sync cursors and presence.'
         : currentUser?.id
-          ? 'Abra um projeto real para ativar a sessao compartilhada.'
-          : 'Identidade de colaboracao indisponivel neste momento.';
+          ? 'Open a real project to activate the shared session.'
+          : 'Collaboration identity is unavailable right now.';
 
       return {
         state: 'disabled',
@@ -196,7 +196,7 @@ export function useWorkbenchRealtimeCollaboration({
       return {
         state: 'error',
         tone: 'danger',
-        label: 'Sync com erro',
+        label: 'Sync error',
         detail: normalizedErrorMessage,
         peerCount,
         liveCursorCount,
@@ -212,9 +212,9 @@ export function useWorkbenchRealtimeCollaboration({
         detail:
           peerCount > 0
             ? liveCursorCount > 0
-              ? `${peerCount} peer${peerCount === 1 ? '' : 's'} conectado${peerCount === 1 ? '' : 's'} - ${liveCursorCount} cursor${liveCursorCount === 1 ? '' : 'es'} ativo${liveCursorCount === 1 ? '' : 's'}`
-              : `${peerCount} peer${peerCount === 1 ? '' : 's'} conectado${peerCount === 1 ? '' : 's'} - presenca sincronizada`
-            : 'Sessao sincronizada. Convide alguem para editar junto.',
+              ? `${peerCount} peer${peerCount === 1 ? '' : 's'} connected${peerCount === 1 ? '' : 's'} - ${liveCursorCount} cursor${liveCursorCount === 1 ? '' : 'es'} active${liveCursorCount === 1 ? '' : 's'}`
+              : `${peerCount} peer${peerCount === 1 ? '' : 's'} connected${peerCount === 1 ? '' : 's'} - presence synchronized`
+            : 'Session synchronized. Invite someone to edit together.',
         peerCount,
         liveCursorCount,
       };
@@ -227,8 +227,8 @@ export function useWorkbenchRealtimeCollaboration({
         label: 'Sincronizando',
         detail:
           peerCount > 0
-            ? `Canal conectado; aguardando sync do documento com ${peerCount} peer${peerCount === 1 ? '' : 's'}.`
-            : 'Canal conectado; aguardando confirmacao de sync do documento.',
+            ? `Canal connected; aguardando sync do documento com ${peerCount} peer${peerCount === 1 ? '' : 's'}.`
+            : 'Canal connected; aguardando confirmacao de sync do documento.',
         peerCount,
         liveCursorCount,
       };
@@ -239,7 +239,7 @@ export function useWorkbenchRealtimeCollaboration({
         state: 'connecting',
         tone: 'warning',
         label: 'Conectando',
-        detail: 'Entrando na sessao compartilhada do projeto.',
+        detail: 'Joining the shared project session.',
         peerCount,
         liveCursorCount,
       };
@@ -249,7 +249,7 @@ export function useWorkbenchRealtimeCollaboration({
       state: 'reconnecting',
       tone: 'warning',
       label: 'Reconectando',
-      detail: 'Sem sync confirmado. Suas alteracoes seguem locais ate a sessao voltar.',
+      detail: 'No sync confirmed. Your changes remain local until the session returns.',
       peerCount,
       liveCursorCount,
     };

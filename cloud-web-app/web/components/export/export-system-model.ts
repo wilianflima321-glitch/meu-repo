@@ -1,15 +1,15 @@
 export type VideoCodec = 'h264' | 'h265' | 'vp8' | 'vp9' | 'av1' | 'prores' | 'dnxhd'
 export type AudioCodec = 'aac' | 'mp3' | 'opus' | 'pcm' | 'flac'
 export type Container = 'mp4' | 'webm' | 'mov' | 'mkv' | 'avi' | 'gif'
-export interface ExportarPreset {
+export interface ExportPreset {
   id: string
   name: string
   category: string
   description?: string
-  settings: ExportarSettings
+  settings: ExportSettings
   icon?: string
 }
-export interface ExportarSettings {
+export interface ExportSettings {
   container: Container
   videoCodec: VideoCodec | null    // null = no video
   audioCodec: AudioCodec | null    // null = no audio
@@ -35,7 +35,7 @@ export interface ExportarSettings {
   includeMetadata: boolean
   customMetadata?: Record<string, string>
 }
-export const EXPORT_PRESETS: ExportarPreset[] = [
+export const EXPORT_PRESETS: ExportPreset[] = [
   {
     id: 'youtube-4k',
     name: 'YouTube 4K',
@@ -426,12 +426,12 @@ export const EXPORT_PRESETS: ExportarPreset[] = [
     }
   }
 ]
-export type ExportarJobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled'
-export interface ExportarJob {
+export type ExportJobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled'
+export interface ExportJob {
   id: string
   name: string
-  settings: ExportarSettings
-  status: ExportarJobStatus
+  settings: ExportSettings
+  status: ExportJobStatus
   progress: number
   startedAt?: number
   completedAt?: number
@@ -441,17 +441,17 @@ export interface ExportarJob {
   sourceProjectId?: string
   sourceRange: { start: number; end: number }
 }
-export class ExportarManager {
-  private queue: ExportarJob[] = []
-  private currentJob: ExportarJob | null = null
+export class ExportManager {
+  private queue: ExportJob[] = []
+  private currentJob: ExportJob | null = null
   private isProcessing = false
   private abortController: AbortController | null = null
-  private onQueueUpdate?: (queue: ExportarJob[]) => void
+  private onQueueUpdate?: (queue: ExportJob[]) => void
   private onJobProgress?: (jobId: string, progress: number) => void
   private onJobComplete?: (jobId: string, outputUrl: string) => void
   private onJobError?: (jobId: string, error: string) => void
   constructor(callbacks?: {
-    onQueueUpdate?: (queue: ExportarJob[]) => void
+    onQueueUpdate?: (queue: ExportJob[]) => void
     onJobProgress?: (jobId: string, progress: number) => void
     onJobComplete?: (jobId: string, outputUrl: string) => void
     onJobError?: (jobId: string, error: string) => void
@@ -463,8 +463,8 @@ export class ExportarManager {
       this.onJobError = callbacks.onJobError
     }
   }
-  addJob(name: string, settings: ExportarSettings, sourceRange: { start: number; end: number }): string {
-    const job: ExportarJob = {
+  addJob(name: string, settings: ExportSettings, sourceRange: { start: number; end: number }): string {
+    const job: ExportJob = {
       id: `export-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       name,
       settings,
@@ -502,7 +502,7 @@ export class ExportarManager {
     }
     return false
   }
-  getQueue(): ExportarJob[] {
+  getQueue(): ExportJob[] {
     return [...this.queue]
   }
   private async processNext(): Promise<void> {
@@ -538,7 +538,7 @@ export class ExportarManager {
     this.abortController = null
     this.processNext()
   }
-  private async processJob(job: ExportarJob, signal: AbortSignal): Promise<string> {
+  private async processJob(job: ExportJob, signal: AbortSignal): Promise<string> {
     const { settings } = job
     const duration = job.sourceRange.end - job.sourceRange.start
     const totalFrames = duration * settings.frameRate

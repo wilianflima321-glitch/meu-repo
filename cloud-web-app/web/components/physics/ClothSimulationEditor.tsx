@@ -63,7 +63,7 @@ const CLOTH_PRESETS: ClothPreset[] = [
   {
     id: 'silk',
     name: 'Seda',
-    description: 'Tecido leve e fluido',
+    description: 'Light and flowing fabric',
     config: {
       mass: 0.3,
       stiffness: 0.6,
@@ -74,8 +74,8 @@ const CLOTH_PRESETS: ClothPreset[] = [
   },
   {
     id: 'cotton',
-    name: 'Algodão',
-    description: 'Tecido médio, comportamento natural',
+    name: 'Cotton',
+    description: 'Medium fabric with natural behavior',
     config: {
       mass: 0.5,
       stiffness: 0.8,
@@ -87,7 +87,7 @@ const CLOTH_PRESETS: ClothPreset[] = [
   {
     id: 'denim',
     name: 'Jeans',
-    description: 'Tecido pesado e rígido',
+    description: 'Heavy and rigid fabric',
     config: {
       mass: 0.8,
       stiffness: 0.95,
@@ -99,7 +99,7 @@ const CLOTH_PRESETS: ClothPreset[] = [
   {
     id: 'leather',
     name: 'Couro',
-    description: 'Material rígido com pouca flexibilidade',
+    description: 'Rigid material with low flexibility',
     config: {
       mass: 1.0,
       stiffness: 0.98,
@@ -111,7 +111,7 @@ const CLOTH_PRESETS: ClothPreset[] = [
   {
     id: 'rubber',
     name: 'Borracha',
-    description: 'Material elástico',
+    description: 'Elastic material',
     config: {
       mass: 0.6,
       stiffness: 0.4,
@@ -148,7 +148,7 @@ const CLOTH_PRESETS: ClothPreset[] = [
   {
     id: 'curtain',
     name: 'Cortina',
-    description: 'Tecido pesado para cortinas',
+    description: 'Heavy fabric for curtains',
     config: {
       mass: 0.7,
       stiffness: 0.85,

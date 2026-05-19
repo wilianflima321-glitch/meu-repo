@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/ai/suggestions/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +57,7 @@ const suggestionPool: AISuggestion[] = [
     type: 'feature',
     priority: 'low',
     title: 'Experimente o novo sistema de iluminacao',
-    description: 'Lumen esta disponivel para seu projeto. Ative para iluminacao global em tempo real.',
+    description: 'Lumen is available for your project. Enable it for real-time global illumination.',
     action: {
       label: 'Ativar Lumen',
       command: 'aethel.enableLumen',
@@ -70,7 +73,7 @@ const suggestionPool: AISuggestion[] = [
     type: 'workflow',
     priority: 'high',
     title: 'Backup automatico configurado',
-    description: 'Seu projeto tem alteracoes nao salvas ha 30 minutos. Ative auto-save para nao perder trabalho.',
+    description: 'Your project has unsaved changes for 30 minutes. Enable auto-save to avoid losing work.',
     action: {
       label: 'Ativar auto-save',
       command: 'aethel.enableAutoSave',
@@ -150,7 +153,7 @@ export async function GET(req: NextRequest) {
       total: suggestionPool.length,
     });
   } catch (error) {
-    console.error('Suggestions API error:', error);
+    routeLogger.error('Suggestions API error:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

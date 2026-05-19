@@ -11,8 +11,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+const log = createComponentLogger('api/experiments/route');
 
 export async function GET(request: NextRequest) {
   try {
@@ -66,7 +68,7 @@ export async function GET(request: NextRequest) {
       experiments: experimentsWithStats,
     });
   } catch (error) {
-    console.error('Failed to get experiments:', error);
+    log.error('Failed to get experiments', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -309,7 +311,7 @@ export async function POST(request: NextRequest) {
             value,
           },
         },
-      }).catch(console.error);
+      }).catch((error) => log.error('Failed to persist experiment conversion analytics event', error));
       
       return NextResponse.json({
         success: true,
@@ -359,7 +361,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Failed to process experiment:', error);
+    log.error('Failed to process experiment', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

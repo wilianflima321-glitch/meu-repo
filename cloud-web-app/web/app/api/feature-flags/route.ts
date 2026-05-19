@@ -8,8 +8,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+const log = createComponentLogger('api/feature-flags/route');
 
 // Feature flags default (fallback se DB não tiver)
 const defaultFlags = [
@@ -28,13 +30,13 @@ const defaultFlags = [
   },
   {
     key: 'multiplayer_editing',
-    name: 'Edição Multiplayer',
+    name: 'Multiplayer editing',
     enabled: true,
     type: 'boolean',
   },
   {
     key: 'advanced_analytics',
-    name: 'Analytics Avançado',
+    name: 'Advanced analytics',
     enabled: true,
     type: 'rule_based',
     rules: [{ attribute: 'user.plan', operator: 'in_list', value: ['pro', 'studio', 'enterprise'] }],
@@ -56,7 +58,7 @@ export async function GET(request: NextRequest) {
       environment: process.env.NODE_ENV || 'development',
     });
   } catch (error) {
-    console.error('Failed to get feature flags:', error);
+    log.error('Failed to get feature flags', error);
     return apiInternalError();
   }
 }
@@ -103,7 +105,7 @@ export const POST = withAdminAuth(
         flag,
       });
     } catch (error) {
-      console.error('Failed to create feature flag:', error);
+      log.error('Failed to create feature flag', error);
       const mapped = apiErrorToResponse(error);
       if (mapped) return mapped;
       return apiInternalError();

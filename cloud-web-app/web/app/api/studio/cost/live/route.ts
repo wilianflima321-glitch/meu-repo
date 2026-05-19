@@ -41,7 +41,7 @@ function buildGuidance(input: {
   }
 
   if (!input.billingReady) {
-    guidance.push('Checkout ainda nao esta pronto: trate upgrades e publish como bloqueados ate o runtime de billing ficar pronto.')
+    guidance.push('Checkout is not ready yet: treat upgrades and publishing as blocked until billing runtime is ready.')
   }
 
   if (input.budgetStatuses.includes('critical')) {

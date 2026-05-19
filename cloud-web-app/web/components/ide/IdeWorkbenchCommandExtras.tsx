@@ -31,7 +31,7 @@ export function IdeWorkbenchCommandExtras() {
       action: () => {
         window.dispatchEvent(new Event('aethel.ide.openChatExecution'))
       },
-      keywords: ['execucao', 'tarefas', 'agent', 'plano', 'task'],
+      keywords: ['execution', 'tasks', 'agent', 'plan', 'task'],
     })
 
     return () => {

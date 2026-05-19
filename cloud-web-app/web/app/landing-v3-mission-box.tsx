@@ -21,11 +21,11 @@ const QUICK_CHIPS = [
 ]
 
 const GENERATION_STEPS = [
-  { step: 'Analisando a missao...', progress: 18 },
-  { step: 'Montando o workspace...', progress: 42 },
-  { step: 'Conectando o fluxo inicial...', progress: 68 },
-  { step: 'Preparando Mission Control...', progress: 88 },
-  { step: 'Finalizando handoff...', progress: 96 },
+  { step: 'Analyzing the mission...', progress: 18 },
+  { step: 'Preparing the workspace...', progress: 42 },
+  { step: 'Connecting the initial workflow...', progress: 68 },
+  { step: 'Preparing Mission Control...', progress: 88 },
+  { step: 'Finalizing handoff...', progress: 96 },
 ]
 
 type WorkspaceCreateResponse = {
@@ -82,7 +82,7 @@ export default function LandingMissionBox() {
 
     setIsGenerating(true)
     setGenerationProgress(0)
-    setGenerationStep('Inicializando missao...')
+    setGenerationStep('Initializing mission...')
 
     try {
       for (const { step, progress } of GENERATION_STEPS) {
@@ -108,7 +108,7 @@ export default function LandingMissionBox() {
 
       const data = (await response.json()) as WorkspaceCreateResponse
       setGenerationProgress(100)
-      setGenerationStep(data.requiresAuth ? 'Abrindo Studio Home...' : 'Missao pronta!')
+      setGenerationStep(data.requiresAuth ? 'Opening Studio Home...' : 'Mission ready!')
 
       await new Promise((resolve) => setTimeout(resolve, 360))
       if (data.handoffUrl) {
@@ -168,7 +168,7 @@ export default function LandingMissionBox() {
           <div className="flex items-center gap-2 sm:pl-2">
             <button
               type="button"
-              aria-label="Anexar contexto"
+              aria-label="Attach context"
               className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
             >
               <Paperclip className="h-4 w-4" />

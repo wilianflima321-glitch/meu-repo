@@ -16,6 +16,9 @@ import {
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
 import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/ai/action/route');
 /**
  * POST /api/ai/action
  * Quick actions endpoint (L3) aligned with AI_SYSTEM_SPEC.
@@ -184,7 +187,7 @@ export async function POST(req: NextRequest) {
       latencyMs: response.latencyMs,
     })
   } catch (error) {
-    console.error('[AI Action] Error:', error)
+    routeLogger.error('[AI Action] Error:', error)
     return NextResponse.json(
       { error: 'AI_ERROR', message: error instanceof Error ? error.message : 'AI request failed' },
       { status: 500 }

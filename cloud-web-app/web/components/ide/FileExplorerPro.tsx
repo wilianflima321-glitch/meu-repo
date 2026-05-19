@@ -108,8 +108,8 @@ function describePresence(peers: RemotePeer[], nodeName: string): string {
   const peerNames = peers.map((peer) => peer.name)
   const leading =
     peerNames.length === 1
-      ? `${peerNames[0]} esta ativo em ${nodeName}`
-      : `${peerNames.length} colaboradores estao ativos em ${nodeName}`
+      ? `${peerNames[0]} is active in ${nodeName}`
+      : `${peerNames.length} colaboradores estao actives em ${nodeName}`
   return `${leading}: ${peerNames.join(', ')}`
 }
 
@@ -147,7 +147,7 @@ function FileTreeNode({
     : fileIcon.icon
   const buttonLabel = isFolder
     ? `${isExpanded ? 'Recolher' : 'Expandir'} pasta ${node.name}${presence ? `. ${presence.label}` : ''}`
-    : `Abrir arquivo ${node.name}${presence ? `. ${presence.label}` : ''}`
+    : `Open file ${node.name}${presence ? `. ${presence.label}` : ''}`
 
   return (
     <>
@@ -200,7 +200,7 @@ function FileTreeNode({
 
         {/* Modified indicator */}
         {node.modified && (
-          <span className="h-2 w-2 rounded-full bg-[var(--aethel-warning-light)]" title="Modificado" aria-label="Arquivo modificado" />
+          <span className="h-2 w-2 rounded-full bg-[var(--aethel-warning-light)]" title="Modified" aria-label="Modified file" />
         )}
       </button>
 
@@ -245,12 +245,12 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
 
     const menuItems = [
       ...(isFolder ? [
-        { id: 'new-file', label: 'Novo arquivo', icon: 'new-file' as CodiconName },
+        { id: 'new-file', label: 'New file', icon: 'new-file' as CodiconName },
         { id: 'new-folder', label: 'Nova pasta', icon: 'new-folder' as CodiconName },
         { id: 'divider-1', divider: true },
       ] : []),
       { id: 'rename', label: 'Renomear', icon: 'edit' as CodiconName },
-      { id: 'delete', label: 'Excluir', icon: 'trash' as CodiconName, danger: true },
+      { id: 'delete', label: 'Delete', icon: 'trash' as CodiconName, danger: true },
     ]
   const actionableItems = menuItems.filter((item) => !item.divider)
 
@@ -591,25 +591,25 @@ export default function FileExplorerPro({
           <button
             type="button"
             onClick={() => setShowSearch(!showSearch)}
-            aria-label="Alternar busca de arquivos"
+            aria-label="Toggle file search"
             className={`${iconButtonClass} ${showSearch ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
-            title="Buscar arquivos"
+            title="Search files"
           >
             <Codicon name="search" />
           </button>
           <button
             type="button"
             onClick={() => onFileCreate?.('/', 'file')}
-            aria-label="Criar novo arquivo"
+            aria-label="Create new file"
             className={iconButtonClass}
-            title="Novo arquivo"
+            title="New file"
           >
             <Codicon name="new-file" />
           </button>
           <button
             type="button"
             onClick={() => onFileCreate?.('/', 'folder')}
-            aria-label="Criar nova pasta"
+            aria-label="Create nova pasta"
             className={iconButtonClass}
             title="Nova pasta"
           >
@@ -618,9 +618,9 @@ export default function FileExplorerPro({
           <button
             type="button"
             onClick={handleRefresh}
-            aria-label="Atualizar arquivos do workspace"
+            aria-label="Refresh workspace files"
             className={iconButtonClass}
-            title="Atualizar"
+            title="Refresh"
           >
             <Codicon name="refresh" />
           </button>
@@ -641,10 +641,10 @@ export default function FileExplorerPro({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar arquivos..."
+              placeholder="Search files..."
               className={`w-full rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] py-1.5 pl-8 pr-3 text-xs text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
               autoFocus
-              aria-label="Buscar arquivos no explorer"
+              aria-label="Search files in explorer"
             />
           </div>
         </div>
@@ -693,7 +693,7 @@ export default function FileExplorerPro({
         {filteredFiles.length === 0 && searchQuery && (
           <div className="px-3 py-3">
             <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] px-3 py-3 text-center text-xs text-[var(--aethel-text-secondary)]">
-              <p className="mb-1 font-medium text-[var(--aethel-text-primary)]">Nenhum arquivo encontrado</p>
+              <p className="mb-1 font-medium text-[var(--aethel-text-primary)]">No files found</p>
               <p>{`"${searchQuery}"`}</p>
             </div>
           </div>
@@ -703,16 +703,18 @@ export default function FileExplorerPro({
             <div className="max-w-xs">
                 <div className="text-xs font-medium text-[var(--aethel-text-secondary)] mb-1">Workspace vazio</div>
                 <div className="text-[11px] text-[var(--aethel-text-tertiary)] mb-3">
-                  Crie um arquivo ou pasta para comecar a editar neste projeto.
+                  Create a file or folder to start editing in this project.
                 </div>
               <div className="flex items-center justify-center gap-2">
-                <button type="button" aria-label="Criar novo arquivo em workspace vazio"
+                <button
+                  type="button"
+                  aria-label="Create new file"
                   onClick={() => onFileCreate?.('/', 'file')}
                   className={`rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
                 >
-                  Novo arquivo
+                  New file
                 </button>
-                <button type="button" aria-label="Criar nova pasta em workspace vazio"
+                <button type="button" aria-label="Create new file in empty workspace"
                   onClick={() => onFileCreate?.('/', 'folder')}
                   className={`rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
                 >

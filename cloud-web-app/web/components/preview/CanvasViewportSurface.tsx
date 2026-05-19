@@ -17,7 +17,7 @@ export default function CanvasViewportSurface({ renderMode }: { renderMode: 'dra
     <ViewportWorkbenchShell
       mode="canvas"
       title="Aethel Canvas Mode"
-      subtitle={`Canvas conectado ao projeto para explorar variantes, research visual e composicao ${renderMode}.`}
+      subtitle={`Canvas connected to the project to explore variants, visual research, and composition ${renderMode}.`}
       left={<Outliner3D />}
       center={<NexusCanvasV2 renderMode={renderMode} />}
       right={<PropertiesPanel3D />}

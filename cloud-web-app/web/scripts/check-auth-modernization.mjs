@@ -73,6 +73,13 @@ requireFile('prisma/migrations/20260513114500_webauthn_passkeys/migration.sql', 
 requirePattern('prisma/migrations/20260513114500_webauthn_passkeys/migration.sql', /public_key TEXT NOT NULL/, 'passkey public keys must be persisted')
 requirePattern('app/security/page.tsx', /Passkeys em rollout tecnico/, 'public security copy must reflect passkey rollout honestly')
 
+requireFile('components/auth/TurnstileField.tsx', 'auth UI must expose the same bot protection enforced by auth APIs')
+requirePattern('components/auth/TurnstileField.tsx', /NEXT_PUBLIC_.*TURNSTILE/, 'Turnstile client widget must read a public site key')
+requirePattern('app/(auth)/login/login-v2.tsx', /TurnstileField/, 'login must render human verification when configured')
+requirePattern('app/(auth)/login/login-v2.tsx', /turnstileToken/, 'login, passkey, and magic-link requests must forward the Turnstile token')
+requirePattern('app/(auth)/register/register-v2.tsx', /TurnstileField/, 'registration must render human verification when configured')
+requirePattern('app/(auth)/register/register-v2.tsx', /turnstileToken/, 'registration requests must forward the Turnstile token')
+
 if (failures.length) {
   console.error('[auth-modernization] FAIL')
   for (const failure of failures) console.error(`- ${failure}`)

@@ -15,6 +15,9 @@ import { AssetProcessor } from '@/lib/server/asset-processor';
 import { evaluateAssetIntakePolicy } from '@/lib/server/asset-intake-policy';
 import { evaluateAssetSourcePolicy } from '@/lib/server/asset-source-policy';
 import { capabilityResponse } from '@/lib/server/capability-response';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/assets/upload/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -114,7 +117,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             error: 'STORAGE_LIMIT_REACHED',
-            message: 'Limite de storage do plano atingido. Faça upgrade para enviar mais assets.',
+            message: 'Plan storage limit reached. Upgrade to upload more assets.',
             plan: entitlements.plan.id,
           },
           { status: 402 }
@@ -222,7 +225,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Upload error:', error);
+    routeLogger.error('Upload error:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError('Failed to upload file');

@@ -245,13 +245,13 @@ export function MixerChannel({
 
       {/* Buttons */}
         <div className="flex gap-1">
-          <button type="button" aria-label={muted ? `Desativar mute de ${name}` : `Ativar mute de ${name}`}
+          <button type="button" aria-label={muted ? `Desactiver mute de ${name}` : `Ativar mute de ${name}`}
             onClick={onMuteToggle}
             className={`px-2 py-1 text-xs rounded ${muted ? 'bg-[var(--aethel-error-dark)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
           >
             M
           </button>
-          <button type="button" aria-label={solo ? `Desativar solo de ${name}` : `Ativar solo de ${name}`}
+          <button type="button" aria-label={solo ? `Desactiver solo de ${name}` : `Ativar solo de ${name}`}
             onClick={onSoloToggle}
             className={`px-2 py-1 text-xs rounded ${solo ? 'bg-[var(--aethel-warning-dark)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
           >

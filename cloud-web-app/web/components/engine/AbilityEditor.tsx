@@ -144,7 +144,7 @@ function TagBadge({ tag, onRemove }: { tag: string; onRemove?: () => void }) {
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs text-[var(--aethel-text-primary)] ${getTagColor(tag)}`}>
       {tag.split('.').pop()}
       {onRemove && (
-        <button type="button" aria-label={`Remover tag ${tag}`} onClick={onRemove} className="ml-1 hover:text-[var(--aethel-error-light)]">×</button>
+        <button type="button" aria-label={`Remove tag ${tag}`} onClick={onRemove} className="ml-1 hover:text-[var(--aethel-error-light)]">×</button>
       )}
     </span>
   );
@@ -357,7 +357,7 @@ export function AbilityEditor({
         <div className="p-4 border-b border-[var(--aethel-border-primary)]">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Abilities</h2>
-            <button type="button" aria-label="Criar nova ability"
+            <button type="button" aria-label="Create nova ability"
               onClick={() => setEditMode(true)}
               className="p-1.5 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg transition"
             >
@@ -480,7 +480,7 @@ export function AbilityEditor({
                   </div>
 
                   <div className="flex gap-3 pt-4">
-                    <button type="button" aria-label="Criar ability com os dados do formulario"
+                    <button type="button" aria-label="Create ability com os dados do formulario"
                       onClick={handleCreateAbility}
                       className="px-4 py-2 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] transition"
                     >

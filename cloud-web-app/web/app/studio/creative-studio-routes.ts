@@ -51,6 +51,14 @@ export const CREATIVE_STUDIO_ROUTES: CreativeStudioRoute[] = [
     maturity: 'ALPHA',
     description: 'Shape particles, magic systems, combat cues, and cinematic effects.',
   },
+  {
+    href: '/studio/quest',
+    label: 'Quest Studio',
+    shortLabel: 'Quest',
+    domain: 'world',
+    maturity: 'ALPHA',
+    description: 'Author branching missions, prerequisites, rewards, and narrative validation graphs.',
+  },
 
   {
     href: '/studio/terrain',

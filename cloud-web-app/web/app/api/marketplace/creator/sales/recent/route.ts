@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/marketplace/creator/sales/recent/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +41,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
-    console.error('[marketplace/creator/sales/recent] Error:', error);
+    routeLogger.error('[marketplace/creator/sales/recent] Error:', error);
     return NextResponse.json(
       {
         error: 'Failed to load recent sales',

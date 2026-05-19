@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useCallback, useState } from 'react';
 import { Plus, Split, X } from 'lucide-react';

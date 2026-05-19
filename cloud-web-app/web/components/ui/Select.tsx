@@ -141,7 +141,7 @@ export function Select({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar..."
+                placeholder="Search..."
                 className="
                   w-full px-3 py-2
                   bg-[var(--aethel-surface-secondary)]/80 border border-[var(--aethel-border-primary)]/50
@@ -157,7 +157,7 @@ export function Select({
           <div className="max-h-60 overflow-y-auto py-1.5">
             {filteredOptions.length === 0 ? (
               <div className="px-4 py-3 text-sm text-[var(--aethel-text-tertiary)] text-center">
-                Nenhuma opcao encontrada
+                No opcao encontrada
               </div>
             ) : (
               filteredOptions.map((option) => (

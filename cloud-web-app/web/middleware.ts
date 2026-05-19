@@ -8,9 +8,9 @@ import { Redis } from '@upstash/redis/cloudflare';
 function getJwtSecretBytes(): Uint8Array {
   const secret = process.env.JWT_SECRET;
   if (!secret || secret === 'your-secret-key-change-in-production') {
-    // Mantém a mesma filosofia de lib/auth-server.ts: sem segredo => misconfig.
+    // Keep the same production posture as lib/auth-server.ts: no secret means misconfig.
     throw Object.assign(
-      new Error('AUTH_NOT_CONFIGURED: defina JWT_SECRET (não use default).'),
+      new Error('AUTH_NOT_CONFIGURED: set JWT_SECRET (do not use the default).'),
       { code: 'AUTH_NOT_CONFIGURED' }
     );
   }
@@ -108,9 +108,9 @@ function withSecurityHeaders(res: NextResponse, req?: NextRequest, requestId?: s
 }
 
 // ============================================================================
-// RATE LIMITING (Edge + produção)
+// RATE LIMITING (Edge + production)
 // - Upstash (Redis over HTTP) quando configurado
-// - Em produção, sem backend => 503 para /api (evita falsa sensação de segurança)
+// - Em produÃ§Ã£o, sem backend => 503 para /api (evita falsa sensaÃ§Ã£o de seguranÃ§a)
 // ============================================================================
 
 type RateLimitName = 'api_general' | 'api_auth' | 'api_ai' | 'api_upload';
@@ -190,12 +190,26 @@ const PUBLIC_PATH_PREFIXES = [
   '/docs',
   '/status',
   '/contact-sales',
+  '/contact',
+  '/customers',
   '/terms',
   '/privacy',
+  '/trust',
+  '/compliance',
+  '/security',
+  '/security-policy',
+  '/security-acknowledgments',
+  '/reliability',
+  '/roadmap',
+  '/honest-status',
   '/help',
   '/download',
   '/marketplace',
   '/compare',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+  '/health',
   '/api/auth',
   '/api/health',
   '/api/billing/webhook',
@@ -206,6 +220,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   '/manifest.webmanifest',
   '/sw.js',
   '/api/analytics/batch',
+  '/api/billing/readiness',
   '/favicon.ico',
   '/favicon.png',
   '/robots.txt',
@@ -234,7 +249,7 @@ export async function middleware(req: NextRequest) {
   const enforceDevRateLimit = process.env.AETHEL_ENFORCE_DEV_RATE_LIMIT === 'true';
   const shouldApplyRateLimit = process.env.NODE_ENV === 'production' || enforceDevRateLimit;
 
-  // Cookie-first para páginas; Bearer-first para APIs.
+  // Cookie-first for pages; bearer-first for APIs.
   const cookieToken = req.cookies.get('token')?.value;
   const authHeader = req.headers.get('authorization');
   const bearerToken = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
@@ -245,7 +260,7 @@ export async function middleware(req: NextRequest) {
              req.headers.get('x-real-ip') || 
              'anonymous';
 
-  // 1) Rate limiting (somente API)
+  // 1) Rate limiting (API only)
   if (shouldApplyRateLimit && isApi && !pathname.startsWith('/api/billing/webhook') && !pathname.startsWith('/api/health')) {
     if (!upstashLimiters) {
       if (process.env.NODE_ENV === 'production') {
@@ -288,7 +303,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // 2) Public Paths (Marketing, docs, auth, assets e runtime publico)
+  // 2) Public paths (marketing, trust, docs, auth, assets, and public runtime).
   const isPublicPath =
     PUBLIC_EXACT_PATHS.has(pathname) ||
     PUBLIC_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
@@ -299,16 +314,16 @@ export async function middleware(req: NextRequest) {
     return withSecurityHeaders(NextResponse.next({ request: { headers: requestHeaders } }), req, requestId);
   }
 
-  // 3) CSRF proteção simples para cookie-based sessions em APIs
+  // 3) Basic CSRF protection for cookie-based API sessions.
   if (isApi && req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS') {
     const origin = req.headers.get('origin');
     const expected = req.nextUrl.origin;
-    // Se o cliente usa Bearer token, o risco de CSRF é bem menor.
+    // Se o cliente usa Bearer token, o risco de CSRF Ã© bem menor.
     const usingCookieOnly = !!cookieToken && !bearerToken;
     if (usingCookieOnly && origin && origin !== expected) {
       return withSecurityHeaders(
         NextResponse.json(
-          { error: 'CSRF_BLOCKED', message: 'Origem inválida.' },
+          { error: 'CSRF_BLOCKED', message: 'Invalid origin.' },
           { status: 403 }
         ),
         req,
@@ -353,7 +368,7 @@ export async function middleware(req: NextRequest) {
     const response = NextResponse.next({ request: { headers: requestHeaders } });
     withSecurityHeaders(response, req, requestId);
     
-    // Adiciona informações do usuário nos headers para APIs
+    // Adiciona informaÃ§Ãµes do usuÃ¡rio nos headers para APIs
     if (pathname.startsWith('/api')) {
       response.headers.set('X-User-Id', payload.userId as string || '');
       response.headers.set('X-User-Role', (payload.role as string) || 'user');

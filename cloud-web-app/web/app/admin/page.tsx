@@ -1,124 +1,137 @@
 "use client"
 
-import Link from 'next/link';
-import useSWR from 'swr';
-import { API_BASE } from '@/lib/api';
-import { getToken } from '@/lib/auth';
-import { ADMIN_CONSOLIDATED_SECTIONS } from '@/lib/admin/admin-consolidation';
-import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import Link from 'next/link'
+import useSWR from 'swr'
+import { API_BASE } from '@/lib/api'
+import { getToken } from '@/lib/auth'
+import {
+  ADMIN_CONSOLIDATED_SECTIONS,
+  getAdminRouteCoverage,
+} from '@/lib/admin/admin-consolidation'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 
 type UserRow = {
-  id: string;
-  name?: string | null;
-  email: string;
-  plan: string;
-  createdAt: string;
-  _count?: { projects?: number };
-};
+  id: string
+  name?: string | null
+  email: string
+  plan: string
+  createdAt: string
+  _count?: { projects?: number }
+}
 
 const fetcher = async (url: string) => {
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${getToken()}` },
-  });
+  })
   if (!response.ok) {
-    const payload = await response.json().catch(() => null);
-    throw new Error(payload?.message || payload?.error || 'Falha ao carregar painel admin');
+    const payload = await response.json().catch(() => null)
+    throw new Error(payload?.message || payload?.error || 'Failed to load the admin console')
   }
-  return response.json();
-};
+  return response.json()
+}
+
+const planLabels: Record<string, string> = {
+  enterprise: 'Enterprise',
+  pro: 'Pro',
+  free: 'Free',
+}
+
+const coverage = getAdminRouteCoverage()
 
 export default function Admin() {
-  const { data, error, isLoading, mutate } = useSWR<{ users: UserRow[] }>(`${API_BASE}/admin/users`, fetcher);
-  const users = Array.isArray(data?.users) ? data.users : [];
+  const { data, error, isLoading, mutate } = useSWR<{ users: UserRow[] }>(`${API_BASE}/admin/users`, fetcher)
+  const users = Array.isArray(data?.users) ? data.users : []
 
-  const planLabels: Record<string, string> = {
-    enterprise: 'Empresarial',
-    pro: 'Pro',
-    free: 'Gratuito',
-  };
-
-  const enterpriseCount = users.filter((user) => user.plan === 'enterprise').length;
-  const proCount = users.filter((user) => user.plan === 'pro').length;
-  const freeCount = users.filter((user) => user.plan === 'free').length;
-
-  const cards = [
-    {
-      href: '/admin/users',
-      title: 'Gerenciar usuários',
-      description: 'Editar perfis, funções, acesso e governanca de contas.',
-    },
-    {
-      href: '/admin/payments',
-      title: 'Pagamentos e Gateway',
-      description: 'Operar checkout web, gateway ativo e conciliacao transacional.',
-    },
-    {
-      href: '/admin/apis',
-      title: 'Integracoes API',
-      description: 'Verificar providers configurados e chaves de ambiente.',
-    },
-    {
-      href: '/admin/security',
-      title: 'Segurança e Auditoria',
-      description: 'Acompanhar eventos criticos e hardening operacional.',
-    },
-  ];
+  const enterpriseCount = users.filter((user) => user.plan === 'enterprise').length
+  const proCount = users.filter((user) => user.plan === 'pro').length
+  const freeCount = users.filter((user) => user.plan === 'free').length
 
   return (
-    <div className='p-6 max-w-7xl mx-auto'>
+    <div className="mx-auto max-w-7xl p-6">
       <AdminPageHeader
-        className='mb-6'
-        eyebrow='Admin Control Center'
-        title='Admin Enterprise Console'
-        subtitle='Operação central de usuários, billing, segurança e integrações.'
+        className="mb-6"
+        eyebrow="Admin Control Center"
+        title="Admin Command Center"
+        subtitle="A dense six-area operating model: every route has one owner, one purpose, and a clear escalation path."
         actions={(
-          <button type="button"
+          <button
+            type="button"
             onClick={() => mutate()}
-            className='rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]'
+            className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]"
           >
-            Recarregar
+            Refresh
           </button>
         )}
       />
 
-      <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-4'>
-        <Stat title='Usuarios' value={users.length} />
-        <Stat title='Enterprise' value={enterpriseCount} tone='emerald' />
-        <Stat title='Pro' value={proCount} tone='sky' />
-        <Stat title='Free' value={freeCount} tone='slate' />
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Stat title="Users" value={users.length} />
+        <Stat title="Enterprise" value={enterpriseCount} tone="emerald" />
+        <Stat title="Pro" value={proCount} tone="sky" />
+        <Stat title="Free" value={freeCount} tone="slate" />
       </div>
 
-      <section className='mb-8 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]'>
-        <div className='mb-4 flex flex-col gap-1 md:flex-row md:items-end md:justify-between'>
-          <div>
-            <p className='text-xs uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]'>Admin consolidation</p>
-            <h2 className='text-lg font-semibold text-[var(--aethel-text-primary)]'>6 operating areas, all legacy routes covered</h2>
+      <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-[1.25fr_0.75fr]">
+        <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+          <p className="text-xs uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Operating spine</p>
+          <h2 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">Six areas, no orphaned admin intent</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
+            The admin surface now behaves like a command center: people, money, AI, platform, trust, and product each own a bounded route set.
+          </p>
+          <div className="mt-5 grid grid-cols-3 gap-3">
+            <MetricPill label="Areas" value={coverage.sections} />
+            <MetricPill label="Routes mapped" value={coverage.routes} />
+            <MetricPill label="Primary paths" value={coverage.primaryLinks} />
           </div>
-          <p className='text-xs text-[var(--aethel-text-tertiary)]'>
-            {ADMIN_CONSOLIDATED_SECTIONS.reduce((total, section) => total + section.routes.length, 0)} routes mapped
+        </div>
+        <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-error)_8%,var(--aethel-surface-secondary))] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+          <p className="text-xs uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Escalation lane</p>
+          <h2 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Risk controls stay one click away</h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+            Emergency, audit, moderation, and security are intentionally visible. A premium admin console should reduce time to containment.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/admin/emergency" className="rounded-full border border-[var(--aethel-error)]/35 bg-[var(--aethel-error)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--aethel-error-light)]">Emergency</Link>
+            <Link href="/admin/audit-logs" className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)]">Audit logs</Link>
+            <Link href="/admin/security" className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)]">Security</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-8 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+        <div className="mb-4 flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Admin consolidation</p>
+            <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Operator-first areas</h2>
+          </div>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">
+            {coverage.routes} routes mapped
           </p>
         </div>
-        <div className='grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3'>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {ADMIN_CONSOLIDATED_SECTIONS.map((section) => (
             <article
               key={section.id}
-              className='rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-4'
+              className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-4"
             >
-              <div className='flex items-start justify-between gap-3'>
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className='text-sm font-semibold text-[var(--aethel-text-primary)]'>{section.label}</h3>
-                  <p className='mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]'>{section.description}</p>
+                  <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">{section.label}</h3>
+                  <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{section.description}</p>
+                  <p className="mt-3 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_55%,transparent)] px-3 py-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                    {section.operatorQuestion}
+                  </p>
                 </div>
-                <span className='rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]'>
+                <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]">
                   {section.routes.length} routes
                 </span>
               </div>
-              <div className='mt-4 flex flex-wrap gap-2'>
+              <div className="mt-4 flex flex-wrap gap-2">
                 {section.primaryLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className='rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]'
+                    className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
                   >
                     {link.label}
                   </Link>
@@ -129,36 +142,36 @@ export default function Admin() {
         </div>
       </section>
 
-      <div className='mb-8 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] shadow-[0_18px_45px_rgba(0,0,0,0.35)]'>
-        <div className='flex items-center justify-between border-b border-[var(--aethel-border-subtle)] px-4 py-3'>
-          <h2 className='text-lg font-semibold'>Usuarios recentes</h2>
-          <p className='text-xs text-[var(--aethel-text-tertiary)]'>Fonte: /admin/users</p>
+      <div className="mb-8 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+        <div className="flex items-center justify-between border-b border-[var(--aethel-border-subtle)] px-4 py-3">
+          <h2 className="text-lg font-semibold">Recent users</h2>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Source: /admin/users</p>
         </div>
 
         {isLoading ? (
-          <div className='p-4 text-sm text-[var(--aethel-text-tertiary)]'>Carregando usu?rios...</div>
+          <div className="p-4 text-sm text-[var(--aethel-text-tertiary)]">Loading users...</div>
         ) : error ? (
-          <div className='p-4 text-sm text-[var(--aethel-error)]'>{error.message}</div>
+          <div className="p-4 text-sm text-[var(--aethel-error)]">{error.message}</div>
         ) : users.length === 0 ? (
-          <div className='p-4 text-sm text-[var(--aethel-text-tertiary)]'>Nenhum usuario retornado no momento.</div>
+          <div className="p-4 text-sm text-[var(--aethel-text-tertiary)]">No users returned yet.</div>
         ) : (
-          <div className='overflow-x-auto'>
-            <table className='min-w-full text-left text-sm'>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
               <thead>
-                <tr className='border-b border-[var(--aethel-border-subtle)] text-[var(--aethel-text-secondary)]'>
-                  <th className='p-2'>Nome</th>
-                  <th className='p-2'>Email</th>
-                  <th className='p-2'>Plano</th>
-                  <th className='p-2'>Projetos</th>
-                  <th className='p-2'>Cadastro</th>
+                <tr className="border-b border-[var(--aethel-border-subtle)] text-[var(--aethel-text-secondary)]">
+                  <th className="p-2">Name</th>
+                  <th className="p-2">Email</th>
+                  <th className="p-2">Plan</th>
+                  <th className="p-2">Projects</th>
+                  <th className="p-2">Created</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id} className='border-b border-[var(--aethel-border-subtle)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'>
-                    <td className='p-2 font-medium'>{user.name || 'Sem nome'}</td>
-                    <td className='p-2 text-[var(--aethel-text-secondary)]'>{user.email}</td>
-                    <td className='p-2'>
+                  <tr key={user.id} className="border-b border-[var(--aethel-border-subtle)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]">
+                    <td className="p-2 font-medium">{user.name || 'Unnamed'}</td>
+                    <td className="p-2 text-[var(--aethel-text-secondary)]">{user.email}</td>
+                    <td className="p-2">
                       <span
                         className={`rounded-full px-2.5 py-1 text-xs ${
                           user.plan === 'enterprise'
@@ -171,8 +184,8 @@ export default function Admin() {
                         {planLabels[user.plan] ?? user.plan}
                       </span>
                     </td>
-                    <td className='p-2'>{user._count?.projects || 0}</td>
-                    <td className='p-2 text-[var(--aethel-text-tertiary)]'>{new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td className="p-2">{user._count?.projects || 0}</td>
+                    <td className="p-2 text-[var(--aethel-text-tertiary)]">{new Date(user.createdAt).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -180,21 +193,8 @@ export default function Admin() {
           </div>
         )}
       </div>
-
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
-        {cards.map((card) => (
-          <Link
-            key={card.href}
-            href={card.href}
-            className='block rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
-          >
-            <h2 className='text-base font-semibold'>{card.title}</h2>
-            <p className='mt-2 text-sm text-[var(--aethel-text-secondary)]'>{card.description}</p>
-          </Link>
-        ))}
-      </div>
     </div>
-  );
+  )
 }
 
 function Stat({
@@ -202,21 +202,30 @@ function Stat({
   value,
   tone = 'sky',
 }: {
-  title: string;
-  value: number;
-  tone?: 'sky' | 'emerald' | 'slate';
+  title: string
+  value: number
+  tone?: 'sky' | 'emerald' | 'slate'
 }) {
   const toneClass =
     tone === 'emerald'
       ? 'text-[var(--aethel-success)]'
       : tone === 'slate'
         ? 'text-[var(--aethel-text-secondary)]'
-        : 'text-[var(--aethel-info)]';
+        : 'text-[var(--aethel-info)]'
 
   return (
-    <div className='rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
-      <p className='text-xs uppercase tracking-[0.08em] text-[var(--aethel-text-tertiary)]'>{title}</p>
+    <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+      <p className="text-xs uppercase tracking-[0.08em] text-[var(--aethel-text-tertiary)]">{title}</p>
       <p className={`mt-2 text-2xl font-bold ${toneClass}`}>{value}</p>
     </div>
-  );
+  )
+}
+
+function MetricPill({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_58%,transparent)] p-3">
+      <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">{label}</p>
+      <p className="mt-1 text-xl font-semibold text-[var(--aethel-text-primary)]">{value}</p>
+    </div>
+  )
 }

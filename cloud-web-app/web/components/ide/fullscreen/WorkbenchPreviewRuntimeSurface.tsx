@@ -41,10 +41,10 @@ function WorkbenchPreviewEmptyState() {
           Visual workspace
         </div>
         <div className="mt-2 text-sm font-semibold text-[var(--aethel-text-primary)]">
-          Selecione um arquivo para abrir a superficie visual certa.
+          Select a file to open the right visual surface.
         </div>
         <div className="mt-2 text-sm leading-6 text-[var(--aethel-text-tertiary)]">
-          Mantemos runtime, devices, console e visual 3D na mesma lane para que a proxima validacao fique a um clique de distancia.
+          Runtime, devices, console, and 3D visual stay in the same lane so the next validation is one click away.
         </div>
         <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-[var(--aethel-text-secondary)]">
           {PREVIEW_MODES.map((mode) => (
@@ -160,7 +160,7 @@ export function WorkbenchPreviewRuntimeSurface({
     <CanonicalPreviewSurface
       key={`${activeFile.path}:${previewRefreshTick}${mode === 'device' ? ':device' : ''}:${isProposalPreviewing ? 'proposal' : 'live'}`}
       variant="runtime"
-      title={isProposalPreviewing ? 'Previa da proposta' : 'Previa ao vivo'}
+      title={isProposalPreviewing ? 'Proposal preview' : 'Live preview'}
       filePath={activeFile.path}
       content={proposalContent ?? activeFile.content}
       projectId={projectId}

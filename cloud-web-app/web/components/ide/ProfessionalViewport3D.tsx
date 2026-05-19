@@ -112,7 +112,7 @@ export function ProfessionalViewport3D() {
                    'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
-              title="Assistente IA"
+              title="AI Assistant"
             >
               <Settings className="w-4 h-4" />
             </button>

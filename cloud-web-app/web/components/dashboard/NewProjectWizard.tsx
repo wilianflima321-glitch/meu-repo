@@ -6,7 +6,7 @@
  * Wizard visual imersivo para criacao de projetos.
  * Meta: Usuario com jogo rodando em < 30 segundos.
  *
- * Fluxo:
+ * Flow:
  * 1. Escolha de Genero (Cards com video preview)
  * 2. Escolha de Estilo Visual (Vibe)
  * 3. Loading cinematografico
@@ -119,7 +119,7 @@ const GENRES: GenreOption[] = [
   {
     id: 'blank',
     name: 'Blank Project',
-    description: 'Projeto vazio para experts. Voce constroi tudo.',
+    description: 'Empty project for experts. You build everything.',
     icon: <Box className="w-8 h-8" />,
     previewImage: '/templates/blank-preview.webp',
     features: ['Cena vazia', 'Liberdade total'],
@@ -135,7 +135,7 @@ const STYLES: StyleOption[] = [
   {
     id: 'pixel',
     name: 'Pixel Art',
-    description: 'Estetica retro com pixels visiveis',
+    description: 'Retro aesthetic with visible pixels',
     previewImage: '/templates/style-pixel.webp',
     colors: ['var(--aethel-accent)', 'var(--aethel-secondary)', 'var(--aethel-warning)'],
   },
@@ -337,7 +337,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           O que vamos criar hoje?
         </h1>
         <p className="text-[var(--aethel-text-tertiary)]">
-          Escolha um genero para comecar com um template pronto para jogar
+          Choose a genre to start with a playable template
         </p>
       </div>
 
@@ -461,7 +461,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           Escolha a vibe visual
         </h1>
         <p className="text-[var(--aethel-text-tertiary)]">
-          Define a estetica do seu jogo. Voce pode mudar depois.
+          Define the aesthetic of your game. You can change it later.
         </p>
       </div>
 
@@ -530,7 +530,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
       {/* Project Name Input */}
       <div className="mt-6 flex items-center gap-4">
-        <label className="text-[var(--aethel-text-tertiary)] whitespace-nowrap">Nome do Projeto:</label>
+        <label className="text-[var(--aethel-text-tertiary)] whitespace-nowrap">Project name:</label>
         <input
           type="text"
           value={projectName}
@@ -549,15 +549,15 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
       {/* Footer */}
       <div className="flex items-center justify-between mt-6 pt-4 border-t border-[var(--aethel-border-primary)]">
-        <button type="button" aria-label="Voltar para escolha de genero"
+        <button type="button" aria-label="Back para escolha de genero"
           onClick={handleBack}
           className="flex items-center gap-2 px-4 py-2 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
-          Voltar
+          Back
         </button>
 
-        <button type="button" aria-label="Materializar universo do projeto"
+        <button type="button" aria-label="Materialize project universe"
           onClick={handleNext}
           disabled={!selectedStyle || !projectName.trim()}
           className={`
@@ -621,7 +621,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
       {/* Project Info */}
       <div className="mt-8 text-center text-[var(--aethel-text-quaternary)] text-sm">
-        <p>Criando: <span className="text-[var(--aethel-text-secondary)]">{projectName}</span></p>
+        <p>Creating: <span className="text-[var(--aethel-text-secondary)]">{projectName}</span></p>
         <p>
           Template: <span className="text-[var(--aethel-text-secondary)]">{GENRES.find(g => g.id === selectedGenre)?.name}</span>
           {' | '}

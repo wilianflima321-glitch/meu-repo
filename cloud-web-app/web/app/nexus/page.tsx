@@ -83,7 +83,7 @@ export default function NexusPage() {
         {/* Left Sidebar: Assets & Context */}
         <div className="hidden w-64 flex-col border-r border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/30 lg:flex">
           <div className="border-b border-[var(--aethel-border-primary)] p-4">
-            <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Contexto do projeto</h2>
+            <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Project context</h2>
             <div className="space-y-1">
               <button type="button" className="flex w-full items-center gap-3 rounded-lg border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/5 px-3 py-2 text-xs text-[var(--aethel-primary-light)]">
                 <Layout size={14} /> <span>Aethel Engine V2</span>

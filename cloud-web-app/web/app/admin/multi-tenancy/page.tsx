@@ -31,12 +31,12 @@ export default function MultiTenancyPage() {
       setError(null);
       const res = await fetch('/api/admin/tenants');
       if (!res.ok) {
-        throw new Error('Falha ao carregar tenants');
+        throw new Error('Failed to load tenants');
       }
       const data = await res.json();
       setTenants(Array.isArray(data?.tenants) ? data.tenants : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro inesperado');
+      setError(err instanceof Error ? err.message : 'Unexpected error');
     } finally {
       setLoading(false);
     }
@@ -56,9 +56,9 @@ export default function MultiTenancyPage() {
     <div className="p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Multilocação</h1>
+          <h1 className="text-2xl font-bold">Multi-tenancy</h1>
           <p className="text-sm text-[var(--aethel-text-secondary)]">
-            Visão por domínio (derivado de usuários reais). Gestão manual de locatários não está habilitada.
+            Domain view (derived from real users). Manual tenant management is not enabled.
           </p>
         </div>
         <button type="button"
@@ -92,13 +92,13 @@ export default function MultiTenancyPage() {
       />
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Locatários existentes</h2>
+        <h2 className="text-lg font-semibold mb-4">Existing tenants</h2>
         {loading ? (
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Carregando locatários...</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Loading tenants...</p>
         ) : error ? (
           <p className="text-sm text-[var(--aethel-error)]">{error}</p>
         ) : tenants.length === 0 ? (
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhum locatário encontrado.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">No tenant found.</p>
         ) : (
           <ul>
             {tenants.map((tenant) => (
@@ -107,10 +107,10 @@ export default function MultiTenancyPage() {
                   <div>
                     <h3 className="font-semibold">{tenant.domain}</h3>
                     <p className="text-sm text-[var(--aethel-text-secondary)]">
-                      Usuários: {tenant.users} | Armazenamento: {formatStorage(tenant.storageBytes)}
+                      Users: {tenant.users} | Armazenamento: {formatStorage(tenant.storageBytes)}
                     </p>
                     <p className="text-xs text-[var(--aethel-text-tertiary)]">
-                      Última atividade: {tenant.lastActiveAt ? new Date(tenant.lastActiveAt).toLocaleString() : 'N/D'}
+                      Last activity: {tenant.lastActiveAt ? new Date(tenant.lastActiveAt).toLocaleString() : 'N/D'}
                     </p>
                   </div>
                   <span
@@ -120,7 +120,7 @@ export default function MultiTenancyPage() {
                         : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                     }`}
                   >
-                    {tenant.status === 'active' ? 'Ativo' : 'Inativo'}
+                    {tenant.status === 'active' ? 'Active' : 'Inactive'}
                   </span>
                 </div>
               </li>

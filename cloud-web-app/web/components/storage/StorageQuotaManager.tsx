@@ -343,7 +343,7 @@ export function StorageQuotaManager({
           <div className="animate-spin">
             <Icons.Refresh />
           </div>
-          <span>Analisando armazenamento...</span>
+          <span>Analyzing armazenamento...</span>
         </div>
       </div>
     )
@@ -401,7 +401,7 @@ export function StorageQuotaManager({
               </p>
               <p className="text-xs opacity-80">
                 {storageInfo.warningLevel === 'blocked'
-                  ? 'Voce precisa liberar espaco antes de salvar novos assets.'
+                  ? 'You need to free up space before saving new assets.'
                   : 'Considere limpar cache ou fazer upgrade do plano.'}
               </p>
             </div>
@@ -432,7 +432,7 @@ export function StorageQuotaManager({
           aria-label={showDetails ? 'Recolher detalhes do cache' : 'Expandir detalhes do cache'}
           className="flex w-full items-center justify-between p-3 text-xs text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
         >
-          <span>Detalhes do cache</span>
+          <span>Details do cache</span>
           <svg
             className={`h-4 w-4 transition-transform ${showDetails ? 'rotate-180' : ''}`}
             fill="none"
@@ -482,7 +482,7 @@ export function StorageQuotaManager({
                 ))}
               </div>
             ) : (
-              <p className="mb-4 text-xs text-[var(--aethel-text-tertiary)]">Nenhum cache encontrado.</p>
+              <p className="mb-4 text-xs text-[var(--aethel-text-tertiary)]">No cache encontrado.</p>
             )}
 
             <div className="flex flex-wrap gap-2">
@@ -518,11 +518,11 @@ export function StorageQuotaManager({
       <div className="border-t border-[var(--aethel-border-primary)] p-4">
         <button
           type="button"
-          aria-label="Exportar assets locais"
+          aria-label="Export assets locais"
           className={`${storageSecondaryButtonClass} w-full justify-center gap-2`}
         >
           <Icons.Download />
-          <span>Exportar assets locais</span>
+          <span>Export assets locais</span>
         </button>
       </div>
     </div>

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { createAssetProvenanceEntry, type AssetDeclaredOrigin } from '@/lib/marketplace/asset-provenance';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/marketplace/assets/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -71,6 +75,13 @@ function getOrderBy(sort: string) {
     default:
       return { downloads: 'desc' as const };
   }
+}
+
+function readDeclaredOrigin(value: unknown): AssetDeclaredOrigin {
+  const allowed = new Set<AssetDeclaredOrigin>(['self-created', 'purchased', 'cc-licensed', 'ai-generated', 'derivative']);
+  return typeof value === 'string' && allowed.has(value as AssetDeclaredOrigin)
+    ? (value as AssetDeclaredOrigin)
+    : 'self-created';
 }
 
 export async function GET(request: NextRequest) {
@@ -205,7 +216,7 @@ export async function GET(request: NextRequest) {
       dataCompleteness: 'partial',
     });
   } catch (error) {
-    console.error('[marketplace/assets] Error:', error);
+    routeLogger.error('[marketplace/assets] Error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch marketplace assets' },
       { status: 500 }
@@ -239,6 +250,47 @@ export async function POST(request: NextRequest) {
       priceCents = Math.max(0, Math.round(Number(body.priceCents)));
     } else if (Number.isFinite(Number(body?.price))) {
       priceCents = Math.max(0, Math.round(Number(body.price) * 100));
+    }
+
+    const declaredOrigin = readDeclaredOrigin(body?.declaredOrigin);
+    const declaredLicense = typeof body?.license === 'string' ? body.license : 'aethel-creator-license-v1';
+    const licenseProofUrl = typeof body?.licenseProofUrl === 'string' ? body.licenseProofUrl : undefined;
+    const sourceUrl = typeof body?.sourceUrl === 'string' ? body.sourceUrl : undefined;
+    const parentAssetId = typeof body?.parentAssetId === 'string' ? body.parentAssetId : undefined;
+    const contentHash = typeof body?.contentHash === 'string' ? body.contentHash : undefined;
+    const listingManifest = JSON.stringify({
+      title,
+      description,
+      category,
+      priceCents,
+      declaredLicense,
+      declaredOrigin,
+      sourceUrl,
+      parentAssetId,
+    });
+    const provenance = createAssetProvenanceEntry({
+      assetId: 'pending',
+      uploaderUserId: user.userId,
+      fileName: typeof body?.fileName === 'string' ? body.fileName : `${title}.aethel-listing.json`,
+      sizeBytes: Number.isFinite(Number(body?.sizeBytes)) ? Math.max(0, Math.round(Number(body.sizeBytes))) : undefined,
+      content: contentHash ? undefined : listingManifest,
+      contentHash,
+      declaredLicense,
+      declaredOrigin,
+      sourceUrl,
+      licenseProofUrl,
+      parentAssetId,
+    });
+
+    if (provenance.blockers.length > 0) {
+      return NextResponse.json(
+        {
+          error: 'Marketplace asset provenance is not publishable',
+          blockers: provenance.blockers,
+          licenseDecision: provenance.licenseDecision,
+        },
+        { status: 400 }
+      );
     }
 
     const created = await prisma.marketplaceItem.create({
@@ -275,6 +327,13 @@ export async function POST(request: NextRequest) {
           createdAt: created.createdAt.toISOString(),
           updatedAt: created.updatedAt.toISOString(),
         },
+        trust: {
+          reviewStatus: provenance.reviewStatus,
+          declaredOrigin: provenance.declaredOrigin,
+          declaredLicense: provenance.declaredLicense,
+          contentHash: provenance.contentHash,
+          warnings: provenance.licenseDecision.warnings,
+        },
         source: 'marketplace-item',
       },
       { status: 201 }
@@ -282,7 +341,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
-    console.error('[marketplace/assets:POST] Error:', error);
+    routeLogger.error('[marketplace/assets:POST] Error:', error);
     return NextResponse.json(
       { error: 'Failed to publish marketplace asset' },
       { status: 500 }

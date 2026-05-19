@@ -393,7 +393,7 @@ export default function VFXGraphEditor({ graph: externalGraph, onGraphChange, on
           >
             {isPlaying ? ' Stop' : ' Play'}
           </button>
-          <button type="button" aria-label="Adicionar novo no ao VFX graph"
+          <button type="button" aria-label="Add novo no ao VFX graph"
             className="px-3 py-1 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded text-sm"
             onClick={() => setShowAddMenu(true)}
           >
@@ -500,7 +500,7 @@ export default function VFXGraphEditor({ graph: externalGraph, onGraphChange, on
                       {type}
                     </div>
                     {keys.map((key) => (
-                      <button type="button" aria-label={`Adicionar no ${NODE_TEMPLATES[key].name} ao VFX graph`}
+                      <button type="button" aria-label={`Add no ${NODE_TEMPLATES[key].name} ao VFX graph`}
                         key={key}
                         className="w-full px-3 py-1 text-left text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]"
                         onClick={() => addNode(key)}
@@ -584,7 +584,7 @@ export default function VFXGraphEditor({ graph: externalGraph, onGraphChange, on
                 ))}
               </div>
 
-              <button type="button" aria-label="Excluir no selecionado do VFX graph"
+              <button type="button" aria-label="Delete no selecionado do VFX graph"
                 onClick={deleteSelectedNode}
                 className="mt-4 w-full px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-text-primary)] rounded text-sm"
               >

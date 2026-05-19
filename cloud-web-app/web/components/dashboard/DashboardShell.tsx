@@ -15,6 +15,7 @@ import { DashboardToast } from './DashboardToast'
 import { DashboardRoutingNotice } from './DashboardRoutingNotice'
 import { resolveDashboardEntryLane } from './aethel-dashboard-entry-triage'
 import { MobileBottomNav } from '@/components/ui/MobileResponsiveLayout'
+import CostMeter from '@/components/cost/CostMeter'
 
 type OnboardingCompleteHandler = ComponentProps<typeof OnboardingWizard>['onComplete']
 type OnboardingSkipHandler = ComponentProps<typeof OnboardingWizard>['onSkip']
@@ -107,7 +108,7 @@ export function DashboardShell({
         href="#dashboard-main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-[var(--aethel-text-primary)] focus:ring-2 focus:ring-[var(--aethel-primary)]"
       >
-        Pular para o conteudo do dashboard
+        Skip to dashboard content
       </a>
       <div className="sr-only" role="status" aria-live="polite" />
       {isTrialActive && showTrialBanner && (
@@ -122,7 +123,7 @@ export function DashboardShell({
 
       <StudioGlobalNav
         title="Studio Home"
-        subtitle="Comece leve, continue na mesma shell e aprofunde no cockpit so quando a tarefa pedir."
+        subtitle="Start light, stay in the same shell, and expand into the cockpit only when the task asks for it."
         rightSlot={
           <StudioActionRail
             sidebarOpen={sidebarOpen}
@@ -138,6 +139,7 @@ export function DashboardShell({
             fullAccessBusy={fullAccessBusy}
             onToggleFullAccess={onToggleFullAccess}
             onOpenIde={onOpenIde}
+            extraActions={<CostMeter />}
           />
         }
       />
@@ -165,7 +167,7 @@ export function DashboardShell({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info)]">
-                  Fluxo principal
+                  Primary flow
                 </span>
                 {entrySource ? (
                   <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
@@ -177,14 +179,14 @@ export function DashboardShell({
                 </span>
               </div>
               <h2 className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)] sm:text-lg">
-                Continue a missao dentro do Studio, sem trocar de produto no meio do caminho.
+                Continue the mission inside Studio without switching products mid-flow.
               </h2>
               <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
                 {entryMission
                   ? entryMission
                   : entrySource
                     ? entryLane.description
-                    : 'Studio Home orienta a proxima acao. O cockpit profundo so expande quando a tarefa realmente precisar.'}
+                    : 'Studio Home points to the next action. The deep cockpit expands only when the task truly needs it.'}
               </p>
             </div>
 
@@ -195,7 +197,7 @@ export function DashboardShell({
                   onClick={onResumeEntryMission}
                   className="inline-flex items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
                 >
-                  Retomar no AI Chat
+                  Resume in AI Chat
                 </button>
               ) : null}
               {onDismissEntryIntent ? (
@@ -204,7 +206,7 @@ export function DashboardShell({
                   onClick={onDismissEntryIntent}
                   className="inline-flex items-center justify-center rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"
                 >
-                  Ocultar contexto
+                  Hide context
                 </button>
               ) : null}
             </div>
@@ -223,7 +225,7 @@ export function DashboardShell({
         {sidebarOpen && (
           <button
             type="button"
-            aria-label="Fechar menu lateral"
+            aria-label="Close sidebar menu"
             className="fixed inset-0 z-40 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] md:hidden"
             onClick={onCloseSidebar}
           />

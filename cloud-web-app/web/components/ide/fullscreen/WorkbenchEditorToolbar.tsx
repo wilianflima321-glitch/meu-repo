@@ -157,7 +157,7 @@ export default function WorkbenchEditorToolbar({
             onClick={onFind}
             className={`${actionButtonClass} ${inactiveActionClass}`}
           >
-            Buscar
+            Search
           </button>
           <button
             type="button"
@@ -175,7 +175,7 @@ export default function WorkbenchEditorToolbar({
                 : inactiveActionClass
             }`}
           >
-            {splitEditorOpen ? 'Fechar split' : 'Dividir editor'}
+            {splitEditorOpen ? 'Close split' : 'Split editor'}
           </button>
           {splitEditorOpen && (
             <>
@@ -188,7 +188,7 @@ export default function WorkbenchEditorToolbar({
                     : inactiveActionClass
                 }`}
               >
-                {nextOpenTarget === 'secondary' ? 'Proximo arquivo: lateral' : 'Proximo arquivo: principal'}
+                {nextOpenTarget === 'secondary' ? 'Next file: secondary' : 'Next file: primary'}
               </button>
               <button
                 type="button"

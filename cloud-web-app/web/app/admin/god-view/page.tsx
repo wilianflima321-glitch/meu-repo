@@ -1,432 +1,84 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { AlertCircle, Eye, Monitor, Pause, Play, RefreshCw, Search, Smartphone } from 'lucide-react';
+
+import { logger } from '@/lib/observability/logger';
 import {
-  Eye,
-  Users,
-  Activity,
-  Globe,
-  Monitor,
-  Smartphone,
-  MapPin,
-  Clock,
-  Bot,
-  DollarSign,
-  Pause,
-  Play,
-  Search,
-  Filter,
-  RefreshCw,
-  ChevronDown,
-  AlertCircle,
-  Zap,
-  MousePointer,
-  Code,
-  FileCode,
-  Box
-} from 'lucide-react';
+  parseUserAgent,
+  SessionCard,
+  StatsOverview,
+  WorldMap,
+  type GodViewSessionsResponse,
+  type GodViewStats,
+  type LiveSession,
+} from './page.parts';
 
-// =============================================================================
-// TYPES
-// =============================================================================
+type GodViewSortBy = 'duration' | 'cost' | 'ai';
 
-interface LiveSession {
-  id: string;
-  userId: string;
-  userEmail: string;
-  userName?: string;
-
-  projectId?: string;
-  projectName?: string;
-
-  socketId?: string;
-  ipAddress?: string;
-  userAgent?: string;
-  country?: string;
-  city?: string;
-
-  currentPage?: string;
-  currentTool?: string;
-  lastAction?: string;
-
-  aiCallsCount: number;
-  aiTokensUsed: number;
-  aiCostIncurred: number;
-
-  startedAt: string;
-  lastPingAt: string;
-
-  isActive: boolean;
-
-  // Derived
-  duration: number; // seconds
-  device: 'desktop' | 'mobile' | 'tablet';
-  browser?: string;
-}
-
-interface GodViewStats {
-  totalActive: number;
-  totalAICalls: number;
-  totalAICost: number;
-  totalTokens: number;
-  byCountry: { country: string; count: number }[];
-  byDevice: { device: string; count: number }[];
-  byPlan: { plan: string; count: number }[];
-}
-
-type GodViewSessionsResponse = {
-  sessions?: Array<Omit<LiveSession, 'duration' | 'device' | 'browser'> & {
-    duration?: number;
-    device?: LiveSession['device'];
-    browser?: string;
-  }>;
-  stats: GodViewStats;
+const INITIAL_STATS: GodViewStats = {
+  totalActive: 0,
+  totalAICalls: 0,
+  totalAICost: 0,
+  totalTokens: 0,
+  byCountry: [],
+  byDevice: [],
+  byPlan: [],
 };
 
-// =============================================================================
-// HELPER FUNCTIONS
-// =============================================================================
-
-function parseUserAgent(ua?: string): { device: 'desktop' | 'mobile' | 'tablet'; browser?: string } {
-  if (!ua) return { device: 'desktop' };
-
-  const isMobile = /Mobile|Android|iPhone|iPod/.test(ua);
-  const isTablet = /iPad|Tablet/.test(ua);
-
-  let browser: string | undefined;
-  if (ua.includes('Chrome')) browser = 'Chrome';
-  else if (ua.includes('Firefox')) browser = 'Firefox';
-  else if (ua.includes('Safari')) browser = 'Safari';
-  else if (ua.includes('Edge')) browser = 'Edge';
-
-  return {
-    device: isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop',
-    browser,
-  };
-}
-
-function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-  const hours = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  return `${hours}h ${mins}m`;
-}
-
-function getToolIcon(tool?: string) {
-  if (!tool) return Box;
-  const lower = tool.toLowerCase();
-  if (lower.includes('code') || lower.includes('script')) return Code;
-  if (lower.includes('file')) return FileCode;
-  if (lower.includes('ai') || lower.includes('copilot')) return Bot;
-  return Box;
-}
-
-// =============================================================================
-// COMPONENTS
-// =============================================================================
-
-function StatsOverview({ stats }: { stats: GodViewStats }) {
-  return (
-    <div className="grid grid-cols-4 gap-4 mb-6">
-      <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Usuários ao vivo</span>
-          <Users className="w-4 h-4 text-[var(--aethel-success)]" />
-        </div>
-        <p className="text-3xl font-bold text-[var(--aethel-text-primary)]">{stats.totalActive}</p>
-        <div className="flex items-center gap-2 mt-2">
-          <span className="w-2 h-2 rounded-full bg-[var(--aethel-success)] animate-pulse" />
-          <span className="text-xs text-[var(--aethel-success)]">Ao vivo</span>
-        </div>
-      </div>
-
-      <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Chamadas de IA</span>
-          <Bot className="w-4 h-4 text-[var(--aethel-info)]" />
-        </div>
-        <p className="text-3xl font-bold text-[var(--aethel-text-primary)]">{stats.totalAICalls.toLocaleString()}</p>
-        <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">{stats.totalTokens.toLocaleString()} tokens</p>
-      </div>
-
-      <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Custo de IA (ao vivo)</span>
-          <DollarSign className="w-4 h-4 text-[var(--aethel-warning)]" />
-        </div>
-        <p className="text-3xl font-bold text-[var(--aethel-text-primary)]">${stats.totalAICost.toFixed(2)}</p>
-        <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">Sessões atuais</p>
-      </div>
-
-      <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Região principal</span>
-          <Globe className="w-4 h-4 text-[var(--aethel-info)]" />
-        </div>
-        <p className="text-3xl font-bold text-[var(--aethel-text-primary)]">
-          {stats.byCountry[0]?.country || 'N/D'}
-        </p>
-        <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">
-          {stats.byCountry[0]?.count || 0} usuários
-        </p>
-      </div>
-    </div>
+function filterSessions(sessions: LiveSession[], searchQuery: string): LiveSession[] {
+  if (!searchQuery) return sessions;
+  const q = searchQuery.toLowerCase();
+  return sessions.filter((session) =>
+    session.userEmail.toLowerCase().includes(q) ||
+    session.userName?.toLowerCase().includes(q) ||
+    session.projectName?.toLowerCase().includes(q) ||
+    session.country?.toLowerCase().includes(q)
   );
 }
 
-function SessionCard({
-  session,
-  isExpanded,
-  onToggle
-}: {
-  session: LiveSession;
-  isExpanded: boolean;
-  onToggle: () => void;
-}) {
-  const DeviceIcon = session.device === 'mobile' ? Smartphone : Monitor;
-  const ToolIcon = getToolIcon(session.currentTool);
-
-  return (
-    <div
-      className={`
-        bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg overflow-hidden
-        ${session.aiCostIncurred > 1 ? 'border-l-4 border-l-yellow-500' : ''}
-      `}
-    >
-      {/* Header Row */}
-      <div
-        className="p-4 cursor-pointer hover:bg-[var(--aethel-surface-tertiary)] transition-colors"
-        onClick={onToggle}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Status Indicator */}
-            <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-[var(--aethel-surface-tertiary)] flex items-center justify-center">
-                <span className="text-sm font-medium text-[var(--aethel-text-primary)]">
-                  {session.userName?.charAt(0) || session.userEmail.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[var(--aethel-success)] border-2 border-[var(--aethel-border-primary)]" />
-            </div>
-
-            {/* User Info */}
-            <div>
-              <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
-                {session.userName || session.userEmail}
-              </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                {session.projectName && (
-                  <span className="text-xs text-[var(--aethel-text-tertiary)]">
-                    {session.projectName}
-                  </span>
-                )}
-                {session.country && (
-                  <span className="text-xs text-[var(--aethel-text-tertiary)] flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {session.city && `${session.city}, `}{session.country}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="flex items-center gap-6">
-            <div className="text-right">
-              <p className="text-xs text-[var(--aethel-text-tertiary)]">Duração</p>
-              <p className="text-sm text-[var(--aethel-text-primary)] flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {formatDuration(session.duration)}
-              </p>
-            </div>
-
-            <div className="text-right">
-              <p className="text-xs text-[var(--aethel-text-tertiary)]">Chamadas de IA</p>
-              <p className="text-sm text-[var(--aethel-text-primary)] flex items-center gap-1">
-                <Bot className="w-3 h-3" />
-                {session.aiCallsCount}
-              </p>
-            </div>
-
-            <div className="text-right">
-              <p className="text-xs text-[var(--aethel-text-tertiary)]">Custo</p>
-              <p className={`text-sm font-medium flex items-center gap-1 ${
-                session.aiCostIncurred > 1 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-text-primary)]'
-              }`}>
-                <DollarSign className="w-3 h-3" />
-                {session.aiCostIncurred.toFixed(3)}
-              </p>
-            </div>
-
-            <DeviceIcon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-
-            <ChevronDown className={`w-4 h-4 text-[var(--aethel-text-tertiary)] transition-transform ${
-              isExpanded ? 'rotate-180' : ''
-            }`} />
-          </div>
-        </div>
-      </div>
-
-      {/* Expanded Details */}
-      {isExpanded && (
-        <div className="px-4 pb-4 border-t border-[var(--aethel-border-primary)] pt-4">
-          <div className="grid grid-cols-3 gap-4">
-            {/* Activity */}
-            <div className="space-y-3">
-              <h4 className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Atividade atual</h4>
-
-              <div className="flex items-center gap-2">
-                <MousePointer className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-                <div>
-                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Pagina</p>
-                  <p className="text-sm text-[var(--aethel-text-primary)]">{session.currentPage || 'Desconhecida'}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <ToolIcon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-                <div>
-                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Ferramenta ativa</p>
-                  <p className="text-sm text-[var(--aethel-text-primary)]">{session.currentTool || 'Nenhuma'}</p>
-                </div>
-              </div>
-
-              {session.lastAction && (
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-                  <div>
-                    <p className="text-xs text-[var(--aethel-text-tertiary)]">Ultima acao</p>
-                    <p className="text-sm text-[var(--aethel-text-primary)]">{session.lastAction}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Technical */}
-            <div className="space-y-3">
-              <h4 className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Técnico</h4>
-
-              <div>
-                <p className="text-xs text-[var(--aethel-text-tertiary)]">ID da sessao</p>
-                <p className="text-sm text-[var(--aethel-text-primary)] font-mono">{session.id.slice(0, 12)}...</p>
-              </div>
-
-              <div>
-                <p className="text-xs text-[var(--aethel-text-tertiary)]">Endereco IP</p>
-                <p className="text-sm text-[var(--aethel-text-primary)] font-mono">{session.ipAddress || 'Desconhecido'}</p>
-              </div>
-
-              <div>
-                <p className="text-xs text-[var(--aethel-text-tertiary)]">Navegador</p>
-                <p className="text-sm text-[var(--aethel-text-primary)]">{session.browser || 'Desconhecido'}</p>
-              </div>
-            </div>
-
-            {/* AI Usage */}
-            <div className="space-y-3">
-              <h4 className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Uso de IA</h4>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-[var(--aethel-surface-tertiary)] rounded p-2">
-                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Chamadas</p>
-                  <p className="text-lg font-medium text-[var(--aethel-text-primary)]">{session.aiCallsCount}</p>
-                </div>
-
-                <div className="bg-[var(--aethel-surface-tertiary)] rounded p-2">
-                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Tokens</p>
-                  <p className="text-lg font-medium text-[var(--aethel-text-primary)]">
-                    {session.aiTokensUsed.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-[var(--aethel-surface-tertiary)] rounded p-2">
-                <p className="text-xs text-[var(--aethel-text-tertiary)]">Custo da sessao</p>
-                <p className={`text-xl font-bold ${
-                  session.aiCostIncurred > 1 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-success)]'
-                }`}>
-                  ${session.aiCostIncurred.toFixed(4)}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+function sortSessions(sessions: LiveSession[], sortBy: GodViewSortBy): LiveSession[] {
+  return [...sessions].sort((a, b) => {
+    switch (sortBy) {
+      case 'cost':
+        return b.aiCostIncurred - a.aiCostIncurred;
+      case 'ai':
+        return b.aiCallsCount - a.aiCallsCount;
+      case 'duration':
+        return b.duration - a.duration;
+    }
+  });
 }
 
-function WorldMap({ byCountry }: { byCountry: { country: string; count: number }[] }) {
-  // Simplified text representation - in production use a proper map library
-  const maxCount = Math.max(...byCountry.map(c => c.count), 1);
-
-  return (
-    <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
-      <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
-        <Globe className="w-4 h-4" />
-        Ativos por região
-      </h3>
-
-      <div className="space-y-2">
-        {byCountry.slice(0, 10).map(({ country, count }) => (
-          <div key={country} className="flex items-center gap-3">
-            <span className="text-sm text-[var(--aethel-text-tertiary)] w-20 truncate">{country}</span>
-            <div className="flex-1 h-2 bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[var(--aethel-primary)] rounded-full"
-                style={{ width: `${(count / maxCount) * 100}%` }}
-              />
-            </div>
-            <span className="text-sm text-[var(--aethel-text-secondary)] w-12 text-right">{count}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+function enrichSessions(data: GodViewSessionsResponse): LiveSession[] {
+  return (data.sessions || []).map((session) => {
+    const { device, browser } = parseUserAgent(session.userAgent);
+    const duration = Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 1000);
+    return { ...session, device, browser, duration };
+  });
 }
-
-// =============================================================================
-// MAIN PAGE
-// =============================================================================
 
 export default function GodViewPage() {
   const [sessions, setSessions] = useState<LiveSession[]>([]);
-  const [stats, setStats] = useState<GodViewStats>({
-    totalActive: 0,
-    totalAICalls: 0,
-    totalAICost: 0,
-    totalTokens: 0,
-    byCountry: [],
-    byDevice: [],
-    byPlan: [],
-  });
+  const [stats, setStats] = useState<GodViewStats>(INITIAL_STATS);
   const [loading, setLoading] = useState(true);
   const [paused, setPaused] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'duration' | 'cost' | 'ai'>('duration');
+  const [sortBy, setSortBy] = useState<GodViewSortBy>('duration');
 
   const fetchSessions = useCallback(async () => {
     if (paused) return;
 
     try {
       const res = await fetch('/api/admin/god-view/sessions');
-      if (!res.ok) throw new Error('Falha ao buscar');
-      const data = await res.json() as GodViewSessionsResponse;
+      if (!res.ok) throw new Error('Failed to fetch god-view sessions');
+      const data = (await res.json()) as GodViewSessionsResponse;
 
-      // Enrich sessions with derived data
-      const enriched = (data.sessions || []).map((s) => {
-        const { device, browser } = parseUserAgent(s.userAgent);
-        const duration = Math.floor((Date.now() - new Date(s.startedAt).getTime()) / 1000);
-        return { ...s, device, browser, duration };
-      });
-
-      setSessions(enriched);
+      setSessions(enrichSessions(data));
       setStats(data.stats);
     } catch (error) {
-      console.error('Falha ao buscar sessões:', error);
+      logger.error('admin.god_view.sessions.fetch_failed', error);
     } finally {
       setLoading(false);
     }
@@ -434,49 +86,30 @@ export default function GodViewPage() {
 
   useEffect(() => {
     fetchSessions();
-    const interval = setInterval(fetchSessions, 5000); // 5s refresh for live feel
+    const interval = setInterval(fetchSessions, 5000);
     return () => clearInterval(interval);
   }, [fetchSessions]);
 
-  // Filter and sort sessions
-  const filteredSessions = sessions
-    .filter(s => {
-      if (!searchQuery) return true;
-      const q = searchQuery.toLowerCase();
-      return (
-        s.userEmail.toLowerCase().includes(q) ||
-        s.userName?.toLowerCase().includes(q) ||
-        s.projectName?.toLowerCase().includes(q) ||
-        s.country?.toLowerCase().includes(q)
-      );
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'cost': return b.aiCostIncurred - a.aiCostIncurred;
-        case 'ai': return b.aiCallsCount - a.aiCallsCount;
-        default: return b.duration - a.duration;
-      }
-    });
+  const filteredSessions = sortSessions(filterSessions(sessions, searchQuery), sortBy);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 text-[var(--aethel-text-tertiary)] animate-spin" />
+      <div className="flex h-64 items-center justify-center">
+        <RefreshCw className="h-6 w-6 animate-spin text-[var(--aethel-text-tertiary)]" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-[var(--aethel-text-primary)] flex items-center gap-2">
-            <Eye className="w-6 h-6" />
+          <h1 className="flex items-center gap-2 text-xl font-semibold text-[var(--aethel-text-primary)]">
+            <Eye className="h-6 w-6" />
             Visao total
             {!paused && (
-              <span className="flex items-center gap-1 ml-2 px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)] rounded text-xs">
-                <span className="w-2 h-2 rounded-full bg-[var(--aethel-success)] animate-pulse" />
+              <span className="ml-2 flex items-center gap-1 rounded bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] px-2 py-0.5 text-xs text-[var(--aethel-success)]">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--aethel-success)]" />
                 AO VIVO
               </span>
             )}
@@ -487,59 +120,54 @@ export default function GodViewPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Search */}
           <div className="relative">
-            <Search className="w-4 h-4 text-[var(--aethel-text-tertiary)] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--aethel-text-tertiary)]" />
             <input
               type="text"
-              placeholder="Buscar usuarios, projetos..."
+              placeholder="Search users, projects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] w-64"
+              className="w-64 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] py-2 pl-9 pr-4 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)]"
             />
           </div>
 
-          {/* Sort */}
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-sm text-[var(--aethel-text-primary)]"
+            onChange={(e) => setSortBy(e.target.value as GodViewSortBy)}
+            className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)]"
           >
-            <option value="duration">Ordenar por duração</option>
+            <option value="duration">Ordenar por duracao</option>
             <option value="cost">Ordenar por custo de IA</option>
             <option value="ai">Ordenar por chamadas de IA</option>
           </select>
 
-          {/* Pause/Play */}
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setPaused(!paused)}
-            className={`p-2 rounded-lg border ${
+            className={`rounded-lg border p-2 ${
               paused
                 ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning)]'
                 : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
             title={paused ? 'Retomar atualizacoes ao vivo' : 'Pausar atualizacoes ao vivo'}
           >
-            {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+            {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
           </button>
 
-          {/* Manual Refresh */}
-          <button type="button"
+          <button
+            type="button"
             onClick={fetchSessions}
             aria-label="Atualizar sessoes do god view"
-            className="p-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
+            className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-2 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {/* Stats Overview */}
       <StatsOverview stats={stats} />
 
-      {/* Main Content */}
       <div className="grid grid-cols-3 gap-6">
-        {/* Sessions List */}
         <div className="col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium text-[var(--aethel-text-primary)]">
@@ -548,8 +176,8 @@ export default function GodViewPage() {
           </div>
 
           {filteredSessions.length === 0 ? (
-            <div className="text-center py-12 text-[var(--aethel-text-tertiary)]">
-              <Eye className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <div className="py-12 text-center text-[var(--aethel-text-tertiary)]">
+              <Eye className="mx-auto mb-3 h-12 w-12 opacity-30" />
               <p>Nenhuma sessao ativa no momento</p>
             </div>
           ) : (
@@ -566,14 +194,12 @@ export default function GodViewPage() {
           )}
         </div>
 
-        {/* Side Panel */}
         <div className="space-y-4">
           <WorldMap byCountry={stats.byCountry} />
 
-          {/* Device Breakdown */}
-          <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
-            <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
-              <Monitor className="w-4 h-4" />
+          <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4">
+            <h3 className="mb-4 flex items-center gap-2 text-sm font-medium text-[var(--aethel-text-primary)]">
+              <Monitor className="h-4 w-4" />
               Tipos de dispositivo
             </h3>
 
@@ -582,28 +208,27 @@ export default function GodViewPage() {
                 <div key={device} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {device === 'mobile' ? (
-                      <Smartphone className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
+                      <Smartphone className="h-4 w-4 text-[var(--aethel-text-tertiary)]" />
                     ) : (
-                      <Monitor className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
+                      <Monitor className="h-4 w-4 text-[var(--aethel-text-tertiary)]" />
                     )}
-                    <span className="text-sm text-[var(--aethel-text-secondary)] capitalize">{device}</span>
+                    <span className="text-sm capitalize text-[var(--aethel-text-secondary)]">{device}</span>
                   </div>
-                  <span className="text-sm text-[var(--aethel-text-primary)] font-medium">{count}</span>
+                  <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{count}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* High Cost Alert */}
-          {filteredSessions.some(s => s.aiCostIncurred > 1) && (
-            <div className="bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="w-4 h-4 text-[var(--aethel-warning)]" />
+          {filteredSessions.some((session) => session.aiCostIncurred > 1) && (
+            <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-[var(--aethel-warning)]" />
                 <span className="text-sm font-medium text-[var(--aethel-warning)]">Uso elevado de IA</span>
               </div>
               <p className="text-xs text-[var(--aethel-text-tertiary)]">
-                {filteredSessions.filter(s => s.aiCostIncurred > 1).length} sessao(oes)
-                ultrapassaram $1 em custos de IA nesta sessão.
+                {filteredSessions.filter((session) => session.aiCostIncurred > 1).length} sessao(oes)
+                ultrapassaram $1 em custos de IA nesta sessao.
               </p>
             </div>
           )}

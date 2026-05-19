@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/projects/[id]/invite-links/[linkId]/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +57,7 @@ export async function DELETE(
       message: 'Invite link revoked',
     });
   } catch (error) {
-    console.error('[Invite Link Delete API] Error:', error);
+    routeLogger.error('[Invite Link Delete API] Error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

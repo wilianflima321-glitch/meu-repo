@@ -11,6 +11,7 @@ const log = createComponentLogger('api/lsp/request/route')
 
 interface LSPRequest {
   language: string;
+
   method: string;
   params: unknown;
   id: number;
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
     const result = await session.rpc.sendRequest(safeId ?? 0, method, params ?? {});
     return NextResponse.json({ jsonrpc: '2.0', id: safeId, result });
   } catch (error) {
-    console.error('LSP request failed:', error);
+    log.error('LSP request failed:', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest) {
           error: {
             code: -32010,
             message: 'LSP_RUNTIME_NOT_READY',
-            data: 'typescript-language-server não encontrado no workspace (instale dependências do web).',
+            data: 'typescript-language-server not found in the workspace (install web dependencies).',
           },
         },
         { status: 503 }

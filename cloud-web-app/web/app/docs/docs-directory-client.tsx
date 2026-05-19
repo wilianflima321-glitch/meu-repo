@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { ArrowRight, Book, ChevronRight, Search } from 'lucide-react'
+import { ArrowRight, Book, Code2, Layers, Puzzle, Rocket, Search, ShieldCheck, Terminal, ChevronRight } from 'lucide-react'
 
 import type { DocLink, DocSection } from './docs-content.data'
 
@@ -10,6 +10,16 @@ type DocsDirectoryClientProps = {
   sections: DocSection[]
   quickLinks: DocLink[]
 }
+
+const docIcons = {
+  book: Book,
+  code: Code2,
+  layers: Layers,
+  puzzle: Puzzle,
+  rocket: Rocket,
+  shield: ShieldCheck,
+  terminal: Terminal,
+} as const
 
 export default function DocsDirectoryClient({
   sections,
@@ -80,14 +90,16 @@ export default function DocsDirectoryClient({
 
       <section className="mx-auto mt-12 max-w-6xl px-6">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredSections.map((section) => (
-            <article
-              key={section.title}
-              className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-6 shadow-[0_20px_50px_rgba(2,8,23,0.22)] transition-colors hover:border-[var(--aethel-border-secondary)]"
-            >
-              <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${section.bgColor}`}>
-                <section.icon className={`h-6 w-6 ${section.color}`} />
-              </div>
+          {filteredSections.map((section) => {
+            const Icon = docIcons[section.icon]
+            return (
+              <article
+                key={section.title}
+                className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-6 shadow-[0_20px_50px_rgba(2,8,23,0.22)] transition-colors hover:border-[var(--aethel-border-secondary)]"
+              >
+                <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${section.bgColor}`}>
+                  <Icon className={`h-6 w-6 ${section.color}`} />
+                </div>
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-xl font-semibold text-[var(--aethel-text-primary)]">{section.title}</h2>
@@ -119,7 +131,8 @@ export default function DocsDirectoryClient({
                 ))}
               </ul>
             </article>
-          ))}
+            )
+          })}
         </div>
 
         {!filteredSections.length ? (

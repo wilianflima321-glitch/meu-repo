@@ -179,7 +179,7 @@ export function PropertiesPanel3D({
           type="button"
           className="p-1 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
           title="Reset"
-          aria-label="Resetar propriedades"
+          aria-label="Reset properties"
         >
           <ArrowDown className="w-3.5 h-3.5" />
         </button>
@@ -192,7 +192,7 @@ export function PropertiesPanel3D({
             <button
               type="button"
               onClick={() => setActiveSection(activeSection === sectionIndex ? -1 : sectionIndex)}
-              aria-label={`${activeSection === sectionIndex ? 'Recolher' : 'Expandir'} secao ${section.title}`}
+              aria-label={`${activeSection === sectionIndex ? 'Collapse' : 'Expand'} section ${section.title}`}
               className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
             >
               <div className="flex items-center gap-2">

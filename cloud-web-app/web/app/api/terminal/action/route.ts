@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
 import { 
   getTerminalPtyManager, 
   writeToTerminal,
   resizeTerminal,
   killTerminalSession,
 } from '@/lib/server/terminal-pty-runtime';
+
+const log = createComponentLogger('api/terminal/action/route');
 
 interface TerminalActionRequest {
   sessionId: string;
@@ -112,7 +115,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Terminal action failed:', error);
+    log.error('Terminal action failed', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

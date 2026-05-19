@@ -564,7 +564,7 @@ function NodePalette({ onAddNode }: { onAddNode: (type: string) => void }) {
               const def = NODE_DEFINITIONS[type];
               if (!def) return null;
               return (
-                <button type="button" aria-label={`Adicionar nó ${def.label}`}
+                <button type="button" aria-label={`Add node ${def.label}`}
                   key={type}
                   onClick={() => onAddNode(type)}
                   className="w-full text-left px-2 py-1.5 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded"

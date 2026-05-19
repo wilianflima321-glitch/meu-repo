@@ -26,13 +26,13 @@ export default function AIAgentsPage() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/ai/agents');
-      if (!res.ok) throw new Error('Falha ao carregar fluxos');
+      if (!res.ok) throw new Error('Failed to load fluxos');
       const data = await res.json();
       setWorkflows(Array.isArray(data?.workflows) ? data.workflows : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar fluxos');
+      setError(err instanceof Error ? err.message : 'Error loading fluxos');
     } finally {
       setLoading(false);
     }
@@ -43,7 +43,7 @@ export default function AIAgentsPage() {
   }, [fetchWorkflows]);
 
   const projects = Array.from(
-    new Set(workflows.map((workflow) => workflow.projectName || 'Sem projeto'))
+    new Set(workflows.map((workflow) => workflow.projectName || 'No project'))
   ).sort();
 
   const filteredWorkflows = workflows.filter((workflow) => {
@@ -52,7 +52,7 @@ export default function AIAgentsPage() {
       !term ||
       workflow.title.toLowerCase().includes(term) ||
       workflow.userEmail.toLowerCase().includes(term);
-    const projectName = workflow.projectName || 'Sem projeto';
+    const projectName = workflow.projectName || 'No project';
     const matchesProject = projectFilter === 'all' || projectFilter === projectName;
     return matchesSearch && matchesProject;
   });
@@ -91,13 +91,13 @@ export default function AIAgentsPage() {
           },
           {
             icon: CheckCircle,
-            label: 'Com projeto',
+            label: 'With project',
             value: summary.withProject,
             tone: 'success',
           },
           {
             icon: XCircle,
-            label: 'Sem projeto',
+            label: 'No project',
             value: summary.withoutProject,
             tone: 'warning',
           },
@@ -107,7 +107,7 @@ export default function AIAgentsPage() {
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <input
           type="text"
-          placeholder="Buscar por título ou responsável"
+          placeholder="Search by title or owner"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="border p-2 rounded w-full md:max-w-sm"
@@ -117,7 +117,7 @@ export default function AIAgentsPage() {
           onChange={(e) => setProjectFilter(e.target.value)}
           className="border p-2 rounded text-sm"
         >
-          <option value="all">Todos os projetos</option>
+          <option value="all">All projects</option>
           {projects.map((project) => (
             <option key={project} value={project}>
               {project}
@@ -127,7 +127,7 @@ export default function AIAgentsPage() {
       </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Fluxos ativos</h2>
+        <h2 className="text-lg font-semibold mb-4">Fluxos assets</h2>
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
@@ -142,22 +142,22 @@ export default function AIAgentsPage() {
             </button>
           </div>
         ) : filteredWorkflows.length === 0 ? (
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhum fluxo ativo encontrado.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">No active flow found.</p>
         ) : (
           <ul>
             {filteredWorkflows.map((workflow) => (
               <li key={workflow.id} className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 p-2 border-b">
                 <div>
                   <h3 className="font-semibold">{workflow.title}</h3>
-                  <p className="text-sm text-[var(--aethel-text-secondary)]">Responsável: {workflow.userEmail}</p>
+                  <p className="text-sm text-[var(--aethel-text-secondary)]">Owner: {workflow.userEmail}</p>
                   {workflow.projectName && (
-                    <p className="text-xs text-[var(--aethel-text-tertiary)]">Projeto: {workflow.projectName}</p>
+                    <p className="text-xs text-[var(--aethel-text-tertiary)]">Project: {workflow.projectName}</p>
                   )}
                 </div>
                 <div className="text-xs text-[var(--aethel-text-tertiary)]">
                   Atualizado: {new Date(workflow.updatedAt).toLocaleString()}
                   {workflow.lastUsedAt && (
-                    <div>Último uso: {new Date(workflow.lastUsedAt).toLocaleString()}</div>
+                    <div>Last used: {new Date(workflow.lastUsedAt).toLocaleString()}</div>
                   )}
                 </div>
               </li>

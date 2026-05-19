@@ -24,7 +24,7 @@ const fetcher = async (url: string) => {
   })
   const payload = await response.json().catch(() => null)
   if (!response.ok) {
-    throw new Error(payload?.error || payload?.message || 'Falha ao carregar modo de emergencia')
+    throw new Error(payload?.error || payload?.message || 'Failed to load emergency mode')
   }
   return payload
 }
@@ -69,12 +69,12 @@ export default function AdminEmergencyPage() {
       })
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        throw new Error(payload?.error || payload?.message || 'Falha ao ativar modo de emergencia')
+        throw new Error(payload?.error || payload?.message || 'Failed to activate emergency mode')
       }
       setReason('')
       await mutate()
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Erro ao ativar modo de emergencia')
+      setError(requestError instanceof Error ? requestError.message : 'Error activating emergency mode')
     } finally {
       setPending(null)
     }
@@ -91,11 +91,11 @@ export default function AdminEmergencyPage() {
       })
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        throw new Error(payload?.error || payload?.message || 'Falha ao desativar modo de emergencia')
+        throw new Error(payload?.error || payload?.message || 'Failed to deactivate emergency mode')
       }
       await mutate()
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Erro ao desativar modo de emergencia')
+      setError(requestError instanceof Error ? requestError.message : 'Error deactivating emergency mode')
     } finally {
       setPending(null)
     }
@@ -120,7 +120,7 @@ export default function AdminEmergencyPage() {
 
       <section className="mb-6 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
         {isLoading ? (
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Carregando estado de emergência...</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Loading emergency state...</p>
         ) : state ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -128,7 +128,7 @@ export default function AdminEmergencyPage() {
                 {state.level.toUpperCase()}
               </span>
               <span className="text-xs text-[var(--aethel-text-tertiary)]">
-                {state.enabled ? 'Modo ativo' : 'Modo inativo'}
+                {state.enabled ? 'Mode active' : 'Mode inactive'}
               </span>
             </div>
             <p className="text-sm text-[var(--aethel-text-secondary)]">
@@ -136,8 +136,8 @@ export default function AdminEmergencyPage() {
             </p>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
               {state.activatedAt
-                ? `Última ativação: ${new Date(state.activatedAt).toLocaleString()} por ${state.activatedBy ? 'sistema' : 'desconhecido'}`
-                : 'Nenhuma ativação recente.'}
+                ? `Last activation: ${new Date(state.activatedAt).toLocaleString()} por ${state.activatedBy ? 'system' : 'unknown'}`
+                : 'No recent activation.'}
             </p>
           </div>
         ) : (
@@ -149,9 +149,9 @@ export default function AdminEmergencyPage() {
         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
           <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-[var(--aethel-text-primary)]">
             <ShieldAlert className="h-4 w-4 text-[var(--aethel-warning)]" />
-            Ativar Contingência
+            Activate Contingency
           </h2>
-          <label className="mb-2 block text-xs uppercase tracking-[0.08em] text-[var(--aethel-text-tertiary)]">Nível</label>
+          <label className="mb-2 block text-xs uppercase tracking-[0.08em] text-[var(--aethel-text-tertiary)]">Level</label>
           <select
             value={level}
             onChange={(event) => setLevel(event.target.value as EmergencyLevel)}
@@ -168,7 +168,7 @@ export default function AdminEmergencyPage() {
             onChange={(event) => setReason(event.target.value)}
             rows={4}
             className="mb-4 w-full rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
-            placeholder="Ex: pico de custo IA fora do budget, mitigação temporária ativada."
+            placeholder="Ex: AI cost spike outside budget, temporary mitigation enabled."
           />
 
           <button type="button"
@@ -184,10 +184,10 @@ export default function AdminEmergencyPage() {
         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
           <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-[var(--aethel-text-primary)]">
             <StopCircle className="h-4 w-4 text-[var(--aethel-error)]" />
-            Normalizar Operação
+            Normalize Operation
           </h2>
           <p className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
-            Desativa o modo de contingência e restaura as políticas normais de execução.
+            Deactivates contingency mode and restores normal execution policies.
           </p>
           <button type="button"
             onClick={deactivateEmergency}

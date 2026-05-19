@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
 import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/ai/settings/route');
 
 // =============================================================================
 // AI SETTINGS ADMIN API
@@ -26,7 +29,7 @@ const DEFAULTS: AiSettingsPayload = {
   model: DEFAULT_OPENROUTER_MODEL_ID,
   creditCost: 0.01,
   maxTokens: 1000,
-  policy: 'Bloquear conteúdo prejudicial',
+  policy: 'Block harmful content',
   enabled: true,
 };
 
@@ -70,7 +73,7 @@ export const GET = withAdminAuth(
 
       return NextResponse.json({ data, environment });
     } catch (error) {
-      console.error('[Admin AI Settings] Error:', error);
+      routeLogger.error('[Admin AI Settings] Error:', error);
       return NextResponse.json({ error: 'Failed to fetch AI settings' }, { status: 500 });
     }
   },
@@ -134,7 +137,7 @@ export const PUT = withAdminAuth(
 
       return NextResponse.json({ status: 'ok' });
     } catch (error) {
-      console.error('[Admin AI Settings] Error:', error);
+      routeLogger.error('[Admin AI Settings] Error:', error);
       return NextResponse.json({ error: 'Failed to update AI settings' }, { status: 500 });
     }
   },

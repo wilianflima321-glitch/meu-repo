@@ -42,13 +42,13 @@ export default function Support() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/support/tickets');
-      if (!res.ok) throw new Error('Falha ao carregar chamados');
+      if (!res.ok) throw new Error('Failed to load chamados');
       const data = await res.json();
       setTickets(Array.isArray(data?.tickets) ? data.tickets : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar chamados');
+      setError(err instanceof Error ? err.message : 'Error loading chamados');
     } finally {
       setLoading(false);
     }
@@ -80,8 +80,8 @@ export default function Support() {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className='text-3xl font-bold'>Suporte ao usuário</h1>
-          <p className='text-[var(--aethel-text-secondary)]'>Chamados reais do sistema de suporte.</p>
+          <h1 className='text-3xl font-bold'>Suporte ao user</h1>
+          <p className='text-[var(--aethel-text-secondary)]'>Chamados reais do system de suporte.</p>
           {lastUpdated && (
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
@@ -133,7 +133,7 @@ export default function Support() {
                 priorityFilter === priority ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
-              {priority === 'all' ? 'Todas prioridades' : (priorityLabels[priority] || priority)}
+              {priority === 'all' ? 'All prioridades' : (priorityLabels[priority] || priority)}
             </button>
           ))}
         </div>
@@ -143,7 +143,7 @@ export default function Support() {
         <thead>
           <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'>
             <th className='p-2'>ID</th>
-            <th className='p-2'>Usuário</th>
+            <th className='p-2'>User</th>
             <th className='p-2'>Assunto</th>
             <th className='p-2'>Status</th>
             <th className='p-2'>Prioridade</th>
@@ -154,7 +154,7 @@ export default function Support() {
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={7}>Carregando chamados...</td>
+              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={7}>Loading tickets...</td>
             </tr>
           ) : error ? (
             <tr>

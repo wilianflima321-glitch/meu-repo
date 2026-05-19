@@ -251,7 +251,7 @@ function AssetPreviewModal({
             {!isLoading && !error && isAudioAsset(asset) && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', color: 'var(--aethel-text-primary)' }}>
                 <audio controls src={previewUrl || asset.path} />
-                <span style={{ fontSize: '12px', color: 'var(--aethel-text-tertiary)' }}>Preview de áudio</span>
+                <span style={{ fontSize: '12px', color: 'var(--aethel-text-tertiary)' }}>Audio preview</span>
               </div>
             )}
             {!isLoading && !error && isModelAsset(asset) && (
@@ -260,7 +260,7 @@ function AssetPreviewModal({
               </div>
             )}
             {!isLoading && !error && !isImageAsset(asset) && !isVideoAsset(asset) && !isAudioAsset(asset) && !isModelAsset(asset) && (
-              <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: '13px' }}>Preview não disponível para este tipo.</div>
+              <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: '13px' }}>Preview is not available for this type.</div>
             )}
           </div>
 
@@ -440,9 +440,9 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
 
   const handleDelete = useCallback(async (asset: Asset) => {
     const shouldDelete = await openConfirmDialog({
-      title: 'Excluir asset',
-      message: `Tem certeza que deseja excluir "${asset.name}"?`,
-      confirmText: 'Excluir',
+      title: 'Delete asset',
+      message: `Are you sure you want to delete "${asset.name}"?`,
+      confirmText: 'Delete',
       cancelText: 'Cancel',
     });
     if (!shouldDelete) return;

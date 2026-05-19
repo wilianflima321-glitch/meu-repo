@@ -182,7 +182,7 @@ export function RecentCallsSection({ calls, expandedId, onToggleExpanded }: Rece
         <span className="flex-1">Usuario</span>
         <span className="w-24 text-right">Tokens</span>
         <span className="w-20 text-right">Latencia</span>
-        <span className="w-16 text-right">Custo</span>
+        <span className="w-16 text-right">Cost</span>
       </div>
 
       <div className="max-h-[500px] overflow-auto">

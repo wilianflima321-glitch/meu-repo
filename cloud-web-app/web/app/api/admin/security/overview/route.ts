@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/security/overview/route');
 
 // =============================================================================
 // SECURITY OVERVIEW ADMIN API
@@ -54,7 +57,7 @@ async function getHandler(req: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('[Admin Security] Error:', error);
+    routeLogger.error('[Admin Security] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch security overview' }, { status: 500 });
   }
 }

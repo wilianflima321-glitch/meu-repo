@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getPreviewRuntimeReadiness } from '@/lib/server/preview-runtime-readiness'
 
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/preview/runtime-readiness/route');
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
@@ -20,7 +23,7 @@ export async function GET() {
       }
     )
   } catch (error) {
-    console.error('[preview/runtime-readiness] failed:', error)
+    routeLogger.error('[preview/runtime-readiness] failed:', error)
     return NextResponse.json(
       {
         status: 'partial',

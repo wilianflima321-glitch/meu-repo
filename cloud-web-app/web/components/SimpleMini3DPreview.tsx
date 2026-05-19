@@ -88,7 +88,7 @@ export default function SimpleMini3DPreview() {
       <div className="absolute bottom-2 left-2 text-xs text-[var(--aethel-text-quaternary)] pointer-events-none">
         <div className="flex items-center gap-1">
           <span className="w-1.5 h-1.5 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded-full animate-pulse" />
-          Preview Ativo
+          Preview Active
         </div>
       </div>
 

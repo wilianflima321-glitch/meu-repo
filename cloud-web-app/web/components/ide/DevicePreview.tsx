@@ -112,7 +112,7 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
             onClick={handleResetZoom}
             className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] px-2 transition-colors"
           >
-            Resetar
+            Reset
           </button>
           <button
             type="button"

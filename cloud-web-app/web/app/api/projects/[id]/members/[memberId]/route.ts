@@ -9,6 +9,9 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/projects/[id]/members/[memberId]/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -74,7 +77,7 @@ export async function PATCH(
 			member: updated,
 		});
 	} catch (error) {
-		console.error('Failed to update member:', error);
+		routeLogger.error('Failed to update member:', error);
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
 		return apiInternalError();
@@ -141,7 +144,7 @@ export async function DELETE(
 			message: 'Member removed',
 		});
 	} catch (error) {
-		console.error('Failed to remove member:', error);
+		routeLogger.error('Failed to remove member:', error);
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
 		return apiInternalError();

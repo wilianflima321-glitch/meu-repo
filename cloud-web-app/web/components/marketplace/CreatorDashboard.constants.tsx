@@ -61,9 +61,9 @@ export const DEFAULT_DASHBOARD_STATS: DashboardStats = {
 };
 
 export const REVENUE_PERIOD_OPTIONS = [
-    { value: '7d', label: 'Ultimos 7 dias' },
-    { value: '30d', label: 'Ultimos 30 dias' },
-    { value: '90d', label: 'Ultimos 90 dias' },
+    { value: '7d', label: 'Ultimos 7 days' },
+    { value: '30d', label: 'Ultimos 30 days' },
+    { value: '90d', label: 'Ultimos 90 days' },
     { value: '1y', label: 'Ultimo ano' },
 ] as const;
 
@@ -84,5 +84,5 @@ export const PRIMARY_STAT_CARDS: readonly PrimaryStatCard[] = [
 
 export const HEADER_ACTIONS: readonly DashboardHeaderAction[] = [
     { key: 'settings', label: 'Configuracoes', icon: Settings, variant: 'outline' },
-    { key: 'upload', label: 'Enviar asset', icon: Upload, variant: 'primary' },
+    { key: 'upload', label: 'Send asset', icon: Upload, variant: 'primary' },
 ];

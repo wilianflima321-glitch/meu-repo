@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowRight, CheckCircle2, Mail, ShieldCheck, Users, Workflow } from 'lucide-react'
 
 import PublicHeader from '@/components/ui/PublicHeader'
@@ -11,75 +10,81 @@ import PublicFooter from '@/components/ui/PublicFooter'
 const enterpriseFeatures = [
   {
     icon: ShieldCheck,
-    title: 'Governanca e readiness',
-    desc: 'Controles operacionais, trust pages publicas e estado explicito por superficie.',
+    title: 'Governance and readiness',
+    desc: 'Operational controls, public trust pages, and explicit status by surface.',
   },
   {
     icon: Workflow,
-    title: 'Pesquisa -> plano -> codigo',
-    desc: 'Fluxo unico para times que precisam sair da analise e entrar em execucao.',
+    title: 'Research -> plan -> code',
+    desc: 'One workflow for teams that need to move from analysis into execution.',
   },
   {
     icon: Users,
-    title: 'Procurement com contexto',
-    desc: 'Briefings mais completos ajudam a encurtar a primeira conversa enterprise.',
+    title: 'Procurement with context',
+    desc: 'Complete briefings make the first enterprise conversation shorter and more useful.',
   },
 ]
 
 const DEAL_STEPS = [
-  'Compartilhe contexto do time, necessidades de rollout e requisitos de seguranca ou procurement.',
-  'Nossa equipe recebe o briefing e organiza o proximo passo comercial com a trilha certa.',
-  'Voltamos por email com direcionamento, materiais adicionais e agenda quando necessario.',
+  'Share team context, rollout needs, and security or procurement requirements.',
+  'Our team reviews the briefing and organizes the right commercial next step.',
+  'We reply by email with guidance, additional materials, and scheduling when needed.',
 ]
 
 const SALES_SIGNALS = [
-  'SSO, SAML, rollout e trilha de auditoria entram melhor na conversa enterprise assistida.',
-  'Apps + Pesquisa continuam sendo a frente comercial mais madura do produto.',
-  'Preview, readiness e governanca devem ser tratados no mesmo rollout, nao em trilhas separadas.',
+  'SSO, SAML, rollout, and audit trail fit best in the assisted enterprise path.',
+  'Apps + Research remain the most mature commercial surface of the product.',
+  'Preview, readiness, and governance should be handled in one rollout, not separate tracks.',
 ]
 
 const TRUST_LINKS = [
-  { label: 'Status operacional', href: '/status' },
-  { label: 'Seguranca', href: '/security' },
+  { label: 'Operational status', href: '/status' },
+  { label: 'Security', href: '/security' },
   { label: 'Compliance', href: '/compliance' },
-  { label: 'Roadmap publico', href: '/roadmap' },
-  { label: 'Pack de procurement', href: '/docs/procurement-starter-pack' },
+  { label: 'Public roadmap', href: '/roadmap' },
+  { label: 'Procurement pack', href: '/docs/procurement-starter-pack' },
+]
+
+const SALES_PROOF_CARDS = [
+  { label: 'Rollout', value: '1 track', desc: 'Plan, security review, and procurement in one workflow.' },
+  { label: 'Enterprise', value: 'SAML + SCIM', desc: 'Corporate identity handled as an entry requirement.' },
+  { label: 'Readiness', value: 'Evidence', desc: 'Status, compliance, and clear limits before the call.' },
 ]
 
 const PRIMARY_GOALS = [
-  { value: '', label: 'Selecione' },
-  { value: 'avaliar-piloto', label: 'Avaliar piloto / design partner' },
+  { value: '', label: 'Select' },
+  { value: 'avaliar-piloto', label: 'Evaluate pilot / design partner' },
   { value: 'security-procurement', label: 'Security / procurement review' },
-  { value: 'rollout-enterprise', label: 'Rollout enterprise assistido' },
+  { value: 'rollout-enterprise', label: 'Assisted enterprise rollout' },
   { value: 'pricing-billing', label: 'Pricing, billing ou contrato' },
 ]
 
 const TIMELINE_OPTIONS = [
-  { value: '', label: 'Selecione' },
-  { value: 'exploratorio', label: 'Exploratorio / sem data fechada' },
+  { value: '', label: 'Select' },
+  { value: 'exploratorio', label: 'Exploratory / no fixed date' },
   { value: '0-30', label: '0-30 dias' },
   { value: '30-90', label: '30-90 dias' },
   { value: '90+', label: '90+ dias' },
 ]
 
 const BRIEFING_PREP = [
-  'Liste a superficie em avaliacao: Apps, Pesquisa, preview, readiness comercial ou trust / governance.',
-  'Explique se a conversa depende de identidade corporativa, logging, procurement ou champion tecnico.',
-  'Inclua prazo desejado, tamanho do time e o que precisa estar claro para a proxima etapa.',
+  'List the surface under evaluation: Apps, Research, preview, commercial readiness, or trust/governance.',
+  'Explain whether the conversation depends on corporate identity, logging, procurement, or a technical champion.',
+  'Include desired timeline, team size, and what must be clear for the next step.',
 ]
 
 const BUYER_FAQS = [
   {
-    question: 'Preciso marcar call antes de ler trust material?',
-    answer: 'Nao. O melhor primeiro passo publico hoje e o pack em /docs/procurement-starter-pack junto de /security, /compliance e /status.',
+    question: 'Do I need to schedule a call before reading trust materials?',
+    answer: 'No. The best first public step today is the /docs/procurement-starter-pack together with /security, /compliance, and /status.',
   },
   {
-    question: 'SSO / SAML ja e self-serve?',
-    answer: 'Ainda nao. A conversa certa hoje e assistida, com roteiro enterprise e alinhamento de rollout.',
+    question: 'Is SSO / SAML self-serve today?',
+    answer: 'Not yet. The right path today is assisted, with an enterprise rollout script and alignment.',
   },
   {
-    question: 'O que acelera nossa resposta?',
-    answer: 'Briefings com contexto, timeline, dono da avaliacao e requisitos de seguranca evitam uma primeira resposta vaga.',
+    question: 'What helps you reply faster?',
+    answer: 'Briefings with context, timeline, evaluation owner, and security requirements prevent vague first replies.',
   },
 ]
 
@@ -121,9 +126,9 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
       formData.message.trim(),
       '',
       '--- briefing metadata ---',
-      formData.role.trim() ? `Cargo: ${formData.role.trim()}` : null,
-      formData.teamSize ? `Tamanho do time: ${formData.teamSize}` : null,
-      formData.primaryGoal ? `Objetivo principal: ${PRIMARY_GOALS.find((option) => option.value === formData.primaryGoal)?.label}` : null,
+      formData.role.trim() ? `Role: ${formData.role.trim()}` : null,
+      formData.teamSize ? `Team size: ${formData.teamSize}` : null,
+      formData.primaryGoal ? `Primary goal: ${PRIMARY_GOALS.find((option) => option.value === formData.primaryGoal)?.label}` : null,
       formData.timeline ? `Timeline: ${TIMELINE_OPTIONS.find((option) => option.value === formData.timeline)?.label}` : null,
       source ? `Origem da jornada: ${sourceReasonLabel(source)}` : null,
     ]
@@ -145,7 +150,7 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
 
       const data = await response.json().catch(() => null)
       if (!response.ok || data?.success === false) {
-        throw new Error(data?.error || 'Nao foi possivel enviar seu briefing agora.')
+        throw new Error(data?.error || 'Could not send your briefing right now.')
       }
 
       setSubmitted(true)
@@ -160,7 +165,7 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
         message: '',
       })
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Nao foi possivel enviar seu briefing agora.')
+      setError(submitError instanceof Error ? submitError.message : 'Could not send your briefing right now.')
     } finally {
       setLoading(false)
     }
@@ -177,7 +182,7 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
             </div>
             <h1 className="mt-6 text-3xl font-semibold text-[var(--aethel-text-primary)]">Briefing enviado</h1>
             <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-              Recebemos seu contexto comercial. Nosso objetivo e responder em ate 24 horas uteis com o melhor proximo passo para o seu time.
+              We received your commercial context. Our goal is to reply within one business day with the best next step for your team.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
@@ -217,10 +222,10 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
                 Conversa enterprise
               </div>
               <h1 className="mt-5 max-w-4xl text-4xl font-semibold leading-tight text-[var(--aethel-text-primary)] sm:text-5xl">
-                Fale com vendas e desenhe o melhor rollout para o seu time.
+                Talk with sales and design the right rollout for your team.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--aethel-text-secondary)] sm:text-lg">
-                Compartilhe objetivos, requisitos de seguranca, procurement e contexto operacional. Organizamos a conversa comercial para acelerar avaliacao, plano e proximos passos.
+                Share goals, security requirements, procurement, and operational context. We organize the commercial conversation to accelerate evaluation, planning, and next steps.
               </p>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -252,20 +257,42 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
             </div>
 
             <aside className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-strong))] p-5 shadow-[0_24px_80px_rgba(2,6,23,0.42)]">
-              <div className="overflow-hidden rounded-[22px] border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]">
-                <Image
-                  src="/screenshots/dashboard.png"
-                  alt="Dashboard do Aethel Studio"
-                  width={1600}
-                  height={960}
-                  className="h-auto w-full object-cover"
-                  priority
-                />
+              <div className="rounded-[24px] border border-[var(--aethel-border-primary)] bg-[radial-gradient(circle_at_top_left,color-mix(in_srgb,var(--aethel-info)_18%,transparent),transparent_34%),color-mix(in_srgb,var(--aethel-surface-primary)_78%,transparent)] p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                      Enterprise briefing
+                    </p>
+                    <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">
+                      Less cold-call energy. More useful context.
+                    </h2>
+                  </div>
+                  <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-success-light)]">
+                    Assisted
+                  </span>
+                </div>
+
+                <div className="mt-5 grid gap-3">
+                  {SALES_PROOF_CARDS.map((card) => (
+                    <div
+                      key={card.label}
+                      className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] p-4"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                          {card.label}
+                        </span>
+                        <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">{card.value}</span>
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{card.desc}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
               <div className="mt-5 rounded-[24px] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">O que voce ganha na conversa</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">What you get from the conversation</p>
                 <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                  Recomendacao de plano, orientacao sobre rollout, requisitos enterprise e alinhamento sobre o fluxo ideal para seu time.
+                  Plan recommendation, rollout guidance, enterprise requirements, and alignment on the best workflow for your team.
                 </p>
               </div>
             </aside>
@@ -276,19 +303,19 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Contato comercial</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Compartilhe seu briefing enterprise</h2>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Contact comercial</p>
+                    <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Share your enterprise briefing</h2>
                   </div>
                   <Mail className="mt-1 h-5 w-5 shrink-0 text-[var(--aethel-text-tertiary)]" />
                 </div>
 
                 <p className="max-w-2xl text-sm leading-6 text-[var(--aethel-text-tertiary)]">
-                  Use este formulario para compartilhar contexto comercial, requisitos tecnicos e prioridades de rollout. Nossa equipe responde com direcionamento claro e proximo passo recomendado.
+                  Use this form to share commercial context, technical requirements, and rollout priorities. Our team replies with clear guidance and a recommended next step.
                 </p>
 
                 {source ? (
                   <div className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)]">
-                    Origem detectada: <span className="font-medium text-[var(--aethel-text-primary)]">{sourceReasonLabel(source)}</span>
+                    Detected source: <span className="font-medium text-[var(--aethel-text-primary)]">{sourceReasonLabel(source)}</span>
                   </div>
                 ) : null}
 
@@ -301,7 +328,7 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="contact-sales-name" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
-                      Nome *
+                      Name *
                     </label>
                     <input
                       id="contact-sales-name"
@@ -309,12 +336,12 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
                       value={formData.name}
                       onChange={(event) => setFormData({ ...formData, name: event.target.value })}
                       className={fieldBase}
-                      placeholder="Seu nome"
+                      placeholder="Your name"
                     />
                   </div>
                   <div>
                     <label htmlFor="contact-sales-email" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
-                      Email corporativo *
+                      Work email *
                     </label>
                     <input
                       id="contact-sales-email"
@@ -322,7 +349,7 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
                       value={formData.email}
                       onChange={(event) => setFormData({ ...formData, email: event.target.value })}
                       className={fieldBase}
-                      placeholder="voce@empresa.com"
+                      placeholder="you@company.com"
                     />
                   </div>
                 </div>
@@ -330,7 +357,7 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="contact-sales-company" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
-                      Empresa *
+                      Company *
                     </label>
                     <input
                       id="contact-sales-company"
@@ -338,12 +365,12 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
                       value={formData.company}
                       onChange={(event) => setFormData({ ...formData, company: event.target.value })}
                       className={fieldBase}
-                      placeholder="Nome da empresa"
+                      placeholder="Name da empresa"
                     />
                   </div>
                   <div>
                     <label htmlFor="contact-sales-role" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
-                      Cargo
+                      Role
                     </label>
                     <input
                       id="contact-sales-role"
@@ -351,7 +378,7 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
                       value={formData.role}
                       onChange={(event) => setFormData({ ...formData, role: event.target.value })}
                       className={fieldBase}
-                      placeholder="Seu cargo"
+                      placeholder="Your role"
                     />
                   </div>
                 </div>
@@ -359,7 +386,7 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <label htmlFor="contact-sales-team-size" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
-                      Tamanho do time
+                      Team size
                     </label>
                     <select
                       id="contact-sales-team-size"
@@ -369,14 +396,14 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
                     >
                       {['', '1-10', '11-50', '51-200', '201-500', '500+'].map((value) => (
                         <option key={value || 'blank'} value={value} className="bg-[var(--aethel-surface-primary)]">
-                          {value || 'Selecione'}
+                          {value || 'Select'}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div>
                     <label htmlFor="contact-sales-primary-goal" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
-                      Objetivo principal
+                      Primary goal
                     </label>
                     <select
                       id="contact-sales-primary-goal"
@@ -412,7 +439,7 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
 
                 <div>
                   <label htmlFor="contact-sales-message" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
-                    Contexto e requisitos *
+                    Context and requirements *
                   </label>
                   <textarea
                     id="contact-sales-message"
@@ -420,12 +447,12 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
                     value={formData.message}
                     onChange={(event) => setFormData({ ...formData, message: event.target.value })}
                     className={textAreaBase}
-                    placeholder="Ex: precisamos avaliar SSO assistido, trust artifacts publicos, timeline de rollout, billing enterprise e ownership da revisao de seguranca."
+                    placeholder="Example: we need to evaluate assisted SSO, public trust artifacts, rollout timeline, enterprise billing, and security review ownership."
                   />
                 </div>
 
                 <div className="grid gap-3 rounded-[24px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Como escrever um briefing melhor</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">How to write a better briefing</p>
                   {BRIEFING_PREP.map((item) => (
                     <div key={item} className="flex items-start gap-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
                       <span className="mt-2 inline-flex h-2 w-2 shrink-0 rounded-full bg-[var(--aethel-info-light)]" />
@@ -444,20 +471,20 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
                         : 'cursor-not-allowed border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
                     }`}
                   >
-                    {loading ? 'Enviando briefing...' : 'Enviar briefing para vendas'}
+                    {loading ? 'Sending briefing...' : 'Send briefing to sales'}
                     {!loading ? <ArrowRight className="h-4 w-4" /> : null}
                   </button>
                   <Link
                     href="/docs/procurement-starter-pack"
                     className="inline-flex w-full items-center justify-center rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-6 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]"
                   >
-                    Ler procurement pack
+                    Read procurement pack
                   </Link>
                 </div>
 
                 {!requiredReady ? (
                   <p className="text-xs text-[var(--aethel-text-tertiary)]">
-                    Preencha nome, email, empresa e contexto para enviar o briefing.
+                    Fill in name, email, company, and context to send the briefing.
                   </p>
                 ) : null}
               </form>
@@ -465,7 +492,7 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
 
             <aside className="space-y-5">
               <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Sinais para a conversa</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Signals for the conversation</p>
                 <div className="mt-4 space-y-3">
                   {SALES_SIGNALS.map((item) => (
                     <div key={item} className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] px-4 py-3">
@@ -476,7 +503,7 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
               </div>
 
               <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">O que acontece depois</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">What happens next</p>
                 <div className="mt-4 space-y-3">
                   {DEAL_STEPS.map((item, index) => (
                     <div key={item} className="flex items-start gap-3">
@@ -490,28 +517,28 @@ export default function ContactSalesContent({ initialSource = '' }: { initialSou
               </div>
 
               <div className="rounded-[28px] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] p-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">Starter pack recomendado</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">Recommended starter pack</p>
                 <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                  Se o seu processo envolve buyer, champion tecnico ou seguranca, use primeiro o pack publico para alinhar linguagem e reduzir perguntas repetidas.
+                  If your process includes a buyer, technical champion, or security review, use the public pack first to align language and reduce repeated questions.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Link
                     href="/docs/procurement-starter-pack"
                     className="inline-flex items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-2 text-xs font-semibold text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)]"
                   >
-                    Abrir pack
+                    Open pack
                   </Link>
                   <Link
                     href="/status"
                     className="inline-flex items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-transparent px-3 py-2 text-xs font-semibold text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)]"
                   >
-                    Ver status
+                    View status
                   </Link>
                 </div>
               </div>
 
               <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">FAQ rapida para buyers</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Quick FAQ for buyers</p>
                 <div className="mt-4 space-y-4">
                   {BUYER_FAQS.map((item) => (
                     <div key={item.question} className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] p-4">

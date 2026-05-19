@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/feature-flags/toggle/route');
 
 export const POST = withAdminAuth(
   async (request, { user }) => {
@@ -8,7 +11,7 @@ export const POST = withAdminAuth(
       const body = await request.json();
       const { key, enabled } = body as { key?: string; enabled?: boolean };
       if (!key || typeof enabled !== 'boolean') {
-        return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
+        return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
       }
 
       const flag = await prisma.featureFlag.update({
@@ -31,7 +34,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ item: flag });
     } catch (error) {
-      console.error('[Admin Feature Flags Toggle] Error:', error);
+      routeLogger.error('[Admin Feature Flags Toggle] Error:', error);
       return NextResponse.json({ error: 'Failed to toggle flag' }, { status: 500 });
     }
   },

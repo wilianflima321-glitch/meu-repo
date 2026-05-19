@@ -1,9 +1,21 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { Sparkles } from 'lucide-react'
 
-import { MonacoChatDiffPanel } from '@/components/ide/MonacoChatDiffPanel'
 import type { ChatDiffFile } from '@/lib/ai/ai-apply-bridge'
+
+const MonacoChatDiffPanel = dynamic(
+  () => import('@/components/ide/MonacoChatDiffPanel').then((module) => module.MonacoChatDiffPanel),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-64 items-center justify-center text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+        Loading diff preview...
+      </div>
+    ),
+  }
+)
 
 interface AIChatProposalPreviewProps {
   pendingDiff: ChatDiffFile

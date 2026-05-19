@@ -3,6 +3,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/marketplace/uninstall/route');
 
 interface UninstallRequest {
   extensionId: string;
@@ -70,7 +73,7 @@ export async function POST(request: NextRequest) {
       },
     );
   } catch (error) {
-    console.error('Extension uninstallation failed:', error);
+    routeLogger.error('Extension uninstallation failed:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return NextResponse.json(

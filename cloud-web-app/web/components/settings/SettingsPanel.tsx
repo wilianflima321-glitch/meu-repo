@@ -1,356 +1,31 @@
 'use client';
 
-/**
- * Settings Panel Component
- *
- * Interface completa para configurações com busca,
- * categorias, profiles e sync.
- */
-
-import React, { useState, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useCallback, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Settings,
-  Search,
-  User,
+  AlertCircle,
+  Check,
+  ChevronDown,
+  ChevronRight,
   Cloud,
   CloudOff,
-  RefreshCw,
   Download,
-  Upload,
-  ChevronRight,
-  ChevronDown,
-  Check,
-  X,
   Plus,
-  Trash2,
-  Edit2,
-  Save,
-  Undo,
-  AlertCircle,
-  Info,
+  RefreshCw,
+  Search,
+  Settings,
+  Upload,
+  User,
+  X,
 } from 'lucide-react';
 import {
-  SettingsService,
+  DEFAULT_SETTINGS,
   SETTING_CATEGORIES,
   SETTING_DEFINITIONS,
-  DEFAULT_SETTINGS,
-  UserProfile,
-  SyncState,
-  SettingDefinition,
-  SettingValue,
+  SettingsService,
 } from '@/lib/settings/settings-service';
-
-// ============================================================================
-// STYLES
-// ============================================================================
-
-const colors = {
-  base: 'var(--aethel-surface-primary)',
-  surface0: 'var(--aethel-surface-tertiary)',
-  surface1: 'var(--aethel-surface-quaternary)',
-  surface2: 'var(--aethel-text-quaternary)',
-  text: 'var(--aethel-text-primary)',
-  subtext0: 'var(--aethel-text-tertiary)',
-  subtext1: 'var(--aethel-text-secondary)',
-  blue: 'var(--aethel-info)',
-  green: 'var(--aethel-success-light)',
-  red: 'var(--aethel-error-light)',
-  yellow: 'var(--aethel-warning-light)',
-  mauve: 'var(--aethel-accent-light)',
-  overlay0: 'var(--aethel-text-muted)',
-};
-
-// ============================================================================
-// SETTING INPUT COMPONENT
-// ============================================================================
-
-interface SettingInputProps {
-  settingKey: string;
-  definition?: SettingDefinition;
-  value: SettingValue;
-  onChange: (value: SettingValue) => void;
-  onReset: () => void;
-  isModified: boolean;
-}
-
-type SyncItem = SyncState['syncedItems'][number];
-
-const SYNC_ITEMS: SyncItem[] = ['settings', 'extensions', 'keybindings', 'snippets', 'tasks', 'profiles'];
-
-const SettingInput: React.FC<SettingInputProps> = ({
-  settingKey,
-  definition,
-  value,
-  onChange,
-  onReset,
-  isModified,
-}) => {
-  const type = definition?.type || 'string';
-
-  const renderInput = () => {
-    switch (type) {
-      case 'boolean':
-        return (
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={Boolean(value)}
-              onChange={(e) => onChange(e.target.checked)}
-              style={{
-                width: '18px',
-                height: '18px',
-                accentColor: colors.blue,
-              }}
-            />
-            <span style={{ color: colors.text }}>
-              {value ? 'Ativado' : 'Desativado'}
-            </span>
-          </label>
-        );
-
-      case 'number':
-        return (
-          <input
-            type="number"
-            value={typeof value === 'number' || typeof value === 'string' ? value : ''}
-            onChange={(e) => onChange(Number(e.target.value))}
-            min={definition?.minimum}
-            max={definition?.maximum}
-            style={{
-              width: '120px',
-              padding: '6px 10px',
-              background: colors.surface0,
-              border: `1px solid ${colors.surface1}`,
-              borderRadius: '6px',
-              color: colors.text,
-              fontSize: '14px',
-            }}
-          />
-        );
-
-      case 'enum':
-        return (
-          <select
-            value={typeof value === 'string' || typeof value === 'number' ? value : ''}
-            onChange={(e) => onChange(e.target.value)}
-            style={{
-              padding: '6px 10px',
-              background: colors.surface0,
-              border: `1px solid ${colors.surface1}`,
-              borderRadius: '6px',
-              color: colors.text,
-              fontSize: '14px',
-              minWidth: '200px',
-            }}
-          >
-            {definition?.enum?.map((opt, idx) => (
-              <option key={String(opt)} value={opt}>
-                {opt}
-                {definition.enumDescriptions?.[idx] && ` - ${definition.enumDescriptions[idx]}`}
-              </option>
-            ))}
-          </select>
-        );
-
-      case 'object':
-        return (
-          <textarea
-            value={JSON.stringify(value, null, 2)}
-            onChange={(e) => {
-              try {
-                onChange(JSON.parse(e.target.value));
-              } catch {}
-            }}
-            style={{
-              width: '100%',
-              minHeight: '100px',
-              padding: '8px',
-              background: colors.surface0,
-              border: `1px solid ${colors.surface1}`,
-              borderRadius: '6px',
-              color: colors.text,
-              fontSize: '13px',
-              fontFamily: 'monospace',
-              resize: 'vertical',
-            }}
-          />
-        );
-
-      default:
-        return (
-          <input
-            type="text"
-            value={typeof value === 'string' || typeof value === 'number' ? value : ''}
-            onChange={(e) => onChange(e.target.value)}
-            style={{
-              width: '100%',
-              maxWidth: '400px',
-              padding: '6px 10px',
-              background: colors.surface0,
-              border: `1px solid ${colors.surface1}`,
-              borderRadius: '6px',
-              color: colors.text,
-              fontSize: '14px',
-            }}
-          />
-        );
-    }
-  };
-
-  return (
-    <div
-      style={{
-        padding: '16px',
-        borderBottom: `1px solid ${colors.surface0}`,
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ color: colors.text, fontWeight: 500 }}>{settingKey}</span>
-            {isModified && (
-              <span style={{
-                padding: '2px 6px',
-                background: colors.blue + '30',
-                color: colors.blue,
-                borderRadius: '4px',
-                fontSize: '11px',
-              }}>
-                Modificado
-              </span>
-            )}
-          </div>
-          <p style={{ color: colors.subtext0, fontSize: '13px', margin: '4px 0 0' }}>
-            {definition?.description || 'Sem descrição'}
-          </p>
-        </div>
-
-        {isModified && (
-          <button type="button"
-            onClick={onReset}
-            style={{
-              padding: '4px 8px',
-              background: 'transparent',
-              border: `1px solid ${colors.surface1}`,
-              borderRadius: '4px',
-              color: colors.subtext0,
-              cursor: 'pointer',
-              fontSize: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <Undo size={12} />
-            Resetar
-          </button>
-        )}
-      </div>
-
-      <div style={{ marginTop: '8px' }}>
-        {renderInput()}
-      </div>
-    </div>
-  );
-};
-
-// ============================================================================
-// PROFILE CARD
-// ============================================================================
-
-interface ProfileCardProps {
-  profile: UserProfile;
-  isActive: boolean;
-  onActivate: () => void;
-  onDelete: () => void;
-}
-
-const ProfileCard: React.FC<ProfileCardProps> = ({ profile, isActive, onActivate, onDelete }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      style={{
-        padding: '16px',
-        background: isActive ? colors.blue + '20' : colors.surface0,
-        border: `1px solid ${isActive ? colors.blue : colors.surface1}`,
-        borderRadius: '8px',
-        cursor: 'pointer',
-      }}
-      onClick={onActivate}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              background: colors.surface1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <User size={20} color={colors.text} />
-          </div>
-          <div>
-            <div style={{ color: colors.text, fontWeight: 500 }}>{profile.name}</div>
-            <div style={{ color: colors.subtext0, fontSize: '12px' }}>
-              {Object.keys(profile.settings).length} settings • {profile.extensions.length} extensions
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {isActive && (
-            <span style={{
-              padding: '4px 8px',
-              background: colors.green + '30',
-              color: colors.green,
-              borderRadius: '4px',
-              fontSize: '12px',
-            }}>
-              Ativo
-            </span>
-          )}
-
-          {profile.id !== 'default' && (
-            <button type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              aria-label="Remover configuracao"
-              style={{
-                padding: '6px',
-                background: 'transparent',
-                border: 'none',
-                borderRadius: '4px',
-                color: colors.red,
-                cursor: 'pointer',
-              }}
-            >
-              <Trash2 size={16} />
-            </button>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
+import type { SettingValue, SyncState, UserProfile } from '@/lib/settings/settings-service';
+import { ProfileCard, SettingInput, SYNC_ITEMS, colors } from './SettingsPanel.parts';
 
 interface SettingsPanelProps {
   settingsService: SettingsService;
@@ -482,7 +157,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
           <Settings size={24} color={colors.blue} />
-          <h2 style={{ margin: 0, fontSize: '18px' }}>Configurações</h2>
+          <h2 style={{ margin: 0, fontSize: '18px' }}>Settings</h2>
         </div>
 
         {/* Search */}
@@ -499,7 +174,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
           <Search size={16} color={colors.subtext0} />
           <input
             type="text"
-            placeholder="Buscar configurações..."
+            placeholder="Search settings..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -514,7 +189,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
           {searchQuery && (
             <button type="button"
               onClick={() => setSearchQuery('')}
-              aria-label="Limpar busca de configuracoes"
+              aria-label="Clear settings search"
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -536,9 +211,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
           }}
         >
           {[
-            { id: 'settings' as const, label: 'Configurações', icon: Settings },
-            { id: 'profiles' as const, label: 'Perfis', icon: User },
-            { id: 'sync' as const, label: 'Sincronizar', icon: Cloud },
+            { id: 'settings' as const, label: 'Settings', icon: Settings },
+            { id: 'profiles' as const, label: 'Profiles', icon: User },
+            { id: 'sync' as const, label: 'Sync', icon: Cloud },
           ].map((tab) => (
             <button type="button"
               key={tab.id}
@@ -655,12 +330,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
             >
               <div style={{ marginBottom: '24px' }}>
                 <h3 style={{ margin: '0 0 8px', fontSize: '14px', color: colors.subtext0 }}>
-                  Criar Novo Perfil
+                  Create New Profile
                 </h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <input
                     type="text"
-                    placeholder="Nome do perfil..."
+                    placeholder="Profile name..."
                     value={newProfileName}
                     onChange={(e) => setNewProfileName(e.target.value)}
                     style={{
@@ -689,20 +364,20 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     }}
                   >
                     <Plus size={16} />
-                    Criar
+                    Create
                   </button>
                 </div>
               </div>
 
               <div>
                 <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: colors.subtext0 }}>
-                  Seus Perfis
+                  Your Profiles
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <ProfileCard
                     profile={{
                       id: 'default',
-                      name: 'Perfil Padrão',
+                      name: 'Default profile',
                       settings: {},
                       extensions: [],
                       keybindings: [],
@@ -756,12 +431,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     )}
                     <div>
                       <div style={{ fontWeight: 500, fontSize: '16px' }}>
-                        {syncState.enabled ? 'Sincronização Ativada' : 'Sincronização Desativada'}
+                        {syncState.enabled ? 'Sync enabled' : 'Sync disabled'}
                       </div>
                       <div style={{ color: colors.subtext0, fontSize: '13px' }}>
                         {syncState.lastSync
-                          ? `Última sincronização: ${new Date(syncState.lastSync).toLocaleString()}`
-                          : 'Nunca sincronizado'}
+                          ? `Last sync: ${new Date(syncState.lastSync).toLocaleString()}`
+                          : 'Never synced'}
                       </div>
                     </div>
                   </div>
@@ -790,7 +465,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                               animation: syncState.status === 'syncing' ? 'spin 1s linear infinite' : 'none',
                             }}
                           />
-                          {syncState.status === 'syncing' ? 'Sincronizando...' : 'Sincronizar Agora'}
+                          {syncState.status === 'syncing' ? 'Syncing...' : 'Sync Now'}
                         </button>
                         <button type="button"
                           onClick={handleDisableSync}
@@ -803,7 +478,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                             cursor: 'pointer',
                           }}
                         >
-                          Desativar
+                          Disable
                         </button>
                       </>
                     ) : (
@@ -819,7 +494,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                           fontWeight: 500,
                         }}
                       >
-                        Ativar Sincronização
+                        Enable sync
                       </button>
                     )}
                   </div>
@@ -844,11 +519,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                 )}
               </div>
 
-              {/* Itens Sincronizados */}
+              {/* Synced Items */}
               {syncState.enabled && (
                 <div style={{ marginBottom: '24px' }}>
                   <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: colors.subtext0 }}>
-                    Itens Sincronizados
+                    Synced Items
                   </h3>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                     {SYNC_ITEMS.map((item) => (
@@ -880,10 +555,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                 </div>
               )}
 
-              {/* Importar / Exportar */}
+              {/* Import / Export */}
               <div>
                 <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: colors.subtext0 }}>
-                  Importar / Exportar
+                  Import / Export
                 </h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button type="button"
@@ -901,7 +576,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     }}
                   >
                     <Download size={16} />
-                    Exportar Configurações
+                    Export settings
                   </button>
                   <button type="button"
                     onClick={handleImport}
@@ -918,11 +593,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     }}
                   >
                     <Upload size={16} />
-                    Importar Configurações
+                    Import settings
                   </button>
                 </div>
                 <p style={{ marginTop: '8px', fontSize: '13px', color: colors.subtext0 }}>
-                  Exporte suas configurações para um arquivo JSON para backup ou compartilhar.
+                  Export your settings to a JSON file for backup or sharing.
                 </p>
               </div>
             </motion.div>

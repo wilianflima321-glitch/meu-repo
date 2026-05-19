@@ -3,6 +3,9 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const log = createComponentLogger('api/files/route');
 
 // GET /api/files?projectId=xxx - List files for project
 export async function GET(req: NextRequest) {
@@ -36,7 +39,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(files);
   } catch (error) {
-    console.error('Get files error:', error);
+    log.error('Get files error', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
@@ -90,7 +93,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(file);
   } catch (error) {
-    console.error('Save file error:', error);
+    log.error('Save file error', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

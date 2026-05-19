@@ -73,7 +73,7 @@ const sections: TrustSection[] = [
         title: 'Auditorias canonicamente honestas',
         tone: 'live',
         description:
-          'O repositorio mantem auditorias e mapas de execucao que continuam corrigindo drift entre narrativa e codigo. Isso e um ativo real de governanca.',
+          'The repository keeps audits and execution maps that continue correcting drift between narrative and code. This is a real governance asset.',
         bullets: [
           'Os gaps continuam nomeados em vez de escondidos.',
           'As entregas novas ja corrigiram varios claims historicos vencidos.',
@@ -105,7 +105,7 @@ const sections: TrustSection[] = [
         title: 'SSO / SAML ainda precisa de rollout publico',
         tone: 'partial',
         description:
-          'Existe readiness tecnica para OIDC/SAML, mas o conjunto ainda nao aparece como fluxo publico canonico, suportado e pronto para operacao enterprise self-serve.',
+          'Technical readiness exists for OIDC/SAML, but the set does not yet appear as a canonical, supported, public flow ready for enterprise self-serve operation.',
         bullets: [
           'Readiness tecnica nao equivale a rollout comercial fechado.',
           'Faltam docs, onboarding e cobertura publica mais clara.',

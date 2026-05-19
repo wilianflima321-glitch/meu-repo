@@ -5,8 +5,10 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 const execFileAsync = promisify(execFile);
+const routeLogger = createComponentLogger('api.git.branch');
 
 interface GitBranchRequest {
   cwd: string;
@@ -81,7 +83,7 @@ export async function POST(request: NextRequest) {
       message: `Created branch '${sanitizedName}'`
     });
   } catch (error) {
-    console.error('Git branch create failed:', error);
+    routeLogger.error('Git branch create failed', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     
@@ -133,7 +135,7 @@ export async function GET(request: NextRequest) {
       current: currentBranch.trim()
     });
   } catch (error) {
-    console.error('Git branch list failed:', error);
+    routeLogger.error('Git branch list failed', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     
@@ -178,7 +180,7 @@ export async function DELETE(request: NextRequest) {
       message: `Deleted branch '${sanitizedName}'`
     });
   } catch (error) {
-    console.error('Git branch delete failed:', error);
+    routeLogger.error('Git branch delete failed', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     

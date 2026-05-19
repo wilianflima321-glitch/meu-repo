@@ -1,0 +1,120 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
+const ROOT = process.cwd()
+const TARGET_DIRS = ['app', 'components', 'lib']
+const OUT = path.join(ROOT, 'docs', 'BUNDLE_BOUNDARIES_AUDIT.md')
+const EXTENSIONS = new Set(['.ts', '.tsx'])
+const ignoreDirs = new Set(['node_modules', '.next', 'dist', 'build'])
+
+const BUDGETS = {
+  threeDirect: 96,
+  reactThreeFiberDirect: 29,
+  reactThreeDreiDirect: 25,
+  monacoEditorDirect: 33,
+  monacoReactDirect: 6,
+  framerMotionDirect: 26,
+  dynamicImportsMin: 41,
+}
+
+const HEAVY_MODULES = {
+  threeDirect: (source) => source === 'three',
+  reactThreeFiberDirect: (source) => source === '@react-three/fiber',
+  reactThreeDreiDirect: (source) => source === '@react-three/drei',
+  monacoEditorDirect: (source) => source === 'monaco-editor' || source.startsWith('monaco-editor/'),
+  monacoReactDirect: (source) => source === '@monaco-editor/react',
+  framerMotionDirect: (source) => source === 'framer-motion',
+}
+
+function walk(dir, out = []) {
+  if (!fs.existsSync(dir)) return out
+
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (ignoreDirs.has(entry.name)) continue
+    const abs = path.join(dir, entry.name)
+    if (entry.isDirectory()) walk(abs, out)
+    else if (EXTENSIONS.has(path.extname(entry.name))) out.push(abs)
+  }
+
+  return out
+}
+
+function rel(file) {
+  return path.relative(ROOT, file).replace(/\\/g, '/')
+}
+
+function extractStaticImports(content) {
+  const imports = []
+  const importRegex = /^\s*import(?:\s+type)?(?:[\s\S]*?)\s+from\s+['"]([^'"]+)['"]/gm
+  let match
+  while ((match = importRegex.exec(content))) imports.push(match[1])
+  return imports
+}
+
+const files = TARGET_DIRS.flatMap((dir) => walk(path.join(ROOT, dir)))
+const counts = Object.fromEntries(Object.keys(BUDGETS).map((key) => [key, 0]))
+const offenders = Object.fromEntries(Object.keys(HEAVY_MODULES).map((key) => [key, []]))
+
+for (const file of files) {
+  const content = fs.readFileSync(file, 'utf8')
+  const staticImports = extractStaticImports(content)
+  const relative = rel(file)
+
+  for (const [key, predicate] of Object.entries(HEAVY_MODULES)) {
+    const hits = staticImports.filter(predicate)
+    if (hits.length > 0) {
+      counts[key] += hits.length
+      offenders[key].push({ file: relative, hits: hits.length })
+    }
+  }
+
+  const dynamicMatches = content.match(/\bdynamic\s*\(/g)
+  counts.dynamicImportsMin += dynamicMatches?.length ?? 0
+}
+
+const failures = []
+for (const [key, budget] of Object.entries(BUDGETS)) {
+  if (key === 'dynamicImportsMin') {
+    if (counts[key] < budget) failures.push(`${key}=${counts[key]} below min=${budget}`)
+  } else if (counts[key] > budget) {
+    failures.push(`${key}=${counts[key]} above max=${budget}`)
+  }
+}
+
+const report = []
+report.push('# BUNDLE_BOUNDARIES_AUDIT.md')
+report.push('Generated: deterministic local scan')
+report.push('')
+report.push(`- Files scanned: ${files.length}`)
+report.push(`- Failures: ${failures.length}`)
+report.push('')
+report.push('## Counts')
+for (const [key, value] of Object.entries(counts)) {
+  const comparator = key === 'dynamicImportsMin' ? 'min' : 'max'
+  report.push(`- ${key}: ${value} (${comparator} ${BUDGETS[key]})`)
+}
+report.push('')
+report.push('## Top Offenders')
+for (const [key, items] of Object.entries(offenders)) {
+  report.push(`### ${key}`)
+  if (items.length === 0) {
+    report.push('- none')
+    continue
+  }
+  for (const item of items.slice(0, 25)) {
+    report.push(`- ${item.file} (${item.hits})`)
+  }
+}
+report.push('')
+report.push('## Failures')
+if (failures.length === 0) report.push('- none')
+else failures.forEach((failure) => report.push(`- ${failure}`))
+
+fs.writeFileSync(OUT, `${report.join('\n')}\n`, 'utf8')
+
+if (failures.length > 0) {
+  console.error(`[bundle-boundaries] FAIL ${failures.join('; ')} report=${rel(OUT)}`)
+  process.exitCode = 1
+} else {
+  console.log(`[bundle-boundaries] PASS report=${rel(OUT)}`)
+}

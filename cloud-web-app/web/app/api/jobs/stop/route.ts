@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/jobs/stop/route');
 
 function isUnauthorizedError(error: unknown): boolean {
   return error instanceof Error && error.message === 'Unauthorized';
@@ -48,9 +51,9 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
-    console.error('Erro ao pausar fila:', error);
+    routeLogger.error('Error pausing queue:', error);
     return NextResponse.json(
-      { error: 'Erro interno ao pausar fila' },
+      { error: 'Internal error pausing queue' },
       { status: 500 }
     );
   }

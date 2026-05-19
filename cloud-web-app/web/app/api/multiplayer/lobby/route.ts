@@ -15,6 +15,9 @@ import { verifyToken } from '@/lib/auth-server';
 import { nanoid } from 'nanoid';
 import redis from '@/lib/redis-cache';
 import crypto from 'crypto';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/multiplayer/lobby/route');
 
 // ============================================================================
 // SCHEMAS
@@ -251,7 +254,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Create lobby error:', error);
+    routeLogger.error('Create lobby error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -333,7 +336,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.error('List lobbies error:', error);
+    routeLogger.error('List lobbies error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

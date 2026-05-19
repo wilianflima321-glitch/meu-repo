@@ -9,8 +9,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+const log = createComponentLogger('api/ai/thinking/route');
 const SIMULATION_DISABLED = process.env.AETHEL_DISABLE_SIMULATION !== 'false';
 
 interface ThinkingStep {
@@ -95,7 +97,7 @@ export async function GET(
 
     return NextResponse.json(withThinkingMeta(session));
   } catch (error) {
-    console.error('Thinking GET error:', error);
+    log.error('Thinking GET error', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -161,7 +163,7 @@ export async function POST(
       }
     );
   } catch (error) {
-    console.error('Thinking POST error:', error);
+    log.error('Thinking POST error', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -175,7 +177,7 @@ function generateThinkingSteps(prompt: string): ThinkingStep[] {
     {
       id: `step_${now}_1`,
       type: 'analyze',
-      title: 'Analisando solicitação',
+      title: 'Analyzing request',
       description: 'Interpretando o contexto e identificando requisitos',
       status: 'active',
       startTime: now,
@@ -185,7 +187,7 @@ function generateThinkingSteps(prompt: string): ThinkingStep[] {
       id: `step_${now}_2`,
       type: 'research',
       title: 'Pesquisando contexto',
-      description: 'Buscando informações relevantes no projeto',
+      description: 'Searching relevant project information',
       status: 'pending',
       confidence: 0.9,
     },
@@ -193,15 +195,15 @@ function generateThinkingSteps(prompt: string): ThinkingStep[] {
       id: `step_${now}_3`,
       type: 'plan',
       title: 'Planejando abordagem',
-      description: 'Definindo estratégia de implementação',
+      description: 'Defining implementation strategy',
       status: 'pending',
       confidence: 0.85,
     },
     {
       id: `step_${now}_4`,
       type: 'implement',
-      title: 'Gerando solução',
-      description: 'Escrevendo código e assets necessários',
+      title: 'Generating solution',
+      description: 'Writing required code and assets',
       status: 'pending',
       confidence: 0.88,
     },
@@ -209,7 +211,7 @@ function generateThinkingSteps(prompt: string): ThinkingStep[] {
       id: `step_${now}_5`,
       type: 'validate',
       title: 'Validando resultado',
-      description: 'Verificando qualidade e correção',
+      description: 'Checking quality and correctness',
       status: 'pending',
       confidence: 0.92,
     },

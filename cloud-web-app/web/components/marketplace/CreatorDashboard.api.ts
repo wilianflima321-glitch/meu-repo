@@ -32,7 +32,7 @@ async function buildApiError(response: Response, fallbackMessage: string): Promi
 export async function fetchCreatorStats(): Promise<DashboardStats> {
     const response = await fetch('/api/marketplace/creator/stats');
     if (!response.ok) {
-        throw await buildApiError(response, 'Falha ao carregar estatisticas do criador');
+        throw await buildApiError(response, 'Failed to load creator statistics');
     }
     return response.json();
 }
@@ -40,7 +40,7 @@ export async function fetchCreatorStats(): Promise<DashboardStats> {
 export async function fetchRevenueData(): Promise<RevenueData[]> {
     const response = await fetch('/api/marketplace/creator/revenue');
     if (!response.ok) {
-        throw await buildApiError(response, 'Falha ao carregar dados de receita');
+        throw await buildApiError(response, 'Failed to load revenue data');
     }
     return response.json();
 }
@@ -48,7 +48,7 @@ export async function fetchRevenueData(): Promise<RevenueData[]> {
 export async function fetchCreatorAssets(): Promise<AssetPerformance[]> {
     const response = await fetch('/api/marketplace/creator/assets');
     if (!response.ok) {
-        throw await buildApiError(response, 'Falha ao carregar assets');
+        throw await buildApiError(response, 'Failed to load assets');
     }
     return response.json();
 }
@@ -56,7 +56,7 @@ export async function fetchCreatorAssets(): Promise<AssetPerformance[]> {
 export async function fetchCategoryBreakdown(): Promise<CategoryData[]> {
     const response = await fetch('/api/marketplace/creator/categories');
     if (!response.ok) {
-        throw await buildApiError(response, 'Falha ao carregar dados de categorias');
+        throw await buildApiError(response, 'Failed to load category data');
     }
     return response.json();
 }
@@ -64,7 +64,7 @@ export async function fetchCategoryBreakdown(): Promise<CategoryData[]> {
 export async function fetchRecentSales(): Promise<RecentSale[]> {
     const response = await fetch('/api/marketplace/creator/sales/recent');
     if (!response.ok) {
-        throw await buildApiError(response, 'Falha ao carregar vendas recentes');
+        throw await buildApiError(response, 'Failed to load recent sales');
     }
     return response.json();
 }
@@ -75,14 +75,14 @@ export function formatTimeAgo(dateString: string): string {
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
 
-    if (diffMins < 1) return 'agora';
-    if (diffMins < 60) return `${diffMins}m atras`;
+    if (diffMins < 1) return 'now';
+    if (diffMins < 60) return `${diffMins}m ago`;
 
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}h atras`;
+    if (diffHours < 24) return `${diffHours}h ago`;
 
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}d atras`;
+    if (diffDays < 7) return `${diffDays}d ago`;
 
-    return date.toLocaleDateString('pt-BR');
+    return date.toLocaleDateString('en-US');
 }

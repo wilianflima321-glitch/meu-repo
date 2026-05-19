@@ -54,7 +54,7 @@ function formatDateTime(value?: string | null): string {
 
 export default function TwoFactorSecurityPanel({
   title = 'Autenticacao de dois fatores',
-  description = 'Fortaleca a conta com um autenticador, codigos de recuperacao e um fluxo claro de revalidacao.',
+  description = 'Strengthen the account with an authenticator, recovery codes, and a clear revalidation flow.',
   variant = 'settings',
   onStatusChange,
 }: TwoFactorSecurityPanelProps) {
@@ -167,7 +167,7 @@ export default function TwoFactorSecurityPanel({
         throw new Error(payload?.error || 'Failed to verify the authenticator code.')
       }
 
-      setNotice('2FA ativado com sucesso. Guarde os codigos de recuperacao em local seguro.')
+      setNotice('2FA activedo com sucesso. Guarde os codigos de recuperacao em local seguro.')
       closeModal()
       await loadStatus()
     } catch (verifyError) {
@@ -194,7 +194,7 @@ export default function TwoFactorSecurityPanel({
         throw new Error(payload?.error || 'Failed to disable 2FA.')
       }
 
-      setNotice('2FA desativado. Recomendamos reativar a protecao quando concluir a manutencao da conta.')
+      setNotice('2FA desactivedo. Recomendamos reactiver a protecao quando concluir a manutencao da conta.')
       closeModal()
       await loadStatus()
     } catch (disableError) {
@@ -247,7 +247,7 @@ export default function TwoFactorSecurityPanel({
   const statusBadge = useMemo(() => {
     if (loading) {
       return {
-        label: 'Verificando',
+        label: 'Checking',
         tone: 'border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]',
         icon: Shield,
       }
@@ -255,7 +255,7 @@ export default function TwoFactorSecurityPanel({
 
     if (status?.twoFactorEnabled) {
       return {
-        label: 'Protecao ativa',
+        label: 'Protecao active',
         tone: 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]',
         icon: ShieldCheck,
       }
@@ -290,11 +290,11 @@ export default function TwoFactorSecurityPanel({
               type="button"
               onClick={() => void loadStatus()}
               disabled={loading || actionLoading}
-              aria-label="Atualizar status de autenticacao de dois fatores"
+              aria-label="Refresh status de autenticacao de dois fatores"
               className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-tertiary)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              Atualizar status
+              Refresh status
             </button>
 
             {status?.twoFactorEnabled ? (
@@ -325,11 +325,11 @@ export default function TwoFactorSecurityPanel({
                     setPassword('')
                   }}
                   disabled={actionLoading}
-                  aria-label="Desativar autenticacao de dois fatores"
+                  aria-label="Desactiver autenticacao de dois fatores"
                   className="inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-sm text-[var(--aethel-error-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <ShieldOff className="h-4 w-4" />
-                  Desativar
+                  Desactiver
                 </button>
               </>
             ) : (
@@ -337,11 +337,11 @@ export default function TwoFactorSecurityPanel({
                 type="button"
                 onClick={() => void handleEnable()}
                 disabled={actionLoading}
-                aria-label="Ativar autenticacao de dois fatores"
+                aria-label="Enable two-factor authentication"
                 className="inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-3 py-2 text-sm text-[var(--aethel-success-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Smartphone className="h-4 w-4" />
-                Ativar 2FA
+                Enable 2FA
               </button>
             )}
           </div>
@@ -440,9 +440,9 @@ export default function TwoFactorSecurityPanel({
                 </div>
                 <h4 className="mt-3 text-xl font-semibold text-[var(--aethel-text-primary)]">
                   {modal === 'setup'
-                    ? 'Ativar autenticacao de dois fatores'
+                    ? 'Enable two-factor authentication'
                     : modal === 'disable'
-                      ? 'Desativar autenticacao de dois fatores'
+                      ? 'Desactiver autenticacao de dois fatores'
                       : 'Generate new backup codes'}
                 </h4>
               </div>
@@ -472,7 +472,7 @@ export default function TwoFactorSecurityPanel({
                     <div className="mx-auto rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-contrast)] p-3">
                       <Image
                         src={setup.qrCode}
-                        alt="QR code para ativar autenticacao de dois fatores"
+                        alt="QR code para activer autenticacao de dois fatores"
                         width={160}
                         height={160}
                         unoptimized
@@ -648,10 +648,10 @@ export default function TwoFactorSecurityPanel({
                   type="button"
                   onClick={() => void confirmSetup()}
                   disabled={actionLoading || authCode.trim().length < 6}
-                  aria-label="Confirmar ativacao da autenticacao de dois fatores"
+                  aria-label="Confirm activecao da autenticacao de dois fatores"
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-4 py-2 text-sm text-[var(--aethel-success-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {actionLoading ? 'Confirmando...' : 'Confirmar ativacao'}
+                  {actionLoading ? 'Confirmando...' : 'Confirm activecao'}
                 </button>
               )}
 
@@ -660,10 +660,10 @@ export default function TwoFactorSecurityPanel({
                   type="button"
                   onClick={() => void confirmDisable()}
                   disabled={actionLoading || authCode.trim().length < 6 || password.trim().length === 0}
-                  aria-label="Confirmar desativacao da autenticacao de dois fatores"
+                  aria-label="Confirm desactivecao da autenticacao de dois fatores"
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-2 text-sm text-[var(--aethel-error-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {actionLoading ? 'Desativando...' : 'Desativar 2FA'}
+                  {actionLoading ? 'Desactivendo...' : 'Desactiver 2FA'}
                 </button>
               )}
 
@@ -678,7 +678,7 @@ export default function TwoFactorSecurityPanel({
                     void handleRegenerateBackupCodes()
                   }}
                   disabled={actionLoading || (backupCodes.length === 0 && authCode.trim().length < 6)}
-                  aria-label={backupCodes.length > 0 ? 'Fechar modal de novos codigos de backup' : 'Confirmar geracao de novos codigos de backup'}
+                  aria-label={backupCodes.length > 0 ? 'Fechar modal de novos codigos de backup' : 'Confirm geracao de novos codigos de backup'}
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-4 py-2 text-sm text-[var(--aethel-info-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {backupCodes.length > 0 ? 'Complete' : actionLoading ? 'Generating...' : 'Generate new codes'}

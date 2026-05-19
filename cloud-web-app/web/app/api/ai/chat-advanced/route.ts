@@ -33,6 +33,14 @@ import { loadProjectRulesContext } from '@/lib/server/project-rules'
 import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models';
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
 import { createComponentLogger } from '@/lib/observability/logger';
+import {
+  SYSTEM_PROMPT,
+  QUALITY_POLICY,
+  MAX_HISTORY_CONTEXT_CHARS,
+  MAX_ROLE_CONTEXT_CHARS,
+  buildSelfQuestioningChecklist,
+  maybeCollectWebBenchmarkContext,
+} from '@/lib/server/advanced-chat-policy';
 
 // Importa web tools para registro
 import '@/lib/ai-web-tools';
@@ -89,150 +97,6 @@ interface ChatResponse {
   };
   traceId?: string;
   traceSummary?: AITraceSummary;
-}
-
-// ============================================================================
-// SYSTEM PROMPTS
-// ============================================================================
-
-const SYSTEM_PROMPT = `Você é o Aethel AI, um assistente de desenvolvimento de jogos e aplicações integrado ao Aethel Engine.
-
-Você tem acesso a ferramentas poderosas para:
-- Criar e editar arquivos de código
-- Gerar imagens, sprites e texturas
-- Criar música e efeitos sonoros
-- Editar vídeos
-- Criar objetos de jogo e níveis
-- Gerar modelos 3D
-
-Quando o usuário pedir para criar algo, use as ferramentas apropriadas.
-Seja conciso e direto. Foque em entregar resultados, não explicações longas.
-Se precisar de mais contexto, pergunte.
-
-Suas capacidades incluem:
-- Criação completa de jogos (2D e 3D)
-- Desenvolvimento web (React, Next.js, Node.js)
-- Design de UI/UX
-- Produção de mídia (áudio, vídeo, imagem)
-- Programação em TypeScript, JavaScript, Python
-
-Sempre responda em português brasileiro.`;
-
-// ============================================================================
-// HANDLER
-// ============================================================================
-
-const QUALITY_POLICY = {
-  standard: `Priorize clareza e resposta direta.`,
-  delivery: `Entregue resposta executavel com passos objetivos, riscos e criterios de aceite.`,
-  studio: `Modo studio obrigatorio:
-- Nao entregue prototipo raso.
-- Nao invente capacidade nao implementada.
-- Inclua checklist de qualidade, riscos e validacoes.
-- Para UI/UX, prefira padroes de mercado com consistencia de acessibilidade e feedback.
-- Se faltar dado critico, explicite a lacuna antes de concluir.`,
-} as const;
-
-const MAX_HISTORY_CONTEXT_CHARS = 12_000;
-const MAX_ROLE_CONTEXT_CHARS = 16_000;
-
-function buildSelfQuestioningChecklist(): string {
-  return [
-    'Perguntas obrigatorias antes de concluir:',
-    '1) Esta resposta executa no estado real do repositorio?',
-    '2) Existe alguma dependencia/contrato que pode quebrar?',
-    '3) Estou propondo algo fora do escopo acordado?',
-    '4) O usuario recebera comportamento funcional, nao fake success?',
-    '5) A UX ficou clara (empty/error/loading/focus/keyboard)?',
-    '6) Quais sao os principais riscos residuais?',
-    '7) Quais validacoes/gates devem rodar para provar entrega?',
-    '8) O resultado esta no nivel studio workflow (sem inflar claim)?',
-  ].join('\n');
-}
-
-function isInterfaceOrUxTask(text: string): boolean {
-  const lower = String(text || '').toLowerCase();
-  return [
-    'interface',
-    'ux',
-    'ui',
-    'usabilidade',
-    'design',
-    'preview',
-    'editor',
-    'dashboard',
-    'layout',
-    'acessibilidade',
-  ].some((token) => lower.includes(token));
-}
-
-async function maybeCollectWebBenchmarkContext(
-  query: string,
-  enabled: boolean
-): Promise<{ summary: string; evidence: Array<{ title: string; url: string }> }> {
-  if (!enabled || !isInterfaceOrUxTask(query)) {
-    return { summary: '', evidence: [] };
-  }
-
-  try {
-    const tavilyKey = process.env.TAVILY_API_KEY;
-    if (tavilyKey) {
-      const response = await fetch('https://api.tavily.com/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          api_key: tavilyKey,
-          query: `${query} best practices interface UX product software IDE`,
-          search_depth: 'advanced',
-          max_results: 3,
-        }),
-        signal: AbortSignal.timeout(8000),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const refs = Array.isArray(data?.results)
-          ? data.results
-              .slice(0, 3)
-              .map((r: { title?: unknown; url?: unknown }) => ({
-                title: String(r?.title || 'reference'),
-                url: String(r?.url || ''),
-              }))
-              .filter((r: { title: string; url: string }) => r.url)
-          : [];
-        if (refs.length > 0) {
-          const summary = refs.map((r: { title: string; url: string }, i: number) => `${i + 1}. ${r.title} (${r.url})`).join('\n');
-          return { summary, evidence: refs };
-        }
-      }
-    }
-
-    const ddg = await fetch(
-      `https://api.duckduckgo.com/?q=${encodeURIComponent(query + ' UX UI best practices')}&format=json&no_html=1`,
-      { signal: AbortSignal.timeout(6000) }
-    );
-    if (ddg.ok) {
-      const data = await ddg.json();
-      const refs: Array<{ title: string; url: string }> = [];
-      if (data?.AbstractURL) {
-        refs.push({ title: String(data?.Heading || 'DuckDuckGo abstract'), url: String(data.AbstractURL) });
-      }
-      const topics = Array.isArray(data?.RelatedTopics) ? data.RelatedTopics : [];
-      for (const topic of topics) {
-        if (refs.length >= 3) break;
-        if (topic?.FirstURL && topic?.Text) {
-          refs.push({ title: String(topic.Text).slice(0, 120), url: String(topic.FirstURL) });
-        }
-      }
-      if (refs.length > 0) {
-        const summary = refs.map((r, i) => `${i + 1}. ${r.title} (${r.url})`).join('\n');
-        return { summary, evidence: refs };
-      }
-    }
-  } catch {
-    // best-effort only
-  }
-
-  return { summary: '', evidence: [] };
 }
 
 function getMissingProviderForModel(
@@ -401,7 +265,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json(
           {
             error: 'AGENTS_LIMIT_EXCEEDED',
-            message: `Seu plano permite no máximo ${limits.maxAgents} agente(s).`,
+            message: `Your plan allows at most ${limits.maxAgents} agent(s).`,
             maxAgents: limits.maxAgents,
           },
           { status: 403 }
@@ -410,7 +274,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       if (stream) {
         return NextResponse.json(
-          { error: 'STREAM_NOT_SUPPORTED_FOR_MULTI_ROLE', message: 'Streaming ainda não suportado no modo multi-role.' },
+          { error: 'STREAM_NOT_SUPPORTED_FOR_MULTI_ROLE', message: 'Streaming is not supported in multi-role mode yet.' },
           { status: 400 }
         );
       }
@@ -496,9 +360,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       if (project) {
         projectContext = `
-Projeto atual: ${project.name}
+Current project: ${project.name}
 Tipo: ${project.template || 'game'}
-Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', ')}
+Recent files: ${project.files.map((f: { path: string }) => f.path).join(', ')}
 `;
       }
     }
@@ -601,7 +465,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
         totalTokens += criticTokensUsed;
         criticSummary = summarizeCritic(criticResult.content);
         if (criticSummary?.verdict && (criticSummary.bullets?.length || 0) > 0) {
-          finalContent = `${finalContent}\n\nCrítico: ${criticSummary.verdict} ${criticSummary.bullets?.slice(0, 3).join(' ')}`;
+          finalContent = `${finalContent}\n\nCritical: ${criticSummary.verdict} ${criticSummary.bullets?.slice(0, 3).join(' ')}`;
         }
       }
 
@@ -644,8 +508,8 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
             traceId,
             summary: `Resposta gerada (multi-role: ${agentCount} agentes).`,
             decisionRecord: {
-              decision: 'Executar Arquiteto/Engenheiro/Crítico internamente e publicar uma resposta consolidada.',
-              reasons: ['Planejamento separado', 'Execução focada', ...(agentCount === 3 ? ['Revisão curta do crítico'] : [])],
+              decision: 'Executar Arquiteto/Engenheiro/Critical internamente e publicar uma resposta consolidada.',
+              reasons: ['Separated planning', 'Focused execution', ...(agentCount === 3 ? ['Short critic review'] : [])],
             },
             evidence: [
               { kind: 'context', label: `historyContextMessages=${messages.length - 1}` },
@@ -682,7 +546,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
           trace: chatResponse.traceSummary,
           kind: 'chat',
           projectId,
-        }).catch((err) => logger.warn('Falha ao persistir trace de chat multi-role', err, { traceId, projectId }));
+        }).catch((err) => logger.warn('Failed to persist multi-role chat trace', err, { traceId, projectId }));
       }
 
       return NextResponse.json(chatResponse);
@@ -724,7 +588,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
             traceId,
             summary: 'Resposta gerada (modo chat).',
             decisionRecord: {
-              decision: 'Responder ao usuário com base no histórico e contexto do projeto.',
+              decision: 'Respond to the user based on history and project context.',
             },
             evidence: [
               {
@@ -768,7 +632,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
         trace: chatResponse.traceSummary,
         kind: 'chat',
         projectId,
-      }).catch((err) => logger.warn('Falha ao persistir trace de chat', err, { traceId, projectId }));
+      }).catch((err) => logger.warn('Failed to persist chat trace', err, { traceId, projectId }));
     }
 
     return NextResponse.json(chatResponse);
@@ -777,7 +641,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
 
-    logger.error('Erro na API de advanced chat', error)
+    logger.error('Advanced chat API error', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
@@ -928,7 +792,7 @@ async function handleAgentRequest(
         kind: 'agent',
         trace: traceSummary,
         projectId,
-      }).catch((err) => logger.warn('Falha ao persistir trace de agent request', err, { traceId, projectId }));
+      }).catch((err) => logger.warn('Failed to persist agent request trace', err, { traceId, projectId }));
     }
 
     return NextResponse.json({
@@ -946,7 +810,7 @@ async function handleAgentRequest(
     });
 
   } catch (error) {
-    logger.error('Erro em execucao de agente', error)
+    logger.error('Agent execution error', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Agent execution failed' },
       { status: 500 }
@@ -1003,14 +867,14 @@ async function handleStreamingResponse(
             evidence: [{ kind: 'context', label: `historyContextMessages=${messages.length - 1}` }],
             telemetry: { model, estimatedTokens, tokensUsed: result.tokensUsed },
           },
-        }).catch((err) => logger.warn('Falha ao persistir trace de streaming', err, { traceId }));
+        }).catch((err) => logger.warn('Failed to persist streaming trace', err, { traceId }));
         const doneData = JSON.stringify({ type: 'done', tokensUsed: result.tokensUsed, traceId });
 				controller.enqueue(encoder.encode(`data: ${doneData}\n\n`));
 
 				controller.close();
 
       } catch (error) {
-        logger.error('Erro no streaming de advanced chat', error, { traceId })
+        logger.error('Advanced chat streaming error', error, { traceId })
         const errorData = JSON.stringify({ 
           type: 'error', 
           error: error instanceof Error ? error.message : 'Stream error' 

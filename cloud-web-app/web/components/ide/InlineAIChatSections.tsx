@@ -108,7 +108,7 @@ export function InlineAIHeader({
                   fontWeight: tokens.typography.fontWeight.semibold,
                 }}
               >
-                Assistente de IA inline
+                Inline AI assistant
               </span>
               <span
                 style={{
@@ -164,7 +164,7 @@ export function InlineAIHeader({
           type="button"
           aria-pressed={showContext}
           aria-controls={contextId}
-          aria-label={showContext ? 'Ocultar detalhes do contexto ativo' : 'Mostrar detalhes do contexto ativo'}
+          aria-label={showContext ? 'Hide active context details' : 'Show active context details'}
           onClick={onToggleContext}
           style={{
             padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
@@ -176,13 +176,13 @@ export function InlineAIHeader({
             cursor: 'pointer',
           }}
         >
-          Contexto
+          Context
         </button>
 
         {onClose && (
           <button
             type="button"
-            aria-label="Fechar chat inline"
+            aria-label="Close inline chat"
             onClick={onClose}
             style={{
               background: 'transparent',

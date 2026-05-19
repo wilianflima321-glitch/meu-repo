@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Bot, DollarSign, Gauge, ShieldAlert, ShieldCheck, TrendingUp, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';

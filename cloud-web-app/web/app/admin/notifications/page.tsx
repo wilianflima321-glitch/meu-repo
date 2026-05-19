@@ -38,14 +38,14 @@ export default function Notifications() {
       params.set('read', readFilter === 'all' ? 'all' : readFilter === 'read' ? 'true' : 'false');
       if (typeFilter !== 'all') params.set('type', typeFilter);
       const res = await fetch(`/api/admin/notifications?${params.toString()}`);
-      if (!res.ok) throw new Error('Falha ao carregar notificações');
+      if (!res.ok) throw new Error('Failed to load notifications');
       const data = await res.json();
       setItems(Array.isArray(data?.items) ? data.items : []);
       setTotals(data?.totals ?? { total: 0, read: 0, unread: 0 });
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar notificações');
+      setError(err instanceof Error ? err.message : 'Error loading notifications');
     } finally {
       setLoading(false);
     }
@@ -68,8 +68,8 @@ export default function Notifications() {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-bold'>Notificações</h1>
-          <p className='text-[var(--aethel-text-secondary)]'>Notificações reais para usuários e administradores.</p>
+          <h1 className='text-3xl font-bold'>Notifications</h1>
+          <p className='text-[var(--aethel-text-secondary)]'>Notifications reais for users e administradores.</p>
           {lastUpdated && (
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
@@ -87,7 +87,7 @@ export default function Notifications() {
         columns={3}
         items={[
           { icon: Bell, label: 'Total', value: totals.total },
-          { icon: CheckCircle, label: 'Lidas', value: totals.read, tone: 'success' },
+          { icon: CheckCircle, label: 'Read', value: totals.read, tone: 'success' },
           { icon: Mail, label: 'Nao lidas', value: totals.unread, tone: 'warning' },
         ]}
       />
@@ -95,7 +95,7 @@ export default function Notifications() {
 <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <input
           type='text'
-          placeholder='Buscar por título, mensagem ou e-mail'
+          placeholder='Search by title, mensagem ou e-mail'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className='border p-2 rounded w-full md:max-w-sm'
@@ -109,7 +109,7 @@ export default function Notifications() {
                 readFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
-              {status === 'all' ? 'Todas' : status === 'read' ? 'Lidas' : 'Não lidas'}
+              {status === 'all' ? 'All' : status === 'read' ? 'Read' : 'Unread'}
             </button>
           ))}
           <select
@@ -130,8 +130,8 @@ export default function Notifications() {
           <thead>
             <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
               <th className='p-2'>Tipo</th>
-              <th className='p-2'>Título</th>
-              <th className='p-2'>Usuário</th>
+              <th className='p-2'>Title</th>
+              <th className='p-2'>User</th>
               <th className='p-2'>Status</th>
               <th className='p-2'>Data</th>
             </tr>
@@ -139,7 +139,7 @@ export default function Notifications() {
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando notificações...</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Loading notifications...</td>
               </tr>
             ) : error ? (
               <tr>
@@ -147,7 +147,7 @@ export default function Notifications() {
               </tr>
             ) : filteredItems.length === 0 ? (
               <tr>
-                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Nenhuma notificação encontrada.</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Nenhuma notificaction encontrada.</td>
               </tr>
             ) : (
               filteredItems.map((item) => (
@@ -159,7 +159,7 @@ export default function Notifications() {
                     <span className={`px-2 py-1 rounded text-xs ${
                       item.read ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                     }`}>
-                      {item.read ? 'Lida' : 'Não lida'}
+                      {item.read ? 'Read' : 'Unread'}
                     </span>
                   </td>
                   <td className='p-2'>{new Date(item.createdAt).toLocaleDateString()}</td>

@@ -5,7 +5,7 @@ import { Clock, DollarSign, Users } from 'lucide-react';
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 /**
- * Admin Subscriptions - Gestão de Planos (dados reais do DB/Stripe config)
+ * Admin Subscriptions - Plan Management (dados reais do DB/Stripe config)
  */
 
 interface PlanSummary {
@@ -29,13 +29,13 @@ export default function AdminSubscriptions() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/subscriptions');
-      if (!res.ok) throw new Error('Falha ao carregar planos');
+      if (!res.ok) throw new Error('Failed to load planos');
       const data = await res.json();
       setPlans(Array.isArray(data?.plans) ? data.plans : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar planos');
+      setError(err instanceof Error ? err.message : 'Error loading planos');
     } finally {
       setLoading(false);
     }
@@ -61,12 +61,12 @@ export default function AdminSubscriptions() {
     <div className='p-6 max-w-7xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-bold'>Gestão de Planos</h1>
+          <h1 className='text-3xl font-bold'>Plan Management</h1>
           <p className='text-[var(--aethel-text-secondary)] mt-2'>
-            Distribuição por plano e MRR baseado nos usuários ativos.
+            Plan distribution and MRR based on active users.
           </p>
           {lastUpdated && (
-            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Updated at {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button type="button"
@@ -81,16 +81,16 @@ export default function AdminSubscriptions() {
         className="mb-6"
         columns={3}
         items={[
-          { icon: Users, label: 'Usuarios totais', value: summary.totalUsers },
+          { icon: Users, label: 'Total users', value: summary.totalUsers },
           { icon: DollarSign, label: 'MRR total (US$)', value: summary.totalMRR.toFixed(2), valuePrefix: 'US$', tone: 'success' },
-          { icon: Clock, label: 'Usuarios em teste', value: summary.trialUsers, tone: 'warning' },
+          { icon: Clock, label: 'Trial users', value: summary.trialUsers, tone: 'warning' },
         ]}
       />
 
 <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <input
           type='text'
-          placeholder='Buscar plano'
+          placeholder='Search plans'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className='border p-2 rounded w-full md:max-w-sm'
@@ -109,9 +109,9 @@ export default function AdminSubscriptions() {
         <table className='w-full'>
           <thead>
             <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
-              <th className='p-3 text-left'>Plano</th>
-              <th className='p-3 text-left'>Preço (US$)</th>
-              <th className='p-3 text-left'>Usuários</th>
+              <th className='p-3 text-left'>Plan</th>
+              <th className='p-3 text-left'>Price (US$)</th>
+              <th className='p-3 text-left'>Users</th>
               <th className='p-3 text-left'>MRR</th>
               <th className='p-3 text-left'>Tipo</th>
             </tr>
@@ -119,7 +119,7 @@ export default function AdminSubscriptions() {
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando planos...</td>
+                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Loading plans...</td>
               </tr>
             ) : error ? (
               <tr>
@@ -127,7 +127,7 @@ export default function AdminSubscriptions() {
               </tr>
             ) : filteredPlans.length === 0 ? (
               <tr>
-                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Nenhum plano encontrado.</td>
+                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>No plan found.</td>
               </tr>
             ) : (
               filteredPlans.map((plan) => (
@@ -151,8 +151,8 @@ export default function AdminSubscriptions() {
       </div>
 
       <div className='mt-6 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4 text-sm text-[var(--aethel-text-secondary)]'>
-        Limitação: preços e identificação de planos vêm da configuração do backend. Tokens, modelos e domínios são
-        definidos no faturamento/Stripe e não são editáveis nesta tela.
+        Limitation: plan prices and identifiers come from backend settings. Tokens, models, and domains are
+        defined in billing/Stripe and are not editable on this screen.
       </div>
     </div>
   );

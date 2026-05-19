@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // =============================================================================
 // DEPLOY ADMIN API
 // =============================================================================
+
+const log = createComponentLogger('api/admin/deploy/route');
 
 export const GET = withAdminAuth(
   async () => {
@@ -13,7 +16,7 @@ export const GET = withAdminAuth(
       const items = await deploymentPipeline.findMany({ orderBy: { updatedAt: 'desc' } });
       return NextResponse.json({ items });
     } catch (error) {
-      console.error('[Admin Deploy] Error:', error);
+      log.error('[Admin Deploy] Error', error);
       return NextResponse.json({ error: 'Failed to fetch pipelines' }, { status: 500 });
     }
   },
@@ -26,7 +29,7 @@ export const POST = withAdminAuth(
       const body = await request.json();
       const { name, provider } = body as { name?: string; provider?: string };
       if (!name) {
-        return NextResponse.json({ error: 'Nome obrigatório' }, { status: 400 });
+        return NextResponse.json({ error: 'Name is required' }, { status: 400 });
       }
 
       const deploymentPipeline = (prisma as any).deploymentPipeline;
@@ -53,7 +56,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ item: pipeline });
     } catch (error) {
-      console.error('[Admin Deploy] Error:', error);
+      log.error('[Admin Deploy] Error', error);
       return NextResponse.json({ error: 'Failed to create pipeline' }, { status: 500 });
     }
   },
@@ -66,7 +69,7 @@ export const PATCH = withAdminAuth(
       const body = await request.json();
       const { id, action, status } = body as { id?: string; action?: 'run' | 'update'; status?: string };
       if (!id) {
-        return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 });
+        return NextResponse.json({ error: 'ID is required' }, { status: 400 });
       }
 
       const deploymentPipeline = (prisma as any).deploymentPipeline;
@@ -93,7 +96,7 @@ export const PATCH = withAdminAuth(
 
       return NextResponse.json({ item: pipeline });
     } catch (error) {
-      console.error('[Admin Deploy] Error:', error);
+      log.error('[Admin Deploy] Error', error);
       return NextResponse.json({ error: 'Failed to update pipeline' }, { status: 500 });
     }
   },

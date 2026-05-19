@@ -41,12 +41,12 @@ interface TaskOpsPanelProps {
 }
 
 const STATUS_LABELS: Record<TaskRecord['status'], string> = {
-  pending: 'pendente',
-  planned: 'planejado',
-  running: 'executando',
-  blocked: 'bloqueado',
-  failed: 'falhou',
-  done: 'concluído',
+  pending: 'pending',
+  planned: 'planned',
+  running: 'running',
+  blocked: 'blocked',
+  failed: 'failed',
+  done: 'done',
 }
 
 const STATUS_TONES: Record<TaskRecord['status'], string> = {
@@ -65,7 +65,7 @@ function getTaskStorageKey(projectId?: string) {
 function formatTimestamp(value?: string) {
   if (!value) return '—'
   try {
-    return new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+    return new Date(value).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })
   } catch {
     return value
   }
@@ -177,7 +177,7 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-3">
         <div className="flex items-center gap-2">
           <ClipboardList className="h-4 w-4 text-[var(--aethel-info-light)]" />
-          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Execução real</span>
+          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Real execution</span>
         </div>
         <button
           type="button"
@@ -186,24 +186,24 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
           className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] disabled:opacity-50"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Atualizar
+          Refresh
         </button>
       </div>
 
       <div className="border-b border-[var(--aethel-border-primary)] p-3">
         <label className="mb-1 block text-[10px] uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
-          Objetivo do plano
+          Plan goal
         </label>
         <textarea
           value={goal}
           onChange={(event) => setGoal(event.target.value)}
           rows={3}
           className="w-full resize-none rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
-          placeholder="Descreva o que precisa ser executado com evidência real..."
+          placeholder="Describe what needs to run with real evidence..."
         />
         <div className="mt-2 flex items-center justify-between">
           <span className="text-[10px] text-[var(--aethel-text-tertiary)]">
-            {taskId ? `Tarefa ativa: ${taskId}` : 'Nenhuma tarefa ativa'}
+            {taskId ? `Active task: ${taskId}` : 'No active task'}
           </span>
           <button
             type="button"
@@ -212,7 +212,7 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
             className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:brightness-110 disabled:opacity-60"
           >
             <Play className="h-3.5 w-3.5" />
-            Criar plano
+            Create plan
           </button>
         </div>
         {error && (
@@ -227,10 +227,10 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--aethel-info-light)]" />
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold text-[var(--aethel-text-primary)]">
-                    Rascunho do modo agente (contrato)
+                    Agent mode draft (contract)
                   </p>
                   <p className="mt-1 text-[10px] leading-relaxed text-[var(--aethel-text-tertiary)]">
-                    API de tarefas indisponível ou incompleta. Isto é a sequência prevista quando o backend estiver ligado — não indica execução real.
+                    Task API is unavailable or incomplete. This is the expected sequence when the backend is connected; it does not indicate real execution.
                   </p>
                 </div>
               </div>
@@ -238,7 +238,7 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
                 type="button"
                 onClick={() => setLocalAgentPreview(null)}
                 className="shrink-0 rounded p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]"
-                aria-label="Fechar rascunho"
+                aria-label="Close draft"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -271,8 +271,8 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
       {!task && (
         <div className="flex flex-1 items-center justify-center p-4 text-center text-xs text-[var(--aethel-text-tertiary)]">
           {localAgentPreview
-            ? 'Quando a API de tarefas estiver disponível, o progresso detalhado aparece nesta área.'
-            : 'Crie um plano para acompanhar a execução.'}
+            ? 'When the task API is available, detailed progress appears in this area.'
+            : 'Create a plan to track execution.'}
         </div>
       )}
 
@@ -282,7 +282,7 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-[var(--aethel-text-primary)]">{task.goal}</p>
-                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Criado em {formatTimestamp(task.createdAt)}</p>
+                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Created at {formatTimestamp(task.createdAt)}</p>
               </div>
               <span className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${STATUS_TONES[task.status]}`}>
                 {STATUS_LABELS[task.status]}

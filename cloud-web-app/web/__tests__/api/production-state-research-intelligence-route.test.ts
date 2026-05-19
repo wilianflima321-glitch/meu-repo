@@ -1,4 +1,4 @@
-﻿import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
 import { PRODUCTION_STATE_SETTINGS_KEY } from '@/lib/production/agentic-production-state'

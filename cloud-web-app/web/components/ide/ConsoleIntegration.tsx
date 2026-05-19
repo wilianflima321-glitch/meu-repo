@@ -241,7 +241,7 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
         >
           {filteredLogs.length === 0 ? (
             <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
-              Nenhum log ainda
+              No log ainda
             </div>
           ) : (
             filteredLogs.map(log => (

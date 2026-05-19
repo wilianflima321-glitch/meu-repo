@@ -292,7 +292,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Buscar..."
+              placeholder="Search..."
               className="w-full px-2 py-1 text-sm bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
             />
           </div>
@@ -311,7 +311,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
                   const colorClass = SYMBOL_COLORS[symbol.kind] || 'text-[var(--aethel-text-tertiary)]';
 
                   return (
-                    <button type="button" aria-label={`Navegar para símbolo ${symbol.name}`}
+                    <button type="button" aria-label={`Navigate to symbol ${symbol.name}`}
                       key={`${symbol.name}-${symbol.range.startLine}`}
                       onClick={() => handleItemClick(item)}
                       className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left transition-colors ${
@@ -652,7 +652,7 @@ export function SymbolOutlinePanel({
 
     return (
       <div key={id}>
-        <button type="button" aria-label={hasChildren ? `Alternar símbolo ${symbol.name}` : `Navegar para símbolo ${symbol.name}`}
+        <button type="button" aria-label={hasChildren ? `Toggle symbol ${symbol.name}` : `Navigate to symbol ${symbol.name}`}
           onClick={() => {
             if (hasChildren) toggleExpanded(id);
             onNavigate?.(symbol);
@@ -704,7 +704,7 @@ export function SymbolOutlinePanel({
           type="text"
           value={filter}
           onChange={e => setFilter(e.target.value)}
-          placeholder="Filtrar simbolos..."
+          placeholder="Filter simbolos..."
           className="w-full px-2 py-1 text-sm bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
         />
       </div>

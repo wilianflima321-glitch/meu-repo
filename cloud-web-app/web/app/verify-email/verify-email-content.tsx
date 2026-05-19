@@ -35,14 +35,14 @@ function VerifyEmailContent() {
 
         const payload = await res.json().catch(() => ({}))
         if (!res.ok) {
-          setError(payload?.error || 'Falha na verificacao do email')
+          setError(payload?.error || 'Email verification failed')
           return
         }
 
         setIsVerified(true)
         setTimeout(() => router.push('/dashboard'), 2500)
       } catch {
-        setError('Erro de rede durante a verificacao')
+        setError('Network error during verification')
       } finally {
         setIsLoading(false)
       }
@@ -61,13 +61,13 @@ function VerifyEmailContent() {
       const res = await fetch('/api/auth/verify-email', { method: 'GET' })
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError(payload?.error || 'Falha ao reenviar email')
+        setError(payload?.error || 'Failed to resend email')
         return
       }
       setError('')
-      toast.success('Email reenviado com sucesso.')
+      toast.success('Verification email sent.')
     } catch {
-      setError('Erro de rede ao reenviar email')
+      setError('Network error while resending email')
     } finally {
       setIsResending(false)
     }
@@ -90,9 +90,9 @@ function VerifyEmailContent() {
           <div className={frameClass}>
             <div className="text-center">
               <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin text-[var(--aethel-primary-light)]" />
-              <h1 className="text-xl font-semibold">Verificando email</h1>
+              <h1 className="text-xl font-semibold">Verifying email</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
-                Validando seu link de acesso.
+                Validating your access link.
               </p>
             </div>
           </div>
@@ -102,15 +102,15 @@ function VerifyEmailContent() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
                 <CheckCircle className="h-7 w-7 text-[var(--aethel-success)]" />
               </div>
-              <h1 className="text-xl font-semibold">Email verificado</h1>
+              <h1 className="text-xl font-semibold">Email verified</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
-                Conta validada. Redirecionando para o painel.
+                Account verified. Redirecting to the dashboard.
               </p>
               <Link
                 href="/dashboard"
                 className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] mt-6 rounded-xl px-5 py-2 text-sm font-semibold"
               >
-                Ir para dashboard
+                Open dashboard
               </Link>
             </div>
           </div>
@@ -120,9 +120,9 @@ function VerifyEmailContent() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--aethel-primary)]/10">
                 <Mail className="h-7 w-7 text-[var(--aethel-primary-light)]" />
               </div>
-              <h1 className="text-xl font-semibold">Confirme seu email</h1>
+              <h1 className="text-xl font-semibold">Confirm your email</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
-                Abra o link enviado para ativar sua conta.
+                Open the link we sent to activate your account.
               </p>
               <div className="mt-5 space-y-3">
                 <button
@@ -136,13 +136,13 @@ function VerifyEmailContent() {
                   ) : (
                     <RefreshCw className="h-4 w-4" />
                   )}
-                  {isResending ? 'Enviando...' : 'Reenviar verificacao'}
+                  {isResending ? 'Sending...' : 'Resend verification'}
                 </button>
                 <Link
                   href="/dashboard"
                   className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] w-full rounded-xl px-4 py-2 text-sm font-semibold"
                 >
-                  Continuar para dashboard
+                  Continue to dashboard
                 </Link>
               </div>
               {error ? (
@@ -156,9 +156,9 @@ function VerifyEmailContent() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--aethel-error)]/10">
                 <XCircle className="h-7 w-7 text-[var(--aethel-error)]" />
               </div>
-              <h1 className="text-xl font-semibold">Falha na verificacao</h1>
+              <h1 className="text-xl font-semibold">Verification failed</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
-                {error || 'Link invalido ou expirado.'}
+                {error || 'Invalid or expired link.'}
               </p>
               <div className="mt-5 space-y-3">
                 <button
@@ -172,13 +172,13 @@ function VerifyEmailContent() {
                   ) : (
                     <RefreshCw className="h-4 w-4" />
                   )}
-                  {isResending ? 'Enviando...' : 'Solicitar novo link'}
+                  {isResending ? 'Sending...' : 'Request a new link'}
                 </button>
                 <Link
                   href="/login"
                   className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] w-full rounded-xl px-4 py-2 text-sm font-semibold"
                 >
-                  Voltar para login
+                  Back to sign in
                 </Link>
               </div>
             </div>

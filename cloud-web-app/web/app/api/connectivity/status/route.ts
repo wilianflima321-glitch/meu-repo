@@ -4,6 +4,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { optionalEnv } from '@/lib/env';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/connectivity/status/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +62,7 @@ export async function GET(req: NextRequest) {
             status_code: null,
           },
         ],
-        message: 'API Next.js ativa (health disponível).',
+        message: 'Next.js API active (health available).',
       },
       {
         name: 'database',
@@ -73,7 +76,7 @@ export async function GET(req: NextRequest) {
           },
         ],
         latency_ms: dbProbe.latency_ms,
-        message: dbProbe.ok ? 'Conexão ok.' : 'Falha na conexão com banco.',
+        message: dbProbe.ok ? 'Connection ok.' : 'Database connection failed.',
       },
       {
         name: 'stripe',
@@ -83,7 +86,7 @@ export async function GET(req: NextRequest) {
             url: 'stripe://STRIPE_SECRET_KEY',
             healthy: stripeConfigured,
             latency_ms: null,
-            error: stripeConfigured ? null : 'Stripe não configurado',
+            error: stripeConfigured ? null : 'Stripe not configured',
           },
         ],
         message: stripeConfigured ? 'Stripe configurado.' : 'Stripe ausente (checkout retorna 503).',
@@ -101,7 +104,7 @@ export async function GET(req: NextRequest) {
       services,
     });
   } catch (error) {
-    console.error('Connectivity status error:', error);
+    routeLogger.error('Connectivity status error:', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

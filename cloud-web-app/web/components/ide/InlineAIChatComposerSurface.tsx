@@ -212,7 +212,7 @@ export function InlineAIComposer({
 
         <button
           type="button"
-          aria-label="Enviar mensagem no chat inline"
+          aria-label="Send mensagem no chat inline"
           onClick={onSend}
           disabled={!hasInput || isLoading}
           style={{
@@ -231,7 +231,7 @@ export function InlineAIComposer({
           }}
         >
           {isLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={16} />}
-          <span>{isLoading ? 'Enviando' : 'Enviar'}</span>
+          <span>{isLoading ? 'Enviando' : 'Send'}</span>
         </button>
       </div>
 

@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     if (!sessionId || !cols || !rows) {
       return NextResponse.json(
-        { error: 'sessionId, cols e rows são obrigatórios' },
+        { error: 'sessionId, cols, and rows are required' },
         { status: 400 }
       );
     }
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const validRows = Math.max(5, Math.min(200, parseInt(rows)));
 
     // Em produção, isso enviaria SIGWINCH para o processo PTY
-    log.info(`[terminal/resize] Redimensionando sessão ${sessionId} para ${validCols}x${validRows}`);
+    log.info(`[terminal/resize] Resizing session ${sessionId} para ${validCols}x${validRows}`);
 
     return NextResponse.json({
       success: true,
@@ -36,9 +36,9 @@ export async function POST(request: NextRequest) {
       rows: validRows,
     });
   } catch (error) {
-    console.error('[terminal/resize] Error:', error);
+    log.error('[terminal/resize] Error', error);
     return NextResponse.json(
-      { error: 'Falha ao redimensionar terminal' },
+      { error: 'Failed to resize terminal' },
       { status: 500 }
     );
   }

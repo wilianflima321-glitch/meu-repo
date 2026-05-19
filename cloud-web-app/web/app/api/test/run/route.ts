@@ -7,6 +7,9 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import { spawn } from 'node:child_process';
 import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/test/run/route');
 
 interface RunTestsRequest {
   adapter: string;
@@ -41,7 +44,7 @@ export async function POST(request: NextRequest) {
 
 		if (adapter !== 'jest' && adapter !== 'pytest' && adapter !== 'gotest') {
 			return NextResponse.json(
-				{ success: false, error: 'UNSUPPORTED_ADAPTER', message: `Adapter não suportado: ${adapter}` },
+				{ success: false, error: 'UNSUPPORTED_ADAPTER', message: `Unsupported adapter: ${adapter}` },
 				{ status: 422 }
 			);
 		}
@@ -51,7 +54,7 @@ export async function POST(request: NextRequest) {
 				{
 					success: false,
 					error: 'RUNNER_NOT_CONFIGURED',
-					message: `Runner server-side para ${adapter} não está configurado neste build.`,
+					message: `Server-side runner for ${adapter} is not configured in this build.`,
 				},
 				{ status: 422 }
 			);
@@ -152,7 +155,7 @@ export async function POST(request: NextRequest) {
 			exitCode: code,
 		});
   } catch (error) {
-    console.error('Failed to run tests:', error);
+    routeLogger.error('Failed to run tests:', error);
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
     return NextResponse.json(

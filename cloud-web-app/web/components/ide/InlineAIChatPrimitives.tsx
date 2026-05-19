@@ -141,18 +141,18 @@ export function CodeBlock({
         <div style={{ display: 'flex', gap: tokens.spacing['2'], flexWrap: 'wrap' }}>
           <button
             type="button"
-            aria-label="Copiar bloco de codigo"
+            aria-label="Copy code block"
             onClick={copyToClipboard}
             style={codeActionButtonStyle}
           >
             {copied ? <Check size={12} /> : <Copy size={12} />}
-            {copied ? 'Copiado' : 'Copiar'}
+            {copied ? 'Copied' : 'Copy'}
           </button>
 
           {onReview && (
             <button
               type="button"
-              aria-label="Abrir diff de revisao para o bloco de codigo"
+              aria-label="Open review diff for the code block"
               style={{
                 ...codeActionButtonStyle,
                 background: PRIMARY_GRADIENT,
@@ -168,7 +168,7 @@ export function CodeBlock({
           {onApply && (
             <button
               type="button"
-              aria-label="Aplicar bloco de codigo ao editor"
+              aria-label="Apply code block to editor"
               onClick={() => onApply(block.code)}
               style={codeActionButtonStyle}
             >

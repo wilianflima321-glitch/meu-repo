@@ -9,6 +9,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/projects/[id]/commits/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -73,7 +76,7 @@ export async function GET(
       hasMore: commits.length === limit,
     });
   } catch (error) {
-    console.error('Commits API error:', error);
+    routeLogger.error('Commits API error:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -89,16 +92,16 @@ async function generateProjectCommits(
   
   // Gerar commits baseados na idade do projeto
   const commitMessages = [
-    { msg: 'feat: Adicionado sistema de partículas', type: 'feature' as const },
-    { msg: 'fix: Corrigido bug de colisão', type: 'fix' as const },
+    { msg: 'feat: Added particle system', type: 'feature' as const },
+    { msg: 'fix: Fixed collision bug', type: 'fix' as const },
     { msg: 'asset: Novos modelos de personagem', type: 'asset' as const },
     { msg: 'refactor: Otimizado sistema de LOD', type: 'refactor' as const },
     { msg: 'feat: Implementado ciclo dia/noite', type: 'feature' as const },
-    { msg: 'fix: Vazamento de memória em texturas', type: 'fix' as const },
+    { msg: 'fix: Texture memory leak', type: 'fix' as const },
     { msg: 'asset: Texturas PBR atualizadas', type: 'asset' as const },
-    { msg: 'config: Ajustes de qualidade gráfica', type: 'config' as const },
+    { msg: 'config: Graphics quality adjustments', type: 'config' as const },
     { msg: 'feat: Sistema de save/load', type: 'feature' as const },
-    { msg: 'auto: Snapshot automático', type: 'auto' as const },
+    { msg: 'auto: Automatic snapshot', type: 'auto' as const },
   ];
 
   const numCommits = Math.min(options.limit, 50);
@@ -118,7 +121,7 @@ async function generateProjectCommits(
       shortHash: hash.slice(0, 7),
       message: msgData.msg,
       author: {
-        name: 'Você',
+        name: 'You',
         email: 'user@aethel.studio',
       },
       date: commitTime.toISOString(),

@@ -23,13 +23,13 @@ export default function Compliance() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/compliance');
-      if (!res.ok) throw new Error('Falha ao carregar conformidade');
+      if (!res.ok) throw new Error('Failed to load conformidade');
       const data = await res.json();
       setPolicies(Array.isArray(data?.policies) ? data.policies : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar conformidade');
+      setError(err instanceof Error ? err.message : 'Error loading conformidade');
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ export default function Compliance() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Compliance e Privacidade</h1>
-          <p className='text-[var(--aethel-text-secondary)]'>Políticas legais e auditorias de conformidade.</p>
+          <p className='text-[var(--aethel-text-secondary)]'>Policys legais e audits de conformidade.</p>
           {lastUpdated && (
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
@@ -84,16 +84,16 @@ export default function Compliance() {
         <table className='w-full table-auto'>
           <thead>
             <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
-              <th className='p-2 text-left'>Política</th>
+              <th className='p-2 text-left'>Policy</th>
               <th className='p-2 text-left'>Status</th>
-              <th className='p-2 text-left'>Última auditoria</th>
+              <th className='p-2 text-left'>Last audit</th>
               <th className='p-2 text-left'>Incidentes</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={4}>Carregando políticas...</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={4}>Loading policies...</td>
               </tr>
             ) : error ? (
               <tr>
@@ -101,7 +101,7 @@ export default function Compliance() {
               </tr>
             ) : policies.length === 0 ? (
               <tr>
-                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={4}>Nenhuma política configurada.</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={4}>No policy configured.</td>
               </tr>
             ) : (
               policies.map((policy) => (
@@ -118,7 +118,7 @@ export default function Compliance() {
                       {policy.status === 'active'
                         ? 'Ativa'
                         : policy.status === 'review'
-                        ? 'Revisão'
+                        ? 'Review'
                         : 'Inativa'}
                     </span>
                   </td>
@@ -134,8 +134,8 @@ export default function Compliance() {
       </div>
 
       <div className='mt-6 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4 text-sm text-[var(--aethel-text-secondary)]'>
-        Limitação: políticas são calculadas a partir de logs de auditoria. Para automações legais completas,
-        integrar serviços externos de conformidade.
+        Limitation: policies are calculated from audit logs. For complete legal automations,
+        integrate external compliance services.
       </div>
     </div>
   );

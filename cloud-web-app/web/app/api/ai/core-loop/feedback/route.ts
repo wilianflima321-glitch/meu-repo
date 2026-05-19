@@ -7,8 +7,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromRequest } from '@/lib/auth-server'
 import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger'
 
 export const dynamic = 'force-dynamic'
+const routeLogger = createComponentLogger('api/ai/core-loop/feedback/route')
 
 interface FeedbackPayload {
   runId: string
@@ -73,7 +75,7 @@ export async function POST(req: NextRequest) {
       recordedAt: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('[core-loop/feedback] Error:', error)
+    routeLogger.error('[core-loop/feedback] Error:', error)
     return NextResponse.json(
       { error: 'FEEDBACK_FAILED', message: 'Unable to record feedback.' },
       { status: 500 }

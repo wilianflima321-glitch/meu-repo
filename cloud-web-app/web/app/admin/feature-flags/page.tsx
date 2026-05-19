@@ -38,12 +38,12 @@ export default function FeatureFlagsAdmin() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/feature-flags');
-      if (!res.ok) throw new Error('Falha ao carregar flags');
+      if (!res.ok) throw new Error('Failed to load flags');
       const json = await res.json();
       setFlags(json.items || []);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar flags');
+      setError(err instanceof Error ? err.message : 'Error loading flags');
     } finally {
       setLoading(false);
     }
@@ -65,10 +65,10 @@ export default function FeatureFlagsAdmin() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key, enabled: !enabled }),
       });
-      if (!res.ok) throw new Error('Falha ao atualizar flag');
+      if (!res.ok) throw new Error('Failed to update flag');
       await fetchFlags();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar flag');
+      setError(err instanceof Error ? err.message : 'Error updating flag');
     }
   };
 
@@ -80,11 +80,11 @@ export default function FeatureFlagsAdmin() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error('Falha ao criar flag');
+      if (!res.ok) throw new Error('Failed to create flag');
       setForm({ key: '', name: '', type: 'boolean', percentage: 50, description: '', enabled: true });
       await fetchFlags();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao criar flag');
+      setError(err instanceof Error ? err.message : 'Error creating flag');
     } finally {
       setSaving(false);
     }
@@ -95,7 +95,7 @@ export default function FeatureFlagsAdmin() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Flags de recursos</h1>
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Controle de distribuição e habilitação por ambiente.</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Distribution control and enablement by environment.</p>
         </div>
         <button type="button" onClick={fetchFlags} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
       </div>
@@ -133,7 +133,7 @@ export default function FeatureFlagsAdmin() {
           </select>
           <input
             className='border p-2 rounded text-sm'
-            placeholder='Descrição'
+            placeholder='Description'
             value={form.description}
             onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
           />
@@ -150,7 +150,7 @@ export default function FeatureFlagsAdmin() {
             disabled={saving || !form.key.trim() || !form.name.trim()}
             className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'
           >
-            {saving ? 'Salvando...' : 'Criar flag'}
+            {saving ? 'Saving...' : 'Criar flag'}
           </button>
         </div>
       </div>
@@ -166,7 +166,7 @@ export default function FeatureFlagsAdmin() {
           />
         </div>
         {loading ? (
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando flags...</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Loading flags...</p>
         ) : filtered.length === 0 ? (
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Nenhuma flag encontrada.</p>
         ) : (
@@ -176,9 +176,9 @@ export default function FeatureFlagsAdmin() {
                 <th className='p-2 text-left'>Chave</th>
                 <th className='p-2 text-left'>Nome</th>
                 <th className='p-2 text-left'>Tipo</th>
-                <th className='p-2 text-left'>Distribuição</th>
+                <th className='p-2 text-left'>Distribution</th>
                 <th className='p-2 text-left'>Status</th>
-                <th className='p-2 text-left'>Ações</th>
+                <th className='p-2 text-left'>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -192,7 +192,7 @@ export default function FeatureFlagsAdmin() {
                   </td>
                   <td className='p-2'>
                     <span className='text-xs px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'>
-                      {flag.enabled ? 'Ativo' : 'Inativo'}
+                      {flag.enabled ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                   <td className='p-2'>

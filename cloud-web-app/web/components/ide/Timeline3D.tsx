@@ -71,7 +71,7 @@ export function Timeline3D({
                  'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
                 : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
             }`}
-            title={isPlaying ? 'Pausar' : 'Reproduzir'}
+            title={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
           </button>
@@ -80,7 +80,7 @@ export function Timeline3D({
             type="button"
             onClick={() => onTimeChange(0)}
             className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-            title="Início"
+            title="Start"
           >
             <SkipBack className="w-3.5 h-3.5" />
           </button>
@@ -99,7 +99,7 @@ export function Timeline3D({
           <button
             type="button"
             className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-            title="Adicionar Keyframe"
+            title="Add Keyframe"
           >
             <KeyRound className="w-3.5 h-3.5" />
           </button>
@@ -115,7 +115,7 @@ export function Timeline3D({
           <button
             type="button"
             className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-            title="Adicionar Track"
+            title="Add Track"
           >
             <Plus className="w-3.5 h-3.5" />
           </button>

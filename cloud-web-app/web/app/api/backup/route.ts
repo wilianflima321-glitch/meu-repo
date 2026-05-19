@@ -17,8 +17,11 @@ import {
   getBackupDetails,
   verifyBackupIntegrity 
 } from '@/lib/backup-service';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+
+const routeLogger = createComponentLogger('api.backup');
 
 export async function GET(request: NextRequest) {
   try {
@@ -63,7 +66,7 @@ export async function GET(request: NextRequest) {
       count: backups.length,
     });
   } catch (error) {
-    console.error('Failed to list backups:', error);
+    routeLogger.error('Failed to list backups', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -105,7 +108,7 @@ export async function POST(request: NextRequest) {
       message: `Backup created successfully. ${backup.filesCount} files, ${backup.assetsCount} assets backed up.`,
     });
   } catch (error: unknown) {
-    console.error('Failed to create backup:', error);
+    routeLogger.error('Failed to create backup', error);
     
     if (error instanceof Error && error.message === 'Project not found or access denied') {
       return NextResponse.json(
@@ -141,7 +144,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Backup deleted successfully',
     });
   } catch (error: unknown) {
-    console.error('Failed to delete backup:', error);
+    routeLogger.error('Failed to delete backup', error);
     
     if (error instanceof Error && error.message === 'Project not found or access denied') {
       return NextResponse.json(

@@ -8,6 +8,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/analytics/first-value/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -187,7 +190,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('First-value tracking error:', error);
+    routeLogger.error('First-value tracking error:', error);
     return NextResponse.json(
       { error: 'Failed to track event' },
       { status: 500 }
@@ -262,7 +265,7 @@ export async function GET(req: NextRequest) {
       demoMode: process.env.ENABLE_DEMO_MODE === 'true',
     });
   } catch (error) {
-    console.error('First-value query error:', error);
+    routeLogger.error('First-value query error:', error);
     return NextResponse.json(
       { error: 'Failed to query funnel data' },
       { status: 500 }

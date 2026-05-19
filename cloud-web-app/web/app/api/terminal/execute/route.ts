@@ -5,8 +5,10 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import * as os from 'os';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 const execAsync = promisify(exec);
+const log = createComponentLogger('api/terminal/execute/route');
 
 /**
  * API Route: Terminal Execute
@@ -335,7 +337,11 @@ export async function POST(req: NextRequest): Promise<Response> {
     // Security check
     if (isCommandBlocked(command)) {
       // Log blocked command attempt for audit
-      console.warn(`[SECURITY] User ${user.userId} attempted blocked command: ${command}`);
+      log.warn('[SECURITY] Blocked terminal command attempt', {
+        userId: user.userId,
+        action: 'terminal.command.blocked',
+        command,
+      });
       return NextResponse.json({
         output: '',
         error: 'Command blocked for security reasons.',
@@ -496,7 +502,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     });
     
   } catch (error) {
-    console.error('Terminal execution error:', error);
+    log.error('Terminal execution error', error);
     return NextResponse.json({
       output: '',
       error: error instanceof Error ? error.message : 'Internal server error',

@@ -10,6 +10,9 @@ import { copyObject, headObject, isS3Available, S3_BUCKET } from '@/lib/storage/
 import { copyFile, mkdir, stat } from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/assets/[id]/duplicate/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -166,7 +169,7 @@ export async function POST(
       asset: duplicated,
     });
   } catch (error) {
-    console.error('Duplicate asset error:', error);
+    routeLogger.error('Duplicate asset error:', error);
     if ((error as Error).message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

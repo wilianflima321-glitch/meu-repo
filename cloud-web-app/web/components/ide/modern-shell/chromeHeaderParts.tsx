@@ -32,7 +32,7 @@ const headerPanelItems: ReadonlyArray<{
   icon: React.ReactNode;
   label: string;
 }> = [
-  { panel: 'sidebar', icon: <FolderTree size={16} />, label: 'Arquivos' },
+  { panel: 'sidebar', icon: <FolderTree size={16} />, label: 'Files' },
   { panel: 'chat', icon: <MessageSquare size={16} />, label: 'AI Console' },
   { panel: 'terminal', icon: <TerminalSquare size={16} />, label: 'Terminal' },
   { panel: 'preview', icon: <Play size={16} />, label: 'Visual' },
@@ -277,7 +277,7 @@ export function HeaderPrimaryActions({
         onClick={onRunPrimaryAction}
         disabled={!onRunPrimaryAction}
         style={getPrimaryActionButtonStyle(Boolean(onRunPrimaryAction))}
-        aria-label="Executar acao principal da previa"
+        aria-label="Run primary preview action"
       >
         <Play size={14} />
         Executar
@@ -296,7 +296,7 @@ export function HeaderPrimaryActions({
           background:
             'color-mix(in srgb, var(--aethel-surface-secondary) 58%, transparent)',
         }}
-        aria-label="Abrir configuracoes"
+        aria-label="Open settings"
       >
         <Settings size={18} />
       </button>
@@ -330,7 +330,7 @@ function CommandCenterButton({
       <button
         type="button"
         onClick={() => onOpenCommandPalette('commands')}
-        aria-label="Abrir command center"
+        aria-label="Open command center"
         title="Cmd+K"
         style={commandCenterButtonStyle}
       >
@@ -396,7 +396,7 @@ function CommandCenterButton({
           borderRadius: tokens.radius.full,
           whiteSpace: 'nowrap',
         }}
-        aria-label="Abrir quick open de arquivos"
+        aria-label="Open file quick open"
         title="Cmd+P"
       >
         <Search size={14} />

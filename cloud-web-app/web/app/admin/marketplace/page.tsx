@@ -24,7 +24,7 @@ export default function AdminMarketplace() {
 
   const load = useCallback(async () => {
     setStatus('loading');
-    setMessage('Carregando itens do marketplace...');
+    setMessage('Loading marketplace items...');
     try {
       const res = await fetch('/api/admin/marketplace', { cache: 'no-store' });
       const data = await res.json().catch(() => null);
@@ -32,7 +32,7 @@ export default function AdminMarketplace() {
         const msg =
           (data && typeof data === 'object' && (data as any).message) ||
           (data && typeof data === 'object' && (data as any).error) ||
-          `Falha ao carregar marketplace (HTTP ${res.status}).`;
+          `Failed to load marketplace (HTTP ${res.status}).`;
         throw new Error(String(msg));
       }
 
@@ -43,7 +43,7 @@ export default function AdminMarketplace() {
     } catch (err) {
       setItems([]);
       setStatus('error');
-      setMessage(err instanceof Error ? err.message : 'Falha ao carregar marketplace.');
+      setMessage(err instanceof Error ? err.message : 'Failed to load marketplace.');
     }
   }, []);
 
@@ -100,20 +100,20 @@ export default function AdminMarketplace() {
         <div className='text-sm text-[var(--aethel-text-tertiary)]'>{message}</div>
       ) : status === 'error' ? (
         <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
-          <div className='font-semibold'>Marketplace indisponível</div>
+          <div className='font-semibold'>Marketplace unavailable</div>
           <div className='mt-1 text-sm text-[var(--aethel-text-tertiary)]'>{message}</div>
         </div>
       ) : items.length === 0 ? (
         <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
-          <div className='font-semibold'>Nenhuma extensão</div>
-          <div className='mt-1 text-sm text-[var(--aethel-text-tertiary)]'>Ainda não há extensões registradas.</div>
+          <div className='font-semibold'>No extension</div>
+          <div className='mt-1 text-sm text-[var(--aethel-text-tertiary)]'>There are no registered extensions yet.</div>
         </div>
       ) : (
         <>
           <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
             <input
               type='text'
-              placeholder='Buscar por título'
+              placeholder='Search by title'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className='border p-2 rounded w-full md:max-w-sm'
@@ -123,7 +123,7 @@ export default function AdminMarketplace() {
               onChange={(e) => setCategoryFilter(e.target.value)}
               className='border p-2 rounded text-sm'
             >
-              <option value='all'>Todas as categorias</option>
+              <option value='all'>All as categorias</option>
               {categories.map((category) => (
                 <option key={category} value={category}>{category}</option>
               ))}
@@ -135,9 +135,9 @@ export default function AdminMarketplace() {
               <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
                 <th className='p-3'>Item</th>
                 <th className='p-3'>Categoria</th>
-                <th className='p-3'>Preço</th>
+                <th className='p-3'>Price</th>
                 <th className='p-3'>Downloads</th>
-                <th className='p-3'>Avaliação</th>
+                <th className='p-3'>Rating</th>
                 <th className='p-3'>Criado em</th>
               </tr>
             </thead>
@@ -146,7 +146,7 @@ export default function AdminMarketplace() {
                 <tr key={String(item.id)} className='border-t'>
                   <td className='p-3'>{String(item.title ?? '')}</td>
                   <td className='p-3'>{String(item.category ?? '')}</td>
-                  <td className='p-3'>{item.price > 0 ? `$${item.price.toFixed(2)}` : 'Grátis'}</td>
+                  <td className='p-3'>{item.price > 0 ? `$${item.price.toFixed(2)}` : 'Free'}</td>
                   <td className='p-3'>{String(item.downloads || 0)}</td>
                   <td className='p-3'>{Number(item.rating || 0).toFixed(1)}</td>
                   <td className='p-3'>{new Date(item.createdAt).toLocaleDateString()}</td>

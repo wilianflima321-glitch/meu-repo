@@ -35,7 +35,7 @@ export function ModernIDEShellPreviewReveal({
         gap: tokens.spacing['2'],
         zIndex: 10,
       }}
-      aria-label={`Abrir ${previewPanelLabel.toLowerCase()}`}
+      aria-label={`Open ${previewPanelLabel.toLowerCase()}`}
     >
       <ChevronLeft size={16} />
       <Play size={14} />

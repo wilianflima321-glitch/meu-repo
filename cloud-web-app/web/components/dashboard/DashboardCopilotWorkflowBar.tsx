@@ -51,13 +51,13 @@ export function DashboardCopilotWorkflowBar({
             onSelectWorkflow(value)
           }
         }}
-        aria-label="Selecionar trabalho ativo do Copilot"
+        aria-label="Select active Copilot work"
         className={`${inputClass} min-w-[12rem]`}
         disabled={controlsDisabled}
       >
         {copilotWorkflows.map((workflow) => (
           <option key={String(workflow.id)} value={String(workflow.id)}>
-            {workflow.title || 'Fluxo'}
+            {workflow.title || 'Flow'}
           </option>
         ))}
         <option value="__new__">+ Novo trabalho</option>
@@ -73,7 +73,7 @@ export function DashboardCopilotWorkflowBar({
       <select
         value={connectFromWorkflowId}
         onChange={(event) => onConnectFromWorkflowChange(event.target.value)}
-        aria-label="Selecionar trabalho para conectar contexto"
+        aria-label="Select work to connect context"
         className={`${inputClass} min-w-[12rem]`}
         disabled={controlsDisabled}
       >
@@ -82,7 +82,7 @@ export function DashboardCopilotWorkflowBar({
           .filter((workflow) => String(workflow.id) !== String(activeWorkflowId))
           .map((workflow) => (
             <option key={String(workflow.id)} value={String(workflow.id)}>
-              {workflow.title || 'Fluxo'}
+              {workflow.title || 'Flow'}
             </option>
           ))}
       </select>
@@ -90,34 +90,34 @@ export function DashboardCopilotWorkflowBar({
       <button
         type="button"
         onClick={onCopyHistory}
-        aria-label="Copiar histórico do trabalho selecionado para o trabalho atual"
+        aria-label="Copy selected work history into the current work item"
         className={buttonClass}
         disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
-        title="Copia historico da thread selecionada para o trabalho atual"
+        title="Copy the selected thread history into the current work"
       >
-        {connectBusy ? 'Processando...' : 'Copiar historico'}
+        {connectBusy ? 'Processing...' : 'Copy history'}
       </button>
 
       <button
         type="button"
         onClick={onImportContext}
-        aria-label="Importar contexto do trabalho selecionado"
+        aria-label="Import context from selected work"
         className={buttonClass}
         disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
-        title="Importa contexto do trabalho selecionado"
+        title="Import context from selected work"
       >
-        {connectBusy ? 'Processando...' : 'Importar contexto'}
+        {connectBusy ? 'Processing...' : 'Import context'}
       </button>
 
       <button
         type="button"
         onClick={onMergeWorkflow}
-        aria-label="Mesclar histórico e contexto do trabalho selecionado"
+        aria-label="Merge selected work history and context"
         className={buttonClass}
         disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
-        title="Mescla historico e contexto do trabalho selecionado"
+        title="Merge the selected work history and context"
       >
-        {connectBusy ? 'Processando...' : 'Mesclar'}
+        {connectBusy ? 'Processing...' : 'Merge'}
       </button>
     </div>
   )

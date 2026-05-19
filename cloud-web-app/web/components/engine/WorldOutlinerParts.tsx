@@ -276,19 +276,19 @@ export function OutlinerContextMenu({
     { id: 'lock', label: object.locked ? '🔓 Desbloquear' : '🔒 Bloquear', divider: true },
     { id: 'group', label: '📁 Agrupar', divider: false },
     { id: 'ungroup', label: '📂 Desagrupar', divider: true },
-    { id: 'create_prefab', label: '🧩 Criar Prefab', divider: false },
-    { id: 'create_blueprint', label: '📐 Criar Blueprint', divider: true },
-    { id: 'delete', label: '🗑️ Excluir', divider: false },
+    { id: 'create_prefab', label: '🧩 Create Prefab', divider: false },
+    { id: 'create_blueprint', label: '📐 Create Blueprint', divider: true },
+    { id: 'delete', label: 'Delete', divider: false },
   ] : [
-    { id: 'create_empty', label: '⊡ Criar Vazio', divider: false },
-    { id: 'create_cube', label: '🔷 Criar Cubo', divider: false },
-    { id: 'create_sphere', label: '🔵 Criar Esfera', divider: false },
-    { id: 'create_plane', label: '⬜ Criar Plano', divider: true },
-    { id: 'create_light', label: '💡 Criar Luz', divider: false },
-    { id: 'create_camera', label: '📷 Criar Camera', divider: false },
-    { id: 'create_audio', label: '🔊 Criar Audio', divider: true },
-    { id: 'create_particle', label: '✨ Criar Particulas', divider: false },
-    { id: 'create_trigger', label: '🎯 Criar Trigger', divider: false },
+    { id: 'create_empty', label: '⊡ Create Vazio', divider: false },
+    { id: 'create_cube', label: '🔷 Create Cubo', divider: false },
+    { id: 'create_sphere', label: '🔵 Create Esfera', divider: false },
+    { id: 'create_plane', label: '⬜ Create Plano', divider: true },
+    { id: 'create_light', label: '💡 Create Luz', divider: false },
+    { id: 'create_camera', label: '📷 Create Camera', divider: false },
+    { id: 'create_audio', label: '🔊 Create Audio', divider: true },
+    { id: 'create_particle', label: '✨ Create Particulas', divider: false },
+    { id: 'create_trigger', label: '🎯 Create Trigger', divider: false },
   ];
 
   return (
@@ -365,7 +365,7 @@ export function OutlinerFilterBar({
       {/* Search */}
       <input
         type="text"
-        placeholder="🔍 Buscar..."
+        placeholder="🔍 Search..."
         value={filter.search || ''}
         onChange={(e) => onFilterChange({ ...filter, search: e.target.value })}
         style={{
@@ -392,7 +392,7 @@ export function OutlinerFilterBar({
             cursor: 'pointer',
             fontSize: '12px',
           }}
-          title="Filtrar por tipo"
+          title="Filter por tipo"
         >
           📋
         </button>

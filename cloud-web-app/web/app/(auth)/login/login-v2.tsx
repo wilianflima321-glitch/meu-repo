@@ -1,11 +1,14 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { startAuthentication } from '@simplewebauthn/browser'
+import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser'
 import Link from 'next/link'
 import Image from 'next/image'
 import Codicon from '@/components/ide/Codicon'
 import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
+import TurnstileField, { isTurnstileClientConfigured } from '@/components/auth/TurnstileField'
 import { analytics } from '@/lib/analytics'
 import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
 
@@ -13,25 +16,19 @@ type AuthResponse = {
   access_token?: string
   error?: string
   message?: string
-  user?: {
-    id: string
-    email: string
-    name?: string | null
-    plan?: string | null
-  }
 }
 
 const DEFAULT_REDIRECT = '/dashboard'
 const LOGIN_HIGHLIGHTS = [
-  'Studio Home com projetos, onboarding e billing na mesma superficie.',
-  'IDE com chat, preview e contexto do projeto conectados.',
-  'Readiness explicita para mostrar o que esta pronto ou parcial.',
+  'Return to the same dashboard, IDE, and preview flow after authentication.',
+  'Keep project context visible before agents or runtime tools make changes.',
+  'Use readiness and evidence signals instead of a noisy marketing wall.',
 ]
 
 const LOGIN_STATS = [
-  { value: 'Apps', label: 'foco atual' },
-  { value: 'IDE', label: 'workbench continuo' },
-  { value: 'L4', label: 'readiness visivel' },
+  { value: '1', label: 'studio flow' },
+  { value: '20+', label: 'agents gated' },
+  { value: 'L4', label: 'readiness' },
 ]
 
 export default function LoginPageV2() {
@@ -40,245 +37,240 @@ export default function LoginPageV2() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPasskeySubmitting, setIsPasskeySubmitting] = useState(false)
+  const [isMagicLinkSubmitting, setIsMagicLinkSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  const [authNotice, setAuthNotice] = useState<string | null>(null)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
 
   const nextTarget = useMemo(() => {
     const requested = searchParams.get('next')?.trim()
-    if (!requested || !requested.startsWith('/')) return DEFAULT_REDIRECT
-    if (requested.startsWith('/api/')) return DEFAULT_REDIRECT
+    if (!requested || !requested.startsWith('/') || requested.startsWith('/api/')) return DEFAULT_REDIRECT
     return requested
   }, [searchParams])
+
+  const isHumanVerificationPending = isTurnstileClientConfigured() && !turnstileToken
+
+  const requireHumanVerification = () => {
+    if (!isHumanVerificationPending) {
+      return true
+    }
+
+    setFormError('Complete human verification to continue.')
+    setAuthNotice(null)
+    return false
+  }
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!email.trim() || !password) {
-      setFormError('Informe email e senha para continuar.')
+      setFormError('Enter your email and password to continue.')
+      return
+    }
+    if (!requireHumanVerification()) {
       return
     }
 
     setIsSubmitting(true)
     setFormError(null)
+    setAuthNotice(null)
 
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-        }),
+        body: JSON.stringify({ email: email.trim(), password, turnstileToken }),
       })
-
       const payload = (await response.json().catch(() => ({}))) as AuthResponse
       if (!response.ok) {
-        setFormError(payload.error || payload.message || 'Falha ao autenticar usuario.')
-        analytics?.track?.('error', 'error_api', {
-          metadata: { source: 'login-form', status: response.status },
-        })
+        setFormError(payload.error || payload.message || 'Failed to authenticate user.')
+        analytics?.track?.('error', 'error_api', { metadata: { source: 'login-form', status: response.status } })
         return
       }
-
-      analytics?.track?.('user', 'login', {
-        metadata: {
-          source: 'auth-login',
-          nextTarget,
-        },
-      })
-
-      analytics?.track?.('engine', 'editor_open', {
-        metadata: {
-          source: 'login-success',
-          target: nextTarget,
-        },
-      })
-
+      analytics?.track?.('user', 'login', { metadata: { source: 'auth-login', nextTarget } })
       window.location.assign(nextTarget)
     } catch {
-      setFormError('Falha de rede ao autenticar. Tente novamente.')
-      analytics?.track?.('error', 'error_api', {
-        metadata: { source: 'login-form', reason: 'network' },
-      })
+      setFormError('Network failure while authenticating. Try again.')
+      analytics?.track?.('error', 'error_api', { metadata: { source: 'login-form', reason: 'network' } })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const startOAuth = (provider: 'github' | 'google') => {
-    analytics?.track?.('user', 'oauth_start', {
-      label: provider,
-      metadata: { source: 'login-form', nextTarget },
-    })
+    analytics?.track?.('user', 'oauth_start', { label: provider, metadata: { source: 'login-form', nextTarget } })
     window.location.href = `/api/auth/oauth/authorize?provider=${provider}`
+  }
+
+  const handlePasskeyLogin = async () => {
+    if (!requireHumanVerification()) {
+      return
+    }
+
+    setIsPasskeySubmitting(true)
+    setFormError(null)
+    setAuthNotice(null)
+
+    try {
+      const optionsResponse = await fetch('/api/auth/webauthn/authenticate/options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() || undefined, turnstileToken }),
+      })
+      if (!optionsResponse.ok) {
+        const payload = (await optionsResponse.json().catch(() => ({}))) as AuthResponse
+        setFormError(payload.error || payload.message || 'Passkey challenge could not start.')
+        return
+      }
+
+      const optionsJSON = (await optionsResponse.json()) as PublicKeyCredentialRequestOptionsJSON
+      const credential = await startAuthentication({ optionsJSON })
+      const verifyResponse = await fetch('/api/auth/webauthn/authenticate/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credential),
+      })
+      const payload = (await verifyResponse.json().catch(() => ({}))) as AuthResponse
+      if (!verifyResponse.ok) {
+        setFormError(payload.error || payload.message || 'Passkey authentication failed.')
+        return
+      }
+
+      analytics?.track?.('user', 'login', { metadata: { source: 'auth-passkey', nextTarget } })
+      window.location.assign(nextTarget)
+    } catch (error) {
+      const cancelled = error instanceof Error && /abort|cancel|notallowed/i.test(error.message)
+      setFormError(cancelled ? 'Passkey sign-in was cancelled.' : 'Passkey sign-in is unavailable on this device.')
+    } finally {
+      setIsPasskeySubmitting(false)
+    }
+  }
+
+  const handleMagicLink = async () => {
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail) {
+      setFormError('Enter your email before requesting a magic link.')
+      return
+    }
+    if (!requireHumanVerification()) {
+      return
+    }
+
+    setIsMagicLinkSubmitting(true)
+    setFormError(null)
+    setAuthNotice(null)
+
+    try {
+      const response = await fetch('/api/auth/magic-link/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail, turnstileToken }),
+      })
+      const payload = (await response.json().catch(() => ({}))) as AuthResponse
+      if (!response.ok) {
+        setFormError(payload.error || payload.message || 'Magic link could not be sent.')
+        return
+      }
+
+      setAuthNotice(payload.message || 'If an account exists for this email, a one-time sign-in link has been sent.')
+      analytics?.track?.('user', 'auth_intent', { label: 'magic-link', metadata: { source: 'auth-login', nextTarget } })
+    } catch {
+      setFormError('Network failure while requesting the magic link. Try again.')
+    } finally {
+      setIsMagicLinkSubmitting(false)
+    }
   }
 
   return (
     <CoreUiProviders>
-      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-10 sm:px-6">
-      <a
-        href="#login-form"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-sm focus:text-[var(--aethel-text-primary)]"
-      >
-        Ir para formulario de login
-      </a>
-      <div className="pointer-events-none absolute inset-0 bg-grid-aethel" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--aethel-info)_22%,transparent),transparent_55%)]" />
+      <main className="relative min-h-screen overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-8 text-[var(--aethel-text-primary)] sm:px-6 lg:py-10">
+        <a href="#login-form" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-sm">
+          Skip to the login form
+        </a>
+        <div className="pointer-events-none absolute inset-0 bg-grid-aethel opacity-45" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,color-mix(in_srgb,var(--aethel-info)_18%,transparent),transparent_34%),radial-gradient(circle_at_82%_8%,color-mix(in_srgb,var(--aethel-primary)_14%,transparent),transparent_30%)]" />
 
-      <div className="relative z-10 w-full max-w-6xl">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:items-stretch">
-          <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-[0_24px_70px_rgba(2,8,23,0.35)] sm:p-8">
-            <div className="mb-6 flex items-center justify-between gap-3">
-              <Link href="/" className="inline-flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]">
-                <Codicon name="arrow-left" />
-                Voltar ao site
-              </Link>
-              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-success-light)]">
-                Studio
-              </span>
-            </div>
-
-            <div className="mb-6 text-left">
-              <div className="mb-4 flex items-center gap-3">
-                <Image
-                  src="/branding/aethel-icon-source.png"
-                  alt="Aethel"
-                  width={36}
-                  height={36}
-                  sizes="36px"
-                  className="rounded-lg ring-1 ring-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)]"
-                  priority
-                />
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]/90">Aethel Studio</span>
-              </div>
-              <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Entrar no Studio</h1>
-              <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                Retome seu projeto e siga no mesmo fluxo entre dashboard, IDE e preview.
-              </p>
-            </div>
-
-            <form id="login-form" onSubmit={handleLogin} className="space-y-5" noValidate aria-describedby={formError ? 'login-form-error' : undefined}>
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm text-[var(--aethel-text-secondary)]">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  required
-                  aria-invalid={Boolean(formError)}
-                  className="w-full rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-4 py-3 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
-                  placeholder="voce@empresa.com"
-                />
+        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-[1120px] items-center">
+          <div className="grid w-full gap-5 lg:grid-cols-[420px_minmax(0,1fr)] lg:items-stretch">
+            <section className="mx-auto w-full max-w-[430px] rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl sm:p-7 lg:mx-0">
+              <div className="mb-7 flex items-center justify-between gap-3">
+                <Link href="/" className="inline-flex items-center gap-2 rounded-full px-1 text-sm text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]">
+                  <Codicon name="arrow-left" /> Back
+                </Link>
+                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-success-light)]">Studio</span>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="text-sm text-[var(--aethel-text-secondary)]">
-                    Senha
-                  </label>
-                  <Link href="/forgot-password" className="text-xs text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)]">
-                    Esqueci a senha
-                  </Link>
+              <div className="mb-7">
+                <div className="mb-4 flex items-center gap-3">
+                  <Image src="/branding/aethel-icon-source.png" alt="Aethel" width={36} height={36} sizes="36px" className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-1" priority />
+                  <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">Aethel Studio</span>
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  required
-                  aria-invalid={Boolean(formError)}
-                  className="w-full rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-4 py-3 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
-                  placeholder="Digite sua senha"
-                />
+                <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[var(--aethel-text-primary)]">Sign in</h1>
+                <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">Resume the exact project flow you left: dashboard, IDE, preview, and readiness.</p>
               </div>
 
-              {formError && (
-                <div
-                  id="login-form-error"
-                  className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-xs text-[var(--aethel-error-light)]"
-                  role="alert"
-                  aria-live="polite"
+              <div className="mb-5">
+                <TurnstileField action="login" onTokenChange={setTurnstileToken} />
+              </div>
+
+              <div className="mb-5 space-y-3 rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/42 p-3" aria-label="Fast sign-in options">
+                <button
+                  type="button"
+                  onClick={handlePasskeyLogin}
+                  disabled={isPasskeySubmitting || isSubmitting || isHumanVerificationPending}
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--aethel-info)] text-sm font-semibold text-slate-950 transition hover:bg-[var(--aethel-info-light)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {formError}
+                  <Codicon name="key" /> {isPasskeySubmitting ? 'Waiting for passkey...' : 'Continue with passkey'}
+                </button>
+                <p className="text-center text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                  Passwordless first. Magic link and password stay available for teams that need fallback access.
+                </p>
+              </div>
+
+              <form id="login-form" onSubmit={handleLogin} className="space-y-4" noValidate aria-describedby={formError ? 'login-form-error' : undefined}>
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Email</label>
+                  <input id="email" name="email" type="email" autoComplete="email webauthn" value={email} onChange={(event) => setEmail(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none transition placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="you@company.com" />
+                  <button
+                    type="button"
+                    onClick={handleMagicLink}
+                    disabled={isMagicLinkSubmitting || isSubmitting || isHumanVerificationPending}
+                    className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isMagicLinkSubmitting ? 'Sending magic link...' : 'Send magic link'}
+                  </button>
                 </div>
-              )}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <label htmlFor="password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Password</label>
+                    <Link href="/forgot-password" className="text-xs font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)]">Forgot password?</Link>
+                  </div>
+                  <input id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none transition placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="Enter your password" />
+                </div>
+                {formError ? <div id="login-form-error" className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)]" role="alert" aria-live="polite">{formError}</div> : null}
+                {authNotice ? <div id="login-form-notice" className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-success)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-success-light)]" role="status" aria-live="polite">{authNotice}</div> : null}
+                <button type="submit" disabled={isSubmitting || isHumanVerificationPending} className="h-12 w-full rounded-2xl bg-[var(--aethel-info)] text-sm font-semibold text-slate-950 transition hover:bg-[var(--aethel-info-light)] disabled:cursor-not-allowed disabled:opacity-60">
+                  {isSubmitting ? 'Signing in...' : 'Use password fallback'}
+                </button>
+              </form>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex w-full items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] px-4 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSubmitting ? 'Entrando...' : 'Entrar no workspace'}
-              </button>
-            </form>
+              <div className="my-5 flex items-center gap-3"><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /><span className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">or</span><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /></div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <button type="button" onClick={() => startOAuth('github')} className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"><Codicon name="github" /> GitHub</button>
+                <button type="button" onClick={() => startOAuth('google')} className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"><Codicon name="google" /> Google</button>
+              </div>
 
-            <div className="my-5 flex items-center gap-3">
-              <div className="h-px flex-1 bg-[var(--aethel-surface-tertiary)]" />
-              <span className="text-[11px] tracking-wide text-[var(--aethel-text-tertiary)]">OAuth</span>
-              <div className="h-px flex-1 bg-[var(--aethel-surface-tertiary)]" />
-            </div>
+              <div className="mt-6 rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/45 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Next step</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">Continue to <span className="font-medium text-[var(--aethel-text-primary)]">{nextTarget}</span> with the same product context.</p>
+              </div>
 
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => startOAuth('github')}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
-                aria-label="Continuar com GitHub"
-              >
-                <Codicon name="github" />
-                Continuar com GitHub
-              </button>
-              <button
-                type="button"
-                onClick={() => startOAuth('google')}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
-                aria-label="Continuar com Google"
-              >
-                <Codicon name="google" />
-                Continuar com Google
-              </button>
-            </div>
+              <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">No account yet? <Link href="/register" className="font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)]">Create one</Link></p>
+            </section>
 
-            <p className="mt-3 text-xs leading-6 text-[var(--aethel-text-tertiary)]">Ou continue com email e senha.</p>
-
-            <div className="mt-6 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-                Proximo passo
-              </p>
-              <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                Depois do login, voce segue para <span className="font-medium text-[var(--aethel-text-primary)]">{nextTarget}</span>.
-              </p>
-            </div>
-
-            <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">
-              Nao tem conta?{' '}
-              <Link href="/register" className="font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)]">
-                Criar conta
-              </Link>
-            </p>
-          </section>
-
-          <AuthExperiencePanel
-            eyebrow="Acesso operacional"
-            domainLabel="Apps + Pesquisa"
-            title="Entre para continuar no mesmo fluxo de produto."
-            description="O login devolve voce ao fluxo real do studio em vez de abrir uma area isolada."
-            highlights={LOGIN_HIGHLIGHTS}
-            stats={LOGIN_STATS}
-            visual={{
-              src: '/screenshots/dashboard.png',
-              alt: 'Dashboard do Aethel Studio',
-              caption: 'A superficie principal ja entrega contexto, sinais de readiness e entrada para o workbench.',
-              chips: ['Dashboard shell', 'Billing readiness', 'Onboarding guiado'],
-            }}
-          />
+            <AuthExperiencePanel eyebrow="Operational access" domainLabel="Apps + Research" title="A quieter entry into serious work." description="The auth surface now behaves like a product door, not a billboard: one decision, one form, one visible next step." highlights={LOGIN_HIGHLIGHTS} stats={LOGIN_STATS} />
+          </div>
         </div>
-      </div>
       </main>
     </CoreUiProviders>
   )

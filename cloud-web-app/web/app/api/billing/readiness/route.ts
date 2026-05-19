@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getBillingRuntimeState } from '@/lib/server/billing-runtime'
 
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/billing/readiness/route');
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
@@ -20,7 +23,7 @@ export async function GET() {
       recommendedCommands: runtime.recommendedCommands,
     })
   } catch (error) {
-    console.error('[billing/readiness] failed:', error)
+    routeLogger.error('[billing/readiness] failed:', error)
     return NextResponse.json(
       {
         status: 'unavailable',

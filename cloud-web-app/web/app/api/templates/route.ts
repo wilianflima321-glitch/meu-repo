@@ -14,6 +14,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { checkStorageQuota } from '@/lib/storage-quota';
 import { randomUUID } from 'crypto';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/templates/route');
 
 // ============================================================================
 // TEMPLATE DEFINITIONS
@@ -47,13 +50,13 @@ const TEMPLATES: ProjectTemplate[] = [
   {
     id: 'fps-starter',
     name: 'FPS Shooter Starter',
-    description: 'Template de FPS completo com sistema de armas, IA de inimigos e HUD',
+    description: 'Template de FPS completo com sistema de armas, Enemy AI e HUD',
     genre: 'fps',
     style: 'lowpoly',
     previewImage: '/templates/fps-preview.webp',
     previewVideo: '/templates/fps-preview.webm',
     estimatedSize: 15 * 1024 * 1024, // 15MB
-    features: ['Sistema de armas', 'IA de inimigos', 'HUD completo', 'Física de projéteis'],
+    features: ['Weapon system', 'Enemy AI', 'Full HUD', 'Projectile physics'],
     defaultScene: 'MainLevel',
     files: [
       {
@@ -319,12 +322,12 @@ export function HUD() {
   {
     id: 'rpg-starter',
     name: 'RPG Top-Down Starter',
-    description: 'Template de RPG com inventário, diálogos e sistema de quests',
+    description: 'RPG template with inventory, dialogue, and quest system',
     genre: 'rpg',
     style: 'pixel',
     previewImage: '/templates/rpg-preview.webp',
     estimatedSize: 20 * 1024 * 1024,
-    features: ['Sistema de inventário', 'Diálogos', 'Quests', 'Combate por turnos'],
+    features: ['Inventory system', 'Dialogue', 'Quests', 'Turn-based combat'],
     defaultScene: 'Village',
     files: [
       {
@@ -466,12 +469,12 @@ export class Inventory {
   {
     id: 'platformer-starter',
     name: 'Platformer 2D Starter',
-    description: 'Template de plataforma com física 2D, parallax e coletáveis',
+    description: 'Platformer template with 2D physics, parallax, and collectibles',
     genre: 'platformer',
     style: 'stylized',
     previewImage: '/templates/platformer-preview.webp',
     estimatedSize: 12 * 1024 * 1024,
-    features: ['Física 2D', 'Parallax scrolling', 'Coletáveis', 'Checkpoints'],
+    features: ['2D physics', 'Parallax scrolling', 'Collectibles', 'Checkpoints'],
     defaultScene: 'Level1',
     files: [
       {
@@ -587,7 +590,7 @@ export class PlatformerController extends Component {
   {
     id: 'blank-project',
     name: 'Blank Project',
-    description: 'Projeto vazio para começar do zero',
+    description: 'Empty project to start from scratch',
     genre: 'blank',
     style: 'stylized',
     previewImage: '/templates/blank-preview.webp',
@@ -658,7 +661,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ templates: templatesMeta });
   } catch (error) {
-    console.error('List templates error:', error);
+    routeLogger.error('List templates error:', error);
     return NextResponse.json(
       { error: 'Failed to list templates' },
       { status: 500 }
@@ -742,7 +745,7 @@ export async function POST(request: NextRequest) {
       message: 'Project created successfully',
     });
   } catch (error: unknown) {
-    console.error('Create project error:', error);
+    routeLogger.error('Create project error:', error);
     
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

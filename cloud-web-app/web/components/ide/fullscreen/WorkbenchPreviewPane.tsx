@@ -64,7 +64,7 @@ export function WorkbenchPreviewPane({
 
     editorBridge.clearPendingDiff()
     setIsProposalPreviewing(false)
-    toast.success('Proposta aplicada', 'O patch foi promovido para o editor ativo.')
+    toast.success('Proposal applied', 'The patch was promoted to the active editor.')
   }, [editorBridge, pendingDiff, toast])
 
   const handleRejectProposal = useCallback(() => {
@@ -74,7 +74,7 @@ export function WorkbenchPreviewPane({
 
     editorBridge.clearPendingDiff()
     setIsProposalPreviewing(false)
-    toast.info('Proposta descartada', 'A previa de patch foi removida do cockpit.')
+    toast.info('Proposal discarded', 'The patch preview was removed from the cockpit.')
   }, [editorBridge, toast])
 
   return (

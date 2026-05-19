@@ -11,6 +11,9 @@ import {
 import * as fs from 'fs/promises'
 import * as path from 'path'
 
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/files/tree/route');
 interface FileTreeEntry {
   name: string
   path: string
@@ -101,7 +104,7 @@ async function buildTree(params: {
 
     return result
   } catch (error) {
-    console.error('[files/tree] read error:', error)
+    routeLogger.error('[files/tree] read error:', error)
     return []
   }
 }

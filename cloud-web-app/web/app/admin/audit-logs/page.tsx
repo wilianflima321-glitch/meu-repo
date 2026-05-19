@@ -21,9 +21,9 @@ type AuditLog = {
 };
 
 const severityLabels: Record<string, string> = {
-  info: 'Informação',
+  info: 'Information',
   warning: 'Aviso',
-  critical: 'Crítico',
+  critical: 'Critical',
 };
 
 export default function AuditLogsPage() {
@@ -51,14 +51,14 @@ export default function AuditLogsPage() {
       if (filter.dateTo) params.set('endDate', filter.dateTo);
 
       const res = await fetch(`/api/admin/audit-logs?${params.toString()}`);
-      if (!res.ok) throw new Error('Falha ao carregar logs');
+      if (!res.ok) throw new Error('Failed to load logs');
       const data = await res.json();
       const records = Array.isArray(data?.logs) ? data.logs : [];
       setLogs(records);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar logs');
+      setError(err instanceof Error ? err.message : 'Error loading logs');
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ export default function AuditLogsPage() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Logs de auditoria avançados</h1>
+          <h1 className="text-2xl font-bold">Advanced audit logs</h1>
           {lastUpdated && (
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
               Atualizado em {lastUpdated.toLocaleString()}
@@ -132,7 +132,7 @@ export default function AuditLogsPage() {
           },
           {
             icon: ShieldAlert,
-            label: 'Críticos',
+            label: 'Criticals',
             value: summary.critical,
             tone: 'error',
           },
@@ -151,7 +151,7 @@ export default function AuditLogsPage() {
           />
           <input
             type="text"
-            placeholder="Ação"
+            placeholder="Action"
             value={filter.action}
             onChange={(e) => setFilter({ ...filter, action: e.target.value })}
             className="border p-2"
@@ -162,9 +162,9 @@ export default function AuditLogsPage() {
             className="border p-2"
           >
             <option value="all">Severidade</option>
-            <option value="info">Informação</option>
+            <option value="info">Information</option>
             <option value="warning">Aviso</option>
-            <option value="critical">Crítico</option>
+            <option value="critical">Critical</option>
           </select>
           <input
             type="date"
@@ -201,7 +201,7 @@ export default function AuditLogsPage() {
             <thead>
               <tr className="border-b text-xs text-[var(--aethel-text-tertiary)]">
                 <th className="text-left p-2">Admin</th>
-                <th className="text-left p-2">Ação</th>
+                <th className="text-left p-2">Action</th>
                 <th className="text-left p-2">Categoria</th>
                 <th className="text-left p-2">Severidade</th>
                 <th className="text-left p-2">Alvo</th>
@@ -228,7 +228,7 @@ export default function AuditLogsPage() {
                             : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                       }`}
                     >
-                      {severityLabels[log.severity || 'info'] ?? 'Informação'}
+                      {severityLabels[log.severity || 'info'] ?? 'Information'}
                     </span>
                   </td>
                   <td className="p-2">

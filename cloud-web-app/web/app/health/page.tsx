@@ -16,7 +16,7 @@ export default function HealthPage(){
 
   <section className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] shadow-[var(--aethel-shadow-md)] p-4">
         <h2 className="text-lg font-semibold mb-2">/health</h2>
-        {healthErr && <div className="text-[var(--aethel-error)]">Erro: {String(healthErr)}</div>}
+        {healthErr && <div className="text-[var(--aethel-error)]">Error: {String(healthErr)}</div>}
         <pre className="bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(health ?? { status: 'unknown' }, null, 2)}</pre>
       </section>
 

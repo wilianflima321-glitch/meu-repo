@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // =============================================================================
 // INDEXING ADMIN API
 // =============================================================================
 
+const log = createComponentLogger('api/admin/indexing/route');
 const getFileName = (path: string) => path.split('/').pop() || path;
 
 type IndexingEntryRecord = {
@@ -60,7 +62,7 @@ export const GET = withAdminAuth(
         files,
       });
     } catch (error) {
-      console.error('[Admin Indexing] Error:', error);
+      log.error('[Admin Indexing] Error', error);
       return NextResponse.json({ error: 'Failed to fetch indexing data' }, { status: 500 });
     }
   },
@@ -104,7 +106,7 @@ export const PATCH = withAdminAuth(
 
       return NextResponse.json({ config });
     } catch (error) {
-      console.error('[Admin Indexing] Error:', error);
+      log.error('[Admin Indexing] Error', error);
       return NextResponse.json({ error: 'Failed to update indexing config' }, { status: 500 });
     }
   },
@@ -118,12 +120,12 @@ export const POST = withAdminAuth(
       const { fileId, indexed, context } = body as { fileId?: string; indexed?: boolean; context?: string };
 
       if (!fileId || typeof indexed !== 'boolean') {
-        return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
+        return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
       }
 
       const file = await prisma.file.findUnique({ where: { id: fileId } });
       if (!file) {
-        return NextResponse.json({ error: 'Arquivo não encontrado' }, { status: 404 });
+        return NextResponse.json({ error: 'File not found' }, { status: 404 });
       }
 
       const indexingEntry = (prisma as any).indexingEntry;
@@ -156,7 +158,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ entry });
     } catch (error) {
-      console.error('[Admin Indexing] Error:', error);
+      log.error('[Admin Indexing] Error', error);
       return NextResponse.json({ error: 'Failed to update indexing entry' }, { status: 500 });
     }
   },

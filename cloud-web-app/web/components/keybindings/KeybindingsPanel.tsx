@@ -444,7 +444,7 @@ const KeybindingRow: React.FC<KeybindingRowProps> = ({ keybinding, onEdit, onRes
         ...styles.actionsColumn,
         ...(isHovered ? styles.actionsVisible : {}),
       }}>
-        <button type="button" style={styles.iconButton} onClick={onEdit} title="Editar">
+        <button type="button" style={styles.iconButton} onClick={onEdit} title="Edit">
 
         </button>
         {keybinding.source === 'user' && (
@@ -551,7 +551,7 @@ export const KeybindingsPanel: React.FC = () => {
           <span style={styles.searchIcon}></span>
           <input
             type="text"
-            placeholder="Buscar atalhos..."
+            placeholder="Search atalhos..."
             style={styles.searchInput}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -561,7 +561,7 @@ export const KeybindingsPanel: React.FC = () => {
 
       <div style={styles.toolbar}>
         {(['all', 'default', 'user', 'extension'] as FilterType[]).map(f => (
-          <button type="button" aria-label={`Filtrar atalhos por ${f}`}
+          <button type="button" aria-label={`Filter atalhos por ${f}`}
             key={f}
             style={{
               ...styles.filterButton,
@@ -576,10 +576,10 @@ export const KeybindingsPanel: React.FC = () => {
         <div style={{ flex: 1 }} />
 
         <button type="button" style={styles.filterButton} onClick={handleImport}>
-           Importar
+           Import
         </button>
         <button type="button" style={styles.filterButton} onClick={handleExport}>
-           Exportar
+           Export
         </button>
       </div>
 
@@ -587,7 +587,7 @@ export const KeybindingsPanel: React.FC = () => {
         {filteredKeybindings.length === 0 ? (
           <div style={styles.emptyState}>
             <span style={{ fontSize: '48px', marginBottom: '16px' }}></span>
-            <span>Nenhum atalho encontrado</span>
+            <span>No atalho encontrado</span>
           </div>
         ) : (
           filteredKeybindings.map((kb, index) => (

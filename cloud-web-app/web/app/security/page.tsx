@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 const metrics: TrustMetric[] = [
   {
     label: 'MFA de conta',
-    value: 'Ativo',
+    value: 'Active',
     detail: 'Fluxo de TOTP com QR code, setup manual e backup codes ja existe no produto.',
     tone: 'live',
   },
@@ -65,7 +65,7 @@ const sections: TrustSection[] = [
         bullets: [
           'Sem uptime rolling inventado para parecer mais maduro do que esta.',
           'Superficies parciais continuam aparecendo como parciais.',
-          'Bloqueios obrigatorios ficam visiveis quando a verificacao publica falha.',
+          'Mandatory blockers become visible when public verification fails.',
         ],
       },
       {
@@ -140,7 +140,7 @@ const faqs: TrustFaq[] = [
       'Sim, em rollout tecnico: ha rotas WebAuthn, storage versionado, painel de registro e gate de QA. Ainda nao chamamos isso de GA enterprise ate fechar recovery e documentacao operacional.',
   },
   {
-    question: 'SSO / SAML ja esta pronto para compra self-serve?',
+    question: 'Is SSO / SAML ready for self-serve purchase?',
     answer:
       'Ainda nao. Existe readiness/plumbing no repositorio, mas nao estamos tratando isso como rollout enterprise GA na experiencia publica atual.',
   },

@@ -83,7 +83,7 @@ export function ModernIDEShell({
   banner,
   headerExtras,
   children,
-  projectName = 'Projeto sem nome',
+  projectName = 'Untitled project',
   activeFileName,
   statusBarProps,
   onToggleSidebar,

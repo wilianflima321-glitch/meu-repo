@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     if (!sessionId) {
       return NextResponse.json(
-        { error: 'sessionId é obrigatório' },
+        { error: 'sessionId is required' },
         { status: 400 }
       );
     }
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const normalizedSignal = validSignals.includes(signal) ? signal : 'SIGTERM';
 
     // Em produção, isso enviaria o sinal para o processo PTY
-    log.info(`[terminal/kill] Enviando ${normalizedSignal} para sessão ${sessionId}`);
+    log.info(`[terminal/kill] Sending ${normalizedSignal} to session ${sessionId}`);
 
     return NextResponse.json({
       success: true,
@@ -36,9 +36,9 @@ export async function POST(request: NextRequest) {
       message: `Sinal ${normalizedSignal} enviado`,
     });
   } catch (error) {
-    console.error('[terminal/kill] Error:', error);
+    log.error('[terminal/kill] Error', error);
     return NextResponse.json(
-      { error: 'Falha ao matar processo' },
+      { error: 'Failed to kill process' },
       { status: 500 }
     );
   }

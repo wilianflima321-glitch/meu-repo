@@ -1,11 +1,11 @@
 /**
  * Monaco LSP HTTP Client
- * 
+ *
  * Conecta Monaco Editor ao LSP server via HTTP API.
  * Mais simples que WebSocket para requests pontuais.
  */
 
-import * as monaco from 'monaco-editor';
+import type * as monaco from 'monaco-editor';
 
 import {createComponentLogger, logger} from '@/lib/observability/logger'
 
@@ -44,7 +44,7 @@ interface LspRange {
 }
 
 interface Hover {
-  contents: string | { kind: string; value: string } | { language: string; value: string }[];
+  contents: string | { kind: string; value: string } | Array<string | { language: string; value: string }>;
   range?: LspRange;
 }
 
@@ -71,41 +71,65 @@ interface Diagnostic {
   message: string;
 }
 
-// LSP to Monaco kind mappings
-const LSP_COMPLETION_KIND_MAP: Record<number, monaco.languages.CompletionItemKind> = {
-  1: monaco.languages.CompletionItemKind.Text,
-  2: monaco.languages.CompletionItemKind.Method,
-  3: monaco.languages.CompletionItemKind.Function,
-  4: monaco.languages.CompletionItemKind.Constructor,
-  5: monaco.languages.CompletionItemKind.Field,
-  6: monaco.languages.CompletionItemKind.Variable,
-  7: monaco.languages.CompletionItemKind.Class,
-  8: monaco.languages.CompletionItemKind.Interface,
-  9: monaco.languages.CompletionItemKind.Module,
-  10: monaco.languages.CompletionItemKind.Property,
-  11: monaco.languages.CompletionItemKind.Unit,
-  12: monaco.languages.CompletionItemKind.Value,
-  13: monaco.languages.CompletionItemKind.Enum,
-  14: monaco.languages.CompletionItemKind.Keyword,
-  15: monaco.languages.CompletionItemKind.Snippet,
-  16: monaco.languages.CompletionItemKind.Color,
-  17: monaco.languages.CompletionItemKind.File,
-  18: monaco.languages.CompletionItemKind.Reference,
-  19: monaco.languages.CompletionItemKind.Folder,
-  20: monaco.languages.CompletionItemKind.EnumMember,
-  21: monaco.languages.CompletionItemKind.Constant,
-  22: monaco.languages.CompletionItemKind.Struct,
-  23: monaco.languages.CompletionItemKind.Event,
-  24: monaco.languages.CompletionItemKind.Operator,
-  25: monaco.languages.CompletionItemKind.TypeParameter,
-};
+function hasStringValue(value: unknown): value is { value: string } {
+  return value !== null && typeof value === 'object' && 'value' in value && typeof value.value === 'string';
+}
 
-const LSP_SEVERITY_MAP: Record<number, monaco.MarkerSeverity> = {
-  1: monaco.MarkerSeverity.Error,
-  2: monaco.MarkerSeverity.Warning,
-  3: monaco.MarkerSeverity.Info,
-  4: monaco.MarkerSeverity.Hint,
-};
+function hasLanguageValue(value: unknown): value is { language: string; value: string } {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    'language' in value &&
+    'value' in value &&
+    typeof value.language === 'string' &&
+    typeof value.value === 'string'
+  );
+}
+
+type MonacoApi = typeof import('monaco-editor');
+
+function getCompletionKind(monacoApi: MonacoApi, kind?: number): monaco.languages.CompletionItemKind {
+  const kinds = monacoApi.languages.CompletionItemKind;
+  const map: Record<number, monaco.languages.CompletionItemKind> = {
+    1: kinds.Text,
+    2: kinds.Method,
+    3: kinds.Function,
+    4: kinds.Constructor,
+    5: kinds.Field,
+    6: kinds.Variable,
+    7: kinds.Class,
+    8: kinds.Interface,
+    9: kinds.Module,
+    10: kinds.Property,
+    11: kinds.Unit,
+    12: kinds.Value,
+    13: kinds.Enum,
+    14: kinds.Keyword,
+    15: kinds.Snippet,
+    16: kinds.Color,
+    17: kinds.File,
+    18: kinds.Reference,
+    19: kinds.Folder,
+    20: kinds.EnumMember,
+    21: kinds.Constant,
+    22: kinds.Struct,
+    23: kinds.Event,
+    24: kinds.Operator,
+    25: kinds.TypeParameter,
+  };
+  return map[kind || 1] || kinds.Text;
+}
+
+function getMarkerSeverity(monacoApi: MonacoApi, severity?: number): monaco.MarkerSeverity {
+  const severities = monacoApi.MarkerSeverity;
+  const map: Record<number, monaco.MarkerSeverity> = {
+    1: severities.Error,
+    2: severities.Warning,
+    3: severities.Info,
+    4: severities.Hint,
+  };
+  return map[severity || 1] || severities.Error;
+}
 
 // Singleton state
 interface LspState {
@@ -144,7 +168,7 @@ async function sendLspRequest<T>(
     }
 
     const data: LspResponse<T> = await response.json();
-    
+
     if (data.error) {
       logger.warn(`[LSP HTTP] Error:`, data.error);
       return null;
@@ -162,7 +186,7 @@ async function sendLspRequest<T>(
  */
 async function ensureInitialized(language: string, documentUri: string): Promise<boolean> {
   const key = `${language}`;
-  
+
   if (lspState.initialized.get(key)) {
     return true;
   }
@@ -173,7 +197,7 @@ async function ensureInitialized(language: string, documentUri: string): Promise
       capabilities: {
         textDocument: {
           synchronization: { didSave: true },
-          completion: { 
+          completion: {
             completionItem: { snippetSupport: true, documentationFormat: ['markdown', 'plaintext'] },
             contextSupport: true,
           },
@@ -229,24 +253,25 @@ function toMonacoRange(range: LspRange): monaco.IRange {
  * Convert LSP completion item to Monaco
  */
 function toMonacoCompletionItem(
+  monacoApi: MonacoApi,
   item: CompletionItem,
   range: monaco.IRange
 ): monaco.languages.CompletionItem {
   let documentation: monaco.languages.CompletionItem['documentation'];
   if (typeof item.documentation === 'string') {
     documentation = item.documentation;
-  } else if (item.documentation && typeof item.documentation === 'object') {
-    documentation = { value: (item.documentation as any).value || '' };
+  } else if (hasStringValue(item.documentation)) {
+    documentation = { value: item.documentation.value };
   }
 
   return {
     label: item.label,
-    kind: LSP_COMPLETION_KIND_MAP[item.kind || 1] || monaco.languages.CompletionItemKind.Text,
+    kind: getCompletionKind(monacoApi, item.kind),
     detail: item.detail,
     documentation,
     insertText: item.insertText || item.label,
-    insertTextRules: item.insertTextFormat === 2 
-      ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet 
+    insertTextRules: item.insertTextFormat === 2
+      ? monacoApi.languages.CompletionItemInsertTextRule.InsertAsSnippet
       : undefined,
     range: item.textEdit ? toMonacoRange(item.textEdit.range) : range,
     sortText: item.sortText,
@@ -267,14 +292,12 @@ function toMonacoHover(hover: Hover): monaco.languages.Hover {
     for (const c of hover.contents) {
       if (typeof c === 'string') {
         contents.push({ value: c });
-      } else if (c && typeof c === 'object' && 'language' in c && 'value' in c) {
-        contents.push({ value: `\`\`\`${(c as any).language}\n${(c as any).value}\n\`\`\`` });
-      } else if (c && typeof c === 'object' && 'value' in c) {
-        contents.push({ value: (c as any).value });
+      } else if (hasLanguageValue(c)) {
+        contents.push({ value: `\`\`\`${c.language}\n${c.value}\n\`\`\`` });
       }
     }
-  } else if (hover.contents && typeof hover.contents === 'object' && 'value' in hover.contents) {
-    contents.push({ value: (hover.contents as any).value });
+  } else if (hasStringValue(hover.contents)) {
+    contents.push({ value: hover.contents.value });
   }
 
   return {
@@ -286,10 +309,13 @@ function toMonacoHover(hover: Hover): monaco.languages.Hover {
 /**
  * Monaco Completion Provider using LSP HTTP
  */
-export function createLspCompletionProvider(language: string): monaco.languages.CompletionItemProvider {
+export function createLspCompletionProvider(
+  monacoApi: MonacoApi,
+  language: string
+): monaco.languages.CompletionItemProvider {
   return {
     triggerCharacters: ['.', ':', '<', '"', "'", '/', '@', '*'],
-    
+
     async provideCompletionItems(
       model,
       position,
@@ -333,7 +359,7 @@ export function createLspCompletionProvider(language: string): monaco.languages.
       };
 
       return {
-        suggestions: items.map((item) => toMonacoCompletionItem(item, range)),
+        suggestions: items.map((item) => toMonacoCompletionItem(monacoApi, item, range)),
         incomplete: !Array.isArray(result) && result.isIncomplete,
       };
     },
@@ -386,14 +412,16 @@ export function createLspSignatureHelpProvider(language: string): monaco.languag
 
       const signatures: monaco.languages.SignatureInformation[] = result.signatures.map((sig) => ({
         label: sig.label,
-        documentation: typeof sig.documentation === 'string' 
-          ? sig.documentation 
+        documentation: typeof sig.documentation === 'string'
+          ? sig.documentation
           : sig.documentation?.value,
         parameters: sig.parameters?.map((p) => ({
           label: typeof p.label === 'string' ? p.label : [p.label[0], p.label[1]],
-          documentation: typeof p.documentation === 'string' 
-            ? p.documentation 
-            : (p.documentation as any)?.value,
+          documentation: typeof p.documentation === 'string'
+            ? p.documentation
+            : hasStringValue(p.documentation)
+              ? p.documentation.value
+              : undefined,
         })) || [],
       }));
 
@@ -410,9 +438,12 @@ export function createLspSignatureHelpProvider(language: string): monaco.languag
 }
 
 /**
- * Monaco Definition Provider using LSP HTTP  
+ * Monaco Definition Provider using LSP HTTP
  */
-export function createLspDefinitionProvider(language: string): monaco.languages.DefinitionProvider {
+export function createLspDefinitionProvider(
+  monacoApi: MonacoApi,
+  language: string
+): monaco.languages.DefinitionProvider {
   return {
     async provideDefinition(model, position): Promise<monaco.languages.Definition | null> {
       const uri = model.uri.toString();
@@ -429,7 +460,7 @@ export function createLspDefinitionProvider(language: string): monaco.languages.
 
       const locations = Array.isArray(result) ? result : [result];
       return locations.map((loc) => ({
-        uri: monaco.Uri.parse(loc.uri),
+        uri: monacoApi.Uri.parse(loc.uri),
         range: toMonacoRange(loc.range),
       }));
     },
@@ -439,7 +470,10 @@ export function createLspDefinitionProvider(language: string): monaco.languages.
 /**
  * Monaco References Provider using LSP HTTP
  */
-export function createLspReferencesProvider(language: string): monaco.languages.ReferenceProvider {
+export function createLspReferencesProvider(
+  monacoApi: MonacoApi,
+  language: string
+): monaco.languages.ReferenceProvider {
   return {
     async provideReferences(model, position, context): Promise<monaco.languages.Location[] | null> {
       const uri = model.uri.toString();
@@ -456,7 +490,7 @@ export function createLspReferencesProvider(language: string): monaco.languages.
       }
 
       return result.map((loc) => ({
-        uri: monaco.Uri.parse(loc.uri),
+        uri: monacoApi.Uri.parse(loc.uri),
         range: toMonacoRange(loc.range),
       }));
     },
@@ -467,15 +501,15 @@ export function createLspReferencesProvider(language: string): monaco.languages.
  * Register all LSP providers for a language in Monaco
  */
 export function registerLspProviders(
-  monaco: typeof import('monaco-editor'),
+  monaco: MonacoApi,
   language: string
 ): monaco.IDisposable[] {
   const disposables: monaco.IDisposable[] = [];
 
   disposables.push(
-    monaco.languages.registerCompletionItemProvider(language, createLspCompletionProvider(language))
+    monaco.languages.registerCompletionItemProvider(language, createLspCompletionProvider(monaco, language))
   );
-  
+
   disposables.push(
     monaco.languages.registerHoverProvider(language, createLspHoverProvider(language))
   );
@@ -485,11 +519,11 @@ export function registerLspProviders(
   );
 
   disposables.push(
-    monaco.languages.registerDefinitionProvider(language, createLspDefinitionProvider(language))
+    monaco.languages.registerDefinitionProvider(language, createLspDefinitionProvider(monaco, language))
   );
 
   disposables.push(
-    monaco.languages.registerReferenceProvider(language, createLspReferencesProvider(language))
+    monaco.languages.registerReferenceProvider(language, createLspReferencesProvider(monaco, language))
   );
 
   log.info(`[LSP HTTP] Registered providers for language: ${language}`);
@@ -520,12 +554,12 @@ export async function getDiagnostics(
  * Apply diagnostics to Monaco editor
  */
 export function applyDiagnosticsToMonaco(
-  monaco: typeof import('monaco-editor'),
+  monaco: MonacoApi,
   model: monaco.editor.ITextModel,
   diagnostics: Diagnostic[]
 ): void {
   const markers: monaco.editor.IMarkerData[] = diagnostics.map((d) => ({
-    severity: LSP_SEVERITY_MAP[d.severity || 1] || monaco.MarkerSeverity.Error,
+    severity: getMarkerSeverity(monaco, d.severity),
     message: d.message,
     startLineNumber: d.range.start.line + 1,
     startColumn: d.range.start.character + 1,

@@ -10,6 +10,9 @@ import { prisma } from '@/lib/db';
 import { verifyToken } from '@/lib/auth-server';
 import { getQueueRedis } from '@/lib/redis-queue';
 import { checkProjectAccess } from '@/lib/project-access';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/projects/[id]/export/[exportId]/route');
 
 type ExportStatus =
   | 'queued'
@@ -117,7 +120,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Export status error:', error);
+    routeLogger.error('Export status error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

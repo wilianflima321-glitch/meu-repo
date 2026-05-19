@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 type CartItem = {
   assetId: string;
@@ -17,6 +18,7 @@ type CartItem = {
 type PreferencesObject = Record<string, unknown>;
 
 const CART_KEY = 'marketplaceCart';
+const routeLogger = createComponentLogger('api.marketplace.cart');
 
 function toPreferencesObject(input: unknown): PreferencesObject {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
@@ -76,7 +78,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
-    console.error('[marketplace/cart:GET] Error:', error);
+    routeLogger.error('[marketplace/cart:GET] Error', error);
     return NextResponse.json({ error: 'Failed to load cart' }, { status: 500 });
   }
 }
@@ -130,7 +132,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
-    console.error('[marketplace/cart:POST] Error:', error);
+    routeLogger.error('[marketplace/cart:POST] Error', error);
     return NextResponse.json({ error: 'Failed to add to cart' }, { status: 500 });
   }
 }
@@ -159,7 +161,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
-    console.error('[marketplace/cart:DELETE] Error:', error);
+    routeLogger.error('[marketplace/cart:DELETE] Error', error);
     return NextResponse.json({ error: 'Failed to update cart' }, { status: 500 });
   }
 }

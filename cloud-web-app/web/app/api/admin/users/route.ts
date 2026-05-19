@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError, createAPIError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/users/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +67,7 @@ export async function GET(req: NextRequest) {
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     
-    console.error('Admin Users Error:', error);
+    routeLogger.error('Admin Users Error:', error);
     return apiInternalError();
   }
 }

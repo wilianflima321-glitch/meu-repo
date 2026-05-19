@@ -9,7 +9,7 @@ function nextSessionId() {
 export function createInitialSessionEntry(prevLength: number, settings: DashboardSettings): SessionEntry {
   return {
     id: nextSessionId(),
-    name: `Sessao ${prevLength + 1}`,
+    name: `Session ${prevLength + 1}`,
     timestamp: Date.now(),
     chatHistory: [],
     livePreviewSuggestions: [],

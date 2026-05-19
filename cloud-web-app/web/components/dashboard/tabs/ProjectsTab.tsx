@@ -68,7 +68,7 @@ const typeLabels: Record<string, string> = {
 }
 
 const statusConfig: Record<string, { label: string; variant: 'success' | 'warning' | 'default' | 'info' }> = {
-  active: { label: 'Ativo', variant: 'success' },
+  active: { label: 'Active', variant: 'success' },
   paused: { label: 'Pausado', variant: 'warning' },
   completed: { label: 'Completed', variant: 'info' },
   archived: { label: 'Arquivado', variant: 'default' },
@@ -88,10 +88,10 @@ function ProjectCard({
   onToggleStar?: () => void
 }) {
   const menuItems: DropdownItem[] = [
-    { id: 'open', label: 'Abrir', icon: <ExternalLink className="w-4 h-4" />, onClick: onOpen },
-    { id: 'edit', label: 'Editar', icon: <Edit className="w-4 h-4" />, onClick: onEdit },
+    { id: 'open', label: 'Open', icon: <ExternalLink className="w-4 h-4" />, onClick: onOpen },
+    { id: 'edit', label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: onEdit },
     { id: 'div1', label: '', divider: true },
-    { id: 'delete', label: 'Excluir', icon: <Trash2 className="w-4 h-4" />, onClick: onDelete, danger: true },
+    { id: 'delete', label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: onDelete, danger: true },
   ]
 
   const status = statusConfig[project.status]
@@ -120,7 +120,7 @@ function ProjectCard({
           </div>
 
           <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-            <button type="button" aria-label={project.starred ? `Remover ${project.name} dos favoritos` : `Adicionar ${project.name} aos favoritos`}
+            <button type="button" aria-label={project.starred ? `Remove ${project.name} dos favoritos` : `Add ${project.name} aos favoritos`}
               onClick={onToggleStar}
               className={`p-1.5 rounded-lg transition-colors ${
                 project.starred
@@ -132,7 +132,7 @@ function ProjectCard({
             </button>
             <Dropdown
               trigger={
-                <button type="button" aria-label={`Abrir acoes do projeto ${project.name}`} className="p-1.5 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] transition-colors">
+                <button type="button" aria-label={`Open project actions ${project.name}`} className="p-1.5 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] transition-colors">
                   <MoreVertical className="w-4 h-4" />
                 </button>
               }
@@ -211,13 +211,13 @@ export function ProjectsTab({
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Projetos</h1>
+          <h1 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Projects</h1>
           <p className="text-[var(--aethel-text-secondary)] mt-1">
-            Gerencie seus projetos e colaboracoes
+            Manage your projects and collaborations
           </p>
         </div>
         <Button icon={<Plus className="w-4 h-4" />} onClick={onCreateProject}>
-          Novo Projeto
+          New project
         </Button>
       </div>
 
@@ -225,7 +225,7 @@ export function ProjectsTab({
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <Input
-            placeholder="Buscar projetos..."
+            placeholder="Search projects..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             icon={<Search className="w-4 h-4" />}
@@ -249,7 +249,7 @@ export function ProjectsTab({
             className="px-4 py-2.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-[var(--aethel-text-primary)] text-sm focus:outline-none focus:border-[var(--aethel-info)]"
           >
             <option value="">Todos os status</option>
-            <option value="active">Ativo</option>
+            <option value="active">Active</option>
             <option value="paused">Pausado</option>
             <option value="completed">Completed</option>
             <option value="archived">Arquivado</option>
@@ -264,7 +264,7 @@ export function ProjectsTab({
             <div className="py-12 text-center">
               <Search className="w-12 h-12 text-[var(--aethel-text-tertiary)] mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-2">
-                Nenhum projeto encontrado
+                No projects found
               </h3>
               <p className="text-[var(--aethel-text-secondary)] mb-4">
                 Tente ajustar seus filtros de busca
@@ -303,7 +303,7 @@ export function ProjectsTab({
       {filteredProjects.length > 0 && (
         <div className="flex items-center justify-between text-sm text-[var(--aethel-text-tertiary)] pt-4 border-t border-[var(--aethel-border-primary)]">
           <span>
-            {filteredProjects.length} de {projects.length} projetos
+            {filteredProjects.length} de {projects.length} projects
           </span>
           <span>
             {projects.filter((p) => p.starred).length} favoritos

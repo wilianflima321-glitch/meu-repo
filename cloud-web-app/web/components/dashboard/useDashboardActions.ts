@@ -212,7 +212,7 @@ export function useDashboardActions({
     chatAbortRef.current?.abort()
     chatAbortRef.current = null
     setIsStreaming(false)
-    showToastMessage('Execucao interrompida pelo usuario.', 'info')
+    showToastMessage('Execucao interrormpida pelo usuario.', 'info')
     trackEvent('ai', 'ai_error', { source: 'dashboard-chat', action: 'abort' })
   }, [chatAbortRef, setIsStreaming, showToastMessage, trackEvent])
 
@@ -278,7 +278,7 @@ export function useDashboardActions({
           if (!response.ok) {
             throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
           }
-          showToastMessage('Full Access temporario ativado (15 min).', 'success')
+          showToastMessage('Full Access temporario activedo (15 min).', 'success')
           trackEvent('security', 'full_access_grant', {
             source: 'dashboard-header',
             projectId: copilotProjectId,
@@ -288,7 +288,7 @@ export function useDashboardActions({
 
         await mutateFullAccess()
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Falha ao atualizar Full Access.'
+        const message = error instanceof Error ? error.message : 'Failed to update Full Access.'
         showToastMessage(message, 'error')
       } finally {
         setFullAccessBusy(false)
@@ -371,20 +371,20 @@ export function useDashboardActions({
   const handleCreateProject = useCallback(() => {
     const value = newProjectName.trim()
     if (!value) {
-      showToastMessage('Defina um nome de projeto antes de criar.', 'error')
+      showToastMessage('Set a project name before creating it.', 'error')
       return
     }
 
     const project = createProjectEntry(projects, value, newProjectType)
     setProjects((prev) => [project, ...prev])
     setNewProjectName('')
-    showToastMessage('Projeto criado com sucesso.', 'success')
+    showToastMessage('Project created successfully.', 'success')
     trackEvent('project', 'project_create', { type: newProjectType })
   }, [newProjectName, newProjectType, projects, setProjects, setNewProjectName, showToastMessage, trackEvent])
 
   const handleDeleteProject = useCallback((id: number) => {
     setProjects((prev) => removeProjectEntry(prev, id))
-    showToastMessage('Projeto removido.', 'info')
+    showToastMessage('Project removed.', 'info')
     trackEvent('project', 'project_delete', { projectId: id })
   }, [setProjects, showToastMessage, trackEvent])
 
@@ -394,7 +394,7 @@ export function useDashboardActions({
   }, [showToastMessage])
 
   const handleApplyDirectorNote = useCallback((title: string) => {
-    setChatMessage(`Aplique a diretriz no projeto atual: ${title}`)
+    setChatMessage(`Apply the guideline to the current project: ${title}`)
     setActiveTab('ai-chat')
     showToastMessage('Diretriz enviada para o Chat IA.', 'success')
   }, [setChatMessage, setActiveTab, showToastMessage])
@@ -408,7 +408,7 @@ export function useDashboardActions({
       if (response.checkoutUrl && typeof window !== 'undefined') {
         window.open(response.checkoutUrl, '_blank', 'noopener,noreferrer')
       }
-      showToastMessage(`Fluxo de assinatura iniciado para ${planId}.`, 'success')
+      showToastMessage(`Subscription flow started for ${planId}.`, 'success')
       void mutate(CURRENT_PLAN_KEY)
     } catch (err) {
       setSubscribeError(mapSubscribeError(err))
@@ -435,7 +435,7 @@ export function useDashboardActions({
     }
     const amount = parsePositiveInteger(purchaseForm.amount)
     if (!amount) {
-      setWalletActionError('Informe um valor de creditos valido.')
+      setWalletActionError('Enter a valid credit amount.')
       setWalletSubmitting(false)
       return
     }
@@ -483,7 +483,7 @@ export function useDashboardActions({
     }
     const amount = parsePositiveInteger(transferForm.amount)
     if (!amount) {
-      setWalletActionError('Valor da transferencia invalido.')
+      setWalletActionError('Invalid transfer amount.')
       setWalletSubmitting(false)
       return
     }
@@ -533,7 +533,7 @@ export function useDashboardActions({
   const handleTemplateSelect = useCallback((templateId: string) => {
     const template = workflowTemplates.find((item) => item.id === templateId)
     if (!template) return
-    setChatMessage(`Aplicar template "${template.name}" com os passos:\n- ${template.steps.join('\n- ')}`)
+    setChatMessage(`Apply template "${template.name}" with steps:\n- ${template.steps.join('\n- ')}`)
     setActiveTab('ai-chat')
     showToastMessage(`Template "${template.name}" carregado no chat.`, 'success')
   }, [workflowTemplates, setChatMessage, setActiveTab, showToastMessage])
@@ -612,7 +612,7 @@ export function useDashboardActions({
         setConnectFromWorkflowId('')
         persistCopilotScope(workflowId, threadId)
       } catch (error) {
-        showToastMessage('Falha ao criar workflow.', 'error')
+        showToastMessage('Failed to create workflow.', 'error')
       } finally {
         setConnectBusy(false)
       }
@@ -648,9 +648,9 @@ export function useDashboardActions({
         setCopilotWorkflows((prev) =>
           prev.map((workflow) => (String(workflow.id) === String(activeWorkflowId) ? updated : workflow))
         )
-        showToastMessage('Workflow renomeado com sucesso.', 'success')
+        showToastMessage('Workflow renamed successfully.', 'success')
       } catch (error) {
-        showToastMessage('Falha ao renomear workflow.', 'error')
+        showToastMessage('Failed to rename workflow.', 'error')
       } finally {
         setConnectBusy(false)
       }
@@ -672,7 +672,7 @@ export function useDashboardActions({
         setActiveChatThreadId(nextThreadId)
         persistCopilotScope(nextWorkflowId, nextThreadId)
       } catch (error) {
-        showToastMessage('Falha ao arquivar workflow.', 'error')
+        showToastMessage('Failed to archive workflow.', 'error')
       } finally {
         setConnectBusy(false)
       }
@@ -689,12 +689,12 @@ export function useDashboardActions({
   ])
 
   const handleCopyHistory = useCallback(() => {
-    void showToastMessage('Copiar historico segue disponivel no modo avancado da ide.', 'info')
+    void showToastMessage('Copy history remains available in advanced IDE mode.', 'info')
   }, [showToastMessage])
 
   const handleImportContext = useCallback(() => {
     if (!activeWorkflowId || !connectFromWorkflowId) {
-      showToastMessage('Selecione workflow origem e destino para importar contexto.', 'info')
+      showToastMessage('Select source and destination workflows to import context.', 'info')
       return
     }
     void (async () => {
@@ -703,7 +703,7 @@ export function useDashboardActions({
         const source = await AethelAPIClient.getCopilotWorkflow(connectFromWorkflowId)
         const patch = buildCopilotContextPatch(activeWorkflowId, source?.workflow?.context)
         if (!patch) {
-          showToastMessage('Workflow fonte sem contexto util para importar.', 'info')
+          showToastMessage('Source workflow has no useful context to import.', 'info')
           return
         }
         const response = await fetch('/api/copilot/context', {
@@ -718,11 +718,11 @@ export function useDashboardActions({
           }),
         })
         if (!response.ok) {
-          throw new Error(await response.text().catch(() => 'Falha ao importar contexto.'))
+          throw new Error(await response.text().catch(() => 'Failed to import context.'))
         }
-        showToastMessage('Contexto importado para o workflow ativo.', 'success')
+        showToastMessage('Context imported into the active workflow.', 'success')
       } catch (error) {
-        showToastMessage('Falha ao importar contexto.', 'error')
+        showToastMessage('Failed to import context.', 'error')
       } finally {
         setConnectBusy(false)
       }
@@ -737,7 +737,7 @@ export function useDashboardActions({
 
   const handleMergeWorkflow = useCallback(() => {
     if (!activeWorkflowId || !connectFromWorkflowId) {
-      showToastMessage('Selecione workflow origem e destino para mesclar.', 'info')
+      showToastMessage('Select source and destination workflows to merge.', 'info')
       return
     }
     void (async () => {
@@ -795,7 +795,7 @@ export function useDashboardActions({
           setChatHistory((prev) => [...prev, { role: 'assistant', content: 'Request interrupted by user.' } as ChatMessage].slice(-200))
           return
         }
-        let errorMessage = error instanceof Error ? error.message : 'Falha na chamada de IA.'
+        let errorMessage = error instanceof Error ? error.message : 'AI call failed.'
         if (error instanceof AdvancedChatRequestError) {
           const providerGate = isProviderSetupError(error)
           if (providerGate) {
@@ -885,8 +885,8 @@ export function useDashboardActions({
           ? `${error.code}: ${error.message}`
           : error instanceof Error
             ? error.message
-            : 'Falha ao gerar sugestao.'
-      setLivePreviewSuggestions((prev) => [`Erro: ${message}`, ...prev].slice(0, 10))
+            : 'Failed to generate suggestion.'
+      setLivePreviewSuggestions((prev) => [`Error: ${message}`, ...prev].slice(0, 10))
     } finally {
       setIsGenerating(false)
     }

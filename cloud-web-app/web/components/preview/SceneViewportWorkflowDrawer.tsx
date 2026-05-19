@@ -69,9 +69,9 @@ function getWorkflowDescription(workflowTool: ViewportWorkflowTool): string {
     case 'visual-script':
       return 'Os nos Move, Rotate e Add Force refletem no objeto selecionado em tempo real.';
     case 'vfx':
-      return 'Emitter, module e renderer agora alimentam glow e leitura cinematica no objeto ativo.';
+      return 'Emitter, module e renderer agora alimentam glow e leitura cinematica no objeto active.';
     case 'ability':
-      return 'Abilities e preview agora podem colorir e orientar o play test do objeto ativo.';
+      return 'Abilities e preview agora podem colorir e orientar o play test do objeto active.';
     default:
       return 'Ferramenta contextual de personagem conectada ao mesmo objeto 3D.';
   }
@@ -90,7 +90,7 @@ export function getViewportWorkflowLabel(workflowTool: ViewportWorkflowTool | nu
     case 'hair':
       return 'Hair';
     default:
-      return 'Nenhum';
+      return 'No';
   }
 }
 

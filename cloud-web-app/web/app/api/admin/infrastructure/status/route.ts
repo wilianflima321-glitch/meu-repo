@@ -5,6 +5,9 @@ import { withAdminAuth } from '@/lib/rbac';
 import cache from '@/lib/redis-cache';
 import queueManager from '@/lib/queue-system';
 import { buildAppUrl } from '@/lib/server/app-origin';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/infrastructure/status/route');
 
 // =============================================================================
 // INFRASTRUCTURE STATUS API
@@ -260,7 +263,7 @@ async function handler(req: NextRequest) {
     });
     
   } catch (error) {
-    console.error('[Infrastructure Status] Error:', error);
+    routeLogger.error('[Infrastructure Status] Error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch infrastructure status' },
       { status: 500 }

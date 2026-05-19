@@ -3,6 +3,9 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/wallet/purchase-intent/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +38,7 @@ export async function POST(req: NextRequest) {
     const currency = normalizeCurrency(body?.currency);
     if (currency !== 'credits') {
       return NextResponse.json(
-        { error: 'UNSUPPORTED_CURRENCY', message: 'Apenas currency="credits" é suportado no momento.' },
+        { error: 'UNSUPPORTED_CURRENCY', message: 'Only currency="credits" is currently supported.' },
         { status: 400 }
       );
     }
@@ -83,7 +86,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Purchase intent error:', error);
+    routeLogger.error('Purchase intent error:', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

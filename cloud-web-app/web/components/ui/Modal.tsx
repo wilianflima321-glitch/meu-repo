@@ -172,7 +172,7 @@ export function ConfirmModal({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirmar',
+  confirmText = 'Confirm',
   cancelText = 'Cancel',
   variant = 'info',
   loading = false,

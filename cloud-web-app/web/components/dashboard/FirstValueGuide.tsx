@@ -83,18 +83,18 @@ export function FirstValueGuide({
   }, [])
 
   const previewStatusLabel = useMemo(() => {
-    if (!previewReadiness?.strategy) return 'Caminho do preview desconhecido'
+    if (!previewReadiness?.strategy) return 'Unknown preview path'
     if (previewReadiness.strategy === 'managed') {
-      return previewReadiness.status === 'ready' ? 'Preview gerenciado disponivel' : 'Preview gerenciado com bloqueios'
+      return previewReadiness.status === 'ready' ? 'Managed preview available' : 'Managed preview has blockers'
     }
     if (previewReadiness.strategy === 'local') return 'Preview local detectado'
-    return 'Fallback inline do preview ativo'
+    return 'Active inline preview fallback'
   }, [previewReadiness])
 
   const previewActionLabel = useMemo(() => {
-    if (previewReadiness?.recommendedAction === 'provision') return 'Abrir IDE + Provisionar Preview'
-    if (previewReadiness?.recommendedAction === 'discover') return 'Abrir IDE + Detectar Preview'
-    return 'Abrir IDE + Preview'
+    if (previewReadiness?.recommendedAction === 'provision') return 'Open IDE + provision preview'
+    if (previewReadiness?.recommendedAction === 'discover') return 'Open IDE + detect preview'
+    return 'Open IDE + preview'
   }, [previewReadiness])
 
   const formatDuration = (value: number | null) => {
@@ -120,15 +120,15 @@ export function FirstValueGuide({
       ? sessionSummary.durationMs !== null && sessionSummary.durationMs <= sessionSummary.targetMs
         ? 'Meta atingida'
         : 'Completed above target'
-      : 'Sessao em andamento'
+      : 'Session in progress'
 
   return (
     <section className="m-4 rounded-2xl border border-[var(--aethel-primary)]/30 bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] p-4 md:m-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex-1">
-          <h3 className="text-sm font-semibold text-[var(--aethel-primary-light)]">Primeiro valor em menos de 2 minutos</h3>
+          <h3 className="text-sm font-semibold text-[var(--aethel-primary-light)]">First value in under 2 minutes</h3>
           <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
-            Crie um projeto, configure o provedor de IA e abra o preview da IDE com um starter pronto para iteracao.
+            Create a project, configure the AI provider, and open the IDE preview with an iteration-ready starter.
           </p>
           <div className="mt-3">
             <div className="h-1.5 w-full rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">
@@ -143,14 +143,14 @@ export function FirstValueGuide({
             </p>
           </div>
           <ul className="mt-2 space-y-1 text-[11px] text-[var(--aethel-text-secondary)]">
-            <li>{firstProjectCreated ? '[OK]' : '[ ]'} Primeiro projeto criado ({formatDuration(milestoneDurations.firstProjectCreatedMs)})</li>
+            <li>{firstProjectCreated ? '[OK]' : '[ ]'} First project created ({formatDuration(milestoneDurations.firstProjectCreatedMs)})</li>
             <li>{firstAiSuccess ? '[OK]' : '[ ]'} Primeira resposta de IA recebida ({formatDuration(milestoneDurations.firstAiSuccessMs)})</li>
             <li>{firstIdeOpened ? '[OK]' : '[ ]'} Preview da IDE aberto ({formatDuration(milestoneDurations.firstIdeOpenedMs)})</li>
           </ul>
 
           <div className="mt-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_40%,transparent)] p-3">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Sessao de primeiro valor</p>
+              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">First-value session</p>
               <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                 {sessionStatusLabel}
               </span>
@@ -163,7 +163,7 @@ export function FirstValueGuide({
                 </p>
               </div>
               <div className="rounded border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
-                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Duracao</p>
+                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Duration</p>
                 <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">{formatDuration(sessionSummary.durationMs)}</p>
               </div>
               <div className="rounded border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
@@ -175,9 +175,9 @@ export function FirstValueGuide({
 
           <div className="mt-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_40%,transparent)] p-3">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Prontidao do preview</p>
+              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Preview readiness</p>
               <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
-                {previewReadiness?.strategy || 'desconhecido'}
+                {previewReadiness?.strategy || 'unknown'}
               </span>
               {previewReadiness?.managedProvider && (
               <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
@@ -241,19 +241,19 @@ export function FirstValueGuide({
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <button type="button" onClick={onCreateProject} className={primaryButtonClass} aria-label="Criar o primeiro projeto">
-            Criar projeto
+          <button type="button" onClick={onCreateProject} className={primaryButtonClass} aria-label="Create the first project">
+            Create project
           </button>
           <button type="button" onClick={onConfigureAI} className={secondaryButtonClass} aria-label="Configure artificial intelligence provider">
             Configure AI
           </button>
-          <button type="button" onClick={onOpenAIChat} className={secondaryButtonClass} aria-label="Abrir o chat de inteligencia artificial">
-            Abrir Chat IA
+          <button type="button" onClick={onOpenAIChat} className={secondaryButtonClass} aria-label="Open the AI chat">
+            Open AI chat
           </button>
           <button type="button" onClick={onOpenIdePreview} className={secondaryButtonClass} aria-label={previewActionLabel}>
             {previewActionLabel}
           </button>
-          <button type="button" onClick={onDismiss} className={ghostButtonClass} aria-label="Dispensar guia de primeiro valor">
+          <button type="button" onClick={onDismiss} className={ghostButtonClass} aria-label="Dismiss first-value guide">
             Dispensar
           </button>
         </div>

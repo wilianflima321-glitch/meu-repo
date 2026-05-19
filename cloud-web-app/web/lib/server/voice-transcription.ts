@@ -1,4 +1,4 @@
-﻿import OpenAI from 'openai'
+import OpenAI from 'openai'
 
 export const VOICE_TRANSCRIPTION_MAX_BYTES = 25 * 1024 * 1024
 

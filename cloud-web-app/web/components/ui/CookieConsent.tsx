@@ -57,7 +57,7 @@ export default function CookieConsent() {
                 <div className="mt-3 space-y-2 text-xs text-[var(--aethel-text-tertiary)]">
                   <div className="flex items-center gap-2">
                     <Shield className="h-3.5 w-3.5 text-[var(--aethel-success)]" />
-                    <span><strong className="text-[var(--aethel-text-secondary)]">Essenciais:</strong> autenticacao, seguranca e preferencias basicas do studio (sempre ativos)</span>
+                    <span><strong className="text-[var(--aethel-text-secondary)]">Essenciais:</strong> autenticacao, seguranca e preferencias basicas do studio (sempre actives)</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Shield className="h-3.5 w-3.5 text-[var(--aethel-info)]" />

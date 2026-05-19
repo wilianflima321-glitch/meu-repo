@@ -112,76 +112,76 @@ interface AgentSession {
 
 const AGENT_TEMPLATES: Omit<Agent, 'id' | 'taskHistory' | 'metrics'>[] = [
   {
-    name: 'Arquiteto',
+    name: 'Architect',
     type: 'architect',
-    description: 'Desenha arquitetura do sistema, planeja a implementacao e cria especificacoes tecnicas.',
+    description: 'Designs system architecture, plans implementation, and writes technical specifications.',
     status: 'idle',
     icon: '🏗️',
     color: 'blue',
-    capabilities: ['Design de sistema', 'Planejamento de API', 'Esquema de dados', 'Estrutura de componentes'],
+    capabilities: ['System design', 'API planning', 'Data schema', 'Component structure'],
   },
   {
     name: 'Dev',
     type: 'coder',
-    description: 'Implementa features, escreve codigo limpo e segue boas praticas.',
+    description: 'Implements features, writes clean code, and follows production practices.',
     status: 'idle',
     icon: '💻',
     color: 'emerald',
-    capabilities: ['Geracao de codigo', 'Refatoracao', 'Otimizacao', 'Documentacao'],
+    capabilities: ['Code generation', 'Refactoring', 'Optimization', 'Documentation'],
   },
   {
-    name: 'Pesquisador',
+    name: 'Researcher',
     type: 'researcher',
-    description: 'Pesquisa documentacao, encontra solucoes e coleta informacoes relevantes.',
+    description: 'Researches documentation, finds solutions, and gathers relevant evidence.',
     status: 'idle',
     icon: '🔬',
     color: 'cyan',
-    capabilities: ['Busca web', 'Analise de docs', 'Pesquisa de API', 'Checagem de dependencias'],
+    capabilities: ['Web search', 'Docs analysis', 'API research', 'Dependency checks'],
   },
   {
-    name: 'Depurador',
+    name: 'Debugger',
     type: 'debugger',
-    description: 'Identifica e corrige bugs, analisa logs de erro e melhora a confiabilidade.',
+    description: 'Identifies and fixes bugs, analyzes error logs, and improves reliability.',
     status: 'idle',
     icon: '🐛',
     color: 'red',
-    capabilities: ['Analise de erros', 'Stack trace', 'Profiling de memoria', 'Performance'],
+    capabilities: ['Error analysis', 'Stack traces', 'Memory profiling', 'Performance'],
   },
   {
-    name: 'Revisor',
+    name: 'Reviewer',
     type: 'reviewer',
-    description: 'Revisa a qualidade do codigo, sugere melhorias e garante boas praticas.',
+    description: 'Reviews code quality, suggests improvements, and enforces production practices.',
     status: 'idle',
     icon: '👁️',
     color: 'amber',
-    capabilities: ['Revisao de codigo', 'Auditoria de seguranca', 'Checagem de estilo', 'Seguranca de tipos'],
+    capabilities: ['Code review', 'Security audit', 'Style checks', 'Type safety'],
   },
   {
     name: 'QA',
     type: 'tester',
-    description: 'Cria e executa testes, garante cobertura e valida a funcionalidade.',
+    description: 'Creates and runs tests, protects coverage, and validates behavior.',
     status: 'idle',
     icon: '🧪',
     color: 'cyan',
-    capabilities: ['Testes unitarios', 'Testes de integracao', 'Testes E2E', 'Cobertura'],
+    capabilities: ['Unit tests', 'Integration tests', 'E2E tests', 'Coverage'],
   },
   {
-    name: 'Orquestrador',
+    name: 'Orchestrator',
     type: 'orchestrator',
-    description: 'Coordena varios agentes, gerencia fluxos e garante conclusao de tarefas.',
+    description: 'Coordinates agents, manages workflows, and keeps tasks moving to completion.',
     status: 'idle',
     icon: '🎭',
     color: 'cyan',
-    capabilities: ['Roteamento de tarefas', 'Coordenacao de agentes', 'Priorizacao', 'Workflow'],
+    capabilities: ['Task routing', 'Agent coordination', 'Prioritization', 'Workflow'],
   },
   {
-    name: 'Visionario',
+    name: 'Visionary',
     type: 'dreamer',
-    description: 'Agente criativo que explora solucoes inovadoras e gera novos conceitos.',
+    description: 'Explores innovative solutions and generates new concepts.',
     status: 'idle',
     icon: '✨',
     color: 'blue',
-    capabilities: ['Ideias criativas', 'Conceitos de UI/UX', 'Inovacao', 'Brainstorm'],
+    capabilities: ['Creative ideas', 'UI/UX concepts', 'Innovation', 'Brainstorming'],
   },
 ]
 
@@ -209,7 +209,7 @@ function formatStatusLabel(status: AgentStatus): string {
     case 'completed':
       return 'concluido'
     case 'failed':
-      return 'falhou'
+      return 'failed'
     case 'waiting':
       return 'aguardando'
     default:
@@ -314,7 +314,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
               <button type="button" aria-label={`Resume agent ${agent.name}`}
                 onClick={(e) => { e.stopPropagation(); onStart() }}
                 className="p-1.5 rounded bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]"
-                title="Retomar agente"
+                title="Resume agent"
               >
                 <Play className="w-3 h-3" />
               </button>
@@ -397,7 +397,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
 
           {/* Metrics */}
           <div className="p-3">
-            <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Metricas</div>
+            <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Metrics</div>
             <div className="grid grid-cols-2 gap-2">
               <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded text-center">
                 <div className="text-lg font-semibold text-[var(--aethel-text-primary)]">{agent.metrics.tasksCompleted}</div>
@@ -405,11 +405,11 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
               </div>
               <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded text-center">
                 <div className="text-lg font-semibold text-[var(--aethel-success)]">{agent.metrics.successRate}%</div>
-                <div className="text-xs text-[var(--aethel-text-tertiary)]">Taxa de sucesso</div>
+                <div className="text-xs text-[var(--aethel-text-tertiary)]">Success rate</div>
               </div>
               <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded text-center">
                 <div className="text-lg font-semibold text-[var(--aethel-warning-light)]">{formatDuration(agent.metrics.avgDuration)}</div>
-                <div className="text-xs text-[var(--aethel-text-tertiary)]">Duracao media</div>
+                <div className="text-xs text-[var(--aethel-text-tertiary)]">Average duration</div>
               </div>
               <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded text-center">
                 <div className="text-lg font-semibold text-[var(--aethel-info-light)]">{(agent.metrics.tokensUsed / 1000).toFixed(1)}k</div>
@@ -433,7 +433,7 @@ function TaskTimeline({ tasks }: TaskTimelineProps) {
   if (tasks.length === 0) {
     return (
       <div className="p-4 text-center text-[var(--aethel-text-tertiary)] text-sm">
-        Nenhuma tarefa no historico ainda.
+        No tasks in history yet.
       </div>
     )
   }
@@ -520,7 +520,7 @@ function WorkflowBuilder({
         <textarea
           value={objective}
           onChange={(e) => setObjective(e.target.value)}
-          placeholder="Descreva o que voce quer concluir..."
+          placeholder="Describe what you want to complete..."
           className="w-full px-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] resize-none"
           rows={2}
         />
@@ -534,7 +534,7 @@ function WorkflowBuilder({
             className="flex items-center gap-1 px-2 py-1 text-xs bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded"
           >
             <Plus className="w-3 h-3" />
-            Adicionar etapa
+            Add etapa
           </button>
         </div>
 
@@ -686,10 +686,10 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       <div className="flex items-center justify-between p-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
           <Bot className="w-5 h-5 text-[var(--aethel-info-light)]" />
-          <span className="font-semibold text-[var(--aethel-text-primary)]">Agentes de IA</span>
+          <span className="font-semibold text-[var(--aethel-text-primary)]">AI agents</span>
           {runningAgents > 0 && (
             <span className="px-2 py-0.5 text-xs bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success)] rounded-full">
-              {runningAgents} ativos
+              {runningAgents} actives
             </span>
           )}
         </div>
@@ -731,7 +731,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
             {tab === 'agents' && <Bot className="w-3 h-3 inline-block mr-1" />}
             {tab === 'workflow' && <Workflow className="w-3 h-3 inline-block mr-1" />}
             {tab === 'history' && <Clock className="w-3 h-3 inline-block mr-1" />}
-            {tab === 'agents' ? 'Agentes' : tab === 'workflow' ? 'Workflow' : 'Historico'}
+            {tab === 'agents' ? 'Agents' : tab === 'workflow' ? 'Workflow' : 'History'}
           </button>
         ))}
       </div>
@@ -773,7 +773,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       <div className="p-3 border-t border-[var(--aethel-border-primary)]">
         <div className="grid grid-cols-2 gap-2">
           <button type="button" aria-label="Send agents prompt to chat"
-            onClick={() => onSendToChat?.('Criar uma nova feature usando agentes de IA')}
+            onClick={() => onSendToChat?.('Create uma nova feature usando agentes de IA')}
             className="flex items-center justify-center gap-2 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm text-[var(--aethel-text-secondary)]"
           >
             <MessageSquare className="w-4 h-4" />

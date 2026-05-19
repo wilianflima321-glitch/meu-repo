@@ -1,21 +1,8 @@
-﻿import './globals.css'
+import './globals.css'
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
-import { Inter, JetBrains_Mono } from 'next/font/google'
 import GlobalCommandSurface from '@/components/ide/GlobalCommandSurface'
 import ProductTelemetry from '@/components/telemetry/ProductTelemetry'
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-})
-
-const jetbrains = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  display: 'swap',
-})
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -28,14 +15,17 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Aethel Engine - estudio multiagente de software',
-  description: 'Estudio multiagente para apps, pesquisa e construcao assistida por IA com operacao explicita.',
+  title: 'Aethel Engine - multi-agent software studio',
+  description: 'Multi-agent studio for apps, research, and AI-assisted software work with explicit operations.',
   metadataBase: new URL('https://aethel.dev'),
   keywords: ['multi-agent IDE', 'AI software studio', 'research to code', 'apps IDE', 'Aethel Engine', 'anti-fake-success'],
   authors: [{ name: 'Aethel Engine Team' }],
   creator: 'Aethel Engine',
   publisher: 'Aethel Engine',
   manifest: '/manifest.webmanifest',
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -46,24 +36,24 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    locale: 'pt_BR',
+    locale: 'en_US',
     url: 'https://aethel.dev',
     siteName: 'Aethel Engine',
-    title: 'Aethel Engine - estudio multiagente de software',
-    description: 'Pesquisa, planejamento, codigo, preview e prontidao em um unico estudio assistido por IA.',
+    title: 'Aethel Engine - multi-agent software studio',
+    description: 'Research, planning, code, preview, and readiness in one AI-assisted studio.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Preview do Aethel Engine',
+        alt: 'Aethel Engine preview',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Aethel Engine',
-    description: 'Estudio multiagente para apps e pesquisa',
+    description: 'Multi-agent studio for apps and research',
     images: ['/twitter-image.png'],
   },
   icons: {
@@ -81,7 +71,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR" className={`dark ${inter.variable} ${jetbrains.variable}`}>
+    <html lang="en" className="dark">
       <body className="min-h-screen antialiased bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
         <ProductTelemetry />
         <GlobalCommandSurface>{children}</GlobalCommandSurface>

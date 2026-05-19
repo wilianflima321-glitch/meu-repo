@@ -12,8 +12,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+
+const routeLogger = createComponentLogger('api.notifications');
 
 export async function GET(request: NextRequest) {
   try {
@@ -54,7 +57,7 @@ export async function GET(request: NextRequest) {
       nextCursor,
     });
   } catch (error) {
-    console.error('Failed to get notifications:', error);
+    routeLogger.error('Failed to get notifications', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -95,7 +98,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Failed to create notification:', error);
+    routeLogger.error('Failed to create notification', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -144,7 +147,7 @@ export async function PATCH(request: NextRequest) {
       updatedAt: new Date(),
     });
   } catch (error) {
-    console.error('Failed to update notifications:', error);
+    routeLogger.error('Failed to update notifications', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -192,7 +195,7 @@ export async function DELETE(request: NextRequest) {
       deletedAt: new Date(),
     });
   } catch (error) {
-    console.error('Failed to delete notifications:', error);
+    routeLogger.error('Failed to delete notifications', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

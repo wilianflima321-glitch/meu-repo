@@ -34,10 +34,10 @@ export default function SettingsPage() {
       setProviderStatus(payload)
       setProviderStatusLoaded(true)
       if (!response.ok) {
-        setProviderError('Falha ao consultar status de provider.')
+        setProviderError('Failed to check provider status.')
       }
     } catch {
-      setProviderError('Falha de rede ao consultar status de provider.')
+      setProviderError('Network failure while checking provider status.')
       setProviderStatusLoaded(false)
     } finally {
       setProviderLoading(false)

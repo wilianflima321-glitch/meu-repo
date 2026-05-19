@@ -197,7 +197,7 @@ export function FeatureFlagAdmin() {
                   : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
               }`}
             >
-              {flag.enabled ? 'Ativo' : 'Inativo'}
+              {flag.enabled ? 'Active' : 'Inactive'}
             </button>
           </div>
         ))}

@@ -3,6 +3,9 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api.projects.project');
 
 // GET /api/projects/[id] - Get single project
 export async function GET(
@@ -33,7 +36,7 @@ export async function GET(
 
     return NextResponse.json(project);
   } catch (error) {
-    console.error('Get project error:', error);
+    routeLogger.error('Get project error', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
@@ -71,7 +74,7 @@ export async function PATCH(
 
     return NextResponse.json(project);
   } catch (error) {
-    console.error('Update project error:', error);
+    routeLogger.error('Update project error', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
@@ -103,7 +106,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Delete project error:', error);
+    routeLogger.error('Delete project error', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

@@ -5,6 +5,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/stats/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +50,7 @@ async function getHandler(_request: NextRequest) {
       generatedAt: new Date(),
     });
   } catch (error) {
-    console.error('[admin/stats] Failed to get system stats:', error);
+    routeLogger.error('[admin/stats] Failed to get system stats:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

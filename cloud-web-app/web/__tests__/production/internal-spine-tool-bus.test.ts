@@ -16,12 +16,12 @@ describe('internal spine tool bus and safety firewall', () => {
     const tools = getCanonicalAgentTools()
     const snapshot = buildAgentToolBusSnapshot()
 
-    expect(tools.length).toBeGreaterThanOrEqual(28)
+    expect(tools.length).toBeGreaterThanOrEqual(29)
     expect(snapshot.criticalTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
     expect(snapshot.replayRequiredTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
     expect(snapshot.explicitApprovalTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
-    expect(snapshot.idempotencyRequiredTools).toEqual(expect.arrayContaining(['diff-proposal', 'deployment']))
-    expect(snapshot.readReceiptRequiredTools).toEqual(expect.arrayContaining(['repository-cartography', 'diff-proposal']))
+    expect(snapshot.idempotencyRequiredTools).toEqual(expect.arrayContaining(['deep-spine-scan', 'diff-proposal', 'deployment']))
+    expect(snapshot.readReceiptRequiredTools).toEqual(expect.arrayContaining(['repository-cartography', 'deep-spine-scan', 'diff-proposal']))
     expect(snapshot.scopeLockedTools).toEqual(expect.arrayContaining(['diff-proposal', 'render-queue', 'render-submit', 'deployment']))
     expect(snapshot.rollbackRequiredTools).toEqual(expect.arrayContaining(['browser-operator', 'deployment']))
     expect(snapshot.writeScopedTools).toEqual(expect.arrayContaining(['mission-ledger', 'diff-proposal', 'render-queue']))
@@ -29,6 +29,7 @@ describe('internal spine tool bus and safety firewall', () => {
     expect(tools.map((tool) => tool.id)).toEqual(
       expect.arrayContaining([
         'code-search',
+        'deep-spine-scan',
         'source-citation',
         'browser-replay',
         'asset-metadata',
@@ -40,6 +41,7 @@ describe('internal spine tool bus and safety firewall', () => {
       ])
     )
     expect(tools.find((tool) => tool.id === 'deployment')?.rollbackStrategy).toBe('deployment-rollback')
+    expect(tools.find((tool) => tool.id === 'deep-spine-scan')?.rollbackStrategy).toBe('artifact-delete')
   })
 
   it('keeps every parallel-agent allowed tool governed by the canonical tool bus', () => {
@@ -145,6 +147,38 @@ describe('internal spine tool bus and safety firewall', () => {
     expect(decision.blockers.join(' ')).toContain('scope lock')
     expect(decision.blockers.join(' ')).toContain('rollback evidence')
     expect(decision.blockers.join(' ')).toContain('maxCostUsd')
+  })
+
+  it('holds deep-spine-scan until idempotency, read receipts, and budget protect expensive scans', () => {
+    const held = evaluateAgentToolInvocation({
+      toolId: 'deep-spine-scan',
+      mode: 'Research',
+      projectId: 'project-1',
+      intent: 'Run a pente fino scan over a GB-scale game project',
+      payloadBytes: 1024 * 1024,
+    })
+
+    expect(held.allowed).toBe(false)
+    expect(held.blockers.join(' ')).toContain('idempotency key')
+    expect(held.blockers.join(' ')).toContain('read receipts')
+    expect(held.blockers.join(' ')).toContain('maxCostUsd')
+    expect(held.requiredEvidence).toEqual(expect.arrayContaining(['scan scope', 'cartography manifest', 'no-auto-fix declaration']))
+
+    const allowed = evaluateAgentToolInvocation({
+      toolId: 'deep-spine-scan',
+      mode: 'Research',
+      projectId: 'project-1',
+      intent: 'Run a governed scan over renderer and engine modules',
+      payloadBytes: 1024 * 1024,
+      maxCostUsd: 1,
+      idempotencyKey: 'scan-v17-renderer',
+      readReceiptRefs: ['read-receipt:cartography-v17'],
+      evidenceRefs: ['cartography manifest', 'context budget', 'metadata-first external sources', 'policy:no-auto-fix'],
+    })
+
+    expect(allowed.allowed).toBe(true)
+    expect(allowed.sandboxPolicy).toBe('write-scoped')
+    expect(allowed.rollbackStrategy).toBe('artifact-delete')
   })
 
   it('blocks oversized payloads before local or cloud execution can freeze the workspace', () => {

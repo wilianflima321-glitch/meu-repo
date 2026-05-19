@@ -84,9 +84,9 @@ export function ApprovalCard({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <GitMerge className="w-4 h-4 text-[var(--aethel-info-light)]" />
-            <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Aprovação necessária</span>
+            <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Approval required</span>
           </div>
-          <span className="text-xs text-[var(--aethel-text-tertiary)]">{totalChanges} arquivo(s) • {totalLines} linha(s)</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">{totalChanges} file(s) • {totalLines} line(s)</span>
         </div>
         <button
           type="button"
@@ -106,13 +106,13 @@ export function ApprovalCard({
                 {estimatedCost > 0 && (
                   <div className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
                     <AlertTriangle className="w-3.5 h-3.5 text-[var(--aethel-warning-light)]" />
-                   <span>Custo estimado: ${estimatedCost.toFixed(4)}</span>
+                   <span>Estimated cost: ${estimatedCost.toFixed(4)}</span>
                   </div>
                 )}
                 {estimatedDuration > 0 && (
                   <div className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
                     <Clock className="w-3.5 h-3.5 text-[var(--aethel-info-light)]" />
-                   <span>Duração estimada: {estimatedDuration}s</span>
+                   <span>Estimated duration: {estimatedDuration}s</span>
                   </div>
                 )}
               </div>
@@ -123,7 +123,7 @@ export function ApprovalCard({
           <div className="p-4 space-y-2 max-h-80 overflow-auto">
             {!hasChanges && (
               <div className="flex items-center justify-center rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-4 text-xs text-[var(--aethel-text-tertiary)]">
-                Nenhuma mudança pendente para aprovação.
+                No pending changes to approve.
               </div>
             )}
             {changes.map((change) => {
@@ -148,7 +148,7 @@ export function ApprovalCard({
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs font-medium text-[var(--aethel-text-primary)]">{change.filePath}</span>
-                          <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{change.lineChanges} linha(s)</span>
+                          <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{change.lineChanges} line(s)</span>
                         </div>
                         <div className="text-[10px] text-[var(--aethel-text-tertiary)]">
                           {change.newContent.length > change.oldContent.length ? '+' : ''}
@@ -170,7 +170,7 @@ export function ApprovalCard({
                           type="button"
                           onClick={() => onApprovePartial(change)}
                           className="p-1 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-success-light)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] transition-colors"
-                          title="Aprovar este arquivo"
+                          title="Approve this file"
                         >
                           <Check className="w-3 h-3" />
                         </button>
@@ -180,7 +180,7 @@ export function ApprovalCard({
                           type="button"
                           onClick={() => onRejectPartial(change)}
                           className="p-1 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] transition-colors"
-                          title="Rejeitar este arquivo"
+                          title="Reject this file"
                         >
                           <X className="w-3 h-3" />
                         </button>

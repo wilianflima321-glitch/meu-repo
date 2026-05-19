@@ -160,8 +160,8 @@ export function useInlineAIChatSession(
           const fallbackContent = createInlineAIMessage(
             'assistant',
             activeFile
-              ? `Nao consegui consultar a IA agora. Posso continuar em modo local explicando ou revisando **${activeFile.path}** se voce quiser tentar novamente.`
-              : 'Nao consegui consultar a IA agora. Tente novamente em alguns instantes ou abra um arquivo para eu responder com contexto mais forte.',
+              ? `I could not reach AI right now. I can continue in local mode by explaining or reviewing **${activeFile.path}** if you want to try again.`
+              : 'I could not reach AI right now. Try again in a moment or open a file so I can answer with stronger context.',
           )
 
           setMessages((previousMessages) => [...previousMessages, fallbackContent])

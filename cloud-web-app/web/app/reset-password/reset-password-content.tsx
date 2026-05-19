@@ -26,7 +26,7 @@ function ResetPasswordForm() {
 
   useEffect(() => {
     if (!token || !email) {
-      setError('Link de redefinicao invalido. Solicite um novo.')
+      setError('Invalid reset link. Request a new one.')
     }
   }, [token, email])
 
@@ -36,13 +36,13 @@ function ResetPasswordForm() {
     setError('')
 
     if (password !== confirmPassword) {
-      setError('As senhas nao coincidem')
+      setError('Passwords do not match')
       setIsLoading(false)
       return
     }
 
     if (password.length < 8) {
-      setError('A senha deve ter pelo menos 8 caracteres')
+      setError('Password must be at least 8 characters')
       setIsLoading(false)
       return
     }
@@ -57,7 +57,7 @@ function ResetPasswordForm() {
       const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        setError(data.error || 'Falha ao redefinir a senha')
+        setError(data.error || 'Failed to reset password')
         return
       }
 
@@ -66,7 +66,7 @@ function ResetPasswordForm() {
         router.push('/login')
       }, 3000)
     } catch {
-      setError('Erro de rede. Tente novamente.')
+      setError('Network error. Try again.')
     } finally {
       setIsLoading(false)
     }
@@ -91,15 +91,15 @@ function ResetPasswordForm() {
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--aethel-error)]/10">
                 <XCircle className="h-8 w-8 text-[var(--aethel-error)]" />
               </div>
-              <h1 className="text-2xl font-bold">Link invalido</h1>
+              <h1 className="text-2xl font-bold">Invalid link</h1>
               <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">
-                Este link expirou ou nao e valido.
+                This link expired or is not valid.
               </p>
               <Link
                 href="/forgot-password"
                 className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] mt-6 rounded-xl px-6 py-3 text-sm font-semibold"
               >
-                Solicitar novo link
+                Request a new link
               </Link>
             </div>
           </div>
@@ -109,16 +109,16 @@ function ResetPasswordForm() {
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
                 <CheckCircle className="h-8 w-8 text-[var(--aethel-success)]" />
               </div>
-              <h1 className="text-2xl font-bold">Senha redefinida</h1>
+              <h1 className="text-2xl font-bold">Password reset</h1>
               <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">
-                Sua senha foi redefinida. Redirecionando para o login.
+                Your password was reset. Redirecting to sign in.
               </p>
               <Link
                 href="/login"
                 className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-6 rounded-xl px-5 py-2 text-sm font-semibold"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Ir para login agora
+                Go to sign in now
               </Link>
             </div>
           </div>
@@ -128,9 +128,9 @@ function ResetPasswordForm() {
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] to-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)]">
                 <Lock className="h-8 w-8 text-[var(--aethel-primary-light)]" />
               </div>
-              <h1 className="text-2xl font-bold">Redefinir senha</h1>
+              <h1 className="text-2xl font-bold">Reset password</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
-                Defina uma nova senha para sua conta.
+                Set a new password for your account.
               </p>
             </div>
 
@@ -146,7 +146,7 @@ function ResetPasswordForm() {
                   htmlFor="password"
                   className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]"
                 >
-                  Nova senha
+                  New password
                 </label>
                 <div className="relative">
                   <input
@@ -174,7 +174,7 @@ function ResetPasswordForm() {
                   htmlFor="confirmPassword"
                   className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]"
                 >
-                  Confirmar senha
+                  Confirm password
                 </label>
                 <input
                   id="confirmPassword"
@@ -190,7 +190,7 @@ function ResetPasswordForm() {
 
               <div className="space-y-1 text-xs text-[var(--aethel-text-tertiary)]">
                 <p className={password.length >= 8 ? 'text-[var(--aethel-success)]' : ''}>
-                  ? Pelo menos 8 caracteres
+                  * At least 8 characters
                 </p>
                 <p
                   className={
@@ -199,7 +199,7 @@ function ResetPasswordForm() {
                       : ''
                   }
                 >
-                  ? Senhas coincidem
+                  * Passwords match
                 </p>
               </div>
 
@@ -211,10 +211,10 @@ function ResetPasswordForm() {
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Redefinindo...
+                    Resetting...
                   </>
                 ) : (
-                  'Redefinir senha'
+                  'Reset password'
                 )}
               </button>
             </form>
@@ -224,7 +224,7 @@ function ResetPasswordForm() {
               className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-4 w-full rounded-xl px-4 py-2 text-sm font-semibold"
             >
               <ArrowLeft className="h-4 w-4" />
-              Voltar para o login
+              Back to sign in
             </Link>
           </div>
         )}

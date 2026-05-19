@@ -3,14 +3,14 @@
 /**
  * AETHEL ENGINE - AI Agent Dashboard
  *
- * Dashboard profissional para monitoramento de agentes de IA.
- * Mostra agentes ativos, execucoes, erros, custos e Metricas.
+ * Professional dashboard for AI agent monitoring.
+ * Shows active agents, executions, errors, costs, and metrics.
  *
  * Features:
- * - Lista de agentes ativos com status
- * - Historico de execucoes
- * - Metricas de custo (tokens/API calls)
- * - Log de erros e warnings
+ * - Active agent list with status
+ * - Execution history
+ * - Cost metrics (tokens/API calls)
+ * - Log de errors e warnings
  * - Controle de sandbox
  *
  * @module components/dashboard/AIAgentDashboard
@@ -331,11 +331,11 @@ export function AIAgentDashboard({
             </div>
             <h2 className={`${CANONICAL_TYPOGRAPHY.h3} text-[var(--aethel-text-primary)]`}>AI Agents</h2>
             <span className="text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2 py-0.5 rounded">
-              {metrics.activeAgents} ativos
+              {metrics.activeAgents} actives
             </span>
           </div>
 
-          <button type="button" aria-label="Atualizar status dos agentes"
+          <button type="button" aria-label="Refresh status dos agentes"
             onClick={refresh}
             disabled={isRefreshing}
             className={`${GHOST_BUTTON_CLASS} p-2`}
@@ -349,7 +349,7 @@ export function AIAgentDashboard({
         {/* Tabs */}
         <div className="flex gap-1 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-1">
           {(['agents', 'history', 'metrics'] as const).map((tab) => (
-            <button type="button" aria-label={`Alternar visualizacao de ${tab === 'agents' ? 'agentes' : tab === 'history' ? 'historico' : 'metricas'}`}
+            <button type="button" aria-label={`Switch view to ${tab === 'agents' ? 'agents' : tab === 'history' ? 'history' : 'metrics'}`}
               key={tab}
               onClick={() => setView(tab)}
               className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold ${CANONICAL_MOTION} ${CANONICAL_FOCUS} ${
@@ -358,7 +358,7 @@ export function AIAgentDashboard({
                   : 'border border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]'
               }`}
             >
-              {tab === 'agents' ? 'Agentes' : tab === 'history' ? 'Historico' : 'Metricas'}
+              {tab === 'agents' ? 'Agents' : tab === 'history' ? 'History' : 'Metrics'}
             </button>
           ))}
         </div>
@@ -370,7 +370,7 @@ export function AIAgentDashboard({
         {view === 'agents' && (
           <div className="space-y-3">
             {agents.length === 0 && !isLoading && (
-              <div className={EMPTY_STATE_CLASS}>Nenhum agente ativo no momento.</div>
+              <div className={EMPTY_STATE_CLASS}>No active agents right now.</div>
             )}
             {agents.map((agent) => (
               <div
@@ -467,7 +467,7 @@ export function AIAgentDashboard({
         {view === 'history' && (
           <div className="space-y-2">
             {executions.length === 0 && !isLoading && (
-              <div className={EMPTY_STATE_CLASS}>Nenhuma execucao registrada.</div>
+              <div className={EMPTY_STATE_CLASS}>No executions recorded.</div>
             )}
             {executions.map((exec) => (
               <div
@@ -508,37 +508,37 @@ export function AIAgentDashboard({
             <div className="grid grid-cols-2 gap-3">
               <MetricCard
                 icon={<Icons.Robot />}
-                label="Agentes Ativos"
+                label="Active agents"
                 value={`${metrics.activeAgents}/${metrics.totalAgents}`}
                 color="text-[var(--aethel-primary-light)]"
               />
               <MetricCard
                 icon={<Icons.Check />}
-                label="Taxa de Sucesso"
+                label="Success rate"
                 value={`${metrics.successRate.toFixed(1)}%`}
                 color="text-[var(--aethel-success-light)]"
               />
               <MetricCard
                 icon={<Icons.Code />}
-                label="Tokens Usados"
+                label="Tokens used"
                 value={formatTokens(metrics.totalTokensUsed)}
                 color="text-[var(--aethel-primary-light)]"
               />
               <MetricCard
                 icon={<Icons.Dollar />}
-                label="Custo Total"
+                label="Total cost"
                 value={formatCost(metrics.totalCost)}
                 color="text-[var(--aethel-warning)]"
               />
               <MetricCard
                 icon={<Icons.Clock />}
-                label="Tempo Medio"
+                label="Average time"
                 value={formatDuration(metrics.avgExecutionTime)}
                 color="text-[var(--aethel-info)]"
               />
               <MetricCard
                 icon={<Icons.Warning />}
-                label="Errors Hoje"
+                label="Errors today"
                 value={metrics.errorsToday.toString()}
                 color="text-[var(--aethel-error)]"
               />
@@ -546,10 +546,10 @@ export function AIAgentDashboard({
 
             {/* Executions Chart - Uses real execution data */}
             <div className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] rounded-lg border border-[var(--aethel-border-subtle)]">
-              <h3 className="text-sm text-[var(--aethel-text-secondary)] mb-3">Execucoes (24h)</h3>
+              <h3 className="text-sm text-[var(--aethel-text-secondary)] mb-3">Executions (24h)</h3>
               <div className="h-32 flex items-end gap-1">
                 {(() => {
-                  // Agrupa execucoes por hora das ultimas 24h
+                  // Groups executions by hour for the last 24h
                   const hourlyData = Array(24).fill(0)
                   const now = new Date()
                   executions.forEach(exec => {
@@ -568,7 +568,7 @@ export function AIAgentDashboard({
                         key={i}
                         className={`flex-1 rounded-t transition-colors ${count > 0 ? 'bg-[var(--aethel-primary)]/70 hover:bg-[var(--aethel-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'}`}
                         style={{ height: `${Math.max(height, 2)}%` }}
-                        title={`${count} execucao(oes)  as  ${hour.toString().padStart(2, '0')}:00`}
+                        title={`${count} execution(s) at  ${hour.toString().padStart(2, '0')}:00`}
                       />
                     )
                   })
@@ -577,19 +577,19 @@ export function AIAgentDashboard({
               <div className="flex justify-between text-xs text-[var(--aethel-text-tertiary)] mt-2">
                 <span>00:00</span>
                 <span>12:00</span>
-                <span>Agora</span>
+                <span>Now</span>
               </div>
             </div>
 
             {/* Model Usage - Calculated from real execution data */}
             <div className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] rounded-lg border border-[var(--aethel-border-subtle)]">
-              <h3 className="text-sm text-[var(--aethel-text-secondary)] mb-3">Uso por modelo</h3>
+              <h3 className="text-sm text-[var(--aethel-text-secondary)] mb-3">Usage by model</h3>
               <div className="space-y-2">
                 {(() => {
-                  // Agrupa uso por modelo das execucoes + agentes ativos
+                  // Groups usage by model from executions plus active agents
                   const modelUsage: Record<string, { tokens: number; cost: number }> = {}
 
-                  // Dados dos agentes ativos
+                  // Dados dos agentes actives
                   agents.forEach(agent => {
                     if (!modelUsage[agent.model]) {
                       modelUsage[agent.model] = { tokens: 0, cost: 0 }
@@ -612,7 +612,7 @@ export function AIAgentDashboard({
                   if (entries.length === 0) {
                     return (
                       <div className={`${EMPTY_STATE_CLASS} py-4 text-xs`}>
-                        Nenhum dado de uso disponivel
+                        No usage data available
                       </div>
                     )
                   }

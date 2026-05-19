@@ -11,6 +11,7 @@ import {
   saveAgentSnapshot,
   type AgentSnapshot,
 } from '@/lib/server/agent-store';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 /**
  * API Route: Agent Mode Execution
@@ -22,6 +23,8 @@ import {
  */
 
 // Store active agents by session (keyed by userId:sessionId)
+const log = createComponentLogger('api/ai/agent/route');
+
 const activeAgents = new Map<string, { agent: AutonomousAgent; userId: string; createdAt: Date }>();
 
 // Limpar agentes inativos após 1 hora
@@ -155,7 +158,7 @@ export async function POST(req: NextRequest) {
         });
         
         // Start task execution (non-blocking)
-        agent.execute(task).catch(console.error);
+        agent.execute(task).catch((error) => log.error('Agent execution failed', error));
         
         return NextResponse.json({
           sessionId: newSessionId,
@@ -264,7 +267,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Agent API Error:', error);
+    log.error('Agent API Error', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -364,7 +367,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Agent SSE Error:', error);
+    log.error('Agent SSE Error', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

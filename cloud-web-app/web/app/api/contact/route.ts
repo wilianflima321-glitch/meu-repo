@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { getUserFromRequest } from '@/lib/auth-server';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/contact/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     if (!name || !email || !message) {
       return NextResponse.json(
-        { success: false, error: 'name, email e message são obrigatórios' },
+        { success: false, error: 'name, email, and message are required' },
         { status: 400 }
       );
     }
@@ -58,7 +61,7 @@ export async function POST(request: NextRequest) {
       error: result.error,
     });
   } catch (error) {
-    console.error('Contact error:', error);
+    routeLogger.error('Contact error:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

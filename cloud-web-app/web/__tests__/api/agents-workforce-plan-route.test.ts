@@ -1,4 +1,4 @@
-﻿import { NextRequest } from 'next/server'
+import { NextRequest } from 'next/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const authMocks = vi.hoisted(() => ({

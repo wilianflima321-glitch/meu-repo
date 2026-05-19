@@ -106,7 +106,7 @@ describe('runtime renderer adapter', () => {
       idempotencyKey: 'project-renderer-adapter:renderer-adapter-review:2026-05-14T12:01:00.000Z',
       runtimeEngine: {
         contract: 'hybrid-wgpu-v1',
-        acceptedTargets: ['local-native', 'cloud-sandbox'],
+        acceptedTargets: ['browser-preview', 'local-native', 'cloud-sandbox', 'held'],
         browserRole: 'preview-only',
         neverMainThread: true,
       },
@@ -161,6 +161,41 @@ describe('runtime renderer adapter', () => {
     expect(result.ok).toBe(false)
     if (!result.ok) {
       expect(result.blockers.join(' ')).toContain('performance-report')
+    }
+  })
+
+  it('rejects browser-preview as completed render evidence', () => {
+    const { renderPayload, envelope } = validEnvelope()
+    const result = coerceRuntimeRendererEvidenceEnvelope({
+      runtimeEngine: {
+        ...envelope.runtimeEngine,
+        backendId: 'browser-preview',
+        backendKind: 'browser-preview',
+        target: 'browser-preview',
+      },
+    }, renderPayload)
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.blockers.join(' ')).toContain('browser-preview')
+      expect(result.blockers.join(' ')).toContain('cannot satisfy final render evidence')
+    }
+  })
+
+  it('rejects held render state as completed render evidence', () => {
+    const { renderPayload, envelope } = validEnvelope()
+    const result = coerceRuntimeRendererEvidenceEnvelope({
+      runtimeEngine: {
+        ...envelope.runtimeEngine,
+        backendId: 'held-runtime',
+        backendKind: 'held',
+        target: 'held',
+      },
+    }, renderPayload)
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.blockers.join(' ')).toContain('held render state')
     }
   })
 })

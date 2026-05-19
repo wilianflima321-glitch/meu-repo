@@ -4,8 +4,6 @@ import { apiErrorToResponse } from '@/lib/api-errors'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import fs from 'node:fs/promises'
-import path from 'node:path'
-import os from 'node:os'
 import { validateAiChange, type ChangeValidationResult } from '@/lib/server/change-validation'
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
 import { appendChangeRunLedgerEvent } from '@/lib/server/change-run-ledger'
@@ -39,8 +37,6 @@ const RUN_SOURCE = 'production'
 const MAX_BATCH_CHANGES = 50
 const MAX_LOCAL_IMPORT_FANOUT = 40
 const MAX_REVERSE_DEPENDENTS = 80
-const SANDBOX_PREFIX = 'change-apply-'
-const SANDBOX_TTL_MS = 6 * 60 * 60 * 1000
 
 type ApplyExecutionMode = 'workspace' | 'sandbox'
 
@@ -100,116 +96,6 @@ function getRequestedChanges(body: ApplyBody): ApplyChangeInput[] {
 function normalizeExecutionMode(value: unknown): ApplyExecutionMode {
   if (value === 'sandbox') return 'sandbox'
   return 'workspace'
-}
-
-function sanitizeVirtualPath(virtualPath: string): string {
-  return virtualPath.replace(/\\/g, '/').replace(/^\/+/, '')
-}
-
-async function applyInSandbox(params: {
-  runId: string
-  userId: string
-  projectId: string
-  preparedChanges: PreparedApplyChange[]
-}): Promise<NextResponse> {
-  await pruneExpiredSandboxes().catch(() => {})
-  const sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), SANDBOX_PREFIX))
-  const sandboxId = path.basename(sandboxRoot)
-  const artifacts: Array<{
-    path: string
-    beforeHash: string
-    afterHash: string
-    dependencyImpact: ChangeValidationResult['dependencyImpact']
-    projectImpact: {
-      scannedFiles: number
-      reverseDependents: number
-      impactedTests: number
-      impactedEndpoints: string[]
-      depth: number
-      truncated: boolean
-      risk: DependencyImpactAnalysis['risk']
-    }
-  }> = []
-
-  for (const change of params.preparedChanges) {
-    const relativePath = sanitizeVirtualPath(change.virtualPath)
-    const targetPath = path.join(sandboxRoot, relativePath)
-    await fs.mkdir(path.dirname(targetPath), { recursive: true })
-    await fs.writeFile(targetPath, change.nextDocument, 'utf8')
-
-    artifacts.push({
-      path: change.virtualPath,
-      beforeHash: hashContent(change.currentContent),
-      afterHash: hashContent(change.nextDocument),
-      dependencyImpact: change.validation.dependencyImpact,
-      projectImpact: {
-        scannedFiles: change.projectImpact.scannedFiles,
-        reverseDependents: change.projectImpact.reverseDependents.length,
-        impactedTests: change.projectImpact.impactedTests.length,
-        impactedEndpoints: change.projectImpact.impactedEndpoints,
-        depth: change.projectImpact.depth,
-        truncated: change.projectImpact.truncated,
-        risk: change.projectImpact.risk,
-      },
-    })
-
-    await appendChangeRunLedgerEvent({
-      eventType: 'apply',
-      capability: CAPABILITY,
-      userId: params.userId,
-      projectId: params.projectId,
-      filePath: change.virtualPath,
-      outcome: 'success',
-      metadata: {
-        runId: params.runId,
-        executionMode: 'sandbox',
-        runSource: RUN_SOURCE,
-        sandboxId,
-        beforeHash: hashContent(change.currentContent),
-        afterHash: hashContent(change.nextDocument),
-        validationVerdict: change.validation.verdict,
-        fullAccessGrantId: change.approvalGrantId,
-      },
-    }).catch(() => {})
-  }
-
-  return capabilityResponse({
-    error: 'NONE',
-    message:
-      params.preparedChanges.length === 1
-        ? 'Sandbox apply simulation completed.'
-        : `Sandbox apply simulation completed for ${params.preparedChanges.length} changes.`,
-    status: 200,
-    capability: CAPABILITY,
-    capabilityStatus: 'PARTIAL',
-    milestone: 'P0',
-      metadata: {
-        runId: params.runId,
-        applyMode: 'sandbox-simulated',
-        executionMode: 'sandbox',
-        runSource: RUN_SOURCE,
-        sandboxId,
-        projectId: params.projectId,
-        changeCount: params.preparedChanges.length,
-      changes: artifacts,
-    },
-  })
-}
-
-async function pruneExpiredSandboxes(): Promise<void> {
-  const tmp = os.tmpdir()
-  const entries = await fs.readdir(tmp, { withFileTypes: true })
-  const now = Date.now()
-
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue
-    if (!entry.name.startsWith(SANDBOX_PREFIX)) continue
-    const fullPath = path.join(tmp, entry.name)
-    const stat = await fs.stat(fullPath).catch(() => null)
-    if (!stat) continue
-    if (now - stat.mtimeMs <= SANDBOX_TTL_MS) continue
-    await fs.rm(fullPath, { recursive: true, force: true }).catch(() => {})
-  }
 }
 
 function isHighRiskPath(virtualPath: string): boolean {

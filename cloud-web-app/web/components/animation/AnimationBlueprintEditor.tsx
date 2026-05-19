@@ -243,7 +243,7 @@ export function AnimationBlueprintEditor({
           onValueChange={handleParameterValueChange}
         />
         <div style={{ marginTop: '16px' }}>
-          <button type="button" aria-label="Adicionar novo estado de animacao"
+          <button type="button" aria-label="Add novo estado de animacao"
             onClick={addState}
             style={{
               width: '100%',

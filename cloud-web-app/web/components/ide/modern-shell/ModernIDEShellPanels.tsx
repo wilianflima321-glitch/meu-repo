@@ -102,7 +102,7 @@ export function ModernIDEShellPanels({
 
         {previewVisible && (
           <ResizeHandle
-            ariaLabel="Redimensionar previa"
+            ariaLabel="Resize preview"
             orientation="vertical"
             onMouseDown={(event) => startHorizontalResize('preview', event)}
             onAdjust={(delta) => setPanelSize('preview', panelState.preview.size + delta)}

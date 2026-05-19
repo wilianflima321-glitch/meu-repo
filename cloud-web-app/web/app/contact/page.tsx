@@ -1,11 +1,11 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 
 import ContactContent from './contact-content'
 
 export const metadata: Metadata = {
   title: 'Contact | Aethel Studio',
   description:
-    'Entre em contato com o time do Aethel Studio para suporte, vendas, parcerias e conversas enterprise.',
+    'Contact the Aethel Studio team for support, sales, partnerships, and enterprise conversations.',
 }
 
 export default function ContactPage() {

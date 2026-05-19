@@ -30,7 +30,7 @@ export default function BillingCheckoutContent() {
     const run = async () => {
       try {
         if (!planId) {
-          throw new Error('Plano inválido para checkout.');
+          throw new Error('Invalid plan for checkout.');
         }
 
         if (planId === 'enterprise') {
@@ -39,7 +39,7 @@ export default function BillingCheckoutContent() {
         }
 
         if (!SELF_SERVE_PLANS.has(planId)) {
-          throw new Error('Plano invalido para checkout.');
+          throw new Error('Invalid plan for checkout.');
         }
 
         const token = getToken();
@@ -60,17 +60,17 @@ export default function BillingCheckoutContent() {
 
         const payload = await res.json().catch(() => ({}));
         if (!res.ok) {
-          throw new Error(payload?.message || payload?.error || 'Falha ao iniciar checkout.');
+          throw new Error(payload?.message || payload?.error || 'Failed to start checkout.');
         }
 
         if (!payload?.checkoutUrl || typeof payload.checkoutUrl !== 'string') {
-          throw new Error('Checkout URL ausente na resposta.');
+          throw new Error('Checkout URL is missing from the response.');
         }
 
         window.location.href = payload.checkoutUrl;
       } catch (err) {
         setStatus('error');
-        setError(err instanceof Error ? err.message : 'Falha no checkout.');
+        setError(err instanceof Error ? err.message : 'Checkout failed.');
       }
     };
 
@@ -81,16 +81,16 @@ export default function BillingCheckoutContent() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[var(--aethel-surface-primary)] p-6 text-[var(--aethel-text-primary)]">
         <div className="w-full max-w-lg rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6">
-          <h1 className="mb-2 text-xl font-semibold">Checkout indisponível</h1>
+          <h1 className="mb-2 text-xl font-semibold">Checkout unavailable</h1>
           <p className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
-            {error || 'Nao foi possível iniciar o checkout.'}
+            {error || 'Unable to start checkout.'}
           </p>
           <button
             type="button"
             onClick={() => router.push('/billing')}
             className="rounded bg-[var(--aethel-primary-dark)] px-4 py-2 text-sm text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary)]"
           >
-            Voltar para Billing
+            Back to billing
           </button>
         </div>
       </main>
@@ -100,9 +100,9 @@ export default function BillingCheckoutContent() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--aethel-surface-primary)] p-6 text-[var(--aethel-text-primary)]">
       <div className="w-full max-w-lg rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6">
-        <h1 className="mb-2 text-xl font-semibold">Preparando checkout</h1>
+        <h1 className="mb-2 text-xl font-semibold">Preparing checkout</h1>
         <p className="text-sm text-[var(--aethel-text-secondary)]">
-          Estamos iniciando o gateway de pagamento para o plano selecionado.
+          Starting the payment gateway for the selected plan.
         </p>
       </div>
     </main>

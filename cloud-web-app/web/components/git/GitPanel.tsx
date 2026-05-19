@@ -480,9 +480,9 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
 
   const handleDeleteBranch = useCallback(async (branchName: string) => {
     const shouldDelete = await openConfirmDialog({
-      title: 'Excluir branch',
-      message: `Excluir branch ${branchName}?`,
-      confirmText: 'Excluir',
+      title: 'Delete branch',
+      message: `Delete branch ${branchName}?`,
+      confirmText: 'Delete',
       cancelText: 'Cancel',
     });
     if (!shouldDelete) return;
@@ -530,7 +530,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                 color: colors.subtext0,
                 cursor: 'pointer',
               }}
-              title="Atualizar"
+              title="Refresh"
             >
               <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
             </button>

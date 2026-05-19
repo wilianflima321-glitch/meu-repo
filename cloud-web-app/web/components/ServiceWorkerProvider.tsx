@@ -191,7 +191,7 @@ export function ServiceWorkerProvider({ children, enabled = false }: ServiceWork
                 onClick={handleUpdate}
                 className="flex-1 border-l border-[var(--aethel-border-primary)] px-4 py-3 text-sm font-medium text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] hover:text-[var(--aethel-info)]"
               >
-                Atualizar agora
+                Refresh agora
               </button>
             </div>
           </div>

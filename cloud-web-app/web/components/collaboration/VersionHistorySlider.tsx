@@ -4,7 +4,7 @@
  * VersionHistorySlider - Componente de Viagem no Tempo para Versões
  *
  * Permite navegar entre versões históricas do projeto.
- * Integrado com sistema de controle de versão.
+ * Integrado com sistema de controle de version.
  *
  * @module components/collaboration/VersionHistorySlider
  */
@@ -151,12 +151,12 @@ export function VersionHistorySlider({
       const hours = Math.floor(diff / (1000 * 60 * 60));
       if (hours === 0) {
         const mins = Math.floor(diff / (1000 * 60));
-        return `${mins}m atrás`;
+        return `${mins}m ago`;
       }
-      return `${hours}h atrás`;
+      return `${hours}h ago`;
     }
     if (days === 1) return 'Ontem';
-    if (days < 7) return `${days} dias atrás`;
+    if (days < 7) return `${days} days ago`;
 
     return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -170,7 +170,7 @@ export function VersionHistorySlider({
     return (
       <div className={`flex items-center justify-center p-4 text-[var(--aethel-text-secondary)] ${className}`}>
         <History className="w-5 h-5 mr-2" />
-        <span>Nenhum histórico disponível</span>
+        <span>No history available</span>
       </div>
     );
   }
@@ -208,7 +208,7 @@ export function VersionHistorySlider({
       <div className="flex items-center justify-between p-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-[var(--aethel-info-light)]" />
-          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Máquina do Tempo</span>
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Time Machine</span>
         </div>
 
         <div className="flex items-center gap-1">
@@ -240,7 +240,7 @@ export function VersionHistorySlider({
 
             <div className="flex-1 min-w-0">
               <p className="text-sm text-[var(--aethel-text-primary)] truncate">
-                {selectedVersion.message || 'Sem descrição'}
+                {selectedVersion.message || 'Sem description'}
               </p>
 
               <div className="flex items-center gap-3 mt-1 text-xs text-[var(--aethel-text-secondary)]">
@@ -300,7 +300,7 @@ export function VersionHistorySlider({
               onClick={handleFirst}
               disabled={selectedIndex === 0}
               className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-              title="Primeira versão"
+              title="Primeira version"
             >
               <SkipBack className="w-4 h-4" />
             </button>
@@ -309,7 +309,7 @@ export function VersionHistorySlider({
               onClick={handlePrevious}
               disabled={selectedIndex === 0}
               className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-              title="Versão anterior"
+              title="Version anterior"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -326,7 +326,7 @@ export function VersionHistorySlider({
               onClick={handleNext}
               disabled={selectedIndex === versions.length - 1}
               className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-              title="Próxima versão"
+              title="Next version"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -335,7 +335,7 @@ export function VersionHistorySlider({
               onClick={handleLast}
               disabled={selectedIndex === versions.length - 1}
               className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-              title="Última versão"
+              title="Latest version"
             >
               <SkipForward className="w-4 h-4" />
             </button>
@@ -386,7 +386,7 @@ export function VersionHistorySlider({
 
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-[var(--aethel-text-primary)] truncate">
-                        {version.message || 'Sem descrição'}
+                        {version.message || 'Sem description'}
                       </p>
                       <p className="text-xs text-[var(--aethel-text-secondary)]">
                         {version.author} • {formatDate(new Date(version.timestamp))}

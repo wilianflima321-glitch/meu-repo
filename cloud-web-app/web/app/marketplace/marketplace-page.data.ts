@@ -1,0 +1,155 @@
+export type ExtensionRiskLevel = 'low' | 'medium' | 'high'
+
+export interface Extension {
+  id: string
+  name: string
+  displayName: string
+  description: string
+  version: string
+  publisher: string
+  icon?: string
+  downloads: number
+  rating: number
+  categories: string[]
+  tags: string[]
+  repository?: string
+  license?: string
+  installed: boolean
+  verified?: boolean
+  riskLevel?: ExtensionRiskLevel
+  permissions?: string[]
+  provenance?: string
+  reviewStatus?: 'verified' | 'community-review' | 'blocked'
+}
+
+export const MARKETPLACE_CATEGORIES = [
+  'all',
+  'languages',
+  'themes',
+  'debuggers',
+  'formatters',
+  'linters',
+  'snippets',
+  'keymaps',
+  'ai-tools',
+  'productivity',
+] as const
+
+export const MARKETPLACE_CATEGORY_LABELS: Record<string, string> = {
+  all: 'All',
+  languages: 'Languages',
+  themes: 'Themes',
+  debuggers: 'Debuggers',
+  formatters: 'Formatters',
+  linters: 'Linters',
+  snippets: 'Snippets',
+  keymaps: 'Keymaps',
+  'ai-tools': 'AI tools',
+  productivity: 'Productivity',
+}
+
+export const MARKETPLACE_SORT_OPTIONS = [
+  { value: 'downloads', label: 'Most installed' },
+  { value: 'rating', label: 'Top rated' },
+  { value: 'name', label: 'Name (A-Z)' },
+] as const
+
+export type MarketplaceSort = (typeof MARKETPLACE_SORT_OPTIONS)[number]['value']
+
+export const CURATED_EXTENSIONS: Extension[] = [
+  {
+    id: 'aethel-agent-replay',
+    name: 'agent-replay',
+    displayName: 'Agent Replay Pack',
+    description: 'Replay browser-operator and agent steps with approvals, evidence, and handoff notes.',
+    version: '0.4.0',
+    publisher: 'Aethel Labs',
+    downloads: 18400,
+    rating: 4.8,
+    categories: ['ai-tools', 'productivity'],
+    tags: ['agents', 'replay', 'evidence'],
+    license: 'aethel-creator-license-v1',
+    installed: false,
+    verified: true,
+    riskLevel: 'low',
+    permissions: ['Read agent runs', 'Write replay evidence'],
+    provenance: 'Aethel reviewed package with signed manifest',
+    reviewStatus: 'verified',
+  },
+  {
+    id: 'aethel-render-readiness',
+    name: 'render-readiness',
+    displayName: 'Render Readiness Kit',
+    description: 'Validate viewport renders, artifact ownership, performance reports, and final-output blockers.',
+    version: '0.3.2',
+    publisher: 'Aethel Labs',
+    downloads: 12200,
+    rating: 4.7,
+    categories: ['ai-tools', 'debuggers'],
+    tags: ['render', 'viewport', 'validation'],
+    license: 'MIT',
+    installed: false,
+    verified: true,
+    riskLevel: 'medium',
+    permissions: ['Read render jobs', 'Write validation report'],
+    provenance: 'Source policy checked, MIT license verified',
+    reviewStatus: 'verified',
+  },
+  {
+    id: 'aethel-design-density',
+    name: 'design-density',
+    displayName: 'Design Density Inspector',
+    description: 'Scan surfaces for oversized media, raw links, weak hierarchy, and crowded copy blocks.',
+    version: '0.2.1',
+    publisher: 'Aethel Labs',
+    downloads: 9800,
+    rating: 4.6,
+    categories: ['productivity', 'themes'],
+    tags: ['ux', 'audit', 'design-system'],
+    license: 'MIT',
+    installed: false,
+    verified: true,
+    riskLevel: 'low',
+    permissions: ['Read UI files', 'Write audit report'],
+    provenance: 'Aethel internal package, checksum tracked',
+    reviewStatus: 'verified',
+  },
+  {
+    id: 'aethel-marketplace-trust',
+    name: 'marketplace-trust',
+    displayName: 'Marketplace Trust Ledger',
+    description: 'Attach provenance, license evidence, and content-origin checks to marketplace assets.',
+    version: '0.5.0',
+    publisher: 'Aethel Labs',
+    downloads: 7600,
+    rating: 4.9,
+    categories: ['productivity', 'ai-tools'],
+    tags: ['license', 'provenance', 'trust'],
+    license: 'Apache-2.0',
+    installed: false,
+    verified: true,
+    riskLevel: 'medium',
+    permissions: ['Read marketplace assets', 'Write provenance ledger'],
+    provenance: 'Apache-2.0 license and source trail verified',
+    reviewStatus: 'verified',
+  },
+  {
+    id: 'community-prompt-kit',
+    name: 'community-prompt-kit',
+    displayName: 'Community Prompt Kit',
+    description: 'Community-maintained prompt snippets for quick workspace experiments. Review before production use.',
+    version: '0.1.0',
+    publisher: 'Community',
+    downloads: 2100,
+    rating: 4.1,
+    categories: ['snippets', 'productivity'],
+    tags: ['prompts', 'snippets', 'community'],
+    license: 'CC-BY-4.0',
+    installed: false,
+    verified: false,
+    riskLevel: 'medium',
+    permissions: ['Read prompts', 'Suggest snippets'],
+    provenance: 'Community package awaiting full provenance review',
+    reviewStatus: 'community-review',
+  },
+]

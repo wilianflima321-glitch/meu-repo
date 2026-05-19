@@ -5,6 +5,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/rbac';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/ai/calls/route');
 
 export const GET = withAdminAuth(
   async (request, { user }) => {
@@ -74,7 +77,7 @@ export const GET = withAdminAuth(
       });
       
     } catch (error) {
-      console.error('[AI Calls] Error:', error);
+      routeLogger.error('[AI Calls] Error:', error);
       return NextResponse.json({
         success: false,
         error: 'Failed to fetch calls',

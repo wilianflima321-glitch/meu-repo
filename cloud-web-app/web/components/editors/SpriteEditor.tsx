@@ -625,13 +625,13 @@ export default function SpriteEditor() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button type="button" aria-label="Exportar sprite" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Export">
+          <button type="button" aria-label="Export sprite" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Export">
             <Download className="w-4 h-4" />
           </button>
-          <button type="button" aria-label="Importar sprite" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Import">
+          <button type="button" aria-label="Import sprite" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Import">
             <Upload className="w-4 h-4" />
           </button>
-          <button type="button" aria-label="Abrir configurações do sprite editor" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Settings">
+          <button type="button" aria-label="Open sprite editor settings" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Settings">
             <Settings className="w-4 h-4" />
           </button>
         </div>

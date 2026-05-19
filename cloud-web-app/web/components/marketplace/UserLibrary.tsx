@@ -201,7 +201,7 @@ function AssetCard({
                                 disabled={isDownloading}
                             >
                                 <Download className="w-4 h-4 mr-1" />
-                                {isDownloading ? 'Baixando...' : 'Baixar'}
+                                {isDownloading ? 'Baixando...' : 'Download'}
                             </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -212,7 +212,7 @@ function AssetCard({
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem onClick={() => onAddToCollection(asset.id)}>
                                         <FolderPlus className="w-4 h-4 mr-2" />
-                                        Adicionar a colecao
+                                        Add a colecao
                                     </DropdownMenuItem>
                                     <DropdownMenuItem>
                                         <ExternalLink className="w-4 h-4 mr-2" />
@@ -224,7 +224,7 @@ function AssetCard({
                                         onClick={() => onRemove(asset.id)}
                                     >
                                         <Trash2 className="w-4 h-4 mr-2" />
-                                        Remover da biblioteca
+                                        Remove da biblioteca
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -234,11 +234,11 @@ function AssetCard({
                 <ContextMenuContent>
                     <ContextMenuItem onClick={handleDownload}>
                         <Download className="w-4 h-4 mr-2" />
-                        Baixar
+                        Download
                     </ContextMenuItem>
                     <ContextMenuItem onClick={() => onAddToCollection(asset.id)}>
                         <FolderPlus className="w-4 h-4 mr-2" />
-                        Adicionar a colecao
+                        Add a colecao
                     </ContextMenuItem>
                     <ContextMenuItem>
                         <ExternalLink className="w-4 h-4 mr-2" />
@@ -250,7 +250,7 @@ function AssetCard({
                         onClick={() => onRemove(asset.id)}
                     >
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Remover
+                        Remove
                     </ContextMenuItem>
                 </ContextMenuContent>
             </ContextMenu>
@@ -288,7 +288,7 @@ function AssetCard({
                         <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button type="button" onClick={handleDownload} disabled={isDownloading}>
                                 <Download className="w-4 h-4 mr-2" />
-                                {isDownloading ? 'Baixando...' : 'Baixar'}
+                                {isDownloading ? 'Baixando...' : 'Download'}
                             </button>
                         </div>
                     </div>
@@ -314,11 +314,11 @@ function AssetCard({
             <ContextMenuContent>
                 <ContextMenuItem onClick={handleDownload}>
                     <Download className="w-4 h-4 mr-2" />
-                    Baixar
+                    Download
                 </ContextMenuItem>
                 <ContextMenuItem onClick={() => onAddToCollection(asset.id)}>
                     <FolderPlus className="w-4 h-4 mr-2" />
-                    Adicionar a colecao
+                    Add a colecao
                 </ContextMenuItem>
                 <ContextMenuSeparator />
                 <ContextMenuItem
@@ -326,7 +326,7 @@ function AssetCard({
                     onClick={() => onRemove(asset.id)}
                 >
                     <Trash2 className="w-4 h-4 mr-2" />
-                    Remover
+                    Remove
                 </ContextMenuItem>
             </ContextMenuContent>
         </ContextMenu>
@@ -387,7 +387,7 @@ function CollectionCard({
                                 onEdit();
                             }}>
                                 <Edit2 className="w-4 h-4 mr-2" />
-                                Editar
+                                Edit
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -398,7 +398,7 @@ function CollectionCard({
                                 }}
                             >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Excluir
+                                Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -492,7 +492,7 @@ export default function UserLibrary() {
             a.download = `asset-${assetId}.zip`;
             a.click();
             URL.revokeObjectURL(url);
-            toast.success('Baixar iniciado.');
+            toast.success('Download iniciado.');
             queryClient.invalidateQueries({ queryKey: ['library-downloads'] });
         },
         onError: () => {
@@ -517,7 +517,7 @@ export default function UserLibrary() {
     const handleCreateCollection = useCallback(() => {
         if (!newCollectionName.trim()) return;
 
-        // Criar collection API call
+        // Create collection API call
         toast.success(`Colecao "${newCollectionName}" criada.`);
         setNewCollectionName('');
         setIsCreateDialogOpen(false);
@@ -546,7 +546,7 @@ export default function UserLibrary() {
                         <div className="relative w-64">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
-                                placeholder="Buscar na biblioteca..."
+                                placeholder="Search na biblioteca..."
                                 className="pl-10"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -613,7 +613,7 @@ export default function UserLibrary() {
                             ) : filterAssets(purchased).length === 0 ? (
                                 <EmptyState
                                     icon={Package}
-                                    title="Nenhum asset comprado"
+                                    title="No asset comprado"
                                     description="Assets comprados no Marketplace aparecerao aqui"
                                     action={
                                         <Button>
@@ -649,7 +649,7 @@ export default function UserLibrary() {
                             ) : filterAssets(favorites).length === 0 ? (
                                 <EmptyState
                                     icon={Heart}
-                                    title="Nenhum favorito ainda"
+                                    title="No favorito ainda"
                                     description="Clique no coracao em um asset para adicionar aos favoritos"
                                 />
                             ) : (
@@ -712,12 +712,12 @@ export default function UserLibrary() {
                                     <DialogTrigger asChild>
                                         <Button>
                                             <Plus className="w-4 h-4 mr-2" />
-                                            Criar colecao
+                                            Create colecao
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent>
                                         <DialogHeader>
-                                            <DialogTitle>Criar colecao</DialogTitle>
+                                            <DialogTitle>Create colecao</DialogTitle>
                                             <DialogDescription>
                                                 De um nome para iniciar a colecao
                                             </DialogDescription>
@@ -732,7 +732,7 @@ export default function UserLibrary() {
                                                 Cancel
                                             </Button>
                                             <button type="button" onClick={handleCreateCollection}>
-                                                Criar
+                                                Create
                                             </button>
                                         </DialogFooter>
                                     </DialogContent>
@@ -744,12 +744,12 @@ export default function UserLibrary() {
                             ) : !collections || collections.length === 0 ? (
                                 <EmptyState
                                     icon={FolderOpen}
-                                    title="Nenhuma colecao ainda"
+                                    title="No colecao ainda"
                                     description="Crie uma colecao para organizar seus assets"
                                     action={
                                         <button type="button" onClick={() => setIsCreateDialogOpen(true)}>
                                             <Plus className="w-4 h-4 mr-2" />
-                                            Criar colecao
+                                            Create colecao
                                         </button>
                                     }
                                 />

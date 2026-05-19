@@ -4,7 +4,7 @@
  * Games & Films Module - Alpha Honest
  *
  * Módulo de criação e gerenciamento de Games e Films
- * Status: Alpha (Funcional, Configurações Básicas)
+ * Status: Alpha (Funcional, Basic settings)
  * Padrão: L5 Design, Real Integration
  */
 import React, { useState } from 'react'
@@ -32,7 +32,7 @@ import { useStudioState } from '@/lib/studio-state'
 import { telemetry } from '@/lib/telemetry'
 
 /**
- * Tipos de Projeto (Games/Films)
+ * Project types (Games/Films)
  */
 interface GameProject {
   id: string
@@ -66,7 +66,7 @@ interface FilmProject {
 type Project = GameProject | FilmProject
 
 /**
- * Componente Principal
+ * Main component
  */
 export function GamesAndFilmsModule() {
   const { state, addNotification } = useStudioState()
@@ -78,7 +78,7 @@ export function GamesAndFilmsModule() {
   const handleCreateGame = () => {
     const newGame: GameProject = {
       id: `game_${Date.now()}`,
-      name: 'Novo Jogo',
+      name: 'New Game',
       type: 'game',
       engine: 'custom',
       status: 'draft',
@@ -90,7 +90,7 @@ export function GamesAndFilmsModule() {
     setProjects([...projects, newGame])
     addNotification({
       type: 'success',
-      message: 'Novo projeto de jogo criado',
+      message: 'New game project created',
       duration: 3000,
     })
 
@@ -101,7 +101,7 @@ export function GamesAndFilmsModule() {
   const handleCreateFilm = () => {
     const newFilm: FilmProject = {
       id: `film_${Date.now()}`,
-      name: 'Novo Filme',
+      name: 'New Film',
       type: 'film',
       format: '3d',
       status: 'draft',
@@ -113,7 +113,7 @@ export function GamesAndFilmsModule() {
     setProjects([...projects, newFilm])
     addNotification({
       type: 'success',
-      message: 'Novo projeto de filme criado',
+      message: 'New film project created',
       duration: 3000,
     })
 
@@ -125,7 +125,7 @@ export function GamesAndFilmsModule() {
     setProjects(projects.filter((p) => p.id !== id))
     addNotification({
       type: 'success',
-      message: 'Projeto deletado',
+      message: 'Project deleted',
       duration: 2000,
     })
   }
@@ -137,7 +137,7 @@ export function GamesAndFilmsModule() {
     setProjects(updated)
     addNotification({
       type: 'success',
-      message: `${project.type === 'game' ? 'Jogo' : 'Filme'} publicado com sucesso!`,
+      message: `${project.type === 'game' ? 'Game' : 'Film'} published successfully!`,
       duration: 3000,
     })
 
@@ -157,12 +157,12 @@ export function GamesAndFilmsModule() {
         <div>
           <h1 className="text-3xl font-bold text-[var(--aethel-text-primary)]">Games & Films</h1>
           <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
-            Crie e gerencie seus projetos de jogos e filmes
+            Create and manage your game and film projects
           </p>
         </div>
         <GlassButton variant="primary" onClick={() => setShowCreateDialog(true)}>
           <Plus size={18} />
-          Novo Projeto
+          New Project
         </GlassButton>
       </div>
 
@@ -178,7 +178,7 @@ export function GamesAndFilmsModule() {
         >
           <div className="flex items-center gap-2">
             <Gamepad2 size={16} />
-            Jogos ({games.length})
+            Games ({games.length})
           </div>
         </button>
         <button type="button"
@@ -191,7 +191,7 @@ export function GamesAndFilmsModule() {
         >
           <div className="flex items-center gap-2">
             <Film size={16} />
-            Filmes ({films.length})
+            Films ({films.length})
           </div>
         </button>
       </div>
@@ -217,7 +217,7 @@ export function GamesAndFilmsModule() {
 }
 
 /**
- * Grid de Jogos
+ * Games grid
  */
 function GamesGrid({
   games,
@@ -235,8 +235,8 @@ function GamesGrid({
         className="text-center py-12 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
       >
         <Gamepad2 size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
-        <p className="text-[var(--aethel-text-secondary)]">Nenhum jogo criado ainda</p>
-        <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">Clique em &quot;Novo Projeto&quot; para começar</p>
+        <p className="text-[var(--aethel-text-secondary)]">No games created yet</p>
+        <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">Click &quot;New Project&quot; to start</p>
       </motion.div>
     )
   }
@@ -256,7 +256,7 @@ function GamesGrid({
 }
 
 /**
- * Grid de Filmes
+ * Films grid
  */
 function FilmsGrid({
   films,
@@ -274,8 +274,8 @@ function FilmsGrid({
         className="text-center py-12 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
       >
         <Film size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
-        <p className="text-[var(--aethel-text-secondary)]">Nenhum filme criado ainda</p>
-        <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">Clique em &quot;Novo Projeto&quot; para começar</p>
+        <p className="text-[var(--aethel-text-secondary)]">No films created yet</p>
+        <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">Click &quot;New Project&quot; to start</p>
       </motion.div>
     )
   }
@@ -295,7 +295,7 @@ function FilmsGrid({
 }
 
 /**
- * Card de Jogo
+ * Game card
  */
 function GameCard({
   game,
@@ -335,11 +335,11 @@ function GameCard({
           className="flex-1 px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
         >
           <Play size={14} />
-          Publicar
+          Publish
         </button>
         <button type="button"
           onClick={() => onDelete(game.id)}
-          aria-label={`Excluir jogo ${game.name}`}
+          aria-label={`Delete game ${game.name}`}
           className="px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] transition-colors"
         >
           <Trash2 size={14} />
@@ -350,7 +350,7 @@ function GameCard({
 }
 
 /**
- * Card de Filme
+ * Film card
  */
 function FilmCard({
   film,
@@ -371,7 +371,7 @@ function FilmCard({
       {/* Info */}
       <div>
         <h3 className="font-semibold text-[var(--aethel-text-primary)]">{film.name}</h3>
-        <p className="text-xs text-[var(--aethel-text-secondary)] mt-1">Formato: {film.format.toUpperCase()}</p>
+        <p className="text-xs text-[var(--aethel-text-secondary)] mt-1">Format: {film.format.toUpperCase()}</p>
       </div>
 
       {/* Status */}
@@ -390,11 +390,11 @@ function FilmCard({
           className="flex-1 px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] text-[var(--aethel-accent-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-accent)_30%,transparent)] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
         >
           <Play size={14} />
-          Publicar
+          Publish
         </button>
         <button type="button"
           onClick={() => onDelete(film.id)}
-          aria-label={`Excluir filme ${film.name}`}
+          aria-label={`Delete film ${film.name}`}
           className="px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] transition-colors"
         >
           <Trash2 size={14} />
@@ -439,7 +439,7 @@ function CreateProjectDialog({
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
             <GlassCard className="w-full max-w-md p-6 space-y-4">
-              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Novo Projeto</h2>
+              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">New Project</h2>
 
               <div className="space-y-3">
                 <GlassButton
@@ -448,7 +448,7 @@ function CreateProjectDialog({
                   className="w-full justify-center"
                 >
                   <Gamepad2 size={18} />
-                  Criar Jogo
+                  Create Game
                 </GlassButton>
 
                 <GlassButton
@@ -457,7 +457,7 @@ function CreateProjectDialog({
                   className="w-full justify-center"
                 >
                   <Film size={18} />
-                  Criar Filme
+                  Create Film
                 </GlassButton>
               </div>
 

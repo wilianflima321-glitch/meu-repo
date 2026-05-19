@@ -5,6 +5,9 @@ import { apiErrorToResponse } from '@/lib/api-errors';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/test/discover/route');
 
 interface DiscoverTestsRequest {
   adapter: string;
@@ -39,7 +42,7 @@ export async function POST(request: NextRequest) {
 		const filePattern = patterns[adapter];
 		if (!filePattern) {
 			return NextResponse.json(
-				{ success: false, error: 'UNSUPPORTED_ADAPTER', message: `Adapter não suportado: ${adapter}`, tests: [] },
+				{ success: false, error: 'UNSUPPORTED_ADAPTER', message: `Unsupported adapter: ${adapter}`, tests: [] },
 				{ status: 422 }
 			);
 		}
@@ -95,7 +98,7 @@ export async function POST(request: NextRequest) {
 			truncated: scanned >= maxFiles || hits >= maxHits,
 		});
   } catch (error) {
-    console.error('Failed to discover tests:', error);
+    routeLogger.error('Failed to discover tests:', error);
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
     return NextResponse.json(

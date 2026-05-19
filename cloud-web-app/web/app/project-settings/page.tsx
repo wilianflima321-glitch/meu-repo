@@ -17,7 +17,7 @@ const ProjectSettings = dynamic(
       <div className="flex items-center justify-center h-screen bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
         <div className="text-center">
           <div className="animate-spin w-12 h-12 border-4 border-[var(--aethel-primary)] border-t-transparent rounded-full mx-auto mb-4" />
-          <div className="text-[var(--aethel-text-primary)]">Carregando configuracoes do projeto...</div>
+          <div className="text-[var(--aethel-text-primary)]">Loading project settings...</div>
         </div>
       </div>
     )
@@ -29,7 +29,7 @@ export default function ProjectSettingsPage() {
     <div className="h-screen w-screen overflow-hidden">
       <Suspense fallback={
         <div className="flex items-center justify-center h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
-          <div className="text-[var(--aethel-text-primary)]">Carregando...</div>
+          <div className="text-[var(--aethel-text-primary)]">Loading...</div>
         </div>
       }>
         <ProjectSettings />

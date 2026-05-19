@@ -28,7 +28,7 @@ export default function Updates() {
 
   const statusLabels: Record<string, string> = {
     approved: 'Aprovada',
-    review: 'Em revisão',
+    review: 'In review',
     blocked: 'Bloqueada',
   };
 
@@ -36,13 +36,13 @@ export default function Updates() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/updates');
-      if (!res.ok) throw new Error('Falha ao carregar atualizações');
+      if (!res.ok) throw new Error('Failed to load updates');
       const json = await res.json();
       setData(json);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar atualizações');
+      setError(err instanceof Error ? err.message : 'Error loading updates');
     } finally {
       setLoading(false);
     }
@@ -66,8 +66,8 @@ export default function Updates() {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-bold'>Pesquisa de Atualizações</h1>
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>A IA monitora lançamentos e mudanças de versão detectadas por logs.</p>
+          <h1 className='text-3xl font-bold'>Pesquisa de Updates</h1>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>AI monitors releases and version changes detected by logs.</p>
           {lastUpdated && (
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
@@ -77,7 +77,7 @@ export default function Updates() {
             onClick={fetchUpdates}
             className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
           >
-            Buscar atualizações
+            Search updates
           </button>
           <button type="button"
             onClick={() => {
@@ -115,11 +115,11 @@ export default function Updates() {
 
 <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4'>
-          <h2 className='text-xl font-semibold'>Histórico de Atualizações</h2>
+          <h2 className='text-xl font-semibold'>Update history</h2>
           <div className='flex gap-2'>
             <input
               type='text'
-              placeholder='Buscar por tipo, descrição ou recurso'
+              placeholder='Search by type, description, or resource'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className='border p-2 rounded text-sm'
@@ -131,7 +131,7 @@ export default function Updates() {
             >
               <option value='all'>Todos</option>
               <option value='approved'>Aprovadas</option>
-              <option value='review'>Em revisão</option>
+              <option value='review'>In review</option>
               <option value='blocked'>Bloqueadas</option>
             </select>
           </div>
@@ -140,7 +140,7 @@ export default function Updates() {
           <thead>
             <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
               <th className='p-2 text-left'>Tipo</th>
-              <th className='p-2 text-left'>Descrição</th>
+              <th className='p-2 text-left'>Description</th>
               <th className='p-2 text-left'>Recurso</th>
               <th className='p-2 text-left'>Status</th>
               <th className='p-2 text-left'>Data</th>
@@ -149,11 +149,11 @@ export default function Updates() {
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando atualizações...</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Loading updates...</td>
               </tr>
             ) : filteredItems.length === 0 ? (
               <tr>
-                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Nenhuma atualização encontrada.</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>No update found.</td>
               </tr>
             ) : (
               filteredItems.map((item) => (

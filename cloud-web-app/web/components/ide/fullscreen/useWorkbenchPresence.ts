@@ -50,7 +50,7 @@ export function useWorkbenchPresence({
       });
       const payload = (await response.json().catch(() => ({ success: false, rooms: [] }))) as CollaborationRoomsResponse;
       if (!response.ok) {
-        throw new Error(`Falha ao carregar presença colaborativa: ${response.status}`);
+        throw new Error(`Failed to load collaborative presence: ${response.status}`);
       }
       return payload;
     },
@@ -77,7 +77,7 @@ export function useWorkbenchPresence({
             ),
           ),
           id: participant.userId,
-          name: participant.user?.name?.trim() || `Usuário ${participant.userId.slice(0, 6)}`,
+          name: participant.user?.name?.trim() || `User ${participant.userId.slice(0, 6)}`,
           avatar: participant.user?.avatar ?? undefined,
           color: collaborationColorForUser(participant.userId),
           lastActivity: participant.lastSeen ? new Date(participant.lastSeen).getTime() : Date.now(),

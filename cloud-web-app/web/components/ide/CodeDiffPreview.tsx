@@ -79,8 +79,8 @@ export function CodeDiffPreview({
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-3">
         <div className="flex items-center gap-2">
           <GitMerge className="w-4 h-4 text-[var(--aethel-info-light)]" />
-          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Prévia de diff</span>
-          <span className="text-xs text-[var(--aethel-text-tertiary)]">{diffs.length} arquivo(s)</span>
+          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Diff preview</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">{diffs.length} file(s)</span>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -90,7 +90,7 @@ export function CodeDiffPreview({
             className="flex items-center gap-1.5 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] hover:text-[var(--aethel-error-light)]"
           >
             <X className="w-3.5 h-3.5" />
-            Rejeitar tudo
+            Reject all
           </button>
           <button
             type="button"
@@ -99,7 +99,7 @@ export function CodeDiffPreview({
             className="flex items-center gap-1.5 rounded-lg bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110"
           >
             <Check className="w-3.5 h-3.5" />
-            Aplicar mudanças
+            Apply changes
           </button>
         </div>
       </div>
@@ -130,7 +130,7 @@ export function CodeDiffPreview({
         {!hasDiffs && (
           <div className="p-4">
             <div className="flex items-center justify-center rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-4 text-xs text-[var(--aethel-text-tertiary)]">
-              Nenhuma mudança pendente para pré-visualização.
+              No pending changes to preview.
             </div>
           </div>
         )}
@@ -158,7 +158,7 @@ export function CodeDiffPreview({
                             type="button"
                             onClick={() => onAcceptLine(selectedDiff.path, line.lineNumber)}
                             className="p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] transition-colors"
-                            title="Aceitar linha"
+                            title="Accept line"
                           >
                             <Check className="w-3 h-3 text-[var(--aethel-success-light)]" />
                           </button>
@@ -168,7 +168,7 @@ export function CodeDiffPreview({
                             type="button"
                             onClick={() => onRejectLine(selectedDiff.path, line.lineNumber)}
                             className="p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] transition-colors"
-                            title="Rejeitar linha"
+                            title="Reject line"
                           >
                             <X className="w-3 h-3 text-[var(--aethel-error-light)]" />
                           </button>
@@ -189,16 +189,16 @@ export function CodeDiffPreview({
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-[var(--aethel-success)]" />
-              {diffs.reduce((acc, d) => acc + d.lines.filter(l => l.type === 'added').length, 0)} adições
+              {diffs.reduce((acc, d) => acc + d.lines.filter(l => l.type === 'added').length, 0)} additions
             </span>
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-[var(--aethel-error)]" />
-              {diffs.reduce((acc, d) => acc + d.lines.filter(l => l.type === 'removed').length, 0)} remoções
+              {diffs.reduce((acc, d) => acc + d.lines.filter(l => l.type === 'removed').length, 0)} removals
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Eye className="w-3.5 h-3.5" />
-            <span>Prévia antes de aplicar</span>
+            <span>Preview before applying</span>
           </div>
         </div>
       </div>

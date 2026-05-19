@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import type { Prisma } from '@prisma/client'
 import { requireAuth } from '@/lib/auth-server'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'

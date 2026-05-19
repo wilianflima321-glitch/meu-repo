@@ -40,8 +40,8 @@ interface BottomDockItemDescriptor {
 }
 
 export const BOTTOM_DOCK_ITEMS: ReadonlyArray<BottomDockItemDescriptor> = [
-  { id: 'explorer', icon: <FolderTree size={16} />, label: 'Arquivos', shortcut: 'Ctrl+Shift+E' },
-  { id: 'search', icon: <Search size={16} />, label: 'Buscar', shortcut: 'Ctrl+Shift+F' },
+  { id: 'explorer', icon: <FolderTree size={16} />, label: 'Files', shortcut: 'Ctrl+Shift+E' },
+  { id: 'search', icon: <Search size={16} />, label: 'Search', shortcut: 'Ctrl+Shift+F' },
   { id: 'git', icon: <GitBranch size={16} />, label: 'Git', shortcut: 'Ctrl+Shift+G' },
   { id: 'viewport', icon: <Play size={16} />, label: 'Visual 3D', shortcut: 'Ctrl+Shift+V' },
   { id: 'canvas', icon: <Code2 size={16} />, label: 'Visual UI', shortcut: 'Ctrl+Shift+U' },
@@ -202,7 +202,7 @@ interface MobileBottomBarItemDescriptor {
 }
 
 export const MOBILE_BOTTOM_BAR_ITEMS: ReadonlyArray<MobileBottomBarItemDescriptor> = [
-  { id: 'sidebar', icon: <FolderTree size={20} />, label: 'Arquivos' },
+  { id: 'sidebar', icon: <FolderTree size={20} />, label: 'Files' },
   { id: 'editor', icon: <Code2 size={20} />, label: 'Editor' },
   { id: 'chat', icon: <MessageSquare size={20} />, label: 'AI Console' },
   { id: 'preview', icon: <Play size={20} />, label: 'Visual' },

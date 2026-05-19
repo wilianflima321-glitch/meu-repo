@@ -123,7 +123,7 @@ const AGENTS: Record<AgentRole, AgentConfig> = {
     bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]',
     borderColor: 'border-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)]',
     ringColor: 'ring-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)]',
-    description: 'Implementa o codigo e cria os arquivos',
+    description: 'Implementa o codigo e cria os files',
   },
   qa: {
     id: 'qa',
@@ -326,7 +326,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
               {task.files && task.files.length > 0 && (
                 <span className="flex items-center gap-1">
                   <Code2 className="w-3 h-3" />
-                  {task.files.length} arquivos
+                  {task.files.length} files
                 </span>
               )}
             </div>
@@ -379,7 +379,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
               {/* Files Created */}
               {task.files && task.files.length > 0 && (
                 <div className="mt-3">
-                  <span className="text-xs text-[var(--aethel-text-quaternary)] mb-2 block">Arquivos modificados:</span>
+                  <span className="text-xs text-[var(--aethel-text-quaternary)] mb-2 block">Files modified:</span>
                   <div className="flex flex-wrap gap-2">
                     {task.files.map((file) => (
                       <span key={file} className="px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded text-xs text-[var(--aethel-text-secondary)] font-mono">
@@ -417,7 +417,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
                 <X className="w-5 h-5" />
                 <span className="font-medium">Task error</span>
               </div>
-              <button type="button" aria-label="Executar novamente a tarefa com erro"
+              <button type="button" aria-label="Executar novamente a tarefa com error"
                 onClick={onRetry}
                 className={`mt-2 flex items-center gap-2 rounded-lg bg-[var(--aethel-error)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:brightness-110 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
               >
@@ -518,7 +518,7 @@ export function SquadChat({ projectId, onFileChange, onApplyDiff, className }: S
       setMessages([{
         id: 'welcome',
         role: 'system',
-        content: 'Squad de IA ativo. Sou sua equipe completa: Arquiteto, Engenheiro e QA trabalhando juntos. Descreva o que precisa e eu planejo, implemento e valido automaticamente.',
+        content: 'Squad de IA active. Sou sua equipe completa: Arquiteto, Engenheiro e QA trabalhando juntos. Descreva o que precisa e eu planejo, implemento e valido automaticamente.',
         timestamp: new Date(),
       }]);
     }
@@ -541,8 +541,8 @@ export function SquadChat({ projectId, onFileChange, onApplyDiff, className }: S
       id: `step-1`,
       agentId: 'architect',
       phase: 'complete',
-      message: 'Analisando estrutura do projeto...',
-      detail: 'Verificando dependencias existentes e padroes de codigo utilizados.',
+      message: 'Analyzing project structure...',
+      detail: 'Checking dependencias existentes e padroes de codigo utilizados.',
       timestamp: new Date(),
       duration: 1500,
     });
@@ -553,8 +553,8 @@ export function SquadChat({ projectId, onFileChange, onApplyDiff, className }: S
       id: `step-2`,
       agentId: 'architect',
       phase: 'complete',
-      message: 'Criando blueprint da solução',
-      detail: `Plano de implementacao:\n1. Criar estrutura de dados\n2. Implementar logica core\n3. Criar interface visual\n4. Conectar eventos`,
+      message: 'Creating blueprint da solution',
+      detail: `Plano de implementacao:\n1. Create estrutura de dados\n2. Implementar logica core\n3. Create interface visual\n4. Conectar eventos`,
       code: `// Blueprint
 interface ${prompt.includes('inventario') ? 'InventorySystem' : 'GameSystem'} {
   initialize(): void;
@@ -573,7 +573,7 @@ interface ${prompt.includes('inventario') ? 'InventorySystem' : 'GameSystem'} {
       id: `step-3`,
       agentId: 'engineer',
       phase: 'complete',
-      message: 'Implementando arquivos principais...',
+      message: 'Implementing files principais...',
       code: `// src/systems/GameSystem.ts
 export class GameSystem implements ISystem {
   private entities: Entity[] = [];
@@ -596,7 +596,7 @@ export class GameSystem implements ISystem {
       id: `step-4`,
       agentId: 'engineer',
       phase: 'complete',
-      message: 'Criando componentes de UI',
+      message: 'Creating componentes de UI',
       diff: {
         before: '// Empty file',
         after: `// src/ui/SystemPanel.tsx
@@ -616,7 +616,7 @@ export function SystemPanel() {
       id: `step-5`,
       agentId: 'qa',
       phase: 'complete',
-      message: 'Rodando testes unitários...',
+      message: 'Running unit tests...',
       detail: 'OK 5/5 testes passaram\nOK Sem vazamento de memoria\nOK Performance OK (< 1ms/frame)',
       timestamp: new Date(),
       duration: 1500,
@@ -628,7 +628,7 @@ export function SystemPanel() {
       id: `step-6`,
       agentId: 'qa',
       phase: 'complete',
-      message: 'Verificando segurança e boas práticas',
+      message: 'Checking security and best practices',
       detail: 'OK Sem vulnerabilidades conhecidas\nOK Codigo TypeScript valido\nOK Imports organizados',
       timestamp: new Date(),
       duration: 1000,
@@ -637,7 +637,7 @@ export function SystemPanel() {
 
     task.status = 'complete';
     task.endTime = new Date();
-    task.result = 'Sistema implementado com sucesso. Os arquivos foram criados e estao prontos para teste.';
+    task.result = 'Sistema implementado com sucesso. Os files foram criados e estao prontos para teste.';
     task.files = ['src/systems/GameSystem.ts', 'src/ui/SystemPanel.tsx', 'src/types/index.ts'];
 
     return task;
@@ -722,7 +722,7 @@ export function SystemPanel() {
               <h3 className="font-semibold text-[var(--aethel-text-primary)]">Squad de IA</h3>
               {projectId ? (
                 <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
-                  projeto {projectId}
+                  project {projectId}
                 </span>
               ) : null}
             </div>
@@ -745,7 +745,7 @@ export function SystemPanel() {
             onApply={() => {
               if (!message.task) return;
               if (!onFileChange && !onApplyDiff) {
-                pushSystemMessage('Proposta pronta para revisao manual. Nenhuma alteracao foi aplicada automaticamente nesta superficie.');
+                pushSystemMessage('Proposta pronta para revisao manual. No alteracao foi aplicada automaticamente nesta superficie.');
                 return;
               }
               pushSystemMessage('Integracao de aplicacao automatica pendente nesta superficie. Revise o diff no copiloto principal.');
@@ -796,7 +796,7 @@ export function SystemPanel() {
             disabled={isProcessing}
             aria-label="Descreva sua tarefa para o squad de IA"
           />
-          <button type="button" aria-label="Enviar tarefa ao squad"
+          <button type="button" aria-label="Send tarefa ao squad"
             onClick={handleSubmit}
             disabled={!input.trim() || isProcessing}
             className={`

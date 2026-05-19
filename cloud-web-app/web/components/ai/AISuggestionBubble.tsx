@@ -2,9 +2,9 @@
 
 import { logger } from '@/lib/observability/logger';
 /**
- * AISuggestionBubble - Bolhas de Sugestão Proativa da IA
+ * AISuggestionBubble - Bolhas de Sugestão Proactive da IA
  *
- * Sugestões contextuais não-intrusivas da IA.
+ * Suggestions contextuais não-intrusivas da IA.
  * Aparece próximo ao elemento relevante.
  * Pode ser dispensada ou aplicada rapidamente.
  *
@@ -42,11 +42,11 @@ import {
 // ============================================================================
 
 export type SuggestionType =
-  | 'code'        // Sugestão de código
+  | 'code'        // Sugestão de code
   | 'design'      // Sugestão de design/visual
   | 'performance' // Sugestão de performance
   | 'ux'          // Sugestão de UX
-  | 'error'       // Correção de erro
+  | 'error'       // Correção de error
   | 'tip';        // Dica geral
 
 export type SuggestionPosition =
@@ -643,7 +643,7 @@ export function SuggestionManager({
 // ============================================================================
 
 /**
- * AISuggestionBubbleAuto - Versão auto-gerenciada
+ * AISuggestionBubbleAuto - Version auto-gerenciada
  * Busca sugestões da API automaticamente e gerencia exibição
  */
 export function AISuggestionBubbleAuto() {
@@ -651,7 +651,7 @@ export function AISuggestionBubbleAuto() {
   const [enabled, setEnabled] = useState(true);
   const pollIntervalRef = useRef<NodeJS.Timeout>();
 
-  // Buscar sugestões da API
+  // Search sugestões da API
   useEffect(() => {
     if (!enabled) return;
 

@@ -3,6 +3,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { startDapSession } from '@/lib/server/dap-runtime';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/dap/session/start/route');
 
 interface StartSessionRequest {
   type: string;
@@ -45,7 +48,7 @@ export async function POST(request: NextRequest) {
       message: 'Debug session started',
     });
   } catch (error) {
-    console.error('Failed to start debug session:', error);
+    routeLogger.error('Failed to start debug session:', error);
     const code = (error as any)?.code;
     if (code === 'DAP_UNSUPPORTED_TYPE') {
       return NextResponse.json(
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: 'DAP_UNSUPPORTED_TYPE',
           message:
-            'Tipo de DAP não suportado/sem adapter configurado. Configure AETHEL_DAP_NODE_CMD/AETHEL_DAP_NODE_ARGS (Node) ou instale/configure o adapter correspondente.'
+            'Unsupported DAP type or missing configured adapter. Configure AETHEL_DAP_NODE_CMD/AETHEL_DAP_NODE_ARGS (Node) or install/configure the corresponding adapter.'
         },
         { status: 422 }
       );

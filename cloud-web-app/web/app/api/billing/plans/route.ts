@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { PLANS } from '@/lib/plans';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/billing/plans/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +31,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching plans:', error);
+    routeLogger.error('Error fetching plans:', error);
     return NextResponse.json(
       { error: 'Failed to fetch plans' },
       { status: 500 }

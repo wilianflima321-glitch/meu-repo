@@ -605,7 +605,7 @@ export const SplitEditor: React.FC<SplitEditorProps> = ({
         <div className="text-center">
           <FileCode size={48} className="mx-auto mb-4 opacity-50" />
           <p className="text-lg">No editors open</p>
-          <p className="text-sm">Abra um arquivo para comecar a editar</p>
+          <p className="text-sm">Open a file to start editing</p>
         </div>
       </div>
     );

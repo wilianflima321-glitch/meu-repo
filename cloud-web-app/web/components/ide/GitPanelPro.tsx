@@ -149,7 +149,7 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
       </span>
 
       {/* File info */}
-      <button type="button" aria-label={`Abrir diff de ${fileName}`}
+      <button type="button" aria-label={`Open diff for ${fileName}`}
         onClick={onOpenDiff}
         className="flex-1 flex items-center gap-1 text-left truncate"
       >
@@ -180,24 +180,24 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
           <button type="button" aria-label={`Descartar altera??es de ${fileName}`}
             onClick={onDiscard}
             className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
-            title="Descartar alterações"
+            title="Discard changes"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
         )}
         {file.staged ? (
-          <button type="button" aria-label={`Remover ${fileName} do stage`}
+          <button type="button" aria-label={`Remove ${fileName} do stage`}
             onClick={onUnstage}
             className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
-            title="Remover do stage"
+            title="Remove do stage"
           >
             <Minus className="w-3.5 h-3.5" />
           </button>
         ) : (
-          <button type="button" aria-label={`Adicionar ${fileName} ao stage`}
+          <button type="button" aria-label={`Add ${fileName} ao stage`}
             onClick={onStage}
             className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
-            title="Adicionar ao stage"
+            title="Add ao stage"
           >
             <Plus className="w-3.5 h-3.5" />
           </button>
@@ -348,11 +348,11 @@ export default function GitPanelPro({
   const handlePush = async () => {
     // Request consent for push operation
     const request = createConsentRequest('git.push', {
-      description: `Enviar ${ahead} commits para o repositório remoto`,
+      description: `Push ${ahead} commits to the remote repository`,
       details: [
         `Branch: ${currentBranch}`,
         `Commits pendentes: ${ahead}`,
-        'Isso vai enviar suas mudanças para o repositório remoto'
+        'This will push your changes to the remote repository'
       ]
     })
 
@@ -443,7 +443,7 @@ export default function GitPanelPro({
           <div>
             <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Loading Git panel</p>
             <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
-              Buscando branch atual, alterações locais e histórico recente.
+              Fetching current branch, local changes, and recent history.
             </p>
           </div>
         </div>
@@ -461,7 +461,7 @@ export default function GitPanelPro({
         >
           <AlertCircle className="h-8 w-8 text-[var(--aethel-error)]" />
           <div>
-            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Não foi possível ler o repositório</p>
+            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Unable to read the repository</p>
             <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">{error}</p>
           </div>
           <p className="text-[11px] text-[var(--aethel-text-quaternary)]">
@@ -496,31 +496,31 @@ export default function GitPanelPro({
           )}
         </button>
         <div className="flex items-center gap-1">
-          <button type="button" aria-label="Buscar atualiza??es do reposit?rio"
+          <button type="button" aria-label="Search atualiza??es do reposit?rio"
             onClick={handleFetch}
             className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
-            title="Buscar atualizacoes"
+            title="Search updates"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
-          <button type="button" aria-label="Baixar mudan?as do reposit?rio"
+          <button type="button" aria-label="Pull changes do reposit?rio"
             onClick={handlePull}
             className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
-            title="Baixar mudanças"
+            title="Pull changes"
           >
             <Download className="w-4 h-4" />
           </button>
-          <button type="button" aria-label="Enviar mudan?as para o reposit?rio"
+          <button type="button" aria-label="Push changes para o reposit?rio"
             onClick={handlePush}
             className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
-            title="Enviar mudanças"
+            title="Push changes"
           >
             <Upload className="w-4 h-4" />
           </button>
           <button type="button" aria-label="Alternar hist?rico de commits"
             onClick={() => setShowHistory(!showHistory)}
             className={`p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] ${showHistory ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
-            title="Historico"
+            title="History"
           >
             <History className="w-4 h-4" />
           </button>
@@ -599,7 +599,7 @@ export default function GitPanelPro({
         <div className="border-b border-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-3 py-2">
           <div className="flex items-center gap-2 text-[var(--aethel-error)] text-sm">
             <AlertCircle className="w-4 h-4" />
-            <span>{conflictedFiles.length} arquivo(s) com conflito de merge</span>
+            <span>{conflictedFiles.length} file(s) with merge conflicts</span>
           </div>
         </div>
       )}
@@ -616,9 +616,9 @@ export default function GitPanelPro({
         />
         <div className="mt-2 flex items-center justify-between">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">
-            {stagedFiles.length} arquivo(s) em stage
+            {stagedFiles.length} staged file(s)
           </span>
-          <button type="button" aria-label="Criar commit com arquivos em stage"
+          <button type="button" aria-label="Create commit with staged files"
             onClick={handleCommit}
             disabled={!commitMessage.trim() || stagedFiles.length === 0}
             className={`
@@ -639,19 +639,19 @@ export default function GitPanelPro({
         {/* Staged Changes */}
         {stagedFiles.length > 0 && (
           <div>
-            <button type="button" aria-label="Alternar se??o de arquivos em stage"
+            <button type="button" aria-label="Toggle staged files section"
               onClick={() => toggleSection('staged')}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
               {expandedSections.staged ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
               <span className="flex-1 text-left">Em stage ({stagedFiles.length})</span>
-              <button type="button" aria-label="Adicionar todas as altera??es ao stage"
+              <button type="button" aria-label="Add todas as altera??es ao stage"
                 onClick={(e) => {
                   e.stopPropagation()
                   handleUnstageAll()
                 }}
                 className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)]"
-                title="Remover tudo do stage"
+                title="Remove tudo do stage"
               >
                 <Minus className="w-3 h-3" />
               </button>
@@ -681,8 +681,8 @@ export default function GitPanelPro({
               className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
               {expandedSections.changes ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-              <span className="flex-1 text-left">Alteracoes ({changedFiles.length})</span>
-              <button type="button" aria-label="Adicionar todas as altera??es ao stage"
+              <span className="flex-1 text-left">Changes ({changedFiles.length})</span>
+              <button type="button" aria-label="Add todas as altera??es ao stage"
                 onClick={(e) => {
                   e.stopPropagation()
                   handleStageAll()
@@ -713,7 +713,7 @@ export default function GitPanelPro({
         {/* Untracked */}
         {untrackedFiles.length > 0 && (
           <div>
-            <button type="button" aria-label="Alternar se??o de arquivos n?o rastreados"
+            <button type="button" aria-label="Toggle untracked files section"
               onClick={() => toggleSection('untracked')}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
@@ -745,13 +745,13 @@ export default function GitPanelPro({
             </div>
             <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Workspace limpo</p>
             <p className="mt-1 max-w-xs text-xs text-[var(--aethel-text-tertiary)]">
-              Nenhuma alteracao pendente para stage ou commit neste momento.
+              No alteracao pendente para stage ou commit neste momento.
             </p>
-            <button type="button" aria-label="Atualizar status do Git"
+            <button type="button" aria-label="Refresh status do Git"
               onClick={fetchStatus}
               className="mt-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_86%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
             >
-              Atualizar status
+              Refresh status
             </button>
           </div>
         )}

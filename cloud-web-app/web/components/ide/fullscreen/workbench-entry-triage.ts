@@ -58,7 +58,7 @@ const ENTRY_PROFILES: Record<Exclude<WorkbenchEntryLaneId, 'general'>, Workbench
     notice: {
       tone: 'info',
       title: 'Artifact-first Studio',
-      description: 'Apps / Sites entra com a previa no palco e a revisao pronta para aprofundar so o que realmente precisa de codigo.',
+      description: 'Apps / Sites opens with preview on stage and review ready to deepen only what truly needs code.',
     },
   },
   research: {
@@ -118,7 +118,7 @@ const ENTRY_PROFILES: Record<Exclude<WorkbenchEntryLaneId, 'general'>, Workbench
     notice: {
       tone: 'info',
       title: 'Ops lane centralizada',
-      description: 'Growth / Ops abre com IA, contexto e artefato no mesmo fluxo para evitar dashboards inchados e pouca continuidade.',
+      description: 'Growth / Ops opens with AI, context, and artifact in one flow to avoid bloated dashboards and weak continuity.',
     },
   },
   games: {
@@ -138,7 +138,7 @@ const ENTRY_PROFILES: Record<Exclude<WorkbenchEntryLaneId, 'general'>, Workbench
     notice: {
       tone: 'info',
       title: 'Viewport dominante',
-      description: 'Games entra com o viewport 3D no comando para o Studio parecer ferramenta de producao, nao chat com preview espremido.',
+      description: 'Games opens with the 3D viewport in command so Studio feels like a production tool, not chat with a squeezed preview.',
     },
   },
   media: {
@@ -158,7 +158,7 @@ const ENTRY_PROFILES: Record<Exclude<WorkbenchEntryLaneId, 'general'>, Workbench
     notice: {
       tone: 'info',
       title: 'Artifact review em foco',
-      description: 'Films / Media entra com canvas dominante e menos chrome para deixar revisao, composicao e handoff mais profissionais.',
+      description: 'Films / Media opens with a dominant canvas and less chrome so review, composition, and handoff feel more professional.',
     },
   },
 };
@@ -225,8 +225,8 @@ export function resolveWorkbenchEntryProfile(params: {
           },
           notice: {
             tone: 'info' as const,
-            title: 'Missao carregada no Studio',
-            description: 'A missao entra com IA e artefato no mesmo cockpit para manter plano, diff e revisao dentro de um fluxo unico.',
+            title: 'Mission loaded in Studio',
+            description: 'The mission enters with AI and artifact in the same cockpit to keep plan, diff, and review in one flow.',
           },
         }
       : ENTRY_PROFILES[laneId];

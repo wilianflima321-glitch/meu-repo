@@ -10,13 +10,16 @@ import {
   type PaymentGateway,
   type PaymentGatewayConfig,
 } from '@/lib/server/payment-gateway-config';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/payments/gateway/route');
 
 async function getHandler(_request: NextRequest) {
   try {
     const config = await readPaymentGatewayConfig();
     return NextResponse.json({ config });
   } catch (error) {
-    console.error('[Admin Payments Gateway] GET error:', error);
+    routeLogger.error('[Admin Payments Gateway] GET error:', error);
     return NextResponse.json({ error: 'Failed to fetch payment gateway config' }, { status: 500 });
   }
 }
@@ -69,7 +72,7 @@ async function putHandler(request: NextRequest, context: { user: { id: string; e
 
     return NextResponse.json({ success: true, config });
   } catch (error) {
-    console.error('[Admin Payments Gateway] PUT error:', error);
+    routeLogger.error('[Admin Payments Gateway] PUT error:', error);
     return NextResponse.json({ error: 'Failed to update payment gateway config' }, { status: 500 });
   }
 }

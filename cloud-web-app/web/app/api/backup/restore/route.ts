@@ -9,6 +9,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { restoreBackup, verifyBackupIntegrity } from '@/lib/backup-service';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/backup/restore/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +65,7 @@ export async function POST(request: NextRequest) {
       }`,
     });
   } catch (error: unknown) {
-    console.error('Failed to restore backup:', error);
+    routeLogger.error('Failed to restore backup:', error);
     
     if (error instanceof Error && error.message === 'Project not found or access denied') {
       return NextResponse.json(

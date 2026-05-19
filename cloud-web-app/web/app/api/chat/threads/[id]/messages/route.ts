@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
     const thread = await assertThreadOwnership(user.userId, threadId);
 
     if (!thread) {
-      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread não encontrada.' }, { status: 404 });
+      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread not found.' }, { status: 404 });
     }
 
     const messages = await prisma.chatMessage.findMany({
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest, ctx: { params: { id: string } }) {
     const thread = await assertThreadOwnership(user.userId, threadId);
 
     if (!thread) {
-      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread não encontrada.' }, { status: 404 });
+      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread not found.' }, { status: 404 });
     }
 
     if (thread.archived) {
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest, ctx: { params: { id: string } }) {
 
     const body = await req.json().catch(() => null);
     if (!body || typeof body !== 'object') {
-      return NextResponse.json({ error: 'INVALID_BODY', message: 'Body JSON inválido.' }, { status: 400 });
+      return NextResponse.json({ error: 'INVALID_BODY', message: 'Invalid JSON body.' }, { status: 400 });
     }
 
     const role = typeof (body as any).role === 'string' ? String((body as any).role) : '';
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest, ctx: { params: { id: string } }) {
     }
 
     if (!content.trim()) {
-      return NextResponse.json({ error: 'EMPTY_CONTENT', message: 'content é obrigatório.' }, { status: 400 });
+      return NextResponse.json({ error: 'EMPTY_CONTENT', message: 'content is required.' }, { status: 400 });
     }
 
     const message = await prisma.chatMessage.create({

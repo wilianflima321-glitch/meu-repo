@@ -53,7 +53,7 @@ type TeamMemberRecord = {
 }
 
 /**
- * Componente Principal
+ * Main component
  */
 export function AdvancedSettingsPanel() {
   const [activeTab, setActiveTab] = useState<AdvancedSettingsTab>('api-keys')
@@ -62,9 +62,9 @@ export function AdvancedSettingsPanel() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-[var(--aethel-text-primary)]">Configurações Avançadas</h1>
+        <h1 className="text-3xl font-bold text-[var(--aethel-text-primary)]">Advanced Settings</h1>
         <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
-          Gerencie API Keys, Webhooks e permissões de time
+          Manage API keys, webhooks, and team permissions
         </p>
       </div>
 
@@ -73,7 +73,7 @@ export function AdvancedSettingsPanel() {
         {([
           { id: 'api-keys', label: 'API Keys', icon: Key },
           { id: 'webhooks', label: 'Webhooks', icon: Webhook },
-          { id: 'team', label: 'Time', icon: Users },
+          { id: 'team', label: 'Team', icon: Users },
         ] satisfies Array<{ id: AdvancedSettingsTab; label: string; icon: typeof Key }>).map(({ id, label, icon: Icon }) => (
           <button type="button"
             key={id}
@@ -114,7 +114,7 @@ function APIKeysTab() {
     if (!newKeyName.trim()) {
       addNotification({
         type: 'error',
-        message: 'Nome da API Key é obrigatório',
+        message: 'API key name is required',
         duration: 3000,
       })
       return
@@ -125,7 +125,7 @@ function APIKeysTab() {
 
     addNotification({
       type: 'success',
-      message: 'API Key criada com sucesso',
+      message: 'API key created successfully',
       duration: 3000,
     })
 
@@ -143,7 +143,7 @@ function APIKeysTab() {
 
     addNotification({
       type: 'success',
-      message: 'API Key revogada',
+      message: 'API key revoked',
       duration: 2000,
     })
   }
@@ -152,7 +152,7 @@ function APIKeysTab() {
     navigator.clipboard.writeText(key)
     addNotification({
       type: 'success',
-      message: 'Copiado para a área de transferência',
+      message: 'Copied to clipboard',
       duration: 2000,
     })
   }
@@ -167,16 +167,16 @@ function APIKeysTab() {
           onClick={() => setShowCreateDialog(true)}
         >
           <Plus size={16} />
-          Nova API Key
+          New API Key
         </GlassButton>
       </div>
 
       {keys.length === 0 ? (
         <GlassCard className="p-8 text-center">
           <Key size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
-          <p className="text-[var(--aethel-text-secondary)]">Nenhuma API Key criada</p>
+          <p className="text-[var(--aethel-text-secondary)]">No API keys created</p>
           <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
-            Crie sua primeira API Key para integrar com a API
+            Create your first API key to integrate with the API
           </p>
         </GlassCard>
       ) : (
@@ -207,7 +207,7 @@ function APIKeysTab() {
 }
 
 /**
- * Card de API Key
+ * API key card
  */
 function APIKeyCard({
   apiKey,
@@ -226,7 +226,7 @@ function APIKeyCard({
         <div>
           <h3 className="font-semibold text-[var(--aethel-text-primary)]">{apiKey.name}</h3>
           <p className="text-xs text-[var(--aethel-text-secondary)] mt-1">
-            Criada em {new Date(apiKey.createdAt).toLocaleDateString()}
+            Created on {new Date(apiKey.createdAt).toLocaleDateString()}
           </p>
         </div>
         <AnimatedBadge
@@ -243,7 +243,7 @@ function APIKeyCard({
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Chave</label>
+        <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Key</label>
         <div className="flex gap-2">
           <input
             type={showSecret ? 'text' : 'password'}
@@ -253,14 +253,14 @@ function APIKeyCard({
           />
           <button type="button"
             onClick={() => onCopy(apiKey.key)}
-            aria-label="Copiar chave da API"
+            aria-label="Copy API key"
             className="px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)] transition-colors"
           >
             <Copy size={16} />
           </button>
           <button type="button"
             onClick={() => setShowSecret(!showSecret)}
-            aria-label={showSecret ? 'Ocultar segredo da API' : 'Exibir segredo da API'}
+            aria-label={showSecret ? 'Hide API secret' : 'Show API secret'}
             aria-pressed={showSecret}
             className="px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)] transition-colors"
           >
@@ -272,7 +272,7 @@ function APIKeyCard({
       {apiKey.expiresAt && (
         <div className="flex items-center gap-2 text-xs text-[var(--aethel-text-secondary)]">
           <Clock size={14} />
-          Expira em {new Date(apiKey.expiresAt).toLocaleDateString()}
+          Expires on {new Date(apiKey.expiresAt).toLocaleDateString()}
         </div>
       )}
 
@@ -283,7 +283,7 @@ function APIKeyCard({
           className="flex-1 px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
         >
           <Trash2 size={14} />
-          Revogar
+          Revoke
         </button>
       </div>
     </GlassCard>
@@ -312,7 +312,7 @@ function WebhooksTab() {
     setWebhooks([...webhooks, newWebhook])
     addNotification({
       type: 'success',
-      message: 'Webhook criado com sucesso',
+      message: 'Webhook created successfully',
       duration: 3000,
     })
     setShowCreateDialog(false)
@@ -328,14 +328,14 @@ function WebhooksTab() {
           onClick={() => setShowCreateDialog(true)}
         >
           <Plus size={16} />
-          Novo Webhook
+          New Webhook
         </GlassButton>
       </div>
 
       {webhooks.length === 0 ? (
         <GlassCard className="p-8 text-center">
           <Webhook size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
-          <p className="text-[var(--aethel-text-secondary)]">Nenhum webhook configurado</p>
+          <p className="text-[var(--aethel-text-secondary)]">No webhooks configured</p>
           <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
             Configure webhooks to receive real-time events
           </p>
@@ -369,11 +369,11 @@ function WebhookCard({ webhook }: { webhook: WebhookRecord }) {
             {webhook.url}
           </h3>
           <p className="text-xs text-[var(--aethel-text-secondary)] mt-1">
-            {webhook.events.length} evento(s)
+            {webhook.events.length} event(s)
           </p>
         </div>
         <AnimatedBadge variant={webhook.active ? 'success' : 'warning'}>
-          {webhook.active ? 'Ativo' : 'Inativo'}
+          {webhook.active ? 'Active' : 'Inactive'}
         </AnimatedBadge>
       </div>
 
@@ -396,7 +396,7 @@ function WebhookCard({ webhook }: { webhook: WebhookRecord }) {
       {webhook.failureCount > 0 && (
         <div className="flex items-center gap-2 text-xs text-[var(--aethel-warning-light)]">
           <AlertCircle size={14} />
-          {webhook.failureCount} falha(s) recente(s)
+          {webhook.failureCount} recent failure(s)
         </div>
       )}
     </GlassCard>
@@ -404,7 +404,7 @@ function WebhookCard({ webhook }: { webhook: WebhookRecord }) {
 }
 
 /**
- * Tab de Time
+ * Tab de Team
  */
 function TeamTab() {
   const [members, setMembers] = useState<TeamMemberRecord[]>([])
@@ -414,23 +414,23 @@ function TeamTab() {
   return (
     <motion.div {...eliteAnimations.fadeInUp} className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Membros do Time</h2>
+        <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Membros do Team</h2>
         <GlassButton
           variant="primary"
           size="sm"
           onClick={() => setShowInviteDialog(true)}
         >
           <Plus size={16} />
-          Convidar Membro
+          Invite member
         </GlassButton>
       </div>
 
       {members.length === 0 ? (
         <GlassCard className="p-8 text-center">
           <Users size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
-          <p className="text-[var(--aethel-text-secondary)]">Nenhum membro no time</p>
+          <p className="text-[var(--aethel-text-secondary)]">No team members</p>
           <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
-            Convide membros para colaborar no seu projeto
+            Invite members to collaborate on your project
           </p>
         </GlassCard>
       ) : (
@@ -456,7 +456,7 @@ function TeamTab() {
 }
 
 /**
- * Dialog de Criar API Key
+ * Create API key dialog
  */
 function CreateAPIKeyDialog({
   open,
@@ -497,10 +497,10 @@ function CreateAPIKeyDialog({
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
             <GlassCard className="w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Nova API Key</h2>
+              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">New API Key</h2>
 
               <div className="space-y-2">
-                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Nome</label>
+                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Name</label>
                 <GlassInput
                   placeholder="Ex: Production API"
                   value={name}
@@ -509,7 +509,7 @@ function CreateAPIKeyDialog({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Permissões</label>
+                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Permissions</label>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {allPermissions.map((perm) => (
                     <label key={perm} className="flex items-center gap-2 cursor-pointer">
@@ -537,7 +537,7 @@ function CreateAPIKeyDialog({
                   onClick={onCreateKey}
                   className="flex-1"
                 >
-                  Criar
+                  Create
                 </GlassButton>
                 <GlassButton
                   variant="ghost"
@@ -556,7 +556,7 @@ function CreateAPIKeyDialog({
 }
 
 /**
- * Dialog de Criar Webhook
+ * Dialog de Create Webhook
  */
 function CreateWebhookDialog({
   open,
@@ -596,7 +596,7 @@ function CreateWebhookDialog({
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
             <GlassCard className="w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Novo Webhook</h2>
+              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">New Webhook</h2>
 
               <div className="space-y-2">
                 <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">URL</label>
@@ -608,7 +608,7 @@ function CreateWebhookDialog({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Eventos</label>
+                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Events</label>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {Object.values(WebhookEvent).map((event) => (
                     <label key={event} className="flex items-center gap-2 cursor-pointer">
@@ -636,7 +636,7 @@ function CreateWebhookDialog({
                   onClick={handleCreate}
                   className="flex-1"
                 >
-                  Criar
+                  Create
                 </GlassButton>
                 <GlassButton
                   variant="ghost"
@@ -655,7 +655,7 @@ function CreateWebhookDialog({
 }
 
 /**
- * Dialog de Convidar Membro
+ * Dialog de Invite member
  */
 function InviteTeamMemberDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [email, setEmail] = useState('')
@@ -666,7 +666,7 @@ function InviteTeamMemberDialog({ open, onClose }: { open: boolean; onClose: () 
     if (email.trim()) {
       addNotification({
         type: 'success',
-        message: `Convite enviado para ${email}`,
+        message: `Invite sent to ${email}`,
         duration: 3000,
       })
       setEmail('')
@@ -693,12 +693,12 @@ function InviteTeamMemberDialog({ open, onClose }: { open: boolean; onClose: () 
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
             <GlassCard className="w-full max-w-md p-6 space-y-4">
-              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Convidar Membro</h2>
+              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Invite member</h2>
 
               <div className="space-y-2">
                 <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Email</label>
                 <GlassInput
-                  placeholder="membro@exemplo.com"
+                  placeholder="member@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -723,7 +723,7 @@ function InviteTeamMemberDialog({ open, onClose }: { open: boolean; onClose: () 
                   onClick={handleInvite}
                   className="flex-1"
                 >
-                  Convidar
+                  Invite
                 </GlassButton>
                 <GlassButton
                   variant="ghost"

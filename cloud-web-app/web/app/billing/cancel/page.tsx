@@ -7,7 +7,7 @@ import { AethelAPIClient, APIError, type BillingReadiness } from '@/lib/api'
 function getErrorMessage(error: unknown) {
   if (error instanceof APIError) return error.message
   if (error instanceof Error) return error.message
-  return 'Nao foi possivel carregar o estado de cancelamento do billing.'
+  return 'Could not load the billing cancellation state.'
 }
 
 export default function BillingCancelPage() {
@@ -40,14 +40,14 @@ export default function BillingCancelPage() {
   return (
     <main className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] flex items-center justify-center p-6">
       <div className="max-w-xl w-full rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6">
-        <h1 className="text-2xl font-semibold mb-2">Checkout cancelado</h1>
+        <h1 className="text-2xl font-semibold mb-2">Checkout canceled</h1>
         <p className="text-sm text-[var(--aethel-text-secondary)] mb-4">
-          Nao presuma mudanca de faturamento a partir desta pagina. Voce pode voltar ao faturamento e tentar novamente quando o runtime estiver pronto.
+          Do not assume billing changes from this page. You can return to billing and try again when the runtime is ready.
         </p>
 
         {loading ? (
           <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/60 px-3 py-3 text-sm text-[var(--aethel-text-secondary)]">
-            Carregando prontidao de billing...
+            Loading billing readiness...
           </div>
         ) : error ? (
           <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/10 px-3 py-3 text-sm text-[var(--aethel-error-light)]">
@@ -56,7 +56,7 @@ export default function BillingCancelPage() {
         ) : (
           <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/60 px-3 py-3 text-sm text-[var(--aethel-text-secondary)]">
             <p>
-              Prontidao de billing:
+              Billing readiness:
               <span className="ml-2 font-medium text-[var(--aethel-text-primary)]">{readiness?.status || 'unknown'}</span>
             </p>
             <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
@@ -75,10 +75,10 @@ export default function BillingCancelPage() {
 
         <div className="mt-6 flex gap-2">
           <Link href="/billing" className="px-4 py-2 rounded bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] text-sm">
-            Voltar ao faturamento
+            Back to billing
           </Link>
           <Link href="/pricing" className="px-4 py-2 rounded border border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-tertiary)] text-sm">
-            Ver planos
+            View plans
           </Link>
         </div>
       </div>

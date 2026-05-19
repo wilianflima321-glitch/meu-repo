@@ -20,16 +20,16 @@ export default function AITraining() {
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     model: 'Aethel-GPT',
-    auxAI: 'GPT-4 para dados sintéticos',
-    optimization: 'Quantização + transferência de aprendizado',
-    filters: 'Detecção de viés habilitada',
+    auxAI: 'GPT-4 for synthetic data',
+    optimization: 'Quantization + transfer learning',
+    filters: 'Bias detection enabled',
   });
   const [saving, setSaving] = useState(false);
 
   const statusLabels: Record<string, string> = {
     queued: 'na fila',
-    running: 'em execução',
-    completed: 'concluído',
+    running: 'running',
+    completed: 'completed',
     failed: 'falhou',
     paused: 'pausado',
   };
@@ -38,12 +38,12 @@ export default function AITraining() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/ai/training');
-      if (!res.ok) throw new Error('Falha ao carregar tarefas');
+      if (!res.ok) throw new Error('Failed to load tarefas');
       const json = await res.json();
       setJobs(json.items || []);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar tarefas');
+      setError(err instanceof Error ? err.message : 'Error loading tarefas');
     } finally {
       setLoading(false);
     }
@@ -61,10 +61,10 @@ export default function AITraining() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error('Falha ao iniciar treinamento');
+      if (!res.ok) throw new Error('Failed to start treinamento');
       await fetchJobs();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao iniciar treinamento');
+      setError(err instanceof Error ? err.message : 'Error starting treinamento');
     } finally {
       setSaving(false);
     }
@@ -75,7 +75,7 @@ export default function AITraining() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Treinamento de IA</h1>
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Crie tarefas e acompanhe status, custos e eficiência.</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Create tasks and track status, costs, and efficiency.</p>
         </div>
         <button type="button" onClick={fetchJobs} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
           Atualizar
@@ -100,7 +100,7 @@ export default function AITraining() {
             />
           </div>
           <div>
-            <label className='block text-sm font-medium'>IA Auxiliar</label>
+            <label className='block text-sm font-medium'>IA Assistant</label>
             <input
               value={form.auxAI}
               onChange={(e) => setForm((prev) => ({ ...prev, auxAI: e.target.value }))}
@@ -108,7 +108,7 @@ export default function AITraining() {
             />
           </div>
           <div>
-            <label className='block text-sm font-medium'>Otimização</label>
+            <label className='block text-sm font-medium'>Optimization</label>
             <input
               value={form.optimization}
               onChange={(e) => setForm((prev) => ({ ...prev, optimization: e.target.value }))}
@@ -136,7 +136,7 @@ export default function AITraining() {
       <div>
         <h2 className='text-xl font-semibold mb-4'>Tarefas recentes</h2>
         {loading ? (
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando tarefas...</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Loading tasks...</p>
         ) : jobs.length === 0 ? (
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Nenhuma tarefa encontrada.</p>
         ) : (
@@ -144,8 +144,8 @@ export default function AITraining() {
             {jobs.map((job) => (
               <div key={job.id} className='p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
                 <h3 className='text-lg font-semibold'>{job.model}</h3>
-                <p className='text-sm text-[var(--aethel-text-secondary)]'>Status: {statusLabels[job.status] || job.status} • Custo: ${job.cost.toFixed(2)} • Eficiência: {job.efficiency.toFixed(0)}%</p>
-                <p className='text-sm text-[var(--aethel-text-secondary)]'>Auxiliar: {job.auxAI || '—'} • Otimização: {job.optimization || '—'}</p>
+                <p className='text-sm text-[var(--aethel-text-secondary)]'>Status: {statusLabels[job.status] || job.status} • Cost: ${job.cost.toFixed(2)} • Efficiency: {job.efficiency.toFixed(0)}%</p>
+                <p className='text-sm text-[var(--aethel-text-secondary)]'>Assistant: {job.auxAI || '—'} • Optimization: {job.optimization || '—'}</p>
                 <p className='text-sm text-[var(--aethel-text-secondary)]'>Filtros: {job.filters || '—'}</p>
               </div>
             ))}

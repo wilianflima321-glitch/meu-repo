@@ -1,4 +1,4 @@
-﻿export type MobileCompanionAction =
+export type MobileCompanionAction =
   | 'approve-task'
   | 'pause-task'
   | 'resume-task'

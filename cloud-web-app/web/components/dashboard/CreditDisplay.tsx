@@ -62,7 +62,7 @@ export function CreditDisplay({ collapsed }: CreditDisplayProps) {
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--aethel-text-secondary)] flex items-center gap-1">
           <Zap className="w-3 h-3 text-[var(--aethel-info)]" />
-          Créditos Aethel
+          Aethel Credits
         </h4>
         {isLoading ? (
           <Loader2 className="w-3 h-3 animate-spin text-[var(--aethel-text-secondary)]" />

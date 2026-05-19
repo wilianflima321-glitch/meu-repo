@@ -21,6 +21,7 @@ export type AgentWorkTool =
   | 'project-brain'
   | 'mission-ledger'
   | 'repository-cartography'
+  | 'deep-spine-scan'
   | 'context-budget'
   | 'code-search'
   | 'file-read'
@@ -131,6 +132,7 @@ function baseToolsForLane(lane: AgentWorkLane): AgentWorkTool[] {
     'project-brain',
     'mission-ledger',
     'repository-cartography',
+    'deep-spine-scan',
     'context-budget',
     'code-search',
     'file-read',
@@ -167,6 +169,7 @@ function buildBlockedUntil(input: BuildParallelAgentWorkContractInput): string[]
   const blockers: string[] = []
   if (!input.manifest) {
     blockers.push('Run Repository Cartography before broad edits or asset imports.')
+    blockers.push('Request Deep Spine Scan when the scope is broad, risky, repeatedly failing, or MB/GB-scale.')
   }
 
   for (const gap of input.criticalGaps) {

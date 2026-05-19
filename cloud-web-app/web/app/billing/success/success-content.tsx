@@ -8,7 +8,7 @@ import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
 function getErrorMessage(error: unknown) {
   if (error instanceof APIError) return error.message
   if (error instanceof Error) return error.message
-  return 'Nao foi possivel carregar o estado de confirmacao do billing.'
+  return 'Could not load the billing confirmation state.'
 }
 
 export default function BillingSuccessContent() {
@@ -51,20 +51,20 @@ export default function BillingSuccessContent() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--aethel-surface-primary)] p-6 text-[var(--aethel-text-primary)]">
       <div className="w-full max-w-xl rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6">
-        <h1 className="mb-2 text-2xl font-semibold">Checkout concluido</h1>
+        <h1 className="mb-2 text-2xl font-semibold">Checkout completed</h1>
         <p className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
-          A aprovacao do pagamento e a ativacao do plano dependem do webhook. Esta pagina nao assume estado da assinatura antes do runtime validar.
+          Payment approval and plan activation depend on the webhook. This page does not assume subscription state before runtime validation.
         </p>
 
         {requestedPlan && (
           <div className="mb-4 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/60 px-3 py-2 text-sm text-[var(--aethel-text-secondary)]">
-            Plano solicitado: <span className="font-medium text-[var(--aethel-text-primary)]">{requestedPlan}</span>
+            Requested plan: <span className="font-medium text-[var(--aethel-text-primary)]">{requestedPlan}</span>
           </div>
         )}
 
         {loading ? (
           <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/60 px-3 py-3 text-sm text-[var(--aethel-text-secondary)]">
-            Carregando estado de billing ao vivo...
+            Loading live billing state...
           </div>
         ) : error ? (
           <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/10 px-3 py-3 text-sm text-[var(--aethel-error-light)]">
@@ -74,7 +74,7 @@ export default function BillingSuccessContent() {
           <div className="space-y-3">
             <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/60 px-3 py-3 text-sm text-[var(--aethel-text-secondary)]">
               <p>
-                Prontidao do runtime:
+                Runtime readiness:
                 <span className="ml-2 font-medium text-[var(--aethel-text-primary)]">{readiness?.status || 'unknown'}</span>
               </p>
               <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
@@ -91,11 +91,11 @@ export default function BillingSuccessContent() {
             </div>
             <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/60 px-3 py-3 text-sm text-[var(--aethel-text-secondary)]">
               <p>
-                Plano atual:
+                Current plan:
                 <span className="ml-2 font-medium text-[var(--aethel-text-primary)]">{subscription?.plan || 'unknown'}</span>
               </p>
               <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
-                Status da assinatura: {subscription?.subscription?.status || 'ainda nao ativa'}
+                Subscription status: {subscription?.subscription?.status || 'not active yet'}
               </p>
             </div>
           </div>
@@ -103,10 +103,10 @@ export default function BillingSuccessContent() {
 
         <div className="mt-6 flex gap-2">
           <Link href="/billing" className="rounded bg-[var(--aethel-primary-dark)] px-4 py-2 text-sm text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary)]">
-            Abrir faturamento
+            Open billing
           </Link>
           <Link href="/dashboard" className="rounded border border-[var(--aethel-border-secondary)] px-4 py-2 text-sm hover:bg-[var(--aethel-surface-tertiary)]">
-            Abrir dashboard
+            Open dashboard
           </Link>
         </div>
       </div>

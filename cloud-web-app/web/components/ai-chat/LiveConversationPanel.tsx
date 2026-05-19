@@ -122,7 +122,7 @@ export function LiveConversationPanel({ isWorking, onInterrupt, onSendMessage }:
               type="button"
               onClick={() => setLiveInput((prev) => `${prev} ${action.label.toLowerCase()}: `)}
               className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
-              aria-label={`Ação rápida: ${action.label}`}
+              aria-label={`Quick action: ${action.label}`}
             >
               <action.icon className="w-3 h-3" />
               {action.label}

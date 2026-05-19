@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ArrowRight, CheckCircle2, ExternalLink, Loader2, RefreshCw, ShieldCheck, WalletCards } from 'lucide-react'

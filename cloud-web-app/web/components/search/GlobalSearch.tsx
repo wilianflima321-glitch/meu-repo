@@ -519,7 +519,7 @@ function SearchResultFile({
               onReplaceAll();
             }}
             className="opacity-0 group-hover:opacity-100 p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-xs text-[var(--aethel-warning-light)]"
-            title="Substituir tudo no arquivo"
+            title="Replace all in file"
           >
             <Replace className="w-3.5 h-3.5" />
           </button>
@@ -639,7 +639,7 @@ export function GlobalSearchPanel({
       <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
           <Search className="w-4 h-4 text-[var(--aethel-info-light)]" />
-          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Buscar</span>
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Search</span>
         </div>
         <div className="flex items-center gap-1">
           <button type="button"
@@ -657,7 +657,7 @@ export function GlobalSearchPanel({
             onClick={() => search()}
             disabled={state.searching}
             className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded disabled:opacity-50"
-            title="Atualizar busca"
+            title="Refresh busca"
           >
             <RefreshCw className={`w-4 h-4 ${state.searching ? 'animate-spin' : ''}`} />
           </button>
@@ -680,7 +680,7 @@ export function GlobalSearchPanel({
               value={state.query}
               onChange={setQuery}
               onSubmit={search}
-              placeholder="Buscar"
+              placeholder="Search"
               showHistory
               history={history}
             />
@@ -745,7 +745,7 @@ export function GlobalSearchPanel({
           className="flex items-center gap-1 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
         >
           <MoreVertical className="w-3 h-3" />
-          arquivos a incluir/excluir
+          files to include/exclude
           {showFilters ? (
             <ChevronDown className="w-3 h-3" />
           ) : (
@@ -759,14 +759,14 @@ export function GlobalSearchPanel({
               type="text"
               value={state.options.includePattern}
               onChange={e => setOptions({ includePattern: e.target.value })}
-              placeholder="arquivos a incluir (ex.: *.ts, src/**)"
+              placeholder="files a incluir (ex.: *.ts, src/**)"
               className="w-full px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
             />
             <input
               type="text"
               value={state.options.excludePattern}
               onChange={e => setOptions({ excludePattern: e.target.value })}
-              placeholder="arquivos a excluir"
+              placeholder="files a excluir"
               className="w-full px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
             />
           </div>
@@ -777,7 +777,7 @@ export function GlobalSearchPanel({
       {state.totalMatches > 0 && (
         <div className="px-3 py-2 text-xs text-[var(--aethel-text-tertiary)] border-b border-[var(--aethel-border-primary)]">
           {state.totalMatches} resultado{state.totalMatches > 1 ? 's' : ''} em{' '}
-          {state.results.length} arquivo{state.results.length > 1 ? 's' : ''}
+          {state.results.length} file{state.results.length > 1 ? 's' : ''}
         </div>
       )}
 
@@ -798,7 +798,7 @@ export function GlobalSearchPanel({
         ) : state.results.length === 0 && state.query ? (
           <div className="px-4 py-12 text-center text-[var(--aethel-text-quaternary)]">
             <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhum resultado encontrado</p>
+            <p>No resultado encontrado</p>
             <p className="text-xs mt-1">
               Tente outros termos ou ajuste os filtros
             </p>
@@ -806,7 +806,7 @@ export function GlobalSearchPanel({
         ) : state.results.length === 0 ? (
           <div className="px-4 py-12 text-center text-[var(--aethel-text-quaternary)]">
             <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Busque em todos os arquivos</p>
+            <p>Busque em todos os files</p>
             <p className="text-xs mt-1">
               Digite pelo menos 2 caracteres para buscar
             </p>

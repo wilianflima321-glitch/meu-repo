@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/system-health/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +28,7 @@ export async function GET(_request: NextRequest) {
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error('[system-health] failed:', error);
+    routeLogger.error('[system-health] failed:', error);
     return NextResponse.json({ error: 'system_health_failed' }, { status: 500 });
   }
 }

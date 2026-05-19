@@ -19,7 +19,7 @@ export default function AdminAI() {
     model: 'gpt-4',
     creditCost: 0.01,
     maxTokens: 1000,
-    policy: 'Bloquear conteúdo prejudicial',
+    policy: 'Block harmful content',
     enabled: true,
   });
   const [environment, setEnvironment] = useState<'staging' | 'production'>('staging');
@@ -37,13 +37,13 @@ export default function AdminAI() {
     try {
       setLoading(true);
       const res = await fetch(`/api/admin/ai/settings?env=${environment}`);
-      if (!res.ok) throw new Error('Falha ao carregar configurações de IA');
+      if (!res.ok) throw new Error('Failed to load AI settings');
       const json = await res.json();
       setAiSettings(json.data);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar configurações');
+      setError(err instanceof Error ? err.message : 'Error loading settings');
     } finally {
       setLoading(false);
     }
@@ -61,10 +61,10 @@ export default function AdminAI() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...aiSettings, environment }),
       });
-      if (!res.ok) throw new Error('Falha ao salvar configurações');
+      if (!res.ok) throw new Error('Failed to save settings');
       await fetchSettings();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar configurações');
+      setError(err instanceof Error ? err.message : 'Error saving settings');
     } finally {
       setSaving(false);
     }
@@ -76,7 +76,7 @@ export default function AdminAI() {
     <div className='p-6 max-w-6xl mx-auto'>
       <AdminPageHeader
         className='mb-6'
-        title='Administração da IA Aethel'
+        title='Aethel AI Administration'
         meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
         actions={(
           <div className='flex gap-2'>
@@ -85,8 +85,8 @@ export default function AdminAI() {
               onChange={(e) => setEnvironment(e.target.value as typeof environment)}
               className='border p-2 rounded text-sm'
             >
-              <option value='staging'>Homologação</option>
-              <option value='production'>Produção</option>
+              <option value='staging'>Staging</option>
+              <option value='production'>Production</option>
             </select>
             <button type="button"
               onClick={fetchSettings}
@@ -122,7 +122,7 @@ export default function AdminAI() {
           },
           {
             icon: Gauge,
-            label: 'Máx. tokens',
+            label: 'Max tokens',
             value: aiSettings.maxTokens,
           },
         ]}
@@ -130,8 +130,8 @@ export default function AdminAI() {
 
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-6 rounded-lg shadow'>
         <div className='mb-4 flex items-center justify-between'>
-          <h2 className='text-xl font-semibold'>Configurações</h2>
-          {loading && <span className='text-xs text-[var(--aethel-text-tertiary)]'>Carregando...</span>}
+          <h2 className='text-xl font-semibold'>Settings</h2>
+          {loading && <span className='text-xs text-[var(--aethel-text-tertiary)]'>Loading...</span>}
         </div>
 
         <div className='mb-4'>
@@ -153,7 +153,7 @@ export default function AdminAI() {
           />
         </div>
         <div className='mb-4'>
-          <label className='block mb-2'>Custo por Crédito</label>
+          <label className='block mb-2'>Cost per Credit</label>
           <input
             type='number'
             step='0.01'
@@ -163,7 +163,7 @@ export default function AdminAI() {
           />
         </div>
         <div className='mb-4'>
-          <label className='block mb-2'>Máx. Tokens</label>
+          <label className='block mb-2'>Max Tokens</label>
           <input
             type='number'
             value={aiSettings.maxTokens}
@@ -172,7 +172,7 @@ export default function AdminAI() {
           />
         </div>
         <div className='mb-4'>
-          <label className='block mb-2'>Política</label>
+          <label className='block mb-2'>Policy</label>
           <textarea
             value={aiSettings.policy}
             onChange={(e) => setAiSettings({ ...aiSettings, policy: e.target.value })}
@@ -183,10 +183,10 @@ export default function AdminAI() {
         <button type="button"
           onClick={handleUpdate}
           disabled={saving}
-          aria-label="Salvar alteracoes da configuracao de IA"
+          aria-label="Save AI configuration changes"
           className='bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50'
         >
-          {saving ? 'Salvando...' : 'Salvar alterações'}
+          {saving ? 'Saving...' : 'Save changes'}
         </button>
       </div>
     </div>

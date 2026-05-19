@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import crypto from 'crypto';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/projects/[id]/duplicate/route');
 
 export async function POST(
   request: NextRequest,
@@ -17,7 +20,7 @@ export async function POST(
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Não autorizado' },
+        { error: 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -30,7 +33,7 @@ export async function POST(
     const newProjectId = crypto.randomUUID();
     const duplicatedProject = {
       id: newProjectId,
-      name: newName || `Cópia de Projeto ${projectId.slice(0, 8)}`,
+      name: newName || `Project copy ${projectId.slice(0, 8)}`,
       originalProjectId: projectId,
       createdAt: new Date().toISOString(),
       createdBy: session.user.email,
@@ -39,13 +42,13 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: 'Projeto duplicado com sucesso',
+      message: 'Project duplicated successfully',
       project: duplicatedProject,
     });
   } catch (error) {
-    console.error('Erro ao duplicar projeto:', error);
+    routeLogger.error('Error duplicating project:', error);
     return NextResponse.json(
-      { error: 'Falha ao duplicar projeto' },
+      { error: 'Failed to duplicate project' },
       { status: 500 }
     );
   }

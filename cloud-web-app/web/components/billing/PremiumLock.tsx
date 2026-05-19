@@ -63,29 +63,29 @@ const FEATURE_INFO: Record<FeatureKey, {
 }> = {
   agents: {
     name: 'AI Agents',
-    description: 'Agentes inteligentes que trabalham autonomamente no seu projeto',
+    description: 'Intelligent agents that work autonomously on your project',
     benefits: [
-      'Geracao automatica de codigo',
-      'Refatoracao inteligente',
-      'Criacao de assets com IA',
+      'Automatic code generation',
+      'Intelligent refactoring',
+      'AI asset creation',
     ],
     icon: <Sparkles className="w-6 h-6" />,
     minPlan: 'pro',
   },
   collaboration: {
-    name: 'Colaboracao em Tempo Real',
-    description: 'Trabalhe com sua equipe no mesmo projeto simultaneamente',
+    name: 'Real-time collaboration',
+    description: 'Work with your team in the same project simultaneously',
     benefits: [
-      'Edicao colaborativa',
-      'Chat de equipe',
-      'Controle de versao integrado',
+      'Collaborative editing',
+      'Team chat',
+      'Integrated version control',
     ],
     icon: <Crown className="w-6 h-6" />,
     minPlan: 'pro',
   },
   git: {
     name: 'Git Integration',
-    description: 'Controle de versao completo integrado ao editor',
+    description: 'Full version control integrated into the editor',
     benefits: [
       'Commits, branches, merges',
       'GitHub/GitLab integration',
@@ -95,19 +95,19 @@ const FEATURE_INFO: Record<FeatureKey, {
     minPlan: 'basic',
   },
   terminal: {
-    name: 'Terminal Integrado',
-    description: 'Terminal completo para comandos e scripts',
+    name: 'Integrated terminal',
+    description: 'Full terminal for commands and scripts',
     benefits: [
-      'Multiplas sessoes',
+      'Multiple sessions',
       'Scripts automatizados',
-      'Integracao com build system',
+      'Build system integration',
     ],
     icon: <Zap className="w-6 h-6" />,
     minPlan: 'basic',
   },
   debugger: {
-    name: 'Debugger Avancado',
-    description: 'Debug visual com breakpoints e inspecao de variaveis',
+    name: 'Advanced debugger',
+    description: 'Visual debugging with breakpoints and variable inspection',
     benefits: [
       'Breakpoints condicionais',
       'Watch expressions',
@@ -118,11 +118,11 @@ const FEATURE_INFO: Record<FeatureKey, {
   },
   build: {
     name: 'Cloud Builds',
-    description: 'Compile e exporte seu projeto na nuvem',
+    description: 'Build and export your project in the cloud',
     benefits: [
-      'Build para multiplas plataformas',
-      'Deploy automatico',
-      'CI/CD integrado',
+      'Build for multiple platforms',
+      'Automatic deploy',
+      'Integrated CI/CD',
     ],
     icon: <Rocket className="w-6 h-6" />,
     minPlan: 'pro',
@@ -132,7 +132,7 @@ const FEATURE_INFO: Record<FeatureKey, {
     description: 'Exporte em formatos profissionais',
     benefits: [
       'Export sem marca d\'agua',
-      'Formatos AAA (4K, HDR)',
+      'Cinematic formats (4K, HDR)',
       'Pacotes otimizados',
     ],
     icon: <ArrowRight className="w-6 h-6" />,
@@ -183,7 +183,7 @@ const FEATURE_INFO: Record<FeatureKey, {
     minPlan: 'studio',
   },
   'team-management': {
-    name: 'Gestao de Equipe',
+    name: 'Gestao de Team',
     description: 'Controle de acesso e permissoes avancadas',
     benefits: [
       'Roles customizados',

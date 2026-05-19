@@ -1,4 +1,4 @@
-import * as monaco from 'monaco-editor'
+import type * as monaco from 'monaco-editor'
 
 /** Diff em memoria para staging; `buildChatDiffFile` alimenta o painel Diff do chat. */
 export type ChatDiffLine = {
@@ -34,7 +34,12 @@ export function applySnippetAtCursor(
 
   const position = editor.getPosition()
   if (!position) return { ok: false, message: 'Sem posicao do cursor' }
-  const range = new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+  const range = {
+    startLineNumber: position.lineNumber,
+    startColumn: position.column,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column,
+  }
   editor.executeEdits('aethel-chat-apply', [{ range, text: code, forceMoveMarkers: true }])
   editor.focus()
   return { ok: true }
@@ -49,7 +54,12 @@ export function insertSnippetAtCursor(
   if (!model) return { ok: false, message: 'Editor sem modelo' }
   const position = editor.getPosition()
   if (!position) return { ok: false, message: 'Sem posicao do cursor' }
-  const range = new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+  const range = {
+    startLineNumber: position.lineNumber,
+    startColumn: position.column,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column,
+  }
   editor.executeEdits('aethel-chat-insert', [{ range, text: code, forceMoveMarkers: true }])
   editor.focus()
   return { ok: true }

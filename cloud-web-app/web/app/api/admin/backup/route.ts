@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // =============================================================================
 // BACKUP ADMIN API
 // =============================================================================
+
+const log = createComponentLogger('api/admin/backup/route');
 
 export const GET = withAdminAuth(
   async () => {
@@ -26,7 +29,7 @@ export const GET = withAdminAuth(
 
       return NextResponse.json({ items });
     } catch (error) {
-      console.error('[Admin Backup] Error:', error);
+      log.error('[Admin Backup] Error', error);
       return NextResponse.json({ error: 'Failed to fetch backups' }, { status: 500 });
     }
   },
@@ -64,7 +67,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ item: backup });
     } catch (error) {
-      console.error('[Admin Backup] Error:', error);
+      log.error('[Admin Backup] Error', error);
       return NextResponse.json({ error: 'Failed to create backup' }, { status: 500 });
     }
   },

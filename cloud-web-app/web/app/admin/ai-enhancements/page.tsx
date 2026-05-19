@@ -31,12 +31,12 @@ export default function AIEnhancements() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/ai/enhancements');
-      if (!res.ok) throw new Error('Falha ao carregar melhorias');
+      if (!res.ok) throw new Error('Failed to load melhorias');
       const json = await res.json();
       setItems(json.items || []);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar melhorias');
+      setError(err instanceof Error ? err.message : 'Error loading melhorias');
     } finally {
       setLoading(false);
     }
@@ -62,10 +62,10 @@ export default function AIEnhancements() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: item.id, applied: !item.applied, status: item.applied ? item.status : 'applied' }),
       });
-      if (!res.ok) throw new Error('Falha ao atualizar melhoria');
+      if (!res.ok) throw new Error('Failed to update melhoria');
       await fetchEnhancements();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar melhoria');
+      setError(err instanceof Error ? err.message : 'Error updating melhoria');
     }
   };
 
@@ -77,11 +77,11 @@ export default function AIEnhancements() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error('Falha ao criar melhoria');
+      if (!res.ok) throw new Error('Failed to create melhoria');
       setForm({ name: '', status: 'planned', description: '' });
       await fetchEnhancements();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao criar melhoria');
+      setError(err instanceof Error ? err.message : 'Error creating melhoria');
     } finally {
       setSaving(false);
     }
@@ -91,8 +91,8 @@ export default function AIEnhancements() {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-bold'>Melhorias Avançadas de IA</h1>
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Roadmap operacional com controle de status e aprovação.</p>
+          <h1 className='text-3xl font-bold'>Advanced AI Enhancements</h1>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Operational roadmap with status control and approval.</p>
         </div>
         <button type="button" onClick={fetchEnhancements} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
           Atualizar
@@ -126,7 +126,7 @@ export default function AIEnhancements() {
           </select>
           <input
             className='border p-2 rounded text-sm'
-            placeholder='Descrição'
+            placeholder='Description'
             value={form.description}
             onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
           />
@@ -136,7 +136,7 @@ export default function AIEnhancements() {
           disabled={saving || !form.name.trim()}
           className='mt-4 px-4 py-2 rounded bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] text-sm disabled:opacity-50'
         >
-          {saving ? 'Salvando...' : 'Adicionar'}
+          {saving ? 'Saving...' : 'Adicionar'}
         </button>
       </div>
 
@@ -164,7 +164,7 @@ export default function AIEnhancements() {
           </div>
         </div>
         {loading ? (
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando melhorias...</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Loading improvements...</p>
         ) : filteredItems.length === 0 ? (
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Nenhuma melhoria encontrada.</p>
         ) : (
@@ -174,7 +174,7 @@ export default function AIEnhancements() {
                 <div className='flex items-center justify-between'>
                   <div>
                     <h3 className='text-lg font-semibold'>{item.name}</h3>
-                    <p className='text-sm text-[var(--aethel-text-tertiary)]'>{item.description || 'Sem descrição'}</p>
+                    <p className='text-sm text-[var(--aethel-text-tertiary)]'>{item.description || 'No description'}</p>
                   </div>
                   <span className='text-xs px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'>
                     {statusLabels[item.status] || item.status}

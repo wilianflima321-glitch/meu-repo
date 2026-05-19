@@ -267,7 +267,7 @@ export async function POST(
       );
     }
 
-    console.error('Export error:', error);
+    routeLogger.error('Export error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

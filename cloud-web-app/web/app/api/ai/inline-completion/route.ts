@@ -16,6 +16,9 @@ import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
 import { AI_INLINE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
 
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/ai/inline-completion/route');
 /**
  * Inline Completion API (compat surface for ghost-text clients)
  * POST /api/ai/inline-completion
@@ -171,7 +174,7 @@ export async function POST(req: NextRequest) {
       latencyMs: response.latencyMs,
     })
   } catch (error) {
-    console.error('[AI Inline Completion] Error:', error)
+    routeLogger.error('[AI Inline Completion] Error:', error)
     return NextResponse.json(
       { error: 'AI_ERROR', message: error instanceof Error ? error.message : 'AI request failed' },
       { status: 500 }

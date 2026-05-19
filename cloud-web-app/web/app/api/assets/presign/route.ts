@@ -24,6 +24,7 @@ import { buildAssetQualityReport, inferAssetClassFromNameAndMime } from '@/lib/s
 import { evaluateAssetIntakePolicy } from '@/lib/server/asset-intake-policy';
 import { evaluateAssetSourcePolicy } from '@/lib/server/asset-source-policy';
 import { capabilityResponse } from '@/lib/server/capability-response';
+import { createComponentLogger } from '@/lib/observability/logger';
 import { 
   generateUploadUrl, 
   generateDownloadUrl, 
@@ -37,6 +38,7 @@ import {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024; // 10GB - AAA game assets
 const MIN_FILE_SIZE = 1; // 1 byte minimum
+const routeLogger = createComponentLogger('api.assets.presign');
 
 // ============================================================================
 // ALLOWED MIME TYPES - Game Engine Assets
@@ -182,7 +184,7 @@ export async function POST(request: NextRequest) {
     // 5. Validate MIME type (if provided)
     if (fileType && !ALLOWED_MIME_TYPES.has(fileType)) {
       // Allow unknown types but log
-      console.warn(`Unknown MIME type: ${fileType} for file: ${fileName}`);
+      routeLogger.warn('Unknown MIME type for upload presign', { fileType, fileName });
     }
 
     const inferredAssetClass = inferAssetClassFromNameAndMime(fileName, fileType)
@@ -335,7 +337,7 @@ export async function POST(request: NextRequest) {
       sourcePolicy,
     });
   } catch (error: unknown) {
-    console.error('Presign error:', error);
+    routeLogger.error('Presign error', error);
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -418,7 +420,7 @@ export async function GET(request: NextRequest) {
       expiresIn: 3600,
     });
   } catch (error: unknown) {
-    console.error('Download URL error:', error);
+    routeLogger.error('Download URL error', error);
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

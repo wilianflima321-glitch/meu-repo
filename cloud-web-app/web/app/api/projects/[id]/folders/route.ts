@@ -9,6 +9,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api.projects.folders');
 
 function normalizeFolderPath(input: string): string {
   const base = (input || '/Content').replace(/\\/g, '/').trim();
@@ -108,7 +111,7 @@ export async function GET(
   } catch (error) {
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
-    console.error('List folders error:', error);
+    routeLogger.error('List folders error', error);
     return apiInternalError('Failed to list folders');
   }
 }
@@ -199,7 +202,7 @@ export async function POST(
       );
     }
 
-    console.error('Create folder error:', error);
+    routeLogger.error('Create folder error', error);
     return apiInternalError('Failed to create folder');
   }
 }
@@ -288,7 +291,7 @@ export async function DELETE(
   } catch (error) {
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
-    console.error('Delete folder error:', error);
+    routeLogger.error('Delete folder error', error);
     return apiInternalError('Failed to delete folder');
   }
 }

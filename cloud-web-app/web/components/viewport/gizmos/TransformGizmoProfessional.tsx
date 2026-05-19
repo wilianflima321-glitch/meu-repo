@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { TransformControls } from '@react-three/drei'
 import type { ReactElement } from 'react'

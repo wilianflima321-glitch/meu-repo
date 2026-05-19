@@ -81,7 +81,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
       <button type="button" onClick={onSplit} title="Dividir terminal" aria-label="Dividir terminal">
         <SplitIcon />
       </button>
-      <button type="button" onClick={onSearch} title="Buscar (Ctrl+F)" aria-label="Buscar no terminal (Ctrl+F)" className={searchVisible ? 'active' : ''}>
+      <button type="button" onClick={onSearch} title="Search (Ctrl+F)" aria-label="Search no terminal (Ctrl+F)" className={searchVisible ? 'active' : ''}>
         <SearchIcon />
       </button>
       <button type="button" onClick={onClear} title="Limpar terminal" aria-label="Limpar terminal">
@@ -323,7 +323,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       <input
         ref={inputRef}
         type="text"
-        placeholder="Buscar no terminal..."
+        placeholder="Search no terminal..."
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -334,7 +334,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       <button type="button" onClick={onFindPrevious} title="Resultado anterior (Shift+Enter)" aria-label="Resultado anterior (Shift+Enter)">
         <ChevronUpIcon />
       </button>
-      <button type="button" onClick={onFindNext} title="Próximo resultado (Enter)" aria-label="Próximo resultado (Enter)">
+      <button type="button" onClick={onFindNext} title="Next resultado (Enter)" aria-label="Next resultado (Enter)">
         <ChevronDownIcon />
       </button>
       <button type="button" onClick={onClose} title="Fechar busca (Escape)" aria-label="Fechar busca (Escape)">

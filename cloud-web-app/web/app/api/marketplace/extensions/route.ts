@@ -4,6 +4,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/marketplace/extensions/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +15,7 @@ const BUILTIN_EXTENSIONS = [
   {
     id: 'aethel.blueprint-editor',
     name: 'Blueprint Visual Scripting',
-    description: 'Sistema de visual scripting estilo Unreal Engine para criar lógica de jogo sem código',
+    description: 'Unreal-style visual scripting system for creating game logic without code',
     version: '1.0.0',
     author: 'Aethel Team',
     category: 'editor',
@@ -26,7 +29,7 @@ const BUILTIN_EXTENSIONS = [
   {
     id: 'aethel.niagara-vfx',
     name: 'Niagara VFX Editor',
-    description: 'Editor avançado de partículas e efeitos visuais baseado no Niagara da Unreal',
+    description: 'Advanced particles and visual effects editor based on Unreal Niagara',
     version: '1.0.0',
     author: 'Aethel Team',
     category: 'editor',
@@ -40,7 +43,7 @@ const BUILTIN_EXTENSIONS = [
   {
     id: 'aethel.ai-assistant',
     name: 'AI Game Assistant',
-    description: 'Assistente de IA para criação de jogos - gera código, assets, e ajuda com gameplay',
+    description: 'AI assistant for game creation - generates code, assets, and helps with gameplay',
     version: '2.0.0',
     author: 'Aethel Team',
     category: 'ai',
@@ -68,7 +71,7 @@ const BUILTIN_EXTENSIONS = [
   {
     id: 'aethel.physics-engine',
     name: 'Advanced Physics Engine',
-    description: 'Motor de física completo com rigid bodies, constraints, e simulação realista',
+    description: 'Full physics engine with rigid bodies, constraints, and realistic simulation',
     version: '1.0.0',
     author: 'Aethel Team',
     category: 'engine',
@@ -82,7 +85,7 @@ const BUILTIN_EXTENSIONS = [
   {
     id: 'aethel.multiplayer',
     name: 'Multiplayer Networking',
-    description: 'Sistema completo de networking para jogos multiplayer com replicação e matchmaking',
+    description: 'Full networking system for multiplayer games with replication and matchmaking',
     version: '1.0.0',
     author: 'Aethel Team',
     category: 'networking',
@@ -188,7 +191,7 @@ export async function GET(request: NextRequest) {
       categories: ['all', 'editor', 'engine', 'ai', 'networking', 'tools', 'templates'],
     });
   } catch (error) {
-    console.error('Failed to list extensions:', error);
+    routeLogger.error('Failed to list extensions:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

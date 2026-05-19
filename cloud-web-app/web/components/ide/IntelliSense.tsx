@@ -78,7 +78,7 @@ export function IntelliSense({ suggestions = [], onSuggestionSelect, visible = t
           type="text"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          placeholder="Filtrar sugestões..."
+          placeholder="Filter suggestions..."
           className="w-full px-3 py-1.5 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-primary)] outline-none transition focus:border-[var(--aethel-primary)]"
         />
       </div>
@@ -87,7 +87,7 @@ export function IntelliSense({ suggestions = [], onSuggestionSelect, visible = t
       <div className="max-h-64 overflow-auto py-1">
         {filteredSuggestions.length === 0 ? (
           <div className="px-4 py-8 text-center text-[var(--aethel-text-tertiary)] text-sm">
-            {suggestions.length === 0 ? 'Integração Monaco pendente' : 'Nenhuma sugestão encontrada'}
+            {suggestions.length === 0 ? 'Monaco integration pending' : 'No suggestions found'}
           </div>
         ) : (
           filteredSuggestions.map((suggestion, index) => (
@@ -127,11 +127,11 @@ export function IntelliSense({ suggestions = [], onSuggestionSelect, visible = t
         </div>
         <div className="flex items-center gap-2 text-[10px] text-[var(--aethel-text-tertiary)]">
           <FileText className="w-3 h-3" />
-          <span>Documentação</span>
+          <span>Documentation</span>
         </div>
       </div>
     </div>
   )
 }
 
-// Sugestões reais devem ser fornecidas pelo Monaco/LSP.
+// Suggestions reais devem ser fornecidas pelo Monaco/LSP.

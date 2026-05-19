@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
 import { requireAuth } from '@/lib/auth-server';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // =============================================================================
 // GOD VIEW SESSIONS API
 // =============================================================================
+
+const log = createComponentLogger('api/admin/god-view/sessions/route');
 
 async function handler(req: NextRequest) {
   try {
@@ -80,7 +83,7 @@ async function handler(req: NextRequest) {
     });
     
   } catch (error) {
-    console.error('[God View] Error:', error);
+    log.error('[God View] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch live sessions' },
       { status: 500 }
@@ -199,7 +202,7 @@ async function updateSessionHandler(req: NextRequest) {
     return NextResponse.json({ success: true });
     
   } catch (error) {
-    console.error('[Session Update] Error:', error);
+    log.error('[Session Update] Error', error);
     return NextResponse.json(
       { error: 'Failed to update session' },
       { status: 500 }
@@ -236,7 +239,7 @@ async function endSessionHandler(req: NextRequest) {
     return NextResponse.json({ success: true });
     
   } catch (error) {
-    console.error('[Session End] Error:', error);
+    log.error('[Session End] Error', error);
     return NextResponse.json(
       { error: 'Failed to end session' },
       { status: 500 }

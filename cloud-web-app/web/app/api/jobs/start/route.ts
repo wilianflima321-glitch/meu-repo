@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/jobs/start/route');
 
 function isUnauthorizedError(error: unknown): boolean {
   return error instanceof Error && error.message === 'Unauthorized';
@@ -49,9 +52,9 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
-    console.error('Erro ao iniciar fila:', error);
+    routeLogger.error('Error starting queue:', error);
     return NextResponse.json(
-      { error: 'Erro interno ao iniciar fila' },
+      { error: 'Internal error starting queue' },
       { status: 500 }
     );
   }
@@ -103,9 +106,9 @@ export async function GET(request: NextRequest) {
         { status: 503 }
       );
     }
-    console.error('Erro ao buscar status da fila:', error);
+    routeLogger.error('Error fetching queue status:', error);
     return NextResponse.json(
-      { error: 'Falha ao buscar status da fila' },
+      { error: 'Failed to fetch queue status' },
       { status: 500 }
     );
   }

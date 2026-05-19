@@ -5,6 +5,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/git/status/route');
 
 const execAsync = promisify(exec);
 
@@ -95,7 +98,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Git status failed:', error);
+    routeLogger.error('Git status failed:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return NextResponse.json(

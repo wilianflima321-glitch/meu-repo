@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import crypto from 'crypto';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/projects/[id]/share/route');
 
 interface ShareConfig {
   type: 'link' | 'email' | 'team';
@@ -25,7 +28,7 @@ export async function POST(
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Não autorizado' },
+        { error: 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -36,7 +39,7 @@ export async function POST(
 
     if (!type || !permissions) {
       return NextResponse.json(
-        { error: 'Tipo de compartilhamento e permissões são obrigatórios' },
+        { error: 'Sharing type and permissions are required' },
         { status: 400 }
       );
     }
@@ -62,21 +65,21 @@ export async function POST(
     } else if (type === 'email' && emails) {
       // Em produção, enviar emails
       shareResult.invitedEmails = emails;
-      shareResult.message = `Convites enviados para ${emails.length} usuário(s)`;
+      shareResult.message = `Invites sent to ${emails.length} user(s)`;
     } else if (type === 'team' && teamId) {
       shareResult.teamId = teamId;
-      shareResult.message = 'Projeto compartilhado com o time';
+      shareResult.message = 'Project shared with the team';
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Projeto compartilhado com sucesso',
+      message: 'Project shared successfully',
       share: shareResult,
     });
   } catch (error) {
-    console.error('Erro ao compartilhar projeto:', error);
+    routeLogger.error('Error sharing project:', error);
     return NextResponse.json(
-      { error: 'Falha ao compartilhar projeto' },
+      { error: 'Failed to share project' },
       { status: 500 }
     );
   }
@@ -91,7 +94,7 @@ export async function GET(
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Não autorizado' },
+        { error: 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -116,9 +119,9 @@ export async function GET(
       totalShares: shares.length,
     });
   } catch (error) {
-    console.error('Erro ao buscar compartilhamentos:', error);
+    routeLogger.error('Error fetching shares:', error);
     return NextResponse.json(
-      { error: 'Falha ao buscar compartilhamentos' },
+      { error: 'Failed to fetch shares' },
       { status: 500 }
     );
   }

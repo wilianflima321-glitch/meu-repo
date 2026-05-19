@@ -13,6 +13,9 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { readdir, stat } from 'fs/promises';
 import { join, extname, basename } from 'path';
 import { existsSync } from 'fs';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/projects/[id]/assets/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -187,7 +190,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Get project assets error:', error);
+    routeLogger.error('Get project assets error:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -233,7 +236,7 @@ async function scanDirectory(dir: string, projectId: string, relativePath = ''):
       }
     }
   } catch (error) {
-    console.error('Error scanning directory:', error);
+    routeLogger.error('Error scanning directory:', error);
   }
   
   return assets;

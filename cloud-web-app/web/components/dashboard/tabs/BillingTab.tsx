@@ -220,7 +220,7 @@ function PlanCard({
             <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">{formatTokenLimit(plan.limits.requests)}</p>
           </div>
           <div className="rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-3">
-            <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Projetos</p>
+            <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Projects</p>
             <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">{formatLimitValue(plan.limits.projects)}</p>
           </div>
           <div className="rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-3">
@@ -418,7 +418,7 @@ export function BillingTab({
           <Card variant="elevated" padding="md" className="flex items-center gap-3">
             <Rocket className="w-5 h-5 text-[var(--aethel-info)]" />
             <div>
-              <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">Ativacao rapida</p>
+              <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">Quick activation</p>
               <p className="text-xs text-[var(--aethel-text-secondary)]">Mudancas dependem de checkout e webhook prontos.</p>
             </div>
           </Card>
@@ -436,7 +436,7 @@ export function BillingTab({
         <Card variant="bordered" padding="md" className="border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="text-sm font-semibold text-[var(--aethel-warning-light)]">Checkout ainda nao esta pronto</p>
+              <p className="text-sm font-semibold text-[var(--aethel-warning-light)]">Checkout is not ready yet</p>
               <p className="mt-1 text-xs text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
                 As rotas existem, mas o runtime ainda reporta readiness parcial.
               </p>
@@ -453,12 +453,12 @@ export function BillingTab({
                 </div>
               ) : null}
               <ul className="mt-3 list-disc space-y-1 pl-4 text-xs text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
-                {billingReadiness.gateway?.checkoutEnabled === false && <li>Checkout desabilitado na configuracao do gateway.</li>}
+                {billingReadiness.gateway?.checkoutEnabled === false && <li>Checkout is disabled in the gateway configuration.</li>}
                 {billingReadiness.gateway?.activeGateway !== 'stripe' && (
-                  <li>Gateway ativo: {billingReadiness.gateway?.activeGateway || 'unknown'}.</li>
+                  <li>Active gateway: {billingReadiness.gateway?.activeGateway || 'unknown'}.</li>
                 )}
-                {billingReadiness.portalReady === false && <li>Portal de assinatura nao esta pronto neste runtime.</li>}
-                {billingReadiness.webhookReady === false && <li>Webhook nao esta pronto, eventos nao devem ser tratados como ativos.</li>}
+                {billingReadiness.portalReady === false && <li>Subscription portal is not ready in this runtime.</li>}
+                {billingReadiness.webhookReady === false && <li>Webhook is not ready; events should not be treated as active.</li>}
                 {billingReadiness.stripe?.missingEnv?.map((envKey) => (
                   <li key={envKey}>Missing {envKey}.</li>
                 ))}
@@ -483,7 +483,7 @@ export function BillingTab({
               {billingReadiness.instructions?.length ? (
                 <div className="mt-4 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_20%,transparent)] p-3">
                   <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
-                    Proximas acoes
+                    Next actions
                   </p>
                   <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
                     {billingReadiness.instructions.map((instruction) => (
@@ -520,7 +520,7 @@ export function BillingTab({
               <p className="mt-1 text-xs text-[color-mix(in_srgb,var(--aethel-error)_80%,transparent)]">{billingActionError}</p>
             </div>
             <Badge variant="error" size="sm">
-              acao bloqueada
+              action blocked
             </Badge>
           </div>
         </Card>
@@ -539,11 +539,11 @@ export function BillingTab({
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--aethel-text-secondary)]">
                   {subscriptionState ? (
                     <Badge variant={subscriptionState === 'active' ? 'success' : 'info'} size="sm">
-                      assinatura: {subscriptionState}
+                      subscription: {subscriptionState}
                     </Badge>
                   ) : (
                     <Badge variant="secondary" size="sm">
-                      sem assinatura ativa
+                      no active subscription
                     </Badge>
                   )}
                   {currentPeriodEnd && <span>Renova em {currentPeriodEnd}</span>}
@@ -556,7 +556,7 @@ export function BillingTab({
               disabled={billingReadiness?.portalReady === false}
               onClick={handleManageSubscription}
             >
-              {billingReadiness?.portalReady === false ? 'Portal indisponivel' : 'Gerenciar assinatura'}
+              {billingReadiness?.portalReady === false ? 'Portal unavailable' : 'Manage subscription'}
             </Button>
           </div>
         </Card>
@@ -575,7 +575,7 @@ export function BillingTab({
             const actionLabel = isEnterprisePlan
               ? 'Falar com vendas'
               : isCheckoutBlocked
-                ? 'Checkout indisponivel'
+                ? 'Checkout unavailable'
                 : plan.price === 0
                 ? 'Comecar gratis'
                 : 'Assinar'
@@ -607,7 +607,7 @@ export function BillingTab({
           <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-4">FAQ</h3>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-[var(--aethel-text-primary)] mb-2">Posso cancelar a qualquer momento?</h4>
+              <h4 className="font-medium text-[var(--aethel-text-primary)] mb-2">Can I cancel at any time?</h4>
               <p className="text-sm text-[var(--aethel-text-secondary)]">
                 Sim. O cancelamento segue o estado real do Stripe e vale no fim do periodo vigente.
               </p>
@@ -625,9 +625,9 @@ export function BillingTab({
               </p>
             </div>
             <div>
-              <h4 className="font-medium text-[var(--aethel-text-primary)] mb-2">Quais metodos de pagamento estao ativos?</h4>
+              <h4 className="font-medium text-[var(--aethel-text-primary)] mb-2">Quais metodos de pagamento estao actives?</h4>
               <p className="text-sm text-[var(--aethel-text-secondary)]">
-                O readiness publico reflete o estado real do gateway. So considere ativo quando checkout e webhook estiverem verdes.
+                Public readiness reflects the real gateway state. Consider it active only when checkout and webhook are green.
               </p>
             </div>
           </div>

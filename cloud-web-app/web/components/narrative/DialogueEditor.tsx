@@ -14,7 +14,7 @@
  * - Localization support
  * - Audio cue linking
  * - Real-time preview
- * - Exportar to runtime format
+ * - Export to runtime format
  */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
@@ -148,13 +148,13 @@ const DEFAULT_VARIABLES: DialogueVariable[] = [
 export interface DialogueEditorProps {
   dialogueId?: string;
   onSave?: (nodes: Node<DialogueNodeData>[], edges: Edge[]) => void;
-  onExportar?: (format: 'json' | 'yarn' | 'ink') => void;
+  onExport?: (format: 'json' | 'yarn' | 'ink') => void;
 }
 
 export default function DialogueEditor({
   dialogueId,
   onSave,
-  onExportar,
+  onExport,
 }: DialogueEditorProps) {
   // Flow state
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -353,11 +353,11 @@ export default function DialogueEditor({
           {/* Actions */}
           <Panel position="top-right" className="flex gap-2">
             <button type="button"
-              onClick={() => onExportar?.('json')}
+              onClick={() => onExport?.('json')}
               className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
             >
               <Download className="w-4 h-4" />
-              Exportar
+              Export
             </button>
             <button type="button"
               className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"

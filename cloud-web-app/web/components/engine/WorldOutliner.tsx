@@ -64,7 +64,7 @@ export interface WorldOutlinerProps {
   onSelectionChange?: (selecionados: SceneObject[]) => void;
   onObjectChange?: (object: SceneObject) => void;
   onCreateObject?: (type: SceneObjectType, parent?: SceneObject) => void;
-  onExcluirObject?: (object: SceneObject) => void;
+  onDeleteObject?: (object: SceneObject) => void;
   onFocarObject?: (object: SceneObject) => void;
   onReparentObject?: (object: SceneObject, newParent: SceneObject | null) => void;
 }
@@ -74,7 +74,7 @@ export default function WorldOutliner({
   onSelectionChange,
   onObjectChange,
   onCreateObject,
-  onExcluirObject,
+  onDeleteObject,
   onFocarObject,
   onReparentObject,
 }: WorldOutlinerProps) {
@@ -401,7 +401,7 @@ export default function WorldOutliner({
 
       case 'delete':
         if (object) {
-          onExcluirObject?.(object);
+          onDeleteObject?.(object);
           setObjects(prev => {
             const removeFromTree = (items: SceneObject[]): SceneObject[] => {
               return items.filter(item => {
@@ -442,7 +442,7 @@ export default function WorldOutliner({
         onCreateObject?.('trigger');
         break;
     }
-  }, [contextMenu, handleToggleVisibility, handleToggleBloquear, onFocarObject, onExcluirObject, onCreateObject]);
+  }, [contextMenu, handleToggleVisibility, handleToggleBloquear, onFocarObject, onDeleteObject, onCreateObject]);
 
   const handleCollapseAll = useCallback(() => {
     setExpandedIds(new Set());
@@ -522,7 +522,7 @@ export default function WorldOutliner({
             color: 'var(--aethel-text-quaternary)',
           }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>🌐</div>
-            <div>Nenhum objeto na cena</div>
+            <div>No objeto na cena</div>
           </div>
         )}
       </div>

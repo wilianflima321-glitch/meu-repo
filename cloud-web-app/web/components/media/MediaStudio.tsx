@@ -441,7 +441,7 @@ export default function MediaStudio({
       canvas.width = width
       canvas.height = height
       const ctx = canvas.getContext('2d')
-      if (!ctx) throw new Error('Canvas 2D indisponível')
+      if (!ctx) throw new Error('Canvas 2D inavailable')
 
       setExportStatus('Loading media...')
 
@@ -486,7 +486,7 @@ export default function MediaStudio({
         if (kind === 'video') await ensureVideoEl(c.source as string)
       }
 
-      setExportStatus('Preparando áudio...')
+      setExportStatus('Preparing audio...')
       const audioContext = new AudioContext()
       const destination = audioContext.createMediaStreamDestination()
       const masterGain = audioContext.createGain()

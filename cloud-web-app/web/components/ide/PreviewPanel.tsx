@@ -122,9 +122,9 @@ function buildCssPreview(css: string): string {
 <body>
   <div class="app">
     <div class="card">
-      <h2>Previa CSS do Aethel</h2>
-      <p>Arquivo CSS aplicado a um template de teste.</p>
-      <button type="button" class="btn">Botao de teste</button>
+      <h2>Aethel CSS preview</h2>
+      <p>CSS file applied to a test template.</p>
+      <button type="button" class="btn">Test button</button>
     </div>
   </div>
 </body>
@@ -144,8 +144,8 @@ function buildJavaScriptPreview(source: string): string {
   </style>
 </head>
 <body>
-  <div id="app">Runtime JS inicializado.</div>
-  <pre id="log">Log do runtime:</pre>
+  <div id="app">JavaScript runtime initialized.</div>
+  <pre id="log">Runtime log:</pre>
   <script>
     const logNode = document.getElementById('log');
     const runtimeConsole = globalThis['console'];
@@ -186,8 +186,8 @@ function buildTypeScriptPreview(source: string, extension: string): string {
   </style>
 </head>
 <body>
-  <div id="app">Runtime TypeScript inicializado.</div>
-  <pre id="log">Log do runtime:</pre>
+  <div id="app">TypeScript runtime initialized.</div>
+  <pre id="log">Runtime log:</pre>
   <script>
     const logNode = document.getElementById('log');
     const runtimeConsole = globalThis['console'];
@@ -245,7 +245,7 @@ function resolvePreviewMode(filePath?: string): PreviewMode {
 }
 
 export default function PreviewPanel({
-  title = 'Previa',
+  title = 'Preview',
   filePath,
   content,
   html,
@@ -356,9 +356,9 @@ export default function PreviewPanel({
           {forceInlineFallback && runtimeUrl && (
             <span
               className="rounded border border-[color-mix(in_srgb,var(--aethel-error)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-1.5 py-0.5 text-[10px] normal-case text-[var(--aethel-error-light)]"
-              title={runtimeUnavailableReason || 'Runtime indisponivel'}
+              title={runtimeUnavailableReason || 'Runtime unavailable'}
             >
-              runtime:indisponivel
+              runtime:unavailable
             </span>
           )}
           {isStale && (
@@ -367,25 +367,25 @@ export default function PreviewPanel({
             </span>
           )}
         </div>
-        <button type="button" aria-label={canUseDevRuntime ? 'Atualizar preview em runtime de desenvolvimento' : 'Atualizar preview'}
+        <button type="button" aria-label={canUseDevRuntime ? 'Refresh preview em runtime de desenvolvimento' : 'Refresh preview'}
           onClick={() => {
             if (canUseDevRuntime) setRuntimeReloadTick((prev) => prev + 1)
             onRefresh?.()
           }}
           disabled={!onRefresh && !canUseDevRuntime}
           className="flex items-center gap-1 rounded px-2 py-1 text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)]"
-          title="Atualizar preview"
+          title="Refresh preview"
         >
           <Codicon name="refresh" />
-          Atualizar
+          Refresh
         </button>
       </div>
 
       <div className="flex-1 bg-[var(--aethel-surface-secondary)]">
         {forceInlineFallback && runtimeUrl && (
           <div className={PREVIEW_NOTICE_CLASS} role="status" aria-live="polite">
-            Runtime externo indisponivel. Fallback inline ativo (recursos de runtime desabilitados).
-            {runtimeUnavailableReason ? ` Motivo: ${runtimeUnavailableReason}.` : ''}
+            External runtime unavailable. Inline fallback active (runtime features disabled).
+            {runtimeUnavailableReason ? ` Reason: ${runtimeUnavailableReason}.` : ''}
           </div>
         )}
         {canUseDevRuntime && (
@@ -448,7 +448,7 @@ export default function PreviewPanel({
         {showMedia && mediaLoadError && (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
             <div className={PREVIEW_STATE_SHELL_CLASS}>
-              <div className={PREVIEW_STATE_TITLE_CLASS}>Preview de midia indisponivel</div>
+              <div className={PREVIEW_STATE_TITLE_CLASS}>Media preview unavailable</div>
               <div className={PREVIEW_STATE_COPY_CLASS}>{mediaLoadError}</div>
               <div className={`${PREVIEW_STATE_COPY_CLASS} mt-2`}>
                 Capacidade em estado parcial. Valide codecs e suporte do runtime no ambiente final.
@@ -460,7 +460,7 @@ export default function PreviewPanel({
         {mode === 'unsupported' && (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
             <div className={`${PREVIEW_STATE_SHELL_CLASS} max-w-md`}>
-              <div className={PREVIEW_STATE_TITLE_CLASS}>Preview ainda nao suportado para este tipo de arquivo</div>
+              <div className={PREVIEW_STATE_TITLE_CLASS}>Preview is not supported for this file type yet</div>
               <div className={PREVIEW_STATE_COPY_CLASS}>
                 A extensao &quot;{ext || 'desconhecida'}&quot; ainda esta fora do escopo validado de preview.
               </div>
@@ -473,10 +473,10 @@ export default function PreviewPanel({
             <div className={PREVIEW_STATE_SHELL_CLASS}>
               <div className={PREVIEW_STATE_TITLE_CLASS}>Preview bloqueado para payload grande</div>
               <div className={PREVIEW_STATE_COPY_CLASS}>
-                Este arquivo excede o limite validado de preview inline ({MAX_INLINE_PREVIEW_CHARS.toLocaleString()} chars).
+                This file exceeds the validated inline preview limit ({MAX_INLINE_PREVIEW_CHARS.toLocaleString()} chars).
               </div>
               <div className={`${PREVIEW_STATE_COPY_CLASS} mt-2`}>
-                Capacidade em estado parcial. Use execucao em runtime ou abra um arquivo menor e mais focado.
+                Capability is partially available. Use runtime execution or open a smaller, more focused file.
               </div>
             </div>
           </div>
@@ -485,9 +485,9 @@ export default function PreviewPanel({
         {!hasText && !showMedia && mode !== 'unsupported' && (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
             <div className={`${PREVIEW_STATE_SHELL_CLASS} max-w-md`}>
-              <div className={PREVIEW_STATE_TITLE_CLASS}>Preview ainda nao disponivel</div>
+              <div className={PREVIEW_STATE_TITLE_CLASS}>Preview is not available yet</div>
               <div className={PREVIEW_STATE_COPY_CLASS}>
-                Abra um arquivo no Explorer para renderizar o preview.
+                Open a file in Explorer to render the preview.
               </div>
             </div>
           </div>
@@ -496,8 +496,8 @@ export default function PreviewPanel({
         {showMedia && !rawAssetUrl && (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
             <div className={`${PREVIEW_STATE_SHELL_CLASS} max-w-md`}>
-              <div className={PREVIEW_STATE_TITLE_CLASS}>Preview de midia indisponivel</div>
-              <div className={PREVIEW_STATE_COPY_CLASS}>Faltou o caminho da midia para este contexto de preview.</div>
+              <div className={PREVIEW_STATE_TITLE_CLASS}>Media preview unavailable</div>
+              <div className={PREVIEW_STATE_COPY_CLASS}>The media path is missing for this preview context.</div>
             </div>
           </div>
         )}

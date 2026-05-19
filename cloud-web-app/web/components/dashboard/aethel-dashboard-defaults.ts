@@ -3,60 +3,60 @@ import type { Project, UseCase, WorkflowTemplate } from './aethel-dashboard-mode
 export const DEFAULT_WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
   {
     id: '1',
-    name: 'Assistente de pesquisa com IA',
-    description: 'Fluxo multiagente para coletar, resumir e reportar descobertas',
-    category: 'Pesquisa',
+    name: 'AI research assistant',
+    description: 'Multi-agent flow to collect, summarize, and report findings',
+    category: 'Research',
     difficulty: 'intermediate',
     steps: [
-      'Definir escopo e fontes confiáveis',
-      'Coletar e consolidar evidências',
-      'Revisar inconsistências e riscos',
-      'Publicar sumário executivo',
+      'Define scope and trusted sources',
+      'Collect and consolidate evidence',
+      'Review inconsistencies and risks',
+      'Publish executive summary',
     ],
     nodes: [],
     edges: [],
   },
   {
     id: '2',
-    name: 'Pipeline de dados',
-    description: 'Processamento e visualizacao de dados ponta a ponta',
-    category: 'Ciencia de Dados',
+    name: 'Data pipeline',
+    description: 'End-to-end data processing and visualization',
+    category: 'Data science',
     difficulty: 'advanced',
     steps: [
-      'Ingestão e validação de dados',
-      'Transformação e enriquecimento',
-      'Geração de métricas e dashboards',
-      'Automação de alertas de qualidade',
+      'Data ingestion and validation',
+      'Transformation and enrichment',
+      'Metric and dashboard generation',
+      'Quality alert automation',
     ],
     nodes: [],
     edges: [],
   },
   {
     id: '3',
-    name: 'Suite de criacao de conteudo',
-    description: 'Geracao e edicao de conteudo em multiplas etapas',
-    category: 'Criativo',
+    name: 'Content creation suite',
+    description: 'Multi-step content generation and editing',
+    category: 'Creative',
     difficulty: 'beginner',
     steps: [
-      'Definir objetivo editorial',
-      'Gerar variações com IA',
-      'Refinar tom e consistência',
-      'Exportar para publicação',
+      'Define editorial goal',
+      'Generate AI variations',
+      'Refine tone and consistency',
+      'Export for publication',
     ],
     nodes: [],
     edges: [],
   },
   {
     id: '4',
-    name: 'Pesquisa e analise',
-    description: 'Fluxo completo de pesquisa e analise',
-    category: 'Pesquisa',
+    name: 'Research e analysis',
+    description: 'Complete research and analysis flow',
+    category: 'Research',
     difficulty: 'intermediate',
     steps: [
-      'Mapear hipótese e critérios',
-      'Executar coleta e triagem',
-      'Consolidar benchmark',
-      'Definir próximos passos',
+      'Map hypothesis and criteria',
+      'Run collection and triage',
+      'Consolidate benchmark',
+      'Define next steps',
     ],
     nodes: [],
     edges: [],
@@ -66,52 +66,52 @@ export const DEFAULT_WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
 export const DEFAULT_USE_CASES: UseCase[] = [
   {
     id: '1',
-    name: 'Criar um dashboard em React',
-    description: 'Fluxo completo para criar um dashboard moderno em React com assistencia de IA',
-    category: 'Desenvolvimento',
+    name: 'Create a React dashboard',
+    description: 'Complete flow to create a modern React dashboard with AI assistance',
+    category: 'Development',
     difficulty: 'beginner',
-    features: ['Planejamento guiado', 'Código validado', 'Preview integrado', 'Checklist de QA'],
-    sharedBy: 'Comunidade',
+    features: ['Guided planning', 'Validated code', 'Integrated preview', 'QA checklist'],
+    sharedBy: 'Community',
     views: 1250,
     likes: 89,
-    tags: ['React', 'Painel', 'Front-end'],
+    tags: ['React', 'Dashboard', 'Front-end'],
     preview: 'https://example.com/preview1.png',
-    title: 'Criar um dashboard em React',
+    title: 'Create a React dashboard',
   },
   {
     id: '2',
-    name: 'Suite de visualizacao de dados',
-    description: 'Pipeline de analise e visualizacao de dados ponta a ponta',
-    category: 'Ciencia de Dados',
+    name: 'Data visualization suite',
+    description: 'End-to-end analysis and data visualization pipeline',
+    category: 'Data science',
     difficulty: 'intermediate',
-    features: ['Ingestão de dados', 'Modelagem', 'Visualização', 'Exportação'],
+    features: ['Data ingestion', 'Modeling', 'Visualization', 'Export'],
     sharedBy: 'EspecialistaDados',
     views: 890,
     likes: 67,
-    tags: ['Python', 'Visualizacao', 'Analises'],
+    tags: ['Python', 'Visualization', 'Analytics'],
     preview: 'https://example.com/preview2.png',
-    title: 'Suite de visualizacao de dados',
+    title: 'Data visualization suite',
   },
   {
     id: '3',
-    name: 'Estrategia de marketing de conteudo',
-    description: 'Criacao de conteudo com IA e desenvolvimento de estrategia de marketing',
+    name: 'Content marketing strategy',
+    description: 'AI content creation and marketing strategy development',
     category: 'Marketing',
     difficulty: 'advanced',
-    features: ['Pesquisa de mercado', 'Calendário editorial', 'Produção em lote', 'Métricas de conversão'],
+    features: ['Market research', 'Editorial calendar', 'Batch production', 'Conversion metrics'],
     sharedBy: 'MarketingPro',
     views: 2100,
     likes: 145,
-    tags: ['Marketing', 'Conteudo', 'Estrategia'],
+    tags: ['Marketing', 'Content', 'Strategy'],
     preview: 'https://example.com/preview3.png',
-    title: 'Estrategia de marketing de conteudo',
+    title: 'Content marketing strategy',
   },
 ]
 
 export const DEFAULT_PROJECTS: Project[] = [
-  { id: 1, name: 'Estudio de Conteudo IA', type: 'code', status: 'active' },
-  { id: 2, name: 'Hub do Metaverso', type: 'unreal', status: 'active' },
-  { id: 3, name: 'Funil de automacao', type: 'web', status: 'planning' },
+  { id: 1, name: 'Estudio de Content IA', type: 'code', status: 'active' },
+  { id: 2, name: 'Metaverse Hub', type: 'unreal', status: 'active' },
+  { id: 3, name: 'Automation funnel', type: 'web', status: 'planning' },
 ]
 
 export const HEALTH_KEY = 'health::status'
@@ -125,34 +125,34 @@ const CHAT_THREAD_KEY_BASE = 'chat::activeThreadId'
 const COPILOT_WORKFLOW_KEY_BASE = 'copilot::activeWorkflowId'
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'pendente',
-  processing: 'processando',
-  paid: 'pago',
-  succeeded: 'confirmado',
-  success: 'confirmado',
-  completed: 'concluido',
-  failed: 'falhou',
-  canceled: 'cancelado',
-  cancelled: 'cancelado',
-  awaiting_settlement: 'aguardando liquidacao',
-  refunded: 'reembolsado',
-  requires_action: 'requer acao',
-  requires_payment_method: 'requer metodo de pagamento',
-  requires_confirmation: 'requer confirmacao',
-  requires_capture: 'requer captura',
+  pending: 'pending',
+  processing: 'processing',
+  paid: 'paid',
+  succeeded: 'confirmed',
+  success: 'confirmed',
+  completed: 'completed',
+  failed: 'failed',
+  canceled: 'canceled',
+  cancelled: 'canceled',
+  awaiting_settlement: 'awaiting settlement',
+  refunded: 'refunded',
+  requires_action: 'requires action',
+  requires_payment_method: 'requires payment method',
+  requires_confirmation: 'requires confirmation',
+  requires_capture: 'requires capture',
 }
 
 const CONNECTIVITY_STATUS_LABELS: Record<string, string> = {
-  healthy: 'saudavel',
-  degraded: 'degradado',
-  down: 'indisponivel',
-  unavailable: 'indisponivel',
-  unknown: 'desconhecido',
+  healthy: 'healthy',
+  degraded: 'degraded',
+  down: 'unavailable',
+  unavailable: 'unavailable',
+  unknown: 'unknown',
 }
 
 export function formatStatusLabel(rawStatus: unknown) {
   if (typeof rawStatus !== 'string' || !rawStatus.trim()) {
-    return 'confirmado'
+    return 'confirmed'
   }
   const normalized = rawStatus.toLowerCase()
   return STATUS_LABELS[normalized] ?? rawStatus
@@ -168,10 +168,10 @@ export function formatConnectivityStatus(rawStatus?: string | null) {
 
 export function formatCurrencyLabel(currency?: string | null) {
   if (!currency) {
-    return 'creditos'
+    return 'credits'
   }
   if (currency.toLowerCase() === 'credits') {
-    return 'creditos'
+    return 'credits'
   }
   return currency
 }

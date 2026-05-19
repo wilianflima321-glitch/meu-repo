@@ -104,10 +104,10 @@ export function useProjectsDashboardController() {
 
   const handleDeleteProject = useCallback(async (projectId: string) => {
     const shouldDelete = await openConfirmDialog({
-      title: 'Excluir projeto',
-      message: 'Tem certeza que deseja excluir este projeto?',
-      confirmText: 'Excluir',
-      cancelText: 'Cancelar',
+      title: 'Delete project',
+      message: 'Are you sure you want to delete this project?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
     });
 
     if (!shouldDelete) return;
@@ -121,7 +121,7 @@ export function useProjectsDashboardController() {
     setFilterType('all');
   }, []);
 
-  const resultsLabel = `${filteredProjects.length} ${filteredProjects.length === 1 ? 'projeto' : 'projetos'}`;
+  const resultsLabel = `${filteredProjects.length} ${filteredProjects.length === 1 ? 'project' : 'projects'}`;
 
   return {
     filteredProjects,

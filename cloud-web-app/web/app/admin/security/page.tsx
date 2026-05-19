@@ -54,14 +54,14 @@ export default function AdminSecurity() {
       });
       if (!res.ok) {
         const payload = await res.json().catch(() => null);
-        throw new Error(payload?.message || payload?.error || 'Falha ao carregar seguranca');
+        throw new Error(payload?.message || payload?.error || 'Failed to load seguranca');
       }
       const json = await res.json();
       setData(json);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar seguranca');
+      setError(err instanceof Error ? err.message : 'Error loading seguranca');
     } finally {
       setLoading(false);
     }
@@ -85,8 +85,8 @@ export default function AdminSecurity() {
     <div className='p-6 max-w-6xl mx-auto'>
       <AdminPageHeader
         className='mb-6'
-        title='Segurança e logs'
-        subtitle='Visão operacional de hardening, eventos críticos e trilha de auditoria.'
+        title='Security and logs'
+        subtitle='Operational view of hardening, critical events, and audit trail.'
         meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
         actions={(
           <button type="button"
@@ -129,9 +129,9 @@ export default function AdminSecurity() {
       />
 
       <div className='mb-6 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
-        <h2 className='text-xl font-semibold mb-4'>Configuracoes de Seguranca</h2>
+        <h2 className='text-xl font-semibold mb-4'>Security settings</h2>
         {loading ? (
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando configuracoes...</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Loading settings...</p>
         ) : (
           <div className='space-y-3'>
             <div className='flex items-center justify-between'>
@@ -144,7 +144,7 @@ export default function AdminSecurity() {
                   data?.settings.enforce2FA ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                 }`}
               >
-                {data?.settings.enforce2FA ? 'Ativo' : 'Inativo'}
+                {data?.settings.enforce2FA ? 'Active' : 'Inactive'}
               </span>
             </div>
             <div className='flex items-center justify-between'>
@@ -157,7 +157,7 @@ export default function AdminSecurity() {
                   data?.settings.blockSuspiciousIps ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                 }`}
               >
-                {data?.settings.blockSuspiciousIps ? 'Ativo' : 'Inativo'}
+                {data?.settings.blockSuspiciousIps ? 'Active' : 'Inactive'}
               </span>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function AdminSecurity() {
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando logs...</td>
+                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Loading logs...</td>
               </tr>
             ) : filteredLogs.length === 0 ? (
               <tr>

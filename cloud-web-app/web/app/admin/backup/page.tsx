@@ -23,12 +23,12 @@ export default function Backup() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/backup');
-      if (!res.ok) throw new Error('Falha ao carregar backups');
+      if (!res.ok) throw new Error('Failed to load backups');
       const json = await res.json();
       setBackups(json.items || []);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar backups');
+      setError(err instanceof Error ? err.message : 'Error loading backups');
     } finally {
       setLoading(false);
     }
@@ -46,11 +46,11 @@ export default function Backup() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description }),
       });
-      if (!res.ok) throw new Error('Falha ao solicitar backup');
+      if (!res.ok) throw new Error('Failed to request backup');
       setDescription('');
       await fetchBackups();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao solicitar backup');
+      setError(err instanceof Error ? err.message : 'Error requesting backup');
     } finally {
       setWorking(false);
     }
@@ -64,9 +64,9 @@ export default function Backup() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ backupId }),
       });
-      if (!res.ok) throw new Error('Falha ao solicitar restauração');
+      if (!res.ok) throw new Error('Failed to request restore');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao solicitar restauração');
+      setError(err instanceof Error ? err.message : 'Error requesting restore');
     } finally {
       setWorking(false);
     }
@@ -83,8 +83,8 @@ export default function Backup() {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-bold'>Backup e recuperação</h1>
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Controle de backups com auditoria e restauração controlada.</p>
+          <h1 className='text-3xl font-bold'>Backup and recovery</h1>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Backup control with auditing and controlled restore.</p>
         </div>
         <button type="button" onClick={fetchBackups} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
       </div>
@@ -100,7 +100,7 @@ export default function Backup() {
         <div className='flex flex-col md:flex-row gap-3'>
           <input
             className='border p-2 rounded text-sm flex-1'
-            placeholder='Descrição do backup (opcional)'
+            placeholder='Description do backup (opcional)'
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -117,13 +117,13 @@ export default function Backup() {
             <th className='p-2 text-left'>Data</th>
             <th className='p-2 text-left'>Tamanho</th>
             <th className='p-2 text-left'>Status</th>
-            <th className='p-2 text-left'>Ações</th>
+            <th className='p-2 text-left'>Actions</th>
           </tr>
         </thead>
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando backups...</td>
+              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Loading backups...</td>
             </tr>
           ) : backups.length === 0 ? (
             <tr>
@@ -147,7 +147,7 @@ export default function Backup() {
                       Baixar
                     </a>
                   ) : (
-                    <span className='text-xs text-[var(--aethel-text-tertiary)] mr-2'>Sem arquivo</span>
+                    <span className='text-xs text-[var(--aethel-text-tertiary)] mr-2'>No file</span>
                   )}
                   <button type="button"
                     onClick={() => requestRestore(b.id)}

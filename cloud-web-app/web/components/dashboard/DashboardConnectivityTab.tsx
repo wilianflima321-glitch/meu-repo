@@ -45,8 +45,8 @@ export function DashboardConnectivityTab({
     <div className={`${CANONICAL_SPACING.page.padding} space-y-6`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className={CANONICAL_TYPOGRAPHY.h1}>Monitor de conectividade</h2>
-        <button type="button" onClick={onRefreshConnectivity} aria-label="Atualizar monitor de conectividade" className={secondaryButtonClass}>
-          Atualizar
+        <button type="button" onClick={onRefreshConnectivity} aria-label="Refresh monitor de conectividade" className={secondaryButtonClass}>
+          Refresh
         </button>
       </div>
 
@@ -68,7 +68,7 @@ export function DashboardConnectivityTab({
               </p>
             </div>
             <div className="text-sm text-[var(--aethel-text-secondary)]">
-              Atualizado em {connectivityData.timestamp ? new Date(connectivityData.timestamp).toLocaleString() : '—'}
+              Updated at {connectivityData.timestamp ? new Date(connectivityData.timestamp).toLocaleString() : '—'}
             </div>
           </div>
 

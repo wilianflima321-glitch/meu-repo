@@ -96,21 +96,21 @@ export function DashboardWalletTab({
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Wallet</p>
-          <h2 className={CANONICAL_TYPOGRAPHY.h1}>Carteira</h2>
+          <h2 className={CANONICAL_TYPOGRAPHY.h1}>Wallet</h2>
         </div>
         {authReady && hasToken && (
-          <button type="button" onClick={onRefreshWallet} className={secondaryButtonClass} aria-label="Atualizar carteira">
-            Atualizar
+          <button type="button" onClick={onRefreshWallet} className={secondaryButtonClass} aria-label="Refresh wallet">
+            Refresh
           </button>
         )}
       </div>
 
-      {!authReady && <p className="text-sm text-[var(--aethel-text-secondary)]">Verificando autenticacao...</p>}
+      {!authReady && <p className="text-sm text-[var(--aethel-text-secondary)]">Checking authentication...</p>}
 
       {authReady && !hasToken && (
         <div className={`${panelClass} max-w-2xl`}>
           <p className="text-sm text-[var(--aethel-text-secondary)]">
-            Para visualizar o saldo e realizar operacoes, faca login no portal.
+            Sign in to view the balance and perform wallet operations.
           </p>
         </div>
       )}
@@ -119,7 +119,7 @@ export function DashboardWalletTab({
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className={`${panelClass} space-y-4`}>
             <div>
-              <h3 className="text-lg font-semibold">Saldo Atual</h3>
+              <h3 className="text-lg font-semibold">Current balance</h3>
               {walletLoading && <p className="text-sm text-[var(--aethel-text-secondary)]">Loading wallet...</p>}
               {hasWalletError && (
                 <p className="text-sm text-[var(--aethel-error)]">
@@ -133,32 +133,32 @@ export function DashboardWalletTab({
                   </div>
                   {creditsInfo && (
                     <p className="text-xs text-[var(--aethel-text-secondary)]">
-                      Creditos faturaveis: {creditsInfo.credits.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
+                      Billable credits: {creditsInfo.credits.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                     </p>
                   )}
                   <p className="text-xs text-[var(--aethel-text-tertiary)]">
-                    {walletTransactions.length} transacoes
+                    {walletTransactions.length} transactions
                   </p>
                   {lastWalletUpdate && (
                     <p className="text-xs text-[var(--aethel-text-tertiary)]">
-                      Atualizado em {new Date(lastWalletUpdate).toLocaleString()}
+                      Updated at {new Date(lastWalletUpdate).toLocaleString()}
                     </p>
                   )}
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div className={statCardClass}>
-                      <p className="text-xs text-[var(--aethel-text-tertiary)]">Gasto hoje</p>
+                      <p className="text-xs text-[var(--aethel-text-tertiary)]">Spent today</p>
                       <p className="text-lg font-semibold text-[var(--aethel-error)]">
                         {creditsUsedToday.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                       </p>
                     </div>
                     <div className={statCardClass}>
-                      <p className="text-xs text-[var(--aethel-text-tertiary)]">Gasto no mes</p>
+                      <p className="text-xs text-[var(--aethel-text-tertiary)]">Spent this month</p>
                       <p className="text-lg font-semibold text-[var(--aethel-warning)]">
                         {creditsUsedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                       </p>
                     </div>
                     <div className={statCardClass}>
-                      <p className="text-xs text-[var(--aethel-text-tertiary)]">Recebido no mes</p>
+                      <p className="text-xs text-[var(--aethel-text-tertiary)]">Received this month</p>
                       <p className="text-lg font-semibold text-[var(--aethel-success)]">
                         {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                       </p>
@@ -166,16 +166,16 @@ export function DashboardWalletTab({
                   </div>
                   {lastPurchaseIntent && (
                     <p className="text-xs text-[var(--aethel-text-secondary)] mt-2">
-                      Ultima intencao #{lastPurchaseIntent.intent_id} - +
+                      Latest intent #{lastPurchaseIntent.intent_id} - +
                       {lastPurchaseIntent.entry.amount.toLocaleString()} {formatCurrencyLabel(lastPurchaseIntent.entry.currency)}{' '}
-                      em {new Date(lastPurchaseIntent.entry.created_at).toLocaleString()}
+                      at {new Date(lastPurchaseIntent.entry.created_at).toLocaleString()}
                     </p>
                   )}
                   {lastTransferReceipt && (
                     <p className="text-xs text-[var(--aethel-text-secondary)]">
-                      Ultima transferencia #{lastTransferReceipt.transfer_id} - -
+                      Latest transfer #{lastTransferReceipt.transfer_id} - -
                       {lastTransferReceipt.sender_entry.amount.toLocaleString()} {formatCurrencyLabel(lastTransferReceipt.sender_entry.currency)}{' '}
-                      em {new Date(lastTransferReceipt.sender_entry.created_at).toLocaleString()}
+                      at {new Date(lastTransferReceipt.sender_entry.created_at).toLocaleString()}
                     </p>
                   )}
                 </>
@@ -189,7 +189,7 @@ export function DashboardWalletTab({
             )}
 
             <form className="space-y-3" onSubmit={onPurchaseIntentSubmit}>
-              <h4 className="text-sm font-semibold">Adicionar Creditos</h4>
+              <h4 className="text-sm font-semibold">Add credits</h4>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -197,17 +197,17 @@ export function DashboardWalletTab({
                   value={purchaseForm.amount}
                   onChange={(event) => setPurchaseForm((prev) => ({ ...prev, amount: event.target.value }))}
                   className={inputClass}
-                  aria-label="Quantidade de creditos"
-                  placeholder="Quantidade"
+                  aria-label="Credit amount"
+                  placeholder="Amount"
                   required
                 />
                 <select
                   value={purchaseForm.currency}
                   onChange={(event) => setPurchaseForm((prev) => ({ ...prev, currency: event.target.value }))}
                   className={`${inputClass} w-32`}
-                  aria-label="Moeda da compra"
+                  aria-label="Purchase currency"
                 >
-                  <option value="credits">Creditos</option>
+                  <option value="credits">Credits</option>
                 </select>
               </div>
               <input
@@ -215,25 +215,25 @@ export function DashboardWalletTab({
                 value={purchaseForm.reference}
                 onChange={(event) => setPurchaseForm((prev) => ({ ...prev, reference: event.target.value }))}
                 className={inputClass}
-                aria-label="Referencia da compra"
-                placeholder="Referencia (opcional)"
+                aria-label="Purchase reference"
+                placeholder="Reference (optional)"
               />
-              <button type="submit" className={primaryButtonClass} disabled={walletSubmitting} aria-label="Confirmar intencao de compra de creditos">
-                {walletSubmitting ? 'Processando...' : 'Confirmar Intencao'}
+              <button type="submit" className={primaryButtonClass} disabled={walletSubmitting} aria-label="Confirm credit purchase intent">
+                {walletSubmitting ? 'Processing...' : 'Confirm intent'}
               </button>
             </form>
           </div>
 
           <div className={`${panelClass} space-y-4`}>
             <form className="space-y-3" onSubmit={onTransferSubmit}>
-              <h3 className="text-lg font-semibold">Transferir Creditos</h3>
+              <h3 className="text-lg font-semibold">Transfer credits</h3>
               <input
                 type="text"
                 value={transferForm.targetUserId}
                 onChange={(event) => setTransferForm((prev) => ({ ...prev, targetUserId: event.target.value }))}
                 className={inputClass}
-                aria-label="Destinatario da transferencia"
-                placeholder="ID do usuario ou e-mail do destinatario"
+                aria-label="Transfer recipient"
+                placeholder="Recipient user ID or email"
                 required
               />
               <div className="flex gap-2">
@@ -243,17 +243,17 @@ export function DashboardWalletTab({
                   value={transferForm.amount}
                   onChange={(event) => setTransferForm((prev) => ({ ...prev, amount: event.target.value }))}
                   className={inputClass}
-                  aria-label="Quantidade para transferir"
-                  placeholder="Quantidade"
+                  aria-label="Transfer amount"
+                  placeholder="Amount"
                   required
                 />
                 <select
                   value={transferForm.currency}
                   onChange={(event) => setTransferForm((prev) => ({ ...prev, currency: event.target.value }))}
                   className={`${inputClass} w-32`}
-                  aria-label="Moeda da transferencia"
+                  aria-label="Transfer currency"
                 >
-                  <option value="credits">Creditos</option>
+                  <option value="credits">Credits</option>
                 </select>
               </div>
               <input
@@ -261,19 +261,19 @@ export function DashboardWalletTab({
                 value={transferForm.reference}
                 onChange={(event) => setTransferForm((prev) => ({ ...prev, reference: event.target.value }))}
                 className={inputClass}
-                aria-label="Referencia da transferencia"
-                placeholder="Referencia (opcional)"
+                aria-label="Transfer reference"
+                placeholder="Reference (optional)"
               />
-              <button type="submit" className={secondaryButtonClass} disabled={walletSubmitting} aria-label="Transferir creditos">
-                {walletSubmitting ? 'Processando...' : 'Transferir'}
+              <button type="submit" className={secondaryButtonClass} disabled={walletSubmitting} aria-label="Transfer credits">
+                {walletSubmitting ? 'Processing...' : 'Transfer'}
               </button>
             </form>
 
             <div>
-              <h4 className="text-sm font-semibold mb-2">Historico Recente</h4>
+              <h4 className="text-sm font-semibold mb-2">Recent history</h4>
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {walletTransactions.length === 0 && (
-                  <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhuma transacao registrada.</p>
+                  <p className="text-sm text-[var(--aethel-text-tertiary)]">No transactions recorded.</p>
                 )}
                 {walletTransactions.slice().reverse().map((entry) => (
                   <div key={entry.id} className="rounded-2xl border border-[var(--aethel-border-primary)] p-3">
@@ -287,7 +287,7 @@ export function DashboardWalletTab({
                     </div>
                     <div className="mt-1 flex items-center justify-between gap-3">
                       <span className="text-xs text-[var(--aethel-text-secondary)]">
-                        Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '-'} {formatCurrencyLabel(entry.currency)}
+                        Balance: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '-'} {formatCurrencyLabel(entry.currency)}
                       </span>
                       <span className="text-xs text-[var(--aethel-text-tertiary)]">
                         {new Date(entry.created_at).toLocaleString()}
@@ -301,26 +301,26 @@ export function DashboardWalletTab({
 
           <div className={`${panelClass} space-y-4 lg:col-span-2`}>
             <div className="flex items-center justify-between gap-3">
-              <h3 className="text-lg font-semibold">Recebiveis</h3>
+              <h3 className="text-lg font-semibold">Receivables</h3>
               <span className="text-xs text-[var(--aethel-text-tertiary)]">
-                {creditEntries.length} lancamentos de entrada
+                {creditEntries.length} incoming entries
               </span>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className={statCardClass}>
-                <p className="text-xs text-[var(--aethel-text-tertiary)]">Recebido no mes</p>
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Received this month</p>
                 <p className="text-lg font-semibold text-[var(--aethel-success)]">
                   {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                 </p>
               </div>
               <div className={statCardClass}>
-                <p className="text-xs text-[var(--aethel-text-tertiary)]">Total creditado</p>
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Total credited</p>
                 <p className="text-lg font-semibold text-[var(--aethel-primary-light)]">
                   {receivableSummary.total.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                 </p>
               </div>
               <div className={statCardClass}>
-                <p className="text-xs text-[var(--aethel-text-tertiary)]">Pendente de conciliacao</p>
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Pending reconciliation</p>
                 <p className="text-lg font-semibold text-[var(--aethel-warning)]">
                   {receivableSummary.pending.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                 </p>
@@ -330,18 +330,18 @@ export function DashboardWalletTab({
               <table className="min-w-full text-xs text-left">
                 <thead>
                   <tr className="text-[var(--aethel-text-secondary)]">
-                    <th className="py-2 pr-4">Referencia</th>
-                    <th className="py-2 pr-4">Valor</th>
+                    <th className="py-2 pr-4">Reference</th>
+                    <th className="py-2 pr-4">Amount</th>
                     <th className="py-2 pr-4">Status</th>
-                    <th className="py-2 pr-4">Saldo</th>
-                    <th className="py-2">Data</th>
+                    <th className="py-2 pr-4">Balance</th>
+                    <th className="py-2">Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   {receivableSummary.recent.length === 0 && (
                     <tr>
                       <td className="py-3 text-[var(--aethel-text-tertiary)]" colSpan={5}>
-                        Nenhum recebimento registrado.
+                        No receivables recorded.
                       </td>
                     </tr>
                   )}
@@ -355,7 +355,7 @@ export function DashboardWalletTab({
                     return (
                       <tr key={entry.id} className="border-t border-[var(--aethel-border-primary)]">
                         <td className="py-2 pr-4 font-medium text-[var(--aethel-text-primary)]">
-                          {invoiceLabel || 'Recebimento'}
+                          {invoiceLabel || 'Receipt'}
                         </td>
                         <td className="py-2 pr-4 text-[var(--aethel-success)]">
                           {amountLabel}

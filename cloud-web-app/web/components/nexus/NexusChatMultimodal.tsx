@@ -104,7 +104,7 @@ export default function NexusChatMultimodal() {
       {
         id: 'task-1',
         agentId: 'architect',
-        description: 'Analisando requisitos e definindo arquitetura',
+        description: 'Analyzing requisitos e definindo arquitetura',
         status: 'in_progress',
         startTime: Date.now(),
         handoffTo: 'designer',
@@ -112,14 +112,14 @@ export default function NexusChatMultimodal() {
       {
         id: 'task-2',
         agentId: 'designer',
-        description: 'Criando componentes UI/UX',
+        description: 'Creating componentes UI/UX',
         status: 'pending',
         handoffTo: 'engineer',
       },
       {
         id: 'task-3',
         agentId: 'engineer',
-        description: 'Implementando lógica e componentes',
+        description: 'Implementing logic and components',
         status: 'pending',
         handoffTo: 'qa',
       },
@@ -143,7 +143,7 @@ export default function NexusChatMultimodal() {
             id: (Date.now() + 1).toString(),
             role: 'assistant',
             agent: activeAgent,
-            content: `Orquestração multi-agent concluída! ${tasks.length} agentes trabalharam em paralelo para entregar sua solicitação.`,
+            content: `Multi-agent orchestration complete! ${tasks.length} agents worked in parallel to deliver your request.`,
             timestamp: new Date(),
           },
         ])
@@ -200,7 +200,7 @@ export default function NexusChatMultimodal() {
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)]">
               <Sparkles className="text-[var(--aethel-primary-light)]" />
             </div>
-            <h3 className="mb-2 font-semibold text-[var(--aethel-text-primary)]">Bem-vindo ao Nexus Chat</h3>
+            <h3 className="mb-2 font-semibold text-[var(--aethel-text-primary)]">Welcome ao Nexus Chat</h3>
             <p className="max-w-xs text-sm text-[var(--aethel-text-quaternary)]">
               Sua equipe de IAs especialistas esta pronta. Escolha um agente e comece.
             </p>
@@ -249,7 +249,7 @@ export default function NexusChatMultimodal() {
             <div className="mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Layers size={14} className="text-[var(--aethel-info-light)]" />
-                <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">Orquestração Multi-Agent</span>
+                <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">Multi-agent orchestration</span>
               </div>
               <span className="text-[10px] text-[var(--aethel-text-tertiary)]">
                 {agentTasks.filter(t => t.status === 'completed').length}/{agentTasks.length}
@@ -329,7 +329,7 @@ export default function NexusChatMultimodal() {
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={`Fale com o ${activeAgent.name}...`}
               className="flex-1 bg-transparent py-2 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none"
-              aria-label="Enviar mensagem para o agente ativo"
+              aria-label="Send mensagem para o agente active"
             />
             <div className="ml-2 flex items-center gap-1 border-l border-[var(--aethel-border-primary)] px-2">
               <button
@@ -342,14 +342,14 @@ export default function NexusChatMultimodal() {
               <button
                 type="button"
                 className="p-2 text-[var(--aethel-text-quaternary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
-                aria-label="Enviar imagem"
+                aria-label="Send imagem"
               >
                 <ImageIcon size={18} />
               </button>
               <button
                 type="submit"
                 className="ml-1 rounded-lg bg-[var(--aethel-primary)] p-2 text-[var(--aethel-text-primary)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] transition-all hover:brightness-110"
-                aria-label="Enviar mensagem"
+                aria-label="Send mensagem"
               >
                 <Send size={18} />
               </button>

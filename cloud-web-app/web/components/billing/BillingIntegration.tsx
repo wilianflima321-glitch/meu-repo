@@ -118,7 +118,7 @@ export function BillingStatusBanner() {
         <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--aethel-warning)]" aria-hidden="true" />
         <div>
           <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
-            Runtime de billing esta {formatReadinessStatus(readiness.status)}
+            Runtime of billing esta {formatReadinessStatus(readiness.status)}
           </p>
           {readiness.blockers.length > 0 && (
             <ul className="mt-1 space-y-0.5 text-xs text-[var(--aethel-text-secondary)]">
@@ -186,11 +186,11 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
           <span className="text-3xl font-bold text-[var(--aethel-text-primary)]">
             ${Math.round(price)}
           </span>
-          <span className="text-sm text-[var(--aethel-text-tertiary)]">/mes</span>
+          <span className="text-sm text-[var(--aethel-text-tertiary)]">/mo</span>
         </div>
         {interval === 'year' && plan.annualPrice && (
           <p className="mt-1 text-xs text-[var(--aethel-success)]">
-            Economize ${Math.round((plan.price * 12 - plan.annualPrice))} por ano
+            Save ${Math.round((plan.price * 12 - plan.annualPrice))} per year
           </p>
         )}
       </div>
@@ -199,7 +199,7 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
       <div className="mb-4 grid grid-cols-2 gap-2 text-xs">
         <div className="flex items-center gap-1.5 text-[var(--aethel-text-tertiary)]">
           <Cpu size={12} aria-hidden="true" />
-          <span>{plan.limits.projects} projetos</span>
+          <span>{plan.limits.projects} projects</span>
         </div>
         <div className="flex items-center gap-1.5 text-[var(--aethel-text-tertiary)]">
           <HardDrive size={12} aria-hidden="true" />
@@ -207,11 +207,11 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
         </div>
         <div className="flex items-center gap-1.5 text-[var(--aethel-text-tertiary)]">
           <Users size={12} aria-hidden="true" />
-          <span>{plan.limits.collaborators} colaboradores</span>
+          <span>{plan.limits.collaborators} collaborators</span>
         </div>
         <div className="flex items-center gap-1.5 text-[var(--aethel-text-tertiary)]">
           <MessageSquare size={12} aria-hidden="true" />
-          <span>{formatTokens(plan.limits.tokensPerMonth)}/mes</span>
+          <span>{formatTokens(plan.limits.tokensPerMonth)}/mo</span>
         </div>
       </div>
 
@@ -237,17 +237,17 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
             ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
             : 'border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
         }`}
-        aria-label={isCurrent ? `Plano atual: ${plan.name}` : `Selecionar plano ${plan.name}`}
+        aria-label={isCurrent ? `Current plan: ${plan.name}` : `Select plan ${plan.name}`}
       >
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : isCurrent ? (
           <>
-            <Check className="h-4 w-4" /> Plano atual
+            <Check className="h-4 w-4" /> Current plan
           </>
         ) : (
           <>
-            Comecar agora <ArrowRight className="h-4 w-4" />
+            Start now <ArrowRight className="h-4 w-4" />
           </>
         )}
       </button>
@@ -360,12 +360,12 @@ export function SubscriptionStatusWidget() {
     return (
       <div className="rounded-lg border border-dashed border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 text-center">
         <CreditCard className="mx-auto mb-2 h-8 w-8 text-[var(--aethel-text-quaternary)]" />
-        <p className="text-sm text-[var(--aethel-text-tertiary)]">Sem assinatura ativa</p>
+        <p className="text-sm text-[var(--aethel-text-tertiary)]">No active subscription</p>
         <a
           href="/pricing"
           className="mt-2 inline-flex items-center gap-1 text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary)]"
         >
-          Ver planos <ArrowRight size={14} />
+          View plans <ArrowRight size={14} />
         </a>
       </div>
     )
@@ -376,7 +376,7 @@ export function SubscriptionStatusWidget() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-[var(--aethel-text-tertiary)]">
-            Plano atual
+            Current plan
           </p>
           <p className="mt-0.5 text-lg font-semibold capitalize text-[var(--aethel-text-primary)]">
             {subscription.plan}
@@ -394,7 +394,7 @@ export function SubscriptionStatusWidget() {
       </div>
       {subscription.currentPeriodEnd && (
         <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">
-          {subscription.cancelAtPeriodEnd ? 'Cancela em' : 'Renova em'}{' '}
+          {subscription.cancelAtPeriodEnd ? 'Cancels on' : 'Renews on'}{' '}
           {new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR')}
         </p>
       )}
@@ -439,8 +439,8 @@ export function UsageQuotaBar({ label, used, limit, unit = '', variant }: QuotaB
         aria-valuenow={used}
         aria-valuemin={0}
         aria-valuemax={limit}
-        aria-label={`${label}: ${Math.round(percentage)}% usado`}
-        aria-valuetext={`${formatNumber(used)}${unit} de ${formatNumber(limit)}${unit} usados`}
+        aria-label={`${label}: ${Math.round(percentage)}% used`}
+        aria-valuetext={`${formatNumber(used)}${unit} of ${formatNumber(limit)}${unit} used`}
       >
         <div
           className={`h-full rounded-full transition-all duration-300 ${barColors[autoVariant]}`}
@@ -465,49 +465,49 @@ export function BillingTransparencyCard({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
-            Transparência de uso
+            Usage transparency
           </p>
           <h3 className="mt-1 text-base font-semibold text-[var(--aethel-text-primary)]">
-            Custo e consumo visíveis no fluxo
+            Cost and usage visible in the workflow
           </h3>
         </div>
         {onOpenDetails ? (
           <button
             type="button"
             onClick={onOpenDetails}
-            aria-label="Abrir detalhes de custo e consumo"
+            aria-label="Abrir detalhes of custo e consumo"
             className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:border-[var(--aethel-border-secondary)]"
           >
-            Ver detalhes <ArrowRight className="h-3.5 w-3.5" />
+            View details <ArrowRight className="h-3.5 w-3.5" />
           </button>
         ) : null}
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] p-3">
-          <p className="text-xs text-[var(--aethel-text-tertiary)]">Custo estimado</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Estimated cost</p>
           <p className="mt-1 text-lg font-semibold text-[var(--aethel-text-primary)]">${estimatedCost.toFixed(2)}</p>
         </div>
         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] p-3">
-          <p className="text-xs text-[var(--aethel-text-tertiary)]">Uso de tokens</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Uso of tokens</p>
           <p className="mt-1 text-lg font-semibold text-[var(--aethel-text-primary)]">
             {formatTokens(tokenUsage)} / {formatTokens(tokenLimit)}
           </p>
         </div>
         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] p-3">
-          <p className="text-xs text-[var(--aethel-text-tertiary)]">Próximo reset</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Next reset</p>
           <p className="mt-1 text-lg font-semibold text-[var(--aethel-text-primary)]">{nextResetLabel || '—'}</p>
         </div>
       </div>
 
       <div className="mt-4">
         <UsageQuotaBar
-          label="Consumo mensal"
+          label="Monthly usage"
           used={tokenUsage}
           limit={tokenLimit}
         />
         <p className="mt-2 text-xs text-[var(--aethel-text-tertiary)]">
-          {Math.round(usagePercent)}% da franquia atual consumida.
+          {Math.round(usagePercent)}% of the current allowance used.
         </p>
       </div>
     </section>
@@ -521,7 +521,7 @@ export function BillingTransparencyCard({
 function formatReadinessStatus(status: BillingReadinessState['status']): string {
   switch (status) {
     case 'ready':
-      return 'pronto'
+      return 'ready'
     case 'partial':
       return 'parcial'
     default:
@@ -533,7 +533,7 @@ function formatSubscriptionStatus(status: string): string {
   const normalized = String(status || '').trim().toLowerCase()
   switch (normalized) {
     case 'active':
-      return 'ativa'
+      return 'active'
     case 'trialing':
       return 'em teste'
     case 'past_due':

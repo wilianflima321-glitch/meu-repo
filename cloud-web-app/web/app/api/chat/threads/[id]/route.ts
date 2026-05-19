@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
     const thread = await assertThreadOwnership(user.userId, threadId);
 
     if (!thread) {
-      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread não encontrada.' }, { status: 404 });
+      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread not found.' }, { status: 404 });
     }
 
     return NextResponse.json({ thread });
@@ -42,7 +42,7 @@ export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
     const threadId = ctx.params.id;
     const existing = await assertThreadOwnership(user.userId, threadId);
     if (!existing) {
-      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread não encontrada.' }, { status: 404 });
+      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread not found.' }, { status: 404 });
     }
 
     const body = await req.json().catch(() => ({}));
@@ -81,7 +81,7 @@ export async function DELETE(req: NextRequest, ctx: { params: { id: string } }) 
     const threadId = ctx.params.id;
     const existing = await assertThreadOwnership(user.userId, threadId);
     if (!existing) {
-      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread não encontrada.' }, { status: 404 });
+      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread not found.' }, { status: 404 });
     }
 
     // Hard delete (mensagens em cascade). Se quiser soft delete, use PATCH archived.

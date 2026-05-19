@@ -79,13 +79,13 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-3">
         <div className="flex items-center gap-2">
           <Brain className="w-4 h-4 text-[var(--aethel-primary-light)]" />
-          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Memória</span>
+          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Memory</span>
         </div>
         <button
           type="button"
           onClick={() => setIsAdding(true)}
           className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-          title="Adicionar memória"
+          title="Add memory"
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -123,7 +123,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
           <textarea
             value={newValue}
             onChange={(e) => setNewValue(e.target.value)}
-            placeholder="Valor..."
+            placeholder="Value..."
             rows={2}
             className="mb-2 w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] resize-none"
           />
@@ -145,7 +145,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
               disabled={!newKey.trim() || !newValue.trim()}
               className="rounded-lg bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110 disabled:opacity-50"
             >
-              Adicionar
+              Add
             </button>
           </div>
         </div>
@@ -155,7 +155,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
       <div className="flex-1 overflow-auto p-3">
         {filteredMemories.length === 0 ? (
           <div className="flex h-full items-center justify-center text-[var(--aethel-text-tertiary)] text-xs">
-            Nenhuma memória neste escopo
+            No memories in this scope
           </div>
         ) : (
           <div className="space-y-2">
@@ -180,7 +180,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
                           setEditingValue(memory.value)
                         }}
                         className="p-1 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-                        title="Editar"
+                        title="Edit"
                       >
                         <Edit className="w-3 h-3" />
                       </button>
@@ -189,7 +189,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
                       type="button"
                       onClick={() => onDelete(memory.id)}
                       className="p-1 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] transition-colors"
-                      title="Excluir"
+                      title="Delete"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -235,8 +235,8 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
       {/* Footer */}
       <div className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-2">
         <div className="flex items-center justify-between text-[10px] text-[var(--aethel-text-tertiary)]">
-          <span>{filteredMemories.length} memórias</span>
-          <span>Escopo: {activeScope}</span>
+          <span>{filteredMemories.length} memories</span>
+          <span>Scope: {activeScope}</span>
         </div>
       </div>
     </div>

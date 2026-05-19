@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { buildDefaultAgenticProductionState, PRODUCTION_STATE_SETTINGS_KEY } from '@/lib/production/agentic-production-state'
 import { buildRepositoryCartographyManifest } from '@/lib/production/repository-cartography'

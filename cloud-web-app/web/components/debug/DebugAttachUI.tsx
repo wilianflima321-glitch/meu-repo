@@ -574,7 +574,7 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button type="button" aria-label="Atualizar lista de processos depuráveis"
+          <button type="button" aria-label="Refresh debuggable process list"
             onClick={refreshProcesses}
             disabled={resolvedRefreshing}
             style={{
@@ -799,7 +799,7 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
               {resolvedProcesses.find((p) => p.id === resolvedAttachedId)?.name}
             </span>
           </div>
-          <button type="button" aria-label="Desanexar depurador da sessão atual"
+          <button type="button" aria-label="Detach debugger from current session"
             onClick={() => handleDetach(resolvedAttachedId)}
             style={{
               padding: '4px 8px',

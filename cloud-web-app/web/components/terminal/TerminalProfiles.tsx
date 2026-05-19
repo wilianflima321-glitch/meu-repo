@@ -92,7 +92,7 @@ export const DEFAULT_TERMINAL_PROFILES: TerminalProfile[] = [
     icon: <Terminal size={16} />,
     shell: process.platform === 'win32' ? 'powershell.exe' : 'bash',
     color: colors.primary,
-    description: 'Terminal interativo padrão',
+    description: 'Default interactive terminal',
     category: 'development',
   },
   {
@@ -112,7 +112,7 @@ export const DEFAULT_TERMINAL_PROFILES: TerminalProfile[] = [
     icon: <Hammer size={16} />,
     shell: process.platform === 'win32' ? 'powershell.exe' : 'bash',
     color: colors.warning,
-    description: 'Saída de compilação e bundling',
+    description: 'Build and bundling output',
     category: 'development',
     commands: ['npm run build -- --watch'],
   },
@@ -122,7 +122,7 @@ export const DEFAULT_TERMINAL_PROFILES: TerminalProfile[] = [
     icon: <GitBranch size={16} />,
     shell: process.platform === 'win32' ? 'powershell.exe' : 'bash',
     color: colors.accent,
-    description: 'Operações Git',
+    description: 'Git operations',
     category: 'tools',
     commands: ['git status'],
   },
@@ -142,7 +142,7 @@ export const DEFAULT_TERMINAL_PROFILES: TerminalProfile[] = [
     icon: <Bug size={16} />,
     shell: process.platform === 'win32' ? 'powershell.exe' : 'bash',
     color: colors.error,
-    description: 'Console de depuração',
+    description: 'Debug console',
     category: 'development',
   },
   {
@@ -151,7 +151,7 @@ export const DEFAULT_TERMINAL_PROFILES: TerminalProfile[] = [
     icon: <Zap size={16} />,
     shell: process.platform === 'win32' ? 'powershell.exe' : 'bash',
     color: colors.cyan,
-    description: 'Execução de testes',
+    description: 'Test execution',
     category: 'development',
     commands: ['npm test -- --watch'],
   },
@@ -378,7 +378,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
                 }}
               >
                 <Settings size={14} />
-                Criar Perfil Personalizado
+                Create Perfil Personalizado
               </button>
             </div>
           </div>

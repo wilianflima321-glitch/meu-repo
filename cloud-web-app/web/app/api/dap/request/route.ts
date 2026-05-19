@@ -10,6 +10,7 @@ const log = createComponentLogger('api/dap/request/route')
 
 interface DAPRequest {
   sessionId: string;
+
   command: string;
   arguments: DapPayload;
   seq: number;
@@ -41,11 +42,11 @@ export async function POST(request: NextRequest) {
       body: responseBody,
     });
   } catch (error) {
-    console.error('DAP request failed:', error);
+    log.error('DAP request failed:', error);
     const code = (error as any)?.code;
     if (code === 'DAP_SESSION_NOT_FOUND') {
       return NextResponse.json(
-        { success: false, message: 'Sessão DAP não encontrada (sessionId inválido ou expirado).' },
+        { success: false, message: 'DAP session not found (sessionId invalid or expired).' },
         { status: 404 }
       );
     }

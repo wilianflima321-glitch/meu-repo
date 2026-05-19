@@ -59,7 +59,7 @@ interface AssetDetail {
     thumbnailUrl: string;
     previewUrl?: string;
     modelUrl?: string;
-    fileTamanho: number;
+    fileSize: number;
     version: string;
     compatibility: string[];
     license: 'standard' | 'extended' | 'exclusive';
@@ -423,7 +423,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
         },
     });
 
-    // Baixar mutation
+    // Download mutation
     const downloadMutation = useMutation({
         mutationFn: async () => {
             const res = await fetch(`/api/marketplace/assets/${assetId}/download`);
@@ -437,7 +437,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
             a.download = `${asset?.name || 'asset'}.zip`;
             a.click();
             URL.revokeObjectURL(url);
-            toast.success('Baixar iniciado.');
+            toast.success('Download iniciado.');
         },
         onError: () => {
             toast.error('Download failed.');
@@ -492,7 +492,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
             <div className="flex flex-col items-center justify-center h-full">
                 <p className="text-muted-foreground">Asset nao encontrado</p>
                 <Button type="button" variant="outline" className="mt-4" onClick={onClose}>
-                    Voltar
+                    Back
                 </Button>
             </div>
         );
@@ -504,7 +504,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
             <header className="flex items-center justify-between px-6 py-4 border-b">
                 <Button type="button" variant="ghost" onClick={onClose}>
                     <ChevronLeft className="w-4 h-4 mr-2" />
-                    Voltar ao Marketplace
+                    Back ao Marketplace
                 </Button>
 
                 <div className="flex items-center gap-2">
@@ -547,44 +547,44 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                 <ImageGallery images={asset.images} />
                             )}
 
-                            {/* Descricao */}
+                            {/* Description */}
                             <div>
-                                <h2 className="text-lg font-semibold mb-4">Descricao</h2>
+                                <h2 className="text-lg font-semibold mb-4">Description</h2>
                                 <div
                                     className="prose prose-sm dark:prose-invert max-w-none"
                                     dangerouslySetInnerHTML={{ __html: asset.description }}
                                 />
                             </div>
 
-                            {/* Detalhes tecnicos */}
+                            {/* Technical details */}
                             <div>
-                                <h2 className="text-lg font-semibold mb-4">Detalhes tecnicos</h2>
+                                <h2 className="text-lg font-semibold mb-4">Technical details</h2>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="flex items-center gap-2">
                                         <Box className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">Categoria:</span>{' '}
+                                            <span className="text-muted-foreground">Category:</span>{' '}
                                             {asset.category}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <FileText className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">Tamanho:</span>{' '}
-                                            {formatFileSize(asset.fileTamanho)}
+                                            <span className="text-muted-foreground">Size:</span>{' '}
+                                            {formatFileSize(asset.fileSize)}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Tag className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">Versao:</span>{' '}
+                                            <span className="text-muted-foreground">Version:</span>{' '}
                                             {asset.version}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Shield className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">Licenca:</span>{' '}
+                                            <span className="text-muted-foreground">License:</span>{' '}
                                             {asset.license.charAt(0).toUpperCase() + asset.license.slice(1)}
                                         </span>
                                     </div>
@@ -592,7 +592,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
 
                                 {/* Included files */}
                                 <div className="mt-6">
-                                    <h3 className="font-medium mb-3">Arquivos inclusos</h3>
+                                    <h3 className="font-medium mb-3">Included files</h3>
                                     <div className="space-y-2">
                                         {asset.files.map((file, index) => (
                                             <div
@@ -608,9 +608,9 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                     </div>
                                 </div>
 
-                                {/* Compatibilidade */}
+                                {/* Compatibility */}
                                 <div className="mt-6">
-                                    <h3 className="font-medium mb-3">Compatibilidade</h3>
+                                    <h3 className="font-medium mb-3">Compatibility</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {asset.compatibility.map((item) => (
                                             <Badge key={item} variant="secondary">
@@ -692,7 +692,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                             ) : (
                                                 <Download className="w-4 h-4 mr-2" />
                                             )}
-                                            Baixar
+                                            Download
                                         </Button>
                                     ) : asset.price === 0 ? (
                                         <Button type="button"
@@ -706,7 +706,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                             ) : (
                                                 <Download className="w-4 h-4 mr-2" />
                                             )}
-                                            Baixar gratis
+                                            Download gratis
                                         </Button>
                                     ) : (
                                         <div className="space-y-2">
@@ -725,7 +725,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                             </Button>
                                             <Button variant="outline" className="w-full" size="lg">
                                                 <ShoppingCart className="w-4 h-4 mr-2" />
-                                                Adicionar ao carrinho
+                                                Add ao carrinho
                                             </Button>
                                         </div>
                                     )}

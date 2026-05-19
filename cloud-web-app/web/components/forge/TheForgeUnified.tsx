@@ -10,7 +10,7 @@ import { getWasmRuntime } from '@/lib/wasm-runtime';
  * ============================================
  *
  * Interface mestre que consolida:
- * - Editor de código (Monaco)
+ * - Editor de code (Monaco)
  * - Chat multimodal com IA
  * - Canvas 3D em tempo real
  * - File explorer
@@ -128,7 +128,7 @@ export class GameScene {
     );
   }, []);
 
-  // Adicionar nova aba
+  // Add nova aba
   const addTab = useCallback((type: ForgeTab['type']) => {
     const newTab: ForgeTab = {
       id: Date.now().toString(),
@@ -154,14 +154,14 @@ export class GameScene {
     });
   }, []);
 
-  // Executar código
+  // Executar code
   const executeCode = useCallback(async () => {
     if (!selectedFile) return;
 
     const output = [`> Executing ${selectedFile.name}...`];
 
     try {
-      // Simular execução de código
+      // Simular execução de code
       const runtime = await getWasmRuntime();
       output.push('✓ WASM Runtime initialized');
       output.push(`✓ Game state: ${runtime.getGameState().entities.size} entities`);
@@ -174,7 +174,7 @@ export class GameScene {
     setConsoleOutput(output);
   }, [selectedFile]);
 
-  // Validar código contra Quality Gates
+  // Validar code contra Quality Gates
   const validateCode = useCallback(async () => {
     const output = [`> Validating ${selectedFile?.name}...`];
 
@@ -202,13 +202,13 @@ export class GameScene {
       <div style={{ ...forgePanelStyle, padding: '12px 16px', borderBottom: '1px solid var(--aethel-border-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: '18px', fontWeight: 'bold' }}>⚡ The Forge (Aethel Engine)</div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button type="button" aria-label="Adicionar aba do editor ao Forge" onClick={() => addTab('editor')} style={forgeAccentButtonStyle}>
+          <button type="button" aria-label="Add aba do editor ao Forge" onClick={() => addTab('editor')} style={forgeAccentButtonStyle}>
             + Editor
           </button>
-          <button type="button" aria-label="Adicionar aba de canvas ao Forge" onClick={() => addTab('canvas')} style={forgeAccentButtonStyle}>
+          <button type="button" aria-label="Add aba de canvas ao Forge" onClick={() => addTab('canvas')} style={forgeAccentButtonStyle}>
             + Canvas
           </button>
-          <button type="button" aria-label="Adicionar aba de chat ao Forge" onClick={() => addTab('chat')} style={forgeAccentButtonStyle}>
+          <button type="button" aria-label="Add aba de chat ao Forge" onClick={() => addTab('chat')} style={forgeAccentButtonStyle}>
             + Chat
           </button>
         </div>

@@ -265,7 +265,7 @@ export default function MultiAgentOrchestrator() {
             <AlertCircle size={14} />
             Modo heuristico (capacidade PARCIAL)
           </div>
-          <p>{runtimeDisclaimer || 'As saidas sao orientativas e ainda exigem validacao deterministica antes de aplicar.'}</p>
+          <p>{runtimeDisclaimer || 'As saidas sao orientactives e ainda exigem validacao deterministica antes de aplicar.'}</p>
           {coordinationHint && <p className="mt-1 text-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]/90">{coordinationHint}</p>}
         </div>
       )}

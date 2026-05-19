@@ -17,7 +17,7 @@ export default function ArpuChurnPage() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/finance/metrics?range=30d');
-      if (!res.ok) throw new Error('Falha ao carregar métricas financeiras');
+      if (!res.ok) throw new Error('Failed to load financial metrics');
       const data = await res.json();
       setMetrics({
         mrr: data?.mrr || 0,
@@ -26,7 +26,7 @@ export default function ArpuChurnPage() {
       });
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar métricas');
+      setError(err instanceof Error ? err.message : 'Error loading metrics');
     } finally {
       setLoading(false);
     }
@@ -40,7 +40,7 @@ export default function ArpuChurnPage() {
     return (
       <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">ARPU e churn</h1>
-        <p className="text-sm text-[var(--aethel-text-tertiary)]">Carregando métricas...</p>
+        <p className="text-sm text-[var(--aethel-text-tertiary)]">Loading metrics...</p>
       </div>
     );
   }
@@ -72,18 +72,18 @@ export default function ArpuChurnPage() {
           <p className="text-2xl font-bold text-[var(--aethel-success)]">${arpu.toFixed(2)}</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Taxa de Churn</h3>
+          <h3 className="text-lg font-semibold">Rate de Churn</h3>
           <p className="text-2xl font-bold text-[var(--aethel-error)]">{churnRate.toFixed(1)}%</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Taxa de Retenção</h3>
+          <h3 className="text-lg font-semibold">Retention Rate</h3>
           <p className="text-2xl font-bold text-[var(--aethel-primary)]">{retentionRate.toFixed(1)}%</p>
         </div>
       </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Dados Históricos</h2>
-        <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhuma série histórica consolidada disponível no momento.</p>
+        <h2 className="text-lg font-semibold mb-4">Historical Data</h2>
+        <p className="text-sm text-[var(--aethel-text-tertiary)]">No consolidated historical series is currently available.</p>
       </div>
     </div>
   );

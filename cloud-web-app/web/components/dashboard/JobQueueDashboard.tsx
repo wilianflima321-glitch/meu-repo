@@ -280,7 +280,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
         <div className="border-t border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] px-4 py-3">
           <div className="grid gap-4 lg:grid-cols-2">
             <div>
-              <h4 className="mb-2 text-xs font-semibold uppercase text-[var(--aethel-text-tertiary)]">Detalhes do job</h4>
+              <h4 className="mb-2 text-xs font-semibold uppercase text-[var(--aethel-text-tertiary)]">Details do job</h4>
               <dl className="space-y-1">
                 <div className="flex">
                   <dt className="w-24 text-xs text-[var(--aethel-text-tertiary)]">ID:</dt>
@@ -494,10 +494,10 @@ export function JobQueueDashboard({
               {isQueueRunning ? 'Pausar fila' : 'Iniciar fila'}
             </span>
           </button>
-          <button type="button" aria-label="Atualizar fila de jobs"
+          <button type="button" aria-label="Refresh fila de jobs"
             onClick={fetchData}
             className={ghostButtonClass}
-            title="Atualizar"
+            title="Refresh"
           >
             <Icons.Refresh />
           </button>
@@ -510,7 +510,7 @@ export function JobQueueDashboard({
           <StatCard label="Executando" value={stats.running} icon={<Icons.Play />} color="text-[var(--aethel-info)]" />
           <StatCard label="Completeds" value={stats.completed} icon={<Icons.Check />} color="text-[var(--aethel-success)]" />
           <StatCard
-            label="Taxa de sucesso"
+            label="Success rate"
             value={`${(stats.successRate * 100).toFixed(1)}%`}
             icon={<Icons.Check />}
             color={stats.successRate > 0.9 ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-warning)]'}
@@ -525,7 +525,7 @@ export function JobQueueDashboard({
             value={filter}
             onChange={(event) => setFilter(event.target.value as JobStatus | 'all')}
             className={inputClass}
-            aria-label="Filtrar jobs por status"
+            aria-label="Filter jobs por status"
           >
             <option value="all">Todos os status</option>
             <option value="pending">Pendente</option>
@@ -539,11 +539,11 @@ export function JobQueueDashboard({
         <div className="flex-1">
           <input
             type="text"
-            placeholder="Buscar por ID ou tipo..."
+            placeholder="Search por ID ou tipo..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             className={inputClass}
-            aria-label="Buscar jobs por id ou tipo"
+            aria-label="Search jobs por id ou tipo"
           />
         </div>
 
@@ -563,13 +563,13 @@ export function JobQueueDashboard({
           <span className="w-24">Tipo</span>
           <span className="w-16">Prioridade</span>
           <span className="w-32">Progresso</span>
-          <span className="w-24 text-right">Duracao</span>
+          <span className="w-24 text-right">Duration</span>
           <span className="w-20 text-right">Criado</span>
           <span className="ml-auto w-16">Acoes</span>
         </div>
 
         {filteredJobs.length === 0 ? (
-          <div className="m-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-4 py-6 text-sm text-[var(--aethel-text-tertiary)]">Nenhum job encontrado.</div>
+          <div className="m-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-4 py-6 text-sm text-[var(--aethel-text-tertiary)]">No job encontrado.</div>
         ) : (
           filteredJobs.map((job) => (
             <JobRow
@@ -590,7 +590,7 @@ export function JobQueueDashboard({
           disabled={page === 1}
           className={`${ghostButtonClass} text-xs disabled:opacity-50`}
         >
-          &lt; Anterior
+          &lt; Previous
         </button>
         <span className="text-xs text-[var(--aethel-text-tertiary)]">Pagina {page}</span>
         <button type="button" aria-label="Proxima pagina da fila"

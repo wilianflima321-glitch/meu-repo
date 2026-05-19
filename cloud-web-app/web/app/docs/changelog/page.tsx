@@ -63,7 +63,7 @@ export default function ChangelogDocsPage() {
 
       <main className="relative z-10 mx-auto max-w-5xl px-6 pb-20 pt-12">
         <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-primary)]">
-          <ArrowLeft className="h-4 w-4" /> Voltar para Docs
+          <ArrowLeft className="h-4 w-4" /> Back to Docs
         </Link>
 
         <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-success)_12%,transparent),color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent))] p-6 shadow-[0_20px_80px_rgba(2,8,23,0.22)] sm:p-8">

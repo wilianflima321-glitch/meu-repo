@@ -6,8 +6,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger'
 
 export const dynamic = 'force-dynamic'
+const routeLogger = createComponentLogger('api/user/export/route')
 
 export async function POST(req: NextRequest) {
   try {
@@ -80,7 +82,7 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[user/export] Error:', error)
+    routeLogger.error('[user/export] Error:', error)
     return NextResponse.json({ error: 'Export failed' }, { status: 500 })
   }
 }

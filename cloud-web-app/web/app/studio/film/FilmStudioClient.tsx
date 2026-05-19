@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
+import StudioEngineModuleMiniPanel from '@/components/studio/StudioEngineModuleMiniPanel'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
 const DirectorMode = dynamic(() => import('@/components/nexus/DirectorMode'), {
@@ -13,6 +14,8 @@ const VideoTimelineEditor = dynamic(() => import('@/components/video/VideoTimeli
   ssr: false,
   loading: () => <CreativeStudioLoading label="Film Timeline" />,
 })
+
+const FILM_ENGINE_MODULES = ['cutscene-system', 'dialogue-cutscene-system', 'capture-system'] as const
 
 function modeButtonClass(active: boolean): string {
   return active
@@ -54,6 +57,7 @@ export default function FilmStudioClient() {
               Edit, layers, timing
             </span>
           </button>
+          <StudioEngineModuleMiniPanel title="Film systems" moduleIds={FILM_ENGINE_MODULES} className="mt-3 rounded-2xl border border-[var(--aethel-border-subtle)]" />
         </aside>
 
         <div className="min-w-0 flex-1 overflow-hidden">

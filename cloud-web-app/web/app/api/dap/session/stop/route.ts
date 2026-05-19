@@ -10,6 +10,7 @@ const log = createComponentLogger('api/dap/session/stop/route')
 
 interface StopSessionRequest {
   sessionId: string;
+
 }
 
 export async function POST(request: NextRequest) {
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
       message: stopped ? 'Debug session stopped' : 'Session not found',
     });
   } catch (error) {
-    console.error('Failed to stop debug session:', error);
+    log.error('Failed to stop debug session:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return NextResponse.json(

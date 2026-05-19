@@ -29,28 +29,28 @@ export default function WorkbenchMissionBar({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">
-              Handoff ativo
+              Active handoff
             </span>
             {source ? (
               <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
-                origem {source}
+                source {source}
               </span>
             ) : null}
             {projectId ? (
               <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
-                projeto {projectId}
+                project {projectId}
               </span>
             ) : null}
           </div>
           <div className="mt-2 text-sm font-medium text-[var(--aethel-text-primary)]">
-            {mission || 'Continue a implementacao com o mesmo contexto vindo do Studio.'}
+            {mission || 'Continue implementation with the same context from Studio.'}
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-[var(--aethel-text-tertiary)]">
             <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2 py-1">
-              preview {previewEnabled ? 'ativo' : 'desativado'}
+              preview {previewEnabled ? 'active' : 'disabled'}
             </span>
             <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2 py-1">
-              estrategia {runtimeStrategyLabel}
+              strategy {runtimeStrategyLabel}
             </span>
             <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2 py-1">
               runtime {runtimeStateLabel}
@@ -65,7 +65,7 @@ export default function WorkbenchMissionBar({
               onClick={onOpenAiPanel}
               className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
             >
-              Abrir copiloto
+              Open copilot
             </button>
           ) : null}
           <button
@@ -73,21 +73,21 @@ export default function WorkbenchMissionBar({
             onClick={onOpenCommandPalette}
             className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
           >
-            Paleta de comandos
+            Command palette
           </button>
           <button
             type="button"
             onClick={onTogglePreview}
             className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
           >
-            {previewEnabled ? 'Ocultar preview' : 'Mostrar preview'}
+            {previewEnabled ? 'Hide preview' : 'Show preview'}
           </button>
           <button
             type="button"
             onClick={onBackToDashboard}
             className="rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-3 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
           >
-            Voltar ao Studio
+            Back to Studio
           </button>
         </div>
       </div>

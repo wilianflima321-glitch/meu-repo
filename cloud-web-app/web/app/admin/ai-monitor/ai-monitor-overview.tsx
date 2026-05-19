@@ -239,9 +239,9 @@ export function MetricsOverviewSection({ metrics }: MetricsOverviewSectionProps)
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
       <AdminMetricCard icon={Brain} label="Total de chamadas (24h)" value={metrics.totalCalls.toLocaleString()} />
       <AdminMetricCard icon={Zap} label="Total de tokens" value={`${(metrics.totalTokens / 1000).toFixed(1)}K`} />
-      <AdminMetricCard icon={DollarSign} label="Custo total" value={`$${metrics.totalCost.toFixed(2)}`} alert={metrics.totalCost > 50} />
+      <AdminMetricCard icon={DollarSign} label="Cost total" value={`$${metrics.totalCost.toFixed(2)}`} alert={metrics.totalCost > 50} />
       <AdminMetricCard icon={Clock} label="Latencia media" value={`${metrics.avgLatency}ms`} alert={metrics.avgLatency > 3000} />
-      <AdminMetricCard icon={AlertTriangle} label="Taxa de erro" value={`${(metrics.errorRate * 100).toFixed(1)}%`} alert={metrics.errorRate > 0.05} />
+      <AdminMetricCard icon={AlertTriangle} label="Error rate" value={`${(metrics.errorRate * 100).toFixed(1)}%`} alert={metrics.errorRate > 0.05} />
     </div>
   );
 }
@@ -290,7 +290,7 @@ export function MonitorFiltersBar({
       >
         <option value="all">Todos os status</option>
         <option value="success">Sucesso</option>
-        <option value="error">Erro</option>
+        <option value="error">Error</option>
         <option value="timeout">Tempo esgotado</option>
       </select>
 

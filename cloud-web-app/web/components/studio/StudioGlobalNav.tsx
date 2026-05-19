@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react'
 import Link from 'next/link'
+import MaturityBadge from '@/components/ui/MaturityBadge'
 import { isNavLinkActive, STUDIO_PRIMARY_LINKS, STUDIO_SECONDARY_LINKS } from '@/lib/navigation/surfaces'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
@@ -14,8 +15,8 @@ type StudioGlobalNavProps = {
 
 function linkClass(active: boolean): string {
   return active
-    ? 'rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_35%,transparent),color-mix(in_srgb,var(--aethel-info)_20%,transparent))] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-primary)]'
-    : 'rounded-full border border-transparent px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] hover:text-[var(--aethel-text-primary)]'
+    ? 'inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_35%,transparent),color-mix(in_srgb,var(--aethel-info)_20%,transparent))] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-primary)]'
+    : 'inline-flex items-center gap-1.5 rounded-full border border-transparent px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] hover:text-[var(--aethel-text-primary)]'
 }
 
 function NavLinkRow({
@@ -33,7 +34,8 @@ function NavLinkRow({
           href={link.href}
           className={linkClass(isNavLinkActive(pathname, link))}
         >
-          {link.label}
+          <span>{link.label}</span>
+          <MaturityBadge path={link.href} compact />
         </Link>
       ))}
     </>

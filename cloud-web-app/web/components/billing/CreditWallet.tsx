@@ -4,7 +4,7 @@ import { logger } from '@/lib/observability/logger';
 /**
  * CreditWallet - UI Completa de Carteira de creditos
  *
- * Painel que mostra saldo, histórico e opções de recarga.
+ * Painel que mostra saldo, history e opções de recarga.
  * Integra com /api/wallet/* endpoints.
  *
  * @see ALINHAMENTO_PLANO_NEGOCIO_E_CUSTOS_2026.md - Seção 4
@@ -322,7 +322,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
       });
 
       if (!response.ok) {
-        throw new Error('Compra falhou');
+        throw new Error('Compra failed');
       }
 
       const { checkoutUrl } = await response.json();
@@ -462,26 +462,26 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
                 />
               </div>
               <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">
-                {wallet.monthlyLimit - wallet.monthlyUsage} creditos restantes neste ciclo
+                {wallet.monthlyLimit - wallet.monthlyUsage} credits remaining this cycle
               </p>
             </div>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-3">
-              <button type="button" aria-label="Ir para compra de creditos"
+              <button type="button" aria-label="Go to credit purchase"
                 onClick={() => setActiveTab('purchase')}
                 className="flex items-center justify-center gap-2 p-3 bg-[var(--aethel-primary)] hover:brightness-110 rounded-xl text-[var(--aethel-text-primary)] font-medium transition-colors"
               >
                 <Sparkles className="w-5 h-5" />
-                Comprar creditos
+                Buy credits
               </button>
               {onUpgrade && (
-                <button type="button" aria-label="Fazer upgrade do plano"
+                <button type="button" aria-label="Upgrade plan"
                   onClick={onUpgrade}
                   className="flex items-center justify-center gap-2 p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-xl text-[var(--aethel-text-primary)] font-medium transition-colors"
                 >
                   <Crown className="w-5 h-5 text-[var(--aethel-warning-light)]" />
-                  Upgrade de Plano
+                  Plan upgrade
                 </button>
               )}
             </div>
@@ -494,7 +494,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             {transactions.length === 0 ? (
               <div className="text-center py-8 text-[var(--aethel-text-tertiary)]">
                 <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>Nenhuma transacao ainda</p>
+                <p>No transactions yet</p>
               </div>
             ) : (
               <div className="space-y-1">
@@ -510,7 +510,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
         {activeTab === 'purchase' && (
           <div className="space-y-4">
             <p className="text-sm text-[var(--aethel-text-tertiary)]">
-              Escolha um pacote de creditos para recarregar sua carteira.
+              Choose a credit package to reload your wallet.
             </p>
 
             <div className="grid grid-cols-2 gap-4">
@@ -528,11 +528,11 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-[var(--aethel-text-tertiary)] mt-0.5" />
                 <div className="text-sm text-[var(--aethel-text-tertiary)]">
-                  <p className="font-medium text-[var(--aethel-text-secondary)] mb-1">Sobre os creditos</p>
+                  <p className="font-medium text-[var(--aethel-text-secondary)] mb-1">About os creditos</p>
                   <ul className="space-y-1 text-xs">
-                    <li>- creditos não expiram enquanto a conta estiver ativa</li>
-                    <li>- Chat simples: 1 crédito / Squad Task: ~20 creditos</li>
-                    <li>- bonus são adicionados automaticamente na compra</li>
+                    <li>- credits do not expire while the account is active</li>
+                    <li>- Simple chat: 1 credit / Squad Task: ~20 credits</li>
+                    <li>- bonuses are added automatically at purchase</li>
                   </ul>
                 </div>
               </div>

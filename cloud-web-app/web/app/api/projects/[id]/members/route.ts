@@ -9,8 +9,10 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+const log = createComponentLogger('api/projects/members/route');
 
 // GET /api/projects/[id]/members
 export async function GET(
@@ -80,7 +82,7 @@ export async function GET(
 			collaboratorsLimit: entitlements.plan.limits.collaborators,
 		});
 	} catch (error) {
-		console.error('Failed to list members:', error);
+		log.error('Failed to list members', error);
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
 		return apiInternalError();
@@ -137,7 +139,7 @@ export async function POST(
 					{
 						success: false,
 						error: 'COLLABORATOR_LIMIT_REACHED',
-						message: `Limite de ${collaboratorsLimit} colaboradores atingido. Faça upgrade para adicionar mais.`,
+						message: `Limite de ${collaboratorsLimit} collaborators reached. Upgrade to add more.`,
 						plan: entitlements.plan.id,
 					},
 					{ status: 402 }
@@ -222,7 +224,7 @@ export async function POST(
 			member,
 		}, { status: 201 });
 	} catch (error) {
-		console.error('Failed to add member:', error);
+		log.error('Failed to add member', error);
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
 		return apiInternalError();

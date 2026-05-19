@@ -12,6 +12,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/ai/director/[projectId]/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -123,7 +126,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Director API error:', error);
+    routeLogger.error('Director API error:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -195,8 +198,8 @@ async function generateDirectorNotes(
       category: 'gameplay',
       severity: 'suggestion',
       title: 'Considere adicionar feedback de impacto',
-      description: 'Efeitos de partículas e screen shake em colisões aumentam a sensação de peso e impacto.',
-      suggestion: 'Adicione um componente de CameraShake às armas e um sistema de partículas para impactos.',
+      description: 'Particle effects and screen shake on collisions increase the feeling of weight and impact.',
+      suggestion: 'Add a CameraShake component to weapons and a particle system for impacts.',
       autoFixAvailable: true,
       createdAt: now,
       status: 'new',
@@ -208,9 +211,9 @@ async function generateDirectorNotes(
       id: `note_${now}_2`,
       category: 'lighting',
       severity: 'recommendation',
-      title: 'Iluminação de 3 pontos incompleta',
-      description: 'A cena principal não possui luz de preenchimento (fill light), resultando em sombras muito duras.',
-      suggestion: 'Adicione uma luz suave a 45° do lado oposto à luz principal com intensidade de 30-50%.',
+      title: 'Incomplete three-point lighting',
+      description: 'The main scene has no fill light, resulting in shadows that are too harsh.',
+      suggestion: 'Add a soft light at 45 degrees opposite the key light with 30-50% intensity.',
       autoFixAvailable: true,
       reference: {
         type: 'scene',
@@ -226,8 +229,8 @@ async function generateDirectorNotes(
     id: `note_${now}_3`,
     category: 'composition',
     severity: 'suggestion',
-    title: 'Regra dos terços pode melhorar',
-    description: 'O ponto focal está centralizado. Considere posicioná-lo em uma das interseções da grade.',
+    title: 'Rule of thirds can improve',
+    description: 'The focal point is centered. Consider positioning it on one of the grid intersections.',
     autoFixAvailable: false,
     createdAt: now,
     status: 'new',
@@ -249,7 +252,7 @@ async function generateDirectorNotes(
       id: `note_${now}_5`,
       category: 'ux',
       severity: 'recommendation',
-      title: 'Tutorial implícito',
+      title: 'Implicit tutorial',
       description: 'Os primeiros 30 segundos devem ensinar os controles sem texto. Considere gating visual.',
       autoFixAvailable: false,
       createdAt: now,
@@ -285,15 +288,15 @@ function calculateOverallScore(notes: DirectorNote[]): {
   const improvements: string[] = [];
 
   if (!criticalCategories.includes('composition')) {
-    strengths.push('Composição visual sólida');
+    strengths.push('Solid visual composition');
   }
   if (!criticalCategories.includes('color')) {
     strengths.push('Paleta de cores coerente');
   }
   if (!criticalCategories.includes('lighting')) {
-    strengths.push('Iluminação bem executada');
+    strengths.push('Well-executed lighting');
   } else {
-    improvements.push('Refinar sistema de iluminação');
+    improvements.push('Refine lighting system');
   }
 
   // Improvements baseados em notas

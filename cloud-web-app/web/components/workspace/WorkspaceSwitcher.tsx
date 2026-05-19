@@ -44,9 +44,9 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
 
   const handleRemoveFolder = async (index: number) => {
     const shouldRemove = await openConfirmDialog({
-      title: 'Remover pasta',
-      message: 'Remover esta pasta do workspace?',
-      confirmText: 'Remover',
+      title: 'Remove pasta',
+      message: 'Remove esta pasta do workspace?',
+      confirmText: 'Remove',
       cancelText: 'Cancel',
     });
     if (!shouldRemove) return;
@@ -88,7 +88,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
                 className="add-button"
                 onClick={() => setShowAddFolder(!showAddFolder)}
               >
-                + Adicionar pasta
+                + Add pasta
               </button>
             </div>
 
@@ -101,13 +101,13 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
                   onChange={(e) => setNewFolderPath(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddFolder()}
                 />
-                <button type="button" onClick={handleAddFolder}>Adicionar</button>
+                <button type="button" onClick={handleAddFolder}>Add</button>
               </div>
             )}
 
             <div className="folder-list">
               {folders.length === 0 ? (
-                <div className="empty-state">Nenhuma pasta no workspace</div>
+                <div className="empty-state">No pasta no workspace</div>
               ) : (
                 folders.map((folder) => (
                   <div key={folder.uri} className="folder-item">
@@ -119,7 +119,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
                       type="button"
                       className="remove-button"
                       onClick={() => handleRemoveFolder(folder.index)}
-                      aria-label={`Remover pasta ${folder.name}`}
+                      aria-label={`Remove pasta ${folder.name}`}
                     >
                       ×
                     </button>
@@ -136,7 +136,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
 
             <div className="recent-list">
               {recentWorkspaces.length === 0 ? (
-                <div className="empty-state">Nenhum workspace recente</div>
+                <div className="empty-state">No workspace recente</div>
               ) : (
                 recentWorkspaces.map((Workspace) => (
                   <div

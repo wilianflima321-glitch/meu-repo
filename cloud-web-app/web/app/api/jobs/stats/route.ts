@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/jobs/stats/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -111,7 +114,7 @@ export async function GET(request: NextRequest) {
         { status: 503 }
       );
     }
-    console.error('Failed to fetch queue statistics:', error);
+    routeLogger.error('Failed to fetch queue statistics:', error);
     return NextResponse.json(
       { error: 'Failed to fetch queue statistics' },
       { status: 500 }

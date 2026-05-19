@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const log = createComponentLogger('api/admin/fine-tuning/jobs/route');
 
 export const GET = withAdminAuth(
   async () => {
@@ -12,7 +15,7 @@ export const GET = withAdminAuth(
       });
       return NextResponse.json({ items });
     } catch (error) {
-      console.error('[Admin Fine Tuning Jobs] Error:', error);
+      log.error('[Admin Fine Tuning Jobs] Error', error);
       return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 });
     }
   },
@@ -30,7 +33,7 @@ export const POST = withAdminAuth(
       };
 
       if (!datasetId) {
-        return NextResponse.json({ error: 'Dataset obrigatório' }, { status: 400 });
+        return NextResponse.json({ error: 'Dataset is required' }, { status: 400 });
       }
 
       const fineTuneJob = (prisma as any).fineTuneJob;
@@ -58,7 +61,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ item: job });
     } catch (error) {
-      console.error('[Admin Fine Tuning Jobs] Error:', error);
+      log.error('[Admin Fine Tuning Jobs] Error', error);
       return NextResponse.json({ error: 'Failed to create job' }, { status: 500 });
     }
   },

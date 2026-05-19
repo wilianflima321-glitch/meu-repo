@@ -37,12 +37,12 @@ export default function AIUpgrades() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/ai/enhancements');
-      if (!res.ok) throw new Error('Falha ao carregar melhorias');
+      if (!res.ok) throw new Error('Failed to load melhorias');
       const json = await res.json();
       setUpgrades(json.items || []);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar melhorias');
+      setError(err instanceof Error ? err.message : 'Error loading melhorias');
     } finally {
       setLoading(false);
     }
@@ -64,38 +64,38 @@ export default function AIUpgrades() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: upgrade.id, applied: !upgrade.applied, status: upgrade.applied ? upgrade.status : 'applied' }),
       });
-      if (!res.ok) throw new Error('Falha ao atualizar melhoria');
+      if (!res.ok) throw new Error('Failed to update melhoria');
       await fetchUpgrades();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar melhoria');
+      setError(err instanceof Error ? err.message : 'Error updating melhoria');
     }
   };
 
   return (
     <div className='p-6 max-w-6xl mx-auto'>
       <h1 className='text-3xl font-bold mb-6'>Melhorias para IA Aethel</h1>
-      <p className='mb-4 text-[var(--aethel-text-secondary)]'>Matriz de maturidade: capacidades atuais, lacunas e melhorias priorizadas com governança.</p>
+      <p className='mb-4 text-[var(--aethel-text-secondary)]'>Maturity matrix: current capabilities, gaps, and prioritized improvements with governance.</p>
 
       <div className='mb-6'>
-        <h2 className='text-xl font-semibold mb-4'>O que Aethel Já Tem (Pontos Fortes)</h2>
+        <h2 className='text-xl font-semibold mb-4'>What Aethel Already Has (Strengths)</h2>
         <ul className='list-disc ml-5 space-y-2'>
-          <li><strong>Integração IDE:</strong> Foco em desenvolvimento, fine-tuning personalizado.</li>
-          <li><strong>Agentes e Detecção de Viés:</strong> Modo agent básico, correção ética.</li>
-          <li><strong>Eficiência:</strong> Treinamento otimizado, custo-eficiente.</li>
-          <li><strong>Modularidade:</strong> Seguro, sem conflitos, escalável.</li>
+          <li><strong>IDE integration:</strong> Focus on development and personalized fine-tuning.</li>
+          <li><strong>Agents and Bias Detection:</strong> Basic agent mode and ethical correction.</li>
+          <li><strong>Efficiency:</strong> Optimized, cost-efficient training.</li>
+          <li><strong>Modularity:</strong> Safe, conflict-free, scalable.</li>
         </ul>
       </div>
 
       <div className='mb-6'>
         <h2 className='text-xl font-semibold mb-4'>Lacunas Identificadas (Benchmark interno)</h2>
         <ul className='list-disc ml-5 space-y-2'>
-          <li><strong>Raciocínio:</strong> Robustez variável em contextos complexos; requer validação e revisão humana.</li>
-          <li><strong>Multimodal:</strong> Cobertura parcial de imagem/áudio/vídeo; precisa de pipeline consistente.</li>
+          <li><strong>Reasoning:</strong> Variable robustness in complex contexts; requires validation and human review.</li>
+          <li><strong>Multimodal:</strong> Partial image/audio/video coverage; needs a consistent pipeline.</li>
           <li><strong>Criatividade:</strong> Forte em engenharia, limitada para arte e narrativa sem curadoria.</li>
-          <li><strong>Processamento:</strong> Arquivos grandes e streaming precisam de otimização de memória e I/O.</li>
-          <li><strong>Programação:</strong> Alta performance, porém ainda há gaps em domínios específicos e otimização fina.</li>
-          <li><strong>Modo Agent:</strong> Colaboração e planejamento multi‑agente em evolução.</li>
-          <li><strong>Ética e Filtros:</strong> Detecção boa, mas faltam dashboards visuais e regras dinâmicas avançadas.</li>
+          <li><strong>Processing:</strong> Large files and streaming need memory and I/O optimization.</li>
+          <li><strong>Programming:</strong> High performance, but still with gaps in specific domains and fine optimization.</li>
+          <li><strong>Agent Mode:</strong> Collaboration and multi-agent planning are evolving.</li>
+          <li><strong>Ethics and Filters:</strong> Detection is good, but visual dashboards and advanced dynamic rules are missing.</li>
         </ul>
       </div>
 
@@ -115,7 +115,7 @@ export default function AIUpgrades() {
           </div>
         )}
         {loading ? (
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando melhorias...</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Loading improvements...</p>
         ) : filtered.length === 0 ? (
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Nenhuma melhoria encontrada.</p>
         ) : (
@@ -128,7 +128,7 @@ export default function AIUpgrades() {
                     <p className={`text-sm font-medium px-2 py-0.5 rounded-full inline-block ${statusColors[upgrade.status]}`}>
                       Status: {statusLabels[upgrade.status]}
                     </p>
-                    <p className="mt-2 text-[var(--aethel-text-secondary)]">{upgrade.description || 'Sem descrição'}</p>
+                    <p className="mt-2 text-[var(--aethel-text-secondary)]">{upgrade.description || 'No description'}</p>
                   </div>
                   <button type="button"
                     onClick={() => applyUpgrade(upgrade)}
@@ -144,12 +144,12 @@ export default function AIUpgrades() {
       </div>
 
       <div className='p-4 bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] rounded-lg'>
-        <h3 className='font-semibold'>Diretrizes de Evolução:</h3>
+        <h3 className='font-semibold'>Evolution Guidelines:</h3>
         <ul className='list-disc ml-5'>
-          <li>Priorize confiabilidade com validação, métricas e aprovação por ambiente.</li>
+          <li>Prioritize reliability with validation, metrics, and approval by environment.</li>
           <li>Expanda multimodal com curadoria e limites de custo/qualidade.</li>
-          <li>Eleve o modo agente com planejamento, execução auditável e rollback.</li>
-          <li>Reforce segurança, compliance e observabilidade em todas as rotas.</li>
+          <li>Elevate agent mode with planning, auditable execution, and rollback.</li>
+          <li>Strengthen security, compliance, and observability across all routes.</li>
         </ul>
       </div>
     </div>

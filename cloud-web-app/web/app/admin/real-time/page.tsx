@@ -39,9 +39,9 @@ export default function RealTimePage() {
         fetch('/api/admin/audit?limit=20'),
       ]);
 
-      if (!quickStatsRes.ok) throw new Error('Falha ao carregar estatísticas rápidas');
-      if (!infraRes.ok) throw new Error('Falha ao carregar infraestrutura');
-      if (!auditRes.ok) throw new Error('Falha ao carregar logs de auditoria');
+      if (!quickStatsRes.ok) throw new Error('Failed to load quick statistics');
+      if (!infraRes.ok) throw new Error('Failed to load infraestrutura');
+      if (!auditRes.ok) throw new Error('Failed to load logs de audit');
 
       const quickStats = await quickStatsRes.json();
       const infra = await infraRes.json();
@@ -57,7 +57,7 @@ export default function RealTimePage() {
       setError(null);
       setLastUpdated(new Date());
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
+      setError(err instanceof Error ? err.message : 'Error loading dados');
     } finally {
       setLoading(false);
     }
@@ -117,25 +117,25 @@ export default function RealTimePage() {
               <>
                 {index === 0 && (
                   <>
-                    <h3 className="text-lg font-semibold">Usuários online</h3>
+                    <h3 className="text-lg font-semibold">Users online</h3>
                     <p className="text-2xl font-bold text-[var(--aethel-primary)]">{metrics.usersOnline}</p>
                   </>
                 )}
                 {index === 1 && (
                   <>
-                    <h3 className="text-lg font-semibold">Requisições de API/min</h3>
+                    <h3 className="text-lg font-semibold">API requests/min</h3>
                     <p className="text-2xl font-bold text-[var(--aethel-success)]">{metrics.apiRequests}</p>
                   </>
                 )}
                 {index === 2 && (
                   <>
-                    <h3 className="text-lg font-semibold">Uso de CPU</h3>
+                    <h3 className="text-lg font-semibold">CPU usage</h3>
                     <p className="text-2xl font-bold text-[var(--aethel-error)]">{metrics.cpuUsage.toFixed(0)}%</p>
                   </>
                 )}
                 {index === 3 && (
                   <>
-                    <h3 className="text-lg font-semibold">Uso de memória</h3>
+                    <h3 className="text-lg font-semibold">Memory usage</h3>
                     <p className="text-2xl font-bold text-[var(--aethel-primary)]">{metrics.memoryUsage.toFixed(0)}%</p>
                   </>
                 )}
@@ -162,7 +162,7 @@ export default function RealTimePage() {
           ) : (
             filteredLogs.map((log) => (
               <p key={log.id} className="text-sm">
-                [{new Date(log.createdAt).toLocaleString()}] {log.action || 'ação'} {log.resource ? `(${log.resource})` : ''}
+                [{new Date(log.createdAt).toLocaleString()}] {log.action || 'action'} {log.resource ? `(${log.resource})` : ''}
               </p>
             ))
           )}

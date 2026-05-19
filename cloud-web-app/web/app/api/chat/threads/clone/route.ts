@@ -98,10 +98,10 @@ export async function POST(req: NextRequest) {
     });
 
     if (!source) {
-      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread de origem não encontrada.' }, { status: 404 });
+      return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Source thread not found.' }, { status: 404 });
     }
 
-    const title = titleRaw || `${source.title} (cópia)`;
+    const title = titleRaw || `${source.title} (copy)`;
 
     const newThread = await prisma.chatThread.create({
       data: {

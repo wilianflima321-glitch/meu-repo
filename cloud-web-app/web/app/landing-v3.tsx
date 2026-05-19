@@ -1,39 +1,39 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, Clock3, Link2, Sparkles } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 import LandingMissionBox from '@/app/landing-v3-mission-box'
+import LandingStudioProof from '@/app/landing-v3-studio-proof'
 
 const START_MODES = [
   {
     title: 'Apps / Sites',
-    description: 'Criar produto, landing, auth, billing e deploy.',
+    description: 'Build a product, landing page, auth, billing, and deploy path.',
     href: '/dashboard?onboarding=1&source=home-apps',
   },
   {
     title: 'Research',
-    description: 'Pesquisar concorrentes, validar decisoes e montar brief.',
+    description: 'Research competitors, validate decisions, and prepare a launch brief.',
     href: '/dashboard?onboarding=1&source=home-research',
   },
   {
     title: 'Cloud / DevOps',
-    description: 'Configurar dominio, ambiente, deploy e custos.',
+    description: 'Configure domains, environments, deployment, and costs.',
     href: '/dashboard?onboarding=1&source=home-cloud',
   },
   {
     title: 'Growth / Ops',
-    description: 'Conectar analytics, CRM, suporte e automacoes.',
+    description: 'Connect analytics, CRM, support, and automations.',
     href: '/dashboard?onboarding=1&source=home-growth',
   },
   {
     title: 'Games',
-    description: 'Organizar worlds, assets, build e preview.',
+    description: 'Organize worlds, assets, builds, and previews.',
     href: '/dashboard?onboarding=1&source=home-games',
   },
   {
     title: 'Films / Media',
-    description: 'Planejar shots, assets, render e aprovacoes.',
+    description: 'Plan shots, assets, render passes, and approvals.',
     href: '/dashboard?onboarding=1&source=home-media',
   },
 ]
@@ -42,21 +42,21 @@ const RECENT_MISSIONS = [
   {
     title: 'Fix failing deployment',
     state: 'Ready for review',
-    detail: 'Preview publicada e aguardando aprovacao.',
+    detail: 'Preview published and waiting for approval.',
     href: '/dashboard?tab=overview&source=resume-review',
     tone: 'success',
   },
   {
     title: 'Launch marketing site',
     state: 'In progress',
-    detail: 'Plano ativo com studio e agentes em execucao.',
+    detail: 'Active plan with studio and agents running.',
     href: '/dashboard?tab=overview&source=resume-launch',
     tone: 'info',
   },
   {
     title: 'Research competitor matrix',
     state: 'Blocked',
-    detail: 'Falta conectar uma fonte antes de continuar.',
+    detail: 'Connect one source before continuing.',
     href: '/dashboard?tab=overview&source=resume-research',
     tone: 'warning',
   },
@@ -65,9 +65,9 @@ const RECENT_MISSIONS = [
 const CONNECTED_TOOLS = ['GitHub', 'Vercel', 'Cloudflare', 'Stripe', 'Notion']
 
 const STUDIO_SIGNALS = [
-  'Mission intake sem poluicao',
-  'Operator, preview e evidence no mesmo fluxo',
-  'Studio Cloud e Studio Local com a mesma gramatica',
+  'Mission intake without clutter',
+  'Operator, preview, and evidence in one flow',
+  'Studio Cloud and Studio Local share one grammar',
 ]
 
 function toneClass(tone: 'success' | 'info' | 'warning') {
@@ -105,7 +105,7 @@ export default function LandingPageV3() {
                 Ask Aethel to build, research, fix or operate anything.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--aethel-text-secondary)] sm:text-base">
-                Entre por uma missao clara. Continue no Mission Control. Aprofunde no Studio so quando a tarefa pedir.
+                Start with a clear mission. Continue in Mission Control. Go deeper in Studio only when the work calls for it.
               </p>
 
               <LandingMissionBox />
@@ -149,7 +149,7 @@ export default function LandingPageV3() {
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
                       Continue mission
                     </p>
-                    <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">Retome sem reexplicar tudo</p>
+                    <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">Resume without explaining everything again</p>
                   </div>
                   <Clock3 className="h-4 w-4 text-[var(--aethel-text-quaternary)]" />
                 </div>
@@ -176,7 +176,7 @@ export default function LandingPageV3() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Studio depth</p>
-                    <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">Cloud agora. Local quando a tarefa exigir.</p>
+                    <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">Cloud now. Local runtime when the task requires it.</p>
                   </div>
                   <Link
                     href="/ide"
@@ -185,16 +185,7 @@ export default function LandingPageV3() {
                     Open Studio
                   </Link>
                 </div>
-                <div className="mt-4 overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)]">
-                  <Image
-                    src="/screenshots/editor.png"
-                    alt="Aethel Studio preview"
-                    width={1280}
-                    height={760}
-                    className="h-auto w-full object-cover"
-                    priority
-                  />
-                </div>
+                <LandingStudioProof />
                 <ul className="mt-4 space-y-2 text-xs text-[var(--aethel-text-secondary)]">
                   {STUDIO_SIGNALS.map((signal) => (
                     <li key={signal} className="flex items-center gap-2">
@@ -214,7 +205,7 @@ export default function LandingPageV3() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Start points</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Escolha um modo de entrada, nao um mar de features.</h2>
+                  <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Choose an entry mode, not a wall of features.</h2>
                 </div>
                 <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_66%,transparent)] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">
                   6 modos
@@ -239,9 +230,9 @@ export default function LandingPageV3() {
                 <Link2 className="h-3.5 w-3.5" />
                 Connected tools
               </div>
-              <p className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Aethel funciona melhor quando suas ferramentas ja estao por perto.</p>
+              <p className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Aethel works best when your tools are already nearby.</p>
               <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                Navegue, configure, pesquise e publique no mesmo fluxo sem virar uma colecao de produtos soltos.
+                Navigate, configure, research, and publish in one workflow instead of a pile of disconnected products.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 {CONNECTED_TOOLS.map((tool) => (
@@ -254,7 +245,7 @@ export default function LandingPageV3() {
                 ))}
               </div>
               <div className="mt-6 rounded-[22px] border border-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] px-4 py-4 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                Web Light para entrar. Mission Control para orientar. Studio para executar. Local para romper o teto do browser.
+                Web Light to enter. Mission Control to orient. Studio to execute. Local runtime to break past browser limits.
               </div>
             </div>
           </div>
@@ -264,9 +255,9 @@ export default function LandingPageV3() {
           <div className="grid gap-4 rounded-[34px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.78),rgba(8,10,16,0.92))] p-6 shadow-[0_26px_90px_rgba(2,6,23,0.38)] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:p-8">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Next step</p>
-              <h2 className="mt-3 text-3xl font-semibold text-[var(--aethel-text-primary)]">Entre pelo fluxo leve. Aprofunde so quando fizer sentido.</h2>
+              <h2 className="mt-3 text-3xl font-semibold text-[var(--aethel-text-primary)]">Enter through the light workflow. Go deeper only when it makes sense.</h2>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--aethel-text-secondary)]">
-                Sem landing de marketing antiga. Sem cockpit pesado cedo demais. Um unico produto, com profundidade progressiva.
+                No old marketing wall. No heavy cockpit too early. One product with progressive depth.
               </p>
             </div>
             <div className="flex flex-wrap gap-3 lg:justify-end">

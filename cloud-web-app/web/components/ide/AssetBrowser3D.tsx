@@ -109,7 +109,7 @@ export function AssetBrowser3D({ assets = defaultAssets, onAssetSelect, onAssetD
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar assets..."
+            placeholder="Search assets..."
             className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-primary)] outline-none transition focus:border-[var(--aethel-primary)]"
           />
         </div>

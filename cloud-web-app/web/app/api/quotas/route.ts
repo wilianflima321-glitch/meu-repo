@@ -12,6 +12,9 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { getPlanLimits, getUsageStatus, recordTokenUsage } from '@/lib/plan-limits';
 import { getUserStorageUsed } from '@/lib/storage-quota';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/quotas/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -100,7 +103,7 @@ export async function GET(request: NextRequest) {
       quotas: quotaStatus,
     });
   } catch (error) {
-    console.error('Failed to get quotas:', error);
+    routeLogger.error('Failed to get quotas:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -198,7 +201,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Failed to process quota:', error);
+    routeLogger.error('Failed to process quota:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

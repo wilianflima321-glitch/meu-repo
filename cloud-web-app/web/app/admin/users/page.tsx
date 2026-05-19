@@ -18,7 +18,7 @@ type AdminUserApiRecord = {
 };
 
 /**
- * Admin Users - Gerenciamento de usuários
+ * Admin Users - Gerenciamento de users
  * Planos alinhados com estratégia 2025 (sem Free)
  */
 export default function AdminUsers() {
@@ -39,9 +39,9 @@ export default function AdminUsers() {
 
   const planLabels: Record<string, string> = {
     starter: 'Inicial',
-    basic: 'Básico',
+    basic: 'Basic',
     pro: 'Pro',
-    studio: 'Estúdio',
+    studio: 'Studio',
     enterprise: 'Empresarial',
   };
 
@@ -49,7 +49,7 @@ export default function AdminUsers() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/users');
-      if (!res.ok) throw new Error('Falha ao carregar usuários');
+      if (!res.ok) throw new Error('Failed to load users');
       const data = await res.json();
       const nextUsers = Array.isArray(data?.users) ? data.users as AdminUserApiRecord[] : [];
       setUsers(nextUsers.map((user) => ({
@@ -64,7 +64,7 @@ export default function AdminUsers() {
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar usuários');
+      setError(err instanceof Error ? err.message : 'Error loading users');
     } finally {
       setLoading(false);
     }
@@ -95,8 +95,8 @@ export default function AdminUsers() {
     <div className='p-6 max-w-7xl mx-auto'>
       <AdminPageHeader
         className='mb-6'
-        title='Usuários'
-        subtitle='Gerencie perfis, planos e status de ativação.'
+        title='Users'
+        subtitle='Gerencie perfis, planos e status de ativaction.'
         meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
         actions={(
           <button type="button"
@@ -113,7 +113,7 @@ export default function AdminUsers() {
         columns={3}
         items={[
           { icon: UsersIcon, label: 'Total', value: summary.total },
-          { icon: CheckCircle, label: 'Planos ativos', value: summary.activePlans, tone: 'success' },
+          { icon: CheckCircle, label: 'Planos assets', value: summary.activePlans, tone: 'success' },
           { icon: Clock, label: 'Testes', value: summary.trials, tone: 'warning' },
         ]}
       />
@@ -147,15 +147,15 @@ export default function AdminUsers() {
             <th className='p-3'>Nome</th>
             <th className='p-3'>E-mail</th>
             <th className='p-3'>Plano</th>
-            <th className='p-3'>Projetos</th>
-            <th className='p-3'>Sessões</th>
+            <th className='p-3'>Projects</th>
+            <th className='p-3'>Sessions</th>
             <th className='p-3'>Criado em</th>
           </tr>
         </thead>
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={6}>Carregando usuários...</td>
+              <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={6}>Loading users...</td>
             </tr>
           ) : error ? (
             <tr>
@@ -163,7 +163,7 @@ export default function AdminUsers() {
             </tr>
           ) : filteredUsers.length === 0 ? (
             <tr>
-              <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={6}>Nenhum usuário encontrado.</td>
+              <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={6}>No user found.</td>
             </tr>
           ) : (
             filteredUsers.map(user => (

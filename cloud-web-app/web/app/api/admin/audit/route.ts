@@ -8,6 +8,9 @@ import type { Prisma } from '@prisma/client';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/audit/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -57,7 +60,7 @@ async function getHandler(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Failed to get audit logs:', error);
+    routeLogger.error('Failed to get audit logs:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

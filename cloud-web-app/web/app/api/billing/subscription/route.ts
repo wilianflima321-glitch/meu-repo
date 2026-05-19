@@ -3,6 +3,9 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/billing/subscription/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +41,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Billing subscription error:', error);
+    routeLogger.error('Billing subscription error:', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

@@ -11,7 +11,7 @@ interface WelcomeWizardProps {
 
 const STEPS = [
   {
-    title: 'Bem-vindo ao Aethel Studio',
+    title: 'Welcome ao Aethel Studio',
     description: 'Apps e Research sao as trilhas prontas hoje. Games e Films seguem em roadmap.',
   },
   {
@@ -19,7 +19,7 @@ const STEPS = [
     description: 'Conecte uma API key para respostas reais e rastreaveis. Nada e simulado.',
   },
   {
-    title: 'Crie seu primeiro projeto',
+    title: 'Create your first project',
     description: 'Escolha um template e valide o ciclo completo no dashboard.',
   },
 ]

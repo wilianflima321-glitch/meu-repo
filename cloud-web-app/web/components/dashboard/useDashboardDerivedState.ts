@@ -75,7 +75,7 @@ export function useDashboardDerivedState({
     [sessionHistory, sessionFilter]
   )
   const aiActivity = useMemo(
-    () => (isStreaming ? 'Processando' : filteredSessions.length > 0 ? 'Ativo' : 'Ocioso'),
+    () => (isStreaming ? 'Processing' : filteredSessions.length > 0 ? 'Active' : 'Idle'),
     [isStreaming, filteredSessions.length]
   )
   const fullAccessActiveGrant = useMemo(() => {
@@ -88,7 +88,7 @@ export function useDashboardDerivedState({
     const status = String((healthData as { status?: string }).status ?? '').toLowerCase()
     return status === '' || status === 'ok' || status === 'healthy' || status === 'online'
   }, [healthData, healthError])
-  const authErrorText = authReady && !hasToken ? 'Sessao nao autenticada para recursos privados.' : null
+  const authErrorText = authReady && !hasToken ? 'Unauthenticated session for private resources.' : null
   const billingErrorText = billingError ? mapSubscribeError(billingError) : null
 
   const billingPlansForUI = useMemo<BillingPlanUI[]>(() => {

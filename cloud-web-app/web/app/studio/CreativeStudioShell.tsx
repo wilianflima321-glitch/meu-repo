@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import StudioLayout from '@/components/studio/StudioLayout'
+import MaturityBadge from '@/components/ui/MaturityBadge'
 import { isNavLinkActive, STUDIO_PRIMARY_LINKS } from '@/lib/navigation/surfaces'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 import { CREATIVE_STUDIO_ROUTES } from './creative-studio-routes'
@@ -96,20 +97,22 @@ export default function CreativeStudioShell({
       >
         <Link
           href="/studio"
-          className={`${creativeTabClass(pathname === '/studio')} inline-flex min-h-10 shrink-0 items-center whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]`}
+          className={`${creativeTabClass(pathname === '/studio')} inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]`}
           aria-current={pathname === '/studio' ? 'page' : undefined}
         >
-          Creative Hub
+          <span>Creative Hub</span>
+          <MaturityBadge path="/studio" compact />
         </Link>
         {CREATIVE_STUDIO_ROUTES.map((route) => (
           <Link
             key={route.href}
             href={route.href}
-            className={`${creativeTabClass(currentHref === route.href || pathname === route.href)} inline-flex min-h-10 shrink-0 items-center whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]`}
+            className={`${creativeTabClass(currentHref === route.href || pathname === route.href)} inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]`}
             title={route.description}
             aria-current={currentHref === route.href || pathname === route.href ? 'page' : undefined}
           >
-            {route.shortLabel}
+            <span>{route.shortLabel}</span>
+            <MaturityBadge maturity={route.maturity} compact />
           </Link>
         ))}
       </nav>

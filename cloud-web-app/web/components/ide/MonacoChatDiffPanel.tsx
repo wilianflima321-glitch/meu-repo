@@ -26,7 +26,7 @@ export type MonacoChatDiffPanelProps = {
   filePath: string
   original: string
   modified: string
-  /** Recebe o texto final do lado modificado. */
+  /** Recebe o texto final do lado modified. */
   onAcceptAll: (finalModified: string) => void
   onReject: () => void
 }

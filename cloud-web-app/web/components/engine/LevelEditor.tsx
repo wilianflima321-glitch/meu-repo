@@ -29,6 +29,7 @@ import {
   useHelper,
 } from '@react-three/drei';
 import * as THREE from 'three';
+import StudioEngineModuleMiniPanel from '@/components/studio/StudioEngineModuleMiniPanel';
 import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
 
 // ============================================================================
@@ -54,6 +55,7 @@ import { DetailsPanelMini, OutlinerMini, Toolbar } from './LevelEditorPanels';
 import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('LevelEditor')
+const LEVEL_ENGINE_MODULES = ['world-streaming', 'quest-system', 'save-manager', 'inventory-system'] as const
 
 
 // ============================================================================
@@ -746,11 +748,14 @@ export default function LevelEditor() {
         </div>
 
         {/* Right Panel - Details */}
-        <div style={{ width: '300px', borderLeft: '1px solid var(--aethel-border-primary)', background: 'var(--aethel-surface-secondary)' }}>
-          <DetailsPanelMini
-            object={selectedObject}
-            onChange={handleObjectChange}
-          />
+        <div style={{ width: '320px', borderLeft: '1px solid var(--aethel-border-primary)', background: 'var(--aethel-surface-secondary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ minHeight: 0, flex: 1, overflow: 'auto' }}>
+            <DetailsPanelMini
+              object={selectedObject}
+              onChange={handleObjectChange}
+            />
+          </div>
+          <StudioEngineModuleMiniPanel title="World systems" moduleIds={LEVEL_ENGINE_MODULES} />
         </div>
       </div>
     </div>

@@ -91,9 +91,9 @@ interface IDELayoutProps {
 }
 
 const SIDEBAR_TABS = [
-  { id: 'explorer' as const, icon: 'files' as CodiconName, label: 'Arquivos', shortcut: 'Ctrl+Shift+E' },
+  { id: 'explorer' as const, icon: 'files' as CodiconName, label: 'Files', shortcut: 'Ctrl+Shift+E' },
   { id: 'search' as const, icon: 'search' as CodiconName, label: 'Busca', shortcut: 'Ctrl+Shift+F' },
-  { id: 'git' as const, icon: 'source-control' as CodiconName, label: 'Controle de codigo', shortcut: 'Ctrl+Shift+G' },
+  { id: 'git' as const, icon: 'source-control' as CodiconName, label: 'Source control', shortcut: 'Ctrl+Shift+G' },
   { id: 'ai' as const, icon: 'sparkle' as CodiconName, label: 'AI', shortcut: 'Ctrl+Shift+I' },
   { id: 'extensions' as const, icon: 'extensions' as CodiconName, label: 'Extensoes', shortcut: '' },
 ]
@@ -102,7 +102,7 @@ const BOTTOM_TABS = [
   { id: 'terminal' as const, icon: 'terminal' as CodiconName, label: 'Terminal' },
   { id: 'output' as const, icon: 'output' as CodiconName, label: 'Saida' },
   { id: 'problems' as const, icon: 'warning' as CodiconName, label: 'Problemas', badge: 0 },
-  { id: 'debug' as const, icon: 'debug' as CodiconName, label: 'Depuracao' },
+  { id: 'debug' as const, icon: 'debug' as CodiconName, label: 'Debug' },
   { id: 'ports' as const, icon: 'plug' as CodiconName, label: 'Portas' },
 ]
 
@@ -349,19 +349,19 @@ export default function IDELayout({
 
   const menuConfigs: MenuConfig[] = [
     {
-      label: 'Arquivo',
+      label: 'File',
       items: [
-        { label: 'Novo arquivo', shortcut: 'Ctrl+N', action: onNewFile },
+        { label: 'New file', shortcut: 'Ctrl+N', action: onNewFile },
         { label: 'Nova pasta', shortcut: 'Ctrl+Shift+N', action: onNewFolder },
         { separator: true, label: '' },
-        { label: 'Abrir arquivo', shortcut: 'Ctrl+O', action: onOpenFile },
-        { label: 'Abrir pasta', shortcut: 'Ctrl+Shift+O', action: onOpenFolder },
-        { label: 'Trocar contexto do projeto', shortcut: 'Ctrl+Alt+P', action: onSwitchProject },
+        { label: 'Open file', shortcut: 'Ctrl+O', action: onOpenFile },
+        { label: 'Open folder', shortcut: 'Ctrl+Shift+O', action: onOpenFolder },
+        { label: 'Switch project context', shortcut: 'Ctrl+Alt+P', action: onSwitchProject },
         { separator: true, label: '' },
         { label: 'Save', shortcut: 'Ctrl+S', action: onSaveFile },
         { label: 'Save all', shortcut: 'Ctrl+Alt+S', action: onSaveAll },
         { separator: true, label: '' },
-        { label: 'Exportar projeto', action: onExport },
+        { label: 'Export project', action: onExport },
       ],
     },
     {
@@ -371,7 +371,7 @@ export default function IDELayout({
         { label: 'Redo', shortcut: 'Ctrl+Shift+Z', action: onRedo },
         { separator: true, label: '' },
         { label: 'Cut', shortcut: 'Ctrl+X', action: onCut },
-        { label: 'Copiar', shortcut: 'Ctrl+C', action: onCopy },
+        { label: 'Copy', shortcut: 'Ctrl+C', action: onCopy },
         { label: 'Paste', shortcut: 'Ctrl+V', action: onPaste },
         { separator: true, label: '' },
         { label: 'Find', shortcut: 'Ctrl+F', action: onFind },
@@ -387,8 +387,8 @@ export default function IDELayout({
         { separator: true, label: '' },
         { label: 'Explorer', shortcut: 'Ctrl+Shift+E', action: () => openSidebarTab('explorer') },
         { label: 'Search', shortcut: 'Ctrl+Shift+F', action: () => openSidebarTab('search') },
-        { label: 'Controle de codigo', shortcut: 'Ctrl+Shift+G', action: () => openSidebarTab('git') },
-        { label: 'Atualizar previa', shortcut: 'Ctrl+Shift+V', action: onTogglePreview },
+        { label: 'Source control', shortcut: 'Ctrl+Shift+G', action: () => openSidebarTab('git') },
+        { label: 'Refresh preview', shortcut: 'Ctrl+Shift+V', action: onTogglePreview },
       ],
     },
     {
@@ -421,7 +421,7 @@ export default function IDELayout({
     {
       label: 'IA',
       items: [
-        { label: 'Abrir painel de IA', shortcut: 'Ctrl+I', action: () => toggleRightSidebar() },
+        { label: 'Open AI panel', shortcut: 'Ctrl+I', action: () => toggleRightSidebar() },
         { label: 'Novo chat de IA', action: onAIChat },
       ],
     },
@@ -450,9 +450,9 @@ export default function IDELayout({
       case 'search':
         return searchPanel || <NotImplementedPanel title="Busca" capability="SEARCH_PANEL" milestone="P1" />
       case 'git':
-        return gitPanel || <NotImplementedPanel title="Controle de codigo" capability="GIT_PANEL" milestone="P1" />
+        return gitPanel || <NotImplementedPanel title="Source control" capability="GIT_PANEL" milestone="P1" />
       case 'ai':
-        return aiChatPanel || <NotImplementedPanel title="Assistente IA" capability="AI_CHAT_PANEL" milestone="P0" />
+        return aiChatPanel || <NotImplementedPanel title="AI Assistant" capability="AI_CHAT_PANEL" milestone="P0" />
       case 'extensions':
         return (
           <NotImplementedPanel
@@ -484,7 +484,7 @@ export default function IDELayout({
               title="Ports"
               capability="PORT_FORWARDING_PANEL"
               milestone="P1"
-              description="Nenhuma porta encaminhada ativa."
+              description="No porta encaminhada active."
             />
           )
         )
@@ -562,7 +562,7 @@ export default function IDELayout({
         <div className="flex items-center gap-2">
           <div className="hidden items-center gap-1 rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2.5 py-1 text-[10px] font-medium text-[var(--aethel-success)] lg:flex">
             <Codicon name="pulse" className="text-[11px]" />
-            Pronto para aplicar
+            Ready to apply
           </div>
           <div className="hidden items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)] xl:flex">
             <span className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
@@ -572,7 +572,7 @@ export default function IDELayout({
             <span className="h-3 w-px bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)]" />
             <span>Workspace local</span>
           </div>
-          <button type="button" aria-label="Abrir paleta de comandos"
+          <button type="button" aria-label="Open command palette"
             onClick={() => onCommandPalette?.()}
             className="hidden items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_4%,transparent)] px-3 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] md:flex"
             title="Paleta de comandos (Ctrl+Shift+P)"
@@ -611,7 +611,7 @@ export default function IDELayout({
       <div className="flex flex-1 overflow-hidden">
         <div className="flex w-12 flex-col items-center border-r border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_95%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))] py-2 shadow-[inset_-1px_0_0_rgba(255,255,255,0.03)]">
           {SIDEBAR_TABS.map((tab) => (
-            <button type="button" aria-label={`Abrir aba lateral ${tab.label}`}
+            <button type="button" aria-label={`Open sidebar tab ${tab.label}`}
               key={tab.id}
               onClick={() => {
                 setActiveSidebarTab(tab.id)
@@ -643,7 +643,7 @@ export default function IDELayout({
                 <span>{SIDEBAR_TABS.find((t) => t.id === activeSidebarTab)?.label}</span>
                 <span className="text-[9px] font-normal tracking-[0.08em] text-[var(--aethel-text-muted)]">Studio surface</span>
               </div>
-              <button type="button" aria-label="Fechar sidebar esquerda" onClick={toggleLeftSidebar} className="rounded-lg p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] hover:text-[var(--aethel-text-secondary)]">
+              <button type="button" aria-label="Close left sidebar" onClick={toggleLeftSidebar} className="rounded-lg p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] hover:text-[var(--aethel-text-secondary)]">
                 <Codicon name="chevron-left" />
               </button>
             </div>
@@ -682,7 +682,7 @@ export default function IDELayout({
               />
               <div className="density-header flex items-center gap-0.5 border-b border-[var(--aethel-border-subtle)] px-1.5">
                 {BOTTOM_TABS.map((tab) => (
-                  <button type="button" aria-label={`Abrir aba inferior ${tab.label}`}
+                  <button type="button" aria-label={`Open bottom tab ${tab.label}`}
                     key={tab.id}
                     onClick={() => setActiveBottomTab(tab.id)}
                     className={`density-row flex items-center gap-1.5 rounded-lg px-2.5 text-[11px] transition-colors ${
@@ -705,7 +705,7 @@ export default function IDELayout({
                 >
                   {bottomPanelHeight === 260 ? <Codicon name="fold-down" /> : <Codicon name="fold-up" />}
                 </button>
-                <button type="button" aria-label="Fechar painel inferior" onClick={toggleBottomPanel} className="rounded-lg p-1 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)]">
+                <button type="button" aria-label="Close bottom panel" onClick={toggleBottomPanel} className="rounded-lg p-1 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)]">
                   <Codicon name="x" />
                 </button>
               </div>
@@ -747,7 +747,7 @@ export default function IDELayout({
           <span className="text-[var(--aethel-text-quaternary)]">UTF-8</span>
           <span className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
             <Codicon name="comment-discussion" className="text-[11px]" />
-            Pronto
+            Ready
           </span>
           <span className="flex items-center gap-1 text-[var(--aethel-success)]">
             <Codicon name="circle-filled" className="text-[8px]" />

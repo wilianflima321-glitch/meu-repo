@@ -76,7 +76,7 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
       if (!res.ok) {
         const rawData = await res.json().catch(() => ({}));
         const data = isPreviewRuntimePayload(rawData) ? rawData : {};
-        throw new Error(getPayloadText(data.error) || getPayloadText(data.message) || `Falha ao provisionar (${res.status})`);
+        throw new Error(getPayloadText(data.error) || getPayloadText(data.message) || `Failure ao provisionar (${res.status})`);
       }
 
       const rawData = await res.json();
@@ -131,7 +131,7 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
           provider: runtimeContext.provider,
           error:
             runtimeContext.guidance ||
-            'Nenhum runtime de preview disponivel. Inicie um servidor local de desenvolvimento ou configure o E2B.',
+            'No runtime de preview disponivel. Inicie um servidor local de desenvolvimento ou configure o E2B.',
           guidance: runtimeContext.guidance,
           recommendedAction:
             runtimeContext.recommendedAction ||
@@ -143,8 +143,8 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
       setRuntime((prev) => ({
         ...prev,
         state: 'failed',
-        error: err instanceof Error ? err.message : 'Falha ao provisionar o preview.',
-        guidance: err instanceof Error ? err.message : 'Falha ao provisionar o preview.',
+        error: err instanceof Error ? err.message : 'Failure ao provisionar o preview.',
+        guidance: err instanceof Error ? err.message : 'Failure ao provisionar o preview.',
         recommendedAction:
           'Revise a configuracao do provider de preview ou use o fallback inline enquanto o runtime remoto nao responde.',
       }));

@@ -140,7 +140,7 @@ export function SceneViewportInspector({
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              aria-label={`Usar espaço ${transformSpace === 'world' ? 'local' : 'world'}`}
+              aria-label={`Use space ${transformSpace === 'world' ? 'local' : 'world'}`}
               onClick={() => onTransformSpaceChange(transformSpace === 'world' ? 'local' : 'world')}
               className={panelButton}
             >
@@ -258,7 +258,7 @@ export function SceneViewportInspector({
           </div>
           <div className="mt-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-3 text-xs text-[var(--aethel-text-secondary)]">
             <p>Active workflow: <span className="font-medium text-[var(--aethel-text-primary)]">{activeWorkflowLabel}</span></p>
-            <p className="mt-1">Visual Script: <span className="font-medium text-[var(--aethel-text-primary)]">{visualScriptNodeCount}</span> nós · <span className="font-medium text-[var(--aethel-text-primary)]">{visualScriptEdgeCount}</span> edges</p>
+            <p className="mt-1">Visual Script: <span className="font-medium text-[var(--aethel-text-primary)]">{visualScriptNodeCount}</span> nodes ? <span className="font-medium text-[var(--aethel-text-primary)]">{visualScriptEdgeCount}</span> edges</p>
           </div>
         </div>
 

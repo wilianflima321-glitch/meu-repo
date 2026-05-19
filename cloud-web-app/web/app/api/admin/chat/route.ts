@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/chat/route');
 
 const THREAD_TITLE = 'Admin Priority Chat';
 
@@ -40,7 +43,7 @@ export const GET = withAdminAuth(
 
       return NextResponse.json({ threadId: thread.id, messages: items });
     } catch (error) {
-      console.error('[Admin Chat] Error:', error);
+      routeLogger.error('[Admin Chat] Error:', error);
       return NextResponse.json({ error: 'Failed to fetch chat' }, { status: 500 });
     }
   },
@@ -53,7 +56,7 @@ export const POST = withAdminAuth(
       const body = await request.json();
       const { text, priority } = body as { text?: string; priority?: string };
       if (!text) {
-        return NextResponse.json({ error: 'Mensagem obrigatória' }, { status: 400 });
+        return NextResponse.json({ error: 'Message is required' }, { status: 400 });
       }
 
       let thread = await prisma.chatThread.findFirst({
@@ -91,7 +94,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ messageId: message.id });
     } catch (error) {
-      console.error('[Admin Chat] Error:', error);
+      routeLogger.error('[Admin Chat] Error:', error);
       return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
     }
   },

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, Clock3, RefreshCw, ShieldCheck, UserCheck } from 'lucide-react'
@@ -131,7 +131,7 @@ export default function UserAuditLogPanel() {
           className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-tertiary)] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Atualizar
+          Refresh
         </button>
       </div>
 
@@ -178,7 +178,7 @@ export default function UserAuditLogPanel() {
 
       {!loading && data?.events.length === 0 && !error && (
         <div className="mt-4 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/35 p-4 text-sm text-[var(--aethel-text-secondary)]">
-          Nenhum evento auditavel recente para sua conta.
+          No evento auditavel recente para sua conta.
         </div>
       )}
 

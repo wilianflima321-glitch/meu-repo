@@ -64,7 +64,7 @@ export function PreviewColumnHeader({
         type="button"
         onClick={onClose}
         style={iconButtonStyle}
-        aria-label={`Fechar ${previewPanelLabel.toLowerCase()}`}
+        aria-label={`Close ${previewPanelLabel.toLowerCase()}`}
       >
         <ChevronRight size={16} />
       </button>

@@ -221,8 +221,8 @@ export function DashboardOverviewTab({
       title: pendingApprovals > 0 ? 'Review pending proposal' : 'Open AI Console',
       description:
         pendingApprovals > 0
-          ? 'Existe mudanca pronta para revisar antes do apply.'
-          : 'Continue o plano, a pesquisa ou a execucao com contexto preservado.',
+          ? 'A change is ready for review before apply.'
+          : 'Continue the plan, research, or execution with preserved context.',
       action: pendingApprovals > 0 ? 'Expand Studio' : 'Open AI Console',
       onClick: pendingApprovals > 0 ? onOpenIde : onOpenAiChat,
       primary: true,
@@ -230,16 +230,16 @@ export function DashboardOverviewTab({
     {
       title: primaryProject ? 'Continue current workspace' : 'Create a workspace',
       description: primaryProject
-        ? 'Volte para codigo, viewport e operator sem perder a missao.'
-        : 'Comece um fluxo novo e deixe o Studio assumir na hora certa.',
+        ? 'Return to code, viewport, and operator without losing the mission.'
+        : 'Start a new flow and let Studio take over at the right moment.',
       action: primaryProject ? 'Expand Studio' : 'Create project',
       onClick: primaryProject ? onOpenIde : onOpenProjects,
     },
     {
       title: walletData ? 'Review budget and billing' : 'Set up billing readiness',
       description: walletData
-        ? 'Cheque consumo e limites antes de escalar agentes e runtime.'
-        : 'Garanta capacidade, governanca e menos friccao comercial.',
+        ? 'Check spend and limits before scaling agents and runtime.'
+        : 'Secure capacity, governance, and less commercial friction.',
       action: 'Open billing',
       onClick: onOpenBilling,
     },
@@ -514,7 +514,7 @@ export function DashboardOverviewTab({
               ))
             ) : (
               <div className="rounded-[22px] border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-4 py-4 text-sm text-[var(--aethel-text-secondary)] sm:col-span-2">
-                Crie uma missao ou abra o AI Console para iniciar o primeiro workspace.
+                Create a mission or open AI Console to start the first workspace.
               </div>
             )}
           </div>

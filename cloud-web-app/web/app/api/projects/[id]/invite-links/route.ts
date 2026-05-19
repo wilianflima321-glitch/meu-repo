@@ -9,8 +9,10 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { nanoid } from 'nanoid';
 import { buildAppUrl } from '@/lib/server/app-origin';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+const routeLogger = createComponentLogger('api.projects.invite-links');
 
 type InviteRole = 'viewer' | 'editor';
 
@@ -109,7 +111,7 @@ export async function GET(
       })),
     });
   } catch (error) {
-    console.error('[Invite Links API] Error:', error);
+    routeLogger.error('[Invite Links API] Error', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -185,7 +187,7 @@ export async function POST(
       });
     } catch (err) {
       // InviteLink model não existe - retorna erro e instrução
-      console.error('[Invite Links API] InviteLink model not available:', err);
+      routeLogger.error('[Invite Links API] InviteLink model not available', err);
       return NextResponse.json(
         { 
           success: false, 
@@ -209,7 +211,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('[Invite Links API] Error:', error);
+    routeLogger.error('[Invite Links API] Error', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

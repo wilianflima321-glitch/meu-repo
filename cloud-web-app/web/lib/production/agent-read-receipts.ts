@@ -1,4 +1,4 @@
-﻿import type { AgenticProductionState, MissionLedgerEntry } from './agentic-production-state'
+import type { AgenticProductionState, MissionLedgerEntry } from './agentic-production-state'
 import { mergeAgenticProductionState } from './agentic-production-state'
 import type { RepositoryCartographyManifest, RepositorySurface } from './repository-cartography'
 import type { ResearchIntelligencePacket } from './research-intelligence-bridge'

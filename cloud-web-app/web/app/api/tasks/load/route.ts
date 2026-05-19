@@ -5,6 +5,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/tasks/load/route');
 
 interface LoadTasksRequest {
   workspaceRoot: string;
@@ -38,7 +41,7 @@ export async function POST(request: NextRequest) {
       });
     }
   } catch (error) {
-    console.error('Failed to load tasks:', error);
+    routeLogger.error('Failed to load tasks:', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

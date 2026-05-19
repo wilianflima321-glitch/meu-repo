@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/health/storage/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +23,7 @@ export async function GET(_request: NextRequest) {
         latency: 0,
         storage: {
           configured: false,
-          message: 'S3/Storage não configurado',
+          message: 'S3/Storage not configured',
         },
         timestamp: new Date().toISOString(),
       });
@@ -41,7 +44,7 @@ export async function GET(_request: NextRequest) {
     });
   } catch (error) {
     const latency = Date.now() - startTime;
-    console.error('[health/storage] Error:', error);
+    routeLogger.error('[health/storage] Error:', error);
     
     return NextResponse.json(
       {

@@ -295,7 +295,7 @@ const GENERAL_SETTINGS: Record<string, Setting[]> = {
       { value: 'relative', label: 'Relative' },
     ]},
     { id: 'editor.formatOnSave', label: 'Format on save', type: 'toggle', value: true },
-    { id: 'editor.autoSave', label: 'Auto salvar', type: 'select', value: 'afterDelay', options: [
+    { id: 'editor.autoSave', label: 'Auto save', type: 'select', value: 'afterDelay', options: [
       { value: 'off', label: 'Off' },
       { value: 'afterDelay', label: 'After Delay' },
       { value: 'onFocusChange', label: 'On Focus Change' },
@@ -307,12 +307,12 @@ const GENERAL_SETTINGS: Record<string, Setting[]> = {
   keyboard: [
     { id: 'key.commandPalette', label: 'Paleta de comandos', type: 'keybinding', value: 'Ctrl+K' },
     { id: 'key.save', label: 'Save', type: 'keybinding', value: 'Ctrl+S' },
-    { id: 'key.find', label: 'Buscar', type: 'keybinding', value: 'Ctrl+F' },
+    { id: 'key.find', label: 'Search', type: 'keybinding', value: 'Ctrl+F' },
     { id: 'key.replace', label: 'Substituir', type: 'keybinding', value: 'Ctrl+H' },
-    { id: 'key.goToFile', label: 'Ir para arquivo', type: 'keybinding', value: 'Ctrl+P' },
+    { id: 'key.goToFile', label: 'Go to file', type: 'keybinding', value: 'Ctrl+P' },
     { id: 'key.goToLine', label: 'Ir para linha', type: 'keybinding', value: 'Ctrl+G' },
     { id: 'key.toggleTerminal', label: 'Alternar terminal', type: 'keybinding', value: 'Ctrl+J' },
-    { id: 'key.toggleSidebar', label: 'Alternar barra lateral', type: 'keybinding', value: 'Ctrl+B' },
+    { id: 'key.toggleSidebar', label: 'Toggle sidebar', type: 'keybinding', value: 'Ctrl+B' },
   ],
 }
 
@@ -327,7 +327,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
   switch (setting.type) {
     case 'toggle':
       return (
-        <button type="button" aria-label={`Alternar configuração ${setting.label}`}
+        <button type="button" aria-label={`Toggle setting ${setting.label}`}
           onClick={() => onChange(!setting.value)}
           className={`
             w-11 h-6 rounded-full transition-colors relative
@@ -395,7 +395,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
 
     case 'keybinding':
       return (
-        <button type="button" aria-label={`Editar atalho ${setting.label}`} className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] font-mono">
+        <button type="button" aria-label={`Edit shortcut ${setting.label}`} className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] font-mono">
           {String(setting.value)}
         </button>
       )
@@ -460,7 +460,7 @@ export default function EngineSettingsPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar ajustes..."
+              placeholder="Search ajustes..."
               className="w-full pl-9 pr-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)]"
             />
           </div>
@@ -470,7 +470,7 @@ export default function EngineSettingsPage() {
         <div className="flex-1 overflow-y-auto py-2">
           {SETTING_SECTIONS.map(section => (
             <div key={section.id}>
-              <button type="button" aria-label={`Abrir seção ${section.label}`}
+              <button type="button" aria-label={`Open section ${section.label}`}
                 onClick={() => {
                   setActiveSection(section.id)
                   if (section.subsections) {
@@ -493,7 +493,7 @@ export default function EngineSettingsPage() {
               {activeSection === section.id && section.subsections && (
                 <div className="ml-4 pl-4 border-l border-[var(--aethel-border-primary)]">
                   {section.subsections.map(sub => (
-                    <button type="button" aria-label={`Abrir subseção ${sub.label}`}
+                    <button type="button" aria-label={`Open subsection ${sub.label}`}
                       key={sub.id}
                       onClick={() => setActiveSubsection(sub.id)}
                       className={`
@@ -580,7 +580,7 @@ export default function EngineSettingsPage() {
             {currentSettings.length === 0 && (
               <div className="text-center py-12 text-[var(--aethel-text-tertiary)]">
                 <Settings className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>Nenhuma configuracao disponivel para esta secao</p>
+                <p>No configuration available for this section</p>
               </div>
             )}
           </div>

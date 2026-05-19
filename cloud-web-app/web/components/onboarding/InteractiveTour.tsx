@@ -2,7 +2,7 @@
 
 import { logger } from '@/lib/observability/logger';
 /**
- * Interactive Tour System - Tour Interativo Guiado
+ * Interactive Tour System - Tour Interactive Guiado
  *
  * Sistema profissional de tour guiado com spotlight, tooltips e navegao.
  * Similar ao Intercom Product Tours ou Appcues.
@@ -413,7 +413,7 @@ function TourOverlay() {
                 className="px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors flex items-center gap-1"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Anterior
+                Previous
               </button>
             )}
             <button type="button"
@@ -454,15 +454,15 @@ export const TOURS = {
         id: 'welcome',
         target: '',
         placement: 'center' as const,
-        title: 'Bem-vindo ao Aethel Engine! 🎮',
+        title: 'Welcome ao Aethel Engine! 🎮',
         content: 'Vamos fazer um tour rpido pelas principais funcionalidades. Voc pode pular a qualquer momento pressionando ESC.',
       },
       {
         id: 'file-explorer',
         target: '[data-tour="file-explorer"]',
         placement: 'right' as const,
-        title: 'Explorador de Arquivos',
-        content: 'Aqui voc gerencia todos os arquivos do seu projeto. Clique com boto direito para criar pastas, arquivos e assets.',
+        title: 'Explorador de Files',
+        content: 'Manage all project files here. Right-click to create folders, files, and assets.',
       },
       {
         id: 'code-editor',
@@ -512,7 +512,7 @@ export const TOURS = {
         id: 'tour-complete',
         target: '',
         placement: 'center' as const,
-        title: 'Pronto para criar! 🚀',
+        title: 'Ready para criar! 🚀',
         content: 'Voc conhece o bsico. Explore, experimente e divirta-se criando! Se precisar de ajuda, a IA est sempre disponvel.',
       },
     ],

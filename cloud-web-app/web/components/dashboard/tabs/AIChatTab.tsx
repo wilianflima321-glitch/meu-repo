@@ -108,7 +108,7 @@ function MessageBubble({
           {!isUser && (
             <>
               <span>•</span>
-              <button type="button" aria-label="Copiar mensagem da IA"
+              <button type="button" aria-label="Copy AI message"
                 onClick={handleCopy}
                 className="hover:text-[var(--aethel-text-secondary)] transition-colors"
               >
@@ -217,7 +217,7 @@ export function AIChatTab({
             trigger={
               <Button variant="ghost" size="sm">
                 <History className="w-4 h-4 mr-2" />
-                Histórico
+                History
                 <ChevronDown className="w-4 h-4 ml-2" />
               </Button>
             }
@@ -290,27 +290,27 @@ export function AIChatTab({
 
         {/* Quick Actions */}
         <div className="flex items-center gap-2 mt-3">
-          <span className="text-xs text-[var(--aethel-text-tertiary)]">Sugestões:</span>
-          <button type="button" aria-label="Usar sugestao explicar codigo"
-            onClick={() => setInputValue('Explique este código: ')}
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Suggestions:</span>
+          <button type="button" aria-label="Use explain-code suggestion"
+            onClick={() => setInputValue('Explain this code: ')}
             className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] rounded-full transition-colors"
           >
             <Code className="w-3 h-3 inline mr-1" />
-            Explicar código
+            Explain code
           </button>
-          <button type="button" aria-label="Usar sugestao refatorar codigo"
-            onClick={() => setInputValue('Refatore este código para: ')}
+          <button type="button" aria-label="Use refactor-code suggestion"
+            onClick={() => setInputValue('Refactor this code to: ')}
             className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] rounded-full transition-colors"
           >
             <RefreshCw className="w-3 h-3 inline mr-1" />
-            Refatorar
+            Refactor
           </button>
           <button type="button" aria-label="Usar sugestao criar teste"
             onClick={() => setInputValue('Crie um teste para: ')}
             className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] rounded-full transition-colors"
           >
             <Sparkles className="w-3 h-3 inline mr-1" />
-            Criar teste
+            Create teste
           </button>
         </div>
       </div>

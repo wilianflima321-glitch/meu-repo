@@ -139,7 +139,7 @@ const checks = [
       "error: 'DEPENDENCY_IMPACT_APPROVAL_REQUIRED'",
       "error: 'DEPENDENCY_GRAPH_APPROVAL_REQUIRED'",
       "error: 'APPLY_WRITE_FAILED'",
-      "'sandbox-simulated'",
+      "error: 'SANDBOX_SIMULATION_DISABLED'",
       "normalizeExecutionMode",
       'runSource: RUN_SOURCE',
       'projectImpact',

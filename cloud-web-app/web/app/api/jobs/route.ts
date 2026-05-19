@@ -321,7 +321,7 @@ export async function GET(request: NextRequest) {
     }
     log.error('Failed to list jobs', error);
     return NextResponse.json(
-      { error: 'Falha ao listar jobs' },
+      { error: 'Failed to list jobs' },
       { status: 500 }
     );
   }
@@ -442,7 +442,7 @@ export async function POST(request: NextRequest) {
     }
     log.error('Failed to create job', error);
     return NextResponse.json(
-      { error: 'Falha ao criar job' },
+      { error: 'Failed to create job' },
       { status: 500 }
     );
   }

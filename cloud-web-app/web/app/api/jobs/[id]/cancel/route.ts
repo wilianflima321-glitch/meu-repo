@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/jobs/[id]/cancel/route');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -46,7 +49,7 @@ export async function POST(
     if (!result.cancelled) {
       if (result.reason === 'JOB_ACTIVE_CANNOT_CANCEL') {
         return NextResponse.json(
-          { error: 'Job ativo nao pode ser cancelado imediatamente', state: result.state },
+          { error: 'Active job cannot be cancelled immediately', state: result.state },
           { status: 409 }
         );
       }
@@ -80,9 +83,9 @@ export async function POST(
         { status: 503 }
       );
     }
-    console.error('Erro ao cancelar job:', error);
+    routeLogger.error('Error cancelling job:', error);
     return NextResponse.json(
-      { error: 'Erro interno ao cancelar job' },
+      { error: 'Internal error cancelling job' },
       { status: 500 }
     );
   }

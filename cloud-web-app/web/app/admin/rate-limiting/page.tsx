@@ -23,13 +23,13 @@ export default function RateLimitingPage() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/rate-limits');
-      if (!res.ok) throw new Error('Falha ao carregar limites');
+      if (!res.ok) throw new Error('Failed to load limites');
       const data = await res.json();
       setLimits(Array.isArray(data?.configs) ? data.configs : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar limites');
+      setError(err instanceof Error ? err.message : 'Error loading limites');
     } finally {
       setLoading(false);
     }
@@ -52,9 +52,9 @@ export default function RateLimitingPage() {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Limitação global de taxa da API</h1>
+          <h1 className="text-2xl font-bold">Global API rate limiting</h1>
           {lastUpdated && (
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Updated at {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button type="button"
@@ -68,27 +68,27 @@ export default function RateLimitingPage() {
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex items-center justify-between gap-3">
         <input
           type="text"
-          placeholder="Buscar por nome ou identificador"
+          placeholder="Search by name or identifier"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="border p-2 rounded w-full"
         />
-        <span className="text-xs text-[var(--aethel-text-tertiary)]">{filteredLimits.length} regras</span>
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">{filteredLimits.length} rules</span>
       </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Limites ativos</h2>
+        <h2 className="text-lg font-semibold mb-4">Active limits</h2>
         {loading ? (
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Carregando limites...</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Loading limits...</p>
         ) : error ? (
           <div>
             <p className="text-sm text-[var(--aethel-error)]">{error}</p>
             <button type="button" className="mt-3 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] px-3 py-1 rounded" onClick={fetchLimits}>
-              Tentar novamente
+              Try again
             </button>
           </div>
         ) : filteredLimits.length === 0 ? (
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhuma configuração disponível.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">No setting available.</p>
         ) : (
           <ul>
             {filteredLimits.map((limit) => (
@@ -96,17 +96,17 @@ export default function RateLimitingPage() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                   <div>
                     <h3 className="font-semibold">{limit.name}</h3>
-                    <p className="text-xs text-[var(--aethel-text-tertiary)]">Algoritmo: {limit.algorithm} • Identificador: {limit.identifier}</p>
+                    <p className="text-xs text-[var(--aethel-text-tertiary)]">Algorithm: {limit.algorithm} • Identifier: {limit.identifier}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="px-2 py-1 rounded text-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">
-                      {limit.limit} requisições / {limit.window}s
+                      {limit.limit} requests / {limit.window}s
                     </span>
                     <button type="button"
                       onClick={() => navigator.clipboard.writeText(limit.identifier)}
                       className="px-3 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]"
                     >
-                      Copiar ID
+                      Copy ID
                     </button>
                   </div>
                 </div>

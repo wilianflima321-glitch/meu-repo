@@ -208,7 +208,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
                       </h3>
                       <button type="button"
                         onClick={() => deleteNotification(notification.id)}
-                        aria-label="Excluir notificacao"
+                        aria-label="Delete notificacao"
                         className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
                       >
                         ✕

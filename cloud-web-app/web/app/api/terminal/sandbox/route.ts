@@ -56,7 +56,7 @@ async function getUserTier(userId: string): Promise<'free' | 'pro' | 'enterprise
     if (plan === 'pro' || plan === 'premium') return 'pro';
     return 'free';
   } catch (error) {
-    console.error('[Sandbox API] Error getting user tier:', error);
+    log.warn('[Sandbox API] Error getting user tier', error);
     return 'free';
   }
 }
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Sandbox API] Error creating sandbox:', error);
+    log.error('[Sandbox API] Error creating sandbox', error);
     
     if (error instanceof Error && error.message.includes('Maximum sessions')) {
       return NextResponse.json(
@@ -205,7 +205,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ success: true });
 
   } catch (error) {
-    console.error('[Sandbox API] Error destroying sandbox:', error);
+    log.error('[Sandbox API] Error destroying sandbox', error);
     return NextResponse.json(
       { error: 'Failed to destroy sandbox session' },
       { status: 500 }
@@ -273,7 +273,7 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Sandbox API] Error getting sandbox info:', error);
+    log.error('[Sandbox API] Error getting sandbox info', error);
     return NextResponse.json(
       { error: 'Failed to get sandbox info' },
       { status: 500 }

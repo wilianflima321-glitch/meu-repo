@@ -34,7 +34,7 @@ export default function DirectorMode() {
         </div>
         <div className="flex items-center gap-2 px-3 py-1 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-full">
           <span className="w-2 h-2 rounded-full bg-[var(--aethel-success)] animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></span>
-          <span className="text-[10px] font-bold text-[var(--aethel-text-tertiary)] uppercase tracking-wider">Engine AAA online</span>
+          <span className="text-[10px] font-bold text-[var(--aethel-text-tertiary)] uppercase tracking-wider">Visual engine online</span>
         </div>
       </div>
 

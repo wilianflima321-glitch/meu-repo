@@ -61,7 +61,7 @@ export function ViewportTopToolbar({
       <button type="button" aria-label={`${snapEnabled ? 'Disable' : 'Enable'} grid snapping`} onClick={() => onSnapEnabledChange(!snapEnabled)} className={snapEnabled ? activeButton : iconButton}>
         <Target className="h-4 w-4" />
       </button>
-      <button type="button" aria-label={`Trocar para espaço ${transformSpace === 'world' ? 'local' : 'world'}`} onClick={() => onTransformSpaceChange(transformSpace === 'world' ? 'local' : 'world')} className={transformSpace === 'local' ? activeButton : iconButton}>
+      <button type="button" aria-label={`Switch to space ${transformSpace === 'world' ? 'local' : 'world'}`} onClick={() => onTransformSpaceChange(transformSpace === 'world' ? 'local' : 'world')} className={transformSpace === 'local' ? activeButton : iconButton}>
         <Film className="h-4 w-4" />
       </button>
       <span className="mx-1 h-6 w-px bg-[var(--aethel-border-subtle)]" aria-hidden />
@@ -137,7 +137,7 @@ export function ViewportAICommandPanel({
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Informative AI</p>
           <p className="mt-1 text-sm font-medium text-[var(--aethel-text-primary)]">Apply commands directly to the gizmo</p>
           <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">
-            {creativeMode === 'film' ? 'Film mode prioriza timing, glow cinematográfico e render rápido.' : 'Game mode prioriza play test, lógica visual e iteração de abilities.'}
+            {creativeMode === 'film' ? 'Film mode prioritizes timing, cinematic glow, and fast rendering.' : 'Game mode prioritizes playtesting, visual logic, and ability iteration.'}
             {abilityLabel ? ` Active ability: ${abilityLabel}.` : ''}
           </p>
         </div>
@@ -159,7 +159,7 @@ export function ViewportAICommandPanel({
           Apply
         </button>
       </div>
-      <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">Shift+Click seleciona vários. W/E/R trocam gizmo. X/Y/Z travam eixos. G alterna pivot. Esc limpa seleção. Use Top/Front/Side para revisar proporção.</p>
+      <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">Shift+Click selects multiple items. W/E/R switch gizmos. X/Y/Z lock axes. G toggles pivot. Esc clears selection. Use Top/Front/Side to review proportion.</p>
       <div className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
         <span className="font-medium text-[var(--aethel-text-primary)]">Asset intake:</span> {assetImportStatus}
       </div>

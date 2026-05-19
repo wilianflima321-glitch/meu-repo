@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/web/fetch/route');
 
 const CONFIG = {
   timeout: 15000,
@@ -178,7 +181,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Web Fetch API] Error:', error);
+    routeLogger.error('[Web Fetch API] Error:', error);
     
     if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json({ error: 'Request timeout' }, { status: 504 });

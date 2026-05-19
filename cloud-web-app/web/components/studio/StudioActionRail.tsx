@@ -44,8 +44,8 @@ export default function StudioActionRail({
       : 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
   const operationalLabel = backendOnline
     ? aiProviderConfigured
-      ? 'Operacao OK'
-      : 'IA pendente'
+      ? 'Operation OK'
+      : 'AI pending'
     : 'Backend offline'
 
   return (
@@ -66,7 +66,7 @@ export default function StudioActionRail({
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
-              Guardrails ativos
+              Guardrails active
             </span>
           )}
         </div>

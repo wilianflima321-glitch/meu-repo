@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // =============================================================================
 // AI ENHANCEMENTS ADMIN API
 // =============================================================================
+
+const log = createComponentLogger('api/admin/ai/enhancements/route');
 
 export const GET = withAdminAuth(
   async () => {
@@ -13,7 +16,7 @@ export const GET = withAdminAuth(
       const items = await aiEnhancement.findMany({ orderBy: { createdAt: 'desc' } });
       return NextResponse.json({ items });
     } catch (error) {
-      console.error('[Admin AI Enhancements] Error:', error);
+      log.error('[Admin AI Enhancements] Error', error);
       return NextResponse.json({ error: 'Failed to fetch enhancements' }, { status: 500 });
     }
   },
@@ -26,7 +29,7 @@ export const POST = withAdminAuth(
       const body = await request.json();
       const { name, description, status } = body as { name?: string; description?: string; status?: string };
       if (!name) {
-        return NextResponse.json({ error: 'Nome obrigatório' }, { status: 400 });
+        return NextResponse.json({ error: 'Name is required' }, { status: 400 });
       }
 
       const aiEnhancement = (prisma as any).aiEnhancement;
@@ -54,7 +57,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ item });
     } catch (error) {
-      console.error('[Admin AI Enhancements] Error:', error);
+      log.error('[Admin AI Enhancements] Error', error);
       return NextResponse.json({ error: 'Failed to create enhancement' }, { status: 500 });
     }
   },
@@ -67,7 +70,7 @@ export const PATCH = withAdminAuth(
       const body = await request.json();
       const { id, applied, status } = body as { id?: string; applied?: boolean; status?: string };
       if (!id) {
-        return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 });
+        return NextResponse.json({ error: 'ID is required' }, { status: 400 });
       }
 
       const aiEnhancement = (prisma as any).aiEnhancement;
@@ -94,7 +97,7 @@ export const PATCH = withAdminAuth(
 
       return NextResponse.json({ item });
     } catch (error) {
-      console.error('[Admin AI Enhancements] Error:', error);
+      log.error('[Admin AI Enhancements] Error', error);
       return NextResponse.json({ error: 'Failed to update enhancement' }, { status: 500 });
     }
   },

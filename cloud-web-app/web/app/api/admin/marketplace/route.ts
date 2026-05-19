@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/marketplace/route');
 
 // =============================================================================
 // MARKETPLACE ADMIN API
@@ -37,7 +40,7 @@ async function getHandler(_req: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('[Admin Marketplace] Error:', error);
+    routeLogger.error('[Admin Marketplace] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch marketplace' }, { status: 500 });
   }
 }

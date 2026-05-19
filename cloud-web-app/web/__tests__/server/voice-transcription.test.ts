@@ -1,4 +1,4 @@
-﻿import {
+import {
   normalizeTranscriptionLanguage,
   validateVoiceTranscriptionFile,
   VOICE_TRANSCRIPTION_MAX_BYTES,

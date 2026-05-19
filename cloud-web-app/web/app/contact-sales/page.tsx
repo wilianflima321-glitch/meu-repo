@@ -5,7 +5,7 @@ import ContactSalesContent from './contact-sales-content'
 export const metadata: Metadata = {
   title: 'Contact Sales | Aethel Studio',
   description:
-    'Converse com vendas sobre rollout, procurement, trust, SSO e requisitos enterprise do Aethel Studio.',
+    'Talk with sales about rollout, procurement, trust, SSO, and enterprise requirements for Aethel Studio.',
 }
 
 export default function ContactSalesPage({

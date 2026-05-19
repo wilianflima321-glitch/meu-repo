@@ -32,7 +32,7 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
 
     const workflow = await getOwnedWorkflow(user.userId, ctx.params.id);
     if (!workflow) {
-      return NextResponse.json({ error: 'WORKFLOW_NOT_FOUND', message: 'Workflow não encontrado.' }, { status: 404 });
+      return NextResponse.json({ error: 'WORKFLOW_NOT_FOUND', message: 'Workflow not found.' }, { status: 404 });
     }
 
     return NextResponse.json({ workflow });
@@ -53,7 +53,7 @@ export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
     const id = ctx.params.id;
     const existing = await prismaAny.copilotWorkflow.findFirst({ where: { id, userId: user.userId }, select: { id: true } });
     if (!existing) {
-      return NextResponse.json({ error: 'WORKFLOW_NOT_FOUND', message: 'Workflow não encontrado.' }, { status: 404 });
+      return NextResponse.json({ error: 'WORKFLOW_NOT_FOUND', message: 'Workflow not found.' }, { status: 404 });
     }
 
     const body = await req.json().catch(() => ({}));
@@ -86,7 +86,7 @@ export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
           select: { id: true },
         });
         if (!ownedThread) {
-          return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread não encontrada.' }, { status: 404 });
+          return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread not found.' }, { status: 404 });
         }
 
         const existingLink = await prismaAny.copilotWorkflow.findFirst({
@@ -95,7 +95,7 @@ export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
         });
         if (existingLink && existingLink.id !== id) {
           return NextResponse.json(
-            { error: 'THREAD_ALREADY_LINKED', message: 'Essa thread já está ligada a um workflow.' },
+            { error: 'THREAD_ALREADY_LINKED', message: 'This thread is already linked to a workflow.' },
             { status: 409 }
           );
         }

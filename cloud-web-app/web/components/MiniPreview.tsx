@@ -63,11 +63,11 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
 
           {suggestions.length > 0 && (
             <div className="space-y-2">
-              <div className="text-[var(--aethel-text-secondary)] text-xs font-semibold">Sugestões:</div>
+              <div className="text-[var(--aethel-text-secondary)] text-xs font-semibold">Suggestions:</div>
               {suggestions.map((suggestion, index) => (
                 <div key={index} className="flex items-center gap-2 bg-[var(--aethel-surface-secondary)] p-2 rounded-lg text-xs group hover:bg-[var(--aethel-surface-quaternary)] transition-colors">
                   <span className="text-[var(--aethel-text-secondary)] flex-1">{suggestion}</span>
-                  <button type="button" aria-label={`Aceitar sugestão ${suggestion}`}
+                  <button type="button" aria-label={`Accept suggestion ${suggestion}`}
                     onClick={() => onAcceptSuggestion(suggestion)}
                     className="bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2 py-1 rounded text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] transition-colors opacity-0 group-hover:opacity-100"
                   >
@@ -80,7 +80,7 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
 
           {!suggestions.length && !aiActivity && (
             <div className="text-[var(--aethel-text-quaternary)] text-xs text-center py-4">
-              Preview em tempo real das alterações feitas pela IA
+              Real-time preview of AI-made changes
             </div>
           )}
         </div>
@@ -93,7 +93,7 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
                 <div className="text-center">
                   <div className="text-[var(--aethel-error-light)] text-sm mb-2">Error loading preview</div>
                   <div className="text-[var(--aethel-text-tertiary)] text-xs">{previewError}</div>
-                  <button type="button" aria-label="Fechar erro do mini preview"
+                  <button type="button" aria-label="Fechar error do mini preview"
                     onClick={() => setPreviewError(null)}
                     className="mt-3 text-xs text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)]"
                   >

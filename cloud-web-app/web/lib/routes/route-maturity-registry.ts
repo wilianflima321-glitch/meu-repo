@@ -9,7 +9,7 @@
 
 export type MaturityLevel = 'GA' | 'BETA' | 'ALPHA' | 'PROTOTYPE' | 'ASPIRATIONAL';
 
-interface RouteEntry {
+export interface RouteEntry {
   path: string;
   maturity: MaturityLevel;
   label: string;
@@ -31,6 +31,7 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/contact', maturity: 'GA', label: 'Contact' },
   { path: '/status', maturity: 'GA', label: 'Status Page' },
   { path: '/health', maturity: 'GA', label: 'Health Check' },
+  { path: '/honest-status', maturity: 'GA', label: 'Honest Status' },
   { path: '/privacy', maturity: 'GA', label: 'Privacy' },
   { path: '/terms', maturity: 'GA', label: 'Terms' },
 
@@ -56,6 +57,7 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/testing', maturity: 'ALPHA', label: 'Test Runner' },
   { path: '/studio/animation', maturity: 'ALPHA', label: 'Animation Studio', notes: 'Wires the existing AnimationBlueprint into the canonical Studio shell' },
   { path: '/studio/vfx', maturity: 'ALPHA', label: 'VFX Studio', notes: 'Wires the existing NiagaraVFX editor into the canonical Studio shell' },
+  { path: '/studio/quest', maturity: 'ALPHA', label: 'Quest Studio', notes: 'Wires QuestEditor into the canonical Studio shell for branching mission design' },
   { path: '/studio/film', maturity: 'ALPHA', label: 'Film Studio', notes: 'Wires DirectorMode and VideoTimelineEditor into one progressive film surface' },
   { path: '/studio/audio', maturity: 'ALPHA', label: 'Audio Studio', notes: 'Wires SoundCueEditor into the canonical Studio shell' },
 
@@ -109,6 +111,10 @@ export function getRoutesByMinMaturity(minMaturity: MaturityLevel): RouteEntry[]
   const order: MaturityLevel[] = ['GA', 'BETA', 'ALPHA', 'PROTOTYPE', 'ASPIRATIONAL'];
   const minIndex = order.indexOf(minMaturity);
   return ROUTE_MATURITY_REGISTRY.filter(r => order.indexOf(r.maturity) <= minIndex);
+}
+
+export function getRouteMaturityEntry(path: string): RouteEntry | undefined {
+  return ROUTE_MATURITY_REGISTRY.find((route) => route.path === path);
 }
 
 /**

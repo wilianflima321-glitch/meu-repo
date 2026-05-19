@@ -94,7 +94,7 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
           transition: 'opacity 0.2s',
         }}
       >
-        <button type="button" aria-label={`Editar estado ${state.name}`}
+        <button type="button" aria-label={`Edit estado ${state.name}`}
           onClick={(e) => { e.stopPropagation(); onEdit(state); }}
           style={{
             background: 'var(--aethel-surface-quaternary)',
@@ -300,7 +300,7 @@ export function ParameterPanel({ parameters, onChange, onValueChange }: Paramete
               {typeof param.value === 'boolean' ? (param.value ? 'true' : 'false') : param.value.toFixed(2)}
             </span>
             {/* Delete */}
-            <button type="button" aria-label={`Remover parametro ${param.name}`}
+            <button type="button" aria-label={`Remove parametro ${param.name}`}
               onClick={() => removeParameter(param.id)}
               style={{
                 background: 'transparent',
@@ -349,7 +349,7 @@ export function ParameterPanel({ parameters, onChange, onValueChange }: Paramete
           <option value="bool">Bool</option>
           <option value="trigger">Trigger</option>
         </select>
-        <button type="button" aria-label="Adicionar novo parametro de animacao"
+        <button type="button" aria-label="Add novo parametro de animacao"
           onClick={addParameter}
           style={{
             background: 'var(--aethel-primary)',
@@ -696,7 +696,7 @@ export function TransitionEditorModal({ transition, onSave, onClose, parameters 
         <div style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Conditions</label>
-            <button type="button" aria-label="Adicionar condicao de transicao"
+            <button type="button" aria-label="Add condicao de transicao"
               onClick={addCondition}
               style={{
                 background: 'var(--aethel-primary)',
@@ -774,7 +774,7 @@ export function TransitionEditorModal({ transition, onSave, onClose, parameters 
                   fontSize: '11px',
                 }}
               />
-              <button type="button" aria-label={`Remover condicao ${index + 1}`}
+              <button type="button" aria-label={`Remove condicao ${index + 1}`}
                 onClick={() => removeCondition(index)}
                 style={{
                   background: 'transparent',

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { requireAuth } from '@/lib/auth-server'
 import { checkRateLimit } from '@/lib/rate-limit'

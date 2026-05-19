@@ -227,11 +227,11 @@ export function PreviewViewport3D({ content: _content = '', mode: _mode = '3d', 
 
   const simulateAIThinking = () => {
     setAiOverlay(true)
-    setAiThinking(['Analisando geometria...', 'Calculando iluminacao...', 'Gerando texturas...', 'Aplicando materiais...'])
+    setAiThinking(['Analyzing geometry...', 'Calculating lighting...', 'Generating textures...', 'Applying materials...'])
     onAIAction('simulate-render-pass')
 
     window.setTimeout(() => {
-      setAiThinking((prev) => [...prev, 'Renderizacao completa!'])
+      setAiThinking((prev) => [...prev, 'Render complete!'])
     }, 2000)
   }
 
@@ -264,35 +264,35 @@ export function PreviewViewport3D({ content: _content = '', mode: _mode = '3d', 
 
           <div className="h-6 w-px bg-[var(--aethel-border-primary)]" />
 
-          <button type="button" onClick={() => setViewMode('solid')} aria-label="Usar visualizacao solida" className={viewMode === 'solid' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Solid">
+          <button type="button" onClick={() => setViewMode('solid')} aria-label="Use solid viewport mode" className={viewMode === 'solid' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Solid">
             <Box className="h-4 w-4" />
           </button>
-          <button type="button" onClick={() => setViewMode('wireframe')} aria-label="Usar visualizacao wireframe" className={viewMode === 'wireframe' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Wireframe">
+          <button type="button" onClick={() => setViewMode('wireframe')} aria-label="Use wireframe viewport mode" className={viewMode === 'wireframe' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Wireframe">
             <Grid3x3 className="h-4 w-4" />
           </button>
 
           <div className="h-6 w-px bg-[var(--aethel-border-primary)]" />
 
-          <button type="button" onClick={() => setShowGrid(!showGrid)} aria-label={showGrid ? 'Ocultar grade do viewport' : 'Mostrar grade do viewport'} className={showGrid ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Grid">
+          <button type="button" onClick={() => setShowGrid(!showGrid)} aria-label={showGrid ? 'Hide viewport grid' : 'Show viewport grid'} className={showGrid ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Grid">
             <Grid3x3 className="h-4 w-4" />
           </button>
-          <button type="button" onClick={() => setShowGizmo(!showGizmo)} aria-label={showGizmo ? 'Ocultar gizmo do viewport' : 'Mostrar gizmo do viewport'} className={showGizmo ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Gizmo">
+          <button type="button" onClick={() => setShowGizmo(!showGizmo)} aria-label={showGizmo ? 'Hide viewport gizmo' : 'Show viewport gizmo'} className={showGizmo ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Gizmo">
             <Layers className="h-4 w-4" />
           </button>
-          <button type="button" onClick={() => setShowStats(!showStats)} aria-label={showStats ? 'Ocultar estatisticas do viewport' : 'Mostrar estatisticas do viewport'} className={showStats ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Stats">
+          <button type="button" onClick={() => setShowStats(!showStats)} aria-label={showStats ? 'Hide viewport stats' : 'Show viewport stats'} className={showStats ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Stats">
             <Eye className="h-4 w-4" />
           </button>
         </div>
 
         <div className="flex items-center gap-2">
-          <button type="button" onClick={simulateAIThinking} aria-label="Executar passe generativo de IA no viewport" className={TOOLBAR_PILL_CLASS}>
+          <button type="button" onClick={simulateAIThinking} aria-label="Executar passe generactive de IA no viewport" className={TOOLBAR_PILL_CLASS}>
             <Sparkles className="h-4 w-4" />
             IA Render
           </button>
-          <button type="button" onClick={() => setIsFullscreen(!isFullscreen)} aria-label={isFullscreen ? 'Sair do modo tela cheia do viewport' : 'Entrar no modo tela cheia do viewport'} className={ICON_BUTTON_CLASS} title="Tela cheia">
+          <button type="button" onClick={() => setIsFullscreen(!isFullscreen)} aria-label={isFullscreen ? 'Sign out do modo tela cheia do viewport' : 'Sign in no modo tela cheia do viewport'} className={ICON_BUTTON_CLASS} title="Tela cheia">
             {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
-          <button type="button" onClick={() => setTimelinePosition(0)} aria-label="Resetar timeline do viewport" className={ICON_BUTTON_CLASS} title="Reset">
+          <button type="button" onClick={() => setTimelinePosition(0)} aria-label="Reset viewport timeline" className={ICON_BUTTON_CLASS} title="Reset">
             <RotateCcw className="h-4 w-4" />
           </button>
         </div>
@@ -306,9 +306,9 @@ export function PreviewViewport3D({ content: _content = '', mode: _mode = '3d', 
             <div className="mb-3 flex items-start justify-between">
               <div className="flex items-center gap-2">
                 <Brain className="h-5 w-5 animate-pulse text-[var(--aethel-primary-light)]" />
-                <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">IA Processando</span>
+                <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">AI processing</span>
               </div>
-              <button type="button" onClick={() => setAiOverlay(false)} aria-label="Fechar overlay de processamento da IA" className={ICON_BUTTON_CLASS.replace('p-2', 'p-1')}>
+              <button type="button" onClick={() => setAiOverlay(false)} aria-label="Close AI processing overlay" className={ICON_BUTTON_CLASS.replace('p-2', 'p-1')}>
                 <X className="h-4 w-4" />
               </button>
             </div>

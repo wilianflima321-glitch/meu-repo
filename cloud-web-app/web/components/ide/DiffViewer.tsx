@@ -520,24 +520,24 @@ export default function DiffViewer({
           </div>
 
           {/* Actions */}
-          <button type="button" aria-label="Copiar diff"
+          <button type="button" aria-label="Copy diff"
             onClick={handleCopy}
             className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
-            title="Copiar alterado"
+            title="Copy modified"
           >
             <Copy className="w-4 h-4" />
           </button>
-          <button type="button" aria-label={isFullscreen ? 'Sair do modo tela cheia do diff' : 'Abrir diff em tela cheia'}
+          <button type="button" aria-label={isFullscreen ? 'Exit diff fullscreen' : 'Open diff fullscreen'}
             onClick={() => setIsFullscreen(!isFullscreen)}
             className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
-            title="Alternar tela cheia"
+            title="Toggle fullscreen"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
-          <button type="button" aria-label="Fechar diff"
+          <button type="button" aria-label="Close diff"
             onClick={onClose}
             className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
-            title="Fechar"
+            title="Close"
           >
             <X className="w-4 h-4" />
           </button>
@@ -566,7 +566,7 @@ export default function DiffViewer({
             {hunks.length === 0 && (
               <div className="text-center py-12 text-[var(--aethel-text-tertiary)]">
                 <Check className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                <p>Nenhuma diferenca encontrada</p>
+                <p>No diff found</p>
               </div>
             )}
           </div>
@@ -576,36 +576,36 @@ export default function DiffViewer({
       {/* Footer actions */}
       <div className="flex items-center justify-between px-4 py-3 bg-[var(--aethel-surface-tertiary)] border-t border-[var(--aethel-border-secondary)]">
         <div className="flex items-center gap-2">
-          <button type="button" aria-label="Aceitar todas as alterações"
+          <button type="button" aria-label="Accept all changes"
             onClick={handleAcceptAll}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded text-sm"
           >
             <Check className="w-4 h-4" />
             Aceitar tudo
           </button>
-          <button type="button" aria-label="Rejeitar todas as alterações"
+          <button type="button" aria-label="Reject all changes"
             onClick={handleRejectAll}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded text-sm"
           >
             <X className="w-4 h-4" />
             Rejeitar tudo
           </button>
-          <button type="button" aria-label="Resetar decisões do diff"
+          <button type="button" aria-label="Reset diff decisions"
             onClick={() => {
               setHunks(prev => prev.map(h => ({ ...h, accepted: null })))
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-sm"
           >
             <RotateCcw className="w-4 h-4" />
-            Resetar
+            Reset
           </button>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">
-            {stats.accepted}/{stats.hunks} mudancas aceitas
+            {stats.accepted}/{stats.hunks} changes accepted
           </span>
-          <button type="button" aria-label="Aplicar alterações aceitas"
+          <button type="button" aria-label="Apply accepted changes"
             onClick={handleApply}
             disabled={stats.pending > 0}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm font-medium ${
@@ -615,7 +615,7 @@ export default function DiffViewer({
             }`}
           >
             <FilePlus className="w-4 h-4" />
-            Aplicar mudancas
+            Apply changes
           </button>
         </div>
       </div>

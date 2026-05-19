@@ -29,21 +29,21 @@ export default function Automation() {
 
   const severityLabels: Record<string, string> = {
     warning: 'aviso',
-    critical: 'crítico',
-    info: 'informação',
+    critical: 'critical',
+    info: 'information',
   };
 
   const fetchAutomation = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/automation');
-      if (!res.ok) throw new Error('Falha ao carregar automações');
+      if (!res.ok) throw new Error('Failed to load automations');
       const json = await res.json();
       setData(json);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar automações');
+      setError(err instanceof Error ? err.message : 'Error loading automations');
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ export default function Automation() {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-bold'>Automação de fluxos</h1>
+          <h1 className='text-3xl font-bold'>Flow automation</h1>
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Eventos e regras automatizadas derivadas dos logs operacionais.</p>
           {lastUpdated && (
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
@@ -113,11 +113,11 @@ export default function Automation() {
 
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4'>
-          <h2 className='text-xl font-semibold'>Histórico de Automação</h2>
+          <h2 className='text-xl font-semibold'>Automation History</h2>
           <div className='flex gap-2'>
             <input
               type='text'
-              placeholder='Buscar por ação, categoria ou recurso'
+              placeholder='Search by action, category, or resource'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className='border p-2 rounded text-sm'
@@ -127,16 +127,16 @@ export default function Automation() {
               onChange={(e) => setSeverity(e.target.value as typeof severity)}
               className='border p-2 rounded text-sm'
             >
-              <option value='all'>Todas</option>
+              <option value='all'>All</option>
               <option value='warning'>Aviso</option>
-              <option value='critical'>Crítica</option>
+              <option value='critical'>Critical</option>
             </select>
           </div>
         </div>
         <table className='w-full table-auto'>
           <thead>
             <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
-              <th className='p-2 text-left'>Ação</th>
+              <th className='p-2 text-left'>Action</th>
               <th className='p-2 text-left'>Categoria</th>
               <th className='p-2 text-left'>Severidade</th>
               <th className='p-2 text-left'>Recurso</th>
@@ -146,7 +146,7 @@ export default function Automation() {
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando automações...</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Loading automations...</td>
               </tr>
             ) : filteredItems.length === 0 ? (
               <tr>
@@ -165,7 +165,7 @@ export default function Automation() {
                         ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                         : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                     }`}>
-                      {severityLabels[item.severity || 'info'] || item.severity || 'informação'}
+                      {severityLabels[item.severity || 'info'] || item.severity || 'information'}
                     </span>
                   </td>
                   <td className='p-2'>{item.resource || '—'}</td>

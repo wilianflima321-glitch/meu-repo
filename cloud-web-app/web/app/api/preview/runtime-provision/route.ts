@@ -528,7 +528,7 @@ export async function POST(request: NextRequest) {
       return capabilityResponse({
         error: 'RUNTIME_PROVISION_BROWSER_SIDE_PROVIDER',
         status: 501,
-        message: 'WebContainers esta declarado como provider gerenciado, mas o runtime no navegador nao esta ativo nesta rota.',
+        message: 'WebContainers is declared as a managed provider, but the browser runtime is not active on this route.',
         capability: CAPABILITY,
         capabilityStatus: 'PARTIAL',
         metadata: {
@@ -643,7 +643,7 @@ export async function POST(request: NextRequest) {
         return capabilityResponse({
           error: 'RUNTIME_PROVISION_FAILED',
           status: 503,
-          message: error instanceof Error ? error.message : 'Falha ao provisionar E2B.',
+          message: error instanceof Error ? error.message : 'Failed to provision E2B.',
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
           metadata: {
@@ -746,7 +746,7 @@ export async function POST(request: NextRequest) {
       return capabilityResponse({
         error: 'RUNTIME_PROVISION_FAILED',
         status: 503,
-        message: 'Falha ao solicitar provisionamento gerenciado.',
+        message: 'Failed to request managed provisioning.',
         capability: CAPABILITY,
         capabilityStatus: 'PARTIAL',
       metadata: {
@@ -832,7 +832,7 @@ export async function POST(request: NextRequest) {
       return capabilityResponse({
         error: 'RUNTIME_PROVISION_EXCEPTION',
         status: 503,
-        message: error instanceof Error ? error.message : 'Falha ao provisionar preview gerenciado.',
+        message: error instanceof Error ? error.message : 'Failed to provision managed preview.',
         capability: CAPABILITY,
         capabilityStatus: 'PARTIAL',
         metadata: {
@@ -852,7 +852,7 @@ export async function POST(request: NextRequest) {
     return capabilityResponse({
       error: 'RUNTIME_PROVISION_EXCEPTION',
       status: 503,
-      message: error instanceof Error ? error.message : 'Falha ao provisionar preview gerenciado.',
+      message: error instanceof Error ? error.message : 'Failed to provision managed preview.',
       capability: CAPABILITY,
       capabilityStatus: 'PARTIAL',
       metadata: {

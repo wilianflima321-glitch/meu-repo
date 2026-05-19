@@ -577,7 +577,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
             onClick={handleSubmit}
             disabled={!input.trim() || status === 'running' || status === 'paused' || !aiAgentLane.decision.canStart}
             title={!aiAgentLane.decision.canStart ? aiAgentLane.decision.reason : undefined}
-            aria-label={status === 'running' || status === 'paused' ? 'Executando tarefa do agente' : 'Enviar tarefa para o agente'}
+            aria-label={status === 'running' || status === 'paused' ? 'Executando tarefa do agente' : 'Send tarefa para o agente'}
             className={`absolute bottom-2 right-2 h-8 w-8 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary-dark)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
           >
             {status === 'running' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

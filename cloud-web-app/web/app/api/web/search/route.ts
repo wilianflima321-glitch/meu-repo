@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/web/search/route');
 
 const CONFIG = {
   tavily: process.env.TAVILY_API_KEY,
@@ -193,7 +196,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result);
 
   } catch (error) {
-    console.error('[Web Search API] Error:', error);
+    routeLogger.error('[Web Search API] Error:', error);
     return NextResponse.json(
       { error: 'Search failed' },
       { status: 500 }

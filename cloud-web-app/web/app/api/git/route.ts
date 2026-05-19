@@ -12,6 +12,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/git/route');
 
 export async function POST(request: NextRequest) {
   try {
@@ -289,7 +292,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: unknown) {
-    console.error('Git API error:', error);
+    routeLogger.error('Git API error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
@@ -357,7 +360,7 @@ export async function GET(request: NextRequest) {
         );
     }
   } catch (error: unknown) {
-    console.error('Git API error:', error);
+    routeLogger.error('Git API error:', error);
     
     // SECURITY: Mapear erros conhecidos, não expor detalhes internos
     const mapped = apiErrorToResponse(error);

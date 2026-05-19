@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import EngineSpineReadinessPanel from '@/components/studio/EngineSpineReadinessPanel'
 import CreativeStudioShell from './CreativeStudioShell'
 import { CREATIVE_STUDIO_ROUTES } from './creative-studio-routes'
 import StudioMissionControl from './StudioMissionControl'
@@ -31,6 +32,8 @@ export default function CreativeStudioPage() {
           </div>
 
           <StudioMissionControl />
+
+          <EngineSpineReadinessPanel />
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {CREATIVE_STUDIO_ROUTES.map((route) => (

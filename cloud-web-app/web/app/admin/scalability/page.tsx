@@ -34,8 +34,8 @@ export default function ScalabilityPage() {
         fetch('/api/billing/usage'),
       ]);
 
-      if (!infraRes.ok) throw new Error('Falha ao carregar infraestrutura');
-      if (!billingRes.ok) throw new Error('Falha ao carregar uso/faturamento');
+      if (!infraRes.ok) throw new Error('Failed to load infrastructure');
+      if (!billingRes.ok) throw new Error('Failed to load usage/billing');
 
       const infra = await infraRes.json();
       const billing = await billingRes.json();
@@ -76,7 +76,7 @@ export default function ScalabilityPage() {
 
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -90,7 +90,7 @@ export default function ScalabilityPage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Métricas de escalabilidade</h1>
+      <h1 className="text-2xl font-bold mb-6">Scalability metrics</h1>
 
       {error && (
         <div className="mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] p-4 text-[var(--aethel-error)]">
@@ -100,29 +100,29 @@ export default function ScalabilityPage() {
 
       {loading && !error && (
         <div className="mb-6 rounded-lg border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)] p-4 text-[var(--aethel-text-tertiary)]">
-          Carregando métricas...
+          Loading metrics...
         </div>
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Uso de CPU</h3>
+          <h3 className="text-lg font-semibold">CPU usage</h3>
           <p className="text-2xl font-bold text-[var(--aethel-primary)]">{metrics.cpuUsage}%</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Uso de memória</h3>
+          <h3 className="text-lg font-semibold">Memory usage</h3>
           <p className="text-2xl font-bold text-[var(--aethel-success)]">{metrics.memoryUsage}%</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Tráfego de rede</h3>
+          <h3 className="text-lg font-semibold">Network traffic</h3>
           <p className="text-2xl font-bold text-[var(--aethel-primary)]">{metrics.networkTraffic} Mbps</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Conexões ativas</h3>
+          <h3 className="text-lg font-semibold">Active connections</h3>
           <p className="text-2xl font-bold text-[var(--aethel-error)]">{metrics.activeConnections}</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Taxa de erro</h3>
+          <h3 className="text-lg font-semibold">Error rate</h3>
           <p className="text-2xl font-bold text-[var(--aethel-warning)]">{metrics.errorRate}%</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
@@ -132,7 +132,7 @@ export default function ScalabilityPage() {
       </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Uso mensal</h2>
+        <h2 className="text-lg font-semibold mb-4">Monthly usage</h2>
         <div className="grid grid-cols-4 gap-4">
           <div className="text-center">
             <h3 className="text-lg font-semibold">Plano</h3>
@@ -147,19 +147,19 @@ export default function ScalabilityPage() {
             <p className="text-2xl font-bold text-[var(--aethel-primary)]">{usage.storageUsedMb.toLocaleString()} MB</p>
           </div>
           <div className="text-center">
-            <h3 className="text-lg font-semibold">Minutos de compilação</h3>
+            <h3 className="text-lg font-semibold">Minutos de compilaction</h3>
             <p className="text-2xl font-bold text-[var(--aethel-error)]">{usage.buildMinutesUsed.toLocaleString()}</p>
           </div>
         </div>
       </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Recomendações de escalabilidade</h2>
+        <h2 className="text-lg font-semibold mb-4">Recommendations de escalabilidade</h2>
         <ul className="list-disc list-inside">
           <li>Considerar autoescalonamento quando CPU &gt; 80%</li>
           <li>Otimizar consultas para reduzir o tempo de resposta</li>
           <li>Implementar CDN para reduzir custos de banda</li>
-          <li>Monitorar a taxa de erro para identificar gargalos</li>
+          <li>Monitor the error rate to identify bottlenecks</li>
         </ul>
       </div>
     </div>

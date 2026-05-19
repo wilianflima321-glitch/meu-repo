@@ -354,7 +354,7 @@ export function ImageEditor({
     const mainCanvas = canvasRef.current;
     if (!mainCanvas) return;
 
-    // Criar canvas final sem o padrao de transparencia
+    // Create canvas final sem o padrao de transparencia
     const exportCanvas = document.createElement('canvas');
     exportCanvas.width = width;
     exportCanvas.height = height;
@@ -455,7 +455,7 @@ export function ImageEditor({
 
         <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] mt-6 mb-3">Layers</h3>
 
-        <button type="button" aria-label="Adicionar nova camada"
+        <button type="button" aria-label="Add nova camada"
           onClick={addLayer}
           className="w-full py-1 bg-[var(--aethel-primary)] rounded text-sm mb-2 hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
         >
@@ -484,7 +484,7 @@ export function ImageEditor({
               />
               <span className="text-sm text-[var(--aethel-text-primary)] flex-1 truncate">{layer.name}</span>
               {layers.length > 1 && (
-                <button type="button" aria-label={`Excluir camada ${layer.name}`}
+                <button type="button" aria-label={`Delete camada ${layer.name}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteLayer(layer.id);

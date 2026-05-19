@@ -3,6 +3,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { readPaymentGatewayConfig } from '@/lib/server/payment-gateway-config';
 import { capabilityResponse } from '@/lib/server/capability-response';
 import { buildAppUrl } from '@/lib/server/app-origin';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/billing/checkout-link/route');
 
 const SELF_SERVE_PLANS = new Set(['starter', 'basic', 'pro', 'studio']);
 
@@ -77,7 +80,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.error('[billing/checkout-link] Error:', error);
+    routeLogger.error('[billing/checkout-link] Error:', error);
     return NextResponse.json({ error: 'Failed to create checkout link' }, { status: 500 });
   }
 }

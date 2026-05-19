@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { evaluateMobileCompanionAction, getMobileCompanionContract } from '@/lib/mobile/mobile-companion-contract'
 

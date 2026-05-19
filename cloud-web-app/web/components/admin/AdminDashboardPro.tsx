@@ -38,7 +38,7 @@ export default function AdminDashboardPro() {
 
   const metrics: AdminMetric[] = [
     { label: 'Usuarios totais', value: '2,847', change: 12.5, status: 'up' },
-    { label: 'Projetos ativos', value: '1,234', change: 8.3, status: 'up' },
+    { label: 'Active projects', value: '1,234', change: 8.3, status: 'up' },
     { label: 'Requisicoes API (24h)', value: '2.3M', change: -2.1, status: 'down' },
     { label: 'Saude do sistema', value: '99.8%', change: 0.2, status: 'stable' }
   ]
@@ -96,7 +96,7 @@ export default function AdminDashboardPro() {
           onClick={handleRefresh}
           disabled={refreshing}
           className={`rounded-lg bg-[var(--aethel-surface-tertiary)] p-2 hover:bg-[var(--aethel-surface-quaternary)] disabled:opacity-50 ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
-          aria-label="Atualizar painel"
+          aria-label="Refresh painel"
         >
           <RefreshCw size={20} className={refreshing ? 'animate-spin' : ''} />
         </button>
@@ -192,7 +192,7 @@ export default function AdminDashboardPro() {
                   <p className="text-2xl font-bold text-[var(--aethel-warning)]">$47,234</p>
                 </div>
                 <div className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] rounded-lg">
-                  <p className="text-xs text-[var(--aethel-text-tertiary)] uppercase font-bold mb-2">Assinaturas ativas</p>
+                  <p className="text-xs text-[var(--aethel-text-tertiary)] uppercase font-bold mb-2">Assinaturas actives</p>
                   <p className="text-2xl font-bold text-[var(--aethel-success)]">1,847</p>
                 </div>
                 <div className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] rounded-lg">
@@ -272,13 +272,13 @@ export default function AdminDashboardPro() {
                   <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Limpar cache</p>
                   <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Limpar dados em cache</p>
                 </button>
-                <button type="button" aria-label="Exportar logs do sistema"
+                <button type="button" aria-label="Export logs do sistema"
                   onClick={() => runOpsAction('logs_export')}
                   disabled={runningAction !== null}
                   className={`group rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] p-4 text-left hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] disabled:cursor-not-allowed disabled:opacity-50 ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
                 >
-                  <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Exportar logs</p>
-                  <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Baixar logs do sistema</p>
+                  <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Export logs</p>
+                  <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Download logs do sistema</p>
                 </button>
                 <button type="button" aria-label="Sincronizar feature flags"
                   onClick={() => runOpsAction('feature_flags')}

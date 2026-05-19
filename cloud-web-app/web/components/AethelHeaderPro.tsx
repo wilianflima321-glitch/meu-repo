@@ -197,14 +197,14 @@ export default function AethelHeader() {
     { id: 'div1', label: '', divider: true },
     {
       id: 'help',
-      label: 'Ajuda & Suporte',
+      label: 'Help & Suporte',
       icon: <HelpCircle className="w-4 h-4" />,
       href: '/help',
     },
     { id: 'div2', label: '', divider: true },
     {
       id: 'logout',
-      label: 'Sair',
+      label: 'Sign out',
       icon: <LogOut className="w-4 h-4" />,
       onClick: () => {
         logout(true)
@@ -291,7 +291,7 @@ export default function AethelHeader() {
               className="hidden sm:flex items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]"
             >
               <Search className="w-4 h-4" />
-              <span>Buscar no workbench</span>
+              <span>Search no workbench</span>
               <kbd className="hidden lg:inline-flex items-center gap-1 rounded-md border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] px-1.5 py-0.5 text-xs text-[var(--aethel-text-quaternary)]">
                 Ctrl+K
               </kbd>
@@ -320,7 +320,7 @@ export default function AethelHeader() {
                     <div className="absolute right-0 top-12 z-50 w-80 overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(16,22,34,0.98),rgba(10,14,24,0.98))] shadow-[0_24px_70px_rgba(2,6,23,0.55)]">
                       <div className="flex items-center justify-between border-b border-[var(--aethel-border-secondary)] px-4 py-3">
                         <div>
-                          <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Notificações</p>
+                          <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Notifications</p>
                           <p className="text-xs text-[var(--aethel-text-quaternary)]">
                             {notifications > 0 ? `${notifications} pendentes` : 'Tudo em dia'}
                           </p>
@@ -359,7 +359,7 @@ export default function AethelHeader() {
                           ))
                         ) : (
                           <div className="px-4 py-6 text-sm text-[var(--aethel-text-tertiary)]">
-                            Nenhuma notificação recente.
+                            No recent notifications.
                           </div>
                         )}
                       </div>
@@ -393,7 +393,7 @@ export default function AethelHeader() {
                   href="/login"
                   className="inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 >
-                  Entrar
+                  Sign in
                 </Link>
                 <Link
                   href="/register"

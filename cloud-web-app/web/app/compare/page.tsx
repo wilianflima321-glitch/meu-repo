@@ -1,11 +1,8 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Compass, Scale, Sparkles } from 'lucide-react'
-
 import PublicFooter from '@/components/ui/PublicFooter'
 import PublicHeader from '@/components/ui/PublicHeader'
-
 import {
   COMPARISON_CARDS,
   COMPARISON_METRICS,
@@ -13,13 +10,11 @@ import {
   EVIDENCE_LINKS,
   HERO_NOTES,
 } from './comparison-content'
-
 export const metadata: Metadata = {
   title: 'Compare | Aethel Studio',
   description:
     'Comparativo honesto entre Aethel, Cursor, Windsurf, Replit, Vercel, Linear e Notion para buyers e champions tecnicos.',
 }
-
 function SourceLink({
   href,
   label,
@@ -42,7 +37,6 @@ function SourceLink({
       </a>
     )
   }
-
   return (
     <Link
       href={href}
@@ -53,7 +47,6 @@ function SourceLink({
     </Link>
   )
 }
-
 export default function ComparePage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--aethel-info)_10%,transparent),transparent_26%),var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
@@ -104,7 +97,7 @@ export default function ComparePage() {
                 <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
                   <div>
                     <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Studio evidence</p>
-                    <p className="text-xs text-[var(--aethel-text-tertiary)]">editor, trust, dashboard e readiness em uma tela</p>
+                    <p className="text-xs text-[var(--aethel-text-tertiary)]">The proof stack buyers should inspect first.</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-error)_78%,transparent)]" />
@@ -112,14 +105,22 @@ export default function ComparePage() {
                     <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_78%,transparent)]" />
                   </div>
                 </div>
-                <Image
-                  src="/screenshots/editor.png"
-                  alt="Aethel Studio com editor, AI ops e preview integrados"
-                  width={1600}
-                  height={960}
-                  className="h-auto w-full object-cover"
-                  priority
-                />
+                <div className="grid gap-3 p-4">
+                  {[
+                    { label: 'Editor', value: 'Monaco + project context', tone: 'var(--aethel-info-light)' },
+                    { label: 'Agents', value: 'Scope locks + read receipts', tone: 'var(--aethel-success-light)' },
+                    { label: 'Trust', value: 'Status, compliance, readiness', tone: 'var(--aethel-warning-light)' },
+                    { label: 'Preview', value: 'Runtime evidence before claims', tone: 'var(--aethel-primary-light)' },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_68%,transparent)] px-4 py-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: item.tone }}>{item.label}</p>
+                        <p className="mt-1 text-sm text-[var(--aethel-text-primary)]">{item.value}</p>
+                      </div>
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--aethel-success-light)]" />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-5">
@@ -278,7 +279,7 @@ export default function ComparePage() {
                 Se o seu criterio e substancia auditavel, comece pelas superficies publicas abaixo.
               </h2>
               <p className="mt-3 text-sm leading-7 text-[var(--aethel-text-secondary)]">
-                Esta e a melhor forma de validar se o Aethel esta pronto para a conversa que o seu time realmente quer
+                This is the best way to validate whether Aethel is ready for the conversation your team actually wants
                 ter: produto, trust, rollout, pricing ou procurement.
               </p>
             </div>

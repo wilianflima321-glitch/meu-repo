@@ -124,7 +124,7 @@ export function usePreviewDeployTrust({
           throw new Error(
             payload.message ||
               payload.error ||
-              `Falha ao carregar deploy (${response.status})`
+              `Failure ao carregar deploy (${response.status})`
           );
         }
 
@@ -135,7 +135,7 @@ export function usePreviewDeployTrust({
         });
       } catch (error) {
         setFeedback(
-          error instanceof Error ? error.message : 'Falha ao carregar deploy'
+          error instanceof Error ? error.message : 'Failure ao carregar deploy'
         );
       } finally {
         setRefreshing(false);
@@ -204,7 +204,7 @@ export function usePreviewDeployTrust({
         throw new Error(
           payload.message ||
             payload.error ||
-            `Falha ao iniciar deploy (${response.status})`
+            `Failure ao iniciar deploy (${response.status})`
         );
       }
 
@@ -221,7 +221,7 @@ export function usePreviewDeployTrust({
       }
     } catch (error) {
       setFeedback(
-        error instanceof Error ? error.message : 'Falha ao iniciar deploy'
+        error instanceof Error ? error.message : 'Failure ao iniciar deploy'
       );
     } finally {
       setSubmitting(false);
@@ -289,7 +289,7 @@ function getDeployStartedLabel(status: PreviewDeployStatus | undefined): string 
     case 'preparing':
       return 'Deploy enfileirado';
     case 'error':
-      return 'Deploy retornou erro';
+      return 'Deploy retornou error';
     default:
       return 'Deploy iniciado';
   }

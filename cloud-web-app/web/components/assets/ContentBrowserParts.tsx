@@ -209,7 +209,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
         <span style={{ color: colors.textDim, fontSize: '11px' }}>
           {asset.size ? `${(asset.size / 1024).toFixed(1)} KB` : '-'}
         </span>
-        <button type="button" aria-label={asset.isFavorite ? `Remover ${asset.name} dos favoritos` : `Adicionar ${asset.name} aos favoritos`}
+        <button type="button" aria-label={asset.isFavorite ? `Remove ${asset.name} dos favoritos` : `Add ${asset.name} aos favoritos`}
           onClick={(e) => {
             e.stopPropagation();
             onToggleFavorite();

@@ -30,7 +30,7 @@ export function CreatorDashboardHeader({
                 <div className="flex items-center gap-2">
                     <Button type="button" variant="outline" onClick={onRefresh} disabled={isRefreshing}>
                         <RefreshCw className={cn('mr-2 h-4 w-4', isRefreshing && 'animate-spin')} />
-                        Atualizar
+                        Refresh
                     </Button>
                     {HEADER_ACTIONS.map((action) => {
                         const Icon = action.icon;

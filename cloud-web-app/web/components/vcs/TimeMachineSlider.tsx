@@ -1,11 +1,11 @@
 'use client';
 
 /**
- * TimeMachineSlider - Slider Visual de Histórico Git
+ * TimeMachineSlider - Slider Visual de History Git
  *
- * Interface visual para navegar pelo histórico de commits.
+ * Interface visual para navegar pelo history de commits.
  * Inspirado em Time Machine do macOS.
- * Preview em tempo real das mudanças.
+ * Preview em tempo real das changes.
  *
  * @see IDEIAS_SUGESTOES_INOVACAO.md
  * @see INOVACOES_TECNICAS_DETALHADAS.md
@@ -129,10 +129,10 @@ function formatRelativeTime(timestamp: number): string {
   const weeks = Math.floor(diff / 604800000);
 
   if (minutes < 1) return 'agora';
-  if (minutes < 60) return `${minutes}min atrás`;
-  if (hours < 24) return `${hours}h atrás`;
-  if (days < 7) return `${days}d atrás`;
-  if (weeks < 4) return `${weeks} sem atrás`;
+  if (minutes < 60) return `${minutes}min ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  if (weeks < 4) return `${weeks} sem ago`;
 
   return new Date(timestamp).toLocaleDateString('pt-BR', {
     day: 'numeric',
@@ -277,7 +277,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
           >
             <div className="p-3 space-y-1.5 max-h-[150px] overflow-y-auto">
               <p className="text-[10px] text-[var(--aethel-text-tertiary)] uppercase tracking-wider mb-2">
-                Arquivos alterados
+                Files alterados
               </p>
               {commit.changes.files.slice(0, 5).map((file, i) => (
                 <button type="button"
@@ -299,7 +299,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
               ))}
               {commit.changes.files.length > 5 && (
                 <p className="text-xs text-[var(--aethel-text-tertiary)] text-center pt-1">
-                  +{commit.changes.files.length - 5} mais arquivos
+                  +{commit.changes.files.length - 5} mais files
                 </p>
               )}
             </div>
@@ -505,9 +505,9 @@ export function TimeMachineSlider({
     return (
       <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-8 text-center ${className}`}>
         <GitCommit className="w-12 h-12 text-[var(--aethel-text-quaternary)] mx-auto mb-3" />
-        <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhum commit encontrado</p>
+        <p className="text-sm text-[var(--aethel-text-tertiary)]">No commit encontrado</p>
         <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
-          Faça alterações e commite para ver o histórico
+          Make changes and commit to see the history
         </p>
       </div>
     );
@@ -653,7 +653,7 @@ export function TimeMachineSlider({
       {/* Keyboard hints */}
       <div className="px-4 pb-3 flex items-center justify-center gap-4 text-[10px] text-[var(--aethel-text-quaternary)]">
         <span>← → para navegar</span>
-        <span>Espaço para play/pause</span>
+        <span>Space to play/pause</span>
       </div>
     </motion.div>
   );

@@ -15,11 +15,13 @@ import {
 import * as THREE from 'three';
 import { World, Entity, TransformComponent, MeshComponent, getWorld } from '@/lib/game-engine-core';
 import { GameSimulation } from './GameSimulation';
+import StudioEngineModuleMiniPanel from '@/components/studio/StudioEngineModuleMiniPanel';
 import { PropertiesPanel } from './ScenePropertiesPanel';
 import { DEFAULT_SNAP_SETTINGS, PRIMITIVE_GEOMETRIES, snapPosition, snapRotation, snapScale } from './scene-editor-models';
 import type { SceneEditorProps, SceneObject, SnapSettings, TransformMode } from './scene-editor-models';
 
 export type { SceneEditorProps, SceneObject, SnapSettings, TransformMode } from './scene-editor-models';
+const SCENE_ENGINE_MODULES = ['behavior-tree-system'] as const;
 interface SceneObjectMeshProps {
   object: SceneObject;
   isSelected: boolean;
@@ -415,7 +417,7 @@ function HierarchyPanel({
               e.stopPropagation();
               onDelete(obj.id);
             }}
-            aria-label="Remover objeto da cena"
+            aria-label="Remove objeto da cena"
             style={{
               background: 'rgba(255,0,0,0.3)',
               border: 'none',
@@ -449,7 +451,7 @@ function HierarchyPanel({
         justifyContent: 'space-between',
         alignItems: 'center',
       }}>
-        <span style={{ fontWeight: 'bold', color: 'var(--aethel-text-primary)' }}>Hierarquia</span>
+        <span style={{ fontWeight: 'bold', color: 'var(--aethel-text-primary)' }}>Hierarchy</span>
         <div style={{ position: 'relative' }}>
           <button type="button"
             onClick={() => setShowAddMenu(!showAddMenu)}
@@ -487,7 +489,7 @@ function HierarchyPanel({
                     onAdd('mesh', geom);
                     setShowAddMenu(false);
                   }}
-                  aria-label={`Adicionar ${geom} na cena`}
+                  aria-label={`Add ${geom} to scene`}
                   style={{
                     display: 'block',
                     width: '100%',
@@ -566,10 +568,11 @@ function HierarchyPanel({
             padding: '20px',
             fontSize: '13px'
           }}>
-            Cena vazia. Clique em &quot;+ Add&quot; para adicionar objetos.
+            Empty scene. Click &quot;+ Add&quot; to add objects.
           </div>
         )}
       </div>
+      <StudioEngineModuleMiniPanel title="Scene AI" moduleIds={SCENE_ENGINE_MODULES} />
     </div>
   );
 }

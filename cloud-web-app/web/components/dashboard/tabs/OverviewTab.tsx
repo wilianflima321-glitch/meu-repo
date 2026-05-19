@@ -87,7 +87,7 @@ function StatCard({
                     : 'text-[var(--aethel-text-secondary)]'
                 }`}
               >
-                {change > 0 ? '+' : ''}{change}% vs mês passado
+                {change > 0 ? '+' : ''}{change}% vs last month
               </span>
             </div>
           )}
@@ -142,9 +142,9 @@ export function OverviewTab({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Bem-vindo de volta!</h1>
+          <h1 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Welcome de volta!</h1>
           <p className="text-[var(--aethel-text-secondary)] mt-1">
-            Aqui está um resumo da sua atividade recente.
+            Here is a summary of your recent activity.
           </p>
         </div>
         <Button icon={<Sparkles className="w-4 h-4" />} onClick={onOpenChat}>
@@ -155,14 +155,14 @@ export function OverviewTab({
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Projetos Ativos"
+          title="Active projects"
           value={currentStats.projects}
           change={currentStats.projectsChange}
           icon={<FolderKanban className="w-6 h-6 text-[var(--aethel-info)]" />}
           trend={currentStats.projectsChange >= 0 ? 'up' : 'down'}
         />
         <StatCard
-          title="Sessões de Chat"
+          title="Chat sessions"
           value={currentStats.chatSessions}
           change={currentStats.chatSessionsChange}
           icon={<MessageSquare className="w-6 h-6 text-[var(--aethel-primary-light)]" />}
@@ -187,7 +187,7 @@ export function OverviewTab({
         {/* Recent Projects */}
         <Card variant="elevated" padding="lg">
           <CardHeader
-            title="Projetos Recentes"
+            title="Recent projects"
             description="Continue de onde parou"
             action={
               <Button type="button" variant="ghost" size="sm" onClick={onCreateProject}>
@@ -201,7 +201,7 @@ export function OverviewTab({
           ) : (
             <div className="space-y-3">
               {recentProjects.map((project) => (
-                <button type="button" aria-label={`Abrir projeto recente ${project.name}`}
+                <button type="button" aria-label={`Open recent project ${project.name}`}
                   key={project.id}
                   onClick={() => onOpenProject?.(project.id)}
                   className="w-full flex items-center gap-4 p-4 rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] transition-colors text-left group"
@@ -230,15 +230,15 @@ export function OverviewTab({
         <Card variant="elevated" padding="lg">
           <CardHeader
             title="Atividade Recente"
-            description="Seu histórico de ações"
+            description="Your action history"
           />
 
           {recentActivity.length === 0 ? (
             <div className="py-12 text-center">
               <TrendingUp className="w-12 h-12 text-[var(--aethel-text-tertiary)] mx-auto mb-4" />
-              <p className="text-[var(--aethel-text-tertiary)]">Nenhuma atividade ainda</p>
+              <p className="text-[var(--aethel-text-tertiary)]">No atividade ainda</p>
               <p className="text-sm text-[var(--aethel-text-tertiary)] mt-1">
-                Suas ações aparecerão aqui
+                Your actions will appear here
               </p>
             </div>
           ) : (
@@ -268,10 +268,10 @@ export function OverviewTab({
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <h3 className="text-xl font-bold text-[var(--aethel-text-primary)] mb-2">
-              Comece algo novo com IA
+              Start something new with AI
             </h3>
             <p className="text-[var(--aethel-text-secondary)]">
-              Use nossos agentes de IA para criar, refatorar ou debugar código.
+              Use our AI agents to create, refactor, or debug code.
             </p>
           </div>
           <div className="flex gap-3">
@@ -279,9 +279,9 @@ export function OverviewTab({
               <MessageSquare className="w-4 h-4 mr-2" />
               Chat AI
             </Button>
-            <button type="button" aria-label="Criar novo projeto" onClick={onCreateProject}>
+            <button type="button" aria-label="Create new project" onClick={onCreateProject}>
               <FolderKanban className="w-4 h-4 mr-2" />
-              Novo Projeto
+              New project
             </button>
           </div>
         </div>

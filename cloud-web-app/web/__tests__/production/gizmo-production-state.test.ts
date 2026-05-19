@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { buildDefaultAgenticProductionState } from '@/lib/production/agentic-production-state'
 import { mergeGizmoTransformOperationIntoProductionState } from '@/lib/production/gizmo-production-state'

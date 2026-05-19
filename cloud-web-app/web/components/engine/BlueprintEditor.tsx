@@ -214,7 +214,7 @@ const NodePalette: React.FC<{
             {expandedCats.has(category) && (
               <div className="py-1">
                 {nodes.map(node => (
-                  <button type="button" aria-label={`Adicionar no ${node.displayName} ao blueprint`}
+                  <button type="button" aria-label={`Add no ${node.displayName} ao blueprint`}
                     key={node.type}
                     onClick={() => onAddNode(node.type)}
                     className="w-full px-4 py-1.5 text-left text-xs text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)] flex items-center gap-2"
@@ -250,7 +250,7 @@ const VariablesPanel: React.FC<{
     <div className="p-3 border-b border-[var(--aethel-border-primary)]">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Variables</span>
-        <button type="button" aria-label="Adicionar variavel ao blueprint"
+        <button type="button" aria-label="Add variavel ao blueprint"
           onClick={onAdd}
           className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-[var(--aethel-text-primary)]"
         >
@@ -272,7 +272,7 @@ const VariablesPanel: React.FC<{
                 <span className="text-[var(--aethel-text-primary)]">{v.name}</span>
                 <span className="text-[var(--aethel-text-secondary)]">({v.type})</span>
               </div>
-              <button type="button" aria-label={`Remover variavel ${v.name} do blueprint`}
+              <button type="button" aria-label={`Remove variavel ${v.name} do blueprint`}
                 onClick={() => onDelete(v.id)}
                 className="text-[var(--aethel-error-light)] hover:text-[var(--aethel-error)]"
               >
@@ -329,7 +329,7 @@ const ComponentsPanel: React.FC<{
     <div className="p-3 border-b border-[var(--aethel-border-primary)]">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Components</span>
-        <button type="button" aria-label="Adicionar componente ao blueprint"
+        <button type="button" aria-label="Add componente ao blueprint"
           onClick={onAdd}
           className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-[var(--aethel-text-primary)]"
         >
@@ -363,7 +363,7 @@ const FunctionsPanel: React.FC<{
     <div className="p-3">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Functions</span>
-        <button type="button" aria-label="Adicionar funcao ao blueprint"
+        <button type="button" aria-label="Add funcao ao blueprint"
           onClick={onAdd}
           className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-[var(--aethel-text-primary)]"
         >
@@ -388,7 +388,7 @@ const FunctionsPanel: React.FC<{
                 <span>{f.isEvent ? '⚡' : 'ƒ'}</span>
                 <span>{f.name}</span>
               </div>
-              <button type="button" aria-label={`Remover funcao ${f.name} do blueprint`}
+              <button type="button" aria-label={`Remove funcao ${f.name} do blueprint`}
                 onClick={(e) => { e.stopPropagation(); onDelete(f.id); }}
                 className="text-[var(--aethel-error-light)] hover:text-[var(--aethel-error)]"
               >

@@ -175,7 +175,7 @@ export function FilterBar({
       </div>
 
       {/* Starred Filter */}
-      <button type="button" aria-label={filter.starred ? 'Desativar filtro de assets favoritos' : 'Ativar filtro de assets favoritos'}
+      <button type="button" aria-label={filter.starred ? 'Desactiver filtro de assets favoritos' : 'Ativar filtro de assets favoritos'}
         onClick={() => onFilterChange({ ...filter, starred: !filter.starred })}
         style={{
           padding: '6px 12px',

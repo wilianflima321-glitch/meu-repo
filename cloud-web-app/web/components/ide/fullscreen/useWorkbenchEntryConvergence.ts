@@ -42,7 +42,7 @@ export function useWorkbenchEntryConvergence({
       tone: 'warning' as const,
       title: 'Surface em modo Labs',
       description:
-        'Esta rota foi convergida para o workbench principal. A experiencia canonica continua no shell de codigo, previa e revisao.',
+        'This route was converged into the main workbench. The canonical experience continues in the code, preview, and review shell.',
     };
 
     clearEntryNotice();
@@ -61,8 +61,8 @@ export function useWorkbenchEntryConvergence({
           tone: 'info',
           title: missionParam?.trim() ? `${laneLabel} em foco no AI Console` : 'Comando de IA convergido',
           description: missionParam?.trim()
-            ? 'A missao entrou no rail principal de IA, onde briefing, diff, execucao e contexto ficam centralizados.'
-            : 'A acao abriu o painel principal de IA dentro do workbench, onde diff, execucao e contexto ficam centralizados.',
+            ? 'The mission entered the main AI rail, where brief, diff, execution, and context stay centralized.'
+            : 'The action opened the main AI panel inside the workbench, where diff, execution, and context stay centralized.',
         });
       }
       return;
@@ -87,7 +87,7 @@ export function useWorkbenchEntryConvergence({
         tone: 'info',
         title: 'Git aberto no workbench',
         description:
-          'A rota dedicada foi convergida para a barra lateral do IDE para manter revisao, arquivos e diff no mesmo fluxo.',
+          'The dedicated route converged into the IDE sidebar to keep review, files, and diff in one flow.',
       });
       return;
     }
@@ -114,11 +114,11 @@ export function useWorkbenchEntryConvergence({
       setPreviewEnabled(true);
       showEntryNotice({
         tone: 'info',
-        title: entryProfile.dominantSurface === 'runtime' ? 'Runtime aberto no shell principal' : 'Previa aberta no shell principal',
+        title: entryProfile.dominantSurface === 'runtime' ? 'Runtime opened in the main shell' : 'Preview opened in the main shell',
         description:
           entryProfile.dominantSurface === 'runtime'
-            ? `${laneLabel} abriu com runtime, console e editor no mesmo cockpit para evitar um side-by-side fraco entre chat e preview.`
-            : 'A previa canonica agora vive dentro do workbench para manter runtime, console e editor no mesmo contexto.',
+            ? `${laneLabel} opened with runtime, console, and editor in the same cockpit to avoid a weak chat-preview split.`
+            : 'The canonical preview now lives inside the workbench so runtime, console, and editor share one context.',
       });
       return;
     }
@@ -127,9 +127,9 @@ export function useWorkbenchEntryConvergence({
       setPreviewEnabled(true);
       showEntryNotice({
         tone: 'info',
-        title: 'Editor Hub convergido',
+        title: 'Editor hub converged',
         description:
-          'Voce ja esta no hub principal do editor. A navegacao dedicada foi removida para evitar duplicidade de shell.',
+          'You are already in the main editor hub. Dedicated navigation was removed to avoid duplicate shells.',
       });
       return;
     }
@@ -157,7 +157,7 @@ export function useWorkbenchEntryConvergence({
         tone: 'info',
         title: 'Playground convergido',
         description:
-          'O playground agora usa o shell principal com previa ativa e copiloto aberto, evitando uma superficie paralela.',
+          'The playground now uses the main shell with preview active and copilot open, avoiding a parallel surface.',
       });
       return;
     }
@@ -173,7 +173,7 @@ export function useWorkbenchEntryConvergence({
         tone: 'info',
         title: 'Testing convergido',
         description:
-          'A rota abriu a previa e os diagnosticos do editor para manter testes e inspecao no mesmo fluxo.',
+          'The route opened preview and editor diagnostics so tests and inspection stay in one flow.',
       });
       return;
     }

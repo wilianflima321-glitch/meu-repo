@@ -233,10 +233,10 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
       <div style={{ padding: '12px' }}>
         <input
           type="text"
-          placeholder="Buscar nos..."
+          placeholder="Search nos..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          aria-label="Buscar nos na paleta"
+          aria-label="Search nos na paleta"
           style={{
             width: '100%',
             background: ui.surfaceAlt,
@@ -280,7 +280,7 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
                 <button type="button"
                   key={node.type}
                   onClick={() => onAddNode(node)}
-                  aria-label={`Adicionar no ${node.label}`}
+                  aria-label={`Add no ${node.label}`}
                   style={{
                     width: '100%',
                     padding: '8px',
@@ -390,10 +390,10 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
         <input
           ref={inputRef}
           type="text"
-          placeholder="Buscar no para criar..."
+          placeholder="Search no para criar..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          aria-label="Buscar no para adicionar ao canvas"
+          aria-label="Search no para adicionar ao canvas"
           style={{
             width: '100%',
             padding: '10px 12px',
@@ -413,14 +413,14 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
           <div style={{ padding: '8px' }}>
             {filteredNodes.length === 0 ? (
               <div style={{ padding: '16px', textAlign: 'center', color: ui.textDim }}>
-                Nenhum no encontrado
+                No no encontrado
               </div>
             ) : (
               filteredNodes.map((node) => (
                 <button type="button"
                   key={node.type}
                   onClick={() => handleAddNode(node)}
-                  aria-label={`Criar no ${node.label}`}
+                  aria-label={`Create no ${node.label}`}
                   style={{
                     width: '100%',
                     padding: '10px 12px',
@@ -478,7 +478,7 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
                     <button type="button"
                       key={node.type}
                       onClick={() => handleAddNode(node)}
-                      aria-label={`Adicionar no ${node.label} a partir do menu contextual`}
+                      aria-label={`Add no ${node.label} a partir do menu contextual`}
                       style={{
                         width: '100%',
                         padding: '8px 10px',

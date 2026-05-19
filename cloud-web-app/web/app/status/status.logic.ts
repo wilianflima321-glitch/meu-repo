@@ -34,13 +34,13 @@ export function stateStyles(state: SurfaceState) {
 export function stateLabel(state: SurfaceState) {
   switch (state) {
     case 'healthy':
-      return 'Operacional'
+      return 'Operational'
     case 'partial':
-      return 'Parcial'
+      return 'Partial'
     case 'unhealthy':
-      return 'Indisponivel'
+      return 'Unavailable'
     default:
-      return 'Desconhecido'
+      return 'Unknown'
   }
 }
 
@@ -63,7 +63,7 @@ export function summarizePayload(
   if (checkId === 'runtime') {
     return {
       state: ok ? 'healthy' : 'unhealthy',
-      detail: ok ? 'Rota de liveness respondendo.' : 'Probe do runtime base falhou.',
+      detail: ok ? 'Liveness route is responding.' : 'Base runtime probe failed.',
       latency,
     }
   }
@@ -73,20 +73,20 @@ export function summarizePayload(
       state: data.status === 'ready' ? 'healthy' : ok ? 'partial' : 'unhealthy',
       detail:
         data.status === 'ready'
-          ? 'Dependencias obrigatorias do runtime estao disponiveis.'
-          : 'Runtime ainda sem uma ou mais dependencias obrigatorias.',
+          ? 'Mandatory runtime dependencies are available.'
+          : 'Runtime is still missing one or more mandatory dependencies.',
       latency,
     }
   }
 
   if (checkId === 'ai') {
     if (ai.configured) {
-      const providerName = typeof ai.provider === 'string' ? ai.provider : 'provedor configurado'
-      return { state: 'healthy', detail: `Configurado via ${providerName}.`, latency }
+      const providerName = typeof ai.provider === 'string' ? ai.provider : 'configured provider'
+      return { state: 'healthy', detail: `Configured via ${providerName}.`, latency }
     }
     return {
       state: data.status === 'unknown' ? 'partial' : ok ? 'partial' : 'unhealthy',
-      detail: typeof ai.message === 'string' ? ai.message : 'Nenhum provedor de IA configurado ainda.',
+      detail: typeof ai.message === 'string' ? ai.message : 'No AI provider configured yet.',
       latency,
     }
   }
@@ -96,19 +96,19 @@ export function summarizePayload(
       const projects = typeof stats.projects === 'number' ? stats.projects : undefined
       return {
         state: 'healthy',
-        detail: typeof projects === 'number' ? `Conectado. ${projects} projetos visiveis.` : 'Conectado.',
+        detail: typeof projects === 'number' ? `Connected. ${projects} visible projects.` : 'Connected.',
         latency,
       }
     }
     return {
       state: 'unhealthy',
-      detail: typeof database.error === 'string' ? database.error : 'Falha na conexao com o banco.',
+      detail: typeof database.error === 'string' ? database.error : 'Database connection failed.',
       latency,
     }
   }
 
   if (checkId === 'cache') {
-    if (cache.configured) return { state: 'healthy', detail: 'Configurado e acessivel.', latency }
+    if (cache.configured) return { state: 'healthy', detail: 'Configured and reachable.', latency }
     return {
       state: data.status === 'unknown' ? 'partial' : ok ? 'partial' : 'unhealthy',
       detail:
@@ -116,7 +116,7 @@ export function summarizePayload(
           ? cache.message
           : typeof cache.error === 'string'
             ? cache.error
-            : 'Cache nao configurado.',
+            : 'Cache is not configured.',
       latency,
     }
   }
@@ -124,7 +124,7 @@ export function summarizePayload(
   if (checkId === 'storage') {
     if (storage.configured) {
       const storageType = typeof storage.type === 'string' ? storage.type : 'storage'
-      return { state: 'healthy', detail: `Configurado em ${storageType}.`, latency }
+      return { state: 'healthy', detail: `Configured on ${storageType}.`, latency }
     }
     return {
       state: data.status === 'unknown' ? 'partial' : ok ? 'partial' : 'unhealthy',
@@ -133,19 +133,19 @@ export function summarizePayload(
           ? storage.message
           : typeof storage.error === 'string'
             ? storage.error
-            : 'Armazenamento nao configurado.',
+            : 'Storage is not configured.',
       latency,
     }
   }
 
   if (checkId === 'stripe') {
-    if (data.healthy) return { state: 'healthy', detail: 'Gateway Stripe pronto para checkout.', latency }
+    if (data.healthy) return { state: 'healthy', detail: 'Stripe gateway ready for checkout.', latency }
     const priceCoverage =
       typeof data.configuredPriceCount === 'number' && typeof data.requiredPriceCount === 'number'
         ? ` prices=${data.configuredPriceCount}/${data.requiredPriceCount}.`
         : ''
     const missingEnv = getStringArray(data.missingEnv)
-    const missingEnvDetail = missingEnv.length > 0 ? ` Ausentes: ${missingEnv.join(', ')}.` : ''
+    const missingEnvDetail = missingEnv.length > 0 ? ` Missing: ${missingEnv.join(', ')}.` : ''
     const gatewayName = typeof data.gateway === 'string' ? data.gateway : 'unknown'
     const providerLabel =
       typeof data.providerLabel === 'string'
@@ -155,13 +155,13 @@ export function summarizePayload(
           : 'unknown'
     return {
       state: ok ? 'partial' : 'unhealthy',
-      detail: `Gateway=${gatewayName}, checkout=${data.checkoutEnabled ? 'habilitado' : 'desabilitado'}, provider=${providerLabel}.${priceCoverage}${missingEnvDetail}`.trim(),
+      detail: `Gateway=${gatewayName}, checkout=${data.checkoutEnabled ? 'enabled' : 'disabled'}, provider=${providerLabel}.${priceCoverage}${missingEnvDetail}`.trim(),
       latency,
     }
   }
 
   if (checkId === 'billing') {
-    if (data.checkoutReady) return { state: 'healthy', detail: 'Runtime de checkout pronto.', latency }
+    if (data.checkoutReady) return { state: 'healthy', detail: 'Checkout runtime ready.', latency }
     const gatewayName =
       typeof gateway.activeGateway === 'string'
         ? gateway.activeGateway
@@ -179,17 +179,17 @@ export function summarizePayload(
         ? ` prices=${stripe.configuredPriceCount}/${stripe.requiredPriceCount}.`
         : ''
     const missingEnv = getStringArray(stripe.missingEnv)
-    const missingEnvDetail = missingEnv.length > 0 ? ` Ausentes: ${missingEnv.join(', ')}.` : ''
+    const missingEnvDetail = missingEnv.length > 0 ? ` Missing: ${missingEnv.join(', ')}.` : ''
     return {
       state: data.status === 'partial' ? 'partial' : ok ? 'partial' : 'unhealthy',
-      detail: `Runtime de billing ainda parcial. Gateway=${gatewayName}, provider=${providerName}.${priceCoverage}${missingEnvDetail}`.trim(),
+      detail: `Billing runtime is still partial. Gateway=${gatewayName}, provider=${providerName}.${priceCoverage}${missingEnvDetail}`.trim(),
       latency,
     }
   }
 
   return {
     state: ok ? 'healthy' : 'unhealthy',
-    detail: ok ? 'Operacional.' : 'Falha no endpoint.',
+    detail: ok ? 'Operational.' : 'Endpoint failed.',
     latency,
   }
 }
@@ -205,7 +205,7 @@ export async function fetchSurface(check: SurfaceCheck): Promise<SurfaceResult> 
       id: check.id,
       name: check.name,
       state: 'unhealthy',
-      detail: error instanceof Error ? error.message : 'Falha na requisicao.',
+      detail: error instanceof Error ? error.message : 'Request failed.',
     }
   }
 }
@@ -229,17 +229,17 @@ export function getStateCounts(surfaces: SurfaceResult[]) {
 }
 
 export function getOverallTitle(overall: SurfaceState) {
-  if (overall === 'healthy') return 'Runtime publico operacional'
-  if (overall === 'partial') return 'Runtime publico parcial'
-  if (overall === 'unhealthy') return 'Runtime com bloqueios ativos'
-  return 'Coletando sinais'
+  if (overall === 'healthy') return 'Public runtime operational'
+  if (overall === 'partial') return 'Public runtime partial'
+  if (overall === 'unhealthy') return 'Runtime has active blockers'
+  return 'Collecting signals'
 }
 
 export function getOverallDescription(overall: SurfaceState) {
-  if (overall === 'healthy') return 'Os checks publicos configurados responderam sem bloqueios relevantes.'
-  if (overall === 'partial') return 'A base publica responde, mas alguns subsistemas ainda estao em estado parcial.'
-  if (overall === 'unhealthy') return 'Um ou mais blocos essenciais do runtime falharam na verificacao publica.'
-  return 'Atualizando checks operacionais em tempo real.'
+  if (overall === 'healthy') return 'Configured public checks responded without relevant blockers.'
+  if (overall === 'partial') return 'The public base responds, but some subsystems are still partial.'
+  if (overall === 'unhealthy') return 'One or more essential runtime blocks failed public verification.'
+  return 'Updating operational checks in real time.'
 }
 
 export function getCoverageSummary(
@@ -254,19 +254,19 @@ export function getCoverageSummary(
   if (blockingSurfaces.length > 0) {
     return {
       customerImpact:
-        'Ha impacto potencial direto para usuarios finais: pelo menos uma dependencia obrigatoria falhou no check publico.',
+        'There is potential direct customer impact: at least one mandatory dependency failed the public check.',
       cards: [
         {
-          title: 'Cobertura provada agora',
-          detail: `${respondingCount}/${checks.length} checks responderam nesta rodada. ${requiredCount} deles sao obrigatorios para a experiencia base.`,
+          title: 'Coverage proven now',
+          detail: `${respondingCount}/${checks.length} checks responded in this round. ${requiredCount} are mandatory for the base experience.`,
         },
         {
-          title: 'Leitura comercial',
-          detail: 'Nao tratamos este momento como green status. A pagina assume bloqueio publico quando runtime, readiness ou banco falham.',
+          title: 'Commercial reading',
+          detail: 'This is not treated as green status. The page declares a public blocker when runtime, readiness, or database checks fail.',
         },
         {
-          title: 'Ainda nao publicado',
-          detail: 'Nao exibimos SLA, uptime rolling ou postmortem arquivado enquanto essa trilha publica ainda nao existe.',
+          title: 'Not published yet',
+          detail: 'We do not show SLA, rolling uptime, or archived postmortems while that public track does not exist.',
         },
       ],
     }
@@ -275,19 +275,19 @@ export function getCoverageSummary(
   if (partialSurfaces.length > 0) {
     return {
       customerImpact:
-        'Usuarios conseguem acessar a base publica, mas capacidades vendaveis como billing, IA ou dependencias opcionais ainda podem variar.',
+        'Users can access the public base, but sellable capabilities like billing, AI, or optional dependencies may still vary.',
       cards: [
         {
-          title: 'Cobertura provada agora',
-          detail: `${respondingCount}/${checks.length} checks responderam. A base publica esta de pe, mas ha superficies ainda incompletas.`,
+          title: 'Coverage proven now',
+          detail: `${respondingCount}/${checks.length} checks responded. The public base is up, but some surfaces are still incomplete.`,
         },
         {
-          title: 'Leitura comercial',
-          detail: 'Usamos "parcial" para sinalizar que a jornada pode funcionar, mas ainda sem cobertura integral de credenciais, checkout ou storage.',
+          title: 'Commercial reading',
+          detail: 'Partial means the journey may work, but still lacks full coverage for credentials, checkout, or storage.',
         },
         {
-          title: 'Ainda nao publicado',
-          detail: 'Nao prometemos confiabilidade historica acima do que os checks atuais conseguem demonstrar em publico.',
+          title: 'Not published yet',
+          detail: 'We do not promise historical reliability beyond what current checks can publicly prove.',
         },
       ],
     }
@@ -295,19 +295,19 @@ export function getCoverageSummary(
 
   return {
     customerImpact:
-      'Nenhum bloqueio publico apareceu nos checks obrigatorios desta rodada, mas a pagina continua limitada ao que estes endpoints conseguem provar.',
+      'No public blocker appeared in mandatory checks this round, but the page remains limited to what these endpoints can prove.',
     cards: [
       {
-        title: 'Cobertura provada agora',
-        detail: `${respondingCount}/${checks.length} checks responderam nesta rodada. Os checks obrigatorios nao acusaram bloqueio ativo.`,
+        title: 'Coverage proven now',
+        detail: `${respondingCount}/${checks.length} checks responded in this round. Mandatory checks did not report an active blocker.`,
       },
       {
-        title: 'Leitura comercial',
-        detail: 'O status atual e bom para leitura de saude publica imediata, nao para substituir um historico formal de SLA ou incidentes.',
+        title: 'Commercial reading',
+        detail: 'The current status is useful for immediate public health, not as a replacement for formal SLA or incident history.',
       },
       {
-        title: 'Ainda nao publicado',
-        detail: 'Continuamos sem uptime rolling, sem arquivo de incidentes encerrados e sem prova L4 integral nesta superficie publica.',
+        title: 'Not published yet',
+        detail: 'We still do not have rolling uptime, a resolved incident archive, or full L4 proof on this public surface.',
       },
     ],
   }
@@ -319,29 +319,29 @@ export function getStatusTimeline(
   partialSurfaces: SurfaceResult[],
   lastUpdated: string | null
 ): StatusTimelineEntry[] {
-  const timestampLabel = lastUpdated ? new Date(lastUpdated).toLocaleTimeString('pt-BR') : 'agora'
+  const timestampLabel = lastUpdated ? new Date(lastUpdated).toLocaleTimeString('en-US') : 'now'
   const activeIncidentTitle =
     overall === 'healthy'
-      ? 'Nenhum incidente publico ativo nos checks obrigatorios'
+      ? 'No active public incident in mandatory checks'
       : overall === 'partial'
-        ? 'Degradacao ativa em capacidades nao totalmente fechadas'
+        ? 'Active degradation in capabilities that are not fully closed'
         : overall === 'unhealthy'
-          ? 'Incidente publico ativo em superficie obrigatoria'
-          : 'Checks ainda coletando estado'
+          ? 'Active public incident on mandatory surface'
+          : 'Checks are still collecting state'
 
   const activeIncidentDetail =
     overall === 'healthy'
-      ? 'A leitura atual nao encontrou bloqueio em runtime, readiness ou banco. Isso nao substitui historico de SLA.'
+      ? 'The current reading did not find a blocker in runtime, readiness, or database. This does not replace SLA history.'
       : overall === 'partial'
-        ? `A base responde, mas ${partialSurfaces.map((surface) => surface.name).join(', ') || 'algumas superficies'} ainda estao em estado parcial.`
+        ? `The base responds, but ${partialSurfaces.map((surface) => surface.name).join(', ') || 'some surfaces'} are still partial.`
         : overall === 'unhealthy'
-          ? `As superficies ${blockingSurfaces.map((surface) => surface.name).join(', ') || 'obrigatorias'} falharam no check publico atual.`
-          : 'A primeira coleta ainda esta em andamento.'
+          ? `The ${blockingSurfaces.map((surface) => surface.name).join(', ') || 'mandatory'} surfaces failed the current public check.`
+          : 'The first collection is still in progress.'
 
   return [
     {
       id: 'now',
-      label: 'Agora',
+      label: 'Now',
       title: activeIncidentTitle,
       detail: activeIncidentDetail,
       tone: overall === 'unknown' ? 'unknown' : overall,
@@ -349,23 +349,23 @@ export function getStatusTimeline(
     },
     {
       id: 'watch',
-      label: 'Leitura comercial',
-      title: partialSurfaces.length > 0 ? 'Capacidades vendaveis ainda em observacao' : 'Sem alerta comercial parcial nesta rodada',
+      label: 'Commercial reading',
+      title: partialSurfaces.length > 0 ? 'Sellable capabilities still under observation' : 'No partial commercial alert this round',
       detail:
         partialSurfaces.length > 0
-          ? `A pagina esta sendo honesta sobre ${partialSurfaces.length} superficie(s) ainda parciais para evitar vender cobertura que o runtime nao provou.`
-          : 'Nao houve necessidade de abrir alerta comercial parcial nesta coleta publica.',
+          ? `The page is being honest about ${partialSurfaces.length} still-partial surface(s) to avoid selling coverage the runtime has not proven.`
+          : 'No partial commercial alert was needed in this public collection.',
       tone: partialSurfaces.length > 0 ? 'partial' : 'healthy',
       timestampLabel,
     },
     {
       id: 'history-gap',
-      label: 'Historico',
-      title: 'Arquivo publico de incidentes ainda incompleto',
+      label: 'History',
+      title: 'Public incident archive still incomplete',
       detail:
-        'Esta pagina ja mostra o estado atual com mais qualidade, mas ainda nao publica timeline encerrada de incidentes, uptime rolling ou postmortems formais.',
+        'This page now shows current state with better quality, but it still does not publish closed incident timelines, rolling uptime, or formal postmortems.',
       tone: 'partial',
-      timestampLabel: 'lacuna aberta',
+      timestampLabel: 'open gap',
     },
   ]
 }
@@ -373,39 +373,39 @@ export function getStatusTimeline(
 export function getNextActions(blockingSurfaces: SurfaceResult[], partialSurfaces: SurfaceResult[]) {
   if (blockingSurfaces.some((surface) => surface.id === 'database')) {
     return [
-      'Restabelecer conectividade com o banco de dados.',
-      'Revalidar readiness e runtime publico apos a conexao voltar.',
-      'Atualizar esta pagina apenas quando o check publico provar a recuperacao.',
+      'Restore database connectivity.',
+      'Revalidate readiness and public runtime after the connection returns.',
+      'Update this page only when the public check proves recovery.',
     ]
   }
 
   if (blockingSurfaces.some((surface) => surface.id === 'runtime' || surface.id === 'readiness')) {
     return [
-      'Recuperar liveness/readiness do app antes de promover qualquer narrativa publica.',
-      'Executar novo ciclo de checks para confirmar estabilidade do runtime.',
-      'Só entao considerar a capacidade como comercialmente confiavel de novo.',
+      'Recover app liveness/readiness before promoting any public narrative.',
+      'Run a new check cycle to confirm runtime stability.',
+      'Only then consider the capability commercially reliable again.',
     ]
   }
 
   if (partialSurfaces.some((surface) => surface.id === 'stripe' || surface.id === 'billing')) {
     return [
-      'Completar checkout + webhook para transformar billing em capacidade vendavel.',
-      'Validar os planos e price IDs com o runtime de billing real.',
-      'Publicar esse ganho aqui apenas quando os checks deixarem de marcar parcial.',
+      'Complete checkout and webhook readiness before treating billing as sellable.',
+      'Validate plans and price IDs with the real billing runtime.',
+      'Publish that gain here only when checks stop marking it partial.',
     ]
   }
 
   if (partialSurfaces.some((surface) => surface.id === 'storage' || surface.id === 'cache' || surface.id === 'ai')) {
     return [
-      'Fechar credenciais/configuracoes das dependencias opcionais ainda parciais.',
-      'Executar um novo check publico para confirmar o ganho de cobertura operacional.',
-      'Usar a leitura comercial para evitar prometer experiencia que ainda depende de setup manual.',
+      'Close credentials and configuration for optional dependencies that are still partial.',
+      'Run a new public check to confirm the operational coverage gain.',
+      'Use the commercial reading to avoid promising an experience that still depends on manual setup.',
     ]
   }
 
   return [
-    'Manter os checks publicos respondendo e ampliar evidencias de producao real.',
-    'Abrir historico publico de incidentes encerrados quando a trilha estiver madura.',
-    'Usar o admin de monitoramento para fechar os blockers de L4 que ainda nao aparecem aqui.',
+    'Keep public checks responding and expand real production evidence.',
+    'Open a public history of resolved incidents when that track is mature.',
+    'Use monitoring admin to close L4 blockers that do not appear here yet.',
   ]
 }

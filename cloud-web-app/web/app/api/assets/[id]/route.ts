@@ -11,6 +11,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { deleteObject, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api.assets.asset');
 
 // ============================================================================
 // HELPER - Verify Asset Access
@@ -70,7 +73,7 @@ export async function GET(
       projectId: asset.projectId,
     });
   } catch (error) {
-    console.error('Get asset error:', error);
+    routeLogger.error('Get asset error', error);
     if (isUnauthorizedError(error)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -128,7 +131,7 @@ export async function PATCH(
       name: updatedAsset.name,
     });
   } catch (error) {
-    console.error('Update asset error:', error);
+    routeLogger.error('Update asset error', error);
     if (isUnauthorizedError(error)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -169,7 +172,7 @@ export async function DELETE(
           : asset.url;
         await deleteObject(s3Key);
       } catch (s3Error) {
-        console.error('S3 delete error:', s3Error);
+        routeLogger.warn('S3 delete error', s3Error);
         // Continue even if S3 delete fails - DB is source of truth
       }
     }
@@ -185,7 +188,7 @@ export async function DELETE(
       assetId: params.id,
     });
   } catch (error) {
-    console.error('Delete asset error:', error);
+    routeLogger.error('Delete asset error', error);
     if (isUnauthorizedError(error)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

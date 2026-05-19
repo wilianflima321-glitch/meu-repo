@@ -161,7 +161,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
         if (response.ok && payload?.storage?.configured) {
           setStorageRuntime({
             status: 'ready',
-            label: `${providerLabel} ativo`,
+            label: `${providerLabel} active`,
             detail: bucket ? `bucket ${bucket}` : null,
           });
           return;
@@ -324,7 +324,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           }}
         >
           <span style={{ fontWeight: 600, color: colors.text }}>Folders</span>
-          <button type="button" aria-label="Criar nova pasta"
+          <button type="button" aria-label="Create nova pasta"
             onClick={() => onCreateFolder?.(selectedPath || '/Content', 'New Folder')}
             style={{
               background: 'transparent',
@@ -382,8 +382,8 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
                 setSearch(e.target.value);
                 onSearchChange?.(e.target.value);
               }}
-              placeholder="Buscar assets..."
-              aria-label="Buscar assets"
+              placeholder="Search assets..."
+              aria-label="Search assets"
               style={{
                 width: '100%',
                 padding: '6px 10px 6px 32px',
@@ -399,7 +399,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           {/* Filter */}
           <select
             value={filterType}
-            aria-label="Filtrar assets por tipo"
+            aria-label="Filter assets por tipo"
             onChange={(e) => {
               const value = e.target.value as AssetType | 'all';
               setFilterType(value);
@@ -490,8 +490,8 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
             type="button"
             aria-label={
               storageRuntime.status === 'ready'
-                ? 'Importar arquivos para storage persistente'
-                : 'Importacao desabilitada ate o storage ficar pronto'
+                ? 'Import files para storage persistente'
+                : 'Import is disabled until storage is ready'
             }
             onClick={() => fileInputRef.current?.click()}
             disabled={storageRuntime.status !== 'ready'}
@@ -510,12 +510,12 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
             }}
             title={
               storageRuntime.status === 'ready'
-                ? (storageRuntime.detail || 'Importar para o bucket configurado')
+                ? (storageRuntime.detail || 'Import para o bucket configurado')
                 : 'Configure persistent storage to unlock imports'
             }
           >
             <Upload size={14} />
-            Importar
+            Import
           </button>
           <input
             ref={fileInputRef}
@@ -527,8 +527,8 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
 
           <button
             type="button"
-            aria-label="Atualizar navegador de assets"
-            title="Atualizar navegador de assets"
+            aria-label="Refresh navegador de assets"
+            title="Refresh navegador de assets"
             onClick={onRefresh}
             style={{
               padding: '6px',
@@ -590,10 +590,10 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
               }}
             >
               <Package size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
-              <p style={{ margin: 0, fontWeight: 500 }}>Nenhum asset encontrado</p>
+              <p style={{ margin: 0, fontWeight: 500 }}>No asset encontrado</p>
               <p style={{ margin: '8px 0 0', fontSize: '12px' }}>
                 {storageRuntime.status === 'ready'
-                  ? 'Importe assets ou crie novos arquivos para comecar.'
+                  ? 'Importe assets ou crie novos files para comecar.'
                   : 'Configure persistent storage to enable reliable imports.'}
               </p>
             </div>
@@ -685,7 +685,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           }}
         >
           <div style={{ fontWeight: 600, color: colors.text }}>Preview</div>
-          <button type="button" aria-label={lowPolyPreview ? 'Desativar preview simplificado' : 'Ativar preview simplificado'}
+          <button type="button" aria-label={lowPolyPreview ? 'Desactiver preview simplificado' : 'Ativar preview simplificado'}
             onClick={() => setLowPolyPreview((prev) => !prev)}
             style={{
               padding: '4px 10px',

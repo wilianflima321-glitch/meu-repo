@@ -5,7 +5,7 @@
  * =========================================
  *
  * Componente para exibir progresso de renderização em tempo real
- * com suporte a múltiplos jobs, thumbnails e estimativa de tempo.
+ * com suporte a múltiplos jobs, thumbnails e estimactive de tempo.
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import NextImage from 'next/image';
@@ -177,7 +177,7 @@ function getStatusLabel(status: RenderJobStatus): string {
         case 'rendering': return 'Renderizando';
         case 'compositing': return 'Compositando';
         case 'finalizing': return 'Finalizando';
-        case 'completed': return 'Concluído';
+        case 'completed': return 'Completed';
         case 'failed': return 'Falhou';
         case 'cancelled': return 'Cancelado';
         case 'paused': return 'Pausado';
@@ -349,10 +349,10 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {canResume && (
-                        <button type="button" aria-label={`Retomar render ${job.name}`}
+                        <button type="button" aria-label={`Resume render ${job.name}`}
                             onClick={() => onResume(job.id)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
-                            title="Retomar"
+                            title="Resume"
                         >
                             <Play size={18} className="text-[var(--aethel-success-light)]" />
                         </button>
@@ -379,7 +379,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {canDownload && (
-                        <button type="button" aria-label={`Baixar resultado do render ${job.name}`}
+                        <button type="button" aria-label={`Download resultado do render ${job.name}`}
                             onClick={() => onDownload(job.id, job.output!)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Download"
@@ -435,7 +435,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                         )}
                         {job.peakMemory !== undefined && (
                             <div>
-                                <span className="text-[var(--aethel-text-tertiary)]">Memória Pico</span>
+                                <span className="text-[var(--aethel-text-tertiary)]">Peak memory</span>
                                 <p className="text-[var(--aethel-text-primary)]">{(job.peakMemory / 1024 / 1024).toFixed(0)} MB</p>
                             </div>
                         )}
@@ -507,7 +507,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
             <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-8 text-center ${className}`}>
                 <ImageIcon size={48} className="mx-auto text-[var(--aethel-text-tertiary)] mb-4" />
                 <h3 className="text-lg font-medium text-[var(--aethel-text-primary)] mb-2">
-                    Nenhum render na fila
+                    No render na fila
                 </h3>
                 <p className="text-[var(--aethel-text-secondary)] text-sm">
                     Inicie um render no editor para ver o progresso aqui.
@@ -532,7 +532,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
                         onClick={onClearCompleted}
                         className="text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] transition-colors"
                     >
-                        Limpar concluídos
+                        Clear completed
                     </button>
                 )}
             </div>
@@ -541,7 +541,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
             <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-[var(--aethel-surface-secondary)] rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-[var(--aethel-primary)]">{activeJobs.length}</div>
-                    <div className="text-xs text-[var(--aethel-text-secondary)]">Ativos</div>
+                    <div className="text-xs text-[var(--aethel-text-secondary)]">Active</div>
                 </div>
                 <div className="bg-[var(--aethel-surface-secondary)] rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-[var(--aethel-warning)]">{queuedJobs.length}</div>
@@ -549,7 +549,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
                 </div>
                 <div className="bg-[var(--aethel-surface-secondary)] rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-[var(--aethel-success-light)]">{completedJobs.length}</div>
-                    <div className="text-xs text-[var(--aethel-text-secondary)]">Concluídos</div>
+                    <div className="text-xs text-[var(--aethel-text-secondary)]">Completeds</div>
                 </div>
             </div>
 
@@ -596,7 +596,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
             {completedJobs.length > 0 && (
                 <div>
                     <h3 className="text-sm font-semibold text-[var(--aethel-text-secondary)] uppercase tracking-wider mb-3">
-                        Histórico ({completedJobs.length})
+                        History ({completedJobs.length})
                     </h3>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                         {completedJobs.map(job => (

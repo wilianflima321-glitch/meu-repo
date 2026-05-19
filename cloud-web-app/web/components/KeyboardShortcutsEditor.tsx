@@ -248,7 +248,7 @@ export default function KeyboardShortcutsEditor() {
               : keybindings.filter(kb => kb.category === category).length;
 
             return (
-              <button type="button" aria-label={`Filtrar atalhos da categoria ${category}`}
+              <button type="button" aria-label={`Filter atalhos da categoria ${category}`}
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`w-full px-4 py-3 text-left hover:bg-[var(--aethel-surface-secondary)] ${

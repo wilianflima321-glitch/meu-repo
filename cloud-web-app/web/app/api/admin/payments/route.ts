@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/payments/route');
 
 // =============================================================================
 // PAYMENTS ADMIN API
@@ -59,7 +62,7 @@ async function getHandler(req: NextRequest) {
 
     return NextResponse.json({ items, totals });
   } catch (error) {
-    console.error('[Admin Payments] Error:', error);
+    routeLogger.error('[Admin Payments] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch payments' }, { status: 500 });
   }
 }

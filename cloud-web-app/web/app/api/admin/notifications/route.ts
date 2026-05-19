@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/notifications/route');
 
 // =============================================================================
 // NOTIFICATIONS ADMIN API
@@ -62,7 +65,7 @@ async function getHandler(req: NextRequest) {
 
     return NextResponse.json({ items, totals });
   } catch (error) {
-    console.error('[Admin Notifications] Error:', error);
+    routeLogger.error('[Admin Notifications] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
   }
 }

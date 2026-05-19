@@ -22,7 +22,7 @@ export default function CostOptimization() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/finance/metrics?range=30d');
-      if (!res.ok) throw new Error('Falha ao carregar métricas financeiras');
+      if (!res.ok) throw new Error('Failed to load financial metrics');
       const data = await res.json();
       setMetrics({
         dailyRevenue: data?.dailyRevenue || 0,
@@ -36,7 +36,7 @@ export default function CostOptimization() {
       });
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar custos');
+      setError(err instanceof Error ? err.message : 'Error loading custos');
     } finally {
       setLoading(false);
     }
@@ -49,8 +49,8 @@ export default function CostOptimization() {
   if (loading) {
     return (
       <div className='p-6 max-w-4xl mx-auto'>
-        <h1 className='text-3xl font-bold mb-6'>Otimização de Custos</h1>
-        <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando métricas...</p>
+        <h1 className='text-3xl font-bold mb-6'>Optimization de Costs</h1>
+        <p className='text-sm text-[var(--aethel-text-tertiary)]'>Loading metrics...</p>
       </div>
     );
   }
@@ -58,7 +58,7 @@ export default function CostOptimization() {
   if (error) {
     return (
       <div className='p-6 max-w-4xl mx-auto'>
-        <h1 className='text-3xl font-bold mb-6'>Otimização de Custos</h1>
+        <h1 className='text-3xl font-bold mb-6'>Optimization de Costs</h1>
         <p className='text-sm text-[var(--aethel-error)]'>{error}</p>
         <button type="button" className='mt-4 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] px-4 py-2 rounded' onClick={fetchMetrics}>
           Tentar novamente
@@ -74,29 +74,29 @@ export default function CostOptimization() {
 
   return (
     <div className='p-6 max-w-4xl mx-auto'>
-      <h1 className='text-3xl font-bold mb-6'>Otimização de Custos</h1>
-      <p className='mb-4 text-[var(--aethel-text-secondary)]'>Custos e margem baseados em dados financeiros reais.</p>
+      <h1 className='text-3xl font-bold mb-6'>Optimization de Costs</h1>
+      <p className='mb-4 text-[var(--aethel-text-secondary)]'>Costs e margem baseados em dados financeiros reais.</p>
 
       <div className='mb-6'>
-        <h2 className='text-xl font-semibold mb-4'>Resumo de Custos (30 dias)</h2>
+        <h2 className='text-xl font-semibold mb-4'>Resumo de Costs (30 dias)</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
-            <h3 className='font-semibold'>IA (diário)</h3>
+            <h3 className='font-semibold'>AI (daily)</h3>
             <p className='text-2xl'>${dailyAI.toFixed(2)}</p>
-            <p className='text-sm text-[var(--aethel-text-secondary)]'>Custo médio diário de IA</p>
+            <p className='text-sm text-[var(--aethel-text-secondary)]'>Average daily AI cost</p>
           </div>
           <div className='p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
-            <h3 className='font-semibold'>Infra (diário)</h3>
+            <h3 className='font-semibold'>Infra (daily)</h3>
             <p className='text-2xl'>${dailyInfra.toFixed(2)}</p>
             <p className='text-sm text-[var(--aethel-text-secondary)]'>Infra configurada por ambiente</p>
           </div>
           <div className='p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
-            <h3 className='font-semibold'>Receita (diária)</h3>
+            <h3 className='font-semibold'>Revenue (daily)</h3>
             <p className='text-2xl'>${dailyRevenue.toFixed(2)}</p>
             <p className='text-sm text-[var(--aethel-text-secondary)]'>Baseada em pagamentos confirmados</p>
           </div>
           <div className={`p-4 rounded-lg shadow ${dailyProfit >= 0 ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)]'}`}>
-            <h3 className='font-semibold'>Lucro (diário)</h3>
+            <h3 className='font-semibold'>Profit (daily)</h3>
             <p className='text-2xl'>${dailyProfit.toFixed(2)}</p>
             <p className='text-sm text-[var(--aethel-text-secondary)]'>Margem: {metrics?.profitMargin?.toFixed(1)}%</p>
           </div>
@@ -104,15 +104,15 @@ export default function CostOptimization() {
       </div>
 
       <div className='mb-6'>
-        <h2 className='text-xl font-semibold mb-4'>Queima diária e fôlego</h2>
+        <h2 className='text-xl font-semibold mb-4'>Daily burn and runway</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
-            <h3 className='font-semibold'>Queima diária</h3>
+            <h3 className='font-semibold'>Daily burn</h3>
             <p className='text-2xl'>${(metrics?.burnRate || 0).toFixed(2)}/dia</p>
-            <p className='text-sm text-[var(--aethel-text-secondary)]'>Diferença custo - receita</p>
+            <p className='text-sm text-[var(--aethel-text-secondary)]'>Cost - revenue difference</p>
           </div>
           <div className='p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
-            <h3 className='font-semibold'>Fôlego</h3>
+            <h3 className='font-semibold'>Runway</h3>
             <p className='text-2xl'>{metrics?.runway || 0} meses</p>
             <p className='text-sm text-[var(--aethel-text-secondary)]'>Baseado em caixa configurado</p>
           </div>
@@ -120,7 +120,7 @@ export default function CostOptimization() {
       </div>
 
       <div className='mt-6 p-4 bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] rounded-lg'>
-        <h3 className='font-semibold'>Recomendações</h3>
+        <h3 className='font-semibold'>Recommendations</h3>
         {metrics?.alerts?.length ? (
           <ul className='list-disc ml-5'>
             {metrics.alerts.map((alert, index) => (
@@ -128,7 +128,7 @@ export default function CostOptimization() {
             ))}
           </ul>
         ) : (
-          <p className='text-sm text-[var(--aethel-text-secondary)]'>Nenhuma recomendação crítica no momento.</p>
+          <p className='text-sm text-[var(--aethel-text-secondary)]'>No critical recommendation at the moment.</p>
         )}
       </div>
     </div>

@@ -74,7 +74,7 @@ function MessageBubble({ message, onApplyCode, onReviewCode }: MessageBubbleProp
   const isUser = message.role === 'user'
   const isSystem = message.role === 'system'
   const plainTextContent = stripCodeBlocks(message.content)
-  const roleLabel = isUser ? 'Voce' : isSystem ? 'Contexto' : 'Assistente'
+  const roleLabel = isUser ? 'You' : isSystem ? 'Context' : 'Assistant'
 
   if (isSystem) {
     return (
@@ -169,7 +169,7 @@ function MessageBubble({ message, onApplyCode, onReviewCode }: MessageBubbleProp
               color: TEXT_SECONDARY,
             }}
           >
-            Codigo sugerido abaixo.
+            Suggested code below.
           </div>
         )}
 

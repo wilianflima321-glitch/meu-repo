@@ -20,10 +20,10 @@ interface State {
 /**
  * Global Error Boundary for the Studio Shell
  *
- * Captura erros de renderização e oferece opções de recuperação:
+ * Captura errors de renderização e oferece opções de recuperação:
  * - Retry (recarregar componente)
- * - Voltar para Dashboard
- * - Reportar erro (Sentry)
+ * - Back to Dashboard
+ * - Report error (Sentry)
  *
  * Padrão: Vercel, Linear, Cursor
  */
@@ -43,10 +43,10 @@ export class GlobalErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log para console em dev
+    // Log in development
     logger.error('Global Error Boundary caught:', error, errorInfo)
 
-    // Incrementar contador de erros
+    // Increment error counter
     const errorCount = (this.state?.errorCount ?? 0) + 1
 
     this.setState((prevState) => ({
@@ -55,7 +55,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
       errorCount,
     }))
 
-    // Enviar para Sentry se disponível
+    // Send para Sentry se available
     if (typeof window !== 'undefined' && (window as any).Sentry) {
       (window as any).Sentry.captureException(error, {
         contexts: {
@@ -66,9 +66,9 @@ export class GlobalErrorBoundary extends Component<Props, State> {
       })
     }
 
-    // Se muitos erros, sugerir reload completo
+    // Suggest a full reload after repeated errors
     if (errorCount > 3) {
-      logger.warn('Múltiplos erros detectados. Sugerindo reload completo.')
+      logger.warn('Multiple errors detected. Suggesting a full reload.')
     }
   }
 
@@ -107,12 +107,12 @@ export class GlobalErrorBoundary extends Component<Props, State> {
 
             {/* Title */}
             <h1 className="text-2xl font-bold text-center mb-2">
-              Algo deu errado
+              Something went wrong
             </h1>
 
             {/* Description */}
             <p className="text-[var(--aethel-text-secondary)] text-center text-sm mb-6">
-              Encontramos um erro inesperado. Tente recarregar ou volte para o início.
+              An unexpected error occurred. Try again or return to the dashboard.
             </p>
 
             {/* Error Details (Dev Only) */}
@@ -132,7 +132,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
             {/* Error Count Warning */}
             {this.state.errorCount > 1 && (
               <div className="mb-6 p-3 bg-[var(--aethel-warning)]/10 rounded-lg border border-[var(--aethel-warning)]/30 text-xs text-[var(--aethel-warning-light)]">
-                ⚠️ Múltiplos erros detectados ({this.state.errorCount}). Recarregamento completo recomendado.
+                Multiple errors detected ({this.state.errorCount}). A full reload is recommended.
               </div>
             )}
 
@@ -143,7 +143,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
                 className="w-full px-4 py-2.5 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
-                Tentar Novamente
+                Try again
               </button>
 
               <Link
@@ -151,7 +151,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
                 className="w-full px-4 py-2.5 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] font-medium rounded-lg transition-colors flex items-center justify-center gap-2 border border-[var(--aethel-border-primary)]"
               >
                 <Home className="w-4 h-4" />
-                Voltar para Dashboard
+                Back to Dashboard
               </Link>
 
               {process.env.NODE_ENV === 'development' && (
@@ -166,7 +166,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
 
             {/* Footer */}
             <p className="text-xs text-[var(--aethel-text-quaternary)] text-center mt-6">
-              Se o problema persistir, entre em contato com o suporte.
+              If the problem persists, contact support.
             </p>
           </div>
         </div>

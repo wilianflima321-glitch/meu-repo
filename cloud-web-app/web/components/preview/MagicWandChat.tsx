@@ -35,7 +35,7 @@ export function MagicWandChat({ position, elementInfo, onClose, onSendMessage }:
   const quickActions = [
     { icon: Eye, label: 'Explique', prompt: 'Explique este elemento:' },
     { icon: Sparkles, label: 'Melhore', prompt: 'Melhore o design deste elemento:' },
-    { icon: Layers, label: 'Animação', prompt: 'Adicione animação a este elemento:' },
+    { icon: Layers, label: 'Animation', prompt: 'Add animation to this element:' },
     { icon: Palette, label: 'Estilo', prompt: 'Melhore o estilo deste elemento:' },
   ]
 
@@ -93,7 +93,7 @@ export function MagicWandChat({ position, elementInfo, onClose, onSendMessage }:
             </div>
 
             <div className="relative">
-              <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} placeholder="Descreva a mudança..." className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" />
+              <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} placeholder="Descreva a change..." className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" />
               <button type="button" onClick={handleSend} disabled={!inputValue.trim()} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] opacity-0 transition-opacity disabled:opacity-0 hover:opacity-100"><Sparkles className="w-3 h-3" /></button>
             </div>
           </>

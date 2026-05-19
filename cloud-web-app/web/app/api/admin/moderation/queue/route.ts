@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/moderation/queue/route');
 
 // =============================================================================
 // MODERATION QUEUE API
@@ -102,7 +105,7 @@ async function getQueueHandler(req: NextRequest) {
     });
     
   } catch (error) {
-    console.error('[Moderation Queue] Error:', error);
+    routeLogger.error('[Moderation Queue] Error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch moderation queue' },
       { status: 500 }

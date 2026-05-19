@@ -54,9 +54,9 @@ async function checkOllama(): Promise<ServiceStatus> {
       return {
         name: 'Ollama (AI Local)',
         status: 'online',
-        version: `${models} modelo(s) disponivel(is)`,
+        version: `${models} model(s) available`,
         lastCheck: new Date(),
-        message: models > 0 ? 'Pronto para IA local' : 'Baixe um modelo: ollama pull llama3',
+        message: models > 0 ? 'Ready for local AI' : 'Download a model: ollama pull llama3',
       }
     }
     throw new Error('Response not OK')
@@ -79,21 +79,21 @@ async function checkBlender(): Promise<ServiceStatus> {
     if (response.ok) {
       const data = await response.json()
       return {
-        name: 'Blender (Renderizacao)',
+        name: 'Blender (Rendering)',
         status: data.found ? 'online' : 'offline',
         version: data.version,
         path: data.path,
         lastCheck: new Date(),
-        message: data.found ? 'Pronto para renderizar' : 'Blender nao encontrado no PATH',
+        message: data.found ? 'Ready to render' : 'Blender not found in PATH',
       }
     }
     throw new Error('API not available')
   } catch {
     return {
-      name: 'Blender (Renderizacao)',
+      name: 'Blender (Rendering)',
       status: 'warning',
       lastCheck: new Date(),
-      message: 'Verificacao via backend indisponivel',
+      message: 'Backend check unavailable',
     }
   }
 }
@@ -145,7 +145,7 @@ async function checkDatabase(): Promise<ServiceStatus> {
       name: 'PostgreSQL',
       status: 'warning',
       lastCheck: new Date(),
-      message: 'Verificacao indisponivel',
+      message: 'Check unavailable',
     }
   }
 }
@@ -306,32 +306,32 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
           <div>
             <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">Status do sistema</h3>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
-              {allOnline ? 'Todos os servicos online' : hasOffline ? 'Alguns servicos offline' : 'Verificando...'}
+              {allOnline ? 'Todos os servicos online' : hasOffline ? 'Alguns servicos offline' : 'Checking...'}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button type="button" aria-label="Atualizar status do sistema"
+          <button type="button" aria-label="Refresh status do sistema"
             onClick={(event) => {
               event.stopPropagation()
               checkAllServices()
             }}
             disabled={isRefreshing}
             className={ghostButtonClass}
-            title="Atualizar"
+            title="Refresh"
           >
             <RefreshCw className={`h-4 w-4 text-[var(--aethel-text-secondary)] ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
 
           {onSettingsClick && (
-            <button type="button" aria-label="Abrir configuracoes de saude"
+            <button type="button" aria-label="Open health settings"
               onClick={(event) => {
                 event.stopPropagation()
                 onSettingsClick()
               }}
               className={ghostButtonClass}
-              title="Configuracoes"
+              title="Settings"
             >
               <Settings className="h-4 w-4 text-[var(--aethel-text-secondary)]" />
             </button>
@@ -377,19 +377,19 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
             <div className="border-t border-[var(--aethel-border-subtle)] pt-4">
               <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--aethel-text-tertiary)]">Acoes rapidas</h4>
               <div className="flex flex-wrap gap-2">
-                <button type="button" aria-label="Baixar Ollama"
+                <button type="button" aria-label="Download Ollama"
                   onClick={handleFixOllama}
                   className={secondaryButtonClass}
                 >
                   <Download className="h-4 w-4" />
-                  Baixar Ollama
+                  Download Ollama
                 </button>
-                <button type="button" aria-label="Baixar Blender"
+                <button type="button" aria-label="Download Blender"
                   onClick={handleFixBlender}
                   className={secondaryButtonClass}
                 >
                   <Download className="h-4 w-4" />
-                  Baixar Blender
+                  Download Blender
                 </button>
               </div>
             </div>

@@ -166,7 +166,7 @@ const ProjectCard: React.FC<{
 
         <button
           type="button"
-          aria-label={project.isFavorite ? `Remover ${project.name} dos favoritos` : `Adicionar ${project.name} aos favoritos`}
+          aria-label={project.isFavorite ? `Remove ${project.name} dos favoritos` : `Add ${project.name} aos favoritos`}
           onClick={(event) => {
             event.stopPropagation();
             onToggleFavorite();
@@ -224,7 +224,7 @@ const ProjectCard: React.FC<{
           <div style={{ position: 'relative' }}>
             <button
               type="button"
-              aria-label={`Abrir menu de acoes do projeto ${project.name}`}
+              aria-label={`Open project actions menu ${project.name}`}
               onClick={(event) => {
                 event.stopPropagation();
                 setShowMenu(!showMenu);
@@ -263,11 +263,11 @@ const ProjectCard: React.FC<{
                     boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
                   }}
                 >
-                  <MenuButton icon={<Play size={14} />} label="Abrir" onClick={onOpen} />
+                  <MenuButton icon={<Play size={14} />} label="Open" onClick={onOpen} />
                   <MenuButton icon={<Copy size={14} />} label="Duplicar" onClick={onDuplicate} />
                   <MenuButton icon={<Share2 size={14} />} label="Compartilhar" onClick={onShare} />
                   <div style={{ height: '1px', background: colors.border, margin: '4px 0' }} />
-                  <MenuButton icon={<Trash2 size={14} />} label="Excluir" onClick={onDelete} danger />
+                  <MenuButton icon={<Trash2 size={14} />} label="Delete" onClick={onDelete} danger />
                 </div>
               </>
             )}
@@ -318,18 +318,18 @@ const ProjectsDashboardEmptyState: React.FC<{
   >
     <FolderOpen size={48} color={colors.textDim} style={{ marginBottom: '16px' }} />
     <h3 style={{ margin: '0 0 8px 0', color: colors.text, fontSize: '18px' }}>
-      {search ? 'Nenhum projeto encontrado' : 'Comece criando seu primeiro projeto'}
+      {search ? 'No projects found' : 'Start by creating your first project'}
     </h3>
     <p style={{ margin: '0 0 24px 0', color: colors.textMuted, fontSize: '14px' }}>
       {search
         ? 'Tente uma busca diferente ou ajuste os filtros.'
-        : 'Crie um novo projeto e comece a desenvolver sua proxima grande ideia.'}
+        : 'Create a new project and start building your next big idea.'}
     </p>
     <div style={{ display: 'inline-flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
       {hasActiveFilters && (
         <button
           type="button"
-          aria-label="Limpar busca e filtros de projetos"
+          aria-label="Clear project search and filters"
           onClick={onClearFilters}
           style={{
             display: 'inline-flex',
@@ -351,7 +351,7 @@ const ProjectsDashboardEmptyState: React.FC<{
       {!search && (
         <button
           type="button"
-          aria-label="Abrir modal para criar primeiro projeto"
+          aria-label="Open modal to create first project"
           onClick={onCreateProject}
           style={{
             display: 'inline-flex',
@@ -367,7 +367,7 @@ const ProjectsDashboardEmptyState: React.FC<{
             cursor: 'pointer',
           }}
         >
-          Criar Primeiro Projeto
+          Create first project
         </button>
       )}
     </div>
@@ -412,7 +412,7 @@ export const ProjectsDashboardToolbar: React.FC<{
           type="text"
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Buscar projetos por nome ou descricao..."
+          placeholder="Search projects by name or description..."
           style={{
             width: '100%',
             padding: '10px 12px 10px 40px',
@@ -463,7 +463,7 @@ export const ProjectsDashboardToolbar: React.FC<{
       >
         <button
           type="button"
-          aria-label="Alternar visualizacao para grade"
+          aria-label="Switch to grid view"
           onClick={() => onViewChange('grid')}
           style={{
             padding: '6px 10px',
@@ -478,7 +478,7 @@ export const ProjectsDashboardToolbar: React.FC<{
         </button>
         <button
           type="button"
-          aria-label="Alternar visualizacao para lista"
+          aria-label="Switch to list view"
           onClick={() => onViewChange('list')}
           style={{
             padding: '6px 10px',
@@ -499,7 +499,7 @@ export const ProjectsDashboardToolbar: React.FC<{
       {hasActiveFilters && (
         <button
           type="button"
-          aria-label="Limpar filtros ativos"
+          aria-label="Limpar filtros actives"
           onClick={onClearFilters}
           style={{
             padding: '6px 10px',

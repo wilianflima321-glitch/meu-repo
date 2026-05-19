@@ -70,13 +70,13 @@ export default function OnboardingAdminPage() {
       setError(null)
       const response = await fetch(`/api/admin/onboarding/stats?days=${days}`, { cache: 'no-store' })
       if (!response.ok) {
-        throw new Error(`Falha ao carregar estatisticas de onboarding (${response.status})`)
+        throw new Error(`Failed to load estatisticas de onboarding (${response.status})`)
       }
       const payload = (await response.json()) as OnboardingStats
       setStats(payload)
       setLastUpdated(new Date())
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Falha ao carregar onboarding')
+      setError(requestError instanceof Error ? requestError.message : 'Failed to load onboarding')
     } finally {
       setLoading(false)
     }
@@ -98,7 +98,7 @@ export default function OnboardingAdminPage() {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">Qualidade do onboarding</h1>
-          <p className="text-sm text-[var(--aethel-text-secondary)]">Conversao de primeiro valor, tempo de ativacao e evidencias por acao.</p>
+          <p className="text-sm text-[var(--aethel-text-secondary)]">Conversao de primeiro valor, tempo de ativacao e evidences por acao.</p>
           {lastUpdated && <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>}
         </div>
         <div className="flex items-center gap-2">
@@ -182,7 +182,7 @@ export default function OnboardingAdminPage() {
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.onboardingEntries || 0}</p>
           </div>
           <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">Primeiro projeto</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">First project</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.firstProjectCreated || 0}</p>
           </div>
           <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">

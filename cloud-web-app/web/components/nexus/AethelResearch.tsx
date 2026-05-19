@@ -159,7 +159,7 @@ export default function AethelResearch() {
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar com contexto verificado..."
+            placeholder="Search com contexto verificado..."
             className="flex-1 bg-transparent py-2 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none"
           />
           <button type="submit" className="ml-2 rounded-lg bg-[var(--aethel-primary)] p-2 text-[var(--aethel-text-primary)] transition-all hover:brightness-110">

@@ -264,7 +264,7 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
               padding: '12px',
             }}
           >
-            Preview indisponível para este asset.
+            Preview inavailable para este asset.
           </div>
         )}
       </div>
@@ -277,7 +277,7 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
         <div style={{ fontWeight: 600, color: 'var(--aethel-text-primary)' }}>{asset.name}</div>
         <div>Tipo: {asset.type}</div>
         <div>Tamanho: {formatSize(asset.size)}</div>
-        <div>Extensão: {extension || '-'}</div>
+        <div>Extension: {extension || '-'}</div>
         <div style={{ color: 'var(--aethel-text-tertiary)', wordBreak: 'break-all' }}>{asset.path}</div>
       </div>
 
@@ -299,10 +299,10 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
             <div>Triangles: {asset.metadata.triangles}</div>
           )}
           {asset.metadata.width !== undefined && asset.metadata.height !== undefined && (
-            <div>Dimensão: {asset.metadata.width} × {asset.metadata.height}</div>
+            <div>Dimensions: {asset.metadata.width} × {asset.metadata.height}</div>
           )}
           {asset.metadata.duration !== undefined && (
-            <div>Duração: {asset.metadata.duration}s</div>
+            <div>Duration: {asset.metadata.duration}s</div>
           )}
         </div>
       )}

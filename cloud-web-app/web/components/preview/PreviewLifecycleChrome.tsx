@@ -11,7 +11,7 @@ import {
 
 export function PreviewSkeleton() {
   const title = 'Loading preview...';
-  const detail = 'Conectando runtime, arquivos e superficie visual.';
+  const detail = 'Conectando runtime, files e superficie visual.';
 
   return (
     <PreviewSkeletonCard title={title} detail={detail} />
@@ -138,7 +138,7 @@ export function LifecycleIndicator({
       ) : null}
       {hasFailures ? (
         <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-warning)]">
-          falhas {failureCount}
+          failures {failureCount}
         </span>
       ) : null}
       {showHmrChip && (

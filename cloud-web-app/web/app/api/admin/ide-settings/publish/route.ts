@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
 import { DEFAULT_SETTINGS, SETTING_DEFINITIONS } from '@/lib/settings/settings-service';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/ide-settings/publish/route');
 
 type IdeSettingRow = {
   key: string;
@@ -22,7 +25,7 @@ export const POST = withAdminAuth(
       const to = resolveScope(searchParams.get('to') || undefined);
 
       if (from === to) {
-        return NextResponse.json({ error: 'Ambientes inválidos' }, { status: 400 });
+        return NextResponse.json({ error: 'Invalid environments' }, { status: 400 });
       }
 
       const ideSetting = (prisma as any).ideSetting;
@@ -83,7 +86,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ status: 'ok', from, to, keys: keys.length });
     } catch (error) {
-      console.error('[Admin IDE Settings Publish] Error:', error);
+      routeLogger.error('[Admin IDE Settings Publish] Error:', error);
       return NextResponse.json({ error: 'Failed to publish IDE settings' }, { status: 500 });
     }
   },

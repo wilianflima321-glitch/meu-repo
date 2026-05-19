@@ -12,7 +12,7 @@ export default function Debugger() {
     let cancelled = false;
     const check = async () => {
       setStatus('checking');
-      setMessage('Verificando disponibilidade do depurador...');
+      setMessage('Checking disponibilidade do depurador...');
       try {
         const res = await fetch('/api/health', { cache: 'no-store' });
         if (!res.ok) {
@@ -21,14 +21,14 @@ export default function Debugger() {
         if (!cancelled) {
           setStatus('unavailable');
           setMessage(
-            'Depurador (DAP) ainda não está conectado a um backend real nesta instalação. Este painel não exibe dados simulados para manter real-or-fail.'
+            'Debugger (DAP) is not connected to a real backend in this installation. This panel does not show simulated data to keep real-or-fail behavior.'
           );
         }
       } catch {
         if (!cancelled) {
           setStatus('unavailable');
           setMessage(
-            'Depurador indisponível no momento. Verifique o backend e os endpoints DAP em /api/dap/*.'
+            'Depurador inavailable no momento. Verifique o backend e os endpoints DAP em /api/dap/*.'
           );
         }
       }
@@ -47,10 +47,10 @@ export default function Debugger() {
         <div className="text-sm text-[var(--aethel-text-quaternary)] dark:text-[var(--aethel-text-secondary)]">{message}</div>
       ) : (
         <div className="text-sm text-[var(--aethel-text-quaternary)] dark:text-[var(--aethel-text-primary)]">
-          <div className="font-semibold">Recurso indisponível</div>
+          <div className="font-semibold">Recurso inavailable</div>
           <div className="mt-1">{message}</div>
           <div className="mt-3 text-xs text-[var(--aethel-text-tertiary)] dark:text-[var(--aethel-text-tertiary)]">
-            Quando o backend DAP estiver implementado, este painel passará a consumir os endpoints em <span className="font-mono">/api/dap/*</span>.
+            When the DAP backend is implemented, this panel will consume the endpoints at <span className="font-mono">/api/dap/*</span>.
           </div>
         </div>
       )}

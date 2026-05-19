@@ -396,7 +396,7 @@ export function useAIChatController({
             {
               id: `assistant-${Date.now()}`,
               role: 'assistant',
-              content: 'Solicitacao interrompida pelo usuario.',
+              content: 'Solicitacao interrormpida pelo usuario.',
               timestamp: new Date(),
               model: currentModel,
             },

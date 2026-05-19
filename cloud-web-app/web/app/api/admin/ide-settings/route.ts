@@ -6,6 +6,9 @@ import {
   SETTING_CATEGORIES,
   SETTING_DEFINITIONS,
 } from '@/lib/settings/settings-service';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/ide-settings/route');
 
 // =============================================================================
 // IDE SETTINGS ADMIN API
@@ -87,7 +90,7 @@ async function getHandler(request: NextRequest) {
       environment,
     });
   } catch (error) {
-    console.error('[Admin IDE Settings] Error:', error);
+    routeLogger.error('[Admin IDE Settings] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch IDE settings' }, { status: 500 });
   }
 }
@@ -151,7 +154,7 @@ async function putHandler(request: NextRequest, context: { user: { id: string; e
 
     return NextResponse.json({ status: 'ok' });
   } catch (error) {
-    console.error('[Admin IDE Settings] Error:', error);
+    routeLogger.error('[Admin IDE Settings] Error:', error);
     return NextResponse.json({ error: 'Failed to update IDE settings' }, { status: 500 });
   }
 }

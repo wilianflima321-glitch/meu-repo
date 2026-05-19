@@ -6,6 +6,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/rbac';
 import { prisma } from '@/lib/db';
 import { readChangeRunLedgerEvents, summarizeChangeRunGroups, summarizeChangeRunLedger } from '@/lib/server/change-run-ledger';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/ai/metrics/route');
 
 export const GET = withAdminAuth(
   async (request, { user }) => {
@@ -86,7 +89,7 @@ export const GET = withAdminAuth(
       });
       
     } catch (error) {
-      console.error('[AI Metrics] Error:', error);
+      routeLogger.error('[AI Metrics] Error:', error);
       return NextResponse.json({
         success: false,
         error: 'Failed to fetch metrics',

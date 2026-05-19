@@ -51,7 +51,7 @@ async function enrichParticipants<T extends RoomParticipantSnapshot>(participant
 function requireCollaborationEnabled(collaboratorsLimit: number): void {
 	if (collaboratorsLimit === 0) {
 		throw Object.assign(
-			new Error('FEATURE_NOT_AVAILABLE: colaboração requer plano Basic ou superior.'),
+			new Error('FEATURE_NOT_AVAILABLE: collaboration requires the Basic plan or higher.'),
 			{ code: 'FEATURE_NOT_AVAILABLE' }
 		);
 	}

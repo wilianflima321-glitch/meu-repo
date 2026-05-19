@@ -6,6 +6,9 @@ import {
 } from '@/lib/ai-provider-config'
 
 export const dynamic = 'force-dynamic';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/health/ai/route');
 
 /**
  * GET /api/health/ai
@@ -24,7 +27,7 @@ export async function GET(_request: NextRequest) {
         latency: 0,
         ai: {
           configured: false,
-          message: 'Backend de IA não configurado',
+          message: 'Backend de IA not configured',
         },
         timestamp: new Date().toISOString(),
       });
@@ -44,7 +47,7 @@ export async function GET(_request: NextRequest) {
     });
   } catch (error) {
     const latency = Date.now() - startTime;
-    console.error('[health/ai] Error:', error);
+    routeLogger.error('[health/ai] Error:', error);
     
     return NextResponse.json(
       {

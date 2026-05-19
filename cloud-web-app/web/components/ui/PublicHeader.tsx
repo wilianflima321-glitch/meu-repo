@@ -1,164 +1,132 @@
-import Link from 'next/link'
+'use client'
+
+import { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { ArrowRight, Menu, Search, X } from 'lucide-react'
 import { PUBLIC_NAV_LINKS } from '@/lib/navigation/surfaces'
 
-const headerGhostLinkClass =
-  'inline-flex min-h-10 items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]'
+const PRIMARY_LINKS = PUBLIC_NAV_LINKS.slice(0, 5)
+const SECONDARY_LINKS = PUBLIC_NAV_LINKS.slice(5)
 
-const headerPrimaryLinkClass =
-  'inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] transition-colors hover:bg-[var(--aethel-primary-dark)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]'
+function isActive(pathname: string, href: string) {
+  if (href === '/') return pathname === '/'
+  return pathname === href || pathname.startsWith(`${href}/`)
+}
 
 export default function PublicHeader() {
+  const pathname = usePathname() || '/'
+  const [mobileOpen, setMobileOpen] = useState(false)
+
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-2xl shadow-xl shadow-black/10">
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Primary navigation">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="group flex items-center gap-2.5"
-              aria-label="Aethel Engine - Home"
-              data-analytics-category="user"
-              data-analytics-action="cta_click"
-              data-analytics-label="public_header_logo"
-              data-analytics-source="public-header"
-            >
-              <Image
-                src="/branding/aethel-icon-source.png"
-                alt=""
-                width={32}
-                height={32}
-                sizes="32px"
-                className="rounded-lg transition-transform duration-200 group-hover:scale-105"
-                priority
-              />
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-bold tracking-tight text-[var(--aethel-text-primary)]">Aethel</span>
-                <span className="hidden rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)] sm:inline-flex">
-                  Studio
-                </span>
-              </div>
-            </Link>
-            <div className="hidden xl:flex items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">
-              <span className="inline-flex h-2 w-2 rounded-full bg-[var(--aethel-success)]" />
-              Apps + Research
-            </div>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-xl focus:border focus:border-[var(--aethel-border-primary)] focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-sm focus:text-[var(--aethel-text-primary)]"
+      >
+        Skip to content
+      </a>
+
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--aethel-border-primary)] bg-[rgba(8,10,16,0.86)] shadow-[0_18px_70px_rgba(2,6,23,0.26)] backdrop-blur-xl">
+        <nav aria-label="Primary navigation" className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <Link href="/" aria-label="Aethel home" className="group inline-flex min-w-0 items-center gap-3 rounded-2xl pr-2 text-[var(--aethel-text-primary)] outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)]">
+            <Image src="/branding/aethel-icon-source.png" alt="" width={32} height={32} sizes="32px" className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-1" priority />
+            <span className="hidden items-center gap-2 sm:inline-flex">
+              <span className="text-sm font-semibold tracking-[-0.02em]">Aethel</span>
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">
+                Studio
+              </span>
+            </span>
+          </Link>
+
+          <div className="hidden flex-1 items-center justify-center gap-1 lg:flex">
+            {PRIMARY_LINKS.map((link) => {
+              const active = isActive(pathname, link.href)
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={active ? 'page' : undefined}
+                  className={`rounded-full px-3 py-2 text-sm font-medium transition ${
+                    active
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-info)_13%,transparent)] text-[var(--aethel-text-primary)]'
+                      : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_52%,transparent)] hover:text-[var(--aethel-text-primary)]'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
           </div>
 
-          <div className="hidden items-center gap-1 md:flex">
-            {PUBLIC_NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="inline-flex min-h-10 items-center rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-                data-analytics-category="user"
-                data-analytics-action="cta_click"
-                data-analytics-label={`public_nav:${link.href}`}
-                data-analytics-source="public-header"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-2 md:flex">
             <Link
-              href="/contact-sales"
-              className={headerGhostLinkClass}
-              data-analytics-category="user"
-              data-analytics-action="contact_sales_start"
-              data-analytics-label="header_contact_sales"
-              data-analytics-source="public-header"
+              href="/docs"
+              className="inline-flex h-10 items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] px-3 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
             >
-              Talk to sales
+              <Search className="h-3.5 w-3.5" />
+              Docs
             </Link>
             <Link
               href="/login"
-              className={headerGhostLinkClass}
-              data-analytics-category="user"
-              data-analytics-action="auth_intent"
-              data-analytics-label="header_login"
-              data-analytics-source="public-header"
+              className="inline-flex h-10 items-center justify-center rounded-full border border-[var(--aethel-border-subtle)] px-4 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
             >
               Sign in
             </Link>
             <Link
               href="/dashboard?onboarding=1&source=header"
-              className={headerPrimaryLinkClass}
-              data-analytics-category="project"
-              data-analytics-action="onboarding_start"
-              data-analytics-label="header_start_free"
-              data-analytics-source="public-header"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-4 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_24%,transparent)] transition hover:brightness-110"
             >
               Start free
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
-          <details className="group relative md:hidden">
-            <summary className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] marker:hidden">
-              <span className="sr-only">Open menu</span>
-              <svg className="h-5 w-5 group-open:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-              <svg className="hidden h-5 w-5 group-open:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </summary>
+          <button
+            type="button"
+            aria-label="Open navigation menu"
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((value) => !value)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-primary)] transition hover:border-[var(--aethel-border-secondary)] md:hidden"
+          >
+            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </nav>
 
-            <div className="absolute right-0 top-12 w-72 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_96%,transparent)] p-3 shadow-2xl shadow-black/25 backdrop-blur-2xl">
-              <div className="space-y-1">
-                {PUBLIC_NAV_LINKS.map((link) => (
+        {mobileOpen ? (
+          <div className="border-t border-[var(--aethel-border-primary)] bg-[rgba(8,10,16,0.96)] px-4 py-4 shadow-2xl md:hidden">
+            <div className="grid gap-2">
+              {[...PRIMARY_LINKS, ...SECONDARY_LINKS].map((link) => {
+                const active = isActive(pathname, link.href)
+                return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="block min-h-11 rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
-                    data-analytics-category="user"
-                    data-analytics-action="cta_click"
-                    data-analytics-label={`mobile_public_nav:${link.href}`}
-                    data-analytics-source="public-header-mobile"
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={active ? 'page' : undefined}
+                    className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
+                      active
+                        ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+                        : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] text-[var(--aethel-text-secondary)]'
+                    }`}
                   >
                     {link.label}
                   </Link>
-                ))}
-              </div>
-              <div className="my-3 h-px bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]" />
-              <div className="grid gap-2">
-                <Link
-                  href="/contact-sales"
-                  className="min-h-11 rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
-                  data-analytics-category="user"
-                  data-analytics-action="contact_sales_start"
-                  data-analytics-label="mobile_header_contact_sales"
-                  data-analytics-source="public-header-mobile"
-                >
-                  Talk to sales
-                </Link>
-                <Link
-                  href="/login"
-                  className={headerGhostLinkClass}
-                  data-analytics-category="user"
-                  data-analytics-action="auth_intent"
-                  data-analytics-label="mobile_header_login"
-                  data-analytics-source="public-header-mobile"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/dashboard?onboarding=1&source=header-mobile"
-                  className={`${headerPrimaryLinkClass} justify-center`}
-                  data-analytics-category="project"
-                  data-analytics-action="onboarding_start"
-                  data-analytics-label="mobile_header_start_free"
-                  data-analytics-source="public-header-mobile"
-                >
-                  Start free
-                </Link>
-              </div>
+                )
+              })}
+              <Link
+                href="/dashboard?onboarding=1&source=mobile-header"
+                onClick={() => setMobileOpen(false)}
+                className="mt-2 inline-flex h-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] text-sm font-semibold text-[var(--aethel-text-primary)]"
+              >
+                Start a mission
+              </Link>
             </div>
-          </details>
-        </nav>
+          </div>
+        ) : null}
       </header>
-      <div className="h-16" />
+      <div className="h-16" aria-hidden="true" />
     </>
   )
 }

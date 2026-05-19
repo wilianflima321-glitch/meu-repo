@@ -34,11 +34,11 @@ interface Template {
 
 const TEMPLATES: Template[] = [
   { id: 'nextjs', name: 'Next.js App', description: 'React + SSR + Tailwind', icon: Globe, type: 'web-app', tags: ['React', 'TypeScript'] },
-  { id: 'react-vite', name: 'React + Vite', description: 'SPA rápido com Vite', icon: Code, type: 'web-app', tags: ['React', 'Vite'] },
+  { id: 'react-vite', name: 'React + Vite', description: 'Fast SPA with Vite', icon: Code, type: 'web-app', tags: ['React', 'Vite'] },
   { id: 'api-express', name: 'API Express', description: 'REST API com Node.js', icon: Layers, type: 'api', tags: ['Node.js', 'Express'] },
   { id: 'react-native', name: 'React Native', description: 'App mobile cross-platform', icon: Smartphone, type: 'mobile', tags: ['React Native', 'Expo'] },
-  { id: 'game-3d', name: 'Game 3D Básico', description: 'Three.js + Physics', icon: Gamepad2, type: 'game', tags: ['Three.js', 'Rapier'] },
-  { id: 'blank', name: 'Projeto em branco', description: 'Comece do zero', icon: Sparkles, type: 'other', tags: [] },
+  { id: 'game-3d', name: 'Basic 3D game', description: 'Three.js + Physics', icon: Gamepad2, type: 'game', tags: ['Three.js', 'Rapier'] },
+  { id: 'blank', name: 'Blank project', description: 'Start from scratch', icon: Sparkles, type: 'other', tags: [] },
 ]
 
 interface OnboardingWizardProps {
@@ -73,7 +73,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
   const steps = [
     { label: 'Template', done: step > 0 },
     { label: 'Nome', done: step > 1 },
-    { label: 'Pronto!', done: false },
+    { label: 'Ready!', done: false },
   ]
 
   return (
@@ -152,34 +152,34 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
       {step === 1 && (
         <div>
           <h2 className={`${CANONICAL_TYPOGRAPHY.h1} text-[var(--aethel-text-primary)] mb-2`}>
-            Nomeie seu projeto
+            Name your project
           </h2>
           <p className={`${CANONICAL_TYPOGRAPHY.body} text-[var(--aethel-text-tertiary)] mb-6`}>
-            Você pode mudar depois.
+            You can change it later.
           </p>
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-[var(--aethel-text-secondary)] mb-1.5">
-                Nome do projeto *
+                Project name *
               </label>
               <input
                 type="text"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                placeholder="meu-projeto-incrivel"
+                placeholder="my-awesome-project"
                 autoFocus
                 className="w-full rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-4 py-3 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:border-[var(--aethel-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary)]/20"
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-[var(--aethel-text-secondary)] mb-1.5">
-                Descrição (opcional)
+                Description (opcional)
               </label>
               <input
                 type="text"
                 value={projectDescription}
                 onChange={(e) => setProjectDescription(e.target.value)}
-                placeholder="Uma breve descrição..."
+                placeholder="Uma breve description..."
                 className="w-full rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-4 py-3 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:border-[var(--aethel-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary)]/20"
               />
             </div>
@@ -194,10 +194,10 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
             <Check className="h-10 w-10 text-[var(--aethel-success)]" />
           </div>
           <h2 className={`${CANONICAL_TYPOGRAPHY.h1} text-[var(--aethel-text-primary)] mb-2`}>
-            Tudo pronto!
+            All set!
           </h2>
           <p className={`${CANONICAL_TYPOGRAPHY.body} text-[var(--aethel-text-tertiary)] mb-2`}>
-            Projeto: <strong className="text-[var(--aethel-text-primary)]">{projectName}</strong>
+            Project: <strong className="text-[var(--aethel-text-primary)]">{projectName}</strong>
           </p>
           <p className={`${CANONICAL_TYPOGRAPHY.meta} text-[var(--aethel-text-tertiary)] mb-8`}>
             Template: {TEMPLATES.find((t) => t.id === selectedTemplate)?.name}
@@ -223,7 +223,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
               onClick={() => setStep((s) => s - 1)}
               className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]"
             >
-              ← Voltar
+              ← Back
             </button>
           )}
         </div>
@@ -235,7 +235,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
               disabled={(step === 0 && !selectedTemplate) || (step === 1 && !projectName.trim())}
               className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] px-6 py-2.5 text-sm font-medium text-[var(--aethel-text-inverse)] shadow-lg shadow-[var(--aethel-primary)]/25 transition-all duration-200 hover:shadow-[var(--aethel-primary)]/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              Próximo <ArrowRight className="h-4 w-4" />
+              Next <ArrowRight className="h-4 w-4" />
             </button>
           ) : (
             <button

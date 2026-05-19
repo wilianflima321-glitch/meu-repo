@@ -58,7 +58,7 @@ const ChatComponent: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'system',
-      content: 'Bem-vindo ao Aethel Chat! Como posso ajudar você hoje?',
+      content: 'Welcome to Aethel Chat! How can I help you today?',
       timestamp: new Date(),
     },
   ]);
@@ -99,7 +99,7 @@ const ChatComponent: React.FC = () => {
       setMessages([
         {
           role: 'system',
-          content: 'Bem-vindo ao Aethel Chat! Como posso ajudar você hoje?',
+          content: 'Welcome to Aethel Chat! How can I help you today?',
           timestamp: new Date(),
         },
       ]);
@@ -161,7 +161,7 @@ const ChatComponent: React.FC = () => {
         const list = await AethelAPIClient.listChatThreads().catch(() => ({ threads: [] as ChatThreadSummary[] }));
         const threads = Array.isArray(list.threads) ? list.threads : [];
 
-        // Determina a thread ativa: workflow -> localStorage -> primeira -> cria.
+        // Determina a thread active: workflow -> localStorage -> primeira -> cria.
         let threadId: string | null = (wf?.chatThreadId as string | null) ?? (storedThreadId || null);
         if (threadId && !threads.find((t) => t?.id === threadId)) {
           threadId = null;
@@ -253,7 +253,7 @@ const ChatComponent: React.FC = () => {
     setConnectBusy(true);
 
     try {
-      pushSystem('Copiando histórico (server-side)…');
+      pushSystem('Copiando history (server-side)…');
       const sourceRes = await AethelAPIClient.getCopilotWorkflow(connectFromWorkflowId).catch(() => null);
       const source = sourceRes?.workflow ?? null;
       const sourceThreadId = source?.chatThreadId ? String(source.chatThreadId) : null;
@@ -263,7 +263,7 @@ const ChatComponent: React.FC = () => {
       }
 
       const current = workflows.find((w) => String(w.id) === String(activeWorkflowId));
-      const title = `${current?.title || 'Workflow'} (cópia)`;
+      const title = `${current?.title || 'Workflow'} (copy)`;
 
       const created = await AethelAPIClient.cloneChatThread({ sourceThreadId, title }).catch(() => null);
       const newThreadId = created?.thread?.id ? String(created.thread.id) : null;
@@ -276,7 +276,7 @@ const ChatComponent: React.FC = () => {
       await refreshWorkflows().catch(() => null);
       setConnectFromWorkflowId('');
       await switchWorkflow(activeWorkflowId);
-      pushSystem('Histórico copiado para este trabalho.');
+      pushSystem('History copiado para este trabalho.');
     } finally {
       setConnectBusy(false);
     }
@@ -436,7 +436,7 @@ const ChatComponent: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Atualiza contexto do Copilot para este workflow (mínimo: arquivo ativo/seleção podem ser enviados depois).
+      // Atualiza contexto do Copilot para este workflow (mínimo: file active/seleção podem ser enviados depois).
       if (activeWorkflowId) {
         void fetch('/api/copilot/context', {
           method: 'POST',
@@ -497,11 +497,11 @@ const ChatComponent: React.FC = () => {
       let errorMessage = 'Failed to send message.';
       if (error instanceof APIError) {
         if (error.status === 401) {
-          errorMessage = 'Sessão expirada. Por favor, faça login novamente.';
+          errorMessage = 'Session expired. Please sign in again.';
         } else if (error.status === 402) {
-          errorMessage = 'Créditos insuficientes. Por favor, recarregue sua conta.';
+          errorMessage = 'Insufficient credits. Please top up your account.';
         } else if (error.status === 429) {
-          errorMessage = 'Muitas requisições. Aguarde um momento e tente novamente.';
+          errorMessage = 'Too many requests. Wait a moment and try again.';
         } else {
           errorMessage = `Error: ${error.message}`;
         }
@@ -685,25 +685,25 @@ const ChatComponent: React.FC = () => {
             onClick={() => void copyHistoryFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
-            title="Copia o histórico do trabalho selecionado para o trabalho atual (clona a thread)"
+            title="Copia o history do trabalho selecionado para o trabalho atual (clona a thread)"
           >
-            {connectBusy ? 'Processando…' : 'Copiar histórico'}
+            {connectBusy ? 'Processando…' : 'Copiar history'}
           </button>
 
-          <button type="button" aria-label="Importar contexto do workflow selecionado"
+          <button type="button" aria-label="Import contexto do workflow selecionado"
             onClick={() => void importContextFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
             title="Importa contexto (livePreview/editor/openFiles) do trabalho selecionado"
           >
-            {connectBusy ? 'Processando…' : 'Importar contexto'}
+            {connectBusy ? 'Processando…' : 'Import contexto'}
           </button>
 
           <button type="button" aria-label="Mesclar workflow selecionado ao workflow atual"
             onClick={() => void mergeFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
-            title="Mescla histórico + contexto do trabalho selecionado e arquiva o trabalho de origem"
+            title="Mescla history + contexto do trabalho selecionado e arquiva o trabalho de origem"
           >
             {connectBusy ? 'Processando…' : 'Mesclar'}
           </button>
@@ -786,12 +786,12 @@ const ChatComponent: React.FC = () => {
             >
               {isStreaming ? 'Pausar' : 'Transmitir'}
             </button>
-            <button type="button" aria-label="Enviar mensagem ao chat"
+            <button type="button" aria-label="Send mensagem ao chat"
               onClick={handleSendMessage}
               disabled={isLoading || isStreaming || !input.trim()}
               className="bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] disabled:bg-[var(--aethel-surface-secondary)] disabled:cursor-not-allowed px-4 py-2 rounded font-semibold transition-colors"
             >
-              {isLoading ? 'Enviando...' : 'Enviar'}
+              {isLoading ? 'Enviando...' : 'Send'}
             </button>
           </div>
         </div>

@@ -232,7 +232,7 @@ export function VariablesPanel({
               <option value="int">Int</option>
               <option value="bool">Bool</option>
             </select>
-            <button type="button" aria-label="Adicionar nova variavel ao animation blueprint"
+            <button type="button" aria-label="Add nova variavel ao animation blueprint"
               onClick={() => {
                 if (newVar.name) {
                   onAddVariable({
@@ -312,7 +312,7 @@ export function VariablesPanel({
             />
           )}
 
-          <button type="button" aria-label={`Remover variavel ${variable.name}`}
+          <button type="button" aria-label={`Remove variavel ${variable.name}`}
             onClick={() => onRemoveVariable(variable.name)}
             style={{
               background: 'none',
@@ -587,7 +587,7 @@ export function TransitionInspector({
           marginBottom: '8px',
         }}>
           <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Conditions</span>
-          <button type="button" aria-label="Adicionar condicao de transicao"
+          <button type="button" aria-label="Add condicao de transicao"
             onClick={() => {
               const newCondition: TransitionCondition = {
                 variable: variables[0]?.name || '',
@@ -694,7 +694,7 @@ export function TransitionInspector({
               }}
             />
 
-            <button type="button" aria-label={`Remover condicao ${i + 1} da transicao`}
+            <button type="button" aria-label={`Remove condicao ${i + 1} da transicao`}
               onClick={() => {
                 const newConditions = transition.conditions.filter((_, j) => j !== i);
                 onUpdate({ conditions: newConditions });

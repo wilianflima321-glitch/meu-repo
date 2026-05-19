@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import aethelMCPServer from '@/lib/mcp/aethel-mcp-server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/mcp/route');
 
 /**
  * Aethel MCP HTTP API
@@ -42,7 +45,7 @@ export async function POST(req: NextRequest) {
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     
-    console.error('MCP API Error:', error);
+    routeLogger.error('MCP API Error:', error);
     return NextResponse.json({
       jsonrpc: '2.0',
       error: { 

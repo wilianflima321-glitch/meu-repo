@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
         select: { id: true },
       });
       if (!owned) {
-        return NextResponse.json({ error: 'PROJECT_NOT_FOUND', message: 'Projeto não encontrado.' }, { status: 404 });
+        return NextResponse.json({ error: 'PROJECT_NOT_FOUND', message: 'Project not found.' }, { status: 404 });
       }
     }
 

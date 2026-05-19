@@ -4,6 +4,9 @@ import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { prisma } from '@/lib/db'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/wallet/purchase/route');
 export const dynamic = 'force-dynamic'
 
 const PACKAGE_AMOUNTS: Record<string, number> = {
@@ -62,7 +65,7 @@ export async function POST(req: NextRequest) {
       message: 'Purchase intent registered. Settlement remains gated by payment runtime.',
     })
   } catch (error) {
-    console.error('wallet purchase error:', error)
+    routeLogger.error('wallet purchase error:', error)
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped
     return apiInternalError()

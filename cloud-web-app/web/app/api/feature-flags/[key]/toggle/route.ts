@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/feature-flags/[key]/toggle/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +44,7 @@ async function toggleHandler(
       updatedAt: flag.updatedAt,
     });
   } catch (error) {
-    console.error('Failed to toggle feature flag:', error);
+    routeLogger.error('Failed to toggle feature flag:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

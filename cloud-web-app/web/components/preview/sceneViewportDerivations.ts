@@ -57,7 +57,7 @@ export function deriveVfxGlowIntensity(graph: VFXGraph | null): number {
 export function deriveAbilityAccent(
   ability: GameplayAbilitySpec | null,
 ): { color: string | null; label: string } {
-  if (!ability) return { color: null, label: 'Nenhuma ability em foco' };
+  if (!ability) return { color: null, label: 'No ability em foco' };
   const normalized = `${ability.name} ${ability.description}`.toLowerCase();
   if (normalized.includes('fire')) return { color: '#f97316', label: ability.name };
   if (normalized.includes('heal')) return { color: '#22c55e', label: ability.name };

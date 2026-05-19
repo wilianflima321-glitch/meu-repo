@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/tenants/route');
 
 // =============================================================================
 // TENANTS API (Derived from user domains)
@@ -73,7 +76,7 @@ async function getHandler(_req: NextRequest) {
 
     return NextResponse.json({ tenants });
   } catch (error) {
-    console.error('[Tenants] Error:', error);
+    routeLogger.error('[Tenants] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch tenants' }, { status: 500 });
   }
 }

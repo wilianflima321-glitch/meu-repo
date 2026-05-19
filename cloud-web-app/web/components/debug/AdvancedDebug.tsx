@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Aethel Engine - Advanced Debug Components
@@ -18,7 +18,7 @@ import {
   useRef,
   useMemo,
   type ReactNode,
-} from 'react';
+} from "react";
 import {
   Bug,
   Circle,
@@ -47,210 +47,30 @@ import {
   FileCode,
   Hash,
   type LucideIcon,
-} from 'lucide-react';
+} from "lucide-react";
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type BreakpointType = 'breakpoint' | 'conditional' | 'logpoint';
-
-export interface Breakpoint {
-  id: string;
-  type: BreakpointType;
-  filePath: string;
-  line: number;
-  column?: number;
-  enabled: boolean;
-  verified?: boolean;
-  condition?: string;
-  hitCondition?: string;
-  logMessage?: string;
-  hitCount?: number;
-}
-
-export interface WatchExpression {
-  id: string;
-  expression: string;
-  value?: string;
-  type?: string;
-  error?: string;
-  expandable?: boolean;
-  expanded?: boolean;
-  children?: WatchExpression[];
-}
-
-export interface StackFrame {
-  id: number;
-  name: string;
-  source?: {
-    name: string;
-    path: string;
-  };
-  line: number;
-  column: number;
-  moduleId?: number;
-  presentationHint?: 'normal' | 'label' | 'subtle';
-}
-
-export interface Thread {
-  id: number;
-  name: string;
-  stopped?: boolean;
-  stoppedReason?: string;
-}
-
-export interface ExceptionBreakpoint {
-  id: string;
-  label: string;
-  enabled: boolean;
-  description?: string;
-  conditionDescription?: string;
-  condition?: string;
-}
-
-// ============================================================================
-// Breakpoint Editor Dialog
-// ============================================================================
-
-export function BreakpointEditor({
-  breakpoint,
-  onSave,
-  onCancel,
-  position,
-}: {
-  breakpoint?: Partial<Breakpoint>;
-  onSave: (breakpoint: Partial<Breakpoint>) => void;
-  onCancel: () => void;
-  position?: { x: number; y: number };
-}) {
-  const [type, setType] = useState<BreakpointType>(breakpoint?.type || 'breakpoint');
-  const [condition, setCondition] = useState(breakpoint?.condition || '');
-  const [hitCondition, setHitCondition] = useState(breakpoint?.hitCondition || '');
-  const [logMessage, setLogMessage] = useState(breakpoint?.logMessage || '');
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 10);
-  }, []);
-
-  const handleSave = () => {
-    onSave({
-      ...breakpoint,
-      type,
-      condition: type === 'conditional' ? condition : undefined,
-      hitCondition: hitCondition || undefined,
-      logMessage: type === 'logpoint' ? logMessage : undefined,
-    });
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSave();
-    } else if (e.key === 'Escape') {
-      onCancel();
-    }
-  };
-
-  return (
-    <div
-      className="absolute z-50 w-80 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl overflow-hidden"
-      style={position ? { left: position.x, top: position.y } : undefined}
-    >
-      {/* Type selector */}
-      <div className="flex border-b border-[var(--aethel-border-primary)]">
-        {[
-          { value: 'breakpoint', label: 'Breakpoint', icon: Circle },
-          { value: 'conditional', label: 'Conditional', icon: CircleDot },
-          { value: 'logpoint', label: 'Logpoint', icon: MessageSquare },
-        ].map(({ value, label, icon: Icon }) => (
-          <button type="button" aria-label={`Selecionar tipo ${label} para breakpoint`}
-            key={value}
-            onClick={() => setType(value as BreakpointType)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs transition-colors ${
-              type === value
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)] border-b-2 border-[var(--aethel-info)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
-            }`}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <div className="p-3 space-y-3" onKeyDown={handleKeyDown}>
-        {/* Conditional expression */}
-        {type === 'conditional' && (
-          <div>
-            <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">
-              Expression (break when true)
-            </label>
-            <input
-              ref={inputRef}
-              type="text"
-              value={condition}
-              onChange={e => setCondition(e.target.value)}
-              placeholder="e.g., i > 10 && user.name === 'test'"
-              className="w-full px-2 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
-            />
-          </div>
-        )}
-
-        {/* Log message */}
-        {type === 'logpoint' && (
-          <div>
-            <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">
-              Log message (use {'{expression}'} for values)
-            </label>
-            <input
-              ref={inputRef}
-              type="text"
-              value={logMessage}
-              onChange={e => setLogMessage(e.target.value)}
-              placeholder="e.g., Value: {myVar}, Count: {count}"
-              className="w-full px-2 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
-            />
-            <div className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
-              Logs to console without pausing
-            </div>
-          </div>
-        )}
-
-        {/* Hit condition (for all types) */}
-        <div>
-          <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">
-            Hit Count (optional)
-          </label>
-          <input
-            type="text"
-            value={hitCondition}
-            onChange={e => setHitCondition(e.target.value)}
-            placeholder="e.g., >= 10, == 5, % 2 == 0"
-            className="w-full px-2 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
-          />
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-2 pt-2">
-          <button type="button" aria-label="Cancel breakpoint configuration"
-            onClick={onCancel}
-            className="px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
-          >
-            Cancel
-          </button>
-          <button type="button" aria-label={breakpoint?.id ? 'Atualizar breakpoint' : 'Adicionar breakpoint'}
-            onClick={handleSave}
-            className="px-3 py-1.5 text-sm bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] rounded transition-colors hover:brightness-110"
-          >
-            {breakpoint?.id ? 'Update' : 'Add'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { BreakpointEditor } from "./AdvancedDebug.editor";
+import type {
+  Breakpoint,
+  BreakpointType,
+  ExceptionBreakpoint,
+  StackFrame,
+  Thread,
+  WatchExpression,
+} from "./AdvancedDebug.types";
+export { BreakpointEditor } from "./AdvancedDebug.editor";
+export type {
+  Breakpoint,
+  BreakpointType,
+  ExceptionBreakpoint,
+  StackFrame,
+  Thread,
+  WatchExpression,
+} from "./AdvancedDebug.types";
 
 // ============================================================================
 // Breakpoints Panel
@@ -284,25 +104,28 @@ export function BreakpointsPanel({
 
   const getBreakpointIcon = (bp: Breakpoint) => {
     if (!bp.enabled) return CircleSlash;
-    if (bp.type === 'logpoint') return MessageSquare;
-    if (bp.type === 'conditional') return CircleDot;
+    if (bp.type === "logpoint") return MessageSquare;
+    if (bp.type === "conditional") return CircleDot;
     return Circle;
   };
 
   const getBreakpointColor = (bp: Breakpoint) => {
-    if (!bp.enabled) return 'text-[var(--aethel-text-tertiary)]';
-    if (!bp.verified) return 'text-[var(--aethel-text-tertiary)]';
-    if (bp.type === 'logpoint') return 'text-[var(--aethel-warning-light)]';
-    return 'text-[var(--aethel-error-light)]';
+    if (!bp.enabled) return "text-[var(--aethel-text-tertiary)]";
+    if (!bp.verified) return "text-[var(--aethel-text-tertiary)]";
+    if (bp.type === "logpoint") return "text-[var(--aethel-warning-light)]";
+    return "text-[var(--aethel-error-light)]";
   };
 
   // Group breakpoints by file
   const groupedBreakpoints = useMemo(() => {
     const groups = new Map<string, Breakpoint[]>();
-    breakpoints.forEach(bp => {
+    breakpoints.forEach((bp) => {
       const existing = groups.get(bp.filePath) || [];
       existing.push(bp);
-      groups.set(bp.filePath, existing.sort((a, b) => a.line - b.line));
+      groups.set(
+        bp.filePath,
+        existing.sort((a, b) => a.line - b.line),
+      );
     });
     return groups;
   }, [breakpoints]);
@@ -313,13 +136,17 @@ export function BreakpointsPanel({
       <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
           <Bug className="w-4 h-4 text-[var(--aethel-error-light)]" />
-          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Breakpoints</span>
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">
+            Breakpoints
+          </span>
           <span className="text-xs text-[var(--aethel-text-tertiary)] bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5 rounded">
             {breakpoints.length}
           </span>
         </div>
         {onRemoveAll && breakpoints.length > 0 && (
-          <button type="button" aria-label="Remover todos os breakpoints"
+          <button
+            type="button"
+            aria-label="Remove todos os breakpoints"
             onClick={onRemoveAll}
             className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)]"
             title="Remove all breakpoints"
@@ -334,7 +161,13 @@ export function BreakpointsPanel({
         {/* Exception Breakpoints */}
         {exceptionBreakpoints && exceptionBreakpoints.length > 0 && (
           <div className="border-b border-[var(--aethel-border-primary)]">
-            <button type="button" aria-label={showExceptions ? 'Recolher excecoes monitoradas' : 'Expandir excecoes monitoradas'}
+            <button
+              type="button"
+              aria-label={
+                showExceptions
+                  ? "Recolher excecoes monitoradas"
+                  : "Expandir excecoes monitoradas"
+              }
               onClick={() => setShowExceptions(!showExceptions)}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
@@ -349,7 +182,7 @@ export function BreakpointsPanel({
 
             {showExceptions && (
               <div className="pb-2">
-                {exceptionBreakpoints.map(ex => (
+                {exceptionBreakpoints.map((ex) => (
                   <label
                     key={ex.id}
                     className="flex items-center gap-2 px-6 py-1 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] cursor-pointer"
@@ -360,7 +193,13 @@ export function BreakpointsPanel({
                       onChange={() => onToggleException?.(ex.id)}
                       className="rounded border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-info)] focus:ring-[var(--aethel-info)]"
                     />
-                    <span className={ex.enabled ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)]'}>
+                    <span
+                      className={
+                        ex.enabled
+                          ? "text-[var(--aethel-text-primary)]"
+                          : "text-[var(--aethel-text-tertiary)]"
+                      }
+                    >
                       {ex.label}
                     </span>
                     {ex.description && (
@@ -377,13 +216,16 @@ export function BreakpointsPanel({
 
         {/* Breakpoints by file */}
         {Array.from(groupedBreakpoints.entries()).map(([filePath, bps]) => (
-          <div key={filePath} className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_50%,transparent)]">
+          <div
+            key={filePath}
+            className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_50%,transparent)]"
+          >
             <div className="flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--aethel-text-tertiary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_30%,transparent)]">
               <FileCode className="w-3.5 h-3.5" />
               <span className="truncate">{getFileName(filePath)}</span>
             </div>
 
-            {bps.map(bp => {
+            {bps.map((bp) => {
               const Icon = getBreakpointIcon(bp);
               const colorClass = getBreakpointColor(bp);
 
@@ -393,16 +235,29 @@ export function BreakpointsPanel({
                   className="flex items-center gap-2 px-3 py-1.5 hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] group"
                 >
                   {/* Toggle */}
-                  <button type="button" aria-label={bp.enabled ? `Desativar breakpoint na linha ${bp.line}` : `Ativar breakpoint na linha ${bp.line}`}
+                  <button
+                    type="button"
+                    aria-label={
+                      bp.enabled
+                        ? `Desactiver breakpoint na linha ${bp.line}`
+                        : `Ativar breakpoint na linha ${bp.line}`
+                    }
                     onClick={() => onToggleBreakpoint(bp.id)}
                     className={`flex-shrink-0 ${colorClass}`}
-                    title={bp.enabled ? 'Disable breakpoint' : 'Enable breakpoint'}
+                    title={
+                      bp.enabled ? "Disable breakpoint" : "Enable breakpoint"
+                    }
                   >
-                    <Icon className="w-4 h-4" fill={bp.enabled && bp.verified ? 'currentColor' : 'none'} />
+                    <Icon
+                      className="w-4 h-4"
+                      fill={bp.enabled && bp.verified ? "currentColor" : "none"}
+                    />
                   </button>
 
                   {/* Info */}
-                  <button type="button" aria-label={`Navegar para breakpoint na linha ${bp.line}`}
+                  <button
+                    type="button"
+                    aria-label={`Navegar para breakpoint na linha ${bp.line}`}
                     onClick={() => onNavigateToBreakpoint(bp)}
                     className="flex-1 flex items-center gap-2 text-left min-w-0"
                   >
@@ -433,14 +288,18 @@ export function BreakpointsPanel({
 
                   {/* Actions */}
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
-                    <button type="button" aria-label={`Editar breakpoint na linha ${bp.line}`}
+                    <button
+                      type="button"
+                      aria-label={`Edit breakpoint na linha ${bp.line}`}
                       onClick={() => onEditBreakpoint(bp)}
                       className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
                       title="Edit breakpoint"
                     >
                       <Edit2 className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
                     </button>
-                    <button type="button" aria-label={`Remover breakpoint na linha ${bp.line}`}
+                    <button
+                      type="button"
+                      aria-label={`Remove breakpoint na linha ${bp.line}`}
                       onClick={() => onRemoveBreakpoint(bp.id)}
                       className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
                       title="Remove breakpoint"
@@ -459,9 +318,7 @@ export function BreakpointsPanel({
           <div className="px-4 py-8 text-center text-[var(--aethel-text-tertiary)] text-sm">
             <Bug className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>No breakpoints set</p>
-            <p className="text-xs mt-1">
-              Click the gutter or press F9 to add
-            </p>
+            <p className="text-xs mt-1">Click the gutter or press F9 to add</p>
           </div>
         )}
       </div>
@@ -490,15 +347,15 @@ export function WatchPanel({
   onToggleExpand?: (id: string) => void;
   disabled?: boolean;
 }) {
-  const [newExpression, setNewExpression] = useState('');
+  const [newExpression, setNewExpression] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState('');
+  const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleAdd = () => {
     if (newExpression.trim()) {
       onAddExpression(newExpression.trim());
-      setNewExpression('');
+      setNewExpression("");
     }
   };
 
@@ -513,7 +370,7 @@ export function WatchPanel({
       onEditExpression(editingId, editValue.trim());
     }
     setEditingId(null);
-    setEditValue('');
+    setEditValue("");
   };
 
   const renderExpression = (expr: WatchExpression, depth = 0): ReactNode => {
@@ -523,13 +380,19 @@ export function WatchPanel({
       <div key={expr.id}>
         <div
           className={`flex items-center gap-2 px-2 py-1 hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] group ${
-            disabled ? 'opacity-50' : ''
+            disabled ? "opacity-50" : ""
           }`}
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
         >
           {/* Expand toggle */}
           {expr.expandable ? (
-            <button type="button" aria-label={expr.expanded ? `Recolher expressao ${expr.expression}` : `Expandir expressao ${expr.expression}`}
+            <button
+              type="button"
+              aria-label={
+                expr.expanded
+                  ? `Recolher expressao ${expr.expression}`
+                  : `Expandir expressao ${expr.expression}`
+              }
               onClick={() => onToggleExpand?.(expr.id)}
               className="flex-shrink-0"
               disabled={disabled}
@@ -550,13 +413,13 @@ export function WatchPanel({
               ref={inputRef}
               type="text"
               value={editValue}
-              onChange={e => setEditValue(e.target.value)}
+              onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleSaveEdit}
-              onKeyDown={e => {
-                if (e.key === 'Enter') handleSaveEdit();
-                if (e.key === 'Escape') {
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSaveEdit();
+                if (e.key === "Escape") {
                   setEditingId(null);
-                  setEditValue('');
+                  setEditValue("");
                 }
               }}
               className="flex-1 px-1 py-0.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
@@ -573,13 +436,18 @@ export function WatchPanel({
                 </span>
               ) : (
                 <>
-                  <span className={`text-sm font-mono truncate ${
-                    expr.type === 'string' ? 'text-[var(--aethel-success-light)]' :
-                    expr.type === 'number' ? 'text-[var(--aethel-warning-light)]' :
-                    expr.type === 'boolean' ? 'text-[var(--aethel-info-light)]' :
-                    'text-[var(--aethel-text-secondary)]'
-                  }`}>
-                    {expr.value ?? 'undefined'}
+                  <span
+                    className={`text-sm font-mono truncate ${
+                      expr.type === "string"
+                        ? "text-[var(--aethel-success-light)]"
+                        : expr.type === "number"
+                          ? "text-[var(--aethel-warning-light)]"
+                          : expr.type === "boolean"
+                            ? "text-[var(--aethel-info-light)]"
+                            : "text-[var(--aethel-text-secondary)]"
+                    }`}
+                  >
+                    {expr.value ?? "undefined"}
                   </span>
                   {expr.type && (
                     <span className="text-xs text-[var(--aethel-text-tertiary)] ml-1">
@@ -593,21 +461,27 @@ export function WatchPanel({
 
           {/* Actions */}
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 ml-auto">
-            <button type="button" aria-label={`Editar expressao ${expr.expression}`}
+            <button
+              type="button"
+              aria-label={`Edit expressao ${expr.expression}`}
               onClick={() => handleEdit(expr)}
               className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
               title="Edit"
             >
               <Edit2 className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
             </button>
-            <button type="button" aria-label={`Copiar valor de ${expr.expression}`}
-              onClick={() => navigator.clipboard.writeText(expr.value || '')}
+            <button
+              type="button"
+              aria-label={`Copiar valor de ${expr.expression}`}
+              onClick={() => navigator.clipboard.writeText(expr.value || "")}
               className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
               title="Copy value"
             >
               <Copy className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
             </button>
-            <button type="button" aria-label={`Remover expressao ${expr.expression}`}
+            <button
+              type="button"
+              aria-label={`Remove expressao ${expr.expression}`}
               onClick={() => onRemoveExpression(expr.id)}
               className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
               title="Remove"
@@ -618,7 +492,8 @@ export function WatchPanel({
         </div>
 
         {/* Children */}
-        {expr.expanded && expr.children?.map(child => renderExpression(child, depth + 1))}
+        {expr.expanded &&
+          expr.children?.map((child) => renderExpression(child, depth + 1))}
       </div>
     );
   };
@@ -629,10 +504,14 @@ export function WatchPanel({
       <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
           <Eye className="w-4 h-4 text-[var(--aethel-info-light)]" />
-          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Watch</span>
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">
+            Watch
+          </span>
         </div>
         {onRefresh && (
-          <button type="button" aria-label="Atualizar expressoes observadas"
+          <button
+            type="button"
+            aria-label="Refresh expressoes observadas"
             onClick={onRefresh}
             className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
             title="Refresh all"
@@ -648,13 +527,15 @@ export function WatchPanel({
         <input
           type="text"
           value={newExpression}
-          onChange={e => setNewExpression(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          onChange={(e) => setNewExpression(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
           placeholder="Add expression..."
           className="flex-1 px-2 py-1 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
           disabled={disabled}
         />
-        <button type="button" aria-label="Adicionar expressao observada"
+        <button
+          type="button"
+          aria-label="Add expressao observada"
           onClick={handleAdd}
           disabled={disabled || !newExpression.trim()}
           className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] disabled:opacity-50"
@@ -674,7 +555,7 @@ export function WatchPanel({
             </p>
           </div>
         ) : (
-          expressions.map(expr => renderExpression(expr))
+          expressions.map((expr) => renderExpression(expr))
         )}
       </div>
     </div>
@@ -704,10 +585,12 @@ export function CallStackPanel({
   onRestartFrame?: (frameId: number) => void;
   disabled?: boolean;
 }) {
-  const [expandedThreads, setExpandedThreads] = useState<Set<number>>(new Set([selectedThreadId || 1]));
+  const [expandedThreads, setExpandedThreads] = useState<Set<number>>(
+    new Set([selectedThreadId || 1]),
+  );
 
   const toggleThread = (id: number) => {
-    setExpandedThreads(prev => {
+    setExpandedThreads((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
@@ -720,12 +603,12 @@ export function CallStackPanel({
 
   const getFrameHint = (frame: StackFrame) => {
     switch (frame.presentationHint) {
-      case 'label':
-        return 'text-[var(--aethel-warning-light)]';
-      case 'subtle':
-        return 'text-[var(--aethel-text-tertiary)] italic';
+      case "label":
+        return "text-[var(--aethel-warning-light)]";
+      case "subtle":
+        return "text-[var(--aethel-text-tertiary)] italic";
       default:
-        return 'text-[var(--aethel-text-secondary)]';
+        return "text-[var(--aethel-text-secondary)]";
     }
   };
 
@@ -734,69 +617,95 @@ export function CallStackPanel({
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <Hash className="w-4 h-4 text-[var(--aethel-warning-light)]" />
-        <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Call Stack</span>
+        <span className="text-sm font-medium text-[var(--aethel-text-primary)]">
+          Call Stack
+        </span>
       </div>
 
       {/* Content */}
-      <div className={`flex-1 overflow-y-auto ${disabled ? 'opacity-50' : ''}`}>
-        {threads && threads.length > 1 ? (
-          // Multi-threaded view
-          threads.map(thread => (
-            <div key={thread.id} className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_50%,transparent)]">
-              <button type="button" aria-label={expandedThreads.has(thread.id) ? `Recolher thread ${thread.name}` : `Expandir thread ${thread.name}`}
-                onClick={() => {
-                  toggleThread(thread.id);
-                  onSelectThread?.(thread.id);
-                }}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] ${
-                  selectedThreadId === thread.id ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' : ''
-                }`}
+      <div className={`flex-1 overflow-y-auto ${disabled ? "opacity-50" : ""}`}>
+        {threads && threads.length > 1
+          ? // Multi-threaded view
+            threads.map((thread) => (
+              <div
+                key={thread.id}
+                className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_50%,transparent)]"
               >
-                {expandedThreads.has(thread.id) ? (
-                  <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-                )}
-                <span className={thread.stopped ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-text-tertiary)]'}>
-                  {thread.stopped ? '⏸' : '▶'}
-                </span>
-                <span className="text-[var(--aethel-text-primary)]">{thread.name}</span>
-                {thread.stoppedReason && (
-                  <span className="text-xs text-[var(--aethel-text-tertiary)]">
-                    ({thread.stoppedReason})
+                <button
+                  type="button"
+                  aria-label={
+                    expandedThreads.has(thread.id)
+                      ? `Recolher thread ${thread.name}`
+                      : `Expandir thread ${thread.name}`
+                  }
+                  onClick={() => {
+                    toggleThread(thread.id);
+                    onSelectThread?.(thread.id);
+                  }}
+                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] ${
+                    selectedThreadId === thread.id
+                      ? "bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
+                      : ""
+                  }`}
+                >
+                  {expandedThreads.has(thread.id) ? (
+                    <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
+                  )}
+                  <span
+                    className={
+                      thread.stopped
+                        ? "text-[var(--aethel-warning-light)]"
+                        : "text-[var(--aethel-text-tertiary)]"
+                    }
+                  >
+                    {thread.stopped ? "⏸" : "▶"}
                   </span>
-                )}
-              </button>
+                  <span className="text-[var(--aethel-text-primary)]">
+                    {thread.name}
+                  </span>
+                  {thread.stoppedReason && (
+                    <span className="text-xs text-[var(--aethel-text-tertiary)]">
+                      ({thread.stoppedReason})
+                    </span>
+                  )}
+                </button>
 
-              {expandedThreads.has(thread.id) && selectedThreadId === thread.id && (
-                <div className="pb-2">
-                  {frames.map((frame, index) => (
-                    <StackFrameItem
-                      key={frame.id}
-                      frame={frame}
-                      index={index}
-                      isSelected={frame.id === selectedFrameId}
-                      onSelect={() => onSelectFrame(frame.id)}
-                      onRestart={onRestartFrame ? () => onRestartFrame(frame.id) : undefined}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          ))
-        ) : (
-          // Single thread view
-          frames.map((frame, index) => (
-            <StackFrameItem
-              key={frame.id}
-              frame={frame}
-              index={index}
-              isSelected={frame.id === selectedFrameId}
-              onSelect={() => onSelectFrame(frame.id)}
-              onRestart={onRestartFrame ? () => onRestartFrame(frame.id) : undefined}
-            />
-          ))
-        )}
+                {expandedThreads.has(thread.id) &&
+                  selectedThreadId === thread.id && (
+                    <div className="pb-2">
+                      {frames.map((frame, index) => (
+                        <StackFrameItem
+                          key={frame.id}
+                          frame={frame}
+                          index={index}
+                          isSelected={frame.id === selectedFrameId}
+                          onSelect={() => onSelectFrame(frame.id)}
+                          onRestart={
+                            onRestartFrame
+                              ? () => onRestartFrame(frame.id)
+                              : undefined
+                          }
+                        />
+                      ))}
+                    </div>
+                  )}
+              </div>
+            ))
+          : // Single thread view
+            frames.map((frame, index) => (
+              <StackFrameItem
+                key={frame.id}
+                frame={frame}
+                index={index}
+                isSelected={frame.id === selectedFrameId}
+                onSelect={() => onSelectFrame(frame.id)}
+                onRestart={
+                  onRestartFrame ? () => onRestartFrame(frame.id) : undefined
+                }
+              />
+            ))}
 
         {frames.length === 0 && (
           <div className="px-4 py-8 text-center text-[var(--aethel-text-tertiary)] text-sm">
@@ -827,20 +736,24 @@ function StackFrameItem({
 }) {
   const getFrameHint = () => {
     switch (frame.presentationHint) {
-      case 'label':
-        return 'text-[var(--aethel-warning-light)]';
-      case 'subtle':
-        return 'text-[var(--aethel-text-tertiary)] italic';
+      case "label":
+        return "text-[var(--aethel-warning-light)]";
+      case "subtle":
+        return "text-[var(--aethel-text-tertiary)] italic";
       default:
-        return 'text-[var(--aethel-text-secondary)]';
+        return "text-[var(--aethel-text-secondary)]";
     }
   };
 
   return (
-    <button type="button" aria-label={`Selecionar frame ${frame.name}`}
+    <button
+      type="button"
+      aria-label={`Selecionar frame ${frame.name}`}
       onClick={onSelect}
       className={`w-full flex items-center gap-2 px-4 py-1.5 text-sm text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] group ${
-        isSelected ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' : ''
+        isSelected
+          ? "bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
+          : ""
       }`}
     >
       {/* Frame number */}
@@ -862,8 +775,10 @@ function StackFrameItem({
 
       {/* Restart button */}
       {onRestart && (
-        <button type="button" aria-label={`Reiniciar frame ${frame.name}`}
-          onClick={e => {
+        <button
+          type="button"
+          aria-label={`Reiniciar frame ${frame.name}`}
+          onClick={(e) => {
             e.stopPropagation();
             onRestart();
           }}
@@ -891,7 +806,7 @@ export function DebugToolbar({
   onRestart,
   onStop,
 }: {
-  state: 'idle' | 'running' | 'paused' | 'initializing';
+  state: "idle" | "running" | "paused" | "initializing";
   onContinue: () => void;
   onPause: () => void;
   onStepOver: () => void;
@@ -900,45 +815,45 @@ export function DebugToolbar({
   onRestart: () => void;
   onStop: () => void;
 }) {
-  const isPaused = state === 'paused';
-  const isRunning = state === 'running';
+  const isPaused = state === "paused";
+  const isRunning = state === "running";
   const isActive = isPaused || isRunning;
 
   const buttons = [
     {
       icon: isPaused ? Play : Pause,
-      label: isPaused ? 'Continue (F5)' : 'Pause (F6)',
+      label: isPaused ? "Continue (F5)" : "Pause (F6)",
       action: isPaused ? onContinue : onPause,
       disabled: !isActive,
       primary: isPaused,
     },
     {
       icon: FastForward,
-      label: 'Step Over (F10)',
+      label: "Step Over (F10)",
       action: onStepOver,
       disabled: !isPaused,
     },
     {
       icon: ArrowDown,
-      label: 'Step Into (F11)',
+      label: "Step Into (F11)",
       action: onStepInto,
       disabled: !isPaused,
     },
     {
       icon: ArrowUp,
-      label: 'Step Out (Shift+F11)',
+      label: "Step Out (Shift+F11)",
       action: onStepOut,
       disabled: !isPaused,
     },
     {
       icon: RotateCcw,
-      label: 'Restart (Ctrl+Shift+F5)',
+      label: "Restart (Ctrl+Shift+F5)",
       action: onRestart,
       disabled: !isActive,
     },
     {
       icon: Square,
-      label: 'Stop (Shift+F5)',
+      label: "Stop (Shift+F5)",
       action: onStop,
       disabled: !isActive,
       danger: true,
@@ -947,28 +862,34 @@ export function DebugToolbar({
 
   return (
     <div className="flex items-center gap-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded-lg">
-      {buttons.map(({ icon: Icon, label, action, disabled, primary, danger }, index) => (
-        <button type="button" aria-label={label}
-          key={label}
-          onClick={action}
-          disabled={disabled}
-          title={label}
-          className={`p-1.5 rounded transition-colors ${
-            disabled
-              ? 'text-[var(--aethel-text-quaternary)] cursor-not-allowed'
-              : primary
-                ? 'text-[var(--aethel-success-light)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-                : danger
-                  ? 'text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
-                  : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
-          }`}
-        >
-          <Icon className="w-4 h-4" fill={primary && !disabled ? 'currentColor' : 'none'} />
-        </button>
-      ))}
+      {buttons.map(
+        ({ icon: Icon, label, action, disabled, primary, danger }, index) => (
+          <button
+            type="button"
+            aria-label={label}
+            key={label}
+            onClick={action}
+            disabled={disabled}
+            title={label}
+            className={`p-1.5 rounded transition-colors ${
+              disabled
+                ? "text-[var(--aethel-text-quaternary)] cursor-not-allowed"
+                : primary
+                  ? "text-[var(--aethel-success-light)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]"
+                  : danger
+                    ? "text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
+                    : "text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]"
+            }`}
+          >
+            <Icon
+              className="w-4 h-4"
+              fill={primary && !disabled ? "currentColor" : "none"}
+            />
+          </button>
+        ),
+      )}
     </div>
   );
 }
 
 export default BreakpointsPanel;
-

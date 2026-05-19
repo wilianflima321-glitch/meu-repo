@@ -9,6 +9,9 @@ import {
   resolveScopedWorkspacePath,
   toVirtualWorkspacePath,
 } from '@/lib/server/workspace-scope';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/files/fs/route');
 
 /**
  * POST /api/files/fs - File System Operations
@@ -230,7 +233,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('File system operation failed:', error);
+    routeLogger.error('File system operation failed:', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

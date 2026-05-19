@@ -32,9 +32,9 @@ interface GitIntegrationProps {
 }
 
 const STATUS_LABELS: Record<GitStatus['status'], string> = {
-  clean: 'limpo',
-  modified: 'modificado',
-  conflict: 'conflito',
+  clean: 'clean',
+  modified: 'modified',
+  conflict: 'conflict',
 }
 
 export function GitIntegration({
@@ -63,7 +63,7 @@ export function GitIntegration({
     }
   }
 
-  const statusLabel = status ? STATUS_LABELS[status.status] : 'integração pendente'
+  const statusLabel = status ? STATUS_LABELS[status.status] : 'integration pending'
   const canCommit = Boolean(status && status.status !== 'clean')
 
   return (
@@ -82,14 +82,14 @@ export function GitIntegration({
             disabled={!status}
           >
             <GitBranch className="w-3.5 h-3.5" />
-            {status?.branch ?? 'Sem repositório'}
+            {status?.branch ?? 'No repository'}
           </button>
           <button
             type="button"
             onClick={onPull}
             className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-            title="Atualizar (pull)"
-            aria-label="Atualizar (pull)"
+            title="Refresh (pull)"
+            aria-label="Refresh (pull)"
           >
             <GitPullRequest className="w-3.5 h-3.5" />
           </button>
@@ -97,8 +97,8 @@ export function GitIntegration({
             type="button"
             onClick={onPush}
             className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-            title="Enviar (push)"
-            aria-label="Enviar (push)"
+            title="Send (push)"
+            aria-label="Send (push)"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
@@ -163,17 +163,17 @@ export function GitIntegration({
       {/* Changes */}
       <div className="flex-1 overflow-auto p-4 space-y-3">
         <div className="text-[10px] font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider mb-2">
-          Mudanças
+          Changes
         </div>
 
         {status?.staged && status.staged > 0 && (
           <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-[var(--aethel-text-primary)]">Preparados</span>
-              <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{status.staged} arquivo(s)</span>
+              <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{status.staged} file(s)</span>
             </div>
             <div className="text-[10px] text-[var(--aethel-text-secondary)]">
-              Pronto para commit
+              Ready to commit
             </div>
           </div>
         )}
@@ -181,11 +181,11 @@ export function GitIntegration({
         {status?.unstaged && status.unstaged > 0 && (
           <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-[var(--aethel-text-primary)]">Não preparados</span>
-              <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{status.unstaged} arquivo(s)</span>
+              <span className="text-xs font-medium text-[var(--aethel-text-primary)]">Unstaged</span>
+              <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{status.unstaged} file(s)</span>
             </div>
             <div className="text-[10px] text-[var(--aethel-text-secondary)]">
-              Modificações não preparadas
+              Unstaged modifications
             </div>
           </div>
         )}
@@ -193,11 +193,11 @@ export function GitIntegration({
         {status?.untracked && status.untracked > 0 && (
           <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-[var(--aethel-text-primary)]">Não rastreados</span>
-              <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{status.untracked} arquivo(s)</span>
+              <span className="text-xs font-medium text-[var(--aethel-text-primary)]">Untracked</span>
+              <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{status.untracked} file(s)</span>
             </div>
             <div className="text-[10px] text-[var(--aethel-text-secondary)]">
-              Arquivos novos não rastreados
+              New untracked files
             </div>
           </div>
         )}
@@ -206,8 +206,8 @@ export function GitIntegration({
           <div className="flex items-center justify-center py-8 text-[var(--aethel-text-tertiary)] text-sm">
             <div className="text-center">
               <Check className="w-12 h-12 mx-auto mb-3 text-[var(--aethel-success-light)]" />
-              <p>Workspace sem pendências</p>
-              <p className="text-xs mt-1">Nenhuma modificação pendente</p>
+              <p>Workspace clean</p>
+              <p className="text-xs mt-1">No pending modifications</p>
             </div>
           </div>
         )}
@@ -215,7 +215,7 @@ export function GitIntegration({
           <div className="flex items-center justify-center py-8 text-[var(--aethel-text-tertiary)] text-sm">
             <div className="text-center">
               <AlertTriangle className="w-12 h-12 mx-auto mb-3 text-[var(--aethel-warning-light)]" />
-              <p>Integração Git pendente</p>
+              <p>Git integration pending</p>
               <p className="text-xs mt-1">Conecte um backend Git para exibir status real.</p>
             </div>
           </div>
@@ -233,7 +233,7 @@ export function GitIntegration({
         <div className="max-h-48 overflow-auto p-2 space-y-1">
           {commits.length === 0 ? (
             <div className="px-3 py-6 text-center text-[10px] text-[var(--aethel-text-tertiary)]">
-              Sem histórico disponível (integração pendente).
+              No history available (integration pending).
             </div>
           ) : (
             commits.map((commit) => (
@@ -257,7 +257,7 @@ export function GitIntegration({
         <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-md rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-4">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Criar commit</span>
+              <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Create commit</span>
               <button
                 type="button"
                 onClick={() => setShowCommitDialog(false)}
@@ -303,9 +303,9 @@ export function GitIntegration({
           className="flex items-center gap-2 rounded-lg bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110 disabled:opacity-50"
         >
           <GitCommit className="w-3.5 h-3.5" />
-          Criar commit ?
+          Create commit ?
         </button>
-        <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{status ? `Branch ${status.branch}` : 'Sem repositório ativo'}</span>
+        <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{status ? `Branch ${status.branch}` : 'No active repository'}</span>
       </div>
     </div>
   )

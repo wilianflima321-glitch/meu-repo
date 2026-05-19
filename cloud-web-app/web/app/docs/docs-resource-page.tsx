@@ -88,7 +88,7 @@ export default function DocsResourcePage({
           className="inline-flex items-center gap-1.5 text-sm text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Voltar para docs
+          Back to docs
         </Link>
 
         <section className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-end">

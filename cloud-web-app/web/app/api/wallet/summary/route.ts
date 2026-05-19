@@ -4,6 +4,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { Prisma } from '@prisma/client';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/wallet/summary/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -65,7 +68,7 @@ export async function GET(req: NextRequest) {
       transactions,
     });
   } catch (error) {
-    console.error('Wallet summary error:', error);
+    routeLogger.error('Wallet summary error:', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

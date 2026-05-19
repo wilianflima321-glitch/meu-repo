@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/health/db/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +46,7 @@ export async function GET(_request: NextRequest) {
     });
   } catch (error) {
     const latency = Date.now() - startTime;
-    console.error('[health/db] Error:', error);
+    routeLogger.error('[health/db] Error:', error);
     
     return NextResponse.json(
       {

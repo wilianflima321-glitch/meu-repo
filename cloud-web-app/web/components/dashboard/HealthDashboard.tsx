@@ -4,8 +4,8 @@
  * AETHEL ENGINE - HEALTH DASHBOARD COMPONENT
  * ==========================================
  *
- * Dashboard em tempo real mostrando saude do sistema,
- * uso de recursos e metricas de performance.
+ * Real-time dashboard showing system health,
+ * resource usage, and performance metrics.
  */
 import React, { useState, useEffect } from 'react'
 import {
@@ -219,7 +219,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
           <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Desconectado</h3>
           <p className="mb-4 text-sm text-[var(--aethel-text-tertiary)]">Nao foi possivel conectar ao servidor</p>
           {onRefresh && (
-            <button type="button" onClick={onRefresh} className={actionButtonClass} aria-label="Reconectar dashboard de saude">
+            <button type="button" onClick={onRefresh} className={actionButtonClass} aria-label="Reconnect health dashboard">
               <RefreshCw size={16} />
               Reconectar
             </button>
@@ -264,7 +264,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
             {health.status.toUpperCase()}
           </span>
           {onRefresh && (
-            <button type="button" onClick={onRefresh} className={ghostIconButtonClass} title="Atualizar" aria-label="Atualizar metricas de saude">
+            <button type="button" onClick={onRefresh} className={ghostIconButtonClass} title="Refresh" aria-label="Refresh health metrics">
               <RefreshCw size={18} className="text-[var(--aethel-text-secondary)]" />
             </button>
           )}
@@ -274,7 +274,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className={metricCardClass}>
           <div className="text-2xl font-semibold text-[var(--aethel-info)]">{health.activeJobs}</div>
-          <div className="text-xs text-[var(--aethel-text-tertiary)]">Jobs ativos</div>
+          <div className="text-xs text-[var(--aethel-text-tertiary)]">Jobs actives</div>
         </div>
         <div className={metricCardClass}>
           <div className="text-2xl font-semibold text-[var(--aethel-warning)]">{health.queuedJobs}</div>
@@ -324,7 +324,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
       </div>
 
       <div className="mt-6 flex flex-wrap justify-between gap-2 border-t border-[var(--aethel-border-subtle)] pt-4 text-xs text-[var(--aethel-text-tertiary)]">
-        <span>Ultima atualizacao: {lastUpdate.toLocaleTimeString()}</span>
+        <span>Last update: {lastUpdate.toLocaleTimeString()}</span>
         <span>Aethel Engine v1.0.0</span>
       </div>
     </div>

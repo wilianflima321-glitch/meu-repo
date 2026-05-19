@@ -38,8 +38,8 @@ export default function TemplatesTab({ templates, onSelect }: TemplatesTabProps)
         </span>
         <h2 className="text-3xl font-semibold tracking-tight text-[var(--aethel-text-primary)]">Modelos de workflow</h2>
         <p className="max-w-3xl text-sm leading-6 text-[var(--aethel-text-secondary)] lg:text-[15px]">
-          Comece mais rapido com estruturas pre-configuradas para fluxos reais. A ideia aqui e
-          reduzir friccao, deixar a escolha mais clara e dar ao usuario um ponto de partida premium.
+          Start faster with preconfigured structures for real workflows. This lane is
+          reduce friction, make the choice clearer, and give users a premium starting point.
         </p>
       </div>
 

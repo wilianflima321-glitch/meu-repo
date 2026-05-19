@@ -44,7 +44,7 @@ export default function SearchReplace() {
       const data = await response.json();
       setResults(data.results || []);
     } catch (err) {
-      setError('Não foi possível realizar a busca. Verifique se o projeto está aberto e tente novamente.');
+      setError('Unable to run the search. Check that the project is open and try again.');
       setResults([]);
     } finally {
       setIsSearching(false);
@@ -74,14 +74,14 @@ export default function SearchReplace() {
 
   return (
     <div className="search-replace p-4 bg-[var(--aethel-surface-secondary)] dark:bg-[var(--aethel-surface-secondary)]">
-      <h3 className="font-bold mb-4">Buscar e substituir</h3>
+      <h3 className="font-bold mb-4">Search e substituir</h3>
 
       <div className="mb-4">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Buscar por..."
+          placeholder="Search por..."
           className="w-full p-2 border rounded mb-2"
         />
         <input
@@ -95,14 +95,14 @@ export default function SearchReplace() {
           type="text"
           value={includePattern}
           onChange={(e) => setIncludePattern(e.target.value)}
-          placeholder="Incluir arquivos (ex.: *.tsx)"
+          placeholder="Incluir files (ex.: *.tsx)"
           className="w-full p-2 border rounded mb-2"
         />
         <input
           type="text"
           value={excludePattern}
           onChange={(e) => setExcludePattern(e.target.value)}
-          placeholder="Excluir arquivos (ex.: node_modules)"
+          placeholder="Delete files (ex.: node_modules)"
           className="w-full p-2 border rounded mb-2"
         />
 
@@ -111,7 +111,7 @@ export default function SearchReplace() {
             onClick={handleSearch}
             className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
           >
-            Buscar
+            Search
           </button>
           <button type="button"
             onClick={handleReplace}
@@ -139,7 +139,7 @@ export default function SearchReplace() {
           <>
             <h4 className="font-semibold mb-2">Resultados ({results.length})</h4>
             {results.length === 0 && searchQuery && !error ? (
-              <div className="text-[var(--aethel-text-tertiary)] text-sm">Nenhum resultado encontrado para &ldquo;{searchQuery}&rdquo;</div>
+              <div className="text-[var(--aethel-text-tertiary)] text-sm">No resultado encontrado para &ldquo;{searchQuery}&rdquo;</div>
             ) : (
               results.map((result, index) => (
                 <div key={index} className="mb-2 p-2 bg-[var(--aethel-surface-secondary)] dark:bg-[var(--aethel-surface-secondary)] rounded border">

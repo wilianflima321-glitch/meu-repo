@@ -9,7 +9,7 @@ import { createComponentLogger } from '@/lib/observability/logger'
 const log = createComponentLogger('GameViewport')
 
 
-// Rapier physics é opcional - usar fallback quando não disponível
+// Rapier physics é opcional - usar fallback quando não available
 let Physics: React.ComponentType<any> | null = null;
 let RigidBody: React.ComponentType<any> | null = null;
 let rapierLoaded = false;

@@ -1,6 +1,25 @@
 /** @type {import('next').NextConfig} */
+const os = require('node:os')
 const { i18n } = require('./next-i18next.config')
 const enableStandalone = process.env.NEXT_STANDALONE === '1'
+const enableOutputFileTracing = enableStandalone || process.env.AETHEL_OUTPUT_FILE_TRACING === '1'
+const defaultBuildCpus = Math.max(2, Math.min(4, typeof os.availableParallelism === 'function' ? os.availableParallelism() : os.cpus().length))
+const configuredBuildCpus = Number.parseInt(process.env.AETHEL_NEXT_BUILD_CPUS || String(defaultBuildCpus), 10)
+const buildCpus = Number.isFinite(configuredBuildCpus) && configuredBuildCpus > 0 ? configuredBuildCpus : 2
+const turboFlag = String(process.env.TURBOPACK || '').trim().toLowerCase()
+if (['0', 'false', 'no', 'off'].includes(turboFlag)) {
+  delete process.env.TURBOPACK
+}
+const serverComponentExternalPackages = [
+  '@aws-sdk/client-s3',
+  '@aws-sdk/s3-request-presigner',
+  '@prisma/client',
+  'e2b',
+  'ioredis',
+  'node-pty',
+  'redis',
+  'ws',
+]
 
 // Security Headers
 const securityHeaders = [
@@ -107,6 +126,10 @@ const routeRedirects = [
 
 const nextConfig = {
   ...(enableStandalone ? { output: 'standalone' } : {}),
+  // This repository has hundreds of route handlers. Next's node-file-trace
+  // pass can dominate local/CI compile time, so keep tracing opt-in unless
+  // we are explicitly producing a standalone deploy bundle.
+  outputFileTracing: enableOutputFileTracing,
   reactStrictMode: true,
   poweredByHeader: false,
   // Next/Image optimization re-enabled (audit V5 finding #3.1).
@@ -127,8 +150,8 @@ const nextConfig = {
   },
   typescript: { ignoreBuildErrors: false },
   experimental: {
-    cpus: 1,
-    serverComponentsExternalPackages: ['e2b'],
+    cpus: buildCpus,
+    serverComponentsExternalPackages: serverComponentExternalPackages,
     // Windows builds were hanging and surfacing unstable prerender failures
     // with worker threads enabled in this workspace. Keep the build path
     // deterministic until production parity is proven again.

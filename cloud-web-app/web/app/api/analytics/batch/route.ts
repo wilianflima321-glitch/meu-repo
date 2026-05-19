@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { Prisma } from '@prisma/client'
 import { getUserFromRequest } from '@/lib/auth-server'
-import { apiInternalError } from '@/lib/api-errors'
 import { prisma } from '@/lib/db'
 import { createComponentLogger } from '@/lib/observability/logger'
 
@@ -114,7 +113,15 @@ export async function POST(request: NextRequest) {
       dropped: rawEvents.length + rawMetrics.length - createData.length,
     })
   } catch (error) {
-    routeLogger.error('Failed to persist analytics batch', error)
-    return apiInternalError('Failed to persist analytics batch')
+    routeLogger.warn('Analytics batch persistence unavailable; accepted as non-critical telemetry', error)
+    return NextResponse.json(
+      {
+        success: true,
+        accepted: 0,
+        persisted: false,
+        warning: 'analytics persistence unavailable',
+      },
+      { status: 202 },
+    )
   }
 }

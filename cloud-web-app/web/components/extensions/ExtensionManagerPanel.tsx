@@ -4,8 +4,8 @@ import { logger } from '@/lib/observability/logger';
 /**
  * Extension Manager Panel
  *
- * Interface para gerenciar extensões - instalar, desinstalar,
- * ativar/desativar, e explorar marketplace.
+ * Interface para gerenciar extensions - instalar, desinstalar,
+ * activer/desactiver, e explorar marketplace.
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';

@@ -1,183 +1,94 @@
-import Link from 'next/link'
 import Image from 'next/image'
+import Link from 'next/link'
 
 const FOOTER_SECTIONS = [
   {
-    title: 'Produto',
+    title: 'Product',
     links: [
-      { label: 'Dashboard', href: '/dashboard' },
-      { label: 'IDE', href: '/ide' },
-      { label: 'Planos', href: '/pricing' },
-      { label: 'Compare', href: '/compare' },
-      { label: 'Roadmap', href: '/roadmap' },
-      { label: 'Documentacao', href: '/docs' },
-    ],
-  },
-  {
-    title: 'Empresa',
-    links: [
-      { label: 'Contato', href: '/contact-sales' },
-      { label: 'Clientes', href: '/customers' },
-      { label: 'Trust center', href: '/trust' },
-      { label: 'Status', href: '/status' },
-      { label: 'Reliability', href: '/reliability' },
-      { label: 'Seguranca', href: '/security' },
-      { label: 'Compliance', href: '/compliance' },
-      { label: 'Termos', href: '/terms' },
-      { label: 'Privacidade', href: '/privacy' },
-    ],
-  },
-  {
-    title: 'Recursos',
-    links: [
-      { label: 'Procurement pack', href: '/docs/procurement-starter-pack' },
-      { label: 'Comparativo honesto', href: '/compare' },
-      { label: 'Security policy', href: '/security-policy' },
-      { label: 'Changelog', href: '/docs/changelog' },
-      { label: 'Ajuda', href: '/docs/support' },
-      { label: 'Comunidade', href: '/docs/community' },
-      { label: 'Download', href: '/download' },
+      { label: 'Mission Control', href: '/dashboard' },
+      { label: 'Studio IDE', href: '/ide' },
       { label: 'Marketplace', href: '/marketplace' },
+      { label: 'Pricing', href: '/pricing' },
+    ],
+  },
+  {
+    title: 'Trust',
+    links: [
+      { label: 'Status', href: '/status' },
+      { label: 'Security', href: '/security' },
+      { label: 'Compliance', href: '/compliance' },
+      { label: 'Reliability', href: '/reliability' },
+    ],
+  },
+  {
+    title: 'Resources',
+    links: [
+      { label: 'Documentation', href: '/docs' },
+      { label: 'Help center', href: '/help' },
+      { label: 'Roadmap', href: '/roadmap' },
+      { label: 'Compare', href: '/compare' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { label: 'Contact', href: '/contact' },
+      { label: 'Sales', href: '/contact-sales' },
+      { label: 'Terms', href: '/terms' },
+      { label: 'Privacy', href: '/privacy' },
     ],
   },
 ]
 
-const COPYRIGHT_YEAR = 2026
+const TRUST_SIGNALS = ['Apps + Research GA', 'Game/Film R&D alpha', 'Evidence-led']
 
 export default function PublicFooter() {
   return (
-    <footer className="bg-gradient-to-b from-[var(--aethel-surface-primary)] via-[var(--aethel-surface-primary)] to-[var(--aethel-surface-secondary)]" role="contentinfo">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-12 rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02),rgba(14,165,233,0.06))] px-6 py-6 shadow-[0_24px_70px_rgba(2,6,23,0.24)] lg:px-8">
-          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Plataforma studio-grade</p>
-              <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">
-                Do briefing ao preview no mesmo sistema de trabalho.
-              </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--aethel-text-secondary)]">
-                Apps + Pesquisa continuam no centro do produto, com IA, preview e readiness no mesmo fluxo.
-              </p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[
-                { label: 'Fluxo', value: 'Studio unico' },
-                { label: 'Preview', value: 'Runtime + fallback' },
-                { label: 'Governanca', value: 'Readiness visivel' },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-4"
-                >
-                  <div className="text-[11px] uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">{item.label}</div>
-                  <div className="mt-2 text-sm font-semibold text-[var(--aethel-text-primary)]">{item.value}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
-          {/* Brand column */}
-          <div>
-            <Link href="/" className="inline-flex items-center gap-2.5">
-              <Image src="/branding/aethel-icon-source.png" alt="" width={28} height={28} sizes="28px" className="rounded-lg" />
-              <span className="text-lg font-bold text-[var(--aethel-text-primary)]">Aethel Studio</span>
+    <footer role="contentinfo" className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_96%,black)]">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="grid gap-9 lg:grid-cols-[minmax(260px,1.35fr)_repeat(4,minmax(120px,1fr))]">
+          <div className="max-w-sm">
+            <Link href="/" className="inline-flex items-center gap-3 rounded-2xl text-[var(--aethel-text-primary)] outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)]">
+              <Image src="/branding/aethel-icon-source.png" alt="" width={30} height={30} sizes="30px" className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-1" />
+              <span className="text-sm font-semibold">Aethel Studio</span>
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-6 text-[var(--aethel-text-tertiary)]">
-              Studio multi-agent para sair da ideia e chegar em software validavel com mais rapidez e controle.
+            <p className="mt-4 text-sm leading-6 text-[var(--aethel-text-tertiary)]">
+              A mission-first AI workspace for apps, research, previews, evidence, and governed agent work. Creative game and film systems remain clearly marked as R&D alpha until runtime evidence is complete.
             </p>
-            <div className="mt-5 flex flex-wrap items-center gap-2">
-              {['Apps', 'Pesquisa', 'Preview', 'Governanca'].map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]"
-                >
+            <div className="mt-5 flex flex-wrap gap-2">
+              {TRUST_SIGNALS.map((item) => (
+                <span key={item} className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
                   {item}
                 </span>
               ))}
             </div>
-            <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">
-              <Link href="/security" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">MFA live</Link>
-              <Link href="/trust" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">Trust center</Link>
-              <Link href="/reliability" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">Reliability</Link>
-              <Link href="/compliance" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">GDPR roadmap</Link>
-              <Link href="/roadmap" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">Roadmap publico</Link>
-              <Link href="/compare" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">Compare sem hype</Link>
-              <Link href="/docs/procurement-starter-pack" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">Procurement pack</Link>
-              <Link href="/contact-sales" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">SSO/SAML consultivo</Link>
-            </div>
-            <div className="mt-6 flex items-center gap-4">
-              <a
-                href="https://github.com/wilianflima321-glitch/meu-repo"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
-                aria-label="GitHub"
-              >
-                <svg className="h-4.5 w-4.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                </svg>
-              </a>
-              <Link
-                href="/docs"
-                className="flex h-9 min-w-[96px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
-              >
-                Documentacao
-              </Link>
-              <Link
-                href="/roadmap"
-                className="flex h-9 min-w-[88px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
-              >
-                Roadmap
-              </Link>
-              <Link
-                href="/compare"
-                className="flex h-9 min-w-[88px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
-              >
-                Compare
-              </Link>
-              <Link
-                href="/docs/procurement-starter-pack"
-                className="flex h-9 min-w-[132px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
-              >
-                Procurement pack
-              </Link>
-              <Link
-                href="/status"
-                className="flex h-9 min-w-[72px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
-              >
-                Status
-              </Link>
-            </div>
           </div>
 
-          {/* Link columns */}
           {FOOTER_SECTIONS.map((section) => (
-            <div key={section.title}>
-              <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">{section.title}</h3>
-              <ul className="mt-4 space-y-3">
+            <nav key={section.title} aria-label={section.title} className="min-w-0">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">{section.title}</h3>
+              <ul className="mt-4 grid gap-3">
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-[var(--aethel-text-secondary)] transition-colors hover:text-[var(--aethel-text-primary)]">
+                    <Link href={link.href} className="text-sm text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]">
                       {link.label}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </nav>
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[var(--aethel-border-primary)] pt-8 sm:flex-row">
-          <p className="text-xs text-[var(--aethel-text-tertiary)]">&copy; {COPYRIGHT_YEAR} Aethel Engine. Todos os direitos reservados.</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-[var(--aethel-success)]" />
-              <span className="text-xs text-[var(--aethel-text-tertiary)]">Fluxo studio-grade, atualizado continuamente</span>
-            </div>
-            <Link href="/status" className="text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-primary)]">
-              Ver status operacional
+        <div className="mt-9 flex flex-col gap-4 border-t border-[var(--aethel-border-primary)] pt-5 text-xs text-[var(--aethel-text-quaternary)] sm:flex-row sm:items-center sm:justify-between">
+          <p>&copy; 2026 Aethel Engine. All rights reserved.</p>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/status" className="inline-flex items-center gap-2 text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]">
+              <span className="h-2 w-2 rounded-full bg-[var(--aethel-success)]" />
+              Public status
+            </Link>
+            <Link href="/honest-status" className="text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]">
+              Maturity map
             </Link>
           </div>
         </div>

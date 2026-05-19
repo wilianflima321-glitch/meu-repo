@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import type * as monacoEditor from 'monaco-editor';
 
-import MonacoEditorPro, {
-} from '@/components/editor/MonacoEditorPro';
 import RemoteCursorLayer from '@/components/collaboration/RemoteCursorLayer';
 import useNativeMonacoYjsBinding from '@/components/ide/fullscreen/useNativeMonacoYjsBinding';
+import type { MonacoEditorProps } from '@/components/editor/MonacoEditorPro';
 
 import type {
   ActiveFileState,
@@ -18,6 +18,18 @@ type WorkbenchEditorCanvasProps = WorkbenchEditorCanvasSharedProps & {
   fileState: ActiveFileState;
   pane: EditorPane;
 };
+
+const MonacoEditorPro = dynamic<MonacoEditorProps>(
+  () => import('@/components/editor/MonacoEditorPro').then((module) => module.MonacoEditorPro),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full min-h-[320px] items-center justify-center rounded-[14px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+        Loading editor runtime...
+      </div>
+    ),
+  }
+);
 
 export default function WorkbenchEditorCanvas({
   fileState,

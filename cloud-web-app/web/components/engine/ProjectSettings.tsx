@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Project Settings UI - Configurações do Projeto
+ * Project Settings UI - Settings do Projeto
  *
  * Interface profissional estilo Unreal Engine para gerenciar
  * todas as configurações do projeto e engine.

@@ -15,7 +15,7 @@ type FeedbackItem = {
 };
 
 export default function Feedback() {
-  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
+  const [feedback, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -33,13 +33,13 @@ export default function Feedback() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/feedback');
-      if (!res.ok) throw new Error('Falha ao carregar feedbacks');
+      if (!res.ok) throw new Error('Failed to load feedback');
       const data = await res.json();
       setFeedbacks(Array.isArray(data?.feedback) ? data.feedback : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar feedbacks');
+      setError(err instanceof Error ? err.message : 'Error loading feedback');
     } finally {
       setLoading(false);
     }
@@ -50,10 +50,10 @@ export default function Feedback() {
   }, [fetchFeedbacks]);
 
   const categories = Array.from(
-    new Set(feedbacks.map((item) => item.category).filter(Boolean))
+    new Set(feedback.map((item) => item.category).filter(Boolean))
   ).sort();
 
-  const filteredFeedbacks = feedbacks.filter((feedback) => {
+  const filteredFeedbacks = feedback.filter((feedback) => {
     const term = search.trim().toLowerCase();
     const matchesSearch =
       !term ||
@@ -66,9 +66,9 @@ export default function Feedback() {
   });
 
   const summary = {
-    total: feedbacks.length,
-    open: feedbacks.filter((item) => item.status === 'open').length,
-    resolved: feedbacks.filter((item) => item.status === 'resolved').length,
+    total: feedback.length,
+    open: feedback.filter((item) => item.status === 'open').length,
+    resolved: feedback.filter((item) => item.status === 'resolved').length,
   };
 
   return (
@@ -76,7 +76,7 @@ export default function Feedback() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className='text-3xl font-bold'>Coleta de feedback</h1>
-          <p className='text-[var(--aethel-text-secondary)]'>Analise feedbacks reais enviados via tickets de suporte.</p>
+          <p className='text-[var(--aethel-text-secondary)]'>Analise feedback reais enviados via tickets de suporte.</p>
           {lastUpdated && (
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
@@ -102,7 +102,7 @@ export default function Feedback() {
 <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <input
           type="text"
-          placeholder="Buscar por usuário, assunto ou comentário"
+          placeholder="Search by user, subject, or comment"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="border p-2 rounded w-full md:max-w-sm"
@@ -124,7 +124,7 @@ export default function Feedback() {
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="border p-1 rounded text-xs"
           >
-            <option value="all">Todas as categorias</option>
+            <option value="all">All as categorias</option>
             {categories.map((category) => (
               <option key={category} value={category}>
                 {category}
@@ -137,9 +137,9 @@ export default function Feedback() {
       <table className='w-full table-auto bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
         <thead>
           <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'>
-            <th className='p-2'>Usuário</th>
+            <th className='p-2'>User</th>
             <th className='p-2'>Assunto</th>
-            <th className='p-2'>Comentário</th>
+            <th className='p-2'>Comment</th>
             <th className='p-2'>Categoria</th>
             <th className='p-2'>Status</th>
             <th className='p-2'>Data</th>
@@ -148,7 +148,7 @@ export default function Feedback() {
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={6}>Carregando feedbacks...</td>
+              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={6}>Loading feedback...</td>
             </tr>
           ) : error ? (
             <tr>

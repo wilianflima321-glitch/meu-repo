@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth, logAdminAction, applyShadowBan, AdminUser } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/moderation/[id]/route');
 
 // =============================================================================
 // MODERATION ACTION API
@@ -163,7 +166,7 @@ async function actionHandler(
     });
     
   } catch (error) {
-    console.error('[Moderation Action] Error:', error);
+    routeLogger.error('[Moderation Action] Error:', error);
     return NextResponse.json(
       { error: 'Failed to process moderation action' },
       { status: 500 }

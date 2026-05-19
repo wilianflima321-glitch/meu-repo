@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // =============================================================================
 // FEATURE FLAGS ADMIN API
 // =============================================================================
+
+const log = createComponentLogger('api/admin/feature-flags/route');
 
 export const GET = withAdminAuth(
   async () => {
@@ -13,7 +16,7 @@ export const GET = withAdminAuth(
       const flags = await prisma.featureFlag.findMany({ orderBy: { updatedAt: 'desc' } });
       return NextResponse.json({ items: flags });
     } catch (error) {
-      console.error('[Admin Feature Flags] Error:', error);
+      log.error('[Admin Feature Flags] Error', error);
       return NextResponse.json({ error: 'Failed to fetch flags' }, { status: 500 });
     }
   },
@@ -36,7 +39,7 @@ export const POST = withAdminAuth(
       };
 
       if (!key || !name) {
-        return NextResponse.json({ error: 'Key e name são obrigatórios' }, { status: 400 });
+        return NextResponse.json({ error: 'Key and name are required' }, { status: 400 });
       }
 
       const flag = await prisma.featureFlag.upsert({
@@ -78,7 +81,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ item: flag });
     } catch (error) {
-      console.error('[Admin Feature Flags] Error:', error);
+      log.error('[Admin Feature Flags] Error', error);
       return NextResponse.json({ error: 'Failed to upsert flag' }, { status: 500 });
     }
   },

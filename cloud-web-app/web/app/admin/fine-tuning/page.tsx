@@ -32,14 +32,14 @@ export default function FineTuningPage() {
 
   const fetchDatasets = useCallback(async () => {
     const res = await fetch('/api/admin/fine-tuning/datasets');
-    if (!res.ok) throw new Error('Falha ao carregar conjuntos de dados');
+    if (!res.ok) throw new Error('Failed to load conjuntos de dados');
     const json = await res.json();
     setDatasets(json.items || []);
   }, []);
 
   const fetchJobs = useCallback(async () => {
     const res = await fetch('/api/admin/fine-tuning/jobs');
-    if (!res.ok) throw new Error('Falha ao carregar tarefas');
+    if (!res.ok) throw new Error('Failed to load tarefas');
     const json = await res.json();
     setJobs(json.items || []);
   }, []);
@@ -51,7 +51,7 @@ export default function FineTuningPage() {
         await Promise.all([fetchDatasets(), fetchJobs()]);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
+        setError(err instanceof Error ? err.message : 'Error loading dados');
       } finally {
         setLoading(false);
       }
@@ -71,7 +71,7 @@ export default function FineTuningPage() {
           contentType: newDataset.file.type || 'application/octet-stream',
         }),
       });
-      if (!res.ok) throw new Error('Falha ao criar conjunto de dados');
+      if (!res.ok) throw new Error('Failed to create conjunto de dados');
       const json = await res.json();
       const dataset = json.dataset as Dataset;
       const uploadUrl = json.uploadUrl as string | null;
@@ -82,7 +82,7 @@ export default function FineTuningPage() {
           headers: { 'Content-Type': newDataset.file.type || 'application/octet-stream' },
           body: newDataset.file,
         });
-        if (!uploadRes.ok) throw new Error('Falha no upload do arquivo');
+        if (!uploadRes.ok) throw new Error('File upload failed');
 
         await fetch('/api/admin/fine-tuning/datasets', {
           method: 'PATCH',
@@ -91,13 +91,13 @@ export default function FineTuningPage() {
         });
         setMessage('Conjunto de dados enviado com sucesso.');
       } else {
-        setMessage('Storage indisponível. Conjunto de dados registrado, envio pendente.');
+        setMessage('Storage unavailable. Dataset registered; upload pending.');
       }
 
       setNewDataset({ name: '', file: null });
       await fetchDatasets();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao fazer upload');
+      setError(err instanceof Error ? err.message : 'Upload error');
     } finally {
       setLoading(false);
     }
@@ -112,11 +112,11 @@ export default function FineTuningPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ datasetId: selectedDataset, epochs, learningRate }),
       });
-      if (!res.ok) throw new Error('Falha ao iniciar treinamento');
+      if (!res.ok) throw new Error('Failed to start treinamento');
       setMessage('Tarefa de ajuste fino criada.');
       await fetchJobs();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao iniciar treinamento');
+      setError(err instanceof Error ? err.message : 'Error starting treinamento');
     } finally {
       setLoading(false);
     }
@@ -127,7 +127,7 @@ export default function FineTuningPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Ajuste fino detalhado</h1>
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Pipeline de conjuntos de dados e tarefas com auditoria.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Pipeline de conjuntos de dados e tarefas com audit.</p>
         </div>
         <button type="button" onClick={() => Promise.all([fetchDatasets(), fetchJobs()])} className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm">Atualizar</button>
       </div>
@@ -158,7 +158,7 @@ export default function FineTuningPage() {
       </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Configurações de treinamento</h2>
+        <h2 className="text-lg font-semibold mb-4">Settings de treinamento</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium">Conjunto de dados</label>
@@ -170,11 +170,11 @@ export default function FineTuningPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium">Épocas</label>
+            <label className="block text-sm font-medium">Epochs</label>
             <input type="number" value={epochs} onChange={(e) => setEpochs(Number(e.target.value))} className="border p-2 w-full" />
           </div>
           <div>
-            <label className="block text-sm font-medium">Taxa de aprendizado</label>
+            <label className="block text-sm font-medium">Rate de aprendizado</label>
             <input type="number" step="0.001" value={learningRate} onChange={(e) => setLearningRate(Number(e.target.value))} className="border p-2 w-full" />
           </div>
         </div>
@@ -184,7 +184,7 @@ export default function FineTuningPage() {
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Conjuntos de dados carregados</h2>
         {loading ? (
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Carregando conjuntos de dados...</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Loading datasets...</p>
         ) : (
           <ul>
             {datasets.map(dataset => (
@@ -206,7 +206,7 @@ export default function FineTuningPage() {
             {jobs.map((job) => (
               <li key={job.id} className="border rounded p-3">
                 <div className="font-medium">{job.dataset?.name || 'Conjunto de dados'}</div>
-                <div className="text-sm text-[var(--aethel-text-secondary)]">Status: {job.status} • Épocas: {job.epochs} • Taxa: {job.learningRate}</div>
+                <div className="text-sm text-[var(--aethel-text-secondary)]">Status: {job.status} • Epochs: {job.epochs} • Rate: {job.learningRate}</div>
               </li>
             ))}
           </ul>

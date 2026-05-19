@@ -1,7 +1,7 @@
 /**
  * Director Actions API
  * POST /api/ai/director/[projectId]/action
- * 
+ *
  * Ações: analyze, dismiss, apply, acknowledge
  */
 
@@ -16,6 +16,8 @@ import { createComponentLogger } from '@/lib/observability/logger'
 const log = createComponentLogger('api/ai/director/[projectId]/action/route')
 
 export const dynamic = 'force-dynamic';
+
+const routeLogger = createComponentLogger('api/ai/director/[projectId]/action/route');
 
 interface ActionPayload {
   action: 'analyze' | 'dismiss' | 'apply' | 'acknowledge';
@@ -70,11 +72,11 @@ export async function POST(
         }
         // Em produção, isso aplicaria a sugestão automaticamente
         await logUserFeedback(user.userId, projectId, body.noteId, 'applied');
-        return NextResponse.json({ 
-          success: true, 
-          noteId: body.noteId, 
+        return NextResponse.json({
+          success: true,
+          noteId: body.noteId,
           status: 'applied',
-          message: 'Sugestão aplicada com sucesso' 
+          message: 'Suggestion applied successfully'
         });
 
       case 'acknowledge':
@@ -87,7 +89,7 @@ export async function POST(
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Director action error:', error);
+    routeLogger.error('Director action error:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

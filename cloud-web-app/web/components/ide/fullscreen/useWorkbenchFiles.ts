@@ -65,7 +65,7 @@ export function useWorkbenchFiles({
 
         if (!response.ok) {
           const bodyText = await response.text();
-          throw new Error(bodyText || `Falha ao ler (HTTP ${response.status})`);
+          throw new Error(bodyText || `Failed to read (HTTP ${response.status})`);
         }
 
         const payload = await response.json();
@@ -83,7 +83,7 @@ export function useWorkbenchFiles({
         }
         setLastSavedAt(null);
       } catch (error) {
-        setFileError(error instanceof Error ? error.message : 'Não foi possível ler o arquivo.');
+        setFileError(error instanceof Error ? error.message : 'Unable to read the file.');
       } finally {
         setIsReadingFile(false);
       }
@@ -114,7 +114,7 @@ export function useWorkbenchFiles({
 
         if (!response.ok) {
           const bodyText = await response.text();
-          throw new Error(bodyText || `Falha ao salvar (HTTP ${response.status})`);
+          throw new Error(bodyText || `Failed to save (HTTP ${response.status})`);
         }
 
         setLastSavedAt(new Date());
@@ -142,7 +142,7 @@ export function useWorkbenchFiles({
           });
         }
       } catch (error) {
-        setFileError(error instanceof Error ? error.message : 'Não foi possível salvar o arquivo.');
+        setFileError(error instanceof Error ? error.message : 'Unable to save the file.');
       } finally {
         setIsSavingFile(false);
       }

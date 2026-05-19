@@ -1,4 +1,4 @@
-﻿import type { AgenticProductionState, MissionLedgerEntry, ProductionGraphKey, ProductionGraphNode } from '@/lib/production/agentic-production-state'
+import type { AgenticProductionState, MissionLedgerEntry, ProductionGraphKey, ProductionGraphNode } from '@/lib/production/agentic-production-state'
 import { mergeAgenticProductionState } from '@/lib/production/agentic-production-state'
 import type { GizmoTransformOperation } from '@/lib/viewport/gizmo-transform-operation'
 import { summarizeGizmoTransformOperation } from '@/lib/viewport/gizmo-transform-operation'

@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Failed to create terminal session:', error);
+    log.error('Failed to create terminal session', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

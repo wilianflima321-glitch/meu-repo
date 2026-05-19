@@ -3,6 +3,9 @@ import { requireAuth } from '@/lib/auth-server'
 import { validateAiChange } from '@/lib/server/change-validation'
 import { capabilityResponse } from '@/lib/server/capability-response'
 
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/ai/change/validate/route');
 export const dynamic = 'force-dynamic'
 
 type ValidateBody = {
@@ -62,7 +65,7 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[AI Change Validate] Error:', error)
+    routeLogger.error('[AI Change Validate] Error:', error)
     return NextResponse.json(
       {
         error: 'VALIDATION_ERROR',

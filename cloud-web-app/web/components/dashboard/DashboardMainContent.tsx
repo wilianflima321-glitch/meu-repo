@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useId, type ComponentProps, type ReactNode } from 'react'
 import dynamic from 'next/dynamic'

@@ -172,8 +172,8 @@ export function MentionPreviewPanel({
 
 const MENTION_TRIGGERS = [
   { trigger: '@Codebase', tag: '@codebase', icon: 'code' as const, color: 'violet' as const, description: 'Contexto completo da base de codigo' },
-  { trigger: '@Docs', tag: '@docs:', icon: 'search' as const, color: 'blue' as const, description: 'Pesquisar documentacao' },
-  { trigger: '@File', tag: '@file:', icon: 'file' as const, color: 'green' as const, description: 'Incluir arquivo especifico' },
+  { trigger: '@Docs', tag: '@docs:', icon: 'search' as const, color: 'blue' as const, description: 'Search documentacao' },
+  { trigger: '@File', tag: '@file:', icon: 'file' as const, color: 'green' as const, description: 'Include a specific file' },
   { trigger: '@Folder', tag: '@folder:', icon: 'folder' as const, color: 'amber' as const, description: 'Listar conteudo da pasta' },
   { trigger: '@Diff', tag: '@diff', icon: 'diff' as const, color: 'amber' as const, description: 'Diff do workspace' },
   { trigger: '@Error', tag: '@error', icon: 'bug' as const, color: 'red' as const, description: 'Build/lint diagnostics' },

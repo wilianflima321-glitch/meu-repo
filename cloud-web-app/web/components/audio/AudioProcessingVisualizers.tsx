@@ -472,7 +472,7 @@ export function EffectRack({
                 </span>
 
                 {/* Bypass toggle */}
-                <button type="button" aria-label={effect.bypass ? `Ativar efeito ${effect.name}` : `Desativar efeito ${effect.name}`}
+                <button type="button" aria-label={effect.bypass ? `Ativar efeito ${effect.name}` : `Desactiver efeito ${effect.name}`}
                   onClick={e => {
                     e.stopPropagation()
                     onChange(effects.map(eff =>
@@ -493,7 +493,7 @@ export function EffectRack({
                 </button>
 
                 {/* Remove button */}
-                <button type="button" aria-label={`Remover efeito ${effect.name}`}
+                <button type="button" aria-label={`Remove efeito ${effect.name}`}
                   onClick={e => {
                     e.stopPropagation()
                     onRemove(effect.id)

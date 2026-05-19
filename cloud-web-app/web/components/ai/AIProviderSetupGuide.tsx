@@ -54,7 +54,7 @@ export default function AIProviderSetupGuide({
     if (state === 'checking') return 'verificando'
     if (state === 'configured') return 'configurado'
     if (state === 'missing') return 'pendente'
-    if (state === 'error') return 'erro'
+    if (state === 'error') return 'error'
     return 'indefinido'
   }, [state])
 
@@ -64,7 +64,7 @@ export default function AIProviderSetupGuide({
     <div className={`rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[var(--aethel-warning)]/10 ${compact ? 'p-3' : 'p-4'}`}>
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className={`${compact ? 'text-xs' : 'text-sm'} font-semibold text-[var(--aethel-warning-light)]`}>Provedor de IA nao configurado</p>
+          <p className={`${compact ? 'text-xs' : 'text-sm'} font-semibold text-[var(--aethel-warning-light)]`}>AI provider nao configurado</p>
           <p className={`${compact ? 'text-xs' : 'text-sm'} mt-1 text-[var(--aethel-warning-light)]/90`}>
             {message ?? 'Configure at least one provider to unlock chat, completion, and inline editing.'}
           </p>
@@ -121,7 +121,7 @@ export default function AIProviderSetupGuide({
       {errorText && <p className="mt-2 text-[11px] text-[var(--aethel-error)]">{errorText}</p>}
       {status?.demoModeEnabled && (
         <p className="mt-2 rounded border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-success)]">
-          Modo demo ativo: fluxo de IA liberado com respostas simuladas.
+          Modo demo active: fluxo de IA liberado com respostas simuladas.
           {typeof status?.demoDailyLimit === 'number' ? ` Limite diario: ${status.demoDailyLimit} interacoes por usuario.` : ''}{' '}
           Configure a real provider for production quality.
         </p>
@@ -148,7 +148,7 @@ export default function AIProviderSetupGuide({
           }}
           className="rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-1 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
         >
-          {state === 'checking' ? 'Verificando...' : 'Verificar agora'}
+          {state === 'checking' ? 'Checking...' : 'Verificar agora'}
         </button>
         <span className="self-center text-[11px] text-[var(--aethel-text-quaternary)]">surface: {source}</span>
       </div>

@@ -230,7 +230,7 @@ const ConnectionOverlay = memo(function ConnectionOverlay({
                         </div>
                         <div className="text-[var(--aethel-text-primary)] font-medium text-lg">Cloud Rendering</div>
                         <div className="text-[var(--aethel-text-secondary)] text-sm max-w-xs">
-                            Stream AAA graphics from cloud GPU directly to your browser
+                            Stream high-fidelity graphics from cloud GPU directly to your browser
                         </div>
                         <Button type="button"
                             onClick={onConnect}

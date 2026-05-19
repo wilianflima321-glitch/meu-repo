@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { AlertTriangle, Bot, CheckCircle2, ShieldAlert, Sparkles, UserRound, Workflow, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';

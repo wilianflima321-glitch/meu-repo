@@ -9,7 +9,6 @@ import {
   AlertTriangle,
   Bell,
   Brain,
-  ChevronDown,
   ChevronRight,
   Clock,
   CreditCard,
@@ -33,12 +32,17 @@ import {
   Database,
 } from 'lucide-react'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
-import { ADMIN_CONSOLIDATED_SECTIONS } from '@/lib/admin/admin-consolidation'
+import {
+  ADMIN_CONSOLIDATED_SECTIONS,
+  findAdminSectionForRoute,
+  getAdminRouteCoverage,
+  getAdminRouteLabel,
+} from '@/lib/admin/admin-consolidation'
 import { Badge } from '@/components/ui/Badge'
 import StudioRuntimeProviders from '@/components/providers/StudioRuntimeProviders'
 
 /* ==========================================================================
- * Admin Ops Layout — Unified with Studio Design Language
+ * Admin Ops Layout - Unified with Studio Design Language
  * Source: docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md
  * ========================================================================== */
 
@@ -61,56 +65,89 @@ interface QuickStats {
 
 interface NavGroup {
   label: string
+  href: string
+  description: string
+  routeCount: number
   icon: React.ElementType
   items: { title: string; href: string; icon: React.ElementType; badge?: string }[]
 }
 
 const sectionIconById = {
-  users: Users,
-  billing: CreditCard,
-  ops: Server,
-  security: Shield,
+  people: Users,
+  money: CreditCard,
   ai: Brain,
-  marketplace: Boxes,
+  platform: Server,
+  trust: Shield,
+  product: Boxes,
 } satisfies Record<string, React.ElementType>
 
 const routeIconByHref: Record<string, React.ElementType> = {
+  '/admin/people': Users,
   '/admin/users': Users,
   '/admin/roles': Lock,
   '/admin/support': MessageSquare,
+  '/admin/feedback': MessageSquare,
   '/admin/onboarding': Zap,
+  '/admin/money': CreditCard,
   '/admin/finance': TrendingUp,
   '/admin/payments': CreditCard,
   '/admin/subscriptions': CreditCard,
   '/admin/cost-optimization': Gauge,
+  '/admin/arpu-churn': TrendingUp,
+  '/admin/promotions': CreditCard,
+  '/admin/platform': Server,
   '/admin/monitoring': Activity,
   '/admin/infrastructure': Server,
   '/admin/deploy': Package,
   '/admin/emergency': AlertTriangle,
+  '/admin/backup': Database,
+  '/admin/scalability': Gauge,
+  '/admin/updates': Package,
+  '/admin/real-time': Activity,
+  '/admin/trust': Shield,
   '/admin/security': Lock,
   '/admin/audit-logs': FileText,
   '/admin/compliance': FileText,
   '/admin/rate-limiting': Gauge,
+  '/admin/moderation': Shield,
+  '/admin/ip-registry': Shield,
+  '/admin/god-view': Gauge,
+  '/admin/ai': Brain,
   '/admin/ai-monitor': Brain,
   '/admin/ai-agents': Boxes,
+  '/admin/ai-training': Gauge,
   '/admin/fine-tuning': Gauge,
   '/admin/indexing': Database,
+  '/admin/ai-enhancements': Brain,
+  '/admin/ai-upgrades': Brain,
+  '/admin/bias-detection': Shield,
+  '/admin/automation': Zap,
+  '/admin/product': LayoutDashboard,
   '/admin/marketplace': Boxes,
   '/admin/feature-flags': Flag,
   '/admin/ide-settings': Settings,
   '/admin/apis': Package,
+  '/admin/collaboration': MessageSquare,
+  '/admin/chat': MessageSquare,
+  '/admin/multi-tenancy': Users,
+  '/admin/notifications': Bell,
 }
 
 const navGroups: NavGroup[] = ADMIN_CONSOLIDATED_SECTIONS.map((section) => ({
   label: section.label,
+  href: section.href,
+  description: section.operatorQuestion,
+  routeCount: section.routes.length,
   icon: sectionIconById[section.id],
-  items: section.primaryLinks.map((link) => ({
-    title: link.label,
-    href: link.href,
-    icon: routeIconByHref[link.href] || sectionIconById[section.id],
-    badge: link.badge,
+  items: section.routes.map((route) => ({
+    title: getAdminRouteLabel(route),
+    href: route,
+    icon: routeIconByHref[route] || sectionIconById[section.id],
+    badge: section.primaryLinks.find((link) => link.href === route)?.badge,
   })),
 }))
+
+const adminCoverage = getAdminRouteCoverage()
 
 /* ---------- Reusable Components ---------- */
 
@@ -170,21 +207,31 @@ function NavGroupSection({ group, isCollapsed }: { group: NavGroup; isCollapsed?
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-wider text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
+        className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-wider transition-colors ${
+          hasActiveChild
+            ? 'bg-[var(--aethel-primary)]/10 text-[var(--aethel-info-light)]'
+            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+        }`}
         aria-expanded={open}
+        aria-label={`${group.label}: ${group.description}`}
       >
         <span className="flex items-center gap-2">
           <group.icon className="h-3 w-3" />
           {!isCollapsed && group.label}
         </span>
         {!isCollapsed && (
-          <ChevronRight
-            className={`h-3 w-3 transition-transform duration-150 ${open ? 'rotate-90' : ''}`}
-          />
+          <span className="flex items-center gap-1.5">
+            <span className="rounded-full border border-[var(--aethel-border-subtle)] px-1.5 py-0.5 text-[10px] normal-case tracking-normal text-[var(--aethel-text-tertiary)]">
+              {group.routeCount}
+            </span>
+            <ChevronRight
+              className={`h-3 w-3 transition-transform duration-150 ${open ? 'rotate-90' : ''}`}
+            />
+          </span>
         )}
       </button>
       {open && !isCollapsed && (
-        <nav className="ml-3 space-y-0.5 border-l border-[var(--aethel-border-subtle)] pl-2 mt-0.5">
+        <nav className="ml-3 mt-1 space-y-0.5 border-l border-[var(--aethel-border-subtle)] pl-2">
           {group.items.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -202,7 +249,7 @@ function NavGroupSection({ group, isCollapsed }: { group: NavGroup; isCollapsed?
                   {item.title}
                 </span>
                 {item.badge && (
-                  <Badge variant={item.badge === 'Ao vivo' ? 'success' : 'secondary'} size="sm">
+                  <Badge variant={item.badge === 'Live' ? 'success' : 'secondary'} size="sm">
                     {item.badge}
                   </Badge>
                 )}
@@ -232,7 +279,7 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         role="navigation"
-        aria-label="Navegação administrativa"
+        aria-label="Admin navigation"
       >
         {/* Header */}
         <div className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--aethel-border-subtle)] px-3">
@@ -248,14 +295,14 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
               <p className="text-xs font-semibold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-info)]">
                 Aethel Admin
               </p>
-              <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Operações</p>
+              <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Operations</p>
             </div>
           </Link>
           <button
             type="button"
             onClick={onClose}
             className="rounded-lg p-1 text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-secondary)] lg:hidden"
-            aria-label="Fechar menu lateral"
+            aria-label="Close sidebar"
           >
             <X className="h-4 w-4" />
           </button>
@@ -264,11 +311,21 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
         {/* Back to Studio */}
         <div className="px-2 pt-2">
           <Link
+            href="/admin"
+            className="mb-1 flex items-center justify-between rounded-lg border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)]/45 px-2.5 py-2 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]"
+          >
+            <span className="flex items-center gap-2">
+              <LayoutDashboard className="h-3.5 w-3.5" />
+              Command center
+            </span>
+            <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{adminCoverage.sections} areas</span>
+          </Link>
+          <Link
             href="/dashboard"
             className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             <Home className="h-3.5 w-3.5" />
-            ← Voltar ao Studio
+            Back to Studio
           </Link>
         </div>
 
@@ -286,7 +343,7 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-error)]/40 bg-[var(--aethel-error)]/15 px-3 py-2 text-xs font-semibold text-[var(--aethel-error-light)] transition-colors hover:bg-[var(--aethel-error)]/25"
           >
             <AlertTriangle className="h-3.5 w-3.5" />
-            Modo de emergência
+            Emergency mode
           </Link>
         </div>
       </aside>
@@ -305,6 +362,10 @@ function Header({
   systemStatus: SystemStatus | null
   quickStats: QuickStats | null
 }) {
+  const pathname = useBrowserPathname()
+  const currentSection = findAdminSectionForRoute(pathname)
+  const currentLabel = pathname === '/admin' ? 'Command center' : getAdminRouteLabel(pathname)
+
   return (
     <header
       className="flex h-12 items-center justify-between border-b border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] px-4"
@@ -315,16 +376,21 @@ function Header({
           type="button"
           onClick={onMenuClick}
           className="rounded-lg p-1.5 text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-secondary)] lg:hidden"
-          aria-label="Abrir menu lateral"
+          aria-label="Open sidebar"
         >
           <Menu className="h-4 w-4" />
         </button>
 
-        {/* Breadcrumb placeholder */}
         <nav className="hidden text-xs text-[var(--aethel-text-tertiary)] md:flex items-center gap-1" aria-label="Breadcrumb">
           <span>Admin</span>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-[var(--aethel-text-secondary)]">Dashboard</span>
+          {currentSection && (
+            <>
+              <span>{currentSection.label}</span>
+              <ChevronRight className="h-3 w-3" />
+            </>
+          )}
+          <span className="text-[var(--aethel-text-secondary)]">{currentLabel}</span>
         </nav>
 
         {systemStatus && (
@@ -343,7 +409,7 @@ function Header({
           <QuickStatPill icon={Activity} label="Req/min" value={quickStats.requestsPerMinute} />
           <QuickStatPill
             icon={CreditCard}
-            label="Custo IA hoje"
+            label="AI cost today"
             value={`$${quickStats.aiCostToday.toFixed(2)}`}
             alert={quickStats.aiCostToday > 50}
           />
@@ -354,7 +420,7 @@ function Header({
         <button
           type="button"
           className="relative rounded-lg p-1.5 text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-secondary)]"
-          aria-label="Notificações"
+          aria-label="Notifications"
         >
           <Bell className="h-4 w-4" />
           <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[var(--aethel-error)]" />
@@ -390,7 +456,7 @@ export default function AdminOpsLayout({ children }: { children: React.ReactNode
             <span>Aethel Admin v2.1</span>
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              Última sincronização: {new Date().toLocaleTimeString('pt-BR')}
+              Last sync: {new Date().toLocaleTimeString('en-US')}
             </span>
           </footer>
         </div>

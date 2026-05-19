@@ -1,4 +1,4 @@
-﻿import type { GizmoTransformOperation } from '@/lib/viewport/gizmo-transform-operation'
+import type { GizmoTransformOperation } from '@/lib/viewport/gizmo-transform-operation'
 
 export type GizmoTransformPersistenceStatus = 'idle' | 'saving' | 'saved' | 'error' | 'skipped'
 

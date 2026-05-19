@@ -98,7 +98,7 @@ export function TopAssetsCard({
                     <CardDescription>Seus mais vendidos no mes</CardDescription>
                 </div>
                 <Button variant="ghost" size="sm">
-                    Ver tudo
+                    View tudo
                     <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
             </CardHeader>
@@ -110,7 +110,7 @@ export function TopAssetsCard({
                 ) : assets.length === 0 ? (
                     <EmptyState
                         icon={Package}
-                        title="Nenhum asset ainda"
+                        title="No asset ainda"
                         description="Seus assets com melhor desempenho aparecerao quando voce publicar o primeiro asset."
                     />
                 ) : (
@@ -156,7 +156,7 @@ export function AssetTableCard({
                 </div>
                 <Button>
                     <Upload className="mr-2 h-4 w-4" />
-                    Enviar novo
+                    Send novo
                 </Button>
             </CardHeader>
             <CardContent>
@@ -167,7 +167,7 @@ export function AssetTableCard({
                 ) : assets.length === 0 ? (
                     <EmptyState
                         icon={FileX}
-                        title="Nenhum asset publicado"
+                        title="No asset publicado"
                         description="Envie seu primeiro asset para o marketplace. Seus assets aparecerao aqui para facilitar a gestao."
                     />
                 ) : (
@@ -219,20 +219,20 @@ export function AssetTableCard({
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem>
                                                     <Edit className="mr-2 h-4 w-4" />
-                                                    Editar
+                                                    Edit
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem>
                                                     <Eye className="mr-2 h-4 w-4" />
-                                                    Ver
+                                                    View
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem>
                                                     <BarChart3 className="mr-2 h-4 w-4" />
-                                                    Analiticos
+                                                    Analytics
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem className="text-[var(--aethel-error-light)]">
                                                     <Trash2 className="mr-2 h-4 w-4" />
-                                                    Excluir
+                                                    Delete
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>

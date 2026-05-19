@@ -48,25 +48,25 @@ export function MediaStudioToolbar({
     <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]">
       <div className="text-sm font-semibold text-[var(--aethel-text-primary)]">Media Studio</div>
 
-      <button type="button" aria-label="Alternar reprodução do Media Studio"
+      <button type="button" aria-label="Toggle Media Studio playback"
         className="ml-3 px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
         onClick={onTogglePlay}
       >
         {isPlaying ? 'Pausar' : 'Tocar'}
       </button>
-      <button type="button" aria-label="Parar reprodução do Media Studio"
+      <button type="button" aria-label="Stop Media Studio playback"
         className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
         onClick={onStop}
       >
         Parar
       </button>
 
-      <button type="button" aria-label={exporting ? 'Exportando mídia do Media Studio' : 'Exportar mídia do Media Studio'}
+      <button type="button" aria-label={exporting ? 'Exporting Media Studio media' : 'Export Media Studio media'}
         className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)] disabled:opacity-50"
         onClick={onExport}
         disabled={exporting}
       >
-        {exporting ? 'Exportando...' : 'Exportar WebM'}
+        {exporting ? 'Exportando...' : 'Export WebM'}
       </button>
 
       {exportStatus && <div className="text-xs text-[var(--aethel-text-tertiary)]">{exportStatus}</div>}
@@ -88,7 +88,7 @@ export function MediaStudioToolbar({
         </label>
 
         <label className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)] cursor-pointer">
-          Importar
+          Import
           <input
             className="hidden"
             type="file"
@@ -119,7 +119,7 @@ export function MediaStudioAssetBin({ assets, selectedAssetId, onSelectAsset }: 
       <div className="p-2 space-y-1 overflow-auto h-full">
         {assets.length === 0 ? (
           <div className="text-sm text-[var(--aethel-text-quaternary)] p-2">
-            Importe um arquivo de midia (imagem, audio ou video) para comecar.
+            Import a media file (image, audio, or video) to get started.
           </div>
         ) : (
           assets.map((asset) => (
@@ -202,13 +202,13 @@ export function MediaStudioPreviewPanel({
               onSeek={onAudioSeek}
             />
             <div className="mt-2 flex gap-2">
-              <button type="button" aria-label="Tocar áudio do Media Studio"
+              <button type="button" aria-label="Play Media Studio audio"
                 className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
                 onClick={onAudioPlay}
               >
                 Tocar audio
               </button>
-              <button type="button" aria-label="Pausar áudio do Media Studio"
+              <button type="button" aria-label="Pause Media Studio audio"
                 className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
                 onClick={onAudioPause}
               >

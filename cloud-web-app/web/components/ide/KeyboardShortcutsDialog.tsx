@@ -7,10 +7,10 @@ const SHORTCUT_CATEGORIES = [
   {
     title: 'Geral',
     shortcuts: [
-      { keys: ['Ctrl', 'Shift', 'P'], action: 'Abrir paleta de comandos' },
-      { keys: ['Ctrl', 'P'], action: 'Abrir rapido (Arquivo)' },
+      { keys: ['Ctrl', 'Shift', 'P'], action: 'Open command palette' },
+      { keys: ['Ctrl', 'P'], action: 'Quick open (File)' },
       { keys: ['Ctrl', 'Shift', 'N'], action: 'Nova janela' },
-      { keys: ['Ctrl', ','], action: 'Abrir ajustes' },
+      { keys: ['Ctrl', ','], action: 'Open settings' },
       { keys: ['Ctrl', 'K', 'Ctrl', 'S'], action: 'Ver atalhos de teclado' },
     ],
   },
@@ -20,7 +20,7 @@ const SHORTCUT_CATEGORIES = [
       { keys: ['Ctrl', 'S'], action: 'Save file' },
       { keys: ['Ctrl', 'Z'], action: 'Desfazer' },
       { keys: ['Ctrl', 'Shift', 'Z'], action: 'Refazer' },
-      { keys: ['Ctrl', 'D'], action: 'Selecionar proxima ocorrencia' },
+      { keys: ['Ctrl', 'D'], action: 'Select next occurrence' },
       { keys: ['Ctrl', 'Shift', 'K'], action: 'Deletar linha' },
       { keys: ['Alt', 'Up'], action: 'Mover linha para cima' },
       { keys: ['Alt', 'Down'], action: 'Mover linha para baixo' },
@@ -31,33 +31,33 @@ const SHORTCUT_CATEGORIES = [
   {
     title: 'AI & Chat',
     shortcuts: [
-      { keys: ['Ctrl', 'L'], action: 'Abrir/focar AI Chat' },
+      { keys: ['Ctrl', 'L'], action: 'Open/focus AI Chat' },
       { keys: ['Ctrl', 'I'], action: 'Inline completion' },
-      { keys: ['Ctrl', 'Shift', 'I'], action: 'Explicar codigo selecionado' },
+      { keys: ['Ctrl', 'Shift', 'I'], action: 'Explain selected code' },
       { keys: ['Tab'], action: 'Aceitar sugestao inline' },
       { keys: ['Escape'], action: 'Recusar sugestao inline' },
     ],
   },
   {
-    title: 'Navegacao',
+    title: 'Navigation',
     shortcuts: [
       { keys: ['Ctrl', 'G'], action: 'Ir para linha' },
       { keys: ['Ctrl', 'Shift', 'O'], action: 'Ir para simbolo' },
       { keys: ['F12'], action: 'Ir para definicao' },
       { keys: ['Alt', 'F12'], action: 'Pre-visualizar definicao' },
-      { keys: ['Ctrl', 'Shift', 'E'], action: 'Focar explorador de arquivos' },
+      { keys: ['Ctrl', 'Shift', 'E'], action: 'Focus file explorer' },
       { keys: ['Ctrl', 'Shift', 'G'], action: 'Focar Git' },
-      { keys: ['Ctrl', '`'], action: 'Abrir/fechar terminal' },
+      { keys: ['Ctrl', '`'], action: 'Open/close terminal' },
     ],
   },
   {
-    title: 'Depuracao',
+    title: 'Debugging',
     shortcuts: [
-      { keys: ['F5'], action: 'Iniciar/continuar depuracao' },
+      { keys: ['F5'], action: 'Start/continue debugging' },
       { keys: ['F9'], action: 'Alternar breakpoint' },
       { keys: ['F10'], action: 'Passo sobre' },
-      { keys: ['F11'], action: 'Entrar' },
-      { keys: ['Shift', 'F11'], action: 'Sair' },
+      { keys: ['F11'], action: 'Sign in' },
+      { keys: ['Shift', 'F11'], action: 'Sign out' },
     ],
   },
 ]
@@ -104,7 +104,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
             type="button"
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
-            aria-label="Fechar"
+            aria-label="Close"
           >
             <Codicon name="close" />
           </button>
@@ -120,7 +120,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar atalho..."
+              placeholder="Search atalho..."
               className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] py-2 pl-9 pr-4 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] focus:outline-none"
               autoFocus
             />
@@ -130,7 +130,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {filteredCategories.length === 0 ? (
-            <p className="py-8 text-center text-sm text-[var(--aethel-text-tertiary)]">Nenhum atalho encontrado</p>
+            <p className="py-8 text-center text-sm text-[var(--aethel-text-tertiary)]">No atalho encontrado</p>
           ) : (
             <div className="space-y-6">
               {filteredCategories.map((cat) => (

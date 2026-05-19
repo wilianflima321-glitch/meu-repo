@@ -26,12 +26,12 @@ export default function Chat() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/chat');
-      if (!res.ok) throw new Error('Falha ao carregar chat');
+      if (!res.ok) throw new Error('Failed to load chat');
       const json = await res.json();
       setMessages(json.messages || []);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar chat');
+      setError(err instanceof Error ? err.message : 'Error loading chat');
     } finally {
       setLoading(false);
     }
@@ -50,11 +50,11 @@ export default function Chat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: newMessage, priority }),
       });
-      if (!res.ok) throw new Error('Falha ao enviar mensagem');
+      if (!res.ok) throw new Error('Failed to send message');
       setNewMessage('');
       await fetchMessages();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao enviar mensagem');
+      setError(err instanceof Error ? err.message : 'Error sending message');
     } finally {
       setSending(false);
     }
@@ -74,8 +74,8 @@ export default function Chat() {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-bold'>Chat Prioritário com IA</h1>
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Histórico persistente e prioridade operacional.</p>
+          <h1 className='text-3xl font-bold'>Priority AI Chat</h1>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Persistent history and operational priority.</p>
         </div>
         <button type="button" onClick={fetchMessages} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
           Atualizar
@@ -105,13 +105,13 @@ export default function Chat() {
           disabled={sending}
           className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'
         >
-          {sending ? 'Enviando...' : 'Enviar'}
+          {sending ? 'Sending...' : 'Enviar'}
         </button>
       </div>
 
       <div className='border rounded p-4 h-96 overflow-y-auto bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'>
         {loading ? (
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando mensagens...</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Loading messages...</p>
         ) : messages.length === 0 ? (
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Nenhuma mensagem registrada.</p>
         ) : (
@@ -125,7 +125,7 @@ export default function Chat() {
       </div>
 
       <div className='mt-4'>
-        <button type="button" onClick={exportHistory} className='px-4 py-2 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] rounded'>Exportar Histórico</button>
+        <button type="button" onClick={exportHistory} className='px-4 py-2 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] rounded'>Export History</button>
       </div>
     </div>
   );

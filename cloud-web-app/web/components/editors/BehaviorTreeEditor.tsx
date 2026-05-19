@@ -240,7 +240,7 @@ const BTNodeComponent: React.FC<{
 
       {/* Add Child Button */}
       {canAddChild && (
-        <button type="button" aria-label="Adicionar nó filho"
+        <button type="button" aria-label="Add child node"
           className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-6 h-6 rounded-full bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] text-xs flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
@@ -441,7 +441,7 @@ export default function BehaviorTreeEditor() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" aria-label={isSimulating ? 'Parar simulação da behavior tree' : 'Iniciar simulação da behavior tree'}
+          <button type="button" aria-label={isSimulating ? 'Stop behavior tree simulation' : 'Start behavior tree simulation'}
             onClick={() => setIsSimulating(!isSimulating)}
             className={`px-3 py-1 rounded text-sm font-medium ${
               isSimulating ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' : 'bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
@@ -449,7 +449,7 @@ export default function BehaviorTreeEditor() {
           >
             {isSimulating ? ' Stop' : ' Simulate'}
           </button>
-          <button type="button" aria-label="Adicionar nó raiz"
+          <button type="button" aria-label="Add root node"
             className="px-3 py-1 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded text-sm"
             onClick={() => setShowAddMenu({ parentId: null, position: { x: 400, y: 100 } })}
           >
@@ -525,7 +525,7 @@ export default function BehaviorTreeEditor() {
                       const template = BT_NODE_TEMPLATES[key];
                       const style = NODE_STYLES[template.type!];
                       return (
-                        <button type="button" aria-label={`Adicionar nó ${template.name}`}
+                        <button type="button" aria-label={`Add node ${template.name}`}
                           key={key}
                           className="w-full px-3 py-1 text-left text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] flex items-center gap-2"
                           onClick={() => addNode(key, showAddMenu.parentId, showAddMenu.position)}
@@ -635,7 +635,7 @@ export default function BehaviorTreeEditor() {
                 ))}
               </div>
 
-              <button type="button" aria-label="Excluir nó selecionado"
+              <button type="button" aria-label="Delete selected node"
                 onClick={() => deleteNode(selectedNodeId!)}
                 className="mt-4 w-full px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-text-primary)] rounded text-sm"
               >

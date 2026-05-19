@@ -55,7 +55,7 @@ export default function SceneViewportSurface({
     <ViewportWorkbenchShell
       mode="viewport"
       title="Canonical Preview Surface"
-      subtitle="Viewport soberano com outliner, inspector generativo e mini timeline para animacao e filme curto."
+      subtitle="Viewport soberano com outliner, inspector generactive e mini timeline para animacao e filme curto."
       left={
         <SceneViewportOutliner
           objects={objects}

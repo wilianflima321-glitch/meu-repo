@@ -208,7 +208,7 @@ export default function GitGraph() {
                 onClick={() => setSelectedCommit(null)}
                 className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] mb-4"
               >
-                â† Back
+                Back
               </button>
               <h3 className="text-xl font-bold text-[var(--aethel-text-primary)] mb-2">Commit Details</h3>
             </div>

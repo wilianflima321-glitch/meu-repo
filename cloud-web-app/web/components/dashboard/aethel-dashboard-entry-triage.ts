@@ -33,7 +33,7 @@ const DEFAULT_LANE: DashboardEntryLane = {
   label: 'Mission intake',
   description: 'Start light, then deepen only when the work really needs Studio.',
   targetTab: 'overview',
-  onboardingToast: 'Studio Home pronto. Escolha a melhor proxima acao sem cair em um dashboard generico.',
+  onboardingToast: 'Studio Home ready. Choose the best next action without falling into a generic dashboard.',
 }
 
 const ENTRY_LANES: Array<{
@@ -45,9 +45,9 @@ const ENTRY_LANES: Array<{
     lane: {
       id: 'apps',
       label: 'Apps / Sites',
-      description: 'Crie o workspace certo antes de abrir o Studio completo.',
+      description: 'Create the right workspace before opening the full Studio.',
       targetTab: 'projects',
-      onboardingToast: 'Fluxo de Apps / Sites pronto. Escolha ou crie o workspace antes do handoff para o Studio.',
+      onboardingToast: 'Apps / Sites flow ready. Choose or create the workspace before handing off to Studio.',
     },
   },
   {
@@ -55,9 +55,9 @@ const ENTRY_LANES: Array<{
     lane: {
       id: 'research',
       label: 'Research',
-      description: 'Comece no AI Console para alinhar briefing, evidencias e benchmark.',
+      description: 'Start in AI Console to align the brief, evidence, and benchmark.',
       targetTab: 'ai-chat',
-      onboardingToast: 'Fluxo de Research pronto. Use o AI Console para consolidar contexto, evidencias e proxima decisao.',
+      onboardingToast: 'Research flow ready. Use the AI Console to consolidate context, evidence, and the next decision.',
     },
   },
   {
@@ -65,9 +65,9 @@ const ENTRY_LANES: Array<{
     lane: {
       id: 'cloud',
       label: 'Cloud / DevOps',
-      description: 'Verifique conectividade e prontidao da plataforma antes de aprofundar.',
+      description: 'Check connectivity and platform readiness before going deeper.',
       targetTab: 'connectivity',
-      onboardingToast: 'Fluxo de Cloud / DevOps pronto. Confirme conectividade, ambiente e readiness antes de seguir.',
+      onboardingToast: 'Cloud / DevOps flow ready. Confirm connectivity, environment, and readiness before continuing.',
     },
   },
   {
@@ -75,9 +75,9 @@ const ENTRY_LANES: Array<{
     lane: {
       id: 'growth',
       label: 'Growth / Ops',
-      description: 'Use o AI Console para organizar operacao, automacoes e proximos passos.',
+      description: 'Use the AI Console to organize operations, automations, and next steps.',
       targetTab: 'ai-chat',
-      onboardingToast: 'Fluxo de Growth / Ops pronto. Estruture a operacao no AI Console antes de espalhar o trabalho.',
+      onboardingToast: 'Growth / Ops flow ready. Structure the operation in the AI Console before spreading the work.',
     },
   },
   {
@@ -85,9 +85,9 @@ const ENTRY_LANES: Array<{
     lane: {
       id: 'games',
       label: 'Games',
-      description: 'Prepare o workspace primeiro e deixe a profundidade pesada para o Studio.',
+      description: 'Prepare the workspace first and leave heavy depth for Studio.',
       targetTab: 'projects',
-      onboardingToast: 'Fluxo de Games pronto. Organize o workspace e so depois aprofunde no Studio.',
+      onboardingToast: 'Games flow ready. Organize the workspace before going deeper in Studio.',
     },
   },
   {
@@ -95,9 +95,9 @@ const ENTRY_LANES: Array<{
     lane: {
       id: 'media',
       label: 'Films / Media',
-      description: 'Comece pelo workspace e preserve o Studio para review e viewport.',
+      description: 'Start from the workspace and preserve Studio for review and viewport work.',
       targetTab: 'projects',
-      onboardingToast: 'Fluxo de Films / Media pronto. Organize o workspace antes de abrir a camada mais profunda.',
+      onboardingToast: 'Films / Media flow ready. Organize the workspace before opening the deeper layer.',
     },
   },
   {
@@ -105,9 +105,9 @@ const ENTRY_LANES: Array<{
     lane: {
       id: 'resume',
       label: 'Mission resume',
-      description: 'Retome a superficie principal e so abra profundidade quando a missao pedir.',
+      description: 'Resume the main surface and open depth only when the mission asks for it.',
       targetTab: 'overview',
-      onboardingToast: 'Missao retomada no ponto certo.',
+      onboardingToast: 'Mission resumed at the right point.',
     },
   },
 ]
@@ -139,7 +139,7 @@ export function resolveDashboardEntrySeed(params: {
       showFirstValueGuide: params.onboarding,
       chatSeed: mission,
       toast: {
-        message: 'Missao carregada no AI Console. Revise, refine e envie quando estiver pronto.',
+        message: 'Mission loaded in the AI Console. Review, refine, and send when ready.',
         type: 'info',
       },
     }

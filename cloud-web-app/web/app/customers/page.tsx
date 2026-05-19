@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Compass, ShieldCheck, Sparkles, Users2 } from 'lucide-react'
 import PublicFooter from '@/components/ui/PublicFooter'
@@ -13,6 +12,12 @@ import {
   TEAM_PROFILES,
   USE_CASES,
 } from './customerProofContent'
+
+const PROOF_STACK = [
+  { label: 'Fit atual', value: 'Apps + Pesquisa', note: 'O produto comercial mais maduro hoje.' },
+  { label: 'Prova publica', value: 'Status + docs', note: 'Readiness verificavel antes de sales call.' },
+  { label: 'Sem inflar', value: 'Beta partners', note: 'Nada de logo wall inventada ou customer count falso.' },
+]
 
 export const metadata: Metadata = {
   title: 'Clientes | Aethel Studio',
@@ -105,7 +110,7 @@ export default function CustomersPage() {
             </div>
 
             <aside className="space-y-4">
-              <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-strong))] shadow-[0_24px_90px_rgba(2,6,23,0.42)]">
+              <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-strong))] p-5 shadow-[0_24px_90px_rgba(2,6,23,0.42)]">
                 <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
                   <div>
                     <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Studio real</p>
@@ -117,14 +122,22 @@ export default function CustomersPage() {
                     <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_78%,transparent)]" />
                   </div>
                 </div>
-                <Image
-                  src="/screenshots/dashboard.png"
-                  alt="Dashboard do Aethel Studio"
-                  width={1600}
-                  height={960}
-                  className="h-auto w-full object-cover"
-                  priority
-                />
+                <div className="mt-5 grid gap-3">
+                  {PROOF_STACK.map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] p-4"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                          {item.label}
+                        </span>
+                        <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">{item.value}</span>
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{item.note}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="rounded-[28px] border border-[color-mix(in_srgb,var(--aethel-warning-light)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning-light)_8%,transparent)] p-5">

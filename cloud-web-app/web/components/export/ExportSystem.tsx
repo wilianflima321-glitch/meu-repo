@@ -1,28 +1,28 @@
 'use client'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { EXPORT_PRESETS, type ExportarJob, type ExportarPreset, type ExportarSettings } from './export-system-model'
-export { EXPORT_PRESETS, ExportarManager } from './export-system-model'
-export type { AudioCodec, Container, ExportarJob, ExportarJobStatus, ExportarPreset, ExportarSettings, VideoCodec } from './export-system-model'
-interface ExportarDialogProps {
+import { EXPORT_PRESETS, type ExportJob, type ExportPreset, type ExportSettings } from './export-system-model'
+export { EXPORT_PRESETS, ExportManager } from './export-system-model'
+export type { AudioCodec, Container, ExportJob, ExportJobStatus, ExportPreset, ExportSettings, VideoCodec } from './export-system-model'
+interface ExportDialogProps {
   open: boolean
   onClose: () => void
-  onExportar: (settings: ExportarSettings) => void
+  onExport: (settings: ExportSettings) => void
   projectDuracao: number
   projectResolucao: { width: number; height: number }
 }
-export function ExportarDialog({
+export function ExportDialog({
   open,
   onClose,
-  onExportar,
+  onExport,
   projectDuracao,
   projectResolucao
-}: ExportarDialogProps) {
-  const [selectedPreset, setSelectedPreset] = useState<ExportarPreset | null>(EXPORT_PRESETS[1])
-  const [customSettings, setCustomSettings] = useState<ExportarSettings>(EXPORT_PRESETS[1].settings)
+}: ExportDialogProps) {
+  const [selectedPreset, setSelectedPreset] = useState<ExportPreset | null>(EXPORT_PRESETS[1])
+  const [customSettings, setCustomSettings] = useState<ExportSettings>(EXPORT_PRESETS[1].settings)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [outputName, setOutputName] = useState('export')
   const presetsByCategory = useMemo(() => {
-    const grouped: Record<string, ExportarPreset[]> = {}
+    const grouped: Record<string, ExportPreset[]> = {}
     EXPORT_PRESETS.forEach(preset => {
       if (!grouped[preset.category]) {
         grouped[preset.category] = []
@@ -78,7 +78,7 @@ export function ExportarDialog({
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <h2 style={{ color: 'var(--aethel-text-primary)', margin: 0, fontSize: 16 }}>Exportar Media</h2>
+          <h2 style={{ color: 'var(--aethel-text-primary)', margin: 0, fontSize: 16 }}>Export Media</h2>
           <button type="button" aria-label="Close export dialog"
             onClick={onClose}
             style={{
@@ -190,13 +190,13 @@ export function ExportarDialog({
                 <div>
                   <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, marginBottom: 4 }}>Video codec</div>
                   <div style={{ color: 'var(--aethel-text-primary)', fontSize: 14 }}>
-                    {customSettings.videoCodec?.toUpperCase() || 'Nenhum'}
+                    {customSettings.videoCodec?.toUpperCase() || 'No'}
                   </div>
                 </div>
                 <div>
                   <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, marginBottom: 4 }}>Audio codec</div>
                   <div style={{ color: 'var(--aethel-text-primary)', fontSize: 14 }}>
-                    {customSettings.audioCodec?.toUpperCase() || 'Nenhum'}
+                    {customSettings.audioCodec?.toUpperCase() || 'No'}
                   </div>
                 </div>
                 <div>
@@ -416,7 +416,7 @@ export function ExportarDialog({
           </button>
           <button type="button" aria-label="Start export"
             onClick={() => {
-              onExportar(customSettings)
+              onExport(customSettings)
               onClose()
             }}
             style={{
@@ -430,19 +430,19 @@ export function ExportarDialog({
               fontWeight: 600
             }}
           >
-            Exportar
+            Export
           </button>
         </div>
       </div>
     </div>
   )
 }
-interface ExportarQueuePanelProps {
-  jobs: ExportarJob[]
+interface ExportQueuePanelProps {
+  jobs: ExportJob[]
   onCancel: (jobId: string) => void
-  onRemover: (jobId: string) => void
+  onRemove: (jobId: string) => void
 }
-export function ExportarQueuePanel({ jobs, onCancel, onRemover }: ExportarQueuePanelProps) {
+export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelProps) {
   if (jobs.length === 0) {
     return (
       <div style={{
@@ -451,7 +451,7 @@ export function ExportarQueuePanel({ jobs, onCancel, onRemover }: ExportarQueueP
         color: 'var(--aethel-text-quaternary)',
         fontSize: 12
       }}>
-        Nenhuma exportacao na fila
+        No exportacao na fila
       </div>
     )
   }
@@ -522,7 +522,7 @@ export function ExportarQueuePanel({ jobs, onCancel, onRemover }: ExportarQueueP
                 textDecoration: 'none'
               }}
             >
-              Baixar
+              Download
             </a>
           )}
           {job.status === 'failed' && job.error && (
@@ -549,7 +549,7 @@ export function ExportarQueuePanel({ jobs, onCancel, onRemover }: ExportarQueueP
             )}
             {['completed', 'failed', 'cancelled'].includes(job.status) && (
               <button type="button" aria-label={`Remove export job ${job.id}`}
-                onClick={() => onRemover(job.id)}
+                onClick={() => onRemove(job.id)}
                 style={{
                   padding: '4px 12px',
                   background: 'var(--aethel-border-secondary)',
@@ -560,7 +560,7 @@ export function ExportarQueuePanel({ jobs, onCancel, onRemover }: ExportarQueueP
                   cursor: 'pointer'
                 }}
               >
-                Remover
+                Remove
               </button>
             )}
           </div>
@@ -569,4 +569,4 @@ export function ExportarQueuePanel({ jobs, onCancel, onRemover }: ExportarQueueP
     </div>
   )
 }
-export default ExportarDialog
+export default ExportDialog

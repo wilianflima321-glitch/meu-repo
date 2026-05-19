@@ -199,7 +199,7 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
       </Canvas>
 
       {/* Magic Wand Button */}
-      <button type="button" aria-label="Ativar seleção Magic Wand no preview"
+      <button type="button" aria-label="Enable Magic Wand selection in preview"
         onClick={handleMagicWandClick}
         className={`absolute top-4 left-4 p-3 rounded-full ${magicWandActive ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' : 'bg-[var(--aethel-surface-secondary)]'} hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] transition`}
         title="Magic Wand - Select areas to improve"
@@ -227,7 +227,7 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
             className="w-full p-2 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded mb-2"
             rows={3}
           />
-          <button type="button" aria-label="Enviar sugestão para o preview"
+          <button type="button" aria-label="Send suggestion to the preview"
             onClick={handleSendSuggestion}
             className="bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-4 py-2 rounded hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
           >

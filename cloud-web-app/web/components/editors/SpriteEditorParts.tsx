@@ -103,7 +103,7 @@ export function LayerPanel({
           <Layers className="w-4 h-4" />
           Layers
         </span>
-        <button type="button" aria-label="Adicionar camada"
+        <button type="button" aria-label="Add camada"
           onClick={onAddLayer}
           className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           title="Add Layer"
@@ -154,7 +154,7 @@ export function LayerPanel({
               >
                 <Copy className="w-3 h-3" />
               </button>
-              <button type="button" aria-label={`Excluir camada ${layer.name}`}
+              <button type="button" aria-label={`Delete camada ${layer.name}`}
                 onClick={(e) => {
                   e.stopPropagation()
                   onDeleteLayer(layer.id)
@@ -215,7 +215,7 @@ export function Timeline({
           <SkipBack className="w-4 h-4" />
         </button>
 
-        <button type="button" aria-label={isPlaying ? 'Pausar animação do sprite' : 'Reproduzir animação do sprite'}
+        <button type="button" aria-label={isPlaying ? 'Pause sprite animation' : 'Play sprite animation'}
           onClick={isPlaying ? onPause : onPlay}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title={isPlaying ? 'Pause' : 'Play'}
@@ -223,7 +223,7 @@ export function Timeline({
           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
         </button>
 
-        <button type="button" aria-label="Ir para próximo frame"
+        <button type="button" aria-label="Go to next frame"
           onClick={onNextFrame}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Next Frame"
@@ -237,7 +237,7 @@ export function Timeline({
 
         <div className="flex-1" />
 
-        <button type="button" aria-label="Adicionar frame"
+        <button type="button" aria-label="Add frame"
           onClick={onAddFrame}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Add Frame"

@@ -3,6 +3,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { getMarketplaceRuntime } from '@/lib/server/marketplace-runtime';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/marketplace/route');
 
 /**
  * GET /api/marketplace - Search/Get Extensions
@@ -95,7 +98,7 @@ export async function GET(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Marketplace request failed:', error);
+    routeLogger.error('Marketplace request failed:', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
@@ -195,7 +198,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Marketplace operation failed:', error);
+    routeLogger.error('Marketplace operation failed:', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

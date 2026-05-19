@@ -1,16 +1,15 @@
-import type { LucideIcon } from 'lucide-react'
-import { Book, Code2, Rocket, Layers, Terminal, Puzzle, ShieldCheck } from 'lucide-react'
-
 export type DocLink = {
   title: string
   href: string
   summary: string
 }
 
+export type DocIcon = 'book' | 'code' | 'rocket' | 'layers' | 'terminal' | 'puzzle' | 'shield'
+
 export type DocSection = {
   title: string
   description: string
-  icon: LucideIcon
+  icon: DocIcon
   color: string
   bgColor: string
   href: string
@@ -21,7 +20,7 @@ export const DOC_SECTIONS: DocSection[] = [
   {
     title: 'Primeiros passos',
     description: 'Entrada oficial para configurar ambiente, abrir o primeiro projeto e entender a shell do studio.',
-    icon: Rocket,
+    icon: 'rocket',
     color: 'text-[var(--aethel-success)]',
     bgColor: 'bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]',
     href: '/docs/getting-started',
@@ -36,7 +35,7 @@ export const DOC_SECTIONS: DocSection[] = [
   {
     title: 'Referencia da API',
     description: 'Contratos das rotas principais, readiness endpoints e surfaces de integracao publica.',
-    icon: Code2,
+    icon: 'code',
     color: 'text-[var(--aethel-primary-light)]',
     bgColor: 'bg-[var(--aethel-primary)]/10',
     href: '/docs/api',
@@ -51,7 +50,7 @@ export const DOC_SECTIONS: DocSection[] = [
   {
     title: 'Trust e buyers',
     description: 'Starter pack para procurement, trust center publico e postura de compliance sem claims infladas.',
-    icon: ShieldCheck,
+    icon: 'shield',
     color: 'text-[var(--aethel-info-light)]',
     bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]',
     href: '/docs/procurement-starter-pack',
@@ -81,7 +80,7 @@ export const DOC_SECTIONS: DocSection[] = [
   {
     title: 'IDE e workbench',
     description: 'Como editor, chat, preview e operacao compartilham o mesmo fluxo dentro do studio.',
-    icon: Layers,
+    icon: 'layers',
     color: 'text-[var(--aethel-info)]',
     bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]',
     href: '/docs/ide',
@@ -96,7 +95,7 @@ export const DOC_SECTIONS: DocSection[] = [
   {
     title: 'Games',
     description: 'Status atual do dominio Games, escopo suportado e lacunas antes de promocao de maturidade.',
-    icon: Terminal,
+    icon: 'terminal',
     color: 'text-[var(--aethel-warning)]',
     bgColor: 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]',
     href: '/docs/games',
@@ -111,7 +110,7 @@ export const DOC_SECTIONS: DocSection[] = [
   {
     title: 'Films',
     description: 'Timeline, story workbench e roadmap real do modulo Films sem inflar capability.',
-    icon: Puzzle,
+    icon: 'puzzle',
     color: 'text-[var(--aethel-info)]',
     bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]',
     href: '/docs/films',
@@ -126,7 +125,7 @@ export const DOC_SECTIONS: DocSection[] = [
   {
     title: 'Operacao e suporte',
     description: 'Mudancas publicas, suporte e comunidade para acompanhar evolucao do produto.',
-    icon: Book,
+    icon: 'book',
     color: 'text-[var(--aethel-primary-light)]',
     bgColor: 'bg-[var(--aethel-primary)]/10',
     href: '/docs/support',

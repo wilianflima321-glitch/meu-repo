@@ -4,7 +4,7 @@
  * Aethel IDE - Outline Panel
  *
  * Painel profissional de outline/symbols similar ao VS Code.
- * Mostra hierarquia de símbolos do arquivo atual (classes, funções, variáveis, etc.)
+ * Mostra hierarquia de símbolos do file atual (classes, funções, variáveis, etc.)
  */
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
@@ -610,8 +610,8 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
           <button type="button"
             className="p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors"
             onClick={onRefresh}
-              title="Atualizar"
-              aria-label="Atualizar estrutura"
+              title="Refresh"
+              aria-label="Refresh estrutura"
             disabled={isLoading}
           >
             <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />

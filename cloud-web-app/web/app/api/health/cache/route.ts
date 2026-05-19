@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/health/cache/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +22,7 @@ export async function GET(_request: NextRequest) {
         latency: 0,
         cache: {
           configured: false,
-          message: 'Redis não configurado',
+          message: 'Redis not configured',
         },
         timestamp: new Date().toISOString(),
       });
@@ -41,7 +44,7 @@ export async function GET(_request: NextRequest) {
     });
   } catch (error) {
     const latency = Date.now() - startTime;
-    console.error('[health/cache] Error:', error);
+    routeLogger.error('[health/cache] Error:', error);
     
     return NextResponse.json(
       {

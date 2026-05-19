@@ -3,15 +3,15 @@
 import { ptBR } from '@/lib/locales/pt-BR'
 
 /**
- * Gerenciador de extensões - Marketplace e gestão
- * Inspirado no painel de extensões do VS Code
+ * Gerenciador de extensions - Marketplace e gestão
+ * Inspirado no painel de extensions do VS Code
  *
  * Features:
  * - Explorar marketplace
- * - Buscar extensões
+ * - Search extensions
  * - Instalar/Desinstalar
- * - Ativar/Desativar
- * - Detalhes da extensão
+ * - Ativar/Desactiver
+ * - Details da extension
  * - Recomendações
  * - Categorias e filtros
  */
@@ -105,7 +105,7 @@ interface ExtensionManagerProps {
   onInstall?: (id: string) => Promise<void>
   onUninstall?: (id: string) => Promise<void>
   onAtivar?: (id: string) => void
-  onDesativar?: (id: string) => void
+  onDesactiver?: (id: string) => void
   onOpenSettings?: (id: string) => void
 }
 
@@ -133,7 +133,7 @@ const CATEGORY_LABELS: Record<ExtensionCategory, string> = {
   formatter: 'Formatadores',
   linter: 'Linters',
   ai: 'IA & Copiloto',
-  git: 'Controle de versão',
+  git: 'Controle de version',
   engine: 'Engine de jogo',
   tool: 'Ferramentas',
   other: 'Outros',
@@ -153,9 +153,9 @@ function formatDate(date: Date): string {
   const diff = now.getTime() - date.getTime()
 
   if (diff < 86400000) return 'hoje'
-  if (diff < 604800000) return `${Math.floor(diff / 86400000)} dias atrás`
-  if (diff < 2592000000) return `${Math.floor(diff / 604800000)} semanas atrás`
-  return `${Math.floor(diff / 2592000000)} meses atrás`
+  if (diff < 604800000) return `${Math.floor(diff / 86400000)} days ago`
+  if (diff < 2592000000) return `${Math.floor(diff / 604800000)} weeks ago`
+  return `${Math.floor(diff / 2592000000)} months ago`
 }
 
 // ============= Main Component =============
@@ -165,7 +165,7 @@ export default function ExtensionManager({
   onInstall: propOnInstall,
   onUninstall: propOnUninstall,
   onAtivar: propOnEnable,
-  onDesativar: propOnDisable,
+  onDesactiver: propOnDisable,
   onOpenSettings,
 }: ExtensionManagerProps) {
   const t = ptBR.extensions.manager;
@@ -406,9 +406,9 @@ export default function ExtensionManager({
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
           <h2 className="text-lg font-semibold">
-            {activeView === 'installed' && `Extensões ${t.installed.toLowerCase()}`}
-            {activeView === 'marketplace' && `${t.marketplace} de extensões`}
-            {activeView === 'recommended' && `Extensões ${t.recommended.toLowerCase()}`}
+            {activeView === 'installed' && `Extensions ${t.installed.toLowerCase()}`}
+            {activeView === 'marketplace' && `${t.marketplace} de extensions`}
+            {activeView === 'recommended' && `Extensions ${t.recommended.toLowerCase()}`}
           </h2>
 
           <div className="flex items-center gap-2">
@@ -427,7 +427,7 @@ export default function ExtensionManager({
               onClick={handleRefresh}
               disabled={apiLoading}
               className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded disabled:opacity-50"
-              title="Atualizar extensões"
+              title="Refresh extensions"
             >
               <RefreshCw className={`w-4 h-4 ${apiLoading ? 'animate-spin' : ''}`} />
             </button>
@@ -461,8 +461,8 @@ export default function ExtensionManager({
           ) : /* Empty State for Instaladas */ activeView === 'installed' && filteredExtensions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               <Package className="w-16 h-16 mb-4 opacity-50" />
-              <p className="text-lg">Nenhuma extensão instalada</p>
-              <p className="text-sm mb-4">Explore o marketplace para encontrar extensões</p>
+              <p className="text-lg">No extension instalada</p>
+              <p className="text-sm mb-4">Explore o marketplace para encontrar extensions</p>
               <button type="button" aria-label="Open marketplace extensions"
                 onClick={() => setActiveView('marketplace')}
                 className="px-4 py-2 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] rounded transition-colors"
@@ -473,7 +473,7 @@ export default function ExtensionManager({
           ) : /* Empty State for Search/Filter */ filteredExtensions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               <Search className="w-16 h-16 mb-4 opacity-50" />
-              <p className="text-lg">Nenhuma extensão encontrada</p>
+              <p className="text-lg">No extension encontrada</p>
               <p className="text-sm">Ajuste a busca ou revise os filtros</p>
             </div>
           ) : activeView === 'installed' && groupedExtensions ? (
@@ -500,11 +500,11 @@ export default function ExtensionManager({
                 </div>
               )}
 
-              {/* Desativadas */}
+              {/* Desactivedas */}
               {showDisabled && groupedExtensions.disabled && groupedExtensions.disabled.length > 0 && (
                 <div>
                   <div className="px-4 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]">
-                    Desativadas ({groupedExtensions.disabled.length})
+                    Desactivedas ({groupedExtensions.disabled.length})
                   </div>
                   {groupedExtensions.disabled.map((ext) => (
                     <ExtensionCard
@@ -542,7 +542,7 @@ export default function ExtensionManager({
 
       {/* Painel de detalhes */}
       {selectedExtension && (
-        <ExtensionDetalhes
+        <ExtensionDetails
           extension={selectedExtension}
           isLoading={isLoading === selectedExtension.id}
           onClose={() => setSelectedExtension(null)}
@@ -640,7 +640,7 @@ function ExtensionCard({
                   ? 'text-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'
               }`}
-              title={extension.isEnabled ? 'Desativar' : 'Ativar'}
+              title={extension.isEnabled ? 'Desactiver' : 'Ativar'}
             >
               {extension.isEnabled ? (
                 <CheckCircle className="w-4 h-4" />
@@ -651,7 +651,7 @@ function ExtensionCard({
             <button type="button" aria-label={`Open settings for extension ${extension.name}`}
               onClick={onOpenSettings}
               className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
-              title="Configurações"
+              title="Settings"
             >
               <Settings className="w-4 h-4" />
             </button>
@@ -676,9 +676,9 @@ function ExtensionCard({
   )
 }
 
-// ============= Extension Detalhes =============
+// ============= Extension Details =============
 
-interface ExtensionDetalhesProps {
+interface ExtensionDetailsProps {
   extension: Extension
   isLoading: boolean
   onClose: () => void
@@ -688,7 +688,7 @@ interface ExtensionDetalhesProps {
   onOpenSettings: () => void
 }
 
-function ExtensionDetalhes({
+function ExtensionDetails({
   extension,
   isLoading,
   onClose,
@@ -696,7 +696,7 @@ function ExtensionDetalhes({
   onUninstall,
   onToggle,
   onOpenSettings,
-}: ExtensionDetalhesProps) {
+}: ExtensionDetailsProps) {
   const [activeTab, setActiveTab] = useState<'details' | 'changelog'>('details')
 
   return (
@@ -760,7 +760,7 @@ function ExtensionDetalhes({
                     : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
                 }`}
               >
-                {extension.isEnabled ? 'Desativar' : 'Ativar'}
+                {extension.isEnabled ? 'Desactiver' : 'Ativar'}
               </button>
               {!extension.isBuiltIn && (
                 <button type="button" aria-label={`Uninstall extension ${extension.name}`}
@@ -795,7 +795,7 @@ function ExtensionDetalhes({
             activeTab === 'details' ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'
           }`}
         >
-          Detalhes
+          Details
         </button>
         <button type="button" aria-label="Open extension changelog tab"
           onClick={() => setActiveTab('changelog')}
@@ -803,7 +803,7 @@ function ExtensionDetalhes({
             activeTab === 'changelog' ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'
           }`}
         >
-          Histórico
+          History
         </button>
       </div>
 
@@ -814,7 +814,7 @@ function ExtensionDetalhes({
             <p className="text-sm text-[var(--aethel-text-secondary)]">{extension.description}</p>
 
             <div>
-              <h4 className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Versão</h4>
+              <h4 className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Version</h4>
               <p className="text-sm text-[var(--aethel-text-secondary)]">{extension.version}</p>
             </div>
 
@@ -836,7 +836,7 @@ function ExtensionDetalhes({
 
             {extension.repository && (
               <div>
-                <h4 className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Repositório</h4>
+                <h4 className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Repository</h4>
                 <a
                   href={extension.repository}
                   target="_blank"
@@ -853,7 +853,7 @@ function ExtensionDetalhes({
 
         {activeTab === 'changelog' && (
           <div className="text-sm text-[var(--aethel-text-tertiary)]">
-            {extension.changelog || 'Nenhum changelog disponível.'}
+            {extension.changelog || 'No changelog available.'}
           </div>
         )}
       </div>

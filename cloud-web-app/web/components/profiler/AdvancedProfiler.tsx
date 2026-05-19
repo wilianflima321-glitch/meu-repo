@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * ADVANCED PROFILER - Aethel Engine
@@ -16,645 +16,33 @@
  * - Physics stats
  * - Custom markers
  */
-import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  categoryColors,
-  TARGET_FRAME_TIME,
-  WARNING_FRAME_TIME,
-} from './advanced-profiler-models';
+  createProfilerSession,
+  generateMockProfilerFrame,
+} from "./AdvancedProfiler.runtime";
+import {
+  CategoryBreakdown,
+  FlameGraph,
+  FrameTimeline,
+  MemoryPanel,
+  StatsPanel,
+} from "./AdvancedProfiler.parts";
 import type {
   MemoryStats,
-  ProfilerCategory,
   ProfilerFrame,
-  ProfilerMarker,
   ProfilerSession,
-} from './advanced-profiler-models';
+} from "./advanced-profiler-models";
 
 export type {
   GPUStats,
   MemoryStats,
-  ProfilerCategory,
   ProfilerFrame,
-  ProfilerMarker,
   ProfilerSession,
-} from './advanced-profiler-models';
+} from "./advanced-profiler-models";
 
 // ============================================================================
-// FRAME TIMELINE COMPONENT
-// ============================================================================
-
-interface FrameTimelineProps {
-  frames: ProfilerFrame[];
-  selectedFrame: number | null;
-  onSelectFrame: (frameId: number) => void;
-  viewRange: { start: number; end: number };
-  onViewRangeChange: (range: { start: number; end: number }) => void;
-}
-
-function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onViewRangeChange }: FrameTimelineProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState(0);
-
-  const visibleFrames = useMemo(() => {
-    return frames.slice(viewRange.start, viewRange.end);
-  }, [frames, viewRange]);
-
-  const maxFrameTime = useMemo(() => {
-    return Math.max(...visibleFrames.map(f => f.duration), TARGET_FRAME_TIME * 2);
-  }, [visibleFrames]);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setDragStart(e.clientX);
-  };
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging || !containerRef.current) return;
-
-    const delta = (e.clientX - dragStart) / containerRef.current.clientWidth;
-    const frameCount = frames.length;
-    const viewSize = viewRange.end - viewRange.start;
-    const shift = Math.round(delta * viewSize);
-
-    if (shift !== 0) {
-      const newStart = Math.max(0, Math.min(frameCount - viewSize, viewRange.start - shift));
-      const newEnd = newStart + viewSize;
-      onViewRangeChange({ start: newStart, end: newEnd });
-      setDragStart(e.clientX);
-    }
-  }, [isDragging, dragStart, frames.length, viewRange, onViewRangeChange]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
-
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const zoomFactor = e.deltaY > 0 ? 1.2 : 0.8;
-    const viewSize = viewRange.end - viewRange.start;
-    const newSize = Math.max(20, Math.min(frames.length, Math.round(viewSize * zoomFactor)));
-    const center = (viewRange.start + viewRange.end) / 2;
-    const newStart = Math.max(0, Math.round(center - newSize / 2));
-    const newEnd = Math.min(frames.length, newStart + newSize);
-    onViewRangeChange({ start: newStart, end: newEnd });
-  };
-
-  return (
-    <div style={{ marginBottom: '16px' }}>
-      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '8px' }}>Frame Timeline</h3>
-
-      {/* Timeline view */}
-      <div
-        ref={containerRef}
-        style={{
-          height: '120px',
-          background: 'var(--aethel-surface-primary)',
-          borderRadius: '8px',
-          position: 'relative',
-          overflow: 'hidden',
-          cursor: isDragging ? 'grabbing' : 'grab',
-        }}
-        onMouseDown={handleMouseDown}
-        onWheel={handleWheel}
-      >
-        {/* Target line (60 FPS) */}
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: `${(TARGET_FRAME_TIME / maxFrameTime) * 100}%`,
-            height: '1px',
-            background: 'var(--aethel-success)',
-            opacity: 0.5,
-            zIndex: 1,
-          }}
-        />
-
-        {/* Warning line (30 FPS) */}
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: `${(WARNING_FRAME_TIME / maxFrameTime) * 100}%`,
-            height: '1px',
-            background: 'var(--aethel-warning)',
-            opacity: 0.5,
-            zIndex: 1,
-          }}
-        />
-
-        {/* Frame bars */}
-        <div style={{ display: 'flex', height: '100%', alignItems: 'flex-end', padding: '4px' }}>
-          {visibleFrames.map((frame, index) => {
-            const height = (frame.duration / maxFrameTime) * 100;
-            const isSelected = frame.frameId === selectedFrame;
-            const isSlow = frame.duration > WARNING_FRAME_TIME;
-            const isWarning = frame.duration > TARGET_FRAME_TIME && !isSlow;
-
-            return (
-              <div
-                key={frame.frameId}
-                onClick={() => onSelectFrame(frame.frameId)}
-                style={{
-                  flex: 1,
-                  maxWidth: '10px',
-                  height: `${Math.min(100, height)}%`,
-                  background: isSlow ? 'var(--aethel-error)' : isWarning ? 'var(--aethel-warning)' : 'var(--aethel-primary)',
-                  borderRadius: '2px 2px 0 0',
-                  cursor: 'pointer',
-                  opacity: isSelected ? 1 : 0.7,
-                  border: isSelected ? '2px solid white' : 'none',
-                  marginRight: '1px',
-                  transition: 'opacity 0.1s',
-                }}
-                title={`Frame ${frame.frameId}: ${frame.duration.toFixed(2)}ms`}
-              />
-            );
-          })}
-        </div>
-
-        {/* Labels */}
-        <div style={{
-          position: 'absolute',
-          right: '8px',
-          top: '8px',
-          fontSize: '10px',
-          color: 'var(--aethel-text-muted)',
-        }}>
-          {(1000 / maxFrameTime).toFixed(0)} FPS
-        </div>
-      </div>
-
-      {/* Scroll bar */}
-      <div style={{
-        height: '8px',
-        background: 'var(--aethel-surface-tertiary)',
-        borderRadius: '4px',
-        marginTop: '4px',
-        position: 'relative',
-      }}>
-        <div
-          style={{
-            position: 'absolute',
-            left: `${(viewRange.start / frames.length) * 100}%`,
-            width: `${((viewRange.end - viewRange.start) / frames.length) * 100}%`,
-            height: '100%',
-            background: 'var(--aethel-primary)',
-            borderRadius: '4px',
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// FLAME GRAPH COMPONENT
-// ============================================================================
-
-interface FlameGraphProps {
-  markers: ProfilerMarker[];
-  frameTime: number;
-  type: 'cpu' | 'gpu';
-}
-
-function FlameGraph({ markers, frameTime, type }: FlameGraphProps) {
-  const [hoveredMarker, setHoveredMarker] = useState<ProfilerMarker | null>(null);
-  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
-
-  const flattenMarkers = useCallback((markers: ProfilerMarker[], depth = 0): (ProfilerMarker & { depth: number })[] => {
-    const result: (ProfilerMarker & { depth: number })[] = [];
-
-    for (const marker of markers) {
-      result.push({ ...marker, depth });
-      if (marker.children) {
-        result.push(...flattenMarkers(marker.children, depth + 1));
-      }
-    }
-
-    return result;
-  }, []);
-
-  const flatMarkers = useMemo(() => flattenMarkers(markers), [markers, flattenMarkers]);
-  const maxDepth = useMemo(() => Math.max(...flatMarkers.map(m => m.depth), 0) + 1, [flatMarkers]);
-
-  const handleMouseMove = (e: React.MouseEvent, marker: ProfilerMarker) => {
-    setHoveredMarker(marker);
-    setTooltipPos({ x: e.clientX, y: e.clientY });
-  };
-
-  return (
-    <div style={{ marginBottom: '16px' }}>
-      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '8px' }}>
-        {type === 'cpu' ? 'CPU' : 'GPU'} Flame Graph
-      </h3>
-
-      <div style={{
-        background: 'var(--aethel-surface-primary)',
-        borderRadius: '8px',
-        padding: '8px',
-        position: 'relative',
-        minHeight: `${maxDepth * 24 + 16}px`,
-      }}>
-        {flatMarkers.map((marker) => {
-          const left = (marker.startTime / frameTime) * 100;
-          const width = Math.max(0.5, (marker.duration / frameTime) * 100);
-
-          return (
-            <div
-              key={marker.id}
-              style={{
-                position: 'absolute',
-                left: `${left}%`,
-                width: `${width}%`,
-                top: `${marker.depth * 24 + 8}px`,
-                height: '20px',
-                background: categoryColors[marker.category] || marker.color,
-                borderRadius: '2px',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '0 4px',
-                cursor: 'pointer',
-                overflow: 'hidden',
-                border: hoveredMarker?.id === marker.id ? '1px solid white' : 'none',
-              }}
-              onMouseMove={(e) => handleMouseMove(e, marker)}
-              onMouseLeave={() => setHoveredMarker(null)}
-            >
-              <span style={{
-                fontSize: '10px',
-                color: 'white',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}>
-                {marker.name}
-              </span>
-            </div>
-          );
-        })}
-
-        {/* Time scale */}
-        <div style={{
-          position: 'absolute',
-          bottom: '4px',
-          left: '8px',
-          right: '8px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          fontSize: '9px',
-          color: 'var(--aethel-text-muted)',
-        }}>
-          <span>0ms</span>
-          <span>{(frameTime / 4).toFixed(1)}ms</span>
-          <span>{(frameTime / 2).toFixed(1)}ms</span>
-          <span>{((frameTime * 3) / 4).toFixed(1)}ms</span>
-          <span>{frameTime.toFixed(1)}ms</span>
-        </div>
-      </div>
-
-      {/* Tooltip */}
-      {hoveredMarker && (
-        <div
-          style={{
-            position: 'fixed',
-            left: tooltipPos.x + 10,
-            top: tooltipPos.y + 10,
-            background: 'var(--aethel-surface-tertiary)',
-            border: '1px solid var(--aethel-border-primary)',
-            borderRadius: '6px',
-            padding: '8px 12px',
-            zIndex: 1000,
-            pointerEvents: 'none',
-          }}
-        >
-          <div style={{ color: 'white', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>
-            {hoveredMarker.name}
-          </div>
-          <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px' }}>
-            Duration: {hoveredMarker.duration.toFixed(3)}ms
-          </div>
-          <div style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>
-            Category: {hoveredMarker.category}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================================================
-// MEMORY PANEL COMPONENT
-// ============================================================================
-
-interface MemoryPanelProps {
-  stats: MemoryStats;
-  history: MemoryStats[];
-}
-
-function MemoryPanel({ stats, history }: MemoryPanelProps) {
-  const formatBytes = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-  };
-
-  const usagePercent = (stats.usedHeap / stats.totalHeap) * 100;
-
-  return (
-    <div style={{
-      padding: '12px',
-      background: 'var(--aethel-surface-primary)',
-      borderRadius: '8px',
-    }}>
-      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Memory</h3>
-
-      {/* Heap usage bar */}
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Heap Usage</span>
-          <span style={{ color: 'var(--aethel-text-muted)', fontSize: '11px' }}>
-            {formatBytes(stats.usedHeap)} / {formatBytes(stats.totalHeap)}
-          </span>
-        </div>
-        <div style={{
-          height: '8px',
-          background: 'var(--aethel-surface-tertiary)',
-          borderRadius: '4px',
-          overflow: 'hidden',
-        }}>
-          <div
-            style={{
-              width: `${usagePercent}%`,
-              height: '100%',
-              background: usagePercent > 80 ? 'var(--aethel-error)' : usagePercent > 60 ? 'var(--aethel-warning)' : 'var(--aethel-success)',
-              transition: 'width 0.3s',
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Memory breakdown */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-        <div style={{ padding: '8px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px' }}>
-          <div style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>Textures</div>
-          <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
-            {formatBytes(stats.textures)}
-          </div>
-        </div>
-
-        <div style={{ padding: '8px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px' }}>
-          <div style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>Geometries</div>
-          <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
-            {formatBytes(stats.geometries)}
-          </div>
-        </div>
-
-        <div style={{ padding: '8px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px' }}>
-          <div style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>Materials</div>
-          <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
-            {formatBytes(stats.materials)}
-          </div>
-        </div>
-
-        <div style={{ padding: '8px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px' }}>
-          <div style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>Shaders</div>
-          <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
-            {formatBytes(stats.shaders)}
-          </div>
-        </div>
-      </div>
-
-      {/* Memory graph */}
-      <div style={{ marginTop: '12px' }}>
-        <div style={{ color: 'var(--aethel-text-muted)', fontSize: '11px', marginBottom: '4px' }}>History</div>
-        <div style={{
-          height: '50px',
-          background: 'var(--aethel-surface-tertiary)',
-          borderRadius: '4px',
-          display: 'flex',
-          alignItems: 'flex-end',
-          padding: '4px',
-          gap: '1px',
-        }}>
-          {history.slice(-50).map((h, i) => (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                height: `${(h.usedHeap / h.totalHeap) * 100}%`,
-                background: 'var(--aethel-primary)',
-                borderRadius: '1px',
-                minWidth: '2px',
-              }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// STATS PANEL COMPONENT
-// ============================================================================
-
-interface StatsPanelProps {
-  frame: ProfilerFrame | null;
-  session: ProfilerSession;
-}
-
-function StatsPanel({ frame, session }: StatsPanelProps) {
-  const currentFPS = frame ? 1000 / frame.duration : 0;
-
-  return (
-    <div style={{
-      padding: '12px',
-      background: 'var(--aethel-surface-primary)',
-      borderRadius: '8px',
-    }}>
-      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Statistics</h3>
-
-      {/* FPS display */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: '16px',
-      }}>
-        <div style={{
-          width: '100px',
-          height: '100px',
-          borderRadius: '50%',
-          background: `conic-gradient(
-            ${currentFPS >= 60 ? 'var(--aethel-success)' : currentFPS >= 30 ? 'var(--aethel-warning)' : 'var(--aethel-error)'} ${(currentFPS / 60) * 360}deg,
-            var(--aethel-surface-tertiary) ${(currentFPS / 60) * 360}deg
-          )`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <div style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '50%',
-            background: 'var(--aethel-surface-primary)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <span style={{ color: 'white', fontSize: '24px', fontWeight: 'bold' }}>
-              {currentFPS.toFixed(0)}
-            </span>
-            <span style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>FPS</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-        <StatBox label="Frame Time" value={`${frame?.duration.toFixed(2) ?? 0}ms`} />
-        <StatBox label="CPU Time" value={`${frame?.cpuTime.toFixed(2) ?? 0}ms`} />
-        <StatBox label="GPU Time" value={`${frame?.gpuTime.toFixed(2) ?? 0}ms`} />
-        <StatBox label="Draw Calls" value={`${frame?.drawCalls ?? 0}`} />
-        <StatBox label="Triangles" value={`${((frame?.triangles ?? 0) / 1000).toFixed(1)}K`} />
-        <StatBox label="Vertices" value={`${((frame?.vertices ?? 0) / 1000).toFixed(1)}K`} />
-      </div>
-
-      {/* Session stats */}
-      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--aethel-border-primary)' }}>
-        <div style={{ color: 'var(--aethel-text-muted)', fontSize: '11px', marginBottom: '8px' }}>Session Statistics</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-          <StatBox label="Avg FPS" value={session.averageFPS.toFixed(0)} small />
-          <StatBox label="Min FPS" value={session.minFPS.toFixed(0)} small warning={session.minFPS < 30} />
-          <StatBox label="Max FPS" value={session.maxFPS.toFixed(0)} small />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StatBox({ label, value, small, warning }: { label: string; value: string; small?: boolean; warning?: boolean }) {
-  return (
-    <div style={{
-      padding: small ? '6px' : '8px',
-      background: 'var(--aethel-surface-tertiary)',
-      borderRadius: '4px',
-      border: warning ? '1px solid var(--aethel-error)' : 'none',
-    }}>
-      <div style={{ color: 'var(--aethel-text-muted)', fontSize: small ? '9px' : '10px' }}>{label}</div>
-      <div style={{
-        color: warning ? 'var(--aethel-error)' : 'white',
-        fontSize: small ? '12px' : '14px',
-        fontWeight: 'bold'
-      }}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// CATEGORY BREAKDOWN
-// ============================================================================
-
-interface CategoryBreakdownProps {
-  markers: ProfilerMarker[];
-  frameTime: number;
-}
-
-function CategoryBreakdown({ markers, frameTime }: CategoryBreakdownProps) {
-  const categoryTimes = useMemo(() => {
-    const times: Record<ProfilerCategory, number> = {
-      render: 0, physics: 0, animation: 0, ai: 0, audio: 0,
-      scripts: 0, ui: 0, network: 0, loading: 0, custom: 0,
-    };
-
-    const sumMarkers = (markers: ProfilerMarker[]) => {
-      for (const marker of markers) {
-        times[marker.category] = (times[marker.category] || 0) + marker.duration;
-        if (marker.children) sumMarkers(marker.children);
-      }
-    };
-
-    sumMarkers(markers);
-    return times;
-  }, [markers]);
-
-  const sortedCategories = useMemo(() => {
-    return Object.entries(categoryTimes)
-      .filter(([_, time]) => time > 0)
-      .sort((a, b) => b[1] - a[1]);
-  }, [categoryTimes]);
-
-  return (
-    <div style={{
-      padding: '12px',
-      background: 'var(--aethel-surface-primary)',
-      borderRadius: '8px',
-    }}>
-      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Category Breakdown</h3>
-
-      {sortedCategories.map(([category, time]) => {
-        const percent = (time / frameTime) * 100;
-
-        return (
-          <div key={category} style={{ marginBottom: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '2px',
-                  background: categoryColors[category as ProfilerCategory],
-                }} />
-                <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', textTransform: 'capitalize' }}>
-                  {category}
-                </span>
-              </div>
-              <span style={{ color: 'var(--aethel-text-muted)', fontSize: '11px' }}>
-                {time.toFixed(2)}ms ({percent.toFixed(1)}%)
-              </span>
-            </div>
-            <div style={{
-              height: '4px',
-              background: 'var(--aethel-surface-tertiary)',
-              borderRadius: '2px',
-              overflow: 'hidden',
-            }}>
-              <div
-                style={{
-                  width: `${Math.min(100, percent)}%`,
-                  height: '100%',
-                  background: categoryColors[category as ProfilerCategory],
-                }}
-              />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ============================================================================
-// MAIN PROFILER COMPONENT
+// FRAME TIMELINECOMPONENT
 // ============================================================================
 
 export interface AdvancedProfilerProps {
@@ -669,113 +57,20 @@ export function AdvancedProfiler({
   maxFrames = 300,
 }: AdvancedProfilerProps) {
   // Session state
-  const [session, setSession] = useState<ProfilerSession>(() => ({
-    id: crypto.randomUUID(),
-    name: 'Session 1',
-    startTime: Date.now(),
-    frames: [],
-    averageFPS: 0,
-    minFPS: Infinity,
-    maxFPS: 0,
-  }));
+  const [session, setSession] = useState<ProfilerSession>(() =>
+    createProfilerSession("Session 1"),
+  );
 
   const [isRecording, setIsRecording] = useState(autoCapture);
   const [selectedFrame, setSelectedFrame] = useState<number | null>(null);
   const [viewRange, setViewRange] = useState({ start: 0, end: 100 });
-  const [activeTab, setActiveTab] = useState<'timeline' | 'memory' | 'gpu'>('timeline');
+  const [activeTab, setActiveTab] = useState<"timeline" | "memory" | "gpu">(
+    "timeline",
+  );
   const [memoryHistory, setMemoryHistory] = useState<MemoryStats[]>([]);
 
-  // Generate mock frame data for demo
   const generateMockFrame = useCallback((): ProfilerFrame => {
-    const baseTime = 10 + Math.random() * 10;
-    const spike = Math.random() > 0.95 ? 20 : 0;
-    const duration = baseTime + spike;
-
-    return {
-      frameId: session.frames.length,
-      timestamp: Date.now(),
-      duration,
-      cpuTime: duration * 0.7,
-      gpuTime: duration * 0.3,
-      markers: [
-        {
-          id: crypto.randomUUID(),
-          name: 'Render',
-          category: 'render',
-          startTime: 0,
-          duration: duration * 0.4,
-          depth: 0,
-          color: categoryColors.render,
-          children: [
-            {
-              id: crypto.randomUUID(),
-              name: 'Shadow Pass',
-              category: 'render',
-              startTime: 0,
-              duration: duration * 0.15,
-              depth: 1,
-              color: categoryColors.render,
-            },
-            {
-              id: crypto.randomUUID(),
-              name: 'Main Pass',
-              category: 'render',
-              startTime: duration * 0.15,
-              duration: duration * 0.2,
-              depth: 1,
-              color: categoryColors.render,
-            },
-          ],
-        },
-        {
-          id: crypto.randomUUID(),
-          name: 'Physics',
-          category: 'physics',
-          startTime: duration * 0.4,
-          duration: duration * 0.2,
-          depth: 0,
-          color: categoryColors.physics,
-        },
-        {
-          id: crypto.randomUUID(),
-          name: 'Animation',
-          category: 'animation',
-          startTime: duration * 0.6,
-          duration: duration * 0.15,
-          depth: 0,
-          color: categoryColors.animation,
-        },
-        {
-          id: crypto.randomUUID(),
-          name: 'Scripts',
-          category: 'scripts',
-          startTime: duration * 0.75,
-          duration: duration * 0.1,
-          depth: 0,
-          color: categoryColors.scripts,
-        },
-        {
-          id: crypto.randomUUID(),
-          name: 'UI',
-          category: 'ui',
-          startTime: duration * 0.85,
-          duration: duration * 0.1,
-          depth: 0,
-          color: categoryColors.ui,
-        },
-      ],
-      memory: {
-        totalHeap: 256 * 1024 * 1024,
-        usedHeap: (128 + Math.random() * 64) * 1024 * 1024,
-        textures: 64 * 1024 * 1024,
-        geometries: 32 * 1024 * 1024,
-        materials: 8 * 1024 * 1024,
-        shaders: 4 * 1024 * 1024,
-      },
-      drawCalls: 500 + Math.floor(Math.random() * 200),
-      triangles: 500000 + Math.floor(Math.random() * 200000),
-      vertices: 250000 + Math.floor(Math.random() * 100000),
-    };
+    return generateMockProfilerFrame(session.frames.length);
   }, [session.frames.length]);
 
   // Recording loop
@@ -785,7 +80,7 @@ export function AdvancedProfiler({
     const interval = setInterval(() => {
       const frame = onCapture?.() ?? generateMockFrame();
 
-      setSession(prev => {
+      setSession((prev) => {
         const frames = [...prev.frames, frame].slice(-maxFrames);
         const fps = 1000 / frame.duration;
         const totalFPS = frames.reduce((sum, f) => sum + 1000 / f.duration, 0);
@@ -799,10 +94,10 @@ export function AdvancedProfiler({
         };
       });
 
-      setMemoryHistory(prev => [...prev.slice(-100), frame.memory]);
+      setMemoryHistory((prev) => [...prev.slice(-100), frame.memory]);
 
       // Auto-scroll
-      setViewRange(prev => {
+      setViewRange((prev) => {
         const frameCount = session.frames.length + 1;
         if (frameCount > prev.end) {
           const viewSize = prev.end - prev.start;
@@ -813,66 +108,92 @@ export function AdvancedProfiler({
     }, 16);
 
     return () => clearInterval(interval);
-  }, [isRecording, onCapture, generateMockFrame, maxFrames, session.frames.length]);
+  }, [
+    isRecording,
+    onCapture,
+    generateMockFrame,
+    maxFrames,
+    session.frames.length,
+  ]);
 
-  const currentFrame = selectedFrame !== null
-    ? session.frames.find(f => f.frameId === selectedFrame)
-    : session.frames[session.frames.length - 1];
+  const currentFrame =
+    selectedFrame !== null
+      ? session.frames.find((f) => f.frameId === selectedFrame)
+      : session.frames[session.frames.length - 1];
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', background: 'var(--aethel-surface-primary)' }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        background: "var(--aethel-surface-primary)",
+      }}
+    >
       {/* Main content */}
-      <div style={{ flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div
+        style={{
+          flex: 1,
+          padding: "16px",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
         {/* Top bar */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '16px',
-        }}>
-          <h2 style={{ color: 'white', fontSize: '18px' }}>📊 Advanced Profiler</h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "16px",
+          }}
+        >
+          <h2 style={{ color: "white", fontSize: "18px" }}>
+            📊 Advanced Profiler
+          </h2>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button type="button"
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              type="button"
               onClick={() => setIsRecording(!isRecording)}
-              aria-label={isRecording ? 'Parar gravacao do profiler' : 'Iniciar gravacao do profiler'}
+              aria-label={
+                isRecording
+                  ? "Parar gravacao do profiler"
+                  : "Iniciar gravacao do profiler"
+              }
               aria-pressed={isRecording}
               style={{
-                background: isRecording ? 'var(--aethel-error)' : 'var(--aethel-success)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '8px 16px',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: 'bold',
+                background: isRecording
+                  ? "var(--aethel-error)"
+                  : "var(--aethel-success)",
+                border: "none",
+                borderRadius: "6px",
+                padding: "8px 16px",
+                color: "white",
+                cursor: "pointer",
+                fontSize: "13px",
+                fontWeight: "bold",
               }}
             >
-              {isRecording ? '⏹ Stop' : '⏺ Record'}
+              {isRecording ? "⏹ Stop" : "⏺ Record"}
             </button>
 
-            <button type="button"
+            <button
+              type="button"
               aria-label="Iniciar nova sessao de profiler"
               onClick={() => {
-                setSession({
-                  id: crypto.randomUUID(),
-                  name: `Session ${Date.now()}`,
-                  startTime: Date.now(),
-                  frames: [],
-                  averageFPS: 0,
-                  minFPS: Infinity,
-                  maxFPS: 0,
-                });
+                setSession(createProfilerSession(`Session ${Date.now()}`));
                 setSelectedFrame(null);
               }}
               style={{
-                background: 'var(--aethel-surface-tertiary)',
-                border: '1px solid var(--aethel-border-primary)',
-                borderRadius: '6px',
-                padding: '8px 16px',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '13px',
+                background: "var(--aethel-surface-tertiary)",
+                border: "1px solid var(--aethel-border-primary)",
+                borderRadius: "6px",
+                padding: "8px 16px",
+                color: "white",
+                cursor: "pointer",
+                fontSize: "13px",
               }}
             >
               🗑 Clear
@@ -881,21 +202,25 @@ export function AdvancedProfiler({
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '4px', marginBottom: '16px' }}>
-          {(['timeline', 'memory', 'gpu'] as const).map(tab => (
-            <button type="button"
+        <div style={{ display: "flex", gap: "4px", marginBottom: "16px" }}>
+          {(["timeline", "memory", "gpu"] as const).map((tab) => (
+            <button
+              type="button"
               key={tab}
               onClick={() => setActiveTab(tab)}
               aria-label={`Abrir aba ${tab}`}
               style={{
-                background: activeTab === tab ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
-                border: 'none',
-                borderRadius: '4px',
-                padding: '8px 16px',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '12px',
-                textTransform: 'capitalize',
+                background:
+                  activeTab === tab
+                    ? "var(--aethel-primary)"
+                    : "var(--aethel-surface-tertiary)",
+                border: "none",
+                borderRadius: "4px",
+                padding: "8px 16px",
+                color: "white",
+                cursor: "pointer",
+                fontSize: "12px",
+                textTransform: "capitalize",
               }}
             >
               {tab}
@@ -904,8 +229,8 @@ export function AdvancedProfiler({
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflow: 'auto' }}>
-          {activeTab === 'timeline' && (
+        <div style={{ flex: 1, overflow: "auto" }}>
+          {activeTab === "timeline" && (
             <>
               <FrameTimeline
                 frames={session.frames}
@@ -925,13 +250,15 @@ export function AdvancedProfiler({
             </>
           )}
 
-          {activeTab === 'memory' && currentFrame && (
+          {activeTab === "memory" && currentFrame && (
             <MemoryPanel stats={currentFrame.memory} history={memoryHistory} />
           )}
 
-          {activeTab === 'gpu' && currentFrame && (
+          {activeTab === "gpu" && currentFrame && (
             <FlameGraph
-              markers={currentFrame.markers.filter(m => m.category === 'render')}
+              markers={currentFrame.markers.filter(
+                (m) => m.category === "render",
+              )}
               frameTime={currentFrame.gpuTime}
               type="gpu"
             />
@@ -940,19 +267,24 @@ export function AdvancedProfiler({
       </div>
 
       {/* Right sidebar */}
-      <div style={{
-        width: '300px',
-        borderLeft: '1px solid var(--aethel-surface-tertiary)',
-        padding: '16px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
-        overflowY: 'auto',
-      }}>
+      <div
+        style={{
+          width: "300px",
+          borderLeft: "1px solid var(--aethel-surface-tertiary)",
+          padding: "16px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+          overflowY: "auto",
+        }}
+      >
         <StatsPanel frame={currentFrame ?? null} session={session} />
 
         {currentFrame && (
-          <CategoryBreakdown markers={currentFrame.markers} frameTime={currentFrame.duration} />
+          <CategoryBreakdown
+            markers={currentFrame.markers}
+            frameTime={currentFrame.duration}
+          />
         )}
       </div>
     </div>

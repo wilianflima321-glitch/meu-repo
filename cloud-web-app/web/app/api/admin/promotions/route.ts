@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { withAdminAuth } from '@/lib/rbac';
 import { getStripe } from '@/lib/stripe';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // =============================================================================
 // PROMOTIONS API (Stripe-backed)
 // =============================================================================
+
+const log = createComponentLogger('api/admin/promotions/route');
 
 type PromotionSummary = {
   id: string;
@@ -59,7 +62,7 @@ async function getHandler(_req: NextRequest) {
       promotions: promoCodes.data.map(mapPromotionCode),
     });
   } catch (error) {
-    console.error('[Promotions] Error:', error);
+    log.error('[Promotions] Error', error);
     return NextResponse.json({ error: 'Stripe not configured or unavailable' }, { status: 500 });
   }
 }
@@ -90,7 +93,7 @@ async function postHandler(req: NextRequest) {
     const expiresAt = typeof body.expiresAt === 'string' ? body.expiresAt : null;
 
     if (!name || !code || !Number.isFinite(discount) || discount <= 0) {
-      return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
     }
 
     const stripe = getStripe();
@@ -122,7 +125,7 @@ async function postHandler(req: NextRequest) {
 
     return NextResponse.json({ promotion: mapPromotionCode(expanded) });
   } catch (error) {
-    console.error('[Promotions] Create Error:', error);
+    log.error('[Promotions] Create Error', error);
     return NextResponse.json({ error: 'Failed to create promotion' }, { status: 500 });
   }
 }
@@ -139,7 +142,7 @@ async function patchHandler(req: NextRequest) {
     const active = typeof body.active === 'boolean' ? body.active : null;
 
     if (!id || active === null) {
-      return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
     }
 
     const stripe = getStripe();
@@ -150,7 +153,7 @@ async function patchHandler(req: NextRequest) {
 
     return NextResponse.json({ promotion: mapPromotionCode(expanded) });
   } catch (error) {
-    console.error('[Promotions] Update Error:', error);
+    log.error('[Promotions] Update Error', error);
     return NextResponse.json({ error: 'Failed to update promotion' }, { status: 500 });
   }
 }

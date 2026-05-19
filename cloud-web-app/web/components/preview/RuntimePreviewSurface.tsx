@@ -119,11 +119,11 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
         <div className="flex h-full flex-col items-center justify-center gap-4 bg-[var(--aethel-surface-primary)] px-6 text-center">
           <div className="max-w-md space-y-2">
             <h3 className="text-sm font-medium text-[var(--aethel-text-primary)]">
-              Preview pronto para iniciar
+              Preview ready to start
             </h3>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
               {runtimeGuidance ||
-                'Inicie o runtime gerenciado ou use o fallback inline para continuar sem prometer um preview remoto ativo.'}
+                'Inicie o runtime gerenciado ou use o fallback inline para continuar sem prometer um preview remoto active.'}
             </p>
             {runtimeAction ? (
               <p className="mt-2 text-[11px] text-[var(--aethel-text-secondary)]">

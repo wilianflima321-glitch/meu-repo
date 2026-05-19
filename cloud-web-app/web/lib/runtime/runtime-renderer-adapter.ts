@@ -4,8 +4,8 @@ import {
 } from '@/lib/production/render-output-evidence'
 import type { ViewportRenderQueuePayload } from '@/lib/viewport/viewport-render-queue'
 
-export type RuntimeRendererBackendKind = 'wgpu-native' | 'cloud-renderer'
-export type RuntimeRendererTarget = 'local-native' | 'cloud-sandbox'
+export type RuntimeRendererBackendKind = 'browser-preview' | 'wgpu-native' | 'cloud-renderer' | 'held'
+export type RuntimeRendererTarget = 'browser-preview' | 'local-native' | 'cloud-sandbox' | 'held'
 
 export interface RuntimeRendererPerformanceReport {
   renderTimeMs: number
@@ -131,7 +131,7 @@ export function buildRuntimeRendererRequestEnvelope(payload: ViewportRenderQueue
     payload,
     runtimeEngine: {
       contract: 'hybrid-wgpu-v1',
-      acceptedTargets: ['local-native', 'cloud-sandbox'],
+      acceptedTargets: ['browser-preview', 'local-native', 'cloud-sandbox', 'held'],
       browserRole: 'preview-only',
       neverMainThread: true,
     },
@@ -159,10 +159,10 @@ export function coerceRuntimeRendererEvidenceEnvelope(
   }
 
   const backendId = stringOrNull(source.backendId)
-  const backendKind = source.backendKind === 'wgpu-native' || source.backendKind === 'cloud-renderer'
+  const backendKind = source.backendKind === 'browser-preview' || source.backendKind === 'wgpu-native' || source.backendKind === 'cloud-renderer' || source.backendKind === 'held'
     ? source.backendKind
     : null
-  const target = source.target === 'local-native' || source.target === 'cloud-sandbox' ? source.target : null
+  const target = source.target === 'browser-preview' || source.target === 'local-native' || source.target === 'cloud-sandbox' || source.target === 'held' ? source.target : null
   const contractId = stringOrNull(source.contractId)
   const projectId = stringOrNull(source.projectId)
   const finishedAt = typeof source.finishedAt === 'string' && !Number.isNaN(Date.parse(source.finishedAt))
@@ -182,6 +182,12 @@ export function coerceRuntimeRendererEvidenceEnvelope(
   if (!validationReport) blockers.push('Renderer backend response must include a validationReport.')
   if (!evidence) blockers.push('Renderer backend response must include viewport output evidence.')
 
+  if (backendKind === 'browser-preview' || target === 'browser-preview') {
+    blockers.push('browser-preview is responsive viewport evidence only and cannot satisfy final render evidence.')
+  }
+  if (backendKind === 'held' || target === 'held') {
+    blockers.push('held render state requires a blocker manifest and cannot satisfy completed render evidence.')
+  }
   if (backendKind === 'wgpu-native' && target !== 'local-native') {
     blockers.push('wgpu-native evidence must come from the local-native runtime target.')
   }

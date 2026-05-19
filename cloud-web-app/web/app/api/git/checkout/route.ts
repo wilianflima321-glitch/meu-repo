@@ -5,6 +5,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/git/checkout/route');
 
 const execFileAsync = promisify(execFile);
 
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
       message: create ? `Created and switched to branch '${sanitizedBranch}'` : `Switched to branch '${sanitizedBranch}'`
     });
   } catch (error) {
-    console.error('Git checkout failed:', error);
+    routeLogger.error('Git checkout failed:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     

@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromRequest } from '@/lib/auth-server'
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/telemetry/event/route');
 
 export const dynamic = 'force-dynamic'
 
@@ -113,7 +116,7 @@ export async function POST(req: NextRequest) {
           eventBuffer.push(entry)
         }
       } catch (error) {
-        console.error('[telemetry/event] Persist failed:', error)
+        routeLogger.error('[telemetry/event] Persist failed:', error)
         return NextResponse.json(
           {
             error: 'TELEMETRY_EVENT_PERSIST_FAILED',
@@ -136,7 +139,7 @@ export async function POST(req: NextRequest) {
       rejectedEvents: rejected.length > 0 ? rejected : undefined,
     })
   } catch (error) {
-    console.error('[telemetry/event] Error:', error)
+    routeLogger.error('[telemetry/event] Error:', error)
     return NextResponse.json(
       {
         error: 'TELEMETRY_EVENT_PERSIST_FAILED',

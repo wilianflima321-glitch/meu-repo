@@ -378,7 +378,7 @@ export function DiffHunkPreview({
             </button>
           )}
           {onRevertChange && change.type !== 'added' && (
-            <button type="button" aria-label="Reverter mudança selecionada"
+            <button type="button" aria-label="Revert selected change"
               onClick={onRevertChange}
               className="px-2 py-1 text-xs text-[var(--aethel-error)] hover:text-[color-mix(in_srgb,var(--aethel-error)_80%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] rounded"
             >
@@ -489,7 +489,7 @@ export function GitStatusIndicator({
   }
 
   return (
-    <button type="button" aria-label="Abrir resumo de mudanças do Git"
+    <button type="button" aria-label="Open Git changes summary"
       onClick={onClick}
       className="flex items-center gap-2 px-2 py-1 text-xs hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
       title="Git changes - Click to view diff"

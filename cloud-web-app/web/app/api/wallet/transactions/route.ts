@@ -9,6 +9,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/wallet/transactions/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +48,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(transactions);
   } catch (error) {
-    console.error('Wallet transactions error:', error);
+    routeLogger.error('Wallet transactions error:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -58,7 +61,7 @@ function getTransactionDescription(
   metadata: unknown
 ): string {
   if (entryType === 'purchase') {
-    return `Compra de créditos`;
+    return `Credit purchase`;
   }
   if (entryType === 'bonus') {
     const reason = typeof metadata === 'object' && metadata !== null && 'reason' in metadata ? metadata.reason : null;
@@ -66,18 +69,18 @@ function getTransactionDescription(
   }
   if (entryType === 'usage') {
     if (reference?.startsWith('ai_')) {
-      return 'Geração de IA';
+      return 'AI generation';
     }
     if (reference?.startsWith('render_')) {
-      return 'Renderização';
+      return 'Rendering';
     }
     if (reference?.startsWith('build_')) {
-      return 'Build de projeto';
+      return 'Project build';
     }
-    return 'Uso de créditos';
+    return 'Credit usage';
   }
   if (entryType === 'refund') {
     return 'Reembolso';
   }
-  return 'Transação';
+  return 'Transaction';
 }

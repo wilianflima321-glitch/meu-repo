@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         select: { id: true },
       });
       if (!ownedProject) {
-        return NextResponse.json({ error: 'PROJECT_NOT_FOUND', message: 'Projeto não encontrado.' }, { status: 404 });
+        return NextResponse.json({ error: 'PROJECT_NOT_FOUND', message: 'Project not found.' }, { status: 404 });
       }
     }
 
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         select: { id: true },
       });
       if (!ownedThread) {
-        return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread não encontrada.' }, { status: 404 });
+        return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread not found.' }, { status: 404 });
       }
 
       const existingLink = await prismaAny.copilotWorkflow.findFirst({
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
       });
       if (existingLink) {
         return NextResponse.json(
-          { error: 'THREAD_ALREADY_LINKED', message: 'Essa thread já está ligada a um workflow.' },
+          { error: 'THREAD_ALREADY_LINKED', message: 'This thread is already linked to a workflow.' },
           { status: 409 }
         );
       }

@@ -50,10 +50,10 @@ import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing';
 
 export type ThinkingStepType =
   | 'thinking'      // Raciocínio geral
-  | 'analyzing'     // Analisando código/contexto
+  | 'analyzing'     // Analyzing code/contexto
   | 'searching'     // Buscando referências
-  | 'planning'      // Planejando solução
-  | 'generating'    // Gerando código/asset
+  | 'planning'      // Planejando solution
+  | 'generating'    // Gerando code/asset
   | 'validating'    // Validando resultado
   | 'refining'      // Refinando output
   | 'complete'      // Etapa concluída

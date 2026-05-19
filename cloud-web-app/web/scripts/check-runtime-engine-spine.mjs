@@ -56,6 +56,12 @@ requirePattern('lib/runtime/runtime-renderer-adapter.ts', /validationReport/, 'r
 requirePattern('lib/runtime/runtime-renderer-adapter.ts', /performance-report/, 'renderer evidence must include performance-report artifacts')
 requirePattern('lib/runtime/runtime-renderer-adapter.ts', /validation-report/, 'renderer evidence must include validation-report artifacts')
 
+requireFile('lib/aaa-renderer-webgpu.ts', 'WebGPU renderer fallback foundation must exist')
+requirePattern('lib/aaa-renderer-webgpu.ts', /navigator\.gpu/, 'WebGPU foundation must probe browser WebGPU support')
+requirePattern('lib/aaa-renderer-webgpu.ts', /WebGPURenderer/, 'WebGPU foundation must lazy-load Three WebGPURenderer')
+requirePattern('lib/aaa-renderer-webgpu.ts', /WebGLRenderer/, 'WebGPU foundation must retain WebGL2 fallback')
+requirePattern('lib/aaa-renderer-webgpu.ts', /planAethelRenderer/, 'WebGPU foundation must expose a deterministic fallback plan')
+
 requireFile('lib/runtime/local-wgpu-sidecar.ts', 'local wgpu sidecar contract skeleton must exist')
 requirePattern('lib/runtime/local-wgpu-sidecar.ts', /aethel\.wgpu\.probe/, 'sidecar must expose a bounded probe request')
 requirePattern('lib/runtime/local-wgpu-sidecar.ts', /aethel\.wgpu\.render/, 'sidecar must expose a render request contract')

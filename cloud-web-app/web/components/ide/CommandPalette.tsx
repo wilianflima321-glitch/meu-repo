@@ -75,9 +75,9 @@ const CATEGORY_ICONS: Record<CommandCategory, CodiconName> = {
 }
 
 const CATEGORY_LABELS: Record<CommandCategory, string> = {
-  file: 'Arquivo',
-  edit: 'Editar',
-  view: 'Visualizar',
+  file: 'File',
+  edit: 'Edit',
+  view: 'View',
   go: 'Ir',
   run: 'Executar',
   terminal: 'Terminal',
@@ -117,13 +117,13 @@ function createDefaultCommands(handlers: {
   return [
     {
       id: 'file.open',
-      label: 'Abrir arquivo',
-      description: 'Abrir um arquivo do workspace',
+      label: 'Open file',
+      description: 'Open a workspace file',
       category: 'file',
       icon: 'folder-opened',
       shortcut: 'Ctrl+O',
       action: handlers.openFile || (() => {}),
-      keywords: ['open', 'file', 'abrir', 'arquivo'],
+      keywords: ['open', 'file'],
     },
     {
       id: 'file.save',
@@ -132,7 +132,7 @@ function createDefaultCommands(handlers: {
       category: 'file',
       shortcut: 'Ctrl+S',
       action: handlers.saveFile || (() => {}),
-      keywords: ['save', 'salvar'],
+      keywords: ['save'],
     },
     {
       id: 'file.saveAll',
@@ -142,22 +142,22 @@ function createDefaultCommands(handlers: {
       shortcut: 'Ctrl+Shift+S',
       action: handlers.saveAll || (() => {}),
       when: () => typeof handlers.saveAll === 'function',
-      keywords: ['save', 'all', 'salvar', 'tudo'],
+      keywords: ['save', 'all'],
     },
     {
       id: 'file.newFile',
-      label: 'Novo arquivo',
-      description: 'Criar um novo arquivo',
+      label: 'New file',
+      description: 'Create a new file',
       category: 'file',
       icon: 'new-file',
       shortcut: 'Ctrl+N',
       action: handlers.newFile || (() => {}),
-      keywords: ['new', 'file', 'novo', 'arquivo'],
+      keywords: ['new', 'file'],
     },
     {
       id: 'file.newFolder',
       label: 'Nova pasta',
-      description: 'Criar uma nova pasta',
+      description: 'Create uma nova pasta',
       category: 'file',
       icon: 'new-folder',
       action: handlers.newFolder || (() => {}),
@@ -185,8 +185,8 @@ function createDefaultCommands(handlers: {
     },
     {
       id: 'edit.find',
-      label: 'Buscar',
-      description: 'Buscar no arquivo',
+      label: 'Search',
+      description: 'Search in file',
       category: 'edit',
       shortcut: 'Ctrl+F',
       action: handlers.find || (() => {}),
@@ -196,7 +196,7 @@ function createDefaultCommands(handlers: {
     {
       id: 'edit.replace',
       label: 'Substituir',
-      description: 'Buscar e substituir',
+      description: 'Search e substituir',
       category: 'edit',
       shortcut: 'Ctrl+H',
       action: handlers.replace || (() => {}),
@@ -206,7 +206,7 @@ function createDefaultCommands(handlers: {
     {
       id: 'view.toggleSidebar',
       label: 'Alternar barra lateral',
-      description: 'Mostrar ou ocultar a barra lateral esquerda',
+      description: 'Show or hide the left sidebar',
       category: 'view',
       shortcut: 'Ctrl+B',
       action: handlers.toggleSidebar || (() => {}),
@@ -215,7 +215,7 @@ function createDefaultCommands(handlers: {
     {
       id: 'view.toggleTerminal',
       label: 'Alternar terminal',
-      description: 'Mostrar ou ocultar o terminal inferior',
+      description: 'Show or hide the bottom terminal',
       category: 'view',
       shortcut: 'Ctrl+`',
       action: handlers.toggleTerminal || (() => {}),
@@ -223,8 +223,8 @@ function createDefaultCommands(handlers: {
     },
     {
       id: 'ai.chat',
-      label: 'Abrir painel de IA',
-      description: 'Abrir painel de IA na direita',
+      label: 'Open AI panel',
+      description: 'Open AI panel na direita',
       category: 'ai',
       shortcut: 'Ctrl+I',
       action: handlers.aiChat || (() => {}),
@@ -232,8 +232,8 @@ function createDefaultCommands(handlers: {
     },
     {
       id: 'settings.open',
-      label: 'Abrir ajustes',
-      description: 'Abrir ajustes da IDE',
+      label: 'Open settings',
+      description: 'Open settings da IDE',
       category: 'settings',
       shortcut: 'Ctrl+,',
       action: handlers.openSettings || (() => {}),
@@ -241,13 +241,13 @@ function createDefaultCommands(handlers: {
     },
     {
       id: 'project.switch',
-      label: 'Trocar contexto do projeto',
-      description: 'Alterar projectId ativo para escopo de arquivos e preview',
+      label: 'Switch project context',
+      description: 'Change the active projectId for file scope and preview',
       category: 'settings',
       shortcut: 'Ctrl+Alt+P',
       action: handlers.switchProject || (() => {}),
       when: () => typeof handlers.switchProject === 'function',
-      keywords: ['project', 'context', 'scope', 'projeto', 'contexto'],
+      keywords: ['project', 'context', 'scope'],
     },
   ]
 }
@@ -610,7 +610,7 @@ function CommandPaletteUI({
 
   const modeConfig: Record<PaletteMode, { placeholder: string; prefix: string }> = {
     commands: { placeholder: 'Digite um comando...', prefix: '>' },
-    files: { placeholder: 'Buscar arquivos...', prefix: '' },
+    files: { placeholder: 'Search files...', prefix: '' },
     symbols: { placeholder: 'Ir para simbolo...', prefix: '@' },
     lines: { placeholder: 'Ir para linha...', prefix: ':' },
   }
@@ -647,13 +647,13 @@ function CommandPaletteUI({
               <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5">Enter</kbd>
               <span>Selecionar</span>
               <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5">Esc</kbd>
-              <span>Fechar</span>
+              <span>Close</span>
             </div>
           </div>
 
           <div ref={listRef} className="max-h-[420px] overflow-y-auto" role="listbox" aria-label="Resultados da paleta">
             {!filteredItems.length && (
-              <div className="px-4 py-8 text-center text-xs text-[var(--aethel-text-tertiary)]">Nenhum resultado encontrado</div>
+              <div className="px-4 py-8 text-center text-xs text-[var(--aethel-text-tertiary)]">No resultado encontrado</div>
             )}
 
             {filteredItems.map((item, index) => {
@@ -717,7 +717,7 @@ function CommandPaletteUI({
                 <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1 py-0.5">Ctrl+Shift+P</kbd> Comandos
               </span>
               <span>
-                <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1 py-0.5">Ctrl+P</kbd> Arquivos
+                <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1 py-0.5">Ctrl+P</kbd> Files
               </span>
             </div>
             <span>{filteredItems.length} resultados</span>

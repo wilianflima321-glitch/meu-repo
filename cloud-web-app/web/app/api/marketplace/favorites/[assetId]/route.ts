@@ -8,6 +8,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/marketplace/favorites/[assetId]/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -98,7 +101,7 @@ async function handleMutation(
     if (err?.code === 'AUTH_NOT_CONFIGURED' || message.includes('AUTH_NOT_CONFIGURED')) {
       return NextResponse.json({ error: 'AUTH_NOT_CONFIGURED' }, { status: 503 });
     }
-    console.error('[marketplace/favorites/:assetId] Error:', error);
+    routeLogger.error('[marketplace/favorites/:assetId] Error:', error);
     return NextResponse.json({ error: 'Failed to update favorite' }, { status: 500 });
   }
 }

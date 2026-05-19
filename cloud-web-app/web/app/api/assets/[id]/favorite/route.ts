@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/assets/[id]/favorite/route');
 
 export async function POST(
   request: NextRequest,
@@ -45,7 +48,7 @@ export async function POST(
       message: 'Favorite toggled (pending prisma generate)',
     });
   } catch (error: unknown) {
-    console.error('Toggle favorite error:', error);
+    routeLogger.error('Toggle favorite error:', error);
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

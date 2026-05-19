@@ -5,7 +5,7 @@
  *
  * A IA age como um "diretor de cinema/jogos" experiente,
  * oferecendo feedback artístico e técnico sobre o projeto.
- * Sugestões proativas baseadas em análise de cena.
+ * Suggestions proactives baseadas em analysis de cena.
  *
  * @see AI_SELF_REFLECTION_SYSTEM.md
  * @see IDEIAS_SUGESTOES_INOVACAO.md
@@ -56,7 +56,7 @@ export type NoteCategory =
   | 'pacing'        // Ritmo/timing
   | 'audio'         // Som e música
   | 'gameplay'      // Mecânicas de jogo
-  | 'narrative'     // Narrativa
+  | 'narrative'     // Narractive
   | 'performance'   // Performance técnica
   | 'accessibility' // Acessibilidade
   | 'ux';           // Experiência do usuário
@@ -123,7 +123,7 @@ const CATEGORY_INFO: Record<NoteCategory, {
   pacing: { icon: Clock, label: 'Ritmo', color: 'text-[var(--aethel-success)]' },
   audio: { icon: Volume2, label: 'Audio', color: 'text-[var(--aethel-primary)]' },
   gameplay: { icon: Gamepad2, label: 'Jogabilidade', color: 'text-[var(--aethel-info)]' },
-  narrative: { icon: MessageSquare, label: 'Narrativa', color: 'text-[var(--aethel-secondary)]' },
+  narrative: { icon: MessageSquare, label: 'Narractive', color: 'text-[var(--aethel-secondary)]' },
   performance: { icon: TrendingUp, label: 'Performance', color: 'text-[var(--aethel-warning-light)]' },
   accessibility: { icon: Users, label: 'Acessibilidade', color: 'text-[var(--aethel-success)]' },
   ux: { icon: Target, label: 'UX', color: 'text-[var(--aethel-info)]' },
@@ -612,13 +612,13 @@ export function DirectorNotePanel({
         <div className="flex items-center gap-2 mt-3">
           <button
             type="button"
-            aria-label="Solicitar nova analise do diretor"
+            aria-label="Solicitar nova analysis do diretor"
             onClick={requestAnalysis}
             disabled={isAnalyzing}
             className={`flex items-center gap-1.5 rounded-lg bg-[var(--aethel-surface-quaternary)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] disabled:opacity-50 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isAnalyzing ? 'animate-spin' : ''}`} />
-            {isAnalyzing ? 'Analisando...' : 'Nova analise'}
+            {isAnalyzing ? 'Analyzing...' : 'Nova analysis'}
           </button>
 
           <button
@@ -652,7 +652,7 @@ export function DirectorNotePanel({
               ].map(({ key, label }) => (
                 <button
                   type="button"
-                  aria-label={`Filtrar notas por ${label}`}
+                  aria-label={`Filter notas por ${label}`}
                   key={key}
                   onClick={() => setActiveFilter(key)}
                   className={`px-2.5 py-1 text-xs whitespace-nowrap rounded-full ${CANONICAL_FOCUS} ${CANONICAL_MOTION} ${activeFilter === key ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'} `}
@@ -679,10 +679,10 @@ export function DirectorNotePanel({
                 <div className="text-center py-8">
                   <CheckCircle2 className="w-10 h-10 text-[color-mix(in_srgb,var(--aethel-success)_50%,transparent)] mx-auto mb-2" />
                   <p className="text-sm text-[var(--aethel-text-tertiary)]">
-                    Nenhuma nota pendente!
+                    No nota pendente!
                   </p>
                   <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
-                    O projeto esta otimo ou clique para nova analise.
+                    The project looks great, or click for a new analysis.
                   </p>
                 </div>
               ) : (

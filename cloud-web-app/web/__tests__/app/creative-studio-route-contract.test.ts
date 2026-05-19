@@ -23,6 +23,7 @@ describe('creative studio route contract', () => {
       '/studio/material',
       '/studio/animation',
       '/studio/vfx',
+      '/studio/quest',
       '/studio/terrain',
       '/studio/landscape',
       '/studio/cloth',

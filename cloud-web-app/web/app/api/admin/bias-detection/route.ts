@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/bias-detection/route');
 
 // =============================================================================
 // BIAS DETECTION API (Moderation-backed)
@@ -78,7 +81,7 @@ async function getHandler(req: NextRequest) {
           (item.contentSnapshot as any)?.preview ||
           (item.contentSnapshot as any)?.fullContent ||
           item.reason ||
-          'Sem conteúdo registrado',
+          'No content registered',
         status: item.status,
         autoScore: item.autoScore,
         autoFlags: parseFlags(item.autoFlags as any),
@@ -87,7 +90,7 @@ async function getHandler(req: NextRequest) {
       stats,
     });
   } catch (error) {
-    console.error('[Bias Detection] Error:', error);
+    routeLogger.error('[Bias Detection] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch bias audits' }, { status: 500 });
   }
 }
@@ -105,7 +108,7 @@ async function postHandler(req: NextRequest, { user }: { user: { id: string; ema
       : 'normal';
 
     if (!text) {
-      return NextResponse.json({ error: 'Texto obrigatório' }, { status: 400 });
+      return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
 
     const preview = text.length > 240 ? `${text.slice(0, 240)}...` : text;
@@ -155,7 +158,7 @@ async function postHandler(req: NextRequest, { user }: { user: { id: string; ema
       },
     });
   } catch (error) {
-    console.error('[Bias Detection] Create Error:', error);
+    routeLogger.error('[Bias Detection] Create Error:', error);
     return NextResponse.json({ error: 'Failed to create bias audit' }, { status: 500 });
   }
 }

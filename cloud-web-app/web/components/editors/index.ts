@@ -1,6 +1,6 @@
 /**
  * Editores de domínio (VFX, sprites, behaviour trees).
- * Não confundir com `components/editor/` (Monaco, tabs, IDE de código).
+ * Não confundir com `components/editor/` (Monaco, tabs, IDE de code).
  */
 export { default as VFXGraphEditor } from './VFXGraphEditor'
 export { default as SpriteEditor } from './SpriteEditor'

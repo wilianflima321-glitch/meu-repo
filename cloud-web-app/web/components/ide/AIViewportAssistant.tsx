@@ -33,7 +33,7 @@ export function AIViewportAssistant({ onAction = () => undefined, onGenerate = (
       {
         id: '1',
         type: 'thinking',
-        message: 'Analisando solicitação...',
+        message: 'Analyzing request...',
         details: userPrompt,
         duration: 1500,
         timestamp: Date.now(),
@@ -41,32 +41,32 @@ export function AIViewportAssistant({ onAction = () => undefined, onGenerate = (
       {
         id: '2',
         type: 'search',
-        message: 'Pesquisando referências...',
-        details: 'Buscando em base de conhecimento...',
+        message: 'Researching references...',
+        details: 'Searching the knowledge base...',
         duration: 1500,
         timestamp: Date.now(),
       },
       {
         id: '3',
         type: 'code',
-        message: 'Gerando código 3D...',
-        details: 'Criando geometria e materiais...',
+        message: 'Generating 3D code...',
+        details: 'Creating geometry and materials...',
         duration: 1500,
         timestamp: Date.now(),
       },
       {
         id: '4',
         type: 'preview',
-        message: 'Renderizando preview...',
-        details: 'Aplicando iluminação e texturas...',
+        message: 'Rendering preview...',
+        details: 'Applying lighting and textures...',
         duration: 1500,
         timestamp: Date.now(),
       },
       {
         id: '5',
         type: 'complete',
-        message: 'Concluído!',
-        details: 'Objeto 3D gerado com sucesso.',
+        message: 'Complete!',
+        details: '3D object generated successfully.',
         duration: 1500,
         timestamp: Date.now(),
       },
@@ -96,9 +96,9 @@ export function AIViewportAssistant({ onAction = () => undefined, onGenerate = (
           <div className={`p-1.5 rounded-lg ${isProcessing ? 'bg-[var(--aethel-primary)] animate-pulse' : 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'}`}>
             <Sparkles className={`w-4 h-4 ${isProcessing ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-primary-light)]'}`} />
           </div>
-          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Assistente IA</span>
+          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">AI Assistant</span>
           {isProcessing && (
-            <span className="text-xs text-[var(--aethel-info-light)]">Processando...</span>
+            <span className="text-xs text-[var(--aethel-info-light)]">Processing...</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -110,7 +110,7 @@ export function AIViewportAssistant({ onAction = () => undefined, onGenerate = (
                  'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
                 : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
             }`}
-            title={isPlaying ? 'Pausar' : 'Reproduzir'}
+            title={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
           </button>
@@ -132,7 +132,7 @@ export function AIViewportAssistant({ onAction = () => undefined, onGenerate = (
               <div className="flex h-full items-center justify-center text-[var(--aethel-text-tertiary)] text-sm">
                 <div className="text-center">
                   <Brain className="w-12 h-12 mx-auto mb-3 text-[var(--aethel-text-quaternary)]" />
-                  <p>Descreva o que você quer criar</p>
+                  <p>Describe what you want to create</p>
                   <p className="text-xs mt-1">Ex: &quot;Crie um cubo vermelho girando&quot;</p>
                 </div>
               </div>
@@ -218,10 +218,10 @@ export function AIViewportAssistant({ onAction = () => undefined, onGenerate = (
               </button>
               <button
                 type="button"
-                onClick={() => setPrompt('Crie uma esfera com material metálico')}
+                onClick={() => setPrompt('Create a sphere with a metallic material')}
                 className="flex-1 px-2 py-1.5 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] hover:text-[var(--aethel-text-primary)] transition-colors"
               >
-                Esfera metálica
+                Metallic sphere
               </button>
               <button
                 type="button"

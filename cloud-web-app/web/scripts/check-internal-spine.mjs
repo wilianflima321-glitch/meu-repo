@@ -68,6 +68,14 @@ requirePattern('lib/production/multi-resolution-project-memory.ts', /metadata-on
 requirePattern('lib/production/multi-resolution-project-memory.ts', /Never dump an entire GB-scale repository/, 'memory must forbid raw GB context dumps')
 requirePattern('lib/production/multi-resolution-project-memory.ts', /requiresReadReceipt/, 'memory shards must connect to read receipts')
 
+requireFile('lib/production/deep-spine-scan.ts', 'agents need a governed pente-fino scan for MB/GB projects')
+requirePattern('lib/production/deep-spine-scan.ts', /DeepSpineScanManifest/, 'deep scan must expose a manifest contract')
+requirePattern('lib/production/deep-spine-scan.ts', /buildMultiResolutionProjectMemory/, 'deep scan must reuse multi-resolution memory')
+requirePattern('lib/production/deep-spine-scan.ts', /metadata-first/, 'deep scan must keep external sources metadata-first')
+requirePattern('lib/production/deep-spine-scan.ts', /safeAutofix:\s*false/, 'deep scan must never auto-fix from scan findings')
+requirePattern('lib/production/agent-tool-bus.ts', /tool\('deep-spine-scan'/, 'deep scan must be governed by the Agent Tool Bus')
+requirePattern('package.json', /qa:deep-spine-scan/, 'package scripts must expose deep spine scan QA')
+
 requireFile('lib/production/task-evidence-ledger.ts', 'tasks need an evidence ledger')
 requirePattern('lib/production/task-evidence-ledger.ts', /evaluateTaskEvidenceReadiness/, 'ledger must gate readiness on required evidence')
 requirePattern('lib/production/task-evidence-ledger.ts', /browser-replay/, 'ledger must track browser replay evidence')

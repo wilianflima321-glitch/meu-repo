@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/ip-registry/route');
 
 // =============================================================================
 // IP REGISTRY ADMIN API
@@ -58,7 +61,7 @@ export const GET = withAdminAuth(
         licenses,
       });
     } catch (error) {
-      console.error('[Admin IP Registry] Error:', error);
+      routeLogger.error('[Admin IP Registry] Error:', error);
       return NextResponse.json({ error: 'Failed to fetch IP registry' }, { status: 500 });
     }
   },
@@ -125,7 +128,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ status: 'ok' });
     } catch (error) {
-      console.error('[Admin IP Registry] Error:', error);
+      routeLogger.error('[Admin IP Registry] Error:', error);
       return NextResponse.json({ error: 'Failed to update IP registry' }, { status: 500 });
     }
   },

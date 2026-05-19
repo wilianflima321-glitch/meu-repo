@@ -1,4 +1,4 @@
-export type AdminSectionId = 'users' | 'billing' | 'ops' | 'security' | 'ai' | 'marketplace'
+export type AdminSectionId = 'people' | 'money' | 'ai' | 'platform' | 'trust' | 'product'
 
 export type AdminSectionLink = {
   label: string
@@ -11,99 +11,112 @@ export type AdminConsolidatedSection = {
   label: string
   href: string
   description: string
+  operatorQuestion: string
   primaryLinks: AdminSectionLink[]
   routes: string[]
 }
 
+export const ADMIN_ROUTE_LABELS: Record<string, string> = {
+  '/admin/ai': 'AI overview',
+  '/admin/ai-agents': 'Agent fleet',
+  '/admin/ai-enhancements': 'Enhancements',
+  '/admin/ai-monitor': 'Live monitor',
+  '/admin/ai-training': 'Training',
+  '/admin/ai-upgrades': 'Upgrades',
+  '/admin/analytics': 'Analytics',
+  '/admin/apis': 'API posture',
+  '/admin/arpu-churn': 'ARPU and churn',
+  '/admin/audit-logs': 'Audit logs',
+  '/admin/automation': 'Automation',
+  '/admin/backup': 'Backups',
+  '/admin/bias-detection': 'Bias review',
+  '/admin/chat': 'Chat operations',
+  '/admin/collaboration': 'Collaboration',
+  '/admin/compliance': 'Compliance',
+  '/admin/cost-optimization': 'Cost optimization',
+  '/admin/deploy': 'Deploys',
+  '/admin/emergency': 'Emergency mode',
+  '/admin/feature-flags': 'Feature flags',
+  '/admin/feedback': 'Feedback',
+  '/admin/finance': 'Finance',
+  '/admin/fine-tuning': 'Fine-tuning',
+  '/admin/god-view': 'God view',
+  '/admin/ide-settings': 'IDE settings',
+  '/admin/indexing': 'Indexing',
+  '/admin/infrastructure': 'Infrastructure',
+  '/admin/ip-registry': 'IP registry',
+  '/admin/marketplace': 'Marketplace',
+  '/admin/moderation': 'Moderation',
+  '/admin/monitoring': 'Monitoring',
+  '/admin/multi-tenancy': 'Multi-tenancy',
+  '/admin/notifications': 'Notifications',
+  '/admin/onboarding': 'Onboarding',
+  '/admin/payments': 'Payments',
+  '/admin/promotions': 'Promotions',
+  '/admin/rate-limiting': 'Rate limiting',
+  '/admin/real-time': 'Realtime',
+  '/admin/roles': 'Roles',
+  '/admin/scalability': 'Scalability',
+  '/admin/security': 'Security',
+  '/admin/subscriptions': 'Subscriptions',
+  '/admin/support': 'Support',
+  '/admin/updates': 'Updates',
+  '/admin/users': 'Users',
+}
+
 export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
   {
-    id: 'users',
-    label: 'Users & Access',
+    id: 'people',
+    label: 'People & Access',
     href: '/admin/users',
-    description: 'Accounts, roles, onboarding, support, and human access reviews.',
+    description: 'Users, roles, onboarding, support, feedback, and workspace access reviews.',
+    operatorQuestion: 'Who can access production surfaces, and what changed recently?',
     primaryLinks: [
       { label: 'Users', href: '/admin/users' },
       { label: 'Roles', href: '/admin/roles' },
       { label: 'Support', href: '/admin/support' },
-      { label: 'Onboarding', href: '/admin/onboarding' },
     ],
-    routes: ['/admin/users', '/admin/roles', '/admin/support', '/admin/onboarding'],
+    routes: [
+      '/admin/users',
+      '/admin/roles',
+      '/admin/support',
+      '/admin/feedback',
+      '/admin/onboarding',
+    ],
   },
   {
-    id: 'billing',
-    label: 'Billing & Revenue',
+    id: 'money',
+    label: 'Money',
     href: '/admin/finance',
-    description: 'Subscriptions, payments, churn, promotions, finance, and AI margin pressure.',
+    description: 'Revenue, payments, subscriptions, promotions, marketplace economics, and cost control.',
+    operatorQuestion: 'Where is revenue moving, and what spend or churn needs action?',
     primaryLinks: [
       { label: 'Finance', href: '/admin/finance', badge: 'MRR' },
       { label: 'Payments', href: '/admin/payments' },
-      { label: 'Subscriptions', href: '/admin/subscriptions' },
-      { label: 'Cost Optimization', href: '/admin/cost-optimization' },
+      { label: 'Marketplace', href: '/admin/marketplace' },
     ],
     routes: [
-      '/admin/subscriptions',
-      '/admin/payments',
-      '/admin/arpu-churn',
       '/admin/finance',
+      '/admin/payments',
+      '/admin/subscriptions',
       '/admin/promotions',
+      '/admin/arpu-churn',
+      '/admin/marketplace',
       '/admin/cost-optimization',
       '/admin/analytics',
     ],
   },
   {
-    id: 'ops',
-    label: 'Operations',
-    href: '/admin/monitoring',
-    description: 'Infrastructure, deploys, backups, realtime health, emergency mode, and scale posture.',
-    primaryLinks: [
-      { label: 'Monitoring', href: '/admin/monitoring' },
-      { label: 'Infrastructure', href: '/admin/infrastructure' },
-      { label: 'Deploys', href: '/admin/deploy' },
-      { label: 'Emergency', href: '/admin/emergency', badge: 'Critical' },
-    ],
-    routes: [
-      '/admin/monitoring',
-      '/admin/deploy',
-      '/admin/infrastructure',
-      '/admin/scalability',
-      '/admin/real-time',
-      '/admin/emergency',
-      '/admin/backup',
-      '/admin/updates',
-      '/admin/multi-tenancy',
-    ],
-  },
-  {
-    id: 'security',
-    label: 'Security & Trust',
-    href: '/admin/security',
-    description: 'Audit logs, compliance posture, rate limits, moderation, IP licensing, and abuse controls.',
-    primaryLinks: [
-      { label: 'Security', href: '/admin/security' },
-      { label: 'Audit Logs', href: '/admin/audit-logs' },
-      { label: 'Compliance', href: '/admin/compliance' },
-      { label: 'Rate Limits', href: '/admin/rate-limiting' },
-    ],
-    routes: [
-      '/admin/audit-logs',
-      '/admin/compliance',
-      '/admin/rate-limiting',
-      '/admin/bias-detection',
-      '/admin/moderation',
-      '/admin/ip-registry',
-      '/admin/security',
-    ],
-  },
-  {
     id: 'ai',
     label: 'AI Operations',
-    href: '/admin/ai-monitor',
-    description: 'Models, agents, training, indexing, automation, ledger health, and production AI readiness.',
+    href: '/admin/ai',
+    description: 'Agent fleet, model quality, training, fine-tuning, indexing, automation, and safety bias review.',
+    operatorQuestion: 'Which agents are working, what did they cost, and where is quality drifting?',
     primaryLinks: [
-      { label: 'AI Monitor', href: '/admin/ai-monitor', badge: 'Live' },
+      { label: 'AI overview', href: '/admin/ai' },
       { label: 'Agents', href: '/admin/ai-agents' },
-      { label: 'Fine-tuning', href: '/admin/fine-tuning' },
-      { label: 'Indexing', href: '/admin/indexing' },
+      { label: 'Monitor', href: '/admin/ai-monitor', badge: 'Live' },
+      { label: 'Training', href: '/admin/ai-training' },
     ],
     routes: [
       '/admin/ai',
@@ -113,31 +126,73 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
       '/admin/ai-training',
       '/admin/ai-upgrades',
       '/admin/fine-tuning',
+      '/admin/bias-detection',
       '/admin/indexing',
       '/admin/automation',
     ],
   },
   {
-    id: 'marketplace',
-    label: 'Product Surfaces',
-    href: '/admin/marketplace',
-    description: 'Marketplace, feature flags, IDE settings, APIs, collaboration, notifications, and customer feedback.',
+    id: 'platform',
+    label: 'Platform',
+    href: '/admin/monitoring',
+    description: 'Infrastructure, observability, deploys, backups, realtime systems, API posture, and scale readiness.',
+    operatorQuestion: 'Is the platform healthy enough to accept traffic and production writes?',
     primaryLinks: [
-      { label: 'Marketplace', href: '/admin/marketplace' },
-      { label: 'Feature Flags', href: '/admin/feature-flags' },
-      { label: 'IDE Settings', href: '/admin/ide-settings' },
+      { label: 'Monitoring', href: '/admin/monitoring' },
+      { label: 'Infrastructure', href: '/admin/infrastructure' },
       { label: 'APIs', href: '/admin/apis' },
     ],
     routes: [
-      '/admin/marketplace',
-      '/admin/feature-flags',
-      '/admin/ide-settings',
+      '/admin/infrastructure',
+      '/admin/monitoring',
+      '/admin/scalability',
+      '/admin/backup',
+      '/admin/deploy',
+      '/admin/updates',
+      '/admin/rate-limiting',
       '/admin/apis',
+      '/admin/real-time',
+    ],
+  },
+  {
+    id: 'trust',
+    label: 'Trust & Safety',
+    href: '/admin/security',
+    description: 'Audit logs, compliance, security, moderation, emergency controls, IP registry, and governance views.',
+    operatorQuestion: 'What risk needs containment before it becomes customer-visible?',
+    primaryLinks: [
+      { label: 'Security', href: '/admin/security' },
+      { label: 'Compliance', href: '/admin/compliance' },
+      { label: 'Moderation', href: '/admin/moderation' },
+    ],
+    routes: [
+      '/admin/audit-logs',
+      '/admin/compliance',
+      '/admin/security',
+      '/admin/moderation',
+      '/admin/ip-registry',
+      '/admin/emergency',
+      '/admin/god-view',
+    ],
+  },
+  {
+    id: 'product',
+    label: 'Product Surfaces',
+    href: '/admin/feature-flags',
+    description: 'Feature flags, chat, collaboration, IDE settings, notifications, multi-tenancy, and product operations.',
+    operatorQuestion: 'Which product surfaces are shipping, gated, or creating support load?',
+    primaryLinks: [
+      { label: 'Feature flags', href: '/admin/feature-flags' },
+      { label: 'Collaboration', href: '/admin/collaboration' },
+      { label: 'IDE settings', href: '/admin/ide-settings' },
+    ],
+    routes: [
+      '/admin/feature-flags',
       '/admin/chat',
       '/admin/collaboration',
-      '/admin/feedback',
+      '/admin/ide-settings',
+      '/admin/multi-tenancy',
       '/admin/notifications',
-      '/admin/god-view',
     ],
   },
 ]
@@ -146,6 +201,19 @@ export function findAdminSectionForRoute(route: string): AdminConsolidatedSectio
   return ADMIN_CONSOLIDATED_SECTIONS.find((section) => section.routes.includes(route) || section.href === route)
 }
 
+export function getAdminRouteLabel(route: string): string {
+  return ADMIN_ROUTE_LABELS[route] || route.replace('/admin/', '').replace(/-/g, ' ')
+}
+
 export function getCoveredAdminRoutes(): string[] {
   return Array.from(new Set(ADMIN_CONSOLIDATED_SECTIONS.flatMap((section) => section.routes))).sort()
+}
+
+export function getAdminRouteCoverage() {
+  const routes = getCoveredAdminRoutes()
+  return {
+    sections: ADMIN_CONSOLIDATED_SECTIONS.length,
+    routes: routes.length,
+    primaryLinks: ADMIN_CONSOLIDATED_SECTIONS.reduce((total, section) => total + section.primaryLinks.length, 0),
+  }
 }

@@ -47,7 +47,7 @@ export function useWorkbenchFullAccess({
       })
       const payload = (await response.json().catch(() => ({}))) as FullAccessResponse
       if (!response.ok) {
-        throw new Error(payload.error || payload.message || `Falha na requisicao: ${response.status}`)
+        throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
       }
       return payload
     },
@@ -85,7 +85,7 @@ export function useWorkbenchFullAccess({
           })
           const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
           if (!response.ok) {
-            throw new Error(payload.error || payload.message || `Falha na requisicao: ${response.status}`)
+            throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
           }
         } else {
           const response = await fetch('/api/studio/access/full', {
@@ -103,7 +103,7 @@ export function useWorkbenchFullAccess({
           })
           const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
           if (!response.ok) {
-            throw new Error(payload.error || payload.message || `Falha na requisicao: ${response.status}`)
+            throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
           }
         }
 

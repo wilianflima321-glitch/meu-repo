@@ -78,7 +78,7 @@ const BALANCE_MESSAGES: Record<BalanceLevel, { title: string; subtitle: string; 
   },
   critical: {
     title: 'Saldo muito baixo',
-    subtitle: 'Restam poucos creditos para operacoes de IA',
+    subtitle: 'Restam poucos credits para operacoes de IA',
     color: 'text-[var(--aethel-warning-light)]',
     icon: <AlertTriangle className="w-6 h-6" />,
   },
@@ -132,7 +132,7 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
             <span className="text-2xl font-bold text-[var(--aethel-text-primary)]">
               {pkg.credits.toLocaleString()}
             </span>
-            <span className="text-sm text-[var(--aethel-text-tertiary)]">creditos</span>
+            <span className="text-sm text-[var(--aethel-text-tertiary)]">credits</span>
           </div>
 
           {pkg.bonus && (
@@ -176,7 +176,7 @@ function UsageEstimate({ minutes }: { minutes: number }) {
   if (minutes <= 0) {
     return (
       <p className="text-xs text-[var(--aethel-error)]">
-        Voce nao tem creditos para operacoes de IA
+        Voce nao tem credits para operacoes de IA
       </p>
     );
   }
@@ -186,7 +186,7 @@ function UsageEstimate({ minutes }: { minutes: number }) {
 
   return (
     <p className="text-xs text-[var(--aethel-text-tertiary)]">
-      Estimativa: {hours > 0 ? `${hours}h ${mins}min` : `${mins} minutos`} de trabalho restante
+      Estimactive: {hours > 0 ? `${hours}h ${mins}min` : `${mins} minutos`} de trabalho restante
     </p>
   );
 }
@@ -324,13 +324,13 @@ export function LowBalanceModal({
               {/* Current balance display */}
               <div className="mt-4 p-3 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] rounded-xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[var(--aethel-text-tertiary)]">Saldo atual</span>
+                  <span className="text-sm text-[var(--aethel-text-tertiary)]">Current balance</span>
                   <div className="flex items-center gap-2">
                     <Coins className={`w-4 h-4 ${balanceInfo.color}`} />
                     <span className="text-lg font-bold text-[var(--aethel-text-primary)]">
                       {currentBalance.toLocaleString()}
                     </span>
-                    <span className="text-sm text-[var(--aethel-text-tertiary)]">creditos</span>
+                    <span className="text-sm text-[var(--aethel-text-tertiary)]">credits</span>
                   </div>
                 </div>
                 <UsageEstimate minutes={estimatedUsage} />
@@ -340,7 +340,7 @@ export function LowBalanceModal({
             {/* Package selection */}
             <div className="p-6">
               <p className="text-sm font-medium text-[var(--aethel-text-secondary)] mb-3">
-                Escolha um pacote de creditos
+                Choose a credit package
               </p>
 
               <div className="grid grid-cols-2 gap-3">
@@ -358,22 +358,22 @@ export function LowBalanceModal({
               <div className="flex items-center justify-center gap-4 mt-4 text-xs text-[var(--aethel-text-tertiary)]">
                 <div className="flex items-center gap-1">
                   <Shield className="w-3.5 h-3.5" />
-                  Pagamento seguro
+                  Secure payment
                 </div>
                 <div className="flex items-center gap-1">
                   <Zap className="w-3.5 h-3.5" />
-                  Ativação instantânea
+                  Instant activation
                 </div>
                 <div className="flex items-center gap-1">
                   <Star className="w-3.5 h-3.5" />
-                  Sem expiração
+                  No expiration
                 </div>
               </div>
             </div>
 
             {/* Actions */}
             <div className="p-6 pt-0 space-y-3">
-              <button type="button" aria-label="Recarregar creditos agora"
+              <button type="button" aria-label="Recarregar credits agora"
                 onClick={handleContinue}
                 disabled={!selectedPackage || isProcessing}
                 className="w-full flex items-center justify-center gap-2 py-3
@@ -390,12 +390,12 @@ export function LowBalanceModal({
                     >
                       <Sparkles className="w-5 h-5" />
                     </motion.div>
-                    Processando...
+                    Processing...
                   </>
                 ) : (
                   <>
                     <CreditCard className="w-5 h-5" />
-                    Recarregar Agora
+                    Reload now
                     {selectedPackage && (
                       <span className="opacity-80">
                         - ${selectedPackage.price.toFixed(2)}
@@ -405,12 +405,12 @@ export function LowBalanceModal({
                 )}
               </button>
 
-              <button type="button" aria-label="Lembrar mais tarde sobre saldo baixo"
+              <button type="button" aria-label="Remind me later about low balance"
                 onClick={handleRemindLater}
                 className="w-full py-2.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
                          transition-colors"
               >
-                Lembrar mais tarde
+                Remind me later
               </button>
             </div>
 
@@ -422,14 +422,14 @@ export function LowBalanceModal({
                   <TrendingUp className="w-5 h-5 text-[var(--aethel-primary)] flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-[var(--aethel-primary)]">
-                      Voce usa muitos creditos?
+                      Voce usa muitos credits?
                     </p>
                     <p className="text-xs text-[color-mix(in_srgb,var(--aethel-primary)_70%,transparent)] mt-1">
-                      Considere o plano Pro para creditos ilimitados por $49/mês
+                      Consider the Pro plan for unlimited credits at $49/month
                     </p>
-                    <button type="button" aria-label="Ver planos para upgrade de creditos" className="flex items-center gap-1 mt-2 text-xs font-medium
+                    <button type="button" aria-label="View plans para upgrade de credits" className="flex items-center gap-1 mt-2 text-xs font-medium
                                       text-[var(--aethel-primary)] hover:text-[var(--aethel-primary)] transition-colors">
-                      Ver planos
+                      View plans
                       <ChevronRight className="w-3 h-3" />
                     </button>
                   </div>
@@ -448,7 +448,7 @@ export function LowBalanceModal({
 // ============================================================================
 
 /**
- * LowBalanceModalAuto - Versão auto-gerenciada
+ * LowBalanceModalAuto - Version auto-gerenciada
  * Monitora o saldo automaticamente e exibe o modal quando necessário.
  * Use este componente no ClientLayout para funcionalidade automática.
  */
@@ -490,7 +490,7 @@ export function LowBalanceModalAuto() {
           }
         }
       } catch (e) {
-        // Silently fail - nao interromper UX
+        // Silently fail - nao interrormper UX
       }
     };
 
@@ -526,7 +526,7 @@ export function LowBalanceModalAuto() {
       onRemindLater={handleRemindLater}
       balanceLevel={balanceLevel}
       currentBalance={currentBalance}
-      estimatedUsage={Math.floor(currentBalance / 2)} // ~2 creditos/min estimado
+      estimatedUsage={Math.floor(currentBalance / 2)} // ~2 credits/min estimado
     />
   );
 }

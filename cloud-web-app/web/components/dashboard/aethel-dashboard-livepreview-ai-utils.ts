@@ -21,10 +21,10 @@ export function buildLivePreviewContextPayload(workflowId: string | null, point:
 
 export function buildLivePreviewPrompt(point: Point3) {
   return (
-    `Contexto da Previa ao Vivo:\n` +
-    `Ponto selecionado: x=${point.x.toFixed(3)}, y=${point.y.toFixed(3)}, z=${point.z.toFixed(3)}\n\n` +
-    `Tarefa: sugira UMA melhoria concreta para a cena naquele ponto. ` +
-    `Retorne uma unica frase curta. Sem markdown. Sem listas.`
+    `Live Preview Context:\n` +
+    `Selected point: x=${point.x.toFixed(3)}, y=${point.y.toFixed(3)}, z=${point.z.toFixed(3)}\n\n` +
+    `Task: suggest ONE concrete improvement for the scene at that point. ` +
+    `Return one short sentence. No markdown. No lists.`
   )
 }
 
@@ -32,7 +32,7 @@ export function buildLivePreviewSystemMessage(): ChatMessage {
   return {
     role: 'system',
     content:
-      'Voce e o Copilot Aethel para Previa ao Vivo. Seja preciso, minimalista e evite suposicoes. Se faltar informacao, faca uma pergunta.',
+      'You are the Aethel Copilot for Live Preview. Be precise, minimal, and avoid assumptions. If information is missing, ask one question.',
   }
 }
 
@@ -60,6 +60,6 @@ export function extractPrimaryAssistantContent(data: unknown): string {
 export function buildLivePreviewSuggestionMessage(suggestion: string): ChatMessage {
   return {
     role: 'user',
-    content: `Sugestao de previa ao vivo: ${suggestion}`,
+    content: `Live preview suggestion: ${suggestion}`,
   }
 }

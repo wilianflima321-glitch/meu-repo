@@ -3,6 +3,9 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const log = createComponentLogger('api/projects/route');
 
 // GET /api/projects - List all projects for user
 export async function GET(req: NextRequest) {
@@ -27,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(projects);
   } catch (error) {
-    console.error('Get projects error:', error);
+    log.error('Get projects error', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
@@ -57,7 +60,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             error: 'PROJECT_LIMIT_REACHED',
-            message: `Limite de projetos do plano (${entitlements.plan.limits.projects}) atingido. Faça upgrade.`,
+            message: `Plan project limit (${entitlements.plan.limits.projects}) reached. Upgrade.`,
             plan: entitlements.plan.id,
           },
           { status: 402 }
@@ -75,7 +78,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
-    console.error('Create project error:', error);
+    log.error('Create project error', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

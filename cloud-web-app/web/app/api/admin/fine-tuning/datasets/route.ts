@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
 import { generateUploadUrl } from '@/lib/storage/s3-client';
+import { createComponentLogger } from '@/lib/observability/logger';
 
+const log = createComponentLogger('api/admin/fine-tuning/datasets/route');
 const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
 export const GET = withAdminAuth(
@@ -12,7 +14,7 @@ export const GET = withAdminAuth(
       const items = await fineTuneDataset.findMany({ orderBy: { createdAt: 'desc' } });
       return NextResponse.json({ items });
     } catch (error) {
-      console.error('[Admin Fine Tuning Datasets] Error:', error);
+      log.error('[Admin Fine Tuning Datasets] Error', error);
       return NextResponse.json({ error: 'Failed to fetch datasets' }, { status: 500 });
     }
   },
@@ -26,7 +28,7 @@ export const POST = withAdminAuth(
       const { name, size, contentType } = body as { name?: string; size?: number; contentType?: string };
 
       if (!name || !size || !contentType) {
-        return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
+        return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
       }
 
       const fineTuneDataset = (prisma as any).fineTuneDataset;
@@ -67,7 +69,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ dataset: { ...dataset, status }, uploadUrl });
     } catch (error) {
-      console.error('[Admin Fine Tuning Datasets] Error:', error);
+      log.error('[Admin Fine Tuning Datasets] Error', error);
       return NextResponse.json({ error: 'Failed to create dataset' }, { status: 500 });
     }
   },
@@ -80,7 +82,7 @@ export const PATCH = withAdminAuth(
       const body = await request.json();
       const { id, status } = body as { id?: string; status?: string };
       if (!id || !status) {
-        return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
+        return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
       }
 
       const fineTuneDataset = (prisma as any).fineTuneDataset;
@@ -104,7 +106,7 @@ export const PATCH = withAdminAuth(
 
       return NextResponse.json({ dataset });
     } catch (error) {
-      console.error('[Admin Fine Tuning Datasets] Error:', error);
+      log.error('[Admin Fine Tuning Datasets] Error', error);
       return NextResponse.json({ error: 'Failed to update dataset' }, { status: 500 });
     }
   },

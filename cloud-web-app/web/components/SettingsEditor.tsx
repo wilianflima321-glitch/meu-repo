@@ -93,7 +93,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'editor.minimap.enabled',
-        title: 'Minimapa ativado',
+        title: 'Minimapa activedo',
         description: 'Controla se o minimapa e exibido',
         type: 'boolean',
         default: true,
@@ -160,13 +160,13 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   },
   {
     id: 'files',
-    label: 'Arquivos',
+    label: 'Files',
     icon: 'FL',
     settings: [
       {
         key: 'files.autoSave',
         title: 'Autosave',
-        description: 'Controla o salvamento automatico de arquivos modificados',
+        description: 'Controla o salvamento automatico de files modified',
         type: 'enum',
         enum: ['off', 'afterDelay', 'onFocusChange', 'onWindowChange'],
         default: 'off',
@@ -176,7 +176,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       {
         key: 'files.autoSaveDelay',
         title: 'Atraso do salvamento automatico',
-        description: 'Controla o atraso em ms para salvar automaticamente arquivos modificados',
+        description: 'Controls the delay in ms for automatically saving modified files',
         type: 'number',
         default: 1000,
         category: 'files',
@@ -246,7 +246,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       {
         key: 'git.enabled',
         title: 'Ativado',
-        description: 'Define se o git esta ativado',
+        description: 'Define se o git esta activedo',
         type: 'boolean',
         default: true,
         category: 'git',
@@ -263,7 +263,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'git.confirmSync',
-        title: 'Confirmar sincronizacao',
+        title: 'Confirm sincronizacao',
         description: 'Confirma antes de sincronizar repositorios git',
         type: 'boolean',
         default: true,
@@ -279,7 +279,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
     settings: [
       {
         key: 'ai.enabled',
-        title: 'IA ativada',
+        title: 'IA activeda',
         description: 'Ativa recursos com IA',
         type: 'boolean',
         default: true,
@@ -306,7 +306,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'ai.provider',
-        title: 'Provedor de IA',
+        title: 'AI provider',
         description: 'Seleciona o provedor de IA',
         type: 'enum',
         enum: ['OpenRouter', 'OpenAI', 'Anthropic', 'Google', 'Ollama'],
@@ -408,7 +408,7 @@ export default function SettingsEditor() {
               onChange={(event) => updateSetting(setting.key, event.target.checked)}
               className="h-4 w-4 rounded border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] text-[var(--aethel-primary)] focus:ring-2 focus:ring-[var(--aethel-primary)]"
             />
-            {value ? 'Ativado' : 'Desativado'}
+            {value ? 'Ativado' : 'Desactivedo'}
           </label>
         )
 
@@ -458,7 +458,7 @@ export default function SettingsEditor() {
         <div className="border-b border-[var(--aethel-border-primary)] p-4">
           <input
             type="text"
-            placeholder="Buscar configuracoes..."
+            placeholder="Search configuracoes..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             className={`${settingsInputClass} w-full`}
@@ -565,7 +565,7 @@ export default function SettingsEditor() {
 
           {currentCategory?.settings.length === 0 && (
             <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_75%,transparent)] py-12 text-center text-sm text-[var(--aethel-text-tertiary)]">
-              <p>Nenhuma configuracao encontrada para &quot;{searchQuery}&quot;</p>
+              <p>No configuracao encontrada para &quot;{searchQuery}&quot;</p>
             </div>
           )}
         </div>

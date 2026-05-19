@@ -1,4 +1,4 @@
-﻿import { planAgentWorkforceForMission } from '@/lib/production/agent-workforce-topology'
+import { planAgentWorkforceForMission } from '@/lib/production/agent-workforce-topology'
 
 function includesAny(input: string, patterns: RegExp[]): boolean {
   return patterns.some((pattern) => pattern.test(input))

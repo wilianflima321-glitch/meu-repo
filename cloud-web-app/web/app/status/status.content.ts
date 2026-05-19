@@ -4,49 +4,49 @@ export const STATUS_REFRESH_INTERVAL_MS = 30_000
 
 export const SURFACE_CHECKS: SurfaceCheck[] = [
   { id: 'runtime', name: 'Runtime base', endpoint: '/api/health/live', required: true },
-  { id: 'readiness', name: 'Prontidao da aplicacao', endpoint: '/api/health/ready', required: true },
-  { id: 'ai', name: 'Provedores de IA', endpoint: '/api/health/ai' },
-  { id: 'database', name: 'Banco de dados', endpoint: '/api/health/db', required: true },
+  { id: 'readiness', name: 'Application readiness', endpoint: '/api/health/ready', required: true },
+  { id: 'ai', name: 'AI providers', endpoint: '/api/health/ai' },
+  { id: 'database', name: 'Database', endpoint: '/api/health/db', required: true },
   { id: 'cache', name: 'Cache / rate limiting', endpoint: '/api/health/cache' },
-  { id: 'storage', name: 'Armazenamento de assets', endpoint: '/api/health/storage' },
+  { id: 'storage', name: 'Asset storage', endpoint: '/api/health/storage' },
   { id: 'stripe', name: 'Gateway Stripe', endpoint: '/api/health/stripe' },
-  { id: 'billing', name: 'Runtime de billing', endpoint: '/api/billing/readiness' },
+  { id: 'billing', name: 'Billing runtime', endpoint: '/api/health/billing' },
 ]
 
 export const TRUST_EXPLAINERS = [
-  { title: 'Ao vivo', detail: 'Sem uptime rolling artificial nem greenwashing operacional.' },
-  { title: 'Impacto', detail: 'Traduzimos checks tecnicos em leitura para cliente final.' },
-  { title: 'Limites', detail: 'O que nao esta publicado fica marcado como ausente, nao escondido.' },
+  { title: 'Live', detail: 'No artificial rolling uptime or operational greenwashing.' },
+  { title: 'Impact', detail: 'Technical checks are translated into customer impact.' },
+  { title: 'Limits', detail: 'What is not published is marked as missing, not hidden.' },
 ]
 
 export const STATUS_TRUTHS = [
-  'Operacional significa que o endpoint respondeu e o payload indicou disponibilidade real.',
-  'Parcial significa que a superficie responde, mas depende de configuracao, credencial ou cobertura ainda incompleta.',
-  'Bloqueado significa falha publica ou dependencia obrigatoria indisponivel.',
-  'Sem timeline decorativa: quando nao existe historico confiavel publicado, esta pagina assume a lacuna em aberto.',
+  'Operational means the endpoint responded and the payload reported real availability.',
+  'Partial means the surface responds, but still depends on configuration, credentials, or incomplete coverage.',
+  'Blocked means a public failure or unavailable mandatory dependency.',
+  'No decorative timeline: when reliable public history is missing, this page states the gap openly.',
 ]
 
 export const STATUS_LIMITS = [
-  'Ainda nao publicamos uptime rolling de 7, 30 ou 90 dias.',
-  'Ainda nao existe arquivo publico completo de incidentes encerrados.',
-  'Evidence L4 continua em outra trilha: depende de producao real, nao so destes checks publicos.',
-  'Esta pagina cobre checks publicos e readiness comercial, nao toda a telemetria interna do produto.',
+  'We do not yet publish rolling uptime for 7, 30, or 90 days.',
+  'There is not yet a complete public archive of resolved incidents.',
+  'L4 evidence remains a separate track: it depends on real production proof, not only these public checks.',
+  'This page covers public checks and commercial readiness, not every internal telemetry signal.',
 ]
 
 export const INCIDENT_GRAMMAR = [
   {
     eyebrow: 'Sev 1',
-    title: 'Bloqueio publico',
-    detail: 'Usamos este estado quando runtime, readiness ou banco obrigatorio falham e o impacto para cliente pode ser imediato.',
+    title: 'Public blocker',
+    detail: 'Used when runtime, readiness, or a mandatory database check fails and customer impact may be immediate.',
   },
   {
     eyebrow: 'Sev 2',
-    title: 'Capacidade degradada',
-    detail: 'Usamos este estado quando a base responde, mas checkout, IA, cache ou storage ainda nao sustentam a experiencia completa prometida.',
+    title: 'Degraded capability',
+    detail: 'Used when the base responds, but checkout, AI, cache, or storage still cannot support the full promised experience.',
   },
   {
     eyebrow: 'Sev 3',
-    title: 'Cobertura incompleta',
-    detail: 'Usamos este estado para lacunas de visibilidade publica: ausencia de historico, SLA ou prova de producao mais profunda.',
+    title: 'Incomplete coverage',
+    detail: 'Used for public visibility gaps: missing history, SLA, or deeper production proof.',
   },
 ]

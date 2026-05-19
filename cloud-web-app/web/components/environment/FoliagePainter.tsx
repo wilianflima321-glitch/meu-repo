@@ -14,7 +14,7 @@
  * - LOD system
  * - Wind animation
  * - Collision generation
- * - Exportar para runtime
+ * - Export para runtime
  */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
@@ -286,13 +286,13 @@ const DEFAULT_FOLIAGE_TYPES: FoliageType[] = [
 export interface FoliagePintarerProps {
   sceneId?: string;
   onFoliageUpdate?: (layers: FoliageCamada[]) => void;
-  onExportar?: (data: { layers: FoliageCamada[]; types: FoliageType[] }) => void;
+  onExport?: (data: { layers: FoliageCamada[]; types: FoliageType[] }) => void;
 }
 
 export default function FoliagePintarer({
   sceneId,
   onFoliageUpdate,
-  onExportar,
+  onExport,
 }: FoliagePintarerProps) {
   const backgroundColor = useMemo(
     () => resolveCssVarColor('--aethel-surface-primary', 'rgb(15, 23, 42)'),
@@ -575,9 +575,9 @@ export default function FoliagePintarer({
           </button>
 
           <button type="button" aria-label="Export foliage data"
-            onClick={() => onExportar?.({ layers, types: foliageTypes })}
+            onClick={() => onExport?.({ layers, types: foliageTypes })}
             className="p-2 rounded bg-[var(--aethel-success)] hover:bg-[var(--aethel-success)]"
-            title="Exportar"
+            title="Export"
           >
             <Download className="w-4 h-4" />
           </button>
@@ -683,7 +683,7 @@ export default function FoliagePintarer({
             defaultOpen={false}
           >
             <Slider
-              label="Inclinação minima"
+              label="Minimum slope"
               value={0}
               min={0}
               max={90}

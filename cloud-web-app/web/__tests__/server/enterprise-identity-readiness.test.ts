@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { buildEnterpriseIdentityReadiness } from '@/lib/security/enterprise-identity-readiness'
 import type { SamlReadiness } from '@/lib/security/saml'

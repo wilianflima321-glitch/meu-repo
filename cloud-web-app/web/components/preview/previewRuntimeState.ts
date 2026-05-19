@@ -70,10 +70,10 @@ export function derivePreviewRecommendedAction(payload: PreviewRuntimePayload): 
   const mode = String(payload?.metadata?.mode || '').trim();
 
   if (errorCode === 'RUNTIME_PROVISION_BACKEND_NOT_CONFIGURED') {
-    return 'Configure um provider gerenciado ou mantenha um dev server local ativo para review.';
+    return 'Configure um provider gerenciado ou mantenha um dev server local active para review.';
   }
   if (errorCode === 'RUNTIME_PROVISION_BROWSER_SIDE_PROVIDER') {
-    return 'Troque o provider para E2B ou endpoint gerenciado; WebContainers nao esta ativo nesta rota.';
+    return 'Troque o provider para E2B ou endpoint gerenciado; WebContainers nao esta active nesta rota.';
   }
   if (errorCode === 'RUNTIME_PROVISION_UNHEALTHY') {
     return 'Verifique logs do runtime, aguarde o warmup terminar ou caia para o preview inline.';
@@ -82,7 +82,7 @@ export function derivePreviewRecommendedAction(payload: PreviewRuntimePayload): 
     return 'Revise a URL retornada pelo provider antes de prometer review remoto para o time.';
   }
   if (strategy === 'local' || mode === 'local_fallback') {
-    return 'Mantenha o servidor local ativo para que o preview continue compartilhavel nesta sessao.';
+    return 'Mantenha o servidor local active para que o preview continue compartilhavel nesta sessao.';
   }
   if (strategy === 'managed') {
     return 'Acompanhe health, HMR e fallback antes de compartilhar esta URL como review canonico.';

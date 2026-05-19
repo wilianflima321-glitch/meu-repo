@@ -40,7 +40,7 @@ const bottomPanelTabs: ReadonlyArray<{
     id: 'chat',
     icon: <MessageSquare size={14} />,
     label: 'AI Console',
-    description: 'Promptos, contexto e operacao dos agentes',
+    description: 'Prompts, context, and agent operation',
   },
   {
     id: 'terminal',
@@ -201,7 +201,7 @@ export function ModernIDEShellCenterStack({
                   type="button"
                   onClick={toggleChat}
                   style={iconButtonStyle}
-                  aria-label={`Fechar ${activePanelMeta.label}`}
+                  aria-label={`Close ${activePanelMeta.label}`}
                 >
                   <X size={14} />
                 </button>

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import os from 'os';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/system/health/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -57,7 +60,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json(healthData);
   } catch (error) {
-    console.error('[system/health] Error:', error);
+    routeLogger.error('[system/health] Error:', error);
     return NextResponse.json(
       { error: 'health_check_failed' },
       { status: 500 }
@@ -120,6 +123,6 @@ async function checkServices() {
     status: service.url ? 'healthy' as const : 'unknown' as const,
     latency: null,
     lastCheck: new Date().toISOString(),
-    message: service.url ? 'Configurado' : 'Não configurado',
+    message: service.url ? 'Configured' : 'Not configured',
   }));
 }

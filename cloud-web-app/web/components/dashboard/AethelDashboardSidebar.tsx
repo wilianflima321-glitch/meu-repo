@@ -34,20 +34,20 @@ const PRIMARY_ITEMS: NavItem[] = [
   {
     tab: 'overview',
     label: 'Studio Home',
-    summary: 'Retome a missao principal sem sair da shell inicial do Studio.',
+    summary: 'Resume the main mission without leaving the Studio shell.',
     iconPrimary:
       'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
   },
   {
     tab: 'ai-chat',
     label: 'AI Console',
-    summary: 'Planeje, pesquise e coordene agents sem perder o contexto.',
+    summary: 'Plan, research, and coordinate agents without losing context.',
     iconPrimary: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
   },
   {
     tab: 'projects',
     label: 'Projects',
-    summary: 'Organize workspaces, handoffs e pontos de entrada.',
+    summary: 'Organize workspaces, handoffs, and entry points.',
     iconPrimary: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z',
     iconSecondary: 'M8 5a2 2 0 012-2h4a2 2 0 012 2v0M8 5a2 2 0 012-2h4a2 2 0 012 2v0',
   },
@@ -57,7 +57,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     id: 'ops',
     label: 'Operations',
-    description: 'Billing, wallet e readiness.',
+    description: 'Billing, wallet, and readiness.',
     items: [
       {
         tab: 'billing',
@@ -129,25 +129,25 @@ function getRecommendedNextStep(activeTab: ActiveTab): {
     case 'overview':
       return {
         label: 'Open AI Console',
-        description: 'Transforme a missao atual em plano, pesquisa e execucao.',
+        description: 'Turn the current mission into a plan, research, and execution path.',
         tab: 'ai-chat',
       }
     case 'ai-chat':
       return {
         label: 'Open Projects',
-        description: 'Escolha o workspace certo antes do handoff para o Studio.',
+        description: 'Choose the right workspace before handing off to the Studio.',
         tab: 'projects',
       }
     case 'projects':
       return {
         label: 'Expand Studio',
-        description: 'Leve o contexto para editor, viewport e review sem trocar de produto.',
+        description: 'Carry context into the editor, viewport, and review without switching products.',
         action: 'ide',
       }
     default:
       return {
         label: 'Back to Studio Home',
-        description: 'Volte para a superficie principal e reencontre a proxima melhor acao.',
+        description: 'Return to the main surface and find the next best action.',
         tab: 'overview',
       }
   }
@@ -197,7 +197,7 @@ export function AethelDashboardSidebar({
       className={`fixed z-50 h-full w-[300px] shrink-0 transform border-r border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(10,13,20,0.98),rgba(8,10,16,0.96))] shadow-[0_30px_80px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-in-out md:sticky md:top-[88px] md:h-[calc(100vh-104px)] md:rounded-r-3xl ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}
-      aria-label="Navegacao principal do studio"
+      aria-label="Primary Studio navigation"
     >
       <div className="flex h-full flex-col overflow-hidden">
         <div className="border-b border-[var(--aethel-border-subtle)] px-4 py-4">
@@ -219,7 +219,7 @@ export function AethelDashboardSidebar({
               type="button"
               onClick={onCloseMobile}
               className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--aethel-border-subtle)] text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)] md:hidden"
-              aria-label="Fechar navegacao"
+              aria-label="Close navigation"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

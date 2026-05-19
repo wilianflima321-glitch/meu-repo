@@ -1,4 +1,4 @@
-﻿export type GizmoTransformMode = 'translate' | 'rotate' | 'scale'
+export type GizmoTransformMode = 'translate' | 'rotate' | 'scale'
 export type GizmoTransformSpace = 'world' | 'local'
 export type GizmoTransformSource = 'user' | 'agent'
 export type GizmoSnapProfile = 'freeform' | 'gameplay-grid' | 'cinematic-shot' | 'ui-layout' | 'architecture'

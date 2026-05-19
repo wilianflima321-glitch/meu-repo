@@ -78,7 +78,7 @@ export async function computeAudioPeaksFromUrl(audioUrl: string, peakCount: numb
 
     return peaks
   } catch (err) {
-    logger.error('Falha ao calcular peaks de áudio:', err)
+    logger.error('Failed to calculate audio peaks:', err)
     return null
   }
 }

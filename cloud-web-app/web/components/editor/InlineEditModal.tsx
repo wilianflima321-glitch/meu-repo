@@ -22,11 +22,11 @@ import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing';
  * InlineEditModal - Componente de edição inline estilo Cursor AI
  *
  * Features:
- * - Cmd+K para abrir em qualquer seleção de código
+ * - Cmd+K para abrir em qualquer seleção de code
  * - Input de instrução com autocomplete
- * - Preview das mudanças antes de aceitar
- * - Undo/Redo das mudanças
- * - Histórico de comandos recentes
+ * - Preview das changes antes de aceitar
+ * - Undo/Redo das changes
+ * - History de comandos recentes
  */
 
 interface InlineEditModalProps {
@@ -48,10 +48,10 @@ interface EditSuggestion {
 }
 
 const QUICK_ACTIONS = [
-  { id: 'refactor', label: 'Refatorar', icon: RefreshCw, prompt: 'Refatore este código para ser mais limpo e legível' },
-  { id: 'optimize', label: 'Otimizar', icon: Wand2, prompt: 'Otimize este código para melhor performance' },
-  { id: 'fix', label: 'Corrigir', icon: AlertCircle, prompt: 'Corrija bugs e problemas neste código' },
-  { id: 'types', label: 'Add Types', icon: Code, prompt: 'Adicione tipos TypeScript a este código' },
+  { id: 'refactor', label: 'Refactor', icon: RefreshCw, prompt: 'Refactor this code to be cleaner and more readable' },
+  { id: 'optimize', label: 'Otimizar', icon: Wand2, prompt: 'Optimize this code for better performance' },
+  { id: 'fix', label: 'Corrigir', icon: AlertCircle, prompt: 'Fix bugs and issues in this code' },
+  { id: 'types', label: 'Add Types', icon: Code, prompt: 'Add TypeScript types to this code' },
 ];
 
 export function InlineEditModal({
@@ -71,10 +71,10 @@ export function InlineEditModal({
   const [showDiff, setShowDiff] = useState(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [recentCommands] = useState<string[]>([
-    'Adicione tratamento de erro',
+    'Add error handling',
     'Converta para async/await',
-    'Extraia para função separada',
-    'Adicione comentários JSDoc',
+    'Extract to a separate function',
+    'Add JSDoc comments',
   ]);
   const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
 
@@ -89,7 +89,7 @@ export function InlineEditModal({
     if (!suggestion) return;
     const applied = await Promise.resolve(onApply(suggestion.modified));
     if (!applied) {
-      setError('Aplicação bloqueada pela validação determinística. Revise o diff e tente novamente.');
+      setError('Apply blocked by deterministic validation. Review the diff and try again.');
       return;
     }
     onClose();
@@ -187,7 +187,7 @@ export function InlineEditModal({
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-[var(--aethel-primary)]" />
-              <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Edição Inline</span>
+              <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Inline edit</span>
               <kbd className="px-1.5 py-0.5 text-xs bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] rounded border border-[var(--aethel-border-primary)]">
                 ⌘K
               </kbd>
@@ -206,7 +206,7 @@ export function InlineEditModal({
           {/* Selected Code Preview */}
           {selectedCode && (
             <div className="px-4 py-2 border-b border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)]">
-              <div className="text-xs text-[var(--aethel-text-quaternary)] mb-1">Código selecionado:</div>
+              <div className="text-xs text-[var(--aethel-text-quaternary)] mb-1">Selected code:</div>
               <pre className="text-xs text-[var(--aethel-text-secondary)] font-mono max-h-24 overflow-auto">
                 {selectedCode.slice(0, 500)}
                 {selectedCode.length > 500 && '...'}
@@ -239,7 +239,7 @@ export function InlineEditModal({
                 ref={inputRef}
                 value={instruction}
                 onChange={(e) => setInstruction(e.target.value)}
-                placeholder="O que você quer fazer com este código?"
+                placeholder="What do you want to do with this code?"
                 className={`min-h-[60px] resize-none bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] pr-24 text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] ${focusClass}`}
                 aria-label="Descrever alteracao desejada no codigo selecionado"
                 onKeyDown={(e) => {
@@ -302,9 +302,9 @@ export function InlineEditModal({
               <div className="flex items-center justify-between px-4 py-2 bg-[var(--aethel-surface-tertiary)]">
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-[var(--aethel-success)]" />
-                  <span className="text-sm text-[var(--aethel-text-primary)]">Sugestão gerada</span>
+                  <span className="text-sm text-[var(--aethel-text-primary)]">Generated suggestion</span>
                   <span className="text-xs text-[var(--aethel-text-quaternary)]">
-                    {Math.round(suggestion.confidence * 100)}% confiança
+                    {Math.round(suggestion.confidence * 100)}% confidence
                   </span>
                 </div>
                 <div className="flex gap-2">

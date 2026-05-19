@@ -525,7 +525,7 @@ export function StatCard({
           <span className={`text-xs font-medium ${trend.positive ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-error-light)]'}`}>
             {trend.positive ? '↑' : '↓'} {trend.value}
           </span>
-          <span className="text-xs text-[var(--aethel-text-quaternary)]">vs último mês</span>
+          <span className="text-xs text-[var(--aethel-text-quaternary)]">vs last month</span>
         </div>
       )}
     </GlassCard>

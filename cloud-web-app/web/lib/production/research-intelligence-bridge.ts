@@ -1,4 +1,4 @@
-﻿import {
+import {
   AgenticProductionState,
   MissionLedgerEntry,
   ProductionGraphKey,

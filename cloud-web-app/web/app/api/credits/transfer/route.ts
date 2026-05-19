@@ -4,6 +4,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { Prisma } from '@prisma/client';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/credits/transfer/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +55,7 @@ export async function POST(req: NextRequest) {
     const currency = normalizeCurrency(body?.currency);
     if (currency !== 'credits') {
       return NextResponse.json(
-        { error: 'UNSUPPORTED_CURRENCY', message: 'Apenas currency="credits" é suportado.' },
+        { error: 'UNSUPPORTED_CURRENCY', message: 'Only currency="credits" is supported.' },
         { status: 400 }
       );
     }
@@ -60,7 +63,7 @@ export async function POST(req: NextRequest) {
     const rawTarget = String(body?.target_user_id ?? '').trim();
     if (!rawTarget) {
       return NextResponse.json(
-        { error: 'INVALID_TARGET', message: 'Campo "target_user_id" é obrigatório (userId ou email).' },
+        { error: 'INVALID_TARGET', message: 'Field "target_user_id" is required (userId or email).' },
         { status: 400 }
       );
     }
@@ -74,14 +77,14 @@ export async function POST(req: NextRequest) {
 
     if (!receiver) {
       return NextResponse.json(
-        { error: 'TARGET_NOT_FOUND', message: 'Destinatário não encontrado.' },
+        { error: 'TARGET_NOT_FOUND', message: 'Recipient not found.' },
         { status: 404 }
       );
     }
 
     if (receiver.id === user.userId) {
       return NextResponse.json(
-        { error: 'INVALID_TARGET', message: 'Não é permitido transferir para si mesmo.' },
+        { error: 'INVALID_TARGET', message: 'Transfers to yourself are not allowed.' },
         { status: 400 }
       );
     }
@@ -156,7 +159,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Transfer credits error:', error);
+    routeLogger.error('Transfer credits error:', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

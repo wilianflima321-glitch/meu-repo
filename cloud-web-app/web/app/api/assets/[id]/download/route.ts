@@ -11,6 +11,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { generateDownloadUrl, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api.assets.download');
 
 // ============================================================================
 // GET - Generate Download URL
@@ -82,7 +85,7 @@ export async function GET(
           expiresIn: 3600,
         });
       } catch (err) {
-        console.error('S3 presign error:', err);
+        routeLogger.warn('S3 presign error', err);
         // Fall through to direct URL
       }
     }
@@ -97,7 +100,7 @@ export async function GET(
       direct: true,
     });
   } catch (error: unknown) {
-    console.error('Download URL error:', error);
+    routeLogger.error('Download URL error', error);
     
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -214,7 +217,7 @@ export async function POST(
       expiresIn: 3600,
     });
   } catch (error: unknown) {
-    console.error('Batch download error:', error);
+    routeLogger.error('Batch download error', error);
     
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -10,7 +10,7 @@ function EntryNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
     <div className={`px-4 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)] shadow-lg ${selected ? 'ring-2 ring-white' : ''}`}>
       <div className="flex items-center gap-2">
         <CircleDot className="w-4 h-4" />
-        <span className="font-medium">Início</span>
+        <span className="font-medium">Start</span>
       </div>
       <Handle type="source" position={Position.Bottom} className="!bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]" />
     </div>
@@ -46,7 +46,7 @@ function DialogueNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
           </div>
         ))}
         {lines.length === 0 && (
-          <p className="text-xs text-[var(--aethel-text-quaternary)] italic">Sem linhas de diálogo</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic">No dialogue lines</p>
         )}
       </div>
 
@@ -89,7 +89,7 @@ function ChoiceNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
           </div>
         ))}
         {choices.length === 0 && (
-          <p className="text-xs text-[var(--aethel-text-quaternary)] italic p-2">Sem escolhas</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic p-2">No choices</p>
         )}
       </div>
     </div>
@@ -107,7 +107,7 @@ function ConditionNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
   return (
     <div className={`w-56 rounded-lg bg-[var(--aethel-surface-secondary)] border shadow-lg ${selected ? 'ring-2 ring-[var(--aethel-info)] border-[var(--aethel-primary)]' : 'border-[var(--aethel-border-secondary)]'}`}>
       <Handle type="target" position={Position.Top} className="!bg-[var(--aethel-primary)]" />
-
+<p className="text-xs text-[var(--aethel-text-quaternary)] italic">No condition defined</p>
       <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)] flex items-center gap-2">
         <Code className="w-4 h-4 text-[var(--aethel-primary)]" />
         <span className="font-medium text-sm text-[var(--aethel-text-primary)]">Condition</span>
@@ -119,7 +119,7 @@ function ConditionNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
             {condition.variable} {condition.operator} {String(condition.value)}
           </div>
         ) : (
-          <p className="text-xs text-[var(--aethel-text-quaternary)] italic">Sem condição definida</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic">No condition defined</p>
         )}
       </div>
 
@@ -170,7 +170,7 @@ function ActionNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
           </div>
         ))}
         {actions.length === 0 && (
-          <p className="text-xs text-[var(--aethel-text-quaternary)] italic p-2">Sem ações</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic p-2">No actions</p>
         )}
       </div>
 
@@ -250,7 +250,7 @@ export const initialNodes: Node<DialogueNodeData>[] = [
     id: 'entry',
     type: 'entry',
     position: { x: 400, y: 50 },
-    data: { label: 'Início', nodeType: 'entry' },
+    data: { label: 'Start', nodeType: 'entry' },
   },
   {
     id: 'dialogue1',
@@ -265,7 +265,7 @@ export const initialNodes: Node<DialogueNodeData>[] = [
           characterId: 'npc1',
           emotion: 'friendly',
           text: 'Welcome, traveler! Looking for something special today?',
-          localization: { 'pt-BR': 'Bem-vindo, viajante! Procurando algo especial hoje?' },
+          localization: { 'pt-BR': 'Welcome, viajante! Procurando algo especial hoje?' },
         },
       ],
     },
@@ -576,10 +576,10 @@ export function VariablesPanel({ variables, onAdd, onUpdate, onDelete }: Variabl
                 onClick={() => onDelete(i)}
                 className="p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
               >
-                <Trash2 className="w-3 h-3 text-[var(--aethel-error-light)]" />
-              </button>
-            </div>
-          ))}
+                Dialogue preview
+          </button>
+        </div>
+      ))}
 
           <button type="button"
             onClick={() => onAdd({ name: `var_${Date.now()}`, type: 'string', defaultValue: '' })}
@@ -624,7 +624,7 @@ export function PreviewPanel({
         className="flex items-center gap-2 px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded"
       >
         <Play className="w-4 h-4" />
-        Prévia do diálogo
+        Dialogue preview
       </button>
     );
   }
@@ -636,7 +636,7 @@ export function PreviewPanel({
   return (
     <div className="w-96 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl">
       <div className="flex items-center justify-between p-3 border-b border-[var(--aethel-border-primary)]">
-        <span className="text-sm font-medium">Prévia do diálogo</span>
+        <span className="text-sm font-medium">Dialogue preview</span>
         <button type="button" onClick={onToggle} className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded">
           <Pause className="w-4 h-4" />
         </button>

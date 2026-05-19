@@ -27,7 +27,7 @@ export function RunCard({ status, duration, cost, model, onInterrupt }: RunCardP
       bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]',
     },
     completed: {
-      label: 'Concluído',
+      label: 'Completed',
       color: 'text-[var(--aethel-success-light)]',
       bgColor: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]',
     },
@@ -63,7 +63,7 @@ export function RunCard({ status, duration, cost, model, onInterrupt }: RunCardP
             type="button"
             onClick={onInterrupt}
             className="flex items-center gap-1 px-2 py-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] text-[10px] font-medium text-[var(--aethel-error)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_22%,transparent)]"
-            aria-label="Interrupt operação"
+            aria-label="Interrupt operation"
           >
             <StopCircle className="w-3 h-3" />
             Interrupt

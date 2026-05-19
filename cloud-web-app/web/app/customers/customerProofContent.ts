@@ -31,7 +31,7 @@ export const TEAM_PROFILES: CustomerProofCard[] = [
     title: 'Times experimentando fluxos visuais, viewport e preview como superficie principal.',
     description:
       'Ainda e uma frente em maturacao, mas ja faz sentido para design partners que querem testar loops de cena, UI visual e validacao operacional sem perder governanca.',
-    bullets: ['Mockups navegaveis com preview', 'Iteracao sobre runtime e viewport', 'Validacao honesta do que ja esta pronto'],
+    bullets: ['Navigable mockups with preview', 'Iteration over runtime and viewport', 'Honest validation of what is already ready'],
   },
 ]
 

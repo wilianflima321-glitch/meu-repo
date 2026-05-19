@@ -39,7 +39,7 @@ const cards = [
     eyebrow: 'AI / agentes',
     title: 'Teste agentes com cuidado extra',
     description:
-      'Falhas envolvendo agentes, browser operator, memoria, runtime local/cloud, tool calls, prompts, arquivos ou aprovacao humana devem ser reportadas com passos seguros e sem executar acoes irreversiveis.',
+      'Failures involving agents, browser operator, memory, local/cloud runtime, tool calls, prompts, files, or human approval must be reported with safe steps and without executing irreversible actions.',
   },
   {
     eyebrow: 'Expectativa',

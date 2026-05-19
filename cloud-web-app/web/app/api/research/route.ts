@@ -13,6 +13,9 @@ import {
   exportResearch,
   checkResearchReadiness,
 } from '@/lib/research/research-agent';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/research/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -58,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Research error:', error);
+    routeLogger.error('Research error:', error);
     return NextResponse.json(
       { error: 'Research query failed' },
       { status: 500 }

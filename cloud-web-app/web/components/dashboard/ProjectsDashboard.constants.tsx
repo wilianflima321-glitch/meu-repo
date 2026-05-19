@@ -67,9 +67,9 @@ export const projectTypeOptions: Array<{ value: Project['type']; label: string }
 ];
 
 export const quickActions = [
-  { href: '/settings', label: 'Configuracoes', icon: <Settings size={20} /> },
+  { href: '/settings', label: 'Settings', icon: <Settings size={20} /> },
   { href: '/billing', label: 'Faturamento', icon: <CreditCard size={20} /> },
-  { href: '/team', label: 'Equipe', icon: <Users size={20} /> },
+  { href: '/team', label: 'Team', icon: <Users size={20} /> },
   { href: '/help', label: 'Suporte', icon: <AlertCircle size={20} /> },
 ] as const;
 
@@ -79,8 +79,8 @@ export const dashboardStatDefinitions: ReadonlyArray<{
   icon: React.ReactNode;
   color?: string;
 }> = [
-  { key: 'totalProjects', label: 'Total de Projetos', icon: <FolderOpen size={20} /> },
-  { key: 'activeProjects', label: 'Projetos Ativos', icon: <Zap size={20} />, color: colors.success },
+  { key: 'totalProjects', label: 'Total projects', icon: <FolderOpen size={20} /> },
+  { key: 'activeProjects', label: 'Active projects', icon: <Zap size={20} />, color: colors.success },
   { key: 'totalStorage', label: 'Storage Usado', icon: <Archive size={20} />, color: colors.accent },
   { key: 'aiTokensUsed', label: 'Tokens AI Usados', icon: <Sparkles size={20} />, color: colors.warning },
 ] as const;
@@ -97,7 +97,7 @@ export function formatRelativeProjectTime(date: string): string {
   const days = Math.floor(hours / 24);
   if (days > 0) return `${days}d atras`;
   if (hours > 0) return `${hours}h atras`;
-  return 'Agora';
+  return 'Now';
 }
 
 export function formatProjectTypeLabel(type: Project['type']): string {

@@ -10,6 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/logs/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +57,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Failed to get logs:', error);
+    routeLogger.error('Failed to get logs:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -89,7 +92,7 @@ export async function POST(request: NextRequest) {
       log,
     });
   } catch (error) {
-    console.error('Failed to create log:', error);
+    routeLogger.error('Failed to create log:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

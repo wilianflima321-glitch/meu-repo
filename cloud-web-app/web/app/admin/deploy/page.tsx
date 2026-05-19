@@ -21,12 +21,12 @@ export default function Deploy() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/deploy');
-      if (!res.ok) throw new Error('Falha ao carregar pipelines');
+      if (!res.ok) throw new Error('Failed to load pipelines');
       const json = await res.json();
       setPipelines(json.items || []);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar pipelines');
+      setError(err instanceof Error ? err.message : 'Error loading pipelines');
     } finally {
       setLoading(false);
     }
@@ -44,11 +44,11 @@ export default function Deploy() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error('Falha ao criar pipeline');
+      if (!res.ok) throw new Error('Failed to create pipeline');
       setForm({ name: '', provider: 'internal' });
       await fetchPipelines();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao criar pipeline');
+      setError(err instanceof Error ? err.message : 'Error creating pipeline');
     } finally {
       setSaving(false);
     }
@@ -61,10 +61,10 @@ export default function Deploy() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, action: 'run' }),
       });
-      if (!res.ok) throw new Error('Falha ao executar pipeline');
+      if (!res.ok) throw new Error('Failed to run pipeline');
       await fetchPipelines();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao executar pipeline');
+      setError(err instanceof Error ? err.message : 'Error running pipeline');
     }
   };
 
@@ -72,8 +72,8 @@ export default function Deploy() {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-bold'>CI/CD e implantação</h1>
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Pipelines auditáveis para build e lançamento.</p>
+          <h1 className='text-3xl font-bold'>CI/CD and deployment</h1>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Auditable pipelines for build and release.</p>
         </div>
         <button type="button" onClick={fetchPipelines} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
       </div>
@@ -107,7 +107,7 @@ export default function Deploy() {
             disabled={saving || !form.name.trim()}
             className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'
           >
-            {saving ? 'Criando...' : 'Criar pipeline'}
+            {saving ? 'Creating...' : 'Criar pipeline'}
           </button>
         </div>
       </div>
@@ -118,14 +118,14 @@ export default function Deploy() {
             <th className='p-2 text-left'>Nome</th>
             <th className='p-2 text-left'>Provedor</th>
             <th className='p-2 text-left'>Status</th>
-            <th className='p-2 text-left'>Última Execução</th>
-            <th className='p-2 text-left'>Ações</th>
+            <th className='p-2 text-left'>Last Run</th>
+            <th className='p-2 text-left'>Actions</th>
           </tr>
         </thead>
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando pipelines...</td>
+              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Loading pipelines...</td>
             </tr>
           ) : pipelines.length === 0 ? (
             <tr>

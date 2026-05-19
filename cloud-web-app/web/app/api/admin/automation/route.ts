@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/automation/route');
 
 // =============================================================================
 // AUTOMATION ADMIN API (Derived from audit logs)
@@ -46,7 +49,7 @@ async function getHandler(req: NextRequest) {
 
     return NextResponse.json({ items, summary });
   } catch (error) {
-    console.error('[Admin Automation] Error:', error);
+    routeLogger.error('[Admin Automation] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch automation data' }, { status: 500 });
   }
 }

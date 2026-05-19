@@ -251,7 +251,7 @@ function BreakpointList({ breakpoints, onToggle, onRemove, onEdit, onNavigate }:
     <div className="text-xs">
       {breakpoints.length === 0 ? (
         <div className="px-3 py-2 text-[var(--aethel-text-tertiary)] text-center">
-          Nenhum breakpoint
+          No breakpoint
         </div>
       ) : (
         breakpoints.map(bp => (
@@ -369,7 +369,7 @@ function WatchExpressions({ expressions, onAdd, onRemove, onEdit }: WatchExpress
           value={newExpression}
           onChange={(e) => setNewExpression(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          placeholder="Adicionar expressao..."
+          placeholder="Add expressao..."
           className="flex-1 bg-transparent border-none outline-none text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)]"
         />
         <button type="button" aria-label="Add watch expression"
@@ -394,7 +394,7 @@ function WatchExpressions({ expressions, onAdd, onRemove, onEdit }: WatchExpress
             ) : expr.result !== undefined ? (
               <div className="text-[var(--aethel-text-secondary)] truncate">{expr.result}</div>
             ) : (
-              <div className="text-[var(--aethel-text-quaternary)]">indisponivel</div>
+              <div className="text-[var(--aethel-text-quaternary)]">unavailable</div>
             )}
           </div>
           <button type="button" aria-label={`Remove watch expression ${expr.expression}`}
@@ -691,7 +691,7 @@ export default function DebugPanel({
           onClick={onStepInto}
           disabled={!isPaused}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] disabled:opacity-50"
-          title="Entrar (F11)"
+          title="Sign in (F11)"
         >
           <ArrowDown className="w-4 h-4" />
         </button>
@@ -700,7 +700,7 @@ export default function DebugPanel({
           onClick={onStepOut}
           disabled={!isPaused}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] disabled:opacity-50"
-          title="Sair (Shift+F11)"
+          title="Sign out (Shift+F11)"
         >
           <ArrowUp className="w-4 h-4" />
         </button>

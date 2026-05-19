@@ -10,6 +10,9 @@ import { optionalEnv } from '@/lib/env';
 import { getStripe, getStripePriceIdForPlan } from '@/lib/stripe';
 import { buildAppUrl } from '@/lib/server/app-origin';
 import { billingRuntimeCapabilityResponse, getBillingRuntimeState } from '@/lib/server/billing-runtime';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/billing/checkout/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -123,7 +126,7 @@ export async function POST(req: NextRequest) {
       sessionId: session.id,
     });
   } catch (error) {
-    console.error('Checkout error:', error);
+    routeLogger.error('Checkout error:', error);
 
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(

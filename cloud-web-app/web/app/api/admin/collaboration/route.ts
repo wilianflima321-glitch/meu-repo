@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/collaboration/route');
 
 // =============================================================================
 // COLLABORATION ADMIN API
@@ -36,7 +39,7 @@ export const GET = withAdminAuth(
 
       return NextResponse.json({ items });
     } catch (error) {
-      console.error('[Admin Collaboration] Error:', error);
+      routeLogger.error('[Admin Collaboration] Error:', error);
       return NextResponse.json({ error: 'Failed to fetch collaboration data' }, { status: 500 });
     }
   },
@@ -49,7 +52,7 @@ export const POST = withAdminAuth(
       const body = await request.json();
       const { projectId, status, reason } = body as { projectId?: string; status?: string; reason?: string };
       if (!projectId || !status) {
-        return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
+        return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
       }
 
       const projectAdminState = (prisma as any).projectAdminState;
@@ -83,7 +86,7 @@ export const POST = withAdminAuth(
 
       return NextResponse.json({ item: state });
     } catch (error) {
-      console.error('[Admin Collaboration] Error:', error);
+      routeLogger.error('[Admin Collaboration] Error:', error);
       return NextResponse.json({ error: 'Failed to update project state' }, { status: 500 });
     }
   },

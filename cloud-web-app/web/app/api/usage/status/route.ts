@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { getUsageStatus } from '@/lib/plan-limits';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/usage/status/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -51,7 +54,7 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Usage Status Error:', error);
+    routeLogger.error('Usage Status Error:', error);
     
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -59,7 +62,7 @@ export async function GET(req: NextRequest) {
     
     return NextResponse.json({ 
       error: 'USAGE_ERROR',
-      message: error instanceof Error ? error.message : 'Erro ao obter status de uso'
+      message: error instanceof Error ? error.message : 'Error getting usage status'
     }, { status: 500 });
   }
 }

@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/jobs/[id]/route');
 
 function isUnauthorizedError(error: unknown): boolean {
   return error instanceof Error && error.message === 'Unauthorized';
@@ -81,9 +84,9 @@ export async function GET(
         { status: 503 }
       );
     }
-    console.error('Erro ao buscar job:', error);
+    routeLogger.error('Error fetching job:', error);
     return NextResponse.json(
-      { error: 'Falha ao buscar job' },
+      { error: 'Failed to fetch job' },
       { status: 500 }
     );
   }
@@ -114,7 +117,7 @@ export async function DELETE(
     if (!result.cancelled) {
       if (result.reason === 'JOB_ACTIVE_CANNOT_CANCEL') {
         return NextResponse.json(
-          { error: 'Job ativo nao pode ser cancelado imediatamente', state: result.state },
+          { error: 'Active job cannot be cancelled immediately', state: result.state },
           { status: 409 }
         );
       }
@@ -149,9 +152,9 @@ export async function DELETE(
         { status: 503 }
       );
     }
-    console.error('Erro ao cancelar job:', error);
+    routeLogger.error('Error cancelling job:', error);
     return NextResponse.json(
-      { error: 'Falha ao cancelar job' },
+      { error: 'Failed to cancel job' },
       { status: 500 }
     );
   }

@@ -84,13 +84,13 @@ export function EditorApplyBridgeProvider({
     try {
       await writeFile(path, model.getValue())
     } catch {
-      // O `writeFile` do IDE ja expoe o erro no estado global.
+      // O `writeFile` do IDE ja expoe o error no estado global.
     }
   }, [activeFilePath, editorRef, writeFile])
 
   const stageDiffForActiveFile = useCallback(
     (newCode: string): ApplyBridgeResult => {
-      if (!activeFilePath) return { ok: false, message: 'Abra um arquivo no editor.' }
+      if (!activeFilePath) return { ok: false, message: 'Open a file in the editor.' }
       setPendingDiff(buildChatDiffFile(activeFilePath, activeFileContent, newCode))
       return { ok: true }
     },
@@ -100,7 +100,7 @@ export function EditorApplyBridgeProvider({
   const applySnippetToEditor = useCallback(
     (code: string): ApplyBridgeResult => {
       const editor = editorRef.current
-      if (!editor) return { ok: false, message: 'Editor nao esta pronto.' }
+      if (!editor) return { ok: false, message: 'Editor is not ready.' }
       const result = applySnippetAtCursor(editor, code)
       if (result.ok && activeFilePath) void persistActiveFileFromModel()
       return result
@@ -111,7 +111,7 @@ export function EditorApplyBridgeProvider({
   const insertAtCursor = useCallback(
     (code: string): ApplyBridgeResult => {
       const editor = editorRef.current
-      if (!editor) return { ok: false, message: 'Editor nao esta pronto.' }
+      if (!editor) return { ok: false, message: 'Editor is not ready.' }
       const result = insertSnippetAtCursor(editor, code)
       if (result.ok && activeFilePath) void persistActiveFileFromModel()
       return result
@@ -122,7 +122,7 @@ export function EditorApplyBridgeProvider({
   const replaceFile = useCallback(
     (code: string): ApplyBridgeResult => {
       const editor = editorRef.current
-      if (!editor) return { ok: false, message: 'Editor nao esta pronto.' }
+      if (!editor) return { ok: false, message: 'Editor is not ready.' }
       const result = replaceEntireDocument(editor, code)
       if (result.ok && activeFilePath) void persistActiveFileFromModel()
       return result
@@ -171,11 +171,11 @@ export function EditorApplyBridgeProvider({
 
   const createFileFromSnippet = useCallback(
     async (code: string): Promise<ApplyBridgeResult> => {
-      if (typeof window === 'undefined') return { ok: false, message: 'Indisponivel no servidor.' }
-      if (createFileBusy) return { ok: false, message: 'Ja existe uma criacao de arquivo em andamento.' }
+      if (typeof window === 'undefined') return { ok: false, message: 'Unavailable on the server.' }
+      if (createFileBusy) return { ok: false, message: 'A file creation is already in progress.' }
 
       const suggestedPath = activeFilePath
-        ? `${activeFilePath.replace(/\/[^/]+$/, '')}/novo-arquivo.ts`
+        ? `${activeFilePath.replace(/\/[^/]+$/, '')}/new-file.ts`
         : '/src/untitled.ts'
 
       setCreateFilePath(suggestedPath)
@@ -218,7 +218,7 @@ export function EditorApplyBridgeProvider({
       <Modal
         isOpen={createFileModalOpen}
         onClose={createFileBusy ? () => undefined : handleCancelCreateFile}
-        title="Criar novo arquivo"
+        title="Create new file"
         description="Escolha onde o snippet deve ser salvo no workspace."
         size="md"
         closeOnOverlayClick={!createFileBusy}
@@ -238,7 +238,7 @@ export function EditorApplyBridgeProvider({
               onClick={() => void handleConfirmCreateFile()}
               loading={createFileBusy}
             >
-              Criar arquivo
+              Create file
             </Button>
           </>
         }
@@ -246,7 +246,7 @@ export function EditorApplyBridgeProvider({
         <div className="space-y-4">
           <Input
             autoFocus
-            label="Caminho do arquivo"
+            label="File path"
             value={createFilePath}
             onChange={(event) => {
               setCreateFilePath(event.target.value)

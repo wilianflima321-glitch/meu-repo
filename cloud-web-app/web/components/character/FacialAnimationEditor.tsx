@@ -711,20 +711,25 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" aria-label={showFACS ? 'Ocultar referência FACS' : 'Mostrar referência FACS'}
+          <button
+            type="button"
+            aria-label={showFACS ? 'Hide FACS reference' : 'Show FACS reference'}
             onClick={() => setShowFACS(!showFACS)}
-            className={`px-3 py-1.5 text-sm rounded transition-colors
-                        ${showFACS ? 'bg-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
+            className={
+              showFACS
+                ? 'rounded bg-[var(--aethel-info)] px-3 py-1.5 text-sm transition-colors hover:bg-[var(--aethel-info)]'
+                : 'rounded bg-[var(--aethel-surface-quaternary)] px-3 py-1.5 text-sm transition-colors hover:bg-[var(--aethel-surface-quaternary)]'
+            }
           >
              FACS Reference
           </button>
-          <button type="button" aria-label="Resetar blend shapes faciais"
+          <button type="button" aria-label="Reset facial blend shapes"
             onClick={handleReset}
             className="px-3 py-1.5 text-sm bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
           >
              Reset
           </button>
-          <button type="button" aria-label="Exportar animacao facial em JSON"
+          <button type="button" aria-label="Export facial animation as JSON"
             onClick={handleExport}
             className="px-3 py-1.5 text-sm bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)] rounded transition-colors"
           >
@@ -788,13 +793,16 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
           {/* Category Tabs */}
           <div className="flex flex-wrap gap-1 p-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
             {BLEND_SHAPE_CATEGORIES.map(category => (
-              <button type="button" aria-label={`Selecionar categoria ${category.name} de blend shapes`}
+              <button
+                type="button"
+                aria-label="Select blend shape category"
                 key={category.name}
                 onClick={() => setActiveCategory(category.name)}
-                className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1
-                            ${activeCategory === category.name
-                              ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
+                className={
+                  activeCategory === category.name
+                    ? 'flex items-center gap-1 rounded bg-[var(--aethel-info)] px-3 py-1.5 text-xs text-[var(--aethel-text-primary)] transition-colors'
+                    : 'flex items-center gap-1 rounded bg-[var(--aethel-surface-quaternary)] px-3 py-1.5 text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-quaternary)]'
+                }
               >
                 <span>{category.icon}</span>
                 <span>{category.name}</span>

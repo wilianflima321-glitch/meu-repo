@@ -15,6 +15,9 @@ import { headObject, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
 import { buildAssetQualityReport, inferAssetClassFromNameAndMime } from '@/lib/server/asset-quality';
 import { evaluateAssetIntakePolicy } from '@/lib/server/asset-intake-policy';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/assets/[id]/confirm/route');
 
 // ============================================================================
 // POST - Confirm Upload
@@ -79,7 +82,7 @@ export async function POST(
             { status: 400 }
           );
         }
-        console.warn('S3 verification skipped:', s3Error);
+        routeLogger.warn('S3 verification skipped:', s3Error);
       }
     }
 
@@ -153,7 +156,7 @@ export async function POST(
       },
     });
   } catch (error: unknown) {
-    console.error('Confirm upload error:', error);
+    routeLogger.error('Confirm upload error:', error);
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

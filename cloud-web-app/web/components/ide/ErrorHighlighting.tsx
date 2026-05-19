@@ -67,7 +67,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-3">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-[var(--aethel-warning-light)]" />
-          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Problemas</span>
+          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Issues</span>
           <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{filteredErrors.length}</span>
         </div>
         <button
@@ -135,9 +135,9 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
               <div className="flex items-center justify-center py-8 text-[var(--aethel-text-tertiary)] text-sm">
                 <div className="text-center">
                   <CheckCircle className="w-12 h-12 mx-auto mb-3 text-[var(--aethel-success-light)]" />
-                 <p>{errors.length === 0 ? 'Integração Monaco pendente' : 'Nenhum problema encontrado'}</p>
+                 <p>{errors.length === 0 ? 'Monaco integration pending' : 'No issues found'}</p>
                   <p className="text-xs mt-1">
-                    {errors.length === 0 ? 'Aguardando diagnósticos do editor.' : 'Seu código está limpo'}
+                    {errors.length === 0 ? 'Waiting for editor diagnostics.' : 'Your code is clean'}
                   </p>
                 </div>
               </div>
@@ -219,7 +219,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1">
                   <XCircle className="w-3 h-3 text-[var(--aethel-error-light)]" />
-                  {getTypeCount('error')} erros
+                  {getTypeCount('error')} errors
                 </span>
                 <span className="flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3 text-[var(--aethel-warning-light)]" />

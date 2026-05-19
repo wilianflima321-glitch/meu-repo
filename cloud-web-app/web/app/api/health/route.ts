@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/health/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +25,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Health check failed:', error);
+    routeLogger.error('Health check failed:', error);
     return NextResponse.json(
       {
         status: 'unhealthy',

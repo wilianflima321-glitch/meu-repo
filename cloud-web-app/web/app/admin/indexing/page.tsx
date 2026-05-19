@@ -18,14 +18,14 @@ export default function IndexingPage() {
       setLoading(true);
       const query = searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : '';
       const res = await fetch(`/api/admin/indexing${query}`);
-      if (!res.ok) throw new Error('Falha ao carregar indexação');
+      if (!res.ok) throw new Error('Failed to load indexing');
       const json = await res.json();
       setFiles(json.files || []);
       setDepthLevel(json.config?.depthLevel ?? 3);
       setMaxFileSizeMb(json.config?.maxFileSizeMb ?? 10);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar indexação');
+      setError(err instanceof Error ? err.message : 'Error loading indexing');
     } finally {
       setLoading(false);
     }
@@ -43,10 +43,10 @@ export default function IndexingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ depthLevel, maxFileSizeMb }),
       });
-      if (!res.ok) throw new Error('Falha ao atualizar configuração');
+      if (!res.ok) throw new Error('Failed to update setting');
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar configuração');
+      setError(err instanceof Error ? err.message : 'Error updating setting');
     } finally {
       setSaving(false);
     }
@@ -59,10 +59,10 @@ export default function IndexingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileId: file.id, indexed: !file.indexed, context: file.context }),
       });
-      if (!res.ok) throw new Error('Falha ao atualizar indexação');
+      if (!res.ok) throw new Error('Failed to update indexing');
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar indexação');
+      setError(err instanceof Error ? err.message : 'Error updating indexing');
     }
   };
 
@@ -70,8 +70,8 @@ export default function IndexingPage() {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Indexação avançada</h1>
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Controle de indexação RAG com auditoria.</p>
+          <h1 className="text-2xl font-bold">Advanced indexing</h1>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Control RAG indexing with audit.</p>
         </div>
         <button type="button" onClick={fetchData} className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm">Atualizar</button>
       </div>
@@ -79,11 +79,11 @@ export default function IndexingPage() {
       {error && <div className="bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4">{error}</div>}
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Busca no projeto</h2>
+        <h2 className="text-lg font-semibold mb-4">Project search</h2>
         <div className="flex gap-4">
           <input
             type="text"
-            placeholder="Buscar por arquivo ou contexto"
+            placeholder="Search by file or context"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="border p-2 flex-1"
@@ -93,26 +93,26 @@ export default function IndexingPage() {
       </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Configurações de contexto</h2>
+        <h2 className="text-lg font-semibold mb-4">Settings de contexto</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium">Nível de profundidade</label>
+            <label className="block text-sm font-medium">Level de profundidade</label>
             <input type="number" value={depthLevel} onChange={(e) => setDepthLevel(Number(e.target.value))} className="border p-2 w-full" />
           </div>
           <div>
-            <label className="block text-sm font-medium">Tamanho máximo (MB)</label>
+            <label className="block text-sm font-medium">Maximum size (MB)</label>
             <input type="number" value={maxFileSizeMb} onChange={(e) => setMaxFileSizeMb(Number(e.target.value))} className="border p-2 w-full" />
           </div>
         </div>
         <button type="button" onClick={updateConfig} disabled={saving} className="mt-4 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">
-          {saving ? 'Salvando...' : 'Atualizar configurações'}
+          {saving ? 'Saving...' : 'Update settings'}
         </button>
       </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Arquivos Indexados</h2>
+        <h2 className="text-lg font-semibold mb-4">Indexed Files</h2>
         {loading ? (
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Carregando arquivos...</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Loading files...</p>
         ) : (
           <ul>
             {files.map(file => (
@@ -123,7 +123,7 @@ export default function IndexingPage() {
                   <p className="text-sm">{file.context || 'Sem contexto'}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">{file.indexed ? 'Indexado' : 'Não Indexado'}</span>
+                  <span className="px-2 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">{file.indexed ? 'Indexed' : 'Not Indexed'}</span>
                   <button type="button" onClick={() => toggleIndex(file)} className="bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)] px-3 py-1 rounded text-sm">Alternar</button>
                 </div>
               </li>

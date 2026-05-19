@@ -11,11 +11,12 @@
  * - Streaming support
  */
 
-import * as monaco from 'monaco-editor';
+import type * as monaco from 'monaco-editor';
 
 import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('ai/inline-completion')
+type MonacoApi = typeof import('monaco-editor');
 
 // AI completion types
 interface AICompletionRequest {
@@ -217,22 +218,22 @@ export class InlineCompletionProvider implements monaco.languages.InlineCompleti
     
     // Get prefix (text before cursor)
     const startLine = Math.max(1, position.lineNumber - maxLines);
-    const prefixRange = new monaco.Range(
-      startLine,
-      1,
-      position.lineNumber,
-      position.column
-    );
+    const prefixRange = {
+      startLineNumber: startLine,
+      startColumn: 1,
+      endLineNumber: position.lineNumber,
+      endColumn: position.column,
+    };
     const prefix = model.getValueInRange(prefixRange);
 
     // Get suffix (text after cursor)
     const endLine = Math.min(lineCount, position.lineNumber + maxLines);
-    const suffixRange = new monaco.Range(
-      position.lineNumber,
-      position.column,
-      endLine,
-      model.getLineMaxColumn(endLine)
-    );
+    const suffixRange = {
+      startLineNumber: position.lineNumber,
+      startColumn: position.column,
+      endLineNumber: endLine,
+      endColumn: model.getLineMaxColumn(endLine),
+    };
     const suffix = model.getValueInRange(suffixRange);
 
     return { prefix, suffix };
@@ -381,12 +382,12 @@ ${prefix}<|fim_suffix|>${suffix}<|fim_middle|>`;
       startColumn = wordAtPosition.startColumn;
     }
 
-    const range = new monaco.Range(
-      position.lineNumber,
+    const range = {
+      startLineNumber: position.lineNumber,
       startColumn,
-      position.lineNumber,
-      position.column
-    );
+      endLineNumber: position.lineNumber,
+      endColumn: position.column,
+    };
 
     return {
       items: [
@@ -453,6 +454,7 @@ let providerDisposable: monaco.IDisposable | null = null;
  * Register inline completion provider for Monaco
  */
 export function registerInlineCompletionProvider(
+  monaco: MonacoApi,
   languages: string[] = ['typescript', 'javascript', 'python', 'rust', 'go', 'cpp', 'java'],
   config?: Partial<InlineCompletionConfig>
 ): monaco.IDisposable {

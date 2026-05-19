@@ -3,6 +3,9 @@ import { requireAuth } from '@/lib/auth-server'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { queueManager } from '@/lib/queue-system'
 
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/render/jobs/[jobId]/cancel/route');
 export const dynamic = 'force-dynamic'
 const CAPABILITY = 'RENDER_JOB_CANCEL'
 
@@ -114,7 +117,7 @@ export async function POST(
       },
     })
   } catch (error) {
-    console.error('[render/jobs/cancel] Error:', error)
+    routeLogger.error('[render/jobs/cancel] Error:', error)
     return NextResponse.json({ error: 'Failed to cancel render job' }, { status: 500 })
   }
 }

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 export { XTerminal, default } from './BaseXTerminal';
 export { MultiTerminalPanel } from './MultiTerminalPanel';

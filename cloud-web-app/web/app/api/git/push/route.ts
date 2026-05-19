@@ -5,6 +5,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/git/push/route');
 
 const execFileAsync = promisify(execFile);
 
@@ -36,7 +39,7 @@ export async function POST(request: NextRequest) {
       message: 'Push completed successfully'
     });
   } catch (error: unknown) {
-    console.error('Git push failed:', error);
+    routeLogger.error('Git push failed:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return NextResponse.json(

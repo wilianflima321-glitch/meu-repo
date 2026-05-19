@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/updates/route');
 
 // =============================================================================
 // UPDATES ADMIN API (Derived from audit logs)
@@ -52,7 +55,7 @@ async function getHandler(req: NextRequest) {
 
     return NextResponse.json({ items, summary });
   } catch (error) {
-    console.error('[Admin Updates] Error:', error);
+    routeLogger.error('[Admin Updates] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch updates' }, { status: 500 });
   }
 }

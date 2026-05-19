@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/dashboard/route');
 
 export const dynamic = 'force-dynamic';
 
@@ -116,7 +119,7 @@ export async function GET(request: NextRequest) {
       generatedAt: new Date(),
     });
   } catch (error) {
-    console.error('Failed to get admin dashboard:', error);
+    routeLogger.error('Failed to get admin dashboard:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

@@ -1,4 +1,4 @@
-﻿import type { AgentType } from '../agent-orchestrator'
+import type { AgentType } from '../agent-orchestrator'
 import { SUPPORTED_AGENT_TYPES } from '../agent-orchestrator'
 
 export type WorkforceMissionType =

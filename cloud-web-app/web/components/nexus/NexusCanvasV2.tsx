@@ -109,12 +109,12 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
     if (!containerRef.current || isInitialized) return;
     const containerElement = containerRef.current;
 
-    // Criar cena
+    // Create cena
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a0e27); // Deep Space Dark
     sceneRef.current = scene;
 
-    // Criar câmera
+    // Create câmera
     const camera = new THREE.PerspectiveCamera(
       75,
       containerElement.clientWidth / containerElement.clientHeight,
@@ -138,7 +138,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
     containerElement.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // Adicionar iluminação
+    // Add iluminação
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
@@ -149,7 +149,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
     directionalLight.shadow.mapSize.height = 2048;
     scene.add(directionalLight);
 
-    // Adicionar grid helper (modo draft)
+    // Add grid helper (modo draft)
     if (renderMode === 'draft') {
       const gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x222222);
       scene.add(gridHelper);
@@ -207,7 +207,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
     };
   }, [initialScene, isInitialized, loadSceneObjects, renderMode]);
 
-  // Adicionar novo objeto à cena
+  // Add novo objeto à cena
   const addObject = useCallback((obj: SceneObject) => {
     if (!sceneRef.current) return;
 
@@ -240,7 +240,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
     }
   }, [onSceneChange]);
 
-  // Remover objeto da cena
+  // Remove objeto da cena
   const removeObject = useCallback((id: string) => {
     const obj = objectsRef.current.get(id);
     if (obj && sceneRef.current) {
@@ -310,10 +310,10 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
                   animation: 'pulse 1.5s ease-in-out infinite',
                 }}
               />
-              <span style={{ fontWeight: 600 }}>IA Criando</span>
+              <span style={{ fontWeight: 600 }}>IA Creating</span>
             </div>
             <div style={{ marginTop: '8px', fontSize: '11px', opacity: 0.9 }}>
-              {paintingProgress.toFixed(0)}% concluído
+              {paintingProgress.toFixed(0)}% done
             </div>
             <div
               style={{

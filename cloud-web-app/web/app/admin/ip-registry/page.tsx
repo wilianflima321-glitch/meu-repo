@@ -30,7 +30,7 @@ export default function AdminIpRegistryPage() {
   const [message, setMessage] = useState<string | null>(null);
   const statusLabels: Record<string, string> = {
     licensed: 'Licenciado',
-    owned: 'Proprietário',
+    owned: 'Owner',
     restricted: 'Restrito',
   };
 
@@ -43,7 +43,7 @@ export default function AdminIpRegistryPage() {
       const j = await res.json() as Registry;
       setData(j);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao carregar registro");
+      setError(e instanceof Error ? e.message : "Error loading registro");
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ export default function AdminIpRegistryPage() {
       setMessage('Registro salvo com sucesso.');
       await fetchRegistry();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao salvar registro");
+      setError(e instanceof Error ? e.message : "Error saving registro");
     } finally {
       setLoading(false);
     }
@@ -83,9 +83,9 @@ export default function AdminIpRegistryPage() {
         body: JSON.stringify({ ip }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setMessage(`Ingestão solicitada para ${ip}.`);
+      setMessage(`Ingestion requested for ${ip}.`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao ingerir RAG");
+      setError(e instanceof Error ? e.message : "RAG ingestion error");
     } finally {
       setLoading(false);
     }
@@ -120,25 +120,25 @@ export default function AdminIpRegistryPage() {
   const allowedList = useMemo(() => data?.allowed || [], [data]);
   const licensesList = useMemo(() => Object.entries(data?.licenses || {}), [data]);
 
-  if (loading && !data) return <div className="p-6">Carregando…</div>;
-  if (error) return <div className="p-6 text-[var(--aethel-error)]">Erro: {error}</div>;
+  if (loading && !data) return <div className="p-6">Loading...</div>;
+  if (error) return <div className="p-6 text-[var(--aethel-error)]">Error: {error}</div>;
 
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Registro de IPs</h1>
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Controle de permissões e licenças com auditoria.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Control permissions and licenses with audit.</p>
         </div>
         <div className="flex gap-2">
           <button type="button" className="px-3 py-1 bg-[var(--aethel-surface-secondary)] rounded" onClick={fetchRegistry}>Atualizar</button>
-          <button type="button" className="px-3 py-1 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded" onClick={saveRegistry}>Salvar</button>
+          <button type="button" className="px-3 py-1 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded" onClick={saveRegistry}>Save</button>
         </div>
       </div>
 
       {message && <div className="bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] text-[var(--aethel-success)] p-3 rounded">{message}</div>}
 
-      {!data ? <div>Nenhum dado disponível.</div> : (
+      {!data ? <div>No data available.</div> : (
         <div className="grid md:grid-cols-2 gap-6">
           <section className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
             <h2 className="text-xl font-medium mb-2">IPs permitidos</h2>
@@ -161,7 +161,7 @@ export default function AdminIpRegistryPage() {
             </ul>
           </section>
           <section className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
-            <h2 className="text-xl font-medium mb-2">Licenças</h2>
+            <h2 className="text-xl font-medium mb-2">Licenses</h2>
             <div className="grid grid-cols-1 gap-2 mb-4">
               <input
                 className="border p-2 rounded text-sm"
@@ -175,7 +175,7 @@ export default function AdminIpRegistryPage() {
                 onChange={(e) => setLicenseForm((prev) => ({ ...prev, status: e.target.value }))}
               >
                 <option value="licensed">Licenciado</option>
-                <option value="owned">Proprietário</option>
+                <option value="owned">Owner</option>
                 <option value="restricted">Restrito</option>
               </select>
               <input
@@ -213,7 +213,7 @@ export default function AdminIpRegistryPage() {
                   <div className="text-sm text-[var(--aethel-text-secondary)]">Status: {statusLabels[lic.status] ?? lic.status}</div>
                   {lic.holder && <div className="text-sm">Titular: {lic.holder}</div>}
                   {lic.since && <div className="text-sm">Desde: {lic.since}</div>}
-                  {lic.until && <div className="text-sm">Até: {lic.until}</div>}
+                  {lic.until && <div className="text-sm">Until: {lic.until}</div>}
                   {lic.notes && <div className="text-sm">Notas: {lic.notes}</div>}
                 </li>
               ))}

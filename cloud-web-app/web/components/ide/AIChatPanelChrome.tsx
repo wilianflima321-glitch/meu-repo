@@ -17,7 +17,7 @@ export function AttachmentPreview({ attachment, onRemove }: AttachmentPreviewPro
           type="button"
           onClick={onRemove}
           className="ml-1 rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-          aria-label="Remover anexo"
+          aria-label="Remove anexo"
         >
           <X className="h-3 w-3" />
         </button>
@@ -50,7 +50,7 @@ export function ChatHistorySidebar({
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-secondary)] px-3 py-2">
         <div className="flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)]">
           <History className="h-4 w-4" />
-          Historico
+          History
         </div>
         <div className="flex items-center gap-1">
           {onCreateThread && (
@@ -67,7 +67,7 @@ export function ChatHistorySidebar({
               type="button"
               onClick={onClose}
               className="rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-              aria-label="Fechar historico"
+              aria-label="Close history"
             >
               <X className="h-3 w-3" />
             </button>
@@ -108,7 +108,7 @@ export function ChatHistorySidebar({
                   onClick={() => onDeleteThread(thread.id)}
                   className="text-[11px] text-[var(--aethel-error)] transition-colors hover:text-[var(--aethel-error)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 >
-                  Excluir
+                  Delete
                 </button>
               )}
             </div>
@@ -132,7 +132,7 @@ export function LiveModeIndicator({ status = 'idle', onEnd }: LiveModeIndicatorP
         ? 'Pensando'
         : status === 'speaking'
           ? 'Falando'
-          : 'Pronto'
+          : 'Ready'
   return (
     <div className="flex items-center justify-between gap-3 border-b border-[var(--aethel-border-secondary)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.86))] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
       <div className="flex items-center gap-2">

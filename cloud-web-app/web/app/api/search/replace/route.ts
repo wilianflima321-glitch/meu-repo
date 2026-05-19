@@ -4,6 +4,9 @@ import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { getSearchRuntime } from '@/lib/server/search-runtime';
 import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/search/replace/route');
 
 /**
  * POST /api/search/replace - Search and Replace in Workspace
@@ -71,7 +74,7 @@ export async function POST(request: NextRequest) {
       ...result,
     });
   } catch (error) {
-    console.error('Replace failed:', error);
+    routeLogger.error('Replace failed:', error);
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

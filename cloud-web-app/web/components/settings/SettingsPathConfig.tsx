@@ -80,7 +80,7 @@ const PATH_CONFIGS: Omit<PathConfig, 'path' | 'isValid'>[] = [
   {
     id: 'blenderPath',
     name: 'Blender',
-    description: 'Caminho para o executavel do Blender (renderizacao 3D)',
+    description: 'Path to the Blender executable (3D rendering)',
     isRequired: true,
     defaultPaths: [
       'C:\\Program Files\\Blender Foundation\\Blender 4.0\\blender.exe',
@@ -93,7 +93,7 @@ const PATH_CONFIGS: Omit<PathConfig, 'path' | 'isValid'>[] = [
   {
     id: 'ffmpegPath',
     name: 'FFmpeg',
-    description: 'Caminho para o FFmpeg (processamento de video)',
+    description: 'Path to FFmpeg (video processing)',
     isRequired: false,
     defaultPaths: ['C:\\ffmpeg\\bin\\ffmpeg.exe', '/usr/local/bin/ffmpeg', '/usr/bin/ffmpeg'],
     icon: 'FF',
@@ -101,23 +101,23 @@ const PATH_CONFIGS: Omit<PathConfig, 'path' | 'isValid'>[] = [
   {
     id: 'pythonPath',
     name: 'Python',
-    description: 'Caminho para o interpretador Python',
+    description: 'Path to the Python interpreter',
     isRequired: false,
     defaultPaths: ['C:\\Python311\\python.exe', 'C:\\Python310\\python.exe', '/usr/bin/python3', '/usr/local/bin/python3'],
     icon: 'PY',
   },
   {
     id: 'projectsPath',
-    name: 'Pasta de projetos',
-    description: 'Onde seus projetos Aethel serao salvos',
+    name: 'Project folder',
+    description: 'Where your Aethel projects will be saved',
     isRequired: true,
     defaultPaths: ['%USERPROFILE%\\Documents\\Aethel Projects', '~/Documents/Aethel Projects'],
     icon: 'PR',
   },
   {
     id: 'cachePath',
-    name: 'Pasta de cache',
-    description: 'Onde arquivos temporarios serao armazenados',
+    name: 'Cache folder',
+    description: 'Where temporary files will be stored',
     isRequired: false,
     defaultPaths: ['%LOCALAPPDATA%\\Aethel\\Cache', '~/.cache/aethel'],
     icon: 'CH',
@@ -351,7 +351,7 @@ export const SettingsPathConfig: React.FC<{
           <div className="flex items-center gap-3">
             <Settings className="h-5 w-5" style={{ color: 'var(--aethel-info-light)' }} />
             <div>
-              <h2 className="text-base font-semibold" style={{ color: 'var(--aethel-text-primary)' }}>Configuracao de caminhos</h2>
+              <h2 className="text-base font-semibold" style={{ color: 'var(--aethel-text-primary)' }}>Path configuration</h2>
               <p className="text-xs" style={{ color: 'var(--aethel-text-tertiary)' }}>Configure onde encontrar programas externos</p>
             </div>
           </div>

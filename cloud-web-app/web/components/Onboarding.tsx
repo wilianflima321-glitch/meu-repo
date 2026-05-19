@@ -205,33 +205,33 @@ export function WelcomeModal({ mission }: { mission?: string }) {
   const welcomeSteps = mission ? [
     {
       title: `Vamos criar: ${mission}`,
-      description: 'Seu workspace foi configurado automaticamente. Agora vamos configurar os detalhes específicos do seu projeto.',
+      description: 'Your workspace was configured automatically. Now let us configure the specific details of your project.',
       icon: <Sparkles className="w-12 h-12 text-[var(--aethel-primary-light)]" />,
     },
     {
       title: 'Configure sua IA',
-      description: 'Escolha seu provider de IA para começar a desenvolver com inteligência artificial integrada.',
+      description: 'Choose your AI provider to start building with integrated artificial intelligence.',
       icon: <Target className="w-12 h-12 text-[var(--aethel-info-light)]" />,
     },
     {
       title: 'Explore o IDE',
-      description: 'Conheça o Editor, Preview e AI Console. Tudo conectado para desenvolvimento ágil.',
+      description: 'Meet the editor, preview, and AI console. Everything is connected for fast development.',
       icon: <Layout className="w-12 h-12 text-[var(--aethel-success-light)]" />,
     },
     {
       title: 'Comece a desenvolver',
-      description: 'Seu projeto está pronto. Use o AI Console para gerar código e veja o preview em tempo real.',
+      description: 'Your project is ready. Use the AI console to generate code and view the preview in real time.',
       icon: <Rocket className="w-12 h-12 text-[var(--aethel-warning-light)]" />,
     },
   ] : [
     {
-      title: 'Bem-vindo ao Aethel Engine',
-      description: 'Estúdio focado em Apps e Research com governança rigorosa. Games e Films seguem em roadmap.',
+      title: 'Welcome ao Aethel Engine',
+      description: 'Studio focused on apps and research with rigorous governance. Games and films remain on the roadmap.',
       icon: <Sparkles className="w-12 h-12 text-[var(--aethel-primary-light)]" />,
     },
     {
-      title: 'Crie seu primeiro projeto',
-      description: 'Escolha um template e defina o objetivo. O sistema cria a base e você valida cada passo.',
+      title: 'Create your first project',
+      description: 'Choose a template and define the goal. The system creates the base and you validate each step.',
       icon: <Rocket className="w-12 h-12 text-[var(--aethel-info-light)]" />,
     },
     {
@@ -241,7 +241,7 @@ export function WelcomeModal({ mission }: { mission?: string }) {
     },
     {
       title: 'Colabore com sua equipe',
-      description: 'Convide colegas, revise mudanças e mantenha rastreabilidade nas entregas.',
+      description: 'Convide colegas, revise changes e mantenha rastreabilidade nas entregas.',
       icon: <Users className="w-12 h-12 text-[var(--aethel-warning-light)]" />,
     },
   ];
@@ -327,32 +327,32 @@ export function WelcomeModal({ mission }: { mission?: string }) {
 const CHECKLIST_ITEMS: OnboardingStep[] = [
   {
     id: 'dependency_check',
-    title: 'Checar runtime e integrações',
+    title: 'Check runtime and integrations',
     description: 'Preview, storage, billing e provedores de IA',
     completed: false,
   },
   {
     id: 'profile_setup',
     title: 'Ajuste seu perfil',
-    description: 'Nome, time e preferências do studio',
+    description: 'Name, team, and studio preferences',
     completed: false,
   },
   {
     id: 'first_project',
-    title: 'Crie seu primeiro projeto',
+    title: 'Create your first project',
     description: 'Use um template base para acelerar o fluxo',
     completed: false,
   },
   {
     id: 'explore_editor',
     title: 'Explore o editor',
-    description: 'Conheça o IDE, preview e painel de status',
+    description: 'Meet the IDE, preview, and status panel',
     completed: false,
   },
   {
     id: 'try_ai',
     title: 'Use a IA',
-    description: 'Peça uma mudança pequena e valide o resultado',
+    description: 'Request a small change and validate the result',
     completed: false,
   },
   {
@@ -364,7 +364,7 @@ const CHECKLIST_ITEMS: OnboardingStep[] = [
   {
     id: 'publish_first',
     title: 'Finalize uma entrega',
-    description: 'Exportar ou preparar deploy para validar o ciclo',
+    description: 'Export ou preparar deploy para validar o ciclo',
     completed: false,
   },
 ];
@@ -407,14 +407,14 @@ export function OnboardingChecklist() {
   if (!state || state.currentStep === 'completed') return null;
 
   const dependencySummary = (() => {
-    if (!health) return 'Aguardando verificação de dependências...';
+    if (!health) return 'Waiting for dependency verification...';
     const total = health.dependencies?.length || 0;
     const ok = health.dependencies?.filter(dep => dep.status === 'healthy').length || 0;
     const requiredMissing = health.missingRequired?.length || 0;
     if (requiredMissing > 0) {
-      return `Faltam ${requiredMissing} dependências críticas`;
+      return `Faltam ${requiredMissing} critical dependencies`;
     }
-    return `${ok}/${total} dependências ok`;
+    return `${ok}/${total} dependencies ok`;
   })();
 
   const items = CHECKLIST_ITEMS.map(item => {
@@ -437,11 +437,11 @@ export function OnboardingChecklist() {
   const healthLabel = (value: SystemHealthReport['overall']) => {
     switch (value) {
       case 'healthy':
-        return 'Saudável';
+        return 'Healthy';
       case 'degraded':
         return 'Parcial';
       case 'unhealthy':
-        return 'Indisponível';
+        return 'Inavailable';
       default:
         return 'Desconhecido';
     }
@@ -479,12 +479,12 @@ export function OnboardingChecklist() {
           <div className="p-2 max-h-64 overflow-y-auto">
             <div className="px-2 pb-3">
               <div className="flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
-                <span>Dependências do sistema</span>
+                <span>System dependencies</span>
                 <button type="button"
                   onClick={fetchHealth}
                   className="text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)] transition-colors"
                 >
-                  {healthLoading ? 'Verificando...' : 'Reverificar'}
+                  {healthLoading ? 'Checking...' : 'Reverificar'}
                 </button>
               </div>
               {healthError && (
@@ -508,7 +508,7 @@ export function OnboardingChecklist() {
                   </div>
                   {health.missingRequired && health.missingRequired.length > 0 && (
                     <div className="text-[var(--aethel-error-light)]">
-                      Críticas: {health.missingRequired.join(', ')}
+                      Critical: {health.missingRequired.join(', ')}
                     </div>
                   )}
                   {health.missingOptional && health.missingOptional.length > 0 && (
@@ -590,11 +590,11 @@ export function OnboardingChecklist() {
 // ============================================================================
 
 const ACHIEVEMENTS: Achievement[] = [
-  { id: 'first_project', name: 'Primeiro projeto', description: 'Criou o primeiro projeto', icon: 'P1', category: 'beginner' },
-  { id: 'ai_master', name: 'Fluxo de IA', description: 'Executou 10 mudanças com IA', icon: 'AI', category: 'ai' },
-  { id: 'collaborator', name: 'Colaboração', description: 'Convidou uma pessoa do time', icon: 'TEAM', category: 'social' },
-  { id: 'publisher', name: 'Entrega pronta', description: 'Gerou uma entrega válida', icon: 'DEP', category: 'delivery' },
-  { id: 'week_streak', name: 'Ritmo semanal', description: 'Ativo por 7 dias', icon: '7D', category: 'engagement' },
+  { id: 'first_project', name: 'First project', description: 'Created the first project', icon: 'P1', category: 'beginner' },
+  { id: 'ai_master', name: 'Fluxo de IA', description: 'Executou 10 changes com IA', icon: 'AI', category: 'ai' },
+  { id: 'collaborator', name: 'Collaboration', description: 'Invited a teammate', icon: 'TEAM', category: 'social' },
+  { id: 'publisher', name: 'Delivery ready', description: 'Generated a valid delivery', icon: 'DEP', category: 'delivery' },
+  { id: 'week_streak', name: 'Ritmo semanal', description: 'Active por 7 days', icon: '7D', category: 'engagement' },
 ];
 
 export function AchievementBadge({ achievement }: { achievement: Achievement }) {

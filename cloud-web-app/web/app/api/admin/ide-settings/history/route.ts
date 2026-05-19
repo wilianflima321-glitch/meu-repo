@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/admin/ide-settings/history/route');
 
 const ACTIONS = ['IDE_SETTINGS_UPDATE', 'IDE_SETTINGS_PUBLISH'];
 
@@ -31,7 +34,7 @@ export const GET = withAdminAuth(
 
       return NextResponse.json({ items });
     } catch (error) {
-      console.error('[Admin IDE Settings History] Error:', error);
+      routeLogger.error('[Admin IDE Settings History] Error:', error);
       return NextResponse.json({ error: 'Failed to fetch history' }, { status: 500 });
     }
   },

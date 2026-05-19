@@ -23,7 +23,7 @@ const CHECKS = [
   {
     name: 'dashboard-hydration-loading',
     file: 'app/dashboard/page.tsx',
-    patterns: ['Carregando Studio Home...', 'role="status"', 'aria-live="polite"'],
+    patterns: ['Loading Studio Home...', 'role="status"', 'aria-live="polite"'],
   },
   {
     name: 'dashboard-main-skip-link',
@@ -38,7 +38,7 @@ const CHECKS = [
   {
     name: 'dashboard-sidebar-mobile-close',
     file: 'components/dashboard/AethelDashboardSidebar.tsx',
-    patterns: ['id="dashboard-sidebar"', 'aria-label="Fechar navegacao"'],
+    patterns: ['id="dashboard-sidebar"', 'aria-label="Close navigation"'],
   },
   {
     name: 'login-accessibility-baseline',

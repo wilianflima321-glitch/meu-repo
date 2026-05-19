@@ -85,7 +85,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 		const body = await req.json().catch(() => null);
 		if (!body || typeof body !== 'object') {
-			return NextResponse.json({ error: 'INVALID_BODY', message: 'Body JSON inválido.' }, { status: 400 });
+			return NextResponse.json({ error: 'INVALID_BODY', message: 'Invalid JSON body.' }, { status: 400 });
 		}
 
 		const payload = body as AiStreamRequestBody;
