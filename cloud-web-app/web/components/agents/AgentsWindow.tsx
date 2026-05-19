@@ -5,6 +5,7 @@ import { Activity, AlertTriangle, Bot, CheckCircle2, Lock, Pause, Play, RefreshC
 import useSWR from 'swr'
 
 import { AgentFleetCoordinatorStrip } from '@/components/ai/AgentFleetCoordinatorStrip'
+import { BrowserOperatorReplay } from '@/components/agents/BrowserOperatorReplay'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 import { cn } from '@/lib/utils'
 
@@ -143,6 +144,8 @@ function AgentCard({ member }: { member: AgentFleetMemberSnapshot }) {
 
 export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
   const [selectedAgentId, setSelectedAgentId] = useState('universal')
+  const [activeView, setActiveView] = useState<'fleet' | 'replay'>('fleet')
+  const [replayRunId, setReplayRunId] = useState('')
   const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
   const currentProjectId = projectId && projectId !== 'default' ? projectId : null
   const canLoadFleet = Boolean(currentProjectId)
@@ -218,6 +221,70 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
         onSelectAgentId={setSelectedAgentId}
       />
 
+      <div className="flex items-center gap-1 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_84%,transparent)] px-3 py-2" role="tablist" aria-label="Agent operation views">
+        {[
+          { id: 'fleet' as const, label: 'Fleet', hint: 'Locks and scope' },
+          { id: 'replay' as const, label: 'Replay', hint: 'Browser evidence' },
+        ].map((view) => {
+          const active = activeView === view.id
+          return (
+            <button
+              key={view.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setActiveView(view.id)}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-left',
+                focusClass,
+                active
+                  ? 'bg-[var(--aethel-surface-elevated)] text-[var(--aethel-text-primary)] shadow-[var(--aethel-shadow-soft)]'
+                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]',
+              )}
+            >
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.14em]">{view.label}</span>
+              <span className="block text-[10px] normal-case tracking-normal text-[var(--aethel-text-muted)]">{view.hint}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {activeView === 'replay' ? (
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-4">
+          <div className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Browser Operator Replay</p>
+            <h3 className="mt-1 text-base font-semibold text-[var(--aethel-text-primary)]">Evidence-first autonomous browsing</h3>
+            <p className="mt-1 max-w-2xl text-xs leading-5 text-[var(--aethel-text-secondary)]">
+              Paste a recorded run id to inspect screenshots, policy blockers, approvals, and replay evidence before trusting autonomous browser work.
+            </p>
+            <label className="mt-4 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]" htmlFor="browser-replay-run-id">
+              Run id
+            </label>
+            <input
+              id="browser-replay-run-id"
+              value={replayRunId}
+              onChange={(event) => setReplayRunId(event.target.value.trim())}
+              placeholder="bor_..."
+              className={cn(
+                'mt-2 w-full rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)]',
+                focusClass,
+              )}
+            />
+          </div>
+
+          {replayRunId ? (
+            <BrowserOperatorReplay runId={replayRunId} />
+          ) : (
+            <div className="rounded-2xl border border-dashed border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-6 text-center">
+              <ShieldCheck className="mx-auto h-8 w-8 text-[var(--aethel-primary-light)]" />
+              <p className="mt-3 text-sm font-semibold text-[var(--aethel-text-primary)]">Replay is ready when evidence exists</p>
+              <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-[var(--aethel-text-tertiary)]">
+                Browser Operator should never be a black box. This view keeps pause, approval, takeover, and policy evidence in the same cockpit as the agent fleet.
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-4">
         <header className="flex flex-col gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -285,6 +352,7 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
           ))}
         </div>
       </div>
+      )}
     </section>
   )
 }

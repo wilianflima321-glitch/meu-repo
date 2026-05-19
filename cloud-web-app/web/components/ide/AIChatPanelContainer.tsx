@@ -14,11 +14,15 @@ import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 const MODELS = DEFAULT_MODELS
 
-export default function AIChatPanelContainer() {
+type AIChatPanelContainerProps = {
+  projectId?: string
+}
+
+export default function AIChatPanelContainer({ projectId: workspaceProjectId }: AIChatPanelContainerProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [currentModel, setCurrentModel] = useState(MODELS[0].id)
   const [isLoading, setIsLoading] = useState(false)
-  const [projectId, setProjectId] = useState<string | undefined>(undefined)
+  const [projectId, setProjectId] = useState<string | undefined>(workspaceProjectId)
   const [mission, setMission] = useState<string | null>(null)
   const [source, setSource] = useState<string | null>(null)
   const [activeRail, setActiveRail] = useState<'composer' | 'agents'>('composer')
@@ -26,6 +30,7 @@ export default function AIChatPanelContainer() {
 
   useAIChatSessionContext({
     currentModel,
+    fallbackProjectId: workspaceProjectId,
     setMessages,
     setMission,
     setProjectId,

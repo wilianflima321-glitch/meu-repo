@@ -168,7 +168,7 @@ export function FullscreenIDEWorkspace({
                   onFileSelect={onFileSelect}
                 />
               ),
-              chat: <AIChatPanelContainer />,
+              chat: <AIChatPanelContainer projectId={projectId} />,
               terminal: <MultiTerminalPanel className="h-full" />,
               editor: <WorkbenchEditorPane {...editorPaneProps} />,
               preview: <WorkbenchPreviewPane {...previewPaneProps} />,

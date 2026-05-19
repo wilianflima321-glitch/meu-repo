@@ -8,6 +8,7 @@ import type { ChatMessage } from '@/components/ai-chat/ai-chat-container.types'
 
 type UseAIChatSessionContextArgs = {
   currentModel: string
+  fallbackProjectId?: string
   setMessages: Dispatch<SetStateAction<ChatMessage[]>>
   setProjectId: Dispatch<SetStateAction<string | undefined>>
   setMission: Dispatch<SetStateAction<string | null>>
@@ -23,13 +24,14 @@ function getProjectIdFromLocation(): string | undefined {
 
 export function useAIChatSessionContext({
   currentModel,
+  fallbackProjectId,
   setMessages,
   setProjectId,
   setMission,
   setSource,
 }: UseAIChatSessionContextArgs) {
   useEffect(() => {
-    setProjectId(getProjectIdFromLocation())
+    setProjectId(getProjectIdFromLocation() ?? fallbackProjectId)
 
     if (typeof window === 'undefined') return
 
@@ -38,7 +40,7 @@ export function useAIChatSessionContext({
     const sourceParam = params.get('source')
     setMission(missionParam && missionParam.trim() ? missionParam.trim() : null)
     setSource(sourceParam && sourceParam.trim() ? sourceParam.trim() : null)
-  }, [setMission, setProjectId, setSource])
+  }, [fallbackProjectId, setMission, setProjectId, setSource])
 
   useEffect(() => {
     const handoff = consumeResearchHandoff()
