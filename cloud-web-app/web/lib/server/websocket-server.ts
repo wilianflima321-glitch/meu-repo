@@ -10,24 +10,42 @@ import type { RawData } from 'ws';
 import { EventEmitter } from 'events';
 import { createServer, IncomingMessage, Server as HttpServer } from 'http';
 import { createRequire } from 'module';
-import jwt from 'jsonwebtoken';
 import * as Y from 'yjs';
 
 import type { TerminalPtyManager, TerminalSessionConfig } from './terminal-pty-runtime';
 import type { ParsedWebSocketUrl } from './websocket-runtime-codecs';
 import type {
   ConnectionInfo,
-  ConnectionType,
-  DecodedAuthPayload,
   LegacyExportState,
   WsChannel,
   WsClient,
   WsMessage,
-  WsMetadata,
   WsRecord,
 } from './websocket-runtime-contracts';
 
 const require = createRequire(import.meta.url);
+const { ensureUserIdentity, handleClientAuth } = require('./websocket/auth.ts') as typeof import('./websocket/auth');
+const {
+  buildHealthPayload,
+  buildMetricsPayload,
+  buildStatsPayload,
+  startHeartbeat,
+} = require('./websocket/presence.ts') as typeof import('./websocket/presence');
+const {
+  addLegacyRoomClient,
+  broadcastToAll: broadcastToAllChannels,
+  broadcastToChannel: broadcastToRoomChannel,
+  broadcastToLegacyRoom: broadcastToLegacyRoomClients,
+  removeLegacyRoomClient,
+  removeSocketFromLegacyRooms,
+  subscribeToChannel: subscribeClientToChannel,
+  unsubscribeFromChannel: unsubscribeClientFromChannel,
+} = require('./websocket/rooms.ts') as typeof import('./websocket/rooms');
+const {
+  sendError: sendTransportError,
+  sendRaw: sendRawTransport,
+  sendToClient: sendTransportToClient,
+} = require('./websocket/transport.ts') as typeof import('./websocket/transport');
 const { getQueueRedis } = require('../redis-queue.ts') as typeof import('../redis-queue');
 const { createComponentLogger } = require('../observability/logger.ts') as typeof import('../observability/logger');
 const { getTerminalPtyManager } = require('./terminal-pty-runtime.ts') as typeof import('./terminal-pty-runtime');
@@ -291,12 +309,7 @@ export class AethelWebSocketServer extends EventEmitter {
       }
     }
 
-    for (const [roomName, clients] of this.legacyRooms.entries()) {
-      clients.delete(ws);
-      if (clients.size === 0) {
-        this.legacyRooms.delete(roomName);
-      }
-    }
+    removeSocketFromLegacyRooms(this.legacyRooms, ws);
 
     this.connections.delete(ws);
     this.emit('connectionClosed', { id: info.id, type: info.type, mode: info.mode });
@@ -363,7 +376,9 @@ export class AethelWebSocketServer extends EventEmitter {
     const queryToken = typeof query.token === 'string' ? query.token : undefined;
     const queryUserId = typeof query.userId === 'string' ? query.userId : undefined;
     if (queryToken || queryUserId) {
-      this.handleAuth(client, { token: queryToken, userId: queryUserId }, false);
+      handleClientAuth(client, { token: queryToken, userId: queryUserId }, false, (event) =>
+        this.emit('authenticated', event)
+      );
     }
 
     this.emit('connection', { clientId, connectionId: info.id });
@@ -390,7 +405,7 @@ export class AethelWebSocketServer extends EventEmitter {
 
     switch (type) {
       case WS_MESSAGE_TYPES.AUTH:
-        this.handleAuth(client, payload, true);
+        handleClientAuth(client, payload, true, (event) => this.emit('authenticated', event));
         break;
 
       case WS_MESSAGE_TYPES.PING:
@@ -493,198 +508,15 @@ export class AethelWebSocketServer extends EventEmitter {
   }
 
   // ==========================================================================
-  // Authentication
-  // ==========================================================================
-
-  private isGuestAuthAllowed(): boolean {
-    const override = process.env.AETHEL_ALLOW_INSECURE_WS_AUTH;
-    if (override === 'true') {
-      return true;
-    }
-    if (override === 'false') {
-      return false;
-    }
-    return process.env.NODE_ENV !== 'production';
-  }
-
-  private getJwtSecret(): string | null {
-    const secret = process.env.JWT_SECRET;
-    if (!secret || secret === 'your-secret-key-change-in-production') {
-      return null;
-    }
-    return secret;
-  }
-
-  private verifyJwtToken(token: string): DecodedAuthPayload | null {
-    const secret = this.getJwtSecret();
-    if (!secret) {
-      return null;
-    }
-
-    try {
-      const decoded = jwt.verify(token, secret) as jwt.JwtPayload & DecodedAuthPayload;
-      if (!decoded.userId) {
-        return null;
-      }
-
-      return {
-        userId: decoded.userId,
-        email: decoded.email,
-        role: decoded.role,
-      };
-    } catch (error) {
-      log.warn('[WebSocket] JWT verification failed', error);
-      return null;
-    }
-  }
-
-  private handleAuth(client: WsClient, payload: unknown, closeOnFailure: boolean): void {
-    const data = asWsRecord(payload);
-    const token = readString(data.token)?.trim() || '';
-    const requestedUserId = readString(data.userId)?.trim() || '';
-
-    if (token) {
-      const decoded = this.verifyJwtToken(token);
-      if (!decoded) {
-        this.sendToClient(client, {
-          type: WS_MESSAGE_TYPES.AUTH_ERROR,
-          channel: 'system',
-          payload: { error: 'Invalid or expired token' },
-        });
-        if (closeOnFailure) {
-          setTimeout(() => client.ws.close(4001, 'Invalid token'), 100);
-        }
-        return;
-      }
-
-      this.setClientIdentity(client, decoded.userId, {
-        email: decoded.email,
-        role: decoded.role,
-        authMode: 'jwt',
-      });
-      this.sendToClient(client, {
-        type: WS_MESSAGE_TYPES.AUTH_SUCCESS,
-        channel: 'system',
-        payload: {
-          userId: decoded.userId,
-          role: decoded.role,
-        },
-      });
-      this.emit('authenticated', { clientId: client.id, userId: decoded.userId });
-      return;
-    }
-
-    const fallbackUserId = this.ensureUserIdentity(client, requestedUserId || undefined);
-    if (!fallbackUserId) {
-      this.sendToClient(client, {
-        type: WS_MESSAGE_TYPES.AUTH_ERROR,
-        channel: 'system',
-        payload: { error: 'Authentication required' },
-      });
-      if (closeOnFailure) {
-        setTimeout(() => client.ws.close(4001, 'Authentication required'), 100);
-      }
-      return;
-    }
-
-    this.sendToClient(client, {
-      type: WS_MESSAGE_TYPES.AUTH_SUCCESS,
-      channel: 'system',
-      payload: {
-        userId: fallbackUserId,
-        role: 'guest',
-        insecure: true,
-      },
-    });
-    this.emit('authenticated', { clientId: client.id, userId: fallbackUserId });
-  }
-
-  private ensureUserIdentity(client: WsClient, requestedUserId?: string): string | null {
-    if (client.userId) {
-      return client.userId;
-    }
-
-    if (!this.isGuestAuthAllowed()) {
-      return null;
-    }
-
-    const userId = requestedUserId || `guest_${client.id}`;
-    this.setClientIdentity(client, userId, { authMode: 'guest' });
-    return userId;
-  }
-
-  private setClientIdentity(client: WsClient, userId: string, metadata: WsMetadata): void {
-    client.userId = userId;
-    client.metadata = {
-      ...client.metadata,
-      ...metadata,
-      authenticatedAt: Date.now(),
-    };
-  }
-
-  // ==========================================================================
   // Channel management
   // ==========================================================================
 
   private subscribeToChannel(client: WsClient, channelName: string, options?: unknown): void {
-    if (!channelName) {
-      this.sendError(client, 'Channel name is required');
-      return;
-    }
-
-    let channel = this.channels.get(channelName);
-    if (!channel) {
-      let type: WsChannel['type'] = 'general';
-      if (channelName.startsWith('terminal:')) type = 'terminal';
-      else if (channelName.startsWith('collab:')) type = 'collaboration';
-      else if (channelName.startsWith('files:')) type = 'filewatcher';
-
-      channel = {
-        name: channelName,
-        clients: new Set(),
-        type,
-        metadata: asWsRecord(asWsRecord(options).metadata),
-      };
-      this.channels.set(channelName, channel);
-    }
-
-    channel.clients.add(client.id);
-    client.channels.add(channelName);
-
-    this.sendToClient(client, {
-      type: WS_MESSAGE_TYPES.SUBSCRIBED,
-      channel: channelName,
-      payload: {
-        clients: channel.clients.size,
-        metadata: channel.metadata,
-      },
-    });
-
-    this.emit('subscribed', { clientId: client.id, channel: channelName });
+    subscribeClientToChannel(this.getRoomContext(), client, channelName, options);
   }
 
   private unsubscribeFromChannel(client: WsClient, channelName: string, notifyClient: boolean = true): void {
-    const channel = this.channels.get(channelName);
-    if (!channel) {
-      return;
-    }
-
-    channel.clients.delete(client.id);
-    client.channels.delete(channelName);
-
-    if (channel.clients.size === 0) {
-      this.channels.delete(channelName);
-    }
-
-    if (notifyClient) {
-      this.sendToClient(client, {
-        type: WS_MESSAGE_TYPES.UNSUBSCRIBED,
-        channel: channelName,
-        payload: {},
-      });
-    }
-
-    this.emit('unsubscribed', { clientId: client.id, channel: channelName });
+    unsubscribeClientFromChannel(this.getRoomContext(), client, channelName, notifyClient);
   }
 
   // ==========================================================================
@@ -693,7 +525,7 @@ export class AethelWebSocketServer extends EventEmitter {
 
   private async handleTerminalCreate(client: WsClient, payload: unknown): Promise<void> {
     const data = asWsRecord(payload);
-    const userId = this.ensureUserIdentity(client, readString(data.userId));
+    const userId = ensureUserIdentity(client, readString(data.userId));
     if (!userId) {
       this.sendToClient(client, {
         type: WS_MESSAGE_TYPES.TERMINAL_ERROR,
@@ -827,7 +659,7 @@ export class AethelWebSocketServer extends EventEmitter {
   private handleCollabJoin(client: WsClient, payload: unknown): void {
     const data = asWsRecord(payload);
     const documentId = readString(data.documentId) || 'default';
-    const userId = this.ensureUserIdentity(client, readString(data.userId));
+    const userId = ensureUserIdentity(client, readString(data.userId));
     const channelName = `collab:${documentId}`;
 
     this.subscribeToChannel(client, channelName, {
@@ -870,7 +702,7 @@ export class AethelWebSocketServer extends EventEmitter {
 
   private handleCollabChat(client: WsClient, channel: string, payload: unknown): void {
     const data = asWsRecord(payload);
-    const userId = this.ensureUserIdentity(client, readString(data.userId));
+    const userId = ensureUserIdentity(client, readString(data.userId));
     this.broadcastToChannel(channel, {
       type: WS_MESSAGE_TYPES.COLLAB_CHAT,
       channel,
@@ -1001,9 +833,7 @@ export class AethelWebSocketServer extends EventEmitter {
       ws.send(state);
     }
 
-    const room = this.legacyRooms.get(roomName) || new Set<WebSocket>();
-    room.add(ws);
-    this.legacyRooms.set(roomName, room);
+    const room = addLegacyRoomClient(this.legacyRooms, roomName, ws);
 
     this.broadcastToLegacyRoom(
       roomName,
@@ -1114,16 +944,13 @@ export class AethelWebSocketServer extends EventEmitter {
         const message = asWsRecord(JSON.parse(data.toString()));
         if (message.type === 'join-room') {
           const roomName = String(message.room || 'default');
-          const room = this.legacyRooms.get(roomName) || new Set<WebSocket>();
-          room.add(ws);
-          this.legacyRooms.set(roomName, room);
+          addLegacyRoomClient(this.legacyRooms, roomName, ws);
           this.sendRaw(ws, { type: 'room-joined', room: roomName });
           return;
         }
 
         if (message.type === 'leave-room') {
-          const room = this.legacyRooms.get(String(message.room || ''));
-          room?.delete(ws);
+          removeLegacyRoomClient(this.legacyRooms, String(message.room || ''), ws);
           return;
         }
 
@@ -1148,65 +975,23 @@ export class AethelWebSocketServer extends EventEmitter {
   // ==========================================================================
 
   private sendToClient(client: WsClient, message: WsMessage): void {
-    if (client.ws.readyState !== WebSocket.OPEN) {
-      return;
-    }
-
-    client.ws.send(
-      JSON.stringify({
-        ...message,
-        timestamp: message.timestamp || Date.now(),
-      })
-    );
+    sendTransportToClient(client, message);
   }
 
   private sendError(client: WsClient, error: string): void {
-    this.sendToClient(client, {
-      type: WS_MESSAGE_TYPES.ERROR,
-      channel: 'system',
-      payload: { error },
-    });
+    sendTransportError(client, error, WS_MESSAGE_TYPES.ERROR);
   }
 
   broadcastToChannel(channelName: string, message: WsMessage, excludeClientId?: string): void {
-    const channel = this.channels.get(channelName);
-    if (!channel) {
-      return;
-    }
-
-    for (const clientId of channel.clients) {
-      if (clientId === excludeClientId) {
-        continue;
-      }
-
-      const client = this.clients.get(clientId);
-      if (client) {
-        this.sendToClient(client, message);
-      }
-    }
+    broadcastToRoomChannel(this.getRoomContext(), channelName, message, excludeClientId);
   }
 
   broadcastToAll(message: WsMessage, excludeClientId?: string): void {
-    for (const client of this.clients.values()) {
-      if (client.id === excludeClientId) {
-        continue;
-      }
-      this.sendToClient(client, message);
-    }
+    broadcastToAllChannels(this.getRoomContext(), message, excludeClientId);
   }
 
   broadcastToLegacyRoom(roomName: string, message: unknown, exclude?: WebSocket): void {
-    const room = this.legacyRooms.get(roomName);
-    if (!room) {
-      return;
-    }
-
-    for (const client of room) {
-      if (client === exclude || client.readyState !== WebSocket.OPEN) {
-        continue;
-      }
-      this.sendRaw(client, message);
-    }
+    broadcastToLegacyRoomClients(this.legacyRooms, roomName, message, exclude);
   }
 
   broadcastRawToAll(message: unknown, exclude?: WebSocket): void {
@@ -1219,40 +1004,7 @@ export class AethelWebSocketServer extends EventEmitter {
   }
 
   private sendRaw(ws: WebSocket, message: unknown): void {
-    if (ws.readyState !== WebSocket.OPEN) {
-      return;
-    }
-
-    if (typeof message === 'string') {
-      ws.send(message);
-      return;
-    }
-
-    if (Array.isArray(message)) {
-      if (message.every((item) => typeof item === 'number')) {
-        ws.send(Buffer.from(message));
-      } else {
-        ws.send(JSON.stringify(message));
-      }
-      return;
-    }
-
-    if (Buffer.isBuffer(message)) {
-      ws.send(message);
-      return;
-    }
-
-    if (message instanceof ArrayBuffer) {
-      ws.send(Buffer.from(message));
-      return;
-    }
-
-    if (ArrayBuffer.isView(message)) {
-      ws.send(Buffer.from(message.buffer, message.byteOffset, message.byteLength));
-      return;
-    }
-
-    ws.send(JSON.stringify(message));
+    sendRawTransport(ws, message);
   }
 
   notifyFileChange(
@@ -1285,21 +1037,16 @@ export class AethelWebSocketServer extends EventEmitter {
   // ==========================================================================
 
   private startPingInterval(): void {
-    this.pingInterval = setInterval(() => {
-      const now = Date.now();
-
-      for (const [clientId, client] of this.clients) {
-        if (!client.isAlive || now - client.lastPing > this.clientTimeout) {
-          log.info(`Terminating inactive client: ${clientId}`);
-          client.ws.terminate();
-          this.handleDisconnect(client);
-          continue;
-        }
-
-        client.isAlive = false;
-        client.ws.ping();
-      }
-    }, this.pingIntervalMs);
+    this.pingInterval = startHeartbeat({
+      clients: this.clients,
+      clientTimeoutMs: this.clientTimeout,
+      intervalMs: this.pingIntervalMs,
+      onInactive: (client, clientId) => {
+        log.info(`Terminating inactive client: ${clientId}`);
+        client.ws.terminate();
+        this.handleDisconnect(client);
+      },
+    });
   }
 
   private stopPingInterval(): void {
@@ -1313,80 +1060,39 @@ export class AethelWebSocketServer extends EventEmitter {
   // Metrics & stats
   // ==========================================================================
 
-  private getConnectionCounts(): Record<ConnectionType, number> {
-    const counts: Record<ConnectionType, number> = {
-      collaboration: 0,
-      terminal: 0,
-      lsp: 0,
-      ai: 0,
-      dap: 0,
-      export: 0,
-      general: 0,
-    };
-
-    for (const info of this.connections.values()) {
-      counts[info.type] += 1;
-    }
-
-    return counts;
-  }
-
   private getHealthPayload() {
-    return {
-      status: 'ok',
-      service: 'aethel-websocket-server',
-      connections: this.connections.size,
-      modernClients: this.clients.size,
-      channels: this.channels.size,
-      rooms: this.legacyRooms.size,
-      uptime: process.uptime(),
-    };
+    return buildHealthPayload(this.getPresenceSnapshot());
   }
 
   private getStatsPayload() {
-    return {
-      totalConnections: this.connections.size,
-      modernClients: this.clients.size,
-      channels: Array.from(this.channels.entries()).map(([name, channel]) => ({
-        name,
-        clients: channel.clients.size,
-        type: channel.type,
-      })),
-      legacyRooms: Array.from(this.legacyRooms.entries()).map(([name, clients]) => ({
-        name,
-        clients: clients.size,
-      })),
-      connectionsByType: this.getConnectionCounts(),
-      memory: process.memoryUsage(),
-    };
+    return buildStatsPayload(this.getPresenceSnapshot());
   }
 
   private getMetricsPayload(): string {
-    const lines = [
-      '# HELP aethel_ws_connections Current active WebSocket connections',
-      '# TYPE aethel_ws_connections gauge',
-      `aethel_ws_connections ${this.connections.size}`,
-      '# HELP aethel_ws_clients Current active modern WebSocket clients',
-      '# TYPE aethel_ws_clients gauge',
-      `aethel_ws_clients ${this.clients.size}`,
-      '# HELP aethel_ws_channels Current active runtime channels',
-      '# TYPE aethel_ws_channels gauge',
-      `aethel_ws_channels ${this.channels.size}`,
-      '# HELP aethel_ws_rooms Current active collaboration rooms',
-      '# TYPE aethel_ws_rooms gauge',
-      `aethel_ws_rooms ${this.legacyRooms.size}`,
-    ];
-
-    for (const [type, count] of Object.entries(this.getConnectionCounts())) {
-      lines.push(`aethel_ws_connections_by_type{type="${type}"} ${count}`);
-    }
-
-    return lines.join('\n');
+    return buildMetricsPayload(this.getPresenceSnapshot());
   }
 
   // ==========================================================================
   // Utilities
   // ==========================================================================
+
+  private getRoomContext() {
+    return {
+      clients: this.clients,
+      channels: this.channels,
+      legacyRooms: this.legacyRooms,
+      emit: (eventName: string, payload: unknown) => this.emit(eventName, payload),
+    };
+  }
+
+  private getPresenceSnapshot() {
+    return {
+      connections: this.connections,
+      clients: this.clients,
+      channels: this.channels,
+      legacyRooms: this.legacyRooms,
+    };
+  }
 
   private generateConnectionId(): string {
     return `conn_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;

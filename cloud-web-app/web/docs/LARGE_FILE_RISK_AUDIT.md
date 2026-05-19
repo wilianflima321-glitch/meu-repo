@@ -6,7 +6,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 67
+- Large source files: 66
 - P0 files: 0
 - P1 low-import large modules: 52
 - Hard ceiling: 1800 lines
@@ -15,7 +15,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Categories
 
-- `foundation-runtime`: 37
+- `foundation-runtime`: 36
 - `creative-runtime`: 24
 - `server-runtime`: 4
 - `mcp-tooling`: 1
@@ -64,9 +64,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Lines | Category | Risk | Import hints |
 | --- | ---: | --- | --- | ---: |
-| `lib/server/websocket-server.ts` | 1444 | server-runtime | P2 tracked large module | 3 |
 | `lib/server/extension-host-runtime.ts` | 1306 | server-runtime | P2 tracked large module | 1 |
-| `lib/pixel-streaming.ts` | 1245 | foundation-runtime | P2 tracked large module | 3 |
 | `lib/level-serialization.ts` | 1227 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/mcp/aethel-mcp-server.ts` | 1227 | mcp-tooling | P2 tracked large module | 2 |
 | `lib/dialogue-cutscene-system.ts` | 1201 | foundation-runtime | P1 low-import large module | 1 |
@@ -86,6 +84,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/quests/quest-system.tsx` | 1153 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/settings/settings-system.tsx` | 1153 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/animation/animation-system.ts` | 1151 | creative-runtime | P1 low-import large module | 0 |
+| `lib/server/websocket-server.ts` | 1150 | server-runtime | P2 tracked large module | 3 |
 | `lib/scene/scene-serializer.ts` | 1149 | creative-runtime | P1 low-import large module | 0 |
 | `lib/aaa-asset-pipeline.ts` | 1148 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/input/controller-mapper.tsx` | 1146 | creative-runtime | P1 low-import large module | 0 |
@@ -134,12 +133,12 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Next Refactor Queue
 
-1. `lib/server/websocket-server.ts`: split transport, auth, room registry, presence, and telemetry.
-2. `lib/server/extension-host-runtime.ts`: split manifest validation, sandbox lifecycle, capability resolution, and process supervision.
-3. `lib/pixel-streaming.ts`: split signaling, session lifecycle, codec policy, and cloud GPU provider adapters.
-4. `lib/mcp/aethel-mcp-server.ts`: split tool definitions, auth policy, handlers, and response schemas.
-5. `lib/level-serialization.ts`: decide whether it becomes the canonical Level Editor serializer or move it behind an explicit legacy/archive boundary.
-6. `app/api/ai/chat-advanced/route.ts` and `app/api/ai/change/apply/route.ts`: move policy and apply orchestration into tested production modules.
+1. `lib/server/extension-host-runtime.ts`: split manifest validation, sandbox lifecycle, capability resolution, and process supervision.
+2. `lib/mcp/aethel-mcp-server.ts`: split tool definitions, auth policy, handlers, and response schemas.
+3. `lib/level-serialization.ts`: decide whether it becomes the canonical Level Editor serializer or move it behind an explicit legacy/archive boundary.
+4. `app/api/ai/chat-advanced/route.ts` and `app/api/ai/change/apply/route.ts`: move policy and apply orchestration into tested production modules.
+5. `lib/pixel-streaming/**`: keep the new signaling/session/codec/cost split enforced by `qa:pixel-streaming-split`.
+6. `lib/server/websocket/**`: keep the transport/auth/rooms/presence split enforced by `qa:websocket-runtime-split`.
 
 ## Validation
 
