@@ -186,6 +186,12 @@ export default function LandingPageV3() {
                   </Link>
                 </div>
                 <LandingStudioProof />
+                <Link
+                  href="/download"
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--aethel-primary-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-primary)_42%,transparent)]"
+                >
+                  Download Studio Local beta
+                </Link>
                 <ul className="mt-4 space-y-2 text-xs text-[var(--aethel-text-secondary)]">
                   {STUDIO_SIGNALS.map((signal) => (
                     <li key={signal} className="flex items-center gap-2">
@@ -272,6 +278,12 @@ export default function LandingPageV3() {
                 className="inline-flex items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
               >
                 Open Studio
+              </Link>
+              <Link
+                href="/download"
+                className="inline-flex items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_38%,transparent)]"
+              >
+                Download Studio Local
               </Link>
             </div>
           </div>

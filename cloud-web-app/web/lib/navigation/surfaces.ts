@@ -9,6 +9,7 @@ export const PUBLIC_NAV_LINKS: NavigationLink[] = [
   { href: '/compare', label: 'Compare' },
   { href: '/docs', label: 'Docs' },
   { href: '/roadmap', label: 'Roadmap' },
+  { href: '/download', label: 'Download' },
   { href: '/trust', label: 'Trust' },
   { href: '/customers', label: 'Customers' },
   { href: '/status', label: 'Status' },

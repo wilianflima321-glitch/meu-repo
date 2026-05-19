@@ -28,6 +28,7 @@ import {
 } from '@/lib/viewport/viewport-asset-import'
 import { isEditableViewportKeyboardTarget } from '@/lib/viewport/viewport-keyboard-targets'
 import { parseAiViewportCommand } from '@/components/viewport/viewportAiCommand'
+import { useRenderPipeline } from '@/lib/hooks/useRenderPipeline'
 
 export type ViewportTransformMode = 'translate' | 'rotate' | 'scale'
 export type ViewportTransformSpace = 'world' | 'local'
@@ -162,6 +163,23 @@ export function AethelViewport3D({
   const [cameraPreset, setCameraPreset] = useState<ViewportCameraPreset>('perspective')
   const [localGizmoConstraint, setLocalGizmoConstraint] = useState<GizmoAxisPlaneConstraint>('free')
   const [localGizmoPivotMode, setLocalGizmoPivotMode] = useState<GizmoPivotMode>('median')
+  const [webGpuAvailable, setWebGpuAvailable] = useState(false)
+  const renderPipeline = useRenderPipeline({
+    initialQuality: renderMode === 'cinematic' ? 'high' : 'medium',
+    customPipeline: {
+      type: renderMode === 'cinematic' ? 'deferred' : 'forwardPlus',
+      hdr: true,
+      shadowMapSize: renderMode === 'cinematic' ? 2048 : 1024,
+    },
+    dynamicQuality: {
+      enabled: true,
+      targetFPS: 60,
+      minQuality: 'mobile',
+      maxQuality: renderMode === 'cinematic' ? 'high' : 'medium',
+      adaptationSpeed: 0.25,
+      hysteresis: 8,
+    },
+  })
   const gizmoConstraint = controlledGizmoConstraint ?? localGizmoConstraint
   const gizmoPivotMode = controlledGizmoPivotMode ?? localGizmoPivotMode
   const commitGizmoConstraint = useCallback((constraint: GizmoAxisPlaneConstraint) => {
@@ -231,6 +249,10 @@ export function AethelViewport3D({
   }, [onImportAssets])
 
   useEffect(() => {
+    setWebGpuAvailable(typeof navigator !== 'undefined' && 'gpu' in navigator)
+  }, [])
+
+  useEffect(() => {
     function handleViewportHotkeys(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey || isEditableViewportKeyboardTarget(event.target)) return
       if (event.code === 'KeyW') {
@@ -298,6 +320,24 @@ export function AethelViewport3D({
       />
 
       <ViewportGizmoMemoryChip chip={gizmoMemoryChip} />
+
+      <div
+        className="absolute bottom-4 left-4 z-20 max-w-[360px] rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[rgba(7,12,20,0.82)] px-3 py-2 text-xs shadow-[0_18px_44px_rgba(0,0,0,0.32)] backdrop-blur-md"
+        role="status"
+        aria-label="Viewport render depth status"
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-primary-light)]">
+            {renderPipeline.pipelineConfig.type}
+          </span>
+          <span className="text-[var(--aethel-text-secondary)]">
+            {renderPipeline.quality.toUpperCase()} / {webGpuAvailable ? 'WebGPU ready' : 'WebGL2 fallback'}
+          </span>
+        </div>
+        <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-quaternary)]">
+          Browser preview now declares the AAA pipeline target; Studio Local and Pixel Streaming can take over for heavy scenes.
+        </p>
+      </div>
 
       <ViewportAICommandPanel
         creativeMode={creativeMode}

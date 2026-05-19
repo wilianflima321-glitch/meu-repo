@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.2.0",
   "scripts": {
-    "dev": "next dev -p 3000 -H 0.0.0.0",
+    "dev": "next dev --turbo -p 3000 -H 0.0.0.0",
     "dev:full": "concurrently \"npm run dev\" \"npm run ws\" \"npm run runtime\"",
     "ws": "ts-node --transpile-only server/websocket-server.ts",
     "ws:dev": "nodemon --exec ts-node --transpile-only server/websocket-server.ts",

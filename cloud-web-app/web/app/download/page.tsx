@@ -1,226 +1,256 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { ArrowRight, CheckCircle2, Cpu, Download, Gauge, HardDrive, Monitor, ShieldCheck, Sparkles, TerminalSquare, Zap } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 
-const WindowsIcon = () => (
-  <svg className="h-8 w-8" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
-  </svg>
-)
-
-const AppleIcon = () => (
-  <svg className="h-8 w-8" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-  </svg>
-)
-
-const LinuxIcon = () => (
-  <svg className="h-8 w-8" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.132 1.884 1.071.771-.06 1.592-.536 2.257-1.306.631-.765 1.683-1.084 2.378-1.503.348-.199.629-.469.649-.853.023-.4-.2-.811-.714-1.376v-.097l-.003-.003c-.17-.2-.25-.535-.338-.926-.085-.401-.182-.786-.492-1.046h-.003c-.059-.054-.123-.067-.188-.135a.357.357 0 00-.19-.064c.431-1.278.264-2.55-.173-3.694-.533-1.41-1.465-2.638-2.175-3.483-.796-1.005-1.576-1.957-1.56-3.368.026-2.152.236-6.133-3.544-6.139z" />
-  </svg>
-)
-
-const DownloadIcon = () => (
-  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-  </svg>
-)
-
-const CheckIcon = () => (
-  <svg className="h-5 w-5 text-[var(--aethel-success)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-  </svg>
-)
-
 type Platform = 'windows' | 'mac' | 'linux'
 
+type RuntimeTarget = {
+  label: string
+  detail: string
+  status: 'ready' | 'beta' | 'planned'
+}
+
+const PLATFORMS: Record<Platform, {
+  name: string
+  artifact: string
+  requirements: string
+  command: string
+}> = {
+  windows: {
+    name: 'Windows',
+    artifact: 'Aethel-Studio-Local-Setup.exe',
+    requirements: 'Windows 10+ x64, WebView2, Node 20+, optional NVIDIA/AMD GPU',
+    command: 'powershell -ExecutionPolicy Bypass -File installers/windows/install-aethel.ps1',
+  },
+  mac: {
+    name: 'macOS',
+    artifact: 'Aethel-Studio-Local-universal.dmg',
+    requirements: 'macOS 12+, Apple Silicon or Intel, Metal-capable GPU',
+    command: 'cargo tauri build --target universal-apple-darwin',
+  },
+  linux: {
+    name: 'Linux',
+    artifact: 'aethel-studio-local.AppImage',
+    requirements: 'Ubuntu 22.04+, Fedora 39+, Arch, Vulkan-capable GPU recommended',
+    command: 'bash installers/linux/install-aethel.sh --user',
+  },
+}
+
+const TARGETS: RuntimeTarget[] = [
+  {
+    label: 'Browser preview',
+    detail: 'WebGPU/WebGL2 for fast iteration, share links, and lightweight reviews.',
+    status: 'ready',
+  },
+  {
+    label: 'Studio Local',
+    detail: 'Tauri native runtime with hardware probe, job recovery, sidecar policy, and local/cloud routing.',
+    status: 'beta',
+  },
+  {
+    label: 'Pixel Streaming',
+    detail: 'Cloud GPU streaming path for Unreal-grade final demos when local hardware is not enough.',
+    status: 'planned',
+  },
+]
+
+const SIDECARS = [
+  'FFmpeg media export',
+  'ONNX local inference',
+  'WGPU native renderer',
+  'Rapier physics',
+  'Shader compiler',
+  'Asset optimizer',
+]
+
+function statusClass(status: RuntimeTarget['status']) {
+  if (status === 'ready') return 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+  if (status === 'beta') return 'border-[color-mix(in_srgb,var(--aethel-warning)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+  return 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] text-[var(--aethel-text-tertiary)]'
+}
+
 export default function DownloadPage() {
-  const [detectedPlatform, setDetectedPlatform] = useState<Platform>('windows')
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>('windows')
 
   useEffect(() => {
-    if (typeof navigator !== 'undefined') {
-      const ua = navigator.userAgent
-      if (/Windows/i.test(ua)) {
-        setDetectedPlatform('windows')
-        setSelectedPlatform('windows')
-      } else if (/Mac OS X|Macintosh/i.test(ua)) {
-        setDetectedPlatform('mac')
-        setSelectedPlatform('mac')
-      } else if (/Linux/i.test(ua) && !/Android/i.test(ua)) {
-        setDetectedPlatform('linux')
-        setSelectedPlatform('linux')
-      }
-    }
+    const ua = navigator.userAgent
+    if (/Mac OS X|Macintosh/i.test(ua)) setSelectedPlatform('mac')
+    else if (/Linux/i.test(ua) && !/Android/i.test(ua)) setSelectedPlatform('linux')
+    else setSelectedPlatform('windows')
   }, [])
 
-  const platforms = {
-    windows: {
-      name: 'Windows',
-      icon: WindowsIcon,
-      version: '0.3.0',
-      size: '~180 MB',
-      file: 'engine-0.3.0-win-x64.exe',
-      requirements: 'Windows 10+ (64-bit)',
-    },
-    mac: {
-      name: 'macOS',
-      icon: AppleIcon,
-      version: '0.3.0',
-      size: '~200 MB',
-      file: 'engine-0.3.0-mac-universal.dmg',
-      requirements: 'macOS 11+ (Intel & Apple Silicon)',
-    },
-    linux: {
-      name: 'Linux',
-      icon: LinuxIcon,
-      version: '0.3.0',
-      size: '~170 MB',
-      file: 'engine-0.3.0-linux-x64.tar.gz',
-      requirements: 'Ubuntu 20.04+, Debian 11+, Fedora 35+',
-    },
-  }
-
-  const features = [
-    'IDE com Monaco Editor e terminal integrado',
-    'Fluxo multi-agent com Architect, Engineer e Critic',
-    'Preview unificado com status e readiness visiveis',
-    'Politica local/cloud para preservar NPU, GPU, memoria e responsividade',
-    'Templates e onboarding guiado para Apps e Pesquisa',
-    'Audit trail e rollback deterministico por change set',
-    'Sync com o web studio e handoff para deploy',
-  ]
-
-  const current = platforms[selectedPlatform]
-  const CurrentIcon = current.icon
+  const current = PLATFORMS[selectedPlatform]
 
   return (
-    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[160px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[160px]" />
-      </div>
-
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(20,184,166,0.1),transparent_30%),var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <PublicHeader />
 
-      <main className="relative z-10">
-        <section className="mx-auto max-w-5xl px-6 pt-14 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">
-            <DownloadIcon />
-            Versao {current.version} disponivel
-          </div>
-          <h1 className="mt-5 text-4xl font-bold sm:text-5xl">
-            Download <span className="gradient-text">Aethel Studio</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--aethel-text-secondary)]">
-            IDE e studio operacional para Apps e Pesquisa. Games e Films seguem em fase experimental.
-          </p>
-        </section>
+      <main id="main-content" className="relative mx-auto max-w-7xl px-4 pb-20 pt-24 sm:px-6 lg:px-8">
+        <section className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_420px] lg:items-start">
+          <div className="rounded-[36px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.88),rgba(8,10,16,0.96))] p-6 shadow-[0_28px_90px_rgba(2,6,23,0.42)] sm:p-8 lg:p-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--aethel-info-light)]">
+              <Monitor className="h-3.5 w-3.5" />
+              Studio Local beta
+            </div>
 
-        <section className="mx-auto mt-10 max-w-5xl px-6">
-          <div className="flex flex-wrap justify-center gap-4">
-            {(Object.keys(platforms) as Platform[]).map((platform) => {
-              const p = platforms[platform]
-              const Icon = p.icon
-              const isSelected = selectedPlatform === platform
-              const isDetected = detectedPlatform === platform
-              return (
-                <button type="button"
-                  key={platform}
-                  onClick={() => setSelectedPlatform(platform)}
-                  className={`flex items-center gap-3 rounded-2xl border px-5 py-4 text-left transition-all ${ isSelected ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-[var(--aethel-primary)]/10 text-[var(--aethel-text-primary)]' : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]' }`}
-                >
-                  <Icon />
-                  <div>
-                    <div className="font-medium">{p.name}</div>
-                    {isDetected && <div className="text-xs text-[var(--aethel-primary-light)]">Detectado</div>}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
+            <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-[3.6rem] lg:leading-[1.04]">
+              Break past browser limits without leaving Aethel.
+            </h1>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--aethel-text-secondary)] sm:text-base">
+              Studio Local is the native Tauri runtime for heavy rendering, asset processing, shader work, local sidecars, and cloud handoff. Same mission, same project memory, deeper execution target.
+            </p>
 
-          <div className="mt-8 rounded-3xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8">
-            <div className="flex flex-col gap-6 md:flex-row md:items-center">
-              <div className="flex-1">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_20%,transparent),color-mix(in_srgb,var(--aethel-info)_20%,transparent))]">
-                    <CurrentIcon />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold">Aethel para {current.name}</h2>
-                    <p className="text-[var(--aethel-text-secondary)]">Versao {current.version} ? {current.size}</p>
-                  </div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/contact-sales?intent=studio-local-beta"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_24%,transparent)] transition hover:brightness-110"
+              >
+                Request desktop beta
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/docs/getting-started"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+              >
+                Read setup guide
+              </Link>
+            </div>
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-3">
+              {TARGETS.map((target) => (
+                <div key={target.label} className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] p-4">
+                  <span className={`inline-flex rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${statusClass(target.status)}`}>
+                    {target.status}
+                  </span>
+                  <h2 className="mt-3 text-sm font-semibold">{target.label}</h2>
+                  <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-tertiary)]">{target.detail}</p>
                 </div>
-                <p className="mt-4 text-sm text-[var(--aethel-text-tertiary)]">Requisitos: {current.requirements}</p>
-                <a
-                  href={`/downloads/${current.file}`}
-                  className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] mt-6 rounded-xl px-6 py-3 text-sm font-semibold"
-                  download
-                >
-                  <DownloadIcon />
-                  Download para {current.name}
-                </a>
-              </div>
-
-              <div className="md:w-px md:self-stretch md:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]" />
-
-              <div className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Incluido</h3>
-                {features.slice(0, 4).map((feature) => (
-                  <div key={feature} className="flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)]">
-                    <CheckIcon />
-                    <span>{feature}</span>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
 
-          <div className="mt-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
-            <a href="/downloads/checksums.txt" className="text-[var(--aethel-primary-light)] hover:underline">
-              Verificar checksums SHA-256
-            </a>
-            {' ? '}
-            <a href="/downloads/RELEASE_NOTES.md" className="text-[var(--aethel-primary-light)] hover:underline">
-              Notas de versao
-            </a>
-            {' ? '}
-            <Link href="/docs/getting-started" className="text-[var(--aethel-primary-light)] hover:underline">
-              Guia de instalacao
+          <aside className="rounded-[32px] border border-[var(--aethel-border-primary)] bg-[rgba(8,10,16,0.84)] p-5 shadow-[0_26px_80px_rgba(2,6,23,0.36)] backdrop-blur-xl">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Release channel</p>
+                <h2 className="mt-2 text-xl font-semibold">Choose your desktop target</h2>
+              </div>
+              <Download className="h-5 w-5 text-[var(--aethel-info-light)]" />
+            </div>
+
+            <div className="mt-5 grid gap-2">
+              {(Object.keys(PLATFORMS) as Platform[]).map((platform) => (
+                <button
+                  key={platform}
+                  type="button"
+                  onClick={() => setSelectedPlatform(platform)}
+                  className={`rounded-2xl border px-4 py-3 text-left transition ${selectedPlatform === platform ? 'border-[color-mix(in_srgb,var(--aethel-info)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]' : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] hover:border-[var(--aethel-border-secondary)]'}`}
+                >
+                  <span className="text-sm font-semibold">{PLATFORMS[platform].name}</span>
+                  <span className="mt-1 block text-xs text-[var(--aethel-text-tertiary)]">{PLATFORMS[platform].requirements}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">Artifact</p>
+              <p className="mt-2 font-mono text-sm text-[var(--aethel-text-primary)]">{current.artifact}</p>
+              <p className="mt-3 text-xs leading-5 text-[var(--aethel-text-tertiary)]">
+                Signed installers are published through the release pipeline. Until then, beta users can run the local build command below from the repository checkout.
+              </p>
+              <code className="mt-3 block overflow-x-auto rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.62)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
+                {current.command}
+              </code>
+            </div>
+          </aside>
+        </section>
+
+        <section className="mt-6 grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-6">
+            <div className="flex items-center gap-3">
+              <div className="grid h-11 w-11 place-items-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)]">
+                <Cpu className="h-5 w-5 text-[var(--aethel-primary-light)]" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Native policy engine</p>
+                <h2 className="text-xl font-semibold">Local when it is safe. Cloud when it is smarter.</h2>
+              </div>
+            </div>
+            <p className="mt-4 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+              The Rust runtime probes GPU, thermal state, storage, AI accelerators, and sidecar availability before routing heavy jobs. Users should see why a task runs in browser, local native, or cloud sandbox.
+            </p>
+            <div className="mt-5 grid gap-2 text-sm text-[var(--aethel-text-secondary)]">
+              {['Hardware probe: Vulkan, DX12, Metal, WebGPU, CUDA, CoreML', 'Job recovery after restart', 'Policy routing by thermal, storage, GPU, and budget', 'HTTP daemon for /health, /probe, /jobs, and cloud sync'].map((item) => (
+                <div key={item} className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-[var(--aethel-success-light)]" />
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-6">
+            <div className="flex items-center gap-3">
+              <div className="grid h-11 w-11 place-items-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]">
+                <TerminalSquare className="h-5 w-5 text-[var(--aethel-info-light)]" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Sidecar matrix</p>
+                <h2 className="text-xl font-semibold">The desktop app exposes capabilities, not mystery.</h2>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {SIDECARS.map((item) => (
+                <div key={item} className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.34)] p-4">
+                  <ShieldCheck className="h-4 w-4 text-[var(--aethel-success-light)]" />
+                  <p className="mt-3 text-sm font-medium">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-6 grid gap-4 md:grid-cols-3">
+          {[
+            { icon: Gauge, title: 'Depth modes', body: 'Web Light, Studio Home, Operator Surface, Studio Cloud, and Studio Local share one progressive interface.' },
+            { icon: HardDrive, title: 'No storage ceiling', body: 'Large projects can bind to disk and keep shader, asset, and render caches persistent.' },
+            { icon: Zap, title: 'Heavy work handoff', body: 'Rendering, video export, simulation, and local inference can move off the browser before the UX collapses.' },
+          ].map((card) => {
+            const Icon = card.icon
+            return (
+              <div key={card.title} className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[rgba(8,10,16,0.68)] p-5">
+                <Icon className="h-5 w-5 text-[var(--aethel-info-light)]" />
+                <h2 className="mt-4 text-lg font-semibold">{card.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{card.body}</p>
+              </div>
+            )
+          })}
+        </section>
+
+        <section className="mt-6 rounded-[34px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.8),rgba(8,10,16,0.94))] p-6 shadow-[0_24px_80px_rgba(2,6,23,0.36)] lg:p-8">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                <Sparkles className="h-3.5 w-3.5" />
+                Honest launch posture
+              </div>
+              <h2 className="mt-3 text-2xl font-semibold">Desktop beta first. Signed installers next. No broken download theater.</h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--aethel-text-secondary)]">
+                This page now sells the actual runtime strategy: browser for light work, Studio Local for native depth, and cloud streaming for final-quality demos. When signed artifacts are published, this route becomes the release hub without redesign.
+              </p>
+            </div>
+            <Link
+              href="/honest-status"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+            >
+              See readiness
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-        </section>
-
-        <section className="mx-auto mt-12 max-w-5xl px-6 pb-16">
-          <h2 className="text-2xl font-bold text-center">Tudo o que voce precisa para iterar</h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {features.map((feature) => (
-              <div key={feature} className="flex items-center gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4">
-                <CheckIcon />
-                <span className="text-sm text-[var(--aethel-text-secondary)]">{feature}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-4xl px-6 pb-20 text-center">
-          <h2 className="text-2xl font-bold">Prefere usar no navegador?</h2>
-          <p className="mt-3 text-[var(--aethel-text-secondary)]">
-            Abra o Aethel Studio no browser com a mesma conta, missao e continuidade. O desktop fica reservado para profundidade local quando o browser bater no teto.
-          </p>
-          <Link
-            href="/ide"
-            className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] mt-6 rounded-xl px-6 py-3 text-sm font-semibold"
-          >
-            Abrir Aethel Web
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </Link>
         </section>
       </main>
 
