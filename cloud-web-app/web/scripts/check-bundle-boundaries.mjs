@@ -81,6 +81,20 @@ for (const [key, budget] of Object.entries(BUDGETS)) {
   }
 }
 
+const canonicalPreviewPath = path.join(ROOT, 'components', 'preview', 'CanonicalPreviewSurface.tsx')
+if (fs.existsSync(canonicalPreviewPath)) {
+  const canonicalPreview = fs.readFileSync(canonicalPreviewPath, 'utf8')
+  const requiredDynamicBoundaries = [
+    'SceneViewportSurface',
+    'CanvasViewportSurface',
+  ]
+  for (const boundary of requiredDynamicBoundaries) {
+    if (!canonicalPreview.includes(`const ${boundary} = dynamic(`)) {
+      failures.push(`CanonicalPreviewSurface must lazy-load ${boundary}`)
+    }
+  }
+}
+
 const report = []
 report.push('# BUNDLE_BOUNDARIES_AUDIT.md')
 report.push('Generated: deterministic local scan')
@@ -109,6 +123,9 @@ report.push('')
 report.push('## Failures')
 if (failures.length === 0) report.push('- none')
 else failures.forEach((failure) => report.push(`- ${failure}`))
+report.push('')
+report.push('## Critical Boundaries')
+report.push('- CanonicalPreviewSurface lazy-loads SceneViewportSurface and CanvasViewportSurface so runtime/live previews do not eagerly pull viewport/Three code.')
 
 fs.writeFileSync(OUT, `${report.join('\n')}\n`, 'utf8')
 

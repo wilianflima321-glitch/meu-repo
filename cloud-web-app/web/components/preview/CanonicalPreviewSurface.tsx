@@ -4,8 +4,6 @@ import dynamic from 'next/dynamic';
 import { type CanonicalRuntimeProps } from '@/components/preview/previewRuntime.types';
 import { PreviewSkeleton } from '@/components/preview/PreviewLifecycleChrome';
 import RuntimePreviewSurface from '@/components/preview/RuntimePreviewSurface';
-import SceneViewportSurface from '@/components/preview/SceneViewportSurface';
-import CanvasViewportSurface from '@/components/preview/CanvasViewportSurface';
 
 
 // ============================================================================
@@ -14,6 +12,16 @@ import CanvasViewportSurface from '@/components/preview/CanvasViewportSurface';
 
 // Dynamic imports
 const LivePreview = dynamic(() => import('@/components/LivePreview'), {
+  ssr: false,
+  loading: () => <PreviewSkeleton />,
+});
+
+const SceneViewportSurface = dynamic(() => import('@/components/preview/SceneViewportSurface'), {
+  ssr: false,
+  loading: () => <PreviewSkeleton />,
+});
+
+const CanvasViewportSurface = dynamic(() => import('@/components/preview/CanvasViewportSurface'), {
   ssr: false,
   loading: () => <PreviewSkeleton />,
 });

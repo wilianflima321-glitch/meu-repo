@@ -1,5 +1,10 @@
 import Link from 'next/link'
-import { ENGINE_SPINE_MODULES, getEngineSpineSummary, type EngineSpineStatus } from '@/lib/studio/engine-spine-modules'
+import {
+  ENGINE_SPINE_MODULES,
+  getEngineSpineSummary,
+  type EngineSpineLoadStrategy,
+  type EngineSpineStatus,
+} from '@/lib/studio/engine-spine-modules'
 
 const STATUS_LABEL: Record<EngineSpineStatus, string> = {
   visible: 'Visible',
@@ -13,6 +18,14 @@ const STATUS_CLASS: Record<EngineSpineStatus, string> = {
   'ready-to-wire': 'border-[color-mix(in_srgb,var(--aethel-info)_36%,transparent)] text-[var(--aethel-info-light)]',
   'adapter-needed': 'border-[color-mix(in_srgb,var(--aethel-warning)_36%,transparent)] text-[var(--aethel-warning-light)]',
   'worker-held': 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] text-[var(--aethel-error-light)]',
+}
+
+const LOAD_STRATEGY_LABEL: Record<EngineSpineLoadStrategy, string> = {
+  'already-visible': 'Visible',
+  'dynamic-client-only': 'Dynamic',
+  'summary-adapter': 'Summary adapter',
+  'worker-or-sidecar': 'Worker/sidecar',
+  'native-or-cloud': 'Native/cloud',
 }
 
 export default function EngineSpineReadinessPanel() {
@@ -43,7 +56,7 @@ export default function EngineSpineReadinessPanel() {
         <Metric label="Modules" value={summary.totalModules.toString()} />
         <Metric label="Approx LOC" value={summary.totalLoc.toLocaleString('en-US')} />
         <Metric label="Ready" value={summary.ready.toString()} />
-        <Metric label="Held/adapters" value={(summary.held + summary.adapterNeeded).toString()} />
+        <Metric label="Heavy held" value={summary.heavyHeld.toString()} />
       </div>
 
       <div className="mt-5 grid gap-3 xl:grid-cols-2">
@@ -62,6 +75,12 @@ export default function EngineSpineReadinessPanel() {
             <div className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-3 py-2">
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Next safe move</p>
               <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{module.nextAction}</p>
+            </div>
+            <div className="mt-2 grid gap-2 md:grid-cols-[auto_minmax(0,1fr)]">
+              <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+                {LOAD_STRATEGY_LABEL[module.loadStrategy]}
+              </span>
+              <p className="text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">{module.limitation}</p>
             </div>
           </article>
         ))}

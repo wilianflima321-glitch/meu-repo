@@ -50,6 +50,9 @@ export default function StudioEngineModuleMiniPanel({ title, moduleIds, classNam
               </span>
             </div>
             <p className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-secondary)]">{module.nextAction}</p>
+            <p className="mt-2 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_40%,transparent)] px-2 py-1.5 text-[10px] leading-4 text-[var(--aethel-text-tertiary)]">
+              Load: {module.loadStrategy}. Limit: {module.limitation}
+            </p>
           </article>
         ))}
       </div>

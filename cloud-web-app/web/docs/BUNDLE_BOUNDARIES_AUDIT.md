@@ -11,7 +11,7 @@ Generated: deterministic local scan
 - monacoEditorDirect: 23 (max 33)
 - monacoReactDirect: 6 (max 6)
 - framerMotionDirect: 26 (max 26)
-- dynamicImportsMin: 43 (min 41)
+- dynamicImportsMin: 45 (min 41)
 
 ## Top Offenders
 ### threeDirect
@@ -152,3 +152,6 @@ Generated: deterministic local scan
 
 ## Failures
 - none
+
+## Critical Boundaries
+- CanonicalPreviewSurface lazy-loads SceneViewportSurface and CanvasViewportSurface so runtime/live previews do not eagerly pull viewport/Three code.
