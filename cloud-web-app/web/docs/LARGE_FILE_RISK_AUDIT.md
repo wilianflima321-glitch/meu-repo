@@ -6,7 +6,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 65
+- Large source files: 64
 - P0 files: 0
 - P1 low-import large modules: 52
 - Hard ceiling: 1800 lines
@@ -18,7 +18,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 - `foundation-runtime`: 36
 - `creative-runtime`: 24
 - `server-runtime`: 3
-- `mcp-tooling`: 1
 - `ui-runtime`: 1
 
 ## Owner Decisions
@@ -65,7 +64,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | File | Lines | Category | Risk | Import hints |
 | --- | ---: | --- | --- | ---: |
 | `lib/level-serialization.ts` | 1227 | foundation-runtime | P1 low-import large module | 1 |
-| `lib/mcp/aethel-mcp-server.ts` | 1227 | mcp-tooling | P2 tracked large module | 2 |
 | `lib/dialogue-cutscene-system.ts` | 1201 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/cutscene/cutscene-system.tsx` | 1195 | creative-runtime | P1 low-import large module | 1 |
 | `lib/ui/ui-framework.tsx` | 1195 | ui-runtime | P1 low-import large module | 0 |
@@ -132,9 +130,9 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Next Refactor Queue
 
-1. `lib/mcp/aethel-mcp-server.ts`: split tool definitions, auth policy, handlers, and response schemas.
-2. `lib/level-serialization.ts`: decide whether it becomes the canonical Level Editor serializer or move it behind an explicit legacy/archive boundary.
-3. `app/api/ai/chat-advanced/route.ts` and `app/api/ai/change/apply/route.ts`: move policy and apply orchestration into tested production modules.
+1. `lib/level-serialization.ts`: decide whether it becomes the canonical Level Editor serializer or move it behind an explicit legacy/archive boundary.
+2. `app/api/ai/chat-advanced/route.ts` and `app/api/ai/change/apply/route.ts`: move policy and apply orchestration into tested production modules.
+3. `lib/mcp/aethel/**`: keep the tool definitions, auth policy, handlers, response schemas, resources, and prompts split enforced by `qa:mcp-server-split`.
 4. `lib/server/extension-host/**`: keep the runtime/API/types split enforced by `qa:extension-host-split`.
 5. `lib/pixel-streaming/**`: keep the new signaling/session/codec/cost split enforced by `qa:pixel-streaming-split`.
 6. `lib/server/websocket/**`: keep the transport/auth/rooms/presence split enforced by `qa:websocket-runtime-split`.
