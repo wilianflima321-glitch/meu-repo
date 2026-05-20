@@ -33,6 +33,13 @@ const expensiveRoutes = [
     usageKind: "kind: 'voice'",
   },
 ]
+const usageGuardedRoutes = [
+  ...expensiveRoutes,
+  {
+    rel: 'app/api/ai/voice/transcribe/route.ts',
+    usageKind: "kind: 'voiceTranscribe'",
+  },
+]
 const meteredRoutes = [
   ...expensiveRoutes,
   {
@@ -91,10 +98,10 @@ for (const route of meteredRoutes) {
   }
 }
 
-for (const route of expensiveRoutes) {
+for (const route of usageGuardedRoutes) {
   const text = exists(route.rel) ? read(route.rel) : ''
   if (!text.includes('enforceExpensiveAiGenerationUsage')) {
-    failures.push(`${route.rel} must still enforce per-user expensive generation usage`)
+    failures.push(`${route.rel} must enforce per-user expensive AI usage`)
   }
   if (!text.includes(route.usageKind)) {
     failures.push(`${route.rel} must keep usage kind ${route.usageKind}`)
@@ -108,7 +115,7 @@ const report = [
   '',
   `- Central spine: ${spineFile}`,
   `- Metered routes checked: ${meteredRoutes.length}`,
-  `- Expensive usage guarded routes checked: ${expensiveRoutes.length}`,
+  `- Expensive usage guarded routes checked: ${usageGuardedRoutes.length}`,
   `- Failures: ${failures.length}`,
   ...failures.map((failure) => `- ${failure}`),
   '',

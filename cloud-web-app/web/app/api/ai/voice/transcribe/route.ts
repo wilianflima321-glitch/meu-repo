@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { requireAuth } from '@/lib/auth-server'
+import { requireAuth, type AuthUser } from '@/lib/auth-server'
 import { AI_VOICE_TRANSCRIBE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
+import { enforceExpensiveAiGenerationUsage } from '@/lib/server/ai-expensive-generation-guard'
 import { createComponentLogger } from '@/lib/observability/logger'
 import {
   normalizeTranscriptionLanguage,
@@ -15,8 +16,9 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
+  let user: AuthUser
   try {
-    requireAuth(request)
+    user = requireAuth(request)
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -57,6 +59,17 @@ export async function POST(request: NextRequest) {
     }
 
     const language = normalizeTranscriptionLanguage(formData.get('language'))
+    const usageGuard = await enforceExpensiveAiGenerationUsage({
+      userId: user.userId,
+      route: '/api/ai/voice/transcribe',
+      kind: 'voiceTranscribe',
+      units: file.size,
+      quality: language ?? 'auto',
+      requiredDomain: 'code',
+      domainLabel: 'AI voice transcription',
+    })
+    if (usageGuard.response) return usageGuard.response
+
     const result = await transcribeVoiceWithOpenAI({ file, apiKey, language })
 
     log.info('voice_transcription.completed', {
@@ -67,17 +80,20 @@ export async function POST(request: NextRequest) {
       textLength: result.text.length,
     })
 
-    return NextResponse.json({
-      success: true,
-      text: result.text,
-      provider: result.provider,
-      model: result.model,
-      language: result.language,
-      metadata: {
-        bytes: result.bytes,
-        durationMs: result.durationMs,
+    return NextResponse.json(
+      {
+        success: true,
+        text: result.text,
+        provider: result.provider,
+        model: result.model,
+        language: result.language,
+        metadata: {
+          bytes: result.bytes,
+          durationMs: result.durationMs,
+        },
       },
-    })
+      { headers: usageGuard.headers },
+    )
   } catch (error) {
     log.error('voice_transcription.failed', error)
     return NextResponse.json({ error: 'VOICE_TRANSCRIPTION_FAILED' }, { status: 500 })

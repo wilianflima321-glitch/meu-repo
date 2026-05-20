@@ -4,13 +4,15 @@ import { apiErrorToResponse } from '@/lib/api-errors'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { consumeMeteredUsage, estimateTokensFromText, type MeteringDecision } from '@/lib/metering'
 
-export type ExpensiveAiGenerationKind = 'image' | 'model3d' | 'music' | 'voice'
+export type ExpensiveAiGenerationKind = 'image' | 'model3d' | 'music' | 'voice' | 'voiceTranscribe'
 
 export interface ExpensiveAiGenerationEstimateInput {
   kind: ExpensiveAiGenerationKind
   prompt?: string
   units?: number
   quality?: string
+  requiredDomain?: string
+  domainLabel?: string
 }
 
 interface EnforceExpensiveAiGenerationUsageInput extends ExpensiveAiGenerationEstimateInput {
@@ -42,6 +44,10 @@ function isUnlimited(value: number): boolean {
   return value === -1
 }
 
+function domainAllows(domains: Set<string>, requiredDomain: string): boolean {
+  return domains.has('*') || domains.has('all') || domains.has(requiredDomain)
+}
+
 export function estimateExpensiveAiGenerationCost(input: ExpensiveAiGenerationEstimateInput): number {
   const promptCost = input.prompt ? estimateTokensFromText(input.prompt) : 0
   const units = clampPositiveInteger(input.units, 1)
@@ -63,6 +69,11 @@ export function estimateExpensiveAiGenerationCost(input: ExpensiveAiGenerationEs
     case 'voice': {
       const textCharacters = Math.min(units, 20_000)
       return Math.max(3_000, Math.ceil(textCharacters / 2) + promptCost)
+    }
+    case 'voiceTranscribe': {
+      const audioBytes = Math.min(units, 25 * 1024 * 1024)
+      const estimatedAudioMinutes = Math.max(1, Math.ceil(audioBytes / (1024 * 1024)))
+      return promptCost + Math.max(2_500, estimatedAudioMinutes * 4_000)
     }
     default:
       return Math.max(1, promptCost)
@@ -90,17 +101,19 @@ export async function enforceExpensiveAiGenerationUsage(
   const entitlements = await requireEntitlementsForUser(input.userId)
   const plan = entitlements.plan
   const domains = new Set(plan.allowedDomains)
-  const canUseCreativeGeneration = domains.has('*') || domains.has('creative')
+  const requiredDomain = input.requiredDomain ?? 'creative'
+  const domainLabel = input.domainLabel ?? 'Creative generation'
 
-  if (!canUseCreativeGeneration) {
+  if (!domainAllows(domains, requiredDomain)) {
     return {
       response: NextResponse.json(
         {
           error: 'GENERATION_PLAN_REQUIRED',
-          message: 'Creative generation requires a plan with the creative domain enabled.',
+          message: `${domainLabel} requires a plan with the ${requiredDomain} domain enabled.`,
           plan: plan.id,
           upgradeUrl: '/pricing',
           route: input.route,
+          requiredDomain,
         },
         { status: 402 },
       ),
