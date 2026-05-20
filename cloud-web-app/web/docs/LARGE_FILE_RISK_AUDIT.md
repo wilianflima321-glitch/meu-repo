@@ -95,7 +95,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/engine/asset-pipeline.ts` | 1092 | creative-runtime | P1 low-import large module | 0 |
 | `lib/materials/material-editor.ts` | 1091 | creative-runtime | P1 low-import large module | 0 |
 | `lib/visual-script/runtime.ts` | 1088 | creative-runtime | P1 low-import large module | 0 |
-| `lib/ai-tools-registry.ts` | 1085 | foundation-runtime | P2 tracked large module | 3 |
+| `lib/ai-tools-registry.ts` | 1085 | foundation-runtime | P2 tracked large module | 5 |
 | `lib/ai/behavior-tree-system.tsx` | 1084 | creative-runtime | P2 tracked large module | 4 |
 | `lib/fluid-simulation-system.ts` | 1077 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/debug/real-debug-adapter.ts` | 1074 | foundation-runtime | P1 low-import large module | 0 |
@@ -129,7 +129,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Next Refactor Queue
 
-1. `app/api/ai/chat-advanced/route.ts` and `app/api/ai/change/apply/route.ts`: move policy and apply orchestration into tested production modules.
+1. `lib/server/ai-chat-advanced/**` and `lib/server/ai-change-apply/**`: keep critical AI route orchestration split and enforced by `qa:ai-route-split`.
 2. `lib/level-serialization/**`: keep the canonical serializer/format/manager/history split enforced by `qa:level-serialization-split`.
 3. `lib/mcp/aethel/**`: keep the tool definitions, auth policy, handlers, response schemas, resources, and prompts split enforced by `qa:mcp-server-split`.
 4. `lib/server/extension-host/**`: keep the runtime/API/types split enforced by `qa:extension-host-split`.
