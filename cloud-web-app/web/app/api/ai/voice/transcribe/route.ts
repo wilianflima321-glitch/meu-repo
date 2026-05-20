@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { requireAuth } from '@/lib/auth-server'
-import { checkRateLimit } from '@/lib/rate-limit'
+import { AI_VOICE_TRANSCRIBE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { createComponentLogger } from '@/lib/observability/logger'
 import {
   normalizeTranscriptionLanguage,
@@ -10,7 +10,6 @@ import {
 } from '@/lib/server/voice-transcription'
 
 const log = createComponentLogger('api/ai/voice/transcribe/route')
-const VOICE_TRANSCRIBE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 120 }
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -22,13 +21,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const rateLimit = checkRateLimit(request, VOICE_TRANSCRIBE_RATE_LIMIT)
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: 'RATE_LIMIT_EXCEEDED', remaining: rateLimit.remaining },
-      { status: 429 },
-    )
-  }
+  const rateLimitResponse = enforceAiCoreRateLimit({
+    req: request,
+    capability: 'ai.voice.transcribe',
+    route: '/api/ai/voice/transcribe',
+    config: AI_VOICE_TRANSCRIBE_RATE_LIMIT,
+  })
+  if (rateLimitResponse) return rateLimitResponse
 
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {

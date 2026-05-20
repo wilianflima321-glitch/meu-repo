@@ -15,16 +15,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { AI_EXPENSIVE_VOICE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 import OpenAI from 'openai';
 
 import { createComponentLogger } from '@/lib/observability/logger'
 import { enforceExpensiveAiGenerationUsage } from '@/lib/server/ai-expensive-generation-guard'
 
 const log = createComponentLogger('api/ai/voice/generate/route')
-
-// Rate limit: 50 voice generations per hour
-const VOICE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 50 };
 
 // Provider configurations
 const PROVIDERS = {
@@ -199,14 +196,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Rate limit
-  const rateLimit = checkRateLimit(req, VOICE_RATE_LIMIT);
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded', remaining: rateLimit.remaining },
-      { status: 429 }
-    );
-  }
+  const rateLimitResponse = enforceAiCoreRateLimit({
+    req,
+    capability: 'ai.voice.generate',
+    route: '/api/ai/voice/generate',
+    config: AI_EXPENSIVE_VOICE_RATE_LIMIT,
+  })
+  if (rateLimitResponse) return rateLimitResponse
 
   try {
     const body: GenerateRequest = await req.json();

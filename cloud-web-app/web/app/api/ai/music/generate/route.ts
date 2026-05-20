@@ -14,15 +14,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { AI_EXPENSIVE_MUSIC_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 
 import { createComponentLogger } from '@/lib/observability/logger'
 import { enforceExpensiveAiGenerationUsage } from '@/lib/server/ai-expensive-generation-guard'
 
 const log = createComponentLogger('api/ai/music/generate/route')
-
-// Rate limit: 30 music generations per hour
-const RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 30 };
 
 // Provider configurations
 const PROVIDERS = {
@@ -241,13 +238,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const rateLimit = checkRateLimit(req, RATE_LIMIT);
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded', remaining: rateLimit.remaining },
-      { status: 429 }
-    );
-  }
+  const rateLimitResponse = enforceAiCoreRateLimit({
+    req,
+    capability: 'ai.music.generate',
+    route: '/api/ai/music/generate',
+    config: AI_EXPENSIVE_MUSIC_RATE_LIMIT,
+  })
+  if (rateLimitResponse) return rateLimitResponse
 
   try {
     const body: GenerateRequest = await req.json();

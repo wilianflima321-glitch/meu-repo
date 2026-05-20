@@ -1,6 +1,6 @@
 # Effect Cleanup Audit
 
-Generated: 2026-05-20T06:24:41.372Z
+Generated: 2026-05-20T06:45:03.100Z
 
 - Risky useEffect blocks: 145
 - Missing cleanup findings: 0

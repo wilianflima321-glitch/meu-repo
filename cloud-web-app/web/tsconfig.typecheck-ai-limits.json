@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": false
+  },
+  "include": [
+    "app/api/ai/3d/generate/route.ts",
+    "app/api/ai/image/generate/route.ts",
+    "app/api/ai/music/generate/route.ts",
+    "app/api/ai/voice/generate/route.ts",
+    "app/api/ai/voice/transcribe/route.ts",
+    "lib/server/ai-core-rate-limit.ts",
+    "lib/server/ai-expensive-generation-guard.ts"
+  ]
+}
