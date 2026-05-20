@@ -6,16 +6,16 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 64
+- Large source files: 63
 - P0 files: 0
-- P1 low-import large modules: 52
+- P1 low-import large modules: 51
 - Hard ceiling: 1800 lines
 - UI ceiling: 1200 lines
 - API route ceiling: 1200 lines
 
 ## Categories
 
-- `foundation-runtime`: 36
+- `foundation-runtime`: 35
 - `creative-runtime`: 24
 - `server-runtime`: 3
 - `ui-runtime`: 1
@@ -33,7 +33,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Lines | Category | Risk | Import hints | Recommendation |
 | --- | ---: | --- | --- | ---: | --- |
-| `lib/level-serialization.ts` | 1227 | foundation-runtime | P1 low-import large module | 1 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
 | `lib/dialogue-cutscene-system.ts` | 1201 | foundation-runtime | P1 low-import large module | 1 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
 | `lib/cutscene/cutscene-system.tsx` | 1195 | creative-runtime | P1 low-import large module | 1 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
 | `lib/ui/ui-framework.tsx` | 1195 | ui-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
@@ -58,12 +57,12 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/input/input-manager.ts` | 1098 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
 | `lib/cache-system.ts` | 1095 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
 | `lib/terrain-engine.ts` | 1094 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
+| `lib/engine/asset-pipeline.ts` | 1092 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
 
 ## Full Inventory
 
 | File | Lines | Category | Risk | Import hints |
 | --- | ---: | --- | --- | ---: |
-| `lib/level-serialization.ts` | 1227 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/dialogue-cutscene-system.ts` | 1201 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/cutscene/cutscene-system.tsx` | 1195 | creative-runtime | P1 low-import large module | 1 |
 | `lib/ui/ui-framework.tsx` | 1195 | ui-runtime | P1 low-import large module | 0 |
@@ -130,8 +129,8 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Next Refactor Queue
 
-1. `lib/level-serialization.ts`: decide whether it becomes the canonical Level Editor serializer or move it behind an explicit legacy/archive boundary.
-2. `app/api/ai/chat-advanced/route.ts` and `app/api/ai/change/apply/route.ts`: move policy and apply orchestration into tested production modules.
+1. `app/api/ai/chat-advanced/route.ts` and `app/api/ai/change/apply/route.ts`: move policy and apply orchestration into tested production modules.
+2. `lib/level-serialization/**`: keep the canonical serializer/format/manager/history split enforced by `qa:level-serialization-split`.
 3. `lib/mcp/aethel/**`: keep the tool definitions, auth policy, handlers, response schemas, resources, and prompts split enforced by `qa:mcp-server-split`.
 4. `lib/server/extension-host/**`: keep the runtime/API/types split enforced by `qa:extension-host-split`.
 5. `lib/pixel-streaming/**`: keep the new signaling/session/codec/cost split enforced by `qa:pixel-streaming-split`.
