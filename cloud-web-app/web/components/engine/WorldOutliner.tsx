@@ -10,6 +10,7 @@
  */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import * as THREE from 'three';
+import { useVirtualWindow } from '@/components/performance/useVirtualWindow';
 import { OutlinerContextMenu, OutlinerFilterBar, TreeItem } from './WorldOutlinerParts';
 
 // ============================================================================
@@ -68,6 +69,8 @@ export interface WorldOutlinerProps {
   onFocarObject?: (object: SceneObject) => void;
   onReparentObject?: (object: SceneObject, newParent: SceneObject | null) => void;
 }
+
+const OUTLINER_ROW_HEIGHT = 26;
 
 export default function WorldOutliner({
   objetos: initialObjects,
@@ -462,6 +465,17 @@ export default function WorldOutliner({
     setExpandedIds(allIds);
   }, [objetos]);
 
+  const {
+    containerRef: treeViewportRef,
+    onScroll: handleTreeScroll,
+    virtualItems: virtualTreeItems,
+    totalSize: virtualTreeHeight,
+  } = useVirtualWindow({
+    itemCount: flattenedObjects.length,
+    itemSize: OUTLINER_ROW_HEIGHT,
+    overscan: 18,
+  });
+
   return (
     <div
       style={{
@@ -494,26 +508,50 @@ export default function WorldOutliner({
       />
 
       {/* Tree */}
-      <div style={{ flex: 1, overflow: 'auto' }}>
-        {flattenedObjects.map(({ object, level }) => (
-          <TreeItem
-            key={object.id}
-            object={object}
-            level={level}
-            isExpanded={expandedIds.has(object.id)}
-            onToggleExpand={() => handleToggleExpand(object.id)}
-            onSelect={(e) => handleSelect(object, e)}
-            onToggleVisibility={() => handleToggleVisibility(object.id)}
-            onToggleBloquear={() => handleToggleBloquear(object.id)}
-            onRenomear={(name) => handleRenomear(object.id, name)}
-            onDragStart={(e) => handleDragStart(e, object.id)}
-            onDragOver={(e) => handleDragOver(e, object.id)}
-            onDrop={(e) => handleDrop(e, object.id)}
-            onContextMenu={(e) => handleContextMenu(e, object)}
-            isDragOver={dragOverId === object.id}
-            selecionadosIds={selecionadosIds}
-          />
-        ))}
+      <div
+        ref={treeViewportRef}
+        onScroll={handleTreeScroll}
+        style={{ flex: 1, overflow: 'auto', position: 'relative' }}
+      >
+        {flattenedObjects.length > 0 && (
+          <div style={{ height: virtualTreeHeight, position: 'relative' }}>
+            {virtualTreeItems.map(({ index, offset }) => {
+              const row = flattenedObjects[index];
+              if (!row) return null;
+              const { object, level } = row;
+
+              return (
+                <div
+                  key={object.id}
+                  style={{
+                    position: 'absolute',
+                    top: offset,
+                    left: 0,
+                    right: 0,
+                    height: OUTLINER_ROW_HEIGHT,
+                  }}
+                >
+                  <TreeItem
+                    object={object}
+                    level={level}
+                    isExpanded={expandedIds.has(object.id)}
+                    onToggleExpand={() => handleToggleExpand(object.id)}
+                    onSelect={(e) => handleSelect(object, e)}
+                    onToggleVisibility={() => handleToggleVisibility(object.id)}
+                    onToggleBloquear={() => handleToggleBloquear(object.id)}
+                    onRenomear={(name) => handleRenomear(object.id, name)}
+                    onDragStart={(e) => handleDragStart(e, object.id)}
+                    onDragOver={(e) => handleDragOver(e, object.id)}
+                    onDrop={(e) => handleDrop(e, object.id)}
+                    onContextMenu={(e) => handleContextMenu(e, object)}
+                    isDragOver={dragOverId === object.id}
+                    selecionadosIds={selecionadosIds}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {flattenedObjects.length === 0 && (
           <div style={{

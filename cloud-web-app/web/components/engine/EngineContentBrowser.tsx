@@ -8,7 +8,7 @@
  *
  * NOT MOCK - real functional system.
  */
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   openConfirmDialog,
   openPromptDialog,
@@ -50,6 +50,12 @@ export interface ContentBrowserProps {
   onAssetSelect?: (asset: Asset) => void;
   onAssetOpen?: (asset: Asset) => void;
 }
+
+const ASSET_GRID_CARD_WIDTH = 128;
+const ASSET_GRID_ROW_HEIGHT = 140;
+const ASSET_GRID_GAP = 8;
+const ASSET_LIST_ROW_HEIGHT = 38;
+const ASSET_VIRTUAL_OVERSCAN = 4;
 
 export default function EngineContentBrowser({
   projectId,
@@ -189,6 +195,9 @@ export default function EngineContentBrowser({
     asset: Asset | null;
   } | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
+  const assetViewportRef = useRef<HTMLDivElement>(null);
+  const [assetScrollTop, setAssetScrollTop] = useState(0);
+  const [assetViewport, setAssetViewport] = useState({ width: 960, height: 520 });
 
   // Filter and sort assets
   const displayedAssets = useMemo(() => {
@@ -249,6 +258,73 @@ export default function EngineContentBrowser({
 
     return filtered;
   }, [assets, currentPath, filter, sortBy, sortOrder]);
+
+  useEffect(() => {
+    const element = assetViewportRef.current;
+    if (!element) return;
+
+    const updateViewport = () => {
+      setAssetViewport({
+        width: element.clientWidth,
+        height: element.clientHeight,
+      });
+    };
+
+    updateViewport();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateViewport);
+      return () => window.removeEventListener("resize", updateViewport);
+    }
+
+    const observer = new ResizeObserver(updateViewport);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  const handleAssetScroll = useCallback<React.UIEventHandler<HTMLDivElement>>(
+    (event) => {
+      setAssetScrollTop(event.currentTarget.scrollTop);
+    },
+    [],
+  );
+
+  const gridColumns = useMemo(() => {
+    const availableWidth = Math.max(ASSET_GRID_CARD_WIDTH, assetViewport.width - 32);
+    return Math.max(
+      1,
+      Math.floor((availableWidth + ASSET_GRID_GAP) / (ASSET_GRID_CARD_WIDTH + ASSET_GRID_GAP)),
+    );
+  }, [assetViewport.width]);
+
+  const assetVirtualRows = useMemo(() => {
+    const rowHeight = viewMode === "grid" ? ASSET_GRID_ROW_HEIGHT : ASSET_LIST_ROW_HEIGHT;
+    const rowCount =
+      viewMode === "grid"
+        ? Math.ceil(displayedAssets.length / gridColumns)
+        : displayedAssets.length;
+    const firstVisible = Math.floor(assetScrollTop / rowHeight);
+    const visibleRows = Math.ceil(assetViewport.height / rowHeight);
+    const start = Math.max(0, firstVisible - ASSET_VIRTUAL_OVERSCAN);
+    const end = Math.min(rowCount, firstVisible + visibleRows + ASSET_VIRTUAL_OVERSCAN);
+    const rows: number[] = [];
+
+    for (let row = start; row < end; row += 1) {
+      rows.push(row);
+    }
+
+    return {
+      rows,
+      rowHeight,
+      totalHeight: rowCount * rowHeight,
+    };
+  }, [
+    assetScrollTop,
+    assetViewport.height,
+    displayedAssets.length,
+    gridColumns,
+    viewMode,
+  ]);
 
   const handleSelect = useCallback(
     (asset: Asset, e: React.MouseEvent) => {
@@ -462,6 +538,8 @@ export default function EngineContentBrowser({
 
         {/* Asset Grid/List */}
         <div
+          ref={assetViewportRef}
+          onScroll={handleAssetScroll}
           style={{
             flex: 1,
             overflow: "auto",
@@ -472,22 +550,42 @@ export default function EngineContentBrowser({
           {viewMode === "grid" ? (
             <div
               style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "8px",
-                alignContent: "flex-start",
+                height: assetVirtualRows.totalHeight,
+                position: "relative",
+                minWidth: "100%",
               }}
             >
-              {displayedAssets.map((asset) => (
-                <AssetCard
-                  key={asset.id}
-                  asset={asset}
-                  isSelected={selectedAssets.has(asset.id)}
-                  onSelect={(e) => handleSelect(asset, e)}
-                  onDoubleClick={() => handleDoubleClick(asset)}
-                  onContextMenu={(e) => handleContextMenu(e, asset)}
-                />
-              ))}
+              {assetVirtualRows.rows.map((rowIndex) => {
+                const rowAssets = displayedAssets.slice(
+                  rowIndex * gridColumns,
+                  rowIndex * gridColumns + gridColumns,
+                );
+
+                return (
+                  <div
+                    key={rowIndex}
+                    style={{
+                      position: "absolute",
+                      top: rowIndex * ASSET_GRID_ROW_HEIGHT,
+                      left: 0,
+                      right: 0,
+                      display: "flex",
+                      gap: `${ASSET_GRID_GAP}px`,
+                    }}
+                  >
+                    {rowAssets.map((asset) => (
+                      <AssetCard
+                        key={asset.id}
+                        asset={asset}
+                        isSelected={selectedAssets.has(asset.id)}
+                        onSelect={(e) => handleSelect(asset, e)}
+                        onDoubleClick={() => handleDoubleClick(asset)}
+                        onContextMenu={(e) => handleContextMenu(e, asset)}
+                      />
+                    ))}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div>
@@ -513,16 +611,33 @@ export default function EngineContentBrowser({
                 <span>Modified</span>
               </div>
 
-              {displayedAssets.map((asset) => (
-                <AssetRow
-                  key={asset.id}
-                  asset={asset}
-                  isSelected={selectedAssets.has(asset.id)}
-                  onSelect={(e) => handleSelect(asset, e)}
-                  onDoubleClick={() => handleDoubleClick(asset)}
-                  onContextMenu={(e) => handleContextMenu(e, asset)}
-                />
-              ))}
+              <div style={{ height: assetVirtualRows.totalHeight, position: "relative" }}>
+                {assetVirtualRows.rows.map((assetIndex) => {
+                  const asset = displayedAssets[assetIndex];
+                  if (!asset) return null;
+
+                  return (
+                    <div
+                      key={asset.id}
+                      style={{
+                        position: "absolute",
+                        top: assetIndex * ASSET_LIST_ROW_HEIGHT,
+                        left: 0,
+                        right: 0,
+                        height: ASSET_LIST_ROW_HEIGHT,
+                      }}
+                    >
+                      <AssetRow
+                        asset={asset}
+                        isSelected={selectedAssets.has(asset.id)}
+                        onSelect={(e) => handleSelect(asset, e)}
+                        onDoubleClick={() => handleDoubleClick(asset)}
+                        onContextMenu={(e) => handleContextMenu(e, asset)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
