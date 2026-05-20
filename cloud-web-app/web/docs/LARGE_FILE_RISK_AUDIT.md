@@ -6,7 +6,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 63
+- Large source files: 64
 - P0 files: 0
 - P1 low-import large modules: 51
 - Hard ceiling: 1800 lines
@@ -15,7 +15,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Categories
 
-- `foundation-runtime`: 35
+- `foundation-runtime`: 36
 - `creative-runtime`: 24
 - `server-runtime`: 3
 - `ui-runtime`: 1
@@ -119,6 +119,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/extensions/extension-system.ts` | 1021 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/cloth-simulation.ts` | 1017 | foundation-runtime | P2 tracked large module | 2 |
 | `lib/facial-animation-system.ts` | 1015 | foundation-runtime | P2 tracked large module | 3 |
+| `lib/yjs-collaboration.ts` | 1013 | foundation-runtime | P2 tracked large module | 8 |
 | `lib/audio/spatial-audio-system.ts` | 1007 | creative-runtime | P1 low-import large module | 0 |
 | `lib/debug/object-inspector.tsx` | 1001 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/debug/profiler-system.tsx` | 1001 | foundation-runtime | P1 low-import large module | 0 |

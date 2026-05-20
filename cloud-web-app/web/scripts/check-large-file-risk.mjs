@@ -42,7 +42,7 @@ function classify(relativePath) {
   if (relativePath.startsWith('lib/viewport/')) return 'viewport-runtime'
   if (relativePath.startsWith('lib/ui/')) return 'ui-runtime'
   if (/lib\/(ai|animation|audio|capture|cutscene|dialogue|ecs|engine|events|input|materials|networking|particles|physics|postprocessing|save|scene|state|terrain|visual-script|world)\//.test(relativePath)) return 'creative-runtime'
-  if (/(advanced-input|ai-audio|ai-tools|behavior-tree|ecs-dots|particle|volumetric|render|ray|shader|asset|pixel|video|fluid|cloth|facial|motion|nanite|webxr|terrain|quest|inventory|dialogue|cache|settings|debug|extension|sdk|translation|hot-reload|level|onboarding)/.test(relativePath)) return 'foundation-runtime'
+  if (/(advanced-input|ai-audio|ai-tools|behavior-tree|ecs-dots|particle|volumetric|render|ray|shader|asset|pixel|video|fluid|cloth|facial|motion|nanite|webxr|terrain|quest|inventory|dialogue|cache|settings|debug|extension|sdk|translation|hot-reload|level|onboarding|yjs-collaboration)/.test(relativePath)) return 'foundation-runtime'
   return 'uncategorized-runtime'
 }
 

@@ -11,7 +11,7 @@ Generated: deterministic local scan
 - monacoEditorDirect: 3 (max 33)
 - monacoReactDirect: 4 (max 6)
 - framerMotionDirect: 25 (max 25)
-- dynamicImportsMin: 242 (min 55)
+- dynamicImportsMin: 243 (min 55)
 
 ## Top Offenders
 ### threeDirect

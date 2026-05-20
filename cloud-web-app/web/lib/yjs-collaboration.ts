@@ -16,6 +16,7 @@
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { Awareness } from 'y-protocols/awareness';
+import type { IndexeddbPersistence } from 'y-indexeddb';
 
 import {createComponentLogger, logger} from '@/lib/observability/logger'
 
@@ -54,12 +55,15 @@ export interface SelectionRange {
 export interface CollaborationConfig {
     documentName: string;
     serverUrl?: string;
+    persistenceEnabled?: boolean;
+    persistenceName?: string;
     user: {
         id: string;
         name: string;
         color?: string;
     };
     onSync?: () => void;
+    onPersistenceSync?: () => void;
     onStatusChange?: (status: 'connecting' | 'connected' | 'disconnected') => void;
     onAwarenessChange?: (users: Map<number, UserInfo>) => void;
 }
@@ -215,6 +219,9 @@ export class CollaborationSession {
     private config: CollaborationConfig;
     private listeners: Map<string, Set<CollaborationEventListener>> = new Map();
     private isDestroyed = false;
+    private persistence: IndexeddbPersistence | null = null;
+    private persistenceSynced = false;
+    private connectionTimeout: ReturnType<typeof setTimeout> | null = null;
     
     // Yjs data structures
     private sceneMap: Y.Map<Y.Map<unknown>> | null = null;
@@ -236,6 +243,7 @@ export class CollaborationSession {
         
         // Initialize shared types
         this.initializeSharedTypes();
+        this.initializeOfflinePersistence();
         
         log.info(`🔗 CollaborationSession created for document: ${config.documentName}`);
     }
@@ -251,6 +259,43 @@ export class CollaborationSession {
         this.undoManager = new Y.UndoManager(this.sceneMap, {
             captureTimeout: 500
         });
+    }
+
+    private getPersistenceName(): string {
+        const rawName = this.config.persistenceName || this.config.documentName;
+        return `aethel-yjs-${rawName.replace(/[^a-zA-Z0-9:_-]/g, '-')}`;
+    }
+
+    private markPersistenceSynced(): void {
+        if (this.isDestroyed) return;
+        if (this.persistenceSynced) return;
+        this.persistenceSynced = true;
+        this.config.onPersistenceSync?.();
+        this.emit('persistence-synced', { name: this.getPersistenceName() });
+    }
+
+    private initializeOfflinePersistence(): void {
+        if (this.config.persistenceEnabled === false || typeof window === 'undefined') {
+            return;
+        }
+
+        void import('y-indexeddb')
+            .then(({ IndexeddbPersistence }) => {
+                if (this.isDestroyed) return;
+                const persistence = new IndexeddbPersistence(this.getPersistenceName(), this.doc);
+                this.persistence = persistence;
+                persistence.on('synced', () => this.markPersistenceSynced());
+                void persistence.whenSynced.then(() => this.markPersistenceSynced());
+            })
+            .catch((error) => {
+                log.warn('Offline collaboration persistence unavailable', { error });
+            });
+    }
+
+    private clearConnectionTimeout(): void {
+        if (!this.connectionTimeout) return;
+        clearTimeout(this.connectionTimeout);
+        this.connectionTimeout = null;
     }
     
     /**
@@ -287,6 +332,7 @@ export class CollaborationSession {
                 // Handle sync
                 this.provider.on('sync', (isSynced: boolean) => {
                     if (isSynced) {
+                        this.clearConnectionTimeout();
                         this.config.onSync?.();
                         this.emit('sync', {});
                         resolve();
@@ -308,8 +354,10 @@ export class CollaborationSession {
                 });
                 
                 // Set timeout for connection
-                setTimeout(() => {
+                this.clearConnectionTimeout();
+                this.connectionTimeout = setTimeout(() => {
                     if (this.provider?.wsconnected === false) {
+                        this.connectionTimeout = null;
                         reject(new Error('Connection timeout'));
                     }
                 }, 10000);
@@ -324,6 +372,7 @@ export class CollaborationSession {
      * Disconnect from server
      */
     disconnect(): void {
+        this.clearConnectionTimeout();
         if (this.provider) {
             this.provider.disconnect();
         }
@@ -337,6 +386,8 @@ export class CollaborationSession {
         this.isDestroyed = true;
         this.disconnect();
         this.provider?.destroy();
+        void this.persistence?.destroy();
+        this.persistence = null;
         this.doc.destroy();
         this.listeners.clear();
         log.info(`🔗 CollaborationSession destroyed: ${this.config.documentName}`);
@@ -422,6 +473,21 @@ export class CollaborationSession {
      */
     getLocalClientId(): number {
         return this.doc.clientID;
+    }
+
+    /**
+     * Whether IndexedDB has loaded local Yjs state for this document.
+     */
+    isOfflinePersistenceSynced(): boolean {
+        return this.persistenceSynced;
+    }
+
+    /**
+     * Clear this document's offline cache. Useful for support/debug flows.
+     */
+    async clearOfflineData(): Promise<void> {
+        await this.persistence?.clearData();
+        this.persistenceSynced = false;
     }
     
     // ========================================================================
@@ -725,6 +791,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 export interface UseCollaborationOptions {
     documentName: string;
     serverUrl?: string;
+    persistenceEnabled?: boolean;
+    persistenceName?: string;
     userId: string;
     userName: string;
     userColor?: string;
@@ -734,6 +802,7 @@ export interface UseCollaborationResult {
     session: CollaborationSession | null;
     isConnected: boolean;
     isSynced: boolean;
+    isPersistenceSynced: boolean;
     users: UserInfo[];
     error: Error | null;
     connect: () => Promise<void>;
@@ -746,6 +815,7 @@ export function useYjsCollaboration(options: UseCollaborationOptions): UseCollab
     const [session, setSession] = useState<CollaborationSession | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [isSynced, setIsSynced] = useState(false);
+    const [isPersistenceSynced, setIsPersistenceSynced] = useState(false);
     const [users, setUsers] = useState<UserInfo[]>([]);
     const [error, setError] = useState<Error | null>(null);
     const sessionRef = useRef<CollaborationSession | null>(null);
@@ -755,12 +825,15 @@ export function useYjsCollaboration(options: UseCollaborationOptions): UseCollab
         const nextSession = new CollaborationSession({
             documentName: options.documentName,
             serverUrl: options.serverUrl,
+            persistenceEnabled: options.persistenceEnabled,
+            persistenceName: options.persistenceName,
             user: {
                 id: options.userId,
                 name: options.userName,
                 color: options.userColor
             },
             onSync: () => setIsSynced(true),
+            onPersistenceSync: () => setIsPersistenceSynced(true),
             onStatusChange: (status) => {
                 setIsConnected(status === 'connected');
             },
@@ -775,8 +848,9 @@ export function useYjsCollaboration(options: UseCollaborationOptions): UseCollab
             sessionRef.current?.destroy();
             sessionRef.current = null;
             setSession(null);
+            setIsPersistenceSynced(false);
         };
-    }, [options.documentName, options.serverUrl, options.userId, options.userName, options.userColor]);
+    }, [options.documentName, options.persistenceEnabled, options.persistenceName, options.serverUrl, options.userId, options.userName, options.userColor]);
     
     const connect = useCallback(async () => {
         try {
@@ -806,6 +880,7 @@ export function useYjsCollaboration(options: UseCollaborationOptions): UseCollab
         session,
         isConnected,
         isSynced,
+        isPersistenceSynced,
         users,
         error,
         connect,

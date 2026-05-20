@@ -115,6 +115,7 @@ export function useWorkbenchRealtimeCollaboration({
     session,
     isConnected,
     isSynced,
+    isPersistenceSynced,
     users,
     error,
     connect,
@@ -124,6 +125,8 @@ export function useWorkbenchRealtimeCollaboration({
   } = useYjsCollaboration({
     documentName,
     serverUrl: resolveCollaborationServerUrl(),
+    persistenceEnabled: collaborationEnabled,
+    persistenceName: collaborationEnabled ? `workbench:${projectId}` : 'disabled',
     userId: currentUser?.id ?? 'anonymous',
     userName: currentUser?.name ?? 'Guest',
     userColor: currentUser?.color,
@@ -249,7 +252,9 @@ export function useWorkbenchRealtimeCollaboration({
       state: 'reconnecting',
       tone: 'warning',
       label: 'Reconectando',
-      detail: 'No sync confirmed. Your changes remain local until the session returns.',
+      detail: isPersistenceSynced
+        ? 'No live sync confirmed. Local offline cache is active until the session returns.'
+        : 'No sync confirmed. Your changes remain local until the session returns.',
       peerCount,
       liveCursorCount,
     };
@@ -261,6 +266,7 @@ export function useWorkbenchRealtimeCollaboration({
     hasToken,
     isConnected,
     isConnecting,
+    isPersistenceSynced,
     isSynced,
   ]);
 
