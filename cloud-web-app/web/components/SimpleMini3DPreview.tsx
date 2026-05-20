@@ -1,101 +1,51 @@
 'use client'
 
-import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Stars, Float } from '@react-three/drei'
-import { useRef, Suspense } from 'react'
-import * as THREE from 'three'
-
-function RotatingCube() {
-  const meshRef = useRef<THREE.Mesh>(null)
-
-  useFrame((_, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x += delta * 0.5
-      meshRef.current.rotation.y += delta * 0.3
-    }
-  })
-
-  return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-      <mesh ref={meshRef} castShadow>
-        <boxGeometry args={[1.5, 1.5, 1.5]} />
-        <meshStandardMaterial
-          color={0x4f46e5}
-          metalness={0.7}
-          roughness={0.2}
-          emissive={0x3730a3}
-          emissiveIntensity={0.2}
-        />
-      </mesh>
-    </Float>
-  )
-}
-
-function GridFloor() {
-  return (
-    <gridHelper
-      args={[20, 20, 0x374151, 0x1f2937]}
-      position={[0, -2, 0]}
-    />
-  )
-}
-
-function Scene() {
-  return (
-    <>
-      <ambientLight intensity={0.3} />
-      <pointLight position={[10, 10, 10]} intensity={1} castShadow />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} color={0x8b5cf6} />
-      <spotLight
-        position={[5, 5, 5]}
-        angle={0.3}
-        penumbra={1}
-        intensity={1}
-        castShadow
-      />
-
-      <RotatingCube />
-      <GridFloor />
-      <Stars radius={100} depth={50} count={1000} factor={4} saturation={0} fade speed={1} />
-
-      <OrbitControls
-        enablePan={false}
-        enableZoom={true}
-        enableRotate={true}
-        autoRotate={false}
-        minDistance={3}
-        maxDistance={15}
-      />
-    </>
-  )
-}
+const cubeFaces = [
+  { name: 'front', transform: 'translateZ(38px)' },
+  { name: 'back', transform: 'rotateY(180deg) translateZ(38px)' },
+  { name: 'right', transform: 'rotateY(90deg) translateZ(38px)' },
+  { name: 'left', transform: 'rotateY(-90deg) translateZ(38px)' },
+  { name: 'top', transform: 'rotateX(90deg) translateZ(38px)' },
+  { name: 'bottom', transform: 'rotateX(-90deg) translateZ(38px)' },
+]
 
 export default function SimpleMini3DPreview() {
   return (
-    <div className="w-full h-full bg-gradient-to-b from-[var(--aethel-surface-primary)] to-[var(--aethel-surface-secondary)]">
-      <Canvas
-        shadows
-        camera={{ position: [4, 3, 4], fov: 50 }}
-        style={{ width: '100%', height: '100%' }}
-        gl={{ antialias: true, alpha: true }}
-      >
-        <Suspense fallback={null}>
-          <Scene />
-        </Suspense>
-      </Canvas>
+    <div className="relative h-full w-full overflow-hidden bg-[radial-gradient(circle_at_50%_20%,rgba(59,130,246,0.22),transparent_32%),linear-gradient(180deg,var(--aethel-surface-primary),var(--aethel-surface-secondary))]">
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-[linear-gradient(to_top,rgba(15,23,42,0.86),transparent)]" />
+      <div className="absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 [perspective:580px]">
+        <div className="relative h-full w-full animate-[spin_9s_linear_infinite] [transform-style:preserve-3d]">
+          {cubeFaces.map((face) => (
+            <div
+              key={face.name}
+              className="absolute inset-7 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_38%,transparent)] bg-[linear-gradient(135deg,rgba(59,130,246,0.34),rgba(20,184,166,0.12))] shadow-[0_0_28px_rgba(59,130,246,0.18)]"
+              style={{ transform: face.transform }}
+            />
+          ))}
+        </div>
+      </div>
 
-      {/* Overlay com informações */}
       <div className="absolute bottom-2 left-2 text-xs text-[var(--aethel-text-quaternary)] pointer-events-none">
         <div className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded-full animate-pulse" />
+          <span className="h-1.5 w-1.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_80%,transparent)] animate-pulse" />
           Preview Active
         </div>
       </div>
 
       <div className="absolute top-2 right-2 text-xs text-[var(--aethel-text-quaternary)] pointer-events-none">
-        Use o mouse para rotacionar
+        Lightweight CSS preview
       </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          from {
+            transform: rotateX(-18deg) rotateY(0deg);
+          }
+          to {
+            transform: rotateX(-18deg) rotateY(360deg);
+          }
+        }
+      `}</style>
     </div>
   )
 }
-

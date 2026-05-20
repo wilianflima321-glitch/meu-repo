@@ -1,4 +1,13 @@
 export type AdminSectionId = 'people' | 'money' | 'ai' | 'platform' | 'trust' | 'product'
+export type AdminRouteRiskLane = 'low' | 'medium' | 'high' | 'critical'
+export type AdminEvidenceStatus = 'live' | 'review' | 'legacy-compatible'
+
+export type AdminRouteOwnership = {
+  owner: string
+  intent: string
+  riskLane: AdminRouteRiskLane
+  evidenceStatus: AdminEvidenceStatus
+}
 
 export type AdminSectionLink = {
   label: string
@@ -12,6 +21,10 @@ export type AdminConsolidatedSection = {
   href: string
   description: string
   operatorQuestion: string
+  owner: string
+  intent: string
+  riskLane: AdminRouteRiskLane
+  evidenceStatus: AdminEvidenceStatus
   primaryLinks: AdminSectionLink[]
   routes: string[]
 }
@@ -71,6 +84,10 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     href: '/admin/users',
     description: 'Users, roles, onboarding, support, feedback, and workspace access reviews.',
     operatorQuestion: 'Who can access production surfaces, and what changed recently?',
+    owner: 'People Ops',
+    intent: 'Keep access, support, onboarding, and accountability in one operational lane.',
+    riskLane: 'medium',
+    evidenceStatus: 'live',
     primaryLinks: [
       { label: 'Users', href: '/admin/users' },
       { label: 'Roles', href: '/admin/roles' },
@@ -90,6 +107,10 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     href: '/admin/finance',
     description: 'Revenue, payments, subscriptions, promotions, marketplace economics, and cost control.',
     operatorQuestion: 'Where is revenue moving, and what spend or churn needs action?',
+    owner: 'Revenue Ops',
+    intent: 'Turn billing, marketplace, subscriptions, churn, and spend into one board of truth.',
+    riskLane: 'high',
+    evidenceStatus: 'live',
     primaryLinks: [
       { label: 'Finance', href: '/admin/finance', badge: 'MRR' },
       { label: 'Payments', href: '/admin/payments' },
@@ -112,6 +133,10 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     href: '/admin/ai',
     description: 'Agent fleet, model quality, training, fine-tuning, indexing, automation, and safety bias review.',
     operatorQuestion: 'Which agents are working, what did they cost, and where is quality drifting?',
+    owner: 'AI Operations',
+    intent: 'Govern agent work, model quality, training, cost, and safety from a single cockpit.',
+    riskLane: 'high',
+    evidenceStatus: 'live',
     primaryLinks: [
       { label: 'AI overview', href: '/admin/ai' },
       { label: 'Agents', href: '/admin/ai-agents' },
@@ -137,6 +162,10 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     href: '/admin/monitoring',
     description: 'Infrastructure, observability, deploys, backups, realtime systems, API posture, and scale readiness.',
     operatorQuestion: 'Is the platform healthy enough to accept traffic and production writes?',
+    owner: 'Platform Engineering',
+    intent: 'Keep deploys, APIs, observability, backup, rate limits, realtime, and scale evidence together.',
+    riskLane: 'critical',
+    evidenceStatus: 'live',
     primaryLinks: [
       { label: 'Monitoring', href: '/admin/monitoring' },
       { label: 'Infrastructure', href: '/admin/infrastructure' },
@@ -160,6 +189,10 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     href: '/admin/security',
     description: 'Audit logs, compliance, security, moderation, emergency controls, IP registry, and governance views.',
     operatorQuestion: 'What risk needs containment before it becomes customer-visible?',
+    owner: 'Trust & Safety',
+    intent: 'Contain security, compliance, moderation, emergency, audit, and IP risk before it leaks to customers.',
+    riskLane: 'critical',
+    evidenceStatus: 'live',
     primaryLinks: [
       { label: 'Security', href: '/admin/security' },
       { label: 'Compliance', href: '/admin/compliance' },
@@ -181,6 +214,10 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     href: '/admin/feature-flags',
     description: 'Feature flags, chat, collaboration, IDE settings, notifications, multi-tenancy, and product operations.',
     operatorQuestion: 'Which product surfaces are shipping, gated, or creating support load?',
+    owner: 'Product Ops',
+    intent: 'Track flags, collaboration, chat, notifications, tenancy, and IDE surfaces without route sprawl.',
+    riskLane: 'medium',
+    evidenceStatus: 'live',
     primaryLinks: [
       { label: 'Feature flags', href: '/admin/feature-flags' },
       { label: 'Collaboration', href: '/admin/collaboration' },
@@ -215,5 +252,7 @@ export function getAdminRouteCoverage() {
     sections: ADMIN_CONSOLIDATED_SECTIONS.length,
     routes: routes.length,
     primaryLinks: ADMIN_CONSOLIDATED_SECTIONS.reduce((total, section) => total + section.primaryLinks.length, 0),
+    criticalSections: ADMIN_CONSOLIDATED_SECTIONS.filter((section) => section.riskLane === 'critical').length,
+    legacyCompatibleRoutes: routes.length,
   }
 }

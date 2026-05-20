@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback } from 'react'
-import * as THREE from 'three'
 import {
   Box,
   Film,
@@ -28,6 +27,10 @@ import {
   type GizmoPivotMode,
 } from '@/lib/viewport/gizmo-elite-controls'
 import { formatViewportAssetSize } from '@/lib/viewport/viewport-asset-import'
+
+function radToDeg(value: number) {
+  return (value * 180) / Math.PI
+}
 
 const iconButton = 'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] p-2 text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]'
 const activeButton = 'inline-flex items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--aethel-primary)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] p-2 text-[var(--aethel-primary-light)] transition hover:brightness-110'
@@ -272,7 +275,7 @@ export function SceneViewportInspector({
               </div>
               <div>
                 <p className="mb-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">Rotation</p>
-                <p>{selectedObject.rotation.map((value) => formatter(THREE.MathUtils.radToDeg(value))).join('° · ')}°</p>
+                <p>{selectedObject.rotation.map((value) => formatter(radToDeg(value))).join('° · ')}°</p>
               </div>
               <div>
                 <p className="mb-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">Scale</p>

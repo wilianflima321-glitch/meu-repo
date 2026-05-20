@@ -85,6 +85,12 @@ requirePattern('lib/device/local-runtime-bridge.ts', /supportsOffscreenRender/, 
 requireFile('components/studio/StudioLocalRuntimeCapsule.tsx', 'Studio must expose local runtime capability state to end users')
 requirePattern('components/studio/StudioLocalRuntimeCapsule.tsx', /LOCAL_RUNTIME_CAPABILITY_REQUEST_EVENT/, 'Studio Local capsule must request fresh native capability probes')
 requirePattern('app/studio/StudioMissionControl.tsx', /StudioLocalRuntimeCapsule/, 'Studio Mission Control must show the local runtime capsule')
+requireFile('lib/studio-local/release-manifest.ts', 'Studio Local release/capability manifest must drive public runtime truth surfaces')
+requirePattern('lib/studio-local/release-manifest.ts', /RuntimeReleaseManifest/, 'Studio Local manifest must expose a typed release manifest')
+requirePattern('lib/studio-local/release-manifest.ts', /signedInstallers:\s*'held'/, 'Studio Local signed installers must stay held until release evidence exists')
+requirePattern('lib/studio-local/release-manifest.ts', /Cloud Stream[\s\S]*NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL/, 'Cloud Stream must disclose configured-url fallback conditions')
+requirePattern('app/download/page.tsx', /STUDIO_LOCAL_RELEASE_MANIFEST/, 'download page must render from the Studio Local manifest instead of hardcoded release theater')
+requirePattern('app/download/page.tsx', /Fallback:/, 'download page must explain runtime fallback reasons')
 
 const studioLocalContracts = '../../apps/studio-local/src-tauri/src/contracts.rs'
 const studioLocalProbe = '../../apps/studio-local/src-tauri/src/probe.rs'

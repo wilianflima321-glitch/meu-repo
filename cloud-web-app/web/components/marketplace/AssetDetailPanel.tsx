@@ -10,25 +10,15 @@
  * - Reviews section
  * - Related assets
  */
-import React, { useState, useRef, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import {
-    OrbitControls,
-    Environment,
-    useGLTF,
-    PresentationControls,
-    Stage,
-    Html as DreiHtml,
-    useProgress
-} from '@react-three/drei';
 import {
     Star, Download, Heart, ShoppingCart, Share2, Flag,
     ChevronLeft, ChevronRight, Check, ExternalLink,
     User, Calendar, FileText, Box, Palette, Tag,
-    MessageSquare, ThumbsUp, Shield, Loader2, Play, Pause
+    MessageSquare, ThumbsUp, Shield, Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
@@ -40,7 +30,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
 import { Textarea } from '@/components/ui/Textarea';
 import { Progress } from '@/components/ui/progress';
 import { useToastActions } from '@/components/ui';
-import * as THREE from 'three';
 
 // ============================================================================
 // Types
@@ -110,78 +99,17 @@ interface Review {
 }
 
 // ============================================================================
-// Preview 3D Components
+// Async 3D Preview Boundary
 // ============================================================================
 
-function Loader() {
-    const { progress } = useProgress();
-    return (
-        <DreiHtml center>
-            <div className="flex flex-col items-center gap-2">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <span className="text-sm text-muted-foreground">
-                    Loading {progress.toFixed(0)}%
-                </span>
-            </div>
-        </DreiHtml>
-    );
-}
-
-function Model({ url }: { url: string }) {
-    const { scene } = useGLTF(url);
-    const ref = useRef<THREE.Group>(null);
-
-    useEffect(() => {
-        // Center and scale the model
-        const box = new THREE.Box3().setFromObject(scene);
-        const size = box.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 2 / maxDim;
-        scene.scale.setScalar(scale);
-
-        const center = box.getCenter(new THREE.Vector3());
-        scene.position.sub(center.multiplyScalar(scale));
-    }, [scene]);
-
-    return <primitive ref={ref} object={scene} />;
-}
-
-function ModelPreview({ modelUrl }: { modelUrl: string }) {
-    const [autoRotate, setAutoRotate] = useState(true);
-
-    return (
-        <div className="relative w-full h-full min-h-[400px] bg-gradient-to-b from-[var(--aethel-surface-primary)] to-[var(--aethel-surface-secondary)] rounded-lg overflow-hidden">
-            <Canvas
-                camera={{ position: [0, 0, 5], fov: 50 }}
-                shadows
-            >
-                <Suspense fallback={<Loader />}>
-                    <Stage environment="city" intensity={0.5}>
-                        <Model url={modelUrl} />
-                    </Stage>
-                    <OrbitControls
-                        autoRotate={autoRotate}
-                        autoRotateSpeed={2}
-                        enablePan={false}
-                        minDistance={2}
-                        maxDistance={10}
-                    />
-                </Suspense>
-            </Canvas>
-
-            {/* Controls overlay */}
-            <div className="absolute bottom-4 right-4 flex gap-2">
-                <Button type="button"
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setAutoRotate(!autoRotate)}
-                >
-                    {autoRotate ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                </Button>
-            </div>
+const ModelPreview = dynamic(() => import('./AssetModelPreview'), {
+    ssr: false,
+    loading: () => (
+        <div className="flex min-h-[400px] items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-muted">
+            <Loader2 className="h-8 w-8 animate-spin" />
         </div>
-    );
-}
+    ),
+});
 
 // ============================================================================
 // Sub-Components

@@ -1,5 +1,8 @@
-import * as THREE from 'three'
 import type { ViewportSceneObject } from '@/components/viewport/AethelViewport3D'
+
+function degToRad(degrees: number) {
+  return (degrees * Math.PI) / 180
+}
 
 function clampScale(scale: [number, number, number]): [number, number, number] {
   return [
@@ -33,7 +36,7 @@ export function parseAiViewportCommand(command: string, object: ViewportSceneObj
     return { position: [object.position[0], object.position[1], object.position[2] + amount] }
   }
   if (normalized.includes('rotate') || normalized.includes('rotacion')) {
-    return { rotation: [object.rotation[0], object.rotation[1] + THREE.MathUtils.degToRad(amount), object.rotation[2]] }
+    return { rotation: [object.rotation[0], object.rotation[1] + degToRad(amount), object.rotation[2]] }
   }
   if (normalized.includes('scale') || normalized.includes('bigger') || normalized.includes('maior')) {
     const factor = 1 + amount / 10

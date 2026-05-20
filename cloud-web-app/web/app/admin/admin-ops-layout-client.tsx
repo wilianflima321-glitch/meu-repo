@@ -34,6 +34,8 @@ import {
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 import {
   ADMIN_CONSOLIDATED_SECTIONS,
+  type AdminEvidenceStatus,
+  type AdminRouteRiskLane,
   findAdminSectionForRoute,
   getAdminRouteCoverage,
   getAdminRouteLabel,
@@ -67,6 +69,10 @@ interface NavGroup {
   label: string
   href: string
   description: string
+  owner: string
+  intent: string
+  riskLane: AdminRouteRiskLane
+  evidenceStatus: AdminEvidenceStatus
   routeCount: number
   icon: React.ElementType
   items: { title: string; href: string; icon: React.ElementType; badge?: string }[]
@@ -139,6 +145,10 @@ const navGroups: NavGroup[] = ADMIN_CONSOLIDATED_SECTIONS.map((section) => ({
   label: section.label,
   href: section.href,
   description: section.operatorQuestion,
+  owner: section.owner,
+  intent: section.intent,
+  riskLane: section.riskLane,
+  evidenceStatus: section.evidenceStatus,
   routeCount: section.routes.length,
   icon: sectionIconById[section.id],
   items: section.routes.map((route) => ({
@@ -248,6 +258,28 @@ function NavGroupSection({ group, isCollapsed }: { group: NavGroup; isCollapsed?
           </button>
         )}
       </div>
+      {open && !isCollapsed && (
+        <div className="ml-3 mt-1 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] px-2.5 py-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+              {group.owner}
+            </span>
+            <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] ${
+              group.riskLane === 'critical'
+                ? 'border-[color-mix(in_srgb,var(--aethel-error)_36%,transparent)] text-[var(--aethel-error-light)]'
+                : group.riskLane === 'high'
+                  ? 'border-[color-mix(in_srgb,var(--aethel-warning)_36%,transparent)] text-[var(--aethel-warning-light)]'
+                  : 'border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] text-[var(--aethel-info-light)]'
+            }`}>
+              {group.riskLane} risk
+            </span>
+            <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_28%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-success-light)]">
+              {group.evidenceStatus}
+            </span>
+          </div>
+          <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">{group.intent}</p>
+        </div>
+      )}
       {open && !isCollapsed && (
         <nav className="ml-3 mt-1 space-y-0.5 border-l border-[var(--aethel-border-subtle)] pl-2">
           {group.primaryItems.map((item) => {

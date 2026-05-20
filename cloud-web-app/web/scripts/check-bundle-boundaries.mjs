@@ -8,14 +8,16 @@ const EXTENSIONS = new Set(['.ts', '.tsx'])
 const ignoreDirs = new Set(['node_modules', '.next', 'dist', 'build'])
 
 const BUDGETS = {
-  threeDirect: 96,
-  reactThreeFiberDirect: 29,
-  reactThreeDreiDirect: 25,
+  threeDirect: 90,
+  reactThreeFiberDirect: 25,
+  reactThreeDreiDirect: 22,
   monacoEditorDirect: 33,
   monacoReactDirect: 6,
-  framerMotionDirect: 26,
-  dynamicImportsMin: 41,
+  framerMotionDirect: 25,
+  dynamicImportsMin: 55,
 }
+
+const HEAVY_ASYNC_BOUNDARY_MARKER = '@aethel-heavy-async-boundary'
 
 const HEAVY_MODULES = {
   threeDirect: (source) => source === 'three',
@@ -45,30 +47,39 @@ function rel(file) {
 
 function extractStaticImports(content) {
   const imports = []
-  const importRegex = /^\s*import(?:\s+type)?(?:[\s\S]*?)\s+from\s+['"]([^'"]+)['"]/gm
+  const importRegex = /^\s*import\s+(type\s+)?(?:[\s\S]*?)\s+from\s+['"]([^'"]+)['"]/gm
   let match
-  while ((match = importRegex.exec(content))) imports.push(match[1])
+  while ((match = importRegex.exec(content))) {
+    if (match[1]) continue
+    imports.push(match[2])
+  }
   return imports
 }
 
 const files = TARGET_DIRS.flatMap((dir) => walk(path.join(ROOT, dir)))
 const counts = Object.fromEntries(Object.keys(BUDGETS).map((key) => [key, 0]))
 const offenders = Object.fromEntries(Object.keys(HEAVY_MODULES).map((key) => [key, []]))
+const asyncBoundaryOffenders = Object.fromEntries(Object.keys(HEAVY_MODULES).map((key) => [key, []]))
 
 for (const file of files) {
   const content = fs.readFileSync(file, 'utf8')
   const staticImports = extractStaticImports(content)
   const relative = rel(file)
+  const isHeavyAsyncBoundary = content.includes(HEAVY_ASYNC_BOUNDARY_MARKER)
 
   for (const [key, predicate] of Object.entries(HEAVY_MODULES)) {
     const hits = staticImports.filter(predicate)
     if (hits.length > 0) {
-      counts[key] += hits.length
-      offenders[key].push({ file: relative, hits: hits.length })
+      if (isHeavyAsyncBoundary) {
+        asyncBoundaryOffenders[key].push({ file: relative, hits: hits.length })
+      } else {
+        counts[key] += hits.length
+        offenders[key].push({ file: relative, hits: hits.length })
+      }
     }
   }
 
-  const dynamicMatches = content.match(/\bdynamic\s*\(/g)
+  const dynamicMatches = content.match(/\bdynamic\s*\(|\bimport\s*\(/g)
   counts.dynamicImportsMin += dynamicMatches?.length ?? 0
 }
 
@@ -110,6 +121,19 @@ for (const [key, value] of Object.entries(counts)) {
 report.push('')
 report.push('## Top Offenders')
 for (const [key, items] of Object.entries(offenders)) {
+  report.push(`### ${key}`)
+  if (items.length === 0) {
+    report.push('- none')
+    continue
+  }
+  for (const item of items.slice(0, 25)) {
+    report.push(`- ${item.file} (${item.hits})`)
+  }
+}
+report.push('')
+report.push('## Async Heavy Boundaries')
+report.push(`Files marked with ${HEAVY_ASYNC_BOUNDARY_MARKER} are reported separately because they are split behind explicit dynamic boundaries and are not allowed to be imported by public route shells.`)
+for (const [key, items] of Object.entries(asyncBoundaryOffenders)) {
   report.push(`### ${key}`)
   if (items.length === 0) {
     report.push('- none')

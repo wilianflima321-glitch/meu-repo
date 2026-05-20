@@ -5,76 +5,25 @@ import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Cpu, Download, Gauge, HardDrive, Monitor, ShieldCheck, Sparkles, TerminalSquare, Zap } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
+import {
+  STUDIO_LOCAL_RELEASE_MANIFEST,
+  type RuntimeReleaseStatus,
+  type StudioLocalPlatformId,
+} from '@/lib/studio-local/release-manifest'
 
-type Platform = 'windows' | 'mac' | 'linux'
+const PLATFORMS = STUDIO_LOCAL_RELEASE_MANIFEST.platforms
+const TARGETS = STUDIO_LOCAL_RELEASE_MANIFEST.targets
+const SIDECARS = STUDIO_LOCAL_RELEASE_MANIFEST.sidecars
 
-type RuntimeTarget = {
-  label: string
-  detail: string
-  status: 'ready' | 'beta' | 'planned'
-}
-
-const PLATFORMS: Record<Platform, {
-  name: string
-  artifact: string
-  requirements: string
-  command: string
-}> = {
-  windows: {
-    name: 'Windows',
-    artifact: 'Aethel-Studio-Local-Setup.exe',
-    requirements: 'Windows 10+ x64, WebView2, Node 20+, optional NVIDIA/AMD GPU',
-    command: 'powershell -ExecutionPolicy Bypass -File installers/windows/install-aethel.ps1',
-  },
-  mac: {
-    name: 'macOS',
-    artifact: 'Aethel-Studio-Local-universal.dmg',
-    requirements: 'macOS 12+, Apple Silicon or Intel, Metal-capable GPU',
-    command: 'cargo tauri build --target universal-apple-darwin',
-  },
-  linux: {
-    name: 'Linux',
-    artifact: 'aethel-studio-local.AppImage',
-    requirements: 'Ubuntu 22.04+, Fedora 39+, Arch, Vulkan-capable GPU recommended',
-    command: 'bash installers/linux/install-aethel.sh --user',
-  },
-}
-
-const TARGETS: RuntimeTarget[] = [
-  {
-    label: 'Browser preview',
-    detail: 'WebGPU/WebGL2 for fast iteration, share links, and lightweight reviews.',
-    status: 'ready',
-  },
-  {
-    label: 'Studio Local',
-    detail: 'Tauri native runtime with hardware probe, job recovery, sidecar policy, and local/cloud routing.',
-    status: 'beta',
-  },
-  {
-    label: 'Pixel Streaming',
-    detail: 'Cloud GPU streaming path for Unreal-grade final demos when local hardware is not enough.',
-    status: 'planned',
-  },
-]
-
-const SIDECARS = [
-  'FFmpeg media export',
-  'ONNX local inference',
-  'WGPU native renderer',
-  'Rapier physics',
-  'Shader compiler',
-  'Asset optimizer',
-]
-
-function statusClass(status: RuntimeTarget['status']) {
-  if (status === 'ready') return 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+function statusClass(status: RuntimeReleaseStatus) {
+  if (status === 'available') return 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
   if (status === 'beta') return 'border-[color-mix(in_srgb,var(--aethel-warning)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+  if (status === 'held') return 'border-[color-mix(in_srgb,var(--aethel-error)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
   return 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] text-[var(--aethel-text-tertiary)]'
 }
 
 export default function DownloadPage() {
-  const [selectedPlatform, setSelectedPlatform] = useState<Platform>('windows')
+  const [selectedPlatform, setSelectedPlatform] = useState<StudioLocalPlatformId>('windows')
 
   useEffect(() => {
     const ua = navigator.userAgent
@@ -128,6 +77,14 @@ export default function DownloadPage() {
                   </span>
                   <h2 className="mt-3 text-sm font-semibold">{target.label}</h2>
                   <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-tertiary)]">{target.detail}</p>
+                  {target.fallbackReason && (
+                    <p className="mt-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.38)] px-3 py-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                      Fallback: {target.fallbackReason}
+                    </p>
+                  )}
+                  {target.costNote && (
+                    <p className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-quaternary)]">{target.costNote}</p>
+                  )}
                 </div>
               ))}
             </div>
@@ -143,14 +100,19 @@ export default function DownloadPage() {
             </div>
 
             <div className="mt-5 grid gap-2">
-              {(Object.keys(PLATFORMS) as Platform[]).map((platform) => (
+              {(Object.keys(PLATFORMS) as StudioLocalPlatformId[]).map((platform) => (
                 <button
                   key={platform}
                   type="button"
                   onClick={() => setSelectedPlatform(platform)}
                   className={`rounded-2xl border px-4 py-3 text-left transition ${selectedPlatform === platform ? 'border-[color-mix(in_srgb,var(--aethel-info)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]' : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] hover:border-[var(--aethel-border-secondary)]'}`}
                 >
-                  <span className="text-sm font-semibold">{PLATFORMS[platform].name}</span>
+                  <span className="flex items-center gap-2 text-sm font-semibold">
+                    {PLATFORMS[platform].name}
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] ${statusClass(PLATFORMS[platform].status)}`}>
+                      {PLATFORMS[platform].status}
+                    </span>
+                  </span>
                   <span className="mt-1 block text-xs text-[var(--aethel-text-tertiary)]">{PLATFORMS[platform].requirements}</span>
                 </button>
               ))}
@@ -160,7 +122,7 @@ export default function DownloadPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">Artifact</p>
               <p className="mt-2 font-mono text-sm text-[var(--aethel-text-primary)]">{current.artifact}</p>
               <p className="mt-3 text-xs leading-5 text-[var(--aethel-text-tertiary)]">
-                Signed installers are published through the release pipeline. Until then, beta users can run the local build command below from the repository checkout.
+                {current.readiness}
               </p>
               <code className="mt-3 block overflow-x-auto rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.62)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
                 {current.command}
@@ -205,9 +167,13 @@ export default function DownloadPage() {
             </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {SIDECARS.map((item) => (
-                <div key={item} className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.34)] p-4">
+                <div key={item.label} className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.34)] p-4">
                   <ShieldCheck className="h-4 w-4 text-[var(--aethel-success-light)]" />
-                  <p className="mt-3 text-sm font-medium">{item}</p>
+                  <p className="mt-3 text-sm font-medium">{item.label}</p>
+                  <span className={`mt-2 inline-flex rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] ${statusClass(item.status)}`}>
+                    {item.status}
+                  </span>
+                  <p className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">{item.evidence}</p>
                 </div>
               ))}
             </div>
