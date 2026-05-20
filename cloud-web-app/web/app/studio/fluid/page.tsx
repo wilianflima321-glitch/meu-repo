@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function FluidEditorPage() {
       subtitle="Prototype liquids, SPH particles, volumes, and simulation evidence."
       activeHref="/studio/fluid"
     >
-      <FluidEditor volumeId="studio-fluid" />
+      <Suspense fallback={<CreativeStudioLoading label="Fluid Studio" />}>
+        <FluidEditor volumeId="studio-fluid" />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

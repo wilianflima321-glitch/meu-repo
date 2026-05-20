@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function FoliageEditorPage() {
       subtitle="Paint procedural vegetation, instancing rules, density, and world-detail evidence."
       activeHref="/studio/foliage"
     >
-      <FoliageEditor sceneId="studio-scene" />
+      <Suspense fallback={<CreativeStudioLoading label="Foliage Studio" />}>
+        <FoliageEditor sceneId="studio-scene" />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

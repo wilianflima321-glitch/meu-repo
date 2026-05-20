@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function ClothEditorPage() {
       subtitle="Simulate garments, cloth constraints, wind, collisions, and export evidence."
       activeHref="/studio/cloth"
     >
-      <ClothEditor meshId="studio-cloth" />
+      <Suspense fallback={<CreativeStudioLoading label="Cloth Studio" />}>
+        <ClothEditor meshId="studio-cloth" />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

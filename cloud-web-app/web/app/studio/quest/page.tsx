@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function QuestStudioPage() {
       subtitle="Branching missions, objectives, rewards, prerequisites, and narrative evidence."
       activeHref="/studio/quest"
     >
-      <QuestEditor />
+      <Suspense fallback={<CreativeStudioLoading label="Quest Studio" />}>
+        <QuestEditor />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function AudioStudioPage() {
       subtitle="Sound cues, audio layers, parameter automation, and review evidence."
       activeHref="/studio/audio"
     >
-      <SoundCueEditor />
+      <Suspense fallback={<CreativeStudioLoading label="Audio Studio" />}>
+        <SoundCueEditor />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

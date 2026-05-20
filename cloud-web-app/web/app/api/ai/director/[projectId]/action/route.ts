@@ -1,107 +1,42 @@
-/**
- * Director Actions API
- * POST /api/ai/director/[projectId]/action
- *
- * Ações: analyze, dismiss, apply, acknowledge
- */
-
-import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth-server';
-import { prisma } from '@/lib/db';
-import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
-import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
-
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
+import { prisma } from '@/lib/db'
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { createComponentLogger } from '@/lib/observability/logger'
+import { handleDirectorAction } from '@/lib/server/ai-director/actions'
+import type { DirectorActionPayload } from '@/lib/server/ai-director/types'
 
-const log = createComponentLogger('api/ai/director/[projectId]/action/route')
+const routeLogger = createComponentLogger('api/ai/director/[projectId]/action/route')
 
-export const dynamic = 'force-dynamic';
-
-const routeLogger = createComponentLogger('api/ai/director/[projectId]/action/route');
-
-interface ActionPayload {
-  action: 'analyze' | 'dismiss' | 'apply' | 'acknowledge';
-  noteId?: string;
-}
+export const dynamic = 'force-dynamic'
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
-    const user = requireAuth(req);
-    const { projectId } = await params;
-    const body: ActionPayload = await req.json();
+    const user = requireAuth(req)
+    const { projectId } = await params
+    const body = (await req.json()) as DirectorActionPayload
 
-    const blocked = blockIfSimulationDisabled({
-      capability: 'AI_DIRECTOR_ACTION',
-      reason: 'CAPABILITY_NOT_IMPLEMENTED',
-      message: 'AI director actions require real runtime implementation.',
-    })
-    if (blocked) return blocked
-
-    // Verificar projeto
     const project = await prisma.project.findFirst({
       where: { id: projectId, userId: user.userId },
-    });
+      select: { id: true },
+    })
 
     if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
-    switch (body.action) {
-      case 'analyze':
-        // Iniciar nova análise (em produção, dispara job assíncrono)
-        return NextResponse.json({
-          success: true,
-          message: 'Analysis started',
-          estimatedTime: 15000, // 15 segundos
-        });
-
-      case 'dismiss':
-        if (!body.noteId) {
-          return NextResponse.json({ error: 'noteId required' }, { status: 400 });
-        }
-        // Log dismissal para melhorar IA
-        await logUserFeedback(user.userId, projectId, body.noteId, 'dismissed');
-        return NextResponse.json({ success: true, noteId: body.noteId, status: 'dismissed' });
-
-      case 'apply':
-        if (!body.noteId) {
-          return NextResponse.json({ error: 'noteId required' }, { status: 400 });
-        }
-        // Em produção, isso aplicaria a sugestão automaticamente
-        await logUserFeedback(user.userId, projectId, body.noteId, 'applied');
-        return NextResponse.json({
-          success: true,
-          noteId: body.noteId,
-          status: 'applied',
-          message: 'Suggestion applied successfully'
-        });
-
-      case 'acknowledge':
-        if (!body.noteId) {
-          return NextResponse.json({ error: 'noteId required' }, { status: 400 });
-        }
-        return NextResponse.json({ success: true, noteId: body.noteId, status: 'acknowledged' });
-
-      default:
-        return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    const response = await handleDirectorAction({ userId: user.userId, projectId, payload: body })
+    if ('error' in response) {
+      return NextResponse.json(response, { status: 400 })
     }
+    return NextResponse.json(response)
   } catch (error) {
-    routeLogger.error('Director action error:', error);
-    const mapped = apiErrorToResponse(error);
-    if (mapped) return mapped;
-    return apiInternalError();
+    routeLogger.error('Director action error', error)
+    const mapped = apiErrorToResponse(error)
+    if (mapped) return mapped
+    return apiInternalError()
   }
-}
-
-async function logUserFeedback(
-  userId: string,
-  projectId: string,
-  noteId: string,
-  action: string
-) {
-  // Em produção, salvar em analytics para melhorar modelo
-  log.info(`[Director Feedback] User ${userId} ${action} note ${noteId} in project ${projectId}`);
 }

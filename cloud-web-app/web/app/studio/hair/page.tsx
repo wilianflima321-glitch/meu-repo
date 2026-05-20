@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function HairEditorPage() {
       subtitle="Design groom regions, strand physics, LODs, and character hair evidence."
       activeHref="/studio/hair"
     >
-      <HairEditor characterId="studio-character" />
+      <Suspense fallback={<CreativeStudioLoading label="Hair Studio" />}>
+        <HairEditor characterId="studio-character" />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

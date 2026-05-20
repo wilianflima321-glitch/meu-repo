@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function SceneStudioPage() {
       subtitle="Hierarchy, transform, lighting, camera, and scene graph review."
       activeHref="/studio/scene"
     >
-      <SceneEditor />
+      <Suspense fallback={<CreativeStudioLoading label="Scene Studio" />}>
+        <SceneEditor />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

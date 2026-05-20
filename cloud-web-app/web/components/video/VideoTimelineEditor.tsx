@@ -66,6 +66,7 @@ export function VideoTimelineEditor({
     if (!isPlaying) return;
     const startTime = performance.now();
     const startPlayhead = currentTime;
+    let frameId = 0;
     const animate = () => {
       const elapsed = (performance.now() - startTime) / 1000;
       const newTime = startPlayhead + elapsed;
@@ -74,10 +75,11 @@ export function VideoTimelineEditor({
         setCurrentTime(project.duration);
       } else {
         setCurrentTime(newTime);
-        requestAnimationFrame(animate);
+        frameId = requestAnimationFrame(animate);
       }
     };
-    requestAnimationFrame(animate);
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
   }, [isPlaying, project.duration, currentTime]);
   const handleSeek = useCallback(
     (time: number) => {

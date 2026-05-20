@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function VfxStudioPage() {
       subtitle="Particles, combat readability, cinematic cues, and effect evidence."
       activeHref="/studio/vfx"
     >
-      <NiagaraVFX />
+      <Suspense fallback={<CreativeStudioLoading label="VFX Studio" />}>
+        <NiagaraVFX />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

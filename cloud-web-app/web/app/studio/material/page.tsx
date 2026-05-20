@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function MaterialStudioPage() {
       subtitle="PBR surfaces, texture decisions, and asset graph material evidence."
       activeHref="/studio/material"
     >
-      <MaterialEditor />
+      <Suspense fallback={<CreativeStudioLoading label="Material Studio" />}>
+        <MaterialEditor />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

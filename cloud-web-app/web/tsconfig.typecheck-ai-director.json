@@ -1,0 +1,12 @@
+﻿{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": false
+  },
+  "include": [
+    "app/api/ai/director/[projectId]/route.ts",
+    "app/api/ai/director/[projectId]/action/route.ts",
+    "lib/server/ai-director/**/*.ts"
+  ]
+}

@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function LevelStudioPage() {
       subtitle="Playable worlds, spatial layout, mission structure, and world evidence."
       activeHref="/studio/level"
     >
-      <LevelEditor />
+      <Suspense fallback={<CreativeStudioLoading label="Level Studio" />}>
+        <LevelEditor />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

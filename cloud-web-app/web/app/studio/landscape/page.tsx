@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function LandscapeEditorPage() {
       subtitle="Shape open-world terrain, paint layers, and coordinate foliage systems."
       activeHref="/studio/landscape"
     >
-      <LandscapeEditor />
+      <Suspense fallback={<CreativeStudioLoading label="Landscape Studio" />}>
+        <LandscapeEditor />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

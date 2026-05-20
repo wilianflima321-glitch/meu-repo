@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function FacialEditorPage() {
       subtitle="Author FACS poses, visemes, emotion presets, and character review packets."
       activeHref="/studio/facial"
     >
-      <FacialEditor characterId="studio-character" />
+      <Suspense fallback={<CreativeStudioLoading label="Facial Studio" />}>
+        <FacialEditor characterId="studio-character" />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

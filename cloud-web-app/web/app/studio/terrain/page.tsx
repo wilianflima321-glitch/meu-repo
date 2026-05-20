@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function TerrainEditorPage() {
       subtitle="Sculpt heightmaps, biomes, erosion passes, and terrain evidence."
       activeHref="/studio/terrain"
     >
-      <TerrainEditor />
+      <Suspense fallback={<CreativeStudioLoading label="Terrain Studio" />}>
+        <TerrainEditor />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

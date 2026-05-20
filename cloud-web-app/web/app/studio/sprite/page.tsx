@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function SpriteEditorPage() {
       subtitle="Edit 2D sprites, animation frames, pixel passes, and lightweight game assets."
       activeHref="/studio/sprite"
     >
-      <SpriteEditor />
+      <Suspense fallback={<CreativeStudioLoading label="Sprite Studio" />}>
+        <SpriteEditor />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

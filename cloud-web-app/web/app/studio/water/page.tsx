@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function WaterEditorPage() {
       subtitle="Create oceans, rivers, foam, flow maps, buoyancy, and water-system evidence."
       activeHref="/studio/water"
     >
-      <WaterEditor sceneId="studio-scene" />
+      <Suspense fallback={<CreativeStudioLoading label="Water Studio" />}>
+        <WaterEditor sceneId="studio-scene" />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function RigEditorPage() {
       subtitle="Build IK/FK chains, procedural controls, constraints, and rig review packets."
       activeHref="/studio/rig"
     >
-      <RigEditor characterId="studio-character" />
+      <Suspense fallback={<CreativeStudioLoading label="Rig Studio" />}>
+        <RigEditor characterId="studio-character" />
+      </Suspense>
     </CreativeStudioShell>
   )
 }

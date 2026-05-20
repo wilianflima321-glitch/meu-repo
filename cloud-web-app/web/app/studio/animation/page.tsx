@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -13,7 +14,9 @@ export default function AnimationStudioPage() {
       subtitle="Animation blueprint planning, transition logic, and motion review packets."
       activeHref="/studio/animation"
     >
-      <AnimationBlueprint />
+      <Suspense fallback={<CreativeStudioLoading label="Animation Studio" />}>
+        <AnimationBlueprint />
+      </Suspense>
     </CreativeStudioShell>
   )
 }
