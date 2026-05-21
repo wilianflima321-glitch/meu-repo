@@ -30,8 +30,8 @@ const REQUIREMENTS = [
   },
   {
     id: 'dashboard-header-cost-visible',
-    file: 'components/dashboard/DashboardShell.tsx',
-    patterns: [/CostMeter/, /extraActions=\{<CostMeter \/>\}/],
+    file: 'components/dashboard/DashboardTopBar.tsx',
+    patterns: [/CostMeter/, /<CostMeter \/>/],
   },
 ]
 

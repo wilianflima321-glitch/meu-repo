@@ -1,0 +1,61 @@
+#!/usr/bin/env node
+
+import fs from 'node:fs'
+import path from 'node:path'
+
+const ROOT = process.cwd()
+const failures = []
+
+function read(relativePath) {
+  const fullPath = path.join(ROOT, relativePath)
+  if (!fs.existsSync(fullPath)) {
+    failures.push(`${relativePath}: missing`)
+    return ''
+  }
+  return fs.readFileSync(fullPath, 'utf8')
+}
+
+function requirePattern(relativePath, pattern, reason) {
+  const content = read(relativePath)
+  if (content && !pattern.test(content)) failures.push(`${relativePath}: missing ${reason}`)
+}
+
+function lineCount(relativePath) {
+  const content = read(relativePath)
+  return content ? content.split(/\r?\n/).length : 0
+}
+
+const agentsWindowLines = lineCount('components/agents/AgentsWindow.tsx')
+if (agentsWindowLines > 180) {
+  failures.push(`components/agents/AgentsWindow.tsx: expected <=180 lines after composition split, found ${agentsWindowLines}`)
+}
+
+const requiredFiles = [
+  'components/agents/window/types.ts',
+  'components/agents/window/agent-window-api.ts',
+  'components/agents/window/AgentCard.tsx',
+  'components/agents/window/AgentTrustStrip.tsx',
+  'components/agents/window/AgentFleetPanel.tsx',
+  'components/agents/window/AgentReplayPanel.tsx',
+  'components/agents/window/AgentWindowStates.tsx',
+  'components/agents/window/AgentWindowTabs.tsx',
+]
+for (const file of requiredFiles) read(file)
+
+requirePattern('components/agents/AgentsWindow.tsx', /AgentReplayPanel/, 'AgentsWindow must delegate replay UI')
+requirePattern('components/agents/AgentsWindow.tsx', /AgentFleetPanel/, 'AgentsWindow must delegate fleet UI')
+requirePattern('components/agents/window/AgentReplayPanel.tsx', /BrowserOperatorReplay/, 'replay panel must keep governed replay evidence visible')
+requirePattern('components/agents/window/AgentTrustStrip.tsx', /CostMeter remains the source of truth/, 'trust strip must be honest about missing per-agent cost')
+requirePattern('components/agents/window/AgentTrustStrip.tsx', /Read receipts/, 'trust strip must show read receipt status')
+requirePattern('components/agents/window/AgentTrustStrip.tsx', /Scope locks/, 'trust strip must show scope locks')
+requirePattern('components/agents/window/AgentReplayPanel.tsx', /No replay yet|Replay is ready when evidence exists/, 'replay empty state must be honest')
+requirePattern('components/agents/window/agent-window-api.ts', /fetchBrowserOperatorRuns/, 'recent replay discovery must stay in API helper')
+requirePattern('components/agents/window/AgentFleetPanel.tsx', /Pause fleet/, 'fleet panel must keep pause control visible')
+
+if (failures.length) {
+  console.error('[agents-window-composition] FAIL')
+  for (const failure of failures) console.error(`- ${failure}`)
+  process.exit(1)
+}
+
+console.log(`[agents-window-composition] PASS AgentsWindow.tsx=${agentsWindowLines} lines modules=${requiredFiles.length}`)

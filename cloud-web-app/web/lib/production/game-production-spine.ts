@@ -6,6 +6,7 @@ import type {
   ProductionRuntimeTarget,
 } from '@/lib/production/agentic-production-state'
 import { mergeAgenticProductionState } from '@/lib/production/agentic-production-state'
+import { GAME_ASSET_QUALITY_REQUIRED_EVIDENCE } from '@/lib/production/game-asset-quality-pipeline'
 
 export type GameProductionScale = 'prototype' | 'vertical-slice' | 'premium-indie' | 'aaa-assisted'
 export type GameProductionReadinessState = 'held' | 'blocked' | 'needs-review' | 'ready'
@@ -138,7 +139,11 @@ function graphEvidence(id: GameProductionDomainGraph): string[] {
     case 'quest-narrative-graph':
       return ['quest dependency map', 'dialog continuity pass', 'lore consistency receipt', 'fail-state design']
     case 'asset-pipeline-graph':
-      return ['asset license/provenance', 'LOD/proxy manifest', 'texture compression report', 'thumbnail catalog']
+      return [
+        'asset license/provenance',
+        ...GAME_ASSET_QUALITY_REQUIRED_EVIDENCE,
+        'thumbnail catalog',
+      ]
     case 'audio-mix-graph':
       return ['music cue map', 'SFX coverage matrix', 'loudness report', 'dialog sync pass']
     case 'performance-graph':

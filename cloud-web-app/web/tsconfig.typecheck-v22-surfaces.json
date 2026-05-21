@@ -24,7 +24,12 @@
     "components/evidence/EvidenceCenter.tsx",
     "components/viewport/AethelViewport3D.tsx",
     "lib/runtime/runtime-mode-view-model.ts",
-    "types/**/*.d.ts"
+    "types/**/*.d.ts",
+    "components/agents/AgentsWindow.tsx",
+    "components/agents/window/**/*.tsx",
+    "components/agents/window/**/*.ts",
+    "lib/production/game-asset-quality-pipeline.ts",
+    "lib/production/game-production-spine.ts"
   ],
   "exclude": [
     "node_modules",

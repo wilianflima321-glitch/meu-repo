@@ -4,7 +4,7 @@ Generated: deterministic local triage on 2026-05-21
 
 Base commit: `abfc5b445 chore: harden trust and runtime evidence gates`
 
-Current execution note: V22.1/V22.2 has since implemented the authenticated UX harness, dashboard topbar compression, global admin compatibility drawer, shared Browser/Studio Local/Cloud Stream runtime model, protected `/evidence`, marketplace install review, pricing disclosure compression, enterprise-aware auth provider breadth, and Studio maturity headers. This document remains the triage baseline; the P0 status table below tracks what has moved from finding to implemented gate.
+Current execution note: V22.1/V22.2/V22.3 has since implemented the authenticated UX harness, dashboard topbar compression, global admin compatibility drawer, shared Browser/Studio Local/Cloud Stream runtime model, protected `/evidence`, marketplace install review, pricing disclosure compression, enterprise-aware auth provider breadth, Studio maturity headers, Agent Cockpit composition, and the Game Asset Quality Pipeline. This document remains the triage baseline; the P0 status table below tracks what has moved from finding to implemented gate.
 
 This audit is intentionally evidence-first. It does not claim that Aethel is already best-in-market on every surface. It identifies where the current product is strong, where it is noisy, where compatibility debt leaks into the user experience, and which fixes should happen before new feature expansion.
 
@@ -25,6 +25,7 @@ This audit is intentionally evidence-first. It does not claim that Aethel is alr
   - `docs/SUSPENSE_BOUNDARIES_AUDIT.md`
   - `docs/EFFECT_CLEANUP_AUDIT.md`
   - `docs/EDITOR_PERFORMANCE_RISK_AUDIT.md`
+  - `docs/GAME_ASSET_QUALITY_PIPELINE_V22.md`
 
 ## Market References Consulted
 
@@ -53,6 +54,7 @@ Top decisions:
 4. Remove or relabel hardcoded marketplace installs/ratings until they are backed by real telemetry.
 5. Consolidate dashboard navigation: one primary sidebar, one command palette, one contextual rail only when it has active work.
 6. Keep "browser-to-local-to-cloud" as the differentiator, but never imply Unreal/Adobe/Figma parity without runtime evidence.
+7. Treat raw AI meshes as draft assets: premium game output requires curated sources, retopology or mesh upgrade, PBR validation, LOD/collision evidence, runtime traces, and human art-direction approval.
 
 ## Surface Score Matrix
 
