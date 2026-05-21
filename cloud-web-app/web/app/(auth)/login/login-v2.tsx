@@ -18,6 +18,8 @@ type AuthResponse = {
   message?: string
 }
 
+type OAuthProvider = 'github' | 'google' | 'gitlab' | 'discord'
+
 const DEFAULT_REDIRECT = '/dashboard'
 const LOGIN_HIGHLIGHTS = [
   'Return to the same dashboard, IDE, and preview flow after authentication.',
@@ -97,9 +99,9 @@ export default function LoginPageV2() {
     }
   }
 
-  const startOAuth = (provider: 'github' | 'google') => {
+  const startOAuth = (provider: OAuthProvider) => {
     analytics?.track?.('user', 'oauth_start', { label: provider, metadata: { source: 'login-form', nextTarget } })
-    window.location.href = `/api/auth/oauth/authorize?provider=${provider}`
+    window.location.href = `/api/auth/oauth/${provider}`
   }
 
   const handlePasskeyLogin = async () => {
@@ -261,9 +263,29 @@ export default function LoginPageV2() {
 
               <div className="my-5 flex items-center gap-3"><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /><span className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">or</span><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /></div>
               <div className="grid gap-2 sm:grid-cols-2">
-                <button type="button" onClick={() => startOAuth('github')} className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"><Codicon name="github" /> GitHub</button>
-                <button type="button" onClick={() => startOAuth('google')} className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"><Codicon name="google" /> Google</button>
+                {[
+                  { id: 'github' as const, label: 'GitHub', icon: <Codicon name="github" /> },
+                  { id: 'google' as const, label: 'Google', icon: <Codicon name="google" /> },
+                  { id: 'gitlab' as const, label: 'GitLab', icon: <span className="text-[11px] font-bold">GL</span> },
+                  { id: 'discord' as const, label: 'Discord', icon: <span className="text-[11px] font-bold">DC</span> },
+                ].map((provider) => (
+                  <button
+                    key={provider.id}
+                    type="button"
+                    onClick={() => startOAuth(provider.id)}
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"
+                  >
+                    {provider.icon}
+                    {provider.label}
+                  </button>
+                ))}
               </div>
+              <Link
+                href="/contact-sales?intent=sso"
+                className="mt-2 inline-flex min-h-10 w-full items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] px-3 text-xs font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_42%,transparent)]"
+              >
+                Team SSO / SAML for enterprise
+              </Link>
 
               <div className="mt-6 rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/45 p-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Next step</p>

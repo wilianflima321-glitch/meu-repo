@@ -27,6 +27,27 @@ function creativeTabClass(active: boolean): string {
     : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_45%,transparent)] text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)]'
 }
 
+function maturityGuidance(maturity?: string) {
+  if (maturity === 'BETA') {
+    return {
+      label: 'Beta surface',
+      detail: 'Core editing is visible; heavy runtime work remains capability-gated through Browser, Studio Local, or Cloud Stream.',
+    }
+  }
+
+  if (maturity === 'ALPHA') {
+    return {
+      label: 'Alpha surface',
+      detail: 'Use for guided authoring and review packets; production writes should keep evidence and rollback plans attached.',
+    }
+  }
+
+  return {
+    label: 'Creative hub',
+    detail: 'Start from mission control, then open deeper editors only when the task needs them.',
+  }
+}
+
 export function CreativeStudioLoading({ label }: { label: string }) {
   return (
     <div className="flex h-full min-h-[420px] items-center justify-center bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)]">
@@ -48,6 +69,8 @@ export default function CreativeStudioShell({
 }: CreativeStudioShellProps) {
   const pathname = useBrowserPathname()
   const currentHref = activeHref ?? pathname
+  const currentRoute = CREATIVE_STUDIO_ROUTES.find((route) => route.href === currentHref || route.href === pathname)
+  const currentGuidance = maturityGuidance(currentRoute?.maturity)
 
   const actions = (
     <div className="flex items-center gap-2">
@@ -116,6 +139,28 @@ export default function CreativeStudioShell({
           </Link>
         ))}
       </nav>
+
+      <div className="flex min-h-[72px] flex-col gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_66%,transparent)] px-4 py-3 lg:flex-row lg:items-center lg:justify-between lg:px-6">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+              {currentGuidance.label}
+            </span>
+            {currentRoute ? <MaturityBadge maturity={currentRoute.maturity} /> : <MaturityBadge path="/studio" />}
+            <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+              Heavy runtime gated
+            </span>
+          </div>
+          <p className="mt-1 max-w-3xl truncate text-xs leading-5 text-[var(--aethel-text-secondary)]">
+            {currentRoute?.description ?? currentGuidance.detail}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Browser preview</span>
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Local when available</span>
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Cloud held by capability</span>
+        </div>
+      </div>
 
       <section className="min-h-0 flex-1 overflow-hidden">
         {children}

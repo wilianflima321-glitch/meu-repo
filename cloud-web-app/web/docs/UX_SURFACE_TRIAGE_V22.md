@@ -4,6 +4,8 @@ Generated: deterministic local triage on 2026-05-21
 
 Base commit: `abfc5b445 chore: harden trust and runtime evidence gates`
 
+Current execution note: V22.1/V22.2 has since implemented the authenticated UX harness, dashboard topbar compression, global admin compatibility drawer, shared Browser/Studio Local/Cloud Stream runtime model, protected `/evidence`, marketplace install review, pricing disclosure compression, enterprise-aware auth provider breadth, and Studio maturity headers. This document remains the triage baseline; the P0 status table below tracks what has moved from finding to implemented gate.
+
 This audit is intentionally evidence-first. It does not claim that Aethel is already best-in-market on every surface. It identifies where the current product is strong, where it is noisy, where compatibility debt leaks into the user experience, and which fixes should happen before new feature expansion.
 
 ## Evidence Inputs
@@ -461,26 +463,31 @@ Next action:
    - Problem: protected route screenshots only validate sign-in.
    - Action: add deterministic seeded/session visual QA for dashboard, IDE, Studio, admin, billing, settings.
    - Acceptance: screenshot captures real authenticated states without production secrets.
+   - Status: implemented as `qa:authenticated-ux-harness` and `qa:authenticated-ux-capture`; full capture still requires a running app and `JWT_SECRET`.
 
 2. Marketplace metrics honesty
    - Problem: hardcoded installs/ratings look like public traction.
    - Action: replace with real telemetry or explicit `Internal preview` labels.
    - Acceptance: no public marketplace card displays fake download/rating metrics.
+   - Status: implemented in marketplace trust cards and guarded by `qa:marketplace-install-review`.
 
 3. Dashboard/admin nav compression
    - Problem: dashboard has multiple nav layers; admin still exposes legacy maps.
    - Action: one primary nav; compatibility maps behind command palette/drawer.
    - Acceptance: default dashboard/admin view has one primary nav and one primary next action.
+   - Status: implemented through `DashboardTopBar`, removal of default flow rail render, and global admin compatibility drawer.
 
 4. Pricing density cut
    - Problem: 97 card-ish nodes, 5164 text chars, 8880px mobile height.
    - Action: three visible plans + collapsed advanced matrix.
    - Acceptance: mobile pricing first decision is visible within 2 viewport heights.
+   - Status: partially implemented by collapsing comparison and FAQ; full mobile height verification needs fresh visual capture.
 
 5. Runtime mode simplification
    - Problem: runtime controls are technically honest but not yet user-simple.
    - Action: single selector: `Browser`, `Local`, `Cloud Stream`, each with status/cost/fallback reason.
    - Acceptance: user can understand where execution is running in under 5 seconds.
+   - Status: implemented with shared `RuntimeModeViewModel` and guarded by `qa:runtime-mode-simplification`.
 
 ## P1 Backlog
 

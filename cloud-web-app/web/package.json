@@ -109,7 +109,9 @@
     "qa:runtime-mode-simplification": "node scripts/check-runtime-mode-simplification.mjs",
     "qa:evidence-center-spine": "node scripts/check-evidence-center-spine.mjs",
     "qa:marketplace-install-review": "node scripts/check-marketplace-install-review.mjs",
-    "qa:typecheck-v22-surfaces": "tsc -p tsconfig.typecheck-v22-surfaces.json --noEmit"
+    "qa:typecheck-v22-surfaces": "tsc -p tsconfig.typecheck-v22-surfaces.json --noEmit",
+    "qa:auth-provider-breadth": "node scripts/check-auth-provider-breadth.mjs",
+    "qa:studio-maturity-headers": "node scripts/check-studio-maturity-headers.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",

@@ -6,6 +6,7 @@
   },
   "include": [
     "next-env.d.ts",
+    "app/(auth)/login/login-v2.tsx",
     "app/admin/admin-ops-layout-client.tsx",
     "app/evidence/page.tsx",
     "app/marketplace/page.tsx",
@@ -14,6 +15,8 @@
     "app/pricing/page.tsx",
     "app/pricing/_components/PricingComparisonTable.tsx",
     "app/pricing/_components/PricingFaq.tsx",
+    "app/studio/CreativeStudioShell.tsx",
+    "app/studio/creative-studio-routes.ts",
     "app/studio/StudioMissionControl.tsx",
     "components/dashboard/AethelDashboardSidebar.tsx",
     "components/dashboard/DashboardShell.tsx",
