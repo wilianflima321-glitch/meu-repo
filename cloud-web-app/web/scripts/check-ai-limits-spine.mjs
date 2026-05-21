@@ -23,6 +23,9 @@ const expensiveRoutes = [
   route('app/api/ai/music/generate/route.ts', 'expensiveMetered', 'AI_EXPENSIVE_MUSIC_RATE_LIMIT', 'ai.music.generate', '/api/ai/music/generate', {
     usageKind: "kind: 'music'",
   }),
+  route('app/api/ai/video/generate/route.ts', 'expensiveMetered', 'AI_EXPENSIVE_VIDEO_RATE_LIMIT', 'ai.video.generate', '/api/ai/video/generate', {
+    usageKind: "kind: 'video'",
+  }),
   route('app/api/ai/voice/generate/route.ts', 'expensiveMetered', 'AI_EXPENSIVE_VOICE_RATE_LIMIT', 'ai.voice.generate', '/api/ai/voice/generate', {
     usageKind: "kind: 'voice'",
   }),
@@ -53,6 +56,7 @@ const statusLimitedRoutes = [
   route('app/api/ai/3d/status/route.ts', 'statusLimited', 'AI_STATUS_RATE_LIMIT', 'ai.status.3d', '/api/ai/3d/status'),
   route('app/api/ai/music/status/route.ts', 'statusLimited', 'AI_STATUS_RATE_LIMIT', 'ai.status.music', '/api/ai/music/status'),
   route('app/api/ai/provider-status/route.ts', 'statusLimited', 'AI_STATUS_RATE_LIMIT', 'ai.status.provider', '/api/ai/provider-status'),
+  route('app/api/ai/video/status/route.ts', 'statusLimited', 'AI_STATUS_RATE_LIMIT', 'ai.status.video', '/api/ai/video/status'),
 ]
 
 const readLimitedRoutes = [
@@ -106,6 +110,7 @@ if (!exists(spineFile)) {
     'AI_EXPENSIVE_IMAGE_RATE_LIMIT',
     'AI_EXPENSIVE_3D_RATE_LIMIT',
     'AI_EXPENSIVE_MUSIC_RATE_LIMIT',
+    'AI_EXPENSIVE_VIDEO_RATE_LIMIT',
     'AI_EXPENSIVE_VOICE_RATE_LIMIT',
     'AI_VOICE_TRANSCRIBE_RATE_LIMIT',
     'AI_AGENT_RATE_LIMIT',

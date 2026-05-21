@@ -41,7 +41,10 @@
     "lib/production/game-scope-orchestrator.ts",
     "lib/production/game-playtest-spine.ts",
     "lib/production/moba-vertical-slice-template.ts",
-    "lib/ai-agent-system.ts"
+    "lib/ai-agent-system.ts",
+    "app/api/ai/video/generate/route.ts",
+    "app/api/ai/video/status/route.ts",
+    "lib/server/ai-video-generation.ts"
   ],
   "exclude": [
     "node_modules",

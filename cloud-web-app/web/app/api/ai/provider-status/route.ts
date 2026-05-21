@@ -4,6 +4,7 @@ import { AI_PROVIDER_CONFIG, getConfiguredAiProviders, getMissingAiProviders } f
 import { isAiDemoModeEnabled } from '@/lib/server/ai-demo-mode'
 import { AI_STATUS_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { getAiDemoDailyLimit } from '@/lib/server/ai-demo-usage'
+import { getAiVideoProviderStatuses } from '@/lib/server/ai-video-generation'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,6 +31,12 @@ export async function GET(request: NextRequest) {
     id: provider.id,
     configured: configuredProviderSet.has(provider.id),
   }))
+  const videoProviders = getAiVideoProviderStatuses().map((provider) => ({
+    id: provider.id,
+    configured: provider.configured,
+    endpointConfigured: provider.endpointConfigured,
+    missingEnv: provider.missingEnv,
+  }))
 
   return NextResponse.json({
     configured: configuredProviders.length > 0,
@@ -45,5 +52,10 @@ export async function GET(request: NextRequest) {
     demoModeEnabled,
     demoModeLabel: demoModeEnabled ? 'DEMO_MODE_ACTIVE' : 'DEMO_MODE_OFF',
     demoDailyLimit,
+    videoGeneration: {
+      configured: videoProviders.some((provider) => provider.configured),
+      providers: videoProviders,
+      copyGuard: 'Draft videos are not final; cloud/video generation cost applies.',
+    },
   })
 }

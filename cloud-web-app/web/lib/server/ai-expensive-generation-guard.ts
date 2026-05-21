@@ -4,7 +4,7 @@ import { apiErrorToResponse } from '@/lib/api-errors'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { consumeMeteredUsage, estimateTokensFromText, type MeteringDecision } from '@/lib/metering'
 
-export type ExpensiveAiGenerationKind = 'image' | 'model3d' | 'music' | 'voice' | 'voiceTranscribe'
+export type ExpensiveAiGenerationKind = 'image' | 'model3d' | 'music' | 'video' | 'voice' | 'voiceTranscribe'
 
 export interface ExpensiveAiGenerationEstimateInput {
   kind: ExpensiveAiGenerationKind
@@ -65,6 +65,16 @@ export function estimateExpensiveAiGenerationCost(input: ExpensiveAiGenerationEs
     case 'music': {
       const durationSeconds = Math.min(units, 240)
       return promptCost + Math.max(15_000, durationSeconds * 900)
+    }
+    case 'video': {
+      const durationSeconds = Math.min(units, 60)
+      const perSecond =
+        quality === '1080p' || quality === 'high'
+          ? 55_000
+          : quality === 'draft' || quality === '480p'
+            ? 25_000
+            : 38_000
+      return promptCost + Math.max(80_000, durationSeconds * perSecond)
     }
     case 'voice': {
       const textCharacters = Math.min(units, 20_000)
