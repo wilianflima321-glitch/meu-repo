@@ -56,11 +56,11 @@ const CHECKS = [
   },
   {
     id: 'marketplace-trust-grammar',
-    description: 'Marketplace must show verified/community tabs, permissions, provenance, risk, and install confirmation.',
+    description: 'Marketplace must show verified/community tabs, permissions, provenance, risk, rollback, and a review-first install decision.',
     files: ['app/marketplace/page.tsx', 'app/marketplace/marketplace-page.parts.tsx', 'app/marketplace/marketplace-page.data.ts'],
     combined: true,
     test: (content) => {
-      const required = ['trustFilter', 'Permissions', 'Provenance', 'Risk', 'Confirm install', 'verified']
+      const required = ['trustFilter', 'Permissions', 'Provenance', 'Risk', 'Rollback', 'Install preview', 'Request review', 'verified']
       return required.filter((token) => !content.includes(token)).length
     },
     limit: 0,

@@ -2,12 +2,13 @@
 
 Generated: deterministic local scan
 
-- Suspense boundaries: 31
+- Suspense boundaries: 32
 - Target: 30
 - Failures: 0
 
 ## Files
 - app/dashboard/page.tsx: 1
+- app/evidence/page.tsx: 1
 - app/project-settings/page.tsx: 1
 - app/reset-password/reset-password-content.tsx: 1
 - app/studio/animation/page.tsx: 1

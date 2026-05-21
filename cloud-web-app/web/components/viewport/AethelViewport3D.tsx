@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { DragEvent } from 'react'
 import dynamic from 'next/dynamic'
 import {
@@ -30,6 +30,7 @@ import {
 import { isEditableViewportKeyboardTarget } from '@/lib/viewport/viewport-keyboard-targets'
 import { parseAiViewportCommand } from '@/components/viewport/viewportAiCommand'
 import { useRenderPipeline } from '@/lib/hooks/useRenderPipeline'
+import { buildRuntimeModeViewModels, findRuntimeModeById } from '@/lib/runtime/runtime-mode-view-model'
 
 const PixelStreamView = dynamic(() => import('@/components/streaming/pixel-stream-view'), {
   ssr: false,
@@ -177,6 +178,8 @@ export function AethelViewport3D({
   const [webGpuAvailable, setWebGpuAvailable] = useState(false)
   const [renderTarget, setRenderTarget] = useState<ViewportRenderTarget>('browser')
   const pixelStreamUrl = process.env.NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL
+  const runtimeModes = useMemo(() => buildRuntimeModeViewModels({ pixelStreamUrl }), [pixelStreamUrl])
+  const currentRuntimeMode = findRuntimeModeById(runtimeModes, renderTarget)
   const renderPipeline = useRenderPipeline({
     initialQuality: renderMode === 'cinematic' ? 'high' : 'medium',
     customPipeline: {
@@ -348,31 +351,28 @@ export function AethelViewport3D({
           </span>
         </div>
         <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-quaternary)]">
-          {renderTarget === 'browser'
-            ? 'Browser preview declares the AAA pipeline target with WebGPU detection and WebGL fallback.'
-            : renderTarget === 'local'
-              ? 'Studio Local is the preferred native lane for heavy scenes when the capability bridge is connected.'
-              : pixelStreamUrl
-                ? 'Cloud Stream uses the Pixel Streaming surface and should be reserved for final review or client demos.'
-                : 'Cloud Stream is held until NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL points at a governed signaling server.'}
+          {currentRuntimeMode.detail}
+          {currentRuntimeMode.fallbackReason ? ` ${currentRuntimeMode.fallbackReason}` : ''}
         </p>
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {([
-            ['browser', 'Browser'],
-            ['local', 'Local'],
-            ['cloud', 'Cloud Stream'],
-          ] as const).map(([target, label]) => (
+          {runtimeModes.map((mode) => (
             <button
-              key={target}
+              key={mode.id}
               type="button"
-              onClick={() => setRenderTarget(target)}
+              onClick={() => {
+                if (mode.selectable) setRenderTarget(mode.id)
+              }}
+              disabled={!mode.selectable}
+              title={!mode.selectable ? mode.fallbackReason : mode.costNote}
               className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition ${
-                renderTarget === target
+                renderTarget === mode.id
                   ? 'border-[color-mix(in_srgb,var(--aethel-info)_36%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)] text-[var(--aethel-info-light)]'
-                  : 'border-[var(--aethel-border-subtle)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+                  : mode.selectable
+                    ? 'border-[var(--aethel-border-subtle)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+                    : 'cursor-not-allowed border-[var(--aethel-border-subtle)] text-[var(--aethel-text-quaternary)] opacity-65'
               }`}
             >
-              {label}
+              {mode.label} · {mode.badge}
             </button>
           ))}
         </div>
@@ -403,8 +403,9 @@ export function AethelViewport3D({
           <div className="max-w-md rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_35%,transparent)] p-5">
             <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Cloud Stream is not configured yet</p>
             <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">
-              Add a governed Pixel Streaming signaling URL before Aethel offers Unreal-quality cloud review in the viewport.
+              {currentRuntimeMode.fallbackReason ?? 'Cloud Stream requires a governed Pixel Streaming signaling URL before it becomes selectable.'}
             </p>
+            <p className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">{currentRuntimeMode.costNote}</p>
           </div>
         </div>
       ) : (

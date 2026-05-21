@@ -50,7 +50,7 @@ const CHECKS = [
     name: 'admin-shell-landmarks',
     file: 'app/admin/admin-ops-layout-client.tsx',
     surface: '/admin',
-    patterns: ['role="navigation"', 'aria-label="Admin navigation"', '<main id="admin-main-content"', 'aria-label={`${group.label} Legacy compatibility map`}'],
+    patterns: ['role="navigation"', 'aria-label="Admin navigation"', '<main id="admin-main-content"', 'aria-label="Global Legacy compatibility map"'],
   },
   {
     name: 'admin-command-center-copy',

@@ -17,6 +17,7 @@ import {
   MarketplaceEmptyState,
   MarketplaceFilters,
   MarketplaceHero,
+  MarketplaceInstallReview,
   type MarketplaceTrustFilter,
 } from './marketplace-page.parts'
 
@@ -34,7 +35,7 @@ export default function MarketplacePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [sortBy, setSortBy] = useState<MarketplaceSort>('evidence')
   const [trustFilter, setTrustFilter] = useState<MarketplaceTrustFilter>('verified')
-  const [confirmingExtensionId, setConfirmingExtensionId] = useState<string | null>(null)
+  const [reviewingExtensionId, setReviewingExtensionId] = useState<string | null>(null)
   const normalizedSearch = normalizeSearch(searchQuery)
 
   const filteredExtensions = useMemo(() => {
@@ -70,6 +71,10 @@ export default function MarketplacePage() {
         return a.displayName.localeCompare(b.displayName)
       })
   }, [extensions, normalizedSearch, selectedCategory, sortBy, trustFilter])
+  const reviewingExtension = useMemo(
+    () => extensions.find((extension) => extension.id === reviewingExtensionId) ?? null,
+    [extensions, reviewingExtensionId],
+  )
 
   const handleSortChange = (value: string) => {
     if (hasMarketplaceSort(value)) setSortBy(value)
@@ -117,10 +122,7 @@ export default function MarketplacePage() {
                 <MarketplaceCard
                   key={extension.id}
                   extension={extension}
-                  isConfirming={confirmingExtensionId === extension.id}
-                  onRequestInstall={setConfirmingExtensionId}
-                  onConfirmInstall={handleInstall}
-                  onCancelInstall={() => setConfirmingExtensionId(null)}
+                  onRequestInstall={setReviewingExtensionId}
                   onUninstall={handleUninstall}
                 />
               ))}
@@ -132,6 +134,12 @@ export default function MarketplacePage() {
           )}
         </section>
       </main>
+
+      <MarketplaceInstallReview
+        extension={reviewingExtension}
+        onConfirmInstall={handleInstall}
+        onCancel={() => setReviewingExtensionId(null)}
+      />
 
       <PublicFooter />
     </div>

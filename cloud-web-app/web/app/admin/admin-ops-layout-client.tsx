@@ -30,6 +30,7 @@ import {
   Lock,
   Zap,
   Database,
+  Search,
 } from 'lucide-react'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 import {
@@ -78,6 +79,16 @@ interface NavGroup {
   items: { title: string; href: string; icon: React.ElementType; badge?: string }[]
   primaryItems: { title: string; href: string; icon: React.ElementType; badge?: string }[]
   legacyItems: { title: string; href: string; icon: React.ElementType; badge?: string }[]
+}
+
+type LegacyRouteItem = {
+  title: string
+  href: string
+  icon: React.ElementType
+  sectionLabel: string
+  owner: string
+  riskLane: AdminRouteRiskLane
+  evidenceStatus: AdminEvidenceStatus
 }
 
 const sectionIconById = {
@@ -318,32 +329,88 @@ function NavGroupSection({ group, isCollapsed }: { group: NavGroup; isCollapsed?
               <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Legacy</span>
             </Link>
           )}
-          {group.legacyItems.length > 0 && (
-            <details className="rounded-lg px-2 py-1" aria-label={`${group.label} Legacy compatibility map`}>
-              <summary className="cursor-pointer text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
-                <span className="sr-only">Legacy map</span>
-                Compatibility routes
-              </summary>
-              <p className="mt-1 text-[10px] normal-case leading-4 tracking-normal text-[var(--aethel-text-quaternary)]">
-                Older URLs remain available but stay secondary to the six operating areas.
-              </p>
-              <div className="mt-1 max-h-48 space-y-0.5 overflow-y-auto pr-1">
-                {group.legacyItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="flex items-center gap-2 rounded-md px-2 py-1 text-[11px] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]"
-                  >
-                    <item.icon className="h-3 w-3" />
-                    {item.title}
-                  </Link>
-                ))}
-              </div>
-            </details>
-          )}
         </nav>
       )}
     </div>
+  )
+}
+
+function CompatibilityRoutesDrawer({ groups }: { groups: NavGroup[] }) {
+  const [query, setQuery] = useState('')
+  const normalizedQuery = query.trim().toLowerCase()
+  const routes: LegacyRouteItem[] = groups.flatMap((group) =>
+    group.legacyItems.map((item) => ({
+      ...item,
+      sectionLabel: group.label,
+      owner: group.owner,
+      riskLane: group.riskLane,
+      evidenceStatus: group.evidenceStatus,
+    })),
+  )
+  const filteredRoutes = normalizedQuery
+    ? routes.filter((route) =>
+        [route.title, route.href, route.sectionLabel, route.owner, route.riskLane, route.evidenceStatus]
+          .join(' ')
+          .toLowerCase()
+          .includes(normalizedQuery),
+      )
+    : routes
+
+  return (
+    <details
+      className="mx-2 mb-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)]"
+      aria-label="Global Legacy compatibility map"
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-secondary)]">
+        <span>
+          <span className="sr-only">Legacy map</span>
+          Compatibility routes
+        </span>
+        <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+          {routes.length}
+        </span>
+      </summary>
+      <div className="border-t border-[var(--aethel-border-subtle)] p-3">
+        <p className="text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+          Legacy URLs remain available for operators, but the visible admin model is the six-area command center.
+        </p>
+        <label className="mt-3 flex min-h-10 items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] px-3 text-xs text-[var(--aethel-text-tertiary)]">
+          <Search className="h-3.5 w-3.5" />
+          <span className="sr-only">Search compatibility routes</span>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.currentTarget.value)}
+            placeholder="Search legacy routes..."
+            className="min-w-0 flex-1 bg-transparent text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)]"
+          />
+        </label>
+        <div className="mt-3 max-h-72 space-y-1 overflow-y-auto pr-1">
+          {filteredRoutes.map((route) => (
+            <Link
+              key={route.href}
+              href={route.href}
+              className="block rounded-xl border border-transparent px-3 py-2 text-xs text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-subtle)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]"
+            >
+              <span className="flex items-center gap-2 font-medium">
+                <route.icon className="h-3.5 w-3.5" />
+                {route.title}
+              </span>
+              <span className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+                <span>{route.sectionLabel}</span>
+                <span>{route.owner}</span>
+                <span>{route.riskLane}</span>
+                <span>{route.evidenceStatus}</span>
+              </span>
+            </Link>
+          ))}
+          {filteredRoutes.length === 0 ? (
+            <div className="rounded-xl border border-[var(--aethel-border-subtle)] px-3 py-4 text-center text-xs text-[var(--aethel-text-tertiary)]">
+              No compatibility route matches this search.
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </details>
   )
 }
 
@@ -420,6 +487,8 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
             <NavGroupSection key={group.label} group={group} />
           ))}
         </div>
+
+        <CompatibilityRoutesDrawer groups={navGroups} />
 
         {/* Emergency Action */}
         <div className="shrink-0 border-t border-[var(--aethel-border-subtle)] p-3">

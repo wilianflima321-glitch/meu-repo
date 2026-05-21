@@ -1,0 +1,31 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "noEmit": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "app/admin/admin-ops-layout-client.tsx",
+    "app/evidence/page.tsx",
+    "app/marketplace/page.tsx",
+    "app/marketplace/marketplace-page.data.ts",
+    "app/marketplace/marketplace-page.parts.tsx",
+    "app/pricing/page.tsx",
+    "app/pricing/_components/PricingComparisonTable.tsx",
+    "app/pricing/_components/PricingFaq.tsx",
+    "app/studio/StudioMissionControl.tsx",
+    "components/dashboard/AethelDashboardSidebar.tsx",
+    "components/dashboard/DashboardShell.tsx",
+    "components/dashboard/DashboardTopBar.tsx",
+    "components/evidence/EvidenceCenter.tsx",
+    "components/viewport/AethelViewport3D.tsx",
+    "lib/runtime/runtime-mode-view-model.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "tests/e2e/**/*",
+    "__tests__/**/*"
+  ]
+}

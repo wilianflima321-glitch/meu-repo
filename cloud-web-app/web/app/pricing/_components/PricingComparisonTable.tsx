@@ -4,11 +4,16 @@ import type { PricingPlan } from './pricing-utils'
 export function PricingComparisonTable({ corePlans }: { corePlans: PricingPlan[] }) {
   return (
     <section className="mx-auto mt-12 max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-strong))] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
-        <div className="border-b border-[var(--aethel-border-primary)] px-6 py-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Quick comparison</p>
-          <h2 className="mt-2 text-2xl font-bold text-[var(--aethel-text-primary)]">What changes between the most-used plans</h2>
-        </div>
+      <details className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-strong))] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
+        <summary className="cursor-pointer list-none border-b border-[var(--aethel-border-primary)] px-6 py-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Detailed comparison</p>
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Compare the most-used plans</h2>
+            <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)]">
+              Open table
+            </span>
+          </div>
+        </summary>
         <div className="overflow-x-auto">
           <table className="min-w-full text-left">
             <thead>
@@ -27,7 +32,7 @@ export function PricingComparisonTable({ corePlans }: { corePlans: PricingPlan[]
             </tbody>
           </table>
         </div>
-      </div>
+      </details>
     </section>
   )
 }

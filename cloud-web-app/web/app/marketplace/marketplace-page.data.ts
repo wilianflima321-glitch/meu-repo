@@ -18,6 +18,7 @@ export interface Extension {
   riskLevel?: ExtensionRiskLevel
   permissions?: string[]
   provenance?: string
+  rollbackPlan?: string
   reviewStatus?: 'verified' | 'community-review' | 'blocked'
 }
 
@@ -72,6 +73,7 @@ export const CURATED_EXTENSIONS: Extension[] = [
     riskLevel: 'low',
     permissions: ['Read agent runs', 'Write replay evidence'],
     provenance: 'Aethel reviewed package with signed manifest',
+    rollbackPlan: 'Disable replay capture and remove generated evidence refs from the project ledger.',
     reviewStatus: 'verified',
   },
   {
@@ -90,6 +92,7 @@ export const CURATED_EXTENSIONS: Extension[] = [
     riskLevel: 'medium',
     permissions: ['Read render jobs', 'Write validation report'],
     provenance: 'Source policy checked, MIT license verified',
+    rollbackPlan: 'Remove generated readiness reports; render job history remains read-only.',
     reviewStatus: 'verified',
   },
   {
@@ -108,6 +111,7 @@ export const CURATED_EXTENSIONS: Extension[] = [
     riskLevel: 'low',
     permissions: ['Read UI files', 'Write audit report'],
     provenance: 'Aethel internal package, checksum tracked',
+    rollbackPlan: 'Delete density reports and keep source UI files unchanged.',
     reviewStatus: 'verified',
   },
   {
@@ -126,6 +130,7 @@ export const CURATED_EXTENSIONS: Extension[] = [
     riskLevel: 'medium',
     permissions: ['Read marketplace assets', 'Write provenance ledger'],
     provenance: 'Apache-2.0 license and source trail verified',
+    rollbackPlan: 'Archive created provenance entries and preserve existing asset metadata.',
     reviewStatus: 'verified',
   },
   {
@@ -144,6 +149,7 @@ export const CURATED_EXTENSIONS: Extension[] = [
     riskLevel: 'medium',
     permissions: ['Read prompts', 'Suggest snippets'],
     provenance: 'Community package awaiting full provenance review',
+    rollbackPlan: 'Remove imported snippets; no workspace files are changed automatically.',
     reviewStatus: 'community-review',
   },
 ]

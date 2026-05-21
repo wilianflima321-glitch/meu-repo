@@ -67,7 +67,7 @@ Landing surfaces must avoid mixed Portuguese/English hardcoded product copy unti
 
 ### marketplace-trust-grammar
 
-Marketplace must show verified/community tabs, permissions, provenance, risk, and install confirmation.
+Marketplace must show verified/community tabs, permissions, provenance, risk, rollback, and a review-first install decision.
 
 | File | Count | Note |
 | --- | ---: | --- |

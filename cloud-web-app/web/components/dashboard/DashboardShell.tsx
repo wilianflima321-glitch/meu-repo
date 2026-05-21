@@ -5,17 +5,14 @@ import { Code, CreditCard, LayoutDashboard, MessageSquare, Settings } from 'luci
 
 import type { ActiveTab, SessionFilter, ToastType } from './aethel-dashboard-model'
 import { TrialBanner } from './TrialBanner'
-import StudioGlobalNav from '../studio/StudioGlobalNav'
-import StudioActionRail from '../studio/StudioActionRail'
 import { AethelDashboardSidebar } from './AethelDashboardSidebar'
-import { DashboardFlowRail } from './DashboardFlowRail'
 import { DashboardMainContent } from './DashboardMainContent'
+import { DashboardTopBar } from './DashboardTopBar'
 import OnboardingWizard from '../onboarding/OnboardingWizard'
 import { DashboardToast } from './DashboardToast'
 import { DashboardRoutingNotice } from './DashboardRoutingNotice'
 import { resolveDashboardEntryLane } from './aethel-dashboard-entry-triage'
 import { MobileBottomNav } from '@/components/ui/MobileResponsiveLayout'
-import CostMeter from '@/components/cost/CostMeter'
 
 type OnboardingCompleteHandler = ComponentProps<typeof OnboardingWizard>['onComplete']
 type OnboardingSkipHandler = ComponentProps<typeof OnboardingWizard>['onSkip']
@@ -121,27 +118,20 @@ export function DashboardShell({
 
       <DashboardRoutingNotice />
 
-      <StudioGlobalNav
-        title="Studio Home"
-        subtitle="Start light, stay in the same shell, and expand into the cockpit only when the task asks for it."
-        rightSlot={
-          <StudioActionRail
-            sidebarOpen={sidebarOpen}
-            onToggleSidebar={onToggleSidebar}
-            onResetDashboard={onResetDashboard}
-            onToggleTheme={onToggleTheme}
-            theme={theme}
-            backendOnline={backendOnline}
-            aiProviderConfigured={aiProviderConfigured}
-            onOpenProviderSettings={onOpenProviderSettings}
-            fullAccessActive={fullAccessActive}
-            fullAccessExpiresAt={fullAccessExpiresAt}
-            fullAccessBusy={fullAccessBusy}
-            onToggleFullAccess={onToggleFullAccess}
-            onOpenIde={onOpenIde}
-            extraActions={<CostMeter />}
-          />
-        }
+      <DashboardTopBar
+        theme={theme}
+        sidebarOpen={sidebarOpen}
+        backendOnline={backendOnline}
+        aiProviderConfigured={aiProviderConfigured}
+        fullAccessActive={fullAccessActive}
+        fullAccessExpiresAt={fullAccessExpiresAt}
+        fullAccessBusy={fullAccessBusy}
+        onToggleSidebar={onToggleSidebar}
+        onResetDashboard={onResetDashboard}
+        onToggleTheme={onToggleTheme}
+        onOpenProviderSettings={onOpenProviderSettings}
+        onToggleFullAccess={onToggleFullAccess}
+        onOpenIde={onOpenIde}
       />
 
       {(authErrorText || billingErrorText) && (
@@ -213,13 +203,6 @@ export function DashboardShell({
           </div>
         </div>
       )}
-
-      <DashboardFlowRail
-        activeTab={activeTab}
-        entryMission={entryMission}
-        onSelectTab={onSelectTab}
-        onOpenIde={onOpenIde}
-      />
 
       <div className="relative z-10 flex flex-1 overflow-hidden">
         {sidebarOpen && (

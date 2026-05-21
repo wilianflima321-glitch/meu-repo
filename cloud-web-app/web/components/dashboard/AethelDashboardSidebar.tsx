@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 import type { ActiveTab, SessionFilter } from './aethel-dashboard-model'
@@ -331,6 +332,12 @@ export function AethelDashboardSidebar({
             >
               Expand Studio
             </button>
+            <Link
+              href="/evidence"
+              className="mt-2 inline-flex w-full items-center justify-center rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-3 py-2 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
+            >
+              Evidence Center
+            </Link>
           </div>
 
           <div className="mt-4 space-y-3">

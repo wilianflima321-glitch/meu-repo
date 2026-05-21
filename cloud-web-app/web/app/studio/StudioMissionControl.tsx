@@ -3,6 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { StudioLocalRuntimeCapsule } from '@/components/studio/StudioLocalRuntimeCapsule'
 import { analytics } from '@/lib/analytics'
+import {
+  buildRuntimeModeViewModels,
+  runtimeModeForTarget,
+  type RuntimeModeTarget,
+} from '@/lib/runtime/runtime-mode-view-model'
 
 type StudioSessionStatus = 'active' | 'stopped'
 
@@ -35,17 +40,10 @@ const MODE_OPTIONS = [
   { value: 'release', label: 'Release' },
 ] as const
 
-const RUNTIME_OPTIONS = [
-  { value: 'cloud-sandbox', label: 'Cloud safe' },
-  { value: 'local-worker', label: 'Local worker' },
-  { value: 'local-native', label: 'Local native' },
-  { value: 'held', label: 'Hold for review' },
-] as const
-
 const STUDIO_SESSION_STORAGE_KEY = 'aethel:last-studio-session-id'
 
 type StudioMode = (typeof MODE_OPTIONS)[number]['value']
-type RuntimeTarget = (typeof RUNTIME_OPTIONS)[number]['value']
+type RuntimeTarget = RuntimeModeTarget
 
 function statusClass(status?: StudioSessionStatus): string {
   if (status === 'active') {
@@ -68,22 +66,25 @@ async function parseResponse<T>(response: Response): Promise<T> {
 export default function StudioMissionControl() {
   const [mission, setMission] = useState('Coordinate a playable scene, evidence, and release checklist.')
   const [mode, setMode] = useState<StudioMode>('game')
-  const [runtimeTarget, setRuntimeTarget] = useState<RuntimeTarget>('cloud-sandbox')
+  const [runtimeTarget, setRuntimeTarget] = useState<RuntimeTarget>('local-main-safe')
   const [session, setSession] = useState<StudioSessionRecord | null>(null)
   const [wave, setWave] = useState<TaskWaveResponse | null>(null)
   const [busy, setBusy] = useState<'resume' | 'start' | 'wave' | 'stop' | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
 
   const canRunWave = session?.status === 'active'
+  const pixelStreamUrl = process.env.NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL
+  const runtimeModes = useMemo(() => buildRuntimeModeViewModels({ pixelStreamUrl }), [pixelStreamUrl])
+  const selectedRuntimeMode = useMemo(() => runtimeModeForTarget(runtimeModes, runtimeTarget), [runtimeModes, runtimeTarget])
   const compactSessionId = useMemo(() => (session ? session.id.replace(/^studio_/, '').slice(0, 12) : 'none'), [session])
 
   const applySessionRecord = useCallback((record: StudioSessionRecord) => {
     setSession(record)
     setMission(record.mission)
     setMode(record.mode as StudioMode)
-    setRuntimeTarget(record.runtimeTarget as RuntimeTarget)
+    setRuntimeTarget(runtimeModeForTarget(runtimeModes, record.runtimeTarget).runtimeTarget)
     window.localStorage.setItem(STUDIO_SESSION_STORAGE_KEY, record.id)
-  }, [])
+  }, [runtimeModes])
 
   useEffect(() => {
     const sessionId = window.localStorage.getItem(STUDIO_SESSION_STORAGE_KEY)
@@ -239,12 +240,22 @@ export default function StudioMissionControl() {
               className="min-h-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-secondary)]"
               aria-label="Runtime target"
             >
-              {RUNTIME_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              {runtimeModes.map((option) => (
+                <option key={option.id} value={option.runtimeTarget} disabled={!option.selectable}>
+                  {option.label} - {option.badge}
                 </option>
               ))}
             </select>
+          </div>
+          <div className="mt-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_45%,transparent)] px-3 py-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+              Runtime truth layer: {selectedRuntimeMode.label} · {selectedRuntimeMode.badge}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{selectedRuntimeMode.detail}</p>
+            <p className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">{selectedRuntimeMode.costNote}</p>
+            {selectedRuntimeMode.fallbackReason ? (
+              <p className="mt-1 text-[11px] text-[var(--aethel-warning-light)]">{selectedRuntimeMode.fallbackReason}</p>
+            ) : null}
           </div>
         </div>
 

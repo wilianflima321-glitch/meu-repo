@@ -101,7 +101,15 @@
     "qa:offline-collaboration-spine": "node scripts/check-offline-collaboration-spine.mjs",
     "qa:typecheck-offline-collaboration": "node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc --noEmit --pretty false --incremental false --project tsconfig.typecheck-offline-collaboration.json",
     "qa:editor-virtualization-spine": "node scripts/check-editor-virtualization-spine.mjs",
-    "qa:typecheck-editor-virtualization": "node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc --noEmit --pretty false --incremental false --project tsconfig.typecheck-editor-virtualization.json"
+    "qa:typecheck-editor-virtualization": "node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc --noEmit --pretty false --incremental false --project tsconfig.typecheck-editor-virtualization.json",
+    "qa:authenticated-ux-harness": "node scripts/check-authenticated-ux-harness.mjs",
+    "qa:authenticated-ux-capture": "node scripts/capture-authenticated-ux-surfaces.mjs",
+    "qa:dashboard-nav-compression": "node scripts/check-dashboard-nav-compression.mjs",
+    "qa:admin-legacy-compression": "node scripts/check-admin-legacy-compression.mjs",
+    "qa:runtime-mode-simplification": "node scripts/check-runtime-mode-simplification.mjs",
+    "qa:evidence-center-spine": "node scripts/check-evidence-center-spine.mjs",
+    "qa:marketplace-install-review": "node scripts/check-marketplace-install-review.mjs",
+    "qa:typecheck-v22-surfaces": "tsc -p tsconfig.typecheck-v22-surfaces.json --noEmit"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
