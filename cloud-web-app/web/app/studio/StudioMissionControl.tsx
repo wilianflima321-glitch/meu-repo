@@ -344,12 +344,15 @@ export default function StudioMissionControl() {
                 ))}
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {gameScopePlan.genrePack.playtestScenarios.slice(0, 4).map((scenario) => (
-                  <span key={scenario} className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_24%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-warning-light)]">
-                    {scenario}
+                {gameScopePlan.playtestSpine.scenarios.slice(0, 4).map((scenario) => (
+                  <span key={scenario.id} className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_24%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-warning-light)]">
+                    {scenario.title}
                   </span>
                 ))}
               </div>
+              <p className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">
+                Playtest spine: {gameScopePlan.playtestSpine.state}; telemetry: {gameScopePlan.playtestSpine.telemetry.slice(0, 3).join(', ')}.
+              </p>
               <p className="mt-3 text-[11px] text-[var(--aethel-warning-light)]">{gameScopePlan.nextAction}</p>
             </div>
           ) : null}

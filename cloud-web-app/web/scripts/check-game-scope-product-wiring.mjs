@@ -26,7 +26,7 @@ requirePattern('app/studio/StudioMissionControl.tsx', /GAME_GENRE_OPTIONS[\s\S]*
 requirePattern('app/studio/StudioMissionControl.tsx', /Game scope:/, 'Studio must show a compact scope plan without hiding it in backend-only state')
 requirePattern('app/studio/StudioMissionControl.tsx', /story-world-character bible|story\/world\/character bible|Production scope|creativeArtifacts/, 'Studio must signal creative planning before heavy generation')
 requirePattern('app/studio/StudioMissionControl.tsx', /genrePack\.cameraModel/, 'Studio must show genre-specific camera/input contract')
-requirePattern('app/studio/StudioMissionControl.tsx', /genrePack\.playtestScenarios/, 'Studio must show genre-specific playtest contract')
+requirePattern('app/studio/StudioMissionControl.tsx', /(genrePack\.playtestScenarios|playtestSpine\.scenarios)/, 'Studio must show genre-specific playtest contract')
 
 requirePattern('components/evidence/EvidenceCenter.tsx', /buildGameScopePlan/, 'Evidence Center must read the generic scope plan')
 requirePattern('components/evidence/EvidenceCenter.tsx', /Production Bible preview/, 'Evidence Center must expose production bible evidence')

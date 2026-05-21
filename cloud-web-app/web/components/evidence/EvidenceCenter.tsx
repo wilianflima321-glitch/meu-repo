@@ -267,6 +267,9 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                       <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
                         Loop: {productionBiblePlan.genrePack.coreLoop.slice(0, 5).join(' -> ')}
                       </p>
+                      <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-warning-light)]">
+                        Playtest spine: {productionBiblePlan.playtestSpine.state}; {productionBiblePlan.playtestSpine.scenarios.length} scenario(s), human review required.
+                      </p>
                     </div>
                     <div className="mt-3 grid gap-2 sm:grid-cols-2">
                       {productionBiblePlan.productionGraphs.slice(0, 6).map((graph) => (
