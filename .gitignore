@@ -34,6 +34,7 @@ cloud-web-app/web/output/
 
 # Rust/Tauri build outputs
 **/target/
+apps/studio-local/src-tauri/gen/
 
 # Env
 .env

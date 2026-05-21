@@ -17,7 +17,8 @@ mod tests {
         LocalRuntimeShaderTool, LocalRuntimeToolchainFeature, RuntimeExecutionTarget,
         RuntimeJobLane, RuntimeJobState, StoragePressure, ThermalState,
     };
-    use crate::jobs::{RuntimeJobRequest, RuntimeJobStore};
+    use crate::contracts::RuntimeJobRequest;
+    use crate::jobs::RuntimeJobStore;
     use crate::policy::resolve_runtime_target;
     use crate::probe::build_probe_from_signals;
     use crate::runtime_engine::{build_local_wgpu_probe_contract, build_local_wgpu_render_contract};

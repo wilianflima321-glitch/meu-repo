@@ -1,12 +1,20 @@
-﻿import { spawnSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 
-const modeArg = process.argv.find((arg) => arg.startsWith('--mode='))
-const mode = modeArg?.split('=')[1] ?? 'dev'
+const modeFlagIndex = process.argv.indexOf('--mode')
+const modeEqualsArg = process.argv.find((arg) => arg.startsWith('--mode='))
+const mode =
+  modeEqualsArg?.split('=')[1] ??
+  (modeFlagIndex >= 0 ? process.argv[modeFlagIndex + 1] : undefined) ??
+  'dev'
 
 function hasCommand(command, args = ['--version']) {
-  const result = spawnSync(command, args, { stdio: 'ignore', shell: process.platform === 'win32' })
-  return result.status === 0
+  const candidates =
+    process.platform === 'win32' && !/\.(cmd|exe)$/i.test(command)
+      ? [`${command}.cmd`, `${command}.exe`, command]
+      : [command]
+
+  return candidates.some((executable) => spawnSync(executable, args, { stdio: 'ignore' }).status === 0)
 }
 
 function requireFile(path) {
