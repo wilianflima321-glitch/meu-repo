@@ -7,8 +7,8 @@ The product now treats `next-i18next` plus `public/locales/{locale}` as the cano
 - Canonical runtime: `next-i18next`.
 - Canonical files: `public/locales/{en,pt-BR,es,fr,ja,zh}/common.json`.
 - Default locale: `en`.
-- Legacy compatibility: `lib/i18n.ts` may bridge `lib/translations.ts` for one release.
-- New UI components must not import `lib/translations.ts` or `lib/locales/pt-BR.ts`.
+- Legacy compatibility: removed.
+- New UI components must not import `lib/translations.ts`, `lib/i18n.ts`, or `lib/locales/pt-BR.ts`.
 
 ## Why
 
@@ -16,10 +16,10 @@ Aethel had multiple translation paths. That makes product copy hard to govern an
 
 ## Migration Order
 
-1. Keep `lib/i18n.ts` as a compatibility adapter while old keys are migrated.
-2. Move active UI copy into `public/locales/*/common.json`.
-3. Remove component imports from `lib/locales/*`.
-4. Delete `lib/translations.ts` and `lib/locales/pt-BR.ts` only after all consumers are gone.
+1. Move active UI copy into `public/locales/*/common.json`.
+2. Keep route-level copy in English unless it is explicitly localized through `next-i18next`.
+3. Block new imports from `lib/translations.ts`, `lib/i18n.ts`, and `lib/locales/*`.
+4. Treat any future locale drift as a product-surface regression, not a docs-only issue.
 
 ## Gate
 

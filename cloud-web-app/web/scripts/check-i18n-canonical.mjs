@@ -7,12 +7,7 @@ const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx'])
 const IGNORED_PARTS = new Set(['node_modules', '.next', 'coverage', 'dist', 'build', '.git'])
 
 const CANONICAL_LOCALES = ['en', 'pt-BR', 'es', 'fr', 'ja', 'zh']
-const COMPATIBILITY_FILES = new Set([
-  'lib/i18n.ts',
-  'lib/translations.ts',
-  'lib/translations.types.ts',
-  'lib/locales/pt-BR.ts',
-])
+const COMPATIBILITY_FILES = new Set()
 
 function walk(dir, files = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -74,12 +69,12 @@ const report = [
   'Generated: deterministic local scan',
   '',
   `- Canonical system: next-i18next + public/locales/{${CANONICAL_LOCALES.join(',')}}`,
-  '- Legacy compatibility: lib/i18n.ts may bridge lib/translations.ts for one release only',
+  '- Legacy compatibility: removed; new code must use the canonical locale folders',
   `- Legacy touchpoints found: ${findings.length}`,
   `- Failures: ${failures.length}`,
   '',
   '## Compatibility Files',
-  ...[...COMPATIBILITY_FILES].sort().map((file) => `- \`${file}\``),
+  '- none',
   '',
   '## Legacy Touchpoints',
   ...(findings.length ? [...new Set(findings)].sort().map((file) => `- \`${file}\``) : ['- none']),
