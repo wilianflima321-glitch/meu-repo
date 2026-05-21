@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, BadgeCheck, CheckCircle2, Download, LockKeyhole, ShieldCheck, Star, XCircle } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, CheckCircle2, LockKeyhole, ShieldCheck, XCircle } from 'lucide-react'
 import type { Extension } from './marketplace-page.data'
 
 export type MarketplaceTrustFilter = 'verified' | 'community-review'
@@ -189,8 +189,13 @@ export function MarketplaceCard({ extension, isConfirming, onRequestInstall, onC
 
       <div className="mt-4 grid gap-2 text-xs text-[var(--aethel-text-secondary)]">
         <div className="flex items-center justify-between rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.28)] px-3 py-2">
-          <span className="inline-flex items-center gap-1.5"><Star className="h-3.5 w-3.5 text-[var(--aethel-warning-light)]" /> {extension.rating.toFixed(1)}</span>
-          <span className="inline-flex items-center gap-1.5"><Download className="h-3.5 w-3.5" /> {(extension.downloads / 1000).toFixed(0)}K installs</span>
+          <span className="inline-flex items-center gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 text-[var(--aethel-success-light)]" />
+            {extension.evidenceLabel}
+          </span>
+          <span className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+            No public install metric yet
+          </span>
         </div>
         <div className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${riskClass(risk)}`}>
           <LockKeyhole className="h-3 w-3" />

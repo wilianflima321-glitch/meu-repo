@@ -26,6 +26,7 @@ build/
 **/.nyc_output/
 playwright-report/
 test-results/
+cloud-web-app/web/output/
 
 # Specific lib build outputs (not source)
 **/dist/lib/

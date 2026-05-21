@@ -8,10 +8,23 @@ type PricingPlansGridProps = {
 }
 
 export function PricingPlansGrid({ corePlans, isAnnual }: PricingPlansGridProps) {
+  const featuredPlans = corePlans.filter((plan) => ['free', 'pro', 'studio'].includes(plan.id))
+  const supportingPlans = corePlans.filter((plan) => !featuredPlans.some((featuredPlan) => featuredPlan.id === plan.id))
+
   return (
     <section className="mx-auto mt-10 max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
-        {corePlans.map((plan) => (
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Most common paths</p>
+          <h2 className="mt-2 text-2xl font-bold text-[var(--aethel-text-primary)]">Pick the pressure level first.</h2>
+        </div>
+        <p className="max-w-xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
+          Starter and Basic remain available for smaller steps, but the first decision should stay simple: validate, build daily, or run a governed studio.
+        </p>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-3">
+        {featuredPlans.map((plan) => (
           <article key={plan.id} className={`relative flex h-full flex-col rounded-[24px] border p-5 transition-all ${plan.popular ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-primary)_22%,transparent)] to-transparent shadow-xl' : 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]'}`}>
             {plan.popular ? <div className="absolute -top-3.5 left-6 rounded-full bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-4 py-1 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg">Best balance</div> : null}
 
@@ -59,6 +72,30 @@ export function PricingPlansGrid({ corePlans, isAnnual }: PricingPlansGridProps)
           </article>
         ))}
       </div>
+
+      {supportingPlans.length > 0 ? (
+        <div className="mt-5 rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Smaller steps</p>
+              <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Use these when budget is tighter than collaboration pressure.</p>
+            </div>
+            <div className="grid w-full gap-3 sm:w-auto sm:grid-cols-2">
+              {supportingPlans.map((plan) => (
+                <Link
+                  key={plan.id}
+                  href={`/dashboard?tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`}
+                  className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_54%,transparent)] px-4 py-3 text-sm transition hover:border-[var(--aethel-border-secondary)]"
+                >
+                  <span className="font-semibold text-[var(--aethel-text-primary)]">{plan.name}</span>
+                  <span className="ml-2 text-[var(--aethel-text-secondary)]">R${plan.displayPriceBRL}/{isAnnual ? 'year' : 'month'}</span>
+                  <span className="mt-1 block text-xs leading-5 text-[var(--aethel-text-tertiary)]">{plan.description}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }

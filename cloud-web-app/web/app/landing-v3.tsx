@@ -125,34 +125,31 @@ export default function LandingPageV3() {
                 </Link>
               </div>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="mt-5 flex flex-wrap gap-2">
                 {START_MODES.slice(0, 3).map((mode) => (
                   <Link
                     key={mode.title}
                     href={mode.href}
-                    className="group rounded-[24px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] px-4 py-4 transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)]"
+                    className="group inline-flex items-center gap-2 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:text-[var(--aethel-text-primary)]"
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{mode.title}</p>
-                      <ArrowRight className="h-4 w-4 text-[var(--aethel-text-quaternary)] transition group-hover:text-[var(--aethel-info-light)]" />
-                    </div>
-                    <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-tertiary)]">{mode.description}</p>
+                    {mode.title}
+                    <ArrowRight className="h-3.5 w-3.5 text-[var(--aethel-text-quaternary)] transition group-hover:text-[var(--aethel-info-light)]" />
                   </Link>
                 ))}
               </div>
             </div>
 
             <aside className="space-y-4">
-              <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.82),rgba(8,10,16,0.94))] p-5 shadow-[0_22px_70px_rgba(2,6,23,0.36)]">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+              <details className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.82),rgba(8,10,16,0.94))] p-5 shadow-[0_22px_70px_rgba(2,6,23,0.36)]">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+                  <span>
+                    <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
                       Product proof
-                    </p>
-                    <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">No black-box automation claims</p>
-                  </div>
+                    </span>
+                    <span className="mt-2 block text-base font-semibold text-[var(--aethel-text-primary)]">Why trust this run?</span>
+                  </span>
                   <Clock3 className="h-4 w-4 text-[var(--aethel-text-quaternary)]" />
-                </div>
+                </summary>
                 <div className="mt-4 space-y-3">
                   {OPERATION_SIGNALS.map((mission) => (
                     <Link
@@ -170,7 +167,7 @@ export default function LandingPageV3() {
                     </Link>
                   ))}
                 </div>
-              </div>
+              </details>
 
               <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.78),rgba(8,10,16,0.92))] p-5 shadow-[0_20px_70px_rgba(2,6,23,0.32)]">
                 <div className="flex items-center justify-between gap-3">

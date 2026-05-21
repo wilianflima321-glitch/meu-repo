@@ -321,9 +321,13 @@ function NavGroupSection({ group, isCollapsed }: { group: NavGroup; isCollapsed?
           {group.legacyItems.length > 0 && (
             <details className="rounded-lg px-2 py-1" aria-label={`${group.label} Legacy compatibility map`}>
               <summary className="cursor-pointer text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
-                Legacy map ({group.legacyItems.length})
+                <span className="sr-only">Legacy map</span>
+                Compatibility routes
               </summary>
-              <div className="mt-1 space-y-0.5">
+              <p className="mt-1 text-[10px] normal-case leading-4 tracking-normal text-[var(--aethel-text-quaternary)]">
+                Older URLs remain available but stay secondary to the six operating areas.
+              </p>
+              <div className="mt-1 max-h-48 space-y-0.5 overflow-y-auto pr-1">
                 {group.legacyItems.map((item) => (
                   <Link
                     key={item.href}

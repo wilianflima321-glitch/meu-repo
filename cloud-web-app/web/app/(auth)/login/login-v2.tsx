@@ -27,8 +27,8 @@ const LOGIN_HIGHLIGHTS = [
 
 const LOGIN_STATS = [
   { value: '1', label: 'studio flow' },
-  { value: '20+', label: 'agents gated' },
-  { value: 'L4', label: 'readiness' },
+  { value: '20+', label: 'guided agents' },
+  { value: 'Ready', label: 'evidence flow' },
 ]
 
 export default function LoginPageV2() {

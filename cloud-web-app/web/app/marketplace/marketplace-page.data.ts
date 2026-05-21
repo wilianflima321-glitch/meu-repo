@@ -8,8 +8,7 @@ export interface Extension {
   version: string
   publisher: string
   icon?: string
-  downloads: number
-  rating: number
+  evidenceLabel: string
   categories: string[]
   tags: string[]
   repository?: string
@@ -49,8 +48,8 @@ export const MARKETPLACE_CATEGORY_LABELS: Record<string, string> = {
 }
 
 export const MARKETPLACE_SORT_OPTIONS = [
-  { value: 'downloads', label: 'Most installed' },
-  { value: 'rating', label: 'Top rated' },
+  { value: 'evidence', label: 'Evidence first' },
+  { value: 'risk', label: 'Lowest risk' },
   { value: 'name', label: 'Name (A-Z)' },
 ] as const
 
@@ -64,8 +63,7 @@ export const CURATED_EXTENSIONS: Extension[] = [
     description: 'Replay browser-operator and agent steps with approvals, evidence, and handoff notes.',
     version: '0.4.0',
     publisher: 'Aethel Labs',
-    downloads: 18400,
-    rating: 4.8,
+    evidenceLabel: 'Internal preview',
     categories: ['ai-tools', 'productivity'],
     tags: ['agents', 'replay', 'evidence'],
     license: 'aethel-creator-license-v1',
@@ -83,8 +81,7 @@ export const CURATED_EXTENSIONS: Extension[] = [
     description: 'Validate viewport renders, artifact ownership, performance reports, and final-output blockers.',
     version: '0.3.2',
     publisher: 'Aethel Labs',
-    downloads: 12200,
-    rating: 4.7,
+    evidenceLabel: 'Internal preview',
     categories: ['ai-tools', 'debuggers'],
     tags: ['render', 'viewport', 'validation'],
     license: 'MIT',
@@ -102,8 +99,7 @@ export const CURATED_EXTENSIONS: Extension[] = [
     description: 'Scan surfaces for oversized media, raw links, weak hierarchy, and crowded copy blocks.',
     version: '0.2.1',
     publisher: 'Aethel Labs',
-    downloads: 9800,
-    rating: 4.6,
+    evidenceLabel: 'Internal preview',
     categories: ['productivity', 'themes'],
     tags: ['ux', 'audit', 'design-system'],
     license: 'MIT',
@@ -121,8 +117,7 @@ export const CURATED_EXTENSIONS: Extension[] = [
     description: 'Attach provenance, license evidence, and content-origin checks to marketplace assets.',
     version: '0.5.0',
     publisher: 'Aethel Labs',
-    downloads: 7600,
-    rating: 4.9,
+    evidenceLabel: 'Internal preview',
     categories: ['productivity', 'ai-tools'],
     tags: ['license', 'provenance', 'trust'],
     license: 'Apache-2.0',
@@ -140,8 +135,7 @@ export const CURATED_EXTENSIONS: Extension[] = [
     description: 'Community-maintained prompt snippets for quick workspace experiments. Review before production use.',
     version: '0.1.0',
     publisher: 'Community',
-    downloads: 2100,
-    rating: 4.1,
+    evidenceLabel: 'Community preview',
     categories: ['snippets', 'productivity'],
     tags: ['prompts', 'snippets', 'community'],
     license: 'CC-BY-4.0',

@@ -25,7 +25,7 @@ const REGISTER_HIGHLIGHTS = [
 const REGISTER_STATS = [
   { value: '90s', label: 'first value' },
   { value: '1', label: 'guided path' },
-  { value: 'L4', label: 'readiness' },
+  { value: 'Ready', label: 'evidence flow' },
 ]
 
 export default function RegisterPageV2() {

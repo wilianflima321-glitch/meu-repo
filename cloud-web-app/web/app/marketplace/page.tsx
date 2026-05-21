@@ -32,7 +32,7 @@ export default function MarketplacePage() {
   const [extensions, setExtensions] = useState<Extension[]>(CURATED_EXTENSIONS)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<MarketplaceSort>('downloads')
+  const [sortBy, setSortBy] = useState<MarketplaceSort>('evidence')
   const [trustFilter, setTrustFilter] = useState<MarketplaceTrustFilter>('verified')
   const [confirmingExtensionId, setConfirmingExtensionId] = useState<string | null>(null)
   const normalizedSearch = normalizeSearch(searchQuery)
@@ -58,8 +58,15 @@ export default function MarketplacePage() {
         return matchesTrustFilter && matchesCategory && (!normalizedSearch || searchable.includes(normalizedSearch))
       })
       .sort((a, b) => {
-        if (sortBy === 'downloads') return b.downloads - a.downloads
-        if (sortBy === 'rating') return b.rating - a.rating
+        if (sortBy === 'evidence') {
+          const verifiedDelta = Number(isVerifiedExtension(b)) - Number(isVerifiedExtension(a))
+          if (verifiedDelta !== 0) return verifiedDelta
+          return a.displayName.localeCompare(b.displayName)
+        }
+        if (sortBy === 'risk') {
+          const riskRank = { low: 0, medium: 1, high: 2 } as const
+          return (riskRank[a.riskLevel ?? 'medium'] - riskRank[b.riskLevel ?? 'medium']) || a.displayName.localeCompare(b.displayName)
+        }
         return a.displayName.localeCompare(b.displayName)
       })
   }, [extensions, normalizedSearch, selectedCategory, sortBy, trustFilter])
