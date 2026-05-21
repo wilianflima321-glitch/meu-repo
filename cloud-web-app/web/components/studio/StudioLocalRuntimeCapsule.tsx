@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Cpu, HardDrive, RadioTower, ShieldCheck, Zap, type LucideIcon } from 'lucide-react'
 
+import { getStudioLocalReleaseReadinessSummary } from '@/lib/studio-local/release-manifest'
 import {
   buildLocalRuntimeBridgeState,
   LOCAL_RUNTIME_CAPABILITY_EVENT,
@@ -66,6 +67,7 @@ export function StudioLocalRuntimeCapsule() {
   }
 
   const toolCount = (report?.localToolchain?.length ?? 0) + (report?.rendererBackends?.length ?? 0)
+  const releaseReadiness = useMemo(() => getStudioLocalReleaseReadinessSummary(), [])
 
   return (
     <section className="mt-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_58%,transparent)] p-4">
@@ -88,6 +90,20 @@ export function StudioLocalRuntimeCapsule() {
         <Metric icon={Zap} label="Executor" value={report?.preferredExecutor ?? 'browser'} />
         <Metric icon={HardDrive} label="Free disk" value={report?.freeStorageGb ? `${Math.round(report.freeStorageGb)} GB` : 'unknown'} />
         <Metric icon={ShieldCheck} label="Sidecars" value={toolCount ? `${toolCount} detected` : 'not attached'} />
+      </div>
+
+      <div className="mt-4 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+            Release readiness
+          </p>
+          <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-error)_28%,transparent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-error-light)]">
+            {releaseReadiness.releaseBlocked ? 'held' : 'ready'}
+          </span>
+        </div>
+        <p className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+          {releaseReadiness.counts.available} available, {releaseReadiness.counts.beta} beta, {releaseReadiness.counts.held} held, {releaseReadiness.counts.planned} planned. Signed installers stay held until evidence exists.
+        </p>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">

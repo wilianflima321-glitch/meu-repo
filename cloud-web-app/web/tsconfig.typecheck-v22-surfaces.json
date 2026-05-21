@@ -48,7 +48,11 @@
     "lib/production/cinematic-evidence-spine.ts",
     "components/studio/EngineModuleAdapterCockpit.tsx",
     "components/studio/EngineSpineReadinessPanel.tsx",
-    "lib/studio/engine-spine-modules.ts"
+    "lib/studio/engine-spine-modules.ts",
+    "app/download/page.tsx",
+    "components/studio/StudioLocalReleaseReadinessMatrix.tsx",
+    "components/studio/StudioLocalRuntimeCapsule.tsx",
+    "lib/studio-local/release-manifest.ts"
   ],
   "exclude": [
     "node_modules",

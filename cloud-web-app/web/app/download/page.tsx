@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Cpu, Download, Gauge, HardDrive, Monitor, ShieldCheck, Sparkles, TerminalSquare, Zap } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
+import StudioLocalReleaseReadinessMatrix from '@/components/studio/StudioLocalReleaseReadinessMatrix'
 import {
   STUDIO_LOCAL_RELEASE_MANIFEST,
   type RuntimeReleaseStatus,
@@ -68,6 +69,8 @@ export default function DownloadPage() {
                 Read setup guide
               </Link>
             </div>
+
+            <StudioLocalReleaseReadinessMatrix className="mt-7" />
 
             <div className="mt-7 grid gap-3 sm:grid-cols-3">
               {TARGETS.map((target) => (
