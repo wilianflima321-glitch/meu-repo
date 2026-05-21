@@ -110,6 +110,9 @@ export function ViewportAssetQualityCard({ asset }: ViewportAssetQualityCardProp
             <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">
               {upgradePlan.recommendedLane} - ${upgradePlan.estimatedCostUsd.toFixed(2)} - {upgradePlan.estimatedMinutes} min
             </p>
+            <p className="mt-1 text-[10px] text-[var(--aethel-text-tertiary)]">
+              Source lane: {upgradePlan.assetSourcingPlan.recommendedLane}; {upgradePlan.assetSourcingPlan.status}.
+            </p>
           </div>
           <button
             type="button"
@@ -135,6 +138,9 @@ export function ViewportAssetQualityCard({ asset }: ViewportAssetQualityCardProp
             ))}
             {upgradePlan.missingEvidence.slice(0, 4).map((item) => (
               <li key={item}>Evidence: {item}</li>
+            ))}
+            {upgradePlan.assetSourcingPlan.searchQueries.slice(0, 2).map((query) => (
+              <li key={query}>Search: {query}</li>
             ))}
           </ul>
         ) : null}

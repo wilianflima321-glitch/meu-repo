@@ -3,6 +3,10 @@ import {
   buildGameAssetQualityPipeline,
   type GameAssetQualityTier,
 } from '@/lib/production/game-asset-quality-pipeline'
+import {
+  buildCuratedAssetSourcingPlan,
+  type CuratedAssetSourcingPlan,
+} from '@/lib/production/curated-asset-sourcing'
 
 export type QualityUpgradeLane = GameAssetQualityTier
 export type QualityOrchestrationStatus = 'available' | 'held' | 'blocked' | 'needs-review'
@@ -46,6 +50,7 @@ export interface QualityOrchestrationPlan {
   estimatedCostUsd: number
   estimatedMinutes: number
   runtimeTarget: ProductionRuntimeTarget
+  assetSourcingPlan: CuratedAssetSourcingPlan
   nextAction: string
   humanReviewRequired: true
   copy: {
@@ -141,6 +146,14 @@ export function buildQualityOrchestrationPlan(input: QualityOrchestrationInput):
   const evidence = new Set(input.evidenceRefs)
   const missingEvidence = requiredEvidence.filter((item) => !evidence.has(item))
   const estimate = LANE_COST_MINUTES[input.targetQuality]
+  const assetSourcingPlan = buildCuratedAssetSourcingPlan({
+    goal: input.goal,
+    domain: input.domain === 'character' ? 'character' : input.domain === 'world' ? 'world' : input.domain === 'scene' ? 'scene' : 'prop',
+    targetQuality: input.targetQuality,
+    budgetUsd: input.budgetUsd,
+    evidenceRefs: input.evidenceRefs,
+    licenseStatus: input.assetMetadata?.licenseStatus,
+  })
   const budgetShortfall = Number.isFinite(input.budgetUsd) && input.budgetUsd < estimate.cost
   const rawDraftFinalClaim = input.assetMetadata?.qualityTier === 'ai-draft' && input.targetQuality !== 'ai-draft'
 
@@ -148,6 +161,7 @@ export function buildQualityOrchestrationPlan(input: QualityOrchestrationInput):
     ...(input.assetMetadata?.licenseStatus === 'blocked' ? ['Asset license is blocked.'] : []),
     ...(budgetShortfall ? [`Budget ${input.budgetUsd.toFixed(2)} USD is below estimated ${estimate.cost.toFixed(2)} USD.`] : []),
     ...missingCapabilities.map((capability) => `Missing runtime capability: ${capability}`),
+    ...(assetSourcingPlan.blocked ? assetSourcingPlan.blockers : []),
     ...(rawDraftFinalClaim ? ['Draft assets are not final; upgrade requires evidence and review.'] : []),
   ]
 
@@ -171,6 +185,7 @@ export function buildQualityOrchestrationPlan(input: QualityOrchestrationInput):
     estimatedCostUsd: estimate.cost,
     estimatedMinutes: estimate.minutes,
     runtimeTarget: LANE_RUNTIME_TARGET[input.targetQuality],
+    assetSourcingPlan,
     nextAction: laneNextAction({
       status,
       targetQuality: input.targetQuality,

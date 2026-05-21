@@ -33,6 +33,7 @@
     "components/viewport/SceneViewportInspector.tsx",
     "components/viewport/ViewportAssetQualityCard.tsx",
     "lib/viewport/viewport-asset-import.ts",
+    "lib/production/curated-asset-sourcing.ts",
     "lib/production/ai-quality-orchestrator.ts",
     "lib/production/game-genre-packs.ts",
     "lib/production/game-scope-orchestrator.ts",
