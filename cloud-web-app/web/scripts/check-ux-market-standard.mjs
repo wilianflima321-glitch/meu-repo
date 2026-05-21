@@ -134,10 +134,10 @@ const CHECKS = [
   {
     id: 'studio-engine-spine-evidence',
     description: 'Studio hub must expose hidden engine systems as honest work packets instead of burying paid code behind marketing claims.',
-    files: ['app/studio/page.tsx', 'components/studio/EngineSpineReadinessPanel.tsx', 'lib/studio/engine-spine-modules.ts'],
+    files: ['app/studio/page.tsx', 'components/studio/EngineSpineReadinessPanel.tsx', 'components/studio/EngineModuleAdapterCockpit.tsx', 'lib/studio/engine-spine-modules.ts'],
     combined: true,
     test: (content) => {
-      const required = ['EngineSpineReadinessPanel', 'ENGINE_SPINE_MODULES', 'adapter-needed', 'worker-held', 'Honest status', 'Next safe move']
+      const required = ['EngineSpineReadinessPanel', 'EngineModuleAdapterCockpit', 'ENGINE_SPINE_MODULES', 'adapter-needed', 'worker-held', 'Read-only adapter evidence', 'Honest status', 'Next safe move']
       return required.filter((token) => !content.includes(token)).length
     },
     limit: 0,

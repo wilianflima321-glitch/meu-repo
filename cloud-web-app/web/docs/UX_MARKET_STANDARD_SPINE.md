@@ -136,6 +136,7 @@ Studio hub must expose hidden engine systems as honest work packets instead of b
 | --- | ---: | --- |
 | `app/studio/page.tsx` | 0 | included |
 | `components/studio/EngineSpineReadinessPanel.tsx` | 0 | included |
+| `components/studio/EngineModuleAdapterCockpit.tsx` | 0 | included |
 | `lib/studio/engine-spine-modules.ts` | 0 | included |
 | `[combined]` | 0 | ok |
 

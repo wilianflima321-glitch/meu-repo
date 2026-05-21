@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Gauge, GitBranch, Layers3, ShieldCheck, type LucideIcon } from 'lucide-react'
+import EngineModuleAdapterCockpit from '@/components/studio/EngineModuleAdapterCockpit'
 import { authHeaders } from '@/lib/auth'
 import type {
   AgenticProductionState,
@@ -222,6 +223,8 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                 </div>
               ))}
             </section>
+
+            <EngineModuleAdapterCockpit compact />
 
             <section className="grid gap-6 lg:grid-cols-[1fr_420px]">
               <div className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-5">

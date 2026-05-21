@@ -81,7 +81,13 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
   }
 
   return (
-    <section className={cn('flex h-full min-h-0 flex-col bg-[color-mix(in_srgb,var(--aethel-surface-primary)_72%,transparent)]', className)}>
+    <section
+      className={cn('flex h-full min-h-0 flex-col bg-[color-mix(in_srgb,var(--aethel-surface-primary)_72%,transparent)]', className)}
+      data-evidence-source="production-state/agent-fleet"
+    >
+      <p className="sr-only">
+        Agent cockpit shows scope locks, replay evidence, read receipts, and cost posture from production-state/agent-fleet.
+      </p>
       <AgentFleetCoordinatorStrip
         projectId={currentProjectId}
         selectedAgentId={selectedAgentId}
