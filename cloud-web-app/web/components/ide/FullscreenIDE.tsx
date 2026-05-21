@@ -403,7 +403,7 @@ export default function FullscreenIDE() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center px-6 text-sm text-[var(--aethel-text-tertiary)]">
+        <div role="status" aria-live="polite" className="flex min-h-screen items-center justify-center px-6 text-sm text-[var(--aethel-text-tertiary)]">
           Loading workspace context...
         </div>
       }

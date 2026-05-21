@@ -1,6 +1,6 @@
 # Effect Cleanup Audit
 
-Generated: 2026-05-21T02:40:48.075Z
+Generated: deterministic local scan
 
 - Risky useEffect blocks: 148
 - Missing cleanup findings: 0

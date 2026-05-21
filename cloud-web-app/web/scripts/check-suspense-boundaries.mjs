@@ -32,7 +32,7 @@ if (count < minSuspense) failures.push(`Suspense boundaries below target: ${coun
 const report = [
   '# Suspense Boundaries Audit',
   '',
-  `Generated: ${new Date().toISOString()}`,
+  'Generated: deterministic local scan',
   '',
   `- Suspense boundaries: ${count}`,
   `- Target: ${minSuspense}`,

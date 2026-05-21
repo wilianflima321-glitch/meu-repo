@@ -43,7 +43,7 @@ if (actionLines > 130) failures.push(`Director action route is too large (${acti
 const report = [
   '# AI Director Real Audit',
   '',
-  `Generated: ${new Date().toISOString()}`,
+  'Generated: deterministic local scan',
   '',
   `- Director route lines: ${routeLines}`,
   `- Director action route lines: ${actionLines}`,

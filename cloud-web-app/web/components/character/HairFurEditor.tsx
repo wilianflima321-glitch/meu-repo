@@ -1,4 +1,5 @@
 'use client';
+// @aethel-heavy-async-boundary
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';

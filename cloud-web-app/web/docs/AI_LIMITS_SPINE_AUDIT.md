@@ -1,6 +1,6 @@
 # AI Limits Spine Audit
 
-Generated: 2026-05-21T03:48:31.558Z
+Generated: deterministic local scan
 
 - Central spine: lib/server/ai-core-rate-limit.ts
 - All AI routes discovered: 36

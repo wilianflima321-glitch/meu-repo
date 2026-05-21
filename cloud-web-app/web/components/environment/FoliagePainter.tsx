@@ -1,5 +1,6 @@
 'use client';
 
+// @aethel-heavy-async-boundary
 /**
  * FOLIAGE PAINTER - Aethel Engine
  *

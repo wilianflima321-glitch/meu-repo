@@ -42,6 +42,8 @@ requirePattern('app/admin/admin-ops-layout-client.tsx', /ADMIN_CONSOLIDATED_SECT
 requirePattern('app/admin/admin-ops-layout-client.tsx', /findAdminSectionForRoute/, 'admin shell breadcrumb must resolve consolidated ownership')
 requirePattern('app/admin/admin-ops-layout-client.tsx', /Command center/, 'admin shell must expose the consolidated command center')
 requirePattern('app/admin/admin-ops-layout-client.tsx', /Legacy map/, 'admin shell must hide legacy route sprawl behind an explicit compatibility disclosure')
+requirePattern('app/admin/admin-ops-layout-client.tsx', /id="admin-main-content"/, 'admin shell must expose a stable main landmark target for skip links and keyboard focus')
+requirePattern('app/admin/admin-ops-layout-client.tsx', /aria-label=\{`\$\{group\.label\} Legacy compatibility map`\}/, 'legacy compatibility disclosure must be labelled per consolidated area')
 requirePattern('app/admin/admin-ops-layout-client.tsx', /riskLane/, 'admin shell must expose risk lanes for each visible area')
 requirePattern('app/admin/admin-ops-layout-client.tsx', /evidenceStatus/, 'admin shell must expose evidence status for each visible area')
 requireFile('components/admin/AdminCommandCenterSections.tsx', 'admin command center sections must stay extracted from the route page')

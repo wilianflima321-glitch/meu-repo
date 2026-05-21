@@ -1,4 +1,4 @@
-﻿# GAP ANALYSIS: Aethel IDE vs VS Code, Unreal Engine, and AI App Builders
+# GAP ANALYSIS: Aethel IDE vs VS Code, Unreal Engine, and AI App Builders
 
 **Date:** 2026-05-03
 **Version:** 2.0

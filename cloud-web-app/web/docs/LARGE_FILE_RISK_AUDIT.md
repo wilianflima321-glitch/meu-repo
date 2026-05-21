@@ -9,6 +9,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 - Large source files: 64
 - P0 files: 0
 - P1 low-import large modules: 51
+- P1 modules with explicit triage: 51
 - Hard ceiling: 1800 lines
 - UI ceiling: 1200 lines
 - API route ceiling: 1200 lines
@@ -26,6 +27,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 - UI surfaces above 1200 lines must be split before new feature work.
 - API routes above 1200 lines must move business logic to `lib/**` modules.
 - Low-import creative/runtime modules must be wired into visible editors or archived; they cannot remain ambiguous forever.
+- Every P1 low-import module must have an explicit `wire`, `archive`, `held`, or `adapter-needed` decision in this report.
 - Engine-spine modules must state a load strategy and limitation so hidden systems do not slow public/product routes by accident.
 - New files over 1000 lines are allowed only with a test, category, and explicit extraction plan.
 
@@ -33,31 +35,87 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Lines | Category | Risk | Import hints | Recommendation |
 | --- | ---: | --- | --- | ---: | --- |
-| `lib/dialogue-cutscene-system.ts` | 1201 | foundation-runtime | P1 low-import large module | 1 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/cutscene/cutscene-system.tsx` | 1195 | creative-runtime | P1 low-import large module | 1 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/ui/ui-framework.tsx` | 1195 | ui-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/capture/capture-system.tsx` | 1193 | creative-runtime | P1 low-import large module | 1 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/inventory/inventory-system.tsx` | 1191 | foundation-runtime | P1 low-import large module | 1 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/ecs/prefab-component-system.tsx` | 1190 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/translations.ts` | 1190 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/aethel-sdk.ts` | 1181 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/networking/multiplayer-system.tsx` | 1171 | creative-runtime | P1 low-import large module | 1 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/hot-reload-system.ts` | 1166 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/advanced-input-system.ts` | 1164 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/state/game-state-manager.tsx` | 1161 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/quests/quest-system.tsx` | 1153 | foundation-runtime | P1 low-import large module | 1 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/settings/settings-system.tsx` | 1153 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/animation/animation-system.ts` | 1151 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/scene/scene-serializer.ts` | 1149 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/aaa-asset-pipeline.ts` | 1148 | foundation-runtime | P1 low-import large module | 1 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/input/controller-mapper.tsx` | 1146 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/save/save-manager.tsx` | 1144 | creative-runtime | P1 low-import large module | 1 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/onboarding-system.ts` | 1137 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/debug/debug-console.tsx` | 1112 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/input/input-manager.ts` | 1098 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/cache-system.ts` | 1095 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/terrain-engine.ts` | 1094 | foundation-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
-| `lib/engine/asset-pipeline.ts` | 1092 | creative-runtime | P1 low-import large module | 0 | Decide: wire visibly into editor/runtime or archive behind an explicit legacy boundary. |
+| `lib/dialogue-cutscene-system.ts` | 1201 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/cutscene/cutscene-system.tsx` | 1195 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/ui/ui-framework.tsx` | 1195 | ui-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/capture/capture-system.tsx` | 1193 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/inventory/inventory-system.tsx` | 1191 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/ecs/prefab-component-system.tsx` | 1190 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/translations.ts` | 1190 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/aethel-sdk.ts` | 1181 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/networking/multiplayer-system.tsx` | 1171 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/hot-reload-system.ts` | 1166 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/advanced-input-system.ts` | 1164 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/state/game-state-manager.tsx` | 1161 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/quests/quest-system.tsx` | 1153 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/settings/settings-system.tsx` | 1153 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/animation/animation-system.ts` | 1151 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/scene/scene-serializer.ts` | 1149 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/aaa-asset-pipeline.ts` | 1148 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/input/controller-mapper.tsx` | 1146 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/save/save-manager.tsx` | 1144 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/onboarding-system.ts` | 1137 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/debug/debug-console.tsx` | 1112 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/input/input-manager.ts` | 1098 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/cache-system.ts` | 1095 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/terrain-engine.ts` | 1094 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/engine/asset-pipeline.ts` | 1092 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+
+## P1 Triage Decisions
+
+| File | Decision | Target surface | Load strategy | Rationale |
+| --- | --- | --- | --- | --- |
+| `lib/dialogue-cutscene-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/cutscene/cutscene-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/ui/ui-framework.tsx` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
+| `lib/capture/capture-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/inventory/inventory-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/ecs/prefab-component-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/translations.ts` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
+| `lib/aethel-sdk.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/networking/multiplayer-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/hot-reload-system.ts` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
+| `lib/advanced-input-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/state/game-state-manager.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/quests/quest-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/settings/settings-system.tsx` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
+| `lib/animation/animation-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/scene/scene-serializer.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/aaa-asset-pipeline.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/input/controller-mapper.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/save/save-manager.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/onboarding-system.ts` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
+| `lib/debug/debug-console.tsx` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
+| `lib/input/input-manager.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/cache-system.ts` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
+| `lib/terrain-engine.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/engine/asset-pipeline.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/materials/material-editor.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/visual-script/runtime.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/fluid-simulation-system.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
+| `lib/debug/real-debug-adapter.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
+| `lib/nanite-virtualized-geometry.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/motion-matching-system.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
+| `lib/engine/scene-graph.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/engine/audio-manager.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/webxr-vr-system.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
+| `lib/ecs-dots-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/dialogue/dialogue-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/aaa-render-system.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
+| `lib/hot-reload/hot-reload-server.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
+| `lib/quest-mission-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/assets/asset-importer.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/pbr-shader-pipeline.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
+| `lib/ray-tracing.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
+| `lib/ai-audio-engine.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/events/event-bus-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/terrain/terrain-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/extensions/extension-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/audio/spatial-audio-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/debug/object-inspector.tsx` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
+| `lib/debug/profiler-system.tsx` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
+| `lib/physics/physics-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/volumetric-clouds.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 
 ## Full Inventory
 

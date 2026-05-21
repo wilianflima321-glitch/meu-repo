@@ -1,4 +1,4 @@
-﻿# Storybook — Aethel Design System
+# Storybook — Aethel Design System
 
 Storybook hosts visual documentation and axe-core a11y checks for every
 primitive exported under `components/**`.

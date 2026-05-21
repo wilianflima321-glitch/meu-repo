@@ -1,5 +1,6 @@
 'use client';
 
+// @aethel-heavy-async-boundary
 import { logger } from '@/lib/observability/logger';
 /**
  * AETHEL ENGINE - Audio Preview System

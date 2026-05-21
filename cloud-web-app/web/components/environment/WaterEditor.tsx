@@ -1,5 +1,6 @@
 'use client';
 
+// @aethel-heavy-async-boundary
 /**
  * WATER EDITOR - Aethel Engine
  *

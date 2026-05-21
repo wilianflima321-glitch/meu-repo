@@ -188,7 +188,7 @@ const groupedCounts = classifiedRoutes.reduce((acc, item) => {
 const report = [
   '# AI Limits Spine Audit',
   '',
-  `Generated: ${new Date().toISOString()}`,
+  'Generated: deterministic local scan',
   '',
   `- Central spine: ${spineFile}`,
   `- All AI routes discovered: ${discoveredRoutes.length}`,

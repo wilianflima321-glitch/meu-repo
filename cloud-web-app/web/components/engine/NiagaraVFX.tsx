@@ -1,4 +1,5 @@
 'use client';
+// @aethel-heavy-async-boundary
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   ReactFlow,

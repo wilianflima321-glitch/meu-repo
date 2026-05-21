@@ -8,13 +8,13 @@ const EXTENSIONS = new Set(['.ts', '.tsx'])
 const ignoreDirs = new Set(['node_modules', '.next', 'dist', 'build'])
 
 const BUDGETS = {
-  threeDirect: 90,
-  reactThreeFiberDirect: 25,
-  reactThreeDreiDirect: 22,
-  monacoEditorDirect: 33,
-  monacoReactDirect: 6,
-  framerMotionDirect: 25,
-  dynamicImportsMin: 55,
+  threeDirect: 86,
+  reactThreeFiberDirect: 19,
+  reactThreeDreiDirect: 17,
+  monacoEditorDirect: 6,
+  monacoReactDirect: 5,
+  framerMotionDirect: 23,
+  dynamicImportsMin: 80,
 }
 
 const HEAVY_ASYNC_BOUNDARY_MARKER = '@aethel-heavy-async-boundary'

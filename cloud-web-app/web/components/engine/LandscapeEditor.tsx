@@ -1,5 +1,6 @@
 'use client';
 
+// @aethel-heavy-async-boundary
 /**
  * Landscape/Terrain Editor - Editor de Terrenos Profissional
  *

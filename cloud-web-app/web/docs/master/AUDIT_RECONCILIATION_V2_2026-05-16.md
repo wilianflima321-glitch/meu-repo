@@ -1,4 +1,4 @@
-﻿# Audit Reconciliation V2 - 2026-05-16
+# Audit Reconciliation V2 - 2026-05-16
 
 This note reconciles the refreshed end-to-end audit with the current working tree. It is intentionally short: the goal is direction for agents, not another archive pile.
 

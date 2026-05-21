@@ -1,8 +1,8 @@
 # AI Director Real Audit
 
-Generated: 2026-05-20T12:23:47.702Z
+Generated: deterministic local scan
 
-- Director route lines: 46
-- Director action route lines: 43
+- Director route lines: 55
+- Director action route lines: 55
 - Required modes: real_llm, provider_unavailable, legacy_heuristic_dev_only
 - Failures: 0

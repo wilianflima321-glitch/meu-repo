@@ -81,7 +81,7 @@ for (const root of scanRoots) {
 const report = [
   '# Effect Cleanup Audit',
   '',
-  `Generated: ${new Date().toISOString()}`,
+  'Generated: deterministic local scan',
   '',
   `- Risky useEffect blocks: ${riskyEffects}`,
   `- Missing cleanup findings: ${findings.length}`,

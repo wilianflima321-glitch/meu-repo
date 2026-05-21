@@ -1,6 +1,6 @@
 # Suspense Boundaries Audit
 
-Generated: 2026-05-20T12:12:07.875Z
+Generated: deterministic local scan
 
 - Suspense boundaries: 31
 - Target: 30

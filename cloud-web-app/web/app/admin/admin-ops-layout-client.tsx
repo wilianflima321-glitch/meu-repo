@@ -319,7 +319,7 @@ function NavGroupSection({ group, isCollapsed }: { group: NavGroup; isCollapsed?
             </Link>
           )}
           {group.legacyItems.length > 0 && (
-            <details className="rounded-lg px-2 py-1">
+            <details className="rounded-lg px-2 py-1" aria-label={`${group.label} Legacy compatibility map`}>
               <summary className="cursor-pointer text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
                 Legacy map ({group.legacyItems.length})
               </summary>
@@ -532,7 +532,7 @@ export default function AdminOpsLayout({ children }: { children: React.ReactNode
             systemStatus={systemStatus}
             quickStats={quickStats}
           />
-          <main className="flex-1 overflow-auto p-6">{children}</main>
+          <main id="admin-main-content" className="flex-1 overflow-auto p-6" tabIndex={-1}>{children}</main>
           <footer className="flex h-8 shrink-0 items-center justify-between border-t border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] px-4 text-[11px] text-[var(--aethel-text-tertiary)]">
             <span>Aethel Admin v2.1</span>
             <span className="flex items-center gap-1">

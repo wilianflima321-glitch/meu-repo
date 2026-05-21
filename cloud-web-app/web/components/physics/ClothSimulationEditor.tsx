@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary
 
 'use client';
 

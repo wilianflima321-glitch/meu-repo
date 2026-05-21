@@ -1,6 +1,6 @@
 # Editor Performance Risk Audit
 
-Generated: 2026-05-21T02:40:43.305Z
+Generated: deterministic local scan
 
 - Target files: 5
 - Failures: 0

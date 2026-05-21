@@ -32,7 +32,7 @@ for (const target of targets) {
 const report = [
   '# Editor Performance Risk Audit',
   '',
-  `Generated: ${new Date().toISOString()}`,
+  'Generated: deterministic local scan',
   '',
   `- Target files: ${targets.length}`,
   `- Failures: ${failures.length}`,
