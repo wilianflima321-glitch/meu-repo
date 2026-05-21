@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: loaded only through VRPreview dynamic imports.
+
 import React, { Suspense, useState, useEffect, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment } from '@react-three/drei';

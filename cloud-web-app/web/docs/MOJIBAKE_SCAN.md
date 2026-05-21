@@ -1,7 +1,7 @@
 # MOJIBAKE_SCAN.md
 Generated: deterministic local scan
 
-- Files scanned: 1925
+- Files scanned: 1929
 - Findings: 0
 
 ## Findings

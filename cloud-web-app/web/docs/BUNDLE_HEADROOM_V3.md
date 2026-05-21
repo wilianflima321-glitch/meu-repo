@@ -10,6 +10,7 @@ Aethel should feel premium before the user reaches the heavy editor. Public, das
 
 - Asset preview is lazy: `ContentBrowser` now loads `AssetPreviewPanel` only when the preview pane is visible.
 - Animated AI feedback is lazy: dashboard streaming thoughts, director notes, and ambient AI suggestions load behind explicit dynamic boundaries.
+- Browser viewport is lazy: `AethelViewport3D` now loads the R3F scene canvas only when the Browser runtime is selected.
 - Studio route editors remain route-level chunks: Level, Scene, Material, Terrain, Fluid, and Rig editors are marked as heavy async boundaries because their routes already load them through `next/dynamic`.
 - Bundle budgets are tighter: direct imports for `three`, R3F, drei, Monaco, and Framer now have real headroom instead of passing at the edge.
 
@@ -23,6 +24,6 @@ Linear, Vercel, Cursor, and Runway keep their first interaction focused. Aethel'
 
 ## Remaining debt
 
-- `ContentBrowserConnected`, `WorldOutliner`, and several viewport helpers still import 3D primitives directly because they are runtime surfaces. They need virtualization and route-level evidence before any further split.
+- `ContentBrowserConnected`, `WorldOutliner`, and several editor `.parts` files still import 3D primitives directly because they are runtime surfaces. They need virtualization and route-level evidence before any further split.
 - Monaco direct imports remain intentionally held in IDE/editor-specific surfaces.
 - Framer Motion still exists in several UI primitives. Those should move toward a smaller motion wrapper only after interaction quality is verified.

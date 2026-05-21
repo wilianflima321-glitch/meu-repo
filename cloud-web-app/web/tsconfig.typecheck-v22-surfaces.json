@@ -66,7 +66,16 @@
     "components/materials/MaterialEditor.tsx",
     "components/terrain/TerrainSculptingEditor.tsx",
     "components/physics/FluidSimulationEditor.tsx",
-    "components/character/ControlRigEditor.tsx"
+    "components/character/ControlRigEditor.tsx",
+    "components/viewport/ViewportSceneCanvas.tsx",
+    "components/viewport/ViewportChrome.tsx",
+    "components/viewport/ViewportCameraPresetApplier.tsx",
+    "components/viewport/viewport-camera-presets.ts",
+    "components/viewport/gizmos/TransformGizmoProfessional.tsx",
+    "components/engine/GameViewport.tsx",
+    "components/VRPreview.tsx",
+    "components/viewport/ViewportRuntimeDepthStatus.tsx",
+    "components/viewport/viewport-model.ts"
   ],
   "exclude": [
     "node_modules",

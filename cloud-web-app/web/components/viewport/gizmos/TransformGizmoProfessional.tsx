@@ -1,5 +1,7 @@
 'use client'
 
+// @aethel-heavy-async-boundary: loaded only inside the dynamic viewport scene canvas.
+
 import { TransformControls } from '@react-three/drei'
 import type { ReactElement } from 'react'
 import { MathUtils } from 'three'

@@ -1,17 +1,17 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 1864
+- Files scanned: 1867
 - Failures: 0
 
 ## Counts
-- threeDirect: 78 (max 80)
-- reactThreeFiberDirect: 11 (max 12)
-- reactThreeDreiDirect: 9 (max 10)
+- threeDirect: 75 (max 76)
+- reactThreeFiberDirect: 8 (max 9)
+- reactThreeDreiDirect: 6 (max 7)
 - monacoEditorDirect: 3 (max 4)
 - monacoReactDirect: 4 (max 4)
 - framerMotionDirect: 18 (max 19)
-- dynamicImportsMin: 251 (min 90)
+- dynamicImportsMin: 253 (min 95)
 
 ## Top Offenders
 ### threeDirect
@@ -33,35 +33,29 @@ Generated: deterministic local scan
 - components/scene-editor/GameSimulation.tsx (1)
 - components/scene-editor/scene-editor-models.ts (1)
 - components/terrain/TerrainSculptingEditor.parts.tsx (1)
-- components/viewport/gizmos/TransformGizmoProfessional.tsx (1)
-- components/viewport/ViewportCameraPresetApplier.tsx (1)
-- components/viewport/ViewportSceneCanvas.tsx (1)
 - lib/aaa-asset-pipeline.ts (1)
 - lib/aaa-material-system.ts (1)
 - lib/aaa-render-system.ts (1)
 - lib/aaa-renderer-impl.ts (1)
+- lib/ai/behavior-tree-system.tsx (1)
+- lib/ai-content-generation.ts (1)
+- lib/animation/animation-system.ts (1)
 ### reactThreeFiberDirect
 - components/character/HairFurEditor.parts.tsx (1)
-- components/engine/GameViewport.tsx (1)
 - components/engine/NiagaraVFXPanels.tsx (1)
 - components/physics/ClothSimulationPanels.tsx (1)
 - components/physics/DestructionEditor.tsx (1)
 - components/physics/FluidSimulationPanels.tsx (1)
 - components/scene-editor/GameSimulation.tsx (1)
 - components/terrain/TerrainSculptingEditor.parts.tsx (1)
-- components/viewport/ViewportCameraPresetApplier.tsx (1)
-- components/viewport/ViewportSceneCanvas.tsx (1)
 - lib/camera/camera-system.tsx (1)
 ### reactThreeDreiDirect
 - components/character/ControlRigEditor.parts.tsx (1)
 - components/character/HairFurEditor.parts.tsx (1)
-- components/engine/GameViewport.tsx (1)
 - components/physics/ClothSimulationPanels.tsx (1)
 - components/physics/DestructionEditor.tsx (1)
 - components/physics/FluidSimulationPanels.tsx (1)
 - components/terrain/TerrainSculptingEditor.parts.tsx (1)
-- components/viewport/gizmos/TransformGizmoProfessional.tsx (1)
-- components/viewport/ViewportSceneCanvas.tsx (1)
 ### monacoEditorDirect
 - components/editor/GhostTextDecorations.tsx (1)
 - lib/collaboration/collaboration-manager.ts (1)
@@ -108,11 +102,15 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - components/physics/ClothSimulationEditor.tsx (1)
 - components/physics/FluidSimulationEditor.tsx (1)
 - components/scene-editor/SceneEditor.tsx (1)
+- components/viewport/gizmos/TransformGizmoProfessional.tsx (1)
+- components/viewport/ViewportCameraPresetApplier.tsx (1)
+- components/viewport/ViewportSceneCanvas.tsx (1)
 ### reactThreeFiberDirect
 - components/assets/AssetPreviewPanel.tsx (1)
 - components/character/ControlRigEditor.tsx (1)
 - components/character/FacialAnimationEditor.tsx (1)
 - components/character/HairFurEditor.tsx (1)
+- components/engine/GameViewport.tsx (1)
 - components/engine/LandscapeEditor.tsx (1)
 - components/engine/LevelEditor.tsx (1)
 - components/engine/NiagaraVFX.tsx (1)
@@ -124,11 +122,14 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - components/physics/FluidSimulationEditor.tsx (1)
 - components/scene-editor/SceneEditor.tsx (1)
 - components/terrain/TerrainSculptingEditor.tsx (1)
+- components/viewport/ViewportCameraPresetApplier.tsx (1)
+- components/viewport/ViewportSceneCanvas.tsx (1)
 ### reactThreeDreiDirect
 - components/assets/AssetPreviewPanel.tsx (1)
 - components/character/ControlRigEditor.tsx (1)
 - components/character/FacialAnimationEditor.tsx (1)
 - components/character/HairFurEditor.tsx (1)
+- components/engine/GameViewport.tsx (1)
 - components/engine/LandscapeEditor.tsx (1)
 - components/engine/LevelEditor.tsx (1)
 - components/engine/NiagaraVFX.tsx (1)
@@ -140,6 +141,8 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - components/physics/FluidSimulationEditor.tsx (1)
 - components/scene-editor/SceneEditor.tsx (1)
 - components/terrain/TerrainSculptingEditor.tsx (1)
+- components/viewport/gizmos/TransformGizmoProfessional.tsx (1)
+- components/viewport/ViewportSceneCanvas.tsx (1)
 ### monacoEditorDirect
 - none
 ### monacoReactDirect

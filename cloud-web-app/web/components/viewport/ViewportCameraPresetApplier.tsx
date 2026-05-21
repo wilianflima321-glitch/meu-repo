@@ -1,20 +1,14 @@
 'use client'
 
+// @aethel-heavy-async-boundary: loaded only inside the dynamic viewport scene canvas.
+
 import { useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import type { ViewportCameraPreset } from '@/components/viewport/viewport-camera-presets'
 
-export type ViewportCameraPreset = 'perspective' | 'top' | 'front' | 'side'
-
-export const VIEWPORT_CAMERA_PRESETS: ReadonlyArray<{
-  id: ViewportCameraPreset
-  label: string
-}> = [
-  { id: 'perspective', label: 'Persp' },
-  { id: 'top', label: 'Top' },
-  { id: 'front', label: 'Front' },
-  { id: 'side', label: 'Side' },
-]
+export { VIEWPORT_CAMERA_PRESETS } from '@/components/viewport/viewport-camera-presets'
+export type { ViewportCameraPreset } from '@/components/viewport/viewport-camera-presets'
 
 export function CameraPresetApplier({ preset }: { preset: ViewportCameraPreset }) {
   const { camera, invalidate } = useThree()

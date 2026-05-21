@@ -9,24 +9,24 @@ import {
   ViewportGizmoMemoryChip,
   ViewportTopToolbar,
 } from '@/components/viewport/ViewportChrome'
-import { ViewportScene } from '@/components/viewport/ViewportSceneCanvas'
 import {
   type ViewportCameraPreset,
-} from '@/components/viewport/ViewportCameraPresetApplier'
-import { buildGizmoTransformOperation, type GizmoTransformOperation } from '@/lib/viewport/gizmo-transform-operation'
+} from '@/components/viewport/viewport-camera-presets'
+import { ViewportRuntimeDepthStatus } from '@/components/viewport/ViewportRuntimeDepthStatus'
 import {
-  buildGizmoTransformPersistenceChip,
-  type GizmoTransformPersistenceStatus,
-} from '@/lib/viewport/gizmo-transform-persistence'
+  viewportSeedObjects,
+  type AethelViewport3DProps,
+  type ViewportRenderTarget,
+  type ViewportSceneObject,
+} from '@/components/viewport/viewport-model'
+import { buildGizmoTransformOperation } from '@/lib/viewport/gizmo-transform-operation'
+import { buildGizmoTransformPersistenceChip } from '@/lib/viewport/gizmo-transform-persistence'
 import {
   buildGizmoEliteControlState,
   buildGizmoInspectorSummary,
   type GizmoAxisPlaneConstraint,
   type GizmoPivotMode,
 } from '@/lib/viewport/gizmo-elite-controls'
-import {
-  type ViewportAssetImportMetadata,
-} from '@/lib/viewport/viewport-asset-import'
 import { isEditableViewportKeyboardTarget } from '@/lib/viewport/viewport-keyboard-targets'
 import { parseAiViewportCommand } from '@/components/viewport/viewportAiCommand'
 import { useRenderPipeline } from '@/lib/hooks/useRenderPipeline'
@@ -41,95 +41,24 @@ const PixelStreamView = dynamic(() => import('@/components/streaming/pixel-strea
   ),
 })
 
-export type ViewportTransformMode = 'translate' | 'rotate' | 'scale'
-export type ViewportTransformSpace = 'world' | 'local'
-export type ViewportCreativeMode = 'game' | 'film'
-type ViewportRenderTarget = 'browser' | 'local' | 'cloud'
+const ViewportScene = dynamic(() => import('@/components/viewport/ViewportSceneCanvas').then((mod) => mod.ViewportScene), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)] text-sm text-[var(--aethel-text-secondary)]">
+      Preparing browser viewport...
+    </div>
+  ),
+})
 
-export type ViewportSceneObject = {
-  id: string
-  name: string
-  type: 'mesh' | 'light' | 'camera'
-  geometry?: 'box' | 'sphere' | 'capsule' | 'cylinder' | 'plane'
-  color: string
-  position: [number, number, number]
-  rotation: [number, number, number]
-  scale: [number, number, number]
-  locked?: boolean
-  visible?: boolean
-  asset?: ViewportAssetImportMetadata
-}
-
-export type AethelViewport3DProps = {
-  objects: ViewportSceneObject[]
-  selectedIds: string[]
-  transformMode: ViewportTransformMode
-  transformSpace: ViewportTransformSpace
-  snapEnabled: boolean
-  creativeMode: ViewportCreativeMode
-  renderMode?: 'draft' | 'cinematic'
-  isPlaying: boolean
-  currentTime: number
-  duration: number
-  vfxGlowIntensity?: number
-  abilityAccentColor?: string | null
-  abilityLabel?: string | null
-  facialExpressionIntensity?: number
-  hairHighlightColor?: string | null
-  hairVolumeIntensity?: number
-  onTogglePlayTest: () => void
-  onObjectsChange: (objects: ViewportSceneObject[]) => void
-  onSelectionChange: (ids: string[]) => void
-  onTransformModeChange: (mode: ViewportTransformMode) => void
-  onTransformSpaceChange: (space: ViewportTransformSpace) => void
-  onSnapEnabledChange: (enabled: boolean) => void
-  onAIAction?: (action: string) => void
-  onGizmoTransformOperation?: (operation: GizmoTransformOperation) => void
-  gizmoConstraint?: GizmoAxisPlaneConstraint
-  gizmoPivotMode?: GizmoPivotMode
-  onGizmoConstraintChange?: (constraint: GizmoAxisPlaneConstraint) => void
-  onGizmoPivotModeChange?: (pivotMode: GizmoPivotMode) => void
-  gizmoMemoryStatus?: GizmoTransformPersistenceStatus
-  gizmoMemoryLabel?: string | null
-  gizmoMemoryError?: string | null
-  gizmoMemoryCanPersist?: boolean
-  assetImportStatus?: string
-  onImportAssets?: (files: File[]) => void
-}
-
-const defaultObjects: ViewportSceneObject[] = [
-  {
-    id: 'airlock-shell',
-    name: 'Airlock Shell',
-    type: 'mesh',
-    geometry: 'box',
-    color: 'rgb(125, 211, 252)',
-    position: [0, 0.55, 0],
-    rotation: [0, 0.35, 0],
-    scale: [1.8, 1.1, 1.2],
-    visible: true,
-  },
-  {
-    id: 'camera-rig',
-    name: 'Camera Rig',
-    type: 'camera',
-    color: 'rgb(167, 139, 250)',
-    position: [2.2, 1.5, 2.4],
-    rotation: [-0.35, 0.72, 0],
-    scale: [1, 1, 1],
-    visible: true,
-  },
-  {
-    id: 'key-light',
-    name: 'Key Light',
-    type: 'light',
-    color: 'rgb(251, 191, 36)',
-    position: [1.6, 2.2, 1.8],
-    rotation: [0, 0, 0],
-    scale: [1, 1, 1],
-    visible: true,
-  },
-]
+export type {
+  AethelViewport3DProps,
+  ViewportCreativeMode,
+  ViewportRenderTarget,
+  ViewportSceneObject,
+  ViewportTransformMode,
+  ViewportTransformSpace,
+} from '@/components/viewport/viewport-model'
+export { viewportSeedObjects }
 
 export { SceneViewportOutliner } from '@/components/viewport/SceneViewportOutliner'
 export { SceneViewportInspector } from '@/components/viewport/SceneViewportInspector'
@@ -337,46 +266,15 @@ export function AethelViewport3D({
 
       <ViewportGizmoMemoryChip chip={gizmoMemoryChip} />
 
-      <div
-        className="absolute bottom-4 left-4 z-20 max-w-[360px] rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[rgba(7,12,20,0.82)] px-3 py-2 text-xs shadow-[0_18px_44px_rgba(0,0,0,0.32)] backdrop-blur-md"
-        role="status"
-        aria-label="Viewport render depth status"
-      >
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-primary-light)]">
-            {renderPipeline.pipelineConfig.type}
-          </span>
-          <span className="text-[var(--aethel-text-secondary)]">
-            {renderPipeline.quality.toUpperCase()} / {webGpuAvailable ? 'WebGPU ready' : 'WebGL2 fallback'}
-          </span>
-        </div>
-        <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-quaternary)]">
-          {currentRuntimeMode.detail}
-          {currentRuntimeMode.fallbackReason ? ` ${currentRuntimeMode.fallbackReason}` : ''}
-        </p>
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {runtimeModes.map((mode) => (
-            <button
-              key={mode.id}
-              type="button"
-              onClick={() => {
-                if (mode.selectable) setRenderTarget(mode.id)
-              }}
-              disabled={!mode.selectable}
-              title={!mode.selectable ? mode.fallbackReason : mode.costNote}
-              className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition ${
-                renderTarget === mode.id
-                  ? 'border-[color-mix(in_srgb,var(--aethel-info)_36%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)] text-[var(--aethel-info-light)]'
-                  : mode.selectable
-                    ? 'border-[var(--aethel-border-subtle)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-                    : 'cursor-not-allowed border-[var(--aethel-border-subtle)] text-[var(--aethel-text-quaternary)] opacity-65'
-              }`}
-            >
-              {mode.label} · {mode.badge}
-            </button>
-          ))}
-        </div>
-      </div>
+      <ViewportRuntimeDepthStatus
+        pipelineType={renderPipeline.pipelineConfig.type}
+        quality={renderPipeline.quality}
+        webGpuAvailable={webGpuAvailable}
+        currentRuntimeMode={currentRuntimeMode}
+        runtimeModes={runtimeModes}
+        renderTarget={renderTarget}
+        onRenderTargetChange={setRenderTarget}
+      />
 
       <ViewportAICommandPanel
         creativeMode={creativeMode}
@@ -410,7 +308,7 @@ export function AethelViewport3D({
         </div>
       ) : (
         <ViewportScene
-          objects={objects.length > 0 ? objects : defaultObjects}
+          objects={objects.length > 0 ? objects : viewportSeedObjects}
           selectedIds={selectedIds}
           transformMode={transformMode}
           transformSpace={transformSpace}
@@ -436,5 +334,3 @@ export function AethelViewport3D({
     </div>
   )
 }
-
-export const viewportSeedObjects = defaultObjects

@@ -1,12 +1,15 @@
 'use client'
 
+// @aethel-heavy-async-boundary: loaded by AethelViewport3D only when Browser runtime is selected.
+
 import { Suspense, useCallback, useMemo, useRef } from 'react'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
 import { Environment, GizmoHelper, GizmoViewport, Grid, Html as DreiHtml, Line, OrbitControls } from '@react-three/drei'
 import { EffectComposer, Outline, Select, Selection } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import TransformGizmoProfessional from '@/components/viewport/gizmos/TransformGizmoProfessional'
-import { CameraPresetApplier, type ViewportCameraPreset } from '@/components/viewport/ViewportCameraPresetApplier'
+import { CameraPresetApplier } from '@/components/viewport/ViewportCameraPresetApplier'
+import type { ViewportCameraPreset } from '@/components/viewport/viewport-camera-presets'
 import type {
   AethelViewport3DProps,
   ViewportSceneObject,

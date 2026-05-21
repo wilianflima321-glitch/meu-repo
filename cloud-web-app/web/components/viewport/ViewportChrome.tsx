@@ -4,7 +4,7 @@ import { Camera, Film, Move3D, RotateCw, Scale3D, Sparkles, Target, Wand2 } from
 import {
   VIEWPORT_CAMERA_PRESETS,
   type ViewportCameraPreset,
-} from '@/components/viewport/ViewportCameraPresetApplier'
+} from '@/components/viewport/viewport-camera-presets'
 import type {
   ViewportCreativeMode,
   ViewportTransformMode,
