@@ -1,4 +1,8 @@
 import type { CreativePlanningArtifact, PlayableGameGenre, PlayableGameScope } from '@/lib/production/game-scope-orchestrator'
+import {
+  buildDeepGameProductionBible,
+  type DeepProductionBible,
+} from '@/lib/production/deep-game-production-bible'
 
 export type ProductionBibleSectionId =
   | 'story'
@@ -24,6 +28,7 @@ export interface ProductionBibleSnapshot {
   compactSummary: string
   pillars: string[]
   sections: ProductionBibleSection[]
+  deepBible: DeepProductionBible
   firstUserDecision: string
   hiddenDepthCount: number
   nextAction: string
@@ -110,6 +115,7 @@ export function buildGameProductionBible(input: {
   genreLabel: string
   userIntent: string
   creativeArtifacts: CreativePlanningArtifact[]
+  evidenceRefs?: string[]
 }): ProductionBibleSnapshot {
   const sections = uniqueSections(
     input.creativeArtifacts
@@ -118,6 +124,13 @@ export function buildGameProductionBible(input: {
   )
   const pillars = sections.slice(0, 5).map((section) => section.label)
   const hiddenDepthCount = Math.max(0, input.creativeArtifacts.length - sections.length)
+  const deepBible = buildDeepGameProductionBible({
+    scope: input.scope,
+    genre: input.genre,
+    genreLabel: input.genreLabel,
+    userIntent: input.userIntent,
+    evidenceRefs: input.evidenceRefs,
+  })
 
   return {
     id: `${input.genre}:${input.scope}:production-bible:v1`,
@@ -125,8 +138,9 @@ export function buildGameProductionBible(input: {
     compactSummary: `${input.genreLabel}: ${input.userIntent}`,
     pillars,
     sections,
+    deepBible,
     firstUserDecision: scopeDecision(input.scope),
-    hiddenDepthCount,
+    hiddenDepthCount: hiddenDepthCount + deepBible.scenes.length + deepBible.agentHandoffs.length,
     nextAction: 'Keep the visible UI compact; expand details only when the user asks agents to execute that lane.',
     humanReviewRequired: true,
   }

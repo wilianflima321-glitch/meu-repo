@@ -339,6 +339,9 @@ export default function StudioMissionControl() {
               <p className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
                 Production bible: {gameScopePlan.productionBible.pillars.slice(0, 4).join(', ')}. Decision: {gameScopePlan.productionBible.firstUserDecision}
               </p>
+              <p className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                Deep bible: {gameScopePlan.productionBible.deepBible.scenes.length} scene beats, {gameScopePlan.productionBible.deepBible.characters.length} character contracts, {gameScopePlan.productionBible.deepBible.evidenceModel.requiredEvidence.length} gates.
+              </p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {gameScopePlan.creativeArtifacts.slice(0, 7).map((artifact) => (
                   <span key={artifact} className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]">

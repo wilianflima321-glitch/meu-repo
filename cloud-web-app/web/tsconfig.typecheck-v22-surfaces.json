@@ -36,6 +36,7 @@
     "lib/production/curated-asset-sourcing.ts",
     "lib/production/ai-quality-orchestrator.ts",
     "lib/production/game-genre-packs.ts",
+    "lib/production/deep-game-production-bible.ts",
     "lib/production/game-production-bible.ts",
     "lib/production/game-scope-orchestrator.ts",
     "lib/production/game-playtest-spine.ts",

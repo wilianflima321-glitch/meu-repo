@@ -314,6 +314,7 @@ export function buildGameScopePlan(input: BuildGameScopePlanInput = {}): GameSco
     genreLabel,
     userIntent,
     creativeArtifacts,
+    evidenceRefs,
   })
   const playtestSpine = buildGamePlaytestSpinePlan({
     genre,

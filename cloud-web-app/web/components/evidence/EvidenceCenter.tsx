@@ -273,6 +273,9 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                       <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
                         Bible pillars: {productionBiblePlan.productionBible.pillars.slice(0, 5).join(', ')}. {productionBiblePlan.productionBible.firstUserDecision}
                       </p>
+                      <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
+                        Deep bible: {productionBiblePlan.productionBible.deepBible.scenes.length} scene beats, {productionBiblePlan.productionBible.deepBible.characters.length} character contracts, {productionBiblePlan.productionBible.deepBible.evidenceModel.requiredEvidence.length} gates.
+                      </p>
                     </div>
                     <div className="mt-3 grid gap-2 sm:grid-cols-2">
                       {productionBiblePlan.productionGraphs.slice(0, 6).map((graph) => (
