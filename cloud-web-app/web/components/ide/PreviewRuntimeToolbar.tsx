@@ -9,8 +9,6 @@ import type {
 } from '@/components/preview/previewDeployTrust'
 import type { PreviewRuntimeHealthStatus, PreviewRuntimeReadinessResponse } from '@/lib/preview/runtime-manager'
 
-import { ptBR } from '@/lib/locales/pt-BR'
-
 type Props = {
   previewRuntimeUrl: string | null
   runtimeHealthStatus: PreviewRuntimeHealthStatus
@@ -58,6 +56,38 @@ type Props = {
   onOpenDeployStatus: () => void
   onOpenDeploySite: () => void
 }
+
+
+const PREVIEW_RUNTIME_COPY = {
+  runtime: 'Runtime',
+  externalServer: 'External server',
+  inlineFallback: 'Inline fallback',
+  health: 'Health',
+  strategy: 'Strategy',
+  nextAction: 'Next action',
+  openNewTab: 'Open preview in a new tab',
+  manualUrl: 'Manual runtime URL',
+  autoDetect: 'Auto-detect',
+  provisionManaged: 'Provision managed runtime',
+  technicalDetails: 'Technical details',
+} as const
+
+const PREVIEW_COMMON_COPY = {
+  status: {
+    checking: 'Checking',
+    reachable: 'Reachable',
+    idle: 'Idle',
+    unavailable: 'Unavailable',
+    ready: 'Ready',
+    partial: 'Partial',
+    blocked: 'Blocked',
+  },
+  actions: {
+    apply: 'Apply',
+    sync: 'Sync',
+    revalidate: 'Revalidate',
+  },
+} as const
 
 function CompactMetric({
   label,
@@ -138,8 +168,8 @@ export default function PreviewRuntimeToolbar({
   onOpenDeployStatus,
   onOpenDeploySite,
 }: Props) {
-  const t = ptBR.ide.preview
-  const tc = ptBR.common
+  const t = PREVIEW_RUNTIME_COPY
+  const tc = PREVIEW_COMMON_COPY
 
   const reachableCandidates = runtimeReadiness?.metadata?.localDiscovery?.reachableCandidates ?? 0
   const totalCandidates = runtimeReadiness?.metadata?.localDiscovery?.totalCandidates ?? 0
@@ -246,8 +276,8 @@ export default function PreviewRuntimeToolbar({
       : deployStatus === 'ready'
         ? 'Public deploy ready to share.'
         : deployStatusHref
-          ? 'Status do deploy acompanhado na mesma lane.'
-          : 'Publique quando precisar validar share e parity fora do runtime local.'
+          ? 'Deploy status is tracked in the same lane.'
+          : 'Publish when you need shareable validation and parity outside the local runtime.'
   const qaBlockerSummary =
     deployReadiness?.qaGate && !deployReadiness.qaGate.ok
       ? deployReadiness.qaGate.blockers.slice(0, 2).join(', ')
@@ -311,7 +341,7 @@ export default function PreviewRuntimeToolbar({
               </div>
               <div className="mt-1 text-[10px] leading-4 text-[var(--aethel-text-tertiary)]">
                 {previewRuntimeUrl
-                  ? 'Valide health, mantenha o sync e promova a mesma lane para review sem perder contexto.'
+                  ? 'Validate health, keep sync current, and promote the same lane to review without losing context.'
                   : 'Use the recommended action to discover or provision real parity when the artifact needs network, device, or deploy.'}
               </div>
               {runtimeLaneHint ? (

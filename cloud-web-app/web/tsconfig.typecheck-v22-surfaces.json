@@ -91,7 +91,9 @@
     "components/editor/EditorScaleReadinessBadge.tsx",
     "components/engine/WorldOutliner.tsx",
     "components/engine/DetailsPanel.tsx",
-    "components/engine/EngineContentBrowser.tsx"
+    "components/engine/EngineContentBrowser.tsx",
+    "components/extensions/ExtensionManager.tsx",
+    "components/ide/PreviewRuntimeToolbar.tsx"
   ],
   "exclude": [
     "node_modules",

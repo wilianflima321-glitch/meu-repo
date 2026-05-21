@@ -1,19 +1,17 @@
 'use client'
 
-import { ptBR } from '@/lib/locales/pt-BR'
-
 /**
- * Gerenciador de extensions - Marketplace e gestão
- * Inspirado no painel de extensions do VS Code
+ * Extension manager - Marketplace and governance
+ * Inspired by the VS Code extensions panel.
  *
  * Features:
- * - Explorar marketplace
+ * - Explore marketplace
  * - Search extensions
- * - Instalar/Desinstalar
- * - Ativar/Desactiver
- * - Details da extension
- * - Recomendações
- * - Categorias e filtros
+ * - Install/uninstall
+ * - Enable/disable
+ * - Extension details
+ * - Recommendations
+ * - Categories and filters
  */
 
 import { useState, useCallback, useMemo } from 'react'
@@ -59,6 +57,21 @@ import {
 } from 'lucide-react'
 import { useExtensions, type Extension as HookExtension } from '@/lib/hooks/useExtensions'
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs'
+
+const EXTENSION_MANAGER_COPY = {
+  searchPlaceholder: 'Search extensions',
+  installed: 'Installed',
+  marketplace: 'Marketplace',
+  recommended: 'Recommended',
+  showDisabled: 'Show disabled',
+  hideDisabled: 'Hide disabled',
+  uninstallConfirm: 'Uninstall extension?',
+  uninstallMessage: (name: string) => `Uninstall ${name}? This keeps workspace files intact.`,
+  actions: {
+    cancel: 'Cancel',
+    delete: 'Delete',
+  },
+} as const
 
 // ============= Types =============
 
@@ -168,8 +181,8 @@ export default function ExtensionManager({
   onDesactiver: propOnDisable,
   onOpenSettings,
 }: ExtensionManagerProps) {
-  const t = ptBR.extensions.manager;
-  const tc = ptBR.common;
+  const t = EXTENSION_MANAGER_COPY
+  const tc = EXTENSION_MANAGER_COPY
 
   // Use the hook to fetch real extensions from API
   const {
@@ -262,13 +275,13 @@ export default function ExtensionManager({
 
   // Handle uninstall
   const handleUninstall = useCallback(async (ext: Extension) => {
-    const shouldDesinstalar = await openConfirmDialog({
+    const shouldUninstall = await openConfirmDialog({
       title: t.uninstallConfirm,
       message: t.uninstallMessage(ext.displayName),
       confirmText: tc.actions.delete,
       cancelText: tc.actions.cancel,
     })
-    if (!shouldDesinstalar) return
+    if (!shouldUninstall) return
     setIsLoading(ext.id)
     try {
       // Use prop callback if provided, otherwise use API
@@ -374,9 +387,9 @@ export default function ExtensionManager({
           </button>
         </div>
 
-        {/* Categorias */}
+        {/* Categories */}
         <div className="flex-1 overflow-y-auto p-2 border-t border-[var(--aethel-border-primary)]">
-          <div className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2 px-3">Categorias</div>
+          <div className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2 px-3">Categories</div>
           <button type="button" aria-label="Show all extension categories"
             onClick={() => setSelectedCategory('all')}
             className={`w-full flex items-center gap-3 px-3 py-1.5 rounded text-left ${
@@ -384,7 +397,7 @@ export default function ExtensionManager({
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span className="text-sm">Todas</span>
+            <span className="text-sm">All</span>
           </button>
           {(Object.keys(CATEGORY_LABELS) as ExtensionCategory[]).map((cat) => (
             <button type="button" aria-label={`Filter extensions by ${CATEGORY_LABELS[cat]}`}
@@ -407,7 +420,7 @@ export default function ExtensionManager({
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
           <h2 className="text-lg font-semibold">
             {activeView === 'installed' && `Extensions ${t.installed.toLowerCase()}`}
-            {activeView === 'marketplace' && `${t.marketplace} de extensions`}
+            {activeView === 'marketplace' && `Extension ${t.marketplace.toLowerCase()}`}
             {activeView === 'recommended' && `Extensions ${t.recommended.toLowerCase()}`}
           </h2>
 
@@ -444,7 +457,7 @@ export default function ExtensionManager({
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               <Loader2 className="w-16 h-16 mb-4 animate-spin text-[var(--aethel-info)]" />
               <p className="text-lg">Loading extensions...</p>
-              <p className="text-sm">Buscando no marketplace</p>
+              <p className="text-sm">Searching marketplace</p>
             </div>
           ) : /* Error State */ apiError ? (
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
@@ -458,11 +471,11 @@ export default function ExtensionManager({
                 Tentar novamente
               </button>
             </div>
-          ) : /* Empty State for Instaladas */ activeView === 'installed' && filteredExtensions.length === 0 ? (
+          ) : /* Empty State for installed extensions */ activeView === 'installed' && filteredExtensions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               <Package className="w-16 h-16 mb-4 opacity-50" />
-              <p className="text-lg">No extension instalada</p>
-              <p className="text-sm mb-4">Explore o marketplace para encontrar extensions</p>
+              <p className="text-lg">No extension installed</p>
+              <p className="text-sm mb-4">Explore the marketplace to find extensions</p>
               <button type="button" aria-label="Open marketplace extensions"
                 onClick={() => setActiveView('marketplace')}
                 className="px-4 py-2 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] rounded transition-colors"
@@ -473,8 +486,8 @@ export default function ExtensionManager({
           ) : /* Empty State for Search/Filter */ filteredExtensions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               <Search className="w-16 h-16 mb-4 opacity-50" />
-              <p className="text-lg">No extension encontrada</p>
-              <p className="text-sm">Ajuste a busca ou revise os filtros</p>
+              <p className="text-lg">No extension found</p>
+              <p className="text-sm">Adjust the search or review filters</p>
             </div>
           ) : activeView === 'installed' && groupedExtensions ? (
             <>
@@ -640,7 +653,7 @@ function ExtensionCard({
                   ? 'text-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'
               }`}
-              title={extension.isEnabled ? 'Desactiver' : 'Ativar'}
+              title={extension.isEnabled ? 'Disable' : 'Enable'}
             >
               {extension.isEnabled ? (
                 <CheckCircle className="w-4 h-4" />
@@ -659,7 +672,7 @@ function ExtensionCard({
               <button type="button" aria-label={`Uninstall extension ${extension.name}`}
                 onClick={onUninstall}
                 className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
-                title="Desinstalar"
+                title="Uninstall"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -760,14 +773,14 @@ function ExtensionDetails({
                     : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
                 }`}
               >
-                {extension.isEnabled ? 'Desactiver' : 'Ativar'}
+                {extension.isEnabled ? 'Disable' : 'Enable'}
               </button>
               {!extension.isBuiltIn && (
                 <button type="button" aria-label={`Uninstall extension ${extension.name}`}
                   onClick={onUninstall}
                   className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded"
                 >
-                  Desinstalar
+                  Uninstall
                 </button>
               )}
             </>

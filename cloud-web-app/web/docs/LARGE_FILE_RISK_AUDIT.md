@@ -8,8 +8,8 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 - Large source files: 64
 - P0 files: 0
-- P1 low-import large modules: 51
-- P1 modules with explicit triage: 51
+- P1 low-import large modules: 50
+- P1 modules with explicit triage: 50
 - Hard ceiling: 1800 lines
 - UI ceiling: 1200 lines
 - API route ceiling: 1200 lines
@@ -41,7 +41,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/capture/capture-system.tsx` | 1193 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/inventory/inventory-system.tsx` | 1191 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/ecs/prefab-component-system.tsx` | 1190 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/translations.ts` | 1190 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/aethel-sdk.ts` | 1181 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/networking/multiplayer-system.tsx` | 1171 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/hot-reload-system.ts` | 1166 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
@@ -60,6 +59,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/cache-system.ts` | 1095 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/terrain-engine.ts` | 1094 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/engine/asset-pipeline.ts` | 1092 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/materials/material-editor.ts` | 1091 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 
 ## P1 Triage Decisions
 
@@ -71,7 +71,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/capture/capture-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/inventory/inventory-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/ecs/prefab-component-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/translations.ts` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
 | `lib/aethel-sdk.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/networking/multiplayer-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/hot-reload-system.ts` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
@@ -127,7 +126,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/capture/capture-system.tsx` | 1193 | creative-runtime | P1 low-import large module | 1 |
 | `lib/inventory/inventory-system.tsx` | 1191 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/ecs/prefab-component-system.tsx` | 1190 | creative-runtime | P1 low-import large module | 0 |
-| `lib/translations.ts` | 1190 | foundation-runtime | P1 low-import large module | 0 |
+| `lib/translations.ts` | 1190 | foundation-runtime | P2 tracked large module | 2 |
 | `lib/aethel-sdk.ts` | 1181 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/postprocessing/post-processing-system.ts` | 1181 | creative-runtime | P2 tracked large module | 4 |
 | `lib/networking/multiplayer-system.tsx` | 1171 | creative-runtime | P1 low-import large module | 1 |
