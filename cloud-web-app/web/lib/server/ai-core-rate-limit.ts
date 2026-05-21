@@ -26,6 +26,11 @@ export const AI_EXPENSIVE_3D_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 60 *
 export const AI_EXPENSIVE_MUSIC_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 60 * 1000, maxRequests: 30 }
 export const AI_EXPENSIVE_VOICE_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 60 * 1000, maxRequests: 50 }
 export const AI_VOICE_TRANSCRIBE_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 60 * 1000, maxRequests: 120 }
+export const AI_AGENT_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 20 }
+export const AI_CHANGE_MUTATION_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 45 }
+export const AI_CONTEXT_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 60 }
+export const AI_DIRECTOR_ACTION_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 30 }
+export const AI_QUERY_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 30 }
 
 export const AI_GENERATION_RATE_LIMITS = {
   image: AI_EXPENSIVE_IMAGE_RATE_LIMIT,

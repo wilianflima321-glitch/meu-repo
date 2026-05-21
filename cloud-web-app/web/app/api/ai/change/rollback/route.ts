@@ -4,6 +4,10 @@ import { apiErrorToResponse } from '@/lib/api-errors'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import {
+  AI_CHANGE_MUTATION_RATE_LIMIT,
+  enforceAiCoreRateLimit,
+} from '@/lib/server/ai-core-rate-limit'
+import {
   hashContent,
   loadRollbackSnapshot,
   markRollbackSnapshotUsed,
@@ -43,6 +47,14 @@ export async function POST(request: NextRequest) {
   try {
     const runId = `rollback_${Date.now().toString(36)}`
     const user = requireAuth(request)
+    const rateLimited = enforceAiCoreRateLimit({
+      req: request,
+      capability: 'ai.change.rollback',
+      route: '/api/ai/change/rollback',
+      config: AI_CHANGE_MUTATION_RATE_LIMIT,
+    })
+    if (rateLimited) return rateLimited
+
     await requireEntitlementsForUser(user.userId)
     const body = (await request.json().catch(() => null)) as RollbackBody | null
 

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { validateAiChange } from '@/lib/server/change-validation'
 import { capabilityResponse } from '@/lib/server/capability-response'
+import {
+  AI_CHANGE_MUTATION_RATE_LIMIT,
+  enforceAiCoreRateLimit,
+} from '@/lib/server/ai-core-rate-limit'
 
 import { createComponentLogger } from '@/lib/observability/logger';
 
@@ -21,6 +25,13 @@ const CAPABILITY = 'AI_CHANGE_VALIDATE'
 export async function POST(req: NextRequest) {
   try {
     requireAuth(req)
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'ai.change.validate',
+      route: '/api/ai/change/validate',
+      config: AI_CHANGE_MUTATION_RATE_LIMIT,
+    })
+    if (rateLimited) return rateLimited
 
     const body = (await req.json().catch(() => null)) as ValidateBody | null
     if (!body || typeof body !== 'object') {

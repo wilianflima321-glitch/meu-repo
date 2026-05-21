@@ -10,6 +10,14 @@
     "app/api/ai/music/generate/route.ts",
     "app/api/ai/voice/generate/route.ts",
     "app/api/ai/voice/transcribe/route.ts",
+    "app/api/ai/agent/route.ts",
+    "app/api/ai/change/apply/route.ts",
+    "app/api/ai/change/rollback/route.ts",
+    "app/api/ai/change/validate/route.ts",
+    "app/api/ai/context/mentions/route.ts",
+    "app/api/ai/context/search/route.ts",
+    "app/api/ai/director/[projectId]/action/route.ts",
+    "app/api/ai/query/route.ts",
     "lib/server/ai-core-rate-limit.ts",
     "lib/server/ai-expensive-generation-guard.ts"
   ]

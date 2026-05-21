@@ -12,6 +12,10 @@ import {
   type AgentSnapshot,
 } from '@/lib/server/agent-store';
 import { createComponentLogger } from '@/lib/observability/logger';
+import {
+  AI_AGENT_RATE_LIMIT,
+  enforceAiCoreRateLimit,
+} from '@/lib/server/ai-core-rate-limit';
 
 /**
  * API Route: Agent Mode Execution
@@ -49,6 +53,13 @@ export async function POST(req: NextRequest) {
   try {
     // AUTENTICAÇÃO OBRIGATÓRIA
     const auth = requireAuth(req);
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'ai.agent.execute',
+      route: '/api/ai/agent',
+      config: AI_AGENT_RATE_LIMIT,
+    });
+    if (rateLimited) return rateLimited;
     
     // Verificar entitlements do usuário
     const entitlements = await requireEntitlementsForUser(auth.userId);

@@ -4,6 +4,10 @@ import { prisma } from '@/lib/db'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { createComponentLogger } from '@/lib/observability/logger'
 import { handleDirectorAction } from '@/lib/server/ai-director/actions'
+import {
+  AI_DIRECTOR_ACTION_RATE_LIMIT,
+  enforceAiCoreRateLimit,
+} from '@/lib/server/ai-core-rate-limit'
 import type { DirectorActionPayload } from '@/lib/server/ai-director/types'
 
 const routeLogger = createComponentLogger('api/ai/director/[projectId]/action/route')
@@ -16,6 +20,14 @@ export async function POST(
 ) {
   try {
     const user = requireAuth(req)
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'ai.director.action',
+      route: '/api/ai/director/[projectId]/action',
+      config: AI_DIRECTOR_ACTION_RATE_LIMIT,
+    })
+    if (rateLimited) return rateLimited
+
     const { projectId } = await params
     const body = (await req.json()) as DirectorActionPayload
 

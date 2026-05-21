@@ -6,6 +6,10 @@ import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from 
 import { AITraceSummary, createAITraceId } from '@/lib/ai-internal-trace';
 import { persistAITrace } from '@/lib/ai-trace-store';
 import { createComponentLogger } from '@/lib/observability/logger';
+import {
+  AI_QUERY_RATE_LIMIT,
+  enforceAiCoreRateLimit,
+} from '@/lib/server/ai-core-rate-limit';
 
 const routeLogger = createComponentLogger('api.ai.query');
 
@@ -19,6 +23,14 @@ const routeLogger = createComponentLogger('api.ai.query');
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'ai.query',
+      route: '/api/ai/query',
+      config: AI_QUERY_RATE_LIMIT,
+    });
+    if (rateLimited) return rateLimited;
+
     const { query, context, provider, model } = await req.json();
 
     const traceId = createAITraceId();

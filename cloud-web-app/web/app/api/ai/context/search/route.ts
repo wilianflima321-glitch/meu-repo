@@ -7,12 +7,24 @@ import {
   searchSemanticCodebase,
 } from '@/lib/server/semantic-code-search'
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
+import {
+  AI_CONTEXT_RATE_LIMIT,
+  enforceAiCoreRateLimit,
+} from '@/lib/server/ai-core-rate-limit'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request)
+    const rateLimited = enforceAiCoreRateLimit({
+      req: request,
+      capability: 'ai.context.search',
+      route: '/api/ai/context/search',
+      config: AI_CONTEXT_RATE_LIMIT,
+    })
+    if (rateLimited) return rateLimited
+
     await requireEntitlementsForUser(user.userId)
 
     const projectId = new URL(request.url).searchParams.get('projectId') || undefined
@@ -46,6 +58,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request)
+    const rateLimited = enforceAiCoreRateLimit({
+      req: request,
+      capability: 'ai.context.search',
+      route: '/api/ai/context/search',
+      config: AI_CONTEXT_RATE_LIMIT,
+    })
+    if (rateLimited) return rateLimited
+
     await requireEntitlementsForUser(user.userId)
 
     const body = await request.json()
