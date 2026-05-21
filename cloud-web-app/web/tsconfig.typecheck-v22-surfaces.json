@@ -32,7 +32,9 @@
     "lib/production/game-production-spine.ts",
     "components/viewport/SceneViewportInspector.tsx",
     "components/viewport/ViewportAssetQualityCard.tsx",
-    "lib/viewport/viewport-asset-import.ts"
+    "lib/viewport/viewport-asset-import.ts",
+    "lib/production/ai-quality-orchestrator.ts",
+    "lib/production/moba-vertical-slice-template.ts"
   ],
   "exclude": [
     "node_modules",

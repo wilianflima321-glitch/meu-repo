@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { ArrowRight, BadgeCheck, ShieldAlert, Sparkles } from 'lucide-react'
 
 import {
@@ -7,6 +8,10 @@ import {
   evaluateGameAssetQualityReadiness,
   type GameAssetQualityTier,
 } from '@/lib/production/game-asset-quality-pipeline'
+import {
+  buildQualityOrchestrationPlan,
+  nextQualityUpgradeLane,
+} from '@/lib/production/ai-quality-orchestrator'
 import {
   buildViewportAssetQualityEvidenceRefs,
   formatViewportAssetSize,
@@ -26,6 +31,7 @@ type ViewportAssetQualityCardProps = {
 }
 
 export function ViewportAssetQualityCard({ asset }: ViewportAssetQualityCardProps) {
+  const [planExpanded, setPlanExpanded] = useState(false)
   const pipeline = buildGameAssetQualityPipeline()
   const tier = inferViewportAssetQualityTier(asset)
   const lane = pipeline.lanes.find((candidate) => candidate.tier === tier)
@@ -33,7 +39,24 @@ export function ViewportAssetQualityCard({ asset }: ViewportAssetQualityCardProp
     tier,
     evidenceRefs: buildViewportAssetQualityEvidenceRefs(asset),
   })
+  const upgradePlan = buildQualityOrchestrationPlan({
+    goal: `Plan quality upgrade for ${asset.fileName}`,
+    domain: tier === 'ai-draft' ? 'asset' : 'character',
+    targetQuality: nextQualityUpgradeLane(tier),
+    budgetUsd: 5,
+    runtimeCapabilities: {
+      'license-provenance-scanner': asset.licenseStatus === 'approved',
+    },
+    evidenceRefs: buildViewportAssetQualityEvidenceRefs(asset),
+    assetMetadata: {
+      fileName: asset.fileName,
+      licenseStatus: asset.licenseStatus,
+      qualityTier: tier,
+      triangleBudgetEstimate: lane?.maxPreviewTriangles,
+    },
+  })
   const missingPreview = readiness.missingEvidence.slice(0, 4)
+  const upgradeBlocked = upgradePlan.status === 'blocked' || upgradePlan.status === 'held'
 
   return (
     <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
@@ -73,6 +96,45 @@ export function ViewportAssetQualityCard({ asset }: ViewportAssetQualityCardProp
           <ul className="mt-2 space-y-1 text-[10px] text-[var(--aethel-text-quaternary)]">
             {missingPreview.map((item) => (
               <li key={item}>Missing: {item}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+
+      <div className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] p-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+              Upgrade plan
+            </p>
+            <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">
+              {upgradePlan.recommendedLane} - ${upgradePlan.estimatedCostUsd.toFixed(2)} - {upgradePlan.estimatedMinutes} min
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={upgradeBlocked}
+            onClick={() => setPlanExpanded((value) => !value)}
+            className="rounded-lg border border-[var(--aethel-border-subtle)] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--aethel-text-secondary)] disabled:cursor-not-allowed disabled:opacity-55"
+            title={upgradePlan.nextAction}
+          >
+            Plan quality upgrade
+          </button>
+        </div>
+        <p className="mt-2 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">{upgradePlan.nextAction}</p>
+        <div className="mt-2 flex flex-wrap gap-1 text-[10px] text-[var(--aethel-text-quaternary)]">
+          <span>{upgradePlan.copy.draftWarning}</span>
+          <span>{upgradePlan.copy.studioLocal}</span>
+          <span>{upgradePlan.copy.cloudCost}</span>
+          <span>{upgradePlan.copy.humanReview}</span>
+        </div>
+        {planExpanded ? (
+          <ul className="mt-2 space-y-1 text-[10px] text-[var(--aethel-text-quaternary)]">
+            {upgradePlan.requiredCapabilities.map((capability) => (
+              <li key={capability}>Capability: {capability}</li>
+            ))}
+            {upgradePlan.missingEvidence.slice(0, 4).map((item) => (
+              <li key={item}>Evidence: {item}</li>
             ))}
           </ul>
         ) : null}
