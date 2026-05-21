@@ -1,11 +1,11 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 1955
+- Files scanned: 1991
 - Failures: 0
 
 ## Counts
-- threeDirect: 48 (max 50)
+- threeDirect: 46 (max 46)
 - reactThreeFiberDirect: 2 (max 3)
 - reactThreeDreiDirect: 1 (max 2)
 - monacoEditorDirect: 3 (max 4)
@@ -21,7 +21,6 @@ Generated: deterministic local scan
 - components/nexus/NexusCanvasV2.tsx (1)
 - components/physics/DestructionEditor.tsx (1)
 - components/physics/fluid-simulation-core.ts (1)
-- lib/aaa-asset-pipeline.ts (1)
 - lib/ai/behavior-tree-system.tsx (1)
 - lib/ai-content-generation.ts (1)
 - lib/asset-import-pipeline.ts (1)
@@ -40,6 +39,7 @@ Generated: deterministic local scan
 - lib/facial-animation-system.ts (1)
 - lib/game-engine-core.ts (1)
 - lib/game-loop.ts (1)
+- lib/hooks/useRenderPipeline.ts (1)
 ### reactThreeFiberDirect
 - components/physics/DestructionEditor.tsx (1)
 - lib/camera/camera-system.tsx (1)

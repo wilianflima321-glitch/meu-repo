@@ -3,12 +3,12 @@
 Generated: deterministic local scan
 
 - Watch line limit: 800
-- Files above watch limit: 126 / 126
-- Max file lines: 1150 / 1151
+- Files above watch limit: 122 / 122
+- Max file lines: 1150 / 1150
 - Failures: 0
 
 ## Category Counts
-- `runtime`: 89
+- `runtime`: 85
 - `ui`: 28
 - `server`: 5
 - `other`: 3
@@ -19,17 +19,11 @@ Generated: deterministic local scan
 | File | Lines | Category | Next action |
 | --- | ---: | --- | --- |
 | `lib/server/websocket-server.ts` | 1150 | server | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/scene/scene-serializer.ts` | 1149 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/aaa-asset-pipeline.ts` | 1148 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/input/controller-mapper.tsx` | 1146 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/save/save-manager.tsx` | 1144 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/particles/advanced-particle-system.ts` | 1132 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `server/workers/build-queue-worker.ts` | 1111 | other | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/input/input-manager.ts` | 1098 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/terrain-engine.ts` | 1094 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/engine/asset-pipeline.ts` | 1092 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/materials/material-editor.ts` | 1091 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/visual-script/runtime.ts` | 1088 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai-tools-registry.ts` | 1085 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai/behavior-tree-system.tsx` | 1084 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/fluid-simulation-system.ts` | 1078 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -48,6 +42,12 @@ Generated: deterministic local scan
 | `lib/assets/asset-importer.ts` | 1040 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/pbr-shader-pipeline.ts` | 1037 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ray-tracing.ts` | 1035 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/ai-audio-engine.ts` | 1034 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/events/event-bus-system.tsx` | 1032 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/terrain/terrain-system.ts` | 1030 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/extensions/extension-system.ts` | 1021 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/cloth-simulation.ts` | 1018 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/facial-animation-system.ts` | 1015 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 
 ## Ratchet Policy
 
