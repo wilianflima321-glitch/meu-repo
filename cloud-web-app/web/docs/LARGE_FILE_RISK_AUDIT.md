@@ -6,20 +6,20 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 59
+- Large source files: 56
 - P0 files: 0
-- P1 low-import large modules: 46
-- P1 modules with explicit triage: 46
+- P1 low-import large modules: 43
+- P1 modules with explicit triage: 43
+- Retired runtime entrypoints forbidden: 4
 - Hard ceiling: 1800 lines
 - UI ceiling: 1200 lines
 - API route ceiling: 1200 lines
 
 ## Categories
 
-- `foundation-runtime`: 31
+- `foundation-runtime`: 29
 - `creative-runtime`: 24
 - `server-runtime`: 3
-- `ui-runtime`: 1
 
 ## Owner Decisions
 
@@ -28,8 +28,18 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 - API routes above 1200 lines must move business logic to `lib/**` modules.
 - Low-import creative/runtime modules must be wired into visible editors or archived; they cannot remain ambiguous forever.
 - Every P1 low-import module must have an explicit `wire`, `archive`, `held`, or `adapter-needed` decision in this report.
+- Retired runtime entrypoints cannot return without a typed adapter, owner surface, and tests.
 - Engine-spine modules must state a load strategy and limitation so hidden systems do not slow public/product routes by accident.
 - New files over 1000 lines are allowed only with a test, category, and explicit extraction plan.
+
+## Retired Runtime Entrypoints
+
+| File | Status | Re-entry rule |
+| --- | --- | --- |
+| `lib/aethel-sdk.ts` | retired-confirmed | Must stay out of the live tree; recover from Git history only if a typed adapter and tests are added first. |
+| `lib/engine/aethel-engine.tsx` | retired-confirmed | Must stay out of the live tree; recover from Git history only if a typed adapter and tests are added first. |
+| `lib/ui/ui-framework.tsx` | retired-confirmed | Must stay out of the live tree; recover from Git history only if a typed adapter and tests are added first. |
+| `lib/debug/debug-console.tsx` | retired-confirmed | Must stay out of the live tree; recover from Git history only if a typed adapter and tests are added first. |
 
 ## Highest-Risk Files
 
@@ -37,7 +47,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | --- | ---: | --- | --- | ---: | --- |
 | `lib/dialogue-cutscene-system.ts` | 1201 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/cutscene/cutscene-system.tsx` | 1195 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/ui/ui-framework.tsx` | 1195 | ui-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/capture/capture-system.tsx` | 1193 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/inventory/inventory-system.tsx` | 1191 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/ecs/prefab-component-system.tsx` | 1190 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
@@ -45,13 +54,11 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/advanced-input-system.ts` | 1164 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/state/game-state-manager.tsx` | 1161 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/quests/quest-system.tsx` | 1153 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/settings/settings-system.tsx` | 1153 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/animation/animation-system.ts` | 1151 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/scene/scene-serializer.ts` | 1149 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/aaa-asset-pipeline.ts` | 1148 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/input/controller-mapper.tsx` | 1146 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/save/save-manager.tsx` | 1144 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/debug/debug-console.tsx` | 1112 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/input/input-manager.ts` | 1098 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/terrain-engine.ts` | 1094 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/engine/asset-pipeline.ts` | 1092 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
@@ -60,6 +67,9 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/fluid-simulation-system.ts` | 1077 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/debug/real-debug-adapter.ts` | 1074 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/nanite-virtualized-geometry.ts` | 1067 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/motion-matching-system.ts` | 1066 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/engine/scene-graph.ts` | 1065 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/engine/audio-manager.ts` | 1063 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 
 ## P1 Triage Decisions
 
@@ -67,7 +77,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | --- | --- | --- | --- | --- |
 | `lib/dialogue-cutscene-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/cutscene/cutscene-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/ui/ui-framework.tsx` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
 | `lib/capture/capture-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/inventory/inventory-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/ecs/prefab-component-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
@@ -75,13 +84,11 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/advanced-input-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/state/game-state-manager.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/quests/quest-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/settings/settings-system.tsx` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
 | `lib/animation/animation-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/scene/scene-serializer.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/aaa-asset-pipeline.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/input/controller-mapper.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/save/save-manager.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/debug/debug-console.tsx` | archive | Legacy compatibility boundary | not-loaded | Low-import legacy surface; preserve compatibility evidence before deletion or redirect. |
 | `lib/input/input-manager.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/terrain-engine.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/engine/asset-pipeline.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
@@ -118,7 +125,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | --- | ---: | --- | --- | ---: |
 | `lib/dialogue-cutscene-system.ts` | 1201 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/cutscene/cutscene-system.tsx` | 1195 | creative-runtime | P1 low-import large module | 1 |
-| `lib/ui/ui-framework.tsx` | 1195 | ui-runtime | P1 low-import large module | 0 |
 | `lib/capture/capture-system.tsx` | 1193 | creative-runtime | P1 low-import large module | 1 |
 | `lib/inventory/inventory-system.tsx` | 1191 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/ecs/prefab-component-system.tsx` | 1190 | creative-runtime | P1 low-import large module | 0 |
@@ -128,7 +134,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/state/game-state-manager.tsx` | 1161 | creative-runtime | P1 low-import large module | 0 |
 | `lib/world/world-streaming.tsx` | 1161 | creative-runtime | P2 tracked large module | 4 |
 | `lib/quests/quest-system.tsx` | 1153 | foundation-runtime | P1 low-import large module | 1 |
-| `lib/settings/settings-system.tsx` | 1153 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/animation/animation-system.ts` | 1151 | creative-runtime | P1 low-import large module | 0 |
 | `lib/server/websocket-server.ts` | 1150 | server-runtime | P2 tracked large module | 3 |
 | `lib/scene/scene-serializer.ts` | 1149 | creative-runtime | P1 low-import large module | 0 |
@@ -136,7 +141,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/input/controller-mapper.tsx` | 1146 | creative-runtime | P1 low-import large module | 0 |
 | `lib/save/save-manager.tsx` | 1144 | creative-runtime | P1 low-import large module | 1 |
 | `lib/particles/advanced-particle-system.ts` | 1132 | creative-runtime | P2 tracked large module | 3 |
-| `lib/debug/debug-console.tsx` | 1112 | foundation-runtime | P1 low-import large module | 0 |
 | `server/workers/build-queue-worker.ts` | 1111 | server-runtime | P2 tracked large module | 0 |
 | `lib/input/input-manager.ts` | 1098 | creative-runtime | P1 low-import large module | 0 |
 | `lib/terrain-engine.ts` | 1094 | foundation-runtime | P1 low-import large module | 0 |
@@ -187,5 +191,5 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Validation
 
-Run `npm run qa:large-file-risk` to fail on unbounded file growth or new untracked monoliths.
+Run `npm run qa:large-file-risk` to fail on unbounded file growth, retired runtime re-entry, or new untracked monoliths.
 Run `npm run qa:engine-spine-modules` to ensure V18-V20 engine assets have explicit load strategies before wiring.

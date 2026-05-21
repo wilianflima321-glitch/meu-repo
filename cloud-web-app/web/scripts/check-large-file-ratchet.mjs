@@ -7,7 +7,7 @@ const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']
 const IGNORED_PARTS = new Set(['node_modules', '.next', 'coverage', 'dist', 'build', '.git'])
 
 const WATCH_LINE_LIMIT = 800
-const WATCH_FILE_BUDGET = 141
+const WATCH_FILE_BUDGET = 138
 const MAX_LINE_BUDGET = 1201
 
 function walk(dir, files = []) {
@@ -34,7 +34,7 @@ function classify(relativePath) {
 
 function recommendation(relativePath) {
   if (relativePath === 'lib/translations.ts') return 'Move remaining compatibility reads behind next-i18next and delete after one release.'
-  if (relativePath.includes('ui-framework') || relativePath.includes('DesignSystem')) return 'Split into primitives, tokens, examples, and compatibility barrel.'
+  if (relativePath.includes('DesignSystem')) return 'Split into primitives, tokens, examples, and compatibility barrel.'
   if (relativePath.includes('cutscene') || relativePath.includes('dialogue')) return 'Split planning, timeline, playback, and serialization before adding film features.'
   if (relativePath.includes('prefab') || relativePath.includes('inventory') || relativePath.includes('quest')) return 'Split data model, runtime, persistence, and editor adapter.'
   if (relativePath.includes('post-processing')) return 'Split effects into bloom, tone mapping, AA, color, and runtime adapter.'

@@ -14,12 +14,16 @@ const UI_MAX_LINES = 1200
 const API_MAX_LINES = 1200
 const REPORT_PATH = path.join(ROOT, 'docs', 'LARGE_FILE_RISK_AUDIT.md')
 const P1_DECISIONS = new Set(['wire', 'archive', 'held', 'adapter-needed'])
+const RETIRED_RUNTIME_FILES = [
+  'lib/aethel-sdk.ts',
+  'lib/engine/aethel-engine.tsx',
+  'lib/ui/ui-framework.tsx',
+  'lib/debug/debug-console.tsx',
+]
 
 const ARCHIVE_CANDIDATE_PATTERNS = [
-  /lib\/ui\/ui-framework\.tsx$/,
   /lib\/hot-reload-system\.ts$/,
   /lib\/onboarding-system\.ts$/,
-  /lib\/debug\/debug-console\.tsx$/,
   /lib\/cache-system\.ts$/,
   /lib\/settings\/settings-system\.tsx$/,
   /lib\/translations\.ts$/,
@@ -222,11 +226,20 @@ function buildReport(inventory) {
     `| \`${entry.relativePath}\` | ${entry.lines} | ${entry.category} | ${entry.risk} | ${entry.importHints} |`
   )).join('\n')
 
-  return `# Large File Risk Audit\n\nGenerated: deterministic local scan\n\nThis audit tracks source files with at least ${LINE_LIMIT} lines. The goal is not to blindly split working systems; it is to stop silent god-file regression, identify low-import aspirational modules, and force extraction plans before future growth.\n\n## Executive Summary\n\n- Large source files: ${inventory.length}\n- P0 files: ${p0.length}\n- P1 low-import large modules: ${p1.length}\n- P1 modules with explicit triage: ${p1.filter((entry) => entry.triage).length}\n- Hard ceiling: ${HARD_MAX_LINES} lines\n- UI ceiling: ${UI_MAX_LINES} lines\n- API route ceiling: ${API_MAX_LINES} lines\n\n## Categories\n\n${categorySummary}\n\n## Owner Decisions\n\n- Keep large runtime kernels only when they are protocol-heavy and covered by gates.\n- UI surfaces above ${UI_MAX_LINES} lines must be split before new feature work.\n- API routes above ${API_MAX_LINES} lines must move business logic to \`lib/**\` modules.\n- Low-import creative/runtime modules must be wired into visible editors or archived; they cannot remain ambiguous forever.\n- Every P1 low-import module must have an explicit \`wire\`, \`archive\`, \`held\`, or \`adapter-needed\` decision in this report.\n- Engine-spine modules must state a load strategy and limitation so hidden systems do not slow public/product routes by accident.\n- New files over ${LINE_LIMIT} lines are allowed only with a test, category, and explicit extraction plan.\n\n## Highest-Risk Files\n\n| File | Lines | Category | Risk | Import hints | Recommendation |\n| --- | ---: | --- | --- | ---: | --- |\n${topRiskRows || '| _None_ | 0 | - | - | 0 | - |'}\n\n## P1 Triage Decisions\n\n| File | Decision | Target surface | Load strategy | Rationale |\n| --- | --- | --- | --- | --- |\n${triageRows || '| _None_ | - | - | - | - |'}\n\n## Full Inventory\n\n| File | Lines | Category | Risk | Import hints |\n| --- | ---: | --- | --- | ---: |\n${inventoryRows}\n\n## Next Refactor Queue\n\n1. \`lib/server/ai-chat-advanced/**\` and \`lib/server/ai-change-apply/**\`: keep critical AI route orchestration split and enforced by \`qa:ai-route-split\`.\n2. \`lib/level-serialization/**\`: keep the canonical serializer/format/manager/history split enforced by \`qa:level-serialization-split\`.\n3. \`lib/mcp/aethel/**\`: keep the tool definitions, auth policy, handlers, response schemas, resources, and prompts split enforced by \`qa:mcp-server-split\`.\n4. \`lib/server/extension-host/**\`: keep the runtime/API/types split enforced by \`qa:extension-host-split\`.\n5. \`lib/pixel-streaming/**\`: keep the new signaling/session/codec/cost split enforced by \`qa:pixel-streaming-split\`.\n6. \`lib/server/websocket/**\`: keep the transport/auth/rooms/presence split enforced by \`qa:websocket-runtime-split\`.\n\n## Validation\n\nRun \`npm run qa:large-file-risk\` to fail on unbounded file growth or new untracked monoliths.\nRun \`npm run qa:engine-spine-modules\` to ensure V18-V20 engine assets have explicit load strategies before wiring.\n`
+  const retiredRows = RETIRED_RUNTIME_FILES.map((file) => (
+    `| \`${file}\` | retired-confirmed | Must stay out of the live tree; recover from Git history only if a typed adapter and tests are added first. |`
+  )).join('\n')
+
+  return `# Large File Risk Audit\n\nGenerated: deterministic local scan\n\nThis audit tracks source files with at least ${LINE_LIMIT} lines. The goal is not to blindly split working systems; it is to stop silent god-file regression, identify low-import aspirational modules, and force extraction plans before future growth.\n\n## Executive Summary\n\n- Large source files: ${inventory.length}\n- P0 files: ${p0.length}\n- P1 low-import large modules: ${p1.length}\n- P1 modules with explicit triage: ${p1.filter((entry) => entry.triage).length}\n- Retired runtime entrypoints forbidden: ${RETIRED_RUNTIME_FILES.length}\n- Hard ceiling: ${HARD_MAX_LINES} lines\n- UI ceiling: ${UI_MAX_LINES} lines\n- API route ceiling: ${API_MAX_LINES} lines\n\n## Categories\n\n${categorySummary}\n\n## Owner Decisions\n\n- Keep large runtime kernels only when they are protocol-heavy and covered by gates.\n- UI surfaces above ${UI_MAX_LINES} lines must be split before new feature work.\n- API routes above ${API_MAX_LINES} lines must move business logic to \`lib/**\` modules.\n- Low-import creative/runtime modules must be wired into visible editors or archived; they cannot remain ambiguous forever.\n- Every P1 low-import module must have an explicit \`wire\`, \`archive\`, \`held\`, or \`adapter-needed\` decision in this report.\n- Retired runtime entrypoints cannot return without a typed adapter, owner surface, and tests.\n- Engine-spine modules must state a load strategy and limitation so hidden systems do not slow public/product routes by accident.\n- New files over ${LINE_LIMIT} lines are allowed only with a test, category, and explicit extraction plan.\n\n## Retired Runtime Entrypoints\n\n| File | Status | Re-entry rule |\n| --- | --- | --- |\n${retiredRows}\n\n## Highest-Risk Files\n\n| File | Lines | Category | Risk | Import hints | Recommendation |\n| --- | ---: | --- | --- | ---: | --- |\n${topRiskRows || '| _None_ | 0 | - | - | 0 | - |'}\n\n## P1 Triage Decisions\n\n| File | Decision | Target surface | Load strategy | Rationale |\n| --- | --- | --- | --- | --- |\n${triageRows || '| _None_ | - | - | - | - |'}\n\n## Full Inventory\n\n| File | Lines | Category | Risk | Import hints |\n| --- | ---: | --- | --- | ---: |\n${inventoryRows}\n\n## Next Refactor Queue\n\n1. \`lib/server/ai-chat-advanced/**\` and \`lib/server/ai-change-apply/**\`: keep critical AI route orchestration split and enforced by \`qa:ai-route-split\`.\n2. \`lib/level-serialization/**\`: keep the canonical serializer/format/manager/history split enforced by \`qa:level-serialization-split\`.\n3. \`lib/mcp/aethel/**\`: keep the tool definitions, auth policy, handlers, response schemas, resources, and prompts split enforced by \`qa:mcp-server-split\`.\n4. \`lib/server/extension-host/**\`: keep the runtime/API/types split enforced by \`qa:extension-host-split\`.\n5. \`lib/pixel-streaming/**\`: keep the new signaling/session/codec/cost split enforced by \`qa:pixel-streaming-split\`.\n6. \`lib/server/websocket/**\`: keep the transport/auth/rooms/presence split enforced by \`qa:websocket-runtime-split\`.\n\n## Validation\n\nRun \`npm run qa:large-file-risk\` to fail on unbounded file growth, retired runtime re-entry, or new untracked monoliths.\nRun \`npm run qa:engine-spine-modules\` to ensure V18-V20 engine assets have explicit load strategies before wiring.\n`
 }
 
 const inventory = loadInventory()
 const failures = []
+for (const file of RETIRED_RUNTIME_FILES) {
+  if (fs.existsSync(path.join(ROOT, file))) {
+    failures.push(`${file}: retired runtime entrypoint returned to the live tree`)
+  }
+}
 for (const entry of inventory) {
   if (entry.lines > HARD_MAX_LINES) failures.push(`${entry.relativePath}: ${entry.lines} lines exceeds hard ceiling ${HARD_MAX_LINES}`)
   if (entry.category === 'ui-surface' && entry.lines > UI_MAX_LINES) failures.push(`${entry.relativePath}: ${entry.lines} lines exceeds UI ceiling ${UI_MAX_LINES}`)
