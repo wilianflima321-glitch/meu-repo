@@ -60,8 +60,8 @@ This is how Aethel gets quality: not by asking one AI to hallucinate an entire g
 
 ## What To Build Next
 
-- Connect this pipeline to the asset import UI so every imported/generated asset shows its lane and missing evidence.
-- Add a `Quality upgrade` action: AI draft -> curated marketplace -> Studio Local optimized -> Cloud render grade.
+- V22.4 connected this pipeline to the viewport inspector through `ViewportAssetQualityCard`, so imported assets now show their lane, missing evidence, license state, runtime lane, and upgrade path.
+- Add a governed `Quality upgrade` action: AI draft -> curated marketplace -> Studio Local optimized -> Cloud render grade.
 - Add per-asset cost estimates before generation, retopology, texture compression, or Cloud Stream review.
 - Add a sidecar capability check for meshoptimizer/gltfpack/KTX2/Rapier/FFmpeg before enabling heavy upgrade buttons.
 - Add visual badges in Studio: `Draft`, `Curated`, `Optimized`, `Render grade`, and `Blocked by provenance`.

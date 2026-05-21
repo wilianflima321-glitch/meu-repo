@@ -29,7 +29,10 @@
     "components/agents/window/**/*.tsx",
     "components/agents/window/**/*.ts",
     "lib/production/game-asset-quality-pipeline.ts",
-    "lib/production/game-production-spine.ts"
+    "lib/production/game-production-spine.ts",
+    "components/viewport/SceneViewportInspector.tsx",
+    "components/viewport/ViewportAssetQualityCard.tsx",
+    "lib/viewport/viewport-asset-import.ts"
   ],
   "exclude": [
     "node_modules",

@@ -1,4 +1,5 @@
 import type { ViewportSceneObject } from '@/components/viewport/AethelViewport3D'
+import type { GameAssetQualityTier } from '@/lib/production/game-asset-quality-pipeline'
 
 export type ViewportAssetImportFormat = 'glb' | 'gltf' | 'fbx' | 'obj' | 'usd' | 'usdz'
 export type ViewportAssetLicenseStatus = 'needs-review' | 'approved' | 'blocked'
@@ -11,6 +12,7 @@ export type ViewportAssetImportMetadata = {
   importedAt: string
   licenseStatus: ViewportAssetLicenseStatus
   qualityGate: 'raw-intake' | 'preview-ready'
+  qualityTier?: GameAssetQualityTier
   evidenceRef: string
 }
 
@@ -47,6 +49,13 @@ export const VIEWPORT_ASSET_IMPORT_EXTENSIONS: readonly ViewportAssetImportForma
   'obj',
   'usd',
   'usdz',
+]
+
+const VIEWPORT_ASSET_QUALITY_TIERS: readonly GameAssetQualityTier[] = [
+  'ai-draft',
+  'curated-marketplace',
+  'studio-local-optimized',
+  'cloud-render-grade',
 ]
 
 const FORMAT_GEOMETRY: Record<ViewportAssetImportFormat, NonNullable<ViewportSceneObject['geometry']>> = {
@@ -86,6 +95,19 @@ export function buildViewportAssetEvidenceRef(fileName: string, importedAt: stri
     .replace(/^-+|-+$/g, '')
     .slice(0, 72) || 'asset'
   return `asset-import:${safeName}:${importedAt}`
+}
+
+export function inferViewportAssetQualityTier(asset: ViewportAssetImportMetadata): GameAssetQualityTier {
+  if (asset.qualityTier) return asset.qualityTier
+  if (asset.licenseStatus === 'approved' && asset.qualityGate === 'preview-ready') return 'curated-marketplace'
+  return 'ai-draft'
+}
+
+export function buildViewportAssetQualityEvidenceRefs(asset: ViewportAssetImportMetadata): string[] {
+  const refs = [asset.evidenceRef, 'source asset manifest']
+  if (asset.licenseStatus === 'approved') refs.push('license/provenance receipt')
+  if (asset.qualityGate === 'preview-ready') refs.push('viewport performance trace')
+  return refs
 }
 
 export function buildViewportImportedObject({
@@ -175,6 +197,12 @@ function pickEnum<T extends string>(value: unknown, allowed: readonly T[], fallb
   return typeof value === 'string' && allowed.includes(value as T) ? (value as T) : fallback
 }
 
+function pickQualityTier(value: unknown): GameAssetQualityTier | undefined {
+  return typeof value === 'string' && VIEWPORT_ASSET_QUALITY_TIERS.includes(value as GameAssetQualityTier)
+    ? (value as GameAssetQualityTier)
+    : undefined
+}
+
 export function buildViewportAssetImportBatch(
   objects: readonly ViewportAssetImportBatchObject[],
   options: {
@@ -213,6 +241,7 @@ export function coerceViewportAssetImportMetadata(input: unknown): ViewportAsset
   const importedAt = pickString(input.importedAt, new Date().toISOString())
   const evidenceRef = pickString(input.evidenceRef, buildViewportAssetEvidenceRef(fileName || 'asset', importedAt))
   if (!fileName) return null
+  const qualityTier = pickQualityTier(input.qualityTier)
   return {
     fileName,
     format,
@@ -221,6 +250,7 @@ export function coerceViewportAssetImportMetadata(input: unknown): ViewportAsset
     importedAt,
     licenseStatus: pickEnum(input.licenseStatus, ['needs-review', 'approved', 'blocked'] as const, 'needs-review'),
     qualityGate: pickEnum(input.qualityGate, ['raw-intake', 'preview-ready'] as const, 'raw-intake'),
+    ...(qualityTier ? { qualityTier } : {}),
     evidenceRef,
   }
 }

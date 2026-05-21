@@ -26,7 +26,7 @@ import {
   type GizmoAxisPlaneConstraint,
   type GizmoPivotMode,
 } from '@/lib/viewport/gizmo-elite-controls'
-import { formatViewportAssetSize } from '@/lib/viewport/viewport-asset-import'
+import { ViewportAssetQualityCard } from '@/components/viewport/ViewportAssetQualityCard'
 
 function radToDeg(value: number) {
   return (value * 180) / Math.PI
@@ -282,13 +282,7 @@ export function SceneViewportInspector({
                 <p>{selectedObject.scale.map(formatter).join(' · ')}</p>
               </div>
               {selectedObject.asset ? (
-                <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
-                  <p className="mb-2 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">Asset Intake</p>
-                  <p className="font-medium text-[var(--aethel-text-primary)]">{selectedObject.asset.fileName}</p>
-                  <p className="mt-1">{selectedObject.asset.format.toUpperCase()} · {formatViewportAssetSize(selectedObject.asset.sizeBytes)}</p>
-                  <p className="mt-1">License: <span className="font-medium text-[var(--aethel-warning-light)]">{selectedObject.asset.licenseStatus}</span></p>
-                  <p className="mt-1 truncate text-[var(--aethel-text-quaternary)]">{selectedObject.asset.evidenceRef}</p>
-                </div>
+                <ViewportAssetQualityCard asset={selectedObject.asset} />
               ) : null}
             </div>
           ) : (

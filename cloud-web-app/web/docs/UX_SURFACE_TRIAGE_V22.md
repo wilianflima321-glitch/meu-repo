@@ -4,7 +4,7 @@ Generated: deterministic local triage on 2026-05-21
 
 Base commit: `abfc5b445 chore: harden trust and runtime evidence gates`
 
-Current execution note: V22.1/V22.2/V22.3 has since implemented the authenticated UX harness, dashboard topbar compression, global admin compatibility drawer, shared Browser/Studio Local/Cloud Stream runtime model, protected `/evidence`, marketplace install review, pricing disclosure compression, enterprise-aware auth provider breadth, Studio maturity headers, Agent Cockpit composition, and the Game Asset Quality Pipeline. This document remains the triage baseline; the P0 status table below tracks what has moved from finding to implemented gate.
+Current execution note: V22.1/V22.2/V22.3/V22.4 has since implemented the authenticated UX harness, dashboard topbar compression, global admin compatibility drawer, shared Browser/Studio Local/Cloud Stream runtime model, protected `/evidence`, marketplace install review, pricing disclosure compression, enterprise-aware auth provider breadth, Studio maturity headers, Agent Cockpit composition, the Game Asset Quality Pipeline, and viewport-level asset quality evidence. This document remains the triage baseline; the P0 status table below tracks what has moved from finding to implemented gate.
 
 This audit is intentionally evidence-first. It does not claim that Aethel is already best-in-market on every surface. It identifies where the current product is strong, where it is noisy, where compatibility debt leaks into the user experience, and which fixes should happen before new feature expansion.
 
