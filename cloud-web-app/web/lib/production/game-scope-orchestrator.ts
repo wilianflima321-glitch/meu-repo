@@ -6,6 +6,7 @@ import {
   type QualityOrchestrationPlan,
   type RuntimeCapabilitySnapshot,
 } from '@/lib/production/ai-quality-orchestrator'
+import { getGameGenrePack, type GameGenrePack } from '@/lib/production/game-genre-packs'
 
 export type PlayableGameScope = 'prototype' | 'demo' | 'complete-game-plan'
 
@@ -56,6 +57,7 @@ export interface GameScopePlan {
   notFullGameClaim: true
   releaseState: GameScopePlanState
   runtimeTargets: ProductionRuntimeTarget[]
+  genrePack: GameGenrePack
   creativeArtifacts: CreativePlanningArtifact[]
   productionGraphs: GameScopeGraph[]
   qualityPlans: QualityOrchestrationPlan[]
@@ -295,13 +297,22 @@ export function buildGameScopePlan(input: BuildGameScopePlanInput = {}): GameSco
   const scope = input.scope ?? 'demo'
   const genre = input.genre ?? 'custom'
   const genreLabel = genre === 'custom' ? input.customGenreLabel || GENRE_LABELS.custom : GENRE_LABELS[genre]
+  const genrePack = getGameGenrePack(genre, genreLabel)
   const userIntent = input.userIntent || `Create a ${genreLabel} ${SCOPE_LABELS[scope].toLowerCase()} with evidence-first agents.`
   const budgetUsd = input.budgetUsd ?? defaultBudgetForScope(scope)
   const evidenceRefs = input.evidenceRefs ?? []
   const targetQuality = input.targetQuality ?? defaultQualityForScope(scope)
   const capabilities = buildRuntimeCapabilitySnapshot(input.runtimeCapabilities)
   const creativeArtifacts = artifactsForScope(scope)
-  const productionGraphs = creativeArtifacts.map(graphForArtifact)
+  const productionGraphs = [
+    ...creativeArtifacts.map(graphForArtifact),
+    ...genrePack.productionGraphs.map((graph) => ({
+      id: `genre-${graph}`,
+      ownerAgent: genrePack.specialistAgents[0] || 'Game Designer Agent',
+      requiredEvidence: genrePack.evidenceRefs,
+      userValue: `${genrePack.label} pack: ${graph}.`,
+    })),
+  ]
   const runtimeTargets: ProductionRuntimeTarget[] =
     scope === 'prototype'
       ? ['local-main-safe', 'local-worker', 'held']
@@ -332,6 +343,7 @@ export function buildGameScopePlan(input: BuildGameScopePlanInput = {}): GameSco
     notFullGameClaim: true,
     releaseState: qualityPlans.some((plan) => plan.blocked) ? 'blocked' : 'held',
     runtimeTargets: unique(runtimeTargets),
+    genrePack,
     creativeArtifacts: unique(creativeArtifacts),
     productionGraphs,
     qualityPlans,

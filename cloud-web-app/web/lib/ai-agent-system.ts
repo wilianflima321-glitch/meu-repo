@@ -550,6 +550,8 @@ export async function createGame(
     [
       `Plan a ${plan.label}: ${description}`,
       `Scope: ${plan.scope}. Genre: ${plan.genre}. Release state: ${plan.releaseState}.`,
+      `Genre pack: camera=${plan.genrePack.cameraModel}; input=${plan.genrePack.inputModel}; coreLoop=${plan.genrePack.coreLoop.join(' -> ')}.`,
+      `Genre-specific playtests: ${plan.genrePack.playtestScenarios.join('; ')}.`,
       `Required creative artifacts before heavy generation: ${plan.creativeArtifacts.join(', ')}.`,
       `Next governed action: ${plan.nextAction}`,
       'Do not claim the game is finished without builds, provenance, playtest evidence, performance traces, rollback, and human approval.',

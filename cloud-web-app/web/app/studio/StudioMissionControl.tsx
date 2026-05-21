@@ -333,10 +333,20 @@ export default function StudioMissionControl() {
                 </span>
               </div>
               <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{gameScopePlan.uxDisclosure}</p>
+              <p className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                Genre pack: {gameScopePlan.genrePack.cameraModel} camera, {gameScopePlan.genrePack.inputModel} input, loop: {gameScopePlan.genrePack.coreLoop.slice(0, 3).join(' -> ')}.
+              </p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {gameScopePlan.creativeArtifacts.slice(0, 7).map((artifact) => (
                   <span key={artifact} className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]">
                     {artifact}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {gameScopePlan.genrePack.playtestScenarios.slice(0, 4).map((scenario) => (
+                  <span key={scenario} className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_24%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-warning-light)]">
+                    {scenario}
                   </span>
                 ))}
               </div>

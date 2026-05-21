@@ -27,6 +27,7 @@ requirePattern('lib/production/game-scope-orchestrator.ts', /complete-game-plan[
 requirePattern('lib/production/game-scope-orchestrator.ts', /notFullGameClaim:\s*true/, 'all scope plans must reject autonomous full-game claims')
 requirePattern('lib/production/game-scope-orchestrator.ts', /humanReviewRequired:\s*true/, 'human review must be mandatory')
 requirePattern('lib/production/game-scope-orchestrator.ts', /buildQualityOrchestrationPlan/, 'scope plans must consume the quality orchestrator')
+requirePattern('lib/production/game-scope-orchestrator.ts', /genrePack:\s*GameGenrePack/, 'scope plans must include genre pack')
 requirePattern('lib/production/game-scope-orchestrator.ts', /buildMobaExampleScopePlan/, 'MOBA should be an example preset, not the whole system')
 requirePattern('lib/production/moba-vertical-slice-template.ts', /genericScopePlan:\s*GameScopePlan/, 'legacy MOBA template must delegate to generic scope plan')
 requirePattern('docs/GAME_SCOPE_ORCHESTRATOR_V22.md', /Users should decide the ambition level/, 'docs must center user scope choice')

@@ -260,6 +260,14 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                       </span>
                     </div>
                     <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{productionBiblePlan.uxDisclosure}</p>
+                    <div className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.16)] p-2">
+                      <p className="text-[11px] font-semibold text-[var(--aethel-text-secondary)]">
+                        Genre pack: {productionBiblePlan.genrePack.label} | {productionBiblePlan.genrePack.cameraModel} | {productionBiblePlan.genrePack.inputModel}
+                      </p>
+                      <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
+                        Loop: {productionBiblePlan.genrePack.coreLoop.slice(0, 5).join(' -> ')}
+                      </p>
+                    </div>
                     <div className="mt-3 grid gap-2 sm:grid-cols-2">
                       {productionBiblePlan.productionGraphs.slice(0, 6).map((graph) => (
                         <div key={graph.id} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.18)] p-2">
