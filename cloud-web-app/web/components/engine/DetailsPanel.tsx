@@ -1,6 +1,8 @@
 'use client';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { EditorScaleReadinessBadge } from '@/components/editor/EditorScaleReadinessBadge';
+import { buildEditorScaleReadiness } from '@/lib/editor/editor-scale-readiness';
 import { ComponentSection, PropertyRow, Vector3Editor } from './DetailsPanelEditors';
 import type { ComponentDefinition, InspectedObject, PropertyDefinition } from './DetailsPanel.types';
 
@@ -351,6 +353,30 @@ export default function DetailsPanel({
     setSelectedObject(updated);
     onObjectChange?.(updated);
   }, [selectedObject, onObjectChange]);
+
+  const detailsPropertyCount = useMemo(() => {
+    if (!selectedObject) return 0;
+
+    const staticCount = selectedObject.staticProperties?.length ?? 0;
+    const componentCount = selectedObject.components.reduce(
+      (total, component) => total + component.properties.length,
+      0,
+    );
+    const transformCount = selectedObject.transform ? 9 : 0;
+
+    return staticCount + componentCount + transformCount;
+  }, [selectedObject]);
+
+  const detailsScaleReadiness = useMemo(
+    () => buildEditorScaleReadiness({
+      lane: 'details-panel',
+      totalCount: detailsPropertyCount,
+      visibleCount: detailsPropertyCount,
+      virtualization: false,
+    }),
+    [detailsPropertyCount],
+  );
+
   if (!selectedObject) {
     return (
       <div style={{
@@ -402,6 +428,7 @@ export default function DetailsPanel({
       }}>
         📋 Details
       </div>
+      <EditorScaleReadinessBadge readiness={detailsScaleReadiness} />
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto', padding: '12px' }}>
         {/* Object Header */}

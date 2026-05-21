@@ -9,6 +9,8 @@
  * NOT MOCK - real functional system.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { EditorScaleReadinessBadge } from "@/components/editor/EditorScaleReadinessBadge";
+import { buildEditorScaleReadiness } from "@/lib/editor/editor-scale-readiness";
 import {
   openConfirmDialog,
   openPromptDialog,
@@ -326,6 +328,27 @@ export default function EngineContentBrowser({
     viewMode,
   ]);
 
+  const contentBrowserScaleReadiness = useMemo(
+    () => buildEditorScaleReadiness({
+      lane: "content-browser",
+      totalCount: assets.length,
+      visibleCount: Math.min(
+        displayedAssets.length,
+        viewMode === "grid"
+          ? assetVirtualRows.rows.length * gridColumns
+          : assetVirtualRows.rows.length,
+      ),
+      virtualization: true,
+    }),
+    [
+      assetVirtualRows.rows.length,
+      assets.length,
+      displayedAssets.length,
+      gridColumns,
+      viewMode,
+    ],
+  );
+
   const handleSelect = useCallback(
     (asset: Asset, e: React.MouseEvent) => {
       if (e.ctrlKey || e.metaKey) {
@@ -526,6 +549,7 @@ export default function EngineContentBrowser({
           setSortOrder(order);
         }}
       />
+      <EditorScaleReadinessBadge readiness={contentBrowserScaleReadiness} />
 
       {/* Main Content */}
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>

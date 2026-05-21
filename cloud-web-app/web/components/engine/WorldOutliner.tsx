@@ -10,7 +10,9 @@
  */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import * as THREE from 'three';
+import { EditorScaleReadinessBadge } from '@/components/editor/EditorScaleReadinessBadge';
 import { useVirtualWindow } from '@/components/performance/useVirtualWindow';
+import { buildEditorScaleReadiness } from '@/lib/editor/editor-scale-readiness';
 import { OutlinerContextMenu, OutlinerFilterBar, TreeItem } from './WorldOutlinerParts';
 
 // ============================================================================
@@ -221,6 +223,13 @@ export default function WorldOutliner({
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; object: SceneObject | null } | null>(null);
+
+  const totalObjectCount = useMemo(() => {
+    const countObjects = (items: SceneObject[]): number =>
+      items.reduce((total, item) => total + 1 + countObjects(item.children), 0);
+
+    return countObjects(objetos);
+  }, [objetos]);
 
   // Flatten tree for rendering with filter
   const flattenedObjects = useMemo(() => {
@@ -476,6 +485,16 @@ export default function WorldOutliner({
     overscan: 18,
   });
 
+  const outlinerScaleReadiness = useMemo(
+    () => buildEditorScaleReadiness({
+      lane: 'world-outliner',
+      totalCount: totalObjectCount,
+      visibleCount: flattenedObjects.length,
+      virtualization: true,
+    }),
+    [flattenedObjects.length, totalObjectCount],
+  );
+
   return (
     <div
       style={{
@@ -506,6 +525,8 @@ export default function WorldOutliner({
         onCollapseAll={handleCollapseAll}
         onExpandAll={handleExpandAll}
       />
+
+      <EditorScaleReadinessBadge readiness={outlinerScaleReadiness} />
 
       {/* Tree */}
       <div

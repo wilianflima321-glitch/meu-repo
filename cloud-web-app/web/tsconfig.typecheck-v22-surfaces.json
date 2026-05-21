@@ -86,7 +86,12 @@
     "components/physics/FluidSimulationPanels.tsx",
     "components/terrain/TerrainSculptingEditor.parts.tsx",
     "components/scene-editor/GameSimulation.tsx",
-    "components/scene-editor/scene-editor-models.ts"
+    "components/scene-editor/scene-editor-models.ts",
+    "lib/editor/editor-scale-readiness.ts",
+    "components/editor/EditorScaleReadinessBadge.tsx",
+    "components/engine/WorldOutliner.tsx",
+    "components/engine/DetailsPanel.tsx",
+    "components/engine/EngineContentBrowser.tsx"
   ],
   "exclude": [
     "node_modules",
