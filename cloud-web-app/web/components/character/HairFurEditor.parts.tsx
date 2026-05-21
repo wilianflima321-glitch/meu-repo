@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: transitive runtime chunk loaded through HairFurEditor.
+
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Html as DreiHtml } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';

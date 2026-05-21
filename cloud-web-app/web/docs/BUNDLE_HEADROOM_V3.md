@@ -12,6 +12,8 @@ Aethel should feel premium before the user reaches the heavy editor. Public, das
 - Animated AI feedback is lazy: dashboard streaming thoughts, director notes, and ambient AI suggestions load behind explicit dynamic boundaries.
 - Browser viewport is lazy: `AethelViewport3D` now loads the R3F scene canvas only when the Browser runtime is selected.
 - Studio route editors remain route-level chunks: Level, Scene, Material, Terrain, Fluid, and Rig editors are marked as heavy async boundaries because their routes already load them through `next/dynamic`.
+- Transitive editor panels are governed: panels loaded only through heavy Studio editors are reported as async boundaries instead of polluting the shell budget.
+- Connected asset model preview is lazy: `ContentBrowserConnected` no longer imports Three or GLTFLoader until a model preview is opened.
 - Bundle budgets are tighter: direct imports for `three`, R3F, drei, Monaco, and Framer now have real headroom instead of passing at the edge.
 
 ## Product rule

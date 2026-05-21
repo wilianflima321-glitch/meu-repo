@@ -1,5 +1,7 @@
 "use client";
 
+// @aethel-heavy-async-boundary: transitive runtime chunk loaded through TerrainSculptingEditor.
+
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import {

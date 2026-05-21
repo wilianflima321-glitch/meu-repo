@@ -1,3 +1,5 @@
+// @aethel-heavy-async-boundary: transitive runtime helpers loaded through SceneEditor.
+
 import * as THREE from 'three';
 
 export type TransformMode = 'translate' | 'rotate' | 'scale';

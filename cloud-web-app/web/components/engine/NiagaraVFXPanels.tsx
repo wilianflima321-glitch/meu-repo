@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: transitive runtime chunk loaded through NiagaraVFX.
+
 import React, { useMemo, useRef, useState } from 'react';
 import { Handle, Node, Edge, NodeTypes, Position } from '@xyflow/react';
 import { useFrame } from '@react-three/fiber';

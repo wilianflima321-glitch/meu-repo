@@ -1,3 +1,5 @@
+// @aethel-heavy-async-boundary: transitive runtime chunk loaded through SceneEditor.
+
 import { logger } from '@/lib/observability/logger';
 import React, { useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';

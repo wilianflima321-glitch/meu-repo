@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: transitive runtime chunk loaded through FoliagePainter.
+
 import React, { useMemo, useRef, useState } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 import { ChevronDown, ChevronRight, Droplets, Eye, EyeOff, Mountain, Trash2, TreeDeciduous } from 'lucide-react';

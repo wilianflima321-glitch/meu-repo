@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: transitive runtime chunk loaded through FluidSimulationEditor.
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html as DreiHtml, Line } from '@react-three/drei';

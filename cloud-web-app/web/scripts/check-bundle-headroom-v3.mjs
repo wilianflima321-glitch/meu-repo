@@ -13,10 +13,19 @@ const REQUIRED_FILES = [
   'components/ai/AIThinkingPanel.tsx',
   'components/ai/DirectorNotePanel.tsx',
   'components/ai/AISuggestionBubble.tsx',
+  'components/assets/ConnectedModelPreview.tsx',
+  'components/character/ControlRigEditor.parts.tsx',
   'components/engine/LevelEditor.tsx',
+  'components/engine/NiagaraVFXPanels.tsx',
+  'components/environment/FoliagePainterPanels.tsx',
+  'components/physics/ClothSimulationPanels.tsx',
+  'components/physics/FluidSimulationPanels.tsx',
+  'components/scene-editor/GameSimulation.tsx',
+  'components/scene-editor/scene-editor-models.ts',
   'components/scene-editor/SceneEditor.tsx',
   'components/materials/MaterialEditor.tsx',
   'components/terrain/TerrainSculptingEditor.tsx',
+  'components/terrain/TerrainSculptingEditor.parts.tsx',
   'components/physics/FluidSimulationEditor.tsx',
   'components/character/ControlRigEditor.tsx',
   'scripts/check-bundle-boundaries.mjs',
@@ -38,13 +47,13 @@ const EXPECTED_BOUNDARY_FILES = [
 ]
 
 const BUDGET_TARGETS = {
-  threeDirect: 76,
-  reactThreeFiberDirect: 9,
-  reactThreeDreiDirect: 7,
+  threeDirect: 66,
+  reactThreeFiberDirect: 3,
+  reactThreeDreiDirect: 2,
   monacoEditorDirect: 4,
   monacoReactDirect: 4,
   framerMotionDirect: 19,
-  dynamicImportsMin: 95,
+  dynamicImportsMin: 100,
 }
 
 const failures = []

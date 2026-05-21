@@ -75,7 +75,18 @@
     "components/engine/GameViewport.tsx",
     "components/VRPreview.tsx",
     "components/viewport/ViewportRuntimeDepthStatus.tsx",
-    "components/viewport/viewport-model.ts"
+    "components/viewport/viewport-model.ts",
+    "components/assets/ContentBrowserConnected.tsx",
+    "components/assets/ConnectedModelPreview.tsx",
+    "components/character/ControlRigEditor.parts.tsx",
+    "components/character/HairFurEditor.parts.tsx",
+    "components/engine/NiagaraVFXPanels.tsx",
+    "components/environment/FoliagePainterPanels.tsx",
+    "components/physics/ClothSimulationPanels.tsx",
+    "components/physics/FluidSimulationPanels.tsx",
+    "components/terrain/TerrainSculptingEditor.parts.tsx",
+    "components/scene-editor/GameSimulation.tsx",
+    "components/scene-editor/scene-editor-models.ts"
   ],
   "exclude": [
     "node_modules",

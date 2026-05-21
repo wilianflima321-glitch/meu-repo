@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: transitive runtime chunk loaded through ControlRigEditor.
+
 import React, { useMemo, useRef, useState } from 'react';
 import { Html as DreiHtml, Line } from '@react-three/drei';
 import * as THREE from 'three';
