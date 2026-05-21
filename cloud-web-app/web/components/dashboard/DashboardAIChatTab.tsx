@@ -1,10 +1,17 @@
+'use client'
+
 import type { ChatMessage, CopilotWorkflowSummary } from '@/lib/api'
+import dynamic from 'next/dynamic'
 import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_SPACING, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
-import { AIThinkingPanel } from '../ai/AIThinkingPanel'
 import AIProviderSetupGuide from '../ai/AIProviderSetupGuide'
 import { EmptyState } from '../ui/EmptyState'
 import { DashboardCopilotWorkflowBar } from './DashboardCopilotWorkflowBar'
+
+const AIThinkingPanel = dynamic(() => import('../ai/AIThinkingPanel').then((mod) => mod.AIThinkingPanel), {
+  ssr: false,
+  loading: () => null,
+})
 
 type ChatMode = 'chat' | 'agent' | 'canvas'
 

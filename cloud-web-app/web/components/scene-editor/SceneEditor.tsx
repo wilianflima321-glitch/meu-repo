@@ -1,4 +1,7 @@
 'use client';
+
+// @aethel-heavy-async-boundary: loaded only through the /studio/scene route dynamic import.
+
 import React, { useRef, useState, useCallback, useEffect, Suspense } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import {

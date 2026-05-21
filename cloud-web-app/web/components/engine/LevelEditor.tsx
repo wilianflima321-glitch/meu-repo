@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: loaded only through the /studio/level route dynamic import.
+
 /**
  * Level Editor Integrado - Editor de Níveis Profissional
  *

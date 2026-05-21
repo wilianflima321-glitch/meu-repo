@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: loaded only through the /studio/fluid route dynamic import.
+
 /**
  * FLUID SIMULATION EDITOR - Aethel Engine
  *

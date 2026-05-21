@@ -52,7 +52,21 @@
     "app/download/page.tsx",
     "components/studio/StudioLocalReleaseReadinessMatrix.tsx",
     "components/studio/StudioLocalRuntimeCapsule.tsx",
-    "lib/studio-local/release-manifest.ts"
+    "lib/studio-local/release-manifest.ts",
+    "components/assets/ContentBrowser.tsx",
+    "components/assets/AssetPreviewPanel.tsx",
+    "components/dashboard/DashboardAIChatTab.tsx",
+    "components/dashboard/DashboardProjectsTab.tsx",
+    "components/providers/runtime/FullStudioRuntime.tsx",
+    "components/ai/AIThinkingPanel.tsx",
+    "components/ai/DirectorNotePanel.tsx",
+    "components/ai/AISuggestionBubble.tsx",
+    "components/engine/LevelEditor.tsx",
+    "components/scene-editor/SceneEditor.tsx",
+    "components/materials/MaterialEditor.tsx",
+    "components/terrain/TerrainSculptingEditor.tsx",
+    "components/physics/FluidSimulationEditor.tsx",
+    "components/character/ControlRigEditor.tsx"
   ],
   "exclude": [
     "node_modules",

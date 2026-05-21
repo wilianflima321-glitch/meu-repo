@@ -7,10 +7,19 @@
  * Suporta drag-and-drop para o viewport 3D.
  */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Search, Grid, List, ChevronRight, Upload, Plus, RefreshCw, Package } from 'lucide-react';
-import AssetPreviewPanel from './AssetPreviewPanel';
 import { AssetCard, assetTypeConfig, colors, ContextMenu, FolderTreeItem } from './ContentBrowserParts';
 import { openPromptDialog } from '@/lib/ui/non-blocking-dialogs';
+
+const AssetPreviewPanel = dynamic(() => import('./AssetPreviewPanel'), {
+  ssr: false,
+  loading: () => (
+    <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-4 text-xs text-[var(--aethel-text-tertiary)]">
+      Loading asset preview...
+    </div>
+  ),
+});
 
 // ============================================================================
 // TYPES

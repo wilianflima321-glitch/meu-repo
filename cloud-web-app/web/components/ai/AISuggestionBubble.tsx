@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: loaded only after runtime pressure allows ambient AI suggestions.
+
 import { logger } from '@/lib/observability/logger';
 /**
  * AISuggestionBubble - Bolhas de Sugestão Proactive da IA

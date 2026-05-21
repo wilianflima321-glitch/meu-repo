@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: loaded only while the dashboard streams animated AI reasoning.
+
 import { logger } from '@/lib/observability/logger';
 /**
  * AIThinkingPanel - Painel Visual de "Cadeia de Pensamento" da IA

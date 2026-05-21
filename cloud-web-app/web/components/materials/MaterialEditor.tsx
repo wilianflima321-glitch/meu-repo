@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: loaded only through the /studio/material route dynamic import.
+
 /**
  * Material Editor - Sistema de Materiais PBR Completo
  *

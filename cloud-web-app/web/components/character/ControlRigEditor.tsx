@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: loaded only through the /studio/rig route dynamic import.
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Environment, GizmoHelper, GizmoViewport, Grid, OrbitControls } from '@react-three/drei';

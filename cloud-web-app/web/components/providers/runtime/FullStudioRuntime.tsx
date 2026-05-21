@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, type ReactNode } from 'react'
-import { AISuggestionBubbleAuto } from '@/components/ai/AISuggestionBubble'
+import dynamic from 'next/dynamic'
 import { LowBalanceModalAuto } from '@/components/billing/LowBalanceModal'
 import CookieConsent from '@/components/ui/CookieConsent'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -22,6 +22,14 @@ import StudioRuntimeCommandRegistration from './StudioRuntimeCommandRegistration
 import StudioRuntimeLoadingFallback from './StudioRuntimeLoadingFallback'
 import { useDeferredRuntimeActivation } from './useDeferredRuntimeActivation'
 import { useRuntimeInteractionPressure } from './useRuntimeInteractionPressure'
+
+const AISuggestionBubbleAuto = dynamic(
+  () => import('@/components/ai/AISuggestionBubble').then((mod) => mod.AISuggestionBubbleAuto),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+)
 
 export default function FullStudioRuntime({
   children,

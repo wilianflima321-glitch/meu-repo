@@ -1,9 +1,16 @@
-import { DirectorNotePanel } from '../ai/DirectorNotePanel'
+'use client'
+
+import dynamic from 'next/dynamic'
 import { VersionHistorySlider } from '../collaboration/VersionHistorySlider'
 import { PremiumEmptyProjects } from '../ui/PremiumEmptyState'
 import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_SPACING, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 import type { Project } from './aethel-dashboard-model'
+
+const DirectorNotePanel = dynamic(() => import('../ai/DirectorNotePanel').then((mod) => mod.DirectorNotePanel), {
+  ssr: false,
+  loading: () => null,
+})
 
 type DashboardProjectsTabProps = {
   projects: Project[]

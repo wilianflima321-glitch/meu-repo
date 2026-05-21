@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: loaded only when project director notes are visible.
+
 /**
  * DirectorNotePanel - Painel de Crítica Artística da IA
  *

@@ -1,4 +1,7 @@
 "use client";
+
+// @aethel-heavy-async-boundary: loaded only through the /studio/terrain route dynamic import.
+
 import React, { useState, useCallback, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";

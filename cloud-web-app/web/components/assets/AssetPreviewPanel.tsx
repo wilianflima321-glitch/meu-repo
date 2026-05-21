@@ -1,5 +1,7 @@
 'use client';
 
+// @aethel-heavy-async-boundary: loaded by ContentBrowser only when the asset preview pane is visible.
+
 import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
