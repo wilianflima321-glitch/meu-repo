@@ -15,9 +15,12 @@ import {
   type CaptureState,
   type GifOptions,
   type PhotoModeSettings,
+  PHOTO_FILTER_PRESETS,
   type ReplayBufferOptions,
+  type ScreenshotEffect,
   type ScreenshotOptions,
   type VideoRecordingOptions,
+  type WatermarkConfig,
 } from './types';
 
 export class CaptureSystem extends EventEmitter {

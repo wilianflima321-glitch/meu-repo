@@ -38,6 +38,30 @@ import type {
   WorkspaceFolder,
 } from './extension-host/types';
 
+export type {
+  ConfigurationProperty,
+  ContributedBreakpoint,
+  ContributedCommand,
+  ContributedConfiguration,
+  ContributedCustomEditor,
+  ContributedDebugger,
+  ContributedGrammar,
+  ContributedIconTheme,
+  ContributedKeybinding,
+  ContributedLanguage,
+  ContributedMenu,
+  ContributedSnippet,
+  ContributedTaskDefinition,
+  ContributedTheme,
+  ContributedView,
+  ContributedViewContainer,
+  ContributedWebviewPanel,
+  Extension,
+  ExtensionContributes,
+  ExtensionContext,
+  ExtensionManifest,
+} from './extension-host/types';
+
 const nativeRequire = eval('require') as NodeRequire;
 
 // ============================================================================

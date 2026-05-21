@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
+import { logger } from '@/lib/observability/logger';
 import { ComponentRegistry } from './component-registry';
-import { type Component, type ComponentData, type ComponentType, type Entity, type EntityId } from './types';
+import { type Component, type ComponentData, type ComponentType, type Entity, type EntityId, type TransformData } from './types';
 
 export class EntityManager extends EventEmitter {
   private entities: Map<EntityId, Entity> = new Map();

@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { EquipmentManager } from './equipment';
 import { Inventory } from './inventory';
-import { type InventoryConfig } from './types';
+import { type EquipmentSlot, type InventoryConfig, type ItemInstance, type ItemStats } from './types';
 
 // ============================================================================
 

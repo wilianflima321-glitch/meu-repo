@@ -39,11 +39,12 @@ requirePattern('app/api/projects/[id]/production-state/read-receipts/route.ts', 
 requirePattern('app/api/projects/[id]/production-state/read-receipts/route.ts', /evaluateAgentReadinessForApply/, 'read receipt API must return readiness decisions')
 requirePattern('app/api/projects/[id]/production-state/read-receipts/route.ts', /buildProductionReadinessSummary/, 'read receipt API must keep Mission Ledger readiness visible')
 
-requirePattern('app/api/ai/change/apply/route.ts', /enforceReadReceipts/, 'apply route must accept explicit read receipt enforcement')
-requirePattern('app/api/ai/change/apply/route.ts', /evaluateAgentReadinessForApply/, 'apply route must evaluate read receipt readiness')
-requirePattern('app/api/ai/change/apply/route.ts', /readRepositoryCartographyManifestFromSettings/, 'apply route must load Repository Cartography from project settings')
-requirePattern('app/api/ai/change/apply/route.ts', /readResearchIntelligencePacketFromSettings/, 'apply route must load Research Intelligence from project settings')
-requirePattern('app/api/ai/change/apply/route.ts', /readReceiptIds/, 'successful apply metadata must include accepted read receipts')
+requirePattern('app/api/ai/change/apply/route.ts', /applyAiChanges/, 'apply route must delegate to the split apply executor')
+requirePattern('lib/server/ai-change-apply/types.ts', /enforceReadReceipts/, 'split apply body must accept explicit read receipt enforcement')
+requirePattern('lib/server/ai-change-apply/agent-guards.ts', /evaluateAgentReadinessForApply/, 'split apply guards must evaluate read receipt readiness')
+requirePattern('lib/server/ai-change-apply/agent-guards.ts', /readRepositoryCartographyManifestFromSettings/, 'split apply guards must load Repository Cartography from project settings')
+requirePattern('lib/server/ai-change-apply/agent-guards.ts', /readResearchIntelligencePacketFromSettings/, 'split apply guards must load Research Intelligence from project settings')
+requirePattern('lib/server/ai-change-apply/executor.ts', /readReceiptIds/, 'successful split apply metadata must include accepted read receipts')
 
 requireFile('__tests__/production/agent-read-receipts.test.ts', 'unit tests must cover read receipt decisions')
 requirePattern('__tests__/production/agent-read-receipts.test.ts', /AGENT_READ_RECEIPTS_CARTOGRAPHY_REQUIRED/, 'tests must cover missing cartography')

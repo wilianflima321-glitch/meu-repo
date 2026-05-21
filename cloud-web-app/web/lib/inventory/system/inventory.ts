@@ -6,6 +6,8 @@ import {
   type InventorySlot,
   type ItemEffect,
   type ItemInstance,
+  type ItemRarity,
+  type ItemType,
   type RemoveItemResult,
   type UseItemResult,
 } from './types';

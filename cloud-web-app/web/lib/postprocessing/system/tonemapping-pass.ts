@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { PostProcessingPass } from './pass';
 import { COMMON_SHADER, TONEMAPPING_FUNCTIONS } from './shader-chunks';
-import { type PostProcessingSettings } from './types';
+import { type PostProcessingSettings, type TonemappingMode } from './types';
 
 export class TonemappingPass extends PostProcessingPass {
   name = 'tonemapping';

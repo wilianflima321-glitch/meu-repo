@@ -1,10 +1,11 @@
 'use client';
 
+import type * as THREE from 'three';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ComponentRegistry } from './component-registry';
 import { EntityManager } from './entity-manager';
 import { PrefabManager } from './prefab-manager';
-import { type ComponentData, type ComponentType, type EntityId } from './types';
+import { type Component, type ComponentData, type ComponentType, type Entity, type EntityId, type PrefabData } from './types';
 
 // ============================================================================
 

@@ -6,6 +6,64 @@ Base commit: `abfc5b445 chore: harden trust and runtime evidence gates`
 
 Current execution note: V22.1/V22.2/V22.3/V22.4 has since implemented the authenticated UX harness, dashboard topbar compression, global admin compatibility drawer, shared Browser/Studio Local/Cloud Stream runtime model, protected `/evidence`, marketplace install review, pricing disclosure compression, enterprise-aware auth provider breadth, Studio maturity headers, Agent Cockpit composition, the Game Asset Quality Pipeline, and viewport-level asset quality evidence. This document remains the triage baseline; the P0 status table below tracks what has moved from finding to implemented gate.
 
+## V23 Execution Backlog Addendum (2026-05-21)
+
+This addendum reflects the repository after the engine runtime god-file split and the full typecheck repair. It is deliberately execution-oriented: each item below should become a small PR/commit, not another broad audit.
+
+### Current Baseline
+
+- Full TypeScript check: passes after restoring split-module type exports/imports.
+- Large-file gate: 50 files above 1000 lines, 38 P1 low-import modules.
+- Large-file ratchet: 132 files above 800 lines; max tracked file is 1171 lines.
+- Bundle boundary: passing but tight, with threeDirect at 65 / 66. This is too close to the ceiling for a premium product.
+- Docs budget: saturated at repoMarkdown 336 / 336, rootDocs 200 / 200, webDocs 67 / 67. Any new documentation must replace or consolidate old docs.
+- i18n hardcoded gate: green, but breadth is shallow at 245 keys across 6 locales.
+- Authenticated visual QA: harness exists; screenshot evidence is still not captured in versioned reports.
+- Game/asset quality: orchestration contracts are strong, but execution is planning-only. No heavy asset upgrade, sidecar job, or final-quality claim should run without evidence.
+
+### P0 - Next 48 Hours
+
+1. Keep full typecheck green in every runtime split. Target files: split modules under `lib/capture/system`, `lib/ecs/prefab-system`, `lib/inventory/system`, `lib/postprocessing/system`, and `lib/server/extension-host-runtime.ts`.
+2. Update static QA gates to follow split architecture. Any gate that checks old route monoliths must check the delegated service modules instead. The first fixed examples are read receipts and product quality progress.
+3. Create authenticated visual evidence. Run the app, set `JWT_SECRET`, execute `qa:authenticated-ux-capture`, and update `docs/AUTHENTICATED_UX_SURFACE_AUDIT.md` with actual dashboard/IDE/Studio/admin/billing/settings screenshots.
+4. Build bundle headroom. Reduce `threeDirect` from 65 to <=55 so one new Studio/runtime feature cannot fail the gate. Start with Studio-only runtime modules in `lib/**` and mark only true dynamic boundaries with `@aethel-heavy-async-boundary`.
+5. Continue god-file reduction. Split the next five P1 modules without behavior changes: `lib/networking/multiplayer-system.tsx`, `lib/advanced-input-system.ts`, `lib/state/game-state-manager.tsx`, `lib/world/world-streaming.tsx`, and `lib/quests/quest-system.tsx`.
+
+### P1 - Product Quality
+
+1. Public UX compression: keep landing/pricing/marketplace mission-first and reduce card walls. Best-in-market feel means one clear action, proof nearby, details behind disclosure.
+2. Dashboard first win: the authenticated dashboard should answer in under 10 seconds: what project is active, what is running, what it costs, what needs approval, and where to continue.
+3. Studio first win: Studio routes should show capability, maturity, runtime mode, evidence, and one next action before editor complexity.
+4. Admin premium: keep the 6-area model visible. Legacy compatibility remains behind drawer/search; no legacy route should feel like a primary product surface.
+5. WCAG promotion: static WCAG is green, but AA claims require runtime axe/Lighthouse evidence across light/dark, keyboard, labels, contrast, and reduced motion.
+
+### P1 - Game And Asset Quality
+
+1. Turn the AI Quality Orchestrator from planning-only into governed job planning. Add a persistent quality-upgrade job ledger before any heavy execution.
+2. Implement asset sourcing execution in stages: curated-library search, provenance receipt, source hash, license review, rollback metadata. Raw AI draft remains blocked from final claims.
+3. Wire Studio Local sidecar job requests for meshoptimizer/gltfpack/KTX2/Rapier/FFmpeg/Blender only after capability evidence exists. Browser remains preview/review.
+4. Add playtest evidence for game scopes: bot run, replay link, frame budget, failure notes, human approval. A `complete-game-plan` can be deep, but a complete game needs builds and tests.
+5. Expand the production bible internally, not visibly: deeper scene contracts, branching consequences, pacing, economy, encounter tables, asset dependency graph, audio/VFX budgets, localization plan, accessibility constraints, and release gates. The UI should stay compact.
+
+### P2 - Engineering Ratchets
+
+1. Lower large-file budgets only after each split: next targets are files above 1100, then files above 1000, then UI/page limits.
+2. Raise Storybook from 32 to 80+ around AI cockpit, CostMeter, runtime selector, Evidence Center, marketplace install review, and Studio quality cards.
+3. Expand i18n from 245 to 500+ keys only for real surfaces. Avoid resurrecting legacy translation systems.
+4. Collapse docs without losing evidence. Because docs budget is full, every new canonical doc should remove or merge one stale doc.
+5. Keep `qa:enterprise-gate` honest: no fake-success text, no Unreal/AAA/final claims without runtime/evidence/human review.
+
+### Suggested Execution Waves
+
+- V23.1: typecheck/gate hygiene and authenticated screenshots.
+- V23.2: bundle headroom to <=55 direct Three imports and route-level visual compression.
+- V23.3: split multiplayer/input/game-state/world/quest P1 modules.
+- V23.4: Evidence Center v2 with real screenshots, playtest proofs, cost proofs, and blocked/held reasons.
+- V23.5: game quality execution ledger plus asset sourcing execution.
+- V23.6: Studio Local governed jobs for optimization, compression, collision/navmesh, and capture.
+- V23.7: launch readiness: runtime axe, Lighthouse, build, Tauri signing readiness, public case study from real product evidence.
+
+
 This audit is intentionally evidence-first. It does not claim that Aethel is already best-in-market on every surface. It identifies where the current product is strong, where it is noisy, where compatibility debt leaks into the user experience, and which fixes should happen before new feature expansion.
 
 ## Evidence Inputs
