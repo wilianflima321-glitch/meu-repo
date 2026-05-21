@@ -3,12 +3,12 @@
 Generated: deterministic local scan
 
 - Watch line limit: 800
-- Files above watch limit: 142 / 142
+- Files above watch limit: 141 / 141
 - Max file lines: 1201 / 1201
 - Failures: 0
 
 ## Category Counts
-- `runtime`: 105
+- `runtime`: 104
 - `ui`: 28
 - `server`: 5
 - `other`: 3
@@ -24,7 +24,6 @@ Generated: deterministic local scan
 | `lib/capture/capture-system.tsx` | 1193 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/inventory/inventory-system.tsx` | 1191 | runtime | Split data model, runtime, persistence, and editor adapter. |
 | `lib/ecs/prefab-component-system.tsx` | 1190 | runtime | Split data model, runtime, persistence, and editor adapter. |
-| `lib/aethel-sdk.ts` | 1181 | runtime | Split public SDK into auth, projects, agents, assets, and billing clients. |
 | `lib/postprocessing/post-processing-system.ts` | 1181 | runtime | Split effects into bloom, tone mapping, AA, color, and runtime adapter. |
 | `lib/networking/multiplayer-system.tsx` | 1171 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/advanced-input-system.ts` | 1164 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -48,6 +47,7 @@ Generated: deterministic local scan
 | `lib/visual-script/runtime.ts` | 1088 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai-tools-registry.ts` | 1085 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai/behavior-tree-system.tsx` | 1084 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/fluid-simulation-system.ts` | 1077 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 
 ## Ratchet Policy
 
