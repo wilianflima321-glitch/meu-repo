@@ -550,6 +550,7 @@ export async function createGame(
     [
       `Plan a ${plan.label}: ${description}`,
       `Scope: ${plan.scope}. Genre: ${plan.genre}. Release state: ${plan.releaseState}.`,
+      `Production bible: ${plan.productionBible.pillars.join(', ')}. First user decision: ${plan.productionBible.firstUserDecision}`,
       `Genre pack: camera=${plan.genrePack.cameraModel}; input=${plan.genrePack.inputModel}; coreLoop=${plan.genrePack.coreLoop.join(' -> ')}.`,
       `Playtest spine: ${plan.playtestSpine.scenarios.map((scenario) => `${scenario.title} via ${scenario.botPath}`).join('; ')}.`,
       `Required playtest telemetry: ${plan.playtestSpine.telemetry.join(', ')}.`,

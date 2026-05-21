@@ -336,6 +336,9 @@ export default function StudioMissionControl() {
               <p className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
                 Genre pack: {gameScopePlan.genrePack.cameraModel} camera, {gameScopePlan.genrePack.inputModel} input, loop: {gameScopePlan.genrePack.coreLoop.slice(0, 3).join(' -> ')}.
               </p>
+              <p className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                Production bible: {gameScopePlan.productionBible.pillars.slice(0, 4).join(', ')}. Decision: {gameScopePlan.productionBible.firstUserDecision}
+              </p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {gameScopePlan.creativeArtifacts.slice(0, 7).map((artifact) => (
                   <span key={artifact} className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]">

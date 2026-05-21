@@ -8,6 +8,7 @@ import {
 } from '@/lib/production/ai-quality-orchestrator'
 import { getGameGenrePack, type GameGenrePack } from '@/lib/production/game-genre-packs'
 import { buildGamePlaytestSpinePlan, type PlaytestSpinePlan } from '@/lib/production/game-playtest-spine'
+import { buildGameProductionBible, type ProductionBibleSnapshot } from '@/lib/production/game-production-bible'
 
 export type PlayableGameScope = 'prototype' | 'demo' | 'complete-game-plan'
 
@@ -59,6 +60,7 @@ export interface GameScopePlan {
   releaseState: GameScopePlanState
   runtimeTargets: ProductionRuntimeTarget[]
   genrePack: GameGenrePack
+  productionBible: ProductionBibleSnapshot
   playtestSpine: PlaytestSpinePlan
   creativeArtifacts: CreativePlanningArtifact[]
   productionGraphs: GameScopeGraph[]
@@ -306,6 +308,13 @@ export function buildGameScopePlan(input: BuildGameScopePlanInput = {}): GameSco
   const targetQuality = input.targetQuality ?? defaultQualityForScope(scope)
   const capabilities = buildRuntimeCapabilitySnapshot(input.runtimeCapabilities)
   const creativeArtifacts = artifactsForScope(scope)
+  const productionBible = buildGameProductionBible({
+    scope,
+    genre,
+    genreLabel,
+    userIntent,
+    creativeArtifacts,
+  })
   const playtestSpine = buildGamePlaytestSpinePlan({
     genre,
     customGenreLabel: genreLabel,
@@ -351,6 +360,7 @@ export function buildGameScopePlan(input: BuildGameScopePlanInput = {}): GameSco
     releaseState: qualityPlans.some((plan) => plan.blocked) ? 'blocked' : 'held',
     runtimeTargets: unique(runtimeTargets),
     genrePack,
+    productionBible,
     playtestSpine,
     creativeArtifacts: unique(creativeArtifacts),
     productionGraphs,
