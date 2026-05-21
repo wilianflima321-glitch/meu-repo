@@ -10,7 +10,7 @@
 import type { Entity, System, World, EntityId, Component, TransformComponent } from './game-engine-core';
 import { VisualScriptRuntime, RuntimeContext, Vector3 } from '../components/visual-scripting/VisualScriptRuntime';
 import type { VisualScript } from '../components/visual-scripting/VisualScriptEditor';
-import * as THREE from 'three';
+import type * as THREE from 'three';
 
 import { createComponentLogger } from '@/lib/observability/logger'
 

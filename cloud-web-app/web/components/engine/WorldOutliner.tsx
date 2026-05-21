@@ -9,7 +9,7 @@
  * NAO E MOCK - Sistema real e funcional!
  */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import * as THREE from 'three';
+import type * as THREE from 'three';
 import { EditorScaleReadinessBadge } from '@/components/editor/EditorScaleReadinessBadge';
 import { useVirtualWindow } from '@/components/performance/useVirtualWindow';
 import { buildEditorScaleReadiness } from '@/lib/editor/editor-scale-readiness';

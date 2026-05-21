@@ -1,16 +1,16 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 1908
+- Files scanned: 1955
 - Failures: 0
 
 ## Counts
-- threeDirect: 65 (max 66)
+- threeDirect: 48 (max 50)
 - reactThreeFiberDirect: 2 (max 3)
 - reactThreeDreiDirect: 1 (max 2)
 - monacoEditorDirect: 3 (max 4)
 - monacoReactDirect: 4 (max 4)
-- framerMotionDirect: 18 (max 19)
+- framerMotionDirect: 18 (max 18)
 - dynamicImportsMin: 254 (min 100)
 
 ## Top Offenders
@@ -18,28 +18,28 @@ Generated: deterministic local scan
 - components/character/control-rig-model.ts (1)
 - components/engine/content-browser-core.ts (1)
 - components/engine/DetailsPanel.tsx (1)
-- components/engine/WorldOutliner.tsx (1)
 - components/nexus/NexusCanvasV2.tsx (1)
-- components/physics/DestructionEditor.model.ts (1)
 - components/physics/DestructionEditor.tsx (1)
 - components/physics/fluid-simulation-core.ts (1)
 - lib/aaa-asset-pipeline.ts (1)
-- lib/aaa-material-system.ts (1)
-- lib/aaa-render-system.ts (1)
-- lib/aaa-renderer-impl.ts (1)
 - lib/ai/behavior-tree-system.tsx (1)
 - lib/ai-content-generation.ts (1)
-- lib/animation/animation-system.ts (1)
 - lib/asset-import-pipeline.ts (1)
 - lib/asset-pipeline.ts (1)
 - lib/assets/asset-importer.ts (1)
 - lib/audio/spatial-audio-system.ts (1)
 - lib/camera/camera-system.tsx (1)
-- lib/cinematic-lighting.ts (1)
-- lib/cloth-simulation.ts (1)
-- lib/control-rig-system.ts (1)
 - lib/cutscene/system/player.ts (1)
-- lib/decal-system.ts (1)
+- lib/dialogue-cutscene/cutscene-system.ts (1)
+- lib/ecs/prefab-system/component-registry.ts (1)
+- lib/ecs/prefab-system/prefab-manager.ts (1)
+- lib/engine/asset-pipeline.ts (1)
+- lib/engine/lod/auto-lod-pipeline.ts (1)
+- lib/engine/lod/__tests__/auto-lod-pipeline.test.ts (1)
+- lib/engine/scene-graph.ts (1)
+- lib/facial-animation-system.ts (1)
+- lib/game-engine-core.ts (1)
+- lib/game-loop.ts (1)
 ### reactThreeFiberDirect
 - components/physics/DestructionEditor.tsx (1)
 - lib/camera/camera-system.tsx (1)

@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary Studio/render-gated runtime; do not import from public route shells.
 /**
  * AAA RENDER SYSTEM - Sistema de Rendering Profissional
  * 

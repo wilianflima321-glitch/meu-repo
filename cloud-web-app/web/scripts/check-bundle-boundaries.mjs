@@ -8,12 +8,12 @@ const EXTENSIONS = new Set(['.ts', '.tsx'])
 const ignoreDirs = new Set(['node_modules', '.next', 'dist', 'build'])
 
 const BUDGETS = {
-  threeDirect: 66,
+  threeDirect: 50,
   reactThreeFiberDirect: 3,
   reactThreeDreiDirect: 2,
   monacoEditorDirect: 4,
   monacoReactDirect: 4,
-  framerMotionDirect: 19,
+  framerMotionDirect: 18,
   dynamicImportsMin: 100,
 }
 

@@ -7,8 +7,8 @@ const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']
 const IGNORED_PARTS = new Set(['node_modules', '.next', 'coverage', 'dist', 'build', '.git'])
 
 const WATCH_LINE_LIMIT = 800
-const WATCH_FILE_BUDGET = 132
-const MAX_LINE_BUDGET = 1171
+const WATCH_FILE_BUDGET = 126
+const MAX_LINE_BUDGET = 1151
 
 function walk(dir, files = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

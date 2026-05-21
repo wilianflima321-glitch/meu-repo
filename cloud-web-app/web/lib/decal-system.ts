@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary Studio/render-gated runtime; do not import from public route shells.
 import { logger } from '@/lib/observability/logger';
 /**
  * Decal System - Sistema de Decalques

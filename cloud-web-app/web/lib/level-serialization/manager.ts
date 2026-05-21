@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import type * as THREE from 'three';
 import type { LevelSettings, RuntimeEntity, RuntimeLevel, RuntimePrefab, SerializedAssetRef, SerializedLevel } from './types';
 import { LevelSerializer } from './serializer';
 import { LevelFileFormat } from './file-format';
