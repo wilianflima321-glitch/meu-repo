@@ -6,6 +6,7 @@ import type {
   ProductionRuntimeTarget,
 } from '@/lib/production/agentic-production-state'
 import { mergeAgenticProductionState } from '@/lib/production/agentic-production-state'
+import { CINEMATIC_EVIDENCE_REQUIRED_EVIDENCE } from '@/lib/production/cinematic-evidence-spine'
 import { GAME_ASSET_QUALITY_REQUIRED_EVIDENCE } from '@/lib/production/game-asset-quality-pipeline'
 
 export type GameProductionScale = 'prototype' | 'vertical-slice' | 'premium-indie' | 'aaa-assisted'
@@ -18,6 +19,7 @@ export type GameProductionDomainGraph =
   | 'combat-graph'
   | 'camera-input-graph'
   | 'animation-graph'
+  | 'cinematic-evidence-graph'
   | 'quest-narrative-graph'
   | 'asset-pipeline-graph'
   | 'audio-mix-graph'
@@ -65,6 +67,7 @@ const GRAPH_LABELS: Record<GameProductionDomainGraph, string> = {
   'combat-graph': 'Combat Graph',
   'camera-input-graph': 'Camera/Input Graph',
   'animation-graph': 'Animation Graph',
+  'cinematic-evidence-graph': 'Cinematic Evidence Graph',
   'quest-narrative-graph': 'Quest/Narrative Graph',
   'asset-pipeline-graph': 'Asset Pipeline Graph',
   'audio-mix-graph': 'Audio Mix Graph',
@@ -80,6 +83,7 @@ const GRAPH_OWNERS: Record<GameProductionDomainGraph, string> = {
   'combat-graph': 'Combat Designer Agent',
   'camera-input-graph': 'Camera Feel Agent',
   'animation-graph': 'Animation Director Agent',
+  'cinematic-evidence-graph': 'Cinematic Director Agent',
   'quest-narrative-graph': 'Narrative Designer Agent',
   'asset-pipeline-graph': 'Technical Artist Agent',
   'audio-mix-graph': 'Audio Director Agent',
@@ -95,6 +99,7 @@ const REQUIRED_GRAPH_IDS: GameProductionDomainGraph[] = [
   'combat-graph',
   'camera-input-graph',
   'animation-graph',
+  'cinematic-evidence-graph',
   'quest-narrative-graph',
   'asset-pipeline-graph',
   'audio-mix-graph',
@@ -111,6 +116,8 @@ const SPECIALIST_AGENTS = [
   'World Architect Agent',
   'Technical Artist Agent',
   'Animation Director Agent',
+  'Cinematic Director Agent',
+  'Video Evidence Agent',
   'Narrative Designer Agent',
   'Audio Director Agent',
   'Performance QA Agent',
@@ -136,6 +143,12 @@ function graphEvidence(id: GameProductionDomainGraph): string[] {
       return ['camera rig capture', 'input latency budget', 'accessibility mapping', 'controller pass']
     case 'animation-graph':
       return ['rig validation', 'blend tree evidence', 'root motion pass', 'IK/facial/cloth budget']
+    case 'cinematic-evidence-graph':
+      return [
+        ...CINEMATIC_EVIDENCE_REQUIRED_EVIDENCE,
+        'shot timing pass',
+        'gameplay handoff capture',
+      ]
     case 'quest-narrative-graph':
       return ['quest dependency map', 'dialog continuity pass', 'lore consistency receipt', 'fail-state design']
     case 'asset-pipeline-graph':
@@ -160,6 +173,14 @@ function graphAcceptance(id: GameProductionDomainGraph): string[] {
   if (id === 'release-graph') return [...base, 'no fake done status', 'final approval before publish']
   if (id === 'performance-graph') return [...base, 'no heavy job on browser main thread']
   if (id === 'playtest-validation-graph') return [...base, 'bot and human review paths captured']
+  if (id === 'cinematic-evidence-graph') {
+    return [
+      ...base,
+      'Draft videos are not final',
+      'AI video provider configured or lane held',
+      'Cloud/video generation cost applies',
+    ]
+  }
   return [...base, 'read receipt attached before apply']
 }
 
@@ -179,7 +200,7 @@ function mapToProductionGraphKey(id: GameProductionDomainGraph): ProductionGraph
   if (id === 'world-graph') return 'sceneWorldGraph'
   if (id === 'release-graph') return 'releaseGraph'
   if (id === 'playtest-validation-graph' || id === 'performance-graph') return 'validationGraph'
-  if (id === 'design-bible' || id === 'quest-narrative-graph') return 'shotFilmGraph'
+  if (id === 'design-bible' || id === 'quest-narrative-graph' || id === 'cinematic-evidence-graph') return 'shotFilmGraph'
   return 'gameplayGraph'
 }
 
@@ -214,8 +235,9 @@ function buildLedger(contract: GameProductionSpineContract): MissionLedgerEntry 
     summary: `${contract.title} requires graph-based production before any premium game claim can be accepted.`,
     acceptance: [
       'Design Bible approved',
-      'Gameplay, world, combat, animation, asset, performance, playtest, and release graphs attached',
+      'Gameplay, world, combat, animation, cinematic, asset, performance, playtest, and release graphs attached',
       'Browser remains preview/review; heavy jobs route to sidecar or cloud',
+      'AI video and animatics remain evidence until runtime capture and human review exist',
       'Release requires human approval and rollback plan',
     ],
     evidenceRefs: contract.graphs.flatMap((graph) => graph.requiredEvidence.map((evidence) => `required:${graph.id}:${evidence}`)),
@@ -251,11 +273,12 @@ export function buildGameProductionSpineContract(input: {
       'Playable build beats chat transcript',
       'Combat feel requires frame data, replay, and tuning notes',
       'World scale requires streaming, navmesh, asset budget, and traversal evidence',
-      'Cinematic quality requires animation, camera, audio, lighting, continuity, and render evidence',
+      'Cinematic quality requires storyboard, animatic, AI video reference, engine capture, audio, continuity, and render evidence',
       'No final game/film state without playtest replay, performance report, provenance, and human approval',
     ],
     knownLimitations: [
       'Browser preview cannot replace a native AAA renderer for final large-world output',
+      'Text-to-video output is a draft/reference lane; final footage requires engine/runtime capture and human approval',
       'AI agents need read receipts, scope locks, playtest evidence, and human review to avoid hallucinated completeness',
       'AAA-assisted means Aethel orchestrates, validates, and exports; it does not promise full autonomous AAA production',
     ],
@@ -324,6 +347,7 @@ export function mergeGameProductionSpineIntoProductionState(
             'Game Design Bible',
             'World Graph',
             'Gameplay Graph',
+            'Cinematic Evidence Graph',
             'Playtest Validation Graph',
           ]),
         },
@@ -334,6 +358,7 @@ export function mergeGameProductionSpineIntoProductionState(
             ...current.brain.technicalBible.constraints,
             'Browser is preview/review only for premium game production',
             'Heavy render, indexing, asset processing, shader compile, and playtest jobs must run in sidecar/cloud lanes',
+            'AI video drafts require provider configuration, cost guard, continuity receipt, runtime capture, and human review',
             'No autonomous AAA claim without graph evidence, playtest replay, performance report, and human approval',
           ]),
         },

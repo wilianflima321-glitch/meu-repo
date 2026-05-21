@@ -205,6 +205,7 @@ export default function StudioMissionControl() {
                 ? [
                     { role: 'Narrative', goal: 'Prepare story/world/character bible before heavy generation.', surface: 'production-bible' },
                     { role: 'Gameplay', goal: 'Convert scope into core loop, input, camera, and playtest contracts.', surface: 'gameplay-graph' },
+                    { role: 'Cinematic', goal: 'Plan storyboard, animatic, AI video reference, engine capture, and review evidence.', surface: 'cinematic-evidence' },
                   ]
                 : []),
               { role: 'QA', goal: 'Validate evidence, blockers, and rollback path.', surface: 'validation-graph' },
@@ -341,6 +342,9 @@ export default function StudioMissionControl() {
               </p>
               <p className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
                 Deep bible: {gameScopePlan.productionBible.deepBible.scenes.length} scene beats, {gameScopePlan.productionBible.deepBible.characters.length} character contracts, {gameScopePlan.productionBible.deepBible.evidenceModel.requiredEvidence.length} gates.
+              </p>
+              <p className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                Cinematics: {gameScopePlan.cinematicEvidence.state}; {gameScopePlan.cinematicEvidence.lanes.length} lane(s). {gameScopePlan.cinematicEvidence.copy.draftWarning}.
               </p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {gameScopePlan.creativeArtifacts.slice(0, 7).map((artifact) => (

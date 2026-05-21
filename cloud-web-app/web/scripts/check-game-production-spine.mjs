@@ -47,6 +47,11 @@ requirePattern(
 )
 requirePattern(
   'lib/production/game-production-spine.ts',
+  /'cinematic-evidence-graph'/,
+  'cinematic evidence graph must be explicit'
+)
+requirePattern(
+  'lib/production/game-production-spine.ts',
   /asset license\/provenance/,
   'asset provenance must be required'
 )
@@ -54,6 +59,11 @@ requirePattern(
   'lib/production/game-production-spine.ts',
   /playtest replay/,
   'playtest replay must be required before release'
+)
+requirePattern(
+  'lib/production/game-production-spine.ts',
+  /Draft videos are not final/,
+  'AI video drafts must be blocked from final footage claims'
 )
 requirePattern(
   'lib/production/game-production-spine.ts',
@@ -137,4 +147,4 @@ if (failures.length) {
   process.exit(1)
 }
 
-console.log('[game-production-spine] PASS graphs=12 release=human-held heavyWork=sidecar-or-cloud')
+console.log('[game-production-spine] PASS graphs=13 release=human-held heavyWork=sidecar-or-cloud')

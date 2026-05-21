@@ -6,6 +6,10 @@ import {
   type QualityOrchestrationPlan,
   type RuntimeCapabilitySnapshot,
 } from '@/lib/production/ai-quality-orchestrator'
+import {
+  buildCinematicEvidencePlan,
+  type CinematicEvidencePlan,
+} from '@/lib/production/cinematic-evidence-spine'
 import { getGameGenrePack, type GameGenrePack } from '@/lib/production/game-genre-packs'
 import { buildGamePlaytestSpinePlan, type PlaytestSpinePlan } from '@/lib/production/game-playtest-spine'
 import { buildGameProductionBible, type ProductionBibleSnapshot } from '@/lib/production/game-production-bible'
@@ -31,6 +35,7 @@ export type CreativePlanningArtifact =
   | 'character-bible'
   | 'gameplay-loop'
   | 'visual-style-guide'
+  | 'cinematic-direction'
   | 'audio-direction'
   | 'quest-dialogue-map'
   | 'level-flow'
@@ -62,6 +67,7 @@ export interface GameScopePlan {
   genrePack: GameGenrePack
   productionBible: ProductionBibleSnapshot
   playtestSpine: PlaytestSpinePlan
+  cinematicEvidence: CinematicEvidencePlan
   creativeArtifacts: CreativePlanningArtifact[]
   productionGraphs: GameScopeGraph[]
   qualityPlans: QualityOrchestrationPlan[]
@@ -114,6 +120,7 @@ const PROTOTYPE_ARTIFACTS: CreativePlanningArtifact[] = [
 
 const DEMO_ARTIFACTS: CreativePlanningArtifact[] = [
   ...PROTOTYPE_ARTIFACTS,
+  'cinematic-direction',
   'quest-dialogue-map',
   'level-flow',
   'effects-vfx-plan',
@@ -183,6 +190,13 @@ function graphForArtifact(artifact: CreativePlanningArtifact): GameScopeGraph {
         ownerAgent: 'Art Direction Agent',
         requiredEvidence: ['reference board', 'palette/material rules', 'camera/lens intent', 'quality target'],
         userValue: 'Generated and curated assets follow one art direction instead of becoming a mixed asset dump.',
+      }
+    case 'cinematic-direction':
+      return {
+        id: 'cinematic-direction',
+        ownerAgent: 'Cinematic Director Agent',
+        requiredEvidence: ['shot list', 'storyboard frames', 'animatic prompt', 'draft video review', 'human cinematic approval'],
+        userValue: 'Cinematics become a governed evidence lane: storyboard first, AI video as draft reference, engine capture before final claims.',
       }
     case 'audio-direction':
       return {
@@ -292,7 +306,7 @@ function qualityPlanGoals(input: {
     `Plan environment and world-kit quality for ${input.userIntent}.`,
   ]
   if (input.scope !== 'prototype') {
-    base.push(`Plan cinematic, VFX, and audio-facing assets for the ${input.genreLabel} demo.`)
+    base.push(`Plan cinematic, VFX, AI video reference, and audio-facing assets for the ${input.genreLabel} demo.`)
   }
   return base
 }
@@ -320,6 +334,12 @@ export function buildGameScopePlan(input: BuildGameScopePlanInput = {}): GameSco
     genre,
     customGenreLabel: genreLabel,
     evidenceRefs,
+  })
+  const cinematicEvidence = buildCinematicEvidencePlan({
+    scope,
+    evidenceRefs,
+    videoProviderConfigured: evidenceRefs.includes('AI video provider status'),
+    cloudStreamConfigured: capabilities['pixel-stream-url'],
   })
   const productionGraphs = [
     ...creativeArtifacts.map(graphForArtifact),
@@ -363,6 +383,7 @@ export function buildGameScopePlan(input: BuildGameScopePlanInput = {}): GameSco
     genrePack,
     productionBible,
     playtestSpine,
+    cinematicEvidence,
     creativeArtifacts: unique(creativeArtifacts),
     productionGraphs,
     qualityPlans,

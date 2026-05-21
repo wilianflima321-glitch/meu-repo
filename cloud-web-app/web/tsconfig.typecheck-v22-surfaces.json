@@ -44,7 +44,8 @@
     "lib/ai-agent-system.ts",
     "app/api/ai/video/generate/route.ts",
     "app/api/ai/video/status/route.ts",
-    "lib/server/ai-video-generation.ts"
+    "lib/server/ai-video-generation.ts",
+    "lib/production/cinematic-evidence-spine.ts"
   ],
   "exclude": [
     "node_modules",

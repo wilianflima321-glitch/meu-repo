@@ -10,6 +10,7 @@ export type ProductionBibleSectionId =
   | 'characters'
   | 'gameplay'
   | 'art-direction'
+  | 'cinematics'
   | 'audio'
   | 'playtest'
   | 'release'
@@ -70,6 +71,13 @@ const SECTION_BY_ARTIFACT: Partial<Record<CreativePlanningArtifact, ProductionBi
     ownerAgent: 'Art Direction Agent',
     compactQuestion: 'What references, materials, lighting, camera, and readability rules lock the style?',
     requiredEvidence: ['reference board', 'palette/material rules', 'camera/lens intent', 'quality target'],
+  },
+  'cinematic-direction': {
+    id: 'cinematics',
+    label: 'Cinematics',
+    ownerAgent: 'Cinematic Director Agent',
+    compactQuestion: 'Which shots, animatics, AI video references, and engine captures prove timing without claiming final footage?',
+    requiredEvidence: ['shot list', 'storyboard frames', 'animatic prompt', 'draft video review', 'human cinematic approval'],
   },
   'audio-direction': {
     id: 'audio',

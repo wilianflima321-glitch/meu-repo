@@ -270,6 +270,9 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                       <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-warning-light)]">
                         Playtest spine: {productionBiblePlan.playtestSpine.state}; {productionBiblePlan.playtestSpine.scenarios.length} scenario(s), human review required.
                       </p>
+                      <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-warning-light)]">
+                        Cinematic evidence: {productionBiblePlan.cinematicEvidence.state}; {productionBiblePlan.cinematicEvidence.lanes.length} lane(s), {productionBiblePlan.cinematicEvidence.copy.cloudCost}.
+                      </p>
                       <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
                         Bible pillars: {productionBiblePlan.productionBible.pillars.slice(0, 5).join(', ')}. {productionBiblePlan.productionBible.firstUserDecision}
                       </p>

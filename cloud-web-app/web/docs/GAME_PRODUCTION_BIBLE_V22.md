@@ -17,6 +17,7 @@ The visible UI should show a compact summary, a few pillars, and the first decis
 - Characters
 - Gameplay
 - Art direction
+- Cinematics
 - Audio
 - Playtest
 - Release
@@ -24,3 +25,7 @@ The visible UI should show a compact summary, a few pillars, and the first decis
 ## Completion Rule
 
 The production bible can unlock agent work, but it cannot mark a game complete. Playability still requires build evidence, playtest replay, performance traces, provenance, rollback, and human review.
+
+## Cinematic Evidence
+
+Cinematics are planned as a compact lane: storyboard, animatic, AI video reference, engine capture, and human review. The UI should show state and next action, not a wall of shot details. AI video drafts are references only and must never be presented as final footage.

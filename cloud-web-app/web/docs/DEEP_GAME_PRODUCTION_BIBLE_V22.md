@@ -13,6 +13,7 @@ The compact Production Bible is the user-facing cover. The Deep Production Bible
 - Character contracts: role, silhouette, motivation, gameplay function, animation, voice, relationships, evidence.
 - Gameplay contract: 10-second loop, 2-minute loop, 20-minute loop, camera/input feel, progression, failure recovery, telemetry.
 - Scene beats: purpose, player objective, emotional beat, location, required assets, animation, audio, camera language, transitions, failure states, performance budget.
+- Cinematic evidence: storyboard, shot blocking, animatic draft, AI video reference, engine render capture, and release footage review.
 - Asset quality: hero assets, environment kits, material rules, sourcing, LOD, rigging, proof.
 - Runtime quality: Browser preview/review, Studio Local heavy production, Cloud Stream final review when configured.
 - Agent handoffs: what each agent reads, writes, and must not do.
@@ -25,3 +26,7 @@ Do not expose the whole bible as a wall of text. Studio and Evidence Center show
 ## Completion Rule
 
 The Deep Bible can make agents smarter, but it cannot make work done. A game is not complete without build evidence, playtest replay, performance trace, asset provenance, rollback plan, and human review.
+
+## Cinematic Rule
+
+AI video is an evidence lane, not a final-output shortcut. Draft videos are not final, Cloud/video generation cost applies, and final footage requires engine/runtime capture plus human cinematic approval.

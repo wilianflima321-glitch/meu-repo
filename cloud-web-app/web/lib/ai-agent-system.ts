@@ -552,6 +552,7 @@ export async function createGame(
       `Scope: ${plan.scope}. Genre: ${plan.genre}. Release state: ${plan.releaseState}.`,
       `Production bible: ${plan.productionBible.pillars.join(', ')}. First user decision: ${plan.productionBible.firstUserDecision}`,
       `Deep bible: ${plan.productionBible.deepBible.scenes.length} scene beats; characters=${plan.productionBible.deepBible.characters.map((character) => character.id).join(', ')}; blocked claims=${plan.productionBible.deepBible.evidenceModel.blockedClaims.join(', ')}.`,
+      `Cinematic evidence: ${plan.cinematicEvidence.state}; lanes=${plan.cinematicEvidence.lanes.map((lane) => `${lane.id}:${lane.status}`).join(', ')}; ${plan.cinematicEvidence.copy.draftWarning}; ${plan.cinematicEvidence.copy.cloudCost}.`,
       `Genre pack: camera=${plan.genrePack.cameraModel}; input=${plan.genrePack.inputModel}; coreLoop=${plan.genrePack.coreLoop.join(' -> ')}.`,
       `Playtest spine: ${plan.playtestSpine.scenarios.map((scenario) => `${scenario.title} via ${scenario.botPath}`).join('; ')}.`,
       `Required playtest telemetry: ${plan.playtestSpine.telemetry.join(', ')}.`,

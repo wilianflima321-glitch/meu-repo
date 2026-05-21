@@ -24,13 +24,15 @@ const source = 'lib/production/game-production-bible.ts'
 
 requirePattern(source, /export interface ProductionBibleSnapshot/, 'ProductionBibleSnapshot contract must exist')
 requirePattern(source, /noWallOfText:\s*true/, 'production bible must stay compact for users')
-requirePattern(source, /'story'[\s\S]*'world'[\s\S]*'characters'[\s\S]*'gameplay'[\s\S]*'art-direction'[\s\S]*'audio'[\s\S]*'playtest'[\s\S]*'release'/, 'core bible sections must be explicit')
+requirePattern(source, /'story'[\s\S]*'world'[\s\S]*'characters'[\s\S]*'gameplay'[\s\S]*'art-direction'[\s\S]*'cinematics'[\s\S]*'audio'[\s\S]*'playtest'[\s\S]*'release'/, 'core bible sections must be explicit')
 requirePattern(source, /firstUserDecision/, 'bible must expose the next user decision')
 requirePattern(source, /hiddenDepthCount/, 'bible must keep deep contracts off the primary UI')
 requirePattern(source, /humanReviewRequired:\s*true/, 'human review must be mandatory')
 requirePattern('lib/production/game-scope-orchestrator.ts', /productionBible:\s*ProductionBibleSnapshot/, 'GameScopePlan must include production bible')
 requirePattern('lib/production/game-scope-orchestrator.ts', /buildGameProductionBible/, 'scope orchestrator must build the bible')
+requirePattern('lib/production/game-scope-orchestrator.ts', /cinematicEvidence:\s*CinematicEvidencePlan/, 'scope orchestrator must expose cinematic evidence')
 requirePattern('app/studio/StudioMissionControl.tsx', /productionBible\.pillars/, 'Studio must show compact bible pillars')
+requirePattern('app/studio/StudioMissionControl.tsx', /gameScopePlan\.cinematicEvidence\.state/, 'Studio must show compact cinematic state')
 requirePattern('components/evidence/EvidenceCenter.tsx', /productionBible\.firstUserDecision/, 'Evidence Center must show first decision')
 requirePattern('lib/ai-agent-system.ts', /Production bible:/, 'agent prompt must receive bible constraints')
 requirePattern('docs/GAME_PRODUCTION_BIBLE_V22.md', /not as a wall of text/, 'docs must protect UX from text overload')
@@ -41,4 +43,4 @@ if (failures.length) {
   process.exit(1)
 }
 
-console.log('[game-production-bible] PASS sections=8 no-wall-of-text=true')
+console.log('[game-production-bible] PASS sections=9 no-wall-of-text=true')

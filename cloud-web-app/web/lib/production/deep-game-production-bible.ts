@@ -1,4 +1,9 @@
 import type { PlayableGameGenre, PlayableGameScope } from '@/lib/production/game-scope-orchestrator'
+import {
+  buildCinematicEvidencePlan,
+  CINEMATIC_EVIDENCE_REQUIRED_EVIDENCE,
+  type CinematicEvidencePlan,
+} from '@/lib/production/cinematic-evidence-spine'
 
 export type DeepBibleReadinessState = 'held' | 'blocked' | 'needs-review'
 
@@ -101,6 +106,7 @@ export interface DeepProductionBible {
     voiceDirection: string[]
     cinematicLanguage: string[]
   }
+  cinematicEvidence: CinematicEvidencePlan
   runtimeQuality: {
     browserRole: 'preview-review'
     studioLocalRole: 'heavy-production'
@@ -165,7 +171,15 @@ function sceneTemplates(scope: PlayableGameScope, genreLabel: string): DeepScene
     continuityDependencies: ['story promise', 'world rule', 'character motivation', 'mechanic availability'],
     failureStates: ['player confusion', 'softlock', 'unreadable objective', 'performance hitch'],
     performanceBudget: 'Capture frame pacing, input latency, and memory pressure on the selected runtime.',
-    requiredEvidence: ['scene brief', 'asset manifest', 'playtest replay', 'performance trace', 'human review note'],
+    requiredEvidence: [
+      'scene brief',
+      'storyboard frames',
+      'animatic prompt',
+      'asset manifest',
+      'playtest replay',
+      'performance trace',
+      'human review note',
+    ],
   }))
 }
 
@@ -214,6 +228,7 @@ function baseEvidence(): string[] {
     'scene briefs',
     'asset provenance',
     'camera/input contract',
+    ...CINEMATIC_EVIDENCE_REQUIRED_EVIDENCE,
     'playtest replay',
     'bug ledger',
     'performance trace',
@@ -235,6 +250,12 @@ export function buildDeepGameProductionBible(input: {
   const state: DeepBibleReadinessState = missingEvidence.length > 0 ? 'held' : 'needs-review'
   const scenes = sceneTemplates(input.scope, input.genreLabel)
   const characters = characterContracts(input.genreLabel)
+  const cinematicEvidence = buildCinematicEvidencePlan({
+    scope: input.scope,
+    evidenceRefs: input.evidenceRefs,
+    videoProviderConfigured: evidence.has('AI video provider status'),
+    cloudStreamConfigured: evidence.has('engine render or cloud stream capture'),
+  })
 
   return {
     id: `${input.genre}:${input.scope}:deep-production-bible:v1`,
@@ -289,8 +310,14 @@ export function buildDeepGameProductionBible(input: {
       musicPillars: ['identity cue', 'pressure cue', 'reward cue'],
       sfxLanguage: ['readability-first', 'state transition cues', 'interaction confirmation'],
       voiceDirection: ['short, motivated, continuity-safe', 'no lore dump in first loop'],
-      cinematicLanguage: ['camera supports player promise', 'cutscenes hand back to gameplay cleanly', 'no cinematic claim without render evidence'],
+      cinematicLanguage: [
+        'camera supports player promise',
+        'cutscenes hand back to gameplay cleanly',
+        'AI video drafts are references, not final footage',
+        'no cinematic claim without render evidence',
+      ],
     },
+    cinematicEvidence,
     runtimeQuality: {
       browserRole: 'preview-review',
       studioLocalRole: 'heavy-production',
@@ -333,11 +360,11 @@ export function buildDeepGameProductionBible(input: {
     ],
     evidenceModel: {
       requiredEvidence,
-      blockedClaims: ['AAA alone', 'Unreal-grade', 'final game', 'release ready', 'marketplace ready'],
+      blockedClaims: ['AAA alone', 'Unreal-grade', 'final game', 'final cinematic', 'release ready', 'marketplace ready'],
       humanApprovalCheckpoints: ['creative promise', 'asset sourcing', 'first playable', 'demo candidate', 'release candidate'],
     },
     compactUiSummary: {
-      visiblePillars: ['Fantasy', 'World', 'Characters', 'Loop', 'Scenes', 'Quality'],
+      visiblePillars: ['Fantasy', 'World', 'Characters', 'Loop', 'Scenes', 'Cinematics', 'Quality'],
       sceneCount: scenes.length,
       characterCount: characters.length,
       qualityGateCount: requiredEvidence.length,
