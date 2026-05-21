@@ -11,6 +11,9 @@
     "components/engine/EngineContentBrowser.tsx",
     "components/engine/EngineContentBrowser.parts.tsx",
     "components/engine/content-browser-core.ts",
-    "components/engine/content-browser-controls.tsx"
+    "components/engine/content-browser-controls.tsx",
+    "components/animation/KeyframeSystem.tsx",
+    "components/animation/KeyframeSystem.model.ts",
+    "components/animation/KeyframeSystem.controls.tsx"
   ]
 }

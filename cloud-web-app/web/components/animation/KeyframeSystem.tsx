@@ -50,6 +50,7 @@ import {
   type EasingType,
   type Keyframe,
   type KeyframeEditorProps,
+  type KeyframeTrack,
   type KeyframeValue,
 } from "./KeyframeSystem.model";
 export {
@@ -68,6 +69,48 @@ export type {
 
 export { KeyframeControls } from "./KeyframeSystem.controls";
 export type { KeyframeControlsProps } from "./KeyframeSystem.controls";
+
+type TimelineRow =
+  | {
+      kind: "track";
+      trackId: string;
+      track: KeyframeTrack;
+      y: number;
+      height: number;
+    }
+  | {
+      kind: "property";
+      trackId: string;
+      track: KeyframeTrack;
+      propertyId: string;
+      property: AnimatedProperty;
+      y: number;
+      height: number;
+    };
+
+interface VisibleTimelineRange {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
+const TIMELINE_DRAW_OVERSCAN = 160;
+
+function findScrollableParent(element: HTMLElement): HTMLElement | Window {
+  let current: HTMLElement | null = element.parentElement;
+
+  while (current) {
+    const style = window.getComputedStyle(current);
+    const overflow = `${style.overflow}${style.overflowY}${style.overflowX}`;
+    if (/(auto|scroll|overlay)/.test(overflow)) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+
+  return window;
+}
 
 export function KeyframeEditor({
   tracks,
@@ -101,6 +144,13 @@ export function KeyframeEditor({
     propertyId: string;
     keyframeId: string;
   } | null>(null);
+  const [visibleTimelineRange, setVisibleTimelineRange] =
+    useState<VisibleTimelineRange>({
+      top: 0,
+      left: 0,
+      width: 1200,
+      height: 640,
+    });
 
   const trackHeight = 24;
   const propertyHeight = 20;
@@ -164,16 +214,119 @@ export function KeyframeEditor({
     [],
   );
 
+  const timelineRows = useMemo<TimelineRow[]>(() => {
+    const rows: TimelineRow[] = [];
+    let y = 0;
+
+    for (const track of tracks) {
+      rows.push({
+        kind: "track",
+        trackId: track.id,
+        track,
+        y,
+        height: trackHeight,
+      });
+      y += trackHeight;
+
+      if (track.expanded) {
+        for (const property of track.properties) {
+          rows.push({
+            kind: "property",
+            trackId: track.id,
+            track,
+            propertyId: property.id,
+            property,
+            y,
+            height: propertyHeight,
+          });
+          y += propertyHeight;
+        }
+      }
+    }
+
+    return rows;
+  }, [propertyHeight, trackHeight, tracks]);
+
   // Calculate total height
   const totalHeight = useMemo(() => {
-    return tracks.reduce((sum, track) => {
-      let h = trackHeight;
-      if (track.expanded) {
-        h += track.properties.length * propertyHeight;
+    const lastRow = timelineRows[timelineRows.length - 1];
+    return lastRow ? lastRow.y + lastRow.height : 0;
+  }, [timelineRows]);
+
+  const sortedKeyframesByProperty = useMemo(() => {
+    const map = new Map<string, Keyframe[]>();
+
+    for (const track of tracks) {
+      for (const property of track.properties) {
+        map.set(
+          `${track.id}:${property.id}`,
+          [...property.keyframes].sort((a, b) => a.time - b.time),
+        );
       }
-      return sum + h;
-    }, 0);
+    }
+
+    return map;
   }, [tracks]);
+
+  const selectedKeyframeIds = useMemo(
+    () => new Set(selectedKeyframes),
+    [selectedKeyframes],
+  );
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || typeof window === "undefined") return;
+
+    const scrollParent = findScrollableParent(canvas);
+    let frameId = 0;
+
+    const updateVisibleRange = () => {
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+        const canvasRect = canvas.getBoundingClientRect();
+        const parentRect =
+          scrollParent === window
+            ? {
+                top: 0,
+                left: 0,
+                width: window.innerWidth,
+                height: window.innerHeight,
+              }
+            : (scrollParent as HTMLElement).getBoundingClientRect();
+
+        const nextRange = {
+          top: Math.max(0, parentRect.top - canvasRect.top),
+          left: Math.max(0, parentRect.left - canvasRect.left),
+          width: Math.max(320, parentRect.width),
+          height: Math.max(240, parentRect.height),
+        };
+
+        setVisibleTimelineRange((previous) =>
+          previous.top === nextRange.top &&
+          previous.left === nextRange.left &&
+          previous.width === nextRange.width &&
+          previous.height === nextRange.height
+            ? previous
+            : nextRange,
+        );
+      });
+    };
+
+    updateVisibleRange();
+
+    const scrollTarget =
+      scrollParent === window ? window : (scrollParent as HTMLElement);
+    scrollTarget.addEventListener("scroll", updateVisibleRange, {
+      passive: true,
+    });
+    window.addEventListener("resize", updateVisibleRange);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      scrollTarget.removeEventListener("scroll", updateVisibleRange);
+      window.removeEventListener("resize", updateVisibleRange);
+    };
+  }, [totalHeight, duration, pixelsPerSecond]);
 
   // Draw keyframe diamonds
   const drawKeyframe = useCallback(
@@ -297,134 +450,160 @@ export function KeyframeEditor({
 
     const width = canvas.width;
     const height = canvas.height;
+    const visibleTop = Math.max(0, visibleTimelineRange.top - TIMELINE_DRAW_OVERSCAN);
+    const visibleLeft = Math.max(0, visibleTimelineRange.left - TIMELINE_DRAW_OVERSCAN);
+    const visibleBottom = Math.min(
+      height,
+      visibleTimelineRange.top + visibleTimelineRange.height + TIMELINE_DRAW_OVERSCAN,
+    );
+    const visibleRight = Math.min(
+      width,
+      visibleTimelineRange.left + visibleTimelineRange.width + TIMELINE_DRAW_OVERSCAN,
+    );
+    const visibleWidth = Math.max(1, visibleRight - visibleLeft);
+    const visibleHeight = Math.max(1, visibleBottom - visibleTop);
 
     // Clear
     ctx.fillStyle = palette.surfaceBase;
-    ctx.fillRect(0, 0, width, height);
+    ctx.fillRect(visibleLeft, visibleTop, visibleWidth, visibleHeight);
 
     // Draw timeline grid
     ctx.strokeStyle = palette.border;
     ctx.lineWidth = 1;
 
-    const secondWidth = pixelsPerSecond;
-    for (let s = 0; s <= duration; s++) {
+    const secondWidth = Math.max(1, pixelsPerSecond);
+    const firstVisibleSecond = Math.max(
+      0,
+      Math.floor((visibleLeft - headerWidth) / secondWidth),
+    );
+    const lastVisibleSecond = Math.min(
+      duration,
+      Math.ceil((visibleRight - headerWidth) / secondWidth),
+    );
+    for (let s = firstVisibleSecond; s <= lastVisibleSecond; s++) {
       const x = headerWidth + s * secondWidth;
       ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
+      ctx.moveTo(x, visibleTop);
+      ctx.lineTo(x, visibleBottom);
       ctx.stroke();
     }
 
     // Draw tracks and keyframes
-    let y = 0;
+    for (const row of timelineRows) {
+      if (row.y + row.height < visibleTop || row.y > visibleBottom) continue;
 
-    for (const track of tracks) {
-      // Track header background
+      if (row.kind === "track") {
+        const { track, y } = row;
+        // Track header background
+        ctx.fillStyle = palette.surfaceMid;
+        ctx.fillRect(0, y, headerWidth, trackHeight);
+
+        // Track label
+        ctx.fillStyle = palette.textSecondary;
+        ctx.font = "bold 11px system-ui";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(track.clipId.slice(0, 20), 24, y + trackHeight / 2);
+
+        // Expand/collapse button
+        ctx.fillStyle = palette.textQuaternary;
+        ctx.font = "10px system-ui";
+        ctx.fillText(track.expanded ? "v" : ">", 8, y + trackHeight / 2);
+
+        // Track background
+        ctx.fillStyle = palette.surfaceStrong;
+        ctx.fillRect(headerWidth, y, width - headerWidth, trackHeight);
+        continue;
+      }
+
+      const { property, trackId, propertyId, y } = row;
+      // Property row background
       ctx.fillStyle = palette.surfaceMid;
-      ctx.fillRect(0, y, headerWidth, trackHeight);
+      ctx.fillRect(0, y, headerWidth, propertyHeight);
 
-      // Track label
-      ctx.fillStyle = palette.textSecondary;
-      ctx.font = "bold 11px system-ui";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      ctx.fillText(track.clipId.slice(0, 20), 24, y + trackHeight / 2);
-
-      // Expand/collapse button
-      ctx.fillStyle = palette.textQuaternary;
+      // Property label
+      ctx.fillStyle = palette.textTertiary;
       ctx.font = "10px system-ui";
-      ctx.fillText(track.expanded ? "v" : ">", 8, y + trackHeight / 2);
+      ctx.fillText(`  ${property.name}`, 24, y + propertyHeight / 2);
 
-      // Track background
-      ctx.fillStyle = palette.surfaceStrong;
-      ctx.fillRect(headerWidth, y, width - headerWidth, trackHeight);
+      // Property timeline background
+      ctx.fillStyle = palette.surfaceBase;
+      ctx.fillRect(headerWidth, y, width - headerWidth, propertyHeight);
 
-      y += trackHeight;
+      const sorted =
+        sortedKeyframesByProperty.get(`${trackId}:${propertyId}`) ?? [];
+      const centerY = y + propertyHeight / 2;
 
-      if (track.expanded) {
-        for (const prop of track.properties) {
-          // Property row background
-          ctx.fillStyle = palette.surfaceMid;
-          ctx.fillRect(0, y, headerWidth, propertyHeight);
+      for (let i = 0; i < sorted.length; i++) {
+        const kf = sorted[i];
+        const x = headerWidth + kf.time * pixelsPerSecond;
 
-          // Property label
-          ctx.fillStyle = palette.textTertiary;
-          ctx.font = "10px system-ui";
-          ctx.fillText(`  ${prop.name}`, 24, y + propertyHeight / 2);
+        if (i < sorted.length - 1) {
+          const nextKf = sorted[i + 1];
+          const nextX = headerWidth + nextKf.time * pixelsPerSecond;
+          const segmentRight = Math.max(x, nextX);
+          const segmentLeft = Math.min(x, nextX);
 
-          // Property timeline background
-          ctx.fillStyle = palette.surfaceBase;
-          ctx.fillRect(headerWidth, y, width - headerWidth, propertyHeight);
-
-          // Draw keyframes and curves
-          const sorted = [...prop.keyframes].sort((a, b) => a.time - b.time);
-
-          for (let i = 0; i < sorted.length; i++) {
-            const kf = sorted[i];
-            const x = headerWidth + kf.time * pixelsPerSecond;
-            const centerY = y + propertyHeight / 2;
-
-            // Draw curve to next keyframe
-            if (i < sorted.length - 1) {
-              const nextKf = sorted[i + 1];
-              const nextX = headerWidth + nextKf.time * pixelsPerSecond;
-              drawEasingCurve(
-                ctx,
-                x,
-                nextX,
-                centerY,
-                kf.easing,
-                kf.bezierOut,
-                nextKf.bezierIn,
-              );
-            }
-
-            // Draw keyframe diamond
-            drawKeyframe(
+          if (segmentRight >= visibleLeft && segmentLeft <= visibleRight) {
+            drawEasingCurve(
               ctx,
               x,
+              nextX,
               centerY,
-              selectedKeyframes.includes(kf.id),
-              hoveredKeyframe === kf.id,
               kf.easing,
+              kf.bezierOut,
+              nextKf.bezierIn,
             );
           }
-
-          y += propertyHeight;
         }
+
+        if (x < visibleLeft || x > visibleRight) continue;
+
+        drawKeyframe(
+          ctx,
+          x,
+          centerY,
+          selectedKeyframeIds.has(kf.id),
+          hoveredKeyframe === kf.id,
+          kf.easing,
+        );
       }
     }
 
     // Draw playhead
     const playheadX = headerWidth + currentTime * pixelsPerSecond;
-    ctx.strokeStyle = palette.error;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(playheadX, 0);
-    ctx.lineTo(playheadX, height);
-    ctx.stroke();
+    if (playheadX >= visibleLeft && playheadX <= visibleRight) {
+      ctx.strokeStyle = palette.error;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(playheadX, visibleTop);
+      ctx.lineTo(playheadX, visibleBottom);
+      ctx.stroke();
 
-    // Playhead head
-    ctx.fillStyle = palette.error;
-    ctx.beginPath();
-    ctx.moveTo(playheadX - 6, 0);
-    ctx.lineTo(playheadX + 6, 0);
-    ctx.lineTo(playheadX, 8);
-    ctx.closePath();
-    ctx.fill();
+      // Playhead head
+      ctx.fillStyle = palette.error;
+      ctx.beginPath();
+      ctx.moveTo(playheadX - 6, Math.max(0, visibleTop));
+      ctx.lineTo(playheadX + 6, Math.max(0, visibleTop));
+      ctx.lineTo(playheadX, Math.max(8, visibleTop + 8));
+      ctx.closePath();
+      ctx.fill();
+    }
   }, [
-    tracks,
     currentTime,
     duration,
     pixelsPerSecond,
-    selectedKeyframes,
+    selectedKeyframeIds,
     hoveredKeyframe,
     drawKeyframe,
     drawEasingCurve,
     headerWidth,
     palette,
     propertyHeight,
+    sortedKeyframesByProperty,
+    timelineRows,
     trackHeight,
+    visibleTimelineRange,
   ]);
 
   // Hit test for keyframe
@@ -444,25 +623,25 @@ export function KeyframeEditor({
       const x = clientX - rect.left;
       const y = clientY - rect.top;
 
-      let currentY = 0;
+      for (const row of timelineRows) {
+        if (row.kind !== "property") continue;
+        if (y < row.y || y > row.y + row.height) continue;
 
-      for (const track of tracks) {
-        currentY += trackHeight;
+        const centerY = row.y + propertyHeight / 2;
+        const sorted =
+          sortedKeyframesByProperty.get(`${row.trackId}:${row.propertyId}`) ??
+          row.property.keyframes;
 
-        if (track.expanded) {
-          for (const prop of track.properties) {
-            const centerY = currentY + propertyHeight / 2;
+        for (const kf of sorted) {
+          const kfX = headerWidth + kf.time * pixelsPerSecond;
+          const dist = Math.sqrt((x - kfX) ** 2 + (y - centerY) ** 2);
 
-            for (const kf of prop.keyframes) {
-              const kfX = headerWidth + kf.time * pixelsPerSecond;
-              const dist = Math.sqrt((x - kfX) ** 2 + (y - centerY) ** 2);
-
-              if (dist <= keyframeSize) {
-                return { trackId: track.id, propertyId: prop.id, keyframe: kf };
-              }
-            }
-
-            currentY += propertyHeight;
+          if (dist <= keyframeSize) {
+            return {
+              trackId: row.trackId,
+              propertyId: row.propertyId,
+              keyframe: kf,
+            };
           }
         }
       }
@@ -470,12 +649,12 @@ export function KeyframeEditor({
       return null;
     },
     [
-      tracks,
+      timelineRows,
+      sortedKeyframesByProperty,
       pixelsPerSecond,
       headerWidth,
       keyframeSize,
       propertyHeight,
-      trackHeight,
     ],
   );
 
@@ -516,39 +695,35 @@ export function KeyframeEditor({
         const y = e.clientY - rect.top;
 
         if (x < headerWidth) {
-          let currentY = 0;
-          for (const track of tracks) {
-            if (y >= currentY && y < currentY + trackHeight) {
-              onTrackToggle?.(track.id);
-              return;
-            }
-            currentY += trackHeight;
-            if (track.expanded) {
-              currentY += track.properties.length * propertyHeight;
-            }
+          const trackRow = timelineRows.find(
+            (row) => row.kind === "track" && y >= row.y && y < row.y + row.height,
+          );
+          if (trackRow?.kind === "track") {
+            onTrackToggle?.(trackRow.trackId);
+            return;
           }
         } else if (e.detail === 2) {
           // Double-click to add keyframe
-          const time = (x - headerWidth) / pixelsPerSecond;
+          const time = (x - headerWidth) / Math.max(1, pixelsPerSecond);
 
-          let currentY = 0;
-          for (const track of tracks) {
-            currentY += trackHeight;
+          const propertyRow = timelineRows.find(
+            (row) =>
+              row.kind === "property" && y >= row.y && y < row.y + row.height,
+          );
 
-            if (track.expanded) {
-              for (const prop of track.properties) {
-                if (y >= currentY && y < currentY + propertyHeight) {
-                  const currentValue = interpolateValue(
-                    prop.keyframes,
-                    time,
-                    prop.defaultValue,
-                  );
-                  onKeyframeAdd(track.id, prop.id, time, currentValue);
-                  return;
-                }
-                currentY += propertyHeight;
-              }
-            }
+          if (propertyRow?.kind === "property") {
+            const currentValue = interpolateValue(
+              propertyRow.property.keyframes,
+              time,
+              propertyRow.property.defaultValue,
+            );
+            onKeyframeAdd(
+              propertyRow.trackId,
+              propertyRow.propertyId,
+              time,
+              currentValue,
+            );
+            return;
           }
         }
 
@@ -562,7 +737,7 @@ export function KeyframeEditor({
       hitTestKeyframe,
       selectedKeyframes,
       onSelectionChange,
-      tracks,
+      timelineRows,
       pixelsPerSecond,
       onKeyframeAdd,
       onTrackToggle,
@@ -578,7 +753,7 @@ export function KeyframeEditor({
         const dx = e.clientX - dragging.startX;
         const newTime = Math.max(
           0,
-          Math.min(duration, dragging.startTime + dx / pixelsPerSecond),
+          Math.min(duration, dragging.startTime + dx / Math.max(1, pixelsPerSecond)),
         );
         onKeyframeMove(
           dragging.trackId,
@@ -620,7 +795,7 @@ export function KeyframeEditor({
         for (const track of tracks) {
           for (const prop of track.properties) {
             for (const kf of prop.keyframes) {
-              if (selectedKeyframes.includes(kf.id)) {
+              if (selectedKeyframeIds.has(kf.id)) {
                 onKeyframeDelete(track.id, prop.id, kf.id);
               }
             }
@@ -629,7 +804,7 @@ export function KeyframeEditor({
         onSelectionChange?.([]);
       }
     },
-    [tracks, selectedKeyframes, onKeyframeDelete, onSelectionChange],
+    [tracks, selectedKeyframeIds, onKeyframeDelete, onSelectionChange],
   );
 
   useEffect(() => {
