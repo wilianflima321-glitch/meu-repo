@@ -16,6 +16,11 @@ import { logger } from '@/lib/observability/logger';
 import { aiTools, AITool, ToolResult, Artifact } from './ai-tools-registry';
 import { aiService } from './ai-service';
 import { getSandbox, safeExecute, AethelGameAPIs, type SandboxResult } from './sandbox';
+import {
+  buildGameScopePlan,
+  type PlayableGameGenre,
+  type PlayableGameScope,
+} from './production/game-scope-orchestrator';
 
 // ============================================================================
 // SANDBOX INTEGRATION
@@ -523,8 +528,33 @@ export async function runAgent(agentId: string, taskDescription: string): Promis
   });
 }
 
-export async function createGame(description: string): Promise<AgentExecution> {
-  return runAgent('universal', `Create a complete game: ${description}`);
+export async function createGame(
+  description: string,
+  options: {
+    scope?: PlayableGameScope;
+    genre?: PlayableGameGenre;
+    budgetUsd?: number;
+    evidenceRefs?: string[];
+  } = {}
+): Promise<AgentExecution> {
+  const plan = buildGameScopePlan({
+    scope: options.scope ?? 'demo',
+    genre: options.genre ?? 'custom',
+    userIntent: description,
+    budgetUsd: options.budgetUsd,
+    evidenceRefs: options.evidenceRefs,
+  });
+
+  return runAgent(
+    'universal',
+    [
+      `Plan a ${plan.label}: ${description}`,
+      `Scope: ${plan.scope}. Genre: ${plan.genre}. Release state: ${plan.releaseState}.`,
+      `Required creative artifacts before heavy generation: ${plan.creativeArtifacts.join(', ')}.`,
+      `Next governed action: ${plan.nextAction}`,
+      'Do not claim the game is finished without builds, provenance, playtest evidence, performance traces, rollback, and human approval.',
+    ].join('\n')
+  );
 }
 
 export async function generateAssets(description: string): Promise<AgentExecution> {

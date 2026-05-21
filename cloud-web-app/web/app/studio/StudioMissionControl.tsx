@@ -8,6 +8,11 @@ import {
   runtimeModeForTarget,
   type RuntimeModeTarget,
 } from '@/lib/runtime/runtime-mode-view-model'
+import {
+  buildGameScopePlan,
+  type PlayableGameGenre,
+  type PlayableGameScope,
+} from '@/lib/production/game-scope-orchestrator'
 
 type StudioSessionStatus = 'active' | 'stopped'
 
@@ -40,6 +45,26 @@ const MODE_OPTIONS = [
   { value: 'release', label: 'Release' },
 ] as const
 
+const GAME_SCOPE_OPTIONS: Array<{ value: PlayableGameScope; label: string; helper: string }> = [
+  { value: 'prototype', label: 'Prototype', helper: 'Smallest playable loop.' },
+  { value: 'demo', label: 'Demo', helper: 'Polished vertical slice.' },
+  { value: 'complete-game-plan', label: 'Full plan', helper: 'Milestones, budget, bible.' },
+]
+
+const GAME_GENRE_OPTIONS: Array<{ value: PlayableGameGenre; label: string }> = [
+  { value: 'custom', label: 'Custom' },
+  { value: 'rpg', label: 'RPG' },
+  { value: 'action-adventure', label: 'Action adventure' },
+  { value: 'moba', label: 'MOBA' },
+  { value: 'platformer', label: 'Platformer' },
+  { value: 'shooter', label: 'Shooter' },
+  { value: 'racing', label: 'Racing' },
+  { value: 'puzzle', label: 'Puzzle' },
+  { value: 'visual-novel', label: 'Visual novel' },
+  { value: 'sandbox', label: 'Sandbox' },
+  { value: 'strategy', label: 'Strategy' },
+]
+
 const STUDIO_SESSION_STORAGE_KEY = 'aethel:last-studio-session-id'
 
 type StudioMode = (typeof MODE_OPTIONS)[number]['value']
@@ -66,6 +91,8 @@ async function parseResponse<T>(response: Response): Promise<T> {
 export default function StudioMissionControl() {
   const [mission, setMission] = useState('Coordinate a playable scene, evidence, and release checklist.')
   const [mode, setMode] = useState<StudioMode>('game')
+  const [gameScope, setGameScope] = useState<PlayableGameScope>('demo')
+  const [gameGenre, setGameGenre] = useState<PlayableGameGenre>('custom')
   const [runtimeTarget, setRuntimeTarget] = useState<RuntimeTarget>('local-main-safe')
   const [session, setSession] = useState<StudioSessionRecord | null>(null)
   const [wave, setWave] = useState<TaskWaveResponse | null>(null)
@@ -77,6 +104,20 @@ export default function StudioMissionControl() {
   const runtimeModes = useMemo(() => buildRuntimeModeViewModels({ pixelStreamUrl }), [pixelStreamUrl])
   const selectedRuntimeMode = useMemo(() => runtimeModeForTarget(runtimeModes, runtimeTarget), [runtimeModes, runtimeTarget])
   const compactSessionId = useMemo(() => (session ? session.id.replace(/^studio_/, '').slice(0, 12) : 'none'), [session])
+  const gameScopePlan = useMemo(() => {
+    if (mode !== 'game') return null
+    return buildGameScopePlan({
+      scope: gameScope,
+      genre: gameGenre,
+      userIntent: mission,
+      budgetUsd: gameScope === 'prototype' ? 8 : gameScope === 'demo' ? 35 : 120,
+      runtimeCapabilities: {
+        'license-provenance-scanner': true,
+        'studio-local': runtimeTarget === 'local-native',
+        'pixel-stream-url': Boolean(pixelStreamUrl),
+      },
+    })
+  }, [gameGenre, gameScope, mission, mode, pixelStreamUrl, runtimeTarget])
 
   const applySessionRecord = useCallback((record: StudioSessionRecord) => {
     setSession(record)
@@ -123,13 +164,13 @@ export default function StudioMissionControl() {
     try {
       analytics?.track('project', 'mission_submit', {
         label: 'studio_session_start',
-        metadata: { mode, runtimeTarget },
+        metadata: { mode, runtimeTarget, gameScope: mode === 'game' ? gameScope : undefined, gameGenre: mode === 'game' ? gameGenre : undefined },
       })
       const payload = await parseResponse<{ session: StudioSessionRecord }>(
         await fetch('/api/studio/session/start', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mission, mode, runtimeTarget }),
+          body: JSON.stringify({ mission, mode, runtimeTarget, gameScope: mode === 'game' ? gameScope : undefined, gameGenre: mode === 'game' ? gameGenre : undefined }),
         })
       )
       applySessionRecord(payload.session)
@@ -149,7 +190,7 @@ export default function StudioMissionControl() {
     try {
       analytics?.track('ai', 'ai_chat', {
         label: 'studio_parallel_wave',
-        metadata: { sessionId: session.id, mode, runtimeTarget },
+        metadata: { sessionId: session.id, mode, runtimeTarget, gameScope: mode === 'game' ? gameScope : undefined, gameGenre: mode === 'game' ? gameGenre : undefined },
       })
       const payload = await parseResponse<TaskWaveResponse>(
         await fetch('/api/studio/tasks/run-wave', {
@@ -159,7 +200,13 @@ export default function StudioMissionControl() {
             sessionId: session.id,
             goal: mission,
             agents: [
-              { role: 'Producer', surface: 'mission-ledger' },
+              { role: 'Producer', goal: gameScopePlan?.nextAction ?? 'Coordinate mission scope, evidence, and next action.', surface: 'mission-ledger' },
+              ...(gameScopePlan
+                ? [
+                    { role: 'Narrative', goal: 'Prepare story/world/character bible before heavy generation.', surface: 'production-bible' },
+                    { role: 'Gameplay', goal: 'Convert scope into core loop, input, camera, and playtest contracts.', surface: 'gameplay-graph' },
+                  ]
+                : []),
               { role: 'QA', goal: 'Validate evidence, blockers, and rollback path.', surface: 'validation-graph' },
               { role: 'Release', goal: 'Prepare deploy/release checklist and risk notes.', surface: 'release-graph' },
             ],
@@ -234,6 +281,34 @@ export default function StudioMissionControl() {
                 </option>
               ))}
             </select>
+            {mode === 'game' ? (
+              <>
+                <select
+                  value={gameScope}
+                  onChange={(event) => setGameScope(event.target.value as PlayableGameScope)}
+                  className="min-h-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-secondary)]"
+                  aria-label="Game scope"
+                >
+                  {GAME_SCOPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={gameGenre}
+                  onChange={(event) => setGameGenre(event.target.value as PlayableGameGenre)}
+                  className="min-h-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-secondary)]"
+                  aria-label="Game genre"
+                >
+                  {GAME_GENRE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : null}
             <select
               value={runtimeTarget}
               onChange={(event) => setRuntimeTarget(event.target.value as RuntimeTarget)}
@@ -247,6 +322,27 @@ export default function StudioMissionControl() {
               ))}
             </select>
           </div>
+          {gameScopePlan ? (
+            <div className="mt-3 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_22%,var(--aethel-border-subtle))] bg-[color-mix(in_srgb,var(--aethel-primary)_7%,transparent)] px-3 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-primary-light)]">
+                  Game scope: {gameScopePlan.label}
+                </p>
+                <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                  {gameScopePlan.releaseState}
+                </span>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{gameScopePlan.uxDisclosure}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {gameScopePlan.creativeArtifacts.slice(0, 7).map((artifact) => (
+                  <span key={artifact} className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]">
+                    {artifact}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-3 text-[11px] text-[var(--aethel-warning-light)]">{gameScopePlan.nextAction}</p>
+            </div>
+          ) : null}
           <div className="mt-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_45%,transparent)] px-3 py-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
               Runtime truth layer: {selectedRuntimeMode.label} · {selectedRuntimeMode.badge}

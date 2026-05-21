@@ -9,6 +9,7 @@ import type {
   ProductionGraphNode,
   ProductionReadinessSummary,
 } from '@/lib/production/agentic-production-state'
+import { buildGameScopePlan } from '@/lib/production/game-scope-orchestrator'
 
 type ProjectSummary = {
   id: string
@@ -107,6 +108,25 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
     [projects, selectedProjectId],
   )
   const graphEntries = useMemo(() => Object.entries(snapshot?.state.graphs ?? {}), [snapshot])
+  const evidenceRefs = useMemo(
+    () => graphEntries.flatMap(([, nodes]) => nodes.flatMap((node) => node.evidenceRefs)),
+    [graphEntries],
+  )
+  const productionBiblePlan = useMemo(() => {
+    if (!snapshot || (snapshot.state.brain.domain !== 'game' && snapshot.state.brain.domain !== 'game-film' && snapshot.state.brain.domain !== 'mixed')) {
+      return null
+    }
+    return buildGameScopePlan({
+      scope: 'demo',
+      genre: 'custom',
+      userIntent: snapshot.state.brain.objective,
+      evidenceRefs,
+      budgetUsd: 35,
+      runtimeCapabilities: {
+        'license-provenance-scanner': true,
+      },
+    })
+  }, [evidenceRefs, snapshot])
   const recentLedger = snapshot?.state.ledger.slice(0, 4) ?? []
   const readinessStats = snapshot
     ? ([
@@ -231,6 +251,26 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                     </p>
                   </div>
                 </div>
+                {productionBiblePlan ? (
+                  <div className="mt-4 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_22%,var(--aethel-border-subtle))] bg-[color-mix(in_srgb,var(--aethel-primary)_7%,transparent)] p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-primary-light)]">Production Bible preview</p>
+                      <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                        {productionBiblePlan.releaseState}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{productionBiblePlan.uxDisclosure}</p>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {productionBiblePlan.productionGraphs.slice(0, 6).map((graph) => (
+                        <div key={graph.id} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.18)] p-2">
+                          <p className="text-xs font-semibold text-[var(--aethel-text-primary)]">{graph.id}</p>
+                          <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">{graph.userValue}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-[11px] text-[var(--aethel-warning-light)]">{productionBiblePlan.nextAction}</p>
+                  </div>
+                ) : null}
               </div>
 
               <div className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-5">
