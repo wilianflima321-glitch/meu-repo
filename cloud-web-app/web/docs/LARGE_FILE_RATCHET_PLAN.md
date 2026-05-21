@@ -3,12 +3,12 @@
 Generated: deterministic local scan
 
 - Watch line limit: 800
-- Files above watch limit: 122 / 122
+- Files above watch limit: 118 / 118
 - Max file lines: 1150 / 1150
 - Failures: 0
 
 ## Category Counts
-- `runtime`: 85
+- `runtime`: 81
 - `ui`: 28
 - `server`: 5
 - `other`: 3
@@ -21,12 +21,8 @@ Generated: deterministic local scan
 | `lib/server/websocket-server.ts` | 1150 | server | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/particles/advanced-particle-system.ts` | 1132 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `server/workers/build-queue-worker.ts` | 1111 | other | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/terrain-engine.ts` | 1094 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/engine/asset-pipeline.ts` | 1092 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/materials/material-editor.ts` | 1091 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai-tools-registry.ts` | 1085 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai/behavior-tree-system.tsx` | 1084 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/fluid-simulation-system.ts` | 1078 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/debug/real-debug-adapter.ts` | 1074 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/nanite-virtualized-geometry.ts` | 1067 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/video-encoder-real.ts` | 1067 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -48,6 +44,10 @@ Generated: deterministic local scan
 | `lib/extensions/extension-system.ts` | 1021 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/cloth-simulation.ts` | 1018 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/facial-animation-system.ts` | 1015 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/yjs-collaboration.ts` | 1013 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/audio/spatial-audio-system.ts` | 1007 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/debug/object-inspector.tsx` | 1001 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/debug/profiler-system.tsx` | 1001 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 
 ## Ratchet Policy
 

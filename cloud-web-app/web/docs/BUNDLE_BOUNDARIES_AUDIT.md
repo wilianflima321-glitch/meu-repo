@@ -1,11 +1,11 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 1991
+- Files scanned: 2022
 - Failures: 0
 
 ## Counts
-- threeDirect: 46 (max 46)
+- threeDirect: 45 (max 45)
 - reactThreeFiberDirect: 2 (max 3)
 - reactThreeDreiDirect: 1 (max 2)
 - monacoEditorDirect: 3 (max 4)
@@ -32,11 +32,11 @@ Generated: deterministic local scan
 - lib/dialogue-cutscene/cutscene-system.ts (1)
 - lib/ecs/prefab-system/component-registry.ts (1)
 - lib/ecs/prefab-system/prefab-manager.ts (1)
-- lib/engine/asset-pipeline.ts (1)
 - lib/engine/lod/auto-lod-pipeline.ts (1)
 - lib/engine/lod/__tests__/auto-lod-pipeline.test.ts (1)
 - lib/engine/scene-graph.ts (1)
 - lib/facial-animation-system.ts (1)
+- lib/fluid-simulation-runtime/kernels.ts (1)
 - lib/game-engine-core.ts (1)
 - lib/game-loop.ts (1)
 - lib/hooks/useRenderPipeline.ts (1)
