@@ -1,7 +1,7 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 1859
+- Files scanned: 1908
 - Failures: 0
 
 ## Counts
@@ -38,7 +38,7 @@ Generated: deterministic local scan
 - lib/cinematic-lighting.ts (1)
 - lib/cloth-simulation.ts (1)
 - lib/control-rig-system.ts (1)
-- lib/cutscene/cutscene-system.tsx (1)
+- lib/cutscene/system/player.ts (1)
 - lib/decal-system.ts (1)
 ### reactThreeFiberDirect
 - components/physics/DestructionEditor.tsx (1)

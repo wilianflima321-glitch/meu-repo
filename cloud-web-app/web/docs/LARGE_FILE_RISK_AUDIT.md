@@ -6,10 +6,10 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 56
+- Large source files: 50
 - P0 files: 0
-- P1 low-import large modules: 43
-- P1 modules with explicit triage: 43
+- P1 low-import large modules: 38
+- P1 modules with explicit triage: 38
 - Retired runtime entrypoints forbidden: 4
 - Hard ceiling: 1800 lines
 - UI ceiling: 1200 lines
@@ -17,8 +17,8 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Categories
 
-- `foundation-runtime`: 29
-- `creative-runtime`: 24
+- `foundation-runtime`: 27
+- `creative-runtime`: 20
 - `server-runtime`: 3
 
 ## Owner Decisions
@@ -45,11 +45,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Lines | Category | Risk | Import hints | Recommendation |
 | --- | ---: | --- | --- | ---: | --- |
-| `lib/dialogue-cutscene-system.ts` | 1201 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/cutscene/cutscene-system.tsx` | 1195 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/capture/capture-system.tsx` | 1193 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/inventory/inventory-system.tsx` | 1191 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/ecs/prefab-component-system.tsx` | 1190 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/networking/multiplayer-system.tsx` | 1171 | creative-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/advanced-input-system.ts` | 1164 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/state/game-state-manager.tsx` | 1161 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
@@ -70,16 +65,16 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/motion-matching-system.ts` | 1066 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/engine/scene-graph.ts` | 1065 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/engine/audio-manager.ts` | 1063 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/webxr-vr-system.ts` | 1061 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/ecs-dots-system.ts` | 1056 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/dialogue/dialogue-system.tsx` | 1054 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/aaa-render-system.ts` | 1052 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/hot-reload/hot-reload-server.ts` | 1049 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 
 ## P1 Triage Decisions
 
 | File | Decision | Target surface | Load strategy | Rationale |
 | --- | --- | --- | --- | --- |
-| `lib/dialogue-cutscene-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/cutscene/cutscene-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/capture/capture-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/inventory/inventory-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/ecs/prefab-component-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/networking/multiplayer-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/advanced-input-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/state/game-state-manager.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
@@ -123,12 +118,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Lines | Category | Risk | Import hints |
 | --- | ---: | --- | --- | ---: |
-| `lib/dialogue-cutscene-system.ts` | 1201 | foundation-runtime | P1 low-import large module | 1 |
-| `lib/cutscene/cutscene-system.tsx` | 1195 | creative-runtime | P1 low-import large module | 1 |
-| `lib/capture/capture-system.tsx` | 1193 | creative-runtime | P1 low-import large module | 1 |
-| `lib/inventory/inventory-system.tsx` | 1191 | foundation-runtime | P1 low-import large module | 1 |
-| `lib/ecs/prefab-component-system.tsx` | 1190 | creative-runtime | P1 low-import large module | 0 |
-| `lib/postprocessing/post-processing-system.ts` | 1181 | creative-runtime | P2 tracked large module | 4 |
 | `lib/networking/multiplayer-system.tsx` | 1171 | creative-runtime | P1 low-import large module | 1 |
 | `lib/advanced-input-system.ts` | 1164 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/state/game-state-manager.tsx` | 1161 | creative-runtime | P1 low-import large module | 0 |

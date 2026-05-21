@@ -3,12 +3,12 @@
 Generated: deterministic local scan
 
 - Watch line limit: 800
-- Files above watch limit: 138 / 138
-- Max file lines: 1201 / 1201
+- Files above watch limit: 132 / 132
+- Max file lines: 1171 / 1171
 - Failures: 0
 
 ## Category Counts
-- `runtime`: 101
+- `runtime`: 95
 - `ui`: 28
 - `server`: 5
 - `other`: 3
@@ -18,12 +18,6 @@ Generated: deterministic local scan
 
 | File | Lines | Category | Next action |
 | --- | ---: | --- | --- |
-| `lib/dialogue-cutscene-system.ts` | 1201 | runtime | Split planning, timeline, playback, and serialization before adding film features. |
-| `lib/cutscene/cutscene-system.tsx` | 1195 | runtime | Split planning, timeline, playback, and serialization before adding film features. |
-| `lib/capture/capture-system.tsx` | 1193 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/inventory/inventory-system.tsx` | 1191 | runtime | Split data model, runtime, persistence, and editor adapter. |
-| `lib/ecs/prefab-component-system.tsx` | 1190 | runtime | Split data model, runtime, persistence, and editor adapter. |
-| `lib/postprocessing/post-processing-system.ts` | 1181 | runtime | Split effects into bloom, tone mapping, AA, color, and runtime adapter. |
 | `lib/networking/multiplayer-system.tsx` | 1171 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/advanced-input-system.ts` | 1164 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/state/game-state-manager.tsx` | 1161 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -48,6 +42,12 @@ Generated: deterministic local scan
 | `lib/debug/real-debug-adapter.ts` | 1074 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/nanite-virtualized-geometry.ts` | 1067 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/video-encoder-real.ts` | 1067 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/motion-matching-system.ts` | 1066 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/engine/scene-graph.ts` | 1065 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/engine/audio-manager.ts` | 1063 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/webxr-vr-system.ts` | 1061 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/ecs-dots-system.ts` | 1056 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/dialogue/dialogue-system.tsx` | 1054 | runtime | Split planning, timeline, playback, and serialization before adding film features. |
 
 ## Ratchet Policy
 
