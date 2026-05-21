@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromRequest } from '@/lib/auth-server'
 import { prisma } from '@/lib/db'
+import { AI_CORE_LOOP_FEEDBACK_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 export const dynamic = 'force-dynamic'
@@ -32,6 +33,14 @@ export async function POST(req: NextRequest) {
     if (!auth?.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'ai.core_loop.feedback',
+      route: '/api/ai/core-loop/feedback',
+      config: AI_CORE_LOOP_FEEDBACK_RATE_LIMIT,
+    })
+    if (rateLimited) return rateLimited
 
     const body: FeedbackPayload = await req.json()
 

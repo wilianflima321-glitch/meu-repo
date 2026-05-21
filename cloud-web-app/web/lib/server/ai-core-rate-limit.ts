@@ -30,7 +30,16 @@ export const AI_AGENT_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRe
 export const AI_CHANGE_MUTATION_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 45 }
 export const AI_CONTEXT_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 60 }
 export const AI_DIRECTOR_ACTION_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 30 }
+export const AI_DIRECTOR_READ_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 45 }
 export const AI_QUERY_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 30 }
+export const AI_STATUS_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 120 }
+export const AI_AGENT_READ_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 60 }
+export const AI_CHANGE_READ_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 75 }
+export const AI_CHANGE_FEEDBACK_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 30 }
+export const AI_SUGGESTIONS_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 60 }
+export const AI_TRACE_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 120 }
+export const AI_THINKING_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 90 }
+export const AI_CORE_LOOP_FEEDBACK_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 1000, maxRequests: 30 }
 
 export const AI_GENERATION_RATE_LIMITS = {
   image: AI_EXPENSIVE_IMAGE_RATE_LIMIT,

@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server'
 import { prisma } from '@/lib/db'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { createComponentLogger } from '@/lib/observability/logger'
+import { AI_DIRECTOR_READ_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { getDirectorSessionPayload } from '@/lib/server/ai-director/service'
 
 const routeLogger = createComponentLogger('api/ai/director/[projectId]/route')
@@ -15,6 +16,14 @@ export async function GET(
 ) {
   try {
     const user = requireAuth(req)
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'ai.director.read',
+      route: '/api/ai/director/[projectId]',
+      config: AI_DIRECTOR_READ_RATE_LIMIT,
+    })
+    if (rateLimited) return rateLimited
+
     const { projectId } = await params
 
     const project = await prisma.project.findFirst({

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { isAnyAiProviderConfigured } from '@/lib/ai-provider-config'
+import { AI_CHANGE_READ_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { filterChangeRunLedgerBySample, readChangeRunLedgerEvents } from '@/lib/server/change-run-ledger'
 import { computeCoreLoopReadiness, type CoreLoopThresholds } from '@/lib/server/core-loop-readiness'
@@ -37,6 +38,14 @@ function parseHours(value: string | null): number {
 
 export async function GET(request: NextRequest) {
   const user = requireAuth(request)
+  const rateLimited = enforceAiCoreRateLimit({
+    req: request,
+    capability: 'ai.change.readiness',
+    route: '/api/ai/change/readiness',
+    config: AI_CHANGE_READ_RATE_LIMIT,
+  })
+  if (rateLimited) return rateLimited
+
   await requireEntitlementsForUser(user.userId)
 
   const hours = parseHours(request.nextUrl.searchParams.get('hours'))

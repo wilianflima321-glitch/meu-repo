@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { AI_THINKING_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
@@ -67,6 +68,14 @@ export async function GET(
 ) {
   try {
     const user = requireAuth(req);
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'ai.thinking.session',
+      route: '/api/ai/thinking/[sessionId]',
+      config: AI_THINKING_RATE_LIMIT,
+    });
+    if (rateLimited) return rateLimited;
+
     const { sessionId } = await params;
 
     if (SIMULATION_DISABLED) {
@@ -110,6 +119,14 @@ export async function POST(
 ) {
   try {
     const user = requireAuth(req);
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'ai.thinking.session',
+      route: '/api/ai/thinking/[sessionId]',
+      config: AI_THINKING_RATE_LIMIT,
+    });
+    if (rateLimited) return rateLimited;
+
     const { sessionId } = await params;
     const body = await req.json();
 

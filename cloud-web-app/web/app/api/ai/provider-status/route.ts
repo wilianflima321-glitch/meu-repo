@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { AI_PROVIDER_SETUP_URL } from '@/lib/capability-constants'
 import { AI_PROVIDER_CONFIG, getConfiguredAiProviders, getMissingAiProviders } from '@/lib/ai-provider-config'
 import { isAiDemoModeEnabled } from '@/lib/server/ai-demo-mode'
+import { AI_STATUS_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { getAiDemoDailyLimit } from '@/lib/server/ai-demo-usage'
 
 export const dynamic = 'force-dynamic'
@@ -11,7 +12,15 @@ type ProviderStatus = {
   configured: boolean
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const rateLimited = enforceAiCoreRateLimit({
+    req: request,
+    capability: 'ai.status.provider',
+    route: '/api/ai/provider-status',
+    config: AI_STATUS_RATE_LIMIT,
+  })
+  if (rateLimited) return rateLimited
+
   const demoModeEnabled = isAiDemoModeEnabled()
   const demoDailyLimit = getAiDemoDailyLimit()
   const configuredProviders = getConfiguredAiProviders().filter((provider) => provider !== 'custom')

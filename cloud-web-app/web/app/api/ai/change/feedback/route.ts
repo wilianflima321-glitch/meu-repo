@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
+import { AI_CHANGE_FEEDBACK_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { appendChangeRunLedgerEvent, readChangeRunLedgerEvents } from '@/lib/server/change-run-ledger'
 import { getScopedProjectId } from '@/lib/server/workspace-scope'
@@ -75,6 +76,14 @@ function extractRunSource(metadata: unknown): string {
 
 export async function POST(request: NextRequest) {
   const user = requireAuth(request)
+  const rateLimited = enforceAiCoreRateLimit({
+    req: request,
+    capability: 'ai.change.feedback',
+    route: '/api/ai/change/feedback',
+    config: AI_CHANGE_FEEDBACK_RATE_LIMIT,
+  })
+  if (rateLimited) return rateLimited
+
   await requireEntitlementsForUser(user.userId)
 
   const body = (await request.json().catch(() => null)) as FeedbackBody | null

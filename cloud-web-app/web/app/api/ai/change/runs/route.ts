@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
+import { AI_CHANGE_READ_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import {
   filterChangeRunLedgerBySample,
@@ -37,6 +38,14 @@ function parseCsvParam<T extends string>(raw: string | null, allowed: T[]): T[] 
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request)
+    const rateLimited = enforceAiCoreRateLimit({
+      req: request,
+      capability: 'ai.change.runs',
+      route: '/api/ai/change/runs',
+      config: AI_CHANGE_READ_RATE_LIMIT,
+    })
+    if (rateLimited) return rateLimited
+
     await requireEntitlementsForUser(user.userId)
 
     const params = new URL(request.url).searchParams

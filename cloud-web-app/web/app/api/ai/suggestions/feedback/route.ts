@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { AI_SUGGESTIONS_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 
 import { createComponentLogger } from '@/lib/observability/logger'
 
@@ -30,6 +31,14 @@ const feedbackStore: Map<string, FeedbackPayload & { userId: string; timestamp: 
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'ai.suggestions.feedback',
+      route: '/api/ai/suggestions/feedback',
+      config: AI_SUGGESTIONS_RATE_LIMIT,
+    });
+    if (rateLimited) return rateLimited;
+
     const body: FeedbackPayload = await req.json();
 
     if (!body.suggestionId) {
@@ -69,6 +78,13 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'ai.suggestions.feedback.stats',
+      route: '/api/ai/suggestions/feedback',
+      config: AI_SUGGESTIONS_RATE_LIMIT,
+    });
+    if (rateLimited) return rateLimited;
     
     // Retorna estatísticas de feedback (admin only em produção)
     const stats = {

@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { AI_SUGGESTIONS_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 import { createComponentLogger } from '@/lib/observability/logger';
 
 const routeLogger = createComponentLogger('api/ai/suggestions/route');
@@ -117,6 +118,14 @@ const suggestionPool: AISuggestion[] = [
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'ai.suggestions.read',
+      route: '/api/ai/suggestions',
+      config: AI_SUGGESTIONS_RATE_LIMIT,
+    });
+    if (rateLimited) return rateLimited;
+
     const { searchParams } = new URL(req.url);
     
     const limit = parseInt(searchParams.get('limit') || '5');

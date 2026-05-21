@@ -8,8 +8,16 @@
 
 import { NextRequest } from 'next/server';
 import { GET as getMusicGenerate } from '../generate/route';
+import { AI_STATUS_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 
 export async function GET(req: NextRequest) {
+  const rateLimited = enforceAiCoreRateLimit({
+    req,
+    capability: 'ai.status.music',
+    route: '/api/ai/music/status',
+    config: AI_STATUS_RATE_LIMIT,
+  });
+  if (rateLimited) return rateLimited;
+
   return getMusicGenerate(req);
 }
-
