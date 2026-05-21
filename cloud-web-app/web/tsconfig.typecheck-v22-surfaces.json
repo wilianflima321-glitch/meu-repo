@@ -34,6 +34,7 @@
     "components/viewport/ViewportAssetQualityCard.tsx",
     "lib/viewport/viewport-asset-import.ts",
     "lib/production/ai-quality-orchestrator.ts",
+    "lib/production/game-scope-orchestrator.ts",
     "lib/production/moba-vertical-slice-template.ts"
   ],
   "exclude": [

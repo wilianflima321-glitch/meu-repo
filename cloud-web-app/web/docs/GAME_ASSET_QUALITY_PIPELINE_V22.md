@@ -7,7 +7,7 @@ Source of truth: `lib/production/game-asset-quality-pipeline.ts`.
 
 Aethel should not pretend that raw text-to-3D output is production-grade. A 10k polygon AI output is draft-only: useful for ideation, blockout, thumbnails, quick prop exploration, and gameplay placeholders. Final or premium-facing game work needs a production lane: art direction, provenance, curated source assets, retopology or mesh upgrade, PBR materials, LODs, collision/navmesh proxies, rig/animation validation, performance traces, and human art-direction approval.
 
-The product direction is therefore not "generate God of War with one prompt". The honest moat is: Aethel orchestrates AI agents, curated assets, Studio Local sidecars, Cloud Stream/final review, and human approval so a small team can build playable prototypes and vertical slices much faster.
+The product direction is therefore not "generate a flagship AAA game with one prompt". The honest moat is: Aethel orchestrates AI agents, curated assets, Studio Local sidecars, Cloud Stream/final review, and human approval so a small team can build playable prototypes, evidence-backed demos, and complete game production plans much faster.
 
 ## Four Quality Lanes
 
@@ -44,13 +44,13 @@ The agents need a toolbelt, not just a model prompt:
 - Runtime lane: Browser preview for iteration, Studio Local for heavy processing, Cloud Stream for final/high-cost review.
 - Review lane: FFmpeg capture, replay evidence, performance trace, human approval before public or client-facing claims.
 
-## League-style Game from Zero
+## Genre-Agnostic Game from Zero
 
-For something like a League-style game from zero, Aethel should split the job into production graphs instead of one giant generation:
+For any serious game direction, Aethel should split the job into production graphs instead of one giant generation. A MOBA or LoL-like idea is only one example preset, not the default product direction:
 
-1. Design Bible: game mode, champion fantasy, roles, map objectives, camera, input, economy, match pacing.
-2. World Graph: modular arena kit, lanes/jungle/objectives, navmesh, fog/visibility zones, streaming budget.
-3. Character Graph: champions start from curated or Studio Local optimized assets, not raw 10k meshes; each gets rig, animations, VFX, SFX and gameplay hitboxes.
+1. Design Bible: scope choice, fantasy, roles, objectives, camera, input, economy, pacing, and scope cuts.
+2. Story/World Graph: premise, tone, lore, biomes, factions, landmarks, navmesh, streaming budget, and continuity rules.
+3. Character Graph: characters start from curated or Studio Local optimized assets, not raw 10k meshes; each gets rig, animations, VFX, SFX and gameplay hitboxes.
 4. Gameplay Graph: ability system, cooldowns, projectiles, targeting, status effects, minions, towers, scoreboard, replay events.
 5. Asset Pipeline Graph: every asset carries provenance, LODs, material budget, collision proxy and runtime target.
 6. Bot/Playtest Graph: simulated matches, telemetry, win-rate deltas, frame budget, feel review and regression bugs.

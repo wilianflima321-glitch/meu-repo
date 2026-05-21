@@ -1,14 +1,12 @@
-import {
-  buildQualityOrchestrationPlan,
-  buildRuntimeCapabilitySnapshot,
-  type QualityOrchestrationPlan,
-} from '@/lib/production/ai-quality-orchestrator'
+import type { QualityOrchestrationPlan } from '@/lib/production/ai-quality-orchestrator'
+import { buildMobaExampleScopePlan, type GameScopePlan } from '@/lib/production/game-scope-orchestrator'
 
 export interface PlayableVerticalSliceTemplate {
   id: 'moba-vertical-slice:v1'
-  label: 'MOBA / LoL-like vertical slice'
+  label: 'MOBA example vertical slice'
   notFullGameClaim: true
   releaseState: 'held'
+  genericScopePlan: GameScopePlan
   scope: {
     map: 'single-small-lane-arena'
     champions: 2
@@ -31,17 +29,20 @@ export function buildMobaVerticalSliceTemplate(input: {
   budgetUsd?: number
   evidenceRefs?: string[]
 } = {}): PlayableVerticalSliceTemplate {
-  const budgetUsd = input.budgetUsd ?? 20
-  const evidenceRefs = input.evidenceRefs ?? []
-  const capabilities = buildRuntimeCapabilitySnapshot({
-    'license-provenance-scanner': true,
+  const genericScopePlan = buildMobaExampleScopePlan({
+    budgetUsd: input.budgetUsd ?? 20,
+    evidenceRefs: input.evidenceRefs ?? [],
+    runtimeCapabilities: {
+      'license-provenance-scanner': true,
+    },
   })
 
   return {
     id: 'moba-vertical-slice:v1',
-    label: 'MOBA / LoL-like vertical slice',
+    label: 'MOBA example vertical slice',
     notFullGameClaim: true,
     releaseState: 'held',
+    genericScopePlan,
     scope: {
       map: 'single-small-lane-arena',
       champions: 2,
@@ -82,30 +83,12 @@ export function buildMobaVerticalSliceTemplate(input: {
         requiredEvidence: ['playable build artifact', 'rollback plan', 'human approval'],
       },
     ],
-    qualityPlans: [
-      buildQualityOrchestrationPlan({
-        goal: 'Upgrade two champion hero assets for a MOBA vertical slice.',
-        domain: 'character',
-        targetQuality: 'studio-local-optimized',
-        budgetUsd,
-        runtimeCapabilities: capabilities,
-        evidenceRefs,
-        assetMetadata: { qualityTier: 'curated-marketplace', licenseStatus: 'approved' },
-      }),
-      buildQualityOrchestrationPlan({
-        goal: 'Prepare arena environment kit for browser preview and Studio Local optimization.',
-        domain: 'world',
-        targetQuality: 'curated-marketplace',
-        budgetUsd,
-        runtimeCapabilities: capabilities,
-        evidenceRefs,
-        assetMetadata: { qualityTier: 'ai-draft', licenseStatus: 'approved' },
-      }),
-    ],
+    qualityPlans: genericScopePlan.qualityPlans,
     blockers: [
-      'This is a vertical slice, not a complete MOBA game.',
+      'This is one example preset, not the default product direction and not a complete MOBA game.',
       'Release is held until bot playtest, performance trace, provenance, rollback, and human approval exist.',
       'Studio Local sidecars are required before claiming optimized character or arena assets.',
+      genericScopePlan.uxDisclosure,
     ],
     nextAction: 'Build the small playable arena first, then attach bot playtest and asset-quality evidence before expanding champion count.',
   }

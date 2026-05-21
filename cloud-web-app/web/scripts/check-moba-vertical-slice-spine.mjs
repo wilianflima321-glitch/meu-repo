@@ -21,15 +21,16 @@ function requirePattern(relativePath, pattern, reason) {
 }
 
 requirePattern('lib/production/moba-vertical-slice-template.ts', /export interface PlayableVerticalSliceTemplate/, 'PlayableVerticalSliceTemplate must exist')
+requirePattern('lib/production/moba-vertical-slice-template.ts', /genericScopePlan:\s*GameScopePlan/, 'template must delegate to the generic scope plan')
 requirePattern('lib/production/moba-vertical-slice-template.ts', /notFullGameClaim:\s*true/, 'template must not claim a complete game')
 requirePattern('lib/production/moba-vertical-slice-template.ts', /releaseState:\s*'held'/, 'release must be held')
 requirePattern('lib/production/moba-vertical-slice-template.ts', /champions:\s*2/, 'vertical slice must scope to two champions')
 requirePattern('lib/production/moba-vertical-slice-template.ts', /bot-playtest-graph/, 'bot playtest graph must be explicit')
 requirePattern('lib/production/moba-vertical-slice-template.ts', /performance-graph/, 'performance graph must be explicit')
 requirePattern('lib/production/moba-vertical-slice-template.ts', /human approval/, 'human approval must block release')
-requirePattern('lib/production/moba-vertical-slice-template.ts', /This is a vertical slice, not a complete MOBA game/, 'blocker must prevent full game claim')
-requirePattern('lib/production/moba-vertical-slice-template.ts', /buildQualityOrchestrationPlan/, 'template must consume quality orchestrator')
-requirePattern('docs/AI_QUALITY_ORCHESTRATOR_V22.md', /MOBA \/ LoL-like Vertical Slice/, 'docs must describe LoL-like vertical slice')
+requirePattern('lib/production/moba-vertical-slice-template.ts', /one example preset, not the default product direction/, 'blocker must prevent making MOBA the product default')
+requirePattern('lib/production/game-scope-orchestrator.ts', /buildMobaExampleScopePlan/, 'MOBA preset must be built from generic scope orchestrator')
+requirePattern('docs/AI_QUALITY_ORCHESTRATOR_V22.md', /Example Presets/, 'docs must describe presets as examples')
 requirePattern('docs/AI_QUALITY_ORCHESTRATOR_V22.md', /not a full game claim/, 'docs must avoid full-game promise')
 
 if (failures.length) {
@@ -38,4 +39,4 @@ if (failures.length) {
   process.exit(1)
 }
 
-console.log('[moba-vertical-slice-spine] PASS scope=2-champions release=held')
+console.log('[moba-vertical-slice-spine] PASS scope=2-champions release=held preset=example-only')

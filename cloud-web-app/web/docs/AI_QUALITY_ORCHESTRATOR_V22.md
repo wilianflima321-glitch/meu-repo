@@ -42,26 +42,29 @@ Every plan returns a `QualityOrchestrationPlan` with:
 
 There is intentionally no `ready` state. Premium/public claims must pass through human review.
 
-## MOBA / LoL-like Vertical Slice
+## Game Scope Orchestrator
 
-`moba-vertical-slice:v1` is a safe template for a League-style game direction. It is not a full game claim.
+Users choose the production depth first: `prototype`, `demo`, or `complete-game-plan`. Agents must not silently force every mission into a MOBA, shooter, RPG, or any other preset.
 
-It scopes the first pass to:
+The scope orchestrator plans the creative work before heavy generation:
 
-- One small lane arena.
-- Two champions.
-- Minion waves.
-- One tower/objective loop.
-- Locked isometric camera.
-- Mouse/keyboard baseline input.
-- Bot playtest graph.
-- Performance graph.
-- Release graph held by human approval.
+- `story-bible`: premise, tone, arc, continuity rules.
+- `world-bible`: biomes, factions, traversal, navigation constraints.
+- `character-bible`: roster, silhouettes, motivations, animation needs.
+- `gameplay-loop`: controls, mechanics, core loop, fail states.
+- `visual-style-guide`: references, materials, camera, readability.
+- `audio-direction`: music pillars, SFX coverage, voice direction.
+- `playtest-plan`: bot/human review, bug ledger, feel notes.
+- `release-plan`: build, rollback, platform checklist, human approval.
 
-This is the right shape for fast quality: playable vertical slice first, then expand champions, map systems, networking, matchmaking, balance, VFX, audio, and ranked progression after telemetry exists.
+`complete-game-plan` means a complete production plan and milestone spine. It does not mean Aethel claims a finished full game without builds, evidence, playtests, performance traces, provenance, and human review.
+
+## Example Presets
+
+`moba-vertical-slice:v1` remains one safe example preset for a MOBA-style direction. It is not the default product direction and not a full game claim. The same generic contract supports RPGs, action adventures, platformers, shooters, racing games, puzzle games, visual novels, sandbox games, strategy games, and custom briefs.
 
 ## Product Rule
 
-Aethel should say: `Generate playable prototypes and vertical slices faster with evidence-backed agents.`
+Aethel should say: `Generate playable prototypes, evidence-backed demos, and complete game production plans with governed agents.`
 
 Aethel should not say: `Generate Unreal-grade AAA games alone.`
