@@ -15,6 +15,8 @@ Aethel should feel premium before the user reaches the heavy editor. Public, das
 - Transitive editor panels are governed: panels loaded only through heavy Studio editors are reported as async boundaries instead of polluting the shell budget.
 - Connected asset model preview is lazy: `ContentBrowserConnected` no longer imports Three or GLTFLoader until a model preview is opened.
 - Bundle budgets are tighter: direct imports for `three`, R3F, drei, Monaco, and Framer now have real headroom instead of passing at the edge.
+- Framer Motion was removed from lightweight settings, inline edit, version history, and marketplace library shells. Current budget is `9 / 10`, leaving room for deliberate motion without making every shell pay for JS animation.
+- Authenticated capture now uses `domcontentloaded` plus a short settle fallback when long-lived sockets keep `networkidle` open. This keeps screenshots deterministic without hiding console-error evidence.
 
 ## Product rule
 
@@ -28,4 +30,5 @@ Linear, Vercel, Cursor, and Runway keep their first interaction focused. Aethel'
 
 - `ContentBrowserConnected`, `WorldOutliner`, and several editor `.parts` files still import 3D primitives directly because they are runtime surfaces. They need virtualization and route-level evidence before any further split.
 - Monaco direct imports remain intentionally held in IDE/editor-specific surfaces.
-- Framer Motion still exists in several UI primitives. Those should move toward a smaller motion wrapper only after interaction quality is verified.
+- Three remains at the ceiling and should be the next bundle target. Runtime/editor modules should either move behind true dynamic boundaries or prove they are Studio-only before the budget can drop from `40` to `35`.
+- The authenticated capture report still exposes route console errors. Those are product-quality evidence, not ignored noise, and should drive the next polish pass.

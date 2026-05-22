@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertCircle,
   Check,
@@ -240,13 +239,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
 
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto' }}>
-        <AnimatePresence mode="wait">
-          {activeTab === 'settings' && (
-            <motion.div
+        {activeTab === 'settings' && (
+            <div
               key="settings"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              className="animate-in fade-in duration-150"
               style={{ display: 'flex', height: '100%' }}
             >
               {/* Categories sidebar */}
@@ -317,15 +313,13 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                   )
                 ))}
               </div>
-            </motion.div>
+            </div>
           )}
 
           {activeTab === 'profiles' && (
-            <motion.div
+            <div
               key="profiles"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              className="animate-in fade-in duration-150"
               style={{ padding: '16px' }}
             >
               <div style={{ marginBottom: '24px' }}>
@@ -402,15 +396,13 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                   ))}
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {activeTab === 'sync' && (
-            <motion.div
+            <div
               key="sync"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              className="animate-in fade-in duration-150"
               style={{ padding: '16px' }}
             >
               {/* Sync Status */}
@@ -600,9 +592,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                   Export your settings to a JSON file for backup or sharing.
                 </p>
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
       </div>
 
       <style>{`

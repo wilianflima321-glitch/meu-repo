@@ -234,12 +234,12 @@ export const ENGINE_SPINE_MODULES: EngineSpineModule[] = [
 ]
 
 export function getEngineSpineSummary() {
-  const totalLoc = ENGINE_SPINE_MODULES.reduce((sum, module) => sum + module.estimatedLoc, 0)
-  const ready = ENGINE_SPINE_MODULES.filter((module) => module.status === 'ready-to-wire').length
-  const held = ENGINE_SPINE_MODULES.filter((module) => module.status === 'worker-held').length
-  const adapterNeeded = ENGINE_SPINE_MODULES.filter((module) => module.status === 'adapter-needed').length
-  const heavyHeld = ENGINE_SPINE_MODULES.filter((module) =>
-    module.loadStrategy === 'worker-or-sidecar' || module.loadStrategy === 'native-or-cloud'
+  const totalLoc = ENGINE_SPINE_MODULES.reduce((sum, engineModule) => sum + engineModule.estimatedLoc, 0)
+  const ready = ENGINE_SPINE_MODULES.filter((engineModule) => engineModule.status === 'ready-to-wire').length
+  const held = ENGINE_SPINE_MODULES.filter((engineModule) => engineModule.status === 'worker-held').length
+  const adapterNeeded = ENGINE_SPINE_MODULES.filter((engineModule) => engineModule.status === 'adapter-needed').length
+  const heavyHeld = ENGINE_SPINE_MODULES.filter((engineModule) =>
+    engineModule.loadStrategy === 'worker-or-sidecar' || engineModule.loadStrategy === 'native-or-cloud'
   ).length
 
   return {
@@ -254,15 +254,15 @@ export function getEngineSpineSummary() {
 
 export function getEngineSpineModulesByIds(ids: readonly string[]) {
   const wanted = new Set(ids)
-  return ENGINE_SPINE_MODULES.filter((module) => wanted.has(module.id))
+  return ENGINE_SPINE_MODULES.filter((engineModule) => wanted.has(engineModule.id))
 }
 
 function countLoc(modules: readonly EngineSpineModule[]) {
-  return modules.reduce((sum, module) => sum + module.estimatedLoc, 0)
+  return modules.reduce((sum, engineModule) => sum + engineModule.estimatedLoc, 0)
 }
 
 function countHighRisk(modules: readonly EngineSpineModule[]) {
-  return modules.filter((module) => module.risk === 'high').length
+  return modules.filter((engineModule) => engineModule.risk === 'high').length
 }
 
 export function getEngineSpineDecisionMatrix(groupBy: 'domain' | 'status' | 'loadStrategy' = 'domain'): EngineSpineDecisionMatrixRow[] {
@@ -286,9 +286,9 @@ export function getEngineSpineDecisionMatrix(groupBy: 'domain' | 'status' | 'loa
   }
   const grouped = new Map<string, EngineSpineModule[]>()
 
-  for (const module of ENGINE_SPINE_MODULES) {
-    const key = module[groupBy]
-    grouped.set(key, [...(grouped.get(key) ?? []), module])
+  for (const engineModule of ENGINE_SPINE_MODULES) {
+    const key = engineModule[groupBy]
+    grouped.set(key, [...(grouped.get(key) ?? []), engineModule])
   }
 
   return [...grouped.entries()]
@@ -333,8 +333,8 @@ export function getEngineSpinePriorityModules(limit = 6): EngineSpineModule[] {
 
 export function getEngineSpineReadinessModel(): EngineSpineReadinessModel {
   const summary = getEngineSpineSummary()
-  const workerHeld = ENGINE_SPINE_MODULES.filter((module) => module.status === 'worker-held')
-  const adapterNeeded = ENGINE_SPINE_MODULES.filter((module) => module.status === 'adapter-needed')
+  const workerHeld = ENGINE_SPINE_MODULES.filter((engineModule) => engineModule.status === 'worker-held')
+  const adapterNeeded = ENGINE_SPINE_MODULES.filter((engineModule) => engineModule.status === 'adapter-needed')
   const blockers: string[] = []
 
   if (workerHeld.length > 0) {

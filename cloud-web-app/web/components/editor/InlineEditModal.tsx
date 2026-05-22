@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles,
   X,
@@ -163,20 +162,12 @@ export function InlineEditModal({
   if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-start justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm pt-20"
+      <div
+        className="fixed inset-0 z-50 flex animate-in fade-in items-start justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] pt-20 backdrop-blur-sm duration-150"
         onClick={(e) => e.target === e.currentTarget && onClose()}
       >
-        <motion.div
-          initial={{ opacity: 0, y: -20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.95 }}
-          transition={{ type: 'spring', duration: 0.3 }}
-          className="w-full max-w-2xl overflow-hidden rounded-xl border"
+        <div
+          className="w-full max-w-2xl animate-in fade-in slide-in-from-top-4 zoom-in-95 overflow-hidden rounded-xl border duration-200"
           style={{
             background: 'var(--aethel-surface-elevated)',
             borderColor: 'var(--aethel-border-primary)',
@@ -368,9 +359,8 @@ export function InlineEditModal({
               </div>
             </div>
           )}
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+      </div>
   );
 }
 

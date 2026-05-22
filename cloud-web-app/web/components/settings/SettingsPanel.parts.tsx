@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Trash2, Undo, User } from 'lucide-react';
 import type { SettingDefinition, SettingValue, SyncState, UserProfile } from '@/lib/settings/settings-service';
 
@@ -239,9 +238,8 @@ interface ProfileCardProps {
 
 export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, isActive, onActivate, onDelete }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
+      className="animate-in fade-in slide-in-from-bottom-2 duration-200"
       style={{
         padding: '16px',
         background: isActive ? colors.blue + '20' : colors.surface0,
@@ -308,6 +306,6 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, isActive, onA
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };

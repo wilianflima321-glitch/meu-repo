@@ -10,7 +10,6 @@ import {
   Grid,
   GizmoHelper,
   GizmoViewport,
-  Environment,
   PivotControls,
   Html as DreiHtml,
   useHelper,
@@ -368,8 +367,9 @@ function SceneCanvas({
           labelColor="white"
         />
       </GizmoHelper>
-      {/* Environment */}
-      <Environment preset="city" background blur={0.5} />
+      {/* Local environment: avoids external HDR downloads that violate production CSP. */}
+      <color attach="background" args={[0x0b1220]} />
+      <fog attach="fog" args={[0x0b1220, 16, 48]} />
       {/* AAA Post Processing */}
       <AAAPostProcessing />
     </>

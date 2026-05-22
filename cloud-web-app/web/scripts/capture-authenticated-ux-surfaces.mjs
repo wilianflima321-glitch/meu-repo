@@ -9,6 +9,8 @@ const JWT_SECRET = process.env.JWT_SECRET
 const BASE_URL = process.env.AUTHENTICATED_UX_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const OUTPUT_DIR = path.join(ROOT, 'output', 'playwright', 'v22-authenticated')
 const DOC_PATH = path.join(ROOT, 'docs', 'AUTHENTICATED_UX_SURFACE_AUDIT.md')
+const NETWORK_IDLE_TIMEOUT_MS = Number(process.env.AUTHENTICATED_UX_NETWORK_IDLE_TIMEOUT_MS ?? 5000)
+const POST_LOAD_SETTLE_MS = Number(process.env.AUTHENTICATED_UX_POST_LOAD_SETTLE_MS ?? 500)
 
 const ROUTES = [
   '/dashboard',
@@ -92,10 +94,17 @@ for (const viewport of VIEWPORTS) {
     let status = null
     let finalUrl = url
     let error = null
+    let stabilization = 'networkidle'
     try {
-      const response = await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 })
+      const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
       status = response?.status() ?? null
       finalUrl = page.url()
+      try {
+        await page.waitForLoadState('networkidle', { timeout: NETWORK_IDLE_TIMEOUT_MS })
+      } catch {
+        stabilization = `domcontentloaded+settle(${POST_LOAD_SETTLE_MS}ms)`
+        await page.waitForTimeout(POST_LOAD_SETTLE_MS)
+      }
       await page.screenshot({ path: outputPath, fullPage: true })
     } catch (captureError) {
       error = captureError instanceof Error ? captureError.message : String(captureError)
@@ -110,6 +119,7 @@ for (const viewport of VIEWPORTS) {
       screenshot: error ? null : path.relative(ROOT, outputPath).replace(/\\/g, '/'),
       consoleErrors,
       error,
+      stabilization,
     })
   }
   await context.close()
@@ -124,10 +134,10 @@ const doc = `# Authenticated UX Surface Audit
 - Auth method: signed JWT injected through cookie \`token\` and localStorage \`aethel-token\`
 - Note: screenshots live under \`output/playwright/v22-authenticated/\` and are intentionally not versioned.
 
-| Viewport | Route | Status | Final URL | Screenshot | Console errors |
-| --- | --- | ---: | --- | --- | ---: |
+| Viewport | Route | Status | Final URL | Screenshot | Stabilization | Console errors |
+| --- | --- | ---: | --- | --- | --- | ---: |
 ${results
-  .map((result) => `| ${result.viewport} | ${result.route} | ${result.status ?? 'n/a'} | ${result.finalUrl} | ${result.screenshot ?? result.error ?? 'n/a'} | ${result.consoleErrors.length} |`)
+  .map((result) => `| ${result.viewport} | ${result.route} | ${result.status ?? 'n/a'} | ${result.finalUrl} | ${result.screenshot ?? result.error ?? 'n/a'} | ${result.stabilization} | ${result.consoleErrors.length} |`)
   .join('\n')}
 `
 

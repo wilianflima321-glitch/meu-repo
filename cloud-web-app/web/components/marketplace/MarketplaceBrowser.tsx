@@ -8,7 +8,6 @@
  */
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
 import { Clock, Crown, Download, Filter, Grid, List, Loader2, Package, Search, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
@@ -177,20 +176,15 @@ export default function MarketplaceBrowser() {
       </header>
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <AnimatePresence>
-          {showFilters ? (
-            <motion.aside
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 256, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              className="overflow-hidden border-r"
+        {showFilters ? (
+            <aside
+              className="w-64 animate-in fade-in slide-in-from-left-2 overflow-hidden border-r duration-150"
             >
               <ScrollArea className="h-full p-4">
                 <FilterSidebar filters={filters} onChange={handleFilterChange} />
               </ScrollArea>
-            </motion.aside>
+            </aside>
           ) : null}
-        </AnimatePresence>
 
         <main className="min-w-0 flex-1 overflow-auto">
           <ScrollArea className="h-full">
@@ -227,8 +221,7 @@ export default function MarketplaceBrowser() {
               {!isLoading && !isError && data && data.assets.length > 0 ? (
                 <>
                   <div className={cn(viewMode === "grid" ? "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "flex flex-col gap-3")}>
-                    <AnimatePresence mode="popLayout">
-                      {data.assets.map((asset) => (
+                    {data.assets.map((asset) => (
                         <AssetCard
                           key={asset.id}
                           asset={asset}
@@ -238,7 +231,6 @@ export default function MarketplaceBrowser() {
                           onSelect={setSelectedAsset}
                         />
                       ))}
-                    </AnimatePresence>
                   </div>
 
                   {data.hasMore ? (

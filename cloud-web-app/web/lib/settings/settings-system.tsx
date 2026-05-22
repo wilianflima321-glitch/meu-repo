@@ -245,10 +245,12 @@ export function useVideoSettings(): VideoSettings {
   return useSettings().getVideo();
 }
 
-export default {
+const settingsSystem = {
   SettingsManager,
   SettingsProvider,
   useSettings,
   useAudioSettings,
   useVideoSettings,
 };
+
+export default settingsSystem;

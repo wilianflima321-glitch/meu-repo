@@ -10,7 +10,6 @@
  */
 import React, { useState, useCallback, useMemo } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Clock,
   History,
@@ -360,13 +359,9 @@ export function VersionHistorySlider({
       </div>
 
       {/* Expanded Details */}
-      <AnimatePresence>
-        {showDetails && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="border-t border-[var(--aethel-border-primary)] overflow-hidden"
+      {showDetails && (
+          <div
+            className="animate-in fade-in slide-in-from-top-2 overflow-hidden border-t border-[var(--aethel-border-primary)] duration-150"
           >
             <div className="p-3 max-h-48 overflow-y-auto">
               <div className="space-y-2">
@@ -396,9 +391,8 @@ export function VersionHistorySlider({
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   );
 }

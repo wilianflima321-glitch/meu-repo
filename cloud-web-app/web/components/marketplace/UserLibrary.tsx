@@ -12,7 +12,6 @@
 import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
     Download, Heart, FolderOpen, Clock, Package,
     Grid, List, Search, Filter, MoreVertical,
@@ -154,11 +153,8 @@ function AssetCard({
         return (
             <ContextMenu>
                 <ContextMenuTrigger>
-                    <motion.div
-                        layout
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors group"
+                    <div
+                        className="group flex animate-in fade-in slide-in-from-bottom-2 items-center gap-4 rounded-lg border bg-card p-4 transition-colors duration-150 hover:bg-accent/50"
                     >
                         {/* Thumbnail */}
                         <div className="w-16 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
@@ -229,7 +225,7 @@ function AssetCard({
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
-                    </motion.div>
+                    </div>
                 </ContextMenuTrigger>
                 <ContextMenuContent>
                     <ContextMenuItem onClick={handleDownload}>
@@ -261,11 +257,8 @@ function AssetCard({
     return (
         <ContextMenu>
             <ContextMenuTrigger>
-                <motion.div
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="group relative rounded-xl border bg-card overflow-hidden hover:shadow-lg transition-all"
+                <div
+                    className="group relative animate-in fade-in zoom-in-95 overflow-hidden rounded-xl border bg-card transition-all duration-150 hover:shadow-lg"
                 >
                     {/* Thumbnail */}
                     <div className="relative aspect-video overflow-hidden bg-muted">
@@ -309,7 +302,7 @@ function AssetCard({
                             </span>
                         </div>
                     </div>
-                </motion.div>
+                </div>
             </ContextMenuTrigger>
             <ContextMenuContent>
                 <ContextMenuItem onClick={handleDownload}>
@@ -345,11 +338,8 @@ function CollectionCard({
     onDelete: () => void;
 }) {
     return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="group relative rounded-xl border bg-card overflow-hidden hover:shadow-lg transition-all cursor-pointer"
+        <div
+            className="group relative cursor-pointer animate-in fade-in zoom-in-95 overflow-hidden rounded-xl border bg-card transition-all duration-150 hover:shadow-lg"
             onClick={onClick}
         >
             {/* Cover */}
@@ -407,7 +397,7 @@ function CollectionCard({
                     {collection.assetCount} assets
                 </p>
             </div>
-        </motion.div>
+        </div>
     );
 }
 
