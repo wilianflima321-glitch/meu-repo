@@ -1,9 +1,7 @@
 'use client';
 
-import { loader, type Monaco } from '@monaco-editor/react';
+import type { Monaco } from '@monaco-editor/react';
 import type * as monacoEditor from 'monaco-editor';
-
-let loaderConfigured = false;
 
 export const AETHEL_DARK_THEME_NAME = 'dark';
 
@@ -50,18 +48,6 @@ const AETHEL_DARK_THEME: monacoEditor.editor.IStandaloneThemeData = {
     'scrollbarSlider.activeBackground': 'var(--aethel-text-quaternary)',
   },
 };
-
-export function ensureMonacoLoaderConfigured() {
-  if (loaderConfigured) return;
-
-  loader.config({
-    paths: {
-      vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs',
-    },
-  });
-
-  loaderConfigured = true;
-}
 
 export function registerAethelMonacoTheme(monaco: Monaco) {
   monaco.editor.defineTheme(AETHEL_DARK_THEME_NAME, AETHEL_DARK_THEME);

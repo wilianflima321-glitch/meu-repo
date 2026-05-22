@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useCallback, useEffect, useMemo, useState } from 'react';
-import Editor, { OnMount, Monaco } from '@monaco-editor/react';
+import Editor, { loader, OnMount, Monaco } from '@monaco-editor/react';
 import type * as monacoEditor from 'monaco-editor';
 import { useInlineEdit, InlineEditModal } from './InlineEditModal';
 import { MonacoInlineCommentDialog } from './MonacoEditorPro.comments';
@@ -11,10 +11,7 @@ import {
   registerMonacoEditorActions,
 } from './MonacoEditorPro.actions';
 import { resolveAuthoritativeDocumentSymbols } from './MonacoEditorPro.symbols';
-import {
-  ensureMonacoLoaderConfigured,
-  registerAethelMonacoTheme,
-} from './MonacoEditorPro.theme';
+import { registerAethelMonacoTheme } from './MonacoEditorPro.theme';
 import { getAuthHeaders, submitChangeFeedback } from '@/lib/ai/change-feedback-client';
 import type { DocumentSymbol } from '@/components/outline/OutlinePanel';
 import { createComponentLogger } from '@/lib/observability/logger';
@@ -123,6 +120,20 @@ type ChangeApplyResponse = {
 };
 
 const log = createComponentLogger('MonacoEditorPro');
+
+let loaderConfigured = false;
+
+function ensureMonacoLoaderConfigured() {
+  if (loaderConfigured) return;
+
+  loader.config({
+    paths: {
+      vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs',
+    },
+  });
+
+  loaderConfigured = true;
+}
 
 ensureMonacoLoaderConfigured();
 

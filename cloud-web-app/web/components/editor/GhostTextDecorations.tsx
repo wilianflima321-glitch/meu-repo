@@ -9,9 +9,8 @@ import { logger } from '@/lib/observability/logger';
  */
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { editor, Position, Range } from 'monaco-editor';
+import type { editor, IPosition, IRange } from 'monaco-editor';
 import { ghostTextProvider, CompletionRequest, CompletionResult } from '@/lib/ai/ghost-text';
-import { motion, AnimatePresence } from 'framer-motion';
 
 // ============================================================================
 // TYPES
@@ -29,7 +28,7 @@ interface GhostTextDecorationsProps {
 
 interface GhostTextState {
   completion: CompletionResult | null;
-  position: Position | null;
+  position: IPosition | null;
   visible: boolean;
   loading: boolean;
 }
@@ -46,6 +45,15 @@ const GHOST_TEXT_DECORATION_OPTIONS: editor.IModelDecorationOptions = {
   },
   className: 'ghost-text-line',
 };
+
+function createRange(
+  startLineNumber: number,
+  startColumn: number,
+  endLineNumber: number,
+  endColumn: number,
+): IRange {
+  return { startLineNumber, startColumn, endLineNumber, endColumn };
+}
 
 // ============================================================================
 // STYLES (injected)
@@ -148,7 +156,7 @@ export function GhostTextDecorations({
     setState(prev => ({ ...prev, completion: null, visible: false }));
   }, [monacoEditor]);
 
-  const showGhostText = useCallback((completion: CompletionResult, position: Position) => {
+  const showGhostText = useCallback((completion: CompletionResult, position: IPosition) => {
     const model = monacoEditor.getModel();
     if (!model) return;
 
@@ -162,7 +170,7 @@ export function GhostTextDecorations({
     // Create decoration for inline text
     const decorations: editor.IModelDeltaDecoration[] = [
       {
-        range: new Range(position.lineNumber, position.column, position.lineNumber, position.column),
+        range: createRange(position.lineNumber, position.column, position.lineNumber, position.column),
         options: {
           after: {
             content: firstLine,
@@ -180,7 +188,7 @@ export function GhostTextDecorations({
 
         if (lineNumber <= lineCount) {
           decorations.push({
-            range: new Range(lineNumber, 1, lineNumber, 1),
+            range: createRange(lineNumber, 1, lineNumber, 1),
             options: {
               before: {
                 content: lines[i],
@@ -269,7 +277,7 @@ export function GhostTextDecorations({
     // Insert the completion text
     monacoEditor.executeEdits('ghost-text', [
       {
-        range: new Range(position.lineNumber, position.column, position.lineNumber, position.column),
+        range: createRange(position.lineNumber, position.column, position.lineNumber, position.column),
         text: completion.text,
         forceMoveMarkers: true,
       },
@@ -306,7 +314,7 @@ export function GhostTextDecorations({
     // Insert partial text
     monacoEditor.executeEdits('ghost-text-partial', [
       {
-        range: new Range(position.lineNumber, position.column, position.lineNumber, position.column),
+        range: createRange(position.lineNumber, position.column, position.lineNumber, position.column),
         text: partialText,
         forceMoveMarkers: true,
       },
@@ -422,66 +430,58 @@ export function GhostTextDecorations({
 
   // Tooltip for keyboard shortcuts
   const tooltipContent = state.visible && state.position && (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: -5 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -5 }}
-        className="ghost-text-tooltip"
-        style={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-        }}
-      >
-        <span className="ghost-text-shortcut">
-          <kbd>Tab</kbd> accept
-          <span style={{ margin: '0 4px' }}>•</span>
-          <kbd>Ctrl</kbd>+<kbd>→</kbd> word
-          <span style={{ margin: '0 4px' }}>•</span>
-          <kbd>Esc</kbd> dismiss
-        </span>
-      </motion.div>
-    </AnimatePresence>
+    <div
+      className="ghost-text-tooltip animate-in fade-in-0 slide-in-from-bottom-1 duration-150"
+      style={{
+        position: 'fixed',
+        bottom: 24,
+        right: 24,
+      }}
+    >
+      <span className="ghost-text-shortcut">
+        <kbd>Tab</kbd> accept
+        <span style={{ margin: '0 4px' }}>/</span>
+        <kbd>Ctrl</kbd>+<kbd>Right</kbd> word
+        <span style={{ margin: '0 4px' }}>/</span>
+        <kbd>Esc</kbd> dismiss
+      </span>
+    </div>
   );
+
 
   return (
     <>
       {/* Loading indicator */}
-      <AnimatePresence>
-        {state.loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+      {state.loading && (
+        <div
+          className="animate-in fade-in-0 duration-150"
+          style={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            background: 'var(--aethel-surface-elevated)',
+            border: '1px solid var(--aethel-border-primary)',
+            borderRadius: 6,
+            padding: '4px 8px',
+            fontSize: 11,
+            color: 'var(--aethel-text-tertiary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
+          <div
             style={{
-              position: 'fixed',
-              bottom: 24,
-              right: 24,
-              background: 'var(--aethel-surface-elevated)',
-              border: '1px solid var(--aethel-border-primary)',
-              borderRadius: 6,
-              padding: '4px 8px',
-              fontSize: 11,
-              color: 'var(--aethel-text-tertiary)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: 'var(--aethel-primary-light)',
+              animation: 'pulse 1s infinite',
             }}
-          >
-            <div
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: 'var(--aethel-primary-light)',
-                animation: 'pulse 1s infinite',
-              }}
-            />
-            Thinking...
-          </motion.div>
-        )}
-      </AnimatePresence>
+          />
+          Thinking...
+        </div>
+      )}
 
       {/* Keyboard shortcuts tooltip */}
       {tooltipContent}

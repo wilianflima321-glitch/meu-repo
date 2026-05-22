@@ -8,9 +8,9 @@ Generated: deterministic local scan
 - threeDirect: 40 (max 40)
 - reactThreeFiberDirect: 2 (max 3)
 - reactThreeDreiDirect: 1 (max 2)
-- monacoEditorDirect: 3 (max 4)
-- monacoReactDirect: 4 (max 4)
-- framerMotionDirect: 16 (max 16)
+- monacoEditorDirect: 2 (max 2)
+- monacoReactDirect: 3 (max 3)
+- framerMotionDirect: 15 (max 15)
 - dynamicImportsMin: 256 (min 100)
 
 ## Top Offenders
@@ -46,18 +46,15 @@ Generated: deterministic local scan
 ### reactThreeDreiDirect
 - components/physics/DestructionEditor.tsx (1)
 ### monacoEditorDirect
-- components/editor/GhostTextDecorations.tsx (1)
 - lib/collaboration/collaboration-manager.ts (1)
 - lib/monaco-lsp-bridge.ts (1)
 ### monacoReactDirect
 - components/editor/MonacoEditor.tsx (1)
-- components/editor/MonacoEditorPro.theme.ts (1)
 - components/editor/MonacoEditorPro.tsx (1)
 - components/ide/MonacoChatDiffPanel.tsx (1)
 ### framerMotionDirect
 - components/ai/AgentModePanel.tsx (1)
 - components/collaboration/VersionHistorySlider.tsx (1)
-- components/editor/GhostTextDecorations.tsx (1)
 - components/editor/InlineEditModal.tsx (1)
 - components/marketplace/MarketplaceBrowser.parts.tsx (1)
 - components/marketplace/MarketplaceBrowser.tsx (1)
