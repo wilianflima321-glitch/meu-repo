@@ -8,7 +8,7 @@ const EXTENSIONS = new Set(['.ts', '.tsx'])
 const ignoreDirs = new Set(['node_modules', '.next', 'dist', 'build', '__tests__', '__mocks__'])
 
 const BUDGETS = {
-  threeDirect: 40,
+  threeDirect: 35,
   reactThreeFiberDirect: 3,
   reactThreeDreiDirect: 2,
   monacoEditorDirect: 2,

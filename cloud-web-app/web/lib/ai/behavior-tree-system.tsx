@@ -13,6 +13,7 @@
  * @module lib/ai/behavior-tree-system
  */
 import { EventEmitter } from 'events';
+// @aethel-heavy-async-boundary
 import * as THREE from 'three';
 import { createComponentLogger } from '@/lib/observability/logger'
 

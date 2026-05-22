@@ -56,7 +56,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/aaa-render-system.ts` | 1053 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/hot-reload/hot-reload-server.ts` | 1049 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/quest-mission-system.ts` | 1046 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/assets/asset-importer.ts` | 1040 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/assets/asset-importer.ts` | 1041 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/pbr-shader-pipeline.ts` | 1037 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/ray-tracing.ts` | 1035 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/ai-audio-engine.ts` | 1034 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
@@ -105,7 +105,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/particles/advanced-particle-system.ts` | 1132 | creative-runtime | P2 tracked large module | 3 |
 | `server/workers/build-queue-worker.ts` | 1111 | server-runtime | P2 tracked large module | 0 |
 | `lib/ai-tools-registry.ts` | 1085 | foundation-runtime | P2 tracked large module | 5 |
-| `lib/ai/behavior-tree-system.tsx` | 1084 | creative-runtime | P2 tracked large module | 4 |
+| `lib/ai/behavior-tree-system.tsx` | 1085 | creative-runtime | P2 tracked large module | 4 |
 | `lib/debug/real-debug-adapter.ts` | 1074 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/nanite-virtualized-geometry.ts` | 1067 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/video-encoder-real.ts` | 1067 | foundation-runtime | P2 tracked large module | 3 |
@@ -118,7 +118,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/aaa-render-system.ts` | 1053 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/hot-reload/hot-reload-server.ts` | 1049 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/quest-mission-system.ts` | 1046 | foundation-runtime | P1 low-import large module | 0 |
-| `lib/assets/asset-importer.ts` | 1040 | foundation-runtime | P1 low-import large module | 0 |
+| `lib/assets/asset-importer.ts` | 1041 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/pbr-shader-pipeline.ts` | 1037 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/ray-tracing.ts` | 1035 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/ai-audio-engine.ts` | 1034 | foundation-runtime | P1 low-import large module | 0 |

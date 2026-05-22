@@ -5,7 +5,7 @@ Generated: deterministic local scan
 - Failures: 0
 
 ## Counts
-- threeDirect: 40 (max 40)
+- threeDirect: 35 (max 35)
 - reactThreeFiberDirect: 2 (max 3)
 - reactThreeDreiDirect: 1 (max 2)
 - monacoEditorDirect: 2 (max 2)
@@ -17,11 +17,6 @@ Generated: deterministic local scan
 ### threeDirect
 - components/nexus/NexusCanvasV2.tsx (1)
 - components/physics/DestructionEditor.tsx (1)
-- lib/ai/behavior-tree-system.tsx (1)
-- lib/ai-content-generation.ts (1)
-- lib/asset-import-pipeline.ts (1)
-- lib/asset-pipeline.ts (1)
-- lib/assets/asset-importer.ts (1)
 - lib/audio/spatial-audio-system.ts (1)
 - lib/camera/camera-system.tsx (1)
 - lib/cutscene/system/player.ts (1)
@@ -40,6 +35,11 @@ Generated: deterministic local scan
 - lib/nanite-virtualized-geometry.ts (1)
 - lib/particle-system-real.ts (1)
 - lib/particles/advanced-particle-system.ts (1)
+- lib/pbr-shader-pipeline.ts (1)
+- lib/physics/physics-system.ts (1)
+- lib/physics-engine-real.ts (1)
+- lib/post-process-volume.ts (1)
+- lib/quest-mission-system.ts (1)
 ### reactThreeFiberDirect
 - components/physics/DestructionEditor.tsx (1)
 - lib/camera/camera-system.tsx (1)

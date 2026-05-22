@@ -6,6 +6,7 @@ import { logger } from '@/lib/observability/logger';
  * Suporta imagens, áudio, modelos 3D, fontes, vídeos e mais.
  */
 
+// @aethel-heavy-async-boundary
 import * as THREE from 'three';
 import type { LODConfig } from './engine/lod/auto-lod-pipeline';
 

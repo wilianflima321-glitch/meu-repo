@@ -30,163 +30,52 @@ import {
 } from 'react';
 import { createComponentLogger } from '@/lib/observability/logger';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+import type {
+    AwarenessState,
+    BridgeData,
+    BridgeResult,
+    ConnectionState,
+    DiskUsage,
+    DownloadProgress,
+    GatewayEventCallback,
+    GatewayMessage,
+    GatewayPayload,
+    GatewayRequestPayload,
+    HealthAlert,
+    HealthDashboardState,
+    Job,
+    PendingGatewayRequest,
+    RenderProgress,
+    ServiceHealth,
+    SystemMetrics,
+} from './aethel-gateway-types';
 
-export interface ConnectionState {
-    connected: boolean;
-    reconnecting: boolean;
-    error: string | null;
-    latency: number;
-}
-
-export interface RenderProgress {
-    jobId: string;
-    status: 'pending' | 'rendering' | 'complete' | 'failed' | 'cancelled';
-    progress: number;
-    currentFrame?: number;
-    totalFrames?: number;
-    currentSample?: number;
-    totalSamples?: number;
-    eta?: number;
-    memory?: number;
-    message?: string;
-    output?: string;
-    error?: string;
-}
-
-export interface ServiceHealth {
-    name: string;
-    status: 'healthy' | 'degraded' | 'offline' | 'unknown';
-    latency?: number;
-    message?: string;
-    lastCheck: number;
-}
-
-export interface SystemMetrics {
-    cpu: {
-        usage: number;
-        cores: number;
-    };
-    memory: {
-        used: number;
-        total: number;
-        percentage: number;
-    };
-    disk: {
-        used: number;
-        total: number;
-        percentage: number;
-    };
-    gpu?: {
-        name: string;
-        usage: number;
-        memory: number;
-        temperature?: number;
-    };
-}
-
-export interface HealthDashboardState {
-    services: Record<string, ServiceHealth>;
-    system: SystemMetrics;
-    alerts: HealthAlert[];
-    uptime: number;
-}
-
-export interface HealthAlert {
-    id: string;
-    level: 'info' | 'warning' | 'critical';
-    service: string;
-    message: string;
-    timestamp: number;
-}
-
-export interface Job {
-    id: string;
-    type: string;
-    status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-    priority: 'low' | 'normal' | 'high' | 'critical';
-    payload: unknown;
-    progress?: number;
-    result?: unknown;
-    error?: string;
-    createdAt: number;
-    startedAt?: number;
-    completedAt?: number;
-}
-
-type GatewayPayload = unknown;
-type GatewayEventCallback = (data: GatewayPayload) => void;
-type GatewayRequestPayload = Record<string, unknown> | undefined;
-
-type GatewayMessage = {
-    requestId?: string;
-    event?: string;
-    type?: string;
-    data?: unknown;
-    payload?: unknown;
-    message?: string;
-};
-
-type PendingGatewayRequest = {
-    resolve: (value: unknown) => void;
-    reject: (error: Error) => void;
-    timeout: NodeJS.Timeout;
-};
-
-type BridgeToolStatus = {
-    available?: boolean;
-};
-
-type BridgeData = {
-    blender?: BridgeToolStatus;
-    ffmpeg?: BridgeToolStatus;
-    unreal?: BridgeToolStatus;
-    id?: string;
-    path?: string;
-};
-
-type BridgeResult = {
-    type?: string;
-    data?: BridgeData;
-    message?: string;
-    path?: string;
-};
-
-type AwarenessState = {
-    user?: {
-        name?: string;
-        color?: string;
-    };
-};
-
-export interface DiskUsage {
-    category: string;
-    used: number;
-    quota: number;
-    percentage: number;
-    files: number;
-}
-
-export interface DownloadProgress {
-    id: string;
-    url: string;
-    filename: string;
-    progress: number;
-    speed: number;
-    downloaded: number;
-    total: number;
-    status: 'pending' | 'downloading' | 'verifying' | 'complete' | 'failed';
-    error?: string;
-}
+export type {
+    ConnectionState,
+    DiskUsage,
+    DownloadProgress,
+    HealthAlert,
+    HealthDashboardState,
+    Job,
+    RenderProgress,
+    ServiceHealth,
+    SystemMetrics,
+} from './aethel-gateway-types';
 
 // ============================================================================
 // GATEWAY CONNECTION CONTEXT
 // ============================================================================
 
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:4000';
+const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL?.trim() || null;
 const logger = createComponentLogger('aethel-gateway');
+
+function getGatewayHttpUrl(): string | null {
+    return GATEWAY_URL ? GATEWAY_URL.replace(/^ws/, 'http') : null;
+}
+
+function getGatewayWsBaseUrl(): string | null {
+    return GATEWAY_URL ? GATEWAY_URL.replace(/\/events$/, '') : null;
+}
 
 interface GatewayContextValue {
     ws: WebSocket | null;
@@ -207,6 +96,11 @@ export function GatewayProvider({ children }: { children: ReactNode }) {
     const reconnectAttemptsRef = useRef(0);
     
     const connect = useCallback(() => {
+        if (!GATEWAY_URL) {
+            logger.info('Gateway URL not configured; realtime bridge remains held');
+            return;
+        }
+
         if (wsRef.current?.readyState === WebSocket.OPEN) return;
         
         try {
@@ -297,7 +191,7 @@ export function GatewayProvider({ children }: { children: ReactNode }) {
     const request = useCallback(<T,>(type: string, payload?: GatewayRequestPayload): Promise<T> => {
         return new Promise((resolve, reject) => {
             if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-                reject(new Error('Not connected'));
+                reject(new Error(GATEWAY_URL ? 'Not connected' : 'Gateway URL not configured'));
                 return;
             }
             
@@ -349,10 +243,12 @@ export function useAethelConnection(): ConnectionState & {
         // Ping to measure latency
         const pingInterval = setInterval(async () => {
             if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            const gatewayHttpUrl = getGatewayHttpUrl();
+            if (!gatewayHttpUrl) return;
             
             const start = Date.now();
             try {
-                await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/health`);
+                await fetch(`${gatewayHttpUrl}/api/health`);
                 setLatency(Date.now() - start);
                 setError(null);
             } catch {
@@ -471,8 +367,11 @@ export function useSystemHealth(): {
     useEffect(() => {
         // Fetch initial state
         const fetchHealth = async () => {
+            const gatewayHttpUrl = getGatewayHttpUrl();
+            if (!gatewayHttpUrl) return;
+
             try {
-                const response = await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/health/dashboard`);
+                const response = await fetch(`${gatewayHttpUrl}/api/health/dashboard`);
                 const data = await response.json();
                 if (data.success) {
                     setState(data.data);
@@ -507,8 +406,11 @@ export function useSystemHealth(): {
     }, [subscribe]);
     
     const refresh = useCallback(async () => {
+        const gatewayHttpUrl = getGatewayHttpUrl();
+        if (!gatewayHttpUrl) return;
+
         try {
-            const response = await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/health/dashboard`);
+            const response = await fetch(`${gatewayHttpUrl}/api/health/dashboard`);
             const data = await response.json();
             if (data.success) {
                 setState(data.data);
@@ -544,8 +446,11 @@ export function useJobQueue(): {
     useEffect(() => {
         // Fetch initial jobs
         const fetchJobs = async () => {
+            const gatewayHttpUrl = getGatewayHttpUrl();
+            if (!gatewayHttpUrl) return;
+
             try {
-                const response = await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/jobs`);
+                const response = await fetch(`${gatewayHttpUrl}/api/jobs`);
                 const data = await response.json();
                 if (data.success) {
                     setJobs(data.data);
@@ -585,7 +490,10 @@ export function useJobQueue(): {
     }), [jobs]);
     
     const createJob = useCallback(async (type: string, payload: GatewayRequestPayload, priority = 'normal') => {
-        const response = await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/jobs`, {
+        const gatewayHttpUrl = getGatewayHttpUrl();
+        if (!gatewayHttpUrl) throw new Error('Gateway URL not configured');
+
+        const response = await fetch(`${gatewayHttpUrl}/api/jobs`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type, payload, priority })
@@ -600,15 +508,21 @@ export function useJobQueue(): {
     }, []);
     
     const cancelJob = useCallback(async (id: string) => {
-        await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/jobs/${id}`, {
+        const gatewayHttpUrl = getGatewayHttpUrl();
+        if (!gatewayHttpUrl) throw new Error('Gateway URL not configured');
+
+        await fetch(`${gatewayHttpUrl}/api/jobs/${id}`, {
             method: 'DELETE'
         });
         setJobs(prev => prev.map(j => j.id === id ? { ...j, status: 'cancelled' as const } : j));
     }, []);
     
     const refresh = useCallback(async () => {
+        const gatewayHttpUrl = getGatewayHttpUrl();
+        if (!gatewayHttpUrl) return;
+
         try {
-            const response = await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/jobs`);
+            const response = await fetch(`${gatewayHttpUrl}/api/jobs`);
             const data = await response.json();
             if (data.success) {
                 setJobs(data.data);
@@ -639,8 +553,11 @@ export function useDiskUsage(): {
     useEffect(() => {
         // Fetch initial state
         const fetchUsage = async () => {
+            const gatewayHttpUrl = getGatewayHttpUrl();
+            if (!gatewayHttpUrl) return;
+
             try {
-                const response = await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/system/disk`);
+                const response = await fetch(`${gatewayHttpUrl}/api/system/disk`);
                 const data = await response.json();
                 if (data.success) {
                     setUsage(data.data.usage || []);
@@ -678,7 +595,10 @@ export function useDiskUsage(): {
     }, [usage]);
     
     const cleanup = useCallback(async (category?: string) => {
-        const response = await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/system/disk/cleanup`, {
+        const gatewayHttpUrl = getGatewayHttpUrl();
+        if (!gatewayHttpUrl) return 0;
+
+        const response = await fetch(`${gatewayHttpUrl}/api/system/disk/cleanup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ category })
@@ -688,8 +608,11 @@ export function useDiskUsage(): {
     }, []);
     
     const refresh = useCallback(async () => {
+        const gatewayHttpUrl = getGatewayHttpUrl();
+        if (!gatewayHttpUrl) return;
+
         try {
-            const response = await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/system/disk`);
+            const response = await fetch(`${gatewayHttpUrl}/api/system/disk`);
             const data = await response.json();
             if (data.success) {
                 setUsage(data.data.usage || []);
@@ -741,7 +664,10 @@ export function useAssetDownload(): {
     }, [subscribe]);
     
     const startDownload = useCallback(async (url: string, options?: { filename?: string; sha256?: string }) => {
-        const response = await fetch(`${GATEWAY_URL.replace('ws', 'http')}/api/assets/download`, {
+        const gatewayHttpUrl = getGatewayHttpUrl();
+        if (!gatewayHttpUrl) throw new Error('Gateway URL not configured');
+
+        const response = await fetch(`${gatewayHttpUrl}/api/assets/download`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -787,6 +713,8 @@ export function useBridge(): {
     // Connect to bridge endpoint
     useEffect(() => {
         const connectBridge = () => {
+            if (!GATEWAY_URL) return;
+
             try {
                 const ws = new WebSocket(`${GATEWAY_URL}/bridge`);
                 bridgeWsRef.current = ws;
@@ -917,6 +845,11 @@ export function useCollaboration(docName: string): {
     
     useEffect(() => {
         if (!connected || !docName) return;
+        const gatewayWsBaseUrl = getGatewayWsBaseUrl();
+        if (!gatewayWsBaseUrl) return;
+
+        let cleanup: (() => void) | undefined;
+        let cancelled = false;
         
         const setupCollab = async () => {
             try {
@@ -928,7 +861,7 @@ export function useCollaboration(docName: string): {
                 docRef.current = doc;
                 
                 const provider = new WebsocketProvider(
-                    GATEWAY_URL.replace('/events', ''),
+                    gatewayWsBaseUrl,
                     docName,
                     doc
                 );
@@ -957,7 +890,16 @@ export function useCollaboration(docName: string): {
             }
         };
         
-        setupCollab();
+        setupCollab().then((teardown) => {
+            if (!teardown) return;
+            if (cancelled) teardown();
+            else cleanup = teardown;
+        });
+
+        return () => {
+            cancelled = true;
+            cleanup?.();
+        };
     }, [connected, docName]);
     
     return {

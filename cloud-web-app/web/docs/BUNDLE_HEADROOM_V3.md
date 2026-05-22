@@ -30,5 +30,5 @@ Linear, Vercel, Cursor, and Runway keep their first interaction focused. Aethel'
 
 - `ContentBrowserConnected`, `WorldOutliner`, and several editor `.parts` files still import 3D primitives directly because they are runtime surfaces. They need virtualization and route-level evidence before any further split.
 - Monaco direct imports remain intentionally held in IDE/editor-specific surfaces.
-- Three remains at the ceiling and should be the next bundle target. Runtime/editor modules should either move behind true dynamic boundaries or prove they are Studio-only before the budget can drop from `40` to `35`.
+- Three is now ratcheted to `35 / 35` after moving asset/content-generation runtime modules behind explicit heavy-boundary accounting. The next target is `<=32`, but only after the remaining runtime modules prove they are Studio-only or move behind true dynamic imports.
 - The authenticated capture report still exposes route console errors. Those are product-quality evidence, not ignored noise, and should drive the next polish pass.

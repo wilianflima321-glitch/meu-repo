@@ -7,6 +7,7 @@
  * NÃO É MOCK - Sistema real e funcional!
  */
 
+// @aethel-heavy-async-boundary
 import * as THREE from 'three';
 import { GLTFLoader, GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';

@@ -8,6 +8,7 @@ import { logger } from '@/lib/observability/logger';
  * @module lib/assets/asset-importer
  */
 
+// @aethel-heavy-async-boundary
 import * as THREE from 'three';
 import { GLTFLoader, GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';

@@ -85,8 +85,19 @@ for (const viewport of VIEWPORTS) {
   for (const route of ROUTES) {
     const page = await context.newPage()
     const consoleErrors = []
+    const networkErrors = []
     page.on('console', (message) => {
       if (message.type() === 'error') consoleErrors.push(message.text())
+    })
+    page.on('response', (response) => {
+      const status = response.status()
+      if (status < 400) return
+      networkErrors.push({
+        status,
+        url: response.url().replace(BASE_URL, ''),
+        method: response.request().method(),
+        resourceType: response.request().resourceType(),
+      })
     })
     const url = new URL(route, BASE_URL).toString()
     const filename = `${viewport.id}-${route.replace(/^\//, '').replace(/[/?=&]/g, '-') || 'home'}.png`
@@ -118,6 +129,7 @@ for (const viewport of VIEWPORTS) {
       finalUrl,
       screenshot: error ? null : path.relative(ROOT, outputPath).replace(/\\/g, '/'),
       consoleErrors,
+      networkErrors,
       error,
       stabilization,
     })
@@ -134,11 +146,24 @@ const doc = `# Authenticated UX Surface Audit
 - Auth method: signed JWT injected through cookie \`token\` and localStorage \`aethel-token\`
 - Note: screenshots live under \`output/playwright/v22-authenticated/\` and are intentionally not versioned.
 
-| Viewport | Route | Status | Final URL | Screenshot | Stabilization | Console errors |
-| --- | --- | ---: | --- | --- | --- | ---: |
+| Viewport | Route | Status | Final URL | Screenshot | Stabilization | Console errors | Network errors |
+| --- | --- | ---: | --- | --- | --- | ---: | ---: |
 ${results
-  .map((result) => `| ${result.viewport} | ${result.route} | ${result.status ?? 'n/a'} | ${result.finalUrl} | ${result.screenshot ?? result.error ?? 'n/a'} | ${result.stabilization} | ${result.consoleErrors.length} |`)
+  .map((result) => `| ${result.viewport} | ${result.route} | ${result.status ?? 'n/a'} | ${result.finalUrl} | ${result.screenshot ?? result.error ?? 'n/a'} | ${result.stabilization} | ${result.consoleErrors.length} | ${result.networkErrors.length} |`)
   .join('\n')}
+
+## Network Error Evidence
+
+${results
+  .filter((result) => result.networkErrors.length > 0)
+  .map((result) => {
+    const items = result.networkErrors
+      .slice(0, 8)
+      .map((item) => `  - ${item.method} ${item.status} ${item.url} (${item.resourceType})`)
+      .join('\n')
+    return `### ${result.viewport} ${result.route}\n${items}`
+  })
+  .join('\n\n') || '- none'}
 `
 
 fs.writeFileSync(path.join(OUTPUT_DIR, 'index.json'), JSON.stringify(results, null, 2))
