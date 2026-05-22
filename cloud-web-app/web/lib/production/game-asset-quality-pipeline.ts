@@ -3,6 +3,7 @@ import type { ProductionRuntimeTarget } from '@/lib/production/agentic-productio
 export type GameAssetQualityTier = 'ai-draft' | 'curated-marketplace' | 'studio-local-optimized' | 'cloud-render-grade'
 export type GameAssetDomain = 'character' | 'creature' | 'environment' | 'prop' | 'weapon' | 'vehicle' | 'vfx' | 'audio' | 'cinematic'
 export type GameAssetPipelineStageState = 'required' | 'held' | 'optional'
+export type AssetFinalClaimState = 'blocked' | 'needs-review'
 
 export interface GameAssetQualityStage {
   id: string
@@ -220,5 +221,36 @@ export function evaluateGameAssetQualityReadiness(input: {
       missingEvidence.length > 0
         ? 'Attach asset quality evidence before agents can upgrade the asset lane.'
         : 'Request human art-direction approval before premium/public claims.',
+  }
+}
+
+export function evaluateAssetFinalClaimReadiness(input: {
+  currentTier: GameAssetQualityTier
+  evidenceRefs: string[]
+  humanApproved?: boolean
+}): {
+  state: AssetFinalClaimState
+  missingEvidence: string[]
+  blockers: string[]
+  nextAction: string
+  humanReviewRequired: true
+} {
+  const evidence = new Set(input.evidenceRefs)
+  const missingEvidence = GAME_ASSET_QUALITY_REQUIRED_EVIDENCE.filter((required) => !evidence.has(required))
+  const blockers = [
+    ...(input.currentTier === 'ai-draft' ? ['AI draft assets are never final; upgrade through curated or Studio Local lanes first.'] : []),
+    ...missingEvidence.map((item) => `Missing final evidence: ${item}`),
+    ...(input.humanApproved === true ? [] : ['Human art-direction approval is required before final/public claims.']),
+  ]
+
+  return {
+    state: blockers.length > 0 ? 'blocked' : 'needs-review',
+    missingEvidence,
+    blockers,
+    nextAction:
+      blockers.length > 0
+        ? 'Complete provenance, LOD/PBR/collision/performance evidence and request human review before final claims.'
+        : 'Final claim can enter human release review; do not auto-publish.',
+    humanReviewRequired: true,
   }
 }

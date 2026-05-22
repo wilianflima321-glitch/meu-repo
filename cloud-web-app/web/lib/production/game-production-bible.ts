@@ -114,6 +114,7 @@ function uniqueSections(sections: ProductionBibleSection[]): ProductionBibleSect
 function scopeDecision(scope: PlayableGameScope): string {
   if (scope === 'prototype') return 'Approve the player fantasy, core loop, and first playable test.'
   if (scope === 'demo') return 'Approve the vertical-slice promise, quality bar, and evidence path.'
+  if (scope === 'vertical-slice') return 'Approve the production-quality chapter, asset evidence, playtest budget, and release hold.'
   return 'Approve the production roadmap, budget, milestone cuts, and release evidence model.'
 }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { buildAgentOverview, parseAgentLimit } from '@/lib/server/agent-observability'
+import { buildAgentRunLedger } from '@/lib/server/agent-run-ledger'
 import { AI_AGENT_READ_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { listAgentSnapshots } from '@/lib/server/agent-store'
 
@@ -20,12 +21,15 @@ export async function GET(request: NextRequest) {
     const limit = parseAgentLimit(request.nextUrl.searchParams.get('limit'), 25)
     const snapshots = await listAgentSnapshots(auth.userId)
     const overview = buildAgentOverview(snapshots, limit)
+    const runLedger = buildAgentRunLedger(snapshots, limit)
 
     return NextResponse.json({
       ...overview,
+      runLedger,
       capability: 'AI_AGENTS_OVERVIEW',
       capabilityStatus: 'READY',
       retention: 'local-agent-store',
+      responsibilityModel: 'human-owner-required',
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {

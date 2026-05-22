@@ -21,7 +21,7 @@ function requirePattern(relativePath, pattern, reason) {
 }
 
 requirePattern('app/studio/StudioMissionControl.tsx', /buildGameScopePlan/, 'Studio Mission Control must consume the game scope orchestrator')
-requirePattern('app/studio/StudioMissionControl.tsx', /GAME_SCOPE_OPTIONS[\s\S]*prototype[\s\S]*demo[\s\S]*complete-game-plan/, 'Studio must expose prototype/demo/full-plan choice')
+requirePattern('app/studio/StudioMissionControl.tsx', /GAME_SCOPE_OPTIONS[\s\S]*prototype[\s\S]*demo[\s\S]*vertical-slice[\s\S]*complete-game-plan/, 'Studio must expose prototype/demo/vertical-slice/full-plan choice')
 requirePattern('app/studio/StudioMissionControl.tsx', /GAME_GENRE_OPTIONS[\s\S]*rpg[\s\S]*action-adventure[\s\S]*moba[\s\S]*strategy[\s\S]*custom/, 'Studio must expose multiple genres, not one LoL path')
 requirePattern('app/studio/StudioMissionControl.tsx', /Game scope:/, 'Studio must show a compact scope plan without hiding it in backend-only state')
 requirePattern('app/studio/StudioMissionControl.tsx', /story-world-character bible|story\/world\/character bible|Production scope|creativeArtifacts/, 'Studio must signal creative planning before heavy generation')

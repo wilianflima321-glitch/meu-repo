@@ -44,7 +44,7 @@ There is intentionally no `ready` state. Premium/public claims must pass through
 
 ## Game Scope Orchestrator
 
-Users choose the production depth first: `prototype`, `demo`, or `complete-game-plan`. Agents must not silently force every mission into a MOBA, shooter, RPG, or any other preset.
+Users choose the production depth first: `prototype`, `demo`, `vertical-slice`, or `complete-game-plan`. Agents must not silently force every mission into a MOBA, shooter, RPG, or any other preset.
 
 The scope orchestrator plans the creative work before heavy generation:
 
@@ -57,7 +57,7 @@ The scope orchestrator plans the creative work before heavy generation:
 - `playtest-plan`: bot/human review, bug ledger, feel notes.
 - `release-plan`: build, rollback, platform checklist, human approval.
 
-`complete-game-plan` means a complete production plan and milestone spine. It does not mean Aethel claims a finished full game without builds, evidence, playtests, performance traces, provenance, and human review.
+`vertical-slice` means one production-quality chapter with release hold, final-candidate asset evidence, bot/human playtests, performance traces, provenance, and human review. `complete-game-plan` means a complete production plan and milestone spine. It does not mean Aethel claims a finished full game without builds, evidence, playtests, performance traces, provenance, and human review.
 
 ## Example Presets
 

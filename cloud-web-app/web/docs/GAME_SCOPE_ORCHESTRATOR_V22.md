@@ -7,7 +7,8 @@ Status: implemented as a planning contract. It does not execute paid generation,
 Users should decide the ambition level before agents start work:
 
 - `prototype`: fastest playable loop with enough story, world, characters, art direction, audio direction, and playtest evidence to avoid a throwaway demo.
-- `demo`: a polished vertical slice with broader story/world/character/gameplay/audio/VFX/performance/release evidence.
+- `demo`: a polished short demo with broader story/world/character/gameplay/audio/VFX/performance/release evidence.
+- `vertical-slice`: one production-quality chapter with final-candidate assets, bot/human playtests, performance traces, rollback, provenance, and release hold.
 - `complete-game-plan`: a complete production plan, milestone roadmap, content backlog, budget, and evidence spine. It is not a fake finished game.
 
 This keeps the interface low-noise: one scope choice, one creative brief, one evidence path. Agents do the graph expansion behind the scenes.
@@ -40,6 +41,7 @@ The MOBA / LoL-like preset remains useful as an example because it exercises cam
 
 - A prototype can be playable, but it is not a final product.
 - A demo can be polished, but it is not the whole game.
+- A vertical-slice can be production-quality for one chapter, but it still needs release hold, evidence, and human approval before public claims.
 - A complete-game-plan can be comprehensive, but it is not a finished game until milestone builds, evidence, playtests, performance traces, provenance, rollback, and human approval exist.
 - Browser is preview/review. Studio Local handles heavy processing. Cloud Stream is cost-visible final review when configured.
 

@@ -47,7 +47,8 @@ const MODE_OPTIONS = [
 
 const GAME_SCOPE_OPTIONS: Array<{ value: PlayableGameScope; label: string; helper: string }> = [
   { value: 'prototype', label: 'Prototype', helper: 'Smallest playable loop.' },
-  { value: 'demo', label: 'Demo', helper: 'Polished vertical slice.' },
+  { value: 'demo', label: 'Demo', helper: 'Polished short demo.' },
+  { value: 'vertical-slice', label: 'Vertical slice', helper: 'Production-quality chapter.' },
   { value: 'complete-game-plan', label: 'Full plan', helper: 'Milestones, budget, bible.' },
 ]
 
@@ -110,7 +111,7 @@ export default function StudioMissionControl() {
       scope: gameScope,
       genre: gameGenre,
       userIntent: mission,
-      budgetUsd: gameScope === 'prototype' ? 8 : gameScope === 'demo' ? 35 : 120,
+      budgetUsd: gameScope === 'prototype' ? 8 : gameScope === 'demo' ? 35 : gameScope === 'vertical-slice' ? 65 : 120,
       runtimeCapabilities: {
         'license-provenance-scanner': true,
         'studio-local': runtimeTarget === 'local-native',

@@ -72,6 +72,10 @@ const checks = [
   },
   {
     file: 'app/api/ai/chat-advanced/route.ts',
+    files: [
+      'app/api/ai/chat-advanced/route.ts',
+      'lib/server/ai-chat-advanced/orchestrator.ts',
+    ],
     patterns: ["error: 'AI_PROVIDER_NOT_CONFIGURED'", 'status: 503', "capabilityStatus: 'PARTIAL'"],
     name: 'ai/chat-advanced provider-gate contract',
   },
@@ -131,6 +135,14 @@ const checks = [
   },
   {
     file: 'app/api/ai/change/apply/route.ts',
+    files: [
+      'app/api/ai/change/apply/route.ts',
+      'lib/server/ai-change-apply/types.ts',
+      'lib/server/ai-change-apply/request.ts',
+      'lib/server/ai-change-apply/preflight.ts',
+      'lib/server/ai-change-apply/agent-guards.ts',
+      'lib/server/ai-change-apply/executor.ts',
+    ],
     patterns: [
       "const CAPABILITY = 'AI_CHANGE_APPLY'",
       "const RUN_SOURCE = 'production'",
@@ -516,7 +528,9 @@ async function main() {
   for (const check of checks) {
     let content
     try {
-      content = await read(check.file)
+      content = check.files
+        ? (await Promise.all(check.files.map((file) => read(file)))).join('\n')
+        : await read(check.file)
     } catch (error) {
       failures.push(`${check.name}: missing file ${check.file}`)
       continue

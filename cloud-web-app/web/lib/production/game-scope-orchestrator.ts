@@ -14,7 +14,7 @@ import { getGameGenrePack, type GameGenrePack } from '@/lib/production/game-genr
 import { buildGamePlaytestSpinePlan, type PlaytestSpinePlan } from '@/lib/production/game-playtest-spine'
 import { buildGameProductionBible, type ProductionBibleSnapshot } from '@/lib/production/game-production-bible'
 
-export type PlayableGameScope = 'prototype' | 'demo' | 'complete-game-plan'
+export type PlayableGameScope = 'prototype' | 'demo' | 'vertical-slice' | 'complete-game-plan'
 
 export type PlayableGameGenre =
   | 'moba'
@@ -91,6 +91,7 @@ export interface BuildGameScopePlanInput {
 const SCOPE_LABELS: Record<PlayableGameScope, string> = {
   prototype: 'Playable prototype',
   demo: 'Evidence-backed demo',
+  'vertical-slice': 'Production vertical slice',
   'complete-game-plan': 'Complete game plan',
 }
 
@@ -127,10 +128,14 @@ const DEMO_ARTIFACTS: CreativePlanningArtifact[] = [
   'release-plan',
 ]
 
-const COMPLETE_GAME_PLAN_ARTIFACTS: CreativePlanningArtifact[] = [
+const VERTICAL_SLICE_ARTIFACTS: CreativePlanningArtifact[] = [
   ...DEMO_ARTIFACTS,
   'content-roadmap',
   'production-budget',
+]
+
+const COMPLETE_GAME_PLAN_ARTIFACTS: CreativePlanningArtifact[] = [
+  ...VERTICAL_SLICE_ARTIFACTS,
 ]
 
 function unique<T>(items: T[]): T[] {
@@ -140,6 +145,7 @@ function unique<T>(items: T[]): T[] {
 function artifactsForScope(scope: PlayableGameScope): CreativePlanningArtifact[] {
   if (scope === 'prototype') return PROTOTYPE_ARTIFACTS
   if (scope === 'demo') return DEMO_ARTIFACTS
+  if (scope === 'vertical-slice') return VERTICAL_SLICE_ARTIFACTS
   return COMPLETE_GAME_PLAN_ARTIFACTS
 }
 
@@ -151,6 +157,7 @@ function defaultQualityForScope(scope: PlayableGameScope): GameAssetQualityTier 
 function defaultBudgetForScope(scope: PlayableGameScope): number {
   if (scope === 'prototype') return 8
   if (scope === 'demo') return 35
+  if (scope === 'vertical-slice') return 65
   return 120
 }
 
@@ -264,6 +271,9 @@ function scopeDisclosure(scope: PlayableGameScope): string {
   if (scope === 'demo') {
     return 'Demo mode creates a polished vertical slice with story, world, character, gameplay, audio, VFX, performance, playtest, and release evidence.'
   }
+  if (scope === 'vertical-slice') {
+    return 'Vertical slice mode creates one production-quality chapter with full bible depth, asset-quality gates, bot/human playtests, performance traces, release hold, and human approval.'
+  }
   return 'Complete game mode creates a complete production plan and milestone spine; it does not claim the full game is finished without builds, evidence, and human review.'
 }
 
@@ -284,6 +294,12 @@ function scopeBlockers(scope: PlayableGameScope): string[] {
       'Demo release is held until gameplay, story, world, character, audio, VFX, performance, rollback, and human approval evidence exist.',
     ]
   }
+  if (scope === 'vertical-slice') {
+    return [
+      ...common,
+      'Vertical-slice release is held until one production-quality chapter has asset-quality evidence, bot and human playtests, performance traces, rollback, provenance, and human approval.',
+    ]
+  }
   return [
     ...common,
     'A complete-game request creates a production plan first; final release remains held until each milestone ships evidence-backed builds.',
@@ -293,6 +309,7 @@ function scopeBlockers(scope: PlayableGameScope): string[] {
 function scopeNextAction(scope: PlayableGameScope): string {
   if (scope === 'prototype') return 'Approve the creative brief, then build the smallest playable loop and attach playtest evidence.'
   if (scope === 'demo') return 'Approve the story/world/character bible, then produce a focused vertical slice with quality gates.'
+  if (scope === 'vertical-slice') return 'Approve the production-quality chapter, asset evidence, playtest plan, performance budget, and release hold.'
   return 'Approve the full production bible, milestone budget, and content roadmap before agents generate milestone work.'
 }
 

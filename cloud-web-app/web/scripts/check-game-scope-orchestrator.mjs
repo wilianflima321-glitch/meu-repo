@@ -20,7 +20,7 @@ function requirePattern(relativePath, pattern, reason) {
   if (content && !pattern.test(content)) failures.push(`${relativePath}: missing ${reason}`)
 }
 
-requirePattern('lib/production/game-scope-orchestrator.ts', /export type PlayableGameScope = 'prototype' \| 'demo' \| 'complete-game-plan'/, 'prototype, demo, and complete-game-plan scopes must be explicit')
+requirePattern('lib/production/game-scope-orchestrator.ts', /export type PlayableGameScope = 'prototype' \| 'demo' \| 'vertical-slice' \| 'complete-game-plan'/, 'prototype, demo, vertical-slice, and complete-game-plan scopes must be explicit')
 requirePattern('lib/production/game-scope-orchestrator.ts', /export type PlayableGameGenre[\s\S]*'moba'[\s\S]*'rpg'[\s\S]*'action-adventure'[\s\S]*'platformer'[\s\S]*'shooter'[\s\S]*'racing'[\s\S]*'puzzle'[\s\S]*'visual-novel'[\s\S]*'sandbox'[\s\S]*'strategy'[\s\S]*'custom'/, 'genre support must be generic, not LoL-only')
 requirePattern('lib/production/game-scope-orchestrator.ts', /'story-bible'[\s\S]*'world-bible'[\s\S]*'character-bible'[\s\S]*'gameplay-loop'[\s\S]*'visual-style-guide'[\s\S]*'audio-direction'[\s\S]*'playtest-plan'/, 'creative planning artifacts must precede generation')
 requirePattern('lib/production/game-scope-orchestrator.ts', /complete-game-plan[\s\S]*production plan[\s\S]*does not claim the full game is finished/, 'complete-game-plan must avoid fake completion')
@@ -32,7 +32,7 @@ requirePattern('lib/production/game-scope-orchestrator.ts', /buildMobaExampleSco
 requirePattern('lib/production/moba-vertical-slice-template.ts', /genericScopePlan:\s*GameScopePlan/, 'legacy MOBA template must delegate to generic scope plan')
 requirePattern('docs/GAME_SCOPE_ORCHESTRATOR_V22.md', /Users should decide the ambition level/, 'docs must center user scope choice')
 requirePattern('docs/GAME_SCOPE_ORCHESTRATOR_V22.md', /MOBA \/ LoL-like preset remains useful as an example/, 'docs must state LoL-like is only an example')
-requirePattern('docs/AI_QUALITY_ORCHESTRATOR_V22.md', /Users choose the production depth first: `prototype`, `demo`, or `complete-game-plan`/, 'AI quality docs must reference generic scope choice')
+requirePattern('docs/AI_QUALITY_ORCHESTRATOR_V22.md', /Users choose the production depth first: `prototype`, `demo`, `vertical-slice`, or `complete-game-plan`/, 'AI quality docs must reference generic scope choice')
 
 if (failures.length) {
   console.error('[game-scope-orchestrator] FAIL')
@@ -40,4 +40,4 @@ if (failures.length) {
   process.exit(1)
 }
 
-console.log('[game-scope-orchestrator] PASS scopes=3 genres=11 moba=example-only')
+console.log('[game-scope-orchestrator] PASS scopes=4 genres=11 moba=example-only')

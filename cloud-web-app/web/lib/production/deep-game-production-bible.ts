@@ -134,12 +134,14 @@ export interface DeepProductionBible {
 function scopeQualityBar(scope: PlayableGameScope): string {
   if (scope === 'prototype') return 'A tight playable loop that proves feel, readability, and technical direction.'
   if (scope === 'demo') return 'A polished vertical slice with believable art/audio cohesion, playtest evidence, and rollback.'
+  if (scope === 'vertical-slice') return 'One production-quality chapter with final-candidate assets, runtime traces, bot/human playtests, and release hold.'
   return 'A milestone-grade production plan with content roadmap, budget, scene graph, and release evidence per build.'
 }
 
 function sceneCountForScope(scope: PlayableGameScope): number {
   if (scope === 'prototype') return 3
   if (scope === 'demo') return 5
+  if (scope === 'vertical-slice') return 6
   return 8
 }
 

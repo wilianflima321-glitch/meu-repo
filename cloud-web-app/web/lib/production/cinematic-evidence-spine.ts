@@ -7,7 +7,7 @@ export type CinematicEvidenceLaneId =
   | 'release-footage-review'
 
 export type CinematicEvidenceStatus = 'available' | 'held' | 'blocked' | 'needs-review'
-export type CinematicProductionScope = 'prototype' | 'demo' | 'complete-game-plan'
+export type CinematicProductionScope = 'prototype' | 'demo' | 'vertical-slice' | 'complete-game-plan'
 
 export interface CinematicEvidenceLane {
   id: CinematicEvidenceLaneId

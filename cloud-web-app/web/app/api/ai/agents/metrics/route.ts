@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { buildAgentMetrics, buildAgentOverview } from '@/lib/server/agent-observability'
+import { buildAgentRunLedger } from '@/lib/server/agent-run-ledger'
 import { AI_AGENT_READ_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { listAgentSnapshots } from '@/lib/server/agent-store'
 
@@ -20,9 +21,11 @@ export async function GET(request: NextRequest) {
     const snapshots = await listAgentSnapshots(auth.userId)
     const overview = buildAgentOverview(snapshots, 100)
     const metrics = buildAgentMetrics(overview)
+    const runLedger = buildAgentRunLedger(snapshots, 100)
 
     return NextResponse.json({
       ...metrics,
+      runLedgerSummary: runLedger.summary,
       capability: 'AI_AGENTS_METRICS',
       capabilityStatus: 'READY',
       retention: 'local-agent-store',
