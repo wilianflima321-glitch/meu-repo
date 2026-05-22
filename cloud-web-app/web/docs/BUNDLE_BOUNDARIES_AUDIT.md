@@ -10,7 +10,7 @@ Generated: deterministic local scan
 - reactThreeDreiDirect: 1 (max 2)
 - monacoEditorDirect: 3 (max 4)
 - monacoReactDirect: 4 (max 4)
-- framerMotionDirect: 18 (max 18)
+- framerMotionDirect: 16 (max 16)
 - dynamicImportsMin: 256 (min 100)
 
 ## Top Offenders
@@ -56,7 +56,6 @@ Generated: deterministic local scan
 - components/ide/MonacoChatDiffPanel.tsx (1)
 ### framerMotionDirect
 - components/ai/AgentModePanel.tsx (1)
-- components/billing/LowBalanceModal.tsx (1)
 - components/collaboration/VersionHistorySlider.tsx (1)
 - components/editor/GhostTextDecorations.tsx (1)
 - components/editor/InlineEditModal.tsx (1)
@@ -70,7 +69,6 @@ Generated: deterministic local scan
 - components/ui/GlassmorphismUI.tsx (1)
 - components/ui/motion.tsx (1)
 - components/ui/premium.tsx (1)
-- components/ui/PremiumSkeleton.tsx (1)
 - components/vcs/TimeMachineSlider.tsx (1)
 - lib/debug/devtools-provider.tsx (1)
 

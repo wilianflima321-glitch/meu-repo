@@ -2,7 +2,7 @@
 
 Generated: deterministic local scan
 
-- Risky useEffect blocks: 148
+- Risky useEffect blocks: 145
 - Missing cleanup findings: 0
 
 ## Findings

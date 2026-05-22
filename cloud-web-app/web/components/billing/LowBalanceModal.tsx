@@ -11,8 +11,7 @@
  *
  * @module components/billing/LowBalanceModal
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Coins,
   AlertTriangle,
@@ -102,12 +101,11 @@ interface PackageCardProps {
 
 function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
   return (
-    <motion.button
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+    <button
+      type="button"
       onClick={() => onSelect(pkg)}
       className={`
-        relative p-4 rounded-xl border-2 transition-all text-left w-full
+        relative p-4 rounded-xl border-2 transition-all text-left w-full hover:scale-[1.01] active:scale-[0.99]
         ${isSelected
           ? 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)]'
           : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] hover:border-[var(--aethel-border-secondary)]'
@@ -159,16 +157,12 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
 
       {/* Selected indicator */}
       {isSelected && (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="absolute top-2 right-2 w-5 h-5 bg-[var(--aethel-primary)] rounded-full
-                   flex items-center justify-center"
-        >
+        <div className="absolute top-2 right-2 w-5 h-5 bg-[var(--aethel-primary)] rounded-full
+                   flex items-center justify-center animate-in zoom-in-95 duration-150">
           <Check className="w-3 h-3 text-[var(--aethel-text-primary)]" />
-        </motion.div>
+        </div>
       )}
-    </motion.button>
+    </button>
   );
 }
 
@@ -234,32 +228,26 @@ export function LowBalanceModal({
     onClose();
   }, [onRemindLater, onClose]);
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop - clickable to close */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm z-50"
-          />
+  if (!isOpen) return null;
 
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`
+  return (
+    <>
+      {/* Backdrop - clickable to close */}
+      <div
+        aria-hidden="true"
+        onClick={onClose}
+        className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm z-50 animate-in fade-in-0 duration-150"
+      />
+
+      {/* Modal */}
+      <div
+        className={`
               fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
               w-full max-w-lg max-h-[90vh] overflow-y-auto
-              bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-2xl shadow-2xl z-50
+              bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-2xl shadow-2xl z-50 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2 duration-200
               ${className}
             `}
-          >
+      >
             {/* Close button */}
             <button type="button" aria-label="Fechar modal de saldo baixo"
               onClick={onClose}
@@ -279,35 +267,17 @@ export function LowBalanceModal({
                     : balanceLevel === 'critical' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]'
                     : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'}
                 `}>
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.1, 1],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: 'easeInOut'
-                    }}
-                    className={balanceInfo.color}
-                  >
+                  <div className={`${balanceInfo.color} animate-pulse`}>
                     {balanceInfo.icon}
-                  </motion.div>
+                  </div>
 
                   {/* Pulse effect */}
-                  <motion.div
-                    className={`absolute inset-0 rounded-2xl ${
+                  <div
+                    className={`absolute inset-0 rounded-2xl animate-ping ${
                       balanceLevel === 'empty' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)]'
                         : balanceLevel === 'critical' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]'
                         : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'
                     }`}
-                    animate={{
-                      scale: [1, 1.3],
-                      opacity: [0.5, 0]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                    }}
                   />
                 </div>
 
@@ -384,12 +354,9 @@ export function LowBalanceModal({
               >
                 {isProcessing ? (
                   <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    >
+                    <span className="animate-spin">
                       <Sparkles className="w-5 h-5" />
-                    </motion.div>
+                    </span>
                     Processing...
                   </>
                 ) : (
@@ -436,10 +403,8 @@ export function LowBalanceModal({
                 </div>
               </div>
             )}
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+      </div>
+    </>
   );
 }
 
@@ -458,6 +423,7 @@ export function LowBalanceModalAuto() {
   const [currentBalance, setCurrentBalance] = useState(0);
   const [dismissed, setDismissed] = useState(false);
   const [lastDismissTime, setLastDismissTime] = useState<number | null>(null);
+  const reminderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Verifica saldo periodicamente
   useEffect(() => {
@@ -512,11 +478,21 @@ export function LowBalanceModalAuto() {
 
   const handleRemindLater = useCallback(() => {
     handleClose();
-    // Lembrar em 30 min
-    setTimeout(() => {
+    if (reminderTimerRef.current) {
+      clearTimeout(reminderTimerRef.current);
+    }
+    reminderTimerRef.current = setTimeout(() => {
       setDismissed(false);
     }, 30 * 60 * 1000);
   }, [handleClose]);
+
+  useEffect(() => {
+    return () => {
+      if (reminderTimerRef.current) {
+        clearTimeout(reminderTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <LowBalanceModal

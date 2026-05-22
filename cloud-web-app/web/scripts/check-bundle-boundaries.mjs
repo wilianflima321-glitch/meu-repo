@@ -13,7 +13,7 @@ const BUDGETS = {
   reactThreeDreiDirect: 2,
   monacoEditorDirect: 4,
   monacoReactDirect: 4,
-  framerMotionDirect: 18,
+  framerMotionDirect: 16,
   dynamicImportsMin: 100,
 }
 

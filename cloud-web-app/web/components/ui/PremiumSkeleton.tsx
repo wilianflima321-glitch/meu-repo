@@ -1,7 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { gentlePulse } from './motion'
 
 // L5 Premium Skeleton Components - Shimmer Effects
 // Professional loading states with Figma-quality animations
@@ -36,15 +34,6 @@ export function ShimmerSkeleton({
     rounded: 'rounded-lg',
   }
 
-  const shimmerAnimation = {
-    backgroundPosition: ['200% 0', '-200% 0'],
-    transition: {
-      duration: 1.5,
-      repeat: Infinity,
-      ease: 'linear',
-    },
-  }
-
   const getStyle = () => ({
     width: width || (variant === 'circular' ? height || '40px' : '100%'),
     height: height || (variant === 'circular' ? width || '40px' : variant === 'text' ? '1rem' : '100%'),
@@ -54,14 +43,13 @@ export function ShimmerSkeleton({
     return (
       <div className={`space-y-3 ${className}`}>
         {Array.from({ length: lines }).map((_, i) => (
-          <motion.div
+          <div
             key={i}
             className={`${baseClasses} ${variantClasses[variant]}`}
             style={{
               ...getStyle(),
               width: i === lines - 1 ? '75%' : '100%',
             }}
-            animate={animate ? shimmerAnimation : {}}
           />
         ))}
       </div>
@@ -69,10 +57,9 @@ export function ShimmerSkeleton({
   }
 
   return (
-    <motion.div
+    <div
       className={`${baseClasses} ${variantClasses[variant]} ${className}`}
       style={getStyle()}
-      animate={animate ? shimmerAnimation : {}}
     />
   )
 }
@@ -172,11 +159,10 @@ export function ChartSkeleton() {
       <ShimmerSkeleton width="30%" className="mb-6" />
       <div className="flex items-end gap-2 h-40">
         {Array.from({ length: 8 }).map((_, i) => (
-          <motion.div
+          <div
             key={i}
-            className="flex-1 bg-gradient-to-t from-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] rounded-t"
-            style={{ height: `${20 + Math.random() * 60}%` }}
-            animate={gentlePulse.animate}
+            className="flex-1 animate-pulse bg-gradient-to-t from-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] rounded-t"
+            style={{ height: `${28 + ((i * 17) % 52)}%` }}
           />
         ))}
       </div>
@@ -240,17 +226,9 @@ export function GallerySkeleton({ count = 6 }: { count?: number }) {
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {Array.from({ length: count }).map((_, i) => (
         <GlassSkeleton key={i} className="aspect-square">
-          <motion.div
-            className="w-full h-full bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-surface-quaternary)_30%,transparent)] via-[color-mix(in_srgb,var(--aethel-surface-quaternary)_25%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-quaternary)_30%,transparent)] bg-[length:200%_200%]"
-            animate={{
-              backgroundPosition: ['0% 0%', '100% 100%'],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'linear',
-              delay: i * 0.2,
-            }}
+          <div
+            className="w-full h-full animate-shimmer bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-surface-quaternary)_30%,transparent)] via-[color-mix(in_srgb,var(--aethel-surface-quaternary)_25%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-quaternary)_30%,transparent)] bg-[length:200%_200%]"
+            style={{ animationDelay: `${i * 0.2}s` }}
           />
         </GlassSkeleton>
       ))}
