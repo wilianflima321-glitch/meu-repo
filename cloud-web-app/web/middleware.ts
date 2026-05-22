@@ -320,7 +320,8 @@ export async function middleware(req: NextRequest) {
     const expected = req.nextUrl.origin;
     // Se o cliente usa Bearer token, o risco de CSRF Ã© bem menor.
     const usingCookieOnly = !!cookieToken && !bearerToken;
-    if (usingCookieOnly && origin && origin !== expected) {
+    const trustedAppOrigin = origin === expected || (origin ? ALLOWED_ORIGINS.has(origin) : false);
+    if (usingCookieOnly && origin && !trustedAppOrigin) {
       return withSecurityHeaders(
         NextResponse.json(
           { error: 'CSRF_BLOCKED', message: 'Invalid origin.' },

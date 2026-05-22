@@ -11,6 +11,11 @@ const OUTPUT_DIR = path.join(ROOT, 'output', 'playwright', 'v22-authenticated')
 const DOC_PATH = path.join(ROOT, 'docs', 'AUTHENTICATED_UX_SURFACE_AUDIT.md')
 const NETWORK_IDLE_TIMEOUT_MS = Number(process.env.AUTHENTICATED_UX_NETWORK_IDLE_TIMEOUT_MS ?? 5000)
 const POST_LOAD_SETTLE_MS = Number(process.env.AUTHENTICATED_UX_POST_LOAD_SETTLE_MS ?? 500)
+const MAX_CONSOLE_ERRORS = Number(process.env.AUTHENTICATED_UX_MAX_CONSOLE_ERRORS ?? 0)
+const MAX_NETWORK_ERRORS = Number(process.env.AUTHENTICATED_UX_MAX_NETWORK_ERRORS ?? 0)
+const SHOULD_SEED_LOCAL_USER =
+  process.env.AUTHENTICATED_UX_SEED_USER !== 'false' &&
+  /https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?/.test(BASE_URL)
 
 const ROUTES = [
   '/dashboard',
@@ -35,6 +40,69 @@ if (!JWT_SECRET) {
   process.exit(1)
 }
 
+async function ensureLocalVisualQaUser() {
+  const fallback = {
+    userId: process.env.AUTHENTICATED_UX_USER_ID || 'visual-qa-user',
+    email: process.env.AUTHENTICATED_UX_EMAIL || 'visual-qa@aethel.local',
+    role: process.env.AUTHENTICATED_UX_ROLE || 'admin',
+    plan: 'studio',
+  }
+
+  if (!SHOULD_SEED_LOCAL_USER) return fallback
+
+  try {
+    const { PrismaClient } = await import('@prisma/client')
+    const prisma = new PrismaClient()
+    const existing = await prisma.user.findFirst({
+      where: {
+        OR: [{ id: fallback.userId }, { email: fallback.email }],
+      },
+      select: { id: true, email: true },
+    })
+
+    const user = existing
+      ? await prisma.user.update({
+          where: { id: existing.id },
+          data: {
+            email: fallback.email,
+            name: 'Aethel Visual QA',
+            role: fallback.role,
+            adminRole: 'owner',
+            plan: fallback.plan,
+            emailVerified: true,
+            trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          },
+          select: { id: true, email: true, role: true, plan: true },
+        })
+      : await prisma.user.create({
+          data: {
+            id: fallback.userId,
+            email: fallback.email,
+            password: 'visual-qa-disabled-password',
+            name: 'Aethel Visual QA',
+            role: fallback.role,
+            adminRole: 'owner',
+            plan: fallback.plan,
+            emailVerified: true,
+            trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          },
+          select: { id: true, email: true, role: true, plan: true },
+        })
+
+    await prisma.$disconnect()
+    return {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      plan: user.plan,
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.warn(`[authenticated-ux-capture] local QA user seed skipped: ${message}`)
+    return fallback
+  }
+}
+
 async function loadChromium() {
   try {
     const playwright = await import('playwright')
@@ -50,12 +118,14 @@ async function loadChromium() {
   }
 }
 
+const qaUser = await ensureLocalVisualQaUser()
+
 const token = jwt.sign(
   {
-    userId: process.env.AUTHENTICATED_UX_USER_ID || 'visual-qa-user',
-    email: process.env.AUTHENTICATED_UX_EMAIL || 'visual-qa@aethel.local',
-    role: process.env.AUTHENTICATED_UX_ROLE || 'admin',
-    plan: 'studio',
+    userId: qaUser.userId,
+    email: qaUser.email,
+    role: qaUser.role,
+    plan: qaUser.plan,
   },
   JWT_SECRET,
   { expiresIn: '2h' },
@@ -144,6 +214,7 @@ const doc = `# Authenticated UX Surface Audit
 - Base URL: ${BASE_URL}
 - Viewports: ${VIEWPORTS.map((viewport) => `${viewport.id} ${viewport.width}x${viewport.height}`).join(', ')}
 - Auth method: signed JWT injected through cookie \`token\` and localStorage \`aethel-token\`
+- Error budgets: console <= ${MAX_CONSOLE_ERRORS}, network <= ${MAX_NETWORK_ERRORS}
 - Note: screenshots live under \`output/playwright/v22-authenticated/\` and are intentionally not versioned.
 
 | Viewport | Route | Status | Final URL | Screenshot | Stabilization | Console errors | Network errors |
@@ -173,6 +244,20 @@ const failed = results.filter((result) => result.error)
 if (failed.length) {
   console.error(`[authenticated-ux-capture] FAIL captured=${results.length - failed.length} failed=${failed.length}`)
   for (const result of failed) console.error(`- ${result.viewport} ${result.route}: ${result.error}`)
+  process.exit(1)
+}
+
+const totalConsoleErrors = results.reduce((sum, result) => sum + result.consoleErrors.length, 0)
+const totalNetworkErrors = results.reduce((sum, result) => sum + result.networkErrors.length, 0)
+const budgetFailures = []
+if (totalConsoleErrors > MAX_CONSOLE_ERRORS) {
+  budgetFailures.push(`consoleErrors=${totalConsoleErrors} above max=${MAX_CONSOLE_ERRORS}`)
+}
+if (totalNetworkErrors > MAX_NETWORK_ERRORS) {
+  budgetFailures.push(`networkErrors=${totalNetworkErrors} above max=${MAX_NETWORK_ERRORS}`)
+}
+if (budgetFailures.length > 0) {
+  console.error(`[authenticated-ux-capture] FAIL ${budgetFailures.join(' ')}`)
   process.exit(1)
 }
 

@@ -266,6 +266,7 @@ export default function StudioMissionControl() {
           </label>
           <textarea
             id="studio-mission"
+            suppressHydrationWarning
             value={mission}
             onChange={(event) => setMission(event.target.value)}
             className="mt-2 min-h-24 w-full resize-none rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_76%,transparent)] px-4 py-3 text-sm leading-6 text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-primary)_55%,transparent)] focus:ring-2 focus:ring-[var(--aethel-focus-ring)]"
