@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import * as THREE from 'three';
+import type { Euler, Vector3 } from 'three';
 import { EditorScaleReadinessBadge } from '@/components/editor/EditorScaleReadinessBadge';
 import { buildEditorScaleReadiness } from '@/lib/editor/editor-scale-readiness';
 import { ComponentSection, PropertyRow, Vector3Editor } from './DetailsPanelEditors';
@@ -8,16 +8,57 @@ import type { ComponentDefinition, InspectedObject, PropertyDefinition } from '.
 
 export type { PropertyType, ComponentDefinition, InspectedObject } from './DetailsPanel.types';
 
+type VectorLike = Vector3 & { clone?: () => Vector3; set?: (x: number, y: number, z: number) => Vector3 };
+type EulerLike = Euler & { clone?: () => Euler; set?: (x: number, y: number, z: number) => Euler };
+
+function makeVector3(x: number, y: number, z: number): Vector3 {
+  return { x, y, z } as Vector3;
+}
+
+function makeEuler(x: number, y: number, z: number): Euler {
+  return { x, y, z, order: 'XYZ' } as Euler;
+}
+
+function updateVector3(vector: Vector3, x: number, y: number, z: number): Vector3 {
+  const candidate = vector as VectorLike;
+  if (typeof candidate.clone === 'function') {
+    const cloned = candidate.clone() as VectorLike;
+    if (typeof cloned.set === 'function') {
+      return cloned.set(x, y, z);
+    }
+  }
+  return makeVector3(x, y, z);
+}
+
+function updateEuler(euler: Euler, x: number, y: number, z: number): Euler {
+  const candidate = euler as EulerLike;
+  if (typeof candidate.clone === 'function') {
+    const cloned = candidate.clone() as EulerLike;
+    if (typeof cloned.set === 'function') {
+      return cloned.set(x, y, z);
+    }
+  }
+  return makeEuler(x, y, z);
+}
+
+function radToDeg(value: number): number {
+  return (value * 180) / Math.PI;
+}
+
+function degToRad(value: number): number {
+  return (value * Math.PI) / 180;
+}
+
 function TransformSection({
   transform,
   onChange,
 }: {
   transform: {
-    position: THREE.Vector3;
-    rotation: THREE.Euler;
-    scale: THREE.Vector3;
+    position: Vector3;
+    rotation: Euler;
+    scale: Vector3;
   };
-  onChange: (transform: { position: THREE.Vector3; rotation: THREE.Euler; scale: THREE.Vector3 }) => void;
+  onChange: (transform: { position: Vector3; rotation: Euler; scale: Vector3 }) => void;
 }) {
   const [expanded, setExpanded] = useState(true);
   return (
@@ -56,9 +97,9 @@ function TransformSection({
           onClick={(e) => {
             e.stopPropagation();
             onChange({
-              position: new THREE.Vector3(0, 0, 0),
-              rotation: new THREE.Euler(0, 0, 0),
-              scale: new THREE.Vector3(1, 1, 1),
+              position: makeVector3(0, 0, 0),
+              rotation: makeEuler(0, 0, 0),
+              scale: makeVector3(1, 1, 1),
             });
           }}
           style={{
@@ -86,7 +127,7 @@ function TransformSection({
             }}>
               <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Position</span>
               <button type="button" aria-label="Reset position"
-                onClick={() => onChange({ ...transform, position: new THREE.Vector3() })}
+                onClick={() => onChange({ ...transform, position: updateVector3(transform.position, 0, 0, 0) })}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -100,7 +141,7 @@ function TransformSection({
             </div>
             <Vector3Editor
               value={{ x: transform.position.x, y: transform.position.y, z: transform.position.z }}
-              onChange={(v) => onChange({ ...transform, position: new THREE.Vector3(v.x, v.y, v.z) })}
+              onChange={(v) => onChange({ ...transform, position: updateVector3(transform.position, v.x, v.y, v.z) })}
             />
           </div>
           {/* Rotation */}
@@ -113,7 +154,7 @@ function TransformSection({
             }}>
               <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Rotation</span>
               <button type="button" aria-label="Reset rotation"
-                onClick={() => onChange({ ...transform, rotation: new THREE.Euler() })}
+                onClick={() => onChange({ ...transform, rotation: updateEuler(transform.rotation, 0, 0, 0) })}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -127,16 +168,17 @@ function TransformSection({
             </div>
             <Vector3Editor
               value={{
-                x: THREE.MathUtils.radToDeg(transform.rotation.x),
-                y: THREE.MathUtils.radToDeg(transform.rotation.y),
-                z: THREE.MathUtils.radToDeg(transform.rotation.z),
+                x: radToDeg(transform.rotation.x),
+                y: radToDeg(transform.rotation.y),
+                z: radToDeg(transform.rotation.z),
               }}
               onChange={(v) => onChange({
                 ...transform,
-                rotation: new THREE.Euler(
-                  THREE.MathUtils.degToRad(v.x),
-                  THREE.MathUtils.degToRad(v.y),
-                  THREE.MathUtils.degToRad(v.z),
+                rotation: updateEuler(
+                  transform.rotation,
+                  degToRad(v.x),
+                  degToRad(v.y),
+                  degToRad(v.z),
                 ),
               })}
             />
@@ -151,7 +193,7 @@ function TransformSection({
             }}>
               <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Scale</span>
               <button type="button" aria-label="Reset scale"
-                onClick={() => onChange({ ...transform, scale: new THREE.Vector3(1, 1, 1) })}
+                onClick={() => onChange({ ...transform, scale: updateVector3(transform.scale, 1, 1, 1) })}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -165,7 +207,7 @@ function TransformSection({
             </div>
             <Vector3Editor
               value={{ x: transform.scale.x, y: transform.scale.y, z: transform.scale.z }}
-              onChange={(v) => onChange({ ...transform, scale: new THREE.Vector3(v.x, v.y, v.z) })}
+              onChange={(v) => onChange({ ...transform, scale: updateVector3(transform.scale, v.x, v.y, v.z) })}
             />
           </div>
         </div>
@@ -191,9 +233,9 @@ export default function DetailsPanel({
     type: 'Blueprint',
     icon: '📐',
     transform: {
-      position: new THREE.Vector3(0, 1, 0),
-      rotation: new THREE.Euler(0, Math.PI / 4, 0),
-      scale: new THREE.Vector3(1, 1, 1),
+      position: makeVector3(0, 1, 0),
+      rotation: makeEuler(0, Math.PI / 4, 0),
+      scale: makeVector3(1, 1, 1),
     },
     components: [
       {

@@ -1,26 +1,22 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2023
+- Files scanned: 2022
 - Failures: 0
 
 ## Counts
-- threeDirect: 45 (max 45)
+- threeDirect: 40 (max 40)
 - reactThreeFiberDirect: 2 (max 3)
 - reactThreeDreiDirect: 1 (max 2)
 - monacoEditorDirect: 3 (max 4)
 - monacoReactDirect: 4 (max 4)
 - framerMotionDirect: 18 (max 18)
-- dynamicImportsMin: 254 (min 100)
+- dynamicImportsMin: 256 (min 100)
 
 ## Top Offenders
 ### threeDirect
-- components/character/control-rig-model.ts (1)
-- components/engine/content-browser-core.ts (1)
-- components/engine/DetailsPanel.tsx (1)
 - components/nexus/NexusCanvasV2.tsx (1)
 - components/physics/DestructionEditor.tsx (1)
-- components/physics/fluid-simulation-core.ts (1)
 - lib/ai/behavior-tree-system.tsx (1)
 - lib/ai-content-generation.ts (1)
 - lib/asset-import-pipeline.ts (1)
@@ -33,13 +29,17 @@ Generated: deterministic local scan
 - lib/ecs/prefab-system/component-registry.ts (1)
 - lib/ecs/prefab-system/prefab-manager.ts (1)
 - lib/engine/lod/auto-lod-pipeline.ts (1)
-- lib/engine/lod/__tests__/auto-lod-pipeline.test.ts (1)
 - lib/engine/scene-graph.ts (1)
 - lib/facial-animation-system.ts (1)
 - lib/fluid-simulation-runtime/kernels.ts (1)
 - lib/game-engine-core.ts (1)
 - lib/game-loop.ts (1)
 - lib/hooks/useRenderPipeline.ts (1)
+- lib/level-serialization/serializer.ts (1)
+- lib/motion-matching-system.ts (1)
+- lib/nanite-virtualized-geometry.ts (1)
+- lib/particle-system-real.ts (1)
+- lib/particles/advanced-particle-system.ts (1)
 ### reactThreeFiberDirect
 - components/physics/DestructionEditor.tsx (1)
 - lib/camera/camera-system.tsx (1)
@@ -79,10 +79,12 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 ### threeDirect
 - components/assets/AssetPreviewPanel.tsx (1)
 - components/assets/ConnectedModelPreview.tsx (1)
+- components/character/control-rig-model.ts (1)
 - components/character/ControlRigEditor.parts.tsx (1)
 - components/character/ControlRigEditor.tsx (1)
 - components/character/FacialAnimationEditor.tsx (1)
 - components/character/HairFurEditor.parts.tsx (1)
+- components/engine/content-browser-loader.ts (1)
 - components/engine/LandscapeEditor.tsx (1)
 - components/engine/LevelEditor.tsx (1)
 - components/engine/NiagaraVFX.tsx (1)
@@ -95,13 +97,11 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - components/materials/MaterialEditor.tsx (1)
 - components/physics/ClothSimulationEditor.tsx (1)
 - components/physics/ClothSimulationPanels.tsx (1)
+- components/physics/fluid-simulation-core.ts (1)
 - components/physics/FluidSimulationEditor.tsx (1)
 - components/physics/FluidSimulationPanels.tsx (1)
 - components/scene-editor/GameSimulation.tsx (1)
 - components/scene-editor/scene-editor-models.ts (1)
-- components/scene-editor/SceneEditor.tsx (1)
-- components/terrain/TerrainSculptingEditor.parts.tsx (1)
-- components/viewport/gizmos/TransformGizmoProfessional.tsx (1)
 ### reactThreeFiberDirect
 - components/assets/AssetPreviewPanel.tsx (1)
 - components/character/ControlRigEditor.tsx (1)
@@ -163,6 +163,37 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - components/collaboration/CollaborationPanel.tsx (1)
 - components/extensions/ExtensionManagerPanel.tsx (1)
 - components/git/GitPanel.tsx (1)
+
+## Async Boundary Import References
+- components/physics/DestructionEditor.tsx statically imports @/lib/destruction-system -> lib/destruction-system.ts
+- components/scene-editor/ScenePropertiesPanel.tsx statically imports ./scene-editor-models -> components/scene-editor/scene-editor-models.ts
+- lib/aaa-asset-pipeline-runtime/singletons.ts statically imports ./importer -> lib/aaa-asset-pipeline-runtime/importer.ts
+- lib/aaa-asset-pipeline-runtime/singletons.ts statically imports ./optimizer -> lib/aaa-asset-pipeline-runtime/optimizer.ts
+- lib/animation/animation-runtime/default-export.ts statically imports ./player -> lib/animation/animation-runtime/player.ts
+- lib/animation/animation-runtime/react.ts statically imports ./player -> lib/animation/animation-runtime/player.ts
+- lib/animation/animation-runtime/state-machine.ts statically imports ./player -> lib/animation/animation-runtime/player.ts
+- lib/engine/asset-pipeline-runtime/manager.ts statically imports ./loaders -> lib/engine/asset-pipeline-runtime/loaders.ts
+- lib/fluid-simulation-runtime/factories.ts statically imports ./flip -> lib/fluid-simulation-runtime/flip.ts
+- lib/fluid-simulation-runtime/factories.ts statically imports ./pbf -> lib/fluid-simulation-runtime/pbf.ts
+- lib/fluid-simulation-runtime/factories.ts statically imports ./sph -> lib/fluid-simulation-runtime/sph.ts
+- lib/game-loop.ts statically imports ./aaa-renderer-impl -> lib/aaa-renderer-impl.ts
+- lib/hooks/useRenderPipeline.ts statically imports ../aaa-render-system -> lib/aaa-render-system.ts
+- lib/materials/material-editor-runtime/default-export.ts statically imports ./factory -> lib/materials/material-editor-runtime/factory.ts
+- lib/materials/material-editor-runtime/editor.ts statically imports ./factory -> lib/materials/material-editor-runtime/factory.ts
+- lib/networking/multiplayer-runtime/default-export.ts statically imports ./network-manager -> lib/networking/multiplayer-runtime/network-manager.ts
+- lib/networking/multiplayer-runtime/react.tsx statically imports ./network-manager -> lib/networking/multiplayer-runtime/network-manager.ts
+- lib/postprocessing/system/default-export.ts statically imports ./bloom-pass -> lib/postprocessing/system/bloom-pass.ts
+- lib/postprocessing/system/default-export.ts statically imports ./chromatic-aberration-pass -> lib/postprocessing/system/chromatic-aberration-pass.ts
+- lib/postprocessing/system/default-export.ts statically imports ./color-grading-pass -> lib/postprocessing/system/color-grading-pass.ts
+- lib/postprocessing/system/default-export.ts statically imports ./effect-composer -> lib/postprocessing/system/effect-composer.ts
+- lib/postprocessing/system/default-export.ts statically imports ./film-grain-pass -> lib/postprocessing/system/film-grain-pass.ts
+- lib/postprocessing/system/default-export.ts statically imports ./tonemapping-pass -> lib/postprocessing/system/tonemapping-pass.ts
+- lib/postprocessing/system/default-export.ts statically imports ./vignette-pass -> lib/postprocessing/system/vignette-pass.ts
+- lib/render-system.ts statically imports ./aaa-renderer-impl -> lib/aaa-renderer-impl.ts
+- lib/scene/scene-serializer-runtime/react.ts statically imports ./serializer -> lib/scene/scene-serializer-runtime/serializer.ts
+
+## Public Route Import Violations
+- none
 
 ## Failures
 - none

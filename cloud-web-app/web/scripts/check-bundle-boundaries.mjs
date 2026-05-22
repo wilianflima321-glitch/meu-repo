@@ -5,10 +5,10 @@ const ROOT = process.cwd()
 const TARGET_DIRS = ['app', 'components', 'lib']
 const OUT = path.join(ROOT, 'docs', 'BUNDLE_BOUNDARIES_AUDIT.md')
 const EXTENSIONS = new Set(['.ts', '.tsx'])
-const ignoreDirs = new Set(['node_modules', '.next', 'dist', 'build'])
+const ignoreDirs = new Set(['node_modules', '.next', 'dist', 'build', '__tests__', '__mocks__'])
 
 const BUDGETS = {
-  threeDirect: 45,
+  threeDirect: 40,
   reactThreeFiberDirect: 3,
   reactThreeDreiDirect: 2,
   monacoEditorDirect: 4,
@@ -56,16 +56,70 @@ function extractStaticImports(content) {
   return imports
 }
 
+function resolveLocalImport(importer, source) {
+  if (!source.startsWith('.') && !source.startsWith('@/')) return null
+
+  const base = source.startsWith('@/')
+    ? path.join(ROOT, source.slice(2))
+    : path.resolve(path.dirname(importer), source)
+
+  const candidates = [
+    base,
+    `${base}.ts`,
+    `${base}.tsx`,
+    path.join(base, 'index.ts'),
+    path.join(base, 'index.tsx'),
+  ]
+
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? null
+}
+
+function isPublicRouteShell(relativePath) {
+  if (!relativePath.startsWith('app/')) return false
+  if (relativePath.startsWith('app/api/')) return false
+  if (relativePath.startsWith('app/studio/')) return false
+  if (relativePath.startsWith('app/ide/')) return false
+  if (relativePath.startsWith('app/nexus/')) return false
+  return /\/(page|layout|template)\.tsx$/.test(`/${relativePath}`)
+}
+
 const files = TARGET_DIRS.flatMap((dir) => walk(path.join(ROOT, dir)))
 const counts = Object.fromEntries(Object.keys(BUDGETS).map((key) => [key, 0]))
 const offenders = Object.fromEntries(Object.keys(HEAVY_MODULES).map((key) => [key, []]))
 const asyncBoundaryOffenders = Object.fromEntries(Object.keys(HEAVY_MODULES).map((key) => [key, []]))
+const heavyAsyncBoundaries = new Set()
+const asyncBoundaryReferences = []
+const publicStaticAsyncBoundaryImports = []
+
+for (const file of files) {
+  const content = fs.readFileSync(file, 'utf8')
+  if (content.includes(HEAVY_ASYNC_BOUNDARY_MARKER)) {
+    heavyAsyncBoundaries.add(path.resolve(file))
+  }
+}
 
 for (const file of files) {
   const content = fs.readFileSync(file, 'utf8')
   const staticImports = extractStaticImports(content)
   const relative = rel(file)
   const isHeavyAsyncBoundary = content.includes(HEAVY_ASYNC_BOUNDARY_MARKER)
+
+  if (!isHeavyAsyncBoundary) {
+    for (const source of staticImports) {
+      const resolved = resolveLocalImport(file, source)
+      if (resolved && heavyAsyncBoundaries.has(path.resolve(resolved))) {
+        const reference = {
+          file: relative,
+          source,
+          boundary: rel(resolved),
+        }
+        asyncBoundaryReferences.push(reference)
+        if (isPublicRouteShell(relative)) {
+          publicStaticAsyncBoundaryImports.push(reference)
+        }
+      }
+    }
+  }
 
   for (const [key, predicate] of Object.entries(HEAVY_MODULES)) {
     const hits = staticImports.filter(predicate)
@@ -90,6 +144,10 @@ for (const [key, budget] of Object.entries(BUDGETS)) {
   } else if (counts[key] > budget) {
     failures.push(`${key}=${counts[key]} above max=${budget}`)
   }
+}
+
+if (publicStaticAsyncBoundaryImports.length > 0) {
+  failures.push(`publicStaticAsyncBoundaryImports=${publicStaticAsyncBoundaryImports.length} must be dynamic imports`)
 }
 
 const canonicalPreviewPath = path.join(ROOT, 'components', 'preview', 'CanonicalPreviewSurface.tsx')
@@ -141,6 +199,24 @@ for (const [key, items] of Object.entries(asyncBoundaryOffenders)) {
   }
   for (const item of items.slice(0, 25)) {
     report.push(`- ${item.file} (${item.hits})`)
+  }
+}
+report.push('')
+report.push('## Async Boundary Import References')
+if (asyncBoundaryReferences.length === 0) {
+  report.push('- none')
+} else {
+  for (const item of asyncBoundaryReferences.slice(0, 50)) {
+    report.push(`- ${item.file} statically imports ${item.source} -> ${item.boundary}`)
+  }
+}
+report.push('')
+report.push('## Public Route Import Violations')
+if (publicStaticAsyncBoundaryImports.length === 0) {
+  report.push('- none')
+} else {
+  for (const item of publicStaticAsyncBoundaryImports) {
+    report.push(`- ${item.file} statically imports ${item.source} -> ${item.boundary}`)
   }
 }
 report.push('')

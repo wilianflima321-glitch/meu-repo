@@ -92,6 +92,7 @@
     "components/engine/WorldOutliner.tsx",
     "components/engine/DetailsPanel.tsx",
     "components/engine/EngineContentBrowser.tsx",
+    "components/engine/content-browser-loader.ts",
     "components/extensions/ExtensionManager.tsx",
     "components/ide/PreviewRuntimeToolbar.tsx"
   ],

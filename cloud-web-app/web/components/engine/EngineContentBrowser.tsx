@@ -17,7 +17,6 @@ import {
 } from "@/lib/ui/non-blocking-dialogs";
 import {
   ASSET_CONFIG,
-  AssetLoader,
   formatFileSize,
   getAssetType,
   type Asset,
@@ -34,8 +33,34 @@ import {
   ImportModal,
 } from "./EngineContentBrowser.parts";
 
-export { AssetLoader };
 export type { Asset, AssetFilter, AssetType, ImportOptions };
+
+export class AssetLoader {
+  private delegate: Promise<import("./content-browser-loader").AssetLoader> | null = null;
+
+  private async getDelegate() {
+    if (!this.delegate) {
+      this.delegate = import("./content-browser-loader").then((module) => new module.AssetLoader());
+    }
+    return this.delegate;
+  }
+
+  async loadAsset(asset: Asset): Promise<unknown> {
+    return (await this.getDelegate()).loadAsset(asset);
+  }
+
+  async generateThumbnail(asset: Asset): Promise<string | undefined> {
+    return (await this.getDelegate()).generateThumbnail(asset);
+  }
+
+  async clearCache(): Promise<void> {
+    (await this.getDelegate()).clearCache();
+  }
+
+  async dispose(): Promise<void> {
+    (await this.getDelegate()).dispose();
+  }
+}
 
 interface AssetStore {
   assets: Asset[];

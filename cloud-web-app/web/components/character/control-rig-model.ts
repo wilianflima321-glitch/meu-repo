@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary: rig preset data is only imported by the dynamically loaded ControlRigEditor.
 import * as THREE from 'three';
 import type { BoneNode, IKChain } from './ControlRigEditor';
 

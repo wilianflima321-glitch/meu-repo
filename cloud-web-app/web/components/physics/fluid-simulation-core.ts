@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary: fluid runtime core is only used by the dynamically loaded FluidSimulationEditor.
 import * as THREE from 'three';
 
 export interface FluidParams {

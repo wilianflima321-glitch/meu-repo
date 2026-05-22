@@ -7,7 +7,7 @@ const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']
 const IGNORED_PARTS = new Set(['node_modules', '.next', 'coverage', 'dist', 'build', '.git'])
 
 const WATCH_LINE_LIMIT = 800
-const WATCH_FILE_BUDGET = 118
+const WATCH_FILE_BUDGET = 117
 const MAX_LINE_BUDGET = 1150
 
 function walk(dir, files = []) {

@@ -3,13 +3,13 @@
 Generated: deterministic local scan
 
 - Watch line limit: 800
-- Files above watch limit: 118 / 118
+- Files above watch limit: 117 / 117
 - Max file lines: 1150 / 1150
 - Failures: 0
 
 ## Category Counts
 - `runtime`: 81
-- `ui`: 28
+- `ui`: 27
 - `server`: 5
 - `other`: 3
 - `route`: 1
