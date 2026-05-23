@@ -6,10 +6,10 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 29
+- Large source files: 25
 - P0 files: 0
-- P1 low-import large modules: 20
-- P1 modules with explicit triage: 20
+- P1 low-import large modules: 17
+- P1 modules with explicit triage: 17
 - Retired runtime entrypoints forbidden: 4
 - Hard ceiling: 1800 lines
 - UI ceiling: 1200 lines
@@ -17,7 +17,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Categories
 
-- `foundation-runtime`: 19
+- `foundation-runtime`: 15
 - `creative-runtime`: 7
 - `server-runtime`: 3
 
@@ -45,9 +45,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Lines | Category | Risk | Import hints | Recommendation |
 | --- | ---: | --- | --- | ---: | --- |
-| `lib/debug/real-debug-adapter.ts` | 1074 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/nanite-virtualized-geometry.ts` | 1067 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/motion-matching-system.ts` | 1066 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/engine/scene-graph.ts` | 1065 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/engine/audio-manager.ts` | 1063 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/webxr-vr-system.ts` | 1061 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
@@ -70,9 +67,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Decision | Target surface | Load strategy | Rationale |
 | --- | --- | --- | --- | --- |
-| `lib/debug/real-debug-adapter.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
-| `lib/nanite-virtualized-geometry.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/motion-matching-system.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
 | `lib/engine/scene-graph.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/engine/audio-manager.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/webxr-vr-system.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
@@ -96,10 +90,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | File | Lines | Category | Risk | Import hints |
 | --- | ---: | --- | --- | ---: |
 | `lib/server/websocket-server.ts` | 1092 | server-runtime | P2 tracked large module | 4 |
-| `lib/debug/real-debug-adapter.ts` | 1074 | foundation-runtime | P1 low-import large module | 0 |
-| `lib/nanite-virtualized-geometry.ts` | 1067 | foundation-runtime | P1 low-import large module | 0 |
-| `lib/video-encoder-real.ts` | 1067 | foundation-runtime | P2 tracked large module | 3 |
-| `lib/motion-matching-system.ts` | 1066 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/engine/scene-graph.ts` | 1065 | creative-runtime | P1 low-import large module | 0 |
 | `lib/engine/audio-manager.ts` | 1063 | creative-runtime | P1 low-import large module | 0 |
 | `lib/webxr-vr-system.ts` | 1061 | foundation-runtime | P1 low-import large module | 0 |

@@ -8,56 +8,9 @@ import { logger } from '@/lib/observability/logger';
  * NÃO É MOCK - Funciona de verdade no navegador!
  */
 
-// ============================================================================
-// TIPOS
-// ============================================================================
+import type { AudioEncoderConfig, ClipEffect, EncodedAudio, EncodedFrame, RenderJob, TimelineClip, VideoCodec, VideoEncoderConfig } from './video-encoder-real-contracts';
 
-export type VideoCodec = 'avc1.42001E' | 'vp8' | 'vp09.00.10.08' | 'av01.0.04M.08';
-export type AudioCodec = 'opus' | 'aac' | 'mp3';
-
-export interface VideoEncoderConfig {
-  codec: VideoCodec;
-  width: number;
-  height: number;
-  bitrate: number;
-  framerate: number;
-  keyFrameInterval?: number;
-  hardwareAcceleration?: 'prefer-hardware' | 'prefer-software' | 'no-preference';
-}
-
-export interface AudioEncoderConfig {
-  codec: AudioCodec;
-  sampleRate: number;
-  numberOfChannels: number;
-  bitrate: number;
-}
-
-export interface EncodedFrame {
-  data: Uint8Array;
-  timestamp: number;
-  duration: number;
-  isKeyFrame: boolean;
-}
-
-export interface EncodedAudio {
-  data: Uint8Array;
-  timestamp: number;
-  duration: number;
-}
-
-export interface RenderJob {
-  id: string;
-  status: 'pending' | 'rendering' | 'encoding' | 'muxing' | 'complete' | 'error';
-  progress: number;
-  totalFrames: number;
-  currentFrame: number;
-  outputBlob?: Blob;
-  error?: string;
-}
-
-// ============================================================================
-// VIDEO ENCODER
-// ============================================================================
+export type { AudioCodec, AudioEncoderConfig, ClipEffect, EncodedAudio, EncodedFrame, RenderJob, TimelineClip, VideoCodec, VideoEncoderConfig } from './video-encoder-real-contracts';
 
 export class VideoEncoderReal {
   private encoder: VideoEncoder | null = null;
@@ -693,23 +646,6 @@ export class WebMMuxer {
 // VIDEO RENDERER - Render Timeline to Video
 // ============================================================================
 
-export interface TimelineClip {
-  id: string;
-  source: string | HTMLVideoElement | HTMLCanvasElement;
-  startTime: number; // Position on timeline (seconds)
-  duration: number;
-  inPoint: number; // Start point in source
-  outPoint: number; // End point in source
-  track: number;
-  effects?: ClipEffect[];
-}
-
-export interface ClipEffect {
-  type: 'opacity' | 'brightness' | 'contrast' | 'saturation' | 'blur' | 'grayscale';
-  value: number;
-  keyframes?: { time: number; value: number }[];
-}
-
 export class VideoRenderer {
   private canvas: OffscreenCanvas;
   private ctx: OffscreenCanvasRenderingContext2D;
@@ -1041,26 +977,4 @@ export class ScreenRecorder {
   }
 }
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
-
-export function createVideoEncoder(config: VideoEncoderConfig): VideoEncoderReal {
-  return new VideoEncoderReal(config);
-}
-
-export function createAudioEncoder(config: AudioEncoderConfig): AudioEncoderReal {
-  return new AudioEncoderReal(config);
-}
-
-export function createVideoRenderer(width: number, height: number, fps?: number): VideoRenderer {
-  return new VideoRenderer(width, height, fps);
-}
-
-export function createExportPipeline(): VideoExportPipeline {
-  return new VideoExportPipeline();
-}
-
-export function createScreenRecorder(): ScreenRecorder {
-  return new ScreenRecorder();
-}
+export { createAudioEncoder, createExportPipeline, createScreenRecorder, createVideoEncoder, createVideoRenderer } from './video-encoder-factories';

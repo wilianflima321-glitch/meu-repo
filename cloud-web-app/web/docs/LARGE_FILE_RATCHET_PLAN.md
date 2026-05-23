@@ -19,10 +19,6 @@ Generated: deterministic local scan
 | File | Lines | Category | Next action |
 | --- | ---: | --- | --- |
 | `lib/server/websocket-server.ts` | 1092 | server | Continue extracting protocol-specific handlers; event bus, transport, auth, rooms, and presence are already split. |
-| `lib/debug/real-debug-adapter.ts` | 1074 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/nanite-virtualized-geometry.ts` | 1067 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/video-encoder-real.ts` | 1067 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/motion-matching-system.ts` | 1066 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/engine/scene-graph.ts` | 1065 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/engine/audio-manager.ts` | 1063 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/webxr-vr-system.ts` | 1061 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -48,6 +44,10 @@ Generated: deterministic local scan
 | `lib/particle-system-real.ts` | 1000 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/volumetric-clouds.ts` | 1000 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/commands/command-handlers.tsx` | 995 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/ai/behavior-tree-system.tsx` | 994 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/nanite-virtualized-geometry.ts` | 990 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/hooks/useTheiaSystemsHooks.ts` | 989 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/ai/agent-mode.ts` | 988 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 
 ## Ratchet Policy
 
