@@ -14,6 +14,7 @@ import * as Y from 'yjs';
 
 import type { TerminalPtyManager, TerminalSessionConfig } from './terminal-pty-runtime';
 import { eventBus } from './websocket/event-bus';
+import { handleRuntimeHttpRequest } from './websocket/http-routes';
 import { createClientId, createConnectionId } from './websocket/ids';
 import type { ParsedWebSocketUrl } from './websocket-runtime-codecs';
 import type {
@@ -125,31 +126,13 @@ export class AethelWebSocketServer extends EventEmitter {
     await initYWebsocket();
 
     return new Promise((resolve, reject) => {
-      this.httpServer = createServer((req, res) => {
-        const url = parseWebSocketRequestUrl(req.url || '/');
-        const pathname = normalizePath(url.pathname);
-
-        if (pathname === '/' || pathname === '/health') {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(this.getHealthPayload()));
-          return;
-        }
-
-        if (pathname === '/stats') {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(this.getStatsPayload()));
-          return;
-        }
-
-        if (pathname === '/metrics') {
-          res.writeHead(200, { 'Content-Type': 'text/plain; version=0.0.4' });
-          res.end(this.getMetricsPayload());
-          return;
-        }
-
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('Not Found');
-      });
+      this.httpServer = createServer((req, res) =>
+        handleRuntimeHttpRequest(req, res, {
+          health: () => this.getHealthPayload(),
+          stats: () => this.getStatsPayload(),
+          metrics: () => this.getMetricsPayload(),
+        })
+      );
 
       this.wss = new WebSocketServer({ server: this.httpServer });
       this.wss.on('connection', (ws, request) => this.handleConnection(ws, request));

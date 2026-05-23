@@ -1,11 +1,11 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2027
+- Files scanned: 2033
 - Failures: 0
 
 ## Counts
-- threeDirect: 33 (max 34)
+- threeDirect: 34 (max 34)
 - reactThreeFiberDirect: 1 (max 2)
 - reactThreeDreiDirect: 0 (max 1)
 - monacoEditorDirect: 2 (max 2)
@@ -15,6 +15,7 @@ Generated: deterministic local scan
 
 ## Top Offenders
 ### threeDirect
+- lib/ai/behavior-tree-blackboard.ts (1)
 - lib/audio/spatial-audio-system.ts (1)
 - lib/camera/camera-system.tsx (1)
 - lib/cutscene/system/player.ts (1)
@@ -39,7 +40,6 @@ Generated: deterministic local scan
 - lib/post-process-volume.ts (1)
 - lib/quest-mission-system.ts (1)
 - lib/ray-tracing.ts (1)
-- lib/render-system.ts (1)
 ### reactThreeFiberDirect
 - lib/camera/camera-system.tsx (1)
 ### reactThreeDreiDirect

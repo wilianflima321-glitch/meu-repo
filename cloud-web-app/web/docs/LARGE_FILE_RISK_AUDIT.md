@@ -6,10 +6,10 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 33
+- Large source files: 29
 - P0 files: 0
-- P1 low-import large modules: 23
-- P1 modules with explicit triage: 23
+- P1 low-import large modules: 20
+- P1 modules with explicit triage: 20
 - Retired runtime entrypoints forbidden: 4
 - Hard ceiling: 1800 lines
 - UI ceiling: 1200 lines
@@ -17,8 +17,8 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Categories
 
-- `foundation-runtime`: 21
-- `creative-runtime`: 9
+- `foundation-runtime`: 19
+- `creative-runtime`: 7
 - `server-runtime`: 3
 
 ## Owner Decisions
@@ -64,9 +64,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/terrain/terrain-system.ts` | 1030 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/extensions/extension-system.ts` | 1021 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/audio/spatial-audio-system.ts` | 1007 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/debug/object-inspector.tsx` | 1001 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/debug/profiler-system.tsx` | 1001 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/physics/physics-system.ts` | 1001 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/volumetric-clouds.ts` | 1000 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 
 ## P1 Triage Decisions
@@ -92,17 +89,13 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/terrain/terrain-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/extensions/extension-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/audio/spatial-audio-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/debug/object-inspector.tsx` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
-| `lib/debug/profiler-system.tsx` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
-| `lib/physics/physics-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/volumetric-clouds.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 
 ## Full Inventory
 
 | File | Lines | Category | Risk | Import hints |
 | --- | ---: | --- | --- | ---: |
-| `lib/server/websocket-server.ts` | 1109 | server-runtime | P2 tracked large module | 4 |
-| `lib/ai/behavior-tree-system.tsx` | 1085 | creative-runtime | P2 tracked large module | 4 |
+| `lib/server/websocket-server.ts` | 1092 | server-runtime | P2 tracked large module | 4 |
 | `lib/debug/real-debug-adapter.ts` | 1074 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/nanite-virtualized-geometry.ts` | 1067 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/video-encoder-real.ts` | 1067 | foundation-runtime | P2 tracked large module | 3 |
@@ -128,9 +121,6 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/facial-animation-system.ts` | 1015 | foundation-runtime | P2 tracked large module | 3 |
 | `lib/yjs-collaboration.ts` | 1013 | foundation-runtime | P2 tracked large module | 8 |
 | `lib/audio/spatial-audio-system.ts` | 1007 | creative-runtime | P1 low-import large module | 0 |
-| `lib/debug/object-inspector.tsx` | 1001 | foundation-runtime | P1 low-import large module | 0 |
-| `lib/debug/profiler-system.tsx` | 1001 | foundation-runtime | P1 low-import large module | 0 |
-| `lib/physics/physics-system.ts` | 1001 | creative-runtime | P1 low-import large module | 0 |
 | `lib/server/build-runtime.ts` | 1001 | server-runtime | P2 tracked large module | 0 |
 | `lib/particle-system-real.ts` | 1000 | foundation-runtime | P2 tracked large module | 3 |
 | `lib/volumetric-clouds.ts` | 1000 | foundation-runtime | P1 low-import large module | 0 |

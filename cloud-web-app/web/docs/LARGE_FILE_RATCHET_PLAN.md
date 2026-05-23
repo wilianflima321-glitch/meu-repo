@@ -4,7 +4,7 @@ Generated: deterministic local scan
 
 - Watch line limit: 800
 - Files above watch limit: 117 / 117
-- Max file lines: 1109 / 1110
+- Max file lines: 1092 / 1092
 - Failures: 0
 
 ## Category Counts
@@ -18,8 +18,7 @@ Generated: deterministic local scan
 
 | File | Lines | Category | Next action |
 | --- | ---: | --- | --- |
-| `lib/server/websocket-server.ts` | 1109 | server | Continue extracting protocol-specific handlers; event bus, transport, auth, rooms, and presence are already split. |
-| `lib/ai/behavior-tree-system.tsx` | 1085 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/server/websocket-server.ts` | 1092 | server | Continue extracting protocol-specific handlers; event bus, transport, auth, rooms, and presence are already split. |
 | `lib/debug/real-debug-adapter.ts` | 1074 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/nanite-virtualized-geometry.ts` | 1067 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/video-encoder-real.ts` | 1067 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -45,14 +44,15 @@ Generated: deterministic local scan
 | `lib/facial-animation-system.ts` | 1015 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/yjs-collaboration.ts` | 1013 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/audio/spatial-audio-system.ts` | 1007 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/debug/object-inspector.tsx` | 1001 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/debug/profiler-system.tsx` | 1001 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/physics/physics-system.ts` | 1001 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/server/build-runtime.ts` | 1001 | server | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/particle-system-real.ts` | 1000 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/volumetric-clouds.ts` | 1000 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/commands/command-handlers.tsx` | 995 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 
 ## Ratchet Policy
 
 - Do not add new files above 800 lines.
-- Do not let any file exceed 1110 lines without an explicit ratchet update.
+- Do not let any file exceed 1092 lines without an explicit ratchet update.
 - Split UI surfaces before adding features.
 - Runtime kernels may stay large only with an owner, adapter strategy, and dedicated gate.
 
