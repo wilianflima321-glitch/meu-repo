@@ -13,6 +13,7 @@ import { createRequire } from 'module';
 import * as Y from 'yjs';
 
 import type { TerminalPtyManager, TerminalSessionConfig } from './terminal-pty-runtime';
+import { eventBus } from './websocket/event-bus';
 import type { ParsedWebSocketUrl } from './websocket-runtime-codecs';
 import type {
   ConnectionInfo,
@@ -81,30 +82,8 @@ const { getYWebsocketSetup, initYWebsocket } = require('./websocket-yjs-bootstra
 const log = createComponentLogger('server/websocket-server');
 
 export { WS_MESSAGE_TYPES };
+export { eventBus } from './websocket/event-bus';
 export type { WsClient, WsChannel, WsMessage } from './websocket-runtime-contracts';
-
-// ============================================================================
-// Compatibility event bus
-// ============================================================================
-
-class ServiceEventBus extends EventEmitter {
-  private static instance: ServiceEventBus;
-
-  private constructor() {
-    super();
-    this.setMaxListeners(100);
-  }
-
-  static getInstance(): ServiceEventBus {
-    if (!ServiceEventBus.instance) {
-      ServiceEventBus.instance = new ServiceEventBus();
-    }
-    return ServiceEventBus.instance;
-  }
-}
-
-export const eventBus = ServiceEventBus.getInstance();
-
 // ============================================================================
 // WebSocket server manager
 // ============================================================================

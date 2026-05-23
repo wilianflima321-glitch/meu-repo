@@ -15,7 +15,9 @@ Aethel should feel premium before the user reaches the heavy editor. Public, das
 - Transitive editor panels are governed: panels loaded only through heavy Studio editors are reported as async boundaries instead of polluting the shell budget.
 - Connected asset model preview is lazy: `ContentBrowserConnected` no longer imports Three or GLTFLoader until a model preview is opened.
 - Bundle budgets are tighter: direct imports for `three`, R3F, drei, Monaco, and Framer now have real headroom instead of passing at the edge.
-- Framer Motion was removed from lightweight settings, inline edit, version history, and marketplace library shells. Current budget is `9 / 10`, leaving room for deliberate motion without making every shell pay for JS animation.
+- DevTools no longer imports Framer Motion through the runtime provider path; its panel uses CSS transitions so admin, billing, and light shells avoid paying for animation JS.
+- Nexus canvas and the Destruction editor are explicit heavy async boundaries; both are 3D/runtime surfaces and must not be imported by public route shells.
+- Current direct import counts are `three 33 / 34`, R3F `1 / 2`, drei `0 / 1`, and Framer Motion `8 / 9`, leaving real regression headroom.
 - Authenticated capture now uses `domcontentloaded` plus a short settle fallback when long-lived sockets keep `networkidle` open. This keeps screenshots deterministic without hiding console-error evidence.
 
 ## Product rule
@@ -30,5 +32,5 @@ Linear, Vercel, Cursor, and Runway keep their first interaction focused. Aethel'
 
 - `ContentBrowserConnected`, `WorldOutliner`, and several editor `.parts` files still import 3D primitives directly because they are runtime surfaces. They need virtualization and route-level evidence before any further split.
 - Monaco direct imports remain intentionally held in IDE/editor-specific surfaces.
-- Three is now ratcheted to `35 / 35` after moving asset/content-generation runtime modules behind explicit heavy-boundary accounting. The next target is `<=32`, but only after the remaining runtime modules prove they are Studio-only or move behind true dynamic imports.
+- Three is now ratcheted to `33 / 34` after moving Nexus and destruction runtime modules behind explicit heavy-boundary accounting. The next target is `<=32`, but only after the remaining runtime modules prove they are Studio-only or move behind true dynamic imports.
 - The authenticated capture report still exposes route console errors. Those are product-quality evidence, not ignored noise, and should drive the next polish pass.

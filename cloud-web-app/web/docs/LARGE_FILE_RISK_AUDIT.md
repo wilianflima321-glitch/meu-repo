@@ -101,8 +101,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Lines | Category | Risk | Import hints |
 | --- | ---: | --- | --- | ---: |
-| `lib/server/websocket-server.ts` | 1150 | server-runtime | P2 tracked large module | 3 |
-| `lib/particles/advanced-particle-system.ts` | 1132 | creative-runtime | P2 tracked large module | 3 |
+| `lib/server/websocket-server.ts` | 1129 | server-runtime | P2 tracked large module | 4 |
 | `server/workers/build-queue-worker.ts` | 1111 | server-runtime | P2 tracked large module | 0 |
 | `lib/ai-tools-registry.ts` | 1085 | foundation-runtime | P2 tracked large module | 5 |
 | `lib/ai/behavior-tree-system.tsx` | 1085 | creative-runtime | P2 tracked large module | 4 |
@@ -124,6 +123,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/ai-audio-engine.ts` | 1034 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/events/event-bus-system.tsx` | 1032 | creative-runtime | P1 low-import large module | 0 |
 | `lib/terrain/terrain-system.ts` | 1030 | creative-runtime | P1 low-import large module | 0 |
+| `lib/particles/advanced-particle-system.ts` | 1023 | creative-runtime | P2 tracked large module | 3 |
 | `lib/extensions/extension-system.ts` | 1021 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/cloth-simulation.ts` | 1018 | foundation-runtime | P2 tracked large module | 2 |
 | `lib/facial-animation-system.ts` | 1015 | foundation-runtime | P2 tracked large module | 3 |

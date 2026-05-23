@@ -1,22 +1,20 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2022
+- Files scanned: 2024
 - Failures: 0
 
 ## Counts
-- threeDirect: 35 (max 35)
-- reactThreeFiberDirect: 2 (max 3)
-- reactThreeDreiDirect: 1 (max 2)
+- threeDirect: 33 (max 34)
+- reactThreeFiberDirect: 1 (max 2)
+- reactThreeDreiDirect: 0 (max 1)
 - monacoEditorDirect: 2 (max 2)
 - monacoReactDirect: 3 (max 3)
-- framerMotionDirect: 9 (max 10)
+- framerMotionDirect: 8 (max 9)
 - dynamicImportsMin: 256 (min 100)
 
 ## Top Offenders
 ### threeDirect
-- components/nexus/NexusCanvasV2.tsx (1)
-- components/physics/DestructionEditor.tsx (1)
 - lib/audio/spatial-audio-system.ts (1)
 - lib/camera/camera-system.tsx (1)
 - lib/cutscene/system/player.ts (1)
@@ -40,11 +38,12 @@ Generated: deterministic local scan
 - lib/physics-engine-real.ts (1)
 - lib/post-process-volume.ts (1)
 - lib/quest-mission-system.ts (1)
+- lib/ray-tracing.ts (1)
+- lib/render-system.ts (1)
 ### reactThreeFiberDirect
-- components/physics/DestructionEditor.tsx (1)
 - lib/camera/camera-system.tsx (1)
 ### reactThreeDreiDirect
-- components/physics/DestructionEditor.tsx (1)
+- none
 ### monacoEditorDirect
 - lib/collaboration/collaboration-manager.ts (1)
 - lib/monaco-lsp-bridge.ts (1)
@@ -61,7 +60,6 @@ Generated: deterministic local scan
 - components/ui/motion.tsx (1)
 - components/ui/premium.tsx (1)
 - components/vcs/TimeMachineSlider.tsx (1)
-- lib/debug/devtools-provider.tsx (1)
 
 ## Async Heavy Boundaries
 Files marked with @aethel-heavy-async-boundary are reported separately because they are split behind explicit dynamic boundaries and are not allowed to be imported by public route shells.
@@ -84,13 +82,13 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - components/LivePreview.tsx (1)
 - components/marketplace/AssetModelPreview.tsx (1)
 - components/materials/MaterialEditor.tsx (1)
+- components/nexus/NexusCanvasV2.tsx (1)
 - components/physics/ClothSimulationEditor.tsx (1)
 - components/physics/ClothSimulationPanels.tsx (1)
+- components/physics/DestructionEditor.tsx (1)
 - components/physics/fluid-simulation-core.ts (1)
 - components/physics/FluidSimulationEditor.tsx (1)
 - components/physics/FluidSimulationPanels.tsx (1)
-- components/scene-editor/GameSimulation.tsx (1)
-- components/scene-editor/scene-editor-models.ts (1)
 ### reactThreeFiberDirect
 - components/assets/AssetPreviewPanel.tsx (1)
 - components/character/ControlRigEditor.tsx (1)
@@ -108,6 +106,7 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - components/marketplace/AssetModelPreview.tsx (1)
 - components/physics/ClothSimulationEditor.tsx (1)
 - components/physics/ClothSimulationPanels.tsx (1)
+- components/physics/DestructionEditor.tsx (1)
 - components/physics/FluidSimulationEditor.tsx (1)
 - components/physics/FluidSimulationPanels.tsx (1)
 - components/scene-editor/GameSimulation.tsx (1)
@@ -133,6 +132,7 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - components/marketplace/AssetModelPreview.tsx (1)
 - components/physics/ClothSimulationEditor.tsx (1)
 - components/physics/ClothSimulationPanels.tsx (1)
+- components/physics/DestructionEditor.tsx (1)
 - components/physics/FluidSimulationEditor.tsx (1)
 - components/physics/FluidSimulationPanels.tsx (1)
 - components/scene-editor/SceneEditor.tsx (1)
@@ -154,7 +154,8 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - components/git/GitPanel.tsx (1)
 
 ## Async Boundary Import References
-- components/physics/DestructionEditor.tsx statically imports @/lib/destruction-system -> lib/destruction-system.ts
+- app/nexus/page.tsx statically imports @/components/nexus/NexusCanvasV2 -> components/nexus/NexusCanvasV2.tsx
+- components/forge/TheForgeUnified.tsx statically imports ../nexus/NexusCanvasV2 -> components/nexus/NexusCanvasV2.tsx
 - components/scene-editor/ScenePropertiesPanel.tsx statically imports ./scene-editor-models -> components/scene-editor/scene-editor-models.ts
 - lib/aaa-asset-pipeline-runtime/singletons.ts statically imports ./importer -> lib/aaa-asset-pipeline-runtime/importer.ts
 - lib/aaa-asset-pipeline-runtime/singletons.ts statically imports ./optimizer -> lib/aaa-asset-pipeline-runtime/optimizer.ts

@@ -4,7 +4,7 @@ Generated: deterministic local scan
 
 - Watch line limit: 800
 - Files above watch limit: 117 / 117
-- Max file lines: 1150 / 1150
+- Max file lines: 1129 / 1130
 - Failures: 0
 
 ## Category Counts
@@ -18,8 +18,7 @@ Generated: deterministic local scan
 
 | File | Lines | Category | Next action |
 | --- | ---: | --- | --- |
-| `lib/server/websocket-server.ts` | 1150 | server | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/particles/advanced-particle-system.ts` | 1132 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/server/websocket-server.ts` | 1129 | server | Continue extracting protocol-specific handlers; event bus, transport, auth, rooms, and presence are already split. |
 | `server/workers/build-queue-worker.ts` | 1111 | other | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai-tools-registry.ts` | 1085 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai/behavior-tree-system.tsx` | 1085 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -41,6 +40,7 @@ Generated: deterministic local scan
 | `lib/ai-audio-engine.ts` | 1034 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/events/event-bus-system.tsx` | 1032 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/terrain/terrain-system.ts` | 1030 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/particles/advanced-particle-system.ts` | 1023 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/extensions/extension-system.ts` | 1021 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/cloth-simulation.ts` | 1018 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/facial-animation-system.ts` | 1015 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -52,7 +52,7 @@ Generated: deterministic local scan
 ## Ratchet Policy
 
 - Do not add new files above 800 lines.
-- Do not let any file exceed 1,200 lines.
+- Do not let any file exceed 1130 lines without an explicit ratchet update.
 - Split UI surfaces before adding features.
 - Runtime kernels may stay large only with an owner, adapter strategy, and dedicated gate.
 

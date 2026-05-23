@@ -8,7 +8,7 @@ const IGNORED_PARTS = new Set(['node_modules', '.next', 'coverage', 'dist', 'bui
 
 const WATCH_LINE_LIMIT = 800
 const WATCH_FILE_BUDGET = 117
-const MAX_LINE_BUDGET = 1150
+const MAX_LINE_BUDGET = 1130
 
 function walk(dir, files = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -33,6 +33,7 @@ function classify(relativePath) {
 }
 
 function recommendation(relativePath) {
+  if (relativePath === 'lib/server/websocket-server.ts') return 'Continue extracting protocol-specific handlers; event bus, transport, auth, rooms, and presence are already split.'
   if (relativePath === 'lib/translations.ts') return 'Move remaining compatibility reads behind next-i18next and delete after one release.'
   if (relativePath.includes('DesignSystem')) return 'Split into primitives, tokens, examples, and compatibility barrel.'
   if (relativePath.includes('cutscene') || relativePath.includes('dialogue')) return 'Split planning, timeline, playback, and serialization before adding film features.'
@@ -95,7 +96,7 @@ const report = [
   '## Ratchet Policy',
   '',
   '- Do not add new files above 800 lines.',
-  '- Do not let any file exceed 1,200 lines.',
+  `- Do not let any file exceed ${MAX_LINE_BUDGET} lines without an explicit ratchet update.`,
   '- Split UI surfaces before adding features.',
   '- Runtime kernels may stay large only with an owner, adapter strategy, and dedicated gate.',
   '',

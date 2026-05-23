@@ -19,7 +19,6 @@ import React, {
   useRef,
   type ReactNode
 } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bug,
   X,
@@ -408,29 +407,23 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
     <>
       {/* Floating Toggle Button */}
       {!isOpen && (
-        <motion.button
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
+        <button
+          type="button"
           onClick={toggle}
-          className="fixed bottom-4 right-4 z-50 p-3 rounded-full bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] shadow-lg hover:bg-[var(--aethel-primary)] transition-colors"
+          className="fixed bottom-4 right-4 z-50 rounded-full bg-[var(--aethel-primary-dark)] p-3 text-[var(--aethel-text-primary)] shadow-lg transition-colors hover:bg-[var(--aethel-primary)]"
           title="Open DevTools (Ctrl+Shift+D)"
         >
           <Bug className="w-5 h-5" />
-        </motion.button>
+        </button>
       )}
       
       {/* DevTools Panel */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ y: '100%', opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`fixed bottom-0 left-0 right-0 z-50 bg-[var(--aethel-surface-primary)] border-t border-[var(--aethel-border-primary)] shadow-2xl ${
-              isMinimized ? 'h-12' : 'h-80'
-            }`}
-          >
+      {isOpen && (
+        <div
+          className={`fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] shadow-2xl transition-[height,transform,opacity] duration-200 ${
+            isMinimized ? 'h-12' : 'h-80'
+          }`}
+        >
             {/* Header */}
             <div className="flex items-center justify-between px-3 h-12 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]">
               <div className="flex items-center gap-3">
@@ -542,9 +535,8 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                 {activeTab === 'console' && <ConsoleTab entries={ctx.console} searchQuery={searchQuery} />}
               </div>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </>
   );
 }

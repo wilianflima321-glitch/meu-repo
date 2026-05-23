@@ -1,5 +1,6 @@
 'use client';
 
+// @aethel-heavy-async-boundary: Nexus canvas is a 3D runtime surface loaded only by Nexus/preview shells.
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 

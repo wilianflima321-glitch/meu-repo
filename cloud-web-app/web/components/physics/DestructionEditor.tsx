@@ -1,5 +1,6 @@
 "use client";
 
+// @aethel-heavy-async-boundary: destruction simulation loads only in Studio physics/editor surfaces.
 /**
  * DESTRUCTION EDITOR - Aethel Engine
  *
