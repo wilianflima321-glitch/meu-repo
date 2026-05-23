@@ -9,6 +9,8 @@ const JWT_SECRET = process.env.JWT_SECRET
 const BASE_URL = process.env.AUTHENTICATED_UX_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const OUTPUT_DIR = path.join(ROOT, 'output', 'playwright', 'v22-authenticated')
 const DOC_PATH = path.join(ROOT, 'docs', 'AUTHENTICATED_UX_SURFACE_AUDIT.md')
+const NAVIGATION_TIMEOUT_MS = Number(process.env.AUTHENTICATED_UX_NAVIGATION_TIMEOUT_MS ?? 90000)
+const SCREENSHOT_TIMEOUT_MS = Number(process.env.AUTHENTICATED_UX_SCREENSHOT_TIMEOUT_MS ?? 90000)
 const NETWORK_IDLE_TIMEOUT_MS = Number(process.env.AUTHENTICATED_UX_NETWORK_IDLE_TIMEOUT_MS ?? 5000)
 const POST_LOAD_SETTLE_MS = Number(process.env.AUTHENTICATED_UX_POST_LOAD_SETTLE_MS ?? 500)
 const MAX_CONSOLE_ERRORS = Number(process.env.AUTHENTICATED_UX_MAX_CONSOLE_ERRORS ?? 0)
@@ -89,6 +91,23 @@ async function ensureLocalVisualQaUser() {
           select: { id: true, email: true, role: true, plan: true },
         })
 
+    await prisma.subscription.upsert({
+      where: { userId: user.id },
+      update: {
+        stripeSubscriptionId: `sub_visual_qa_${user.id}`,
+        stripePriceId: 'price_visual_qa_studio',
+        status: 'active',
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+      create: {
+        userId: user.id,
+        stripeSubscriptionId: `sub_visual_qa_${user.id}`,
+        stripePriceId: 'price_visual_qa_studio',
+        status: 'active',
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+    })
+
     await prisma.$disconnect()
     return {
       userId: user.id,
@@ -156,18 +175,32 @@ for (const viewport of VIEWPORTS) {
     const page = await context.newPage()
     const consoleErrors = []
     const networkErrors = []
+    const networkErrorBodies = []
     page.on('console', (message) => {
       if (message.type() === 'error') consoleErrors.push(message.text())
     })
     page.on('response', (response) => {
       const status = response.status()
       if (status < 400) return
-      networkErrors.push({
+      const entry = {
         status,
         url: response.url().replace(BASE_URL, ''),
         method: response.request().method(),
         resourceType: response.request().resourceType(),
-      })
+        requestBody: response.request().postData()?.replace(/\s+/g, ' ').slice(0, 220) ?? '',
+        body: '',
+      }
+      networkErrors.push(entry)
+      networkErrorBodies.push(
+        response
+          .text()
+          .then((body) => {
+            entry.body = body.replace(/\s+/g, ' ').slice(0, 220)
+          })
+          .catch(() => {
+            entry.body = 'unavailable'
+          }),
+      )
     })
     const url = new URL(route, BASE_URL).toString()
     const filename = `${viewport.id}-${route.replace(/^\//, '').replace(/[/?=&]/g, '-') || 'home'}.png`
@@ -176,17 +209,22 @@ for (const viewport of VIEWPORTS) {
     let finalUrl = url
     let error = null
     let stabilization = 'networkidle'
+    let finalPathOk = false
     try {
-      const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
+      const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: NAVIGATION_TIMEOUT_MS })
       status = response?.status() ?? null
       finalUrl = page.url()
+      finalPathOk = new URL(finalUrl).pathname === route
       try {
         await page.waitForLoadState('networkidle', { timeout: NETWORK_IDLE_TIMEOUT_MS })
       } catch {
         stabilization = `domcontentloaded+settle(${POST_LOAD_SETTLE_MS}ms)`
         await page.waitForTimeout(POST_LOAD_SETTLE_MS)
       }
-      await page.screenshot({ path: outputPath, fullPage: true })
+      if (networkErrorBodies.length) {
+        await Promise.allSettled(networkErrorBodies)
+      }
+      await page.screenshot({ path: outputPath, fullPage: true, timeout: SCREENSHOT_TIMEOUT_MS })
     } catch (captureError) {
       error = captureError instanceof Error ? captureError.message : String(captureError)
     } finally {
@@ -202,6 +240,7 @@ for (const viewport of VIEWPORTS) {
       networkErrors,
       error,
       stabilization,
+      finalPathOk,
     })
   }
   await context.close()
@@ -217,10 +256,10 @@ const doc = `# Authenticated UX Surface Audit
 - Error budgets: console <= ${MAX_CONSOLE_ERRORS}, network <= ${MAX_NETWORK_ERRORS}
 - Note: screenshots live under \`output/playwright/v22-authenticated/\` and are intentionally not versioned.
 
-| Viewport | Route | Status | Final URL | Screenshot | Stabilization | Console errors | Network errors |
-| --- | --- | ---: | --- | --- | --- | ---: | ---: |
+| Viewport | Route | Status | Final URL | Route match | Screenshot | Stabilization | Console errors | Network errors |
+| --- | --- | ---: | --- | --- | --- | --- | ---: | ---: |
 ${results
-  .map((result) => `| ${result.viewport} | ${result.route} | ${result.status ?? 'n/a'} | ${result.finalUrl} | ${result.screenshot ?? result.error ?? 'n/a'} | ${result.stabilization} | ${result.consoleErrors.length} | ${result.networkErrors.length} |`)
+  .map((result) => `| ${result.viewport} | ${result.route} | ${result.status ?? 'n/a'} | ${result.finalUrl} | ${result.finalPathOk ? 'yes' : 'no'} | ${result.screenshot ?? result.error ?? 'n/a'} | ${result.stabilization} | ${result.consoleErrors.length} | ${result.networkErrors.length} |`)
   .join('\n')}
 
 ## Network Error Evidence
@@ -230,7 +269,7 @@ ${results
   .map((result) => {
     const items = result.networkErrors
       .slice(0, 8)
-      .map((item) => `  - ${item.method} ${item.status} ${item.url} (${item.resourceType})`)
+      .map((item) => `  - ${item.method} ${item.status} ${item.url} (${item.resourceType})${item.requestBody ? ` request=${item.requestBody}` : ''}${item.body ? ` - ${item.body}` : ''}`)
       .join('\n')
     return `### ${result.viewport} ${result.route}\n${items}`
   })
@@ -244,6 +283,15 @@ const failed = results.filter((result) => result.error)
 if (failed.length) {
   console.error(`[authenticated-ux-capture] FAIL captured=${results.length - failed.length} failed=${failed.length}`)
   for (const result of failed) console.error(`- ${result.viewport} ${result.route}: ${result.error}`)
+  process.exit(1)
+}
+
+const redirectFailures = results.filter((result) => !result.finalPathOk)
+if (redirectFailures.length) {
+  console.error(`[authenticated-ux-capture] FAIL authenticated routes redirected=${redirectFailures.length}`)
+  for (const result of redirectFailures) {
+    console.error(`- ${result.viewport} ${result.route}: finalUrl=${result.finalUrl}`)
+  }
   process.exit(1)
 }
 

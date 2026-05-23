@@ -98,7 +98,7 @@ export function EnhancedDashboardSidebar({
             type="button"
             onClick={onToggleCollapse}
             className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]"
-            aria-label={collapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <Codicon name={collapsed ? 'chevron-right' : 'chevron-left'} />
           </button>

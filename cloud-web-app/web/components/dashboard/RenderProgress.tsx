@@ -389,7 +389,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {!compact && (
-                        <button type="button" aria-label={expanded ? `Recolher detalhes do render ${job.name}` : `Expandir detalhes do render ${job.name}`}
+                        <button type="button" aria-label={expanded ? `Collapse render details for ${job.name}` : `Expand render details for ${job.name}`}
                             onClick={() => setExpanded(!expanded)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                         >

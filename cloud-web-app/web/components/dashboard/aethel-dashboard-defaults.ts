@@ -109,7 +109,7 @@ export const DEFAULT_USE_CASES: UseCase[] = [
 ]
 
 export const DEFAULT_PROJECTS: Project[] = [
-  { id: 1, name: 'Estudio de Content IA', type: 'code', status: 'active' },
+  { id: 1, name: 'AI Content Studio', type: 'code', status: 'active' },
   { id: 2, name: 'Metaverse Hub', type: 'unreal', status: 'active' },
   { id: 3, name: 'Automation funnel', type: 'web', status: 'planning' },
 ]

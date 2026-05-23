@@ -4,7 +4,7 @@
  * NewProjectWizard - Experiencia de Onboarding "Time-to-Fun"
  *
  * Wizard visual imersivo para criacao de projetos.
- * Meta: Usuario com jogo rodando em < 30 segundos.
+ * Goal: user reaches a running game loop in under 30 seconds.
  *
  * Flow:
  * 1. Escolha de Genero (Cards com video preview)

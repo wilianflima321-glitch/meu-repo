@@ -66,6 +66,7 @@ function BooleanSetting({ definition, value, onChange, modified, onReset }: Base
   return (
     <div className="flex items-start gap-3">
       <input
+        suppressHydrationWarning
         type="checkbox"
         checked={value}
         onChange={event => onChange(event.target.checked)}
@@ -86,6 +87,7 @@ function StringSetting({ definition, value, onChange, modified, onReset }: BaseS
     <div>
       <SettingLabel definition={definition} modified={modified} onReset={onReset} />
       <input
+        suppressHydrationWarning
         type="text"
         value={value}
         onChange={event => onChange(event.target.value)}
@@ -104,6 +106,7 @@ function NumberSetting({ definition, value, onChange, modified, onReset }: BaseS
       <SettingLabel definition={definition} modified={modified} onReset={onReset} />
       <div className="mt-2 flex items-center gap-3">
         <input
+          suppressHydrationWarning
           type="range"
           min={definition.minimum}
           max={definition.maximum}
@@ -113,6 +116,7 @@ function NumberSetting({ definition, value, onChange, modified, onReset }: BaseS
           className="flex-1"
         />
         <input
+          suppressHydrationWarning
           type="number"
           min={definition.minimum}
           max={definition.maximum}
@@ -165,6 +169,7 @@ function ArraySetting({ definition, value, onChange, modified, onReset }: BaseSe
         {value.map((item, index) => (
           <div key={`${definition.key}-${index}`} className="flex items-center gap-2">
             <input
+              suppressHydrationWarning
               type="text"
               value={item}
               onChange={event => updateItem(index, event.target.value)}
@@ -201,8 +206,9 @@ function ColorSetting({ definition, value, onChange, modified, onReset }: BaseSe
     <div>
       <SettingLabel definition={definition} modified={modified} onReset={onReset} />
       <div className="mt-2 flex items-center gap-3">
-        <input type="color" value={value} onChange={event => onChange(event.target.value)} className="h-10 w-16 rounded" />
+        <input suppressHydrationWarning type="color" value={value} onChange={event => onChange(event.target.value)} className="h-10 w-16 rounded" />
         <input
+          suppressHydrationWarning
           type="text"
           value={value}
           onChange={event => onChange(event.target.value)}

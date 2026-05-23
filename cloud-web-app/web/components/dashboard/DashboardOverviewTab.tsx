@@ -29,8 +29,19 @@ type Point3 = {
 const CanonicalPreviewSurface = dynamic(() => import('@/components/preview/CanonicalPreviewSurface'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full min-h-[260px] items-center justify-center rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] px-6 py-8 text-sm text-[var(--aethel-text-secondary)]">
-      Loading studio preview...
+    <div className="flex h-full min-h-[260px] flex-col justify-between rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent),color-mix(in_srgb,var(--aethel-info)_8%,transparent))] px-6 py-5 text-sm text-[var(--aethel-text-secondary)]">
+      <div>
+        <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Preview surface</p>
+        <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">Warming up the artifact preview</p>
+        <p className="mt-2 max-w-lg text-xs leading-5 text-[var(--aethel-text-secondary)]">
+          The Studio shell stays interactive while the heavier preview chunk loads.
+        </p>
+      </div>
+      <div className="mt-6 grid gap-2 sm:grid-cols-3" aria-hidden="true">
+        <div className="h-16 rounded-2xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)]" />
+        <div className="h-16 rounded-2xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)]" />
+        <div className="h-16 rounded-2xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)]" />
+      </div>
     </div>
   ),
 })
@@ -250,7 +261,7 @@ export function DashboardOverviewTab({
     : !hasToken
       ? 'Sign in to unlock billing and wallet'
       : walletLoading
-        ? 'Loading wallet'
+        ? 'Budget sync pending'
         : walletError
           ? walletError instanceof APIError && walletError.status === 401
             ? 'Session expired'
@@ -561,7 +572,7 @@ export function DashboardOverviewTab({
             <button
               type="button"
               onClick={onToggleMiniPreviewExpanded}
-              aria-label={miniPreviewExpanded ? 'Recolher preview ao vivo' : 'Expandir preview ao vivo'}
+              aria-label={miniPreviewExpanded ? 'Collapse live preview' : 'Expand live preview'}
               className={ghostButtonClass}
             >
               {miniPreviewExpanded ? 'Compact preview' : 'Expand preview'}

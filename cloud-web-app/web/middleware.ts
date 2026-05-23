@@ -72,6 +72,12 @@ const ALLOWED_ORIGINS = new Set([
   ] : []),
 ]);
 
+const LOCAL_DEV_ORIGIN_PATTERN = /^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/;
+
+function isAllowedRequestOrigin(origin: string): boolean {
+  return ALLOWED_ORIGINS.has(origin) || (process.env.NODE_ENV !== 'production' && LOCAL_DEV_ORIGIN_PATTERN.test(origin));
+}
+
 const securityHeaders = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
@@ -92,7 +98,7 @@ function withSecurityHeaders(res: NextResponse, req?: NextRequest, requestId?: s
   // CORS: Only allow specific origins instead of wildcard
   if (req) {
     const origin = req.headers.get('origin');
-    if (origin && ALLOWED_ORIGINS.has(origin)) {
+    if (origin && isAllowedRequestOrigin(origin)) {
       res.headers.set('Access-Control-Allow-Origin', origin);
       res.headers.set('Access-Control-Allow-Credentials', 'true');
     }
@@ -109,8 +115,8 @@ function withSecurityHeaders(res: NextResponse, req?: NextRequest, requestId?: s
 
 // ============================================================================
 // RATE LIMITING (Edge + production)
-// - Upstash (Redis over HTTP) quando configurado
-// - Em produÃ§Ã£o, sem backend => 503 para /api (evita falsa sensaÃ§Ã£o de seguranÃ§a)
+// - Upstash (Redis over HTTP) when configured
+// - In production, missing backend => 503 for /api to avoid a false security signal.
 // ============================================================================
 
 type RateLimitName = 'api_general' | 'api_auth' | 'api_ai' | 'api_upload';
@@ -318,9 +324,9 @@ export async function middleware(req: NextRequest) {
   if (isApi && req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS') {
     const origin = req.headers.get('origin');
     const expected = req.nextUrl.origin;
-    // Se o cliente usa Bearer token, o risco de CSRF Ã© bem menor.
+    // Bearer-token requests have much lower CSRF risk than cookie-only sessions.
     const usingCookieOnly = !!cookieToken && !bearerToken;
-    const trustedAppOrigin = origin === expected || (origin ? ALLOWED_ORIGINS.has(origin) : false);
+    const trustedAppOrigin = origin === expected || (origin ? isAllowedRequestOrigin(origin) : false);
     if (usingCookieOnly && origin && !trustedAppOrigin) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -369,7 +375,7 @@ export async function middleware(req: NextRequest) {
     const response = NextResponse.next({ request: { headers: requestHeaders } });
     withSecurityHeaders(response, req, requestId);
     
-    // Adiciona informaÃ§Ãµes do usuÃ¡rio nos headers para APIs
+    // Add user context headers for API handlers.
     if (pathname.startsWith('/api')) {
       response.headers.set('X-User-Id', payload.userId as string || '');
       response.headers.set('X-User-Role', (payload.role as string) || 'user');

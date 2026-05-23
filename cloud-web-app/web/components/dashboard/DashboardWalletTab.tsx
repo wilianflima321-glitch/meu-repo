@@ -120,7 +120,7 @@ export function DashboardWalletTab({
           <div className={`${panelClass} space-y-4`}>
             <div>
               <h3 className="text-lg font-semibold">Current balance</h3>
-              {walletLoading && <p className="text-sm text-[var(--aethel-text-secondary)]">Loading wallet...</p>}
+              {walletLoading && <p className="text-sm text-[var(--aethel-text-secondary)]">Wallet syncing...</p>}
               {hasWalletError && (
                 <p className="text-sm text-[var(--aethel-error)]">
                   Failed to load data. Try again.

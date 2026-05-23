@@ -18,7 +18,7 @@ const requiredRoutes = ['/dashboard', '/ide', '/studio', '/studio/level', '/stud
 for (const route of requiredRoutes) {
   if (!content.includes(`'${route}'`) && !content.includes(`"${route}"`)) failures.push(`${scriptPath}: missing route ${route}`)
 }
-for (const required of ['JWT_SECRET', 'AUTH_QA_SECRET_MISSING', 'aethel-token', "name: 'token'", 'jsonwebtoken']) {
+for (const required of ['JWT_SECRET', 'AUTH_QA_SECRET_MISSING', 'aethel-token', "name: 'token'", 'jsonwebtoken', 'finalPathOk', 'authenticated routes redirected']) {
   if (!content.includes(required)) failures.push(`${scriptPath}: missing ${required}`)
 }
 if (/secret\s*=\s*['"][^'"]+['"]/.test(content)) {

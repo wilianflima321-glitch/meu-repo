@@ -32,11 +32,11 @@ export interface MobileNavItem {
 }
 
 const DEFAULT_NAV_ITEMS: MobileNavItem[] = [
-  { href: '/dashboard', label: 'Inicio', icon: Home, matchPaths: ['/dashboard'] },
+  { href: '/dashboard', label: 'Home', icon: Home, matchPaths: ['/dashboard'] },
   { href: '/ide', label: 'IDE', icon: Code, matchPaths: ['/ide'] },
-  { href: '/dashboard?tab=ai-chat', label: 'Chat', icon: MessageSquare, matchPaths: [] },
-  { href: '/search', label: 'Busca', icon: Search, matchPaths: ['/search'] },
-  { href: '/settings', label: 'Ajustes', icon: Settings, matchPaths: ['/settings'] },
+  { href: '/dashboard?tab=ai-chat', label: 'AI', icon: MessageSquare, matchPaths: [] },
+  { href: '/search', label: 'Search', icon: Search, matchPaths: ['/search'] },
+  { href: '/settings', label: 'Settings', icon: Settings, matchPaths: ['/settings'] },
 ]
 
 export function MobileBottomNav({
@@ -56,9 +56,11 @@ export function MobileBottomNav({
 
   return (
     <nav
-      className={joinClasses('mobile-bottom-nav')}
+      className={joinClasses(
+        'mobile-bottom-nav fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent)] p-1 shadow-[0_18px_60px_rgba(2,6,23,0.42)] backdrop-blur-xl md:hidden'
+      )}
       role="navigation"
-      aria-label="Navegacao mobile"
+      aria-label="Mobile navigation"
     >
       {items.map((item) => {
         const Icon = item.icon
@@ -67,7 +69,11 @@ export function MobileBottomNav({
           <Link
             key={item.href}
             href={item.href}
-            className={`mobile-bottom-nav-item ${active ? 'active' : ''}`}
+            className={`mobile-bottom-nav-item flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-[18px] px-1 py-1 text-[10px] font-semibold transition ${
+              active
+                ? 'active bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
+                : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] hover:text-[var(--aethel-text-primary)]'
+            }`}
             aria-current={active ? 'page' : undefined}
             aria-label={item.label}
           >

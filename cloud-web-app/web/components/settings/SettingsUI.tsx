@@ -99,6 +99,7 @@ function SettingsUIView({ className }: { className?: string }) {
           <input
             ref={searchInputRef}
             type="text"
+            suppressHydrationWarning
             value={searchQuery}
             onChange={event => setSearchQuery(event.target.value)}
             placeholder="Search settings, descriptions, or categories..."

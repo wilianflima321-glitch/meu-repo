@@ -18,9 +18,9 @@ type FirstValueGuideProps = {
 }
 
 const STARTER_TEMPLATES = [
-  { id: 'saas-starter', label: 'App SaaS', description: 'Auth, billing, dashboard e deploy' },
-  { id: 'research-starter', label: 'Research Flow', description: 'Pesquisa, plano e handoff para o IDE' },
-  { id: 'game-prototype', label: 'Game Prototype', description: 'Loop inicial com preview e logica basica' },
+  { id: 'saas-starter', label: 'SaaS App', description: 'Auth, billing, dashboard, and deploy' },
+  { id: 'research-starter', label: 'Research Flow', description: 'Research, plan, and IDE handoff' },
+  { id: 'game-prototype', label: 'Game Prototype', description: 'Initial loop with preview and basic logic' },
 ]
 
 type PreviewRuntimeReadiness = {
@@ -87,7 +87,7 @@ export function FirstValueGuide({
     if (previewReadiness.strategy === 'managed') {
       return previewReadiness.status === 'ready' ? 'Managed preview available' : 'Managed preview has blockers'
     }
-    if (previewReadiness.strategy === 'local') return 'Preview local detectado'
+    if (previewReadiness.strategy === 'local') return 'Local preview detected'
     return 'Active inline preview fallback'
   }, [previewReadiness])
 
@@ -118,7 +118,7 @@ export function FirstValueGuide({
   const sessionStatusLabel =
     sessionSummary.status === 'completed'
       ? sessionSummary.durationMs !== null && sessionSummary.durationMs <= sessionSummary.targetMs
-        ? 'Meta atingida'
+        ? 'Target reached'
         : 'Completed above target'
       : 'Session in progress'
 
@@ -138,14 +138,14 @@ export function FirstValueGuide({
               />
             </div>
             <p className="mt-1 text-[11px] text-[var(--aethel-text-secondary)]">
-              Progresso: {completedSteps}/{totalSteps} ({Math.round(completionRatio * 100)}%)
-              {estimatedRemainingMinutes > 0 ? ` - ~${estimatedRemainingMinutes} min restantes` : ' - concluido'}
+              Progress: {completedSteps}/{totalSteps} ({Math.round(completionRatio * 100)}%)
+              {estimatedRemainingMinutes > 0 ? ` - ~${estimatedRemainingMinutes} min remaining` : ' - complete'}
             </p>
           </div>
           <ul className="mt-2 space-y-1 text-[11px] text-[var(--aethel-text-secondary)]">
             <li>{firstProjectCreated ? '[OK]' : '[ ]'} First project created ({formatDuration(milestoneDurations.firstProjectCreatedMs)})</li>
-            <li>{firstAiSuccess ? '[OK]' : '[ ]'} Primeira resposta de IA recebida ({formatDuration(milestoneDurations.firstAiSuccessMs)})</li>
-            <li>{firstIdeOpened ? '[OK]' : '[ ]'} Preview da IDE aberto ({formatDuration(milestoneDurations.firstIdeOpenedMs)})</li>
+            <li>{firstAiSuccess ? '[OK]' : '[ ]'} First AI response received ({formatDuration(milestoneDurations.firstAiSuccessMs)})</li>
+            <li>{firstIdeOpened ? '[OK]' : '[ ]'} IDE preview opened ({formatDuration(milestoneDurations.firstIdeOpenedMs)})</li>
           </ul>
 
           <div className="mt-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_40%,transparent)] p-3">
@@ -157,7 +157,7 @@ export function FirstValueGuide({
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               <div className="rounded border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
-                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Inicio</p>
+                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Started</p>
                 <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">
                   {sessionSummary.startedAt ? new Date(sessionSummary.startedAt).toLocaleTimeString() : '--'}
                 </p>
@@ -167,7 +167,7 @@ export function FirstValueGuide({
                 <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">{formatDuration(sessionSummary.durationMs)}</p>
               </div>
               <div className="rounded border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
-                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Meta</p>
+                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Target</p>
                 <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">{formatDuration(sessionSummary.targetMs)}</p>
               </div>
             </div>
@@ -223,7 +223,7 @@ export function FirstValueGuide({
           </div>
 
           <div className="mt-4">
-            <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Starters recomendados</p>
+            <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Recommended starters</p>
             <div className="mt-2 grid gap-2 md:[grid-template-columns:repeat(3,minmax(0,1fr))]">
               {STARTER_TEMPLATES.map((template) => (
                 <button
@@ -254,7 +254,7 @@ export function FirstValueGuide({
             {previewActionLabel}
           </button>
           <button type="button" onClick={onDismiss} className={ghostButtonClass} aria-label="Dismiss first-value guide">
-            Dispensar
+            Dismiss
           </button>
         </div>
       </div>
