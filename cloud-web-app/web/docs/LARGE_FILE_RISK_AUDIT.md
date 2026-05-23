@@ -101,7 +101,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Lines | Category | Risk | Import hints |
 | --- | ---: | --- | --- | ---: |
-| `lib/server/websocket-server.ts` | 1129 | server-runtime | P2 tracked large module | 4 |
+| `lib/server/websocket-server.ts` | 1118 | server-runtime | P2 tracked large module | 4 |
 | `server/workers/build-queue-worker.ts` | 1111 | server-runtime | P2 tracked large module | 0 |
 | `lib/ai-tools-registry.ts` | 1085 | foundation-runtime | P2 tracked large module | 5 |
 | `lib/ai/behavior-tree-system.tsx` | 1085 | creative-runtime | P2 tracked large module | 4 |

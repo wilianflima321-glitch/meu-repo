@@ -14,6 +14,7 @@ import * as Y from 'yjs';
 
 import type { TerminalPtyManager, TerminalSessionConfig } from './terminal-pty-runtime';
 import { eventBus } from './websocket/event-bus';
+import { createClientId, createConnectionId } from './websocket/ids';
 import type { ParsedWebSocketUrl } from './websocket-runtime-codecs';
 import type {
   ConnectionInfo,
@@ -214,7 +215,7 @@ export class AethelWebSocketServer extends EventEmitter {
     }
 
     const info: ConnectionInfo = {
-      id: this.generateConnectionId(),
+      id: createConnectionId(),
       type: resolveConnectionType(pathname),
       path: pathname,
       mode: isModernRuntimePath(pathname) ? 'modern' : 'legacy',
@@ -315,7 +316,7 @@ export class AethelWebSocketServer extends EventEmitter {
     parsedUrl: ParsedWebSocketUrl,
     info: ConnectionInfo
   ): void {
-    const clientId = this.generateClientId();
+    const clientId = createClientId();
     const query = parsedUrl.query;
     const client: WsClient = {
       id: clientId,
@@ -516,7 +517,7 @@ export class AethelWebSocketServer extends EventEmitter {
 
     try {
       const config: TerminalSessionConfig = {
-        id: readString(data.sessionId) || this.generateClientId(),
+        id: readString(data.sessionId) || createClientId(),
         userId,
         name: readString(data.name) || 'Terminal',
         cwd: readString(data.cwd) || process.cwd(),
@@ -1051,10 +1052,6 @@ export class AethelWebSocketServer extends EventEmitter {
     return buildMetricsPayload(this.getPresenceSnapshot());
   }
 
-  // ==========================================================================
-  // Utilities
-  // ==========================================================================
-
   private getRoomContext() {
     return {
       clients: this.clients,
@@ -1071,14 +1068,6 @@ export class AethelWebSocketServer extends EventEmitter {
       channels: this.channels,
       legacyRooms: this.legacyRooms,
     };
-  }
-
-  private generateConnectionId(): string {
-    return `conn_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
-  }
-
-  private generateClientId(): string {
-    return `client_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
   }
 
   getStats(): {

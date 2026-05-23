@@ -11,6 +11,7 @@ const REQUIRED_FILES = [
   'lib/server/websocket/rooms.ts',
   'lib/server/websocket/presence.ts',
   'lib/server/websocket/event-bus.ts',
+  'lib/server/websocket/ids.ts',
 ]
 
 const failures = []
@@ -35,8 +36,9 @@ const auth = sources.get('lib/server/websocket/auth.ts') ?? ''
 const rooms = sources.get('lib/server/websocket/rooms.ts') ?? ''
 const presence = sources.get('lib/server/websocket/presence.ts') ?? ''
 const eventBus = sources.get('lib/server/websocket/event-bus.ts') ?? ''
+const ids = sources.get('lib/server/websocket/ids.ts') ?? ''
 
-if (countLines(server) > 1130) failures.push(`lib/server/websocket-server.ts must stay below 1130 lines after split; got ${countLines(server)}`)
+if (countLines(server) > 1120) failures.push(`lib/server/websocket-server.ts must stay below 1120 lines after split; got ${countLines(server)}`)
 if (/import\s+jwt\s+from\s+['"]jsonwebtoken/.test(server)) failures.push('websocket-server.ts must not own JWT/auth policy')
 if (/function\s+verifyJwtToken|private\s+verifyJwtToken|private\s+handleAuth/.test(server)) failures.push('auth lifecycle must live in websocket/auth.ts')
 if (/function\s+sendRaw\s*\(|private\s+sendRaw\s*\([^)]*\)\s*:\s*void\s*{\s*if\s*\(/s.test(server)) failures.push('raw transport implementation must live in websocket/transport.ts')
@@ -62,6 +64,8 @@ const requiredExports = [
   ['lib/server/websocket/presence.ts', /export\s+function\s+startHeartbeat/, 'startHeartbeat'],
   ['lib/server/websocket/presence.ts', /export\s+function\s+buildMetricsPayload/, 'buildMetricsPayload'],
   ['lib/server/websocket/event-bus.ts', /export\s+const\s+eventBus/, 'eventBus'],
+  ['lib/server/websocket/ids.ts', /export\s+function\s+createConnectionId/, 'createConnectionId'],
+  ['lib/server/websocket/ids.ts', /export\s+function\s+createClientId/, 'createClientId'],
 ]
 for (const [file, pattern, label] of requiredExports) {
   if (!pattern.test(sources.get(file) ?? '')) failures.push(`${file}: missing export ${label}`)
@@ -69,7 +73,7 @@ for (const [file, pattern, label] of requiredExports) {
 
 if (!/jsonwebtoken/.test(auth)) failures.push('websocket/auth.ts must own JWT verification')
 if (/jsonwebtoken/.test(transport) || /jsonwebtoken/.test(rooms) || /jsonwebtoken/.test(presence)) failures.push('JWT dependency leaked outside websocket/auth.ts')
-if (/createServer|WebSocketServer/.test(auth + rooms + presence + transport + eventBus)) failures.push('transport/auth/rooms/presence/event-bus modules must not create the server listener')
+if (/createServer|WebSocketServer/.test(auth + rooms + presence + transport + eventBus + ids)) failures.push('transport/auth/rooms/presence/event-bus/ids modules must not create the server listener')
 if (/JWT_SECRET/.test(server)) failures.push('JWT_SECRET must not be read by websocket-server.ts directly')
 if (/setInterval/.test(server) && !server.includes('startHeartbeat')) failures.push('heartbeat interval must be delegated to websocket/presence.ts')
 
@@ -79,6 +83,7 @@ const maxLines = {
   'lib/server/websocket/rooms.ts': 240,
   'lib/server/websocket/presence.ts': 160,
   'lib/server/websocket/event-bus.ts': 80,
+  'lib/server/websocket/ids.ts': 60,
 }
 for (const [file, max] of Object.entries(maxLines)) {
   const lines = countLines(sources.get(file) ?? '')

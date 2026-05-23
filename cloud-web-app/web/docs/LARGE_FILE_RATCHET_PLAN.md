@@ -4,7 +4,7 @@ Generated: deterministic local scan
 
 - Watch line limit: 800
 - Files above watch limit: 117 / 117
-- Max file lines: 1129 / 1130
+- Max file lines: 1118 / 1120
 - Failures: 0
 
 ## Category Counts
@@ -18,7 +18,7 @@ Generated: deterministic local scan
 
 | File | Lines | Category | Next action |
 | --- | ---: | --- | --- |
-| `lib/server/websocket-server.ts` | 1129 | server | Continue extracting protocol-specific handlers; event bus, transport, auth, rooms, and presence are already split. |
+| `lib/server/websocket-server.ts` | 1118 | server | Continue extracting protocol-specific handlers; event bus, transport, auth, rooms, and presence are already split. |
 | `server/workers/build-queue-worker.ts` | 1111 | other | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai-tools-registry.ts` | 1085 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai/behavior-tree-system.tsx` | 1085 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -52,7 +52,7 @@ Generated: deterministic local scan
 ## Ratchet Policy
 
 - Do not add new files above 800 lines.
-- Do not let any file exceed 1130 lines without an explicit ratchet update.
+- Do not let any file exceed 1120 lines without an explicit ratchet update.
 - Split UI surfaces before adding features.
 - Runtime kernels may stay large only with an owner, adapter strategy, and dedicated gate.
 
