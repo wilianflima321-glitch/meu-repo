@@ -16,98 +16,20 @@ import { loadAgentHandoffContext } from '@/lib/production/agent-handoff-context'
 import { evaluateAgentApplyScope } from '@/lib/production/agent-scope-enforcement';
 import { acquireAgentSurfaceLocks } from '@/lib/production/agent-surface-locks';
 import type { Prisma } from '@prisma/client';
-
-type ToolExecutionContext = {
-  userId: string;
-  projectId?: string;
-  agent?: string;
-  enforceAgentScope?: boolean;
-};
-
-function getContext(params: Record<string, unknown>): ToolExecutionContext {
-  const ctx = params.__aethelContext;
-  if (!ctx || typeof ctx !== 'object') {
-    throw Object.assign(new Error('MISSING_CONTEXT'), { code: 'MISSING_CONTEXT' });
-  }
-  const contextRecord = ctx as Record<string, unknown>;
-  const userId = String(contextRecord.userId || '').trim();
-  const projectId = typeof contextRecord.projectId === 'string' ? contextRecord.projectId.trim() : undefined;
-  const agent = typeof contextRecord.agent === 'string' ? contextRecord.agent.trim() : undefined;
-  const enforceAgentScope = contextRecord.enforceAgentScope === true;
-  if (!userId) {
-    throw Object.assign(new Error('MISSING_USER'), { code: 'MISSING_USER' });
-  }
-  return { userId, projectId, agent, enforceAgentScope };
-}
-
-function getStringParam(params: Record<string, unknown>, key: string, fallback = ''): string {
-  const value = params[key];
-  return typeof value === 'string' ? value : fallback;
-}
-
-function getNumberParam(params: Record<string, unknown>, key: string, fallback: number): number {
-  const value = params[key];
-  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
-}
-
-function getBooleanParam(params: Record<string, unknown>, key: string, fallback = false): boolean {
-  const value = params[key];
-  return typeof value === 'boolean' ? value : fallback;
-}
-
-function normalizePath(path: string): string {
-  const raw = String(path || '').trim();
-  if (!raw) return '/';
-  const p = raw.startsWith('/') ? raw : `/${raw}`;
-  const cleaned = p.replace(/\\/g, '/');
-  // Bloqueia traversal e strings suspeitas
-  if (cleaned.includes('\u0000') || cleaned.split('/').includes('..')) {
-    throw Object.assign(new Error('INVALID_PATH'), { code: 'INVALID_PATH' });
-  }
-  return cleaned;
-}
-
-function inferLanguageFromPath(path: string): string | undefined {
-  const p = String(path || '').toLowerCase();
-  if (p.endsWith('.ts') || p.endsWith('.tsx')) return 'typescript';
-  if (p.endsWith('.js') || p.endsWith('.jsx') || p.endsWith('.mjs') || p.endsWith('.cjs')) return 'javascript';
-  if (p.endsWith('.json')) return 'json';
-  if (p.endsWith('.css')) return 'css';
-  if (p.endsWith('.html')) return 'html';
-  if (p.endsWith('.py')) return 'python';
-  if (p.endsWith('.rs')) return 'rust';
-  if (p.endsWith('.go')) return 'go';
-  if (p.endsWith('.md')) return 'markdown';
-  return undefined;
-}
-
-function clampContent(content: string, maxChars: number): string {
-  const s = String(content ?? '');
-  if (s.length <= maxChars) return s;
-  return s.slice(0, maxChars);
-}
-
-function shouldEnforceAgentScope(params: Record<string, unknown>, context: ToolExecutionContext): boolean {
-  return params.__aethelAgentScope === true || params.enforceAgentScope === true || context.enforceAgentScope === true;
-}
-
-function requestedAgentForTool(params: Record<string, unknown>, context: ToolExecutionContext): string | undefined {
-  if (typeof params.__aethelAgent === 'string' && params.__aethelAgent.trim()) {
-    return params.__aethelAgent.trim();
-  }
-  if (typeof params.agent === 'string' && params.agent.trim()) {
-    return params.agent.trim();
-  }
-  return context.agent;
-}
-
-function pathsForScopedTool(toolName: string, params: Record<string, unknown>): string[] {
-  if (toolName === 'create_file' || toolName === 'edit_file') {
-    const path = getStringParam(params, 'path').trim();
-    return path ? [path] : [];
-  }
-  return [];
-}
+import type { AITool, ToolCategory, ToolResult } from './ai-tools-registry-types';
+import {
+  clampContent,
+  getBooleanParam,
+  getContext,
+  getNumberParam,
+  getStringParam,
+  inferLanguageFromPath,
+  normalizePath,
+  pathsForScopedTool,
+  requestedAgentForTool,
+  shouldEnforceAgentScope,
+} from './ai-tools-registry-utils';
+export type { AITool, Artifact, ToolCategory, ToolParameter, ToolResult } from './ai-tools-registry-types';
 
 async function loadPathModifiedAt(projectId: string, paths: string[]): Promise<Record<string, Date>> {
   const entries = await Promise.all(
@@ -235,53 +157,6 @@ async function audit(userId: string | null, action: string, resource?: string, m
     // audit é best-effort
   }
 }
-
-// ============================================================================
-// TIPOS BASE
-// ============================================================================
-
-export interface AITool {
-  name: string;
-  description: string;
-  category: ToolCategory;
-  parameters: ToolParameter[];
-  returns: string;
-  execute: (params: Record<string, unknown>) => Promise<ToolResult>;
-}
-
-export interface ToolParameter {
-  name: string;
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
-  description: string;
-  required: boolean;
-  default?: unknown;
-  enum?: string[];
-}
-
-export interface ToolResult {
-  success: boolean;
-  data?: unknown;
-  error?: string;
-  artifacts?: Artifact[];
-}
-
-export interface Artifact {
-  type: 'file' | 'image' | 'audio' | 'video' | 'code' | '3d-model';
-  name: string;
-  content: string | Blob;
-  mimeType: string;
-}
-
-export type ToolCategory = 
-  | 'code'      // Edição de código
-  | 'image'     // Manipulação de imagem
-  | 'audio'     // Manipulação de áudio
-  | 'video'     // Manipulação de vídeo
-  | 'game'      // Game engine
-  | 'asset'     // Geração de assets
-  | 'project'   // Gerenciamento de projeto
-  | 'ui'        // Interface do usuário
-  | 'analysis'; // Análise e debug
 
 // ============================================================================
 // REGISTRY DE FERRAMENTAS

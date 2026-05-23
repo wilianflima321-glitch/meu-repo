@@ -1070,26 +1070,17 @@ export class AethelWebSocketServer extends EventEmitter {
     };
   }
 
-  getStats(): {
-    clients: number;
-    channels: number;
-    legacyRooms: number;
-    connections: number;
-    uptime: number;
-  } {
+  getStats() {
+    const { clients, channels, legacyRooms, connections } = this.getPresenceSnapshot();
     return {
-      clients: this.clients.size,
-      channels: this.channels.size,
-      legacyRooms: this.legacyRooms.size,
-      connections: this.connections.size,
+      clients: clients.size,
+      channels: channels.size,
+      legacyRooms: legacyRooms.size,
+      connections: connections.size,
       uptime: process.uptime(),
     };
   }
 }
-
-// ============================================================================
-// Singleton export
-// ============================================================================
 
 let _server: AethelWebSocketServer | null = null;
 

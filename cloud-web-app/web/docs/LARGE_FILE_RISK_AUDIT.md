@@ -6,7 +6,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 34
+- Large source files: 33
 - P0 files: 0
 - P1 low-import large modules: 23
 - P1 modules with explicit triage: 23
@@ -17,7 +17,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Categories
 
-- `foundation-runtime`: 22
+- `foundation-runtime`: 21
 - `creative-runtime`: 9
 - `server-runtime`: 3
 
@@ -101,9 +101,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Lines | Category | Risk | Import hints |
 | --- | ---: | --- | --- | ---: |
-| `lib/server/websocket-server.ts` | 1118 | server-runtime | P2 tracked large module | 4 |
-| `server/workers/build-queue-worker.ts` | 1111 | server-runtime | P2 tracked large module | 0 |
-| `lib/ai-tools-registry.ts` | 1085 | foundation-runtime | P2 tracked large module | 5 |
+| `lib/server/websocket-server.ts` | 1109 | server-runtime | P2 tracked large module | 4 |
 | `lib/ai/behavior-tree-system.tsx` | 1085 | creative-runtime | P2 tracked large module | 4 |
 | `lib/debug/real-debug-adapter.ts` | 1074 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/nanite-virtualized-geometry.ts` | 1067 | foundation-runtime | P1 low-import large module | 0 |
@@ -121,6 +119,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/pbr-shader-pipeline.ts` | 1037 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/ray-tracing.ts` | 1035 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/ai-audio-engine.ts` | 1034 | foundation-runtime | P1 low-import large module | 0 |
+| `server/workers/build-queue-worker.ts` | 1033 | server-runtime | P2 tracked large module | 0 |
 | `lib/events/event-bus-system.tsx` | 1032 | creative-runtime | P1 low-import large module | 0 |
 | `lib/terrain/terrain-system.ts` | 1030 | creative-runtime | P1 low-import large module | 0 |
 | `lib/particles/advanced-particle-system.ts` | 1023 | creative-runtime | P2 tracked large module | 3 |

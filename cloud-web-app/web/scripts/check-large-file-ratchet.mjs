@@ -8,7 +8,7 @@ const IGNORED_PARTS = new Set(['node_modules', '.next', 'coverage', 'dist', 'bui
 
 const WATCH_LINE_LIMIT = 800
 const WATCH_FILE_BUDGET = 117
-const MAX_LINE_BUDGET = 1120
+const MAX_LINE_BUDGET = 1110
 
 function walk(dir, files = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
