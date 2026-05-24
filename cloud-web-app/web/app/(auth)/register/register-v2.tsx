@@ -1,9 +1,9 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import Codicon from '@/components/ide/Codicon'
 import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
 import TurnstileField, { isTurnstileClientConfigured } from '@/components/auth/TurnstileField'
 import { analytics } from '@/lib/analytics'
@@ -26,6 +26,19 @@ const REGISTER_STATS = [
   { value: '1', label: 'guided path' },
   { value: 'Ready', label: 'evidence flow' },
 ]
+
+const REGISTER_OAUTH_PROVIDERS = [
+  { id: 'github' as const, label: 'GitHub', mark: 'GH' },
+  { id: 'google' as const, label: 'Google', mark: 'G' },
+]
+
+function AuthProviderMark({ mark }: { mark: string }) {
+  return (
+    <span className="grid h-6 w-6 place-items-center rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[10px] font-bold tracking-[-0.02em] text-[var(--aethel-text-primary)]">
+      {mark}
+    </span>
+  )
+}
 
 export default function RegisterPageV2() {
   const search = useBrowserSearch()
@@ -95,7 +108,7 @@ export default function RegisterPageV2() {
           <div className="grid w-full gap-5 lg:grid-cols-[460px_minmax(0,1fr)] lg:items-stretch">
             <section className="mx-auto w-full max-w-[460px] rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl sm:p-7 lg:mx-0">
               <div className="mb-7 flex items-center justify-between gap-3">
-                <Link href="/" className="inline-flex items-center gap-2 rounded-full px-1 text-sm text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]"><Codicon name="arrow-left" /> Back</Link>
+                <Link href="/" className="inline-flex items-center gap-2 rounded-full px-1 text-sm text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]"><ArrowLeft className="h-4 w-4" /> Back</Link>
                 <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-primary-light)]">{requestedPlan}</span>
               </div>
 
@@ -115,7 +128,14 @@ export default function RegisterPageV2() {
               </form>
 
               <div className="my-5 flex items-center gap-3"><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /><span className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">or</span><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /></div>
-              <div className="grid gap-2 sm:grid-cols-2"><button type="button" onClick={() => startOAuth('github')} className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"><Codicon name="github" /> GitHub</button><button type="button" onClick={() => startOAuth('google')} className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"><Codicon name="google" /> Google</button></div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {REGISTER_OAUTH_PROVIDERS.map((provider) => (
+                  <button key={provider.id} type="button" onClick={() => startOAuth(provider.id)} className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
+                    <AuthProviderMark mark={provider.mark} />
+                    {provider.label}
+                  </button>
+                ))}
+              </div>
               <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">Already have an account? <Link href="/login" className="font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)]">Sign in</Link></p>
             </section>
 
