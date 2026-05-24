@@ -1,11 +1,4 @@
-/**
- * Particle System REAL - GPU Particles com WebGL
- * 
- * Sistema REAL de partículas usando GPU para milhões de partículas.
- * Suporta emissores, forças, colisões e efeitos visuais.
- * 
- * NÃO É MOCK - Roda de verdade com shaders GPU!
- */
+/** GPU particle runtime for emitters, forces, collisions and shader-driven effects. */
 
 import * as THREE from 'three';
 

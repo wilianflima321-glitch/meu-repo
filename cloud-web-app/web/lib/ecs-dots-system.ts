@@ -19,55 +19,28 @@
 // TYPES
 // ============================================================================
 
-export type Entity = number;
-export type ComponentType = number;
-export type SystemId = number;
-
-export interface ComponentSchema {
-  id: ComponentType;
-  name: string;
-  size: number; // bytes
-  fields: ComponentField[];
-  defaultData?: ArrayBuffer;
-}
-
-export interface ComponentField {
-  name: string;
-  type: 'f32' | 'f64' | 'i32' | 'u32' | 'i8' | 'u8' | 'bool' | 'vec2' | 'vec3' | 'vec4' | 'mat4' | 'entity';
-  offset: number; // byte offset
-  size: number;   // bytes
-}
-
-export interface Archetype {
-  id: number;
-  componentTypes: Set<ComponentType>;
-  componentArrays: Map<ComponentType, ArrayBuffer>;
-  entityIds: Entity[];
-  entityCount: number;
-  capacity: number;
-}
-
-export interface Query {
-  all?: ComponentType[];
-  any?: ComponentType[];
-  none?: ComponentType[];
-}
-
-export interface SystemConfig {
-  id: SystemId;
-  name: string;
-  query: Query;
-  update: (world: World, entities: Entity[], deltaTime: number) => void;
-  priority?: number;
-  enabled?: boolean;
-  runInParallel?: boolean;
-}
-
-export interface WorldConfig {
-  initialCapacity?: number;
-  maxEntities?: number;
-  enableChangeDetection?: boolean;
-}
+import type {
+  Archetype,
+  ComponentField,
+  ComponentSchema,
+  ComponentType,
+  Entity,
+  Query,
+  SystemConfig as BaseSystemConfig,
+  SystemId,
+  WorldConfig,
+} from './ecs-dots-contracts';
+export type {
+  Archetype,
+  ComponentField,
+  ComponentSchema,
+  ComponentType,
+  Entity,
+  Query,
+  SystemId,
+  WorldConfig,
+} from './ecs-dots-contracts';
+export type SystemConfig = BaseSystemConfig<World>;
 
 // ============================================================================
 // COMPONENT REGISTRY
@@ -138,75 +111,6 @@ export class ComponentRegistry {
   
   getAllSchemas(): ComponentSchema[] {
     return Array.from(this.schemas.values());
-  }
-}
-
-// ============================================================================
-// SPARSE SET
-// ============================================================================
-
-/**
- * Sparse Set para mapeamento rápido Entity -> Index
- */
-export class SparseSet {
-  private sparse: Uint32Array;
-  private dense: Uint32Array;
-  private count: number = 0;
-  
-  constructor(maxEntities: number) {
-    this.sparse = new Uint32Array(maxEntities);
-    this.dense = new Uint32Array(maxEntities);
-    this.sparse.fill(0xFFFFFFFF); // Invalid index
-  }
-  
-  add(entity: Entity): number {
-    if (this.has(entity)) {
-      return this.sparse[entity];
-    }
-    
-    const index = this.count++;
-    this.dense[index] = entity;
-    this.sparse[entity] = index;
-    return index;
-  }
-  
-  remove(entity: Entity): boolean {
-    if (!this.has(entity)) return false;
-    
-    const index = this.sparse[entity];
-    const lastIndex = --this.count;
-    
-    // Swap com último
-    if (index !== lastIndex) {
-      const lastEntity = this.dense[lastIndex];
-      this.dense[index] = lastEntity;
-      this.sparse[lastEntity] = index;
-    }
-    
-    this.sparse[entity] = 0xFFFFFFFF;
-    return true;
-  }
-  
-  has(entity: Entity): boolean {
-    return entity < this.sparse.length && this.sparse[entity] !== 0xFFFFFFFF;
-  }
-  
-  getIndex(entity: Entity): number {
-    return this.sparse[entity];
-  }
-  
-  getEntity(index: number): Entity {
-    return this.dense[index];
-  }
-  
-  getCount(): number {
-    return this.count;
-  }
-  
-  *[Symbol.iterator](): Iterator<Entity> {
-    for (let i = 0; i < this.count; i++) {
-      yield this.dense[i];
-    }
   }
 }
 

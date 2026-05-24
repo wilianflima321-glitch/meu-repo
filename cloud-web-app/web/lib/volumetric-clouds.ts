@@ -1,20 +1,4 @@
-/**
- * VOLUMETRIC CLOUDS SYSTEM - Aethel Engine
- * 
- * Sistema de nuvens volumétricas baseado em ray marching.
- * Inspirado em Horizon Zero Dawn / Red Dead Redemption 2.
- * 
- * FEATURES:
- * - Ray marching através de volumes de nuvem
- * - 3D Worley + Perlin noise para forma das nuvens
- * - Weather map para controle de cobertura
- * - Light scattering (Mie + Rayleigh)
- * - God rays
- * - Day/night cycle
- * - Cloud shadows
- * - Wind animation
- * - Multiple cloud layers
- */
+/** Volumetric cloud runtime using ray marching, weather maps, scattering and wind layers. */
 
 import * as THREE from 'three';
 

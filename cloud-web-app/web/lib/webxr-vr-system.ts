@@ -1,24 +1,5 @@
 import { logger } from '@/lib/observability/logger';
-/**
- * WEBXR / VR SYSTEM - Aethel Engine
- * 
- * Sistema completo de realidade virtual e aumentada para web.
- * 
- * FEATURES:
- * - WebXR Device API
- * - Hand tracking
- * - Eye tracking (foveated rendering)
- * - Controller input
- * - Haptic feedback
- * - Spatial anchors
- * - Passthrough AR
- * - Guardian/boundary system
- * - Teleportation locomotion
- * - Smooth locomotion
- * - Snap/smooth turning
- * - Grabbing/interaction
- * - UI panels in VR
- */
+/** WebXR/VR runtime: hands, controllers, anchors, passthrough, locomotion and in-VR UI. */
 import * as THREE from 'three';
 import {
   XR_HAND_JOINTS,

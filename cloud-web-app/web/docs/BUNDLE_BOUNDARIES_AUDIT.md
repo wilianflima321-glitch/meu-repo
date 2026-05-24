@@ -1,7 +1,7 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2048
+- Files scanned: 2060
 - Failures: 0
 
 ## Counts
@@ -172,6 +172,7 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/materials/material-editor-runtime/editor.ts statically imports ./factory -> lib/materials/material-editor-runtime/factory.ts
 - lib/networking/multiplayer-runtime/default-export.ts statically imports ./network-manager -> lib/networking/multiplayer-runtime/network-manager.ts
 - lib/networking/multiplayer-runtime/react.tsx statically imports ./network-manager -> lib/networking/multiplayer-runtime/network-manager.ts
+- lib/pbr-shader-pipeline.ts statically imports ./pbr-shader-sources -> lib/pbr-shader-sources.ts
 - lib/postprocessing/system/default-export.ts statically imports ./bloom-pass -> lib/postprocessing/system/bloom-pass.ts
 - lib/postprocessing/system/default-export.ts statically imports ./chromatic-aberration-pass -> lib/postprocessing/system/chromatic-aberration-pass.ts
 - lib/postprocessing/system/default-export.ts statically imports ./color-grading-pass -> lib/postprocessing/system/color-grading-pass.ts

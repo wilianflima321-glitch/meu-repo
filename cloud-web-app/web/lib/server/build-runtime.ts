@@ -1,19 +1,4 @@
-/**
- * Aethel Build Runtime - Backend Real
- * 
- * Sistema de build real que executa compiladores e bundlers reais.
- * Suporta múltiplas linguagens e ferramentas de build.
- * 
- * Features:
- * - TypeScript/JavaScript (esbuild, tsc, webpack, vite)
- * - Rust (cargo)
- * - Go (go build)
- * - Python (pyinstaller, cx_freeze)
- * - C/C++ (gcc, clang, msvc)
- * - Build progress streaming
- * - Error/warning parsing
- * - Asset processing
- */
+/** Real build runtime for compiler execution, progress streaming and parsed diagnostics. */
 
 import { spawn, exec, ChildProcess } from 'child_process';
 import { promisify } from 'util';
