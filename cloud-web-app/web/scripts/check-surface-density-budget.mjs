@@ -29,6 +29,13 @@ const CHECKS = [
     required: ['Research runboard', 'Review-first research package', 'Open in IDE', 'Copy prompt'],
     maxCards: 22,
   },
+  {
+    id: 'studio-mobile-nav-compression',
+    file: 'components/studio/StudioGlobalNav.tsx',
+    required: ['hidden flex-wrap items-center gap-2 md:flex', 'hidden overflow-x-auto pb-1 md:block', 'Studio primary navigation'],
+    forbidden: ['Navegacao'],
+    maxCards: 10,
+  },
 ]
 
 const failures = []
@@ -41,6 +48,8 @@ for (const check of CHECKS) {
   const content = fs.readFileSync(abs, 'utf8')
   const missing = check.required.filter((token) => !content.includes(token))
   if (missing.length > 0) failures.push(`${check.id}: missing ${missing.join(', ')}`)
+  const forbidden = (check.forbidden ?? []).filter((token) => content.includes(token))
+  if (forbidden.length > 0) failures.push(`${check.id}: forbidden ${forbidden.join(', ')}`)
   const cardCount = (content.match(/rounded-\[|rounded-xl|rounded-2xl|rounded-\(?/g) ?? []).length
   if (cardCount > check.maxCards) failures.push(`${check.id}: visual-card markers ${cardCount} > ${check.maxCards}`)
 }
