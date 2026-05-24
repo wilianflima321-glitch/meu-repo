@@ -3,10 +3,9 @@
 import useSWR from 'swr'
 
 import {
-  AdminOperatingSpine,
+  AdminCoverageDisclosure,
   AdminRecentUsersTable,
   AdminSectionGrid,
-  AdminStatsGrid,
   type AdminUserRow,
 } from '@/components/admin/AdminCommandCenterSections'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
@@ -54,16 +53,15 @@ export default function Admin() {
           <button
             type="button"
             onClick={() => mutate()}
-            className="rounded-full bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.18)]"
+            className="rounded-full bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] transition hover:bg-[var(--aethel-text-secondary)]"
           >
             Refresh
           </button>
         )}
         density="compact"
       >
-        <AdminStatsGrid users={users} />
-        <AdminOperatingSpine coverage={coverage} />
         <AdminSectionGrid coverage={coverage} />
+        <AdminCoverageDisclosure users={users} coverage={coverage} />
         <AdminRecentUsersTable users={users} isLoading={isLoading} errorMessage={error?.message} />
       </SurfaceQualityShell>
     </div>

@@ -45,6 +45,18 @@ const riskTone: Record<AdminRouteRiskLane, string> = {
   critical: 'border-[color-mix(in_srgb,var(--aethel-error)_34%,transparent)] text-[var(--aethel-error-light)]',
 }
 
+const healthTone: Record<AdminConsolidatedSection['evidenceStatus'], string> = {
+  live: 'border-[color-mix(in_srgb,var(--aethel-success)_26%,transparent)] text-[var(--aethel-success-light)]',
+  review: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] text-[var(--aethel-warning-light)]',
+  'legacy-compatible': 'border-[var(--aethel-border-subtle)] text-[var(--aethel-text-tertiary)]',
+}
+
+function healthLabel(status: AdminConsolidatedSection['evidenceStatus']) {
+  if (status === 'live') return 'Healthy'
+  if (status === 'review') return 'Review'
+  return 'Compatible'
+}
+
 export function AdminStatsGrid({
   users,
 }: {
@@ -98,43 +110,48 @@ export function AdminOperatingSpine({ coverage }: { coverage: AdminCoverageSumma
 
 export function AdminSectionGrid({ coverage }: { coverage: AdminCoverageSummary }) {
   return (
-    <section className="mb-8 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+    <section className="mb-6 rounded-[26px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] p-4 shadow-[0_20px_70px_rgba(0,0,0,0.24)]" data-admin-operator-board="linear-density">
       <div className="mb-4 flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Admin consolidation / Operations board</p>
-          <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Operator-first areas</h2>
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--aethel-text-primary)]">Operator-first areas</h2>
         </div>
         <p className="text-xs text-[var(--aethel-text-tertiary)]">
           {coverage.legacyCompatibleRoutes} legacy routes remain compatible
         </p>
       </div>
       <div className="overflow-hidden rounded-2xl border border-[var(--aethel-border-subtle)]">
-        <div className="grid grid-cols-[1fr_92px_96px_1.25fr] gap-3 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_62%,transparent)] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+        <div className="grid grid-cols-[minmax(180px,1.25fr)_94px_94px_minmax(120px,0.9fr)_minmax(170px,1fr)] gap-3 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_62%,transparent)] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
           <span>Area</span>
+          <span>Health</span>
           <span>Risk</span>
-          <span>Routes</span>
+          <span>Owner</span>
           <span>Next action</span>
         </div>
         {ADMIN_CONSOLIDATED_SECTIONS.map((section) => (
-          <div key={section.id} className="grid grid-cols-[1fr_92px_96px_1.25fr] gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3 last:border-b-0">
+          <div key={section.id} className="grid grid-cols-[minmax(180px,1.25fr)_94px_94px_minmax(120px,0.9fr)_minmax(170px,1fr)] gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3 last:border-b-0">
             <div>
               <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{section.label}</p>
-              <p className="mt-1 line-clamp-1 text-xs text-[var(--aethel-text-secondary)]">{section.owner}</p>
+              <p className="mt-1 line-clamp-1 text-xs text-[var(--aethel-text-secondary)]">{section.operatorQuestion}</p>
             </div>
+            <span className={`h-fit rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] ${healthTone[section.evidenceStatus]}`}>
+              {healthLabel(section.evidenceStatus)}
+            </span>
             <span className={`h-fit rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] ${riskTone[section.riskLane]}`}>
               {section.riskLane}
             </span>
-            <span className="text-sm text-[var(--aethel-text-secondary)]">{section.routes.length}</span>
-            <div className="flex min-w-0 flex-wrap gap-2">
-              {section.primaryLinks.slice(0, 3).map((link) => (
+            <span className="truncate text-xs text-[var(--aethel-text-secondary)]">{section.owner}</span>
+            <div className="flex min-w-0 items-center gap-2">
+              {section.primaryLinks.slice(0, 1).map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
+                  className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-3 py-1 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
                 >
                   {link.label}
                 </Link>
               ))}
+              <span className="text-[11px] text-[var(--aethel-text-tertiary)]">{section.routes.length} routes</span>
             </div>
           </div>
         ))}
@@ -150,6 +167,20 @@ export function AdminSectionGrid({ coverage }: { coverage: AdminCoverageSummary 
         </div>
       </details>
     </section>
+  )
+}
+
+export function AdminCoverageDisclosure({ users, coverage }: { users: AdminUserRow[]; coverage: AdminCoverageSummary }) {
+  return (
+    <details className="mb-6 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-3" data-admin-coverage-disclosure>
+      <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
+        Coverage and user snapshot
+      </summary>
+      <div className="mt-4">
+        <AdminStatsGrid users={users} />
+        <AdminOperatingSpine coverage={coverage} />
+      </div>
+    </details>
   )
 }
 
