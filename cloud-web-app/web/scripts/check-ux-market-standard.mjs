@@ -19,6 +19,16 @@ const MARKET_REFERENCES = [
     source: 'https://docs.cursor.com/en/background-agents',
   },
   {
+    product: 'OpenAI Realtime API',
+    standard: 'Browser voice agents need WebRTC/session state, ephemeral credentials, safety identifiers, tool events, and an obvious interrupt path.',
+    source: 'https://platform.openai.com/docs/guides/realtime-webrtc',
+  },
+  {
+    product: 'Gemini Live API',
+    standard: 'Live AI interaction needs low-latency audio/video/text, barge-in, tool use, transcripts, and explicit preview/GA capability state.',
+    source: 'https://ai.google.dev/gemini-api/docs/live-api/capabilities',
+  },
+  {
     product: 'v0 Platform API',
     standard: 'Prompt-to-product should expose clean chat, workflows, project management, deployment, and agent APIs without forcing users through an internal cockpit.',
     source: 'https://v0.app/docs/api/platform/overview',
@@ -193,6 +203,13 @@ const SUBAREA_MATRIX = [
     comparator: 'Cursor Background Agents',
     critique: 'Agent power is only premium if scope locks, cost, replay, handoff, and takeover are always close to the composer.',
     decision: 'visible governance',
+  },
+  {
+    area: 'AI conversation and live mode',
+    surface: '/ide AI Copilot',
+    comparator: 'OpenAI Realtime + Gemini Live + Cursor/Codex',
+    critique: 'Voice/live cannot be a mystery icon; the UI must expose model lane, native-audio readiness, barge-in, transcript, and tool-use state compactly.',
+    decision: 'conversation readiness chips',
   },
   {
     area: 'Studio primary navigation',
@@ -399,6 +416,67 @@ const CHECKS = [
       ]
       return required.filter((token) => !content.includes(token)).length
     },
+    limit: 0,
+  },
+  {
+    id: 'ai-conversation-live-readiness',
+    description: 'AI Copilot must expose a compact conversation lane for native audio readiness, barge-in, transcript, and governed tool use.',
+    files: ['components/ai-chat/AIChatHeader.tsx'],
+    test: (content) => {
+      const required = ['Conversation lane', 'Tool use governed', 'Native audio held', 'Barge-in via Stop', 'Transcript via mic fallback']
+      return required.filter((token) => !content.includes(token)).length
+    },
+    limit: 0,
+  },
+  {
+    id: 'ai-session-intent-compression',
+    description: 'Session handoff shortcuts should stay compact like premium copilot chips, not three explanatory cards.',
+    files: ['components/ai-chat/AIChatSessionBanner.tsx'],
+    test: (content) => {
+      const required = ['Quick intents', 'title={intent.description}', 'rounded-full']
+      return required.filter((token) => !content.includes(token)).length
+    },
+    limit: 0,
+  },
+  {
+    id: 'ide-visible-language-drift',
+    description: 'Cookie consent, onboarding, command chrome, and viewport controls must not leak Portuguese into screenshots of the authenticated IDE.',
+    files: [
+      'components/ui/CookieConsent.tsx',
+      'components/Onboarding.tsx',
+      'components/ide/fullscreen/WorkbenchEditorToolbar.tsx',
+      'components/ide/modern-shell/chromeHeaderParts.tsx',
+      'components/ide/PreviewViewport3D.tsx',
+    ],
+    test: (content) =>
+      (
+        content.match(
+          /\b(Usamos|Apenas|Aceitar|Saiba|Primeiros|concluidos|Reverificar|Parcial|Viewport compacto|Substituir|Diagnosticos|Executar|IA Render|experiencia|Alternar|Pergunte|Selecionado|Pausar|Reproduzir|Tela cheia|Opcionais|Conquistas|Pular|Comecar|Proximo|Desconhecido|Faltam|Status geral|Ferramentas|Empilhar|Dividir)\b/gi,
+        ) ?? []
+      ).length,
+    limit: 0,
+  },
+  {
+    id: 'ai-copilot-language-drift',
+    description: 'IDE chat, live mode, history, tool calls, and context panels must not mix Portuguese fallback copy into the premium AI cockpit.',
+    files: [
+      'components/ai-chat/AIChatComposer.tsx',
+      'components/ai-chat/AIChatHeader.tsx',
+      'components/ai-chat/AIChatMessagesPane.tsx',
+      'components/ai-chat/AIChatSessionBanner.tsx',
+      'components/ai-chat/MessageBubbleActionBar.tsx',
+      'components/ide/AIChatContextPanels.tsx',
+      'components/ide/AIChatPanelChrome.tsx',
+      'components/ide/AIAgentsPanelPro.tsx',
+      'components/ide/CommandPalette.tsx',
+      'components/ide/IDELayout.tsx',
+    ],
+    test: (content) =>
+      (
+        content.match(
+          /\b(Analisando|correspondencia|semantica|relevancia|resposta|anexo|Novo|Arquivar|Ouvindo|Pensando|Falando|Encerrar|Processo|passos|Concluida|Falhou|andamento|Objetivo|Etapas|Execucao|Executar|Parar|Reiniciar|Compilar|Depurar|Publicar|Preferencias|Paleta|Ajustes|Explorador|Busca|Extensoes|Saida|Problemas|Alternar|Pesquisa|Copiloto|Sincronizado)\b/gi,
+        ) ?? []
+      ).length,
     limit: 0,
   },
   {

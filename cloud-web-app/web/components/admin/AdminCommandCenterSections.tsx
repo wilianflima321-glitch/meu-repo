@@ -29,6 +29,15 @@ const planLabels: Record<string, string> = {
   free: 'Free',
 }
 
+
+function maskAdminEmail(email: string) {
+  const [local = 'user', domain = 'example.com'] = email.split('@')
+  const safeLocal = local.length <= 2 ? `${local[0] ?? 'u'}***` : `${local.slice(0, 2)}***${local.slice(-1)}`
+  const [domainName = 'example', ...suffix] = domain.split('.')
+  const safeDomain = `${domainName.slice(0, 1)}***${suffix.length ? `.${suffix.join('.')}` : '.local'}`
+  return `${safeLocal}@${safeDomain}`
+}
+
 const riskTone: Record<AdminRouteRiskLane, string> = {
   low: 'border-[color-mix(in_srgb,var(--aethel-success)_24%,transparent)] text-[var(--aethel-success-light)]',
   medium: 'border-[color-mix(in_srgb,var(--aethel-info)_26%,transparent)] text-[var(--aethel-info-light)]',
@@ -92,18 +101,54 @@ export function AdminSectionGrid({ coverage }: { coverage: AdminCoverageSummary 
     <section className="mb-8 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
       <div className="mb-4 flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Admin consolidation</p>
+          <p className="text-xs uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Admin consolidation / Operations board</p>
           <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Operator-first areas</h2>
         </div>
         <p className="text-xs text-[var(--aethel-text-tertiary)]">
           {coverage.legacyCompatibleRoutes} legacy routes remain compatible
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="overflow-hidden rounded-2xl border border-[var(--aethel-border-subtle)]">
+        <div className="grid grid-cols-[1fr_92px_96px_1.25fr] gap-3 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_62%,transparent)] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+          <span>Area</span>
+          <span>Risk</span>
+          <span>Routes</span>
+          <span>Next action</span>
+        </div>
         {ADMIN_CONSOLIDATED_SECTIONS.map((section) => (
-          <AdminSectionCard key={section.id} section={section} />
+          <div key={section.id} className="grid grid-cols-[1fr_92px_96px_1.25fr] gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3 last:border-b-0">
+            <div>
+              <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{section.label}</p>
+              <p className="mt-1 line-clamp-1 text-xs text-[var(--aethel-text-secondary)]">{section.owner}</p>
+            </div>
+            <span className={`h-fit rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] ${riskTone[section.riskLane]}`}>
+              {section.riskLane}
+            </span>
+            <span className="text-sm text-[var(--aethel-text-secondary)]">{section.routes.length}</span>
+            <div className="flex min-w-0 flex-wrap gap-2">
+              {section.primaryLinks.slice(0, 3).map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
+      <details className="mt-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_38%,transparent)] p-3">
+        <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
+          Open compatibility route cards
+        </summary>
+        <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {ADMIN_CONSOLIDATED_SECTIONS.map((section) => (
+            <AdminSectionCard key={section.id} section={section} />
+          ))}
+        </div>
+      </details>
     </section>
   )
 }
@@ -121,7 +166,7 @@ export function AdminRecentUsersTable({
     <div className="mb-8 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-subtle)] px-4 py-3">
         <h2 className="text-lg font-semibold">Recent users</h2>
-        <p className="text-xs text-[var(--aethel-text-tertiary)]">Source: /admin/users</p>
+        <p className="text-xs text-[var(--aethel-text-tertiary)]">Source: /admin/users - screenshot safe</p>
       </div>
 
       {isLoading ? (
@@ -146,7 +191,7 @@ export function AdminRecentUsersTable({
               {users.map((user) => (
                 <tr key={user.id} className="border-b border-[var(--aethel-border-subtle)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]">
                   <td className="p-2 font-medium">{user.name || 'Unnamed'}</td>
-                  <td className="p-2 text-[var(--aethel-text-secondary)]">{user.email}</td>
+                  <td className="p-2 text-[var(--aethel-text-secondary)]" data-privacy="masked">{maskAdminEmail(user.email)}</td>
                   <td className="p-2">
                     <span className={`rounded-full px-2.5 py-1 text-xs ${
                       user.plan === 'enterprise'

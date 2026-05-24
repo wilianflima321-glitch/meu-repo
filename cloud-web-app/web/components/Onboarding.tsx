@@ -204,28 +204,28 @@ export function WelcomeModal({ mission }: { mission?: string }) {
   // Mission-first onboarding steps
   const welcomeSteps = mission ? [
     {
-      title: `Vamos criar: ${mission}`,
+      title: `Let us build: ${mission}`,
       description: 'Your workspace was configured automatically. Now let us configure the specific details of your project.',
       icon: <Sparkles className="w-12 h-12 text-[var(--aethel-primary-light)]" />,
     },
     {
-      title: 'Configure sua IA',
+      title: 'Connect your AI',
       description: 'Choose your AI provider to start building with integrated artificial intelligence.',
       icon: <Target className="w-12 h-12 text-[var(--aethel-info-light)]" />,
     },
     {
-      title: 'Explore o IDE',
+      title: 'Explore the IDE',
       description: 'Meet the editor, preview, and AI console. Everything is connected for fast development.',
       icon: <Layout className="w-12 h-12 text-[var(--aethel-success-light)]" />,
     },
     {
-      title: 'Comece a desenvolver',
+      title: 'Start building',
       description: 'Your project is ready. Use the AI console to generate code and view the preview in real time.',
       icon: <Rocket className="w-12 h-12 text-[var(--aethel-warning-light)]" />,
     },
   ] : [
     {
-      title: 'Welcome ao Aethel Engine',
+      title: 'Welcome to Aethel Engine',
       description: 'Studio focused on apps and research with rigorous governance. Games and films remain on the roadmap.',
       icon: <Sparkles className="w-12 h-12 text-[var(--aethel-primary-light)]" />,
     },
@@ -235,13 +235,13 @@ export function WelcomeModal({ mission }: { mission?: string }) {
       icon: <Rocket className="w-12 h-12 text-[var(--aethel-info-light)]" />,
     },
     {
-      title: 'Conecte sua IA',
+      title: 'Connect your AI',
       description: 'Configure your provider for real, traceable responses. Nothing is simulated.',
       icon: <Target className="w-12 h-12 text-[var(--aethel-success-light)]" />,
     },
     {
-      title: 'Colabore com sua equipe',
-      description: 'Convide colegas, revise changes e mantenha rastreabilidade nas entregas.',
+      title: 'Collaborate with your team',
+      description: 'Invite teammates, review changes, and keep delivery evidence traceable.',
       icon: <Users className="w-12 h-12 text-[var(--aethel-warning-light)]" />,
     },
   ];
@@ -301,16 +301,16 @@ export function WelcomeModal({ mission }: { mission?: string }) {
             <button type="button"
               onClick={skipOnboarding}
               className={onboardingSecondaryButtonClass}
-              aria-label="Pular onboarding inicial"
+              aria-label="Skip initial onboarding"
             >
-              Pular
+              Skip
             </button>
             <button type="button"
               onClick={handleNext}
               className={onboardingPrimaryButtonClass}
               aria-label={isLastStep ? 'Complete onboarding and start' : 'Go to the next onboarding step'}
             >
-              {isLastStep ? 'Comecar' : 'Proximo'}
+              {isLastStep ? 'Start' : 'Next'}
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -328,50 +328,50 @@ const CHECKLIST_ITEMS: OnboardingStep[] = [
   {
     id: 'dependency_check',
     title: 'Check runtime and integrations',
-    description: 'Preview, storage, billing e provedores de IA',
+    description: 'Preview, storage, billing, and AI providers',
     completed: false,
   },
   {
     id: 'profile_setup',
-    title: 'Ajuste seu perfil',
+    title: 'Tune your profile',
     description: 'Name, team, and studio preferences',
     completed: false,
   },
   {
     id: 'first_project',
     title: 'Create your first project',
-    description: 'Use um template base para acelerar o fluxo',
+    description: 'Use a base template to accelerate the flow',
     completed: false,
   },
   {
     id: 'explore_editor',
-    title: 'Explore o editor',
+    title: 'Explore the editor',
     description: 'Meet the IDE, preview, and status panel',
     completed: false,
   },
   {
     id: 'try_ai',
-    title: 'Use a IA',
+    title: 'Use AI',
     description: 'Request a small change and validate the result',
     completed: false,
   },
   {
     id: 'invite_team',
-    title: 'Convide sua equipe',
-    description: 'Compartilhe o workspace com o time',
+    title: 'Invite your team',
+    description: 'Share the workspace with your team',
     completed: false,
   },
   {
     id: 'publish_first',
-    title: 'Finalize uma entrega',
-    description: 'Export ou preparar deploy para validar o ciclo',
+    title: 'Finish a delivery',
+    description: 'Export or prepare a deploy to validate the loop',
     completed: false,
   },
 ];
 
 export function OnboardingChecklist() {
   const { state, completeStep } = useOnboarding();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [health, setHealth] = useState<SystemHealthReport | null>(null);
   const [healthLoading, setHealthLoading] = useState(false);
   const [healthError, setHealthError] = useState<string | null>(null);
@@ -412,7 +412,7 @@ export function OnboardingChecklist() {
     const ok = health.dependencies?.filter(dep => dep.status === 'healthy').length || 0;
     const requiredMissing = health.missingRequired?.length || 0;
     if (requiredMissing > 0) {
-      return `Faltam ${requiredMissing} critical dependencies`;
+      return `${requiredMissing} critical dependencies missing`;
     }
     return `${ok}/${total} dependencies ok`;
   })();
@@ -439,11 +439,11 @@ export function OnboardingChecklist() {
       case 'healthy':
         return 'Healthy';
       case 'degraded':
-        return 'Parcial';
+        return 'Partial';
       case 'unhealthy':
-        return 'Inavailable';
+        return 'Unavailable';
       default:
-        return 'Desconhecido';
+        return 'Unknown';
     }
   };
 
@@ -454,10 +454,10 @@ export function OnboardingChecklist() {
           {/* Header */}
           <div className="p-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold text-[var(--aethel-text-primary)]">Primeiros passos</h3>
+              <h3 className="font-semibold text-[var(--aethel-text-primary)]">First steps</h3>
               <button type="button"
                 onClick={() => setIsOpen(false)}
-                aria-label="Fechar onboarding"
+                aria-label="Close onboarding"
                 className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
               >
                 <X className="w-4 h-4" />
@@ -471,7 +471,7 @@ export function OnboardingChecklist() {
               />
             </div>
             <div className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
-              {completedCount} de {items.length} concluidos
+              {completedCount} of {items.length} complete
             </div>
           </div>
 
@@ -484,7 +484,7 @@ export function OnboardingChecklist() {
                   onClick={fetchHealth}
                   className="text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)] transition-colors"
                 >
-                  {healthLoading ? 'Checking...' : 'Reverificar'}
+                  {healthLoading ? 'Checking...' : 'Recheck'}
                 </button>
               </div>
               {healthError && (
@@ -495,7 +495,7 @@ export function OnboardingChecklist() {
               {health && (
                 <div className="mt-2 space-y-1 text-xs text-[var(--aethel-text-secondary)]">
                   <div className="flex items-center justify-between">
-                    <span>Status geral</span>
+                    <span>Overall status</span>
                     <span className={
                       health.overall === 'healthy'
                         ? 'text-[var(--aethel-success-light)]'
@@ -513,7 +513,7 @@ export function OnboardingChecklist() {
                   )}
                   {health.missingOptional && health.missingOptional.length > 0 && (
                     <div className="text-[var(--aethel-text-tertiary)]">
-                      Opcionais: {health.missingOptional.join(', ')}
+                      Optional: {health.missingOptional.join(', ')}
                     </div>
                   )}
                   {health.dependencies && health.dependencies.length > 0 && (
@@ -575,7 +575,7 @@ export function OnboardingChecklist() {
         <button type="button"
           onClick={() => setIsOpen(true)}
           className={onboardingPrimaryButtonClass.replace('px-6 py-2 text-sm', 'px-4 py-2 text-xs')}
-          aria-label="Abrir checklist de onboarding"
+          aria-label="Open onboarding checklist"
         >
           <Target className="w-4 h-4" />
           {completedCount}/{items.length}
@@ -591,10 +591,10 @@ export function OnboardingChecklist() {
 
 const ACHIEVEMENTS: Achievement[] = [
   { id: 'first_project', name: 'First project', description: 'Created the first project', icon: 'P1', category: 'beginner' },
-  { id: 'ai_master', name: 'Fluxo de IA', description: 'Executou 10 changes com IA', icon: 'AI', category: 'ai' },
+  { id: 'ai_master', name: 'AI flow', description: 'Ran 10 AI changes', icon: 'AI', category: 'ai' },
   { id: 'collaborator', name: 'Collaboration', description: 'Invited a teammate', icon: 'TEAM', category: 'social' },
   { id: 'publisher', name: 'Delivery ready', description: 'Generated a valid delivery', icon: 'DEP', category: 'delivery' },
-  { id: 'week_streak', name: 'Ritmo semanal', description: 'Active por 7 days', icon: '7D', category: 'engagement' },
+  { id: 'week_streak', name: 'Weekly rhythm', description: 'Active for 7 days', icon: '7D', category: 'engagement' },
 ];
 
 export function AchievementBadge({ achievement }: { achievement: Achievement }) {
@@ -620,11 +620,11 @@ export function AchievementToast({ achievement, onClose }: { achievement: Achiev
       <div className="flex items-center gap-4 p-4 bg-[linear-gradient(90deg,color-mix(in_srgb,var(--aethel-warning)_18%,transparent),color-mix(in_srgb,var(--aethel-warning-dark)_22%,transparent))] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] rounded-lg shadow-2xl">
         <Award className="w-8 h-8 text-[var(--aethel-warning-light)]" />
         <div>
-          <div className="text-xs text-[var(--aethel-warning-light)] font-medium">Conquista desbloqueada</div>
+          <div className="text-xs text-[var(--aethel-warning-light)] font-medium">Achievement unlocked</div>
           <div className="text-[var(--aethel-text-primary)] font-semibold">{achievement.name}</div>
           <div className="text-sm text-[var(--aethel-text-secondary)]">{achievement.description}</div>
         </div>
-        <button type="button" onClick={onClose} aria-label="Fechar tour de onboarding" className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
+        <button type="button" onClick={onClose} aria-label="Close onboarding tour" className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -647,7 +647,7 @@ export function AchievementsPanel() {
     <div className="p-4">
       <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
         <Award className="w-5 h-5 text-[var(--aethel-warning-light)]" />
-        Conquistas
+        Achievements
       </h2>
 
       <div className="grid gap-3">

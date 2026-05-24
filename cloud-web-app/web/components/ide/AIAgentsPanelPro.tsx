@@ -303,7 +303,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
               <button type="button" aria-label={`Stop agent ${agent.name}`}
                 onClick={(e) => { e.stopPropagation(); onStop() }}
                 className="p-1.5 rounded bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)]"
-                title="Parar agente"
+                title="Stop agent"
               >
                 <Square className="w-3 h-3" />
               </button>
@@ -321,7 +321,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
               <button type="button" aria-label={`Stop agent ${agent.name}`}
                 onClick={(e) => { e.stopPropagation(); onStop() }}
                 className="p-1.5 rounded bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)]"
-                title="Parar agente"
+                title="Stop agent"
               >
                 <Square className="w-3 h-3" />
               </button>
@@ -401,7 +401,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
             <div className="grid grid-cols-2 gap-2">
               <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded text-center">
                 <div className="text-lg font-semibold text-[var(--aethel-text-primary)]">{agent.metrics.tasksCompleted}</div>
-                <div className="text-xs text-[var(--aethel-text-tertiary)]">Tarefas concluidas</div>
+                <div className="text-xs text-[var(--aethel-text-tertiary)]">Completed tasks</div>
               </div>
               <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded text-center">
                 <div className="text-lg font-semibold text-[var(--aethel-success)]">{agent.metrics.successRate}%</div>
@@ -464,10 +464,10 @@ function TaskTimeline({ tasks }: TaskTimelineProps) {
             </div>
             <div className="text-xs text-[var(--aethel-text-tertiary)] mt-0.5">
               {task.completedAt
-                ? `Concluida em ${formatDuration(task.completedAt.getTime() - (task.startedAt?.getTime() || 0))}`
+                ? `Completed in ${formatDuration(task.completedAt.getTime() - (task.startedAt?.getTime() || 0))}`
                 : task.startedAt
-                  ? 'Em andamento...'
-                  : 'Pendente'
+                  ? 'Running...'
+                  : 'Pending'
               }
             </div>
             {task.error && (
@@ -516,7 +516,7 @@ function WorkflowBuilder({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">Objetivo</label>
+        <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">Objective</label>
         <textarea
           value={objective}
           onChange={(e) => setObjective(e.target.value)}
@@ -528,19 +528,19 @@ function WorkflowBuilder({
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-[var(--aethel-text-tertiary)]">Etapas do workflow</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Workflow steps</span>
           <button type="button" aria-label="Add workflow step"
             onClick={addStep}
             className="flex items-center gap-1 px-2 py-1 text-xs bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded"
           >
             <Plus className="w-3 h-3" />
-            Add etapa
+            Add step
           </button>
         </div>
 
         {steps.length === 0 ? (
           <div className="p-4 text-center text-[var(--aethel-text-tertiary)] text-sm border border-dashed border-[var(--aethel-border-secondary)] rounded">
-            Adicione etapas para montar o workflow
+            Add steps to assemble the workflow
           </div>
         ) : (
           <div className="space-y-2">
@@ -673,7 +673,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       .map((step, index) => `${index + 1}. ${step.agent.name}: ${step.prompt}`)
       .join('\n')
     onSendToChat?.(
-      `Workflow solicitado (${steps.length} etapas).\n${workflowSummary}\n\nStatus: WORKFLOW_EXECUTION_GATED (P1).`
+      `Workflow requested (${steps.length} steps).\n${workflowSummary}\n\nStatus: WORKFLOW_EXECUTION_GATED (P1).`
     )
   }, [onSendToChat])
 
@@ -706,7 +706,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
             <button type="button" aria-label="Stop all agents"
               onClick={stopAllAgents}
               className="p-1.5 rounded bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)]"
-              title="Parar todos"
+              title="Stop all"
             >
               <Square className="w-4 h-4" />
             </button>
@@ -773,7 +773,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       <div className="p-3 border-t border-[var(--aethel-border-primary)]">
         <div className="grid grid-cols-2 gap-2">
           <button type="button" aria-label="Send agents prompt to chat"
-            onClick={() => onSendToChat?.('Create uma nova feature usando agentes de IA')}
+            onClick={() => onSendToChat?.('Create a new feature with governed AI agents')}
             className="flex items-center justify-center gap-2 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm text-[var(--aethel-text-secondary)]"
           >
             <MessageSquare className="w-4 h-4" />

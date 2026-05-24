@@ -242,23 +242,23 @@ export function PreviewViewport3D({ content: _content = '', mode: _mode = '3d', 
           <button
             type="button"
             onClick={() => setIsPlaying(!isPlaying)}
-            aria-label={isPlaying ? 'Pausar viewport 3D' : 'Reproduzir viewport 3D'}
+            aria-label={isPlaying ? 'Pause 3D viewport' : 'Play 3D viewport'}
             className={`rounded-lg p-2 ${CANONICAL_FOCUS} ${CANONICAL_MOTION} ${
               isPlaying
                 ? 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
                 : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
             }`}
-            title={isPlaying ? 'Pausar' : 'Reproduzir'}
+            title={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
 
           <div className="h-6 w-px bg-[var(--aethel-border-primary)]" />
 
-          <button type="button" onClick={() => setCameraMode('orbit')} aria-label="Usar camera orbit" className={cameraMode === 'orbit' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Camera Orbit">
+          <button type="button" onClick={() => setCameraMode('orbit')} aria-label="Use orbit camera" className={cameraMode === 'orbit' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Camera Orbit">
             <Camera className="h-4 w-4" />
           </button>
-          <button type="button" onClick={() => setCameraMode('fly')} aria-label="Usar camera fly" className={cameraMode === 'fly' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Camera Fly">
+          <button type="button" onClick={() => setCameraMode('fly')} aria-label="Use fly camera" className={cameraMode === 'fly' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Camera Fly">
             <Box className="h-4 w-4" />
           </button>
 
@@ -285,11 +285,11 @@ export function PreviewViewport3D({ content: _content = '', mode: _mode = '3d', 
         </div>
 
         <div className="flex items-center gap-2">
-          <button type="button" onClick={simulateAIThinking} aria-label="Executar passe generactive de IA no viewport" className={TOOLBAR_PILL_CLASS}>
+          <button type="button" onClick={simulateAIThinking} aria-label="Run AI render pass in the viewport" className={TOOLBAR_PILL_CLASS}>
             <Sparkles className="h-4 w-4" />
-            IA Render
+            AI Render
           </button>
-          <button type="button" onClick={() => setIsFullscreen(!isFullscreen)} aria-label={isFullscreen ? 'Sign out do modo tela cheia do viewport' : 'Sign in no modo tela cheia do viewport'} className={ICON_BUTTON_CLASS} title="Tela cheia">
+          <button type="button" onClick={() => setIsFullscreen(!isFullscreen)} aria-label={isFullscreen ? 'Exit viewport fullscreen mode' : 'Enter viewport fullscreen mode'} className={ICON_BUTTON_CLASS} title="Fullscreen">
             {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
           <button type="button" onClick={() => setTimelinePosition(0)} aria-label="Reset viewport timeline" className={ICON_BUTTON_CLASS} title="Reset">
@@ -325,7 +325,7 @@ export function PreviewViewport3D({ content: _content = '', mode: _mode = '3d', 
 
         {selectedObject && (
           <div className={`${FLOATING_CARD_CLASS} bottom-4 left-4`}>
-            <div className="text-xs text-[var(--aethel-text-tertiary)]">Selecionado</div>
+            <div className="text-xs text-[var(--aethel-text-tertiary)]">Selected</div>
             <div className="text-xs font-mono text-[var(--aethel-text-primary)]">{selectedObject}</div>
           </div>
         )}

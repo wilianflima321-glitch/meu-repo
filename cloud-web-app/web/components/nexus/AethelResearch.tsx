@@ -36,27 +36,27 @@ interface ResearchResult {
 const PRESET_SOURCES: Source[] = [
   {
     id: '1',
-    title: 'Aethel Technical Whitepaper',
-    url: 'https://aethel.ai/docs',
-    credibility: 0.98,
+    title: 'Cursor Background Agents',
+    url: 'https://docs.cursor.com/en/background-agents',
+    credibility: 0.96,
     verified: true,
-    snippet: 'Architecture constraints and capability-contract governance baseline.',
+    snippet: 'Async agent status, takeover, branch handoff, and security disclosure benchmark.',
   },
   {
     id: '2',
-    title: 'Market Analysis 2026',
-    url: 'https://research.market',
-    credibility: 0.92,
+    title: 'OpenAI Realtime WebRTC',
+    url: 'https://platform.openai.com/docs/guides/realtime-webrtc',
+    credibility: 0.95,
     verified: true,
-    snippet: 'Comparison between Manus, Perplexity and Aethel execution reliability.',
+    snippet: 'Voice-agent session state, ephemeral credentials, tool events, and interruption path.',
   },
   {
     id: '3',
-    title: 'Unreal Engine Roadmap',
-    url: 'https://unrealengine.com',
-    credibility: 0.95,
+    title: 'Gemini Live API capabilities',
+    url: 'https://ai.google.dev/gemini-api/docs/live-api/capabilities',
+    credibility: 0.94,
     verified: true,
-    snippet: 'Native rendering roadmap and practical browser/runtime limitations.',
+    snippet: 'Live audio/video/text expectations, barge-in, transcripts, and tool-use capability state.',
   },
 ]
 
@@ -104,7 +104,7 @@ export default function AethelResearch() {
           query: value,
           status: 'complete',
           summary:
-            `Deep analysis finished for "${value}". Sources were cross-checked and normalized into a build-ready context package for Forge handoff.`,
+            `Draft research package prepared for "${value}". Sources are curated references and the handoff stays review-first before any execution.`,
           sources: PRESET_SOURCES,
         })
       }, 1200)
@@ -146,9 +146,22 @@ export default function AethelResearch() {
           <Search className="text-[var(--aethel-info-light)]" size={20} />
         </div>
         <div>
-          <h2 className="text-lg font-bold uppercase tracking-wider">Pesquisa Aethel</h2>
-          <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--aethel-text-quaternary)]">Motor de verificacao profunda</p>
+          <h2 className="text-lg font-bold uppercase tracking-wider">Research Workspace</h2>
+          <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--aethel-text-quaternary)]">Plan, sources, replay, handoff</p>
         </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2" aria-label="Research runboard">
+        {[
+          ['Plan', result.query ? 'ready' : 'waiting'],
+          ['Sources', result.sources.length ? `${result.sources.length}` : 'held'],
+          ['Handoff', canHandoff ? 'review' : 'blocked'],
+        ].map(([label, value]) => (
+          <div key={label} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-3 py-2">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">{label}</p>
+            <p className="mt-1 text-xs font-semibold text-[var(--aethel-text-secondary)]">{value}</p>
+          </div>
+        ))}
       </div>
 
       <form onSubmit={handleSearch} className="group relative">
@@ -159,7 +172,7 @@ export default function AethelResearch() {
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search com contexto verificado..."
+            placeholder="Ask for market, source, or implementation evidence..."
             className="flex-1 bg-transparent py-2 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none"
           />
           <button type="submit" className="ml-2 rounded-lg bg-[var(--aethel-primary)] p-2 text-[var(--aethel-text-primary)] transition-all hover:brightness-110">
@@ -183,7 +196,7 @@ export default function AethelResearch() {
                     ></div>
                   </div>
                   <p className="mt-2 text-[10px] font-bold uppercase tracking-tighter text-[var(--aethel-text-quaternary)]">
-                    {result.status === 'searching' ? 'Coletando fontes...' : 'Pontuando credibilidade e sintese...'}
+                    {result.status === 'searching' ? 'Collecting sources...' : 'Scoring credibility and synthesis...'}
                   </p>
                 </div>
               </div>
@@ -198,7 +211,7 @@ export default function AethelResearch() {
                 </div>
                 <div className="mb-3 flex items-center gap-2">
                   <CheckCircle size={16} className="text-[var(--aethel-success)]" />
-                  <span className="text-[10px] font-bold uppercase text-[var(--aethel-success)]">Pacote de sintese verificada</span>
+                  <span className="text-[10px] font-bold uppercase text-[var(--aethel-success)]">Review-first research package</span>
                 </div>
                 <p className="text-sm leading-relaxed text-[var(--aethel-text-primary)]">{result.summary}</p>
               </div>
@@ -210,7 +223,7 @@ export default function AethelResearch() {
                   className="inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] px-3 py-2 text-xs font-semibold text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)]"
                 >
                   <Send size={14} />
-                  Abrir na IDE
+                  Open in IDE
                 </button>
                 <button
                   type="button"
@@ -218,14 +231,14 @@ export default function AethelResearch() {
                   className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]/70 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)]"
                 >
                   <Copy size={14} />
-                  Copiar prompt
+                  Copy prompt
                 </button>
                 {handoffMessage && <span className="text-xs text-[var(--aethel-text-tertiary)]">{handoffMessage}</span>}
               </div>
 
               <div className="space-y-3">
                 <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-quaternary)]">
-                  <BookOpen size={14} /> Fontes de alta credibilidade
+                  <BookOpen size={14} /> High-confidence sources
                 </h3>
                 <div className="grid grid-cols-1 gap-3">
                   {result.sources.map((source) => (
@@ -242,7 +255,7 @@ export default function AethelResearch() {
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5 text-[9px] font-mono text-[var(--aethel-text-tertiary)]">
-                            {Math.round(source.credibility * 100)}% confianca
+                            {Math.round(source.credibility * 100)}% confidence
                           </div>
                           <a href={source.url} target="_blank" rel="noreferrer" className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]">
                             <ExternalLink size={12} />
@@ -259,18 +272,18 @@ export default function AethelResearch() {
                 <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]/30 p-4">
                   <div className="mb-2 flex items-center gap-2">
                     <Database size={14} className="text-[var(--aethel-info-light)]" />
-                    <span className="text-[10px] font-bold uppercase text-[var(--aethel-text-quaternary)]">Dataset bruto</span>
+                    <span className="text-[10px] font-bold uppercase text-[var(--aethel-text-quaternary)]">Artifacts</span>
                   </div>
-                  <div className="text-lg font-bold text-[var(--aethel-text-primary)]">1.2 TB</div>
-                  <div className="text-[9px] text-[var(--aethel-text-quaternary)]">Indexado e deduplicado</div>
+                  <div className="text-lg font-bold text-[var(--aethel-text-primary)]">Held</div>
+                  <div className="text-[9px] text-[var(--aethel-text-quaternary)]">Saved only after user review</div>
                 </div>
                 <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]/30 p-4">
                   <div className="mb-2 flex items-center gap-2">
                     <BarChart3 size={14} className="text-[var(--aethel-warning-light)]" />
-                    <span className="text-[10px] font-bold uppercase text-[var(--aethel-text-quaternary)]">Latencia</span>
+                    <span className="text-[10px] font-bold uppercase text-[var(--aethel-text-quaternary)]">Cost</span>
                   </div>
-                  <div className="text-lg font-bold text-[var(--aethel-text-primary)]">450ms</div>
-                  <div className="text-[9px] text-[var(--aethel-text-quaternary)]">Passagem paralela de verificacao</div>
+                  <div className="text-lg font-bold text-[var(--aethel-text-primary)]">Review</div>
+                  <div className="text-[9px] text-[var(--aethel-text-quaternary)]">Estimate before long runs</div>
                 </div>
               </div>
             </>

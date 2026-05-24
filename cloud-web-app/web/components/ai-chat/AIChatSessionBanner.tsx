@@ -69,17 +69,17 @@ export default function AIChatSessionBanner({
       <div className="mt-2 text-sm font-medium text-[var(--aethel-text-primary)]">
         {mission || 'Continue from the studio context without losing the current handoff.'}
       </div>
-      <div className="mt-3 grid gap-2">
+      <div className="mt-3 flex flex-wrap gap-2" aria-label="Quick intents">
         {intents.map((intent) => (
           <button
             key={intent.id}
             type="button"
             onClick={() => onIntent(intent.buildPrompt(mission))}
-            className={`rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-4 py-3 text-left hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] ${focusClass}`}
+            title={intent.description}
+            className={`rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-3 py-1.5 text-left text-xs font-semibold text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
             aria-label={`Run shortcut ${intent.label}`}
           >
-            <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{intent.label}</p>
-            <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{intent.description}</p>
+            {intent.label}
           </button>
         ))}
       </div>

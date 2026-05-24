@@ -48,10 +48,10 @@ export function MessageBubbleActionBar({
         <div className="ml-2 flex items-center gap-1 opacity-100 transition-opacity duration-150 md:opacity-0 md:group-hover/message:opacity-100 md:group-focus-within/message:opacity-100">
           <button
             type="button"
-            aria-label={copied ? 'Resposta copiada' : 'Copiar resposta'}
+            aria-label={copied ? 'Response copied' : 'Copy response'}
             onClick={onCopy}
             className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-            title={copied ? 'Resposta copiada' : 'Copiar resposta'}
+            title={copied ? 'Response copied' : 'Copy response'}
           >
             {copied ? (
               <Check className="h-3.5 w-3.5 text-[var(--aethel-success)]" />
@@ -61,28 +61,28 @@ export function MessageBubbleActionBar({
           </button>
           <button
             type="button"
-            aria-label="Regenerar resposta"
+            aria-label="Regenerate response"
             onClick={onRegenerate}
             className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-            title="Regenerar resposta"
+            title="Regenerate response"
           >
             <RefreshCw className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
-            aria-label="Marcar resposta como util"
+            aria-label="Mark response as useful"
             onClick={() => onRate('up')}
             className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-success)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-            title="Marcar resposta como util"
+            title="Mark response as useful"
           >
             <ThumbsUp className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
-            aria-label="Marcar resposta como insuficiente"
+            aria-label="Mark response as insufficient"
             onClick={() => onRate('down')}
             className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-            title="Marcar resposta como insuficiente"
+            title="Mark response as insufficient"
           >
             <ThumbsDown className="h-3.5 w-3.5" />
           </button>

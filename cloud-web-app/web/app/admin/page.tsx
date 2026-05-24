@@ -10,6 +10,7 @@ import {
   type AdminUserRow,
 } from '@/components/admin/AdminCommandCenterSections'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { SurfaceQualityShell } from '@/components/product/SurfaceQualityShell'
 import { API_BASE } from '@/lib/api'
 import { getToken } from '@/lib/auth'
 import { getAdminRouteCoverage } from '@/lib/admin/admin-consolidation'
@@ -34,25 +35,37 @@ export default function Admin() {
   return (
     <div className="mx-auto max-w-7xl p-6">
       <AdminPageHeader
-        className="mb-6"
+        className="sr-only"
         eyebrow="Admin Control Center"
         title="Admin Command Center"
-        subtitle="A dense six-area operating model: every route has one owner, one purpose, and a clear escalation path."
-        actions={(
+        subtitle="Six premium areas with compatibility routes held behind the sidebar drawer."
+      />
+
+      <SurfaceQualityShell
+        eyebrow="Admin command center"
+        title="Operate by risk, owner, and next action."
+        subtitle="Six areas stay visible; legacy routes remain compatible but no longer behave like primary navigation."
+        status={[
+          { label: 'Areas', value: String(coverage.sections), tone: 'available' },
+          { label: 'Legacy', value: `${coverage.legacyCompatibleRoutes} hidden`, tone: 'held' },
+          { label: 'Privacy', value: 'masked', tone: 'available' },
+        ]}
+        primaryAction={(
           <button
             type="button"
             onClick={() => mutate()}
-            className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]"
+            className="rounded-full bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.18)]"
           >
             Refresh
           </button>
         )}
-      />
-
-      <AdminStatsGrid users={users} />
-      <AdminOperatingSpine coverage={coverage} />
-      <AdminSectionGrid coverage={coverage} />
-      <AdminRecentUsersTable users={users} isLoading={isLoading} errorMessage={error?.message} />
+        density="compact"
+      >
+        <AdminStatsGrid users={users} />
+        <AdminOperatingSpine coverage={coverage} />
+        <AdminSectionGrid coverage={coverage} />
+        <AdminRecentUsersTable users={users} isLoading={isLoading} errorMessage={error?.message} />
+      </SurfaceQualityShell>
     </div>
   )
 }

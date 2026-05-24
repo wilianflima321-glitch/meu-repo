@@ -17,7 +17,7 @@ export function AttachmentPreview({ attachment, onRemove }: AttachmentPreviewPro
           type="button"
           onClick={onRemove}
           className="ml-1 rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-          aria-label="Remove anexo"
+          aria-label="Remove attachment"
         >
           <X className="h-3 w-3" />
         </button>
@@ -59,7 +59,7 @@ export function ChatHistorySidebar({
               onClick={onCreateThread}
               className="rounded px-2 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
-              Novo
+              New
             </button>
           )}
           {onClose && (
@@ -99,7 +99,7 @@ export function ChatHistorySidebar({
                   onClick={() => onArchiveThread(thread.id)}
                   className="text-[11px] text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 >
-                  Arquivar
+                  Archive
                 </button>
               )}
               {onDeleteThread && (
@@ -127,17 +127,17 @@ type LiveModeIndicatorProps = {
 export function LiveModeIndicator({ status = 'idle', onEnd }: LiveModeIndicatorProps) {
   const label =
     status === 'listening'
-      ? 'Ouvindo'
+      ? 'Listening'
       : status === 'thinking'
-        ? 'Pensando'
+        ? 'Thinking'
         : status === 'speaking'
-          ? 'Falando'
+          ? 'Speaking'
           : 'Ready'
   return (
     <div className="flex items-center justify-between gap-3 border-b border-[var(--aethel-border-secondary)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.86))] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
       <div className="flex items-center gap-2">
         <Zap className="h-3.5 w-3.5 text-[var(--aethel-info-light)]" />
-        <span>Modo ao vivo: {label}</span>
+        <span>Live mode: {label}</span>
       </div>
       {onEnd && (
         <button
@@ -145,7 +145,7 @@ export function LiveModeIndicator({ status = 'idle', onEnd }: LiveModeIndicatorP
           onClick={onEnd}
           className="rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
         >
-          Encerrar
+          End
         </button>
       )}
     </div>
@@ -178,10 +178,10 @@ export function ThinkingDisplay({ thinking, isExpanded, onToggle, steps }: Think
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Loader2 className="h-3 w-3 animate-spin text-[var(--aethel-info-light)]" />
-          <span className="font-medium text-[var(--aethel-text-primary)]">Processo de Pensamento</span>
+          <span className="font-medium text-[var(--aethel-text-primary)]">Reasoning trace</span>
         </div>
         <div className="flex items-center gap-1 text-[10px] text-[var(--aethel-text-tertiary)]">
-          {parsedSteps.filter(s => s.status === 'completed').length}/{parsedSteps.length} passos
+          {parsedSteps.filter(s => s.status === 'completed').length}/{parsedSteps.length} steps
         </div>
       </div>
       
@@ -246,7 +246,7 @@ function parseThinkingSteps(thinking: string): Array<{
   const lines = thinking.split('\n').filter(line => line.trim())
   return lines.map((line, index) => ({
     id: `step-${index}`,
-    title: line.replace(/^[-•]\s*/, '').trim(),
+    title: line.replace(/^[-*]\s*/, '').trim(),
     status: index === lines.length - 1 ? 'in_progress' : 'completed',
   }))
 }
@@ -265,10 +265,10 @@ export function ToolCallDisplay({ toolCall }: ToolCallDisplayProps) {
   const Icon = icon
   const statusLabel =
     toolCall.status === 'completed'
-      ? 'Concluida'
+      ? 'Done'
       : toolCall.status === 'failed'
-        ? 'Falhou'
-        : 'Em andamento'
+        ? 'Failed'
+        : 'Running'
   const argsSummary = toolCall.args
     ? Object.entries(toolCall.args)
         .slice(0, 3)
@@ -288,7 +288,7 @@ export function ToolCallDisplay({ toolCall }: ToolCallDisplayProps) {
         <span className="font-medium">{toolCall.name}</span>
         <span className="text-[11px] text-[var(--aethel-text-quaternary)]">{statusLabel}</span>
         {durationLabel && (
-          <span className="text-[11px] text-[var(--aethel-text-quaternary)]">• {durationLabel}</span>
+          <span className="text-[11px] text-[var(--aethel-text-quaternary)]">- {durationLabel}</span>
         )}
       </div>
       {argsSummary && (

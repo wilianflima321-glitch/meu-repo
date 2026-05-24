@@ -119,13 +119,13 @@ export default function WorkbenchEditorToolbar({
     <>
       {isCompactViewport && (
         <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-4 py-3.5 text-xs leading-6 text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
-          Viewport compacto detectado. Para melhor experiencia use desktop com {'>='} 1024px.
+          Compact viewport detected. For the best editor experience, use desktop with {'>='} 1024px.
         </div>
       )}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-2.5 text-[11px]">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
           <div className="flex min-w-0 flex-col text-[var(--aethel-text-tertiary)]">
-            <span className="font-medium uppercase tracking-[0.12em]">Ferramentas do editor</span>
+            <span className="font-medium uppercase tracking-[0.12em]">Editor tools</span>
             <span
               className="truncate pt-1 text-[11px] text-[var(--aethel-text-secondary)]"
               title={collaborationStatus.errorMessage ?? helperDetail}
@@ -164,7 +164,7 @@ export default function WorkbenchEditorToolbar({
             onClick={onReplace}
             className={`${actionButtonClass} ${inactiveActionClass}`}
           >
-            Substituir
+            Replace
           </button>
           <button
             type="button"
@@ -195,7 +195,7 @@ export default function WorkbenchEditorToolbar({
                 onClick={() => setSplitDirection((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'))}
                 className={`${actionButtonClass} ${inactiveActionClass}`}
               >
-                {splitDirection === 'horizontal' ? 'Empilhar verticalmente' : 'Dividir lado a lado'}
+                {splitDirection === 'horizontal' ? 'Stack vertically' : 'Split side by side'}
               </button>
             </>
           )}
@@ -230,7 +230,7 @@ export default function WorkbenchEditorToolbar({
                 : inactiveActionClass
             }`}
           >
-            Diagnosticos
+            Diagnostics
           </button>
         </div>
       </div>

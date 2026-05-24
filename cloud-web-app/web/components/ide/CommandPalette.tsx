@@ -78,14 +78,14 @@ const CATEGORY_LABELS: Record<CommandCategory, string> = {
   file: 'File',
   edit: 'Edit',
   view: 'View',
-  go: 'Ir',
-  run: 'Executar',
+  go: 'Go',
+  run: 'Run',
   terminal: 'Terminal',
   git: 'Git',
-  ai: 'IA',
-  settings: 'Ajustes',
+  ai: 'AI',
+  settings: 'Settings',
   debug: 'Debug',
-  extension: 'Extensoes',
+  extension: 'Extensions',
 }
 
 const CommandPaletteContext = createContext<CommandPaletteContextType | null>(null)
@@ -156,8 +156,8 @@ function createDefaultCommands(handlers: {
     },
     {
       id: 'file.newFolder',
-      label: 'Nova pasta',
-      description: 'Create uma nova pasta',
+      label: 'New folder',
+      description: 'Create a new folder',
       category: 'file',
       icon: 'new-folder',
       action: handlers.newFolder || (() => {}),
@@ -165,8 +165,8 @@ function createDefaultCommands(handlers: {
     },
     {
       id: 'edit.undo',
-      label: 'Desfazer',
-      description: 'Desfazer a ultima acao',
+      label: 'Undo',
+      description: 'Undo the last action',
       category: 'edit',
       shortcut: 'Ctrl+Z',
       action: handlers.undo || (() => {}),
@@ -175,8 +175,8 @@ function createDefaultCommands(handlers: {
     },
     {
       id: 'edit.redo',
-      label: 'Refazer',
-      description: 'Refazer a acao desfeita',
+      label: 'Redo',
+      description: 'Redo the undone action',
       category: 'edit',
       shortcut: 'Ctrl+Y',
       action: handlers.redo || (() => {}),
@@ -191,21 +191,21 @@ function createDefaultCommands(handlers: {
       shortcut: 'Ctrl+F',
       action: handlers.find || (() => {}),
       when: () => typeof handlers.find === 'function',
-      keywords: ['find', 'search', 'buscar'],
+      keywords: ['find', 'search'],
     },
     {
       id: 'edit.replace',
-      label: 'Substituir',
-      description: 'Search e substituir',
+      label: 'Replace',
+      description: 'Search and replace',
       category: 'edit',
       shortcut: 'Ctrl+H',
       action: handlers.replace || (() => {}),
       when: () => typeof handlers.replace === 'function',
-      keywords: ['replace', 'substituir'],
+      keywords: ['replace'],
     },
     {
       id: 'view.toggleSidebar',
-      label: 'Alternar barra lateral',
+      label: 'Toggle sidebar',
       description: 'Show or hide the left sidebar',
       category: 'view',
       shortcut: 'Ctrl+B',
@@ -214,7 +214,7 @@ function createDefaultCommands(handlers: {
     },
     {
       id: 'view.toggleTerminal',
-      label: 'Alternar terminal',
+      label: 'Toggle terminal',
       description: 'Show or hide the bottom terminal',
       category: 'view',
       shortcut: 'Ctrl+`',
@@ -224,7 +224,7 @@ function createDefaultCommands(handlers: {
     {
       id: 'ai.chat',
       label: 'Open AI panel',
-      description: 'Open AI panel na direita',
+      description: 'Open AI panel on the right',
       category: 'ai',
       shortcut: 'Ctrl+I',
       action: handlers.aiChat || (() => {}),
@@ -233,11 +233,11 @@ function createDefaultCommands(handlers: {
     {
       id: 'settings.open',
       label: 'Open settings',
-      description: 'Open settings da IDE',
+      description: 'Open IDE settings',
       category: 'settings',
       shortcut: 'Ctrl+,',
       action: handlers.openSettings || (() => {}),
-      keywords: ['settings', 'preferences', 'ajustes', 'preferencias'],
+      keywords: ['settings', 'preferences'],
     },
     {
       id: 'project.switch',
@@ -609,10 +609,10 @@ function CommandPaletteUI({
   if (!isOpen) return null
 
   const modeConfig: Record<PaletteMode, { placeholder: string; prefix: string }> = {
-    commands: { placeholder: 'Digite um comando...', prefix: '>' },
+    commands: { placeholder: 'Type a command...', prefix: '>' },
     files: { placeholder: 'Search files...', prefix: '' },
-    symbols: { placeholder: 'Ir para simbolo...', prefix: '@' },
-    lines: { placeholder: 'Ir para linha...', prefix: ':' },
+    symbols: { placeholder: 'Go to symbol...', prefix: '@' },
+    lines: { placeholder: 'Go to line...', prefix: ':' },
   }
 
   const currentMode = modeConfig[mode]
@@ -624,7 +624,7 @@ function CommandPaletteUI({
         className="fixed left-1/2 top-[12%] z-50 w-[680px] max-w-[94vw] -translate-x-1/2"
         role="dialog"
         aria-modal="true"
-        aria-label="Paleta de comandos"
+        aria-label="Command palette"
       >
         <div className="overflow-hidden rounded-lg border border-[var(--aethel-border-secondary)]/80 bg-[var(--aethel-surface-primary)] shadow-2xl">
           <div className="flex items-center gap-2 border-b border-[var(--aethel-border-secondary)]/70 px-3 py-2.5">
@@ -639,21 +639,21 @@ function CommandPaletteUI({
               className="flex-1 bg-transparent text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-tertiary)]"
               autoComplete="off"
               spellCheck={false}
-              aria-label="Entrada da paleta de comandos"
+              aria-label="Command palette input"
             />
             <div className="hidden items-center gap-2 text-[10px] text-[var(--aethel-text-tertiary)] md:flex">
               <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5">Up/Down</kbd>
-              <span>Navegar</span>
+              <span>Navigate</span>
               <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5">Enter</kbd>
-              <span>Selecionar</span>
+              <span>Select</span>
               <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5">Esc</kbd>
               <span>Close</span>
             </div>
           </div>
 
-          <div ref={listRef} className="max-h-[420px] overflow-y-auto" role="listbox" aria-label="Resultados da paleta">
+          <div ref={listRef} className="max-h-[420px] overflow-y-auto" role="listbox" aria-label="Palette results">
             {!filteredItems.length && (
-              <div className="px-4 py-8 text-center text-xs text-[var(--aethel-text-tertiary)]">No resultado encontrado</div>
+              <div className="px-4 py-8 text-center text-xs text-[var(--aethel-text-tertiary)]">No result found</div>
             )}
 
             {filteredItems.map((item, index) => {
@@ -714,13 +714,13 @@ function CommandPaletteUI({
           <div className="flex items-center justify-between border-t border-[var(--aethel-border-secondary)]/70 px-3 py-1.5 text-[10px] text-[var(--aethel-text-tertiary)]">
             <div className="flex items-center gap-3">
               <span>
-                <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1 py-0.5">Ctrl+Shift+P</kbd> Comandos
+                <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1 py-0.5">Ctrl+Shift+P</kbd> Commands
               </span>
               <span>
                 <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1 py-0.5">Ctrl+P</kbd> Files
               </span>
             </div>
-            <span>{filteredItems.length} resultados</span>
+            <span>{filteredItems.length} results</span>
           </div>
         </div>
       </div>
@@ -739,5 +739,3 @@ export function useRegisterCommand(command: CommandItem, deps: unknown[] = []) {
 }
 
 export default CommandPaletteProvider
-
-

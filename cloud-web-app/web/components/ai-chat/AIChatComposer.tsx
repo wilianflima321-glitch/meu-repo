@@ -230,8 +230,8 @@ export function AIChatComposer({
                 ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110'
                 : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
             }`}
-            aria-label={isLoading ? 'Stop resposta' : modePreset.submitLabel}
-            title={isLoading ? 'Stop resposta' : modePreset.submitLabel}
+            aria-label={isLoading ? 'Stop response' : modePreset.submitLabel}
+            title={isLoading ? 'Stop response' : modePreset.submitLabel}
           >
             {isLoading ? <StopCircle className="h-4 w-4" /> : <Send className="h-4 w-4" />}
           </button>

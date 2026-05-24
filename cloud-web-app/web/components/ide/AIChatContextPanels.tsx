@@ -27,7 +27,7 @@ export function CodebaseContextPanel({
           </div>
           <div className="text-[11px] text-[var(--aethel-text-tertiary)]">
             {preview.loading
-              ? 'Analyzing o escopo atual...'
+              ? 'Analyzing the current scope...'
               : `Source: ${preview.source || 'persistent-local-cache'}${preview.scope ? ` | scope=${preview.scope}` : ''}`}
           </div>
           {preview.stats && (
@@ -65,7 +65,7 @@ export function CodebaseContextPanel({
       )}
       {!preview.error && preview.results.length === 0 && !preview.loading && (
         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-tertiary)]">
-          No correspondencia semantica encontrada para este prompt ate agora.
+          No semantic match found for this prompt yet.
         </div>
       )}
       <div className="space-y-2">
@@ -74,7 +74,7 @@ export function CodebaseContextPanel({
             <div className="mb-1 flex items-center justify-between gap-2 text-[11px]">
               <span className="font-mono text-[var(--aethel-text-secondary)]">{result.filePath}:{result.startLine}-{result.endLine}</span>
               <div className="flex items-center gap-2">
-                <span className="text-[var(--aethel-info-light)]">relevancia {result.score}</span>
+                <span className="text-[var(--aethel-info-light)]">relevance {result.score}</span>
                 <button
                   type="button"
                   onClick={() => onCopy(result.filePath)}

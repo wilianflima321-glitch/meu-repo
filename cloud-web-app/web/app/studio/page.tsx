@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { SurfaceQualityShell } from '@/components/product/SurfaceQualityShell'
 import EngineSpineReadinessPanel from '@/components/studio/EngineSpineReadinessPanel'
 import CreativeStudioShell from './CreativeStudioShell'
 import { CREATIVE_STUDIO_ROUTES, isPrimaryCreativeStudioRoute } from './creative-studio-routes'
@@ -23,21 +24,25 @@ export default function CreativeStudioPage() {
     >
       <div className="h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,color-mix(in_srgb,var(--aethel-primary)_14%,transparent),transparent_34%),var(--aethel-surface-primary)] px-4 py-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-6 max-w-3xl">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--aethel-primary-light)]">
-              Progressive creative depth
-            </p>
-            <h2 className="text-3xl font-bold tracking-tight text-[var(--aethel-text-primary)]">
-              Use the right surface only when the mission needs it.
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-              The hub keeps the product calm for beginners, while giving agents and advanced users direct entry into the editors that were previously hidden behind legacy routes.
-            </p>
-          </div>
+          <SurfaceQualityShell
+            eyebrow="Studio runboard"
+            title="Plan, validate, then open the right editor."
+            subtitle="Creative depth stays governed: Browser previews, Studio Local handles heavy work when attached, and Cloud Stream remains held until capability is real."
+            status={[
+              { label: 'Browser', value: 'preview', tone: 'available' },
+              { label: 'Studio Local', value: 'held', tone: 'held' },
+              { label: 'Cloud Stream', value: 'held', tone: 'held' },
+            ]}
+            primaryAction={<a href="#studio-primary-surfaces" className="rounded-full bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.18)]">Open editor</a>}
+            secondaryAction={<a href="#studio-runboard" className="rounded-full border border-[var(--aethel-border-subtle)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)]">Validate plan</a>}
+          >
+            <div id="studio-runboard" className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
+              <StudioMissionControl />
+              <EngineSpineReadinessPanel />
+            </div>
+          </SurfaceQualityShell>
 
-          <StudioMissionControl />
-
-          <EngineSpineReadinessPanel />
+          <div id="studio-primary-surfaces" className="mt-8" />
 
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>

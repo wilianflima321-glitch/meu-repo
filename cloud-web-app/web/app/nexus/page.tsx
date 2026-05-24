@@ -44,7 +44,7 @@ export default function NexusPage() {
             rightPanelMode === 'research' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
           }`}
         >
-          Pesquisa
+          Research
         </button>
         <button type="button"
           onClick={() => setRightPanelMode('director')}
@@ -52,7 +52,7 @@ export default function NexusPage() {
             rightPanelMode === 'director' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
           }`}
         >
-          Direcao
+          Director
         </button>
       </div>
       <button type="button" className="rounded-lg bg-[var(--aethel-primary-dark)] px-4 py-1.5 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg shadow-blue-900/20 transition-all hover:bg-[var(--aethel-primary)]">
@@ -64,7 +64,7 @@ export default function NexusPage() {
   return (
     <StudioLayout
       title="Nexus"
-      subtitle="Orquestracao multimodal e renderizacao em tempo real."
+      subtitle="Multimodal orchestration, research, and real-time review."
       actions={actions}
       padded={false}
       maxWidth="full"
@@ -97,7 +97,7 @@ export default function NexusPage() {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-4">
-            <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Assets ao vivo</h2>
+            <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Live assets</h2>
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((item) => (
                 <div
@@ -109,7 +109,7 @@ export default function NexusPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[10px] font-bold transition-colors group-hover:text-[var(--aethel-primary-light)]">Asset_Prototype_0{item}.obj</p>
-                    <p className="text-[9px] uppercase text-[var(--aethel-text-tertiary)]">Otimizado</p>
+                    <p className="text-[9px] uppercase text-[var(--aethel-text-tertiary)]">Optimized</p>
                   </div>
                 </div>
               ))}

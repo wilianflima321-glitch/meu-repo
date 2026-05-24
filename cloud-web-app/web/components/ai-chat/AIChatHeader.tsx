@@ -299,6 +299,23 @@ export function AIChatHeader({
           </button>
         </div>
       </div>
+
+      {showAdvancedControls ? (
+        <div
+          className="flex flex-wrap items-center gap-2 border-t border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_44%,transparent)] px-3 py-1.5 text-[10px] text-[var(--aethel-text-tertiary)]"
+          aria-label="Conversation lane readiness"
+        >
+          <span className="font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">Conversation lane</span>
+          <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5">Tool use governed</span>
+          <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5">
+            {selectedModel.supportsVoice ? 'Native audio ready' : 'Native audio held'}
+          </span>
+          <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5">Barge-in via Stop</span>
+          <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5">
+            {selectedModel.supportsVoice ? 'Transcript ready' : 'Transcript via mic fallback'}
+          </span>
+        </div>
+      ) : null}
     </div>
   )
 }

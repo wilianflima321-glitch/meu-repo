@@ -126,7 +126,7 @@ export function HeaderIdentity({
           background:
             'color-mix(in srgb, var(--aethel-surface-secondary) 58%, transparent)',
         }}
-        aria-label="Alternar barra lateral"
+        aria-label="Toggle sidebar"
       >
         <Layout size={18} />
       </button>
@@ -280,7 +280,7 @@ export function HeaderPrimaryActions({
         aria-label="Run primary preview action"
       >
         <Play size={14} />
-        Executar
+        Run
       </button>
       <button
         type="button"
@@ -379,7 +379,7 @@ function CommandCenterButton({
                 whiteSpace: 'nowrap',
               }}
             >
-              Pergunte, navegue e execute sem sair do cockpit.
+              Ask, navigate, and run without leaving the cockpit.
             </span>
           </span>
         </span>
