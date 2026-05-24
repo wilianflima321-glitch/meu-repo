@@ -34,9 +34,6 @@ export default function PublicHeader() {
             <Image src="/branding/aethel-icon-source.png" alt="" width={32} height={32} sizes="32px" className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-1" priority />
             <span className="hidden items-center gap-2 sm:inline-flex">
               <span className="text-sm font-semibold tracking-[-0.02em]">Aethel</span>
-              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">
-                Studio
-              </span>
             </span>
           </Link>
 
@@ -76,7 +73,7 @@ export default function PublicHeader() {
             </Link>
             <Link
               href="/dashboard?onboarding=1&source=header"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-4 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_24%,transparent)] transition hover:brightness-110"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[var(--aethel-text-primary)] px-4 text-sm font-semibold text-[var(--aethel-surface-primary)] transition hover:bg-[var(--aethel-text-secondary)]"
             >
               Start free
               <ArrowRight className="h-3.5 w-3.5" />
@@ -118,7 +115,7 @@ export default function PublicHeader() {
               <Link
                 href="/dashboard?onboarding=1&source=mobile-header"
                 onClick={() => setMobileOpen(false)}
-                className="mt-2 inline-flex h-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] text-sm font-semibold text-[var(--aethel-text-primary)]"
+                className="mt-2 inline-flex h-12 items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] text-sm font-semibold text-[var(--aethel-surface-primary)]"
               >
                 Start a mission
               </Link>
