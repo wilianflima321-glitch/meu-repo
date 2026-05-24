@@ -10,12 +10,38 @@ import { X, Cookie, Shield } from 'lucide-react'
 const CONSENT_KEY = 'aethel_cookie_consent'
 type ConsentLevel = 'all' | 'essential' | null
 
+const AUTHENTICATED_WORKSPACE_PATHS = [
+  '/admin',
+  '/billing',
+  '/dashboard',
+  '/evidence',
+  '/ide',
+  '/marketplace',
+  '/nexus',
+  '/profile',
+  '/project-settings',
+  '/settings',
+  '/studio',
+]
+
+function shouldSuppressForAuthenticatedWorkspace() {
+  if (typeof window === 'undefined') return false
+  const path = window.location.pathname
+  const isWorkspacePath = AUTHENTICATED_WORKSPACE_PATHS.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
+  if (!isWorkspacePath) return false
+
+  const hasTokenCookie = document.cookie.split(';').some((cookie) => cookie.trim().startsWith('token='))
+  const hasLocalToken = Boolean(localStorage.getItem('aethel-token') || localStorage.getItem('token'))
+  return hasTokenCookie || hasLocalToken
+}
+
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+    if (shouldSuppressForAuthenticatedWorkspace()) return
     const stored = localStorage.getItem(CONSENT_KEY)
     if (!stored) {
       // Delay slightly to avoid CLS
