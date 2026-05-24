@@ -1,9 +1,4 @@
-/**
- * Aethel Engine - WebSocket Server Runtime
- *
- * Hybrid WebSocket runtime used by both the modern channel-based transport
- * and the legacy Yjs/export endpoints that existing scripts still rely on.
- */
+/** Hybrid WebSocket runtime for modern channels plus legacy Yjs/export endpoints. */
 
 import { WebSocketServer, WebSocket } from 'ws';
 import type { RawData } from 'ws';
@@ -17,6 +12,7 @@ import { eventBus } from './websocket/event-bus';
 import { handleRuntimeHttpRequest } from './websocket/http-routes';
 import { createClientId, createConnectionId } from './websocket/ids';
 import type { ParsedWebSocketUrl } from './websocket-runtime-codecs';
+import { handleLegacyAiSocket, handleLegacyDapSocket, handleLegacyGeneralSocket, handleLegacyLspSocket } from './websocket/legacy-simple-handlers';
 import type {
   ConnectionInfo,
   LegacyExportState,
@@ -39,7 +35,6 @@ const {
   broadcastToAll: broadcastToAllChannels,
   broadcastToChannel: broadcastToRoomChannel,
   broadcastToLegacyRoom: broadcastToLegacyRoomClients,
-  removeLegacyRoomClient,
   removeSocketFromLegacyRooms,
   subscribeToChannel: subscribeClientToChannel,
   unsubscribeFromChannel: unsubscribeClientFromChannel,
@@ -86,9 +81,7 @@ const log = createComponentLogger('server/websocket-server');
 export { WS_MESSAGE_TYPES };
 export { eventBus } from './websocket/event-bus';
 export type { WsClient, WsChannel, WsMessage } from './websocket-runtime-contracts';
-// ============================================================================
 // WebSocket server manager
-// ============================================================================
 
 export class AethelWebSocketServer extends EventEmitter {
   private wss: WebSocketServer | null = null;
@@ -114,9 +107,7 @@ export class AethelWebSocketServer extends EventEmitter {
     this.setupTerminalEvents();
   }
 
-  // ==========================================================================
   // Server lifecycle
-  // ==========================================================================
 
   async start(): Promise<void> {
     if (this.wss) {
@@ -182,9 +173,7 @@ export class AethelWebSocketServer extends EventEmitter {
     this.emit('stopped');
   }
 
-  // ==========================================================================
   // Connection routing
-  // ==========================================================================
 
   private handleConnection(ws: WebSocket, request: IncomingMessage): void {
     const parsedUrl = parseWebSocketRequestUrl(request.url || '/');
@@ -289,9 +278,7 @@ export class AethelWebSocketServer extends EventEmitter {
   }
 
 
-  // ==========================================================================
   // Modern runtime protocol
-  // ==========================================================================
 
   private handleModernConnection(
     ws: WebSocket,
@@ -470,9 +457,7 @@ export class AethelWebSocketServer extends EventEmitter {
     this.emit('disconnect', { clientId: client.id, userId: client.userId });
   }
 
-  // ==========================================================================
   // Channel management
-  // ==========================================================================
 
   private subscribeToChannel(client: WsClient, channelName: string, options?: unknown): void {
     subscribeClientToChannel(this.getRoomContext(), client, channelName, options);
@@ -482,9 +467,7 @@ export class AethelWebSocketServer extends EventEmitter {
     unsubscribeClientFromChannel(this.getRoomContext(), client, channelName, notifyClient);
   }
 
-  // ==========================================================================
   // Terminal handlers
-  // ==========================================================================
 
   private async handleTerminalCreate(client: WsClient, payload: unknown): Promise<void> {
     const data = asWsRecord(payload);
@@ -615,9 +598,7 @@ export class AethelWebSocketServer extends EventEmitter {
     });
   }
 
-  // ==========================================================================
   // Collaboration handlers (modern protocol)
-  // ==========================================================================
 
   private handleCollabJoin(client: WsClient, payload: unknown): void {
     const data = asWsRecord(payload);
@@ -677,9 +658,7 @@ export class AethelWebSocketServer extends EventEmitter {
     });
   }
 
-  // ==========================================================================
   // Legacy handlers
-  // ==========================================================================
 
   private async handleExportConnection(ws: WebSocket, pathname: string): Promise<void> {
     const exportId = pathname.split('/').filter(Boolean)[1];
@@ -839,103 +818,28 @@ export class AethelWebSocketServer extends EventEmitter {
   }
 
   private handleLegacyLspConnection(ws: WebSocket, info: ConnectionInfo): void {
-    const language = info.sessionId || 'typescript';
-
-    ws.on('message', (data) => {
-      try {
-        const message = asWsRecord(JSON.parse(data.toString()));
-        eventBus.emit('lsp:message', {
-          language,
-          message,
-          respond: (response: unknown) => {
-            this.sendRaw(ws, response);
-          },
-        });
-      } catch (error) {
-        log.error('[LSP] Message parse error', error);
-      }
-    });
-
-    this.sendRaw(ws, { type: 'ready', language });
+    handleLegacyLspSocket(ws, info, (socket, message) => this.sendRaw(socket, message));
   }
 
   private handleLegacyAiConnection(ws: WebSocket): void {
-    ws.on('message', (data) => {
-      try {
-        const message = asWsRecord(JSON.parse(data.toString()));
-        eventBus.emit('ai:stream', {
-          ...message,
-          stream: (chunk: string) => {
-            this.sendRaw(ws, { type: 'chunk', content: chunk });
-          },
-          done: () => {
-            this.sendRaw(ws, { type: 'done' });
-          },
-          error: (err: string) => {
-            this.sendRaw(ws, { type: 'error', error: err });
-          },
-        });
-      } catch (error) {
-        log.error('[AI] Message parse error', error);
-      }
-    });
-
-    this.sendRaw(ws, { type: 'ready' });
+    handleLegacyAiSocket(ws, (socket, message) => this.sendRaw(socket, message));
   }
 
   private handleLegacyDapConnection(ws: WebSocket): void {
-    ws.on('message', (data) => {
-      try {
-        const message = asWsRecord(JSON.parse(data.toString()));
-        eventBus.emit('dap:message', {
-          message,
-          respond: (response: unknown) => {
-            this.sendRaw(ws, response);
-          },
-        });
-      } catch (error) {
-        log.error('[DAP] Message parse error', error);
-      }
-    });
-
-    this.sendRaw(ws, { type: 'ready' });
+    handleLegacyDapSocket(ws, (socket, message) => this.sendRaw(socket, message));
   }
 
   private handleLegacyGeneralConnection(ws: WebSocket, info: ConnectionInfo): void {
-    ws.on('message', (data) => {
-      try {
-        const message = asWsRecord(JSON.parse(data.toString()));
-        if (message.type === 'join-room') {
-          const roomName = String(message.room || 'default');
-          addLegacyRoomClient(this.legacyRooms, roomName, ws);
-          this.sendRaw(ws, { type: 'room-joined', room: roomName });
-          return;
-        }
-
-        if (message.type === 'leave-room') {
-          removeLegacyRoomClient(this.legacyRooms, String(message.room || ''), ws);
-          return;
-        }
-
-        if (message.type === 'broadcast') {
-          this.broadcastToLegacyRoom(String(message.room || ''), message.data, ws);
-          return;
-        }
-
-        if (message.type === 'ping') {
-          this.sendRaw(ws, { type: 'pong', timestamp: Date.now() });
-        }
-      } catch (error) {
-        log.error('[General] Message parse error', error);
-      }
+    handleLegacyGeneralSocket({
+      ws,
+      info,
+      legacyRooms: this.legacyRooms,
+      sendRaw: (socket, message) => this.sendRaw(socket, message),
+      broadcastToLegacyRoom: (roomName, message, exclude) => this.broadcastToLegacyRoom(roomName, message, exclude),
     });
-
-    this.sendRaw(ws, { type: 'connected', connectionId: info.id });
   }
 
-  // ==========================================================================
   // Messaging utilities
-  // ==========================================================================
 
   private sendToClient(client: WsClient, message: WsMessage): void {
     sendTransportToClient(client, message);
@@ -995,9 +899,7 @@ export class AethelWebSocketServer extends EventEmitter {
     });
   }
 
-  // ==========================================================================
   // Ping/pong & cleanup
-  // ==========================================================================
 
   private startPingInterval(): void {
     this.pingInterval = startHeartbeat({
@@ -1019,9 +921,7 @@ export class AethelWebSocketServer extends EventEmitter {
     }
   }
 
-  // ==========================================================================
   // Metrics & stats
-  // ==========================================================================
 
   private getHealthPayload() {
     return buildHealthPayload(this.getPresenceSnapshot());

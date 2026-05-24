@@ -1,12 +1,4 @@
-/**
- * Build Queue Worker
- *
- * Consome a Redis list `build-queue` (LPUSH producer, então BRPOP consumer para FIFO)
- * e atualiza o estado do export em Redis/DB.
- *
- * Observação: este worker gera artefatos reais (ZIP + manifest + assets opcionais),
- * com upload S3/MinIO e URL de download/presign quando disponível.
- */
+/** Build queue worker for Redis FIFO exports, artifacts, manifests and optional S3 upload. */
 
 import { prisma } from '../../lib/db';
 import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
@@ -19,24 +11,8 @@ import { existsSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 
 import { createComponentLogger } from '@/lib/observability/logger'
-import {
-  DELAY_BASE_MS,
-  DELAYED_QUEUE,
-  MAX_ATTEMPTS,
-  METRICS_KEY,
-  PROCESSING_QUEUE,
-  PROCESSING_TIMEOUT_MS,
-  PROCESSING_TS_PREFIX,
-  REAPER_INTERVAL_MS,
-  SOURCE_QUEUE,
-  type AssetManifest,
-  type BuildQueueMessage,
-  type ExportState,
-  type RedisClient,
-  type RedisConstructor,
-  type SourceManifest,
-  type WorkerMetric,
-} from './build-queue-worker-contracts'
+import { addWebTemplate } from './build-queue-worker-web-template'
+import { DELAY_BASE_MS, DELAYED_QUEUE, MAX_ATTEMPTS, METRICS_KEY, PROCESSING_QUEUE, PROCESSING_TIMEOUT_MS, PROCESSING_TS_PREFIX, REAPER_INTERVAL_MS, SOURCE_QUEUE, type AssetManifest, type BuildQueueMessage, type ExportState, type RedisClient, type RedisConstructor, type SourceManifest, type WorkerMetric } from './build-queue-worker-contracts'
 
 const log = createComponentLogger('workers/build-queue-worker')
 
@@ -110,29 +86,6 @@ function getRuntimeTemplatesDir() {
   return process.env.RUNTIME_TEMPLATES_DIR
     ? path.resolve(process.env.RUNTIME_TEMPLATES_DIR)
     : path.resolve(process.cwd(), '..', '..', 'runtime-templates');
-}
-
-function addWebTemplate(zip: AdmZip, projectName: string) {
-  const html = `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${projectName}</title>
-    <style>body{margin:0;background:#0b0b0b;color:#fff;font-family:Inter,Segoe UI,Arial,sans-serif}#app{padding:24px}</style>
-  </head>
-  <body>
-    <div id="app">
-      <h1>${projectName}</h1>
-      <p>Runtime Web exportado pelo Aethel Engine.</p>
-      <p>Assets estão em <code>/assets</code>.</p>
-      <script src="app.js"></script>
-    </div>
-  </body>
-</html>`;
-  const js = `log.info('Aethel Web Runtime');`;
-  zip.addFile('index.html', Buffer.from(html, 'utf8'));
-  zip.addFile('app.js', Buffer.from(js, 'utf8'));
 }
 
 function matchesExcludePatterns(filePath: string, patterns: string[]) {

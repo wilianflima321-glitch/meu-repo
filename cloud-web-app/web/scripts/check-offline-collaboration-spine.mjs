@@ -7,8 +7,11 @@ const read = (rel) => fs.readFileSync(path.join(webRoot, rel), 'utf8')
 const failures = []
 
 const yjsFile = 'lib/yjs-collaboration.ts'
+const yjsContractsFile = 'lib/yjs-collaboration-contracts.ts'
 const workbenchHookFile = 'components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts'
 const yjsText = read(yjsFile)
+const yjsContractsText = read(yjsContractsFile)
+const yjsContractSurface = `${yjsText}\n${yjsContractsText}`
 const hookText = read(workbenchHookFile)
 
 const requirePattern = (text, pattern, message) => {
@@ -26,12 +29,12 @@ requirePattern(
   'Canonical Yjs collaboration must dynamically load y-indexeddb for browser-safe offline persistence.',
 )
 requirePattern(
-  yjsText,
+  yjsContractSurface,
   /persistenceEnabled\?:\s*boolean/,
   'CollaborationConfig must expose persistenceEnabled.',
 )
 requirePattern(
-  yjsText,
+  yjsContractSurface,
   /persistenceName\?:\s*string/,
   'CollaborationConfig must expose persistenceName.',
 )

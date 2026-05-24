@@ -6,10 +6,10 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 7
+- Large source files: 0
 - P0 files: 0
-- P1 low-import large modules: 2
-- P1 modules with explicit triage: 2
+- P1 low-import large modules: 0
+- P1 modules with explicit triage: 0
 - Retired runtime entrypoints forbidden: 4
 - Hard ceiling: 1800 lines
 - UI ceiling: 1200 lines
@@ -17,9 +17,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Categories
 
-- `foundation-runtime`: 4
-- `server-runtime`: 2
-- `creative-runtime`: 1
+
 
 ## Owner Decisions
 
@@ -45,27 +43,19 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 | File | Lines | Category | Risk | Import hints | Recommendation |
 | --- | ---: | --- | --- | ---: | --- |
-| `lib/engine/scene-graph.ts` | 1065 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/hot-reload/hot-reload-server.ts` | 1049 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| _None_ | 0 | - | - | 0 | - |
 
 ## P1 Triage Decisions
 
 | File | Decision | Target surface | Load strategy | Rationale |
 | --- | --- | --- | --- | --- |
-| `lib/engine/scene-graph.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/hot-reload/hot-reload-server.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
+| _None_ | - | - | - | - |
 
 ## Full Inventory
 
 | File | Lines | Category | Risk | Import hints |
 | --- | ---: | --- | --- | ---: |
-| `lib/server/websocket-server.ts` | 1092 | server-runtime | P2 tracked large module | 4 |
-| `lib/engine/scene-graph.ts` | 1065 | creative-runtime | P1 low-import large module | 0 |
-| `lib/hot-reload/hot-reload-server.ts` | 1049 | foundation-runtime | P1 low-import large module | 0 |
-| `server/workers/build-queue-worker.ts` | 1033 | server-runtime | P2 tracked large module | 0 |
-| `lib/cloth-simulation.ts` | 1018 | foundation-runtime | P2 tracked large module | 2 |
-| `lib/facial-animation-system.ts` | 1015 | foundation-runtime | P2 tracked large module | 3 |
-| `lib/yjs-collaboration.ts` | 1013 | foundation-runtime | P2 tracked large module | 8 |
+
 
 ## Next Refactor Queue
 

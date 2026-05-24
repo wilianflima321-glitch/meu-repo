@@ -1,7 +1,7 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2060
+- Files scanned: 2067
 - Failures: 0
 
 ## Counts
@@ -163,6 +163,7 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/animation/animation-runtime/react.ts statically imports ./player -> lib/animation/animation-runtime/player.ts
 - lib/animation/animation-runtime/state-machine.ts statically imports ./player -> lib/animation/animation-runtime/player.ts
 - lib/engine/asset-pipeline-runtime/manager.ts statically imports ./loaders -> lib/engine/asset-pipeline-runtime/loaders.ts
+- lib/engine/scene-graph.ts statically imports ./scene-transform -> lib/engine/scene-transform.ts
 - lib/fluid-simulation-runtime/factories.ts statically imports ./flip -> lib/fluid-simulation-runtime/flip.ts
 - lib/fluid-simulation-runtime/factories.ts statically imports ./pbf -> lib/fluid-simulation-runtime/pbf.ts
 - lib/fluid-simulation-runtime/factories.ts statically imports ./sph -> lib/fluid-simulation-runtime/sph.ts

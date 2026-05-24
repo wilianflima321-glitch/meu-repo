@@ -18,129 +18,10 @@
  */
 
 import * as THREE from 'three';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface FacialConfig {
-  useFACS: boolean;
-  useBlendShapes: boolean;
-  useBones: boolean;
-  enableLipSync: boolean;
-  enableEyeTracking: boolean;
-  enableMicroExpressions: boolean;
-  enableWrinkles: boolean;
-}
-
-// FACS Action Units
-export enum ActionUnit {
-  // Upper Face
-  AU1 = 'InnerBrowRaiser',
-  AU2 = 'OuterBrowRaiser',
-  AU4 = 'BrowLowerer',
-  AU5 = 'UpperLidRaiser',
-  AU6 = 'CheekRaiser',
-  AU7 = 'LidTightener',
-  AU43 = 'EyesClosed',
-  AU45 = 'Blink',
-  AU46 = 'Wink',
-  
-  // Lower Face
-  AU9 = 'NoseWrinkler',
-  AU10 = 'UpperLipRaiser',
-  AU11 = 'NasolabialDeepener',
-  AU12 = 'LipCornerPuller',
-  AU13 = 'CheekPuffer',
-  AU14 = 'Dimpler',
-  AU15 = 'LipCornerDepressor',
-  AU16 = 'LowerLipDepressor',
-  AU17 = 'ChinRaiser',
-  AU18 = 'LipPucker',
-  AU20 = 'LipStretcher',
-  AU22 = 'LipFunneler',
-  AU23 = 'LipTightener',
-  AU24 = 'LipPressor',
-  AU25 = 'LipsPart',
-  AU26 = 'JawDrop',
-  AU27 = 'MouthStretch',
-  AU28 = 'LipSuck',
-  
-  // Head Position
-  AU51 = 'HeadTurnLeft',
-  AU52 = 'HeadTurnRight',
-  AU53 = 'HeadUp',
-  AU54 = 'HeadDown',
-  AU55 = 'HeadTiltLeft',
-  AU56 = 'HeadTiltRight',
-  AU57 = 'HeadForward',
-  AU58 = 'HeadBack',
-  
-  // Eye Position
-  AU61 = 'EyesLookLeft',
-  AU62 = 'EyesLookRight',
-  AU63 = 'EyesLookUp',
-  AU64 = 'EyesLookDown',
-}
-
-// Visemes for lip sync
-export enum Viseme {
-  Silence = 'sil',      // Silence/rest
-  PP = 'PP',            // p, b, m
-  FF = 'FF',            // f, v
-  TH = 'TH',            // th
-  DD = 'DD',            // t, d, n, l
-  KK = 'kk',            // k, g, ng
-  CH = 'CH',            // ch, j, sh
-  SS = 'SS',            // s, z
-  NN = 'nn',            // n, l
-  RR = 'RR',            // r
-  AA = 'aa',            // a (as in "father")
-  E = 'E',              // e (as in "bed")
-  I = 'I',              // i (as in "see")
-  O = 'O',              // o (as in "go")
-  U = 'U',              // u (as in "you")
-}
-
-export interface FACSPose {
-  actionUnits: Map<ActionUnit, number>; // AU -> intensity (0-1)
-}
-
-export interface BlendShapeData {
-  name: string;
-  vertices: THREE.Vector3[];
-  normals?: THREE.Vector3[];
-}
-
-export interface FacialBone {
-  name: string;
-  position: THREE.Vector3;
-  rotation: THREE.Quaternion;
-  scale: THREE.Vector3;
-}
-
-export interface EmotionState {
-  happiness: number;
-  sadness: number;
-  anger: number;
-  fear: number;
-  surprise: number;
-  disgust: number;
-  contempt: number;
-}
-
-export interface LipSyncData {
-  visemes: { time: number; viseme: Viseme; intensity: number }[];
-  duration: number;
-}
-
-export interface EyeTrackingState {
-  leftEyeTarget: THREE.Vector3;
-  rightEyeTarget: THREE.Vector3;
-  leftEyeOpenness: number;
-  rightEyeOpenness: number;
-  blinkProgress: number;
-}
+import { ActionUnit, Viseme } from './facial-animation-contracts';
+import type { BlendShapeData, EmotionState, EyeTrackingState, FacialBone, FacialConfig, FACSPose, LipSyncData, WrinkleMapConfig } from './facial-animation-contracts';
+export { ActionUnit, Viseme } from './facial-animation-contracts';
+export type { BlendShapeData, EmotionState, EyeTrackingState, FacialBone, FacialConfig, FACSPose, LipSyncData, WrinkleMapConfig } from './facial-animation-contracts';
 
 // ============================================================================
 // PHONEME TO VISEME MAPPING
@@ -654,14 +535,6 @@ export class MicroExpressionGenerator {
 // ============================================================================
 // WRINKLE MAP CONTROLLER
 // ============================================================================
-
-export interface WrinkleMapConfig {
-  foreheadWrinkle: THREE.Texture | null;
-  browWrinkle: THREE.Texture | null;
-  noseWrinkle: THREE.Texture | null;
-  smileWrinkle: THREE.Texture | null;
-  frownWrinkle: THREE.Texture | null;
-}
 
 export class WrinkleMapController {
   private textures: WrinkleMapConfig;

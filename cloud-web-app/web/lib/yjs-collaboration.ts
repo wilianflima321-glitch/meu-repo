@@ -1,135 +1,16 @@
 'use client';
 
-/**
- * AETHEL ENGINE - YJS COLLABORATION MODULE
- * ========================================
- * 
- * Módulo de colaboração em tempo real padronizado usando Yjs.
- * Substitui qualquer implementação CRDT customizada.
- * 
- * Yjs é battle-tested e suporta:
- * - Monaco Editor nativamente
- * - Quill, ProseMirror, etc.
- * - WebSocket e WebRTC providers
- * - Awareness (cursores, seleção, etc.)
- */
+/** Battle-tested Yjs collaboration runtime for documents, scene objects, awareness and Monaco. */
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { Awareness } from 'y-protocols/awareness';
 import type { IndexeddbPersistence } from 'y-indexeddb';
 
 import {createComponentLogger, logger} from '@/lib/observability/logger'
+import type { CollaborationConfig, CollaborationEventListener, CursorPosition, MonacoBinding, MonacoContentChange, MonacoEditorLike, MonacoModelLike, MonacoPosition, MonacoRangeLike, SceneObject, SelectionRange, UseCollaborationOptions, UseCollaborationResult as BaseUseCollaborationResult, UserInfo, YTextDelta } from './yjs-collaboration-contracts';
+export type { CollaborationConfig, CollaborationEventListener, CursorPosition, MonacoBinding, MonacoContentChange, MonacoEditorLike, MonacoModelLike, MonacoPosition, MonacoRangeLike, SceneObject, SelectionRange, UseCollaborationOptions, UserInfo, YTextDelta } from './yjs-collaboration-contracts';
 
 const log = createComponentLogger('yjs-collaboration')
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface UserInfo {
-    id: string;
-    name: string;
-    color: string;
-    avatar?: string;
-    cursor?: CursorPosition;
-    selection?: SelectionRange;
-}
-
-export interface CursorPosition {
-    x: number;
-    y: number;
-    z?: number;
-    filePath?: string;
-    pane?: string;
-    line?: number;
-    column?: number;
-}
-
-export interface SelectionRange {
-    filePath?: string;
-    pane?: string;
-    start: { index: number; length: number };
-    end: { index: number; length: number };
-}
-
-export interface CollaborationConfig {
-    documentName: string;
-    serverUrl?: string;
-    persistenceEnabled?: boolean;
-    persistenceName?: string;
-    user: {
-        id: string;
-        name: string;
-        color?: string;
-    };
-    onSync?: () => void;
-    onPersistenceSync?: () => void;
-    onStatusChange?: (status: 'connecting' | 'connected' | 'disconnected') => void;
-    onAwarenessChange?: (users: Map<number, UserInfo>) => void;
-}
-
-export interface SceneObject {
-    id: string;
-    type: string;
-    name: string;
-    position: { x: number; y: number; z: number };
-    rotation: { x: number; y: number; z: number };
-    scale: { x: number; y: number; z: number };
-    visible: boolean;
-    locked: boolean;
-    lockedBy?: string;
-    parentId?: string;
-    children?: string[];
-    properties: Record<string, unknown>;
-}
-
-type CollaborationEventListener = (data: unknown) => void;
-
-interface MonacoPosition {
-    lineNumber: number;
-    column: number;
-}
-
-interface MonacoRangeLike {
-    startLineNumber: number;
-    startColumn: number;
-    endLineNumber: number;
-    endColumn: number;
-}
-
-interface MonacoContentChange {
-    range: {
-        startLineNumber: number;
-        startColumn: number;
-    };
-    rangeLength: number;
-    text: string;
-}
-
-interface MonacoModelLike {
-    getValue(): string;
-    setValue(value: string): void;
-    getPositionAt(offset: number): MonacoPosition;
-    getOffsetAt(position: MonacoPosition): number;
-    onDidChangeContent(callback: (event: { changes: MonacoContentChange[] }) => void): { dispose: () => void };
-}
-
-interface MonacoEditorLike {
-    getModel(): MonacoModelLike | null;
-    executeEdits(
-        source: string,
-        edits: Array<{
-            range: MonacoRangeLike;
-            text: string;
-        }>
-    ): void;
-}
-
-interface YTextDelta {
-    retain?: number;
-    insert?: string;
-    delete?: number;
-}
 
 function isVector3(value: unknown): value is SceneObject['position'] {
     return typeof value === 'object' &&
@@ -788,28 +669,7 @@ export class CollaborationSession {
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-export interface UseCollaborationOptions {
-    documentName: string;
-    serverUrl?: string;
-    persistenceEnabled?: boolean;
-    persistenceName?: string;
-    userId: string;
-    userName: string;
-    userColor?: string;
-}
-
-export interface UseCollaborationResult {
-    session: CollaborationSession | null;
-    isConnected: boolean;
-    isSynced: boolean;
-    isPersistenceSynced: boolean;
-    users: UserInfo[];
-    error: Error | null;
-    connect: () => Promise<void>;
-    disconnect: () => void;
-    updateCursor: (position: CursorPosition) => void;
-    updateSelection: (selection: SelectionRange | null) => void;
-}
+export type UseCollaborationResult = BaseUseCollaborationResult<CollaborationSession>;
 
 export function useYjsCollaboration(options: UseCollaborationOptions): UseCollaborationResult {
     const [session, setSession] = useState<CollaborationSession | null>(null);
@@ -893,10 +753,6 @@ export function useYjsCollaboration(options: UseCollaborationOptions): UseCollab
 // ============================================================================
 // MONACO EDITOR BINDING
 // ============================================================================
-
-export interface MonacoBinding {
-    destroy: () => void;
-}
 
 /**
  * Bind Yjs to Monaco Editor
