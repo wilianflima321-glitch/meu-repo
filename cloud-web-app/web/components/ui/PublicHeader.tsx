@@ -31,7 +31,7 @@ export default function PublicHeader() {
       <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--aethel-border-primary)] bg-[rgba(8,10,16,0.86)] shadow-[0_18px_70px_rgba(2,6,23,0.26)] backdrop-blur-xl">
         <nav aria-label="Primary navigation" className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link href="/" aria-label="Aethel home" className="group inline-flex min-w-0 items-center gap-3 rounded-2xl pr-2 text-[var(--aethel-text-primary)] outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)]">
-            <Image src="/branding/aethel-icon-source.png" alt="" width={32} height={32} sizes="32px" className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-1" priority />
+            <Image src="/branding/aethel-mark.svg" alt="" width={32} height={32} sizes="32px" className="rounded-xl shadow-[0_0_0_1px_var(--aethel-border-primary)]" priority />
             <span className="hidden items-center gap-2 sm:inline-flex">
               <span className="text-sm font-semibold tracking-[-0.02em]">Aethel</span>
             </span>

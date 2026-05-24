@@ -437,11 +437,11 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
         <div className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--aethel-border-subtle)] px-3">
           <Link href="/dashboard" className="flex items-center gap-2 group">
             <Image
-              src="/branding/aethel-icon-source.png"
+              src="/branding/aethel-mark.svg"
               alt="Aethel"
               width={28}
               height={28}
-              className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)] p-1"
+              className="rounded-lg shadow-[0_0_0_1px_var(--aethel-border-subtle)]"
             />
             <div>
               <p className="text-xs font-semibold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-info)]">

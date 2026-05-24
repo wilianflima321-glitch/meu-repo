@@ -49,7 +49,7 @@ export default function PublicFooter() {
         <div className="grid gap-9 lg:grid-cols-[minmax(260px,1.35fr)_repeat(4,minmax(120px,1fr))]">
           <div className="max-w-sm">
             <Link href="/" className="inline-flex items-center gap-3 rounded-2xl text-[var(--aethel-text-primary)] outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)]">
-              <Image src="/branding/aethel-icon-source.png" alt="" width={30} height={30} sizes="30px" className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-1" />
+              <Image src="/branding/aethel-mark.svg" alt="" width={30} height={30} sizes="30px" className="rounded-xl shadow-[0_0_0_1px_var(--aethel-border-primary)]" />
               <span className="text-sm font-semibold">Aethel Studio</span>
             </Link>
             <p className="mt-4 text-sm leading-6 text-[var(--aethel-text-tertiary)]">

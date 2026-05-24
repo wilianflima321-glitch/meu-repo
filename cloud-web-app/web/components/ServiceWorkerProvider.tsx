@@ -238,7 +238,7 @@ export function InstallPrompt() {
     <div className="fixed bottom-4 left-4 z-[9999] max-w-sm">
       <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 shadow-2xl">
         <div className="flex items-center gap-3">
-          <Image src="/branding/aethel-icon-source.png" alt="" width={40} height={40} sizes="40px" className="h-10 w-10 rounded-lg" />
+          <Image src="/branding/aethel-mark.svg" alt="" width={40} height={40} sizes="40px" className="h-10 w-10 rounded-lg" />
           <div className="flex-1">
             <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Instalar Aethel Engine</p>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Acesse rapidamente do seu desktop</p>

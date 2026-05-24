@@ -217,7 +217,7 @@ export default function LoginPageV2() {
 
               <div className="mb-7">
                 <div className="mb-4 flex items-center gap-3">
-                  <Image src="/branding/aethel-icon-source.png" alt="Aethel" width={36} height={36} sizes="36px" className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-1" priority />
+                  <Image src="/branding/aethel-mark.svg" alt="Aethel" width={36} height={36} sizes="36px" className="rounded-xl shadow-[0_0_0_1px_var(--aethel-border-primary)]" priority />
                   <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">Aethel Studio</span>
                 </div>
                 <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[var(--aethel-text-primary)]">Sign in</h1>

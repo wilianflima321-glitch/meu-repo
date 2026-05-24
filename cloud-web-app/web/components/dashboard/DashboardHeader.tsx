@@ -58,11 +58,11 @@ export function DashboardHeader({
 
           <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(18,25,38,0.9),rgba(12,17,28,0.72))] px-3 py-1.5 shadow-[0_20px_50px_rgba(2,6,23,0.42)]">
             <Image
-              src="/branding/aethel-icon-source.png"
+              src="/branding/aethel-mark.svg"
               alt="Aethel"
               width={40}
               height={40}
-              className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[radial-gradient(circle_at_top,rgba(79,70,229,0.3),rgba(14,165,233,0.1)_60%,transparent)] p-1.5 shadow-[0_12px_30px_rgba(56,189,248,0.25)]"
+              className="rounded-2xl shadow-[0_0_0_1px_var(--aethel-border-subtle),0_12px_30px_rgba(56,189,248,0.18)]"
             />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">

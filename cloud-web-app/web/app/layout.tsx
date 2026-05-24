@@ -59,6 +59,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: '/branding/aethel-mark.svg', type: 'image/svg+xml' },
       { url: '/icons/favicon.ico', type: 'image/x-icon' },
       { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
       { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },

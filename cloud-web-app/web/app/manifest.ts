@@ -10,7 +10,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Aethel Engine',
     short_name: 'Aethel',
-    description: 'Professional platform for building games, films, and apps in a unified web-native studio.',
+    description: 'Mission-first AI workspace for apps, research, previews, evidence, and governed creative runtimes.',
     start_url: '/ide',
     display: 'standalone',
     background_color: '#0a0a0f',
@@ -18,6 +18,7 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: 'landscape',
     categories: ['games', 'productivity', 'developer tools'],
     icons: [
+      { src: '/branding/aethel-mark.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
       { src: '/icons/icon-72x72.png', sizes: '72x72', type: 'image/png', purpose: 'maskable' },
       { src: '/icons/icon-96x96.png', sizes: '96x96', type: 'image/png', purpose: 'maskable' },
       { src: '/icons/icon-128x128.png', sizes: '128x128', type: 'image/png', purpose: 'maskable' },

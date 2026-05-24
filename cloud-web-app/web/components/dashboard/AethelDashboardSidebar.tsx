@@ -205,11 +205,11 @@ export function AethelDashboardSidebar({
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <Image
-                src="/branding/aethel-icon-source.png"
+                src="/branding/aethel-mark.svg"
                 alt="Aethel"
                 width={28}
                 height={28}
-                className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-1"
+                className="rounded-xl shadow-[0_0_0_1px_var(--aethel-border-subtle)]"
               />
               <div>
                 <span className="block text-sm font-semibold text-[var(--aethel-text-primary)]">Studio nav</span>

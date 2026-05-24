@@ -39,12 +39,12 @@ export default function AuthExperiencePanel({
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Image
-              src="/branding/aethel-icon-source.png"
+              src="/branding/aethel-mark.svg"
               alt="Aethel"
               width={38}
               height={38}
               sizes="38px"
-              className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-1.5"
+              className="rounded-2xl shadow-[0_0_0_1px_var(--aethel-border-primary),0_14px_32px_rgba(56,189,248,0.16)]"
             />
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">{eyebrow}</p>
