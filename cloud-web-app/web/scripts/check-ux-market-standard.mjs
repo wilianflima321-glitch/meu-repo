@@ -7,6 +7,160 @@ const ROOT = process.cwd()
 const DOCS_DIR = path.join(ROOT, 'docs')
 const REPORT_FILE = path.join(DOCS_DIR, 'UX_MARKET_STANDARD_SPINE.md')
 
+const MARKET_REFERENCES = [
+  {
+    product: 'Linear Agent',
+    standard: 'Contextual agent work lives where the user already works; chats, comments, skills, and MCP connections stay permission-aware.',
+    source: 'https://linear.app/docs/linear-agent',
+  },
+  {
+    product: 'Cursor Background Agents',
+    standard: 'Async agents need visible status, takeover, branch handoff, environment setup, and security disclosure.',
+    source: 'https://docs.cursor.com/en/background-agents',
+  },
+  {
+    product: 'v0 Platform API',
+    standard: 'Prompt-to-product should expose clean chat, workflows, project management, deployment, and agent APIs without forcing users through an internal cockpit.',
+    source: 'https://v0.app/docs/api/platform/overview',
+  },
+  {
+    product: 'Replit Agent',
+    standard: 'Agent-first creation works best when the user can preview what will be built before committing and see production primitives nearby.',
+    source: 'https://replit.com/blog/2025-replit-in-review',
+  },
+  {
+    product: 'Unreal Engine 5.6',
+    standard: 'High-fidelity game tooling needs production-grade performance, asset organization, animation authoring, and runtime evidence before quality claims.',
+    source: 'https://www.unrealengine.com/news/unreal-engine-5-6-is-now-available',
+  },
+  {
+    product: 'Adobe Premiere Generative Extend',
+    standard: 'Creative AI features should state limits, source media constraints, generated-media storage, and cloud requirements inside the workflow.',
+    source: 'https://helpx.adobe.com/in/premiere/desktop/edit-projects/edit-with-generative-ai/generative-extend-overview.html',
+  },
+  {
+    product: 'Canva Magic Studio',
+    standard: 'Powerful AI should feel like one place, not a stack of disconnected tools; safety and marketplace trust are part of the creative surface.',
+    source: 'https://www.canva.com/en_in/newsroom/news/magic-studio/',
+  },
+  {
+    product: 'Figma Dev Mode',
+    standard: 'Professional handoff depends on focus views, ready states, annotations, status, and plugins that reduce context switching.',
+    source: 'https://help.figma.com/hc/en-us/articles/15023124644247-Guide-to-Dev-Mode',
+  },
+]
+
+const SURFACE_MATRIX = [
+  {
+    surface: 'Landing',
+    route: '/',
+    comparator: 'v0 + Replit prompt-first entry',
+    decision: 'refine',
+    principle: 'One mission input, one primary CTA, proof behind progressive disclosure.',
+  },
+  {
+    surface: 'Auth',
+    route: '/login, /register',
+    comparator: 'Vercel + Linear auth',
+    decision: 'refine',
+    principle: 'Passkey, magic link, OAuth, and password fallback must be visible without jargon.',
+  },
+  {
+    surface: 'Pricing',
+    route: '/pricing',
+    comparator: 'Linear + Vercel pricing',
+    decision: 'compress',
+    principle: 'Three first-choice plans; advanced comparison and policy details stay collapsed.',
+  },
+  {
+    surface: 'Marketplace',
+    route: '/marketplace',
+    comparator: 'Canva app marketplace + browser extension permission review',
+    decision: 'refine',
+    principle: 'Default to verified, show permissions/provenance/risk/rollback before mutation.',
+  },
+  {
+    surface: 'Dashboard',
+    route: '/dashboard',
+    comparator: 'Linear home + Replit app creation flow',
+    decision: 'refine',
+    principle: 'Answer active project, running agent, cost, approval, and next action in one glance.',
+  },
+  {
+    surface: 'IDE',
+    route: '/ide',
+    comparator: 'Cursor agent sidebar',
+    decision: 'keep/refine',
+    principle: 'Agent status, scope locks, replay, cost, and takeover stay visible near the composer.',
+  },
+  {
+    surface: 'Studio Hub',
+    route: '/studio',
+    comparator: 'Unreal project browser + Figma focus views',
+    decision: 'refine',
+    principle: 'Show primary surfaces first; deeper editors behind compact progressive navigation.',
+  },
+  {
+    surface: 'Studio Editors',
+    route: '/studio/*',
+    comparator: 'Unreal/Unity editor panes',
+    decision: 'adapter-needed',
+    principle: 'Capability, maturity, runtime mode, evidence, and next action before dense editor controls.',
+  },
+  {
+    surface: 'Cloud Stream',
+    route: '/studio/cinematic',
+    comparator: 'Unreal Pixel Streaming operations',
+    decision: 'held-by-capability',
+    principle: 'Available only with configured URL, cost, teardown, session, and runtime evidence.',
+  },
+  {
+    surface: 'Evidence Center',
+    route: '/evidence',
+    comparator: 'Figma ready-for-dev + Linear activity context',
+    decision: 'keep/refine',
+    principle: 'Proof, blockers, readiness, and next action beat explanatory copy.',
+  },
+  {
+    surface: 'Admin',
+    route: '/admin',
+    comparator: 'AWS/Vercel console IA',
+    decision: 'hide legacy',
+    principle: 'Six visible areas; compatibility drawer closed by default.',
+  },
+  {
+    surface: 'Billing',
+    route: '/billing',
+    comparator: 'Stripe/Vercel billing',
+    decision: 'refine',
+    principle: 'Spend, limits, and readiness close to the workflow; no accounting wall.',
+  },
+  {
+    surface: 'Settings',
+    route: '/settings',
+    comparator: 'Linear workspace settings',
+    decision: 'refine',
+    principle: 'Grouped decisions, current state, and enterprise paths without duplicated navigation.',
+  },
+  {
+    surface: 'Mobile/PWA',
+    route: 'mobile shell',
+    comparator: 'Replit mobile + Linear mobile',
+    decision: 'refine',
+    principle: 'Review, approve, monitor, and resume; heavy editing remains desktop/local.',
+  },
+]
+
+const BACKLOG = [
+  ['P0', 'Authenticated screenshots', 'Capture real dashboard/IDE/Studio/admin/billing/settings states with JWT instead of relying on auth-gate screenshots.'],
+  ['P0', 'Surface density ratchet', 'Keep pricing, landing, marketplace, and Studio nav below card-wall thresholds with progressive disclosure.'],
+  ['P1', 'Dashboard first answer', 'The first authenticated screen must show active project, agent run, cost, approval, and next action without scrolling.'],
+  ['P1', 'Studio editor readiness headers', 'Every editor route should show capability, runtime, evidence, maturity, and one next action before tools.'],
+  ['P1', 'Game asset quality evidence', 'Raw AI draft assets stay blocked from final until provenance, license, LOD, PBR, collision/navmesh, perf trace, playtest, and human approval exist.'],
+  ['P2', 'Runtime visual QA', 'Add Lighthouse/axe runtime evidence for public and authenticated routes before promoting WCAG/market-quality claims.'],
+  ['P2', 'Storybook expansion', 'Cover Agent Cockpit, CostMeter, runtime selector, Evidence Center, marketplace review, and Studio quality cards.'],
+]
+
 const CHECKS = [
   {
     id: 'public-chrome-no-inline-style',
@@ -160,6 +314,47 @@ const CHECKS = [
     },
     limit: 0,
   },
+  {
+    id: 'landing-progressive-disclosure',
+    description: 'Landing must reduce mode-card walls by keeping primary modes visible and moving secondary modes behind progressive disclosure.',
+    files: ['app/landing-v3.tsx'],
+    test: (content) => {
+      const required = ['PRIMARY_START_MODES', 'SECONDARY_START_MODES', 'More modes']
+      return required.filter((token) => !content.includes(token)).length
+    },
+    limit: 0,
+  },
+  {
+    id: 'pricing-decision-compression',
+    description: 'Pricing must keep the first decision to the common plans and move smaller steps/details out of the primary scan path.',
+    files: ['app/pricing/_components/PricingPlansGrid.tsx', 'app/pricing/_components/PricingComparisonTable.tsx', 'app/pricing/_components/PricingFaq.tsx'],
+    combined: true,
+    test: (content) => {
+      const required = ['featuredPlans', 'supportingPlans', 'Most common paths', 'Smaller steps', 'Detailed comparison', 'Open only if you need']
+      return required.filter((token) => !content.includes(token)).length
+    },
+    limit: 0,
+  },
+  {
+    id: 'studio-progressive-navigation',
+    description: 'Studio must not expose every specialized editor as equal-weight chrome; primary editors stay visible and advanced editors move behind a compact route picker.',
+    files: ['app/studio/CreativeStudioShell.tsx'],
+    test: (content) => {
+      const required = ['PRIMARY_CREATIVE_HREFS', 'primaryCreativeRoutes', 'secondaryCreativeRoutes', 'More editors']
+      return required.filter((token) => !content.includes(token)).length
+    },
+    limit: 0,
+  },
+  {
+    id: 'dashboard-first-answer',
+    description: 'Dashboard overview must answer project, run state, cost, approval, evidence, preview, and next action before deep cockpit details.',
+    files: ['components/dashboard/DashboardOverviewTab.tsx'],
+    test: (content) => {
+      const required = ['Active runs', 'Approvals', 'Evidence', 'Preview', 'Next actions', 'Budget', 'Review pending proposal']
+      return required.filter((token) => !content.includes(token)).length
+    },
+    limit: 0,
+  },
 ]
 
 function rel(file) {
@@ -210,7 +405,31 @@ fs.mkdirSync(DOCS_DIR, { recursive: true })
 const lines = []
 lines.push('# UX Market Standard Spine')
 lines.push('')
-lines.push('Generated by `npm run qa:ux-market-standard`. This gate keeps Aethel aligned with the local UX arsenal: mission-first entry, disciplined public chrome, trust-first marketplace, and no screenshot billboard regressions.')
+lines.push('Generated by `npm run qa:ux-market-standard`. This gate keeps Aethel aligned with the local UX arsenal: mission-first entry, disciplined public chrome, trust-first marketplace, progressive Studio navigation, and no screenshot billboard regressions.')
+lines.push('')
+lines.push('## Market Standards Consulted')
+lines.push('')
+lines.push('| Product | Standard Aethel Must Match | Source |')
+lines.push('| --- | --- | --- |')
+for (const reference of MARKET_REFERENCES) {
+  lines.push(`| ${reference.product} | ${reference.standard} | ${reference.source} |`)
+}
+lines.push('')
+lines.push('## Surface Quality Matrix')
+lines.push('')
+lines.push('| Surface | Route | Comparator | Decision | Principle |')
+lines.push('| --- | --- | --- | --- | --- |')
+for (const surface of SURFACE_MATRIX) {
+  lines.push(`| ${surface.surface} | \`${surface.route}\` | ${surface.comparator} | ${surface.decision} | ${surface.principle} |`)
+}
+lines.push('')
+lines.push('## Prioritized UX Backlog')
+lines.push('')
+lines.push('| Priority | Area | Action |')
+lines.push('| --- | --- | --- |')
+for (const [priority, area, action] of BACKLOG) {
+  lines.push(`| ${priority} | ${area} | ${action} |`)
+}
 lines.push('')
 lines.push('## Summary')
 for (const result of results) {

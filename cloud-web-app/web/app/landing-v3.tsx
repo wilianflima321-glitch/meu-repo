@@ -38,6 +38,9 @@ const START_MODES = [
   },
 ]
 
+const PRIMARY_START_MODES = START_MODES.slice(0, 3)
+const SECONDARY_START_MODES = START_MODES.slice(3)
+
 const OPERATION_SIGNALS = [
   {
     title: 'Agent replay cockpit',
@@ -126,7 +129,7 @@ export default function LandingPageV3() {
               </div>
 
               <div className="mt-5 flex flex-wrap gap-2">
-                {START_MODES.slice(0, 3).map((mode) => (
+                {PRIMARY_START_MODES.map((mode) => (
                   <Link
                     key={mode.title}
                     href={mode.href}
@@ -215,7 +218,7 @@ export default function LandingPageV3() {
                 </span>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {START_MODES.map((mode) => (
+                {PRIMARY_START_MODES.map((mode) => (
                   <Link
                     key={mode.title}
                     href={mode.href}
@@ -226,6 +229,23 @@ export default function LandingPageV3() {
                   </Link>
                 ))}
               </div>
+              <details className="mt-4 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 py-3">
+                <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-secondary)]">
+                  More modes
+                </summary>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                  {SECONDARY_START_MODES.map((mode) => (
+                    <Link
+                      key={mode.title}
+                      href={mode.href}
+                      className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_46%,transparent)] px-3 py-3 transition hover:border-[color-mix(in_srgb,var(--aethel-info)_26%,transparent)]"
+                    >
+                      <span className="block text-sm font-semibold text-[var(--aethel-text-primary)]">{mode.title}</span>
+                      <span className="mt-1 block text-xs leading-5 text-[var(--aethel-text-tertiary)]">{mode.description}</span>
+                    </Link>
+                  ))}
+                </div>
+              </details>
             </div>
 
             <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.28)]">

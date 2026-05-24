@@ -8,6 +8,15 @@ import { isNavLinkActive, STUDIO_PRIMARY_LINKS } from '@/lib/navigation/surfaces
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 import { CREATIVE_STUDIO_ROUTES } from './creative-studio-routes'
 
+const PRIMARY_CREATIVE_HREFS = new Set([
+  '/studio/level',
+  '/studio/scene',
+  '/studio/material',
+  '/studio/film',
+  '/studio/audio',
+  '/studio/cinematic',
+])
+
 interface CreativeStudioShellProps {
   title: string
   subtitle: string
@@ -71,6 +80,9 @@ export default function CreativeStudioShell({
   const currentHref = activeHref ?? pathname
   const currentRoute = CREATIVE_STUDIO_ROUTES.find((route) => route.href === currentHref || route.href === pathname)
   const currentGuidance = maturityGuidance(currentRoute?.maturity)
+  const primaryCreativeRoutes = CREATIVE_STUDIO_ROUTES.filter((route) => PRIMARY_CREATIVE_HREFS.has(route.href))
+  const secondaryCreativeRoutes = CREATIVE_STUDIO_ROUTES.filter((route) => !PRIMARY_CREATIVE_HREFS.has(route.href))
+  const currentRouteIsSecondary = currentRoute ? !PRIMARY_CREATIVE_HREFS.has(currentRoute.href) : false
 
   const actions = (
     <div className="flex items-center gap-2">
@@ -126,7 +138,19 @@ export default function CreativeStudioShell({
           <span>Creative Hub</span>
           <MaturityBadge path="/studio" compact />
         </Link>
-        {CREATIVE_STUDIO_ROUTES.map((route) => (
+        {currentRouteIsSecondary && currentRoute ? (
+          <Link
+            key={currentRoute.href}
+            href={currentRoute.href}
+            className={`${creativeTabClass(true)} inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]`}
+            title={currentRoute.description}
+            aria-current="page"
+          >
+            <span>{currentRoute.shortLabel}</span>
+            <MaturityBadge maturity={currentRoute.maturity} compact />
+          </Link>
+        ) : null}
+        {primaryCreativeRoutes.map((route) => (
           <Link
             key={route.href}
             href={route.href}
@@ -138,6 +162,30 @@ export default function CreativeStudioShell({
             <MaturityBadge maturity={route.maturity} compact />
           </Link>
         ))}
+        <details className="group relative shrink-0">
+          <summary className={`${creativeTabClass(currentRouteIsSecondary)} inline-flex min-h-10 cursor-pointer list-none items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]`}>
+            More editors
+          </summary>
+          <div className="fixed left-3 right-3 top-36 z-50 grid max-h-[70vh] gap-2 overflow-y-auto rounded-[24px] border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-3 shadow-[0_24px_80px_rgba(0,0,0,0.42)] sm:left-auto sm:right-6 sm:w-[640px] sm:grid-cols-2 lg:grid-cols-3">
+            {secondaryCreativeRoutes.map((route) => (
+              <Link
+                key={route.href}
+                href={route.href}
+                className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-3 py-3 transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
+                title={route.description}
+                aria-current={currentHref === route.href || pathname === route.href ? 'page' : undefined}
+              >
+                <span className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">{route.label}</span>
+                  <MaturityBadge maturity={route.maturity} compact />
+                </span>
+                <span className="mt-1 line-clamp-2 block text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
+                  {route.description}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </details>
       </nav>
 
       <div className="flex min-h-[72px] flex-col gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_66%,transparent)] px-4 py-3 lg:flex-row lg:items-center lg:justify-between lg:px-6">
