@@ -20,14 +20,8 @@ Generated: deterministic local scan
 | --- | ---: | --- | --- |
 | `lib/server/websocket-server.ts` | 1092 | server | Continue extracting protocol-specific handlers; event bus, transport, auth, rooms, and presence are already split. |
 | `lib/engine/scene-graph.ts` | 1065 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/engine/audio-manager.ts` | 1063 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/webxr-vr-system.ts` | 1061 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ecs-dots-system.ts` | 1056 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/dialogue/dialogue-system.tsx` | 1054 | runtime | Split planning, timeline, playback, and serialization before adding film features. |
-| `lib/aaa-render-system.ts` | 1053 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/hot-reload/hot-reload-server.ts` | 1049 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/quest-mission-system.ts` | 1046 | runtime | Split data model, runtime, persistence, and editor adapter. |
-| `lib/assets/asset-importer.ts` | 1041 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/pbr-shader-pipeline.ts` | 1037 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ray-tracing.ts` | 1035 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai-audio-engine.ts` | 1034 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -41,6 +35,7 @@ Generated: deterministic local scan
 | `lib/yjs-collaboration.ts` | 1013 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/audio/spatial-audio-system.ts` | 1007 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/server/build-runtime.ts` | 1001 | server | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/webxr-vr-system.ts` | 1001 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/particle-system-real.ts` | 1000 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/volumetric-clouds.ts` | 1000 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/commands/command-handlers.tsx` | 995 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -48,6 +43,11 @@ Generated: deterministic local scan
 | `lib/nanite-virtualized-geometry.ts` | 990 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/hooks/useTheiaSystemsHooks.ts` | 989 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai/agent-mode.ts` | 988 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/control-rig-system.ts` | 986 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/dialogue/dialogue-system.tsx` | 986 | runtime | Split planning, timeline, playback, and serialization before adding film features. |
+| `lib/workspace/workspace-service.ts` | 985 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/assets/asset-importer.ts` | 984 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/video-encoder-real.ts` | 981 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 
 ## Ratchet Policy
 

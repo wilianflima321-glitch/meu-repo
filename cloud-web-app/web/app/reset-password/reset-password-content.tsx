@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Lock, Eye, EyeOff, ArrowLeft, CheckCircle, Loader2, XCircle } from 'lucide-react'
-import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
@@ -237,16 +236,14 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordContentPage() {
   return (
-    <CoreUiProviders>
-      <Suspense
-        fallback={
-          <div className="min-h-screen flex items-center justify-center bg-[var(--aethel-surface-primary)]">
-            <Loader2 className="h-8 w-8 animate-spin text-[var(--aethel-primary-light)]" />
-          </div>
-        }
-      >
-        <ResetPasswordForm />
-      </Suspense>
-    </CoreUiProviders>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[var(--aethel-surface-primary)]">
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--aethel-primary-light)]" />
+        </div>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
   )
 }

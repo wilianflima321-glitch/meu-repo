@@ -6,7 +6,6 @@ import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/brow
 import Link from 'next/link'
 import Image from 'next/image'
 import Codicon from '@/components/ide/Codicon'
-import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
 import TurnstileField, { isTurnstileClientConfigured } from '@/components/auth/TurnstileField'
 import { analytics } from '@/lib/analytics'
@@ -184,8 +183,7 @@ export default function LoginPageV2() {
   }
 
   return (
-    <CoreUiProviders>
-      <main className="relative min-h-screen overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-8 text-[var(--aethel-text-primary)] sm:px-6 lg:py-10">
+    <main className="relative min-h-screen overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-8 text-[var(--aethel-text-primary)] sm:px-6 lg:py-10">
         <a href="#login-form" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-sm">
           Skip to the login form
         </a>
@@ -298,7 +296,6 @@ export default function LoginPageV2() {
             <AuthExperiencePanel eyebrow="Operational access" domainLabel="Apps + Research" title="A quieter entry into serious work." description="The auth surface now behaves like a product door, not a billboard: one decision, one form, one visible next step." highlights={LOGIN_HIGHLIGHTS} stats={LOGIN_STATS} />
           </div>
         </div>
-      </main>
-    </CoreUiProviders>
+    </main>
   )
 }

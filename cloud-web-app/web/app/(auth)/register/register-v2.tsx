@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import Codicon from '@/components/ide/Codicon'
-import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
 import TurnstileField, { isTurnstileClientConfigured } from '@/components/auth/TurnstileField'
 import { analytics } from '@/lib/analytics'
@@ -87,8 +86,7 @@ export default function RegisterPageV2() {
   }
 
   return (
-    <CoreUiProviders>
-      <main className="relative min-h-screen overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-8 text-[var(--aethel-text-primary)] sm:px-6 lg:py-10">
+    <main className="relative min-h-screen overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-8 text-[var(--aethel-text-primary)] sm:px-6 lg:py-10">
         <a href="#register-form" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-sm">Skip to the registration form</a>
         <div className="pointer-events-none absolute inset-0 bg-grid-aethel opacity-45" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,color-mix(in_srgb,var(--aethel-primary)_16%,transparent),transparent_34%),radial-gradient(circle_at_82%_8%,color-mix(in_srgb,var(--aethel-info)_12%,transparent),transparent_30%)]" />
@@ -124,7 +122,6 @@ export default function RegisterPageV2() {
             <AuthExperiencePanel eyebrow="First access" domainLabel="Mission first" title="Start with context, not clutter." description="Registration should prepare the first useful action and keep the user inside a calm, inspectable workflow." highlights={REGISTER_HIGHLIGHTS} stats={REGISTER_STATS} />
           </div>
         </div>
-      </main>
-    </CoreUiProviders>
+    </main>
   )
 }

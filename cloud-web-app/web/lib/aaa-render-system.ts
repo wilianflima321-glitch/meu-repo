@@ -14,176 +14,39 @@
  */
 
 import * as THREE from 'three';
-
-// ============================================================================
-// RENDERING PIPELINE
-// ============================================================================
-
-export type RenderPipelineType = 'forward' | 'deferred' | 'forwardPlus' | 'tiled';
-
-export interface RenderPipelineConfig {
-  type: RenderPipelineType;
-  hdr: boolean;
-  multisampling: boolean;
-  samples: number;
-  toneMapping: THREE.ToneMapping;
-  toneMappingExposure: number;
-  shadowMapEnabled: boolean;
-  shadowMapType: THREE.ShadowMapType;
-  shadowMapSize: number;
-  physicallyCorrectLights: boolean;
-  outputColorSpace: THREE.ColorSpace;
-}
+import {
+  DEFAULT_GI_CONFIG,
+  DEFAULT_PIPELINE_CONFIG,
+  LITE_GI_CONFIG,
+  LITE_PIPELINE_CONFIG,
+  MOBILE_GI_CONFIG,
+  MOBILE_PIPELINE_CONFIG,
+  type GBuffer,
+  type GIMethod,
+  type GlobalIlluminationConfig,
+  type RenderPipelineConfig,
+  type RenderPipelineType,
+} from './aaa-render-configs';
+export {
+  DEFAULT_GI_CONFIG,
+  DEFAULT_PIPELINE_CONFIG,
+  LITE_GI_CONFIG,
+  LITE_PIPELINE_CONFIG,
+  MOBILE_GI_CONFIG,
+  MOBILE_PIPELINE_CONFIG,
+} from './aaa-render-configs';
+export type {
+  GBuffer,
+  GIMethod,
+  GlobalIlluminationConfig,
+  RenderPipelineConfig,
+  RenderPipelineType,
+} from './aaa-render-configs';
 
 interface EffectComposerLike {
   render(): void;
   setSize(width: number, height: number): void;
 }
-
-export const DEFAULT_PIPELINE_CONFIG: RenderPipelineConfig = {
-  type: 'forwardPlus',
-  hdr: true,
-  multisampling: true,
-  samples: 4,
-  toneMapping: THREE.ACESFilmicToneMapping,
-  toneMappingExposure: 1.0,
-  shadowMapEnabled: true,
-  shadowMapType: THREE.PCFSoftShadowMap,
-  shadowMapSize: 2048,
-  physicallyCorrectLights: true,
-  outputColorSpace: THREE.SRGBColorSpace,
-};
-
-/**
- * LITE MODE PIPELINE CONFIG
- * 
- * Optimized for mid-range GPUs (GTX 1060, RX 580, etc.)
- * Reduces VRAM usage from ~200MB to ~50MB for G-Buffer
- * Maintains visual quality with forward rendering
- */
-export const LITE_PIPELINE_CONFIG: RenderPipelineConfig = {
-  type: 'forward', // Skip deferred, lower VRAM
-  hdr: true, // Keep HDR for quality
-  multisampling: false, // No MSAA, use FXAA instead
-  samples: 1,
-  toneMapping: THREE.ACESFilmicToneMapping,
-  toneMappingExposure: 1.0,
-  shadowMapEnabled: true,
-  shadowMapType: THREE.BasicShadowMap, // Fastest shadow type
-  shadowMapSize: 1024, // Half resolution
-  physicallyCorrectLights: true,
-  outputColorSpace: THREE.SRGBColorSpace,
-};
-
-/**
- * MOBILE PIPELINE CONFIG
- * 
- * For WebGL on mobile devices and integrated GPUs
- * Minimal VRAM footprint, battery-friendly
- */
-export const MOBILE_PIPELINE_CONFIG: RenderPipelineConfig = {
-  type: 'forward',
-  hdr: false, // Disable HDR
-  multisampling: false,
-  samples: 1,
-  toneMapping: THREE.LinearToneMapping,
-  toneMappingExposure: 1.0,
-  shadowMapEnabled: true,
-  shadowMapType: THREE.BasicShadowMap,
-  shadowMapSize: 512, // Very low resolution
-  physicallyCorrectLights: false, // Faster lighting
-  outputColorSpace: THREE.SRGBColorSpace,
-};
-
-// ============================================================================
-// G-BUFFER LAYOUT (Deferred Rendering)
-// ============================================================================
-
-export interface GBuffer {
-  albedo: THREE.WebGLRenderTarget;        // RGB: albedo, A: metallic
-  normal: THREE.WebGLRenderTarget;        // RGB: world normal, A: roughness
-  emissive: THREE.WebGLRenderTarget;      // RGB: emissive, A: AO
-  depth: THREE.WebGLRenderTarget;         // R: linear depth
-  velocity: THREE.WebGLRenderTarget;      // RG: screen-space velocity
-  material: THREE.WebGLRenderTarget;      // R: material ID, G: subsurface, B: clearcoat, A: sheen
-}
-
-// ============================================================================
-// GLOBAL ILLUMINATION
-// ============================================================================
-
-export type GIMethod = 'none' | 'lightProbes' | 'ssgi' | 'rtgi' | 'voxelGI' | 'lpv';
-
-export interface GlobalIlluminationConfig {
-  method: GIMethod;
-  intensity: number;
-  bounces: number;
-  // Light Probe Volumes
-  probeResolution: number;
-  probeSpacing: number;
-  // SSGI
-  ssgiSamples: number;
-  ssgiRadius: number;
-  // RTGI
-  rtgiRaysPerPixel: number;
-  rtgiDenoiser: boolean;
-  // Voxel GI
-  voxelResolution: number;
-  voxelBounce: number;
-}
-
-export const DEFAULT_GI_CONFIG: GlobalIlluminationConfig = {
-  method: 'ssgi',
-  intensity: 1.0,
-  bounces: 1,
-  probeResolution: 16,
-  probeSpacing: 2,
-  ssgiSamples: 16,
-  ssgiRadius: 0.5,
-  rtgiRaysPerPixel: 1,
-  rtgiDenoiser: true,
-  voxelResolution: 128,
-  voxelBounce: 1,
-};
-
-/**
- * LITE GI CONFIG
- * 
- * Light probes instead of SSGI for better performance
- * Suitable for GTX 1060 / RX 580 class GPUs
- */
-export const LITE_GI_CONFIG: GlobalIlluminationConfig = {
-  method: 'lightProbes', // Pre-baked, no real-time cost
-  intensity: 0.85,
-  bounces: 0,
-  probeResolution: 8, // Lower resolution probes
-  probeSpacing: 4, // Fewer probes
-  ssgiSamples: 0, // Disabled
-  ssgiRadius: 0,
-  rtgiRaysPerPixel: 0,
-  rtgiDenoiser: false,
-  voxelResolution: 64,
-  voxelBounce: 0,
-};
-
-/**
- * MOBILE GI CONFIG
- * 
- * Minimal GI for mobile/low-end devices
- */
-export const MOBILE_GI_CONFIG: GlobalIlluminationConfig = {
-  method: 'none',
-  intensity: 0,
-  bounces: 0,
-  probeResolution: 4,
-  probeSpacing: 8,
-  ssgiSamples: 0,
-  ssgiRadius: 0,
-  rtgiRaysPerPixel: 0,
-  rtgiDenoiser: false,
-  voxelResolution: 32,
-  voxelBounce: 0,
-};
 
 // ============================================================================
 // VOLUMETRIC LIGHTING

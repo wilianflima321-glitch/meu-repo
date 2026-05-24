@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Mail, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react'
-import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 
@@ -142,9 +141,5 @@ function ForgotPasswordContent() {
 }
 
 export default function ForgotPasswordContentPage() {
-  return (
-    <CoreUiProviders>
-      <ForgotPasswordContent />
-    </CoreUiProviders>
-  )
+  return <ForgotPasswordContent />
 }

@@ -4,7 +4,6 @@ import { Suspense, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CheckCircle, Loader2, Mail, RefreshCw, XCircle } from 'lucide-react'
-import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import { useToast } from '@/components/ui/Toast'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
@@ -193,16 +192,14 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailContentPage() {
   return (
-    <CoreUiProviders>
-      <Suspense
-        fallback={
-          <div className="min-h-screen flex items-center justify-center bg-[var(--aethel-surface-primary)]">
-            <Loader2 className="h-7 w-7 animate-spin text-[var(--aethel-primary-light)]" />
-          </div>
-        }
-      >
-        <VerifyEmailContent />
-      </Suspense>
-    </CoreUiProviders>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[var(--aethel-surface-primary)]">
+          <Loader2 className="h-7 w-7 animate-spin text-[var(--aethel-primary-light)]" />
+        </div>
+      }
+    >
+      <VerifyEmailContent />
+    </Suspense>
   )
 }

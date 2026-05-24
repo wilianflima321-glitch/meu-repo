@@ -1,6 +1,6 @@
 # Offline Collaboration Spine Audit
 
-Generated: 2026-05-23T12:04:00.406Z
+Generated: 2026-05-24T03:40:36.201Z
 
 - Canonical module: lib/yjs-collaboration.ts
 - Workbench hook: components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts

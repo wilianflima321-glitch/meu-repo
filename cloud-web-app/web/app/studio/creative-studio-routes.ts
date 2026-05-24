@@ -1,4 +1,4 @@
-export type CreativeStudioDomain = 'world' | 'film' | 'audio'
+export type CreativeStudioDomain = 'world' | 'film' | 'audio' | 'runtime'
 export type CreativeStudioMaturity = 'BETA' | 'ALPHA'
 
 export interface CreativeStudioRoute {
@@ -147,6 +147,14 @@ export const CREATIVE_STUDIO_ROUTES: CreativeStudioRoute[] = [
     domain: 'film',
     maturity: 'ALPHA',
     description: 'Move between director notes, continuity review, and the video timeline.',
+  },
+  {
+    href: '/studio/cinematic',
+    label: 'Cinematic Cloud Stream',
+    shortLabel: 'Cloud',
+    domain: 'runtime',
+    maturity: 'ALPHA',
+    description: 'Review governed Cloud Stream readiness, cost, teardown, and Pixel Streaming capability without pretending it is available by default.',
   },
   {
     href: '/studio/audio',

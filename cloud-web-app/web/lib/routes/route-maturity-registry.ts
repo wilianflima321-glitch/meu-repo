@@ -59,6 +59,7 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/studio/vfx', maturity: 'ALPHA', label: 'VFX Studio', notes: 'Wires the existing NiagaraVFX editor into the canonical Studio shell' },
   { path: '/studio/quest', maturity: 'ALPHA', label: 'Quest Studio', notes: 'Wires QuestEditor into the canonical Studio shell for branching mission design' },
   { path: '/studio/film', maturity: 'ALPHA', label: 'Film Studio', notes: 'Wires DirectorMode and VideoTimelineEditor into one progressive film surface' },
+  { path: '/studio/cinematic', maturity: 'ALPHA', label: 'Cinematic Cloud Stream', notes: 'Visible readiness surface for Cloud Stream; held unless signaling, cost, teardown, and session evidence exist' },
   { path: '/studio/audio', maturity: 'ALPHA', label: 'Audio Studio', notes: 'Wires SoundCueEditor into the canonical Studio shell' },
 
   { path: '/studio/cloth', maturity: 'ALPHA', label: 'Cloth Studio', notes: 'Wires ClothSimulationEditor into the canonical Studio shell' },

@@ -1,7 +1,7 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2039
+- Files scanned: 2048
 - Failures: 0
 
 ## Counts
@@ -11,7 +11,7 @@ Generated: deterministic local scan
 - monacoEditorDirect: 2 (max 2)
 - monacoReactDirect: 3 (max 3)
 - framerMotionDirect: 8 (max 9)
-- dynamicImportsMin: 256 (min 100)
+- dynamicImportsMin: 258 (min 100)
 
 ## Top Offenders
 ### threeDirect

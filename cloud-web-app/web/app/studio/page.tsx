@@ -8,6 +8,7 @@ const DOMAIN_LABELS = {
   world: 'Game and world',
   film: 'Film',
   audio: 'Audio',
+  runtime: 'Runtime',
 } as const
 
 export default function CreativeStudioPage() {

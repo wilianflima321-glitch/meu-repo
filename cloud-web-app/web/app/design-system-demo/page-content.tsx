@@ -6,7 +6,6 @@
  */
 
 import React from 'react'
-import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import {
   GlassPanel,
   GlowBadge,
@@ -391,9 +390,5 @@ function DesignSystemDemoBody() {
 }
 
 export default function DesignSystemDemoContentPage() {
-  return (
-    <CoreUiProviders>
-      <DesignSystemDemoBody />
-    </CoreUiProviders>
-  )
+  return <DesignSystemDemoBody />
 }

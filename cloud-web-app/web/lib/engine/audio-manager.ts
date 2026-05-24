@@ -8,83 +8,27 @@
 import { EventEmitter } from 'events';
 
 import {createComponentLogger, logger} from '@/lib/observability/logger'
+import type {
+  AudioEffectConfig,
+  AudioGroupConfig,
+  AudioListenerConfig,
+  AudioSnapshot,
+  AudioSourceConfig,
+  ReverbPreset,
+  Vector3,
+} from './audio-manager-contracts'
+export { ReverbPresets } from './audio-manager-presets'
+export type {
+  AudioEffectConfig,
+  AudioGroupConfig,
+  AudioListenerConfig,
+  AudioSnapshot,
+  AudioSourceConfig,
+  ReverbPreset,
+  Vector3,
+} from './audio-manager-contracts'
 
 const log = createComponentLogger('engine/audio-manager')
-
-// ============================================================================
-// Types & Interfaces
-// ============================================================================
-
-export interface Vector3 {
-  x: number;
-  y: number;
-  z: number;
-}
-
-export interface AudioListenerConfig {
-  position: Vector3;
-  forward: Vector3;
-  up: Vector3;
-}
-
-export interface AudioSourceConfig {
-  name: string;
-  url?: string;
-  buffer?: AudioBuffer;
-  
-  // Spatial
-  spatial?: boolean;
-  position?: Vector3;
-  
-  // Playback
-  volume?: number;
-  pitch?: number;
-  loop?: boolean;
-  autoplay?: boolean;
-  
-  // 3D Audio
-  refDistance?: number;
-  maxDistance?: number;
-  rolloffFactor?: number;
-  coneInnerAngle?: number;
-  coneOuterAngle?: number;
-  coneOuterGain?: number;
-  distanceModel?: 'linear' | 'inverse' | 'exponential';
-  
-  // Effects
-  reverb?: boolean;
-  reverbMix?: number;
-  lowPassFilter?: number;
-  highPassFilter?: number;
-  
-  // Group
-  group?: string;
-}
-
-export interface AudioGroupConfig {
-  name: string;
-  volume?: number;
-  muted?: boolean;
-  effects?: AudioEffectConfig[];
-}
-
-export interface AudioEffectConfig {
-  type: 'reverb' | 'delay' | 'distortion' | 'compressor' | 'eq';
-  params: Record<string, number>;
-}
-
-export interface ReverbPreset {
-  name: string;
-  decay: number;
-  preDelay: number;
-  wetMix: number;
-}
-
-export interface AudioSnapshot {
-  masterVolume: number;
-  groups: { name: string; volume: number; muted: boolean }[];
-  sources: { id: string; volume: number; position?: Vector3 }[];
-}
 
 // ============================================================================
 // Audio Source
@@ -1021,42 +965,5 @@ export class AudioManager extends EventEmitter {
     return this.audioContext;
   }
 }
-
-// ============================================================================
-// Reverb Presets
-// ============================================================================
-
-export const ReverbPresets: Record<string, ReverbPreset> = {
-  room: {
-    name: 'Room',
-    decay: 0.5,
-    preDelay: 0.01,
-    wetMix: 0.2,
-  },
-  hall: {
-    name: 'Hall',
-    decay: 2.0,
-    preDelay: 0.02,
-    wetMix: 0.3,
-  },
-  cathedral: {
-    name: 'Cathedral',
-    decay: 5.0,
-    preDelay: 0.05,
-    wetMix: 0.4,
-  },
-  cave: {
-    name: 'Cave',
-    decay: 3.0,
-    preDelay: 0.1,
-    wetMix: 0.5,
-  },
-  outdoor: {
-    name: 'Outdoor',
-    decay: 0.3,
-    preDelay: 0.005,
-    wetMix: 0.1,
-  },
-};
 
 export default AudioManager;

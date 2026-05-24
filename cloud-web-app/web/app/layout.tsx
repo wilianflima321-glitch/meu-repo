@@ -2,6 +2,7 @@ import './globals.css'
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import GlobalCommandSurface from '@/components/ide/GlobalCommandSurface'
+import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import ProductTelemetry from '@/components/telemetry/ProductTelemetry'
 
 export const viewport: Viewport = {
@@ -73,8 +74,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen antialiased bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-        <ProductTelemetry />
-        <GlobalCommandSurface>{children}</GlobalCommandSurface>
+        <CoreUiProviders>
+          <ProductTelemetry />
+          <GlobalCommandSurface>{children}</GlobalCommandSurface>
+        </CoreUiProviders>
       </body>
     </html>
   )

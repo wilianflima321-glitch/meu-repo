@@ -6,10 +6,10 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Executive Summary
 
-- Large source files: 25
+- Large source files: 20
 - P0 files: 0
-- P1 low-import large modules: 17
-- P1 modules with explicit triage: 17
+- P1 low-import large modules: 12
+- P1 modules with explicit triage: 12
 - Retired runtime entrypoints forbidden: 4
 - Hard ceiling: 1800 lines
 - UI ceiling: 1200 lines
@@ -17,8 +17,8 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 
 ## Categories
 
-- `foundation-runtime`: 15
-- `creative-runtime`: 7
+- `foundation-runtime`: 12
+- `creative-runtime`: 5
 - `server-runtime`: 3
 
 ## Owner Decisions
@@ -46,14 +46,8 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | File | Lines | Category | Risk | Import hints | Recommendation |
 | --- | ---: | --- | --- | ---: | --- |
 | `lib/engine/scene-graph.ts` | 1065 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/engine/audio-manager.ts` | 1063 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/webxr-vr-system.ts` | 1061 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/ecs-dots-system.ts` | 1056 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/dialogue/dialogue-system.tsx` | 1054 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/aaa-render-system.ts` | 1053 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/hot-reload/hot-reload-server.ts` | 1049 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/quest-mission-system.ts` | 1046 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
-| `lib/assets/asset-importer.ts` | 1041 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/pbr-shader-pipeline.ts` | 1037 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/ray-tracing.ts` | 1035 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/ai-audio-engine.ts` | 1034 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
@@ -61,6 +55,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/terrain/terrain-system.ts` | 1030 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/extensions/extension-system.ts` | 1021 | foundation-runtime | P1 low-import large module | 1 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/audio/spatial-audio-system.ts` | 1007 | creative-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
+| `lib/webxr-vr-system.ts` | 1001 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 | `lib/volumetric-clouds.ts` | 1000 | foundation-runtime | P1 low-import large module | 0 | Decision is mandatory: wire visibly, archive, hold, or expose through a safe adapter. |
 
 ## P1 Triage Decisions
@@ -68,14 +63,8 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | File | Decision | Target surface | Load strategy | Rationale |
 | --- | --- | --- | --- | --- |
 | `lib/engine/scene-graph.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/engine/audio-manager.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/webxr-vr-system.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
 | `lib/ecs-dots-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/dialogue/dialogue-system.tsx` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/aaa-render-system.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
 | `lib/hot-reload/hot-reload-server.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
-| `lib/quest-mission-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
-| `lib/assets/asset-importer.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/pbr-shader-pipeline.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
 | `lib/ray-tracing.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
 | `lib/ai-audio-engine.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
@@ -83,6 +72,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/terrain/terrain-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/extensions/extension-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 | `lib/audio/spatial-audio-system.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
+| `lib/webxr-vr-system.ts` | held | Runtime/toolchain evidence | worker-or-sidecar | Needs capability, cost, license, and safety evidence before runtime activation. |
 | `lib/volumetric-clouds.ts` | adapter-needed | Studio engine adapter | dynamic-client-only or worker/sidecar | Expose as read-only capability evidence before enabling writes or heavy execution. |
 
 ## Full Inventory
@@ -91,14 +81,8 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | --- | ---: | --- | --- | ---: |
 | `lib/server/websocket-server.ts` | 1092 | server-runtime | P2 tracked large module | 4 |
 | `lib/engine/scene-graph.ts` | 1065 | creative-runtime | P1 low-import large module | 0 |
-| `lib/engine/audio-manager.ts` | 1063 | creative-runtime | P1 low-import large module | 0 |
-| `lib/webxr-vr-system.ts` | 1061 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/ecs-dots-system.ts` | 1056 | foundation-runtime | P1 low-import large module | 0 |
-| `lib/dialogue/dialogue-system.tsx` | 1054 | creative-runtime | P1 low-import large module | 0 |
-| `lib/aaa-render-system.ts` | 1053 | foundation-runtime | P1 low-import large module | 1 |
 | `lib/hot-reload/hot-reload-server.ts` | 1049 | foundation-runtime | P1 low-import large module | 0 |
-| `lib/quest-mission-system.ts` | 1046 | foundation-runtime | P1 low-import large module | 0 |
-| `lib/assets/asset-importer.ts` | 1041 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/pbr-shader-pipeline.ts` | 1037 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/ray-tracing.ts` | 1035 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/ai-audio-engine.ts` | 1034 | foundation-runtime | P1 low-import large module | 0 |
@@ -112,6 +96,7 @@ This audit tracks source files with at least 1000 lines. The goal is not to blin
 | `lib/yjs-collaboration.ts` | 1013 | foundation-runtime | P2 tracked large module | 8 |
 | `lib/audio/spatial-audio-system.ts` | 1007 | creative-runtime | P1 low-import large module | 0 |
 | `lib/server/build-runtime.ts` | 1001 | server-runtime | P2 tracked large module | 0 |
+| `lib/webxr-vr-system.ts` | 1001 | foundation-runtime | P1 low-import large module | 0 |
 | `lib/particle-system-real.ts` | 1000 | foundation-runtime | P2 tracked large module | 3 |
 | `lib/volumetric-clouds.ts` | 1000 | foundation-runtime | P1 low-import large module | 0 |
 

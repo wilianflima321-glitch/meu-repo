@@ -62,6 +62,7 @@ const REQUIRED_STUDIO_ROUTES = [
   '/studio/water',
   '/studio/sprite',
   '/studio/quest',
+  '/studio/cinematic',
 ]
 
 const STALE_EVIDENCE_PATTERNS = [
