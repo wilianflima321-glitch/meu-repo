@@ -213,7 +213,7 @@ export function DashboardOverviewTab({
   const recentWork = [
     ...projects.slice(0, 3).map((project) => ({
       title: project.name,
-      context: `${formatProjectType(project.type)} · ${formatProjectStatus(project.status)}`,
+      context: `${formatProjectType(project.type)} - ${formatProjectStatus(project.status)}`,
       action: 'Open project',
       onClick: onOpenProjects,
     })),
@@ -269,7 +269,7 @@ export function DashboardOverviewTab({
             : 'No wallet data'
 
   const walletFootnote = walletData
-    ? `${walletTransactions.length} transactions · ${lastWalletUpdate ? `Updated ${new Date(lastWalletUpdate).toLocaleTimeString()}` : 'Live state'}`
+    ? `${walletTransactions.length} transactions - ${lastWalletUpdate ? `Updated ${new Date(lastWalletUpdate).toLocaleTimeString()}` : 'Live state'}`
     : 'Billing and budget stay visible without leaving Studio Home.'
 
   const connectivitySummary = connectivityLoading

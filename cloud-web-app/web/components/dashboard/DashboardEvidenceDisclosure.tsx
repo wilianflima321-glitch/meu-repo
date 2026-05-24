@@ -113,7 +113,7 @@ export function DashboardEvidenceDisclosure({
   return (
     <section
       data-dashboard-evidence-disclosure
-      className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.72),rgba(8,10,16,0.94))] shadow-[0_24px_80px_rgba(2,6,23,0.30)]"
+      className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] shadow-[0_24px_80px_rgba(2,6,23,0.24)]"
       aria-label="Mission evidence and runtime readiness"
     >
       <div className="grid gap-4 px-4 py-4 sm:px-5 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1fr)] lg:items-center">

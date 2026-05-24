@@ -37,6 +37,7 @@ const requiredOverviewTokens = [
 const requiredHeroTokens = [
   'data-dashboard-command-card="one-glance"',
   'data-dashboard-run-state-panel',
+  'data-dashboard-secondary-actions',
   'Continue workspace',
 ]
 
@@ -77,9 +78,19 @@ for (const forbidden of ['<DashboardProjectBrainCard', '<DashboardMissionLedgerC
   }
 }
 
+if (overview.includes('Â')) {
+  failures.push('DashboardOverviewTab.tsx contains mojibake; keep dashboard copy clean for screenshots')
+}
+
 for (const forbidden of ['bg-[linear-gradient', 'Expand Studio', 'Embedded Studio']) {
   if (hero.includes(forbidden)) {
     failures.push(`DashboardMissionHero.tsx still contains dense/cliche hero token: ${forbidden}`)
+  }
+}
+
+for (const forbidden of ['bg-[linear-gradient']) {
+  if (disclosure.includes(forbidden)) {
+    failures.push(`DashboardEvidenceDisclosure.tsx still contains decorative evidence chrome token: ${forbidden}`)
   }
 }
 

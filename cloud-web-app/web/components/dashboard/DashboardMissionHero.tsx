@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, CheckCircle2, ChevronDown } from 'lucide-react'
 
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
@@ -91,7 +91,7 @@ export function DashboardMissionHero({
             ))}
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-wrap items-start gap-3">
             <button
               type="button"
               onClick={onOpenIde}
@@ -100,12 +100,28 @@ export function DashboardMissionHero({
               Continue workspace
               <ArrowRight className="h-4 w-4" />
             </button>
-            <button type="button" onClick={onOpenAiChat} className={ghostButtonClass}>
-              Open AI Console
-            </button>
-            <button type="button" onClick={onOpenProjects} className={ghostButtonClass}>
-              New project
-            </button>
+            <details className="group relative" data-dashboard-secondary-actions>
+              <summary className={`${ghostButtonClass} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>
+                More actions
+                <ChevronDown className="h-3.5 w-3.5 transition group-open:rotate-180" />
+              </summary>
+              <div className="absolute left-0 top-12 z-30 w-56 rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-2 shadow-[0_20px_60px_rgba(2,6,23,0.36)]">
+                <button
+                  type="button"
+                  onClick={onOpenAiChat}
+                  className="block w-full rounded-xl px-3 py-2 text-left text-sm font-medium text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_56%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                >
+                  Open AI Console
+                </button>
+                <button
+                  type="button"
+                  onClick={onOpenProjects}
+                  className="mt-1 block w-full rounded-xl px-3 py-2 text-left text-sm font-medium text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_56%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                >
+                  New project
+                </button>
+              </div>
+            </details>
           </div>
         </div>
 
