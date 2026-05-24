@@ -343,34 +343,27 @@ export default function StudioMissionControl() {
                   {gameScopePlan.releaseState}
                 </span>
               </div>
-
-              <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                <div className="rounded-xl border border-[var(--aethel-border-subtle)] px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--aethel-text-tertiary)]">Camera / input</p>
-                  <p className="mt-1 truncate text-xs font-semibold text-[var(--aethel-text-primary)]">
-                    {gameScopePlan.genrePack.cameraModel} / {gameScopePlan.genrePack.inputModel}
-                  </p>
-                </div>
-                <div className="rounded-xl border border-[var(--aethel-border-subtle)] px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--aethel-text-tertiary)]">Bible</p>
-                  <p className="mt-1 truncate text-xs font-semibold text-[var(--aethel-text-primary)]">
-                    {gameScopePlan.productionBible.pillars.slice(0, 2).join(', ')}
-                  </p>
-                </div>
-                <div className="rounded-xl border border-[var(--aethel-border-subtle)] px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--aethel-text-tertiary)]">Review</p>
-                  <p className="mt-1 truncate text-xs font-semibold text-[var(--aethel-text-primary)]">
-                    {gameScopePlan.cinematicEvidence.state} / {gameScopePlan.playtestSpine.state}
-                  </p>
-                </div>
-              </div>
-
               <p className="mt-3 text-xs leading-5 text-[var(--aethel-text-secondary)]">{gameScopePlan.uxDisclosure}</p>
+              <p className="mt-2 text-[11px] font-semibold text-[var(--aethel-warning-light)]">{gameScopePlan.nextAction}</p>
               <details className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-3 py-2">
                 <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
                   Review production evidence
                 </summary>
-                <div className="mt-3 space-y-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                <div className="mt-3 grid gap-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <p>
+                      <span className="block text-[10px] uppercase tracking-[0.15em]">Camera / input</span>
+                      <span className="text-[var(--aethel-text-primary)]">{gameScopePlan.genrePack.cameraModel} / {gameScopePlan.genrePack.inputModel}</span>
+                    </p>
+                    <p>
+                      <span className="block text-[10px] uppercase tracking-[0.15em]">Bible</span>
+                      <span className="text-[var(--aethel-text-primary)]">{gameScopePlan.productionBible.pillars.slice(0, 2).join(', ')}</span>
+                    </p>
+                    <p>
+                      <span className="block text-[10px] uppercase tracking-[0.15em]">Review</span>
+                      <span className="text-[var(--aethel-text-primary)]">{gameScopePlan.cinematicEvidence.state} / {gameScopePlan.playtestSpine.state}</span>
+                    </p>
+                  </div>
                   <p>Production bible: {gameScopePlan.productionBible.pillars.slice(0, 4).join(', ')}. Decision: {gameScopePlan.productionBible.firstUserDecision}</p>
                   <p>Deep bible: {gameScopePlan.productionBible.deepBible.scenes.length} scene beats, {gameScopePlan.productionBible.deepBible.characters.length} character contracts, {gameScopePlan.productionBible.deepBible.evidenceModel.requiredEvidence.length} gates.</p>
                   <p>Cinematics: {gameScopePlan.cinematicEvidence.state}; {gameScopePlan.cinematicEvidence.lanes.length} lane(s). {gameScopePlan.cinematicEvidence.copy.draftWarning}.</p>
@@ -391,7 +384,6 @@ export default function StudioMissionControl() {
                   </div>
                 </div>
               </details>
-              <p className="mt-3 text-[11px] text-[var(--aethel-warning-light)]">{gameScopePlan.nextAction}</p>
             </div>
           ) : null}
 
@@ -424,7 +416,7 @@ export default function StudioMissionControl() {
               type="button"
               onClick={startSession}
               disabled={busy !== null || !mission.trim()}
-              className="min-h-11 rounded-xl bg-[var(--aethel-primary-dark)] px-4 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:bg-[var(--aethel-primary)] disabled:cursor-not-allowed disabled:opacity-55"
+              className="min-h-11 rounded-xl bg-[var(--aethel-text-primary)] px-4 text-sm font-semibold text-[var(--aethel-surface-primary)] transition hover:bg-[var(--aethel-text-secondary)] disabled:cursor-not-allowed disabled:opacity-55"
             >
               {busy === 'resume' ? 'Resuming...' : busy === 'start' ? 'Starting...' : session ? 'Restart session' : 'Start session'}
             </button>

@@ -22,7 +22,7 @@ export default function CreativeStudioPage() {
       subtitle="Mission-first routes for game, film, VFX, material, animation, and audio work."
       activeHref="/studio"
     >
-      <div className="h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,color-mix(in_srgb,var(--aethel-primary)_14%,transparent),transparent_34%),var(--aethel-surface-primary)] px-4 py-6 lg:px-8">
+      <div className="h-full overflow-y-auto bg-[var(--aethel-surface-primary)] px-4 py-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <SurfaceQualityShell
             eyebrow="Studio runboard"
@@ -33,7 +33,7 @@ export default function CreativeStudioPage() {
               { label: 'Local optimizer optional', tone: 'neutral' },
               { label: 'Cloud review gated', tone: 'neutral' },
             ]}
-            primaryAction={<a href="#studio-primary-surfaces" className="rounded-full bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.18)]">Open editor</a>}
+            primaryAction={<a href="#studio-primary-surfaces" className="rounded-full bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)]">Open editor</a>}
             secondaryAction={<a href="#studio-runboard" className="rounded-full border border-[var(--aethel-border-subtle)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)]">Validate plan</a>}
           >
             <div id="studio-runboard" className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
@@ -50,7 +50,7 @@ export default function CreativeStudioPage() {
                 Primary surfaces
               </p>
               <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">
-                Start where most missions actually continue.
+                Choose the surface that moves the mission forward.
               </h3>
             </div>
             <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
@@ -58,36 +58,37 @@ export default function CreativeStudioPage() {
             </span>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-[0_18px_70px_rgba(0,0,0,0.14)]" data-studio-surface-board="operator-density">
+            <div className="grid grid-cols-[minmax(170px,1fr)_112px_96px_minmax(130px,0.55fr)] gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)] max-md:hidden">
+              <span>Surface</span>
+              <span>Domain</span>
+              <span>Maturity</span>
+              <span>Action</span>
+            </div>
             {primaryStudioRoutes.map((route) => (
               <Link
                 key={route.href}
                 href={route.href}
-                className="group flex h-full flex-col rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] p-5 shadow-[0_20px_80px_rgba(0,0,0,0.22)] transition-all hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--aethel-primary)_48%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                className="group grid gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-4 transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] last:border-b-0 md:grid-cols-[minmax(170px,1fr)_112px_96px_minmax(130px,0.55fr)] md:items-center"
                 aria-label={`Open ${route.label}`}
               >
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <span className="rounded-full border border-[var(--aethel-border-secondary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
-                    {DOMAIN_LABELS[route.domain]}
-                  </span>
-                  <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">
-                    {route.maturity}
-                  </span>
+                <div className="min-w-0">
+                  <h3 className="text-base font-semibold text-[var(--aethel-text-primary)] transition-colors group-hover:text-[var(--aethel-primary-light)]">
+                    {route.label}
+                  </h3>
+                  <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">
+                    {route.description}
+                  </p>
                 </div>
-                <h3 className="text-xl font-semibold text-[var(--aethel-text-primary)] transition-colors group-hover:text-[var(--aethel-primary-light)]">
-                  {route.label}
-                </h3>
-                <p className="mt-2 flex-1 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                  {route.description}
-                </p>
-                <div className="mt-5 flex items-center justify-between border-t border-[var(--aethel-border-subtle)] pt-4">
-                  <span className="text-xs font-semibold text-[var(--aethel-primary-light)]">
-                    Open editor
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
-                    {route.shortLabel}
-                  </span>
-                </div>
+                <span className="w-fit rounded-full border border-[var(--aethel-border-secondary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                  {DOMAIN_LABELS[route.domain]}
+                </span>
+                <span className="w-fit rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">
+                  {route.maturity}
+                </span>
+                <span className="text-xs font-semibold text-[var(--aethel-primary-light)]">
+                  Open editor
+                </span>
               </Link>
             ))}
           </div>

@@ -14,7 +14,8 @@ const CHECKS = [
   {
     id: 'studio-runboard-shell',
     file: 'app/studio/page.tsx',
-    required: ['SurfaceQualityShell', 'Studio runboard', 'Open editor', 'Validate plan', '<details'],
+    required: ['SurfaceQualityShell', 'Studio runboard', 'Open editor', 'Validate plan', '<details', 'data-studio-surface-board="operator-density"'],
+    forbidden: ['bg-[linear-gradient', 'bg-[radial-gradient',],
     maxCards: 28,
   },
   {

@@ -48,8 +48,14 @@ if (!fs.existsSync(studioPagePath)) {
   for (const token of ['Preview ready', 'Local optimizer optional', 'Cloud review gated']) {
     if (!page.includes(token)) failures.push(`app/studio/page.tsx missing user-facing runtime label: ${token}`)
   }
+  for (const token of ['data-studio-surface-board="operator-density"', 'Choose the surface that moves the mission forward.']) {
+    if (!page.includes(token)) failures.push(`app/studio/page.tsx missing premium surface-board token: ${token}`)
+  }
   for (const jargon of ['Browser: preview', 'Studio Local: held', 'Cloud Stream: held', 'capability is real']) {
     if (page.includes(jargon)) failures.push(`app/studio/page.tsx still exposes old runtime jargon: ${jargon}`)
+  }
+  for (const visualDebt of ['bg-[linear-gradient', 'bg-[radial-gradient']) {
+    if (page.includes(visualDebt)) failures.push(`app/studio/page.tsx still uses decorative Studio hub chrome: ${visualDebt}`)
   }
 }
 

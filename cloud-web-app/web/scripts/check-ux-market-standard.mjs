@@ -527,8 +527,10 @@ const CHECKS = [
     files: ['app/studio/page.tsx', 'app/studio/creative-studio-routes.ts'],
     combined: true,
     test: (content) => {
-      const required = ['primaryStudioRoutes', 'advancedStudioRoutes', 'Primary surfaces', 'Advanced editors', 'isPrimaryCreativeStudioRoute']
-      return required.filter((token) => !content.includes(token)).length
+      const required = ['primaryStudioRoutes', 'advancedStudioRoutes', 'Primary surfaces', 'Advanced editors', 'isPrimaryCreativeStudioRoute', 'data-studio-surface-board="operator-density"']
+      const missing = required.filter((token) => !content.includes(token)).length
+      const decorativeDebt = (content.match(/bg-\[(linear|radial)-gradient/g) ?? []).length
+      return missing + decorativeDebt
     },
     limit: 0,
   },
