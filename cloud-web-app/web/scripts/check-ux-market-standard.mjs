@@ -439,6 +439,26 @@ const CHECKS = [
     limit: 0,
   },
   {
+    id: 'ai-copilot-calm-chrome',
+    description: 'AI Copilot chrome must stay calm: no decorative gradients in the header/banner, composer details are progressive, and compact state markers remain explicit.',
+    files: [
+      'components/ai-chat/AIChatHeader.tsx',
+      'components/ai-chat/AIChatComposer.tsx',
+      'components/ai-chat/AIChatSessionBanner.tsx',
+    ],
+    combined: true,
+    test: (content) => {
+      const required = [
+        'data-ai-copilot-header="calm"',
+        'data-ai-composer="calm"',
+        'data-ai-session-banner="compact"',
+        'Composer context',
+      ]
+      return required.filter((token) => !content.includes(token)).length + (content.match(/bg-\[linear-gradient/g) ?? []).length
+    },
+    limit: 0,
+  },
+  {
     id: 'ide-visible-language-drift',
     description: 'Cookie consent, onboarding, command chrome, and viewport controls must not leak Portuguese into screenshots of the authenticated IDE.',
     files: [

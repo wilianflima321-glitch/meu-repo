@@ -70,16 +70,19 @@ export function AIChatHeader({
     selectedModel.outputCost !== undefined ? formatCost(selectedModel.outputCost) : null
 
   return (
-    <div className="flex flex-col border-b border-[var(--aethel-border-secondary)]">
-      <div className="flex items-center gap-1 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-3 py-1.5">
+    <div
+      data-ai-copilot-header="calm"
+      className="flex flex-col border-b border-[var(--aethel-border-secondary)]"
+    >
+      <div className="flex items-center gap-1 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] px-3 py-1">
         {CONSOLE_MODES.map((mode) => (
           <button
             key={mode.id}
             type="button"
             onClick={() => onConsoleModeChange(mode.id)}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
               consoleMode === mode.id
-                ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] shadow-sm'
+                ? 'border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]'
             }`}
             title={mode.description}
@@ -128,7 +131,7 @@ export function AIChatHeader({
                 {showModelSelector && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={onCloseModelSelector} />
-                    <div className="absolute left-0 top-full z-50 mt-1 min-w-72 rounded-lg border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(16,22,34,0.98),rgba(10,14,24,0.94))] py-1 shadow-[0_24px_80px_rgba(2,6,23,0.48)]">
+                    <div className="absolute left-0 top-full z-50 mt-1 min-w-72 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] py-1 shadow-[0_24px_80px_rgba(2,6,23,0.42)]">
                       {models.map((model) => (
                         <button
                           type="button"
@@ -248,7 +251,7 @@ export function AIChatHeader({
                   onClick={onToggleLiveMode}
                   className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${
                     isLiveMode
-                      ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+                      ? 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-info-light)]'
                       : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'
                   }`}
                   title={isLiveMode ? 'Exit live mode' : 'Enter live mode'}
@@ -263,7 +266,7 @@ export function AIChatHeader({
                 onClick={onToggleSpeaking}
                 className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${
                   isSpeaking
-                    ? 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
+                    ? 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-success)]'
                     : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'
                 }`}
                 title={isSpeaking ? 'Stop reading' : 'Read latest response'}

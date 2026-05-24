@@ -97,7 +97,11 @@ export function AIChatComposer({
   onOpenMentionContextBlock,
 }: AIChatComposerProps) {
   return (
-    <form onSubmit={onSubmit} className="border-t border-[var(--aethel-border-secondary)] p-3">
+    <form
+      data-ai-composer="calm"
+      onSubmit={onSubmit}
+      className="border-t border-[var(--aethel-border-secondary)] p-3"
+    >
       {mentionState.parsedMentions.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {mentionState.parsedMentions.map((mention, index) => (
@@ -227,7 +231,7 @@ export function AIChatComposer({
             onClick={isLoading ? onInterrupt : undefined}
             className={`absolute bottom-2 right-2 rounded-lg p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${
               (isLoading && onInterrupt) || (input.trim() && !isLoading)
-                ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110'
+                ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)] hover:bg-[var(--aethel-text-secondary)]'
                 : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
             }`}
             aria-label={isLoading ? 'Stop response' : modePreset.submitLabel}
@@ -238,21 +242,29 @@ export function AIChatComposer({
         </div>
       </div>
 
-      <div className="mt-2 text-[11px] text-[var(--aethel-text-quaternary)]">{modePreset.helper}</div>
-
-      {showAdvancedControls && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {modePreset.quickMentions.map((mention) => (
-            <button
-              key={mention.label}
-              type="button"
-              onClick={() => onInsertQuickMention(mention.value)}
-              className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-            >
-              {mention.label}
-            </button>
-          ))}
-        </div>
+      {showAdvancedControls ? (
+        <details className="group mt-2 text-[11px] text-[var(--aethel-text-quaternary)]">
+          <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-secondary)]">
+            Composer context
+            <span className="text-[var(--aethel-text-quaternary)] group-open:hidden">show</span>
+            <span className="hidden text-[var(--aethel-text-quaternary)] group-open:inline">hide</span>
+          </summary>
+          <div className="mt-2 text-[11px] text-[var(--aethel-text-quaternary)]">{modePreset.helper}</div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {modePreset.quickMentions.map((mention) => (
+              <button
+                key={mention.label}
+                type="button"
+                onClick={() => onInsertQuickMention(mention.value)}
+                className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+              >
+                {mention.label}
+              </button>
+            ))}
+          </div>
+        </details>
+      ) : (
+        <div className="mt-2 text-[11px] text-[var(--aethel-text-quaternary)]">{modePreset.helper}</div>
       )}
 
       <CodebaseContextPanel

@@ -50,7 +50,10 @@ export default function AIChatSessionBanner({
   const intents = useMemo(() => IDE_CHAT_INTENTS, [])
 
   return (
-    <div className="mx-3 mt-3 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_14%,transparent),color-mix(in_srgb,var(--aethel-info)_10%,transparent),rgba(15,23,42,0.78))] p-4">
+    <div
+      data-ai-session-banner="compact"
+      className="mx-3 mt-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] p-3"
+    >
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">
           Work session
@@ -66,7 +69,7 @@ export default function AIChatSessionBanner({
           </span>
         ) : null}
       </div>
-      <div className="mt-2 text-sm font-medium text-[var(--aethel-text-primary)]">
+      <div className="mt-2 text-sm font-medium leading-6 text-[var(--aethel-text-primary)]">
         {mission || 'Continue from the studio context without losing the current handoff.'}
       </div>
       <div className="mt-3 flex flex-wrap gap-2" aria-label="Quick intents">
