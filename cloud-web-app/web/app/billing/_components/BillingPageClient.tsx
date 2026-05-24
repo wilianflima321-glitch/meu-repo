@@ -32,6 +32,8 @@ const fetcher = async <T,>(url: string): Promise<T> => {
   return response.json()
 }
 
+const primaryPlanIds = ['basic', 'pro', 'studio']
+
 function formatTokens(tokens: number): string {
   if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(1)}M`
   if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(1)}K`
@@ -60,11 +62,13 @@ export function BillingPageClient() {
   const [currency, setCurrency] = useState<Currency>('USD')
   const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
-  const [showUsage, setShowUsage] = useState(true)
+  const [showUsage, setShowUsage] = useState(false)
 
   const { data, isLoading, error } = useSWR<PlansResponse>(`${API_BASE}/billing/plans`, fetcher)
   const { data: readiness } = useSWR<BillingReadiness>(`${API_BASE}/billing/readiness`, fetcher)
   const plans = useMemo(() => data?.plans || [], [data])
+  const primaryPlans = useMemo(() => plans.filter((plan) => primaryPlanIds.includes(plan.id)), [plans])
+  const secondaryPlans = useMemo(() => plans.filter((plan) => !primaryPlanIds.includes(plan.id)), [plans])
 
   const handleSubscribe = async (planId: string) => {
     if (planId === 'enterprise') {
@@ -93,7 +97,7 @@ export function BillingPageClient() {
     }
   }
 
-  if (isLoading) return <BillingShell><BillingNotice text="Loading plans..." /></BillingShell>
+  if (isLoading) return <BillingShell><BillingLoadingRunboard /></BillingShell>
   if (error) return <BillingShell><BillingNotice title="Failed to load billing" text="Plans could not be recovered right now. Try again in a moment." /></BillingShell>
 
   return (
@@ -104,8 +108,8 @@ export function BillingPageClient() {
         <BillingCycleSwitch billingCycle={billingCycle} onChange={setBillingCycle} />
         <UsageSection showUsage={showUsage} onToggle={() => setShowUsage((previous) => !previous)} />
         {readiness?.checkoutReady === false && <CheckoutReadinessWarning />}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5">
-          {plans.map((plan) => (
+        <div data-billing-primary-decision="true" className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {primaryPlans.map((plan) => (
             <PlanCard
               key={plan.id}
               billingCycle={billingCycle}
@@ -117,6 +121,29 @@ export function BillingPageClient() {
             />
           ))}
         </div>
+        {secondaryPlans.length > 0 && (
+          <details className="mt-5 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+              Compare starter, free, and enterprise options
+            </summary>
+            <p className="mt-2 max-w-2xl text-xs leading-5 text-[var(--aethel-text-secondary)]">
+              Secondary plans stay available for edge cases, testing, and sales-led rollout, but the main buying decision stays focused on the three production paths.
+            </p>
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+              {secondaryPlans.map((plan) => (
+                <PlanCard
+                  key={plan.id}
+                  billingCycle={billingCycle}
+                  currency={currency}
+                  isBusy={selectedPlan === plan.id}
+                  isCheckoutBlocked={readiness?.checkoutReady === false && plan.id !== 'enterprise'}
+                  onSubscribe={handleSubscribe}
+                  plan={plan}
+                />
+              ))}
+            </div>
+          </details>
+        )}
         <p className="mt-8 text-center text-sm text-[var(--aethel-text-secondary)]">AI, execution, and deployment limits vary by plan. Upgrades and downgrades apply without manual migration.</p>
         <p className="mt-2 text-center text-xs text-[var(--aethel-text-tertiary)]">Secure checkout through Stripe | Cancel anytime</p>
       </div>
@@ -125,11 +152,65 @@ export function BillingPageClient() {
 }
 
 function BillingShell({ children }: { children: ReactNode }) {
-  return <StudioLayout title="Billing" subtitle="Plans, usage, and workspace billing."><div className="flex items-center justify-center px-6 py-12">{children}</div></StudioLayout>
+  return (
+    <StudioLayout title="Billing" subtitle="Plans, usage, and workspace billing." maxWidth="7xl">
+      <div className="px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+    </StudioLayout>
+  )
 }
 
 function BillingNotice({ text, title }: { text: string; title?: string }) {
-  return <div className="max-w-md rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-6 shadow-[var(--aethel-shadow-md)]">{title && <h1 className="mb-2 text-xl font-bold">{title}</h1>}<p className="text-sm text-[var(--aethel-text-secondary)]">{text}</p></div>
+  return <div className="mx-auto max-w-md rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-6 shadow-[var(--aethel-shadow-md)]">{title && <h1 className="mb-2 text-xl font-bold">{title}</h1>}<p className="text-sm text-[var(--aethel-text-secondary)]">{text}</p></div>
+}
+
+function BillingLoadingRunboard() {
+  const placeholders = ['Starter', 'Pro', 'Studio']
+  return (
+    <div data-billing-loading-runboard="true" className="space-y-4">
+      <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.74),rgba(8,10,16,0.88))] p-5 shadow-[0_24px_80px_rgba(2,6,23,0.28)]">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">Billing runboard</p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-[var(--aethel-text-primary)]">Cost and checkout readiness are syncing.</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
+              Plans, usage, wallet state, and Stripe readiness load as separate evidence lanes so upgrades never look available before checkout is safe.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.12em]">
+            <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1 text-[var(--aethel-info-light)]">Plans syncing</span>
+            <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-1 text-[var(--aethel-warning-light)]">Checkout guarded</span>
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          {['Usage ledger', 'Subscription state', 'Webhook health'].map((item) => (
+            <div key={item} className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_42%,transparent)] p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">{item}</p>
+              <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-[var(--aethel-surface-tertiary)]" />
+              <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-[var(--aethel-surface-tertiary)]" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="grid gap-3 md:grid-cols-3">
+        {placeholders.map((plan) => (
+          <div key={plan} className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] p-5">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{plan}</p>
+              <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Loading</span>
+            </div>
+            <div className="mt-4 h-8 w-28 animate-pulse rounded bg-[var(--aethel-surface-tertiary)]" />
+            <div className="mt-4 space-y-2">
+              <div className="h-3 w-full animate-pulse rounded bg-[var(--aethel-surface-tertiary)]" />
+              <div className="h-3 w-5/6 animate-pulse rounded bg-[var(--aethel-surface-tertiary)]" />
+              <div className="h-3 w-2/3 animate-pulse rounded bg-[var(--aethel-surface-tertiary)]" />
+            </div>
+          </div>
+        ))}
+      </section>
+    </div>
+  )
 }
 
 function BillingHeader({ currency, onCurrencyChange }: { currency: Currency; onCurrencyChange: (currency: Currency) => void }) {
@@ -185,4 +266,3 @@ function PlanLimits({ isEnterprise, plan }: { isEnterprise: boolean; plan: Plan 
   ]
   return <div className="mb-4 grid grid-cols-2 gap-2">{items.map(([label, value]) => <div key={label} className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3"><p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">{label}</p><p className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">{value}</p></div>)}</div>
 }
-
