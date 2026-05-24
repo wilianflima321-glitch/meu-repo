@@ -330,7 +330,7 @@ const CHECKS = [
     files: ['app/pricing/_components/PricingPlansGrid.tsx', 'app/pricing/_components/PricingComparisonTable.tsx', 'app/pricing/_components/PricingFaq.tsx'],
     combined: true,
     test: (content) => {
-      const required = ['featuredPlans', 'supportingPlans', 'Most common paths', 'Smaller steps', 'Detailed comparison', 'Open only if you need']
+      const required = ['featuredPlans', 'supportingPlans', 'Most common paths', 'Smaller steps', 'Open smaller plans', '<details', 'Detailed comparison', 'Open only if you need']
       return required.filter((token) => !content.includes(token)).length
     },
     limit: 0,
@@ -338,9 +338,21 @@ const CHECKS = [
   {
     id: 'studio-progressive-navigation',
     description: 'Studio must not expose every specialized editor as equal-weight chrome; primary editors stay visible and advanced editors move behind a compact route picker.',
-    files: ['app/studio/CreativeStudioShell.tsx'],
+    files: ['app/studio/CreativeStudioShell.tsx', 'app/studio/creative-studio-routes.ts'],
+    combined: true,
     test: (content) => {
-      const required = ['PRIMARY_CREATIVE_HREFS', 'primaryCreativeRoutes', 'secondaryCreativeRoutes', 'More editors']
+      const required = ['PRIMARY_CREATIVE_HREFS', 'isPrimaryCreativeStudioRoute', 'primaryCreativeRoutes', 'secondaryCreativeRoutes', 'More editors']
+      return required.filter((token) => !content.includes(token)).length
+    },
+    limit: 0,
+  },
+  {
+    id: 'studio-hub-card-compression',
+    description: 'Studio hub must expose primary surfaces first and collapse specialized editors so the user does not meet the entire editor map at once.',
+    files: ['app/studio/page.tsx', 'app/studio/creative-studio-routes.ts'],
+    combined: true,
+    test: (content) => {
+      const required = ['primaryStudioRoutes', 'advancedStudioRoutes', 'Primary surfaces', 'Advanced editors', 'isPrimaryCreativeStudioRoute']
       return required.filter((token) => !content.includes(token)).length
     },
     limit: 0,

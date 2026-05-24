@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import EngineSpineReadinessPanel from '@/components/studio/EngineSpineReadinessPanel'
 import CreativeStudioShell from './CreativeStudioShell'
-import { CREATIVE_STUDIO_ROUTES } from './creative-studio-routes'
+import { CREATIVE_STUDIO_ROUTES, isPrimaryCreativeStudioRoute } from './creative-studio-routes'
 import StudioMissionControl from './StudioMissionControl'
 
 const DOMAIN_LABELS = {
@@ -10,6 +10,9 @@ const DOMAIN_LABELS = {
   audio: 'Audio',
   runtime: 'Runtime',
 } as const
+
+const primaryStudioRoutes = CREATIVE_STUDIO_ROUTES.filter(isPrimaryCreativeStudioRoute)
+const advancedStudioRoutes = CREATIVE_STUDIO_ROUTES.filter((route) => !isPrimaryCreativeStudioRoute(route))
 
 export default function CreativeStudioPage() {
   return (
@@ -36,8 +39,22 @@ export default function CreativeStudioPage() {
 
           <EngineSpineReadinessPanel />
 
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                Primary surfaces
+              </p>
+              <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">
+                Start where most missions actually continue.
+              </h3>
+            </div>
+            <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
+              {primaryStudioRoutes.length} core entries
+            </span>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {CREATIVE_STUDIO_ROUTES.map((route) => (
+            {primaryStudioRoutes.map((route) => (
               <Link
                 key={route.href}
                 href={route.href}
@@ -69,6 +86,49 @@ export default function CreativeStudioPage() {
               </Link>
             ))}
           </div>
+
+          <details className="mt-5 rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] p-4 shadow-[0_18px_70px_rgba(0,0,0,0.18)]">
+            <summary className="cursor-pointer list-none">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                    Advanced editors
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">
+                    Open specialized surfaces only when the mission asks for them.
+                  </h3>
+                </div>
+                <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
+                  {advancedStudioRoutes.length} available
+                </span>
+              </div>
+            </summary>
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {advancedStudioRoutes.map((route) => (
+                <Link
+                  key={route.href}
+                  href={route.href}
+                  className="group flex h-full flex-col rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_42%,transparent)] p-4 transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                  aria-label={`Open ${route.label}`}
+                >
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className="rounded-full border border-[var(--aethel-border-secondary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                      {DOMAIN_LABELS[route.domain]}
+                    </span>
+                    <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">
+                      {route.maturity}
+                    </span>
+                  </div>
+                  <h4 className="text-base font-semibold text-[var(--aethel-text-primary)] transition-colors group-hover:text-[var(--aethel-primary-light)]">
+                    {route.label}
+                  </h4>
+                  <p className="mt-2 line-clamp-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">
+                    {route.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </details>
         </div>
       </div>
     </CreativeStudioShell>

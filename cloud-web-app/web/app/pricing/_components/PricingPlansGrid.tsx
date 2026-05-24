@@ -74,10 +74,21 @@ export function PricingPlansGrid({ corePlans, isAnnual }: PricingPlansGridProps)
       </div>
 
       {supportingPlans.length > 0 ? (
-        <div className="mt-5 rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+        <details className="mt-5 rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-4">
+          <summary className="cursor-pointer list-none">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Smaller steps</p>
+                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Open smaller plans only if the three main paths feel too large.</p>
+              </div>
+              <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
+                Open smaller plans
+              </span>
+            </div>
+          </summary>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--aethel-border-subtle)] pt-4">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Smaller steps</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Supporting plans</p>
               <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Use these when budget is tighter than collaboration pressure.</p>
             </div>
             <div className="grid w-full gap-3 sm:w-auto sm:grid-cols-2">
@@ -94,7 +105,7 @@ export function PricingPlansGrid({ corePlans, isAnnual }: PricingPlansGridProps)
               ))}
             </div>
           </div>
-        </div>
+        </details>
       ) : null}
     </section>
   )

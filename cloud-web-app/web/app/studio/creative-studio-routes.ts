@@ -10,6 +10,19 @@ export interface CreativeStudioRoute {
   description: string
 }
 
+export const PRIMARY_CREATIVE_HREFS = new Set([
+  '/studio/level',
+  '/studio/scene',
+  '/studio/material',
+  '/studio/film',
+  '/studio/audio',
+  '/studio/cinematic',
+])
+
+export function isPrimaryCreativeStudioRoute(route: CreativeStudioRoute) {
+  return PRIMARY_CREATIVE_HREFS.has(route.href)
+}
+
 export const CREATIVE_STUDIO_ROUTES: CreativeStudioRoute[] = [
   {
     href: '/studio/level',

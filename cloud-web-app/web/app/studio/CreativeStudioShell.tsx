@@ -6,16 +6,7 @@ import StudioLayout from '@/components/studio/StudioLayout'
 import MaturityBadge from '@/components/ui/MaturityBadge'
 import { isNavLinkActive, STUDIO_PRIMARY_LINKS } from '@/lib/navigation/surfaces'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
-import { CREATIVE_STUDIO_ROUTES } from './creative-studio-routes'
-
-const PRIMARY_CREATIVE_HREFS = new Set([
-  '/studio/level',
-  '/studio/scene',
-  '/studio/material',
-  '/studio/film',
-  '/studio/audio',
-  '/studio/cinematic',
-])
+import { CREATIVE_STUDIO_ROUTES, isPrimaryCreativeStudioRoute } from './creative-studio-routes'
 
 interface CreativeStudioShellProps {
   title: string
@@ -80,9 +71,9 @@ export default function CreativeStudioShell({
   const currentHref = activeHref ?? pathname
   const currentRoute = CREATIVE_STUDIO_ROUTES.find((route) => route.href === currentHref || route.href === pathname)
   const currentGuidance = maturityGuidance(currentRoute?.maturity)
-  const primaryCreativeRoutes = CREATIVE_STUDIO_ROUTES.filter((route) => PRIMARY_CREATIVE_HREFS.has(route.href))
-  const secondaryCreativeRoutes = CREATIVE_STUDIO_ROUTES.filter((route) => !PRIMARY_CREATIVE_HREFS.has(route.href))
-  const currentRouteIsSecondary = currentRoute ? !PRIMARY_CREATIVE_HREFS.has(currentRoute.href) : false
+  const primaryCreativeRoutes = CREATIVE_STUDIO_ROUTES.filter(isPrimaryCreativeStudioRoute)
+  const secondaryCreativeRoutes = CREATIVE_STUDIO_ROUTES.filter((route) => !isPrimaryCreativeStudioRoute(route))
+  const currentRouteIsSecondary = currentRoute ? !isPrimaryCreativeStudioRoute(currentRoute) : false
 
   const actions = (
     <div className="flex items-center gap-2">
