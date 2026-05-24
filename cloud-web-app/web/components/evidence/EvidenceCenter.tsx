@@ -263,34 +263,42 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                       </span>
                     </div>
                     <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{productionBiblePlan.uxDisclosure}</p>
-                    <div className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.16)] p-2">
-                      <p className="text-[11px] font-semibold text-[var(--aethel-text-secondary)]">
-                        Genre pack: {productionBiblePlan.genrePack.label} | {productionBiblePlan.genrePack.cameraModel} | {productionBiblePlan.genrePack.inputModel}
-                      </p>
-                      <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
-                        Loop: {productionBiblePlan.genrePack.coreLoop.slice(0, 5).join(' -> ')}
-                      </p>
-                      <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-warning-light)]">
-                        Playtest spine: {productionBiblePlan.playtestSpine.state}; {productionBiblePlan.playtestSpine.scenarios.length} scenario(s), human review required.
-                      </p>
-                      <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-warning-light)]">
-                        Cinematic evidence: {productionBiblePlan.cinematicEvidence.state}; {productionBiblePlan.cinematicEvidence.lanes.length} lane(s), {productionBiblePlan.cinematicEvidence.copy.cloudCost}.
-                      </p>
-                      <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
-                        Bible pillars: {productionBiblePlan.productionBible.pillars.slice(0, 5).join(', ')}. {productionBiblePlan.productionBible.firstUserDecision}
-                      </p>
-                      <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
-                        Deep bible: {productionBiblePlan.productionBible.deepBible.scenes.length} scene beats, {productionBiblePlan.productionBible.deepBible.characters.length} character contracts, {productionBiblePlan.productionBible.deepBible.evidenceModel.requiredEvidence.length} gates.
-                      </p>
-                    </div>
-                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                      {productionBiblePlan.productionGraphs.slice(0, 6).map((graph) => (
-                        <div key={graph.id} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.18)] p-2">
-                          <p className="text-xs font-semibold text-[var(--aethel-text-primary)]">{graph.id}</p>
-                          <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">{graph.userValue}</p>
-                        </div>
-                      ))}
-                    </div>
+                    <details className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.16)] p-2">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[11px] font-semibold text-[var(--aethel-text-secondary)]">
+                        <span>Open production bible details</span>
+                        <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+                          {productionBiblePlan.productionGraphs.slice(0, 6).length} graphs
+                        </span>
+                      </summary>
+                      <div className="mt-3">
+                        <p className="text-[11px] font-semibold text-[var(--aethel-text-secondary)]">
+                          Genre pack: {productionBiblePlan.genrePack.label} | {productionBiblePlan.genrePack.cameraModel} | {productionBiblePlan.genrePack.inputModel}
+                        </p>
+                        <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
+                          Loop: {productionBiblePlan.genrePack.coreLoop.slice(0, 5).join(' -> ')}
+                        </p>
+                        <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-warning-light)]">
+                          Playtest spine: {productionBiblePlan.playtestSpine.state}; {productionBiblePlan.playtestSpine.scenarios.length} scenario(s), human review required.
+                        </p>
+                        <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-warning-light)]">
+                          Cinematic evidence: {productionBiblePlan.cinematicEvidence.state}; {productionBiblePlan.cinematicEvidence.lanes.length} lane(s), {productionBiblePlan.cinematicEvidence.copy.cloudCost}.
+                        </p>
+                        <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
+                          Bible pillars: {productionBiblePlan.productionBible.pillars.slice(0, 5).join(', ')}. {productionBiblePlan.productionBible.firstUserDecision}
+                        </p>
+                        <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
+                          Deep bible: {productionBiblePlan.productionBible.deepBible.scenes.length} scene beats, {productionBiblePlan.productionBible.deepBible.characters.length} character contracts, {productionBiblePlan.productionBible.deepBible.evidenceModel.requiredEvidence.length} gates.
+                        </p>
+                      </div>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {productionBiblePlan.productionGraphs.slice(0, 6).map((graph) => (
+                          <div key={graph.id} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.18)] p-2">
+                            <p className="text-xs font-semibold text-[var(--aethel-text-primary)]">{graph.id}</p>
+                            <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">{graph.userValue}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
                     <p className="mt-3 text-[11px] text-[var(--aethel-warning-light)]">{productionBiblePlan.nextAction}</p>
                   </div>
                 ) : null}

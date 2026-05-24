@@ -141,25 +141,33 @@ export function MarketplaceFilters({
         </select>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {categories.map((category) => {
-          const active = selectedCategory === category
-          return (
-            <button
-              type="button"
-              key={category}
-              onClick={() => onCategoryChange(category)}
-              className={`rounded-full border px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition ${
-                active
-                  ? 'border-[color-mix(in_srgb,var(--aethel-info)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                  : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
-              }`}
-            >
-              {categoryLabels[category] ?? category}
-            </button>
-          )
-        })}
-      </div>
+      <details className="mt-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_42%,transparent)] px-3 py-3">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
+          <span>Category filters</span>
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]">
+            {categoryLabels[selectedCategory] ?? selectedCategory}
+          </span>
+        </summary>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {categories.map((category) => {
+            const active = selectedCategory === category
+            return (
+              <button
+                type="button"
+                key={category}
+                onClick={() => onCategoryChange(category)}
+                className={`rounded-full border px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition ${
+                  active
+                    ? 'border-[color-mix(in_srgb,var(--aethel-info)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+                    : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+                }`}
+              >
+                {categoryLabels[category] ?? category}
+              </button>
+            )
+          })}
+        </div>
+      </details>
     </div>
   )
 }

@@ -151,6 +151,93 @@ const SURFACE_MATRIX = [
   },
 ]
 
+const SUBAREA_MATRIX = [
+  {
+    area: 'Landing mission entry',
+    surface: '/',
+    comparator: 'v0 prompt bar + Replit agent intake',
+    critique: 'Good differentiation, but must keep proof and secondary modes behind disclosure so the first action stays obvious.',
+    decision: 'keep compact',
+  },
+  {
+    area: 'Public proof and claims',
+    surface: '/, /pricing, /marketplace',
+    comparator: 'Linear trust pages + Vercel launch pages',
+    critique: 'Operational proof beats screenshots and grand claims; every big promise needs readiness, cost, or evidence nearby.',
+    decision: 'evidence-first',
+  },
+  {
+    area: 'Pricing first decision',
+    surface: '/pricing',
+    comparator: 'Linear pricing',
+    critique: 'Users should choose between the common paths first; edge-case plans and comparisons should not dominate the first scan.',
+    decision: 'compressed',
+  },
+  {
+    area: 'Marketplace trust filters',
+    surface: '/marketplace',
+    comparator: 'Canva marketplace + browser extension review flows',
+    critique: 'Trust tabs, search, and install review are primary; category taxonomies are secondary and should stay collapsible.',
+    decision: 'category filters collapsed',
+  },
+  {
+    area: 'Dashboard first answer',
+    surface: '/dashboard',
+    comparator: 'Linear home + Cursor agent status',
+    critique: 'The authenticated home must answer current work, cost, approval, preview, and next action before any cockpit depth.',
+    decision: 'one-glance operating state',
+  },
+  {
+    area: 'IDE agent cockpit',
+    surface: '/ide',
+    comparator: 'Cursor Background Agents',
+    critique: 'Agent power is only premium if scope locks, cost, replay, handoff, and takeover are always close to the composer.',
+    decision: 'visible governance',
+  },
+  {
+    area: 'Studio primary navigation',
+    surface: '/studio, /studio/*',
+    comparator: 'Unreal project browser + Figma focus views',
+    critique: 'Primary editors stay visible; specialized tooling should feel discoverable, not dumped into equal-weight chrome.',
+    decision: 'progressive route map',
+  },
+  {
+    area: 'Studio editor readiness',
+    surface: '/studio/*',
+    comparator: 'Unity package maturity + Unreal editor panels',
+    critique: 'Each editor needs maturity, runtime mode, capability, evidence, and one next move before dense controls.',
+    decision: 'adapter evidence before tools',
+  },
+  {
+    area: 'Cloud Stream readiness',
+    surface: '/studio/cinematic',
+    comparator: 'Unreal Pixel Streaming operations',
+    critique: 'Cloud render quality must be held unless URL, session lifecycle, teardown, and cost are real.',
+    decision: 'held by capability',
+  },
+  {
+    area: 'Evidence production bible',
+    surface: '/evidence',
+    comparator: 'Figma ready-for-dev + Linear issue evidence',
+    critique: 'The Bible can be deep internally, but the UI must reveal summary, blockers, and next action first.',
+    decision: 'deep details collapsed',
+  },
+  {
+    area: 'Admin compatibility',
+    surface: '/admin',
+    comparator: 'AWS/Vercel consoles',
+    critique: 'Six premium areas should feel like the product; legacy routes belong behind a closed compatibility drawer.',
+    decision: 'legacy hidden',
+  },
+  {
+    area: 'Mobile companion',
+    surface: 'PWA/mobile',
+    comparator: 'Linear mobile + Replit mobile',
+    critique: 'Mobile should monitor, approve, and resume; heavy creative editing remains desktop/local/cloud.',
+    decision: 'companion, not desktop clone',
+  },
+]
+
 const BACKLOG = [
   ['P0', 'Authenticated screenshots', 'Capture real dashboard/IDE/Studio/admin/billing/settings states with JWT instead of relying on auth-gate screenshots.'],
   ['P0', 'Surface density ratchet', 'Keep pricing, landing, marketplace, and Studio nav below card-wall thresholds with progressive disclosure.'],
@@ -315,6 +402,16 @@ const CHECKS = [
     limit: 0,
   },
   {
+    id: 'marketplace-filter-compression',
+    description: 'Marketplace category taxonomies must stay secondary to search, trust tabs, provenance, and install review.',
+    files: ['app/marketplace/marketplace-page.parts.tsx'],
+    test: (content) => {
+      const required = ['trustFilter', 'Category filters', '<details', 'selectedCategory']
+      return required.filter((token) => !content.includes(token)).length
+    },
+    limit: 0,
+  },
+  {
     id: 'landing-progressive-disclosure',
     description: 'Landing must reduce mode-card walls by keeping primary modes visible and moving secondary modes behind progressive disclosure.',
     files: ['app/landing-v3.tsx'],
@@ -363,6 +460,16 @@ const CHECKS = [
     files: ['components/dashboard/DashboardOverviewTab.tsx'],
     test: (content) => {
       const required = ['Active runs', 'Approvals', 'Evidence', 'Preview', 'Next actions', 'Budget', 'Review pending proposal']
+      return required.filter((token) => !content.includes(token)).length
+    },
+    limit: 0,
+  },
+  {
+    id: 'evidence-detail-compression',
+    description: 'Evidence Center must keep the production bible deep internally while showing compact proof and next action first.',
+    files: ['components/evidence/EvidenceCenter.tsx'],
+    test: (content) => {
+      const required = ['Production Bible preview', 'Open production bible details', '<details', 'uxDisclosure', 'nextAction']
       return required.filter((token) => !content.includes(token)).length
     },
     limit: 0,
@@ -441,6 +548,14 @@ lines.push('| Priority | Area | Action |')
 lines.push('| --- | --- | --- |')
 for (const [priority, area, action] of BACKLOG) {
   lines.push(`| ${priority} | ${area} | ${action} |`)
+}
+lines.push('')
+lines.push('## Subarea Quality Matrix')
+lines.push('')
+lines.push('| Subarea | Surface | Comparator | Critique | Decision |')
+lines.push('| --- | --- | --- | --- | --- |')
+for (const subarea of SUBAREA_MATRIX) {
+  lines.push(`| ${subarea.area} | \`${subarea.surface}\` | ${subarea.comparator} | ${subarea.critique} | ${subarea.decision} |`)
 }
 lines.push('')
 lines.push('## Summary')
