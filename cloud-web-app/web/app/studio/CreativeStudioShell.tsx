@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import StudioLayout from '@/components/studio/StudioLayout'
 import MaturityBadge from '@/components/ui/MaturityBadge'
-import { isNavLinkActive, STUDIO_PRIMARY_LINKS } from '@/lib/navigation/surfaces'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 import { CREATIVE_STUDIO_ROUTES, isPrimaryCreativeStudioRoute } from './creative-studio-routes'
 
@@ -13,12 +12,6 @@ interface CreativeStudioShellProps {
   subtitle: string
   activeHref?: string
   children: ReactNode
-}
-
-function topLinkClass(active: boolean): string {
-  return active
-    ? 'inline-flex min-h-9 shrink-0 items-center whitespace-nowrap rounded-md border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--aethel-info-light)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]'
-    : 'inline-flex min-h-9 shrink-0 items-center whitespace-nowrap rounded-md border border-transparent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]'
 }
 
 function creativeTabClass(active: boolean): string {
@@ -31,14 +24,14 @@ function maturityGuidance(maturity?: string) {
   if (maturity === 'BETA') {
     return {
       label: 'Beta surface',
-      detail: 'Core editing is visible; heavy runtime work remains capability-gated through Browser, Studio Local, or Cloud Stream.',
+      detail: 'Core editing is visible. Expensive work waits for a local optimizer or a configured cloud review lane.',
     }
   }
 
   if (maturity === 'ALPHA') {
     return {
       label: 'Alpha surface',
-      detail: 'Use for guided authoring and review packets; production writes should keep evidence and rollback plans attached.',
+      detail: 'Use for guided authoring and review packets. Production writes need evidence and rollback plans attached.',
     }
   }
 
@@ -101,22 +94,6 @@ export default function CreativeStudioShell({
       maxWidth="full"
       className="flex h-[calc(100vh-116px)] flex-col overflow-hidden"
     >
-      <nav
-        className="hidden min-h-12 items-center gap-2 overflow-x-auto border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-4 py-2 md:flex lg:px-6"
-        aria-label="Studio primary surfaces"
-      >
-        {STUDIO_PRIMARY_LINKS.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={topLinkClass(isNavLinkActive(pathname, link))}
-            aria-current={isNavLinkActive(pathname, link) ? 'page' : undefined}
-          >
-            {link.label}
-          </Link>
-        ))}
-      </nav>
-
       <div
         className="border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_66%,transparent)] px-4 py-3 md:hidden"
         data-studio-mobile-editor-switcher
@@ -252,7 +229,7 @@ export default function CreativeStudioShell({
             </span>
             {currentRoute ? <MaturityBadge maturity={currentRoute.maturity} /> : <MaturityBadge path="/studio" />}
             <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
-              Heavy runtime gated
+              Heavy work guarded
             </span>
           </div>
           <p className="mt-1 max-w-3xl truncate text-xs leading-5 text-[var(--aethel-text-secondary)]">
@@ -260,9 +237,9 @@ export default function CreativeStudioShell({
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
-          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Browser preview</span>
-          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Local when available</span>
-          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Cloud held by capability</span>
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Preview ready</span>
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Local optimizer optional</span>
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Cloud review gated</span>
         </div>
       </div>
 

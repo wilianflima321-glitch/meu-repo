@@ -27,11 +27,11 @@ export default function CreativeStudioPage() {
           <SurfaceQualityShell
             eyebrow="Studio runboard"
             title="Plan, validate, then open the right editor."
-            subtitle="Creative depth stays governed: Browser previews, Studio Local handles heavy work when attached, and Cloud Stream remains held until capability is real."
+            subtitle="Creative depth stays governed: preview now, optimize locally when attached, request cloud review only when capability and cost are real."
             status={[
-              { label: 'Browser', value: 'preview', tone: 'available' },
-              { label: 'Studio Local', value: 'held', tone: 'held' },
-              { label: 'Cloud Stream', value: 'held', tone: 'held' },
+              { label: 'Preview ready', tone: 'available' },
+              { label: 'Local optimizer optional', tone: 'neutral' },
+              { label: 'Cloud review gated', tone: 'neutral' },
             ]}
             primaryAction={<a href="#studio-primary-surfaces" className="rounded-full bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.18)]">Open editor</a>}
             secondaryAction={<a href="#studio-runboard" className="rounded-full border border-[var(--aethel-border-subtle)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)]">Validate plan</a>}
