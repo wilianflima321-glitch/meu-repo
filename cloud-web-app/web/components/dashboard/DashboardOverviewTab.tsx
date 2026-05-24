@@ -369,19 +369,22 @@ export function DashboardOverviewTab({
         onOpenProjects={onOpenProjects}
       />
 
-      <div className="hidden gap-3 md:grid lg:grid-cols-4" data-dashboard-desktop-signal-strip>
-        {liveStrip.map((item) => (
-          <div
-            key={item.label}
-            className="rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] px-4 py-4 shadow-[0_16px_40px_rgba(2,6,23,0.18)]"
-          >
-            <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">{item.label}</div>
-            <div className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${toneClasses[item.tone]}`}>
-              {item.value}
-            </div>
-          </div>
-        ))}
-      </div>
+      <details
+        className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-4 py-3"
+        data-dashboard-operator-snapshot
+      >
+        <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-[var(--aethel-text-primary)]">
+          <span>Operational snapshot</span>
+          <span className="text-xs font-medium text-[var(--aethel-text-tertiary)]">Agents, approvals, evidence, preview</span>
+        </summary>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {liveStrip.map((item) => (
+            <span key={item.label} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${toneClasses[item.tone]}`}>
+              {item.label}: {item.value}
+            </span>
+          ))}
+        </div>
+      </details>
 
       <DashboardEvidenceDisclosure
         projectBrainSnapshot={projectBrainSnapshot}

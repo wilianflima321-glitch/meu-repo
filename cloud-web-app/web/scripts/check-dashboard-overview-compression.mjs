@@ -24,12 +24,14 @@ const hero = read(heroPath)
 const requiredOverviewTokens = [
   'DashboardEvidenceDisclosure',
   'DashboardMissionHero',
-  'data-dashboard-desktop-signal-strip',
+  'data-dashboard-operator-snapshot',
+  'Operational snapshot',
 ]
 
 const requiredHeroTokens = [
-  'hidden max-w-2xl text-sm leading-7',
-  'hidden rounded-[28px]',
+  'data-dashboard-command-card="one-glance"',
+  'data-dashboard-run-state-panel',
+  'Continue workspace',
 ]
 
 const requiredDisclosureTokens = [
@@ -52,9 +54,15 @@ for (const token of requiredDisclosureTokens) {
   if (!disclosure.includes(token)) failures.push(`DashboardEvidenceDisclosure.tsx missing ${token}`)
 }
 
-for (const forbidden of ['<DashboardProjectBrainCard', '<DashboardMissionLedgerCard', '<DashboardRepositoryCartographyCard', '<DeviceRuntimeGuardCard']) {
+for (const forbidden of ['<DashboardProjectBrainCard', '<DashboardMissionLedgerCard', '<DashboardRepositoryCartographyCard', '<DeviceRuntimeGuardCard', 'data-dashboard-desktop-signal-strip']) {
   if (overview.includes(forbidden)) {
     failures.push(`DashboardOverviewTab.tsx must not render ${forbidden} directly; keep deep evidence behind disclosure`)
+  }
+}
+
+for (const forbidden of ['bg-[linear-gradient', 'Expand Studio', 'Embedded Studio']) {
+  if (hero.includes(forbidden)) {
+    failures.push(`DashboardMissionHero.tsx still contains dense/cliche hero token: ${forbidden}`)
   }
 }
 
