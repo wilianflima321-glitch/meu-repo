@@ -249,18 +249,44 @@ export default function StudioMissionControl() {
     }
   }
 
+  const selectClass =
+    'min-h-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-secondary)]'
+  const quietPanelClass =
+    'rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_48%,transparent)]'
+  const runtimeReady = selectedRuntimeMode.status === 'available' || selectedRuntimeMode.status === 'beta'
+  const studioStats = [
+    { label: 'Session', value: compactSessionId },
+    { label: 'Tasks', value: String(session?.activeTaskIds.length ?? 0) },
+    { label: 'Evidence', value: String(session?.evidenceRefs.length ?? 0) },
+  ]
+
   return (
-    <section className="mb-6 rounded-[28px] border border-[color-mix(in_srgb,var(--aethel-primary)_22%,var(--aethel-border-primary))] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_94%,transparent))] p-4 shadow-[0_24px_90px_rgba(2,6,23,0.28)] sm:p-5">
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+    <section
+      className="mb-6 rounded-[30px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] p-4 shadow-[0_24px_90px_rgba(2,6,23,0.22)] sm:p-5"
+      data-studio-mission-runboard="compact"
+    >
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--aethel-primary-light)]">
-              Mission Control
-            </span>
-            <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${statusClass(session?.status)}`}>
-              {session?.status ?? 'No session'}
-            </span>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_9%,transparent)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--aethel-primary-light)]">
+                  Studio runboard
+                </span>
+                <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${statusClass(session?.status)}`}>
+                  {session?.status ?? 'No session'}
+                </span>
+                <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${runtimeReady ? statusClass('active') : statusClass('stopped')}`}>
+                  {selectedRuntimeMode.label}: {selectedRuntimeMode.badge}
+                </span>
+              </div>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[var(--aethel-text-primary)]">Plan the next Studio move.</h2>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
+                One mission, one runtime truth, one governed next action. Deep production detail stays under review.
+              </p>
+            </div>
           </div>
+
           <label htmlFor="studio-mission" className="mt-4 block text-sm font-semibold text-[var(--aethel-text-primary)]">
             What should the Studio coordinate?
           </label>
@@ -269,15 +295,11 @@ export default function StudioMissionControl() {
             suppressHydrationWarning
             value={mission}
             onChange={(event) => setMission(event.target.value)}
-            className="mt-2 min-h-24 w-full resize-none rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_76%,transparent)] px-4 py-3 text-sm leading-6 text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-primary)_55%,transparent)] focus:ring-2 focus:ring-[var(--aethel-focus-ring)]"
+            className="mt-2 min-h-20 w-full resize-none rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_76%,transparent)] px-4 py-3 text-sm leading-6 text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-primary)_55%,transparent)] focus:ring-2 focus:ring-[var(--aethel-focus-ring)]"
           />
-          <div className="mt-3 flex flex-wrap gap-2">
-            <select
-              value={mode}
-              onChange={(event) => setMode(event.target.value as StudioMode)}
-              className="min-h-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-secondary)]"
-              aria-label="Studio mode"
-            >
+
+          <div className="mt-3 flex flex-wrap gap-2" aria-label="Studio mode picker">
+            <select value={mode} onChange={(event) => setMode(event.target.value as StudioMode)} className={selectClass} aria-label="Studio mode">
               {MODE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -286,24 +308,14 @@ export default function StudioMissionControl() {
             </select>
             {mode === 'game' ? (
               <>
-                <select
-                  value={gameScope}
-                  onChange={(event) => setGameScope(event.target.value as PlayableGameScope)}
-                  className="min-h-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-secondary)]"
-                  aria-label="Game scope"
-                >
+                <select value={gameScope} onChange={(event) => setGameScope(event.target.value as PlayableGameScope)} className={selectClass} aria-label="Game scope">
                   {GAME_SCOPE_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
                   ))}
                 </select>
-                <select
-                  value={gameGenre}
-                  onChange={(event) => setGameGenre(event.target.value as PlayableGameGenre)}
-                  className="min-h-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-secondary)]"
-                  aria-label="Game genre"
-                >
+                <select value={gameGenre} onChange={(event) => setGameGenre(event.target.value as PlayableGameGenre)} className={selectClass} aria-label="Game genre">
                   {GAME_GENRE_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -312,12 +324,7 @@ export default function StudioMissionControl() {
                 </select>
               </>
             ) : null}
-            <select
-              value={runtimeTarget}
-              onChange={(event) => setRuntimeTarget(event.target.value as RuntimeTarget)}
-              className="min-h-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-secondary)]"
-              aria-label="Runtime target"
-            >
+            <select value={runtimeTarget} onChange={(event) => setRuntimeTarget(event.target.value as RuntimeTarget)} className={selectClass} aria-label="Runtime target">
               {runtimeModes.map((option) => (
                 <option key={option.id} value={option.runtimeTarget} disabled={!option.selectable}>
                   {option.label} - {option.badge}
@@ -325,9 +332,10 @@ export default function StudioMissionControl() {
               ))}
             </select>
           </div>
+
           {gameScopePlan ? (
-            <div className="mt-3 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_22%,var(--aethel-border-subtle))] bg-[color-mix(in_srgb,var(--aethel-primary)_7%,transparent)] px-3 py-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className={`mt-3 ${quietPanelClass} px-3 py-3`}>
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--aethel-border-subtle)] pb-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-primary-light)]">
                   Game scope: {gameScopePlan.label}
                 </p>
@@ -335,65 +343,80 @@ export default function StudioMissionControl() {
                   {gameScopePlan.releaseState}
                 </span>
               </div>
-              <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{gameScopePlan.uxDisclosure}</p>
-              <p className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
-                Genre pack: {gameScopePlan.genrePack.cameraModel} camera, {gameScopePlan.genrePack.inputModel} input, loop: {gameScopePlan.genrePack.coreLoop.slice(0, 3).join(' -> ')}.
-              </p>
-              <p className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
-                Production bible: {gameScopePlan.productionBible.pillars.slice(0, 4).join(', ')}. Decision: {gameScopePlan.productionBible.firstUserDecision}
-              </p>
-              <p className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
-                Deep bible: {gameScopePlan.productionBible.deepBible.scenes.length} scene beats, {gameScopePlan.productionBible.deepBible.characters.length} character contracts, {gameScopePlan.productionBible.deepBible.evidenceModel.requiredEvidence.length} gates.
-              </p>
-              <p className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
-                Cinematics: {gameScopePlan.cinematicEvidence.state}; {gameScopePlan.cinematicEvidence.lanes.length} lane(s). {gameScopePlan.cinematicEvidence.copy.draftWarning}.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {gameScopePlan.creativeArtifacts.slice(0, 7).map((artifact) => (
-                  <span key={artifact} className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]">
-                    {artifact}
-                  </span>
-                ))}
+
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                <div className="rounded-xl border border-[var(--aethel-border-subtle)] px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--aethel-text-tertiary)]">Camera / input</p>
+                  <p className="mt-1 truncate text-xs font-semibold text-[var(--aethel-text-primary)]">
+                    {gameScopePlan.genrePack.cameraModel} / {gameScopePlan.genrePack.inputModel}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-[var(--aethel-border-subtle)] px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--aethel-text-tertiary)]">Bible</p>
+                  <p className="mt-1 truncate text-xs font-semibold text-[var(--aethel-text-primary)]">
+                    {gameScopePlan.productionBible.pillars.slice(0, 2).join(', ')}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-[var(--aethel-border-subtle)] px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--aethel-text-tertiary)]">Review</p>
+                  <p className="mt-1 truncate text-xs font-semibold text-[var(--aethel-text-primary)]">
+                    {gameScopePlan.cinematicEvidence.state} / {gameScopePlan.playtestSpine.state}
+                  </p>
+                </div>
               </div>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {gameScopePlan.playtestSpine.scenarios.slice(0, 4).map((scenario) => (
-                  <span key={scenario.id} className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_24%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-warning-light)]">
-                    {scenario.title}
-                  </span>
-                ))}
-              </div>
-              <p className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">
-                Playtest spine: {gameScopePlan.playtestSpine.state}; telemetry: {gameScopePlan.playtestSpine.telemetry.slice(0, 3).join(', ')}.
-              </p>
+
+              <p className="mt-3 text-xs leading-5 text-[var(--aethel-text-secondary)]">{gameScopePlan.uxDisclosure}</p>
+              <details className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-3 py-2">
+                <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                  Review production evidence
+                </summary>
+                <div className="mt-3 space-y-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                  <p>Production bible: {gameScopePlan.productionBible.pillars.slice(0, 4).join(', ')}. Decision: {gameScopePlan.productionBible.firstUserDecision}</p>
+                  <p>Deep bible: {gameScopePlan.productionBible.deepBible.scenes.length} scene beats, {gameScopePlan.productionBible.deepBible.characters.length} character contracts, {gameScopePlan.productionBible.deepBible.evidenceModel.requiredEvidence.length} gates.</p>
+                  <p>Cinematics: {gameScopePlan.cinematicEvidence.state}; {gameScopePlan.cinematicEvidence.lanes.length} lane(s). {gameScopePlan.cinematicEvidence.copy.draftWarning}.</p>
+                  <p>Playtest spine: {gameScopePlan.playtestSpine.state}; telemetry: {gameScopePlan.playtestSpine.telemetry.slice(0, 3).join(', ')}.</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {gameScopePlan.creativeArtifacts.slice(0, 5).map((artifact) => (
+                      <span key={artifact} className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]">
+                        {artifact}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {gameScopePlan.playtestSpine.scenarios.slice(0, 3).map((scenario) => (
+                      <span key={scenario.id} className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_24%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-warning-light)]">
+                        {scenario.title}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </details>
               <p className="mt-3 text-[11px] text-[var(--aethel-warning-light)]">{gameScopePlan.nextAction}</p>
             </div>
           ) : null}
-          <div className="mt-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_45%,transparent)] px-3 py-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
-              Runtime truth layer: {selectedRuntimeMode.label} · {selectedRuntimeMode.badge}
-            </p>
+
+          <div className={`mt-3 ${quietPanelClass} px-3 py-2`}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                Runtime truth layer: {selectedRuntimeMode.label} / {selectedRuntimeMode.badge}
+              </p>
+              <span className="text-[11px] text-[var(--aethel-text-tertiary)]">{selectedRuntimeMode.costNote}</span>
+            </div>
             <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{selectedRuntimeMode.detail}</p>
-            <p className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">{selectedRuntimeMode.costNote}</p>
             {selectedRuntimeMode.fallbackReason ? (
               <p className="mt-1 text-[11px] text-[var(--aethel-warning-light)]">{selectedRuntimeMode.fallbackReason}</p>
             ) : null}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_58%,transparent)] p-4">
+        <div className={`${quietPanelClass} p-4`}>
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-xl border border-[var(--aethel-border-subtle)] p-2">
-              <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">Session</p>
-              <p className="mt-1 truncate text-xs font-semibold text-[var(--aethel-text-primary)]">{compactSessionId}</p>
-            </div>
-            <div className="rounded-xl border border-[var(--aethel-border-subtle)] p-2">
-              <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">Tasks</p>
-              <p className="mt-1 text-xs font-semibold text-[var(--aethel-text-primary)]">{session?.activeTaskIds.length ?? 0}</p>
-            </div>
-            <div className="rounded-xl border border-[var(--aethel-border-subtle)] p-2">
-              <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">Evidence</p>
-              <p className="mt-1 text-xs font-semibold text-[var(--aethel-text-primary)]">{session?.evidenceRefs.length ?? 0}</p>
-            </div>
+            {studioStats.map((item) => (
+              <div key={item.label} className="rounded-xl border border-[var(--aethel-border-subtle)] p-2">
+                <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">{item.label}</p>
+                <p className="mt-1 truncate text-xs font-semibold text-[var(--aethel-text-primary)]">{item.value}</p>
+              </div>
+            ))}
           </div>
 
           <div className="mt-4 grid gap-2">
@@ -411,7 +434,7 @@ export default function StudioMissionControl() {
               disabled={!canRunWave || busy !== null}
               className="min-h-11 rounded-xl border border-[var(--aethel-border-primary)] px-4 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-secondary)] disabled:cursor-not-allowed disabled:opacity-55"
             >
-              {busy === 'wave' ? 'Planning wave...' : 'Run 3-agent wave'}
+              {busy === 'wave' ? 'Planning wave...' : 'Validate plan'}
             </button>
             <button
               type="button"
@@ -431,13 +454,18 @@ export default function StudioMissionControl() {
             </p>
           )}
           {wave?.tasks && wave.tasks.length > 0 && (
-            <div className="mt-3 space-y-1">
-              {wave.tasks.slice(0, 3).map((task) => (
-                <p key={task.id} className="truncate text-[11px] text-[var(--aethel-text-tertiary)]">
-                  {task.goal}
-                </p>
-              ))}
-            </div>
+            <details className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] px-3 py-2">
+              <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                Planned tasks ({Math.min(wave.tasks.length, 3)})
+              </summary>
+              <div className="mt-2 space-y-1">
+                {wave.tasks.slice(0, 3).map((task) => (
+                  <p key={task.id} className="truncate text-[11px] text-[var(--aethel-text-tertiary)]">
+                    {task.goal}
+                  </p>
+                ))}
+              </div>
+            </details>
           )}
         </div>
       </div>

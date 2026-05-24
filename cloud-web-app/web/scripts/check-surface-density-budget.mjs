@@ -18,6 +18,13 @@ const CHECKS = [
     maxCards: 28,
   },
   {
+    id: 'studio-mission-runboard',
+    file: 'app/studio/StudioMissionControl.tsx',
+    required: ['data-studio-mission-runboard="compact"', 'Review production evidence', 'Validate plan', 'Runtime truth layer'],
+    forbidden: ['Run 3-agent wave', 'Cloud held by capability', 'Heavy runtime gated'],
+    maxCards: 20,
+  },
+  {
     id: 'admin-operations-board',
     file: 'components/admin/AdminCommandCenterSections.tsx',
     required: ['Operations board', 'Open compatibility route cards', 'data-privacy="masked"'],
