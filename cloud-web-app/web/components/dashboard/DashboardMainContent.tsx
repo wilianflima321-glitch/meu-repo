@@ -72,7 +72,7 @@ function SurfaceFrame({ eyebrow, title, description, icon, children }: SurfaceFr
   return (
     <div className="space-y-4">
       <section
-        className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.72),rgba(8,10,16,0.94))] px-5 py-5 shadow-[0_20px_70px_rgba(2,6,23,0.26)] sm:px-6"
+        className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-5 py-5 shadow-[0_20px_70px_rgba(2,6,23,0.20)] sm:px-6"
         aria-labelledby={headingId}
       >
         <div className="flex items-start justify-between gap-4">

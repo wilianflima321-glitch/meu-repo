@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import type { ActiveTab, SessionFilter } from './aethel-dashboard-model'
 
@@ -108,7 +108,7 @@ const NAV_SECTIONS: NavSection[] = [
 function buildSidebarItemClass(isActive: boolean) {
   const base = 'flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left text-sm font-medium transition-all'
   return isActive
-    ? `${base} border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_22%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))] text-[var(--aethel-text-primary)] shadow-[0_14px_30px_rgba(14,165,233,0.12)]`
+    ? `${base} border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_12px_28px_rgba(2,6,23,0.18)]`
     : `${base} border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] hover:text-[var(--aethel-text-primary)]`
 }
 
@@ -116,42 +116,8 @@ function buildFilterClass(isActive: boolean) {
   const base =
     'flex items-center justify-center rounded-full px-3 py-1.5 text-xs leading-4 border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-secondary)] transition'
   return isActive
-    ? `${base} bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)]`
+    ? `${base} bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-primary)] border-[var(--aethel-border-primary)]`
     : `${base} text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]`
-}
-
-function getRecommendedNextStep(activeTab: ActiveTab): {
-  label: string
-  description: string
-  tab?: ActiveTab
-  action?: 'ide'
-} {
-  switch (activeTab) {
-    case 'overview':
-      return {
-        label: 'Open AI Console',
-        description: 'Turn the current mission into a plan, research, and execution path.',
-        tab: 'ai-chat',
-      }
-    case 'ai-chat':
-      return {
-        label: 'Open Projects',
-        description: 'Choose the right workspace before handing off to the Studio.',
-        tab: 'projects',
-      }
-    case 'projects':
-      return {
-        label: 'Expand Studio',
-        description: 'Carry context into the editor, viewport, and review without switching products.',
-        action: 'ide',
-      }
-    default:
-      return {
-        label: 'Back to Studio Home',
-        description: 'Return to the main surface and find the next best action.',
-        tab: 'overview',
-      }
-  }
 }
 
 function SidebarIcon({ item }: { item: NavItem }) {
@@ -178,12 +144,6 @@ export function AethelDashboardSidebar({
     ops: false,
     explore: false,
   })
-  const recommendedStep = getRecommendedNextStep(activeTab)
-
-  const activeNavItem = useMemo(
-    () => [...PRIMARY_ITEMS, ...NAV_SECTIONS.flatMap((section) => section.items)].find((item) => item.tab === activeTab),
-    [activeTab]
-  )
 
   const selectTab = (tab: ActiveTab) => {
     onSelectTab(tab)
@@ -195,7 +155,7 @@ export function AethelDashboardSidebar({
   return (
     <nav
       id="dashboard-sidebar"
-      className={`fixed z-50 h-full w-[300px] shrink-0 transform border-r border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(10,13,20,0.98),rgba(8,10,16,0.96))] shadow-[0_30px_80px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-in-out md:sticky md:top-[88px] md:h-[calc(100vh-104px)] md:rounded-r-3xl ${
+      className={`fixed z-50 h-full w-[292px] shrink-0 transform border-r border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] shadow-[0_30px_80px_rgba(0,0,0,0.30)] transition-transform duration-300 ease-in-out md:sticky md:top-[88px] md:h-[calc(100vh-104px)] md:rounded-r-3xl ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}
       aria-label="Primary Studio navigation"
@@ -233,7 +193,7 @@ export function AethelDashboardSidebar({
           <button
             type="button"
             onClick={onCreateNewSession}
-            className="inline-flex w-full min-w-9 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-3 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_10px_24px_rgba(59,130,246,0.25)] transition active:opacity-80 hover:brightness-110"
+            className="inline-flex w-full min-w-9 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[var(--aethel-text-primary)] px-3 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_10px_24px_rgba(2,6,23,0.18)] transition active:opacity-80 hover:bg-[var(--aethel-text-secondary)]"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -265,38 +225,7 @@ export function AethelDashboardSidebar({
           </details>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 pb-4">
-          <div className="mb-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] px-3 py-3">
-            <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Current surface</div>
-            <div className="mt-2 text-sm font-medium text-[var(--aethel-text-primary)]">{activeNavItem?.label ?? 'Studio'}</div>
-            <div className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">
-              {entryMission
-                ? `Mission: ${entryMission}`
-                : activeNavItem?.summary ?? 'Keep the product focused around one visible next step.'}
-            </div>
-          </div>
-
-          <div className="mb-4 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_24%,transparent)] bg-[linear-gradient(135deg,rgba(79,70,229,0.12),rgba(14,165,233,0.08))] px-3 py-3 shadow-[0_16px_40px_rgba(2,6,23,0.16)]">
-            <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Next best move</div>
-            <div className="mt-2 text-sm font-semibold text-[var(--aethel-text-primary)]">{recommendedStep.label}</div>
-            <div className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{recommendedStep.description}</div>
-            <button
-              type="button"
-              onClick={() => {
-                if (recommendedStep.action === 'ide') {
-                  onOpenIde?.()
-                  return
-                }
-                if (recommendedStep.tab) {
-                  selectTab(recommendedStep.tab)
-                }
-              }}
-              className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-3 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_10px_24px_rgba(59,130,246,0.25)] transition hover:brightness-110"
-            >
-              {recommendedStep.label}
-            </button>
-          </div>
-
+        <div className="flex-1 overflow-y-auto px-3 pb-4" data-dashboard-sidebar-density="primary-first">
           <section className="space-y-2">
             <div className="px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Primary flow</div>
             <div className="space-y-1">
@@ -317,28 +246,6 @@ export function AethelDashboardSidebar({
               ))}
             </div>
           </section>
-
-          <div className="mt-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-3">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Deep Studio</div>
-                <div className="mt-1 text-sm font-medium text-[var(--aethel-text-primary)]">Expand the cockpit only when the task gets deep.</div>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => onOpenIde?.()}
-              className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-2 text-sm font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_36%,transparent)]"
-            >
-              Expand Studio
-            </button>
-            <Link
-              href="/evidence"
-              className="mt-2 inline-flex w-full items-center justify-center rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-3 py-2 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
-            >
-              Evidence Center
-            </Link>
-          </div>
 
           <div className="mt-4 space-y-3">
             {NAV_SECTIONS.map((section) => {
@@ -387,6 +294,22 @@ export function AethelDashboardSidebar({
                 </section>
               )
             })}
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-2 border-t border-[var(--aethel-border-subtle)] pt-4">
+            <button
+              type="button"
+              onClick={() => onOpenIde?.()}
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)]"
+            >
+              Open Studio
+            </button>
+            <Link
+              href="/evidence"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-subtle)] bg-transparent px-3 py-2 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
+            >
+              Evidence
+            </Link>
           </div>
         </div>
       </div>

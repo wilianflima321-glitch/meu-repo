@@ -27,7 +27,7 @@ type Point3 = {
 const CanonicalPreviewSurface = dynamic(() => import('@/components/preview/CanonicalPreviewSurface'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full min-h-[260px] flex-col justify-between rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent),color-mix(in_srgb,var(--aethel-info)_8%,transparent))] px-6 py-5 text-sm text-[var(--aethel-text-secondary)]">
+    <div className="flex h-full min-h-[260px] flex-col justify-between rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] px-6 py-5 text-sm text-[var(--aethel-text-secondary)]">
       <div>
         <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Preview surface</p>
         <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">Warming up the artifact preview</p>
@@ -232,7 +232,7 @@ export function DashboardOverviewTab({
         pendingApprovals > 0
           ? 'A change is ready for review before apply.'
           : 'Continue the plan, research, or execution with preserved context.',
-      action: pendingApprovals > 0 ? 'Expand Studio' : 'Open AI Console',
+      action: pendingApprovals > 0 ? 'Open Studio' : 'Open AI Console',
       onClick: pendingApprovals > 0 ? onOpenIde : onOpenAiChat,
       primary: true,
     },
@@ -241,7 +241,7 @@ export function DashboardOverviewTab({
       description: primaryProject
         ? 'Return to code, viewport, and operator without losing the mission.'
         : 'Start a new flow and let Studio take over at the right moment.',
-      action: primaryProject ? 'Expand Studio' : 'Create project',
+      action: primaryProject ? 'Open Studio' : 'Create project',
       onClick: primaryProject ? onOpenIde : onOpenProjects,
     },
     {
@@ -350,7 +350,7 @@ export function DashboardOverviewTab({
   }
 
   const panelClass =
-    'overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.76),rgba(8,10,16,0.96))] p-5 shadow-[0_24px_80px_rgba(2,6,23,0.34)] sm:p-6'
+    'overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] p-5 shadow-[0_24px_80px_rgba(2,6,23,0.24)] sm:p-6'
   const ghostButtonClass = `inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--aethel-border-subtle)] bg-transparent px-3 py-1 text-sm font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   return (
@@ -453,7 +453,7 @@ export function DashboardOverviewTab({
                 onClick={action.onClick}
                 className={`w-full rounded-[22px] border px-4 py-4 text-left transition ${
                   action.primary
-                    ? 'border-[color-mix(in_srgb,var(--aethel-primary)_34%,transparent)] bg-[linear-gradient(135deg,rgba(79,70,229,0.18),rgba(14,165,233,0.12))] shadow-[0_18px_40px_rgba(56,189,248,0.12)] hover:brightness-110'
+                    ? 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] shadow-[0_18px_40px_rgba(2,6,23,0.18)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_76%,transparent)]'
                     : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
                 }`}
               >

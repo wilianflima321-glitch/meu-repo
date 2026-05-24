@@ -100,7 +100,7 @@ export function DashboardShell({
         'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
       }`}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.12),transparent_30%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.1),transparent_28%),linear-gradient(180deg,transparent,rgba(2,6,23,0.18))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)]" />
       <a
         href="#dashboard-main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-[var(--aethel-text-primary)] focus:ring-2 focus:ring-[var(--aethel-primary)]"
@@ -153,7 +153,7 @@ export function DashboardShell({
 
       {(entryMission || entrySource) && (
         <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-3 sm:px-6">
-          <div className="flex flex-col gap-3 rounded-[24px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,rgba(15,23,42,0.94),rgba(2,6,23,0.9),rgba(14,165,233,0.08))] px-4 py-4 shadow-[0_20px_60px_rgba(2,6,23,0.28)] md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 rounded-[24px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] px-4 py-4 shadow-[0_20px_60px_rgba(2,6,23,0.22)] md:flex-row md:items-center md:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info)]">
@@ -185,7 +185,7 @@ export function DashboardShell({
                 <button
                   type="button"
                   onClick={onResumeEntryMission}
-                  className="inline-flex items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
+                  className="inline-flex items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)] transition hover:bg-[var(--aethel-text-secondary)]"
                 >
                   Resume in AI Chat
                 </button>

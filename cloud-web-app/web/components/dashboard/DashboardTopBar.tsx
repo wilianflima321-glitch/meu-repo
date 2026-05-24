@@ -90,7 +90,7 @@ export function DashboardTopBar({
           <button
             type="button"
             onClick={onOpenIde}
-            className="inline-flex min-h-10 items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-4 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.18)] transition hover:brightness-110"
+            className="inline-flex min-h-10 items-center gap-2 rounded-2xl bg-[var(--aethel-text-primary)] px-4 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)] transition hover:bg-[var(--aethel-text-secondary)]"
           >
             <Terminal className="h-4 w-4" />
             Open Studio

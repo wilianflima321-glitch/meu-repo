@@ -7,6 +7,9 @@ const ROOT = process.cwd()
 const overviewPath = path.join(ROOT, 'components', 'dashboard', 'DashboardOverviewTab.tsx')
 const disclosurePath = path.join(ROOT, 'components', 'dashboard', 'DashboardEvidenceDisclosure.tsx')
 const heroPath = path.join(ROOT, 'components', 'dashboard', 'DashboardMissionHero.tsx')
+const sidebarPath = path.join(ROOT, 'components', 'dashboard', 'AethelDashboardSidebar.tsx')
+const shellPath = path.join(ROOT, 'components', 'dashboard', 'DashboardShell.tsx')
+const topbarPath = path.join(ROOT, 'components', 'dashboard', 'DashboardTopBar.tsx')
 const failures = []
 
 function read(filePath) {
@@ -20,6 +23,9 @@ function read(filePath) {
 const overview = read(overviewPath)
 const disclosure = read(disclosurePath)
 const hero = read(heroPath)
+const sidebar = read(sidebarPath)
+const shell = read(shellPath)
+const topbar = read(topbarPath)
 
 const requiredOverviewTokens = [
   'DashboardEvidenceDisclosure',
@@ -42,6 +48,13 @@ const requiredDisclosureTokens = [
   'Proof stays one tap away.',
 ]
 
+const requiredSidebarTokens = [
+  'data-dashboard-sidebar-density="primary-first"',
+  'Primary flow',
+  'Open Studio',
+  'Evidence',
+]
+
 for (const token of requiredOverviewTokens) {
   if (!overview.includes(token)) failures.push(`DashboardOverviewTab.tsx missing ${token}`)
 }
@@ -54,6 +67,10 @@ for (const token of requiredDisclosureTokens) {
   if (!disclosure.includes(token)) failures.push(`DashboardEvidenceDisclosure.tsx missing ${token}`)
 }
 
+for (const token of requiredSidebarTokens) {
+  if (!sidebar.includes(token)) failures.push(`AethelDashboardSidebar.tsx missing ${token}`)
+}
+
 for (const forbidden of ['<DashboardProjectBrainCard', '<DashboardMissionLedgerCard', '<DashboardRepositoryCartographyCard', '<DeviceRuntimeGuardCard', 'data-dashboard-desktop-signal-strip']) {
   if (overview.includes(forbidden)) {
     failures.push(`DashboardOverviewTab.tsx must not render ${forbidden} directly; keep deep evidence behind disclosure`)
@@ -63,6 +80,21 @@ for (const forbidden of ['<DashboardProjectBrainCard', '<DashboardMissionLedgerC
 for (const forbidden of ['bg-[linear-gradient', 'Expand Studio', 'Embedded Studio']) {
   if (hero.includes(forbidden)) {
     failures.push(`DashboardMissionHero.tsx still contains dense/cliche hero token: ${forbidden}`)
+  }
+}
+
+for (const forbidden of ['Next best move', 'Current surface', 'bg-[linear-gradient']) {
+  if (sidebar.includes(forbidden)) {
+    failures.push(`AethelDashboardSidebar.tsx still contains redundant/cliche sidebar token: ${forbidden}`)
+  }
+}
+
+for (const [label, content] of [
+  ['DashboardShell.tsx', shell],
+  ['DashboardTopBar.tsx', topbar],
+]) {
+  if (content.includes('bg-[linear-gradient')) {
+    failures.push(`${label} must use solid product chrome instead of gradient dashboard chrome`)
   }
 }
 
