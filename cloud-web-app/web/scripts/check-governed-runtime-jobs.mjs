@@ -43,6 +43,10 @@ requirePattern('package.json', /"qa:governed-runtime-jobs"/, 'package script')
 requirePattern('package.json', /qa:governed-runtime-jobs/, 'enterprise gate inclusion')
 requirePattern('scripts/check-backbone-market-readiness.mjs', /governed-runtime-jobs\.ts/, 'backbone market gate coverage')
 
+requirePattern('__tests__/production/governed-runtime-jobs.test.ts', /executionAllowed:\s*false/, 'test must prove external jobs stay planning-only')
+requirePattern('__tests__/production/governed-runtime-jobs.test.ts', /Do not auto-publish governed runtime output/, 'test must prove release hold')
+requirePattern('__tests__/production/governed-runtime-jobs.test.ts', /humanReviewRequired:\s*true/, 'test must prove human review gate')
+
 if (failures.length) {
   console.error('[governed-runtime-jobs] FAIL')
   for (const failure of failures) console.error(`- ${failure}`)

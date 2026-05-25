@@ -115,10 +115,6 @@ function pickNumber(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback
 }
 
-function pickBoolean(value: unknown, fallback: boolean): boolean {
-  return typeof value === 'boolean' ? value : fallback
-}
-
 function pickEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
   return typeof value === 'string' && allowed.includes(value as T) ? (value as T) : fallback
 }
@@ -307,7 +303,7 @@ export function coerceGovernedRuntimeJob(input: unknown): GovernedRuntimeJob | n
     nextAction: pickString(input.nextAction, 'Request explicit approval before queueing this governed runtime job.'),
     estimatedCostUsd: Math.max(0, pickNumber(input.estimatedCostUsd, 0)),
     estimatedMinutes: Math.max(0, pickNumber(input.estimatedMinutes, 0)),
-    executionAllowed: pickBoolean(input.executionAllowed, false),
+    executionAllowed: false,
     humanReviewRequired: true,
     requestedRuntimeTarget: pickEnum(input.requestedRuntimeTarget, VALID_RUNTIME_TARGETS, DEFAULT_RUNTIME_TARGET),
     provider: typeof input.provider === 'string' ? input.provider : undefined,
