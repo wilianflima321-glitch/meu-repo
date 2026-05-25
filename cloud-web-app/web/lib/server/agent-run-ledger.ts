@@ -1,5 +1,18 @@
 import { buildAgentExecutionSummary, type AgentExecutionState } from '@/lib/server/agent-observability'
 import type { AgentSnapshot } from '@/lib/server/agent-store'
+import {
+  mergeAgenticProductionState,
+  type AgenticProductionState,
+  type MissionLedgerEntry,
+  type ProductionGraphKey,
+  type ProductionGraphNode,
+  type ProductionNodeStatus,
+} from '@/lib/production/agentic-production-state'
+
+export const AGENT_RUN_LEDGER_SETTINGS_KEY = 'aethelAgentRunLedger'
+export const AGENT_RUN_LEDGER_ENTRY_ID = 'agent-run-ledger'
+export const AGENT_RUN_LEDGER_EVIDENCE_NODE_ID = 'agent-run-ledger-evidenceGraph'
+export const AGENT_RUN_LEDGER_VALIDATION_NODE_ID = 'agent-run-ledger-validationGraph'
 
 export type AgentRunArtifactKind =
   | 'evidence'
@@ -79,6 +92,10 @@ export function buildAgentRunLedger(snapshots: AgentSnapshot[], limit = 50): Age
   }
 }
 
+export function filterAgentSnapshotsForProject(snapshots: AgentSnapshot[], projectId: string): AgentSnapshot[] {
+  return snapshots.filter((snapshot) => snapshotProjectId(snapshot) === projectId)
+}
+
 export function buildAgentRunLedgerEntry(snapshot: AgentSnapshot): AgentRunLedgerEntry {
   const summary = buildAgentExecutionSummary(snapshot)
   const status = getRecord(snapshot.status)
@@ -148,6 +165,76 @@ export function summarizeAgentRunLedger(entries: AgentRunLedgerEntry[]): AgentRu
   }
 }
 
+export function mergeAgentRunLedgerIntoProductionState(
+  state: AgenticProductionState,
+  ledger: AgentRunLedger
+): AgenticProductionState {
+  const evidenceRefs = collectLedgerEvidenceRefs(ledger)
+  const blockers = unique([
+    ...ledger.entries.flatMap((entry) => entry.missingMarketEvidence),
+    ...(ledger.summary.totalRuns === 0 ? ['No persisted agent run exists for this project yet.'] : []),
+  ])
+  const nextAction = nextActionForLedger(ledger)
+
+  return mergeAgenticProductionState(state, {
+    brain: {
+      technicalBible: {
+        ...state.brain.technicalBible,
+        constraints: unique([
+          ...state.brain.technicalBible.constraints,
+          'Agent execution claims require AgentRunLedger evidence before they can affect release readiness.',
+          'Every market-facing agent result needs evidence refs plus a branch/PR or preview/replay artifact.',
+          'Human-owner responsibility remains required before approving autonomous agent output.',
+        ]),
+      },
+      risks: unique([
+        ...state.brain.risks,
+        ...blockers.map((blocker) => `AGENT_RUN_LEDGER_BLOCKER: ${blocker}`),
+      ]),
+      decisions: [
+        {
+          id: 'decision-agent-run-ledger',
+          title: 'Agent work is governed by run ledger evidence',
+          rationale: `${ledger.summary.totalRuns} runs tracked; ${ledger.summary.blockedRuns} blocked; ${ledger.summary.runsReadyForHumanReview} ready for human review.`,
+          ownerAgent: 'Release Manager Agent',
+          createdAt: new Date().toISOString(),
+        },
+        ...state.brain.decisions.filter((decision) => decision.id !== 'decision-agent-run-ledger'),
+      ],
+    },
+    ledger: upsertLedgerEntry(state.ledger, buildAgentRunMissionLedgerEntry(ledger, evidenceRefs, nextAction)),
+    graphs: {
+      evidenceGraph: upsertGraphNode(state.graphs.evidenceGraph, buildAgentRunGraphNode(ledger, 'evidenceGraph', evidenceRefs, blockers)),
+      validationGraph: upsertGraphNode(state.graphs.validationGraph, buildAgentRunGraphNode(ledger, 'validationGraph', evidenceRefs, blockers)),
+    },
+    runtimePolicy: {
+      requiresHumanApproval: true,
+      maxConcurrentHeavyJobs: Math.min(state.runtimePolicy.maxConcurrentHeavyJobs, 2),
+    },
+  })
+}
+
+export function readAgentRunLedgerFromSettings(settings: unknown): AgentRunLedger | null {
+  const record = getRecord(settings)
+  const candidate = record[AGENT_RUN_LEDGER_SETTINGS_KEY]
+  if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) return null
+  const ledger = candidate as Partial<AgentRunLedger>
+  if (!Array.isArray(ledger.entries)) return null
+  if (!ledger.summary || typeof ledger.summary !== 'object') return null
+  if (ledger.responsibilityModel !== 'human-owner-required') return null
+  return ledger as AgentRunLedger
+}
+
+export function writeAgentRunLedgerToSettings(
+  settings: unknown,
+  ledger: AgentRunLedger
+): Record<string, unknown> {
+  return {
+    ...getRecord(settings),
+    [AGENT_RUN_LEDGER_SETTINGS_KEY]: ledger,
+  }
+}
+
 function collectEvidenceRefs(snapshot: AgentSnapshot): string[] {
   const status = getRecord(snapshot.status)
   const currentTask = getRecord(status.currentTask)
@@ -164,6 +251,13 @@ function collectEvidenceRefs(snapshot: AgentSnapshot): string[] {
     ])),
   ]
   return unique(refs.filter((ref) => ref.trim().length > 0)).slice(0, 60)
+}
+
+function snapshotProjectId(snapshot: AgentSnapshot): string | null {
+  const status = getRecord(snapshot.status)
+  const config = getRecord(snapshot.config)
+  const currentTask = getRecord(status.currentTask)
+  return firstString(config.projectId, status.projectId, currentTask.projectId)
 }
 
 function collectArtifacts(input: {
@@ -240,6 +334,85 @@ function marketReadinessForMissingEvidence(
   if (state === 'failed' || state === 'unknown' || missingEvidence.length > 0) return 'blocked'
   if (state === 'completed' || state === 'stopped') return 'needs-review'
   return 'blocked'
+}
+
+function collectLedgerEvidenceRefs(ledger: AgentRunLedger): string[] {
+  return unique([
+    `agent-run-ledger:runs:${ledger.summary.totalRuns}`,
+    ...ledger.entries.flatMap((entry) => [
+      `agent-run:${entry.sessionId}`,
+      ...entry.evidenceRefs,
+      ...entry.artifacts.map((artifact) => `${artifact.kind}:${artifact.ref}`),
+    ]),
+  ]).slice(0, 120)
+}
+
+function graphStatusForLedger(ledger: AgentRunLedger): ProductionNodeStatus {
+  if (ledger.summary.totalRuns === 0 || ledger.summary.blockedRuns > 0) return 'blocked'
+  return 'needs-review'
+}
+
+function missionStateForLedger(ledger: AgentRunLedger): MissionLedgerEntry['state'] {
+  if (ledger.summary.totalRuns === 0 || ledger.summary.blockedRuns > 0) return 'blocked'
+  if (ledger.summary.activeRuns > 0) return 'running'
+  return 'needs-approval'
+}
+
+function nextActionForLedger(ledger: AgentRunLedger): string {
+  if (ledger.summary.totalRuns === 0) return 'Run or attach an evidence-backed agent execution before trusting agent output.'
+  if (ledger.summary.blockedRuns > 0) return 'Resolve missing evidence, branch/PR, preview, replay, or recovery notes on blocked agent runs.'
+  if (ledger.summary.activeRuns > 0) return 'Wait for active agent runs, then request human review with artifacts attached.'
+  return 'Request human review for evidence-backed agent output before release or public claims.'
+}
+
+function buildAgentRunMissionLedgerEntry(
+  ledger: AgentRunLedger,
+  evidenceRefs: string[],
+  nextAction: string
+): MissionLedgerEntry {
+  return {
+    id: AGENT_RUN_LEDGER_ENTRY_ID,
+    phase: 'Agent run evidence ledger',
+    ownerAgent: 'Release Manager Agent',
+    state: missionStateForLedger(ledger),
+    summary: `${ledger.summary.totalRuns} agent runs tracked; ${ledger.summary.blockedRuns} blocked; ${ledger.summary.runsReadyForHumanReview} ready for human review.`,
+    acceptance: [
+      'Agent run ledger is persisted into project production state',
+      'Evidence refs are present before agent output can be trusted',
+      'Branch, pull request, preview, replay, or screenshot artifacts are tracked',
+      'Human owner approval remains required before market-ready claims',
+    ],
+    evidenceRefs,
+    rollbackPlan: 'Pause affected agents, revoke pending approvals, and return to the last reviewed branch/preview artifact.',
+    nextAction,
+    estimatedCostUsd: 0,
+    updatedAt: new Date().toISOString(),
+  }
+}
+
+function buildAgentRunGraphNode(
+  ledger: AgentRunLedger,
+  graphKey: ProductionGraphKey,
+  evidenceRefs: string[],
+  blockers: string[]
+): ProductionGraphNode {
+  return {
+    id: graphKey === 'validationGraph' ? AGENT_RUN_LEDGER_VALIDATION_NODE_ID : AGENT_RUN_LEDGER_EVIDENCE_NODE_ID,
+    label: graphKey === 'validationGraph' ? 'Agent run validation' : 'Agent run evidence',
+    status: graphStatusForLedger(ledger),
+    ownerAgent: 'Release Manager Agent',
+    evidenceRefs,
+    blockers,
+    updatedAt: new Date().toISOString(),
+  }
+}
+
+function upsertLedgerEntry(ledger: MissionLedgerEntry[], entry: MissionLedgerEntry): MissionLedgerEntry[] {
+  return [entry, ...ledger.filter((candidate) => candidate.id !== entry.id)]
+}
+
+function upsertGraphNode(nodes: ProductionGraphNode[], node: ProductionGraphNode): ProductionGraphNode[] {
+  return [node, ...nodes.filter((candidate) => candidate.id !== node.id)]
 }
 
 function controlsForState(state: AgentExecutionState): AgentRunControl[] {

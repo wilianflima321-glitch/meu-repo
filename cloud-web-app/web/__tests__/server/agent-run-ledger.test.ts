@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  AGENT_RUN_LEDGER_SETTINGS_KEY,
   buildAgentRunLedger,
   buildAgentRunLedgerEntry,
+  filterAgentSnapshotsForProject,
+  mergeAgentRunLedgerIntoProductionState,
+  readAgentRunLedgerFromSettings,
+  writeAgentRunLedgerToSettings,
 } from '@/lib/server/agent-run-ledger'
 import type { AgentSnapshot } from '@/lib/server/agent-store'
+import { buildDefaultAgenticProductionState, PRODUCTION_STATE_SETTINGS_KEY } from '@/lib/production/agentic-production-state'
 
 function snapshot(input: Partial<AgentSnapshot>): AgentSnapshot {
   return {
@@ -95,5 +101,59 @@ describe('agent run ledger', () => {
       lastUpdatedAt: '2026-05-22T12:00:00.000Z',
     })
     expect(ledger.responsibilityModel).toBe('human-owner-required')
+  })
+
+  it('filters snapshots by project before project-memory sync', () => {
+    const projectRun = snapshot({
+      sessionId: 'project-run',
+      config: { projectId: 'project-a', role: 'engineer' },
+    })
+    const otherRun = snapshot({
+      sessionId: 'other-run',
+      config: { projectId: 'project-b', role: 'engineer' },
+    })
+
+    expect(filterAgentSnapshotsForProject([projectRun, otherRun], 'project-a')).toEqual([projectRun])
+  })
+
+  it('merges agent run ledger into Project Brain, Mission Ledger, and evidence graphs', () => {
+    const state = buildDefaultAgenticProductionState({ projectName: 'Agent run memory', projectType: 'web' })
+    const ledger = buildAgentRunLedger([
+      snapshot({
+        sessionId: 'project-run-ready',
+        config: {
+          projectId: 'project-a',
+          role: 'engineer',
+          branchName: 'codex/project-run-ready',
+          pullRequestUrl: 'https://github.com/acme/aethel/pull/88',
+        },
+        steps: [{
+          id: 'step-1',
+          evidenceRefs: ['preview:https://preview.example.com', 'replay:s3://evidence/project-run-ready.webm'],
+        }],
+      }),
+    ])
+    const merged = mergeAgentRunLedgerIntoProductionState(state, ledger)
+
+    expect(merged.ledger[0]).toMatchObject({
+      id: 'agent-run-ledger',
+      ownerAgent: 'Release Manager Agent',
+      state: 'needs-approval',
+    })
+    expect(merged.graphs.evidenceGraph[0]).toMatchObject({
+      id: 'agent-run-ledger-evidenceGraph',
+      status: 'needs-review',
+    })
+    expect(merged.brain.technicalBible.constraints.join(' ')).toContain('Agent execution claims require AgentRunLedger evidence')
+    expect(merged.runtimePolicy.requiresHumanApproval).toBe(true)
+  })
+
+  it('persists agent run ledger in project settings', () => {
+    const ledger = buildAgentRunLedger([snapshot({ sessionId: 'persisted-run' })])
+    const settings = writeAgentRunLedgerToSettings({ [PRODUCTION_STATE_SETTINGS_KEY]: { version: 1 } }, ledger)
+
+    expect(settings[AGENT_RUN_LEDGER_SETTINGS_KEY]).toMatchObject({ responsibilityModel: 'human-owner-required' })
+    expect(readAgentRunLedgerFromSettings(settings)?.entries[0]).toMatchObject({ sessionId: 'persisted-run' })
+    expect(readAgentRunLedgerFromSettings({ [AGENT_RUN_LEDGER_SETTINGS_KEY]: { entries: [] } })).toBeNull()
   })
 })
