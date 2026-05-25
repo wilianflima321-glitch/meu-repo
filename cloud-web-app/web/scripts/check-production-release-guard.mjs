@@ -34,7 +34,7 @@ requirePattern(productionTest, /allows release readiness only with explicit huma
 requirePattern(apiTest, /cannot bypass release approval through the production-state patch route/, 'API bypass regression')
 requirePattern(apiTest, /payload\.state\.runtimePolicy\.requiresHumanApproval\)\.toBe\(true\)/, 'API must force human review')
 requirePattern('package.json', /"qa:production-release-guard"/, 'package script')
-requirePattern('package.json', /qa:governed-runtime-jobs && npm run qa:asset-quality-job-runner && npm run qa:production-release-guard && npm run qa:runtime-engine-spine/, 'enterprise gate ordering')
+requirePattern('package.json', /qa:governed-runtime-jobs && npm run qa:asset-quality-job-runner && npm run qa:studio-local-cook-queue && npm run qa:production-release-guard && npm run qa:runtime-engine-spine/, 'enterprise gate ordering')
 requirePattern('scripts/check-backbone-market-readiness.mjs', /enforceProductionReleaseGuard/, 'backbone gate release guard coverage')
 
 if (failures.length) {
