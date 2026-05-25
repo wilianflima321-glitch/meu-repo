@@ -21,7 +21,9 @@
     "lib/studio/**/*.ts",
     "lib/studio-local/**/*.ts",
     "lib/runtime/**/*.ts",
-    "types/**/*.d.ts"
+    "types/**/*.d.ts",
+    "lib/production/governed-runtime-jobs.ts",
+    "app/api/projects/[id]/production-state/governed-job/route.ts"
   ],
   "exclude": [
     "node_modules",

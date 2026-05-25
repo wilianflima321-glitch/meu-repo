@@ -100,6 +100,7 @@ const DOMAINS = [
       'lib/production/game-asset-quality-pipeline.ts',
       'lib/production/curated-asset-sourcing.ts',
       'lib/production/asset-import-production-state.ts',
+      'lib/production/governed-runtime-jobs.ts',
       'components/viewport/ViewportAssetQualityCard.tsx',
     ],
     tokens: [
@@ -111,6 +112,9 @@ const DOMAINS = [
       'collision/navmesh proxy report',
       'viewport performance trace',
       'human art-direction approval',
+      'QualityUpgradeJob',
+      'RuntimeJobRequest',
+      'executionAllowed',
     ],
   },
   {
@@ -121,6 +125,7 @@ const DOMAINS = [
       'lib/runtime/runtime-engine-spine.ts',
       'lib/runtime/local-wgpu-sidecar.ts',
       'lib/runtime/runtime-renderer-adapter.ts',
+      'lib/production/governed-runtime-jobs.ts',
       'lib/pixel-streaming/session.ts',
       'app/studio/cinematic/CloudStreamStudioClient.tsx',
       '../../apps/studio-local/src-tauri/src/policy.rs',
@@ -135,6 +140,7 @@ const DOMAINS = [
       'sidecar',
       'pixel',
       'policy',
+      'mergeGovernedRuntimeJobIntoProductionState',
     ],
   },
   {
