@@ -333,6 +333,52 @@ export function writeAgenticProductionStateToSettings(
   }
 }
 
+const releaseApprovalEvidencePatterns = [
+  /human[-_ ]?approval/i,
+  /release[-_ ]?approval/i,
+  /approval[-_: ]?record/i,
+  /approved[-_: ]?release/i,
+]
+
+function hasReleaseApprovalEvidence(state: AgenticProductionState): boolean {
+  const graphEvidence = state.graphs.releaseGraph.flatMap((node) => node.evidenceRefs)
+  const ledgerEvidence = state.ledger.flatMap((entry) => entry.evidenceRefs)
+  return [...graphEvidence, ...ledgerEvidence].some((ref) =>
+    releaseApprovalEvidencePatterns.some((pattern) => pattern.test(ref))
+  )
+}
+
+function uniqueStrings(values: string[]): string[] {
+  return Array.from(new Set(values.filter((value) => value.trim().length > 0)))
+}
+
+export function enforceProductionReleaseGuard(state: AgenticProductionState): AgenticProductionState {
+  const releaseApproved = hasReleaseApprovalEvidence(state)
+  const releaseGraph = state.graphs.releaseGraph.map((node) => {
+    if (releaseApproved || node.status !== 'ready') return node
+    return {
+      ...node,
+      status: 'needs-review' as const,
+      blockers: uniqueStrings([
+        ...node.blockers,
+        'Human release approval evidence is required before release can be marked ready.',
+      ]),
+    }
+  })
+
+  return {
+    ...state,
+    graphs: {
+      ...state.graphs,
+      releaseGraph,
+    },
+    runtimePolicy: {
+      ...state.runtimePolicy,
+      requiresHumanApproval: releaseApproved ? state.runtimePolicy.requiresHumanApproval : true,
+    },
+  }
+}
+
 export function normalizeAgenticProductionState(input: unknown): AgenticProductionState {
   const fallback = buildDefaultAgenticProductionState()
   if (!isRecord(input)) return fallback
@@ -356,7 +402,7 @@ export function normalizeAgenticProductionState(input: unknown): AgenticProducti
   const ledgerInput = Array.isArray(input.ledger) ? input.ledger : []
   const ledgerFallback = fallback.ledger[0]
 
-  return {
+  const normalized: AgenticProductionState = {
     version: 1,
     updatedAt: pickString(input.updatedAt, fallback.updatedAt),
     brain: {
@@ -412,6 +458,8 @@ export function normalizeAgenticProductionState(input: unknown): AgenticProducti
       ),
     },
   }
+
+  return enforceProductionReleaseGuard(normalized)
 }
 
 export function coerceAgenticProductionStatePatch(input: unknown): AgenticProductionStatePatch {
@@ -490,26 +538,27 @@ export function mergeAgenticProductionState(
     },
   })
 
-  return {
+  return enforceProductionReleaseGuard({
     ...merged,
     updatedAt: now,
-  }
+  })
 }
 
 export function buildProductionReadinessSummary(state: AgenticProductionState): ProductionReadinessSummary {
-  const allNodes = productionGraphKeys.flatMap((key) => state.graphs[key])
+  const guardedState = enforceProductionReleaseGuard(state)
+  const allNodes = productionGraphKeys.flatMap((key) => guardedState.graphs[key])
   const readyGraphCount = productionGraphKeys.filter((key) =>
-    state.graphs[key].some((node) => node.status === 'ready' || node.status === 'needs-review')
+    guardedState.graphs[key].some((node) => node.status === 'ready' || node.status === 'needs-review')
   ).length
   const evidenceCount = allNodes.reduce((total, node) => total + node.evidenceRefs.length, 0)
   const blockedCount = allNodes.filter((node) => node.status === 'blocked').length
   const graphCoverage = Math.round((readyGraphCount / productionGraphKeys.length) * 100)
-  const latestLedger = state.ledger[0]
+  const latestLedger = guardedState.ledger[0]
   const ready =
     readyGraphCount === productionGraphKeys.length &&
     evidenceCount > 0 &&
     blockedCount === 0 &&
-    !state.runtimePolicy.requiresHumanApproval
+    !guardedState.runtimePolicy.requiresHumanApproval
 
   return {
     ready,
@@ -518,14 +567,14 @@ export function buildProductionReadinessSummary(state: AgenticProductionState): 
     totalGraphCount: productionGraphKeys.length,
     evidenceCount,
     blockedCount,
-    needsHumanApproval: state.runtimePolicy.requiresHumanApproval,
+    needsHumanApproval: guardedState.runtimePolicy.requiresHumanApproval,
     nextAction:
       latestLedger?.nextAction ||
       (blockedCount > 0
         ? 'Resolve blocked production graph'
         : readyGraphCount < productionGraphKeys.length
           ? 'Complete production graphs'
-          : state.runtimePolicy.requiresHumanApproval
+          : guardedState.runtimePolicy.requiresHumanApproval
             ? 'Request human approval'
             : 'Prepare release evidence'),
   }

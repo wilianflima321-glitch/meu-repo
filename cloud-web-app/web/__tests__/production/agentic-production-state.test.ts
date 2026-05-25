@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   buildDefaultAgenticProductionState,
+  enforceProductionReleaseGuard,
   buildProductionReadinessSummary,
   mergeAgenticProductionState,
   PRODUCTION_STATE_SETTINGS_KEY,
@@ -69,6 +70,80 @@ describe('agentic production state', () => {
     expect(readiness.blockedCount).toBe(1)
     expect(readiness.needsHumanApproval).toBe(true)
     expect(readiness.nextAction).toBe('Complete production graphs')
+  })
+
+
+  it('guards release readiness from patches that lack human approval evidence', () => {
+    const state = buildDefaultAgenticProductionState({ projectName: 'Universal release gate' })
+    const readyGraphs = Object.fromEntries(
+      Object.entries(state.graphs).map(([key, nodes]) => [
+        key,
+        [
+          {
+            ...nodes[0],
+            status: 'ready',
+            evidenceRefs: [`${key}:validated`],
+            blockers: [],
+          },
+        ],
+      ])
+    )
+
+    const patched = mergeAgenticProductionState(
+      state,
+      {
+        graphs: readyGraphs as typeof state.graphs,
+        runtimePolicy: {
+          requiresHumanApproval: false,
+        },
+      },
+      '2026-05-25T13:00:00.000Z'
+    )
+    const guarded = enforceProductionReleaseGuard(patched)
+    const readiness = buildProductionReadinessSummary(patched)
+
+    expect(guarded.runtimePolicy.requiresHumanApproval).toBe(true)
+    expect(guarded.graphs.releaseGraph[0]).toMatchObject({ status: 'needs-review' })
+    expect(guarded.graphs.releaseGraph[0].blockers).toContain(
+      'Human release approval evidence is required before release can be marked ready.'
+    )
+    expect(readiness.ready).toBe(false)
+    expect(readiness.needsHumanApproval).toBe(true)
+    expect(readiness.nextAction).not.toBe('Prepare release evidence')
+  })
+
+  it('allows release readiness only with explicit human approval evidence', () => {
+    const state = buildDefaultAgenticProductionState({ projectName: 'Approved cinematic app launch' })
+    const readyGraphs = Object.fromEntries(
+      Object.entries(state.graphs).map(([key, nodes]) => [
+        key,
+        [
+          {
+            ...nodes[0],
+            status: 'ready',
+            evidenceRefs: key === 'releaseGraph' ? ['human approval:release-manager:42'] : [`${key}:validated`],
+            blockers: [],
+          },
+        ],
+      ])
+    )
+
+    const patched = mergeAgenticProductionState(
+      state,
+      {
+        graphs: readyGraphs as typeof state.graphs,
+        runtimePolicy: {
+          requiresHumanApproval: false,
+        },
+      },
+      '2026-05-25T14:00:00.000Z'
+    )
+    const readiness = buildProductionReadinessSummary(patched)
+
+    expect(patched.runtimePolicy.requiresHumanApproval).toBe(false)
+    expect(patched.graphs.releaseGraph[0].status).toBe('ready')
+    expect(readiness.ready).toBe(true)
+    expect(readiness.needsHumanApproval).toBe(false)
   })
 
   it('merges brain, runtime policy, and ledger patches without dropping existing graphs', () => {

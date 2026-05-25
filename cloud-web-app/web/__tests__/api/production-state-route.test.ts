@@ -110,6 +110,55 @@ describe('api/projects/[id]/production-state route', () => {
     )
   })
 
+
+  it('cannot bypass release approval through the production-state patch route', async () => {
+    const seeded = buildDefaultAgenticProductionState({ projectName: 'Cross-domain launch' })
+    const readyGraphs = Object.fromEntries(
+      Object.entries(seeded.graphs).map(([key, nodes]) => [
+        key,
+        [
+          {
+            ...nodes[0],
+            status: 'ready',
+            evidenceRefs: [`${key}:validated`],
+            blockers: [],
+          },
+        ],
+      ])
+    )
+    prismaMocks.prisma.project.findFirst.mockResolvedValue({
+      id: 'project-1',
+      name: 'Cross-domain launch',
+      template: 'nextjs',
+      userId: 'user-1',
+      settings: { [PRODUCTION_STATE_SETTINGS_KEY]: seeded },
+      members: [],
+    })
+
+    const request = new NextRequest('http://localhost:3000/api/projects/project-1/production-state', {
+      method: 'PATCH',
+      body: JSON.stringify({
+        graphs: readyGraphs,
+        runtimePolicy: {
+          requiresHumanApproval: false,
+        },
+      }),
+      headers: { 'content-type': 'application/json' },
+    })
+
+    const response = await PATCH(request, { params: { id: 'project-1' } })
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.state.runtimePolicy.requiresHumanApproval).toBe(true)
+    expect(payload.state.graphs.releaseGraph[0].status).toBe('needs-review')
+    expect(payload.state.graphs.releaseGraph[0].blockers).toContain(
+      'Human release approval evidence is required before release can be marked ready.'
+    )
+    expect(payload.readiness.ready).toBe(false)
+    expect(payload.readiness.needsHumanApproval).toBe(true)
+  })
+
   it('rejects viewer-only collaborators before mutating production memory', async () => {
     const seeded = buildDefaultAgenticProductionState({ projectName: 'Film intro' })
     prismaMocks.prisma.project.findFirst.mockResolvedValue({
