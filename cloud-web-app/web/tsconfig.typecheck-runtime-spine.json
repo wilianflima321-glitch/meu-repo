@@ -27,7 +27,9 @@
     "lib/production/studio-local-cook-queue.ts",
     "app/api/projects/[id]/production-state/governed-job/route.ts",
     "app/api/projects/[id]/production-state/asset-quality-job/route.ts",
-    "app/api/projects/[id]/production-state/studio-local-cook-job/route.ts"
+    "app/api/projects/[id]/production-state/studio-local-cook-job/route.ts",
+    "lib/production/studio-local-cook-dispatch.ts",
+    "app/api/projects/[id]/production-state/studio-local-cook-dispatch/route.ts"
   ],
   "exclude": [
     "node_modules",
