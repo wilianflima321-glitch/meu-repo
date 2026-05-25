@@ -47,6 +47,10 @@ requirePattern('__tests__/production/governed-runtime-jobs.test.ts', /executionA
 requirePattern('__tests__/production/governed-runtime-jobs.test.ts', /Do not auto-publish governed runtime output/, 'test must prove release hold')
 requirePattern('__tests__/production/governed-runtime-jobs.test.ts', /humanReviewRequired:\s*true/, 'test must prove human review gate')
 
+requirePattern('__tests__/api/production-state-governed-job-route.test.ts', /forcing planning-only execution and release hold/, 'API test must prove planning-only persistence')
+requirePattern('__tests__/api/production-state-governed-job-route.test.ts', /rejects viewer collaborators/, 'API test must protect write permissions')
+requirePattern('__tests__/api/production-state-governed-job-route.test.ts', /Invalid governed runtime job/, 'API test must reject malformed jobs')
+
 if (failures.length) {
   console.error('[governed-runtime-jobs] FAIL')
   for (const failure of failures) console.error(`- ${failure}`)
