@@ -23,7 +23,9 @@
     "lib/runtime/**/*.ts",
     "types/**/*.d.ts",
     "lib/production/governed-runtime-jobs.ts",
-    "app/api/projects/[id]/production-state/governed-job/route.ts"
+    "lib/production/asset-quality-job-runner.ts",
+    "app/api/projects/[id]/production-state/governed-job/route.ts",
+    "app/api/projects/[id]/production-state/asset-quality-job/route.ts"
   ],
   "exclude": [
     "node_modules",
