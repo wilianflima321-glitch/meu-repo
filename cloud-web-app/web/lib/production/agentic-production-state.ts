@@ -183,6 +183,12 @@ function domainFromProjectType(projectType?: string | null): ProductionDomain {
       return 'code'
     case 'unreal':
       return 'game-film'
+    case 'game':
+      return 'game'
+    case 'film':
+      return 'film'
+    case 'game-film':
+      return 'game-film'
     default:
       return 'mixed'
   }
