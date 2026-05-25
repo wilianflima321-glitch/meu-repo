@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildResearchNavigationMesh } from '@/lib/production/research-navigation-mesh'
+import { buildDefaultAgenticProductionState, PRODUCTION_STATE_SETTINGS_KEY } from '@/lib/production/agentic-production-state'
+import {
+  buildResearchNavigationMesh,
+  mergeResearchNavigationMeshIntoProductionState,
+  readResearchNavigationMeshFromSettings,
+  RESEARCH_NAVIGATION_MESH_SETTINGS_KEY,
+  writeResearchNavigationMeshToSettings,
+} from '@/lib/production/research-navigation-mesh'
 
 describe('research navigation mesh', () => {
   it('recommends a headless worker for public research when evidence capture is complete', () => {
@@ -73,5 +80,42 @@ describe('research navigation mesh', () => {
     expect(mesh.lanes.flatMap((lane) => lane.missingCapabilities)).toEqual(
       expect.arrayContaining(['hasReplayCapture', 'hasScreenshotCapture']),
     )
+  })
+
+  it('merges lane selection into Project Brain, Mission Ledger, and evidence graphs', () => {
+    const state = buildDefaultAgenticProductionState({ projectName: 'Browser research workspace', projectType: 'web' })
+    const mesh = buildResearchNavigationMesh({
+      missionKind: 'advanced-research',
+      targetUrl: 'https://docs.example.com',
+      intendedAction: 'read public docs',
+      hasHeadlessBrowserWorker: true,
+      hasNetworkIsolation: true,
+      hasReplayCapture: true,
+      hasScreenshotCapture: true,
+      hasDomSnapshot: true,
+      hasPauseControl: true,
+    })
+    const merged = mergeResearchNavigationMeshIntoProductionState(state, mesh)
+
+    expect(merged.ledger[0]).toMatchObject({
+      id: 'research-navigation-mesh',
+      ownerAgent: 'Browser Operator Agent',
+      state: 'planned',
+    })
+    expect(merged.graphs.evidenceGraph[0]).toMatchObject({
+      id: 'research-navigation-mesh-evidenceGraph',
+      status: 'needs-review',
+    })
+    expect(merged.brain.technicalBible.constraints.join(' ')).toContain('Research navigation mesh status')
+    expect(merged.brain.decisions[0]).toMatchObject({ id: 'decision-research-navigation-mesh' })
+  })
+
+  it('persists the latest navigation mesh in project settings', () => {
+    const mesh = buildResearchNavigationMesh({ missionKind: 'advanced-research' })
+    const settings = writeResearchNavigationMeshToSettings({ [PRODUCTION_STATE_SETTINGS_KEY]: { version: 1 } }, mesh)
+
+    expect(settings[RESEARCH_NAVIGATION_MESH_SETTINGS_KEY]).toMatchObject({ capability: 'AETHEL_RESEARCH_NAVIGATION_MESH' })
+    expect(readResearchNavigationMeshFromSettings(settings)).toMatchObject({ missionKind: 'advanced-research' })
+    expect(readResearchNavigationMeshFromSettings({ [RESEARCH_NAVIGATION_MESH_SETTINGS_KEY]: { version: 1 } })).toBeNull()
   })
 })

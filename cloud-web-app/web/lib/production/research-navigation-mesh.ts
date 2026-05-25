@@ -2,6 +2,19 @@ import {
   evaluateBrowserOperatorPolicy,
   type BrowserOperatorPolicyDecision,
 } from '@/lib/production/browser-operator-safety'
+import {
+  type AgenticProductionState,
+  type MissionLedgerEntry,
+  type ProductionGraphKey,
+  type ProductionGraphNode,
+  type ProductionNodeStatus,
+  mergeAgenticProductionState,
+} from '@/lib/production/agentic-production-state'
+
+export const RESEARCH_NAVIGATION_MESH_SETTINGS_KEY = 'aethelResearchNavigationMesh'
+export const RESEARCH_NAVIGATION_MESH_LEDGER_ENTRY_ID = 'research-navigation-mesh'
+export const RESEARCH_NAVIGATION_MESH_EVIDENCE_NODE_ID = 'research-navigation-mesh-evidenceGraph'
+export const RESEARCH_NAVIGATION_MESH_VALIDATION_NODE_ID = 'research-navigation-mesh-validationGraph'
 
 export type AgentNavigationLaneId =
   | 'headless-browser-worker'
@@ -148,6 +161,10 @@ function unique(values: string[]): string[] {
   return Array.from(new Set(values.map((value) => value.trim()).filter(Boolean)))
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
 function missionKindFor(input: AgentNavigationCapabilityInput): AgentNavigationMissionKind {
   if (input.missionKind) return input.missionKind
   const action = input.intendedAction?.toLowerCase() ?? ''
@@ -277,5 +294,140 @@ export function buildResearchNavigationMesh(input: AgentNavigationCapabilityInpu
     nextAction:
       recommended?.nextAction ??
       'Connect a governed browser lane with replay, screenshot, DOM hash, pause/takeover, and source evidence before agent navigation.',
+  }
+}
+
+function graphStatusFromMesh(mesh: ResearchNavigationMesh): ProductionNodeStatus {
+  if (mesh.capabilityStatus === 'available') return 'needs-review'
+  if (mesh.capabilityStatus === 'blocked') return 'blocked'
+  return 'needs-review'
+}
+
+function ledgerStateFromMesh(mesh: ResearchNavigationMesh): MissionLedgerEntry['state'] {
+  if (mesh.capabilityStatus === 'available') return 'planned'
+  if (mesh.capabilityStatus === 'blocked') return 'blocked'
+  return 'needs-approval'
+}
+
+function buildNavigationEvidenceRefs(mesh: ResearchNavigationMesh): string[] {
+  return unique([
+    `research-navigation-mesh:${mesh.capabilityStatus}`,
+    mesh.recommendedLane ? `navigation-lane:${mesh.recommendedLane}` : 'navigation-lane:none-ready',
+    ...mesh.policyDecision.requiredEvidence.map((evidence) => `required-evidence:${evidence}`),
+  ])
+}
+
+function buildNavigationLedgerEntry(mesh: ResearchNavigationMesh): MissionLedgerEntry {
+  const recommended = mesh.lanes.find((lane) => lane.laneId === mesh.recommendedLane)
+
+  return {
+    id: RESEARCH_NAVIGATION_MESH_LEDGER_ENTRY_ID,
+    phase: 'Research navigation lane selection',
+    ownerAgent: 'Browser Operator Agent',
+    state: ledgerStateFromMesh(mesh),
+    summary: recommended
+      ? `Selected ${recommended.label} for ${mesh.missionKind}; status ${recommended.status}.`
+      : `No browser lane can start for ${mesh.missionKind}; keep agents held.`,
+    acceptance: [
+      'Recommended navigation lane recorded before browser work starts',
+      'Replay, screenshot, DOM hash, source date, confidence, and contradiction evidence required',
+      'Pause/takeover and human approval gates preserved for consequence-bearing actions',
+      'Prompt-injection and denied-domain blockers stop autonomous navigation',
+    ],
+    evidenceRefs: buildNavigationEvidenceRefs(mesh),
+    rollbackPlan: 'Pause Browser Operator, revoke pending approvals, and discard unreviewed navigation-derived claims.',
+    nextAction: mesh.nextAction,
+    estimatedCostUsd: 0,
+    updatedAt: new Date().toISOString(),
+  }
+}
+
+function buildNavigationGraphNode(mesh: ResearchNavigationMesh, graphKey: ProductionGraphKey): ProductionGraphNode {
+  const recommended = mesh.lanes.find((lane) => lane.laneId === mesh.recommendedLane)
+
+  return {
+    id: graphKey === 'validationGraph' ? RESEARCH_NAVIGATION_MESH_VALIDATION_NODE_ID : RESEARCH_NAVIGATION_MESH_EVIDENCE_NODE_ID,
+    label: graphKey === 'validationGraph' ? 'Browser navigation validation' : 'Browser navigation evidence',
+    status: graphStatusFromMesh(mesh),
+    ownerAgent: 'Browser Operator Agent',
+    evidenceRefs: buildNavigationEvidenceRefs(mesh),
+    blockers: unique([
+      ...mesh.policyDecision.blockers,
+      ...(recommended?.blockers ?? []),
+      ...(mesh.capabilityStatus !== 'available' ? ['Browser navigation is held until required capabilities and evidence are present.'] : []),
+    ]),
+    updatedAt: new Date().toISOString(),
+  }
+}
+
+function upsertLedgerEntry(ledger: MissionLedgerEntry[], entry: MissionLedgerEntry): MissionLedgerEntry[] {
+  return [entry, ...ledger.filter((candidate) => candidate.id !== entry.id)]
+}
+
+function upsertGraphNode(nodes: ProductionGraphNode[], node: ProductionGraphNode): ProductionGraphNode[] {
+  return [node, ...nodes.filter((candidate) => candidate.id !== node.id)]
+}
+
+export function mergeResearchNavigationMeshIntoProductionState(
+  state: AgenticProductionState,
+  mesh: ResearchNavigationMesh
+): AgenticProductionState {
+  const recommendedLane = mesh.recommendedLane ?? 'none'
+  const constraints = [
+    `Research navigation mesh status: ${mesh.capabilityStatus}.`,
+    `Recommended browser lane: ${recommendedLane}.`,
+    'Browser agents require replay, screenshot, DOM hash, source date, confidence, contradiction check, pause/takeover, and approval evidence before claims or actions.',
+  ]
+  const risks = mesh.capabilityStatus === 'available'
+    ? []
+    : [`RESEARCH_NAVIGATION_${mesh.capabilityStatus.toUpperCase()}: ${mesh.nextAction}`]
+
+  return mergeAgenticProductionState(state, {
+    brain: {
+      technicalBible: {
+        ...state.brain.technicalBible,
+        constraints: unique([...state.brain.technicalBible.constraints, ...constraints]),
+      },
+      risks: unique([...state.brain.risks, ...risks]),
+      decisions: [
+        {
+          id: 'decision-research-navigation-mesh',
+          title: 'Browser agents route through Research Navigation Mesh',
+          rationale: `Lane ${recommendedLane} selected with status ${mesh.capabilityStatus}; no browser work starts without evidence gates.`,
+          ownerAgent: 'Browser Operator Agent',
+          createdAt: new Date().toISOString(),
+        },
+        ...state.brain.decisions.filter((decision) => decision.id !== 'decision-research-navigation-mesh'),
+      ],
+    },
+    ledger: upsertLedgerEntry(state.ledger, buildNavigationLedgerEntry(mesh)),
+    graphs: {
+      evidenceGraph: upsertGraphNode(state.graphs.evidenceGraph, buildNavigationGraphNode(mesh, 'evidenceGraph')),
+      validationGraph: upsertGraphNode(state.graphs.validationGraph, buildNavigationGraphNode(mesh, 'validationGraph')),
+    },
+    runtimePolicy: {
+      requiresHumanApproval: state.runtimePolicy.requiresHumanApproval || mesh.capabilityStatus !== 'available',
+      maxConcurrentHeavyJobs: Math.min(state.runtimePolicy.maxConcurrentHeavyJobs, 2),
+    },
+  })
+}
+
+export function readResearchNavigationMeshFromSettings(settings: unknown): ResearchNavigationMesh | null {
+  if (!isRecord(settings)) return null
+  const candidate = settings[RESEARCH_NAVIGATION_MESH_SETTINGS_KEY]
+  if (!isRecord(candidate)) return null
+  if (candidate.version !== 1) return null
+  if (candidate.capability !== 'AETHEL_RESEARCH_NAVIGATION_MESH') return null
+  if (!Array.isArray(candidate.lanes)) return null
+  return candidate as unknown as ResearchNavigationMesh
+}
+
+export function writeResearchNavigationMeshToSettings(
+  settings: unknown,
+  mesh: ResearchNavigationMesh
+): Record<string, unknown> {
+  return {
+    ...(isRecord(settings) ? settings : {}),
+    [RESEARCH_NAVIGATION_MESH_SETTINGS_KEY]: mesh,
   }
 }

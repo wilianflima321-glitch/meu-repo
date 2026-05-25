@@ -22,6 +22,8 @@
     "components/dashboard/DashboardShell.tsx",
     "components/dashboard/DashboardTopBar.tsx",
     "components/evidence/EvidenceCenter.tsx",
+    "app/api/projects/[id]/production-state/research-navigation/route.ts",
+    "lib/production/research-navigation-mesh.ts",
     "components/viewport/AethelViewport3D.tsx",
     "lib/runtime/runtime-mode-view-model.ts",
     "types/**/*.d.ts",

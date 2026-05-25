@@ -38,6 +38,7 @@ const DOMAINS = [
       'app/api/research/route.ts',
       'app/api/research/navigation-mesh/route.ts',
       'app/api/projects/[id]/production-state/research-intelligence/route.ts',
+      'app/api/projects/[id]/production-state/research-navigation/route.ts',
       'components/nexus/AethelResearch.tsx',
     ],
     tokens: [
@@ -48,6 +49,8 @@ const DOMAINS = [
       'conflicts-with-repo',
       'externalToolPlan',
       'AETHEL_RESEARCH_NAVIGATION_MESH',
+      'RESEARCH_NAVIGATION_MESH_SETTINGS_KEY',
+      'mergeResearchNavigationMeshIntoProductionState',
       'user-chrome-extension',
       'local-chrome-devtools',
       'pause/takeover before consequence-bearing actions',
