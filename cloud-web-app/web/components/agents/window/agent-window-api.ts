@@ -5,6 +5,7 @@ import type {
   AgentFleetSnapshot,
   BrowserOperatorRunsResponse,
   BrowserOperatorRunSummary,
+  ResearchNavigationMeshSnapshot,
 } from './types'
 
 export async function fetchAgentFleet(projectId: string): Promise<AgentFleetSnapshot> {
@@ -53,6 +54,19 @@ export async function fetchBrowserOperatorRuns(projectId: string): Promise<Brows
 
   const payload = (await response.json()) as BrowserOperatorRunsResponse
   return payload.runs
+}
+
+export async function fetchResearchNavigationMesh(): Promise<ResearchNavigationMeshSnapshot> {
+  const response = await fetch('/api/research/navigation-mesh?missionKind=advanced-research', {
+    headers: { Accept: 'application/json' },
+    cache: 'no-store',
+  })
+
+  if (!response.ok) {
+    throw new Error(`research-navigation-mesh:${response.status}`)
+  }
+
+  return (await response.json()) as ResearchNavigationMeshSnapshot
 }
 
 export function groupMembers(members: AgentFleetMemberSnapshot[]): Record<AgentFleetMemberStatus, AgentFleetMemberSnapshot[]> {

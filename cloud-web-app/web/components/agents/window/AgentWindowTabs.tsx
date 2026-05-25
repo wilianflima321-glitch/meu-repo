@@ -3,13 +3,14 @@
 import { cn } from '@/lib/utils'
 
 type AgentWindowTabsProps = {
-  activeView: 'fleet' | 'replay'
-  setActiveView: (view: 'fleet' | 'replay') => void
+  activeView: 'fleet' | 'navigation' | 'replay'
+  setActiveView: (view: 'fleet' | 'navigation' | 'replay') => void
   focusClass: string
 }
 
 const views = [
   { id: 'fleet' as const, label: 'Fleet', hint: 'Locks and scope' },
+  { id: 'navigation' as const, label: 'Navigation', hint: 'Browser lanes' },
   { id: 'replay' as const, label: 'Replay', hint: 'Browser evidence' },
 ]
 

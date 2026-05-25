@@ -7,8 +7,9 @@ import { AgentFleetCoordinatorStrip } from '@/components/ai/AgentFleetCoordinato
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 import { cn } from '@/lib/utils'
 
-import { fetchAgentFleet, fetchBrowserOperatorRuns, groupMembers, patchAgentFleet } from './window/agent-window-api'
+import { fetchAgentFleet, fetchBrowserOperatorRuns, fetchResearchNavigationMesh, groupMembers, patchAgentFleet } from './window/agent-window-api'
 import { AgentFleetPanel } from './window/AgentFleetPanel'
+import { AgentNavigationPanel } from './window/AgentNavigationPanel'
 import { AgentReplayPanel } from './window/AgentReplayPanel'
 import { AgentWindowError, AgentWindowLoading, AgentWindowNoProject } from './window/AgentWindowStates'
 import { AgentWindowTabs } from './window/AgentWindowTabs'
@@ -20,7 +21,7 @@ type AgentsWindowProps = {
 
 export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
   const [selectedAgentId, setSelectedAgentId] = useState('universal')
-  const [activeView, setActiveView] = useState<'fleet' | 'replay'>('fleet')
+  const [activeView, setActiveView] = useState<'fleet' | 'navigation' | 'replay'>('fleet')
   const [replayRunId, setReplayRunId] = useState('')
   const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
   const currentProjectId = projectId && projectId !== 'default' ? projectId : null
@@ -44,6 +45,19 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
     () => fetchBrowserOperatorRuns(currentProjectId as string),
     {
       refreshInterval: activeView === 'replay' ? 10000 : 30000,
+      revalidateOnFocus: false,
+    },
+  )
+  const {
+    data: navigationMesh,
+    error: navigationMeshError,
+    isLoading: navigationMeshLoading,
+    mutate: refreshNavigationMesh,
+  } = useSWR(
+    currentProjectId ? ['research-navigation-mesh', currentProjectId] : null,
+    () => fetchResearchNavigationMesh(),
+    {
+      refreshInterval: activeView === 'navigation' ? 15000 : 45000,
       revalidateOnFocus: false,
     },
   )
@@ -96,7 +110,15 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
 
       <AgentWindowTabs activeView={activeView} setActiveView={setActiveView} focusClass={focusClass} />
 
-      {activeView === 'replay' ? (
+      {activeView === 'navigation' ? (
+        <AgentNavigationPanel
+          mesh={navigationMesh}
+          isLoading={navigationMeshLoading}
+          error={navigationMeshError}
+          onRefresh={() => void refreshNavigationMesh()}
+          focusClass={focusClass}
+        />
+      ) : activeView === 'replay' ? (
         <AgentReplayPanel
           replayRunId={replayRunId}
           setReplayRunId={setReplayRunId}

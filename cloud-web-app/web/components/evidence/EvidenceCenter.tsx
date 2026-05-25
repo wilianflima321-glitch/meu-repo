@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Gauge, GitBranch, Layers3, ShieldCheck, type LucideIcon } from 'lucide-react'
+import { AlertTriangle, ArrowRight, CheckCircle2, Compass, FileText, Gauge, GitBranch, Layers3, ShieldCheck, type LucideIcon } from 'lucide-react'
 import EngineModuleAdapterCockpit from '@/components/studio/EngineModuleAdapterCockpit'
 import { authHeaders } from '@/lib/auth'
 import type {
@@ -23,6 +23,22 @@ type EvidenceCenterSnapshot = {
   readiness: ProductionReadinessSummary
   persisted?: boolean
   settingsKey?: string
+}
+
+type ResearchNavigationMeshSnapshot = {
+  capabilityStatus: 'available' | 'held' | 'blocked' | 'needs-review'
+  recommendedLane: string | null
+  lanes: Array<{
+    laneId: string
+    label: string
+    status: 'available' | 'held' | 'blocked' | 'needs-review'
+    missingCapabilities: string[]
+    blockers: string[]
+    nextAction: string
+  }>
+  marketParityCoverage: string[]
+  limitations: string[]
+  nextAction: string
 }
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'empty' | 'error'
@@ -54,6 +70,7 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
   const [projects, setProjects] = useState<ProjectSummary[]>([])
   const [selectedProjectId, setSelectedProjectId] = useState(initialProjectId ?? '')
   const [snapshot, setSnapshot] = useState<EvidenceCenterSnapshot | null>(null)
+  const [navigationMesh, setNavigationMesh] = useState<ResearchNavigationMeshSnapshot | null>(null)
   const [loadState, setLoadState] = useState<LoadState>('idle')
   const [errorText, setErrorText] = useState<string | null>(null)
 
@@ -103,6 +120,20 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
       active = false
     }
   }, [selectedProjectId])
+
+  useEffect(() => {
+    let active = true
+    readJson<ResearchNavigationMeshSnapshot>('/api/research/navigation-mesh?missionKind=advanced-research')
+      .then((payload) => {
+        if (active) setNavigationMesh(payload)
+      })
+      .catch(() => {
+        if (active) setNavigationMesh(null)
+      })
+    return () => {
+      active = false
+    }
+  }, [])
 
   const selectedProject = useMemo(
     () => projects.find((project) => project.id === selectedProjectId) ?? null,
@@ -225,6 +256,69 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
             </section>
 
             <EngineModuleAdapterCockpit compact />
+
+            {navigationMesh ? (
+              <section className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] p-5" data-evidence-source="research-navigation-mesh">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <p className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">
+                      <Compass className="h-3.5 w-3.5" />
+                      Research navigation mesh
+                    </p>
+                    <h2 className="mt-2 text-xl font-semibold">
+                      {navigationMesh.recommendedLane
+                        ? navigationMesh.lanes.find((lane) => lane.laneId === navigationMesh.recommendedLane)?.label ?? navigationMesh.recommendedLane
+                        : 'No browser lane ready yet'}
+                    </h2>
+                    <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--aethel-text-secondary)]">{navigationMesh.nextAction}</p>
+                  </div>
+                  <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${
+                    navigationMesh.capabilityStatus === 'available'
+                      ? 'border-[color-mix(in_srgb,var(--aethel-success)_32%,transparent)] text-[var(--aethel-success-light)]'
+                      : navigationMesh.capabilityStatus === 'blocked'
+                        ? 'border-[color-mix(in_srgb,var(--aethel-error)_32%,transparent)] text-[var(--aethel-error-light)]'
+                        : 'border-[color-mix(in_srgb,var(--aethel-warning)_32%,transparent)] text-[var(--aethel-warning-light)]'
+                  }`}>
+                    {navigationMesh.capabilityStatus}
+                  </span>
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {navigationMesh.lanes.slice(0, 6).map((lane) => (
+                    <div key={lane.laneId} className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.18)] p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{lane.label}</p>
+                        <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">{lane.status}</span>
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{lane.nextAction}</p>
+                      {lane.missingCapabilities.length > 0 ? (
+                        <p className="mt-2 text-[11px] text-[var(--aethel-warning-light)]">
+                          Missing: {lane.missingCapabilities.slice(0, 2).join(', ')}
+                        </p>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+                <details className="mt-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.16)] p-3">
+                  <summary className="cursor-pointer list-none text-xs font-semibold text-[var(--aethel-text-secondary)]">
+                    Show market parity and limits
+                  </summary>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">Parity coverage</p>
+                      <ul className="mt-2 space-y-1 text-xs text-[var(--aethel-text-secondary)]">
+                        {navigationMesh.marketParityCoverage.map((item) => <li key={item}>- {item}</li>)}
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">Limits</p>
+                      <ul className="mt-2 space-y-1 text-xs text-[var(--aethel-text-secondary)]">
+                        {navigationMesh.limitations.slice(0, 4).map((item) => <li key={item}>- {item}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                </details>
+              </section>
+            ) : null}
 
             <section className="grid gap-6 lg:grid-cols-[1fr_420px]">
               <div className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-5">

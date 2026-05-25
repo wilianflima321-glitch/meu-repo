@@ -46,3 +46,30 @@ export type BrowserOperatorRunSummary = {
 export type BrowserOperatorRunsResponse = {
   runs: BrowserOperatorRunSummary[]
 }
+
+export type AgentNavigationStatus = 'available' | 'held' | 'blocked' | 'needs-review'
+
+export type AgentNavigationLaneSummary = {
+  laneId: string
+  label: string
+  status: AgentNavigationStatus
+  bestFor: string[]
+  missingCapabilities: string[]
+  requiredEvidence: string[]
+  blockers: string[]
+  guardrails: string[]
+  nextAction: string
+}
+
+export type ResearchNavigationMeshSnapshot = {
+  version: 1
+  capability: 'AETHEL_RESEARCH_NAVIGATION_MESH'
+  capabilityStatus: AgentNavigationStatus
+  missionKind: string
+  recommendedLane: string | null
+  lanes: AgentNavigationLaneSummary[]
+  requiredEvidence: string[]
+  marketParityCoverage: string[]
+  limitations: string[]
+  nextAction: string
+}

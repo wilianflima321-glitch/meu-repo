@@ -51,6 +51,14 @@ requirePattern(unitTest, /prompt-injection pages/, 'prompt injection regression'
 requirePattern(routeTest, /without exposing connector env values/, 'route secret redaction regression')
 requirePattern(routeTest, /no browser lane is configured/, 'held route regression')
 
+requirePattern('components/agents/window/AgentNavigationPanel.tsx', /Research navigation mesh/, 'AgentsWindow navigation panel')
+requirePattern('components/agents/window/AgentNavigationPanel.tsx', /marketParityCoverage/, 'navigation panel parity evidence')
+requirePattern('components/agents/window/AgentWindowTabs.tsx', /Navigation/, 'AgentsWindow navigation tab')
+requirePattern('components/agents/AgentsWindow.tsx', /fetchResearchNavigationMesh/, 'AgentsWindow fetches navigation mesh')
+requirePattern('components/agents/AgentsWindow.tsx', /activeView === 'navigation'/, 'AgentsWindow renders navigation mesh panel')
+requirePattern('components/evidence/EvidenceCenter.tsx', /\/api\/research\/navigation-mesh\?missionKind=advanced-research/, 'Evidence Center fetches navigation mesh')
+requirePattern('components/evidence/EvidenceCenter.tsx', /data-evidence-source="research-navigation-mesh"/, 'Evidence Center surfaces navigation evidence')
+
 requirePattern('package.json', /"qa:research-navigation-mesh"/, 'package script')
 requirePattern('package.json', /qa:research-intelligence && npm run qa:research-navigation-mesh && npm run qa:agent-read-receipts/, 'enterprise gate ordering')
 requirePattern('scripts/check-backbone-market-readiness.mjs', /research-navigation-mesh/, 'backbone coverage')
