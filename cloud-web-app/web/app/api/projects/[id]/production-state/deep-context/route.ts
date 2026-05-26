@@ -9,6 +9,11 @@ import { prisma } from '@/lib/db'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { createComponentLogger } from '@/lib/observability/logger'
 import {
+  buildDeepContextPack,
+  type DeepContextPackMode,
+  type DeepContextPackSurface,
+} from '@/lib/production/deep-context-context-pack'
+import {
   DEEP_CONTEXT_CATEGORIES,
   DEEP_CONTEXT_MEMORY_SETTINGS_KEY,
   readDeepContextMemorySnapshotFromSettings,
@@ -59,6 +64,11 @@ function parseBoolean(value: string | null): boolean {
   return value === '1' || value === 'true' || value === 'yes'
 }
 
+function parseOptionalBoolean(value: string | null): boolean | undefined {
+  if (value === null) return undefined
+  return parseBoolean(value)
+}
+
 function parsePositiveInt(value: string | null, fallback: number, min: number, max: number): number {
   const parsed = Number.parseInt(value ?? '', 10)
   if (!Number.isFinite(parsed)) return fallback
@@ -72,6 +82,37 @@ function parseCategories(value: string | null): ContextCategory[] | undefined {
     .map((category) => category.trim())
     .filter((category): category is ContextCategory => DEEP_CONTEXT_CATEGORIES.includes(category as ContextCategory))
   return categories.length ? categories : undefined
+}
+
+function parseMode(value: string | null): DeepContextPackMode {
+  const modes: DeepContextPackMode[] = ['plan', 'code', 'research', 'creative', 'gameplay', 'release']
+  return typeof value === 'string' && modes.includes(value as DeepContextPackMode) ? (value as DeepContextPackMode) : 'plan'
+}
+
+function parseSurface(value: string | null): DeepContextPackSurface {
+  const surfaces: DeepContextPackSurface[] = ['web', 'ide', 'studio-local', 'cloud-agent']
+  return typeof value === 'string' && surfaces.includes(value as DeepContextPackSurface)
+    ? (value as DeepContextPackSurface)
+    : 'web'
+}
+
+function parseQueryArray(value: string | null): string[] {
+  if (!value) return []
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 80)
+}
+
+function parseQueryEmbedding(value: string | null): number[] | undefined {
+  if (!value) return undefined
+  const embedding = value
+    .split(',')
+    .map((item) => Number.parseFloat(item.trim()))
+    .filter((item) => Number.isFinite(item))
+    .slice(0, 4096)
+  return embedding.length ? embedding : undefined
 }
 
 function parseStringArray(value: unknown, limit: number): string[] {
@@ -141,11 +182,25 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     const snapshot = readDeepContextMemorySnapshotFromSettings(project.settings, project.id)
     const url = new URL(request.url)
     const query = url.searchParams.get('q') ?? url.searchParams.get('query')
+    const packRequested = parseBoolean(url.searchParams.get('pack')) || Boolean(url.searchParams.get('mode'))
 
     if (!snapshot || !query?.trim()) {
       return NextResponse.json({
         memory: snapshot,
         recall: null,
+        pack: packRequested
+          ? buildDeepContextPack({
+              snapshot,
+              query: query ?? '',
+              mode: parseMode(url.searchParams.get('mode')),
+              surface: parseSurface(url.searchParams.get('surface')),
+              model: url.searchParams.get('model') ?? undefined,
+              maxTokens: parsePositiveInt(url.searchParams.get('maxTokens'), 6000, 256, 32000),
+              maxChunks: parsePositiveInt(url.searchParams.get('maxChunks'), 8, 1, 64),
+              includeHeld: parseBoolean(url.searchParams.get('includeHeld')),
+              requireEvidence: parseOptionalBoolean(url.searchParams.get('requireEvidence')),
+            })
+          : null,
         hasMemory: Boolean(snapshot),
         settingsKey: DEEP_CONTEXT_MEMORY_SETTINGS_KEY,
       })
@@ -160,10 +215,29 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
       maxChunks: parsePositiveInt(url.searchParams.get('maxChunks'), 8, 1, 32),
       maxTokens: parsePositiveInt(url.searchParams.get('maxTokens'), 6000, 256, 32000),
     })
+    const pack = packRequested
+      ? buildDeepContextPack({
+          snapshot,
+          query,
+          mode: parseMode(url.searchParams.get('mode')),
+          surface: parseSurface(url.searchParams.get('surface')),
+          model: url.searchParams.get('model') ?? undefined,
+          modelMaxInputTokens: parsePositiveInt(url.searchParams.get('modelMaxInputTokens'), 0, 0, 1_000_000) || undefined,
+          maxTokens: parsePositiveInt(url.searchParams.get('maxTokens'), 6000, 256, 32000),
+          maxChunks: parsePositiveInt(url.searchParams.get('maxChunks'), 8, 1, 64),
+          includeHeld: parseBoolean(url.searchParams.get('includeHeld')),
+          requireEvidence: parseOptionalBoolean(url.searchParams.get('requireEvidence')),
+          queryEmbedding: parseQueryEmbedding(url.searchParams.get('queryEmbedding')),
+          readReceiptRefs: parseQueryArray(url.searchParams.get('readReceiptRefs')),
+          evidenceRefs: parseQueryArray(url.searchParams.get('evidenceRefs')),
+          conversationHistoryChars: parsePositiveInt(url.searchParams.get('conversationHistoryChars'), 0, 0, 2_000_000),
+        })
+      : null
 
     return NextResponse.json({
       memory: snapshot,
       recall,
+      pack,
       hasMemory: true,
       settingsKey: DEEP_CONTEXT_MEMORY_SETTINGS_KEY,
     })

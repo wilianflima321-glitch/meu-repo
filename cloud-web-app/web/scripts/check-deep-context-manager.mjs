@@ -9,9 +9,11 @@ function read(relativePath) {
 
 const files = [
   'lib/ai/deep-context-manager.ts',
+  'lib/production/deep-context-context-pack.ts',
   'lib/production/deep-context-settings-persistence.ts',
   'app/api/projects/[id]/production-state/deep-context/route.ts',
   '__tests__/ai/deep-context-manager.test.ts',
+  '__tests__/production/deep-context-context-pack.test.ts',
   '__tests__/production/deep-context-settings-persistence.test.ts',
   '__tests__/api/production-state-deep-context-route.test.ts',
 ]
@@ -22,9 +24,11 @@ for (const file of files) {
 }
 
 const source = read('lib/ai/deep-context-manager.ts')
+const contextPack = read('lib/production/deep-context-context-pack.ts')
 const settingsPersistence = read('lib/production/deep-context-settings-persistence.ts')
 const route = read('app/api/projects/[id]/production-state/deep-context/route.ts')
 const test = read('__tests__/ai/deep-context-manager.test.ts')
+const contextPackTest = read('__tests__/production/deep-context-context-pack.test.ts')
 const settingsTest = read('__tests__/production/deep-context-settings-persistence.test.ts')
 const routeTest = read('__tests__/api/production-state-deep-context-route.test.ts')
 
@@ -43,6 +47,22 @@ const sourceChecks = [
 
 for (const [label, pattern] of sourceChecks) {
   if (!pattern.test(source)) failures.push(`deep-context-manager missing ${label}`)
+}
+
+const contextPackChecks = [
+  ['context pack builder', /buildDeepContextPack/],
+  ['context pack validator', /validateDeepContextPack/],
+  ['model-aware budget', /modelMaxInputTokens/],
+  ['deterministic cache key', /cacheKey/],
+  ['semantic-lite ranking', /lexicalScore/],
+  ['optional embedding scoring', /cosineSimilarity/],
+  ['release evidence gate', /mode === 'release'/],
+  ['read receipt gate', /requiresReadReceipts/],
+  ['hallucination controls', /hallucinationControls/],
+]
+
+for (const [label, pattern] of contextPackChecks) {
+  if (!pattern.test(contextPack)) failures.push(`deep-context context pack missing ${label}`)
 }
 
 const persistenceChecks = [
@@ -64,6 +84,7 @@ const routeChecks = [
   ['auth required', /requireAuth/],
   ['entitlements required', /requireEntitlementsForUser/],
   ['settings persistence', /writeDeepContextMemorySnapshotToSettings/],
+  ['context pack response', /buildDeepContextPack/],
   ['evidence recall option', /requireEvidence/],
   ['viewer write protection', /canWriteDeepContext/],
 ]
@@ -92,6 +113,16 @@ for (const [label, pattern] of testChecks) {
   if (!pattern.test(test)) failures.push(`deep-context-manager test missing ${label}`)
 }
 
+const contextPackTestChecks = [
+  ['bounded pack scenario', /bounded model-aware context pack/],
+  ['release evidence hold scenario', /holds release memory without evidence/],
+  ['missing memory blocked scenario', /blocks broad autonomous work when memory is missing/],
+]
+
+for (const [label, pattern] of contextPackTestChecks) {
+  if (!pattern.test(contextPackTest)) failures.push(`deep-context context pack test missing ${label}`)
+}
+
 const settingsTestChecks = [
   ['settings round trip', /writes and reads sanitized project memory/],
   ['malformed rejection', /rejects mismatched projects and malformed chunks/],
@@ -106,6 +137,7 @@ const routeTestChecks = [
   ['empty memory state', /returns empty governed memory/],
   ['POST persist state', /persists a new memory chunk/],
   ['evidence recall state', /recalls only evidence-backed chunks/],
+  ['context pack state', /model-aware context pack/],
   ['viewer rejection', /rejects viewer collaborators/],
 ]
 
@@ -119,4 +151,4 @@ if (failures.length) {
   process.exit(1)
 }
 
-console.log('[deep-context-manager] PASS persistent memory, settings storage, evidence refs, token budgets, and bounded snapshots are governed')
+console.log('[deep-context-manager] PASS persistent memory, context packs, settings storage, evidence refs, token budgets, and bounded snapshots are governed')

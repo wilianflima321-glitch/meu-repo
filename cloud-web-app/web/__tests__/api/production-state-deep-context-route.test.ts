@@ -168,6 +168,27 @@ describe('api/projects/[id]/production-state/deep-context route', () => {
     expect(payload.recall.heldChunks.map((chunk: { id: string }) => chunk.id)).toContain('draft-quest-note')
   })
 
+  it('returns a model-aware context pack for governed agent execution', async () => {
+    prismaMocks.prisma.project.findFirst.mockResolvedValue(
+      project(writeDeepContextMemorySnapshotToSettings({}, snapshot))
+    )
+
+    const response = await GET(
+      new NextRequest(
+        'http://localhost:3000/api/projects/project-1/production-state/deep-context?query=faction+quest+magic&pack=1&mode=release&surface=cloud-agent&includeHeld=1&readReceiptRefs=read://approved-world-rule'
+      ),
+      { params: { id: 'project-1' } }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.pack.status).toBe('held')
+    expect(payload.pack.mode).toBe('release')
+    expect(payload.pack.cacheKey).toMatch(/^[a-f0-9]{24}$/)
+    expect(payload.pack.heldItems.map((item: { chunk: { id: string } }) => item.chunk.id)).toContain('draft-quest-note')
+    expect(payload.pack.context).toContain('CONTEXT GOVERNANCE')
+  })
+
   it('rejects viewer collaborators before writing memory', async () => {
     prismaMocks.prisma.project.findFirst.mockResolvedValue({
       id: 'project-1',
