@@ -24,7 +24,17 @@ const center = exists('components/evidence/EvidenceCenter.tsx') ? read('componen
 const middleware = read('middleware.ts')
 
 if (!page.includes('EvidenceCenter')) failures.push('app/evidence/page.tsx: must render EvidenceCenter')
-for (const required of ['/api/projects', '/production-state', 'Project Brain', 'Mission ledger', 'Graph coverage', 'Evidence unavailable']) {
+for (const required of [
+  '/api/projects',
+  '/production-state',
+  '/production-state/release-evidence-readiness',
+  'Release evidence package',
+  'data-evidence-source="release-evidence-readiness"',
+  'Project Brain',
+  'Mission ledger',
+  'Graph coverage',
+  'Evidence unavailable',
+]) {
   if (!center.includes(required)) failures.push(`components/evidence/EvidenceCenter.tsx: missing ${required}`)
 }
 if (/PUBLIC_PATH_PREFIXES[\s\S]*['"]\/evidence['"]/.test(middleware) || /PUBLIC_EXACT_PATHS[\s\S]*['"]\/evidence['"]/.test(middleware)) {
@@ -40,6 +50,7 @@ const report = `# Evidence Center Spine Audit
 - Client surface: \`components/evidence/EvidenceCenter.tsx\`
 - Uses projects API: ${center.includes('/api/projects') ? 'yes' : 'no'}
 - Uses production-state API: ${center.includes('/production-state') ? 'yes' : 'no'}
+- Uses release-evidence-readiness API: ${center.includes('/production-state/release-evidence-readiness') ? 'yes' : 'no'}
 - Middleware public allow-list includes /evidence: ${middleware.includes("'/evidence'") || middleware.includes('"/evidence"') ? 'yes' : 'no'}
 
 Status: ${failures.length ? 'FAIL' : 'PASS'}

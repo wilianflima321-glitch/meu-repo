@@ -41,6 +41,31 @@ type ResearchNavigationMeshSnapshot = {
   nextAction: string
 }
 
+
+type ReleaseEvidenceReadinessSnapshot = {
+  capabilityStatus: 'blocked' | 'needs-review' | 'evidence-backed'
+  status: 'blocked' | 'needs-review' | 'evidence-backed'
+  releaseReady: false
+  humanApprovalRequired: true
+  canRequestHumanReview: boolean
+  scorePercent: number
+  coveredRequiredLanes: number
+  totalRequiredLanes: number
+  lanes: Array<{
+    id: string
+    label: string
+    required: boolean
+    status: 'covered' | 'missing' | 'needs-review' | 'blocked'
+    evidenceRefs: string[]
+    missingEvidence: string[]
+    blockers: string[]
+    nextAction: string
+  }>
+  missingEvidence: string[]
+  blockers: string[]
+  nextAction: string
+}
+
 type LoadState = 'idle' | 'loading' | 'ready' | 'empty' | 'error'
 
 type EvidenceCenterProps = {
@@ -71,6 +96,7 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
   const [selectedProjectId, setSelectedProjectId] = useState(initialProjectId ?? '')
   const [snapshot, setSnapshot] = useState<EvidenceCenterSnapshot | null>(null)
   const [navigationMesh, setNavigationMesh] = useState<ResearchNavigationMeshSnapshot | null>(null)
+  const [releaseReadiness, setReleaseReadiness] = useState<ReleaseEvidenceReadinessSnapshot | null>(null)
   const [loadState, setLoadState] = useState<LoadState>('idle')
   const [errorText, setErrorText] = useState<string | null>(null)
 
@@ -134,6 +160,25 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
       active = false
     }
   }, [])
+
+
+  useEffect(() => {
+    if (!selectedProjectId) {
+      setReleaseReadiness(null)
+      return
+    }
+    let active = true
+    readJson<{ snapshot: ReleaseEvidenceReadinessSnapshot }>(`/api/projects/${encodeURIComponent(selectedProjectId)}/production-state/release-evidence-readiness`)
+      .then((payload) => {
+        if (active) setReleaseReadiness(payload.snapshot)
+      })
+      .catch(() => {
+        if (active) setReleaseReadiness(null)
+      })
+    return () => {
+      active = false
+    }
+  }, [selectedProjectId])
 
   const selectedProject = useMemo(
     () => projects.find((project) => project.id === selectedProjectId) ?? null,
@@ -254,6 +299,67 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                 </div>
               ))}
             </section>
+
+            {releaseReadiness ? (
+              <section className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] p-5" data-evidence-source="release-evidence-readiness">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <p className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      Release evidence package
+                    </p>
+                    <h2 className="mt-2 text-xl font-semibold">
+                      {releaseReadiness.scorePercent}% evidence coverage for review
+                    </h2>
+                    <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--aethel-text-secondary)]">{releaseReadiness.nextAction}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${
+                      releaseReadiness.status === 'evidence-backed'
+                        ? 'border-[color-mix(in_srgb,var(--aethel-success)_32%,transparent)] text-[var(--aethel-success-light)]'
+                        : releaseReadiness.status === 'blocked'
+                          ? 'border-[color-mix(in_srgb,var(--aethel-error)_32%,transparent)] text-[var(--aethel-error-light)]'
+                          : 'border-[color-mix(in_srgb,var(--aethel-warning)_32%,transparent)] text-[var(--aethel-warning-light)]'
+                    }`}>
+                      {releaseReadiness.status}
+                    </span>
+                    <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                      release held
+                    </span>
+                    <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                      human approval required
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                  {releaseReadiness.lanes.map((lane) => (
+                    <div key={lane.id} className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.18)] p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{lane.label}</p>
+                        <span className={`text-[10px] font-bold uppercase tracking-[0.12em] ${
+                          lane.status === 'covered'
+                            ? 'text-[var(--aethel-success-light)]'
+                            : lane.status === 'blocked'
+                              ? 'text-[var(--aethel-error-light)]'
+                              : 'text-[var(--aethel-warning-light)]'
+                        }`}>
+                          {lane.status}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{lane.nextAction}</p>
+                      {lane.missingEvidence.length > 0 ? (
+                        <p className="mt-2 text-[11px] leading-4 text-[var(--aethel-warning-light)]">
+                          {lane.missingEvidence[0]}
+                        </p>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-4 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                  This package is evidence for review only. It never auto-publishes or marks a game, film, app, or runtime job as final.
+                </p>
+              </section>
+            ) : null}
 
             <EngineModuleAdapterCockpit compact />
 

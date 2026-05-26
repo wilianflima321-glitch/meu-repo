@@ -115,6 +115,16 @@ requireToken(
 
 requireToken('package.json', 'qa:release-evidence-readiness', 'package script')
 requireToken('scripts/check-backbone-market-readiness.mjs', 'AETHEL_RELEASE_EVIDENCE_READINESS', 'backbone readiness token')
+requireToken(
+  'components/evidence/EvidenceCenter.tsx',
+  '/production-state/release-evidence-readiness',
+  'Evidence Center release readiness fetch',
+)
+requireToken(
+  'components/evidence/EvidenceCenter.tsx',
+  'data-evidence-source="release-evidence-readiness"',
+  'Evidence Center release readiness surface',
+)
 
 if (failures.length > 0) {
   console.error('[release-evidence-readiness] FAIL')
