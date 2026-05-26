@@ -19,6 +19,7 @@ import {
   mergeReleaseEvidenceReviewDecisionIntoProductionState,
   mergeReleaseEvidenceReviewRequestIntoProductionState,
   RELEASE_EVIDENCE_READINESS_CAPABILITY,
+  verifyReleaseEvidencePackageManifest,
   type ReleaseEvidenceReviewDecision,
 } from '@/lib/production/release-evidence-readiness'
 import { readRuntimeJobReceiptStateFromSettings } from '@/lib/production/runtime-job-receipts'
@@ -79,6 +80,7 @@ function buildReadinessPayload(project: ReleaseEvidenceProject) {
     projectName: project.name,
     generatedBy: 'release-evidence-readiness-api',
   })
+  const packageManifestVerification = verifyReleaseEvidencePackageManifest(packageManifest)
 
   return {
     state,
@@ -86,6 +88,7 @@ function buildReadinessPayload(project: ReleaseEvidenceProject) {
     runtimeReceiptState,
     snapshot,
     packageManifest,
+    packageManifestVerification,
   }
 }
 
@@ -116,11 +119,12 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     const project = await loadProjectForReleaseEvidenceReadiness(params.id, user.userId)
     if (!project) return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 
-    const { snapshot, packageManifest } = buildReadinessPayload(project)
+    const { snapshot, packageManifest, packageManifestVerification } = buildReadinessPayload(project)
 
     return NextResponse.json({
       snapshot,
       packageManifest,
+      packageManifestVerification,
       capability: RELEASE_EVIDENCE_READINESS_CAPABILITY,
       capabilityStatus: snapshot.capabilityStatus,
       releaseReady: false,
@@ -193,10 +197,12 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       projectName: project.name,
       generatedBy: 'release-evidence-readiness-api',
     })
+    const packageManifestVerification = verifyReleaseEvidencePackageManifest(packageManifest)
 
     return NextResponse.json({
       snapshot: updatedSnapshot,
       packageManifest,
+      packageManifestVerification,
       readiness: buildProductionReadinessSummary(result.state),
       productionState: result.state,
       reviewRequestId: 'reviewRequestId' in result ? result.reviewRequestId : undefined,

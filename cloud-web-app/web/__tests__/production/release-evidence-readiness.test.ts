@@ -12,6 +12,7 @@ import {
   buildReleaseEvidenceReadinessSnapshot,
   mergeReleaseEvidenceReviewDecisionIntoProductionState,
   mergeReleaseEvidenceReviewRequestIntoProductionState,
+  verifyReleaseEvidencePackageManifest,
 } from '@/lib/production/release-evidence-readiness'
 import { buildRuntimeJobReceiptState, RUNTIME_JOB_RECEIPTS_SETTINGS_KEY } from '@/lib/production/runtime-job-receipts'
 
@@ -167,6 +168,38 @@ describe('release evidence readiness', () => {
       'Unreal-grade',
       'automatic public release',
     ]))
+    expect(verifyReleaseEvidencePackageManifest(first)).toMatchObject({
+      valid: true,
+      releaseReady: false,
+      manualPublishRequired: true,
+    })
+  })
+
+  it('detects tampered release evidence manifests', () => {
+    const state = graphReadyState('web')
+    const snapshot = buildReleaseEvidenceReadinessSnapshot({
+      state,
+      evidenceCoverage: coverageFor(state),
+      runtimeReceiptState: fullRuntimeReceiptState(),
+      now: NOW,
+    })
+    const manifest = buildReleaseEvidencePackageManifest({
+      state,
+      snapshot,
+      projectId: 'project-release-readiness',
+      projectName: 'Release evidence workspace',
+      generatedAt: NOW,
+      generatedBy: 'test',
+    })
+    const tampered = {
+      ...manifest,
+      evidenceRefs: [...manifest.evidenceRefs, 'tampered:evidence-ref'],
+    }
+
+    const verification = verifyReleaseEvidencePackageManifest(tampered)
+    expect(verification.valid).toBe(false)
+    expect(verification.errors.join(' ')).toContain('integrity hash')
+    expect(verification.releaseReady).toBe(false)
   })
 
   it('persists a human review request without marking release ready', () => {

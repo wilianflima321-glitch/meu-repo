@@ -147,6 +147,15 @@ export interface ReleaseEvidencePackageManifest {
   integrityHash: string
 }
 
+export interface ReleaseEvidencePackageManifestVerification {
+  valid: boolean
+  actualHash: string
+  expectedHash: string
+  errors: string[]
+  releaseReady: false
+  manualPublishRequired: true
+}
+
 const RELEASE_APPROVAL_PATTERNS = [
   /human[-_ ]?approval/i,
   /release[-_ ]?approval/i,
@@ -719,6 +728,30 @@ export function buildReleaseEvidencePackageManifest(
   return {
     ...baseManifest,
     integrityHash,
+  }
+}
+
+export function verifyReleaseEvidencePackageManifest(
+  manifest: ReleaseEvidencePackageManifest,
+): ReleaseEvidencePackageManifestVerification {
+  const expectedHash = manifest.integrityHash
+  const { integrityHash: _integrityHash, ...withoutHash } = manifest
+  const actualHash = `fnv1a:${fnv1a(canonicalStringify(withoutHash))}`
+  const errors = unique([
+    ...(actualHash === expectedHash ? [] : ['Manifest integrity hash does not match package contents.']),
+    ...(manifest.capability === RELEASE_EVIDENCE_READINESS_CAPABILITY ? [] : ['Manifest capability is not release evidence readiness.']),
+    ...(manifest.readiness.releaseReady === false ? [] : ['Manifest cannot claim releaseReady=true.']),
+    ...(manifest.readiness.manualPublishRequired === true ? [] : ['Manifest must require a separate manual publish action.']),
+    ...(manifest.claimPolicy.prohibitedClaims.includes('automatic public release') ? [] : ['Manifest claim policy must prohibit automatic public release.']),
+  ], 40)
+
+  return {
+    valid: errors.length === 0,
+    actualHash,
+    expectedHash,
+    errors,
+    releaseReady: false,
+    manualPublishRequired: true,
   }
 }
 

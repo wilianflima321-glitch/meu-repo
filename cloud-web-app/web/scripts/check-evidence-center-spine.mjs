@@ -33,6 +33,7 @@ for (const required of [
   'Record approval',
   'Reject package',
   'Export manifest',
+  'Integrity verified',
   'data-evidence-source="release-evidence-package-manifest"',
   'data-evidence-source="release-evidence-readiness"',
   'Project Brain',

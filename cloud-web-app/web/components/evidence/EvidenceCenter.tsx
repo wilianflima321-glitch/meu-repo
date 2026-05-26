@@ -82,6 +82,15 @@ type ReleaseEvidencePackageManifest = {
   evidenceRefs: string[]
 }
 
+type ReleaseEvidencePackageManifestVerification = {
+  valid: boolean
+  actualHash: string
+  expectedHash: string
+  errors: string[]
+  releaseReady: false
+  manualPublishRequired: true
+}
+
 type LoadState = 'idle' | 'loading' | 'ready' | 'empty' | 'error'
 type ReleaseReviewState = 'idle' | 'requesting' | 'requested' | 'deciding' | 'approved' | 'rejected' | 'blocked' | 'error'
 
@@ -132,6 +141,7 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
   const [navigationMesh, setNavigationMesh] = useState<ResearchNavigationMeshSnapshot | null>(null)
   const [releaseReadiness, setReleaseReadiness] = useState<ReleaseEvidenceReadinessSnapshot | null>(null)
   const [releaseManifest, setReleaseManifest] = useState<ReleaseEvidencePackageManifest | null>(null)
+  const [releaseManifestVerification, setReleaseManifestVerification] = useState<ReleaseEvidencePackageManifestVerification | null>(null)
   const [releaseReviewState, setReleaseReviewState] = useState<ReleaseReviewState>('idle')
   const [releaseReviewMessage, setReleaseReviewMessage] = useState<string | null>(null)
   const [releaseDecisionNote, setReleaseDecisionNote] = useState('')
@@ -204,22 +214,29 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
     if (!selectedProjectId) {
       setReleaseReadiness(null)
       setReleaseManifest(null)
+      setReleaseManifestVerification(null)
       return
     }
     let active = true
     setReleaseReviewState('idle')
     setReleaseReviewMessage(null)
     setReleaseDecisionNote('')
-    readJson<{ snapshot: ReleaseEvidenceReadinessSnapshot; packageManifest: ReleaseEvidencePackageManifest }>(`/api/projects/${encodeURIComponent(selectedProjectId)}/production-state/release-evidence-readiness`)
+    readJson<{
+      snapshot: ReleaseEvidenceReadinessSnapshot
+      packageManifest: ReleaseEvidencePackageManifest
+      packageManifestVerification: ReleaseEvidencePackageManifestVerification
+    }>(`/api/projects/${encodeURIComponent(selectedProjectId)}/production-state/release-evidence-readiness`)
       .then((payload) => {
         if (!active) return
         setReleaseReadiness(payload.snapshot)
         setReleaseManifest(payload.packageManifest)
+        setReleaseManifestVerification(payload.packageManifestVerification)
       })
       .catch(() => {
         if (!active) return
         setReleaseReadiness(null)
         setReleaseManifest(null)
+        setReleaseManifestVerification(null)
       })
     return () => {
       active = false
@@ -273,6 +290,7 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
         readiness: ProductionReadinessSummary
         productionState: AgenticProductionState
         packageManifest: ReleaseEvidencePackageManifest
+        packageManifestVerification: ReleaseEvidencePackageManifestVerification
         reviewRequestId: string
         decision?: 'approved' | 'rejected'
         releaseNote: string
@@ -283,6 +301,7 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
 
       setReleaseReadiness(payload.snapshot)
       setReleaseManifest(payload.packageManifest)
+      setReleaseManifestVerification(payload.packageManifestVerification)
       setSnapshot((current) => (
         current
           ? { ...current, state: payload.productionState, readiness: payload.readiness, persisted: true }
@@ -486,6 +505,17 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                       <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">
                         {releaseManifest.evidenceRefs.length} refs · manual publish required · prohibited: {releaseManifest.claimPolicy.prohibitedClaims.slice(0, 3).join(', ')}
                       </p>
+                      {releaseManifestVerification ? (
+                        <p className={`mt-1 text-[11px] font-semibold ${
+                          releaseManifestVerification.valid
+                            ? 'text-[var(--aethel-success-light)]'
+                            : 'text-[var(--aethel-error-light)]'
+                        }`}>
+                          {releaseManifestVerification.valid
+                            ? 'Integrity verified'
+                            : `Integrity warning: ${releaseManifestVerification.errors[0] ?? 'manifest mismatch'}`}
+                        </p>
+                      ) : null}
                     </div>
                     <button
                       type="button"

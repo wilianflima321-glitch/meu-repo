@@ -45,10 +45,20 @@ requireToken(
   'buildReleaseEvidencePackageManifest',
   'exportable evidence manifest builder',
 )
+requireToken(
+  'lib/production/release-evidence-readiness.ts',
+  'verifyReleaseEvidencePackageManifest',
+  'exportable evidence manifest verifier',
+)
 requirePattern(
   'lib/production/release-evidence-readiness.ts',
   /integrityHash[\s\S]*fnv1a/,
   'deterministic manifest integrity hash',
+)
+requirePattern(
+  'lib/production/release-evidence-readiness.ts',
+  /Manifest integrity hash does not match package contents/,
+  'manifest tamper detection',
 )
 requirePattern(
   'lib/production/release-evidence-readiness.ts',
@@ -133,6 +143,11 @@ requirePattern(
 )
 requirePattern(
   'app/api/projects/[id]/production-state/release-evidence-readiness/route.ts',
+  /packageManifestVerification/,
+  'route manifest verification payload',
+)
+requirePattern(
+  'app/api/projects/[id]/production-state/release-evidence-readiness/route.ts',
   /export async function POST/,
   'governed review request mutation',
 )
@@ -161,6 +176,11 @@ requireToken(
   '__tests__/production/release-evidence-readiness.test.ts',
   'deterministic exportable manifest',
   'unit coverage for exportable manifest',
+)
+requireToken(
+  '__tests__/production/release-evidence-readiness.test.ts',
+  'detects tampered release evidence manifests',
+  'unit coverage for tamper detection',
 )
 requireToken(
   '__tests__/production/release-evidence-readiness.test.ts',
@@ -214,6 +234,11 @@ requireToken(
   'components/evidence/EvidenceCenter.tsx',
   'Export manifest',
   'Evidence Center manifest export action',
+)
+requireToken(
+  'components/evidence/EvidenceCenter.tsx',
+  'Integrity verified',
+  'Evidence Center manifest verification state',
 )
 requireToken(
   'components/evidence/EvidenceCenter.tsx',
