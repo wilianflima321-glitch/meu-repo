@@ -15,228 +15,38 @@ import { toolsRegistry, executeTool } from '@/lib/ai-tools-registry';
 import '@/lib/ai-web-tools'
 import { EventEmitter } from 'events';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+import type {
+  AgentTask,
+  AgentStep,
+  ToolCall,
+  AgentMemory,
+  MemoryEntry,
+  AgentConfig,
+  AgentToolContextProvider,
+  AgentAction,
+  AgentPlan,
+  AgentThinking,
+  AgentReflection,
+  AgentReview,
+  AgentToolDescriptor
+} from './agent-mode-contracts';
 
-export interface AgentTask {
-  id: string;
-  description: string;
-  status: 'pending' | 'planning' | 'executing' | 'reviewing' | 'completed' | 'failed' | 'paused';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  createdAt: Date;
-  updatedAt: Date;
-  completedAt?: Date;
-  parentTaskId?: string;
-  subtasks: AgentTask[];
-  result?: unknown;
-  error?: string;
-}
+import { EXECUTOR_PROMPT, PLANNER_PROMPT, REFLECTOR_PROMPT } from './agent-mode-prompts';
 
-export interface AgentStep {
-  id: string;
-  taskId: string;
-  type: 'think' | 'plan' | 'execute' | 'observe' | 'reflect' | 'correct';
-  content: string;
-  toolCalls?: ToolCall[];
-  timestamp: Date;
-  duration?: number;
-}
-
-export interface ToolCall {
-  id: string;
-  tool: string;
-  input: Record<string, unknown>;
-  output?: unknown;
-  error?: string;
-  status: 'pending' | 'running' | 'success' | 'failed';
-  startTime: Date;
-  endTime?: Date;
-}
-
-export interface AgentMemory {
-  shortTerm: MemoryEntry[];  // Current task context
-  longTerm: MemoryEntry[];   // Persistent knowledge
-  working: Map<string, unknown>; // Active variables/state
-}
-
-export interface MemoryEntry {
-  id: string;
-  type: 'fact' | 'decision' | 'error' | 'success' | 'context';
-  content: string;
-  metadata?: Record<string, unknown>;
-  timestamp: Date;
-  relevance: number;
-}
-
-export interface AgentConfig {
-  maxIterations: number;
-  maxRetries: number;
-  thinkingBudget: number;  // Max tokens for reasoning
-  autonomyLevel: 'supervised' | 'semi-autonomous' | 'autonomous';
-  requireApproval: boolean;
-  enableSelfCorrection: boolean;
-  enableParallelExecution: boolean;
-  model: string;
-  toolContextProvider?: AgentToolContextProvider | null;
-}
-
-export type AgentToolContextProvider = (
-  action: AgentAction
-) => Record<string, unknown> | null | undefined | Promise<Record<string, unknown> | null | undefined>;
-
-interface AgentPlan {
-  analysis: string;
-  approach: string;
-  subtasks: Array<{
-    id: string;
-    description: string;
-    tools: string[];
-    dependencies: string[];
-    estimatedSteps: number;
-    riskLevel: string;
-  }>;
-  successCriteria: string;
-  potentialIssues: string[];
-}
-
-export interface AgentAction {
-  type: 'tool_call' | 'ask_human' | 'complete' | 'error';
-  tool?: string;
-  input?: Record<string, unknown>;
-  reason: string;
-}
-
-interface AgentThinking {
-  thinking: string;
-  action: AgentAction;
-  confidence: number;
-  nextSteps: string[];
-}
-
-interface AgentReflection {
-  assessment: string;
-  success: boolean;
-  progress: number;
-  issues: string[];
-  corrections: string[];
-  nextAction: 'continue' | 'retry' | 'adjust' | 'complete' | 'abort';
-  adjustments: string;
-}
-
-interface AgentReview {
-  success: boolean;
-  result?: unknown;
-  error?: string;
-}
-
-interface AgentToolDescriptor {
-  name: string;
-  description: string;
-  inputSchema: Record<string, unknown>;
-}
+export type {
+  AgentTask,
+  AgentStep,
+  ToolCall,
+  AgentMemory,
+  MemoryEntry,
+  AgentConfig,
+  AgentToolContextProvider,
+  AgentAction
+} from './agent-mode-contracts';
 
 function parseJsonObject<T>(raw: string): T {
   return JSON.parse(raw) as T;
 }
-
-// ============================================================================
-// AGENT PROMPTS
-// ============================================================================
-
-const PLANNER_PROMPT = `Você é um agente de planejamento especializado em decomposição de tarefas complexas.
-
-OBJETIVO: Analisar uma tarefa e criar um plano de execução detalhado.
-
-REGRAS:
-1. Divida tarefas complexas em subtarefas atômicas e executáveis
-2. Identifique dependências entre subtarefas
-3. Estime complexidade e risco de cada etapa
-4. Sempre inclua etapas de verificação/teste
-5. Considere edge cases e possíveis falhas
-
-FORMATO DE RESPOSTA (JSON):
-{
-  "analysis": "Análise da tarefa e contexto necessário",
-  "approach": "Estratégia geral de abordagem",
-  "subtasks": [
-    {
-      "id": "1",
-      "description": "Descrição clara da subtarefa",
-      "tools": ["tool1", "tool2"],
-      "dependencies": [],
-      "estimatedSteps": 3,
-      "riskLevel": "low|medium|high"
-    }
-  ],
-  "successCriteria": "Como verificar que a tarefa foi completada",
-  "potentialIssues": ["Issue 1", "Issue 2"]
-}`;
-
-const EXECUTOR_PROMPT = `Você é um agente executor especializado em completar tarefas usando ferramentas.
-
-CONTEXTO ATUAL:
-{context}
-
-TAREFA:
-{task}
-
-FERRAMENTAS DISPONÍVEIS:
-{tools}
-
-MEMÓRIA RELEVANTE:
-{memory}
-
-REGRAS:
-1. Execute uma ação por vez
-2. Observe o resultado antes de prosseguir
-3. Se encontrar erro, tente corrigir (máx 3 tentativas)
-4. Documente suas decisões
-5. Pare e peça ajuda se estiver travado
-
-FORMATO DE RESPOSTA (JSON):
-{
-  "thinking": "Seu raciocínio sobre o próximo passo",
-  "action": {
-    "type": "tool_call|ask_human|complete|error",
-    "tool": "nome_da_ferramenta",
-    "input": { ... },
-    "reason": "Por que esta ação"
-  },
-  "confidence": 0.0-1.0,
-  "nextSteps": ["Passo 1", "Passo 2"]
-}`;
-
-const REFLECTOR_PROMPT = `Você é um agente de reflexão que analisa resultados e decide próximos passos.
-
-TAREFA ORIGINAL:
-{task}
-
-AÇÃO EXECUTADA:
-{action}
-
-RESULTADO:
-{result}
-
-HISTÓRICO:
-{history}
-
-ANALISE:
-1. A ação foi bem sucedida?
-2. O resultado nos aproxima do objetivo?
-3. Há erros que precisam ser corrigidos?
-4. Devemos continuar, ajustar ou parar?
-
-FORMATO DE RESPOSTA (JSON):
-{
-  "assessment": "Avaliação do resultado",
-  "success": true|false,
-  "progress": 0-100,
-  "issues": ["Issue 1"],
-  "corrections": ["Correção 1"],
-  "nextAction": "continue|retry|adjust|complete|abort",
-  "adjustments": "O que ajustar se necessário"
-}`;
 
 // ============================================================================
 // AUTONOMOUS AGENT CLASS

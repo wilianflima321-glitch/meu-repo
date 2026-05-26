@@ -3,14 +3,14 @@
 Generated: deterministic local scan
 
 - Watch line limit: 800
-- Files above watch limit: 110 / 110
+- Files above watch limit: 108 / 108
 - Max file lines: 992 / 993
 - Low-import large modules: 0 / 0
 - Low-import threshold: <= 1 import hint
 - Failures: 0
 
 ## Category Counts
-- `runtime`: 71
+- `runtime`: 69
 - `ui`: 27
 - `server`: 6
 - `production-spine`: 3
@@ -22,8 +22,6 @@ Generated: deterministic local scan
 | File | Lines | Import hints | Category | Next action |
 | --- | ---: | ---: | --- | --- |
 | `lib/server/websocket-server.ts` | 992 | 4 | server | Continue extracting protocol-specific handlers; event bus, transport, auth, rooms, and presence are already split. |
-| `lib/nanite-virtualized-geometry.ts` | 990 | 4 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/ai/agent-mode.ts` | 988 | 2 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/control-rig-system.ts` | 986 | 3 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/dialogue/dialogue-system.tsx` | 986 | 4 | runtime | Split planning, timeline, playback, and serialization before adding film features. |
 | `lib/server/build-runtime.ts` | 986 | 0 | server | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -51,6 +49,8 @@ Generated: deterministic local scan
 | `components/editor/MonacoEditorPro.tsx` | 965 | 12 | ui | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/quest-mission-system.ts` | 963 | 4 | runtime | Split data model, runtime, persistence, and editor adapter. |
 | `lib/ai-tools-registry.ts` | 960 | 5 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/ecs-dots-system.ts` | 960 | 4 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/streaming/level-streaming-system.tsx` | 959 | 4 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 
 ## Low-Import Large Modules
 
