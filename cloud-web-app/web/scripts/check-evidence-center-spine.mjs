@@ -32,6 +32,8 @@ for (const required of [
   'Request review',
   'Record approval',
   'Reject package',
+  'Export manifest',
+  'data-evidence-source="release-evidence-package-manifest"',
   'data-evidence-source="release-evidence-readiness"',
   'Project Brain',
   'Mission ledger',

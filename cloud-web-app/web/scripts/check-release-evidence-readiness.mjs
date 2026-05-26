@@ -42,6 +42,21 @@ requireToken(
 )
 requireToken(
   'lib/production/release-evidence-readiness.ts',
+  'buildReleaseEvidencePackageManifest',
+  'exportable evidence manifest builder',
+)
+requirePattern(
+  'lib/production/release-evidence-readiness.ts',
+  /integrityHash[\s\S]*fnv1a/,
+  'deterministic manifest integrity hash',
+)
+requirePattern(
+  'lib/production/release-evidence-readiness.ts',
+  /manualPublishRequired:\s*true/,
+  'manifest manual publish contract',
+)
+requireToken(
+  'lib/production/release-evidence-readiness.ts',
   'mergeReleaseEvidenceReviewRequestIntoProductionState',
   'governed review request state merge',
 )
@@ -113,6 +128,11 @@ requirePattern(
 )
 requirePattern(
   'app/api/projects/[id]/production-state/release-evidence-readiness/route.ts',
+  /packageManifest/,
+  'route manifest payload',
+)
+requirePattern(
+  'app/api/projects/[id]/production-state/release-evidence-readiness/route.ts',
   /export async function POST/,
   'governed review request mutation',
 )
@@ -136,6 +156,11 @@ requireToken(
   '__tests__/production/release-evidence-readiness.test.ts',
   'canRequestHumanReview',
   'unit coverage for human review request path',
+)
+requireToken(
+  '__tests__/production/release-evidence-readiness.test.ts',
+  'deterministic exportable manifest',
+  'unit coverage for exportable manifest',
 )
 requireToken(
   '__tests__/production/release-evidence-readiness.test.ts',
@@ -184,6 +209,16 @@ requireToken(
   'components/evidence/EvidenceCenter.tsx',
   'Request review',
   'Evidence Center governed review request action',
+)
+requireToken(
+  'components/evidence/EvidenceCenter.tsx',
+  'Export manifest',
+  'Evidence Center manifest export action',
+)
+requireToken(
+  'components/evidence/EvidenceCenter.tsx',
+  'data-evidence-source="release-evidence-package-manifest"',
+  'Evidence Center manifest surface',
 )
 requireToken(
   'components/evidence/EvidenceCenter.tsx',

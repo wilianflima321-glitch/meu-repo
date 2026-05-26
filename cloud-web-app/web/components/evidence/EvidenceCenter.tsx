@@ -66,6 +66,22 @@ type ReleaseEvidenceReadinessSnapshot = {
   nextAction: string
 }
 
+type ReleaseEvidencePackageManifest = {
+  packageId: string
+  generatedAt: string
+  integrityHash: string
+  readiness: {
+    status: 'blocked' | 'needs-review' | 'evidence-backed'
+    releaseReady: false
+    manualPublishRequired: true
+  }
+  claimPolicy: {
+    allowedClaims: string[]
+    prohibitedClaims: string[]
+  }
+  evidenceRefs: string[]
+}
+
 type LoadState = 'idle' | 'loading' | 'ready' | 'empty' | 'error'
 type ReleaseReviewState = 'idle' | 'requesting' | 'requested' | 'deciding' | 'approved' | 'rejected' | 'blocked' | 'error'
 
@@ -115,6 +131,7 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
   const [snapshot, setSnapshot] = useState<EvidenceCenterSnapshot | null>(null)
   const [navigationMesh, setNavigationMesh] = useState<ResearchNavigationMeshSnapshot | null>(null)
   const [releaseReadiness, setReleaseReadiness] = useState<ReleaseEvidenceReadinessSnapshot | null>(null)
+  const [releaseManifest, setReleaseManifest] = useState<ReleaseEvidencePackageManifest | null>(null)
   const [releaseReviewState, setReleaseReviewState] = useState<ReleaseReviewState>('idle')
   const [releaseReviewMessage, setReleaseReviewMessage] = useState<string | null>(null)
   const [releaseDecisionNote, setReleaseDecisionNote] = useState('')
@@ -186,18 +203,23 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
   useEffect(() => {
     if (!selectedProjectId) {
       setReleaseReadiness(null)
+      setReleaseManifest(null)
       return
     }
     let active = true
     setReleaseReviewState('idle')
     setReleaseReviewMessage(null)
     setReleaseDecisionNote('')
-    readJson<{ snapshot: ReleaseEvidenceReadinessSnapshot }>(`/api/projects/${encodeURIComponent(selectedProjectId)}/production-state/release-evidence-readiness`)
+    readJson<{ snapshot: ReleaseEvidenceReadinessSnapshot; packageManifest: ReleaseEvidencePackageManifest }>(`/api/projects/${encodeURIComponent(selectedProjectId)}/production-state/release-evidence-readiness`)
       .then((payload) => {
-        if (active) setReleaseReadiness(payload.snapshot)
+        if (!active) return
+        setReleaseReadiness(payload.snapshot)
+        setReleaseManifest(payload.packageManifest)
       })
       .catch(() => {
-        if (active) setReleaseReadiness(null)
+        if (!active) return
+        setReleaseReadiness(null)
+        setReleaseManifest(null)
       })
     return () => {
       active = false
@@ -250,6 +272,7 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
         snapshot: ReleaseEvidenceReadinessSnapshot
         readiness: ProductionReadinessSummary
         productionState: AgenticProductionState
+        packageManifest: ReleaseEvidencePackageManifest
         reviewRequestId: string
         decision?: 'approved' | 'rejected'
         releaseNote: string
@@ -259,6 +282,7 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
       })
 
       setReleaseReadiness(payload.snapshot)
+      setReleaseManifest(payload.packageManifest)
       setSnapshot((current) => (
         current
           ? { ...current, state: payload.productionState, readiness: payload.readiness, persisted: true }
@@ -270,6 +294,17 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
       setReleaseReviewState(releaseReadiness.canRequestHumanReview ? 'error' : 'blocked')
       setReleaseReviewMessage(error instanceof Error ? error.message : 'Release review request could not be created.')
     }
+  }
+
+  function exportReleaseManifest() {
+    if (!releaseManifest) return
+    const blob = new Blob([JSON.stringify(releaseManifest, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `${releaseManifest.packageId.replace(/[^a-z0-9._-]+/gi, '-')}.json`
+    anchor.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -443,6 +478,24 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                     </div>
                   </div>
                 </div>
+                {releaseManifest ? (
+                  <div className="mt-3 flex flex-col gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.18)] p-3 lg:flex-row lg:items-center lg:justify-between" data-evidence-source="release-evidence-package-manifest">
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Exportable evidence manifest</p>
+                      <p className="mt-1 font-mono text-[11px] text-[var(--aethel-text-tertiary)]">{releaseManifest.integrityHash}</p>
+                      <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">
+                        {releaseManifest.evidenceRefs.length} refs · manual publish required · prohibited: {releaseManifest.claimPolicy.prohibitedClaims.slice(0, 3).join(', ')}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={exportReleaseManifest}
+                      className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] px-4 text-xs font-bold uppercase tracking-[0.12em] text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
+                    >
+                      Export manifest
+                    </button>
+                  </div>
+                ) : null}
                 <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
                   {releaseReadiness.lanes.map((lane) => (
                     <div key={lane.id} className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.18)] p-3">

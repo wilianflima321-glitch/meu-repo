@@ -158,6 +158,9 @@ describe('api/projects/[id]/production-state/release-evidence-readiness route', 
     expect(response.status).toBe(200)
     expect(payload.capability).toBe('AETHEL_RELEASE_EVIDENCE_READINESS')
     expect(payload.releaseReady).toBe(false)
+    expect(payload.packageManifest.releaseReady).toBeUndefined()
+    expect(payload.packageManifest.readiness.releaseReady).toBe(false)
+    expect(payload.packageManifest.integrityHash).toMatch(/^fnv1a:/)
     expect(payload.snapshot.releaseReady).toBe(false)
     expect(payload.snapshot.humanApprovalRequired).toBe(true)
     expect(payload.snapshot.lanes.map((lane: { id: string }) => lane.id)).toEqual(expect.arrayContaining([
@@ -208,6 +211,8 @@ describe('api/projects/[id]/production-state/release-evidence-readiness route', 
     expect(response.status).toBe(200)
     expect(payload.persisted).toBe(true)
     expect(payload.releaseReady).toBe(false)
+    expect(payload.packageManifest.readiness.manualPublishRequired).toBe(true)
+    expect(payload.packageManifest.integrityHash).toMatch(/^fnv1a:/)
     expect(payload.reviewRequestId).toBe('release-evidence-review-request')
     expect(payload.productionState.ledger[0].id).toBe('release-evidence-review-request')
     expect(prismaMocks.prisma.project.update).toHaveBeenCalledWith(expect.objectContaining({
@@ -256,6 +261,7 @@ describe('api/projects/[id]/production-state/release-evidence-readiness route', 
     expect(response.status).toBe(200)
     expect(payload.persisted).toBe(true)
     expect(payload.releaseReady).toBe(false)
+    expect(payload.packageManifest.readiness.releaseReady).toBe(false)
     expect(payload.decision).toBe('approved')
     expect(payload.decisionId).toBe('release-evidence-review-approved')
     expect(payload.snapshot.status).toBe('evidence-backed')

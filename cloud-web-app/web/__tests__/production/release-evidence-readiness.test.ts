@@ -8,6 +8,7 @@ import {
 } from '@/lib/production/agentic-production-state'
 import { buildEvidenceRefCoverageReport } from '@/lib/production/evidence-ref-coverage'
 import {
+  buildReleaseEvidencePackageManifest,
   buildReleaseEvidenceReadinessSnapshot,
   mergeReleaseEvidenceReviewDecisionIntoProductionState,
   mergeReleaseEvidenceReviewRequestIntoProductionState,
@@ -130,6 +131,42 @@ describe('release evidence readiness', () => {
       status: 'missing',
     })
     expect(snapshot.nextAction).toContain('human owner review')
+  })
+
+  it('builds a deterministic exportable manifest with claim policy and release hold', () => {
+    const state = graphReadyState('web')
+    const snapshot = buildReleaseEvidenceReadinessSnapshot({
+      state,
+      evidenceCoverage: coverageFor(state),
+      runtimeReceiptState: fullRuntimeReceiptState(),
+      now: NOW,
+    })
+
+    const first = buildReleaseEvidencePackageManifest({
+      state,
+      snapshot,
+      projectId: 'project-release-readiness',
+      projectName: 'Release evidence workspace',
+      generatedAt: NOW,
+      generatedBy: 'test',
+    })
+    const second = buildReleaseEvidencePackageManifest({
+      state,
+      snapshot,
+      projectId: 'project-release-readiness',
+      projectName: 'Release evidence workspace',
+      generatedAt: NOW,
+      generatedBy: 'test',
+    })
+
+    expect(first.integrityHash).toBe(second.integrityHash)
+    expect(first.readiness.releaseReady).toBe(false)
+    expect(first.readiness.manualPublishRequired).toBe(true)
+    expect(first.claimPolicy.prohibitedClaims).toEqual(expect.arrayContaining([
+      'final',
+      'Unreal-grade',
+      'automatic public release',
+    ]))
   })
 
   it('persists a human review request without marking release ready', () => {
