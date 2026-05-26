@@ -12,6 +12,8 @@ describe('Studio Local release readiness', () => {
     expect(STUDIO_LOCAL_RELEASE_MANIFEST.signedInstallers).toBe('held')
     expect(summary.publicDownloadReady).toBe(false)
     expect(summary.releaseBlocked).toBe(true)
+    expect(summary.signingReadiness.publicInstallerEligible).toBe(false)
+    expect(summary.signingReadiness.signedInstallerClaimAllowed).toBe(false)
     expect(summary.nextAction).toContain('Request desktop beta')
   })
 

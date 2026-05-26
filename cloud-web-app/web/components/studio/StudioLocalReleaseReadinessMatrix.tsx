@@ -19,6 +19,7 @@ type StudioLocalReleaseReadinessMatrixProps = {
 export default function StudioLocalReleaseReadinessMatrix({ compact = false, className = '' }: StudioLocalReleaseReadinessMatrixProps) {
   const summary = getStudioLocalReleaseReadinessSummary()
   const items = compact ? STUDIO_LOCAL_RELEASE_MANIFEST.releaseReadiness.slice(0, 5) : STUDIO_LOCAL_RELEASE_MANIFEST.releaseReadiness
+  const signingHeld = summary.signingReadiness.lanes.filter((lane) => lane.status === 'held').length
 
   return (
     <section
@@ -75,7 +76,7 @@ export default function StudioLocalReleaseReadinessMatrix({ compact = false, cla
       </div>
 
       <p className="mt-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_42%,transparent)] px-3 py-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">
-        {summary.nextAction}
+        {summary.nextAction} Signing chain: {signingHeld} held lanes across Windows Artifact Signing, macOS notarization, Linux provenance, updater, and release attestation.
       </p>
     </section>
   )

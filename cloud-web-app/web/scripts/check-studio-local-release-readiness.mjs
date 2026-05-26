@@ -6,6 +6,7 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const REQUIRED_FILES = [
   'lib/studio-local/release-manifest.ts',
+  'lib/studio-local/release-signing-readiness.ts',
   'components/studio/StudioLocalReleaseReadinessMatrix.tsx',
   'components/studio/StudioLocalRuntimeCapsule.tsx',
   'app/download/page.tsx',
@@ -41,13 +42,20 @@ for (const id of [
 }
 
 requireToken('lib/studio-local/release-manifest.ts', "signedInstallers: 'held'", 'signed installers held')
+requireToken('lib/studio-local/release-manifest.ts', 'buildStudioLocalSigningReadiness', 'signing readiness summary')
 requireToken('lib/studio-local/release-manifest.ts', 'getStudioLocalReleaseReadinessSummary')
 requireToken('lib/studio-local/release-manifest.ts', 'Public release remains held')
 requireToken('lib/studio-local/release-manifest.ts', 'No public signed artifact evidence')
 requireToken('lib/studio-local/release-manifest.ts', 'NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL')
+requireToken('lib/studio-local/release-signing-readiness.ts', 'Windows Azure Artifact Signing or EV/OV signing evidence', 'Windows signing evidence')
+requireToken('lib/studio-local/release-signing-readiness.ts', 'macOS notarization and staple evidence', 'macOS notarization evidence')
+requireToken('lib/studio-local/release-signing-readiness.ts', 'Tauri updater artifacts, public key, HTTPS endpoint, and rollback channel', 'updater evidence')
+requireToken('lib/studio-local/release-signing-readiness.ts', 'signedInstallerClaimAllowed', 'signed installer claim guard')
+requireToken('lib/studio-local/release-signing-readiness.ts', 'publicInstallerEligible', 'public installer eligibility guard')
 requireToken('components/studio/StudioLocalReleaseReadinessMatrix.tsx', 'Request beta only')
 requireToken('components/studio/StudioLocalReleaseReadinessMatrix.tsx', 'Windows, macOS, Linux, updater, signing, sidecars')
 requireToken('components/studio/StudioLocalReleaseReadinessMatrix.tsx', 'Studio Local release readiness matrix')
+requireToken('components/studio/StudioLocalReleaseReadinessMatrix.tsx', 'Signing chain:', 'signing chain disclosure')
 requireToken('components/studio/StudioLocalRuntimeCapsule.tsx', 'getStudioLocalReleaseReadinessSummary')
 requireToken('components/studio/StudioLocalRuntimeCapsule.tsx', 'Signed installers stay held')
 requireToken('app/download/page.tsx', 'StudioLocalReleaseReadinessMatrix')

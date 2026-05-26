@@ -1,3 +1,5 @@
+import { buildStudioLocalSigningReadiness } from './release-signing-readiness'
+
 export type RuntimeReleaseStatus = 'available' | 'beta' | 'held' | 'planned'
 export type StudioLocalPlatformId = 'windows' | 'mac' | 'linux'
 export type StudioLocalReadinessId =
@@ -191,6 +193,7 @@ export const STUDIO_LOCAL_RELEASE_MANIFEST: RuntimeReleaseManifest = {
 }
 
 export function getStudioLocalReleaseReadinessSummary(manifest: RuntimeReleaseManifest = STUDIO_LOCAL_RELEASE_MANIFEST) {
+  const signingReadiness = buildStudioLocalSigningReadiness()
   const counts = manifest.releaseReadiness.reduce<Record<RuntimeReleaseStatus, number>>(
     (acc, item) => {
       acc[item.status] += 1
@@ -205,11 +208,20 @@ export function getStudioLocalReleaseReadinessSummary(manifest: RuntimeReleaseMa
   return {
     total: manifest.releaseReadiness.length,
     counts,
-    publicDownloadReady: manifest.signedInstallers === 'available' && counts.held === 0 && counts.planned === 0,
-    releaseBlocked: manifest.signedInstallers !== 'available' || counts.held > 0 || counts.planned > 0,
+    signingReadiness,
+    publicDownloadReady:
+      manifest.signedInstallers === 'available' &&
+      counts.held === 0 &&
+      counts.planned === 0 &&
+      signingReadiness.publicInstallerEligible,
+    releaseBlocked:
+      manifest.signedInstallers !== 'available' ||
+      counts.held > 0 ||
+      counts.planned > 0 ||
+      !signingReadiness.publicInstallerEligible,
     blockers,
     nextAction:
-      blockers.length > 0
+      blockers.length > 0 || !signingReadiness.publicInstallerEligible
         ? 'Keep Request desktop beta as the CTA and collect signing, updater, sidecar, and Cloud Stream evidence before public downloads.'
         : 'Publish signed installers with checksums, updater feed, rollback path, and support docs.',
   }
