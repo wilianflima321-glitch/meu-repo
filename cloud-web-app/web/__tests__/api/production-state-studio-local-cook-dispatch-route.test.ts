@@ -7,6 +7,7 @@ import {
   type StudioLocalDispatchApproval,
 } from '@/lib/production/studio-local-cook-dispatch'
 import type { StudioLocalCookJobRequest } from '@/lib/production/studio-local-cook-queue'
+import { RUNTIME_JOB_RECEIPTS_SETTINGS_KEY } from '@/lib/production/runtime-job-receipts'
 
 const authMocks = vi.hoisted(() => ({
   requireAuth: vi.fn(),
@@ -180,9 +181,33 @@ describe('api/projects/[id]/production-state/studio-local-cook-dispatch route', 
       executionAllowed: true,
       humanReviewRequired: true,
     })
-    expect(payload.state.graphs.releaseGraph[0].blockers).toContain('Do not auto-publish governed runtime output.')
-    expect(payload.state.graphs.releaseGraph[0].blockers).toContain('Human review required before final/public claims.')
-    expect(payload.state.graphs.evidenceGraph[0].blockers).toContain('Required evidence: signed Studio Local daemon dispatch')
+    expect(payload.state.graphs.releaseGraph).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        id: expect.stringContaining('runtime-job-receipts'),
+        blockers: expect.arrayContaining(['Do not release runtime output without human approval.']),
+      }),
+      expect.objectContaining({
+        blockers: expect.arrayContaining([
+          'Do not auto-publish governed runtime output.',
+          'Human review required before final/public claims.',
+        ]),
+      }),
+    ]))
+    expect(payload.receiptState.summary.totalReceipts).toBeGreaterThanOrEqual(4)
+    expect(payload.receiptState.receipts.map((receipt: { kind: string }) => receipt.kind)).toEqual(expect.arrayContaining([
+      'dispatch',
+      'capability-probe',
+      'cost-meter',
+      'rollback',
+    ]))
+    expect(payload.state.graphs.evidenceGraph).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        id: expect.stringContaining('runtime-job-receipts'),
+      }),
+      expect.objectContaining({
+        blockers: expect.arrayContaining(['Required evidence: signed Studio Local daemon dispatch']),
+      }),
+    ]))
     expect(prismaMocks.prisma.project.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: PROJECT_ID },
@@ -190,6 +215,9 @@ describe('api/projects/[id]/production-state/studio-local-cook-dispatch route', 
           settings: expect.objectContaining({
             [PRODUCTION_STATE_SETTINGS_KEY]: expect.objectContaining({
               runtimePolicy: expect.objectContaining({ requiresHumanApproval: true }),
+            }),
+            [RUNTIME_JOB_RECEIPTS_SETTINGS_KEY]: expect.objectContaining({
+              releasePolicy: 'human-review-required',
             }),
           }),
         }),

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
 import { PRODUCTION_STATE_SETTINGS_KEY } from '@/lib/production/agentic-production-state'
+import { RUNTIME_JOB_RECEIPTS_SETTINGS_KEY } from '@/lib/production/runtime-job-receipts'
 
 const authMocks = vi.hoisted(() => ({
   requireAuth: vi.fn(),
@@ -98,6 +99,11 @@ describe('api/projects/[id]/production-state/render-job/evidence route', () => {
     expect(payload.persisted).toBe(true)
     expect(payload.releaseReady).toBe(false)
     expect(payload.releaseNote).toContain('Human approval')
+    expect(payload.receiptState.summary.totalReceipts).toBe(2)
+    expect(payload.receiptState.receipts.map((receipt: { kind: string }) => receipt.kind)).toEqual(expect.arrayContaining([
+      'artifact',
+      'validation',
+    ]))
     expect(payload.evidence.artifacts).toEqual([
       expect.objectContaining({
         url: 's3://renders/final.mp4',
@@ -116,11 +122,17 @@ describe('api/projects/[id]/production-state/render-job/evidence route', () => {
         accessMode: 'project-authenticated-proxy',
       }),
     ])
-    expect(payload.state.graphs.releaseGraph[0]).toMatchObject({
-      id: 'render-release-render-final-shot',
-      status: 'needs-review',
-      ownerAgent: 'Release Agent',
-    })
+    expect(payload.state.graphs.releaseGraph).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        id: 'render-release-render-final-shot',
+        status: 'needs-review',
+        ownerAgent: 'Release Agent',
+      }),
+      expect.objectContaining({
+        id: 'runtime-job-receipts-release',
+        status: 'needs-review',
+      }),
+    ]))
     expect(prismaMocks.prisma.project.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'project-1' },
@@ -132,6 +144,9 @@ describe('api/projects/[id]/production-state/render-job/evidence route', () => {
                   expect.objectContaining({ id: 'render-output-render-final-shot' }),
                 ]),
               }),
+            }),
+            [RUNTIME_JOB_RECEIPTS_SETTINGS_KEY]: expect.objectContaining({
+              releasePolicy: 'human-review-required',
             }),
           }),
         }),

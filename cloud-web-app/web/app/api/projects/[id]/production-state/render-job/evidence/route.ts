@@ -17,6 +17,13 @@ import {
   mergeViewportRenderOutputEvidenceIntoProductionState,
   type ViewportRenderOutputEvidence,
 } from '@/lib/production/render-output-evidence'
+import {
+  buildRuntimeJobReceiptInputsFromRenderEvidence,
+  buildRuntimeJobReceiptState,
+  mergeRuntimeJobReceiptsIntoProductionState,
+  readRuntimeJobReceiptStateFromSettings,
+  writeRuntimeJobReceiptStateToSettings,
+} from '@/lib/production/runtime-job-receipts'
 import { withViewportRenderEvidenceArtifactAccess } from '@/lib/viewport/viewport-render-artifact-access'
 import {
   validateViewportRenderEvidenceArtifactOwnership,
@@ -130,8 +137,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       projectId: project.id,
     }
     const currentState = readStateForProject(project)
-    const state = mergeViewportRenderOutputEvidenceIntoProductionState(currentState, projectEvidence)
-    const settings = writeAgenticProductionStateToSettings(project.settings, state)
+    const renderEvidenceState = mergeViewportRenderOutputEvidenceIntoProductionState(currentState, projectEvidence)
+    const receiptState = buildRuntimeJobReceiptState({
+      projectId: project.id,
+      previous: readRuntimeJobReceiptStateFromSettings(project.settings),
+      receipts: buildRuntimeJobReceiptInputsFromRenderEvidence(projectEvidence),
+    })
+    const state = mergeRuntimeJobReceiptsIntoProductionState(renderEvidenceState, receiptState)
+    const settingsWithState = writeAgenticProductionStateToSettings(project.settings, state)
+    const settings = writeRuntimeJobReceiptStateToSettings(settingsWithState, receiptState)
     const readiness = buildProductionReadinessSummary(state)
 
     await prisma.project.update({
@@ -149,10 +163,12 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       performanceOk: evidence.validation.performanceOk,
       licenseOk: evidence.validation.licenseOk,
       continuityOk: evidence.validation.continuityOk,
+      receiptCount: receiptState.summary.totalReceipts,
     })
 
     return NextResponse.json({
       evidence: withViewportRenderEvidenceArtifactAccess(projectEvidence, project.id),
+      receiptState,
       state,
       readiness,
       persisted: true,

@@ -17,6 +17,13 @@ import {
   coerceStudioLocalCookDispatchRequest,
 } from '@/lib/production/studio-local-cook-dispatch'
 import { mergeGovernedRuntimeJobIntoProductionState } from '@/lib/production/governed-runtime-jobs'
+import {
+  buildRuntimeJobReceiptInputsFromGovernedJob,
+  buildRuntimeJobReceiptState,
+  mergeRuntimeJobReceiptsIntoProductionState,
+  readRuntimeJobReceiptStateFromSettings,
+  writeRuntimeJobReceiptStateToSettings,
+} from '@/lib/production/runtime-job-receipts'
 
 const logger = createComponentLogger('api.projects.production-state.studio-local-cook-dispatch')
 
@@ -118,8 +125,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     }
 
     const currentState = readStateForProject(project)
-    const state = mergeGovernedRuntimeJobIntoProductionState(currentState, decision.governedJob)
-    const settings = writeAgenticProductionStateToSettings(project.settings, state)
+    const jobState = mergeGovernedRuntimeJobIntoProductionState(currentState, decision.governedJob)
+    const receiptState = buildRuntimeJobReceiptState({
+      projectId: project.id,
+      previous: readRuntimeJobReceiptStateFromSettings(project.settings),
+      receipts: buildRuntimeJobReceiptInputsFromGovernedJob(decision.governedJob),
+    })
+    const state = mergeRuntimeJobReceiptsIntoProductionState(jobState, receiptState, decision.governedJob)
+    const settingsWithState = writeAgenticProductionStateToSettings(project.settings, state)
+    const settings = writeRuntimeJobReceiptStateToSettings(settingsWithState, receiptState)
     const readiness = buildProductionReadinessSummary(state)
 
     await prisma.project.update({
@@ -132,6 +146,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       projectId: project.id,
       assetId: dispatchRequest.cookRequest.assetId,
       jobId: decision.governedJob.id,
+      receiptCount: receiptState.summary.totalReceipts,
       state: decision.state,
       dispatchAllowed: true,
       executionAllowed: true,
@@ -142,6 +157,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       job: decision.governedJob,
       state,
       readiness,
+      receiptState,
       persisted: true,
       dispatchAllowed: true,
       executionAllowed: true,

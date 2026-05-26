@@ -6,6 +6,7 @@ import type {
 } from '@/lib/production/agentic-production-state'
 import { mergeAgenticProductionState } from '@/lib/production/agentic-production-state'
 import type { GovernedRuntimeJob, RuntimeJobRequest } from '@/lib/production/governed-runtime-jobs'
+import type { ViewportRenderOutputEvidence } from '@/lib/production/render-output-evidence'
 
 export const RUNTIME_JOB_RECEIPTS_SETTINGS_KEY = 'aethelRuntimeJobReceipts'
 
@@ -223,6 +224,126 @@ export function evaluateRuntimeJobReceiptCoverage(input: {
         ? 'Capture missing dispatch, capability, cost, artifact, validation, teardown, or rollback receipts before review.'
         : 'Receipts are attached; request human release review before final/public claims.',
   }
+}
+
+export function buildRuntimeJobReceiptInputsFromGovernedJob(
+  job: RuntimeJobRequest,
+  input: { capturedAt?: string; capturedBy?: string } = {},
+): RuntimeJobReceiptInput[] {
+  const capturedAt = input.capturedAt ?? job.updatedAt
+  const capturedBy = input.capturedBy ?? job.requestedByAgent
+  const receipts: RuntimeJobReceiptInput[] = [
+    {
+      id: `${job.id}:dispatch`,
+      jobId: job.id,
+      kind: 'dispatch',
+      runtimeTarget: job.runtimeTarget,
+      capturedBy,
+      capturedAt,
+      refs: unique([`runtime-job:${job.id}`, ...job.evidenceRefs], 80),
+      provider: job.provider,
+      note: job.reason,
+    },
+    {
+      id: `${job.id}:capability-probe`,
+      jobId: job.id,
+      kind: 'capability-probe',
+      runtimeTarget: job.runtimeTarget,
+      capturedBy,
+      capturedAt,
+      refs: unique(job.requiredCapabilities.map((capability) => `capability:${capability}`), 80),
+      provider: job.provider,
+      note: `Runtime capability status: ${job.runtimeCapabilityStatus}`,
+    },
+  ]
+
+  if (job.estimatedCostUsd > 0) {
+    receipts.push({
+      id: `${job.id}:cost-meter`,
+      jobId: job.id,
+      kind: 'cost-meter',
+      runtimeTarget: job.runtimeTarget,
+      capturedBy: 'Cost Governor Agent',
+      capturedAt,
+      costUsd: job.estimatedCostUsd,
+      durationSeconds: Math.round(job.estimatedMinutes * 60),
+      refs: [`cost:${job.estimatedCostUsd.toFixed(6)}`],
+      provider: job.provider,
+    })
+  }
+
+  if (job.rollbackPlan.trim().length > 0) {
+    receipts.push({
+      id: `${job.id}:rollback`,
+      jobId: job.id,
+      kind: 'rollback',
+      runtimeTarget: job.runtimeTarget,
+      capturedBy: 'Release Manager Agent',
+      capturedAt,
+      refs: ['rollback-plan:attached'],
+      note: job.rollbackPlan,
+    })
+  }
+
+  return receipts
+}
+
+export function buildRuntimeJobReceiptInputsFromRenderEvidence(
+  evidence: ViewportRenderOutputEvidence,
+  input: { capturedBy?: string } = {},
+): RuntimeJobReceiptInput[] {
+  const jobId = evidence.jobId ?? evidence.contractId
+  const playbackPassed =
+    evidence.validation.playbackOk &&
+    evidence.validation.performanceOk &&
+    evidence.validation.licenseOk &&
+    evidence.validation.continuityOk
+  const artifactRefs = evidence.artifacts.map((artifact) => `${artifact.kind}:${artifact.url}`)
+  const receipts: RuntimeJobReceiptInput[] = [
+    {
+      id: `${jobId}:artifact:${evidence.capturedAt}`,
+      jobId,
+      kind: 'artifact',
+      runtimeTarget: evidence.runtimeTarget,
+      capturedBy: input.capturedBy ?? 'Render Queue Agent',
+      capturedAt: evidence.capturedAt,
+      status: evidence.artifacts.length > 0 ? 'captured' : 'failed',
+      refs: artifactRefs,
+      durationSeconds: Math.round(evidence.artifacts.reduce((total, artifact) => total + (artifact.durationSeconds ?? 0), 0)),
+      note: `Render output evidence captured for ${evidence.quality} quality.`,
+    },
+    {
+      id: `${jobId}:validation:${evidence.capturedAt}`,
+      jobId,
+      kind: 'validation',
+      runtimeTarget: evidence.runtimeTarget,
+      capturedBy: 'Performance QA Agent',
+      capturedAt: evidence.capturedAt,
+      status: playbackPassed ? 'captured' : 'failed',
+      refs: [
+        `playback:${evidence.validation.playbackOk}`,
+        `performance:${evidence.validation.performanceOk}`,
+        `license:${evidence.validation.licenseOk}`,
+        `continuity:${evidence.validation.continuityOk}`,
+      ],
+      note: evidence.notes.join(' ') || 'Render output validation attached.',
+    },
+  ]
+
+  if (evidence.notes.some((note) => /teardown/i.test(note))) {
+    receipts.push({
+      id: `${jobId}:teardown:${evidence.capturedAt}`,
+      jobId,
+      kind: 'teardown',
+      runtimeTarget: evidence.runtimeTarget,
+      capturedBy: 'Runtime Orchestrator Agent',
+      capturedAt: evidence.capturedAt,
+      refs: unique(evidence.notes.filter((note) => /teardown/i.test(note)), 20),
+      note: 'Teardown evidence was included in render notes.',
+    })
+  }
+
+  return receipts
 }
 
 function requiredReceiptKindsForJob(
