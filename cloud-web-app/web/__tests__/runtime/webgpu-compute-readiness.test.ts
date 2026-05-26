@@ -5,12 +5,31 @@ import {
   AETHEL_WEBGPU_COMPUTE_SHADER_LIBRARY,
   validateWebGPUComputeShaderLibrary,
 } from '@/lib/runtime/webgpu-compute-shader-library'
+import { buildWebGPUPerformanceTraceSummary } from '@/lib/runtime/webgpu-performance-trace'
 
 const BASE_LIMITS = {
   maxComputeInvocationsPerWorkgroup: 256,
   maxComputeWorkgroupStorageSize: 32 * 1024,
   maxStorageBufferBindingSize: 128 * 1024 * 1024,
   maxBufferSize: 256 * 1024 * 1024,
+}
+
+function buildReviewedTrace() {
+  return buildWebGPUPerformanceTraceSummary({
+    traceRef: 'evidence://webgpu/trace-001',
+    targetFps: 60,
+    humanReviewAttached: true,
+    samples: Array.from({ length: 90 }, (_, frameIndex) => ({
+      frameIndex,
+      frameTimeMs: frameIndex % 20 === 0 ? 17.2 : 15.7,
+      gpuTimeMs: 8.4,
+      drawCalls: 420,
+      triangles: 720_000,
+      visibleMeshlets: 360,
+      culledMeshlets: 640,
+      memoryMb: 900,
+    })),
+  })
 }
 
 describe('WebGPU compute readiness', () => {
@@ -40,7 +59,7 @@ describe('WebGPU compute readiness', () => {
       limits: BASE_LIMITS,
       rendererModuleAvailable: true,
       shaderValidation: 'passed',
-      benchmarkTraceRef: 'evidence://webgpu/trace-001',
+      performanceTrace: buildReviewedTrace(),
     })
 
     expect(snapshot.status).toBe('available')
@@ -52,6 +71,25 @@ describe('WebGPU compute readiness', () => {
       'material-preflight',
     ]))
     expect(snapshot.warnings.join(' ')).toContain('preview/review only')
+  })
+
+  it('holds compute lanes when structured performance trace is missing', () => {
+    const snapshot = buildWebGPUComputeReadinessSnapshot({
+      secureContext: true,
+      navigatorGpuAvailable: true,
+      adapterRequested: true,
+      adapterAvailable: true,
+      deviceRequested: true,
+      deviceAvailable: true,
+      features: ['core-features-and-limits'],
+      limits: BASE_LIMITS,
+      rendererModuleAvailable: true,
+      shaderValidation: 'passed',
+    })
+
+    expect(snapshot.status).toBe('held')
+    expect(snapshot.computeAvailable).toBe(false)
+    expect(snapshot.blockers.join(' ')).toContain('No structured WebGPU performance trace')
   })
 
   it('holds compute lanes when shader validation or supported limits are missing', () => {

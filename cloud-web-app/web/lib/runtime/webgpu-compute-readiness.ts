@@ -1,3 +1,5 @@
+import type { WebGPUPerformanceTraceSummary } from './webgpu-performance-trace'
+
 export type WebGPUComputeReadinessStatus = 'available' | 'fallback' | 'held'
 
 export type WebGPUShaderValidationStatus = 'passed' | 'not-run' | 'failed'
@@ -34,6 +36,7 @@ export type WebGPUComputeEvidenceInput = {
   rendererModuleAvailable?: boolean
   shaderValidation?: WebGPUShaderValidationStatus
   benchmarkTraceRef?: string
+  performanceTrace?: WebGPUPerformanceTraceSummary
 }
 
 export type WebGPUComputeReadinessSnapshot = {
@@ -67,7 +70,7 @@ const REQUIRED_EVIDENCE = [
   'GPUSupportedFeatures',
   'GPUSupportedLimits',
   'WGSL shader validation',
-  'performance trace',
+  'structured WebGPU performance trace',
   'human review before final render',
 ]
 
@@ -136,8 +139,19 @@ export function buildWebGPUComputeReadinessSnapshot(
     )
   }
 
-  if (!input.benchmarkTraceRef) {
-    warnings.push('No performance trace is attached yet; do not promote this path to final render quality.')
+  if (input.performanceTrace) {
+    if (input.performanceTrace.status === 'blocked' || input.performanceTrace.status === 'held') {
+      blockers.push(
+        `WebGPU performance trace is ${input.performanceTrace.status}; ${input.performanceTrace.nextAction}`,
+      )
+    }
+    if (input.performanceTrace.status === 'needs-review') {
+      warnings.push('WebGPU performance trace passed budgets but still needs human review before release evidence.')
+    }
+  } else if (!input.benchmarkTraceRef) {
+    blockers.push('No structured WebGPU performance trace is attached; compute lanes remain held.')
+  } else {
+    warnings.push('Legacy performance trace ref is attached without metrics; attach structured trace before release review.')
   }
 
   warnings.push('Browser WebGPU compute is preview/review only; final rendering still requires Studio Local or Cloud Stream evidence.')
