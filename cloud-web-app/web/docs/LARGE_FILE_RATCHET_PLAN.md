@@ -3,14 +3,14 @@
 Generated: deterministic local scan
 
 - Watch line limit: 800
-- Files above watch limit: 112 / 112
-- Max file lines: 994 / 995
+- Files above watch limit: 110 / 110
+- Max file lines: 992 / 993
 - Low-import large modules: 0 / 0
 - Low-import threshold: <= 1 import hint
 - Failures: 0
 
 ## Category Counts
-- `runtime`: 73
+- `runtime`: 71
 - `ui`: 27
 - `server`: 6
 - `production-spine`: 3
@@ -21,10 +21,8 @@ Generated: deterministic local scan
 
 | File | Lines | Import hints | Category | Next action |
 | --- | ---: | ---: | --- | --- |
-| `lib/ai/behavior-tree-system.tsx` | 994 | 4 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/server/websocket-server.ts` | 992 | 4 | server | Continue extracting protocol-specific handlers; event bus, transport, auth, rooms, and presence are already split. |
 | `lib/nanite-virtualized-geometry.ts` | 990 | 4 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/hooks/useTheiaSystemsHooks.ts` | 989 | 3 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai/agent-mode.ts` | 988 | 2 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/control-rig-system.ts` | 986 | 3 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/dialogue/dialogue-system.tsx` | 986 | 4 | runtime | Split planning, timeline, playback, and serialization before adding film features. |
@@ -51,6 +49,8 @@ Generated: deterministic local scan
 | `lib/rate-limiting.ts` | 967 | 2 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/particles/advanced-particle-system.ts` | 966 | 3 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `components/editor/MonacoEditorPro.tsx` | 965 | 12 | ui | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/quest-mission-system.ts` | 963 | 4 | runtime | Split data model, runtime, persistence, and editor adapter. |
+| `lib/ai-tools-registry.ts` | 960 | 5 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 
 ## Low-Import Large Modules
 
@@ -62,7 +62,7 @@ These are the most suspicious modules: large enough to affect maintainability, b
 ## Ratchet Policy
 
 - Do not add new files above 800 lines.
-- Do not let any file exceed 995 lines without an explicit ratchet update.
+- Do not let any file exceed 993 lines without an explicit ratchet update.
 - Do not increase low-import large modules above 0; new large modules need product wiring, adapter evidence, or archive decision.
 - Split UI surfaces before adding features.
 - Runtime kernels may stay large only with an owner, adapter strategy, and dedicated gate.
