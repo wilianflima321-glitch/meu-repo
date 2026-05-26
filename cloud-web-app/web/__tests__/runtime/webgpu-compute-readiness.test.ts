@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
 import { buildWebGPUComputeReadinessSnapshot } from '@/lib/runtime/webgpu-compute-readiness'
+import {
+  AETHEL_WEBGPU_COMPUTE_SHADER_LIBRARY,
+  validateWebGPUComputeShaderLibrary,
+} from '@/lib/runtime/webgpu-compute-shader-library'
 
 const BASE_LIMITS = {
   maxComputeInvocationsPerWorkgroup: 256,
@@ -72,5 +76,18 @@ describe('WebGPU compute readiness', () => {
     expect(snapshot.availableLanes).toEqual([])
     expect(snapshot.blockers.join(' ')).toContain('WGSL shader validation has not run')
     expect(snapshot.blockers.join(' ')).toContain('maxStorageBufferBindingSize')
+  })
+
+  it('validates the canonical shader library for preview compute lanes', () => {
+    const validation = validateWebGPUComputeShaderLibrary()
+
+    expect(validation.valid).toBe(true)
+    expect(validation.shaderCount).toBe(3)
+    expect(validation.lanes).toEqual(expect.arrayContaining([
+      'meshlet-culling-preview',
+      'light-culling-preview',
+      'material-preflight',
+    ]))
+    expect(AETHEL_WEBGPU_COMPUTE_SHADER_LIBRARY.every((shader) => shader.requiredEvidence.length >= 3)).toBe(true)
   })
 })

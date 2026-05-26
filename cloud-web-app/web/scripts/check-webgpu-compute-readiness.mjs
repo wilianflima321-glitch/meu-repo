@@ -27,6 +27,7 @@ function requirePattern(file, pattern, reason) {
 
 const sources = {
   'lib/runtime/webgpu-compute-readiness.ts': read('lib/runtime/webgpu-compute-readiness.ts'),
+  'lib/runtime/webgpu-compute-shader-library.ts': read('lib/runtime/webgpu-compute-shader-library.ts'),
   '__tests__/runtime/webgpu-compute-readiness.test.ts': read('__tests__/runtime/webgpu-compute-readiness.test.ts'),
   'lib/aaa-renderer-webgpu.ts': read('lib/aaa-renderer-webgpu.ts'),
   'package.json': read('package.json'),
@@ -44,12 +45,19 @@ requireToken('lib/runtime/webgpu-compute-readiness.ts', 'meshlet-culling-preview
 requireToken('lib/runtime/webgpu-compute-readiness.ts', 'light-culling-preview', 'light culling compute lane')
 requireToken('lib/runtime/webgpu-compute-readiness.ts', 'Do not claim AAA, Unreal-grade, or final output', 'honest claim warning')
 requireToken('lib/runtime/webgpu-compute-readiness.ts', 'probeBrowserWebGPUComputeReadiness', 'runtime probe entrypoint')
+requireToken('lib/runtime/webgpu-compute-shader-library.ts', 'AETHEL_WEBGPU_COMPUTE_SHADER_LIBRARY', 'canonical shader library')
+requireToken('lib/runtime/webgpu-compute-shader-library.ts', 'meshlet-frustum-cull-v1', 'meshlet culling shader')
+requireToken('lib/runtime/webgpu-compute-shader-library.ts', 'tiled-light-list-v1', 'tiled light shader')
+requireToken('lib/runtime/webgpu-compute-shader-library.ts', 'material-pbr-preflight-v1', 'material preflight shader')
+requireToken('lib/runtime/webgpu-compute-shader-library.ts', 'validateWebGPUComputeShaderLibrary', 'shader library validation')
+requirePattern('lib/runtime/webgpu-compute-shader-library.ts', /@compute[\s\S]*@workgroup_size\(64\)/, 'WGSL compute entrypoints')
 requireToken('lib/aaa-renderer-webgpu.ts', 'WebGPURenderer', 'WebGPU renderer fallback foundation')
 requireToken('lib/aaa-renderer-webgpu.ts', 'WebGLRenderer', 'WebGL2 fallback foundation')
 
 requirePattern('__tests__/runtime/webgpu-compute-readiness.test.ts', /navigator\.gpu is unavailable/, 'fallback test')
 requirePattern('__tests__/runtime/webgpu-compute-readiness.test.ts', /adapter, device, limits and WGSL evidence/, 'available evidence test')
 requirePattern('__tests__/runtime/webgpu-compute-readiness.test.ts', /shader validation or supported limits are missing/, 'held evidence test')
+requirePattern('__tests__/runtime/webgpu-compute-readiness.test.ts', /validates the canonical shader library/, 'shader corpus regression')
 
 requireToken('package.json', 'qa:webgpu-compute-readiness', 'package QA script')
 requirePattern('package.json', /qa:enterprise-gate[\s\S]*qa:webgpu-compute-readiness/, 'enterprise gate must include WebGPU compute readiness')
