@@ -4,17 +4,23 @@ import {
   ENGINE_MODULE_ADAPTERS,
   createAssetImporterAdapterSummary,
   createAudioRuntimeAdapterSummary,
+  createCameraRuntimeAdapterSummary,
   createCharacterRigAdapterSummary,
+  createDialogueRuntimeAdapterSummary,
+  createHapticsAdapterSummary,
   createEngineModuleEvidencePacket,
   createNaniteAdapterSummary,
   createParticleAdapterSummary,
   createPhysicsAdapterSummary,
   createPostProcessingAdapterSummary,
   createRayTracingAdapterSummary,
+  createMotionMatchingAdapterSummary,
   createSpatialAudioAdapterSummary,
   createSequencerAdapterSummary,
   createTerrainAdapterSummary,
   createVolumetricCloudAdapterSummary,
+  createWeatherAdapterSummary,
+  createWebXRAdapterSummary,
   createWorldStreamingAdapterSummary,
   listEngineModuleEvidencePackets,
   validateEngineModuleAdapters,
@@ -45,6 +51,17 @@ describe('engine module integration plan', () => {
         'lib/physics/physics-system.ts',
         'lib/terrain/terrain-system.ts',
         'lib/volumetric-clouds.ts',
+        'lib/dialogue/dialogue-system.tsx',
+        'lib/webxr-vr-system.ts',
+        'lib/motion-matching-system.ts',
+        'lib/input/haptics-system.tsx',
+        'lib/environment/weather-system.tsx',
+        'lib/camera/camera-system.tsx',
+        'lib/commands/command-handlers.tsx',
+        'lib/hooks/useTheiaSystemsHooks.ts',
+        'lib/workspace/workspace-service.ts',
+        'lib/events/event-bus-system.tsx',
+        'lib/health-check.ts',
         'lib/collaboration/collaboration-realtime.ts',
         'lib/theme-service.ts',
         'lib/workspace-store.ts',
@@ -74,6 +91,9 @@ describe('engine module integration plan', () => {
         'lib/nanite-virtualized-geometry.ts',
         'lib/assets/asset-importer.ts',
         'lib/engine/audio-manager.ts',
+        'lib/dialogue/dialogue-system.tsx',
+        'lib/webxr-vr-system.ts',
+        'lib/motion-matching-system.ts',
       ])
     )
     expect(ENGINE_MODULE_ADAPTERS.every((adapter) => adapter.evidenceSignals.length >= 2)).toBe(true)
@@ -93,6 +113,12 @@ describe('engine module integration plan', () => {
     expect(createPhysicsAdapterSummary().settingsKeys).toContain('fixedTimeStep')
     expect(createTerrainAdapterSummary().settingsKeys).toContain('generateCollider')
     expect(createVolumetricCloudAdapterSummary().renderGate).toBe('webgpu-or-cloud-trace-required')
+    expect(createDialogueRuntimeAdapterSummary().conversationKeys).toContain('nodes')
+    expect(createWebXRAdapterSummary().optionalFeatures).toContain('hand-tracking')
+    expect(createMotionMatchingAdapterSummary().resultKey).toBe('cost')
+    expect(createHapticsAdapterSummary().supportedMotors).toContain('both')
+    expect(createWeatherAdapterSummary().weatherTypes).toContain('thunderstorm')
+    expect(createCameraRuntimeAdapterSummary().modes).toContain('cinematic')
 
     const packets = listEngineModuleEvidencePackets()
     expect(packets).toHaveLength(ENGINE_MODULE_ADAPTERS.length)

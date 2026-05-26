@@ -10,7 +10,7 @@ const WATCH_LINE_LIMIT = 800
 const WATCH_FILE_BUDGET = 115
 const MAX_LINE_BUDGET = 1000
 const LOW_IMPORT_HINT_LIMIT = 1
-const LOW_IMPORT_LARGE_BUDGET = 65
+const LOW_IMPORT_LARGE_BUDGET = 54
 
 function walk(dir, files = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

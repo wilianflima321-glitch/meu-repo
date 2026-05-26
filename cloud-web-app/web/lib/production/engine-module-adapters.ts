@@ -9,10 +9,16 @@ import type { ParticleEmitterConfig } from '@/lib/particle-system-real';
 import type { BehaviorTree } from '@/lib/ai/behavior-tree-system';
 import type { AudioSettings, ReverbSettings, SoundSettings } from '@/lib/audio/spatial-audio-contracts';
 import type { AssetType, ImportOptions } from '@/lib/assets/asset-importer-contracts';
+import type { CameraConfig, CameraMode, FollowSettings, ShakeSettings } from '@/lib/camera/camera-system';
+import type { DialogueConversation, DialogueEvent, DialogueState } from '@/lib/dialogue/dialogue-contracts';
 import type { AudioGroupConfig, AudioSourceConfig } from '@/lib/engine/audio-manager-contracts';
+import type { WeatherConfig, WeatherState, WeatherType } from '@/lib/environment/weather-system';
+import type { HapticMotor, HapticsConfig, HapticType } from '@/lib/input/haptics-system';
+import type { MotionDatabase, MotionMatchingConfig, MotionMatchResult } from '@/lib/motion-matching-contracts';
 import type { ColliderShape, PhysicsSettings, RigidBodyConfig } from '@/lib/physics/physics-system-contracts';
 import type { RayTracingConfig } from '@/lib/ray-tracing-contracts';
 import type { BrushSettings, NoiseSettings, TerrainSettings } from '@/lib/terrain/terrain-contracts';
+import type { XRConfig, XRControllerState, XRFeature } from '@/lib/webxr-vr-contracts';
 import type { CullingStats, NaniteConfig, VirtualizedMesh } from '@/lib/nanite-virtualized-geometry-contracts';
 import type { StreamingConfig } from '@/lib/world/world-streaming';
 import type { ControlRigConfig } from '@/lib/control-rig-system';
@@ -21,6 +27,7 @@ import type { CloudConfig } from '@/lib/volumetric-clouds';
 
 export type EngineModuleAdapterSurface =
   | '/studio/film'
+  | '/studio/animation'
   | '/studio/level'
   | '/studio/scene'
   | '/studio/vfx'
@@ -123,6 +130,43 @@ export interface TerrainAdapterSummary {
 export interface VolumetricCloudAdapterSummary {
   configKeys: (keyof CloudConfig)[];
   renderGate: 'webgpu-or-cloud-trace-required';
+}
+
+export interface DialogueRuntimeAdapterSummary {
+  conversationKeys: (keyof DialogueConversation)[];
+  stateKeys: (keyof DialogueState)[];
+  eventKeys: (keyof DialogueEvent)[];
+}
+
+export interface WebXRAdapterSummary {
+  configKeys: (keyof XRConfig)[];
+  optionalFeatures: XRFeature[];
+  controllerSignal: keyof XRControllerState;
+}
+
+export interface MotionMatchingAdapterSummary {
+  configKeys: (keyof MotionMatchingConfig)[];
+  databaseKey: keyof MotionDatabase;
+  resultKey: keyof MotionMatchResult;
+}
+
+export interface HapticsAdapterSummary {
+  configKeys: (keyof HapticsConfig)[];
+  supportedMotors: HapticMotor[];
+  hapticTypes: HapticType[];
+}
+
+export interface WeatherAdapterSummary {
+  configKeys: (keyof WeatherConfig)[];
+  stateKeys: (keyof WeatherState)[];
+  weatherTypes: WeatherType[];
+}
+
+export interface CameraRuntimeAdapterSummary {
+  configKeys: (keyof CameraConfig)[];
+  followKeys: (keyof FollowSettings)[];
+  shakeKeys: (keyof ShakeSettings)[];
+  modes: CameraMode[];
 }
 
 export const ENGINE_MODULE_ADAPTERS: EngineModuleAdapter[] = [
@@ -253,6 +297,54 @@ export const ENGINE_MODULE_ADAPTERS: EngineModuleAdapter[] = [
     runtimeBoundary: 'render-gated',
     exportedContracts: ['CloudConfig', 'VolumetricCloudRenderer', 'CloudShadowMap'],
     evidenceSignals: ['cloud-raymarch-budget', 'shadow-map-budget', 'performance-trace'],
+  },
+  {
+    modulePath: 'lib/dialogue/dialogue-system.tsx',
+    ownerSurface: '/studio/film',
+    contractKind: 'dialogue-runtime-review',
+    runtimeBoundary: 'summary-adapter',
+    exportedContracts: ['DialogueConversation', 'DialogueState', 'DialogueEvent'],
+    evidenceSignals: ['branch-coverage', 'voice-consent', 'localization-review'],
+  },
+  {
+    modulePath: 'lib/webxr-vr-system.ts',
+    ownerSurface: '/studio/scene',
+    contractKind: 'immersive-xr-readiness',
+    runtimeBoundary: 'worker-held',
+    exportedContracts: ['XRConfig', 'XRControllerState', 'XRFeature'],
+    evidenceSignals: ['device-capability', 'comfort-review', 'input-latency-trace'],
+  },
+  {
+    modulePath: 'lib/motion-matching-system.ts',
+    ownerSurface: '/studio/animation',
+    contractKind: 'motion-matching-readiness',
+    runtimeBoundary: 'worker-held',
+    exportedContracts: ['MotionMatchingConfig', 'MotionDatabase', 'MotionMatchResult'],
+    evidenceSignals: ['pose-database-size', 'foot-lock-review', 'animation-playtest'],
+  },
+  {
+    modulePath: 'lib/input/haptics-system.tsx',
+    ownerSurface: '/studio/level',
+    contractKind: 'haptics-feedback-review',
+    runtimeBoundary: 'type-contract',
+    exportedContracts: ['HapticsConfig', 'HapticType', 'HapticMotor'],
+    evidenceSignals: ['gamepad-support', 'intensity-profile', 'accessibility-toggle'],
+  },
+  {
+    modulePath: 'lib/environment/weather-system.tsx',
+    ownerSurface: '/studio/scene',
+    contractKind: 'weather-state-summary',
+    runtimeBoundary: 'summary-adapter',
+    exportedContracts: ['WeatherConfig', 'WeatherState', 'WeatherType'],
+    evidenceSignals: ['transition-duration', 'wind-state', 'lighting-impact'],
+  },
+  {
+    modulePath: 'lib/camera/camera-system.tsx',
+    ownerSurface: '/studio/scene',
+    contractKind: 'camera-runtime-review',
+    runtimeBoundary: 'summary-adapter',
+    exportedContracts: ['CameraConfig', 'FollowSettings', 'ShakeSettings'],
+    evidenceSignals: ['camera-mode', 'motion-sickness-review', 'shot-continuity'],
   },
 ];
 
@@ -386,6 +478,55 @@ export function createVolumetricCloudAdapterSummary(): VolumetricCloudAdapterSum
   };
 }
 
+export function createDialogueRuntimeAdapterSummary(): DialogueRuntimeAdapterSummary {
+  return {
+    conversationKeys: ['id', 'title', 'startNode', 'nodes', 'characters'],
+    stateKeys: ['currentConversation', 'currentNode', 'isActive', 'history'],
+    eventKeys: ['type', 'key', 'value', 'params'],
+  };
+}
+
+export function createWebXRAdapterSummary(): WebXRAdapterSummary {
+  return {
+    configKeys: ['sessionMode', 'referenceSpace', 'features', 'optionalFeatures', 'handTracking'],
+    optionalFeatures: ['hand-tracking', 'hit-test', 'depth-sensing', 'light-estimation'],
+    controllerSignal: 'trigger',
+  };
+}
+
+export function createMotionMatchingAdapterSummary(): MotionMatchingAdapterSummary {
+  return {
+    configKeys: ['searchRadius', 'blendTime', 'trajectoryPredictionTime', 'footLockingEnabled'],
+    databaseKey: 'poses',
+    resultKey: 'cost',
+  };
+}
+
+export function createHapticsAdapterSummary(): HapticsAdapterSummary {
+  return {
+    configKeys: ['enabled', 'globalIntensity', 'respectAccessibility', 'gamepadEnabled'],
+    supportedMotors: ['weak', 'strong', 'both'],
+    hapticTypes: ['light', 'medium', 'success', 'warning', 'error', 'impact', 'selection'],
+  };
+}
+
+export function createWeatherAdapterSummary(): WeatherAdapterSummary {
+  return {
+    configKeys: ['enablePrecipitation', 'enableLightning', 'enableFog', 'enableWind'],
+    stateKeys: ['type', 'intensity', 'windSpeed', 'humidity', 'temperature'],
+    weatherTypes: ['clear', 'cloudy', 'rain', 'thunderstorm', 'fog', 'snow'],
+  };
+}
+
+export function createCameraRuntimeAdapterSummary(): CameraRuntimeAdapterSummary {
+  return {
+    configKeys: ['fov', 'near', 'far', 'aspect'],
+    followKeys: ['target', 'offset', 'lookAtOffset', 'smoothing'],
+    shakeKeys: ['intensity', 'duration', 'frequency', 'decay'],
+    modes: ['first_person', 'third_person', 'orbit', 'free', 'cinematic'],
+  };
+}
+
 const SUMMARY_KEYS_BY_CONTRACT_KIND: Record<string, () => string[]> = {
   'shot-sequence-summary': () => Object.keys(createSequencerAdapterSummary()),
   'viewport-quality-preset': () => Object.keys(createPostProcessingAdapterSummary()),
@@ -403,6 +544,12 @@ const SUMMARY_KEYS_BY_CONTRACT_KIND: Record<string, () => string[]> = {
   'physics-readiness-summary': () => Object.keys(createPhysicsAdapterSummary()),
   'terrain-world-summary': () => Object.keys(createTerrainAdapterSummary()),
   'volumetric-atmosphere-summary': () => Object.keys(createVolumetricCloudAdapterSummary()),
+  'dialogue-runtime-review': () => Object.keys(createDialogueRuntimeAdapterSummary()),
+  'immersive-xr-readiness': () => Object.keys(createWebXRAdapterSummary()),
+  'motion-matching-readiness': () => Object.keys(createMotionMatchingAdapterSummary()),
+  'haptics-feedback-review': () => Object.keys(createHapticsAdapterSummary()),
+  'weather-state-summary': () => Object.keys(createWeatherAdapterSummary()),
+  'camera-runtime-review': () => Object.keys(createCameraRuntimeAdapterSummary()),
 };
 
 export function createEngineModuleEvidencePacket(adapter: EngineModuleAdapter): EngineModuleEvidencePacket {
