@@ -2,11 +2,19 @@ import { describe, expect, it } from 'vitest'
 
 import {
   ENGINE_MODULE_ADAPTERS,
+  createAssetImporterAdapterSummary,
+  createAudioRuntimeAdapterSummary,
   createCharacterRigAdapterSummary,
   createEngineModuleEvidencePacket,
+  createNaniteAdapterSummary,
   createParticleAdapterSummary,
+  createPhysicsAdapterSummary,
   createPostProcessingAdapterSummary,
+  createRayTracingAdapterSummary,
+  createSpatialAudioAdapterSummary,
   createSequencerAdapterSummary,
+  createTerrainAdapterSummary,
+  createVolumetricCloudAdapterSummary,
   createWorldStreamingAdapterSummary,
   listEngineModuleEvidencePackets,
   validateEngineModuleAdapters,
@@ -29,6 +37,14 @@ describe('engine module integration plan', () => {
         'lib/control-rig-system.ts',
         'lib/facial-animation-system.ts',
         'lib/world/world-streaming.tsx',
+        'lib/ray-tracing.ts',
+        'lib/nanite-virtualized-geometry.ts',
+        'lib/assets/asset-importer.ts',
+        'lib/engine/audio-manager.ts',
+        'lib/audio/spatial-audio-system.ts',
+        'lib/physics/physics-system.ts',
+        'lib/terrain/terrain-system.ts',
+        'lib/volumetric-clouds.ts',
         'lib/collaboration/collaboration-realtime.ts',
         'lib/theme-service.ts',
         'lib/workspace-store.ts',
@@ -54,6 +70,10 @@ describe('engine module integration plan', () => {
         'lib/postprocessing/post-processing-system.ts',
         'lib/particles/advanced-particle-system.ts',
         'lib/world/world-streaming.tsx',
+        'lib/ray-tracing.ts',
+        'lib/nanite-virtualized-geometry.ts',
+        'lib/assets/asset-importer.ts',
+        'lib/engine/audio-manager.ts',
       ])
     )
     expect(ENGINE_MODULE_ADAPTERS.every((adapter) => adapter.evidenceSignals.length >= 2)).toBe(true)
@@ -65,6 +85,14 @@ describe('engine module integration plan', () => {
     expect(createParticleAdapterSummary().realtime.blendMode).toBe('additive')
     expect(createCharacterRigAdapterSummary().behaviorTreeContract).toBe('tick')
     expect(createWorldStreamingAdapterSummary().memoryBudgetSignal).toBe('memoryBudgetMB')
+    expect(createRayTracingAdapterSummary().renderGate).toBe('performance-trace-required')
+    expect(createNaniteAdapterSummary().meshContract).toBe('totalTriangles')
+    expect(createAssetImporterAdapterSummary().executionBoundary).toBe('worker-or-studio-local')
+    expect(createAudioRuntimeAdapterSummary().reviewGate).toBe('mix-evidence-required')
+    expect(createSpatialAudioAdapterSummary().reverbKeys).toContain('wetDry')
+    expect(createPhysicsAdapterSummary().settingsKeys).toContain('fixedTimeStep')
+    expect(createTerrainAdapterSummary().settingsKeys).toContain('generateCollider')
+    expect(createVolumetricCloudAdapterSummary().renderGate).toBe('webgpu-or-cloud-trace-required')
 
     const packets = listEngineModuleEvidencePackets()
     expect(packets).toHaveLength(ENGINE_MODULE_ADAPTERS.length)

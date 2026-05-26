@@ -7,19 +7,30 @@ import type {
 import type { ParticleSystemSettings } from '@/lib/particles/advanced-particle-system';
 import type { ParticleEmitterConfig } from '@/lib/particle-system-real';
 import type { BehaviorTree } from '@/lib/ai/behavior-tree-system';
+import type { AudioSettings, ReverbSettings, SoundSettings } from '@/lib/audio/spatial-audio-contracts';
+import type { AssetType, ImportOptions } from '@/lib/assets/asset-importer-contracts';
+import type { AudioGroupConfig, AudioSourceConfig } from '@/lib/engine/audio-manager-contracts';
+import type { ColliderShape, PhysicsSettings, RigidBodyConfig } from '@/lib/physics/physics-system-contracts';
+import type { RayTracingConfig } from '@/lib/ray-tracing-contracts';
+import type { BrushSettings, NoiseSettings, TerrainSettings } from '@/lib/terrain/terrain-contracts';
+import type { CullingStats, NaniteConfig, VirtualizedMesh } from '@/lib/nanite-virtualized-geometry-contracts';
 import type { StreamingConfig } from '@/lib/world/world-streaming';
 import type { ControlRigConfig } from '@/lib/control-rig-system';
 import type { FacialConfig } from '@/lib/facial-animation-system';
+import type { CloudConfig } from '@/lib/volumetric-clouds';
 
 export type EngineModuleAdapterSurface =
   | '/studio/film'
   | '/studio/level'
+  | '/studio/scene'
   | '/studio/vfx'
   | '/studio/rig'
   | '/studio/facial'
-  | '/studio/landscape';
+  | '/studio/landscape'
+  | '/studio/terrain'
+  | '/studio/audio';
 
-export type EngineModuleRuntimeBoundary = 'summary-adapter' | 'type-contract' | 'render-gated';
+export type EngineModuleRuntimeBoundary = 'summary-adapter' | 'type-contract' | 'render-gated' | 'worker-held';
 
 export interface EngineModuleAdapter {
   modulePath: string;
@@ -66,6 +77,52 @@ export interface CharacterRigAdapterSummary {
 export interface WorldStreamingAdapterSummary {
   streamingContract: keyof StreamingConfig;
   memoryBudgetSignal: 'memoryBudgetMB';
+}
+
+export interface RayTracingAdapterSummary {
+  configKeys: (keyof RayTracingConfig)[];
+  renderGate: 'performance-trace-required';
+}
+
+export interface NaniteAdapterSummary {
+  configKeys: (keyof NaniteConfig)[];
+  meshContract: keyof VirtualizedMesh;
+  cullingSignal: keyof CullingStats;
+}
+
+export interface AssetImporterAdapterSummary {
+  acceptedTypes: AssetType[];
+  optionKeys: (keyof ImportOptions)[];
+  executionBoundary: 'worker-or-studio-local';
+}
+
+export interface AudioRuntimeAdapterSummary {
+  sourceKeys: (keyof AudioSourceConfig)[];
+  groupKeys: (keyof AudioGroupConfig)[];
+  reviewGate: 'mix-evidence-required';
+}
+
+export interface SpatialAudioAdapterSummary {
+  settingsKeys: (keyof AudioSettings)[];
+  soundKeys: (keyof SoundSettings)[];
+  reverbKeys: (keyof ReverbSettings)[];
+}
+
+export interface PhysicsAdapterSummary {
+  settingsKeys: (keyof PhysicsSettings)[];
+  rigidBodyKeys: (keyof RigidBodyConfig)[];
+  colliderKeys: (keyof ColliderShape)[];
+}
+
+export interface TerrainAdapterSummary {
+  settingsKeys: (keyof TerrainSettings)[];
+  noiseKeys: (keyof NoiseSettings)[];
+  brushKeys: (keyof BrushSettings)[];
+}
+
+export interface VolumetricCloudAdapterSummary {
+  configKeys: (keyof CloudConfig)[];
+  renderGate: 'webgpu-or-cloud-trace-required';
 }
 
 export const ENGINE_MODULE_ADAPTERS: EngineModuleAdapter[] = [
@@ -132,6 +189,70 @@ export const ENGINE_MODULE_ADAPTERS: EngineModuleAdapter[] = [
     runtimeBoundary: 'type-contract',
     exportedContracts: ['FacialConfig', 'FACSPose', 'LipSyncData'],
     evidenceSignals: ['facs-pose', 'lip-sync-evidence', 'emotion-state'],
+  },
+  {
+    modulePath: 'lib/ray-tracing.ts',
+    ownerSurface: '/studio/scene',
+    contractKind: 'ray-tracing-readiness',
+    runtimeBoundary: 'render-gated',
+    exportedContracts: ['RayTracingConfig', 'BVHNode', 'RTMaterial'],
+    evidenceSignals: ['p95-frame-ms', 'denoiser-enabled', 'human-render-review'],
+  },
+  {
+    modulePath: 'lib/nanite-virtualized-geometry.ts',
+    ownerSurface: '/studio/scene',
+    contractKind: 'virtualized-geometry-summary',
+    runtimeBoundary: 'render-gated',
+    exportedContracts: ['NaniteConfig', 'VirtualizedMesh', 'CullingStats'],
+    evidenceSignals: ['visible-meshlets', 'triangles-rendered', 'memory-budget-mb'],
+  },
+  {
+    modulePath: 'lib/assets/asset-importer.ts',
+    ownerSurface: '/studio/level',
+    contractKind: 'asset-import-intake',
+    runtimeBoundary: 'worker-held',
+    exportedContracts: ['AssetType', 'ImportOptions', 'ImportedAsset'],
+    evidenceSignals: ['license-report', 'checksum', 'lod-pbr-collision-evidence'],
+  },
+  {
+    modulePath: 'lib/engine/audio-manager.ts',
+    ownerSurface: '/studio/audio',
+    contractKind: 'audio-mix-summary',
+    runtimeBoundary: 'summary-adapter',
+    exportedContracts: ['AudioSourceConfig', 'AudioGroupConfig', 'AudioSnapshot'],
+    evidenceSignals: ['mix-snapshot', 'peak-levels', 'human-audio-review'],
+  },
+  {
+    modulePath: 'lib/audio/spatial-audio-system.ts',
+    ownerSurface: '/studio/audio',
+    contractKind: 'spatial-audio-review',
+    runtimeBoundary: 'summary-adapter',
+    exportedContracts: ['AudioSettings', 'SoundSettings', 'ReverbSettings'],
+    evidenceSignals: ['listener-position', 'reverb-zone', 'headphone-review'],
+  },
+  {
+    modulePath: 'lib/physics/physics-system.ts',
+    ownerSurface: '/studio/level',
+    contractKind: 'physics-readiness-summary',
+    runtimeBoundary: 'type-contract',
+    exportedContracts: ['PhysicsSettings', 'RigidBodyConfig', 'ColliderShape'],
+    evidenceSignals: ['fixed-timestep', 'collision-budget', 'playtest-physics-report'],
+  },
+  {
+    modulePath: 'lib/terrain/terrain-system.ts',
+    ownerSurface: '/studio/terrain',
+    contractKind: 'terrain-world-summary',
+    runtimeBoundary: 'worker-held',
+    exportedContracts: ['TerrainSettings', 'NoiseSettings', 'BrushSettings'],
+    evidenceSignals: ['heightmap-resolution', 'lod-levels', 'terrain-collider-evidence'],
+  },
+  {
+    modulePath: 'lib/volumetric-clouds.ts',
+    ownerSurface: '/studio/scene',
+    contractKind: 'volumetric-atmosphere-summary',
+    runtimeBoundary: 'render-gated',
+    exportedContracts: ['CloudConfig', 'VolumetricCloudRenderer', 'CloudShadowMap'],
+    evidenceSignals: ['cloud-raymarch-budget', 'shadow-map-budget', 'performance-trace'],
   },
 ];
 
@@ -203,6 +324,68 @@ export function createWorldStreamingAdapterSummary(): WorldStreamingAdapterSumma
   };
 }
 
+export function createRayTracingAdapterSummary(): RayTracingAdapterSummary {
+  return {
+    configKeys: ['maxBounces', 'samplesPerPixel', 'denoiseEnabled', 'resolution'],
+    renderGate: 'performance-trace-required',
+  };
+}
+
+export function createNaniteAdapterSummary(): NaniteAdapterSummary {
+  return {
+    configKeys: ['targetTrianglesPerMeshlet', 'screenSpaceErrorThreshold', 'memoryBudgetMB'],
+    meshContract: 'totalTriangles',
+    cullingSignal: 'trianglesRendered',
+  };
+}
+
+export function createAssetImporterAdapterSummary(): AssetImporterAdapterSummary {
+  return {
+    acceptedTypes: ['model', 'texture', 'hdri', 'audio', 'video', 'font', 'data'],
+    optionKeys: ['optimizeMeshes', 'computeNormals', 'centerModel', 'normalizeScale'],
+    executionBoundary: 'worker-or-studio-local',
+  };
+}
+
+export function createAudioRuntimeAdapterSummary(): AudioRuntimeAdapterSummary {
+  return {
+    sourceKeys: ['name', 'spatial', 'volume', 'loop', 'group'],
+    groupKeys: ['name', 'volume', 'muted', 'effects'],
+    reviewGate: 'mix-evidence-required',
+  };
+}
+
+export function createSpatialAudioAdapterSummary(): SpatialAudioAdapterSummary {
+  return {
+    settingsKeys: ['masterVolume', 'spatialEnabled', 'maxDistance', 'dopplerFactor'],
+    soundKeys: ['volume', 'spatial', 'minDistance', 'maxDistance', 'category'],
+    reverbKeys: ['decay', 'preDelay', 'wetDry'],
+  };
+}
+
+export function createPhysicsAdapterSummary(): PhysicsAdapterSummary {
+  return {
+    settingsKeys: ['gravity', 'fixedTimeStep', 'maxSubSteps', 'solverIterations'],
+    rigidBodyKeys: ['type', 'mass', 'material', 'collisionGroup', 'collisionMask'],
+    colliderKeys: ['type', 'offset', 'rotation', 'vertices', 'indices'],
+  };
+}
+
+export function createTerrainAdapterSummary(): TerrainAdapterSummary {
+  return {
+    settingsKeys: ['width', 'depth', 'resolution', 'lodLevels', 'generateCollider'],
+    noiseKeys: ['type', 'seed', 'octaves', 'frequency', 'amplitude'],
+    brushKeys: ['size', 'strength', 'falloff', 'shape'],
+  };
+}
+
+export function createVolumetricCloudAdapterSummary(): VolumetricCloudAdapterSummary {
+  return {
+    configKeys: ['coverage', 'density', 'cloudScale', 'godRaysEnabled', 'shadowsEnabled'],
+    renderGate: 'webgpu-or-cloud-trace-required',
+  };
+}
+
 const SUMMARY_KEYS_BY_CONTRACT_KIND: Record<string, () => string[]> = {
   'shot-sequence-summary': () => Object.keys(createSequencerAdapterSummary()),
   'viewport-quality-preset': () => Object.keys(createPostProcessingAdapterSummary()),
@@ -212,6 +395,14 @@ const SUMMARY_KEYS_BY_CONTRACT_KIND: Record<string, () => string[]> = {
   'world-partition-summary': () => Object.keys(createWorldStreamingAdapterSummary()),
   'character-rig-validation': () => Object.keys(createCharacterRigAdapterSummary()),
   'facial-animation-review': () => Object.keys(createCharacterRigAdapterSummary()),
+  'ray-tracing-readiness': () => Object.keys(createRayTracingAdapterSummary()),
+  'virtualized-geometry-summary': () => Object.keys(createNaniteAdapterSummary()),
+  'asset-import-intake': () => Object.keys(createAssetImporterAdapterSummary()),
+  'audio-mix-summary': () => Object.keys(createAudioRuntimeAdapterSummary()),
+  'spatial-audio-review': () => Object.keys(createSpatialAudioAdapterSummary()),
+  'physics-readiness-summary': () => Object.keys(createPhysicsAdapterSummary()),
+  'terrain-world-summary': () => Object.keys(createTerrainAdapterSummary()),
+  'volumetric-atmosphere-summary': () => Object.keys(createVolumetricCloudAdapterSummary()),
 };
 
 export function createEngineModuleEvidencePacket(adapter: EngineModuleAdapter): EngineModuleEvidencePacket {
