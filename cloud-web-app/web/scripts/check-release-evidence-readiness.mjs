@@ -40,6 +40,16 @@ requireToken(
   'buildReleaseEvidenceReadinessSnapshot',
   'snapshot builder',
 )
+requireToken(
+  'lib/production/release-evidence-readiness.ts',
+  'mergeReleaseEvidenceReviewRequestIntoProductionState',
+  'governed review request state merge',
+)
+requirePattern(
+  'lib/production/release-evidence-readiness.ts',
+  /no automatic publish occurs/,
+  'no automatic publish contract',
+)
 requirePattern(
   'lib/production/release-evidence-readiness.ts',
   /releaseReady:\s*false/,
@@ -91,6 +101,21 @@ requirePattern(
   /releaseReady:\s*false/,
   'route release hold',
 )
+requirePattern(
+  'app/api/projects/[id]/production-state/release-evidence-readiness/route.ts',
+  /export async function POST/,
+  'governed review request mutation',
+)
+requirePattern(
+  'app/api/projects/[id]/production-state/release-evidence-readiness/route.ts',
+  /canWriteReleaseEvidenceReadiness/,
+  'write access guard',
+)
+requirePattern(
+  'app/api/projects/[id]/production-state/release-evidence-readiness/route.ts',
+  /prisma\.project\.update/,
+  'persisted review request',
+)
 
 requireToken(
   '__tests__/production/release-evidence-readiness.test.ts',
@@ -112,6 +137,11 @@ requireToken(
   'AETHEL_RELEASE_EVIDENCE_READINESS',
   'API route regression',
 )
+requireToken(
+  '__tests__/api/production-state-release-evidence-readiness-route.test.ts',
+  'persists a governed review request',
+  'API route review request regression',
+)
 
 requireToken('package.json', 'qa:release-evidence-readiness', 'package script')
 requireToken('scripts/check-backbone-market-readiness.mjs', 'AETHEL_RELEASE_EVIDENCE_READINESS', 'backbone readiness token')
@@ -124,6 +154,11 @@ requireToken(
   'components/evidence/EvidenceCenter.tsx',
   'data-evidence-source="release-evidence-readiness"',
   'Evidence Center release readiness surface',
+)
+requireToken(
+  'components/evidence/EvidenceCenter.tsx',
+  'Request review',
+  'Evidence Center governed review request action',
 )
 
 if (failures.length > 0) {

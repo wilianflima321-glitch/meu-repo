@@ -67,6 +67,7 @@ type ReleaseEvidenceReadinessSnapshot = {
 }
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'empty' | 'error'
+type ReleaseReviewState = 'idle' | 'requesting' | 'requested' | 'blocked' | 'error'
 
 type EvidenceCenterProps = {
   initialProjectId?: string
@@ -84,6 +85,23 @@ async function readJson<T>(url: string): Promise<T> {
   return payload
 }
 
+async function postJson<T>(url: string, body?: unknown): Promise<T> {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      ...authHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body ?? {}),
+    cache: 'no-store',
+  })
+  const payload = (await response.json().catch(() => ({}))) as T & { error?: string; message?: string; nextAction?: string }
+  if (!response.ok) {
+    throw new Error(payload.nextAction || payload.message || payload.error || `Request failed with ${response.status}`)
+  }
+  return payload
+}
+
 function statusTone(status: ProductionGraphNode['status']) {
   if (status === 'ready') return 'text-[var(--aethel-success-light)]'
   if (status === 'blocked') return 'text-[var(--aethel-error-light)]'
@@ -97,6 +115,8 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
   const [snapshot, setSnapshot] = useState<EvidenceCenterSnapshot | null>(null)
   const [navigationMesh, setNavigationMesh] = useState<ResearchNavigationMeshSnapshot | null>(null)
   const [releaseReadiness, setReleaseReadiness] = useState<ReleaseEvidenceReadinessSnapshot | null>(null)
+  const [releaseReviewState, setReleaseReviewState] = useState<ReleaseReviewState>('idle')
+  const [releaseReviewMessage, setReleaseReviewMessage] = useState<string | null>(null)
   const [loadState, setLoadState] = useState<LoadState>('idle')
   const [errorText, setErrorText] = useState<string | null>(null)
 
@@ -168,6 +188,8 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
       return
     }
     let active = true
+    setReleaseReviewState('idle')
+    setReleaseReviewMessage(null)
     readJson<{ snapshot: ReleaseEvidenceReadinessSnapshot }>(`/api/projects/${encodeURIComponent(selectedProjectId)}/production-state/release-evidence-readiness`)
       .then((payload) => {
         if (active) setReleaseReadiness(payload.snapshot)
@@ -213,6 +235,36 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
         ['Blockers', snapshot.readiness.blockedCount, AlertTriangle],
       ] satisfies Array<[string, string | number, LucideIcon]>)
     : []
+
+  async function requestReleaseReview() {
+    if (!selectedProjectId || !releaseReadiness) return
+    setReleaseReviewState('requesting')
+    setReleaseReviewMessage(null)
+
+    try {
+      const payload = await postJson<{
+        snapshot: ReleaseEvidenceReadinessSnapshot
+        readiness: ProductionReadinessSummary
+        productionState: AgenticProductionState
+        reviewRequestId: string
+        releaseNote: string
+      }>(`/api/projects/${encodeURIComponent(selectedProjectId)}/production-state/release-evidence-readiness`, {
+        action: 'request-human-review',
+      })
+
+      setReleaseReadiness(payload.snapshot)
+      setSnapshot((current) => (
+        current
+          ? { ...current, state: payload.productionState, readiness: payload.readiness, persisted: true }
+          : current
+      ))
+      setReleaseReviewState('requested')
+      setReleaseReviewMessage(payload.releaseNote)
+    } catch (error) {
+      setReleaseReviewState(releaseReadiness.canRequestHumanReview ? 'error' : 'blocked')
+      setReleaseReviewMessage(error instanceof Error ? error.message : 'Release review request could not be created.')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
@@ -330,6 +382,33 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                       human approval required
                     </span>
                   </div>
+                </div>
+                <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.18)] p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Human release review</p>
+                    <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">
+                      {releaseReadiness.canRequestHumanReview
+                        ? 'Non-human lanes are covered. Request owner review; release stays held until explicit approval evidence exists.'
+                        : 'Review request is held until every non-human evidence lane is covered.'}
+                    </p>
+                    {releaseReviewMessage ? (
+                      <p className={`mt-2 text-[11px] leading-5 ${
+                        releaseReviewState === 'requested'
+                          ? 'text-[var(--aethel-success-light)]'
+                          : 'text-[var(--aethel-warning-light)]'
+                      }`}>
+                        {releaseReviewMessage}
+                      </p>
+                    ) : null}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={requestReleaseReview}
+                    disabled={!releaseReadiness.canRequestHumanReview || releaseReviewState === 'requesting'}
+                    className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-4 text-xs font-bold uppercase tracking-[0.12em] text-[var(--aethel-info-light)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {releaseReviewState === 'requesting' ? 'Requesting...' : 'Request review'}
+                  </button>
                 </div>
                 <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
                   {releaseReadiness.lanes.map((lane) => (

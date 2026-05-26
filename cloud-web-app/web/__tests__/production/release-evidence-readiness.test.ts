@@ -7,7 +7,10 @@ import {
   type ProductionGraphKey,
 } from '@/lib/production/agentic-production-state'
 import { buildEvidenceRefCoverageReport } from '@/lib/production/evidence-ref-coverage'
-import { buildReleaseEvidenceReadinessSnapshot } from '@/lib/production/release-evidence-readiness'
+import {
+  buildReleaseEvidenceReadinessSnapshot,
+  mergeReleaseEvidenceReviewRequestIntoProductionState,
+} from '@/lib/production/release-evidence-readiness'
 import { buildRuntimeJobReceiptState, RUNTIME_JOB_RECEIPTS_SETTINGS_KEY } from '@/lib/production/runtime-job-receipts'
 
 const NOW = '2026-05-26T12:00:00.000Z'
@@ -126,6 +129,57 @@ describe('release evidence readiness', () => {
       status: 'missing',
     })
     expect(snapshot.nextAction).toContain('human owner review')
+  })
+
+  it('persists a human review request without marking release ready', () => {
+    const state = graphReadyState('web')
+    const snapshot = buildReleaseEvidenceReadinessSnapshot({
+      state,
+      evidenceCoverage: coverageFor(state),
+      runtimeReceiptState: fullRuntimeReceiptState(),
+      now: NOW,
+    })
+
+    const result = mergeReleaseEvidenceReviewRequestIntoProductionState({
+      state,
+      snapshot,
+      requestedBy: 'Release Manager Agent',
+      requestedAt: NOW,
+    })
+
+    expect(result.accepted).toBe(true)
+    expect(result.releaseReady).toBe(false)
+    expect(result.state.ledger[0]).toMatchObject({
+      id: 'release-evidence-review-request',
+      state: 'needs-approval',
+    })
+    expect(result.state.graphs.releaseGraph[0]).toMatchObject({
+      id: 'release-evidence-review-request',
+      status: 'needs-review',
+    })
+    expect(result.nextAction).toContain('no automatic publish')
+  })
+
+  it('rejects human review requests while non-human evidence lanes are blocked', () => {
+    const state = buildDefaultAgenticProductionState({ projectName: 'Blocked workspace', projectType: 'game', now: NOW })
+    const snapshot = buildReleaseEvidenceReadinessSnapshot({
+      state,
+      evidenceCoverage: buildEvidenceRefCoverageReport({ state, settings: {} }),
+      runtimeReceiptState: null,
+      now: NOW,
+    })
+
+    const result = mergeReleaseEvidenceReviewRequestIntoProductionState({
+      state,
+      snapshot,
+      requestedBy: 'Release Manager Agent',
+      requestedAt: NOW,
+    })
+
+    expect(result.accepted).toBe(false)
+    expect(result.releaseReady).toBe(false)
+    expect(result.state).toBe(state)
+    expect(result.blockers.join(' ')).toContain('Non-human release evidence lanes')
   })
 
   it('requires final asset and playtest evidence for game production packages', () => {

@@ -1,7 +1,10 @@
 import {
   buildProductionReadinessSummary,
   enforceProductionReleaseGuard,
+  mergeAgenticProductionState,
   type AgenticProductionState,
+  type MissionLedgerEntry,
+  type ProductionGraphNode,
 } from '@/lib/production/agentic-production-state'
 import {
   buildEvidenceRefCoverageReport,
@@ -57,6 +60,22 @@ export interface ReleaseEvidenceReadinessInput {
   evidenceCoverage?: EvidenceRefCoverageReport | null
   runtimeReceiptState?: RuntimeJobReceiptState | null
   now?: string
+}
+
+export interface ReleaseEvidenceReviewRequestInput {
+  state: AgenticProductionState
+  snapshot: ReleaseEvidenceReadinessSnapshot
+  requestedBy: string
+  requestedAt?: string
+}
+
+export interface ReleaseEvidenceReviewRequestResult {
+  accepted: boolean
+  state: AgenticProductionState
+  reviewRequestId: string
+  releaseReady: false
+  blockers: string[]
+  nextAction: string
 }
 
 const RELEASE_APPROVAL_PATTERNS = [
@@ -380,6 +399,90 @@ export function buildReleaseEvidenceReadinessSnapshot(
     blockers: unique(requiredLanes.flatMap((lane) => lane.blockers), 120),
     nextAction: nextActionForSnapshot(status, lanes),
     updatedAt: input.now ?? new Date().toISOString(),
+  }
+}
+
+export function mergeReleaseEvidenceReviewRequestIntoProductionState(
+  input: ReleaseEvidenceReviewRequestInput,
+): ReleaseEvidenceReviewRequestResult {
+  const reviewRequestId = 'release-evidence-review-request'
+  const requestedAt = input.requestedAt ?? new Date().toISOString()
+  const blockers = unique([
+    ...input.snapshot.blockers,
+    ...input.snapshot.missingEvidence,
+    ...(!input.snapshot.canRequestHumanReview ? ['Non-human release evidence lanes must be covered before human review can be requested.'] : []),
+    ...(input.snapshot.status === 'blocked' ? ['Release evidence package is blocked and cannot enter review yet.'] : []),
+  ], 160)
+
+  if (!input.snapshot.canRequestHumanReview || input.snapshot.status === 'blocked') {
+    return {
+      accepted: false,
+      state: input.state,
+      reviewRequestId,
+      releaseReady: false,
+      blockers,
+      nextAction: blockers[0] ?? input.snapshot.nextAction,
+    }
+  }
+
+  const evidenceRefs = unique([
+    `release-evidence-readiness:${input.snapshot.scorePercent}`,
+    `release-evidence-review-request:${requestedAt}`,
+    ...input.snapshot.evidenceRefs,
+  ], 180)
+  const ledgerEntry: MissionLedgerEntry = {
+    id: reviewRequestId,
+    phase: 'Release evidence review request',
+    ownerAgent: input.requestedBy,
+    state: 'needs-approval',
+    summary: `Release evidence review requested with ${input.snapshot.scorePercent}% evidence coverage.`,
+    acceptance: [
+      'Evidence package generated',
+      'Non-human release evidence lanes covered',
+      'Human owner approval required before final/public claims',
+    ],
+    evidenceRefs,
+    rollbackPlan: 'Reject the review request, preserve evidence, and return to the last approved checkpoint.',
+    nextAction: 'Owner must approve or reject the evidence package; no automatic publish occurs.',
+    estimatedCostUsd: 0,
+    updatedAt: requestedAt,
+  }
+  const releaseNode: ProductionGraphNode = {
+    id: reviewRequestId,
+    label: 'Release evidence review request',
+    status: 'needs-review',
+    ownerAgent: 'Release Manager Agent',
+    evidenceRefs,
+    blockers: ['Human release approval evidence is required before release can be marked ready.'],
+    updatedAt: requestedAt,
+  }
+  const nextState = mergeAgenticProductionState(
+    input.state,
+    {
+      ledger: [
+        ledgerEntry,
+        ...input.state.ledger.filter((entry) => entry.id !== reviewRequestId),
+      ].slice(0, 50),
+      graphs: {
+        releaseGraph: [
+          releaseNode,
+          ...input.state.graphs.releaseGraph.filter((node) => node.id !== reviewRequestId),
+        ].slice(0, 40),
+      },
+      runtimePolicy: {
+        requiresHumanApproval: true,
+      },
+    },
+    requestedAt,
+  )
+
+  return {
+    accepted: true,
+    state: nextState,
+    reviewRequestId,
+    releaseReady: false,
+    blockers: releaseNode.blockers,
+    nextAction: ledgerEntry.nextAction,
   }
 }
 
