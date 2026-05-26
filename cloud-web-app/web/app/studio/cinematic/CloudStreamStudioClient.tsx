@@ -7,6 +7,10 @@ import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShe
 import { buildRuntimeModeViewModels, findRuntimeModeById } from '@/lib/runtime/runtime-mode-view-model'
 import { STUDIO_LOCAL_RELEASE_MANIFEST } from '@/lib/studio-local/release-manifest'
 import { estimatePixelStreamingCost } from '@/lib/pixel-streaming/cost'
+import {
+  CLOUD_STREAM_REQUIRED_EVIDENCE,
+  buildCloudStreamSafetyPlan,
+} from '@/lib/pixel-streaming/cloud-stream-safety'
 
 const PixelStreamView = dynamic(() => import('@/components/streaming/pixel-stream-view'), {
   ssr: false,
@@ -23,19 +27,26 @@ function cardClass(state: 'available' | 'held' | 'neutral') {
   return 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)]'
 }
 
-const REQUIRED_CLOUD_EVIDENCE = [
-  'NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL configured',
-  'Governed backend session manager',
-  'Visible per-minute cost before connection',
-  'Idle teardown and rollback path',
-  'Human review required before release evidence',
-]
-
 export default function CloudStreamStudioClient() {
   const pixelStreamUrl = process.env.NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL
-  const runtimeModes = useMemo(() => buildRuntimeModeViewModels({ pixelStreamUrl }), [pixelStreamUrl])
+  const cloudSafety = useMemo(() => buildCloudStreamSafetyPlan({
+    signalingUrl: pixelStreamUrl,
+    sessionManagerConfigured: false,
+    teardownConfigured: false,
+    idleTimeoutSeconds: 300,
+    maxSessionMinutes: 30,
+    costPerMinuteUsd: 0.03,
+    costCapUsd: 0.9,
+    humanReviewRequired: true,
+    recordingEvidenceEnabled: false,
+  }), [pixelStreamUrl])
+  const runtimeModes = useMemo(
+    () => buildRuntimeModeViewModels({ pixelStreamUrl: cloudSafety.streamConnectAllowed ? pixelStreamUrl : null }),
+    [cloudSafety.streamConnectAllowed, pixelStreamUrl],
+  )
   const cloudMode = findRuntimeModeById(runtimeModes, 'cloud')
-  const configured = Boolean(pixelStreamUrl)
+  const configured = cloudSafety.streamConnectAllowed
+  const hasSignalingUrl = Boolean(pixelStreamUrl)
   const costEstimate = estimatePixelStreamingCost({ qualityScore: 80 }, { target: 'cloud-stream', costPerMinuteUsd: 0.03 })
   const cloudReadiness = STUDIO_LOCAL_RELEASE_MANIFEST.releaseReadiness.find((item) => item.id === 'cloud-stream-handoff')
 
@@ -123,7 +134,9 @@ export default function CloudStreamStudioClient() {
                   <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">
                     ${costEstimate.costPerMinuteUsd.toFixed(2)}/min estimated
                   </p>
-                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Cloud Stream cost applies before any session starts.</p>
+                  <p className="text-xs text-[var(--aethel-text-tertiary)]">
+                    Cap: ${cloudSafety.costCapUsd.toFixed(2)} / {cloudSafety.maxSessionMinutes} min. Cloud Stream cost applies before any session starts.
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] p-3">
@@ -141,8 +154,8 @@ export default function CloudStreamStudioClient() {
               Required evidence
             </p>
             <div className="mt-4 space-y-2">
-              {REQUIRED_CLOUD_EVIDENCE.map((item, index) => {
-                const satisfied = index === 0 ? configured : false
+              {CLOUD_STREAM_REQUIRED_EVIDENCE.map((item, index) => {
+                const satisfied = index === 0 ? hasSignalingUrl : false
                 return (
                   <div key={item} className="flex items-start gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] p-3">
                     {satisfied ? (
@@ -165,8 +178,11 @@ export default function CloudStreamStudioClient() {
                 <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-tertiary)]">
                   {cloudReadiness?.blocker ?? 'Cloud Stream requires a governed session manager before public use.'}
                 </p>
+                <p className="mt-2 text-xs leading-5 text-[var(--aethel-warning-light)]">
+                  Safety plan: {cloudSafety.blockers[0] ?? cloudSafety.warnings[0]}
+                </p>
                 <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-tertiary)]">
-                  Next action: {cloudReadiness?.nextAction ?? 'Attach signaling, teardown, cost, and review evidence.'}
+                  Next action: {cloudSafety.nextAction}
                 </p>
               </div>
             </div>
