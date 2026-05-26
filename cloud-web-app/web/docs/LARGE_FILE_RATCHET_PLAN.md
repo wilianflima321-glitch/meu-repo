@@ -5,7 +5,7 @@ Generated: deterministic local scan
 - Watch line limit: 800
 - Files above watch limit: 115 / 115
 - Max file lines: 997 / 1000
-- Low-import large modules: 41 / 41
+- Low-import large modules: 0 / 0
 - Low-import threshold: <= 1 import hint
 - Failures: 0
 
@@ -58,42 +58,12 @@ These are the most suspicious modules: large enough to affect maintainability, b
 
 | File | Lines | Import hints | Category | Required decision |
 | --- | ---: | ---: | --- | --- |
-| `components/dashboard/useDashboardActions.ts` | 948 | 0 | ui | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/debug/profiler-system.tsx` | 946 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/debug/object-inspector.tsx` | 925 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `hooks/useAethelGateway.ts` | 918 | 1 | other | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/aaa-render-system.ts` | 916 | 1 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/plugins/plugin-system.tsx` | 909 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `components/dashboard/SecurityDashboard.tsx` | 902 | 1 | ui | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/localization/localization-system.tsx` | 902 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/feature-flags.ts` | 901 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/sandbox/script-sandbox.ts` | 900 | 1 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `components/debug/AdvancedDebug.tsx` | 896 | 1 | ui | Wire visibly, archive, or keep held with owner/evidence. |
-| `components/physics/DestructionEditor.tsx` | 895 | 1 | ui | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/ui/notification-system.tsx` | 890 | 1 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `components/profiler/AdvancedProfiler.parts.tsx` | 886 | 1 | ui | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/hot-reload/hot-reload-server.ts` | 884 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `components/project/ProjectPersistence.tsx` | 882 | 0 | ui | Wire visibly, archive, or keep held with owner/evidence. |
-| `components/extensions/ExtensionManager.tsx` | 877 | 1 | ui | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/input/input-manager-runtime/manager.ts` | 874 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/debug/debug-adapter.ts` | 873 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/test/systems-integration.test.ts` | 873 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/blueprint-system.ts` | 869 | 1 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/ui/tooltip-system.tsx` | 862 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/debug/real-debug-adapter.ts` | 859 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `components/search/GlobalSearch.tsx` | 855 | 0 | ui | Wire visibly, archive, or keep held with owner/evidence. |
-| `components/debug/DebugAttachUI.tsx` | 853 | 1 | ui | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/ai/advanced-ai-provider.ts` | 848 | 1 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/ai-content-generation.ts` | 840 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/monaco-lsp-bridge.ts` | 837 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/backup-system.ts` | 835 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
-| `lib/scene/scene-serializer-runtime/serializer.ts` | 835 | 0 | runtime | Wire visibly, archive, or keep held with owner/evidence. |
 
 ## Ratchet Policy
 
 - Do not add new files above 800 lines.
 - Do not let any file exceed 1000 lines without an explicit ratchet update.
-- Do not increase low-import large modules above 41; new large modules need product wiring, adapter evidence, or archive decision.
+- Do not increase low-import large modules above 0; new large modules need product wiring, adapter evidence, or archive decision.
 - Split UI surfaces before adding features.
 - Runtime kernels may stay large only with an owner, adapter strategy, and dedicated gate.
 

@@ -167,7 +167,8 @@
     "qa:webgpu-compute-readiness": "node scripts/check-webgpu-compute-readiness.mjs",
     "qa:studio-local-tauri-hardening": "node scripts/check-studio-local-tauri-hardening.mjs",
     "qa:cloud-stream-cost-safety": "node scripts/check-cloud-stream-cost-safety.mjs",
-    "qa:webgpu-performance-trace": "node scripts/check-webgpu-performance-trace.mjs"
+    "qa:webgpu-performance-trace": "node scripts/check-webgpu-performance-trace.mjs",
+    "qa:internal-runtime-governance": "node scripts/check-internal-runtime-governance.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
