@@ -24,6 +24,36 @@ import type { StreamingConfig } from '@/lib/world/world-streaming';
 import type { ControlRigConfig } from '@/lib/control-rig-system';
 import type { FacialConfig } from '@/lib/facial-animation-system';
 import type { CloudConfig } from '@/lib/volumetric-clouds';
+import {
+  createLegacyPhysicsEngineAdapterSummary,
+  createQuestMissionAdapterSummary,
+  createDotsEcsAdapterSummary,
+  createLevelStreamingAdapterSummary,
+  createMultiplayerNetcodeAdapterSummary,
+  createFoliageAdapterSummary,
+  createVirtualTextureAdapterSummary,
+  createAIAudioAdapterSummary,
+  createDayNightAdapterSummary,
+  createAssetImportPipelineAdapterSummary,
+  createAudioEngineAdapterSummary,
+  createPostProcessVolumeAdapterSummary,
+  createMaterialSystemAdapterSummary,
+} from '@/lib/production/engine-module-adapter-extended-summaries';
+export {
+  createLegacyPhysicsEngineAdapterSummary,
+  createQuestMissionAdapterSummary,
+  createDotsEcsAdapterSummary,
+  createLevelStreamingAdapterSummary,
+  createMultiplayerNetcodeAdapterSummary,
+  createFoliageAdapterSummary,
+  createVirtualTextureAdapterSummary,
+  createAIAudioAdapterSummary,
+  createDayNightAdapterSummary,
+  createAssetImportPipelineAdapterSummary,
+  createAudioEngineAdapterSummary,
+  createPostProcessVolumeAdapterSummary,
+  createMaterialSystemAdapterSummary,
+} from '@/lib/production/engine-module-adapter-extended-summaries';
 
 export type EngineModuleAdapterSurface =
   | '/studio/film'
@@ -35,7 +65,10 @@ export type EngineModuleAdapterSurface =
   | '/studio/facial'
   | '/studio/landscape'
   | '/studio/terrain'
-  | '/studio/audio';
+  | '/studio/audio'
+  | '/studio/foliage'
+  | '/studio/material'
+  | '/studio/quest';
 
 export type EngineModuleRuntimeBoundary = 'summary-adapter' | 'type-contract' | 'render-gated' | 'worker-held';
 
@@ -346,6 +379,110 @@ export const ENGINE_MODULE_ADAPTERS: EngineModuleAdapter[] = [
     exportedContracts: ['CameraConfig', 'FollowSettings', 'ShakeSettings'],
     evidenceSignals: ['camera-mode', 'motion-sickness-review', 'shot-continuity'],
   },
+  {
+    modulePath: 'lib/engine/physics-engine.ts',
+    ownerSurface: '/studio/level',
+    contractKind: 'legacy-physics-engine-boundary',
+    runtimeBoundary: 'type-contract',
+    exportedContracts: ['PhysicsWorld', 'RigidBody', 'ColliderConfig'],
+    evidenceSignals: ['deterministic-step', 'collision-replay', 'migration-target'],
+  },
+  {
+    modulePath: 'lib/quest-mission-system.ts',
+    ownerSurface: '/studio/quest',
+    contractKind: 'quest-mission-governance',
+    runtimeBoundary: 'summary-adapter',
+    exportedContracts: ['QuestManager', 'QuestUIRenderer', 'QuestMarkerRenderer'],
+    evidenceSignals: ['branch-coverage', 'reward-balance', 'localization-review'],
+  },
+  {
+    modulePath: 'lib/ecs-dots-system.ts',
+    ownerSurface: '/studio/level',
+    contractKind: 'dots-ecs-scheduler-boundary',
+    runtimeBoundary: 'worker-held',
+    exportedContracts: ['World', 'SystemScheduler', 'JobSystem'],
+    evidenceSignals: ['system-order', 'component-count', 'worker-trace'],
+  },
+  {
+    modulePath: 'lib/streaming/level-streaming-system.tsx',
+    ownerSurface: '/studio/level',
+    contractKind: 'level-streaming-readiness',
+    runtimeBoundary: 'worker-held',
+    exportedContracts: ['LevelStreamingManager', 'StreamingConfig', 'StreamingMetrics'],
+    evidenceSignals: ['loaded-levels', 'memory-pressure', 'transition-trace'],
+  },
+  {
+    modulePath: 'lib/networking-multiplayer.ts',
+    ownerSurface: '/studio/level',
+    contractKind: 'multiplayer-netcode-readiness',
+    runtimeBoundary: 'worker-held',
+    exportedContracts: ['NetworkManager', 'RollbackNetcode', 'Matchmaker'],
+    evidenceSignals: ['latency-budget', 'rollback-state', 'authority-model'],
+  },
+  {
+    modulePath: 'lib/foliage-system.ts',
+    ownerSurface: '/studio/foliage',
+    contractKind: 'foliage-density-readiness',
+    runtimeBoundary: 'render-gated',
+    exportedContracts: ['FoliagePainter', 'FoliageClusterManager', 'GrassGenerator'],
+    evidenceSignals: ['instance-count', 'lod-culling', 'frame-trace'],
+  },
+  {
+    modulePath: 'lib/virtual-texture-system.ts',
+    ownerSurface: '/studio/material',
+    contractKind: 'virtual-texture-readiness',
+    runtimeBoundary: 'worker-held',
+    exportedContracts: ['VirtualTextureSystem', 'TileCache', 'FeedbackBuffer'],
+    evidenceSignals: ['tile-cache-hit-rate', 'feedback-buffer', 'texture-memory-budget'],
+  },
+  {
+    modulePath: 'lib/ai-audio-engine.ts',
+    ownerSurface: '/studio/audio',
+    contractKind: 'ai-audio-emotion-review',
+    runtimeBoundary: 'summary-adapter',
+    exportedContracts: ['AIEmotionalAudioSystem', 'EmotionAnalyzer', 'ContextTracker'],
+    evidenceSignals: ['emotion-map', 'context-window', 'human-audio-review'],
+  },
+  {
+    modulePath: 'lib/environment/day-night-cycle.tsx',
+    ownerSurface: '/studio/scene',
+    contractKind: 'day-night-cycle-readiness',
+    runtimeBoundary: 'summary-adapter',
+    exportedContracts: ['DayNightCycle', 'TimeState', 'SkyState'],
+    evidenceSignals: ['time-state', 'sun-direction', 'lighting-transition'],
+  },
+  {
+    modulePath: 'lib/asset-import-pipeline.ts',
+    ownerSurface: '/studio/level',
+    contractKind: 'asset-import-pipeline-readiness',
+    runtimeBoundary: 'worker-held',
+    exportedContracts: ['AssetImportPipeline', 'ImportedAsset', 'ImportOptions'],
+    evidenceSignals: ['format-support', 'license-checksum', 'optimization-report'],
+  },
+  {
+    modulePath: 'lib/audio-engine.ts',
+    ownerSurface: '/studio/audio',
+    contractKind: 'browser-audio-engine-boundary',
+    runtimeBoundary: 'summary-adapter',
+    exportedContracts: ['AethelAudioEngine', 'AudioTrack', 'ChannelConfig'],
+    evidenceSignals: ['channel-mix', 'peak-levels', 'autoplay-safe'],
+  },
+  {
+    modulePath: 'lib/post-process-volume.ts',
+    ownerSurface: '/studio/scene',
+    contractKind: 'post-process-volume-readiness',
+    runtimeBoundary: 'render-gated',
+    exportedContracts: ['PostProcessVolume', 'PostProcessSettings', 'PostProcessVolumeManager'],
+    evidenceSignals: ['volume-priority', 'blend-distance', 'shot-performance-trace'],
+  },
+  {
+    modulePath: 'lib/aaa-material-system.ts',
+    ownerSurface: '/studio/material',
+    contractKind: 'material-system-readiness',
+    runtimeBoundary: 'render-gated',
+    exportedContracts: ['AdvancedPBRMaterial', 'MaterialLibrary', 'ShaderGraphCompiler'],
+    evidenceSignals: ['pbr-completeness', 'shader-preview', 'texture-license'],
+  },
 ];
 
 export function createSequencerAdapterSummary(): SequencerAdapterSummary {
@@ -550,6 +687,19 @@ const SUMMARY_KEYS_BY_CONTRACT_KIND: Record<string, () => string[]> = {
   'haptics-feedback-review': () => Object.keys(createHapticsAdapterSummary()),
   'weather-state-summary': () => Object.keys(createWeatherAdapterSummary()),
   'camera-runtime-review': () => Object.keys(createCameraRuntimeAdapterSummary()),
+  'legacy-physics-engine-boundary': () => Object.keys(createLegacyPhysicsEngineAdapterSummary()),
+  'quest-mission-governance': () => Object.keys(createQuestMissionAdapterSummary()),
+  'dots-ecs-scheduler-boundary': () => Object.keys(createDotsEcsAdapterSummary()),
+  'level-streaming-readiness': () => Object.keys(createLevelStreamingAdapterSummary()),
+  'multiplayer-netcode-readiness': () => Object.keys(createMultiplayerNetcodeAdapterSummary()),
+  'foliage-density-readiness': () => Object.keys(createFoliageAdapterSummary()),
+  'virtual-texture-readiness': () => Object.keys(createVirtualTextureAdapterSummary()),
+  'ai-audio-emotion-review': () => Object.keys(createAIAudioAdapterSummary()),
+  'day-night-cycle-readiness': () => Object.keys(createDayNightAdapterSummary()),
+  'asset-import-pipeline-readiness': () => Object.keys(createAssetImportPipelineAdapterSummary()),
+  'browser-audio-engine-boundary': () => Object.keys(createAudioEngineAdapterSummary()),
+  'post-process-volume-readiness': () => Object.keys(createPostProcessVolumeAdapterSummary()),
+  'material-system-readiness': () => Object.keys(createMaterialSystemAdapterSummary()),
 };
 
 export function createEngineModuleEvidencePacket(adapter: EngineModuleAdapter): EngineModuleEvidencePacket {

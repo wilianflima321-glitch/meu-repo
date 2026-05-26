@@ -2,22 +2,35 @@ import { describe, expect, it } from 'vitest'
 
 import {
   ENGINE_MODULE_ADAPTERS,
+  createAIAudioAdapterSummary,
+  createAssetImportPipelineAdapterSummary,
   createAssetImporterAdapterSummary,
+  createAudioEngineAdapterSummary,
   createAudioRuntimeAdapterSummary,
   createCameraRuntimeAdapterSummary,
   createCharacterRigAdapterSummary,
+  createDayNightAdapterSummary,
   createDialogueRuntimeAdapterSummary,
+  createDotsEcsAdapterSummary,
+  createFoliageAdapterSummary,
   createHapticsAdapterSummary,
   createEngineModuleEvidencePacket,
+  createLegacyPhysicsEngineAdapterSummary,
+  createLevelStreamingAdapterSummary,
+  createMaterialSystemAdapterSummary,
+  createMultiplayerNetcodeAdapterSummary,
   createNaniteAdapterSummary,
   createParticleAdapterSummary,
   createPhysicsAdapterSummary,
+  createPostProcessVolumeAdapterSummary,
   createPostProcessingAdapterSummary,
+  createQuestMissionAdapterSummary,
   createRayTracingAdapterSummary,
   createMotionMatchingAdapterSummary,
   createSpatialAudioAdapterSummary,
   createSequencerAdapterSummary,
   createTerrainAdapterSummary,
+  createVirtualTextureAdapterSummary,
   createVolumetricCloudAdapterSummary,
   createWeatherAdapterSummary,
   createWebXRAdapterSummary,
@@ -57,6 +70,19 @@ describe('engine module integration plan', () => {
         'lib/input/haptics-system.tsx',
         'lib/environment/weather-system.tsx',
         'lib/camera/camera-system.tsx',
+        'lib/engine/physics-engine.ts',
+        'lib/quest-mission-system.ts',
+        'lib/ecs-dots-system.ts',
+        'lib/streaming/level-streaming-system.tsx',
+        'lib/networking-multiplayer.ts',
+        'lib/foliage-system.ts',
+        'lib/virtual-texture-system.ts',
+        'lib/ai-audio-engine.ts',
+        'lib/environment/day-night-cycle.tsx',
+        'lib/asset-import-pipeline.ts',
+        'lib/audio-engine.ts',
+        'lib/post-process-volume.ts',
+        'lib/aaa-material-system.ts',
         'lib/commands/command-handlers.tsx',
         'lib/hooks/useTheiaSystemsHooks.ts',
         'lib/workspace/workspace-service.ts',
@@ -94,6 +120,9 @@ describe('engine module integration plan', () => {
         'lib/dialogue/dialogue-system.tsx',
         'lib/webxr-vr-system.ts',
         'lib/motion-matching-system.ts',
+        'lib/foliage-system.ts',
+        'lib/virtual-texture-system.ts',
+        'lib/aaa-material-system.ts',
       ])
     )
     expect(ENGINE_MODULE_ADAPTERS.every((adapter) => adapter.evidenceSignals.length >= 2)).toBe(true)
@@ -119,6 +148,19 @@ describe('engine module integration plan', () => {
     expect(createHapticsAdapterSummary().supportedMotors).toContain('both')
     expect(createWeatherAdapterSummary().weatherTypes).toContain('thunderstorm')
     expect(createCameraRuntimeAdapterSummary().modes).toContain('cinematic')
+    expect(createLegacyPhysicsEngineAdapterSummary().migrationTarget).toBe('lib/physics/physics-system.ts')
+    expect(createQuestMissionAdapterSummary().evidenceGate).toBe('branch-balance-localization-review')
+    expect(createDotsEcsAdapterSummary().mutationBoundary).toBe('system-scheduler-held')
+    expect(createLevelStreamingAdapterSummary().executionGate).toBe('worker-or-sidecar')
+    expect(createMultiplayerNetcodeAdapterSummary().evidenceGate).toBe('latency-rollback-authority-trace')
+    expect(createFoliageAdapterSummary().renderGate).toBe('lod-culling-performance-trace')
+    expect(createVirtualTextureAdapterSummary().renderGate).toBe('tile-cache-feedback-trace')
+    expect(createAIAudioAdapterSummary().evidenceGate).toBe('emotion-context-human-review')
+    expect(createDayNightAdapterSummary().gameplayGate).toBe('time-state-playtest-required')
+    expect(createAssetImportPipelineAdapterSummary().evidenceGate).toBe('license-checksum-lod-pbr-review')
+    expect(createAudioEngineAdapterSummary().executionBoundary).toBe('no-autoplay-in-browser')
+    expect(createPostProcessVolumeAdapterSummary().executionBoundary).toBe('review-quality-only')
+    expect(createMaterialSystemAdapterSummary().evidenceGate).toBe('pbr-texture-license-review')
 
     const packets = listEngineModuleEvidencePackets()
     expect(packets).toHaveLength(ENGINE_MODULE_ADAPTERS.length)
