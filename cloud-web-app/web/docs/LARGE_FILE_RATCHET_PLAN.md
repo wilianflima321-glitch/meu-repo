@@ -3,14 +3,14 @@
 Generated: deterministic local scan
 
 - Watch line limit: 800
-- Files above watch limit: 115 / 115
-- Max file lines: 997 / 1000
+- Files above watch limit: 112 / 112
+- Max file lines: 994 / 995
 - Low-import large modules: 0 / 0
 - Low-import threshold: <= 1 import hint
 - Failures: 0
 
 ## Category Counts
-- `runtime`: 76
+- `runtime`: 73
 - `ui`: 27
 - `server`: 6
 - `production-spine`: 3
@@ -21,10 +21,7 @@ Generated: deterministic local scan
 
 | File | Lines | Import hints | Category | Next action |
 | --- | ---: | ---: | --- | --- |
-| `lib/ray-tracing.ts` | 997 | 4 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/commands/command-handlers.tsx` | 995 | 3 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/ai/behavior-tree-system.tsx` | 994 | 4 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
-| `lib/particle-system-real.ts` | 993 | 3 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/server/websocket-server.ts` | 992 | 4 | server | Continue extracting protocol-specific handlers; event bus, transport, auth, rooms, and presence are already split. |
 | `lib/nanite-virtualized-geometry.ts` | 990 | 4 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/hooks/useTheiaSystemsHooks.ts` | 989 | 3 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
@@ -51,6 +48,9 @@ Generated: deterministic local scan
 | `lib/environment/weather-system.tsx` | 970 | 4 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/health-check.ts` | 970 | 3 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
 | `lib/camera/camera-system.tsx` | 969 | 4 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/rate-limiting.ts` | 967 | 2 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `lib/particles/advanced-particle-system.ts` | 966 | 3 | runtime | Assign owner and extract one cohesive subsystem before feature growth. |
+| `components/editor/MonacoEditorPro.tsx` | 965 | 12 | ui | Assign owner and extract one cohesive subsystem before feature growth. |
 
 ## Low-Import Large Modules
 
@@ -62,7 +62,7 @@ These are the most suspicious modules: large enough to affect maintainability, b
 ## Ratchet Policy
 
 - Do not add new files above 800 lines.
-- Do not let any file exceed 1000 lines without an explicit ratchet update.
+- Do not let any file exceed 995 lines without an explicit ratchet update.
 - Do not increase low-import large modules above 0; new large modules need product wiring, adapter evidence, or archive decision.
 - Split UI surfaces before adding features.
 - Runtime kernels may stay large only with an owner, adapter strategy, and dedicated gate.
