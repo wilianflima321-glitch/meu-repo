@@ -58,6 +58,7 @@ const SETTINGS_KEYS = {
   researchNavigation: 'aethelResearchNavigationMesh',
   agentRunLedger: 'aethelAgentRunLedger',
   agentReadReceipts: 'aethelAgentReadReceipts',
+  runtimeJobReceipts: 'aethelRuntimeJobReceipts',
 }
 
 const releaseApprovalPatterns = [
@@ -216,6 +217,7 @@ function settingsEvidenceMatches(domain: EvidenceCoverageDomainId, settings: unk
   if (domain === 'browser-navigation') return hasSettingsKey(settings, SETTINGS_KEYS.researchNavigation)
   if (domain === 'agent-run-ledger') return hasSettingsKey(settings, SETTINGS_KEYS.agentRunLedger)
   if (domain === 'project-memory') return hasSettingsKey(settings, SETTINGS_KEYS.agentReadReceipts)
+  if (domain === 'runtime-job') return hasSettingsKey(settings, SETTINGS_KEYS.runtimeJobReceipts)
   return false
 }
 
