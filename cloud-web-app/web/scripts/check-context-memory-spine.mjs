@@ -9,7 +9,10 @@ function read(relativePath) {
 
 const requiredFiles = [
   'lib/production/context-memory-spine.ts',
+  'lib/server/ai-chat-advanced/context.ts',
+  'lib/server/ai-chat-advanced/orchestrator.ts',
   '__tests__/production/context-memory-spine.test.ts',
+  '__tests__/server/advanced-chat-context-memory.test.ts',
   'lib/production/multi-resolution-project-memory.ts',
   'lib/production/repository-context-budget-execution.ts',
 ]
@@ -22,6 +25,9 @@ for (const file of requiredFiles) {
 
 const spine = read('lib/production/context-memory-spine.ts')
 const test = read('__tests__/production/context-memory-spine.test.ts')
+const chatContext = read('lib/server/ai-chat-advanced/context.ts')
+const orchestrator = read('lib/server/ai-chat-advanced/orchestrator.ts')
+const chatTest = read('__tests__/server/advanced-chat-context-memory.test.ts')
 const multiMemory = read('lib/production/multi-resolution-project-memory.ts')
 
 const mustContain = [
@@ -51,6 +57,21 @@ const testCases = [
 for (const [label, pattern] of testCases) {
   if (!pattern.test(test)) failures.push(`context-memory-spine test missing ${label}`)
 }
+
+const chatIntegration = [
+  ['advanced chat imports spine', /buildContextMemorySpinePlan/],
+  ['advanced chat builds retrieval plan', /planProjectMemoryRetrieval/],
+  ['advanced chat injects instruction', /CONTEXT MEMORY SPINE/],
+  ['advanced chat exposes plan', /contextMemoryPlan/],
+]
+
+for (const [label, pattern] of chatIntegration) {
+  if (!pattern.test(chatContext)) failures.push(`advanced chat context missing ${label}`)
+}
+
+if (!/contextMemory=/.test(orchestrator)) failures.push('advanced chat orchestrator does not expose context memory trace evidence')
+if (!/project memory is missing/.test(chatTest)) failures.push('advanced chat context test missing blocked memory scenario')
+if (!/project memory exists/.test(chatTest)) failures.push('advanced chat context test missing available memory scenario')
 
 const memoryPolicy = [
   'Never dump an entire GB-scale repository',

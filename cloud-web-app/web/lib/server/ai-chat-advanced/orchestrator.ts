@@ -274,6 +274,7 @@ export async function handleAdvancedChatRequest(params: {
     lastUserMessage,
     mentionContext,
     webBenchmark,
+    contextMemoryPlan,
     enhancedSystemMessage,
     historyContext,
   } = await buildAdvancedChatContext({
@@ -418,6 +419,15 @@ Critical: ${criticSummary.verdict} ${criticSummary.bullets?.slice(0, 3).join(' '
               ...(mentionContext.tags.length > 0
                 ? ([{ kind: 'other', label: 'mentionTags', detail: mentionContext.tags.join(', ') }] as const)
                 : []),
+              ...(contextMemoryPlan
+                ? ([
+                    {
+                      kind: 'context',
+                      label: `contextMemory=${contextMemoryPlan.status}/${contextMemoryPlan.compressionLane}`,
+                      detail: `planned=${contextMemoryPlan.plannedInputTokens}/${contextMemoryPlan.usableInputTokens}; uiThread=${contextMemoryPlan.canUseUiThread ? 'yes' : 'no'}; next=${contextMemoryPlan.nextAction}`,
+                    },
+                  ] as const)
+                : []),
               { kind: 'other', label: 'models', detail: `architect=${architectModel}; engineer=${engineerModel}${agentCount === 3 ? `; critic=${criticModel}` : ''}` },
               { kind: 'other', label: 'architectOutput', detail: clampText(architectResult.content, 800) },
               ...(webBenchmark.evidence.map((ref) => ({
@@ -502,6 +512,15 @@ Critical: ${criticSummary.verdict} ${criticSummary.bullets?.slice(0, 3).join(' '
             { kind: 'other', label: `qualityMode=${qualityMode}` },
             ...(mentionContext.tags.length > 0
               ? ([{ kind: 'other', label: 'mentionTags', detail: mentionContext.tags.join(', ') }] as const)
+              : []),
+            ...(contextMemoryPlan
+              ? ([
+                  {
+                    kind: 'context',
+                    label: `contextMemory=${contextMemoryPlan.status}/${contextMemoryPlan.compressionLane}`,
+                    detail: `planned=${contextMemoryPlan.plannedInputTokens}/${contextMemoryPlan.usableInputTokens}; uiThread=${contextMemoryPlan.canUseUiThread ? 'yes' : 'no'}; next=${contextMemoryPlan.nextAction}`,
+                  },
+                ] as const)
               : []),
             ...(webBenchmark.evidence.map((ref) => ({
               kind: 'search' as const,
