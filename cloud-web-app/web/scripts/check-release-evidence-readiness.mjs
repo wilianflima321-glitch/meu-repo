@@ -45,10 +45,20 @@ requireToken(
   'mergeReleaseEvidenceReviewRequestIntoProductionState',
   'governed review request state merge',
 )
+requireToken(
+  'lib/production/release-evidence-readiness.ts',
+  'mergeReleaseEvidenceReviewDecisionIntoProductionState',
+  'governed review decision state merge',
+)
 requirePattern(
   'lib/production/release-evidence-readiness.ts',
   /no automatic publish occurs/,
   'no automatic publish contract',
+)
+requirePattern(
+  'lib/production/release-evidence-readiness.ts',
+  /human-approval:release-evidence/,
+  'human approval evidence ref contract',
 )
 requirePattern(
   'lib/production/release-evidence-readiness.ts',
@@ -116,11 +126,21 @@ requirePattern(
   /prisma\.project\.update/,
   'persisted review request',
 )
+requirePattern(
+  'app/api/projects/[id]/production-state/release-evidence-readiness/route.ts',
+  /record-human-approval[\s\S]*reject-human-review/,
+  'governed review decision actions',
+)
 
 requireToken(
   '__tests__/production/release-evidence-readiness.test.ts',
   'canRequestHumanReview',
   'unit coverage for human review request path',
+)
+requireToken(
+  '__tests__/production/release-evidence-readiness.test.ts',
+  'records human approval evidence without automatic publishing',
+  'unit coverage for human approval decision path',
 )
 requireToken(
   '__tests__/production/release-evidence-readiness.test.ts',
@@ -142,6 +162,11 @@ requireToken(
   'persists a governed review request',
   'API route review request regression',
 )
+requireToken(
+  '__tests__/api/production-state-release-evidence-readiness-route.test.ts',
+  'persists human approval evidence without returning release-ready',
+  'API route approval decision regression',
+)
 
 requireToken('package.json', 'qa:release-evidence-readiness', 'package script')
 requireToken('scripts/check-backbone-market-readiness.mjs', 'AETHEL_RELEASE_EVIDENCE_READINESS', 'backbone readiness token')
@@ -159,6 +184,16 @@ requireToken(
   'components/evidence/EvidenceCenter.tsx',
   'Request review',
   'Evidence Center governed review request action',
+)
+requireToken(
+  'components/evidence/EvidenceCenter.tsx',
+  'Record approval',
+  'Evidence Center governed approval action',
+)
+requireToken(
+  'components/evidence/EvidenceCenter.tsx',
+  'Reject package',
+  'Evidence Center governed rejection action',
 )
 
 if (failures.length > 0) {

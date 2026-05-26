@@ -15,8 +15,10 @@ import {
 import { buildEvidenceRefCoverageReport } from '@/lib/production/evidence-ref-coverage'
 import {
   buildReleaseEvidenceReadinessSnapshot,
+  mergeReleaseEvidenceReviewDecisionIntoProductionState,
   mergeReleaseEvidenceReviewRequestIntoProductionState,
   RELEASE_EVIDENCE_READINESS_CAPABILITY,
+  type ReleaseEvidenceReviewDecision,
 } from '@/lib/production/release-evidence-readiness'
 import { readRuntimeJobReceiptStateFromSettings } from '@/lib/production/runtime-job-receipts'
 
@@ -78,6 +80,25 @@ function buildReadinessPayload(project: ReleaseEvidenceProject) {
   }
 }
 
+function parseReleaseReviewAction(request: NextRequest): Promise<{ action: string; note?: string }> {
+  return request.json()
+    .then((body) => {
+      if (!body || typeof body !== 'object') return { action: 'request-human-review' }
+      const record = body as Record<string, unknown>
+      return {
+        action: typeof record.action === 'string' ? record.action : 'request-human-review',
+        note: typeof record.note === 'string' ? record.note.slice(0, 800) : undefined,
+      }
+    })
+    .catch(() => ({ action: 'request-human-review' }))
+}
+
+function actionToDecision(action: string): ReleaseEvidenceReviewDecision | null {
+  if (action === 'record-human-approval' || action === 'approve-human-review') return 'approved'
+  if (action === 'reject-human-review' || action === 'record-human-rejection') return 'rejected'
+  return null
+}
+
 export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
     const user = requireAuth(request)
@@ -115,16 +136,28 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Editor access is required to request release evidence review.' }, { status: 403 })
     }
 
+    const { action, note } = await parseReleaseReviewAction(request)
     const { state, runtimeReceiptState, snapshot } = buildReadinessPayload(project)
-    const result = mergeReleaseEvidenceReviewRequestIntoProductionState({
-      state,
-      snapshot,
-      requestedBy: user.email ?? user.userId,
-    })
+    const decision = actionToDecision(action)
+    const result = decision
+      ? mergeReleaseEvidenceReviewDecisionIntoProductionState({
+          state,
+          snapshot,
+          decision,
+          note,
+          decidedBy: user.email ?? user.userId,
+        })
+      : mergeReleaseEvidenceReviewRequestIntoProductionState({
+          state,
+          snapshot,
+          requestedBy: user.email ?? user.userId,
+        })
 
     if (!result.accepted) {
       return NextResponse.json({
-        error: 'Release evidence review cannot be requested yet.',
+        error: decision
+          ? 'Release evidence review decision cannot be recorded yet.'
+          : 'Release evidence review cannot be requested yet.',
         blockers: result.blockers,
         nextAction: result.nextAction,
         snapshot,
@@ -148,10 +181,14 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       snapshot: updatedSnapshot,
       readiness: buildProductionReadinessSummary(result.state),
       productionState: result.state,
-      reviewRequestId: result.reviewRequestId,
+      reviewRequestId: 'reviewRequestId' in result ? result.reviewRequestId : undefined,
+      decisionId: 'decisionId' in result ? result.decisionId : undefined,
+      decision: 'decision' in result ? result.decision : undefined,
       persisted: true,
       releaseReady: false,
-      releaseNote: 'Release review request was persisted. Manual owner approval is still required before final/public claims.',
+      releaseNote: decision
+        ? 'Release review decision was persisted as evidence. A separate manual publish action is still required.'
+        : 'Release review request was persisted. Manual owner approval is still required before final/public claims.',
     })
   } catch (error) {
     logger.error('release_evidence_readiness.post_failed', error)

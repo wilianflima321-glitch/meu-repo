@@ -78,6 +78,27 @@ export interface ReleaseEvidenceReviewRequestResult {
   nextAction: string
 }
 
+export type ReleaseEvidenceReviewDecision = 'approved' | 'rejected'
+
+export interface ReleaseEvidenceReviewDecisionInput {
+  state: AgenticProductionState
+  snapshot: ReleaseEvidenceReadinessSnapshot
+  decision: ReleaseEvidenceReviewDecision
+  decidedBy: string
+  note?: string
+  decidedAt?: string
+}
+
+export interface ReleaseEvidenceReviewDecisionResult {
+  accepted: boolean
+  state: AgenticProductionState
+  decisionId: string
+  decision: ReleaseEvidenceReviewDecision
+  releaseReady: false
+  blockers: string[]
+  nextAction: string
+}
+
 const RELEASE_APPROVAL_PATTERNS = [
   /human[-_ ]?approval/i,
   /release[-_ ]?approval/i,
@@ -483,6 +504,114 @@ export function mergeReleaseEvidenceReviewRequestIntoProductionState(
     releaseReady: false,
     blockers: releaseNode.blockers,
     nextAction: ledgerEntry.nextAction,
+  }
+}
+
+export function mergeReleaseEvidenceReviewDecisionIntoProductionState(
+  input: ReleaseEvidenceReviewDecisionInput,
+): ReleaseEvidenceReviewDecisionResult {
+  const decisionId = `release-evidence-review-${input.decision}`
+  const decidedAt = input.decidedAt ?? new Date().toISOString()
+  const hasReviewRequest =
+    input.state.ledger.some((entry) => entry.id === 'release-evidence-review-request') ||
+    input.state.graphs.releaseGraph.some((node) => node.id === 'release-evidence-review-request')
+  const blockers = unique([
+    ...(!hasReviewRequest ? ['A release evidence review request must be recorded before a decision.'] : []),
+    ...(input.snapshot.status === 'blocked' ? ['Release evidence package is blocked and cannot receive a human decision yet.'] : []),
+  ], 80)
+
+  if (!hasReviewRequest || input.snapshot.status === 'blocked') {
+    return {
+      accepted: false,
+      state: input.state,
+      decisionId,
+      decision: input.decision,
+      releaseReady: false,
+      blockers,
+      nextAction: blockers[0] ?? input.snapshot.nextAction,
+    }
+  }
+
+  const approvalEvidenceRefs = input.decision === 'approved'
+    ? [
+        `human-approval:release-evidence:${decidedAt}`,
+        `approval-record:release-evidence:${decidedAt}`,
+      ]
+    : [`release-review-rejected:${decidedAt}`]
+  const evidenceRefs = unique([
+    ...approvalEvidenceRefs,
+    `release-evidence-decision:${input.decision}:${decidedAt}`,
+    ...input.snapshot.evidenceRefs,
+  ], 180)
+  const approved = input.decision === 'approved'
+  const summary = approved
+    ? 'Human owner approval evidence was attached to the release evidence package.'
+    : 'Human owner rejected the release evidence package; release remains blocked.'
+  const nextAction = approved
+    ? 'Approval evidence is recorded. A separate manual publish action is still required.'
+    : 'Resolve the rejection note and request a new release evidence review.'
+  const ledgerEntry: MissionLedgerEntry = {
+    id: decisionId,
+    phase: 'Human release evidence decision',
+    ownerAgent: input.decidedBy,
+    state: approved ? 'complete' : 'blocked',
+    summary: input.note ? `${summary} Note: ${input.note}` : summary,
+    acceptance: approved
+      ? [
+          'Human approval evidence attached',
+          'Release package remains evidence-backed only',
+          'No automatic publish was triggered',
+        ]
+      : [
+          'Human rejection recorded',
+          'Release package remains held',
+          'A new review is required after remediation',
+        ],
+    evidenceRefs,
+    rollbackPlan: approved
+      ? 'Revoke approval evidence and return the package to needs-review.'
+      : 'Resolve rejection blockers and request review again.',
+    nextAction,
+    estimatedCostUsd: 0,
+    updatedAt: decidedAt,
+  }
+  const decisionNode: ProductionGraphNode = {
+    id: decisionId,
+    label: approved ? 'Human approval evidence' : 'Human rejection evidence',
+    status: approved ? 'ready' : 'blocked',
+    ownerAgent: 'Release Manager Agent',
+    evidenceRefs,
+    blockers: approved ? [] : [input.note || 'Human owner rejected the release evidence package.'],
+    updatedAt: decidedAt,
+  }
+  const nextState = mergeAgenticProductionState(
+    input.state,
+    {
+      ledger: [
+        ledgerEntry,
+        ...input.state.ledger.filter((entry) => entry.id !== decisionId),
+      ].slice(0, 50),
+      graphs: {
+        releaseGraph: [
+          decisionNode,
+          ...input.state.graphs.releaseGraph.filter((node) => node.id !== decisionId),
+        ].slice(0, 40),
+      },
+      runtimePolicy: {
+        requiresHumanApproval: true,
+      },
+    },
+    decidedAt,
+  )
+
+  return {
+    accepted: true,
+    state: nextState,
+    decisionId,
+    decision: input.decision,
+    releaseReady: false,
+    blockers: decisionNode.blockers,
+    nextAction,
   }
 }
 

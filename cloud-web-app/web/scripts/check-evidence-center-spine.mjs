@@ -30,6 +30,8 @@ for (const required of [
   '/production-state/release-evidence-readiness',
   'Release evidence package',
   'Request review',
+  'Record approval',
+  'Reject package',
   'data-evidence-source="release-evidence-readiness"',
   'Project Brain',
   'Mission ledger',

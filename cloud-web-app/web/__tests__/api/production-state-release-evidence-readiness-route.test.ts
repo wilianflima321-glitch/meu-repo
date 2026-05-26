@@ -8,6 +8,11 @@ import {
   type ProductionGraphKey,
   PRODUCTION_STATE_SETTINGS_KEY,
 } from '@/lib/production/agentic-production-state'
+import { buildEvidenceRefCoverageReport } from '@/lib/production/evidence-ref-coverage'
+import {
+  buildReleaseEvidenceReadinessSnapshot,
+  mergeReleaseEvidenceReviewRequestIntoProductionState,
+} from '@/lib/production/release-evidence-readiness'
 import { buildRuntimeJobReceiptState, RUNTIME_JOB_RECEIPTS_SETTINGS_KEY } from '@/lib/production/runtime-job-receipts'
 
 const authMocks = vi.hoisted(() => ({
@@ -208,5 +213,52 @@ describe('api/projects/[id]/production-state/release-evidence-readiness route', 
     expect(prismaMocks.prisma.project.update).toHaveBeenCalledWith(expect.objectContaining({
       where: { id: 'project-release-readiness' },
     }))
+  })
+
+  it('persists human approval evidence without returning release-ready', async () => {
+    const state = graphReadyState('web')
+    const receiptState = fullRuntimeReceiptState()
+    const snapshot = buildReleaseEvidenceReadinessSnapshot({
+      state,
+      evidenceCoverage: buildEvidenceRefCoverageReport({ state, settings: { [RUNTIME_JOB_RECEIPTS_SETTINGS_KEY]: receiptState } }),
+      runtimeReceiptState: receiptState,
+      now: NOW,
+    })
+    const requested = mergeReleaseEvidenceReviewRequestIntoProductionState({
+      state,
+      snapshot,
+      requestedBy: 'Release Manager Agent',
+      requestedAt: NOW,
+    })
+    prismaMocks.prisma.project.findFirst.mockResolvedValueOnce({
+      id: 'project-release-readiness',
+      name: 'Release evidence route workspace',
+      template: 'web',
+      userId: 'user-1',
+      members: [],
+      settings: {
+        [PRODUCTION_STATE_SETTINGS_KEY]: requested.state,
+        [RUNTIME_JOB_RECEIPTS_SETTINGS_KEY]: receiptState,
+        aethelAgentReadReceipts: { receipts: [] },
+        aethelAgentRunLedger: { entries: [] },
+      },
+    })
+
+    const response = await POST(
+      new NextRequest('http://localhost:3000/api/projects/project-release-readiness/production-state/release-evidence-readiness', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'record-human-approval', note: 'Owner reviewed the evidence package.' }),
+      }),
+      { params: { id: 'project-release-readiness' } },
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.persisted).toBe(true)
+    expect(payload.releaseReady).toBe(false)
+    expect(payload.decision).toBe('approved')
+    expect(payload.decisionId).toBe('release-evidence-review-approved')
+    expect(payload.snapshot.status).toBe('evidence-backed')
+    expect(prismaMocks.prisma.project.update).toHaveBeenCalled()
   })
 })

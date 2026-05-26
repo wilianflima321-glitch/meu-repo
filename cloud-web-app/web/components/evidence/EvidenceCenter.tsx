@@ -67,7 +67,7 @@ type ReleaseEvidenceReadinessSnapshot = {
 }
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'empty' | 'error'
-type ReleaseReviewState = 'idle' | 'requesting' | 'requested' | 'blocked' | 'error'
+type ReleaseReviewState = 'idle' | 'requesting' | 'requested' | 'deciding' | 'approved' | 'rejected' | 'blocked' | 'error'
 
 type EvidenceCenterProps = {
   initialProjectId?: string
@@ -117,6 +117,7 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
   const [releaseReadiness, setReleaseReadiness] = useState<ReleaseEvidenceReadinessSnapshot | null>(null)
   const [releaseReviewState, setReleaseReviewState] = useState<ReleaseReviewState>('idle')
   const [releaseReviewMessage, setReleaseReviewMessage] = useState<string | null>(null)
+  const [releaseDecisionNote, setReleaseDecisionNote] = useState('')
   const [loadState, setLoadState] = useState<LoadState>('idle')
   const [errorText, setErrorText] = useState<string | null>(null)
 
@@ -190,6 +191,7 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
     let active = true
     setReleaseReviewState('idle')
     setReleaseReviewMessage(null)
+    setReleaseDecisionNote('')
     readJson<{ snapshot: ReleaseEvidenceReadinessSnapshot }>(`/api/projects/${encodeURIComponent(selectedProjectId)}/production-state/release-evidence-readiness`)
       .then((payload) => {
         if (active) setReleaseReadiness(payload.snapshot)
@@ -236,9 +238,11 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
       ] satisfies Array<[string, string | number, LucideIcon]>)
     : []
 
-  async function requestReleaseReview() {
+  async function submitReleaseReviewAction(action: 'request-human-review' | 'record-human-approval' | 'reject-human-review') {
     if (!selectedProjectId || !releaseReadiness) return
-    setReleaseReviewState('requesting')
+    const isRequest = action === 'request-human-review'
+    const isApproval = action === 'record-human-approval'
+    setReleaseReviewState(isRequest ? 'requesting' : 'deciding')
     setReleaseReviewMessage(null)
 
     try {
@@ -247,9 +251,11 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
         readiness: ProductionReadinessSummary
         productionState: AgenticProductionState
         reviewRequestId: string
+        decision?: 'approved' | 'rejected'
         releaseNote: string
       }>(`/api/projects/${encodeURIComponent(selectedProjectId)}/production-state/release-evidence-readiness`, {
-        action: 'request-human-review',
+        action,
+        note: releaseDecisionNote,
       })
 
       setReleaseReadiness(payload.snapshot)
@@ -258,7 +264,7 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
           ? { ...current, state: payload.productionState, readiness: payload.readiness, persisted: true }
           : current
       ))
-      setReleaseReviewState('requested')
+      setReleaseReviewState(isRequest ? 'requested' : isApproval ? 'approved' : 'rejected')
       setReleaseReviewMessage(payload.releaseNote)
     } catch (error) {
       setReleaseReviewState(releaseReadiness.canRequestHumanReview ? 'error' : 'blocked')
@@ -391,9 +397,9 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                         ? 'Non-human lanes are covered. Request owner review; release stays held until explicit approval evidence exists.'
                         : 'Review request is held until every non-human evidence lane is covered.'}
                     </p>
-                    {releaseReviewMessage ? (
+                      {releaseReviewMessage ? (
                       <p className={`mt-2 text-[11px] leading-5 ${
-                        releaseReviewState === 'requested'
+                        releaseReviewState === 'requested' || releaseReviewState === 'approved'
                           ? 'text-[var(--aethel-success-light)]'
                           : 'text-[var(--aethel-warning-light)]'
                       }`}>
@@ -401,14 +407,41 @@ export function EvidenceCenter({ initialProjectId }: EvidenceCenterProps) {
                       </p>
                     ) : null}
                   </div>
-                  <button
-                    type="button"
-                    onClick={requestReleaseReview}
-                    disabled={!releaseReadiness.canRequestHumanReview || releaseReviewState === 'requesting'}
-                    className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-4 text-xs font-bold uppercase tracking-[0.12em] text-[var(--aethel-info-light)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {releaseReviewState === 'requesting' ? 'Requesting...' : 'Request review'}
-                  </button>
+                  <div className="flex w-full flex-col gap-2 sm:w-auto">
+                    <input
+                      type="text"
+                      value={releaseDecisionNote}
+                      onChange={(event) => setReleaseDecisionNote(event.currentTarget.value)}
+                      placeholder="Optional owner note"
+                      className="min-h-10 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] px-3 text-xs text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:ring-2 focus:ring-[var(--aethel-focus-ring)]"
+                    />
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      <button
+                        type="button"
+                        onClick={() => submitReleaseReviewAction('request-human-review')}
+                        disabled={!releaseReadiness.canRequestHumanReview || releaseReviewState === 'requesting' || releaseReviewState === 'deciding'}
+                        className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-info-light)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {releaseReviewState === 'requesting' ? 'Requesting...' : 'Request review'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => submitReleaseReviewAction('record-human-approval')}
+                        disabled={!releaseReadiness.canRequestHumanReview || releaseReadiness.status === 'blocked' || releaseReviewState === 'requesting' || releaseReviewState === 'deciding'}
+                        className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-success)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-success-light)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Record approval
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => submitReleaseReviewAction('reject-human-review')}
+                        disabled={!releaseReadiness.canRequestHumanReview || releaseReadiness.status === 'blocked' || releaseReviewState === 'requesting' || releaseReviewState === 'deciding'}
+                        className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-warning)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-warning-light)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Reject package
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
                   {releaseReadiness.lanes.map((lane) => (

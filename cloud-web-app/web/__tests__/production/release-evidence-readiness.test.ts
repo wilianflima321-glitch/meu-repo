@@ -9,6 +9,7 @@ import {
 import { buildEvidenceRefCoverageReport } from '@/lib/production/evidence-ref-coverage'
 import {
   buildReleaseEvidenceReadinessSnapshot,
+  mergeReleaseEvidenceReviewDecisionIntoProductionState,
   mergeReleaseEvidenceReviewRequestIntoProductionState,
 } from '@/lib/production/release-evidence-readiness'
 import { buildRuntimeJobReceiptState, RUNTIME_JOB_RECEIPTS_SETTINGS_KEY } from '@/lib/production/runtime-job-receipts'
@@ -158,6 +159,97 @@ describe('release evidence readiness', () => {
       status: 'needs-review',
     })
     expect(result.nextAction).toContain('no automatic publish')
+  })
+
+  it('records human approval evidence without automatic publishing', () => {
+    const state = graphReadyState('web')
+    const receiptState = fullRuntimeReceiptState()
+    const snapshot = buildReleaseEvidenceReadinessSnapshot({
+      state,
+      evidenceCoverage: coverageFor(state),
+      runtimeReceiptState: receiptState,
+      now: NOW,
+    })
+    const request = mergeReleaseEvidenceReviewRequestIntoProductionState({
+      state,
+      snapshot,
+      requestedBy: 'Release Manager Agent',
+      requestedAt: NOW,
+    })
+    const requestedSnapshot = buildReleaseEvidenceReadinessSnapshot({
+      state: request.state,
+      evidenceCoverage: coverageFor(request.state),
+      runtimeReceiptState: receiptState,
+      now: NOW,
+    })
+
+    const decision = mergeReleaseEvidenceReviewDecisionIntoProductionState({
+      state: request.state,
+      snapshot: requestedSnapshot,
+      decision: 'approved',
+      decidedBy: 'Founder',
+      note: 'Evidence reviewed and approved for package completeness.',
+      decidedAt: NOW,
+    })
+    const approvedSnapshot = buildReleaseEvidenceReadinessSnapshot({
+      state: decision.state,
+      evidenceCoverage: coverageFor(decision.state),
+      runtimeReceiptState: receiptState,
+      now: NOW,
+    })
+
+    expect(decision.accepted).toBe(true)
+    expect(decision.releaseReady).toBe(false)
+    expect(decision.state.ledger[0]).toMatchObject({
+      id: 'release-evidence-review-approved',
+      state: 'complete',
+    })
+    expect(approvedSnapshot.status).toBe('evidence-backed')
+    expect(approvedSnapshot.releaseReady).toBe(false)
+    expect(decision.nextAction).toContain('manual publish')
+  })
+
+  it('records human rejection as a blocked evidence decision', () => {
+    const state = graphReadyState('web')
+    const receiptState = fullRuntimeReceiptState()
+    const snapshot = buildReleaseEvidenceReadinessSnapshot({
+      state,
+      evidenceCoverage: coverageFor(state),
+      runtimeReceiptState: receiptState,
+      now: NOW,
+    })
+    const request = mergeReleaseEvidenceReviewRequestIntoProductionState({
+      state,
+      snapshot,
+      requestedBy: 'Release Manager Agent',
+      requestedAt: NOW,
+    })
+    const requestedSnapshot = buildReleaseEvidenceReadinessSnapshot({
+      state: request.state,
+      evidenceCoverage: coverageFor(request.state),
+      runtimeReceiptState: receiptState,
+      now: NOW,
+    })
+
+    const decision = mergeReleaseEvidenceReviewDecisionIntoProductionState({
+      state: request.state,
+      snapshot: requestedSnapshot,
+      decision: 'rejected',
+      decidedBy: 'Founder',
+      note: 'Performance evidence is not strong enough.',
+      decidedAt: NOW,
+    })
+
+    expect(decision.accepted).toBe(true)
+    expect(decision.releaseReady).toBe(false)
+    expect(decision.state.ledger[0]).toMatchObject({
+      id: 'release-evidence-review-rejected',
+      state: 'blocked',
+    })
+    expect(decision.state.graphs.releaseGraph[0]).toMatchObject({
+      id: 'release-evidence-review-rejected',
+      status: 'blocked',
+    })
   })
 
   it('rejects human review requests while non-human evidence lanes are blocked', () => {
