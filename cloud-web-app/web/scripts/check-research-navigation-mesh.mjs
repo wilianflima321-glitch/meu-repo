@@ -82,7 +82,7 @@ requirePattern('components/evidence/EvidenceCenter.tsx', /\/api\/research\/navig
 requirePattern('components/evidence/EvidenceCenter.tsx', /data-evidence-source="research-navigation-mesh"/, 'Evidence Center surfaces navigation evidence')
 
 requirePattern('package.json', /"qa:research-navigation-mesh"/, 'package script')
-requirePattern('package.json', /qa:research-intelligence && npm run qa:research-navigation-mesh && npm run qa:agent-read-receipts/, 'enterprise gate ordering')
+requirePattern('package.json', /qa:research-intelligence && npm run qa:research-navigation-mesh && npm run qa:evidence-ref-coverage && npm run qa:release-evidence-readiness && npm run qa:agent-read-receipts/, 'enterprise gate ordering')
 requirePattern('scripts/check-backbone-market-readiness.mjs', /research-navigation-mesh/, 'backbone coverage')
 requirePattern('scripts/check-backbone-market-readiness.mjs', /AETHEL_RESEARCH_NAVIGATION_MESH/, 'backbone capability token')
 
