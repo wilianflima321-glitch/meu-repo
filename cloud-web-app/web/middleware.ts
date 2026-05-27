@@ -190,6 +190,7 @@ const PUBLIC_PATH_PREFIXES = [
   '/icons',
   '/branding',
   '/screenshots',
+  '/product-proof',
   '/login',
   '/register',
   '/pricing',
