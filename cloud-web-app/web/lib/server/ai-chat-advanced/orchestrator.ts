@@ -275,6 +275,7 @@ export async function handleAdvancedChatRequest(params: {
     mentionContext,
     webBenchmark,
     contextMemoryPlan,
+    deepContextPack,
     enhancedSystemMessage,
     historyContext,
   } = await buildAdvancedChatContext({
@@ -283,6 +284,7 @@ export async function handleAdvancedChatRequest(params: {
     messages,
     qualityMode,
     enableWebResearch,
+    model,
   })
 
   if (stream) {
@@ -428,6 +430,15 @@ Critical: ${criticSummary.verdict} ${criticSummary.bullets?.slice(0, 3).join(' '
                     },
                   ] as const)
                 : []),
+              ...(deepContextPack
+                ? ([
+                    {
+                      kind: 'context',
+                      label: `deepContextPack=${deepContextPack.status}/${deepContextPack.mode}`,
+                      detail: `cache=${deepContextPack.cacheKey}; selected=${deepContextPack.selectedItems.length}; held=${deepContextPack.heldItems.length}; tokens=${deepContextPack.selectedTokens}/${deepContextPack.contextBudgetTokens}; next=${deepContextPack.nextAction}`,
+                    },
+                  ] as const)
+                : []),
               { kind: 'other', label: 'models', detail: `architect=${architectModel}; engineer=${engineerModel}${agentCount === 3 ? `; critic=${criticModel}` : ''}` },
               { kind: 'other', label: 'architectOutput', detail: clampText(architectResult.content, 800) },
               ...(webBenchmark.evidence.map((ref) => ({
@@ -519,6 +530,15 @@ Critical: ${criticSummary.verdict} ${criticSummary.bullets?.slice(0, 3).join(' '
                     kind: 'context',
                     label: `contextMemory=${contextMemoryPlan.status}/${contextMemoryPlan.compressionLane}`,
                     detail: `planned=${contextMemoryPlan.plannedInputTokens}/${contextMemoryPlan.usableInputTokens}; uiThread=${contextMemoryPlan.canUseUiThread ? 'yes' : 'no'}; next=${contextMemoryPlan.nextAction}`,
+                  },
+                ] as const)
+              : []),
+            ...(deepContextPack
+              ? ([
+                  {
+                    kind: 'context',
+                    label: `deepContextPack=${deepContextPack.status}/${deepContextPack.mode}`,
+                    detail: `cache=${deepContextPack.cacheKey}; selected=${deepContextPack.selectedItems.length}; held=${deepContextPack.heldItems.length}; tokens=${deepContextPack.selectedTokens}/${deepContextPack.contextBudgetTokens}; next=${deepContextPack.nextAction}`,
                   },
                 ] as const)
               : []),

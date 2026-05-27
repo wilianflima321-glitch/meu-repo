@@ -15,6 +15,8 @@ const requiredFiles = [
   '__tests__/server/advanced-chat-context-memory.test.ts',
   'lib/production/multi-resolution-project-memory.ts',
   'lib/production/repository-context-budget-execution.ts',
+  'lib/production/deep-context-context-pack.ts',
+  'lib/production/deep-context-settings-persistence.ts',
 ]
 
 const failures = []
@@ -29,6 +31,7 @@ const chatContext = read('lib/server/ai-chat-advanced/context.ts')
 const orchestrator = read('lib/server/ai-chat-advanced/orchestrator.ts')
 const chatTest = read('__tests__/server/advanced-chat-context-memory.test.ts')
 const multiMemory = read('lib/production/multi-resolution-project-memory.ts')
+const deepContextPack = read('lib/production/deep-context-context-pack.ts')
 
 const mustContain = [
   ['context status states', /'available' \| 'held' \| 'blocked' \| 'needs-review'/],
@@ -61,8 +64,12 @@ for (const [label, pattern] of testCases) {
 const chatIntegration = [
   ['advanced chat imports spine', /buildContextMemorySpinePlan/],
   ['advanced chat builds retrieval plan', /planProjectMemoryRetrieval/],
+  ['advanced chat imports deep context pack', /buildDeepContextPack/],
+  ['advanced chat reads deep context settings', /readDeepContextMemorySnapshotFromSettings/],
   ['advanced chat injects instruction', /CONTEXT MEMORY SPINE/],
+  ['advanced chat injects deep context pack', /DEEP CONTEXT PACK/],
   ['advanced chat exposes plan', /contextMemoryPlan/],
+  ['advanced chat exposes deep pack', /deepContextPack/],
 ]
 
 for (const [label, pattern] of chatIntegration) {
@@ -70,8 +77,10 @@ for (const [label, pattern] of chatIntegration) {
 }
 
 if (!/contextMemory=/.test(orchestrator)) failures.push('advanced chat orchestrator does not expose context memory trace evidence')
+if (!/deepContextPack=/.test(orchestrator)) failures.push('advanced chat orchestrator does not expose deep context pack trace evidence')
 if (!/project memory is missing/.test(chatTest)) failures.push('advanced chat context test missing blocked memory scenario')
 if (!/project memory exists/.test(chatTest)) failures.push('advanced chat context test missing available memory scenario')
+if (!/governed deep-context pack/.test(chatTest)) failures.push('advanced chat context test missing governed deep context pack scenario')
 
 const memoryPolicy = [
   'Never dump an entire GB-scale repository',
@@ -82,6 +91,17 @@ const memoryPolicy = [
 
 for (const phrase of memoryPolicy) {
   if (!multiMemory.includes(phrase)) failures.push(`multi-resolution memory missing policy phrase: ${phrase}`)
+}
+
+const deepContextPolicy = [
+  'cacheKey',
+  'requiresReadReceipts',
+  'Do not treat draft memory as final',
+  'validateDeepContextPack',
+]
+
+for (const phrase of deepContextPolicy) {
+  if (!deepContextPack.includes(phrase)) failures.push(`deep context pack missing policy phrase: ${phrase}`)
 }
 
 if (failures.length) {

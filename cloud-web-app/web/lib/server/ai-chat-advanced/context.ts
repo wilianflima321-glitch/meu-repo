@@ -5,6 +5,12 @@ import {
   type ContextMemorySpinePlan,
 } from '@/lib/production/context-memory-spine'
 import {
+  buildDeepContextPack,
+  type DeepContextPack,
+  type DeepContextPackMode,
+} from '@/lib/production/deep-context-context-pack'
+import { readDeepContextMemorySnapshotFromSettings } from '@/lib/production/deep-context-settings-persistence'
+import {
   buildMultiResolutionProjectMemory,
   planProjectMemoryRetrieval,
 } from '@/lib/production/multi-resolution-project-memory'
@@ -50,14 +56,57 @@ ${plan.deviceControls.slice(0, 4).map((rule) => `- ${rule}`).join('\n')}
 If the context status is blocked or held, answer simple questions normally, but do not claim broad autonomous edits, final assets, release readiness, or complete game/film execution. Ask for the missing Project Memory, read receipts, evidence, Studio Local capacity, cloud indexing, or human review before apply.`
 }
 
+function inferDeepContextMode(message: string, qualityMode: 'standard' | 'delivery' | 'studio'): DeepContextPackMode {
+  const normalized = message.toLowerCase()
+  if (/\b(release|publish|deploy|ship|final|approval|approve|launch)\b/.test(normalized)) return 'release'
+  if (/\b(code|refactor|bug|test|typescript|route|api|component|commit)\b/.test(normalized)) return 'code'
+  if (/\b(research|benchmark|compare|market|source|paper|audit)\b/.test(normalized)) return 'research'
+  if (/\b(gameplay|playtest|combat|quest|asset|mesh|lod|pbr|navmesh|character controller)\b/.test(normalized)) return 'gameplay'
+  if (/\b(story|world|scene|shot|film|character|cinematic|dialogue)\b/.test(normalized)) return 'creative'
+  return qualityMode === 'delivery' ? 'release' : 'plan'
+}
+
+function buildDeepContextPackInstruction(pack: DeepContextPack | null): string {
+  if (!pack) return ''
+
+  const selected = pack.selectedItems
+    .slice(0, 8)
+    .map((item) => `${item.chunk.id}:${item.chunk.category}`)
+    .join(', ') || 'none'
+  const held = pack.heldItems
+    .slice(0, 8)
+    .map((item) => `${item.chunk.id}:${item.reasons.join('|') || 'held'}`)
+    .join(', ') || 'none'
+
+  return `
+
+DEEP CONTEXT PACK:
+- Status: ${pack.status}
+- Mode: ${pack.mode}
+- Surface: ${pack.surface}
+- Model: ${pack.model}
+- Cache key: ${pack.cacheKey}
+- Selected tokens: ${pack.selectedTokens}/${pack.contextBudgetTokens}
+- Selected chunks: ${selected}
+- Held chunks: ${held}
+- Evidence required: ${pack.requiresEvidence ? 'yes' : 'no'}
+- Read receipts: ${pack.requiresReadReceipts ? 'required before apply' : 'satisfied or not required'}
+- Next action: ${pack.nextAction}
+
+${pack.context}
+
+If the Deep Context Pack is blocked, held, or needs-review, keep the answer useful but do not invent missing facts, assets, files, runtime capability, final approvals, release readiness, or game/film completeness.`
+}
+
 export async function buildAdvancedChatContext(params: {
   userId: string
   projectId?: string
   messages: ChatMessage[]
   qualityMode: 'standard' | 'delivery' | 'studio'
   enableWebResearch: boolean
+  model?: string
 }) {
-  const { userId, projectId, messages, qualityMode, enableWebResearch } = params
+  const { userId, projectId, messages, qualityMode, enableWebResearch, model = 'advanced-chat' } = params
   const lastUserMessage = messages[messages.length - 1]?.content ?? ''
   const historyContextRaw = messages
     .slice(0, -1)
@@ -66,6 +115,7 @@ export async function buildAdvancedChatContext(params: {
     .join('\n')
   let projectContext = ''
   let contextMemoryPlan: ContextMemorySpinePlan | null = null
+  let deepContextPack: DeepContextPack | null = null
 
   if (projectId) {
     const project = await prisma.project.findFirst({
@@ -84,6 +134,7 @@ Recent files: ${recentFilePaths.join(', ')}
 `
       const manifest = readRepositoryCartographyManifestFromSettings(project.settings)
       const receiptState = readAgentReadReceiptStateFromSettings(project.settings)
+      const deepContextSnapshot = readDeepContextMemorySnapshotFromSettings(project.settings, project.id)
 
       if (manifest) {
         const memory = buildMultiResolutionProjectMemory({ manifest })
@@ -112,6 +163,20 @@ Recent files: ${recentFilePaths.join(', ')}
           conversationHistoryChars: historyContextRaw.length,
         })
       }
+
+      deepContextPack = buildDeepContextPack({
+        snapshot: deepContextSnapshot,
+        query: lastUserMessage,
+        mode: inferDeepContextMode(lastUserMessage, qualityMode),
+        surface: 'ide',
+        model,
+        maxTokens: contextBudgetForQualityMode(qualityMode),
+        maxChunks: qualityMode === 'studio' ? 12 : 8,
+        includeHeld: true,
+        readReceiptRefs: receiptState?.receipts.map((receipt) => receipt.id) ?? [],
+        evidenceRefs: manifest ? [`repository-cartography:${manifest.id}`] : [],
+        conversationHistoryChars: historyContextRaw.length,
+      })
     }
   }
 
@@ -141,9 +206,10 @@ ${webBenchmark.summary}
 Use as benchmark context; do not copy blindly.`
     : ''
   const contextMemoryInstruction = buildContextMemoryInstruction(contextMemoryPlan)
+  const deepContextPackInstruction = buildDeepContextPackInstruction(deepContextPack)
   const enhancedSystemMessage = `${systemMessage}
 
-${qualityInstruction}${rulesInstruction}${mentionInstruction}${benchmarkInstruction}${contextMemoryInstruction}`
+${qualityInstruction}${rulesInstruction}${mentionInstruction}${benchmarkInstruction}${contextMemoryInstruction}${deepContextPackInstruction}`
   const historyContext = clampText(historyContextRaw, MAX_HISTORY_CONTEXT_CHARS)
 
   return {
@@ -154,6 +220,7 @@ ${qualityInstruction}${rulesInstruction}${mentionInstruction}${benchmarkInstruct
     projectRulesContext,
     webBenchmark,
     contextMemoryPlan,
+    deepContextPack,
     enhancedSystemMessage,
     historyContext,
   }
