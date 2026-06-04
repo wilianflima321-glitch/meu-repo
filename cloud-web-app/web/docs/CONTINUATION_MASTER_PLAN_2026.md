@@ -1,390 +1,196 @@
-# 🚀 AETHEL ENGINE - MASTER CONTINUATION PLAN 2026
-
-> **Data:** 3 de Janeiro de 2026  
-> **Status:** IDE 89% completa | Plataforma 47% completa  
-> **Meta:** VS Code + Unreal Engine + Gitpod + Replit = Aethel
-
----
-
-## 📊 ESTADO ATUAL AUDITADO
-
-### IDE Features
-
-| Área | Status | Completude | Linhas de Código |
-|------|--------|------------|------------------|
-| Editor de Código (Monaco) | ✅ REAL | 85% | 613+ |
-| Sistema de Arquivos | ✅ REAL | 90% | 1.268+ |
-| Terminal (xterm.js) | ✅ REAL | 95% | 1.174+ |
-| Git Integration | ✅ REAL | 88% | 2.450+ |
-| Debug (DAP) | ✅ REAL | 85% | 2.600+ |
-| AI Features | ✅ REAL | 92% | 1.900+ |
-| **VS Code Parity** | ✅ | **80%** | |
-| **Unreal Engine Parity** | ✅ | **90%** | |
-
-### Plataforma Cloud
-
-| Feature | vs Gitpod | vs Replit |
-|---------|-----------|-----------|
-| Terminal real | ✅ | ✅ |
-| Git completo | ✅ | ✅ |
-| Extensions | ✅ | ✅ |
-| Collaboration | ✅ | ✅ |
-| AI Superior | ✅✅ | ✅✅ |
-| Workspace Provisioning | ❌ | ❌ |
-| One-Click Deploy | ❌ | ❌ |
-| Prebuilds | ❌ | ❌ |
-| Port Forwarding UI | ❌ | ❌ |
-
-### 🏆 DIFERENCIAIS ÚNICOS (Ninguém tem)
-
-1. **Blueprint Editor** - Visual scripting estilo Unreal
-2. **Material Editor** - PBR node graph
-3. **Level/Scene Editor** - 3D integrado
-4. **Agent Mode** - Nível Manus/Devin
-5. **MCP Protocol** - Model Context Protocol
-6. **Game Engine Systems** - Physics, particles, cloth
-
----
-
-## 🎯 PRÓXIMAS IMPLEMENTAÇÕES (PRIORIZADO)
-
-### FASE 1: CRÍTICO (1-2 semanas)
-
-#### 1.1 Command Palette Completa
-```
-Arquivo: components/ide/CommandPalette.tsx
-- Ctrl+Shift+P para comandos
-- Ctrl+P para arquivos (Quick Open)
-- Fuzzy search
-- Keyboard navigation
-- Recent commands
-- Extensível via API
-```
-
-#### 1.2 Breadcrumbs + Symbol Outline
-```
-Arquivo: components/editor/Breadcrumbs.tsx
-- Path navigation clicável
-- Symbol dropdown
-- Outline panel com símbolos
-- Jump to symbol
-```
-
-#### 1.3 Git Gutter Decorations
-```
-Arquivo: components/editor/GitGutter.tsx
-- Verde: linhas adicionadas
-- Vermelho: linhas deletadas
-- Azul: linhas modificadas
-- Click para ver diff inline
-```
-
-#### 1.4 Go to Definition/References
-```
-Arquivo: lib/editor/navigation.ts
-- F12 Go to Definition
-- Shift+F12 Find All References
-- Peek Definition popup
-- Reference list panel
-```
-
-### FASE 2: IMPORTANTE (2-3 semanas)
-
-#### 2.1 Debug Avançado
-```
-Arquivos:
-- components/debug/ConditionalBreakpoint.tsx
-- components/debug/WatchExpressions.tsx
-- components/debug/CallStackPanel.tsx
-
-Features:
-- Breakpoint conditions UI
-- Logpoints
-- Watch expressions add/edit/delete
-- Call stack com inline preview
-```
-
-#### 2.2 Settings UI
-```
-Arquivo: app/settings/page.tsx
-- UI visual para settings
-- Search settings
-- Sync settings
-- Per-workspace settings
-- Keyboard shortcuts editor
-```
-
-#### 2.3 Editor Tabs Avançado
-```
-Arquivo: components/editor/TabBar.tsx
-- Drag and drop reorder
-- Pin tabs
-- Split editor groups
-- Tab overflow menu
-- Dirty indicator (*)
-- Close others/right
-```
-
-#### 2.4 Search & Replace Global
-```
-Arquivo: components/ide/GlobalSearch.tsx
-- Search across files
-- Regex support
-- Include/exclude patterns
-- Replace all
-- Preserve case
-```
-
-### FASE 3: PLATAFORMA CLOUD (3-4 semanas)
-
-#### 3.1 Workspace Provisioning
-```
-Arquivos:
-- lib/workspace/provisioner.ts
-- app/api/workspaces/route.ts
-- components/workspace/WorkspaceManager.tsx
-
-Features:
-- Container creation on demand
-- Resource limits (CPU, RAM)
-- Auto-sleep after inactivity
-- Snapshot/restore
-```
-
-#### 3.2 Port Forwarding UI
-```
-Arquivo: components/workspace/PortsPanel.tsx
-- Lista de portas abertas
-- Toggle público/privado
-- Custom port labels
-- Auto-detect running servers
-- Copy URL
-```
-
-#### 3.3 One-Click Deploy
-```
-Arquivos:
-- lib/deploy/deployment-service.ts
-- components/deploy/DeployPanel.tsx
-- app/api/deploy/route.ts
-
-Targets:
-- Vercel
-- Netlify
-- Railway
-- Fly.io
-- Custom (Docker)
-```
-
-#### 3.4 Prebuilds
-```
-Arquivos:
-- lib/workspace/prebuild.ts
-- .aethel.yml parser
-
-Features:
-- Build on push
-- Cache dependencies
-- Instant workspace start
-- Prebuild status UI
-```
-
-### FASE 4: POLIMENTO (2 semanas)
-
-#### 4.1 Themes System
-```
-Arquivo: lib/themes/theme-manager.ts
-- Import VS Code themes
-- Theme marketplace
-- Live preview
-- Custom theme editor
-```
-
-#### 4.2 Extensions Marketplace
-```
-Arquivo: app/marketplace/page.tsx
-- Browse extensions
-- Install/uninstall
-- Ratings/reviews
-- Featured/trending
-```
-
-#### 4.3 Collaboration
-```
-Arquivo: lib/collab/collaboration-service.ts
-- Cursor presence
-- Selection sharing
-- Voice chat
-- Chat panel
-- Permissions
-```
-
----
-
-## 🤖 PROMPT PARA AGENTES
-
-### PROMPT 1: IDE Core Features
-
-```
-CONTEXTO: Aethel Engine IDE em cloud-web-app/web, usando React/Next.js/TypeScript.
-Já temos: Monaco Editor, Terminal xterm.js, Git Panel, Debug Panel, AI Chat.
-
-TAREFA: Implementar as features CRÍTICAS faltantes para paridade VS Code:
-
-1. **CommandPalette.tsx** (~400 linhas)
-   - Ctrl+Shift+P abre paleta de comandos
-   - Ctrl+P abre Quick Open (arquivos)
-   - Hook useCommandPalette() para registrar comandos
-   - Fuzzy search com highlight
-   - Keyboard navigation (arrows, enter, escape)
-   - Categorias: File, Edit, View, Go, Run, Terminal
-
-2. **Breadcrumbs.tsx** (~250 linhas)
-   - Mostra path: folder > folder > file > symbol
-   - Cada parte clicável com dropdown
-   - Integra com Monaco para símbolos
-   - Sticky no topo do editor
-
-3. **GitGutter.tsx** (~200 linhas)
-   - Decorações no gutter do Monaco
-   - Verde: added, Vermelho: deleted, Azul: modified
-   - Hover mostra preview do diff
-   - Click abre diff completo
-
-4. **navigation.ts** (~300 linhas)
-   - goToDefinition(position) - F12
-   - findReferences(position) - Shift+F12
-   - peekDefinition(position) - Alt+F12
-   - Integra com Monaco e LSP
-
-ESTILO: Seguir padrões existentes em components/. 
-Design: Dark theme slate-900, purple accents.
-Exportar tudo tipado.
-```
-
-### PROMPT 2: Platform Features
-
-```
-CONTEXTO: Plataforma Aethel similar Gitpod/Replit.
-Backend: Next.js API routes. DB: Prisma/PostgreSQL.
-
-TAREFA: Implementar features de plataforma cloud:
-
-1. **WorkspaceProvisioner.ts** (~500 linhas)
-   - createWorkspace(config): cria container Docker
-   - startWorkspace(id): inicia workspace
-   - stopWorkspace(id): para workspace
-   - deleteWorkspace(id): remove workspace
-   - getWorkspaceStatus(id): retorna estado
-   - API routes em app/api/workspaces/
-
-2. **PortsPanel.tsx** (~300 linhas)
-   - Lista portas detectadas automaticamente
-   - Toggle visibilidade (private/public)
-   - Copy URL button
-   - Preview in browser
-   - Custom labels
-
-3. **DeployPanel.tsx** (~400 linhas)
-   - Deploy targets: Vercel, Netlify, Railway
-   - One-click deploy button
-   - Deploy history
-   - Rollback
-   - Environment variables
-
-4. **PrebuildSystem.ts** (~400 linhas)
-   - Parse .aethel.yml
-   - Trigger prebuild on git push
-   - Cache node_modules, .next, etc
-   - Status webhook
-
-PADRÃO: Usar Zustand para state, React Query para data fetching.
-```
-
-### PROMPT 3: Designer/UI Polish
-
-```
-CONTEXTO: Design system Aethel em components/ui/ e lib/design-system.ts
-
-TAREFA: Polimento visual para nível VS Code/Unreal:
-
-1. **Animações suaves**
-   - Panel transitions (framer-motion)
-   - Loading states (skeleton)
-   - Hover effects
-   - Focus rings
-
-2. **Iconografia consistente**
-   - Lucide icons em todo lugar
-   - Custom icons para engine features
-   - Tamanhos padronizados (16, 20, 24)
-
-3. **Temas**
-   - Catppuccin variantes (mocha, latte, frappe)
-   - VS Code Dark+
-   - Unreal Engine theme
-   - High contrast
-
-4. **Responsividade**
-   - Mobile-friendly panels
-   - Touch targets 44px
-   - Collapsible sidebars
-   - Adaptive layouts
-
-5. **Micro-interactions**
-   - Button click feedback
-   - Toast notifications
-   - Progress indicators
-   - Error states visuais
-
-LIBS: Tailwind CSS, Framer Motion, Radix UI primitives.
-```
-
----
-
-## 📅 TIMELINE ESTIMADA
-
-| Fase | Duração | Entregáveis |
-|------|---------|-------------|
-| Fase 1 | 1-2 sem | Command Palette, Breadcrumbs, Git Gutter, Navigation |
-| Fase 2 | 2-3 sem | Debug avançado, Settings UI, Tabs, Search |
-| Fase 3 | 3-4 sem | Workspace provisioning, Ports, Deploy, Prebuilds |
-| Fase 4 | 2 sem | Themes, Marketplace, Collaboration polish |
-| **TOTAL** | **8-11 sem** | **IDE + Plataforma 100%** |
-
----
-
-## ✅ CHECKLIST DE QUALIDADE
-
-- [ ] Zero erros TypeScript
-- [ ] Testes E2E para fluxos críticos
-- [ ] Lighthouse score > 90
-- [ ] Accessibility WCAG AA
-- [ ] Mobile responsive
-- [ ] Keyboard navigation completa
-- [ ] Loading states em todo lugar
-- [ ] Error handling graceful
-- [ ] Documentation atualizada
-
----
-
-## 🎯 POSICIONAMENTO DE MERCADO
-
-> **"Aethel Engine: O Primeiro Cloud IDE para Game Development com IA Avançada"**
-
-**Público-alvo:**
-1. Game developers (Unity/Unreal refugees)
-2. Full-stack developers querendo cloud IDE
-3. Equipes querendo collaboration
-4. Developers querendo AI assistance nível enterprise
-
-**Diferencial competitivo:**
-- Único com Blueprint visual scripting
-- Único com 3D viewport integrado
-- AI Agent Mode superior
-- Engine integration nativa
-
----
-
-*Documento gerado em 3 de Janeiro de 2026*
-*Status: READY FOR IMPLEMENTATION*
+# Aethel Continuation Master Plan 2026
+
+Status: active V28 continuation plan
+Generated from: local repo scan, V25/V26/V27/V28 audits, and current QA gates
+Product principle: one premium action, clear state, evidence near the action, details hidden until needed.
+
+## Current Measured Baseline
+
+| Area | Current | Market-Grade Target | Decision |
+| --- | ---: | ---: | --- |
+| App pages | 78 | <= 60 visible / legacy hidden | Continue route compression, not feature sprawl. |
+| Admin pages | 24 physical | 6 visible areas | Keep redirects/drawer; do not expose 24 items in primary nav. |
+| Studio pages | 8 physical | 5 visible groups | World, Character, FX, Film, Logic only. |
+| Tests | 210 | 300+ | Add tests around runtime contracts before adding UI. |
+| Stories | 30 | 120+ | Build visual confidence for premium surfaces. |
+| Large files >800 LOC | 0 | 0 | Keep ratchet. New code must split by contract/adapters/views. |
+| Direct heavy imports | high raw count | contained by route boundaries | Keep passing bundle gates; reduce raw imports in next rounds. |
+| Product screenshots | partial | real authenticated evidence | Public hero must show real product, not logos or decorative art. |
+
+## Non-Negotiable Product Rules
+
+- Browser is preview and review. Heavy execution belongs to Studio Local or Cloud Render with cost, teardown, and capability evidence.
+- No public copy may claim `AAA ready`, `Unreal-grade`, `final asset`, `signed installer`, `Pixel Streaming available`, or `research verified` without receipts.
+- Public and authenticated first folds must avoid internal jargon: `readiness`, `cockpit`, `surface`, `capabilityStatus`, `Cloud held`, `Studio Local`.
+- EN is the premium default. PT-BR must go through i18n, not hardcoded mixed copy.
+- Aethel wins by execution + receipts + governance, not by showing more panels.
+
+## P0: Safety And Platform Spine
+
+### Supply Chain
+
+- Keep `next@14.2.35+` stable while planning a separate Next 16 / React 19 migration branch.
+- Do not run forced audit upgrades in the product branch; forced upgrades affect Next, Sentry, Storybook/Vite, Monaco, Jest JUnit, and auth.
+- Finish non-breaking overrides first: AWS XML builder, `fast-xml-parser`, `fast-uri`, `flatted`, `ws`, `picomatch`, `brace-expansion`, `i18next-fs-backend`.
+- Open a dedicated security migration for remaining audit items:
+  - Next 16 App Router compatibility pass.
+  - React 19 hydration and client boundary audit.
+  - Sentry 10 migration.
+  - Storybook 10 / Vite 7 validation.
+  - Monaco / DOMPurify risk path.
+  - NextAuth/Auth.js modernization path.
+
+### Gates That Must Stay Green
+
+- `npm run lint`
+- `npm run typecheck`
+- `npm run qa:v28-total-spine`
+- `npm run qa:bundle-boundaries`
+- `npm run qa:route-experience-spine`
+- `npm run qa:preview-surface-canonical`
+- `git diff --check`
+
+## P1: Product Navigation Spine
+
+### Canonical Surfaces
+
+Aethel should feel like six products stitched by one spine, not dozens of route experiments:
+
+| Surface | Purpose | Visible Entry |
+| --- | --- | --- |
+| Home | mission entry and proof | `/` |
+| Workspace | active projects and runs | `/dashboard` |
+| IDE | code, agents, terminal, preview | `/ide` |
+| Canvas/Viewport | visual selection, annotation, 3D review | embedded canonical preview |
+| Research | Manus-grade investigation with receipts | `/research` or workspace mode |
+| Evidence | receipts, graph, timeline, blockers | `/evidence` |
+
+### Route Compression Tasks
+
+- Keep admin primary nav to 6 areas: people, money, ai, platform, trust, product.
+- Keep studio primary nav to 5 groups: World, Character, FX, Film, Logic.
+- Legacy routes stay searchable in drawers with redirects/anchors until analytics prove they are unused.
+- Remove utility pages that only create volume unless they have a user action, compliance requirement, or receipt.
+
+## P2: IDE And Agents Spine
+
+### Target Experience
+
+Aethel IDE should borrow the calm density of Cursor, the familiar muscle memory of VS Code, and the governed agent receipts that competitors do not expose well enough.
+
+### Required Regions
+
+- Editor: Monaco only inside IDE boundaries, never in public/dashboard/admin shells.
+- Preview: one canonical preview authority for runtime app, device preview, canvas artifact, and 3D viewport.
+- Agents/chat: one sidecar with mode, model, cost, tools, transcript, voice/live readiness, and handoff hidden behind compact controls.
+- Terminal/problems/output: resilient region with local/remote capability state.
+- Command palette: the primary way to access deep actions without permanent visual clutter.
+
+### Next Tasks
+
+- Reduce remaining duplicated chat/agent entry points into one sidecar contract.
+- Add per-region error boundaries and skeletons where missing.
+- Move advanced controls into command palette, context menu, or drawer.
+- Add keyboard-first navigation parity: command palette, quick open, go to symbol, problems focus, preview focus, agent focus.
+- Add receipts to every agent action: input, tool, cost, output, confidence, rollback path.
+
+## P3: Preview And Viewport Spine
+
+### Minimum Professional Viewport
+
+The viewport cannot look like a demo. It needs a serious editor contract:
+
+- Selection and hover feedback.
+- Transform gizmo with W/E/R shortcuts.
+- Outliner, inspector, timeline, and proposal overlay.
+- Contextual drawer for AI prompt, asset intake, playtest, and export.
+- Evidence next to action: capability, cost, perf, provenance, missing runtime.
+- No always-open wall of tools.
+
+### Runtime Boundaries
+
+- Three/R3F/Drei must remain behind heavy async boundaries.
+- Public, dashboard, admin, pricing, marketplace, auth, and docs route shells must not import heavy runtime directly.
+- Scene/asset/viewport modules must export adapters and contracts before UI panels.
+
+## P4: Games And Films Robustness
+
+### Honest Positioning
+
+Aethel should not promise Unreal-grade in the browser. It should offer a governed creative pipeline that can call Studio Local or Cloud Render when real runtime is required.
+
+### Required Pipeline
+
+- Asset quality ledger: provenance, license, prompt/source, version, owner, review state.
+- PBR maps: albedo, normal, roughness, metallic, AO, displacement where supported.
+- LODs and poly budgets by target platform.
+- Rig, animation retargeting, collision, navmesh, physics metadata.
+- Sequencer/timeline with shots, audio, camera, dialogue, and render notes.
+- Playtest bot plus human approval gate.
+- Perf trace and export job receipts.
+- Final asset blocked until evidence is complete.
+
+### Next Tasks
+
+- Add tests around asset final evidence, playtest spine, scope orchestrator, export job contracts.
+- Add one real demo path: import asset -> inspect quality -> place in viewport -> run playtest -> produce evidence packet.
+- Keep missing native/cloud runtime as `held`, not hidden and not marketed as available.
+
+## P5: Research / Manus-Grade Spine
+
+### Required Workspace
+
+- Plan with steps and estimated cost.
+- Browser replay with page receipts, timestamps, screenshots, and source metadata.
+- Sources table with confidence and contradiction handling.
+- Artifacts: brief, table, code, slide, image, or export.
+- Stop/takeover controls.
+- Final answer only after receipts exist.
+
+### Next Tasks
+
+- Add a research run object that links plan, browser events, evidence receipts, artifacts, and final answer.
+- Prevent `research verified` copy unless source receipts pass the gate.
+- Add replay UI with compact summary first and full logs in disclosure.
+
+## P6: Desktop / Studio Local Spine
+
+### Required Native Capabilities
+
+- Signed installer path and updater path separated from web preview.
+- Native filesystem, terminal, git, local model/runtime, FFmpeg, and render worker capabilities.
+- WGPU/native viewport only when capability exists.
+- Crash telemetry and update rollback.
+
+### Next Tasks
+
+- Add Tauri updater evidence endpoint and release draft validation without claiming signed installers.
+- Add native capability registry: available, held, blocked, provider_unavailable, human_review_required.
+- Add CI coverage for Tauri build evidence; signing remains held until certs/secrets exist.
+
+## P7: UX Copy And Visual Cleanliness
+
+### Cleanup Targets
+
+- Auth, compare, docs/help, contact sales, pricing, marketplace, download, evidence, IDE copilot, and viewport first folds.
+- Replace long explanatory text with: one headline, one primary action, one evidence chip, one disclosure.
+- Hide technical copy in details/drawers/logs.
+- Replace decorative gradients/glow/premium variants with consistent typography, spacing, and real screenshots.
+
+### Quality Bar
+
+- Every critical screen has one obvious primary action within 5 seconds.
+- No card wall in first fold.
+- No mixed PT/EN on premium surfaces.
+- No more pages that exist only to make the product look larger.
+
+## Next Execution Order
+
+1. Finish non-breaking supply chain hardening and prove typecheck/lint/gates.
+2. Run a route/component utility audit and mark delete/merge/keep for low-utility pages.
+3. Compress authenticated dashboard and studio/admin visible nav further without deleting compatibility paths.
+4. Harden IDE sidecar and canonical preview contract.
+5. Build one games/films proof path with asset ledger and playtest evidence.
+6. Build research replay receipts and final answer gating.
+7. Increase tests to 300 and stories to 120 for the core primitives and premium surfaces.
+8. Plan Next 16 / React 19 in a dedicated migration branch.

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Aethel Gateway runtime context.
  *
  * This file owns the WebSocket provider and request/response plumbing. Feature
