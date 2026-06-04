@@ -189,7 +189,7 @@ const PathInput: React.FC<{
             type="text"
             value={value}
             onChange={(event) => onChange(event.target.value)}
-            placeholder={config.defaultPaths[0] || 'Caminho nao configurado'}
+            placeholder={config.defaultPaths[0] || 'Path not configured'}
             className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-xs text-[var(--aethel-text-primary)] outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)]"
             style={{
               background: 'var(--aethel-surface-primary)',
@@ -214,14 +214,14 @@ const PathInput: React.FC<{
 
         <button type="button"
           onClick={() => onChange('')}
-          aria-label={`Limpar caminho de ${config.name}`}
+          aria-label={`Clear path for ${config.name}`}
           className={settingsGhostButtonClass}
           style={{
             background: 'color-mix(in srgb, var(--aethel-surface-secondary) 72%, transparent)',
             color: 'var(--aethel-text-secondary)',
             border: '1px solid var(--aethel-border-primary)',
           }}
-          title="Limpar"
+          title="Clear"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -359,7 +359,7 @@ export const SettingsPathConfig: React.FC<{
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fechar configuracao de caminhos"
+            aria-label="Close path configuration"
             className="inline-flex items-center justify-center rounded-lg p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)]"
             style={{
               background: 'color-mix(in srgb, var(--aethel-surface-secondary) 72%, transparent)',
@@ -374,8 +374,8 @@ export const SettingsPathConfig: React.FC<{
         <div className="max-h-[60vh] space-y-4 overflow-y-auto p-4">
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] p-3">
             <div>
-              <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Deteccao automatica</p>
-              <p className="text-xs text-[var(--aethel-text-tertiary)]">Deixe o Aethel encontrar os programas por voce</p>
+              <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Automatic detection</p>
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Let Aethel find installed programs for you</p>
             </div>
             <button type="button"
               onClick={handleAutoDetect}
@@ -403,7 +403,7 @@ export const SettingsPathConfig: React.FC<{
 
         <div className="flex items-center justify-between border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
           <div className="text-xs text-[var(--aethel-text-tertiary)]">
-            {isDirty && <span className="text-[var(--aethel-warning-light)]">Alteracoes nao salvas</span>}
+            {isDirty && <span className="text-[var(--aethel-warning-light)]">Unsaved changes</span>}
           </div>
 
           <div className="flex gap-2">
@@ -438,4 +438,3 @@ export const SettingsPathConfig: React.FC<{
 }
 
 export default SettingsPathConfig
-

@@ -1,12 +1,12 @@
 /**
  * AI Tools Registry - Registro de Ferramentas para IA
- * 
+ *
  * Define todas as ferramentas que a IA pode usar para:
  * - Editar código
  * - Manipular vídeo/áudio/imagem
  * - Controlar o game engine
  * - Gerar assets procedurais
- * 
+ *
  * Baseado no padrão de Function Calling da OpenAI/Anthropic
  */
 
@@ -29,6 +29,8 @@ import {
   requestedAgentForTool,
   shouldEnforceAgentScope,
 } from './ai-tools-registry-utils';
+import { registerAssetTools } from './ai-tools-registry.assets';
+import { registerCreativeTools } from './ai-tools-registry.creative';
 export type { AITool, Artifact, ToolCategory, ToolParameter, ToolResult } from './ai-tools-registry-types';
 
 async function loadPathModifiedAt(projectId: string, paths: string[]): Promise<Record<string, Date>> {
@@ -168,7 +170,7 @@ class AIToolsRegistry {
 
   register(tool: AITool): void {
     this.tools.set(tool.name, tool);
-    
+
     const categoryTools = this.toolsByCategory.get(tool.category) || [];
     categoryTools.push(tool);
     this.toolsByCategory.set(tool.category, categoryTools);
@@ -205,9 +207,9 @@ class AIToolsRegistry {
 
       return await tool.execute(params);
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
@@ -411,7 +413,7 @@ aiTools.register({
   execute: async (params) => {
     return {
       success: true,
-      data: { 
+      data: {
         issues: [],
         suggestions: [],
         score: 85,
@@ -420,479 +422,10 @@ aiTools.register({
   },
 });
 
-// ============================================================================
-// FERRAMENTAS DE IMAGEM
-// ============================================================================
+registerCreativeTools(aiTools);
 
-aiTools.register({
-  name: 'generate_image',
-  description: 'Gera uma imagem usando IA (DALL-E, Stable Diffusion)',
-  category: 'image',
-  parameters: [
-    { name: 'prompt', type: 'string', description: 'Descrição da imagem a ser gerada', required: true },
-    { name: 'style', type: 'string', description: 'Estilo da imagem', required: false, enum: ['realistic', 'cartoon', 'pixel-art', 'concept-art', '3d-render', 'anime'] },
-    { name: 'width', type: 'number', description: 'Largura em pixels', required: false, default: 1024 },
-    { name: 'height', type: 'number', description: 'Altura em pixels', required: false, default: 1024 },
-  ],
-  returns: 'URL ou base64 da imagem gerada',
-  execute: async (params) => {
-    // Integração com DALL-E ou Stable Diffusion
-    return {
-      success: true,
-      data: { imageUrl: '', prompt: params.prompt },
-      artifacts: [{
-        type: 'image',
-        name: 'generated-image.png',
-        content: '',
-        mimeType: 'image/png',
-      }],
-    };
-  },
-});
-
-aiTools.register({
-  name: 'edit_image',
-  description: 'Edita uma imagem existente (crop, resize, filters, ajustes)',
-  category: 'image',
-  parameters: [
-    { name: 'imagePath', type: 'string', description: 'Caminho da imagem', required: true },
-    { name: 'operation', type: 'string', description: 'Operação a realizar', required: true, enum: ['crop', 'resize', 'rotate', 'flip', 'brightness', 'contrast', 'saturation', 'blur', 'sharpen', 'remove-background'] },
-    { name: 'params', type: 'object', description: 'Parâmetros específicos da operação', required: false },
-  ],
-  returns: 'Imagem editada',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { operation: params.operation, applied: true },
-    };
-  },
-});
-
-aiTools.register({
-  name: 'create_sprite_sheet',
-  description: 'Cria sprite sheet para animação de jogos',
-  category: 'image',
-  parameters: [
-    { name: 'prompt', type: 'string', description: 'Descrição do personagem/objeto', required: true },
-    { name: 'frames', type: 'number', description: 'Número de frames', required: true },
-    { name: 'animation', type: 'string', description: 'Tipo de animação', required: true, enum: ['idle', 'walk', 'run', 'jump', 'attack', 'death'] },
-    { name: 'direction', type: 'string', description: 'Direção do sprite', required: false, enum: ['side', 'top-down', 'isometric'] },
-  ],
-  returns: 'Sprite sheet com todas as frames',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { frames: params.frames, animation: params.animation },
-    };
-  },
-});
-
-// ============================================================================
-// FERRAMENTAS DE ÁUDIO
-// ============================================================================
-
-aiTools.register({
-  name: 'generate_music',
-  description: 'Gera música usando IA (Suno, MusicGen)',
-  category: 'audio',
-  parameters: [
-    { name: 'prompt', type: 'string', description: 'Descrição da música', required: true },
-    { name: 'genre', type: 'string', description: 'Gênero musical', required: false, enum: ['electronic', 'orchestral', 'rock', 'jazz', 'ambient', 'chiptune', 'cinematic'] },
-    { name: 'duration', type: 'number', description: 'Duração em segundos', required: false, default: 30 },
-    { name: 'tempo', type: 'number', description: 'BPM', required: false, default: 120 },
-  ],
-  returns: 'Arquivo de áudio gerado',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { prompt: params.prompt, genre: params.genre },
-      artifacts: [{
-        type: 'audio',
-        name: 'generated-music.mp3',
-        content: '',
-        mimeType: 'audio/mpeg',
-      }],
-    };
-  },
-});
-
-aiTools.register({
-  name: 'generate_sfx',
-  description: 'Gera efeitos sonoros para jogos',
-  category: 'audio',
-  parameters: [
-    { name: 'type', type: 'string', description: 'Tipo de efeito', required: true, enum: ['explosion', 'footstep', 'door', 'weapon', 'magic', 'ui-click', 'powerup', 'ambient'] },
-    { name: 'variation', type: 'string', description: 'Variação do efeito', required: false },
-    { name: 'duration', type: 'number', description: 'Duração máxima em ms', required: false, default: 1000 },
-  ],
-  returns: 'Efeito sonoro gerado',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { type: params.type },
-    };
-  },
-});
-
-aiTools.register({
-  name: 'text_to_speech',
-  description: 'Converte texto em fala para diálogos de jogos',
-  category: 'audio',
-  parameters: [
-    { name: 'text', type: 'string', description: 'Texto a ser falado', required: true },
-    { name: 'voice', type: 'string', description: 'Tipo de voz', required: false, enum: ['male-deep', 'male-young', 'female-soft', 'female-strong', 'child', 'robot', 'monster'] },
-    { name: 'emotion', type: 'string', description: 'Emoção na fala', required: false, enum: ['neutral', 'happy', 'sad', 'angry', 'scared', 'excited'] },
-    { name: 'language', type: 'string', description: 'Idioma', required: false, default: 'pt-BR' },
-  ],
-  returns: 'Áudio da fala',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { text: params.text, voice: params.voice },
-    };
-  },
-});
-
-// ============================================================================
-// FERRAMENTAS DE VÍDEO
-// ============================================================================
-
-aiTools.register({
-  name: 'create_video_clip',
-  description: 'Cria um clip de vídeo na timeline',
-  category: 'video',
-  parameters: [
-    { name: 'source', type: 'string', description: 'Caminho do vídeo fonte', required: true },
-    { name: 'startTime', type: 'number', description: 'Tempo de início na timeline (segundos)', required: true },
-    { name: 'inPoint', type: 'number', description: 'Ponto de entrada no source (segundos)', required: false, default: 0 },
-    { name: 'outPoint', type: 'number', description: 'Ponto de saída no source (segundos)', required: false },
-    { name: 'track', type: 'number', description: 'Índice da track', required: false, default: 0 },
-  ],
-  returns: 'ID do clip criado',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { clipId: `clip-${Date.now()}`, startTime: params.startTime },
-    };
-  },
-});
-
-aiTools.register({
-  name: 'add_video_effect',
-  description: 'Adiciona efeito visual a um clip de vídeo',
-  category: 'video',
-  parameters: [
-    { name: 'clipId', type: 'string', description: 'ID do clip', required: true },
-    { name: 'effect', type: 'string', description: 'Tipo de efeito', required: true, enum: ['color-correction', 'blur', 'glow', 'vignette', 'chromatic-aberration', 'film-grain', 'shake', 'zoom', 'transition-fade', 'transition-wipe'] },
-    { name: 'intensity', type: 'number', description: 'Intensidade do efeito (0-100)', required: false, default: 50 },
-    { name: 'keyframes', type: 'array', description: 'Keyframes para animação do efeito', required: false },
-  ],
-  returns: 'Confirmação do efeito aplicado',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { clipId: params.clipId, effect: params.effect },
-    };
-  },
-});
-
-aiTools.register({
-  name: 'render_video',
-  description: 'Renderiza o vídeo final da timeline',
-  category: 'video',
-  parameters: [
-    { name: 'format', type: 'string', description: 'Formato de saída', required: true, enum: ['mp4', 'webm', 'mov', 'gif'] },
-    { name: 'quality', type: 'string', description: 'Qualidade', required: false, enum: ['draft', 'preview', 'final'], default: 'final' },
-    { name: 'resolution', type: 'string', description: 'Resolução', required: false, enum: ['720p', '1080p', '4k'], default: '1080p' },
-    { name: 'fps', type: 'number', description: 'Frames por segundo', required: false, default: 30 },
-  ],
-  returns: 'URL do vídeo renderizado',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { format: params.format, resolution: params.resolution },
-    };
-  },
-});
-
-// ============================================================================
-// FERRAMENTAS DE GAME ENGINE
-// ============================================================================
-
-aiTools.register({
-  name: 'create_game_object',
-  description: 'Cria um objeto no game engine (sprite, 3D model, luz, câmera)',
-  category: 'game',
-  parameters: [
-    { name: 'type', type: 'string', description: 'Tipo de objeto', required: true, enum: ['sprite', 'mesh', 'light', 'camera', 'particle-system', 'audio-source', 'trigger', 'ui-element'] },
-    { name: 'name', type: 'string', description: 'Nome do objeto', required: true },
-    { name: 'position', type: 'object', description: 'Posição {x, y, z}', required: false },
-    { name: 'properties', type: 'object', description: 'Propriedades específicas do tipo', required: false },
-  ],
-  returns: 'ID do objeto criado',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { objectId: `obj-${Date.now()}`, type: params.type, name: params.name },
-    };
-  },
-});
-
-aiTools.register({
-  name: 'add_component',
-  description: 'Adiciona componente a um game object (physics, script, animator)',
-  category: 'game',
-  parameters: [
-    { name: 'objectId', type: 'string', description: 'ID do objeto', required: true },
-    { name: 'component', type: 'string', description: 'Tipo de componente', required: true, enum: ['rigidbody', 'collider', 'script', 'animator', 'audio-listener', 'nav-agent', 'health', 'inventory'] },
-    { name: 'config', type: 'object', description: 'Configuração do componente', required: false },
-  ],
-  returns: 'Confirmação do componente adicionado',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { objectId: params.objectId, component: params.component },
-    };
-  },
-});
-
-aiTools.register({
-  name: 'create_game_script',
-  description: 'Cria um script de comportamento para game object',
-  category: 'game',
-  parameters: [
-    { name: 'name', type: 'string', description: 'Nome do script', required: true },
-    { name: 'behavior', type: 'string', description: 'Descrição do comportamento desejado', required: true },
-    { name: 'language', type: 'string', description: 'Linguagem do script', required: false, enum: ['typescript', 'visual-script'], default: 'typescript' },
-  ],
-  returns: 'Código do script gerado',
-  execute: async (params) => {
-    // IA gera o código do script baseado na descrição
-    return {
-      success: true,
-      data: { scriptName: params.name, code: '' },
-      artifacts: [{
-        type: 'code',
-        name: `${params.name}.ts`,
-        content: '',
-        mimeType: 'text/typescript',
-      }],
-    };
-  },
-});
-
-aiTools.register({
-  name: 'generate_level',
-  description: 'Gera um nível/mapa proceduralmente',
-  category: 'game',
-  parameters: [
-    { name: 'type', type: 'string', description: 'Tipo de level', required: true, enum: ['platformer', 'dungeon', 'open-world', 'racing-track', 'puzzle-room'] },
-    { name: 'theme', type: 'string', description: 'Tema visual', required: true },
-    { name: 'difficulty', type: 'string', description: 'Dificuldade', required: false, enum: ['easy', 'medium', 'hard'], default: 'medium' },
-    { name: 'size', type: 'string', description: 'Tamanho do level', required: false, enum: ['small', 'medium', 'large'], default: 'medium' },
-    { name: 'seed', type: 'number', description: 'Seed para geração (para reproduzir)', required: false },
-  ],
-  returns: 'Dados do level gerado',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { type: params.type, theme: params.theme, seed: params.seed || Math.random() },
-    };
-  },
-});
-
-// ============================================================================
-// FERRAMENTAS DE ASSETS
-// ============================================================================
-
-aiTools.register({
-  name: 'query_assets',
-  description: 'Busca e lista assets do projeto atual. Use para encontrar modelos 3D, texturas, áudio, scripts e outros recursos.',
-  category: 'asset',
-  parameters: [
-    { name: 'search', type: 'string', description: 'Termo de busca (nome, tag)', required: false },
-    { name: 'type', type: 'string', description: 'Filtrar por tipo de asset', required: false, enum: ['mesh', 'texture', 'material', 'audio', 'video', 'blueprint', 'animation', 'prefab', 'level', 'script', 'all'] },
-    { name: 'path', type: 'string', description: 'Filtrar por pasta (ex: /Content/Characters)', required: false },
-    { name: 'limit', type: 'number', description: 'Máximo de resultados', required: false, default: 50 },
-    { name: 'favorites', type: 'boolean', description: 'Apenas favoritos', required: false, default: false },
-  ],
-  returns: 'Lista de assets com id, nome, tipo, caminho, tamanho e metadados',
-  execute: async (params) => {
-    try {
-      const ctx = getContext(params);
-      if (!ctx.projectId) return { success: false, error: 'Nenhum projeto selecionado' };
-      
-      const whereClause: Prisma.AssetWhereInput = { projectId: ctx.projectId, status: 'ready' };
-      
-      const search = getStringParam(params, 'search').trim();
-      const assetType = getStringParam(params, 'type').trim();
-      const assetPath = getStringParam(params, 'path').trim();
-
-      if (search) {
-        whereClause.name = { contains: search, mode: 'insensitive' };
-      }
-      if (assetType && assetType !== 'all') {
-        whereClause.type = assetType;
-      }
-      if (assetPath) {
-        whereClause.path = { startsWith: assetPath };
-      }
-      if (getBooleanParam(params, 'favorites')) {
-        whereClause.isFavorite = true;
-      }
-
-      const assets = await prisma.asset.findMany({
-        where: whereClause,
-        take: getNumberParam(params, 'limit', 50),
-        orderBy: [{ isFavorite: 'desc' }, { updatedAt: 'desc' }],
-        select: {
-          id: true,
-          name: true,
-          type: true,
-          path: true,
-          extension: true,
-          size: true,
-          thumbnail: true,
-          metadata: true,
-          isFavorite: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
-
-      return {
-        success: true,
-        data: {
-          count: assets.length,
-          assets: assets.map(a => ({
-            id: a.id,
-            name: a.name,
-            type: a.type,
-            path: a.path,
-            extension: a.extension,
-            size: formatBytes(a.size),
-            sizeBytes: a.size,
-            thumbnail: a.thumbnail,
-            metadata: a.metadata,
-            isFavorite: a.isFavorite,
-            modifiedAt: a.updatedAt.toISOString(),
-          })),
-        },
-      };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Erro ao buscar assets' };
-    }
-  },
-});
-
-// Helper function for file size formatting
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-}
-
-aiTools.register({
-  name: 'get_asset_details',
-  description: 'Obtém detalhes completos de um asset específico pelo ID ou caminho',
-  category: 'asset',
-  parameters: [
-    { name: 'assetId', type: 'string', description: 'ID do asset', required: false },
-    { name: 'assetPath', type: 'string', description: 'Caminho completo do asset', required: false },
-  ],
-  returns: 'Detalhes completos do asset incluindo metadados técnicos',
-  execute: async (params) => {
-    try {
-      const ctx = getContext(params);
-      if (!ctx.projectId) return { success: false, error: 'Nenhum projeto selecionado' };
-      
-      const assetId = getStringParam(params, 'assetId').trim();
-      const assetPath = getStringParam(params, 'assetPath').trim();
-      
-      if (!assetId && !assetPath) {
-        return { success: false, error: 'Forneça assetId ou assetPath' };
-      }
-
-      const whereClause: Prisma.AssetWhereInput = { projectId: ctx.projectId };
-      if (assetId) whereClause.id = assetId;
-      if (assetPath) whereClause.path = assetPath;
-
-      const asset = await prisma.asset.findFirst({
-        where: whereClause,
-      });
-
-      if (!asset) return { success: false, error: 'Asset não encontrado' };
-
-      return {
-        success: true,
-        data: {
-          id: asset.id,
-          name: asset.name,
-          type: asset.type,
-          path: asset.path,
-          extension: asset.extension,
-          size: formatBytes(asset.size),
-          sizeBytes: asset.size,
-          mimeType: asset.mimeType,
-          thumbnail: asset.thumbnail,
-          metadata: asset.metadata,
-          isFavorite: asset.isFavorite,
-          status: asset.status,
-          storagePath: asset.storagePath,
-          createdAt: asset.createdAt.toISOString(),
-          updatedAt: asset.updatedAt.toISOString(),
-        },
-      };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Erro ao buscar asset' };
-    }
-  },
-});
-
-aiTools.register({
-  name: 'generate_3d_model',
-  description: 'Gera modelo 3D usando IA',
-  category: 'asset',
-  parameters: [
-    { name: 'prompt', type: 'string', description: 'Descrição do modelo', required: true },
-    { name: 'style', type: 'string', description: 'Estilo do modelo', required: false, enum: ['realistic', 'low-poly', 'stylized', 'voxel'] },
-    { name: 'format', type: 'string', description: 'Formato de saída', required: false, enum: ['gltf', 'fbx', 'obj'], default: 'gltf' },
-  ],
-  returns: 'Modelo 3D gerado',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { prompt: params.prompt, style: params.style },
-      artifacts: [{
-        type: '3d-model',
-        name: 'generated-model.gltf',
-        content: '',
-        mimeType: 'model/gltf+json',
-      }],
-    };
-  },
-});
-
-aiTools.register({
-  name: 'generate_texture',
-  description: 'Gera textura tileable para materiais',
-  category: 'asset',
-  parameters: [
-    { name: 'type', type: 'string', description: 'Tipo de textura', required: true, enum: ['diffuse', 'normal', 'roughness', 'metallic', 'ao', 'height', 'emission'] },
-    { name: 'material', type: 'string', description: 'Material (ex: wood, metal, stone)', required: true },
-    { name: 'resolution', type: 'number', description: 'Resolução da textura', required: false, default: 1024 },
-    { name: 'tileable', type: 'boolean', description: 'Se deve ser tileable', required: false, default: true },
-  ],
-  returns: 'Textura gerada',
-  execute: async (params) => {
-    return {
-      success: true,
-      data: { type: params.type, material: params.material },
-    };
-  },
-});
+// Register asset tools in a focused module so the central registry stays reviewable.
+registerAssetTools(aiTools);
 
 // ============================================================================
 // FERRAMENTAS DE PROJETO

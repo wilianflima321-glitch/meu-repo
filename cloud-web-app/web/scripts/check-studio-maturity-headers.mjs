@@ -11,7 +11,7 @@ const shell = fs.readFileSync(path.join(ROOT, shellPath), 'utf8')
 const routes = fs.readFileSync(path.join(ROOT, routesPath), 'utf8')
 const failures = []
 
-for (const token of ['maturityGuidance', 'Heavy runtime gated', 'Browser preview', 'Local when available', 'Cloud held by capability']) {
+for (const token of ['maturityGuidance', 'Heavy jobs wait for runtime.', 'Preview', 'Local optional', 'Cloud locked']) {
   if (!shell.includes(token)) failures.push(`${shellPath}: missing ${token}`)
 }
 if (!shell.includes('MaturityBadge maturity={currentRoute.maturity}')) {
@@ -36,7 +36,7 @@ const report = `# Studio Maturity Headers Audit
 - Creative route registry: \`${routesPath}\`
 - Studio routes: ${routeCount}
 - Routes with maturity metadata: ${maturityCount}
-- Header exposes runtime gating: ${shell.includes('Heavy runtime gated') ? 'yes' : 'no'}
+- Header exposes runtime gating: ${shell.includes('Heavy jobs wait for runtime.') ? 'yes' : 'no'}
 - Unsupported AAA/Unreal claims: ${/Unreal-grade|AAA sozinho|100% Unreal/i.test(shell + routes) ? 'yes' : 'no'}
 
 Status: ${failures.length ? 'FAIL' : 'PASS'}

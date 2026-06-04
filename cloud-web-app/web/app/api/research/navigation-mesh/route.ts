@@ -8,6 +8,7 @@ import {
   buildResearchNavigationMesh,
   type AgentNavigationMissionKind,
 } from '@/lib/production/research-navigation-mesh'
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback'
 
 const logger = createComponentLogger('api.research.navigation-mesh')
 
@@ -76,6 +77,38 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     logger.error('research_navigation_mesh.failed', error)
+    if (shouldUseLocalEvidenceFallback(request, error)) {
+      const mesh = buildResearchNavigationMesh({
+        missionKind: coerceMissionKind(request.nextUrl.searchParams.get('missionKind')),
+        targetUrl: request.nextUrl.searchParams.get('targetUrl') ?? undefined,
+        intendedAction: request.nextUrl.searchParams.get('intendedAction') ?? undefined,
+        hasHeadlessBrowserWorker: false,
+        hasCloudBrowser: false,
+        hasChromeExtension: false,
+        hasChromeDevTools: false,
+        hasComputerUseSandbox: false,
+        hasMobileCompanion: false,
+        hasReplayCapture: false,
+        hasScreenshotCapture: false,
+        hasDomSnapshot: false,
+        hasPauseControl: false,
+        hasHumanTakeover: false,
+        hasCredentialVault: false,
+        hasNetworkIsolation: false,
+      })
+
+      return localEvidenceJson(
+        request,
+        error,
+        {
+          ...mesh,
+          capabilityStatus: 'held',
+          recommendedLane: null,
+          blockers: [...mesh.policyDecision.blockers, 'LOCAL_EVIDENCE_RESEARCH_BACKEND_UNAVAILABLE'],
+        },
+        { surface: 'research.navigation-mesh', state: 'held' },
+      )
+    }
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped
     return apiInternalError()

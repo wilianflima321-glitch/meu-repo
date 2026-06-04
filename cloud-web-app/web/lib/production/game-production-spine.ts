@@ -232,7 +232,7 @@ function buildLedger(contract: GameProductionSpineContract): MissionLedgerEntry 
     phase: 'Game production spine',
     ownerAgent: 'Producer Agent',
     state: 'needs-approval',
-    summary: `${contract.title} requires graph-based production before any premium game claim can be accepted.`,
+    summary: `${contract.title} requires graph-based production before premium game claims can be accepted.`,
     acceptance: [
       'Design Bible approved',
       'Gameplay, world, combat, animation, cinematic, asset, performance, playtest, and release graphs attached',

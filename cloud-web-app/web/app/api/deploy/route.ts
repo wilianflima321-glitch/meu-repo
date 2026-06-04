@@ -20,6 +20,7 @@ import {
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { createComponentLogger } from '@/lib/observability/logger';
 import { runQaGate, type QaGateResult } from '@/lib/server/qa-gate';
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback';
 
 export const dynamic = 'force-dynamic';
 
@@ -238,6 +239,19 @@ export async function GET(req: NextRequest) {
     logger.error('Deploy status request failed', error, {
       action: 'read-deploy-status',
     });
+    if (req.nextUrl.searchParams.get('readiness') === 'true' && shouldUseLocalEvidenceFallback(req, error)) {
+      return localEvidenceJson(
+        req,
+        error,
+        {
+          canDeploy: false,
+          missing: ['deployment configuration', 'quality gate evidence'],
+          message: 'Deploy remains held in local evidence mode until auth, billing, and Vercel runtime are configured.',
+          qaGate: undefined,
+        },
+        { surface: 'deploy.readiness', state: 'held' },
+      );
+    }
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

@@ -78,10 +78,10 @@ export function EmptyProjects({ onCreate }: { onCreate: () => void }) {
   return (
     <EmptyState
       icon={<FolderOpen className="h-12 w-12" />}
-      title="No project yet"
-      description="Create your first project para comecar a desenvolver com IA."
+      title="Start your first project"
+      description="Create a workspace that carries mission context, preview evidence, and IDE handoff in one continuous flow."
       action={{
-        label: 'Create project',
+        label: 'Create first project',
         onClick: onCreate,
         icon: <Sparkles className="h-4 w-4" />,
       }}
@@ -93,8 +93,8 @@ export function EmptySearch({ query }: { query: string }) {
   return (
     <EmptyState
       icon={<Search className="h-12 w-12" />}
-      title="No resultado encontrado"
-      description={`Nao encontramos resultados para "${query}". Tente usar termos diferentes.`}
+      title="No results found"
+      description={`We could not find results for "${query}". Try a different search term.`}
     />
   )
 }
@@ -103,10 +103,10 @@ export function EmptyChat({ onStart }: { onStart: () => void }) {
   return (
     <EmptyState
       icon={<Sparkles className="h-12 w-12" />}
-      title="Comece uma conversa"
-      description="Pergunte qualquer coisa sobre codigo, arquitetura, ou peca para criar algo novo."
+      title="Start a conversation"
+      description="Ask about code, architecture, or the next thing you want to create."
       action={{
-        label: 'Iniciar Chat',
+        label: 'Start chat',
         onClick: onStart,
       }}
     />
@@ -117,8 +117,8 @@ export function EmptyWorkflows({ onCreate }: { onCreate: () => void }) {
   return (
     <EmptyState
       icon={<FileText className="h-12 w-12" />}
-      title="No workflow criado"
-      description="Workflows ajudam a organizar tarefas complexas com multiplos agentes de IA."
+      title="No workflow yet"
+      description="Workflows organize complex tasks across multiple AI agents."
       action={{
         label: 'Create Workflow',
         onClick: onCreate,

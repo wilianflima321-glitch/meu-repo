@@ -1,21 +1,22 @@
 'use client';
 
 /**
- * Command Registry - Sistema de Registro de Comandos
- * 
- * Sistema world-class similar ao VS Code para registro dinâmico de comandos.
- * Permite extensões e módulos registrarem comandos que aparecem no Command Palette.
- * 
+ * Command Registry
+ *
+ * VS Code-style command layer for dynamic command registration.
+ * Extensions and product modules can register actions that appear in the Command Palette.
+ *
  * @module lib/commands/command-registry
  */
 import { createContext, useContext, useCallback, useMemo, useState, useEffect, type ReactNode } from 'react';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { DEFAULT_COMMANDS } from './default-commands';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-export type CommandCategory = 
+export type CommandCategory =
   | 'file'
   | 'edit'
   | 'view'
@@ -39,7 +40,7 @@ export interface CommandDefinition {
   description?: string;
   /** Category for grouping */
   category: CommandCategory;
-  /** Keyboard shortcut (e.g., '⌘N', 'Ctrl+Shift+P') */
+  /** Keyboard shortcut (e.g., 'Cmd+N', 'Ctrl+Shift+P') */
   shortcut?: string;
   /** Alternative keyboard shortcut */
   altShortcut?: string;
@@ -100,10 +101,6 @@ interface CommandRegistryContextValue {
 const CommandRegistryContext = createContext<CommandRegistryContextValue | null>(null);
 const logger = createComponentLogger('command-registry');
 
-function logCommandIntent(label: string) {
-  return () => logger.info(`Command triggered: ${label}`);
-}
-
 // ============================================================================
 // HOOKS
 // ============================================================================
@@ -119,7 +116,7 @@ export function useCommandRegistry() {
 export function useCommand(commandId: string) {
   const { getCommand, executeCommand } = useCommandRegistry();
   const command = getCommand(commandId);
-  
+
   const execute = useCallback(
     (args?: Record<string, unknown>) => executeCommand(commandId, args),
     [commandId, executeCommand]
@@ -130,7 +127,7 @@ export function useCommand(commandId: string) {
 
 export function useRegisterCommand(command: CommandDefinition) {
   const { registerCommand } = useCommandRegistry();
-  
+
   useEffect(() => {
     const unregister = registerCommand(command);
     return unregister;
@@ -144,27 +141,27 @@ export function useRegisterCommand(command: CommandDefinition) {
 function fuzzyMatch(text: string, query: string): { match: boolean; score: number } {
   const textLower = text.toLowerCase();
   const queryLower = query.toLowerCase();
-  
+
   // Exact match
   if (textLower === queryLower) {
     return { match: true, score: 1000 };
   }
-  
+
   // Starts with
   if (textLower.startsWith(queryLower)) {
     return { match: true, score: 900 };
   }
-  
+
   // Contains
   if (textLower.includes(queryLower)) {
     return { match: true, score: 800 - textLower.indexOf(queryLower) };
   }
-  
+
   // Fuzzy match (all query chars appear in order)
   let queryIndex = 0;
   let score = 0;
   let consecutiveBonus = 0;
-  
+
   for (let i = 0; i < textLower.length && queryIndex < queryLower.length; i++) {
     if (textLower[i] === queryLower[queryIndex]) {
       queryIndex++;
@@ -174,17 +171,43 @@ function fuzzyMatch(text: string, query: string): { match: boolean; score: numbe
       consecutiveBonus = 0;
     }
   }
-  
+
   if (queryIndex === queryLower.length) {
     return { match: true, score };
   }
-  
+
   return { match: false, score: 0 };
 }
 
 // ============================================================================
 // PROVIDER
 // ============================================================================
+
+
+function shortcutMatchesEvent(shortcut: string, event: KeyboardEvent): boolean {
+  if (!shortcut || shortcut.includes(' ')) return false
+
+  const parts = shortcut.split('+')
+  const key = parts.pop()?.toLowerCase()
+  if (!key) return false
+
+  const isMac = navigator.platform.includes('Mac')
+  const wantsCmd = parts.includes('Cmd')
+  const wantsCtrl = parts.includes('Ctrl')
+  const wantsAlt = parts.includes('Alt')
+  const wantsShift = parts.includes('Shift')
+
+  const expectedMeta = wantsCmd && isMac
+  const expectedCtrl = wantsCtrl || (wantsCmd && !isMac)
+  const actualKey = event.key === '?' ? '/' : event.key.toLowerCase()
+
+  if (event.metaKey !== expectedMeta) return false
+  if (event.ctrlKey !== expectedCtrl) return false
+  if (wantsAlt !== event.altKey) return false
+  if (wantsShift !== event.shiftKey) return false
+
+  return actualKey === key
+}
 
 interface CommandRegistryProviderProps {
   children: ReactNode;
@@ -262,7 +285,7 @@ export function CommandRegistryProvider({ children }: CommandRegistryProviderPro
   }, []);
 
   const executeCommand = useCallback(async (
-    commandId: string, 
+    commandId: string,
     args?: Record<string, unknown>
   ): Promise<CommandExecutionResult> => {
     const start = performance.now();
@@ -429,475 +452,12 @@ export function CommandRegistryProvider({ children }: CommandRegistryProviderPro
 // DEFAULT COMMANDS
 // ============================================================================
 
-export const DEFAULT_COMMANDS: CommandDefinition[] = [
-  // === FILE ===
-  {
-    id: 'file.new',
-    label: 'Novo Arquivo',
-    description: 'Criar um novo arquivo',
-    category: 'file',
-    shortcut: '⌘N',
-    icon: 'file-plus',
-    priority: 100,
-    tags: ['create', 'new', 'file', 'criar', 'novo', 'arquivo'],
-    handler: logCommandIntent('New file'),
-  },
-  {
-    id: 'file.newFolder',
-    label: 'Nova Pasta',
-    description: 'Criar uma nova pasta',
-    category: 'file',
-    shortcut: '⇧⌘N',
-    icon: 'folder-plus',
-    priority: 99,
-    tags: ['create', 'folder', 'directory', 'pasta', 'diretório'],
-    handler: logCommandIntent('New folder'),
-  },
-  {
-    id: 'file.open',
-    label: 'Abrir Arquivo',
-    description: 'Abrir um arquivo existente',
-    category: 'file',
-    shortcut: '⌘O',
-    icon: 'folder-open',
-    priority: 98,
-    tags: ['open', 'file', 'abrir', 'arquivo'],
-    handler: logCommandIntent('Open file'),
-  },
-  {
-    id: 'file.save',
-    label: 'Salvar',
-    description: 'Salvar o arquivo atual',
-    category: 'file',
-    shortcut: '⌘S',
-    icon: 'save',
-    priority: 97,
-    tags: ['save', 'salvar', 'gravar'],
-    handler: logCommandIntent('Save file'),
-  },
-  {
-    id: 'file.saveAll',
-    label: 'Salvar Todos',
-    description: 'Salvar todos os arquivos abertos',
-    category: 'file',
-    shortcut: '⌥⌘S',
-    icon: 'save-all',
-    priority: 96,
-    tags: ['save', 'all', 'salvar', 'todos'],
-    handler: logCommandIntent('Save all'),
-  },
-
-  // === EDIT ===
-  {
-    id: 'edit.undo',
-    label: 'Desfazer',
-    description: 'Desfazer a última ação',
-    category: 'edit',
-    shortcut: '⌘Z',
-    icon: 'undo',
-    priority: 100,
-    tags: ['undo', 'desfazer', 'voltar'],
-    handler: logCommandIntent('Undo'),
-  },
-  {
-    id: 'edit.redo',
-    label: 'Refazer',
-    description: 'Refazer a ação desfeita',
-    category: 'edit',
-    shortcut: '⇧⌘Z',
-    icon: 'redo',
-    priority: 99,
-    tags: ['redo', 'refazer'],
-    handler: logCommandIntent('Redo'),
-  },
-  {
-    id: 'edit.cut',
-    label: 'Recortar',
-    description: 'Recortar seleção',
-    category: 'edit',
-    shortcut: '⌘X',
-    icon: 'scissors',
-    priority: 98,
-    tags: ['cut', 'recortar', 'cortar'],
-    handler: logCommandIntent('Cut'),
-  },
-  {
-    id: 'edit.copy',
-    label: 'Copiar',
-    description: 'Copiar seleção',
-    category: 'edit',
-    shortcut: '⌘C',
-    icon: 'copy',
-    priority: 97,
-    tags: ['copy', 'copiar'],
-    handler: logCommandIntent('Copy'),
-  },
-  {
-    id: 'edit.paste',
-    label: 'Colar',
-    description: 'Colar do clipboard',
-    category: 'edit',
-    shortcut: '⌘V',
-    icon: 'clipboard',
-    priority: 96,
-    tags: ['paste', 'colar'],
-    handler: logCommandIntent('Paste'),
-  },
-  {
-    id: 'edit.find',
-    label: 'Buscar',
-    description: 'Buscar no arquivo',
-    category: 'edit',
-    shortcut: '⌘F',
-    icon: 'search',
-    priority: 95,
-    tags: ['find', 'search', 'buscar', 'procurar', 'pesquisar'],
-    handler: logCommandIntent('Find'),
-  },
-  {
-    id: 'edit.replace',
-    label: 'Substituir',
-    description: 'Buscar e substituir',
-    category: 'edit',
-    shortcut: '⌥⌘F',
-    icon: 'replace',
-    priority: 94,
-    tags: ['replace', 'substituir', 'trocar'],
-    handler: logCommandIntent('Replace'),
-  },
-
-  // === VIEW ===
-  {
-    id: 'view.commandPalette',
-    label: 'Command Palette',
-    description: 'Abrir paleta de comandos',
-    category: 'view',
-    shortcut: '⇧⌘P',
-    icon: 'command',
-    priority: 100,
-    tags: ['command', 'palette', 'comando', 'paleta'],
-    handler: logCommandIntent('Command palette'),
-  },
-  {
-    id: 'view.explorer',
-    label: 'Explorador',
-    description: 'Mostrar explorador de arquivos',
-    category: 'view',
-    shortcut: '⇧⌘E',
-    icon: 'files',
-    priority: 99,
-    tags: ['explorer', 'files', 'explorador', 'arquivos'],
-    handler: logCommandIntent('Explorer'),
-  },
-  {
-    id: 'view.search',
-    label: 'Buscar em Arquivos',
-    description: 'Buscar em todos os arquivos',
-    category: 'view',
-    shortcut: '⇧⌘F',
-    icon: 'search',
-    priority: 98,
-    tags: ['search', 'files', 'buscar', 'arquivos'],
-    handler: logCommandIntent('Search'),
-  },
-  {
-    id: 'view.git',
-    label: 'Controle de Versão',
-    description: 'Mostrar painel Git',
-    category: 'view',
-    shortcut: '⌃⇧G',
-    icon: 'git-branch',
-    priority: 97,
-    tags: ['git', 'source', 'control', 'versão'],
-    handler: logCommandIntent('Git'),
-  },
-  {
-    id: 'view.terminal',
-    label: 'Terminal',
-    description: 'Abrir terminal integrado',
-    category: 'view',
-    shortcut: '⌃`',
-    icon: 'terminal',
-    priority: 96,
-    tags: ['terminal', 'console', 'shell'],
-    handler: logCommandIntent('Terminal'),
-  },
-  {
-    id: 'view.toggleSidebar',
-    label: 'Alternar Barra Lateral',
-    description: 'Mostrar/ocultar barra lateral',
-    category: 'view',
-    shortcut: '⌘B',
-    icon: 'panel-left',
-    priority: 95,
-    tags: ['sidebar', 'toggle', 'barra', 'lateral'],
-    handler: logCommandIntent('Toggle sidebar'),
-  },
-  {
-    id: 'view.togglePanel',
-    label: 'Alternar Painel Inferior',
-    description: 'Mostrar/ocultar painel inferior',
-    category: 'view',
-    shortcut: '⌘J',
-    icon: 'panel-bottom',
-    priority: 94,
-    tags: ['panel', 'bottom', 'painel', 'inferior'],
-    handler: logCommandIntent('Toggle panel'),
-  },
-  {
-    id: 'view.zoomIn',
-    label: 'Aumentar Zoom',
-    description: 'Aumentar zoom do editor',
-    category: 'view',
-    shortcut: '⌘+',
-    icon: 'zoom-in',
-    priority: 93,
-    tags: ['zoom', 'in', 'aumentar'],
-    handler: logCommandIntent('Zoom in'),
-  },
-  {
-    id: 'view.zoomOut',
-    label: 'Diminuir Zoom',
-    description: 'Diminuir zoom do editor',
-    category: 'view',
-    shortcut: '⌘-',
-    icon: 'zoom-out',
-    priority: 92,
-    tags: ['zoom', 'out', 'diminuir'],
-    handler: logCommandIntent('Zoom out'),
-  },
-
-  // === RUN ===
-  {
-    id: 'run.start',
-    label: 'Iniciar',
-    description: 'Executar o projeto',
-    category: 'run',
-    shortcut: 'F5',
-    icon: 'play',
-    priority: 100,
-    tags: ['run', 'start', 'executar', 'iniciar', 'play'],
-    handler: logCommandIntent('Run'),
-  },
-  {
-    id: 'run.debug',
-    label: 'Depurar',
-    description: 'Iniciar depuração',
-    category: 'run',
-    shortcut: '⇧F5',
-    icon: 'bug',
-    priority: 99,
-    tags: ['debug', 'depurar'],
-    handler: logCommandIntent('Debug'),
-  },
-  {
-    id: 'run.stop',
-    label: 'Parar',
-    description: 'Parar execução',
-    category: 'run',
-    shortcut: '⇧F5',
-    icon: 'square',
-    priority: 98,
-    tags: ['stop', 'parar'],
-    handler: logCommandIntent('Stop'),
-  },
-  {
-    id: 'run.restart',
-    label: 'Reiniciar',
-    description: 'Reiniciar execução',
-    category: 'run',
-    shortcut: '⇧⌘F5',
-    icon: 'refresh-cw',
-    priority: 97,
-    tags: ['restart', 'reiniciar'],
-    handler: logCommandIntent('Restart'),
-  },
-  {
-    id: 'run.build',
-    label: 'Build',
-    description: 'Compilar projeto',
-    category: 'run',
-    shortcut: '⇧⌘B',
-    icon: 'package',
-    priority: 96,
-    tags: ['build', 'compile', 'compilar'],
-    handler: logCommandIntent('Build'),
-  },
-
-  // === AI ===
-  {
-    id: 'ai.chat',
-    label: 'Chat IA',
-    description: 'Abrir chat com IA',
-    category: 'ai',
-    shortcut: '⌘I',
-    icon: 'message-square',
-    priority: 100,
-    tags: ['ai', 'chat', 'copilot', 'ia', 'assistente'],
-    handler: logCommandIntent('AI Chat'),
-  },
-  {
-    id: 'ai.generateCode',
-    label: 'Gerar Código com IA',
-    description: 'Usar IA para gerar código',
-    category: 'ai',
-    shortcut: '⌃⌘I',
-    icon: 'sparkles',
-    priority: 99,
-    tags: ['ai', 'generate', 'code', 'gerar', 'código'],
-    handler: logCommandIntent('Generate code'),
-  },
-  {
-    id: 'ai.explain',
-    label: 'Explicar com IA',
-    description: 'IA explica código selecionado',
-    category: 'ai',
-    icon: 'help-circle',
-    priority: 98,
-    tags: ['ai', 'explain', 'explicar'],
-    handler: logCommandIntent('Explain'),
-  },
-  {
-    id: 'ai.refactor',
-    label: 'Refatorar com IA',
-    description: 'IA sugere refatoração',
-    category: 'ai',
-    icon: 'wand',
-    priority: 97,
-    tags: ['ai', 'refactor', 'refatorar'],
-    handler: logCommandIntent('Refactor'),
-  },
-
-  // === ENGINE ===
-  {
-    id: 'engine.viewport3d',
-    label: 'Viewport 3D',
-    description: 'Abrir viewport 3D',
-    category: 'engine',
-    icon: 'box',
-    priority: 100,
-    tags: ['3d', 'viewport', 'scene', 'cena'],
-    handler: logCommandIntent('3D Viewport'),
-  },
-  {
-    id: 'engine.visualScripting',
-    label: 'Visual Scripting',
-    description: 'Abrir editor de scripts visuais',
-    category: 'engine',
-    icon: 'workflow',
-    priority: 99,
-    tags: ['visual', 'scripting', 'blueprint', 'node'],
-    handler: logCommandIntent('Visual Scripting'),
-  },
-  {
-    id: 'engine.materials',
-    label: 'Editor de Materiais',
-    description: 'Abrir editor de materiais',
-    category: 'engine',
-    icon: 'palette',
-    priority: 98,
-    tags: ['material', 'shader', 'texture', 'textura'],
-    handler: logCommandIntent('Materials'),
-  },
-  {
-    id: 'engine.animation',
-    label: 'Editor de Animação',
-    description: 'Abrir timeline de animação',
-    category: 'engine',
-    icon: 'clapperboard',
-    priority: 97,
-    tags: ['animation', 'timeline', 'animação'],
-    handler: logCommandIntent('Animation'),
-  },
-  {
-    id: 'engine.particles',
-    label: 'Editor de Partículas',
-    description: 'Sistema de partículas Niagara',
-    category: 'engine',
-    icon: 'sparkles',
-    priority: 96,
-    tags: ['particles', 'niagara', 'vfx', 'partículas'],
-    handler: logCommandIntent('Particles'),
-  },
-
-  // === PREFERENCES ===
-  {
-    id: 'preferences.settings',
-    label: 'Configurações',
-    description: 'Abrir configurações',
-    category: 'preferences',
-    shortcut: '⌘,',
-    icon: 'settings',
-    priority: 100,
-    tags: ['settings', 'preferences', 'configurações', 'preferências'],
-    handler: logCommandIntent('Settings'),
-  },
-  {
-    id: 'preferences.keyboardShortcuts',
-    label: 'Atalhos de Teclado',
-    description: 'Configurar atalhos de teclado',
-    category: 'preferences',
-    shortcut: '⌘K ⌘S',
-    icon: 'keyboard',
-    priority: 99,
-    tags: ['keyboard', 'shortcuts', 'teclado', 'atalhos'],
-    handler: logCommandIntent('Keyboard shortcuts'),
-  },
-  {
-    id: 'preferences.themes',
-    label: 'Temas',
-    description: 'Escolher tema de cores',
-    category: 'preferences',
-    icon: 'palette',
-    priority: 98,
-    tags: ['theme', 'colors', 'tema', 'cores'],
-    handler: logCommandIntent('Themes'),
-  },
-
-  // === HELP ===
-  {
-    id: 'help.documentation',
-    label: 'Documentação',
-    description: 'Abrir documentação online',
-    category: 'help',
-    icon: 'book',
-    priority: 100,
-    tags: ['docs', 'documentation', 'documentação', 'help', 'ajuda'],
-    handler: () => window.open('/docs', '_blank'),
-  },
-  {
-    id: 'help.shortcuts',
-    label: 'Referência de Atalhos',
-    description: 'Ver todos os atalhos de teclado',
-    category: 'help',
-    shortcut: '⌃⇧/',
-    icon: 'keyboard',
-    priority: 99,
-    tags: ['shortcuts', 'reference', 'atalhos', 'referência'],
-    handler: logCommandIntent('Shortcuts reference'),
-  },
-  {
-    id: 'help.about',
-    label: 'Sobre',
-    description: 'Informações sobre o Aethel Engine',
-    category: 'help',
-    icon: 'info',
-    priority: 98,
-    tags: ['about', 'version', 'sobre', 'versão'],
-    handler: logCommandIntent('About'),
-  },
-];
-
-// ============================================================================
-// UTILITY HOOKS
-// ============================================================================
-
 /**
  * Hook to register default commands on mount
  */
 export function useDefaultCommands() {
   const { registerCommands } = useCommandRegistry();
-  
+
   useEffect(() => {
     const unregister = registerCommands(DEFAULT_COMMANDS);
     return unregister;
@@ -913,24 +473,11 @@ export function useGlobalShortcuts() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const commands = getAllCommands();
-      
+
       for (const command of commands) {
         if (!command.shortcut) continue;
-        
-        // Parse shortcut and check if it matches
-        // This is a simplified version - real implementation would be more complex
-        const shortcut = command.shortcut;
-        const isMac = navigator.platform.includes('Mac');
-        
-        // Convert shortcut to key combo
-        let match = false;
-        if (shortcut === '⌘N' && isMac && e.metaKey && e.key === 'n') match = true;
-        if (shortcut === '⌘S' && isMac && e.metaKey && e.key === 's') match = true;
-        if (shortcut === '⌘Z' && isMac && e.metaKey && e.key === 'z') match = true;
-        if (shortcut === 'F5' && e.key === 'F5') match = true;
-        // ... add more shortcuts as needed
-        
-        if (match) {
+
+        if (shortcutMatchesEvent(command.shortcut, e)) {
           e.preventDefault();
           executeCommand(command.id);
           return;

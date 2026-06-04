@@ -74,35 +74,35 @@ export default function SearchReplace() {
 
   return (
     <div className="search-replace p-4 bg-[var(--aethel-surface-secondary)] dark:bg-[var(--aethel-surface-secondary)]">
-      <h3 className="font-bold mb-4">Search e substituir</h3>
+      <h3 className="font-bold mb-4">Search and replace</h3>
 
       <div className="mb-4">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search por..."
+          placeholder="Search for..."
           className="w-full p-2 border rounded mb-2"
         />
         <input
           type="text"
           value={replaceQuery}
           onChange={(e) => setReplaceQuery(e.target.value)}
-          placeholder="Substituir por..."
+          placeholder="Replace with..."
           className="w-full p-2 border rounded mb-2"
         />
         <input
           type="text"
           value={includePattern}
           onChange={(e) => setIncludePattern(e.target.value)}
-          placeholder="Incluir files (ex.: *.tsx)"
+          placeholder="Include files (for example: *.tsx)"
           className="w-full p-2 border rounded mb-2"
         />
         <input
           type="text"
           value={excludePattern}
           onChange={(e) => setExcludePattern(e.target.value)}
-          placeholder="Delete files (ex.: node_modules)"
+          placeholder="Exclude files (for example: node_modules)"
           className="w-full p-2 border rounded mb-2"
         />
 
@@ -118,7 +118,7 @@ export default function SearchReplace() {
             className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)] rounded hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]"
             disabled={!replaceQuery.trim()}
           >
-            Substituir tudo
+            Replace all
           </button>
         </div>
       </div>
@@ -133,13 +133,13 @@ export default function SearchReplace() {
         {isSearching ? (
           <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
             <div className="animate-spin w-4 h-4 border-2 border-[var(--aethel-border-primary)] border-t-[var(--aethel-info)] rounded-full" />
-            Buscando...
+            Searching...
           </div>
         ) : (
           <>
-            <h4 className="font-semibold mb-2">Resultados ({results.length})</h4>
+            <h4 className="font-semibold mb-2">Results ({results.length})</h4>
             {results.length === 0 && searchQuery && !error ? (
-              <div className="text-[var(--aethel-text-tertiary)] text-sm">No resultado encontrado para &ldquo;{searchQuery}&rdquo;</div>
+              <div className="text-[var(--aethel-text-tertiary)] text-sm">No result found for &ldquo;{searchQuery}&rdquo;</div>
             ) : (
               results.map((result, index) => (
                 <div key={index} className="mb-2 p-2 bg-[var(--aethel-surface-secondary)] dark:bg-[var(--aethel-surface-secondary)] rounded border">

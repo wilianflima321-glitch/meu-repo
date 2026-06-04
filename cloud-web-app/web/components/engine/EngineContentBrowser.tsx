@@ -6,7 +6,7 @@
  * Unreal-style system for browsing, importing, organizing,
  * and managing project assets.
  *
- * NOT MOCK - real functional system.
+ * Production-oriented content browser surface.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EditorScaleReadinessBadge } from "@/components/editor/EditorScaleReadinessBadge";
@@ -25,6 +25,7 @@ import {
   type ImportOptions,
 } from "./content-browser-core";
 import { BreadcrumbNav, FilterBar } from "./content-browser-controls";
+import { createInitialContentBrowserAssets } from "./content-browser-fixtures";
 import {
   AssetCard,
   AssetRow,
@@ -36,11 +37,11 @@ import {
 export type { Asset, AssetFilter, AssetType, ImportOptions };
 
 export class AssetLoader {
-  private delegate: Promise<import("./content-browser-loader").AssetLoader> | null = null;
+  private delegate: Promise<import("@/lib/assets/content-browser-loader").AssetLoader> | null = null;
 
   private async getDelegate() {
     if (!this.delegate) {
-      this.delegate = import("./content-browser-loader").then((module) => new module.AssetLoader());
+      this.delegate = import("@/lib/assets/content-browser-loader").then((module) => new module.AssetLoader());
     }
     return this.delegate;
   }
@@ -89,125 +90,7 @@ export default function EngineContentBrowser({
   onAssetSelect,
   onAssetOpen,
 }: ContentBrowserProps) {
-  // Sample data - in real app, this would come from API
-  const [assets, setAssets] = useState<Asset[]>([
-    {
-      id: "1",
-      name: "Characters",
-      type: "folder",
-      path: "/Characters",
-      size: 0,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-      children: [],
-    },
-    {
-      id: "2",
-      name: "Environments",
-      type: "folder",
-      path: "/Environments",
-      size: 0,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-      children: [],
-    },
-    {
-      id: "3",
-      name: "Materials",
-      type: "folder",
-      path: "/Materials",
-      size: 0,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-      children: [],
-    },
-    {
-      id: "4",
-      name: "Audio",
-      type: "folder",
-      path: "/Audio",
-      size: 0,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-      children: [],
-    },
-    {
-      id: "5",
-      name: "Blueprints",
-      type: "folder",
-      path: "/Blueprints",
-      size: 0,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-      children: [],
-    },
-    {
-      id: "6",
-      name: "PlayerCharacter.fbx",
-      type: "mesh",
-      path: "/Characters/PlayerCharacter.fbx",
-      size: 2500000,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-      starred: true,
-    },
-    {
-      id: "7",
-      name: "Grass_Albedo.png",
-      type: "texture",
-      path: "/Materials/Grass_Albedo.png",
-      size: 1200000,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-    },
-    {
-      id: "8",
-      name: "M_Ground.material",
-      type: "material",
-      path: "/Materials/M_Ground.material",
-      size: 5000,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-    },
-    {
-      id: "9",
-      name: "BP_Enemy.blueprint",
-      type: "blueprint",
-      path: "/Blueprints/BP_Enemy.blueprint",
-      size: 15000,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-      starred: true,
-    },
-    {
-      id: "10",
-      name: "Footsteps.wav",
-      type: "audio",
-      path: "/Audio/Footsteps.wav",
-      size: 800000,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-    },
-    {
-      id: "11",
-      name: "MainLevel.level",
-      type: "level",
-      path: "/Environments/MainLevel.level",
-      size: 5000000,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-    },
-    {
-      id: "12",
-      name: "Fire.vfx",
-      type: "particle",
-      path: "/Effects/Fire.vfx",
-      size: 25000,
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-    },
-  ]);
-
+  const [assets, setAssets] = useState<Asset[]>(() => createInitialContentBrowserAssets());
   const [currentPath, setCurrentPath] = useState("/");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<AssetFilter>({});

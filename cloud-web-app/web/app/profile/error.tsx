@@ -3,5 +3,5 @@
 import { RouteError } from "@/components/route-boundaries/RouteError";
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  return <RouteError error={error} reset={reset} title="Profile surface recovered safely" detail="Profile failures are contained while the rest of Aethel remains usable." />;
+  return <RouteError error={error} reset={reset} title="Profile recovered safely" detail="Profile failures are contained while the rest of Aethel remains usable." />;
 }

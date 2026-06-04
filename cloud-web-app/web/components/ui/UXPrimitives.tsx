@@ -204,7 +204,7 @@ export function Toast({ message, type = 'info', onDismiss, action }: ToastProps)
           type="button"
           onClick={onDismiss}
           className="ml-1 flex h-5 w-5 items-center justify-center rounded text-current opacity-60 transition-opacity hover:opacity-100"
-          aria-label="Fechar notificacao"
+          aria-label="Close notification"
         >
           <Codicon name="close" />
         </button>

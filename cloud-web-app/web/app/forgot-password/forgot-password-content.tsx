@@ -40,19 +40,17 @@ function ForgotPasswordContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[160px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[160px]" />
-      </div>
-
+    <div
+      className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]"
+      data-forgot-password-surface="compact"
+    >
       <PublicHeader />
 
       <main className="relative z-10 flex min-h-[70vh] items-center justify-center px-6 pb-16 pt-12">
-        <div className="w-full max-w-md rounded-3xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8">
+        <div className="w-full max-w-md border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8">
           {isSuccess ? (
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
                 <CheckCircle className="h-8 w-8 text-[var(--aethel-success)]" />
               </div>
               <h1 className="text-2xl font-bold">Check your email</h1>
@@ -66,7 +64,7 @@ function ForgotPasswordContent() {
               </p>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-6 rounded-xl px-5 py-2 text-sm font-semibold"
+                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-6 px-5 py-2 text-sm font-semibold"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to sign in
@@ -75,7 +73,7 @@ function ForgotPasswordContent() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_20%,transparent),color-mix(in_srgb,var(--aethel-info)_20%,transparent))]">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_74%,transparent)]">
                   <Mail className="h-8 w-8 text-[var(--aethel-primary-light)]" />
                 </div>
                 <h1 className="text-2xl font-bold">Forgot your password?</h1>
@@ -85,7 +83,7 @@ function ForgotPasswordContent() {
               </div>
 
               {error && (
-                <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 p-3 text-sm text-[var(--aethel-error-light)]">
+                <div className="border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 p-3 text-sm text-[var(--aethel-error-light)]">
                   {error}
                 </div>
               )}
@@ -104,14 +102,14 @@ function ForgotPasswordContent() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
+                  className="h-12 w-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] w-full rounded-xl px-4 py-3 text-sm font-semibold"
+                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] w-full px-4 py-3 text-sm font-semibold"
               >
                 {isLoading ? (
                   <>
@@ -125,7 +123,7 @@ function ForgotPasswordContent() {
 
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] w-full rounded-xl px-4 py-2 text-sm font-semibold"
+                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] w-full px-4 py-2 text-sm font-semibold"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to sign in

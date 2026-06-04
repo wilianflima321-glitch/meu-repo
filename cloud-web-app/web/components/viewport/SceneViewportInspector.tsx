@@ -111,7 +111,7 @@ export function SceneViewportInspector({
       <div className="border-b border-[var(--aethel-border-primary)] px-4 py-3">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Inspector</p>
         <h3 className="mt-2 text-sm font-semibold text-[var(--aethel-text-primary)]">{selectedObject?.name ?? 'No object selected'}</h3>
-        <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">Transform, snapping, and play test connected to the sovereign viewport.</p>
+        <p className="sr-only">Selection details and safe edits.</p>
       </div>
       <div className="flex-1 space-y-4 overflow-auto px-4 py-4">
         <div>
@@ -162,9 +162,11 @@ export function SceneViewportInspector({
           </div>
         </div>
 
-        <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Pivot & Constraints</p>
-          <div className={`rounded-2xl border p-3 text-xs ${summaryToneClass[eliteSummary.tone]}`} role={eliteSummary.tone === 'blocked' ? 'alert' : 'status'}>
+        <details className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] p-3">
+          <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+            Advanced gizmo
+          </summary>
+          <div className={`mt-3 rounded-2xl border p-3 text-xs ${summaryToneClass[eliteSummary.tone]}`} role={eliteSummary.tone === 'blocked' ? 'alert' : 'status'}>
             <p className="font-semibold">{eliteSummary.title}</p>
             <p className="mt-1 text-[var(--aethel-text-secondary)]">{eliteSummary.detail}</p>
             <div className="mt-2 flex flex-wrap gap-1">
@@ -207,27 +209,29 @@ export function SceneViewportInspector({
             ))}
           </div>
           <p className="mt-2 text-[11px] text-[var(--aethel-text-quaternary)]">
-            {canApplyGizmoEliteControl(eliteState) ? 'Ready for transform evidence.' : 'Held until blockers are resolved.'}
+            {canApplyGizmoEliteControl(eliteState) ? 'Ready to transform.' : 'Held until blockers are resolved.'}
           </p>
-        </div>
+        </details>
 
-        <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">AI + Simulation</p>
-          <div className="space-y-2">
-            <button type="button" aria-label="Run play test" onClick={onTogglePlayTest} className={panelButton}>
+        <details className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] p-3">
+          <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+            Playtest & prompt
+          </summary>
+          <div className="mt-3 space-y-2">
+            <button type="button" aria-label={isPlaying ? 'Stop play test' : 'Run play test'} onClick={onTogglePlayTest} className={panelButton}>
               <Wand2 className="h-4 w-4" />
               {isPlaying ? 'Stop Play Test' : 'Play Test'}
             </button>
             <div className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-3">
               <p className="text-xs font-medium text-[var(--aethel-text-primary)]">Text to action</p>
-              <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">“move este objeto 2 para cima”, “rotate 15”, “scale 2”.</p>
+              <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">Try: move up 2, rotate 15, scale 2. Review before release.</p>
             </div>
           </div>
-        </div>
+        </details>
 
-        <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Character Tools</p>
-          <div className="grid grid-cols-2 gap-2">
+        <details className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] p-3">
+          <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Character tools</summary>
+          <div className="mt-3 grid grid-cols-2 gap-2">
             <button type="button" aria-label="Open contextual facial editor" onClick={onOpenFacialEditor} className={panelButton}>
               <Sparkles className="h-4 w-4" />
               Facial
@@ -241,11 +245,11 @@ export function SceneViewportInspector({
             <p>Active blend shapes: <span className="font-medium text-[var(--aethel-text-primary)]">{facialBlendShapeCount}</span></p>
             <p className="mt-1">Hair preset: <span className="font-medium text-[var(--aethel-text-primary)]">{hairPresetLabel}</span></p>
           </div>
-        </div>
+        </details>
 
-        <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Workflow Tools</p>
-          <div className="grid grid-cols-1 gap-2">
+        <details className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] p-3">
+          <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Logic tools</summary>
+          <div className="mt-3 grid grid-cols-1 gap-2">
             <button type="button" aria-label="Open contextual visual script editor" onClick={onOpenVisualScript} className={panelButton}>
               <GitBranch className="h-4 w-4" />
               Visual Script
@@ -260,10 +264,10 @@ export function SceneViewportInspector({
             </button>
           </div>
           <div className="mt-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-3 text-xs text-[var(--aethel-text-secondary)]">
-            <p>Active workflow: <span className="font-medium text-[var(--aethel-text-primary)]">{activeWorkflowLabel}</span></p>
-            <p className="mt-1">Visual Script: <span className="font-medium text-[var(--aethel-text-primary)]">{visualScriptNodeCount}</span> nodes ? <span className="font-medium text-[var(--aethel-text-primary)]">{visualScriptEdgeCount}</span> edges</p>
+            <p>Active tool: <span className="font-medium text-[var(--aethel-text-primary)]">{activeWorkflowLabel}</span></p>
+            <p className="mt-1">Visual Script: <span className="font-medium text-[var(--aethel-text-primary)]">{visualScriptNodeCount}</span> nodes / <span className="font-medium text-[var(--aethel-text-primary)]">{visualScriptEdgeCount}</span> edges</p>
           </div>
-        </div>
+        </details>
 
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Transform</p>
@@ -271,15 +275,15 @@ export function SceneViewportInspector({
             <div className="space-y-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-3 text-xs text-[var(--aethel-text-secondary)]">
               <div>
                 <p className="mb-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">Position</p>
-                <p>{selectedObject.position.map(formatter).join(' · ')}</p>
+                <p>{selectedObject.position.map(formatter).join(' / ')}</p>
               </div>
               <div>
                 <p className="mb-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">Rotation</p>
-                <p>{selectedObject.rotation.map((value) => formatter(radToDeg(value))).join('° · ')}°</p>
+                <p>{selectedObject.rotation.map((value) => `${formatter(radToDeg(value))} deg`).join(' / ')}</p>
               </div>
               <div>
                 <p className="mb-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">Scale</p>
-                <p>{selectedObject.scale.map(formatter).join(' · ')}</p>
+                <p>{selectedObject.scale.map(formatter).join(' / ')}</p>
               </div>
               {selectedObject.asset ? (
                 <ViewportAssetQualityCard asset={selectedObject.asset} />
@@ -287,7 +291,7 @@ export function SceneViewportInspector({
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-[var(--aethel-border-subtle)] px-4 py-6 text-center text-xs text-[var(--aethel-text-quaternary)]">
-              Select an object in the viewport or hierarchy to edit with the professional gizmo.
+              Select an object to edit transform, materials, and tools.
             </div>
           )}
         </div>

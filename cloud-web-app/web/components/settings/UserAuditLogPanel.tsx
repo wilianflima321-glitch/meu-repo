@@ -52,8 +52,8 @@ function formatDateTime(value: string): string {
 }
 
 function actorLabel(actor: AuditActor): string {
-  if (actor === 'you') return 'Voce'
-  if (actor === 'aethel_operator') return 'Operador Aethel'
+  if (actor === 'you') return 'You'
+  if (actor === 'aethel_operator') return 'Aethel operator'
   return 'Sistema'
 }
 
@@ -86,13 +86,13 @@ export default function UserAuditLogPanel() {
       const payload = (await response.json().catch(() => null)) as AuditLogResponse | { error?: string } | null
 
       if (!response.ok || !payload || !('events' in payload)) {
-        throw new Error((payload && 'error' in payload && payload.error) || 'Nao foi possivel carregar a atividade da conta.')
+        throw new Error((payload && 'error' in payload && payload.error) || 'Unable to load account activity.')
       }
 
       setData(payload)
     } catch (loadError) {
       logger.warn('Failed to load user audit log', loadError)
-      setError(loadError instanceof Error ? loadError.message : 'Nao foi possivel carregar a atividade da conta.')
+      setError(loadError instanceof Error ? loadError.message : 'Unable to load account activity.')
       setData(null)
     } finally {
       setLoading(false)
@@ -220,7 +220,7 @@ export default function UserAuditLogPanel() {
       {data && data.summary.critical > 0 && (
         <div className="mt-4 flex items-start gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_45%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] p-3 text-xs text-[var(--aethel-error-light)]">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-          Revise eventos criticos e altere sua senha se algo nao foi iniciado por voce.
+          Review critical events and change your password if something was not started by you.
         </div>
       )}
     </section>

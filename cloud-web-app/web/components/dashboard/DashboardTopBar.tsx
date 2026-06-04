@@ -93,7 +93,7 @@ export function DashboardTopBar({
             className="inline-flex min-h-10 items-center gap-2 rounded-2xl bg-[var(--aethel-text-primary)] px-4 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)] transition hover:bg-[var(--aethel-text-secondary)]"
           >
             <Terminal className="h-4 w-4" />
-            Open Studio
+            Open IDE
           </button>
           <details className="group relative">
             <summary className="inline-flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-4 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]">

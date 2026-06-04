@@ -2,14 +2,9 @@
 
 // @aethel-heavy-async-boundary: loaded by ContentBrowser only when the asset preview pane is visible.
 
-import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import dynamic from 'next/dynamic';
 import type { Asset } from './ContentBrowser';
 
 interface AssetPreviewPanelProps {
@@ -17,11 +12,17 @@ interface AssetPreviewPanelProps {
   lowPoly: boolean;
 }
 
-function resolveCssVarColor(varName: string, fallback: string): string {
-  if (typeof window === 'undefined') return fallback;
-  const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-  return value || fallback;
-}
+const AssetMeshPreview = dynamic(
+  () => import('@/lib/assets/asset-preview-mesh-runtime').then((mod) => mod.AssetMeshPreview),
+  {
+    ssr: false,
+    loading: () => (
+      <div style={{ display: 'grid', height: '100%', placeItems: 'center', color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>
+        Loading mesh...
+      </div>
+    ),
+  },
+);
 
 function formatSize(bytes?: number): string {
   if (!bytes) return '-';
@@ -39,93 +40,6 @@ function getExtension(asset: Asset): string {
   if (asset.extension) return asset.extension.replace('.', '').toLowerCase();
   const fromPath = asset.path.split('.').pop();
   return fromPath ? fromPath.toLowerCase() : '';
-}
-
-function getLoaderByExtension(ext: string) {
-  if (['gltf', 'glb'].includes(ext)) return GLTFLoader;
-  if (['fbx'].includes(ext)) return FBXLoader;
-  if (['obj'].includes(ext)) return OBJLoader;
-  return null;
-}
-
-function applyLowPolyStyle(object: THREE.Object3D) {
-  const baseColor = resolveCssVarColor('--aethel-accent', 'rgb(124, 131, 255)');
-  object.traverse((child) => {
-    if ((child as THREE.Mesh).isMesh) {
-      const mesh = child as THREE.Mesh;
-      const geom = mesh.geometry as THREE.BufferGeometry;
-      const flatGeom = geom.index ? geom.toNonIndexed() : geom.clone();
-      flatGeom.computeVertexNormals();
-      mesh.geometry = flatGeom;
-      mesh.material = new THREE.MeshStandardMaterial({
-        color: baseColor,
-        roughness: 0.85,
-        metalness: 0.1,
-        flatShading: true,
-      });
-    }
-  });
-}
-
-function disposeObject(object: THREE.Object3D) {
-  object.traverse((child) => {
-    if ((child as THREE.Mesh).isMesh) {
-      const mesh = child as THREE.Mesh;
-      mesh.geometry?.dispose();
-      if (Array.isArray(mesh.material)) {
-        mesh.material.forEach((mat) => mat.dispose());
-      } else {
-        mesh.material?.dispose();
-      }
-    }
-  });
-}
-
-function ModelPreview({ url, lowPoly, extension }: { url: string; lowPoly: boolean; extension: string }) {
-  const loader = useMemo(() => getLoaderByExtension(extension), [extension]);
-  const loaded = useLoader(loader as any, url);
-
-  const sourceObject = useMemo(() => {
-    if ((loaded as { scene?: THREE.Object3D }).scene) {
-      return (loaded as { scene: THREE.Object3D }).scene;
-    }
-    return loaded as THREE.Object3D;
-  }, [loaded]);
-
-  const previewObject = useMemo(() => {
-    const clone = sourceObject.clone(true);
-    if (lowPoly) {
-      applyLowPolyStyle(clone);
-    }
-    return clone;
-  }, [sourceObject, lowPoly]);
-
-  useEffect(() => () => disposeObject(previewObject), [previewObject]);
-
-  const groupRef = useRef<THREE.Group>(null);
-
-  useEffect(() => {
-    const box = new THREE.Box3().setFromObject(previewObject);
-    const center = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z) || 1;
-
-    previewObject.position.sub(center);
-    const scale = 1.6 / maxDim;
-    previewObject.scale.setScalar(scale);
-  }, [previewObject]);
-
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.35;
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      <primitive object={previewObject} />
-    </group>
-  );
 }
 
 export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelProps) {
@@ -185,7 +99,7 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
   if (!asset) {
     return (
       <div style={{ padding: '16px', color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>
-        Selecione um asset para visualizar o preview.
+        Select an asset to preview.
       </div>
     );
   }
@@ -229,14 +143,7 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
         )}
 
         {canLoadMesh ? (
-          <Canvas camera={{ position: [2.4, 2.1, 2.4], fov: 45 }}>
-            <ambientLight intensity={0.6} />
-            <directionalLight position={[4, 6, 4]} intensity={0.9} />
-            <Suspense fallback={null}>
-              <ModelPreview url={downloadUrl} lowPoly={lowPoly} extension={extension} />
-            </Suspense>
-            <OrbitControls enablePan={false} />
-          </Canvas>
+          <AssetMeshPreview url={downloadUrl} lowPoly={lowPoly} extension={extension} />
         ) : isTexture && downloadUrl ? (
           <Image
             src={downloadUrl}

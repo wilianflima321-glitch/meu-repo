@@ -121,7 +121,7 @@ export function GlowBadge({
 }
 
 // ============================================================================
-// AETHEL BUTTON - Botão com variants consistentes
+// AETHEL BUTTON - consistent button variants
 // ============================================================================
 
 interface AethelButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

@@ -1,7 +1,7 @@
 'use client'
 
 import { logger } from '@/lib/observability/logger';
-import React, { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { VideoTimeline, type VideoClip } from '../video/VideoTimeline'
 import type { ClipEffect } from '../../lib/video-encoder-real'
 
@@ -29,72 +29,27 @@ import {
   MediaStudioPreviewPanel,
   MediaStudioToolbar,
 } from './MediaStudioPanels'
+import {
+  useMediaStudioProjectState,
+  type MediaStudioProjectStateProps,
+} from './useMediaStudioProjectState'
 
-type Props = {
+type Props = MediaStudioProjectStateProps & {
   path?: string
-  project?: MediaProject
-  onProjectChange?: (project: MediaProject) => void
-  selectedAssetId?: string | null
-  onSelectedAssetIdChange?: (assetId: string | null) => void
-  selectedClipId?: string | null
-  onSelectedClipIdChange?: (clipId: string | null) => void
 }
 
 export default function MediaStudio({
   path,
-  project: controlledProject,
-  onProjectChange,
-  selectedAssetId: controlledSelectedAssetId,
-  onSelectedAssetIdChange,
-  selectedClipId: controlledSelectedClipId,
-  onSelectedClipIdChange,
+  ...projectStateProps
 }: Props) {
-  const initialProject = useMemo<MediaProject>(() => {
-    const now = Date.now()
-    return {
-      id: `media-project-${now}`,
-      name: 'Media Studio',
-      assets: [],
-      tracks: [
-        { id: 't-video-1', name: 'V1', type: 'video', muted: false, locked: false, height: 60 },
-        { id: 't-audio-1', name: 'A1', type: 'audio', muted: false, locked: false, height: 60 },
-      ],
-      clips: [],
-      duration: 30,
-    }
-  }, [])
-
-  const [internalProject, setInternalProject] = useState<MediaProject>(initialProject)
-  const [internalSelectedAssetId, setInternalSelectedAssetId] = useState<string | null>(null)
-  const [internalSelectedClipId, setInternalSelectedClipId] = useState<string | null>(null)
-  const project = controlledProject ?? internalProject
-  const selectedAssetId = controlledSelectedAssetId ?? internalSelectedAssetId
-  const selectedClipId = controlledSelectedClipId ?? internalSelectedClipId
-
-  const setProject = useCallback((update: SetStateAction<MediaProject>) => {
-    if (controlledProject && onProjectChange) {
-      const nextProject = typeof update === 'function' ? update(controlledProject) : update
-      onProjectChange(nextProject)
-      return
-    }
-    setInternalProject(update)
-  }, [controlledProject, onProjectChange])
-
-  const setSelectedAssetId = useCallback((nextId: string | null) => {
-    if (controlledSelectedAssetId !== undefined) {
-      onSelectedAssetIdChange?.(nextId)
-      return
-    }
-    setInternalSelectedAssetId(nextId)
-  }, [controlledSelectedAssetId, onSelectedAssetIdChange])
-
-  const setSelectedClipId = useCallback((nextId: string | null) => {
-    if (controlledSelectedClipId !== undefined) {
-      onSelectedClipIdChange?.(nextId)
-      return
-    }
-    setInternalSelectedClipId(nextId)
-  }, [controlledSelectedClipId, onSelectedClipIdChange])
+  const {
+    project,
+    selectedAssetId,
+    selectedClipId,
+    setProject,
+    setSelectedAssetId,
+    setSelectedClipId,
+  } = useMediaStudioProjectState(projectStateProps)
 
   const [currentTime, setCurrentTime] = useState(0)
   const [zoom, setZoom] = useState(80)

@@ -11,6 +11,7 @@ import {
   describeWorkbenchEntryProfile,
   resolveWorkbenchEntryProfile,
 } from '@/components/ide/fullscreen/workbench-entry-triage';
+import { getPreviewSurfaceDefinition } from '@/components/preview/previewSurfaceRegistry';
 
 import { PREVIEW_MODES } from './workbenchPreviewPaneModels';
 
@@ -27,6 +28,7 @@ export function WorkbenchPreviewModeHeader({
 }: WorkbenchPreviewModeHeaderProps) {
   const searchParams = useSearchParams();
   const activeModeMeta = PREVIEW_MODES.find((mode) => mode.id === previewMode) ?? PREVIEW_MODES[0];
+  const activeSurface = getPreviewSurfaceDefinition(previewMode);
   const sourceParam = searchParams?.get('source') ?? null;
   const missionParam = searchParams?.get('mission') ?? null;
   const entryProfile = useMemo(
@@ -41,13 +43,23 @@ export function WorkbenchPreviewModeHeader({
     () => describeWorkbenchEntryProfile(entryProfile),
     [entryProfile],
   );
+  const contextTitle = [
+    chromeContext.stageLabel,
+    `Mode: ${activeModeMeta.label}`,
+    `Policy: ${activeSurface.detailPolicy.replace(/-/g, ' ')}`,
+    missionParam?.trim() ? `Mission: ${missionParam}` : null,
+    activeFile ? `File: ${activeFile.path}` : null,
+  ]
+    .filter(Boolean)
+    .join(' - ');
 
   return (
-    <div className="border-b border-[var(--aethel-border-secondary)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent))] px-2 py-1.5">
+    <div className="border-b border-[var(--aethel-border-secondary)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent))] px-2 py-1.5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-[280px] flex-1 flex-wrap items-center gap-1.5">
           {PREVIEW_MODES.map((mode) => {
             const isActive = previewMode === mode.id;
+            const surfaceMeta = getPreviewSurfaceDefinition(mode.id);
 
             return (
               <button
@@ -55,6 +67,8 @@ export function WorkbenchPreviewModeHeader({
                 type="button"
                 onClick={() => setPreviewMode(mode.id)}
                 aria-pressed={isActive}
+                data-preview-surface-kind={surfaceMeta.kind}
+                data-preview-surface-owner={surfaceMeta.owner}
                 className={`group min-h-[30px] rounded-full border px-2.5 py-1 text-left transition-all ${
                   isActive
                     ? 'border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_14%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_10px_24px_rgba(0,0,0,0.18)]'
@@ -68,22 +82,27 @@ export function WorkbenchPreviewModeHeader({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-[11px]">
-          <span className="inline-flex min-h-[26px] items-center rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-secondary)]">
-            {chromeContext.stageLabel}
-          </span>
-          <span className="inline-flex min-h-[26px] items-center rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-secondary)]">
-            Surface: {activeModeMeta.label}
-          </span>
+          {activeFile ? (
+            <span
+              title={contextTitle}
+              className="hidden min-h-[26px] items-center rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-2.5 py-1 text-[var(--aethel-text-secondary)] xl:inline-flex"
+            >
+              {activeModeMeta.label} - {activeSurface.detailPolicy.replace(/-/g, ' ')}
+            </span>
+          ) : null}
           {missionParam?.trim() ? (
             <span
               title={missionParam}
-              className="inline-flex min-h-[26px] max-w-[220px] items-center truncate rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-tertiary)]"
+              className="hidden min-h-[26px] max-w-[180px] items-center truncate rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-2.5 py-1 text-[var(--aethel-text-tertiary)] xl:inline-flex"
             >
               {missionParam}
             </span>
           ) : null}
           {activeFile ? (
-            <span className="inline-flex min-h-[26px] max-w-[260px] items-center truncate rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-tertiary)]">
+            <span
+              title={activeFile.path}
+              className="hidden min-h-[26px] max-w-[220px] items-center truncate rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-2.5 py-1 text-[var(--aethel-text-tertiary)] 2xl:inline-flex"
+            >
               {activeFile.path}
             </span>
           ) : null}

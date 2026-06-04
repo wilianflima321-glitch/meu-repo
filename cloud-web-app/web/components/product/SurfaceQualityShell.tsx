@@ -39,7 +39,7 @@ export function SurfaceQualityShell({
 }: SurfaceQualityShellProps) {
   return (
     <section className={density === 'compact' ? 'space-y-4' : 'space-y-5'} data-surface-quality-shell="true">
-      <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent),color-mix(in_srgb,var(--aethel-info)_6%,transparent))] p-4 shadow-[0_22px_70px_rgba(0,0,0,0.24)] md:p-5">
+      <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] p-4 shadow-[0_22px_70px_rgba(0,0,0,0.24)] md:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">{eyebrow}</p>

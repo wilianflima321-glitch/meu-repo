@@ -4,7 +4,7 @@
  * Aethel IDE - Virtualized List Component
  *
  * Lista virtualizada de alta performance para renderizar
- * milhares de itens sem degradação de performance.
+ * thousands of items without performance degradation.
  * Similar ao que VS Code usa para file explorer e search results.
  */
 import React, {

@@ -35,9 +35,10 @@ const checks = [
     required: [
       'data-settings-command-center',
       'Workspace control',
-      'Settings should answer what needs attention.',
+      'Settings should show the next action.',
       'Review security',
-      'Open advanced editor',
+      'Advanced controls',
+      'Open advanced controls',
     ],
     forbidden: ['configuracao', 'preferencia', 'somente'],
   },

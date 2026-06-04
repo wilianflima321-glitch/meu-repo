@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary: behavior tree serialization belongs to runtime/agent execution lanes.
 import * as THREE from 'three'
 
 export class Blackboard {

@@ -4,7 +4,7 @@ import React, { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 're
 import { Loader2 } from 'lucide-react'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'outline' | 'premium'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'outline'
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'icon'
   loading?: boolean
   icon?: ReactNode
@@ -58,14 +58,6 @@ const variantClasses: Record<string, string> = {
     hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_40%,transparent)] hover:text-[var(--aethel-text-primary)]
     active:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)]
     border border-[var(--aethel-border-secondary)] hover:border-[var(--aethel-border-primary)]
-  `,
-  premium: `
-    bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))]
-    text-[var(--aethel-text-primary)] font-semibold
-    hover:brightness-110
-    active:brightness-95
-    shadow-xl shadow-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] hover:shadow-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)]
-    border border-[color-mix(in_srgb,var(--aethel-border-primary)_40%,transparent)]
   `,
 }
 
@@ -163,4 +155,3 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button'
 
 export default Button
-

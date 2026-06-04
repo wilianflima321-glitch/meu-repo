@@ -184,15 +184,15 @@ export function ThinkingDisplay({ thinking, isExpanded, onToggle, steps }: Think
           {parsedSteps.filter(s => s.status === 'completed').length}/{parsedSteps.length} steps
         </div>
       </div>
-      
+
       {/* Steps Timeline */}
       <div className="mt-2 space-y-1">
         {parsedSteps.slice(0, isExpanded ? undefined : 3).map((step, index) => {
-          const StepIcon = step.status === 'completed' ? CheckCircle2 
+          const StepIcon = step.status === 'completed' ? CheckCircle2
                         : step.status === 'in_progress' ? Loader2
                         : step.status === 'failed' ? AlertTriangle
                         : Circle
-          
+
           return (
             <div key={step.id} className="flex items-start gap-2">
               <div className="mt-0.5">
@@ -200,7 +200,7 @@ export function ThinkingDisplay({ thinking, isExpanded, onToggle, steps }: Think
                   <Loader2 className="h-3 w-3 animate-spin text-[var(--aethel-info-light)]" />
                 ) : (
                   <StepIcon className={`h-3 w-3 ${
-                    step.status === 'completed' ? 'text-[var(--aethel-success-light)]' 
+                    step.status === 'completed' ? 'text-[var(--aethel-success-light)]'
                     : step.status === 'failed' ? 'text-[var(--aethel-error-light)]'
                     : 'text-[var(--aethel-text-quaternary)]'
                   }`} />
@@ -291,10 +291,15 @@ export function ToolCallDisplay({ toolCall }: ToolCallDisplayProps) {
           <span className="text-[11px] text-[var(--aethel-text-quaternary)]">- {durationLabel}</span>
         )}
       </div>
-      {argsSummary && (
-        <div className="mt-1 text-[11px] text-[var(--aethel-text-quaternary)]">params: {argsSummary}</div>
+      {(argsSummary || toolCall.result) && (
+        <details className="mt-2">
+          <summary className="cursor-pointer text-[11px] text-[var(--aethel-text-quaternary)]">Tool details</summary>
+          {argsSummary && (
+            <div className="mt-1 text-[11px] text-[var(--aethel-text-quaternary)]">params: {argsSummary}</div>
+          )}
+          {toolCall.result && <div className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">{toolCall.result}</div>}
+        </details>
       )}
-      {toolCall.result && <div className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">{toolCall.result}</div>}
     </div>
   )
 }

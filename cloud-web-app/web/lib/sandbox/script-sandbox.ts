@@ -1,194 +1,49 @@
 import { logger } from '@/lib/observability/logger';
+import { DANGEROUS_PATTERNS, sanitizeOutput, validateScript } from './script-sandbox-guards';
+import { AethelGameAPIs } from './script-sandbox-game-apis';
 /**
- * Script Sandbox - Isolamento de Execução de Scripts
- * 
- * Este módulo implementa um sandbox seguro para execução de scripts
- * de usuário usando Web Workers e QuickJS-Emscripten.
- * 
- * SEGURANÇA CRÍTICA:
- * - Scripts rodam em Web Worker isolado (thread separada)
- * - Sem acesso ao DOM principal
- * - Sem acesso a tokens/localStorage da IDE
- * - Timeout automático para prevenir loops infinitos
- * - Memory limit para prevenir DoS
- * - Whitelist de APIs disponíveis
- * 
- * @security CVE-AETHEL-001 - Mitigação de execução arbitrária
+ * Script Sandbox - isolated user-script execution.
+ *
+ * Runs user scripts in a constrained worker with timeout, memory policy,
+ * output sanitization and a strict allowlist of APIs.
+ *
+ * @security CVE-AETHEL-001 - arbitrary execution mitigation layer
  */
 
-// ============================================================================
-// TIPOS
-// ============================================================================
-
-export interface SandboxConfig {
-  /** Timeout em milissegundos (default: 5000) */
-  timeout: number;
-  /** Limite de memória em bytes (default: 50MB) */
-  memoryLimit: number;
-  /** APIs permitidas para o script */
-  allowedAPIs: AllowedAPI[];
-  /** Variáveis globais injetadas */
-  globals: Record<string, unknown>;
-  /** Modo de execução */
-  mode: 'strict' | 'permissive';
-}
-
-export type AllowedAPI = 
-  | 'console'      // console APIs
-  | 'math'         // Math.*
-  | 'json'         // JSON.parse/stringify
-  | 'date'         // Date
-  | 'array'        // Array methods
-  | 'string'       // String methods
-  | 'object'       // Object methods
-  | 'number'       // Number methods
-  | 'boolean'      // Boolean methods
-  | 'aethel-game'  // APIs de jogo do Aethel
-  | 'aethel-ui';   // APIs de UI do Aethel
-
-export interface SandboxResult {
-  success: boolean;
-  result?: unknown;
-  error?: string;
-  executionTime: number;
-  memoryUsed: number;
-  logs: SandboxLog[];
-}
-
-export interface SandboxLog {
-  level: 'log' | 'warn' | 'error' | 'info';
-  message: string;
-  timestamp: number;
-}
-
-export interface SandboxMessage {
-  type: 'execute' | 'result' | 'log' | 'error' | 'timeout' | 'ready';
-  payload?: unknown;
-}
+export { DANGEROUS_PATTERNS, sanitizeOutput, validateScript } from './script-sandbox-guards';
+export { AethelGameAPIs } from './script-sandbox-game-apis';
+export type { AllowedAPI, SandboxConfig, SandboxLog, SandboxMessage, SandboxResult } from './script-sandbox.types';
+import type { AllowedAPI, SandboxConfig, SandboxLog, SandboxMessage, SandboxResult } from './script-sandbox.types';
 
 // ============================================================================
-// PADRÕES PERIGOSOS
+// TYPES
 // ============================================================================
 
-export const DANGEROUS_PATTERNS = [
-  // Acesso a protótipos
-  /__proto__/,
-  /Object\s*\.\s*prototype/,
-  /Array\s*\.\s*prototype/,
-  /constructor\s*\[/,
-  /constructor\s*\.\s*constructor/,
-  /prototype\s*\[/,
-  
-  // Manipulação de escopo
-  /\beval\b/,
-  /\bFunction\b\s*\(/,
-  /new\s+Function/,
-  
-  // Acesso ao DOM
-  /\bdocument\b/,
-  /\bwindow\b/,
-  /\bglobalThis\b/,
-  /\bself\b/,
-  
-  // Node.js específicos
-  /\brequire\b/,
-  /\bimport\b\s*\(/,
-  /\bprocess\b/,
-  /\b__dirname\b/,
-  /\b__filename\b/,
-  
-  // Fetch e comunicação
-  /\bfetch\b/,
-  /\bXMLHttpRequest\b/,
-  /\bWebSocket\b/,
-  
-  // Storage
-  /\blocalStorage\b/,
-  /\bsessionStorage\b/,
-  /\bindexedDB\b/,
-  
-  // Workers (prevenir escape)
-  /\bWorker\b/,
-  /\bSharedWorker\b/,
-  /\bServiceWorker\b/,
-  
-  // Timing attacks
-  /\bperformance\b\.now/,
-  
-  // Módulos perigosos
-  /child_process/,
-  /fs\s*\./,
-];
-
-export function validateScript(code: string): { valid: boolean; reason?: string } {
-  for (const pattern of DANGEROUS_PATTERNS) {
-    if (pattern.test(code)) {
-      return { valid: false, reason: `Blocked by pattern: ${pattern.toString()}` };
-    }
-  }
-  return { valid: true };
+type SimulatedWorker = Worker & {
+  simulateMessage?: (message: SandboxMessage) => void;
 }
 
-export function sanitizeOutput(
-  output: unknown,
-  options?: {
-    maxDepth?: number;
-    maxSize?: number;
-    maxArrayLength?: number;
-    maxStringLength?: number;
-  }
-): unknown {
-  const opts = {
-    maxDepth: options?.maxDepth ?? 6,
-    maxSize: options?.maxSize ?? 100_000,
-    maxArrayLength: options?.maxArrayLength ?? 5000,
-    maxStringLength: options?.maxStringLength ?? 10_000,
-  };
+type SandboxResultPayload = SandboxResult & {
+  id?: string;
+}
 
-  const seen = new WeakSet<object>();
-  let size = 0;
+function hasSimulatedWorker(worker: Worker | null): worker is SimulatedWorker {
+  return !!worker && typeof (worker as SimulatedWorker).simulateMessage === 'function';
+}
 
-  const sanitize = (value: unknown, depth: number): unknown => {
-    if (value === null || value === undefined) return value;
-    if (typeof value === 'string') {
-      const truncated = value.length > opts.maxStringLength
-        ? `${value.slice(0, opts.maxStringLength)}[truncated]`
-        : value;
-      size += truncated.length;
-      return truncated
-        .replace(/<script/gi, '&lt;script')
-        .replace(/on\w+\s*=/gi, 'data-attr=');
-    }
-    if (typeof value === 'function') return '[Function]';
-    if (typeof value !== 'object') return value;
+function isSandboxResultPayload(value: unknown): value is SandboxResultPayload {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<SandboxResultPayload>;
+  return (
+    Object.prototype.hasOwnProperty.call(candidate, 'success') ||
+    Object.prototype.hasOwnProperty.call(candidate, 'error') ||
+    Object.prototype.hasOwnProperty.call(candidate, 'logs')
+  );
+}
 
-    if (seen.has(value)) return '[Circular]';
-    seen.add(value);
-
-    if (depth > opts.maxDepth) return '[MaxDepth]';
-
-    if (Array.isArray(value)) {
-      const arr: unknown[] = [];
-      const limit = Math.min(value.length, opts.maxArrayLength);
-      for (let i = 0; i < limit; i++) {
-        arr.push(sanitize(value[i], depth + 1));
-        if (size > opts.maxSize) return arr;
-      }
-      if (value.length > opts.maxArrayLength) {
-        arr.push('[Truncated]');
-      }
-      return arr;
-    }
-
-    const obj: Record<string, unknown> = {};
-    for (const [key, val] of Object.entries(value)) {
-      obj[key] = sanitize(val, depth + 1);
-      if (size > opts.maxSize) break;
-    }
-    return obj;
-  };
-
-  return sanitize(output, 0);
+function getPayloadResult(value: unknown): unknown {
+  if (!value || typeof value !== 'object') return undefined;
+  return (value as { result?: unknown }).result;
 }
 
 // ============================================================================
@@ -218,7 +73,7 @@ export class ScriptSandbox {
   }
 
   /**
-   * Inicializa o Worker sandbox
+   * Initializes the sandbox worker
    */
   async initialize(): Promise<void> {
     if (this.disposed) {
@@ -238,11 +93,11 @@ export class ScriptSandbox {
         const workerCode = this.generateWorkerCode();
         const blob = new Blob([workerCode], { type: 'application/javascript' });
         const workerUrl = URL.createObjectURL(blob);
-        
+
         const worker = new Worker(workerUrl);
         this.worker = worker;
         this.workers.push(worker);
-        
+
         let settled = false;
         let initTimeout: NodeJS.Timeout | null = null;
         const finalizeReady = () => {
@@ -287,12 +142,12 @@ export class ScriptSandbox {
           }
         }, 3000);
 
-        // Ambientes de teste com MockWorker não disparam "ready"
-        if ((worker as any)?.simulateMessage) {
-          (worker as any).simulateMessage({ type: 'ready' });
+        // Test workers do not always dispatch the ready event automatically.
+        if (hasSimulatedWorker(worker)) {
+          worker.simulateMessage?.({ type: 'ready' });
         }
 
-        // Cleanup URL
+        // Cleanup URL.
         URL.revokeObjectURL(workerUrl);
       } catch (error) {
         reject(error);
@@ -301,7 +156,7 @@ export class ScriptSandbox {
   }
 
   /**
-   * Finaliza o sandbox e limpa recursos
+   * Disposes the sandbox and releases resources
    */
   dispose(): void {
     this.disposed = true;
@@ -486,11 +341,10 @@ export class ScriptSandbox {
       if (pending) {
         clearTimeout(pending.timer);
         this.messageQueue.delete(pendingId);
-        const payloadObj = payload as any;
-        if (payloadObj && (Object.prototype.hasOwnProperty.call(payloadObj, 'success') || Object.prototype.hasOwnProperty.call(payloadObj, 'error') || Object.prototype.hasOwnProperty.call(payloadObj, 'logs'))) {
+        if (isSandboxResultPayload(payload)) {
           const resolved = this.isMockWorker()
-            ? (payloadObj as SandboxResult)
-            : this.normalizeResult(payloadObj as SandboxResult);
+            ? payload
+            : this.normalizeResult(payload);
           pending.resolve(resolved);
           return;
         }
@@ -504,7 +358,7 @@ export class ScriptSandbox {
         }
         pending.resolve({
           success: true,
-          result: sanitizeOutput((message.payload as any)?.result),
+          result: sanitizeOutput(getPayloadResult(message.payload)),
           executionTime: 0,
           memoryUsed: 0,
           logs: [],
@@ -577,7 +431,7 @@ export class ScriptSandbox {
   }
 
   private isMockWorker(): boolean {
-    return !!(this.worker as any)?.simulateMessage;
+    return hasSimulatedWorker(this.worker);
   }
 
   private executeInProcess(code: string, context?: Record<string, unknown>): SandboxResult {
@@ -675,7 +529,7 @@ export class ScriptSandbox {
 
       // Remover acesso a APIs perigosas
       const _postMessage = postMessage;
-      
+
       // APIs permitidas (será filtrado por execução)
       const safeAPIs = {
         console: {
@@ -728,7 +582,7 @@ export class ScriptSandbox {
         try {
           // Construir escopo seguro
           const scope = { ...context };
-          
+
           // Adicionar APIs permitidas
           const apiMap = {
             console: 'console',
@@ -790,7 +644,7 @@ export class ScriptSandbox {
 
         if (type === 'execute') {
           const { id, code, context, allowedAPIs, memoryLimit } = payload;
-          
+
           // Executar com segurança
           const result = safeExecute(code, context, allowedAPIs);
 
@@ -836,64 +690,5 @@ export async function safeExecute(
   return sandbox.execute(code, context);
 }
 
-// ============================================================================
-// AETHEL GAME APIs (para scripts de jogo)
-// ============================================================================
-
-/**
- * APIs seguras expostas para scripts de jogo
- */
-export const AethelGameAPIs = {
-  // Matemática de jogo
-  lerp: (a: number, b: number, t: number) => a + (b - a) * t,
-  clamp: (value: number, min: number, max: number) => Math.min(Math.max(value, min), max),
-  randomRange: (min: number, max: number) => Math.random() * (max - min) + min,
-  distance: (x1: number, y1: number, x2: number, y2: number) => 
-    Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2),
-  
-  // Vetores 2D
-  vec2: {
-    add: (a: [number, number], b: [number, number]): [number, number] => 
-      [a[0] + b[0], a[1] + b[1]],
-    sub: (a: [number, number], b: [number, number]): [number, number] => 
-      [a[0] - b[0], a[1] - b[1]],
-    mul: (a: [number, number], s: number): [number, number] => 
-      [a[0] * s, a[1] * s],
-    normalize: (a: [number, number]): [number, number] => {
-      const len = Math.sqrt(a[0] ** 2 + a[1] ** 2);
-      return len > 0 ? [a[0] / len, a[1] / len] : [0, 0];
-    },
-  },
-  
-  // Vetores 3D
-  vec3: {
-    add: (a: [number, number, number], b: [number, number, number]): [number, number, number] => 
-      [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
-    sub: (a: [number, number, number], b: [number, number, number]): [number, number, number] => 
-      [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
-    mul: (a: [number, number, number], s: number): [number, number, number] => 
-      [a[0] * s, a[1] * s, a[2] * s],
-    cross: (a: [number, number, number], b: [number, number, number]): [number, number, number] => [
-      a[1] * b[2] - a[2] * b[1],
-      a[2] * b[0] - a[0] * b[2],
-      a[0] * b[1] - a[1] * b[0],
-    ],
-    dot: (a: [number, number, number], b: [number, number, number]): number => 
-      a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
-  },
-  
-  // Easing functions
-  ease: {
-    linear: (t: number) => t,
-    inQuad: (t: number) => t * t,
-    outQuad: (t: number) => t * (2 - t),
-    inOutQuad: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
-    inCubic: (t: number) => t * t * t,
-    outCubic: (t: number) => (--t) * t * t + 1,
-    inOutCubic: (t: number) => t < 0.5 
-      ? 4 * t * t * t 
-      : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
-  },
-};
 
 export default ScriptSandbox;

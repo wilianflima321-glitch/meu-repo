@@ -142,7 +142,7 @@ export function ServiceWorkerProvider({ children, enabled = false }: ServiceWork
                 d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"
               />
             </svg>
-            Voce esta offline. Algumas funcionalidades podem ficar limitadas.
+            You are offline. Some features may be limited.
           </span>
         </div>
       ) : null}
@@ -169,10 +169,10 @@ export function ServiceWorkerProvider({ children, enabled = false }: ServiceWork
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 id="update-title" className="text-sm font-semibold text-[var(--aethel-text-primary)]">
-                    Nova versao disponivel
+                    Update available
                   </h3>
                   <p id="update-description" className="mt-1 text-sm text-[var(--aethel-text-tertiary)]">
-                    Uma nova versao do Aethel Engine esta pronta para ser instalada.
+                    A new Aethel Engine version is ready to install.
                   </p>
                 </div>
               </div>
@@ -184,14 +184,14 @@ export function ServiceWorkerProvider({ children, enabled = false }: ServiceWork
                 onClick={handleDismiss}
                 className="flex-1 px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] hover:text-[var(--aethel-text-primary)]"
               >
-                Mais tarde
+                Later
               </button>
               <button
                 type="button"
                 onClick={handleUpdate}
                 className="flex-1 border-l border-[var(--aethel-border-primary)] px-4 py-3 text-sm font-medium text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] hover:text-[var(--aethel-info)]"
               >
-                Refresh agora
+                Refresh now
               </button>
             </div>
           </div>

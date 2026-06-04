@@ -46,7 +46,7 @@ const bottomPanelTabs: ReadonlyArray<{
     id: 'terminal',
     icon: <TerminalSquare size={14} />,
     label: 'Terminal',
-    description: 'Comandos, sessoes e logs do workspace',
+    description: 'Commands, sessions, and workspace logs',
   },
 ];
 
@@ -93,7 +93,7 @@ export function ModernIDEShellCenterStack({
       {chatOpen && !isCompact && (
         <>
           <ResizeHandle
-            ariaLabel={`Redimensionar ${activePanelMeta.label}`}
+            ariaLabel={`Resize ${activePanelMeta.label}`}
             orientation="horizontal"
             onMouseDown={startVerticalResize}
             onAdjust={(delta) => setChatSize(chatSize + delta)}

@@ -45,6 +45,7 @@ export function MobileBottomNav({
   items?: MobileNavItem[]
 }) {
   const pathname = useBrowserPathname()
+  const columnClass = items.length <= 3 ? 'grid-cols-3' : items.length === 4 ? 'grid-cols-4' : 'grid-cols-5'
 
   const isActive = useCallback(
     (item: MobileNavItem) => {
@@ -57,7 +58,8 @@ export function MobileBottomNav({
   return (
     <nav
       className={joinClasses(
-        'mobile-bottom-nav fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent)] p-1 shadow-[0_18px_60px_rgba(2,6,23,0.42)] backdrop-blur-xl md:hidden'
+        'mobile-bottom-nav fixed inset-x-3 bottom-3 z-40 grid gap-1 rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent)] p-1 shadow-[0_18px_60px_rgba(2,6,23,0.42)] backdrop-blur-xl md:hidden',
+        columnClass,
       )}
       role="navigation"
       aria-label="Mobile navigation"
@@ -200,7 +202,7 @@ export function MobileSidebarOverlay({
           <button type="button"
             onClick={onClose}
             className="ml-auto flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
-            aria-label="Fechar menu"
+            aria-label="Close menu"
           >
             <X size={20} />
           </button>
@@ -426,7 +428,7 @@ export function MobileMenuButton({
         'inline-flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)] md:hidden',
         className
       )}
-      aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
+      aria-label={isOpen ? 'Close menu' : 'Open menu'}
       aria-expanded={isOpen}
     >
       {isOpen ? <X size={20} /> : <Menu size={20} />}

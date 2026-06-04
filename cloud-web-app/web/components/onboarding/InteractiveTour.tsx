@@ -358,7 +358,7 @@ function TourOverlay() {
             <button type="button"
               onClick={endTour}
               className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] rounded transition-colors"
-              aria-label="Fechar tour"
+              aria-label="Close tour"
             >
               <X className="w-4 h-4" />
             </button>
@@ -574,4 +574,3 @@ export function useStartTour() {
 // ============================================================================
 
 export default TourProvider;
-

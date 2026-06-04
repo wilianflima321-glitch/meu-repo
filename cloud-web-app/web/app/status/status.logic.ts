@@ -262,7 +262,7 @@ export function getCoverageSummary(
         },
         {
           title: 'Commercial reading',
-          detail: 'This is not treated as green status. The page declares a public blocker when runtime, readiness, or database checks fail.',
+          detail: 'This is not treated as green status. The page declares a public blocker when the app, status, or database checks fail.',
         },
         {
           title: 'Not published yet',
@@ -279,7 +279,7 @@ export function getCoverageSummary(
       cards: [
         {
           title: 'Coverage proven now',
-          detail: `${respondingCount}/${checks.length} checks responded. The public base is up, but some surfaces are still incomplete.`,
+          detail: `${respondingCount}/${checks.length} checks responded. The public base is up, but some checks are still incomplete.`,
         },
         {
           title: 'Commercial reading',
@@ -307,7 +307,7 @@ export function getCoverageSummary(
       },
       {
         title: 'Not published yet',
-        detail: 'We still do not have rolling uptime, a resolved incident archive, or full L4 proof on this public surface.',
+        detail: 'We still do not have rolling uptime, a resolved incident archive, or full L4 receipt coverage on this public page.',
       },
     ],
   }
@@ -326,16 +326,16 @@ export function getStatusTimeline(
       : overall === 'partial'
         ? 'Active degradation in capabilities that are not fully closed'
         : overall === 'unhealthy'
-          ? 'Active public incident on mandatory surface'
+          ? 'Active public incident on mandatory check'
           : 'Checks are still collecting state'
 
   const activeIncidentDetail =
     overall === 'healthy'
-      ? 'The current reading did not find a blocker in runtime, readiness, or database. This does not replace SLA history.'
+      ? 'The current reading did not find a blocker in app, status, or database. This does not replace SLA history.'
       : overall === 'partial'
-        ? `The base responds, but ${partialSurfaces.map((surface) => surface.name).join(', ') || 'some surfaces'} are still partial.`
+        ? `The base responds, but ${partialSurfaces.map((surface) => surface.name).join(', ') || 'some checks'} are still partial.`
         : overall === 'unhealthy'
-          ? `The ${blockingSurfaces.map((surface) => surface.name).join(', ') || 'mandatory'} surfaces failed the current public check.`
+          ? `The ${blockingSurfaces.map((surface) => surface.name).join(', ') || 'mandatory'} checks failed the current public check.`
           : 'The first collection is still in progress.'
 
   return [
@@ -353,7 +353,7 @@ export function getStatusTimeline(
       title: partialSurfaces.length > 0 ? 'Sellable capabilities still under observation' : 'No partial commercial alert this round',
       detail:
         partialSurfaces.length > 0
-          ? `The page is being honest about ${partialSurfaces.length} still-partial surface(s) to avoid selling coverage the runtime has not proven.`
+          ? `The page is being honest about ${partialSurfaces.length} still-partial check(s) to avoid selling coverage the runtime has not proven.`
           : 'No partial commercial alert was needed in this public collection.',
       tone: partialSurfaces.length > 0 ? 'partial' : 'healthy',
       timestampLabel,
@@ -374,14 +374,14 @@ export function getNextActions(blockingSurfaces: SurfaceResult[], partialSurface
   if (blockingSurfaces.some((surface) => surface.id === 'database')) {
     return [
       'Restore database connectivity.',
-      'Revalidate readiness and public runtime after the connection returns.',
+      'Revalidate app status after the connection returns.',
       'Update this page only when the public check proves recovery.',
     ]
   }
 
   if (blockingSurfaces.some((surface) => surface.id === 'runtime' || surface.id === 'readiness')) {
     return [
-      'Recover app liveness/readiness before promoting any public narrative.',
+      'Recover app liveness and status before promoting any public narrative.',
       'Run a new check cycle to confirm runtime stability.',
       'Only then consider the capability commercially reliable again.',
     ]
@@ -389,7 +389,7 @@ export function getNextActions(blockingSurfaces: SurfaceResult[], partialSurface
 
   if (partialSurfaces.some((surface) => surface.id === 'stripe' || surface.id === 'billing')) {
     return [
-      'Complete checkout and webhook readiness before treating billing as sellable.',
+      'Complete checkout and webhook status before treating billing as sellable.',
       'Validate plans and price IDs with the real billing runtime.',
       'Publish that gain here only when checks stop marking it partial.',
     ]

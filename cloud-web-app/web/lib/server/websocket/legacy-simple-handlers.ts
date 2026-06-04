@@ -63,6 +63,35 @@ export function handleLegacyDapSocket(ws: WebSocket, sendRaw: SendRaw): void {
   sendRaw(ws, { type: 'ready' })
 }
 
+export function handleLegacyTerminalSocket(ws: WebSocket, info: ConnectionInfo, sendRaw: SendRaw): void {
+  const terminalId = info.sessionId || `term_${Date.now().toString(36)}`
+
+  ws.on('message', (data) => {
+    try {
+      const message = asWsRecord(JSON.parse(data.toString()))
+      switch (message.type) {
+        case 'input':
+          eventBus.emit('terminal:input', { terminalId, data: message.data })
+          break
+        case 'resize':
+          eventBus.emit('terminal:resize', {
+            terminalId,
+            cols: message.cols,
+            rows: message.rows,
+          })
+          break
+        case 'ping':
+          sendRaw(ws, { type: 'pong', timestamp: Date.now() })
+          break
+      }
+    } catch (error) {
+      log.error('[Terminal] Message parse error', error)
+    }
+  })
+
+  sendRaw(ws, { type: 'ready', terminalId })
+}
+
 export function handleLegacyGeneralSocket(options: {
   ws: WebSocket
   info: ConnectionInfo

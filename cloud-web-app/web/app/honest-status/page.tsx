@@ -48,7 +48,7 @@ export default function HonestStatusPage() {
               </p>
             </div>
             <Link
-              href="/roadmap"
+              href="/docs/changelog"
               className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-secondary)]"
             >
               View roadmap

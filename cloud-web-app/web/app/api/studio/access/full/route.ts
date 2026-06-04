@@ -8,6 +8,7 @@ import {
   listFullAccessGrants,
   type FullAccessGrantRecord,
 } from '@/lib/server/full-access-ledger'
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback'
 
 export const dynamic = 'force-dynamic'
 
@@ -93,6 +94,29 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
+    if (shouldUseLocalEvidenceFallback(request, error)) {
+      return localEvidenceJson(
+        request,
+        error,
+        {
+          error: 'NONE',
+          message: 'Full access grants are held in local evidence fallback.',
+          capability: CAPABILITY,
+          milestone: 'P1',
+          metadata: {
+            grants: [],
+            activeCount: 0,
+            includeInactive: request.nextUrl.searchParams.get('includeInactive') === 'true',
+            governance: {
+              scopeRequired: true,
+              shortLived: true,
+              auditTrail: 'ndjson-hash-chain',
+            },
+          },
+        },
+        { surface: 'studio.access.full', state: 'held' },
+      )
+    }
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped
     return capabilityResponse({
@@ -157,6 +181,19 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
+    if (shouldUseLocalEvidenceFallback(request, error)) {
+      return localEvidenceJson(
+        request,
+        error,
+        {
+          error: 'STUDIO_FULL_ACCESS_GRANT_HELD',
+          message: 'Full-access grant creation is held until the grant ledger is available.',
+          capability: CAPABILITY,
+          milestone: 'P1',
+        },
+        { surface: 'studio.access.full.create', state: 'held', status: 503 },
+      )
+    }
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped
     return capabilityResponse({

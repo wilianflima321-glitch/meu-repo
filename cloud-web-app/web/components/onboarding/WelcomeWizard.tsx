@@ -11,16 +11,16 @@ interface WelcomeWizardProps {
 
 const STEPS = [
   {
-    title: 'Welcome ao Aethel Studio',
-    description: 'Apps e Research sao as trilhas prontas hoje. Games e Films seguem em roadmap.',
+    title: 'Welcome to Aethel Studio',
+    description: 'Apps and Research are ready today. Games and Films stay clearly marked until the pipeline is complete.',
   },
   {
-    title: 'Configure seu provider',
-    description: 'Conecte uma API key para respostas reais e rastreaveis. Nada e simulado.',
+    title: 'Connect a provider',
+    description: 'Add an API key for real responses and traceable runs.',
   },
   {
     title: 'Create your first project',
-    description: 'Escolha um template e valide o ciclo completo no dashboard.',
+    description: 'Choose a template and validate the full loop in the dashboard.',
   },
 ]
 
@@ -55,7 +55,7 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
             type="button"
             onClick={() => onSkip?.()}
             className="absolute right-4 top-4 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] p-2 text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-primary)]"
-            aria-label="Fechar"
+            aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
@@ -79,17 +79,17 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
               type="button"
               onClick={() => onSkip?.()}
               className={wizardSecondaryButtonClass}
-              aria-label="Pular wizard de boas-vindas"
+              aria-label="Skip welcome wizard"
             >
-              Pular
+              Skip
             </button>
             <button
               type="button"
               onClick={handleNext}
               className={wizardPrimaryButtonClass}
-              aria-label={isLast ? 'Abrir studio apos concluir onboarding' : 'Avancar para a proxima etapa do onboarding'}
+              aria-label={isLast ? 'Open Studio after onboarding' : 'Advance to the next onboarding step'}
             >
-              {isLast ? 'Abrir Studio' : 'Proximo'}
+              {isLast ? 'Open Studio' : 'Next'}
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
@@ -100,4 +100,3 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
 }
 
 export default WelcomeWizard
-

@@ -5,10 +5,9 @@ import DocsContent from './docs-content'
 export const metadata: Metadata = {
   title: 'Docs | Aethel Studio',
   description:
-    'Documentacao publica do Aethel Studio para onboarding, trust, procurement, workbench e superfícies operacionais.',
+    'Aethel Studio public documentation for onboarding, trust, procurement, IDE, and product areas.',
 }
 
 export default function DocsPage() {
   return <DocsContent />
 }
-

@@ -1,6 +1,7 @@
+// @aethel-heavy-async-boundary Studio/viewport runtime module; never import from public/dashboard/admin route shells.
 /**
  * PBR Shader Pipeline - Pipeline de Shaders PBR Completo
- * 
+ *
  * Sistema profissional de renderização Physically Based Rendering:
  * - PBR metallic-roughness workflow
  * - Image-Based Lighting (IBL) com HDR

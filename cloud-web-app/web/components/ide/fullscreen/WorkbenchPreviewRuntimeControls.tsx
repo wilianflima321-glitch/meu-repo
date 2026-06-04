@@ -164,6 +164,7 @@ export function WorkbenchPreviewRuntimeControls({
       deployUrl={deployment?.url ?? null}
       deployFeedback={deployFeedback}
       reviewTarget={reviewTarget ?? null}
+      projectId={projectId}
       isDeploySubmitting={isSubmittingDeploy}
       isDeployRefreshing={isRefreshingDeploy}
       onRunRecommendedAction={runRecommendedAction}

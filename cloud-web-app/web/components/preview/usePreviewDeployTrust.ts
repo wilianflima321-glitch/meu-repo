@@ -124,7 +124,7 @@ export function usePreviewDeployTrust({
           throw new Error(
             payload.message ||
               payload.error ||
-              `Failure ao carregar deploy (${response.status})`
+              `Failed to load deployment (${response.status})`
           );
         }
 
@@ -135,7 +135,7 @@ export function usePreviewDeployTrust({
         });
       } catch (error) {
         setFeedback(
-          error instanceof Error ? error.message : 'Failure ao carregar deploy'
+          error instanceof Error ? error.message : 'Failed to load deployment'
         );
       } finally {
         setRefreshing(false);
@@ -204,7 +204,7 @@ export function usePreviewDeployTrust({
         throw new Error(
           payload.message ||
             payload.error ||
-            `Failure ao iniciar deploy (${response.status})`
+            `Failed to start deploy (${response.status})`
         );
       }
 
@@ -221,7 +221,7 @@ export function usePreviewDeployTrust({
       }
     } catch (error) {
       setFeedback(
-        error instanceof Error ? error.message : 'Failure ao iniciar deploy'
+        error instanceof Error ? error.message : 'Failed to start deploy'
       );
     } finally {
       setSubmitting(false);
@@ -242,9 +242,9 @@ export function usePreviewDeployTrust({
 
     try {
       await navigator.clipboard.writeText(absoluteBrowserHref(target.href));
-      setFeedback(`${target.label} copiado`);
+      setFeedback(`${target.label} copied`);
     } catch {
-      setFeedback('Nao foi possivel copiar o link');
+      setFeedback('Could not copy the link');
     }
   }, [reviewTarget, shareTarget]);
 

@@ -1,7 +1,7 @@
 /**
  * Aethel UI Component Library
- * 
- * Canonical exports for shared UI primitives, layout components, and 
+ *
+ * Canonical exports for shared UI primitives, layout components, and
  * accessibility utilities used across the Aethel product surface.
  */
 
@@ -80,10 +80,6 @@ export {
 
 // Premium
 export * from './premium'
-
-// Premium Skeleton & Empty States
-export * from './PremiumSkeleton'
-export * from './PremiumEmptyState'
 
 // Accessibility
 export {

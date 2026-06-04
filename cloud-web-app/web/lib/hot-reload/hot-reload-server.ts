@@ -2,14 +2,10 @@ import { EventEmitter } from 'events';
 import { createServer, Server as HttpServer, IncomingMessage, ServerResponse } from 'http';
 import { WebSocketServer, WebSocket, RawData } from 'ws';
 import { watch, FSWatcher, WatchOptions } from 'chokidar';
-import { createHash } from 'crypto';
 import { readFile, stat } from 'fs/promises';
 import { extname, relative, resolve, normalize } from 'path';
 import { parse as parseUrl } from 'url';
-import {createComponentLogger, logger} from '@/lib/observability/logger'
-
-const log = createComponentLogger('hot-reload/hot-reload-server')
-
+import { createComponentLogger, logger } from '@/lib/observability/logger';
 import { DEFAULT_OPTIONS } from './hot-reload-contracts';
 import type {
   BuildResult,
@@ -34,6 +30,9 @@ import type {
   UpdateMessage,
   UpdateStrategy
 } from './hot-reload-contracts';
+import { createHotReloadClientScript } from './hot-reload-client-script';
+import { Debouncer, FileHashCache, Logger } from './hot-reload-server-utils';
+
 export { DEFAULT_OPTIONS } from './hot-reload-contracts';
 export type {
   BuildResult,
@@ -59,104 +58,8 @@ export type {
   UpdateStrategy
 } from './hot-reload-contracts';
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-const LOG_LEVELS: Record<LogLevel, number> = {
-  debug: 0,
-  info: 1,
-  warn: 2,
-  error: 3
-};
-class Logger {
-  private level: LogLevel;
-  private enabled: boolean;
-  private prefix: string;
-  constructor(enabled: boolean, level: LogLevel, prefix = '[HMR]') {
-    this.enabled = enabled;
-    this.level = level;
-    this.prefix = prefix;
-  }
-  private shouldLog(level: LogLevel): boolean {
-    return this.enabled && LOG_LEVELS[level] >= LOG_LEVELS[this.level];
-  }
-  private formatMessage(level: LogLevel, message: string): string {
-    const timestamp = new Date().toISOString();
-    return `${this.prefix} ${timestamp} [${level.toUpperCase()}] ${message}`;
-  }
-  debug(message: string, ...args: unknown[]): void {
-    if (this.shouldLog('debug')) {
-      log.debug(this.formatMessage('debug', message), ...args);
-    }
-  }
-  info(message: string, ...args: unknown[]): void {
-    if (this.shouldLog('info')) {
-      log.info(this.formatMessage('info', message), ...args);
-    }
-  }
-  warn(message: string, ...args: unknown[]): void {
-    if (this.shouldLog('warn')) {
-      logger.warn(this.formatMessage('warn', message), ...args);
-    }
-  }
-  error(message: string, ...args: unknown[]): void {
-    if (this.shouldLog('error')) {
-      logger.error(this.formatMessage('error', message), ...args);
-    }
-  }
-}
-class Debouncer {
-  private timers: Map<string, NodeJS.Timeout> = new Map();
-  private pendingChanges: Map<string, FileChangeEvent[]> = new Map();
-  constructor(private delay: number) {}
-  debounce(key: string, event: FileChangeEvent, callback: (events: FileChangeEvent[]) => void): void {
-    const pending = this.pendingChanges.get(key) || [];
-    pending.push(event);
-    this.pendingChanges.set(key, pending);
-    const existingTimer = this.timers.get(key);
-    if (existingTimer) {
-      clearTimeout(existingTimer);
-    }
-    const timer = setTimeout(() => {
-      const events = this.pendingChanges.get(key) || [];
-      this.pendingChanges.delete(key);
-      this.timers.delete(key);
-      if (events.length > 0) {
-        callback(events);
-      }
-    }, this.delay);
-    this.timers.set(key, timer);
-  }
-  clear(): void {
-    for (const timer of this.timers.values()) {
-      clearTimeout(timer);
-    }
-    this.timers.clear();
-    this.pendingChanges.clear();
-  }
-}
-class FileHashCache {
-  private cache: Map<string, { hash: string; mtime: number }> = new Map();
-  async getHash(filePath: string): Promise<string | null> {
-    try {
-      const stats = await stat(filePath);
-      const cached = this.cache.get(filePath);
-      if (cached && cached.mtime === stats.mtimeMs) {
-        return cached.hash;
-      }
-      const content = await readFile(filePath);
-      const hash = createHash('md5').update(content as unknown as string).digest('hex');
-      this.cache.set(filePath, { hash, mtime: stats.mtimeMs });
-      return hash;
-    } catch {
-      return null;
-    }
-  }
-  invalidate(filePath: string): void {
-    this.cache.delete(filePath);
-  }
-  clear(): void {
-    this.cache.clear();
-  }
-}
+const log = createComponentLogger('hot-reload/hot-reload-server');
+
 export class HotReloadServer extends EventEmitter {
   private options: HotReloadServerOptions;
   private httpServer: HttpServer | null = null;
@@ -658,195 +561,10 @@ export class HotReloadServer extends EventEmitter {
     res.writeHead(404);
     res.end('Not Found');
   }
+
   /** Get the hot reload client script */
   getClientScript(): string {
-    return `
-(function() {
-  'use strict';
-  const HotReloadClient = {
-    socket: null,
-    clientId: null,
-    reconnectAttempts: 0,
-    maxReconnectAttempts: 10,
-    reconnectDelay: 1000,
-    errorOverlay: null,
-    init: function(wsUrl) {
-      this.wsUrl = wsUrl || 'ws://' + location.hostname + ':${this.options.port}';
-      this.connect();
-    },
-    connect: function() {
-      try {
-        this.socket = new WebSocket(this.wsUrl);
-        this.socket.onopen = () => {
-          log.info('[HMR] Connected to Hot Reload Server');
-          this.reconnectAttempts = 0;
-        };
-        this.socket.onmessage = (event) => {
-          this.handleMessage(JSON.parse(event.data));
-        };
-        this.socket.onclose = () => {
-          log.info('[HMR] Disconnected from Hot Reload Server');
-          this.attemptReconnect();
-        };
-        this.socket.onerror = (error) => {
-          logger.error('[HMR] WebSocket error:', error);
-        };
-      } catch (error) {
-        logger.error('[HMR] Failed to connect:', error);
-        this.attemptReconnect();
-      }
-    },
-    attemptReconnect: function() {
-      if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        this.reconnectAttempts++;
-        const delay = this.reconnectDelay * Math.pow(1.5, this.reconnectAttempts - 1);
-        log.info('[HMR] Reconnecting in ' + Math.round(delay) + 'ms...');
-        setTimeout(() => this.connect(), delay);
-      }
-    },
-    handleMessage: function(message) {
-      switch (message.type) {
-        case 'connected':
-          this.clientId = message.clientId;
-          log.info('[HMR] Client ID:', message.clientId);
-          break;
-        case 'ping':
-          this.send({ type: 'pong', timestamp: Date.now() });
-          break;
-        case 'update':
-          this.handleUpdate(message);
-          break;
-        case 'reload':
-          log.info('[HMR] Full reload:', message.reason);
-          location.reload();
-          break;
-        case 'error':
-          this.showErrorOverlay(message.error);
-          break;
-        case 'clear-error':
-          this.hideErrorOverlay();
-          break;
-        case 'build-start':
-          log.info('[HMR] Build started...');
-          break;
-        case 'build-end':
-          log.info('[HMR] Build completed in ' + message.duration + 'ms');
-          break;
-      }
-    },
-    handleUpdate: function(message) {
-      log.info('[HMR] Received update:', message.strategy, message.files.map(f => f.path));
-      switch (message.strategy) {
-        case 'css-inject':
-          this.injectCSS(message.files);
-          break;
-        case 'hmr':
-          this.applyHMR(message.files);
-          break;
-        case 'full-reload':
-          location.reload();
-          break;
-      }
-    },
-    injectCSS: function(files) {
-      files.forEach(file => {
-        const links = document.querySelectorAll('link[rel="stylesheet"]');
-        let updated = false;
-        links.forEach(link => {
-          const href = link.getAttribute('href');
-          if (href && href.includes(file.path.replace(/\\\\/g, '/'))) {
-            const newHref = href.split('?')[0] + '?t=' + Date.now();
-            link.setAttribute('href', newHref);
-            updated = true;
-            log.info('[HMR] CSS updated:', file.path);
-          }
-        });
-        if (!updated && file.content) {
-          const style = document.createElement('style');
-          style.setAttribute('data-hmr-path', file.path);
-          style.textContent = file.content;
-          document.head.appendChild(style);
-          log.info('[HMR] CSS injected:', file.path);
-        }
-      });
-    },
-    applyHMR: function(files) {
-      let reloadNeeded = false;
-      files.forEach(file => {
-        if (window.__HMR_MODULES__ && window.__HMR_MODULES__[file.path]) {
-          try {
-            window.__HMR_MODULES__[file.path](file);
-            log.info('[HMR] Module updated:', file.path);
-            this.send({ type: 'hmr-accept', path: file.path });
-          } catch (error) {
-            logger.error('[HMR] Module update failed:', file.path, error);
-            this.send({ type: 'hmr-decline', path: file.path });
-            reloadNeeded = true;
-          }
-        } else {
-          reloadNeeded = true;
-        }
-      });
-      if (reloadNeeded) {
-        log.info('[HMR] HMR not available, reloading...');
-        location.reload();
-      }
-    },
-    showErrorOverlay: function(error) {
-      this.hideErrorOverlay();
-      const overlay = document.createElement('div');
-      overlay.id = 'hmr-error-overlay';
-      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);color:#ff6b6b;font-family:monospace;font-size:14px;padding:40px;z-index:999999;overflow:auto;';
-      let html = '<div style="max-width:900px;margin:0 auto;">';
-      html += '<h2 style="color:#ff6b6b;margin:0 0 20px;">Build Error</h2>';
-      html += '<pre style="background:#1a1a1a;padding:20px;border-radius:8px;overflow:auto;white-space:pre-wrap;word-wrap:break-word;">';
-      html += this.escapeHtml(error.message);
-      if (error.file) {
-        html += '\\n\\nFile: ' + this.escapeHtml(error.file);
-        if (error.line) html += ':' + error.line;
-        if (error.column) html += ':' + error.column;
-      }
-      if (error.frame) {
-        html += '\\n\\n' + this.escapeHtml(error.frame);
-      }
-      if (error.stack) {
-        html += '\\n\\nStack:\\n' + this.escapeHtml(error.stack);
-      }
-      html += '</pre>';
-      html += '<button type="button" onclick="document.getElementById(\\'hmr-error-overlay\\').remove()" style="position:absolute;top:20px;right:20px;background:#333;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;">Close</button>';
-      html += '</div>';
-      overlay.innerHTML = html;
-      document.body.appendChild(overlay);
-      this.errorOverlay = overlay;
-    },
-    hideErrorOverlay: function() {
-      if (this.errorOverlay) {
-        this.errorOverlay.remove();
-        this.errorOverlay = null;
-      }
-      const existing = document.getElementById('hmr-error-overlay');
-      if (existing) existing.remove();
-    },
-    escapeHtml: function(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    },
-    send: function(message) {
-      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        this.socket.send(JSON.stringify(message));
-      }
-    }
-  };
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => HotReloadClient.init());
-  } else {
-    HotReloadClient.init();
-  }
-  window.HotReloadClient = HotReloadClient;
-  window.__HMR_MODULES__ = window.__HMR_MODULES__ || {};
-})();
-`;
+    return createHotReloadClientScript(this.options.port);
   }
 }
 /** Create a new Hot Reload Server instance */

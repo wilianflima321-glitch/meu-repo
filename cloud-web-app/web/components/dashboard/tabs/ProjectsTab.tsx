@@ -61,7 +61,7 @@ const typeIcons: Record<string, React.ReactNode> = {
 }
 
 const typeLabels: Record<string, string> = {
-  code: 'Codigo',
+  code: 'Code',
   web: 'Web App',
   unreal: 'Unreal',
   api: 'API',
@@ -69,9 +69,9 @@ const typeLabels: Record<string, string> = {
 
 const statusConfig: Record<string, { label: string; variant: 'success' | 'warning' | 'default' | 'info' }> = {
   active: { label: 'Active', variant: 'success' },
-  paused: { label: 'Pausado', variant: 'warning' },
+  paused: { label: 'Paused', variant: 'warning' },
   completed: { label: 'Completed', variant: 'info' },
-  archived: { label: 'Arquivado', variant: 'default' },
+  archived: { label: 'Archived', variant: 'default' },
 }
 
 function ProjectCard({
@@ -237,8 +237,8 @@ export function ProjectsTab({
             onChange={(e) => setFilterType(e.target.value || null)}
             className="px-4 py-2.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-[var(--aethel-text-primary)] text-sm focus:outline-none focus:border-[var(--aethel-info)]"
           >
-            <option value="">Todos os tipos</option>
-            <option value="code">Codigo</option>
+            <option value="">All types</option>
+            <option value="code">Code</option>
             <option value="web">Web App</option>
             <option value="unreal">Unreal</option>
             <option value="api">API</option>
@@ -248,11 +248,11 @@ export function ProjectsTab({
             onChange={(e) => setFilterStatus(e.target.value || null)}
             className="px-4 py-2.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-[var(--aethel-text-primary)] text-sm focus:outline-none focus:border-[var(--aethel-info)]"
           >
-            <option value="">Todos os status</option>
+            <option value="">All statuses</option>
             <option value="active">Active</option>
-            <option value="paused">Pausado</option>
+            <option value="paused">Paused</option>
             <option value="completed">Completed</option>
-            <option value="archived">Arquivado</option>
+            <option value="archived">Archived</option>
           </select>
         </div>
       </div>
@@ -277,7 +277,7 @@ export function ProjectsTab({
                   setFilterStatus(null)
                 }}
               >
-                Limpar Filtros
+                Clear Filters
               </Button>
             </div>
           ) : (
@@ -315,4 +315,3 @@ export function ProjectsTab({
 }
 
 export default ProjectsTab
-

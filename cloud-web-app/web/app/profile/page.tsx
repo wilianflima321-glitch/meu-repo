@@ -22,12 +22,12 @@ type ProfileApiPayload = Partial<UserProfile> & {
 const logger = createComponentLogger('ProfilePage')
 
 const PLAN_LABELS: Record<string, string> = {
-  starter: 'Inicial',
-  basic: 'Basico',
+  starter: 'Starter',
+  basic: 'Basic',
   pro: 'Pro',
-  studio: 'Estudio',
-  enterprise: 'Empresarial',
-  free: 'Gratuito',
+  studio: 'Studio',
+  enterprise: 'Enterprise',
+  free: 'Free',
 }
 
 function unwrapProfileResponse(response: unknown): ProfileApiPayload {
@@ -39,7 +39,7 @@ function normalizeProfile(data: ProfileApiPayload): UserProfile {
   return {
     id: data.id ?? '',
     email: data.email ?? '',
-    name: data.name || data.email?.split('@')[0] || 'Usuario',
+    name: data.name || data.email?.split('@')[0] || 'User',
     avatar: data.avatar || undefined,
     createdAt: data.createdAt || new Date().toISOString(),
     lastLogin: data.lastLogin || undefined,
@@ -75,7 +75,7 @@ export default function ProfilePage() {
       setProfileError(null)
     } catch (error) {
       logger.error('Failed to load profile', error)
-      setProfileError('Nao foi possivel carregar o perfil. Tente novamente.')
+      setProfileError('Unable to load the profile. Try again.')
       setProfile(null)
     } finally {
       setLoading(false)
@@ -135,7 +135,7 @@ export default function ProfilePage() {
   }, [router])
 
   if (loading) return <ProfileLoadingView />
-  if (!profile) return <ProfileUnavailableView message={profileError || 'Perfil indisponivel.'} />
+  if (!profile) return <ProfileUnavailableView message={profileError || 'Profile unavailable.'} />
 
   return (
     <ProfileView

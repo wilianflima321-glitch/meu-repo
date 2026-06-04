@@ -27,10 +27,23 @@ function requirePattern(relativePath, pattern, reason) {
   if (!pattern.test(content)) failures.push(`${relativePath}: missing pattern ${pattern} (${reason})`)
 }
 
+function requirePatternAny(relativePaths, pattern, reason) {
+  const existing = relativePaths.filter(exists)
+  if (existing.length === 0) {
+    failures.push(`${relativePaths.join(', ')}: missing (${reason})`)
+    return
+  }
+  const content = existing.map(read).join('\n')
+  if (!pattern.test(content)) failures.push(`${relativePaths.join(', ')}: missing pattern ${pattern} (${reason})`)
+}
+
+const agentToolRegistryFiles = ['lib/production/agent-tool-bus.ts', 'lib/production/agent-tool-bus-catalog.ts']
+const deepSpineContractFiles = ['lib/production/deep-spine-scan.ts', 'lib/production/deep-spine-scan.contracts.ts']
+
 requireFile('lib/production/deep-spine-scan.ts', 'Deep Spine Scan needs a production contract')
-requirePattern('lib/production/deep-spine-scan.ts', /export interface DeepSpineScanManifest/, 'manifest shape must be exported')
-requirePattern('lib/production/deep-spine-scan.ts', /scanId[\s\S]*projectId[\s\S]*mode[\s\S]*scope[\s\S]*budget/, 'manifest must include required identity and budget fields')
-requirePattern('lib/production/deep-spine-scan.ts', /findings[\s\S]*readReceipts[\s\S]*evidenceRefs[\s\S]*nextActions[\s\S]*blockedActions[\s\S]*handoffPrompt/, 'manifest must include evidence, findings, and handoff fields')
+requirePatternAny(deepSpineContractFiles, /export interface DeepSpineScanManifest/, 'manifest shape must be exported')
+requirePatternAny(deepSpineContractFiles, /scanId[\s\S]*projectId[\s\S]*mode[\s\S]*scope[\s\S]*budget/, 'manifest must include required identity and budget fields')
+requirePatternAny(deepSpineContractFiles, /findings[\s\S]*readReceipts[\s\S]*evidenceRefs[\s\S]*nextActions[\s\S]*blockedActions[\s\S]*handoffPrompt/, 'manifest must include evidence, findings, and handoff fields')
 requirePattern('lib/production/deep-spine-scan.ts', /buildDeepSpineScanManifest/, 'scanner must build manifests from artifacts')
 requirePattern('lib/production/deep-spine-scan.ts', /scanWorkspaceForRepositoryArtifacts|buildRepositoryCartographyManifest/, 'scanner must reuse repository cartography concepts')
 requirePattern('lib/production/deep-spine-scan.ts', /buildMultiResolutionProjectMemory/, 'scanner must connect to multi-resolution memory')
@@ -45,12 +58,12 @@ requirePattern('lib/production/deep-spine-scan.ts', /browser main thread/, 'heav
 requirePattern('lib/production/parallel-agent-work-contract.ts', /'deep-spine-scan'/, 'agent work tools must declare deep-spine-scan')
 requirePattern('lib/production/parallel-agent-work-contract.ts', /deep-spine-scan[\s\S]*context-budget/, 'deep scan must be available before context-heavy work')
 
-requirePattern('lib/production/agent-tool-bus.ts', /tool\('deep-spine-scan'/, 'tool bus must govern deep-spine-scan')
-requirePattern('lib/production/agent-tool-bus.ts', /label:\s*'Deep Spine Scan'[\s\S]*requiresIdempotencyKey:\s*true/, 'deep scan must require idempotency')
-requirePattern('lib/production/agent-tool-bus.ts', /label:\s*'Deep Spine Scan'[\s\S]*requiresReadReceipts:\s*true/, 'deep scan must require read receipts')
-requirePattern('lib/production/agent-tool-bus.ts', /label:\s*'Deep Spine Scan'[\s\S]*maxPayloadBytes/, 'deep scan must cap payload size')
-requirePattern('lib/production/agent-tool-bus.ts', /label:\s*'Deep Spine Scan'[\s\S]*rollbackStrategy:\s*'artifact-delete'/, 'deep scan evidence artifacts must have a cleanup strategy')
-requirePattern('lib/production/agent-tool-bus.ts', /metadata-first external sources/, 'tool bus must require metadata-first external evidence')
+requirePatternAny(agentToolRegistryFiles, /tool\('deep-spine-scan'/, 'tool bus must govern deep-spine-scan')
+requirePatternAny(agentToolRegistryFiles, /label:\s*'Deep Spine Scan'[\s\S]*requiresIdempotencyKey:\s*true/, 'deep scan must require idempotency')
+requirePatternAny(agentToolRegistryFiles, /label:\s*'Deep Spine Scan'[\s\S]*requiresReadReceipts:\s*true/, 'deep scan must require read receipts')
+requirePatternAny(agentToolRegistryFiles, /label:\s*'Deep Spine Scan'[\s\S]*maxPayloadBytes/, 'deep scan must cap payload size')
+requirePatternAny(agentToolRegistryFiles, /label:\s*'Deep Spine Scan'[\s\S]*rollbackStrategy:\s*'artifact-delete'/, 'deep scan evidence artifacts must have a cleanup strategy')
+requirePatternAny(agentToolRegistryFiles, /metadata-first external sources/, 'tool bus must require metadata-first external evidence')
 
 requireFile('scripts/deep-spine-scan.mjs', 'local command must exist')
 requirePattern('scripts/deep-spine-scan.mjs', /--mode[\s\S]*quick[\s\S]*deep[\s\S]*aaa[\s\S]*external/, 'command must expose fixed scan modes')

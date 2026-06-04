@@ -67,13 +67,13 @@ function getWorkflowTitle(workflowTool: ViewportWorkflowTool): string {
 function getWorkflowDescription(workflowTool: ViewportWorkflowTool): string {
   switch (workflowTool) {
     case 'visual-script':
-      return 'Os nos Move, Rotate e Add Force refletem no objeto selecionado em tempo real.';
+      return 'Node logic updates the selected object live.';
     case 'vfx':
-      return 'Emitter, module e renderer agora alimentam glow e leitura cinematica no objeto active.';
+      return 'Tune cinematic feedback on the active object.';
     case 'ability':
-      return 'Abilities e preview agora podem colorir e orientar o play test do objeto active.';
+      return 'Shape playtest behavior for the selection.';
     default:
-      return 'Ferramenta contextual de personagem conectada ao mesmo objeto 3D.';
+      return 'Character tools stay tied to the selection.';
   }
 }
 
@@ -111,7 +111,7 @@ export default function SceneViewportWorkflowDrawer({
         <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
-              Viewport Workflow
+              Edit tool
             </p>
             <h3 className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">
               {getWorkflowTitle(workflowTool)}
@@ -123,10 +123,10 @@ export default function SceneViewportWorkflowDrawer({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fechar ferramenta contextual do viewport"
+            aria-label="Close viewport contextual tool"
             className="rounded-lg border border-[var(--aethel-border-subtle)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
           >
-            Fechar
+            Close
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-auto">

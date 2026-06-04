@@ -27,8 +27,8 @@ Source: docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md
 | LivePreview (root) | `@/components/LivePreview.tsx` | `@/components/preview/CanonicalPreviewSurface` |
 | OutputPanel (root) | `@/components/OutputPanel.tsx` | Integrate into IDE shell |
 | QuickOpen (root) | `@/components/QuickOpen.tsx` | Merge into CommandPalette |
-| IDELayout (legacy) | `@/components/ide/IDELayout.tsx` | `ModernIDEShell` |
-| PreviewPanel (ide) | `@/components/ide/PreviewPanel.tsx` | `CanonicalPreviewSurface` |
+| IDELayout (legacy) | removed | `FullscreenIDE` + `ModernIDEShell` |
+| PreviewPanel (ide) | `@/components/ide/PreviewPanel.tsx` | `WorkbenchPreviewPane` + `CanonicalPreviewSurface` |
 
 ## Admin Components - Needs Migration to Canonical
 | Component | Current Issue | Action |

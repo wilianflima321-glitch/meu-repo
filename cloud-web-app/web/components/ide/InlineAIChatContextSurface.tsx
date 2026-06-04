@@ -39,12 +39,12 @@ function buildContextDetailItems(
       value: activeFile?.path ?? 'No file open',
     },
     {
-      label: 'Linguagem',
-      value: activeFile?.language ?? 'Sem linguagem active',
+      label: 'Language',
+      value: activeFile?.language ?? 'No active language',
     },
     {
-      label: 'Tamanho',
-      value: activeFile ? `${activeFile.content.length} caracteres` : 'Sem buffer anexado',
+      label: 'Size',
+      value: activeFile ? `${activeFile.content.length} characters` : 'No buffer attached',
     },
     {
       label: 'Project',
@@ -53,12 +53,12 @@ function buildContextDetailItems(
         : 'No project attached',
     },
     {
-      label: 'Saida do operador',
+      label: 'Operator output',
       value: 'Explanation, review, and applicable code blocks',
     },
     {
       label: 'Application',
-      value: 'Sempre manual e explicita pelo botao Aplicar',
+      value: 'Always manual and explicit through the Apply button',
     },
   ]
 }

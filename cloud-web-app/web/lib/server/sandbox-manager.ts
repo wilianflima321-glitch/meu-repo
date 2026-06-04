@@ -1,9 +1,9 @@
 /**
  * Docker Container Sandbox Manager
- * 
+ *
  * Security-critical component that creates isolated containers for each terminal session.
  * Each user gets their own ephemeral container with resource limits and network isolation.
- * 
+ *
  * SECURITY MODEL:
  * - Each terminal session = 1 ephemeral container
  * - Container is destroyed on disconnect
@@ -140,12 +140,12 @@ class DockerSandboxManager extends EventEmitter {
       '--rm',                                    // Auto-remove on exit
       '-d',                                      // Detached mode for creation
       '--name', containerName,
-      
+
       // Resource limits
       '--cpus', config.cpuLimit || limits.cpu,
       '--memory', config.memoryLimit || limits.memory,
       '--pids-limit', String(config.pidsLimit || limits.pids),
-      
+
       // Security
       '--read-only',                             // Read-only root filesystem
       '--security-opt', 'no-new-privileges',     // No privilege escalation
@@ -153,42 +153,42 @@ class DockerSandboxManager extends EventEmitter {
       '--cap-add', 'CHOWN',                      // Allow chown for npm/pip
       '--cap-add', 'SETUID',                     // Allow setuid for su
       '--cap-add', 'SETGID',                     // Allow setgid
-      
+
       // Network isolation
       '--network', config.networkMode === 'bridge' ? 'bridge' : 'none',
-      
+
       // User namespace mapping
       '--userns', 'host',                        // Or configure user namespace
-      
+
       // Tmpfs for writable directories
       '--tmpfs', '/tmp:rw,noexec,nosuid,size=100m',
       '--tmpfs', '/home/sandbox:rw,noexec,nosuid,size=500m',
-      
+
       // Mount workspace (read-write)
       '-v', `${config.workspacePath}:/workspace:rw`,
-      
+
       // Working directory
       '-w', '/workspace',
-      
+
       // Labels for management
       '--label', `aethel.userId=${config.userId}`,
       '--label', `aethel.workspaceId=${config.workspaceId}`,
       '--label', `aethel.sessionId=${sessionId}`,
       '--label', `aethel.createdAt=${new Date().toISOString()}`,
-      
+
       // Timeout (kill container after timeout)
       '--stop-timeout', '10',
-      
+
       // Environment
       '-e', 'HOME=/home/sandbox',
       '-e', 'USER=sandbox',
       '-e', 'TERM=xterm-256color',
       '-e', `AETHEL_SESSION_ID=${sessionId}`,
       '-e', `AETHEL_WORKSPACE_ID=${config.workspaceId}`,
-      
+
       // Image
       config.image || DEFAULT_IMAGE,
-      
+
       // Keep container alive
       'sleep', String(config.timeout || limits.timeout),
     ];
@@ -339,7 +339,7 @@ class DockerSandboxManager extends EventEmitter {
 
     session.isActive = false;
 
-    // Kill any running process
+    // Kill active process
     if (session.process) {
       session.process.kill('SIGTERM');
     }

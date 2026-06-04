@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { resolveWorkbenchConvergenceRedirect } from '@/lib/routes/workbench-convergence';
+import { getAdminLegacyRedirectTarget } from '@/lib/admin/admin-consolidation';
 import { jwtVerify } from 'jose';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis/cloudflare';
@@ -24,7 +25,7 @@ function getJwtSecretBytes(): Uint8Array {
 // Content Security Policy - Restrictive but allows necessary features
 const getCSP = () => {
   const isDev = process.env.NODE_ENV !== 'production';
-  
+
   // Base CSP directives
   const directives = [
     "default-src 'self'",
@@ -53,7 +54,7 @@ const getCSP = () => {
     // Upgrade insecure requests in production
     ...(isDev ? [] : ["upgrade-insecure-requests"]),
   ];
-  
+
   return directives.join('; ');
 };
 
@@ -78,6 +79,14 @@ function isAllowedRequestOrigin(origin: string): boolean {
   return ALLOWED_ORIGINS.has(origin) || (process.env.NODE_ENV !== 'production' && LOCAL_DEV_ORIGIN_PATTERN.test(origin));
 }
 
+function canUseLocalRateLimitFallback(req: NextRequest): boolean {
+  return (
+    LOCAL_DEV_ORIGIN_PATTERN.test(req.nextUrl.origin) ||
+    process.env.AUTHENTICATED_UX_RATE_LIMIT_FALLBACK === '1' ||
+    process.env.AETHEL_RATE_LIMIT_FALLBACK === 'local'
+  );
+}
+
 const securityHeaders = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
@@ -94,7 +103,7 @@ function withSecurityHeaders(res: NextResponse, req?: NextRequest, requestId?: s
   if (requestId) {
     res.headers.set('X-Request-Id', requestId);
   }
-  
+
   // CORS: Only allow specific origins instead of wildcard
   if (req) {
     const origin = req.headers.get('origin');
@@ -109,7 +118,7 @@ function withSecurityHeaders(res: NextResponse, req?: NextRequest, requestId?: s
       res.headers.set('Access-Control-Max-Age', '86400');
     }
   }
-  
+
   return res;
 }
 
@@ -205,7 +214,6 @@ const PUBLIC_PATH_PREFIXES = [
   '/compliance',
   '/security',
   '/security-policy',
-  '/security-acknowledgments',
   '/reliability',
   '/roadmap',
   '/honest-status',
@@ -216,7 +224,6 @@ const PUBLIC_PATH_PREFIXES = [
   '/forgot-password',
   '/reset-password',
   '/verify-email',
-  '/health',
   '/api/auth',
   '/api/health',
   '/api/billing/webhook',
@@ -235,6 +242,29 @@ const PUBLIC_EXACT_PATHS = new Set([
   '/offline',
 ]);
 
+const PUBLIC_ROUTE_REDIRECTS: Record<string, string> = {
+  '/contact': '/help',
+  '/customers': '/trust',
+  '/roadmap': '/docs/changelog',
+  '/security-acknowledgments': '/security-policy',
+  '/health': '/status',
+};
+
+const STUDIO_LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
+  '/studio/scene': '/studio/level?tool=scene',
+  '/studio/material': '/studio/level?tool=material',
+  '/studio/terrain': '/studio/level?tool=terrain',
+  '/studio/landscape': '/studio/level?tool=landscape',
+  '/studio/foliage': '/studio/level?tool=foliage',
+  '/studio/water': '/studio/level?tool=water',
+  '/studio/rig': '/studio/animation?tool=rig',
+  '/studio/facial': '/studio/animation?tool=facial',
+  '/studio/hair': '/studio/animation?tool=hair',
+  '/studio/cloth': '/studio/animation?tool=cloth',
+  '/studio/fluid': '/studio/vfx?tool=fluid',
+  '/studio/sprite': '/studio/vfx?tool=sprite',
+};
+
 // ============================================================================
 // MIDDLEWARE
 // ============================================================================
@@ -252,6 +282,15 @@ export async function middleware(req: NextRequest) {
     return withSecurityHeaders(NextResponse.redirect(url), req, requestId);
   }
 
+  const publicRedirectTarget = PUBLIC_ROUTE_REDIRECTS[pathname];
+  if (publicRedirectTarget && req.method === 'GET') {
+    const url = req.nextUrl.clone();
+    const target = new URL(publicRedirectTarget, req.nextUrl.origin);
+    url.pathname = target.pathname;
+    url.search = target.search;
+    return withSecurityHeaders(NextResponse.redirect(url, 308), req, requestId);
+  }
+
   const isApi = pathname.startsWith('/api');
   const enforceDevRateLimit = process.env.AETHEL_ENFORCE_DEV_RATE_LIMIT === 'true';
   const shouldApplyRateLimit = process.env.NODE_ENV === 'production' || enforceDevRateLimit;
@@ -261,10 +300,10 @@ export async function middleware(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
   const bearerToken = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
   const token = isApi ? (bearerToken || cookieToken) : (cookieToken || bearerToken);
-  
+
   // Get client IP for rate limiting
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 
-             req.headers.get('x-real-ip') || 
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ||
+             req.headers.get('x-real-ip') ||
              'anonymous';
 
   // 1) Rate limiting (API only)
@@ -282,7 +321,32 @@ export async function middleware(req: NextRequest) {
       }
     } else {
       const limitName = getRateLimitName(pathname);
-      const result = await upstashLimiters[limitName].limit(ip);
+      let result: Awaited<ReturnType<Ratelimit['limit']>>;
+      try {
+        result = await upstashLimiters[limitName].limit(ip);
+      } catch {
+        if (canUseLocalRateLimitFallback(req)) {
+          result = {
+            success: true,
+            limit: 0,
+            remaining: 0,
+            reset: Date.now(),
+            pending: Promise.resolve(),
+          };
+        } else {
+          return withSecurityHeaders(
+            NextResponse.json(
+              {
+                error: 'RATE_LIMIT_BACKEND_UNAVAILABLE',
+                message: 'Rate limit backend is unavailable.',
+              },
+              { status: 503 }
+            ),
+            req,
+            requestId
+          );
+        }
+      }
       if (!result.success) {
         return withSecurityHeaders(
           NextResponse.json(
@@ -356,7 +420,7 @@ export async function middleware(req: NextRequest) {
   try {
     // Verify token
     const { payload } = await jwtVerify(token, getJwtSecretBytes());
-    
+
     // Admin Check - verifica role no token
     if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
       const userRole = payload.role as string | undefined;
@@ -369,13 +433,35 @@ export async function middleware(req: NextRequest) {
         }
         return withSecurityHeaders(NextResponse.json({ error: 'Admin access required' }, { status: 403 }), req, requestId);
       }
+
+      if (!pathname.startsWith('/api') && req.method === 'GET') {
+        const adminLegacyTarget = getAdminLegacyRedirectTarget(pathname);
+        if (adminLegacyTarget) {
+          const url = req.nextUrl.clone();
+          const target = new URL(adminLegacyTarget, req.nextUrl.origin);
+          url.pathname = target.pathname;
+          url.search = target.search;
+          return withSecurityHeaders(NextResponse.redirect(url, 308), req, requestId);
+        }
+      }
+    }
+
+    if (!pathname.startsWith('/api') && req.method === 'GET') {
+      const studioLegacyTarget = STUDIO_LEGACY_ROUTE_REDIRECTS[pathname];
+      if (studioLegacyTarget) {
+        const url = req.nextUrl.clone();
+        const target = new URL(studioLegacyTarget, req.nextUrl.origin);
+        url.pathname = target.pathname;
+        url.search = target.search;
+        return withSecurityHeaders(NextResponse.redirect(url, 308), req, requestId);
+      }
     }
 
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set('x-request-id', requestId);
     const response = NextResponse.next({ request: { headers: requestHeaders } });
     withSecurityHeaders(response, req, requestId);
-    
+
     // Add user context headers for API handlers.
     if (pathname.startsWith('/api')) {
       response.headers.set('X-User-Id', payload.userId as string || '');

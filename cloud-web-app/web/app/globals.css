@@ -9,6 +9,13 @@
 
 @layer base {
   :root {
+    /* Premium identity system */
+    --aethel-brand-pure-black: #000000;
+    --aethel-brand-ink: #0a0a0a;
+    --aethel-brand-graphite: #1f1f23;
+    --aethel-brand-mist: #a1a1aa;
+    --aethel-brand-paper: #fafafa;
+
     /* Aethel L5 core */
     --aethel-bg: #0a0a0f;
     --aethel-panel: rgba(13, 18, 31, 0.82);
@@ -90,26 +97,9 @@
     --aethel-error-dark: #dc2626;
     --aethel-text-muted: #64748b;
 
-    /* Backwards-compatible aliases */
-    --bg-primary: var(--aethel-surface-primary);
-    --bg-surface: var(--aethel-surface-secondary);
-    --bg-elevated: var(--aethel-surface-tertiary);
-    --bg-hover: var(--aethel-surface-quaternary);
-
-    --text-primary: var(--aethel-text-primary);
-    --text-secondary: var(--aethel-text-secondary);
-    --text-muted: var(--aethel-text-tertiary);
-
-    --border-primary: var(--aethel-border-primary);
-    --border-muted: var(--aethel-border-secondary);
-    --border-focus: var(--aethel-border-focus);
-
-    --brand-primary: var(--aethel-primary);
-    --brand-secondary: var(--aethel-info);
-
     /* Typography */
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+    --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-mono: var(--font-geist-mono), "SFMono-Regular", "Cascadia Code", ui-monospace, monospace;
   }
 
   html {

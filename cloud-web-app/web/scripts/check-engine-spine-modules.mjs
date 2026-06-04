@@ -5,7 +5,10 @@ import path from 'node:path'
 
 const ROOT = process.cwd()
 const REPO_ROOT = path.resolve(ROOT, '..', '..')
-const SOURCE_PATH = path.join(ROOT, 'lib', 'studio', 'engine-spine-modules.ts')
+const SOURCE_PATHS = [
+  path.join(ROOT, 'lib', 'studio', 'engine-spine-modules.ts'),
+  path.join(ROOT, 'lib', 'studio', 'engine-spine-modules.data.ts'),
+]
 
 const REQUIRED_IDS = [
   'aaa-render-system',
@@ -64,12 +67,13 @@ function resolveModulePath(modulePath) {
   return path.join(ROOT, modulePath)
 }
 
-if (!fs.existsSync(SOURCE_PATH)) {
-  console.error('[engine-spine-modules] FAIL missing lib/studio/engine-spine-modules.ts')
+const missingSource = SOURCE_PATHS.find((sourcePath) => !fs.existsSync(sourcePath))
+if (missingSource) {
+  console.error(`[engine-spine-modules] FAIL missing ${path.relative(ROOT, missingSource).replace(/\\/g, '/')}`)
   process.exit(1)
 }
 
-const source = fs.readFileSync(SOURCE_PATH, 'utf8')
+const source = SOURCE_PATHS.map((sourcePath) => fs.readFileSync(sourcePath, 'utf8')).join('\n')
 const modules = extractObjectBlocks(source)
   .map((block) => ({
     id: getStringProperty(block, 'id'),

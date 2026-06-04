@@ -56,7 +56,7 @@ export function ColorSwatch({ color, selected, onClick, onRightClick, size = 'md
   }[size]
 
   return (
-    <button type="button" aria-label="Selecionar cor da paleta"
+    <button type="button" aria-label="Select palette color"
       onClick={onClick}
       onContextMenu={(e) => {
         e.preventDefault()

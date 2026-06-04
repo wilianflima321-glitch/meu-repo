@@ -233,10 +233,10 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
       <div style={{ padding: '12px' }}>
         <input
           type="text"
-          placeholder="Search nos..."
+          placeholder="Search nodes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          aria-label="Search nos na paleta"
+          aria-label="Search nodes in the palette"
           style={{
             width: '100%',
             background: ui.surfaceAlt,
@@ -390,10 +390,10 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search no para criar..."
+          placeholder="Search nodes to create..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          aria-label="Search no para adicionar ao canvas"
+          aria-label="Search nodes to add to the canvas"
           style={{
             width: '100%',
             padding: '10px 12px',
@@ -405,7 +405,7 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
           }}
         />
         <div style={{ fontSize: '11px', color: ui.textDim, marginTop: '6px' }}>
-          Clique com o botao direito no canvas para abrir este menu
+          Right-click the canvas to open this menu
         </div>
       </div>
       <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
@@ -595,9 +595,9 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
   }, [nodes, edges, script]);
   const handleClearGraph = useCallback(async () => {
     const shouldClear = await openConfirmDialog({
-      title: 'Limpar grafo',
-      message: 'Limpar todos os nos?',
-      confirmText: 'Limpar',
+      title: 'Clear graph',
+      message: 'Clear all nodes?',
+      confirmText: 'Clear',
       cancelText: 'Cancel',
     });
     if (!shouldClear) return;
@@ -657,7 +657,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
               </button>
               <button type="button"
                 onClick={handleClearGraph}
-                aria-label="Limpar todos os nos do script visual"
+                aria-label="Clear all visual script nodes"
                 style={{
                   padding: '8px 16px',
                   borderRadius: '8px',
@@ -668,7 +668,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
                   cursor: 'pointer',
                 }}
               >
-                Limpar
+                Clear
               </button>
             </div>
           </Panel>

@@ -1,12 +1,12 @@
 'use client';
 
 /**
- * World Outliner - Hierarquia de Objetos da Cena
+ * World Outliner - scene object hierarchy
  *
- * Sistema profissional estilo Unreal Engine para visualizar
- * e gerenciar a hierarquia de objetos na cena.
+ * Unreal-style system for inspecting
+ * and managing the scene object hierarchy.
  *
- * NAO E MOCK - Sistema real e funcional!
+ * Production-oriented world outliner surface.
  */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import type * as THREE from 'three';
@@ -41,7 +41,7 @@ export interface SceneObject {
   type: SceneObjectType;
   visible: boolean;
   locked: boolean;
-  selecionados: boolean;
+  selected: boolean;
   children: SceneObject[];
   parentId?: string;
   components?: string[];
@@ -54,7 +54,7 @@ export interface OutlinerFilter {
   search?: string;
   types?: SceneObjectType[];
   showHidden?: boolean;
-  showBloqueared?: boolean;
+  showLocked?: boolean;
   tags?: string[];
 }
 
@@ -63,35 +63,35 @@ export interface OutlinerFilter {
 // ============================================================================
 
 export interface WorldOutlinerProps {
-  objetos?: SceneObject[];
-  onSelectionChange?: (selecionados: SceneObject[]) => void;
+  objects?: SceneObject[];
+  onSelectionChange?: (selected: SceneObject[]) => void;
   onObjectChange?: (object: SceneObject) => void;
   onCreateObject?: (type: SceneObjectType, parent?: SceneObject) => void;
   onDeleteObject?: (object: SceneObject) => void;
-  onFocarObject?: (object: SceneObject) => void;
+  onFocusObject?: (object: SceneObject) => void;
   onReparentObject?: (object: SceneObject, newParent: SceneObject | null) => void;
 }
 
 const OUTLINER_ROW_HEIGHT = 26;
 
 export default function WorldOutliner({
-  objetos: initialObjects,
+  objects: initialObjects,
   onSelectionChange,
   onObjectChange,
   onCreateObject,
   onDeleteObject,
-  onFocarObject,
+  onFocusObject,
   onReparentObject,
 }: WorldOutlinerProps) {
   // Sample data
-  const [objetos, setObjects] = useState<SceneObject[]>(initialObjects || [
+  const [objects, setObjects] = useState<SceneObject[]>(initialObjects || [
     {
       id: '1',
       name: 'DirectionalLight',
       type: 'light',
       visible: true,
       locked: false,
-      selecionados: false,
+      selected: false,
       children: [],
     },
     {
@@ -100,7 +100,7 @@ export default function WorldOutliner({
       type: 'camera',
       visible: true,
       locked: true,
-      selecionados: false,
+      selected: false,
       children: [],
     },
     {
@@ -109,7 +109,7 @@ export default function WorldOutliner({
       type: 'group',
       visible: true,
       locked: false,
-      selecionados: false,
+      selected: false,
       children: [
         {
           id: '3a',
@@ -117,7 +117,7 @@ export default function WorldOutliner({
           type: 'landscape',
           visible: true,
           locked: false,
-          selecionados: false,
+          selected: false,
           children: [],
           parentId: '3',
         },
@@ -127,7 +127,7 @@ export default function WorldOutliner({
           type: 'foliage',
           visible: true,
           locked: false,
-          selecionados: false,
+          selected: false,
           children: [],
           parentId: '3',
         },
@@ -139,7 +139,7 @@ export default function WorldOutliner({
       type: 'blueprint',
       visible: true,
       locked: false,
-      selecionados: true,
+      selected: true,
       components: ['CharacterMovement', 'CameraArm', 'SkeletalMesh'],
       children: [
         {
@@ -148,7 +148,7 @@ export default function WorldOutliner({
           type: 'mesh',
           visible: true,
           locked: false,
-          selecionados: false,
+          selected: false,
           children: [],
           parentId: '4',
         },
@@ -160,7 +160,7 @@ export default function WorldOutliner({
       type: 'group',
       visible: true,
       locked: false,
-      selecionados: false,
+      selected: false,
       children: [
         {
           id: '5a',
@@ -168,7 +168,7 @@ export default function WorldOutliner({
           type: 'blueprint',
           visible: true,
           locked: false,
-          selecionados: false,
+          selected: false,
           children: [],
           parentId: '5',
           components: ['AI', 'Health'],
@@ -179,7 +179,7 @@ export default function WorldOutliner({
           type: 'blueprint',
           visible: true,
           locked: false,
-          selecionados: false,
+          selected: false,
           children: [],
           parentId: '5',
           components: ['AI', 'Health'],
@@ -192,7 +192,7 @@ export default function WorldOutliner({
       type: 'audio',
       visible: true,
       locked: false,
-      selecionados: false,
+      selected: false,
       children: [],
     },
     {
@@ -201,7 +201,7 @@ export default function WorldOutliner({
       type: 'group',
       visible: true,
       locked: false,
-      selecionados: false,
+      selected: false,
       children: [
         {
           id: '7a',
@@ -209,7 +209,7 @@ export default function WorldOutliner({
           type: 'particle',
           visible: true,
           locked: false,
-          selecionados: false,
+          selected: false,
           children: [],
           parentId: '7',
         },
@@ -219,7 +219,7 @@ export default function WorldOutliner({
 
   const [filter, setFilter] = useState<OutlinerFilter>({});
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(['3', '4', '5', '7']));
-  const [selecionadosIds, setSelectedIds] = useState<Set<string>>(new Set(['4']));
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(['4']));
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; object: SceneObject | null } | null>(null);
@@ -228,8 +228,8 @@ export default function WorldOutliner({
     const countObjects = (items: SceneObject[]): number =>
       items.reduce((total, item) => total + 1 + countObjects(item.children), 0);
 
-    return countObjects(objetos);
-  }, [objetos]);
+    return countObjects(objects);
+  }, [objects]);
 
   // Flatten tree for rendering with filter
   const flattenedObjects = useMemo(() => {
@@ -256,12 +256,12 @@ export default function WorldOutliner({
       }
     };
 
-    traverse(objetos, 0);
+    traverse(objects, 0);
     return result;
-  }, [objetos, filter, expandedIds]);
+  }, [objects, filter, expandedIds]);
 
   // Find object by ID in tree
-  const findObjectById = useCallback((id: string, items: SceneObject[] = objetos): SceneObject | null => {
+  const findObjectById = useCallback((id: string, items: SceneObject[] = objects): SceneObject | null => {
     for (const item of items) {
       if (item.id === id) return item;
       if (item.children.length > 0) {
@@ -270,7 +270,7 @@ export default function WorldOutliner({
       }
     }
     return null;
-  }, [objetos]);
+  }, [objects]);
 
   // Update object in tree
   const updateObject = useCallback((id: string, updates: Partial<SceneObject>) => {
@@ -288,8 +288,8 @@ export default function WorldOutliner({
       });
     };
 
-    setObjects(updateInTree(objetos));
-  }, [objetos, onObjectChange]);
+    setObjects(updateInTree(objects));
+  }, [objects, onObjectChange]);
 
   // Handlers
   const handleSelect = useCallback((object: SceneObject, e: React.MouseEvent) => {
@@ -309,11 +309,11 @@ export default function WorldOutliner({
   }, []);
 
   useEffect(() => {
-    const selecionados = Array.from(selecionadosIds)
+    const selected = Array.from(selectedIds)
       .map(id => findObjectById(id))
       .filter(Boolean) as SceneObject[];
-    onSelectionChange?.(selecionados);
-  }, [selecionadosIds, findObjectById, onSelectionChange]);
+    onSelectionChange?.(selected);
+  }, [selectedIds, findObjectById, onSelectionChange]);
 
   const handleToggleExpand = useCallback((id: string) => {
     setExpandedIds(prev => {
@@ -334,14 +334,14 @@ export default function WorldOutliner({
     }
   }, [findObjectById, updateObject]);
 
-  const handleToggleBloquear = useCallback((id: string) => {
+  const handleToggleLock = useCallback((id: string) => {
     const obj = findObjectById(id);
     if (obj) {
       updateObject(id, { locked: !obj.locked });
     }
   }, [findObjectById, updateObject]);
 
-  const handleRenomear = useCallback((id: string, name: string) => {
+  const handleRename = useCallback((id: string, name: string) => {
     updateObject(id, { name });
   }, [updateObject]);
 
@@ -383,7 +383,7 @@ export default function WorldOutliner({
 
     switch (action) {
       case 'focus':
-        if (object) onFocarObject?.(object);
+        if (object) onFocusObject?.(object);
         break;
 
       case 'rename':
@@ -396,7 +396,7 @@ export default function WorldOutliner({
             ...object,
             id: Date.now().toString(),
             name: `${object.name}_copy`,
-            selecionados: false,
+            selected: false,
             children: [],
           };
           setObjects(prev => [...prev, duplicate]);
@@ -408,7 +408,7 @@ export default function WorldOutliner({
         break;
 
       case 'lock':
-        if (object) handleToggleBloquear(object.id);
+        if (object) handleToggleLock(object.id);
         break;
 
       case 'delete':
@@ -454,7 +454,7 @@ export default function WorldOutliner({
         onCreateObject?.('trigger');
         break;
     }
-  }, [contextMenu, handleToggleVisibility, handleToggleBloquear, onFocarObject, onDeleteObject, onCreateObject]);
+  }, [contextMenu, handleToggleVisibility, handleToggleLock, onFocusObject, onDeleteObject, onCreateObject]);
 
   const handleCollapseAll = useCallback(() => {
     setExpandedIds(new Set());
@@ -470,9 +470,9 @@ export default function WorldOutliner({
         }
       }
     };
-    collectIds(objetos);
+    collectIds(objects);
     setExpandedIds(allIds);
-  }, [objetos]);
+  }, [objects]);
 
   const {
     containerRef: treeViewportRef,
@@ -559,14 +559,14 @@ export default function WorldOutliner({
                     onToggleExpand={() => handleToggleExpand(object.id)}
                     onSelect={(e) => handleSelect(object, e)}
                     onToggleVisibility={() => handleToggleVisibility(object.id)}
-                    onToggleBloquear={() => handleToggleBloquear(object.id)}
-                    onRenomear={(name) => handleRenomear(object.id, name)}
+                    onToggleLock={() => handleToggleLock(object.id)}
+                    onRename={(name) => handleRename(object.id, name)}
                     onDragStart={(e) => handleDragStart(e, object.id)}
                     onDragOver={(e) => handleDragOver(e, object.id)}
                     onDrop={(e) => handleDrop(e, object.id)}
                     onContextMenu={(e) => handleContextMenu(e, object)}
                     isDragOver={dragOverId === object.id}
-                    selecionadosIds={selecionadosIds}
+                    selectedIds={selectedIds}
                   />
                 </div>
               );
@@ -581,7 +581,7 @@ export default function WorldOutliner({
             color: 'var(--aethel-text-quaternary)',
           }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>🌐</div>
-            <div>No objeto na cena</div>
+            <div>No objects in scene</div>
           </div>
         )}
       </div>
@@ -594,7 +594,7 @@ export default function WorldOutliner({
         color: 'var(--aethel-text-quaternary)',
         background: 'var(--aethel-surface-secondary)',
       }}>
-        {flattenedObjects.length} objetos • {selecionadosIds.size} selecionados
+        {flattenedObjects.length} objects • {selectedIds.size} selected
       </div>
 
       {/* Context Menu */}

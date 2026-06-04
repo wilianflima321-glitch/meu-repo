@@ -1,6 +1,6 @@
 /**
  * Aethel Engine - Audio System
- * 
+ *
  * Full 3D spatial audio system using Web Audio API.
  * Supports positional audio, reverb, effects, and dynamic mixing.
  */
@@ -8,6 +8,7 @@
 import { EventEmitter } from 'events';
 
 import {createComponentLogger, logger} from '@/lib/observability/logger'
+import { AudioSource } from './audio-source'
 import type {
   AudioEffectConfig,
   AudioGroupConfig,
@@ -18,6 +19,7 @@ import type {
   Vector3,
 } from './audio-manager-contracts'
 export { ReverbPresets } from './audio-manager-presets'
+export { AudioSource } from './audio-source'
 export type {
   AudioEffectConfig,
   AudioGroupConfig,
@@ -34,306 +36,13 @@ const log = createComponentLogger('engine/audio-manager')
 // Audio Source
 // ============================================================================
 
-export class AudioSource extends EventEmitter {
-  public id: string;
-  public name: string;
-  public config: AudioSourceConfig;
-  
-  private audioContext: AudioContext;
-  private buffer: AudioBuffer | null = null;
-  private sourceNode: AudioBufferSourceNode | null = null;
-  private gainNode: GainNode;
-  private pannerNode: PannerNode | null = null;
-  private lowPassNode: BiquadFilterNode | null = null;
-  private highPassNode: BiquadFilterNode | null = null;
-  
-  private isPlaying = false;
-  private isPaused = false;
-  private startTime = 0;
-  private pauseTime = 0;
-  private playbackRate = 1;
-  
-  // Position
-  private _position: Vector3 = { x: 0, y: 0, z: 0 };
-  private _velocity: Vector3 = { x: 0, y: 0, z: 0 };
-
-  constructor(
-    audioContext: AudioContext,
-    config: AudioSourceConfig,
-    destination: AudioNode
-  ) {
-    super();
-    
-    this.id = crypto.randomUUID();
-    this.name = config.name;
-    this.config = config;
-    this.audioContext = audioContext;
-    
-    // Create gain node
-    this.gainNode = audioContext.createGain();
-    this.gainNode.gain.value = config.volume ?? 1;
-    
-    // Create panner node for 3D audio
-    if (config.spatial !== false) {
-      this.pannerNode = audioContext.createPanner();
-      this.pannerNode.panningModel = 'HRTF';
-      this.pannerNode.distanceModel = config.distanceModel ?? 'inverse';
-      this.pannerNode.refDistance = config.refDistance ?? 1;
-      this.pannerNode.maxDistance = config.maxDistance ?? 10000;
-      this.pannerNode.rolloffFactor = config.rolloffFactor ?? 1;
-      this.pannerNode.coneInnerAngle = config.coneInnerAngle ?? 360;
-      this.pannerNode.coneOuterAngle = config.coneOuterAngle ?? 360;
-      this.pannerNode.coneOuterGain = config.coneOuterGain ?? 0;
-      
-      if (config.position) {
-        this.setPosition(config.position);
-      }
-    }
-    
-    // Create filters
-    if (config.lowPassFilter !== undefined) {
-      this.lowPassNode = audioContext.createBiquadFilter();
-      this.lowPassNode.type = 'lowpass';
-      this.lowPassNode.frequency.value = config.lowPassFilter;
-    }
-    
-    if (config.highPassFilter !== undefined) {
-      this.highPassNode = audioContext.createBiquadFilter();
-      this.highPassNode.type = 'highpass';
-      this.highPassNode.frequency.value = config.highPassFilter;
-    }
-    
-    // Connect nodes
-    this.connectNodes(destination);
-    
-    // Set playback rate
-    this.playbackRate = config.pitch ?? 1;
-    
-    // Load audio if URL provided
-    if (config.url) {
-      this.load(config.url);
-    } else if (config.buffer) {
-      this.buffer = config.buffer;
-      if (config.autoplay) {
-        this.play();
-      }
-    }
-  }
-
-  private connectNodes(destination: AudioNode): void {
-    let lastNode: AudioNode = this.gainNode;
-    
-    if (this.highPassNode) {
-      lastNode.connect(this.highPassNode);
-      lastNode = this.highPassNode;
-    }
-    
-    if (this.lowPassNode) {
-      lastNode.connect(this.lowPassNode);
-      lastNode = this.lowPassNode;
-    }
-    
-    if (this.pannerNode) {
-      lastNode.connect(this.pannerNode);
-      lastNode = this.pannerNode;
-    }
-    
-    lastNode.connect(destination);
-  }
-
-  async load(url: string): Promise<void> {
-    try {
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-      this.buffer = await this.audioContext.decodeAudioData(arrayBuffer);
-      
-      this.emit('loaded', this);
-      
-      if (this.config.autoplay) {
-        this.play();
-      }
-    } catch (error) {
-      logger.error(`[Audio] Failed to load ${url}:`, error);
-      this.emit('error', error);
-    }
-  }
-
-  play(offset = 0): void {
-    if (!this.buffer) {
-      logger.warn('[Audio] No buffer loaded');
-      return;
-    }
-    
-    if (this.isPlaying) {
-      this.stop();
-    }
-    
-    this.sourceNode = this.audioContext.createBufferSource();
-    this.sourceNode.buffer = this.buffer;
-    this.sourceNode.loop = this.config.loop ?? false;
-    this.sourceNode.playbackRate.value = this.playbackRate;
-    
-    this.sourceNode.connect(this.gainNode);
-    
-    this.sourceNode.onended = () => {
-      if (!this.isPaused) {
-        this.isPlaying = false;
-        this.emit('ended', this);
-      }
-    };
-    
-    const actualOffset = this.isPaused ? this.pauseTime : offset;
-    this.sourceNode.start(0, actualOffset);
-    this.startTime = this.audioContext.currentTime - actualOffset;
-    
-    this.isPlaying = true;
-    this.isPaused = false;
-    
-    this.emit('play', this);
-  }
-
-  pause(): void {
-    if (!this.isPlaying || this.isPaused) return;
-    
-    this.pauseTime = this.audioContext.currentTime - this.startTime;
-    this.sourceNode?.stop();
-    this.sourceNode = null;
-    
-    this.isPaused = true;
-    this.emit('pause', this);
-  }
-
-  resume(): void {
-    if (!this.isPaused) return;
-    this.play();
-  }
-
-  stop(): void {
-    if (this.sourceNode) {
-      this.sourceNode.stop();
-      this.sourceNode.disconnect();
-      this.sourceNode = null;
-    }
-    
-    this.isPlaying = false;
-    this.isPaused = false;
-    this.pauseTime = 0;
-    
-    this.emit('stop', this);
-  }
-
-  // Volume control
-  setVolume(value: number, fadeTime = 0): void {
-    const clampedValue = Math.max(0, Math.min(1, value));
-    
-    if (fadeTime > 0) {
-      this.gainNode.gain.linearRampToValueAtTime(
-        clampedValue,
-        this.audioContext.currentTime + fadeTime
-      );
-    } else {
-      this.gainNode.gain.value = clampedValue;
-    }
-  }
-
-  getVolume(): number {
-    return this.gainNode.gain.value;
-  }
-
-  // Pitch control
-  setPitch(value: number): void {
-    this.playbackRate = value;
-    if (this.sourceNode) {
-      this.sourceNode.playbackRate.value = value;
-    }
-  }
-
-  getPitch(): number {
-    return this.playbackRate;
-  }
-
-  // Position for 3D audio
-  setPosition(position: Vector3): void {
-    this._position = position;
-    if (this.pannerNode) {
-      this.pannerNode.positionX.value = position.x;
-      this.pannerNode.positionY.value = position.y;
-      this.pannerNode.positionZ.value = position.z;
-    }
-  }
-
-  getPosition(): Vector3 {
-    return { ...this._position };
-  }
-
-  setVelocity(velocity: Vector3): void {
-    this._velocity = velocity;
-    // Note: Web Audio API doesn't support velocity directly
-    // This can be used for doppler effect calculations
-  }
-
-  getVelocity(): Vector3 {
-    return { ...this._velocity };
-  }
-
-  // Orientation for directional audio
-  setOrientation(forward: Vector3): void {
-    if (this.pannerNode) {
-      this.pannerNode.orientationX.value = forward.x;
-      this.pannerNode.orientationY.value = forward.y;
-      this.pannerNode.orientationZ.value = forward.z;
-    }
-  }
-
-  // Filter control
-  setLowPassFrequency(frequency: number): void {
-    if (this.lowPassNode) {
-      this.lowPassNode.frequency.value = frequency;
-    }
-  }
-
-  setHighPassFrequency(frequency: number): void {
-    if (this.highPassNode) {
-      this.highPassNode.frequency.value = frequency;
-    }
-  }
-
-  // State
-  getIsPlaying(): boolean {
-    return this.isPlaying && !this.isPaused;
-  }
-
-  getIsPaused(): boolean {
-    return this.isPaused;
-  }
-
-  getCurrentTime(): number {
-    if (this.isPaused) return this.pauseTime;
-    if (!this.isPlaying) return 0;
-    return this.audioContext.currentTime - this.startTime;
-  }
-
-  getDuration(): number {
-    return this.buffer?.duration ?? 0;
-  }
-
-  dispose(): void {
-    this.stop();
-    this.gainNode.disconnect();
-    this.pannerNode?.disconnect();
-    this.lowPassNode?.disconnect();
-    this.highPassNode?.disconnect();
-    this.removeAllListeners();
-  }
-}
-
 // ============================================================================
 // Audio Group (Bus)
 // ============================================================================
 
 export class AudioGroup extends EventEmitter {
   public name: string;
-  
+
   private audioContext: AudioContext;
   private gainNode: GainNode;
   private sources: AudioSource[] = [];
@@ -346,19 +55,19 @@ export class AudioGroup extends EventEmitter {
     destination: AudioNode
   ) {
     super();
-    
+
     this.name = config.name;
     this.audioContext = audioContext;
-    
+
     this.gainNode = audioContext.createGain();
     this.gainNode.gain.value = config.volume ?? 1;
     this._volume = config.volume ?? 1;
     this._muted = config.muted ?? false;
-    
+
     if (this._muted) {
       this.gainNode.gain.value = 0;
     }
-    
+
     this.gainNode.connect(destination);
   }
 
@@ -379,7 +88,7 @@ export class AudioGroup extends EventEmitter {
 
   setVolume(value: number, fadeTime = 0): void {
     this._volume = Math.max(0, Math.min(1, value));
-    
+
     if (!this._muted) {
       if (fadeTime > 0) {
         this.gainNode.gain.linearRampToValueAtTime(
@@ -399,7 +108,7 @@ export class AudioGroup extends EventEmitter {
   setMuted(muted: boolean, fadeTime = 0): void {
     this._muted = muted;
     const targetValue = muted ? 0 : this._volume;
-    
+
     if (fadeTime > 0) {
       this.gainNode.gain.linearRampToValueAtTime(
         targetValue,
@@ -458,24 +167,24 @@ class ReverbEffect {
 
   constructor(audioContext: AudioContext, preset?: ReverbPreset) {
     this.audioContext = audioContext;
-    
+
     this.inputNode = audioContext.createGain();
     this.outputNode = audioContext.createGain();
     this.convolverNode = audioContext.createConvolver();
     this.wetGainNode = audioContext.createGain();
     this.dryGainNode = audioContext.createGain();
-    
+
     // Connect nodes
     this.inputNode.connect(this.dryGainNode);
     this.inputNode.connect(this.convolverNode);
     this.convolverNode.connect(this.wetGainNode);
     this.dryGainNode.connect(this.outputNode);
     this.wetGainNode.connect(this.outputNode);
-    
+
     // Set initial mix
     this.wetGainNode.gain.value = preset?.wetMix ?? 0.3;
     this.dryGainNode.gain.value = 1 - (preset?.wetMix ?? 0.3);
-    
+
     // Generate impulse response
     this.generateImpulseResponse(preset?.decay ?? 2, preset?.preDelay ?? 0.01);
   }
@@ -485,10 +194,10 @@ class ReverbEffect {
     const length = sampleRate * decay;
     const preDelaySamples = sampleRate * preDelay;
     const buffer = this.audioContext.createBuffer(2, length, sampleRate);
-    
+
     for (let channel = 0; channel < 2; channel++) {
       const channelData = buffer.getChannelData(channel);
-      
+
       for (let i = 0; i < length; i++) {
         if (i < preDelaySamples) {
           channelData[i] = 0;
@@ -498,7 +207,7 @@ class ReverbEffect {
         }
       }
     }
-    
+
     this.convolverNode.buffer = buffer;
   }
 
@@ -530,22 +239,22 @@ class ReverbEffect {
 
 export class AudioManager extends EventEmitter {
   private static instance: AudioManager | null = null;
-  
+
   private audioContext: AudioContext | null = null;
   private masterGain: GainNode | null = null;
   private compressor: DynamicsCompressorNode | null = null;
   private reverb: ReverbEffect | null = null;
-  
+
   private sources = new Map<string, AudioSource>();
   private groups = new Map<string, AudioGroup>();
   private bufferCache = new Map<string, AudioBuffer>();
-  
+
   private listener: AudioListenerConfig = {
     position: { x: 0, y: 0, z: 0 },
     forward: { x: 0, y: 0, z: -1 },
     up: { x: 0, y: 1, z: 0 },
   };
-  
+
   private isInitialized = false;
   private isSuspended = false;
 
@@ -569,14 +278,14 @@ export class AudioManager extends EventEmitter {
 
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
-    
+
     try {
       // Create audio context
       this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      
+
       // Create master gain
       this.masterGain = this.audioContext.createGain();
-      
+
       // Create compressor for master bus
       this.compressor = this.audioContext.createDynamicsCompressor();
       this.compressor.threshold.value = -24;
@@ -584,24 +293,24 @@ export class AudioManager extends EventEmitter {
       this.compressor.ratio.value = 12;
       this.compressor.attack.value = 0.003;
       this.compressor.release.value = 0.25;
-      
+
       // Create reverb
       this.reverb = new ReverbEffect(this.audioContext);
-      
+
       // Connect master chain
       this.masterGain.connect(this.compressor);
       this.compressor.connect(this.audioContext.destination);
-      
+
       // Create default groups
       this.createGroup({ name: 'master', volume: 1 });
       this.createGroup({ name: 'music', volume: 0.7 });
       this.createGroup({ name: 'sfx', volume: 1 });
       this.createGroup({ name: 'voice', volume: 1 });
       this.createGroup({ name: 'ambient', volume: 0.5 });
-      
+
       this.isInitialized = true;
       this.emit('initialized');
-      
+
       log.info('[Audio] System initialized');
     } catch (error) {
       logger.error('[Audio] Failed to initialize:', error);
@@ -631,13 +340,13 @@ export class AudioManager extends EventEmitter {
     if (!this.audioContext || !this.masterGain) {
       throw new Error('Audio system not initialized');
     }
-    
+
     const group = new AudioGroup(
       this.audioContext,
       config,
       this.masterGain
     );
-    
+
     this.groups.set(config.name, group);
     return group;
   }
@@ -665,7 +374,7 @@ export class AudioManager extends EventEmitter {
     if (!this.audioContext || !this.masterGain) {
       throw new Error('Audio system not initialized');
     }
-    
+
     // Get destination (group or master)
     let destination: AudioNode = this.masterGain;
     if (config.group) {
@@ -674,20 +383,20 @@ export class AudioManager extends EventEmitter {
         destination = group.getInputNode();
       }
     }
-    
+
     const source = new AudioSource(
       this.audioContext,
       config,
       destination
     );
-    
+
     this.sources.set(source.id, source);
-    
+
     if (config.group) {
       const group = this.groups.get(config.group);
       group?.addSource(source);
     }
-    
+
     return source;
   }
 
@@ -709,14 +418,14 @@ export class AudioManager extends EventEmitter {
   async playSound(url: string, config?: Partial<AudioSourceConfig>): Promise<AudioSource> {
     // Check cache
     let buffer = this.bufferCache.get(url);
-    
+
     if (!buffer && this.audioContext) {
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
       buffer = await this.audioContext.decodeAudioData(arrayBuffer);
       this.bufferCache.set(url, buffer);
     }
-    
+
     const source = this.createSource({
       name: url,
       buffer,
@@ -724,16 +433,16 @@ export class AudioManager extends EventEmitter {
       spatial: false,
       ...config,
     });
-    
+
     source.play();
-    
+
     // Auto-cleanup non-looping sounds
     if (!config?.loop) {
       source.on('ended', () => {
         this.removeSource(source.id);
       });
     }
-    
+
     return source;
   }
 
@@ -741,7 +450,7 @@ export class AudioManager extends EventEmitter {
     // Stop existing music in group
     const musicGroup = this.groups.get('music');
     musicGroup?.stopAll();
-    
+
     const source = this.createSource({
       name: url,
       url,
@@ -751,13 +460,13 @@ export class AudioManager extends EventEmitter {
       volume: 0,
       ...config,
     });
-    
+
     // Fade in
     source.on('loaded', () => {
       source.play();
       source.setVolume(config?.volume ?? 1, 2);
     });
-    
+
     return source;
   }
 
@@ -772,17 +481,17 @@ export class AudioManager extends EventEmitter {
       group: 'sfx',
       ...config,
     });
-    
+
     return source;
   }
 
   // Listener management
   setListenerPosition(position: Vector3): void {
     this.listener.position = position;
-    
+
     if (this.audioContext) {
       const listener = this.audioContext.listener;
-      
+
       if (listener.positionX) {
         listener.positionX.value = position.x;
         listener.positionY.value = position.y;
@@ -797,10 +506,10 @@ export class AudioManager extends EventEmitter {
   setListenerOrientation(forward: Vector3, up: Vector3): void {
     this.listener.forward = forward;
     this.listener.up = up;
-    
+
     if (this.audioContext) {
       const listener = this.audioContext.listener;
-      
+
       if (listener.forwardX) {
         listener.forwardX.value = forward.x;
         listener.forwardY.value = forward.y;
@@ -825,9 +534,9 @@ export class AudioManager extends EventEmitter {
   // Master controls
   setMasterVolume(volume: number, fadeTime = 0): void {
     if (!this.masterGain) return;
-    
+
     const clampedVolume = Math.max(0, Math.min(1, volume));
-    
+
     if (fadeTime > 0 && this.audioContext) {
       this.masterGain.gain.linearRampToValueAtTime(
         clampedVolume,
@@ -854,7 +563,7 @@ export class AudioManager extends EventEmitter {
       groups: [],
       sources: [],
     };
-    
+
     for (const [name, group] of this.groups) {
       snapshot.groups.push({
         name,
@@ -862,7 +571,7 @@ export class AudioManager extends EventEmitter {
         muted: group.isMuted(),
       });
     }
-    
+
     for (const [id, source] of this.sources) {
       snapshot.sources.push({
         id,
@@ -870,13 +579,13 @@ export class AudioManager extends EventEmitter {
         position: source.getPosition(),
       });
     }
-    
+
     return snapshot;
   }
 
   applySnapshot(snapshot: AudioSnapshot, fadeTime = 0): void {
     this.setMasterVolume(snapshot.masterVolume, fadeTime);
-    
+
     for (const groupData of snapshot.groups) {
       const group = this.groups.get(groupData.name);
       if (group) {
@@ -884,7 +593,7 @@ export class AudioManager extends EventEmitter {
         group.setMuted(groupData.muted, fadeTime);
       }
     }
-    
+
     for (const sourceData of snapshot.sources) {
       const source = this.sources.get(sourceData.id);
       if (source) {
@@ -922,32 +631,32 @@ export class AudioManager extends EventEmitter {
   // Cleanup
   clear(): void {
     this.stopAll();
-    
+
     for (const source of this.sources.values()) {
       source.dispose();
     }
     this.sources.clear();
-    
+
     this.bufferCache.clear();
   }
 
   dispose(): void {
     this.clear();
-    
+
     for (const group of this.groups.values()) {
       group.dispose();
     }
     this.groups.clear();
-    
+
     this.reverb?.dispose();
     this.compressor?.disconnect();
     this.masterGain?.disconnect();
-    
+
     if (this.audioContext) {
       this.audioContext.close();
       this.audioContext = null;
     }
-    
+
     this.isInitialized = false;
     this.removeAllListeners();
   }

@@ -77,6 +77,40 @@ export const ADMIN_ROUTE_LABELS: Record<string, string> = {
   '/admin/users': 'Users',
 }
 
+export const ADMIN_LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
+  '/admin/ai-enhancements': '/admin/ai?legacy=ai-enhancements',
+  '/admin/ai-upgrades': '/admin/ai?legacy=ai-upgrades',
+  '/admin/arpu-churn': '/admin/finance?legacy=arpu-churn',
+  '/admin/cost-optimization': '/admin/finance?legacy=cost-optimization',
+  '/admin/multi-tenancy': '/admin/feature-flags?legacy=multi-tenancy',
+  '/admin/rate-limiting': '/admin/security?legacy=rate-limiting',
+  '/admin/real-time': '/admin/monitoring?legacy=real-time',
+  '/admin/scalability': '/admin/monitoring?legacy=scalability',
+
+  '/admin/feedback': '/admin/support?legacy=feedback',
+  '/admin/onboarding': '/admin/users?legacy=onboarding',
+  '/admin/analytics': '/admin/finance?legacy=analytics',
+  '/admin/subscriptions': '/admin/finance?legacy=subscriptions',
+  '/admin/promotions': '/admin/finance?legacy=promotions',
+  '/admin/fine-tuning': '/admin/ai-training?legacy=fine-tuning',
+  '/admin/bias-detection': '/admin/ai-monitor?legacy=bias-detection',
+  '/admin/indexing': '/admin/ai?legacy=indexing',
+  '/admin/automation': '/admin/ai?legacy=automation',
+  '/admin/backup': '/admin/infrastructure?legacy=backup',
+  '/admin/deploy': '/admin/infrastructure?legacy=deploy',
+  '/admin/updates': '/admin/monitoring?legacy=updates',
+  '/admin/chat': '/admin/collaboration?legacy=chat',
+  '/admin/notifications': '/admin/feature-flags?legacy=notifications',
+}
+
+export function getAdminLegacyRedirectTarget(route: string): string | undefined {
+  return ADMIN_LEGACY_ROUTE_REDIRECTS[route]
+}
+
+export function getAdminRouteNavigationHref(route: string): string {
+  return getAdminLegacyRedirectTarget(route) || route
+}
+
 export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
   {
     id: 'people',

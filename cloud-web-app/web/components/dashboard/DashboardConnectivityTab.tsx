@@ -51,18 +51,18 @@ export function DashboardConnectivityTab({
       </div>
 
       {connectivityLoading && (
-        <p className="text-sm text-[var(--aethel-text-secondary)]">Monitorando servicos...</p>
+        <p className="text-sm text-[var(--aethel-text-secondary)]">Monitoring services...</p>
       )}
 
       {hasConnectivityError && (
-        <p className="text-sm text-[var(--aethel-error)]">Nao foi possivel consultar os endpoints.</p>
+        <p className="text-sm text-[var(--aethel-error)]">Could not query the endpoints.</p>
       )}
 
       {!connectivityLoading && !hasConnectivityError && connectivityData && (
         <div className="space-y-4">
           <div className={`${panelClass} flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between`}>
             <div>
-              <p className="text-sm text-[var(--aethel-text-secondary)]">Status geral</p>
+              <p className="text-sm text-[var(--aethel-text-secondary)]">Overall status</p>
               <p className="text-3xl font-bold">
                 {String(formatConnectivityStatus(connectivityData.overall_status)).toUpperCase()}
               </p>

@@ -84,7 +84,7 @@ export function AIChatEconomicsPanel({ projectId, currentRunEstimate }: AIChatEc
   if (isLoading) {
     return (
       <div className="flex h-full min-h-[180px] items-center justify-center p-4 text-[11px] text-[var(--aethel-text-tertiary)]">
-        Loading economics plane...
+        Loading cost guard...
       </div>
     )
   }
@@ -93,9 +93,9 @@ export function AIChatEconomicsPanel({ projectId, currentRunEstimate }: AIChatEc
     return (
       <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 p-4 text-center text-[11px] text-[var(--aethel-text-tertiary)]">
         <AlertTriangle className="h-5 w-5 text-[var(--aethel-warning-light)]" />
-        <p>Economics plane unavailable.</p>
+        <p>Cost guard unavailable.</p>
         <p className="max-w-[240px] text-[var(--aethel-text-quaternary)]">
-          Could not load live cost, wallet, and billing readiness for this surface.
+          Could not load live cost, wallet, and payment setup.
         </p>
       </div>
     )
@@ -115,9 +115,9 @@ export function AIChatEconomicsPanel({ projectId, currentRunEstimate }: AIChatEc
           <div className="flex items-center gap-2">
             <DollarSign className="h-4 w-4" />
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.16em]">Economics plane</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em]">Cost guard</div>
               <p className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-secondary)]">
-                Wallet, budget, and readiness before releasing the next wave.
+                Wallet, budget, and payment setup before the next wave.
               </p>
             </div>
           </div>
@@ -169,7 +169,7 @@ export function AIChatEconomicsPanel({ projectId, currentRunEstimate }: AIChatEc
             ) : (
               <ShieldAlert className="h-3.5 w-3.5 text-[var(--aethel-warning-light)]" />
             )}
-            Billing runtime
+            Payment setup
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
             <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-secondary)]">

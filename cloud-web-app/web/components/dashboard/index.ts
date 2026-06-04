@@ -3,11 +3,6 @@
 
 export { AethelDashboardSidebar as DashboardSidebarCanonical } from './AethelDashboardSidebar'
 
-// Legacy shell exports kept only for compatibility with older refactors.
-export { DashboardSidebar, type DashboardTab } from './DashboardSidebar'
-export { DashboardSidebar as LegacyDashboardSidebar } from './DashboardSidebar'
-export { DashboardLayout } from './DashboardLayout'
-export { DashboardLayout as LegacyDashboardLayout } from './DashboardLayout'
 export { NewProjectWizard } from './NewProjectWizard'
 export { ProjectsDashboard } from './ProjectsDashboard'
 
@@ -15,11 +10,10 @@ export { ProjectsDashboard } from './ProjectsDashboard'
 export { OverviewTab } from './tabs/OverviewTab'
 export { ProjectsTab, type Project } from './tabs/ProjectsTab'
 export { AIChatTab, type ChatMessage, type ChatThread } from './tabs/AIChatTab'
-export { BillingTab, type Plan } from './tabs/BillingTab'
 
 // System Monitoring
-export { 
-    HealthDashboard, 
+export {
+    HealthDashboard,
     type SystemHealth,
     type ComponentHealth,
     type HealthDashboardProps

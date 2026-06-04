@@ -43,7 +43,7 @@ const DOMAIN_TEMPLATES = [
     icon: 'search',
     name: 'Fluxo de pesquisa',
     description: 'Research with citations, plan, and code',
-    stack: ['Nexus Pesquisa', 'Citations', 'Code Gen'],
+    stack: ['Nexus Research', 'Citations', 'Code Gen'],
     color: 'from-[var(--aethel-warning)] to-[var(--aethel-warning-dark)]',
     mission: 'Research a topic, generate a plan, and implement a solution',
   },
@@ -146,7 +146,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
           type="button"
           onClick={onDismiss}
           className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)]"
-          aria-label="Fechar assistente"
+          aria-label="Close assistant"
         >
           <Codicon name="close" />
         </button>
@@ -188,11 +188,11 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
             {/* Domain filter */}
             <div className="mt-6 flex flex-wrap justify-center gap-2">
               {[
-                { id: 'all', label: 'Todos' },
+                { id: 'all', label: 'All' },
                 { id: 'app', label: 'Apps' },
-                { id: 'research', label: 'Pesquisa' },
-                { id: 'game', label: 'Jogos' },
-                { id: 'film', label: 'Filmes' },
+                { id: 'research', label: 'Research' },
+                { id: 'game', label: 'Games' },
+                { id: 'film', label: 'Films' },
               ].map((f) => (
                 <button
                   key={f.id}
@@ -227,7 +227,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                   >
                     {isDisabled && (
                       <span className="absolute right-3 top-3 rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-0.5 text-[10px] font-semibold text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">
-                        Em roadmap
+                        Roadmap
                       </span>
                     )}
                     {selectedTemplate === tpl.id && !isDisabled && (
@@ -257,7 +257,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                 onClick={onDismiss}
                 className="text-sm text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-primary)]"
               >
-                Pular assistente
+                Skip assistant
               </button>
               <button
                 type="button"
@@ -432,7 +432,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                 onClick={handleComplete}
                 className="flex items-center gap-2 rounded-xl bg-[linear-gradient(90deg,var(--aethel-primary),var(--aethel-info))] px-6 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg shadow-[0_18px_40px_color-mix(in_srgb,var(--aethel-info)_35%,transparent)] transition-all hover:brightness-110 active:scale-[0.98]"
               >
-                Abrir Dashboard
+                Open Dashboard
                 <Codicon name="arrow-right" />
               </button>
             </div>
@@ -442,6 +442,3 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
     </div>
   )
 }
-
-
-

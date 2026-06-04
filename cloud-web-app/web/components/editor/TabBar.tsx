@@ -3,14 +3,8 @@
 /**
  * Aethel Engine - Advanced Tab Bar System
  *
- * VS Code-style tabs with:
- * - Drag & drop reordering
- * - Pin tabs (sticky left)
- * - Tab groups / Split editors
- * - Dirty indicator (*)
- * - Close others / Close to the right
- * - Tab context menu
- * - Tab overflow menu
+ * VS Code-style tabs with: drag reordering, pinning, split editors,
+ * dirty indicators, context actions, and overflow handling.
  */
 
 import React, {
@@ -18,138 +12,19 @@ import React, {
   useEffect,
   useCallback,
   useRef,
-  useMemo,
-  createContext,
-  useContext,
   type ReactNode,
   type DragEvent,
   type MouseEvent,
 } from 'react';
-import {
+import { ChevronDown, MoreHorizontal } from 'lucide-react';
 
+import { Tab, TabContextMenu } from './TabBar.components'
+import { TabContext, useTabBar } from './TabBar.context'
+import { getFileIcon } from './TabBar.file-icons'
+import type { EditorTab, TabGroup } from './TabBar.types'
 
-  X,
-  MoreHorizontal,
-  ChevronDown,
-  Pin,
-  PinOff,
-  Copy,
-  Split,
-  ArrowLeft,
-  ArrowRight,
-  ExternalLink,
-  Trash2,
-  FileCode,
-  FileJson,
-  FileText,
-  Settings,
-  Terminal,
-  GitBranch,
-  Bug,
-  Search,
-  type LucideIcon,
-} from 'lucide-react';
-import { createComponentLogger } from '@/lib/observability/logger'
-
-const log = createComponentLogger('TabBar')
-
-
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface EditorTab {
-  id: string;
-  title: string;
-  path: string;
-  icon?: LucideIcon | string;
-  iconColor?: string;
-  isDirty?: boolean;
-  isPinned?: boolean;
-  isPreview?: boolean;
-  groupId?: string;
-  language?: string;
-}
-
-export interface TabGroup {
-  id: string;
-  tabs: EditorTab[];
-  activeTabId?: string;
-  isActive?: boolean;
-  orientation?: 'horizontal' | 'vertical';
-}
-
-export interface TabContextMenuAction {
-  id: string;
-  label: string;
-  icon?: LucideIcon;
-  shortcut?: string;
-  danger?: boolean;
-  disabled?: boolean;
-  action: (tab: EditorTab) => void;
-}
-
-// ============================================================================
-// Tab Context
-// ============================================================================
-
-interface TabContextValue {
-  tabs: EditorTab[];
-  groups: TabGroup[];
-  activeTabId: string | null;
-  activeGroupId: string;
-  openTab: (tab: Omit<EditorTab, 'id'>, options?: { preview?: boolean; focus?: boolean }) => void;
-  closeTab: (tabId: string) => void;
-  closeOtherTabs: (tabId: string) => void;
-  closeTabsToRight: (tabId: string) => void;
-  closeAllTabs: () => void;
-  setActiveTab: (tabId: string) => void;
-  reorderTabs: (fromIndex: number, toIndex: number) => void;
-  togglePin: (tabId: string) => void;
-  duplicateTab: (tabId: string) => void;
-  splitTab: (tabId: string, direction: 'horizontal' | 'vertical') => void;
-  moveTabToGroup: (tabId: string, groupId: string) => void;
-  markTabDirty: (tabId: string, dirty: boolean) => void;
-  convertPreviewToNormal: (tabId: string) => void;
-}
-
-const TabContext = createContext<TabContextValue | null>(null);
-
-export function useTabBar() {
-  const context = useContext(TabContext);
-  if (!context) {
-    throw new Error('useTabBar must be used within TabProvider');
-  }
-  return context;
-}
-
-// ============================================================================
-// File Icons
-// ============================================================================
-
-const FILE_ICONS: Record<string, { icon: LucideIcon; color: string }> = {
-  '.ts': { icon: FileCode, color: 'rgb(49, 120, 198)' },
-  '.tsx': { icon: FileCode, color: 'rgb(49, 120, 198)' },
-  '.js': { icon: FileCode, color: 'rgb(247, 223, 30)' },
-  '.jsx': { icon: FileCode, color: 'rgb(97, 218, 251)' },
-  '.json': { icon: FileJson, color: 'rgb(203, 203, 65)' },
-  '.md': { icon: FileText, color: 'rgb(81, 154, 186)' },
-  '.css': { icon: FileCode, color: 'rgb(86, 61, 124)' },
-  '.scss': { icon: FileCode, color: 'rgb(204, 102, 153)' },
-  '.html': { icon: FileCode, color: 'rgb(227, 76, 38)' },
-  '.py': { icon: FileCode, color: 'rgb(53, 114, 165)' },
-  '.rs': { icon: FileCode, color: 'rgb(222, 165, 132)' },
-  '.go': { icon: FileCode, color: 'rgb(0, 173, 216)' },
-};
-
-function getFileIcon(path: string): { icon: LucideIcon; color: string } {
-  const ext = path.match(/\.[^.]+$/)?.[0] || '';
-  return FILE_ICONS[ext] || { icon: FileText, color: 'var(--aethel-text-muted)' };
-}
-
-// ============================================================================
-// Tab Provider
-// ============================================================================
+export { useTabBar } from './TabBar.context'
+export type { EditorTab, TabContextMenuAction, TabGroup } from './TabBar.types'
 
 export function TabProvider({
   children,
@@ -398,278 +273,6 @@ export function TabProvider({
 }
 
 // ============================================================================
-// Tab Context Menu
-// ============================================================================
-
-function TabContextMenu({
-  tab,
-  position,
-  onClose,
-}: {
-  tab: EditorTab;
-  position: { x: number; y: number };
-  onClose: () => void;
-}) {
-  const {
-    closeTab,
-    closeOtherTabs,
-    closeTabsToRight,
-    closeAllTabs,
-    togglePin,
-    duplicateTab,
-    splitTab,
-  } = useTabBar();
-
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: Event) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [onClose]);
-
-  const actions: TabContextMenuAction[] = [
-    {
-      id: 'close',
-      label: 'Close',
-      shortcut: 'Ctrl+W',
-      action: () => closeTab(tab.id),
-    },
-    {
-      id: 'close-others',
-      label: 'Close Others',
-      action: () => closeOtherTabs(tab.id),
-    },
-    {
-      id: 'close-right',
-      label: 'Close to the Right',
-      action: () => closeTabsToRight(tab.id),
-    },
-    {
-      id: 'close-all',
-      label: 'Close All',
-      danger: true,
-      action: () => closeAllTabs(),
-    },
-    { id: 'divider-1', label: '-', action: () => {} },
-    {
-      id: 'pin',
-      label: tab.isPinned ? 'Unpin' : 'Pin',
-      icon: tab.isPinned ? PinOff : Pin,
-      action: () => togglePin(tab.id),
-    },
-    {
-      id: 'duplicate',
-      label: 'Duplicate',
-      icon: Copy,
-      action: () => duplicateTab(tab.id),
-    },
-    { id: 'divider-2', label: '-', action: () => {} },
-    {
-      id: 'split-right',
-      label: 'Split Right',
-      icon: Split,
-      action: () => splitTab(tab.id, 'horizontal'),
-    },
-    {
-      id: 'split-down',
-      label: 'Split Down',
-      icon: Split,
-      action: () => splitTab(tab.id, 'vertical'),
-    },
-    { id: 'divider-3', label: '-', action: () => {} },
-    {
-      id: 'copy-path',
-      label: 'Copy Path',
-      icon: Copy,
-      action: () => navigator.clipboard.writeText(tab.path),
-    },
-    {
-      id: 'reveal',
-      label: 'Reveal in Explorer',
-      icon: ExternalLink,
-      action: () => {
-        // Trigger reveal in file explorer
-        log.info('Reveal:', tab.path);
-      },
-    },
-  ];
-
-  return (
-    <div
-      ref={menuRef}
-      className="fixed z-50 min-w-48 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl py-1 overflow-hidden"
-      style={{ left: position.x, top: position.y }}
-    >
-      {actions.map((action, index) => {
-        if (action.label === '-') {
-          return <div key={action.id} className="my-1 border-t border-[var(--aethel-border-primary)]" />;
-        }
-
-        return (
-          <button type="button" aria-label={`${action.label} ${tab.title}`}
-            key={action.id}
-            onClick={() => {
-              action.action(tab);
-              onClose();
-            }}
-            disabled={action.disabled}
-            className={`w-full flex items-center justify-between gap-4 px-3 py-1.5 text-sm ${
-              action.danger
-                ? 'text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)]'
-                : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)]'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            <div className="flex items-center gap-2">
-              {action.icon && <action.icon className="w-4 h-4" />}
-              {action.label}
-            </div>
-            {action.shortcut && (
-              <span className="text-xs text-[var(--aethel-text-tertiary)]">{action.shortcut}</span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-// ============================================================================
-// Single Tab Component
-// ============================================================================
-
-function Tab({
-  tab,
-  isActive,
-  onSelect,
-  onClose,
-  onContextMenu,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  isDragging,
-  isDragOver,
-}: {
-  tab: EditorTab;
-  isActive: boolean;
-  onSelect: () => void;
-  onClose: () => void;
-  onContextMenu: (e: MouseEvent) => void;
-  onDragStart: (e: DragEvent) => void;
-  onDragOver: (e: DragEvent) => void;
-  onDrop: (e: DragEvent) => void;
-  isDragging: boolean;
-  isDragOver: boolean;
-}) {
-  const { convertPreviewToNormal } = useTabBar();
-  const fileIcon = typeof tab.icon === 'string' ? null : tab.icon || getFileIcon(tab.path).icon;
-  const iconColor = tab.iconColor || (typeof tab.icon !== 'string' ? getFileIcon(tab.path).color : undefined);
-
-  const handleDoubleClick = () => {
-    if (tab.isPreview) {
-      convertPreviewToNormal(tab.id);
-    }
-  };
-
-  const handleMiddleClick = (e: MouseEvent) => {
-    if (e.button === 1) {
-      e.preventDefault();
-      onClose();
-    }
-  };
-
-  return (
-    <div
-      draggable
-      onClick={onSelect}
-      onDoubleClick={handleDoubleClick}
-      onAuxClick={handleMiddleClick}
-      onContextMenu={onContextMenu}
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      className={`
-        group flex h-9 items-center gap-2 border-r border-[var(--aethel-border-subtle)] px-3 cursor-pointer
-        transition-all select-none
-        ${isActive
-          ? 'bg-[linear-gradient(180deg,rgba(18,23,33,0.98),rgba(14,18,25,0.98))] text-[var(--aethel-text-primary)] border-t-2 border-t-[var(--aethel-info)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
-          : 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)] border-t-2 border-t-transparent hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] hover:text-[var(--aethel-text-primary)]'
-        }
-        ${tab.isPreview ? 'italic' : ''}
-        ${isDragging ? 'opacity-50' : ''}
-        ${isDragOver ? 'border-l-2 border-l-[var(--aethel-info)]' : ''}
-        ${tab.isPinned ? 'px-2' : ''}
-      `}
-    >
-      {/* Pin indicator */}
-      {tab.isPinned && (
-        <Pin className="w-3 h-3 text-[var(--aethel-info)] flex-shrink-0" />
-      )}
-
-      {/* File icon */}
-      {fileIcon && (
-        <div className="flex-shrink-0" style={{ color: iconColor }}>
-          {typeof fileIcon === 'function' ? (
-            // LucideIcon
-            React.createElement(fileIcon, { className: 'w-4 h-4' })
-          ) : null}
-        </div>
-      )}
-
-      {/* Tab title */}
-      {!tab.isPinned && (
-        <span className="max-w-32 truncate text-[13px] font-medium">
-          {tab.title}
-          {tab.isDirty && (
-            <span className="ml-1 text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">*</span>
-          )}
-        </span>
-      )}
-
-      {/* Close button */}
-      {!tab.isPinned && (
-        <button type="button" aria-label={`Fechar aba ${tab.title}`}
-          onClick={e => {
-            e.stopPropagation();
-            onClose();
-          }}
-          className={`
-            flex-shrink-0 rounded-md p-0.5
-            ${isActive || tab.isDirty
-              ? 'opacity-100'
-              : 'opacity-0 group-hover:opacity-100'
-            }
-            hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
-          `}
-        >
-          {tab.isDirty ? (
-            <div className="h-2.5 w-2.5 rounded-full bg-[var(--aethel-warning-light)]" />
-          ) : (
-            <X className="w-3 h-3" />
-          )}
-        </button>
-      )}
-    </div>
-  );
-}
-
-// ============================================================================
 // Tab Bar Component
 // ============================================================================
 
@@ -764,7 +367,7 @@ export function TabBar({ className }: { className?: string }) {
       {/* Overflow menu */}
       {overflowTabs.length > 0 && (
         <div className="relative">
-          <button type="button" aria-label={showOverflowMenu ? 'Fechar menu de abas ocultas' : 'Abrir menu de abas ocultas'}
+          <button type="button" aria-label={showOverflowMenu ? 'Close hidden tabs menu' : 'Open hidden tabs menu'}
             onClick={() => setShowOverflowMenu(!showOverflowMenu)}
             className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
           >
@@ -776,9 +379,9 @@ export function TabBar({ className }: { className?: string }) {
           {showOverflowMenu && (
             <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_98%,transparent)] py-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
               {overflowTabs.map(tab => {
-                const Icon = typeof tab.icon !== 'string' ? tab.icon || getFileIcon(tab.path).icon : FileText;
+                const Icon = typeof tab.icon !== 'string' ? tab.icon || getFileIcon(tab.path).icon : getFileIcon(tab.path).icon;
                 return (
-                  <button type="button" aria-label={`Ativar aba ${tab.title}`}
+                  <button type="button" aria-label={`Activate ${tab.title}`}
                     key={tab.id}
                     onClick={() => {
                       setActiveTab(tab.id);
@@ -896,4 +499,3 @@ export function TabGroupContainer({
 }
 
 export default TabBar;
-

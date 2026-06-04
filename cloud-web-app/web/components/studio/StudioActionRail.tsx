@@ -131,7 +131,7 @@ export default function StudioActionRail({
           type="button"
           onClick={onToggleSidebar}
           className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] md:hidden"
-          aria-label={sidebarOpen ? 'Fechar menu lateral' : 'Abrir menu lateral'}
+          aria-label={sidebarOpen ? 'Close side menu' : 'Open side menu'}
           aria-expanded={sidebarOpen}
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

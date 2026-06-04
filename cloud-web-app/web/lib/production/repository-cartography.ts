@@ -7,170 +7,27 @@ import {
   mergeAgenticProductionState,
 } from './agentic-production-state'
 import { buildRepositorySurface } from './repository-cartography-surface-classifier'
+import { buildAgentHandoffs } from './repository-cartography-handoffs'
 
-export type CartographySourceKind =
-  | 'local-workspace'
-  | 'git'
-  | 'github'
-  | 'huggingface-hub'
-  | 's3'
-  | 'marketplace'
-  | 'user-upload'
-  | 'browser-export'
-
-export type RepositorySurfaceDomain =
-  | 'app-code'
-  | 'api-server'
-  | 'engine-code'
-  | 'game-scene'
-  | 'film-shot'
-  | 'asset'
-  | 'audio'
-  | 'video'
-  | 'story-doc'
-  | 'test'
-  | 'config'
-  | 'infra'
-  | 'unknown'
-
-export type RepositorySurfaceLayer =
-  | 'mission-control'
-  | 'application'
-  | 'studio'
-  | 'engine'
-  | 'content'
-  | 'validation'
-  | 'release'
-  | 'documentation'
-  | 'external'
-  | 'unknown'
-
-export type RepositoryContextStrategy =
-  | 'direct-read'
-  | 'summarize-first'
-  | 'index-only'
-  | 'external-mirror'
-  | 'manual-review'
-
-export type RepositoryPriority = 'critical' | 'high' | 'medium' | 'low'
-export type RepositoryGapSeverity = 'blocker' | 'high' | 'medium' | 'low'
-
-export interface RepositoryArtifactInput {
-  path: string
-  sizeBytes: number
-  sourceKind?: CartographySourceKind
-  mimeType?: string | null
-  hash?: string | null
-  lastModified?: string | null
-  symbols?: string[]
-  dependencies?: string[]
-  license?: string | null
-  sourceUrl?: string | null
-}
-
-export interface RepositorySurface {
-  id: string
-  path: string
-  basename: string
-  extension: string
-  sizeBytes: number
-  sizeClass: 'tiny' | 'small' | 'medium' | 'large' | 'huge'
-  sourceKind: CartographySourceKind
-  sourceUrl?: string
-  mimeType?: string
-  hash?: string
-  license?: string
-  domain: RepositorySurfaceDomain
-  layer: RepositorySurfaceLayer
-  strategy: RepositoryContextStrategy
-  priority: RepositoryPriority
-  ownerAgents: string[]
-  risks: string[]
-  symbols: string[]
-  dependencies: string[]
-  lastModified?: string
-}
-
-export interface RepositoryDuplicateGroup {
-  id: string
-  reason: 'hash' | 'name-size'
-  totalBytes: number
-  paths: string[]
-}
-
-export interface RepositoryCriticalGap {
-  id: string
-  severity: RepositoryGapSeverity
-  title: string
-  recommendation: string
-  affectedPaths: string[]
-}
-
-export interface RepositoryAgentHandoff {
-  agent: string
-  priority: RepositoryPriority
-  surfaces: string[]
-  objective: string
-  requiredEvidence: string[]
-}
-
-export interface RepositoryContextPlan {
-  mustReadFirst: string[]
-  doNotInvent: string[]
-  indexingPolicy: string[]
-}
-
-export interface RepositoryRetrievalBatch {
-  id: string
-  strategy: RepositoryContextStrategy
-  purpose: string
-  maxSurfaceCount: number
-  surfaces: string[]
-}
-
-export interface RepositoryContextBudget {
-  version: 1
-  directReadBytes: number
-  summarizeFirstBytes: number
-  indexOnlyBytes: number
-  externalMirrorBytes: number
-  manualReviewBytes: number
-  estimatedChunkCount: number
-  retrievalBatches: RepositoryRetrievalBatch[]
-  largestContextRisks: Array<Pick<RepositorySurface, 'path' | 'sizeBytes' | 'domain' | 'strategy' | 'sourceKind'>>
-  guardrails: string[]
-}
-
-export interface RepositoryCartographyTotals {
-  totalFiles: number
-  totalBytes: number
-  domainCounts: Record<RepositorySurfaceDomain, number>
-  strategyCounts: Record<RepositoryContextStrategy, number>
-  largestSurfaces: Array<Pick<RepositorySurface, 'path' | 'sizeBytes' | 'domain' | 'strategy'>>
-}
-
-export interface RepositoryCartographyManifest {
-  version: 1
-  id: string
-  generatedAt: string
-  projectId: string
-  sourceKinds: CartographySourceKind[]
-  totals: RepositoryCartographyTotals
-  surfaces: RepositorySurface[]
-  duplicateGroups: RepositoryDuplicateGroup[]
-  criticalGaps: RepositoryCriticalGap[]
-  contextPlan: RepositoryContextPlan
-  contextBudget: RepositoryContextBudget
-  agentHandoffs: RepositoryAgentHandoff[]
-}
-
-export interface RepositoryCartographyInput {
-  projectId: string
-  generatedAt?: string
-  artifacts: RepositoryArtifactInput[]
-}
-
-export const REPOSITORY_CARTOGRAPHY_SETTINGS_KEY = 'aethelRepositoryCartographyManifest'
+import { REPOSITORY_CARTOGRAPHY_SETTINGS_KEY } from './repository-cartography-contracts'
+import type {
+  CartographySourceKind,
+  RepositoryArtifactInput,
+  RepositoryCartographyInput,
+  RepositoryCartographyManifest,
+  RepositoryCartographyTotals,
+  RepositoryContextBudget,
+  RepositoryContextPlan,
+  RepositoryContextStrategy,
+  RepositoryCriticalGap,
+  RepositoryDuplicateGroup,
+  RepositoryGapSeverity,
+  RepositoryPriority,
+  RepositoryRetrievalBatch,
+  RepositorySurface,
+  RepositorySurfaceDomain,
+} from './repository-cartography-contracts'
+export * from './repository-cartography-contracts'
 
 const ONE_MB = 1024 * 1024
 const DIRECT_READ_LIMIT = 256 * 1024
@@ -563,124 +420,6 @@ function buildContextBudget(
         .filter((gap) => gap.severity === 'blocker' || gap.severity === 'high')
         .map((gap) => `Resolve or explicitly accept ${gap.severity} gap before broad retrieval: ${gap.title}.`),
     ]),
-  }
-}
-
-function priorityFromSurfaces(surfaces: RepositorySurface[]): RepositoryPriority {
-  if (surfaces.some((surface) => surface.priority === 'critical')) return 'critical'
-  if (surfaces.some((surface) => surface.priority === 'high')) return 'high'
-  if (surfaces.some((surface) => surface.priority === 'medium')) return 'medium'
-  return 'low'
-}
-
-function buildAgentHandoffs(surfaces: RepositorySurface[], gaps: RepositoryCriticalGap[]): RepositoryAgentHandoff[] {
-  const byAgent = new Map<string, RepositorySurface[]>()
-  for (const surface of surfaces) {
-    for (const agent of surface.ownerAgents) {
-      const list = byAgent.get(agent) ?? []
-      list.push(surface)
-      byAgent.set(agent, list)
-    }
-  }
-
-  const handoffs: RepositoryAgentHandoff[] = [
-    {
-      agent: 'Producer Agent',
-      priority: gaps.some((gap) => gap.severity === 'blocker' || gap.severity === 'high') ? 'critical' : 'high',
-      surfaces: surfaces
-        .filter((surface) => surface.priority === 'critical')
-        .slice(0, 12)
-        .map((surface) => surface.path),
-      objective: 'Lock mission scope, canonical owners, approval gates, and no-invention rules before specialized agents act.',
-      requiredEvidence: ['Project Brain update', 'Mission Ledger entry', 'Approval checkpoint'],
-    },
-    {
-      agent: 'Research Agent',
-      priority: surfaces.some((surface) => surface.sourceKind === 'huggingface-hub' || surface.strategy === 'external-mirror')
-        ? 'high'
-        : 'medium',
-      surfaces: surfaces
-        .filter((surface) => surface.sourceKind === 'huggingface-hub' || surface.strategy === 'external-mirror')
-        .slice(0, 12)
-        .map((surface) => surface.path),
-      objective: 'Mirror external metadata, licenses, model/dataset readmes, and folder trees without pulling unnecessary GB payloads.',
-      requiredEvidence: ['External source manifest', 'License summary', 'Download budget'],
-    },
-  ]
-
-  for (const [agent, agentSurfaces] of byAgent.entries()) {
-    if (agent === 'Producer Agent') continue
-    handoffs.push({
-      agent,
-      priority: priorityFromSurfaces(agentSurfaces),
-      surfaces: agentSurfaces
-        .sort((a, b) => b.sizeBytes - a.sizeBytes)
-        .slice(0, 12)
-        .map((surface) => surface.path),
-      objective: objectiveForAgent(agent),
-      requiredEvidence: evidenceForAgent(agent),
-    })
-  }
-
-  return handoffs.sort((a, b) => priorityWeight(b.priority) - priorityWeight(a.priority) || a.agent.localeCompare(b.agent))
-}
-
-function priorityWeight(priority: RepositoryPriority): number {
-  switch (priority) {
-    case 'critical':
-      return 4
-    case 'high':
-      return 3
-    case 'medium':
-      return 2
-    default:
-      return 1
-  }
-}
-
-function objectiveForAgent(agent: string): string {
-  switch (agent) {
-    case 'Asset Librarian Agent':
-      return 'Normalize asset provenance, duplicates, quality, size, LOD, materials, animation clips, and scene usage.'
-    case 'Technical Artist Agent':
-      return 'Connect scene/world surfaces to viewport, lighting, materials, collision, streaming, and performance budgets.'
-    case 'Gameplay Engineer Agent':
-      return 'Map gameplay systems, combat feel, inputs, physics, enemies, quests, and playtest criteria before code edits.'
-    case 'Cinematic Editor Agent':
-      return 'Map shots, timeline, cameras, audio, subtitles, continuity, render queue, and review states.'
-    case 'Story Agent':
-      return 'Protect narrative continuity, style, character intent, quests, shots, and approved creative decisions.'
-    case 'QA Agent':
-      return 'Attach test, playtest, render, build, license, and regression evidence to every mission milestone.'
-    case 'Performance Agent':
-      return 'Prevent UI freezes by routing heavy assets, builds, renders, and indexing to workers, native, or cloud.'
-    case 'Release Agent':
-      return 'Verify build, deploy, rollback, environment, status, and release evidence before public output.'
-    default:
-      return 'Inspect owned surfaces and report evidence-backed next actions.'
-  }
-}
-
-function evidenceForAgent(agent: string): string[] {
-  switch (agent) {
-    case 'Asset Librarian Agent':
-      return ['Asset provenance report', 'Duplicate resolution', 'Quality/LOD summary']
-    case 'Technical Artist Agent':
-      return ['Viewport screenshot', 'Scene graph diff', 'Performance budget note']
-    case 'Gameplay Engineer Agent':
-      return ['Playtest capture', 'Input/combat criteria', 'Code diff validation']
-    case 'Cinematic Editor Agent':
-      return ['Shot preview', 'Timeline/render report', 'Continuity checklist']
-    case 'Story Agent':
-      return ['Creative bible update', 'Continuity decision', 'Approved story delta']
-    case 'QA Agent':
-      return ['Test report', 'Regression evidence', 'Known risk list']
-    case 'Performance Agent':
-      return ['Heavy job routing plan', 'Memory/FPS budget', 'Worker/cloud fallback proof']
-    case 'Release Agent':
-      return ['Build log', 'Deploy preview', 'Rollback plan']
-    default:
-      return ['Evidence note']
   }
 }
 

@@ -26,14 +26,22 @@ export async function GET() {
     routeLogger.error('[billing/readiness] failed:', error)
     return NextResponse.json(
       {
-        status: 'unavailable',
+        status: 'held',
         checkoutReady: false,
+        portalReady: false,
+        webhookReady: false,
         blockers: ['BILLING_READINESS_UNAVAILABLE'],
         instructions: ['Billing readiness could not be loaded.'],
         recommendedCommands: ['GET /api/billing/readiness'],
+        capabilityStatus: 'held',
         error: 'BILLING_READINESS_UNAVAILABLE',
       },
-      { status: 500 }
+      {
+        status: 200,
+        headers: {
+          'x-aethel-capability-status': 'held',
+        },
+      }
     )
   }
 }

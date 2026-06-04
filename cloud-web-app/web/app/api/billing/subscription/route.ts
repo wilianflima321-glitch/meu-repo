@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback';
 
 const routeLogger = createComponentLogger('api/billing/subscription/route');
 
@@ -42,6 +43,23 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     routeLogger.error('Billing subscription error:', error);
+
+    if (shouldUseLocalEvidenceFallback(req, error)) {
+      return localEvidenceJson(
+        req,
+        error,
+        {
+          success: true,
+          data: {
+            plan: 'studio',
+            stripeCustomerId: null,
+            subscription: null,
+          },
+          status: 'held',
+        },
+        { surface: 'billing.subscription', state: 'held' },
+      );
+    }
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

@@ -77,8 +77,8 @@ const ENTRY_PROFILES: Record<Exclude<WorkbenchEntryLaneId, 'general'>, Workbench
     },
     notice: {
       tone: 'info',
-      title: 'Research lane pronta',
-      description: 'Briefing, evidencias e artefato ficam no mesmo cockpit, sem transformar o Studio em uma tela de chat generica.',
+      title: 'Research lane ready',
+      description: 'Briefing, receipts, and output stay together so the Studio does not become a generic chat screen.',
     },
   },
   cloud: {
@@ -97,8 +97,8 @@ const ENTRY_PROFILES: Record<Exclude<WorkbenchEntryLaneId, 'general'>, Workbench
     },
     notice: {
       tone: 'info',
-      title: 'Runtime em foco',
-      description: 'Cloud / DevOps entra com runtime, terminal e sinais de readiness mais acessiveis do que um side-by-side fraco de preview e chat.',
+      title: 'Runtime in focus',
+      description: 'Cloud / DevOps opens with runtime, terminal, and status signals in one focused shell.',
     },
   },
   growth: {
@@ -211,7 +211,7 @@ export function resolveWorkbenchEntryProfile(params: {
     laneId === 'general'
       ? {
           laneId: 'general' as const,
-          laneLabel: 'Mission',
+          laneLabel: 'Project',
           dominantSurface: 'ai' as const,
           previewEnabled: true,
           previewMode: 'runtime' as const,
@@ -225,8 +225,8 @@ export function resolveWorkbenchEntryProfile(params: {
           },
           notice: {
             tone: 'info' as const,
-            title: 'Mission loaded in Studio',
-            description: 'The mission enters with AI and artifact in the same cockpit to keep plan, diff, and review in one flow.',
+            title: 'Project opened in Studio',
+            description: 'AI, artifact, diff, and review stay in one focused flow.',
           },
         }
       : ENTRY_PROFILES[laneId];
@@ -251,9 +251,9 @@ export function describeWorkbenchEntryProfile(
       };
     case 'research':
       return {
-        focusLabel: 'Evidence-first',
+        focusLabel: 'Receipts-first',
         supportLabel: 'Canvas plus AI',
-        summary: 'Research keeps evidence, draft output, and AI context in one Studio surface instead of a generic chat lane.',
+        summary: 'Research keeps receipts, draft output, and AI context in one Studio surface instead of a generic chat lane.',
         stageLabel: 'Research lane',
       };
     case 'cloud':
@@ -286,9 +286,9 @@ export function describeWorkbenchEntryProfile(
       };
     default:
       return {
-        focusLabel: profile.dominantSurface === 'ai' ? 'Mission-led' : 'Studio-ready',
+        focusLabel: profile.dominantSurface === 'ai' ? 'Project-led' : 'Studio-ready',
         supportLabel: 'Depth on demand',
-        summary: 'The shell starts light, then expands into deeper Studio work only when the mission actually needs it.',
+        summary: 'Starts light. Expands only when the project needs it.',
         stageLabel: 'Studio lane',
       };
   }

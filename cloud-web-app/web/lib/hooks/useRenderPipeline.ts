@@ -1,6 +1,7 @@
+// @aethel-heavy-async-boundary Studio/viewport runtime module; never import from public/dashboard/admin route shells.
 /**
  * useRenderPipeline Hook
- * 
+ *
  * Hook React profissional para integrar o AAA Render System
  * com componentes React. Fornece uma API completa para:
  * - Configuração de pipeline (Forward/Deferred)
@@ -8,7 +9,7 @@
  * - Quality presets (Ultra/High/Medium/Low/Mobile)
  * - Performance monitoring
  * - Dynamic quality adjustment
- * 
+ *
  * @module hooks/useRenderPipeline
  */
 
@@ -19,16 +20,10 @@ import {
   GlobalIlluminationConfig,
   VolumetricConfig,
   ShadowConfig,
-  PostProcessingStack,
-  DEFAULT_PIPELINE_CONFIG,
-  LITE_PIPELINE_CONFIG,
-  MOBILE_PIPELINE_CONFIG,
-  DEFAULT_GI_CONFIG,
-  LITE_GI_CONFIG,
-  MOBILE_GI_CONFIG,
   DEFAULT_VOLUMETRIC_CONFIG,
   DEFAULT_SHADOW_CONFIG,
 } from '../aaa-render-system';
+import { QUALITY_PRESETS } from './useRenderPipeline.presets';
 
 // ============================================================================
 // AAA RENDERER INTERFACE (quando disponível)
@@ -120,20 +115,20 @@ export interface UseRenderPipelineReturn {
   stats: RenderStats;
   capabilities: GPUCapabilities;
   isInitialized: boolean;
-  
+
   // Configurações
   pipelineConfig: RenderPipelineConfig;
   giConfig: GlobalIlluminationConfig;
   shadowConfig: ShadowConfig;
   volumetricConfig: VolumetricConfig;
-  
+
   // Ações de qualidade
   setQuality: (preset: QualityPreset) => void;
   setCustomPipeline: (config: Partial<RenderPipelineConfig>) => void;
   setGIConfig: (config: Partial<GlobalIlluminationConfig>) => void;
   setShadowConfig: (config: Partial<ShadowConfig>) => void;
   setVolumetricConfig: (config: Partial<VolumetricConfig>) => void;
-  
+
   // Post-processing
   setSSAO: (enabled: boolean, intensity?: number) => void;
   setSSR: (enabled: boolean, intensity?: number) => void;
@@ -141,12 +136,12 @@ export interface UseRenderPipelineReturn {
   setDOF: (enabled: boolean, focusDistance?: number) => void;
   setMotionBlur: (enabled: boolean, intensity?: number) => void;
   setAntialiasing: (mode: 'none' | 'fxaa' | 'smaa' | 'taa' | 'msaa') => void;
-  
+
   // Render control
   render: (scene: THREE.Scene, camera: THREE.Camera) => void;
   resize: (width: number, height: number) => void;
   dispose: () => void;
-  
+
   // Utilities
   getRenderer: () => THREE.WebGLRenderer | null;
   screenshot: (format?: 'png' | 'jpeg', quality?: number) => string | null;
@@ -154,106 +149,8 @@ export interface UseRenderPipelineReturn {
 }
 
 // ============================================================================
-// QUALITY PRESETS
-// ============================================================================
-
-const QUALITY_PRESETS: Record<QualityPreset, {
-  pipeline: RenderPipelineConfig;
-  gi: GlobalIlluminationConfig;
-  shadow: Partial<ShadowConfig>;
-  postProcess: Partial<PostProcessingStack>;
-}> = {
-  ultra: {
-    pipeline: DEFAULT_PIPELINE_CONFIG,
-    gi: DEFAULT_GI_CONFIG,
-    shadow: {
-      technique: 'cascaded',
-      resolution: 4096,
-      cascades: 4,
-      contactShadows: true,
-    },
-    postProcess: {
-      antialiasing: 'taa',
-    },
-  },
-  high: {
-    pipeline: {
-      ...DEFAULT_PIPELINE_CONFIG,
-      shadowMapSize: 2048,
-      samples: 4,
-    },
-    gi: {
-      ...DEFAULT_GI_CONFIG,
-      ssgiSamples: 12,
-    },
-    shadow: {
-      technique: 'cascaded',
-      resolution: 2048,
-      cascades: 4,
-      contactShadows: true,
-    },
-    postProcess: {
-      antialiasing: 'taa',
-    },
-  },
-  medium: {
-    pipeline: LITE_PIPELINE_CONFIG,
-    gi: LITE_GI_CONFIG,
-    shadow: {
-      technique: 'pcf',
-      resolution: 1024,
-      cascades: 2,
-      contactShadows: false,
-    },
-    postProcess: {
-      antialiasing: 'fxaa',
-    },
-  },
-  low: {
-    pipeline: {
-      ...LITE_PIPELINE_CONFIG,
-      shadowMapSize: 512,
-      hdr: false,
-    },
-    gi: {
-      ...LITE_GI_CONFIG,
-      method: 'none',
-    },
-    shadow: {
-      technique: 'basic',
-      resolution: 512,
-      cascades: 1,
-      contactShadows: false,
-    },
-    postProcess: {
-      antialiasing: 'fxaa',
-    },
-  },
-  mobile: {
-    pipeline: MOBILE_PIPELINE_CONFIG,
-    gi: MOBILE_GI_CONFIG,
-    shadow: {
-      technique: 'basic',
-      resolution: 256,
-      cascades: 1,
-      contactShadows: false,
-    },
-    postProcess: {
-      antialiasing: 'none',
-    },
-  },
-  custom: {
-    pipeline: DEFAULT_PIPELINE_CONFIG,
-    gi: DEFAULT_GI_CONFIG,
-    shadow: DEFAULT_SHADOW_CONFIG,
-    postProcess: {},
-  },
-};
-
-// ============================================================================
 // HOOK IMPLEMENTATION
 // ============================================================================
-
 export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRenderPipelineReturn {
   const {
     canvas,
@@ -306,7 +203,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
 
   // Configs
   const [pipelineConfig, setPipelineConfig] = useState<RenderPipelineConfig>(
-    customPipeline 
+    customPipeline
       ? { ...QUALITY_PRESETS[initialQuality].pipeline, ...customPipeline }
       : QUALITY_PRESETS[initialQuality].pipeline
   );
@@ -355,7 +252,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
       const gl = renderer.getContext();
       const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
       const drawBuffersExt = gl.getExtension('WEBGL_draw_buffers');
-      
+
       setCapabilities({
         webgl2: renderer.capabilities.isWebGL2,
         webgpu: 'gpu' in navigator,
@@ -407,7 +304,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
 
   const setQuality = useCallback((preset: QualityPreset) => {
     const presetConfig = QUALITY_PRESETS[preset];
-    
+
     setPipelineConfig(prev => ({
       ...prev,
       ...presetConfig.pipeline,
@@ -418,7 +315,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
       ...prev,
       ...presetConfig.shadow,
     }));
-    
+
     setQualityState(preset);
       eventsRef.current.onQualityChanged?.(preset);
 
@@ -498,7 +395,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
 
     const { targetFPS, minQuality, maxQuality, hysteresis } = dynamicQuality;
     const qualityOrder: QualityPreset[] = ['mobile', 'low', 'medium', 'high', 'ultra'];
-    
+
     const currentIndex = qualityOrder.indexOf(quality);
     const minIndex = qualityOrder.indexOf(minQuality);
     const maxIndex = qualityOrder.indexOf(maxQuality);
@@ -527,7 +424,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
     // Calculate stats
     const frameTime = performance.now() - startTime;
     frameTimesRef.current.push(frameTime);
-    
+
     // Keep last 60 frames for averaging
     if (frameTimesRef.current.length > 60) {
       frameTimesRef.current.shift();
@@ -593,7 +490,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
 
   const screenshot = useCallback((format: 'png' | 'jpeg' = 'png', quality: number = 0.9): string | null => {
     if (!rendererRef.current) return null;
-    
+
     const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
     return rendererRef.current.domElement.toDataURL(mimeType, quality);
   }, []);
@@ -602,7 +499,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
     try {
       const { GLTFExporter } = await import('three/examples/jsm/exporters/GLTFExporter.js');
       const exporter = new GLTFExporter();
-      
+
       return new Promise((resolve, reject) => {
         exporter.parse(
           scene,
@@ -633,20 +530,20 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
     stats,
     capabilities,
     isInitialized,
-    
+
     // Configurações
     pipelineConfig,
     giConfig,
     shadowConfig,
     volumetricConfig,
-    
+
     // Ações de qualidade
     setQuality,
     setCustomPipeline,
     setGIConfig,
     setShadowConfig,
     setVolumetricConfig,
-    
+
     // Post-processing
     setSSAO,
     setSSR,
@@ -654,12 +551,12 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
     setDOF,
     setMotionBlur,
     setAntialiasing,
-    
+
     // Render control
     render,
     resize,
     dispose,
-    
+
     // Utilities
     getRenderer,
     screenshot,
@@ -705,7 +602,7 @@ export function detectOptimalQuality(): QualityPreset {
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent
   );
-  
+
   if (isMobile) return 'mobile';
 
   // Check memory
@@ -716,32 +613,32 @@ export function detectOptimalQuality(): QualityPreset {
   // Check GPU via WebGL
   const canvas = document.createElement('canvas');
   const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-  
+
   if (!gl) return 'low';
 
   const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
   if (debugInfo) {
     const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL).toLowerCase();
-    
+
     // High-end GPUs
     if (renderer.includes('rtx 40') || renderer.includes('rtx 30') ||
         renderer.includes('rx 7') || renderer.includes('rx 6')) {
       return 'ultra';
     }
-    
+
     // Mid-range GPUs
     if (renderer.includes('rtx 20') || renderer.includes('gtx 16') ||
         renderer.includes('rx 5') || renderer.includes('gtx 1080') ||
         renderer.includes('gtx 1070')) {
       return 'high';
     }
-    
+
     // Entry GPUs
     if (renderer.includes('gtx 1060') || renderer.includes('gtx 1050') ||
         renderer.includes('rx 580') || renderer.includes('rx 570')) {
       return 'medium';
     }
-    
+
     // Integrated GPUs
     if (renderer.includes('intel') || renderer.includes('integrated')) {
       return 'low';

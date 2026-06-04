@@ -4,9 +4,15 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const ROOT = process.cwd()
-const filePath = 'app/admin/admin-ops-layout-client.tsx'
+const filePaths = [
+  'app/admin/admin-ops-layout-client.tsx',
+  'app/admin/admin-ops-layout.parts.tsx',
+  'app/admin/admin-ops-layout.sidebar.tsx',
+  'app/admin/admin-ops-layout.header.tsx',
+  'app/admin/admin-ops-layout.model.tsx',
+]
 const reportPath = path.join(ROOT, 'docs', 'ADMIN_LEGACY_COMPRESSION_AUDIT.md')
-const content = fs.readFileSync(path.join(ROOT, filePath), 'utf8')
+const content = filePaths.map((filePath) => fs.readFileSync(path.join(ROOT, filePath), 'utf8')).join('\n')
 const failures = []
 
 if (!content.includes('CompatibilityRoutesDrawer')) failures.push('missing global CompatibilityRoutesDrawer component')
@@ -22,7 +28,7 @@ if (compatibilityOccurrences > 3) {
 
 const report = `# Admin Legacy Compression Audit
 
-- Shell: \`${filePath}\`
+- Shell files: ${filePaths.map((filePath) => `\`${filePath}\``).join(', ')}
 - Global drawer present: ${content.includes('CompatibilityRoutesDrawer') ? 'yes' : 'no'}
 - Per-section legacy disclosure removed: ${content.includes('${group.label} Legacy compatibility map') ? 'no' : 'yes'}
 - Searchable compatibility map: ${content.includes('Search compatibility routes') ? 'yes' : 'no'}

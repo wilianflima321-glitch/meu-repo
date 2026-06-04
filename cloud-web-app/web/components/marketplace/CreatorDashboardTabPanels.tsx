@@ -334,7 +334,7 @@ function PayoutsPanel({ controller }: { controller: CreatorDashboardController }
                 <PayoutMetricCard
                     title="Pendente"
                     amount={estimatedPendingBalance}
-                    description="Pipeline de payouts indisponivel ate habilitar o ledger de transacoes."
+                    description="Payout pipeline is unavailable until the transaction ledger is enabled."
                 />
                 <PayoutMetricCard
                     title="Total recebido"

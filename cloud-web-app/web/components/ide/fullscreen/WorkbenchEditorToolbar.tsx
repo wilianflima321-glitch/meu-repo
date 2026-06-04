@@ -114,14 +114,79 @@ export default function WorkbenchEditorToolbar({
   const showCollaborators =
     collaborationStatus.state === 'live' && collaborationPeers.length > 0;
   const helperDetail = collaborationStatus.detail;
+  const presenceSurface = showCollaborators ? (
+    <CollaboratorsBar
+      peers={collaborationPeers}
+      maxVisible={4}
+      showStatusDot
+      className="max-w-full"
+    />
+  ) : (
+    <PresenceChip
+      collaborationConnected={collaborationConnected}
+      collaborationStatus={collaborationStatus}
+    />
+  );
+
+  if (isCompactViewport) {
+    return (
+      <>
+        <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_7%,transparent)] px-3 py-2 text-[11px] leading-5 text-[color-mix(in_srgb,var(--aethel-warning-light)_74%,transparent)]">
+          Compact editor: core tools stay available; full multi-pane layout unlocks at 1024px.
+        </div>
+        <div className="border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-3 py-2 text-[11px]">
+          <div className="flex min-w-0 items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-medium uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+                Editor tools
+              </p>
+              <p
+                className="truncate pt-1 text-[11px] text-[var(--aethel-text-secondary)]"
+                title={collaborationStatus.errorMessage ?? helperDetail}
+              >
+                {helperDetail}
+              </p>
+            </div>
+            <div className="shrink-0">{presenceSurface}</div>
+          </div>
+          <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+            <button
+              type="button"
+              onClick={onFind}
+              className={`${actionButtonClass} ${inactiveActionClass} shrink-0`}
+            >
+              Search
+            </button>
+            <button
+              type="button"
+              onClick={onToggleSplitEditor}
+              className={`${actionButtonClass} shrink-0 ${
+                splitEditorOpen
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+                  : inactiveActionClass
+              }`}
+            >
+              {splitEditorOpen ? 'Close split' : 'Split'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowDiagnostics((prev) => !prev)}
+              className={`${actionButtonClass} shrink-0 ${
+                showDiagnostics
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[var(--aethel-warning-light)]'
+                  : inactiveActionClass
+              }`}
+            >
+              Diagnostics
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
-      {isCompactViewport && (
-        <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-4 py-3.5 text-xs leading-6 text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
-          Compact viewport detected. For the best editor experience, use desktop with {'>='} 1024px.
-        </div>
-      )}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-2.5 text-[11px]">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
           <div className="flex min-w-0 flex-col text-[var(--aethel-text-tertiary)]">
@@ -137,19 +202,7 @@ export default function WorkbenchEditorToolbar({
             aria-hidden="true"
             className="hidden h-7 w-px bg-[color-mix(in_srgb,var(--aethel-border-secondary)_72%,transparent)] sm:block"
           />
-          {showCollaborators ? (
-            <CollaboratorsBar
-              peers={collaborationPeers}
-              maxVisible={4}
-              showStatusDot
-              className="max-w-full"
-            />
-          ) : (
-            <PresenceChip
-              collaborationConnected={collaborationConnected}
-              collaborationStatus={collaborationStatus}
-            />
-          )}
+          {presenceSurface}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button

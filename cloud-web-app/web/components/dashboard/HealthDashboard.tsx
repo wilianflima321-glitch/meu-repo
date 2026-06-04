@@ -216,8 +216,8 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
       <div className={`${panelClass} ${className}`}>
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <WifiOff size={40} className="mb-4 text-[var(--aethel-error)]" />
-          <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Desconectado</h3>
-          <p className="mb-4 text-sm text-[var(--aethel-text-tertiary)]">Nao foi possivel conectar ao servidor</p>
+          <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Disconnected</h3>
+          <p className="mb-4 text-sm text-[var(--aethel-text-tertiary)]">Could not connect to the server</p>
           {onRefresh && (
             <button type="button" onClick={onRefresh} className={actionButtonClass} aria-label="Reconnect health dashboard">
               <RefreshCw size={16} />
@@ -305,7 +305,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
           <div className="flex items-center justify-between pt-2 text-xs text-[var(--aethel-text-tertiary)]">
             <div className="flex items-center gap-2">
               <Wifi size={14} />
-              <span>Latencia</span>
+              <span>Latency</span>
             </div>
             <span className={`font-mono ${getMetricColor(health.metrics.networkLatency, [100, 500])}`}>
               {health.metrics.networkLatency}ms

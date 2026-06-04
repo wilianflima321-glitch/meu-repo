@@ -44,7 +44,7 @@ export function MessageBubble({ message, onCopy, onRegenerate, onRate }: Message
         {message.isVoice && (
           <div className="mb-1 flex items-center gap-1 text-xs text-[var(--aethel-info-light)]">
             <Mic className="h-3 w-3" />
-            Mensagem de voz
+            Voice message
           </div>
         )}
 

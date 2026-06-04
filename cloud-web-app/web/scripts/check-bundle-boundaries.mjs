@@ -8,12 +8,12 @@ const EXTENSIONS = new Set(['.ts', '.tsx'])
 const ignoreDirs = new Set(['node_modules', '.next', 'dist', 'build', '__tests__', '__mocks__'])
 
 const BUDGETS = {
-  threeDirect: 34,
+  threeDirect: 0,
   reactThreeFiberDirect: 2,
-  reactThreeDreiDirect: 1,
-  monacoEditorDirect: 2,
-  monacoReactDirect: 3,
-  framerMotionDirect: 9,
+  reactThreeDreiDirect: 0,
+  monacoEditorDirect: 0,
+  monacoReactDirect: 0,
+  framerMotionDirect: 0,
   dynamicImportsMin: 100,
 }
 
@@ -151,17 +151,26 @@ if (publicStaticAsyncBoundaryImports.length > 0) {
 }
 
 const canonicalPreviewPath = path.join(ROOT, 'components', 'preview', 'CanonicalPreviewSurface.tsx')
+const unifiedViewportPath = path.join(ROOT, 'components', 'canvas', 'UnifiedViewport.tsx')
 if (fs.existsSync(canonicalPreviewPath)) {
   const canonicalPreview = fs.readFileSync(canonicalPreviewPath, 'utf8')
+  if (!canonicalPreview.includes("import UnifiedViewport from '@/components/canvas/UnifiedViewport'")) {
+    failures.push('CanonicalPreviewSurface must delegate viewport/canvas work to UnifiedViewport')
+  }
+}
+if (fs.existsSync(unifiedViewportPath)) {
+  const unifiedViewport = fs.readFileSync(unifiedViewportPath, 'utf8')
   const requiredDynamicBoundaries = [
     'SceneViewportSurface',
     'CanvasViewportSurface',
   ]
   for (const boundary of requiredDynamicBoundaries) {
-    if (!canonicalPreview.includes(`const ${boundary} = dynamic(`)) {
-      failures.push(`CanonicalPreviewSurface must lazy-load ${boundary}`)
+    if (!unifiedViewport.includes(`const ${boundary} = dynamic(`)) {
+      failures.push(`UnifiedViewport must lazy-load ${boundary}`)
     }
   }
+} else {
+  failures.push('components/canvas/UnifiedViewport.tsx is required as the single viewport adapter')
 }
 
 const report = []
@@ -225,7 +234,8 @@ if (failures.length === 0) report.push('- none')
 else failures.forEach((failure) => report.push(`- ${failure}`))
 report.push('')
 report.push('## Critical Boundaries')
-report.push('- CanonicalPreviewSurface lazy-loads SceneViewportSurface and CanvasViewportSurface so runtime/live previews do not eagerly pull viewport/Three code.')
+report.push('- CanonicalPreviewSurface delegates viewport/canvas work to UnifiedViewport.')
+report.push('- UnifiedViewport lazy-loads SceneViewportSurface and CanvasViewportSurface so runtime/live previews do not eagerly pull viewport/Three code.')
 
 fs.writeFileSync(OUT, `${report.join('\n')}\n`, 'utf8')
 

@@ -19,14 +19,14 @@ export function PricingPlansGrid({ corePlans, isAnnual }: PricingPlansGridProps)
           <h2 className="mt-2 text-2xl font-bold text-[var(--aethel-text-primary)]">Pick the pressure level first.</h2>
         </div>
         <p className="max-w-xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
-          Starter and Basic remain available for smaller steps, but the first decision should stay simple: validate, build daily, or run a governed studio.
+          Starter and Basic remain available, but the first choice should stay simple: validate an idea, build daily, or run larger work.
         </p>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-3">
         {featuredPlans.map((plan) => (
-          <article key={plan.id} className={`relative flex h-full flex-col rounded-[24px] border p-5 transition-all ${plan.popular ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-primary)_22%,transparent)] to-transparent shadow-xl' : 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]'}`}>
-            {plan.popular ? <div className="absolute -top-3.5 left-6 rounded-full bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-4 py-1 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg">Best balance</div> : null}
+          <article key={plan.id} className={`relative flex h-full flex-col rounded-[24px] border p-5 transition-all ${plan.popular ? 'border-[color-mix(in_srgb,var(--aethel-primary)_42%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-xl' : 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]'}`}>
+            {plan.popular ? <div className="absolute -top-3.5 left-6 rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_38%,transparent)] bg-[var(--aethel-surface-primary)] px-4 py-1 text-xs font-bold text-[var(--aethel-primary-light)] shadow-lg">Best balance</div> : null}
 
             <div className="mb-5">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">{plan.id}</p>
@@ -47,8 +47,6 @@ export function PricingPlansGrid({ corePlans, isAnnual }: PricingPlansGridProps)
               {[
                 { label: 'Projects', value: formatLimit(plan.limits.projects) },
                 { label: 'Storage', value: formatStorage(plan.limits.storage) },
-                { label: 'Daily tokens', value: formatLimit(plan.limits.tokensPerDay) },
-                { label: 'Collaboration', value: formatLimit(plan.limits.collaborators) },
               ].map((item) => (
                 <div key={item.label} className="rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3">
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)]">{item.label}</p>
@@ -58,13 +56,26 @@ export function PricingPlansGrid({ corePlans, isAnnual }: PricingPlansGridProps)
             </div>
 
             <ul className="mb-6 flex-1 space-y-2.5 text-sm">
-              {plan.features.slice(0, 6).map((feature) => (
+              {plan.features.slice(0, 4).map((feature) => (
                 <li key={feature} className="flex items-start gap-2 text-[var(--aethel-text-secondary)]">
                   <span className="mt-0.5 shrink-0 text-[var(--aethel-success)]"><Codicon name="check" /></span>
                   <span>{feature}</span>
                 </li>
               ))}
             </ul>
+
+            <details className="mb-5 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-3 py-2">
+              <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                Limits
+              </summary>
+              <div className="mt-3 grid gap-2 text-xs text-[var(--aethel-text-secondary)]">
+                <p>Daily tokens: <span className="font-semibold text-[var(--aethel-text-primary)]">{formatLimit(plan.limits.tokensPerDay)}</span></p>
+                <p>Collaborators: <span className="font-semibold text-[var(--aethel-text-primary)]">{formatLimit(plan.limits.collaborators)}</span></p>
+                {plan.features.length > 4 ? (
+                  <p className="text-[var(--aethel-text-tertiary)]">{plan.features.length - 4} more plan details stay available after selection.</p>
+                ) : null}
+              </div>
+            </details>
 
             <Link href={plan.id === 'free' ? '/register?plan=free&intent=studio' : `/dashboard?tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`} className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${plan.popular ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] shadow-lg hover:bg-[var(--aethel-primary-dark)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)]'}`} data-analytics-category="billing" data-analytics-action={plan.id === 'free' ? 'onboarding_start' : 'checkout_start'} data-analytics-label={`pricing_plan:${plan.id}:${isAnnual ? 'year' : 'month'}`} data-analytics-source="pricing-plan-card">
               {plan.id === 'free' ? 'Start free' : `Select ${plan.name}`}

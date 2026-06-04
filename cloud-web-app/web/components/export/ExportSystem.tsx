@@ -144,7 +144,7 @@ export function ExportDialog({
             {/* Output name */}
             <div style={{ marginBottom: 20 }}>
               <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, display: 'block', marginBottom: 4 }}>
-                Nome de saida
+                Output name
               </label>
               <input
                 type="text"

@@ -160,7 +160,7 @@ export function usePreviewRuntimeManager({
     setIsDiscoveringRuntime(true)
     if (mode === 'manual') {
       setRuntimeDiscoveryTone('info')
-      setRuntimeDiscoveryMessage('Buscando runtime local nas portas padrao...')
+      setRuntimeDiscoveryMessage('Searching local runtime ports...')
     }
 
     try {
@@ -173,8 +173,8 @@ export function usePreviewRuntimeManager({
           setRuntimeDiscoveryTone('warning')
           setRuntimeDiscoveryMessage(
             suggestedCommand
-              ? `Nenhum runtime local encontrado. Proximo passo: ${suggestedCommand}`
-              : suggestedInstruction || 'Nenhum runtime local encontrado. Inicie npm run dev e tente novamente.'
+              ? `No local runtime found. Next step: ${suggestedCommand}`
+              : suggestedInstruction || 'No local runtime found. Start npm run dev and try again.'
           )
         } else {
           setRuntimeDiscoveryMessage(null)
@@ -322,7 +322,7 @@ export function usePreviewRuntimeManager({
     if (isSyncingRuntime) return false
     if (!previewSandboxId) {
       setRuntimeDiscoveryTone('warning')
-      setRuntimeDiscoveryMessage('Sync indisponivel: sandboxId nao encontrado.')
+      setRuntimeDiscoveryMessage('Sync unavailable: sandboxId not found.')
       return false
     }
     if (syncLaneBlockedReason) {
@@ -331,20 +331,20 @@ export function usePreviewRuntimeManager({
     }
     setIsSyncingRuntime(true)
     setRuntimeDiscoveryTone('info')
-    setRuntimeDiscoveryMessage('Sincronizando workspace com runtime...')
+    setRuntimeDiscoveryMessage('Syncing workspace with runtime...')
     try {
       const result = await syncPreviewRuntime(projectId, previewSandboxId)
       const filesCount = result.metadata?.filesCount
-      const suffix = Number.isFinite(filesCount) ? `arquivos=${filesCount}` : null
+      const suffix = Number.isFinite(filesCount) ? `files=${filesCount}` : null
       setRuntimeDiscoveryTone('success')
       setRuntimeDiscoveryMessage(
-        suffix ? `Runtime sincronizado (${suffix}).` : 'Runtime sincronizado.'
+        suffix ? `Runtime synced (${suffix}).` : 'Runtime synced.'
       )
       return true
     } catch (error) {
       setRuntimeDiscoveryTone('warning')
       setRuntimeDiscoveryMessage(
-        error instanceof Error ? `Falha ao sincronizar runtime: ${error.message}` : 'Falha ao sincronizar runtime.'
+        error instanceof Error ? `Failed to sync runtime: ${error.message}` : 'Failed to sync runtime.'
       )
       return false
     } finally {
@@ -362,7 +362,7 @@ export function usePreviewRuntimeManager({
       } catch (error) {
         setRuntimeDiscoveryTone('warning')
         setRuntimeDiscoveryMessage(
-          error instanceof Error ? `Falha ao sincronizar arquivo: ${error.message}` : 'Falha ao sincronizar arquivo.'
+          error instanceof Error ? `Failed to sync file: ${error.message}` : 'Failed to sync file.'
         )
         return false
       }
@@ -471,39 +471,39 @@ export function usePreviewRuntimeManager({
 
   const runtimeHealthHint =
     runtimeHealth.status === 'reachable'
-      ? `Runtime ativo${typeof runtimeHealth.latencyMs === 'number' ? ` (${runtimeHealth.latencyMs}ms)` : ''}.`
+      ? `Runtime active${typeof runtimeHealth.latencyMs === 'number' ? ` (${runtimeHealth.latencyMs}ms)` : ''}.`
       : runtimeHealth.status === 'checking'
-        ? 'Validando runtime externo...'
+        ? 'Checking external runtime...'
         : runtimeHealth.status === 'unhealthy'
-          ? 'Runtime respondeu com erro. Preview usara fallback inline.'
+          ? 'Runtime returned an error. Preview will use the inline fallback.'
           : runtimeHealth.status === 'unreachable'
-            ? 'Runtime inacessivel. Preview usara fallback inline.'
+            ? 'Runtime is unreachable. Preview will use the inline fallback.'
             : runtimeHealth.status === 'invalid'
-              ? 'Runtime URL invalida/bloqueada. Corrija para usar dev-server.'
-              : 'Sem runtime externo configurado (modo inline).'
+              ? 'Runtime URL is invalid or blocked. Fix it before using a dev server.'
+              : 'No external runtime configured. Inline mode is active.'
 
   const managedProviderLabel =
     runtimeReadiness?.managedProviderLabel || runtimeReadiness?.managedProvider || null
 
   const runtimeStrategyLabel =
     runtimeReadiness?.strategy === 'managed'
-      ? `sandbox gerenciado${managedProviderLabel ? ` (${managedProviderLabel})` : ''}`
+      ? `managed sandbox${managedProviderLabel ? ` (${managedProviderLabel})` : ''}`
       : runtimeReadiness?.strategy === 'local'
-        ? 'servidor local'
+        ? 'local server'
         : runtimeReadiness?.strategy === 'browser-side'
-        ? 'webcontainer (navegador)'
+        ? 'webcontainer (browser)'
           : 'inline'
 
   const runtimeStrategyHint =
     runtimeReadiness?.strategy === 'managed'
       ? runtimeReadiness.readyForManagedProvision
-        ? 'Preview gerenciado configurado; provisionamento pode ser usado como caminho principal.'
-        : 'Preview gerenciado detectado, mas ainda ha bloqueios de runtime.'
+        ? 'Managed preview is configured; provisioning can be used as the primary path.'
+        : 'Managed preview detected, but runtime blockers remain.'
       : runtimeReadiness?.strategy === 'local'
-        ? 'Runtime local detectado; o preview depende do dev-server rodando na sua maquina.'
+        ? 'Local runtime detected; preview depends on your dev server staying online.'
         : runtimeReadiness?.strategy === 'browser-side'
-          ? 'Runtime no navegador; sem sandbox remoto ou servidor local.'
-          : 'Sem sandbox gerenciado ou runtime local detectado; preview fica em modo inline.'
+          ? 'Browser-side runtime; no remote sandbox or local server is attached.'
+          : 'No managed sandbox or local runtime detected; preview stays in inline mode.'
 
   const runtimePrimaryAction =
     runtimeReadiness?.recommendedAction === 'provision'
@@ -514,10 +514,10 @@ export function usePreviewRuntimeManager({
 
   const runtimePrimaryActionLabel =
     runtimePrimaryAction === 'provision'
-      ? 'Provisionar sandbox'
+      ? 'Provision sandbox'
       : runtimePrimaryAction === 'discover'
-        ? 'Detectar servidor local'
-        : 'Usar preview inline'
+        ? 'Detect local server'
+        : 'Use inline preview'
 
   const handleUseInlineFallback = useCallback(() => {
     setPreviewRuntimeInput('')
@@ -525,7 +525,7 @@ export function usePreviewRuntimeManager({
     setRuntimeHealth({ status: 'idle' })
     setRuntimeHealthCheckedAt(null)
     setRuntimeDiscoveryTone('info')
-    setRuntimeDiscoveryMessage('Modo inline ativo.')
+    setRuntimeDiscoveryMessage('Inline mode active.')
     persistPreviewRuntimeUrl(null, PREVIEW_RUNTIME_URL_STORAGE_KEY)
     setPreviewSandboxId(null)
     persistPreviewSandboxId(null, PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)

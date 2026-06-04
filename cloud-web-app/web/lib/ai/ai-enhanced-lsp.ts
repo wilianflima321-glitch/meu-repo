@@ -54,7 +54,7 @@ export class AIEnhancedLSP {
     try {
       // 1. Get LSP completions
       const lspServer = await this.lspManager.getClient(language);
-      const lspCompletions = lspServer 
+      const lspCompletions = lspServer
         ? await lspServer.completion(uri, position)
         : [];
 
@@ -88,7 +88,7 @@ export class AIEnhancedLSP {
     try {
       // 1. Get LSP hover
       const lspServer = await this.lspManager.getClient(language);
-      const lspHover = lspServer 
+      const lspHover = lspServer
         ? await lspServer.hover(uri, position)
         : null;
 
@@ -127,7 +127,7 @@ export class AIEnhancedLSP {
     try {
       // 1. Get LSP code actions
       const lspServer = await this.lspManager.getClient(language);
-      const lspActions = lspServer 
+      const lspActions = lspServer
         ? await lspServer.codeAction(uri, range, context)
         : [];
 
@@ -143,7 +143,7 @@ export class AIEnhancedLSP {
     } catch (error) {
       logger.error('[AI-Enhanced LSP] Error getting code actions:', error);
       const lspServer = await this.lspManager.getClient(language);
-      const lspActions = lspServer 
+      const lspActions = lspServer
         ? await lspServer.codeAction(uri, range, context)
         : [];
       return lspActions.map(a => this.toAICodeAction(a, false, 1.0));
@@ -161,7 +161,7 @@ export class AIEnhancedLSP {
   ): Promise<CompletionItem[]> {
     try {
       const prompt = this.buildCompletionPrompt(language, position, context);
-      
+
       const response = await fetch(this.chatOrchestratorUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -194,7 +194,7 @@ export class AIEnhancedLSP {
   ): Promise<string> {
     try {
       const codeStr = typeof code === 'string' ? code : JSON.stringify(code);
-      
+
       const response = await fetch(this.chatOrchestratorUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -383,8 +383,8 @@ export class AIEnhancedLSP {
     lspContents: unknown,
     aiExplanation: string
   ): string {
-    const lspStr = typeof lspContents === 'string' 
-      ? lspContents 
+    const lspStr = typeof lspContents === 'string'
+      ? lspContents
       : JSON.stringify(lspContents);
 
     if (!aiExplanation) {
@@ -395,7 +395,7 @@ export class AIEnhancedLSP {
   }
 
   /**
-   * Get code in range (mock implementation)
+   * Get code in range through the workspace file API.
    */
   private async getCodeInRange(uri: string, range: Range): Promise<string> {
     try {

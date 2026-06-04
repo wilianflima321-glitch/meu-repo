@@ -41,9 +41,9 @@ export default function Admin() {
       />
 
       <SurfaceQualityShell
-        eyebrow="Admin command center"
-        title="Operate by risk, owner, and next action."
-        subtitle="Six areas stay visible; legacy routes remain compatible but no longer behave like primary navigation."
+        eyebrow="Admin"
+        title="Run the operation."
+        subtitle="Six areas stay visible. Legacy routes stay searchable, not primary."
         status={[
           { label: 'Areas', value: String(coverage.sections), tone: 'available' },
           { label: 'Legacy', value: `${coverage.legacyCompatibleRoutes} hidden`, tone: 'held' },

@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary Particle presets instantiate Three runtime values and must stay behind Studio/runtime imports.
 import * as THREE from 'three';
 import type { ParticleEmitterConfig } from './particle-system-real';
 
@@ -24,7 +25,7 @@ export const ParticlePresets = {
     blendMode: 'additive',
     shape: { type: 'circle', radius: 0.5 },
   }),
-  
+
   smoke: (): Partial<ParticleEmitterConfig> => ({
     maxParticles: 3000,
     emissionRate: 50,
@@ -43,7 +44,7 @@ export const ParticlePresets = {
     blendMode: 'normal',
     shape: { type: 'circle', radius: 0.3 },
   }),
-  
+
   sparks: (): Partial<ParticleEmitterConfig> => ({
     maxParticles: 2000,
     emissionRate: 500,
@@ -62,7 +63,7 @@ export const ParticlePresets = {
     blendMode: 'additive',
     shape: { type: 'point' },
   }),
-  
+
   snow: (): Partial<ParticleEmitterConfig> => ({
     maxParticles: 10000,
     emissionRate: 100,
@@ -81,7 +82,7 @@ export const ParticlePresets = {
     blendMode: 'normal',
     shape: { type: 'box', size: new THREE.Vector3(50, 0, 50) },
   }),
-  
+
   rain: (): Partial<ParticleEmitterConfig> => ({
     maxParticles: 10000,
     emissionRate: 500,
@@ -100,7 +101,7 @@ export const ParticlePresets = {
     blendMode: 'normal',
     shape: { type: 'box', size: new THREE.Vector3(50, 0, 50) },
   }),
-  
+
   explosion: (): Partial<ParticleEmitterConfig> => ({
     maxParticles: 1000,
     emissionRate: 0, // Burst only
@@ -119,7 +120,7 @@ export const ParticlePresets = {
     blendMode: 'additive',
     shape: { type: 'sphere', radius: 0.1 },
   }),
-  
+
   magic: (): Partial<ParticleEmitterConfig> => ({
     maxParticles: 3000,
     emissionRate: 100,
@@ -139,7 +140,7 @@ export const ParticlePresets = {
     blendMode: 'additive',
     shape: { type: 'sphere', radius: 0.5 },
   }),
-  
+
   confetti: (): Partial<ParticleEmitterConfig> => ({
     maxParticles: 5000,
     emissionRate: 200,

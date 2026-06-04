@@ -152,7 +152,7 @@ export function ApprovalCard({
                         </div>
                         <div className="text-[10px] text-[var(--aethel-text-tertiary)]">
                           {change.newContent.length > change.oldContent.length ? '+' : ''}
-                          {change.newContent.length - change.oldContent.length} caracteres
+                          {change.newContent.length - change.oldContent.length} characters
                         </div>
                       </div>
                     </div>
@@ -161,7 +161,7 @@ export function ApprovalCard({
                         type="button"
                       onClick={() => setViewingChange(viewingChange === change.filePath ? null : change.filePath)}
                         className="p-1 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-                        title="Ver diff"
+                        title="View diff"
                       >
                         <Eye className="w-3 h-3" />
                       </button>
@@ -210,7 +210,7 @@ export function ApprovalCard({
                 className="flex items-center gap-1.5 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] hover:text-[var(--aethel-error-light)]"
               >
                 <X className="w-3.5 h-3.5" />
-                Rejeitar tudo
+                Reject all
               </button>
               <button
                 type="button"
@@ -219,17 +219,17 @@ export function ApprovalCard({
                 className="flex items-center gap-1.5 rounded-lg bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110"
               >
                 <Check className="w-3.5 h-3.5" />
-                Aplicar tudo
+                Apply all
               </button>
             </div>
             {selectedChanges.size > 0 && (
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{selectedChanges.size} selecionado(s)</span>
+                <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{selectedChanges.size} selected</span>
                 <button
                   type="button"
                   onClick={handleRejectSelected}
                   className="p-1 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] transition-colors"
-                  title="Rejeitar selecionados"
+                  title="Reject selected"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -237,7 +237,7 @@ export function ApprovalCard({
                   type="button"
                   onClick={handleApproveSelected}
                   className="p-1 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-success-light)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] transition-colors"
-                  title="Aprovar selecionados"
+                  title="Approve selected"
                 >
                   <Check className="w-3 h-3" />
                 </button>

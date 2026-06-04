@@ -76,32 +76,42 @@ export function ViewportWorkbenchShell({
             <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">{subtitle}</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              aria-label="Gerar asset no viewport"
-              className="inline-flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-primary)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:brightness-110"
-            >
-              <Wand2 className="h-4 w-4" />
-              Generate
-            </button>
-            <button
-              type="button"
-              aria-label="Animar elemento selecionado"
-              className="inline-flex items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:border-[var(--aethel-border-secondary)]"
-            >
-              <Play className="h-4 w-4" />
-              Animate
-            </button>
-            <button
-              type="button"
-              aria-label="Abrir ferramentas do inspetor"
-              className="inline-flex items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:border-[var(--aethel-border-secondary)]"
-            >
+          <details
+            className="group relative"
+            data-viewport-tools-drawer="collapsed-by-default"
+            data-viewport-primary-action="contextual-drawer"
+          >
+            <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:border-[var(--aethel-border-secondary)]">
               <SlidersHorizontal className="h-4 w-4" />
-              Inspector
-            </button>
-          </div>
+              Tools
+            </summary>
+            <div className="absolute right-0 z-30 mt-2 w-56 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_94%,transparent)] p-2 shadow-[0_24px_80px_rgba(2,6,23,0.42)] backdrop-blur-md">
+              <button
+                type="button"
+                aria-label="Generate asset in viewport"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-medium text-[var(--aethel-text-primary)] transition hover:bg-[var(--aethel-surface-tertiary)]"
+              >
+                <Wand2 className="h-4 w-4 text-[var(--aethel-primary-light)]" />
+                Generate proposal
+              </button>
+              <button
+                type="button"
+                aria-label="Animate selected element"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]"
+              >
+                <Play className="h-4 w-4" />
+                Animate selected
+              </button>
+              <button
+                type="button"
+                aria-label="Open inspector tools"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                Open inspector
+              </button>
+            </div>
+          </details>
         </div>
       </div>
 
@@ -125,4 +135,3 @@ export function ViewportWorkbenchShell({
     </div>
   )
 }
-

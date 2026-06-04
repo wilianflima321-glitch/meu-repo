@@ -1,51 +1,13 @@
 'use client'
 
-import type { FormEvent } from 'react'
 import { useCallback } from 'react'
 import {
-  AethelAPIClient,
   type ChatMessage,
   type CopilotWorkflowSummary,
   type PurchaseIntentResponse,
   type TransferResponse,
 } from '@/lib/api'
-import { analytics } from '@/lib/analytics'
-import {
-  AdvancedChatRequestError,
-  isProviderSetupError,
-  requestAdvancedChat,
-} from '@/lib/ai-chat-advanced-client'
-import {
-  buildLivePreviewContextPayload,
-  buildLivePreviewPrompt,
-  buildLivePreviewSuggestionMessage,
-  buildLivePreviewSystemMessage,
-  extractPrimaryAssistantContent,
-} from './aethel-dashboard-livepreview-ai-utils'
-import { extractApiContent, getAuthHeaders } from './aethel-dashboard-location-utils'
-import {
-  buildCopilotContextPatch,
-  buildWorkflowTitle,
-} from './aethel-dashboard-copilot-utils'
-import {
-  buildPurchaseSuccessMessage,
-  buildTransferSuccessMessage,
-  mapPurchaseIntentError,
-  mapSubscribeError,
-  mapTransferError,
-  normalizeCurrencyCode,
-  parsePositiveInteger,
-  validatePurchaseInput,
-  validateTransferInput,
-} from './aethel-dashboard-billing-utils'
-import {
-  DASHBOARD_DEFAULT_SETTINGS,
-  type Point3,
-} from './aethel-dashboard-core-types'
-import {
-  DEFAULT_MODEL,
-  ONBOARDING_WIZARD_DISMISSED_KEY,
-} from './aethel-dashboard-constants'
+import type { Point3 } from './aethel-dashboard-core-types'
 import type {
   ActiveTab,
   DashboardSettings,
@@ -54,10 +16,13 @@ import type {
   ToastType,
   WorkflowTemplate,
 } from './aethel-dashboard-model'
-import { STORAGE_KEYS, clearStoredDashboardState } from './aethel-dashboard-model'
-import { createInitialSessionEntry } from './aethel-dashboard-session-utils'
-import { createProjectEntry, removeProjectEntry } from './aethel-dashboard-project-utils'
-import { DEFAULT_PROJECTS, CURRENT_PLAN_KEY } from './aethel-dashboard-defaults'
+import { STORAGE_KEYS, resolvePrimaryDashboardTab } from './aethel-dashboard-model'
+import { useDashboardAccessActions } from './useDashboardAccessActions'
+import { useDashboardBillingActions } from './useDashboardBillingActions'
+import { useDashboardChatActions } from './useDashboardChatActions'
+import { useDashboardOnboardingActions } from './useDashboardOnboardingActions'
+import { useDashboardWorkflowActions } from './useDashboardWorkflowActions'
+import { useDashboardWorkspaceActions } from './useDashboardWorkspaceActions'
 
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 
@@ -193,337 +158,114 @@ export function useDashboardActions({
   setShowOnboardingWizard,
 }: DashboardActionsInput) {
   const handleTabChange = useCallback((tab: ActiveTab) => {
-    setActiveTab(tab)
+    const nextTab = resolvePrimaryDashboardTab(tab)
+    setActiveTab(nextTab)
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEYS.activeTab, tab)
+      window.localStorage.setItem(STORAGE_KEYS.activeTab, nextTab)
     }
-    trackEvent('user', 'settings_change', { section: 'dashboard-tab', tab })
+    trackEvent('user', 'settings_change', { section: 'dashboard-tab', tab: nextTab, requestedTab: tab })
   }, [setActiveTab, trackEvent])
 
-  const handleOpenProviderSettings = useCallback(() => {
-    const setupTarget = aiProviderGate?.setupUrl || '/settings?tab=api'
-    if (typeof window !== 'undefined') {
-      window.location.assign(setupTarget)
-    }
-    trackEvent('ai', 'ai_error', { source: 'provider-gate', action: 'open-settings-api-tab', setupTarget })
-  }, [aiProviderGate?.setupUrl, trackEvent])
-
-  const handleStopDashboardChat = useCallback(() => {
-    chatAbortRef.current?.abort()
-    chatAbortRef.current = null
-    setIsStreaming(false)
-    showToastMessage('Execucao interrormpida pelo usuario.', 'info')
-    trackEvent('ai', 'ai_error', { source: 'dashboard-chat', action: 'abort' })
-  }, [chatAbortRef, setIsStreaming, showToastMessage, trackEvent])
-
-  const handleOpenIdeLivePreview = useCallback(() => {
-    setFirstValueOpenedIde(true)
-    navigateToIdeWithContext('dashboard-first-value', 'live-preview')
-  }, [setFirstValueOpenedIde, navigateToIdeWithContext])
-
-  const handleOpenAIChatFromGuide = useCallback(() => {
-    setActiveTab('ai-chat')
-    setChatMode('chat')
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEYS.activeTab, 'ai-chat')
-    }
-    trackEvent('ai', 'ai_chat', { source: 'first-value-guide', action: 'open-ai-chat' })
-  }, [setActiveTab, setChatMode, trackEvent])
-
-  const handleOpenIdeFromHeader = useCallback(() => {
-    navigateToIdeWithContext('dashboard-header', 'quick-open')
-  }, [navigateToIdeWithContext])
-
-  const handleToggleFullAccess = useCallback(() => {
-    if (!hasToken || fullAccessBusy) {
-      if (!hasToken) showToastMessage('Autentique-se para alterar Full Access.', 'error')
-      return
-    }
-
-    void (async () => {
-      setFullAccessBusy(true)
-      try {
-        if (fullAccessActiveGrant?.id) {
-          const response = await fetch(`/api/studio/access/full/${encodeURIComponent(fullAccessActiveGrant.id)}`, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-              ...getAuthHeaders(),
-            },
-          })
-          const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
-          if (!response.ok) {
-            throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
-          }
-          showToastMessage('Full Access revogado.', 'success')
-          trackEvent('security', 'full_access_revoke', {
-            source: 'dashboard-header',
-            projectId: copilotProjectId,
-          })
-        } else {
-          const response = await fetch('/api/studio/access/full', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...getAuthHeaders(),
-            },
-            body: JSON.stringify({
-              projectId: copilotProjectId || undefined,
-              durationMinutes: 15,
-              reason: `dashboard_header_full_access:${copilotProjectId || 'workspace'}`,
-              scope: copilotProjectId ? [`project:${copilotProjectId}`, 'workspace:apply'] : ['workspace:apply'],
-            }),
-          })
-          const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
-          if (!response.ok) {
-            throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
-          }
-          showToastMessage('Full Access temporario activedo (15 min).', 'success')
-          trackEvent('security', 'full_access_grant', {
-            source: 'dashboard-header',
-            projectId: copilotProjectId,
-            durationMinutes: 15,
-          })
-        }
-
-        await mutateFullAccess()
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to update Full Access.'
-        showToastMessage(message, 'error')
-      } finally {
-        setFullAccessBusy(false)
-      }
-    })()
-  }, [
+  const { handleToggleFullAccess } = useDashboardAccessActions({
+    trackEvent,
+    showToastMessage,
     hasToken,
     fullAccessBusy,
-    fullAccessActiveGrant?.id,
-    showToastMessage,
-    trackEvent,
+    fullAccessActiveGrant,
     copilotProjectId,
     mutateFullAccess,
     setFullAccessBusy,
-  ])
+  })
 
-  const handleResetDashboard = useCallback(() => {
-    clearStoredDashboardState()
-    setSessionHistory([])
-    setSessionFilter('all')
-    setActiveTab('overview')
-    setChatHistory([])
-    setChatMessage('')
-    setLivePreviewSuggestions([])
-    setSettings({ ...DASHBOARD_DEFAULT_SETTINGS })
-    setProjects(DEFAULT_PROJECTS)
-    setActiveWorkflowId(null)
-    setActiveChatThreadId(null)
-    setConnectFromWorkflowId('')
-    persistCopilotScope(null, null)
-    showToastMessage('Painel redefinido para o baseline.', 'info')
-  }, [
+  const {
+    handleOpenIdeLivePreview,
+    handleOpenAIChatFromGuide,
+    handleOpenIdeFromHeader,
+    handleResetDashboard,
+    handleToggleTheme,
+    handleCreateNewSession,
+    handleCreateProject,
+    handleDeleteProject,
+    handleProjectVersionChange,
+  } = useDashboardWorkspaceActions({
+    trackEvent,
+    showToastMessage,
+    persistCopilotScope,
+    navigateToIdeWithContext,
+    settings,
+    projects,
+    newProjectName,
+    newProjectType,
+    setActiveTab,
+    setChatMode,
+    setChatMessage,
+    setChatHistory,
+    setActiveWorkflowId,
+    setActiveChatThreadId,
+    setConnectFromWorkflowId,
     setSessionHistory,
     setSessionFilter,
-    setActiveTab,
-    setChatHistory,
-    setChatMessage,
     setLivePreviewSuggestions,
     setSettings,
     setProjects,
-    setActiveWorkflowId,
-    setActiveChatThreadId,
-    setConnectFromWorkflowId,
-    persistCopilotScope,
-    showToastMessage,
-  ])
+    setNewProjectName,
+    setFirstValueOpenedIde,
+  })
 
-  const handleToggleTheme = useCallback(() => {
-    setSettings((prev) => ({
-      ...prev,
-      theme: prev.theme === 'dark' ? 'light' : 'dark',
-    }))
-  }, [setSettings])
-
-  const handleCreateNewSession = useCallback(() => {
-    setSessionHistory((prev) => [createInitialSessionEntry(prev.length, settings), ...prev].slice(0, 20))
-    setChatHistory([])
-    setLivePreviewSuggestions([])
-    setChatMessage('')
-    setActiveWorkflowId(null)
-    setActiveChatThreadId(null)
-    setConnectFromWorkflowId('')
-    persistCopilotScope(null, null)
-    showToastMessage('Nova sessao iniciada.', 'success')
-    trackEvent('project', 'project_open', { source: 'dashboard-session' })
-  }, [
-    setSessionHistory,
-    settings,
-    setChatHistory,
-    setLivePreviewSuggestions,
-    setChatMessage,
-    setActiveWorkflowId,
-    setActiveChatThreadId,
-    setConnectFromWorkflowId,
-    persistCopilotScope,
-    showToastMessage,
+  const {
+    handleOpenProviderSettings,
+    handleStopDashboardChat,
+    handleApplyDirectorNote,
+    handleSendChatMessage,
+    handleMagicWandSelect,
+    handleSendLivePreviewSuggestion,
+  } = useDashboardChatActions({
     trackEvent,
-  ])
+    showToastMessage,
+    chatAbortRef,
+    aiProviderGate,
+    copilotProjectId,
+    activeWorkflowId,
+    chatMessage,
+    chatHistory,
+    isStreaming,
+    isGenerating,
+    selectedPreviewPoint,
+    setActiveTab,
+    setChatMessage,
+    setChatHistory,
+    setIsStreaming,
+    setIsGenerating,
+    setLivePreviewSuggestions,
+    setSelectedPreviewPoint,
+    setFirstValueAiSuccess,
+    setAiProviderGate,
+  })
 
-  const handleCreateProject = useCallback(() => {
-    const value = newProjectName.trim()
-    if (!value) {
-      showToastMessage('Set a project name before creating it.', 'error')
-      return
-    }
-
-    const project = createProjectEntry(projects, value, newProjectType)
-    setProjects((prev) => [project, ...prev])
-    setNewProjectName('')
-    showToastMessage('Project created successfully.', 'success')
-    trackEvent('project', 'project_create', { type: newProjectType })
-  }, [newProjectName, newProjectType, projects, setProjects, setNewProjectName, showToastMessage, trackEvent])
-
-  const handleDeleteProject = useCallback((id: number) => {
-    setProjects((prev) => removeProjectEntry(prev, id))
-    showToastMessage('Project removed.', 'info')
-    trackEvent('project', 'project_delete', { projectId: id })
-  }, [setProjects, showToastMessage, trackEvent])
-
-  const handleProjectVersionChange = useCallback((versionId: string) => {
-    if (!versionId) return
-    showToastMessage(`Snapshot ${versionId} aplicado no workspace.`, 'info')
-  }, [showToastMessage])
-
-  const handleApplyDirectorNote = useCallback((title: string) => {
-    setChatMessage(`Apply the guideline to the current project: ${title}`)
-    setActiveTab('ai-chat')
-    showToastMessage('Diretriz enviada para o Chat IA.', 'success')
-  }, [setChatMessage, setActiveTab, showToastMessage])
-
-  const handleSubscribe = useCallback(async (planId: string, interval: 'month' | 'year' = 'month') => {
-    setSubscribingPlan(planId)
-    setSubscribeError(null)
-
-    try {
-      const response = await AethelAPIClient.subscribe(planId, interval)
-      if (response.checkoutUrl && typeof window !== 'undefined') {
-        window.open(response.checkoutUrl, '_blank', 'noopener,noreferrer')
-      }
-      showToastMessage(`Subscription flow started for ${planId}.`, 'success')
-      void mutate(CURRENT_PLAN_KEY)
-    } catch (err) {
-      setSubscribeError(mapSubscribeError(err))
-    } finally {
-      setSubscribingPlan(null)
-    }
-  }, [mutate, setSubscribingPlan, setSubscribeError, showToastMessage])
-
-  const handleManageSubscription = useCallback(() => {
-    handleTabChange('billing')
-  }, [handleTabChange])
-
-  const handlePurchase = useCallback(async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setWalletSubmitting(true)
-    setWalletActionError(null)
-    setWalletActionMessage(null)
-
-    const validationError = validatePurchaseInput(hasToken, purchaseForm.amount)
-    if (validationError) {
-      setWalletActionError(validationError)
-      setWalletSubmitting(false)
-      return
-    }
-    const amount = parsePositiveInteger(purchaseForm.amount)
-    if (!amount) {
-      setWalletActionError('Enter a valid credit amount.')
-      setWalletSubmitting(false)
-      return
-    }
-
-    try {
-      const response = await AethelAPIClient.createPurchaseIntent({
-        amount,
-        currency: normalizeCurrencyCode(purchaseForm.currency),
-        reference: purchaseForm.reference || undefined,
-      })
-      setLastPurchaseIntent(response)
-      setWalletActionMessage(buildPurchaseSuccessMessage(response, formatCurrencyLabel))
-      await mutateWallet()
-      await mutateCredits()
-    } catch (err) {
-      setWalletActionError(mapPurchaseIntentError(err))
-    } finally {
-      setWalletSubmitting(false)
-    }
-  }, [
+  const {
+    handleSubscribe,
+    handleManageSubscription,
+    handlePurchase,
+    handleTransfer,
+    handleRefreshWallet,
+  } = useDashboardBillingActions({
     hasToken,
-    purchaseForm.amount,
-    purchaseForm.currency,
-    purchaseForm.reference,
+    purchaseForm,
+    transferForm,
+    mutate,
+    mutateWallet,
+    mutateCredits,
+    formatCurrencyLabel,
+    showToastMessage,
+    handleTabChange,
+    setSubscribingPlan,
+    setSubscribeError,
     setWalletSubmitting,
     setWalletActionError,
     setWalletActionMessage,
     setLastPurchaseIntent,
-    formatCurrencyLabel,
-    mutateWallet,
-    mutateCredits,
-  ])
-
-  const handleTransfer = useCallback(async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setWalletSubmitting(true)
-    setWalletActionError(null)
-    setWalletActionMessage(null)
-
-    const validationError = validateTransferInput(hasToken, transferForm.amount, transferForm.targetUserId)
-    if (validationError) {
-      setWalletActionError(validationError)
-      setWalletSubmitting(false)
-      return
-    }
-    const amount = parsePositiveInteger(transferForm.amount)
-    if (!amount) {
-      setWalletActionError('Invalid transfer amount.')
-      setWalletSubmitting(false)
-      return
-    }
-
-    try {
-      const response = await AethelAPIClient.transferCredits({
-        target_user_id: transferForm.targetUserId.trim(),
-        amount,
-        currency: normalizeCurrencyCode(transferForm.currency),
-        reference: transferForm.reference || undefined,
-      })
-      setLastTransferReceipt(response)
-      setWalletActionMessage(buildTransferSuccessMessage(response, formatCurrencyLabel))
-      await mutateWallet()
-      await mutateCredits()
-    } catch (err) {
-      setWalletActionError(mapTransferError(err))
-    } finally {
-      setWalletSubmitting(false)
-    }
-  }, [
-    hasToken,
-    transferForm.amount,
-    transferForm.currency,
-    transferForm.reference,
-    transferForm.targetUserId,
-    setWalletSubmitting,
-    setWalletActionError,
-    setWalletActionMessage,
     setLastTransferReceipt,
-    formatCurrencyLabel,
-    mutateWallet,
-    mutateCredits,
-  ])
-
-  const handleRefreshWallet = useCallback(() => {
-    if (!hasToken) return
-    void mutateWallet()
-    void mutateCredits()
-  }, [hasToken, mutateWallet, mutateCredits])
+  })
 
   const handleRefreshConnectivity = useCallback(() => {
     if (!hasToken) return
@@ -534,370 +276,45 @@ export function useDashboardActions({
     const template = workflowTemplates.find((item) => item.id === templateId)
     if (!template) return
     setChatMessage(`Apply template "${template.name}" with steps:\n- ${template.steps.join('\n- ')}`)
-    setActiveTab('ai-chat')
-    showToastMessage(`Template "${template.name}" carregado no chat.`, 'success')
-  }, [workflowTemplates, setChatMessage, setActiveTab, showToastMessage])
+    setActiveTab('activity')
+    navigateToIdeWithContext('dashboard-template', `template:${template.id}`)
+    showToastMessage(`Template "${template.name}" prepared for IDE agents.`, 'success')
+  }, [workflowTemplates, setChatMessage, setActiveTab, navigateToIdeWithContext, showToastMessage])
 
-  const persistOnboardingProgress = useCallback((action: 'complete_step' | 'skip', step?: string) => {
-    if (!hasToken) return
+  const {
+    handleDismissOnboardingWizard,
+    handleOnboardingComplete,
+    handleOnboardingSkip,
+  } = useDashboardOnboardingActions({
+    hasToken,
+    mutateOnboarding,
+    trackEvent,
+    handleTemplateSelect,
+    setNewProjectName,
+    setShowOnboardingWizard,
+  })
 
-    void (async () => {
-      try {
-        const response = await fetch('/api/onboarding', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeaders(),
-          },
-          body: JSON.stringify(step ? { action, step } : { action }),
-        })
-
-        if (!response.ok) {
-          throw new Error(`Request failed: ${response.status}`)
-        }
-
-        await mutateOnboarding()
-      } catch (error) {
-        trackEvent('onboarding', 'wizard_sync_error', {
-          action,
-          step: step || null,
-          error: error instanceof Error ? error.message : 'unknown',
-        })
-      }
-    })()
-  }, [hasToken, mutateOnboarding, trackEvent])
-
-  const handleDismissOnboardingWizard = useCallback((reason: 'skip' | 'complete') => {
-    setShowOnboardingWizard(false)
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(ONBOARDING_WIZARD_DISMISSED_KEY, '1')
-    }
-    trackEvent('onboarding', 'wizard_dismiss', { reason })
-  }, [setShowOnboardingWizard, trackEvent])
-
-  const handleOnboardingComplete = useCallback((data: { template: string; name: string; description: string }) => {
-    handleDismissOnboardingWizard('complete')
-    persistOnboardingProgress('complete_step', 'welcome')
-    if (data?.name?.trim()) {
-      setNewProjectName(data.name.trim())
-    }
-    if (data?.template) {
-      handleTemplateSelect(data.template)
-    }
-  }, [handleDismissOnboardingWizard, handleTemplateSelect, persistOnboardingProgress, setNewProjectName])
-
-  const handleOnboardingSkip = useCallback(() => {
-    handleDismissOnboardingWizard('skip')
-    persistOnboardingProgress('skip')
-  }, [handleDismissOnboardingWizard, persistOnboardingProgress])
-
-  const handleCreateWorkflow = useCallback(() => {
-    void (async () => {
-      setConnectBusy(true)
-      try {
-        const thread = await AethelAPIClient.createChatThread({
-          title: buildWorkflowTitle('Chat'),
-          projectId: copilotProjectId ?? undefined,
-        })
-        const created = await AethelAPIClient.createCopilotWorkflow({
-          title: buildWorkflowTitle('Workflow'),
-          projectId: copilotProjectId ?? undefined,
-          chatThreadId: thread.thread.id,
-        })
-        setCopilotWorkflows((prev) => [created.workflow, ...prev])
-        const workflowId = String(created.workflow.id)
-        const threadId = String(created.workflow.chatThreadId ?? thread.thread.id)
-        setActiveWorkflowId(workflowId)
-        setActiveChatThreadId(threadId)
-        setConnectFromWorkflowId('')
-        persistCopilotScope(workflowId, threadId)
-      } catch (error) {
-        showToastMessage('Failed to create workflow.', 'error')
-      } finally {
-        setConnectBusy(false)
-      }
-    })()
-  }, [
-    setConnectBusy,
+  const {
+    handleCreateWorkflow,
+    handleSelectWorkflow,
+    handleRenameWorkflow,
+    handleArchiveWorkflow,
+    handleCopyHistory,
+    handleImportContext,
+    handleMergeWorkflow,
+  } = useDashboardWorkflowActions({
+    showToastMessage,
+    persistCopilotScope,
     copilotProjectId,
-    setCopilotWorkflows,
+    copilotWorkflows,
+    activeWorkflowId,
+    connectFromWorkflowId,
     setActiveWorkflowId,
     setActiveChatThreadId,
     setConnectFromWorkflowId,
-    persistCopilotScope,
-    showToastMessage,
-  ])
-
-  const handleSelectWorkflow = useCallback((workflowId: string) => {
-    const workflow = copilotWorkflows.find((item) => String(item.id) === String(workflowId))
-    const threadId = workflow?.chatThreadId ? String(workflow.chatThreadId) : null
-    setActiveWorkflowId(workflowId)
-    setActiveChatThreadId(threadId)
-    persistCopilotScope(workflowId, threadId)
-  }, [copilotWorkflows, setActiveWorkflowId, setActiveChatThreadId, persistCopilotScope])
-
-  const handleRenameWorkflow = useCallback(() => {
-    if (!activeWorkflowId) return
-    void (async () => {
-      setConnectBusy(true)
-      try {
-        const response = await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, {
-          title: buildWorkflowTitle('Workflow'),
-        })
-        const updated = response.workflow
-        setCopilotWorkflows((prev) =>
-          prev.map((workflow) => (String(workflow.id) === String(activeWorkflowId) ? updated : workflow))
-        )
-        showToastMessage('Workflow renamed successfully.', 'success')
-      } catch (error) {
-        showToastMessage('Failed to rename workflow.', 'error')
-      } finally {
-        setConnectBusy(false)
-      }
-    })()
-  }, [activeWorkflowId, setConnectBusy, setCopilotWorkflows, showToastMessage])
-
-  const handleArchiveWorkflow = useCallback(() => {
-    if (!activeWorkflowId) return
-    void (async () => {
-      setConnectBusy(true)
-      try {
-        await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { archived: true })
-        const remaining = copilotWorkflows.filter((workflow) => String(workflow.id) !== String(activeWorkflowId))
-        setCopilotWorkflows(remaining)
-        const next = remaining[0]
-        const nextWorkflowId = next ? String(next.id) : null
-        const nextThreadId = next?.chatThreadId ? String(next.chatThreadId) : null
-        setActiveWorkflowId(nextWorkflowId)
-        setActiveChatThreadId(nextThreadId)
-        persistCopilotScope(nextWorkflowId, nextThreadId)
-      } catch (error) {
-        showToastMessage('Failed to archive workflow.', 'error')
-      } finally {
-        setConnectBusy(false)
-      }
-    })()
-  }, [
-    activeWorkflowId,
     setConnectBusy,
-    copilotWorkflows,
     setCopilotWorkflows,
-    setActiveWorkflowId,
-    setActiveChatThreadId,
-    persistCopilotScope,
-    showToastMessage,
-  ])
-
-  const handleCopyHistory = useCallback(() => {
-    void showToastMessage('Copy history remains available in advanced IDE mode.', 'info')
-  }, [showToastMessage])
-
-  const handleImportContext = useCallback(() => {
-    if (!activeWorkflowId || !connectFromWorkflowId) {
-      showToastMessage('Select source and destination workflows to import context.', 'info')
-      return
-    }
-    void (async () => {
-      setConnectBusy(true)
-      try {
-        const source = await AethelAPIClient.getCopilotWorkflow(connectFromWorkflowId)
-        const patch = buildCopilotContextPatch(activeWorkflowId, source?.workflow?.context)
-        if (!patch) {
-          showToastMessage('Source workflow has no useful context to import.', 'info')
-          return
-        }
-        const response = await fetch('/api/copilot/context', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeaders(),
-          },
-          body: JSON.stringify({
-            projectId: copilotProjectId,
-            ...patch,
-          }),
-        })
-        if (!response.ok) {
-          throw new Error(await response.text().catch(() => 'Failed to import context.'))
-        }
-        showToastMessage('Context imported into the active workflow.', 'success')
-      } catch (error) {
-        showToastMessage('Failed to import context.', 'error')
-      } finally {
-        setConnectBusy(false)
-      }
-    })()
-  }, [
-    activeWorkflowId,
-    connectFromWorkflowId,
-    copilotProjectId,
-    setConnectBusy,
-    showToastMessage,
-  ])
-
-  const handleMergeWorkflow = useCallback(() => {
-    if (!activeWorkflowId || !connectFromWorkflowId) {
-      showToastMessage('Select source and destination workflows to merge.', 'info')
-      return
-    }
-    void (async () => {
-      await Promise.all([Promise.resolve(handleCopyHistory()), Promise.resolve(handleImportContext())])
-    })()
-  }, [activeWorkflowId, connectFromWorkflowId, handleCopyHistory, handleImportContext, showToastMessage])
-
-  const handleSendChatMessage = useCallback(() => {
-    void (async () => {
-      const message = chatMessage.trim()
-      if (!message || isStreaming) return
-      const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now()
-      setAiProviderGate(null)
-      const nextMessages = [...chatHistory, { role: 'user', content: message } as ChatMessage].slice(-200)
-      setChatMessage('')
-      setChatHistory(nextMessages)
-      setIsStreaming(true)
-      try {
-        const controller = new AbortController()
-        chatAbortRef.current = controller
-        const result = await requestAdvancedChat({
-          message,
-          model: DEFAULT_MODEL,
-          messages: nextMessages.map((item) => ({ role: item.role, content: item.content })),
-          projectId: copilotProjectId ?? undefined,
-          headers: getAuthHeaders(),
-          signal: controller.signal,
-        })
-        const assistantMessage: ChatMessage = {
-          role: 'assistant',
-          content: extractApiContent(result.raw) || 'Resposta vazia do modelo.',
-        }
-        const latencyMs = Math.max(
-          0,
-          Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt)
-        )
-        setChatHistory((prev) => [...prev, assistantMessage].slice(-200))
-        setFirstValueAiSuccess(true)
-        setAiProviderGate(null)
-        trackEvent('ai', 'ai_chat', { source: 'dashboard-chat', status: 'success', latencyMs })
-        analytics?.trackPerformance?.('ai_chat_latency', latencyMs, 'ms', {
-          surface: 'dashboard',
-          status: 'success',
-        })
-        analytics?.track?.('ai', 'ai_stream', {
-          metadata: {
-            source: 'dashboard-chat',
-            latencyMs,
-            status: 'success',
-            usedFallback: result.usedFallback,
-          },
-        })
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') {
-          setChatHistory((prev) => [...prev, { role: 'assistant', content: 'Request interrupted by user.' } as ChatMessage].slice(-200))
-          return
-        }
-        let errorMessage = error instanceof Error ? error.message : 'AI call failed.'
-        if (error instanceof AdvancedChatRequestError) {
-          const providerGate = isProviderSetupError(error)
-          if (providerGate) {
-            setAiProviderGate({
-              message: error.message,
-              capabilityStatus: error.capabilityStatus,
-              setupUrl: error.setupUrl,
-            })
-            const setupTarget = error.setupUrl || '/settings?tab=api'
-            errorMessage = `${error.message} Configure um provider em ${setupTarget} para liberar o chat.`
-          } else {
-            errorMessage = `${error.code}: ${error.message}`
-          }
-        }
-        const latencyMs = Math.max(
-          0,
-          Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt)
-        )
-        setChatHistory((prev) => [...prev, { role: 'assistant', content: errorMessage } as ChatMessage].slice(-200))
-        trackEvent('ai', 'ai_error', { source: 'dashboard-chat', latencyMs, error: errorMessage })
-        analytics?.trackPerformance?.('ai_chat_latency', latencyMs, 'ms', {
-          surface: 'dashboard',
-          status: 'error',
-        })
-      } finally {
-        chatAbortRef.current = null
-        setIsStreaming(false)
-      }
-    })()
-  }, [
-    chatMessage,
-    isStreaming,
-    chatHistory,
-    copilotProjectId,
-    chatAbortRef,
-    setChatMessage,
-    setChatHistory,
-    setIsStreaming,
-    setFirstValueAiSuccess,
-    setAiProviderGate,
-    trackEvent,
-  ])
-
-  const handleMagicWandSelect = useCallback((position: Point3) => {
-    setSelectedPreviewPoint(position)
-    if (!activeWorkflowId) return
-    const payload = buildLivePreviewContextPayload(activeWorkflowId, position)
-    void fetch('/api/copilot/context', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthHeaders(),
-      },
-      body: JSON.stringify({
-        projectId: copilotProjectId,
-        ...payload,
-      }),
-    })
-  }, [setSelectedPreviewPoint, activeWorkflowId, copilotProjectId])
-
-  const handleSendLivePreviewSuggestion = useCallback(async (suggestion: string) => {
-    const normalized = suggestion.trim()
-    if (!normalized || isGenerating) return
-    setIsGenerating(true)
-    setLivePreviewSuggestions((prev) => [normalized, ...prev].slice(0, 10))
-    try {
-      const prompt = selectedPreviewPoint ? `${buildLivePreviewPrompt(selectedPreviewPoint)}\n\nPedido do usuario: ${normalized}` : normalized
-      const result = await requestAdvancedChat({
-        message: prompt,
-        model: DEFAULT_MODEL,
-        messages: [buildLivePreviewSystemMessage(), { role: 'user', content: prompt }],
-        projectId: copilotProjectId ?? undefined,
-        headers: getAuthHeaders(),
-        profileOverride: {
-          qualityMode: 'delivery',
-          agentCount: 1,
-          enableWebResearch: false,
-        },
-      })
-      const parsed = extractPrimaryAssistantContent(JSON.parse(result.raw)) || extractApiContent(result.raw)
-      const finalSuggestion = parsed.trim() || normalized
-      setLivePreviewSuggestions((prev) => [finalSuggestion, ...prev].slice(0, 10))
-      setChatHistory((prev) => [...prev, buildLivePreviewSuggestionMessage(finalSuggestion)].slice(-200))
-    } catch (error) {
-      const message =
-        error instanceof AdvancedChatRequestError
-          ? `${error.code}: ${error.message}`
-          : error instanceof Error
-            ? error.message
-            : 'Failed to generate suggestion.'
-      setLivePreviewSuggestions((prev) => [`Error: ${message}`, ...prev].slice(0, 10))
-    } finally {
-      setIsGenerating(false)
-    }
-  }, [
-    isGenerating,
-    selectedPreviewPoint,
-    copilotProjectId,
-    setIsGenerating,
-    setLivePreviewSuggestions,
-    setChatHistory,
-  ])
+  })
 
   const dismissFirstValueGuide = useCallback(() => {
     setShowFirstValueGuide(false)

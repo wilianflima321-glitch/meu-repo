@@ -9,37 +9,37 @@ const IDE_FEATURES = [
   {
     icon: Code,
     title: 'Monaco Editor',
-    description: 'Full VS Code-powered editor with syntax highlighting, IntelliSense, and multi-cursor support.',
+    description: 'Code, navigate, and edit in a familiar IDE.',
     shortcut: null,
   },
   {
     icon: MessageSquare,
     title: 'AI Chat Panel',
-    description: 'Context-aware AI assistant with @mentions for codebase, docs, diffs, and errors.',
+    description: 'Ask with files, diffs, docs, and errors in scope.',
     shortcut: 'Cmd+Shift+A',
   },
   {
     icon: Eye,
-    title: 'Preview ao vivo',
-    description: 'Preview em tempo real com HMR. Sandbox E2B ou fallback WebContainers.',
+    title: 'Live Preview',
+    description: 'Review app changes next to code.',
     shortcut: 'Cmd+Shift+P',
   },
   {
     icon: Terminal,
     title: 'Integrated Terminal',
-    description: 'Full terminal with tabs, split panes, and command history.',
+    description: 'Run commands without leaving the workspace.',
     shortcut: 'Cmd+`',
   },
   {
     icon: GitBranch,
     title: 'Git Integration',
-    description: 'Built-in git panel with diff view, commit, push, and branch management.',
+    description: 'Review diffs before changes leave the IDE.',
     shortcut: 'Cmd+Shift+G',
   },
   {
     icon: Keyboard,
     title: 'Command Palette',
-    description: 'Fuzzy-search command palette for quick access to all IDE features.',
+    description: 'Jump to actions without hunting through panels.',
     shortcut: 'Cmd+Shift+K',
   },
 ]
@@ -66,9 +66,9 @@ export default function IDEDocsPage() {
           <ArrowLeft className="h-4 w-4" /> Back to Docs
         </Link>
 
-        <h1 className="text-4xl font-bold">IDE / Workbench</h1>
+        <h1 className="text-4xl font-bold">IDE and agents</h1>
         <p className="mt-3 text-lg text-[var(--aethel-text-tertiary)]">
-          IDE cloud completa com assistencia de IA, preview ao vivo e terminal integrado.
+          A focused shell for code, agents, preview, and terminal.
         </p>
 
         <h2 className="mt-10 text-2xl font-semibold">Features</h2>
@@ -109,18 +109,17 @@ export default function IDEDocsPage() {
           ))}
         </div>
 
-        <h2 className="mt-10 text-2xl font-semibold">AI Context Mentions</h2>
-        <div className="mt-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] p-6">
-          <p className="text-sm text-[var(--aethel-text-tertiary)] mb-4">
-            Use @mentions in the AI chat to inject specific context:
-          </p>
-          <div className="grid gap-2">
+        <details className="mt-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] p-5">
+          <summary className="cursor-pointer list-none text-sm font-semibold text-[var(--aethel-text-primary)]">
+            AI context mentions
+          </summary>
+          <div className="mt-4 grid gap-2">
             {[
-              { mention: '@Codebase', desc: 'Search the entire project codebase semantically' },
-              { mention: '@Docs', desc: 'Reference project documentation' },
-              { mention: '@Diff', desc: 'Include recent git changes as context' },
-              { mention: '@Error', desc: 'Inject current error/stacktrace from console' },
-              { mention: '@git:log', desc: 'Include relevant commit history' },
+              { mention: '@Codebase', desc: 'Project search' },
+              { mention: '@Docs', desc: 'Relevant docs' },
+              { mention: '@Diff', desc: 'Current changes' },
+              { mention: '@Error', desc: 'Latest error' },
+              { mention: '@git:log', desc: 'Commit history' },
             ].map((item) => (
               <div key={item.mention} className="flex items-center gap-3 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] px-3 py-2">
                 <code className="text-sm font-mono font-semibold text-[var(--aethel-primary-light)]">{item.mention}</code>
@@ -128,10 +127,9 @@ export default function IDEDocsPage() {
               </div>
             ))}
           </div>
-        </div>
+        </details>
       </main>
       <PublicFooter />
     </div>
   )
 }
-

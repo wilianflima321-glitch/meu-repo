@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import PublicFooter from '@/components/ui/PublicFooter'
 import PublicHeader from '@/components/ui/PublicHeader'
 import {
@@ -91,11 +91,6 @@ export default function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/3 top-0 h-[560px] w-[560px] rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_7%,transparent)] blur-[170px]" />
-        <div className="absolute bottom-0 right-1/4 h-[480px] w-[480px] rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_6%,transparent)] blur-[160px]" />
-      </div>
-
       <PublicHeader />
 
       <main id="main-content" className="relative z-10 pb-16">
@@ -116,22 +111,24 @@ export default function MarketplacePage() {
             onTrustFilterChange={setTrustFilter}
           />
 
-          {filteredExtensions.length > 0 ? (
-            <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {filteredExtensions.map((extension) => (
-                <MarketplaceCard
-                  key={extension.id}
-                  extension={extension}
-                  onRequestInstall={setReviewingExtensionId}
-                  onUninstall={handleUninstall}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="mt-6">
-              <MarketplaceEmptyState showingFallbackCatalog={false} />
-            </div>
-          )}
+          <Suspense fallback={<div className="mt-6 h-52 animate-pulse rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
+            {filteredExtensions.length > 0 ? (
+              <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {filteredExtensions.map((extension) => (
+                  <MarketplaceCard
+                    key={extension.id}
+                    extension={extension}
+                    onRequestInstall={setReviewingExtensionId}
+                    onUninstall={handleUninstall}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="mt-6">
+                <MarketplaceEmptyState showingFallbackCatalog={false} />
+              </div>
+            )}
+          </Suspense>
         </section>
       </main>
 

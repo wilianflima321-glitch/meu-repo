@@ -123,7 +123,7 @@ export function MediaStudioAssetBin({ assets, selectedAssetId, onSelectAsset }: 
           </div>
         ) : (
           assets.map((asset) => (
-            <button type="button" aria-label={`Selecionar asset ${asset.name}`}
+            <button type="button" aria-label={`Select asset ${asset.name}`}
               key={asset.id}
               onClick={() => onSelectAsset(asset.id)}
               className={
@@ -218,7 +218,7 @@ export function MediaStudioPreviewPanel({
           </div>
         ) : (
           <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
-            Selecione um asset ou clip para visualizar.
+            Select an asset or clip to preview.
           </div>
         )}
         <div className="sr-only">Tempo atual {currentTime}</div>

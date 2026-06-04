@@ -55,6 +55,42 @@ export interface Asset {
   createdAt: string;
 }
 
+export interface FileTreeNode {
+  id?: string;
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  language?: string;
+  children?: FileTreeNode[];
+}
+
+export interface BillingPlan {
+  id: string;
+  name: string;
+  price?: number;
+  currency?: string;
+  interval?: string;
+  features?: string[];
+}
+
+export interface Subscription {
+  id?: string;
+  planId?: string;
+  status: string;
+  currentPeriodEnd?: string;
+}
+
+export interface AdminAnalytics {
+  users?: number;
+  projects?: number;
+  revenue?: number;
+  usage?: Record<string, unknown>;
+}
+
+export type AssetUploadFile = Blob & {
+  name?: string;
+};
+
 export class APIClient {
   private baseURL: string;
   private token: string | null = null;
@@ -63,7 +99,7 @@ export class APIClient {
     // O client-side deve falar somente com as rotas Next (/api/*),
     // para garantir auth/entitlements/metering no server.
     this.baseURL = '/api';
-    
+
     // Load token from localStorage if available
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('aethel-token');
@@ -105,7 +141,7 @@ export class APIClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const headers = new Headers(options.headers);
     if (!headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
@@ -288,8 +324,8 @@ export class APIClient {
   /**
    * Get file structure for project
    */
-  async getFileStructure(projectId: string): Promise<any> {
-    return this.request(`/files/structure?projectId=${projectId}`);
+  async getFileStructure(projectId: string): Promise<FileTreeNode[]> {
+    return this.request<FileTreeNode[]>(`/files/structure?projectId=${projectId}`);
   }
 
   // ============================================
@@ -308,15 +344,15 @@ export class APIClient {
    */
   async uploadAsset(
     projectId: string,
-    file: File
+    file: AssetUploadFile
   ): Promise<Asset> {
     const formData = new FormData();
-    formData.append('file', file as unknown as Blob, (file as any)?.name ?? 'upload.bin');
+    formData.append('file', file, file.name ?? 'upload.bin');
     formData.append('projectId', projectId);
 
     const url = `${this.baseURL}/assets/upload`;
     const headers: HeadersInit = {};
-    
+
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
@@ -350,8 +386,8 @@ export class APIClient {
   /**
    * Get billing plans
    */
-  async getBillingPlans(): Promise<any[]> {
-    return this.request('/billing/plans');
+  async getBillingPlans(): Promise<BillingPlan[]> {
+    return this.request<BillingPlan[]>('/billing/plans');
   }
 
   /**
@@ -367,8 +403,8 @@ export class APIClient {
   /**
    * Get user subscription
    */
-  async getSubscription(): Promise<any> {
-    return this.request('/billing/subscription');
+  async getSubscription(): Promise<Subscription> {
+    return this.request<Subscription>('/billing/subscription');
   }
 
   // ============================================
@@ -385,8 +421,8 @@ export class APIClient {
   /**
    * Get analytics (admin only)
    */
-  async getAnalytics(): Promise<any> {
-    return this.request('/admin/analytics');
+  async getAnalytics(): Promise<AdminAnalytics> {
+    return this.request<AdminAnalytics>('/admin/analytics');
   }
 }
 

@@ -476,6 +476,6 @@ export function planGbScaleProjectIndexing(input: {
     nextAction:
       heldBytes > 0
         ? 'Pause apply; resolve held shards with cloud indexing, local sidecar capacity, or human review.'
-        : 'Index selected shards in workers/sidecar and create read receipts before any agent apply.',
+        : 'Index selected shards in workers/sidecar and create read receipts before each agent apply.',
   }
 }

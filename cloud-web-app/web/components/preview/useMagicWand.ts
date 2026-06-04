@@ -6,6 +6,16 @@ interface ElementInfo {
   tag: string
   id?: string
   className?: string
+  textContent?: string
+  attributes?: Record<string, string>
+  boxModel?: {
+    width: number
+    height: number
+    margin: string
+    padding: string
+    border: string
+  }
+  computedStyles?: Record<string, string>
 }
 
 interface MagicWandState {
@@ -26,7 +36,7 @@ export function useMagicWand(onSendMessage: (message: string, context: { element
     const nativeEvent = 'nativeEvent' in event ? event.nativeEvent : event
     const target = nativeEvent.target as HTMLElement
     const rect = target.getBoundingClientRect()
-    
+
     setMagicWandState({
       isOpen: true,
       position: {
@@ -38,6 +48,14 @@ export function useMagicWand(onSendMessage: (message: string, context: { element
         id: target.id,
         className: target.className,
       },
+    })
+  }, [])
+
+  const openMagicWandAt = useCallback((position: { x: number; y: number }, elementInfo?: ElementInfo) => {
+    setMagicWandState({
+      isOpen: true,
+      position,
+      elementInfo,
     })
   }, [])
 
@@ -56,6 +74,7 @@ export function useMagicWand(onSendMessage: (message: string, context: { element
   return {
     magicWandState,
     openMagicWand,
+    openMagicWandAt,
     closeMagicWand,
     handleSendMessage,
   }

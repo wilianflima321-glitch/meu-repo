@@ -54,22 +54,22 @@ export type CanonicalRuntimeProps = {
 };
 
 export const LIFECYCLE_LABELS: Record<PreviewLifecycleState, string> = {
-  idle: 'Aguardando preview',
-  provisioning: 'Iniciando sandbox...',
-  warming: 'Aquecendo runtime...',
+  idle: 'Preview waiting',
+  provisioning: 'Starting sandbox...',
+  warming: 'Warming runtime...',
   syncing: 'Syncing project files...',
-  healthy: 'Preview em execucao',
-  degraded: 'Preview degradado',
-  failed: 'Failure no preview',
+  healthy: 'Preview running',
+  degraded: 'Preview degraded',
+  failed: 'Preview failure',
   offline: 'Preview offline',
 };
 
 export const STRATEGY_LABELS: Record<PreviewStrategy, string> = {
-  e2b: 'sandbox gerenciado',
+  e2b: 'managed sandbox',
   webcontainer: 'webcontainer',
-  iframe: 'runtime externo',
-  inline: 'fallback inline',
-  none: 'sem runtime',
+  iframe: 'external runtime',
+  inline: 'local preview',
+  none: 'no runtime',
 };
 
 export const LIFECYCLE_COLORS: Record<PreviewLifecycleState, string> = {

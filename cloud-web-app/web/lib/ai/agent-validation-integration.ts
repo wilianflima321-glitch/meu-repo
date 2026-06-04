@@ -1,9 +1,9 @@
 /**
  * Agent Code Validation Integration
- * 
+ *
  * Intercepta operações de escrita de arquivo do agent e valida o código automaticamente.
  * Se encontrar erros, cria um loop de correção até o código estar limpo.
- * 
+ *
  * CRÍTICO para evitar que a IA gere código com erros.
  */
 
@@ -29,6 +29,10 @@ interface AgentToolExecutionResult {
 interface AgentWithToolExecutor {
   executeToolCall(taskId: string, action: AgentAction): Promise<AgentToolExecutionResult>;
 }
+
+type ValidatedAgent = AutonomousAgent & {
+  validation: AgentCodeValidationMiddleware;
+};
 
 function isWritableTool(tool: unknown): tool is WritableAgentTool {
   return tool === 'write_file' || tool === 'edit_file' || tool === 'create_file';
@@ -134,10 +138,10 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
       // Validate
       lastValidation = await this.validator.validateFile(filePath);
 
-      this.emit('validation:result', { 
-        filePath, 
-        attempt: attempts, 
-        result: lastValidation 
+      this.emit('validation:result', {
+        filePath,
+        attempt: attempts,
+        result: lastValidation
       });
 
       // Store in history
@@ -149,11 +153,11 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
       if (lastValidation.success) {
         log.info(`[CodeValidation] ✅ ${filePath} is clean after ${attempts} attempt(s)`);
         this.emit('validation:success', { filePath, attempts });
-        return { 
-          success: true, 
-          validation: lastValidation, 
+        return {
+          success: true,
+          validation: lastValidation,
           fixedContent: currentContent,
-          attempts 
+          attempts
         };
       }
 
@@ -165,7 +169,7 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
       // Try to fix
       if (this.config.autoFix && attempts < this.config.maxFixAttempts) {
         log.info(`[CodeValidation] Attempting auto-fix (attempt ${attempts + 1}/${this.config.maxFixAttempts})...`);
-        
+
         const fixedContent = await this.attemptFix(
           currentContent,
           filePath,
@@ -188,10 +192,10 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
 
     // Failed to fix
     log.info(`[CodeValidation] ❌ Failed to fix ${filePath} after ${attempts} attempts`);
-    this.emit('validation:failed', { 
-      filePath, 
-      attempts, 
-      errors: lastValidation?.errors || [] 
+    this.emit('validation:failed', {
+      filePath,
+      attempts,
+      errors: lastValidation?.errors || []
     });
 
     return {
@@ -259,7 +263,7 @@ CÓDIGO CORRIGIDO:`;
 
       // Extract code from response
       let fixedCode = response.content;
-      
+
       // Remove markdown code blocks if present
       const codeMatch = fixedCode.match(/```(?:typescript|javascript|tsx|jsx|ts|js)?\n?([\s\S]*?)```/);
       if (codeMatch) {
@@ -357,7 +361,7 @@ CÓDIGO CORRIGIDO:`;
 export function createValidatedAgent(
   agent: AutonomousAgent,
   config?: Partial<ValidationConfig>
-): AutonomousAgent & { validation: AgentCodeValidationMiddleware } {
+): ValidatedAgent {
   const middleware = new AgentCodeValidationMiddleware(config);
 
   // Intercept tool execution
@@ -399,10 +403,10 @@ export function createValidatedAgent(
     agent.emit('code:validation_failed', data);
   });
 
-  // Attach middleware to agent
-  (agent as any).validation = middleware;
+  const validatedAgent = agent as ValidatedAgent;
+  validatedAgent.validation = middleware;
 
-  return agent as AutonomousAgent & { validation: AgentCodeValidationMiddleware };
+  return validatedAgent;
 }
 
 // ============================================================================

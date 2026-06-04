@@ -31,11 +31,24 @@ const NOT_FOUND_CODES = new Set([
 	'USER_NOT_FOUND',
 ]);
 
+type ApiErrorLike = Error & {
+	code?: string;
+	retryAfterSeconds?: number;
+	resetAt?: string;
+	limitType?: string;
+};
+
+function getApiError(error: unknown): ApiErrorLike | null {
+	return error instanceof Error ? (error as ApiErrorLike) : null;
+}
+
 export function apiErrorToResponse(error: unknown): NextResponse | null {
+	const apiError = getApiError(error);
+
 	// Auth not configured is a server-side misconfig, not a 401.
-	if ((error as any)?.code === 'AUTH_NOT_CONFIGURED') {
+	if (apiError?.code === 'AUTH_NOT_CONFIGURED') {
 		return NextResponse.json(
-			{ error: 'AUTH_NOT_CONFIGURED', message: (error as Error).message },
+			{ error: 'AUTH_NOT_CONFIGURED', message: apiError.message },
 			{ status: 503 }
 		);
 	}
@@ -44,31 +57,31 @@ export function apiErrorToResponse(error: unknown): NextResponse | null {
 		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
-	const code = (error as any)?.code;
-	if (typeof code === 'string') {
+	const code = apiError?.code;
+	if (typeof code === 'string' && apiError) {
 		if (FORBIDDEN_CODES.has(code)) {
 			return NextResponse.json(
-				{ error: code, message: (error as Error).message },
+				{ error: code, message: apiError.message },
 				{ status: 403 }
 			);
 		}
 
 		if (NOT_FOUND_CODES.has(code)) {
 			return NextResponse.json(
-				{ error: code, message: (error as Error).message },
+				{ error: code, message: apiError.message },
 				{ status: 404 }
 			);
 		}
 
 		if (TOO_MANY_REQUESTS_CODES.has(code)) {
-			const retryAfterSeconds = Number((error as any)?.retryAfterSeconds);
-			const resetAt = String((error as any)?.resetAt || '');
-			const limitType = String((error as any)?.limitType || '');
+			const retryAfterSeconds = Number(apiError.retryAfterSeconds);
+			const resetAt = String(apiError.resetAt || '');
+			const limitType = String(apiError.limitType || '');
 
 			return NextResponse.json(
 				{
 					error: code,
-					message: (error as Error).message,
+					message: apiError.message,
 					limitType,
 					retryAfterSeconds: Number.isFinite(retryAfterSeconds)
 						? Math.max(1, Math.floor(retryAfterSeconds))
@@ -90,14 +103,14 @@ export function apiErrorToResponse(error: unknown): NextResponse | null {
 
 		if (PAYMENT_CODES.has(code)) {
 			return NextResponse.json(
-				{ error: code, message: (error as Error).message },
+				{ error: code, message: apiError.message },
 				{ status: 402 }
 			);
 		}
 
 		if (BAD_REQUEST_CODES.has(code) || code.startsWith('INVALID_')) {
 			return NextResponse.json(
-				{ error: code, message: (error as Error).message },
+				{ error: code, message: apiError.message },
 				{ status: 400 }
 			);
 		}
@@ -111,11 +124,11 @@ export function apiInternalError(message = 'Internal server error', status = 500
 }
 
 /**
- * Cria um erro de API com código e mensagem
+ * Creates an API error with a stable code and message.
  */
 export function createAPIError(code: string, message: string, details?: Record<string, unknown>): Error {
-	const error = new Error(message);
-	(error as any).code = code;
+	const error = new Error(message) as ApiErrorLike;
+	error.code = code;
 	if (details) {
 		Object.assign(error, details);
 	}

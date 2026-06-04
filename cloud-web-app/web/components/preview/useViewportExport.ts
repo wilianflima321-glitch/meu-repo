@@ -12,6 +12,8 @@ import {
   type ViewportRenderQuality,
   type ViewportRenderSurfaceMode,
 } from '@/lib/viewport/viewport-render-contract';
+import { buildExportPipelinePlan } from '@/lib/export/export-pipeline-spine';
+import type { AssetQualityLedger } from '@/lib/product/workspace-blueprint';
 
 type UseViewportExportParams = {
   activeWorkflowLabel: string;
@@ -46,6 +48,19 @@ function downloadViewportManifest(payload: unknown, mode: ViewportCreativeMode) 
   link.click();
   URL.revokeObjectURL(url);
 }
+
+const ASSET_EXPORT_REQUIRED_EVIDENCE: AssetQualityLedger['requiredEvidence'] = [
+  'provenance',
+  'license',
+  'lods',
+  'pbr-maps',
+  'rig-or-skeleton',
+  'collision',
+  'navmesh',
+  'performance-trace',
+  'playtest',
+  'human-approval',
+];
 
 export function useViewportExport({
   activeWorkflowLabel,
@@ -101,10 +116,36 @@ export function useViewportExport({
         vfxConnections: vfxGraph?.connections.length ?? 0,
       },
     });
+    const assetQualityLedger: AssetQualityLedger = {
+      state: assetCount > 0 ? 'needs-review' : 'held',
+      requiredEvidence: ASSET_EXPORT_REQUIRED_EVIDENCE,
+      releaseHoldReason:
+        assetCount > 0
+          ? 'Assets need provenance, license, quality, performance, playtest, and human approval evidence before final export.'
+          : 'No asset quality ledger is attached to this viewport export.',
+    };
+    const exportPipeline = buildExportPipelinePlan({
+      format: renderQuality === 'draft' ? 'zip' : 'mp4',
+      durationSeconds: timelineDuration,
+      estimatedBytes: assetCount * 80_000_000 + Math.ceil(timelineDuration) * 2_000_000,
+      requiresGpu: renderQuality !== 'draft' || renderMode === 'cinematic',
+      runtimeLane: renderQuality === 'draft' ? 'browser-preview' : 'cloud-render',
+      studioLocalAvailable: false,
+      cloudRenderAvailable: false,
+      assetQualityLedger,
+      humanApproved: false,
+      evidenceRefs: [
+        ...contract.evidenceRefs,
+        'rollback-plan:viewport-export-contract',
+        'runtime-capability:browser-preview',
+      ],
+    });
     const payload = {
       mode: creativeMode,
       exportedAt: new Date().toISOString(),
       renderContract: contract,
+      exportPipeline,
+      assetQualityLedger,
       selectedObjectId: selectedObject?.id ?? null,
       selectedObjectName: selectedObject?.name ?? null,
       timeline: {
@@ -130,11 +171,19 @@ export function useViewportExport({
       objects,
     };
 
-    setExportStatus(`${contract.profile.label} contract staged`);
-    const result = await renderPersistence.persistContract(contract, { enqueue: true });
+    setExportStatus(
+      exportPipeline.state === 'available'
+        ? `${contract.profile.label} contract staged`
+        : `${contract.profile.label} held for evidence`,
+    );
+    const result = await renderPersistence.persistContract(contract, { enqueue: exportPipeline.state === 'available' });
     downloadViewportManifest(payload, creativeMode);
 
     if (result.ok) {
+      if (exportPipeline.state !== 'available') {
+        setExportStatus(`${contract.profile.label} saved - export held for evidence`);
+        return;
+      }
       if (result.queued) {
         setExportStatus(`${contract.profile.label} queued - evidence required`);
         return;

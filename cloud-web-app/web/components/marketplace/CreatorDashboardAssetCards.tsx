@@ -151,7 +151,7 @@ export function AssetTableCard({
         <Card>
             <CardHeader className="flex flex-row items-center justify-between gap-4">
                 <div>
-                    <CardTitle>Todos os assets</CardTitle>
+                    <CardTitle>All assets</CardTitle>
                     <CardDescription>Gerencie seus assets publicados</CardDescription>
                 </div>
                 <Button>

@@ -11,7 +11,7 @@ import { logger } from '@/lib/observability/logger';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/ui/motion';
 import {
   Package,
   Search,

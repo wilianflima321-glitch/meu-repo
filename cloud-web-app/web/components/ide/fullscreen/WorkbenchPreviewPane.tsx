@@ -58,7 +58,7 @@ export function WorkbenchPreviewPane({
 
     const result = editorBridge.replaceEntireFile(pendingDiff.newContent)
     if (!result.ok) {
-      toast.warning('Nao foi possivel aplicar a proposta', result.message)
+      toast.warning('Could not apply the proposal', result.message)
       return
     }
 
@@ -74,7 +74,7 @@ export function WorkbenchPreviewPane({
 
     editorBridge.clearPendingDiff()
     setIsProposalPreviewing(false)
-    toast.info('Proposal discarded', 'The patch preview was removed from the cockpit.')
+    toast.info('Proposal discarded', 'The patch preview was removed.')
   }, [editorBridge, toast])
 
   return (

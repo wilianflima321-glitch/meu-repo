@@ -148,7 +148,7 @@ export default function AIProviderSetupGuide({
           }}
           className="rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-1 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
         >
-          {state === 'checking' ? 'Checking...' : 'Verificar agora'}
+          {state === 'checking' ? 'Checking...' : 'Check now'}
         </button>
         <span className="self-center text-[11px] text-[var(--aethel-text-quaternary)]">surface: {source}</span>
       </div>

@@ -62,7 +62,7 @@ export function BreakpointEditor({
         ].map(({ value, label, icon: Icon }) => (
           <button
             type="button"
-            aria-label={`Selecionar tipo ${label} para breakpoint`}
+            aria-label={`Select type ${label} para breakpoint`}
             key={value}
             onClick={() => setType(value as BreakpointType)}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs transition-colors ${

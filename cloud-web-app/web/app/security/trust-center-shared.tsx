@@ -65,11 +65,11 @@ interface TrustCenterPageShellProps {
 function toneLabel(tone: TrustTone) {
   switch (tone) {
     case 'live':
-      return 'Disponivel agora'
+      return 'Available now'
     case 'partial':
-      return 'Parcial / em rollout'
+      return 'Partial / rollout'
     default:
-      return 'Planejado'
+      return 'Planned'
   }
 }
 
@@ -128,20 +128,21 @@ export function TrustCenterPageShell({
   faqs,
   actions,
 }: TrustCenterPageShellProps) {
-  return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--aethel-info)_10%,transparent),transparent_28%),var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[620px] w-[620px] rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] blur-[170px]" />
-        <div className="absolute bottom-0 right-1/4 h-[520px] w-[520px] rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_6%,transparent)] blur-[160px]" />
-      </div>
+  const primaryResources = resources.slice(0, 4)
+  const secondaryResources = resources.slice(4)
 
+  return (
+    <div
+      className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]"
+      data-trust-center-surface="compact"
+    >
       <PublicHeader />
 
       <main className="relative z-10 px-4 pb-20 pt-14 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl space-y-10">
           <section className="grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.55fr)] lg:items-end">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">
+              <div className="inline-flex items-center gap-2 border-l border-[color-mix(in_srgb,var(--aethel-info)_38%,transparent)] pl-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">
                 <HeroIcon className="h-3.5 w-3.5" />
                 {badge}
               </div>
@@ -153,23 +154,28 @@ export function TrustCenterPageShell({
               </p>
             </div>
 
-            <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_76%,transparent)] p-6">
+            <div className="border-y border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] py-6">
               <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
                 <ShieldAlert className="h-3.5 w-3.5 text-[var(--aethel-warning-light)]" />
-                Leitura honesta
+                Honest read
               </div>
               <h2 className="mt-3 text-2xl font-semibold text-[var(--aethel-text-primary)]">{summaryTitle}</h2>
               <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">{summaryBody}</p>
-              <div className="mt-4 space-y-3">
-                {summaryPoints.map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-[20px] border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/10 px-4 py-3 text-sm leading-6 text-[var(--aethel-text-primary)]"
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
+              <details className="mt-4 border-t border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/10 p-4">
+                <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                  Open posture notes
+                </summary>
+                <div className="mt-4 space-y-3">
+                  {summaryPoints.map((item) => (
+                    <div
+                      key={item}
+                      className="border-l border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/10 px-4 py-3 text-sm leading-6 text-[var(--aethel-text-primary)]"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </details>
             </div>
           </section>
 
@@ -177,7 +183,7 @@ export function TrustCenterPageShell({
             {metrics.map((metric) => (
               <div
                 key={metric.label}
-                className={`rounded-[24px] border p-5 ${metricToneClass(metric.tone)}`}
+                className={`border-t p-5 ${metricToneClass(metric.tone)}`}
               >
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
                   {metric.label}
@@ -200,7 +206,7 @@ export function TrustCenterPageShell({
 
               <div className="grid gap-4 xl:grid-cols-3">
                 {section.cards.map((card) => (
-                  <article key={card.title} className={`rounded-[28px] border p-6 ${tonePanelClass(card.tone)}`}>
+                  <article key={card.title} className={`border-t p-6 ${tonePanelClass(card.tone)}`}>
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         {card.eyebrow ? (
@@ -210,22 +216,22 @@ export function TrustCenterPageShell({
                         ) : null}
                         <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">{card.title}</h3>
                       </div>
-                      <span className={`rounded-full border px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] ${toneBadgeClass(card.tone)}`}>
+                      <span className={`border px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] ${toneBadgeClass(card.tone)}`}>
                         {toneLabel(card.tone)}
                       </span>
                     </div>
 
                     <p className="mt-4 text-sm leading-6 text-[var(--aethel-text-secondary)]">{card.description}</p>
-                    <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--aethel-text-primary)]">
-                      {card.bullets.map((bullet) => (
-                        <li
-                          key={bullet}
-                          className="rounded-[20px] border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/10 px-4 py-3"
-                        >
-                          {bullet}
-                        </li>
-                      ))}
-                    </ul>
+                    <details className="mt-4 border-t border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/10 p-4">
+                      <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                        Open controls
+                      </summary>
+                      <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--aethel-text-primary)]">
+                        {card.bullets.map((bullet) => (
+                          <li key={bullet}>- {bullet}</li>
+                        ))}
+                      </ul>
+                    </details>
                   </article>
                 ))}
               </div>
@@ -236,23 +242,22 @@ export function TrustCenterPageShell({
             <section className="space-y-5">
               <div className="max-w-3xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
-                  Artefatos publicos
+                  Review links
                 </p>
                 <h2 className="mt-2 text-3xl font-semibold text-[var(--aethel-text-primary)]">
-                  O melhor kit publico para due diligence agora.
+                  Public review links.
                 </h2>
                 <p className="mt-3 text-base leading-7 text-[var(--aethel-text-secondary)]">
-                  Em vez de um trust portal decorativo, junte estas superficies para entender o que esta live, o
-                  que segue assistido e onde a conversa comercial realmente comeca.
+                  Open the trail your review needs, then keep moving.
                 </p>
               </div>
 
               <div className="grid gap-4 xl:grid-cols-3">
-                {resources.map((resource) => (
+                {primaryResources.map((resource) => (
                   <Link
                     key={resource.href}
                     href={resource.href}
-                    className="group rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-soft))] p-6 transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)]"
+                    className="group border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] py-6 transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_66%,transparent)]"
                   >
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
                       {resource.eyebrow}
@@ -265,42 +270,69 @@ export function TrustCenterPageShell({
                   </Link>
                 ))}
               </div>
+              {secondaryResources.length ? (
+                <details className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] p-4">
+                  <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                    More review links
+                  </summary>
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    {secondaryResources.map((resource) => (
+                      <Link
+                        key={resource.href}
+                        href={resource.href}
+                        className="group border-t border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/10 py-4 transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)]"
+                      >
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                          {resource.eyebrow}
+                        </p>
+                        <div className="mt-2 flex items-center justify-between gap-3">
+                          <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">{resource.title}</h3>
+                          <ArrowRight className="h-4 w-4 shrink-0 text-[var(--aethel-info-light)] transition group-hover:translate-x-0.5" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </details>
+              ) : null}
             </section>
           ) : null}
 
           <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.9fr)]">
-            <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-6">
+            <div className="border-y border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] py-6">
               <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
                 <CheckCircle2 className="h-3.5 w-3.5 text-[var(--aethel-success-light)]" />
-                Perguntas frequentes
+                Questions
               </div>
               <div className="mt-4 space-y-4">
                 {faqs.map((faq) => (
-                  <div
+                  <details
                     key={faq.question}
-                    className="rounded-[22px] border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/10 p-4"
+                    className="border-t border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/10 p-4"
                   >
-                    <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">{faq.question}</h3>
+                    <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+                      {faq.question}
+                    </summary>
                     <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{faq.answer}</p>
-                  </div>
+                    <span className="sr-only">Open answer</span>
+                  </details>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] p-6">
+            <div className="border-y border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] py-6">
               <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">
                 <Clock3 className="h-3.5 w-3.5" />
-                Proximo melhor passo
+                Next best step
               </div>
               <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                Se sua avaliacao envolve procurement, seguranca, rollout ou readiness, use estas paginas como ponto de partida e depois puxe a conversa correta.
+                Start with public evidence. Use sales only when rollout, contracts, or questionnaires enter the review.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 {actions.map((action) => (
                   <Link
                     key={action.href}
                     href={action.href}
-                    className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${actionClass(action.tone)}`}
+                    className={`inline-flex items-center gap-2 border px-4 py-2 text-sm font-medium transition-colors ${actionClass(action.tone)}`}
                   >
                     {action.label}
                     <ArrowRight className="h-4 w-4" />

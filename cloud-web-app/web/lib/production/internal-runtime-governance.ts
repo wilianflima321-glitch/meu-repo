@@ -11,6 +11,7 @@ export type InternalRuntimeBoundary =
 export type InternalRuntimeRisk =
   | 'agent-safety-risk'
   | 'bundle-risk'
+  | 'creative-gap'
   | 'debug-surface-risk'
   | 'developer-experience-risk'
   | 'parallel-runtime'
@@ -72,7 +73,7 @@ export const INTERNAL_RUNTIME_GOVERNANCE_DECISIONS: InternalRuntimeGovernanceDec
   {
     modulePath: 'lib/aaa-render-system.ts',
     decision: 'hold',
-    ownerSurface: '/studio/scene',
+    ownerSurface: '/studio/level',
     boundary: 'summary-only',
     reason: 'The render kernel remains strategic, but direct imports should wait for a viewport backend adapter and trace evidence.',
     risks: ['bundle-risk', 'parallel-runtime'],
@@ -312,7 +313,7 @@ export const INTERNAL_RUNTIME_GOVERNANCE_DECISIONS: InternalRuntimeGovernanceDec
   {
     modulePath: 'lib/scene/scene-serializer-runtime/serializer.ts',
     decision: 'split',
-    ownerSurface: '/studio/scene',
+    ownerSurface: '/studio/level',
     boundary: 'worker-held',
     reason: 'Scene serialization can become a hidden source of corruption unless schema, migration, and rollback are explicit.',
     risks: ['state-drift', 'creative-gap'],
@@ -322,7 +323,7 @@ export const INTERNAL_RUNTIME_GOVERNANCE_DECISIONS: InternalRuntimeGovernanceDec
   {
     modulePath: 'lib/engine/scene-graph.ts',
     decision: 'split',
-    ownerSurface: '/studio/scene',
+    ownerSurface: '/studio/level',
     boundary: 'summary-only',
     reason: 'Scene graph is core engine state and should not compete with serializer, editor state, or runtime graph models.',
     risks: ['parallel-runtime', 'state-drift'],
@@ -362,7 +363,7 @@ export const INTERNAL_RUNTIME_GOVERNANCE_DECISIONS: InternalRuntimeGovernanceDec
   {
     modulePath: 'lib/decal-system.ts',
     decision: 'hold',
-    ownerSurface: '/studio/material',
+    ownerSurface: '/studio/level',
     boundary: 'summary-only',
     reason: 'Decals are useful for visual quality but need material, projection, and performance evidence before scene application.',
     risks: ['bundle-risk', 'creative-gap'],

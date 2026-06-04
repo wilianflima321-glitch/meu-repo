@@ -30,7 +30,7 @@ Key product-facing components:
 
 - Header: `components/AethelHeaderPro.tsx`
 - Workbench chat: `components/ide/AIChatPanelPro.tsx`
-- Workbench layout: `components/ide/IDELayout.tsx`
+- Workbench layout: `components/ide/FullscreenIDE.tsx` + `components/ide/fullscreen/FullscreenIDEWorkspace.tsx`
 - Preview: `components/preview/CanonicalPreviewSurface.tsx`
 - Billing surfaces: `components/billing/BillingIntegration.tsx`
 - Onboarding: `components/onboarding/OnboardingWizard.tsx`
@@ -122,4 +122,3 @@ Experience targets were aligned against:
 - Appcues and UXCam guidance for time-to-value and onboarding activation
 
 These references inform the product direction, but the codebase remains the source of truth for what is actually implemented today.
-

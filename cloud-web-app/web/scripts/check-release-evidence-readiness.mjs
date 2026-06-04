@@ -101,12 +101,12 @@ requirePattern(
   'runtime receipt input',
 )
 requirePattern(
-  'lib/production/release-evidence-readiness.ts',
+  'lib/production/release-evidence-readiness.rules.ts',
   /ASSET_FINAL_EVIDENCE_GROUPS[\s\S]*provenance[\s\S]*LOD[\s\S]*collision[\s\S]*performance[-_ \]?trace[\s\S]*human art-direction approval/,
   'final asset evidence groups',
 )
 requirePattern(
-  'lib/production/release-evidence-readiness.ts',
+  'lib/production/release-evidence-readiness.rules.ts',
   /PLAYTEST_EVIDENCE_GROUPS[\s\S]*playtest[\s\S]*input replay[\s\S]*performance trace[\s\S]*bug\/blocker ledger/,
   'playtest evidence groups',
 )
@@ -220,41 +220,18 @@ requireToken(
   '/production-state/release-evidence-readiness',
   'Evidence Center release readiness fetch',
 )
-requireToken(
-  'components/evidence/EvidenceCenter.tsx',
-  'data-evidence-source="release-evidence-readiness"',
-  'Evidence Center release readiness surface',
-)
-requireToken(
-  'components/evidence/EvidenceCenter.tsx',
-  'Request review',
-  'Evidence Center governed review request action',
-)
-requireToken(
-  'components/evidence/EvidenceCenter.tsx',
-  'Export manifest',
-  'Evidence Center manifest export action',
-)
-requireToken(
-  'components/evidence/EvidenceCenter.tsx',
-  'Integrity verified',
-  'Evidence Center manifest verification state',
-)
-requireToken(
-  'components/evidence/EvidenceCenter.tsx',
-  'data-evidence-source="release-evidence-package-manifest"',
-  'Evidence Center manifest surface',
-)
-requireToken(
-  'components/evidence/EvidenceCenter.tsx',
-  'Record approval',
-  'Evidence Center governed approval action',
-)
-requireToken(
-  'components/evidence/EvidenceCenter.tsx',
-  'Reject package',
-  'Evidence Center governed rejection action',
-)
+const evidenceCenterSurface = `${read('components/evidence/EvidenceCenter.tsx')}\n${read('components/evidence/EvidenceCenter.parts.tsx')}`
+for (const [token, label] of [
+  ['data-evidence-source="release-evidence-readiness"', 'Evidence Center release readiness surface'],
+  ['Request review', 'Evidence Center governed review request action'],
+  ['Export manifest', 'Evidence Center manifest export action'],
+  ['Integrity verified', 'Evidence Center manifest verification state'],
+  ['data-evidence-source="release-evidence-package-manifest"', 'Evidence Center manifest surface'],
+  ['Record approval', 'Evidence Center governed approval action'],
+  ['Reject package', 'Evidence Center governed rejection action'],
+]) {
+  if (!evidenceCenterSurface.includes(token)) failures.push(`components/evidence/EvidenceCenter.tsx: missing ${label}`)
+}
 
 if (failures.length > 0) {
   console.error('[release-evidence-readiness] FAIL')

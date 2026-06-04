@@ -72,22 +72,20 @@ function ResetPasswordForm() {
   }
 
   const frameClass =
-    'w-full max-w-md rounded-3xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8'
+    'w-full max-w-md  border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8'
 
   return (
-    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[160px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[160px]" />
-      </div>
-
+    <div
+      className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]"
+      data-reset-password-surface="compact"
+    >
       <PublicHeader />
 
       <main className="relative z-10 flex min-h-[70vh] items-center justify-center px-6 pb-16 pt-12">
         {!token || !email ? (
           <div className={frameClass}>
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--aethel-error)]/10">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center bg-[var(--aethel-error)]/10">
                 <XCircle className="h-8 w-8 text-[var(--aethel-error)]" />
               </div>
               <h1 className="text-2xl font-bold">Invalid link</h1>
@@ -96,7 +94,7 @@ function ResetPasswordForm() {
               </p>
               <Link
                 href="/forgot-password"
-                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] mt-6 rounded-xl px-6 py-3 text-sm font-semibold"
+                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] mt-6 px-6 py-3 text-sm font-semibold"
               >
                 Request a new link
               </Link>
@@ -105,7 +103,7 @@ function ResetPasswordForm() {
         ) : isSuccess ? (
           <div className={frameClass}>
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
                 <CheckCircle className="h-8 w-8 text-[var(--aethel-success)]" />
               </div>
               <h1 className="text-2xl font-bold">Password reset</h1>
@@ -114,7 +112,7 @@ function ResetPasswordForm() {
               </p>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-6 rounded-xl px-5 py-2 text-sm font-semibold"
+                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-6 px-5 py-2 text-sm font-semibold"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Go to sign in now
@@ -124,7 +122,7 @@ function ResetPasswordForm() {
         ) : (
           <div className={frameClass}>
             <div className="text-center mb-6">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] to-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)]">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_74%,transparent)]">
                 <Lock className="h-8 w-8 text-[var(--aethel-primary-light)]" />
               </div>
               <h1 className="text-2xl font-bold">Reset password</h1>
@@ -135,7 +133,7 @@ function ResetPasswordForm() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 p-3 text-sm text-[var(--aethel-error-light)]">
+                <div className="border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 p-3 text-sm text-[var(--aethel-error-light)]">
                   {error}
                 </div>
               )}
@@ -153,10 +151,10 @@ function ResetPasswordForm() {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="????????"
+                    placeholder="At least 8 characters"
                     required
                     minLength={8}
-                    className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 pr-12 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
+                    className="h-12 w-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 pr-12 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
                   />
                   <button
                     type="button"
@@ -180,10 +178,10 @@ function ResetPasswordForm() {
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="????????"
+                  placeholder="Confirm your new password"
                   required
                   minLength={8}
-                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
+                  className="h-12 w-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
                 />
               </div>
 
@@ -205,7 +203,7 @@ function ResetPasswordForm() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] w-full rounded-xl px-4 py-3 text-sm font-semibold"
+                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] w-full px-4 py-3 text-sm font-semibold"
               >
                 {isLoading ? (
                   <>
@@ -220,7 +218,7 @@ function ResetPasswordForm() {
 
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-4 w-full rounded-xl px-4 py-2 text-sm font-semibold"
+              className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-4 w-full px-4 py-2 text-sm font-semibold"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to sign in

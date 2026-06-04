@@ -1,12 +1,13 @@
+// @aethel-heavy-async-boundary Motion-heavy surface; lazy-load outside its owning product region.
 'use client';
 
 /**
  * Advanced Settings Panel - RBAC, Webhooks, API Keys
  *
- * Painel de configurações avançadas com L5 design
+ * Governed settings surface for RBAC, webhooks and API keys.
  */
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, StaggerContainer } from '@/lib/ui/motion'
 import {
   Key,
   Webhook,
@@ -20,16 +21,19 @@ import {
   AlertCircle,
   Clock,
 } from 'lucide-react'
-import {
-  GlassCard,
-  GlassButton,
-  GlassInput,
-  AnimatedBadge,
-  StaggerContainer,
-  eliteAnimations,
-} from '@/components/ui/GlassmorphismUI'
+import { Card } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 import { useStudioState } from '@/lib/studio-state'
-import { advancedConfig, Role, ROLE_PERMISSIONS, WebhookEvent } from '@/lib/advanced-config'
+import { advancedConfig, Role } from '@/lib/advanced-config'
+import { CreateAPIKeyDialog, CreateWebhookDialog, InviteTeamMemberDialog } from './AdvancedSettingsPanel.dialogs'
+
+const fadeInUpMotion = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: 20 },
+  transition: { duration: 0.24, ease: 'easeOut' },
+} as const
 
 type AdvancedSettingsTab = 'api-keys' | 'webhooks' | 'team'
 
@@ -101,7 +105,7 @@ export function AdvancedSettingsPanel() {
 }
 
 /**
- * Tab de API Keys
+ * API keys tab
  */
 function APIKeysTab() {
   const [keys, setKeys] = useState<APIKeyRecord[]>([])
@@ -158,27 +162,27 @@ function APIKeysTab() {
   }
 
   return (
-    <motion.div {...eliteAnimations.fadeInUp} className="space-y-4">
+    <motion.div {...fadeInUpMotion} className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">API Keys</h2>
-        <GlassButton
+        <Button
           variant="primary"
           size="sm"
           onClick={() => setShowCreateDialog(true)}
         >
           <Plus size={16} />
           New API Key
-        </GlassButton>
+        </Button>
       </div>
 
       {keys.length === 0 ? (
-        <GlassCard className="p-8 text-center">
+        <Card padding="none" className="p-8 text-center">
           <Key size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
           <p className="text-[var(--aethel-text-secondary)]">No API keys created</p>
           <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
             Create your first API key to integrate with the API
           </p>
-        </GlassCard>
+        </Card>
       ) : (
         <StaggerContainer className="space-y-3">
           {keys.map((key) => (
@@ -221,7 +225,7 @@ function APIKeyCard({
   const [showSecret, setShowSecret] = useState(false)
 
   return (
-    <GlassCard className="p-4 space-y-3">
+    <Card padding="none" className="p-4 space-y-3">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="font-semibold text-[var(--aethel-text-primary)]">{apiKey.name}</h3>
@@ -229,7 +233,7 @@ function APIKeyCard({
             Created on {new Date(apiKey.createdAt).toLocaleDateString()}
           </p>
         </div>
-        <AnimatedBadge
+        <Badge
           variant={
             apiKey.status === 'active'
               ? 'success'
@@ -239,7 +243,7 @@ function APIKeyCard({
           }
         >
           {apiKey.status}
-        </AnimatedBadge>
+        </Badge>
       </div>
 
       <div className="space-y-2">
@@ -286,12 +290,12 @@ function APIKeyCard({
           Revoke
         </button>
       </div>
-    </GlassCard>
+    </Card>
   )
 }
 
 /**
- * Tab de Webhooks
+ * Webhooks tab
  */
 function WebhooksTab() {
   const [webhooks, setWebhooks] = useState<WebhookRecord[]>([])
@@ -319,27 +323,27 @@ function WebhooksTab() {
   }
 
   return (
-    <motion.div {...eliteAnimations.fadeInUp} className="space-y-4">
+    <motion.div {...fadeInUpMotion} className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Webhooks</h2>
-        <GlassButton
+        <Button
           variant="primary"
           size="sm"
           onClick={() => setShowCreateDialog(true)}
         >
           <Plus size={16} />
           New Webhook
-        </GlassButton>
+        </Button>
       </div>
 
       {webhooks.length === 0 ? (
-        <GlassCard className="p-8 text-center">
+        <Card padding="none" className="p-8 text-center">
           <Webhook size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
           <p className="text-[var(--aethel-text-secondary)]">No webhooks configured</p>
           <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
             Configure webhooks to receive real-time events
           </p>
-        </GlassCard>
+        </Card>
       ) : (
         <StaggerContainer className="space-y-3">
           {webhooks.map((webhook) => (
@@ -362,7 +366,7 @@ function WebhooksTab() {
  */
 function WebhookCard({ webhook }: { webhook: WebhookRecord }) {
   return (
-    <GlassCard className="p-4 space-y-3">
+    <Card padding="none" className="p-4 space-y-3">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="font-semibold text-[var(--aethel-text-primary)] font-mono text-sm break-all">
@@ -372,9 +376,9 @@ function WebhookCard({ webhook }: { webhook: WebhookRecord }) {
             {webhook.events.length} event(s)
           </p>
         </div>
-        <AnimatedBadge variant={webhook.active ? 'success' : 'warning'}>
+        <Badge variant={webhook.active ? 'success' : 'warning'}>
           {webhook.active ? 'Active' : 'Inactive'}
-        </AnimatedBadge>
+        </Badge>
       </div>
 
       <div className="flex flex-wrap gap-1">
@@ -399,12 +403,12 @@ function WebhookCard({ webhook }: { webhook: WebhookRecord }) {
           {webhook.failureCount} recent failure(s)
         </div>
       )}
-    </GlassCard>
+    </Card>
   )
 }
 
 /**
- * Tab de Team
+ * Team tab
  */
 function TeamTab() {
   const [members, setMembers] = useState<TeamMemberRecord[]>([])
@@ -412,27 +416,27 @@ function TeamTab() {
   const { addNotification } = useStudioState()
 
   return (
-    <motion.div {...eliteAnimations.fadeInUp} className="space-y-4">
+    <motion.div {...fadeInUpMotion} className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Membros do Team</h2>
-        <GlassButton
+        <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Team members</h2>
+        <Button
           variant="primary"
           size="sm"
           onClick={() => setShowInviteDialog(true)}
         >
           <Plus size={16} />
           Invite member
-        </GlassButton>
+        </Button>
       </div>
 
       {members.length === 0 ? (
-        <GlassCard className="p-8 text-center">
+        <Card padding="none" className="p-8 text-center">
           <Users size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
           <p className="text-[var(--aethel-text-secondary)]">No team members</p>
           <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
             Invite members to collaborate on your project
           </p>
-        </GlassCard>
+        </Card>
       ) : (
         <StaggerContainer className="space-y-3">
           {members.map((member) => (
@@ -441,7 +445,7 @@ function TeamTab() {
                 <p className="font-medium text-[var(--aethel-text-primary)]">{member.name}</p>
                 <p className="text-xs text-[var(--aethel-text-secondary)]">{member.email}</p>
               </div>
-              <AnimatedBadge variant="info">{member.role}</AnimatedBadge>
+              <Badge variant="info">{member.role}</Badge>
             </div>
           ))}
         </StaggerContainer>
@@ -452,291 +456,5 @@ function TeamTab() {
         onClose={() => setShowInviteDialog(false)}
       />
     </motion.div>
-  )
-}
-
-/**
- * Create API key dialog
- */
-function CreateAPIKeyDialog({
-  open,
-  onClose,
-  onCreateKey,
-  name,
-  onNameChange,
-  permissions,
-  onPermissionsChange,
-}: {
-  open: boolean
-  onClose: () => void
-  onCreateKey: () => void
-  name: string
-  onNameChange: (name: string) => void
-  permissions: string[]
-  onPermissionsChange: (permissions: string[]) => void
-}) {
-  const allPermissions = Object.values(ROLE_PERMISSIONS)
-    .flat()
-    .filter((v, i, a) => a.indexOf(v) === i)
-
-  return (
-    <AnimatePresence>
-      {open && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm z-40"
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed inset-0 flex items-center justify-center z-50 p-4"
-          >
-            <GlassCard className="w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">New API Key</h2>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Name</label>
-                <GlassInput
-                  placeholder="Ex: Production API"
-                  value={name}
-                  onChange={(e) => onNameChange(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Permissions</label>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {allPermissions.map((perm) => (
-                    <label key={perm} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={permissions.includes(perm)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            onPermissionsChange([...permissions, perm])
-                          } else {
-                            onPermissionsChange(permissions.filter((p) => p !== perm))
-                          }
-                        }}
-                        className="w-4 h-4 rounded"
-                      />
-                      <span className="text-sm text-[var(--aethel-text-secondary)]">{perm}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
-                <GlassButton
-                  variant="primary"
-                  onClick={onCreateKey}
-                  className="flex-1"
-                >
-                  Create
-                </GlassButton>
-                <GlassButton
-                  variant="ghost"
-                  onClick={onClose}
-                  className="flex-1"
-                >
-                  Cancel
-                </GlassButton>
-              </div>
-            </GlassCard>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  )
-}
-
-/**
- * Dialog de Create Webhook
- */
-function CreateWebhookDialog({
-  open,
-  onClose,
-  onCreateWebhook,
-}: {
-  open: boolean
-  onClose: () => void
-  onCreateWebhook: (url: string, events: string[]) => void
-}) {
-  const [url, setUrl] = useState('')
-  const [selectedEvents, setSelectedEvents] = useState<string[]>([])
-
-  const handleCreate = () => {
-    if (url.trim() && selectedEvents.length > 0) {
-      onCreateWebhook(url, selectedEvents)
-      setUrl('')
-      setSelectedEvents([])
-    }
-  }
-
-  return (
-    <AnimatePresence>
-      {open && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm z-40"
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed inset-0 flex items-center justify-center z-50 p-4"
-          >
-            <GlassCard className="w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">New Webhook</h2>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">URL</label>
-                <GlassInput
-                  placeholder="https://seu-servidor.com/webhook"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Events</label>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {Object.values(WebhookEvent).map((event) => (
-                    <label key={event} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedEvents.includes(event)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedEvents([...selectedEvents, event])
-                          } else {
-                            setSelectedEvents(selectedEvents.filter((e) => e !== event))
-                          }
-                        }}
-                        className="w-4 h-4 rounded"
-                      />
-                      <span className="text-sm text-[var(--aethel-text-secondary)]">{event}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
-                <GlassButton
-                  variant="primary"
-                  onClick={handleCreate}
-                  className="flex-1"
-                >
-                  Create
-                </GlassButton>
-                <GlassButton
-                  variant="ghost"
-                  onClick={onClose}
-                  className="flex-1"
-                >
-                  Cancel
-                </GlassButton>
-              </div>
-            </GlassCard>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  )
-}
-
-/**
- * Dialog de Invite member
- */
-function InviteTeamMemberDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [email, setEmail] = useState('')
-  const [role, setRole] = useState('developer')
-  const { addNotification } = useStudioState()
-
-  const handleInvite = () => {
-    if (email.trim()) {
-      addNotification({
-        type: 'success',
-        message: `Invite sent to ${email}`,
-        duration: 3000,
-      })
-      setEmail('')
-      setRole('developer')
-      onClose()
-    }
-  }
-
-  return (
-    <AnimatePresence>
-      {open && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm z-40"
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed inset-0 flex items-center justify-center z-50 p-4"
-          >
-            <GlassCard className="w-full max-w-md p-6 space-y-4">
-              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Invite member</h2>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Email</label>
-                <GlassInput
-                  placeholder="member@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Role</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)]"
-                >
-                  <option value="developer">Developer</option>
-                  <option value="viewer">Viewer</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-
-              <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
-                <GlassButton
-                  variant="primary"
-                  onClick={handleInvite}
-                  className="flex-1"
-                >
-                  Invite
-                </GlassButton>
-                <GlassButton
-                  variant="ghost"
-                  onClick={onClose}
-                  className="flex-1"
-                >
-                  Cancel
-                </GlassButton>
-              </div>
-            </GlassCard>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
   )
 }

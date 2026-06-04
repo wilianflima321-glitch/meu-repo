@@ -115,7 +115,7 @@ function AssetPreviewModal({
           fontSize: '14px',
         }}>
           <div style={{ fontWeight: 600 }}>{asset.name}</div>
-          <button type="button" aria-label="Fechar preview do asset"
+          <button type="button" aria-label="Close asset preview"
             onClick={onClose}
             style={{
               background: 'transparent',

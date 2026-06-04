@@ -27,6 +27,16 @@ function requirePattern(relativePath, pattern, reason) {
   if (!pattern.test(content)) failures.push(`${relativePath}: missing pattern ${pattern} (${reason})`)
 }
 
+function requirePatternAcross(relativePaths, pattern, reason) {
+  const available = relativePaths.filter(exists)
+  if (available.length === 0) {
+    failures.push(`${relativePaths.join(' + ')}: missing (${reason})`)
+    return
+  }
+  const content = available.map(read).join('\n')
+  if (!pattern.test(content)) failures.push(`${relativePaths.join(' + ')}: missing pattern ${pattern} (${reason})`)
+}
+
 requireFile('lib/server/magic-link.ts', 'passwordless email login needs a server contract')
 requirePattern('lib/server/magic-link.ts', /hashMagicLinkToken/, 'magic links must persist hashed tokens only')
 requirePattern('lib/server/magic-link.ts', /MAGIC_LINK_TTL_MS/, 'magic links must expire quickly')
@@ -45,7 +55,11 @@ requireFile('prisma/migrations/20260513105000_magic_link_auth/migration.sql', 'm
 requirePattern('prisma/migrations/20260513105000_magic_link_auth/migration.sql', /auth_magic_link_tokens/, 'migration must create magic-link token table')
 requirePattern('prisma/migrations/20260513105000_magic_link_auth/migration.sql', /token_hash TEXT NOT NULL UNIQUE/, 'tokens must be unique and hashed')
 
-requirePattern('lib/email-system.ts', /'magic_link'/, 'transactional email templates must include magic links')
+requirePatternAcross(
+  ['lib/email-system.ts', 'lib/email-system.templates.ts'],
+  /\bmagic_link\b/,
+  'transactional email templates must include magic links',
+)
 requireFile('__tests__/server/magic-link.test.ts', 'magic-link server contract needs tests')
 requirePattern('__tests__/server/magic-link.test.ts', /one-time sign-in email/, 'tests must cover issuing the email')
 requirePattern('__tests__/server/magic-link.test.ts', /rejects invalid, expired, and used tokens/, 'tests must cover invalid token states')
@@ -71,7 +85,7 @@ requirePattern('components/settings/PasskeysPanel.tsx', /startRegistration/, 'Pa
 requirePattern('components/settings/TwoFactorSecurityPanel.tsx', /PasskeysPanel/, 'security settings must embed passkey registration')
 requireFile('prisma/migrations/20260513114500_webauthn_passkeys/migration.sql', 'passkey storage must be versioned')
 requirePattern('prisma/migrations/20260513114500_webauthn_passkeys/migration.sql', /public_key TEXT NOT NULL/, 'passkey public keys must be persisted')
-requirePattern('app/security/page.tsx', /Passkeys em rollout tecnico/, 'public security copy must reflect passkey rollout honestly')
+requirePattern('app/security/page.tsx', /passkeys in technical rollout/i, 'public security copy must reflect passkey rollout honestly')
 
 requireFile('components/auth/TurnstileField.tsx', 'auth UI must expose the same bot protection enforced by auth APIs')
 requirePattern('components/auth/TurnstileField.tsx', /NEXT_PUBLIC_.*TURNSTILE/, 'Turnstile client widget must read a public site key')

@@ -92,7 +92,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
               }`}
             >
-              Todos {filteredErrors.length}
+              All {filteredErrors.length}
             </button>
             <button
               type="button"
@@ -184,7 +184,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
                             className="mt-2 flex items-center gap-1 text-[10px] text-[var(--aethel-primary-light)] hover:underline"
                           >
                             <ExternalLink className="w-3 h-3" />
-                            Saiba mais
+                            Learn more
                           </button>
                         </div>
                       )}
@@ -234,4 +234,4 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
     </div>
   )
 }
-// Diagnósticos reais devem ser fornecidos pela integração Monaco/LSP.
+// Real diagnostics should come from the Monaco/LSP integration.

@@ -26,7 +26,7 @@ type SidebarFileEntry = {
   type: 'file' | 'folder';
 };
 
-type FullscreenIDEWorkspaceProps = {
+export type FullscreenIDEWorkspaceProps = {
   projectId: string;
   activeFile: ActiveFileState | null;
   bridgeActiveFile: ActiveFileState | null;

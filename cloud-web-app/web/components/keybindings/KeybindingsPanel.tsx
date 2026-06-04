@@ -361,7 +361,7 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
 
           {conflict && (
             <div style={styles.conflictWarning}>
-               Conflito: Este atalho ja esta sendo usado por {`"${conflict.command}"`}
+               Conflict: this shortcut is already used by {`"${conflict.command}"`}
             </div>
           )}
         </div>
@@ -569,7 +569,7 @@ export const KeybindingsPanel: React.FC = () => {
             }}
             onClick={() => setFilter(f)}
           >
-            {f === 'all' ? 'Todos' : f === 'default' ? 'Padrao' : f === 'user' ? 'Usuario' : 'Extensoes'}
+            {f === 'all' ? 'All' : f === 'default' ? 'Default' : f === 'user' ? 'User' : 'Extensions'}
           </button>
         ))}
 

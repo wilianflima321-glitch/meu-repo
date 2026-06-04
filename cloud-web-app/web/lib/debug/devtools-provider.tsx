@@ -2,11 +2,11 @@
 
 /**
  * DevTools Provider - Development Tools System
- * 
+ *
  * Sistema profissional de ferramentas de desenvolvimento similar ao React DevTools.
  * Fornece inspeção de estado, histórico de ações, métricas de performance,
  * e debugging avançado para o Aethel Engine.
- * 
+ *
  * @module lib/debug/devtools-provider
  */
 import React, {
@@ -20,31 +20,22 @@ import React, {
   type ReactNode
 } from 'react';
 import {
-  Bug,
-  X,
   Activity,
-  History,
-  Settings,
-  Layers,
+  Bug,
   Database,
-  Cpu,
-  Network,
-  Timer,
-  ChevronRight,
-  ChevronDown,
-  Trash2,
   Download,
-  Search,
+  History,
+  Maximize2,
+  Minimize2,
+  Network,
   Pause,
   Play,
-  RefreshCw,
-  Copy,
+  Search,
   Terminal,
-  Eye,
-  EyeOff,
-  Maximize2,
-  Minimize2
+  Trash2,
+  X,
 } from 'lucide-react';
+import { ActionsTab, ConsoleTab, NetworkTab, PerformanceTab, StateTab } from './devtools-tabs';
 
 // ============================================================================
 // TYPES
@@ -167,28 +158,28 @@ export function DevToolsProvider({
   const [activeTab, setActiveTab] = useState<DevToolsTab>('state');
   const [isRecording, setIsRecording] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
-  
+
   const [snapshots, setSnapshots] = useState<StateSnapshot[]>([]);
   const [actions, setActions] = useState<ActionLog[]>([]);
   const [metrics, setMetrics] = useState<PerformanceMetric[]>([]);
   const [requests, setRequests] = useState<NetworkRequest[]>([]);
   const [consoleEntries, setConsoleEntries] = useState<ConsoleEntry[]>([]);
-  
+
   const idCounter = useRef(0);
-  
+
   const generateId = useCallback(() => {
     idCounter.current += 1;
     return `devtools-${Date.now()}-${idCounter.current}`;
   }, []);
-  
+
   const toggle = useCallback(() => setIsOpen(prev => !prev), []);
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
   const toggleRecording = useCallback(() => setIsRecording(prev => !prev), []);
-  
+
   const logAction = useCallback((type: string, payload?: unknown, source = 'unknown') => {
     if (!isRecording) return;
-    
+
     const newAction: ActionLog = {
       id: generateId(),
       timestamp: Date.now(),
@@ -196,29 +187,29 @@ export function DevToolsProvider({
       payload,
       source
     };
-    
+
     setActions(prev => {
       const updated = [newAction, ...prev];
       return updated.slice(0, maxEntries);
     });
   }, [isRecording, generateId, maxEntries]);
-  
+
   const takeSnapshot = useCallback((label: string, state: Record<string, unknown>) => {
     if (!isRecording) return;
-    
+
     const snapshot: StateSnapshot = {
       id: generateId(),
       timestamp: Date.now(),
       label,
       state: JSON.parse(JSON.stringify(state)) // Deep clone
     };
-    
+
     setSnapshots(prev => {
       const updated = [snapshot, ...prev];
       return updated.slice(0, maxEntries);
     });
   }, [isRecording, generateId, maxEntries]);
-  
+
   const logMetric = useCallback((
     name: string,
     value: number,
@@ -226,7 +217,7 @@ export function DevToolsProvider({
     category: PerformanceMetric['category'] = 'custom'
   ) => {
     if (!isRecording) return;
-    
+
     const metric: PerformanceMetric = {
       id: generateId(),
       name,
@@ -235,28 +226,28 @@ export function DevToolsProvider({
       category,
       timestamp: Date.now()
     };
-    
+
     setMetrics(prev => {
       const updated = [metric, ...prev];
       return updated.slice(0, maxEntries);
     });
   }, [isRecording, generateId, maxEntries]);
-  
+
   const logNetwork = useCallback((request: Omit<NetworkRequest, 'id' | 'timestamp'>) => {
     if (!isRecording) return;
-    
+
     const networkEntry: NetworkRequest = {
       ...request,
       id: generateId(),
       timestamp: Date.now()
     };
-    
+
     setRequests(prev => {
       const updated = [networkEntry, ...prev];
       return updated.slice(0, maxEntries);
     });
   }, [isRecording, generateId, maxEntries]);
-  
+
   const log = useCallback((
     level: ConsoleEntry['level'],
     message: string,
@@ -264,7 +255,7 @@ export function DevToolsProvider({
     source?: string
   ) => {
     if (!isRecording) return;
-    
+
     const entry: ConsoleEntry = {
       id: generateId(),
       level,
@@ -273,13 +264,13 @@ export function DevToolsProvider({
       source,
       timestamp: Date.now()
     };
-    
+
     setConsoleEntries(prev => {
       const updated = [entry, ...prev];
       return updated.slice(0, maxEntries);
     });
   }, [isRecording, generateId, maxEntries]);
-  
+
   const clearAll = useCallback(() => {
     setSnapshots([]);
     setActions([]);
@@ -287,7 +278,7 @@ export function DevToolsProvider({
     setRequests([]);
     setConsoleEntries([]);
   }, []);
-  
+
   const exportLogs = useCallback(() => {
     const exportData = {
       exportedAt: new Date().toISOString(),
@@ -297,7 +288,7 @@ export function DevToolsProvider({
       requests,
       console: consoleEntries
     };
-    
+
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -306,32 +297,32 @@ export function DevToolsProvider({
     a.click();
     URL.revokeObjectURL(url);
   }, [snapshots, actions, metrics, requests, consoleEntries]);
-  
+
   // Keyboard shortcut to toggle DevTools (Ctrl+Shift+D)
   useEffect(() => {
     if (!enabled) return;
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'D') {
         e.preventDefault();
         toggle();
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [enabled, toggle]);
-  
+
   // Auto-log performance metrics
   useEffect(() => {
     if (!enabled || !isRecording) return;
-    
+
     const collectPerformanceMetrics = () => {
       if ('memory' in performance) {
         const memory = (performance as { memory: { usedJSHeapSize: number } }).memory;
         logMetric('JS Heap Size', Math.round(memory.usedJSHeapSize / 1024 / 1024), 'MB', 'memory');
       }
-      
+
       const entries = performance.getEntriesByType('paint');
       entries.forEach(entry => {
         if (entry.name === 'first-contentful-paint') {
@@ -339,11 +330,11 @@ export function DevToolsProvider({
         }
       });
     };
-    
+
     const interval = setInterval(collectPerformanceMetrics, 5000);
     return () => clearInterval(interval);
   }, [enabled, isRecording, logMetric]);
-  
+
   const value = useMemo<DevToolsContextValue>(() => ({
     isOpen,
     toggle,
@@ -370,11 +361,11 @@ export function DevToolsProvider({
     logAction, takeSnapshot, logMetric, logNetwork, log, clearAll, exportLogs,
     snapshots, actions, metrics, requests, consoleEntries
   ]);
-  
+
   if (!enabled) {
     return <>{children}</>;
   }
-  
+
   return (
     <DevToolsContext.Provider value={value}>
       {children}
@@ -390,11 +381,11 @@ export function DevToolsProvider({
 function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMinimize: () => void }) {
   const ctx = useContext(DevToolsContext);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   if (!ctx) return null;
-  
+
   const { isOpen, toggle, activeTab, setActiveTab, isRecording, toggleRecording, clearAll, exportLogs } = ctx;
-  
+
   const tabs: { id: DevToolsTab; label: string; icon: React.ReactNode; count: number }[] = [
     { id: 'state', label: 'State', icon: <Database className="w-4 h-4" />, count: ctx.snapshots.length },
     { id: 'actions', label: 'Actions', icon: <History className="w-4 h-4" />, count: ctx.actions.length },
@@ -402,7 +393,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
     { id: 'network', label: 'Network', icon: <Network className="w-4 h-4" />, count: ctx.requests.length },
     { id: 'console', label: 'Console', icon: <Terminal className="w-4 h-4" />, count: ctx.console.length }
   ];
-  
+
   return (
     <>
       {/* Floating Toggle Button */}
@@ -416,7 +407,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
           <Bug className="w-5 h-5" />
         </button>
       )}
-      
+
       {/* DevTools Panel */}
       {isOpen && (
         <div
@@ -431,7 +422,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                   <Bug className="w-4 h-4" />
                   <span className="text-sm font-semibold">Aethel DevTools</span>
                 </div>
-                
+
                 {!isMinimized && (
                   <div className="flex items-center">
                     {tabs.map(tab => (
@@ -458,7 +449,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                   </div>
                 )}
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {!isMinimized && (
                   <>
@@ -473,7 +464,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                         className="w-40 pl-7 pr-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-md text-[var(--aethel-text-secondary)] placeholder-[var(--aethel-text-quaternary)] focus:border-[var(--aethel-primary)] focus:outline-none"
                       />
                     </div>
-                    
+
                     {/* Recording */}
                     <button type="button"
                       onClick={toggleRecording}
@@ -484,7 +475,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                     >
                       {isRecording ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                     </button>
-                    
+
                     {/* Clear */}
                     <button type="button"
                       onClick={clearAll}
@@ -493,7 +484,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    
+
                     {/* Export */}
                     <button type="button"
                       onClick={exportLogs}
@@ -504,7 +495,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                     </button>
                   </>
                 )}
-                
+
                 {/* Minimize */}
                 <button type="button"
                   onClick={onMinimize}
@@ -513,7 +504,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                 >
                   {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
                 </button>
-                
+
                 {/* Close */}
                 <button type="button"
                   onClick={toggle}
@@ -524,7 +515,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                 </button>
               </div>
             </div>
-            
+
             {/* Content */}
             {!isMinimized && (
               <div className="h-[calc(100%-3rem)] overflow-hidden">
@@ -545,300 +536,13 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
 // TAB COMPONENTS
 // ============================================================================
 
-function StateTab({ snapshots, searchQuery }: { snapshots: StateSnapshot[]; searchQuery: string }) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  
-  const filtered = snapshots.filter(s => 
-    s.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  if (filtered.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
-        <div className="text-center">
-          <Database className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No state snapshots yet</p>
-          <p className="text-xs mt-1">Use takeSnapshot() to capture state</p>
-        </div>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="h-full overflow-auto p-2 space-y-1">
-      {filtered.map(snapshot => (
-        <div key={snapshot.id} className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded-lg overflow-hidden">
-          <button type="button"
-            onClick={() => setExpandedId(expandedId === snapshot.id ? null : snapshot.id)}
-            className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--aethel-surface-tertiary)]/50 transition-colors"
-          >
-            {expandedId === snapshot.id ? (
-              <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-            ) : (
-              <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-            )}
-            <span className="text-sm text-[var(--aethel-text-secondary)]">{snapshot.label}</span>
-            <span className="text-xs text-[var(--aethel-text-quaternary)] ml-auto">
-              {new Date(snapshot.timestamp).toLocaleTimeString()}
-            </span>
-          </button>
-          {expandedId === snapshot.id && (
-            <div className="px-3 pb-3">
-              <pre className="text-xs text-[var(--aethel-text-secondary)] bg-[var(--aethel-surface-primary)] p-2 rounded overflow-auto max-h-40">
-                {JSON.stringify(snapshot.state, null, 2)}
-              </pre>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ActionsTab({ actions, searchQuery }: { actions: ActionLog[]; searchQuery: string }) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  
-  const filtered = actions.filter(a => 
-    a.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.source.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  if (filtered.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
-        <div className="text-center">
-          <History className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No actions logged</p>
-          <p className="text-xs mt-1">Use logAction() to log actions</p>
-        </div>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="h-full overflow-auto p-2 space-y-1">
-      {filtered.map(action => {
-        const hasPayload = action.payload !== undefined && action.payload !== null;
-        const payloadStr = hasPayload ? JSON.stringify(action.payload, null, 2) : '';
-        
-        return (
-          <div key={action.id} className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded-lg overflow-hidden">
-            <button type="button"
-              onClick={() => setExpandedId(expandedId === action.id ? null : action.id)}
-              className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--aethel-surface-tertiary)]/50 transition-colors"
-            >
-              {expandedId === action.id ? (
-                <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-              )}
-              <span className="text-sm text-[var(--aethel-primary-light)] font-mono">{action.type}</span>
-              <span className="text-xs text-[var(--aethel-text-quaternary)]">{action.source}</span>
-              <span className="text-xs text-[var(--aethel-text-quaternary)] ml-auto">
-                {new Date(action.timestamp).toLocaleTimeString()}
-              </span>
-            </button>
-            {expandedId === action.id && hasPayload && (
-              <div className="px-3 pb-3">
-                <pre className="text-xs text-[var(--aethel-text-secondary)] bg-[var(--aethel-surface-primary)] p-2 rounded overflow-auto max-h-40">
-                  {payloadStr}
-                </pre>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function PerformanceTab({ metrics, searchQuery }: { metrics: PerformanceMetric[]; searchQuery: string }) {
-  const filtered = metrics.filter(m => 
-    m.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  // Group by category
-  const grouped = filtered.reduce((acc, metric) => {
-    if (!acc[metric.category]) acc[metric.category] = [];
-    acc[metric.category].push(metric);
-    return acc;
-  }, {} as Record<string, PerformanceMetric[]>);
-  
-  const categoryIcons: Record<string, React.ReactNode> = {
-    render: <Layers className="w-4 h-4" />,
-    network: <Network className="w-4 h-4" />,
-    memory: <Database className="w-4 h-4" />,
-    cpu: <Cpu className="w-4 h-4" />,
-    custom: <Timer className="w-4 h-4" />
-  };
-  
-  if (filtered.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
-        <div className="text-center">
-          <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No performance metrics</p>
-          <p className="text-xs mt-1">Metrics are collected automatically</p>
-        </div>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="h-full overflow-auto p-4">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {Object.entries(grouped).map(([category, items]) => (
-          <div key={category} className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded-lg p-3">
-            <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)] mb-2">
-              {categoryIcons[category]}
-              <span className="text-xs uppercase tracking-wide">{category}</span>
-            </div>
-            <div className="space-y-2">
-              {items.slice(0, 5).map(metric => (
-                <div key={metric.id} className="flex items-baseline justify-between">
-                  <span className="text-xs text-[var(--aethel-text-secondary)]">{metric.name}</span>
-                  <span className="text-sm font-mono text-[var(--aethel-primary-light)]">
-                    {metric.value.toFixed(1)} {metric.unit}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function NetworkTab({ requests, searchQuery }: { requests: NetworkRequest[]; searchQuery: string }) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  
-  const filtered = requests.filter(r => 
-    r.url.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.method.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  const getStatusColor = (status?: number) => {
-    if (!status) return 'text-[var(--aethel-text-tertiary)]';
-    if (status >= 200 && status < 300) return 'text-[var(--aethel-success-light)]';
-    if (status >= 300 && status < 400) return 'text-[var(--aethel-warning-light)]';
-    return 'text-[var(--aethel-error-light)]';
-  };
-  
-  if (filtered.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
-        <div className="text-center">
-          <Network className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No network requests</p>
-          <p className="text-xs mt-1">Use logNetwork() to log requests</p>
-        </div>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="h-full overflow-auto">
-      <table className="w-full text-xs">
-        <thead className="sticky top-0 bg-[var(--aethel-surface-secondary)]">
-          <tr className="text-left text-[var(--aethel-text-tertiary)]">
-            <th className="px-3 py-2">Method</th>
-            <th className="px-3 py-2">URL</th>
-            <th className="px-3 py-2">Status</th>
-            <th className="px-3 py-2">Duration</th>
-            <th className="px-3 py-2">Size</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map(req => (
-            <tr
-              key={req.id}
-              onClick={() => setExpandedId(expandedId === req.id ? null : req.id)}
-              className="border-t border-[var(--aethel-border-primary)]/50 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] cursor-pointer"
-            >
-              <td className="px-3 py-2 font-mono text-[var(--aethel-primary-light)]">{req.method}</td>
-              <td className="px-3 py-2 text-[var(--aethel-text-secondary)] max-w-xs truncate">{req.url}</td>
-              <td className={`px-3 py-2 font-mono ${getStatusColor(req.status)}`}>
-                {req.status || 'pending'}
-              </td>
-              <td className="px-3 py-2 text-[var(--aethel-text-tertiary)]">
-                {req.duration ? `${req.duration}ms` : '-'}
-              </td>
-              <td className="px-3 py-2 text-[var(--aethel-text-tertiary)]">
-                {req.size ? `${(req.size / 1024).toFixed(1)}KB` : '-'}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function ConsoleTab({ entries, searchQuery }: { entries: ConsoleEntry[]; searchQuery: string }) {
-  const filtered = entries.filter(e => 
-    e.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (e.source?.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-  
-  const levelColors: Record<string, string> = {
-    log: 'text-[var(--aethel-text-secondary)]',
-    info: 'text-[var(--aethel-info-light)]',
-    warn: 'text-[var(--aethel-warning-light)]',
-    error: 'text-[var(--aethel-error-light)]',
-    debug: 'text-[var(--aethel-accent-light)]'
-  };
-  
-  const levelBgs: Record<string, string> = {
-    log: 'bg-transparent',
-    info: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]',
-    warn: 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]',
-    error: 'bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]',
-    debug: 'bg-[color-mix(in_srgb,var(--aethel-accent)_10%,transparent)]'
-  };
-  
-  if (filtered.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
-        <div className="text-center">
-          <Terminal className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No console entries</p>
-          <p className="text-xs mt-1">Use log() to add entries</p>
-        </div>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="h-full overflow-auto font-mono text-xs">
-      {filtered.map(entry => (
-        <div
-          key={entry.id}
-          className={`flex items-start gap-2 px-3 py-1.5 border-b border-[var(--aethel-border-primary)] ${levelBgs[entry.level]}`}
-        >
-          <span className={`uppercase text-[10px] w-12 ${levelColors[entry.level]}`}>
-            [{entry.level}]
-          </span>
-          <span className={`flex-1 ${levelColors[entry.level]}`}>{entry.message}</span>
-          {entry.source && (
-            <span className="text-[var(--aethel-text-quaternary)]">{entry.source}</span>
-          )}
-          <span className="text-[var(--aethel-text-quaternary)]">
-            {new Date(entry.timestamp).toLocaleTimeString()}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // ============================================================================
 // HOOKS
 // ============================================================================
 
 export function useDevTools() {
   const context = useContext(DevToolsContext);
-  
+
   if (!context) {
     // Return no-op functions when not in DevTools provider
     return {
@@ -864,7 +568,7 @@ export function useDevTools() {
       console: []
     };
   }
-  
+
   return context;
 }
 
@@ -874,11 +578,11 @@ export function useDevTools() {
 export function usePerformanceMeasure(name: string) {
   const { logMetric } = useDevTools();
   const startTime = useRef<number>(0);
-  
+
   const start = useCallback(() => {
     startTime.current = performance.now();
   }, []);
-  
+
   const end = useCallback(() => {
     if (startTime.current > 0) {
       const duration = performance.now() - startTime.current;
@@ -886,7 +590,7 @@ export function usePerformanceMeasure(name: string) {
       startTime.current = 0;
     }
   }, [name, logMetric]);
-  
+
   return { start, end };
 }
 
@@ -895,12 +599,10 @@ export function usePerformanceMeasure(name: string) {
  */
 export function useActionLogger(source: string) {
   const { logAction } = useDevTools();
-  
+
   return useCallback((type: string, payload?: unknown) => {
     logAction(type, payload, source);
   }, [logAction, source]);
 }
 
 export default DevToolsProvider;
-
-

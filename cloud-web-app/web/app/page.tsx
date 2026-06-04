@@ -3,8 +3,8 @@ import LandingPageV3 from './landing-v3'
 
 export const metadata: Metadata = {
   title: 'Aethel Engine | Multi-agent software studio',
-    description:
-      'Aethel unifica pesquisa, planejamento, codigo, preview e readiness operacional em um unico software studio com multi-agent e anti-fake-success.',
+  description:
+    'Aethel unifies research, planning, code, preview, and receipts in one multi-agent software studio.',
 }
 
 export default function Page() {

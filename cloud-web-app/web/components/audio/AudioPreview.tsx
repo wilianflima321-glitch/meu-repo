@@ -21,7 +21,7 @@ import React, {
     forwardRef,
     useImperativeHandle
 } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/ui/motion';
 import {
     Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
     Volume1, Repeat, Download, Music, Loader2, AlertCircle
@@ -690,70 +690,4 @@ AudioPreview.displayName = 'AudioPreview';
 
 export default AudioPreview;
 
-// ============================================================================
-// Audio Preview Hook
-// ============================================================================
-
-export function useAudioPreview(src: string) {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-
-    useEffect(() => {
-        const audio = new Audio(src);
-        audioRef.current = audio;
-
-        audio.addEventListener('loadedmetadata', () => {
-            setDuration(audio.duration);
-        });
-
-        audio.addEventListener('timeupdate', () => {
-            setCurrentTime(audio.currentTime);
-        });
-
-        audio.addEventListener('ended', () => {
-            setIsPlaying(false);
-        });
-
-        return () => {
-            audio.pause();
-            audio.src = '';
-        };
-    }, [src]);
-
-    const play = useCallback(() => {
-        audioRef.current?.play();
-        setIsPlaying(true);
-    }, []);
-
-    const pause = useCallback(() => {
-        audioRef.current?.pause();
-        setIsPlaying(false);
-    }, []);
-
-    const toggle = useCallback(() => {
-        if (isPlaying) {
-            pause();
-        } else {
-            play();
-        }
-    }, [isPlaying, play, pause]);
-
-    const seek = useCallback((time: number) => {
-        if (audioRef.current) {
-            audioRef.current.currentTime = time;
-        }
-    }, []);
-
-    return {
-        isPlaying,
-        currentTime,
-        duration,
-        play,
-        pause,
-        toggle,
-        seek,
-        progress: duration > 0 ? (currentTime / duration) * 100 : 0,
-    };
-}
+export { useAudioPreview } from './useAudioPreview';

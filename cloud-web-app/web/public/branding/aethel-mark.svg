@@ -1,36 +1,7 @@
 <svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">Aethel mark</title>
-  <desc id="desc">A geometric A-shaped agent lattice with evidence nodes.</desc>
-  <defs>
-    <linearGradient id="aethel-stroke" x1="50" y1="206" x2="210" y2="48" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#65E4FF"/>
-      <stop offset="0.48" stop-color="#EAF2FF"/>
-      <stop offset="1" stop-color="#8E7CFF"/>
-    </linearGradient>
-    <linearGradient id="aethel-node" x1="79" y1="179" x2="179" y2="80" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#22D3EE"/>
-      <stop offset="1" stop-color="#A78BFA"/>
-    </linearGradient>
-    <radialGradient id="aethel-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(128 129) rotate(90) scale(124)">
-      <stop stop-color="#1D4ED8" stop-opacity="0.34"/>
-      <stop offset="0.5" stop-color="#0EA5E9" stop-opacity="0.12"/>
-      <stop offset="1" stop-color="#020617" stop-opacity="0"/>
-    </radialGradient>
-    <filter id="soft-shadow" x="26" y="30" width="204" height="203" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#020617" flood-opacity="0.45"/>
-    </filter>
-  </defs>
-  <rect x="10" y="10" width="236" height="236" rx="58" fill="#05070D"/>
-  <rect x="10.5" y="10.5" width="235" height="235" rx="57.5" stroke="#263244" stroke-opacity="0.9"/>
-  <rect x="18" y="18" width="220" height="220" rx="50" fill="url(#aethel-glow)"/>
-  <g filter="url(#soft-shadow)">
-    <path d="M49 202L108.2 61.9C115.1 45.7 138.1 45.1 145.8 61L213 202" stroke="url(#aethel-stroke)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M82 157H174" stroke="url(#aethel-stroke)" stroke-width="16" stroke-linecap="round"/>
-    <path d="M128 88L101 157" stroke="#DCEAFF" stroke-width="10" stroke-linecap="round" opacity="0.82"/>
-    <path d="M128 88L155 157" stroke="#DCEAFF" stroke-width="10" stroke-linecap="round" opacity="0.46"/>
-  </g>
-  <circle cx="128" cy="88" r="9" fill="#07111F" stroke="url(#aethel-node)" stroke-width="4"/>
-  <circle cx="82" cy="157" r="7" fill="#07111F" stroke="#65E4FF" stroke-width="3"/>
-  <circle cx="174" cy="157" r="7" fill="#07111F" stroke="#A78BFA" stroke-width="3"/>
-  <circle cx="128" cy="157" r="5" fill="#EAF2FF"/>
+  <desc id="desc">A monochrome AE ligature mark for the Aethel governed Creator IDE.</desc>
+  <rect x="8" y="8" width="240" height="240" rx="44" fill="#0A0A0A"/>
+  <rect x="8.75" y="8.75" width="238.5" height="238.5" rx="43.25" stroke="#A1A1AA" stroke-opacity="0.34" stroke-width="1.5"/>
+  <text x="128" y="173" text-anchor="middle" fill="#FAFAFA" font-family="Inter, Geist, Arial Black, Arial, sans-serif" font-size="150" font-weight="900" letter-spacing="-19">&#198;</text>
 </svg>

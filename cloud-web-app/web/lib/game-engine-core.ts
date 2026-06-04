@@ -1,9 +1,10 @@
+// @aethel-heavy-async-boundary Studio/engine runtime module; never import from public/dashboard/admin route shells.
 /**
  * Game Engine Core - Motor de Jogos Real
- * 
+ *
  * Sistema completo de game engine com ECS (Entity Component System),
  * física, renderização e scripting.
- * 
+ *
  * Integrado com react-three-fiber para renderização 3D.
  */
 
@@ -13,189 +14,49 @@ import * as THREE from 'three';
 // ECS - ENTITY COMPONENT SYSTEM
 // ============================================================================
 
-export type EntityId = string;
-export type ComponentType = string;
+import type {
+  AnimatorComponent,
+  AudioSourceComponent,
+  CameraComponent,
+  ColliderComponent,
+  CollisionContact,
+  Component,
+  ComponentType,
+  Entity,
+  EntityId,
+  LightComponent,
+  MeshComponent,
+  ParticleSystemComponent,
+  Prefab,
+  PrefabComponent,
+  RigidbodyComponent,
+  SpriteComponent,
+  System,
+  TransformComponent,
+  UIComponent,
+} from './game-engine-core.contracts';
 
-/**
- * Entidade - Apenas um ID que agrupa componentes
- */
-export interface Entity {
-  id: EntityId;
-  name: string;
-  active: boolean;
-  tags: Set<string>;
-  parent?: EntityId;
-  children: EntityId[];
-}
-
-/**
- * Componente - Dados puros, sem lógica
- */
-export interface Component {
-  type: ComponentType;
-  entityId: EntityId;
-}
-
-/**
- * Sistema - Lógica que opera em componentes
- */
-export interface System {
-  name: string;
-  requiredComponents: ComponentType[];
-  priority: number; // Menor = executa primeiro
-  update(entities: Entity[], deltaTime: number): void;
-  onEntityAdded?(entity: Entity): void;
-  onEntityRemoved?(entity: Entity): void;
-}
-
-// ============================================================================
-// COMPONENTES BUILT-IN
-// ============================================================================
-
-export interface TransformComponent extends Component {
-  type: 'transform';
-  position: THREE.Vector3;
-  rotation: THREE.Euler;
-  scale: THREE.Vector3;
-  localPosition: THREE.Vector3;
-  localRotation: THREE.Euler;
-  localScale: THREE.Vector3;
-}
-
-export interface MeshComponent extends Component {
-  type: 'mesh';
-  geometry: THREE.BufferGeometry;
-  material: THREE.Material;
-  castShadow: boolean;
-  receiveShadow: boolean;
-}
-
-export interface RigidbodyComponent extends Component {
-  type: 'rigidbody';
-  mass: number;
-  velocity: THREE.Vector3;
-  angularVelocity: THREE.Vector3;
-  drag: number;
-  angularDrag: number;
-  useGravity: boolean;
-  isKinematic: boolean;
-  constraints: {
-    freezePositionX: boolean;
-    freezePositionY: boolean;
-    freezePositionZ: boolean;
-    freezeRotationX: boolean;
-    freezeRotationY: boolean;
-    freezeRotationZ: boolean;
-  };
-}
-
-export interface ColliderComponent extends Component {
-  type: 'collider';
-  shape: 'box' | 'sphere' | 'capsule' | 'mesh';
-  size: THREE.Vector3;
-  center: THREE.Vector3;
-  isTrigger: boolean;
-  physicMaterial?: {
-    friction: number;
-    bounciness: number;
-  };
-}
-
-export interface CameraComponent extends Component {
-  type: 'camera';
-  fov: number;
-  near: number;
-  far: number;
-  isMain: boolean;
-  clearColor?: number;
-}
-
-export interface LightComponent extends Component {
-  type: 'light';
-  lightType: 'directional' | 'point' | 'spot' | 'ambient';
-  color: number;
-  intensity: number;
-  castShadow: boolean;
-  shadowMapSize: number;
-  // Spot/Point specific
-  range?: number;
-  // Spot specific
-  angle?: number;
-  penumbra?: number;
-}
-
-export interface AudioSourceComponent extends Component {
-  type: 'audioSource';
-  clip?: string;
-  volume: number;
-  pitch: number;
-  loop: boolean;
-  playOnAwake: boolean;
-  spatialBlend: number; // 0 = 2D, 1 = 3D
-  minDistance: number;
-  maxDistance: number;
-}
-
-export interface AnimatorComponent extends Component {
-  type: 'animator';
-  clips: Map<string, THREE.AnimationClip>;
-  currentClip?: string;
-  speed: number;
-  mixer?: THREE.AnimationMixer;
-}
-
-export interface ScriptComponent extends Component {
-  type: 'script';
-  scriptName: string;
-  properties: Record<string, unknown>;
-  instance?: GameScript;
-}
-
-export interface SpriteComponent extends Component {
-  type: 'sprite';
-  texture: string;
-  color: number;
-  flipX: boolean;
-  flipY: boolean;
-  pixelsPerUnit: number;
-}
-
-export interface UIComponent extends Component {
-  type: 'ui';
-  uiType: 'text' | 'image' | 'button' | 'panel' | 'slider';
-  text?: string;
-  fontSize?: number;
-  color?: number;
-  onClick?: () => void;
-}
-
-export interface ParticleSystemComponent extends Component {
-  type: 'particleSystem';
-  maxParticles: number;
-  emissionRate: number;
-  lifetime: { min: number; max: number };
-  startSpeed: { min: number; max: number };
-  startSize: { min: number; max: number };
-  startColor: { min: number; max: number };
-  gravity: number;
-  texture?: string;
-  shape: 'sphere' | 'cone' | 'box';
-}
-
-// Tipo união de todos componentes
-export type AnyComponent = 
-  | TransformComponent
-  | MeshComponent
-  | RigidbodyComponent
-  | ColliderComponent
-  | CameraComponent
-  | LightComponent
-  | AudioSourceComponent
-  | AnimatorComponent
-  | ScriptComponent
-  | SpriteComponent
-  | UIComponent
-  | ParticleSystemComponent;
+export type {
+  AnimatorComponent,
+  AudioSourceComponent,
+  CameraComponent,
+  ColliderComponent,
+  CollisionContact,
+  Component,
+  ComponentType,
+  Entity,
+  EntityId,
+  LightComponent,
+  MeshComponent,
+  ParticleSystemComponent,
+  Prefab,
+  PrefabComponent,
+  RigidbodyComponent,
+  SpriteComponent,
+  System,
+  TransformComponent,
+  UIComponent,
+} from './game-engine-core.contracts';
 
 // ============================================================================
 // BASE CLASS PARA SCRIPTS
@@ -219,7 +80,7 @@ export abstract class GameScript {
   fixedUpdate(_fixedDeltaTime: number): void {}
   lateUpdate(_deltaTime: number): void {}
   onDestroy(): void {}
-  
+
   // Collision callbacks
   onCollisionEnter(_other: Entity, _contact: CollisionContact): void {}
   onCollisionStay(_other: Entity, _contact: CollisionContact): void {}
@@ -254,21 +115,27 @@ export abstract class GameScript {
   }
 }
 
-export interface CollisionContact {
-  point: THREE.Vector3;
-  normal: THREE.Vector3;
-  impulse: number;
+export interface ScriptComponent extends Component {
+  type: 'script';
+  scriptName: string;
+  properties: Record<string, unknown>;
+  instance?: GameScript;
 }
 
-// ============================================================================
-// PREFAB SYSTEM
-// ============================================================================
-
-export interface Prefab {
-  name: string;
-  components: Omit<AnyComponent, 'entityId'>[];
-  children?: Prefab[];
-}
+// Tipo união de todos componentes
+export type AnyComponent =
+  | TransformComponent
+  | MeshComponent
+  | RigidbodyComponent
+  | ColliderComponent
+  | CameraComponent
+  | LightComponent
+  | AudioSourceComponent
+  | AnimatorComponent
+  | ScriptComponent
+  | SpriteComponent
+  | UIComponent
+  | ParticleSystemComponent;
 
 // ============================================================================
 // WORLD - GERENCIADOR CENTRAL
@@ -280,7 +147,7 @@ export class World {
   private systems: System[] = [];
   private prefabs: Map<string, Prefab> = new Map();
   private scriptRegistry: Map<string, new () => GameScript> = new Map();
-  
+
   private entitiesToDestroy: { entity: Entity; delay: number }[] = [];
   private nextEntityId = 1;
 
@@ -374,7 +241,7 @@ export class World {
       tags: new Set(),
       children: [],
     };
-    
+
     this.entities.set(id, entity);
     this.components.set(id, new Map());
 
@@ -479,7 +346,7 @@ export class World {
   }
 
   getEntitiesWithComponents(types: ComponentType[]): Entity[] {
-    return Array.from(this.entities.values()).filter(entity => 
+    return Array.from(this.entities.values()).filter(entity =>
       types.every(type => this.hasComponent(entity.id, type))
     );
   }
@@ -516,7 +383,7 @@ export class World {
 
   private instantiatePrefab(prefab: Prefab, position?: THREE.Vector3, parent?: Entity): Entity {
     const entity = this.createEntity(prefab.name);
-    
+
     if (parent) {
       entity.parent = parent.id;
       parent.children.push(entity.id);
@@ -580,7 +447,7 @@ export class World {
     // Update scripts
     this.entities.forEach(entity => {
       if (!entity.active) return;
-      
+
       const scriptComp = this.getComponent<ScriptComponent>(entity.id, 'script');
       if (scriptComp?.instance) {
         scriptComp.instance.update(this.time.deltaTime);
@@ -609,7 +476,7 @@ export class World {
     // Physics update
     this.entities.forEach(entity => {
       if (!entity.active) return;
-      
+
       const scriptComp = this.getComponent<ScriptComponent>(entity.id, 'script');
       if (scriptComp?.instance) {
         scriptComp.instance.fixedUpdate(this.time.fixedDeltaTime);
@@ -620,7 +487,7 @@ export class World {
   lateUpdate(): void {
     this.entities.forEach(entity => {
       if (!entity.active) return;
-      
+
       const scriptComp = this.getComponent<ScriptComponent>(entity.id, 'script');
       if (scriptComp?.instance) {
         scriptComp.instance.lateUpdate(this.time.deltaTime);

@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { usePathname } from 'next/navigation'
 import { analytics, type EventAction, type EventCategory } from '@/lib/analytics'
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
 type RouteSurface =
   | 'web-entry'
@@ -50,7 +50,7 @@ function findTrackableElement(target: EventTarget | null): HTMLElement | null {
 }
 
 export default function ProductTelemetry() {
-  const pathname = usePathname() || '/'
+  const pathname = useBrowserPathname()
   const previousPathRef = useRef<string | null>(null)
 
   useEffect(() => {

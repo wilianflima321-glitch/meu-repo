@@ -12,6 +12,7 @@ import {
   shouldRequireStudioLocalSyncSignature,
   verifyStudioLocalSyncSignature,
 } from '@/lib/server/studio-local-sync-signature'
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,8 +56,24 @@ export async function GET(request: NextRequest) {
     return buildUnauthorizedResponse()
   }
 
-  const snapshot = await loadLatestLocalRuntimeCapabilitySnapshot(user.userId)
-  return NextResponse.json(buildSnapshotResponse(snapshot))
+  try {
+    const snapshot = await loadLatestLocalRuntimeCapabilitySnapshot(user.userId)
+    return NextResponse.json(buildSnapshotResponse(snapshot))
+  } catch (error) {
+    if (shouldUseLocalEvidenceFallback(request, error)) {
+      return localEvidenceJson(
+        request,
+        error,
+        {
+          snapshot: null,
+          status: 'held',
+          message: 'Studio Local capability snapshot is held until the local runtime ledger is available.',
+        },
+        { surface: 'runtime.local-capabilities', state: 'held' },
+      )
+    }
+    throw error
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -129,6 +146,19 @@ export async function POST(request: NextRequest) {
       ...buildSnapshotResponse(snapshot),
     })
   } catch (error) {
+    if (shouldUseLocalEvidenceFallback(request, error)) {
+      return localEvidenceJson(
+        request,
+        error,
+        {
+          ok: false,
+          snapshot: null,
+          status: 'held',
+          error: 'LOCAL_RUNTIME_CAPABILITY_LEDGER_HELD',
+        },
+        { surface: 'runtime.local-capabilities.sync', state: 'held', status: 503 },
+      )
+    }
     const message = error instanceof Error ? error.message : 'Failed to persist local runtime capability snapshot.'
     return NextResponse.json({ error: message }, { status: 500 })
   }

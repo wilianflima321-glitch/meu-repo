@@ -76,7 +76,7 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
       if (!res.ok) {
         const rawData = await res.json().catch(() => ({}));
         const data = isPreviewRuntimePayload(rawData) ? rawData : {};
-        throw new Error(getPayloadText(data.error) || getPayloadText(data.message) || `Failure ao provisionar (${res.status})`);
+        throw new Error(getPayloadText(data.error) || getPayloadText(data.message) || `Provisioning failed (${res.status})`);
       }
 
       const rawData = await res.json();
@@ -131,11 +131,11 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
           provider: runtimeContext.provider,
           error:
             runtimeContext.guidance ||
-            'No runtime de preview disponivel. Inicie um servidor local de desenvolvimento ou configure o E2B.',
+            'No preview runtime available. Start a local development server or configure E2B.',
           guidance: runtimeContext.guidance,
           recommendedAction:
             runtimeContext.recommendedAction ||
-            'Configure um provider valido ou troque para o fallback inline antes de continuar.',
+            'Configure a valid provider or keep using local preview before continuing.',
           setupEnv: runtimeContext.setupEnv,
         }));
       }
@@ -143,10 +143,10 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
       setRuntime((prev) => ({
         ...prev,
         state: 'failed',
-        error: err instanceof Error ? err.message : 'Failure ao provisionar o preview.',
-        guidance: err instanceof Error ? err.message : 'Failure ao provisionar o preview.',
+        error: err instanceof Error ? err.message : 'Failed to provision preview.',
+        guidance: err instanceof Error ? err.message : 'Failed to provision preview.',
         recommendedAction:
-          'Revise a configuracao do provider de preview ou use o fallback inline enquanto o runtime remoto nao responde.',
+          'Review preview provider configuration or keep using local preview while the remote runtime is not responding.',
       }));
     }
   }, [extractRuntimeContext, projectId, startHealthPolling]);
@@ -166,7 +166,7 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
       error: prev.error,
       guidance: prev.guidance,
       recommendedAction:
-        prev.recommendedAction || 'Continue no fallback inline enquanto estabilizamos o runtime remoto.',
+        prev.recommendedAction || 'Continue in local preview while the remote runtime stabilizes.',
       setupEnv: prev.setupEnv,
     }));
   }, [clearHealthPolling, clearHmrBridge]);

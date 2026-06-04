@@ -53,9 +53,9 @@ export interface DashboardSettings {
 
 export type SessionFilter = 'all' | 'favorites' | 'scheduled'
 
-export type ActiveTab =
-  | 'overview'
-  | 'projects'
+export type DashboardPrimaryTab = 'overview' | 'projects' | 'activity'
+
+export type DashboardLegacyTab =
   | 'ai-chat'
   | 'content-creation'
   | 'unreal'
@@ -64,13 +64,20 @@ export type ActiveTab =
   | 'connectivity'
   | 'templates'
 
-export const MISSION_CONTROL_TABS = ['overview', 'ai-chat', 'projects'] as const satisfies readonly ActiveTab[]
+export type ActiveTab = DashboardPrimaryTab | DashboardLegacyTab
+
+export const MISSION_CONTROL_TABS = ['overview', 'projects', 'activity'] as const satisfies readonly DashboardPrimaryTab[]
 export const OPERATIONS_TABS = ['billing', 'wallet', 'connectivity'] as const satisfies readonly ActiveTab[]
 export const EXPLORE_TABS = [
   'templates',
   'content-creation',
   'unreal',
 ] as const satisfies readonly ActiveTab[]
+export const LEGACY_DASHBOARD_TABS = [
+  'ai-chat',
+  ...OPERATIONS_TABS,
+  ...EXPLORE_TABS,
+] as const satisfies readonly DashboardLegacyTab[]
 
 export const DASHBOARD_TAB_GROUPS = {
   mission: MISSION_CONTROL_TABS,
@@ -119,9 +126,15 @@ export const STORAGE_KEYS = {
 
 export const DASHBOARD_TABS: ActiveTab[] = [
   ...MISSION_CONTROL_TABS,
-  ...OPERATIONS_TABS,
-  ...EXPLORE_TABS,
+  ...LEGACY_DASHBOARD_TABS,
 ]
+
+export const resolvePrimaryDashboardTab = (tab: ActiveTab): DashboardPrimaryTab => {
+  if (tab === 'overview' || tab === 'projects' || tab === 'activity') {
+    return tab
+  }
+  return 'activity'
+}
 
 const isChatMessage = (value: unknown): value is ChatMessage => {
   if (!value || typeof value !== 'object') {
@@ -234,8 +247,14 @@ export const resolveStoredSettings = (raw: string | null): DashboardSettings => 
 }
 
 export const resolveStoredActiveTab = (raw: string | null): ActiveTab => {
-  if (raw && DASHBOARD_TABS.includes(raw as ActiveTab)) {
-    return raw as ActiveTab
+  if (!raw) {
+    return 'overview'
+  }
+  if (MISSION_CONTROL_TABS.includes(raw as DashboardPrimaryTab)) {
+    return raw as DashboardPrimaryTab
+  }
+  if (LEGACY_DASHBOARD_TABS.includes(raw as DashboardLegacyTab)) {
+    return 'activity'
   }
   return 'overview'
 }

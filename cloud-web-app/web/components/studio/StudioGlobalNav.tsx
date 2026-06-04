@@ -11,11 +11,12 @@ type StudioGlobalNavProps = {
   subtitle?: string
   rightSlot?: ReactNode
   className?: string
+  compact?: boolean
 }
 
 function linkClass(active: boolean): string {
   return active
-    ? 'inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_35%,transparent),color-mix(in_srgb,var(--aethel-info)_20%,transparent))] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-primary)]'
+    ? 'inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_18%,var(--aethel-surface-secondary))] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-primary)]'
     : 'inline-flex items-center gap-1.5 rounded-full border border-transparent px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] hover:text-[var(--aethel-text-primary)]'
 }
 
@@ -42,11 +43,11 @@ function NavLinkRow({
   )
 }
 
-export default function StudioGlobalNav({ title, subtitle, rightSlot, className = '' }: StudioGlobalNavProps) {
+export default function StudioGlobalNav({ title, subtitle, rightSlot, className = '', compact = false }: StudioGlobalNavProps) {
   const pathname = useBrowserPathname() ?? ''
 
   return (
-    <header className={`sticky top-0 z-40 border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,18,26,0.96),rgba(9,11,16,0.98))] backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.35)] ${className}`}>
+    <header className={`sticky top-0 z-40 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_94%,transparent)] backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.22)] ${className}`}>
       <div className="mx-auto w-full max-w-7xl px-4 py-3 sm:px-6">
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -63,16 +64,18 @@ export default function StudioGlobalNav({ title, subtitle, rightSlot, className 
               {subtitle ? <p className="mt-0.5 max-w-2xl text-xs text-[var(--aethel-text-tertiary)] sm:text-sm">{subtitle}</p> : null}
             </div>
             <div className="hidden flex-wrap items-center gap-2 md:flex">
-              <NavLinkRow links={STUDIO_SECONDARY_LINKS} pathname={pathname} />
+              {!compact ? <NavLinkRow links={STUDIO_SECONDARY_LINKS} pathname={pathname} /> : null}
               {rightSlot}
             </div>
           </div>
 
-          <nav aria-label="Studio primary navigation" className="hidden overflow-x-auto pb-1 md:block">
-            <div className="flex min-w-max items-center gap-2">
-              <NavLinkRow links={STUDIO_PRIMARY_LINKS} pathname={pathname} />
-            </div>
-          </nav>
+          {!compact ? (
+            <nav aria-label="Studio primary navigation" className="hidden overflow-x-auto pb-1 md:block">
+              <div className="flex min-w-max items-center gap-2">
+                <NavLinkRow links={STUDIO_PRIMARY_LINKS} pathname={pathname} />
+              </div>
+            </nav>
+          ) : null}
         </div>
       </div>
     </header>

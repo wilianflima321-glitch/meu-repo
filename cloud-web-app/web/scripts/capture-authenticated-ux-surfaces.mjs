@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken'
 
 const ROOT = process.cwd()
 const JWT_SECRET = process.env.JWT_SECRET
+const AUTHENTICATED_UX_TOKEN = process.env.AUTHENTICATED_UX_TOKEN
 const BASE_URL = process.env.AUTHENTICATED_UX_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const OUTPUT_DIR = path.join(ROOT, 'output', 'playwright', 'v22-authenticated')
 const DOC_PATH = path.join(ROOT, 'docs', 'AUTHENTICATED_UX_SURFACE_AUDIT.md')
@@ -13,6 +14,7 @@ const NAVIGATION_TIMEOUT_MS = Number(process.env.AUTHENTICATED_UX_NAVIGATION_TIM
 const SCREENSHOT_TIMEOUT_MS = Number(process.env.AUTHENTICATED_UX_SCREENSHOT_TIMEOUT_MS ?? 90000)
 const NETWORK_IDLE_TIMEOUT_MS = Number(process.env.AUTHENTICATED_UX_NETWORK_IDLE_TIMEOUT_MS ?? 5000)
 const POST_LOAD_SETTLE_MS = Number(process.env.AUTHENTICATED_UX_POST_LOAD_SETTLE_MS ?? 500)
+const ROUTE_SIGNAL_WAIT_MS = Number(process.env.AUTHENTICATED_UX_ROUTE_SIGNAL_WAIT_MS ?? 20000)
 const MAX_CONSOLE_ERRORS = Number(process.env.AUTHENTICATED_UX_MAX_CONSOLE_ERRORS ?? 0)
 const MAX_NETWORK_ERRORS = Number(process.env.AUTHENTICATED_UX_MAX_NETWORK_ERRORS ?? 0)
 const SHOULD_SEED_LOCAL_USER =
@@ -24,7 +26,7 @@ const ROUTES = [
   '/ide',
   '/studio',
   '/studio/level',
-  '/studio/scene',
+  '/studio/level?tool=scene',
   '/studio/film',
   '/admin',
   '/billing',
@@ -32,13 +34,33 @@ const ROUTES = [
   '/evidence',
 ]
 
+const AUTH_FORBIDDEN_SIGNALS = [
+  'Sign in to Aethel',
+  'Create your account',
+  'Continue with GitHub',
+  'Continue with Google',
+]
+
+const ROUTE_EXPECTATIONS = {
+  '/dashboard': ['Studio Home', 'Mission control', 'Primary flow'],
+  '/ide': ['Files', 'Editor', 'AI Console'],
+  '/studio': ['Studio', 'Mission', 'Creative'],
+  '/studio/level': ['Level Studio', 'World Outliner', 'Inspector'],
+  '/studio/level?tool=scene': ['World Studio', 'Scene', 'Hierarchy'],
+  '/studio/film': ['Film', 'Director', 'timeline'],
+  '/admin': ['Admin', 'Operator', 'Platform'],
+  '/billing': ['Billing', 'Plan', 'Usage'],
+  '/settings': ['Settings', 'Workspace', 'Account'],
+  '/evidence': ['Evidence', 'Receipts', 'Review'],
+}
+
 const VIEWPORTS = [
   { id: 'desktop', width: 1440, height: 1000 },
   { id: 'mobile', width: 390, height: 844 },
 ]
 
-if (!JWT_SECRET) {
-  console.error('AUTH_QA_SECRET_MISSING: set JWT_SECRET before running authenticated UX capture.')
+if (!JWT_SECRET && !AUTHENTICATED_UX_TOKEN) {
+  console.error('AUTH_QA_SECRET_MISSING: set JWT_SECRET or AUTHENTICATED_UX_TOKEN before running authenticated UX capture.')
   process.exit(1)
 }
 
@@ -137,18 +159,24 @@ async function loadChromium() {
   }
 }
 
+function normalizeText(value) {
+  return value.replace(/\s+/g, ' ').trim()
+}
+
 const qaUser = await ensureLocalVisualQaUser()
 
-const token = jwt.sign(
-  {
-    userId: qaUser.userId,
-    email: qaUser.email,
-    role: qaUser.role,
-    plan: qaUser.plan,
-  },
-  JWT_SECRET,
-  { expiresIn: '2h' },
-)
+const token =
+  AUTHENTICATED_UX_TOKEN ||
+  jwt.sign(
+    {
+      userId: qaUser.userId,
+      email: qaUser.email,
+      role: qaUser.role,
+      plan: qaUser.plan,
+    },
+    JWT_SECRET,
+    { expiresIn: '2h' },
+  )
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true })
 
@@ -156,8 +184,7 @@ const chromium = await loadChromium()
 const browser = await chromium.launch({ headless: true })
 const results = []
 
-for (const viewport of VIEWPORTS) {
-  const context = await browser.newContext({ viewport })
+async function addAuthToContext(context) {
   await context.addCookies([
     {
       name: 'token',
@@ -170,6 +197,49 @@ for (const viewport of VIEWPORTS) {
   await context.addInitScript((value) => {
     window.localStorage.setItem('aethel-token', value)
   }, token)
+}
+
+async function assertAuthPreflight() {
+  const context = await browser.newContext({ viewport: VIEWPORTS[0] })
+  await addAuthToContext(context)
+  const page = await context.newPage()
+  const route = ROUTES[0]
+  const url = new URL(route, BASE_URL).toString()
+
+  try {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: NAVIGATION_TIMEOUT_MS })
+    await page.waitForTimeout(POST_LOAD_SETTLE_MS)
+    const finalUrl = page.url()
+    const finalPath = new URL(finalUrl).pathname
+    const bodySample = await page
+      .locator('body')
+      .innerText({ timeout: ROUTE_SIGNAL_WAIT_MS })
+      .then((text) => normalizeText(text).slice(0, 600))
+      .catch(() => '')
+    const forbiddenSignals = AUTH_FORBIDDEN_SIGNALS.filter((signal) => bodySample.toLowerCase().includes(signal.toLowerCase()))
+
+    if (finalPath !== route || forbiddenSignals.length > 0) {
+      console.error(
+        `[authenticated-ux-capture] AUTH_QA_TOKEN_REJECTED route=${route} finalUrl=${finalUrl} forbidden=${
+          forbiddenSignals.join(',') || 'none'
+        }`,
+      )
+      console.error(
+        '[authenticated-ux-capture] Make sure the running Next.js server was started with the same JWT_SECRET, or pass a server-accepted AUTHENTICATED_UX_TOKEN.',
+      )
+      process.exit(1)
+    }
+  } finally {
+    await page.close().catch(() => {})
+    await context.close().catch(() => {})
+  }
+}
+
+await assertAuthPreflight()
+
+for (const viewport of VIEWPORTS) {
+  const context = await browser.newContext({ viewport })
+  await addAuthToContext(context)
 
   for (const route of ROUTES) {
     const page = await context.newPage()
@@ -210,6 +280,11 @@ for (const viewport of VIEWPORTS) {
     let error = null
     let stabilization = 'networkidle'
     let finalPathOk = false
+    let pageTitle = ''
+    let bodySample = ''
+    let matchedSignals = []
+    let missingSignals = []
+    let forbiddenSignals = []
     try {
       const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: NAVIGATION_TIMEOUT_MS })
       status = response?.status() ?? null
@@ -224,6 +299,28 @@ for (const viewport of VIEWPORTS) {
       if (networkErrorBodies.length) {
         await Promise.allSettled(networkErrorBodies)
       }
+      const expectedSignals = ROUTE_EXPECTATIONS[route] ?? []
+      if (expectedSignals.length > 0) {
+        await page
+          .waitForFunction(
+            (signals) => {
+              const text = document.body?.innerText?.replace(/\s+/g, ' ').trim().toLowerCase() ?? ''
+              return signals.some((signal) => text.includes(String(signal).toLowerCase())) || text.length > 160
+            },
+            expectedSignals,
+            { timeout: ROUTE_SIGNAL_WAIT_MS },
+          )
+          .catch(() => {})
+      }
+      pageTitle = await page.title().catch(() => '')
+      bodySample = await page
+        .locator('body')
+        .innerText({ timeout: ROUTE_SIGNAL_WAIT_MS })
+        .then((text) => normalizeText(text).slice(0, 1600))
+        .catch(() => '')
+      matchedSignals = expectedSignals.filter((signal) => bodySample.toLowerCase().includes(signal.toLowerCase()))
+      missingSignals = expectedSignals.filter((signal) => !bodySample.toLowerCase().includes(signal.toLowerCase()))
+      forbiddenSignals = AUTH_FORBIDDEN_SIGNALS.filter((signal) => bodySample.toLowerCase().includes(signal.toLowerCase()))
       await page.screenshot({ path: outputPath, fullPage: true, timeout: SCREENSHOT_TIMEOUT_MS })
     } catch (captureError) {
       error = captureError instanceof Error ? captureError.message : String(captureError)
@@ -241,6 +338,11 @@ for (const viewport of VIEWPORTS) {
       error,
       stabilization,
       finalPathOk,
+      pageTitle,
+      bodySample,
+      matchedSignals,
+      missingSignals,
+      forbiddenSignals,
     })
   }
   await context.close()
@@ -256,10 +358,10 @@ const doc = `# Authenticated UX Surface Audit
 - Error budgets: console <= ${MAX_CONSOLE_ERRORS}, network <= ${MAX_NETWORK_ERRORS}
 - Note: screenshots live under \`output/playwright/v22-authenticated/\` and are intentionally not versioned.
 
-| Viewport | Route | Status | Final URL | Route match | Screenshot | Stabilization | Console errors | Network errors |
-| --- | --- | ---: | --- | --- | --- | --- | ---: | ---: |
+| Viewport | Route | Status | Final URL | Route match | Screenshot | Stabilization | Signals | Auth chrome | Console errors | Network errors |
+| --- | --- | ---: | --- | --- | --- | --- | --- | --- | ---: | ---: |
 ${results
-  .map((result) => `| ${result.viewport} | ${result.route} | ${result.status ?? 'n/a'} | ${result.finalUrl} | ${result.finalPathOk ? 'yes' : 'no'} | ${result.screenshot ?? result.error ?? 'n/a'} | ${result.stabilization} | ${result.consoleErrors.length} | ${result.networkErrors.length} |`)
+  .map((result) => `| ${result.viewport} | ${result.route} | ${result.status ?? 'n/a'} | ${result.finalUrl} | ${result.finalPathOk ? 'yes' : 'no'} | ${result.screenshot ?? result.error ?? 'n/a'} | ${result.stabilization} | ${result.missingSignals.length === 0 ? 'ok' : `missing: ${result.missingSignals.join(', ')}`} | ${result.forbiddenSignals.length === 0 ? 'clean' : `forbidden: ${result.forbiddenSignals.join(', ')}`} | ${result.consoleErrors.length} | ${result.networkErrors.length} |`)
   .join('\n')}
 
 ## Network Error Evidence
@@ -291,6 +393,15 @@ if (redirectFailures.length) {
   console.error(`[authenticated-ux-capture] FAIL authenticated routes redirected=${redirectFailures.length}`)
   for (const result of redirectFailures) {
     console.error(`- ${result.viewport} ${result.route}: finalUrl=${result.finalUrl}`)
+  }
+  process.exit(1)
+}
+
+const signalFailures = results.filter((result) => result.missingSignals.length > 0 || result.forbiddenSignals.length > 0)
+if (signalFailures.length) {
+  console.error(`[authenticated-ux-capture] FAIL route-signal-mismatch=${signalFailures.length}`)
+  for (const result of signalFailures) {
+    console.error(`- ${result.viewport} ${result.route}: missing=${result.missingSignals.join(',') || 'none'} forbidden=${result.forbiddenSignals.join(',') || 'none'}`)
   }
   process.exit(1)
 }

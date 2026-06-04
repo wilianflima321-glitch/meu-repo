@@ -297,7 +297,7 @@ function ToastItem({
           style={closeButtonStyle}
           onMouseEnter={(e) => (e.currentTarget.style.color = TEXT_PRIMARY)}
           onMouseLeave={(e) => (e.currentTarget.style.color = TEXT_TERTIARY)}
-          aria-label="Fechar notificacao"
+          aria-label="Close notification"
         >
           x
         </button>

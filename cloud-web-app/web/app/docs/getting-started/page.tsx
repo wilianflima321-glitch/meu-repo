@@ -77,7 +77,7 @@ curl http://localhost:3000/api/health/live`,
   {
     number: '05',
     title: 'Verify everything works',
-    description: 'Run the production readiness check.',
+    description: 'Run the production gate check.',
     code: `# Full QA suite:
 npm run qa:production-runtime-readiness
 
@@ -147,4 +147,3 @@ export default function GettingStartedPage() {
     </div>
   )
 }
-

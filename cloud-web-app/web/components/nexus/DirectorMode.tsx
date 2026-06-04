@@ -1,131 +1,227 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Clapperboard, Film, Play, Pause, SkipBack, SkipForward, Settings, Layers, Eye, Shield, CheckCircle, AlertCircle, Sparkles, Wand2, Box } from 'lucide-react'
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clapperboard,
+  Clock3,
+  Eye,
+  Film,
+  Layers3,
+  Play,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+
+type ShotStatus = 'reviewed' | 'render-held' | 'draft'
+type QualityLane = 'preview' | 'cinematic-review' | 'release-gate'
 
 interface Shot {
   id: string
   title: string
-  status: 'draft' | 'rendering' | 'completed' | 'error'
+  status: ShotStatus
   continuityScore: number
-  visualQuality: 'low' | 'medium' | 'high' | 'aaa'
+  qualityLane: QualityLane
+  evidenceRefs: string[]
+  nextAction: string
 }
 
-export default function DirectorMode() {
-  const [shots, setShots] = useState<Shot[]>([
-    { id: '1', title: 'Abertura cinematica', status: 'completed', continuityScore: 0.98, visualQuality: 'aaa' },
-    { id: '2', title: 'Combate em tempo real', status: 'rendering', continuityScore: 0.92, visualQuality: 'high' },
-    { id: '3', title: 'Exploracao de ambiente', status: 'draft', continuityScore: 0, visualQuality: 'medium' }
-  ])
+const SHOTS: Shot[] = [
+  {
+    id: '01',
+    title: 'Opening corridor reveal',
+    status: 'reviewed',
+    continuityScore: 0.98,
+    qualityLane: 'release-gate',
+    evidenceRefs: ['shot-continuity-01', 'lighting-match-01'],
+    nextAction: 'Lock edit after human review',
+  },
+  {
+    id: '02',
+    title: 'Realtime combat beat',
+    status: 'render-held',
+    continuityScore: 0.92,
+    qualityLane: 'cinematic-review',
+    evidenceRefs: ['animation-blocking-02', 'perf-trace-needed'],
+    nextAction: 'Request Studio Local render evidence',
+  },
+  {
+    id: '03',
+    title: 'Environment exploration pass',
+    status: 'draft',
+    continuityScore: 0.64,
+    qualityLane: 'preview',
+    evidenceRefs: ['layout-draft-03'],
+    nextAction: 'Validate camera path and asset provenance',
+  },
+]
 
+const STATUS_COPY: Record<ShotStatus, { label: string; className: string }> = {
+  reviewed: {
+    label: 'reviewed',
+    className:
+      'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_14%,transparent)] text-[var(--aethel-success)]',
+  },
+  'render-held': {
+    label: 'render held',
+    className:
+      'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_14%,transparent)] text-[var(--aethel-warning-light)]',
+  },
+  draft: {
+    label: 'draft',
+    className:
+      'border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]',
+  },
+}
+
+const QUALITY_COPY: Record<QualityLane, string> = {
+  preview: 'Browser preview',
+  'cinematic-review': 'Cinematic review',
+  'release-gate': 'Release gate',
+}
+
+const READINESS_ITEMS = [
+  { label: 'Continuity', value: '3 shots tracked', icon: Film },
+  { label: 'Render evidence', value: 'Studio Local required', icon: Clock3 },
+  { label: 'Release state', value: 'Human review required', icon: ShieldCheck },
+]
+
+function StatusPill({ status }: { status: ShotStatus }) {
+  const copy = STATUS_COPY[status]
   return (
-    <div className="flex flex-col h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] p-6 space-y-6 overflow-y-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_16%,transparent)]">
-            <Clapperboard className="text-[var(--aethel-info-light)]" size={20} />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold uppercase tracking-wider">Modo diretor</h2>
-            <p className="text-[10px] text-[var(--aethel-text-quaternary)] font-medium uppercase tracking-widest">Continuidade e motor visual</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-full">
-          <span className="w-2 h-2 rounded-full bg-[var(--aethel-success)] animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></span>
-          <span className="text-[10px] font-bold text-[var(--aethel-text-tertiary)] uppercase tracking-wider">Visual engine online</span>
-        </div>
-      </div>
+    <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${copy.className}`}>
+      {copy.label}
+    </span>
+  )
+}
 
-      {/* Timeline / Shot List */}
-      <div className="space-y-4">
-        <h3 className="text-xs font-bold text-[var(--aethel-text-quaternary)] uppercase tracking-widest flex items-center gap-2">
-          <Film size={14} /> Linha de tempo de producao
-        </h3>
-        <div className="space-y-3">
-          {shots.map(shot => (
-            <div key={shot.id} className="p-4 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-primary)] transition-colors group relative overflow-hidden">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
-                    shot.status === 'completed' ? 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success)]' :
-                    shot.status === 'rendering' ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)]'
-                  }`}>
-                    {shot.id}
-                  </div>
-                  <span className="text-sm font-bold text-[var(--aethel-text-primary)]">{shot.title}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                    shot.visualQuality === 'aaa' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' :
-                    shot.visualQuality === 'high' ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)]'
-                  }`}>
-                    {shot.visualQuality}
-                  </span>
-                  <Settings size={14} className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] cursor-pointer" />
-                </div>
-              </div>
-
-              {/* Progress / Stats */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[10px] text-[var(--aethel-text-quaternary)] uppercase font-bold tracking-tighter">
-                    <span>Continuidade</span>
-                    <span>{Math.round(shot.continuityScore * 100)}%</span>
-                  </div>
-                  <div className="h-1 w-full bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden">
-                    <div className="h-full bg-[var(--aethel-success)]" style={{ width: `${shot.continuityScore * 100}%` }}></div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-end gap-2">
-                  {shot.status === 'completed' ? (
-                    <CheckCircle size={14} className="text-[var(--aethel-success)]" />
-                  ) : shot.status === 'rendering' ? (
-                    <Sparkles size={14} className="text-[var(--aethel-info-light)] animate-pulse" />
-                  ) : (
-                    <AlertCircle size={14} className="text-[var(--aethel-text-quaternary)]" />
-                  )}
-                  <span className="text-[10px] font-bold text-[var(--aethel-text-quaternary)] uppercase">{shot.status}</span>
-                </div>
-              </div>
-
-              {/* Action Overlay (Hover) */}
-              <div className="absolute inset-0 bg-[var(--aethel-surface-primary)]/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                <Button type="button" className="p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-secondary)] transition-colors"><Play size={20} /></Button>
-                <Button type="button" className="p-3 bg-[var(--aethel-primary)] hover:brightness-110 rounded-full text-[var(--aethel-text-primary)] transition-colors"><Wand2 size={20} /></Button>
-                <Button type="button" className="p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-secondary)] transition-colors"><Eye size={20} /></Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="p-4 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-2xl">
-        <div className="flex items-center justify-center gap-6 mb-4">
-          <Button type="button" className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"><SkipBack size={20} /></Button>
-          <Button type="button" className="p-4 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-primary)] transition-colors"><Play size={24} /></Button>
-          <Button type="button" className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"><SkipForward size={20} /></Button>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          <button type="button" className="flex flex-col items-center gap-1 p-3 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-primary)] transition-all">
-            <Layers size={16} className="text-[var(--aethel-info-light)]" />
-            <span className="text-[9px] font-bold text-[var(--aethel-text-quaternary)] uppercase">Camadas</span>
-          </button>
-          <button type="button" className="flex flex-col items-center gap-1 p-3 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-primary)] transition-all">
-            <Shield size={16} className="text-[var(--aethel-success)]" />
-            <span className="text-[9px] font-bold text-[var(--aethel-text-quaternary)] uppercase">Qualidade</span>
-          </button>
-          <button type="button" className="flex flex-col items-center gap-1 p-3 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-primary)] transition-all">
-            <Box size={16} className="text-[var(--aethel-info)]" />
-            <span className="text-[9px] font-bold text-[var(--aethel-text-quaternary)] uppercase">Assets</span>
-          </button>
-        </div>
-      </div>
+function EvidenceList({ refs }: { refs: string[] }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {refs.map(ref => (
+        <span
+          key={ref}
+          className="rounded-md border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] px-2 py-1 text-[10px] font-medium text-[var(--aethel-text-quaternary)]"
+        >
+          {ref}
+        </span>
+      ))}
     </div>
   )
 }
 
+function ShotCard({ shot }: { shot: Shot }) {
+  return (
+    <article className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 shadow-sm shadow-black/10">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] px-2 py-1 text-[11px] font-bold text-[var(--aethel-text-tertiary)]">
+              {shot.id}
+            </span>
+            <h3 className="truncate text-sm font-semibold text-[var(--aethel-text-primary)]">{shot.title}</h3>
+          </div>
+          <p className="text-xs text-[var(--aethel-text-quaternary)]">{shot.nextAction}</p>
+        </div>
+        <StatusPill status={shot.status} />
+      </div>
 
+      <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_160px]">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">
+            <span>Continuity</span>
+            <span>{Math.round(shot.continuityScore * 100)}%</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-[var(--aethel-surface-tertiary)]">
+            <div
+              className="h-full rounded-full bg-[var(--aethel-success)]"
+              style={{ width: `${Math.round(shot.continuityScore * 100)}%` }}
+            />
+          </div>
+          <EvidenceList refs={shot.evidenceRefs} />
+        </div>
+        <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] p-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">Quality lane</p>
+          <p className="mt-1 text-sm font-semibold text-[var(--aethel-text-secondary)]">{QUALITY_COPY[shot.qualityLane]}</p>
+        </div>
+      </div>
+    </article>
+  )
+}
 
+export default function DirectorMode() {
+  return (
+    <div className="flex h-full flex-col overflow-y-auto bg-[var(--aethel-surface-primary)] p-5 text-[var(--aethel-text-primary)]">
+      <header className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] p-2">
+              <Clapperboard className="h-5 w-5 text-[var(--aethel-info-light)]" />
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-quaternary)]">Director Mode</p>
+              <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Cinematic review board</h2>
+              <p className="mt-1 max-w-2xl text-sm text-[var(--aethel-text-tertiary)]">
+                Review shots, continuity, receipts, and render status before any release-quality claim.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="secondary" size="sm" icon={<Eye className="h-3.5 w-3.5" />}>
+              Preview
+            </Button>
+            <Button type="button" variant="primary" size="sm" icon={<ShieldCheck className="h-3.5 w-3.5" />}>
+              Validate continuity
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-2 md:grid-cols-3">
+          {READINESS_ITEMS.map(item => {
+            const Icon = item.icon
+            return (
+              <div key={item.label} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] p-3">
+                <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">
+                  <Icon className="h-3.5 w-3.5" />
+                  {item.label}
+                </div>
+                <p className="mt-1 text-sm font-semibold text-[var(--aethel-text-secondary)]">{item.value}</p>
+              </div>
+            )
+          })}
+        </div>
+      </header>
+
+      <section className="mt-4 space-y-3" aria-label="Director shot timeline">
+        {SHOTS.map(shot => (
+          <ShotCard key={shot.id} shot={shot} />
+        ))}
+      </section>
+
+      <footer className="mt-4 grid gap-3 rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 md:grid-cols-3">
+        <button type="button" className="flex items-center gap-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] p-3 text-left hover:border-[var(--aethel-border-primary)]">
+          <Layers3 className="h-4 w-4 text-[var(--aethel-info-light)]" />
+          <span>
+            <span className="block text-sm font-semibold text-[var(--aethel-text-secondary)]">Shot layers</span>
+            <span className="block text-xs text-[var(--aethel-text-quaternary)]">Camera, audio, assets</span>
+          </span>
+        </button>
+        <button type="button" className="flex items-center gap-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] p-3 text-left hover:border-[var(--aethel-border-primary)]">
+          <AlertCircle className="h-4 w-4 text-[var(--aethel-warning-light)]" />
+          <span>
+            <span className="block text-sm font-semibold text-[var(--aethel-text-secondary)]">Release holds</span>
+            <span className="block text-xs text-[var(--aethel-text-quaternary)]">Runtime and approvals</span>
+          </span>
+        </button>
+        <button type="button" className="flex items-center gap-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] p-3 text-left hover:border-[var(--aethel-border-primary)]">
+          <CheckCircle2 className="h-4 w-4 text-[var(--aethel-success)]" />
+          <span>
+            <span className="block text-sm font-semibold text-[var(--aethel-text-secondary)]">Evidence packet</span>
+            <span className="block text-xs text-[var(--aethel-text-quaternary)]">Ready for review</span>
+          </span>
+        </button>
+      </footer>
+    </div>
+  )
+}

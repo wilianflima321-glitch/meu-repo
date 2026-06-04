@@ -1,30 +1,9 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import { useState } from 'react';
+import UnifiedViewport from '@/components/canvas/UnifiedViewport';
 import { type CanonicalRuntimeProps } from '@/components/preview/previewRuntime.types';
-import { PreviewSkeleton } from '@/components/preview/PreviewLifecycleChrome';
 import RuntimePreviewSurface from '@/components/preview/RuntimePreviewSurface';
-
-
-// ============================================================================
-// TYPES & CONSTANTS
-// ============================================================================
-
-// Dynamic imports
-const LivePreview = dynamic(() => import('@/components/LivePreview'), {
-  ssr: false,
-  loading: () => <PreviewSkeleton />,
-});
-
-const SceneViewportSurface = dynamic(() => import('@/components/preview/SceneViewportSurface'), {
-  ssr: false,
-  loading: () => <PreviewSkeleton />,
-});
-
-const CanvasViewportSurface = dynamic(() => import('@/components/preview/CanvasViewportSurface'), {
-  ssr: false,
-  loading: () => <PreviewSkeleton />,
-});
 
 // ============================================================================
 // CANONICAL SURFACE PROPS
@@ -57,6 +36,87 @@ export type CanonicalPreviewSurfaceProps =
   | CanonicalSceneProps
   | CanonicalCanvasProps;
 
+function LivePreviewReviewSurface({
+  suggestions,
+  onMagicWandSelect,
+  onSendSuggestion,
+  isGenerating,
+}: CanonicalLiveProps) {
+  const [draftSuggestion, setDraftSuggestion] = useState('');
+
+  const submitSuggestion = async () => {
+    const normalized = draftSuggestion.trim();
+    if (!normalized) return;
+    await onSendSuggestion(normalized);
+    setDraftSuggestion('');
+  };
+
+  return (
+    <div className="relative min-h-[360px] overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)]">
+      <UnifiedViewport surface="scene" renderMode="draft" />
+
+      <div className="pointer-events-none absolute inset-x-4 top-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_82%,transparent)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-secondary)] shadow-[0_12px_36px_rgba(2,6,23,0.28)]">
+          Canonical preview
+        </div>
+        {isGenerating ? (
+          <div className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,var(--aethel-surface-primary))] px-3 py-1.5 text-xs font-medium text-[var(--aethel-info-light)]">
+            Agent is preparing a proposal
+          </div>
+        ) : null}
+      </div>
+
+      <div className="absolute inset-x-4 bottom-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <form
+          className="flex min-h-12 items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] p-2 shadow-[0_18px_48px_rgba(2,6,23,0.3)] backdrop-blur"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submitSuggestion();
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => onMagicWandSelect({ x: 0, y: 0, z: 0 })}
+            className="min-h-9 rounded-xl border border-[var(--aethel-border-subtle)] px-3 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+          >
+            Mark focus
+          </button>
+          <input
+            value={draftSuggestion}
+            onChange={(event) => setDraftSuggestion(event.target.value)}
+            placeholder="Ask the agent to improve the selected area..."
+            className="min-w-0 flex-1 bg-transparent text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)]"
+          />
+          <button
+            type="submit"
+            disabled={!draftSuggestion.trim()}
+            className="min-h-9 rounded-xl bg-[var(--aethel-text-primary)] px-4 text-xs font-semibold text-[var(--aethel-surface-primary)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            Send
+          </button>
+        </form>
+
+        <div className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] p-3 shadow-[0_18px_48px_rgba(2,6,23,0.3)] backdrop-blur">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">Review queue</div>
+          <div className="mt-2 space-y-2">
+            {suggestions.length > 0 ? (
+              suggestions.slice(0, 2).map((suggestion) => (
+                <div key={suggestion} className="line-clamp-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-3 py-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">
+                  {suggestion}
+                </div>
+              ))
+            ) : (
+              <div className="rounded-xl border border-dashed border-[var(--aethel-border-secondary)] px-3 py-2 text-xs leading-5 text-[var(--aethel-text-tertiary)]">
+                No proposal yet. Select a focus point or ask for a targeted improvement.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -77,22 +137,31 @@ export type CanonicalPreviewSurfaceProps =
 export default function CanonicalPreviewSurface(props: CanonicalPreviewSurfaceProps) {
   if (props.variant === 'live') {
     return (
-      <LivePreview
-        onMagicWandSelect={props.onMagicWandSelect}
-        suggestions={props.suggestions}
-        onSendSuggestion={props.onSendSuggestion}
-        isGenerating={props.isGenerating}
-      />
+      <div className="h-full min-h-0" data-canonical-preview-surface="live">
+        <LivePreviewReviewSurface {...props} />
+      </div>
     );
   }
 
   if (props.variant === 'scene') {
-    return <SceneViewportSurface renderMode={props.renderMode ?? 'draft'} projectId={props.projectId} />;
+    return (
+      <div className="h-full min-h-0" data-canonical-preview-surface="scene">
+        <UnifiedViewport surface="scene" renderMode={props.renderMode ?? 'draft'} projectId={props.projectId} />
+      </div>
+    );
   }
 
   if (props.variant === 'canvas') {
-    return <CanvasViewportSurface renderMode={props.renderMode ?? 'draft'} />;
+    return (
+      <div className="h-full min-h-0" data-canonical-preview-surface="canvas">
+        <UnifiedViewport surface="canvas" renderMode={props.renderMode ?? 'draft'} />
+      </div>
+    );
   }
 
-  return <RuntimePreviewSurface {...props} />;
+  return (
+    <div className="h-full min-h-0" data-canonical-preview-surface="runtime">
+      <RuntimePreviewSurface {...props} />
+    </div>
+  );
 }

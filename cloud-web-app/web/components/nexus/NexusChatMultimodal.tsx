@@ -50,8 +50,8 @@ const AGENTS: Agent[] = [
   },
   {
     id: 'designer',
-    name: 'Designer de UI/UX',
-    role: 'Experiencia e interface',
+    name: 'UI/UX Designer',
+    role: 'Experience and interface',
     icon: Wand2,
     color: 'text-[var(--aethel-info-light)]',
     chipClass:
@@ -99,7 +99,7 @@ export default function NexusChatMultimodal() {
     setInputValue('')
     setIsThinking(true)
 
-    // Simular orquestração multi-agent
+    // Simulate multi-agent orchestration
     const tasks: AgentTask[] = [
       {
         id: 'task-1',
@@ -126,7 +126,7 @@ export default function NexusChatMultimodal() {
       {
         id: 'task-4',
         agentId: 'qa',
-        description: 'Validando qualidade e testes',
+        description: 'Validating quality and tests',
         status: 'pending',
       },
     ]
@@ -154,14 +154,14 @@ export default function NexusChatMultimodal() {
       const task = tasks[currentIndex]
       const updatedTasks = [...tasks]
       updatedTasks[currentIndex] = { ...task, status: 'completed', endTime: Date.now() }
-      
+
       if (currentIndex < tasks.length - 1) {
         updatedTasks[currentIndex + 1] = { ...tasks[currentIndex + 1], status: 'in_progress', startTime: Date.now() }
       }
-      
+
       setAgentTasks(updatedTasks)
       currentIndex++
-      
+
       setTimeout(processNextTask, 1500)
     }
 
@@ -182,7 +182,7 @@ export default function NexusChatMultimodal() {
                 : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'
             }`}
             aria-pressed={activeAgent.id === agent.id}
-            aria-label={`Selecionar agente ${agent.name}`}
+            aria-label={`Select agent ${agent.name}`}
           >
             <agent.icon
               size={14}
@@ -200,9 +200,9 @@ export default function NexusChatMultimodal() {
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)]">
               <Sparkles className="text-[var(--aethel-primary-light)]" />
             </div>
-            <h3 className="mb-2 font-semibold text-[var(--aethel-text-primary)]">Welcome ao Nexus Chat</h3>
+            <h3 className="mb-2 font-semibold text-[var(--aethel-text-primary)]">Welcome to Nexus Chat</h3>
             <p className="max-w-xs text-sm text-[var(--aethel-text-quaternary)]">
-              Sua equipe de IAs especialistas esta pronta. Escolha um agente e comece.
+              Choose an agent and start with a focused request.
             </p>
           </div>
         )}
@@ -255,15 +255,15 @@ export default function NexusChatMultimodal() {
                 {agentTasks.filter(t => t.status === 'completed').length}/{agentTasks.length}
               </span>
             </div>
-            
+
             <div className="space-y-2">
               {agentTasks.map((task, index) => {
                 const agent = AGENTS.find(a => a.id === task.agentId)
                 if (!agent) return null
-                
+
                 const nextAgent = task.handoffTo ? AGENTS.find(a => a.id === task.handoffTo) : null
                 const isLast = index === agentTasks.length - 1
-                
+
                 return (
                   <div key={task.id} className="flex items-start gap-2">
                     <div className="mt-1.5 flex flex-col items-center">
@@ -278,7 +278,7 @@ export default function NexusChatMultimodal() {
                         <ArrowRight size={12} className="mt-1 text-[var(--aethel-text-tertiary)]" />
                       )}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <agent.icon size={12} className={agent.color} />
@@ -312,7 +312,7 @@ export default function NexusChatMultimodal() {
           >
             <Loader2 size={14} className="animate-spin text-[var(--aethel-primary-light)]" />
             <span className="text-xs font-medium text-[var(--aethel-text-tertiary)]">
-              O {activeAgent.name} esta em execucao...
+              {activeAgent.name} is running...
             </span>
           </div>
         )}
@@ -329,7 +329,7 @@ export default function NexusChatMultimodal() {
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={`Fale com o ${activeAgent.name}...`}
               className="flex-1 bg-transparent py-2 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none"
-              aria-label="Send mensagem para o agente active"
+              aria-label="Send message to the active agent"
             />
             <div className="ml-2 flex items-center gap-1 border-l border-[var(--aethel-border-primary)] px-2">
               <button
@@ -349,7 +349,7 @@ export default function NexusChatMultimodal() {
               <button
                 type="submit"
                 className="ml-1 rounded-lg bg-[var(--aethel-primary)] p-2 text-[var(--aethel-text-primary)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] transition-all hover:brightness-110"
-                aria-label="Send mensagem"
+                aria-label="Send message"
               >
                 <Send size={18} />
               </button>

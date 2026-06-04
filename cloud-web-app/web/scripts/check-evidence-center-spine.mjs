@@ -15,12 +15,18 @@ function exists(relativePath) {
   return fs.existsSync(path.join(ROOT, relativePath))
 }
 
-for (const file of ['app/evidence/page.tsx', 'components/evidence/EvidenceCenter.tsx']) {
+for (const file of [
+  'app/evidence/page.tsx',
+  'components/evidence/EvidenceCenter.tsx',
+  'components/evidence/EvidenceCenter.parts.tsx',
+]) {
   if (!exists(file)) failures.push(`${file}: missing`)
 }
 
 const page = exists('app/evidence/page.tsx') ? read('app/evidence/page.tsx') : ''
 const center = exists('components/evidence/EvidenceCenter.tsx') ? read('components/evidence/EvidenceCenter.tsx') : ''
+const centerParts = exists('components/evidence/EvidenceCenter.parts.tsx') ? read('components/evidence/EvidenceCenter.parts.tsx') : ''
+const centerSurface = `${center}\n${centerParts}`
 const middleware = read('middleware.ts')
 
 if (!page.includes('EvidenceCenter')) failures.push('app/evidence/page.tsx: must render EvidenceCenter')
@@ -28,7 +34,7 @@ for (const required of [
   '/api/projects',
   '/production-state',
   '/production-state/release-evidence-readiness',
-  'Release evidence package',
+  'Review package',
   'Request review',
   'Record approval',
   'Reject package',
@@ -36,27 +42,40 @@ for (const required of [
   'Integrity verified',
   'data-evidence-source="release-evidence-package-manifest"',
   'data-evidence-source="release-evidence-readiness"',
-  'Project Brain',
-  'Mission ledger',
-  'Graph coverage',
+  'Project context',
+  'Recent activity',
+  'Receipts graph',
   'Evidence unavailable',
 ]) {
-  if (!center.includes(required)) failures.push(`components/evidence/EvidenceCenter.tsx: missing ${required}`)
+  if (!centerSurface.includes(required)) failures.push(`Evidence Center surface: missing ${required}`)
+}
+for (const required of [
+  'EvidenceCenterHero',
+  'EvidenceReadinessSummary',
+  'EvidenceGraphPanel',
+  'EvidenceTimelinePanel',
+]) {
+  if (!center.includes(required) && !centerParts.includes(required)) {
+    failures.push(`Evidence Center modularization: missing ${required}`)
+  }
 }
 if (/PUBLIC_PATH_PREFIXES[\s\S]*['"]\/evidence['"]/.test(middleware) || /PUBLIC_EXACT_PATHS[\s\S]*['"]\/evidence['"]/.test(middleware)) {
   failures.push('middleware.ts: /evidence must remain protected')
 }
-if (/fake|simulated success|AAA sozinho|Unreal-grade/i.test(center)) {
-  failures.push('components/evidence/EvidenceCenter.tsx: fake-success or unsafe marketing copy detected')
+if (/fake|simulated success|AAA sozinho|Unreal-grade/i.test(centerSurface)) {
+  failures.push('Evidence Center surface: fake-success or unsafe marketing copy detected')
 }
 
 const report = `# Evidence Center Spine Audit
 
 - Protected UI route: \`app/evidence/page.tsx\`
 - Client surface: \`components/evidence/EvidenceCenter.tsx\`
+- Split surface parts: \`components/evidence/EvidenceCenter.parts.tsx\`
 - Uses projects API: ${center.includes('/api/projects') ? 'yes' : 'no'}
 - Uses production-state API: ${center.includes('/production-state') ? 'yes' : 'no'}
 - Uses release-evidence-readiness API: ${center.includes('/production-state/release-evidence-readiness') ? 'yes' : 'no'}
+- Summary split: ${centerSurface.includes('EvidenceReadinessSummary') ? 'yes' : 'no'}
+- Timeline split: ${centerSurface.includes('EvidenceTimelinePanel') ? 'yes' : 'no'}
 - Middleware public allow-list includes /evidence: ${middleware.includes("'/evidence'") || middleware.includes('"/evidence"') ? 'yes' : 'no'}
 
 Status: ${failures.length ? 'FAIL' : 'PASS'}

@@ -10,6 +10,7 @@ const REQUIRED_FILES = [
   'components/studio/StudioLocalReleaseReadinessMatrix.tsx',
   'components/studio/StudioLocalRuntimeCapsule.tsx',
   'app/download/page.tsx',
+  'app/download/download-page.parts.tsx',
   'docs/STUDIO_LOCAL_RELEASE_READINESS_V22.md',
 ]
 
@@ -58,14 +59,14 @@ requireToken('components/studio/StudioLocalReleaseReadinessMatrix.tsx', 'Studio 
 requireToken('components/studio/StudioLocalReleaseReadinessMatrix.tsx', 'Signing chain:', 'signing chain disclosure')
 requireToken('components/studio/StudioLocalRuntimeCapsule.tsx', 'getStudioLocalReleaseReadinessSummary')
 requireToken('components/studio/StudioLocalRuntimeCapsule.tsx', 'Signed installers stay held')
-requireToken('app/download/page.tsx', 'StudioLocalReleaseReadinessMatrix')
-requireToken('app/download/page.tsx', 'Request desktop beta')
+requireToken('app/download/download-page.parts.tsx', 'StudioLocalReleaseReadinessMatrix')
+requireToken('app/download/download-page.parts.tsx', 'Request desktop beta')
 requireToken('docs/STUDIO_LOCAL_RELEASE_READINESS_V22.md', 'No broken download theater')
 requireToken('docs/STUDIO_LOCAL_RELEASE_READINESS_V22.md', 'signed installers')
 requireToken('docs/STUDIO_LOCAL_RELEASE_READINESS_V22.md', 'auto-updater')
 requireToken('docs/STUDIO_LOCAL_RELEASE_READINESS_V22.md', 'Cloud Stream handoff')
 
-const download = sources['app/download/page.tsx'] ?? ''
+const download = `${sources['app/download/page.tsx'] ?? ''}\n${sources['app/download/download-page.parts.tsx'] ?? ''}`
 if (/href=\{current\.artifact\}|href=\{`.*artifact/.test(download)) {
   failures.push('app/download/page.tsx: must not link directly to unsigned artifact names')
 }

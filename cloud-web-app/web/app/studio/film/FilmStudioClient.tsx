@@ -16,6 +16,12 @@ const VideoTimelineEditor = dynamic(() => import('@/components/video/VideoTimeli
 })
 
 const FILM_ENGINE_MODULES = ['cutscene-system', 'dialogue-cutscene-system', 'capture-system'] as const
+const FILM_MODES = [
+  { id: 'director', label: 'Director Mode', description: 'Story, shots, continuity' },
+  { id: 'timeline', label: 'Timeline', description: 'Edit, layers, timing' },
+] as const
+
+type FilmMode = (typeof FILM_MODES)[number]['id']
 
 function modeButtonClass(active: boolean): string {
   return active
@@ -24,7 +30,7 @@ function modeButtonClass(active: boolean): string {
 }
 
 export default function FilmStudioClient() {
-  const [mode, setMode] = useState<'director' | 'timeline'>('director')
+  const [mode, setMode] = useState<FilmMode>('director')
 
   return (
     <CreativeStudioShell
@@ -37,31 +43,40 @@ export default function FilmStudioClient() {
           <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
             Film modes
           </p>
-          <button
-            type="button"
-            onClick={() => setMode('director')}
-            className={`${modeButtonClass(mode === 'director')} mb-2 w-full rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors`}
-          >
-            Director Mode
-            <span className="mt-1 block text-[10px] font-normal text-[var(--aethel-text-tertiary)]">
-              Story, shots, continuity
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('timeline')}
-            className={`${modeButtonClass(mode === 'timeline')} w-full rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors`}
-          >
-            Timeline
-            <span className="mt-1 block text-[10px] font-normal text-[var(--aethel-text-tertiary)]">
-              Edit, layers, timing
-            </span>
-          </button>
+          {FILM_MODES.map(item => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setMode(item.id)}
+              className={`${modeButtonClass(mode === item.id)} mb-2 w-full rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors`}
+            >
+              {item.label}
+              <span className="mt-1 block text-[10px] font-normal text-[var(--aethel-text-tertiary)]">
+                {item.description}
+              </span>
+            </button>
+          ))}
           <StudioEngineModuleMiniPanel title="Film systems" moduleIds={FILM_ENGINE_MODULES} className="mt-3 rounded-2xl border border-[var(--aethel-border-subtle)]" />
         </aside>
 
-        <div className="min-w-0 flex-1 overflow-hidden">
-          {mode === 'director' ? <DirectorMode /> : <VideoTimelineEditor />}
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          <div className="border-b border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-2 md:hidden">
+            <div className="grid grid-cols-2 gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] p-1">
+              {FILM_MODES.map(item => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setMode(item.id)}
+                  className={`${modeButtonClass(mode === item.id)} rounded-xl border px-3 py-2 text-xs font-semibold transition-colors`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="min-h-0 flex-1 overflow-hidden">
+            {mode === 'director' ? <DirectorMode /> : <VideoTimelineEditor />}
+          </div>
         </div>
       </div>
     </CreativeStudioShell>

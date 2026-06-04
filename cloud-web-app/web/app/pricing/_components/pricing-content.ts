@@ -7,7 +7,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'How is Aethel different from other AI IDEs?',
-    a: 'Aethel combines Studio Home, workbench, preview, billing, and readiness in one operational product flow instead of acting like a prompt wrapper.',
+    a: 'Aethel keeps the dashboard, editor, preview, billing, and review trail in one product flow instead of scattering the work across separate tools.',
   },
   {
     q: 'Do the prices include AI tokens?',
@@ -15,11 +15,11 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'Are Games and Films included?',
-    a: 'The surfaces exist, but the commercial product today focuses on Apps + Research. Games and Films remain experimental maturity areas.',
+    a: 'The tools exist, but the commercial product today focuses on Apps + Research. Games and Films remain experimental areas.',
   },
   {
     q: 'Is billing live end to end?',
-    a: 'Billing surfaces exist, while public checkout depends on real Stripe credentials. We keep that readiness visible on the page itself.',
+    a: 'Billing tools exist, while public checkout depends on real Stripe credentials. We keep that status visible on the page itself.',
   },
   {
     q: 'How does cancellation work?',

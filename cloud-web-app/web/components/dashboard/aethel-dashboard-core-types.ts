@@ -40,6 +40,6 @@ export type FullAccessResponse = {
 }
 
 export function coerceActiveTab(raw: string | null): ActiveTab {
-  if (raw === 'chat') return 'ai-chat'
+  if (raw === 'chat') return 'activity'
   return resolveStoredActiveTab(raw)
 }

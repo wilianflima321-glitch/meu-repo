@@ -18,13 +18,13 @@ const REQUIRED_LANDING = [
   'data-landing-minimal-hero',
   'data-landing-product-proof',
   'START_MODES',
-  '/product-proof/studio-home.webp',
+  '/product-proof/studio-home.png',
 ]
 
 const REQUIRED_MISSION_BOX = [
   'landing-mission-input',
-  'Describe one mission for Aethel',
-  'Start a mission',
+  'Describe what you want Aethel to build',
+  'Start building',
 ]
 
 const FORBIDDEN_LANDING = [
@@ -59,6 +59,7 @@ const FORBIDDEN_MISSION_BOX = [
 const FORBIDDEN_HEADER = [
   '>Studio</span>',
   'linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))',
+  'Search className=',
 ]
 
 const failures = []
@@ -85,6 +86,17 @@ for (const token of FORBIDDEN_MISSION_BOX) {
 
 for (const token of FORBIDDEN_HEADER) {
   if (header.includes(token)) failures.push(`public header still contains forbidden chrome token: ${token}`)
+}
+
+const primaryLinkDeclaration = header.match(/const PRIMARY_(?:HREFS|LINKS)[\s\S]*?\n/)?.[0] ?? ''
+if (!primaryLinkDeclaration.includes("'/pricing'") || !primaryLinkDeclaration.includes("'/compare'") || !primaryLinkDeclaration.includes("'/docs'")) {
+  failures.push('public header primary links must be Pricing, Compare, and Docs')
+}
+
+const desktopHeaderActions = header.match(/<div className="hidden items-center gap-2 md:flex">[\s\S]*?<\/div>/)?.[0] ?? ''
+const desktopActionLinks = (desktopHeaderActions.match(/<Link\b/g) ?? []).length
+if (desktopActionLinks > 2) {
+  failures.push(`public header desktop actions has ${desktopActionLinks} links; keep only Sign in and Start free`)
 }
 
 const heroSection = landing.match(/<section[\s\S]*?data-landing-minimal-hero[\s\S]*?<\/section>/)?.[0] ?? ''

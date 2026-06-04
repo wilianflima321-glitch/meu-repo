@@ -64,7 +64,7 @@ function StatCard({
 }) {
   return (
     <Card variant="elevated" padding="md" className="relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute right-4 top-4 h-10 w-10 rounded-full border border-[var(--aethel-border-subtle)] opacity-40" />
 
       <div className="flex items-start justify-between">
         <div>
@@ -142,13 +142,13 @@ export function OverviewTab({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Welcome de volta!</h1>
+          <h1 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Welcome back</h1>
           <p className="text-[var(--aethel-text-secondary)] mt-1">
             Here is a summary of your recent activity.
           </p>
         </div>
         <Button icon={<Sparkles className="w-4 h-4" />} onClick={onOpenChat}>
-          Nova Conversa AI
+          Open AI chat
         </Button>
       </div>
 
@@ -169,14 +169,14 @@ export function OverviewTab({
           trend={currentStats.chatSessionsChange >= 0 ? 'up' : 'down'}
         />
         <StatCard
-          title="Requests AI"
+          title="AI requests"
           value={currentStats.aiRequests}
           change={currentStats.aiRequestsChange}
           icon={<Zap className="w-6 h-6 text-[var(--aethel-warning)]" />}
           trend={currentStats.aiRequestsChange >= 0 ? 'up' : 'down'}
         />
         <StatCard
-          title="Tempo Codando"
+          title="Coding time"
           value={currentStats.timeSpent}
           icon={<Clock className="w-6 h-6 text-[var(--aethel-success)]" />}
         />
@@ -188,10 +188,10 @@ export function OverviewTab({
         <Card variant="elevated" padding="lg">
           <CardHeader
             title="Recent projects"
-            description="Continue de onde parou"
+            description="Resume recent work"
             action={
               <Button type="button" variant="ghost" size="sm" onClick={onCreateProject}>
-                Ver todos
+                View all
               </Button>
             }
           />
@@ -229,14 +229,14 @@ export function OverviewTab({
         {/* Recent Activity */}
         <Card variant="elevated" padding="lg">
           <CardHeader
-            title="Atividade Recente"
+            title="Recent activity"
             description="Your action history"
           />
 
           {recentActivity.length === 0 ? (
             <div className="py-12 text-center">
               <TrendingUp className="w-12 h-12 text-[var(--aethel-text-tertiary)] mx-auto mb-4" />
-              <p className="text-[var(--aethel-text-tertiary)]">No atividade ainda</p>
+              <p className="text-[var(--aethel-text-tertiary)]">No activity yet</p>
               <p className="text-sm text-[var(--aethel-text-tertiary)] mt-1">
                 Your actions will appear here
               </p>
@@ -264,7 +264,7 @@ export function OverviewTab({
       </div>
 
       {/* Quick Actions */}
-      <Card variant="gradient" padding="lg">
+      <Card variant="elevated" padding="lg">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <h3 className="text-xl font-bold text-[var(--aethel-text-primary)] mb-2">
@@ -277,12 +277,12 @@ export function OverviewTab({
           <div className="flex gap-3">
             <Button type="button" variant="secondary" onClick={onOpenChat}>
               <MessageSquare className="w-4 h-4 mr-2" />
-              Chat AI
+              Open chat
             </Button>
-            <button type="button" aria-label="Create new project" onClick={onCreateProject}>
+            <Button type="button" aria-label="Create new project" onClick={onCreateProject}>
               <FolderKanban className="w-4 h-4 mr-2" />
               New project
-            </button>
+            </Button>
           </div>
         </div>
       </Card>

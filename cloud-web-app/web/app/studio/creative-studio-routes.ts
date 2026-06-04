@@ -1,4 +1,5 @@
 export type CreativeStudioDomain = 'world' | 'film' | 'audio' | 'runtime'
+export type CreativeStudioGroup = 'world' | 'character' | 'fx' | 'film' | 'logic'
 export type CreativeStudioMaturity = 'BETA' | 'ALPHA'
 
 export interface CreativeStudioRoute {
@@ -6,21 +7,72 @@ export interface CreativeStudioRoute {
   label: string
   shortLabel: string
   domain: CreativeStudioDomain
+  group: CreativeStudioGroup
   maturity: CreativeStudioMaturity
   description: string
 }
 
+export const CREATIVE_STUDIO_GROUPS: ReadonlyArray<{
+  id: CreativeStudioGroup
+  label: string
+  description: string
+}> = [
+  {
+    id: 'world',
+    label: 'World',
+    description: 'Levels, scenes, terrain, materials, foliage, water, and spatial layout.',
+  },
+  {
+    id: 'character',
+    label: 'Character',
+    description: 'Rigging, animation, facial performance, hair, cloth, and character continuity.',
+  },
+  {
+    id: 'fx',
+    label: 'FX',
+    description: 'Particles, fluid, sprite passes, combat cues, and generated visual effects.',
+  },
+  {
+    id: 'film',
+    label: 'Film',
+    description: 'Director review, timeline, cinematic receipts, audio, and cloud review status.',
+  },
+  {
+    id: 'logic',
+    label: 'Logic',
+    description: 'Quest graphs, gameplay contracts, missions, rewards, and validation rules.',
+  },
+]
+
 export const PRIMARY_CREATIVE_HREFS = new Set([
   '/studio/level',
-  '/studio/scene',
-  '/studio/material',
+  '/studio/animation',
+  '/studio/vfx',
   '/studio/film',
-  '/studio/audio',
-  '/studio/cinematic',
+  '/studio/quest',
 ])
+
+export const CREATIVE_STUDIO_ROUTE_REDIRECTS: Record<string, string> = {
+  '/studio/scene': '/studio/level?tool=scene',
+  '/studio/material': '/studio/level?tool=material',
+  '/studio/terrain': '/studio/level?tool=terrain',
+  '/studio/landscape': '/studio/level?tool=landscape',
+  '/studio/foliage': '/studio/level?tool=foliage',
+  '/studio/water': '/studio/level?tool=water',
+  '/studio/rig': '/studio/animation?tool=rig',
+  '/studio/facial': '/studio/animation?tool=facial',
+  '/studio/hair': '/studio/animation?tool=hair',
+  '/studio/cloth': '/studio/animation?tool=cloth',
+  '/studio/fluid': '/studio/vfx?tool=fluid',
+  '/studio/sprite': '/studio/vfx?tool=sprite',
+}
 
 export function isPrimaryCreativeStudioRoute(route: CreativeStudioRoute) {
   return PRIMARY_CREATIVE_HREFS.has(route.href)
+}
+
+export function getCreativeStudioRouteNavigationHref(route: CreativeStudioRoute) {
+  return CREATIVE_STUDIO_ROUTE_REDIRECTS[route.href] || route.href
 }
 
 export const CREATIVE_STUDIO_ROUTES: CreativeStudioRoute[] = [
@@ -29,22 +81,25 @@ export const CREATIVE_STUDIO_ROUTES: CreativeStudioRoute[] = [
     label: 'Level Studio',
     shortLabel: 'Level',
     domain: 'world',
+    group: 'world',
     maturity: 'BETA',
     description: 'Block out playable spaces, streaming regions, spawn points, and scene evidence.',
   },
   {
     href: '/studio/scene',
-    label: 'Scene Studio',
+    label: 'Scene',
     shortLabel: 'Scene',
     domain: 'world',
+    group: 'world',
     maturity: 'BETA',
     description: 'Inspect hierarchy, cameras, lights, transforms, and authored world state.',
   },
   {
     href: '/studio/material',
-    label: 'Material Studio',
+    label: 'Material',
     shortLabel: 'Material',
     domain: 'world',
+    group: 'world',
     maturity: 'BETA',
     description: 'Tune PBR surfaces and keep texture decisions attached to the Asset Graph.',
   },
@@ -53,6 +108,7 @@ export const CREATIVE_STUDIO_ROUTES: CreativeStudioRoute[] = [
     label: 'Animation Studio',
     shortLabel: 'Animation',
     domain: 'world',
+    group: 'character',
     maturity: 'ALPHA',
     description: 'Author animation blueprints, transitions, timing, and review packets.',
   },
@@ -61,6 +117,7 @@ export const CREATIVE_STUDIO_ROUTES: CreativeStudioRoute[] = [
     label: 'VFX Studio',
     shortLabel: 'VFX',
     domain: 'world',
+    group: 'fx',
     maturity: 'ALPHA',
     description: 'Shape particles, magic systems, combat cues, and cinematic effects.',
   },
@@ -69,87 +126,98 @@ export const CREATIVE_STUDIO_ROUTES: CreativeStudioRoute[] = [
     label: 'Quest Studio',
     shortLabel: 'Quest',
     domain: 'world',
+    group: 'logic',
     maturity: 'ALPHA',
     description: 'Author branching missions, prerequisites, rewards, and narrative validation graphs.',
   },
 
   {
     href: '/studio/terrain',
-    label: 'Terrain Studio',
+    label: 'Terrain',
     shortLabel: 'Terrain',
     domain: 'world',
+    group: 'world',
     maturity: 'BETA',
-    description: 'Sculpt heightmaps, biome zones, erosion passes, and terrain validation evidence.',
+    description: 'Sculpt heightmaps, biome zones, erosion passes, and terrain review packets.',
   },
   {
     href: '/studio/landscape',
-    label: 'Landscape Studio',
+    label: 'Landscape',
     shortLabel: 'Landscape',
     domain: 'world',
+    group: 'world',
     maturity: 'BETA',
     description: 'Coordinate open-world terrain, painted layers, streaming-ready regions, and foliage systems.',
   },
   {
     href: '/studio/cloth',
-    label: 'Cloth Studio',
+    label: 'Cloth',
     shortLabel: 'Cloth',
     domain: 'world',
+    group: 'character',
     maturity: 'ALPHA',
     description: 'Simulate garments, wind, pinning, collisions, and cloth export review packets.',
   },
   {
     href: '/studio/facial',
-    label: 'Facial Studio',
+    label: 'Facial',
     shortLabel: 'Facial',
     domain: 'film',
+    group: 'character',
     maturity: 'ALPHA',
     description: 'Author blendshapes, FACS poses, visemes, emotions, and continuity-safe character performance.',
   },
   {
     href: '/studio/fluid',
-    label: 'Fluid Studio',
+    label: 'Fluid',
     shortLabel: 'Fluid',
     domain: 'world',
+    group: 'fx',
     maturity: 'ALPHA',
-    description: 'Prototype SPH particles, fluids, volume boundaries, and simulation evidence for scenes.',
+    description: 'Prototype particles, fluids, volume boundaries, and simulation review packets for scenes.',
   },
   {
     href: '/studio/foliage',
-    label: 'Foliage Studio',
+    label: 'Foliage',
     shortLabel: 'Foliage',
     domain: 'world',
+    group: 'world',
     maturity: 'ALPHA',
     description: 'Paint procedural vegetation with density, slope, LOD, collision, and wind constraints.',
   },
   {
     href: '/studio/hair',
-    label: 'Hair & Fur Studio',
+    label: 'Hair',
     shortLabel: 'Hair',
     domain: 'film',
+    group: 'character',
     maturity: 'ALPHA',
-    description: 'Design groom regions, strand physics, clumping, color gradients, and LOD evidence.',
+    description: 'Design groom regions, strand physics, clumping, color gradients, and LOD review packets.',
   },
   {
     href: '/studio/rig',
-    label: 'Control Rig Studio',
+    label: 'Rig',
     shortLabel: 'Rig',
     domain: 'film',
+    group: 'character',
     maturity: 'ALPHA',
     description: 'Build IK/FK chains, procedural controls, constraints, and rig handoff packets.',
   },
   {
     href: '/studio/water',
-    label: 'Water Studio',
+    label: 'Water',
     shortLabel: 'Water',
     domain: 'world',
+    group: 'world',
     maturity: 'ALPHA',
-    description: 'Create oceans, rivers, foam, flow maps, buoyancy, and water-system evidence.',
+    description: 'Create oceans, rivers, foam, flow maps, buoyancy, and water-system receipts.',
   },
   {
     href: '/studio/sprite',
-    label: 'Sprite Studio',
+    label: 'Sprite',
     shortLabel: 'Sprite',
     domain: 'world',
+    group: 'fx',
     maturity: 'ALPHA',
     description: 'Edit 2D sprites, animation frames, pixel passes, and lightweight game assets.',
   },
@@ -158,6 +226,7 @@ export const CREATIVE_STUDIO_ROUTES: CreativeStudioRoute[] = [
     label: 'Film Studio',
     shortLabel: 'Film',
     domain: 'film',
+    group: 'film',
     maturity: 'ALPHA',
     description: 'Move between director notes, continuity review, and the video timeline.',
   },
@@ -166,17 +235,26 @@ export const CREATIVE_STUDIO_ROUTES: CreativeStudioRoute[] = [
     label: 'Cinematic Cloud Stream',
     shortLabel: 'Cloud',
     domain: 'runtime',
+    group: 'film',
     maturity: 'ALPHA',
-    description: 'Review governed Cloud Stream readiness, cost, teardown, and Pixel Streaming capability without pretending it is available by default.',
+    description: 'Review cloud stream cost, teardown, and Pixel Streaming status before any session starts.',
   },
   {
     href: '/studio/audio',
     label: 'Audio Studio',
     shortLabel: 'Audio',
     domain: 'audio',
+    group: 'film',
     maturity: 'ALPHA',
-    description: 'Compose sound cues, mix layers, and prepare audio evidence for review.',
+    description: 'Compose sound cues, mix layers, and prepare audio receipts for review.',
   },
 ]
 
 export const CREATIVE_STUDIO_ROUTE_HREFS = CREATIVE_STUDIO_ROUTES.map((route) => route.href)
+
+export function groupCreativeStudioRoutes(routes: readonly CreativeStudioRoute[]) {
+  return CREATIVE_STUDIO_GROUPS.map((group) => ({
+    ...group,
+    routes: routes.filter((route) => route.group === group.id),
+  })).filter((group) => group.routes.length > 0)
+}

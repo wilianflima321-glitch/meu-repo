@@ -10,8 +10,8 @@ const REPORT_FILE = path.join(DOCS_DIR, 'ROUTE_EXPERIENCE_SPINE.md')
 const ROUTES_INVENTORY_FILE = path.join(DOCS_DIR, 'ROUTES_INVENTORY.md')
 // Ratchet this downward as the largest App Router pages are split. Do not raise
 // without explicitly accepting route UX debt.
-const MAX_PAGE_LINES = 300
-const MAX_ADMIN_ROUTES = 46
+const MAX_PAGE_LINES = 250
+const MAX_ADMIN_ROUTES = 23
 
 const REQUIRED_BOUNDARY_SEGMENTS = [
   'admin',
@@ -45,22 +45,10 @@ const REQUIRED_ROUTES = [
 
 const REQUIRED_STUDIO_ROUTES = [
   '/studio/level',
-  '/studio/scene',
-  '/studio/material',
   '/studio/animation',
   '/studio/vfx',
   '/studio/film',
   '/studio/audio',
-  '/studio/terrain',
-  '/studio/landscape',
-  '/studio/cloth',
-  '/studio/facial',
-  '/studio/fluid',
-  '/studio/foliage',
-  '/studio/hair',
-  '/studio/rig',
-  '/studio/water',
-  '/studio/sprite',
   '/studio/quest',
   '/studio/cinematic',
 ]
@@ -111,10 +99,10 @@ function classifyRoute(route) {
   if (route === '/docs' || route.startsWith('/docs/')) return 'docs'
   if (route === '/billing' || route.startsWith('/billing/')) return 'billing'
   if (route === '/marketplace' || route.startsWith('/marketplace/')) return 'marketplace'
-  if (['/trust', '/security', '/security-policy', '/security-acknowledgments', '/compliance', '/reliability'].includes(route)) return 'trust'
+  if (['/trust', '/security', '/security-policy', '/compliance', '/reliability'].includes(route)) return 'trust'
   if (['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'].includes(route)) return 'auth'
-  if (['/dashboard', '/ide', '/nexus', '/settings', '/profile', '/project-settings'].includes(route)) return 'core-workspace'
-  if (['/pricing', '/compare', '/customers', '/roadmap', '/contact-sales', '/download'].includes(route)) return 'marketing'
+  if (['/dashboard', '/ide', '/nexus', '/settings', '/profile'].includes(route)) return 'core-workspace'
+  if (['/pricing', '/compare', '/contact-sales', '/download'].includes(route)) return 'marketing'
   return 'product'
 }
 
@@ -123,7 +111,11 @@ function countLines(content) {
 }
 
 function main() {
-  const pageFiles = walk(APP_DIR, (abs) => abs.endsWith(`${path.sep}page.tsx`) && !abs.includes(`${path.sep}api${path.sep}`))
+  const pageFiles = walk(APP_DIR, (abs) => {
+    if (!abs.endsWith(`${path.sep}page.tsx`)) return false
+    const rel = path.relative(APP_DIR, abs).replace(/\\/g, '/')
+    return !rel.startsWith('api/')
+  })
   const routeEntries = pageFiles
     .map((file) => {
       const content = fs.readFileSync(file, 'utf8')
@@ -158,7 +150,7 @@ function main() {
     if (!fs.existsSync(path.join(APP_DIR, segment, 'loading.tsx'))) failures.push(`missing route loading state app/${segment}/loading.tsx`)
   }
 
-  const adminRoutes = routeEntries.filter((entry) => entry.group === 'admin')
+  const adminRoutes = routeEntries.filter((entry) => entry.group === 'admin' && entry.route !== '/admin')
   if (adminRoutes.length > MAX_ADMIN_ROUTES) {
     failures.push(`admin route count regressed: ${adminRoutes.length} > ${MAX_ADMIN_ROUTES}`)
   }

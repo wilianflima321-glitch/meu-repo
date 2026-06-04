@@ -26,7 +26,7 @@ export async function GET() {
     routeLogger.error('[preview/runtime-readiness] failed:', error)
     return NextResponse.json(
       {
-        status: 'partial',
+        status: 'held',
         strategy: 'inline',
         managedConfigured: false,
         managedProvider: null,
@@ -38,9 +38,17 @@ export async function GET() {
         blockers: ['PREVIEW_RUNTIME_READINESS_UNAVAILABLE'],
         instructions: ['Runtime readiness could not be loaded.'],
         recommendedCommands: ['npm --prefix cloud-web-app/web run dev'],
+        capability: 'IDE_PREVIEW_RUNTIME',
+        capabilityStatus: 'held',
         error: 'PREVIEW_RUNTIME_READINESS_UNAVAILABLE',
       },
-      { status: 500 }
+      {
+        status: 200,
+        headers: {
+          'x-aethel-capability': 'IDE_PREVIEW_RUNTIME',
+          'x-aethel-capability-status': 'held',
+        },
+      }
     )
   }
 }

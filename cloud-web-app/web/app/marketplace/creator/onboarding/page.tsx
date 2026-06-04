@@ -26,7 +26,7 @@ type CreatorConnectStatus = {
 type LoadState = 'loading' | 'ready' | 'error'
 
 function statusCopy(status: CreatorConnectStatus | null) {
-  if (!status) return { label: 'Checking', tone: 'neutral', helper: 'Loading creator payout readiness.' }
+  if (!status) return { label: 'Checking', tone: 'neutral', helper: 'Loading creator payout status.' }
   if (!status.configured) {
     return {
       label: 'Provider not configured',
@@ -62,7 +62,7 @@ function statusCopy(status: CreatorConnectStatus | null) {
   }
 }
 
-function readinessSteps(status: CreatorConnectStatus | null) {
+function payoutSteps(status: CreatorConnectStatus | null) {
   return [
     { label: 'Stripe provider configured', done: Boolean(status?.configured) },
     { label: 'Creator account created', done: Boolean(status?.connected) },
@@ -119,8 +119,18 @@ export default function CreatorPayoutOnboardingPage() {
     }
   }, [status?.country])
 
-  const copy = useMemo(() => statusCopy(status), [status])
-  const steps = useMemo(() => readinessSteps(status), [status])
+  const copy = useMemo(
+    () =>
+      error && !status
+        ? {
+            label: 'Status unavailable',
+            tone: 'warning',
+            helper: 'Sign in or refresh to check creator payout setup.',
+          }
+        : statusCopy(status),
+    [error, status]
+  )
+  const steps = useMemo(() => payoutSteps(status), [status])
   const completedSteps = steps.filter((step) => step.done).length
 
   return (
@@ -128,14 +138,14 @@ export default function CreatorPayoutOnboardingPage() {
       <PublicHeader />
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-12">
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-3xl border border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-surface-secondary)_92%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))] p-8 shadow-2xl">
+          <div className="rounded-3xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-8 shadow-2xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--aethel-border-secondary)] px-3 py-1 text-xs text-[var(--aethel-text-tertiary)]">
               <WalletCards className="h-3.5 w-3.5" />
               Marketplace creator payouts
             </div>
             <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">Connect Stripe Express without fake payout promises.</h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--aethel-text-secondary)] md:text-base">
-              Aethel only unlocks paid marketplace flows after the creator account, charge capability, payout capability, and review evidence are explicit.
+              Aethel only unlocks paid marketplace flows after the creator account, charge access, payout access, and review state are explicit.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button
@@ -158,9 +168,12 @@ export default function CreatorPayoutOnboardingPage() {
               </button>
             </div>
             {error ? (
-              <div className="mt-5 rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error)]">
-                {error}
-              </div>
+              <details className="mt-5 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_8%,transparent)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)]">
+                <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-warning-light)]">
+                  Status check details
+                </summary>
+                <p className="mt-3 leading-6">{error}</p>
+              </details>
             ) : null}
           </div>
 
@@ -175,7 +188,7 @@ export default function CreatorPayoutOnboardingPage() {
             </div>
             <div className="mt-6 rounded-2xl border border-[var(--aethel-border-secondary)] p-4">
               <div className="mb-3 flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
-                <span>Readiness</span>
+                <span>Status</span>
                 <span>{completedSteps}/{steps.length}</span>
               </div>
               <div className="space-y-3">
@@ -204,7 +217,7 @@ export default function CreatorPayoutOnboardingPage() {
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="text-xl font-semibold">What happens next</h2>
-              <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Creator monetization stays evidence-first: no paid asset goes live without onboarding, ledger readiness, and reviewable payout state.</p>
+              <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Creator monetization stays review-first: no paid asset goes live without onboarding, payout status, and a reviewable release state.</p>
             </div>
             <a href="/marketplace" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--aethel-primary-light)] hover:underline">
               Back to marketplace

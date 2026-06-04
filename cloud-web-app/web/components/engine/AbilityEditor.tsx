@@ -388,7 +388,7 @@ export function AbilityEditor({
         {/* Tabs */}
         <div className="flex border-b border-[var(--aethel-border-primary)]">
           {(['abilities', 'attributes', 'effects'] as const).map(tab => (
-            <button type="button" aria-label={`Abrir aba ${tab}`}
+            <button type="button" aria-label={`Open tab ${tab}`}
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-3 text-sm font-medium transition ${

@@ -1,14 +1,15 @@
+// @aethel-heavy-async-boundary Motion-heavy surface; lazy-load outside its owning product region.
 'use client';
 
 /**
  * Games & Films Module - Alpha Honest
  *
- * Módulo de criação e gerenciamento de Games e Films
- * Status: Alpha (Funcional, Basic settings)
- * Padrão: L5 Design, Real Integration
+ * Governed creation and management surface for games and films.
+ * Status: Alpha (functional, basic settings)
+ * Pattern: governed Studio surface with honest release readiness
  */
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, StaggerContainer } from '@/lib/ui/motion'
 import {
   Gamepad2,
   Film,
@@ -21,15 +22,18 @@ import {
   Download,
   Share2,
 } from 'lucide-react'
-import {
-  GlassCard,
-  GlassButton,
-  StaggerContainer,
-  AnimatedBadge,
-  eliteAnimations,
-} from '@/components/ui/GlassmorphismUI'
+import { Card } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 import { useStudioState } from '@/lib/studio-state'
 import { telemetry } from '@/lib/telemetry'
+
+const fadeInUpMotion = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: 20 },
+  transition: { duration: 0.24, ease: 'easeOut' },
+} as const
 
 /**
  * Project types (Games/Films)
@@ -39,7 +43,7 @@ interface GameProject {
   name: string
   type: 'game'
   engine: 'unity' | 'unreal' | 'godot' | 'custom'
-  status: 'draft' | 'development' | 'testing' | 'published'
+  status: 'draft' | 'development' | 'testing' | 'review-ready'
   thumbnail?: string
   createdAt: string
   updatedAt: string
@@ -53,7 +57,7 @@ interface FilmProject {
   name: string
   type: 'film'
   format: '2d' | '3d' | 'vr' | 'interactive'
-  status: 'draft' | 'production' | 'post-production' | 'published'
+  status: 'draft' | 'production' | 'post-production' | 'review-ready'
   thumbnail?: string
   createdAt: string
   updatedAt: string
@@ -130,18 +134,18 @@ export function GamesAndFilmsModule() {
     })
   }
 
-  const handlePublish = (project: Project) => {
+  const handleMarkReviewReady = (project: Project) => {
     const updated = projects.map((p) =>
-      p.id === project.id ? { ...p, status: 'published' as const } : p
+      p.id === project.id ? { ...p, status: 'review-ready' as const } : p
     )
     setProjects(updated)
     addNotification({
       type: 'success',
-      message: `${project.type === 'game' ? 'Game' : 'Film'} published successfully!`,
+      message: `${project.type === 'game' ? 'Game' : 'Film'} marked ready for human release review.`,
       duration: 3000,
     })
 
-    telemetry.trackFeatureUsage('project_published', {
+    telemetry.trackFeatureUsage('project_review_ready', {
       type: project.type,
       projectId: project.id,
     })
@@ -160,10 +164,10 @@ export function GamesAndFilmsModule() {
             Create and manage your game and film projects
           </p>
         </div>
-        <GlassButton variant="primary" onClick={() => setShowCreateDialog(true)}>
+        <Button variant="primary" onClick={() => setShowCreateDialog(true)}>
           <Plus size={18} />
           New Project
-        </GlassButton>
+        </Button>
       </div>
 
       {/* Tabs */}
@@ -199,9 +203,9 @@ export function GamesAndFilmsModule() {
       {/* Projects Grid */}
       <AnimatePresence mode="wait">
         {activeTab === 'games' ? (
-          <GamesGrid games={games} onDelete={handleDeleteProject} onPublish={handlePublish} />
+          <GamesGrid games={games} onDelete={handleDeleteProject} onPublish={handleMarkReviewReady} />
         ) : (
-          <FilmsGrid films={films} onDelete={handleDeleteProject} onPublish={handlePublish} />
+          <FilmsGrid films={films} onDelete={handleDeleteProject} onPublish={handleMarkReviewReady} />
         )}
       </AnimatePresence>
 
@@ -231,7 +235,7 @@ function GamesGrid({
   if (games.length === 0) {
     return (
       <motion.div
-        {...eliteAnimations.fadeInUp}
+        {...fadeInUpMotion}
         className="text-center py-12 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
       >
         <Gamepad2 size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
@@ -270,7 +274,7 @@ function FilmsGrid({
   if (films.length === 0) {
     return (
       <motion.div
-        {...eliteAnimations.fadeInUp}
+        {...fadeInUpMotion}
         className="text-center py-12 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
       >
         <Film size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
@@ -307,9 +311,9 @@ function GameCard({
   onPublish: (project: GameProject) => void
 }) {
   return (
-    <GlassCard hover glow animated className="p-4 space-y-4">
+    <Card hoverable padding="none" className="p-4 space-y-4">
       {/* Thumbnail */}
-      <div className="w-full h-32 rounded-lg bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] flex items-center justify-center">
+      <div className="flex h-32 w-full items-center justify-center rounded-lg border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)]">
         <Gamepad2 size={48} className="text-[var(--aethel-text-secondary)]" />
       </div>
 
@@ -321,21 +325,21 @@ function GameCard({
 
       {/* Status */}
       <div className="flex gap-2">
-        <AnimatedBadge variant={game.status === 'published' ? 'success' : 'info'}>
+        <Badge variant={game.status === 'review-ready' ? 'success' : 'info'}>
           {game.status}
-        </AnimatedBadge>
-        <AnimatedBadge variant="default">v{game.version}</AnimatedBadge>
+        </Badge>
+        <Badge variant="default">v{game.version}</Badge>
       </div>
 
       {/* Actions */}
       <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
         <button type="button"
           onClick={() => onPublish(game)}
-          disabled={game.status === 'published'}
+          disabled={game.status === 'review-ready'}
           className="flex-1 px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
         >
           <Play size={14} />
-          Publish
+          Mark ready
         </button>
         <button type="button"
           onClick={() => onDelete(game.id)}
@@ -345,7 +349,7 @@ function GameCard({
           <Trash2 size={14} />
         </button>
       </div>
-    </GlassCard>
+    </Card>
   )
 }
 
@@ -362,9 +366,9 @@ function FilmCard({
   onPublish: (project: FilmProject) => void
 }) {
   return (
-    <GlassCard hover glow animated className="p-4 space-y-4">
+    <Card hoverable padding="none" className="p-4 space-y-4">
       {/* Thumbnail */}
-      <div className="w-full h-32 rounded-lg bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-secondary)_20%,transparent)] flex items-center justify-center">
+      <div className="flex h-32 w-full items-center justify-center rounded-lg border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)]">
         <Film size={48} className="text-[var(--aethel-text-secondary)]" />
       </div>
 
@@ -376,21 +380,21 @@ function FilmCard({
 
       {/* Status */}
       <div className="flex gap-2">
-        <AnimatedBadge variant={film.status === 'published' ? 'success' : 'info'}>
+        <Badge variant={film.status === 'review-ready' ? 'success' : 'info'}>
           {film.status}
-        </AnimatedBadge>
-        <AnimatedBadge variant="default">{film.resolution}</AnimatedBadge>
+        </Badge>
+        <Badge variant="default">{film.resolution}</Badge>
       </div>
 
       {/* Actions */}
       <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
         <button type="button"
           onClick={() => onPublish(film)}
-          disabled={film.status === 'published'}
+          disabled={film.status === 'review-ready'}
           className="flex-1 px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] text-[var(--aethel-accent-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-accent)_30%,transparent)] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
         >
           <Play size={14} />
-          Publish
+          Mark ready
         </button>
         <button type="button"
           onClick={() => onDelete(film.id)}
@@ -400,12 +404,12 @@ function FilmCard({
           <Trash2 size={14} />
         </button>
       </div>
-    </GlassCard>
+    </Card>
   )
 }
 
 /**
- * Dialog de Criação
+ * Creation dialog
  */
 function CreateProjectDialog({
   open,
@@ -438,27 +442,27 @@ function CreateProjectDialog({
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
-            <GlassCard className="w-full max-w-md p-6 space-y-4">
+            <Card padding="none" className="w-full max-w-md p-6 space-y-4">
               <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">New Project</h2>
 
               <div className="space-y-3">
-                <GlassButton
+                <Button
                   variant="primary"
                   onClick={onCreateGame}
                   className="w-full justify-center"
                 >
                   <Gamepad2 size={18} />
                   Create Game
-                </GlassButton>
+                </Button>
 
-                <GlassButton
+                <Button
                   variant="secondary"
                   onClick={onCreateFilm}
                   className="w-full justify-center"
                 >
                   <Film size={18} />
                   Create Film
-                </GlassButton>
+                </Button>
               </div>
 
               <button type="button"
@@ -467,7 +471,7 @@ function CreateProjectDialog({
               >
                 Cancel
               </button>
-            </GlassCard>
+            </Card>
           </motion.div>
         </>
       )}

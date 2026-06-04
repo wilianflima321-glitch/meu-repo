@@ -17,14 +17,13 @@ type AuthResponse = {
 
 const DEFAULT_MISSION = 'Create a first web project with chat and live preview'
 const REGISTER_HIGHLIGHTS = [
-  'Start with a mission and template instead of an empty dashboard.',
-  'Keep billing, onboarding, and project readiness on one surface.',
-  'Make first value obvious before advanced studio surfaces appear.',
+  'Project setup and onboarding stay connected.',
+  'First value opens before advanced tools.',
 ]
 const REGISTER_STATS = [
-  { value: '90s', label: 'first value' },
-  { value: '1', label: 'guided path' },
-  { value: 'Ready', label: 'evidence flow' },
+  { value: '90s', label: 'first step' },
+  { value: '1', label: 'path' },
+  { value: 'Live', label: 'activity' },
 ]
 
 const REGISTER_OAUTH_PROVIDERS = [
@@ -34,7 +33,7 @@ const REGISTER_OAUTH_PROVIDERS = [
 
 function AuthProviderMark({ mark }: { mark: string }) {
   return (
-    <span className="grid h-6 w-6 place-items-center rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[10px] font-bold tracking-[-0.02em] text-[var(--aethel-text-primary)]">
+    <span className="grid h-6 w-6 place-items-center border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[10px] font-bold tracking-[-0.02em] text-[var(--aethel-text-primary)]">
       {mark}
     </span>
   )
@@ -102,20 +101,19 @@ export default function RegisterPageV2() {
     <main className="relative min-h-screen overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-8 text-[var(--aethel-text-primary)] sm:px-6 lg:py-10">
         <a href="#register-form" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-sm">Skip to the registration form</a>
         <div className="pointer-events-none absolute inset-0 bg-grid-aethel opacity-45" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,color-mix(in_srgb,var(--aethel-primary)_16%,transparent),transparent_34%),radial-gradient(circle_at_82%_8%,color-mix(in_srgb,var(--aethel-info)_12%,transparent),transparent_30%)]" />
 
         <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-[1120px] items-center">
           <div className="grid w-full gap-5 lg:grid-cols-[460px_minmax(0,1fr)] lg:items-stretch">
-            <section className="mx-auto w-full max-w-[460px] rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl sm:p-7 lg:mx-0">
+            <section className="mx-auto w-full max-w-[460px] border-y border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-6 py-7 lg:mx-0">
               <div className="mb-7 flex items-center justify-between gap-3">
-                <Link href="/" className="inline-flex items-center gap-2 rounded-full px-1 text-sm text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]"><ArrowLeft className="h-4 w-4" /> Back</Link>
-                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-primary-light)]">{requestedPlan}</span>
+                <Link href="/" className="inline-flex items-center gap-2 px-1 text-sm text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]"><ArrowLeft className="h-4 w-4" /> Back</Link>
+                <span className="border-l border-[color-mix(in_srgb,var(--aethel-primary)_42%,transparent)] pl-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-primary-light)]">{requestedPlan}</span>
               </div>
 
               <div className="mb-7">
-                <div className="mb-4 flex items-center gap-3"><Image src="/branding/aethel-mark.svg" alt="Aethel" width={36} height={36} sizes="36px" className="rounded-xl shadow-[0_0_0_1px_var(--aethel-border-primary)]" priority /><span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">Aethel Studio</span></div>
+                <div className="mb-4 flex items-center gap-3"><Image src="/branding/aethel-mark.svg" alt="Aethel" width={36} height={36} sizes="36px" className="shadow-[0_0_0_1px_var(--aethel-border-primary)]" priority /><span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">Aethel Studio</span></div>
                 <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[var(--aethel-text-primary)]">Create account</h1>
-                <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">Open Studio with onboarding, project context, and a first mission ready.</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">Open Studio with your first project ready.</p>
               </div>
 
               <form id="register-form" onSubmit={handleRegister} className="space-y-4" noValidate aria-describedby={formError ? 'register-form-error' : undefined}>
@@ -123,14 +121,14 @@ export default function RegisterPageV2() {
                 <div className="space-y-2"><label htmlFor="email" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Email</label><input id="email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="you@company.com" /></div>
                 <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><label htmlFor="password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Password</label><input id="password" name="password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="8+ characters" /></div><div className="space-y-2"><label htmlFor="confirm-password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Confirm</label><input id="confirm-password" name="confirm-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="Repeat password" /></div></div>
                 <TurnstileField action="register" onTokenChange={setTurnstileToken} />
-                {formError ? <div id="register-form-error" className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)]" role="alert" aria-live="polite">{formError}</div> : null}
-                <button type="submit" disabled={isSubmitting || isHumanVerificationPending} className="h-12 w-full rounded-2xl bg-[var(--aethel-primary)] text-sm font-semibold text-white transition hover:bg-[var(--aethel-primary-light)] disabled:cursor-not-allowed disabled:opacity-60">{isSubmitting ? 'Creating account...' : 'Create account and open Studio'}</button>
+                {formError ? <div id="register-form-error" className="border-l border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)]" role="alert" aria-live="polite">{formError}</div> : null}
+                <button type="submit" disabled={isSubmitting || isHumanVerificationPending} className="h-12 w-full bg-[var(--aethel-primary)] text-sm font-semibold text-white transition hover:bg-[var(--aethel-primary-light)] disabled:cursor-not-allowed disabled:opacity-60">{isSubmitting ? 'Creating account...' : 'Create account and open Studio'}</button>
               </form>
 
               <div className="my-5 flex items-center gap-3"><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /><span className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">or</span><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /></div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {REGISTER_OAUTH_PROVIDERS.map((provider) => (
-                  <button key={provider.id} type="button" onClick={() => startOAuth(provider.id)} className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
+                  <button key={provider.id} type="button" onClick={() => startOAuth(provider.id)} className="inline-flex h-11 items-center justify-center gap-2 border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
                     <AuthProviderMark mark={provider.mark} />
                     {provider.label}
                   </button>
@@ -139,7 +137,7 @@ export default function RegisterPageV2() {
               <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">Already have an account? <Link href="/login" className="font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)]">Sign in</Link></p>
             </section>
 
-            <AuthExperiencePanel eyebrow="First access" domainLabel="Mission first" title="Start with context, not clutter." description="Registration should prepare the first useful action and keep the user inside a calm, inspectable workflow." highlights={REGISTER_HIGHLIGHTS} stats={REGISTER_STATS} />
+            <AuthExperiencePanel eyebrow="First access" domainLabel="Project first" title="Start with context, not clutter." description="Create the workspace and open the first useful action." highlights={REGISTER_HIGHLIGHTS} stats={REGISTER_STATS} />
           </div>
         </div>
     </main>

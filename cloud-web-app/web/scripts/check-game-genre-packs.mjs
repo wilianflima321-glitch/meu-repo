@@ -38,9 +38,12 @@ for (const genre of requiredGenres) {
 
 requirePattern('lib/production/game-scope-orchestrator.ts', /genrePack:\s*GameGenrePack/, 'GameScopePlan must include genrePack')
 requirePattern('lib/production/game-scope-orchestrator.ts', /getGameGenrePack/, 'GameScopePlan must resolve genre pack')
-requirePattern('app/studio/StudioMissionControl.tsx', /genrePack\.cameraModel/, 'Studio must surface genre pack camera')
-requirePattern('app/studio/StudioMissionControl.tsx', /(genrePack\.playtestScenarios|playtestSpine\.scenarios)/, 'Studio must surface genre playtest scenarios')
-requirePattern('components/evidence/EvidenceCenter.tsx', /genrePack\.coreLoop/, 'Evidence Center must surface genre core loop')
+requirePattern('app/studio/StudioGameScopeEvidencePanel.tsx', /genrePack\.cameraModel/, 'Studio must surface genre pack camera')
+requirePattern('app/studio/StudioGameScopeEvidencePanel.tsx', /(genrePack\.playtestScenarios|playtestSpine\.scenarios)/, 'Studio must surface genre playtest scenarios')
+const evidenceCenterSurface = `${read('components/evidence/EvidenceCenter.tsx')}\n${read('components/evidence/EvidenceCenter.parts.tsx')}`
+if (!/genrePack\.coreLoop/.test(evidenceCenterSurface)) {
+  failures.push('components/evidence/EvidenceCenter.tsx: missing Evidence Center must surface genre core loop')
+}
 requirePattern('lib/ai-agent-system.ts', /Genre pack: camera=/, 'agent prompt must receive genre pack constraints')
 requirePattern('docs/GAME_GENRE_PACKS_V22.md', /Multi-genre support cannot be just a dropdown/, 'docs must explain genre pack purpose')
 

@@ -26,7 +26,7 @@ const START_MODES = [
 const PROOF_POINTS = [
   { label: 'Agents', value: 'scope locked' },
   { label: 'Cost', value: 'visible' },
-  { label: 'Evidence', value: 'one tap' },
+  { label: 'Receipts', value: 'close' },
 ] as const
 
 export default function LandingPageV3() {
@@ -42,16 +42,16 @@ export default function LandingPageV3() {
           <div className="mx-auto max-w-4xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_56%,transparent)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
               <Sparkles className="h-3.5 w-3.5 text-[var(--aethel-info-light)]" />
-              AI Workforce IDE
+              AI product studio
             </div>
 
             <h1 className="mx-auto mt-8 max-w-4xl text-5xl font-semibold tracking-[-0.055em] text-[var(--aethel-text-primary)] sm:text-6xl lg:text-[5rem] lg:leading-[0.98]">
               The AI <span className="font-serif italic tracking-[-0.03em]">workforce</span> for builders who need{' '}
-              <span className="font-serif italic tracking-[-0.03em]">evidence</span>.
+              <span className="font-serif italic tracking-[-0.03em]">evidence</span>, not hype.
             </h1>
 
             <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-[var(--aethel-text-secondary)] sm:text-lg">
-              Describe one mission. Aethel coordinates agents, cost, replay, and Studio handoff without turning the first screen into a cockpit.
+              Describe what you want to build, preview the result, and keep the change trail close.
             </p>
 
             <div className="mx-auto">
@@ -64,7 +64,7 @@ export default function LandingPageV3() {
           <div className="overflow-hidden rounded-[34px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-[0_30px_110px_rgba(2,6,23,0.42)]">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3 sm:px-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-                FIG 1 - Mission Control
+                FIG 1 - Studio Home
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 {PROOF_POINTS.map((point) => (
@@ -78,8 +78,8 @@ export default function LandingPageV3() {
               </div>
             </div>
             <Image
-              src="/product-proof/studio-home.webp"
-              alt="Aethel Mission Control showing the active project, agent state, evidence, preview, and next actions."
+              src="/product-proof/studio-home.png"
+              alt="Aethel Studio Home showing the active project, agent state, receipts, preview, and next actions."
               width={1500}
               height={900}
               sizes="(min-width: 1280px) 1180px, calc(100vw - 32px)"
@@ -93,10 +93,10 @@ export default function LandingPageV3() {
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Start points</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--aethel-text-primary)] sm:text-4xl">
-                Choose the entry, then let the workspace get deeper only when needed.
+                Choose the entry, then open deeper tools only when needed.
               </h2>
               <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--aethel-text-secondary)]">
-                The first decision is intentionally small. Advanced creative, cloud, and runtime paths stay available without stealing the first scan.
+                Keep the first decision small. Advanced creative, cloud, and runtime paths stay close but quiet.
               </p>
             </div>
 
@@ -125,7 +125,7 @@ export default function LandingPageV3() {
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Next step</p>
               <h2 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight text-[var(--aethel-text-primary)]">
-                Start light. Keep proof close. Open the cockpit only when the mission needs it.
+                Start light. Keep receipts close. Open deeper tools only when the work needs them.
               </h2>
             </div>
             <div className="mt-5 flex flex-wrap gap-3 lg:mt-0 lg:justify-end">
@@ -133,7 +133,7 @@ export default function LandingPageV3() {
                 href="/dashboard?onboarding=1&source=landing-primary-cta"
                 className="inline-flex items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-5 py-3 text-sm font-semibold text-[var(--aethel-surface-primary)] transition hover:bg-[var(--aethel-text-secondary)]"
               >
-                Start a mission
+                Continue in dashboard
               </Link>
               <Link
                 href="/ide"

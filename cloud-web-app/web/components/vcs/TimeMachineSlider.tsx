@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary Motion-heavy surface; lazy-load outside its owning product region.
 'use client';
 
 /**
@@ -14,7 +15,7 @@
  */
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } from '@/lib/ui/motion';
 import useSWR from 'swr';
 import {
   History,
@@ -380,7 +381,7 @@ function TimelineBar({ commits, activeIndex, onSelect }: {
           <button type="button"
             key={i}
             onClick={() => onSelect(i)}
-            aria-label={`Selecionar commit ${i + 1}`}
+            aria-label={`Select commit ${i + 1}`}
             className={`
               w-2 h-2 rounded-full transition-all mx-0.5
               ${i === activeIndex

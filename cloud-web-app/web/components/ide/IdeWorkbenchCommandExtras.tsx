@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useCommandPalette } from '@/components/ide/CommandPalette'
 
 /**
- * Registra comandos extras do workbench na paleta do IDE.
+ * Registers extra workbench commands in the IDE command palette.
  */
 export function IdeWorkbenchCommandExtras() {
   const { registerCommand, unregisterCommand } = useCommandPalette()
@@ -12,8 +12,8 @@ export function IdeWorkbenchCommandExtras() {
   useEffect(() => {
     registerCommand({
       id: 'ai.openChatDiff',
-      label: 'IA: abrir painel Diff',
-      description: 'Mostra o separador Diff no painel avancado do chat',
+      label: 'AI: open Diff panel',
+      description: 'Shows the Diff tab in the advanced chat panel',
       category: 'ai',
       icon: 'git-compare',
       action: () => {
@@ -24,8 +24,8 @@ export function IdeWorkbenchCommandExtras() {
 
     registerCommand({
       id: 'ai.openChatExecution',
-      label: 'IA: abrir Execucao (tarefas)',
-      description: 'Mostra o separador Execucao no painel avancado do chat',
+      label: 'AI: open Execution tasks',
+      description: 'Shows the Execution tab in the advanced chat panel',
       category: 'ai',
       icon: 'tasklist',
       action: () => {

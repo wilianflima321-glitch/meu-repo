@@ -7,8 +7,8 @@ const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']
 const IGNORED_PARTS = new Set(['node_modules', '.next', 'coverage', 'dist', 'build', '.git'])
 
 const WATCH_LINE_LIMIT = 800
-const WATCH_FILE_BUDGET = 108
-const MAX_LINE_BUDGET = 993
+const WATCH_FILE_BUDGET = 0
+const MAX_LINE_BUDGET = 800
 const LOW_IMPORT_HINT_LIMIT = 1
 const LOW_IMPORT_LARGE_BUDGET = 0
 

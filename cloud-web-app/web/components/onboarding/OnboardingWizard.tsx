@@ -16,7 +16,7 @@ import {
 import { CANONICAL_TYPOGRAPHY, CANONICAL_SPACING } from '@/lib/canonical-spacing'
 
 /**
- * OnboardingWizard — 3-step quick start flow
+ * OnboardingWizard - 3-step quick start flow
  * Benchmark target: Replit (< 60 seconds to first value)
  * Source: docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md
  */
@@ -72,7 +72,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
 
   const steps = [
     { label: 'Template', done: step > 0 },
-    { label: 'Nome', done: step > 1 },
+    { label: 'Name', done: step > 1 },
     { label: 'Ready!', done: false },
   ]
 
@@ -109,10 +109,10 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
       {step === 0 && (
         <div>
           <h2 className={`${CANONICAL_TYPOGRAPHY.h1} text-[var(--aethel-text-primary)] mb-2`}>
-            Escolha um template
+            Choose a template
           </h2>
           <p className={`${CANONICAL_TYPOGRAPHY.body} text-[var(--aethel-text-tertiary)] mb-6`}>
-            Comece com uma base pronta ou do zero.
+            Start from a clean base or a focused starter.
           </p>
           <div className="grid grid-cols-2 gap-3">
             {TEMPLATES.map((t) => (
@@ -214,7 +214,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
               onClick={onSkip}
               className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] underline"
             >
-              Pular e ir ao Studio
+              Skip to Studio
             </button>
           )}
           {step > 0 && (
@@ -223,7 +223,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
               onClick={() => setStep((s) => s - 1)}
               className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]"
             >
-              ← Back
+              ? Back
             </button>
           )}
         </div>
@@ -243,7 +243,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
               onClick={handleComplete}
               className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--aethel-success)] to-[var(--aethel-secondary)] px-6 py-2.5 text-sm font-medium text-[var(--aethel-text-inverse)] shadow-lg shadow-[var(--aethel-success)]/25 transition-all duration-200 hover:shadow-[var(--aethel-success)]/40 hover:scale-[1.02] active:scale-[0.98]"
             >
-              Abrir no IDE <Sparkles className="h-4 w-4" />
+              Open in IDE <Sparkles className="h-4 w-4" />
             </button>
           )}
         </div>

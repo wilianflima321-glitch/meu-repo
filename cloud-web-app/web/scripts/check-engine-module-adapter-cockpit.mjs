@@ -9,7 +9,9 @@ const REQUIRED_FILES = [
   'components/studio/EngineModuleAdapterCockpit.tsx',
   'components/studio/EngineSpineReadinessPanel.tsx',
   'components/evidence/EvidenceCenter.tsx',
+  'components/evidence/EvidenceCenterReadySurface.tsx',
   'lib/studio/engine-spine-modules.ts',
+  'lib/studio/engine-spine-modules.data.ts',
   'docs/ENGINE_MODULE_ADAPTER_COCKPIT_V22.md',
 ]
 
@@ -42,7 +44,8 @@ requireToken('components/studio/EngineModuleAdapterCockpit.tsx', 'getEngineSpine
 requireToken('components/studio/EngineModuleAdapterCockpit.tsx', 'getEngineSpineDecisionMatrix')
 requireToken('components/studio/EngineModuleAdapterCockpit.tsx', 'Next safe move')
 requireToken('components/studio/EngineSpineReadinessPanel.tsx', 'EngineModuleAdapterCockpit')
-requireToken('components/evidence/EvidenceCenter.tsx', 'EngineModuleAdapterCockpit')
+requireToken('components/evidence/EvidenceCenter.tsx', 'EvidenceCenterReadySurface')
+requireToken('components/evidence/EvidenceCenterReadySurface.tsx', 'EngineModuleAdapterCockpit')
 requireToken('lib/studio/engine-spine-modules.ts', 'getEngineSpineReadinessModel')
 requireToken('lib/studio/engine-spine-modules.ts', 'getEngineSpineDecisionMatrix')
 requireToken('lib/studio/engine-spine-modules.ts', 'getEngineSpinePriorityModules')
@@ -59,7 +62,10 @@ if (/from ['"]@\/lib\/(aaa-render-system|world|capture|networking|aaa-asset-pipe
   failures.push('EngineModuleAdapterCockpit must not import heavy runtime modules directly')
 }
 
-const moduleSource = sources.get('lib/studio/engine-spine-modules.ts') ?? ''
+const moduleSource = [
+  sources.get('lib/studio/engine-spine-modules.ts') ?? '',
+  sources.get('lib/studio/engine-spine-modules.data.ts') ?? '',
+].join('\n')
 const highWorkerHeld = [...moduleSource.matchAll(/risk:\s*'high'[\s\S]{0,260}?loadStrategy:\s*'worker-or-sidecar'|loadStrategy:\s*'worker-or-sidecar'[\s\S]{0,260}?risk:\s*'high'/g)].length
 if (highWorkerHeld < 2) {
   failures.push('Engine spine must keep high-risk modules behind worker-or-sidecar boundaries')

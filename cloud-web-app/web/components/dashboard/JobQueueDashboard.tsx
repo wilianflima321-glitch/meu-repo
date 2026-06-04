@@ -8,137 +8,18 @@
  * Real-time visualization of job processing, stats, and history.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-type JobStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout'
-type JobPriority = 'low' | 'normal' | 'high' | 'critical'
-
-interface Job {
-  id: string
-  type: string
-  priority: JobPriority
-  status: JobStatus
-  payload: unknown
-  result: unknown
-  error: string
-  progress: number
-  retryCount: number
-  maxRetries: number
-  createdAt: string
-  startedAt: string
-  completedAt: string
-  timeoutMs: number
-  scheduledAt: string
-  workerId: string
-  metadata: Record<string, unknown>
-}
-
-interface QueueStats {
-  pending: number
-  running: number
-  completed: number
-  failed: number
-  cancelled: number
-  total: number
-  avgProcessingTime: number
-  successRate: number
-}
-
-interface JobQueueDashboardProps {
-  /** WebSocket URL for real-time updates */
-  wsUrl?: string
-  /** HTTP API base URL */
-  apiUrl?: string
-  /** Refresh interval in ms */
-  refreshInterval?: number
-  /** Custom class name */
-  className?: string
-  /** Jobs per page */
-  pageSize?: number
-}
-
-// ============================================================================
-// ICONS
-// ============================================================================
-
-const Icons = {
-  Play: () => (
-    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  Pause: () => (
-    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  Check: () => (
-    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  X: () => (
-    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  Clock: () => (
-    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  Refresh: () => (
-    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-    </svg>
-  ),
-  Trash: () => (
-    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-    </svg>
-  ),
-  Filter: () => (
-    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-    </svg>
-  ),
-  ChevronDown: () => (
-    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-    </svg>
-  ),
-  Server: () => (
-    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-    </svg>
-  ),
-}
-
-// ============================================================================
-// STATUS COLORS
-// ============================================================================
-
-const STATUS_COLORS: Record<JobStatus, { bg: string; text: string; dot: string }> = {
-  pending: { bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]', text: 'text-[var(--aethel-warning)]', dot: 'bg-[var(--aethel-warning-light)]' },
-  running: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]', text: 'text-[var(--aethel-info)]', dot: 'bg-[var(--aethel-info-light)] animate-pulse' },
-  completed: { bg: 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)]', text: 'text-[var(--aethel-success)]', dot: 'bg-[var(--aethel-success-light)]' },
-  failed: { bg: 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]', text: 'text-[var(--aethel-error)]', dot: 'bg-[var(--aethel-error-light)]' },
-  cancelled: { bg: 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_30%,transparent)]', text: 'text-[var(--aethel-text-secondary)]', dot: 'bg-[var(--aethel-text-tertiary)]' },
-  timeout: { bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]', text: 'text-[var(--aethel-warning-light)]', dot: 'bg-[var(--aethel-warning)]' },
-}
-
-const PRIORITY_COLORS: Record<JobPriority, string> = {
-  critical: 'text-[var(--aethel-error)]',
-  high: 'text-[var(--aethel-warning-light)]',
-  normal: 'text-[var(--aethel-info)]',
-  low: 'text-[var(--aethel-text-secondary)]',
-}
+import {
+  Icons,
+  PRIORITY_COLORS,
+  STATUS_COLORS,
+  type Job,
+  type JobPriority,
+  type JobQueueDashboardProps,
+  type JobStatus,
+  type QueueStats,
+} from './JobQueueDashboard.model'
 
 // ============================================================================
 // STAT CARD
@@ -147,7 +28,7 @@ const PRIORITY_COLORS: Record<JobPriority, string> = {
 interface StatCardProps {
   label: string
   value: string | number
-  icon: React.ReactNode
+  icon: ReactNode
   trend?: { value: number; isUp: boolean }
   color?: string
 }
@@ -164,7 +45,7 @@ function StatCard({ label, value, icon, trend, color = 'text-[var(--aethel-text-
       </div>
       {trend && (
         <div className={`mt-2 text-xs ${trend.isUp ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'}`}>
-          {trend.isUp ? 'up' : 'down'} {trend.value}% da ultima hora
+          {trend.isUp ? 'up' : 'down'} {trend.value}% in the last hour
         </div>
       )}
     </div>
@@ -250,13 +131,13 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
 
         <div className="ml-auto flex items-center gap-1">
           {(job.status === 'failed' || job.status === 'cancelled') && (
-            <button type="button" aria-label={`Tentar novamente job ${job.id}`}
+            <button type="button" aria-label={`Retry job ${job.id}`}
               onClick={(event) => {
                 event.stopPropagation()
                 onRetry(job.id)
               }}
               className={`rounded-xl p-1.5 text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] hover:text-[var(--aethel-info-light)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
-              title="Tentar novamente"
+              title="Retry"
             >
               <Icons.Refresh />
             </button>
@@ -280,7 +161,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
         <div className="border-t border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] px-4 py-3">
           <div className="grid gap-4 lg:grid-cols-2">
             <div>
-              <h4 className="mb-2 text-xs font-semibold uppercase text-[var(--aethel-text-tertiary)]">Details do job</h4>
+              <h4 className="mb-2 text-xs font-semibold uppercase text-[var(--aethel-text-tertiary)]">Job details</h4>
               <dl className="space-y-1">
                 <div className="flex">
                   <dt className="w-24 text-xs text-[var(--aethel-text-tertiary)]">ID:</dt>
@@ -322,7 +203,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
 
           {Boolean(job.result) && (
             <div className="mt-3">
-              <h4 className="mb-1 text-xs font-semibold uppercase text-[var(--aethel-success)]">Resultado</h4>
+              <h4 className="mb-1 text-xs font-semibold uppercase text-[var(--aethel-success)]">Result</h4>
               <pre className="max-h-32 overflow-auto rounded-md bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] p-2 text-xs font-mono text-[var(--aethel-success-light)]">
                 {JSON.stringify(job.result, null, 2)}
               </pre>
@@ -470,18 +351,18 @@ export function JobQueueDashboard({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3">
         <div className="flex items-center gap-3">
           <Icons.Server />
-          <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Fila de jobs</h2>
+          <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Job queue</h2>
           <span
             className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               isQueueRunning ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
             }`}
           >
-            {isQueueRunning ? 'Executando' : 'Pausada'}
+            {isQueueRunning ? 'Running' : 'Paused'}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <button type="button" aria-label={isQueueRunning ? 'Pausar fila de jobs' : 'Iniciar fila de jobs'}
+          <button type="button" aria-label={isQueueRunning ? 'Pause job queue' : 'Start job queue'}
             onClick={handleToggleQueue}
             className={`${primaryButtonClass} ${
               isQueueRunning
@@ -491,10 +372,10 @@ export function JobQueueDashboard({
           >
             <span className="flex items-center gap-2">
               {isQueueRunning ? <Icons.Pause /> : <Icons.Play />}
-              {isQueueRunning ? 'Pausar fila' : 'Iniciar fila'}
+              {isQueueRunning ? 'Pause queue' : 'Start queue'}
             </span>
           </button>
-          <button type="button" aria-label="Refresh fila de jobs"
+          <button type="button" aria-label="Refresh job queue"
             onClick={fetchData}
             className={ghostButtonClass}
             title="Refresh"
@@ -506,9 +387,9 @@ export function JobQueueDashboard({
 
       {stats && (
         <div className="grid gap-4 border-b border-[var(--aethel-border-subtle)] p-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Pendentes" value={stats.pending} icon={<Icons.Clock />} color="text-[var(--aethel-warning)]" />
-          <StatCard label="Executando" value={stats.running} icon={<Icons.Play />} color="text-[var(--aethel-info)]" />
-          <StatCard label="Completeds" value={stats.completed} icon={<Icons.Check />} color="text-[var(--aethel-success)]" />
+        <StatCard label="Pending" value={stats.pending} icon={<Icons.Clock />} color="text-[var(--aethel-warning)]" />
+        <StatCard label="Running" value={stats.running} icon={<Icons.Play />} color="text-[var(--aethel-info)]" />
+          <StatCard label="Completed" value={stats.completed} icon={<Icons.Check />} color="text-[var(--aethel-success)]" />
           <StatCard
             label="Success rate"
             value={`${(stats.successRate * 100).toFixed(1)}%`}
@@ -525,25 +406,25 @@ export function JobQueueDashboard({
             value={filter}
             onChange={(event) => setFilter(event.target.value as JobStatus | 'all')}
             className={inputClass}
-            aria-label="Filter jobs por status"
+            aria-label="Filter jobs by status"
           >
-            <option value="all">Todos os status</option>
-            <option value="pending">Pendente</option>
-            <option value="running">Executando</option>
+            <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="running">Running</option>
             <option value="completed">Completed</option>
-            <option value="failed">Falhou</option>
-            <option value="cancelled">Cancelado</option>
+            <option value="failed">Failed</option>
+            <option value="cancelled">Cancelled</option>
           </select>
         </div>
 
         <div className="flex-1">
           <input
             type="text"
-            placeholder="Search por ID ou tipo..."
+            placeholder="Search by ID or type..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             className={inputClass}
-            aria-label="Search jobs por id ou tipo"
+            aria-label="Search jobs by ID or type"
           />
         </div>
 
@@ -560,16 +441,16 @@ export function JobQueueDashboard({
         <div className="sticky top-0 flex items-center gap-4 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-[10px] uppercase text-[var(--aethel-text-tertiary)]">
           <span className="w-4"></span>
           <span className="w-20">Status</span>
-          <span className="w-24">Tipo</span>
-          <span className="w-16">Prioridade</span>
-          <span className="w-32">Progresso</span>
+          <span className="w-24">Type</span>
+          <span className="w-16">Priority</span>
+          <span className="w-32">Progress</span>
           <span className="w-24 text-right">Duration</span>
-          <span className="w-20 text-right">Criado</span>
-          <span className="ml-auto w-16">Acoes</span>
+          <span className="w-20 text-right">Created</span>
+          <span className="ml-auto w-16">Actions</span>
         </div>
 
         {filteredJobs.length === 0 ? (
-          <div className="m-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-4 py-6 text-sm text-[var(--aethel-text-tertiary)]">No job encontrado.</div>
+          <div className="m-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-4 py-6 text-sm text-[var(--aethel-text-tertiary)]">No jobs found.</div>
         ) : (
           filteredJobs.map((job) => (
             <JobRow
@@ -585,20 +466,20 @@ export function JobQueueDashboard({
       </div>
 
       <div className="flex items-center justify-between border-t border-[var(--aethel-border-subtle)] px-4 py-3">
-        <button type="button" aria-label="Pagina anterior da fila"
+        <button type="button" aria-label="Previous queue page"
           onClick={() => setPage(Math.max(1, page - 1))}
           disabled={page === 1}
           className={`${ghostButtonClass} text-xs disabled:opacity-50`}
         >
           &lt; Previous
         </button>
-        <span className="text-xs text-[var(--aethel-text-tertiary)]">Pagina {page}</span>
-        <button type="button" aria-label="Proxima pagina da fila"
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">Page {page}</span>
+        <button type="button" aria-label="Next queue page"
           onClick={() => setPage(page + 1)}
           disabled={filteredJobs.length < pageSize}
           className={`${ghostButtonClass} text-xs disabled:opacity-50`}
         >
-          Proxima &gt;
+          Next &gt;
         </button>
       </div>
     </div>

@@ -79,10 +79,13 @@ requirePattern('components/agents/window/AgentWindowTabs.tsx', /Navigation/, 'Ag
 requirePattern('components/agents/AgentsWindow.tsx', /fetchResearchNavigationMesh/, 'AgentsWindow fetches navigation mesh')
 requirePattern('components/agents/AgentsWindow.tsx', /activeView === 'navigation'/, 'AgentsWindow renders navigation mesh panel')
 requirePattern('components/evidence/EvidenceCenter.tsx', /\/api\/research\/navigation-mesh\?missionKind=advanced-research/, 'Evidence Center fetches navigation mesh')
-requirePattern('components/evidence/EvidenceCenter.tsx', /data-evidence-source="research-navigation-mesh"/, 'Evidence Center surfaces navigation evidence')
+const evidenceCenterSurface = `${read('components/evidence/EvidenceCenter.tsx')}\n${read('components/evidence/EvidenceCenter.parts.tsx')}`
+if (!/data-evidence-source="research-navigation-mesh"/.test(evidenceCenterSurface)) {
+  failures.push('components/evidence/EvidenceCenter.tsx: missing Evidence Center surfaces navigation evidence')
+}
 
 requirePattern('package.json', /"qa:research-navigation-mesh"/, 'package script')
-requirePattern('package.json', /qa:research-intelligence && npm run qa:research-navigation-mesh && npm run qa:evidence-ref-coverage && npm run qa:release-evidence-readiness && npm run qa:agent-read-receipts/, 'enterprise gate ordering')
+requirePattern('package.json', /qa:research-intelligence && npm run qa:research-navigation-mesh && npm run qa:(?:research-runtime-spine && npm run qa:)?evidence-ref-coverage && npm run qa:release-evidence-readiness && npm run qa:agent-read-receipts/, 'enterprise gate ordering')
 requirePattern('scripts/check-backbone-market-readiness.mjs', /research-navigation-mesh/, 'backbone coverage')
 requirePattern('scripts/check-backbone-market-readiness.mjs', /AETHEL_RESEARCH_NAVIGATION_MESH/, 'backbone capability token')
 

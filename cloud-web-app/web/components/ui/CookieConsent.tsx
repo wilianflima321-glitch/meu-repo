@@ -19,7 +19,6 @@ const AUTHENTICATED_WORKSPACE_PATHS = [
   '/marketplace',
   '/nexus',
   '/profile',
-  '/project-settings',
   '/settings',
   '/studio',
 ]

@@ -199,7 +199,7 @@ export default function AdminPanel() {
             <div className={PANEL_CLASS}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">Total de Users</h3>
+                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">Total users</h3>
                   <p className="text-2xl font-bold text-[var(--aethel-text-primary)]">{currentStats.total_users.toLocaleString()}</p>
                   <p className="text-xs text-[var(--aethel-success-light)] mt-1">Active: {currentStats.active_users}</p>
                 </div>
@@ -212,7 +212,7 @@ export default function AdminPanel() {
             <div className={PANEL_CLASS}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">Total de Credits</h3>
+                  <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">Total credits</h3>
                   <p className="text-2xl font-bold text-[var(--aethel-text-primary)]">${currentStats.total_credits.toFixed(2)}</p>
                   <p className="text-xs text-[var(--aethel-success-light)] mt-1">All users</p>
                 </div>
@@ -297,17 +297,17 @@ export default function AdminPanel() {
       {activeAdminTab === 'users' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className={CANONICAL_TYPOGRAPHY.h2}>Gestao de usuarios</h3>
+            <h3 className={CANONICAL_TYPOGRAPHY.h2}>User management</h3>
             <div className="flex gap-4">
               <input
                 type="text"
-                placeholder="Search usuarios..."
+                placeholder="Search users..."
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
                 className={`${INPUT_CLASS} w-64`}
-                aria-label="Search usuarios"
+                aria-label="Search users"
               />
-              <button type="button" aria-label="Create novo usuario" className={BUTTON_PRIMARY_CLASS}>Novo usuario</button>
+              <button type="button" aria-label="Create new user" className={BUTTON_PRIMARY_CLASS}>New user</button>
             </div>
           </div>
 
@@ -357,11 +357,11 @@ export default function AdminPanel() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex gap-2">
-                          <button type="button" aria-label={`Add creditos para ${user.email}`}
+                          <button type="button" aria-label={`Add credits to ${user.email}`}
                             onClick={async () => {
                               const amount = await openPromptDialog({
-                                title: 'Add creditos',
-                                message: 'Digite os creditos a adicionar:',
+                                title: 'Add credits',
+                                message: 'Enter credits to add:',
                                 placeholder: '100',
                                 confirmText: 'Add',
                                 cancelText: 'Cancel',
@@ -369,7 +369,7 @@ export default function AdminPanel() {
                               if (!amount) return;
                               const parsed = Number.parseFloat(amount);
                               if (Number.isNaN(parsed)) {
-                                toast.error('Valor invalido para creditos');
+                                toast.error('Invalid credit amount');
                                 return;
                               }
                               handleAddCredits(user.id, parsed);
@@ -379,14 +379,14 @@ export default function AdminPanel() {
                             Add Credits
                           </button>
                           {user.is_active ? (
-                            <button type="button" aria-label={`Suspender usuario ${user.email}`}
+                            <button type="button" aria-label={`Suspend user ${user.email}`}
                               onClick={() => handleSuspendUser(user.id)}
                               className={`${BUTTON_SECONDARY_CLASS} border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] text-[var(--aethel-error-light)]`}
                             >
                               Suspender
                             </button>
                           ) : (
-                            <button type="button" aria-label={`Ativar usuario ${user.email}`}
+                            <button type="button" aria-label={`Activate user ${user.email}`}
                               onClick={() => handleActivateUser(user.id)}
                               className={BUTTON_SECONDARY_CLASS}
                             >
@@ -404,10 +404,10 @@ export default function AdminPanel() {
             {/* Pagetion */}
             <div className="mt-4 flex items-center justify-between">
               <span className="text-sm text-[var(--aethel-text-tertiary)]">
-                Mostrando {users.length} de {totalUsers} usuarios
+                Showing {users.length} de {totalUsers} users
               </span>
               <div className="flex gap-2">
-                <button type="button" aria-label="Ir para a pagina anterior de usuarios"
+                <button type="button" aria-label="Go to previous users page"
                   onClick={() => setUserPage(Math.max(1, userPage - 1))}
                   disabled={userPage === 1}
                   className={BUTTON_SECONDARY_CLASS}
@@ -417,7 +417,7 @@ export default function AdminPanel() {
                 <span className="px-3 py-1 text-sm text-[var(--aethel-text-tertiary)]">
                   Page {userPage}
                 </span>
-                <button type="button" aria-label="Ir para a proxima pagina de usuarios"
+                <button type="button" aria-label="Go to next users page"
                   onClick={() => setUserPage(userPage + 1)}
                   disabled={users.length < 20}
                   className={BUTTON_SECONDARY_CLASS}
@@ -433,8 +433,8 @@ export default function AdminPanel() {
       {activeAdminTab === 'credits' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className={CANONICAL_TYPOGRAPHY.h2}>Gerenciamento de creditos</h3>
-            <button type="button" aria-label="Executar operacao de creditos em lote" className={BUTTON_PRIMARY_CLASS}>Operacao de creditos em lote</button>
+            <h3 className={CANONICAL_TYPOGRAPHY.h2}>Credit management</h3>
+            <button type="button" aria-label="Run bulk credit operation" className={BUTTON_PRIMARY_CLASS}>Bulk credit operation</button>
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -443,17 +443,17 @@ export default function AdminPanel() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">E-mail do User</label>
-                  <input type="email" className={INPUT_CLASS} placeholder="usuario@exemplo.com" aria-label="E-mail do usuario para alocacao de creditos" />
+                  <input type="email" className={INPUT_CLASS} placeholder="user@example.com" aria-label="User email for credit allocation" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Credits a Add</label>
-                  <input type="number" className={INPUT_CLASS} placeholder="1000" aria-label="Quantidade de creditos a adicionar" />
+                  <label className="block text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Credits to add</label>
+                  <input type="number" className={INPUT_CLASS} placeholder="1000" aria-label="Credit amount to add" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Motivo</label>
-                  <textarea className={`${INPUT_CLASS} h-20`} placeholder="Motivo para alocacao de creditos" aria-label="Motivo para alocacao de creditos" />
+                  <label className="block text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Reason</label>
+                  <textarea className={`${INPUT_CLASS} h-20`} placeholder="Reason for credit allocation" aria-label="Reason for credit allocation" />
                 </div>
-                <button type="button" aria-label="Add creditos manualmente" className={`${BUTTON_PRIMARY_CLASS} w-full`}>Add Credits</button>
+                <button type="button" aria-label="Add credits manually" className={`${BUTTON_PRIMARY_CLASS} w-full`}>Add Credits</button>
               </div>
             </div>
 
@@ -484,7 +484,7 @@ export default function AdminPanel() {
                   <tr className="border-b border-[var(--aethel-border-primary)]">
                     <th className="text-left py-3 px-4">User</th>
                     <th className="text-left py-3 px-4">Tipo</th>
-                    <th className="text-left py-3 px-4">Valor</th>
+                    <th className="text-left py-3 px-4">Amount</th>
                     <th className="text-left py-3 px-4">Descricao</th>
                     <th className="text-left py-3 px-4">Horario</th>
                   </tr>
@@ -531,13 +531,13 @@ export default function AdminPanel() {
       {activeAdminTab === 'financial' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className={CANONICAL_TYPOGRAPHY.h2}>Gestao financeira</h3>
-            <button type="button" aria-label="Gerar relatorio financeiro" className={BUTTON_PRIMARY_CLASS}>Gerar relatorio</button>
+            <h3 className={CANONICAL_TYPOGRAPHY.h2}>Financial management</h3>
+            <button type="button" aria-label="Generate financial report" className={BUTTON_PRIMARY_CLASS}>Generate report</button>
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className={PANEL_CLASS}>
-              <h4 className="text-lg font-semibold mb-4">Detalhamento de Receita</h4>
+              <h4 className="text-lg font-semibold mb-4">Revenue breakdown</h4>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-sm text-[var(--aethel-text-tertiary)]">Starter ($19)</span>
@@ -593,8 +593,8 @@ export default function AdminPanel() {
                 <thead>
                   <tr className="border-b border-[var(--aethel-border-primary)]">
                     <th className="text-left py-3 px-4">User</th>
-                    <th className="text-left py-3 px-4">Plano</th>
-                    <th className="text-left py-3 px-4">Valor</th>
+                    <th className="text-left py-3 px-4">Plan</th>
+                    <th className="text-left py-3 px-4">Amount</th>
                     <th className="text-left py-3 px-4">Status</th>
                     <th className="text-left py-3 px-4">Data</th>
                   </tr>
@@ -602,7 +602,7 @@ export default function AdminPanel() {
                 <tbody>
                   <tr className="border-b border-[var(--aethel-border-primary)]">
                     <td className="py-3 px-4">john.doe@example.com</td>
-                    <td className="py-3 px-4">Plano Pro</td>
+                    <td className="py-3 px-4">Pro plan</td>
                     <td className="py-3 px-4">$39.00</td>
                     <td className="py-3 px-4">
                       <span className="rounded-full px-2 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]">
@@ -613,7 +613,7 @@ export default function AdminPanel() {
                   </tr>
                   <tr className="border-b border-[var(--aethel-border-primary)]">
                     <td className="py-3 px-4">jane.smith@example.com</td>
-                    <td className="py-3 px-4">Plano Starter</td>
+                    <td className="py-3 px-4">Starter plan</td>
                     <td className="py-3 px-4">$19.00</td>
                     <td className="py-3 px-4">
                       <span className="rounded-full px-2 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]">
@@ -632,7 +632,7 @@ export default function AdminPanel() {
       {activeAdminTab === 'system' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className={CANONICAL_TYPOGRAPHY.h2}>Gestao do sistema</h3>
+            <h3 className={CANONICAL_TYPOGRAPHY.h2}>System management</h3>
             <button type="button" aria-label="Open system settings" className={BUTTON_PRIMARY_CLASS}>System settings</button>
           </div>
 

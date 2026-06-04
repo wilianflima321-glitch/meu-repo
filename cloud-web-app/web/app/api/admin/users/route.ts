@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError, createAPIError } from '@/lib/api-errors';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback';
 
 const routeLogger = createComponentLogger('api/admin/users/route');
 
@@ -21,16 +22,16 @@ async function requireAdminAccess(userId: string): Promise<void> {
     where: { id: userId },
     select: { role: true, email: true, adminRole: true }
   });
-  
+
   if (!user) {
     throw createAPIError('USER_NOT_FOUND', 'User not found');
   }
-  
-  const isAdmin = 
+
+  const isAdmin =
     ADMIN_ROLES.includes(user.role) ||
     ADMIN_ROLES.includes(user.adminRole || '') ||
     ADMIN_EMAILS.includes(user.email);
-  
+
   if (!isAdmin) {
     throw createAPIError('FORBIDDEN', 'Admin access required');
   }
@@ -64,9 +65,25 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ users });
   } catch (error) {
+    if (shouldUseLocalEvidenceFallback(req, error)) {
+      return localEvidenceJson(
+        req,
+        error,
+        {
+          users: [],
+          status: 'held',
+          privacy: {
+            screenshotsMasked: true,
+            realEmailsExcluded: true,
+          },
+        },
+        { surface: 'admin.users', state: 'held' },
+      );
+    }
+
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
-    
+
     routeLogger.error('Admin Users Error:', error);
     return apiInternalError();
   }

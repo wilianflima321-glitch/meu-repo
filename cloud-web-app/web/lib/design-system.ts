@@ -13,9 +13,7 @@ export function createCSSCustomProperties(): void {
   // If the app already defines design tokens (CSS vars), do nothing.
   // This avoids introducing new, hard-coded colors/tokens in JS.
   const styles = getComputedStyle(root);
-  const existing =
-    styles.getPropertyValue('--aethel-primary') ||
-    styles.getPropertyValue('--color-primary-500');
+  const existing = styles.getPropertyValue('--aethel-primary');
   if (existing && existing.trim().length > 0) return;
 
   // Fallback: ensure we at least set a stable attribute that CSS can hook into.

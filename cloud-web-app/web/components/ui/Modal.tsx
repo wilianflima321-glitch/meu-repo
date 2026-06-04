@@ -120,7 +120,7 @@ export function Modal({
                     transition-all duration-200
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)]
                   "
-                  aria-label="Fechar modal"
+                  aria-label="Close modal"
                 >
                   <X className="h-5 w-5" />
                 </button>

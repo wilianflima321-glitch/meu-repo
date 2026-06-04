@@ -1,12 +1,13 @@
+// @aethel-heavy-async-boundary IDE/Monaco runtime module; never import from public/dashboard/admin route shells.
 /**
  * Collaboration Manager
- * 
+ *
  * Central manager for real-time collaboration features including:
  * - Document synchronization via CRDT
  * - Cursor and selection sharing
  * - Presence (who's online, where they are)
  * - Session management (create, join, leave)
- * 
+ *
  * Dependencies:
  * - yjs: CRDT implementation
  * - y-websocket: WebSocket provider for Yjs
@@ -126,15 +127,15 @@ export class CollaborationManager extends EventEmitter {
   private userId: string;
   private userName: string;
   private userColor: string;
-  
+
   private ydoc: Y.Doc | null = null;
   private wsProvider: WebsocketProvider | null = null;
   private monacoBindings = new Map<string, MonacoBindingLike>();
-  
+
   private currentSession: CollaborationSession | null = null;
   private collaborators = new Map<string, Collaborator>();
   private chatHistory: ChatMessage[] = [];
-  
+
   private isConnected = false;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
@@ -170,7 +171,7 @@ export class CollaborationManager extends EventEmitter {
    */
   async createSession(projectId: string, name: string, settings?: Partial<SessionSettings>): Promise<CollaborationSession> {
     const sessionId = this.generateSessionId();
-    
+
     const session: CollaborationSession = {
       id: sessionId,
       name,
@@ -216,7 +217,7 @@ export class CollaborationManager extends EventEmitter {
 
     // Set up awareness (presence)
     const awareness = this.wsProvider.awareness;
-    
+
     // Set local user state
     awareness.setLocalState({
       user: {
@@ -289,10 +290,10 @@ export class CollaborationManager extends EventEmitter {
 
     this.collaborators.clear();
     this.chatHistory = [];
-    
+
     const session = this.currentSession;
     this.currentSession = null;
-    
+
     this.emit('sessionLeft');
   }
 
@@ -339,7 +340,7 @@ export class CollaborationManager extends EventEmitter {
               lineNumber: change.range.startLineNumber,
               column: change.range.startColumn
             });
-            
+
             if (change.rangeLength > 0) {
               yText.delete(offset, change.rangeLength);
             }
@@ -404,7 +405,7 @@ export class CollaborationManager extends EventEmitter {
 
     const awareness = this.wsProvider.awareness;
     const state = awareness.getLocalState() || {};
-    
+
     awareness.setLocalState({
       ...state,
       cursor: { line, column },
@@ -420,7 +421,7 @@ export class CollaborationManager extends EventEmitter {
 
     const awareness = this.wsProvider.awareness;
     const state = awareness.getLocalState() || {};
-    
+
     awareness.setLocalState({
       ...state,
       selection: selection ? {
@@ -440,7 +441,7 @@ export class CollaborationManager extends EventEmitter {
     if (!this.ydoc) return;
 
     const chatArray = this.ydoc.getArray<ChatMessage>('chat');
-    
+
     const chatMessage: ChatMessage = {
       id: this.generateMessageId(),
       userId: this.userId,
@@ -495,7 +496,7 @@ export class CollaborationManager extends EventEmitter {
    */
   private handleAwarenessChange(awareness: WebsocketProvider['awareness']): void {
     const states = awareness.getStates();
-    
+
     const onlineUsers = new Set<string>();
 
     states.forEach((state: unknown, clientId: number) => {
@@ -526,13 +527,13 @@ export class CollaborationManager extends EventEmitter {
       } else {
         // Update existing collaborator
         this.collaborators.set(userId, collaborator);
-        
+
         // Emit cursor/selection events
-        if (existing.cursor?.line !== collaborator.cursor?.line || 
+        if (existing.cursor?.line !== collaborator.cursor?.line ||
             existing.cursor?.column !== collaborator.cursor?.column) {
           this.emit('cursorMoved', userId, collaborator.cursor!);
         }
-        
+
         if (JSON.stringify(existing.selection) !== JSON.stringify(collaborator.selection)) {
           this.emit('selectionChanged', userId, collaborator.selection || null);
         }

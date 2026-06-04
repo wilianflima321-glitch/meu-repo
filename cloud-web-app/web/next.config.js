@@ -105,9 +105,6 @@ const routeRedirects = [
   ['/chat', '/ide?entry=chat'],
   ['/dashboard/legacy', '/dashboard?legacy=1'],
   ['/debugger', '/ide?entry=debugger'],
-  ['/docs/changelog', '/docs#changelog'],
-  ['/docs/community', '/docs#community'],
-  ['/docs/support', '/docs#support'],
   ['/editor-hub', '/ide'],
   ['/explorer', '/ide?entry=explorer'],
   ['/git', '/ide?entry=git'],
@@ -149,6 +146,7 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   typescript: { ignoreBuildErrors: false },
+  transpilePackages: ['geist'],
   experimental: {
     cpus: buildCpus,
     serverComponentsExternalPackages: serverComponentExternalPackages,

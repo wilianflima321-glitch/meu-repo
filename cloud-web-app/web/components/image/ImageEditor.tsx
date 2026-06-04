@@ -377,7 +377,7 @@ export function ImageEditor({
       {/* Toolbar */}
       <div className="w-12 bg-[var(--aethel-surface-secondary)] border-r border-[var(--aethel-border-primary)] flex flex-col items-center py-2 gap-1">
         {(['brush', 'eraser', 'fill', 'eyedropper', 'move'] as Tool[]).map(t => (
-          <button type="button" aria-label={`Selecionar ferramenta ${t}`}
+          <button type="button" aria-label={`Select tool ${t}`}
             key={t}
             onClick={() => setTool(t)}
             className={`w-10 h-10 rounded flex items-center justify-center text-lg ${
@@ -510,5 +510,3 @@ export function ImageEditor({
 }
 
 export default ImageEditor;
-
-

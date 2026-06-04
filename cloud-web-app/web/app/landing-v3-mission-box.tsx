@@ -119,7 +119,7 @@ export default function LandingMissionBox() {
           <div className="flex min-w-0 flex-1 items-center gap-3 rounded-[20px] px-2 py-2">
             <Sparkles className="h-4.5 w-4.5 shrink-0 text-[var(--aethel-info-light)]" />
             <label htmlFor="landing-mission-input" className="sr-only">
-              Describe one mission for Aethel
+              Describe what you want Aethel to build
             </label>
             <input
               id="landing-mission-input"
@@ -145,7 +145,7 @@ export default function LandingMissionBox() {
               className="inline-flex min-w-[168px] items-center justify-center gap-2 rounded-2xl bg-[var(--aethel-text-primary)] px-5 py-3 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-lg transition hover:bg-[var(--aethel-text-secondary)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-              {isGenerating ? 'Starting...' : 'Start a mission'}
+              {isGenerating ? 'Starting...' : 'Start building'}
             </button>
           </div>
         </div>

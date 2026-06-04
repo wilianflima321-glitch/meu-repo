@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { FileItem } from '@/components/ide/CommandPalette';
 import { analytics } from '@/lib/analytics';
 import {
+  getAuthHeaders,
   normalizePath,
   pickFirstFilePath,
   resolveLanguage,
@@ -55,6 +56,7 @@ export function useWorkbenchFiles({
           headers: {
             'Content-Type': 'application/json',
             'x-project-id': projectId,
+            ...getAuthHeaders(),
           },
           body: JSON.stringify({
             action: 'read',
@@ -103,6 +105,7 @@ export function useWorkbenchFiles({
           headers: {
             'Content-Type': 'application/json',
             'x-project-id': projectId,
+            ...getAuthHeaders(),
           },
           body: JSON.stringify({
             action: 'write',

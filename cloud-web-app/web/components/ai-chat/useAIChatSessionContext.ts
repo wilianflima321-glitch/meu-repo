@@ -4,6 +4,10 @@ import { useEffect, type Dispatch, type SetStateAction } from 'react'
 import { analytics } from '@/lib/analytics'
 import { buildResearchPrompt, consumeResearchHandoff } from '@/lib/research-handoff'
 import { buildResearchArtifactFromPayload } from '@/components/ai-chat/ai-chat-evidence'
+import {
+  buildDashboardLaunchSystemContext,
+  consumeDashboardLaunchMission,
+} from '@/components/dashboard/dashboard-launch-handoff'
 import type { ChatMessage } from '@/components/ai-chat/ai-chat-container.types'
 
 type UseAIChatSessionContextArgs = {
@@ -38,9 +42,43 @@ export function useAIChatSessionContext({
     const params = new URLSearchParams(window.location.search)
     const missionParam = params.get('mission')
     const sourceParam = params.get('source')
-    setMission(missionParam && missionParam.trim() ? missionParam.trim() : null)
-    setSource(sourceParam && sourceParam.trim() ? sourceParam.trim() : null)
-  }, [fallbackProjectId, setMission, setProjectId, setSource])
+    const launchHandoff = missionParam?.trim() ? null : consumeDashboardLaunchMission()
+    const mission = missionParam && missionParam.trim() ? missionParam.trim() : launchHandoff?.mission ?? null
+    const source = sourceParam && sourceParam.trim() ? sourceParam.trim() : launchHandoff?.source ?? null
+
+    setMission(mission)
+    setSource(source)
+
+    if (!launchHandoff) return
+
+    setMessages((prev) => {
+      if (prev.length > 0) return prev
+
+      return [
+        {
+          id: `system-dashboard-launch-${Date.now()}`,
+          role: 'system',
+          content: buildDashboardLaunchSystemContext(launchHandoff),
+          timestamp: new Date(),
+        },
+        {
+          id: `assistant-dashboard-launch-${Date.now() + 1}`,
+          role: 'assistant',
+          content:
+            'Studio Home mission loaded. Choose a quick intent or send the next message and I will keep Copilot, IDE, preview, Viewport 3D, receipts, and runtime checks aligned.',
+          timestamp: new Date(),
+          model: currentModel,
+        },
+      ]
+    })
+
+    analytics?.track?.('ai', 'ai_chat', {
+      metadata: {
+        source: 'dashboard-launch-handoff',
+        missionLength: launchHandoff.mission.length,
+      },
+    })
+  }, [currentModel, fallbackProjectId, setMessages, setMission, setProjectId, setSource])
 
   useEffect(() => {
     const handoff = consumeResearchHandoff()

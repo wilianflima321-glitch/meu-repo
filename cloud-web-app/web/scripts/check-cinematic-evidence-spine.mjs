@@ -37,8 +37,11 @@ requirePattern('lib/production/game-production-spine.ts', /CINEMATIC_EVIDENCE_RE
 requirePattern('lib/production/deep-game-production-bible.ts', /cinematicEvidence:\s*CinematicEvidencePlan/, 'deep bible must include cinematic evidence plan')
 requirePattern('lib/production/game-production-bible.ts', /'cinematics'/, 'compact bible must include cinematics pillar')
 requirePattern('lib/production/game-scope-orchestrator.ts', /cinematicEvidence:\s*CinematicEvidencePlan/, 'scope plan must expose cinematic evidence')
-requirePattern('app/studio/StudioMissionControl.tsx', /gameScopePlan\.cinematicEvidence\.state/, 'Studio must show compact cinematic evidence state')
-requirePattern('components/evidence/EvidenceCenter.tsx', /productionBiblePlan\.cinematicEvidence\.state/, 'Evidence Center must show cinematic evidence state')
+requirePattern('app/studio/StudioMissionControl.tsx', /gameScopePlan\??\.cinematicEvidence\.state/, 'Studio must show compact cinematic evidence state')
+const evidenceCenterSurface = `${read('components/evidence/EvidenceCenter.tsx')}\n${read('components/evidence/EvidenceCenter.parts.tsx')}`
+if (!/productionBiblePlan\.cinematicEvidence\.state/.test(evidenceCenterSurface)) {
+  failures.push('components/evidence/EvidenceCenter.tsx: missing Evidence Center must show cinematic evidence state')
+}
 requirePattern('lib/ai-agent-system.ts', /Cinematic evidence:/, 'agents must receive cinematic evidence context')
 requirePattern('__tests__/production/cinematic-evidence-spine.test.ts', /blocks AI video reference when no provider evidence exists/, 'tests must cover provider-blocked video evidence')
 requirePattern('__tests__/production/cinematic-evidence-spine.test.ts', /keeps fully evidenced cinematic work in human review instead of ready/, 'tests must prove human-held cinematic release behavior')

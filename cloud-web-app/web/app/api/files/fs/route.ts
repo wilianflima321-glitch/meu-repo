@@ -10,12 +10,19 @@ import {
   toVirtualWorkspacePath,
 } from '@/lib/server/workspace-scope';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback';
 
 const routeLogger = createComponentLogger('api/files/fs/route');
 
+function isClientAbortError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  const code = 'code' in error ? String((error as { code?: unknown }).code ?? '') : '';
+  return code === 'ECONNRESET' || error.message.toLowerCase() === 'aborted';
+}
+
 /**
  * POST /api/files/fs - File System Operations
- * 
+ *
  * Body:
  * - action: 'list' | 'read' | 'write' | 'delete' | 'copy' | 'move' | 'mkdir' | 'info' | 'exists'
  * - path: string (required)
@@ -24,12 +31,35 @@ const routeLogger = createComponentLogger('api/files/fs/route');
  * - options: object (action-specific options)
  */
 export async function POST(request: NextRequest) {
+  let attemptedAction = 'unknown';
+  let attemptedPath = '/';
   try {
     const user = requireAuth(request);
     await requireEntitlementsForUser(user.userId);
 
-    const body = await request.json();
+    const rawBody = await request.text();
+    let body: any = { action: 'list', path: '/' };
+    if (rawBody.trim()) {
+      try {
+        body = JSON.parse(rawBody);
+      } catch {
+        return NextResponse.json(
+          { error: 'valid JSON body is required' },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json(
+        { error: 'valid JSON body is required' },
+        { status: 400 }
+      );
+    }
+
     const { action, path: filePath, content, destination, options } = body;
+    attemptedAction = String(action || 'unknown');
+    attemptedPath = String(filePath || '/');
     const projectId = getScopedProjectId(request, body);
 
     if (!action || !filePath) {
@@ -233,7 +263,54 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
+    if (isClientAbortError(error)) {
+      routeLogger.warn('File system operation aborted by client.', {
+        action: attemptedAction,
+        path: attemptedPath,
+      });
+      return NextResponse.json(
+        { error: 'REQUEST_ABORTED', action: attemptedAction, path: attemptedPath },
+        { status: 499 }
+      );
+    }
+
     routeLogger.error('File system operation failed:', error);
+
+    if (shouldUseLocalEvidenceFallback(request, error)) {
+      const status = attemptedAction === 'list' || attemptedAction === 'exists' ? 200 : 503;
+      const payload =
+        attemptedAction === 'list'
+          ? {
+              path: attemptedPath,
+              entries: [],
+              total: 0,
+              projectId: request.nextUrl.searchParams.get('projectId') ?? 'local-evidence',
+              runtime: 'filesystem-runtime',
+              authority: 'canonical',
+              status: 'held',
+            }
+          : attemptedAction === 'exists'
+            ? {
+                exists: false,
+                path: attemptedPath,
+                projectId: request.nextUrl.searchParams.get('projectId') ?? 'local-evidence',
+                runtime: 'filesystem-runtime',
+                authority: 'canonical',
+                status: 'held',
+              }
+            : {
+                error: 'FILESYSTEM_RUNTIME_HELD',
+                message: 'File operation is held until local filesystem runtime and entitlements are available.',
+                action: attemptedAction,
+                path: attemptedPath,
+              };
+
+      return localEvidenceJson(request, error, payload, {
+        surface: 'files.fs',
+        state: 'held',
+        status,
+      });
+    }
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

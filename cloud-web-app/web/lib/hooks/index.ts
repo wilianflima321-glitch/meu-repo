@@ -1,19 +1,8 @@
 /**
  * Aethel Engine - Hooks Index
- * 
+ *
  * Exportação centralizada de todos os hooks React.
  */
-
-// ============================================================================
-// Terminal
-// ============================================================================
-
-export {
-  useTerminal,
-  type UseTerminalOptions,
-  type UseTerminalReturn,
-  type TerminalTheme,
-} from './useTerminal';
 
 // ============================================================================
 // Collaboration

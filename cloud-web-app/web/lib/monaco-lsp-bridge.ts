@@ -1,113 +1,19 @@
+// @aethel-heavy-async-boundary IDE/Monaco runtime module; never import from public/dashboard/admin route shells.
 /**
  * Monaco LSP Bridge
- * 
+ *
  * Connects Monaco Editor to the LSP server via WebSocket for real-time
  * language intelligence features like autocomplete, hover, go-to-definition, etc.
  */
 
 import * as monaco from 'monaco-editor';
 
-import {createComponentLogger, logger} from '@/lib/observability/logger'
+import { createComponentLogger, logger } from '@/lib/observability/logger';
+import { DEFAULT_LSP_ROOT_URI, DEFAULT_LSP_WORKSPACE_FOLDERS, DEFAULT_LSP_WS_URL, LSP_CLIENT_CAPABILITIES, LSP_REQUEST_TIMEOUT_MS, SUPPORTED_LSP_LANGUAGES } from './monaco-lsp-bridge.config';
+import { LSP_COMPLETION_KIND_MAP, LSP_SEVERITY_MAP } from './monaco-lsp-bridge.maps';
+import type { CompletionItem, Diagnostic, Hover, Location, LspMessage, Range, TextDocumentPositionParams } from './monaco-lsp-bridge.types';
 
-const log = createComponentLogger('monaco-lsp-bridge')
-
-// LSP Message Types
-interface LspMessage {
-  jsonrpc: '2.0';
-  id?: number;
-  method?: string;
-  params?: unknown;
-  result?: unknown;
-  error?: { code: number; message: string; data?: unknown };
-}
-
-interface Position {
-  line: number;
-  character: number;
-}
-
-interface Range {
-  start: Position;
-  end: Position;
-}
-
-interface TextDocumentIdentifier {
-  uri: string;
-}
-
-interface TextDocumentPositionParams {
-  textDocument: TextDocumentIdentifier;
-  position: Position;
-}
-
-interface CompletionItem {
-  label: string;
-  kind?: number;
-  detail?: string;
-  documentation?: string | { kind: string; value: string };
-  insertText?: string;
-  insertTextFormat?: number;
-  textEdit?: { range: Range; newText: string };
-  additionalTextEdits?: { range: Range; newText: string }[];
-  sortText?: string;
-  filterText?: string;
-  preselect?: boolean;
-}
-
-interface Hover {
-  contents: string | { kind: string; value: string } | { language: string; value: string }[];
-  range?: Range;
-}
-
-interface Location {
-  uri: string;
-  range: Range;
-}
-
-interface Diagnostic {
-  range: Range;
-  severity?: number;
-  code?: string | number;
-  source?: string;
-  message: string;
-  relatedInformation?: { location: Location; message: string }[];
-}
-
-// LSP to Monaco kind mappings
-const LSP_COMPLETION_KIND_MAP: Record<number, monaco.languages.CompletionItemKind> = {
-  1: monaco.languages.CompletionItemKind.Text,
-  2: monaco.languages.CompletionItemKind.Method,
-  3: monaco.languages.CompletionItemKind.Function,
-  4: monaco.languages.CompletionItemKind.Constructor,
-  5: monaco.languages.CompletionItemKind.Field,
-  6: monaco.languages.CompletionItemKind.Variable,
-  7: monaco.languages.CompletionItemKind.Class,
-  8: monaco.languages.CompletionItemKind.Interface,
-  9: monaco.languages.CompletionItemKind.Module,
-  10: monaco.languages.CompletionItemKind.Property,
-  11: monaco.languages.CompletionItemKind.Unit,
-  12: monaco.languages.CompletionItemKind.Value,
-  13: monaco.languages.CompletionItemKind.Enum,
-  14: monaco.languages.CompletionItemKind.Keyword,
-  15: monaco.languages.CompletionItemKind.Snippet,
-  16: monaco.languages.CompletionItemKind.Color,
-  17: monaco.languages.CompletionItemKind.File,
-  18: monaco.languages.CompletionItemKind.Reference,
-  19: monaco.languages.CompletionItemKind.Folder,
-  20: monaco.languages.CompletionItemKind.EnumMember,
-  21: monaco.languages.CompletionItemKind.Constant,
-  22: monaco.languages.CompletionItemKind.Struct,
-  23: monaco.languages.CompletionItemKind.Event,
-  24: monaco.languages.CompletionItemKind.Operator,
-  25: monaco.languages.CompletionItemKind.TypeParameter,
-};
-
-const LSP_SEVERITY_MAP: Record<number, monaco.MarkerSeverity> = {
-  1: monaco.MarkerSeverity.Error,
-  2: monaco.MarkerSeverity.Warning,
-  3: monaco.MarkerSeverity.Info,
-  4: monaco.MarkerSeverity.Hint,
-};
+const log = createComponentLogger('monaco-lsp-bridge');
 
 /**
  * Monaco LSP Bridge - connects Monaco Editor to LSP server
@@ -123,7 +29,7 @@ export class MonacoLspBridge {
   private reconnectDelay = 1000;
   private serverCapabilities: Record<string, unknown> = {};
 
-  constructor(private wsUrl: string = 'ws://localhost:3001/lsp') {}
+  constructor(private wsUrl: string = DEFAULT_LSP_WS_URL) {}
 
   /**
    * Initialize the bridge and connect to LSP server
@@ -171,7 +77,7 @@ export class MonacoLspBridge {
       this.reconnectAttempts++;
       const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
       log.info(`[LSP Bridge] Attempting reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-      
+
       setTimeout(async () => {
         try {
           await this.connect();
@@ -193,58 +99,9 @@ export class MonacoLspBridge {
   private async initializeLsp(): Promise<void> {
     const result = await this.sendRequest<{ capabilities: Record<string, unknown> }>('initialize', {
       processId: null,
-      capabilities: {
-        textDocument: {
-          synchronization: {
-            dynamicRegistration: true,
-            willSave: true,
-            willSaveWaitUntil: true,
-            didSave: true,
-          },
-          completion: {
-            dynamicRegistration: true,
-            completionItem: {
-              snippetSupport: true,
-              commitCharactersSupport: true,
-              documentationFormat: ['markdown', 'plaintext'],
-              deprecatedSupport: true,
-              preselectSupport: true,
-              insertReplaceSupport: true,
-            },
-            contextSupport: true,
-          },
-          hover: {
-            dynamicRegistration: true,
-            contentFormat: ['markdown', 'plaintext'],
-          },
-          signatureHelp: {
-            dynamicRegistration: true,
-            signatureInformation: {
-              documentationFormat: ['markdown', 'plaintext'],
-              parameterInformation: { labelOffsetSupport: true },
-            },
-          },
-          definition: { dynamicRegistration: true },
-          references: { dynamicRegistration: true },
-          documentHighlight: { dynamicRegistration: true },
-          documentSymbol: { dynamicRegistration: true },
-          codeAction: { dynamicRegistration: true },
-          codeLens: { dynamicRegistration: true },
-          formatting: { dynamicRegistration: true },
-          rangeFormatting: { dynamicRegistration: true },
-          rename: { dynamicRegistration: true, prepareSupport: true },
-          publishDiagnostics: { relatedInformation: true },
-        },
-        workspace: {
-          applyEdit: true,
-          workspaceEdit: { documentChanges: true },
-          didChangeConfiguration: { dynamicRegistration: true },
-          workspaceFolders: true,
-          symbol: { dynamicRegistration: true },
-        },
-      },
-      rootUri: 'file:///workspace',
-      workspaceFolders: [{ uri: 'file:///workspace', name: 'workspace' }],
+      capabilities: LSP_CLIENT_CAPABILITIES,
+      rootUri: DEFAULT_LSP_ROOT_URI,
+      workspaceFolders: DEFAULT_LSP_WORKSPACE_FOLDERS,
     });
 
     this.serverCapabilities = result.capabilities;
@@ -279,7 +136,7 @@ export class MonacoLspBridge {
           this.pendingRequests.delete(id);
           reject(new Error(`Request ${method} timed out`));
         }
-      }, 10000);
+      }, LSP_REQUEST_TIMEOUT_MS);
     });
   }
 
@@ -367,10 +224,7 @@ export class MonacoLspBridge {
    * Register Monaco providers
    */
   private registerProviders(): void {
-    // Register for common languages
-    const languages = ['typescript', 'javascript', 'python', 'rust', 'go', 'cpp', 'c', 'java'];
-
-    for (const language of languages) {
+    for (const language of SUPPORTED_LSP_LANGUAGES) {
       // Completion provider
       this.disposables.push(
         monaco.languages.registerCompletionItemProvider(language, {
@@ -444,7 +298,7 @@ export class MonacoLspBridge {
   async didOpen(uri: string, languageId: string, text: string): Promise<void> {
     const version = 1;
     this.openDocuments.set(uri, { version, languageId });
-    
+
     this.sendNotification('textDocument/didOpen', {
       textDocument: { uri, languageId, version, text },
     });
@@ -567,7 +421,7 @@ export class MonacoLspBridge {
       if (!result) return null;
 
       const contents: monaco.IMarkdownString[] = [];
-      
+
       if (typeof result.contents === 'string') {
         contents.push({ value: result.contents });
       } else if (Array.isArray(result.contents)) {
@@ -665,15 +519,15 @@ export class MonacoLspBridge {
         activeSignature?: number;
         activeParameter?: number;
       } | null>('textDocument/signatureHelp', params);
-      
+
       if (!result || !result.signatures.length) return null;
 
       return {
         value: {
           signatures: result.signatures.map(sig => ({
             label: sig.label,
-            documentation: typeof sig.documentation === 'string' 
-              ? sig.documentation 
+            documentation: typeof sig.documentation === 'string'
+              ? sig.documentation
               : sig.documentation?.value,
             parameters: sig.parameters?.map(p => ({
               label: p.label,
@@ -738,7 +592,7 @@ export class MonacoLspBridge {
         changes?: Record<string, { range: Range; newText: string }[]>;
         documentChanges?: { textDocument: { uri: string }; edits: { range: Range; newText: string }[] }[];
       } | null>('textDocument/rename', params);
-      
+
       if (!result) return null;
 
       const edits: monaco.languages.IWorkspaceTextEdit[] = [];
@@ -800,7 +654,7 @@ export class MonacoLspBridge {
       disposable.dispose();
     }
     this.disposables = [];
-    
+
     if (this.ws) {
       this.ws.close();
       this.ws = null;

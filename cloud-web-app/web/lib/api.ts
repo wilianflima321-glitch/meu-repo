@@ -214,6 +214,29 @@ export type TransferResponse = {
 	receiver_entry?: WalletTransaction;
 };
 
+export type UsageStatusResponse = {
+	data?: {
+		plan?: unknown;
+		usage?: {
+			tokens?: {
+				remaining?: unknown;
+			};
+		};
+	};
+};
+
+export type AIChatResponse = {
+	choices?: Array<{
+		message?: {
+			content?: string;
+		};
+	}>;
+	message?: {
+		content?: string;
+	};
+	content?: string;
+};
+
 type RequestOptions = {
 	method?: string;
 	headers?: Record<string, string>;
@@ -239,6 +262,16 @@ function getAuthToken(): string | null {
 	return window.localStorage.getItem('aethel-token');
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function readStringField(value: unknown, key: string): string | null {
+	if (!isRecord(value)) return null;
+	const field = value[key];
+	return typeof field === 'string' ? field : null;
+}
+
 async function requestJSON<T>(path: string, options: RequestOptions = {}): Promise<T> {
 	const token = getAuthToken();
 	const res = await fetch(`${API_BASE}${path}`, {
@@ -262,8 +295,8 @@ async function requestJSON<T>(path: string, options: RequestOptions = {}): Promi
 
 	if (!res.ok) {
 		const message =
-			(data && typeof data === 'object' && (data as any).message) ||
-			(data && typeof data === 'object' && (data as any).error) ||
+			readStringField(data, 'message') ||
+			readStringField(data, 'error') ||
 			(typeof data === 'string' ? data : null) ||
 			`HTTP ${res.status}`;
 		throw new APIError(res.status, res.statusText, String(message), data);
@@ -302,8 +335,8 @@ export const AethelAPIClient = {
 	health: () => requestJSON<{ status: string; timestamp: string; services: Record<string, string> }>('/health'),
 
 	getBillingPlans: async (): Promise<BillingPlan[]> => {
-		const data = await requestJSON<{ plans?: BillingPlan[]; success?: boolean }>('/billing/plans');
-		return Array.isArray(data?.plans) ? data.plans : (data as any);
+		const data = await requestJSON<{ plans?: BillingPlan[]; success?: boolean } | BillingPlan[]>('/billing/plans');
+		return Array.isArray(data) ? data : Array.isArray(data?.plans) ? data.plans : [];
 	},
 
 	getBillingReadiness: async (): Promise<BillingReadiness> => {
@@ -330,7 +363,7 @@ export const AethelAPIClient = {
 	},
 
 	getCurrentPlan: async (): Promise<BillingPlan> => {
-		const usage = await requestJSON<any>('/usage/status');
+		const usage = await requestJSON<UsageStatusResponse>('/usage/status');
 		const planId = String(usage?.data?.plan ?? '').trim();
 		const plans = await AethelAPIClient.getBillingPlans().catch(() => [] as BillingPlan[]);
 		const match = plans.find((p) => String(p.id) === planId);
@@ -344,13 +377,13 @@ export const AethelAPIClient = {
 	},
 
 	getCredits: async (): Promise<{ credits: number }> => {
-		const usage = await requestJSON<any>('/usage/status');
+		const usage = await requestJSON<UsageStatusResponse>('/usage/status');
 		const remaining = Number(usage?.data?.usage?.tokens?.remaining ?? 0);
 		return { credits: Number.isFinite(remaining) ? remaining : 0 };
 	},
 
 	chat: (input: { model: string; messages: ChatMessage[] }) =>
-		requestJSON<any>('/ai/chat', { method: 'POST', body: input }),
+		requestJSON<AIChatResponse>('/ai/chat', { method: 'POST', body: input }),
 
 	chatStream: (input: { model: string; messages: ChatMessage[] }) => streamText('/ai/stream', input),
 
@@ -433,15 +466,15 @@ export const AethelAPIClient = {
 	},
 
 	// ========== Profile ==========
-	
+
 	getProfile: async () => {
 		return requestJSON<{ profile: UserProfile }>('/auth/profile');
 	},
-	
+
 	updateProfile: async (updates: Record<string, unknown>) => {
 		return requestJSON<{ profile: UserProfile }>('/auth/profile', { method: 'PATCH', body: updates });
 	},
-	
+
 	deleteAccount: async () => {
 		return requestJSON<{ success: boolean }>('/auth/delete-account', { method: 'DELETE' });
 	},

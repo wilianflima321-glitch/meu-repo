@@ -116,7 +116,7 @@ export function FilterBar({
 
       {/* Type Filter */}
       <div style={{ position: 'relative' }}>
-        <button type="button" aria-label={showTypeFilter ? 'Fechar filtro de tipo de asset' : 'Abrir filtro de tipo de asset'}
+        <button type="button" aria-label={showTypeFilter ? 'Close asset type filter' : 'Open asset type filter'}
           onClick={() => setShowTypeFilter(!showTypeFilter)}
           style={{
             padding: '6px 12px',
@@ -220,7 +220,7 @@ export function FilterBar({
       {/* View Mode */}
       <div style={{ display: 'flex', gap: '2px' }}>
         {(['grid', 'list', 'columns'] as const).map((mode) => (
-          <button type="button" aria-label={`Ativar visualizacao ${mode}`}
+          <button type="button" aria-label={`Activate view ${mode}`}
             key={mode}
             onClick={() => onViewModeChange(mode)}
             style={{

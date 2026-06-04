@@ -1,7 +1,7 @@
 /**
  * CineLink Module Index
- * 
- * Exporta componentes do sistema de câmera virtual.
+ *
+ * Exports virtual camera system components.
  */
 
 export { CineLinkClient, CineLinkMobile, default } from './CineLinkClient';

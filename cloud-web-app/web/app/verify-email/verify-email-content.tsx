@@ -73,15 +73,13 @@ function VerifyEmailContent() {
   }
 
   const frameClass =
-    'w-full max-w-md rounded-3xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8'
+    'w-full max-w-md  border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8'
 
   return (
-    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[160px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[160px]" />
-      </div>
-
+    <div
+      className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]"
+      data-verify-email-surface="compact"
+    >
       <PublicHeader />
 
       <main className="relative z-10 flex min-h-[70vh] items-center justify-center px-6 pb-16 pt-12">
@@ -98,7 +96,7 @@ function VerifyEmailContent() {
         ) : isVerified ? (
           <div className={frameClass}>
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
                 <CheckCircle className="h-7 w-7 text-[var(--aethel-success)]" />
               </div>
               <h1 className="text-xl font-semibold">Email verified</h1>
@@ -107,7 +105,7 @@ function VerifyEmailContent() {
               </p>
               <Link
                 href="/dashboard"
-                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] mt-6 rounded-xl px-5 py-2 text-sm font-semibold"
+                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] mt-6 px-5 py-2 text-sm font-semibold"
               >
                 Open dashboard
               </Link>
@@ -116,7 +114,7 @@ function VerifyEmailContent() {
         ) : !token || !email ? (
           <div className={frameClass}>
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--aethel-primary)]/10">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center bg-[var(--aethel-primary)]/10">
                 <Mail className="h-7 w-7 text-[var(--aethel-primary-light)]" />
               </div>
               <h1 className="text-xl font-semibold">Confirm your email</h1>
@@ -128,7 +126,7 @@ function VerifyEmailContent() {
                   type="button"
                   onClick={resendVerification}
                   disabled={isResending}
-                  className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] w-full rounded-xl px-4 py-2 text-sm font-semibold"
+                  className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] w-full px-4 py-2 text-sm font-semibold"
                 >
                   {isResending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -139,7 +137,7 @@ function VerifyEmailContent() {
                 </button>
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] w-full rounded-xl px-4 py-2 text-sm font-semibold"
+                  className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] w-full px-4 py-2 text-sm font-semibold"
                 >
                   Continue to dashboard
                 </Link>
@@ -152,7 +150,7 @@ function VerifyEmailContent() {
         ) : (
           <div className={frameClass}>
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--aethel-error)]/10">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center bg-[var(--aethel-error)]/10">
                 <XCircle className="h-7 w-7 text-[var(--aethel-error)]" />
               </div>
               <h1 className="text-xl font-semibold">Verification failed</h1>
@@ -164,7 +162,7 @@ function VerifyEmailContent() {
                   type="button"
                   onClick={resendVerification}
                   disabled={isResending}
-                  className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] w-full rounded-xl px-4 py-2 text-sm font-semibold"
+                  className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] w-full px-4 py-2 text-sm font-semibold"
                 >
                   {isResending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -175,7 +173,7 @@ function VerifyEmailContent() {
                 </button>
                 <Link
                   href="/login"
-                  className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] w-full rounded-xl px-4 py-2 text-sm font-semibold"
+                  className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] w-full px-4 py-2 text-sm font-semibold"
                 >
                   Back to sign in
                 </Link>

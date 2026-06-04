@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { VersionHistorySlider } from '../collaboration/VersionHistorySlider'
-import { PremiumEmptyProjects } from '../ui/PremiumEmptyState'
+import { EmptyProjects } from '../ui/EmptyState'
 import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_SPACING, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 import type { Project } from './aethel-dashboard-model'
@@ -36,7 +36,7 @@ type ProjectTypeOption = {
 const PANEL_CLASS =
   'rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.16)]'
 const INPUT_CLASS = `h-12 w-full rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
-const PRIMARY_BUTTON_CLASS = `inline-flex min-h-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] hover:brightness-110 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+const PRIMARY_BUTTON_CLASS = `inline-flex min-h-11 items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)] hover:bg-[var(--aethel-text-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 const SECONDARY_BUTTON_CLASS = `inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 const DANGER_BUTTON_CLASS = `inline-flex min-h-10 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
@@ -133,7 +133,7 @@ function WorkspaceComposer({
                 onClick={() => onProjectTypeChange(option.value)}
                 className={`rounded-2xl border p-3 text-left transition ${
                   selected
-                    ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_24%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))]'
+                    ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)]'
                     : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] hover:border-[var(--aethel-border-secondary)]'
                 }`}
               >
@@ -186,12 +186,12 @@ export function DashboardProjectsTab({
         ) : null}
       </div>
 
-      <section className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(15,23,42,0.88),rgba(8,47,73,0.16),rgba(15,23,42,0.72))] p-5 shadow-[0_20px_70px_rgba(2,6,23,0.24)]">
+      <section className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] p-5 shadow-[0_20px_70px_rgba(2,6,23,0.18)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Workspace stage</p>
             <h3 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">
-              Shape the workspace before opening the full cockpit.
+              Shape the workspace before opening deeper Studio tools.
             </h3>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
               {entryMission
@@ -229,7 +229,7 @@ export function DashboardProjectsTab({
       {projects.length === 0 ? (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.15fr,0.95fr]">
           <div className={`${PANEL_CLASS} p-0`}>
-            <PremiumEmptyProjects onCreate={onCreateProject} />
+            <EmptyProjects onCreate={onCreateProject} />
           </div>
           <WorkspaceComposer
             title="Create the first workspace"

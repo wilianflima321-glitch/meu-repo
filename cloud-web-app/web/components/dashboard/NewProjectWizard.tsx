@@ -1,192 +1,37 @@
 'use client';
 
 /**
- * NewProjectWizard - Experiencia de Onboarding "Time-to-Fun"
+ * NewProjectWizard - fast project creation flow.
  *
- * Wizard visual imersivo para criacao de projetos.
- * Goal: user reaches a running game loop in under 30 seconds.
- *
- * Flow:
- * 1. Escolha de Genero (Cards com video preview)
- * 2. Escolha de Estilo Visual (Vibe)
- * 3. Loading cinematografico
- * 4. Redirect para editor com projeto pronto
- *
- * @see DETALHAMENTO_UX_STRATEGY_2026.md - Secao 1
+ * Keeps the first-run experience focused: choose a genre, choose a visual
+ * direction, then open the editor with clear progress and no public jargon.
  */
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
-  Crosshair,
-  Sword,
-  Gamepad2,
-  Car,
-  Box,
   Sparkles,
-  Palette,
   Cpu,
-  Zap,
   ChevronRight,
   ChevronLeft,
-  Play,
   Volume2,
   VolumeX,
   Loader2,
   Check,
   Rocket,
 } from 'lucide-react';
+import {
+  GENRES,
+  LOADING_STEPS,
+  STYLES,
+  createSuggestedProjectName,
+  type GameGenre,
+  type NewProjectWizardProps,
+  type VisualStyle,
+} from './NewProjectWizard.model';
 
 // ============================================================================
-// TIPOS
-// ============================================================================
-
-export type GameGenre = 'fps' | 'rpg' | 'platformer' | 'racing' | 'blank';
-export type VisualStyle = 'pixel' | 'lowpoly' | 'realistic' | 'scifi' | 'stylized';
-
-interface GenreOption {
-  id: GameGenre;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  previewVideo?: string;
-  previewImage: string;
-  features: string[];
-  expertOnly?: boolean;
-}
-
-interface StyleOption {
-  id: VisualStyle;
-  name: string;
-  description: string;
-  previewImage: string;
-  requiresGPU?: boolean;
-  colors: string[];
-}
-
-interface LoadingStep {
-  id: string;
-  message: string;
-  duration: number;
-}
-
-interface NewProjectWizardProps {
-  onComplete?: (projectId: string) => void;
-  onCancel?: () => void;
-}
-
-// ============================================================================
-// DADOS DOS GENEROS
-// ============================================================================
-
-const GENRES: GenreOption[] = [
-  {
-    id: 'fps',
-    name: 'FPS Shooter',
-    description: 'Acao em primeira pessoa com tiroteio e combate',
-    icon: <Crosshair className="w-8 h-8" />,
-    previewImage: '/templates/fps-preview.webp',
-    previewVideo: '/templates/fps-preview.webm',
-    features: ['Sistema de armas', 'IA de inimigos', 'HUD completo', 'Fisica de projeteis'],
-  },
-  {
-    id: 'rpg',
-    name: 'RPG Top-Down',
-    description: 'Aventura com exploracao, inventario e batalhas',
-    icon: <Sword className="w-8 h-8" />,
-    previewImage: '/templates/rpg-preview.webp',
-    previewVideo: '/templates/rpg-preview.webm',
-    features: ['Sistema de inventario', 'Dialogos', 'Quests', 'Combate por turnos'],
-  },
-  {
-    id: 'platformer',
-    name: 'Platformer 2D',
-    description: 'Plataforma side-scrolling com pulos e obstaculos',
-    icon: <Gamepad2 className="w-8 h-8" />,
-    previewImage: '/templates/platformer-preview.webp',
-    previewVideo: '/templates/platformer-preview.webm',
-    features: ['Fisica 2D', 'Parallax scrolling', 'Coletaveis', 'Checkpoints'],
-  },
-  {
-    id: 'racing',
-    name: 'Racing',
-    description: 'Corrida arcade com veiculos e pistas',
-    icon: <Car className="w-8 h-8" />,
-    previewImage: '/templates/racing-preview.webp',
-    previewVideo: '/templates/racing-preview.webm',
-    features: ['Fisica de veiculos', 'Waypoints de pista', 'Volta cronometrada', 'Power-ups'],
-  },
-  {
-    id: 'blank',
-    name: 'Blank Project',
-    description: 'Empty project for experts. You build everything.',
-    icon: <Box className="w-8 h-8" />,
-    previewImage: '/templates/blank-preview.webp',
-    features: ['Cena vazia', 'Liberdade total'],
-    expertOnly: true,
-  },
-];
-
-// ============================================================================
-// DADOS DOS ESTILOS VISUAIS
-// ============================================================================
-
-const STYLES: StyleOption[] = [
-  {
-    id: 'pixel',
-    name: 'Pixel Art',
-    description: 'Retro aesthetic with visible pixels',
-    previewImage: '/templates/style-pixel.webp',
-    colors: ['var(--aethel-accent)', 'var(--aethel-secondary)', 'var(--aethel-warning)'],
-  },
-  {
-    id: 'lowpoly',
-    name: 'Low Poly 3D',
-    description: 'Geometria simplificada, visual moderno',
-    previewImage: '/templates/style-lowpoly.webp',
-    colors: ['var(--aethel-success)', 'var(--aethel-primary)', 'var(--aethel-warning-light)'],
-  },
-  {
-    id: 'realistic',
-    name: 'Realistic PBR',
-    description: 'Graficos realistas com materiais avancados',
-    previewImage: '/templates/style-realistic.webp',
-    requiresGPU: true,
-    colors: ['var(--aethel-text-quaternary)', 'var(--aethel-surface-quaternary)', 'var(--aethel-surface-tertiary)'],
-  },
-  {
-    id: 'scifi',
-    name: 'Sci-Fi Neon',
-    description: 'Futurista com cores vibrantes e bloom',
-    previewImage: '/templates/style-scifi.webp',
-    colors: ['var(--aethel-info)', 'var(--aethel-accent)', 'var(--aethel-secondary)'],
-  },
-  {
-    id: 'stylized',
-    name: 'Stylized Toon',
-    description: 'Cel-shading e outlines estilizados',
-    previewImage: '/templates/style-stylized.webp',
-    colors: ['var(--aethel-secondary-light)', 'var(--aethel-accent-light)', 'var(--aethel-success-light)'],
-  },
-];
-
-// ============================================================================
-// STEPS DE LOADING (fake mas util)
-// ============================================================================
-
-const LOADING_STEPS: LoadingStep[] = [
-  { id: 'init', message: 'Inicializando universo...', duration: 800 },
-  { id: 'terrain', message: 'Gerando terreno procedural...', duration: 1200 },
-  { id: 'shaders', message: 'Compilando shaders...', duration: 1000 },
-  { id: 'assets', message: 'Loading base assets...', duration: 1500 },
-  { id: 'ai', message: 'Acordando agentes de IA...', duration: 800 },
-  { id: 'physics', message: 'Calibrando motor de fisica...', duration: 600 },
-  { id: 'audio', message: 'Sincronizando audio espacial...', duration: 400 },
-  { id: 'final', message: 'Materializando seu universo...', duration: 700 },
-];
-
-// ============================================================================
-// COMPONENTE PRINCIPAL
+// MAIN COMPONENT
 // ============================================================================
 
 export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps) {
@@ -207,18 +52,18 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
   useEffect(() => {
     if (selectedGenre && !projectName) {
       const genre = GENRES.find(g => g.id === selectedGenre);
-      const adjectives = ['Epic', 'Cosmic', 'Neon', 'Shadow', 'Crystal', 'Quantum'];
-      const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-      setProjectName(`${adj} ${genre?.name || 'Project'}`);
+      setProjectName(createSuggestedProjectName(genre?.name));
     }
   }, [selectedGenre, projectName]);
 
-  // Simulate loading steps
+  // Run loading steps with cleanup so the modal never leaks timers.
   useEffect(() => {
     if (step !== 'loading') return;
 
     let currentStep = 0;
     let currentProgress = 0;
+    const intervalIds: ReturnType<typeof setInterval>[] = [];
+    const timeoutIds: ReturnType<typeof setTimeout>[] = [];
 
     const runStep = () => {
       if (currentStep >= LOADING_STEPS.length) {
@@ -235,20 +80,29 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         currentProgress += progressIncrement / 10;
         setLoadingProgress(Math.min(currentProgress, 100));
       }, stepData.duration / 10);
+      intervalIds.push(progressInterval);
 
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         clearInterval(progressInterval);
         currentStep++;
         runStep();
       }, stepData.duration);
+      timeoutIds.push(timeoutId);
     };
 
     runStep();
+
+    return () => {
+      intervalIds.forEach(clearInterval);
+      timeoutIds.forEach(clearTimeout);
+    };
   }, [step]);
 
   // Create project on complete
   useEffect(() => {
     if (step !== 'complete') return;
+    let redirectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isCancelled = false;
 
     const createProject = async () => {
       try {
@@ -267,9 +121,9 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         }
 
         const { projectId } = await response.json();
+        if (isCancelled) return;
 
-        // Small delay for dramatic effect
-        setTimeout(() => {
+        redirectTimeout = setTimeout(() => {
           if (onComplete) {
             onComplete(projectId);
           } else {
@@ -277,12 +131,17 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           }
         }, 1000);
       } catch (err) {
-        setError('Failed to create project. Tente novamente.');
+        setError('Failed to create project. Try again.');
         setStep('style');
       }
     };
 
     createProject();
+
+    return () => {
+      isCancelled = true;
+      if (redirectTimeout) clearTimeout(redirectTimeout);
+    };
   }, [step, projectName, selectedGenre, selectedStyle, onComplete, router]);
 
   // Handle video hover preview
@@ -334,7 +193,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-[var(--aethel-text-primary)] mb-2">
-          O que vamos criar hoje?
+          What should we build?
         </h1>
         <p className="text-[var(--aethel-text-tertiary)]">
           Choose a genre to start with a playable template
@@ -356,7 +215,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       {/* Genre Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 flex-1">
         {GENRES.map((genre) => (
-          <button type="button" aria-label={`Selecionar genero ${genre.name}`}
+          <button type="button" aria-label={`Select genre ${genre.name}`}
             key={genre.id}
             onClick={() => handleGenreSelect(genre.id)}
             onMouseEnter={() => handleGenreHover(genre.id)}
@@ -423,14 +282,14 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
         <div className="flex items-center gap-3">
           {/* Mute toggle */}
-          <button type="button" aria-label={isMuted ? 'Ativar audio do preview' : 'Silenciar audio do preview'}
+          <button type="button" aria-label={isMuted ? 'Enable preview audio' : 'Mute preview audio'}
             onClick={() => setIsMuted(!isMuted)}
             className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"
           >
             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
           </button>
 
-          <button type="button" aria-label="Avancar para escolha de estilo"
+          <button type="button" aria-label="Continue to visual style"
             onClick={handleNext}
             disabled={!selectedGenre}
             className={`
@@ -441,7 +300,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
               }
             `}
           >
-            Proximo
+            Next
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
@@ -458,7 +317,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-[var(--aethel-text-primary)] mb-2">
-          Escolha a vibe visual
+          Choose a visual direction
         </h1>
         <p className="text-[var(--aethel-text-tertiary)]">
           Define the aesthetic of your game. You can change it later.
@@ -468,7 +327,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       {/* Style Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 flex-1">
         {STYLES.map((style) => (
-          <button type="button" aria-label={`Selecionar estilo ${style.name}`}
+          <button type="button" aria-label={`Select style ${style.name}`}
             key={style.id}
             onClick={() => handleStyleSelect(style.id)}
             className={`
@@ -536,7 +395,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
           className="flex-1 px-4 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-primary)] focus:outline-none focus:border-[var(--aethel-accent)]"
-          placeholder="Meu Jogo Epico"
+          placeholder="Epic Starter"
         />
       </div>
 
@@ -549,7 +408,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
       {/* Footer */}
       <div className="flex items-center justify-between mt-6 pt-4 border-t border-[var(--aethel-border-primary)]">
-        <button type="button" aria-label="Back para escolha de genero"
+        <button type="button" aria-label="Back to genre selection"
           onClick={handleBack}
           className="flex items-center gap-2 px-4 py-2 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
         >
@@ -569,7 +428,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           `}
         >
           <Rocket className="w-5 h-5" />
-          Materializar Universo
+          Create project
         </button>
       </div>
     </div>
@@ -600,7 +459,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
       {/* Current Step Message */}
       <p className="text-lg text-[var(--aethel-text-primary)] mb-2 font-medium">
-        {LOADING_STEPS[loadingStep]?.message || 'Finalizando...'}
+        {LOADING_STEPS[loadingStep]?.message || 'Finalizing...'}
       </p>
 
       {/* Steps Progress */}
@@ -625,7 +484,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         <p>
           Template: <span className="text-[var(--aethel-text-secondary)]">{GENRES.find(g => g.id === selectedGenre)?.name}</span>
           {' | '}
-          Estilo: <span className="text-[var(--aethel-text-secondary)]">{STYLES.find(s => s.id === selectedStyle)?.name}</span>
+          Style: <span className="text-[var(--aethel-text-secondary)]">{STYLES.find(s => s.id === selectedStyle)?.name}</span>
         </p>
       </div>
     </div>
@@ -640,8 +499,8 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       <div className="w-20 h-20 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] flex items-center justify-center mb-6">
         <Check className="w-10 h-10 text-[var(--aethel-success-light)]" />
       </div>
-      <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)] mb-2">Universo Criado!</h2>
-      <p className="text-[var(--aethel-text-tertiary)] mb-6">Abrindo o editor...</p>
+      <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)] mb-2">Project ready</h2>
+      <p className="text-[var(--aethel-text-tertiary)] mb-6">Opening the editor...</p>
       <Loader2 className="w-6 h-6 text-[var(--aethel-primary-light)] animate-spin" />
     </div>
   );
@@ -660,14 +519,14 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'genre' ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}>
                 1
               </div>
-              <span className="hidden sm:inline">Genero</span>
+              <span className="hidden sm:inline">Genre</span>
             </div>
             <div className="w-12 h-0.5 bg-[var(--aethel-surface-quaternary)]" />
             <div className={`flex items-center gap-2 ${step === 'style' ? 'text-[var(--aethel-primary-light)]' : 'text-[var(--aethel-text-quaternary)]'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'style' ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}>
                 2
               </div>
-              <span className="hidden sm:inline">Estilo</span>
+              <span className="hidden sm:inline">Style</span>
             </div>
           </div>
         )}

@@ -84,7 +84,7 @@ export function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelPro
             <button type="button"
               key={shape}
               onClick={() => update('shape', shape)}
-              aria-label={`Selecionar pincel ${shape}`}
+              aria-label={`Select brush ${shape}`}
               aria-pressed={settings.shape === shape}
               style={{
                 flex: 1,

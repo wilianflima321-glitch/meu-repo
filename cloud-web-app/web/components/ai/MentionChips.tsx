@@ -150,7 +150,7 @@ export function MentionPreviewPanel({
           <span className={colors.text}>{icons[chip.icon]}</span>
           <span className={`text-xs font-medium ${colors.text}`}>{chip.tag}</span>
         </div>
-        <button type="button" aria-label="Fechar preview"
+        <button type="button" aria-label="Close preview"
           onClick={onClose}
           className={`text-xs text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
         >

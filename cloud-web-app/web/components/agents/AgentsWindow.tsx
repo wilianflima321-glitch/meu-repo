@@ -100,7 +100,7 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
       data-evidence-source="production-state/agent-fleet"
     >
       <p className="sr-only">
-        Agent cockpit shows scope locks, replay evidence, read receipts, and cost posture from production-state/agent-fleet.
+        Agent window shows scope locks, replay receipts, read receipts, and cost posture from production-state/agent-fleet.
       </p>
       <AgentFleetCoordinatorStrip
         projectId={currentProjectId}

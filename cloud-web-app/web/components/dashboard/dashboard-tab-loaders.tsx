@@ -16,5 +16,4 @@ export const DashboardUnrealTab = dynamic(
   () => import('./DashboardUnrealTab').then((mod) => mod.DashboardUnrealTab),
   { ssr: false, loading: TabLoading }
 )
-export const BillingTab = dynamic(() => import('./tabs/BillingTab'), { ssr: false, loading: TabLoading })
 export const TemplatesTab = dynamic(() => import('./tabs/TemplatesTab'), { ssr: false, loading: TabLoading })

@@ -189,7 +189,7 @@ export function buildWebGPUComputeReadinessSnapshot(
     warnings,
     adapterSummary: summarizeAdapter(input),
     nextAction: computeAvailable
-      ? 'Enable preview compute lanes only; attach performance trace and human review before any release-quality render claim.'
+      ? 'Enable preview compute lanes only; attach performance trace and human review before release-quality render claims.'
       : status === 'fallback'
         ? 'Use WebGL2 Browser Preview and route heavy geometry, cooking, and final renders to Studio Local or Cloud Stream.'
         : 'Collect adapter, device, supported limits, WGSL validation, and performance trace evidence before enabling compute lanes.',

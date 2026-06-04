@@ -244,8 +244,8 @@ export default function MultiAgentOrchestrator() {
           <Zap className="text-[var(--aethel-info-light)]" size={20} />
         </div>
         <div>
-          <h2 className="text-lg font-bold uppercase tracking-wider">Orquestrador multiagente</h2>
-          <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--aethel-text-quaternary)]">Execucao paralela com gates explicitos</p>
+          <h2 className="text-lg font-bold uppercase tracking-wider">Multi-agent orchestrator</h2>
+          <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--aethel-text-quaternary)]">Parallel execution with explicit gates</p>
         </div>
       </div>
 
@@ -253,7 +253,7 @@ export default function MultiAgentOrchestrator() {
         <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-3 text-sm text-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]">
           <div className="mb-1 flex items-center gap-2 font-semibold">
             <AlertCircle size={14} />
-            Gate de capacidade ou runtime
+            Capability or runtime gate
           </div>
           <p>{streamError}</p>
         </div>
@@ -263,15 +263,15 @@ export default function MultiAgentOrchestrator() {
         <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-3 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
           <div className="mb-1 flex items-center gap-2 font-semibold">
             <AlertCircle size={14} />
-            Modo heuristico (capacidade PARCIAL)
+            Heuristic mode (PARTIAL capability)
           </div>
-          <p>{runtimeDisclaimer || 'As saidas sao orientactives e ainda exigem validacao deterministica antes de aplicar.'}</p>
+          <p>{runtimeDisclaimer || 'Outputs are directional and still require deterministic validation before applying.'}</p>
           {coordinationHint && <p className="mt-1 text-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]/90">{coordinationHint}</p>}
         </div>
       )}
 
       <div className="space-y-2">
-        <label className="text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-quaternary)]">Modo de execucao</label>
+        <label className="text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-quaternary)]">Execution mode</label>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -301,12 +301,12 @@ export default function MultiAgentOrchestrator() {
           </button>
         </div>
         <p className="text-[11px] text-[var(--aethel-text-quaternary)]">
-          O modo heuristico esta sempre disponivel. O modo com provider exige ao menos um provider configurado.
+          Heuristic mode is always available. Provider mode requires at least one configured provider.
         </p>
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-quaternary)]">Selecionar agentes</label>
+        <label className="text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-quaternary)]">Select agents</label>
         <div className="flex flex-wrap gap-2">
           {presetAgentSets.map((preset) => (
             <button
@@ -358,7 +358,7 @@ export default function MultiAgentOrchestrator() {
             type="text"
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
-            placeholder="Descreva a tarefa para planner, coder e reviewer..."
+            placeholder="Describe the task for planner, coder, and reviewer..."
             className="flex-1 bg-transparent py-2 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none"
             disabled={isStreaming}
           />
@@ -377,7 +377,7 @@ export default function MultiAgentOrchestrator() {
               type="submit"
               disabled={!prompt.trim() || selectedAgents.length === 0}
               className="ml-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] p-2 text-[var(--aethel-text-primary)] transition-all hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:opacity-50"
-              aria-label="Iniciar stream"
+              aria-label="Start stream"
             >
               <Send size={18} />
             </button>
@@ -391,9 +391,9 @@ export default function MultiAgentOrchestrator() {
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]">
               <Zap className="text-[var(--aethel-info-light)]" />
             </div>
-            <h3 className="mb-2 font-semibold text-[var(--aethel-text-primary)]">Orquestracao pronta</h3>
+            <h3 className="mb-2 font-semibold text-[var(--aethel-text-primary)]">Orchestration ready</h3>
             <p className="max-w-xs text-sm text-[var(--aethel-text-quaternary)]">
-              Selecione os agentes e inicie uma execucao. Capacidades parciais continuam sinalizadas de forma explicita.
+              Select agents and start a run. Partial capabilities remain explicitly labeled.
             </p>
           </div>
         )}
@@ -424,12 +424,10 @@ export default function MultiAgentOrchestrator() {
         {isStreaming && (
           <div className="flex animate-pulse items-center gap-3 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-4">
             <Loader2 size={14} className="animate-spin text-[var(--aethel-info-light)]" />
-            <span className="text-xs font-medium text-[var(--aethel-text-tertiary)]">Agentes em execucao...</span>
+            <span className="text-xs font-medium text-[var(--aethel-text-tertiary)]">Agents running...</span>
           </div>
         )}
       </div>
     </div>
   )
 }
-
-

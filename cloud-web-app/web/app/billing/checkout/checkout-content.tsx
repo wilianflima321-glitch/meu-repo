@@ -81,7 +81,7 @@ export default function BillingCheckoutContent() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[var(--aethel-surface-primary)] p-6 text-[var(--aethel-text-primary)]">
         <div className="w-full max-w-lg rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6">
-          <h1 className="mb-2 text-xl font-semibold">Checkout unavailable</h1>
+          <h1 className="mb-2 text-xl font-semibold">Checkout paused</h1>
           <p className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
             {error || 'Unable to start checkout.'}
           </p>

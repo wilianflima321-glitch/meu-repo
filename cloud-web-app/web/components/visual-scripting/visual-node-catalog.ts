@@ -1,4 +1,4 @@
-export type NodeCategory = 
+export type NodeCategory =
   | 'event'     // Eventos (OnStart, OnUpdate, etc.)
   | 'action'    // Acoes (Move, Jump, Spawn, etc.)
   | 'condition' // Condicoes (If, Compare, etc.)
@@ -332,7 +332,7 @@ export const NODE_CATALOG: NodeDefinition[] = [
     type: 'flow_multi_gate',
     category: 'flow',
     label: 'Multi Gate',
-    description: 'Distribui execucao entre multiplas saidas',
+    description: 'Distributes execution across multiple outputs',
     inputs: [
       { id: 'exec', label: '', type: 'exec' },
       { id: 'reset', label: 'Reset', type: 'exec' },

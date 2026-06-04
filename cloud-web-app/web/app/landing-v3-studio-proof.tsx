@@ -32,7 +32,7 @@ export default function LandingStudioProof() {
           <span className="h-2.5 w-2.5 rounded-full bg-[var(--aethel-success)]" />
         </div>
         <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
-          Studio proof
+          Studio receipts
         </span>
       </div>
 
@@ -88,4 +88,3 @@ export default function LandingStudioProof() {
     </div>
   )
 }
-

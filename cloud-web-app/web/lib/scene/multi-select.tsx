@@ -1,13 +1,14 @@
+// @aethel-heavy-async-boundary Studio/viewport runtime module; never import from public/dashboard/admin route shells.
 /**
  * Multi-Select System - Sistema de Seleção Múltipla
- * 
+ *
  * Sistema world-class para seleção múltipla de objetos em cena 3D.
  * Similar ao Unreal Engine e Blender com:
  * - Shift+Click para adicionar à seleção
  * - Ctrl+Click para toggle
  * - Box selection (arrastar para selecionar)
  * - Seleção de grupo
- * 
+ *
  * @module lib/scene/multi-select
  */
 
@@ -162,7 +163,7 @@ export function useMultiSelect(
     setIsBoxSelecting(false);
     setBoxStart(null);
     setBoxEnd(null);
-    
+
     if (objectsInBox.length > 0) {
       selectMultiple(objectsInBox);
     }
@@ -358,7 +359,7 @@ export function getSelectionCenter(objects: THREE.Object3D[]): THREE.Vector3 {
   if (objects.length === 0) return new THREE.Vector3();
 
   const box = new THREE.Box3();
-  
+
   for (const obj of objects) {
     box.expandByObject(obj);
   }

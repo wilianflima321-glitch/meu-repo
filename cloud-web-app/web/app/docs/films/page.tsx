@@ -8,38 +8,38 @@ import PublicFooter from '@/components/ui/PublicFooter'
 const FILM_CAPABILITIES = [
   {
     icon: Film,
-    title: 'Storyboarding Assistance',
-    description: 'AI-generated storyboards from script descriptions. Visual shot planning with automated layout.',
+    title: 'Storyboards',
+    description: 'Plan shots from script context.',
     status: 'available',
   },
   {
     icon: Camera,
-    title: 'Shot Description Generation',
-    description: 'Detailed shot descriptions including camera angles, lighting, and composition from natural language.',
+    title: 'Shot Notes',
+    description: 'Track camera, lighting, and composition choices.',
     status: 'available',
   },
   {
     icon: Palette,
     title: 'Static Asset Preview',
-    description: 'Preview generated visual assets in context. Scene composition visualization.',
+    description: 'Review visual assets in scene context.',
     status: 'available',
   },
   {
     icon: Scissors,
     title: 'NLE Timeline',
-    description: 'Basic non-linear editing timeline. Visual trim, transitions, and shot ordering.',
+    description: 'Sequence shots and trims for review.',
     status: 'experimental',
   },
   {
     icon: Clock,
     title: 'Continuity Engine',
-    description: 'Character identity and prop continuity tracking across scenes. Shot coherence validation.',
+    description: 'Track identity, props, and shot coherence.',
     status: 'experimental',
   },
   {
     icon: Download,
     title: 'Video Export',
-    description: 'Export to MP4 via server-side ffmpeg. Post-process quality gates for technical validation.',
+    description: 'Held until render quality and review gates exist.',
     status: 'planned',
   },
 ]
@@ -58,12 +58,11 @@ export default function FilmsDocsPage() {
         </div>
         <h1 className="text-4xl font-bold">Films Module</h1>
         <p className="mt-3 text-lg text-[var(--aethel-text-tertiary)]">
-          AI-assisted filmmaking tools. From storyboarding to shot descriptions and basic NLE capabilities.
+          Plan shots, continuity, timeline, and review in one place.
         </p>
 
         <div className="mt-4 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_5%,transparent)] p-4 text-sm text-[var(--aethel-warning-light)]">
-          <strong>Current Maturity: L2 Experimental.</strong> Claims allowed: Storyboarding assistance,
-          shot description generation, static asset preview. Video generation and NLE are under development.
+          <strong>L2 Experimental.</strong> Film work stays review-first; export remains gated until render quality is verified.
         </div>
 
         <h2 className="mt-10 text-2xl font-semibold">Capabilities</h2>
@@ -93,4 +92,3 @@ export default function FilmsDocsPage() {
     </div>
   )
 }
-

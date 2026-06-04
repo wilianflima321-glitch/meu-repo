@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,17 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ workflows });
   } catch (error) {
+    if (shouldUseLocalEvidenceFallback(req, error)) {
+      return localEvidenceJson(
+        req,
+        error,
+        {
+          workflows: [],
+          status: 'held',
+        },
+        { surface: 'copilot.workflows', state: 'held' },
+      );
+    }
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -115,6 +127,17 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ workflow }, { status: 201 });
   } catch (error) {
+    if (shouldUseLocalEvidenceFallback(req, error)) {
+      return localEvidenceJson(
+        req,
+        error,
+        {
+          error: 'COPILOT_WORKFLOW_CREATE_HELD',
+          message: 'Workflow creation is held until the copilot workflow ledger is available.',
+        },
+        { surface: 'copilot.workflows.create', state: 'held', status: 503 },
+      );
+    }
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

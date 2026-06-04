@@ -219,7 +219,7 @@ export function EditorApplyBridgeProvider({
         isOpen={createFileModalOpen}
         onClose={createFileBusy ? () => undefined : handleCancelCreateFile}
         title="Create new file"
-        description="Escolha onde o snippet deve ser salvo no workspace."
+        description="Choose where the snippet should be saved in the workspace."
         size="md"
         closeOnOverlayClick={!createFileBusy}
         closeOnEscape={!createFileBusy}

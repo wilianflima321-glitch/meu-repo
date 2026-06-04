@@ -196,7 +196,7 @@ export function buildContextMemorySpinePlan(input: ContextMemorySpineInput): Con
 
   const hallucinationControls = unique([
     'Use selected shard IDs, source refs, and evidence refs; never invent missing files, assets, scenes, lore, or capabilities.',
-    'Create read receipts before any apply step.',
+    'Create read receipts before each apply step.',
     'Use metadata-only context for large assets until provenance, license, thumbnails, and quality sidecars exist.',
     'If a surface is held or blocked, keep the agent in planning/review mode instead of fabricating success.',
     ...(input.memory?.noRawContextRules ?? []),

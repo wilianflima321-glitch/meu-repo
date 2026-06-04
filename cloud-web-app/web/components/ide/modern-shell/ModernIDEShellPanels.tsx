@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { EditorErrorBoundary, PanelErrorBoundary } from '@/components/error/ErrorBoundary';
 import { ResizeHandle } from './ModernIDEShellChrome';
 import { ModernIDEShellCenterStack } from './ModernIDEShellCenterStack';
 import {
@@ -67,14 +68,21 @@ export function ModernIDEShellPanels({
   const previewPanelLabel = getPreviewPanelLabel(activePreviewMode);
   const sidebarVisible = panelState.sidebar.open && sidebarOpen;
   const previewVisible = panelState.preview.open && !isCompact;
+  const safeSlots = {
+    sidebar: <PanelErrorBoundary panelName="Explorer">{slots.sidebar}</PanelErrorBoundary>,
+    editor: <EditorErrorBoundary>{slots.editor}</EditorErrorBoundary>,
+    preview: <PanelErrorBoundary panelName={previewPanelLabel}>{slots.preview}</PanelErrorBoundary>,
+    chat: <PanelErrorBoundary panelName="AI Console">{slots.chat}</PanelErrorBoundary>,
+    terminal: <PanelErrorBoundary panelName="Terminal">{slots.terminal}</PanelErrorBoundary>,
+  };
 
   return (
     <div ref={mainAreaRef} style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
-      {sidebarVisible && <ModernIDEShellSidebarColumn sidebar={slots.sidebar} size={panelState.sidebar.size} />}
+      {sidebarVisible && <ModernIDEShellSidebarColumn sidebar={safeSlots.sidebar} size={panelState.sidebar.size} />}
 
       {sidebarVisible && !isCompact && (
         <ResizeHandle
-          ariaLabel="Redimensionar barra lateral"
+          ariaLabel="Resize sidebar"
           orientation="vertical"
           onMouseDown={(event) => startHorizontalResize('sidebar', event)}
           onAdjust={(delta) => setPanelSize('sidebar', panelState.sidebar.size + delta)}
@@ -86,9 +94,9 @@ export function ModernIDEShellPanels({
 
       <div ref={contentRowRef} style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <ModernIDEShellCenterStack
-          editor={slots.editor}
-          chat={slots.chat}
-          terminal={slots.terminal}
+          editor={safeSlots.editor}
+          chat={safeSlots.chat}
+          terminal={safeSlots.terminal}
           chatOpen={panelState.chat.open}
           chatSize={panelState.chat.size}
           activeBottomPanel={activeBottomPanel}
@@ -114,7 +122,7 @@ export function ModernIDEShellPanels({
 
         {previewVisible && (
           <ModernIDEShellPreviewColumn
-            preview={slots.preview}
+            preview={safeSlots.preview}
             size={panelState.preview.size}
             previewPanelLabel={previewPanelLabel}
             onClose={() => togglePanel('preview')}

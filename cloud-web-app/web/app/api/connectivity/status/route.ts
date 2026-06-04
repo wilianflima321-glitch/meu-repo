@@ -5,6 +5,7 @@ import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { optionalEnv } from '@/lib/env';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback';
 
 const routeLogger = createComponentLogger('api/connectivity/status/route');
 
@@ -105,6 +106,39 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     routeLogger.error('Connectivity status error:', error);
+
+    if (shouldUseLocalEvidenceFallback(req, error)) {
+      return localEvidenceJson(
+        req,
+        error,
+        {
+          overall_status: 'degraded',
+          timestamp: new Date().toISOString(),
+          services: [
+            {
+              name: 'web_api',
+              status: 'healthy',
+              endpoints: [{ url: req.nextUrl.origin, healthy: true, latency_ms: null, status_code: null }],
+              message: 'Next.js app is reachable for local authenticated evidence.',
+            },
+            {
+              name: 'database',
+              status: 'held',
+              endpoints: [
+                {
+                  url: 'postgresql://DATABASE_URL',
+                  healthy: false,
+                  latency_ms: null,
+                  error: 'Database probe held in local evidence fallback.',
+                },
+              ],
+              message: 'Configure DATABASE_URL for production-grade connectivity evidence.',
+            },
+          ],
+        },
+        { surface: 'connectivity.status', state: 'held' },
+      );
+    }
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

@@ -71,7 +71,7 @@ export type AgentToolContextProvider = (
   action: AgentAction
 ) => Record<string, unknown> | null | undefined | Promise<Record<string, unknown> | null | undefined>;
 
-interface AgentPlan {
+export interface AgentPlan {
   analysis: string;
   approach: string;
   subtasks: Array<{
@@ -93,14 +93,14 @@ export interface AgentAction {
   reason: string;
 }
 
-interface AgentThinking {
+export interface AgentThinking {
   thinking: string;
   action: AgentAction;
   confidence: number;
   nextSteps: string[];
 }
 
-interface AgentReflection {
+export interface AgentReflection {
   assessment: string;
   success: boolean;
   progress: number;
@@ -110,13 +110,13 @@ interface AgentReflection {
   adjustments: string;
 }
 
-interface AgentReview {
+export interface AgentReview {
   success: boolean;
   result?: unknown;
   error?: string;
 }
 
-interface AgentToolDescriptor {
+export interface AgentToolDescriptor {
   name: string;
   description: string;
   inputSchema: Record<string, unknown>;

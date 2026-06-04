@@ -1,5 +1,4 @@
 'use client'
-
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { DragEvent } from 'react'
 import dynamic from 'next/dynamic'
@@ -9,9 +8,7 @@ import {
   ViewportGizmoMemoryChip,
   ViewportTopToolbar,
 } from '@/components/viewport/ViewportChrome'
-import {
-  type ViewportCameraPreset,
-} from '@/components/viewport/viewport-camera-presets'
+import { type ViewportCameraPreset } from '@/components/viewport/viewport-camera-presets'
 import { ViewportRuntimeDepthStatus } from '@/components/viewport/ViewportRuntimeDepthStatus'
 import {
   viewportSeedObjects,
@@ -36,7 +33,7 @@ const PixelStreamView = dynamic(() => import('@/components/streaming/pixel-strea
   ssr: false,
   loading: () => (
     <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)] text-sm text-[var(--aethel-text-secondary)]">
-      Preparing cloud stream surface...
+      Preparing cloud stream...
     </div>
   ),
 })
@@ -45,7 +42,7 @@ const ViewportScene = dynamic(() => import('@/components/viewport/ViewportSceneC
   ssr: false,
   loading: () => (
     <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)] text-sm text-[var(--aethel-text-secondary)]">
-      Preparing browser viewport...
+      Preparing viewport...
     </div>
   ),
 })
@@ -96,7 +93,7 @@ export function AethelViewport3D({
   gizmoMemoryLabel,
   gizmoMemoryError,
   gizmoMemoryCanPersist = false,
-  assetImportStatus = 'Drop GLTF, GLB, FBX, OBJ, USD or USDZ assets',
+  assetImportStatus = 'Drop GLTF, GLB, FBX, OBJ, USD, or USDZ',
   onImportAssets,
 }: AethelViewport3DProps) {
   const [aiCommand, setAiCommand] = useState('move this object 2 up')
@@ -106,6 +103,7 @@ export function AethelViewport3D({
   const [localGizmoPivotMode, setLocalGizmoPivotMode] = useState<GizmoPivotMode>('median')
   const [webGpuAvailable, setWebGpuAvailable] = useState(false)
   const [renderTarget, setRenderTarget] = useState<ViewportRenderTarget>('browser')
+  const [focusSelectionNonce, setFocusSelectionNonce] = useState(0)
   const pixelStreamUrl = process.env.NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL
   const runtimeModes = useMemo(() => buildRuntimeModeViewModels({ pixelStreamUrl }), [pixelStreamUrl])
   const currentRuntimeMode = findRuntimeModeById(runtimeModes, renderTarget)
@@ -136,6 +134,9 @@ export function AethelViewport3D({
     onGizmoPivotModeChange?.(pivotMode)
   }, [onGizmoPivotModeChange])
   const selectedObject = objects.find((object) => object.id === selectedIds[0]) ?? null
+  const frameSelection = useCallback(() => {
+    if (!selectedObject) return; setCameraPreset('perspective'); setFocusSelectionNonce((value) => value + 1)
+  }, [selectedObject])
   const topGizmoState = buildGizmoEliteControlState({
     mode: transformMode,
     space: transformSpace,
@@ -235,6 +236,11 @@ export function AethelViewport3D({
         commitGizmoPivotMode(gizmoPivotMode === 'median' ? 'active-object' : 'median')
         return
       }
+      if (event.code === 'KeyF') {
+        event.preventDefault()
+        frameSelection()
+        return
+      }
       if (event.code === 'Escape') {
         event.preventDefault()
         onSelectionChange([])
@@ -243,11 +249,14 @@ export function AethelViewport3D({
 
     window.addEventListener('keydown', handleViewportHotkeys)
     return () => window.removeEventListener('keydown', handleViewportHotkeys)
-  }, [commitGizmoConstraint, commitGizmoPivotMode, gizmoConstraint, gizmoPivotMode, onSelectionChange, onTransformModeChange])
+  }, [commitGizmoConstraint, commitGizmoPivotMode, frameSelection, gizmoConstraint, gizmoPivotMode, onSelectionChange, onTransformModeChange])
 
   return (
     <div
       className="relative h-full min-h-0 w-full overflow-hidden"
+      data-canonical-viewport3d="true"
+      data-aethel-viewport3d="canonical"
+      data-viewport-render-target={renderTarget}
       onDragOver={handleAssetDragOver}
       onDragLeave={handleAssetDragLeave}
       onDrop={handleAssetDrop}
@@ -262,6 +271,7 @@ export function AethelViewport3D({
         onTransformSpaceChange={onTransformSpaceChange}
         onSnapEnabledChange={onSnapEnabledChange}
         onCameraPresetChange={setCameraPreset}
+        onFrameSelection={frameSelection}
       />
 
       <ViewportGizmoMemoryChip chip={gizmoMemoryChip} />
@@ -329,6 +339,8 @@ export function AethelViewport3D({
           onSelectionChange={onSelectionChange}
           onGizmoTransformOperation={onGizmoTransformOperation}
           cameraPreset={cameraPreset}
+          focusTarget={selectedObject?.position ?? null}
+          focusNonce={focusSelectionNonce}
         />
       )}
     </div>

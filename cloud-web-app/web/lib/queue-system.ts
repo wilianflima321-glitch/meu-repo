@@ -1,85 +1,49 @@
 import { createComponentLogger } from '@/lib/observability/logger'
+import { DEFAULT_JOB_OPTIONS, QUEUE_NAMES } from './queue-system.config';
+import type {
+  AIBatchJobData,
+  AssetJobData,
+  BullMQRuntime,
+  EmailJobData,
+  ExportJobData,
+  JobData,
+  JobType,
+  QueueAdapter,
+  QueueEventsAdapter,
+  QueueJobAdapter,
+  QueueJobSnapshot,
+  RedisConnectionAdapter,
+  RedisConstructor,
+  WebhookJobData,
+  WorkerAdapter,
+} from './queue-system.types';
 
 const log = createComponentLogger('queue-system')
 
+export { QUEUE_NAMES } from './queue-system.config';
+export type {
+  AIBatchJobData,
+  AssetJobData,
+  EmailJobData,
+  ExportJobData,
+  JobData,
+  JobType,
+  QueueJobAdapter,
+  QueueJobSnapshot,
+  WebhookJobData,
+  WorkerAdapter,
+} from './queue-system.types';
 
 /**
- * Queue System - BullMQ para Jobs Assíncronos
- * 
- * Sistema de filas para processamento de tarefas pesadas:
- * - Emails transacionais
- * - Exports de projetos
- * - Processamento de assets
- * - AI batch jobs
- * - Webhooks
- * 
- * Usa Redis como backend para persistência e distribuição.
- * 
- * DEPENDÊNCIAS OPCIONAIS:
- * npm install bullmq ioredis
+ * Queue System - governed async job runtime.
+ *
+ * Optional BullMQ/ioredis integration for heavy work: email, exports, assets,
+ * AI batches, webhooks, analytics and backup jobs.
  */
 
 // ============================================================================
-// LAZY LOAD - Dependências opcionais
+// LAZY LOAD - optional dependencies
 // ============================================================================
-
-export interface QueueJobAdapter {
-  id?: string | number;
-  name: string;
-  data: unknown;
-  attemptsMade?: number;
-  progress?: unknown;
-  returnvalue?: unknown;
-  failedReason?: string;
-  timestamp?: number | string;
-  processedOn?: number;
-  finishedOn?: number;
-  getState: () => Promise<string>;
-  remove: () => Promise<void>;
-  retry: () => Promise<void>;
-}
-
-interface QueueAdapter {
-  add: (name: string, data: unknown, options: Record<string, unknown>) => Promise<QueueJobAdapter>;
-  getWaitingCount: () => Promise<number>;
-  getActiveCount: () => Promise<number>;
-  getCompletedCount: () => Promise<number>;
-  getFailedCount: () => Promise<number>;
-  getDelayedCount: () => Promise<number>;
-  getJobs: (states: string[], start: number, end: number, asc: boolean) => Promise<QueueJobAdapter[]>;
-  getJob: (jobId: string) => Promise<QueueJobAdapter | null>;
-  pause: () => Promise<void>;
-  resume: () => Promise<void>;
-  clean: (grace: number, limit: number, type: string) => Promise<unknown[]>;
-  close: () => Promise<void>;
-}
-
-interface QueueEventsAdapter {
-  on: (event: string, listener: (payload: Record<string, unknown>) => void) => void;
-  close: () => Promise<void>;
-}
-
-export interface WorkerAdapter {
-  on: (event: string, listener: (job: QueueJobAdapter | undefined, err?: Error) => void) => void;
-  close: () => Promise<void>;
-}
-
-interface RedisConnectionAdapter {
-  on: (event: string, listener: (...args: unknown[]) => void) => void;
-  quit: () => Promise<void>;
-}
-
-interface BullMQRuntime {
-  Queue: new (name: string, options: { connection: RedisConnectionAdapter }) => QueueAdapter;
-  QueueEvents: new (name: string, options: { connection: RedisConnectionAdapter }) => QueueEventsAdapter;
-  Worker: new (
-    name: string,
-    processor: (job: QueueJobAdapter) => Promise<unknown>,
-    options: { connection: RedisConnectionAdapter | null; concurrency: number }
-  ) => WorkerAdapter;
-}
-
-type RedisConstructor = new (config: Record<string, unknown>) => RedisConnectionAdapter;
 
 let BullMQ: BullMQRuntime | null = null;
 let IORedis: RedisConstructor | null = null;
@@ -88,9 +52,9 @@ let loadAttempted = false;
 async function loadDependencies(): Promise<boolean> {
   if (loadAttempted) return !!BullMQ;
   loadAttempted = true;
-  
+
   try {
-    // Dynamic imports usando eval para evitar erros de webpack
+    // Dynamic imports use eval to avoid bundler hard failures
     BullMQ = (await eval('import("bullmq")')) as BullMQRuntime;
     const redisModule = (await eval('import("ioredis")')) as { default?: RedisConstructor } | RedisConstructor;
     IORedis = typeof redisModule === 'function' ? redisModule : redisModule.default || null;
@@ -102,7 +66,7 @@ async function loadDependencies(): Promise<boolean> {
 }
 
 // ============================================================================
-// CONFIGURAÇÃO REDIS
+// REDIS CONFIG
 // ============================================================================
 
 const redisConfig = {
@@ -112,138 +76,25 @@ const redisConfig = {
   maxRetriesPerRequest: null, // Required for BullMQ
 };
 
-// Conexão singleton
+// Singleton connection
 let redisConnection: RedisConnectionAdapter | null = null;
 
 async function getRedisConnection(): Promise<RedisConnectionAdapter | null> {
   if (!await loadDependencies() || !IORedis) return null;
-  
+
   if (!redisConnection) {
     redisConnection = new IORedis(redisConfig);
-    
+
     redisConnection.on('error', (error: unknown) => {
       log.error('[QueueSystem] Redis connection error:', error);
     });
-    
+
     redisConnection.on('connect', () => {
       log.info('[QueueSystem] Redis connected');
     });
   }
   return redisConnection;
 }
-
-// ============================================================================
-// TIPOS DE JOBS
-// ============================================================================
-
-export type JobType =
-  | 'email:send'
-  | 'email:welcome'
-  | 'email:password-reset'
-  | 'email:invoice'
-  | 'render:viewport'
-  | 'export:project'
-  | 'export:game'
-  | 'asset:process'
-  | 'asset:thumbnail'
-  | 'asset:optimize'
-  | 'ai:batch'
-  | 'ai:embedding'
-  | 'ai:moderation'
-  | 'webhook:send'
-  | 'analytics:aggregate'
-  | 'backup:create'
-  | 'backup:restore';
-
-export interface JobData {
-  type: JobType;
-  userId?: string;
-  payload: Record<string, unknown>;
-  priority?: number;
-  retries?: number;
-}
-
-export interface QueueJobSnapshot {
-  id: string;
-  queueName: string;
-  name: string;
-  state: string;
-  data: unknown;
-  attemptsMade: number;
-  progress: unknown;
-  returnvalue?: unknown;
-  failedReason?: string;
-  timestamp: number;
-  processedOn?: number;
-  finishedOn?: number;
-}
-
-export interface EmailJobData {
-  to: string;
-  subject: string;
-  template: string;
-  variables: Record<string, unknown>;
-}
-
-export interface ExportJobData {
-  projectId: string;
-  userId: string;
-  format: 'zip' | 'html5' | 'electron';
-  options: Record<string, unknown>;
-}
-
-export interface AssetJobData {
-  assetId: string;
-  userId: string;
-  operation: 'process' | 'thumbnail' | 'optimize' | 'convert';
-  options: Record<string, unknown>;
-}
-
-export interface AIBatchJobData {
-  userId: string;
-  operation: 'embedding' | 'moderation' | 'batch-chat';
-  items: Array<{ id: string; content: string }>;
-  model?: string;
-}
-
-export interface WebhookJobData {
-  url: string;
-  event: string;
-  payload: Record<string, unknown>;
-  headers?: Record<string, string>;
-}
-
-// ============================================================================
-// FILAS
-// ============================================================================
-
-// Queue names
-export const QUEUE_NAMES = {
-  EMAIL: 'aethel:email',
-  EXPORT: 'aethel:export',
-  ASSET: 'aethel:asset',
-  AI: 'aethel:ai',
-  WEBHOOK: 'aethel:webhook',
-  ANALYTICS: 'aethel:analytics',
-  BACKUP: 'aethel:backup',
-} as const;
-
-// Default job options
-const DEFAULT_JOB_OPTIONS = {
-  attempts: 3,
-  backoff: {
-    type: 'exponential' as const,
-    delay: 1000,
-  },
-  removeOnComplete: {
-    count: 1000, // Keep last 1000 completed jobs
-    age: 24 * 3600, // 24 hours
-  },
-  removeOnFail: {
-    count: 5000, // Keep last 5000 failed jobs for debugging
-    age: 7 * 24 * 3600, // 7 days
-  },
-};
 
 // ============================================================================
 // CLASSE PRINCIPAL: QUEUE MANAGER
@@ -255,7 +106,7 @@ class QueueManager {
   private events: Map<string, QueueEventsAdapter> = new Map();
   private initialized = false;
   private available = false;
-  
+
   /**
    * Verifica se o sistema de filas está disponível
    */
@@ -263,45 +114,45 @@ class QueueManager {
     await this.initialize();
     return this.available;
   }
-  
+
   /**
    * Inicializa todas as filas
    */
   async initialize(): Promise<void> {
     if (this.initialized) return;
     this.initialized = true;
-    
+
     const connection = await getRedisConnection();
     if (!connection || !BullMQ) {
       log.warn('[QueueManager] Redis/BullMQ not available. Queue features disabled.');
       this.available = false;
       return;
     }
-    
+
     this.available = true;
     const { Queue, QueueEvents } = BullMQ;
-    
+
     // Cria filas
     for (const [name, queueName] of Object.entries(QUEUE_NAMES)) {
       const queue = new Queue(queueName, { connection });
       this.queues.set(queueName, queue);
-      
+
       // Event listeners
       const events = new QueueEvents(queueName, { connection });
       this.events.set(queueName, events);
-      
+
       events.on('completed', ({ jobId }) => {
         log.info(`[Queue:${name}] Job ${jobId} completed`);
       });
-      
+
       events.on('failed', ({ jobId, failedReason }) => {
         log.error(`[Queue:${name}] Job ${jobId} failed:`, failedReason);
       });
     }
-    
+
     log.info('[QueueManager] All queues initialized');
   }
-  
+
   /**
    * Adiciona job a uma fila
    */
@@ -317,17 +168,17 @@ class QueueManager {
     }
   ): Promise<QueueJobAdapter | null> {
     await this.initialize();
-    
+
     if (!this.available) {
       log.warn('[QueueManager] Queue system not available. Job not queued:', jobType);
       return null;
     }
-    
+
     const queue = this.queues.get(queueName);
     if (!queue) {
       throw new Error(`Queue ${queueName} not found`);
     }
-    
+
     const job = await queue.add(
       jobType,
       data,
@@ -340,11 +191,11 @@ class QueueManager {
         attempts: options?.attempts || 3,
       }
     );
-    
+
     log.info(`[QueueManager] Added job ${job.id} to ${queueName}`);
     return job;
   }
-  
+
   /**
    * Registra worker para processar jobs
    */
@@ -354,15 +205,15 @@ class QueueManager {
     concurrency = 5
   ): Promise<WorkerAdapter | null> {
     await this.initialize();
-    
+
     if (!this.available || !BullMQ) {
       log.warn('[QueueManager] Queue system not available. Worker not registered.');
       return null;
     }
-    
+
     const connection = await getRedisConnection();
     const { Worker } = BullMQ;
-    
+
     const worker = new Worker(
       queueName,
       async (job: QueueJobAdapter) => {
@@ -377,21 +228,21 @@ class QueueManager {
       },
       { connection, concurrency }
     );
-    
+
     worker.on('completed', (job) => {
       log.info(`[Worker:${queueName}] Job ${job?.id ?? 'unknown'} completed`);
     });
-    
+
     worker.on('failed', (job, err) => {
       log.error(`[Worker:${queueName}] Job ${job?.id} failed:`, err);
     });
-    
+
     this.workers.set(queueName, worker);
     log.info(`[QueueManager] Worker registered for ${queueName} (concurrency: ${concurrency})`);
-    
+
     return worker;
   }
-  
+
   /**
    * Retorna estatísticas de uma fila
    */
@@ -406,12 +257,12 @@ class QueueManager {
     if (!this.available) {
       return { waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 };
     }
-    
+
     const queue = this.queues.get(queueName);
     if (!queue) {
       return { waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 };
     }
-    
+
     const [waiting, active, completed, failed, delayed] = await Promise.all([
       queue.getWaitingCount(),
       queue.getActiveCount(),
@@ -419,10 +270,10 @@ class QueueManager {
       queue.getFailedCount(),
       queue.getDelayedCount(),
     ]);
-    
+
     return { waiting, active, completed, failed, delayed };
   }
-  
+
   /**
    * Retorna estatísticas de todas as filas
    */
@@ -441,14 +292,14 @@ class QueueManager {
       failed: number;
       delayed: number;
     }> = {};
-    
+
     for (const queueName of Object.values(QUEUE_NAMES)) {
       stats[queueName] = await this.getQueueStats(queueName);
     }
-    
+
     return stats;
   }
-  
+
   /**
    * Pausa uma fila
    */
@@ -461,7 +312,7 @@ class QueueManager {
       log.info(`[QueueManager] Queue ${queueName} paused`);
     }
   }
-  
+
   /**
    * Resume uma fila
    */
@@ -631,7 +482,7 @@ class QueueManager {
     }
     return { available: true, queues: touched };
   }
-  
+
   /**
    * Limpa jobs completos/falhos
    */
@@ -643,41 +494,41 @@ class QueueManager {
   ): Promise<number> {
     const queue = this.queues.get(queueName);
     if (!queue) return 0;
-    
+
     const removed = await queue.clean(grace, limit, type);
     log.info(`[QueueManager] Cleaned ${removed.length} ${type} jobs from ${queueName}`);
     return removed.length;
   }
-  
+
   /**
    * Fecha todas as conexões
    */
   async shutdown(): Promise<void> {
     log.info('[QueueManager] Shutting down...');
-    
+
     // Fecha workers
     for (const [name, worker] of this.workers) {
       await worker.close();
       log.info(`[QueueManager] Worker ${name} closed`);
     }
-    
+
     // Fecha event listeners
     for (const [name, events] of this.events) {
       await events.close();
     }
-    
+
     // Fecha filas
     for (const [name, queue] of this.queues) {
       await queue.close();
       log.info(`[QueueManager] Queue ${name} closed`);
     }
-    
+
     // Fecha Redis
     if (redisConnection) {
       await redisConnection.quit();
       redisConnection = null;
     }
-    
+
     this.initialized = false;
     log.info('[QueueManager] Shutdown complete');
   }

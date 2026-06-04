@@ -29,8 +29,14 @@ export function Toolbar({
   isPlaying, onPlayPause,
   onSave, onBuild,
 }: ToolbarProps) {
+  const transformTools: Record<TransformMode, { shortcut: string; label: string }> = {
+    translate: { shortcut: 'W', label: 'Move' },
+    rotate: { shortcut: 'E', label: 'Rotate' },
+    scale: { shortcut: 'R', label: 'Scale' },
+  };
+
   return (
-    <div style={{
+    <div role="toolbar" aria-label="Level editor command toolbar" style={{
       height: '40px',
       background: 'var(--aethel-surface-tertiary)',
       borderBottom: '1px solid var(--aethel-border-primary)',
@@ -41,25 +47,33 @@ export function Toolbar({
     }}>
       {/* Transform Mode */}
       <div style={{ display: 'flex', gap: '2px', marginRight: '8px' }}>
-        {(['translate', 'rotate', 'scale'] as TransformMode[]).map((mode) => (
-          <button type="button" aria-label={`Switch transform mode to ${mode}`}
-            key={mode}
-            onClick={() => onTransformModeChange(mode)}
-            title={mode.charAt(0).toUpperCase() + mode.slice(1) + ' (W/E/R)'}
-            style={{
-              width: '32px',
-              height: '28px',
-              background: transformMode === mode ? 'var(--aethel-primary)' : 'var(--aethel-surface-quaternary)',
-              border: 'none',
-              borderRadius: '3px',
-              color: 'var(--aethel-text-primary)',
-              cursor: 'pointer',
-              fontSize: '14px',
-            }}
-          >
-            {mode === 'translate' ? 'T' : mode === 'rotate' ? 'R' : 'S'}
-          </button>
-        ))}
+        {(['translate', 'rotate', 'scale'] as TransformMode[]).map((mode) => {
+          const tool = transformTools[mode];
+          const active = transformMode === mode;
+          return (
+            <button type="button" aria-label={`Switch transform mode to ${tool.label}`}
+              key={mode}
+              onClick={() => onTransformModeChange(mode)}
+              title={`${tool.label} (${tool.shortcut})`}
+              style={{
+                height: '28px',
+                background: active ? 'var(--aethel-primary)' : 'var(--aethel-surface-quaternary)',
+                border: active ? '1px solid var(--aethel-primary)' : '1px solid var(--aethel-border-subtle)',
+                borderRadius: '6px',
+                color: 'var(--aethel-text-primary)',
+                cursor: 'pointer',
+                fontSize: '11px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0 8px',
+              }}
+            >
+              <span style={{ color: active ? 'var(--aethel-text-primary)' : 'var(--aethel-text-quaternary)', fontWeight: 700 }}>{tool.shortcut}</span>
+              <span>{tool.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       <div style={{ width: '1px', height: '20px', background: 'var(--aethel-border-primary)' }} />
@@ -77,9 +91,9 @@ export function Toolbar({
           fontSize: '11px',
         }}
       >
-        <option value="none">No Snap</option>
-        <option value="grid">Grid Snap</option>
-        <option value="vertex">Vertex Snap</option>
+        <option value="none">Free</option>
+        <option value="grid">Grid</option>
+        <option value="vertex">Vertex</option>
       </select>
 
       {snapMode === 'grid' && (
@@ -141,7 +155,7 @@ export function Toolbar({
           fontSize: '12px',
         }}
       >
-        {isPlaying ? 'Stop' : 'Play'}
+        {isPlaying ? 'Stop' : 'Run'}
       </button>
 
       <div style={{ width: '1px', height: '20px', background: 'var(--aethel-border-primary)' }} />
@@ -211,12 +225,25 @@ export function OutlinerMini({ objects, selectedId, onSelect, onToggleVisibility
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--aethel-border-primary)', fontWeight: 'bold', fontSize: '12px' }}>
-        World Outliner
+      <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--aethel-border-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '12px', letterSpacing: '0.01em' }}>World Outliner</div>
+          <div style={{ marginTop: '2px', fontSize: '10px', color: 'var(--aethel-text-quaternary)' }}>Scene hierarchy</div>
+        </div>
+        <span style={{ border: '1px solid var(--aethel-border-secondary)', borderRadius: '999px', padding: '3px 7px', color: 'var(--aethel-text-tertiary)', fontSize: '10px', whiteSpace: 'nowrap' }}>
+          {objects.length} objects
+        </span>
       </div>
 
       <div style={{ flex: 1, overflow: 'auto', padding: '4px' }}>
-        {objects.map((obj) => (
+        {objects.length === 0 ? (
+          <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', color: 'var(--aethel-text-tertiary)', textAlign: 'center' }}>
+            <div style={{ maxWidth: '220px' }}>
+              <div style={{ color: 'var(--aethel-text-primary)', fontSize: '12px', fontWeight: 700 }}>No objects yet</div>
+              <div style={{ marginTop: '6px', fontSize: '11px', lineHeight: 1.5 }}>Drop assets or create a primitive to begin the scene hierarchy.</div>
+            </div>
+          </div>
+        ) : objects.map((obj) => (
           <div
             key={obj.id}
             onClick={() => onSelect(obj.id)}
@@ -234,21 +261,41 @@ export function OutlinerMini({ objects, selectedId, onSelect, onToggleVisibility
               opacity: obj.visible ? 1 : 0.5,
             }}
           >
-            <span>{getIcon(obj.type)}</span>
+            <span
+              title={obj.type}
+              aria-hidden="true"
+              style={{
+                width: '20px',
+                height: '20px',
+                borderRadius: '5px',
+                border: '1px solid var(--aethel-border-secondary)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--aethel-text-tertiary)',
+                fontSize: '10px',
+                fontWeight: 700,
+                flex: '0 0 auto',
+              }}
+            >
+              {getIcon(obj.type)}
+            </span>
             <span style={{ flex: 1, fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {obj.name}
             </span>
             <button type="button" aria-label={obj.visible ? `Hide ${obj.name}` : `Show ${obj.name}`}
+              title={obj.visible ? 'Hide object' : 'Show object'}
               onClick={(e) => { e.stopPropagation(); onToggleVisibility(obj.id); }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', opacity: 0.6, color: 'var(--aethel-text-secondary)', fontSize: '10px' }}
+              style={{ minWidth: '30px', background: 'var(--aethel-surface-tertiary)', border: '1px solid var(--aethel-border-subtle)', borderRadius: '999px', cursor: 'pointer', padding: '2px 6px', color: 'var(--aethel-text-tertiary)', fontSize: '10px' }}
             >
-              {obj.visible ? 'Visible' : 'Hidden'}
+              {obj.visible ? 'On' : 'Off'}
             </button>
             <button type="button" aria-label={obj.locked ? `Unlock ${obj.name}` : `Lock ${obj.name}`}
+              title={obj.locked ? 'Unlock object' : 'Lock object'}
               onClick={(e) => { e.stopPropagation(); onToggleLock(obj.id); }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', opacity: 0.6, color: 'var(--aethel-text-secondary)', fontSize: '10px' }}
+              style={{ minWidth: '42px', background: obj.locked ? 'var(--aethel-surface-quaternary)' : 'transparent', border: '1px solid var(--aethel-border-subtle)', borderRadius: '999px', cursor: 'pointer', padding: '2px 6px', color: 'var(--aethel-text-tertiary)', fontSize: '10px' }}
             >
-              {obj.locked ? 'Lock' : 'Open'}
+              {obj.locked ? 'Locked' : 'Edit'}
             </button>
           </div>
         ))}
@@ -289,11 +336,25 @@ export function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
   if (!object) {
     return (
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--aethel-border-primary)', fontWeight: 'bold', fontSize: '12px' }}>
-          Details
+        <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--aethel-border-primary)' }}>
+          <div style={{ fontWeight: 700, fontSize: '12px', letterSpacing: '0.01em' }}>Inspector</div>
+          <div style={{ marginTop: '2px', color: 'var(--aethel-text-quaternary)', fontSize: '10px' }}>Context-aware properties</div>
         </div>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--aethel-text-muted)' }}>
-          Select an object
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '18px', color: 'var(--aethel-text-muted)' }}>
+          <div style={{ maxWidth: '260px', border: '1px solid var(--aethel-border-subtle)', borderRadius: '12px', background: 'var(--aethel-surface-tertiary)', padding: '16px', textAlign: 'left' }}>
+            <div style={{ color: 'var(--aethel-text-quaternary)', fontSize: '10px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase' }}>No selection</div>
+            <div style={{ marginTop: '8px', color: 'var(--aethel-text-primary)', fontSize: '13px', fontWeight: 700 }}>Select an object in the viewport or outliner.</div>
+            <div style={{ marginTop: '6px', color: 'var(--aethel-text-tertiary)', fontSize: '11px', lineHeight: 1.5 }}>
+              Transform, components, and asset quality appear here only when there is real context.
+            </div>
+            <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {['Click object', 'Use outliner', 'W/E/R transform'].map((hint) => (
+                <span key={hint} style={{ border: '1px solid var(--aethel-border-secondary)', borderRadius: '999px', padding: '3px 7px', color: 'var(--aethel-text-tertiary)', fontSize: '10px' }}>
+                  {hint}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -301,8 +362,14 @@ export function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--aethel-border-primary)', fontWeight: 'bold', fontSize: '12px' }}>
-        Details - {object.name}
+      <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--aethel-border-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: '12px', letterSpacing: '0.01em' }}>Inspector</div>
+          <div style={{ marginTop: '2px', color: 'var(--aethel-text-quaternary)', fontSize: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{object.name}</div>
+        </div>
+        <span style={{ border: '1px solid var(--aethel-border-secondary)', borderRadius: '999px', padding: '3px 7px', color: 'var(--aethel-text-tertiary)', fontSize: '10px', textTransform: 'capitalize' }}>
+          {object.type}
+        </span>
       </div>
 
       <div style={{ flex: 1, overflow: 'auto', padding: '12px' }}>
@@ -458,4 +525,3 @@ export function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
     </div>
   );
 }
-

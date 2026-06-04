@@ -46,12 +46,12 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
     const originalDebug = consoleApi.debug?.bind(consoleApi) ?? (() => undefined)
 
     const addLog = (type: ConsoleLog['type'], args: unknown[]) => {
-      const message = args.map(arg => 
+      const message = args.map(arg =>
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
       ).join(' ')
       const firstArg = args[0]
       const stack = firstArg instanceof Error ? firstArg.stack : undefined
-      
+
       const log: ConsoleLog = {
         id: `${Date.now()}-${Math.random()}`,
         type,
@@ -60,7 +60,7 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
         source: 'browser',
         stack: type === 'error' ? stack : undefined,
       }
-      
+
       setLogs(prev => [...prev.slice(-99), log]) // Keep last 100 logs
     }
 
@@ -165,7 +165,7 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
             type="button"
             onClick={clearLogs}
             className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-            title="Limpar console"
+            title="Clear console"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -194,7 +194,7 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
             >
-              Todos ({logCounts.all})
+              All ({logCounts.all})
             </button>
             <button
               type="button"

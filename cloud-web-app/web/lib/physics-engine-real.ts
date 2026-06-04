@@ -1,9 +1,10 @@
+// @aethel-heavy-async-boundary Studio/engine runtime module; never import from public/dashboard/admin route shells.
 /**
  * Physics Engine REAL (Powered by RAPIER WASM)
- * 
+ *
  * Implementação PROFISSIONAL de física usando @dimforge/rapier3d-compat.
  * Substitui o motor TypeScript naive por uma simulação WASM robusta.
- * 
+ *
  * Features:
  * - Rigid Bodies (dynamic, static, kinematic) via Rapier
  * - Colliders (box, sphere, capsule, mesh, heightfield) via Rapier
@@ -114,7 +115,7 @@ export class PhysicsBody {
   id: string;
   world: PhysicsWorld;
   rawBody: RAPIER.RigidBody;
-  
+
   // Cache for Three.js objects to avoid GC
   private _position: THREE.Vector3 = new THREE.Vector3();
   private _rotation: THREE.Quaternion = new THREE.Quaternion();
@@ -126,7 +127,7 @@ export class PhysicsBody {
     this.id = id;
     this.world = world;
     this.rawBody = rawBody;
-    
+
     // Apply initial locks
     this.rawBody.setEnabledRotations(
       !config.lockRotationX,
@@ -249,13 +250,13 @@ export class PhysicsCollider {
   id: string;
   bodyId: string;
   rawCollider: RAPIER.Collider;
-  
+
   constructor(id: string, bodyId: string, rawCollider: RAPIER.Collider) {
     this.id = id;
     this.bodyId = bodyId;
     this.rawCollider = rawCollider;
   }
-  
+
   get shape(): ColliderShape {
     return 'box'; // Simplified for now
   }
@@ -269,7 +270,7 @@ export class PhysicsWorld {
   rawWorld: RAPIER.World | undefined;
   private bodies: Map<string, PhysicsBody> = new Map();
   private colliders: Map<string, PhysicsCollider> = new Map();
-  
+
   private eventQueue: RAPIER.EventQueue | undefined;
   private nextBodyId = 1;
   private nextColliderId = 1;
@@ -299,7 +300,7 @@ export class PhysicsWorld {
 
     this.rawWorld.timestep = dt;
     this.rawWorld.step(this.eventQueue);
-    
+
     // Process Events (simplified)
     this.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
       // Propagation logic would go here
@@ -310,10 +311,10 @@ export class PhysicsWorld {
     if (!this.rawWorld) throw new Error('Physics World not initialized. Call await initPhysicsEngine() first.');
 
     const id = `body_${this.nextBodyId++}`;
-    
+
     // Config definition
     let rigidBodyDesc: RAPIER.RigidBodyDesc;
-    
+
     switch (config.type) {
       case 'dynamic': rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic(); break;
       case 'static': rigidBodyDesc = RAPIER.RigidBodyDesc.fixed(); break;
@@ -323,7 +324,7 @@ export class PhysicsWorld {
     rigidBodyDesc
       .setTranslation(config.position.x, config.position.y, config.position.z)
       .setRotation({ x: config.rotation.x, y: config.rotation.y, z: config.rotation.z, w: config.rotation.w });
-      
+
     if (config.linearDamping !== undefined) rigidBodyDesc.setLinearDamping(config.linearDamping);
     if (config.angularDamping !== undefined) rigidBodyDesc.setAngularDamping(config.angularDamping);
     if (config.canSleep === false) rigidBodyDesc.setCanSleep(false);
@@ -331,7 +332,7 @@ export class PhysicsWorld {
 
     const rawBody = this.rawWorld.createRigidBody(rigidBodyDesc);
     const body = new PhysicsBody(id, this, config, rawBody);
-    
+
     this.bodies.set(id, body);
     return body;
   }
@@ -392,10 +393,10 @@ export class PhysicsWorld {
     const rawCollider = this.rawWorld.createCollider(colliderDesc, body.rawBody);
     const id = `collider_${this.nextColliderId++}`;
     const collider = new PhysicsCollider(id, bodyId, rawCollider);
-    
+
     this.colliders.set(id, collider);
     body.colliders.push(collider);
-    
+
     return collider;
   }
 
@@ -406,12 +407,12 @@ export class PhysicsWorld {
       { x: origin.x, y: origin.y, z: origin.z },
       { x: direction.x, y: direction.y, z: direction.z }
     );
-    
+
     const hit = this.rawWorld.castRay(ray, maxDistance, true);
     if (!hit) return null;
 
     const point = ray.pointAt(hit.timeOfImpact);
-    
+
     return {
       point: new THREE.Vector3(point.x, point.y, point.z),
       normal: new THREE.Vector3(0, 1, 0), // Rapier requires explicit call for normal

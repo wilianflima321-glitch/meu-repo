@@ -13,7 +13,7 @@ export function AIChatEvidencePanel({ latestArtifact }: AIChatEvidencePanelProps
         <SearchCheck className="h-5 w-5 text-[var(--aethel-text-quaternary)]" />
         <p>No evidence capsule available.</p>
         <p className="max-w-[240px] text-[var(--aethel-text-quaternary)]">
-          When AI responds with a trace or a research handoff enters the cockpit, evidence appears here.
+          When AI responds with a trace or research handoff, receipts appear here.
         </p>
       </div>
     )
@@ -23,7 +23,7 @@ export function AIChatEvidencePanel({ latestArtifact }: AIChatEvidencePanelProps
     <div className="h-full overflow-y-auto p-3">
       <div className="mb-3">
         <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
-          Evidence workflow
+          Receipts workflow
         </div>
         <p className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
           Provenance and confidence signals for the latest response.

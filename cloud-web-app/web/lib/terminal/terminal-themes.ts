@@ -1,8 +1,30 @@
-import type { TerminalTheme } from '@/lib/hooks/useTerminal';
+export interface XtermPalette {
+  background: string;
+  foreground: string;
+  cursor: string;
+  cursorAccent: string;
+  selection: string;
+  black: string;
+  red: string;
+  green: string;
+  yellow: string;
+  blue: string;
+  magenta: string;
+  cyan: string;
+  white: string;
+  brightBlack: string;
+  brightRed: string;
+  brightGreen: string;
+  brightYellow: string;
+  brightBlue: string;
+  brightMagenta: string;
+  brightCyan: string;
+  brightWhite: string;
+}
 
 // Terminal emulator palettes are ANSI color data, not component styling.
 // Keep them outside TSX so UI files stay token-driven and easy to audit.
-export const TERMINAL_THEMES: Record<string, TerminalTheme> = {
+export const TERMINAL_THEMES: Record<string, XtermPalette> = {
   catppuccinMocha: {
     background: '#1e1e2e',
     foreground: '#cdd6f4',

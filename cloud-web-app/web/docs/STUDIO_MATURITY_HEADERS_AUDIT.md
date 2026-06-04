@@ -2,8 +2,8 @@
 
 - Shell: `app/studio/CreativeStudioShell.tsx`
 - Creative route registry: `app/studio/creative-studio-routes.ts`
-- Studio routes: 18
-- Routes with maturity metadata: 18
+- Studio routes: 19
+- Routes with maturity metadata: 19
 - Header exposes runtime gating: yes
 - Unsupported AAA/Unreal claims: no
 

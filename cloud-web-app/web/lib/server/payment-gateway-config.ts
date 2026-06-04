@@ -23,8 +23,17 @@ export const DEFAULT_PAYMENT_GATEWAY_CONFIG: PaymentGatewayConfig = {
   updatedAt: null,
 };
 
+type IdeSettingModel = {
+  findUnique(args: unknown): Promise<{ value: unknown } | null>;
+  upsert(args: unknown): Promise<unknown>;
+};
+
+type PrismaWithIdeSetting = typeof prisma & {
+  ideSetting?: IdeSettingModel;
+};
+
 export function getIdeSettingModel() {
-  const ideSetting = (prisma as any).ideSetting;
+  const ideSetting = (prisma as PrismaWithIdeSetting).ideSetting;
   if (!ideSetting) {
     throw new Error('IDE settings model not configured');
   }

@@ -1,4 +1,5 @@
 /**
+ * @aethel-heavy-async-boundary
  * Fluid Simulation - split runtime modules.
  *
  * SPH, PBF, FLIP, and surface reconstruction stay behind Studio/runtime

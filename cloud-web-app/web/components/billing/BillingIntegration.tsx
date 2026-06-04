@@ -118,7 +118,7 @@ export function BillingStatusBanner() {
         <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--aethel-warning)]" aria-hidden="true" />
         <div>
           <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
-            Runtime of billing esta {formatReadinessStatus(readiness.status)}
+            Billing setup is {formatReadinessStatus(readiness.status)}
           </p>
           {readiness.blockers.length > 0 && (
             <ul className="mt-1 space-y-0.5 text-xs text-[var(--aethel-text-secondary)]">
@@ -475,7 +475,7 @@ export function BillingTransparencyCard({
           <button
             type="button"
             onClick={onOpenDetails}
-            aria-label="Abrir detalhes of custo e consumo"
+            aria-label="Open cost and usage details"
             className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:border-[var(--aethel-border-secondary)]"
           >
             View details <ArrowRight className="h-3.5 w-3.5" />
@@ -523,9 +523,9 @@ function formatReadinessStatus(status: BillingReadinessState['status']): string 
     case 'ready':
       return 'ready'
     case 'partial':
-      return 'parcial'
+      return 'partial'
     default:
-      return 'indisponivel'
+      return 'unavailable'
   }
 }
 
@@ -535,17 +535,17 @@ function formatSubscriptionStatus(status: string): string {
     case 'active':
       return 'active'
     case 'trialing':
-      return 'em teste'
+      return 'trialing'
     case 'past_due':
-      return 'pagamento pendente'
+      return 'past due'
     case 'canceled':
-      return 'cancelada'
+      return 'canceled'
     case 'incomplete':
-      return 'incompleta'
+      return 'incomplete'
     case 'unpaid':
-      return 'inadimplente'
+      return 'unpaid'
     default:
-      return normalized || 'sem status'
+      return normalized || 'no status'
   }
 }
 

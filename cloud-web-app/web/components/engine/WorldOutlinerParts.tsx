@@ -4,20 +4,20 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { OutlinerFilter, SceneObject, SceneObjectType } from './WorldOutliner';
 
 export const OBJECT_TYPE_CONFIG: Record<SceneObjectType, { icon: string; color: string }> = {
-  empty: { icon: '⊡', color: 'var(--aethel-text-quaternary)' },
-  mesh: { icon: '🔷', color: 'var(--aethel-primary)' },
-  light: { icon: '💡', color: 'var(--aethel-warning)' },
-  camera: { icon: '📷', color: 'var(--aethel-accent)' },
-  audio: { icon: '🔊', color: 'var(--aethel-info)' },
-  particle: { icon: '✨', color: 'var(--aethel-error)' },
-  trigger: { icon: '🎯', color: 'var(--aethel-success)' },
-  volume: { icon: '📦', color: 'var(--aethel-text-tertiary)' },
-  blueprint: { icon: '📐', color: 'var(--aethel-primary)' },
-  prefab: { icon: '🧩', color: 'var(--aethel-info)' },
-  landscape: { icon: '🏔️', color: 'var(--aethel-success)' },
-  foliage: { icon: '🌿', color: 'var(--aethel-success)' },
-  spline: { icon: '〰️', color: 'var(--aethel-warning)' },
-  group: { icon: '📁', color: 'var(--aethel-text-tertiary)' },
+  empty: { icon: 'E', color: 'var(--aethel-text-quaternary)' },
+  mesh: { icon: 'M', color: 'var(--aethel-primary)' },
+  light: { icon: 'L', color: 'var(--aethel-warning)' },
+  camera: { icon: 'C', color: 'var(--aethel-accent)' },
+  audio: { icon: 'A', color: 'var(--aethel-info)' },
+  particle: { icon: 'P', color: 'var(--aethel-error)' },
+  trigger: { icon: 'T', color: 'var(--aethel-success)' },
+  volume: { icon: 'V', color: 'var(--aethel-text-tertiary)' },
+  blueprint: { icon: 'B', color: 'var(--aethel-primary)' },
+  prefab: { icon: 'PF', color: 'var(--aethel-info)' },
+  landscape: { icon: 'LS', color: 'var(--aethel-success)' },
+  foliage: { icon: 'F', color: 'var(--aethel-success)' },
+  spline: { icon: 'S', color: 'var(--aethel-warning)' },
+  group: { icon: 'G', color: 'var(--aethel-text-tertiary)' },
 };
 
 // ============================================================================
@@ -31,14 +31,14 @@ interface TreeItemProps {
   onToggleExpand: () => void;
   onSelect: (e: React.MouseEvent) => void;
   onToggleVisibility: () => void;
-  onToggleBloquear: () => void;
-  onRenomear: (name: string) => void;
+  onToggleLock: () => void;
+  onRename: (name: string) => void;
   onDragStart: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
   onContextMenu: (e: React.MouseEvent) => void;
   isDragOver: boolean;
-  selecionadosIds: Set<string>;
+  selectedIds: Set<string>;
 }
 
 export function TreeItem({
@@ -48,21 +48,21 @@ export function TreeItem({
   onToggleExpand,
   onSelect,
   onToggleVisibility,
-  onToggleBloquear,
-  onRenomear,
+  onToggleLock,
+  onRename,
   onDragStart,
   onDragOver,
   onDrop,
   onContextMenu,
   isDragOver,
-  selecionadosIds,
+  selectedIds,
 }: TreeItemProps) {
   const [isRenaming, setIsRenaming] = useState(false);
-  const [renameValue, setRenomearValue] = useState(object.name);
+  const [renameValue, setRenameValue] = useState(object.name);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const config = OBJECT_TYPE_CONFIG[object.type];
-  const isSelected = selecionadosIds.has(object.id);
+  const isSelected = selectedIds.has(object.id);
   const hasChildren = object.children.length > 0;
 
   useEffect(() => {
@@ -72,9 +72,9 @@ export function TreeItem({
     }
   }, [isRenaming]);
 
-  const handleRenomearSubmit = () => {
+  const handleRenameSubmit = () => {
     if (renameValue.trim() && renameValue !== object.name) {
-      onRenomear(renameValue.trim());
+      onRename(renameValue.trim());
     }
     setIsRenaming(false);
   };
@@ -136,7 +136,7 @@ export function TreeItem({
             visibility: hasChildren ? 'visible' : 'hidden',
           }}
         >
-          {isExpanded ? '▼' : '▶'}
+          {isExpanded ? 'v' : '>'}
         </button>
 
         {/* Icon */}
@@ -154,12 +154,12 @@ export function TreeItem({
             ref={inputRef}
             type="text"
             value={renameValue}
-            onChange={(e) => setRenomearValue(e.target.value)}
-            onBlur={handleRenomearSubmit}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onBlur={handleRenameSubmit}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') handleRenomearSubmit();
+              if (e.key === 'Enter') handleRenameSubmit();
               if (e.key === 'Escape') {
-                setRenomearValue(object.name);
+                setRenameValue(object.name);
                 setIsRenaming(false);
               }
             }}
@@ -216,14 +216,14 @@ export function TreeItem({
             cursor: 'pointer',
             fontSize: '12px',
           }}
-          title={object.visible ? 'Ocultar' : 'Mostrar'}
+          title={object.visible ? 'Hide' : 'Show'}
         >
-          {object.visible ? '👁' : '👁‍🗨'}
+          {object.visible ? 'Visible' : 'Hidden'}
         </button>
 
-        {/* Bloquear Toggle */}
+        {/* Lock toggle */}
         <button type="button" aria-label={object.locked ? `Unlock ${object.name}` : `Lock ${object.name}`}
-          onClick={(e) => { e.stopPropagation(); onToggleBloquear(); }}
+          onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
           style={{
             width: '20px',
             height: '20px',
@@ -236,9 +236,9 @@ export function TreeItem({
             cursor: 'pointer',
             fontSize: '12px',
           }}
-          title={object.locked ? 'Desbloquear' : 'Bloquear'}
+          title={object.locked ? 'Unlock' : 'Lock'}
         >
-          {object.locked ? '🔒' : '🔓'}
+          {object.locked ? 'Locked' : 'Open'}
         </button>
       </div>
     </div>
@@ -269,26 +269,26 @@ export function OutlinerContextMenu({
   }, [onClose]);
 
   const items = object ? [
-    { id: 'focus', label: '🎯 Focar', divider: false },
-    { id: 'rename', label: '✏️ Renomear', divider: false },
-    { id: 'duplicate', label: '📋 Duplicar', divider: true },
-    { id: 'visibility', label: object.visible ? '👁‍🗨 Ocultar' : '👁 Mostrar', divider: false },
-    { id: 'lock', label: object.locked ? '🔓 Desbloquear' : '🔒 Bloquear', divider: true },
-    { id: 'group', label: '📁 Agrupar', divider: false },
-    { id: 'ungroup', label: '📂 Desagrupar', divider: true },
-    { id: 'create_prefab', label: '🧩 Create Prefab', divider: false },
-    { id: 'create_blueprint', label: '📐 Create Blueprint', divider: true },
+    { id: 'focus', label: 'Focus', divider: false },
+    { id: 'rename', label: 'Rename', divider: false },
+    { id: 'duplicate', label: 'Duplicate', divider: true },
+    { id: 'visibility', label: object.visible ? 'Hide' : 'Show', divider: false },
+    { id: 'lock', label: object.locked ? 'Unlock' : 'Lock', divider: true },
+    { id: 'group', label: 'Group', divider: false },
+    { id: 'ungroup', label: 'Ungroup', divider: true },
+    { id: 'create_prefab', label: 'Create Prefab', divider: false },
+    { id: 'create_blueprint', label: 'Create Blueprint', divider: true },
     { id: 'delete', label: 'Delete', divider: false },
   ] : [
-    { id: 'create_empty', label: '⊡ Create Vazio', divider: false },
-    { id: 'create_cube', label: '🔷 Create Cubo', divider: false },
-    { id: 'create_sphere', label: '🔵 Create Esfera', divider: false },
-    { id: 'create_plane', label: '⬜ Create Plano', divider: true },
-    { id: 'create_light', label: '💡 Create Luz', divider: false },
-    { id: 'create_camera', label: '📷 Create Camera', divider: false },
-    { id: 'create_audio', label: '🔊 Create Audio', divider: true },
-    { id: 'create_particle', label: '✨ Create Particulas', divider: false },
-    { id: 'create_trigger', label: '🎯 Create Trigger', divider: false },
+    { id: 'create_empty', label: 'Create Empty', divider: false },
+    { id: 'create_cube', label: 'Create Cube', divider: false },
+    { id: 'create_sphere', label: 'Create Sphere', divider: false },
+    { id: 'create_plane', label: 'Create Plane', divider: true },
+    { id: 'create_light', label: 'Create Light', divider: false },
+    { id: 'create_camera', label: 'Create Camera', divider: false },
+    { id: 'create_audio', label: 'Create Audio', divider: true },
+    { id: 'create_particle', label: 'Create Particles', divider: false },
+    { id: 'create_trigger', label: 'Create Trigger', divider: false },
   ];
 
   return (
@@ -352,7 +352,7 @@ export function OutlinerFilterBar({
   onCollapseAll: () => void;
   onExpandAll: () => void;
 }) {
-  const [showTypeFilter, setMostrarTypeFilter] = useState(false);
+  const [showTypeFilter, setShowTypeFilter] = useState(false);
 
   return (
     <div style={{
@@ -365,7 +365,7 @@ export function OutlinerFilterBar({
       {/* Search */}
       <input
         type="text"
-        placeholder="🔍 Search..."
+        placeholder="Search..."
         value={filter.search || ''}
         onChange={(e) => onFilterChange({ ...filter, search: e.target.value })}
         style={{
@@ -382,7 +382,7 @@ export function OutlinerFilterBar({
       {/* Type Filter */}
       <div style={{ position: 'relative' }}>
         <button type="button" aria-label={showTypeFilter ? 'Hide type filters' : 'Show type filters'}
-          onClick={() => setMostrarTypeFilter(!showTypeFilter)}
+          onClick={() => setShowTypeFilter(!showTypeFilter)}
           style={{
             padding: '4px 8px',
             background: filter.types?.length ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
@@ -392,9 +392,9 @@ export function OutlinerFilterBar({
             cursor: 'pointer',
             fontSize: '12px',
           }}
-          title="Filter por tipo"
+          title="Filter by type"
         >
-          📋
+          Type
         </button>
 
         {showTypeFilter && (
@@ -440,7 +440,7 @@ export function OutlinerFilterBar({
         )}
       </div>
 
-      {/* Recolher tudo */}
+      {/* Collapse all */}
       <button type="button" aria-label="Collapse all world outliner items"
         onClick={onCollapseAll}
         style={{
@@ -452,12 +452,12 @@ export function OutlinerFilterBar({
           cursor: 'pointer',
           fontSize: '12px',
         }}
-        title="Recolher tudo"
+        title="Collapse all"
       >
-        ⬆
+        Collapse
       </button>
 
-      {/* Expandir tudo */}
+      {/* Expand all */}
       <button type="button" aria-label="Expand all world outliner items"
         onClick={onExpandAll}
         style={{
@@ -469,9 +469,9 @@ export function OutlinerFilterBar({
           cursor: 'pointer',
           fontSize: '12px',
         }}
-        title="Expandir tudo"
+        title="Expand all"
       >
-        ⬇
+        Expand
       </button>
     </div>
   );

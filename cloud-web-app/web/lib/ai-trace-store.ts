@@ -56,6 +56,11 @@ function sanitizeTraceSummary(input: AITraceSummary): AITraceSummary {
   };
 }
 
+function readTraceFromMetadata(metadata: unknown): unknown {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
+  return (metadata as { trace?: unknown }).trace;
+}
+
 export async function persistAITrace(params: {
   userId: string;
   trace: AITraceSummary;
@@ -97,7 +102,7 @@ export async function getAITraceForUser(params: {
     orderBy: { createdAt: 'desc' },
   });
 
-  const trace = (row?.metadata as any)?.trace;
+  const trace = readTraceFromMetadata(row?.metadata);
   if (!trace || typeof trace !== 'object') return null;
   return trace as AITraceSummary;
 }

@@ -42,12 +42,12 @@ export default function BillingCancelPage() {
       <div className="max-w-xl w-full rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6">
         <h1 className="text-2xl font-semibold mb-2">Checkout canceled</h1>
         <p className="text-sm text-[var(--aethel-text-secondary)] mb-4">
-          Do not assume billing changes from this page. You can return to billing and try again when the runtime is ready.
+          No plan changes were applied. You can return to billing when you are ready.
         </p>
 
         {loading ? (
           <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/60 px-3 py-3 text-sm text-[var(--aethel-text-secondary)]">
-            Loading billing readiness...
+            Checking payment setup...
           </div>
         ) : error ? (
           <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/10 px-3 py-3 text-sm text-[var(--aethel-error-light)]">
@@ -56,20 +56,23 @@ export default function BillingCancelPage() {
         ) : (
           <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/60 px-3 py-3 text-sm text-[var(--aethel-text-secondary)]">
             <p>
-              Billing readiness:
+              Payment setup:
               <span className="ml-2 font-medium text-[var(--aethel-text-primary)]">{readiness?.status || 'unknown'}</span>
             </p>
-            <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
-              checkout={String(Boolean(readiness?.checkoutReady))} portal={String(Boolean(readiness?.portalReady))} webhook={String(Boolean(readiness?.webhookReady))}
-            </p>
-            {readiness?.provider ? (
-              <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
-                provider={readiness.provider.label}
-                {readiness.stripe
-                  ? ` | publishable=${String(readiness.stripe.publishableKeyConfigured)} | prices=${readiness.stripe.configuredPriceCount}/${readiness.stripe.requiredPriceCount}`
-                  : ''}
+            <details className="mt-2 text-xs text-[var(--aethel-text-secondary)]">
+              <summary className="cursor-pointer list-none font-medium text-[var(--aethel-text-tertiary)]">Show payment checks</summary>
+              <p className="mt-1">
+                checkout={String(Boolean(readiness?.checkoutReady))} portal={String(Boolean(readiness?.portalReady))} webhook={String(Boolean(readiness?.webhookReady))}
               </p>
-            ) : null}
+              {readiness?.provider ? (
+                <p className="mt-1">
+                  provider={readiness.provider.label}
+                  {readiness.stripe
+                    ? ` | publishable=${String(readiness.stripe.publishableKeyConfigured)} | prices=${readiness.stripe.configuredPriceCount}/${readiness.stripe.requiredPriceCount}`
+                    : ''}
+                </p>
+              ) : null}
+            </details>
           </div>
         )}
 

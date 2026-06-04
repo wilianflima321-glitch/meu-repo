@@ -1,9 +1,10 @@
-
+// @aethel-heavy-async-boundary Advanced particle simulation is a Studio/runtime module, not a public shell dependency.
 import * as THREE from 'three';
 import { EventEmitter } from 'events';
-
+import { createFireParticleSettings, createSmokeParticleSettings, createSparkParticleSettings } from './advanced-particle-presets';
+import { ParticlePool } from './advanced-particle-pool';
+import { createParticleMaterial } from './advanced-particle-material';
 import type {
-  BlendMode,
   CollisionSettings,
   ColorStop,
   EmitterSettings,
@@ -13,7 +14,6 @@ import type {
   ParticleSystemSettings,
 } from './advanced-particle-system-types';
 export type {
-  BlendMode,
   CollisionSettings,
   ColorStop,
   EmitterSettings,
@@ -28,76 +28,6 @@ export type {
   SubEmitterSettings,
   Vector3Range,
 } from './advanced-particle-system-types';
-
-class ParticlePool {
-  private particles: Particle[] = [];
-  private activeCount = 0;
-  private maxParticles: number;
-
-  constructor(maxParticles: number) {
-    this.maxParticles = maxParticles;
-
-    for (let i = 0; i < maxParticles; i++) {
-      this.particles.push(this.createParticle());
-    }
-  }
-
-  private createParticle(): Particle {
-    return {
-      position: new THREE.Vector3(),
-      velocity: new THREE.Vector3(),
-      age: 0,
-      lifetime: 1,
-      size: 1,
-      rotation: 0,
-      color: new THREE.Color(1, 1, 1),
-      alpha: 1,
-      speed: 1,
-      alive: false,
-    };
-  }
-
-  acquire(): Particle | null {
-    for (let i = 0; i < this.maxParticles; i++) {
-      if (!this.particles[i].alive) {
-        this.particles[i].alive = true;
-        this.activeCount++;
-        return this.particles[i];
-      }
-    }
-    return null;
-  }
-
-  release(particle: Particle): void {
-    particle.alive = false;
-    this.activeCount--;
-  }
-
-  forEach(callback: (particle: Particle, index: number) => void): void {
-    let index = 0;
-    for (let i = 0; i < this.maxParticles; i++) {
-      if (this.particles[i].alive) {
-        callback(this.particles[i], index++);
-      }
-    }
-  }
-
-  getActiveCount(): number {
-    return this.activeCount;
-  }
-
-  getAll(): Particle[] {
-    return this.particles;
-  }
-
-  clear(): void {
-    for (const particle of this.particles) {
-      particle.alive = false;
-    }
-    this.activeCount = 0;
-  }
-}
-
 export class ParticleEmitter extends EventEmitter {
   private settings: ParticleSystemSettings;
   private pool: ParticlePool;
@@ -130,70 +60,7 @@ export class ParticleEmitter extends EventEmitter {
     this.geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
     this.geometry.setAttribute('rotation', new THREE.BufferAttribute(rotations, 1));
 
-    const blendModes: Record<BlendMode, THREE.Blending> = {
-      additive: THREE.AdditiveBlending,
-      normal: THREE.NormalBlending,
-      multiply: THREE.MultiplyBlending,
-      screen: THREE.CustomBlending,
-    };
-
-    this.material = new THREE.ShaderMaterial({
-      uniforms: {
-        pointTexture: { value: null },
-        uTime: { value: 0 },
-      },
-      vertexShader: `
-        attribute vec4 color;
-        attribute float size;
-        attribute float rotation;
-
-        varying vec4 vColor;
-        varying float vRotation;
-
-        void main() {
-          vColor = color;
-          vRotation = rotation;
-
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = size * (300.0 / -mvPosition.z);
-          gl_Position = projectionMatrix * mvPosition;
-        }
-      `,
-      fragmentShader: `
-        uniform sampler2D pointTexture;
-        uniform float uTime;
-
-        varying vec4 vColor;
-        varying float vRotation;
-
-        void main() {
-          vec2 center = gl_PointCoord - 0.5;
-
-          float c = cos(vRotation);
-          float s = sin(vRotation);
-          vec2 rotated = vec2(
-            center.x * c - center.y * s,
-            center.x * s + center.y * c
-          ) + 0.5;
-
-          vec4 texColor = texture2D(pointTexture, rotated);
-
-          float dist = length(center) * 2.0;
-          float alpha = 1.0 - smoothstep(0.8, 1.0, dist);
-
-          gl_FragColor = vec4(vColor.rgb, vColor.a * alpha);
-        }
-      `,
-      transparent: true,
-      depthWrite: false,
-      blending: blendModes[settings.particle.blendMode],
-    });
-
-    if (settings.particle.texture) {
-      new THREE.TextureLoader().load(settings.particle.texture, (texture) => {
-        (this.material as THREE.ShaderMaterial).uniforms.pointTexture.value = texture;
-      });
-    }
+    this.material = createParticleMaterial(settings);
 
     this.mesh = new THREE.Points(this.geometry, this.material);
     this.mesh.frustumCulled = false;
@@ -784,163 +651,15 @@ export class ParticleSystemManager extends EventEmitter {
   }
 
   createFireEffect(position: { x: number; y: number; z: number }): ParticleEmitter {
-    return this.createEmitter({
-      id: `fire_${Date.now()}`,
-      name: 'Fire',
-      duration: 2,
-      looping: true,
-      prewarm: true,
-      maxParticles: 500,
-      emitter: {
-        shape: 'cone',
-        position,
-        rotation: { x: 0, y: 0, z: 0 },
-        coneAngle: 15,
-        coneRadius: 0.5,
-        rate: 100,
-        simulationSpace: 'world',
-      },
-      particle: {
-        lifetime: { min: 0.5, max: 1.5 },
-        startSpeed: { min: 2, max: 4 },
-        startSize: { min: 0.3, max: 0.6 },
-        startRotation: { min: 0, max: 360 },
-        startColor: [{ time: 0, color: { r: 1, g: 0.8, b: 0.3, a: 1 } }],
-        colorOverLifetime: [
-          { time: 0, color: { r: 1, g: 0.9, b: 0.3, a: 1 } },
-          { time: 0.3, color: { r: 1, g: 0.5, b: 0.1, a: 0.8 } },
-          { time: 0.7, color: { r: 0.5, g: 0.1, b: 0.05, a: 0.5 } },
-          { time: 1, color: { r: 0.1, g: 0.1, b: 0.1, a: 0 } },
-        ],
-        sizeOverLifetime: [
-          { time: 0, value: 0.5 },
-          { time: 0.3, value: 1 },
-          { time: 1, value: 0.2 },
-        ],
-        inheritVelocity: 0,
-        velocityRandomness: { min: { x: -0.5, y: 0, z: -0.5 }, max: { x: 0.5, y: 0, z: 0.5 } },
-        blendMode: 'additive',
-        renderOrder: 10,
-        billboard: true,
-        stretchedBillboard: false,
-        stretchFactor: 0,
-        sortByDistance: true,
-      },
-      modifiers: {
-        gravity: { x: 0, y: 0.5, z: 0 },
-        drag: 0.1,
-        turbulenceStrength: 2,
-        turbulenceFrequency: 2,
-        turbulenceScrollSpeed: 1,
-      },
-      collision: { enabled: false, bounce: 0, dampen: 0, lifetime: 1, world: false },
-      subEmitters: [],
-    });
+    return this.createEmitter(createFireParticleSettings(position));
   }
 
   createSmokeEffect(position: { x: number; y: number; z: number }): ParticleEmitter {
-    return this.createEmitter({
-      id: `smoke_${Date.now()}`,
-      name: 'Smoke',
-      duration: 3,
-      looping: true,
-      prewarm: true,
-      maxParticles: 200,
-      emitter: {
-        shape: 'cone',
-        position,
-        rotation: { x: 0, y: 0, z: 0 },
-        coneAngle: 20,
-        coneRadius: 0.3,
-        rate: 30,
-        simulationSpace: 'world',
-      },
-      particle: {
-        lifetime: { min: 2, max: 4 },
-        startSpeed: { min: 0.5, max: 1 },
-        startSize: { min: 0.5, max: 1 },
-        startRotation: { min: 0, max: 360 },
-        startColor: [{ time: 0, color: { r: 0.3, g: 0.3, b: 0.3, a: 0.5 } }],
-        colorOverLifetime: [
-          { time: 0, color: { r: 0.4, g: 0.4, b: 0.4, a: 0.4 } },
-          { time: 0.5, color: { r: 0.5, g: 0.5, b: 0.5, a: 0.2 } },
-          { time: 1, color: { r: 0.6, g: 0.6, b: 0.6, a: 0 } },
-        ],
-        sizeOverLifetime: [
-          { time: 0, value: 0.5 },
-          { time: 1, value: 3 },
-        ],
-        rotationOverLifetime: 20,
-        inheritVelocity: 0,
-        velocityRandomness: { min: { x: -0.2, y: 0, z: -0.2 }, max: { x: 0.2, y: 0, z: 0.2 } },
-        blendMode: 'normal',
-        renderOrder: 5,
-        billboard: true,
-        stretchedBillboard: false,
-        stretchFactor: 0,
-        sortByDistance: true,
-      },
-      modifiers: {
-        gravity: { x: 0, y: 0.2, z: 0 },
-        drag: 0.2,
-        turbulenceStrength: 1,
-        turbulenceFrequency: 0.5,
-        turbulenceScrollSpeed: 0.5,
-      },
-      collision: { enabled: false, bounce: 0, dampen: 0, lifetime: 1, world: false },
-      subEmitters: [],
-    });
+    return this.createEmitter(createSmokeParticleSettings(position));
   }
 
   createSparkEffect(position: { x: number; y: number; z: number }): ParticleEmitter {
-    return this.createEmitter({
-      id: `spark_${Date.now()}`,
-      name: 'Sparks',
-      duration: 0.5,
-      looping: false,
-      prewarm: false,
-      maxParticles: 100,
-      emitter: {
-        shape: 'point',
-        position,
-        rotation: { x: 0, y: 0, z: 0 },
-        rate: 0,
-        bursts: [{ time: 0, count: 50, probability: 1 }],
-        simulationSpace: 'world',
-      },
-      particle: {
-        lifetime: { min: 0.3, max: 0.8 },
-        startSpeed: { min: 5, max: 10 },
-        startSize: { min: 0.05, max: 0.15 },
-        startRotation: { min: 0, max: 0 },
-        startColor: [
-          { time: 0, color: { r: 1, g: 1, b: 0.5, a: 1 } },
-          { time: 0, color: { r: 1, g: 0.8, b: 0.3, a: 1 } },
-        ],
-        colorOverLifetime: [
-          { time: 0, color: { r: 1, g: 1, b: 0.8, a: 1 } },
-          { time: 0.5, color: { r: 1, g: 0.5, b: 0.2, a: 1 } },
-          { time: 1, color: { r: 0.5, g: 0.1, b: 0.05, a: 0 } },
-        ],
-        inheritVelocity: 0,
-        velocityRandomness: { min: { x: -1, y: -1, z: -1 }, max: { x: 1, y: 1, z: 1 } },
-        blendMode: 'additive',
-        renderOrder: 15,
-        billboard: true,
-        stretchedBillboard: true,
-        stretchFactor: 0.5,
-        sortByDistance: false,
-      },
-      modifiers: {
-        gravity: { x: 0, y: -10, z: 0 },
-        drag: 0.5,
-        turbulenceStrength: 0,
-        turbulenceFrequency: 0,
-        turbulenceScrollSpeed: 0,
-      },
-      collision: { enabled: true, bounce: 0.3, dampen: 0.5, lifetime: 0.5, world: true },
-      subEmitters: [],
-    });
+    return this.createEmitter(createSparkParticleSettings(position));
   }
 
   dispose(): void {

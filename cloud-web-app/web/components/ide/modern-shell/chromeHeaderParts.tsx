@@ -2,14 +2,11 @@ import React from 'react';
 import { tokens } from '@/lib/design-tokens';
 import {
   Code2,
-  FolderTree,
   Layout,
-  MessageSquare,
   Play,
   Search,
   Settings,
   Sparkles,
-  TerminalSquare,
 } from 'lucide-react';
 import type { BottomPanelMode, PanelState } from './types';
 import {
@@ -18,25 +15,12 @@ import {
   TEXT_PRIMARY,
   TEXT_SECONDARY,
   TEXT_TERTIARY,
-  getPanelToggleStyle,
   getPrimaryActionButtonStyle,
   iconButtonStyle,
 } from './chromeStyles';
 import { DeployTopbarAction } from './deployTopbarAction';
 
-type HeaderPanelKey = 'sidebar' | 'chat' | 'terminal' | 'preview';
 type CommandPaletteMode = 'commands' | 'files';
-
-const headerPanelItems: ReadonlyArray<{
-  panel: HeaderPanelKey;
-  icon: React.ReactNode;
-  label: string;
-}> = [
-  { panel: 'sidebar', icon: <FolderTree size={16} />, label: 'Files' },
-  { panel: 'chat', icon: <MessageSquare size={16} />, label: 'AI Console' },
-  { panel: 'terminal', icon: <TerminalSquare size={16} />, label: 'Terminal' },
-  { panel: 'preview', icon: <Play size={16} />, label: 'Visual' },
-];
 
 const floatingClusterStyle: React.CSSProperties = {
   display: 'flex',
@@ -52,7 +36,7 @@ const floatingClusterStyle: React.CSSProperties = {
 
 const commandCenterButtonStyle: React.CSSProperties = {
   display: 'flex',
-  minWidth: '280px',
+  minWidth: '220px',
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: tokens.spacing['3'],
@@ -190,10 +174,6 @@ interface HeaderWorkspaceControlsProps {
 
 export function HeaderWorkspaceControls({
   headerExtras,
-  panelState,
-  activeBottomPanel,
-  onTogglePanel,
-  onSelectBottomPanel,
   onOpenCommandPalette,
 }: HeaderWorkspaceControlsProps) {
   return (
@@ -209,42 +189,6 @@ export function HeaderWorkspaceControls({
       }}
     >
       {headerExtras ? <div style={floatingClusterStyle}>{headerExtras}</div> : null}
-
-      <div style={floatingClusterStyle}>
-        {headerPanelItems.map((item) => (
-          <PanelToggle
-            key={item.panel}
-            icon={item.icon}
-            label={item.label}
-            active={
-              item.panel === 'terminal'
-                ? panelState.chat.open && activeBottomPanel === 'terminal'
-                : item.panel === 'chat'
-                  ? panelState.chat.open && activeBottomPanel === 'chat'
-                  : panelState[item.panel].open
-            }
-            onClick={() => {
-              if (item.panel === 'terminal') {
-                onSelectBottomPanel?.('terminal');
-                if (!(panelState.chat.open && activeBottomPanel !== 'terminal')) {
-                  onTogglePanel('chat');
-                }
-                return;
-              }
-
-              if (item.panel === 'chat') {
-                onSelectBottomPanel?.('chat');
-                if (!(panelState.chat.open && activeBottomPanel !== 'chat')) {
-                  onTogglePanel('chat');
-                }
-                return;
-              }
-
-              onTogglePanel(item.panel);
-            }}
-          />
-        ))}
-      </div>
 
       {onOpenCommandPalette ? (
         <CommandCenterButton onOpenCommandPalette={onOpenCommandPalette} />
@@ -304,22 +248,6 @@ export function HeaderPrimaryActions({
   );
 }
 
-interface PanelToggleProps {
-  icon: React.ReactNode;
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}
-
-function PanelToggle({ icon, label, active, onClick }: PanelToggleProps) {
-  return (
-    <button type="button" onClick={onClick} style={getPanelToggleStyle(active)}>
-      {icon}
-      {label}
-    </button>
-  );
-}
-
 function CommandCenterButton({
   onOpenCommandPalette,
 }: {
@@ -354,33 +282,16 @@ function CommandCenterButton({
           </span>
           <span
             style={{
-              display: 'flex',
               minWidth: 0,
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              gap: '2px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              fontSize: tokens.typography.fontSize.sm,
+              fontWeight: tokens.typography.fontWeight.semibold,
+              color: TEXT_PRIMARY,
             }}
           >
-            <span
-              style={{
-                fontSize: tokens.typography.fontSize.sm,
-                fontWeight: tokens.typography.fontWeight.semibold,
-                color: TEXT_PRIMARY,
-              }}
-            >
-              Command Center
-            </span>
-            <span
-              style={{
-                fontSize: tokens.typography.fontSize.xs,
-                color: TEXT_TERTIARY,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Ask, navigate, and run without leaving the cockpit.
-            </span>
+            Command Center
           </span>
         </span>
         <span style={commandCenterHintStyle}>Cmd+K</span>

@@ -1,4 +1,4 @@
-import type * as monaco from 'monaco-editor'
+import type { StandaloneCodeEditorLike } from '@/lib/editor/editor-structural-types'
 
 /** Diff em memoria para staging; `buildChatDiffFile` alimenta o painel Diff do chat. */
 export type ChatDiffLine = {
@@ -20,7 +20,7 @@ export type ApplyBridgeResult = { ok: true } | { ok: false; message: string }
  * Substitui a selecao atual; se estiver vazia, insere no cursor.
  */
 export function applySnippetAtCursor(
-  editor: monaco.editor.IStandaloneCodeEditor,
+  editor: StandaloneCodeEditorLike,
   code: string
 ): ApplyBridgeResult {
   const model = editor.getModel()
@@ -47,7 +47,7 @@ export function applySnippetAtCursor(
 
 /** Insere um trecho no cursor sem substituir a selecao. */
 export function insertSnippetAtCursor(
-  editor: monaco.editor.IStandaloneCodeEditor,
+  editor: StandaloneCodeEditorLike,
   code: string
 ): ApplyBridgeResult {
   const model = editor.getModel()
@@ -66,7 +66,7 @@ export function insertSnippetAtCursor(
 }
 
 export function replaceEntireDocument(
-  editor: monaco.editor.IStandaloneCodeEditor,
+  editor: StandaloneCodeEditorLike,
   code: string
 ): ApplyBridgeResult {
   const model = editor.getModel()

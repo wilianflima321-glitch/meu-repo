@@ -29,6 +29,8 @@ interface StudioLayoutProps {
   maxWidth?: ResponsiveMaxWidth
   /** Add padding to content area (default: true) */
   padded?: boolean
+  /** Hide global route rows when a child surface owns navigation */
+  compactNav?: boolean
 }
 
 const STUDIO_MOBILE_NAV_ITEMS: MobileNavItem[] = [
@@ -71,6 +73,7 @@ export default function StudioLayout({
   className = '',
   maxWidth = '7xl',
   padded = true,
+  compactNav = false,
 }: StudioLayoutProps) {
   return (
     <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
@@ -85,6 +88,7 @@ export default function StudioLayout({
         title={title}
         subtitle={subtitle}
         rightSlot={actions}
+        compact={compactNav}
       />
 
       <main

@@ -61,8 +61,8 @@ export function SuggestionStrip({ activeFile, onSelect }: SuggestionStripProps) 
           fontSize: tokens.typography.fontSize.xs,
         }}
       >
-        <span>Atalhos do operador</span>
-        <span>Preenchem o composer antes do envio</span>
+        <span>Operator shortcuts</span>
+        <span>Fill the composer before sending</span>
       </div>
 
       <div
@@ -80,7 +80,7 @@ export function SuggestionStrip({ activeFile, onSelect }: SuggestionStripProps) 
             <button
               key={chip.id}
               type="button"
-              aria-label={`Usar sugestao rapida ${chip.label}`}
+              aria-label={`Use quick suggestion ${chip.label}`}
               onClick={() => onSelect(chip.prompt)}
               style={{
                 display: 'flex',
@@ -140,8 +140,8 @@ export function InlineAIComposer({
   const hasInput = input.trim().length > 0
 
   const placeholder = activeFile
-    ? `Pergunte sobre ${getInlineAIFileName(activeFile.path)} ou peca um patch/refatoracao...`
-    : 'Descreva a tarefa ou use um atalho para estruturar o pedido...'
+    ? `Ask about ${getInlineAIFileName(activeFile.path)} or request a patch/refactor...`
+    : 'Describe the task or use a shortcut to structure the request...'
 
   return (
     <div
@@ -163,7 +163,7 @@ export function InlineAIComposer({
         {activeFile && <ContextBadge label={getInlineAIFileName(activeFile.path)} icon={<FileText size={12} />} />}
         {projectContext && <ContextBadge label={projectContext.name} icon={<Sparkles size={12} />} />}
         <ContextBadge
-          label={canApplyDirectly ? 'Aplicar continua manual' : 'Modo consulta'}
+          label={canApplyDirectly ? 'Manual apply' : 'Ask mode'}
           icon={<Check size={12} />}
           accent={canApplyDirectly ? ACCENT_SUCCESS : TEXT_SECONDARY}
         />
@@ -212,7 +212,7 @@ export function InlineAIComposer({
 
         <button
           type="button"
-          aria-label="Send mensagem no chat inline"
+          aria-label="Send inline chat message"
           onClick={onSend}
           disabled={!hasInput || isLoading}
           style={{
@@ -231,7 +231,7 @@ export function InlineAIComposer({
           }}
         >
           {isLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={16} />}
-          <span>{isLoading ? 'Enviando' : 'Send'}</span>
+          <span>{isLoading ? 'Sending' : 'Send'}</span>
         </button>
       </div>
 
@@ -247,8 +247,8 @@ export function InlineAIComposer({
           color: TEXT_TERTIARY,
         }}
       >
-        <span>{hasInput ? `${input.trim().length} caracteres prontos` : 'Nada sera aplicado automaticamente.'}</span>
-        <span>Enter envia | Shift+Enter cria nova linha</span>
+        <span>{hasInput ? `${input.trim().length} characters ready` : 'Nothing is applied automatically.'}</span>
+        <span>Enter sends | Shift+Enter adds a new line</span>
       </div>
     </div>
   )

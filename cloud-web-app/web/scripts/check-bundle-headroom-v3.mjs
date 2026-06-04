@@ -47,12 +47,12 @@ const EXPECTED_BOUNDARY_FILES = [
 ]
 
 const BUDGET_TARGETS = {
-  threeDirect: 34,
+  threeDirect: 0,
   reactThreeFiberDirect: 2,
-  reactThreeDreiDirect: 1,
-  monacoEditorDirect: 2,
-  monacoReactDirect: 3,
-  framerMotionDirect: 9,
+  reactThreeDreiDirect: 0,
+  monacoEditorDirect: 0,
+  monacoReactDirect: 0,
+  framerMotionDirect: 0,
   dynamicImportsMin: 100,
 }
 

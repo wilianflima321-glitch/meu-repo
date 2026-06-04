@@ -1,9 +1,10 @@
+// @aethel-heavy-async-boundary Studio/engine runtime module; never import from public/dashboard/admin route shells.
 /**
  * MOTION MATCHING SYSTEM - Aethel Engine
- * 
+ *
  * Sistema de animação baseado em Motion Matching como Unreal Engine 5.
  * Busca animações em banco de dados baseado em features do movimento atual.
- * 
+ *
  * FEATURES:
  * - Feature extraction (pose, velocity, trajectory)
  * - KD-Tree para busca eficiente
@@ -15,18 +16,15 @@
  * - Strafe/locomotion presets
  */
 import * as THREE from 'three';
-import { DEFAULT_MOTION_MATCHING_CONFIG, LOCOMOTION_PRESET_CONFIG } from './motion-matching-defaults';
+import { DEFAULT_MOTION_MATCHING_CONFIG } from './motion-matching-defaults';
+import { MotionKDTree } from './motion-matching-kdtree';
 import type {
   AnimationData,
   AnimationPoseData,
-  FeatureCosts,
-  FeatureWeights,
   FootLockState,
-  KDNode,
   MotionDatabase,
   MotionFeature,
   MotionMatchingConfig,
-  MotionMatchResult,
   PoseFeature,
   TrajectoryPoint,
 } from './motion-matching-contracts';
@@ -34,174 +32,16 @@ import type {
 export type {
   AnimationData,
   AnimationPoseData,
-  FeatureCosts,
-  FeatureWeights,
   FootLockState,
-  KDNode,
   MotionDatabase,
   MotionFeature,
   MotionMatchingConfig,
-  MotionMatchResult,
   PoseFeature,
   TrajectoryPoint,
 } from './motion-matching-contracts';
 
-export class MotionKDTree {
-  private root: KDNode | null = null;
-  private dimensions: number;
-  constructor(poses: AnimationPoseData[], private weights: FeatureWeights) {
-    this.dimensions = this.calculateDimensions();
-    this.root = this.buildTree(poses, 0);
-  }
-  private calculateDimensions(): number {
-    return 9 * 3 + 1 + 5 * 5; // 53 dimensions
-  }
-  private poseToFeatureVector(pose: AnimationPoseData): number[] {
-    const f = pose.feature;
-    const vector: number[] = [];
-    const addVec3 = (v: THREE.Vector3, w: number) => {
-      vector.push(v.x * w, v.y * w, v.z * w);
-    };
-    addVec3(f.pose.leftFootPosition, this.weights.leftFootPosition);
-    addVec3(f.pose.rightFootPosition, this.weights.rightFootPosition);
-    addVec3(f.pose.leftHandPosition, 1.0);
-    addVec3(f.pose.rightHandPosition, 1.0);
-    addVec3(f.pose.hipPosition, this.weights.hipPosition);
-    addVec3(f.pose.leftFootVelocity, this.weights.leftFootVelocity);
-    addVec3(f.pose.rightFootVelocity, this.weights.rightFootVelocity);
-    addVec3(f.pose.hipVelocity, this.weights.hipVelocity);
-    addVec3(f.pose.rootVelocity, 1.0);
-    vector.push(f.pose.rootAngularVelocity);
-    for (let i = 0; i < 5; i++) {
-      const t = f.trajectory[i] || { position: new THREE.Vector3(), facing: new THREE.Vector2() };
-      vector.push(
-        t.position.x * this.weights.trajectory,
-        t.position.y * this.weights.trajectory,
-        t.position.z * this.weights.trajectory,
-        t.facing.x * this.weights.facing,
-        t.facing.y * this.weights.facing
-      );
-    }
-    return vector;
-  }
-  private buildTree(poses: AnimationPoseData[], depth: number): KDNode | null {
-    if (poses.length === 0) return null;
-    const axis = depth % this.dimensions;
-    const sortedPoses = [...poses].sort((a, b) => {
-      const vecA = this.poseToFeatureVector(a);
-      const vecB = this.poseToFeatureVector(b);
-      return vecA[axis] - vecB[axis];
-    });
-    const medianIndex = Math.floor(sortedPoses.length / 2);
-    const medianPose = sortedPoses[medianIndex];
-    return {
-      pose: medianPose,
-      featureVector: this.poseToFeatureVector(medianPose),
-      left: this.buildTree(sortedPoses.slice(0, medianIndex), depth + 1),
-      right: this.buildTree(sortedPoses.slice(medianIndex + 1), depth + 1),
-      splitAxis: axis,
-    };
-  }
-  findNearest(queryFeature: MotionFeature, k: number = 1, tags?: string[]): MotionMatchResult[] {
-    const queryVector = this.featureToVector(queryFeature);
-    const results: { node: KDNode; distance: number }[] = [];
-    this.searchNearest(this.root, queryVector, k, results, tags);
-    return results.map(r => ({
-      poseData: r.node.pose,
-      cost: r.distance,
-      featureCosts: this.calculateFeatureCosts(queryVector, r.node.featureVector),
-    }));
-  }
-  private featureToVector(feature: MotionFeature): number[] {
-    const f = feature;
-    const vector: number[] = [];
-    const addVec3 = (v: THREE.Vector3, w: number) => {
-      vector.push(v.x * w, v.y * w, v.z * w);
-    };
-    addVec3(f.pose.leftFootPosition, this.weights.leftFootPosition);
-    addVec3(f.pose.rightFootPosition, this.weights.rightFootPosition);
-    addVec3(f.pose.leftHandPosition, 1.0);
-    addVec3(f.pose.rightHandPosition, 1.0);
-    addVec3(f.pose.hipPosition, this.weights.hipPosition);
-    addVec3(f.pose.leftFootVelocity, this.weights.leftFootVelocity);
-    addVec3(f.pose.rightFootVelocity, this.weights.rightFootVelocity);
-    addVec3(f.pose.hipVelocity, this.weights.hipVelocity);
-    addVec3(f.pose.rootVelocity, 1.0);
-    vector.push(f.pose.rootAngularVelocity);
-    for (let i = 0; i < 5; i++) {
-      const t = f.trajectory[i] || { position: new THREE.Vector3(), facing: new THREE.Vector2() };
-      vector.push(
-        t.position.x * this.weights.trajectory,
-        t.position.y * this.weights.trajectory,
-        t.position.z * this.weights.trajectory,
-        t.facing.x * this.weights.facing,
-        t.facing.y * this.weights.facing
-      );
-    }
-    return vector;
-  }
-  private searchNearest(
-    node: KDNode | null,
-    query: number[],
-    k: number,
-    results: { node: KDNode; distance: number }[],
-    tags?: string[]
-  ): void {
-    if (!node) return;
-    if (tags && tags.length > 0) {
-      const hasRequiredTag = tags.some(t => node.pose.feature.tags.includes(t));
-      if (!hasRequiredTag) {
-        this.searchNearest(node.left, query, k, results, tags);
-        this.searchNearest(node.right, query, k, results, tags);
-        return;
-      }
-    }
-    const distance = this.euclideanDistance(query, node.featureVector);
-    if (results.length < k) {
-      results.push({ node, distance });
-      results.sort((a, b) => a.distance - b.distance);
-    } else if (distance < results[results.length - 1].distance) {
-      results[results.length - 1] = { node, distance };
-      results.sort((a, b) => a.distance - b.distance);
-    }
-    const axis = node.splitAxis;
-    const diff = query[axis] - node.featureVector[axis];
-    const first = diff < 0 ? node.left : node.right;
-    const second = diff < 0 ? node.right : node.left;
-    this.searchNearest(first, query, k, results, tags);
-    if (results.length < k || Math.abs(diff) < results[results.length - 1].distance) {
-      this.searchNearest(second, query, k, results, tags);
-    }
-  }
-  private euclideanDistance(a: number[], b: number[]): number {
-    let sum = 0;
-    for (let i = 0; i < a.length; i++) {
-      const diff = a[i] - b[i];
-      sum += diff * diff;
-    }
-    return Math.sqrt(sum);
-  }
-  private calculateFeatureCosts(query: number[], target: number[]): FeatureCosts {
-    let poseCost = 0;
-    for (let i = 0; i < 27; i++) {
-      poseCost += (query[i] - target[i]) ** 2;
-    }
-    let velocityCost = 0;
-    for (let i = 27; i < 37; i++) {
-      velocityCost += (query[i] - target[i]) ** 2;
-    }
-    let trajectoryCost = 0;
-    for (let i = 37; i < query.length; i++) {
-      trajectoryCost += (query[i] - target[i]) ** 2;
-    }
-    return {
-      pose: Math.sqrt(poseCost),
-      velocity: Math.sqrt(velocityCost),
-      trajectory: Math.sqrt(trajectoryCost),
-      total: Math.sqrt(poseCost + velocityCost + trajectoryCost),
-    };
-  }
-}
+export { MotionKDTree } from './motion-matching-kdtree';
+
 export class InertializationBlender {
   private sourceOffset: Map<string, { position: THREE.Vector3; rotation: THREE.Quaternion }> = new Map();
   private sourceVelocity: Map<string, { position: THREE.Vector3; rotation: THREE.Vector3 }> = new Map();
@@ -225,9 +65,9 @@ export class InertializationBlender {
         position: posOffset,
         rotation: rotOffset,
       });
-      const vel = velocities.get(boneName) || { 
-        position: new THREE.Vector3(), 
-        rotation: new THREE.Vector3() 
+      const vel = velocities.get(boneName) || {
+        position: new THREE.Vector3(),
+        rotation: new THREE.Vector3()
       };
       this.sourceVelocity.set(boneName, vel);
     }
@@ -523,7 +363,7 @@ export class MotionMatchingSystem {
     prevSample: typeof sample | null,
     dt: number
   ): MotionFeature {
-    const getBonePos = (name: string) => 
+    const getBonePos = (name: string) =>
       sample.boneTransforms.get(name)?.position.clone() || new THREE.Vector3();
     const getBoneVel = (name: string) => {
       if (!prevSample) return new THREE.Vector3();
@@ -730,250 +570,5 @@ export class MotionMatchingSystem {
     };
   }
 }
-export class LocomotionPreset {
-  private motionSystem: MotionMatchingSystem;
-  constructor() {
-    this.motionSystem = new MotionMatchingSystem(LOCOMOTION_PRESET_CONFIG);
-  }
-  generateProceduralLocomotion(): void {
-    this.generateIdleAnimation();
-    this.generateWalkAnimation('walk_forward', new THREE.Vector3(0, 0, 1), 1.4);
-    this.generateWalkAnimation('walk_backward', new THREE.Vector3(0, 0, -1), 1.2);
-    this.generateWalkAnimation('walk_left', new THREE.Vector3(-1, 0, 0), 1.2);
-    this.generateWalkAnimation('walk_right', new THREE.Vector3(1, 0, 0), 1.2);
-    this.generateRunAnimation('run_forward', new THREE.Vector3(0, 0, 1), 4.0);
-    this.generateRunAnimation('run_backward', new THREE.Vector3(0, 0, -1), 3.0);
-    this.generateTurnAnimation('turn_left', -Math.PI / 2);
-    this.generateTurnAnimation('turn_right', Math.PI / 2);
-    this.motionSystem.buildSearchTree();
-  }
-  private generateIdleAnimation(): void {
-    const duration = 2.0;
-    const frameRate = 30;
-    this.motionSystem.addAnimation(
-      'idle',
-      'Idle',
-      duration,
-      frameRate,
-      true,
-      ['idle', 'standing'],
-      false,
-      (time: number) => {
-        const breathCycle = Math.sin(time * Math.PI);
-        return {
-          boneTransforms: this.createStandingPose(breathCycle * 0.02),
-          rootPosition: new THREE.Vector3(),
-          rootRotation: new THREE.Quaternion(),
-        };
-      }
-    );
-  }
-  private generateWalkAnimation(id: string, direction: THREE.Vector3, speed: number): void {
-    const duration = 1.0; // One full walk cycle
-    const frameRate = 30;
-    const stride = speed * duration / 2; // Distance per step
-    const tags = ['locomotion', 'walk'];
-    if (direction.z > 0) tags.push('forward');
-    if (direction.z < 0) tags.push('backward');
-    if (direction.x < 0) tags.push('strafe_left');
-    if (direction.x > 0) tags.push('strafe_right');
-    this.motionSystem.addAnimation(
-      id,
-      id.replace('_', ' '),
-      duration,
-      frameRate,
-      true,
-      tags,
-      true,
-      (time: number) => {
-        const phase = (time / duration) * 2 * Math.PI;
-        const leftFootPhase = phase;
-        const rightFootPhase = phase + Math.PI;
-        const leftFootX = Math.sin(leftFootPhase) * 0.1 * direction.x;
-        const leftFootY = Math.max(0, Math.sin(leftFootPhase)) * 0.1;
-        const leftFootZ = Math.sin(leftFootPhase) * stride * 0.5 * direction.z;
-        const rightFootX = Math.sin(rightFootPhase) * 0.1 * direction.x;
-        const rightFootY = Math.max(0, Math.sin(rightFootPhase)) * 0.1;
-        const rightFootZ = Math.sin(rightFootPhase) * stride * 0.5 * direction.z;
-        const hipSway = Math.sin(phase * 2) * 0.03;
-        const transforms = this.createStandingPose(0);
-        transforms.set('LeftFoot', {
-          position: new THREE.Vector3(-0.1 + leftFootX, leftFootY, leftFootZ),
-          rotation: new THREE.Quaternion(),
-        });
-        transforms.set('RightFoot', {
-          position: new THREE.Vector3(0.1 + rightFootX, rightFootY, rightFootZ),
-          rotation: new THREE.Quaternion(),
-        });
-        transforms.set('Hips', {
-          position: new THREE.Vector3(hipSway, 1.0 + Math.sin(phase * 2) * 0.02, 0),
-          rotation: new THREE.Quaternion(),
-        });
-        return {
-          boneTransforms: transforms,
-          rootPosition: direction.clone().multiplyScalar(time * speed),
-          rootRotation: new THREE.Quaternion(),
-        };
-      }
-    );
-  }
-  private generateRunAnimation(id: string, direction: THREE.Vector3, speed: number): void {
-    const duration = 0.6; // Faster cycle
-    const frameRate = 30;
-    const stride = speed * duration / 2;
-    const tags = ['locomotion', 'run'];
-    if (direction.z > 0) tags.push('forward');
-    if (direction.z < 0) tags.push('backward');
-    this.motionSystem.addAnimation(
-      id,
-      id.replace('_', ' '),
-      duration,
-      frameRate,
-      true,
-      tags,
-      true,
-      (time: number) => {
-        const phase = (time / duration) * 2 * Math.PI;
-        const leftFootPhase = phase;
-        const rightFootPhase = phase + Math.PI;
-        const leftFootY = Math.max(0, Math.sin(leftFootPhase)) * 0.2;
-        const leftFootZ = Math.sin(leftFootPhase) * stride * 0.5 * direction.z;
-        const rightFootY = Math.max(0, Math.sin(rightFootPhase)) * 0.2;
-        const rightFootZ = Math.sin(rightFootPhase) * stride * 0.5 * direction.z;
-        const bounce = Math.abs(Math.sin(phase)) * 0.05;
-        const transforms = this.createStandingPose(0);
-        transforms.set('LeftFoot', {
-          position: new THREE.Vector3(-0.1, leftFootY, leftFootZ),
-          rotation: new THREE.Quaternion(),
-        });
-        transforms.set('RightFoot', {
-          position: new THREE.Vector3(0.1, rightFootY, rightFootZ),
-          rotation: new THREE.Quaternion(),
-        });
-        transforms.set('Hips', {
-          position: new THREE.Vector3(0, 1.0 + bounce, 0),
-          rotation: new THREE.Quaternion(),
-        });
-        transforms.set('LeftHand', {
-          position: new THREE.Vector3(-0.3, 0.8, Math.sin(rightFootPhase) * 0.3),
-          rotation: new THREE.Quaternion(),
-        });
-        transforms.set('RightHand', {
-          position: new THREE.Vector3(0.3, 0.8, Math.sin(leftFootPhase) * 0.3),
-          rotation: new THREE.Quaternion(),
-        });
-        return {
-          boneTransforms: transforms,
-          rootPosition: direction.clone().multiplyScalar(time * speed),
-          rootRotation: new THREE.Quaternion(),
-        };
-      }
-    );
-  }
-  private generateTurnAnimation(id: string, angle: number): void {
-    const duration = 0.5;
-    const frameRate = 30;
-    const tags = ['locomotion', 'turn'];
-    if (angle < 0) tags.push('turn_left');
-    if (angle > 0) tags.push('turn_right');
-    this.motionSystem.addAnimation(
-      id,
-      id.replace('_', ' '),
-      duration,
-      frameRate,
-      false,
-      tags,
-      true,
-      (time: number) => {
-        const t = time / duration;
-        const easeT = t * t * (3 - 2 * t); // Smoothstep
-        const currentAngle = angle * easeT;
-        const transforms = this.createStandingPose(0);
-        transforms.set('Hips', {
-          position: new THREE.Vector3(0, 1.0, 0),
-          rotation: new THREE.Quaternion().setFromAxisAngle(
-            new THREE.Vector3(0, 1, 0),
-            currentAngle * 0.2
-          ),
-        });
-        if (angle < 0) {
-          transforms.set('LeftFoot', {
-            position: new THREE.Vector3(-0.1, 0, 0),
-            rotation: new THREE.Quaternion().setFromAxisAngle(
-              new THREE.Vector3(0, 1, 0),
-              currentAngle * 0.5
-            ),
-          });
-        } else {
-          transforms.set('RightFoot', {
-            position: new THREE.Vector3(0.1, 0, 0),
-            rotation: new THREE.Quaternion().setFromAxisAngle(
-              new THREE.Vector3(0, 1, 0),
-              currentAngle * 0.5
-            ),
-          });
-        }
-        return {
-          boneTransforms: transforms,
-          rootPosition: new THREE.Vector3(),
-          rootRotation: new THREE.Quaternion().setFromAxisAngle(
-            new THREE.Vector3(0, 1, 0),
-            currentAngle
-          ),
-        };
-      }
-    );
-  }
-  private createStandingPose(breathOffset: number): Map<string, { position: THREE.Vector3; rotation: THREE.Quaternion }> {
-    const transforms = new Map<string, { position: THREE.Vector3; rotation: THREE.Quaternion }>();
-    transforms.set('Hips', {
-      position: new THREE.Vector3(0, 1.0, 0),
-      rotation: new THREE.Quaternion(),
-    });
-    transforms.set('Spine', {
-      position: new THREE.Vector3(0, 1.2 + breathOffset, 0),
-      rotation: new THREE.Quaternion(),
-    });
-    transforms.set('Chest', {
-      position: new THREE.Vector3(0, 1.4 + breathOffset, 0),
-      rotation: new THREE.Quaternion(),
-    });
-    transforms.set('Head', {
-      position: new THREE.Vector3(0, 1.7 + breathOffset, 0),
-      rotation: new THREE.Quaternion(),
-    });
-    transforms.set('LeftShoulder', {
-      position: new THREE.Vector3(-0.2, 1.5, 0),
-      rotation: new THREE.Quaternion(),
-    });
-    transforms.set('RightShoulder', {
-      position: new THREE.Vector3(0.2, 1.5, 0),
-      rotation: new THREE.Quaternion(),
-    });
-    transforms.set('LeftHand', {
-      position: new THREE.Vector3(-0.3, 0.9, 0),
-      rotation: new THREE.Quaternion(),
-    });
-    transforms.set('RightHand', {
-      position: new THREE.Vector3(0.3, 0.9, 0),
-      rotation: new THREE.Quaternion(),
-    });
-    transforms.set('LeftFoot', {
-      position: new THREE.Vector3(-0.1, 0, 0),
-      rotation: new THREE.Quaternion(),
-    });
-    transforms.set('RightFoot', {
-      position: new THREE.Vector3(0.1, 0, 0),
-      rotation: new THREE.Quaternion(),
-    });
-    return transforms;
-  }
-  getMotionSystem(): MotionMatchingSystem {
-    return this.motionSystem;
-  }
-}
-export const createLocomotionPreset = (): LocomotionPreset => {
-  const preset = new LocomotionPreset();
-  preset.generateProceduralLocomotion();
-  return preset;
-};
+
+export { LocomotionPreset, createLocomotionPreset } from './motion-matching-locomotion-preset';

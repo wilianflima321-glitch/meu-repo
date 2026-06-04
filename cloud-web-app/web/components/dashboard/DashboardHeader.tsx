@@ -75,7 +75,7 @@ export function DashboardHeader({
                 Aethel Studio
               </h1>
               <p className="hidden text-xs text-[var(--aethel-text-secondary)] sm:block">
-                Operations, AI, preview, billing, and governance in one focused surface.
+                Operations, AI, preview, and billing in one focused workspace.
               </p>
             </div>
           </div>

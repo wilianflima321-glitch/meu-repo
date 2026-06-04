@@ -1,4 +1,6 @@
 import {createComponentLogger, logger} from '@/lib/observability/logger'
+import { ContextTracker, EmotionAnalyzer } from './ai-audio-engine-analysis'
+import { generateSfxChannels } from './ai-audio-engine-sfx'
 import type {
   AmbientLayer,
   AudioAnalysisData,
@@ -33,9 +35,26 @@ export type {
   VoiceProfile,
   VoiceRequest,
 } from './ai-audio-engine-contracts'
+export { ContextTracker, EmotionAnalyzer } from './ai-audio-engine-analysis'
 
 
 const log = createComponentLogger('ai-audio-engine')
+type EmotionSignal = keyof EmotionalContext;
+type SfxMaterial = NonNullable<SFXParameters['material']>;
+
+const SFX_MATERIALS = new Set<SfxMaterial>([
+  'wood',
+  'metal',
+  'stone',
+  'dirt',
+  'grass',
+  'water',
+  'snow',
+  'sand',
+  'glass',
+  'flesh',
+  'cloth',
+]);
 
 
 export class AIEmotionalAudioSystem {
@@ -283,7 +302,7 @@ export class AIEmotionalAudioSystem {
     }
     if (emotions && emotions.length > 0) {
       const hasMatchingEmotion = emotions.some(e => {
-        const emotionValue = (context.emotion as any)[e];
+        const emotionValue = this.readEmotionSignal(context.emotion, e);
         return emotionValue > 0.5;
       });
       if (!hasMatchingEmotion) return false;
@@ -293,6 +312,31 @@ export class AIEmotionalAudioSystem {
       if (!hasMatchingEvent) return false;
     }
     return true;
+  }
+  private readEmotionSignal(emotion: EmotionalContext, signal: string): number {
+    if (!this.isEmotionSignal(signal)) {
+      return 0;
+    }
+
+    return emotion[signal];
+  }
+  private isEmotionSignal(signal: string): signal is EmotionSignal {
+    return signal in this.createNeutralEmotion();
+  }
+  private createNeutralEmotion(): EmotionalContext {
+    return {
+      joy: 0,
+      sadness: 0,
+      anger: 0,
+      fear: 0,
+      surprise: 0,
+      disgust: 0,
+      trust: 0,
+      anticipation: 0,
+      intensity: 0,
+      valence: 0,
+      arousal: 0,
+    };
   }
   setStemEnabled(stemId: string, enabled: boolean, fadeDuration = 0.5): void {
     const player = this.stemPlayers.get(stemId);
@@ -363,210 +407,13 @@ export class AIEmotionalAudioSystem {
     const buffer = this.audioContext.createBuffer(2, length, sampleRate);
     const leftChannel = buffer.getChannelData(0);
     const rightChannel = buffer.getChannelData(1);
-    switch (params.category) {
-      case 'footstep':
-        this.generateFootstepSFX(leftChannel, rightChannel, params);
-        break;
-      case 'impact':
-        this.generateImpactSFX(leftChannel, rightChannel, params);
-        break;
-      case 'explosion':
-        this.generateExplosionSFX(leftChannel, rightChannel, params);
-        break;
-      case 'ambient':
-        this.generateAmbientSFX(leftChannel, rightChannel, params);
-        break;
-      case 'weapon':
-        this.generateWeaponSFX(leftChannel, rightChannel, params);
-        break;
-      case 'magic':
-        this.generateMagicSFX(leftChannel, rightChannel, params);
-        break;
-      default:
-        this.generateGenericSFX(leftChannel, rightChannel, params);
-    }
+    generateSfxChannels(leftChannel, rightChannel, params, sampleRate);
     return buffer;
-  }
-  private generateFootstepSFX(left: Float32Array, right: Float32Array, params: SFXParameters): void {
-    const sampleRate = this.audioContext!.sampleRate;
-    const length = left.length;
-    let attack = 0.005;
-    let decay = 0.1;
-    let frequency = 200;
-    let noiseAmount = 0.5;
-    switch (params.material) {
-      case 'wood':
-        attack = 0.002;
-        decay = 0.08;
-        frequency = 300;
-        noiseAmount = 0.3;
-        break;
-      case 'metal':
-        attack = 0.001;
-        decay = 0.15;
-        frequency = 800;
-        noiseAmount = 0.2;
-        break;
-      case 'stone':
-        attack = 0.003;
-        decay = 0.05;
-        frequency = 400;
-        noiseAmount = 0.6;
-        break;
-      case 'grass':
-        attack = 0.01;
-        decay = 0.1;
-        frequency = 100;
-        noiseAmount = 0.8;
-        break;
-      case 'water':
-        attack = 0.01;
-        decay = 0.2;
-        frequency = 150;
-        noiseAmount = 0.9;
-        break;
-      case 'snow':
-        attack = 0.02;
-        decay = 0.15;
-        frequency = 80;
-        noiseAmount = 0.7;
-        break;
-    }
-    const intensityMod = params.intensity || 0.5;
-    decay *= (1 + intensityMod);
-    for (let i = 0; i < length; i++) {
-      const t = i / sampleRate;
-      let envelope = 0;
-      if (t < attack) {
-        envelope = t / attack;
-      } else if (t < attack + decay) {
-        envelope = 1 - ((t - attack) / decay);
-      }
-      envelope = Math.pow(envelope, 2);
-      const tonal = Math.sin(2 * Math.PI * frequency * t) * (1 - noiseAmount);
-      const noise = (Math.random() * 2 - 1) * noiseAmount;
-      const pitchVar = 1 + (Math.random() - 0.5) * params.pitchVariation;
-      const sample = (tonal + noise) * envelope * intensityMod * pitchVar;
-      left[i] = sample;
-      right[i] = sample * (0.9 + Math.random() * 0.2); // Slight stereo variation
-    }
-  }
-  private generateImpactSFX(left: Float32Array, right: Float32Array, params: SFXParameters): void {
-    const sampleRate = this.audioContext!.sampleRate;
-    const length = left.length;
-    const intensityMod = params.intensity || 0.5;
-    const sizeMultiplier = this.sizeToMultiplier(params.size);
-    for (let i = 0; i < length; i++) {
-      const t = i / sampleRate;
-      const envelope = Math.exp(-t * 20 / sizeMultiplier) * intensityMod;
-      const low = Math.sin(2 * Math.PI * 60 * sizeMultiplier * t);
-      const mid = Math.sin(2 * Math.PI * 200 * t) * 0.5;
-      const high = Math.sin(2 * Math.PI * 800 * t) * 0.3;
-      const transient = i < sampleRate * 0.01 ? (Math.random() * 2 - 1) * 0.5 : 0;
-      const sample = (low + mid + high + transient) * envelope;
-      left[i] = sample;
-      right[i] = sample;
-    }
-  }
-  private generateExplosionSFX(left: Float32Array, right: Float32Array, params: SFXParameters): void {
-    const sampleRate = this.audioContext!.sampleRate;
-    const length = left.length;
-    const intensityMod = params.intensity || 0.8;
-    const sizeMultiplier = this.sizeToMultiplier(params.size);
-    for (let i = 0; i < length; i++) {
-      const t = i / sampleRate;
-      let envelope: number;
-      if (t < 0.02) {
-        envelope = t / 0.02;
-      } else {
-        envelope = Math.exp(-(t - 0.02) * 3 / sizeMultiplier);
-      }
-      const rumble = Math.sin(2 * Math.PI * 30 * sizeMultiplier * t) * 0.6;
-      const crackle = (Math.random() * 2 - 1) * Math.exp(-t * 10) * 0.4;
-      const debris = (Math.random() * 2 - 1) * Math.exp(-t * 20) * 0.3;
-      const sample = (rumble + crackle + debris) * envelope * intensityMod;
-      left[i] = sample;
-      right[i] = sample * (0.95 + Math.random() * 0.1);
-    }
-  }
-  private generateAmbientSFX(left: Float32Array, right: Float32Array, params: SFXParameters): void {
-    const sampleRate = this.audioContext!.sampleRate;
-    const length = left.length;
-    for (let i = 0; i < length; i++) {
-      const t = i / sampleRate;
-      const lfo = Math.sin(2 * Math.PI * 0.1 * t) * 0.5 + 0.5;
-      const noise = (Math.random() * 2 - 1) * 0.3;
-      let envelope = 1;
-      const fadeTime = 0.5;
-      if (t < fadeTime) {
-        envelope = t / fadeTime;
-      } else if (t > params.duration - fadeTime) {
-        envelope = (params.duration - t) / fadeTime;
-      }
-      const sample = noise * lfo * envelope * (params.intensity || 0.5);
-      left[i] = sample;
-      right[i] = sample * (0.8 + Math.random() * 0.4);
-    }
-  }
-  private generateWeaponSFX(left: Float32Array, right: Float32Array, params: SFXParameters): void {
-    const sampleRate = this.audioContext!.sampleRate;
-    const length = left.length;
-    const intensityMod = params.intensity || 0.9;
-    for (let i = 0; i < length; i++) {
-      const t = i / sampleRate;
-      const envelope = Math.exp(-t * 30) * intensityMod;
-      const crack = i < sampleRate * 0.002 ? (Math.random() * 2 - 1) : 0;
-      const body = Math.sin(2 * Math.PI * 150 * t) * Math.exp(-t * 15);
-      const tail = (Math.random() * 2 - 1) * Math.exp(-t * 8) * 0.2;
-      const sample = (crack + body + tail) * envelope;
-      left[i] = sample;
-      right[i] = sample;
-    }
-  }
-  private generateMagicSFX(left: Float32Array, right: Float32Array, params: SFXParameters): void {
-    const sampleRate = this.audioContext!.sampleRate;
-    const length = left.length;
-    const intensityMod = params.intensity || 0.7;
-    for (let i = 0; i < length; i++) {
-      const t = i / sampleRate;
-      const envelope = Math.sin(Math.PI * t / params.duration) * intensityMod;
-      const pitchSweep = 200 + Math.sin(Math.PI * t / params.duration) * 600;
-      const tone1 = Math.sin(2 * Math.PI * pitchSweep * t);
-      const tone2 = Math.sin(2 * Math.PI * pitchSweep * 1.5 * t) * 0.5;
-      const tone3 = Math.sin(2 * Math.PI * pitchSweep * 2 * t) * 0.25;
-      const shimmer = Math.sin(2 * Math.PI * 2000 * t) * Math.sin(2 * Math.PI * 5 * t) * 0.1;
-      const sample = (tone1 + tone2 + tone3 + shimmer) * envelope;
-      const spread = Math.sin(2 * Math.PI * 2 * t) * 0.5;
-      left[i] = sample * (1 - spread * 0.3);
-      right[i] = sample * (1 + spread * 0.3);
-    }
-  }
-  private generateGenericSFX(left: Float32Array, right: Float32Array, params: SFXParameters): void {
-    const sampleRate = this.audioContext!.sampleRate;
-    const length = left.length;
-    for (let i = 0; i < length; i++) {
-      const t = i / sampleRate;
-      const envelope = Math.exp(-t * 5) * (params.intensity || 0.5);
-      const noise = (Math.random() * 2 - 1);
-      const sample = noise * envelope;
-      left[i] = sample;
-      right[i] = sample;
-    }
-  }
-  private sizeToMultiplier(size: string): number {
-    switch (size) {
-      case 'tiny': return 0.3;
-      case 'small': return 0.6;
-      case 'medium': return 1;
-      case 'large': return 1.5;
-      case 'huge': return 2.5;
-      default: return 1;
-    }
   }
   async processFoleyEvent(event: FoleyEvent): Promise<void> {
     const sfxParams: SFXParameters = {
       category: 'footstep',
-      material: event.material as any,
+      material: this.toSfxMaterial(event.material),
       size: 'medium',
       intensity: event.velocity,
       distance: 1,
@@ -593,6 +440,9 @@ export class AIEmotionalAudioSystem {
     }
     const buffer = await this.generateSFX(sfxParams);
     this.playSFX(buffer, sfxParams);
+  }
+  private toSfxMaterial(material: string): SfxMaterial | undefined {
+    return SFX_MATERIALS.has(material as SfxMaterial) ? (material as SfxMaterial) : undefined;
   }
   async generateVoice(text: string, profile: VoiceProfile, emotion?: EmotionalContext): Promise<AudioBuffer> {
     log.info(`[AIEmotionalAudio] Generating voice: "${text}" with emotion:`, emotion);
@@ -780,112 +630,6 @@ export class AIEmotionalAudioSystem {
     this.musicAnalyzer.getByteFrequencyData(frequencyData);
     this.musicAnalyzer.getByteTimeDomainData(timeData);
     return { frequencyData, timeData };
-  }
-}
-export class EmotionAnalyzer {
-  private emotionKeywords: Record<string, string[]> = {
-    joy: ['happy', 'joy', 'excited', 'wonderful', 'amazing', 'love', 'celebrate', 'triumph'],
-    sadness: ['sad', 'cry', 'tears', 'loss', 'grief', 'mourn', 'lonely', 'heartbreak'],
-    anger: ['angry', 'rage', 'fury', 'hate', 'violent', 'attack', 'destroy', 'revenge'],
-    fear: ['scared', 'afraid', 'terror', 'horror', 'panic', 'dread', 'danger', 'threat'],
-    surprise: ['surprise', 'shock', 'unexpected', 'sudden', 'reveal', 'discover', 'twist'],
-    anticipation: ['wait', 'expect', 'building', 'tension', 'suspense', 'approaching', 'imminent'],
-  };
-  analyzeText(text: string): EmotionalContext {
-    const words = text.toLowerCase().split(/\s+/);
-    const wordCount = words.length;
-    const scores: Record<string, number> = {
-      joy: 0,
-      sadness: 0,
-      anger: 0,
-      fear: 0,
-      surprise: 0,
-      anticipation: 0,
-    };
-    for (const word of words) {
-      for (const [emotion, keywords] of Object.entries(this.emotionKeywords)) {
-        if (keywords.some(kw => word.includes(kw))) {
-          scores[emotion]++;
-        }
-      }
-    }
-    const maxScore = Math.max(...Object.values(scores), 1);
-    for (const emotion of Object.keys(scores)) {
-      scores[emotion] /= maxScore;
-    }
-    const valence = (scores.joy - scores.sadness - scores.anger - scores.fear) / 2;
-    const arousal = (scores.anger + scores.fear + scores.surprise + scores.anticipation) / 4;
-    const intensity = Math.max(...Object.values(scores));
-    return {
-      joy: scores.joy,
-      sadness: scores.sadness,
-      anger: scores.anger,
-      fear: scores.fear,
-      surprise: scores.surprise,
-      disgust: 0,
-      trust: 1 - scores.fear,
-      anticipation: scores.anticipation,
-      intensity,
-      valence: Math.max(-1, Math.min(1, valence)),
-      arousal: Math.max(0, Math.min(1, arousal)),
-    };
-  }
-  async analyzeVisual(_imageData: ImageData | HTMLCanvasElement): Promise<EmotionalContext> {
-    return {
-      joy: 0.3,
-      sadness: 0.1,
-      anger: 0,
-      fear: 0,
-      surprise: 0.1,
-      disgust: 0,
-      trust: 0.5,
-      anticipation: 0.2,
-      intensity: 0.3,
-      valence: 0.2,
-      arousal: 0.3,
-    };
-  }
-}
-export class ContextTracker {
-  private history: SceneContext[] = [];
-  private listeners: ((context: SceneContext) => void)[] = [];
-  track(context: SceneContext): void {
-    this.history.push(context);
-    if (this.history.length > 60) {
-      this.history.shift();
-    }
-    for (const listener of this.listeners) {
-      listener(context);
-    }
-  }
-  onContextChange(callback: (context: SceneContext) => void): () => void {
-    this.listeners.push(callback);
-    return () => {
-      this.listeners = this.listeners.filter(l => l !== callback);
-    };
-  }
-  getAverageEmotion(): EmotionalContext {
-    if (this.history.length === 0) {
-      return {
-        joy: 0, sadness: 0, anger: 0, fear: 0, surprise: 0,
-        disgust: 0, trust: 0, anticipation: 0,
-        intensity: 0, valence: 0, arousal: 0,
-      };
-    }
-    const sum: EmotionalContext = {
-      joy: 0, sadness: 0, anger: 0, fear: 0, surprise: 0,
-      disgust: 0, trust: 0, anticipation: 0,
-      intensity: 0, valence: 0, arousal: 0,
-    };
-    for (const ctx of this.history) {
-      for (const key of Object.keys(sum) as (keyof EmotionalContext)[]) {
-        sum[key] += ctx.emotion[key];
-      }
-    }
-    for (const key of Object.keys(sum) as (keyof EmotionalContext)[]) {
-      sum[key] /= this.history.length;
-    }
-    return sum;
   }
 }
 let _instance: AIEmotionalAudioSystem | null = null;

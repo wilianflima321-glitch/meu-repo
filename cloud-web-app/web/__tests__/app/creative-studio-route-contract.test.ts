@@ -2,8 +2,10 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
+  CREATIVE_STUDIO_ROUTE_REDIRECTS,
   CREATIVE_STUDIO_ROUTE_HREFS,
   CREATIVE_STUDIO_ROUTES,
+  getCreativeStudioRouteNavigationHref,
 } from '@/app/studio/creative-studio-routes'
 import { STUDIO_PRIMARY_LINKS } from '@/lib/navigation/surfaces'
 import { ROUTE_MATURITY_REGISTRY } from '@/lib/routes/route-maturity-registry'
@@ -11,8 +13,9 @@ import { ROUTE_MATURITY_REGISTRY } from '@/lib/routes/route-maturity-registry'
 const root = join(__dirname, '..', '..', '..', '..')
 
 function pagePathFor(href: string) {
-  if (href === '/studio') return 'cloud-web-app/web/app/studio/page.tsx'
-  return `cloud-web-app/web/app${href}/page.tsx`
+  const pathOnly = href.split('?')[0]
+  if (pathOnly === '/studio') return 'cloud-web-app/web/app/studio/page.tsx'
+  return `cloud-web-app/web/app${pathOnly}/page.tsx`
 }
 
 describe('creative studio route contract', () => {
@@ -35,12 +38,32 @@ describe('creative studio route contract', () => {
       '/studio/water',
       '/studio/sprite',
       '/studio/film',
+      '/studio/cinematic',
       '/studio/audio',
     ])
 
     for (const href of ['/studio', ...CREATIVE_STUDIO_ROUTE_HREFS]) {
-      expect(existsSync(join(root, pagePathFor(href))), `${href} page should exist`).toBe(true)
+      const navigationHref = getCreativeStudioRouteNavigationHref({ href } as (typeof CREATIVE_STUDIO_ROUTES)[number])
+      expect(
+        existsSync(join(root, pagePathFor(navigationHref))),
+        `${href} should resolve to a physical Studio page through grouped navigation`,
+      ).toBe(true)
     }
+
+    expect(Object.keys(CREATIVE_STUDIO_ROUTE_REDIRECTS)).toEqual([
+      '/studio/scene',
+      '/studio/material',
+      '/studio/terrain',
+      '/studio/landscape',
+      '/studio/foliage',
+      '/studio/water',
+      '/studio/rig',
+      '/studio/facial',
+      '/studio/hair',
+      '/studio/cloth',
+      '/studio/fluid',
+      '/studio/sprite',
+    ])
   })
 
   it('keeps creative depth discoverable without replacing the mission-first Studio home', () => {

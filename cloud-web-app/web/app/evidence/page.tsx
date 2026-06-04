@@ -4,7 +4,7 @@ import { EvidenceCenter } from '@/components/evidence/EvidenceCenter'
 
 export const metadata: Metadata = {
   title: 'Evidence Center | Aethel',
-  description: 'Protected project evidence, readiness, blockers, and next actions.',
+  description: 'Protected project evidence, blockers, and next actions.',
 }
 
 export default function EvidencePage({

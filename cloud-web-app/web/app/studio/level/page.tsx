@@ -1,22 +1,5 @@
-import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
-import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
+import StudioGroupedEditorClient from '../StudioGroupedEditorClient'
 
-const LevelEditor = dynamic(() => import('@/components/engine/LevelEditor'), {
-  ssr: false,
-  loading: () => <CreativeStudioLoading label="Level Studio" />,
-})
-
-export default function LevelStudioPage() {
-  return (
-    <CreativeStudioShell
-      title="Level Studio"
-      subtitle="Playable worlds, spatial layout, mission structure, and world evidence."
-      activeHref="/studio/level"
-    >
-      <Suspense fallback={<CreativeStudioLoading label="Level Studio" />}>
-        <LevelEditor />
-      </Suspense>
-    </CreativeStudioShell>
-  )
+export default function WorldStudioPage() {
+  return <StudioGroupedEditorClient group="world" />
 }

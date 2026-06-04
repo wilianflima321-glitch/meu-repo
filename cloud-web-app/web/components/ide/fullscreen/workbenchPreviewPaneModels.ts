@@ -9,6 +9,7 @@ import type {
   ActiveFileState,
   PreviewMode,
 } from '@/components/ide/fullscreen/types';
+import { PREVIEW_SURFACE_REGISTRY } from '@/components/preview/previewSurfaceRegistry';
 
 export type WorkbenchPreviewModeOption = {
   id: PreviewMode;
@@ -16,13 +17,9 @@ export type WorkbenchPreviewModeOption = {
   description: string;
 };
 
-export const PREVIEW_MODES: WorkbenchPreviewModeOption[] = [
-  { id: 'viewport3d', label: 'Visual (3D)', description: 'Scene-oriented preview' },
-  { id: 'canvas', label: 'Visual (UI)', description: 'Canvas-oriented artifact view' },
-  { id: 'runtime', label: 'App Preview', description: 'Live runtime surface' },
-  { id: 'device', label: 'Devices', description: 'Responsive framing' },
-  { id: 'console', label: 'Console', description: 'Logs and runtime output' },
-];
+export const PREVIEW_MODES: WorkbenchPreviewModeOption[] = PREVIEW_SURFACE_REGISTRY.map(
+  ({ id, label, description }) => ({ id, label, description }),
+);
 
 export type WorkbenchPreviewPaneProps = {
   activeFile: ActiveFileState | null;

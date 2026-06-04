@@ -3,18 +3,18 @@
 /**
  * PremiumLock Component - Paywall para Features Premium
  *
- * Wrapper que bloqueia conteudo e exibe CTA de upgrade quando
- * o usuario nao tem acesso a uma feature especifica.
+ * Wrapper that blocks content and shows an upgrade CTA when
+ * the user does not have access to a specific feature.
  *
  * Uso:
  * <PremiumLock feature="agents" plan="pro">
  *   <AIAgentPanel />
  * </PremiumLock>
  *
- * Se o usuario nao tiver o plano necessario, mostra overlay com:
- * - Descricao da feature
- * - Beneficios do upgrade
- * - CTA para pagina de pricing
+ * If the user does not have the required plan, shows an overlay with:
+ * - Feature description
+ * - Upgrade benefits
+ * - CTA to the pricing page
  */
 import React, { useState, useEffect, ReactNode } from 'react';
 import { Lock, Sparkles, ArrowRight, X, Crown, Zap, Shield, Rocket } from 'lucide-react';
@@ -150,7 +150,7 @@ const FEATURE_INFO: Record<FeatureKey, {
     minPlan: 'studio',
   },
   'priority-support': {
-    name: 'Suporte Prioritario',
+    name: 'Priority support',
     description: 'Atendimento dedicado com SLA',
     benefits: [
       'Resposta em ate 4h',
@@ -298,7 +298,7 @@ export function PremiumLock({
             <h2 className="premium-modal-title">{featureInfo.name}</h2>
             <p className="premium-modal-description">{featureInfo.description}</p>
             <div className="premium-modal-benefits">
-              <h3>O que voce ganha:</h3>
+              <h3>What you get:</h3>
               <ul>
                 {featureInfo.benefits.map((benefit, i) => (
                   <li key={i}>
@@ -322,7 +322,7 @@ export function PremiumLock({
               <ArrowRight className="w-4 h-4" />
             </button>
             <p className="premium-modal-note">
-              Voce esta no plano {PLAN_NAMES[userPlan]}
+              You are on the {PLAN_NAMES[userPlan]}
             </p>
           </div>
         </div>

@@ -6,30 +6,13 @@ import {
   AGENTS,
   AgentExecutor,
   AgentExecution,
-  AgentStep,
   Agent,
   AgentTask,
 } from '../../lib/ai-agent-system'
 import { AgentFleetCoordinatorStrip } from './AgentFleetCoordinatorStrip'
-
-// ============================================================================
-// TIPOS
-// ============================================================================
-
-interface Message {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  timestamp: Date
-  execution?: AgentExecution
-  isStreaming?: boolean
-}
-
-interface CommandSuggestion {
-  command: string
-  description: string
-  agentId: string
-}
+import { ExecutionPanel, MessageBubble } from './AICommandCenter.parts'
+import { formatExecutionResult } from './AICommandCenter.format'
+import type { CommandSuggestion, Message } from './AICommandCenter.types'
 
 // ============================================================================
 // SUGESTOES DE COMANDOS
@@ -220,7 +203,7 @@ export function AICommandCenter() {
             value={selectedAgent}
             onChange={(e) => setSelectedAgent(e.target.value)}
             className={`rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)] ${focusClass}`}
-            aria-label="Selecionar agente"
+            aria-label="Select agent"
           >
             {agentList.map((agent) => (
               <option key={agent.id} value={agent.id}>
@@ -335,173 +318,4 @@ export function AICommandCenter() {
   )
 }
 
-// ============================================================================
-// SUB-COMPONENTES
-// ============================================================================
-
-function MessageBubble({ message }: { message: Message }) {
-  const isUser = message.role === 'user'
-  const isSystem = message.role === 'system'
-
-  return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div
-        className={`max-w-[80%] rounded-lg p-4 ${
-          isUser
-            ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
-            : isSystem
-            ? 'bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)]'
-            : 'bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]'
-        } ${message.isStreaming ? 'animate-pulse' : ''}`}
-      >
-        <div
-          className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-sm"
-          dangerouslySetInnerHTML={{ __html: formatMarkdown(message.content) }}
-        />
-        <p className="mt-2 text-xs opacity-60">{message.timestamp.toLocaleTimeString()}</p>
-      </div>
-    </div>
-  )
-}
-
-function ExecutionPanel({
-  execution,
-  onClose,
-}: {
-  execution: AgentExecution
-  onClose: () => void
-}) {
-  const [expanded, setExpanded] = useState(false)
-  const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
-
-  return (
-    <div className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]">
-      <button type="button" aria-label={expanded ? 'Recolher detalhes de execucao do agente' : 'Expandir detalhes de execucao do agente'}
-        onClick={() => setExpanded(!expanded)}
-        className={`flex w-full items-center justify-between px-4 py-2 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] ${focusClass}`}
-        aria-expanded={expanded}
-        aria-controls="ai-execution-panel"
-      >
-        <span className="flex items-center gap-2">
-          <svg className="h-4 w-4 text-[var(--aethel-info-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-            />
-          </svg>
-          {execution.steps.length} passos executados
-          {execution.artifacts.length > 0 && (
-            <span className="text-[var(--aethel-success-light)]">| {execution.artifacts.length} artefatos</span>
-          )}
-        </span>
-        <svg
-          className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {expanded && (
-        <div id="ai-execution-panel" className="max-h-64 space-y-3 overflow-y-auto px-4 pb-4">
-          {execution.steps.map((step, i) => (
-            <StepCard key={i} step={step} index={i} />
-          ))}
-
-          {execution.artifacts.length > 0 && (
-            <div className="mt-4">
-              <p className="mb-2 text-xs text-[var(--aethel-text-quaternary)]">Artefatos:</p>
-              <div className="flex flex-wrap gap-2">
-                {execution.artifacts.map((artifact, i) => (
-                  <span
-                    key={i}
-                    className="rounded bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] px-2 py-1 text-xs text-[var(--aethel-success-light)]"
-                  >
-                    {artifact.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function StepCard({ step, index }: { step: AgentStep; index: number }) {
-  return (
-    <div className="rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-3">
-      <div className="flex items-start gap-2">
-        <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[var(--aethel-surface-tertiary)] text-xs text-[var(--aethel-text-secondary)]">
-          {index + 1}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm text-[var(--aethel-text-secondary)]">{step.thought}</p>
-          {step.action && (
-            <p className="mt-1 text-xs text-[var(--aethel-info-light)]">
-              {'->'} {step.action.tool}
-            </p>
-          )}
-          {step.observation && (
-            <p className="mt-1 truncate text-xs text-[var(--aethel-text-quaternary)]">
-              {step.observation.substring(0, 100)}...
-            </p>
-          )}
-        </div>
-        {step.result?.success !== undefined && (
-          <span className={`text-xs ${step.result.success ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-error-light)]'}`}>
-            {step.result.success ? 'ok' : 'failure'}
-          </span>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ============================================================================
-// UTILIDADES
-// ============================================================================
-
-function formatExecutionResult(execution: AgentExecution): string {
-  if (execution.error) {
-    return `**Failure:** ${execution.error}`
-  }
-
-  if (execution.finalAnswer) {
-    return execution.finalAnswer
-  }
-
-  const artifactList = execution.artifacts?.length
-    ? `\n\n**Artefatos**\n${execution.artifacts.map((artifact) => `- ${artifact.name}`).join('\n')}`
-    : ''
-
-  const statusMap: Record<string, string> = {
-    completed: 'concluida',
-    running: 'em execucao',
-    pending: 'pendente',
-    failed: 'failed',
-  }
-
-  const statusLine = execution.status === 'completed'
-    ? 'Execucao concluida.'
-    : `Status atual: ${statusMap[execution.status] || execution.status}.`
-
-  return `${statusLine}${artifactList}`
-}
-
-function formatMarkdown(text: string): string {
-  return text
-    .replace(/\*\*(.*|)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*|)\*/g, '<em>$1</em>')
-    .replace(/`(.*|)`/g, '<code class="bg-[var(--aethel-surface-tertiary)] px-1 rounded">$1</code>')
-    .replace(/\n/g, '<br/>')
-}
-
 export default AICommandCenter
-
-

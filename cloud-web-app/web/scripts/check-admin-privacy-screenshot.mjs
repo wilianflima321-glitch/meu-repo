@@ -8,7 +8,7 @@ const files = [
   'components/admin/AdminCommandCenterSections.tsx',
   'app/admin/page.tsx',
 ]
-const required = ['maskAdminEmail', 'data-privacy="masked"', 'screenshot safe', 'Privacy', 'masked']
+const required = ['maskAdminEmail', 'data-privacy="masked"', 'Emails masked', 'Privacy', 'masked']
 const source = files.map((file) => fs.existsSync(path.join(ROOT, file)) ? fs.readFileSync(path.join(ROOT, file), 'utf8') : '').join('\n')
 const missing = required.filter((token) => !source.includes(token))
 const rawEmailInAdminUi = source.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) ?? []

@@ -1,8 +1,8 @@
 # Editor Virtualization Spine Audit
 
-Generated: 2026-05-26T04:26:47.733Z
+Generated: 2026-06-04T04:50:30.704Z
 
 - Shared hook: components/performance/useVirtualWindow.ts
 - Virtualized editors: components/engine/WorldOutliner.tsx, components/engine/EngineContentBrowser.tsx
-- Canvas-culling editor: components/animation/KeyframeSystem.tsx
+- Canvas-culling editor: components/animation/KeyframeSystem.tsx + components/animation/KeyframeSystem.canvas.ts
 - Failures: 0

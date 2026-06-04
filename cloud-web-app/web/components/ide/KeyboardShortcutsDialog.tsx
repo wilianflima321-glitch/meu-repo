@@ -5,27 +5,27 @@ import Codicon from './Codicon'
 
 const SHORTCUT_CATEGORIES = [
   {
-    title: 'Geral',
+    title: 'General',
     shortcuts: [
       { keys: ['Ctrl', 'Shift', 'P'], action: 'Open command palette' },
       { keys: ['Ctrl', 'P'], action: 'Quick open (File)' },
-      { keys: ['Ctrl', 'Shift', 'N'], action: 'Nova janela' },
+      { keys: ['Ctrl', 'Shift', 'N'], action: 'New window' },
       { keys: ['Ctrl', ','], action: 'Open settings' },
-      { keys: ['Ctrl', 'K', 'Ctrl', 'S'], action: 'Ver atalhos de teclado' },
+      { keys: ['Ctrl', 'K', 'Ctrl', 'S'], action: 'View keyboard shortcuts' },
     ],
   },
   {
     title: 'Editor',
     shortcuts: [
       { keys: ['Ctrl', 'S'], action: 'Save file' },
-      { keys: ['Ctrl', 'Z'], action: 'Desfazer' },
-      { keys: ['Ctrl', 'Shift', 'Z'], action: 'Refazer' },
+      { keys: ['Ctrl', 'Z'], action: 'Undo' },
+      { keys: ['Ctrl', 'Shift', 'Z'], action: 'Redo' },
       { keys: ['Ctrl', 'D'], action: 'Select next occurrence' },
-      { keys: ['Ctrl', 'Shift', 'K'], action: 'Deletar linha' },
-      { keys: ['Alt', 'Up'], action: 'Mover linha para cima' },
-      { keys: ['Alt', 'Down'], action: 'Mover linha para baixo' },
-      { keys: ['Ctrl', '/'], action: 'Comentar/descomentar linha' },
-      { keys: ['Ctrl', 'Shift', 'F'], action: 'Formatar documento' },
+      { keys: ['Ctrl', 'Shift', 'K'], action: 'Delete line' },
+      { keys: ['Alt', 'Up'], action: 'Move line up' },
+      { keys: ['Alt', 'Down'], action: 'Move line down' },
+      { keys: ['Ctrl', '/'], action: 'Toggle line comment' },
+      { keys: ['Ctrl', 'Shift', 'F'], action: 'Format document' },
     ],
   },
   {
@@ -34,19 +34,19 @@ const SHORTCUT_CATEGORIES = [
       { keys: ['Ctrl', 'L'], action: 'Open/focus AI Chat' },
       { keys: ['Ctrl', 'I'], action: 'Inline completion' },
       { keys: ['Ctrl', 'Shift', 'I'], action: 'Explain selected code' },
-      { keys: ['Tab'], action: 'Aceitar sugestao inline' },
-      { keys: ['Escape'], action: 'Recusar sugestao inline' },
+      { keys: ['Tab'], action: 'Accept inline suggestion' },
+      { keys: ['Escape'], action: 'Reject inline suggestion' },
     ],
   },
   {
     title: 'Navigation',
     shortcuts: [
-      { keys: ['Ctrl', 'G'], action: 'Ir para linha' },
-      { keys: ['Ctrl', 'Shift', 'O'], action: 'Ir para simbolo' },
-      { keys: ['F12'], action: 'Ir para definicao' },
-      { keys: ['Alt', 'F12'], action: 'Pre-visualizar definicao' },
+      { keys: ['Ctrl', 'G'], action: 'Go to line' },
+      { keys: ['Ctrl', 'Shift', 'O'], action: 'Go to symbol' },
+      { keys: ['F12'], action: 'Go to definition' },
+      { keys: ['Alt', 'F12'], action: 'Peek definition' },
       { keys: ['Ctrl', 'Shift', 'E'], action: 'Focus file explorer' },
-      { keys: ['Ctrl', 'Shift', 'G'], action: 'Focar Git' },
+      { keys: ['Ctrl', 'Shift', 'G'], action: 'Focus Git' },
       { keys: ['Ctrl', '`'], action: 'Open/close terminal' },
     ],
   },
@@ -54,8 +54,8 @@ const SHORTCUT_CATEGORIES = [
     title: 'Debugging',
     shortcuts: [
       { keys: ['F5'], action: 'Start/continue debugging' },
-      { keys: ['F9'], action: 'Alternar breakpoint' },
-      { keys: ['F10'], action: 'Passo sobre' },
+      { keys: ['F9'], action: 'Toggle breakpoint' },
+      { keys: ['F10'], action: 'Step over' },
       { keys: ['F11'], action: 'Sign in' },
       { keys: ['Shift', 'F11'], action: 'Sign out' },
     ],
@@ -86,7 +86,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
       className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-label="Atalhos de teclado"
+      aria-label="Keyboard shortcuts"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -98,7 +98,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]">
               <Codicon name="keyboard" />
             </div>
-            <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Atalhos de Teclado</h2>
+            <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Keyboard shortcuts</h2>
           </div>
           <button
             type="button"
@@ -120,7 +120,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search atalho..."
+              placeholder="Search shortcuts..."
               className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] py-2 pl-9 pr-4 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] focus:outline-none"
               autoFocus
             />
@@ -130,7 +130,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {filteredCategories.length === 0 ? (
-            <p className="py-8 text-center text-sm text-[var(--aethel-text-tertiary)]">No atalho encontrado</p>
+            <p className="py-8 text-center text-sm text-[var(--aethel-text-tertiary)]">No shortcut found</p>
           ) : (
             <div className="space-y-6">
               {filteredCategories.map((cat) => (
@@ -168,7 +168,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
             Pressione <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">Ctrl</kbd> +{' '}
             <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">K</kbd> +{' '}
             <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">Ctrl</kbd> +{' '}
-            <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">S</kbd> para abrir esta lista
+            <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">S</kbd> to open this list
           </p>
         </div>
       </div>

@@ -16,11 +16,11 @@ if (!fs.existsSync(shellPath)) {
     'data-studio-mobile-editor-switcher',
     'hidden min-h-12 items-center gap-2 overflow-x-auto',
     'aria-label="Creative studio modes"',
-    'hidden min-h-[72px] flex-col gap-2',
+    'hidden min-h-[52px] flex-col gap-2',
     'Advanced editors ({secondaryCreativeRoutes.length})',
-    'Preview ready',
-    'Local optimizer optional',
-    'Cloud review gated',
+    'Preview',
+    'Local optional',
+    'Cloud locked',
   ]
 
   for (const token of required) {
@@ -45,11 +45,11 @@ if (!fs.existsSync(studioPagePath)) {
   failures.push('missing app/studio/page.tsx')
 } else {
   const page = fs.readFileSync(studioPagePath, 'utf8')
-  for (const token of ['Preview ready', 'Local optimizer optional', 'Cloud review gated']) {
+  for (const token of ['Preview ready', 'Local tools optional', 'Cloud review locked']) {
     if (!page.includes(token)) failures.push(`app/studio/page.tsx missing user-facing runtime label: ${token}`)
   }
-  for (const token of ['data-studio-surface-board="operator-density"', 'Choose the surface that moves the mission forward.']) {
-    if (!page.includes(token)) failures.push(`app/studio/page.tsx missing premium surface-board token: ${token}`)
+  for (const token of ['data-studio-surface-board="operator-density"', 'data-studio-primary-lanes="5"', 'Choose the editor that moves the mission forward.']) {
+    if (!page.includes(token)) failures.push(`app/studio/page.tsx missing premium editor-board token: ${token}`)
   }
   for (const jargon of ['Browser: preview', 'Studio Local: held', 'Cloud Stream: held', 'capability is real']) {
     if (page.includes(jargon)) failures.push(`app/studio/page.tsx still exposes old runtime jargon: ${jargon}`)

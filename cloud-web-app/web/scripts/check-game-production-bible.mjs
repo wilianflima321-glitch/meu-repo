@@ -32,8 +32,11 @@ requirePattern('lib/production/game-scope-orchestrator.ts', /productionBible:\s*
 requirePattern('lib/production/game-scope-orchestrator.ts', /buildGameProductionBible/, 'scope orchestrator must build the bible')
 requirePattern('lib/production/game-scope-orchestrator.ts', /cinematicEvidence:\s*CinematicEvidencePlan/, 'scope orchestrator must expose cinematic evidence')
 requirePattern('app/studio/StudioMissionControl.tsx', /productionBible\.pillars/, 'Studio must show compact bible pillars')
-requirePattern('app/studio/StudioMissionControl.tsx', /gameScopePlan\.cinematicEvidence\.state/, 'Studio must show compact cinematic state')
-requirePattern('components/evidence/EvidenceCenter.tsx', /productionBible\.firstUserDecision/, 'Evidence Center must show first decision')
+requirePattern('app/studio/StudioMissionControl.tsx', /gameScopePlan\??\.cinematicEvidence\.state/, 'Studio must show compact cinematic state')
+const evidenceCenterSurface = `${read('components/evidence/EvidenceCenter.tsx')}\n${read('components/evidence/EvidenceCenter.parts.tsx')}`
+if (!/productionBible\.firstUserDecision/.test(evidenceCenterSurface)) {
+  failures.push('components/evidence/EvidenceCenter.tsx: missing Evidence Center must show first decision')
+}
 requirePattern('lib/ai-agent-system.ts', /Production bible:/, 'agent prompt must receive bible constraints')
 requirePattern('docs/GAME_PRODUCTION_BIBLE_V22.md', /not as a wall of text/, 'docs must protect UX from text overload')
 

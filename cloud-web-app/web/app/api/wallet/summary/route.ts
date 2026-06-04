@@ -5,6 +5,7 @@ import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { Prisma } from '@prisma/client';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback';
 
 const routeLogger = createComponentLogger('api/wallet/summary/route');
 
@@ -69,6 +70,20 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     routeLogger.error('Wallet summary error:', error);
+
+    if (shouldUseLocalEvidenceFallback(req, error)) {
+      return localEvidenceJson(
+        req,
+        error,
+        {
+          balance: 0,
+          currency: 'credits',
+          transactions: [],
+          status: 'held',
+        },
+        { surface: 'wallet.summary' },
+      );
+    }
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

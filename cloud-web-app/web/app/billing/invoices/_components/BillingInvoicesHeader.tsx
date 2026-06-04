@@ -11,7 +11,7 @@ export function BillingInvoicesHeader({ onRefresh, onBack }: BillingInvoicesHead
       <div>
         <h1 className="text-3xl font-semibold">Invoices and billing</h1>
         <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
-          Billing surfaces now reflect runtime readiness. Do not assume checkout or portal access is live unless readiness is green.
+          Manage invoices, payment methods, and subscription access from one place.
         </p>
       </div>
       <div className="flex items-center gap-2">

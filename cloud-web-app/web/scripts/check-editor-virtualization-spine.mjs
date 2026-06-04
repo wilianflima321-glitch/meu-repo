@@ -14,9 +14,10 @@ const hookFile = 'components/performance/useVirtualWindow.ts'
 const outlinerFile = 'components/engine/WorldOutliner.tsx'
 const browserFile = 'components/engine/EngineContentBrowser.tsx'
 const keyframeFile = 'components/animation/KeyframeSystem.tsx'
+const keyframeCanvasFile = 'components/animation/KeyframeSystem.canvas.ts'
 const packageFile = 'package.json'
 
-for (const file of [hookFile, outlinerFile, browserFile, keyframeFile]) {
+for (const file of [hookFile, outlinerFile, browserFile, keyframeFile, keyframeCanvasFile]) {
   if (!fs.existsSync(path.join(webRoot, file))) failures.push(`Missing virtualization spine file: ${file}`)
 }
 
@@ -24,6 +25,8 @@ const hookText = fs.existsSync(path.join(webRoot, hookFile)) ? read(hookFile) : 
 const outlinerText = fs.existsSync(path.join(webRoot, outlinerFile)) ? read(outlinerFile) : ''
 const browserText = fs.existsSync(path.join(webRoot, browserFile)) ? read(browserFile) : ''
 const keyframeText = fs.existsSync(path.join(webRoot, keyframeFile)) ? read(keyframeFile) : ''
+const keyframeCanvasText = fs.existsSync(path.join(webRoot, keyframeCanvasFile)) ? read(keyframeCanvasFile) : ''
+const keyframeSurfaceText = `${keyframeText}\n${keyframeCanvasText}`
 const packageText = read(packageFile)
 
 requirePattern(
@@ -92,37 +95,37 @@ requirePattern(
   'EngineContentBrowser list view must read only visible rows.',
 )
 requirePattern(
-  keyframeText,
+  keyframeSurfaceText,
   /timelineRows/,
   'KeyframeSystem must flatten tracks into deterministic timeline rows.',
 )
 requirePattern(
-  keyframeText,
+  keyframeSurfaceText,
   /visibleTimelineRange/,
   'KeyframeSystem must track the visible canvas range for draw culling.',
 )
 requirePattern(
-  keyframeText,
+  keyframeSurfaceText,
   /findScrollableParent/,
   'KeyframeSystem must detect scroll containers for viewport-aware drawing.',
 )
 requirePattern(
-  keyframeText,
+  keyframeSurfaceText,
   /TIMELINE_DRAW_OVERSCAN/,
   'KeyframeSystem must use explicit overscan when culling canvas drawing.',
 )
 requirePattern(
-  keyframeText,
+  keyframeSurfaceText,
   /sortedKeyframesByProperty/,
   'KeyframeSystem must pre-sort keyframes instead of sorting during every draw row.',
 )
 requirePattern(
-  keyframeText,
-  /row\.kind === "property"/,
+  keyframeSurfaceText,
+  /row\.kind === ['"]property['"]/,
   'KeyframeSystem must draw and hit-test only property rows when needed.',
 )
 requirePattern(
-  keyframeText,
+  keyframeSurfaceText,
   /segmentRight >= visibleLeft && segmentLeft <= visibleRight/,
   'KeyframeSystem must skip easing segments outside the visible horizontal range.',
 )
@@ -139,7 +142,7 @@ const report = [
   '',
   `- Shared hook: ${hookFile}`,
   `- Virtualized editors: ${outlinerFile}, ${browserFile}`,
-  `- Canvas-culling editor: ${keyframeFile}`,
+  `- Canvas-culling editor: ${keyframeFile} + ${keyframeCanvasFile}`,
   `- Failures: ${failures.length}`,
   '',
   ...failures.map((failure) => `- ${failure}`),

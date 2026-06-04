@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { NexusCanvasV2 } from '../nexus/NexusCanvasV2';
+import dynamic from 'next/dynamic';
 import { getWasmRuntime } from '@/lib/wasm-runtime';
 
 /**
@@ -41,6 +41,18 @@ interface ForgeFile {
   type: 'typescript' | 'glsl' | 'json' | 'wasm';
   content: string;
 }
+
+const NexusCanvasV2 = dynamic(
+  () => import('../nexus/NexusCanvasV2').then((mod) => mod.NexusCanvasV2),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full min-h-[320px] items-center justify-center rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] text-xs uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+        Loading canvas
+      </div>
+    ),
+  },
+);
 
 const forgeShellStyle: React.CSSProperties = {
   display: 'flex',

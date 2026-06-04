@@ -93,8 +93,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'editor.minimap.enabled',
-        title: 'Minimapa activedo',
-        description: 'Controla se o minimapa e exibido',
+        title: 'Minimap enabled',
+        description: 'Controls whether the minimap is displayed',
         type: 'boolean',
         default: true,
         category: 'editor',
@@ -245,8 +245,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
     settings: [
       {
         key: 'git.enabled',
-        title: 'Ativado',
-        description: 'Define se o git esta activedo',
+        title: 'Enabled',
+        description: 'Defines whether Git is enabled',
         type: 'boolean',
         default: true,
         category: 'git',
@@ -263,8 +263,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'git.confirmSync',
-        title: 'Confirm sincronizacao',
-        description: 'Confirma antes de sincronizar repositorios git',
+        title: 'Confirm sync',
+        description: 'Confirms before syncing Git repositories',
         type: 'boolean',
         default: true,
         category: 'git',
@@ -288,8 +288,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'ai.completions.enabled',
-        title: 'Autocompletar com IA',
-        description: 'Ativa sugestoes de codigo com IA',
+        title: 'AI autocomplete',
+        description: 'Enables AI code suggestions',
         type: 'boolean',
         default: true,
         category: 'ai',
@@ -384,9 +384,9 @@ export default function SettingsEditor() {
 
   const resetAllSettings = async () => {
     const shouldReset = await openConfirmDialog({
-      title: 'Redefinir configuracoes',
-      message: 'Tem certeza de que deseja redefinir todas as configuracoes?',
-      confirmText: 'Redefinir',
+      title: 'Reset settings',
+      message: 'Are you sure you want to reset all settings?',
+      confirmText: 'Reset',
       cancelText: 'Cancel',
     })
     if (!shouldReset) return
@@ -408,7 +408,7 @@ export default function SettingsEditor() {
               onChange={(event) => updateSetting(setting.key, event.target.checked)}
               className="h-4 w-4 rounded border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] text-[var(--aethel-primary)] focus:ring-2 focus:ring-[var(--aethel-primary)]"
             />
-            {value ? 'Ativado' : 'Desactivedo'}
+            {value ? 'Enabled' : 'Disabled'}
           </label>
         )
 
@@ -448,7 +448,7 @@ export default function SettingsEditor() {
         )
 
       default:
-        return <span className="text-xs text-[var(--aethel-text-quaternary)]">Tipo nao suportado: {setting.type}</span>
+        return <span className="text-xs text-[var(--aethel-text-quaternary)]">Unsupported type: {setting.type}</span>
     }
   }
 
@@ -458,7 +458,7 @@ export default function SettingsEditor() {
         <div className="border-b border-[var(--aethel-border-primary)] p-4">
           <input
             type="text"
-            placeholder="Search configuracoes..."
+            placeholder="Search settings..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             className={`${settingsInputClass} w-full`}
@@ -469,7 +469,7 @@ export default function SettingsEditor() {
           <div className="flex gap-2">
             <button type="button"
               onClick={() => setScope('user')}
-              aria-label="Mostrar configuracoes do usuario"
+              aria-label="Show user settings"
               className={`flex-1 ${
                 scope === 'user' ? settingsPrimaryButtonClass : settingsSecondaryButtonClass
               }`}
@@ -478,7 +478,7 @@ export default function SettingsEditor() {
             </button>
             <button type="button"
               onClick={() => setScope('workspace')}
-              aria-label="Mostrar configuracoes do workspace"
+              aria-label="Show workspace settings"
               className={`flex-1 ${
                 scope === 'workspace' ? settingsPrimaryButtonClass : settingsSecondaryButtonClass
               }`}
@@ -500,7 +500,7 @@ export default function SettingsEditor() {
               <span className="rounded-md bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-text-tertiary)]">{category.icon}</span>
               <div className="flex-1">
                 <div className="text-sm font-medium">{category.label}</div>
-                <div className="text-xs text-[var(--aethel-text-quaternary)]">{category.settings.length} configuracoes</div>
+                <div className="text-xs text-[var(--aethel-text-quaternary)]">{category.settings.length} settings</div>
               </div>
             </button>
           ))}
@@ -510,10 +510,10 @@ export default function SettingsEditor() {
           <button
             type="button"
             onClick={resetAllSettings}
-            aria-label="Redefinir todas as configuracoes"
+            aria-label="Reset all settings"
             className={`${settingsDangerButtonClass} w-full`}
           >
-            Redefinir todas as configuracoes
+            Reset all settings
           </button>
         </div>
       </div>
@@ -525,7 +525,7 @@ export default function SettingsEditor() {
               <span className="rounded-md bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-1 text-sm text-[var(--aethel-text-secondary)]">{currentCategory?.icon}</span>
               {currentCategory?.label}
             </h1>
-            <p className="text-sm text-[var(--aethel-text-quaternary)]">{currentCategory?.settings.length} configuracoes</p>
+            <p className="text-sm text-[var(--aethel-text-quaternary)]">{currentCategory?.settings.length} settings</p>
           </div>
 
           <div className="space-y-6">
@@ -550,10 +550,10 @@ export default function SettingsEditor() {
                     {isModified && (
                       <button type="button"
                         onClick={() => resetSetting(setting.key)}
-                        aria-label={`Redefinir configuracao ${setting.title}`}
+                        aria-label={`Reset setting ${setting.title}`}
                         className={settingsSecondaryButtonClass}
                       >
-                        Redefinir
+                        Reset
                       </button>
                     )}
                   </div>
@@ -565,7 +565,7 @@ export default function SettingsEditor() {
 
           {currentCategory?.settings.length === 0 && (
             <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_75%,transparent)] py-12 text-center text-sm text-[var(--aethel-text-tertiary)]">
-              <p>No configuracao encontrada para &quot;{searchQuery}&quot;</p>
+              <p>No setting found for &quot;{searchQuery}&quot;</p>
             </div>
           )}
         </div>
@@ -573,4 +573,3 @@ export default function SettingsEditor() {
     </div>
   )
 }
-

@@ -1,102 +1,66 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Offline - Aethel Engine</title>
+  <title>Offline - Aethel Studio</title>
   <link rel="icon" href="/icons/favicon.ico" type="image/x-icon">
   <style>
     :root {
-      --bg-primary: #0a0a0f;
-      --bg-secondary: #13131a;
-      --text-primary: #e4e4e7;
-      --text-secondary: #a1a1aa;
-      --accent: #6366f1;
-      --accent-hover: #818cf8;
+      --aethel-surface-primary: #0a0a0f;
+      --aethel-surface-secondary: #13131a;
+      --aethel-text-primary: #e4e4e7;
+      --aethel-text-secondary: #a1a1aa;
+      --aethel-primary: #8b8cff;
+      --aethel-primary-hover: #a5a6ff;
+      --aethel-border-subtle: rgba(255,255,255,0.1);
+      --aethel-success: #22c55e;
+      --aethel-error: #ef4444;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 2rem;
+      background: var(--aethel-surface-primary);
+      color: var(--aethel-text-primary);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    .container {
-      max-width: 480px;
-      text-align: center;
-    }
+    .container { max-width: 460px; text-align: center; }
+    .logo { width: 72px; height: 72px; margin-bottom: 2rem; opacity: 0.9; }
+    .icon-offline { width: 104px; height: 104px; margin-bottom: 1.5rem; opacity: 0.64; }
 
-    .logo {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 2rem;
-      opacity: 0.8;
-    }
-
-    .icon-offline {
-      width: 120px;
-      height: 120px;
-      margin-bottom: 1.5rem;
-      opacity: 0.6;
-    }
-
-    h1 {
-      font-size: 1.75rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    p {
-      color: var(--text-secondary);
-      line-height: 1.6;
-      margin-bottom: 1.5rem;
-    }
+    h1 { margin-bottom: 0.85rem; font-size: 1.75rem; font-weight: 650; letter-spacing: -0.03em; }
+    p { margin-bottom: 1.5rem; color: var(--aethel-text-secondary); line-height: 1.6; }
 
     .retry-btn {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 500;
+      padding: 0.75rem 1.35rem;
+      border: 0;
+      border-radius: 999px;
+      background: var(--aethel-text-primary);
+      color: var(--aethel-surface-primary);
+      font-size: 0.95rem;
+      font-weight: 650;
       cursor: pointer;
-      transition: all 0.2s ease;
     }
 
-    .retry-btn:hover {
-      background: var(--accent-hover);
-      transform: translateY(-2px);
-    }
-
-    .retry-btn:active {
-      transform: translateY(0);
-    }
+    .retry-btn:hover { background: #ffffff; }
 
     .status {
-      margin-top: 2rem;
-      padding: 1rem;
-      background: var(--bg-secondary);
-      border-radius: 8px;
+      margin-top: 1.75rem;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--aethel-border-subtle);
+      border-radius: 14px;
+      background: var(--aethel-surface-secondary);
+      color: var(--aethel-text-secondary);
       font-size: 0.875rem;
     }
 
@@ -104,140 +68,90 @@
       display: inline-block;
       width: 8px;
       height: 8px;
-      border-radius: 50%;
-      background: #ef4444;
       margin-right: 0.5rem;
+      border-radius: 50%;
+      background: var(--aethel-error);
       animation: pulse 2s infinite;
     }
 
-    .status-indicator.online {
-      background: #22c55e;
-      animation: none;
-    }
+    .status-indicator.online { background: var(--aethel-success); animation: none; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    .cached-pages {
-      margin-top: 2rem;
-      text-align: left;
-    }
-
-    .cached-pages h3 {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-      margin-bottom: 0.75rem;
-    }
-
-    .cached-pages ul {
-      list-style: none;
-    }
-
-    .cached-pages li {
-      padding: 0.5rem 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .cached-pages a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .cached-pages a:hover {
-      text-decoration: underline;
-    }
+    .cached-pages { margin-top: 1.5rem; text-align: left; }
+    .cached-pages h3 { margin-bottom: 0.75rem; color: var(--aethel-text-secondary); font-size: 0.8rem; font-weight: 650; text-transform: uppercase; letter-spacing: 0.12em; }
+    .cached-pages ul { list-style: none; }
+    .cached-pages li { padding: 0.5rem 0; border-bottom: 1px solid var(--aethel-border-subtle); }
+    .cached-pages a { color: var(--aethel-primary); text-decoration: none; }
+    .cached-pages a:hover { color: var(--aethel-primary-hover); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <img src="/branding/aethel-icon-source.png" alt="Aethel Engine" class="logo">
-    
-    <svg class="icon-offline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+  <main class="container">
+    <img src="/branding/aethel-icon-source.png" alt="Aethel Studio" class="logo">
+    <svg class="icon-offline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
       <path d="M8.288 3.853c.3-.158.6-.311.908-.46A12 12 0 0 1 12 3c1.386 0 2.723.235 3.938.664M8.288 3.853A12.06 12.06 0 0 0 3 7.5c-.368.428-.72.874-1.053 1.335M8.288 3.853L3.47 18.177M4.022 9.82c-.56.818-1.057 1.68-1.485 2.583M4.022 9.82l-.552 1.657M20.478 9.82a13.6 13.6 0 0 1 1.484 2.583M20.478 9.82l.551 1.657M20.478 9.82c-.56-.818-1.057-1.68-1.485-2.583M21.962 12.403c-.299.96-.664 1.886-1.093 2.77M2.037 12.403c.299.96.664 1.886 1.093 2.77M21.962 12.403l-.551 1.657M12 17.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z"/>
       <line x1="1" y1="1" x2="23" y2="23" stroke-width="2"/>
     </svg>
-    
-    <h1>Você está offline</h1>
-    
-    <p>
-      Não foi possível conectar à internet. Verifique sua conexão 
-      e tente novamente. Algumas funcionalidades podem estar disponíveis 
-      no modo offline.
-    </p>
-    
-    <button class="retry-btn" onclick="location.reload()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <h1>You are offline</h1>
+    <p>Aethel cannot reach the network right now. Reconnect to continue working, or open one of the cached pages below if available.</p>
+    <button class="retry-btn" onclick="location.reload()" type="button">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
         <path d="M21 3v5h-5"/>
       </svg>
-      Tentar novamente
+      Try again
     </button>
-    
-    <div class="status">
+    <div class="status" role="status">
       <span class="status-indicator" id="statusIndicator"></span>
-      <span id="statusText">Verificando conexão...</span>
+      <span id="statusText">Checking connection...</span>
     </div>
-    
-    <div class="cached-pages" id="cachedPages" style="display: none;">
-      <h3>Páginas disponíveis offline:</h3>
+    <section class="cached-pages" id="cachedPages" style="display: none;">
+      <h3>Available offline</h3>
       <ul id="cachedPagesList"></ul>
-    </div>
-  </div>
+    </section>
+  </main>
 
   <script>
-    // Verificar status de conexão
     function updateConnectionStatus() {
       const indicator = document.getElementById('statusIndicator');
       const text = document.getElementById('statusText');
-      
       if (navigator.onLine) {
         indicator.classList.add('online');
-        text.textContent = 'Conexão restaurada! Recarregando...';
+        text.textContent = 'Connection restored. Reloading...';
         setTimeout(() => location.reload(), 1000);
       } else {
         indicator.classList.remove('online');
-        text.textContent = 'Sem conexão com a internet';
+        text.textContent = 'No internet connection';
       }
     }
 
-    // Listar páginas cacheadas
     async function listCachedPages() {
-      if ('caches' in window) {
-        try {
-          const cache = await caches.open('aethel-static-v2.0.0');
-          const requests = await cache.keys();
-          const pages = requests
-            .filter(req => req.url.endsWith('/') || !req.url.includes('.'))
-            .map(req => new URL(req.url).pathname);
-          
-          if (pages.length > 0) {
-            const container = document.getElementById('cachedPages');
-            const list = document.getElementById('cachedPagesList');
-            
-            pages.forEach(page => {
-              const li = document.createElement('li');
-              const a = document.createElement('a');
-              a.href = page;
-              a.textContent = page === '/' ? 'Página inicial' : page;
-              li.appendChild(a);
-              list.appendChild(li);
-            });
-            
-            container.style.display = 'block';
-          }
-        } catch (e) {
-          console.log('Could not list cached pages:', e);
-        }
+      if (!('caches' in window)) return;
+      try {
+        const cache = await caches.open('aethel-static-v2.0.0');
+        const requests = await cache.keys();
+        const pages = requests
+          .filter((req) => req.url.endsWith('/') || !req.url.includes('.'))
+          .map((req) => new URL(req.url).pathname);
+        if (pages.length === 0) return;
+        const container = document.getElementById('cachedPages');
+        const list = document.getElementById('cachedPagesList');
+        pages.forEach((page) => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = page;
+          a.textContent = page === '/' ? 'Home' : page;
+          li.appendChild(a);
+          list.appendChild(li);
+        });
+        container.style.display = 'block';
+      } catch {
+        // Cache listing is optional; the offline action stays usable without it.
       }
     }
 
-    // Event listeners
     window.addEventListener('online', updateConnectionStatus);
     window.addEventListener('offline', updateConnectionStatus);
-    
-    // Inicialização
     updateConnectionStatus();
     listCachedPages();
   </script>

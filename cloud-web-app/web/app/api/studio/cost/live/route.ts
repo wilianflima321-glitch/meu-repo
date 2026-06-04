@@ -6,6 +6,7 @@ import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { getBillingRuntimeState } from '@/lib/server/billing-runtime'
 import { createComponentLogger } from '@/lib/observability/logger'
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback'
 
 export const dynamic = 'force-dynamic'
 
@@ -158,6 +159,56 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     log.error('Failed to load studio cost live state', error)
+    if (shouldUseLocalEvidenceFallback(request, error)) {
+      const emptyBudget = buildBudgetMeter(0, 0)
+      return localEvidenceJson(
+        request,
+        error,
+        {
+          status: 'blocked',
+          projectId: request.nextUrl.searchParams.get('projectId'),
+          wallet: {
+            balance: 0,
+            currency: 'credits',
+            lowBalance: true,
+            lowBalanceThreshold: LOW_BALANCE_THRESHOLD,
+          },
+          budget: {
+            hourly: emptyBudget,
+            daily: emptyBudget,
+            monthly: emptyBudget,
+          },
+          billing: {
+            status: 'held',
+            checkoutReady: false,
+            portalReady: false,
+            webhookReady: false,
+            blockers: ['LOCAL_EVIDENCE_BILLING_BACKEND_UNAVAILABLE'],
+            providerLabel: 'Stripe',
+            setupEnv: ['STRIPE_SECRET_KEY', 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY', 'STRIPE_WEBHOOK_SECRET'],
+          },
+          policy: {
+            emergencyLevel: 'normal',
+            fallbackModel: 'openai/gpt-5-nano',
+            autoDowngradeOnWarning: true,
+            autoShutdownOnCritical: true,
+            maxTokensPerRequest: 4096,
+            allowedModels: [],
+          },
+          metrics: {
+            totalRequestsToday: 0,
+            totalTokensToday: 0,
+            avgCostPerRequestUsd: 0,
+            updatedAt: new Date().toISOString(),
+          },
+          guidance: [
+            'Cost runtime is held locally until billing and credit ledger storage are configured.',
+            'Do not publish, upgrade, or claim production billing readiness from this fallback state.',
+          ],
+        },
+        { surface: 'studio.cost.live', state: 'held' },
+      )
+    }
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped
     return apiInternalError()

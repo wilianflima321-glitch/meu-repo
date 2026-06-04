@@ -28,7 +28,7 @@ export function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
         color: 'var(--aethel-text-quaternary)',
         fontSize: '13px',
       }}>
-        Selecione um objeto para ver suas propriedades.
+        Select an object to view its properties.
       </div>
     );
   }

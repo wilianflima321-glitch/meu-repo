@@ -1,7 +1,7 @@
 'use client'
 
 import type { ComponentProps } from 'react'
-import { Code, CreditCard, LayoutDashboard, MessageSquare, Settings } from 'lucide-react'
+import { Code, LayoutDashboard, MessageSquare } from 'lucide-react'
 
 import type { ActiveTab, SessionFilter, ToastType } from './aethel-dashboard-model'
 import { TrialBanner } from './TrialBanner'
@@ -176,7 +176,7 @@ export function DashboardShell({
                   ? entryMission
                   : entrySource
                     ? entryLane.description
-                    : 'Studio Home points to the next action. The deep cockpit expands only when the task truly needs it.'}
+                    : 'Studio Home points to the next action. Deep tools expand only when the task truly needs them.'}
               </p>
             </div>
 
@@ -240,9 +240,7 @@ export function DashboardShell({
         items={[
           { href: '/dashboard', label: 'Home', icon: LayoutDashboard, matchPaths: ['/dashboard'] },
           { href: '/ide', label: 'Studio', icon: Code, matchPaths: ['/ide'] },
-          { href: '/dashboard?tab=ai-chat', label: 'AI', icon: MessageSquare, matchPaths: [] },
-          { href: '/billing', label: 'Billing', icon: CreditCard, matchPaths: ['/billing'] },
-          { href: '/settings', label: 'Settings', icon: Settings, matchPaths: ['/settings'] },
+          { href: '/ide?panel=agents', label: 'Agents', icon: MessageSquare, matchPaths: ['/ide'] },
         ]}
       />
 

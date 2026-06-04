@@ -1,6 +1,6 @@
 import type { Command, Keybinding, Theme } from './useTheiaSystemsHooks'
 
-export export async function loadThemes(): Promise<Theme[]> {
+export async function loadThemes(): Promise<Theme[]> {
     // Built-in themes
     return [
         {
@@ -86,10 +86,10 @@ export function buildKeyString(e: KeyboardEvent): string {
     if (e.shiftKey) parts.push('Shift');
     if (e.altKey) parts.push('Alt');
     if (e.metaKey) parts.push('Meta');
-    
+
     const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
     parts.push(key);
-    
+
     return parts.join('+');
 }
 

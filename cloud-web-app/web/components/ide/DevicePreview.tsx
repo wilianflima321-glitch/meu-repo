@@ -122,7 +122,7 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
                  'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
             }`}
-            title="Tela cheia"
+            title="Fullscreen"
           >
             <Maximize2 className="w-4 h-4" />
           </button>
@@ -141,7 +141,7 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
         >
           {/* Device Frame Styling */}
           <div className="absolute inset-0 pointer-events-none border-4 border-[var(--aethel-border-primary)] rounded-lg" />
-          
+
           {/* Device Notch (for mobile) */}
           {device === 'mobile' && !isRotated && (
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[var(--aethel-border-primary)] rounded-b-xl" />

@@ -1,7 +1,7 @@
 import { logger } from '@/lib/observability/logger';
 /**
  * Aethel AI Ghost Text - Inline Completions
- * 
+ *
  * Sistema de autocomplete com IA que mostra sugestões
  * inline (ghost text) enquanto o usuário digita.
  * Similar ao GitHub Copilot.
@@ -69,6 +69,12 @@ const DEFAULT_CONFIG: GhostTextConfig = {
   model: 'gpt-4',
 };
 
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException
+    ? error.name === 'AbortError'
+    : error instanceof Error && error.name === 'AbortError';
+}
+
 // ============================================================================
 // GHOST TEXT PROVIDER
 // ============================================================================
@@ -78,40 +84,40 @@ export class GhostTextProvider {
   private cache: Map<string, CompletionResult[]> = new Map();
   private pendingRequest: AbortController | null = null;
   private lastRequestTime: number = 0;
-  
+
   constructor(config: Partial<GhostTextConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
   }
-  
+
   /**
    * Gera completions para o contexto atual
    */
   async getCompletions(request: CompletionRequest): Promise<CompletionResult[]> {
     // Check if enabled
     if (!this.config.enabled) return [];
-    
+
     // Check minimum prefix length
     if (request.prefix.length < this.config.minPrefixLength) return [];
-    
+
     // Check cache
     const cacheKey = this.getCacheKey(request);
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey)!;
     }
-    
+
     // Cancel pending request
     if (this.pendingRequest) {
       this.pendingRequest.abort();
     }
-    
+
     // Create new abort controller
     this.pendingRequest = new AbortController();
     const startTime = Date.now();
-    
+
     try {
       // Build prompt
       const prompt = this.buildPrompt(request);
-      
+
       // Call AI through canonical server endpoint
       const response = await fetch('/api/ai/inline-completion', {
         method: 'POST',
@@ -132,15 +138,15 @@ export class GhostTextProvider {
 
       const payload = await response.json().catch(() => null) as { suggestion?: string; text?: string } | null;
       const completionText = payload?.suggestion ?? payload?.text ?? '';
-      
+
       const latency = Date.now() - startTime;
-      
+
       // Parse response
       const completions = this.parseCompletions(completionText, request, latency);
-      
+
       // Cache results
       this.cache.set(cacheKey, completions);
-      
+
       // Limit cache size
       if (this.cache.size > 100) {
         const firstKey = this.cache.keys().next().value;
@@ -148,11 +154,11 @@ export class GhostTextProvider {
           this.cache.delete(firstKey);
         }
       }
-      
+
       return completions;
-      
+
     } catch (error) {
-      if ((error as any).name === 'AbortError') {
+      if (isAbortError(error)) {
         return [];
       }
       logger.error('Ghost text error:', error);
@@ -161,7 +167,7 @@ export class GhostTextProvider {
       this.pendingRequest = null;
     }
   }
-  
+
   /**
    * Cancela request pendente
    */
@@ -171,25 +177,25 @@ export class GhostTextProvider {
       this.pendingRequest = null;
     }
   }
-  
+
   /**
    * Limpa cache
    */
   clearCache(): void {
     this.cache.clear();
   }
-  
+
   /**
    * Atualiza configuração
    */
   updateConfig(config: Partial<GhostTextConfig>): void {
     this.config = { ...this.config, ...config };
   }
-  
+
   // ============================================================================
   // PRIVATE METHODS
   // ============================================================================
-  
+
   private getSystemPrompt(language: string): string {
     return `Você é um assistente de código inline. Complete o código do usuário de forma concisa e precisa.
 
@@ -204,27 +210,27 @@ REGRAS CRÍTICAS:
 
 FORMATO: Retorne apenas o texto de completion, nada mais.`;
   }
-  
+
   private buildPrompt(request: CompletionRequest): string {
     const lines: string[] = [];
-    
+
     // Add context
     if (request.context?.imports?.length) {
       lines.push('// Imports disponíveis:');
       lines.push(request.context.imports.slice(0, 5).join('\n'));
       lines.push('');
     }
-    
+
     if (request.context?.symbols?.length) {
       lines.push(`// Símbolos em escopo: ${request.context.symbols.slice(0, 10).join(', ')}`);
       lines.push('');
     }
-    
+
     // Add file path context
     if (request.filePath) {
       lines.push(`// Arquivo: ${request.filePath}`);
     }
-    
+
     // Add code context
     lines.push('// Código atual:');
     lines.push(request.prefix);
@@ -232,13 +238,13 @@ FORMATO: Retorne apenas o texto de completion, nada mais.`;
     if (request.suffix.trim()) {
       lines.push(request.suffix);
     }
-    
+
     lines.push('');
     lines.push('// Complete o código a partir do cursor (█). Retorne apenas a completion:');
-    
+
     return lines.join('\n');
   }
-  
+
   private parseCompletions(
     response: string,
     request: CompletionRequest,
@@ -249,18 +255,18 @@ FORMATO: Retorne apenas o texto de completion, nada mais.`;
       .replace(/```[\w]*\n?/g, '')
       .replace(/```$/g, '')
       .trim();
-    
-    // Remove any leading explanation
+
+    // Remove leading explanation
     if (text.includes(':')) {
       const colonIndex = text.indexOf(':');
       if (colonIndex < 50) {
         text = text.slice(colonIndex + 1).trim();
       }
     }
-    
+
     // Empty response
     if (!text) return [];
-    
+
     // Create completion result
     const completion: CompletionResult = {
       text,
@@ -276,19 +282,19 @@ FORMATO: Retorne apenas o texto de completion, nada mais.`;
         latency,
       },
     };
-    
+
     return [completion];
   }
-  
+
   private calculateConfidence(text: string, request: CompletionRequest): number {
     let confidence = 0.8;
-    
+
     // Reduce confidence for very long completions
     if (text.length > 200) confidence -= 0.1;
-    
+
     // Reduce confidence for multi-line completions
     if (text.includes('\n')) confidence -= 0.1;
-    
+
     // Increase confidence if matches expected patterns
     if (request.language === 'typescript' || request.language === 'javascript') {
       // Check for common patterns
@@ -296,10 +302,10 @@ FORMATO: Retorne apenas o texto de completion, nada mais.`;
       if (text.match(/^[a-zA-Z_$][a-zA-Z0-9_$]*\./)) confidence += 0.05; // Property access
       if (text.match(/^\s*[});\]]/)) confidence += 0.1; // Closing bracket
     }
-    
+
     return Math.min(1, Math.max(0, confidence));
   }
-  
+
   private getCacheKey(request: CompletionRequest): string {
     // Use last 100 chars of prefix + first 50 of suffix
     const prefix = request.prefix.slice(-100);
@@ -493,25 +499,25 @@ const BUILTIN_SNIPPETS: Record<string, Snippet[]> = {
 
 export class SnippetProvider {
   private snippets: Map<string, Snippet[]> = new Map();
-  
+
   constructor() {
     // Load built-in snippets
     Object.entries(BUILTIN_SNIPPETS).forEach(([lang, snips]) => {
       this.snippets.set(lang, snips);
     });
   }
-  
+
   /**
    * Busca snippets que correspondem ao prefixo
    */
   getSnippets(prefix: string, language: string): Snippet[] {
     const langSnippets = this.snippets.get(language) || [];
     const genericSnippets = this.snippets.get('generic') || [];
-    
+
     return [...langSnippets, ...genericSnippets]
       .filter(s => s.prefix.startsWith(prefix.toLowerCase()));
   }
-  
+
   /**
    * Adiciona snippet customizado
    */
@@ -521,13 +527,13 @@ export class SnippetProvider {
     }
     this.snippets.get(language)!.push(snippet);
   }
-  
+
   /**
    * Expande snippet body para texto final
    */
   expandSnippet(snippet: Snippet): string {
     const body = Array.isArray(snippet.body) ? snippet.body.join('\n') : snippet.body;
-    
+
     // Simple expansion - remove tab stops
     return body
       .replace(/\$\{(\d+)(?::([^}]*))?\}/g, '$2')

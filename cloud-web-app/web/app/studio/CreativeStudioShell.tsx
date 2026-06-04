@@ -5,7 +5,7 @@ import Link from 'next/link'
 import StudioLayout from '@/components/studio/StudioLayout'
 import MaturityBadge from '@/components/ui/MaturityBadge'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
-import { CREATIVE_STUDIO_ROUTES, isPrimaryCreativeStudioRoute } from './creative-studio-routes'
+import { CREATIVE_STUDIO_ROUTES, groupCreativeStudioRoutes, isPrimaryCreativeStudioRoute, getCreativeStudioRouteNavigationHref } from './creative-studio-routes'
 
 interface CreativeStudioShellProps {
   title: string
@@ -23,21 +23,21 @@ function creativeTabClass(active: boolean): string {
 function maturityGuidance(maturity?: string) {
   if (maturity === 'BETA') {
     return {
-      label: 'Beta surface',
-      detail: 'Core editing is visible. Expensive work waits for a local optimizer or a configured cloud review lane.',
+      label: 'Beta editor',
+      detail: 'Edit here. Heavy jobs wait for runtime.',
     }
   }
 
   if (maturity === 'ALPHA') {
     return {
-      label: 'Alpha surface',
-      detail: 'Use for guided authoring and review packets. Production writes need evidence and rollback plans attached.',
+      label: 'Alpha editor',
+      detail: 'Draft and review. Ship only with receipts.',
     }
   }
 
   return {
     label: 'Creative hub',
-    detail: 'Start from mission control, then open deeper editors only when the task needs them.',
+    detail: 'Pick a lane. Open deeper editors only when needed.',
   }
 }
 
@@ -56,7 +56,7 @@ export function CreativeStudioLoading({ label }: { label: string }) {
 
 export default function CreativeStudioShell({
   title,
-  subtitle,
+  subtitle: _subtitle,
   activeHref,
   children,
 }: CreativeStudioShellProps) {
@@ -66,6 +66,7 @@ export default function CreativeStudioShell({
   const currentGuidance = maturityGuidance(currentRoute?.maturity)
   const primaryCreativeRoutes = CREATIVE_STUDIO_ROUTES.filter(isPrimaryCreativeStudioRoute)
   const secondaryCreativeRoutes = CREATIVE_STUDIO_ROUTES.filter((route) => !isPrimaryCreativeStudioRoute(route))
+  const secondaryCreativeGroups = groupCreativeStudioRoutes(secondaryCreativeRoutes)
   const currentRouteIsSecondary = currentRoute ? !isPrimaryCreativeStudioRoute(currentRoute) : false
 
   const actions = (
@@ -88,10 +89,11 @@ export default function CreativeStudioShell({
   return (
     <StudioLayout
       title={title}
-      subtitle={subtitle}
+      subtitle={undefined}
       actions={actions}
       padded={false}
       maxWidth="full"
+      compactNav
       className="flex h-[calc(100vh-116px)] flex-col overflow-hidden"
     >
       <div
@@ -125,7 +127,7 @@ export default function CreativeStudioShell({
               {primaryCreativeRoutes.map((route) => (
                 <Link
                   key={route.href}
-                  href={route.href}
+                  href={getCreativeStudioRouteNavigationHref(route)}
                   className={`${creativeTabClass(currentHref === route.href || pathname === route.href)} inline-flex min-h-10 items-center justify-between gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold`}
                   title={route.description}
                 >
@@ -140,18 +142,27 @@ export default function CreativeStudioShell({
                 Advanced editors ({secondaryCreativeRoutes.length})
               </summary>
               <div className="grid gap-2 border-t border-[var(--aethel-border-subtle)] p-2">
-                {secondaryCreativeRoutes.map((route) => (
-                  <Link
-                    key={route.href}
-                    href={route.href}
-                    className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-3 py-2"
-                    title={route.description}
-                  >
-                    <span className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">{route.label}</span>
-                      <MaturityBadge maturity={route.maturity} compact />
-                    </span>
-                  </Link>
+                {secondaryCreativeGroups.map((group) => (
+                  <div key={group.id} className="space-y-2" data-studio-editor-group={group.id}>
+                    <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                      {group.label}
+                    </p>
+                    {group.routes.map((route) => (
+                      <Link
+                        key={route.href}
+                        href={getCreativeStudioRouteNavigationHref(route)}
+                        className="block rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-3 py-2"
+                        title={route.description}
+                        data-studio-editor-group={route.group}
+                        data-studio-editor-route={route.href}
+                      >
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">{route.label}</span>
+                          <MaturityBadge maturity={route.maturity} compact />
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
                 ))}
               </div>
             </details>
@@ -186,7 +197,7 @@ export default function CreativeStudioShell({
         {primaryCreativeRoutes.map((route) => (
           <Link
             key={route.href}
-            href={route.href}
+            href={getCreativeStudioRouteNavigationHref(route)}
             className={`${creativeTabClass(currentHref === route.href || pathname === route.href)} inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]`}
             title={route.description}
             aria-current={currentHref === route.href || pathname === route.href ? 'page' : undefined}
@@ -200,28 +211,41 @@ export default function CreativeStudioShell({
             More editors
           </summary>
           <div className="fixed left-3 right-3 top-36 z-50 grid max-h-[70vh] gap-2 overflow-y-auto rounded-[24px] border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-3 shadow-[0_24px_80px_rgba(0,0,0,0.42)] sm:left-auto sm:right-6 sm:w-[640px] sm:grid-cols-2 lg:grid-cols-3">
-            {secondaryCreativeRoutes.map((route) => (
-              <Link
-                key={route.href}
-                href={route.href}
-                className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-3 py-3 transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
-                title={route.description}
-                aria-current={currentHref === route.href || pathname === route.href ? 'page' : undefined}
+            {secondaryCreativeGroups.map((group) => (
+              <div
+                key={group.id}
+                className="space-y-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-2"
+                data-studio-editor-group={group.id}
               >
-                <span className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">{route.label}</span>
-                  <MaturityBadge maturity={route.maturity} compact />
-                </span>
-                <span className="mt-1 line-clamp-2 block text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
-                  {route.description}
-                </span>
-              </Link>
+                <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                  {group.label}
+                </p>
+                {group.routes.map((route) => (
+                  <Link
+                    key={route.href}
+                    href={getCreativeStudioRouteNavigationHref(route)}
+                    className="block rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-3 py-3 transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
+                    title={route.description}
+                    aria-current={currentHref === route.href || pathname === route.href ? 'page' : undefined}
+                    data-studio-editor-group={route.group}
+                    data-studio-editor-route={route.href}
+                  >
+                    <span className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">{route.label}</span>
+                      <MaturityBadge maturity={route.maturity} compact />
+                    </span>
+                    <span className="mt-1 line-clamp-2 block text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
+                      {route.description}
+                    </span>
+                  </Link>
+                ))}
+              </div>
             ))}
           </div>
         </details>
       </nav>
 
-      <div className="hidden min-h-[72px] flex-col gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_66%,transparent)] px-4 py-3 md:flex lg:flex-row lg:items-center lg:justify-between lg:px-6">
+      <div className="hidden min-h-[52px] flex-col gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_66%,transparent)] px-4 py-2 md:flex lg:flex-row lg:items-center lg:justify-between lg:px-6">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
@@ -229,17 +253,17 @@ export default function CreativeStudioShell({
             </span>
             {currentRoute ? <MaturityBadge maturity={currentRoute.maturity} /> : <MaturityBadge path="/studio" />}
             <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
-              Heavy work guarded
+              Jobs paused
             </span>
           </div>
           <p className="mt-1 max-w-3xl truncate text-xs leading-5 text-[var(--aethel-text-secondary)]">
-            {currentRoute?.description ?? currentGuidance.detail}
+            {currentGuidance.detail}
           </p>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-2 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
-          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Preview ready</span>
-          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Local optimizer optional</span>
-          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Cloud review gated</span>
+        <div className="hidden shrink-0 flex-wrap gap-2 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)] xl:flex">
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Preview</span>
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Local optional</span>
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1">Cloud locked</span>
         </div>
       </div>
 

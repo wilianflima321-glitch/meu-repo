@@ -274,8 +274,8 @@ export function useAIChatController({
             id: `assistant-${Date.now()}`,
             role: 'assistant',
             content:
-              `${unsupportedList} ainda nao e suportado nesta superficie.\n` +
-              'Disponivel no momento: @studio, @delivery, @fast, @web e @agents:1|2|3.',
+              `${unsupportedList} is not supported here yet.\n` +
+              'Available now: @studio, @delivery, @fast, @web, and @agents:1|2|3.',
             timestamp: new Date(),
             model: currentModel,
           },
@@ -300,7 +300,7 @@ export function useAIChatController({
           {
             id: `assistant-${Date.now()}`,
             role: 'assistant',
-            content: 'Anexos ainda nao estao disponiveis nesta superficie. Use prompts apenas de texto por enquanto.',
+            content: 'Attachments are not available here yet. Use text prompts for now.',
             timestamp: new Date(),
             model: currentModel,
           },

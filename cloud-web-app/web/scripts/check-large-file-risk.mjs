@@ -74,6 +74,7 @@ function classify(relativePath) {
   if (relativePath.startsWith('server/') || relativePath.startsWith('lib/server/')) return 'server-runtime'
   if (relativePath.includes('/workers/')) return 'worker-runtime'
   if (relativePath.startsWith('components/')) return 'ui-surface'
+  if (relativePath.startsWith('scripts/')) return 'qa-script'
   if (relativePath.startsWith('lib/production/') || relativePath.includes('repository-cartography')) return 'agent-spine'
   if (relativePath.startsWith('lib/mcp/')) return 'mcp-tooling'
   if (relativePath.startsWith('lib/viewport/')) return 'viewport-runtime'

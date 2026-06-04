@@ -102,7 +102,7 @@ export const ProjectsDashboardHeader: React.FC<{
           My projects
         </h1>
         <p style={{ margin: 0, fontSize: '14px', color: colors.textMuted }}>
-          Manage your projects, track usage signals, and enter the workbench faster.
+          Manage projects, track activity, and open the IDE faster.
         </p>
       </div>
 

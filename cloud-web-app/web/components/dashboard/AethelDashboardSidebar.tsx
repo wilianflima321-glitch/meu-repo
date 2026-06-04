@@ -2,21 +2,33 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 
-import type { ActiveTab, SessionFilter } from './aethel-dashboard-model'
+import {
+  resolvePrimaryDashboardTab,
+  type ActiveTab,
+  type DashboardPrimaryTab,
+  type SessionFilter,
+} from './aethel-dashboard-model'
 
 type NavItem = {
-  tab: ActiveTab
+  tab: DashboardPrimaryTab
   label: string
   iconPrimary: string
   iconSecondary?: string
   summary?: string
 }
 
+type ToolLink = {
+  href: string
+  label: string
+  summary: string
+  iconPrimary: string
+}
+
 type NavSection = {
   id: 'ops' | 'explore'
   label: string
   description: string
-  items: NavItem[]
+  items: ToolLink[]
 }
 
 type AethelDashboardSidebarProps = {
@@ -35,22 +47,22 @@ const PRIMARY_ITEMS: NavItem[] = [
   {
     tab: 'overview',
     label: 'Studio Home',
-    summary: 'Resume the main mission without leaving the Studio shell.',
+    summary: 'Mission, preview, cost, next action.',
     iconPrimary:
       'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
   },
   {
-    tab: 'ai-chat',
-    label: 'AI Console',
-    summary: 'Plan, research, and coordinate agents without losing context.',
-    iconPrimary: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-  },
-  {
     tab: 'projects',
     label: 'Projects',
-    summary: 'Organize workspaces, handoffs, and entry points.',
+    summary: 'Choose or shape a workspace.',
     iconPrimary: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z',
     iconSecondary: 'M8 5a2 2 0 012-2h4a2 2 0 012 2v0M8 5a2 2 0 012-2h4a2 2 0 012 2v0',
+  },
+  {
+    tab: 'activity',
+    label: 'Activity',
+    summary: 'Agents, cost, trust, evidence.',
+    iconPrimary: 'M4 6h16M4 12h10M4 18h7M17 12l2 2 4-4',
   },
 ]
 
@@ -58,48 +70,50 @@ const NAV_SECTIONS: NavSection[] = [
   {
     id: 'ops',
     label: 'Operations',
-    description: 'Billing, wallet, and readiness.',
+    description: 'Secondary tools.',
     items: [
       {
-        tab: 'billing',
+        href: '/billing',
         label: 'Billing',
-        iconPrimary:
-          'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1',
+        summary: 'Plans, invoices, wallet.',
+        iconPrimary: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1',
       },
       {
-        tab: 'wallet',
-        label: 'Wallet',
-        iconPrimary: 'M3 7h18a2 2 0 012 2v6a2 2 0 01-2 2H3a2 2 0 01-2-2V9a2 2 0 012-2z',
-        iconSecondary: 'M16 11a1 1 0 110 2 1 1 0 010-2z',
-      },
-      {
-        tab: 'connectivity',
-        label: 'Connectivity',
+        href: '/settings?tab=integrations',
+        label: 'Integrations',
+        summary: 'Providers, keys, services.',
         iconPrimary: 'M12 8c-3.866 0-7 3.134-7 7m7-11c5.523 0 10 4.477 10 10m-5 0a5 5 0 00-10 0',
-        iconSecondary: 'M12 19h.01',
+      },
+      {
+        href: '/evidence',
+        label: 'Evidence',
+        summary: 'Receipts, blockers, release state.',
+        iconPrimary: 'M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z',
       },
     ],
   },
   {
     id: 'explore',
-    label: 'Explore',
-    description: 'Templates and creative lanes without polluting the mission flow.',
+    label: 'Depth',
+    description: 'Deep tools.',
     items: [
       {
-        tab: 'templates',
-        label: 'Templates',
-        iconPrimary: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-      },
-      {
-        tab: 'content-creation',
-        label: 'Content creation',
-        iconPrimary: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z',
-        iconSecondary: 'M7 10l2 2-2 2',
-      },
-      {
-        tab: 'unreal',
-        label: 'Unreal',
+        href: '/ide?panel=agents',
+        label: 'Agents in IDE',
+        summary: 'Copilot, tools, handoffs.',
         iconPrimary: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+      },
+      {
+        href: '/studio',
+        label: 'Creative Studio',
+        summary: 'World, character, FX, film, logic.',
+        iconPrimary: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z',
+      },
+      {
+        href: '/marketplace',
+        label: 'Marketplace',
+        summary: 'Assets and extensions.',
+        iconPrimary: 'M4 7h16M4 12h16M4 17h16',
       },
     ],
   },
@@ -120,11 +134,11 @@ function buildFilterClass(isActive: boolean) {
     : `${base} text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]`
 }
 
-function SidebarIcon({ item }: { item: NavItem }) {
+function SidebarIcon({ path, secondary }: { path: string; secondary?: string }) {
   return (
     <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconPrimary} />
-      {item.iconSecondary ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconSecondary} /> : null}
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={path} />
+      {secondary ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={secondary} /> : null}
     </svg>
   )
 }
@@ -144,8 +158,9 @@ export function AethelDashboardSidebar({
     ops: false,
     explore: false,
   })
+  const primaryActiveTab = resolvePrimaryDashboardTab(activeTab)
 
-  const selectTab = (tab: ActiveTab) => {
+  const selectTab = (tab: DashboardPrimaryTab) => {
     onSelectTab(tab)
     if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
       onCloseMobile?.()
@@ -173,7 +188,9 @@ export function AethelDashboardSidebar({
               />
               <div>
                 <span className="block text-sm font-semibold text-[var(--aethel-text-primary)]">Studio nav</span>
-                <span className="block text-[11px] text-[var(--aethel-text-tertiary)]">One shell, more depth only when needed</span>
+                <span className="block text-[11px] text-[var(--aethel-text-tertiary)]">
+                  Three paths. Depth on demand.
+                </span>
               </div>
             </div>
             <button
@@ -187,13 +204,18 @@ export function AethelDashboardSidebar({
               </svg>
             </button>
           </div>
+          {entryMission ? (
+            <p className="mt-3 line-clamp-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-3 py-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">
+              {entryMission}
+            </p>
+          ) : null}
         </div>
 
         <div className="px-4 py-4">
           <button
             type="button"
             onClick={onCreateNewSession}
-            className="inline-flex w-full min-w-9 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[var(--aethel-text-primary)] px-3 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_10px_24px_rgba(2,6,23,0.18)] transition active:opacity-80 hover:bg-[var(--aethel-text-secondary)]"
+            className="inline-flex w-full min-w-9 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[var(--aethel-text-primary)] px-3 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_10px_24px_rgba(2,6,23,0.18)] transition hover:bg-[var(--aethel-text-secondary)] active:opacity-80"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -225,8 +247,8 @@ export function AethelDashboardSidebar({
           </details>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 pb-4" data-dashboard-sidebar-density="primary-first">
-          <section className="space-y-2">
+        <div className="flex-1 overflow-y-auto px-3 pb-4" data-dashboard-sidebar-density="three-primary-tabs">
+          <section className="space-y-2" data-dashboard-primary-tabs="3">
             <div className="px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Primary flow</div>
             <div className="space-y-1">
               {PRIMARY_ITEMS.map((item) => (
@@ -234,10 +256,10 @@ export function AethelDashboardSidebar({
                   key={item.tab}
                   type="button"
                   onClick={() => selectTab(item.tab)}
-                  className={buildSidebarItemClass(activeTab === item.tab)}
-                  aria-current={activeTab === item.tab ? 'page' : undefined}
+                  className={buildSidebarItemClass(primaryActiveTab === item.tab)}
+                  aria-current={primaryActiveTab === item.tab ? 'page' : undefined}
                 >
-                  <SidebarIcon item={item} />
+                  <SidebarIcon path={item.iconPrimary} secondary={item.iconSecondary} />
                   <div className="min-w-0 flex-1">
                     <div>{item.label}</div>
                     {item.summary ? <div className="mt-0.5 text-xs font-normal text-[var(--aethel-text-tertiary)]">{item.summary}</div> : null}
@@ -247,10 +269,9 @@ export function AethelDashboardSidebar({
             </div>
           </section>
 
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 space-y-3" data-dashboard-secondary-tools="drawer-links">
             {NAV_SECTIONS.map((section) => {
-              const hasActiveItem = section.items.some((item) => item.tab === activeTab)
-              const isExpanded = hasActiveItem || expandedSections[section.id]
+              const isExpanded = expandedSections[section.id]
 
               return (
                 <section key={section.id} className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-2">
@@ -278,16 +299,13 @@ export function AethelDashboardSidebar({
                   {isExpanded ? (
                     <div id={`sidebar-section-${section.id}`} className="mt-2 space-y-1">
                       {section.items.map((item) => (
-                        <button
-                          key={item.tab}
-                          type="button"
-                          onClick={() => selectTab(item.tab)}
-                          className={buildSidebarItemClass(activeTab === item.tab)}
-                          aria-current={activeTab === item.tab ? 'page' : undefined}
-                        >
-                          <SidebarIcon item={item} />
-                          {item.label}
-                        </button>
+                        <Link key={item.href} href={item.href} className={buildSidebarItemClass(false)} onClick={onCloseMobile}>
+                          <SidebarIcon path={item.iconPrimary} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block">{item.label}</span>
+                            <span className="mt-0.5 block text-xs font-normal text-[var(--aethel-text-tertiary)]">{item.summary}</span>
+                          </span>
+                        </Link>
                       ))}
                     </div>
                   ) : null}
@@ -302,7 +320,7 @@ export function AethelDashboardSidebar({
               onClick={() => onOpenIde?.()}
               className="inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)]"
             >
-              Open Studio
+              Open IDE
             </button>
             <Link
               href="/evidence"

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import PublicFooter from '@/components/ui/PublicFooter'
 import PublicHeader from '@/components/ui/PublicHeader'
 import { analytics } from '@/lib/analytics'
@@ -42,19 +42,28 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.07] blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[150px]" />
-      </div>
-
       <PublicHeader />
 
       <main className="relative z-10">
         <PricingHero billingCycle={billingCycle} onBillingCycleChange={changeBillingCycle} />
         <PricingPlansGrid corePlans={corePlans} isAnnual={isAnnual} />
         <PricingEnterpriseCard enterprisePlan={enterprisePlan} isAnnual={isAnnual} />
-        <PricingComparisonTable corePlans={corePlans} />
-        <PricingReadiness />
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <details className="border-y border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] px-5 py-5">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
+              <span>Billing details and limits</span>
+              <span className="text-[10px] normal-case tracking-normal text-[var(--aethel-text-quaternary)]">
+                Compare only if needed
+              </span>
+            </summary>
+            <Suspense fallback={<div className="mt-6 h-28 animate-pulse rounded-xl bg-[var(--aethel-surface-secondary)]" />}>
+              <div className="mt-6 space-y-8">
+                <PricingComparisonTable corePlans={corePlans} />
+                <PricingReadiness />
+              </div>
+            </Suspense>
+          </details>
+        </section>
         <PricingFaq openFaq={openFaq} onToggle={(index) => setOpenFaq(openFaq === index ? null : index)} />
       </main>
 

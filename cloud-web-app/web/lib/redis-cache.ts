@@ -1,19 +1,20 @@
 import {createComponentLogger, logger} from '@/lib/observability/logger'
+import { MemoryCache } from './redis-cache-memory'
 
 const log = createComponentLogger('redis-cache')
 
 
 /**
  * Redis Cache Layer - Cache Distribuído
- * 
+ *
  * Sistema de cache distribuído para:
  * - Sessions de usuário
  * - Respostas de API
  * - Dados frequentemente acessados
  * - Rate limiting global
- * 
+ *
  * Suporta fallback para cache in-memory se Redis não estiver disponível.
- * 
+ *
  * DEPENDÊNCIAS OPCIONAIS:
  * npm install ioredis
  */
@@ -53,7 +54,7 @@ let loadAttempted = false;
 async function loadIORedis(): Promise<IORedisConstructor | null> {
   if (loadAttempted) return IORedisModule;
   loadAttempted = true;
-  
+
   try {
     IORedisModule = await eval('import("ioredis")').then((module: unknown) => {
       const candidate = module as { default?: IORedisConstructor };
@@ -115,81 +116,6 @@ export interface CacheOptions {
 }
 
 // ============================================================================
-// FALLBACK IN-MEMORY CACHE
-// ============================================================================
-
-class MemoryCache {
-  private cache: Map<string, { value: string; expiresAt: number }> = new Map();
-  private memoryUsage = 0;
-  
-  async get(key: string): Promise<string | null> {
-    const entry = this.cache.get(key);
-    if (!entry) return null;
-    
-    if (Date.now() > entry.expiresAt) {
-      this.delete(key);
-      return null;
-    }
-    
-    return entry.value;
-  }
-  
-  async set(key: string, value: string, ttl: number): Promise<void> {
-    // Limpa entradas expiradas se memória estiver alta
-    if (this.memoryUsage > config.maxMemoryFallback * 0.9) {
-      this.cleanup();
-    }
-    
-    const existing = this.cache.get(key);
-    if (existing) {
-      this.memoryUsage -= existing.value.length;
-    }
-    
-    this.cache.set(key, {
-      value,
-      expiresAt: Date.now() + ttl * 1000,
-    });
-    this.memoryUsage += value.length;
-  }
-  
-  async delete(key: string): Promise<boolean> {
-    const entry = this.cache.get(key);
-    if (entry) {
-      this.memoryUsage -= entry.value.length;
-      return this.cache.delete(key);
-    }
-    return false;
-  }
-  
-  async keys(pattern: string): Promise<string[]> {
-    const regex = new RegExp(pattern.replace('*', '.*'));
-    return Array.from(this.cache.keys()).filter(k => regex.test(k));
-  }
-  
-  async flush(): Promise<void> {
-    this.cache.clear();
-    this.memoryUsage = 0;
-  }
-  
-  getSize(): number {
-    return this.cache.size;
-  }
-  
-  getMemoryUsage(): number {
-    return this.memoryUsage;
-  }
-  
-  private cleanup(): void {
-    const now = Date.now();
-    for (const [key, entry] of this.cache) {
-      if (now > entry.expiresAt) {
-        this.delete(key);
-      }
-    }
-  }
-}
-
-// ============================================================================
 // CLASSE PRINCIPAL: REDIS CACHE
 // ============================================================================
 
@@ -208,29 +134,29 @@ class RedisCache {
     memoryUsage: 0,
     isRedisConnected: false,
   };
-  
+
   constructor() {
-    this.fallback = new MemoryCache();
+    this.fallback = new MemoryCache(config.maxMemoryFallback);
   }
-  
+
   /**
    * Conecta ao Redis (lazy)
    */
   private async connect(): Promise<void> {
     if (this.connectAttempted) return;
     this.connectAttempted = true;
-    
+
     if (process.env.SKIP_REDIS === 'true') {
       log.info('[RedisCache] Redis disabled, using memory fallback');
       return;
     }
-    
+
     const IORedis = await loadIORedis();
     if (!IORedis) {
       log.info('[RedisCache] ioredis not available, using memory fallback');
       return;
     }
-    
+
     try {
       this.redis = new IORedis({
         host: config.host,
@@ -246,78 +172,78 @@ class RedisCache {
         },
         lazyConnect: true,
       });
-      
+
       this.redis.on('connect', () => {
         this.isConnected = true;
         this.stats.isRedisConnected = true;
         log.info('[RedisCache] Connected to Redis');
       });
-      
+
       this.redis.on('error', (error: Error) => {
         logger.error('[RedisCache] Redis error:', error.message);
         this.isConnected = false;
         this.stats.isRedisConnected = false;
       });
-      
+
       this.redis.on('close', () => {
         this.isConnected = false;
         this.stats.isRedisConnected = false;
         log.info('[RedisCache] Redis connection closed');
       });
-      
+
       // Tenta conectar
       await this.redis.connect().catch((err: Error) => {
         logger.error('[RedisCache] Failed to connect:', err.message);
       });
-      
+
     } catch (error) {
       logger.error('[RedisCache] Failed to initialize:', error);
     }
   }
-  
+
   /**
    * Obtém valor do cache
    */
   async get<T = unknown>(key: string): Promise<T | null> {
     await this.connect();
-    
+
     try {
       let value: string | null;
-      
+
       if (this.isConnected && this.redis) {
         value = await this.redis.get(key);
       } else {
         value = await this.fallback.get(key);
       }
-      
+
       if (value) {
         this.stats.hits++;
         return JSON.parse(value) as T;
       }
-      
+
       this.stats.misses++;
       return null;
-      
+
     } catch (error) {
       this.stats.misses++;
       logger.error('[RedisCache] Get error:', error);
       return null;
     }
   }
-  
+
   /**
    * Define valor no cache
    */
   async set<T>(key: string, value: T, options?: CacheOptions): Promise<boolean> {
     await this.connect();
-    
+
     try {
       const ttl = options?.ttl || config.defaultTTL;
       const serialized = JSON.stringify(value);
-      
+
       if (this.isConnected && this.redis) {
         await this.redis.setex(key, ttl, serialized);
-        
+
         // Se tem tags, adiciona ao set de tags
         if (options?.tags) {
           for (const tag of options.tags) {
@@ -327,47 +253,47 @@ class RedisCache {
       } else {
         await this.fallback.set(key, serialized, ttl);
       }
-      
+
       this.stats.sets++;
       return true;
-      
+
     } catch (error) {
       logger.error('[RedisCache] Set error:', error);
       return false;
     }
   }
-  
+
   /**
    * Remove valor do cache
    */
   async delete(key: string): Promise<boolean> {
     await this.connect();
-    
+
     try {
       if (this.isConnected && this.redis) {
         await this.redis.del(key);
       } else {
         await this.fallback.delete(key);
       }
-      
+
       this.stats.deletes++;
       return true;
-      
+
     } catch (error) {
       logger.error('[RedisCache] Delete error:', error);
       return false;
     }
   }
-  
+
   /**
    * Remove múltiplas chaves por pattern
    */
   async deletePattern(pattern: string): Promise<number> {
     await this.connect();
-    
+
     try {
       let count = 0;
-      
+
       if (this.isConnected && this.redis) {
         const keys = await this.redis.keys(pattern);
         if (keys.length > 0) {
@@ -382,10 +308,10 @@ class RedisCache {
           count++;
         }
       }
-      
+
       this.stats.deletes += count;
       return count;
-      
+
     } catch (error) {
       logger.error('[RedisCache] DeletePattern error:', error);
       return 0;
@@ -455,7 +381,7 @@ class RedisCache {
       return 0;
     }
   }
-  
+
   /**
    * Invalida cache por tag
    */
@@ -475,7 +401,7 @@ class RedisCache {
       return 0;
     }
   }
-  
+
   /**
    * Cache-aside pattern: get or set
    */
@@ -489,16 +415,16 @@ class RedisCache {
     if (cached !== null) {
       return cached;
     }
-    
+
     // Não está no cache, executa factory
     const value = await factory();
-    
+
     // Salva no cache
     await this.set(key, value, options);
-    
+
     return value;
   }
-  
+
   /**
    * Verifica se chave existe
    */
@@ -512,7 +438,7 @@ class RedisCache {
       return false;
     }
   }
-  
+
   /**
    * Incrementa valor numérico
    */
@@ -521,19 +447,19 @@ class RedisCache {
       if (this.isConnected && this.redis) {
         return await this.redis.incrby(key, amount);
       }
-      
+
       // Fallback: get, increment, set
       const current = await this.fallback.get(key);
       const value = (current ? parseInt(current) : 0) + amount;
       await this.fallback.set(key, value.toString(), config.defaultTTL);
       return value;
-      
+
     } catch (error) {
       logger.error('[RedisCache] Increment error:', error);
       return 0;
     }
   }
-  
+
   /**
    * Define expiração de uma chave
    */
@@ -547,7 +473,7 @@ class RedisCache {
       return false;
     }
   }
-  
+
   /**
    * Limpa todo o cache
    */
@@ -561,13 +487,13 @@ class RedisCache {
         }
       }
       await this.fallback.flush();
-      
+
       log.info('[RedisCache] Cache flushed');
     } catch (error) {
       logger.error('[RedisCache] Flush error:', error);
     }
   }
-  
+
   /**
    * Retorna estatísticas do cache
    */
@@ -577,26 +503,26 @@ class RedisCache {
         const info = await this.redis.info('memory');
         const memMatch = info.match(/used_memory:(\d+)/);
         this.stats.memoryUsage = memMatch ? parseInt(memMatch[1]) : 0;
-        
+
         const keys = await this.redis.dbsize();
         this.stats.size = keys;
       } else {
         this.stats.size = this.fallback.getSize();
         this.stats.memoryUsage = this.fallback.getMemoryUsage();
       }
-      
+
       return { ...this.stats };
     } catch {
       return { ...this.stats };
     }
   }
-  
+
   /**
    * Health check
    */
   async healthCheck(): Promise<{ healthy: boolean; latencyMs: number }> {
     const start = Date.now();
-    
+
     try {
       if (this.isConnected && this.redis) {
         await this.redis.ping();
@@ -612,7 +538,7 @@ class RedisCache {
       };
     }
   }
-  
+
   /**
    * Fecha conexão
    */
@@ -639,39 +565,7 @@ if (process.env.NODE_ENV !== 'production') {
   globalForCache.redisCache = cache;
 }
 
-// ============================================================================
-// CACHE KEYS HELPERS
-// ============================================================================
-
-export const CacheKeys = {
-  // Usuários
-  user: (id: string) => `user:${id}`,
-  userSession: (id: string) => `session:${id}`,
-  userProjects: (id: string) => `user:${id}:projects`,
-  
-  // Projetos
-  project: (id: string) => `project:${id}`,
-  projectFiles: (id: string) => `project:${id}:files`,
-  projectAssets: (id: string) => `project:${id}:assets`,
-  
-  // AI
-  aiResponse: (hash: string) => `ai:response:${hash}`,
-  aiEmbedding: (id: string) => `ai:embedding:${id}`,
-  
-  // Rate limiting
-  rateLimit: (key: string) => `ratelimit:${key}`,
-  
-  // Marketplace
-  marketplaceItem: (id: string) => `marketplace:${id}`,
-  marketplaceFeatured: () => `marketplace:featured`,
-  
-  // Analytics
-  analytics: (type: string, date: string) => `analytics:${type}:${date}`,
-  
-  // Config
-  featureFlags: () => `config:feature_flags`,
-  systemSettings: () => `config:system`,
-};
+export { CacheKeys } from './redis-cache-keys'
 
 // ============================================================================
 // DECORATORS / HOC PARA CACHING
@@ -687,25 +581,25 @@ export function cached<T extends AsyncCacheable>(
   return function (_target: object, _propertyKey: string, descriptor: TypedPropertyDescriptor<T>) {
     const originalMethod = descriptor.value;
     if (!originalMethod) return descriptor;
-    
+
     descriptor.value = async function (this: unknown, ...args: Parameters<T>) {
       const key = keyGenerator(...args);
-      
+
       // Tenta obter do cache
       const cached = await cache.get(key);
       if (cached !== null) {
         return cached;
       }
-      
+
       // Executa método original
       const result = await originalMethod.apply(this, args);
-      
+
       // Cacheia resultado
       await cache.set(key, result, options);
-      
+
       return result as Awaited<ReturnType<T>>;
     } as T;
-    
+
     return descriptor;
   };
 }

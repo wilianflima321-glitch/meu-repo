@@ -174,7 +174,7 @@ export function VariablesPanel({
         <span style={{ fontWeight: 'bold', fontSize: '12px', color: 'var(--aethel-text-primary)' }}>
           Variables
         </span>
-        <button type="button" aria-label={showAdd ? 'Fechar formulario de nova variavel' : 'Abrir formulario de nova variavel'}
+        <button type="button" aria-label={showAdd ? 'Close new variable form' : 'Open new variable form'}
           onClick={() => setShowAdd(!showAdd)}
           style={{
             padding: '4px 8px',

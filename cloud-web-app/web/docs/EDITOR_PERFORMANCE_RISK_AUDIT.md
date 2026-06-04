@@ -9,6 +9,6 @@ Generated: deterministic local scan
 | --- | ---: | ---: | --- | --- |
 | components/engine/WorldOutliner.tsx | 3 | 8 | yes | yes |
 | components/engine/EngineContentBrowser.tsx | 6 | 8 | yes | yes |
-| components/animation/KeyframeSystem.tsx | 2 | 4 | yes | yes |
+| components/animation/KeyframeSystem.tsx | 0 | 4 | yes | yes |
 | components/engine/DetailsPanel.tsx | 7 | 8 | yes | yes |
 | components/assets/ContentBrowserConnected.tsx | 6 | 10 | yes | yes |

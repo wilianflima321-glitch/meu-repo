@@ -564,9 +564,19 @@ export function useAethelDashboardRuntime() {
       aiProviderConfigured: !aiProviderGate,
       currentPlanName: currentPlan?.name || currentPlan?.id || null,
       onOpenProjects: () => handleTabChange('projects'),
-      onOpenAiChat: handleOpenAIChatFromGuide,
+      onOpenAiChat: (missionDraft?: string) => {
+        const normalized = missionDraft?.trim()
+        if (normalized) {
+          setChatMessage((previous) => (previous.trim() ? previous : normalized))
+        }
+        handleOpenAIChatFromGuide()
+      },
       onOpenIde: handleOpenIdeFromHeader,
-      onOpenBilling: () => handleTabChange('billing'),
+      onOpenBilling: () => {
+        if (typeof window !== 'undefined') {
+          window.location.assign('/billing')
+        }
+      },
       onRefreshWallet: handleRefreshWallet,
       lastWalletUpdate,
       walletLoading,
@@ -593,7 +603,7 @@ export function useAethelDashboardRuntime() {
       onProjectTypeChange: setNewProjectType,
       onProjectVersionChange: handleProjectVersionChange,
       onApplyDirectorNote: handleApplyDirectorNote,
-      onOpenAiChat: () => handleTabChange('ai-chat'),
+      onOpenAiChat: handleOpenAIChatFromGuide,
       onOpenIde: handleOpenIdeFromHeader,
     },
     aiChatProps: {
@@ -665,7 +675,11 @@ export function useAethelDashboardRuntime() {
     showTrialBanner,
     trialDaysLeft,
     onDismissTrialBanner: () => setShowTrialBanner(false),
-    onUpgradeTrial: () => handleTabChange('billing'),
+    onUpgradeTrial: () => {
+      if (typeof window !== 'undefined') {
+        window.location.assign('/billing')
+      }
+    },
     authErrorText,
     billingErrorText,
     sidebarOpen,
@@ -688,7 +702,7 @@ export function useAethelDashboardRuntime() {
     onSelectTab: handleTabChange,
     entryMission,
     entrySource,
-    onResumeEntryMission: () => handleTabChange('ai-chat'),
+    onResumeEntryMission: handleOpenAIChatFromGuide,
     onDismissEntryIntent: dismissEntryIntent,
     showOnboardingWizard,
     onOnboardingComplete: handleOnboardingComplete,

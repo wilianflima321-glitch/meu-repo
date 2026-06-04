@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { localEvidenceHeaders, localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback';
 
 const log = createComponentLogger('api/projects/route');
 
@@ -31,6 +32,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(projects);
   } catch (error) {
     log.error('Get projects error', error);
+
+    if (shouldUseLocalEvidenceFallback(req, error)) {
+      return NextResponse.json([], { headers: localEvidenceHeaders('held') });
+    }
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
@@ -79,6 +84,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     log.error('Create project error', error);
+
+    if (shouldUseLocalEvidenceFallback(req, error)) {
+      return localEvidenceJson(
+        req,
+        error,
+        {
+          error: 'PROJECT_CREATE_HELD',
+          message: 'Project creation is held until project storage and entitlement checks are configured.',
+        },
+        { surface: 'projects.create', state: 'held', status: 503 },
+      );
+    }
 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;

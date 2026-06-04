@@ -5,8 +5,7 @@ import path from 'node:path'
 
 const ROOT = process.cwd()
 const overviewPath = path.join(ROOT, 'components', 'dashboard', 'DashboardOverviewTab.tsx')
-const disclosurePath = path.join(ROOT, 'components', 'dashboard', 'DashboardEvidenceDisclosure.tsx')
-const heroPath = path.join(ROOT, 'components', 'dashboard', 'DashboardMissionHero.tsx')
+const launchPath = path.join(ROOT, 'components', 'dashboard', 'DashboardWorkspaceLaunch.tsx')
 const sidebarPath = path.join(ROOT, 'components', 'dashboard', 'AethelDashboardSidebar.tsx')
 const shellPath = path.join(ROOT, 'components', 'dashboard', 'DashboardShell.tsx')
 const topbarPath = path.join(ROOT, 'components', 'dashboard', 'DashboardTopBar.tsx')
@@ -21,38 +20,36 @@ function read(filePath) {
 }
 
 const overview = read(overviewPath)
-const disclosure = read(disclosurePath)
-const hero = read(heroPath)
+const launch = read(launchPath)
 const sidebar = read(sidebarPath)
 const shell = read(shellPath)
 const topbar = read(topbarPath)
 
 const requiredOverviewTokens = [
-  'DashboardEvidenceDisclosure',
-  'DashboardMissionHero',
-  'data-dashboard-operator-snapshot',
-  'Operational snapshot',
+  'DashboardWorkspaceLaunch',
+  'primaryProject',
+  'pendingApprovals',
+  'aiProviderConfigured',
+  'backendOnline',
 ]
 
-const requiredHeroTokens = [
+const requiredLaunchTokens = [
+  'data-dashboard-firebase-launch="workspace-entry"',
   'data-dashboard-command-card="one-glance"',
-  'data-dashboard-run-state-panel',
-  'data-dashboard-secondary-actions',
-  'Continue workspace',
-]
-
-const requiredDisclosureTokens = [
-  'data-dashboard-evidence-disclosure',
-  'data-dashboard-evidence-details',
-  '<details',
-  'Open deep evidence and runtime diagnostics',
-  'Proof stays one tap away.',
+  'Plan with Copilot',
+  'My workspaces',
+  'Open IDE',
+  '3D scene',
+  'Open receipts',
+  'persistDashboardLaunchMission',
 ]
 
 const requiredSidebarTokens = [
-  'data-dashboard-sidebar-density="primary-first"',
+  'data-dashboard-sidebar-density="three-primary-tabs"',
+  'data-dashboard-primary-tabs="3"',
+  'data-dashboard-secondary-tools="drawer-links"',
   'Primary flow',
-  'Open Studio',
+  'Creative Studio',
   'Evidence',
 ]
 
@@ -60,12 +57,8 @@ for (const token of requiredOverviewTokens) {
   if (!overview.includes(token)) failures.push(`DashboardOverviewTab.tsx missing ${token}`)
 }
 
-for (const token of requiredHeroTokens) {
-  if (!hero.includes(token)) failures.push(`DashboardMissionHero.tsx missing ${token}`)
-}
-
-for (const token of requiredDisclosureTokens) {
-  if (!disclosure.includes(token)) failures.push(`DashboardEvidenceDisclosure.tsx missing ${token}`)
+for (const token of requiredLaunchTokens) {
+  if (!launch.includes(token)) failures.push(`DashboardWorkspaceLaunch.tsx missing ${token}`)
 }
 
 for (const token of requiredSidebarTokens) {
@@ -78,19 +71,19 @@ for (const forbidden of ['<DashboardProjectBrainCard', '<DashboardMissionLedgerC
   }
 }
 
+for (const forbidden of ['DashboardEvidenceDisclosure']) {
+  if (overview.includes(forbidden)) {
+    failures.push(`DashboardOverviewTab.tsx must not render ${forbidden}; deep receipts belong in /evidence`)
+  }
+}
+
 if (overview.includes('Â')) {
   failures.push('DashboardOverviewTab.tsx contains mojibake; keep dashboard copy clean for screenshots')
 }
 
-for (const forbidden of ['bg-[linear-gradient', 'Expand Studio', 'Embedded Studio']) {
-  if (hero.includes(forbidden)) {
-    failures.push(`DashboardMissionHero.tsx still contains dense/cliche hero token: ${forbidden}`)
-  }
-}
-
-for (const forbidden of ['bg-[linear-gradient']) {
-  if (disclosure.includes(forbidden)) {
-    failures.push(`DashboardEvidenceDisclosure.tsx still contains decorative evidence chrome token: ${forbidden}`)
+for (const forbidden of ['bg-[linear-gradient', 'Operational snapshot', 'Proof stays one click away']) {
+  if (launch.includes(forbidden)) {
+    failures.push(`DashboardWorkspaceLaunch.tsx still contains dense/cliche launch token: ${forbidden}`)
   }
 }
 
@@ -110,8 +103,13 @@ for (const [label, content] of [
 }
 
 const overviewLines = overview.split(/\r?\n/).length
-if (overviewLines > 620) {
-  failures.push(`DashboardOverviewTab.tsx is ${overviewLines} lines; split/compact threshold is 620`)
+const launchLines = launch.split(/\r?\n/).length
+if (overviewLines > 420) {
+  failures.push(`DashboardOverviewTab.tsx is ${overviewLines} lines; split/compact threshold is 420`)
+}
+
+if (launchLines > 260) {
+  failures.push(`DashboardWorkspaceLaunch.tsx is ${launchLines} lines; split/compact threshold is 260`)
 }
 
 if (failures.length > 0) {
@@ -119,4 +117,4 @@ if (failures.length > 0) {
   process.exit(1)
 }
 
-console.log(`[dashboard-overview-compression] PASS overviewLines=${overviewLines}`)
+console.log(`[dashboard-overview-compression] PASS overviewLines=${overviewLines} launchLines=${launchLines}`)

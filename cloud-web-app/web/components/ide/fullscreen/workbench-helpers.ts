@@ -13,7 +13,7 @@ export type WorkspaceTreeNode = {
 
 export function getAuthHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {};
-  const token = window.localStorage.getItem('token');
+  const token = window.localStorage.getItem('aethel-token') || window.localStorage.getItem('token');
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 

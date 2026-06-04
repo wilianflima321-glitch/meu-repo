@@ -6,6 +6,7 @@ import path from 'node:path';
 const ROOT = process.cwd();
 const PLAN_PATH = path.join(ROOT, 'lib/production/engine-module-integration-plan.ts');
 const ADAPTERS_PATH = path.join(ROOT, 'lib/production/engine-module-adapters.ts');
+const ADAPTERS_CATALOG_PATH = path.join(ROOT, 'lib/production/engine-module-adapters.catalog.ts');
 
 const IGNORE_DIRS = new Set([
   '.git',
@@ -117,7 +118,7 @@ function findRetiredReferences(modulePath) {
 
 const failures = [];
 const planSource = readRequired(PLAN_PATH);
-const adapterSource = readRequired(ADAPTERS_PATH);
+const adapterSource = `${readRequired(ADAPTERS_PATH)}\n${readRequired(ADAPTERS_CATALOG_PATH)}`;
 const decisions = extractDecisions(planSource);
 const adapters = extractAdapters(adapterSource);
 const adaptersByPath = new Map(adapters.map((adapter) => [adapter.modulePath, adapter]));

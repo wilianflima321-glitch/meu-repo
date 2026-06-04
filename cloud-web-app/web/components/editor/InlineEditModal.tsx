@@ -18,14 +18,14 @@ import { Textarea } from '@/components/ui/Textarea';
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing';
 
 /**
- * InlineEditModal - Componente de edição inline estilo Cursor AI
+ * InlineEditModal - Cursor-style inline edit surface
  *
  * Features:
- * - Cmd+K para abrir em qualquer seleção de code
- * - Input de instrução com autocomplete
- * - Preview das changes antes de aceitar
- * - Undo/Redo das changes
- * - History de comandos recentes
+ * - Cmd+K opens on any code selection
+ * - Instruction input with autocomplete
+ * - Preview changes before accepting
+ * - Undo/redo support
+ * - Recent command history
  */
 
 interface InlineEditModalProps {
@@ -187,7 +187,7 @@ export function InlineEditModal({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              aria-label="Fechar edicao inline"
+              aria-label="Close inline edit"
               className={`h-8 w-8 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
             >
               <X className="h-4 w-4" />
@@ -213,7 +213,7 @@ export function InlineEditModal({
                 variant="outline"
                 size="sm"
                 onClick={() => handleQuickAction(action.prompt)}
-                aria-label={`Aplicar atalho ${action.label}`}
+                aria-label={`Apply shortcut ${action.label}`}
                 className={`bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
                 disabled={isProcessing}
               >
@@ -232,7 +232,7 @@ export function InlineEditModal({
                 onChange={(e) => setInstruction(e.target.value)}
                 placeholder="What do you want to do with this code?"
                 className={`min-h-[60px] resize-none bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] pr-24 text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] ${focusClass}`}
-                aria-label="Descrever alteracao desejada no codigo selecionado"
+                aria-label="Describe the desired change to the selected code"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -244,7 +244,7 @@ export function InlineEditModal({
                 size="sm"
                 onClick={handleSubmit}
                 disabled={isProcessing || (!instruction.trim() && !selectedCode)}
-                aria-label={isProcessing ? 'Gerando sugestao de edicao inline' : 'Gerar sugestao de edicao inline'}
+                aria-label={isProcessing ? 'Generating inline edit suggestion' : 'Generate inline edit suggestion'}
                 className={`absolute bottom-2 right-2 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary-dark)] ${focusClass}`}
               >
                 {isProcessing ? (
@@ -252,7 +252,7 @@ export function InlineEditModal({
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-1" />
-                    Gerar
+                    Generate
                   </>
                 )}
               </Button>
@@ -261,10 +261,10 @@ export function InlineEditModal({
             {/* Recent Commands */}
             {!instruction && !suggestion && (
               <div className="mt-3">
-                <div className="text-xs text-[var(--aethel-text-quaternary)] mb-2">Comandos recentes:</div>
+                <div className="text-xs text-[var(--aethel-text-quaternary)] mb-2">Recent commands:</div>
                 <div className="flex flex-wrap gap-1.5">
                   {recentCommands.map((cmd, i) => (
-                    <button type="button" aria-label={`Usar comando recente ${cmd}`}
+                    <button type="button" aria-label={`Use recent command ${cmd}`}
                       key={i}
                       onClick={() => setInstruction(cmd)}
                       className={`rounded bg-[var(--aethel-surface-tertiary)] px-2 py-1 text-xs text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
@@ -303,10 +303,10 @@ export function InlineEditModal({
               variant="ghost"
               size="sm"
               onClick={() => setShowDiff(!showDiff)}
-              aria-label={showDiff ? 'Ocultar diff da sugestao' : 'Mostrar diff da sugestao'}
+              aria-label={showDiff ? 'Hide suggestion diff' : 'Show suggestion diff'}
                     className={`text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
                   >
-                    {showDiff ? 'Ocultar Diff' : 'Mostrar Diff'}
+                    {showDiff ? 'Hide diff' : 'Show diff'}
                   </Button>
                 </div>
               </div>
@@ -332,11 +332,11 @@ export function InlineEditModal({
                 <Button type="button"
                   variant="ghost"
                   onClick={() => setSuggestion(null)}
-                  aria-label="Descartar diff atual e regenerar sugestao"
+                  aria-label="Discard current diff and regenerate suggestion"
                   className={`text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Regenerar
+                  Regenerate
                 </Button>
                 <div className="flex gap-2">
                   <Button type="button"
@@ -347,12 +347,12 @@ export function InlineEditModal({
                   >
                     Cancel
                   </Button>
-                  <button type="button" aria-label="Aplicar edicao inline gerada"
+                  <button type="button" aria-label="Apply generated inline edit"
                     onClick={() => void handleApply()}
                     className={`inline-flex items-center rounded-lg bg-[var(--aethel-success)] px-4 py-2 text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-success-dark)] ${focusClass}`}
                   >
                     <Check className="h-4 w-4 mr-2" />
-                    Aplicar
+                    Apply
                     <kbd className="ml-2 px-1 py-0.5 text-xs bg-[var(--aethel-success-dark)] rounded">⌘↵</kbd>
                   </button>
                 </div>

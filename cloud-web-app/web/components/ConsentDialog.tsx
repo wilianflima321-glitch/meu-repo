@@ -92,7 +92,7 @@ export default function ConsentDialog({
               </h2>
               <p className="text-[var(--aethel-text-secondary)]">{request.description}</p>
             </div>
-            <button type="button" aria-label="Fechar dialogo de consentimento"
+            <button type="button" aria-label="Close consent dialog"
               onClick={onClose}
               className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
             >

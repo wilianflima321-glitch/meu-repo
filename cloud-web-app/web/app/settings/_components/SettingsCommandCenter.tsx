@@ -20,10 +20,16 @@ const actionCards: Array<{
   action: string
 }> = [
   { id: 'security', eyebrow: 'Account safety', title: 'Security first', body: 'Passkeys, 2FA, recovery, and audit events stay close to the account owner.', action: 'Review security' },
-  { id: 'billing', eyebrow: 'Spend control', title: 'Billing and limits', body: 'Usage, plan, and upgrade controls live in the dedicated billing surface.', action: 'Open billing' },
-  { id: 'api', eyebrow: 'AI runtime', title: 'Provider readiness', body: 'Provider status is checked explicitly; missing keys stay visible before generation.', action: 'Check providers' },
-  { id: 'editor', eyebrow: 'Advanced', title: 'Editor settings wall', body: 'The full workbench configuration remains available, but it is no longer the default first impression.', action: 'Open advanced editor' },
+  { id: 'billing', eyebrow: 'Spend control', title: 'Billing and limits', body: 'Usage, plan, and upgrade controls live on the billing page.', action: 'Open billing' },
+  { id: 'api', eyebrow: 'AI runtime', title: 'Provider setup', body: 'Provider status is checked explicitly; missing keys stay visible before generation.', action: 'Check providers' },
 ]
+
+const advancedCard = {
+  id: 'editor' as const,
+  title: 'Advanced editor',
+  body: 'Editor and engine controls stay available without becoming the first screen.',
+  action: 'Open advanced controls',
+}
 
 export default function SettingsCommandCenter({
   configuredProviders,
@@ -41,9 +47,9 @@ export default function SettingsCommandCenter({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">Workspace control</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-[var(--aethel-text-primary)]">Settings should answer what needs attention.</h2>
+            <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-[var(--aethel-text-primary)]">Settings should show the next action.</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
-              Account, security, billing, AI readiness, and advanced editor controls are organized by next action instead of opening with a configuration wall.
+              Account, security, billing, and AI setup stay organized. Advanced controls stay one layer deeper.
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.12em]">
@@ -77,6 +83,21 @@ export default function SettingsCommandCenter({
           </button>
         ))}
       </div>
+
+      <details className="mt-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_34%,transparent)] px-4 py-3">
+        <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+          Advanced controls
+        </summary>
+        <button
+          type="button"
+          onClick={() => onSelectTab(advancedCard.id)}
+          className="mt-3 block w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] p-4 text-left transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)]"
+        >
+          <h3 className="text-base font-semibold text-[var(--aethel-text-primary)]">{advancedCard.title}</h3>
+          <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{advancedCard.body}</p>
+          <span className="mt-3 inline-flex text-xs font-semibold text-[var(--aethel-info-light)]">{advancedCard.action}</span>
+        </button>
+      </details>
     </div>
   )
 }

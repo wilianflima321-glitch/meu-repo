@@ -4,21 +4,31 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const ROOT = process.cwd()
-const file = 'app/billing/_components/BillingPageClient.tsx'
-const absolutePath = path.join(ROOT, file)
+const files = [
+  'app/billing/_components/BillingPageClient.tsx',
+  'app/billing/_components/BillingPageClient.parts.tsx',
+]
 const failures = []
 
-if (!fs.existsSync(absolutePath)) {
-  failures.push(`missing ${file}`)
-} else {
-  const content = fs.readFileSync(absolutePath, 'utf8')
+const content = files
+  .map((file) => {
+    const absolutePath = path.join(ROOT, file)
+    if (!fs.existsSync(absolutePath)) {
+      failures.push(`missing ${file}`)
+      return ''
+    }
+    return fs.readFileSync(absolutePath, 'utf8')
+  })
+  .join('\n')
+
+if (content) {
   const required = [
     'BillingLoadingRunboard',
     'data-billing-loading-runboard',
-    'Billing runboard',
-    'Cost and checkout readiness are syncing.',
-    'Checkout guarded',
-    'Plans syncing',
+    'Billing status',
+    'Cost and checkout status are updating.',
+    'Checkout paused',
+    'Plans updating',
     'primaryPlanIds',
     'data-billing-primary-decision',
     'Compare starter, free, and enterprise options',

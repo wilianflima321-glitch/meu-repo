@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowRight, BadgeCheck, ShieldAlert, Sparkles } from 'lucide-react'
+import { BadgeCheck, ShieldAlert, Sparkles } from 'lucide-react'
 
 import {
   buildGameAssetQualityPipeline,
@@ -74,32 +74,28 @@ export function ViewportAssetQualityCard({ asset }: ViewportAssetQualityCardProp
         </span>
       </div>
 
-      <div className="mt-3 grid gap-2 text-[11px] text-[var(--aethel-text-secondary)]">
-        <p>
-          License: <span className="font-medium text-[var(--aethel-warning-light)]">{asset.licenseStatus}</span>
-        </p>
-        <p>
-          Runtime lane: <span className="font-medium text-[var(--aethel-text-primary)]">{lane?.runtimeTargets.join(' + ') ?? 'held'}</span>
-        </p>
-        <p>
-          Hero budget: <span className="font-medium text-[var(--aethel-text-primary)]">{lane ? lane.maxHeroTriangles.toLocaleString('en-US') : 'held'} tris</span>
-        </p>
-      </div>
-
       <div className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] p-2">
         <div className="flex items-center gap-2 text-[11px] font-semibold text-[var(--aethel-text-primary)]">
           {readiness.state === 'held' ? <ShieldAlert className="h-3.5 w-3.5 text-[var(--aethel-warning-light)]" /> : <BadgeCheck className="h-3.5 w-3.5 text-[var(--aethel-success-light)]" />}
           {readiness.state === 'held' ? 'Quality upgrade held' : 'Ready for art-direction review'}
         </div>
         <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">{readiness.nextAction}</p>
-        {missingPreview.length > 0 ? (
-          <ul className="mt-2 space-y-1 text-[10px] text-[var(--aethel-text-quaternary)]">
-            {missingPreview.map((item) => (
-              <li key={item}>Missing: {item}</li>
-            ))}
-          </ul>
-        ) : null}
       </div>
+
+      <details className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-2">
+        <summary className="cursor-pointer list-none text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+          Asset receipts
+        </summary>
+        <div className="mt-2 grid gap-1 text-[10px] text-[var(--aethel-text-quaternary)]">
+          <p>License: <span className="font-medium text-[var(--aethel-warning-light)]">{asset.licenseStatus}</span></p>
+          <p>Runtime lane: <span className="font-medium text-[var(--aethel-text-primary)]">{lane?.runtimeTargets.join(' + ') ?? 'held'}</span></p>
+          <p>Hero budget: <span className="font-medium text-[var(--aethel-text-primary)]">{lane ? lane.maxHeroTriangles.toLocaleString('en-US') : 'held'} tris</span></p>
+          {missingPreview.map((item) => (
+            <p key={item}>Missing: {item}</p>
+          ))}
+          <p className="truncate">{asset.evidenceRef}</p>
+        </div>
+      </details>
 
       <div className="mt-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] p-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -125,14 +121,13 @@ export function ViewportAssetQualityCard({ asset }: ViewportAssetQualityCardProp
           </button>
         </div>
         <p className="mt-2 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">{upgradePlan.nextAction}</p>
-        <div className="mt-2 flex flex-wrap gap-1 text-[10px] text-[var(--aethel-text-quaternary)]">
-          <span>{upgradePlan.copy.draftWarning}</span>
-          <span>{upgradePlan.copy.studioLocal}</span>
-          <span>{upgradePlan.copy.cloudCost}</span>
-          <span>{upgradePlan.copy.humanReview}</span>
-        </div>
         {planExpanded ? (
           <ul className="mt-2 space-y-1 text-[10px] text-[var(--aethel-text-quaternary)]">
+            <li>Draft - Curated - Optimized - Render grade</li>
+            <li>{upgradePlan.copy.draftWarning}</li>
+            <li>{upgradePlan.copy.studioLocal}</li>
+            <li>{upgradePlan.copy.cloudCost}</li>
+            <li>{upgradePlan.copy.humanReview}</li>
             {upgradePlan.requiredCapabilities.map((capability) => (
               <li key={capability}>Capability: {capability}</li>
             ))}
@@ -145,17 +140,6 @@ export function ViewportAssetQualityCard({ asset }: ViewportAssetQualityCardProp
           </ul>
         ) : null}
       </div>
-
-      <div className="mt-3 flex flex-wrap items-center gap-1 text-[10px] uppercase tracking-[0.08em] text-[var(--aethel-text-quaternary)]">
-        <span>Draft</span>
-        <ArrowRight className="h-3 w-3" />
-        <span>Curated</span>
-        <ArrowRight className="h-3 w-3" />
-        <span>Optimized</span>
-        <ArrowRight className="h-3 w-3" />
-        <span>Render grade</span>
-      </div>
-      <p className="mt-2 truncate text-[10px] text-[var(--aethel-text-quaternary)]">{asset.evidenceRef}</p>
     </div>
   )
 }

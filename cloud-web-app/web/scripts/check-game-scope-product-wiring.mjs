@@ -21,17 +21,22 @@ function requirePattern(relativePath, pattern, reason) {
 }
 
 requirePattern('app/studio/StudioMissionControl.tsx', /buildGameScopePlan/, 'Studio Mission Control must consume the game scope orchestrator')
-requirePattern('app/studio/StudioMissionControl.tsx', /GAME_SCOPE_OPTIONS[\s\S]*prototype[\s\S]*demo[\s\S]*vertical-slice[\s\S]*complete-game-plan/, 'Studio must expose prototype/demo/vertical-slice/full-plan choice')
-requirePattern('app/studio/StudioMissionControl.tsx', /GAME_GENRE_OPTIONS[\s\S]*rpg[\s\S]*action-adventure[\s\S]*moba[\s\S]*strategy[\s\S]*custom/, 'Studio must expose multiple genres, not one LoL path')
-requirePattern('app/studio/StudioMissionControl.tsx', /Game scope:/, 'Studio must show a compact scope plan without hiding it in backend-only state')
-requirePattern('app/studio/StudioMissionControl.tsx', /story-world-character bible|story\/world\/character bible|Production scope|creativeArtifacts/, 'Studio must signal creative planning before heavy generation')
-requirePattern('app/studio/StudioMissionControl.tsx', /genrePack\.cameraModel/, 'Studio must show genre-specific camera/input contract')
-requirePattern('app/studio/StudioMissionControl.tsx', /(genrePack\.playtestScenarios|playtestSpine\.scenarios)/, 'Studio must show genre-specific playtest contract')
+requirePattern('app/studio/StudioMissionControl.options.ts', /GAME_SCOPE_OPTIONS[\s\S]*prototype[\s\S]*demo[\s\S]*vertical-slice[\s\S]*complete-game-plan/, 'Studio must expose prototype/demo/vertical-slice/full-plan choice')
+requirePattern('app/studio/StudioMissionControl.options.ts', /GAME_GENRE_OPTIONS(?=[\s\S]*rpg)(?=[\s\S]*action-adventure)(?=[\s\S]*moba)(?=[\s\S]*strategy)(?=[\s\S]*custom)/, 'Studio must expose multiple genres, not one LoL path')
+requirePattern('app/studio/StudioGameScopeEvidencePanel.tsx', /Game scope:/, 'Studio must show a compact scope plan without hiding it in backend-only state')
+requirePattern('app/studio/StudioGameScopeEvidencePanel.tsx', /story-world-character bible|story\/world\/character bible|Production scope|creativeArtifacts|productionBible/, 'Studio must signal creative planning before heavy generation')
+requirePattern('app/studio/StudioGameScopeEvidencePanel.tsx', /genrePack\.cameraModel/, 'Studio must show genre-specific camera/input contract')
+requirePattern('app/studio/StudioGameScopeEvidencePanel.tsx', /(genrePack\.playtestScenarios|playtestSpine\.scenarios)/, 'Studio must show genre-specific playtest contract')
 
 requirePattern('components/evidence/EvidenceCenter.tsx', /buildGameScopePlan/, 'Evidence Center must read the generic scope plan')
-requirePattern('components/evidence/EvidenceCenter.tsx', /Production Bible preview/, 'Evidence Center must expose production bible evidence')
-requirePattern('components/evidence/EvidenceCenter.tsx', /productionGraphs\.slice/, 'Evidence Center must render graph-level production planning')
-requirePattern('components/evidence/EvidenceCenter.tsx', /genrePack\.coreLoop/, 'Evidence Center must expose genre core loop')
+const evidenceCenterSurface = `${read('components/evidence/EvidenceCenter.tsx')}\n${read('components/evidence/EvidenceCenter.parts.tsx')}`
+for (const [pattern, label] of [
+  [/Production plan preview/, 'Evidence Center must expose production planning proof'],
+  [/productionGraphs\.slice/, 'Evidence Center must render graph-level production planning'],
+  [/genrePack\.coreLoop/, 'Evidence Center must expose genre core loop'],
+]) {
+  if (!pattern.test(evidenceCenterSurface)) failures.push(`components/evidence/EvidenceCenter.tsx: missing ${label}`)
+}
 
 const agentSystem = read('lib/ai-agent-system.ts')
 if (/Create a complete game:/.test(agentSystem)) {

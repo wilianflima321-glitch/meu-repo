@@ -106,7 +106,7 @@ class WorkspaceAPI {
    * Get workspace file
    */
   get workspaceFile(): string | undefined {
-    return this._workspaceFolders.length > 0 
+    return this._workspaceFolders.length > 0
       ? `${this._workspaceFolders[0].uri}/.vscode/workspace.code-workspace`
       : undefined;
   }
@@ -130,7 +130,7 @@ class WorkspaceAPI {
    */
   asRelativePath(pathOrUri: string | { path: string }, includeWorkspaceFolder?: boolean): string {
     const path = typeof pathOrUri === 'string' ? pathOrUri : pathOrUri.path;
-    
+
     for (const folder of this._workspaceFolders) {
       if (path.startsWith(folder.uri)) {
         const relative = path.substring(folder.uri.length + 1);
@@ -240,8 +240,7 @@ class WorkspaceAPI {
   async applyEdit(edit: WorkspaceApiValue): Promise<boolean> {
     log.info('[Workspace] Applying edit:', edit);
 
-    // Mock implementation
-    return true;
+    return false;
   }
 
   /**
@@ -305,7 +304,6 @@ class WorkspaceAPI {
   ): Promise<string[]> {
     log.info('[Workspace] Finding files:', { include, exclude, maxResults });
 
-    // Mock implementation
     return [];
   }
 
@@ -471,7 +469,7 @@ class WorkspaceAPI {
    */
   private detectLanguageId(fileName: string): string {
     const ext = fileName.split('.').pop()?.toLowerCase();
-    
+
     const languageMap: Record<string, string> = {
       'ts': 'typescript',
       'tsx': 'typescriptreact',

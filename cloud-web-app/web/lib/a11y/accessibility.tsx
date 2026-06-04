@@ -1,10 +1,9 @@
 'use client';
 
 /**
- * Aethel Engine - Accessibility (a11y) Utilities
- * 
- * Comprehensive accessibility system with focus management, announcements,
- * keyboard navigation, and screen reader support.
+ * Aethel accessibility runtime.
+ *
+ * Focus management, live announcements, keyboard navigation, and screen reader helpers.
  */
 
 import {
@@ -15,11 +14,33 @@ import {
   useRef,
   useState,
   useMemo,
-  createElement,
   type ReactNode,
   type RefObject,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
+import {
+  getListboxProps,
+  getMenuItemProps,
+  getMenuProps,
+  getOptionProps,
+  getTabListProps,
+  getTabPanelProps,
+  getTabProps,
+  getTreeItemProps,
+  getTreeProps,
+} from './accessibility.aria';
+export {
+  getListboxProps,
+  getMenuItemProps,
+  getMenuProps,
+  getOptionProps,
+  getTabListProps,
+  getTabPanelProps,
+  getTabProps,
+  getTreeItemProps,
+  getTreeProps,
+} from './accessibility.aria';
+
 
 // ============================================================================
 // Types
@@ -76,11 +97,11 @@ export function getFocusableElements(container: HTMLElement): HTMLElement[] {
   return elements.filter((el) => {
     // Check visibility
     if (el.offsetParent === null && el.style.position !== 'fixed') return false;
-    
+
     // Check computed style
     const style = window.getComputedStyle(el);
     if (style.display === 'none' || style.visibility === 'hidden') return false;
-    
+
     return true;
   });
 }
@@ -399,7 +420,7 @@ export function announce(message: string, priority: 'polite' | 'assertive' = 'po
 
   // Clear and set new message
   region.textContent = '';
-  
+
   // Use setTimeout to ensure the change is detected
   setTimeout(() => {
     region.textContent = message;
@@ -431,14 +452,14 @@ export function useA11yPreferences() {
     // Reduced motion
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setReducedMotion(motionQuery.matches);
-    
+
     const handleMotionChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
     motionQuery.addEventListener('change', handleMotionChange);
 
     // High contrast
     const contrastQuery = window.matchMedia('(prefers-contrast: more)');
     setHighContrast(contrastQuery.matches);
-    
+
     const handleContrastChange = (e: MediaQueryListEvent) => setHighContrast(e.matches);
     contrastQuery.addEventListener('change', handleContrastChange);
 
@@ -629,7 +650,7 @@ export function A11yProvider({ children }: { children: ReactNode }) {
     if (main instanceof HTMLElement) {
       main.tabIndex = -1;
       main.focus();
-      announce('Navegado para o conteúdo principal');
+      announce('Skipped to main content');
     }
   }, []);
 
@@ -652,251 +673,8 @@ export function A11yProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// ============================================================================
-// Accessibility Components
-// ============================================================================
-
-/**
- * Skip Links Component
- */
-export function SkipLinks() {
-  return (
-    <div className="skip-links">
-      <a
-        href="#main-content"
-        className="
-          sr-only focus:not-sr-only
-          fixed top-0 left-0 z-[9999]
-          px-4 py-2 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]
-          focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary-light)]
-        "
-        onClick={(e) => {
-          e.preventDefault();
-          const main = document.getElementById('main-content') || 
-                       document.querySelector('main');
-          if (main) {
-            main.tabIndex = -1;
-            main.focus();
-          }
-        }}
-      >
-        Pular para o conteúdo principal
-      </a>
-      <a
-        href="#navigation"
-        className="
-          sr-only focus:not-sr-only
-          fixed top-0 left-0 z-[9999]
-          px-4 py-2 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]
-          focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary-light)]
-        "
-        onClick={(e) => {
-          e.preventDefault();
-          const nav = document.getElementById('navigation') || 
-                      document.querySelector('nav');
-          if (nav) {
-            nav.tabIndex = -1;
-            nav.focus();
-          }
-        }}
-      >
-        Pular para a navegação
-      </a>
-    </div>
-  );
-}
-
-/**
- * Visually Hidden Component (for screen readers only)
- */
-export function VisuallyHidden({
-  children,
-  as: tag = 'span',
-}: {
-  children: ReactNode;
-  as?: 'span' | 'div' | 'p';
-}) {
-  return createElement(
-    tag,
-    {
-      className: 'sr-only',
-      style: {
-        position: 'absolute' as const,
-        width: '1px',
-        height: '1px',
-        padding: '0',
-        margin: '-1px',
-        overflow: 'hidden' as const,
-        clip: 'rect(0, 0, 0, 0)',
-        whiteSpace: 'nowrap' as const,
-        border: '0',
-      },
-    },
-    children
-  );
-}
-
-/**
- * Live Region Component
- */
-export function LiveRegion({
-  children,
-  priority = 'polite',
-  atomic = true,
-  relevant = 'additions text',
-}: {
-  children: ReactNode;
-  priority?: 'polite' | 'assertive';
-  atomic?: boolean;
-  relevant?: 'additions' | 'additions text' | 'all' | 'removals' | 'removals additions' | 'removals text' | 'text' | 'text additions' | 'text removals';
-}) {
-  return createElement(
-    'div',
-    {
-      role: 'status',
-      'aria-live': priority,
-      'aria-atomic': atomic,
-      'aria-relevant': relevant,
-      className: 'sr-only',
-    },
-    children
-  );
-}
-
-// ============================================================================
-// ARIA Helpers
-// ============================================================================
-
-/**
- * Generate ARIA props for a listbox
- */
-export function getListboxProps(
-  selectedIndex: number,
-  options: { multiselectable?: boolean; label?: string; labelledBy?: string }
-) {
-  return {
-    role: 'listbox' as const,
-    'aria-activedescendant': `option-${selectedIndex}`,
-    'aria-multiselectable': options.multiselectable,
-    'aria-label': options.label,
-    'aria-labelledby': options.labelledBy,
-    tabIndex: 0,
-  };
-}
-
-/**
- * Generate ARIA props for a listbox option
- */
-export function getOptionProps(
-  index: number,
-  isSelected: boolean,
-  isDisabled?: boolean
-) {
-  return {
-    id: `option-${index}`,
-    role: 'option' as const,
-    'aria-selected': isSelected,
-    'aria-disabled': isDisabled,
-    tabIndex: -1,
-  };
-}
-
-/**
- * Generate ARIA props for a menu
- */
-export function getMenuProps(options: { label?: string; labelledBy?: string }) {
-  return {
-    role: 'menu' as const,
-    'aria-label': options.label,
-    'aria-labelledby': options.labelledBy,
-    tabIndex: -1,
-  };
-}
-
-/**
- * Generate ARIA props for a menu item
- */
-export function getMenuItemProps(isDisabled?: boolean) {
-  return {
-    role: 'menuitem' as const,
-    'aria-disabled': isDisabled,
-    tabIndex: -1,
-  };
-}
-
-/**
- * Generate ARIA props for a tree
- */
-export function getTreeProps(options: { label?: string; labelledBy?: string; multiselectable?: boolean }) {
-  return {
-    role: 'tree' as const,
-    'aria-label': options.label,
-    'aria-labelledby': options.labelledBy,
-    'aria-multiselectable': options.multiselectable,
-  };
-}
-
-/**
- * Generate ARIA props for a tree item
- */
-export function getTreeItemProps(
-  level: number,
-  expanded?: boolean,
-  hasChildren?: boolean,
-  isSelected?: boolean
-) {
-  return {
-    role: 'treeitem' as const,
-    'aria-level': level,
-    'aria-expanded': hasChildren ? expanded : undefined,
-    'aria-selected': isSelected,
-    tabIndex: -1,
-  };
-}
-
-/**
- * Generate ARIA props for a tab list
- */
-export function getTabListProps(options: { label?: string; labelledBy?: string; orientation?: 'horizontal' | 'vertical' }) {
-  return {
-    role: 'tablist' as const,
-    'aria-label': options.label,
-    'aria-labelledby': options.labelledBy,
-    'aria-orientation': options.orientation || 'horizontal',
-  };
-}
-
-/**
- * Generate ARIA props for a tab
- */
-export function getTabProps(
-  index: number,
-  panelId: string,
-  isSelected: boolean,
-  isDisabled?: boolean
-) {
-  return {
-    id: `tab-${index}`,
-    role: 'tab' as const,
-    'aria-selected': isSelected,
-    'aria-controls': panelId,
-    'aria-disabled': isDisabled,
-    tabIndex: isSelected ? 0 : -1,
-  };
-}
-
-/**
- * Generate ARIA props for a tab panel
- */
-export function getTabPanelProps(index: number, tabId: string, isSelected: boolean) {
-  return {
-    id: `tabpanel-${index}`,
-    role: 'tabpanel' as const,
-    'aria-labelledby': tabId,
-    tabIndex: 0,
-    hidden: !isSelected,
-  };
-}
+import { LiveRegion, SkipLinks, VisuallyHidden } from './accessibility-components';
+export { LiveRegion, SkipLinks, VisuallyHidden } from './accessibility-components';
 
 const a11yExports = {
   announce,

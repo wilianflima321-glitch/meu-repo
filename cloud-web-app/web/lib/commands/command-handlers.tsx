@@ -2,17 +2,24 @@
 
 /**
  * Command Handlers - Implementações Reais dos Comandos
- * 
+ *
  * Este módulo conecta os comandos do Command Registry com os serviços
  * reais do Aethel Engine. Nada de console calls - tudo funcional.
- * 
+ *
  * @module lib/commands/command-handlers
  */
 import { useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCommandRegistry, type CommandDefinition } from './command-registry';
 import { useDevTools } from '@/lib/debug/devtools-provider';
-import { commandEventBus, fileOperations, undoRedoManager } from './command-services';
+import {
+  clipboardService,
+  commandEventBus,
+  fileOperations,
+  navigationService,
+  searchService,
+  undoRedoManager,
+} from './command-services';
 export { clipboardService, commandEventBus, fileOperations, navigationService, searchService, undoRedoManager } from './command-services';
 export type { CommandEventType, SearchOptions, SearchResult } from './command-services';
 
@@ -57,11 +64,11 @@ export function useRealCommandHandlers() {
   const router = useRouter();
   const { registerCommands } = useCommandRegistry();
   const { logAction, log } = useDevTools();
-  
+
   const commandPaletteRef = useRef<{ open: () => void; close: () => void } | null>(null);
   const searchPanelRef = useRef<{ open: () => void; focus: () => void } | null>(null);
   const terminalRef = useRef<{ toggle: () => void; focus: () => void } | null>(null);
-  
+
   // UI State refs that can be updated externally
   const uiStateRef = useRef({
     sidebarVisible: true,
@@ -73,13 +80,13 @@ export function useRealCommandHandlers() {
   const createFileNew = useCallback(async () => {
     logAction('file:new', undefined, 'CommandHandler');
     log('info', 'Criando novo arquivo...', undefined, 'file');
-    
+
     const filename = `untitled-${Date.now()}.ts`;
     const content = `// ${filename}\n// Created at ${new Date().toISOString()}\n\n`;
-    
+
     fileOperations.markDirty(filename, content);
     commandEventBus.emit('file:new', { filename, content });
-    
+
     // Navigate to editor with new file
     router.push(`/ide?file=${encodeURIComponent(filename)}`);
   }, [logAction, log, router]);
@@ -87,19 +94,19 @@ export function useRealCommandHandlers() {
   const createFolderNew = useCallback(async () => {
     logAction('file:newFolder', undefined, 'CommandHandler');
     log('info', 'Criando nova pasta...', undefined, 'file');
-    
+
     const folderName = `new-folder-${Date.now()}`;
     commandEventBus.emit('file:new', { folderName, isDirectory: true });
   }, [logAction, log]);
 
   const openFile = useCallback(async () => {
     logAction('file:open', undefined, 'CommandHandler');
-    
+
     const files = await fileOperations.showOpenDialog({
       accept: '.ts,.tsx,.js,.jsx,.json,.md,.css,.html',
       multiple: true,
     });
-    
+
     if (files.length > 0) {
       for (const file of files) {
         const content = await file.text();
@@ -112,7 +119,7 @@ export function useRealCommandHandlers() {
   const saveFile = useCallback(async () => {
     logAction('file:save', undefined, 'CommandHandler');
     log('info', 'Salvando arquivo...', undefined, 'file');
-    
+
     const dirtyFiles = fileOperations.getDirtyFiles();
     if (dirtyFiles.length > 0) {
       const uri = dirtyFiles[0];
@@ -121,27 +128,27 @@ export function useRealCommandHandlers() {
       fileOperations.clearDirty(uri);
       log('info', `Arquivo salvo: ${uri}`, undefined, 'file');
     }
-    
+
     commandEventBus.emit('file:save');
   }, [logAction, log]);
 
   const saveAllFiles = useCallback(async () => {
     logAction('file:saveAll', undefined, 'CommandHandler');
-    
+
     const dirtyFiles = fileOperations.getDirtyFiles();
     log('info', `Salvando ${dirtyFiles.length} arquivos...`, undefined, 'file');
-    
+
     for (const uri of dirtyFiles) {
       fileOperations.clearDirty(uri);
     }
-    
+
     commandEventBus.emit('file:saveAll');
     log('info', 'Todos os arquivos salvos', undefined, 'file');
   }, [logAction, log]);
 
   const undoAction = useCallback(async () => {
     logAction('edit:undo', undefined, 'CommandHandler');
-    
+
     const success = await undoRedoManager.undo();
     if (success) {
       log('info', `Desfeito: ${undoRedoManager.getRedoLabel()}`, undefined, 'edit');
@@ -151,7 +158,7 @@ export function useRealCommandHandlers() {
 
   const redoAction = useCallback(async () => {
     logAction('edit:redo', undefined, 'CommandHandler');
-    
+
     const success = await undoRedoManager.redo();
     if (success) {
       log('info', `Refeito: ${undoRedoManager.getUndoLabel()}`, undefined, 'edit');
@@ -161,7 +168,7 @@ export function useRealCommandHandlers() {
 
   const cutSelection = useCallback(async () => {
     logAction('edit:cut', undefined, 'CommandHandler');
-    
+
     const selection = window.getSelection()?.toString() || '';
     if (selection) {
       await clipboardService.copy(selection);
@@ -173,7 +180,7 @@ export function useRealCommandHandlers() {
 
   const copySelection = useCallback(async () => {
     logAction('edit:copy', undefined, 'CommandHandler');
-    
+
     const selection = window.getSelection()?.toString() || '';
     if (selection) {
       await clipboardService.copy(selection);
@@ -184,7 +191,7 @@ export function useRealCommandHandlers() {
 
   const pasteFromClipboard = useCallback(async () => {
     logAction('edit:paste', undefined, 'CommandHandler');
-    
+
     const text = await clipboardService.paste();
     log('info', 'Texto colado', { length: text.length }, 'edit');
     commandEventBus.emit('edit:paste', { text });
@@ -193,7 +200,7 @@ export function useRealCommandHandlers() {
   const openFind = useCallback(() => {
     logAction('edit:find', undefined, 'CommandHandler');
     log('info', 'Abrindo busca...', undefined, 'search');
-    
+
     searchPanelRef.current?.open();
     commandEventBus.emit('edit:find');
   }, [logAction, log]);
@@ -201,7 +208,7 @@ export function useRealCommandHandlers() {
   const openReplace = useCallback(() => {
     logAction('edit:replace', undefined, 'CommandHandler');
     log('info', 'Abrindo substituir...', undefined, 'search');
-    
+
     searchPanelRef.current?.open();
     commandEventBus.emit('edit:replace');
   }, [logAction, log]);
@@ -341,7 +348,7 @@ export function useRealCommandHandlers() {
       { id: 'file.open', label: 'Abrir Arquivo', description: 'Abrir um arquivo existente', category: 'file', shortcut: '⌘O', icon: 'folder-open', priority: 98, tags: ['open', 'file'], handler: openFile },
       { id: 'file.save', label: 'Salvar', description: 'Salvar o arquivo atual', category: 'file', shortcut: '⌘S', icon: 'save', priority: 97, tags: ['save'], handler: saveFile },
       { id: 'file.saveAll', label: 'Salvar Todos', description: 'Salvar todos os arquivos', category: 'file', shortcut: '⌥⌘S', icon: 'save-all', priority: 96, tags: ['save', 'all'], handler: saveAllFiles },
-      
+
       // Edit commands
       { id: 'edit.undo', label: 'Desfazer', description: 'Desfazer a última ação', category: 'edit', shortcut: '⌘Z', icon: 'undo', priority: 100, tags: ['undo'], handler: undoAction, when: () => undoRedoManager.canUndo() },
       { id: 'edit.redo', label: 'Refazer', description: 'Refazer a ação desfeita', category: 'edit', shortcut: '⇧⌘Z', icon: 'redo', priority: 99, tags: ['redo'], handler: redoAction, when: () => undoRedoManager.canRedo() },
@@ -350,7 +357,7 @@ export function useRealCommandHandlers() {
       { id: 'edit.paste', label: 'Colar', description: 'Colar do clipboard', category: 'edit', shortcut: '⌘V', icon: 'clipboard', priority: 96, tags: ['paste'], handler: pasteFromClipboard },
       { id: 'edit.find', label: 'Buscar', description: 'Buscar no arquivo', category: 'edit', shortcut: '⌘F', icon: 'search', priority: 95, tags: ['find', 'search'], handler: openFind },
       { id: 'edit.replace', label: 'Substituir', description: 'Buscar e substituir', category: 'edit', shortcut: '⌥⌘F', icon: 'replace', priority: 94, tags: ['replace'], handler: openReplace },
-      
+
       // View commands
       { id: 'view.commandPalette', label: 'Command Palette', description: 'Abrir paleta de comandos', category: 'view', shortcut: '⇧⌘P', icon: 'command', priority: 100, tags: ['command', 'palette'], handler: openCommandPalette },
       { id: 'view.explorer', label: 'Explorador', description: 'Mostrar explorador', category: 'view', shortcut: '⇧⌘E', icon: 'files', priority: 99, tags: ['explorer'], handler: showExplorer },
@@ -363,28 +370,28 @@ export function useRealCommandHandlers() {
       { id: 'view.zoomIn', label: 'Aumentar Zoom', description: 'Aumentar zoom da interface', category: 'view', shortcut: '⌘=', icon: 'zoom-in', priority: 92, tags: ['zoom', 'in'], handler: zoomIn },
       { id: 'view.zoomOut', label: 'Diminuir Zoom', description: 'Diminuir zoom da interface', category: 'view', shortcut: '⌘-', icon: 'zoom-out', priority: 91, tags: ['zoom', 'out'], handler: zoomOut },
       { id: 'view.resetZoom', label: 'Resetar Zoom', description: 'Voltar zoom para 100%', category: 'view', shortcut: '⌘0', icon: 'zoom-reset', priority: 90, tags: ['zoom', 'reset'], handler: resetZoom },
-      
+
       // Run commands
       { id: 'run.start', label: 'Executar', description: 'Iniciar execução', category: 'run', shortcut: 'F5', icon: 'play', priority: 100, tags: ['run', 'start', 'execute'], handler: runStart },
       { id: 'run.debug', label: 'Iniciar Debug', description: 'Iniciar com debugger', category: 'run', shortcut: '⇧F5', icon: 'bug-play', priority: 99, tags: ['debug', 'start'], handler: runDebug },
       { id: 'run.build', label: 'Build', description: 'Compilar projeto', category: 'run', shortcut: '⇧⌘B', icon: 'package', priority: 98, tags: ['build', 'compile'], handler: runBuild },
-      
+
       // AI commands
       { id: 'ai.chat', label: 'AI Chat', description: 'Abrir chat com IA', category: 'ai', shortcut: '⌘I', icon: 'sparkles', priority: 100, tags: ['ai', 'chat', 'copilot'], handler: openAIChat },
-      
+
       // Preferences
       { id: 'preferences.open', label: 'Configurações', description: 'Abrir configurações', category: 'preferences', shortcut: '⌘,', icon: 'settings', priority: 100, tags: ['settings', 'preferences'], handler: openSettings },
       { id: 'preferences.keyboardShortcuts', label: 'Atalhos de Teclado', description: 'Configurar atalhos', category: 'preferences', shortcut: '⌘K ⌘S', icon: 'keyboard', priority: 99, tags: ['keyboard', 'shortcuts'], handler: openKeyboardShortcuts },
-      
+
       // Help
       { id: 'help.documentation', label: 'Documentação', description: 'Abrir documentação', category: 'help', icon: 'book', priority: 100, tags: ['docs', 'documentation', 'help'], handler: openDocumentation },
     ];
 
     const unregister = registerCommands(commands);
-    
+
     // Load search history
     searchService.loadHistory();
-    
+
     return unregister;
   }, [
     registerCommands, createFileNew, createFolderNew, openFile, saveFile, saveAllFiles,

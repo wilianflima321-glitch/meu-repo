@@ -20,15 +20,27 @@ export function SceneViewportOutliner({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Hierarchy</p>
-            <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">Scene, cameras, and lights connected to the viewport.</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">Scene graph connected to selection and inspector.</p>
           </div>
-          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
-            {objects.length} items
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+              {objects.length} items
+            </span>
+            <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+              {selectedIds.length} selected
+            </span>
+          </div>
         </div>
       </div>
       <div className="flex-1 overflow-auto px-2 py-2">
-        {objects.map((object) => {
+        {objects.length === 0 ? (
+          <div className="flex h-full items-center justify-center px-3 text-center">
+            <div className="max-w-[220px] rounded-2xl border border-dashed border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] px-4 py-5">
+              <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Scene graph is empty</p>
+              <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-tertiary)]">Drop an asset or create a primitive to begin editing.</p>
+            </div>
+          </div>
+        ) : objects.map((object) => {
           const active = selectedIds.includes(object.id)
           const Icon = object.type === 'light' ? Sparkles : object.type === 'camera' ? Camera : Box
           return (

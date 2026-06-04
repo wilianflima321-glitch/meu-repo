@@ -120,7 +120,7 @@ async function checkServer(): Promise<ServiceStatus> {
       name: 'Aethel Server',
       status: 'offline',
       lastCheck: new Date(),
-      message: 'Servidor nao esta respondendo',
+      message: 'Server is not responding',
     }
   }
 }
@@ -304,9 +304,9 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
         <div className="flex items-center gap-3">
           <Activity className={`h-4 w-4 ${allOnline ? 'text-[var(--aethel-success)]' : hasOffline ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-warning)]'}`} />
           <div>
-            <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">Status do sistema</h3>
+            <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">System status</h3>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
-              {allOnline ? 'Todos os servicos online' : hasOffline ? 'Alguns servicos offline' : 'Checking...'}
+              {allOnline ? 'All services online' : hasOffline ? 'Some services offline' : 'Checking...'}
             </p>
           </div>
         </div>

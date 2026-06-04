@@ -1,6 +1,6 @@
 /**
  * Visual Script Runtime - Interpretador de Scripts Visuais
- * 
+ *
  * Executa scripts criados no Visual Scripting Editor.
  * Converte nós e conexões em lógica executável.
  */
@@ -15,7 +15,7 @@ import type { Edge } from '@xyflow/react';
 export interface RuntimeContext {
   // Variáveis do script
   variables: Map<string, unknown>;
-  
+
   // Referência ao objeto alvo
   gameObject?: {
     position: { x: number; y: number; z: number };
@@ -24,10 +24,10 @@ export interface RuntimeContext {
     name: string;
     [key: string]: unknown;
   };
-  
+
   // Delta time do frame
   deltaTime: number;
-  
+
   // Sistema de input
   input: {
     getKey: (key: string) => boolean;
@@ -38,26 +38,26 @@ export interface RuntimeContext {
     mouseDelta: { x: number; y: number };
     mouseButton: (button: number) => boolean;
   };
-  
+
   // Sistema de física
   physics: {
     raycast: (origin: Vector3, direction: Vector3, distance: number) => RaycastHit | null;
     addForce: (target: unknown, force: Vector3, impulse?: boolean) => void;
   };
-  
+
   // Sistema de áudio
   audio: {
     playSound: (sound: string, volume?: number, loop?: boolean) => void;
     stopSound: (sound: string) => void;
   };
-  
+
   // Sistema de objetos
   objects: {
     spawn: (prefab: string, position: Vector3) => unknown;
     destroy: (target: unknown, delay?: number) => void;
     find: (name: string) => unknown;
   };
-  
+
   // Log
   log: (message: string) => void;
 }
@@ -98,28 +98,28 @@ export class VisualScriptRuntime {
   constructor(script: VisualScript, context: RuntimeContext) {
     this.script = script;
     this.context = context;
-    
+
     // Indexar nós para acesso rápido
     this.nodeMap = new Map(script.nodes.map(n => [n.id, n]));
-    
+
     // Indexar edges por source e target
     this.edgesBySource = new Map();
     this.edgesByTarget = new Map();
-    
+
     script.edges.forEach(edge => {
       // By source
       const sourceKey = `${edge.source}:${edge.sourceHandle}`;
       const sourceEdges = this.edgesBySource.get(sourceKey) || [];
       sourceEdges.push(edge);
       this.edgesBySource.set(sourceKey, sourceEdges);
-      
+
       // By target
       const targetKey = `${edge.target}:${edge.targetHandle}`;
       const targetEdges = this.edgesByTarget.get(targetKey) || [];
       targetEdges.push(edge);
       this.edgesByTarget.set(targetKey, targetEdges);
     });
-    
+
     // Inicializar variáveis
     script.variables.forEach(v => {
       this.context.variables.set(v.name, v.defaultValue);
@@ -133,7 +133,7 @@ export class VisualScriptRuntime {
     const startNodes = this.script.nodes.filter(
       n => n.data?.definition?.type === 'event_start'
     );
-    
+
     startNodes.forEach(node => {
       this.executeFromNode(node.id, 'exec');
     });
@@ -144,11 +144,11 @@ export class VisualScriptRuntime {
    */
   update(deltaTime: number): void {
     this.context.deltaTime = deltaTime;
-    
+
     const updateNodes = this.script.nodes.filter(
       n => n.data?.definition?.type === 'event_update'
     );
-    
+
     updateNodes.forEach(node => {
       this.executeFromNode(node.id, 'exec');
     });
@@ -161,7 +161,7 @@ export class VisualScriptRuntime {
     const collisionNodes = this.script.nodes.filter(
       n => n.data?.definition?.type === 'event_collision'
     );
-    
+
     collisionNodes.forEach(node => {
       // Definir outputs do nó de evento
       const execution: NodeExecution = {
@@ -172,7 +172,7 @@ export class VisualScriptRuntime {
           ['point', point],
         ]),
       };
-      
+
       this.executeFromNodeWithContext(node.id, 'exec', execution);
     });
   }
@@ -184,14 +184,14 @@ export class VisualScriptRuntime {
     const triggerNodes = this.script.nodes.filter(
       n => n.data?.definition?.type === 'event_trigger'
     );
-    
+
     triggerNodes.forEach(node => {
       const execution: NodeExecution = {
         nodeId: node.id,
         inputs: new Map(),
         outputs: new Map([['other', other]]),
       };
-      
+
       this.executeFromNodeWithContext(node.id, 'enter', execution);
     });
   }
@@ -200,14 +200,14 @@ export class VisualScriptRuntime {
     const triggerNodes = this.script.nodes.filter(
       n => n.data?.definition?.type === 'event_trigger'
     );
-    
+
     triggerNodes.forEach(node => {
       const execution: NodeExecution = {
         nodeId: node.id,
         inputs: new Map(),
         outputs: new Map([['other', other]]),
       };
-      
+
       this.executeFromNodeWithContext(node.id, 'exit', execution);
     });
   }
@@ -222,7 +222,7 @@ export class VisualScriptRuntime {
   }
 
   // ============================================================================
-  // EXECUÇÃO INTERNA
+  // INTERNAL EXECUTION
   // ============================================================================
 
   private executeFromNode(nodeId: string, outputHandle: string): void {
@@ -241,14 +241,14 @@ export class VisualScriptRuntime {
     // Encontrar edges conectadas a este output
     const key = `${nodeId}:${outputHandle}`;
     const edges = this.edgesBySource.get(key) || [];
-    
+
     edges.forEach(edge => {
       const targetNode = this.nodeMap.get(edge.target);
       if (!targetNode) return;
-      
+
       // Coletar inputs para o nó de destino
       const inputs = this.collectInputs(edge.target);
-      
+
       // Executar o nó
       this.executeNode(edge.target, inputs, currentExecution);
     });
@@ -266,7 +266,7 @@ export class VisualScriptRuntime {
     definition.inputs.forEach((inputDef: { id: string; default?: unknown }) => {
       const key = `${nodeId}:${inputDef.id}`;
       const incomingEdges = this.edgesByTarget.get(key) || [];
-      
+
       if (incomingEdges.length > 0) {
         // Tem conexão - avaliar nó fonte
         const edge = incomingEdges[0];
@@ -289,7 +289,7 @@ export class VisualScriptRuntime {
     // Executar nó para obter output (se for nó de dados)
     const inputs = this.collectInputs(nodeId);
     const result = this.computeNodeOutput(node, inputs);
-    
+
     return result.get(handleId);
   }
 
@@ -381,7 +381,7 @@ export class VisualScriptRuntime {
         const origin = inputs.get('origin') as Vector3 || { x: 0, y: 0, z: 0 };
         const direction = inputs.get('direction') as Vector3 || { x: 0, y: 0, z: 1 };
         const distance = Number(inputs.get('distance')) || 100;
-        
+
         const hit = this.context.physics.raycast(origin, direction, distance);
         outputs.set('hit', hit !== null);
         outputs.set('point', hit?.point || { x: 0, y: 0, z: 0 });
@@ -423,13 +423,13 @@ export class VisualScriptRuntime {
       case 'action_move': {
         const direction = inputs.get('direction') as Vector3 || { x: 0, y: 0, z: 0 };
         const speed = Number(inputs.get('speed')) || 5;
-        
+
         if (this.context.gameObject) {
           this.context.gameObject.position.x += direction.x * speed * this.context.deltaTime;
           this.context.gameObject.position.y += direction.y * speed * this.context.deltaTime;
           this.context.gameObject.position.z += direction.z * speed * this.context.deltaTime;
         }
-        
+
         this.executeFromNode(nodeId, 'exec');
         break;
       }
@@ -437,13 +437,13 @@ export class VisualScriptRuntime {
       case 'action_rotate': {
         const euler = inputs.get('euler') as Vector3 || { x: 0, y: 0, z: 0 };
         const speed = Number(inputs.get('speed')) || 1;
-        
+
         if (this.context.gameObject) {
           this.context.gameObject.rotation.x += euler.x * speed * this.context.deltaTime;
           this.context.gameObject.rotation.y += euler.y * speed * this.context.deltaTime;
           this.context.gameObject.rotation.z += euler.z * speed * this.context.deltaTime;
         }
-        
+
         this.executeFromNode(nodeId, 'exec');
         break;
       }
@@ -451,10 +451,10 @@ export class VisualScriptRuntime {
       case 'action_spawn': {
         const prefab = String(inputs.get('prefab') || '');
         const position = inputs.get('position') as Vector3 || { x: 0, y: 0, z: 0 };
-        
+
         const spawned = this.context.objects.spawn(prefab, position);
         outputs.set('spawned', spawned);
-        
+
         this.executeFromNodeWithContext(nodeId, 'exec', {
           nodeId,
           inputs,
@@ -466,7 +466,7 @@ export class VisualScriptRuntime {
       case 'action_destroy': {
         const target = inputs.get('target') || this.context.gameObject;
         const delay = Number(inputs.get('delay')) || 0;
-        
+
         this.context.objects.destroy(target, delay);
         this.executeFromNode(nodeId, 'exec');
         break;
@@ -482,7 +482,7 @@ export class VisualScriptRuntime {
       // === FLOW ===
       case 'condition_branch': {
         const condition = Boolean(inputs.get('condition'));
-        
+
         if (condition) {
           this.executeFromNode(nodeId, 'true');
         } else {
@@ -500,12 +500,12 @@ export class VisualScriptRuntime {
 
       case 'flow_delay': {
         const duration = Number(inputs.get('duration')) || 1;
-        
+
         const timeout = setTimeout(() => {
           this.executeFromNode(nodeId, 'exec');
           this.pendingDelays.delete(nodeId);
         }, duration * 1000);
-        
+
         this.pendingDelays.set(nodeId, timeout);
         break;
       }
@@ -513,7 +513,7 @@ export class VisualScriptRuntime {
       case 'flow_loop': {
         const start = Number(inputs.get('start')) || 0;
         const end = Number(inputs.get('end')) || 10;
-        
+
         for (let i = start; i < end; i++) {
           outputs.set('index', i);
           this.executeFromNodeWithContext(nodeId, 'body', {
@@ -522,7 +522,7 @@ export class VisualScriptRuntime {
             outputs,
           });
         }
-        
+
         this.executeFromNode(nodeId, 'completed');
         break;
       }
@@ -531,7 +531,7 @@ export class VisualScriptRuntime {
       case 'variable_set': {
         const name = String(inputs.get('name') || '');
         const value = inputs.get('value');
-        
+
         this.context.variables.set(name, value);
         this.executeFromNode(nodeId, 'exec');
         break;
@@ -542,7 +542,7 @@ export class VisualScriptRuntime {
         const target = inputs.get('target') || this.context.gameObject;
         const force = inputs.get('force') as Vector3 || { x: 0, y: 0, z: 0 };
         const impulse = Boolean(inputs.get('impulse'));
-        
+
         this.context.physics.addForce(target, force, impulse);
         this.executeFromNode(nodeId, 'exec');
         break;
@@ -553,7 +553,7 @@ export class VisualScriptRuntime {
         const sound = String(inputs.get('sound') || '');
         const volume = Number(inputs.get('volume')) ?? 1;
         const loop = Boolean(inputs.get('loop'));
-        
+
         this.context.audio.playSound(sound, volume, loop);
         this.executeFromNode(nodeId, 'exec');
         break;
@@ -572,14 +572,14 @@ export class VisualScriptCompiler {
    */
   static compileToTypeScript(script: VisualScript): string {
     const lines: string[] = [];
-    
+
     lines.push('// Auto-generated from Visual Script');
     lines.push(`// Script: ${script.name}`);
     lines.push('');
     lines.push('import { GameScript, Vector3 } from "@/lib/game-engine";');
     lines.push('');
     lines.push(`export class ${script.name.replace(/\s+/g, '')}Script extends GameScript {`);
-    
+
     // Variáveis
     if (script.variables.length > 0) {
       lines.push('  // Variables');
@@ -588,15 +588,15 @@ export class VisualScriptCompiler {
       });
       lines.push('');
     }
-    
+
     // Métodos de evento
-    const eventNodes = script.nodes.filter(n => 
+    const eventNodes = script.nodes.filter(n =>
       n.data?.definition?.category === 'event'
     );
-    
+
     eventNodes.forEach(eventNode => {
       const type = eventNode.data?.definition?.type;
-      
+
       switch (type) {
         case 'event_start':
           lines.push('  start(): void {');
@@ -614,12 +614,12 @@ export class VisualScriptCompiler {
           lines.push('  }');
           break;
       }
-      
+
       lines.push('');
     });
-    
+
     lines.push('}');
-    
+
     return lines.join('\n');
   }
 }

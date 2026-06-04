@@ -1,9 +1,9 @@
 /**
  * Aethel Extension Marketplace Runtime
- * 
+ *
  * Sistema de marketplace para extensões com download,
  * instalação, atualização e verificação.
- * 
+ *
  * Features:
  * - Busca de extensões (Open VSX / VS Code Marketplace)
  * - Download e instalação de VSIX
@@ -21,193 +21,10 @@ import { pipeline } from 'stream/promises';
 import { createGunzip } from 'zlib';
 import { resolveWorkspaceRoot } from './workspace-path';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+import { OPEN_VSX, VSCODE_MARKETPLACE } from './marketplace-runtime.contracts';
+import type { Extension, ExtensionManifest, ExtensionVersion, InstallResult, InstalledExtension, MarketplaceConfig, OpenVsxExtension, OpenVsxSearchResponse, SearchResult, VsCodeExtension, VsCodeResultMetadata, VsCodeSearchResponse, VsCodeStatistic } from './marketplace-runtime.contracts';
 
-export interface Extension {
-  id: string;                    // publisher.name
-  name: string;
-  displayName: string;
-  publisher: string;
-  version: string;
-  description: string;
-  categories: string[];
-  tags: string[];
-  icon?: string;
-  repository?: string;
-  license?: string;
-  
-  // Stats
-  downloadCount: number;
-  rating: number;
-  ratingCount: number;
-  
-  // Flags
-  verified: boolean;
-  preview: boolean;
-  deprecated: boolean;
-  
-  // Requirements
-  engines: {
-    vscode?: string;
-    aethel?: string;
-  };
-  dependencies?: string[];
-  extensionPack?: string[];
-  
-  // Dates
-  publishedAt: Date;
-  updatedAt: Date;
-}
-
-export interface ExtensionVersion {
-  version: string;
-  targetPlatform?: string;
-  assetUri: string;
-  fallbackAssetUri?: string;
-  files: ExtensionFile[];
-  properties: Record<string, string>;
-}
-
-export interface ExtensionFile {
-  assetType: string;
-  source: string;
-}
-
-export interface InstalledExtension extends Extension {
-  installPath: string;
-  installedAt: Date;
-  enabled: boolean;
-  isBuiltIn: boolean;
-  manifest: ExtensionManifest;
-}
-
-export interface ExtensionManifest {
-  name: string;
-  displayName?: string;
-  description?: string;
-  version: string;
-  publisher: string;
-  engines: Record<string, string>;
-  categories?: string[];
-  keywords?: string[];
-  activationEvents?: string[];
-  main?: string;
-  browser?: string;
-  contributes?: Record<string, unknown>;
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-}
-
-export interface SearchResult {
-  extensions: Extension[];
-  totalCount: number;
-  pageNumber: number;
-  pageSize: number;
-}
-
-export interface InstallResult {
-  success: boolean;
-  extension?: InstalledExtension;
-  error?: string;
-}
-
-// ============================================================================
-// MARKETPLACE SOURCES
-// ============================================================================
-
-interface MarketplaceConfig {
-  name: string;
-  searchUrl: string;
-  downloadUrl: string;
-  headers?: Record<string, string>;
-}
-
-interface OpenVsxExtension {
-  namespace: string;
-  name: string;
-  displayName?: string;
-  version: string;
-  description?: string;
-  categories?: string[];
-  tags?: string[];
-  files?: { icon?: string };
-  repository?: string;
-  license?: string;
-  downloadCount?: number;
-  averageRating?: number;
-  reviewCount?: number;
-  verified?: boolean;
-  preview?: boolean;
-  deprecated?: boolean;
-  engines?: Extension['engines'];
-  publishedDate?: string;
-  lastUpdated?: string;
-  timestamp?: string;
-}
-
-interface OpenVsxSearchResponse {
-  extensions?: OpenVsxExtension[];
-  totalSize?: number;
-}
-
-interface VsCodeStatistic {
-  statisticName: string;
-  value: number;
-}
-
-interface VsCodeVersion {
-  version?: string;
-  properties?: Array<{ key: string; value: string }>;
-  files?: Array<{ assetType: string; source: string }>;
-}
-
-interface VsCodeExtension {
-  extensionName: string;
-  displayName?: string;
-  shortDescription?: string;
-  publisher: {
-    publisherName: string;
-    isDomainVerified?: boolean;
-  };
-  versions?: VsCodeVersion[];
-  categories?: string[];
-  tags?: string[];
-  statistics?: VsCodeStatistic[];
-  flags?: string[];
-  publishedDate?: string;
-  lastUpdated?: string;
-}
-
-interface VsCodeResultMetadata {
-  metadataType: string;
-  metadataItems?: Array<{ count?: number }>;
-}
-
-interface VsCodeSearchResponse {
-  results?: Array<{
-    extensions?: VsCodeExtension[];
-    resultMetadata?: VsCodeResultMetadata[];
-  }>;
-}
-
-const OPEN_VSX: MarketplaceConfig = {
-  name: 'Open VSX',
-  searchUrl: 'https://open-vsx.org/api/-/search',
-  downloadUrl: 'https://open-vsx.org/api',
-};
-
-const VSCODE_MARKETPLACE: MarketplaceConfig = {
-  name: 'VS Code Marketplace',
-  searchUrl: 'https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery',
-  downloadUrl: 'https://marketplace.visualstudio.com/_apis/public/gallery/publishers',
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json;api-version=6.0-preview.1',
-  },
-};
-
+export type { Extension, ExtensionManifest, ExtensionVersion, InstallResult, InstalledExtension, SearchResult } from './marketplace-runtime.contracts';
 // ============================================================================
 // EXTENSION MARKETPLACE RUNTIME
 // ============================================================================
@@ -217,18 +34,18 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
   private cacheDir: string;
   private installedExtensions: Map<string, InstalledExtension> = new Map();
   private marketplace: MarketplaceConfig = OPEN_VSX;
-  
+
   constructor(options?: { extensionsPath?: string; cacheDir?: string; marketplace?: 'openvsx' | 'vscode' }) {
     super();
-    
+
     this.extensionsPath = options?.extensionsPath || path.join(process.cwd(), '.aethel', 'extensions');
     this.cacheDir = options?.cacheDir || path.join(process.cwd(), '.aethel', 'cache', 'extensions');
-    
+
     if (options?.marketplace === 'vscode') {
       this.marketplace = VSCODE_MARKETPLACE;
     }
   }
-  
+
   /**
    * Inicializa o marketplace e carrega extensões instaladas
    */
@@ -237,11 +54,11 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
     await fs.mkdir(this.cacheDir, { recursive: true });
     await this.loadInstalledExtensions();
   }
-  
+
   // ==========================================================================
   // SEARCH
   // ==========================================================================
-  
+
   /**
    * Busca extensões no marketplace
    */
@@ -257,14 +74,14 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       pageSize = 20,
       pageNumber = 1,
     } = options || {};
-    
+
     if (this.marketplace.name === 'Open VSX') {
       return this.searchOpenVSX(query, category, sortBy, pageSize, pageNumber);
     } else {
       return this.searchVSCodeMarketplace(query, category, sortBy, pageSize, pageNumber);
     }
   }
-  
+
   private async searchOpenVSX(
     query: string,
     category: string | undefined,
@@ -279,19 +96,19 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       sortBy: sortBy === 'downloads' ? 'downloadCount' : sortBy === 'rating' ? 'averageRating' : sortBy,
       sortOrder: 'desc',
     });
-    
+
     if (category) {
       params.set('category', category);
     }
-    
+
     const response = await fetch(`${this.marketplace.searchUrl}?${params}`);
-    
+
     if (!response.ok) {
       throw new Error(`Search failed: ${response.statusText}`);
     }
-    
+
     const data = await response.json() as OpenVsxSearchResponse;
-    
+
     const extensions: Extension[] = (data.extensions || []).map((ext: OpenVsxExtension) => ({
       id: `${ext.namespace}.${ext.name}`,
       name: ext.name,
@@ -314,7 +131,7 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       publishedAt: new Date(ext.publishedDate || ext.timestamp || Date.now()),
       updatedAt: new Date(ext.lastUpdated || ext.timestamp || Date.now()),
     }));
-    
+
     return {
       extensions,
       totalCount: data.totalSize || extensions.length,
@@ -322,7 +139,7 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       pageSize,
     };
   }
-  
+
   private async searchVSCodeMarketplace(
     query: string,
     category: string | undefined,
@@ -346,27 +163,27 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       assetTypes: [],
       flags: 914,
     };
-    
+
     const response = await fetch(this.marketplace.searchUrl, {
       method: 'POST',
       headers: this.marketplace.headers,
       body: JSON.stringify(body),
     });
-    
+
     if (!response.ok) {
       throw new Error(`Search failed: ${response.statusText}`);
     }
-    
+
     const data = await response.json() as VsCodeSearchResponse;
     const results = data.results?.[0];
-    
+
     const extensions: Extension[] = (results?.extensions || []).map((ext: VsCodeExtension) => {
       const latestVersion = ext.versions?.[0];
       const properties = this.parseProperties(latestVersion?.properties || []);
       const installStatistic = ext.statistics?.find((statistic: VsCodeStatistic) => statistic.statisticName === 'install');
       const ratingStatistic = ext.statistics?.find((statistic: VsCodeStatistic) => statistic.statisticName === 'averagerating');
       const ratingCountStatistic = ext.statistics?.find((statistic: VsCodeStatistic) => statistic.statisticName === 'ratingcount');
-      
+
       return {
         id: `${ext.publisher.publisherName}.${ext.extensionName}`,
         name: ext.extensionName,
@@ -389,7 +206,7 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
         updatedAt: new Date(ext.lastUpdated || Date.now()),
       };
     });
-    
+
     return {
       extensions,
       totalCount: results?.resultMetadata?.find((metadata: VsCodeResultMetadata) => metadata.metadataType === 'ResultCount')?.metadataItems?.[0]?.count || extensions.length,
@@ -397,26 +214,26 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       pageSize,
     };
   }
-  
+
   // ==========================================================================
   // DETAILS
   // ==========================================================================
-  
+
   /**
    * Obtém detalhes de uma extensão
    */
   async getExtensionDetails(extensionId: string): Promise<Extension | null> {
     const [publisher, name] = extensionId.split('.');
-    
+
     if (this.marketplace.name === 'Open VSX') {
       const response = await fetch(`${this.marketplace.downloadUrl}/${publisher}/${name}`);
-      
+
       if (!response.ok) {
         return null;
       }
-      
+
       const ext = await response.json();
-      
+
       return {
         id: extensionId,
         name: ext.name,
@@ -442,25 +259,25 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
         updatedAt: new Date(ext.lastUpdated || ext.timestamp),
       };
     }
-    
+
     return null;
   }
-  
+
   /**
    * Obtém versões disponíveis
    */
   async getExtensionVersions(extensionId: string): Promise<ExtensionVersion[]> {
     const [publisher, name] = extensionId.split('.');
-    
+
     if (this.marketplace.name === 'Open VSX') {
       const response = await fetch(`${this.marketplace.downloadUrl}/${publisher}/${name}/versions`);
-      
+
       if (!response.ok) {
         return [];
       }
-      
+
       const data = await response.json();
-      
+
       return Object.entries(data.versions || {}).map(([version, url]) => ({
         version,
         assetUri: url as string,
@@ -468,26 +285,26 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
         properties: {},
       }));
     }
-    
+
     return [];
   }
-  
+
   // ==========================================================================
   // INSTALLATION
   // ==========================================================================
-  
+
   /**
    * Instala uma extensão
    */
   async install(extensionId: string, version?: string): Promise<InstallResult> {
     const [publisher, name] = extensionId.split('.');
-    
+
     this.emit('installStart', { extensionId, version });
-    
+
     try {
       // Get download URL
       let downloadUrl: string;
-      
+
       if (this.marketplace.name === 'Open VSX') {
         downloadUrl = version
           ? `${this.marketplace.downloadUrl}/${publisher}/${name}/${version}/file/${name}-${version}.vsix`
@@ -497,24 +314,24 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
         const v = version || 'latest';
         downloadUrl = `${this.marketplace.downloadUrl}/${publisher}/vsextensions/${name}/${v}/vspackage`;
       }
-      
+
       this.emit('installProgress', { extensionId, phase: 'downloading', progress: 0 });
-      
+
       // Download VSIX
       const vsixPath = path.join(this.cacheDir, `${extensionId}-${version || 'latest'}.vsix`);
       await this.downloadFile(downloadUrl, vsixPath);
-      
+
       this.emit('installProgress', { extensionId, phase: 'extracting', progress: 50 });
-      
+
       // Extract VSIX
       const installPath = path.join(this.extensionsPath, extensionId);
       await this.extractVsix(vsixPath, installPath);
-      
+
       this.emit('installProgress', { extensionId, phase: 'loading', progress: 80 });
-      
+
       // Load manifest
       const manifest = await this.loadManifest(installPath);
-      
+
       // Create installed extension record
       const installed: InstalledExtension = {
         id: extensionId,
@@ -540,142 +357,142 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
         isBuiltIn: false,
         manifest,
       };
-      
+
       this.installedExtensions.set(extensionId, installed);
-      
+
       // Save installed extensions list
       await this.saveInstalledList();
-      
+
       this.emit('installComplete', { extensionId, extension: installed });
-      
+
       return { success: true, extension: installed };
-      
+
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Installation failed';
       this.emit('installFailed', { extensionId, error: errorMsg });
       return { success: false, error: errorMsg };
     }
   }
-  
+
   /**
    * Desinstala uma extensão
    */
   async uninstall(extensionId: string): Promise<boolean> {
     const extension = this.installedExtensions.get(extensionId);
-    
+
     if (!extension) {
       return false;
     }
-    
+
     if (extension.isBuiltIn) {
       throw new Error('Cannot uninstall built-in extension');
     }
-    
+
     try {
       // Remove files
       await fs.rm(extension.installPath, { recursive: true, force: true });
-      
+
       // Remove from list
       this.installedExtensions.delete(extensionId);
       await this.saveInstalledList();
-      
+
       this.emit('uninstalled', { extensionId });
       return true;
-      
+
     } catch (error) {
       return false;
     }
   }
-  
+
   /**
    * Atualiza uma extensão
    */
   async update(extensionId: string, targetVersion?: string): Promise<InstallResult> {
     const current = this.installedExtensions.get(extensionId);
-    
+
     if (!current) {
       return { success: false, error: 'Extension not installed' };
     }
-    
+
     // Backup current
     const backupPath = `${current.installPath}.bak`;
     await fs.cp(current.installPath, backupPath, { recursive: true });
-    
+
     try {
       // Uninstall current
       await fs.rm(current.installPath, { recursive: true, force: true });
-      
+
       // Install new version
       const result = await this.install(extensionId, targetVersion);
-      
+
       // Remove backup on success
       if (result.success) {
         await fs.rm(backupPath, { recursive: true, force: true });
       }
-      
+
       return result;
-      
+
     } catch (error) {
       // Restore backup on failure
       await fs.rename(backupPath, current.installPath);
       return { success: false, error: error instanceof Error ? error.message : 'Update failed' };
     }
   }
-  
+
   // ==========================================================================
   // MANAGEMENT
   // ==========================================================================
-  
+
   /**
    * Obtém extensões instaladas
    */
   getInstalledExtensions(): InstalledExtension[] {
     return Array.from(this.installedExtensions.values());
   }
-  
+
   /**
    * Verifica se extensão está instalada
    */
   isInstalled(extensionId: string): boolean {
     return this.installedExtensions.has(extensionId);
   }
-  
+
   /**
    * Obtém extensão instalada
    */
   getInstalledExtension(extensionId: string): InstalledExtension | undefined {
     return this.installedExtensions.get(extensionId);
   }
-  
+
   /**
    * Habilita/desabilita extensão
    */
   async setEnabled(extensionId: string, enabled: boolean): Promise<boolean> {
     const extension = this.installedExtensions.get(extensionId);
-    
+
     if (!extension) {
       return false;
     }
-    
+
     extension.enabled = enabled;
     await this.saveInstalledList();
-    
+
     this.emit('enabledChanged', { extensionId, enabled });
     return true;
   }
-  
+
   /**
    * Verifica atualizações disponíveis
    */
   async checkForUpdates(): Promise<Array<{ extension: InstalledExtension; latestVersion: string }>> {
     const updates: Array<{ extension: InstalledExtension; latestVersion: string }> = [];
-    
+
     for (const extension of this.installedExtensions.values()) {
       if (extension.isBuiltIn) continue;
-      
+
       try {
         const details = await this.getExtensionDetails(extension.id);
-        
+
         if (details && this.isNewerVersion(details.version, extension.version)) {
           updates.push({ extension, latestVersion: details.version });
         }
@@ -683,24 +500,24 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
         // Ignore errors for individual extensions
       }
     }
-    
+
     return updates;
   }
-  
+
   // ==========================================================================
   // PRIVATE HELPERS
   // ==========================================================================
-  
+
   private async loadInstalledExtensions(): Promise<void> {
     try {
       const listPath = path.join(this.extensionsPath, 'extensions.json');
       const content = await fs.readFile(listPath, 'utf-8');
       const list = JSON.parse(content);
-      
+
       for (const ext of list) {
         try {
           const manifest = await this.loadManifest(ext.installPath);
-          
+
           this.installedExtensions.set(ext.id, {
             ...ext,
             manifest,
@@ -716,7 +533,7 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       // No extensions list yet
     }
   }
-  
+
   private async saveInstalledList(): Promise<void> {
     const list = Array.from(this.installedExtensions.values()).map(ext => ({
       id: ext.id,
@@ -731,59 +548,66 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       publishedAt: ext.publishedAt,
       updatedAt: ext.updatedAt,
     }));
-    
+
     const listPath = path.join(this.extensionsPath, 'extensions.json');
     await fs.writeFile(listPath, JSON.stringify(list, null, 2));
   }
-  
+
   private async downloadFile(url: string, destPath: string): Promise<void> {
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       throw new Error(`Download failed: ${response.statusText}`);
     }
-    
+
     if (!response.body) {
       throw new Error('No response body');
     }
-    
+
     await fs.mkdir(path.dirname(destPath), { recursive: true });
-    
+
     const fileStream = createWriteStream(destPath);
     const reader = response.body.getReader();
-    
+
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       fileStream.write(Buffer.from(value));
     }
-    
+
     fileStream.end();
-    
+
     await new Promise<void>((resolve, reject) => {
       fileStream.on('finish', () => resolve());
       fileStream.on('error', reject);
     });
   }
-  
+
   private async extractVsix(vsixPath: string, destPath: string): Promise<void> {
     // VSIX is a ZIP file - adm-zip uses CommonJS export = syntax
-    const AdmZipModule = await import('adm-zip');
-    const AdmZip = (AdmZipModule as any).default || AdmZipModule;
-    
+    type AdmZipConstructor = new (input: string) => {
+      getEntries(): Array<{
+        entryName: string
+        isDirectory: boolean
+        getData(): Buffer
+      }>
+    }
+    const AdmZipModule = (await import('adm-zip')) as unknown as { default?: AdmZipConstructor } & AdmZipConstructor;
+    const AdmZip = AdmZipModule.default || AdmZipModule;
+
     const zip = new AdmZip(vsixPath);
-    
+
     await fs.mkdir(destPath, { recursive: true });
-    
+
     // Extract extension folder (inside ZIP)
     for (const entry of zip.getEntries()) {
       if (entry.entryName.startsWith('extension/')) {
         const relativePath = entry.entryName.replace('extension/', '');
-        
+
         if (!relativePath) continue;
-        
+
         const fullPath = path.join(destPath, relativePath);
-        
+
         if (entry.isDirectory) {
           await fs.mkdir(fullPath, { recursive: true });
         } else {
@@ -793,13 +617,13 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       }
     }
   }
-  
+
   private async loadManifest(extensionPath: string): Promise<ExtensionManifest> {
     const manifestPath = path.join(extensionPath, 'package.json');
     const content = await fs.readFile(manifestPath, 'utf-8');
     return JSON.parse(content);
   }
-  
+
   private parseProperties(properties: Array<{ key: string; value: string }>): Record<string, string> {
     const result: Record<string, string> = {};
     for (const prop of properties) {
@@ -807,23 +631,23 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
     }
     return result;
   }
-  
+
   private findAsset(files: Array<{ assetType: string; source: string }> | undefined, assetType: string): string | undefined {
     return files?.find(f => f.assetType === assetType)?.source;
   }
-  
+
   private isNewerVersion(version1: string, version2: string): boolean {
     const v1Parts = version1.split('.').map(Number);
     const v2Parts = version2.split('.').map(Number);
-    
+
     for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
       const v1 = v1Parts[i] || 0;
       const v2 = v2Parts[i] || 0;
-      
+
       if (v1 > v2) return true;
       if (v1 < v2) return false;
     }
-    
+
     return false;
   }
 }

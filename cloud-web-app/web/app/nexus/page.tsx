@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import NexusCanvasV2 from '@/components/nexus/NexusCanvasV2'
+import dynamic from 'next/dynamic'
 import NexusChatMultimodal from '@/components/nexus/NexusChatMultimodal'
 import AethelResearch from '@/components/nexus/AethelResearch'
 import DirectorMode from '@/components/nexus/DirectorMode'
@@ -14,6 +14,15 @@ import {
   Shield,
 } from 'lucide-react'
 import Link from 'next/link'
+
+const NexusCanvasV2 = dynamic(() => import('@/components/nexus/NexusCanvasV2'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full min-h-[360px] items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+      Loading canvas
+    </div>
+  ),
+})
 
 function studioLinkClass(active: boolean): string {
   return active

@@ -12,12 +12,12 @@ export function PricingEnterpriseCard({ enterprisePlan, isAnnual }: PricingEnter
 
   return (
     <section className="mx-auto mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
-      <article className="overflow-hidden rounded-[28px] border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[linear-gradient(135deg,var(--aethel-panel),var(--aethel-panel-soft))] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
+      <article className="overflow-hidden rounded-[28px] border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[var(--aethel-panel)] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
         <div className="grid gap-8 p-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:p-8">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">Enterprise</p>
-            <h2 className="mt-3 text-3xl font-bold text-[var(--aethel-text-primary)]">Contracts for larger operations, governance, and custom integration</h2>
-            <p className="mt-4 text-sm leading-7 text-[var(--aethel-text-secondary)]">When the decision involves teams, compliance, SSO, quotas, and rollout traces, the conversation becomes rollout architecture instead of self-serve checkout.</p>
+            <h2 className="mt-3 text-3xl font-bold text-[var(--aethel-text-primary)]">Enterprise support for SSO, compliance, and rollout</h2>
+            <p className="mt-4 text-sm leading-7 text-[var(--aethel-text-secondary)]">Talk with us when you need team controls, contracts, or guided setup.</p>
             <div className="mt-6 flex flex-wrap gap-2">
               {['SSO + SAML', 'Audit trails', '24/7 support', 'Guided rollout'].map((label) => (
                 <span key={label} className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">{label}</span>
@@ -26,7 +26,7 @@ export function PricingEnterpriseCard({ enterprisePlan, isAnnual }: PricingEnter
             <div className="mt-4 flex flex-wrap gap-2">
               <TrustLink href="/security">View security</TrustLink>
               <TrustLink href="/compliance">View compliance</TrustLink>
-              <TrustLink href="/customers">View beta customers</TrustLink>
+              <TrustLink href="/trust">View trust fit</TrustLink>
             </div>
           </div>
 

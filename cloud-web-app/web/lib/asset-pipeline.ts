@@ -1,7 +1,7 @@
 import { logger } from '@/lib/observability/logger';
 /**
  * Asset Pipeline Manager - Gerenciador de Assets
- * 
+ *
  * Sistema completo para importar, processar e gerenciar assets do projeto.
  * Suporta imagens, áudio, modelos 3D, fontes, vídeos e mais.
  */
@@ -72,19 +72,19 @@ export interface ImportSettings {
   generateMipmaps?: boolean;
   maxTextureSize?: number;
   compression?: 'none' | 'low' | 'medium' | 'high';
-  
+
   // Audio settings
   loadType?: 'decompress' | 'compressed' | 'streaming';
   sampleRateOverride?: number;
   normalize?: boolean;
-  
+
   // Model settings
   scaleFactor?: number;
   importMaterials?: boolean;
   importAnimations?: boolean;
   generateColliders?: boolean;
   optimizeMesh?: boolean;
-  
+
   // General
   customData?: Record<string, unknown>;
 }
@@ -112,291 +112,14 @@ export interface AssetSearchQuery {
 // IMPORTERS
 // ============================================================================
 
-interface AssetImporter {
-  extensions: string[];
-  import(file: File | ArrayBuffer, settings?: ImportSettings): Promise<AssetImportResult>;
-}
-
-const textureImporter: AssetImporter = {
-  extensions: ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg'],
-  async import(file: File | ArrayBuffer, settings?: ImportSettings): Promise<AssetImportResult> {
-    try {
-      let blob: Blob;
-      let fileName: string;
-      
-      if (file instanceof File) {
-        blob = file;
-        fileName = file.name;
-      } else {
-        blob = new Blob([file]);
-        fileName = 'texture';
-      }
-
-      // Criar URL temporária
-      const url = URL.createObjectURL(blob);
-      
-      // Carregar imagem para obter dimensões
-      const img = new Image();
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = url;
-      });
-
-      const asset: Asset = {
-        id: `texture_${Date.now()}`,
-        name: fileName.replace(/\.[^.]+$/, ''),
-        type: settings?.textureType === 'sprite' ? 'sprite' : 'texture',
-        path: url,
-        size: blob.size,
-        mimeType: blob.type,
-        metadata: {
-          width: img.width,
-          height: img.height,
-          format: blob.type.split('/')[1],
-        },
-        importSettings: settings || {
-          filterMode: 'bilinear',
-          wrapMode: 'clamp',
-          generateMipmaps: true,
-        },
-        dependencies: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      // Gerar thumbnail
-      const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(img, 0, 0, 128, 128);
-      asset.thumbnail = canvas.toDataURL('image/png');
-
-      return { success: true, asset };
-
-    } catch (error) {
-      return {
-        success: false,
-        errors: [error instanceof Error ? error.message : 'Failed to import texture'],
-      };
-    }
-  },
-};
-
-const audioImporter: AssetImporter = {
-  extensions: ['.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac'],
-  async import(file: File | ArrayBuffer, settings?: ImportSettings): Promise<AssetImportResult> {
-    try {
-      let blob: Blob;
-      let fileName: string;
-      
-      if (file instanceof File) {
-        blob = file;
-        fileName = file.name;
-      } else {
-        blob = new Blob([file]);
-        fileName = 'audio';
-      }
-
-      const url = URL.createObjectURL(blob);
-      
-      // Carregar áudio para obter duração
-      const audio = new Audio();
-      await new Promise((resolve, reject) => {
-        audio.onloadedmetadata = resolve;
-        audio.onerror = reject;
-        audio.src = url;
-      });
-
-      const asset: Asset = {
-        id: `audio_${Date.now()}`,
-        name: fileName.replace(/\.[^.]+$/, ''),
-        type: 'audio',
-        path: url,
-        size: blob.size,
-        mimeType: blob.type,
-        metadata: {
-          duration: audio.duration,
-          format: blob.type.split('/')[1],
-        },
-        importSettings: settings || {
-          loadType: 'decompress',
-          normalize: true,
-        },
-        dependencies: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      return { success: true, asset };
-
-    } catch (error) {
-      return {
-        success: false,
-        errors: [error instanceof Error ? error.message : 'Failed to import audio'],
-      };
-    }
-  },
-};
-
-const modelImporter: AssetImporter = {
-  extensions: ['.gltf', '.glb', '.obj', '.fbx', '.dae'],
-  async import(file: File | ArrayBuffer, settings?: ImportSettings): Promise<AssetImportResult> {
-    try {
-      let blob: Blob;
-      let fileName: string;
-      
-      if (file instanceof File) {
-        blob = file;
-        fileName = file.name;
-      } else {
-        blob = new Blob([file]);
-        fileName = 'model';
-      }
-
-      const url = URL.createObjectURL(blob);
-
-      // Para modelos, precisaríamos de GLTFLoader ou outros loaders
-      // Por enquanto, retornamos asset básico
-      const asset: Asset = {
-        id: `model_${Date.now()}`,
-        name: fileName.replace(/\.[^.]+$/, ''),
-        type: 'model',
-        path: url,
-        size: blob.size,
-        mimeType: 'model/gltf-binary',
-        metadata: {
-          format: fileName.split('.').pop(),
-        },
-        importSettings: settings || {
-          scaleFactor: 1,
-          importMaterials: true,
-          importAnimations: true,
-          optimizeMesh: true,
-        },
-        dependencies: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      return { success: true, asset };
-
-    } catch (error) {
-      return {
-        success: false,
-        errors: [error instanceof Error ? error.message : 'Failed to import model'],
-      };
-    }
-  },
-};
-
-const fontImporter: AssetImporter = {
-  extensions: ['.ttf', '.otf', '.woff', '.woff2'],
-  async import(file: File | ArrayBuffer, settings?: ImportSettings): Promise<AssetImportResult> {
-    try {
-      let blob: Blob;
-      let fileName: string;
-      
-      if (file instanceof File) {
-        blob = file;
-        fileName = file.name;
-      } else {
-        blob = new Blob([file]);
-        fileName = 'font';
-      }
-
-      const url = URL.createObjectURL(blob);
-
-      const asset: Asset = {
-        id: `font_${Date.now()}`,
-        name: fileName.replace(/\.[^.]+$/, ''),
-        type: 'font',
-        path: url,
-        size: blob.size,
-        mimeType: 'font/' + (fileName.split('.').pop() || 'ttf'),
-        metadata: {
-          format: fileName.split('.').pop(),
-        },
-        importSettings: settings || {},
-        dependencies: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      return { success: true, asset };
-
-    } catch (error) {
-      return {
-        success: false,
-        errors: [error instanceof Error ? error.message : 'Failed to import font'],
-      };
-    }
-  },
-};
-
-const videoImporter: AssetImporter = {
-  extensions: ['.mp4', '.webm', '.mov', '.avi'],
-  async import(file: File | ArrayBuffer, settings?: ImportSettings): Promise<AssetImportResult> {
-    try {
-      let blob: Blob;
-      let fileName: string;
-      
-      if (file instanceof File) {
-        blob = file;
-        fileName = file.name;
-      } else {
-        blob = new Blob([file]);
-        fileName = 'video';
-      }
-
-      const url = URL.createObjectURL(blob);
-      
-      // Carregar vídeo para obter metadados
-      const video = document.createElement('video');
-      await new Promise((resolve, reject) => {
-        video.onloadedmetadata = resolve;
-        video.onerror = reject;
-        video.src = url;
-      });
-
-      const asset: Asset = {
-        id: `video_${Date.now()}`,
-        name: fileName.replace(/\.[^.]+$/, ''),
-        type: 'video',
-        path: url,
-        size: blob.size,
-        mimeType: blob.type,
-        metadata: {
-          width: video.videoWidth,
-          height: video.videoHeight,
-          duration: video.duration,
-          format: blob.type.split('/')[1],
-        },
-        importSettings: settings || {},
-        dependencies: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      // Gerar thumbnail do primeiro frame
-      const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 72;
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(video, 0, 0, 128, 72);
-      asset.thumbnail = canvas.toDataURL('image/png');
-
-      return { success: true, asset };
-
-    } catch (error) {
-      return {
-        success: false,
-        errors: [error instanceof Error ? error.message : 'Failed to import video'],
-      };
-    }
-  },
-};
+import {
+  audioImporter,
+  fontImporter,
+  modelImporter,
+  textureImporter,
+  videoImporter,
+} from './asset-pipeline.importers';
+import type { AssetImporter } from './asset-pipeline.importers';
 
 // ============================================================================
 // ASSET PIPELINE
@@ -446,7 +169,7 @@ export class AssetPipeline {
     }
 
     const result = await importer.import(file, settings);
-    
+
     if (result.success && result.asset) {
       this.assets.set(result.asset.id, result.asset);
     }
@@ -489,7 +212,7 @@ export class AssetPipeline {
   }
 
   getByName(name: string): Asset[] {
-    return Array.from(this.assets.values()).filter(a => 
+    return Array.from(this.assets.values()).filter(a =>
       a.name.toLowerCase().includes(name.toLowerCase())
     );
   }
@@ -613,19 +336,19 @@ export class AssetPipeline {
       case 'texture':
       case 'sprite':
         return this.loadTexture(asset);
-      
+
       case 'audio':
         return this.loadAudio(asset);
-      
+
       case 'model':
         return this.loadModel(asset);
-      
+
       case 'video':
         return this.loadVideo(asset);
-      
+
       case 'data':
         return this.loadData(asset);
-      
+
       default:
         return asset;
     }
@@ -634,7 +357,7 @@ export class AssetPipeline {
   private async loadTexture(asset: Asset): Promise<THREE.Texture> {
     const loader = new THREE.TextureLoader();
     const texture = await loader.loadAsync(asset.path);
-    
+
     // Aplicar settings
     const settings = asset.importSettings;
     if (settings.filterMode === 'point') {

@@ -16,7 +16,7 @@ export interface WorkspaceFolder {
 
 export interface WorkspaceConfiguration {
   folders: WorkspaceFolder[];
-  settings: Record<string, any>;
+  settings: Record<string, unknown>;
   extensions?: {
     recommendations?: string[];
     unwantedRecommendations?: string[];
@@ -83,7 +83,7 @@ export class WorkspaceManager {
     }
 
     const removed = this.folders.splice(index, 1)[0];
-    
+
     // Reindex remaining folders
     this.folders.forEach((folder, i) => {
       folder.index = i;
@@ -145,7 +145,7 @@ export class WorkspaceManager {
   /**
    * Update workspace settings
    */
-  async updateSettings(settings: Record<string, any>): Promise<void> {
+  async updateSettings(settings: Record<string, unknown>): Promise<void> {
     if (!this.configuration) {
       this.configuration = {
         folders: this.folders,
@@ -169,7 +169,8 @@ export class WorkspaceManager {
    */
   getSetting<T>(key: string, defaultValue?: T): T | undefined {
     if (!this.configuration) return defaultValue;
-    return this.configuration.settings[key] ?? defaultValue;
+    const value = this.configuration.settings[key];
+    return value === undefined ? defaultValue : (value as T);
   }
 
   /**
@@ -265,13 +266,13 @@ export class WorkspaceManager {
   addToRecent(workspaceUri: string): void {
     try {
       let recent = this.getRecentWorkspaces();
-      
+
       // Remove if already exists
       recent = recent.filter(uri => uri !== workspaceUri);
-      
+
       // Add to front
       recent.unshift(workspaceUri);
-      
+
       // Limit to 10
       if (recent.length > 10) {
         recent = recent.slice(0, 10);
@@ -318,7 +319,7 @@ export class WorkspaceManager {
    */
   async loadWorkspaceFile(path: string): Promise<WorkspaceConfiguration> {
     const response = await fetch(`/api/files/read?path=${encodeURIComponent(path)}`);
-    
+
     if (!response.ok) {
       throw new Error('Failed to load workspace file');
     }
@@ -350,7 +351,7 @@ export class WorkspaceManager {
       // Try to load .code-workspace file
       const workspaceFile = `${workspaceUri}/.code-workspace`;
       const response = await fetch(`/api/files/read?path=${encodeURIComponent(workspaceFile)}`);
-      
+
       if (response.ok) {
         const content = await response.text();
         this.configuration = JSON.parse(content);
@@ -365,7 +366,7 @@ export class WorkspaceManager {
       }
     } catch (error) {
       logger.warn('[Workspace] Failed to load configuration:', error);
-      
+
       // Fallback to single folder
       this.folders = [{
         uri: workspaceUri,
@@ -384,7 +385,7 @@ export class WorkspaceManager {
     this.configuration.folders = this.folders;
 
     const content = JSON.stringify(this.configuration, null, 2);
-    
+
     try {
       await fetch('/api/files/write', {
         method: 'POST',

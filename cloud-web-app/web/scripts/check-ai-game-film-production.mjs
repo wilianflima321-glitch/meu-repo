@@ -22,6 +22,12 @@ function requireFile(relativePath, reason) {
   if (!exists(relativePath)) failures.push(`${relativePath}: missing (${reason})`)
 }
 
+function routeHasGovernedSurface(route) {
+  if (exists(`app${route}/page.tsx`)) return true
+  const middleware = exists('middleware.ts') ? read('middleware.ts') : ''
+  return middleware.includes(`'${route}'`) && middleware.includes('STUDIO_LEGACY_ROUTE_REDIRECTS')
+}
+
 function requirePattern(relativePath, pattern, reason) {
   if (!exists(relativePath)) {
     failures.push(`${relativePath}: missing (${reason})`)
@@ -67,7 +73,7 @@ const creativeRoutes = [
 ]
 
 for (const route of creativeRoutes) {
-  requireFile(`app${route}/page.tsx`, `${route} must expose its editor surface`)
+  if (!routeHasGovernedSurface(route)) failures.push(`${route}: missing physical page or governed redirect`)
   requirePattern('app/studio/creative-studio-routes.ts', new RegExp(`href:\\s*'${route}'`), `${route} must be listed in the Studio hub`)
   requirePattern('lib/routes/route-maturity-registry.ts', new RegExp(`path:\\s*'${route}'`), `${route} must have an honest maturity entry`)
 }
@@ -118,15 +124,16 @@ requirePattern(
 )
 requirePattern('app/studio/StudioMissionControl.tsx', /StudioMissionControl/, 'mission control must remain visible')
 requirePattern('app/studio/CreativeStudioShell.tsx', /CreativeStudioShell/, 'creative surfaces must share one shell')
-requirePattern('components/viewport/ViewportSceneCanvas.tsx', /EffectComposer/, 'viewport scene canvas must use post-processing for professional selection feedback')
-requirePattern('components/viewport/ViewportSceneCanvas.tsx', /<Outline/, 'viewport scene canvas must render selected objects with outline evidence')
-requirePattern('components/viewport/ViewportSceneCanvas.tsx', /<Selection>/, 'viewport selected-object outline must be selection-aware')
+requirePattern('lib/viewport/ViewportSceneCanvas.runtime.tsx', /EffectComposer/, 'viewport scene runtime must use post-processing for professional selection feedback')
+requirePattern('lib/viewport/ViewportSceneCanvas.runtime.tsx', /<Outline/, 'viewport scene runtime must render selected objects with outline evidence')
+requirePattern('lib/viewport/ViewportSceneCanvas.runtime.tsx', /<Selection>/, 'viewport selected-object outline must be selection-aware')
 requirePattern('lib/viewport/gizmo-elite-controls.ts', /GizmoPivotMode/, 'gizmo controls must define pivot modes')
 requirePattern('lib/viewport/gizmo-elite-controls.ts', /GizmoAxisPlaneConstraint/, 'gizmo controls must define axis-plane constraints')
 requirePattern('lib/viewport/gizmo-elite-controls.ts', /buildGizmoUndoVisualPacket/, 'gizmo controls must expose undo visual packets')
 requirePattern('lib/viewport/gizmo-elite-controls.ts', /buildGizmoInspectorSummary/, 'gizmo controls must expose inspector-ready state')
-requirePattern('components/viewport/gizmos/TransformGizmoProfessional.tsx', /constraint\?: GizmoAxisPlaneConstraint/, 'Transform gizmo must accept axis-plane constraints')
-requirePattern('components/viewport/gizmos/TransformGizmoProfessional.tsx', /pivotMode\?: GizmoPivotMode/, 'Transform gizmo must accept pivot modes')
+requirePattern('components/viewport/gizmos/TransformGizmoProfessional.tsx', /@\/lib\/viewport\/gizmos\/TransformGizmoProfessional/, 'Transform gizmo component must stay a light adapter')
+requirePattern('lib/viewport/gizmos/TransformGizmoProfessional.tsx', /constraint\?: GizmoAxisPlaneConstraint/, 'Transform gizmo runtime must accept axis-plane constraints')
+requirePattern('lib/viewport/gizmos/TransformGizmoProfessional.tsx', /pivotMode\?: GizmoPivotMode/, 'Transform gizmo runtime must accept pivot modes')
 requirePattern('components/viewport/AethelViewport3D.tsx', /onGizmoConstraintChange/, 'viewport inspector must expose constraint controls')
 requirePattern('components/viewport/AethelViewport3D.tsx', /onGizmoPivotModeChange/, 'viewport inspector must expose pivot controls')
 requirePattern('components/preview/SceneViewportStage.tsx', /gizmoConstraint=\{gizmoConstraint\}/, 'viewport stage must forward controlled gizmo constraints')

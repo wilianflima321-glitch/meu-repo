@@ -1,8 +1,9 @@
+// @aethel-heavy-async-boundary Motion-heavy surface; lazy-load outside its owning product region.
 "use client";
 
 import React, { useState, type ReactNode } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from '@/lib/ui/motion';
 import {
   Box,
   Check,

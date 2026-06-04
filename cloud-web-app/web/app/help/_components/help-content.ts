@@ -7,19 +7,19 @@ export const HELP_CATEGORIES: HelpCategory[] = [
     faqs: [
       {
         question: 'How do I create my first account?',
-        answer: 'Open the registration page and follow the guided flow. Signup takes only a few minutes and starts you with project templates that are safe to explore.',
+        answer: 'Open registration, create the account, and start from the guided first project.',
       },
       {
         question: 'Do I need to install anything?',
-        answer: 'No. Aethel runs in the browser. Optional local runtime tools are only used for heavier jobs when the user explicitly enables them.',
+        answer: 'No. Aethel runs in the browser. Local tools are optional for heavier jobs.',
       },
       {
         question: 'Which languages are supported?',
-        answer: 'The IDE supports JavaScript, TypeScript, Python, Java, C#, Go, Rust, PHP, and more. Agents inspect the repository before proposing changes.',
+        answer: 'The IDE supports common app languages. Agents inspect the repo before proposing changes.',
       },
       {
         question: 'Can I import existing projects?',
-        answer: 'Yes. You can import projects through GitHub or ZIP upload. The workspace detects the stack and prepares the environment from project evidence.',
+        answer: 'Yes. Import through GitHub or ZIP; Aethel detects the stack before setup.',
       },
     ],
   },
@@ -29,7 +29,7 @@ export const HELP_CATEGORIES: HelpCategory[] = [
     faqs: [
       {
         question: 'What is the difference between plans?',
-        answer: 'Plans vary by project limits, AI tokens, collaboration, preview runtime, RAG, deployment, and enterprise governance. The pricing page shows the current tiers.',
+        answer: 'Plans vary by limits, AI usage, collaboration, deploy, and governance.',
       },
       {
         question: 'Do I need a credit card to start?',
@@ -37,11 +37,11 @@ export const HELP_CATEGORIES: HelpCategory[] = [
       },
       {
         question: 'How does billing work?',
-        answer: 'Billing is monthly or annual through Stripe when checkout is enabled. Plan changes and cancellation are handled through the customer portal.',
+        answer: 'Billing is monthly or annual. Plan changes happen in the billing portal.',
       },
       {
         question: 'What happens when I exceed quota?',
-        answer: 'Aethel warns before limits are reached. When quota is exhausted, write-heavy AI actions are paused until the next cycle or an upgrade.',
+        answer: 'Aethel warns before limits. Write-heavy AI actions pause when quota is exhausted.',
       },
     ],
   },
@@ -51,7 +51,7 @@ export const HELP_CATEGORIES: HelpCategory[] = [
     faqs: [
       {
         question: 'How does Aethel AI work?',
-        answer: 'Aethel uses specialized agents with scope locks, read receipts, evidence, tests, and rollback plans. A change is not treated as successful without proof.',
+        answer: 'Agents review the repo, propose changes, run checks, and show the result before you accept.',
       },
       {
         question: 'Is real-time collaboration available?',
@@ -59,11 +59,11 @@ export const HELP_CATEGORIES: HelpCategory[] = [
       },
       {
         question: 'Can I integrate with CI/CD?',
-        answer: 'Yes. Aethel integrates with GitHub workflows and compatible deployment providers. One-click deploy is guarded by readiness checks.',
+        answer: 'Yes. Aethel integrates with GitHub workflows and compatible deployment providers. One-click deploy is guarded by status checks.',
       },
       {
         question: 'Is preview running in a real sandbox?',
-        answer: 'Preview is unified behind the canonical preview surface. Managed sandbox execution is used when the runtime and token are configured.',
+        answer: 'Preview opens through one shared viewer. Managed sandbox execution is used when the runtime and token are configured.',
       },
     ],
   },
@@ -73,7 +73,7 @@ export const HELP_CATEGORIES: HelpCategory[] = [
     faqs: [
       {
         question: 'Is my code safe in Aethel?',
-        answer: 'Traffic is protected with TLS and enterprise controls are designed around audit logs, scope enforcement, and explicit evidence trails.',
+        answer: 'Traffic is protected with TLS and enterprise controls are designed around audit logs, scope enforcement, and clear activity logs.',
       },
       {
         question: 'Does AI train on my code?',
@@ -81,7 +81,7 @@ export const HELP_CATEGORIES: HelpCategory[] = [
       },
       {
         question: 'Do you have security certifications?',
-        answer: 'Aethel is preparing formal SOC 2 and compliance evidence. Public controls are published as they become reviewable.',
+        answer: 'Aethel is preparing formal SOC 2 materials. Public controls are published as they become reviewable.',
       },
       {
         question: 'Where is my data hosted?',
@@ -115,7 +115,7 @@ export const HELP_CATEGORIES: HelpCategory[] = [
 
 export const HELP_QUICK_LINKS: HelpQuickLink[] = [
   { href: '/docs', title: 'Documentation', description: 'Guides and technical reference', icon: 'book', tone: 'primary' },
-  { href: '/contact', title: 'Support', description: 'Talk to the Aethel team', icon: 'message', tone: 'success' },
-  { href: '/status', title: 'Status', description: 'Public checks in real time', icon: 'zap', tone: 'warning' },
-  { href: 'https://discord.gg/aethel', title: 'Community', description: 'Official Discord', icon: 'users', tone: 'info', external: true },
+  { href: '/docs/support', title: 'Support', description: 'Find the right support path', icon: 'message', tone: 'success' },
+  { href: '/status', title: 'Status', description: 'Live service checks', icon: 'zap', tone: 'warning' },
+  { href: '/docs/community', title: 'Community', description: 'Public GitHub and design-partner feedback', icon: 'users', tone: 'info' },
 ]

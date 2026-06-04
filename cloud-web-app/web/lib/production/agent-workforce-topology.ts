@@ -375,7 +375,7 @@ function parallelWorkerCount(input: WorkforcePlanningInput, squads: WorkforceSqu
 function approvalRequirements(missionType: WorkforceMissionType, riskLevel: WorkforceRiskLevel, input: WorkforcePlanningInput): string[] {
   const approvals: string[] = []
   if (riskLevel === 'critical' || missionType === 'financial-investment') {
-    approvals.push('signed human approval before any investment, transfer, purchase, credential, account, or submit action')
+    approvals.push('signed human approval before investment, transfer, purchase, credential, account, or submit actions')
   }
   if (input.requiresBrowser) approvals.push('browser pause/takeover approval for login, payment, admin, message, deploy, or destructive submit')
   if (input.requiresRelease) approvals.push('release approval with build/test evidence, rollback owner, and deployment target')

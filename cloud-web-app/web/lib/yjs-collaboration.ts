@@ -7,7 +7,7 @@ import { Awareness } from 'y-protocols/awareness';
 import type { IndexeddbPersistence } from 'y-indexeddb';
 
 import {createComponentLogger, logger} from '@/lib/observability/logger'
-import type { CollaborationConfig, CollaborationEventListener, CursorPosition, MonacoBinding, MonacoContentChange, MonacoEditorLike, MonacoModelLike, MonacoPosition, MonacoRangeLike, SceneObject, SelectionRange, UseCollaborationOptions, UseCollaborationResult as BaseUseCollaborationResult, UserInfo, YTextDelta } from './yjs-collaboration-contracts';
+import type { CollaborationConfig, CollaborationEventListener, CursorPosition, SceneObject, SelectionRange, UserInfo } from './yjs-collaboration-contracts';
 export type { CollaborationConfig, CollaborationEventListener, CursorPosition, MonacoBinding, MonacoContentChange, MonacoEditorLike, MonacoModelLike, MonacoPosition, MonacoRangeLike, SceneObject, SelectionRange, UseCollaborationOptions, UserInfo, YTextDelta } from './yjs-collaboration-contracts';
 
 const log = createComponentLogger('yjs-collaboration')
@@ -103,12 +103,12 @@ export class CollaborationSession {
     private persistence: IndexeddbPersistence | null = null;
     private persistenceSynced = false;
     private connectionTimeout: ReturnType<typeof setTimeout> | null = null;
-    
+
     // Yjs data structures
     private sceneMap: Y.Map<Y.Map<unknown>> | null = null;
     private textMap: Y.Map<Y.Text> | null = null;
     private undoManager: Y.UndoManager | null = null;
-    
+
     constructor(config: CollaborationConfig) {
         this.config = {
             ...config,
@@ -118,24 +118,24 @@ export class CollaborationSession {
                 color: config.user.color || generateUserColor(config.user.id)
             }
         };
-        
+
         // Create Yjs document
         this.doc = new Y.Doc();
-        
+
         // Initialize shared types
         this.initializeSharedTypes();
         this.initializeOfflinePersistence();
-        
+
         log.info(`🔗 CollaborationSession created for document: ${config.documentName}`);
     }
-    
+
     private initializeSharedTypes(): void {
         // Scene objects (3D scenes, levels, blueprints)
         this.sceneMap = this.doc.getMap('scene');
-        
+
         // Text content (scripts, notes)
         this.textMap = this.doc.getMap('text');
-        
+
         // Setup undo manager for scene
         this.undoManager = new Y.UndoManager(this.sceneMap, {
             captureTimeout: 500
@@ -178,7 +178,7 @@ export class CollaborationSession {
         clearTimeout(this.connectionTimeout);
         this.connectionTimeout = null;
     }
-    
+
     /**
      * Connect to collaboration server
      */
@@ -186,11 +186,11 @@ export class CollaborationSession {
         if (this.isDestroyed) {
             throw new Error('Session has been destroyed');
         }
-        
+
         return new Promise((resolve, reject) => {
             try {
                 this.config.onStatusChange?.('connecting');
-                
+
                 // Create WebSocket provider
                 this.provider = new WebsocketProvider(
                     this.config.serverUrl!,
@@ -198,9 +198,9 @@ export class CollaborationSession {
                     this.doc,
                     { connect: true }
                 );
-                
+
                 this.awareness = this.provider.awareness;
-                
+
                 // Set local user state
                 if (this.awareness) {
                     this.awareness.setLocalStateField('user', {
@@ -209,7 +209,7 @@ export class CollaborationSession {
                         color: this.config.user.color
                     });
                 }
-                
+
                 // Handle sync
                 this.provider.on('sync', (isSynced: boolean) => {
                     if (isSynced) {
@@ -219,21 +219,21 @@ export class CollaborationSession {
                         resolve();
                     }
                 });
-                
+
                 // Handle status changes
                 this.provider.on('status', (event: { status: string }) => {
                     const status = event.status === 'connected' ? 'connected' : 'disconnected';
                     this.config.onStatusChange?.(status);
                     this.emit('status', { status });
                 });
-                
+
                 // Handle awareness changes
                 this.awareness?.on('change', () => {
                     const users = this.getConnectedUsers();
                     this.config.onAwarenessChange?.(users);
                     this.emit('awareness', { users: Array.from(users.values()) });
                 });
-                
+
                 // Set timeout for connection
                 this.clearConnectionTimeout();
                 this.connectionTimeout = setTimeout(() => {
@@ -242,13 +242,13 @@ export class CollaborationSession {
                         reject(new Error('Connection timeout'));
                     }
                 }, 10000);
-                
+
             } catch (err) {
                 reject(err);
             }
         });
     }
-    
+
     /**
      * Disconnect from server
      */
@@ -259,7 +259,7 @@ export class CollaborationSession {
         }
         this.config.onStatusChange?.('disconnected');
     }
-    
+
     /**
      * Destroy session and cleanup
      */
@@ -273,17 +273,17 @@ export class CollaborationSession {
         this.listeners.clear();
         log.info(`🔗 CollaborationSession destroyed: ${this.config.documentName}`);
     }
-    
+
     // ========================================================================
     // USER AWARENESS
     // ========================================================================
-    
+
     /**
      * Get all connected users
      */
     getConnectedUsers(): Map<number, UserInfo> {
         const users = new Map<number, UserInfo>();
-        
+
         if (this.awareness) {
             this.awareness.getStates().forEach((state, clientId) => {
                 const rawState = state as {
@@ -306,17 +306,17 @@ export class CollaborationSession {
                 });
             });
         }
-        
+
         return users;
     }
-    
+
     /**
      * Update local cursor position
      */
     updateCursor(position: CursorPosition): void {
         this.awareness?.setLocalStateField('cursor', position);
     }
-    
+
     /**
      * Update local selection
      */
@@ -348,7 +348,7 @@ export class CollaborationSession {
             name: this.config.user.name,
         };
     }
-    
+
     /**
      * Get local client ID
      */
@@ -370,17 +370,17 @@ export class CollaborationSession {
         await this.persistence?.clearData();
         this.persistenceSynced = false;
     }
-    
+
     // ========================================================================
     // SCENE OPERATIONS
     // ========================================================================
-    
+
     /**
      * Add object to scene
      */
     addSceneObject(object: SceneObject): void {
         if (!this.sceneMap) return;
-        
+
         const objMap = new Y.Map<any>();
         objMap.set('id', object.id);
         objMap.set('type', object.type);
@@ -394,140 +394,140 @@ export class CollaborationSession {
         objMap.set('parentId', object.parentId || null);
         objMap.set('children', object.children || []);
         objMap.set('properties', object.properties);
-        
+
         this.sceneMap.set(object.id, objMap);
-        
+
         this.emit('object-added', object);
     }
-    
+
     /**
      * Update scene object
      */
     updateSceneObject(objectId: string, updates: Partial<SceneObject>): void {
         if (!this.sceneMap) return;
-        
+
         const objMap = this.sceneMap.get(objectId);
         if (!objMap) {
             logger.warn(`Object not found: ${objectId}`);
             return;
         }
-        
+
         // Check if object is locked by another user
         const lockedBy = objMap.get('lockedBy');
         if (lockedBy && lockedBy !== this.config.user.id) {
             logger.warn(`Object ${objectId} is locked by ${lockedBy}`);
             return;
         }
-        
+
         // Apply updates
         Object.entries(updates).forEach(([key, value]) => {
             objMap.set(key, value);
         });
-        
+
         this.emit('object-updated', { id: objectId, updates });
     }
-    
+
     /**
      * Remove object from scene
      */
     removeSceneObject(objectId: string): void {
         if (!this.sceneMap) return;
-        
+
         const objMap = this.sceneMap.get(objectId);
         if (!objMap) return;
-        
+
         // Check if object is locked
         const lockedBy = objMap.get('lockedBy');
         if (lockedBy && lockedBy !== this.config.user.id) {
             logger.warn(`Object ${objectId} is locked by ${lockedBy}`);
             return;
         }
-        
+
         this.sceneMap.delete(objectId);
-        
+
         this.emit('object-removed', { id: objectId });
     }
-    
+
     /**
      * Get scene object
      */
     getSceneObject(objectId: string): SceneObject | undefined {
         if (!this.sceneMap) return undefined;
-        
+
         const objMap = this.sceneMap.get(objectId);
         if (!objMap) return undefined;
-        
+
         return sceneObjectFromMap(objMap);
     }
-    
+
     /**
      * Get all scene objects
      */
     getAllSceneObjects(): SceneObject[] {
         if (!this.sceneMap) return [];
-        
+
         const objects: SceneObject[] = [];
         this.sceneMap.forEach((objMap) => {
             objects.push(sceneObjectFromMap(objMap));
         });
-        
+
         return objects;
     }
-    
+
     /**
      * Lock object for editing
      */
     lockObject(objectId: string): boolean {
         if (!this.sceneMap) return false;
-        
+
         const objMap = this.sceneMap.get(objectId);
         if (!objMap) return false;
-        
+
         const currentLock = objMap.get('lockedBy');
         if (currentLock && currentLock !== this.config.user.id) {
             return false; // Already locked by another user
         }
-        
+
         objMap.set('locked', true);
         objMap.set('lockedBy', this.config.user.id);
-        
+
         return true;
     }
-    
+
     /**
      * Unlock object
      */
     unlockObject(objectId: string): boolean {
         if (!this.sceneMap) return false;
-        
+
         const objMap = this.sceneMap.get(objectId);
         if (!objMap) return false;
-        
+
         const currentLock = objMap.get('lockedBy');
         if (currentLock && currentLock !== this.config.user.id) {
             return false; // Can't unlock another user's lock
         }
-        
+
         objMap.set('locked', false);
         objMap.set('lockedBy', null);
-        
+
         return true;
     }
-    
+
     /**
      * Observe scene changes
      */
     observeScene(callback: (event: Y.YMapEvent<any>) => void): () => void {
         if (!this.sceneMap) return () => {};
-        
+
         this.sceneMap.observeDeep(callback as any);
         return () => this.sceneMap?.unobserveDeep(callback as any);
     }
-    
+
     // ========================================================================
     // TEXT OPERATIONS
     // ========================================================================
-    
+
     /**
      * Get or create a text document
      */
@@ -535,23 +535,23 @@ export class CollaborationSession {
         if (!this.textMap) {
             throw new Error('Collaboration session not initialized');
         }
-        
+
         let text = this.textMap.get(name);
         if (!text) {
             text = new Y.Text();
             this.textMap.set(name, text);
         }
-        
+
         return text;
     }
-    
+
     /**
      * Get text content as string
      */
     getTextContent(name: string): string {
         return this.getText(name).toString();
     }
-    
+
     /**
      * Set text content
      */
@@ -560,101 +560,101 @@ export class CollaborationSession {
         text.delete(0, text.length);
         text.insert(0, content);
     }
-    
+
     /**
      * Insert text at position
      */
     insertText(name: string, position: number, content: string): void {
         this.getText(name).insert(position, content);
     }
-    
+
     /**
      * Delete text range
      */
     deleteText(name: string, position: number, length: number): void {
         this.getText(name).delete(position, length);
     }
-    
+
     // ========================================================================
     // UNDO/REDO
     // ========================================================================
-    
+
     /**
      * Undo last change
      */
     undo(): void {
         this.undoManager?.undo();
     }
-    
+
     /**
      * Redo last undone change
      */
     redo(): void {
         this.undoManager?.redo();
     }
-    
+
     /**
      * Check if can undo
      */
     canUndo(): boolean {
         return (this.undoManager?.undoStack.length ?? 0) > 0;
     }
-    
+
     /**
      * Check if can redo
      */
     canRedo(): boolean {
         return (this.undoManager?.redoStack.length ?? 0) > 0;
     }
-    
+
     // ========================================================================
     // TRANSACTIONS
     // ========================================================================
-    
+
     /**
      * Execute operations in a single transaction
      */
     transaction(fn: () => void): void {
         this.doc.transact(fn);
     }
-    
+
     // ========================================================================
     // EVENTS
     // ========================================================================
-    
+
     on(event: string, callback: CollaborationEventListener): () => void {
         if (!this.listeners.has(event)) {
             this.listeners.set(event, new Set());
         }
         this.listeners.get(event)!.add(callback);
-        
+
         return () => {
             this.listeners.get(event)?.delete(callback);
         };
     }
-    
+
     private emit(event: string, data: unknown): void {
         this.listeners.get(event)?.forEach(cb => cb(data));
     }
-    
+
     // ========================================================================
     // EXPORT/IMPORT
     // ========================================================================
-    
+
     /**
      * Export document state
      */
     exportState(): Uint8Array {
         return Y.encodeStateAsUpdate(this.doc);
     }
-    
+
     /**
      * Import document state
      */
     importState(state: Uint8Array): void {
         Y.applyUpdate(this.doc, state);
     }
-    
+
     /**
      * Get state vector (for syncing)
      */
@@ -663,202 +663,9 @@ export class CollaborationSession {
     }
 }
 
-// ============================================================================
-// REACT HOOK
-// ============================================================================
-
-import { useState, useEffect, useRef, useCallback } from 'react';
-
-export type UseCollaborationResult = BaseUseCollaborationResult<CollaborationSession>;
-
-export function useYjsCollaboration(options: UseCollaborationOptions): UseCollaborationResult {
-    const [session, setSession] = useState<CollaborationSession | null>(null);
-    const [isConnected, setIsConnected] = useState(false);
-    const [isSynced, setIsSynced] = useState(false);
-    const [isPersistenceSynced, setIsPersistenceSynced] = useState(false);
-    const [users, setUsers] = useState<UserInfo[]>([]);
-    const [error, setError] = useState<Error | null>(null);
-    const sessionRef = useRef<CollaborationSession | null>(null);
-    
-    useEffect(() => {
-        // Create session
-        const nextSession = new CollaborationSession({
-            documentName: options.documentName,
-            serverUrl: options.serverUrl,
-            persistenceEnabled: options.persistenceEnabled,
-            persistenceName: options.persistenceName,
-            user: {
-                id: options.userId,
-                name: options.userName,
-                color: options.userColor
-            },
-            onSync: () => setIsSynced(true),
-            onPersistenceSync: () => setIsPersistenceSynced(true),
-            onStatusChange: (status) => {
-                setIsConnected(status === 'connected');
-            },
-            onAwarenessChange: (userMap) => {
-                setUsers(Array.from(userMap.values()));
-            }
-        });
-        sessionRef.current = nextSession;
-        setSession(nextSession);
-        
-        return () => {
-            sessionRef.current?.destroy();
-            sessionRef.current = null;
-            setSession(null);
-            setIsPersistenceSynced(false);
-        };
-    }, [options.documentName, options.persistenceEnabled, options.persistenceName, options.serverUrl, options.userId, options.userName, options.userColor]);
-    
-    const connect = useCallback(async () => {
-        try {
-            setError(null);
-            await sessionRef.current?.connect();
-        } catch (err) {
-            setError(err as Error);
-            throw err;
-        }
-    }, []);
-    
-    const disconnect = useCallback(() => {
-        sessionRef.current?.disconnect();
-        setIsConnected(false);
-        setIsSynced(false);
-    }, []);
-
-    const updateCursor = useCallback((position: CursorPosition) => {
-        sessionRef.current?.updateCursor(position);
-    }, []);
-
-    const updateSelection = useCallback((selection: SelectionRange | null) => {
-        sessionRef.current?.updateSelection(selection);
-    }, []);
-    
-    return {
-        session,
-        isConnected,
-        isSynced,
-        isPersistenceSynced,
-        users,
-        error,
-        connect,
-        disconnect,
-        updateCursor,
-        updateSelection
-    };
-}
-
-// ============================================================================
-// MONACO EDITOR BINDING
-// ============================================================================
-
-/**
- * Bind Yjs to Monaco Editor
- * 
- * Usage:
- *   const binding = bindMonaco(session, 'script.py', editor);
- *   // ... later
- *   binding.destroy();
- */
-export function bindMonaco(
-    session: CollaborationSession,
-    textName: string,
-    editor: MonacoEditorLike
-): MonacoBinding {
-    const text = session.getText(textName);
-    const model = editor.getModel();
-    
-    if (!model) {
-        throw new Error('Editor has no model');
-    }
-    
-    let isUpdating = false;
-    
-    // Sync Yjs -> Monaco
-    const observer = (event: Y.YTextEvent) => {
-        if (isUpdating) return;
-        
-        isUpdating = true;
-        
-        // Apply deltas to Monaco
-        event.delta.forEach((delta: YTextDelta) => {
-            if (delta.retain) {
-                // Skip
-            } else if (delta.insert) {
-                // Insert
-                const position = model.getPositionAt(delta.retain || 0);
-                editor.executeEdits('yjs', [{
-                    range: {
-                        startLineNumber: position.lineNumber,
-                        startColumn: position.column,
-                        endLineNumber: position.lineNumber,
-                        endColumn: position.column
-                    },
-                    text: delta.insert
-                }]);
-            } else if (delta.delete) {
-                // Delete
-                const startPosition = model.getPositionAt(delta.retain || 0);
-                const endPosition = model.getPositionAt((delta.retain || 0) + delta.delete);
-                editor.executeEdits('yjs', [{
-                    range: {
-                        startLineNumber: startPosition.lineNumber,
-                        startColumn: startPosition.column,
-                        endLineNumber: endPosition.lineNumber,
-                        endColumn: endPosition.column
-                    },
-                    text: ''
-                }]);
-            }
-        });
-        
-        isUpdating = false;
-    };
-    
-    text.observe(observer);
-    
-    // Sync Monaco -> Yjs
-    const disposable = model.onDidChangeContent((event) => {
-        if (isUpdating) return;
-        
-        isUpdating = true;
-        
-        event.changes.forEach((change) => {
-            const startOffset = model.getOffsetAt({
-                lineNumber: change.range.startLineNumber,
-                column: change.range.startColumn
-            });
-            
-            session.transaction(() => {
-                // Delete old text
-                if (change.rangeLength > 0) {
-                    text.delete(startOffset, change.rangeLength);
-                }
-                
-                // Insert new text
-                if (change.text) {
-                    text.insert(startOffset, change.text);
-                }
-            });
-        });
-        
-        isUpdating = false;
-    });
-    
-    // Initial sync
-    if (text.length > 0 && model.getValue() !== text.toString()) {
-        model.setValue(text.toString());
-    }
-    
-    return {
-        destroy: () => {
-            text.unobserve(observer);
-            disposable.dispose();
-        }
-    };
-}
+export type { UseCollaborationResult } from './yjs-collaboration-react';
+export { useYjsCollaboration } from './yjs-collaboration-react';
+export { bindMonaco } from './yjs-collaboration-monaco';
 
 // ============================================================================
 // EXPORTS

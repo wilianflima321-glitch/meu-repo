@@ -27,21 +27,33 @@ function requirePattern(relativePath, pattern, reason) {
   if (!pattern.test(content)) failures.push(`${relativePath}: missing pattern ${pattern} (${reason})`)
 }
 
+function requirePatternAny(relativePaths, pattern, reason) {
+  const existing = relativePaths.filter(exists)
+  if (existing.length === 0) {
+    failures.push(`${relativePaths.join(', ')}: missing (${reason})`)
+    return
+  }
+  const content = existing.map(read).join('\n')
+  if (!pattern.test(content)) failures.push(`${relativePaths.join(', ')}: missing pattern ${pattern} (${reason})`)
+}
+
+const agentToolRegistryFiles = ['lib/production/agent-tool-bus.ts', 'lib/production/agent-tool-bus-catalog.ts']
 requireFile('lib/production/agent-tool-bus.ts', 'agents need a canonical tool bus')
+requireFile('lib/production/agent-tool-bus-catalog.ts', 'canonical tool contracts may live in the catalog split')
 requirePattern('lib/production/agent-tool-bus.ts', /getCanonicalAgentTools/, 'tool bus must expose the canonical registry')
 requirePattern('lib/production/agent-tool-bus.ts', /evaluateAgentToolInvocation/, 'tool bus must evaluate each invocation')
-requirePattern('lib/production/agent-tool-bus.ts', /browser-operator/, 'browser automation must be a governed tool')
-requirePattern('lib/production/agent-tool-bus.ts', /explicit-human/, 'high-risk tools must require explicit human approval')
-requirePattern('lib/production/agent-tool-bus.ts', /huggingface-mirror/, 'external AI asset/repo sources must be modeled as metadata-first tools')
-requirePattern('lib/production/agent-tool-bus.ts', /requiresIdempotencyKey/, 'mutating or replayable tools must require idempotency keys')
-requirePattern('lib/production/agent-tool-bus.ts', /requiresReadReceipts/, 'agents must prove what they read before writes and research-heavy actions')
-requirePattern('lib/production/agent-tool-bus.ts', /requiresScopeLock/, 'write tools must require scoped ownership locks')
-requirePattern('lib/production/agent-tool-bus.ts', /maxPayloadBytes/, 'heavy tools must cap payload size before local/cloud execution')
-requirePattern('lib/production/agent-tool-bus.ts', /rollbackStrategy/, 'mutating tools must declare rollback strategy')
-requirePattern('lib/production/agent-tool-bus.ts', /sandboxPolicy/, 'every tool must declare its sandbox policy')
+requirePatternAny(agentToolRegistryFiles, /browser-operator/, 'browser automation must be a governed tool')
+requirePatternAny(agentToolRegistryFiles, /explicit-human/, 'high-risk tools must require explicit human approval')
+requirePatternAny(agentToolRegistryFiles, /huggingface-mirror/, 'external AI asset/repo sources must be modeled as metadata-first tools')
+requirePatternAny(agentToolRegistryFiles, /requiresIdempotencyKey/, 'mutating or replayable tools must require idempotency keys')
+requirePatternAny(agentToolRegistryFiles, /requiresReadReceipts/, 'agents must prove what they read before writes and research-heavy actions')
+requirePatternAny(agentToolRegistryFiles, /requiresScopeLock/, 'write tools must require scoped ownership locks')
+requirePatternAny(agentToolRegistryFiles, /maxPayloadBytes/, 'heavy tools must cap payload size before local/cloud execution')
+requirePatternAny(agentToolRegistryFiles, /rollbackStrategy/, 'mutating tools must declare rollback strategy')
+requirePatternAny(agentToolRegistryFiles, /sandboxPolicy/, 'every tool must declare its sandbox policy')
 
 if (exists('lib/production/agent-tool-bus.ts') && exists('lib/production/parallel-agent-work-contract.ts')) {
-  const toolBus = read('lib/production/agent-tool-bus.ts')
+  const toolBus = agentToolRegistryFiles.filter(exists).map(read).join('\n')
   const workContract = read('lib/production/parallel-agent-work-contract.ts')
   const canonicalToolIds = new Set([...toolBus.matchAll(/tool\('([^']+)'/g)].map((match) => match[1]))
   const toolTypeBlock = workContract.match(/export type AgentWorkTool =([\s\S]*?)\n\nexport type AgentScopeMode/)?.[1] ?? ''
@@ -73,7 +85,7 @@ requirePattern('lib/production/deep-spine-scan.ts', /DeepSpineScanManifest/, 'de
 requirePattern('lib/production/deep-spine-scan.ts', /buildMultiResolutionProjectMemory/, 'deep scan must reuse multi-resolution memory')
 requirePattern('lib/production/deep-spine-scan.ts', /metadata-first/, 'deep scan must keep external sources metadata-first')
 requirePattern('lib/production/deep-spine-scan.ts', /safeAutofix:\s*false/, 'deep scan must never auto-fix from scan findings')
-requirePattern('lib/production/agent-tool-bus.ts', /tool\('deep-spine-scan'/, 'deep scan must be governed by the Agent Tool Bus')
+requirePatternAny(agentToolRegistryFiles, /tool\('deep-spine-scan'/, 'deep scan must be governed by the Agent Tool Bus')
 requirePattern('package.json', /qa:deep-spine-scan/, 'package scripts must expose deep spine scan QA')
 
 requireFile('lib/production/task-evidence-ledger.ts', 'tasks need an evidence ledger')

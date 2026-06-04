@@ -9,13 +9,13 @@ import {
   Database,
   ExternalLink,
   Globe,
-  Loader2,
   Search,
   Send,
   Shield,
 } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
 import { buildResearchPrompt, saveResearchHandoff, type ResearchHandoffPayload } from '@/lib/research-handoff'
+import { buildResearchRuntimeSpinePlan } from '@/lib/research/research-runtime-spine'
 
 interface Source {
   id: string
@@ -30,7 +30,7 @@ interface ResearchResult {
   query: string
   summary: string
   sources: Source[]
-  status: 'idle' | 'searching' | 'analyzing' | 'complete'
+  status: 'idle' | 'complete'
 }
 
 const PRESET_SOURCES: Source[] = [
@@ -86,29 +86,41 @@ export default function AethelResearch() {
 
   const canHandoff = result.status === 'complete' && result.sources.length > 0
   const handoffPayload = useMemo(() => (canHandoff ? toHandoffPayload(result) : null), [canHandoff, result])
+  const researchRuntimeSpine = useMemo(
+    () =>
+      buildResearchRuntimeSpinePlan({
+        query: result.query || query,
+        sourceCount: result.sources.length,
+        browserReplayEnabled: false,
+        artifactPersistenceEnabled: false,
+        confidenceScores: result.sources.map((source) => source.credibility),
+        costEstimateUsd: result.status === 'complete' ? 0 : null,
+        finalAnswerReady: result.status === 'complete',
+        humanReviewed: false,
+        evidenceRefs: [
+          result.query ? 'query:research-workspace' : '',
+          ...result.sources.map((source) => `source:${source.id}`),
+          result.status === 'complete' ? 'cost:local-benchmark-pack' : '',
+        ].filter(Boolean),
+      }),
+    [query, result],
+  )
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault()
     const value = query.trim()
     if (!value) return
 
-    setResult((prev) => ({ ...prev, query: value, status: 'searching' }))
     setHandoffMessage(null)
     analytics?.track?.('ai', 'ai_chat', { metadata: { source: 'nexus-research', queryLength: value.length } })
 
-    window.setTimeout(() => {
-      setResult((prev) => ({ ...prev, status: 'analyzing' }))
-
-      window.setTimeout(() => {
-        setResult({
-          query: value,
-          status: 'complete',
-          summary:
-            `Draft research package prepared for "${value}". Sources are curated references and the handoff stays review-first before any execution.`,
-          sources: PRESET_SOURCES,
-        })
-      }, 1200)
-    }, 900)
+    setResult({
+      query: value,
+      status: 'complete',
+      summary:
+        `Review packet prepared for "${value}". This surface uses a governed benchmark pack; live browser replay, account navigation, and artifact persistence stay held until the browser operator lane is explicitly started.`,
+      sources: PRESET_SOURCES,
+    })
   }
 
   const handleCopyPrompt = async () => {
@@ -139,8 +151,20 @@ export default function AethelResearch() {
     window.location.assign('/ide?entry=ai&source=research')
   }
 
+  const handleOperatorControl = (action: 'stop' | 'takeover') => {
+    setHandoffMessage(
+      action === 'stop'
+        ? 'Browser operator remains stopped. No hidden navigation is running.'
+        : 'Takeover lane is held until a live browser replay session starts.',
+    )
+  }
+
   return (
-    <div className="flex h-full flex-col space-y-6 overflow-y-auto bg-[var(--aethel-surface-primary)] p-6 text-[var(--aethel-text-primary)]">
+    <div
+      className="flex h-full flex-col space-y-6 overflow-y-auto bg-[var(--aethel-surface-primary)] p-6 text-[var(--aethel-text-primary)]"
+      data-research-workspace="manus-grade"
+      data-research-state={researchRuntimeSpine.state}
+    >
       <div className="mb-4 flex items-center gap-3">
         <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_16%,transparent)] p-2">
           <Search className="text-[var(--aethel-info-light)]" size={20} />
@@ -151,21 +175,16 @@ export default function AethelResearch() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2" aria-label="Research runboard">
-        {[
-          ['Plan', result.query ? 'ready' : 'waiting'],
-          ['Sources', result.sources.length ? `${result.sources.length}` : 'held'],
-          ['Handoff', canHandoff ? 'review' : 'blocked'],
-        ].map(([label, value]) => (
-          <div key={label} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-3 py-2">
-            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">{label}</p>
-            <p className="mt-1 text-xs font-semibold text-[var(--aethel-text-secondary)]">{value}</p>
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-5" aria-label="Research runboard">
+        {researchRuntimeSpine.steps.slice(0, 5).map((item) => (
+          <div key={item.id} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-3 py-2">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">{item.label}</p>
+            <p className="mt-1 text-xs font-semibold text-[var(--aethel-text-secondary)]">{item.state}</p>
           </div>
         ))}
       </div>
 
       <form onSubmit={handleSearch} className="group relative">
-        <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] opacity-20 blur transition duration-500 group-focus-within:opacity-50"></div>
         <div className="relative flex items-center rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-2 pl-4">
           <Globe className="mr-3 text-[var(--aethel-text-quaternary)]" size={18} />
           <input
@@ -183,26 +202,6 @@ export default function AethelResearch() {
 
       {result.status !== 'idle' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-500">
-          {result.status !== 'complete' && (
-            <div className="rounded-xl border border-[var(--aethel-border-primary)] border-dashed bg-[var(--aethel-surface-secondary)]/50 p-4">
-              <div className="flex items-center gap-4">
-                <Loader2 className="animate-spin text-[var(--aethel-info)]" size={20} />
-                <div className="flex-1">
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--aethel-surface-tertiary)]">
-                    <div
-                      className={`h-full bg-[var(--aethel-info)] transition-all duration-1000 ${
-                        result.status === 'searching' ? 'w-1/3' : 'w-2/3'
-                      }`}
-                    ></div>
-                  </div>
-                  <p className="mt-2 text-[10px] font-bold uppercase tracking-tighter text-[var(--aethel-text-quaternary)]">
-                    {result.status === 'searching' ? 'Collecting sources...' : 'Scoring credibility and synthesis...'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
           {result.status === 'complete' && (
             <>
               <div className="group relative overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] p-5">
@@ -232,6 +231,22 @@ export default function AethelResearch() {
                 >
                   <Copy size={14} />
                   Copy prompt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOperatorControl('stop')}
+                  className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]/70 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]"
+                  data-research-control="stop"
+                >
+                  Stop
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOperatorControl('takeover')}
+                  className="inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_36%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-xs font-semibold text-[var(--aethel-warning-light)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]"
+                  data-research-control="takeover"
+                >
+                  Take over
                 </button>
                 {handoffMessage && <span className="text-xs text-[var(--aethel-text-tertiary)]">{handoffMessage}</span>}
               </div>
@@ -268,7 +283,15 @@ export default function AethelResearch() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]/30 p-4">
+                  <div className="mb-2 flex items-center gap-2">
+                    <Globe size={14} className="text-[var(--aethel-info-light)]" />
+                    <span className="text-[10px] font-bold uppercase text-[var(--aethel-text-quaternary)]">Browser replay</span>
+                  </div>
+                  <div className="text-lg font-bold text-[var(--aethel-text-primary)]">Held</div>
+                  <div className="text-[9px] text-[var(--aethel-text-quaternary)]">Start operator lane for auditable navigation</div>
+                </div>
                 <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]/30 p-4">
                   <div className="mb-2 flex items-center gap-2">
                     <Database size={14} className="text-[var(--aethel-info-light)]" />
@@ -293,5 +316,3 @@ export default function AethelResearch() {
     </div>
   )
 }
-
-

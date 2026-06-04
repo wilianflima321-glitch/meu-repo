@@ -48,7 +48,7 @@ export function FirstValueGuide({
   onOpenIdePreview,
   onDismiss,
 }: FirstValueGuideProps) {
-  const primaryButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] hover:brightness-110 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const primaryButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-4 py-2 text-xs font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)] hover:bg-[var(--aethel-text-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
   const secondaryButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-4 py-2 text-xs font-medium text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
   const ghostButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
@@ -139,7 +139,7 @@ export function FirstValueGuide({
           </div>
           <div className="mt-3 h-1.5 w-full rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">
             <div
-              className="h-1.5 rounded-full bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info-light)] transition-all duration-300"
+              className="h-1.5 rounded-full bg-[var(--aethel-primary)] transition-all duration-300"
               style={{ width: `${Math.round(completionRatio * 100)}%` }}
             />
           </div>
@@ -149,12 +149,6 @@ export function FirstValueGuide({
           <button type="button" onClick={onCreateProject} className={primaryButtonClass} aria-label="Create the first project">
             Create project
           </button>
-          <button type="button" onClick={onConfigureAI} className={secondaryButtonClass} aria-label="Configure artificial intelligence provider">
-            Configure AI
-          </button>
-          <button type="button" onClick={onOpenAIChat} className={secondaryButtonClass} aria-label="Open the AI chat">
-            Open AI chat
-          </button>
           <button type="button" onClick={onDismiss} className={ghostButtonClass} aria-label="Dismiss first-value guide">
             Dismiss
           </button>
@@ -163,7 +157,7 @@ export function FirstValueGuide({
 
       <details className="mt-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_40%,transparent)] px-3 py-2">
         <summary className="cursor-pointer list-none text-xs font-semibold text-[var(--aethel-text-secondary)]">
-          Open setup details, preview readiness, and starter templates
+          Setup details
         </summary>
         <div className="mt-3 grid gap-3 xl:grid-cols-[1fr_1fr]">
           <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] p-3">
@@ -182,7 +176,7 @@ export function FirstValueGuide({
 
           <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] p-3">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Preview readiness</p>
+              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Preview status</p>
               <span className="rounded-full border border-[var(--aethel-border-secondary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                 {previewReadiness?.strategy || 'unknown'}
               </span>
@@ -200,6 +194,12 @@ export function FirstValueGuide({
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
+          <button type="button" onClick={onConfigureAI} className={secondaryButtonClass} aria-label="Configure artificial intelligence provider">
+            Configure AI
+          </button>
+          <button type="button" onClick={onOpenAIChat} className={secondaryButtonClass} aria-label="Open the AI chat">
+            Open AI chat
+          </button>
           {STARTER_TEMPLATES.map((template) => (
             <button
               key={template.id}

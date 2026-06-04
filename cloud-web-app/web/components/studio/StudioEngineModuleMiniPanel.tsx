@@ -29,7 +29,7 @@ export default function StudioEngineModuleMiniPanel({ title, moduleIds, classNam
     <section className={`border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_52%,transparent)] p-3 ${className}`} aria-label={`${title} engine modules`}>
       <div className="mb-3 flex items-center justify-between gap-2">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--aethel-primary-light)]">Engine spine</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--aethel-primary-light)]">Runtime modules</p>
           <h3 className="text-xs font-semibold text-[var(--aethel-text-primary)]">{title}</h3>
         </div>
         <span className="rounded-full border border-[var(--aethel-border-primary)] px-2 py-1 text-[10px] font-semibold text-[var(--aethel-text-tertiary)]">

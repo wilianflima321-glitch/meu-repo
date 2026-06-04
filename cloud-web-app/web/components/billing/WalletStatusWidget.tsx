@@ -418,7 +418,7 @@ export function WalletStatusWidget({
       {showLowBalanceAlert && wallet.lowBalanceWarning && (
         <div className="fixed bottom-20 right-4 w-80 bg-[var(--aethel-surface-secondary)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]
                       rounded-lg shadow-2xl p-4 animate-in slide-in-from-right-5 z-50">
-          <button type="button" aria-label="Fechar alerta de saldo baixo"
+          <button type="button" aria-label="Close low balance alert"
             onClick={() => setShowLowBalanceAlert(false)}
             className="absolute top-2 right-2 p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
           >
@@ -436,7 +436,7 @@ export function WalletStatusWidget({
                 Top up to keep creating.
               </p>
               <div className="flex gap-2 mt-3">
-                <button type="button" aria-label="Abrir recarga imediata de creditos"
+                <button type="button" aria-label="Open immediate credit top-up"
                   onClick={() => {
                     setShowLowBalanceAlert(false);
                     onRecharge?.();
@@ -444,9 +444,9 @@ export function WalletStatusWidget({
                   className="px-3 py-1.5 bg-[var(--aethel-accent)]
                            rounded text-sm font-medium transition-colors hover:brightness-110"
                 >
-                  Reload agora
+                  Reload now
                 </button>
-                <button type="button" aria-label="Fechar alerta e decidir depois"
+                <button type="button" aria-label="Close alert and decide later"
                   onClick={() => setShowLowBalanceAlert(false)}
                   className="px-3 py-1.5 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)]
                            rounded text-sm text-[var(--aethel-text-secondary)] transition-colors"

@@ -1,6 +1,6 @@
 /**
  * Aethel Extension System
- * 
+ *
  * Sistema completo de extensões similar ao VS Code.
  * Permite desenvolvedores criar e distribuir extensões.
  */
@@ -77,58 +77,58 @@ export class ExtensionHost extends EventEmitter {
   private commandHandlers: Map<string, (...args: unknown[]) => unknown> = new Map();
   private configurationListeners: Map<string, Set<(e: unknown) => void>> = new Map();
   private disposables: Map<string, Set<{ dispose(): void }>> = new Map();
-  
+
   constructor() {
     super();
   }
-  
+
   // ==========================================================================
   // EXTENSION LIFECYCLE
   // ==========================================================================
-  
+
   async loadExtension(manifest: ExtensionManifest, extensionPath: string): Promise<void> {
     const id = `${manifest.publisher}.${manifest.name}`;
-    
+
     if (this.extensions.has(id)) {
       throw new Error(`Extension ${id} is already loaded`);
     }
-    
+
     // Create extension context
     const context = this.createExtensionContext(id, manifest, extensionPath);
-    
+
     const loadedExt: LoadedExtension = {
       manifest,
       context,
       api: null,
       status: 'inactive',
     };
-    
+
     this.extensions.set(id, loadedExt);
     this.disposables.set(id, new Set());
-    
+
     // Register contributions
     if (manifest.contributes) {
       this.registerContributions(id, manifest.contributes);
     }
-    
+
     this.emit('extensionLoaded', { id, manifest });
-    
+
     // Check for immediate activation
     if (this.shouldActivateOnStartup(manifest)) {
       await this.activateExtension(id);
     }
   }
-  
+
   async activateExtension(id: string): Promise<unknown> {
     const ext = this.extensions.get(id);
     if (!ext) {
       throw new Error(`Extension ${id} not found`);
     }
-    
+
     if (ext.status === 'active') {
       return ext.api?.activate(ext.context);
     }
-    
+
     if (ext.status === 'activating') {
       // Wait for activation to complete
       return new Promise((resolve, reject) => {
@@ -147,10 +147,10 @@ export class ExtensionHost extends EventEmitter {
         this.on('extensionActivationFailed', handler);
       });
     }
-    
+
     ext.status = 'activating';
     const startTime = Date.now();
-    
+
     try {
       // Activate dependencies first
       if (ext.manifest.extensionDependencies) {
@@ -158,10 +158,10 @@ export class ExtensionHost extends EventEmitter {
           await this.activateExtension(depId);
         }
       }
-      
+
       // Load extension module
       let api: ExtensionAPI;
-      
+
       if (ext.manifest.browser) {
         // Browser extension
         const extModule = await import(/* webpackIgnore: true */ `${ext.context.extensionPath}/${ext.manifest.browser}`);
@@ -177,39 +177,39 @@ export class ExtensionHost extends EventEmitter {
         this.emit('extensionActivated', { id, exports: undefined });
         return undefined;
       }
-      
+
       ext.api = api;
-      
+
       // Call activate
       const exports = await api.activate(ext.context);
-      
+
       ext.status = 'active';
       ext.activationTime = Date.now() - startTime;
-      
+
       this.emit('extensionActivated', { id, exports, activationTime: ext.activationTime });
-      
+
       return exports;
-      
+
     } catch (error) {
       ext.status = 'error';
       ext.error = error instanceof Error ? error : new Error(String(error));
-      
+
       this.emit('extensionActivationFailed', { id, error });
-      
+
       throw error;
     }
   }
-  
+
   async deactivateExtension(id: string): Promise<void> {
     const ext = this.extensions.get(id);
     if (!ext || ext.status !== 'active') return;
-    
+
     try {
       // Call deactivate if defined
       if (ext.api?.deactivate) {
         await ext.api.deactivate();
       }
-      
+
       // Dispose all subscriptions
       for (const disposable of ext.context.subscriptions) {
         try {
@@ -218,7 +218,7 @@ export class ExtensionHost extends EventEmitter {
           log.error(`Error disposing subscription for ${id}:`, e);
         }
       }
-      
+
       // Clear disposables
       const extDisposables = this.disposables.get(id);
       if (extDisposables) {
@@ -231,66 +231,66 @@ export class ExtensionHost extends EventEmitter {
         }
         extDisposables.clear();
       }
-      
+
       ext.status = 'inactive';
-      
+
       this.emit('extensionDeactivated', { id });
-      
+
     } catch (error) {
       log.error(`Error deactivating extension ${id}:`, error);
       throw error;
     }
   }
-  
+
   async unloadExtension(id: string): Promise<void> {
     await this.deactivateExtension(id);
-    
+
     // Unregister contributions
     const ext = this.extensions.get(id);
     if (ext?.manifest.contributes) {
       this.unregisterContributions(id, ext.manifest.contributes);
     }
-    
+
     this.extensions.delete(id);
     this.disposables.delete(id);
-    
+
     this.emit('extensionUnloaded', { id });
   }
-  
+
   // ==========================================================================
   // COMMANDS
   // ==========================================================================
-  
+
   registerCommand(command: string, handler: (...args: unknown[]) => unknown, extensionId?: string): { dispose(): void } {
     if (this.commandHandlers.has(command)) {
       throw new Error(`Command ${command} is already registered`);
     }
-    
+
     this.commandHandlers.set(command, handler);
-    
+
     const disposable = {
       dispose: () => {
         this.commandHandlers.delete(command);
       },
     };
-    
+
     // Track for extension cleanup
     if (extensionId) {
       this.disposables.get(extensionId)?.add(disposable);
     }
-    
+
     return disposable;
   }
-  
+
   async executeCommand<T = unknown>(command: string, ...args: unknown[]): Promise<T> {
     const handler = this.commandHandlers.get(command);
     if (!handler) {
       throw new Error(`Command ${command} not found`);
     }
-    
+
     return await Promise.resolve(handler(...args)) as T;
   }
-  
+
   getCommands(filterInternal: boolean = true): string[] {
     const commands = Array.from(this.commandHandlers.keys());
     if (filterInternal) {
@@ -298,11 +298,11 @@ export class ExtensionHost extends EventEmitter {
     }
     return commands;
   }
-  
+
   // ==========================================================================
   // ACTIVATION EVENTS
   // ==========================================================================
-  
+
   async triggerActivationEvent(event: string): Promise<void> {
     for (const [id, ext] of this.extensions) {
       if (ext.status === 'inactive' && this.matchesActivationEvent(ext.manifest, event)) {
@@ -314,46 +314,46 @@ export class ExtensionHost extends EventEmitter {
       }
     }
   }
-  
+
   private matchesActivationEvent(manifest: ExtensionManifest, event: string): boolean {
     if (!manifest.activationEvents) return false;
-    
+
     for (const activationEvent of manifest.activationEvents) {
       if (activationEvent === '*') return true;
       if (activationEvent === event) return true;
-      
+
       // Pattern matching
       if (activationEvent.startsWith('onLanguage:')) {
         const lang = activationEvent.slice('onLanguage:'.length);
         if (event === `onLanguage:${lang}`) return true;
       }
-      
+
       if (activationEvent.startsWith('onCommand:')) {
         const cmd = activationEvent.slice('onCommand:'.length);
         if (event === `onCommand:${cmd}`) return true;
       }
-      
+
       if (activationEvent.startsWith('workspaceContains:')) {
         const pattern = activationEvent.slice('workspaceContains:'.length);
         if (event.startsWith('workspaceContains:')) return true;
       }
-      
+
       if (activationEvent === 'onStartupFinished' && event === 'onStartupFinished') {
         return true;
       }
     }
-    
+
     return false;
   }
-  
+
   private shouldActivateOnStartup(manifest: ExtensionManifest): boolean {
     return manifest.activationEvents?.includes('*') || false;
   }
-  
+
   // ==========================================================================
   // CONTRIBUTIONS
   // ==========================================================================
-  
+
   private registerContributions(extensionId: string, contributes: ExtensionContributions): void {
     // Register commands
     if (contributes.commands) {
@@ -361,50 +361,50 @@ export class ExtensionHost extends EventEmitter {
         this.emit('commandContributed', { extensionId, command: cmd });
       }
     }
-    
+
     // Register keybindings
     if (contributes.keybindings) {
       for (const kb of contributes.keybindings) {
         this.emit('keybindingContributed', { extensionId, keybinding: kb });
       }
     }
-    
+
     // Register languages
     if (contributes.languages) {
       for (const lang of contributes.languages) {
         this.emit('languageContributed', { extensionId, language: lang });
       }
     }
-    
+
     // Register themes
     if (contributes.themes) {
       for (const theme of contributes.themes) {
         this.emit('themeContributed', { extensionId, theme });
       }
     }
-    
+
     // Register snippets
     if (contributes.snippets) {
       for (const snippet of contributes.snippets) {
         this.emit('snippetContributed', { extensionId, snippet });
       }
     }
-    
+
     // Register configuration
     if (contributes.configuration) {
       this.emit('configurationContributed', { extensionId, configuration: contributes.configuration });
     }
-    
+
     // Register views
     if (contributes.views) {
       this.emit('viewsContributed', { extensionId, views: contributes.views });
     }
-    
+
     // Register view containers
     if (contributes.viewsContainers) {
       this.emit('viewContainersContributed', { extensionId, viewsContainers: contributes.viewsContainers });
     }
-    
+
     // Register debuggers
     if (contributes.debuggers) {
       for (const debugger_ of contributes.debuggers) {
@@ -412,25 +412,25 @@ export class ExtensionHost extends EventEmitter {
       }
     }
   }
-  
+
   private unregisterContributions(extensionId: string, contributes: ExtensionContributions): void {
     this.emit('contributionsUnregistered', { extensionId });
   }
-  
+
   // ==========================================================================
   // CONTEXT
   // ==========================================================================
-  
+
   private createExtensionContext(id: string, manifest: ExtensionManifest, extensionPath: string): ExtensionContext {
     const globalStoragePath = `/extensions/${id}/globalStorage`;
     const storagePath = `/workspace/extensions/${id}/storage`;
     const logPath = `/extensions/${id}/logs`;
-    
+
     const globalState = this.createMemento(`${id}:global`);
     const workspaceState = this.createMemento(`${id}:workspace`);
     const secrets = this.createSecretStorage(id);
     const subscriptions: { dispose(): void }[] = [];
-    
+
     const context: ExtensionContext = {
       extensionId: id,
       extensionUri: extensionPath,
@@ -458,14 +458,14 @@ export class ExtensionHost extends EventEmitter {
       storageUri: { fsPath: storagePath, path: storagePath },
       logUri: { fsPath: logPath, path: logPath },
     };
-    
+
     return context;
   }
-  
+
   private createMemento(key: string): Memento {
     const storage = new Map<string, unknown>();
     const syncKeys = new Set<string>();
-    
+
     return {
       keys: () => Array.from(storage.keys()),
       get: <T>(k: string, defaultValue?: T): T | undefined => {
@@ -484,11 +484,11 @@ export class ExtensionHost extends EventEmitter {
       },
     };
   }
-  
+
   private createSecretStorage(extensionId: string): SecretStorage {
     const secrets = new Map<string, string>();
     const listeners = new Set<(e: { key: string }) => void>();
-    
+
     return {
       get: async (key: string) => secrets.get(key),
       store: async (key: string, value: string) => {
@@ -505,10 +505,10 @@ export class ExtensionHost extends EventEmitter {
       },
     };
   }
-  
+
   private createEnvVarCollection(): EnvironmentVariableCollection {
     const vars = new Map<string, EnvironmentVariableMutator>();
-    
+
     return {
       persistent: true,
       description: undefined,
@@ -521,23 +521,23 @@ export class ExtensionHost extends EventEmitter {
       clear: () => vars.clear(),
     };
   }
-  
+
   // ==========================================================================
   // QUERIES
   // ==========================================================================
-  
+
   getExtension(id: string): LoadedExtension | undefined {
     return this.extensions.get(id);
   }
-  
+
   getAllExtensions(): LoadedExtension[] {
     return Array.from(this.extensions.values());
   }
-  
+
   getActiveExtensions(): LoadedExtension[] {
     return this.getAllExtensions().filter(e => e.status === 'active');
   }
-  
+
   isExtensionActive(id: string): boolean {
     return this.extensions.get(id)?.status === 'active';
   }
@@ -549,12 +549,12 @@ export class ExtensionHost extends EventEmitter {
 
 export class ExtensionMarketplace extends EventEmitter {
   private baseUrl: string;
-  
+
   constructor(baseUrl: string = 'https://marketplace.aethel.dev/api') {
     super();
     this.baseUrl = baseUrl;
   }
-  
+
   async search(query: string, options?: {
     category?: string;
     sortBy?: 'relevance' | 'downloads' | 'rating' | 'updated';
@@ -562,7 +562,7 @@ export class ExtensionMarketplace extends EventEmitter {
     pageSize?: number;
     pageNumber?: number;
   }): Promise<SearchResult> {
-    // Mock implementation - replace with real API call
+    // Browser builds expose an empty marketplace until the provider contract is configured.
     return {
       extensions: [],
       totalCount: 0,
@@ -570,30 +570,30 @@ export class ExtensionMarketplace extends EventEmitter {
       pageNumber: options?.pageNumber || 1,
     };
   }
-  
+
   async getExtension(id: string): Promise<MarketplaceExtension | null> {
-    // Mock implementation
+    // Provider unavailable: do not invent marketplace metadata.
     return null;
   }
-  
+
   async getExtensionVersions(id: string): Promise<string[]> {
     return [];
   }
-  
+
   async downloadExtension(id: string, version?: string): Promise<ArrayBuffer> {
-    throw new Error('Not implemented');
+    throw new Error('EXTENSION_MARKETPLACE_PROVIDER_UNAVAILABLE');
   }
-  
+
   async installExtension(id: string, version?: string): Promise<void> {
     const data = await this.downloadExtension(id, version);
     // Unpack and install
     this.emit('extensionInstalled', { id, version });
   }
-  
+
   async getInstalled(): Promise<string[]> {
     return [];
   }
-  
+
   async getOutdated(): Promise<{ id: string; currentVersion: string; latestVersion: string }[]> {
     return [];
   }

@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary Studio/engine runtime module; never import from public/dashboard/admin route shells.
 import * as THREE from 'three';
 import { AAARenderer } from './aaa-renderer-impl';
 import { World, Entity, MeshComponent, TransformComponent } from './game-engine-core';
@@ -11,7 +12,7 @@ export class RenderSystem {
     update() {
         // 1. Check for new entities with MeshComponent
         const entities = this.world.getEntitiesWithComponents(['mesh', 'transform']);
-        
+
         for (const entity of entities) {
             this.syncEntity(entity);
         }
@@ -23,7 +24,7 @@ export class RenderSystem {
     private syncEntity(entity: Entity) {
         const meshComp = this.world.getComponent<MeshComponent>(entity.id, 'mesh');
         const transform = this.world.getComponent<TransformComponent>(entity.id, 'transform');
-        
+
         if (!meshComp || !transform) return;
 
         let mesh = this.meshMap.get(entity.id);
@@ -33,7 +34,7 @@ export class RenderSystem {
             mesh = new THREE.Mesh(meshComp.geometry, meshComp.material);
             mesh.castShadow = meshComp.castShadow;
             mesh.receiveShadow = meshComp.receiveShadow;
-            
+
             this.renderer.scene.add(mesh);
             this.meshMap.set(entity.id, mesh);
         }
@@ -42,7 +43,7 @@ export class RenderSystem {
         mesh.position.copy(transform.position);
         mesh.rotation.copy(transform.rotation);
         mesh.scale.copy(transform.scale);
-        
+
         // Update Material/Geometry if changed (Diffing logic omitted for perf)
     }
 }

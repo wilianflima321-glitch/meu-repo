@@ -23,6 +23,15 @@ type PersistedPayload = {
   routes: CompatibilityRouteMetric[]
 }
 
+type IdeSettingModel = {
+  findUnique(args: unknown): Promise<{ value: unknown } | null>
+  upsert(args: unknown): Promise<unknown>
+}
+
+type PrismaWithIdeSetting = typeof prisma & {
+  ideSetting?: IdeSettingModel
+}
+
 const METRICS_KEY = 'compatibility.route.metrics.v1'
 const METRICS_SCOPE = 'global'
 const DEFAULT_DEPRECATION_POLICY = 'phaseout_after_2_cycles'
@@ -97,7 +106,7 @@ function mergeMetric(store: CompatibilityRouteStore, metric: CompatibilityRouteM
 }
 
 async function readPersistedMetrics(): Promise<CompatibilityRouteMetric[]> {
-  const ideSetting = (prisma as any).ideSetting
+  const ideSetting = (prisma as PrismaWithIdeSetting).ideSetting
   if (!ideSetting) return []
 
   const row = await ideSetting.findUnique({
@@ -124,7 +133,7 @@ async function readPersistedMetrics(): Promise<CompatibilityRouteMetric[]> {
 }
 
 async function persistMetricsSnapshot(snapshot: CompatibilityRouteMetric[]) {
-  const ideSetting = (prisma as any).ideSetting
+  const ideSetting = (prisma as PrismaWithIdeSetting).ideSetting
   if (!ideSetting) return
 
   const payload: PersistedPayload = {

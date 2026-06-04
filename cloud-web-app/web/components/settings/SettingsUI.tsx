@@ -48,7 +48,7 @@ function SettingsUIView({ className }: { className?: string }) {
           <div>
             <span className="text-lg font-medium text-[var(--aethel-text-primary)]">Settings</span>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
-              Tune editor, workbench, and engine defaults without leaving the cockpit.
+              Tune editor, workspace, and engine defaults in one place.
             </p>
           </div>
         </div>

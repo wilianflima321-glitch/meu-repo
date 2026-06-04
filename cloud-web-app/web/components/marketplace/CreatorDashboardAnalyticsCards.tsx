@@ -71,7 +71,7 @@ export function RevenueChartCard({
                     isNotImplementedError(error) ? (
                         <EmptyState
                             icon={AlertCircle}
-                            title="Linha do tempo de receita indisponivel"
+                            title="Revenue timeline unavailable"
                             description={stripErrorCodePrefix(error.message)}
                         />
                     ) : (

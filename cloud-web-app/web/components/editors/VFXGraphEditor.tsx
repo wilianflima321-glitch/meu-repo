@@ -393,7 +393,7 @@ export default function VFXGraphEditor({ graph: externalGraph, onGraphChange, on
           >
             {isPlaying ? ' Stop' : ' Play'}
           </button>
-          <button type="button" aria-label="Add novo no ao VFX graph"
+          <button type="button" aria-label="Add new node to VFX graph"
             className="px-3 py-1 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded text-sm"
             onClick={() => setShowAddMenu(true)}
           >

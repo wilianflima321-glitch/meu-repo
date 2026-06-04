@@ -4,19 +4,46 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const ROOT = process.cwd()
-const partsPath = 'app/marketplace/marketplace-page.parts.tsx'
+const componentPaths = [
+  'app/marketplace/MarketplaceCard.tsx',
+  'app/marketplace/MarketplaceInstallReview.tsx',
+  'app/marketplace/MarketplaceFilters.tsx',
+  'app/marketplace/marketplace-page.parts.tsx',
+]
+const partsPath = componentPaths.join(', ')
 const dataPath = 'app/marketplace/marketplace-page.data.ts'
-const reportPath = path.join(ROOT, 'docs', 'MARKETPLACE_INSTALL_REVIEW_AUDIT.md')
-const parts = fs.readFileSync(path.join(ROOT, partsPath), 'utf8')
+const reportPath = path.join(
+  ROOT,
+  'docs',
+  'MARKETPLACE_INSTALL_REVIEW_AUDIT.md',
+)
+const parts = componentPaths
+  .map((file) => fs.readFileSync(path.join(ROOT, file), 'utf8'))
+  .join('\n')
 const data = fs.readFileSync(path.join(ROOT, dataPath), 'utf8')
 const failures = []
 
-for (const required of ['MarketplaceInstallReview', 'Permissions', 'Provenance', 'Rollback', 'Install preview', 'Request review']) {
-  if (!parts.includes(required)) failures.push(`${partsPath}: missing ${required}`)
+for (const required of [
+  'MarketplaceInstallReview',
+  'Permissions',
+  'Provenance',
+  'Rollback',
+  'Install preview',
+  'Request review',
+]) {
+  if (!parts.includes(required))
+    failures.push(`${partsPath}: missing ${required}`)
 }
-if (!data.includes('rollbackPlan')) failures.push(`${dataPath}: marketplace data must expose rollbackPlan`)
-if (/Confirm install/.test(parts)) failures.push(`${partsPath}: compact confirmation copy must be replaced by install review`)
-if (/public install metric|installs|downloads/i.test(parts) && !parts.includes('No public install metric yet')) {
+if (!data.includes('rollbackPlan'))
+  failures.push(`${dataPath}: marketplace data must expose rollbackPlan`)
+if (/Confirm install/.test(parts))
+  failures.push(
+    `${partsPath}: compact confirmation copy must be replaced by install review`,
+  )
+if (
+  /public install metric|installs|downloads/i.test(parts) &&
+  !parts.includes('No public install metric yet')
+) {
   failures.push(`${partsPath}: public metrics must remain evidence-backed`)
 }
 

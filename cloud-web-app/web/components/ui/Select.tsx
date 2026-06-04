@@ -34,7 +34,7 @@ export function Select({
   options,
   value,
   onChange,
-  placeholder = 'Selecione...',
+  placeholder = 'Select...',
   label,
   error,
   disabled = false,

@@ -76,7 +76,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/control-rig-system.ts',
     decision: 'wire',
-    ownerSurface: '/studio/rig',
+    ownerSurface: '/studio/animation',
     reason: 'Control Rig and Facial Animation need one animation authority for retargeting, constraints, and review packets.',
     risks: ['creative-gap', 'dead-code'],
     status: 'adapter-wired',
@@ -88,7 +88,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/facial-animation-system.ts',
     decision: 'wire',
-    ownerSurface: '/studio/facial',
+    ownerSurface: '/studio/animation',
     reason: 'Facial Studio needs FACS, lip-sync, and emotion contracts connected to review evidence before export.',
     risks: ['creative-gap', 'dead-code'],
     status: 'adapter-wired',
@@ -100,7 +100,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/world/world-streaming.tsx',
     decision: 'wire',
-    ownerSurface: '/studio/landscape',
+    ownerSurface: '/studio/level',
     reason: 'Large worlds require streaming/partition contracts to avoid browser stalls and hallucinated world state.',
     risks: ['creative-gap', 'parallel-runtime'],
     status: 'adapter-wired',
@@ -112,7 +112,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/ray-tracing.ts',
     decision: 'wire',
-    ownerSurface: '/studio/scene',
+    ownerSurface: '/studio/level',
     reason: 'Ray tracing is high-value render code, but it must stay evidence-gated behind performance traces instead of loading as a browser-default promise.',
     risks: ['creative-gap', 'bundle-risk'],
     status: 'adapter-wired',
@@ -124,7 +124,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/nanite-virtualized-geometry.ts',
     decision: 'wire',
-    ownerSurface: '/studio/scene',
+    ownerSurface: '/studio/level',
     reason: 'Virtualized geometry is strategic for AAA-scale scenes, but it must map to meshlet, culling, and memory evidence before product claims.',
     risks: ['creative-gap', 'bundle-risk'],
     status: 'adapter-wired',
@@ -184,7 +184,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/terrain/terrain-system.ts',
     decision: 'wire',
-    ownerSurface: '/studio/terrain',
+    ownerSurface: '/studio/level',
     reason: 'Terrain generation can be expensive and must expose LOD, heightmap, collider, and brush evidence before world-building claims.',
     risks: ['creative-gap', 'parallel-runtime'],
     status: 'adapter-wired',
@@ -196,7 +196,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/volumetric-clouds.ts',
     decision: 'wire',
-    ownerSurface: '/studio/scene',
+    ownerSurface: '/studio/level',
     reason: 'Atmosphere quality is valuable for premium visuals, but volumetric clouds must be render-gated by trace evidence to avoid fake cinematic claims.',
     risks: ['creative-gap', 'bundle-risk'],
     status: 'adapter-wired',
@@ -220,7 +220,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/webxr-vr-system.ts',
     decision: 'wire',
-    ownerSurface: '/studio/scene',
+    ownerSurface: '/studio/level',
     reason: 'Immersive previews can differentiate Aethel, but XR must remain device/capability held to avoid comfort and input-latency issues.',
     risks: ['creative-gap', 'bundle-risk'],
     status: 'adapter-wired',
@@ -256,7 +256,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/environment/weather-system.tsx',
     decision: 'wire',
-    ownerSurface: '/studio/scene',
+    ownerSurface: '/studio/level',
     reason: 'Weather and atmosphere affect gameplay, lighting, and performance; they must be evidence-visible before large-world claims.',
     risks: ['creative-gap', 'bundle-risk'],
     status: 'adapter-wired',
@@ -268,7 +268,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/camera/camera-system.tsx',
     decision: 'wire',
-    ownerSurface: '/studio/scene',
+    ownerSurface: '/studio/level',
     reason: 'Camera feel is core to games and films; camera runtime needs continuity, shake, follow, and comfort evidence.',
     risks: ['creative-gap', 'dead-code'],
     status: 'adapter-wired',
@@ -329,7 +329,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
     modulePath: 'lib/networking-multiplayer.ts',
     decision: 'wire',
     ownerSurface: '/studio/level',
-    reason: 'Multiplayer quality needs authoritative networking, rollback, and matchmaking evidence before any live co-op/gameplay claim.',
+    reason: 'Multiplayer quality needs authoritative networking, rollback, and matchmaking evidence before live co-op/gameplay claims.',
     risks: ['parallel-runtime', 'bundle-risk'],
     status: 'adapter-wired',
     acceptanceCriteria: [
@@ -340,7 +340,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/foliage-system.ts',
     decision: 'wire',
-    ownerSurface: '/studio/foliage',
+    ownerSurface: '/studio/level',
     reason: 'Foliage density is a major visual-quality gap; it must be evidence-gated by instance, LOD, culling, and performance traces.',
     risks: ['creative-gap', 'bundle-risk'],
     status: 'adapter-wired',
@@ -352,7 +352,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/virtual-texture-system.ts',
     decision: 'wire',
-    ownerSurface: '/studio/material',
+    ownerSurface: '/studio/level',
     reason: 'Virtual textures can unlock large worlds and high-resolution materials, but tile cache and feedback-buffer work must remain worker-held.',
     risks: ['creative-gap', 'bundle-risk'],
     status: 'adapter-wired',
@@ -376,7 +376,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/environment/day-night-cycle.tsx',
     decision: 'wire',
-    ownerSurface: '/studio/scene',
+    ownerSurface: '/studio/level',
     reason: 'Day/night cycles affect lighting, gameplay, atmosphere, and performance; they need transition and playtest evidence before world claims.',
     risks: ['creative-gap', 'bundle-risk'],
     status: 'adapter-wired',
@@ -412,7 +412,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/post-process-volume.ts',
     decision: 'wire',
-    ownerSurface: '/studio/scene',
+    ownerSurface: '/studio/level',
     reason: 'Shot and zone-based post-process volumes are premium render controls, but they need performance traces before becoming final-quality claims.',
     risks: ['creative-gap', 'bundle-risk'],
     status: 'adapter-wired',
@@ -424,7 +424,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/aaa-material-system.ts',
     decision: 'wire',
-    ownerSurface: '/studio/material',
+    ownerSurface: '/studio/level',
     reason: 'Material quality is central to best-in-market games/films, but PBR and shader graph work must be governed by preview, license, and performance evidence.',
     risks: ['creative-gap', 'bundle-risk'],
     status: 'adapter-wired',
@@ -437,7 +437,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
     modulePath: 'lib/commands/command-handlers.tsx',
     decision: 'monitor',
     ownerSurface: 'ide-command-bus',
-    reason: 'Command handling is large and valuable, but it should be consolidated through the IDE command bus before any new command surface grows.',
+    reason: 'Command handling is large and valuable, but it should be consolidated through the IDE command bus before new command surfaces grow.',
     risks: ['parallel-runtime', 'bundle-risk'],
     status: 'monitoring',
     acceptanceCriteria: [

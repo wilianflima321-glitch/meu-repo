@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import AgentsWindow from '@/components/agents/AgentsWindow'
 import AIChatSessionBanner from '@/components/ai-chat/AIChatSessionBanner'
 import type { ChatMessage } from '@/components/ai-chat/ai-chat-container.types'
@@ -13,6 +13,20 @@ import { DEFAULT_MODELS } from '@/components/ide/AIChatPanelPro.types'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 const MODELS = DEFAULT_MODELS
+
+type PreviewInspectRequestDetail = {
+  message?: string
+  projectId?: string
+  filePath?: string
+  title?: string
+  source?: string
+  elementInfo?: {
+    tag: string
+    id?: string
+    className?: string
+    textContent?: string
+  }
+}
 
 type AIChatPanelContainerProps = {
   projectId?: string
@@ -58,34 +72,74 @@ export default function AIChatPanelContainer({ projectId: workspaceProjectId }: 
     [handleSendMessage]
   )
 
+  useEffect(() => {
+    const onPreviewInspectRequest = (event: Event) => {
+      const detail = (event as CustomEvent<PreviewInspectRequestDetail>).detail
+      if (!detail?.message) return
+
+      const element = detail.elementInfo
+      const selector = element
+        ? [element.tag, element.id ? `#${element.id}` : '', element.className ? `.${element.className}` : ''].join('')
+        : 'selected preview element'
+      const prompt = [
+        `Preview inspector request: ${detail.message}`,
+        `Target: ${selector}`,
+        detail.filePath ? `File: ${detail.filePath}` : null,
+        element?.textContent ? `Visible text: ${element.textContent}` : null,
+        'Return a scoped proposal with the smallest safe diff, validation steps, rollback note, and evidence impact.',
+      ]
+        .filter(Boolean)
+        .join('\n')
+
+      setActiveRail('composer')
+      setSource(detail.source || 'preview-inspector')
+      setMission(detail.message)
+      if (detail.projectId) setProjectId(detail.projectId)
+      void handleSendMessage(prompt)
+    }
+
+    window.addEventListener('aethel.preview.inspectRequest', onPreviewInspectRequest)
+    return () => window.removeEventListener('aethel.preview.inspectRequest', onPreviewInspectRequest)
+  }, [handleSendMessage])
+
   const rails = [
-    { id: 'composer' as const, label: 'Composer', hint: 'Chat, voice, files' },
-    { id: 'agents' as const, label: 'Agents', hint: 'Locks, replay, cost' },
+    { id: 'composer' as const, label: 'Copilot' },
+    { id: 'agents' as const, label: 'Agents' },
   ]
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex items-center gap-1 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_84%,transparent)] px-3 py-2" role="tablist" aria-label="AI cockpit rail">
-        {rails.map((rail) => {
-          const active = activeRail === rail.id
-          return (
-            <button
-              key={rail.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setActiveRail(rail.id)}
-              className={`rounded-lg px-3 py-1.5 text-left ${focusClass} ${
-                active
-                  ? 'bg-[var(--aethel-surface-elevated)] text-[var(--aethel-text-primary)] shadow-[var(--aethel-shadow-soft)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-              }`}
-            >
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.14em]">{rail.label}</span>
-              <span className="block text-[10px] normal-case tracking-normal text-[var(--aethel-text-muted)]">{rail.hint}</span>
-            </button>
-          )
-        })}
+      <div
+        className="flex items-center justify-between gap-2 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_84%,transparent)] px-3 py-2"
+        role="tablist"
+        aria-label="AI side rail"
+        data-ai-cockpit-rail="compact"
+      >
+        <div className="flex items-center gap-1 rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)] p-1">
+          {rails.map((rail) => {
+            const active = activeRail === rail.id
+            return (
+              <button
+                key={rail.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setActiveRail(rail.id)}
+                className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] ${focusClass} ${
+                  active
+                    ? 'bg-[var(--aethel-surface-elevated)] text-[var(--aethel-text-primary)] shadow-[var(--aethel-shadow-soft)]'
+                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+                }`}
+              >
+                {rail.label}
+              </button>
+            )
+          })}
+        </div>
+        <div className="hidden items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)] sm:flex">
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1">cost metered</span>
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1">replay ready</span>
+        </div>
       </div>
 
       {activeRail === 'agents' ? (

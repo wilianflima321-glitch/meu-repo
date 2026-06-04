@@ -9,7 +9,7 @@ export default function StudioRuntimeLoadingFallback() {
           <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_center,color-mix(in_srgb,var(--aethel-primary)_22%,transparent),transparent_60%)]" />
         </div>
         <div className="space-y-1 text-center">
-          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Inicializando studio</p>
+          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Loading studio</p>
           <p className="text-xs text-[var(--aethel-text-tertiary)]">Loading Aethel runtime, commands, and context.</p>
         </div>
       </div>

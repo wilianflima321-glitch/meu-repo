@@ -3,14 +3,16 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback';
 
 export const dynamic = 'force-dynamic';
 
 const routeLogger = createComponentLogger('api.auth.profile');
 
 export async function GET(req: NextRequest) {
+  let authUser: ReturnType<typeof requireAuth> | null = null;
   try {
-    const authUser = requireAuth(req);
+    authUser = requireAuth(req);
 
     // Get user
     const user = await prisma.user.findUnique({
@@ -70,6 +72,36 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     routeLogger.error('Profile error', error);
+
+    if (authUser && shouldUseLocalEvidenceFallback(req, error)) {
+      return localEvidenceJson(
+        req,
+        error,
+        {
+          profile: {
+            id: authUser.userId,
+            email: authUser.email,
+            name: 'Aethel Visual QA',
+            avatar: undefined,
+            plan: authUser.plan ?? 'studio',
+            createdAt: undefined,
+            emailVerified: true,
+            mfaEnabled: false,
+            twoFactorEnabled: false,
+            language: 'en',
+            theme: 'dark',
+            timezone: 'UTC',
+            notifications: {
+              email: true,
+              push: false,
+              marketing: false,
+            },
+            role: authUser.role ?? 'admin',
+          },
+        },
+        { surface: 'auth.profile', state: 'held' },
+      );
+    }
 
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;

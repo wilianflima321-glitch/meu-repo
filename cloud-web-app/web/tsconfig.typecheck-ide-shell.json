@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "noEmit": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "components/ide/CommandPalette.tsx",
+    "components/ide/CommandPalette.parts.tsx",
+    "components/ide/DebugPanel.tsx",
+    "components/ide/DebugPanel.parts.tsx",
+    "components/ide/FileExplorerPro.tsx",
+    "components/ide/FileExplorerPro.parts.tsx",
+    "components/ide/InlineCompletion.tsx",
+    "components/ide/InlineCompletion.parts.tsx",
+    "components/ide/PreviewPanel.tsx",
+    "components/ide/PreviewPanel.parts.ts",
+    "components/ide/PreviewRuntimeToolbar.tsx",
+    "components/ide/PreviewRuntimeToolbar.parts.tsx",
+    "types/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "tests/e2e/**/*",
+    "__tests__/**/*"
+  ]
+}

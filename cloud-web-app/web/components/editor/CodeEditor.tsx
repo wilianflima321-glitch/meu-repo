@@ -9,7 +9,7 @@ const MonacoEditor = dynamic(() => import('./MonacoEditor'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)]">
-      Inicializando editor...
+      Loading editor...
     </div>
   ),
 });
@@ -22,7 +22,7 @@ interface CodeEditorProps {
 }
 
 export default function CodeEditor({
-  initialValue = '// Comece a digitar seu codigo aqui...',
+  initialValue = '// Start typing your code here...',
   language = 'typescript',
   filename = 'untitled.ts',
   onSave,
@@ -69,7 +69,7 @@ export default function CodeEditor({
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{filename}</span>
           {isDirty && (
-            <span className="w-2 h-2 rounded-full bg-[var(--aethel-warning)]" title="Nao salvo" />
+            <span className="w-2 h-2 rounded-full bg-[var(--aethel-warning)]" title="Unsaved" />
           )}
         </div>
         <div className="flex items-center gap-2">

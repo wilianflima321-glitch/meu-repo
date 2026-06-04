@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary Studio/engine runtime module; never import from public/dashboard/admin route shells.
 import * as THREE from 'three';
 import { Track, SequenceConfig, Easings, KeyframeValue } from './sequencer-cinematics';
 
@@ -12,10 +13,10 @@ export class SequencerRuntime {
   private tracks: Track[];
   private _currentTime: number = 0;
   private _isPlaying: boolean = false;
-  
+
   // Cache for rapid lookup
   private trackMap: Map<string, Track>;
-  
+
   constructor(config: SequenceConfig, tracks: Track[]) {
     this.config = config;
     this.tracks = tracks;
@@ -42,7 +43,7 @@ export class SequencerRuntime {
         this._currentTime = 0;
       }
     }
-    
+
     // Apply tracks
     for (const track of this.tracks) {
       if (!track.enabled || track.muted) continue;
@@ -58,7 +59,7 @@ export class SequencerRuntime {
     // Find surrounding keys
     let k1 = keys[0];
     let k2 = keys[0];
-    
+
     for (let i = 0; i < keys.length; i++) {
         if (keys[i].time <= time) {
             k1 = keys[i];
@@ -79,7 +80,7 @@ export class SequencerRuntime {
     const t = (time - k1.time) / (k2.time - k1.time);
     const easedT = k1.easing(t);
     const blendedValue = this.lerp(k1.value, k2.value, easedT);
-    
+
     this.applyValue(track, blendedValue, sceneConfig);
   }
 
@@ -109,7 +110,7 @@ export class SequencerRuntime {
              sceneConfig.camera.updateProjectionMatrix();
         }
       }
-      
+
       // More property mappings would go here (transform, etc)
       // This bridges the "Data" to the "Engine"
   }

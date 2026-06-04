@@ -4,11 +4,12 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ArrowRight, Menu, Search, X } from 'lucide-react'
+import { ArrowRight, Menu, X } from 'lucide-react'
 import { PUBLIC_NAV_LINKS } from '@/lib/navigation/surfaces'
 
-const PRIMARY_LINKS = PUBLIC_NAV_LINKS.slice(0, 5)
-const SECONDARY_LINKS = PUBLIC_NAV_LINKS.slice(5)
+const PRIMARY_HREFS = new Set(['/pricing', '/compare', '/docs'])
+const PRIMARY_LINKS = PUBLIC_NAV_LINKS.filter((link) => PRIMARY_HREFS.has(link.href))
+const SECONDARY_LINKS = PUBLIC_NAV_LINKS.filter((link) => !PRIMARY_HREFS.has(link.href))
 
 function isActive(pathname: string, href: string) {
   if (href === '/') return pathname === '/'
@@ -31,9 +32,9 @@ export default function PublicHeader() {
       <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--aethel-border-primary)] bg-[rgba(8,10,16,0.86)] shadow-[0_18px_70px_rgba(2,6,23,0.26)] backdrop-blur-xl">
         <nav aria-label="Primary navigation" className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link href="/" aria-label="Aethel home" className="group inline-flex min-w-0 items-center gap-3 rounded-2xl pr-2 text-[var(--aethel-text-primary)] outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)]">
-            <Image src="/branding/aethel-mark.svg" alt="" width={32} height={32} sizes="32px" className="rounded-xl shadow-[0_0_0_1px_var(--aethel-border-primary)]" priority />
+            <Image src="/branding/aethel-mark.svg" alt="" width={32} height={32} sizes="32px" className="rounded-[10px] shadow-[0_0_0_1px_var(--aethel-border-primary)]" priority />
             <span className="hidden items-center gap-2 sm:inline-flex">
-              <span className="text-sm font-semibold tracking-[-0.02em]">Aethel</span>
+              <span className="text-sm font-semibold tracking-[-0.03em]">aethel</span>
             </span>
           </Link>
 
@@ -55,16 +56,33 @@ export default function PublicHeader() {
                 </Link>
               )
             })}
+            <details className="group relative">
+              <summary className="cursor-pointer list-none rounded-full px-3 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_52%,transparent)] hover:text-[var(--aethel-text-primary)]">
+                More
+              </summary>
+              <div className="absolute left-1/2 top-11 z-50 hidden min-w-48 -translate-x-1/2 gap-1 rounded-2xl border border-[var(--aethel-border-primary)] bg-[rgba(8,10,16,0.98)] p-2 shadow-[0_24px_90px_rgba(2,6,23,0.42)] group-open:grid">
+                {SECONDARY_LINKS.map((link) => {
+                  const active = isActive(pathname, link.href)
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      aria-current={active ? 'page' : undefined}
+                      className={`rounded-xl px-3 py-2 text-sm transition ${
+                        active
+                          ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+                          : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_55%,transparent)] hover:text-[var(--aethel-text-primary)]'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  )
+                })}
+              </div>
+            </details>
           </div>
 
           <div className="hidden items-center gap-2 md:flex">
-            <Link
-              href="/docs"
-              className="inline-flex h-10 items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] px-3 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
-            >
-              <Search className="h-3.5 w-3.5" />
-              Docs
-            </Link>
             <Link
               href="/login"
               className="inline-flex h-10 items-center justify-center rounded-full border border-[var(--aethel-border-subtle)] px-4 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
@@ -94,7 +112,7 @@ export default function PublicHeader() {
         {mobileOpen ? (
           <div className="border-t border-[var(--aethel-border-primary)] bg-[rgba(8,10,16,0.96)] px-4 py-4 shadow-2xl md:hidden">
             <div className="grid gap-2">
-              {[...PRIMARY_LINKS, ...SECONDARY_LINKS].map((link) => {
+              {PRIMARY_LINKS.map((link) => {
                 const active = isActive(pathname, link.href)
                 return (
                   <Link
@@ -112,12 +130,37 @@ export default function PublicHeader() {
                   </Link>
                 )
               })}
+              <details className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-4 py-3">
+                <summary className="cursor-pointer text-sm font-medium text-[var(--aethel-text-secondary)]">
+                  More
+                </summary>
+                <div className="mt-3 grid gap-2">
+                  {SECONDARY_LINKS.map((link) => {
+                    const active = isActive(pathname, link.href)
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMobileOpen(false)}
+                        aria-current={active ? 'page' : undefined}
+                        className={`rounded-xl px-3 py-2 text-sm ${
+                          active
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+                            : 'text-[var(--aethel-text-tertiary)]'
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    )
+                  })}
+                </div>
+              </details>
               <Link
                 href="/dashboard?onboarding=1&source=mobile-header"
                 onClick={() => setMobileOpen(false)}
                 className="mt-2 inline-flex h-12 items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] text-sm font-semibold text-[var(--aethel-surface-primary)]"
               >
-                Start a mission
+                Start building
               </Link>
             </div>
           </div>

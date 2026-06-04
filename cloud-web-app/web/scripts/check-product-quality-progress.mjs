@@ -50,6 +50,18 @@ function requirePattern(relativePath, pattern, reason) {
   }
 }
 
+function requirePatternAcross(relativePaths, pattern, reason) {
+  const missingFiles = relativePaths.filter((relativePath) => !exists(relativePath))
+  if (missingFiles.length) {
+    failures.push(`${missingFiles.join(', ')}: missing (${reason})`)
+    return
+  }
+  const content = relativePaths.map((relativePath) => read(relativePath)).join('\n')
+  if (!pattern.test(content)) {
+    failures.push(`${relativePaths.join(' + ')}: missing pattern ${pattern} (${reason})`)
+  }
+}
+
 const storyFiles = walk(
   path.join(ROOT, 'components'),
   (file) => file.endsWith('.stories.tsx')
@@ -71,11 +83,25 @@ requirePattern('components/ide/GlobalCommandSurface.tsx', /KeyboardShortcutsDial
 requirePattern('components/ide/GlobalCommandSurface.tsx', /event\.key === '\?'/, 'question-mark shortcut must open help')
 requirePattern('components/ide/fullscreen/types.ts', /'research'/, 'Workbench sidebar must expose a research tab')
 requirePattern('components/ide/fullscreen/WorkbenchSidebar.tsx', /AethelResearch/, 'agentic research must be available inside the IDE sidebar')
-requirePattern('components/editor/MonacoEditorPro.tsx', /InlineAIChat/, 'Monaco must expose the inline AI chat surface')
+requirePatternAcross(
+  ['components/editor/MonacoEditorPro.tsx', 'components/editor/MonacoEditorPro.shell.tsx'],
+  /InlineAIChat/,
+  'Monaco must expose the inline AI chat surface',
+)
 requirePattern('components/editor/MonacoEditorPro.actions.ts', /aethel\.inlineChat/, 'Monaco must register a dedicated inline chat action')
 requirePattern('components/editor/MonacoEditorPro.actions.ts', /KeyCode\.KeyL/, 'Inline chat must use Cmd/Ctrl+L for Cursor-grade local flow')
 requireFile('lib/admin/admin-consolidation.ts', 'admin console must be consolidated into 6 operating areas')
-requirePattern('app/admin/admin-ops-layout-client.tsx', /ADMIN_CONSOLIDATED_SECTIONS/, 'admin sidebar must use the consolidated registry')
+requirePatternAcross(
+  [
+    'app/admin/admin-ops-layout-client.tsx',
+    'app/admin/admin-ops-layout.parts.tsx',
+    'app/admin/admin-ops-layout.sidebar.tsx',
+    'app/admin/admin-ops-layout.header.tsx',
+    'app/admin/admin-ops-layout.model.tsx',
+  ],
+  /ADMIN_CONSOLIDATED_SECTIONS/,
+  'admin sidebar must use the consolidated registry',
+)
 requirePattern('package.json', /qa:admin-consolidation/, 'enterprise gate must include admin consolidation')
 requireFile('lib/project-scaffolds.ts', 'onboarding must have reusable real scaffold definitions')
 requirePattern('lib/project-scaffolds.ts', /game-3d/, 'game onboarding scaffold must exist')
@@ -110,7 +136,7 @@ requireFile('app/api/auth/magic-link/request/route.ts', 'magic-link request rout
 requireFile('app/api/auth/magic-link/verify/route.ts', 'magic-link verify route must exist')
 requireFile('lib/server/webauthn-passkeys.ts', 'auth UX must support WebAuthn passkey rollout')
 requireFile('components/settings/PasskeysPanel.tsx', 'settings security must expose passkey registration')
-requirePattern('app/security/page.tsx', /Passkeys em rollout tecnico/, 'public security page must describe passkeys accurately')
+requirePattern('app/security/page.tsx', /passkeys in technical rollout/i, 'public security page must describe passkeys accurately')
 requirePattern('package.json', /qa:auth-modernization/, 'enterprise gate must include auth modernization QA')
 requireFile('scripts/check-mobile-pwa-readiness.mjs', 'mobile/PWA readiness gate must exist')
 requirePattern('package.json', /qa:mobile-pwa-readiness/, 'enterprise gate must include mobile/PWA readiness')

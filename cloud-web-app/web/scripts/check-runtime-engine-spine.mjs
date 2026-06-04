@@ -27,6 +27,18 @@ function requirePattern(relativePath, pattern, reason) {
   if (!pattern.test(content)) failures.push(`${relativePath}: missing pattern ${pattern} (${reason})`)
 }
 
+function requirePatternAny(relativePaths, pattern, reason) {
+  const existing = relativePaths.filter(exists)
+  if (existing.length === 0) {
+    failures.push(`${relativePaths.join(', ')}: missing (${reason})`)
+    return
+  }
+  const content = existing.map(read).join('\n')
+  if (!pattern.test(content)) failures.push(`${relativePaths.join(', ')}: missing pattern ${pattern} (${reason})`)
+}
+
+const agentToolRegistryFiles = ['lib/production/agent-tool-bus.ts', 'lib/production/agent-tool-bus-catalog.ts']
+
 requireFile('lib/runtime/runtime-engine-spine.ts', 'runtime engine spine contracts must exist')
 requirePattern('lib/runtime/runtime-engine-spine.ts', /hybrid|wgpu-native|cloud-renderer|browser-preview|held/i, 'runtime must model hybrid wgpu/browser/cloud targets')
 requirePattern('lib/runtime/runtime-engine-spine.ts', /manual-consent-only/, 'toolchain downloads must require manual consent')
@@ -69,28 +81,29 @@ requirePattern('lib/runtime/local-wgpu-sidecar.ts', /noDownloads: true/, 'sideca
 requirePattern('lib/runtime/local-wgpu-sidecar.ts', /noMainThread: true/, 'sidecar contracts must stay off the browser main thread')
 requirePattern('lib/runtime/local-wgpu-sidecar.ts', /supportsOffscreenRender/, 'sidecar probe must report offscreen render support')
 
+const localRuntimeBridgeFiles = ['lib/device/local-runtime-bridge.ts', 'lib/device/local-runtime-bridge.normalize.ts']
 requireFile('lib/device/local-runtime-bridge.ts', 'local runtime report must expose native toolchain capabilities')
-requirePattern('lib/device/local-runtime-bridge.ts', /rendererBackends/, 'local runtime must report renderer backends')
-requirePattern('lib/device/local-runtime-bridge.ts', /assetTools/, 'local runtime must report asset tools')
-requirePattern('lib/device/local-runtime-bridge.ts', /recast-detour/, 'local runtime bridge must normalize Recast/Detour support')
-requirePattern('lib/device/local-runtime-bridge.ts', /zig-toolchain/, 'local runtime bridge must normalize Zig toolchain support')
-requirePattern('lib/device/local-runtime-bridge.ts', /zig-c-compiler/, 'local runtime bridge must normalize Zig C/C++ compiler support')
-requirePattern('lib/device/local-runtime-bridge.ts', /ozz-animation/, 'local runtime bridge must normalize Ozz Animation support')
-requirePattern('lib/device/local-runtime-bridge.ts', /unreal-export-bridge/, 'local runtime bridge must normalize external engine export bridge support')
-requirePattern('lib/device/local-runtime-bridge.ts', /mediaTools/, 'local runtime must report media tools')
-requirePattern('lib/device/local-runtime-bridge.ts', /shaderTools/, 'local runtime must report shader tools')
-requirePattern('lib/device/local-runtime-bridge.ts', /toolVersions/, 'local runtime must report tool versions')
-requirePattern('lib/device/local-runtime-bridge.ts', /toolDigests/, 'local runtime must report tool digests')
-requirePattern('lib/device/local-runtime-bridge.ts', /supportsOffscreenRender/, 'local runtime must report offscreen render support')
+requirePatternAny(localRuntimeBridgeFiles, /rendererBackends/, 'local runtime must report renderer backends')
+requirePatternAny(localRuntimeBridgeFiles, /assetTools/, 'local runtime must report asset tools')
+requirePatternAny(localRuntimeBridgeFiles, /recast-detour/, 'local runtime bridge must normalize Recast/Detour support')
+requirePatternAny(localRuntimeBridgeFiles, /zig-toolchain/, 'local runtime bridge must normalize Zig toolchain support')
+requirePatternAny(localRuntimeBridgeFiles, /zig-c-compiler/, 'local runtime bridge must normalize Zig C/C++ compiler support')
+requirePatternAny(localRuntimeBridgeFiles, /ozz-animation/, 'local runtime bridge must normalize Ozz Animation support')
+requirePatternAny(localRuntimeBridgeFiles, /unreal-export-bridge/, 'local runtime bridge must normalize external engine export bridge support')
+requirePatternAny(localRuntimeBridgeFiles, /mediaTools/, 'local runtime must report media tools')
+requirePatternAny(localRuntimeBridgeFiles, /shaderTools/, 'local runtime must report shader tools')
+requirePatternAny(localRuntimeBridgeFiles, /toolVersions/, 'local runtime must report tool versions')
+requirePatternAny(localRuntimeBridgeFiles, /toolDigests/, 'local runtime must report tool digests')
+requirePatternAny(localRuntimeBridgeFiles, /supportsOffscreenRender/, 'local runtime must report offscreen render support')
 requireFile('components/studio/StudioLocalRuntimeCapsule.tsx', 'Studio must expose local runtime capability state to end users')
 requirePattern('components/studio/StudioLocalRuntimeCapsule.tsx', /LOCAL_RUNTIME_CAPABILITY_REQUEST_EVENT/, 'Studio Local capsule must request fresh native capability probes')
-requirePattern('app/studio/StudioMissionControl.tsx', /StudioLocalRuntimeCapsule/, 'Studio Mission Control must show the local runtime capsule')
+requirePattern('app/studio/StudioRunboardActions.tsx', /StudioLocalRuntimeCapsule/, 'Studio runboard must show the local runtime capsule')
 requireFile('lib/studio-local/release-manifest.ts', 'Studio Local release/capability manifest must drive public runtime truth surfaces')
 requirePattern('lib/studio-local/release-manifest.ts', /RuntimeReleaseManifest/, 'Studio Local manifest must expose a typed release manifest')
 requirePattern('lib/studio-local/release-manifest.ts', /signedInstallers:\s*'held'/, 'Studio Local signed installers must stay held until release evidence exists')
 requirePattern('lib/studio-local/release-manifest.ts', /Cloud Stream[\s\S]*NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL/, 'Cloud Stream must disclose configured-url fallback conditions')
-requirePattern('app/download/page.tsx', /STUDIO_LOCAL_RELEASE_MANIFEST/, 'download page must render from the Studio Local manifest instead of hardcoded release theater')
-requirePattern('app/download/page.tsx', /Fallback:/, 'download page must explain runtime fallback reasons')
+requirePattern('app/download/download-page.parts.tsx', /STUDIO_LOCAL_RELEASE_MANIFEST/, 'download page must render from the Studio Local manifest instead of hardcoded release theater')
+requirePattern('app/download/download-page.parts.tsx', /Fallback:/, 'download page must explain runtime fallback reasons')
 
 const studioLocalContracts = '../../apps/studio-local/src-tauri/src/contracts.rs'
 const studioLocalProbe = '../../apps/studio-local/src-tauri/src/probe.rs'
@@ -113,12 +126,13 @@ requirePattern(studioLocalProbe, /godot/, 'Studio Local probe must detect Godot 
 requirePattern('../../apps/studio-local/src-tauri/src/sidecars.rs', /BuildExport[\s\S]*NativeCompiler/, 'build/export lane must require native compiler sidecar when running locally')
 
 requireFile('lib/production/agent-tool-bus.ts', 'agent tool bus must govern runtime engine tools')
+requireFile('lib/production/agent-tool-bus-catalog.ts', 'runtime engine tool contracts may live in the catalog split')
 for (const tool of ['renderer-probe', 'asset-optimize', 'shader-compile', 'render-submit', 'render-validate']) {
-  requirePattern('lib/production/agent-tool-bus.ts', new RegExp(tool), `${tool} must be a governed agent tool`)
+  requirePatternAny(agentToolRegistryFiles, new RegExp(tool), `${tool} must be a governed agent tool`)
 }
-requirePattern('lib/production/agent-tool-bus.ts', /render backend contract/, 'render-submit must require backend contract evidence')
-requirePattern('lib/production/agent-tool-bus.ts', /asset graph/, 'render-submit must require asset graph evidence')
-requirePattern('lib/production/agent-tool-bus.ts', /validation graph/, 'render-submit must require validation graph evidence')
+requirePatternAny(agentToolRegistryFiles, /render backend contract/, 'render-submit must require backend contract evidence')
+requirePatternAny(agentToolRegistryFiles, /asset graph/, 'render-submit must require asset graph evidence')
+requirePatternAny(agentToolRegistryFiles, /validation graph/, 'render-submit must require validation graph evidence')
 
 requireFile('lib/production/parallel-agent-work-contract.ts', 'parallel agents must be able to request runtime tools')
 requirePattern('lib/production/parallel-agent-work-contract.ts', /asset-optimize/, 'asset agents must expose asset optimization')

@@ -42,9 +42,14 @@ requirePattern(source, /blockedClaims:\s*\[[\s\S]*'AAA alone'[\s\S]*'Unreal-grad
 requirePattern(source, /humanReviewRequired:\s*true/, 'human review must be mandatory')
 requirePattern('lib/production/game-production-bible.ts', /deepBible:\s*DeepProductionBible/, 'compact bible must include deep bible')
 requirePattern('lib/production/game-production-bible.ts', /buildDeepGameProductionBible/, 'compact bible must build deep bible')
-requirePattern('app/studio/StudioMissionControl.tsx', /deepBible\.scenes\.length/, 'Studio must surface deep bible summary without full text')
-requirePattern('components/evidence/EvidenceCenter.tsx', /deepBible\.evidenceModel\.requiredEvidence\.length/, 'Evidence Center must surface deep bible gate count')
-requirePattern('components/evidence/EvidenceCenter.tsx', /productionBiblePlan\.cinematicEvidence\.state/, 'Evidence Center must surface compact cinematic evidence state')
+requirePattern('app/studio/StudioGameScopeEvidencePanel.tsx', /deepBible\.scenes\.length/, 'Studio must surface deep bible summary without full text')
+const evidenceCenterSurface = `${read('components/evidence/EvidenceCenter.tsx')}\n${read('components/evidence/EvidenceCenter.parts.tsx')}`
+if (!/deepBible\.evidenceModel\.requiredEvidence\.length/.test(evidenceCenterSurface)) {
+  failures.push('components/evidence/EvidenceCenter.tsx: missing Evidence Center must surface deep bible gate count')
+}
+if (!/productionBiblePlan\.cinematicEvidence\.state/.test(evidenceCenterSurface)) {
+  failures.push('components/evidence/EvidenceCenter.tsx: missing Evidence Center must surface compact cinematic evidence state')
+}
 requirePattern('lib/ai-agent-system.ts', /Deep bible:/, 'agents must receive deep bible context')
 requirePattern('lib/ai-agent-system.ts', /Cinematic evidence:/, 'agents must receive cinematic evidence context')
 requirePattern('docs/DEEP_GAME_PRODUCTION_BIBLE_V22.md', /Do not expose the whole bible as a wall of text/, 'docs must protect UX from text overload')

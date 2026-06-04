@@ -274,7 +274,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
                     textTransform: 'capitalize',
                   }}
                 >
-                  {f === 'all' ? 'Todos' : f}
+                  {f === 'all' ? 'All' : f}
                 </button>
               ))}
             </div>
@@ -284,7 +284,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
               {filteredProfiles.map((profile) => (
                 <button type="button"
                   key={profile.id}
-                  aria-label={`Selecionar perfil de terminal ${profile.name}`}
+                  aria-label={`Select terminal profile ${profile.name}`}
                   onClick={() => {
                     onSelect(profile);
                     setIsOpen(false);
@@ -483,7 +483,7 @@ export const TerminalTab: React.FC<TerminalTabProps> = ({
             e.stopPropagation();
             onClose();
           }}
-          aria-label="Fechar seletor de perfis de terminal"
+          aria-label="Close terminal profile selector"
           style={{
             width: '20px',
             height: '20px',

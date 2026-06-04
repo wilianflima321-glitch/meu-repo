@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 
 import { MagicWandChat } from '@/components/preview/MagicWandChat';
+import { PreviewContextDock } from '@/components/preview/PreviewContextDock';
 import {
   PreviewFailedState,
   PreviewSkeleton,
@@ -45,8 +46,22 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
   } = props;
 
   const { runtime: internalRuntime, provision, switchToInline } = usePreviewRuntime(projectId, autoProvision);
-  const { magicWandState, openMagicWand, closeMagicWand, handleSendMessage } = useMagicWand(
+  const [inspectArmed, setInspectArmed] = useState(false);
+  const { magicWandState, openMagicWand, openMagicWandAt, closeMagicWand, handleSendMessage } = useMagicWand(
     (message, context) => {
+      const elementInfo = context.elementInfo ?? (context as { element?: typeof context.elementInfo }).element;
+      window.dispatchEvent(
+        new CustomEvent('aethel.preview.inspectRequest', {
+          detail: {
+            message,
+            elementInfo,
+            projectId,
+            filePath,
+            title,
+            source: 'preview-inspector',
+          },
+        }),
+      );
       log.info('Magic Wand message:', message, context);
     },
   );
@@ -123,11 +138,11 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
             </h3>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
               {runtimeGuidance ||
-                'Inicie o runtime gerenciado ou use o fallback inline para continuar sem prometer um preview remoto active.'}
+                'Start the managed runtime or keep using local preview without claiming a remote preview is active.'}
             </p>
             {runtimeAction ? (
               <p className="mt-2 text-[11px] text-[var(--aethel-text-secondary)]">
-                Proximo passo: {runtimeAction}
+                Next step: {runtimeAction}
               </p>
             ) : null}
             {runtimeSetupEnv.length > 0 ? (
@@ -142,14 +157,14 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
               onClick={handleProvision}
               className="rounded-md bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:brightness-110"
             >
-              Iniciar preview
+              Start preview
             </button>
             <button
               type="button"
               onClick={handleSwitchToInline}
               className="rounded-md border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
             >
-              Usar fallback inline
+              Use local preview
             </button>
           </div>
         </div>
@@ -177,14 +192,14 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
           badge={effectiveState === 'provisioning' ? 'managed runtime' : 'runtime warmup'}
           title={
             effectiveState === 'provisioning'
-              ? 'Iniciando a lane de runtime...'
-              : 'Aquecendo a superficie remota...'
+              ? 'Starting the runtime lane...'
+              : 'Warming the remote preview...'
           }
           detail={
             effectiveState === 'provisioning'
-              ? runtimeAction || 'Validando provider, sandbox e endpoint antes de prometer uma URL remota confiavel.'
+              ? runtimeAction || 'Validating provider, sandbox, and endpoint before promising a trusted remote URL.'
               : runtimeGuidance ||
-                'Esperando a primeira resposta do runtime para liberar health, HMR e fallback com contexto.'
+                'Waiting for the first runtime response before enabling health, HMR, and contextual fallback.'
           }
         />
       </div>
@@ -219,39 +234,38 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
           forceInlineFallback={useInline}
           runtimeUnavailableReason={runtimeUnavailableReason}
           isStale={isStale}
+          inspectArmed={inspectArmed}
           onRefresh={onRefresh}
+          onInlineElementInspect={({ position, elementInfo }) => {
+            setInspectArmed(false);
+            openMagicWandAt(position, elementInfo);
+          }}
         />
         {useInline && (
           <div className="absolute left-1 top-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-warning)]">
-            Fallback inline
+            Local preview
           </div>
         )}
         {isStale && (
           <div className="absolute right-1 top-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-warning)]">
-            Desatualizado
+            Out of sync
           </div>
         )}
-        <button
-          type="button"
-          onClick={(event) => openMagicWand(event)}
-          className="absolute bottom-4 right-4 rounded-full bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] p-3 shadow-lg transition hover:scale-105 hover:brightness-110"
-          title="Magic Wand - Clique em um elemento para editar com IA"
-          aria-label="Magic Wand"
-        >
-          <svg
-            className="h-5 w-5 text-[var(--aethel-text-primary)]"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 10V3L4 14h7v7l9-11h-7z"
-            />
-          </svg>
-        </button>
+        <PreviewContextDock
+          isInline={useInline}
+          isInspecting={inspectArmed}
+          isStale={isStale}
+          onInspect={(event) => {
+            if (useInline) {
+              event.preventDefault();
+              event.stopPropagation();
+              setInspectArmed(true);
+              return;
+            }
+            openMagicWand(event);
+          }}
+          onRefresh={onRefresh}
+        />
         {magicWandState.isOpen && (
           <MagicWandChat
             position={magicWandState.position}

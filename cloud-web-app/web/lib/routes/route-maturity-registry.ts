@@ -1,7 +1,7 @@
 /**
  * Aethel Route Maturity Registry
  * Source: docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md
- * 
+ *
  * Controls which routes are visible based on maturity level.
  * Routes below BETA should be hidden from production unless
  * NEXT_PUBLIC_SHOW_ASPIRATIONAL_ROUTES=true
@@ -28,29 +28,27 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/settings', maturity: 'GA', label: 'Settings' },
   { path: '/profile', maturity: 'GA', label: 'Profile' },
   { path: '/billing', maturity: 'GA', label: 'Billing' },
-  { path: '/contact', maturity: 'GA', label: 'Contact' },
   { path: '/status', maturity: 'GA', label: 'Status Page' },
-  { path: '/health', maturity: 'GA', label: 'Health Check' },
   { path: '/honest-status', maturity: 'GA', label: 'Honest Status' },
   { path: '/privacy', maturity: 'GA', label: 'Privacy' },
   { path: '/terms', maturity: 'GA', label: 'Terms' },
 
   // BETA - Feature complete but needs polish
-  { path: '/chat', maturity: 'BETA', label: 'AI Chat', notes: 'Falta streaming com syntax highlighting' },
-  { path: '/admin', maturity: 'BETA', label: 'Admin Panel', notes: 'Precisa convergir visual com Studio' },
+  { path: '/chat', maturity: 'BETA', label: 'AI Chat', notes: 'Converges into the IDE agent sidecar' },
+  { path: '/admin', maturity: 'BETA', label: 'Admin Panel', notes: 'Visible navigation is compressed to six operator areas' },
   { path: '/marketplace', maturity: 'BETA', label: 'Marketplace', notes: 'Parcialmente funcional' },
   { path: '/team', maturity: 'BETA', label: 'Team Management' },
   { path: '/studio', maturity: 'BETA', label: 'Creative Studio', notes: 'Mission-first creative hub for game, film, VFX, material, animation, and audio routes' },
   { path: '/studio/level', maturity: 'BETA', label: 'Level Studio', notes: 'Wires the existing LevelEditor into the canonical Studio shell' },
-  { path: '/studio/scene', maturity: 'BETA', label: 'Scene Studio', notes: 'Wires the existing SceneEditor into the canonical Studio shell' },
-  { path: '/studio/material', maturity: 'BETA', label: 'Material Studio', notes: 'Wires the existing MaterialEditor into the canonical Studio shell' },
+  { path: '/studio/scene', maturity: 'BETA', label: 'Scene', notes: 'Compatibility URL; opens World Studio with the Scene tool selected' },
+  { path: '/studio/material', maturity: 'BETA', label: 'Material', notes: 'Compatibility URL; opens World Studio with the Material tool selected' },
 
-  { path: '/studio/terrain', maturity: 'BETA', label: 'Terrain Studio', notes: 'Wires TerrainSculptingEditor into the canonical Studio shell' },
-  { path: '/studio/landscape', maturity: 'BETA', label: 'Landscape Studio', notes: 'Wires LandscapeEditor into the canonical Studio shell' },
+  { path: '/studio/terrain', maturity: 'BETA', label: 'Terrain', notes: 'Compatibility URL; opens World Studio with the Terrain tool selected' },
+  { path: '/studio/landscape', maturity: 'BETA', label: 'Landscape', notes: 'Compatibility URL; opens World Studio with the Landscape tool selected' },
 
   // ALPHA - Core functionality works but incomplete
-  { path: '/nexus', maturity: 'ALPHA', label: 'Nexus 3D Viewport', notes: 'Sem selecao, gizmos, hierarquia' },
-  { path: '/preview', maturity: 'ALPHA', label: 'Live Preview', notes: 'Sem HMR confiavel' },
+  { path: '/nexus', maturity: 'ALPHA', label: 'Nexus 3D Viewport', notes: 'Routes through the canonical canvas and research workspace' },
+  { path: '/preview', maturity: 'ALPHA', label: 'Live Preview', notes: 'Legacy preview path; canonical work happens in the IDE preview pane' },
   { path: '/search', maturity: 'ALPHA', label: 'Global Search' },
   { path: '/terminal', maturity: 'ALPHA', label: 'Terminal' },
   { path: '/git', maturity: 'ALPHA', label: 'Git Panel' },
@@ -62,32 +60,32 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/studio/cinematic', maturity: 'ALPHA', label: 'Cinematic Cloud Stream', notes: 'Visible readiness surface for Cloud Stream; held unless signaling, cost, teardown, and session evidence exist' },
   { path: '/studio/audio', maturity: 'ALPHA', label: 'Audio Studio', notes: 'Wires SoundCueEditor into the canonical Studio shell' },
 
-  { path: '/studio/cloth', maturity: 'ALPHA', label: 'Cloth Studio', notes: 'Wires ClothSimulationEditor into the canonical Studio shell' },
-  { path: '/studio/facial', maturity: 'ALPHA', label: 'Facial Studio', notes: 'Wires FacialAnimationEditor into the canonical Studio shell' },
-  { path: '/studio/fluid', maturity: 'ALPHA', label: 'Fluid Studio', notes: 'Wires FluidSimulationEditor into the canonical Studio shell' },
-  { path: '/studio/foliage', maturity: 'ALPHA', label: 'Foliage Studio', notes: 'Wires FoliagePainter into the canonical Studio shell' },
-  { path: '/studio/hair', maturity: 'ALPHA', label: 'Hair & Fur Studio', notes: 'Wires HairFurEditor into the canonical Studio shell' },
-  { path: '/studio/rig', maturity: 'ALPHA', label: 'Control Rig Studio', notes: 'Wires ControlRigEditor into the canonical Studio shell' },
-  { path: '/studio/water', maturity: 'ALPHA', label: 'Water Studio', notes: 'Wires WaterEditor into the canonical Studio shell' },
-  { path: '/studio/sprite', maturity: 'ALPHA', label: 'Sprite Studio', notes: 'Wires SpriteEditor into the canonical Studio shell' },
+  { path: '/studio/cloth', maturity: 'ALPHA', label: 'Cloth', notes: 'Compatibility URL; opens Character Studio with the Cloth tool selected' },
+  { path: '/studio/facial', maturity: 'ALPHA', label: 'Facial', notes: 'Compatibility URL; opens Character Studio with the Facial tool selected' },
+  { path: '/studio/fluid', maturity: 'ALPHA', label: 'Fluid', notes: 'Compatibility URL; opens FX Studio with the Fluid tool selected' },
+  { path: '/studio/foliage', maturity: 'ALPHA', label: 'Foliage', notes: 'Compatibility URL; opens World Studio with the Foliage tool selected' },
+  { path: '/studio/hair', maturity: 'ALPHA', label: 'Hair', notes: 'Compatibility URL; opens Character Studio with the Hair tool selected' },
+  { path: '/studio/rig', maturity: 'ALPHA', label: 'Rig', notes: 'Compatibility URL; opens Character Studio with the Rig tool selected' },
+  { path: '/studio/water', maturity: 'ALPHA', label: 'Water', notes: 'Compatibility URL; opens World Studio with the Water tool selected' },
+  { path: '/studio/sprite', maturity: 'ALPHA', label: 'Sprite', notes: 'Compatibility URL; opens FX Studio with the Sprite tool selected' },
 
   // PROTOTYPE - Shell exists but minimal functionality
-  { path: '/debugger', maturity: 'PROTOTYPE', label: 'Debugger', notes: 'Sem conexao DAP real' },
-  { path: '/playground', maturity: 'PROTOTYPE', label: 'Playground', notes: 'Proposito ambiguo' },
-  { path: '/explorer', maturity: 'PROTOTYPE', label: 'File Explorer', notes: 'Duplica funcionalidade do IDE' },
+  { path: '/debugger', maturity: 'PROTOTYPE', label: 'Debugger', notes: 'Legacy path; debugger UX belongs inside the IDE' },
+  { path: '/playground', maturity: 'PROTOTYPE', label: 'Playground', notes: 'Legacy path; experiments should enter through Workspace or IDE' },
+  { path: '/explorer', maturity: 'PROTOTYPE', label: 'File Explorer', notes: 'Legacy path; file browsing belongs inside the IDE' },
   { path: '/design-system-demo', maturity: 'PROTOTYPE', label: 'Design System Demo' },
 
   // ASPIRATIONAL - Route exists but no real functionality
-  { path: '/animation-blueprint', maturity: 'ASPIRATIONAL', label: 'Animation Blueprint', notes: 'Shell sem funcionalidade' },
-  { path: '/blueprint-editor', maturity: 'ASPIRATIONAL', label: 'Blueprint Editor', notes: 'Prototipo sem uso real' },
-  { path: '/landscape-editor', maturity: 'ASPIRATIONAL', label: 'Landscape Editor', notes: 'Prototipo sem uso real' },
-  { path: '/level-editor', maturity: 'ASPIRATIONAL', label: 'Level Editor', notes: 'Prototipo sem uso real' },
-  { path: '/niagara-editor', maturity: 'ASPIRATIONAL', label: 'Niagara Editor', notes: 'Prototipo sem uso real' },
-  { path: '/vr-preview', maturity: 'ASPIRATIONAL', label: 'VR Preview', notes: 'Prototipo sem uso real' },
-  { path: '/ai-command', maturity: 'ASPIRATIONAL', label: 'AI Command', notes: 'Funcionalidade ambigua' },
-  { path: '/editor-hub', maturity: 'ASPIRATIONAL', label: 'Editor Hub', notes: 'Ja redirecionado' },
-  { path: '/live-preview', maturity: 'ASPIRATIONAL', label: 'Live Preview Alt', notes: 'Duplica preview do IDE' },
-  { path: '/contact-sales', maturity: 'ASPIRATIONAL', label: 'Contact Sales' },
+  { path: '/animation-blueprint', maturity: 'ASPIRATIONAL', label: 'Animation Blueprint', notes: 'Legacy shell; use Studio Character or Film groups' },
+  { path: '/blueprint-editor', maturity: 'ASPIRATIONAL', label: 'Blueprint Editor', notes: 'Legacy shell; use IDE proposals and Studio Logic' },
+  { path: '/landscape-editor', maturity: 'ASPIRATIONAL', label: 'Landscape Editor', notes: 'Legacy shell; use Studio World' },
+  { path: '/level-editor', maturity: 'ASPIRATIONAL', label: 'Level Editor', notes: 'Legacy shell; use Studio World' },
+  { path: '/niagara-editor', maturity: 'ASPIRATIONAL', label: 'Niagara Editor', notes: 'Legacy shell; use Studio FX' },
+  { path: '/vr-preview', maturity: 'ASPIRATIONAL', label: 'VR Preview', notes: 'Held until device capability and runtime evidence exist' },
+  { path: '/ai-command', maturity: 'ASPIRATIONAL', label: 'AI Command', notes: 'Legacy path; use IDE command palette' },
+  { path: '/editor-hub', maturity: 'ASPIRATIONAL', label: 'Editor Hub', notes: 'Redirected into the IDE' },
+  { path: '/live-preview', maturity: 'ASPIRATIONAL', label: 'Live Preview Alt', notes: 'Legacy path; use the IDE preview pane' },
+  { path: '/contact-sales', maturity: 'BETA', label: 'Contact Sales', notes: 'Compact enterprise intake with procurement evidence' },
 ];
 
 /**
@@ -97,11 +95,11 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
 export function isRouteVisible(path: string): boolean {
   const showAspirations = process.env.NEXT_PUBLIC_SHOW_ASPIRATIONAL_ROUTES === 'true';
   const entry = ROUTE_MATURITY_REGISTRY.find(r => r.path === path);
-  
+
   if (!entry) return true; // Unknown route = allow by default
-  
+
   if (showAspirations) return true;
-  
+
   return entry.maturity === 'GA' || entry.maturity === 'BETA';
 }
 

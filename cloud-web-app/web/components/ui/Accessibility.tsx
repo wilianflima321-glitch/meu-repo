@@ -14,8 +14,8 @@ interface SkipLink {
 }
 
 const DEFAULT_SKIP_LINKS: SkipLink[] = [
-  { href: '#main-content', label: 'Pular para conteudo principal' },
-  { href: '#navigation', label: 'Pular para navegacao' },
+  { href: '#main-content', label: 'Skip to main content' },
+  { href: '#navigation', label: 'Skip to navigation' },
 ]
 
 export function SkipToContent({ links = DEFAULT_SKIP_LINKS }: { links?: SkipLink[] }) {
@@ -155,4 +155,3 @@ export function IconButton({ label, size = 'md', className = '', children, ...pr
     </button>
   )
 }
-

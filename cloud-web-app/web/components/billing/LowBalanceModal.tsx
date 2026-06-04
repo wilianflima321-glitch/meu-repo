@@ -1,11 +1,11 @@
 'use client';
 
 /**
- * LowBalanceModal - Modal Não-Intrusivo de Saldo Baixo
+ * LowBalanceModal - Non-intrusive low-balance modal
  *
- * Aparece quando o saldo do usuário está crítico.
- * Design nao-bloqueante com opção de "depois".
- * Animações suaves e nao-agressivas.
+ * Appears when the user credit balance is critical.
+ * Non-blocking design with a later option.
+ * Soft, non-aggressive animations.
  *
  * @see ROADMAP_MONETIZACAO_XP_FINAL.md
  *
@@ -62,10 +62,10 @@ export interface LowBalanceModalProps {
 // ============================================================================
 
 const DEFAULT_PACKAGES: CreditPackage[] = [
-  { id: 'starter', name: 'Inicial', credits: 500, price: 9.99, currency: 'USD' },
+  { id: 'starter', name: 'Starter', credits: 500, price: 9.99, currency: 'USD' },
   { id: 'popular', name: 'Popular', credits: 2000, price: 29.99, currency: 'USD', bonus: 200, popular: true, savings: 25 },
   { id: 'pro', name: 'Pro', credits: 5000, price: 59.99, currency: 'USD', bonus: 750, savings: 40 },
-  { id: 'enterprise', name: 'Empresarial', credits: 15000, price: 149.99, currency: 'USD', bonus: 3000, savings: 50 },
+  { id: 'enterprise', name: 'Enterprise', credits: 15000, price: 149.99, currency: 'USD', bonus: 3000, savings: 50 },
 ];
 
 const BALANCE_MESSAGES: Record<BalanceLevel, { title: string; subtitle: string; color: string; icon: React.ReactNode }> = {
@@ -170,7 +170,7 @@ function UsageEstimate({ minutes }: { minutes: number }) {
   if (minutes <= 0) {
     return (
       <p className="text-xs text-[var(--aethel-error)]">
-        Voce nao tem credits para operacoes de IA
+        You do not have credits for AI operations
       </p>
     );
   }
@@ -249,7 +249,7 @@ export function LowBalanceModal({
             `}
       >
             {/* Close button */}
-            <button type="button" aria-label="Fechar modal de saldo baixo"
+            <button type="button" aria-label="Close low balance modal"
               onClick={onClose}
               className="absolute top-4 right-4 p-2 hover:bg-[var(--aethel-surface-quaternary)]
                        rounded-lg transition-colors z-10"
@@ -343,7 +343,7 @@ export function LowBalanceModal({
 
             {/* Actions */}
             <div className="p-6 pt-0 space-y-3">
-              <button type="button" aria-label="Recarregar credits agora"
+              <button type="button" aria-label="Reload credits now"
                 onClick={handleContinue}
                 disabled={!selectedPackage || isProcessing}
                 className="w-full flex items-center justify-center gap-2 py-3
@@ -389,7 +389,7 @@ export function LowBalanceModal({
                   <TrendingUp className="w-5 h-5 text-[var(--aethel-primary)] flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-[var(--aethel-primary)]">
-                      Voce usa muitos credits?
+                      Do you use many credits?
                     </p>
                     <p className="text-xs text-[color-mix(in_srgb,var(--aethel-primary)_70%,transparent)] mt-1">
                       Consider the Pro plan for unlimited credits at $49/month
@@ -440,7 +440,7 @@ export function LowBalanceModalAuto() {
           if (balance <= 0) level = 'empty';
           else if (balance < 50) level = 'critical';
           else if (balance < 200) level = 'low';
-          else return; // Saldo ok, nao mostrar modal
+          else return; // Balance is healthy; do not show the modal
 
           setBalanceLevel(level);
 
@@ -456,7 +456,7 @@ export function LowBalanceModalAuto() {
           }
         }
       } catch (e) {
-        // Silently fail - nao interrormper UX
+        // Silently fail without interrupting the UX
       }
     };
 
@@ -509,5 +509,3 @@ export function LowBalanceModalAuto() {
 
 export { LowBalanceModalAuto as LowBalanceModalWrapper };
 export default LowBalanceModal;
-
-

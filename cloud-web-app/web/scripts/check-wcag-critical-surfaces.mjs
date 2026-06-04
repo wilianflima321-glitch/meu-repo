@@ -48,7 +48,13 @@ const CHECKS = [
   },
   {
     name: 'admin-shell-landmarks',
-    file: 'app/admin/admin-ops-layout-client.tsx',
+    file: 'app/admin/admin-ops-layout-client.tsx + split admin shell parts',
+    files: [
+      'app/admin/admin-ops-layout-client.tsx',
+      'app/admin/admin-ops-layout.parts.tsx',
+      'app/admin/admin-ops-layout.sidebar.tsx',
+      'app/admin/admin-ops-layout.header.tsx',
+    ],
     surface: '/admin',
     patterns: ['role="navigation"', 'aria-label="Admin navigation"', '<main id="admin-main-content"', 'aria-label="Global Legacy compatibility map"'],
   },
@@ -72,9 +78,9 @@ const CHECKS = [
   },
   {
     name: 'settings-provider-recovery',
-    file: 'app/settings/page.tsx',
+    file: 'app/settings/_components/SettingsAIProvidersPanel.tsx',
     surface: '/settings',
-    patterns: ['/api/ai/provider-status', "providerStatus?.setupUrl || '/settings?tab=api'"],
+    patterns: ["providerStatus?.setupUrl || '/settings?tab=api'", 'aria-live="polite"'],
   },
   {
     name: 'ide-workbench-runtime-accessibility',
@@ -87,7 +93,7 @@ const CHECKS = [
 const failures = []
 
 for (const check of CHECKS) {
-  const content = read(check.file)
+  const content = (check.files ?? [check.file]).map((file) => read(file)).join('\n')
   for (const pattern of check.patterns) {
     if (!content.includes(pattern)) {
       failures.push(`[${check.name}] pattern not found in ${check.file}: ${pattern}`)

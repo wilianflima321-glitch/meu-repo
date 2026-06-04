@@ -75,14 +75,9 @@ export default function DocsResourcePage({
 }: DocsResourcePageProps) {
   return (
     <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/3 top-0 h-[520px] w-[520px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[170px]" />
-        <div className="absolute bottom-0 right-1/4 h-[420px] w-[420px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[150px]" />
-      </div>
-
       <PublicHeader />
 
-      <main className="relative z-10 mx-auto max-w-6xl px-6 pb-20 pt-12">
+      <main className="mx-auto max-w-6xl px-6 pb-20 pt-12" data-docs-resource-surface="compact">
         <Link
           href="/docs"
           className="inline-flex items-center gap-1.5 text-sm text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]"
@@ -103,7 +98,7 @@ export default function DocsResourcePage({
 
           <aside className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_35%,transparent)] p-5 shadow-[0_24px_60px_rgba(2,8,23,0.28)]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-              Leitura honesta
+              Honest read
             </p>
             <p className="mt-3 text-sm leading-7 text-[var(--aethel-text-secondary)]">{summary}</p>
           </aside>
@@ -113,13 +108,18 @@ export default function DocsResourcePage({
           {cards.map((card) => (
             <article
               key={card.title}
-              className="rounded-[24px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-soft))] p-6 shadow-[0_18px_50px_rgba(2,8,23,0.24)]"
+              className="rounded-[24px] border border-[var(--aethel-border-primary)] bg-[var(--aethel-panel)] p-6 shadow-[0_18px_50px_rgba(2,8,23,0.2)]"
             >
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-quaternary)]">
                 {card.eyebrow}
               </p>
               <h2 className="mt-3 text-xl font-semibold text-[var(--aethel-text-primary)]">{card.title}</h2>
-              <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">{card.description}</p>
+              <details className="mt-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-4 py-3">
+                <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                  Open details
+                </summary>
+                <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">{card.description}</p>
+              </details>
               {card.links?.length ? (
                 <div className="mt-5 flex flex-wrap gap-3">
                   {card.links.map((link) => (
@@ -133,7 +133,12 @@ export default function DocsResourcePage({
 
         <section className="mt-12 rounded-[30px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-8 shadow-[0_18px_56px_rgba(2,8,23,0.22)]">
           <h2 className="text-2xl font-semibold text-[var(--aethel-text-primary)]">{calloutTitle}</h2>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--aethel-text-secondary)]">{calloutDescription}</p>
+          <details className="mt-4 max-w-3xl rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_42%,transparent)] px-4 py-3">
+            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+              Open callout details
+            </summary>
+            <p className="mt-3 text-sm leading-7 text-[var(--aethel-text-secondary)]">{calloutDescription}</p>
+          </details>
           <div className="mt-6 flex flex-wrap gap-3">
             {calloutLinks.map((link) => (
               <RenderLink key={`callout-${link.href}`} link={link} />

@@ -30,7 +30,10 @@ requirePattern('lib/production/game-playtest-spine.ts', /humanReviewRequired:\s*
 requirePattern('lib/production/game-playtest-spine.ts', /missingEvidence\.length > 0 \? 'held' : 'needs-review'/, 'playtest must not auto-ready')
 requirePattern('lib/production/game-scope-orchestrator.ts', /playtestSpine:\s*PlaytestSpinePlan/, 'GameScopePlan must include playtest spine')
 requirePattern('app/studio/StudioMissionControl.tsx', /playtestSpine\.scenarios/, 'Studio must surface playtest scenarios')
-requirePattern('components/evidence/EvidenceCenter.tsx', /playtestSpine\.state/, 'Evidence Center must surface playtest state')
+const evidenceCenterSurface = `${read('components/evidence/EvidenceCenter.tsx')}\n${read('components/evidence/EvidenceCenter.parts.tsx')}`
+if (!/playtestSpine\.state/.test(evidenceCenterSurface)) {
+  failures.push('components/evidence/EvidenceCenter.tsx: missing Evidence Center must surface playtest state')
+}
 requirePattern('lib/ai-agent-system.ts', /Playtest spine:/, 'agent prompt must include playtest spine')
 requirePattern('docs/GAME_PLAYTEST_SPINE_V22.md', /No playable\/demo\/final claim without playtest evidence/, 'docs must block fake playability claims')
 

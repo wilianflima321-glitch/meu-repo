@@ -1,11 +1,11 @@
 /**
  * AI 3D Model Generation API
- * 
+ *
  * Unified endpoint for 3D generation using multiple providers:
  * - Meshy (text-to-3D, image-to-3D)
  * - Tripo3D (fast generation)
  * - OpenAI Shap-E (experimental)
- * 
+ *
  * Used for:
  * - Game assets (characters, props, environments)
  * - Film assets
@@ -42,6 +42,11 @@ const PROVIDERS = {
 } as const;
 
 type Provider = keyof typeof PROVIDERS;
+
+const IMPLEMENTED_PROVIDER_MODES: Record<Provider, GenerateRequest['mode'][]> = {
+  meshy: ['text-to-3d', 'image-to-3d'],
+  tripo3d: ['text-to-3d', 'image-to-3d'],
+}
 
 interface GenerateRequest {
   provider?: Provider;
@@ -211,9 +216,9 @@ async function checkTaskStatus(
     const response = await fetch(`https://api.meshy.ai/v2/text-to-3d/${taskId}`, {
       headers: { 'Authorization': `Bearer ${apiKey}` },
     });
-    
+
     const result = await response.json();
-    
+
     if (result.status === 'SUCCEEDED') {
       return {
         status: 'completed',
@@ -224,7 +229,7 @@ async function checkTaskStatus(
     } else if (result.status === 'FAILED') {
       return { status: 'failed', error: result.task_error?.message };
     }
-    
+
     return {
       status: 'processing',
       progress: result.progress || 0,
@@ -236,10 +241,10 @@ async function checkTaskStatus(
     const response = await fetch(`https://api.tripo3d.ai/v2/openapi/task/${taskId}`, {
       headers: { 'Authorization': `Bearer ${apiKey}` },
     });
-    
+
     const result = await response.json();
     const data = result.data;
-    
+
     if (data.status === 'success') {
       return {
         status: 'completed',
@@ -250,7 +255,7 @@ async function checkTaskStatus(
     } else if (data.status === 'failed') {
       return { status: 'failed', error: data.message };
     }
-    
+
     return {
       status: 'processing',
       progress: data.progress || 0,
@@ -298,16 +303,16 @@ export async function POST(req: NextRequest) {
     }
 
     const providerConfig = PROVIDERS[provider as Provider];
-    
+
     // Check API key
     if (!process.env[providerConfig.envKey]) {
       const availableProvider = Object.entries(PROVIDERS).find(
         ([_, config]) => process.env[config.envKey]
       );
-      
+
       if (!availableProvider) {
         return NextResponse.json(
-          { 
+          {
             error: 'No 3D provider configured',
             message: 'Please configure MESHY_API_KEY or TRIPO_API_KEY',
           },
@@ -337,6 +342,24 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const implementedModes = IMPLEMENTED_PROVIDER_MODES[provider]
+    if (!implementedModes.includes(mode)) {
+      return NextResponse.json(
+        {
+          error: 'GENERATION_MODE_HELD',
+          message: `${providerConfig.name} ${mode} is held until the production provider contract is wired.`,
+          capability: 'AI_3D_GENERATION_MODE',
+          capabilityStatus: 'held',
+          provider,
+          mode,
+          supportedModes: providerConfig.modes,
+          availableModes: implementedModes,
+          nextAction: 'Use text-to-3d or image-to-3d, or wire the provider-specific texture endpoint before exposing this mode.',
+        },
+        { status: 424 },
+      )
+    }
+
     const usageGuard = await enforceExpensiveAiGenerationUsage({
       userId: user.userId,
       route: '/api/ai/3d/generate',
@@ -358,7 +381,7 @@ export async function POST(req: NextRequest) {
         const resolvedImageUrl = imageUrl || `data:image/png;base64,${imageBase64}`;
         result = await meshyImageTo3D(resolvedImageUrl, quality);
       } else {
-        return NextResponse.json({ error: 'Mode not implemented' }, { status: 501 });
+        return NextResponse.json({ error: 'GENERATION_MODE_HELD' }, { status: 424 });
       }
     } else if (provider === 'tripo3d') {
       if (mode === 'text-to-3d') {
@@ -367,7 +390,7 @@ export async function POST(req: NextRequest) {
         const resolvedImageUrl = imageUrl || `data:image/png;base64,${imageBase64}`;
         result = await tripoImageTo3D(resolvedImageUrl);
       } else {
-        return NextResponse.json({ error: 'Mode not implemented' }, { status: 501 });
+        return NextResponse.json({ error: 'GENERATION_MODE_HELD' }, { status: 424 });
       }
     } else {
       return NextResponse.json({ error: 'Invalid provider' }, { status: 400 });

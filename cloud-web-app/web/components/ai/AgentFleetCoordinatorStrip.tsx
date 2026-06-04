@@ -3,288 +3,34 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
-import { cn } from '@/lib/utils'
 import type { AgentFleetMode } from '@/lib/production/agent-fleet-session'
+import { cn } from '@/lib/utils'
 
-type AgentFleetMemberStatus = 'ready' | 'attention' | 'blocked' | 'paused'
+import {
+  acknowledgeReadReceipts,
+  fetchAgentLocks,
+  fetchFleetSnapshot,
+  fetchReadReceipts,
+  patchFleetSnapshot,
+} from './AgentFleetCoordinatorStrip.api'
+import {
+  canRenderFleet,
+  formatLockCount,
+  mapFleetAgentToCommandAgentId,
+  modeLabels,
+  readReceiptLabel,
+  readReceiptTone,
+  statusTone,
+  uniqueNames,
+} from './AgentFleetCoordinatorStrip.helpers'
+import type {
+  AgentFleetCoordinatorStripProps,
+  AgentFleetSnapshot,
+  AgentLocksApiResponse,
+  AgentReadinessDecision,
+} from './AgentFleetCoordinatorStrip.types'
 
-type AgentFleetMemberSnapshot = {
-  agent: string
-  role: 'senior-coordinator' | 'specialist'
-  lane: string
-  status: AgentFleetMemberStatus
-  ownedSurfaceCount: number
-  activeLockCount: number
-  lockedSurfacePreview: string[]
-  staleSurfaceCount: number
-  staleSurfacePreview: string[]
-  nextAction: string
-}
-
-type AgentSurfaceLockOwnerSnapshot = {
-  agent: string
-  ownerUserId: string
-  lockCount: number
-  paths: string[]
-  expiresAt: string
-}
-
-type AgentSurfaceLockSnapshot = {
-  projectId: string
-  generatedAt: string
-  activeLockCount: number
-  lockedPathCount: number
-  owners: AgentSurfaceLockOwnerSnapshot[]
-  expiringSoonCount: number
-  arbitrationRequired: boolean
-  nextAction: string
-}
-
-type AgentFleetSnapshot = {
-  mode: AgentFleetMode
-  paused: boolean
-  hasManifest: boolean
-  centralAgent: string
-  summary: string
-  composer: {
-    primaryMode: string
-    switcherHint: string
-  }
-  members: AgentFleetMemberSnapshot[]
-  blockers: string[]
-  activeLockCount: number
-  staleSurfaceCount: number
-  lockCoordination: AgentSurfaceLockSnapshot
-  nextAction: string
-}
-
-type AgentFleetApiResponse = {
-  snapshot: AgentFleetSnapshot
-}
-
-type AgentSurfaceLock = {
-  id: string
-  agent: string
-  ownerUserId: string
-  paths: string[]
-  source: 'apply' | 'tool' | 'session'
-  reason: string
-  expiresAt: string
-}
-
-type AgentLocksApiResponse = {
-  locks: AgentSurfaceLock[]
-  snapshot: AgentSurfaceLockSnapshot
-}
-
-type AgentReadReceiptKind = 'repository-cartography' | 'research-intelligence'
-
-type AgentReadinessDecision = {
-  allowed: boolean
-  enforcement?: 'skipped' | 'passed'
-  reason?: string
-  code?: string
-  status?: number
-  message?: string
-  metadata: {
-    agent: string
-    targetPaths: string[]
-    manifestId: string | null
-    researchPacketId: string | null
-    missing: string[]
-    stale: string[]
-    acceptedReceiptIds: string[]
-    blockers: string[]
-  }
-}
-
-type AgentReadReceiptsApiResponse = {
-  readiness: AgentReadinessDecision
-  persisted?: boolean
-}
-
-interface AgentFleetCoordinatorStripProps {
-  projectId: string
-  selectedAgentId: string
-  onSelectAgentId: (agentId: string) => void
-  className?: string
-}
-
-const modeLabels: Record<AgentFleetMode, string> = {
-  'coordinator-first': 'Coordinator',
-  'selected-agent': 'Specialist',
-  'review-only': 'Review',
-}
-
-const statusTone: Record<AgentFleetMemberStatus, string> = {
-  ready: 'bg-[var(--aethel-success)]',
-  attention: 'bg-[var(--aethel-warning)]',
-  blocked: 'bg-[var(--aethel-error)]',
-  paused: 'bg-[var(--aethel-text-quaternary)]',
-}
-
-export function mapFleetAgentToCommandAgentId(agentName: string): string {
-  const normalized = agentName.toLowerCase()
-  if (normalized.includes('software') || normalized.includes('release')) return 'coder'
-  if (normalized.includes('asset') || normalized.includes('artist') || normalized.includes('technical artist')) {
-    return 'artist'
-  }
-  if (normalized.includes('cinematic')) return 'video-editor'
-  if (normalized.includes('gameplay')) return 'game-designer'
-  if (normalized.includes('research') || normalized.includes('performance')) return 'architect'
-  if (normalized.includes('story') || normalized.includes('browser') || normalized.includes('qa')) return 'universal'
-  return 'universal'
-}
-
-function canRenderFleet(projectId: string): boolean {
-  return Boolean(projectId && projectId !== 'default')
-}
-
-function uniqueNames(names: string[]): string[] {
-  return Array.from(new Set(names))
-}
-
-function formatLockCount(count: number): string {
-  return `${count} lock${count === 1 ? '' : 's'}`
-}
-
-function readReceiptLabel(readiness: AgentReadinessDecision | null): string {
-  if (!readiness) return 'Context...'
-  if (readiness.allowed) return 'Context read'
-  if (readiness.code === 'AGENT_READ_RECEIPTS_RESEARCH_BLOCKED') return 'Research blocked'
-  if (!readiness.metadata.manifestId) return 'Cartography needed'
-  return 'Context unread'
-}
-
-function readReceiptTone(readiness: AgentReadinessDecision | null): string {
-  if (!readiness) return 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-tertiary)]'
-  if (readiness.allowed) return 'bg-[color-mix(in_srgb,var(--aethel-success)_14%,transparent)] text-[var(--aethel-success-light)]'
-  if (readiness.code === 'AGENT_READ_RECEIPTS_RESEARCH_BLOCKED') {
-    return 'bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)] text-[var(--aethel-error-light)]'
-  }
-  return 'bg-[color-mix(in_srgb,var(--aethel-warning)_14%,transparent)] text-[var(--aethel-warning-light)]'
-}
-
-async function fetchFleetSnapshot(projectId: string): Promise<AgentFleetSnapshot> {
-  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/production-state/agent-fleet`, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-  })
-
-  if (!response.ok) {
-    throw new Error(`agent-fleet:${response.status}`)
-  }
-
-  const payload = (await response.json()) as AgentFleetApiResponse
-  return payload.snapshot
-}
-
-async function fetchAgentLocks(projectId: string): Promise<AgentLocksApiResponse> {
-  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/production-state/agent-locks`, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-  })
-
-  if (!response.ok) {
-    throw new Error(`agent-locks:${response.status}`)
-  }
-
-  return (await response.json()) as AgentLocksApiResponse
-}
-
-async function fetchReadReceipts(projectId: string, agent: string): Promise<AgentReadinessDecision> {
-  const params = new URLSearchParams({
-    agent,
-    enforceReadReceipts: 'true',
-  })
-  const response = await fetch(
-    `/api/projects/${encodeURIComponent(projectId)}/production-state/read-receipts?${params.toString()}`,
-    {
-      method: 'GET',
-      headers: { Accept: 'application/json' },
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error(`agent-read-receipts:${response.status}`)
-  }
-
-  const payload = (await response.json()) as AgentReadReceiptsApiResponse
-  return payload.readiness
-}
-
-async function acknowledgeReadReceipts(projectId: string, readiness: AgentReadinessDecision): Promise<AgentReadinessDecision> {
-  const receipts: Array<{
-    agent: string
-    kind: AgentReadReceiptKind
-    ref: string
-    readAt: string
-    evidenceRefs: string[]
-    note: string
-  }> = []
-  const readAt = new Date().toISOString()
-  const agent = readiness.metadata.agent
-
-  if (readiness.metadata.manifestId) {
-    receipts.push({
-      agent,
-      kind: 'repository-cartography',
-      ref: readiness.metadata.manifestId,
-      readAt,
-      evidenceRefs: ['agent-fleet:context-receipts'],
-      note: 'Coordinator acknowledged Repository Cartography from Agent Fleet.',
-    })
-  }
-
-  if (readiness.metadata.researchPacketId) {
-    receipts.push({
-      agent,
-      kind: 'research-intelligence',
-      ref: readiness.metadata.researchPacketId,
-      readAt,
-      evidenceRefs: ['agent-fleet:context-receipts'],
-      note: 'Coordinator acknowledged Research Intelligence from Agent Fleet.',
-    })
-  }
-
-  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/production-state/read-receipts`, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      agent,
-      enforceReadReceipts: true,
-      receipts,
-    }),
-  })
-
-  if (!response.ok) {
-    throw new Error(`agent-read-receipts.patch:${response.status}`)
-  }
-
-  const payload = (await response.json()) as AgentReadReceiptsApiResponse
-  return payload.readiness
-}
-
-async function patchFleetSnapshot(projectId: string, patch: Partial<Pick<AgentFleetSnapshot, 'centralAgent' | 'mode' | 'paused'>>) {
-  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/production-state/agent-fleet`, {
-    method: 'PATCH',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(patch),
-  })
-
-  if (!response.ok) {
-    throw new Error(`agent-fleet.patch:${response.status}`)
-  }
-
-  const payload = (await response.json()) as AgentFleetApiResponse
-  return payload.snapshot
-}
+export { mapFleetAgentToCommandAgentId } from './AgentFleetCoordinatorStrip.helpers'
 
 export function AgentFleetCoordinatorStrip({
   projectId,

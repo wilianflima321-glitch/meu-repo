@@ -83,7 +83,7 @@ class CommandsAPI {
    */
   getCommands(filterInternal: boolean = false): string[] {
     const commands = Array.from(this.commands.keys());
-    
+
     if (filterInternal) {
       return commands.filter(cmd => !cmd.startsWith('_'));
     }
@@ -214,28 +214,22 @@ class CommandsAPI {
    * Execute built-in command
    */
   private async executeBuiltInCommand(command: string, ...args: unknown[]): Promise<unknown> {
-    // Mock implementation for built-in commands
     log.info(`[Commands] Executing built-in command: ${command}`, args);
 
     switch (command) {
       case 'workbench.action.files.save':
-        return { success: true, message: 'File saved' };
-      
       case 'workbench.action.files.saveAll':
-        return { success: true, message: 'All files saved' };
-      
       case 'workbench.action.quickOpen':
-        return { success: true, message: 'Quick open triggered' };
-      
       case 'workbench.action.showCommands':
-        return { success: true, message: 'Command palette opened' };
-      
       case 'editor.action.formatDocument':
-        return { success: true, message: 'Document formatted' };
-      
       case 'editor.action.organizeImports':
-        return { success: true, message: 'Imports organized' };
-      
+        return {
+          success: false,
+          capabilityStatus: 'provider_unavailable',
+          command,
+          message: 'Built-in command bridge is not connected to the active workbench provider.',
+        };
+
       default:
         return undefined;
     }

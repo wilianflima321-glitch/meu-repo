@@ -2,22 +2,23 @@
 
 // @aethel-heavy-async-boundary: Nexus canvas is a 3D runtime surface loaded only by Nexus/preview shells.
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import * as THREE from 'three';
+import type * as THREE from 'three';
+import { loadThree, type ThreeNamespace } from '@/lib/three';
 
 /**
  * ============================================
- * NEXUS CANVAS V2: Motor de Renderizacao (Baseline)
+ * NEXUS CANVAS V2: Render runtime baseline
  * ============================================
  *
- * Renderizador 3D baseado em Three.js/WebGL para iteracao local.
+ * Three.js/WebGL renderer for local iteration.
  * Recursos WebGPU avancados permanecem como trilha de evolucao.
  *
- * Características:
- * - Renderização em tempo real (60 FPS)
+ * Capabilities:
+ * - Real-time rendering target (60 FPS)
  * - Suporte a Scene Graphs
- * - Integração com WASM Logic Engine
- * - Hot-reload de assets e lógica
- * - Qualidade visual de prototipagem
+ * - WASM logic engine integration
+ * - Asset and logic hot reload
+ * - Prototype visual quality
  */
 
 interface SceneObject {
@@ -58,40 +59,41 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const threeRuntimeRef = useRef<ThreeNamespace | null>(null);
   const objectsRef = useRef<Map<string, THREE.Object3D>>(new Map());
   const [isInitialized, setIsInitialized] = useState(false);
   const [stats, setStats] = useState({ fps: 0, objects: 0 });
 
-  // Carregar objetos da cena
-  const loadSceneObjects = useCallback((scene: THREE.Scene, objects: SceneObject[]) => {
+  // Load scene objects
+  const loadSceneObjects = useCallback((three: ThreeNamespace, scene: THREE.Scene, objects: SceneObject[]) => {
     objects.forEach((obj) => {
       let threeObj: THREE.Object3D | null = null;
 
       switch (obj.type) {
         case 'mesh':
-          const geometry = new THREE.BoxGeometry(1, 1, 1);
-          const material = new THREE.MeshStandardMaterial({
+          const geometry = new three.BoxGeometry(1, 1, 1);
+          const material = new three.MeshStandardMaterial({
             color: obj.material?.color || 'white',
             metalness: obj.material?.metalness || 0.5,
             roughness: obj.material?.roughness || 0.5,
           });
-          threeObj = new THREE.Mesh(geometry, material);
+          threeObj = new three.Mesh(geometry, material);
           break;
 
         case 'light':
-          threeObj = new THREE.PointLight(0xffffff, 1, 100);
+          threeObj = new three.PointLight(0xffffff, 1, 100);
           break;
 
         case 'particle':
-          const particleGeometry = new THREE.BufferGeometry();
+          const particleGeometry = new three.BufferGeometry();
           const particleCount = 1000;
           const positions = new Float32Array(particleCount * 3);
           for (let i = 0; i < particleCount * 3; i++) {
             positions[i] = (Math.random() - 0.5) * 100;
           }
-          particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-          const particleMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
-          threeObj = new THREE.Points(particleGeometry, particleMaterial);
+          particleGeometry.setAttribute('position', new three.BufferAttribute(positions, 3));
+          const particleMaterial = new three.PointsMaterial({ color: 0xffffff, size: 0.1 });
+          threeObj = new three.Points(particleGeometry, particleMaterial);
           break;
       }
 
@@ -105,121 +107,148 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
     });
   }, []);
 
-  // Inicializar a cena 3D
+  // Initialize the 3D scene
   useEffect(() => {
     if (!containerRef.current || isInitialized) return;
     const containerElement = containerRef.current;
-
-    // Create cena
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0a0e27); // Deep Space Dark
-    sceneRef.current = scene;
-
-    // Create câmera
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      containerElement.clientWidth / containerElement.clientHeight,
-      0.1,
-      10000
-    );
-    camera.position.set(0, 5, 10);
-    camera.lookAt(0, 0, 0);
-    cameraRef.current = camera;
-
-    // Renderer baseline (Three.js WebGL)
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      powerPreference: renderMode === 'cinematic' ? 'high-performance' : 'default',
-    });
-    renderer.setSize(containerElement.clientWidth, containerElement.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap;
-    containerElement.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
-
-    // Add iluminação
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(10, 10, 10);
-    directionalLight.castShadow = true;
-    directionalLight.shadow.mapSize.width = 2048;
-    directionalLight.shadow.mapSize.height = 2048;
-    scene.add(directionalLight);
-
-    // Add grid helper (modo draft)
-    if (renderMode === 'draft') {
-      const gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x222222);
-      scene.add(gridHelper);
-    }
-
-    // Carregar cena inicial
-    if (initialScene.length > 0) {
-      loadSceneObjects(scene, initialScene);
-    }
-
-    // Loop de renderização
-    let frameCount = 0;
-    let lastTime = performance.now();
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-
-      // Calcular FPS
-      frameCount++;
-      const currentTime = performance.now();
-      if (currentTime - lastTime >= 1000) {
-        setStats({ fps: frameCount, objects: objectsRef.current.size });
-        frameCount = 0;
-        lastTime = currentTime;
-      }
-
-      // Renderizar
-      if (rendererRef.current && cameraRef.current && sceneRef.current) {
-        rendererRef.current.render(sceneRef.current, cameraRef.current);
-      }
+    const sceneObjects = objectsRef.current;
+    let cancelled = false;
+    let animationFrameId: number | null = null;
+    const cleanupRef = {
+      current: null as null | (() => void),
     };
 
-    animate();
+    void (async () => {
+      const three = await loadThree();
+      if (cancelled || !containerRef.current || isInitialized) return;
+      threeRuntimeRef.current = three;
 
-    // Handle resize
-    const handleResize = () => {
-      if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
+      // Create scene
+      const scene = new three.Scene();
+      scene.background = new three.Color(0x0a0e27); // Deep Space Dark
+      sceneRef.current = scene;
 
-      const width = containerRef.current.clientWidth;
-      const height = containerRef.current.clientHeight;
+      // Create camera
+      const camera = new three.PerspectiveCamera(
+        75,
+        containerElement.clientWidth / containerElement.clientHeight,
+        0.1,
+        10000
+      );
+      camera.position.set(0, 5, 10);
+      camera.lookAt(0, 0, 0);
+      cameraRef.current = camera;
 
-      cameraRef.current.aspect = width / height;
-      cameraRef.current.updateProjectionMatrix();
-      rendererRef.current.setSize(width, height);
-    };
+      // Renderer baseline (Three.js WebGL)
+      const renderer = new three.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        powerPreference: renderMode === 'cinematic' ? 'high-performance' : 'default',
+      });
+      renderer.setSize(containerElement.clientWidth, containerElement.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = three.PCFShadowMap;
+      containerElement.appendChild(renderer.domElement);
+      rendererRef.current = renderer;
 
-    window.addEventListener('resize', handleResize);
-    setIsInitialized(true);
+      // Add lighting
+      const ambientLight = new three.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const directionalLight = new three.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(10, 10, 10);
+      directionalLight.castShadow = true;
+      directionalLight.shadow.mapSize.width = 2048;
+      directionalLight.shadow.mapSize.height = 2048;
+      scene.add(directionalLight);
+
+      // Add grid helper (modo draft)
+      if (renderMode === 'draft') {
+        const gridHelper = new three.GridHelper(100, 100, 0x444444, 0x222222);
+        scene.add(gridHelper);
+      }
+
+      // Load initial scene
+      if (initialScene.length > 0) {
+        loadSceneObjects(three, scene, initialScene);
+      }
+
+      // Render loop
+      let frameCount = 0;
+      let lastTime = performance.now();
+
+      const animate = () => {
+        animationFrameId = requestAnimationFrame(animate);
+        if (cancelled) return;
+
+        // Calcular FPS
+        frameCount++;
+        const currentTime = performance.now();
+        if (currentTime - lastTime >= 1000) {
+          setStats({ fps: frameCount, objects: objectsRef.current.size });
+          frameCount = 0;
+          lastTime = currentTime;
+        }
+
+        // Renderizar
+        if (rendererRef.current && cameraRef.current && sceneRef.current) {
+          rendererRef.current.render(sceneRef.current, cameraRef.current);
+        }
+      };
+
+      animate();
+
+      // Handle resize
+      const handleResize = () => {
+        if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
+
+        const width = containerRef.current.clientWidth;
+        const height = containerRef.current.clientHeight;
+
+        cameraRef.current.aspect = width / height;
+        cameraRef.current.updateProjectionMatrix();
+        rendererRef.current.setSize(width, height);
+      };
+
+      window.addEventListener('resize', handleResize);
+      setIsInitialized(true);
+
+      const previousCleanup = cleanupRef.current;
+      cleanupRef.current = () => {
+        previousCleanup?.();
+        window.removeEventListener('resize', handleResize);
+      };
+    })();
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      cancelled = true;
+      cleanupRef.current?.();
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
       if (rendererRef.current && rendererRef.current.domElement.parentElement === containerElement) {
         containerElement.removeChild(rendererRef.current.domElement);
       }
+      rendererRef.current?.dispose();
+      rendererRef.current = null;
+      sceneRef.current = null;
+      cameraRef.current = null;
+      sceneObjects.clear();
     };
   }, [initialScene, isInitialized, loadSceneObjects, renderMode]);
 
-  // Add novo objeto à cena
+  // Add a new object to the scene
   const addObject = useCallback((obj: SceneObject) => {
-    if (!sceneRef.current) return;
+    const three = threeRuntimeRef.current;
+    if (!sceneRef.current || !three) return;
 
     let threeObj: THREE.Object3D | null = null;
 
     if (obj.type === 'mesh') {
-      const geometry = new THREE.BoxGeometry(1, 1, 1);
-      const material = new THREE.MeshStandardMaterial({
+      const geometry = new three.BoxGeometry(1, 1, 1);
+      const material = new three.MeshStandardMaterial({
         color: obj.material?.color || 'white',
       });
-      threeObj = new THREE.Mesh(geometry, material);
+      threeObj = new three.Mesh(geometry, material);
     }
 
     if (threeObj) {
@@ -241,7 +270,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
     }
   }, [onSceneChange]);
 
-  // Remove objeto da cena
+  // Remove object from scene
   const removeObject = useCallback((id: string) => {
     const obj = objectsRef.current.get(id);
     if (obj && sceneRef.current) {

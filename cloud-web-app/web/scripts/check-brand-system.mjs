@@ -9,8 +9,8 @@ const SOURCE_DIRS = ['app', 'components']
 const failures = []
 
 const requiredAssets = [
-  { file: 'aethel-mark.svg', maxBytes: 9000, requiredTokens: ['Aethel mark', 'agent lattice', '<linearGradient', '<circle'] },
-  { file: 'aethel-wordmark.svg', maxBytes: 12000, requiredTokens: ['Aethel wordmark', 'AI WORKFORCE IDE'] },
+  { file: 'aethel-mark.svg', maxBytes: 9000, requiredTokens: ['Aethel mark', 'monochrome', '#0A0A0A', '#FAFAFA'] },
+  { file: 'aethel-wordmark.svg', maxBytes: 12000, requiredTokens: ['Aethel wordmark', 'AI WORKFORCE IDE', '#FAFAFA'] },
 ]
 
 for (const asset of requiredAssets) {
@@ -28,6 +28,9 @@ for (const asset of requiredAssets) {
   const content = fs.readFileSync(abs, 'utf8')
   for (const token of asset.requiredTokens) {
     if (!content.includes(token)) failures.push(`brand asset ${asset.file} missing token: ${token}`)
+  }
+  if (/linearGradient|radialGradient|url\(#|filter id=/.test(content)) {
+    failures.push(`brand asset ${asset.file} must stay monochrome without decorative gradients or SVG filters`)
   }
 }
 

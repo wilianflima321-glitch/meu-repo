@@ -366,7 +366,7 @@ export function VersionHistorySlider({
             <div className="p-3 max-h-48 overflow-y-auto">
               <div className="space-y-2">
                 {versions.map((version, index) => (
-                  <button type="button" aria-label={`Selecionar vers?o ${version.message || version.id}`}
+                  <button type="button" aria-label={`Select version ${version.message || version.id}`}
                     key={version.id}
                     onClick={() => setSelectedIndex(index)}
                     className={`w-full flex items-center gap-2 p-2 rounded text-left transition-colors ${

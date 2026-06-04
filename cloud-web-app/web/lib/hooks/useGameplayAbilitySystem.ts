@@ -1,6 +1,6 @@
 /**
  * useGameplayAbilitySystem Hook
- * 
+ *
  * Hook React profissional para integrar o Gameplay Ability System (GAS)
  * com componentes React. Fornece uma API completa para:
  * - Gerenciamento de atributos
@@ -8,7 +8,7 @@
  * - Aplicação de efeitos
  * - Sistema de tags
  * - Cooldowns e custos
- * 
+ *
  * @module hooks/useGameplayAbilitySystem
  */
 
@@ -18,7 +18,6 @@ import {
   GameplayAbilitySpec,
   GameplayEffectSpec,
   GameplayTag,
-  AttributeDefinition,
   AttributeModifier,
   ActiveGameplayEffect,
   ActiveAbility,
@@ -26,115 +25,9 @@ import {
   createAbilitySystemComponent,
 } from '../gameplay-ability-system';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+import type { AbilityState, AttributeState, EffectState, GASStats, UseGASOptions, UseGASReturn } from './useGameplayAbilitySystem.types';
 
-export interface AbilityState {
-  id: string;
-  name: string;
-  description: string;
-  icon?: string;
-  isActive: boolean;
-  isOnCooldown: boolean;
-  cooldownRemaining: number;
-  cooldownTotal: number;
-  canActivate: boolean;
-  costs: Array<{ attribute: string; value: number; available: number }>;
-}
-
-export interface EffectState {
-  id: string;
-  name: string;
-  description: string;
-  remainingDuration?: number;
-  stackCount: number;
-  isPeriodic: boolean;
-  isInfinite: boolean;
-}
-
-export interface AttributeState {
-  name: string;
-  baseValue: number;
-  currentValue: number;
-  minValue?: number;
-  maxValue?: number;
-  percentage?: number;
-}
-
-export interface GASStats {
-  totalAbilities: number;
-  activeAbilities: number;
-  activeEffects: number;
-  totalTags: number;
-  tickRate: number;
-  lastTickTime: number;
-}
-
-export interface UseGASOptions {
-  /** Atributos iniciais */
-  attributes?: AttributeDefinition[];
-  /** Habilidades disponíveis */
-  abilities?: GameplayAbilitySpec[];
-  /** Usar atributos padrão do sistema */
-  useStandardAttributes?: boolean;
-  /** Taxa de atualização em Hz (padrão: 60) */
-  tickRate?: number;
-  /** Callbacks de eventos */
-  events?: {
-    onAbilityActivated?: (ability: GameplayAbilitySpec) => void;
-    onAbilityEnded?: (ability: GameplayAbilitySpec, cancelled: boolean) => void;
-    onEffectApplied?: (effect: GameplayEffectSpec) => void;
-    onEffectRemoved?: (effect: GameplayEffectSpec) => void;
-    onAttributeChanged?: (name: string, oldValue: number, newValue: number) => void;
-    onDamageReceived?: (amount: number, source?: string) => void;
-    onHealReceived?: (amount: number, source?: string) => void;
-  };
-}
-
-export interface UseGASReturn {
-  // Estado
-  attributes: Map<string, AttributeState>;
-  abilities: Map<string, AbilityState>;
-  activeEffects: EffectState[];
-  tags: GameplayTag[];
-  stats: GASStats;
-  
-  // Ações de atributos
-  getAttribute: (name: string) => number;
-  setAttribute: (name: string, value: number) => void;
-  modifyAttribute: (modifier: AttributeModifier) => void;
-  removeModifier: (modifierId: string) => void;
-  
-  // Ações de habilidades
-  grantAbility: (spec: GameplayAbilitySpec) => void;
-  removeAbility: (abilityId: string) => void;
-  activateAbility: (abilityId: string, target?: AbilitySystemComponent) => boolean;
-  cancelAbility: (abilityId: string) => void;
-  canActivateAbility: (abilityId: string) => boolean;
-  
-  // Ações de efeitos
-  applyEffect: (spec: GameplayEffectSpec, level?: number) => void;
-  removeEffect: (effectId: string) => void;
-  hasEffect: (effectId: string) => boolean;
-  getEffectStacks: (effectId: string) => number;
-  
-  // Ações de tags
-  addTag: (tag: string) => void;
-  removeTag: (tag: string) => void;
-  hasTag: (tag: string) => boolean;
-  hasAnyTag: (tags: string[]) => boolean;
-  hasAllTags: (tags: string[]) => boolean;
-  
-  // Utilitários
-  dealDamage: (amount: number, source?: string) => number;
-  heal: (amount: number, source?: string) => number;
-  isAlive: () => boolean;
-  reset: () => void;
-  
-  // Acesso ao sistema interno
-  getSystemComponent: () => AbilitySystemComponent;
-}
+export type { AbilityState, AttributeState, EffectState, GASStats, UseGASOptions, UseGASReturn } from './useGameplayAbilitySystem.types';
 
 // ============================================================================
 // HOOK IMPLEMENTATION
@@ -151,7 +44,7 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
 
   // Sistema GAS interno
   const systemRef = useRef<AbilitySystemComponent | null>(null);
-  
+
   // Estado React
   const [attributeStates, setAttributeStates] = useState<Map<string, AttributeState>>(new Map());
   const [abilityStates, setAbilityStates] = useState<Map<string, AbilityState>>(new Map());
@@ -181,7 +74,7 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
 
   useEffect(() => {
     // Criar atributos
-    const attrs = useStandardAttributes 
+    const attrs = useStandardAttributes
       ? CommonAttributes
       : customAttributes ?? [];
 
@@ -247,11 +140,11 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
     // Sincronizar atributos
     const newAttributes = new Map<string, AttributeState>();
     const attrNames = system.attributes.getAttributeNames();
-    
+
     for (const name of attrNames) {
       const current = system.attributes.getAttribute(name);
       const base = system.attributes.getBaseValue(name);
-      
+
       // Check for changes
       const prevValue = prevAttributesRef.current.get(name);
       if (prevValue !== undefined && prevValue !== current) {
@@ -281,7 +174,7 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
     // Sincronizar habilidades
     const newAbilities = new Map<string, AbilityState>();
     const abilities = system.getAbilities();
-    
+
     for (const ability of abilities) {
       const spec = ability.spec;
       const cooldownRemaining = system.getCooldownRemaining(spec.id);
@@ -380,29 +273,29 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
 
   const activateAbility = useCallback((abilityId: string, target?: AbilitySystemComponent): boolean => {
     if (!systemRef.current) return false;
-    
+
     const success = systemRef.current.activateAbility(abilityId, target);
-    
+
     if (success) {
       const ability = systemRef.current.getAbility(abilityId);
       if (ability) {
         events.onAbilityActivated?.(ability.spec);
       }
     }
-    
+
     syncState();
     return success;
   }, [syncState, events]);
 
   const cancelAbility = useCallback((abilityId: string): void => {
     if (!systemRef.current) return;
-    
+
     const ability = systemRef.current.getAbility(abilityId);
     if (ability) {
       systemRef.current.endAbility(abilityId, true);
       events.onAbilityEnded?.(ability.spec, true);
     }
-    
+
     syncState();
   }, [syncState, events]);
 
@@ -416,7 +309,7 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
 
   const applyEffect = useCallback((spec: GameplayEffectSpec, level: number = 1): void => {
     if (!systemRef.current) return;
-    
+
     systemRef.current.applyEffect(spec, systemRef.current, level);
     events.onEffectApplied?.(spec);
     syncState();
@@ -424,13 +317,13 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
 
   const removeEffect = useCallback((effectId: string): void => {
     if (!systemRef.current) return;
-    
+
     const effect = systemRef.current.getActiveEffects().find(e => e.spec.id === effectId);
     if (effect) {
       systemRef.current.removeEffect(effectId);
       events.onEffectRemoved?.(effect.spec);
     }
-    
+
     syncState();
   }, [syncState, events]);
 
@@ -477,37 +370,37 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
 
   const dealDamage = useCallback((amount: number, source?: string): number => {
     if (!systemRef.current) return 0;
-    
+
     const currentHealth = systemRef.current.attributes.getAttribute('health');
     const defense = systemRef.current.attributes.getAttribute('defense') ?? 0;
-    
+
     // Aplicar redução de dano baseada em defesa
     const damageReduction = defense / (defense + 100); // Formula de redução logarítmica
     const actualDamage = amount * (1 - damageReduction);
-    
+
     const newHealth = Math.max(0, currentHealth - actualDamage);
     systemRef.current.attributes.setBaseValue('health', newHealth);
-    
+
     events.onDamageReceived?.(actualDamage, source);
     syncState();
-    
+
     return actualDamage;
   }, [syncState, events]);
 
   const heal = useCallback((amount: number, source?: string): number => {
     if (!systemRef.current) return 0;
-    
+
     const currentHealth = systemRef.current.attributes.getAttribute('health');
     const maxHealth = systemRef.current.attributes.getAttribute('maxHealth') ?? 100;
-    
+
     const actualHeal = Math.min(amount, maxHealth - currentHealth);
     const newHealth = currentHealth + actualHeal;
-    
+
     systemRef.current.attributes.setBaseValue('health', newHealth);
-    
+
     events.onHealReceived?.(actualHeal, source);
     syncState();
-    
+
     return actualHeal;
   }, [syncState, events]);
 
@@ -518,20 +411,20 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
 
   const reset = useCallback((): void => {
     if (!systemRef.current) return;
-    
+
     // Reset attributes to base values
     const attrNames = systemRef.current.attributes.getAttributeNames();
     for (const name of attrNames) {
       const baseValue = systemRef.current.attributes.getBaseValue(name);
       systemRef.current.attributes.setBaseValue(name, baseValue);
     }
-    
+
     // Remove all active effects
     const effects = systemRef.current.getActiveEffects();
     for (const effect of effects) {
       systemRef.current.removeEffect(effect.spec.id);
     }
-    
+
     // Cancel all active abilities
     const abilities = systemRef.current.getAbilities();
     for (const ability of abilities) {
@@ -539,10 +432,10 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
         systemRef.current.endAbility(ability.spec.id, true);
       }
     }
-    
+
     // Clear tags
     systemRef.current.tags.clear();
-    
+
     syncState();
   }, [syncState]);
 
@@ -564,39 +457,39 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
     activeEffects,
     tags,
     stats,
-    
+
     // Ações de atributos
     getAttribute,
     setAttribute,
     modifyAttribute,
     removeModifier,
-    
+
     // Ações de habilidades
     grantAbility,
     removeAbility,
     activateAbility,
     cancelAbility,
     canActivateAbility,
-    
+
     // Ações de efeitos
     applyEffect,
     removeEffect,
     hasEffect,
     getEffectStacks,
-    
+
     // Ações de tags
     addTag,
     removeTag,
     hasTag,
     hasAnyTag,
     hasAllTags,
-    
+
     // Utilitários
     dealDamage,
     heal,
     isAlive,
     reset,
-    
+
     // Sistema interno
     getSystemComponent,
   }), [

@@ -1,14 +1,14 @@
 {
   "name": "Aethel Engine",
   "short_name": "Aethel",
-  "description": "Next-generation AI-powered game development IDE for the web",
-  "start_url": "/",
+  "description": "Mission-first AI workspace for apps, research, previews, evidence, and governed creative runtimes.",
+  "start_url": "/ide",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#2563eb",
-  "orientation": "any",
+  "orientation": "landscape",
   "scope": "/",
-  "lang": "pt-BR",
+  "lang": "en-US",
   "categories": ["games", "developer tools", "productivity"],
   "icons": [
     {
@@ -84,24 +84,24 @@
   ],
   "shortcuts": [
     {
-      "name": "Novo Projeto",
-      "short_name": "Novo",
-      "description": "Criar um novo projeto de jogo",
-      "url": "/projects/new",
+      "name": "New project",
+      "short_name": "New",
+      "description": "Create a new app, research, game, or film workspace.",
+      "url": "/ide?entry=explorer",
       "icons": [{ "src": "/icons/new-project.png", "sizes": "96x96" }]
     },
     {
-      "name": "Meus Projetos",
-      "short_name": "Projetos",
-      "description": "Ver todos os projetos",
-      "url": "/projects",
+      "name": "My projects",
+      "short_name": "Projects",
+      "description": "Open existing workspaces and continue editing.",
+      "url": "/ide?entry=explorer",
       "icons": [{ "src": "/icons/projects.png", "sizes": "96x96" }]
     },
     {
       "name": "Templates",
       "short_name": "Templates",
-      "description": "Explorar templates de jogos",
-      "url": "/marketplace/templates",
+      "description": "Explore verified templates and installable assets.",
+      "url": "/marketplace",
       "icons": [{ "src": "/icons/templates.png", "sizes": "96x96" }]
     }
   ],
@@ -109,7 +109,7 @@
   "prefer_related_applications": false,
   "file_handlers": [
     {
-      "action": "/editor",
+      "action": "/ide",
       "accept": {
         "application/json": [".aethel", ".scene", ".prefab"],
         "text/javascript": [".js", ".ts"],

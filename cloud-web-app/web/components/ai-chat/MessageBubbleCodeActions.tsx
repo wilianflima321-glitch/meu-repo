@@ -37,7 +37,7 @@ function describeBridgeSuccess(actionLabel: string) {
     case 'Create file':
       return {
         title: 'File created',
-        description: 'The snippet was saved and opened in the workbench.',
+        description: 'The snippet was saved and opened in the IDE.',
       }
     case 'Insert selection':
       return {
@@ -69,7 +69,7 @@ async function runBridgeAction(
   if (!enabled) {
     notify.warning(
       `${actionLabel} unavailable`,
-      bridge ? 'Open a file in the editor to continue.' : 'This action is available inside the workbench (/ide).'
+      bridge ? 'Open a file in the editor to continue.' : 'This action is available inside the IDE.'
     )
     return
   }
@@ -119,7 +119,7 @@ export function MessageBubbleCodeActions({
             ? hasActiveFile
               ? 'Replaces the selection or inserts at the cursor'
               : 'Open a file in the editor'
-            : 'Available in the workbench (/ide)'
+            : 'Available in the IDE'
         }
         onClick={() =>
           void runBridgeAction(
@@ -143,7 +143,7 @@ export function MessageBubbleCodeActions({
             ? hasActiveFile
               ? 'Opens the side panel with before/after preview'
               : 'Open a file in the editor'
-            : 'Available in the workbench (/ide)'
+            : 'Available in the IDE'
         }
         onClick={() =>
           void runBridgeAction(
@@ -162,7 +162,7 @@ export function MessageBubbleCodeActions({
         type="button"
         disabled={!hasBridge}
         className={actionButtonClass(hasBridge)}
-        title={editorBridge ? 'Creates a file through the API and opens it in the editor' : 'Available in the workbench (/ide)'}
+        title={editorBridge ? 'Creates a file through the API and opens it in the editor' : 'Available in the IDE'}
         onClick={() =>
           void runBridgeAction(
             editorBridge,
@@ -185,7 +185,7 @@ export function MessageBubbleCodeActions({
             ? hasActiveFile
               ? 'Inserts at the cursor without replacing selection'
               : 'Open a file in the editor'
-            : 'Available in the workbench (/ide)'
+            : 'Available in the IDE'
         }
         onClick={() =>
           void runBridgeAction(
@@ -201,7 +201,7 @@ export function MessageBubbleCodeActions({
       </button>
 
       <span className="ml-auto text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
-        {editorBridge ? 'Editor bridge active' : 'Workbench: /ide'}
+        {editorBridge ? 'Editor bridge active' : 'Open in IDE'}
       </span>
     </div>
   )

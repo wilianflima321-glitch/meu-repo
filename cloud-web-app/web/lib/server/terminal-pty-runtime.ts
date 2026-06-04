@@ -1,6 +1,6 @@
 /**
  * Aethel Engine - Terminal PTY Runtime
- * 
+ *
  * Servidor real de terminal com PTY usando node-pty.
  * Suporta múltiplas sessões, shells diferentes e streaming via WebSocket.
  */
@@ -57,13 +57,17 @@ export interface TerminalResize {
   rows: number;
 }
 
+type TerminalSessionGlobal = typeof globalThis & {
+  __AETHEL_TERMINAL_SESSIONS__?: Map<string, TerminalSession>
+}
+
 // ============================================================================
 // Shell Detection
 // ============================================================================
 
 function getDefaultShell(): { shell: string; args: string[] } {
   const platform = os.platform();
-  
+
   if (platform === 'win32') {
     // Try PowerShell first, then cmd
     const pwshPaths = [
@@ -71,7 +75,7 @@ function getDefaultShell(): { shell: string; args: string[] } {
       'C:\\Program Files\\PowerShell\\7\\pwsh.exe',
       'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
     ].filter(Boolean) as string[];
-    
+
     for (const pwsh of pwshPaths) {
       try {
         if (pwsh && require('fs').existsSync(pwsh)) {
@@ -79,10 +83,10 @@ function getDefaultShell(): { shell: string; args: string[] } {
         }
       } catch {}
     }
-    
+
     return { shell: 'cmd.exe', args: [] };
   }
-  
+
   // Unix-like systems
   const userShell = process.env.SHELL || '/bin/bash';
   return { shell: userShell, args: ['--login'] };
@@ -92,7 +96,7 @@ async function resolveShell(shellPath?: string): Promise<{ shell: string; args: 
   if (!shellPath) {
     return getDefaultShell();
   }
-  
+
   // Verify shell exists
   try {
     await fs.access(shellPath);
@@ -108,7 +112,7 @@ async function resolveShell(shellPath?: string): Promise<{ shell: string; args: 
 // ============================================================================
 
 function getGlobalSessions(): Map<string, TerminalSession> {
-  const g = globalThis as any;
+  const g = globalThis as TerminalSessionGlobal;
   if (!g.__AETHEL_TERMINAL_SESSIONS__) {
     g.__AETHEL_TERMINAL_SESSIONS__ = new Map();
   }
@@ -124,17 +128,17 @@ export class TerminalPtyManager extends EventEmitter {
   private cleanupInterval: NodeJS.Timeout | null = null;
   private readonly maxIdleTime = 30 * 60 * 1000; // 30 minutes
   private readonly maxSessions = 50;
-  
+
   constructor() {
     super();
     this.sessions = getGlobalSessions();
     this.startCleanupInterval();
   }
-  
+
   // ==========================================================================
   // Session Management
   // ==========================================================================
-  
+
   async createSession(config: TerminalSessionConfig): Promise<TerminalSession> {
     // Check session limit
     const userSessions = this.getSessionsByUser(config.userId);
@@ -145,11 +149,11 @@ export class TerminalPtyManager extends EventEmitter {
         await this.killSession(oldest.id);
       }
     }
-    
+
     if (this.sessions.size >= this.maxSessions) {
       throw new Error('Maximum terminal sessions reached');
     }
-    
+
     // Resolve working directory
     let cwd = config.cwd || os.homedir();
     try {
@@ -160,11 +164,11 @@ export class TerminalPtyManager extends EventEmitter {
     } catch {
       cwd = os.homedir();
     }
-    
+
     // Resolve shell
     const { shell, args } = await resolveShell(config.shell);
     const shellArgs = config.args || args;
-    
+
     // Build environment
     const env = {
       ...process.env,
@@ -176,7 +180,7 @@ export class TerminalPtyManager extends EventEmitter {
       AETHEL_TERMINAL: '1',
       AETHEL_SESSION_ID: config.id,
     };
-    
+
     // Create PTY
     const pty = spawn(shell, shellArgs, {
       name: 'xterm-256color',
@@ -185,7 +189,7 @@ export class TerminalPtyManager extends EventEmitter {
       cols: config.cols || 120,
       rows: config.rows || 30,
     });
-    
+
     const session: TerminalSession = {
       id: config.id,
       userId: config.userId,
@@ -197,7 +201,7 @@ export class TerminalPtyManager extends EventEmitter {
       lastActivity: Date.now(),
       isAlive: true,
     };
-    
+
     // Setup event handlers
     pty.onData((data: string) => {
       session.lastActivity = Date.now();
@@ -207,7 +211,7 @@ export class TerminalPtyManager extends EventEmitter {
         timestamp: Date.now(),
       } as TerminalOutput);
     });
-    
+
     pty.onExit(({ exitCode, signal }) => {
       session.isAlive = false;
       this.emit('exit', {
@@ -222,50 +226,50 @@ export class TerminalPtyManager extends EventEmitter {
         }
       }, 5000);
     });
-    
+
     this.sessions.set(config.id, session);
     this.emit('created', { sessionId: session.id });
-    
+
     return session;
   }
-  
+
   getSession(sessionId: string): TerminalSession | undefined {
     return this.sessions.get(sessionId);
   }
-  
+
   getSessionsByUser(userId: string): TerminalSession[] {
     return Array.from(this.sessions.values()).filter(s => s.userId === userId);
   }
-  
+
   getAllSessions(): TerminalSession[] {
     return Array.from(this.sessions.values());
   }
-  
+
   async killSession(sessionId: string): Promise<boolean> {
     const session = this.sessions.get(sessionId);
     if (!session) return false;
-    
+
     try {
       session.pty.kill();
       session.isAlive = false;
     } catch (error) {
       log.error(`Failed to kill session ${sessionId}:`, error);
     }
-    
+
     this.sessions.delete(sessionId);
     this.emit('killed', { sessionId });
-    
+
     return true;
   }
-  
+
   // ==========================================================================
   // PTY Operations
   // ==========================================================================
-  
+
   write(sessionId: string, data: string): boolean {
     const session = this.sessions.get(sessionId);
     if (!session || !session.isAlive) return false;
-    
+
     try {
       session.pty.write(data);
       session.lastActivity = Date.now();
@@ -275,11 +279,11 @@ export class TerminalPtyManager extends EventEmitter {
       return false;
     }
   }
-  
+
   resize(sessionId: string, cols: number, rows: number): boolean {
     const session = this.sessions.get(sessionId);
     if (!session || !session.isAlive) return false;
-    
+
     try {
       session.pty.resize(cols, rows);
       this.emit('resized', { sessionId, cols, rows } as TerminalResize);
@@ -289,26 +293,26 @@ export class TerminalPtyManager extends EventEmitter {
       return false;
     }
   }
-  
+
   // ==========================================================================
   // Shell Operations
   // ==========================================================================
-  
+
   async executeCommand(sessionId: string, command: string): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session || !session.isAlive) {
       throw new Error('Session not found or not alive');
     }
-    
+
     // Write command with newline
     session.pty.write(command + '\r');
     session.lastActivity = Date.now();
   }
-  
+
   sendSignal(sessionId: string, signal: string): boolean {
     const session = this.sessions.get(sessionId);
     if (!session || !session.isAlive) return false;
-    
+
     try {
       // Send signal as control character
       switch (signal.toUpperCase()) {
@@ -336,33 +340,33 @@ export class TerminalPtyManager extends EventEmitter {
       return false;
     }
   }
-  
+
   clearScreen(sessionId: string): boolean {
     const session = this.sessions.get(sessionId);
     if (!session || !session.isAlive) return false;
-    
+
     // Send clear screen escape sequence
     session.pty.write('\x1b[2J\x1b[H');
     return true;
   }
-  
+
   // ==========================================================================
   // Cleanup
   // ==========================================================================
-  
+
   private startCleanupInterval(): void {
     if (this.cleanupInterval) return;
-    
+
     this.cleanupInterval = setInterval(() => {
       const now = Date.now();
-      
+
       for (const [id, session] of this.sessions) {
         // Clean up dead sessions
         if (!session.isAlive) {
           this.sessions.delete(id);
           continue;
         }
-        
+
         // Clean up idle sessions
         if (now - session.lastActivity > this.maxIdleTime) {
           log.info(`Cleaning up idle terminal session: ${id}`);
@@ -371,17 +375,17 @@ export class TerminalPtyManager extends EventEmitter {
       }
     }, 60000); // Check every minute
   }
-  
+
   stopCleanup(): void {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
       this.cleanupInterval = null;
     }
   }
-  
+
   async shutdown(): Promise<void> {
     this.stopCleanup();
-    
+
     const killPromises = Array.from(this.sessions.keys()).map(id => this.killSession(id));
     await Promise.all(killPromises);
   }

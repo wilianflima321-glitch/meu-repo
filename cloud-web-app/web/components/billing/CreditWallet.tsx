@@ -2,12 +2,12 @@
 
 import { logger } from '@/lib/observability/logger';
 /**
- * CreditWallet - UI Completa de Carteira de creditos
+ * CreditWallet - Complete credit wallet UI
  *
- * Painel que mostra saldo, history e opções de recarga.
- * Integra com /api/wallet/* endpoints.
+ * Panel that shows balance, history, and top-up options.
+ * Integrates with /api/wallet/* endpoints.
  *
- * @see ALINHAMENTO_PLANO_NEGOCIO_E_CUSTOS_2026.md - Seção 4
+ * @see ALINHAMENTO_PLANO_NEGOCIO_E_CUSTOS_2026.md - Section 4
  */
 import React, { useState, useCallback } from 'react';
 import useSWR from 'swr';
@@ -85,14 +85,14 @@ const CREDIT_WALLET_TABS: Array<{ id: CreditWalletTabId; label: string; icon: Re
 const CREDIT_PACKAGES: CreditPackage[] = [
   {
     id: 'pack-500',
-    name: 'Pacote inicial',
+    name: 'Starter pack',
     credits: 500,
     price: 9.99,
     bonus: 0,
   },
   {
     id: 'pack-1500',
-    name: 'Pacote criador',
+    name: 'Creator pack',
     credits: 1500,
     price: 24.99,
     bonus: 100,
@@ -100,7 +100,7 @@ const CREDIT_PACKAGES: CreditPackage[] = [
   },
   {
     id: 'pack-5000',
-    name: 'Pacote pro',
+    name: 'Pro pack',
     credits: 5000,
     price: 74.99,
     bonus: 500,
@@ -108,7 +108,7 @@ const CREDIT_PACKAGES: CreditPackage[] = [
   },
   {
     id: 'pack-15000',
-    name: 'Pacote studio',
+    name: 'Studio pack',
     credits: 15000,
     price: 199.99,
     bonus: 2000,
@@ -228,7 +228,7 @@ interface PackageCardProps {
 
 function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
   return (
-    <button type="button" aria-label={`Selecionar pacote ${pkg.name}`}
+    <button type="button" aria-label={`Select package ${pkg.name}`}
       onClick={onSelect}
       disabled={isLoading}
       className={`
@@ -400,7 +400,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
       {/* Tabs */}
       <div className="flex border-b border-[var(--aethel-border-primary)]">
         {CREDIT_WALLET_TABS.map((tab) => (
-          <button type="button" aria-label={`Abrir aba ${tab.label.toLowerCase()} da carteira`}
+          <button type="button" aria-label={`Open tab ${tab.label.toLowerCase()} in wallet`}
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`
@@ -545,6 +545,3 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
 }
 
 export default CreditWallet;
-
-
-

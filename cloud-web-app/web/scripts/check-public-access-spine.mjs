@@ -26,7 +26,6 @@ const PUBLIC_MARKETING_ROUTES = [
   '/compliance',
   '/security',
   '/security-policy',
-  '/security-acknowledgments',
   '/reliability',
   '/honest-status',
   '/terms',
@@ -41,6 +40,13 @@ function routeToPagePath(route) {
   if (route === '/') return path.join(APP_DIR, 'page.tsx')
   const segments = route.split('/').filter(Boolean)
   return path.join(APP_DIR, ...segments, 'page.tsx')
+}
+
+
+function parsePublicRedirects(content) {
+  const match = content.match(/const\s+PUBLIC_ROUTE_REDIRECTS\s*:\s*Record<string, string>\s*=\s*\{(?<body>[\s\S]*?)\};/)
+  if (!match?.groups?.body) return new Map()
+  return new Map([...match.groups.body.matchAll(/'([^']+)'\s*:\s*'([^']+)'/g)].map((item) => [item[1], item[2]]))
 }
 
 function parseMiddlewareList(content, constName) {
@@ -69,15 +75,18 @@ function main() {
   }
   const exactPaths = new Set([...exactBody.matchAll(/'([^']+)'/g)].map((item) => item[1]))
 
+  const redirects = parsePublicRedirects(middleware)
+
   const failures = []
   const rows = []
   for (const route of PUBLIC_MARKETING_ROUTES) {
     const pagePath = routeToPagePath(route)
     const pageExists = fs.existsSync(pagePath)
     const middlewareAllowed = isAllowedByPublicMiddleware(route, exactPaths, prefixes)
-    rows.push({ route, pageExists, middlewareAllowed })
-    if (!pageExists) failures.push(`${route}: missing App Router page`)
-    if (!middlewareAllowed) failures.push(`${route}: redirects unauthenticated users; add it to the public middleware allowlist`)
+    const redirectTarget = redirects.get(route) ?? ''
+    rows.push({ route, pageExists, middlewareAllowed, redirectTarget })
+    if (!pageExists && !redirectTarget) failures.push(`${route}: missing App Router page or public redirect`)
+    if (!middlewareAllowed && !redirectTarget) failures.push(`${route}: redirects unauthenticated users; add it to the public middleware allowlist or PUBLIC_ROUTE_REDIRECTS`)
   }
 
   fs.mkdirSync(DOCS_DIR, { recursive: true })
@@ -88,13 +97,13 @@ function main() {
     '',
     '## Public Route Matrix',
     '',
-    '| Route | Page exists | Public in middleware |',
-    '|---|---:|---:|',
-    ...rows.map((row) => `| ${row.route} | ${row.pageExists ? 'yes' : 'no'} | ${row.middlewareAllowed ? 'yes' : 'no'} |`),
+    '| Route | Page exists | Public in middleware | Redirect target |',
+    '|---|---:|---:|---|',
+    ...rows.map((row) => `| ${row.route} | ${row.pageExists ? 'yes' : 'no'} | ${row.middlewareAllowed ? 'yes' : 'no'} | ${row.redirectTarget || '-'} |`),
     '',
     '## Policy',
     '',
-    '- Public trust, security, compliance, pricing, help, contact, and recovery pages cannot redirect to `/login`.',
+    '- Public trust, security, compliance, pricing, help, and recovery pages cannot redirect to `/login`.',
     '- Product workspace routes such as `/dashboard`, `/ide`, `/settings`, and `/profile` remain protected.',
     '- Add new marketing routes to this gate when PublicHeader or footer exposes them.',
   ]

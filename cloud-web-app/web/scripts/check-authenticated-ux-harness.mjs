@@ -13,12 +13,23 @@ if (!fs.existsSync(path.join(ROOT, scriptPath))) {
 }
 
 const content = fs.existsSync(path.join(ROOT, scriptPath)) ? fs.readFileSync(path.join(ROOT, scriptPath), 'utf8') : ''
-const requiredRoutes = ['/dashboard', '/ide', '/studio', '/studio/level', '/studio/scene', '/studio/film', '/admin', '/billing', '/settings', '/evidence']
+const requiredRoutes = ['/dashboard', '/ide', '/studio', '/studio/level', '/studio/level?tool=scene', '/studio/film', '/admin', '/billing', '/settings', '/evidence']
 
 for (const route of requiredRoutes) {
   if (!content.includes(`'${route}'`) && !content.includes(`"${route}"`)) failures.push(`${scriptPath}: missing route ${route}`)
 }
-for (const required of ['JWT_SECRET', 'AUTH_QA_SECRET_MISSING', 'aethel-token', "name: 'token'", 'jsonwebtoken', 'finalPathOk', 'authenticated routes redirected']) {
+for (const required of [
+  'JWT_SECRET',
+  'AUTHENTICATED_UX_TOKEN',
+  'AUTH_QA_SECRET_MISSING',
+  'AUTH_QA_TOKEN_REJECTED',
+  'assertAuthPreflight',
+  'aethel-token',
+  "name: 'token'",
+  'jsonwebtoken',
+  'finalPathOk',
+  'authenticated routes redirected',
+]) {
   if (!content.includes(required)) failures.push(`${scriptPath}: missing ${required}`)
 }
 if (/secret\s*=\s*['"][^'"]+['"]/.test(content)) {
@@ -33,6 +44,8 @@ const report = `# Authenticated UX Harness Audit
 - Capture script: \`${scriptPath}\`
 - Protected routes covered: ${requiredRoutes.filter((route) => content.includes(`'${route}'`) || content.includes(`"${route}"`)).length}/${requiredRoutes.length}
 - Uses signed JWT from env: ${content.includes('JWT_SECRET') ? 'yes' : 'no'}
+- Supports pre-signed token override: ${content.includes('AUTHENTICATED_UX_TOKEN') ? 'yes' : 'no'}
+- Fails fast when the running server rejects the QA token: ${content.includes('AUTH_QA_TOKEN_REJECTED') ? 'yes' : 'no'}
 - Injects cookie and localStorage token: ${content.includes("name: 'token'") && content.includes('aethel-token') ? 'yes' : 'no'}
 
 Status: ${failures.length ? 'FAIL' : 'PASS'}

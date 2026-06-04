@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary Studio/viewport runtime module; never import from public/dashboard/admin route shells.
 import { logger } from '@/lib/observability/logger';
 import * as THREE from 'three';
 import {
@@ -19,34 +20,34 @@ import {
 
 export class ComponentRegistry {
   private definitions: Map<ComponentType, ComponentDefinition> = new Map();
-  
+
   constructor() {
     this.registerBuiltInComponents();
   }
-  
+
   register<T extends ComponentData>(definition: ComponentDefinition<T>): void {
     this.definitions.set(definition.type, definition as unknown as ComponentDefinition);
   }
-  
+
   get(type: ComponentType): ComponentDefinition | undefined {
     return this.definitions.get(type);
   }
-  
+
   has(type: ComponentType): boolean {
     return this.definitions.has(type);
   }
-  
+
   getAll(): ComponentDefinition[] {
     return Array.from(this.definitions.values());
   }
-  
+
   createComponent<T extends ComponentData>(type: ComponentType): Component<T> | null {
     const definition = this.definitions.get(type);
     if (!definition) {
       logger.warn(`Component type not registered: ${type}`);
       return null;
     }
-    
+
     return {
       id: `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type,
@@ -55,7 +56,7 @@ export class ComponentRegistry {
       entity: null,
     };
   }
-  
+
   private registerBuiltInComponents(): void {
     // Transform
     this.register<TransformData>({
@@ -90,7 +91,7 @@ export class ComponentRegistry {
       };
       },
     });
-    
+
     // MeshRenderer
     this.register<MeshRendererData>({
       type: 'meshRenderer',
@@ -111,7 +112,7 @@ export class ComponentRegistry {
         renderOrder: { type: 'number', default: 0 },
       },
     });
-    
+
     // Light
     this.register<LightData>({
       type: 'light',
@@ -146,7 +147,7 @@ export class ComponentRegistry {
         } as LightData;
       },
     });
-    
+
     // Camera
     this.register<CameraData>({
       type: 'camera',
@@ -168,7 +169,7 @@ export class ComponentRegistry {
         far: { type: 'number', min: 1, default: 1000 },
       },
     });
-    
+
     // Collider
     this.register<ColliderData>({
       type: 'collider',
@@ -189,7 +190,7 @@ export class ComponentRegistry {
         radius: { type: 'number', min: 0, default: 0.5 },
       },
     });
-    
+
     // Rigidbody
     this.register<RigidbodyData>({
       type: 'rigidbody',
@@ -210,7 +211,7 @@ export class ComponentRegistry {
         isKinematic: { type: 'boolean', default: false },
       },
     });
-    
+
     // AudioSource
     this.register<AudioSourceData>({
       type: 'audioSource',
@@ -233,7 +234,7 @@ export class ComponentRegistry {
         spatial: { type: 'boolean', default: true },
       },
     });
-    
+
     // Script
     this.register<ScriptData>({
       type: 'script',

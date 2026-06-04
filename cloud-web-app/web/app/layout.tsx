@@ -1,6 +1,8 @@
 import './globals.css'
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
 import GlobalCommandSurface from '@/components/ide/GlobalCommandSurface'
 import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import ProductTelemetry from '@/components/telemetry/ProductTelemetry'
@@ -41,7 +43,7 @@ export const metadata: Metadata = {
     url: 'https://aethel.dev',
     siteName: 'Aethel Engine',
     title: 'Aethel Engine - multi-agent software studio',
-    description: 'Research, planning, code, preview, and readiness in one AI-assisted studio.',
+    description: 'Research, planning, code, preview, and receipts in one AI-assisted studio.',
     images: [
       {
         url: '/og-image.png',
@@ -73,7 +75,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`dark ${GeistSans.variable} ${GeistMono.variable}`}>
       <body className="min-h-screen antialiased bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
         <CoreUiProviders>
           <ProductTelemetry />
@@ -83,4 +85,3 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     </html>
   )
 }
-

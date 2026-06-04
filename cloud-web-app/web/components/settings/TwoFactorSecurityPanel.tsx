@@ -40,7 +40,7 @@ type TwoFactorSecurityPanelProps = {
 const logger = createComponentLogger('TwoFactorSecurityPanel')
 
 function formatDateTime(value?: string | null): string {
-  if (!value) return 'Ainda nao validado'
+  if (!value) return 'Not validated yet'
 
   try {
     return new Intl.DateTimeFormat('pt-BR', {
@@ -167,7 +167,7 @@ export default function TwoFactorSecurityPanel({
         throw new Error(payload?.error || 'Failed to verify the authenticator code.')
       }
 
-      setNotice('2FA activedo com sucesso. Guarde os codigos de recuperacao em local seguro.')
+      setNotice('2FA enabled successfully. Store recovery codes in a safe place.')
       closeModal()
       await loadStatus()
     } catch (verifyError) {
@@ -194,7 +194,7 @@ export default function TwoFactorSecurityPanel({
         throw new Error(payload?.error || 'Failed to disable 2FA.')
       }
 
-      setNotice('2FA desactivedo. Recomendamos reactiver a protecao quando concluir a manutencao da conta.')
+      setNotice('2FA disabled. We recommend re-enabling protection after account maintenance is complete.')
       closeModal()
       await loadStatus()
     } catch (disableError) {
@@ -222,7 +222,7 @@ export default function TwoFactorSecurityPanel({
       }
 
       setBackupCodes(Array.isArray(payload?.backupCodes) ? payload.backupCodes.map(String) : [])
-      setNotice('Novos codigos de backup gerados. Substitua imediatamente os codigos antigos.')
+      setNotice('New backup codes generated. Replace the old codes immediately.')
       await loadStatus()
     } catch (regenError) {
       logger.warn('Failed to regenerate backup codes', regenError)
@@ -309,11 +309,11 @@ export default function TwoFactorSecurityPanel({
                     setBackupCodes([])
                   }}
                   disabled={actionLoading}
-                  aria-label="Regenerar codigos de backup da autenticacao de dois fatores"
+                  aria-label="Regenerate two-factor authentication backup codes"
                   className="inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-2 text-sm text-[var(--aethel-info-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <KeyRound className="h-4 w-4" />
-                  Novos codigos
+                  New codes
                 </button>
                 <button
                   type="button"
@@ -365,7 +365,7 @@ export default function TwoFactorSecurityPanel({
           <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-4">
             <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Postura atual</p>
             <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">
-              {status?.twoFactorEnabled ? 'Conta reforcada com autenticador' : 'Conta protegida apenas por senha'}
+              {status?.twoFactorEnabled ? 'Account reinforced with an authenticator' : 'Account protected by password only'}
             </p>
             <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
               {status?.twoFactorEnabled
@@ -375,26 +375,26 @@ export default function TwoFactorSecurityPanel({
           </div>
 
           <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Recuperacao</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Recovery</p>
             <p className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">
               {status?.twoFactorEnabled ? status?.backupCodesRemaining ?? '--' : '--'}
             </p>
             <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
               {status?.twoFactorEnabled
-                ? 'Codigos de backup restantes para emergencias.'
-                : 'Os codigos de backup aparecem no setup e podem ser regenerados depois.'}
+                ? 'Backup codes remaining for emergencies.'
+                : 'Backup codes appear during setup and can be regenerated later.'}
             </p>
           </div>
 
           <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Proximo passo</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Next step</p>
             <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">
               {status?.twoFactorEnabled ? 'Review codes and trusted devices' : 'Configure an authenticator in under 2 minutes'}
             </p>
             <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
               {variant === 'settings'
-                ? 'Use este painel como trilha canonica de hardening da conta e acompanhe o estado sem sair do workspace.'
-                : 'Mantenha este bloco como checkpoint rapido de seguranca antes de editar billing, API keys ou acesso do time.'}
+                ? 'Use this panel as the canonical account-hardening path and track status without leaving the workspace.'
+                : 'Keep this block as a quick security checkpoint before editing billing, API keys, or team access.'}
             </p>
           </div>
         </div>
@@ -418,12 +418,12 @@ export default function TwoFactorSecurityPanel({
 
         {variant === 'settings' && (
           <div className="mt-4 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3 text-sm text-[var(--aethel-text-secondary)]">
-            Para gestao completa da conta, revise tambem o perfil principal, sessoes e preferencias pessoais.
+            For complete account management, also review the main profile, sessions, and personal preferences.
             <Link
               href="/profile"
               className="ml-2 font-medium text-[var(--aethel-info-light)] underline decoration-transparent transition hover:decoration-current"
             >
-              Abrir perfil
+              Open profile
             </Link>
           </div>
         )}
@@ -436,7 +436,7 @@ export default function TwoFactorSecurityPanel({
               <div>
                 <div className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)]">
                   <Shield className="h-3.5 w-3.5" />
-                  Seguranca da conta
+                  Account security
                 </div>
                 <h4 className="mt-3 text-xl font-semibold text-[var(--aethel-text-primary)]">
                   {modal === 'setup'
@@ -449,10 +449,10 @@ export default function TwoFactorSecurityPanel({
               <button
                 type="button"
                 onClick={closeModal}
-                aria-label="Fechar modal de seguranca"
+                aria-label="Close security modal"
                 className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-tertiary)]"
               >
-                Fechar
+                Close
               </button>
             </div>
 
@@ -481,7 +481,7 @@ export default function TwoFactorSecurityPanel({
                     </div>
                     <div className="space-y-3">
                       <p className="text-sm text-[var(--aethel-text-secondary)]">
-                        Escaneie o QR code no autenticador da sua preferencia e confirme com um codigo de 6 digitos.
+                        Scan the QR code in your preferred authenticator and confirm with a 6-digit code.
                       </p>
                       {setup.secret && (
                         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-3">
@@ -495,7 +495,7 @@ export default function TwoFactorSecurityPanel({
 
                 <div>
                   <label htmlFor="two-factor-setup-code" className="text-sm font-medium text-[var(--aethel-text-primary)]">
-                    Codigo do autenticador
+                    Authenticator code
                   </label>
                   <input
                     id="two-factor-setup-code"
@@ -512,15 +512,15 @@ export default function TwoFactorSecurityPanel({
                   <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Codigos de recuperacao</p>
+                        <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Recovery codes</p>
                         <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
-                          Guarde em um cofre seguro. Cada codigo pode ser usado uma vez.
+                          Store them in a secure vault. Each code can be used once.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => void copyBackupCodes()}
-                        aria-label="Copiar codigos de backup"
+                        aria-label="Copy backup codes"
                         className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-tertiary)]"
                       >
                         <Copy className="h-3.5 w-3.5" />
@@ -545,12 +545,12 @@ export default function TwoFactorSecurityPanel({
             {modal === 'disable' && (
               <div className="mt-5 space-y-4">
                 <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] p-4 text-sm text-[var(--aethel-warning-light)]">
-                  Desative apenas se estiver trocando de autenticador ou resolvendo um incidente de acesso.
+                  Disable only if you are changing authenticators or resolving an access incident.
                 </div>
 
                 <div>
                   <label htmlFor="two-factor-disable-code" className="text-sm font-medium text-[var(--aethel-text-primary)]">
-                    Codigo atual do autenticador
+                    Current authenticator code
                   </label>
                   <input
                     id="two-factor-disable-code"
@@ -583,11 +583,11 @@ export default function TwoFactorSecurityPanel({
                 {backupCodes.length === 0 ? (
                   <>
                     <p className="text-sm text-[var(--aethel-text-secondary)]">
-                      Confirme com um codigo atual do autenticador para emitir um novo conjunto de backup codes.
+                      Confirm with a current authenticator code to issue a new set of backup codes.
                     </p>
                     <div>
                       <label htmlFor="two-factor-backup-code" className="text-sm font-medium text-[var(--aethel-text-primary)]">
-                        Codigo atual do autenticador
+                        Current authenticator code
                       </label>
                       <input
                         id="two-factor-backup-code"
@@ -604,15 +604,15 @@ export default function TwoFactorSecurityPanel({
                   <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Novos codigos emitidos</p>
+                        <p className="text-sm font-medium text-[var(--aethel-text-primary)]">New codes emitidos</p>
                         <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
-                          Os codigos antigos deixam de valer assim que este lote e confirmado.
+                          Old codes stop working as soon as this batch is confirmed.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => void copyBackupCodes()}
-                        aria-label="Copiar novos codigos de backup"
+                        aria-label="Copy new backup codes"
                         className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-tertiary)]"
                       >
                         <Copy className="h-3.5 w-3.5" />
@@ -678,7 +678,7 @@ export default function TwoFactorSecurityPanel({
                     void handleRegenerateBackupCodes()
                   }}
                   disabled={actionLoading || (backupCodes.length === 0 && authCode.trim().length < 6)}
-                  aria-label={backupCodes.length > 0 ? 'Fechar modal de novos codigos de backup' : 'Confirm geracao de novos codigos de backup'}
+                  aria-label={backupCodes.length > 0 ? 'Close new backup codes modal' : 'Confirm new backup code generation'}
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-4 py-2 text-sm text-[var(--aethel-info-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {backupCodes.length > 0 ? 'Complete' : actionLoading ? 'Generating...' : 'Generate new codes'}

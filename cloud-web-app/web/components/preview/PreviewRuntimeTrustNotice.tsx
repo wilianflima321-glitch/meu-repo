@@ -82,31 +82,31 @@ export function PreviewRuntimeTrustNotice({
         : 'info';
 
   const heading = isSavingFile
-    ? 'Sincronizando as ultimas mudancas com a superficie visual.'
+    ? 'Syncing the latest visual changes.'
     : forceInlinePreviewFallback || !previewRuntimeUrl
-      ? 'Preview operando no fallback inline ate o runtime ficar confiavel.'
+      ? 'Using inline preview until live checks are ready.'
       : runtimeHealth.status === 'checking'
-        ? 'Revalidando o runtime remoto antes de chamar esta lane de confiavel.'
+        ? 'Checking the live preview again.'
         : runtimeHealth.status === 'unhealthy' || runtimeHealth.status === 'unreachable' || runtimeHealth.status === 'invalid'
-          ? 'O runtime remoto perdeu confianca e precisa de uma nova validacao.'
-          : 'Existe sinal suficiente para seguir, mas a readiness ainda nao esta completa.';
+          ? 'The live preview needs a fresh check.'
+          : 'Preview can continue; one check is still pending.';
 
   const body =
     runtimeHealth.reason ||
     runtimeDiscoveryMessage ||
     firstBlocker ||
     (previewRuntimeUrl
-      ? 'Use a proxima acao recomendada para restaurar parity de runtime sem sair da IDE.'
-      : 'Descubra ou provisione um runtime quando precisar validar device, rede ou deploy fora do inline.');
+      ? 'Use the next action to restore live preview without leaving the IDE.'
+      : 'Set up live preview when you need device, network, or deploy checks outside inline preview.');
   const compactSummary = isSavingFile
     ? 'Syncing the latest visual changes.'
     : forceInlinePreviewFallback || !previewRuntimeUrl
-      ? 'Inline fallback active.'
+      ? 'Local preview active.'
       : runtimeHealth.status === 'checking'
         ? 'Revalidating remote runtime.'
         : runtimeHealth.status === 'unhealthy' || runtimeHealth.status === 'unreachable' || runtimeHealth.status === 'invalid'
-          ? 'Runtime trust degraded.'
-          : 'Runtime is reachable, but readiness is still tightening.';
+          ? 'Live preview needs attention.'
+          : 'Live preview is reachable; one check is still pending.';
   const compactDetail =
     isSavingFile ||
     forceInlinePreviewFallback ||
@@ -118,36 +118,83 @@ export function PreviewRuntimeTrustNotice({
       : null;
 
   if (density === 'compact') {
+    const compactPrimaryStatus = forceInlinePreviewFallback || !previewRuntimeUrl ? 'Local preview' : runtimeStrategyLabel;
+
     return (
-      <div className="border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_94%,transparent))] px-3 py-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <NoticeChip tone={tone}>
-            {forceInlinePreviewFallback || !previewRuntimeUrl ? 'Inline fallback' : runtimeStrategyLabel}
-          </NoticeChip>
-          <NoticeChip tone={hasReachableRuntime ? 'success' : tone}>
-            {hasReachableRuntime ? 'Runtime reachable' : `Health ${runtimeHealth.status}`}
-          </NoticeChip>
-          {runtimeReadiness?.status ? (
-            <NoticeChip tone={runtimeReadiness.status === 'ready' ? 'success' : tone}>
-              Readiness {runtimeReadiness.status}
-            </NoticeChip>
-          ) : null}
-          <NoticeChip tone={artifactLabel === 'proposal' ? 'info' : hasReachableRuntime ? 'success' : tone}>
-            Artifact {artifactLabel}
-          </NoticeChip>
-          <span className="inline-flex min-h-[28px] items-center rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
-            Next move: {runtimePrimaryActionLabel}
+      <div
+        className="border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-2"
+        data-preview-trust-notice="compact"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex min-w-0 items-center gap-2">
+              <span
+                className={`h-2 w-2 shrink-0 rounded-full ${
+                  tone === 'success'
+                    ? 'bg-[var(--aethel-success)]'
+                    : tone === 'warning'
+                      ? 'bg-[var(--aethel-warning)]'
+                      : 'bg-[var(--aethel-info)]'
+                }`}
+                aria-hidden="true"
+              />
+              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                Preview status<span className="sr-only"> Preview trust</span>
+              </span>
+              <span
+                className="truncate text-xs font-medium text-[var(--aethel-text-secondary)]"
+                title={compactDetail ? `${heading} ${compactDetail}` : heading}
+              >
+                {compactSummary}
+              </span>
+            </div>
+          </div>
+          <span className="hidden shrink-0 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_64%,transparent)] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--aethel-text-secondary)] sm:inline-flex">
+            Next: {runtimePrimaryActionLabel}
           </span>
         </div>
-        <div
-          className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-5"
-          title={compactDetail ? `${heading} ${compactDetail}` : heading}
-        >
-          <span className="font-medium text-[var(--aethel-text-secondary)]">{compactSummary}</span>
-          {compactDetail ? (
-            <span className="text-[var(--aethel-text-tertiary)]">{compactDetail}</span>
-          ) : null}
-        </div>
+
+        <details className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">
+          <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full px-0 py-1 font-medium text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]">
+            Details<span className="sr-only"> Runtime evidence</span>
+          </summary>
+          <div className="mt-2 grid gap-2 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_62%,transparent)] p-3 sm:grid-cols-4">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+                Mode
+              </div>
+              <div className="mt-1 text-xs font-medium text-[var(--aethel-text-secondary)]">{compactPrimaryStatus}</div>
+            </div>
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+                Health
+              </div>
+              <div className="mt-1 text-xs font-medium text-[var(--aethel-text-secondary)]">
+                {hasReachableRuntime ? 'reachable' : runtimeHealth.status}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+                Check
+              </div>
+              <div className="mt-1 text-xs font-medium text-[var(--aethel-text-secondary)]">
+                {runtimeReadiness?.status ?? 'checking'}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+                Preview
+              </div>
+              <div className="mt-1 text-xs font-medium text-[var(--aethel-text-secondary)]">{artifactLabel}</div>
+            </div>
+            <div className="sm:col-span-4">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+                Note
+              </div>
+              <div className="mt-1 text-xs leading-5 text-[var(--aethel-text-tertiary)]">{compactDetail ?? body}</div>
+            </div>
+          </div>
+        </details>
       </div>
     );
   }
@@ -158,18 +205,18 @@ export function PreviewRuntimeTrustNotice({
         <div className="min-w-[220px] flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <NoticeChip tone={tone}>
-              {forceInlinePreviewFallback || !previewRuntimeUrl ? 'Inline fallback' : runtimeStrategyLabel}
+              {forceInlinePreviewFallback || !previewRuntimeUrl ? 'Local preview' : runtimeStrategyLabel}
             </NoticeChip>
             <NoticeChip tone={hasReachableRuntime ? 'success' : tone}>
-              {hasReachableRuntime ? 'Runtime reachable' : `Health ${runtimeHealth.status}`}
+              {hasReachableRuntime ? 'Live preview reachable' : `Health ${runtimeHealth.status}`}
             </NoticeChip>
             {runtimeReadiness?.status ? (
               <NoticeChip tone={runtimeReadiness.status === 'ready' ? 'success' : tone}>
-                Readiness {runtimeReadiness.status}
+                Check {runtimeReadiness.status}
               </NoticeChip>
             ) : null}
             <NoticeChip tone={artifactLabel === 'proposal' ? 'info' : hasReachableRuntime ? 'success' : tone}>
-              Artifact {artifactLabel}
+              Preview {artifactLabel}
             </NoticeChip>
           </div>
           <div className="mt-2 text-sm font-semibold text-[var(--aethel-text-primary)]">{heading}</div>
@@ -182,7 +229,7 @@ export function PreviewRuntimeTrustNotice({
           </div>
           <div className="mt-1 font-medium text-[var(--aethel-text-primary)]">{runtimePrimaryActionLabel}</div>
           <div className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
-            {runtimeReadiness?.instructions?.[0] || 'Mantenha a validacao na mesma lane ate o runtime voltar a um estado confiavel.'}
+            {runtimeReadiness?.instructions?.[0] || 'Keep checking this preview until it is trusted again.'}
           </div>
         </div>
       </div>

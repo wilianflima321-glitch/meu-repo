@@ -40,7 +40,7 @@ export function usePreviewRuntimeHealthMonitor(setRuntime: RuntimeSetter) {
             ...prev,
             state: res.ok ? 'healthy' : 'degraded',
             latencyMs,
-            error: res.ok ? null : `Runtime respondeu com HTTP ${res.status}.`,
+            error: res.ok ? null : `Runtime responded with HTTP ${res.status}.`,
             failureCount: res.ok ? 0 : prev.failureCount + 1,
             lastHealthCheckAt: checkedAt,
             lastHealthyAt: res.ok ? checkedAt : prev.lastHealthyAt,
@@ -61,8 +61,8 @@ export function usePreviewRuntimeHealthMonitor(setRuntime: RuntimeSetter) {
               latencyMs: null,
               error:
                 prev.state === 'warming'
-                  ? 'O runtime ainda nao respondeu. Continue no fallback inline ou revalide quando o servidor subir.'
-                  : 'Nao foi possivel validar o runtime remoto agora.',
+                  ? 'The runtime has not responded yet. Stay in local preview or revalidate when the server is ready.'
+                  : 'Could not validate the remote runtime right now.',
               failureCount: prev.failureCount + 1,
               lastHealthCheckAt: checkedAt,
             };

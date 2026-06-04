@@ -8,38 +8,38 @@ import PublicFooter from '@/components/ui/PublicFooter'
 const GAME_CAPABILITIES = [
   {
     icon: Box,
-    title: 'AI-Assisted Asset Generation',
-    description: 'Generate 3D models, textures, and sprites using AI. Meshy 3D integration for real-time asset creation.',
-    status: 'available',
+    title: 'Asset Intake',
+    description: 'Prepare, review, and track game assets before use.',
+    status: 'needs-review',
   },
   {
     icon: Cpu,
     title: 'Physics Engine (Rapier)',
-    description: 'WASM-based physics with @dimforge/rapier3d-compat. Rigid bodies, collisions, and constraints.',
+    description: 'Collision and motion support for playable previews.',
     status: 'available',
   },
   {
     icon: Gamepad2,
     title: 'Scene Preview',
-    description: 'Real-time 3D scene preview with Three.js. Live editing and hot reload for immediate feedback.',
+    description: 'Inspect scenes while editing gameplay logic.',
     status: 'available',
   },
   {
     icon: Volume2,
-    title: 'Web Audio API',
-    description: 'Spatial audio, sound effects, and music generation for immersive game experiences.',
+    title: 'Audio Pass',
+    description: 'Track sound, music, and spatial-audio notes.',
     status: 'experimental',
   },
   {
     icon: Trophy,
     title: 'Gameplay QA Loop',
-    description: 'Automated validators for soft-lock detection, pacing analysis, and balance checking.',
+    description: 'Catch soft-lock, pacing, and balance risks.',
     status: 'experimental',
   },
   {
     icon: Download,
     title: 'Export Pipeline',
-    description: 'Export to HTML5 for web deployment. itch.io integration for publishing.',
+    description: 'Package only after checks pass.',
     status: 'experimental',
   },
 ]
@@ -58,13 +58,11 @@ export default function GamesDocsPage() {
         </div>
         <h1 className="text-4xl font-bold">Games Module</h1>
         <p className="mt-3 text-lg text-[var(--aethel-text-tertiary)]">
-          Build games with AI assistance. From 2D platformers to 3D experiences, Aethel provides
-          code-based logic generation, physics, and asset pipelines.
+          Build playable prototypes with code, assets, physics, and review gates.
         </p>
 
         <div className="mt-4 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_5%,transparent)] p-4 text-sm text-[var(--aethel-warning-light)]">
-          <strong>Current Maturity: L2 Experimental.</strong> Claims allowed: AI-assisted asset generation,
-          scene preview, code-based logic generation. Advanced features are under active development.
+          <strong>L2 Experimental.</strong> Game work stays gated by asset, runtime, and playtest evidence.
         </div>
 
         <h2 className="mt-10 text-2xl font-semibold">Capabilities</h2>
@@ -88,18 +86,17 @@ export default function GamesDocsPage() {
           })}
         </div>
 
-        <h2 className="mt-10 text-2xl font-semibold">Quick Start</h2>
-        <div className="mt-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-6 font-mono text-sm text-[var(--aethel-text-secondary)]">
-          <p className="text-[var(--aethel-text-quaternary)]"># Create a new game project</p>
-          <p>1. Go to /dashboard and click &quot;New Project&quot;</p>
-          <p>2. Select &quot;Games&quot; domain</p>
-          <p>3. Choose a template (e.g., 2D Platformer)</p>
-          <p>4. Use the AI chat to describe your game logic</p>
-          <p>5. Preview in real-time with the 3D/2D preview panel</p>
-        </div>
+        <details className="mt-10 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] p-5">
+          <summary className="cursor-pointer list-none text-sm font-semibold text-[var(--aethel-text-primary)]">Game setup path</summary>
+          <div className="mt-4 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-4 font-mono text-sm text-[var(--aethel-text-secondary)]">
+            <p>1. Start from Dashboard or Studio.</p>
+            <p>2. Choose Games.</p>
+            <p>3. Add logic, assets, and preview checks.</p>
+            <p>4. Promote only after QA evidence.</p>
+          </div>
+        </details>
       </main>
       <PublicFooter />
     </div>
   )
 }
-

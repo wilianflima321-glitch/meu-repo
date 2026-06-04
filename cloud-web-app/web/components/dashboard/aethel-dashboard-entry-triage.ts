@@ -55,9 +55,9 @@ const ENTRY_LANES: Array<{
     lane: {
       id: 'research',
       label: 'Research',
-      description: 'Start in AI Console to align the brief, evidence, and benchmark.',
-      targetTab: 'ai-chat',
-      onboardingToast: 'Research flow ready. Use the AI Console to consolidate context, evidence, and the next decision.',
+      description: 'Start with compact activity, then open IDE agents when the brief is ready for execution.',
+      targetTab: 'activity',
+      onboardingToast: 'Research flow ready. Activity keeps evidence, cost, and the next action together.',
     },
   },
   {
@@ -65,9 +65,9 @@ const ENTRY_LANES: Array<{
     lane: {
       id: 'cloud',
       label: 'Cloud / DevOps',
-      description: 'Check connectivity and platform readiness before going deeper.',
-      targetTab: 'connectivity',
-      onboardingToast: 'Cloud / DevOps flow ready. Confirm connectivity, environment, and readiness before continuing.',
+      description: 'Check status without turning Studio Home into a settings wall.',
+      targetTab: 'activity',
+      onboardingToast: 'Cloud / DevOps flow ready. Activity summarizes status and links to settings only when needed.',
     },
   },
   {
@@ -75,9 +75,9 @@ const ENTRY_LANES: Array<{
     lane: {
       id: 'growth',
       label: 'Growth / Ops',
-      description: 'Use the AI Console to organize operations, automations, and next steps.',
-      targetTab: 'ai-chat',
-      onboardingToast: 'Growth / Ops flow ready. Structure the operation in the AI Console before spreading the work.',
+      description: 'Organize operations, automations, and next steps from a compact activity lane.',
+      targetTab: 'activity',
+      onboardingToast: 'Growth / Ops flow ready. Activity keeps the next operational decision in one place.',
     },
   },
   {
@@ -135,11 +135,11 @@ export function resolveDashboardEntrySeed(params: {
 
   if (mission) {
     return {
-      targetTab: 'ai-chat',
+      targetTab: 'activity',
       showFirstValueGuide: params.onboarding,
       chatSeed: mission,
       toast: {
-        message: 'Mission loaded in the AI Console. Review, refine, and send when ready.',
+        message: 'Mission loaded. Open IDE agents when you are ready to execute.',
         type: 'info',
       },
     }

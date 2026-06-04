@@ -1,37 +1,19 @@
 'use client'
 
+import Link from 'next/link'
 import { useId, type ComponentProps, type ReactNode } from 'react'
-import dynamic from 'next/dynamic'
-import { Blocks, CloudCog, CreditCard, PanelTopOpen, ShieldCheck, Sparkles } from 'lucide-react'
+import { Activity, ExternalLink, PanelTopOpen } from 'lucide-react'
 import { CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 import { FirstValueGuide } from './FirstValueGuide'
 import { DashboardProjectsTab } from './DashboardProjectsTab'
-import { DashboardAIChatTab } from './DashboardAIChatTab'
-import { DashboardWalletTab } from './DashboardWalletTab'
-import { DashboardConnectivityTab } from './DashboardConnectivityTab'
-import type { DashboardOverviewTabProps } from './DashboardOverviewTab'
+import { DashboardOverviewTab, type DashboardOverviewTabProps } from './DashboardOverviewTab'
 import type { FirstValueSessionSummary } from './useFirstValueTracking'
 import {
-  DashboardContentCreationTab,
-  DashboardUnrealTab,
-  BillingTab,
-  TemplatesTab,
-} from './dashboard-tab-loaders'
-import type { ActiveTab, WorkflowTemplate } from './aethel-dashboard-model'
-
-type BillingTabProps = ComponentProps<typeof BillingTab>
-const DashboardOverviewTab = dynamic(
-  () => import('./DashboardOverviewTab').then((mod) => mod.DashboardOverviewTab),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-4 py-4 text-sm text-[var(--aethel-text-secondary)]">
-        Preparing Studio overview...
-      </div>
-    ),
-  }
-)
+  resolvePrimaryDashboardTab,
+  type ActiveTab,
+  type WorkflowTemplate,
+} from './aethel-dashboard-model'
 
 type DashboardMainContentProps = {
   activeTab: ActiveTab
@@ -48,14 +30,14 @@ type DashboardMainContentProps = {
   onFirstValueDismiss: () => void
   overviewProps: DashboardOverviewTabProps
   projectsProps: ComponentProps<typeof DashboardProjectsTab>
-  aiChatProps: ComponentProps<typeof DashboardAIChatTab>
-  walletProps: ComponentProps<typeof DashboardWalletTab>
-  billingProps: BillingTabProps
-  billingError: string | null
-  subscribingPlan: string | null
-  connectivityProps: ComponentProps<typeof DashboardConnectivityTab>
-  workflowTemplates: WorkflowTemplate[]
-  onTemplateSelect: (templateId: string) => void
+  aiChatProps?: unknown
+  walletProps?: unknown
+  billingProps?: unknown
+  billingError?: string | null
+  subscribingPlan?: string | null
+  connectivityProps?: unknown
+  workflowTemplates?: WorkflowTemplate[]
+  onTemplateSelect?: (templateId: string) => void
 }
 
 type SurfaceFrameProps = {
@@ -93,6 +75,162 @@ function SurfaceFrame({ eyebrow, title, description, icon, children }: SurfaceFr
   )
 }
 
+function ActivityCard({
+  label,
+  title,
+  body,
+  children,
+}: {
+  label: string
+  title: string
+  body: string
+  children?: ReactNode
+}) {
+  return (
+    <article className="rounded-[26px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] p-5 shadow-[0_18px_58px_rgba(2,6,23,0.18)]">
+      <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">{label}</p>
+      <h3 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{body}</p>
+      {children ? <div className="mt-4">{children}</div> : null}
+    </article>
+  )
+}
+
+function DashboardActivitySurface({ overviewProps, sourceTab }: { overviewProps: DashboardOverviewTabProps; sourceTab: ActiveTab }) {
+  const {
+    aiActivity,
+    authReady,
+    hasToken,
+    walletLoading,
+    walletError,
+    walletData,
+    formatCurrencyLabel,
+    connectivityData,
+    connectivityLoading,
+    connectivityError,
+    connectivityServices = [],
+    formatConnectivityStatus,
+    backendOnline,
+    aiProviderConfigured,
+    currentPlanName,
+    onOpenAiChat,
+    onOpenBilling,
+    onOpenIde,
+    onOpenProjects,
+  } = overviewProps
+
+  const walletSummary = !authReady
+    ? 'Checking session'
+    : !hasToken
+      ? 'Sign in required'
+      : walletLoading
+        ? 'Syncing budget'
+        : walletError
+          ? 'Wallet needs review'
+          : walletData
+            ? `${walletData.balance.toLocaleString()} ${formatCurrencyLabel(walletData.currency)}`
+            : 'No wallet data'
+
+  const trustSummary = connectivityLoading
+    ? 'Checking services'
+    : connectivityError
+          ? 'Status needs review'
+      : connectivityData
+        ? formatConnectivityStatus(connectivityData.overall_status)
+        : 'Not configured'
+
+  const legacyNotice = sourceTab === 'activity' ? null : (
+    <div className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-4 py-3 text-xs leading-5 text-[var(--aethel-text-secondary)]">
+      <span className={CANONICAL_TYPOGRAPHY.label}>Path compressed</span>
+      <span className="ml-2">The old `{sourceTab}` tab now opens here so Studio Home keeps only three primary paths.</span>
+    </div>
+  )
+
+  return (
+    <SurfaceFrame
+      eyebrow="Activity"
+      title="Agents, status and receipts without another control room"
+      description="This is the compact work lane. Deep work opens only when the mission needs it."
+      icon={<Activity className="h-5 w-5" />}
+    >
+      <div className="space-y-4">
+        {legacyNotice}
+        <div className="grid gap-4 xl:grid-cols-3">
+          <ActivityCard
+            label="Agents"
+            title={aiProviderConfigured ? 'Agent lane ready' : 'Provider setup needed'}
+            body={aiActivity || 'Open the IDE agent sidecar when planning becomes implementation.'}
+          >
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => onOpenAiChat('Continue this mission in the IDE agent sidecar.')}
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--aethel-text-primary)] px-3 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)]"
+              >
+                Open agents <ExternalLink className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={onOpenIde}
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
+              >
+                Open IDE
+              </button>
+            </div>
+          </ActivityCard>
+
+          <ActivityCard
+            label="Cost"
+            title={walletSummary}
+            body={`Plan: ${currentPlanName ?? 'not selected'}. Budget stays visible here, while plan changes live in Billing.`}
+          >
+            <button
+              type="button"
+              onClick={onOpenBilling}
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
+            >
+              Open billing
+            </button>
+          </ActivityCard>
+
+          <ActivityCard
+            label="Trust"
+            title={trustSummary}
+            body={backendOnline ? 'Runtime and provider signals are summarized here. Deep diagnostics stay out of the first fold.' : 'Backend is not reachable; keep execution held until runtime is healthy.'}
+          >
+            <div className="space-y-2">
+              {connectivityServices.slice(0, 3).map((service) => (
+                <div key={service.name} className="flex items-center justify-between rounded-2xl border border-[var(--aethel-border-subtle)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
+                  <span>{service.name.replace(/_/g, ' ')}</span>
+                  <span>{formatConnectivityStatus(service.status)}</span>
+                </div>
+              ))}
+              <Link href="/settings?tab=integrations" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--aethel-text-primary)]">
+                Open settings <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </ActivityCard>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          <Link href="/evidence" className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] p-4 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
+            <span className="block font-semibold text-[var(--aethel-text-primary)]">Receipts</span>
+            Receipts, blockers, release checks and runtime status.
+          </Link>
+          <Link href="/studio" className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] p-4 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
+            <span className="block font-semibold text-[var(--aethel-text-primary)]">Creative Studio</span>
+            World, character, FX, film and logic lanes.
+          </Link>
+          <button type="button" onClick={onOpenProjects} className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] p-4 text-left text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
+            <span className="block font-semibold text-[var(--aethel-text-primary)]">Projects</span>
+            Return to workspace selection and continuity.
+          </button>
+        </div>
+      </div>
+    </SurfaceFrame>
+  )
+}
+
 export function DashboardMainContent({
   activeTab,
   showFirstValueGuide,
@@ -108,18 +246,12 @@ export function DashboardMainContent({
   onFirstValueDismiss,
   overviewProps,
   projectsProps,
-  aiChatProps,
-  walletProps,
-  billingProps,
-  billingError,
-  subscribingPlan,
-  connectivityProps,
-  workflowTemplates,
-  onTemplateSelect,
 }: DashboardMainContentProps) {
+  const primaryActiveTab = resolvePrimaryDashboardTab(activeTab)
+
   return (
-    <div className="mx-auto w-full max-w-[1600px] space-y-4 px-4 py-3 sm:px-5 lg:px-6 lg:py-5">
-      {showFirstValueGuide && activeTab === 'overview' && (
+    <div className="mx-auto w-full max-w-[1600px] space-y-4 px-4 py-3 sm:px-5 lg:px-6 lg:py-5" data-dashboard-primary-surface={primaryActiveTab}>
+      {showFirstValueGuide && primaryActiveTab === 'overview' && (
         <FirstValueGuide
           firstProjectCreated={firstProjectCreated}
           firstAiSuccess={firstValueAiSuccess}
@@ -134,118 +266,20 @@ export function DashboardMainContent({
         />
       )}
 
-      {activeTab === 'overview' && <DashboardOverviewTab {...overviewProps} />}
+      {primaryActiveTab === 'overview' && <DashboardOverviewTab {...overviewProps} />}
 
-      {activeTab === 'projects' && (
+      {primaryActiveTab === 'projects' && (
         <SurfaceFrame
           eyebrow="Projects"
           title="Workspace continuity before deep execution"
-          description="Use this surface to choose or shape the right workspace before handing off to the full Studio."
+          description="Choose or shape the right workspace before handing off to the IDE or Creative Studio."
           icon={<PanelTopOpen className="h-5 w-5" />}
         >
           <DashboardProjectsTab {...projectsProps} />
         </SurfaceFrame>
       )}
 
-      {activeTab === 'ai-chat' && (
-        <SurfaceFrame
-          eyebrow="AI Console"
-          title="Plan, research and coordinate before the heavy cockpit opens"
-          description="Keep the mission thread coherent here, then expand into deeper Studio surfaces when artifact review or implementation becomes the dominant task."
-          icon={<Sparkles className="h-5 w-5" />}
-        >
-          <DashboardAIChatTab {...aiChatProps} />
-        </SurfaceFrame>
-      )}
-
-      {activeTab === 'wallet' && (
-        <SurfaceFrame
-          eyebrow="Wallet"
-          title="Cost awareness stays close to the mission"
-          description="Review balance, credits and spend without turning Studio Home into a finance dashboard."
-          icon={<CreditCard className="h-5 w-5" />}
-        >
-          <DashboardWalletTab {...walletProps} />
-        </SurfaceFrame>
-      )}
-
-      {activeTab === 'billing' && (
-        <SurfaceFrame
-          eyebrow="Billing"
-          title="Commercial readiness, without losing product continuity"
-          description="Plan selection, limits and billing state stay visible as an operational support surface, not as the main product identity."
-          icon={<ShieldCheck className="h-5 w-5" />}
-        >
-          <div className="space-y-4">
-            <BillingTab {...billingProps} />
-            {billingError && (
-              <div
-                className="mt-4 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-3 text-xs text-[var(--aethel-error)]"
-                role="alert"
-                aria-live="polite"
-              >
-                <p className={`${CANONICAL_TYPOGRAPHY.label} mb-1`}>Billing</p>
-                {billingError}
-              </div>
-            )}
-            {subscribingPlan && (
-              <div
-                className="mt-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-4 py-3 text-xs text-[var(--aethel-text-secondary)]"
-                role="status"
-                aria-live="polite"
-              >
-                <p className={`${CANONICAL_TYPOGRAPHY.label} mb-1 text-[var(--aethel-text-primary)]`}>Billing</p>
-                Processing {subscribingPlan} plan...
-              </div>
-            )}
-          </div>
-        </SurfaceFrame>
-      )}
-
-      {activeTab === 'connectivity' && (
-        <SurfaceFrame
-          eyebrow="Connectivity"
-          title="Provider and service readiness"
-          description="Use this surface to confirm platform trust and service health before expecting operator, preview or deploy flows to feel solid."
-          icon={<CloudCog className="h-5 w-5" />}
-        >
-          <DashboardConnectivityTab {...connectivityProps} />
-        </SurfaceFrame>
-      )}
-
-      {activeTab === 'content-creation' && (
-        <SurfaceFrame
-          eyebrow="Content creation"
-          title="Media and asset generation stay in a focused lane"
-          description="Keep this as an exploration and production support surface instead of mixing it into the primary mission layer."
-          icon={<Blocks className="h-5 w-5" />}
-        >
-          <DashboardContentCreationTab />
-        </SurfaceFrame>
-      )}
-
-      {activeTab === 'unreal' && (
-        <SurfaceFrame
-          eyebrow="Unreal"
-          title="Viewport-heavy creation belongs to its own depth mode"
-          description="This lane exists to support deeper creation workflows without forcing Unreal-grade density into the main entry surfaces."
-          icon={<Blocks className="h-5 w-5" />}
-        >
-          <DashboardUnrealTab />
-        </SurfaceFrame>
-      )}
-
-      {activeTab === 'templates' && (
-        <SurfaceFrame
-          eyebrow="Templates"
-          title="Start from strong patterns without cluttering the entry flow"
-          description="Templates stay available as accelerators, but Studio Home remains centered on the current mission, not on browsing everything at once."
-          icon={<Blocks className="h-5 w-5" />}
-        >
-          <TemplatesTab templates={workflowTemplates} onSelect={onTemplateSelect} />
-        </SurfaceFrame>
-      )}
-
+      {primaryActiveTab === 'activity' && <DashboardActivitySurface overviewProps={overviewProps} sourceTab={activeTab} />}
     </div>
   )
 }

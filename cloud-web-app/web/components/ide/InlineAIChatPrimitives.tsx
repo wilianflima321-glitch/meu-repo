@@ -173,7 +173,7 @@ export function CodeBlock({
               style={codeActionButtonStyle}
             >
               <Sparkles size={12} />
-              Aplicar
+              Apply
             </button>
           )}
         </div>
@@ -309,4 +309,3 @@ function fallbackCopy(content: string) {
   document.execCommand('copy')
   document.body.removeChild(textarea)
 }
-

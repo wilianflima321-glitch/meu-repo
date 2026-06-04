@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { createComponentLogger } from '@/lib/observability/logger';
 import { componentSerializers } from './component-serializers';
 import type {
@@ -94,14 +93,14 @@ export class LevelSerializer {
   }
 
   static deserializeTransform(data: SerializedTransform): {
-    position: THREE.Vector3;
-    rotation: THREE.Quaternion;
-    scale: THREE.Vector3;
+    position: SerializedVector3;
+    rotation: SerializedQuaternion;
+    scale: SerializedVector3;
   } {
     return {
-      position: new THREE.Vector3(data.position.x, data.position.y, data.position.z),
-      rotation: new THREE.Quaternion(data.rotation.x, data.rotation.y, data.rotation.z, data.rotation.w),
-      scale: new THREE.Vector3(data.scale.x, data.scale.y, data.scale.z),
+      position: vector3(data.position, { x: 0, y: 0, z: 0 }),
+      rotation: quaternion(data.rotation, { x: 0, y: 0, z: 0, w: 1 }),
+      scale: vector3(data.scale, { x: 1, y: 1, z: 1 }),
     };
   }
 

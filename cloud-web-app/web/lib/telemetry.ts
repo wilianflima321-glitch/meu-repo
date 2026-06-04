@@ -2,10 +2,34 @@ import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('telemetry')
 
+type TelemetryData = Record<string, unknown>
+
+type BrowserSentry = {
+  Replay?: new (options: { maskAllText: boolean; blockAllMedia: boolean }) => unknown
+  init(options: TelemetryData): void
+  setUser(user: TelemetryData | null): void
+  captureException(error: Error, options?: TelemetryData): void
+  captureMessage(message: string, options?: TelemetryData): void
+}
+
+type BrowserTelemetryWindow = Window & {
+  Sentry?: BrowserSentry
+  gtag?: (command: string, eventName: string, params: TelemetryData) => void
+}
+
+function getBrowserTelemetryWindow(): BrowserTelemetryWindow | null {
+  return typeof window === 'undefined' ? null : (window as BrowserTelemetryWindow)
+}
+
+function getRuntimeEnvironment(): TelemetryContext['environment'] {
+  if (process.env.NODE_ENV === 'production') return 'production'
+  if (process.env.NODE_ENV === 'test') return 'staging'
+  return 'development'
+}
 
 /**
  * Telemetry & Observability - Enterprise Grade Monitoring
- * 
+ *
  * Integração com Sentry, OpenTelemetry e métricas de performance
  * Padrão: Vercel, Linear, Cursor
  */
@@ -17,30 +41,30 @@ export enum TelemetryEventType {
   // Navegação
   PAGE_VIEW = 'page_view',
   NAVIGATION = 'navigation',
-  
+
   // Interação
   BUTTON_CLICK = 'button_click',
   FORM_SUBMIT = 'form_submit',
   SEARCH = 'search',
-  
+
   // Performance
   API_CALL = 'api_call',
   API_ERROR = 'api_error',
   LOAD_TIME = 'load_time',
-  
+
   // Erro
   ERROR = 'error',
   CRASH = 'crash',
-  
+
   // Billing
   BILLING_ACTION = 'billing_action',
   SUBSCRIPTION_CHANGE = 'subscription_change',
-  
+
   // Autenticação
   LOGIN = 'login',
   LOGOUT = 'logout',
   SIGNUP = 'signup',
-  
+
   // Features
   FEATURE_USAGE = 'feature_usage',
   FEATURE_ERROR = 'feature_error',
@@ -65,7 +89,7 @@ export interface TelemetryContext {
 export interface TelemetryEvent {
   type: TelemetryEventType
   name: string
-  data?: Record<string, any>
+  data?: TelemetryData
   duration?: number
   error?: {
     message: string
@@ -87,7 +111,7 @@ export class TelemetryManager {
   private constructor() {
     this.context = {
       timestamp: Date.now(),
-      environment: (process.env.NODE_ENV as any) || 'development',
+      environment: getRuntimeEnvironment(),
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
       url: typeof window !== 'undefined' ? window.location.href : undefined,
     }
@@ -110,18 +134,22 @@ export class TelemetryManager {
    * Inicializar Sentry
    */
   private initializeSentry(): void {
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      const Sentry = (window as any).Sentry
+    const browserWindow = getBrowserTelemetryWindow()
+    if (browserWindow?.Sentry) {
+      const Sentry = browserWindow.Sentry
+      const replay = Sentry.Replay
       Sentry.init({
         dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
         environment: process.env.NODE_ENV,
         tracesSampleRate: 1.0,
-        integrations: [
-          new Sentry.Replay({
+        integrations: replay
+          ? [
+          new replay({
             maskAllText: true,
             blockAllMedia: true,
           }),
-        ],
+        ]
+          : [],
         replaySessionSampleRate: 0.1,
         replayOnErrorSampleRate: 1.0,
       })
@@ -131,11 +159,12 @@ export class TelemetryManager {
   /**
    * Definir contexto do usuário
    */
-  setUserContext(userId: string, metadata?: Record<string, any>): void {
+  setUserContext(userId: string, metadata?: TelemetryData): void {
     this.context.userId = userId
 
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.setUser({
+    const browserWindow = getBrowserTelemetryWindow()
+    if (browserWindow?.Sentry) {
+      browserWindow.Sentry.setUser({
         id: userId,
         ...metadata,
       })
@@ -148,8 +177,9 @@ export class TelemetryManager {
   clearUserContext(): void {
     delete this.context.userId
 
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.setUser(null)
+    const browserWindow = getBrowserTelemetryWindow()
+    if (browserWindow?.Sentry) {
+      browserWindow.Sentry.setUser(null)
     }
   }
 
@@ -187,7 +217,7 @@ export class TelemetryManager {
   /**
    * Rastrear erro
    */
-  trackError(error: Error, context?: Record<string, any>): void {
+  trackError(error: Error, context?: TelemetryData): void {
     this.trackEvent({
       type: TelemetryEventType.ERROR,
       name: error.name,
@@ -199,8 +229,9 @@ export class TelemetryManager {
     })
 
     // Enviar para Sentry
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(error, {
+    const browserWindow = getBrowserTelemetryWindow()
+    if (browserWindow?.Sentry) {
+      browserWindow.Sentry.captureException(error, {
         contexts: {
           custom: context,
         },
@@ -267,7 +298,7 @@ export class TelemetryManager {
   /**
    * Rastrear clique de botão
    */
-  trackButtonClick(buttonName: string, metadata?: Record<string, any>): void {
+  trackButtonClick(buttonName: string, metadata?: TelemetryData): void {
     this.trackEvent({
       type: TelemetryEventType.BUTTON_CLICK,
       name: buttonName,
@@ -278,7 +309,7 @@ export class TelemetryManager {
   /**
    * Rastrear envio de formulário
    */
-  trackFormSubmit(formName: string, success: boolean, metadata?: Record<string, any>): void {
+  trackFormSubmit(formName: string, success: boolean, metadata?: TelemetryData): void {
     this.trackEvent({
       type: TelemetryEventType.FORM_SUBMIT,
       name: formName,
@@ -292,7 +323,7 @@ export class TelemetryManager {
   /**
    * Rastrear uso de feature
    */
-  trackFeatureUsage(featureName: string, metadata?: Record<string, any>): void {
+  trackFeatureUsage(featureName: string, metadata?: TelemetryData): void {
     this.trackEvent({
       type: TelemetryEventType.FEATURE_USAGE,
       name: featureName,
@@ -318,8 +349,9 @@ export class TelemetryManager {
    * Enviar para Sentry
    */
   private sendToSentry(event: TelemetryEvent): void {
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureMessage(event.name, {
+    const browserWindow = getBrowserTelemetryWindow()
+    if (browserWindow?.Sentry) {
+      browserWindow.Sentry.captureMessage(event.name, {
         level: event.type === TelemetryEventType.CRASH ? 'fatal' : 'error',
         contexts: {
           telemetry: event,
@@ -332,8 +364,9 @@ export class TelemetryManager {
    * Enviar para analytics (Google Analytics, Mixpanel, etc.)
    */
   private sendToAnalytics(event: TelemetryEvent): void {
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', event.name, {
+    const browserWindow = getBrowserTelemetryWindow()
+    if (browserWindow?.gtag) {
+      browserWindow.gtag('event', event.name, {
         event_category: event.type,
         event_label: event.name,
         ...event.data,

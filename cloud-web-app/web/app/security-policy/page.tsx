@@ -6,46 +6,58 @@ import DocsResourcePage from '@/app/docs/docs-resource-page'
 export const metadata: Metadata = {
   title: 'Security Policy | Aethel Studio',
   description:
-    'Responsible disclosure policy publica do Aethel Studio com safe harbor, escopo, regras de teste e limites honestos do programa atual.',
+    'Aethel Studio responsible disclosure policy with safe harbor, testing scope, reporting rules, and current program limits.',
 }
 
 const cards = [
   {
-    eyebrow: 'Contato',
+    eyebrow: 'Contact',
     title: 'Responsible disclosure',
     description:
-      'O canal principal para vulnerabilidades continua sendo security@aethel.dev. Inclua impacto, passos de reproducao, superficie afetada e qualquer evidencia minima que ajude a triagem.',
-    links: [{ label: 'Enviar email', href: 'mailto:security@aethel.dev', external: true }],
+      'Use security@aethel.dev. Include impact, reproduction steps, affected page or route, and minimal triage evidence.',
+    links: [
+      {
+        label: 'Send email',
+        href: 'mailto:security@aethel.dev',
+        external: true,
+      },
+    ],
   },
   {
     eyebrow: 'Safe harbor',
-    title: 'Boa-fe, nao destrutivo e coordenado',
+    title: 'Good-faith coordinated testing',
     description:
-      'Se a pesquisa seguir esta politica, for conduzida de boa-fe, nao acessar dados de terceiros e nao interromper o servico, trataremos a atividade como autorizada para fins de coordenacao responsavel.',
+      'Testing is authorized when it follows this policy, avoids third-party data, avoids disruption, and is coordinated responsibly.',
   },
   {
-    eyebrow: 'Escopo',
-    title: 'Superficies publicas e contas proprias',
+    eyebrow: 'Scope',
+    title: 'Public pages and your own account',
     description:
-      'Inclua testes em paginas publicas, fluxos autenticados da sua propria conta, APIs publicas, Studio Web, billing self-service, auth, deploy, marketplace e rotas de preview que voce controla.',
+      'In scope: public pages, your own authenticated flows, public APIs, Studio Web, billing, auth, deploy, marketplace, and previews you control.',
   },
   {
-    eyebrow: 'Fora de escopo',
-    title: 'Sem abuso, spam, exfiltracao ou impacto operacional',
+    eyebrow: 'Out of scope',
+    title: 'No abuse, exfiltration, spam, or operational impact',
     description:
-      'Nao faca DoS, brute force, engenharia social, spam, scraping agressivo, acesso a dados de outras pessoas, exploracao persistente, alteracao destrutiva ou tentativa de contornar pagamentos.',
+      'Do not perform DoS, brute force, social engineering, spam, scraping, cross-account access, destructive changes, or payment bypass attempts.',
   },
   {
-    eyebrow: 'AI / agentes',
-    title: 'Teste agentes com cuidado extra',
+    eyebrow: 'AI / agents',
+    title: 'Use extra care when testing agents',
     description:
-      'Failures involving agents, browser operator, memory, local/cloud runtime, tool calls, prompts, files, or human approval must be reported with safe steps and without executing irreversible actions.',
+      'Agent, browser, memory, runtime, tool, prompt, file, and approval issues need safe steps and no irreversible actions.',
   },
   {
-    eyebrow: 'Expectativa',
-    title: 'Response targets, nao SLA juridico',
+    eyebrow: 'Expectation',
+    title: 'Response targets, not a contractual SLA',
     description:
-      'Nossa meta inicial e confirmar recebimento em ate 48 horas uteis, triagem inicial em ate 5 dias uteis e atualizacoes proporcionais a severidade. Isso nao e SLA contratual nem bounty formal.',
+      'Targets: acknowledgment within 48 business hours, first triage within 5 business days, and severity-appropriate updates.',
+  },
+  {
+    eyebrow: 'Credit',
+    title: 'Acknowledgment only after real remediation',
+    description:
+      'Validated reports can be credited from this policy flow when triage, remediation, and safe disclosure are complete.',
   },
 ]
 
@@ -53,20 +65,22 @@ export default function SecurityPolicyPage() {
   return (
     <DocsResourcePage
       eyebrow="Security policy"
-      title="Politica publica de divulgacao responsavel com safe harbor, escopo claro e limites honestos."
-      description="A melhor leitura desta politica hoje e simples: como relatar vulnerabilidades, como testar sem causar dano, o que esta em escopo e quais promessas ainda nao fazemos."
+      title="Responsible disclosure, clearly scoped."
+      description="Report safely. Test within scope. Keep claims earned."
       icon={ShieldCheck}
       accentClassName="text-[var(--aethel-success-light)]"
-      summary="Ainda nao transformamos seguranca em um programa performatico. O foco publico agora e dar um caminho claro de coordinated disclosure, safe harbor de boa-fe, triagem e follow-up, mantendo a mesma honestidade das paginas de trust, security, compliance e status."
+      summary="Coordinated disclosure, good-faith safe harbor, predictable triage, and honest scope."
       cards={cards}
-      calloutTitle="Melhor trilha publica para reporte ou security review"
-      calloutDescription="Para reportar vulnerabilidade, comece por security@aethel.dev e preserve coordenacao. Para due diligence, use esta politica junto de /trust, /security, /compliance, /status e do procurement starter pack."
+      calloutTitle="Report or review security"
+      calloutDescription="For vulnerabilities, start with security@aethel.dev. For due diligence, read this with trust, compliance, status, and procurement docs."
       calloutLinks={[
         { label: 'Trust center', href: '/trust' },
-        { label: 'Security acknowledgments', href: '/security-acknowledgments' },
         { label: 'Compliance', href: '/compliance' },
         { label: 'Status', href: '/status' },
-        { label: 'Procurement starter pack', href: '/docs/procurement-starter-pack' },
+        {
+          label: 'Procurement starter pack',
+          href: '/docs/procurement-starter-pack',
+        },
       ]}
     />
   )

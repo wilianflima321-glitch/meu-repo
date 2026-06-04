@@ -186,18 +186,17 @@ class WindowAPI {
     options?: QuickPickOptions
   ): Promise<T | T[] | undefined> {
     const resolvedItems = await Promise.resolve(items);
-    
+
     log.info('[Window] Show quick pick:', {
       itemCount: resolvedItems.length,
       options,
     });
 
-    // Mock implementation - return first item
     if (resolvedItems.length > 0) {
       if (options?.canPickMany) {
         return resolvedItems.filter(item => item.picked);
       }
-      return resolvedItems[0];
+      return resolvedItems.find(item => item.picked);
     }
 
     return undefined;
@@ -209,8 +208,7 @@ class WindowAPI {
   async showInputBox(options?: InputBoxOptions): Promise<string | undefined> {
     log.info('[Window] Show input box:', options);
 
-    // Mock implementation - return default value or empty string
-    return options?.value || '';
+    return undefined;
   }
 
   /**
@@ -219,7 +217,6 @@ class WindowAPI {
   async showOpenDialog(options?: OpenDialogOptions): Promise<string[] | undefined> {
     log.info('[Window] Show open dialog:', options);
 
-    // Mock implementation
     return undefined;
   }
 
@@ -229,7 +226,6 @@ class WindowAPI {
   async showSaveDialog(options?: SaveDialogOptions): Promise<string | undefined> {
     log.info('[Window] Show save dialog:', options);
 
-    // Mock implementation
     return undefined;
   }
 
@@ -239,11 +235,13 @@ class WindowAPI {
   async showTextDocument(uri: string, options?: TextDocumentShowOptions): Promise<TextEditor> {
     log.info('[Window] Show text document:', uri, options);
 
-    // Mock implementation
-    return {
+    const editor = {
       uri,
       document: { uri },
     };
+    this._activeTextEditor = editor;
+    this._visibleTextEditors = [editor];
+    return editor;
   }
 
   /**
@@ -415,11 +413,6 @@ class WindowAPI {
     this.messageListeners.forEach(listener => {
       listener({ type, message, options, items });
     });
-
-    // Mock implementation - return first item if available
-    if (items.length > 0) {
-      return typeof items[0] === 'string' ? { title: items[0] } : items[0];
-    }
 
     return undefined;
   }
