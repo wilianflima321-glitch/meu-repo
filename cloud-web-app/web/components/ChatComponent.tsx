@@ -3,65 +3,14 @@ import { logger } from '@/lib/observability/logger';
 import React, { useState, useRef, useEffect } from 'react';
 import { AethelAPIClient, APIError } from '@/lib/api';
 import { isAuthenticated } from '@/lib/auth';
-import type { ChatMessage, ChatThreadSummary, ChatStoredMessage, CopilotContextResponse, CopilotWorkflowDetail, CopilotWorkflowSummary } from '@/lib/api';
+import type { ChatMessage, ChatThreadSummary, CopilotContextResponse, CopilotWorkflowDetail, CopilotWorkflowSummary } from '@/lib/api';
 import { openConfirmDialog, openPromptDialog } from '@/lib/ui/non-blocking-dialogs';
-import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models';
-
-const STORAGE_KEYS_BASE = {
-  activeThreadId: 'chat::activeThreadId',
-  activeWorkflowId: 'copilot::activeWorkflowId',
-} as const;
-
-function getScopedStorageKeys(projectId: string | null) {
-  const suffix = projectId ? `::${projectId}` : '';
-  return {
-    activeThreadId: `${STORAGE_KEYS_BASE.activeThreadId}${suffix}`,
-    activeWorkflowId: `${STORAGE_KEYS_BASE.activeWorkflowId}${suffix}`,
-    legacyActiveThreadId: STORAGE_KEYS_BASE.activeThreadId,
-    legacyActiveWorkflowId: STORAGE_KEYS_BASE.activeWorkflowId,
-  };
-}
-
-interface Message {
-  role: 'user' | 'assistant' | 'system' | 'error';
-  content: string;
-  timestamp: Date;
-}
-
-type CopilotContextPatch = {
-  workflowId: string;
-  livePreview?: unknown;
-  editor?: unknown;
-  openFiles?: unknown[];
-};
-
-function toMessageRole(role: ChatStoredMessage['role']): Message['role'] {
-  return role === 'assistant' || role === 'system' || role === 'user' ? role : 'user';
-}
-
-function isContextRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
-}
-
-function buildContextPatch(workflowId: string, context: unknown): CopilotContextPatch | null {
-  if (!isContextRecord(context)) return null;
-
-  const patch: CopilotContextPatch = { workflowId };
-  if ('livePreview' in context) patch.livePreview = context.livePreview;
-  if ('editor' in context) patch.editor = context.editor;
-  if (Array.isArray(context.openFiles)) patch.openFiles = context.openFiles;
-
-  return patch;
-}
+import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models';
+import { buildContextPatch, createWelcomeMessages, getScopedStorageKeys, toMessageRole, type Message } from './ChatComponent.helpers';
+import { ChatComponentSurface } from './ChatComponentSurface';
 
 const ChatComponent: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'system',
-      content: 'Welcome to Aethel Chat! How can I help you today?',
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(() => createWelcomeMessages());
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -96,13 +45,7 @@ const ChatComponent: React.FC = () => {
       }));
     if (restored.length) setMessages(restored);
     else {
-      setMessages([
-        {
-          role: 'system',
-          content: 'Welcome to Aethel Chat! How can I help you today?',
-          timestamp: new Date(),
-        },
-      ]);
+      setMessages(createWelcomeMessages());
     }
   };
 
@@ -390,7 +333,7 @@ const ChatComponent: React.FC = () => {
       title: 'Renomear trabalho',
       message: 'Informe o novo nome do workflow.',
       defaultValue: current?.title || 'Workflow',
-      placeholder: 'Nome do workflow',
+      placeholder: 'Workflow name',
       confirmText: 'Save',
       cancelText: 'Cancel',
     });
@@ -622,181 +565,33 @@ const ChatComponent: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
-      {/* Header */}
-      <div className="p-4 border-b border-[var(--aethel-border-primary)] flex items-center justify-between">
-        <h1 className="text-xl font-bold">Aethel Chat</h1>
-        <div className="flex items-center gap-2">
-          <select
-            value={activeWorkflowId ?? ''}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v === '__new__') {
-                void createWorkflow();
-                return;
-              }
-              if (v) void switchWorkflow(v);
-            }}
-            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm"
-            disabled={isLoading || isStreaming || workflowsLoading || connectBusy}
-            title="Trabalho (workflow)"
-          >
-            {(workflows?.length ? workflows : []).map((wf) => (
-              <option key={String(wf.id)} value={String(wf.id)}>
-                {wf.title || 'Workflow'}
-              </option>
-            ))}
-            <option value="__new__">+ Novo trabalho</option>
-          </select>
-
-          <button type="button" aria-label="Renomear workflow atual"
-            onClick={() => void renameWorkflow()}
-            disabled={!activeWorkflowId || isLoading || isStreaming}
-            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
-          >
-            Renomear
-          </button>
-          <button type="button" aria-label="Arquivar workflow atual"
-            onClick={() => void archiveWorkflow()}
-            disabled={!activeWorkflowId || isLoading || isStreaming}
-            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
-          >
-            Arquivar
-          </button>
-
-          <select
-            value={connectFromWorkflowId}
-            onChange={(e) => setConnectFromWorkflowId(e.target.value)}
-            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm"
-            disabled={isLoading || isStreaming || workflowsLoading || connectBusy}
-            title="Conectar trabalhos: escolha uma origem"
-          >
-            <option value="">Conectar…</option>
-            {workflows
-              .filter((w) => String(w.id) !== String(activeWorkflowId))
-              .map((wf) => (
-                <option key={String(wf.id)} value={String(wf.id)}>
-                  {wf.title || 'Workflow'}
-                </option>
-              ))}
-          </select>
-
-          <button type="button" aria-label="Copiar historico do workflow selecionado"
-            onClick={() => void copyHistoryFromWorkflow()}
-            disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
-            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
-            title="Copia o history do trabalho selecionado para o trabalho atual (clona a thread)"
-          >
-            {connectBusy ? 'Processando…' : 'Copiar history'}
-          </button>
-
-          <button type="button" aria-label="Import contexto do workflow selecionado"
-            onClick={() => void importContextFromWorkflow()}
-            disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
-            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
-            title="Importa contexto (livePreview/editor/openFiles) do trabalho selecionado"
-          >
-            {connectBusy ? 'Processando…' : 'Import contexto'}
-          </button>
-
-          <button type="button" aria-label="Mesclar workflow selecionado ao workflow atual"
-            onClick={() => void mergeFromWorkflow()}
-            disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
-            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
-            title="Mescla history + contexto do trabalho selecionado e arquiva o trabalho de origem"
-          >
-            {connectBusy ? 'Processando…' : 'Mesclar'}
-          </button>
-
-          <select
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm"
-            disabled={isLoading || isStreaming}
-            title="Modelo"
-          >
-            {OPENROUTER_MODEL_OPTIONS.map((option) => (
-              <option key={option.value} value={`openrouter:${option.value}`}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                msg.role === 'user'
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
-                  : msg.role === 'error'
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-text-primary)]'
-                  : msg.role === 'system'
-                  ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] italic'
-                  : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]'
-              }`}
-            >
-              <p className="whitespace-pre-wrap">{msg.content}</p>
-              <span className="text-xs opacity-70 mt-1 block">
-                {msg.timestamp.toLocaleTimeString()}
-              </span>
-            </div>
-          </div>
-        ))}
-
-        {/* Streaming message */}
-        {isStreaming && streamingContent && (
-          <div className="flex justify-start">
-            <div className="max-w-[80%] rounded-lg px-4 py-2 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
-              <p className="whitespace-pre-wrap">{streamingContent}</p>
-              <span className="text-xs opacity-70 mt-1 block animate-pulse">
-                Transmitindo...
-              </span>
-            </div>
-          </div>
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input */}
-      <div className="p-4 border-t border-[var(--aethel-border-primary)]">
-        <div className="flex gap-2">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para nova linha)"
-            aria-label="Digite sua mensagem para o chat"
-            className="flex-1 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-4 py-2 text-[var(--aethel-text-primary)] resize-none focus:outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]"
-            rows={2}
-            disabled={isLoading || isStreaming}
-          />
-          <div className="flex flex-col gap-2">
-            <button type="button" aria-label="Transmitir resposta em streaming"
-              onClick={handleStreamMessage}
-              disabled={isLoading || isStreaming || !input.trim()}
-              className="bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:bg-[var(--aethel-surface-secondary)] disabled:cursor-not-allowed px-4 py-2 rounded font-semibold transition-colors"
-            >
-              {isStreaming ? 'Pausar' : 'Transmitir'}
-            </button>
-            <button type="button" aria-label="Send mensagem ao chat"
-              onClick={handleSendMessage}
-              disabled={isLoading || isStreaming || !input.trim()}
-              className="bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] disabled:bg-[var(--aethel-surface-secondary)] disabled:cursor-not-allowed px-4 py-2 rounded font-semibold transition-colors"
-            >
-              {isLoading ? 'Enviando...' : 'Send'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ChatComponentSurface
+      messages={messages}
+      input={input}
+      setInput={setInput}
+      isLoading={isLoading}
+      isStreaming={isStreaming}
+      streamingContent={streamingContent}
+      selectedModel={selectedModel}
+      setSelectedModel={setSelectedModel}
+      activeWorkflowId={activeWorkflowId}
+      workflows={workflows}
+      workflowsLoading={workflowsLoading}
+      connectBusy={connectBusy}
+      connectFromWorkflowId={connectFromWorkflowId}
+      setConnectFromWorkflowId={setConnectFromWorkflowId}
+      messagesEndRef={messagesEndRef}
+      createWorkflow={createWorkflow}
+      switchWorkflow={switchWorkflow}
+      renameWorkflow={renameWorkflow}
+      archiveWorkflow={archiveWorkflow}
+      copyHistoryFromWorkflow={copyHistoryFromWorkflow}
+      importContextFromWorkflow={importContextFromWorkflow}
+      mergeFromWorkflow={mergeFromWorkflow}
+      handleKeyPress={handleKeyPress}
+      handleStreamMessage={handleStreamMessage}
+      handleSendMessage={handleSendMessage}
+    />
   );
 };
 

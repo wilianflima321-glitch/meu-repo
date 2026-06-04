@@ -10,208 +10,58 @@ import {
   buildEvidenceRefCoverageReport,
   type EvidenceRefCoverageReport,
 } from '@/lib/production/evidence-ref-coverage'
+import {
+  ASSET_FINAL_EVIDENCE_GROUPS,
+  BASE_RUNTIME_RECEIPT_KINDS,
+  PLAYTEST_EVIDENCE_GROUPS,
+  RELEASE_APPROVAL_PATTERNS,
+} from '@/lib/production/release-evidence-readiness.rules'
 import type { RuntimeJobReceiptKind, RuntimeJobReceiptState } from '@/lib/production/runtime-job-receipts'
 
-export const RELEASE_EVIDENCE_READINESS_CAPABILITY = 'AETHEL_RELEASE_EVIDENCE_READINESS'
+import {
+  RELEASE_EVIDENCE_READINESS_CAPABILITY,
+  type ReleaseEvidenceReadinessStatus,
+  type ReleaseEvidenceLaneStatus,
+  type ReleaseEvidenceReadinessLaneId,
+  type ReleaseEvidenceReadinessLane,
+  type ReleaseEvidenceReadinessSnapshot,
+  type ReleaseEvidenceReadinessInput,
+  type ReleaseEvidenceReviewRequestInput,
+  type ReleaseEvidenceReviewRequestResult,
+  type ReleaseEvidenceReviewDecision,
+  type ReleaseEvidenceReviewDecisionInput,
+  type ReleaseEvidenceReviewDecisionResult,
+  type ReleaseEvidencePackageManifestInput,
+  type ReleaseEvidencePackageManifest,
+  type ReleaseEvidencePackageManifestVerification,
+} from '@/lib/production/release-evidence-readiness.contracts'
 
-export type ReleaseEvidenceReadinessStatus = 'blocked' | 'needs-review' | 'evidence-backed'
-export type ReleaseEvidenceLaneStatus = 'covered' | 'missing' | 'needs-review' | 'blocked'
+export { RELEASE_EVIDENCE_READINESS_CAPABILITY } from '@/lib/production/release-evidence-readiness.contracts'
+export type {
+  ReleaseEvidenceReadinessStatus,
+  ReleaseEvidenceLaneStatus,
+  ReleaseEvidenceReadinessLaneId,
+  ReleaseEvidenceReadinessLane,
+  ReleaseEvidenceReadinessSnapshot,
+  ReleaseEvidenceReadinessInput,
+  ReleaseEvidenceReviewRequestInput,
+  ReleaseEvidenceReviewRequestResult,
+  ReleaseEvidenceReviewDecision,
+  ReleaseEvidenceReviewDecisionInput,
+  ReleaseEvidenceReviewDecisionResult,
+  ReleaseEvidencePackageManifestInput,
+  ReleaseEvidencePackageManifest,
+  ReleaseEvidencePackageManifestVerification,
+} from '@/lib/production/release-evidence-readiness.contracts'
 
-export type ReleaseEvidenceReadinessLaneId =
-  | 'production-state'
-  | 'evidence-coverage'
-  | 'runtime-receipts'
-  | 'asset-final'
-  | 'playtest'
-  | 'human-approval'
-
-export interface ReleaseEvidenceReadinessLane {
-  id: ReleaseEvidenceReadinessLaneId
-  label: string
-  required: boolean
-  status: ReleaseEvidenceLaneStatus
-  evidenceRefs: string[]
-  missingEvidence: string[]
-  blockers: string[]
-  nextAction: string
-}
-
-export interface ReleaseEvidenceReadinessSnapshot {
-  version: 1
-  capability: typeof RELEASE_EVIDENCE_READINESS_CAPABILITY
-  capabilityStatus: ReleaseEvidenceReadinessStatus
-  status: ReleaseEvidenceReadinessStatus
-  releaseReady: false
-  humanApprovalRequired: true
-  canRequestHumanReview: boolean
-  scorePercent: number
-  coveredRequiredLanes: number
-  totalRequiredLanes: number
-  lanes: ReleaseEvidenceReadinessLane[]
-  evidenceRefs: string[]
-  missingEvidence: string[]
-  blockers: string[]
-  nextAction: string
-  updatedAt: string
-}
-
-export interface ReleaseEvidenceReadinessInput {
-  state: AgenticProductionState
-  evidenceCoverage?: EvidenceRefCoverageReport | null
-  runtimeReceiptState?: RuntimeJobReceiptState | null
-  now?: string
-}
-
-export interface ReleaseEvidenceReviewRequestInput {
-  state: AgenticProductionState
-  snapshot: ReleaseEvidenceReadinessSnapshot
-  requestedBy: string
-  requestedAt?: string
-}
-
-export interface ReleaseEvidenceReviewRequestResult {
-  accepted: boolean
-  state: AgenticProductionState
-  reviewRequestId: string
-  releaseReady: false
-  blockers: string[]
-  nextAction: string
-}
-
-export type ReleaseEvidenceReviewDecision = 'approved' | 'rejected'
-
-export interface ReleaseEvidenceReviewDecisionInput {
-  state: AgenticProductionState
-  snapshot: ReleaseEvidenceReadinessSnapshot
-  decision: ReleaseEvidenceReviewDecision
-  decidedBy: string
-  note?: string
-  decidedAt?: string
-}
-
-export interface ReleaseEvidenceReviewDecisionResult {
-  accepted: boolean
-  state: AgenticProductionState
-  decisionId: string
-  decision: ReleaseEvidenceReviewDecision
-  releaseReady: false
-  blockers: string[]
-  nextAction: string
-}
-
-export interface ReleaseEvidencePackageManifestInput {
-  state: AgenticProductionState
-  snapshot: ReleaseEvidenceReadinessSnapshot
-  projectId?: string
-  projectName?: string
-  generatedBy?: string
-  generatedAt?: string
-}
-
-export interface ReleaseEvidencePackageManifest {
-  version: 1
-  packageId: string
-  capability: typeof RELEASE_EVIDENCE_READINESS_CAPABILITY
-  generatedAt: string
-  generatedBy: string
-  project: {
-    id: string | null
-    name: string | null
-    domain: AgenticProductionState['brain']['domain']
-    objective: string
-  }
-  readiness: {
-    status: ReleaseEvidenceReadinessStatus
-    scorePercent: number
-    coveredRequiredLanes: number
-    totalRequiredLanes: number
-    releaseReady: false
-    humanApprovalRequired: true
-    manualPublishRequired: true
-  }
-  claimPolicy: {
-    allowedClaims: string[]
-    prohibitedClaims: string[]
-  }
-  lanes: Array<{
-    id: ReleaseEvidenceReadinessLaneId
-    status: ReleaseEvidenceLaneStatus
-    required: boolean
-    evidenceCount: number
-    missingEvidence: string[]
-    blockers: string[]
-  }>
-  evidenceRefs: string[]
-  runtimePolicy: AgenticProductionState['runtimePolicy']
-  nextAction: string
-  integrityHash: string
-}
-
-export interface ReleaseEvidencePackageManifestVerification {
-  valid: boolean
-  actualHash: string
-  expectedHash: string
-  errors: string[]
-  releaseReady: false
-  manualPublishRequired: true
-}
-
-const RELEASE_APPROVAL_PATTERNS = [
-  /human[-_ ]?approval/i,
-  /release[-_ ]?approval/i,
-  /approval[-_: ]?record/i,
-  /approved[-_: ]?release/i,
-]
-
-const ASSET_FINAL_EVIDENCE_GROUPS = [
-  {
-    label: 'provenance/license receipt',
-    patterns: [/provenance/i, /license/i, /rights[-_ ]?clearance/i],
-  },
-  {
-    label: 'LOD/PBR material evidence',
-    patterns: [/LOD[0-3]/i, /\blod\b/i, /PBR/i, /material[-_ ]?audit/i],
-  },
-  {
-    label: 'collision/navmesh/rig proxy evidence',
-    patterns: [/collision/i, /navmesh/i, /rig/i, /skeleton/i, /retopo/i],
-  },
-  {
-    label: 'viewport performance trace',
-    patterns: [/performance[-_ ]?trace/i, /frame[-_ ]?time/i, /perf[-_ ]?budget/i, /render[-_ ]?trace/i],
-  },
-  {
-    label: 'human art-direction approval',
-    patterns: [/human[-_ ]?(review|approval)/i, /art[-_ ]?direction[-_ ]?approval/i, /asset[-_ ]?approval/i],
-  },
-]
-
-const PLAYTEST_EVIDENCE_GROUPS = [
-  {
-    label: 'bot/human playtest run',
-    patterns: [/playtest/i, /bot[-_ ]?run/i, /human[-_ ]?feel[-_ ]?review/i],
-  },
-  {
-    label: 'input replay evidence',
-    patterns: [/input[-_ ]?replay/i, /replay:/i, /session[-_ ]?capture/i],
-  },
-  {
-    label: 'performance trace',
-    patterns: [/performance[-_ ]?trace/i, /frame[-_ ]?time/i, /latency[-_ ]?trace/i],
-  },
-  {
-    label: 'bug/blocker ledger',
-    patterns: [/bug[-_ ]?ledger/i, /blocker[-_ ]?ledger/i, /softlock/i, /crash[-_ ]?report/i],
-  },
-]
-
-const BASE_RUNTIME_RECEIPT_KINDS: RuntimeJobReceiptKind[] = [
-  'dispatch',
-  'capability-probe',
-  'artifact',
-  'validation',
-]
-
+/**
+ * Canonical gate markers retained in the runtime file while the contracts live
+ * in release-evidence-readiness.contracts.ts:
+ * AETHEL_RELEASE_EVIDENCE_READINESS
+ * ReleaseEvidenceReadinessLaneId:
+ * 'production-state' | 'evidence-coverage' | 'runtime-receipts' |
+ * 'asset-final' | 'playtest' | 'human-approval'
+ */
 function isCreativeDomain(state: AgenticProductionState): boolean {
   return state.brain.domain === 'game' || state.brain.domain === 'film' || state.brain.domain === 'game-film'
 }

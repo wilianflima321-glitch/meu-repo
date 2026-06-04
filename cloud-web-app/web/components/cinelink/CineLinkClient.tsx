@@ -3,12 +3,12 @@
 /**
  * CineLink - Virtual Camera System
  *
- * Transforma um smartphone em uma câmera virtual rastreada.
- * Usa giroscópio do celular para controlar a câmera 3D em tempo real.
+ * Turns a smartphone into a tracked virtual camera.
+ * Uses the device gyroscope to control the 3D camera in real time.
  *
  * Arquitetura:
  * - Desktop: Exibe QR Code, recebe dados via WebSocket
- * - Mobile: Envia orientação do dispositivo via WebSocket
+ * - Mobile: Sends device orientation through WebSocket
  *
  * @module CineLink
  */
@@ -34,114 +34,24 @@ import {
   Move3d
 } from 'lucide-react';
 import {createComponentLogger, logger} from '@/lib/observability/logger'
+import { generateCineLinkQRCode } from './cinelink-qr';
 
 const log = createComponentLogger('CineLinkClient')
 
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
-interface DeviceOrientation {
-  alpha: number | null;  // Z-axis rotation [0, 360)
-  beta: number | null;   // X-axis rotation [-180, 180)
-  gamma: number | null;  // Y-axis rotation [-90, 90)
-}
-
-interface CineLinkState {
-  isConnected: boolean;
-  isStreaming: boolean;
-  deviceId: string | null;
-  lastOrientation: DeviceOrientation;
-  latency: number;
-  batteryLevel: number | null;
-}
-
-interface CineLinkSettings {
-  smoothing: number;        // 0-1, quanto suavizar os movimentos
-  sensitivity: number;      // Multiplicador de sensibilidade
-  invertX: boolean;
-  invertY: boolean;
-  deadzone: number;         // Zona morta para ignorar micro-movimentos
-  updateRate: number;       // Hz - taxa de atualização
-}
-
-interface CineLinkMessage {
-  type: 'CAM_MOVE' | 'CAM_CONNECT' | 'CAM_DISCONNECT' | 'CAM_BATTERY' | 'CAM_PING';
-  deviceId?: string;
-  rotation?: DeviceOrientation;
-  battery?: number;
-  timestamp?: number;
-}
-
-// ============================================================================
-// DEFAULT VALUES
-// ============================================================================
-
-const DEFAULT_SETTINGS: CineLinkSettings = {
-  smoothing: 0.7,
-  sensitivity: 1.0,
-  invertX: false,
-  invertY: false,
-  deadzone: 0.5,
-  updateRate: 60,
-};
-
-const DEFAULT_STATE: CineLinkState = {
-  isConnected: false,
-  isStreaming: false,
-  deviceId: null,
-  lastOrientation: { alpha: 0, beta: 0, gamma: 0 },
-  latency: 0,
-  batteryLevel: null,
-};
-
-// ============================================================================
-// QR CODE GENERATOR (Simple SVG-based)
-// ============================================================================
-
-function generateQRCode(data: string, size: number = 200): string {
-  // Placeholder: Em produção, usar biblioteca como 'qrcode' ou 'qrcode.react'
-  // Por ora, criamos um SVG placeholder
-  const encodedData = encodeURIComponent(data);
-
-  // Simular um QR code com padrão visual (em produção usar qrcode-generator)
-  const modules = 25; // 25x25 grid
-  const moduleSize = size / modules;
-
-  // Gerar padrão pseudo-aleatório baseado nos dados
-  const hash = data.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-  let paths = '';
-
-  // Finder patterns (cantos)
-  const finderPositions = [[0, 0], [0, modules - 7], [modules - 7, 0]];
-  finderPositions.forEach(([x, y]) => {
-    // Outer square
-    paths += `<rect x="${x * moduleSize}" y="${y * moduleSize}" width="${7 * moduleSize}" height="${7 * moduleSize}" fill="black"/>`;
-    paths += `<rect x="${(x + 1) * moduleSize}" y="${(y + 1) * moduleSize}" width="${5 * moduleSize}" height="${5 * moduleSize}" fill="white"/>`;
-    paths += `<rect x="${(x + 2) * moduleSize}" y="${(y + 2) * moduleSize}" width="${3 * moduleSize}" height="${3 * moduleSize}" fill="black"/>`;
-  });
-
-  // Data modules (simulated)
-  for (let row = 0; row < modules; row++) {
-    for (let col = 0; col < modules; col++) {
-      // Skip finder pattern areas
-      if ((row < 8 && col < 8) || (row < 8 && col >= modules - 8) || (row >= modules - 8 && col < 8)) continue;
-
-      // Generate pseudo-random pattern
-      const shouldFill = ((hash + row * col + row + col) % 3) === 0;
-      if (shouldFill) {
-        paths += `<rect x="${col * moduleSize}" y="${row * moduleSize}" width="${moduleSize}" height="${moduleSize}" fill="black"/>`;
-      }
-    }
-  }
-
-  return `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-    <rect width="${size}" height="${size}" fill="white"/>
-    ${paths}
-  </svg>`;
-}
+import type {
+  CineLinkMessage,
+  CineLinkSettings,
+  CineLinkState,
+  DeviceOrientation,
+} from './CineLinkClient.contracts';
+import { DEFAULT_SETTINGS, DEFAULT_STATE } from './CineLinkClient.contracts';
+export type {
+  CineLinkMessage,
+  CineLinkSettings,
+  CineLinkState,
+  DeviceOrientation,
+} from './CineLinkClient.contracts';
 
 // ============================================================================
 // CINELINK CLIENT COMPONENT
@@ -358,7 +268,7 @@ export function CineLinkClient({
 
   // Generate QR code SVG
   const qrCodeSvg = connectionUrl
-    ? generateQRCode(connectionUrl.replace('/cinelink', '/mobile-cam'))
+    ? generateCineLinkQRCode(connectionUrl.replace('/cinelink', '/mobile-cam'))
     : '';
 
   // Minimized view
@@ -418,7 +328,7 @@ export function CineLinkClient({
         <div className="p-4 bg-[var(--aethel-surface-secondary)]/50 border-b border-[var(--aethel-border-primary)] space-y-4">
           <div className="flex justify-between items-center">
             <h4 className="text-sm font-medium text-[var(--aethel-text-primary)]">Settings</h4>
-            <button type="button" onClick={() => setShowSettings(false)} aria-label="Fechar painel de configuracoes do CineLink">
+            <button type="button" onClick={() => setShowSettings(false)} aria-label="Close CineLink settings panel">
               <X className="w-4 h-4 text-[var(--aethel-text-secondary)]" />
             </button>
           </div>
@@ -719,7 +629,7 @@ export function CineLinkMobile({ serverUrl }: CineLinkMobileProps): JSX.Element 
 
         {/* Status */}
         {!isStreaming ? (
-          <button type="button" aria-label="Iniciar transmissao da camera virtual"
+          <button type="button" aria-label="Start virtual camera stream"
             onClick={startStreaming}
             className="w-full py-4 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-xl text-lg font-medium transition flex items-center justify-center gap-3"
           >
@@ -757,7 +667,7 @@ export function CineLinkMobile({ serverUrl }: CineLinkMobileProps): JSX.Element 
             </div>
 
             {/* Stop button */}
-            <button type="button" aria-label="Parar transmissao da camera virtual"
+            <button type="button" aria-label="Stop virtual camera stream"
               onClick={stopStreaming}
               className="w-full py-4 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded-xl text-lg font-medium transition flex items-center justify-center gap-3"
             >
