@@ -1,21 +1,15 @@
 /**
- * AETHEL ENGINE - Editor Components Export
- * 
- * Barrel export para todos os componentes de editor.
+ * Canonical editor component barrel.
+ * Code IDE primitives live here; creative runtime editors live in domain folders.
  */
+export { default as CodeEditor } from './CodeEditor'
+export { default as MonacoEditor } from './MonacoEditor'
+export { default as MonacoEditorPro } from './MonacoEditorPro'
+export { default as SplitEditor } from './SplitEditor'
 
-// Core Editors
-export { default as CodeEditor } from './CodeEditor';
-export { default as MonacoEditor } from './MonacoEditor';
-export { default as MonacoEditorPro } from './MonacoEditorPro';
-export { default as SplitEditor } from './SplitEditor';
+export { default as Breadcrumbs } from './Breadcrumbs'
+export { default as TabBar } from './TabBar'
+export { Minimap } from './Minimap'
 
-// Editor UI Components
-export { default as Breadcrumbs } from './Breadcrumbs';
-export { default as TabBar } from './TabBar';
-export { Minimap } from './Minimap';
-export { default as GitGutter } from './GitGutter';
-
-// Editor Features
-export { default as InlineEditModal } from './InlineEditModal';
-export { GhostTextDecorations } from './GhostTextDecorations';
+export { default as InlineEditModal } from './InlineEditModal'
+export { GhostTextDecorations } from './GhostTextDecorations'
