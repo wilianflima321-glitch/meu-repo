@@ -1,7 +1,6 @@
 /**
- * Editores de domínio (VFX, sprites, behaviour trees).
- * Não confundir com `components/editor/` (Monaco, tabs, IDE de code).
+ * Domain editors for creative tools.
+ * Keep this barrel distinct from `components/editor/`, which owns Monaco/code IDE primitives.
  */
 export { default as VFXGraphEditor } from './VFXGraphEditor'
 export { default as SpriteEditor } from './SpriteEditor'
-export { default as BehaviorTreeEditor } from './BehaviorTreeEditor'
