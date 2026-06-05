@@ -73,7 +73,7 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/debugger', maturity: 'PROTOTYPE', label: 'Debugger', notes: 'Legacy path; debugger UX belongs inside the IDE' },
   { path: '/playground', maturity: 'PROTOTYPE', label: 'Playground', notes: 'Legacy path; experiments should enter through Workspace or IDE' },
   { path: '/explorer', maturity: 'PROTOTYPE', label: 'File Explorer', notes: 'Legacy path; file browsing belongs inside the IDE' },
-  { path: '/design-system-demo', maturity: 'PROTOTYPE', label: 'Design System Demo' },
+  { path: '/design-system-demo', maturity: 'PROTOTYPE', label: 'Design System Demo', notes: 'Dev-only compatibility URL; redirects to docs in the product shell' },
 
   // ASPIRATIONAL - Route exists but no real functionality
   { path: '/animation-blueprint', maturity: 'ASPIRATIONAL', label: 'Animation Blueprint', notes: 'Legacy shell; use Studio Character or Film groups' },

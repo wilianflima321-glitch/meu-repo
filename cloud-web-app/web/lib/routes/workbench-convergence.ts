@@ -50,8 +50,8 @@ export function resolveWorkbenchConvergenceRedirect(
 ): { target: string; reason: 'lab' | 'ide' | 'design-demo' | 'settings' } | null {
   const normalized = pathname.endsWith('/') && pathname.length > 1 ? pathname.slice(0, -1) : pathname
 
-  if (process.env.NODE_ENV === 'production' && normalized === '/design-system-demo') {
-    return { target: '/dashboard?notice=design-demo-dev-only', reason: 'design-demo' }
+  if (normalized === '/design-system-demo') {
+    return { target: '/docs?notice=design-demo-dev-only', reason: 'design-demo' }
   }
 
   if (normalized === '/project-settings') {
