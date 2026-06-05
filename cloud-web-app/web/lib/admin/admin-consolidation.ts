@@ -78,6 +78,7 @@ export const ADMIN_ROUTE_LABELS: Record<string, string> = {
 }
 
 export const ADMIN_LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
+  '/admin/god-view': '/admin/security?legacy=god-view',
   '/admin/ai-enhancements': '/admin/ai?legacy=ai-enhancements',
   '/admin/ai-upgrades': '/admin/ai?legacy=ai-upgrades',
   '/admin/arpu-churn': '/admin/finance?legacy=arpu-churn',

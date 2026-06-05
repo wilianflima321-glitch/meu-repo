@@ -11,7 +11,7 @@ const ROUTES_INVENTORY_FILE = path.join(DOCS_DIR, 'ROUTES_INVENTORY.md')
 // Ratchet this downward as the largest App Router pages are split. Do not raise
 // without explicitly accepting route UX debt.
 const MAX_PAGE_LINES = 250
-const MAX_ADMIN_ROUTES = 23
+const MAX_ADMIN_ROUTES = 22
 
 const REQUIRED_BOUNDARY_SEGMENTS = [
   'admin',
