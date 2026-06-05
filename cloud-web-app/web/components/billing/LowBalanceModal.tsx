@@ -409,13 +409,12 @@ export function LowBalanceModal({
 }
 
 // ============================================================================
-// AUTO-MANAGED WRAPPER (Integrado com AethelProvider)
+// AUTO-MANAGED WRAPPER
 // ============================================================================
 
 /**
- * LowBalanceModalAuto - Version auto-gerenciada
- * Monitora o saldo automaticamente e exibe o modal quando necessário.
- * Use este componente no ClientLayout para funcionalidade automática.
+ * LowBalanceModalAuto watches wallet balance and opens the modal only when
+ * the billing provider returns real balance data.
  */
 export function LowBalanceModalAuto() {
   const [isOpen, setIsOpen] = useState(false);
@@ -425,7 +424,7 @@ export function LowBalanceModalAuto() {
   const [lastDismissTime, setLastDismissTime] = useState<number | null>(null);
   const reminderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Verifica saldo periodicamente
+  // Check balance periodically without claiming a provider is configured.
   useEffect(() => {
     const checkBalance = async () => {
       try {
