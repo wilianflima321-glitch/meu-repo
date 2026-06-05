@@ -11,7 +11,7 @@
     "app/studio/**/*.tsx",
     "components/admin/**/*.tsx",
     "components/agents/**/*.tsx",
-    "components/VRPreview.tsx",
+    "components/labs/VRPreview.tsx",
     "components/studio/**/*.tsx",
     "components/viewport/**/*.tsx",
     "lib/admin/**/*.ts",

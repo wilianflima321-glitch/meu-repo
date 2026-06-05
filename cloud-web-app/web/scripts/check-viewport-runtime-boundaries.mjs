@@ -16,7 +16,7 @@ const REQUIRED_FILES = [
   'components/viewport/ViewportRuntimeDepthStatus.tsx',
   'components/viewport/gizmos/TransformGizmoProfessional.tsx',
   'components/engine/GameViewport.tsx',
-  'components/VRPreview.tsx',
+  'components/labs/VRPreview.tsx',
   'docs/VIEWPORT_RUNTIME_BOUNDARIES_V22.md',
 ]
 
@@ -133,8 +133,8 @@ for (const token of [
 }
 
 requirePattern(
-  'components/VRPreview.tsx',
-  /dynamic\(\(\)\s*=>\s*import\(['"]\.\/engine\/GameViewport['"]\)/,
+  'components/labs/VRPreview.tsx',
+  /dynamic\(\(\)\s*=>\s*import\(['"]\.\.\/engine\/GameViewport['"]\)/,
   'dynamic GameViewport import',
 )
 

@@ -85,7 +85,7 @@
     "components/viewport/viewport-camera-presets.ts",
     "components/viewport/gizmos/TransformGizmoProfessional.tsx",
     "components/engine/GameViewport.tsx",
-    "components/VRPreview.tsx",
+    "components/labs/VRPreview.tsx",
     "components/viewport/ViewportRuntimeDepthStatus.tsx",
     "components/viewport/viewport-model.ts",
     "components/assets/ContentBrowserConnected.tsx",

@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 
 // @aethel-heavy-async-boundary: GameViewport stays behind this explicit Labs boundary.
-const GameViewport = dynamic(() => import('./engine/GameViewport'), {
+const GameViewport = dynamic(() => import('../engine/GameViewport'), {
   ssr: false,
   loading: () => (
     <div className="flex h-full min-h-[320px] items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] text-sm text-[var(--aethel-text-secondary)]">

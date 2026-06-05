@@ -98,12 +98,12 @@ mustInclude('components/ide/fullscreen/WorkbenchPreviewRuntimeSurface.tsx', [
   'variant="runtime"',
 ])
 
-const vrPreview = read('components/VRPreview.tsx')
+const vrPreview = read('components/labs/VRPreview.tsx')
 if (vrPreview && !vrPreview.includes("NEXT_PUBLIC_LABS_VR !== 'true'")) {
-  failures.push('components/VRPreview.tsx: VR preview must stay behind NEXT_PUBLIC_LABS_VR')
+  failures.push('components/labs/VRPreview.tsx: VR preview must stay behind NEXT_PUBLIC_LABS_VR')
 }
 if (vrPreview && !vrPreview.includes('@aethel-heavy-async-boundary')) {
-  failures.push('components/VRPreview.tsx: heavy viewport must stay behind explicit async boundary')
+  failures.push('components/labs/VRPreview.tsx: heavy viewport must stay behind explicit async boundary')
 }
 
 function listSourceFiles(dir) {
