@@ -186,7 +186,6 @@ export function useDashboardActions({
     handleCreateNewSession,
     handleCreateProject,
     handleDeleteProject,
-    handleProjectVersionChange,
   } = useDashboardWorkspaceActions({
     trackEvent,
     showToastMessage,
@@ -337,7 +336,6 @@ export function useDashboardActions({
     handleCreateNewSession,
     handleCreateProject,
     handleDeleteProject,
-    handleProjectVersionChange,
     handleApplyDirectorNote,
     handleSubscribe,
     handleManageSubscription,

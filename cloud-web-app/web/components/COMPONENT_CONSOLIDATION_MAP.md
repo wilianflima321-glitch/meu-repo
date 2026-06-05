@@ -21,11 +21,11 @@ Source: docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md
 |---|---|---|
 | Button (legacy) | `@/components/Button.tsx` | `@/components/ui/Button` |
 | Breadcrumbs (legacy) | `@/components/Breadcrumbs.tsx` | Create canonical in ui/ |
-| NotificationCenter | `@/components/NotificationCenter.tsx` | `@/components/ui/Toast` |
-| NotificationSystem | `@/components/NotificationSystem.tsx` | `@/components/ui/Toast` |
+| NotificationCenter | removed | `@/components/ui/Toast` |
+| NotificationSystem | removed | `@/components/ui/Toast` |
 | LivePreview (root) | `@/components/LivePreview.tsx` | `@/components/preview/CanonicalPreviewSurface` |
-| OutputPanel (root) | `@/components/OutputPanel.tsx` | Integrate into IDE shell |
-| QuickOpen (root) | `@/components/QuickOpen.tsx` | Merge into CommandPalette |
+| OutputPanel (legacy) | removed | `WorkbenchOutputPane` inside IDE shell |
+| QuickOpen (legacy) | removed | `CommandPalette` |
 | IDELayout (legacy) | removed | `FullscreenIDE` + `ModernIDEShell` |
 | PreviewPanel (ide) | `@/components/ide/PreviewPanel.tsx` | `WorkbenchPreviewPane` + `CanonicalPreviewSurface` |
 

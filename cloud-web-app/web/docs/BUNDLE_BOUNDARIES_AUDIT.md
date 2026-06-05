@@ -1,7 +1,7 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2365
+- Files scanned: 2347
 - Failures: 0
 
 ## Counts
@@ -120,7 +120,6 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/ui/premium.tsx (1)
 
 ## Async Boundary Import References
-- components/collaboration/CollaborationPanel.parts.tsx statically imports @/lib/ui/motion -> lib/ui/motion.tsx
 - components/scene-editor/ScenePropertiesPanel.tsx statically imports ./scene-editor-models -> components/scene-editor/scene-editor-models.ts
 - components/viewport/AethelViewport3D.tsx statically imports @/lib/hooks/useRenderPipeline -> lib/hooks/useRenderPipeline.ts
 - lib/aaa-asset-pipeline-runtime/singletons.ts statically imports ./importer -> lib/aaa-asset-pipeline-runtime/importer.ts

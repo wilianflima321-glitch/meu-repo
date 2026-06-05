@@ -168,11 +168,6 @@ export function useDashboardWorkspaceActions({
     trackEvent('project', 'project_delete', { projectId: id })
   }, [setProjects, showToastMessage, trackEvent])
 
-  const handleProjectVersionChange = useCallback((versionId: string) => {
-    if (!versionId) return
-    showToastMessage(`Snapshot ${versionId} applied to the workspace.`, 'info')
-  }, [showToastMessage])
-
   return {
     handleOpenIdeLivePreview,
     handleOpenAIChatFromGuide,
@@ -182,6 +177,5 @@ export function useDashboardWorkspaceActions({
     handleCreateNewSession,
     handleCreateProject,
     handleDeleteProject,
-    handleProjectVersionChange,
   }
 }

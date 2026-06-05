@@ -8,7 +8,7 @@
  * - useSearch() instead of SearchManager
  * - useTheme() instead of ThemeManager
  * - useKeybinding() instead of KeyboardManager
- * - useNotifications() instead of NotificationCenter local state
+ * - useNotifications() instead of local notification state
  * - useCommandPalette() instead of local command handling
  */
 

@@ -32,7 +32,7 @@ export {
 export {
   NotificationProvider,
   useNotifications,
-} from '@/components/NotificationSystem';
+} from './ui/notification-system';
 export {
   TooltipManager,
   TooltipProvider,

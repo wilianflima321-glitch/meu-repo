@@ -1,7 +1,6 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { VersionHistorySlider } from '../collaboration/VersionHistorySlider'
 import { EmptyProjects } from '../ui/EmptyState'
 import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_SPACING, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
@@ -21,7 +20,6 @@ type DashboardProjectsTabProps = {
   onCreateProject: () => void
   onProjectNameChange: (value: string) => void
   onProjectTypeChange: (value: Project['type']) => void
-  onProjectVersionChange: (versionId: string) => void
   onApplyDirectorNote: (title: string) => void
   onOpenAiChat?: () => void
   onOpenIde?: () => void
@@ -161,7 +159,6 @@ export function DashboardProjectsTab({
   onCreateProject,
   onProjectNameChange,
   onProjectTypeChange,
-  onProjectVersionChange,
   onApplyDirectorNote,
   onOpenAiChat,
   onOpenIde,
@@ -179,11 +176,6 @@ export function DashboardProjectsTab({
             Keep only the workspaces that move the mission forward and stay ready for a clean Studio expansion.
           </p>
         </div>
-        {projects.length > 0 ? (
-          <div className="w-full max-w-md">
-            <VersionHistorySlider versions={[]} onVersionChange={onProjectVersionChange} variant="compact" />
-          </div>
-        ) : null}
       </div>
 
       <section className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] p-5 shadow-[0_20px_70px_rgba(2,6,23,0.18)]">
