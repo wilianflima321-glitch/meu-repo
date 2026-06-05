@@ -61,7 +61,7 @@ requireToken('lib/navigation/workspace-navigation.ts', "id: 'share'", 'workspace
 requirePattern('lib/routes/workbench-convergence.ts', /'\/preview':\s*'\/ide\?entry=preview'/, 'legacy preview route must converge into the IDE preview pane')
 requirePattern('lib/routes/product-surface-registry.ts', /visibleDashboardTabs:\s*3/, 'dashboard 3-tab ratchet')
 requirePattern('lib/routes/product-surface-registry.ts', /visibleStudioGroups:\s*5/, 'studio 5-group ratchet')
-requirePattern('lib/routes/product-surface-registry.ts', /maxAdminPhysicalRoutes:\s*21/, 'admin physical route ratchet')
+requirePattern('lib/routes/product-surface-registry.ts', /maxAdminPhysicalRoutes:\s*20/, 'admin physical route ratchet')
 
 requirePattern('components/dashboard/aethel-dashboard-model.ts', /MISSION_CONTROL_TABS\s*=\s*\['overview',\s*'projects',\s*'activity'\]/, 'dashboard must expose only three primary tabs')
 requireToken('components/dashboard/AethelDashboardSidebar.tsx', 'data-dashboard-primary-tabs="3"', 'dashboard visible tab marker')
@@ -140,7 +140,7 @@ const routePages = listFiles(path.join(ROOT, 'app'), (file) => {
 })
 const adminPages = routePages.filter((file) => file.includes(`${path.sep}app${path.sep}admin${path.sep}`) && !file.endsWith(`${path.sep}app${path.sep}admin${path.sep}page.tsx`))
 const studioPages = routePages.filter((file) => file.includes(`${path.sep}app${path.sep}studio${path.sep}`) && !file.endsWith(`${path.sep}app${path.sep}studio${path.sep}page.tsx`))
-if (adminPages.length > 21) failures.push(`admin physical routes ${adminPages.length} > 21`)
+if (adminPages.length > 20) failures.push(`admin physical routes ${adminPages.length} > 20`)
 if (studioPages.length > 7) failures.push(`studio physical routes ${studioPages.length} > 7`)
 
 const heavyPublicShellPattern = /from ['"](?:three|@react-three\/fiber|@react-three\/drei|monaco-editor|@monaco-editor\/react)['"]/
@@ -157,7 +157,7 @@ fs.writeFileSync(
   `# V28 Best-In-Market Spine
 
 - Product surfaces: ${requiredSurfaces.join(', ')}
-- Admin physical routes: ${adminPages.length}/21
+- Admin physical routes: ${adminPages.length}/20
 - Studio physical routes: ${studioPages.length}/7
 - Unified viewport surfaces: scene, character, material, cinematic, audio, canvas, runtime
 - Agent runtime spine: tool calling, memory, sandbox, browser replay, vector store, role evals, squad, approval gate
@@ -173,4 +173,4 @@ if (failures.length > 0) {
   process.exit(1)
 }
 
-console.log(`[v28-best-in-market-spine] PASS surfaces=6 adminRoutes=${adminPages.length}/21 studioRoutes=${studioPages.length}/7`)
+console.log(`[v28-best-in-market-spine] PASS surfaces=6 adminRoutes=${adminPages.length}/20 studioRoutes=${studioPages.length}/7`)
