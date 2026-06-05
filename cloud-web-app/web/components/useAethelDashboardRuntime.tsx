@@ -1,16 +1,9 @@
 'use client'
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { useSWRConfig } from 'swr'
-import { AethelAPIClient } from '@/lib/api'
 import { analytics, type EventAction, type EventCategory } from '@/lib/analytics'
 import {
-  buildAiProviderGateMessage,
-  fetchAiProviderStatus,
-} from '@/lib/ai-provider-status-client'
-import { isAuthenticated } from '@/lib/auth'
-import {
   type ToastType,
-  STORAGE_KEYS,
 } from './dashboard/aethel-dashboard-model'
 import {
   DEFAULT_PROJECTS,
@@ -19,25 +12,20 @@ import {
   formatStatusLabel,
   getScopedKeys,
 } from './dashboard/aethel-dashboard-defaults'
-import { getProjectIdFromLocation } from './dashboard/aethel-dashboard-location-utils'
 import { resolveIdeHandoffParams } from './dashboard/aethel-dashboard-ide-handoff'
 import {
-  extractCopilotWorkflowList,
-  mapApiMessagesToChatHistory,
-} from './dashboard/aethel-dashboard-copilot-utils'
-import {
   PREVIEW_RUNTIME_URL_STORAGE_KEY,
-  coerceActiveTab,
 } from './dashboard/aethel-dashboard-core-types'
 import { useFirstValueTracking } from './dashboard/useFirstValueTracking'
 import { useDashboardMissionSeed } from './dashboard/useDashboardMissionSeed'
 import { useDashboardStoragePersistence } from './dashboard/useDashboardStoragePersistence'
 import { useDashboardEntryIntent } from './dashboard/useDashboardEntryIntent'
 import { useDashboardUiState } from './dashboard/useDashboardUiState'
-import { ONBOARDING_WIZARD_DISMISSED_KEY } from './dashboard/aethel-dashboard-constants'
 import { useDashboardActions } from './dashboard/useDashboardActions'
 import { useDashboardDerivedState } from './dashboard/useDashboardDerivedState'
 import { useDashboardRemoteData } from './dashboard/useDashboardRemoteData'
+import { useDashboardCopilotSync } from './dashboard/useDashboardCopilotSync'
+import { useDashboardRuntimeLifecycle } from './dashboard/useDashboardRuntimeLifecycle'
 
 export function useAethelDashboardRuntime() {
   const { mutate } = useSWRConfig()
@@ -345,125 +333,35 @@ export function useAethelDashboardRuntime() {
     setChatMessage,
   })
 
-  useEffect(() => {
-    if (!authReady || !hasToken) return
-    if (typeof window === 'undefined') return
-    const params = new URLSearchParams(window.location.search)
-    const forced = params.get('onboarding') === '1'
-    const dismissed = window.localStorage.getItem(ONBOARDING_WIZARD_DISMISSED_KEY) === '1'
-    if (forced || (!dismissed && shouldShowFirstRunOnboarding)) {
-      setShowOnboardingWizard(true)
-    }
-  }, [authReady, hasToken, setShowOnboardingWizard, shouldShowFirstRunOnboarding])
+  useDashboardRuntimeLifecycle({
+    authReady,
+    copilotProjectId,
+    hasToken,
+    setActiveChatThreadId,
+    setActiveTab,
+    setActiveWorkflowId,
+    setAiProviderGate,
+    setAuthReady,
+    setCopilotProjectId,
+    setHasToken,
+    setShowOnboardingWizard,
+    settingsTheme: settings.theme,
+    shouldShowFirstRunOnboarding,
+    trackEvent,
+  })
 
-  useEffect(() => {
-    setAuthReady(true)
-    setHasToken(isAuthenticated())
-    setCopilotProjectId(getProjectIdFromLocation())
-    trackEvent('engine', 'editor_open', { surface: 'dashboard' })
-    analytics?.trackPageLoad?.('dashboard')
-  }, [setAuthReady, setCopilotProjectId, setHasToken, trackEvent])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const params = new URLSearchParams(window.location.search)
-    const tab = params.get('tab')
-    if (!tab) return
-    const nextTab = coerceActiveTab(tab)
-    setActiveTab(nextTab)
-    window.localStorage.setItem(STORAGE_KEYS.activeTab, nextTab)
-  }, [setActiveTab])
-
-  useEffect(() => {
-    if (!authReady || !hasToken) return
-    const controller = new AbortController()
-
-    ;(async () => {
-      try {
-        const status = await fetchAiProviderStatus(controller.signal)
-        if (status.configured || status.demoModeEnabled) {
-          setAiProviderGate(null)
-          return
-        }
-        setAiProviderGate({
-          message: buildAiProviderGateMessage(status),
-          capabilityStatus: status.capabilityStatus,
-          setupUrl: status.setupUrl,
-        })
-        trackEvent('ai', 'ai_error', {
-          source: 'dashboard-provider-preflight',
-          error: 'AI_PROVIDER_NOT_CONFIGURED',
-        })
-      } catch {
-        // best-effort preflight only
-      }
-    })()
-
-    return () => controller.abort()
-  }, [authReady, hasToken, setAiProviderGate, trackEvent])
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return
-    document.documentElement.setAttribute('data-aethel-theme', settings.theme)
-  }, [settings.theme])
-
-  useEffect(() => {
-    if (!hasToken || typeof window === 'undefined') return
-    const keys = getScopedKeys(copilotProjectId)
-    const storedWorkflow =
-      window.localStorage.getItem(keys.workflowKey) ||
-      window.localStorage.getItem(keys.legacyWorkflowKey)
-    const storedThread =
-      window.localStorage.getItem(keys.chatThreadKey) ||
-      window.localStorage.getItem(keys.legacyChatThreadKey)
-
-    if (storedWorkflow) {
-      setActiveWorkflowId(storedWorkflow)
-    }
-    if (storedThread) {
-      setActiveChatThreadId(storedThread)
-    }
-  }, [hasToken, copilotProjectId, setActiveChatThreadId, setActiveWorkflowId])
-
-  useEffect(() => {
-    if (!hasToken) {
-      setCopilotWorkflows([])
-      setActiveWorkflowId(null)
-      setActiveChatThreadId(null)
-      return
-    }
-    void (async () => {
-      try {
-        const response = await AethelAPIClient.listCopilotWorkflows({
-          projectId: copilotProjectId ?? undefined,
-          archived: false,
-        })
-        const workflows = extractCopilotWorkflowList(response)
-        setCopilotWorkflows(workflows)
-        if (workflows.length === 0) return
-        const selected = workflows.find((workflow) => String(workflow.id) === String(activeWorkflowId)) ?? workflows[0]
-        const selectedWorkflowId = String(selected.id)
-        const selectedThreadId = selected.chatThreadId ? String(selected.chatThreadId) : null
-        setActiveWorkflowId(selectedWorkflowId)
-        setActiveChatThreadId(selectedThreadId)
-        persistCopilotScope(selectedWorkflowId, selectedThreadId)
-      } catch (error) {
-        showToastMessage('Failed to load Copilot workflows.', 'error')
-      }
-    })()
-  }, [activeWorkflowId, copilotProjectId, hasToken, persistCopilotScope, setActiveChatThreadId, setActiveWorkflowId, setCopilotWorkflows, showToastMessage])
-
-  useEffect(() => {
-    if (!activeChatThreadId) return
-    void (async () => {
-      try {
-        const result = await AethelAPIClient.getChatMessages(activeChatThreadId)
-        setChatHistory(mapApiMessagesToChatHistory(result))
-      } catch {
-        setChatHistory([])
-      }
-    })()
-  }, [activeChatThreadId, setChatHistory])
+  useDashboardCopilotSync({
+    activeChatThreadId,
+    activeWorkflowId,
+    copilotProjectId,
+    hasToken,
+    persistCopilotScope,
+    setActiveChatThreadId,
+    setActiveWorkflowId,
+    setChatHistory,
+    setCopilotWorkflows,
+    showToastMessage,
+  })
 
   const dashboardMainProps = {
     activeTab, showFirstValueGuide, firstProjectCreated: projects.length > DEFAULT_PROJECTS.length, firstValueAiSuccess, firstValueOpenedIde, firstValueSessionSummary, onFirstValueStartTemplate: handleTemplateSelect,
