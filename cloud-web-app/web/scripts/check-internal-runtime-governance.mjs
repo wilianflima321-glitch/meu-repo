@@ -37,7 +37,7 @@ const REQUIRED_MODULES = [
   'components/team/TeamInviteManager.parts.tsx',
   'components/ide/DebugPanel.tsx',
   'lib/git/git-service.ts',
-  'components/ChatComponent.tsx',
+  'components/ide/AIChatPanelPro.tsx',
 ]
 
 function extractObjectBlocks(source) {

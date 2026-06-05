@@ -284,7 +284,8 @@ Account, billing, settings, and onboarding surfaces must use a consistent Englis
 | `app/profile/profile-primitives.tsx` | 0 | ok |
 | `app/profile/profile-shell.tsx` | 0 | ok |
 | `app/profile/profile-tabs.tsx` | 0 | ok |
-| `components/SettingsEditor.tsx` | 0 | ok |
+| `app/settings/page.tsx` | 0 | ok |
+| `app/settings/_components/SettingsCommandCenter.tsx` | 0 | ok |
 | `components/settings/UserAuditLogPanel.tsx` | 0 | ok |
 | `components/settings/TwoFactorSecurityPanel.tsx` | 0 | ok |
 | `components/billing/PremiumLock.tsx` | 0 | ok |

@@ -19,7 +19,6 @@ const DEPRECATED_SURFACE_TOKENS = [
   "variant='gradient'",
 ]
 const DEPRECATED_SURFACE_ALLOWLIST = new Set([
-  'components/ui/GlassmorphismUI.tsx',
   'components/ui/premium.tsx',
 ])
 const CHECKS = [
