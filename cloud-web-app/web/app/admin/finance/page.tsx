@@ -9,6 +9,7 @@ import { FinanceAIMarginSections, FinanceCostMetrics, FinanceCriticalMetrics, Fi
 import { FinanceErrorState, FinanceLoadingState } from './_components/FinanceStates'
 import { FinanceTransactionsTable } from './_components/FinanceTransactionsTable'
 import type { FinanceDateRange, FinanceMetrics } from './_components/finance-types'
+import { PaymentsAdminPanel } from '../payments/_components/PaymentsAdminPanel'
 
 export default function FinanceDashboard() {
   const [metrics, setMetrics] = useState<FinanceMetrics | null>(null)
@@ -16,6 +17,7 @@ export default function FinanceDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [dateRange, setDateRange] = useState<FinanceDateRange>('today')
+  const [showPaymentsPanel, setShowPaymentsPanel] = useState(false)
 
   const fetchMetrics = useCallback(async () => {
     try {
@@ -39,6 +41,11 @@ export default function FinanceDashboard() {
     return () => clearInterval(interval)
   }, [fetchMetrics, autoRefresh])
 
+  useEffect(() => {
+    const legacy = new URLSearchParams(window.location.search).get('legacy')
+    if (legacy === 'payments') setShowPaymentsPanel(true)
+  }, [])
+
   if (loading) return <FinanceLoadingState />
   if (error || !metrics) return <FinanceErrorState error={error} onRetry={fetchMetrics} />
 
@@ -52,6 +59,19 @@ export default function FinanceDashboard() {
       {metrics.alerts.length > 0 ? <FinanceAlertsPanel alerts={metrics.alerts} /> : null}
       <FinanceCharts metrics={metrics} />
       <FinanceTransactionsTable transactions={metrics.recentTransactions} />
+      <details
+        id="payments"
+        className="rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] p-4"
+        open={showPaymentsPanel}
+        onToggle={(event) => setShowPaymentsPanel(event.currentTarget.open)}
+      >
+        <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+          Payments operations
+        </summary>
+        <div className="mt-4">
+          <PaymentsAdminPanel />
+        </div>
+      </details>
     </div>
   )
 }

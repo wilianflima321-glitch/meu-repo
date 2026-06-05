@@ -1,13 +1,21 @@
 'use client'
 
+import type { ToastType } from './aethel-dashboard-model'
+
 type DashboardToastProps = {
   message: string
-  type: 'success' | 'error' | 'info'
+  type: ToastType
 }
 
 export function DashboardToast({ message, type }: DashboardToastProps) {
   const colorClass =
-    type === 'success' ? 'bg-[var(--aethel-success-dark)]' : type === 'error' ? 'bg-[var(--aethel-error-dark)]' : 'bg-[var(--aethel-primary-dark)]'
+    type === 'success'
+      ? 'bg-[var(--aethel-success-dark)]'
+      : type === 'error'
+        ? 'bg-[var(--aethel-error-dark)]'
+        : type === 'warning'
+          ? 'bg-[var(--aethel-warning-dark)] text-[var(--aethel-bg)]'
+          : 'bg-[var(--aethel-primary-dark)]'
 
   return (
     <div

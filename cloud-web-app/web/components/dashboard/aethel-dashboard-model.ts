@@ -85,7 +85,7 @@ export const DASHBOARD_TAB_GROUPS = {
   explore: EXPLORE_TABS,
 } as const
 
-export type ToastType = 'success' | 'error' | 'info'
+export type ToastType = 'success' | 'error' | 'info' | 'warning'
 
 export interface ToastState {
   message: string
