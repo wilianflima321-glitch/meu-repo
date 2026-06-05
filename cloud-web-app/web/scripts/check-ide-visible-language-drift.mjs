@@ -60,7 +60,6 @@ const FILES = [
   'components/ide/CommandPalette.tsx',
   'components/ide/CommandPalette.parts.tsx',
   'components/ide/ConsoleIntegration.tsx',
-  'components/SearchReplace.tsx',
   'components/visual-scripting/VisualScriptEditor.tsx',
   'components/nexus/AethelResearch.tsx',
   'components/nexus/NexusChatMultimodal.tsx',

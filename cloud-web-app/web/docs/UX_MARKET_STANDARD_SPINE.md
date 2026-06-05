@@ -260,7 +260,6 @@ Shared product primitives used by IDE, Studio, and admin must not leak Portugues
 | File | Count | Note |
 | --- | ---: | --- |
 | `components/ui/Select.tsx` | 0 | ok |
-| `components/terminal/TerminalWidget.tsx` | 0 | ok |
 | `components/viewport/SceneViewportInspector.tsx` | 0 | ok |
 | `components/visual-scripting/VisualScriptEditor.tsx` | 0 | ok |
 | `components/visual-scripting/visual-node-catalog.ts` | 0 | ok |

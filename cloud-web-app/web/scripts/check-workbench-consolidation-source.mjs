@@ -76,6 +76,9 @@ const retiredFiles = [
   ['components/ui/PremiumSkeleton.tsx', 'premium duplicate primitive must stay retired'],
   ['components/ui/PremiumEmptyState.tsx', 'premium duplicate primitive must stay retired'],
   ['lib/hooks/useTerminal.ts', 'legacy xterm hook must stay retired; use components/terminal/XTerminal'],
+  ['components/terminal/IntegratedTerminal.tsx', 'legacy terminal wrapper must stay retired'],
+  ['components/terminal/TerminalWidget.tsx', 'legacy terminal wrapper must stay retired'],
+  ['components/TerminalPro.tsx', 'legacy terminal wrapper must stay retired'],
 ]
 
 for (const [file, reason] of retiredFiles) forbidFile(file, reason)
@@ -86,9 +89,6 @@ requireToken(
   'IDE workbench must consume the canonical terminal panel',
 )
 requireToken('components/terminal/XTerminal.tsx', "export { MultiTerminalPanel }", 'canonical terminal panel export')
-requireToken('components/terminal/IntegratedTerminal.tsx', '@deprecated V26', 'legacy terminal deprecation marker')
-requireToken('components/terminal/TerminalWidget.tsx', '@deprecated V26', 'legacy terminal deprecation marker')
-requireToken('components/TerminalPro.tsx', '@deprecated V26', 'legacy terminal deprecation marker')
 rejectPattern(
   'lib/hooks/index.ts',
   /useTerminal/,
@@ -119,11 +119,6 @@ const importRules = [
   {
     name: 'legacy terminal families outside the terminal lab',
     pattern: /from\s+['"][^'"]*(IntegratedTerminal|TerminalWidget|TerminalPro)['"]/,
-    allow: new Set([
-      'components/terminal/IntegratedTerminal.tsx',
-      'components/terminal/TerminalWidget.tsx',
-      'components/TerminalPro.tsx',
-    ]),
   },
   {
     name: 'retired terminal hook',

@@ -144,7 +144,6 @@ export const PUBLIC_UX_CHECKS = [
       'Shared product primitives used by IDE, Studio, and admin must not leak Portuguese placeholders or mojibake into premium surfaces.',
     files: [
       'components/ui/Select.tsx',
-      'components/terminal/TerminalWidget.tsx',
       'components/viewport/SceneViewportInspector.tsx',
       'components/visual-scripting/VisualScriptEditor.tsx',
       'components/visual-scripting/visual-node-catalog.ts',
