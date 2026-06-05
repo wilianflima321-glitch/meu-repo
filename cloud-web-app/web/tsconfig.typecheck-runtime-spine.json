@@ -27,7 +27,8 @@
     "app/api/projects/[id]/production-state/studio-local-cook-job/route.ts",
     "lib/production/studio-local-cook-dispatch.ts",
     "app/api/projects/[id]/production-state/studio-local-cook-dispatch/route.ts",
-    "app/api/runtime/toolchain-readiness/route.ts"
+    "app/api/runtime/toolchain-readiness/route.ts",
+    "app/api/runtime/best-market-internal-spine/route.ts"
   ],
   "exclude": [
     "node_modules",
