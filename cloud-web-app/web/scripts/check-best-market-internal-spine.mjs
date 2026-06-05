@@ -49,6 +49,12 @@ requireToken(spineFile, 'AETHEL_BEST_MARKET_INTERNAL_SPINE', 'capability marker'
 requireToken(spineFile, 'BEST_MARKET_INTERNAL_NO_FAKE_SUCCESS_RULES', 'no fake success rule matrix')
 requireToken(spineFile, 'buildBestMarketInternalSpineReport', 'spine report builder')
 requireToken(spineFile, 'validateBestMarketInternalSpineReport', 'spine report validator')
+requireToken(spineFile, 'coerceBestMarketInternalSpineInputFromSearchParams', 'search param coercion')
+requireToken(spineFile, 'domainCount', 'domain count metric')
+requireToken(spineFile, 'heldOrBlockedDomainCount', 'held/blocked domain metric')
+requireToken(spineFile, 'p0GapCount', 'P0 gap metric')
+requireToken(spineFile, 'p1GapCount', 'P1 gap metric')
+requireToken(spineFile, 'p2GapCount', 'P2 gap metric')
 requireToken(spineFile, 'buildAethelToolchainReadinessSnapshot', 'toolchain readiness integration')
 requireToken(spineFile, 'buildAgentRuntimeSpinePlan', 'agent runtime integration')
 requireToken(spineFile, 'buildResearchRuntimeSpinePlan', 'research runtime integration')
@@ -56,8 +62,11 @@ requireToken(spineFile, 'buildContextMemorySpinePlan', 'context memory integrati
 requireToken(spineFile, 'buildGameAssetQualityPipeline', 'asset quality integration')
 requireToken(spineFile, 'buildExportPipelinePlan', 'export pipeline integration')
 requireToken(routeFile, 'buildBestMarketInternalSpineReport', 'authenticated internal spine API')
+requireToken(routeFile, 'coerceBestMarketInternalSpineInputFromSearchParams', 'API query input coercion')
 requireToken(routeFile, 'requireEntitlementsForUser', 'entitlement guard')
 requireToken(routeFile, 'x-aethel-capability-status', 'runtime capability status header')
+requireToken(routeFile, 'x-aethel-domain-count', 'domain count header')
+requireToken(routeFile, 'x-aethel-held-domains', 'held domain count header')
 
 for (const domain of domains) {
   requirePattern(spineFile, new RegExp(`id:\\s*'${domain}'`), `domain ${domain}`)
@@ -103,6 +112,9 @@ if (!packageJson.scripts?.['qa:v28-total-spine']?.includes('qa:best-market-inter
 if (!packageJson.scripts?.['qa:enterprise-gate']?.includes('qa:best-market-internal-spine')) {
   failures.push('package.json: qa:enterprise-gate must include qa:best-market-internal-spine')
 }
+if (!packageJson.scripts?.['qa:internal-runtime-priority-gate']?.includes('qa:best-market-internal-spine')) {
+  failures.push('package.json: qa:internal-runtime-priority-gate must include qa:best-market-internal-spine')
+}
 
 const fakePromotionPattern = /(AAA pronto|Unreal-grade|final asset is available|Pixel Streaming available|installer signed by default|research verified by default)/i
 if (fakePromotionPattern.test(spine)) {
@@ -119,6 +131,7 @@ fs.writeFileSync(
 - Required evidence checks: ${requiredEvidence.length}
 - Validator guards: ${requiredGuards.length}
 - Script wired: ${scriptValue === 'node scripts/check-best-market-internal-spine.mjs'}
+- Runtime-priority gate wired: ${Boolean(packageJson.scripts?.['qa:internal-runtime-priority-gate']?.includes('qa:best-market-internal-spine'))}
 - Failures: ${failures.length}
 
 This gate protects internal robustness, not visual polish. It ensures Aethel keeps apps, research, agents, games, films, viewport, Studio Local, Cloud Render, export, marketplace, context memory, and browser operator behind evidence and honest claim ceilings.

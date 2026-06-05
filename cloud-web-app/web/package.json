@@ -194,7 +194,8 @@
     "qa:agent-runtime-spine": "node scripts/check-agent-runtime-spine.mjs",
     "qa:creator-runtime-spine": "node scripts/check-creator-runtime-spine.mjs",
     "qa:research-runtime-spine": "node scripts/check-research-runtime-spine.mjs",
-    "qa:best-market-internal-spine": "node scripts/check-best-market-internal-spine.mjs"
+    "qa:best-market-internal-spine": "node scripts/check-best-market-internal-spine.mjs",
+    "qa:internal-runtime-priority-gate": "npm run qa:best-market-internal-spine && npm run qa:runtime-engine-spine && npm run qa:runtime-toolchain-readiness-snapshot && npm run qa:agent-runtime-spine && npm run qa:research-runtime-spine && npm run qa:context-memory-spine && npm run qa:game-asset-quality-pipeline && npm run qa:asset-final-evidence-gate"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",

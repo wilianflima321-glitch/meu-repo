@@ -4,7 +4,10 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { createComponentLogger } from '@/lib/observability/logger'
-import { buildBestMarketInternalSpineReport } from '@/lib/runtime/best-market-internal-spine'
+import {
+  buildBestMarketInternalSpineReport,
+  coerceBestMarketInternalSpineInputFromSearchParams,
+} from '@/lib/runtime/best-market-internal-spine'
 
 const logger = createComponentLogger('api.runtime.best-market-internal-spine')
 
@@ -16,23 +19,25 @@ export async function GET(request: NextRequest) {
     const user = requireAuth(request)
     await requireEntitlementsForUser(user.userId)
 
-    const mission = request.nextUrl.searchParams.get('mission') ?? undefined
-    const report = buildBestMarketInternalSpineReport({ mission })
-    const p0GapCount = report.gaps.filter((gap) => gap.severity === 'p0').length
+    const input = coerceBestMarketInternalSpineInputFromSearchParams(request.nextUrl.searchParams)
+    const report = buildBestMarketInternalSpineReport(input)
 
     logger.info('best_market_internal_spine.snapshot', {
       userId: user.userId,
       state: report.state,
-      domains: report.domains.length,
+      domains: report.domainCount,
       gaps: report.gaps.length,
-      p0GapCount,
+      p0GapCount: report.p0GapCount,
+      heldOrBlockedDomainCount: report.heldOrBlockedDomainCount,
     })
 
     return NextResponse.json(report, {
       headers: {
         'x-aethel-capability': report.capability,
         'x-aethel-capability-status': report.state,
-        'x-aethel-p0-gaps': String(p0GapCount),
+        'x-aethel-domain-count': String(report.domainCount),
+        'x-aethel-held-domains': String(report.heldOrBlockedDomainCount),
+        'x-aethel-p0-gaps': String(report.p0GapCount),
       },
     })
   } catch (error) {

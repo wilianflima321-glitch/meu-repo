@@ -74,10 +74,20 @@ export type BestMarketInternalSpineReport = {
   generatedAt: string
   capability: 'AETHEL_BEST_MARKET_INTERNAL_SPINE'
   state: GovernedRuntimeState
+  domainCount: number
+  availableDomainCount: number
+  heldOrBlockedDomainCount: number
+  p0GapCount: number
+  p1GapCount: number
+  p2GapCount: number
   domains: BestMarketInternalDomain[]
   gaps: BestMarketInternalGap[]
   noFakeSuccessRules: string[]
   nextAction: string
+}
+
+export type BestMarketInternalSearchParams = {
+  get(name: string): string | null
 }
 
 const DOMAIN_ORDER: BestMarketInternalDomainId[] = [
@@ -144,6 +154,63 @@ function domain(input: Omit<BestMarketInternalDomain, 'state'> & { state?: Gover
     state: input.state ?? stateFrom(input.blockers),
     requiredEvidence: unique(input.requiredEvidence),
     blockers: unique(input.blockers),
+  }
+}
+
+function splitCsv(value: string | null | undefined): string[] {
+  if (!value) return []
+  return unique(value.split(','))
+}
+
+function readBoolean(value: string | null | undefined): boolean | undefined {
+  if (value == null) return undefined
+  if (/^(1|true|yes|on)$/i.test(value)) return true
+  if (/^(0|false|no|off)$/i.test(value)) return false
+  return undefined
+}
+
+function readNumber(value: string | null | undefined): number | undefined {
+  if (value == null || value.trim() === '') return undefined
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+function readSandboxProvider(value: string | null | undefined): BestMarketInternalSpineInput['sandboxProvider'] {
+  if (value === 'local-script-sandbox' || value === 'vercel-sandbox' || value === 'studio-local') return value
+  if (value === 'none') return 'none'
+  return undefined
+}
+
+function readVectorStoreProvider(value: string | null | undefined): BestMarketInternalSpineInput['vectorStoreProvider'] {
+  if (value === 'local-index' || value === 'cloud-index') return value
+  if (value === 'none') return 'none'
+  return undefined
+}
+
+export function coerceBestMarketInternalSpineInputFromSearchParams(
+  searchParams: BestMarketInternalSearchParams,
+  env: Record<string, string | undefined> = process.env,
+): BestMarketInternalSpineInput {
+  return {
+    mission: searchParams.get('mission') ?? undefined,
+    env,
+    evidenceRefs: splitCsv(searchParams.get('evidenceRefs')),
+    installedNativeToolIds: splitCsv(searchParams.get('installedNativeToolIds')),
+    approvedHumanProcessIds: splitCsv(searchParams.get('approvedHumanProcessIds')),
+    browserReplayEnabled: readBoolean(searchParams.get('browserReplayEnabled') ?? searchParams.get('browserReplay')),
+    artifactPersistenceEnabled: readBoolean(searchParams.get('artifactPersistenceEnabled') ?? searchParams.get('artifacts')),
+    sourceCount: readNumber(searchParams.get('sourceCount')),
+    confidenceScores: splitCsv(searchParams.get('confidenceScores')).map(Number).filter(Number.isFinite),
+    costEstimateUsd: readNumber(searchParams.get('costEstimateUsd')) ?? null,
+    finalAnswerReady: readBoolean(searchParams.get('finalAnswerReady')),
+    humanReviewed: readBoolean(searchParams.get('humanReviewed')),
+    toolRegistryAvailable: readBoolean(searchParams.get('toolRegistryAvailable')),
+    sandboxProvider: readSandboxProvider(searchParams.get('sandboxProvider')),
+    vectorStoreProvider: readVectorStoreProvider(searchParams.get('vectorStoreProvider')),
+    roleEvalSuiteAvailable: readBoolean(searchParams.get('roleEvalSuiteAvailable')),
+    studioLocalAvailable: readBoolean(searchParams.get('studioLocalAvailable')),
+    cloudRenderAvailable: readBoolean(searchParams.get('cloudRenderAvailable')),
+    privacyMaskEnabled: readBoolean(searchParams.get('privacyMaskEnabled')),
   }
 }
 
@@ -334,17 +401,26 @@ export function buildBestMarketInternalSpineReport(input: BestMarketInternalSpin
     })),
   )
   const state = mergeState(domains.map((item) => item.state))
+  const p0GapCount = gaps.filter((gap) => gap.severity === 'p0').length
+  const p1GapCount = gaps.filter((gap) => gap.severity === 'p1').length
+  const p2GapCount = gaps.filter((gap) => gap.severity === 'p2').length
 
   return {
     version: 1,
     generatedAt: new Date().toISOString(),
     capability: 'AETHEL_BEST_MARKET_INTERNAL_SPINE',
     state,
+    domainCount: domains.length,
+    availableDomainCount: domains.filter((item) => item.state === 'available').length,
+    heldOrBlockedDomainCount: domains.filter((item) => item.state !== 'available').length,
+    p0GapCount,
+    p1GapCount,
+    p2GapCount,
     domains,
     gaps,
     noFakeSuccessRules: [...BEST_MARKET_INTERNAL_NO_FAKE_SUCCESS_RULES],
     nextAction:
-      gaps.some((gap) => gap.severity === 'p0')
+      p0GapCount > 0
         ? 'Resolve P0 evidence/toolchain/runtime gaps before claiming best-in-market execution.'
         : state === 'available'
           ? 'All modeled domains can proceed with receipts and human review.'
@@ -358,6 +434,14 @@ export function validateBestMarketInternalSpineReport(report: BestMarketInternal
   for (const id of DOMAIN_ORDER) {
     if (!ids.has(id)) failures.push(`missing domain: ${id}`)
   }
+  if (report.domainCount !== DOMAIN_ORDER.length) failures.push(`expected domainCount ${DOMAIN_ORDER.length}`)
+  if (report.domainCount !== report.domains.length) failures.push('domainCount does not match domains length')
+  if (report.heldOrBlockedDomainCount !== report.domains.filter((item) => item.state !== 'available').length) {
+    failures.push('heldOrBlockedDomainCount does not match domains')
+  }
+  if (report.p0GapCount !== report.gaps.filter((gap) => gap.severity === 'p0').length) failures.push('p0GapCount mismatch')
+  if (report.p1GapCount !== report.gaps.filter((gap) => gap.severity === 'p1').length) failures.push('p1GapCount mismatch')
+  if (report.p2GapCount !== report.gaps.filter((gap) => gap.severity === 'p2').length) failures.push('p2GapCount mismatch')
   if (report.domains.length !== DOMAIN_ORDER.length) failures.push(`expected ${DOMAIN_ORDER.length} domains`)
   if (report.noFakeSuccessRules.length < 6) failures.push('no-fake-success matrix is too thin')
   for (const item of report.domains) {
