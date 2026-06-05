@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { getToken } from '@/lib/auth'
+import { InfrastructureAdminPanel } from '../infrastructure/InfrastructureAdminPanel'
 
 import { HEALTH_ENDPOINTS } from './_components/monitoring-constants'
 import { MonitoringAlertThresholds } from './_components/MonitoringAlertThresholds'
@@ -19,6 +20,7 @@ export default function AdminMonitoringPage() {
   const [coreLoop, setCoreLoop] = useState<CoreLoopPromotionSnapshot | null>(null)
   const [loading, setLoading] = useState(true)
   const [lastRefresh, setLastRefresh] = useState<string | null>(null)
+  const [showInfrastructurePanel, setShowInfrastructurePanel] = useState(false)
 
   const runHealthChecks = useCallback(async (): Promise<HealthCheckResult[]> => {
     const results: HealthCheckResult[] = []
@@ -58,6 +60,11 @@ export default function AdminMonitoringPage() {
     return () => clearInterval(interval)
   }, [refresh])
 
+  useEffect(() => {
+    const legacy = new URLSearchParams(window.location.search).get('legacy')
+    if (legacy === 'infrastructure') setShowInfrastructurePanel(true)
+  }, [])
+
   const blockedChecks = metrics?.healthChecks.filter((check) => check.status === 'down') ?? []
   const degradedChecks = metrics?.healthChecks.filter((check) => check.status === 'degraded') ?? []
   const monitoringTone = useMemo(() => getMonitoringTone(metrics), [metrics])
@@ -72,6 +79,19 @@ export default function AdminMonitoringPage() {
           <MonitoringInterpretationPanel />
         </section>
         <MonitoringHealthChecksTable metrics={metrics} loading={loading} />
+        <details
+          id="infrastructure"
+          className="rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] p-4"
+          open={showInfrastructurePanel}
+          onToggle={(event) => setShowInfrastructurePanel(event.currentTarget.open)}
+        >
+          <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+            Infrastructure status
+          </summary>
+          <div className="mt-4">
+            <InfrastructureAdminPanel />
+          </div>
+        </details>
         <MonitoringCoreLoopEvidence coreLoop={coreLoop} />
         <MonitoringAlertThresholds metrics={metrics} />
       </div>

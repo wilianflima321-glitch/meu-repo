@@ -105,8 +105,9 @@ export const ADMIN_LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
   '/admin/bias-detection': '/admin/ai?legacy=monitor&source=bias-detection',
   '/admin/indexing': '/admin/ai?legacy=indexing',
   '/admin/automation': '/admin/ai?legacy=automation',
-  '/admin/backup': '/admin/infrastructure?legacy=backup',
-  '/admin/deploy': '/admin/infrastructure?legacy=deploy',
+  '/admin/infrastructure': '/admin/monitoring?legacy=infrastructure',
+  '/admin/backup': '/admin/monitoring?legacy=infrastructure&source=backup',
+  '/admin/deploy': '/admin/monitoring?legacy=infrastructure&source=deploy',
   '/admin/updates': '/admin/monitoring?legacy=updates',
   '/admin/chat': '/admin/collaboration?legacy=chat',
   '/admin/notifications': '/admin/feature-flags?legacy=notifications',
@@ -211,7 +212,7 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     evidenceStatus: 'live',
     primaryLinks: [
       { label: 'Monitoring', href: '/admin/monitoring' },
-      { label: 'Infrastructure', href: '/admin/infrastructure' },
+      { label: 'Infrastructure', href: '/admin/monitoring?legacy=infrastructure' },
       { label: 'APIs', href: '/admin/apis' },
     ],
     routes: [

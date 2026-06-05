@@ -11,7 +11,7 @@ import { InfrastructureResources } from './_components/InfrastructureResources'
 import { InfrastructureServiceGrid } from './_components/InfrastructureServiceGrid'
 import type { InfrastructureData, ServiceHealth } from './_components/infrastructure-types'
 
-export default function InfrastructureDashboard() {
+export function InfrastructureAdminPanel() {
   const [data, setData] = useState<InfrastructureData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -51,13 +51,13 @@ export default function InfrastructureDashboard() {
   if (error || !data) return <InfrastructureErrorState error={error} onRetry={fetchData} />
 
   return (
-    <div className="space-y-6">
+    <section className="space-y-6">
       <InfrastructureHeader status={overallStatus} autoRefresh={autoRefresh} lastUpdated={lastUpdated} onToggleAutoRefresh={() => setAutoRefresh((value) => !value)} />
       <InfrastructureOverviewMetrics data={data} />
       <InfrastructureServiceGrid services={data.services} />
       <InfrastructureResources resources={data.resources} />
       <InfrastructureDataStores data={data} />
       <InfrastructureQueues queues={data.queues} />
-    </div>
+    </section>
   )
 }
