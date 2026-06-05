@@ -82,6 +82,7 @@ export const ADMIN_LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
   '/admin/ip-registry': '/admin/security?legacy=ip-registry',
   '/admin/audit-logs': '/admin/security?legacy=audit-logs',
   '/admin/support': '/admin/users?legacy=support',
+  '/admin/roles': '/admin/users?legacy=roles',
   '/admin/emergency': '/admin/security?legacy=emergency',
   '/admin/payments': '/admin/finance?legacy=payments',
   '/admin/ai-enhancements': '/admin/ai?legacy=ai-enhancements',
@@ -130,7 +131,7 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     evidenceStatus: 'live',
     primaryLinks: [
       { label: 'Users', href: '/admin/users' },
-      { label: 'Roles', href: '/admin/roles' },
+      { label: 'Roles', href: '/admin/users?legacy=roles' },
       { label: 'Support', href: '/admin/users?legacy=support' },
     ],
     routes: [

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle, Clock, Users as UsersIcon } from 'lucide-react';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
+import { RolesAdminPanel } from '../roles/_components/RolesAdminPanel';
 
 type AdminUserApiRecord = {
   id: string;
@@ -36,6 +37,7 @@ export default function AdminUsers() {
   const [search, setSearch] = useState('');
   const [planFilter, setPlanFilter] = useState<'all' | 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise'>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [showRolesPanel, setShowRolesPanel] = useState(false);
 
   const planLabels: Record<string, string> = {
     starter: 'Inicial',
@@ -73,6 +75,11 @@ export default function AdminUsers() {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  useEffect(() => {
+    const legacy = new URLSearchParams(window.location.search).get('legacy');
+    if (legacy === 'roles') setShowRolesPanel(true);
+  }, []);
 
   const filteredUsers = users.filter((user) => {
     const term = search.trim().toLowerCase();
@@ -189,6 +196,20 @@ export default function AdminUsers() {
           )}
         </tbody>
       </table>
+
+      <details
+        id="roles"
+        className="mt-6 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] p-4"
+        open={showRolesPanel}
+        onToggle={(event) => setShowRolesPanel(event.currentTarget.open)}
+      >
+        <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+          Roles and permissions
+        </summary>
+        <div className="mt-4">
+          <RolesAdminPanel />
+        </div>
+      </details>
     </div>
   );
 }

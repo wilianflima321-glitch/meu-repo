@@ -124,7 +124,7 @@ export const V28_NAVIGATION_RATCHETS = {
   visibleDashboardTabs: 3,
   visibleAdminAreas: ADMIN_CONSOLIDATED_SECTIONS.length,
   visibleStudioGroups: 5,
-  maxAdminPhysicalRoutes: 17,
+  maxAdminPhysicalRoutes: 16,
   maxStudioPhysicalRoutes: 7,
   forbiddenPublicFirstFoldCopy: [
     'readiness',
