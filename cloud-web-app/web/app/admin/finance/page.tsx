@@ -9,6 +9,7 @@ import { FinanceAIMarginSections, FinanceCostMetrics, FinanceCriticalMetrics, Fi
 import { FinanceErrorState, FinanceLoadingState } from './_components/FinanceStates'
 import { FinanceTransactionsTable } from './_components/FinanceTransactionsTable'
 import type { FinanceDateRange, FinanceMetrics } from './_components/finance-types'
+import { MarketplaceAdminPanel } from '../marketplace/MarketplaceAdminPanel'
 import { PaymentsAdminPanel } from '../payments/_components/PaymentsAdminPanel'
 
 export default function FinanceDashboard() {
@@ -18,6 +19,7 @@ export default function FinanceDashboard() {
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [dateRange, setDateRange] = useState<FinanceDateRange>('today')
   const [showPaymentsPanel, setShowPaymentsPanel] = useState(false)
+  const [showMarketplacePanel, setShowMarketplacePanel] = useState(false)
 
   const fetchMetrics = useCallback(async () => {
     try {
@@ -44,6 +46,7 @@ export default function FinanceDashboard() {
   useEffect(() => {
     const legacy = new URLSearchParams(window.location.search).get('legacy')
     if (legacy === 'payments') setShowPaymentsPanel(true)
+    if (legacy === 'marketplace') setShowMarketplacePanel(true)
   }, [])
 
   if (loading) return <FinanceLoadingState />
@@ -70,6 +73,19 @@ export default function FinanceDashboard() {
         </summary>
         <div className="mt-4">
           <PaymentsAdminPanel />
+        </div>
+      </details>
+      <details
+        id="marketplace"
+        className="rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] p-4"
+        open={showMarketplacePanel}
+        onToggle={(event) => setShowMarketplacePanel(event.currentTarget.open)}
+      >
+        <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+          Marketplace operations
+        </summary>
+        <div className="mt-4">
+          <MarketplaceAdminPanel />
         </div>
       </details>
     </div>

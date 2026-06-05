@@ -85,6 +85,7 @@ export const ADMIN_LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
   '/admin/roles': '/admin/users?legacy=roles',
   '/admin/emergency': '/admin/security?legacy=emergency',
   '/admin/payments': '/admin/finance?legacy=payments',
+  '/admin/marketplace': '/admin/finance?legacy=marketplace',
   '/admin/ai-enhancements': '/admin/ai?legacy=ai-enhancements',
   '/admin/ai-upgrades': '/admin/ai?legacy=ai-upgrades',
   '/admin/arpu-churn': '/admin/finance?legacy=arpu-churn',
@@ -158,7 +159,7 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     primaryLinks: [
       { label: 'Finance', href: '/admin/finance', badge: 'MRR' },
       { label: 'Payments', href: '/admin/finance?legacy=payments' },
-      { label: 'Marketplace', href: '/admin/marketplace' },
+      { label: 'Marketplace', href: '/admin/finance?legacy=marketplace' },
     ],
     routes: [
       '/admin/finance',
