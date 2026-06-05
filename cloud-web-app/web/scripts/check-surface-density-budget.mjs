@@ -139,27 +139,6 @@ const CHECKS = [
     maxCards: 14,
   },
   {
-    id: 'studio-premium-primitive-surface',
-    file: 'components/studio/GamesAndFilmsModule.tsx',
-    extraFiles: ['components/studio/AdvancedSettingsPanel.tsx'],
-    required: [
-      '@/components/ui/Card',
-      '@/components/ui/Button',
-      '@/components/ui/Badge',
-      'fadeInUpMotion',
-    ],
-    forbidden: [
-      'GlassmorphismUI',
-      'GlassCard',
-      'GlassButton',
-      'GlassInput',
-      'AnimatedBadge',
-      'eliteAnimations',
-      'MÃ',
-      'Ã',
-    ],
-  },
-  {
     id: 'public-compare-compact-benchmark',
     file: 'app/compare/page.tsx',
     extraFiles: ['app/compare/CompareHero.tsx'],

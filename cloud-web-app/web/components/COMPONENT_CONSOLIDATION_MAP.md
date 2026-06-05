@@ -33,7 +33,7 @@ Source: docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md
 ## Admin Components - Needs Migration to Canonical
 | Component | Current Issue | Action |
 |---|---|---|
-| AdminDashboardPro | Uses legacy aethel-* classes | Migrate to canonical tokens |
+| AdminDashboardPro | Removed as unused legacy shell | Use `app/admin/page.tsx` + `AdminCommandCenterSections` |
 | AdminMetricCard | Inconsistent with Studio cards | Use canonical Card + spacing |
 | AdminPageHeader | Different layout than Studio | Align with StudioGlobalNav |
 | AdminSummaryGrid | Custom grid system | Use canonical gap/padding |

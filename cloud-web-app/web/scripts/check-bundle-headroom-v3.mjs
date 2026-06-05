@@ -7,10 +7,8 @@ const ROOT = process.cwd()
 const REQUIRED_FILES = [
   'components/assets/ContentBrowser.tsx',
   'components/assets/AssetPreviewPanel.tsx',
-  'components/dashboard/DashboardAIChatTab.tsx',
   'components/dashboard/DashboardProjectsTab.tsx',
   'components/providers/runtime/FullStudioRuntime.tsx',
-  'components/ai/AIThinkingPanel.tsx',
   'components/ai/DirectorNotePanel.tsx',
   'components/ai/AISuggestionBubble.tsx',
   'components/assets/ConnectedModelPreview.tsx',
@@ -35,7 +33,6 @@ const REQUIRED_FILES = [
 
 const EXPECTED_BOUNDARY_FILES = [
   'components/assets/AssetPreviewPanel.tsx',
-  'components/ai/AIThinkingPanel.tsx',
   'components/ai/DirectorNotePanel.tsx',
   'components/ai/AISuggestionBubble.tsx',
   'components/engine/LevelEditor.tsx',
@@ -81,11 +78,6 @@ requirePattern(
   'components/assets/ContentBrowser.tsx',
   /const\s+AssetPreviewPanel\s*=\s*dynamic\(\s*\(\)\s*=>\s*import\(['"]\.\/AssetPreviewPanel['"]\)/,
   'dynamic AssetPreviewPanel boundary',
-)
-requirePattern(
-  'components/dashboard/DashboardAIChatTab.tsx',
-  /const\s+AIThinkingPanel\s*=\s*dynamic\(\s*\(\)\s*=>\s*import\(['"]\.\.\/ai\/AIThinkingPanel['"]\)/,
-  'dynamic AIThinkingPanel boundary',
 )
 requirePattern(
   'components/dashboard/DashboardProjectsTab.tsx',

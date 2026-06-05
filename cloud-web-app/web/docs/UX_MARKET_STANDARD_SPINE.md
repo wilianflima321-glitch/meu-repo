@@ -260,7 +260,6 @@ Shared product primitives used by IDE, Studio, and admin must not leak Portugues
 | File | Count | Note |
 | --- | ---: | --- |
 | `components/ui/Select.tsx` | 0 | ok |
-| `components/workspace/WorkspaceSwitcher.tsx` | 0 | ok |
 | `components/terminal/TerminalWidget.tsx` | 0 | ok |
 | `components/viewport/SceneViewportInspector.tsx` | 0 | ok |
 | `components/visual-scripting/VisualScriptEditor.tsx` | 0 | ok |
@@ -286,16 +285,13 @@ Account, billing, settings, and onboarding surfaces must use a consistent Englis
 | `app/profile/profile-shell.tsx` | 0 | ok |
 | `app/profile/profile-tabs.tsx` | 0 | ok |
 | `components/SettingsEditor.tsx` | 0 | ok |
-| `components/settings/SettingsPathConfig.tsx` | 0 | ok |
 | `components/settings/UserAuditLogPanel.tsx` | 0 | ok |
 | `components/settings/TwoFactorSecurityPanel.tsx` | 0 | ok |
-| `components/billing/WalletStatusWidget.tsx` | 0 | ok |
 | `components/billing/PremiumLock.tsx` | 0 | ok |
 | `components/billing/LowBalanceModal.tsx` | 0 | ok |
 | `components/billing/CreditWallet.tsx` | 0 | ok |
 | `components/billing/BillingIntegration.tsx` | 0 | ok |
 | `components/onboarding/WelcomeWizard.tsx` | 0 | ok |
-| `components/onboarding/QuickStartWizard.tsx` | 0 | ok |
 | `components/onboarding/OnboardingWizard.tsx` | 0 | ok |
 
 ### public-docs-deep-routes
@@ -371,9 +367,6 @@ Dashboard and IDE cockpit surfaces must not mix Portuguese fallback copy into th
 | `components/dashboard/DashboardShell.tsx` | 0 | ok |
 | `components/dashboard/DashboardOverviewTab.tsx` | 0 | ok |
 | `components/dashboard/DashboardWorkspaceLaunch.tsx` | 0 | ok |
-| `components/dashboard/DashboardWalletTab.tsx` | 0 | ok |
-| `components/dashboard/DashboardContentCreationTab.tsx` | 0 | ok |
-| `components/dashboard/DashboardUnrealTab.tsx` | 0 | ok |
 | `components/dashboard/DashboardCopilotWorkflowBar.tsx` | 0 | ok |
 | `components/dashboard/DashboardRoutingNotice.tsx` | 0 | ok |
 | `components/dashboard/FirstValueGuide.tsx` | 0 | ok |

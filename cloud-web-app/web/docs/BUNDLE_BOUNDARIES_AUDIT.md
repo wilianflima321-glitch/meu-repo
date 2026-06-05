@@ -1,7 +1,7 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2489
+- Files scanned: 2462
 - Failures: 0
 
 ## Counts
@@ -11,7 +11,7 @@ Generated: deterministic local scan
 - monacoEditorDirect: 0 (max 0)
 - monacoReactDirect: 0 (max 0)
 - framerMotionDirect: 0 (max 0)
-- dynamicImportsMin: 277 (min 100)
+- dynamicImportsMin: 269 (min 100)
 
 ## Top Offenders
 ### threeDirect
@@ -123,7 +123,6 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - components/collaboration/CollaborationPanel.parts.tsx statically imports @/lib/ui/motion -> lib/ui/motion.tsx
 - components/marketplace/MarketplaceBrowser.tsx statically imports ./MarketplaceBrowser.parts -> components/marketplace/MarketplaceBrowser.parts.tsx
 - components/scene-editor/ScenePropertiesPanel.tsx statically imports ./scene-editor-models -> components/scene-editor/scene-editor-models.ts
-- components/studio/AdvancedSettingsPanel.dialogs.tsx statically imports @/lib/ui/motion -> lib/ui/motion.tsx
 - components/viewport/AethelViewport3D.tsx statically imports @/lib/hooks/useRenderPipeline -> lib/hooks/useRenderPipeline.ts
 - lib/aaa-asset-pipeline-runtime/singletons.ts statically imports ./importer -> lib/aaa-asset-pipeline-runtime/importer.ts
 - lib/aaa-asset-pipeline-runtime/singletons.ts statically imports ./optimizer -> lib/aaa-asset-pipeline-runtime/optimizer.ts

@@ -73,8 +73,6 @@ const FIRST_FOLD_SURFACES = [
   'components/viewport/ViewportTopToolbar.tsx',
   'components/viewport/SceneViewportInspector.tsx',
   'components/preview/SceneViewportWorkflowDrawer.tsx',
-  'components/dashboard/DashboardContentCreationTab.tsx',
-  'components/dashboard/DashboardUnrealTab.tsx',
   'components/media/MediaStudioPanels.tsx',
   'components/editors/VFXGraphEditor.tsx',
   'components/animation/AnimationBlueprintEditor.tsx',

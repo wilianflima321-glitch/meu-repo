@@ -9,7 +9,6 @@ export { ProjectsDashboard } from './ProjectsDashboard'
 // Tabs
 export { OverviewTab } from './tabs/OverviewTab'
 export { ProjectsTab, type Project } from './tabs/ProjectsTab'
-export { AIChatTab, type ChatMessage, type ChatThread } from './tabs/AIChatTab'
 
 // System Monitoring
 export {
