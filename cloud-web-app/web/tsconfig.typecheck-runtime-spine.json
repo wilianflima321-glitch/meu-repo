@@ -20,6 +20,7 @@
     "lib/runtime/**/*.ts",
     "types/**/*.d.ts",
     "lib/production/governed-runtime-jobs.ts",
+    "lib/production/runtime-execution-evidence-package.ts",
     "lib/production/asset-quality-job-runner.ts",
     "lib/production/studio-local-cook-queue.ts",
     "app/api/projects/[id]/production-state/governed-job/route.ts",
