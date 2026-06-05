@@ -38,6 +38,8 @@ describe('admin consolidation registry', () => {
     expect(getAdminRouteNavigationHref('/admin/god-view')).toBe('/admin/security?legacy=god-view')
     expect(routes).toContain('/admin/payments')
     expect(getAdminRouteNavigationHref('/admin/payments')).toBe('/admin/finance?legacy=payments')
+    expect(routes).toContain('/admin/ai-monitor')
+    expect(getAdminRouteNavigationHref('/admin/ai-monitor')).toBe('/admin/ai?legacy=monitor')
     expect(new Set(routes).size).toBe(routes.length)
   })
 

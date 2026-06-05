@@ -21,11 +21,11 @@ import {
 } from './ai-monitor-sections'
 import { useAiMonitorPageState } from './use-ai-monitor-page-state'
 
-export default function AgentMonitorPage() {
+export function AiMonitorAdminPanel() {
   const monitor = useAiMonitorPageState()
 
   return (
-    <div className="space-y-6 p-6">
+    <section className="space-y-6">
       <MonitorHeroSection
         headerDescription={monitor.headerDescription}
         headerTitle={monitor.headerTitle}
@@ -81,6 +81,6 @@ export default function AgentMonitorPage() {
       />
 
       <RecentCallsSection calls={monitor.calls} expandedId={monitor.expandedId} onToggleExpanded={monitor.handleToggleExpanded} />
-    </div>
+    </section>
   )
 }

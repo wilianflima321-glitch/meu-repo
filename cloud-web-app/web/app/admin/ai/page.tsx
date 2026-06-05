@@ -5,6 +5,7 @@ import { Activity, Cpu, Gauge } from 'lucide-react';
 
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
+import { AiMonitorAdminPanel } from '../ai-monitor/AiMonitorAdminPanel';
 
 interface AiSettings {
   model: string;
@@ -27,6 +28,7 @@ export default function AdminAI() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [showMonitorPanel, setShowMonitorPanel] = useState(false);
 
   const environmentLabels: Record<'staging' | 'production', string> = {
     staging: 'Homologa??o',
@@ -52,6 +54,11 @@ export default function AdminAI() {
   useEffect(() => {
     fetchSettings();
   }, [fetchSettings]);
+
+  useEffect(() => {
+    const legacy = new URLSearchParams(window.location.search).get('legacy');
+    if (legacy === 'monitor') setShowMonitorPanel(true);
+  }, []);
 
   const handleUpdate = async () => {
     try {
@@ -189,6 +196,20 @@ export default function AdminAI() {
           {saving ? 'Saving...' : 'Save changes'}
         </button>
       </div>
+
+      <details
+        id="monitor"
+        className="mt-6 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] p-4"
+        open={showMonitorPanel}
+        onToggle={(event) => setShowMonitorPanel(event.currentTarget.open)}
+      >
+        <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+          Live AI monitor
+        </summary>
+        <div className="mt-4">
+          <AiMonitorAdminPanel />
+        </div>
+      </details>
     </div>
   );
 }
