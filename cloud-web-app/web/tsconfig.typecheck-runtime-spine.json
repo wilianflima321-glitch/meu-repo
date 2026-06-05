@@ -29,6 +29,7 @@
     "lib/production/studio-local-cook-dispatch.ts",
     "app/api/projects/[id]/production-state/studio-local-cook-dispatch/route.ts",
     "app/api/projects/[id]/production-state/runtime-execution-evidence-package/route.ts",
+    "app/api/projects/[id]/production-state/runtime-job-receipts/route.ts",
     "app/api/runtime/toolchain-readiness/route.ts",
     "app/api/runtime/best-market-internal-spine/route.ts"
   ],

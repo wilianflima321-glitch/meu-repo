@@ -56,7 +56,11 @@ requirePattern('__tests__/api/production-state-studio-local-cook-dispatch-route.
 requirePattern('__tests__/api/production-state-render-output-evidence-route.test.ts', /receiptState\.summary\.totalReceipts/, 'render evidence receipts regression')
 
 requirePattern('package.json', /"qa:runtime-job-receipts"/, 'package script')
-requirePattern('package.json', /qa:governed-runtime-jobs && npm run qa:runtime-job-receipts && npm run qa:asset-quality-job-runner/, 'enterprise gate ordering')
+requirePattern(
+  'package.json',
+  /qa:governed-runtime-jobs && npm run qa:runtime-job-receipts && npm run qa:runtime-execution-evidence-package && npm run qa:asset-quality-job-runner/,
+  'enterprise gate ordering',
+)
 requirePattern('scripts/check-backbone-market-readiness.mjs', /runtime-job-receipts\.ts/, 'backbone readiness coverage')
 requirePattern('scripts/check-backbone-market-readiness.mjs', /qa:runtime-job-receipts/, 'backbone QA coverage')
 

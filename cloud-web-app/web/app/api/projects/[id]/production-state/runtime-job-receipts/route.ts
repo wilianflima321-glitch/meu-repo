@@ -22,6 +22,10 @@ import {
   type RuntimeJobReceiptInput,
 } from '@/lib/production/runtime-job-receipts'
 import { coerceGovernedRuntimeJob } from '@/lib/production/governed-runtime-jobs'
+import {
+  buildRuntimeExecutionEvidencePackage,
+  verifyRuntimeExecutionEvidencePackage,
+} from '@/lib/production/runtime-execution-evidence-package'
 
 const logger = createComponentLogger('api.projects.production-state.runtime-job-receipts')
 
@@ -135,6 +139,17 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     const settings = writeRuntimeJobReceiptStateToSettings(settingsWithState, receiptState)
     const readiness = buildProductionReadinessSummary(productionState)
     const coverage = job ? evaluateRuntimeJobReceiptCoverage({ job, receiptState }) : null
+    const evidencePackage = job
+      ? buildRuntimeExecutionEvidencePackage({
+          projectId: project.id,
+          projectName: project.name,
+          state: productionState,
+          job,
+          receiptState,
+          generatedBy: user.email,
+        })
+      : null
+    const evidencePackageVerification = evidencePackage ? verifyRuntimeExecutionEvidencePackage(evidencePackage) : null
 
     await prisma.project.update({
       where: { id: project.id },
@@ -147,6 +162,8 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       receiptCount: receiptState.summary.totalReceipts,
       jobCount: receiptState.summary.jobCount,
       failedReceipts: receiptState.summary.failedReceipts,
+      evidencePackageStatus: evidencePackage?.status,
+      evidencePackageValid: evidencePackageVerification?.valid,
     })
 
     return NextResponse.json({
@@ -154,6 +171,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       productionState,
       readiness,
       coverage,
+      evidencePackage,
+      evidencePackageVerification,
+      runtimeExecutionEvidencePackageGenerated: Boolean(evidencePackage),
       persisted: true,
       settingsKey: RUNTIME_JOB_RECEIPTS_SETTINGS_KEY,
       releaseReady: false,

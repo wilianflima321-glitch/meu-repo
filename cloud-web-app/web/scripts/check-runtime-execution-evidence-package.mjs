@@ -27,6 +27,7 @@ function requirePattern(relativePath, pattern, reason) {
 
 const packageFile = 'lib/production/runtime-execution-evidence-package.ts'
 const routeFile = 'app/api/projects/[id]/production-state/runtime-execution-evidence-package/route.ts'
+const receiptsRouteFile = 'app/api/projects/[id]/production-state/runtime-job-receipts/route.ts'
 const packageJson = JSON.parse(read('package.json'))
 
 requireToken(packageFile, 'AETHEL_RUNTIME_EXECUTION_EVIDENCE_PACKAGE', 'capability marker')
@@ -52,6 +53,11 @@ requireToken(routeFile, 'verifyRuntimeExecutionEvidencePackage', 'route evidence
 requireToken(routeFile, 'manualPublishRequired: true', 'route manual publish hold')
 requireToken(routeFile, 'x-aethel-release-ready', 'route release-ready header')
 requireToken(routeFile, 'Runtime execution evidence was packaged for review.', 'route human review note')
+requireToken(receiptsRouteFile, 'buildRuntimeExecutionEvidencePackage', 'receipts route evidence package builder')
+requireToken(receiptsRouteFile, 'verifyRuntimeExecutionEvidencePackage', 'receipts route evidence package verifier')
+requireToken(receiptsRouteFile, 'runtimeExecutionEvidencePackageGenerated', 'receipts route generated flag')
+requireToken(receiptsRouteFile, 'evidencePackageVerification', 'receipts route verification payload')
+requireToken(receiptsRouteFile, 'releaseReady: false', 'receipts route release hold')
 
 const requiredEvidenceTokens = [
   'runtime-job:',
