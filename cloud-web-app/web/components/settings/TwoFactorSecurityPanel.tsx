@@ -43,7 +43,7 @@ function formatDateTime(value?: string | null): string {
   if (!value) return 'Not validated yet'
 
   try {
-    return new Intl.DateTimeFormat('pt-BR', {
+    return new Intl.DateTimeFormat('en-US', {
       dateStyle: 'medium',
       timeStyle: 'short',
     }).format(new Date(value))
@@ -53,7 +53,7 @@ function formatDateTime(value?: string | null): string {
 }
 
 export default function TwoFactorSecurityPanel({
-  title = 'Autenticacao de dois fatores',
+  title = 'Two-factor authentication',
   description = 'Strengthen the account with an authenticator, recovery codes, and a clear revalidation flow.',
   variant = 'settings',
   onStatusChange,
@@ -290,7 +290,7 @@ export default function TwoFactorSecurityPanel({
               type="button"
               onClick={() => void loadStatus()}
               disabled={loading || actionLoading}
-              aria-label="Refresh status de autenticacao de dois fatores"
+              aria-label="Refresh two-factor authentication status"
               className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-tertiary)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -325,11 +325,11 @@ export default function TwoFactorSecurityPanel({
                     setPassword('')
                   }}
                   disabled={actionLoading}
-                  aria-label="Desactiver autenticacao de dois fatores"
+                  aria-label="Disable two-factor authentication"
                   className="inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-sm text-[var(--aethel-error-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <ShieldOff className="h-4 w-4" />
-                  Desactiver
+                  Disable
                 </button>
               </>
             ) : (
@@ -363,14 +363,14 @@ export default function TwoFactorSecurityPanel({
 
         <div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-3">
           <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Postura atual</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Current posture</p>
             <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">
               {status?.twoFactorEnabled ? 'Account reinforced with an authenticator' : 'Account protected by password only'}
             </p>
             <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
               {status?.twoFactorEnabled
-                ? `Ultima validacao registrada em ${formatDateTime(status.verifiedAt)}.`
-                : 'Ative o 2FA para reduzir risco de takeover e facilitar exigencias enterprise.'}
+                ? `Last validation recorded at ${formatDateTime(status.verifiedAt)}.`
+                : 'Enable 2FA to reduce takeover risk and satisfy enterprise security requirements.'}
             </p>
           </div>
 
@@ -402,15 +402,15 @@ export default function TwoFactorSecurityPanel({
         <div className="mt-4 flex flex-wrap gap-3 text-xs text-[var(--aethel-text-tertiary)]">
           <span className="inline-flex items-center gap-1">
             <CheckCircle2 className="h-3.5 w-3.5 text-[var(--aethel-success)]" />
-            QR code e setup manual
+            QR code and manual setup
           </span>
           <span className="inline-flex items-center gap-1">
             <CheckCircle2 className="h-3.5 w-3.5 text-[var(--aethel-success)]" />
-            Backup codes regeneraveis
+            Regenerable backup codes
           </span>
           <span className="inline-flex items-center gap-1">
             <CheckCircle2 className="h-3.5 w-3.5 text-[var(--aethel-success)]" />
-            Passkeys em rollout tecnico
+            Passkeys in technical rollout
           </span>
         </div>
 
@@ -442,7 +442,7 @@ export default function TwoFactorSecurityPanel({
                   {modal === 'setup'
                     ? 'Enable two-factor authentication'
                     : modal === 'disable'
-                      ? 'Desactiver autenticacao de dois fatores'
+                      ? 'Disable two-factor authentication'
                       : 'Generate new backup codes'}
                 </h4>
               </div>
@@ -472,7 +472,7 @@ export default function TwoFactorSecurityPanel({
                     <div className="mx-auto rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-contrast)] p-3">
                       <Image
                         src={setup.qrCode}
-                        alt="QR code para activer autenticacao de dois fatores"
+                        alt="QR code for enabling two-factor authentication"
                         width={160}
                         height={160}
                         unoptimized
@@ -485,7 +485,7 @@ export default function TwoFactorSecurityPanel({
                       </p>
                       {setup.secret && (
                         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-3">
-                          <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Setup manual</p>
+                          <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Manual setup</p>
                           <code className="mt-2 block break-all text-sm text-[var(--aethel-text-primary)]">{setup.secret}</code>
                         </div>
                       )}
@@ -524,7 +524,7 @@ export default function TwoFactorSecurityPanel({
                         className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-tertiary)]"
                       >
                         <Copy className="h-3.5 w-3.5" />
-                        {copied ? 'Copiado' : 'Copiar'}
+                        {copied ? 'Copied' : 'Copy'}
                       </button>
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-2">
@@ -565,7 +565,7 @@ export default function TwoFactorSecurityPanel({
 
                 <div>
                   <label htmlFor="two-factor-disable-password" className="text-sm font-medium text-[var(--aethel-text-primary)]">
-                    Senha da conta
+                    Account password
                   </label>
                   <input
                     id="two-factor-disable-password"
@@ -604,7 +604,7 @@ export default function TwoFactorSecurityPanel({
                   <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-medium text-[var(--aethel-text-primary)]">New codes emitidos</p>
+                        <p className="text-sm font-medium text-[var(--aethel-text-primary)]">New codes issued</p>
                         <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
                           Old codes stop working as soon as this batch is confirmed.
                         </p>
@@ -616,7 +616,7 @@ export default function TwoFactorSecurityPanel({
                         className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-tertiary)]"
                       >
                         <Copy className="h-3.5 w-3.5" />
-                        {copied ? 'Copiado' : 'Copiar'}
+                        {copied ? 'Copied' : 'Copy'}
                       </button>
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-2">
@@ -648,10 +648,10 @@ export default function TwoFactorSecurityPanel({
                   type="button"
                   onClick={() => void confirmSetup()}
                   disabled={actionLoading || authCode.trim().length < 6}
-                  aria-label="Confirm activecao da autenticacao de dois fatores"
+                  aria-label="Confirm two-factor authentication setup"
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-4 py-2 text-sm text-[var(--aethel-success-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {actionLoading ? 'Confirmando...' : 'Confirm activecao'}
+                  {actionLoading ? 'Confirming...' : 'Confirm setup'}
                 </button>
               )}
 
@@ -660,10 +660,10 @@ export default function TwoFactorSecurityPanel({
                   type="button"
                   onClick={() => void confirmDisable()}
                   disabled={actionLoading || authCode.trim().length < 6 || password.trim().length === 0}
-                  aria-label="Confirm desactivecao da autenticacao de dois fatores"
+                  aria-label="Confirm two-factor authentication disablement"
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-2 text-sm text-[var(--aethel-error-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {actionLoading ? 'Desactivendo...' : 'Desactiver 2FA'}
+                  {actionLoading ? 'Disabling...' : 'Disable 2FA'}
                 </button>
               )}
 
