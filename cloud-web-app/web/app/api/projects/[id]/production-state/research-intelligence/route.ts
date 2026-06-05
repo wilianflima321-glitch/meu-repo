@@ -21,6 +21,10 @@ import {
   writeResearchIntelligencePacketToSettings,
   type ResearchEvidenceInput,
 } from '@/lib/production/research-intelligence-bridge'
+import {
+  buildResearchEvidencePackage,
+  verifyResearchEvidencePackage,
+} from '@/lib/research/research-evidence-package'
 
 const logger = createComponentLogger('api.projects.production-state.research-intelligence')
 
@@ -36,6 +40,10 @@ type RouteContext = {
 type ResearchIntelligenceBody = {
   mission?: string
   evidence: ResearchEvidenceInput[]
+  artifactRefs?: string[]
+  costEstimateUsd?: number | null
+  finalAnswerReady?: boolean
+  humanReviewed?: boolean
 }
 
 async function loadProjectForResearchIntelligence(projectId: string, userId: string) {
@@ -121,6 +129,12 @@ async function readBody(request: NextRequest): Promise<ResearchIntelligenceBody>
     return {
       mission: typeof body.mission === 'string' ? body.mission : undefined,
       evidence,
+      artifactRefs: Array.isArray(body.artifactRefs)
+        ? body.artifactRefs.filter((item): item is string => typeof item === 'string')
+        : undefined,
+      costEstimateUsd: typeof body.costEstimateUsd === 'number' ? body.costEstimateUsd : undefined,
+      finalAnswerReady: typeof body.finalAnswerReady === 'boolean' ? body.finalAnswerReady : undefined,
+      humanReviewed: typeof body.humanReviewed === 'boolean' ? body.humanReviewed : undefined,
     }
   } catch {
     return { evidence: [] }
@@ -175,6 +189,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       evidence: body.evidence,
       repositoryManifest: manifest,
     })
+    const evidencePackage = buildResearchEvidencePackage({
+      packet,
+      artifactRefs: body.artifactRefs,
+      costEstimateUsd: body.costEstimateUsd,
+      finalAnswerReady: body.finalAnswerReady,
+      humanReviewed: body.humanReviewed,
+      generatedBy: user.email,
+    })
+    const evidencePackageVerification = verifyResearchEvidencePackage(evidencePackage)
     const state = mergeResearchIntelligenceIntoProductionState(currentState, packet)
     const settingsWithState = writeAgenticProductionStateToSettings(project.settings, state)
     const settings = writeResearchIntelligencePacketToSettings(settingsWithState, packet)
@@ -191,10 +214,17 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       claims: packet.claims.length,
       risks: packet.risks.length,
       repositoryManifestId: manifest?.id ?? null,
+      evidencePackageStatus: evidencePackage.status,
+      evidencePackageValid: evidencePackageVerification.valid,
     })
 
     return NextResponse.json({
       packet,
+      evidencePackage,
+      evidencePackageVerification,
+      researchEvidencePackageGenerated: true,
+      researchVerified: false,
+      finalAnswerReleaseReady: false,
       state,
       readiness: buildProductionReadinessSummary(state),
       repositoryManifestId: manifest?.id ?? null,
