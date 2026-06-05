@@ -12,6 +12,11 @@ import {
   readAgenticProductionStateFromSettings,
   writeAgenticProductionStateToSettings,
 } from '@/lib/production/agentic-production-state'
+import { readAgentReadReceiptStateFromSettings } from '@/lib/production/agent-read-receipts'
+import {
+  buildAgentExecutionEvidencePackage,
+  verifyAgentExecutionEvidencePackage,
+} from '@/lib/agents/agent-execution-evidence-package'
 import {
   AGENT_RUN_LEDGER_SETTINGS_KEY,
   buildAgentRunLedger,
@@ -114,7 +119,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     const currentState =
       readAgenticProductionStateFromSettings(project.settings) ??
       buildDefaultAgenticProductionState({ projectName: project.name, projectType: project.template })
+    const readReceiptState = readAgentReadReceiptStateFromSettings(project.settings)
     const productionState = mergeAgentRunLedgerIntoProductionState(currentState, runLedger)
+    const evidencePackage = buildAgentExecutionEvidencePackage({
+      projectId: project.id,
+      ledger: runLedger,
+      readReceiptState,
+      generatedBy: user.email,
+    })
+    const evidencePackageVerification = verifyAgentExecutionEvidencePackage(evidencePackage)
     const settingsWithState = writeAgenticProductionStateToSettings(project.settings, productionState)
     const settings = writeAgentRunLedgerToSettings(settingsWithState, runLedger)
 
@@ -129,10 +142,17 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       totalRuns: runLedger.summary.totalRuns,
       blockedRuns: runLedger.summary.blockedRuns,
       runsReadyForHumanReview: runLedger.summary.runsReadyForHumanReview,
+      evidencePackageStatus: evidencePackage.status,
+      evidencePackageValid: evidencePackageVerification.valid,
     })
 
     return NextResponse.json({
       runLedger,
+      evidencePackage,
+      evidencePackageVerification,
+      agentExecutionEvidencePackageGenerated: true,
+      autonomousExecutionReady: false,
+      releaseReady: false,
       productionState,
       readiness: buildProductionReadinessSummary(productionState),
       persisted: true,

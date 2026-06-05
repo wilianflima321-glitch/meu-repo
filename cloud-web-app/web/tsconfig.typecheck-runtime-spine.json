@@ -18,6 +18,7 @@
     "lib/studio/**/*.ts",
     "lib/studio-local/**/*.ts",
     "lib/runtime/**/*.ts",
+    "lib/agents/agent-execution-evidence-package.ts",
     "lib/research/research-evidence-package.ts",
     "types/**/*.d.ts",
     "lib/production/governed-runtime-jobs.ts",
@@ -32,6 +33,7 @@
     "app/api/projects/[id]/production-state/runtime-execution-evidence-package/route.ts",
     "app/api/projects/[id]/production-state/runtime-job-receipts/route.ts",
     "app/api/projects/[id]/production-state/research-intelligence/route.ts",
+    "app/api/projects/[id]/production-state/agent-run-ledger/route.ts",
     "app/api/runtime/toolchain-readiness/route.ts",
     "app/api/runtime/best-market-internal-spine/route.ts"
   ],
