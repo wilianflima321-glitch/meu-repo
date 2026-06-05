@@ -5,6 +5,7 @@ import { Activity, Cpu, Gauge } from 'lucide-react';
 
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
+import { AiTrainingAdminPanel } from '../ai-training/AiTrainingAdminPanel';
 import { AiMonitorAdminPanel } from '../ai-monitor/AiMonitorAdminPanel';
 
 interface AiSettings {
@@ -29,6 +30,7 @@ export default function AdminAI() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [showMonitorPanel, setShowMonitorPanel] = useState(false);
+  const [showTrainingPanel, setShowTrainingPanel] = useState(false);
 
   const environmentLabels: Record<'staging' | 'production', string> = {
     staging: 'Homologa??o',
@@ -58,6 +60,7 @@ export default function AdminAI() {
   useEffect(() => {
     const legacy = new URLSearchParams(window.location.search).get('legacy');
     if (legacy === 'monitor') setShowMonitorPanel(true);
+    if (legacy === 'training') setShowTrainingPanel(true);
   }, []);
 
   const handleUpdate = async () => {
@@ -208,6 +211,20 @@ export default function AdminAI() {
         </summary>
         <div className="mt-4">
           <AiMonitorAdminPanel />
+        </div>
+      </details>
+
+      <details
+        id="training"
+        className="mt-6 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] p-4"
+        open={showTrainingPanel}
+        onToggle={(event) => setShowTrainingPanel(event.currentTarget.open)}
+      >
+        <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+          Training jobs
+        </summary>
+        <div className="mt-4">
+          <AiTrainingAdminPanel />
         </div>
       </details>
     </div>

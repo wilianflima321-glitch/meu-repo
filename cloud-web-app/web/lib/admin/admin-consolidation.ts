@@ -99,7 +99,8 @@ export const ADMIN_LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
   '/admin/analytics': '/admin/finance?legacy=analytics',
   '/admin/subscriptions': '/admin/finance?legacy=subscriptions',
   '/admin/promotions': '/admin/finance?legacy=promotions',
-  '/admin/fine-tuning': '/admin/ai-training?legacy=fine-tuning',
+  '/admin/ai-training': '/admin/ai?legacy=training',
+  '/admin/fine-tuning': '/admin/ai?legacy=training&source=fine-tuning',
   '/admin/ai-monitor': '/admin/ai?legacy=monitor',
   '/admin/bias-detection': '/admin/ai?legacy=monitor&source=bias-detection',
   '/admin/indexing': '/admin/ai?legacy=indexing',
@@ -183,7 +184,7 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
       { label: 'AI overview', href: '/admin/ai' },
       { label: 'Agents', href: '/admin/ai-agents' },
       { label: 'Monitor', href: '/admin/ai?legacy=monitor', badge: 'Live' },
-      { label: 'Training', href: '/admin/ai-training' },
+      { label: 'Training', href: '/admin/ai?legacy=training' },
     ],
     routes: [
       '/admin/ai',

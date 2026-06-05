@@ -11,8 +11,8 @@ const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.mjs'])
 const SKIP_DIRS = new Set(['node_modules', '.next', 'dist', 'build', 'coverage', 'out', '.git'])
 
 const BUDGETS = {
-  physicalPages: 69,
-  adminChildPages: 15,
+  physicalPages: 68,
+  adminChildPages: 14,
   studioChildPages: 7,
   sourceFilesAtOrAbove750Lines: 0,
   directHeavyImportsInComponents: 0,
@@ -21,8 +21,8 @@ const BUDGETS = {
 }
 
 const NEXT_TARGETS = {
-  physicalPages: 68,
-  adminChildPages: 15,
+  physicalPages: 67,
+  adminChildPages: 14,
   studioChildPages: 5,
   sourceFilesAtOrAbove750Lines: 0,
   directHeavyImportsInComponents: 0,
