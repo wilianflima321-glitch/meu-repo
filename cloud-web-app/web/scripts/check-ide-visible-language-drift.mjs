@@ -67,7 +67,6 @@ const FILES = [
   'components/nexus/AethelResearch.tsx',
   'components/nexus/NexusChatMultimodal.tsx',
   'components/nexus/NexusCanvasV2.tsx',
-  'components/nexus/MultiAgentOrchestrator.tsx',
   'components/ai/DirectorNotePanel.tsx',
   'components/engine/ProjectSettings.tsx',
   'components/engine/LevelEditor.tsx',

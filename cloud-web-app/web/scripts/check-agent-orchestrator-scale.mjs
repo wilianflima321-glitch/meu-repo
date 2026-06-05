@@ -45,8 +45,8 @@ requirePattern('lib/agent-orchestrator.ts', /buildRoleScope\(agent: AgentType\)/
 requirePattern('lib/agent-orchestrator.ts', /executionOrder: SUPPORTED_AGENT_TYPES/, 'coordination policy must schedule the full fleet')
 requirePattern('app/api/agents/stream/route.ts', /SUPPORTED_AGENT_TYPES\.length/, 'stream route must size concurrency from supported roles')
 requirePattern('app/api/agents/stream/route.ts', /buildRoleScope\(agent\)/, 'stream route must expose scope receipts')
-requirePattern('components/nexus/MultiAgentOrchestrator.tsx', /SUPPORTED_AGENT_TYPES/, 'Nexus orchestrator UI must surface the canonical fleet')
-requirePattern('components/nexus/MultiAgentOrchestrator.tsx', /Full fleet/, 'Nexus orchestrator UI must expose a full-fleet preset')
+requirePattern('components/agents/AgentsWindow.tsx', /AgentFleetCoordinatorStrip/, 'IDE AgentsWindow must surface the canonical fleet coordinator')
+requirePattern('components/agents/AgentsWindow.tsx', /production-state\/agent-fleet/, 'IDE AgentsWindow must expose governed fleet receipts')
 requirePattern('__tests__/production/agent-orchestrator-scale.test.ts', /wide specialist fleet/, 'wide fleet contract test must exist')
 
 if (failures.length > 0) {

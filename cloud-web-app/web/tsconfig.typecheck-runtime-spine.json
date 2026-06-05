@@ -12,8 +12,6 @@
     "components/admin/**/*.tsx",
     "components/agents/**/*.tsx",
     "components/VRPreview.tsx",
-    "components/marketplace/AssetDetailPanel.tsx",
-    "components/marketplace/AssetModelPreview.tsx",
     "components/studio/**/*.tsx",
     "components/viewport/**/*.tsx",
     "lib/admin/**/*.ts",
