@@ -26,6 +26,7 @@ function requirePattern(relativePath, pattern, reason) {
 }
 
 const packageFile = 'lib/production/runtime-execution-evidence-package.ts'
+const routeFile = 'app/api/projects/[id]/production-state/runtime-execution-evidence-package/route.ts'
 const packageJson = JSON.parse(read('package.json'))
 
 requireToken(packageFile, 'AETHEL_RUNTIME_EXECUTION_EVIDENCE_PACKAGE', 'capability marker')
@@ -41,6 +42,16 @@ requireToken(packageFile, 'manualPublishRequired: true', 'manual publish require
 requireToken(packageFile, 'Runtime execution package cannot set releaseReady=true.', 'releaseReady verifier guard')
 requireToken(packageFile, 'Runtime execution package must require manual publish.', 'manual publish verifier guard')
 requireToken(packageFile, 'Runtime execution package must require human approval.', 'human approval verifier guard')
+requireToken(routeFile, 'RUNTIME_EXECUTION_EVIDENCE_PACKAGE_CAPABILITY', 'route capability marker')
+requireToken(routeFile, 'requireAuth', 'route auth guard')
+requireToken(routeFile, 'requireEntitlementsForUser', 'route entitlement guard')
+requireToken(routeFile, 'coerceGovernedRuntimeJob', 'route governed job coercion')
+requireToken(routeFile, 'readRuntimeJobReceiptStateFromSettings', 'route receipt state read')
+requireToken(routeFile, 'buildRuntimeExecutionEvidencePackage', 'route evidence package builder')
+requireToken(routeFile, 'verifyRuntimeExecutionEvidencePackage', 'route evidence package verifier')
+requireToken(routeFile, 'manualPublishRequired: true', 'route manual publish hold')
+requireToken(routeFile, 'x-aethel-release-ready', 'route release-ready header')
+requireToken(routeFile, 'Runtime execution evidence was packaged for review.', 'route human review note')
 
 const requiredEvidenceTokens = [
   'runtime-job:',
@@ -74,6 +85,7 @@ fs.writeFileSync(
 - Capability: AETHEL_RUNTIME_EXECUTION_EVIDENCE_PACKAGE
 - Runtime receipt coverage: required
 - Release manifest verification: required
+- API route: required
 - Human approval: required
 - Manual publish: required
 - Failures: ${failures.length}
