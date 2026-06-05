@@ -108,7 +108,7 @@ export function AdminOperatingSpine({ coverage }: { coverage: AdminCoverageSumma
           Emergency, audit, and security stay visible when speed matters.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link href="/admin/emergency" className="rounded-full border border-[var(--aethel-error)]/35 bg-[var(--aethel-error)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--aethel-error-light)]">Emergency</Link>
+          <Link href="/admin/security?legacy=emergency" className="rounded-full border border-[var(--aethel-error)]/35 bg-[var(--aethel-error)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--aethel-error-light)]">Emergency</Link>
           <Link href="/admin/security?legacy=audit-logs" className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)]">Audit logs</Link>
           <Link href="/admin/security" className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)]">Security</Link>
         </div>

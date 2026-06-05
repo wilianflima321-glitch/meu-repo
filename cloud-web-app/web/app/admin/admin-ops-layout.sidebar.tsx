@@ -263,7 +263,7 @@ export function AdminOpsSidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
 
         <div className="shrink-0 border-t border-[var(--aethel-border-subtle)] p-3">
           <Link
-            href="/admin/emergency"
+            href="/admin/security?legacy=emergency"
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-error)]/40 bg-[var(--aethel-error)]/15 px-3 py-2 text-xs font-semibold text-[var(--aethel-error-light)] transition-colors hover:bg-[var(--aethel-error)]/25"
           >
             <AlertTriangle className="h-3.5 w-3.5" />

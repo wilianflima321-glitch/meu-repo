@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { AlertTriangle, ShieldAlert, StopCircle } from 'lucide-react'
+
 import { API_BASE } from '@/lib/api'
 import { getToken } from '@/lib/auth'
 
@@ -29,7 +30,7 @@ const fetcher = async (url: string) => {
   return payload
 }
 
-export default function AdminEmergencyPage() {
+export function EmergencyModePanel() {
   const [level, setLevel] = useState<EmergencyLevel>('warning')
   const [reason, setReason] = useState('')
   const [pending, setPending] = useState<'activate' | 'deactivate' | null>(null)
@@ -43,15 +44,15 @@ export default function AdminEmergencyPage() {
   const isActive = Boolean(state?.enabled)
 
   const levelTone = useMemo(() => {
-    if (!state?.level || state.level === 'normal') return 'text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] border-[var(--aethel-border-secondary)]'
-    if (state.level === 'warning') return 'text-[var(--aethel-warning)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
-    if (state.level === 'critical') return 'text-[var(--aethel-warning-light)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
-    return 'text-[var(--aethel-error-light)] bg-[var(--aethel-error)]/10 border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'
+    if (!state?.level || state.level === 'normal') return 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] text-[var(--aethel-text-secondary)]'
+    if (state.level === 'warning') return 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning)]'
+    if (state.level === 'critical') return 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning-light)]'
+    return 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/10 text-[var(--aethel-error-light)]'
   }, [state?.level])
 
   async function activateEmergency() {
     if (!reason.trim()) {
-      setError('Informe um motivo operacional antes de ativar.')
+      setError('Add an operational reason before activating contingency mode.')
       return
     }
 
@@ -102,28 +103,30 @@ export default function AdminEmergencyPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl p-6">
-      <header className="mb-6 flex items-start justify-between gap-4">
+    <section className="mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_22%,var(--aethel-border-primary))] bg-[color-mix(in_srgb,var(--aethel-error)_6%,var(--aethel-surface-secondary))] p-4 shadow">
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)]">Controle de emergencia</h1>
-          <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">
-            Opera o modo de contingencia para cargas criticas sem estado fake.
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--aethel-error-light)]">Contingency</p>
+          <h2 className="mt-1 text-lg font-semibold text-[var(--aethel-text-primary)]">Emergency controls</h2>
+          <p className="mt-1 max-w-2xl text-sm text-[var(--aethel-text-secondary)]">
+            Use only for cost spikes, unsafe agent behavior, or production containment.
           </p>
         </div>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => mutate()}
-          className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
+          className="w-fit rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
         >
-          Recarregar
+          Refresh
         </button>
-      </header>
+      </div>
 
-      <section className="mb-6 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+      <div className="mb-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_56%,transparent)] p-3">
         {isLoading ? (
           <p className="text-sm text-[var(--aethel-text-tertiary)]">Loading emergency state...</p>
         ) : state ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className={`inline-flex items-center rounded-full border px-2 py-1 text-xs font-medium ${levelTone}`}>
                 {state.level.toUpperCase()}
               </span>
@@ -132,78 +135,81 @@ export default function AdminEmergencyPage() {
               </span>
             </div>
             <p className="text-sm text-[var(--aethel-text-secondary)]">
-              {state.reason ? state.reason : 'Sem motivo registrado no momento.'}
+              {state.reason ? state.reason : 'No reason registered.'}
             </p>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
               {state.activatedAt
-                ? `Last activation: ${new Date(state.activatedAt).toLocaleString()} por ${state.activatedBy ? 'system' : 'unknown'}`
+                ? `Last activation: ${new Date(state.activatedAt).toLocaleString()} by ${state.activatedBy || 'unknown'}`
                 : 'No recent activation.'}
             </p>
           </div>
         ) : (
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhum estado retornado pela API.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">No emergency state returned by the API.</p>
         )}
-      </section>
+      </div>
 
-      <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
-          <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-[var(--aethel-text-primary)]">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_48%,transparent)] p-3">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--aethel-text-primary)]">
             <ShieldAlert className="h-4 w-4 text-[var(--aethel-warning)]" />
-            Activate Contingency
-          </h2>
+            Activate contingency
+          </h3>
           <label className="mb-2 block text-xs uppercase tracking-[0.08em] text-[var(--aethel-text-tertiary)]">Level</label>
           <select
             value={level}
             onChange={(event) => setLevel(event.target.value as EmergencyLevel)}
-            className="mb-4 w-full rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
+            className="mb-3 w-full rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
           >
-            <option value="warning">Aviso</option>
-            <option value="critical">Critico</option>
-            <option value="shutdown">Desligamento</option>
+            <option value="warning">Warning</option>
+            <option value="critical">Critical</option>
+            <option value="shutdown">Shutdown</option>
           </select>
 
-          <label className="mb-2 block text-xs uppercase tracking-[0.08em] text-[var(--aethel-text-tertiary)]">Motivo</label>
+          <label className="mb-2 block text-xs uppercase tracking-[0.08em] text-[var(--aethel-text-tertiary)]">Reason</label>
           <textarea
             value={reason}
             onChange={(event) => setReason(event.target.value)}
-            rows={4}
-            className="mb-4 w-full rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
-            placeholder="Ex: AI cost spike outside budget, temporary mitigation enabled."
+            rows={3}
+            className="mb-3 w-full rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
+            placeholder="Example: AI cost spike outside budget, temporary mitigation enabled."
           />
 
-          <button type="button"
+          <button
+            type="button"
             onClick={activateEmergency}
             disabled={pending !== null}
             className="inline-flex items-center gap-2 rounded bg-[var(--aethel-warning-dark)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-warning)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <AlertTriangle className="h-4 w-4" />
-            {pending === 'activate' ? 'Ativando...' : 'Ativar emergencia'}
+            {pending === 'activate' ? 'Activating...' : 'Activate'}
           </button>
         </div>
 
-        <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
-          <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-[var(--aethel-text-primary)]">
+        <div className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_48%,transparent)] p-3">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--aethel-text-primary)]">
             <StopCircle className="h-4 w-4 text-[var(--aethel-error)]" />
-            Normalize Operation
-          </h2>
+            Normalize operation
+          </h3>
           <p className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
-            Deactivates contingency mode and restores normal execution policies.
+            Deactivate contingency mode and restore normal execution policies.
           </p>
-          <button type="button"
+          <button
+            type="button"
             onClick={deactivateEmergency}
             disabled={!isActive || pending !== null}
-            aria-label="Desativar estado de emergencia"
             className="inline-flex items-center gap-2 rounded bg-[var(--aethel-error-dark)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-error)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <StopCircle className="h-4 w-4" />
-            {pending === 'deactivate' ? 'Desativando...' : 'Desativar emergencia'}
+            {pending === 'deactivate' ? 'Deactivating...' : 'Deactivate'}
           </button>
         </div>
-      </section>
+      </div>
 
       {error ? (
-        <div className="mt-4 rounded border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] p-3 text-sm text-[var(--aethel-error)]">{error}</div>
+        <div className="mt-4 rounded border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] p-3 text-sm text-[var(--aethel-error)]">
+          {error}
+        </div>
       ) : null}
-    </div>
+    </section>
   )
 }

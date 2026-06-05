@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Activity, AlertTriangle, ShieldAlert } from 'lucide-react';
 
+import { EmergencyModePanel } from '@/components/admin/EmergencyModePanel';
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { getToken } from '@/lib/auth';
@@ -127,6 +128,8 @@ export default function AdminSecurity() {
           },
         ]}
       />
+
+      <EmergencyModePanel />
 
       <div className='mb-6 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
         <h2 className='text-xl font-semibold mb-4'>Security settings</h2>

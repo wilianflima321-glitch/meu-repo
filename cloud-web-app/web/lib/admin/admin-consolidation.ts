@@ -82,6 +82,7 @@ export const ADMIN_LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
   '/admin/ip-registry': '/admin/security?legacy=ip-registry',
   '/admin/audit-logs': '/admin/security?legacy=audit-logs',
   '/admin/support': '/admin/users?legacy=support',
+  '/admin/emergency': '/admin/security?legacy=emergency',
   '/admin/ai-enhancements': '/admin/ai?legacy=ai-enhancements',
   '/admin/ai-upgrades': '/admin/ai?legacy=ai-upgrades',
   '/admin/arpu-churn': '/admin/finance?legacy=arpu-churn',

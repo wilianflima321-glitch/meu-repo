@@ -221,7 +221,7 @@ export function EmergencyBanner({ emergencyState }: EmergencyBannerProps) {
         </div>
       </div>
       <a
-        href="/admin/emergency"
+        href="/admin/security?legacy=emergency"
         className="rounded-lg bg-[var(--aethel-error-dark)] px-4 py-2 text-sm text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-error)]"
       >
         Gerenciar
