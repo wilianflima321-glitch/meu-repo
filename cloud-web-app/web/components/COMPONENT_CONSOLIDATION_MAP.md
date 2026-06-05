@@ -14,8 +14,7 @@ Source: docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md
 | Toast | `@/components/ui/Toast` | All notifications |
 | Select | `@/components/ui/Select` | All dropdowns |
 | Tabs | `@/components/ui/Tabs` | All tab navigation |
-| primitives | `@/components/ui/primitives` | Low-level glass panels, etc |
-| premium | `@/components/ui/premium` | Premium UI patterns |
+| primitives | `@/components/ui/primitives` | Low-level shared primitives |
 
 ## Deprecated Components (MIGRATE AWAY)
 | Component | Path | Migrate To |

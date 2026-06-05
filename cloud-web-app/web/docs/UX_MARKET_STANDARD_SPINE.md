@@ -264,7 +264,7 @@ Shared product primitives used by IDE, Studio, and admin must not leak Portugues
 | `components/viewport/SceneViewportInspector.tsx` | 0 | ok |
 | `components/visual-scripting/VisualScriptEditor.tsx` | 0 | ok |
 | `components/visual-scripting/visual-node-catalog.ts` | 0 | ok |
-| `components/team/TeamInviteManager.parts.tsx` | 0 | ok |
+| `app/settings/page.tsx` | 0 | ok |
 | `components/assets/AssetPreviewPanel.tsx` | 0 | ok |
 | `components/media/MediaStudioPanels.tsx` | 0 | ok |
 | `components/scene-editor/ScenePropertiesPanel.tsx` | 0 | ok |

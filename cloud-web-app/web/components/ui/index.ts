@@ -78,9 +78,6 @@ export {
   MobileFAB,
 } from './mobile-gestures'
 
-// Premium
-export * from './premium'
-
 // Accessibility
 export {
   SkipToContent,

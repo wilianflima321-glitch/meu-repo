@@ -148,7 +148,7 @@ export const PUBLIC_UX_CHECKS = [
       'components/viewport/SceneViewportInspector.tsx',
       'components/visual-scripting/VisualScriptEditor.tsx',
       'components/visual-scripting/visual-node-catalog.ts',
-      'components/team/TeamInviteManager.parts.tsx',
+      'app/settings/page.tsx',
       'components/assets/AssetPreviewPanel.tsx',
       'components/media/MediaStudioPanels.tsx',
       'components/scene-editor/ScenePropertiesPanel.tsx',
