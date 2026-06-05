@@ -1,7 +1,7 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2433
+- Files scanned: 2396
 - Failures: 0
 
 ## Counts

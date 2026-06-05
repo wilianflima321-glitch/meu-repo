@@ -9,7 +9,6 @@ export const PRODUCT_UX_CHECKS = [
       'components/dashboard/DashboardShell.tsx',
       'components/dashboard/DashboardOverviewTab.tsx',
       'components/dashboard/DashboardWorkspaceLaunch.tsx',
-      'components/dashboard/DashboardCopilotWorkflowBar.tsx',
       'components/dashboard/DashboardRoutingNotice.tsx',
       'components/dashboard/FirstValueGuide.tsx',
       'components/dashboard/aethel-dashboard-entry-triage.ts',

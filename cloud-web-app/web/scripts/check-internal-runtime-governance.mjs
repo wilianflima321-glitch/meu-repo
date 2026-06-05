@@ -33,7 +33,7 @@ const REQUIRED_MODULES = [
   'lib/blueprint-system.ts',
   'lib/ui/tooltip-system.tsx',
   'components/animation/AnimationBlueprintEditorPanels.tsx',
-  'components/ai/SquadChat.tsx',
+  'components/agents/AgentsWindow.tsx',
   'components/team/TeamInviteManager.parts.tsx',
   'components/ide/DebugPanel.tsx',
   'lib/git/git-service.ts',

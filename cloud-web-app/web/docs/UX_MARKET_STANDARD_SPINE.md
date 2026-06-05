@@ -367,7 +367,6 @@ Dashboard and IDE cockpit surfaces must not mix Portuguese fallback copy into th
 | `components/dashboard/DashboardShell.tsx` | 0 | ok |
 | `components/dashboard/DashboardOverviewTab.tsx` | 0 | ok |
 | `components/dashboard/DashboardWorkspaceLaunch.tsx` | 0 | ok |
-| `components/dashboard/DashboardCopilotWorkflowBar.tsx` | 0 | ok |
 | `components/dashboard/DashboardRoutingNotice.tsx` | 0 | ok |
 | `components/dashboard/FirstValueGuide.tsx` | 0 | ok |
 | `components/dashboard/aethel-dashboard-entry-triage.ts` | 0 | ok |
