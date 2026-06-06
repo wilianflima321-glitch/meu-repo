@@ -122,6 +122,27 @@ export interface PrismaModelCoverageMatrix {
   unknownModels: string[]
 }
 
+export interface V29ProductSurfaceConvergence {
+  version: 1
+  canonicalRegistry: 'cloud-web-app/web/lib/routes/product-surface-registry.ts'
+  canonicalRegistryToken: 'PRODUCT_SURFACE_REGISTRY'
+  publicRouteConsolidation: 'cloud-web-app/web/lib/navigation/public-route-consolidation.ts'
+  workbenchConvergence: 'cloud-web-app/web/lib/routes/workbench-convergence.ts'
+  requiredSurfaces: ['home', 'workspace', 'ide', 'canvas', 'research', 'evidence']
+  publicCompatibilityRoutes: Array<{
+    route: string
+    canonicalSurface: string
+    preserveUrl: false
+  }>
+  hiddenRoutePolicy: 'redirect-or-drawer-only'
+  routeBudgets: {
+    publicPrimaryMax: number
+    dashboardPrimaryTabs: 3
+    adminVisibleAreas: 6
+    studioVisibleGroups: 5
+  }
+}
+
 export const V29_BASELINE_LIMITS = {
   pagesMax: 66,
   adminPagesMax: 13,
@@ -315,6 +336,28 @@ export const V29_PRISMA_MODEL_COVERAGE_POLICY: Record<V29PrismaCoverageStatus, P
     status: 'candidate-for-removal',
     owner: 'backend/product ops owner',
     requiredEvidence: ['zero usage scan', 'migration plan', 'delete gate'],
+  },
+}
+
+export const V29_PRODUCT_SURFACE_CONVERGENCE: V29ProductSurfaceConvergence = {
+  version: 1,
+  canonicalRegistry: 'cloud-web-app/web/lib/routes/product-surface-registry.ts',
+  canonicalRegistryToken: 'PRODUCT_SURFACE_REGISTRY',
+  publicRouteConsolidation: 'cloud-web-app/web/lib/navigation/public-route-consolidation.ts',
+  workbenchConvergence: 'cloud-web-app/web/lib/routes/workbench-convergence.ts',
+  requiredSurfaces: ['home', 'workspace', 'ide', 'canvas', 'research', 'evidence'],
+  publicCompatibilityRoutes: [
+    { route: '/contact', canonicalSurface: '/help', preserveUrl: false },
+    { route: '/customers', canonicalSurface: '/trust', preserveUrl: false },
+    { route: '/roadmap', canonicalSurface: '/docs/changelog', preserveUrl: false },
+    { route: '/security-acknowledgments', canonicalSurface: '/security-policy', preserveUrl: false },
+  ],
+  hiddenRoutePolicy: 'redirect-or-drawer-only',
+  routeBudgets: {
+    publicPrimaryMax: 6,
+    dashboardPrimaryTabs: 3,
+    adminVisibleAreas: 6,
+    studioVisibleGroups: 5,
   },
 }
 

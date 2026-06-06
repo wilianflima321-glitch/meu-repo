@@ -43,6 +43,14 @@ export const PUBLIC_ROUTE_CONSOLIDATION: PublicRouteConsolidation[] = [
     rationale: 'A roadmap page with caveats reads like internal audit copy; changelog is clearer public proof.',
   },
   {
+    route: '/security-acknowledgments',
+    canonicalSurface: '/security-policy',
+    visibility: 'compatibility',
+    preserveUrl: false,
+    primaryAction: 'Fold acknowledgments into the security policy instead of keeping a low-value standalone page.',
+    rationale: 'A thin acknowledgments page adds public surface area without improving buyer trust or user action.',
+  },
+  {
     route: '/contact-sales',
     canonicalSurface: '/pricing',
     visibility: 'secondary',

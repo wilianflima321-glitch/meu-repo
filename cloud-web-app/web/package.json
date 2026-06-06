@@ -205,7 +205,8 @@
     "qa:v29-desktop-capability-manifest": "node scripts/check-v29-desktop-capability-manifest.mjs",
     "qa:v29-creative-toolchain-contract": "node scripts/check-v29-creative-toolchain-contract.mjs",
     "qa:v29-prisma-model-coverage": "node scripts/check-v29-prisma-model-coverage.mjs",
-    "qa:v29-total-spine": "node scripts/check-v29-total-spine.mjs"
+    "qa:v29-total-spine": "node scripts/check-v29-total-spine.mjs",
+    "qa:v29-route-surface-convergence": "node scripts/check-v29-route-surface-convergence.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
