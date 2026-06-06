@@ -320,6 +320,48 @@ export const V29_DESKTOP_BRIDGE_COMMAND_CONTRACT: V29DesktopBridgeCommandContrac
   prohibitedFallback: 'Desktop adapter must not coerce held/native runtime decisions into browser-preview success.',
   commands: [
     {
+      command: 'fs_read',
+      purpose: 'Read bounded UTF-8 files through the Studio Local native bridge with allowlisted roots only.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
+    },
+    {
+      command: 'fs_write',
+      purpose: 'Write bounded text payloads only inside allowed Studio Local workspace roots.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
+    },
+    {
+      command: 'fs_list',
+      purpose: 'List allowed workspace directories while hiding protected internals.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
+    },
+    {
+      command: 'notify_native',
+      purpose: 'Return an honest provider_unavailable status until a native notification plugin is installed.',
+      state: 'provider_unavailable',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
+    },
+    {
+      command: 'window_minimize',
+      purpose: 'Expose native shell window minimization from the Tauri bridge.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
+    },
+    {
+      command: 'window_toggle_maximize',
+      purpose: 'Expose native shell maximize/unmaximize without custom browser-only chrome shims.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
+    },
+    {
+      command: 'window_close',
+      purpose: 'Expose native shell window close from the Tauri bridge.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
+    },
+    {
       command: 'local_runtime_probe',
       purpose: 'Compact runtime probe for the shared RuntimeAdapter.',
       state: 'available',

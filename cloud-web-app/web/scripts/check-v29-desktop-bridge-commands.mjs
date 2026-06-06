@@ -27,6 +27,13 @@ const contract = read('lib/runtime/v29-internal-spine.ts')
 const packageJson = JSON.parse(read('package.json') || '{}')
 
 const commands = [
+  'fs_read',
+  'fs_write',
+  'fs_list',
+  'notify_native',
+  'window_minimize',
+  'window_toggle_maximize',
+  'window_close',
   'local_runtime_probe',
   'local_runtime_probe_report',
   'local_runtime_sidecars',
@@ -44,6 +51,11 @@ for (const token of [
   'RuntimeJobStore',
   'Mutex',
   'tauri::State',
+  'desktop_commands::fs_read',
+  'desktop_commands::fs_write',
+  'desktop_commands::fs_list',
+  'desktop_commands::notify_native',
+  'desktop_commands::window_minimize',
   'resolve_runtime_target',
   'build_sidecar_capability_manifest',
   'parse_job_lane',
@@ -53,6 +65,9 @@ for (const token of [
 }
 
 for (const token of [
+  "invoke<string>('fs_read'",
+  "invoke<void>('fs_write'",
+  "invoke<Array<{ path: string; type: 'file' | 'folder' }>>('fs_list'",
   "invoke<RuntimeProbe>('local_runtime_probe')",
   "invoke<StudioLocalRouteJobResult>('jobs_route'",
   'RuntimeLane',
@@ -85,7 +100,7 @@ const reportDir = path.join(ROOT, '.next', 'aethel-audits')
 fs.mkdirSync(reportDir, { recursive: true })
 fs.writeFileSync(
   path.join(reportDir, 'V29_DESKTOP_BRIDGE_COMMANDS.md'),
-  `# V29 Desktop Bridge Commands\n\nCommands: ${commands.join(', ')}\nFailures: ${failures.length}\n`,
+  `# V29 Desktop Bridge Commands\n\nCommands: ${commands.join(', ')}\nGuarded filesystem: fs_read/fs_write/fs_list\nFailures: ${failures.length}\n`,
 )
 
 if (failures.length) {

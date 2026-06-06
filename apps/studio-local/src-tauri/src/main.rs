@@ -11,6 +11,8 @@ use aethel_studio_local::sidecars::build_sidecar_capability_manifest;
 use serde::Serialize;
 use tauri::State;
 
+mod desktop_commands;
+
 const LOCAL_DEVICE_ID: &str = "local-device";
 
 #[derive(Debug, Serialize)]
@@ -155,6 +157,13 @@ fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(RuntimeJobStore::default()))
         .invoke_handler(tauri::generate_handler![
+            desktop_commands::fs_read,
+            desktop_commands::fs_write,
+            desktop_commands::fs_list,
+            desktop_commands::notify_native,
+            desktop_commands::window_minimize,
+            desktop_commands::window_toggle_maximize,
+            desktop_commands::window_close,
             local_runtime_health,
             local_runtime_probe,
             local_runtime_probe_report,
