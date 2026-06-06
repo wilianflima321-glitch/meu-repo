@@ -1,4 +1,4 @@
-﻿import type { AgentRunLedger } from '@/lib/server/agent-run-ledger'
+import type { AgentRunLedger } from '@/lib/server/agent-run-ledger'
 import type { AgentReadReceiptState } from '@/lib/production/agent-read-receipts'
 import type { ContextMemorySpinePlan } from '@/lib/production/context-memory-spine'
 import {

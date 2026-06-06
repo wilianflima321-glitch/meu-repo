@@ -1,4 +1,4 @@
-﻿import type { ResearchIntelligencePacket } from '@/lib/production/research-intelligence-bridge'
+import type { ResearchIntelligencePacket } from '@/lib/production/research-intelligence-bridge'
 import {
   buildResearchRuntimeSpinePlan,
   validateResearchRuntimeSpinePlan,

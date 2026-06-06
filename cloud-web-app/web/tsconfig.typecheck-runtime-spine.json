@@ -18,6 +18,7 @@
     "lib/studio/**/*.ts",
     "lib/studio-local/**/*.ts",
     "lib/runtime/**/*.ts",
+    "lib/runtime/v29-internal-spine.ts",
     "lib/agents/agent-execution-evidence-package.ts",
     "lib/research/research-evidence-package.ts",
     "types/**/*.d.ts",

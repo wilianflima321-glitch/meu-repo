@@ -85,7 +85,7 @@ if (!/data-evidence-source="research-navigation-mesh"/.test(evidenceCenterSurfac
 }
 
 requirePattern('package.json', /"qa:research-navigation-mesh"/, 'package script')
-requirePattern('package.json', /qa:research-intelligence && npm run qa:research-navigation-mesh && npm run qa:(?:research-runtime-spine && npm run qa:)?evidence-ref-coverage && npm run qa:release-evidence-readiness && npm run qa:agent-read-receipts/, 'enterprise gate ordering')
+requirePattern('package.json', /qa:research-intelligence && npm run qa:research-navigation-mesh && npm run qa:(?:research-runtime-spine && npm run qa:)?(?:research-evidence-package && npm run qa:)?evidence-ref-coverage && npm run qa:release-evidence-readiness && npm run qa:agent-read-receipts/, 'enterprise gate ordering')
 requirePattern('scripts/check-backbone-market-readiness.mjs', /research-navigation-mesh/, 'backbone coverage')
 requirePattern('scripts/check-backbone-market-readiness.mjs', /AETHEL_RESEARCH_NAVIGATION_MESH/, 'backbone capability token')
 
