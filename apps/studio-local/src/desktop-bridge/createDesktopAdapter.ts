@@ -14,6 +14,13 @@ export type StudioLocalRouteJobResult = {
   requiresHumanApproval: boolean;
 };
 
+export type StudioLocalAiCompleteResult = {
+  text: string;
+  costUsd?: number;
+  state: 'provider_unavailable';
+  reason: string;
+};
+
 export function createDesktopAdapter(invoke: TauriInvoke): RuntimeAdapter {
   return {
     fs: {
@@ -31,11 +38,11 @@ export function createDesktopAdapter(invoke: TauriInvoke): RuntimeAdapter {
       routeJob: (kind) => invoke<StudioLocalRouteJobResult>('jobs_route', { kind }),
     },
     ai: {
-      complete: (input) => invoke('ai_complete', input),
+      complete: (input) => invoke<StudioLocalAiCompleteResult>('ai_complete', input),
     },
     notifications: {
       notify: (input) => {
-        void invoke('notify_native', input);
+        void invoke('notify_native', { input });
       },
     },
     window: {
