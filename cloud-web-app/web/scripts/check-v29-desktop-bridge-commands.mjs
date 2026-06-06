@@ -20,6 +20,7 @@ function expectToken(label, content, token) {
 }
 
 const main = read('../../apps/studio-local/src-tauri/src/main.rs')
+const desktopCommands = read('../../apps/studio-local/src-tauri/src/desktop_commands.rs')
 const adapter = read('../../apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts')
 const sharedTypes = read('../../packages/aethel-ide-shared/src/runtime-adapter/types.ts')
 const webAdapter = read('../../packages/aethel-ide-shared/src/runtime-adapter/web-adapter.ts')
@@ -70,6 +71,18 @@ for (const token of [
   'target_lane',
 ]) {
   expectToken('tauri main', main, token)
+}
+
+for (const token of [
+  'filesystem_commands_are_guarded_and_bounded',
+  'terminal_sessions_stay_held_without_spawning_shell',
+  'ai_completion_stays_provider_unavailable_until_sidecar_exists',
+  'native_notification_reports_provider_unavailable_without_plugin',
+  'protected workspace internals',
+  'MAX_TEXT_FILE_BYTES',
+  'MAX_TERMINAL_INPUT_BYTES',
+]) {
+  expectToken('desktop command tests', desktopCommands, token)
 }
 
 for (const token of [

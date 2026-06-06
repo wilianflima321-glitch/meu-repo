@@ -343,3 +343,83 @@ pub fn window_toggle_maximize(window: Window) -> Result<(), String> {
 pub fn window_close(window: Window) -> Result<(), String> {
     window.close().map_err(|error| format!("failed to close window: {error}"))
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    use super::*;
+
+    fn test_workspace(name: &str) -> PathBuf {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|duration| duration.as_nanos())
+            .unwrap_or(0);
+        let root = env::current_dir()
+            .expect("current dir is available")
+            .join("desktop-command-tests")
+            .join(format!("{name}-{nonce}"));
+        fs::create_dir_all(&root).expect("test workspace created");
+        root
+    }
+
+    #[test]
+    fn filesystem_commands_are_guarded_and_bounded() {
+        let root = test_workspace("filesystem");
+        let file = root.join("note.txt");
+
+        fs_write(file.display().to_string(), "hello from Studio Local".to_string()).expect("write allowed file");
+        let contents = fs_read(file.display().to_string()).expect("read allowed file");
+        assert_eq!(contents, "hello from Studio Local");
+
+        let entries = fs_list(root.display().to_string()).expect("list allowed directory");
+        assert!(entries.iter().any(|entry| entry.path.ends_with("note.txt") && entry.entry_type == "file"));
+
+        let protected_dir = root.join(".git");
+        fs::create_dir_all(&protected_dir).expect("protected dir created");
+        let protected_file = protected_dir.join("config");
+        fs::write(&protected_file, "secret").expect("protected file created");
+        let error = fs_read(protected_file.display().to_string()).expect_err("protected path is blocked");
+        assert!(error.contains("protected workspace internals"));
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn terminal_sessions_stay_held_without_spawning_shell() {
+        let mut store = TerminalSessionStore::default();
+        let session = store.create_held(None);
+        assert_eq!(session.state, "held");
+        assert!(session.reason.contains("held"));
+
+        let written = store.write_held(&session.id, 42).expect("held terminal input recorded");
+        assert_eq!(written.state, "held");
+        let record = store.sessions.get(&session.id).expect("session stored");
+        assert_eq!(record.last_input_bytes, 42);
+
+        let closed = store.close(&session.id).expect("held terminal closed");
+        assert_eq!(closed.state, "cancelled");
+        assert!(!store.sessions.contains_key(&session.id));
+    }
+
+    #[test]
+    fn ai_completion_stays_provider_unavailable_until_sidecar_exists() {
+        let response = ai_complete("draft a plan".to_string(), Some("local-fixture".to_string()));
+        assert_eq!(response.state, "provider_unavailable");
+        assert_eq!(response.cost_usd, Some(0.0));
+        assert!(response.text.is_empty());
+        assert!(response.reason.contains("Local AI completion is not wired"));
+    }
+
+    #[test]
+    fn native_notification_reports_provider_unavailable_without_plugin() {
+        let response = notify_native(NativeNotificationInput {
+            title: "Aethel".to_string(),
+            body: Some("hello".to_string()),
+            tone: Some("info".to_string()),
+        });
+        assert_eq!(response.state, "provider_unavailable");
+        assert!(response.reason.contains("Native notification plugin is not installed"));
+    }
+}
