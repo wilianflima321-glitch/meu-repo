@@ -1,4 +1,4 @@
-import type { RuntimeAdapter } from './types';
+import type { RuntimeAdapter, RuntimeLane } from './types';
 
 async function jsonFetch<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
@@ -40,7 +40,7 @@ export function createWebRuntimeAdapter(): RuntimeAdapter {
           }),
         ),
       routeJob: (kind) =>
-        jsonFetch<{ lane?: 'browser-preview' | 'local-native' | 'cloud-sandbox'; reason?: string }>(
+        jsonFetch<{ lane?: RuntimeLane; reason?: string }>(
           '/api/runtime/local-capabilities',
           {
             method: 'POST',

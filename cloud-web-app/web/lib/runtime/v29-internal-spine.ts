@@ -87,6 +87,21 @@ export interface DesktopCapabilityManifest {
   prohibitedClaims: string[]
 }
 
+export interface V29DesktopBridgeCommandContract {
+  version: 1
+  rustEntrypoint: 'apps/studio-local/src-tauri/src/main.rs'
+  adapterEntrypoint: 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'
+  sharedRuntimeTypes: 'packages/aethel-ide-shared/src/runtime-adapter/types.ts'
+  commands: Array<{
+    command: string
+    purpose: string
+    state: V29OperationalState
+    evidenceRefs: string[]
+  }>
+  routePolicy: 'held-targets-stay-held'
+  prohibitedFallback: string
+}
+
 export interface CreativeToolchainContract {
   version: 1
   canonicalShell: string
@@ -195,7 +210,7 @@ export const V29_SUBSYSTEM_OWNERSHIP: V29SubsystemOwnership[] = [
     owner: 'runtime/native owner',
     canonicalEntrypoint: 'apps/studio-local/src/index.html',
     userSurface: 'Aethel Studio Local',
-    gates: ['qa:v29-desktop-capability-manifest', 'qa:studio-local-release-readiness'],
+    gates: ['qa:v29-desktop-capability-manifest', 'qa:v29-desktop-bridge-commands', 'qa:studio-local-release-readiness'],
     status: 'held',
     nextAction: 'Use Tauri web shell v1, absorb runtime templates, persist machine capability manifest, and avoid signed/native renderer claims.',
   },
@@ -294,6 +309,53 @@ export const V29_DESKTOP_CAPABILITY_MANIFEST: DesktopCapabilityManifest = {
     },
   ],
   prohibitedClaims: ['desktop ready', 'native renderer ready', 'signed installer', 'Unreal-grade', 'releaseReady=true'],
+}
+
+export const V29_DESKTOP_BRIDGE_COMMAND_CONTRACT: V29DesktopBridgeCommandContract = {
+  version: 1,
+  rustEntrypoint: 'apps/studio-local/src-tauri/src/main.rs',
+  adapterEntrypoint: 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts',
+  sharedRuntimeTypes: 'packages/aethel-ide-shared/src/runtime-adapter/types.ts',
+  routePolicy: 'held-targets-stay-held',
+  prohibitedFallback: 'Desktop adapter must not coerce held/native runtime decisions into browser-preview success.',
+  commands: [
+    {
+      command: 'local_runtime_probe',
+      purpose: 'Compact runtime probe for the shared RuntimeAdapter.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/main.rs', 'apps/studio-local/src-tauri/src/probe.rs'],
+    },
+    {
+      command: 'local_runtime_probe_report',
+      purpose: 'Full native probe report for evidence/debug surfaces.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/main.rs', 'apps/studio-local/src-tauri/src/contracts.rs'],
+    },
+    {
+      command: 'local_runtime_sidecars',
+      purpose: 'Native sidecar capability manifest derived from the machine probe.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/main.rs', 'apps/studio-local/src-tauri/src/sidecars.rs'],
+    },
+    {
+      command: 'jobs_route',
+      purpose: 'Route governed runtime jobs through Rust policy before work starts.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/main.rs', 'apps/studio-local/src-tauri/src/policy.rs', 'apps/studio-local/src-tauri/src/jobs.rs'],
+    },
+    {
+      command: 'jobs_list',
+      purpose: 'Expose compact local runtime job state for recovery and receipts.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/main.rs', 'apps/studio-local/src-tauri/src/jobs.rs'],
+    },
+    {
+      command: 'jobs_cancel',
+      purpose: 'Allow explicit user or policy cancellation of local runtime jobs.',
+      state: 'available',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/main.rs', 'apps/studio-local/src-tauri/src/jobs.rs'],
+    },
+  ],
 }
 
 export const V29_CREATIVE_TOOLCHAIN_CONTRACT: CreativeToolchainContract = {

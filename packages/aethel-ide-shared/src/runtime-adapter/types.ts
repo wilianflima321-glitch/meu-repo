@@ -1,4 +1,4 @@
-export type RuntimeLane = 'browser-preview' | 'local-native' | 'cloud-sandbox';
+export type RuntimeLane = 'browser-preview' | 'local-native' | 'local-worker' | 'cloud-sandbox' | 'held';
 
 export type RuntimeProbe = {
   lane: RuntimeLane;

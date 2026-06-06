@@ -1,6 +1,18 @@
-import type { RuntimeAdapter } from '../../../../packages/aethel-ide-shared/src/runtime-adapter/types';
+import type {
+  RuntimeAdapter,
+  RuntimeLane,
+  RuntimeProbe,
+} from '../../../../packages/aethel-ide-shared/src/runtime-adapter/types';
 
 export type TauriInvoke = <T>(command: string, args?: Record<string, unknown>) => Promise<T>;
+
+export type StudioLocalRouteJobResult = {
+  lane: RuntimeLane;
+  reason: string;
+  jobId: string;
+  state: 'queued' | 'running' | 'held' | 'needs-review' | 'complete' | 'blocked' | 'cancelled';
+  requiresHumanApproval: boolean;
+};
 
 export function createDesktopAdapter(invoke: TauriInvoke): RuntimeAdapter {
   return {
@@ -15,8 +27,8 @@ export function createDesktopAdapter(invoke: TauriInvoke): RuntimeAdapter {
       close: (sessionId) => invoke<void>('terminal_close', { sessionId }),
     },
     runtime: {
-      probe: () => invoke('local_runtime_health'),
-      routeJob: (kind) => invoke('jobs_route', { kind }),
+      probe: () => invoke<RuntimeProbe>('local_runtime_probe'),
+      routeJob: (kind) => invoke<StudioLocalRouteJobResult>('jobs_route', { kind }),
     },
     ai: {
       complete: (input) => invoke('ai_complete', input),

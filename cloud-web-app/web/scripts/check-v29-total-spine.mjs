@@ -10,6 +10,7 @@ const scripts = [
   'check-v29-workbench-convergence.mjs',
   'check-v29-route-surface-convergence.mjs',
   'check-v29-desktop-capability-manifest.mjs',
+  'check-v29-desktop-bridge-commands.mjs',
   'check-v29-creative-toolchain-contract.mjs',
   'check-v29-prisma-model-coverage.mjs',
 ]
@@ -21,4 +22,4 @@ for (const script of scripts) {
   if (result.status !== 0) process.exit(result.status ?? 1)
 }
 
-console.log('[v29-total-spine] PASS gates=7')
+console.log('[v29-total-spine] PASS gates=8')
