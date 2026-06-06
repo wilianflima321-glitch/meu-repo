@@ -338,6 +338,30 @@ export const V29_DESKTOP_BRIDGE_COMMAND_CONTRACT: V29DesktopBridgeCommandContrac
       evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
     },
     {
+      command: 'terminal_create',
+      purpose: 'Create a held terminal session record without spawning a local shell process.',
+      state: 'held',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
+    },
+    {
+      command: 'terminal_write',
+      purpose: 'Record held terminal input while native shell execution remains blocked.',
+      state: 'held',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
+    },
+    {
+      command: 'terminal_close',
+      purpose: 'Close a held terminal session without terminating any spawned process.',
+      state: 'held',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
+    },
+    {
+      command: 'ai_complete',
+      purpose: 'Return provider_unavailable until a governed local model sidecar is approved.',
+      state: 'provider_unavailable',
+      evidenceRefs: ['apps/studio-local/src-tauri/src/desktop_commands.rs', 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'],
+    },
+    {
       command: 'notify_native',
       purpose: 'Return an honest provider_unavailable status until a native notification plugin is installed.',
       state: 'provider_unavailable',

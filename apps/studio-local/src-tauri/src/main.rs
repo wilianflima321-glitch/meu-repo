@@ -156,10 +156,15 @@ fn jobs_cancel(
 fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(RuntimeJobStore::default()))
+        .manage(Mutex::new(desktop_commands::TerminalSessionStore::default()))
         .invoke_handler(tauri::generate_handler![
             desktop_commands::fs_read,
             desktop_commands::fs_write,
             desktop_commands::fs_list,
+            desktop_commands::terminal_create,
+            desktop_commands::terminal_write,
+            desktop_commands::terminal_close,
+            desktop_commands::ai_complete,
             desktop_commands::notify_native,
             desktop_commands::window_minimize,
             desktop_commands::window_toggle_maximize,

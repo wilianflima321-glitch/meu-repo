@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::env;
 use std::fs;
 use std::path::{Component, Path, PathBuf};
@@ -7,6 +8,7 @@ use tauri::Window;
 
 const MAX_TEXT_FILE_BYTES: u64 = 2 * 1024 * 1024;
 const MAX_WRITE_BYTES: usize = 2 * 1024 * 1024;
+const MAX_TERMINAL_INPUT_BYTES: usize = 64 * 1024;
 const ALLOWED_ROOTS_ENV: &str = "AETHEL_STUDIO_ALLOWED_ROOTS";
 const DENIED_SEGMENTS: &[&str] = &[".git", "node_modules", ".next", "target"];
 
@@ -31,6 +33,81 @@ pub struct NativeNotificationInput {
 pub struct NativeCommandStatus {
     state: String,
     reason: String,
+}
+
+#[derive(Debug, Clone)]
+struct TerminalSessionRecord {
+    id: String,
+    cwd: Option<String>,
+    last_input_bytes: usize,
+}
+
+#[derive(Debug, Default)]
+pub struct TerminalSessionStore {
+    next_id: u64,
+    sessions: BTreeMap<String, TerminalSessionRecord>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TerminalSessionResponse {
+    id: String,
+    state: String,
+    reason: String,
+    cwd: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AiCompleteResponse {
+    text: String,
+    cost_usd: Option<f64>,
+    state: String,
+    reason: String,
+}
+
+impl TerminalSessionStore {
+    fn create_held(&mut self, cwd: Option<String>) -> TerminalSessionResponse {
+        self.next_id += 1;
+        let id = format!("terminal-held-{}", self.next_id);
+        self.sessions.insert(
+            id.clone(),
+            TerminalSessionRecord {
+                id: id.clone(),
+                cwd: cwd.clone(),
+                last_input_bytes: 0,
+            },
+        );
+        TerminalSessionResponse {
+            id,
+            state: "held".to_string(),
+            reason: "Native terminal execution is held until a sandboxed sidecar and human approval policy are wired.".to_string(),
+            cwd,
+        }
+    }
+
+    fn write_held(&mut self, session_id: &str, input_bytes: usize) -> Result<NativeCommandStatus, String> {
+        let session = self
+            .sessions
+            .get_mut(session_id)
+            .ok_or_else(|| format!("Studio Local terminal session was not found: {session_id}"))?;
+        let _ = (&session.id, &session.cwd);
+        session.last_input_bytes = input_bytes;
+        Ok(NativeCommandStatus {
+            state: "held".to_string(),
+            reason: "Terminal input was recorded as held; no local shell process was spawned.".to_string(),
+        })
+    }
+
+    fn close(&mut self, session_id: &str) -> Result<NativeCommandStatus, String> {
+        self.sessions
+            .remove(session_id)
+            .ok_or_else(|| format!("Studio Local terminal session was not found: {session_id}"))?;
+        Ok(NativeCommandStatus {
+            state: "cancelled".to_string(),
+            reason: "Held terminal session was closed without spawning a shell.".to_string(),
+        })
+    }
 }
 
 fn split_allowed_roots(value: &str) -> Vec<PathBuf> {
@@ -173,6 +250,67 @@ pub fn fs_list(path: String) -> Result<Vec<FileEntry>, String> {
     }
     entries.sort_by(|left, right| left.path.cmp(&right.path));
     Ok(entries)
+}
+
+#[tauri::command]
+pub fn terminal_create(
+    cwd: Option<String>,
+    store: tauri::State<'_, std::sync::Mutex<TerminalSessionStore>>,
+) -> Result<TerminalSessionResponse, String> {
+    let cwd = match cwd {
+        Some(path) if !path.trim().is_empty() => {
+            let resolved = ensure_allowed_existing_path(&path)?;
+            if !resolved.is_dir() {
+                return Err("Studio Local terminal cwd must be an allowed directory.".to_string());
+            }
+            Some(resolved.display().to_string())
+        }
+        _ => None,
+    };
+
+    let mut store = store
+        .lock()
+        .map_err(|_| "Studio Local terminal store lock is poisoned.".to_string())?;
+    Ok(store.create_held(cwd))
+}
+
+#[tauri::command]
+pub fn terminal_write(
+    session_id: String,
+    input: String,
+    store: tauri::State<'_, std::sync::Mutex<TerminalSessionStore>>,
+) -> Result<NativeCommandStatus, String> {
+    if input.len() > MAX_TERMINAL_INPUT_BYTES {
+        return Err(format!(
+            "Studio Local refuses terminal payloads larger than {MAX_TERMINAL_INPUT_BYTES} bytes."
+        ));
+    }
+    let mut store = store
+        .lock()
+        .map_err(|_| "Studio Local terminal store lock is poisoned.".to_string())?;
+    store.write_held(&session_id, input.len())
+}
+
+#[tauri::command]
+pub fn terminal_close(
+    session_id: String,
+    store: tauri::State<'_, std::sync::Mutex<TerminalSessionStore>>,
+) -> Result<NativeCommandStatus, String> {
+    let mut store = store
+        .lock()
+        .map_err(|_| "Studio Local terminal store lock is poisoned.".to_string())?;
+    store.close(&session_id)
+}
+
+#[tauri::command]
+pub fn ai_complete(prompt: String, model: Option<String>) -> AiCompleteResponse {
+    let _ = (prompt, model);
+    AiCompleteResponse {
+        text: String::new(),
+        cost_usd: Some(0.0),
+        state: "provider_unavailable".to_string(),
+        reason: "Local AI completion is not wired in Studio Local; use the governed cloud/provider adapter until a local model sidecar is approved.".to_string(),
+    }
 }
 
 #[tauri::command]
