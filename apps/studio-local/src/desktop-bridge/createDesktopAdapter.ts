@@ -1,4 +1,5 @@
 import type {
+  NativeKernelManifest,
   RuntimeAdapter,
   RuntimeLane,
   RuntimeProbe,
@@ -36,6 +37,7 @@ export function createDesktopAdapter(invoke: TauriInvoke): RuntimeAdapter {
     runtime: {
       probe: () => invoke<RuntimeProbe>('local_runtime_probe'),
       routeJob: (kind) => invoke<StudioLocalRouteJobResult>('jobs_route', { kind }),
+      nativeKernelManifest: () => invoke<NativeKernelManifest>('native_kernel_manifest'),
     },
     ai: {
       complete: (input) => invoke<StudioLocalAiCompleteResult>('ai_complete', input),

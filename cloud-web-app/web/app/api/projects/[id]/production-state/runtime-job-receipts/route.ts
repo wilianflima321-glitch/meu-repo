@@ -26,6 +26,10 @@ import {
   buildRuntimeExecutionEvidencePackage,
   verifyRuntimeExecutionEvidencePackage,
 } from '@/lib/production/runtime-execution-evidence-package'
+import { readRuntimeFailureSmokeBrowserRunnerStateFromSettings } from '@/lib/production/runtime-failure-smoke-browser-runner-state'
+import { readRuntimeFailureSmokePackStateFromSettings } from '@/lib/production/runtime-failure-smoke-pack-state'
+import { readV29SidecarInstallManifestFromSettings } from '@/lib/runtime/v29-sidecar-install-manifest'
+import { readV29SidecarLifecycleReportFromSettings } from '@/lib/runtime/v29-sidecar-lifecycle'
 
 const logger = createComponentLogger('api.projects.production-state.runtime-job-receipts')
 
@@ -146,6 +150,10 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
           state: productionState,
           job,
           receiptState,
+          failureSmokePackState: readRuntimeFailureSmokePackStateFromSettings(project.settings),
+          failureSmokeBrowserRunnerState: readRuntimeFailureSmokeBrowserRunnerStateFromSettings(project.settings),
+          sidecarLifecycleReport: readV29SidecarLifecycleReportFromSettings(project.settings),
+          sidecarInstallManifest: readV29SidecarInstallManifestFromSettings(project.settings),
           generatedBy: user.email,
         })
       : null

@@ -141,7 +141,7 @@ export function CollaborationAdminView({
           }}
           className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] px-4 py-2 text-sm"
         >
-          Atualizar
+          Refresh
         </button>
       </div>
 
@@ -403,11 +403,11 @@ export function CollaborationAdminView({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] text-[var(--aethel-text-secondary)]">
-                  <th className="p-2 text-left">Nome</th>
+                  <th className="p-2 text-left">Name</th>
                   <th className="p-2 text-left">Membros</th>
                   <th className="p-2 text-left">Status</th>
                   <th className="p-2 text-left">Atualizado</th>
-                  <th className="p-2 text-left">Acao</th>
+                  <th className="p-2 text-left">Action</th>
                 </tr>
               </thead>
               <tbody>

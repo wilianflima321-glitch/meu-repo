@@ -159,9 +159,9 @@ export interface V29ProductSurfaceConvergence {
 }
 
 export const V29_BASELINE_LIMITS = {
-  pagesMax: 66,
-  adminPagesMax: 13,
-  studioPagesMax: 8,
+  pagesMax: 58,
+  adminPagesMax: 7,
+  studioPagesMax: 6,
   apiRoutesMax: 379,
   filesOver500Max: 218,
   storyFilesMin: 30,
@@ -402,6 +402,10 @@ export const V29_DESKTOP_BRIDGE_COMMAND_CONTRACT: V29DesktopBridgeCommandContrac
       purpose: 'Native sidecar capability manifest derived from the machine probe.',
       state: 'available',
       evidenceRefs: ['apps/studio-local/src-tauri/src/main.rs', 'apps/studio-local/src-tauri/src/sidecars.rs'],
+    },
+    {
+      command: 'native_kernel_manifest', purpose: 'Expose the honest native kernel manifest for PTY, watcher, daemon, crash recovery, and updater readiness.',
+      state: 'needs-review', evidenceRefs: ['apps/studio-local/src-tauri/src/main.rs', 'apps/studio-local/src-tauri/src/native_kernel.rs'],
     },
     {
       command: 'jobs_route',

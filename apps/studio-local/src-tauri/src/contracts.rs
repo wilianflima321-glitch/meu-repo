@@ -1,4 +1,4 @@
-﻿use std::collections::BTreeMap;
+use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
@@ -58,7 +58,10 @@ impl RuntimeJobLane {
     }
 
     pub fn requires_human_approval(self) -> bool {
-        matches!(self, Self::BrowserOperator | Self::BuildExport | Self::RenderQueue)
+        matches!(
+            self,
+            Self::BrowserOperator | Self::BuildExport | Self::RenderQueue
+        )
     }
 }
 

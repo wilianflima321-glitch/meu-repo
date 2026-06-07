@@ -7,6 +7,7 @@ import { EmergencyModePanel } from '@/components/admin/EmergencyModePanel';
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { getToken } from '@/lib/auth';
+import { AdminSecurityLegacyDrawers } from './AdminSecurityLegacyDrawers';
 
 type SecurityLog = {
   id: string;
@@ -34,9 +35,9 @@ export default function AdminSecurity() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const severityLabels: Record<string, string> = {
-    critical: 'critico',
-    warning: 'aviso',
-    info: 'informacao',
+    critical: 'critical',
+    warning: 'warning',
+    info: 'info',
   };
 
   const getAuthHeaders = useCallback(() => {
@@ -55,14 +56,14 @@ export default function AdminSecurity() {
       });
       if (!res.ok) {
         const payload = await res.json().catch(() => null);
-        throw new Error(payload?.message || payload?.error || 'Failed to load seguranca');
+        throw new Error(payload?.message || payload?.error || 'Failed to load security posture');
       }
       const json = await res.json();
       setData(json);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading seguranca');
+      setError(err instanceof Error ? err.message : 'Error loading security posture');
     } finally {
       setLoading(false);
     }
@@ -71,6 +72,7 @@ export default function AdminSecurity() {
   useEffect(() => {
     fetchSecurity();
   }, [fetchSecurity]);
+
 
   const filteredLogs = (data?.logs || []).filter((log) => {
     const term = search.trim().toLowerCase();
@@ -94,7 +96,7 @@ export default function AdminSecurity() {
             onClick={fetchSecurity}
             className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
           >
-            Atualizar
+            Refresh
           </button>
         )}
       />
@@ -152,8 +154,8 @@ export default function AdminSecurity() {
             </div>
             <div className='flex items-center justify-between'>
               <div>
-                <p className='font-medium'>Bloqueio de IP suspeito</p>
-                <p className='text-xs text-[var(--aethel-text-tertiary)]'>Controlado por regras server-side e observabilidade de rede.</p>
+                <p className='font-medium'>Suspicious IP block</p>
+                <p className='text-xs text-[var(--aethel-text-tertiary)]'>Controlled by server-side rules and network observability.</p>
               </div>
               <span
                 className={`px-2 py-1 rounded text-xs ${
@@ -167,12 +169,14 @@ export default function AdminSecurity() {
         )}
       </div>
 
+      <AdminSecurityLegacyDrawers />
+
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
         <div className='flex items-center justify-between mb-4 gap-3'>
           <h2 className='text-xl font-semibold'>Logs de Auditoria</h2>
           <input
             type='text'
-            placeholder='Buscar por acao, admin ou IP'
+            placeholder='Search action, admin, or IP'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className='border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] p-2 rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)]'
@@ -181,10 +185,10 @@ export default function AdminSecurity() {
         <table className='w-full'>
           <thead>
             <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
-              <th className='p-3 text-left'>Acao</th>
+              <th className='p-3 text-left'>Action</th>
               <th className='p-3 text-left'>Admin</th>
               <th className='p-3 text-left'>Severidade</th>
-              <th className='p-3 text-left'>Data/Hora</th>
+              <th className='p-3 text-left'>Timestamp</th>
               <th className='p-3 text-left'>IP</th>
             </tr>
           </thead>
@@ -195,7 +199,7 @@ export default function AdminSecurity() {
               </tr>
             ) : filteredLogs.length === 0 ? (
               <tr>
-                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Nenhum log encontrado.</td>
+                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>No audit logs found.</td>
               </tr>
             ) : (
               filteredLogs.map((log) => (
@@ -212,7 +216,7 @@ export default function AdminSecurity() {
                             : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                       }`}
                     >
-                      {severityLabels[log.severity || 'info'] || log.severity || 'informacao'}
+                      {severityLabels[log.severity || 'info'] || log.severity || 'info'}
                     </span>
                   </td>
                   <td className='p-3'>{new Date(log.createdAt).toLocaleString()}</td>

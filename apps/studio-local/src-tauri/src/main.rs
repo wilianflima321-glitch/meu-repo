@@ -5,6 +5,7 @@ use aethel_studio_local::contracts::{
     RuntimeJobStatus, RuntimeSidecarCapability,
 };
 use aethel_studio_local::jobs::RuntimeJobStore;
+use aethel_studio_local::native_kernel::{build_native_kernel_manifest, NativeKernelManifest};
 use aethel_studio_local::policy::resolve_runtime_target;
 use aethel_studio_local::probe::collect_local_probe;
 use aethel_studio_local::sidecars::build_sidecar_capability_manifest;
@@ -37,7 +38,9 @@ struct RuntimeRouteResponse {
 fn target_lane(target: RuntimeExecutionTarget) -> &'static str {
     match target {
         RuntimeExecutionTarget::LocalNative => "local-native",
-        RuntimeExecutionTarget::LocalWorker | RuntimeExecutionTarget::LocalMainSafe => "local-worker",
+        RuntimeExecutionTarget::LocalWorker | RuntimeExecutionTarget::LocalMainSafe => {
+            "local-worker"
+        }
         RuntimeExecutionTarget::CloudSandbox => "cloud-sandbox",
         RuntimeExecutionTarget::Held => "held",
     }
@@ -58,7 +61,9 @@ fn job_state_label(state: RuntimeJobState) -> &'static str {
 fn parse_job_lane(kind: &str) -> Option<RuntimeJobLane> {
     let normalized = kind.trim().replace('_', "-").to_ascii_lowercase();
     match normalized.as_str() {
-        "ai" | "ai-local" | "ai-local-inference" | "inference" => Some(RuntimeJobLane::AiLocalInference),
+        "ai" | "ai-local" | "ai-local-inference" | "inference" => {
+            Some(RuntimeJobLane::AiLocalInference)
+        }
         "memory" | "memory-index" | "memory-indexing" => Some(RuntimeJobLane::MemoryIndexing),
         "asset" | "asset-import" | "import" => Some(RuntimeJobLane::AssetImport),
         "viewport" | "viewport-render" | "render-preview" => Some(RuntimeJobLane::ViewportRender),
@@ -84,7 +89,8 @@ fn local_runtime_probe() -> RuntimeProbeSummary {
         lane,
         available: probe.preferred_executor != RuntimeExecutionTarget::Held,
         reason: if probe.preferred_executor == RuntimeExecutionTarget::Held {
-            "Studio Local held native execution until device capability evidence improves.".to_string()
+            "Studio Local held native execution until device capability evidence improves."
+                .to_string()
         } else {
             "Studio Local produced a governed runtime lane from the native probe.".to_string()
         },
@@ -104,11 +110,17 @@ fn local_runtime_sidecars() -> Vec<RuntimeSidecarCapability> {
 }
 
 #[tauri::command]
+fn native_kernel_manifest() -> NativeKernelManifest {
+    build_native_kernel_manifest()
+}
+
+#[tauri::command]
 fn jobs_route(
     kind: String,
     store: State<'_, Mutex<RuntimeJobStore>>,
 ) -> Result<RuntimeRouteResponse, String> {
-    let lane = parse_job_lane(&kind).ok_or_else(|| format!("Unsupported Studio Local job lane: {kind}"))?;
+    let lane = parse_job_lane(&kind)
+        .ok_or_else(|| format!("Unsupported Studio Local job lane: {kind}"))?;
     let probe = collect_local_probe(LOCAL_DEVICE_ID);
     let decision = resolve_runtime_target(&probe, lane);
     let mut store = store
@@ -121,11 +133,9 @@ fn jobs_route(
 
     Ok(RuntimeRouteResponse {
         lane: target_lane(status.target).to_string(),
-        reason: status
-            .compact_log
-            .first()
-            .cloned()
-            .unwrap_or_else(|| "Studio Local routed the job through the native policy.".to_string()),
+        reason: status.compact_log.first().cloned().unwrap_or_else(|| {
+            "Studio Local routed the job through the native policy.".to_string()
+        }),
         job_id: status.id,
         state: job_state_label(status.state).to_string(),
         requires_human_approval: status.request.requires_human_approval,
@@ -173,6 +183,7 @@ fn main() {
             local_runtime_probe,
             local_runtime_probe_report,
             local_runtime_sidecars,
+            native_kernel_manifest,
             jobs_route,
             jobs_list,
             jobs_cancel

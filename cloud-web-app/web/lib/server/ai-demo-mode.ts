@@ -99,7 +99,7 @@ export function buildDemoCompletion(args: {
   const language = sanitizeText(args.language || 'text', 40) || 'text'
   const context = sanitizeText(args.prefix || args.prompt || '')
   if (context.endsWith('{')) {
-    return '\n  // TODO: configure provider real para obter completion contextual\n'
+    return '\n  // demo: configure a real provider for contextual completion\n'
   }
   if (context.includes('return')) {
     return ' /* demo: configure provider real para completion contextual */'

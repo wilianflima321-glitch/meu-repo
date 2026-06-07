@@ -65,6 +65,8 @@ export const CREATIVE_STUDIO_ROUTE_REDIRECTS: Record<string, string> = {
   '/studio/cloth': '/studio/animation?tool=cloth',
   '/studio/fluid': '/studio/vfx?tool=fluid',
   '/studio/sprite': '/studio/vfx?tool=sprite',
+  '/studio/audio': '/studio/film?tool=audio',
+  '/studio/cinematic': '/studio/film?tool=cinematic',
 }
 
 export function isPrimaryCreativeStudioRoute(route: CreativeStudioRoute) {
@@ -228,25 +230,7 @@ export const CREATIVE_STUDIO_ROUTES: CreativeStudioRoute[] = [
     domain: 'film',
     group: 'film',
     maturity: 'ALPHA',
-    description: 'Move between director notes, continuity review, and the video timeline.',
-  },
-  {
-    href: '/studio/cinematic',
-    label: 'Cinematic Cloud Stream',
-    shortLabel: 'Cloud',
-    domain: 'runtime',
-    group: 'film',
-    maturity: 'ALPHA',
-    description: 'Review cloud stream cost, teardown, and Pixel Streaming status before any session starts.',
-  },
-  {
-    href: '/studio/audio',
-    label: 'Audio Studio',
-    shortLabel: 'Audio',
-    domain: 'audio',
-    group: 'film',
-    maturity: 'ALPHA',
-    description: 'Compose sound cues, mix layers, and prepare audio receipts for review.',
+    description: 'Move between director notes, continuity review, timeline, audio, and governed cloud review.',
   },
 ]
 

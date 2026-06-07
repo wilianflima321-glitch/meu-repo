@@ -61,6 +61,12 @@ requireToken(spineFile, 'buildResearchRuntimeSpinePlan', 'research runtime integ
 requireToken(spineFile, 'buildContextMemorySpinePlan', 'context memory integration')
 requireToken(spineFile, 'buildGameAssetQualityPipeline', 'asset quality integration')
 requireToken(spineFile, 'buildExportPipelinePlan', 'export pipeline integration')
+requireToken(spineFile, 'buildV29ForensicRuntimeBacklogReport', 'V29 forensic backlog integration')
+requireToken(spineFile, 'forensicRuntimeBacklog', 'forensic runtime backlog summary')
+requireToken(spineFile, 'buildRuntimeResilienceBudgetReport', 'runtime resilience integration')
+requireToken(spineFile, 'runtimeResilienceBudgets', 'runtime resilience summary')
+requireToken(spineFile, 'buildRuntimeFailureSmokePackReport', 'runtime failure smoke pack integration')
+requireToken(spineFile, 'runtimeFailureSmokePack', 'runtime failure smoke pack summary')
 requireToken(routeFile, 'buildBestMarketInternalSpineReport', 'authenticated internal spine API')
 requireToken(routeFile, 'coerceBestMarketInternalSpineInputFromSearchParams', 'API query input coercion')
 requireToken(routeFile, 'requireEntitlementsForUser', 'entitlement guard')
@@ -84,6 +90,9 @@ const requiredEvidence = [
   'license',
   'provenance',
   'takeover control',
+  'crash-state-receipt',
+  'rollback-receipt',
+  'teardown-receipt',
 ]
 
 for (const evidence of requiredEvidence) {
@@ -96,6 +105,8 @@ const requiredGuards = [
   'games must require playtest evidence',
   'films must require playback evidence',
   'browser operator must require takeover control',
+  'runtime resilience budgets are too thin',
+  'runtime resilience budgets must expose P0 blockers',
 ]
 
 for (const guard of requiredGuards) {
@@ -134,7 +145,7 @@ fs.writeFileSync(
 - Runtime-priority gate wired: ${Boolean(packageJson.scripts?.['qa:internal-runtime-priority-gate']?.includes('qa:best-market-internal-spine'))}
 - Failures: ${failures.length}
 
-This gate protects internal robustness, not visual polish. It ensures Aethel keeps apps, research, agents, games, films, viewport, Studio Local, Cloud Render, export, marketplace, context memory, and browser operator behind evidence and honest claim ceilings.
+This gate protects internal robustness, not visual polish. It ensures Aethel keeps apps, research, agents, games, films, viewport, Studio Local, Cloud Render, export, marketplace, context memory, browser operator, and runtime resilience, and failure smoke packs behind evidence, recovery budgets, ledgers, simulations, and honest claim ceilings.
 `,
 )
 

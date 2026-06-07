@@ -2,6 +2,128 @@
 
 export const WORKSPACE_UX_CHECKS = [
   {
+    id: 'preview-canonical-fragmentation',
+    description:
+      'Preview and Viewport must route through CanonicalPreviewSurface with scene/canvas/runtime as one product grammar, not raw parallel viewport shells.',
+    files: [
+      'components/preview/CanonicalPreviewSurface.tsx',
+      'components/canvas/UnifiedViewport.tsx',
+      'components/preview/SceneViewportSurface.tsx',
+      'components/preview/CanvasViewportSurface.tsx',
+      'components/preview/previewSurfaceRegistry.ts',
+    ],
+    combined: true,
+    test: (content, { read } = {}) => {
+      const canonical = read('components/preview/CanonicalPreviewSurface.tsx') ?? ''
+      const required = [
+        "import UnifiedViewport from '@/components/canvas/UnifiedViewport'",
+        '<UnifiedViewport',
+        "dynamic(() => import('@/components/preview/SceneViewportSurface')",
+        "dynamic(() => import('@/components/preview/CanvasViewportSurface')",
+        'data-canonical-preview-surface="scene"',
+        'data-canonical-preview-surface="canvas"',
+        'data-canonical-preview-surface="runtime"',
+        'SceneViewportOutliner',
+        'SceneViewportInspector',
+        'TimelineOverlay',
+        'PREVIEW_SURFACE_REGISTRY',
+        'hiddenActions',
+        'contextual-drawer',
+      ]
+      const forbiddenInCanonical = [
+        'NexusCanvasV2',
+        'AethelViewport3D',
+      ]
+      return (
+        required.filter((token) => !content.includes(token)).length +
+        forbiddenInCanonical.filter((token) => canonical.includes(token)).length
+      )
+    },
+    limit: 0,
+  },
+  {
+    id: 'dashboard-sidebar-fragmentation',
+    description:
+      'Dashboard may expose one canonical sidebar only; legacy/enhanced sidebars must not re-enter the shell.',
+    files: [
+      'components/dashboard/DashboardShell.tsx',
+      'components/dashboard/AethelDashboardSidebar.tsx',
+    ],
+    combined: true,
+    test: (content, { read } = {}) => {
+      const shell = read('components/dashboard/DashboardShell.tsx') ?? ''
+      const required = [
+        'AethelDashboardSidebar',
+        'DashboardMainContent',
+        'MobileBottomNav',
+      ]
+      const forbidden = [
+        'EnhancedDashboardSidebar',
+        "from './DashboardSidebar'",
+        '<DashboardSidebar',
+      ]
+      return required.filter((token) => !content.includes(token)).length + forbidden.filter((token) => shell.includes(token)).length
+    },
+    limit: 0,
+  },
+  {
+    id: 'ide-workbench-region-fragmentation',
+    description:
+      'IDE must converge on ModernIDEShell regions: sidebar, editor, preview, AI sidecar, and terminal; each region needs a boundary and no parallel shell grammar.',
+    files: [
+      'components/ide/modern-shell/types.ts',
+      'components/ide/modern-shell/ModernIDEShellPanels.tsx',
+      'components/ide/ModernIDEShell.tsx',
+    ],
+    combined: true,
+    test: (content) => {
+      const required = [
+        'WORKBENCH_REGION_REGISTRY',
+        "'sidebar'",
+        "'editor'",
+        "'preview'",
+        "'chat'",
+        "'terminal'",
+        'getWorkbenchRegionDefinition',
+        'PanelErrorBoundary',
+        'EditorErrorBoundary',
+        'RuntimeFailureSmokeFault',
+        'data-modern-ide-shell="true"',
+      ]
+      const forbidden = [
+        'IDELayout as canonical',
+        'FullscreenIDE as canonical',
+        'new WorkbenchShell',
+      ]
+      return required.filter((token) => !content.includes(token)).length + forbidden.filter((token) => content.includes(token)).length
+    },
+    limit: 0,
+  },
+  {
+    id: 'studio-route-fragmentation-ratchet',
+    description:
+      'Studio must keep five visible groups and route specialized editors through redirects/tools instead of equal-weight pages.',
+    files: ['app/studio/creative-studio-routes.ts'],
+    test: (content) => {
+      const groupCount = (content.match(/id:\s*'(world|character|fx|film|logic)'/g) ?? []).length
+      const primaryCount = (content.match(/PRIMARY_CREATIVE_HREFS/g) ?? []).length
+      const redirectCount = (content.match(/CREATIVE_STUDIO_ROUTE_REDIRECTS/g) ?? []).length
+      const primaryHrefs = [...content.matchAll(/'\/studio\/(level|animation|vfx|film|quest)'/g)].length
+      const compressedFilmTools = [
+        "'/studio/audio': '/studio/film?tool=audio'",
+        "'/studio/cinematic': '/studio/film?tool=cinematic'",
+      ]
+      return (
+        (groupCount === 5 ? 0 : 1) +
+        (primaryCount >= 1 ? 0 : 1) +
+        (redirectCount >= 1 ? 0 : 1) +
+        (primaryHrefs >= 5 ? 0 : 1) +
+        compressedFilmTools.filter((token) => !content.includes(token)).length
+      )
+    },
+    limit: 0,
+  },
+  {
     id: 'marketplace-filter-compression',
     description:
       'Marketplace category taxonomies must stay secondary to search, trust tabs, provenance, and install review.',

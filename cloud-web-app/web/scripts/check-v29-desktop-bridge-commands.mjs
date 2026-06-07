@@ -42,6 +42,7 @@ const commands = [
   'local_runtime_probe',
   'local_runtime_probe_report',
   'local_runtime_sidecars',
+  'native_kernel_manifest',
   'jobs_route',
   'jobs_list',
   'jobs_cancel',
@@ -67,6 +68,8 @@ for (const token of [
   'desktop_commands::window_minimize',
   'resolve_runtime_target',
   'build_sidecar_capability_manifest',
+  'build_native_kernel_manifest',
+  'NativeKernelManifest',
   'parse_job_lane',
   'target_lane',
 ]) {
@@ -95,6 +98,7 @@ for (const token of [
   "invoke<StudioLocalAiCompleteResult>('ai_complete'",
   "void invoke('notify_native', { input })",
   "invoke<RuntimeProbe>('local_runtime_probe')",
+  "invoke<NativeKernelManifest>('native_kernel_manifest')",
   "invoke<StudioLocalRouteJobResult>('jobs_route'",
   'RuntimeLane',
   'requiresHumanApproval',
@@ -104,6 +108,9 @@ for (const token of [
 
 for (const token of ["'held'", "'local-worker'", 'RuntimeLane']) {
   expectToken('shared runtime types', sharedTypes, token)
+}
+for (const token of ['NativeKernelManifest', 'NativeKernelCapability', 'nativeKernelManifest?']) {
+  expectToken('shared runtime native kernel types', sharedTypes, token)
 }
 for (const token of ['RuntimeLane', 'jsonFetch<{ lane?: RuntimeLane; reason?: string }']) {
   expectToken('web runtime adapter', webAdapter, token)
@@ -117,6 +124,7 @@ for (const token of [
   "command: 'terminal_write'",
   "command: 'terminal_close'",
   "command: 'ai_complete'",
+  "command: 'native_kernel_manifest'",
   "state: 'held'",
   "state: 'provider_unavailable'",
   'Desktop adapter must not coerce held/native runtime decisions',

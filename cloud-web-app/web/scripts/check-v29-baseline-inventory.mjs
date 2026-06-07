@@ -80,10 +80,10 @@ const inventory = {
 }
 
 const limits = {
-  pages: 66,
+  pages: 58,
   apiRoutes: 379,
-  adminPages: 13,
-  studioPages: 8,
+  adminPages: 7,
+  studioPages: 6,
   filesOver500Lines: 218,
   storyFiles: 30,
   testFiles: 206,

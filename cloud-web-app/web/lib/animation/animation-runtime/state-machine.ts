@@ -170,7 +170,7 @@ export class AnimationStateMachine extends EventEmitter {
     this.player.update(deltaTime);
   }
   
-  // Stub for getting clip by ID - should be connected to asset system
+  // Clip registry bridge used until the asset system injects runtime clips
   private clipRegistry: Map<string, AnimationClipData> = new Map();
   
   registerClip(clip: AnimationClipData): void {

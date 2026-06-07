@@ -196,6 +196,30 @@ The chat economics contract is protected by `tools/check-economics-transparency-
 
 ---
 
+## V29 Forensic Runtime Backlog
+
+Source audit: `AETHEL_ENGINE_FORENSIC_RUNTIME_AUDIT_4037ac8`.
+
+This backlog is now executable through `npm run qa:v29-forensic-runtime-backlog` and included in `npm run qa:v29-total-spine`.
+
+The intent is not to add prototypes. It is to prevent Aethel from promoting ambitious systems until the internal runtime, receipts, and gates exist.
+
+| Block | Current risk | Canonical target | Required proof |
+|---|---|---|---|
+| WebGPU render kernel | AAA renderer naming can outrun actual GPU pipeline evidence. | `cloud-web-app/web/lib/render/webgpu` | WebGPU readiness, performance trace, viewport boundary gate. |
+| Sequencer kernel | Film/animation/audio/VFX depend on a thin sequencer core. | `cloud-web-app/web/lib/sequencer` | Track/clip/curve serialization, playback evidence, export receipts. |
+| Agent runtime tools | Agent roles exist, but autonomy needs scoped tools, sandbox, replay, memory, and evals. | `cloud-web-app/web/lib/agents/runtime` | Tool receipts, sandbox receipts, browser replay, role evals. |
+| MCP/plugin host | SDK surfaces exist, but host/registry/tool-call lifecycle must be real. | `cloud-web-app/web/lib/mcp/host.ts` | Server registry, approval policy, tool-call audit receipts. |
+| Studio Local native kernel | Tauri shell exists, but native terminal, local daemon, signing, and updater remain held. | `apps/studio-local/src-tauri/src` | Probe, sidecar, crash, update, signing, and release receipts. |
+| Cloud render/export | Render/export claims need provider, queue, cost, logs, cancel, teardown, and artifact proof. | `cloud-web-app/web/lib/render-farm` and `cloud-web-app/web/lib/export` | Job receipts, cost cap, teardown receipt, artifact signature. |
+| Asset library quality | Asset import exists, but market-grade catalog needs source, license, provenance, and quality ledger. | `cloud-web-app/web/lib/assets/library` | License policy, provenance, quality ledger, human approval. |
+| Physics/on-device/photogrammetry | Game/film tools need real physics, capture, retargeting, and privacy receipts. | `cloud-web-app/web/lib/ai-ondevice` and `cloud-web-app/web/lib/integrations/photogrammetry` | Runtime adapter, provider receipts, privacy review, playtest evidence. |
+| i18n single source | Multiple translation systems and hardcoded strings risk premium copy drift. | `cloud-web-app/web/public/locales` | One source of truth, hardcoded ratchet, EN premium default. |
+
+Guardrail: the forbidden promotion list is centralized in `cloud-web-app/web/lib/runtime/v29-forensic-runtime-backlog.ts`. Claims such as `Unreal-grade`, `final asset`, `production ready`, `research verified`, and `signed installer ready` must remain blocked until evidence exists.
+
+---
+
 ## Conclusion
 
 The product thesis remains strong: Aethel should combine the approachable mission-first entry of the best AI app builders, the real IDE depth of VS Code/Firebase Studio, the browser automation trust model of Manus, and the world-building ambition of Unreal.

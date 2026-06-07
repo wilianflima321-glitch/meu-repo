@@ -263,11 +263,9 @@ const STUDIO_LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
   '/studio/cloth': '/studio/animation?tool=cloth',
   '/studio/fluid': '/studio/vfx?tool=fluid',
   '/studio/sprite': '/studio/vfx?tool=sprite',
+  '/studio/audio': '/studio/film?tool=audio',
+  '/studio/cinematic': '/studio/film?tool=cinematic',
 };
-
-// ============================================================================
-// MIDDLEWARE
-// ============================================================================
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -404,13 +402,35 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  if (!pathname.startsWith('/api') && req.method === 'GET') {
+    const adminLegacyTarget = getAdminLegacyRedirectTarget(pathname);
+    if (adminLegacyTarget) {
+      const url = req.nextUrl.clone();
+      const target = new URL(adminLegacyTarget, req.nextUrl.origin);
+      url.pathname = target.pathname;
+      url.search = target.search;
+      return withSecurityHeaders(NextResponse.redirect(url, 308), req, requestId);
+    }
+
+    const studioLegacyTarget = STUDIO_LEGACY_ROUTE_REDIRECTS[pathname];
+    if (studioLegacyTarget) {
+      const url = req.nextUrl.clone();
+      const target = new URL(studioLegacyTarget, req.nextUrl.origin);
+      url.pathname = target.pathname;
+      url.search = target.search;
+      return withSecurityHeaders(NextResponse.redirect(url, 308), req, requestId);
+    }
+  }
+
   // 4. Protected Paths (Admin, Dashboard, Billing)
   if (!token) {
     // Redirect to login if trying to access protected pages
     if (!pathname.startsWith('/api')) {
       const url = req.nextUrl.clone();
+      const from = `${pathname}${req.nextUrl.search}`;
       url.pathname = '/login';
-      url.searchParams.set('from', pathname);
+      url.search = '';
+      url.searchParams.set('from', from);
       return withSecurityHeaders(NextResponse.redirect(url), req, requestId);
     }
     // Return 401 for API calls
@@ -432,28 +452,6 @@ export async function middleware(req: NextRequest) {
           return withSecurityHeaders(NextResponse.redirect(url), req, requestId);
         }
         return withSecurityHeaders(NextResponse.json({ error: 'Admin access required' }, { status: 403 }), req, requestId);
-      }
-
-      if (!pathname.startsWith('/api') && req.method === 'GET') {
-        const adminLegacyTarget = getAdminLegacyRedirectTarget(pathname);
-        if (adminLegacyTarget) {
-          const url = req.nextUrl.clone();
-          const target = new URL(adminLegacyTarget, req.nextUrl.origin);
-          url.pathname = target.pathname;
-          url.search = target.search;
-          return withSecurityHeaders(NextResponse.redirect(url, 308), req, requestId);
-        }
-      }
-    }
-
-    if (!pathname.startsWith('/api') && req.method === 'GET') {
-      const studioLegacyTarget = STUDIO_LEGACY_ROUTE_REDIRECTS[pathname];
-      if (studioLegacyTarget) {
-        const url = req.nextUrl.clone();
-        const target = new URL(studioLegacyTarget, req.nextUrl.origin);
-        url.pathname = target.pathname;
-        url.search = target.search;
-        return withSecurityHeaders(NextResponse.redirect(url, 308), req, requestId);
       }
     }
 

@@ -1,5 +1,13 @@
 import type { AgenticProductionState } from '@/lib/production/agentic-production-state'
+import {
+  type RuntimeResilienceLedger,
+  validateRuntimeResilienceLedger,
+} from '@/lib/runtime/runtime-resilience-ledger'
 import type { GovernedRuntimeJob } from '@/lib/production/governed-runtime-jobs'
+import type { RuntimeFailureSmokeBrowserRunnerState } from '@/lib/production/runtime-failure-smoke-browser-runner-state'
+import type { RuntimeFailureSmokePackState } from '@/lib/production/runtime-failure-smoke-pack-state'
+import type { V29SidecarInstallManifest } from '@/lib/runtime/v29-sidecar-install-manifest'
+import type { V29SidecarLifecycleReport } from '@/lib/runtime/v29-sidecar-lifecycle'
 import {
   evaluateRuntimeJobReceiptCoverage,
   type RuntimeJobReceiptCoverage,
@@ -26,6 +34,11 @@ export interface RuntimeExecutionEvidencePackageInput {
   state: AgenticProductionState
   job: GovernedRuntimeJob
   receiptState?: RuntimeJobReceiptState | null
+  failureSmokePackState?: RuntimeFailureSmokePackState | null
+  failureSmokeBrowserRunnerState?: RuntimeFailureSmokeBrowserRunnerState | null
+  sidecarLifecycleReport?: V29SidecarLifecycleReport | null
+  sidecarInstallManifest?: V29SidecarInstallManifest | null
+  resilienceLedger?: RuntimeResilienceLedger | null
   generatedBy?: string
   generatedAt?: string
 }
@@ -48,6 +61,12 @@ export interface RuntimeExecutionEvidencePackage {
   releaseSnapshot: ReleaseEvidenceReadinessSnapshot
   releaseManifest: ReleaseEvidencePackageManifest
   manifestVerification: ReleaseEvidencePackageManifestVerification
+  failureSmokePackState: RuntimeFailureSmokePackState | null
+  failureSmokeBrowserRunnerState: RuntimeFailureSmokeBrowserRunnerState | null
+  sidecarLifecycleReport: V29SidecarLifecycleReport | null
+  sidecarInstallManifest: V29SidecarInstallManifest | null
+  resilienceLedger: RuntimeResilienceLedger | null
+  resilienceLedgerVerification: string[]
   status: RuntimeExecutionEvidencePackageStatus
   releaseReady: false
   executionEvidenceComplete: boolean
@@ -99,11 +118,49 @@ export function buildRuntimeExecutionEvidencePackage(
     generatedAt,
   })
   const manifestVerification = verifyReleaseEvidencePackageManifest(releaseManifest)
+  const resilienceLedgerVerification = input.resilienceLedger
+    ? validateRuntimeResilienceLedger(input.resilienceLedger)
+    : ['Runtime resilience ledger is missing from the evidence package.']
   const blockers = unique([
     ...input.job.blockers,
     ...receiptCoverage.blockers,
     ...releaseSnapshot.blockers,
     ...manifestVerification.errors,
+    ...resilienceLedgerVerification,
+    ...(input.failureSmokePackState ? [] : ['Runtime failure smoke pack state is missing from the evidence package.']),
+    ...(input.failureSmokePackState?.summary.releaseReady === false ? [] : ['Runtime failure smoke pack state cannot be release ready.']),
+    ...(input.failureSmokeBrowserRunnerState
+      ? []
+      : ['Runtime failure smoke browser runner state is missing from the evidence package.']),
+    ...(input.failureSmokeBrowserRunnerState?.summary.releaseReady === false
+      ? []
+      : ['Runtime failure smoke browser runner state cannot be release ready.']),
+    ...((input.failureSmokeBrowserRunnerState?.summary.strictReceiptMatchCount ?? 0) >= 2
+      ? []
+      : ['Runtime failure smoke browser runner receipts are incomplete.']),
+    ...(input.sidecarLifecycleReport ? [] : ['Sidecar lifecycle report is missing from the evidence package.']),
+    ...(input.sidecarLifecycleReport?.summary.releaseReady === false
+      ? []
+      : ['Sidecar lifecycle report cannot be release ready.']),
+    ...((input.sidecarLifecycleReport?.summary.checksumVerified ?? 0) >= 1
+      ? []
+      : ['Sidecar lifecycle checksum evidence is missing.']),
+    ...((input.sidecarLifecycleReport?.summary.healthChecked ?? 0) >= 1
+      ? []
+      : ['Sidecar lifecycle health evidence is missing.']),
+    ...(input.sidecarInstallManifest ? [] : ['Sidecar install manifest is missing from the evidence package.']),
+    ...(input.sidecarInstallManifest?.summary.releaseReady === false
+      ? []
+      : ['Sidecar install manifest cannot be release ready.']),
+    ...((input.sidecarInstallManifest?.summary.checksumCoverage ?? 0) >= 1
+      ? []
+      : ['Sidecar install checksum evidence is missing.']),
+    ...((input.sidecarInstallManifest?.summary.signatureCoverage ?? 0) >= 1
+      ? []
+      : ['Sidecar install signature evidence is missing.']),
+    ...(input.resilienceLedger?.summary.readyForStrongerClaims === false
+      ? ['Runtime resilience ledger still blocks stronger reliability claims.']
+      : []),
     ...(input.job.executionAllowed ? [] : ['Governed runtime job execution was not allowed at package time.']),
     'Human release approval is required before final/public claims.',
   ])
@@ -114,6 +171,21 @@ export function buildRuntimeExecutionEvidencePackage(
     ...(input.receiptState?.receipts.filter((receipt) => receipt.jobId === input.job.id).flatMap((receipt) => receipt.refs) ?? []),
     `release-manifest:${releaseManifest.packageId}`,
     `release-manifest-integrity:${releaseManifest.integrityHash}`,
+    ...(input.resilienceLedger ? [`runtime-resilience-ledger:${input.resilienceLedger.runId}`] : []),
+    ...(input.failureSmokePackState ? [`runtime-failure-smoke-pack-state:${input.failureSmokePackState.summary.lastRunId ?? input.failureSmokePackState.projectId}`] : []),
+    ...(input.failureSmokePackState?.packs.flatMap((pack) => pack.evidenceRefs) ?? []),
+    ...(input.failureSmokeBrowserRunnerState
+      ? [
+          `runtime-failure-smoke-browser-runner-state:${
+            input.failureSmokeBrowserRunnerState.summary.lastRunId ?? input.failureSmokeBrowserRunnerState.projectId
+          }`,
+        ]
+      : []),
+    ...(input.failureSmokeBrowserRunnerState?.reports.flatMap((report) => report.evidenceRefs) ?? []),
+    ...(input.sidecarLifecycleReport ? [`sidecar-lifecycle-report:${input.sidecarLifecycleReport.generatedAt}`] : []),
+    ...(input.sidecarLifecycleReport?.sidecars.flatMap((entry) => entry.evidenceRefs) ?? []),
+    ...(input.sidecarInstallManifest ? [`sidecar-install-manifest:${input.sidecarInstallManifest.generatedAt}`] : []),
+    ...(input.sidecarInstallManifest?.artifacts.flatMap((artifact) => artifact.evidenceRefs) ?? []),
   ])
 
   return {
@@ -134,6 +206,12 @@ export function buildRuntimeExecutionEvidencePackage(
     releaseSnapshot,
     releaseManifest,
     manifestVerification,
+    failureSmokePackState: input.failureSmokePackState ?? null,
+    failureSmokeBrowserRunnerState: input.failureSmokeBrowserRunnerState ?? null,
+    sidecarLifecycleReport: input.sidecarLifecycleReport ?? null,
+    sidecarInstallManifest: input.sidecarInstallManifest ?? null,
+    resilienceLedger: input.resilienceLedger ?? null,
+    resilienceLedgerVerification,
     status: statusFor(blockers),
     releaseReady: false,
     executionEvidenceComplete: receiptCoverage.missingKinds.length === 0 && receiptCoverage.blockers.length === 0,
@@ -146,6 +224,11 @@ export function buildRuntimeExecutionEvidencePackage(
         'runtime evidence package generated',
         'receipt coverage calculated',
         'release manifest integrity checked',
+        'resilience ledger attached',
+        'failure smoke pack state attached',
+        'failure smoke browser runner evidence attached',
+        'sidecar lifecycle evidence attached',
+        'sidecar install manifest attached',
         'human review can be requested when blockers are cleared',
       ],
       prohibitedClaims: [
@@ -155,6 +238,12 @@ export function buildRuntimeExecutionEvidencePackage(
         'Unreal-grade',
         'automatic publish',
         'releaseReady=true',
+        'research verified',
+        'desktop ready',
+        'native renderer ready',
+        'signed installer',
+        'public download ready',
+        'cloud render available',
       ],
     },
     nextAction:
@@ -175,9 +264,45 @@ export function verifyRuntimeExecutionEvidencePackage(
     ...(evidencePackage.manualPublishRequired === true ? [] : ['Runtime execution package must require manual publish.']),
     ...(evidencePackage.humanApprovalRequired === true ? [] : ['Runtime execution package must require human approval.']),
     ...(evidencePackage.manifestVerification.valid ? [] : evidencePackage.manifestVerification.errors),
+    ...(evidencePackage.resilienceLedgerVerification.length === 0
+      ? []
+      : evidencePackage.resilienceLedgerVerification.map((error) => `Runtime resilience ledger error: ${error}`)),
+    ...(evidencePackage.failureSmokePackState
+      ? []
+      : ['Runtime execution package must include failure smoke pack state.']),
+    ...(evidencePackage.failureSmokeBrowserRunnerState
+      ? []
+      : ['Runtime execution package must include failure smoke browser runner state.']),
+    ...(evidencePackage.failureSmokeBrowserRunnerState?.summary.releaseReady === false
+      ? []
+      : ['Runtime failure smoke browser runner state cannot be release ready.']),
+    ...((evidencePackage.failureSmokeBrowserRunnerState?.summary.strictReceiptMatchCount ?? 0) >= 2
+      ? []
+      : ['Runtime failure smoke browser runner receipts are incomplete.']),
+    ...(evidencePackage.sidecarLifecycleReport
+      ? []
+      : ['Runtime execution package must include sidecar lifecycle report.']),
+    ...(evidencePackage.sidecarLifecycleReport?.summary.releaseReady === false
+      ? []
+      : ['Sidecar lifecycle report cannot be release ready.']),
+    ...(evidencePackage.sidecarInstallManifest
+      ? []
+      : ['Runtime execution package must include sidecar install manifest.']),
+    ...(evidencePackage.sidecarInstallManifest?.summary.releaseReady === false
+      ? []
+      : ['Sidecar install manifest cannot be release ready.']),
     ...(evidencePackage.claimPolicy.prohibitedClaims.includes('automatic publish')
       ? []
       : ['Claim policy must prohibit automatic publish.']),
+    ...(evidencePackage.claimPolicy.prohibitedClaims.includes('research verified')
+      ? []
+      : ['Claim policy must prohibit research verified without resilience evidence.']),
+    ...(evidencePackage.claimPolicy.prohibitedClaims.includes('signed installer')
+      ? []
+      : ['Claim policy must prohibit signed installer.']),
+    ...(evidencePackage.claimPolicy.prohibitedClaims.includes('public download ready')
+      ? []
+      : ['Claim policy must prohibit public download ready.']),
   ])
 
   return {

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
+import { useSearchParams } from 'next/navigation'
 import StudioEngineModuleMiniPanel from '@/components/studio/StudioEngineModuleMiniPanel'
 import CreativeStudioShell, { CreativeStudioLoading } from '../CreativeStudioShell'
 
@@ -15,13 +16,29 @@ const VideoTimelineEditor = dynamic(() => import('@/components/video/VideoTimeli
   loading: () => <CreativeStudioLoading label="Film Timeline" />,
 })
 
+const SoundCueEditor = dynamic(() => import('@/components/audio/SoundCueEditor'), {
+  ssr: false,
+  loading: () => <CreativeStudioLoading label="Audio Studio" />,
+})
+
+const CloudStreamStudioClient = dynamic(() => import('../cinematic/CloudStreamStudioClient'), {
+  ssr: false,
+  loading: () => <CreativeStudioLoading label="Cloud Stream" />,
+})
+
 const FILM_ENGINE_MODULES = ['cutscene-system', 'dialogue-cutscene-system', 'capture-system'] as const
 const FILM_MODES = [
   { id: 'director', label: 'Director Mode', description: 'Story, shots, continuity' },
   { id: 'timeline', label: 'Timeline', description: 'Edit, layers, timing' },
+  { id: 'audio', label: 'Audio', description: 'Sound cues and mix' },
+  { id: 'cinematic', label: 'Cloud Review', description: 'Stream, cost, teardown' },
 ] as const
 
 type FilmMode = (typeof FILM_MODES)[number]['id']
+
+function coerceFilmMode(value: string | null): FilmMode {
+  return FILM_MODES.some((item) => item.id === value) ? (value as FilmMode) : 'director'
+}
 
 function modeButtonClass(active: boolean): string {
   return active
@@ -30,7 +47,13 @@ function modeButtonClass(active: boolean): string {
 }
 
 export default function FilmStudioClient() {
-  const [mode, setMode] = useState<FilmMode>('director')
+  const searchParams = useSearchParams()
+  const routedMode = useMemo(() => coerceFilmMode(searchParams?.get('tool') ?? null), [searchParams])
+  const [mode, setMode] = useState<FilmMode>(routedMode)
+
+  useEffect(() => {
+    setMode(routedMode)
+  }, [routedMode])
 
   return (
     <CreativeStudioShell
@@ -75,7 +98,10 @@ export default function FilmStudioClient() {
             </div>
           </div>
           <div className="min-h-0 flex-1 overflow-hidden">
-            {mode === 'director' ? <DirectorMode /> : <VideoTimelineEditor />}
+            {mode === 'director' ? <DirectorMode /> : null}
+            {mode === 'timeline' ? <VideoTimelineEditor /> : null}
+            {mode === 'audio' ? <SoundCueEditor /> : null}
+            {mode === 'cinematic' ? <CloudStreamStudioClient embedded /> : null}
           </div>
         </div>
       </div>

@@ -18,9 +18,16 @@ pub fn health_body() -> String {
     "{\"ok\":true,\"service\":\"aethel-studio-local\",\"version\":1}".to_string()
 }
 
-pub fn handle_request(method: &str, path: &str, store: &mut RuntimeJobStore) -> RuntimeHttpResponse {
+pub fn handle_request(
+    method: &str,
+    path: &str,
+    store: &mut RuntimeJobStore,
+) -> RuntimeHttpResponse {
     match (method, path) {
-        ("GET", HEALTH_ENDPOINT) => RuntimeHttpResponse { status_code: 200, body: health_body() },
+        ("GET", HEALTH_ENDPOINT) => RuntimeHttpResponse {
+            status_code: 200,
+            body: health_body(),
+        },
         ("POST", PROBE_ENDPOINT) => {
             let probe = collect_local_probe("local-device");
             RuntimeHttpResponse {
@@ -45,17 +52,34 @@ pub fn handle_request(method: &str, path: &str, store: &mut RuntimeJobStore) -> 
         _ if method == "GET" && path.starts_with("/jobs/") => {
             let id = path.trim_start_matches("/jobs/");
             match store.get(id) {
-                Some(status) => RuntimeHttpResponse { status_code: 200, body: format!("job:{}:{}", status.id, status.target.as_str()) },
-                None => RuntimeHttpResponse { status_code: 404, body: "job:not-found".to_string() },
+                Some(status) => RuntimeHttpResponse {
+                    status_code: 200,
+                    body: format!("job:{}:{}", status.id, status.target.as_str()),
+                },
+                None => RuntimeHttpResponse {
+                    status_code: 404,
+                    body: "job:not-found".to_string(),
+                },
             }
         }
         _ if method == "POST" && path.starts_with("/jobs/") && path.ends_with("/cancel") => {
-            let id = path.trim_start_matches("/jobs/").trim_end_matches("/cancel");
+            let id = path
+                .trim_start_matches("/jobs/")
+                .trim_end_matches("/cancel");
             match store.cancel(id) {
-                Some(status) => RuntimeHttpResponse { status_code: 202, body: format!("job:{}:cancelled", status.id) },
-                None => RuntimeHttpResponse { status_code: 404, body: "job:not-found".to_string() },
+                Some(status) => RuntimeHttpResponse {
+                    status_code: 202,
+                    body: format!("job:{}:cancelled", status.id),
+                },
+                None => RuntimeHttpResponse {
+                    status_code: 404,
+                    body: "job:not-found".to_string(),
+                },
             }
         }
-        _ => RuntimeHttpResponse { status_code: 404, body: "endpoint:not-found".to_string() },
+        _ => RuntimeHttpResponse {
+            status_code: 404,
+            body: "endpoint:not-found".to_string(),
+        },
     }
 }

@@ -498,6 +498,18 @@ export const ErrorBoundaryProvider: React.FC<{ children: ReactNode }> = ({ child
 // Specialized Error Boundaries
 // ============================================================================
 
+function getRuntimeFailureSmokeReceipt(error: Error, fallbackReceipt: string): string {
+  if (error.message.includes('AETHEL_RUNTIME_FAILURE_SMOKE:ide-region-crash-isolated')) {
+    return 'error boundary receipt:ide-editor-region';
+  }
+
+  if (error.message.includes('AETHEL_RUNTIME_FAILURE_SMOKE:preview-render-fallback')) {
+    return 'error boundary receipt:preview-render-adapter';
+  }
+
+  return fallbackReceipt;
+}
+
 /**
  * Error boundary for editor components - shows inline error
  */
@@ -506,18 +518,25 @@ export const EditorErrorBoundary: React.FC<{ children: ReactNode }> = ({ childre
     <ErrorBoundary
       level="warning"
       showDetails={false}
-      fallback={(error, reset) => (
-        <div className="flex flex-col items-center justify-center h-full p-4 bg-[var(--aethel-surface-secondary)]">
-          <AlertTriangle className="w-8 h-8 text-[var(--aethel-warning-light)] mb-2" />
-          <p className="text-sm text-[var(--aethel-text-secondary)] mb-3">Failed to render editor</p>
-          <button type="button" aria-label="Retry compact error boundary"
-            onClick={reset}
-            className="px-3 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded"
+      fallback={(error, reset) => {
+        const smokeReceipt = getRuntimeFailureSmokeReceipt(error, 'error boundary receipt:ide-editor-region');
+        return (
+          <div
+            className="flex flex-col items-center justify-center h-full p-4 bg-[var(--aethel-surface-secondary)]"
+            data-aethel-editor-error-boundary="active"
+            data-aethel-runtime-failure-smoke-receipt={smokeReceipt}
           >
-            Retry
-          </button>
-        </div>
-      )}
+            <AlertTriangle className="w-8 h-8 text-[var(--aethel-warning-light)] mb-2" />
+            <p className="text-sm text-[var(--aethel-text-secondary)] mb-3">Failed to render editor</p>
+            <button type="button" aria-label="Retry compact error boundary"
+              onClick={reset}
+              className="px-3 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded"
+            >
+              Retry
+            </button>
+          </div>
+        );
+      }}
     >
       {children}
     </ErrorBoundary>
@@ -535,19 +554,26 @@ export const PanelErrorBoundary: React.FC<{
     <ErrorBoundary
       level="info"
       showDetails={false}
-      fallback={(error, reset) => (
-        <div className="flex items-center justify-between p-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] border-b border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]">
-          <span className="text-xs text-[var(--aethel-error-light)]">
-            {panelName} error: {error.message}
-          </span>
-          <button type="button" aria-label="Retry tiny error boundary"
-            onClick={reset}
-            className="p-1 hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded"
+      fallback={(error, reset) => {
+        const smokeReceipt = getRuntimeFailureSmokeReceipt(error, `error boundary receipt:${panelName}`);
+        return (
+          <div
+            className="flex items-center justify-between p-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] border-b border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]"
+            data-aethel-panel-error-boundary={panelName}
+            data-aethel-runtime-failure-smoke-receipt={smokeReceipt}
           >
-            <RefreshCw size={12} className="text-[var(--aethel-error-light)]" />
-          </button>
-        </div>
-      )}
+            <span className="text-xs text-[var(--aethel-error-light)]">
+              {panelName} error: {error.message}
+            </span>
+            <button type="button" aria-label="Retry tiny error boundary"
+              onClick={reset}
+              className="p-1 hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded"
+            >
+              <RefreshCw size={12} className="text-[var(--aethel-error-light)]" />
+            </button>
+          </div>
+        );
+      }}
     >
       {children}
     </ErrorBoundary>

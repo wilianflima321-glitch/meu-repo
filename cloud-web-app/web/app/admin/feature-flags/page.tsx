@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { AdminProductLegacyDrawers } from './AdminProductLegacyDrawers';
+
 interface FeatureFlag {
   id: string;
   key: string;
@@ -28,8 +30,8 @@ export default function FeatureFlagsAdmin() {
   });
   const [saving, setSaving] = useState(false);
   const typeLabels: Record<string, string> = {
-    boolean: 'Booleano',
-    percentage: 'Percentual',
+    boolean: 'Boolean',
+    percentage: 'Percentage',
     rule_based: 'Baseado em regras',
     variant: 'Variante',
   };
@@ -97,8 +99,10 @@ export default function FeatureFlagsAdmin() {
           <h1 className='text-3xl font-bold'>Flags de recursos</h1>
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Distribution control and enablement by environment.</p>
         </div>
-        <button type="button" onClick={fetchFlags} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
+        <button type="button" onClick={fetchFlags} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Refresh</button>
       </div>
+
+      <AdminProductLegacyDrawers />
 
       {error && (
         <div className='bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4'>
@@ -111,13 +115,13 @@ export default function FeatureFlagsAdmin() {
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <input
             className='border p-2 rounded text-sm'
-            placeholder='Chave'
+            placeholder='Key'
             value={form.key}
             onChange={(e) => setForm((prev) => ({ ...prev, key: e.target.value }))}
           />
           <input
             className='border p-2 rounded text-sm'
-            placeholder='Nome'
+            placeholder='Name'
             value={form.name}
             onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
           />
@@ -126,9 +130,9 @@ export default function FeatureFlagsAdmin() {
             value={form.type}
             onChange={(e) => setForm((prev) => ({ ...prev, type: e.target.value }))}
           >
-            <option value='boolean'>Booleano</option>
-            <option value='percentage'>Percentual</option>
-            <option value='rule_based'>Baseado em regras</option>
+            <option value='boolean'>Boolean</option>
+            <option value='percentage'>Percentage</option>
+            <option value='rule_based'>Rule based</option>
             <option value='variant'>Variante</option>
           </select>
           <input
@@ -150,7 +154,7 @@ export default function FeatureFlagsAdmin() {
             disabled={saving || !form.key.trim() || !form.name.trim()}
             className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'
           >
-            {saving ? 'Saving...' : 'Criar flag'}
+            {saving ? 'Saving...' : 'Create flag'}
           </button>
         </div>
       </div>
@@ -160,7 +164,7 @@ export default function FeatureFlagsAdmin() {
           <h2 className='text-xl font-semibold'>Flags ativas</h2>
           <input
             className='border p-2 rounded text-sm'
-            placeholder='Buscar'
+            placeholder='Search'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -168,13 +172,13 @@ export default function FeatureFlagsAdmin() {
         {loading ? (
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Loading flags...</p>
         ) : filtered.length === 0 ? (
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Nenhuma flag encontrada.</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>No flags found.</p>
         ) : (
           <table className='w-full table-auto'>
             <thead>
               <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'>
-                <th className='p-2 text-left'>Chave</th>
-                <th className='p-2 text-left'>Nome</th>
+                <th className='p-2 text-left'>Key</th>
+                <th className='p-2 text-left'>Name</th>
                 <th className='p-2 text-left'>Tipo</th>
                 <th className='p-2 text-left'>Distribution</th>
                 <th className='p-2 text-left'>Status</th>
@@ -198,10 +202,10 @@ export default function FeatureFlagsAdmin() {
                   <td className='p-2'>
                     <button type="button"
                       onClick={() => toggleFlag(flag.key, flag.enabled)}
-                      aria-label={flag.enabled ? `Desativar flag ${flag.key}` : `Ativar flag ${flag.key}`}
+                      aria-label={flag.enabled ? `Disable flag ${flag.key}` : `Enable flag ${flag.key}`}
                       className='px-2 py-1 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded text-sm'
                     >
-                      {flag.enabled ? 'Desativar' : 'Ativar'}
+                      {flag.enabled ? 'Disable' : 'Enable'}
                     </button>
                   </td>
                 </tr>

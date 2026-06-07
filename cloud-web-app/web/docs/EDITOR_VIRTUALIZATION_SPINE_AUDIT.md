@@ -1,6 +1,6 @@
 # Editor Virtualization Spine Audit
 
-Generated: 2026-06-06T02:02:59.111Z
+Generated: 2026-06-06T15:14:47.040Z
 
 - Shared hook: components/performance/useVirtualWindow.ts
 - Virtualized editors: components/engine/WorldOutliner.tsx, components/engine/EngineContentBrowser.tsx

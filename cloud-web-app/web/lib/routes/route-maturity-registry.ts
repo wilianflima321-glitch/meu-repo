@@ -56,9 +56,9 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/studio/animation', maturity: 'ALPHA', label: 'Animation Studio', notes: 'Wires the existing AnimationBlueprint into the canonical Studio shell' },
   { path: '/studio/vfx', maturity: 'ALPHA', label: 'VFX Studio', notes: 'Wires the existing NiagaraVFX editor into the canonical Studio shell' },
   { path: '/studio/quest', maturity: 'ALPHA', label: 'Quest Studio', notes: 'Wires QuestEditor into the canonical Studio shell for branching mission design' },
-  { path: '/studio/film', maturity: 'ALPHA', label: 'Film Studio', notes: 'Wires DirectorMode and VideoTimelineEditor into one progressive film surface' },
-  { path: '/studio/cinematic', maturity: 'ALPHA', label: 'Cinematic Cloud Stream', notes: 'Visible readiness surface for Cloud Stream; held unless signaling, cost, teardown, and session evidence exist' },
-  { path: '/studio/audio', maturity: 'ALPHA', label: 'Audio Studio', notes: 'Wires SoundCueEditor into the canonical Studio shell' },
+  { path: '/studio/film', maturity: 'ALPHA', label: 'Film Studio', notes: 'Wires DirectorMode, VideoTimelineEditor, SoundCueEditor, and governed Cloud Stream review into one progressive film surface' },
+  { path: '/studio/cinematic', maturity: 'ALPHA', label: 'Cinematic Cloud Stream', notes: 'Compatibility URL; opens Film Studio with governed Cloud Stream review selected and held unless signaling, cost, teardown, and session evidence exist' },
+  { path: '/studio/audio', maturity: 'ALPHA', label: 'Audio Studio', notes: 'Compatibility URL; opens Film Studio with the Audio tool selected' },
 
   { path: '/studio/cloth', maturity: 'ALPHA', label: 'Cloth', notes: 'Compatibility URL; opens Character Studio with the Cloth tool selected' },
   { path: '/studio/facial', maturity: 'ALPHA', label: 'Facial', notes: 'Compatibility URL; opens Character Studio with the Facial tool selected' },

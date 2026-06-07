@@ -86,7 +86,11 @@ impl TerminalSessionStore {
         }
     }
 
-    fn write_held(&mut self, session_id: &str, input_bytes: usize) -> Result<NativeCommandStatus, String> {
+    fn write_held(
+        &mut self,
+        session_id: &str,
+        input_bytes: usize,
+    ) -> Result<NativeCommandStatus, String> {
         let session = self
             .sessions
             .get_mut(session_id)
@@ -95,7 +99,8 @@ impl TerminalSessionStore {
         session.last_input_bytes = input_bytes;
         Ok(NativeCommandStatus {
             state: "held".to_string(),
-            reason: "Terminal input was recorded as held; no local shell process was spawned.".to_string(),
+            reason: "Terminal input was recorded as held; no local shell process was spawned."
+                .to_string(),
         })
     }
 
@@ -138,7 +143,11 @@ fn has_denied_segment(path: &Path) -> bool {
     path.components().any(|component| match component {
         Component::Normal(value) => value
             .to_str()
-            .map(|segment| DENIED_SEGMENTS.iter().any(|denied| segment.eq_ignore_ascii_case(denied)))
+            .map(|segment| {
+                DENIED_SEGMENTS
+                    .iter()
+                    .any(|denied| segment.eq_ignore_ascii_case(denied))
+            })
             .unwrap_or(false),
         _ => false,
     })
@@ -165,7 +174,10 @@ fn ensure_allowed_existing_path(input: &str) -> Result<PathBuf, String> {
 
 fn ensure_allowed_resolved_path(resolved: PathBuf) -> Result<PathBuf, String> {
     if has_denied_segment(&resolved) {
-        return Err("Studio Local blocks protected workspace internals for native filesystem commands.".to_string());
+        return Err(
+            "Studio Local blocks protected workspace internals for native filesystem commands."
+                .to_string(),
+        );
     }
 
     let roots = allowed_roots();
@@ -188,9 +200,9 @@ fn ensure_allowed_write_path(input: &str) -> Result<PathBuf, String> {
             .join(candidate)
     };
 
-    let parent = absolute
-        .parent()
-        .ok_or_else(|| "Studio Local requires a parent directory before native writes.".to_string())?;
+    let parent = absolute.parent().ok_or_else(|| {
+        "Studio Local requires a parent directory before native writes.".to_string()
+    })?;
     let file_name = absolute
         .file_name()
         .ok_or_else(|| "Studio Local requires a file name before native writes.".to_string())?;
@@ -204,7 +216,8 @@ fn ensure_allowed_write_path(input: &str) -> Result<PathBuf, String> {
 #[tauri::command]
 pub fn fs_read(path: String) -> Result<String, String> {
     let path = ensure_allowed_existing_path(&path)?;
-    let metadata = fs::metadata(&path).map_err(|error| format!("failed to inspect file: {error}"))?;
+    let metadata =
+        fs::metadata(&path).map_err(|error| format!("failed to inspect file: {error}"))?;
     if !metadata.is_file() {
         return Err("Studio Local fs_read only accepts files.".to_string());
     }
@@ -230,22 +243,31 @@ pub fn fs_write(path: String, content: String) -> Result<(), String> {
 #[tauri::command]
 pub fn fs_list(path: String) -> Result<Vec<FileEntry>, String> {
     let path = ensure_allowed_existing_path(&path)?;
-    let metadata = fs::metadata(&path).map_err(|error| format!("failed to inspect directory: {error}"))?;
+    let metadata =
+        fs::metadata(&path).map_err(|error| format!("failed to inspect directory: {error}"))?;
     if !metadata.is_dir() {
         return Err("Studio Local fs_list only accepts directories.".to_string());
     }
 
     let mut entries = Vec::new();
-    for entry in fs::read_dir(&path).map_err(|error| format!("failed to list directory: {error}"))? {
+    for entry in
+        fs::read_dir(&path).map_err(|error| format!("failed to list directory: {error}"))?
+    {
         let entry = entry.map_err(|error| format!("failed to inspect directory entry: {error}"))?;
         let entry_path = entry.path();
         if has_denied_segment(&entry_path) {
             continue;
         }
-        let metadata = entry.metadata().map_err(|error| format!("failed to inspect directory entry: {error}"))?;
+        let metadata = entry
+            .metadata()
+            .map_err(|error| format!("failed to inspect directory entry: {error}"))?;
         entries.push(FileEntry {
             path: entry_path.display().to_string(),
-            entry_type: if metadata.is_dir() { "folder".to_string() } else { "file".to_string() },
+            entry_type: if metadata.is_dir() {
+                "folder".to_string()
+            } else {
+                "file".to_string()
+            },
         });
     }
     entries.sort_by(|left, right| left.path.cmp(&right.path));
@@ -324,7 +346,9 @@ pub fn notify_native(input: NativeNotificationInput) -> NativeCommandStatus {
 
 #[tauri::command]
 pub fn window_minimize(window: Window) -> Result<(), String> {
-    window.minimize().map_err(|error| format!("failed to minimize window: {error}"))
+    window
+        .minimize()
+        .map_err(|error| format!("failed to minimize window: {error}"))
 }
 
 #[tauri::command]
@@ -333,15 +357,21 @@ pub fn window_toggle_maximize(window: Window) -> Result<(), String> {
         .is_maximized()
         .map_err(|error| format!("failed to inspect window state: {error}"))?;
     if is_maximized {
-        window.unmaximize().map_err(|error| format!("failed to unmaximize window: {error}"))
+        window
+            .unmaximize()
+            .map_err(|error| format!("failed to unmaximize window: {error}"))
     } else {
-        window.maximize().map_err(|error| format!("failed to maximize window: {error}"))
+        window
+            .maximize()
+            .map_err(|error| format!("failed to maximize window: {error}"))
     }
 }
 
 #[tauri::command]
 pub fn window_close(window: Window) -> Result<(), String> {
-    window.close().map_err(|error| format!("failed to close window: {error}"))
+    window
+        .close()
+        .map_err(|error| format!("failed to close window: {error}"))
 }
 
 #[cfg(test)]
@@ -369,18 +399,25 @@ mod tests {
         let root = test_workspace("filesystem");
         let file = root.join("note.txt");
 
-        fs_write(file.display().to_string(), "hello from Studio Local".to_string()).expect("write allowed file");
+        fs_write(
+            file.display().to_string(),
+            "hello from Studio Local".to_string(),
+        )
+        .expect("write allowed file");
         let contents = fs_read(file.display().to_string()).expect("read allowed file");
         assert_eq!(contents, "hello from Studio Local");
 
         let entries = fs_list(root.display().to_string()).expect("list allowed directory");
-        assert!(entries.iter().any(|entry| entry.path.ends_with("note.txt") && entry.entry_type == "file"));
+        assert!(entries
+            .iter()
+            .any(|entry| entry.path.ends_with("note.txt") && entry.entry_type == "file"));
 
         let protected_dir = root.join(".git");
         fs::create_dir_all(&protected_dir).expect("protected dir created");
         let protected_file = protected_dir.join("config");
         fs::write(&protected_file, "secret").expect("protected file created");
-        let error = fs_read(protected_file.display().to_string()).expect_err("protected path is blocked");
+        let error =
+            fs_read(protected_file.display().to_string()).expect_err("protected path is blocked");
         assert!(error.contains("protected workspace internals"));
 
         let _ = fs::remove_dir_all(root);
@@ -393,7 +430,9 @@ mod tests {
         assert_eq!(session.state, "held");
         assert!(session.reason.contains("held"));
 
-        let written = store.write_held(&session.id, 42).expect("held terminal input recorded");
+        let written = store
+            .write_held(&session.id, 42)
+            .expect("held terminal input recorded");
         assert_eq!(written.state, "held");
         let record = store.sessions.get(&session.id).expect("session stored");
         assert_eq!(record.last_input_bytes, 42);
@@ -405,7 +444,10 @@ mod tests {
 
     #[test]
     fn ai_completion_stays_provider_unavailable_until_sidecar_exists() {
-        let response = ai_complete("draft a plan".to_string(), Some("local-fixture".to_string()));
+        let response = ai_complete(
+            "draft a plan".to_string(),
+            Some("local-fixture".to_string()),
+        );
         assert_eq!(response.state, "provider_unavailable");
         assert_eq!(response.cost_usd, Some(0.0));
         assert!(response.text.is_empty());
@@ -420,6 +462,8 @@ mod tests {
             tone: Some("info".to_string()),
         });
         assert_eq!(response.state, "provider_unavailable");
-        assert!(response.reason.contains("Native notification plugin is not installed"));
+        assert!(response
+            .reason
+            .contains("Native notification plugin is not installed"));
     }
 }

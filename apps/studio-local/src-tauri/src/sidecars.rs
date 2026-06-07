@@ -4,7 +4,10 @@ use crate::contracts::{
     RuntimeJobLane, RuntimeSidecarCapability, RuntimeSidecarKind,
 };
 
-fn has_toolchain_feature(probe: &LocalRuntimeProbeReport, feature: LocalRuntimeToolchainFeature) -> bool {
+fn has_toolchain_feature(
+    probe: &LocalRuntimeProbeReport,
+    feature: LocalRuntimeToolchainFeature,
+) -> bool {
     probe.local_toolchain.contains(&feature)
 }
 
@@ -12,7 +15,9 @@ fn sidecar_available(probe: &LocalRuntimeProbeReport, kind: RuntimeSidecarKind) 
     match kind {
         RuntimeSidecarKind::WgpuRenderer => {
             probe.supports_offscreen_render
-                && probe.renderer_backends.contains(&LocalRuntimeRendererBackend::WgpuNative)
+                && probe
+                    .renderer_backends
+                    .contains(&LocalRuntimeRendererBackend::WgpuNative)
         }
         RuntimeSidecarKind::Ffmpeg => {
             probe.ffmpeg_available
@@ -23,14 +28,21 @@ fn sidecar_available(probe: &LocalRuntimeProbeReport, kind: RuntimeSidecarKind) 
             has_toolchain_feature(probe, LocalRuntimeToolchainFeature::Ffprobe)
                 || probe.media_tools.contains(&LocalRuntimeMediaTool::Ffprobe)
         }
-        RuntimeSidecarKind::OnnxRuntime => probe.onnx_runtime_available || !probe.ai_execution_providers.is_empty(),
+        RuntimeSidecarKind::OnnxRuntime => {
+            probe.onnx_runtime_available || !probe.ai_execution_providers.is_empty()
+        }
         RuntimeSidecarKind::BrowserOperator => {
-            probe.browser_automation_available || has_toolchain_feature(probe, LocalRuntimeToolchainFeature::BrowserAutomation)
+            probe.browser_automation_available
+                || has_toolchain_feature(probe, LocalRuntimeToolchainFeature::BrowserAutomation)
         }
         RuntimeSidecarKind::AssetOptimizer => {
             has_toolchain_feature(probe, LocalRuntimeToolchainFeature::AssetOptimizer)
-                || probe.asset_tools.contains(&LocalRuntimeAssetTool::GltfTransform)
-                || probe.asset_tools.contains(&LocalRuntimeAssetTool::Meshoptimizer)
+                || probe
+                    .asset_tools
+                    .contains(&LocalRuntimeAssetTool::GltfTransform)
+                || probe
+                    .asset_tools
+                    .contains(&LocalRuntimeAssetTool::Meshoptimizer)
         }
         RuntimeSidecarKind::ShaderCompiler => {
             has_toolchain_feature(probe, LocalRuntimeToolchainFeature::ShaderCompiler)
@@ -41,7 +53,10 @@ fn sidecar_available(probe: &LocalRuntimeProbeReport, kind: RuntimeSidecarKind) 
             has_toolchain_feature(probe, LocalRuntimeToolchainFeature::ZigToolchain)
                 || has_toolchain_feature(probe, LocalRuntimeToolchainFeature::ZigCCompiler)
         }
-        RuntimeSidecarKind::RapierPhysics => probe.rapier_available || has_toolchain_feature(probe, LocalRuntimeToolchainFeature::Rapier),
+        RuntimeSidecarKind::RapierPhysics => {
+            probe.rapier_available
+                || has_toolchain_feature(probe, LocalRuntimeToolchainFeature::Rapier)
+        }
     }
 }
 
@@ -49,21 +64,34 @@ pub fn required_sidecars_for_lane(lane: RuntimeJobLane) -> Vec<RuntimeSidecarKin
     match lane {
         RuntimeJobLane::AiLocalInference => vec![RuntimeSidecarKind::OnnxRuntime],
         RuntimeJobLane::MemoryIndexing => Vec::new(),
-        RuntimeJobLane::AssetImport => vec![RuntimeSidecarKind::AssetOptimizer, RuntimeSidecarKind::Ffprobe],
+        RuntimeJobLane::AssetImport => vec![
+            RuntimeSidecarKind::AssetOptimizer,
+            RuntimeSidecarKind::Ffprobe,
+        ],
         RuntimeJobLane::ViewportRender => vec![
             RuntimeSidecarKind::WgpuRenderer,
             RuntimeSidecarKind::ShaderCompiler,
             RuntimeSidecarKind::RapierPhysics,
         ],
-        RuntimeJobLane::BuildExport => vec![RuntimeSidecarKind::AssetOptimizer, RuntimeSidecarKind::NativeCompiler],
+        RuntimeJobLane::BuildExport => vec![
+            RuntimeSidecarKind::AssetOptimizer,
+            RuntimeSidecarKind::NativeCompiler,
+        ],
         RuntimeJobLane::BrowserOperator => vec![RuntimeSidecarKind::BrowserOperator],
         RuntimeJobLane::FileSync => Vec::new(),
-        RuntimeJobLane::Playtest => vec![RuntimeSidecarKind::WgpuRenderer, RuntimeSidecarKind::RapierPhysics],
-        RuntimeJobLane::RenderQueue => vec![RuntimeSidecarKind::Ffmpeg, RuntimeSidecarKind::Ffprobe],
+        RuntimeJobLane::Playtest => vec![
+            RuntimeSidecarKind::WgpuRenderer,
+            RuntimeSidecarKind::RapierPhysics,
+        ],
+        RuntimeJobLane::RenderQueue => {
+            vec![RuntimeSidecarKind::Ffmpeg, RuntimeSidecarKind::Ffprobe]
+        }
     }
 }
 
-pub fn build_sidecar_capability_manifest(probe: &LocalRuntimeProbeReport) -> Vec<RuntimeSidecarCapability> {
+pub fn build_sidecar_capability_manifest(
+    probe: &LocalRuntimeProbeReport,
+) -> Vec<RuntimeSidecarCapability> {
     [
         RuntimeSidecarKind::WgpuRenderer,
         RuntimeSidecarKind::Ffmpeg,
@@ -85,14 +113,20 @@ pub fn build_sidecar_capability_manifest(probe: &LocalRuntimeProbeReport) -> Vec
             reason: if available {
                 format!("{} is available for local execution.", kind.label())
             } else {
-                format!("{} was not confirmed by the Studio Local probe.", kind.label())
+                format!(
+                    "{} was not confirmed by the Studio Local probe.",
+                    kind.label()
+                )
             },
         }
     })
     .collect()
 }
 
-pub fn missing_required_sidecars(probe: &LocalRuntimeProbeReport, lane: RuntimeJobLane) -> Vec<RuntimeSidecarKind> {
+pub fn missing_required_sidecars(
+    probe: &LocalRuntimeProbeReport,
+    lane: RuntimeJobLane,
+) -> Vec<RuntimeSidecarKind> {
     required_sidecars_for_lane(lane)
         .into_iter()
         .filter(|kind| !sidecar_available(probe, *kind))
@@ -100,5 +134,9 @@ pub fn missing_required_sidecars(probe: &LocalRuntimeProbeReport, lane: RuntimeJ
 }
 
 pub fn sidecar_names(items: &[RuntimeSidecarKind]) -> String {
-    items.iter().map(|item| item.as_str()).collect::<Vec<_>>().join(", ")
+    items
+        .iter()
+        .map(|item| item.as_str())
+        .collect::<Vec<_>>()
+        .join(", ")
 }

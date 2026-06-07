@@ -136,7 +136,7 @@ export function ModernIDEShell({
   };
 
   return (
-    <div ref={containerRef} style={containerStyle}>
+    <div ref={containerRef} style={containerStyle} data-modern-ide-shell="true">
       <IDEHeader
         projectName={projectName}
         activeFileName={activeFileName}

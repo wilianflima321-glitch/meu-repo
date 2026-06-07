@@ -7,6 +7,34 @@ export type RuntimeProbe = {
   checkedAt: string;
 };
 
+export type NativeKernelCapabilityState =
+  | 'available'
+  | 'held'
+  | 'needs-review'
+  | 'provider-unavailable'
+  | 'blocked';
+
+export type NativeKernelCapability = {
+  id: string;
+  label: string;
+  state: NativeKernelCapabilityState;
+  evidenceRefs: string[];
+  blocker?: string | null;
+  nextAction: string;
+};
+
+export type NativeKernelManifest = {
+  version: 1;
+  target: 'tauri-web-shell-with-native-bridge';
+  capabilities: NativeKernelCapability[];
+  crashState: {
+    lastCrashRef?: string | null;
+    recoveryMode: string;
+    requiresUserReview: boolean;
+  };
+  prohibitedClaims: string[];
+};
+
 export type FileSystemAdapter = {
   read(path: string): Promise<string>;
   write(path: string, content: string): Promise<void>;
@@ -22,6 +50,7 @@ export type TerminalAdapter = {
 export type RuntimeAPIAdapter = {
   probe(): Promise<RuntimeProbe>;
   routeJob(kind: string): Promise<{ lane: RuntimeLane; reason: string }>;
+  nativeKernelManifest?(): Promise<NativeKernelManifest>;
 };
 
 export type AIAdapter = {

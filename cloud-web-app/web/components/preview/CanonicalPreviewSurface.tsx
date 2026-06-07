@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import UnifiedViewport from '@/components/canvas/UnifiedViewport';
 import { type CanonicalRuntimeProps } from '@/components/preview/previewRuntime.types';
 import RuntimePreviewSurface from '@/components/preview/RuntimePreviewSurface';
+import UnifiedViewport from '@/components/canvas/UnifiedViewport';
 
 // ============================================================================
 // CANONICAL SURFACE PROPS

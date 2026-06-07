@@ -78,6 +78,12 @@ export const ADMIN_ROUTE_LABELS: Record<string, string> = {
 }
 
 export const ADMIN_LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
+  '/admin/ai-agents': '/admin/ai?legacy=agents',
+  '/admin/apis': '/admin/monitoring?legacy=apis',
+  '/admin/collaboration': '/admin/feature-flags?legacy=collaboration',
+  '/admin/compliance': '/admin/security?legacy=compliance',
+  '/admin/ide-settings': '/admin/feature-flags?legacy=ide-settings',
+  '/admin/moderation': '/admin/security?legacy=moderation',
   '/admin/god-view': '/admin/security?legacy=god-view',
   '/admin/ip-registry': '/admin/security?legacy=ip-registry',
   '/admin/audit-logs': '/admin/security?legacy=audit-logs',
@@ -184,7 +190,7 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     evidenceStatus: 'live',
     primaryLinks: [
       { label: 'AI overview', href: '/admin/ai' },
-      { label: 'Agents', href: '/admin/ai-agents' },
+      { label: 'Agents', href: '/admin/ai?legacy=agents' },
       { label: 'Monitor', href: '/admin/ai?legacy=monitor', badge: 'Live' },
       { label: 'Training', href: '/admin/ai?legacy=training' },
     ],
@@ -214,7 +220,7 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     primaryLinks: [
       { label: 'Monitoring', href: '/admin/monitoring' },
       { label: 'Infrastructure', href: '/admin/monitoring?legacy=infrastructure' },
-      { label: 'APIs', href: '/admin/apis' },
+      { label: 'APIs', href: '/admin/monitoring?legacy=apis' },
     ],
     routes: [
       '/admin/infrastructure',
@@ -240,8 +246,8 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     evidenceStatus: 'live',
     primaryLinks: [
       { label: 'Security', href: '/admin/security' },
-      { label: 'Compliance', href: '/admin/compliance' },
-      { label: 'Moderation', href: '/admin/moderation' },
+      { label: 'Compliance', href: '/admin/security?legacy=compliance' },
+      { label: 'Moderation', href: '/admin/security?legacy=moderation' },
     ],
     routes: [
       '/admin/audit-logs',
@@ -265,8 +271,8 @@ export const ADMIN_CONSOLIDATED_SECTIONS: AdminConsolidatedSection[] = [
     evidenceStatus: 'live',
     primaryLinks: [
       { label: 'Feature flags', href: '/admin/feature-flags' },
-      { label: 'Collaboration', href: '/admin/collaboration' },
-      { label: 'IDE settings', href: '/admin/ide-settings' },
+      { label: 'Collaboration', href: '/admin/feature-flags?legacy=collaboration' },
+      { label: 'IDE settings', href: '/admin/feature-flags?legacy=ide-settings' },
     ],
     routes: [
       '/admin/feature-flags',

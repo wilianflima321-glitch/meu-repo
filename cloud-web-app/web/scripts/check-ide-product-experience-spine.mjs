@@ -265,8 +265,13 @@ rejectPattern(
 )
 requirePattern(
   'components/ide/modern-shell/ModernIDEShellPanels.tsx',
-  /EditorErrorBoundary[\s\S]*PanelErrorBoundary[\s\S]*Explorer[\s\S]*AI Console[\s\S]*Terminal/,
+  /PanelErrorBoundary[\s\S]*EditorErrorBoundary[\s\S]*PanelErrorBoundary/,
   'IDE regions must have independent error boundaries so one failed pane does not crash the workbench',
+)
+requirePattern(
+  'components/ide/modern-shell/types.ts',
+  /WORKBENCH_REGION_REGISTRY[\s\S]*Explorer[\s\S]*AI Console[\s\S]*Terminal/,
+  'IDE region labels must stay registry-backed instead of duplicated panel copy',
 )
 rejectPattern(
   'components/ide/modern-shell/ModernIDEShellPanels.tsx',

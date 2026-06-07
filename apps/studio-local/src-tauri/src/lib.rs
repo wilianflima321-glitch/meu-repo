@@ -1,6 +1,7 @@
-﻿pub mod contracts;
+pub mod contracts;
 pub mod daemon;
 pub mod jobs;
+pub mod native_kernel;
 pub mod policy;
 pub mod probe;
 pub mod runtime_engine;
@@ -12,21 +13,33 @@ mod tests {
     use std::path::PathBuf;
     use std::time::{SystemTime, UNIX_EPOCH};
 
+    use crate::contracts::RuntimeJobRequest;
     use crate::contracts::{
         LocalRuntimeAssetTool, LocalRuntimeMediaTool, LocalRuntimeRendererBackend,
         LocalRuntimeShaderTool, LocalRuntimeToolchainFeature, RuntimeExecutionTarget,
         RuntimeJobLane, RuntimeJobState, StoragePressure, ThermalState,
     };
-    use crate::contracts::RuntimeJobRequest;
     use crate::jobs::RuntimeJobStore;
+    use crate::native_kernel::{
+        build_native_kernel_manifest, validate_native_kernel_manifest, NativeKernelState,
+    };
     use crate::policy::resolve_runtime_target;
     use crate::probe::build_probe_from_signals;
-    use crate::runtime_engine::{build_local_wgpu_probe_contract, build_local_wgpu_render_contract};
+    use crate::runtime_engine::{
+        build_local_wgpu_probe_contract, build_local_wgpu_render_contract,
+    };
     use crate::sidecars::{build_sidecar_capability_manifest, missing_required_sidecars};
 
     #[test]
     fn strong_device_routes_heavy_jobs_to_local_native() {
-        let probe = build_probe_from_signals("test-device", true, true, 16_384, ThermalState::Nominal, StoragePressure::Ok);
+        let probe = build_probe_from_signals(
+            "test-device",
+            true,
+            true,
+            16_384,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
         let decision = resolve_runtime_target(&probe, RuntimeJobLane::ViewportRender);
         assert_eq!(decision.target, RuntimeExecutionTarget::LocalNative);
         assert!(decision.can_start);
@@ -34,7 +47,14 @@ mod tests {
 
     #[test]
     fn weak_device_routes_heavy_jobs_to_cloud_sandbox() {
-        let probe = build_probe_from_signals("test-device", false, false, 2_048, ThermalState::Nominal, StoragePressure::Ok);
+        let probe = build_probe_from_signals(
+            "test-device",
+            false,
+            false,
+            2_048,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
         let decision = resolve_runtime_target(&probe, RuntimeJobLane::RenderQueue);
         assert_eq!(decision.target, RuntimeExecutionTarget::CloudSandbox);
         assert!(decision.can_start);
@@ -42,7 +62,14 @@ mod tests {
 
     #[test]
     fn critical_thermal_state_holds_work() {
-        let probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Critical, StoragePressure::Ok);
+        let probe = build_probe_from_signals(
+            "test-device",
+            true,
+            true,
+            32_768,
+            ThermalState::Critical,
+            StoragePressure::Ok,
+        );
         let decision = resolve_runtime_target(&probe, RuntimeJobLane::AiLocalInference);
         assert_eq!(decision.target, RuntimeExecutionTarget::Held);
         assert!(!decision.can_start);
@@ -50,9 +77,18 @@ mod tests {
 
     #[test]
     fn render_queue_without_ffmpeg_routes_to_cloud_sandbox() {
-        let mut probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        let mut probe = build_probe_from_signals(
+            "test-device",
+            true,
+            true,
+            32_768,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
         probe.ffmpeg_available = false;
-        probe.local_toolchain.retain(|feature| feature.as_str() != "ffmpeg");
+        probe
+            .local_toolchain
+            .retain(|feature| feature.as_str() != "ffmpeg");
 
         let decision = resolve_runtime_target(&probe, RuntimeJobLane::RenderQueue);
 
@@ -63,7 +99,14 @@ mod tests {
 
     #[test]
     fn ai_local_inference_without_execution_provider_routes_to_cloud_sandbox() {
-        let mut probe = build_probe_from_signals("test-device", false, false, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        let mut probe = build_probe_from_signals(
+            "test-device",
+            false,
+            false,
+            32_768,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
         probe.onnx_runtime_available = false;
         probe.direct_ml_available = false;
         probe.web_nn_available = false;
@@ -77,7 +120,14 @@ mod tests {
 
     #[test]
     fn viewport_render_without_native_graphics_routes_to_cloud_sandbox() {
-        let mut probe = build_probe_from_signals("test-device", false, false, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        let mut probe = build_probe_from_signals(
+            "test-device",
+            false,
+            false,
+            32_768,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
         probe.gpu_available = false;
         probe.web_gpu_available = false;
         probe.native_graphics_backends.clear();
@@ -90,9 +140,18 @@ mod tests {
 
     #[test]
     fn browser_operator_without_browser_runtime_routes_to_approved_sandbox() {
-        let mut probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        let mut probe = build_probe_from_signals(
+            "test-device",
+            true,
+            true,
+            32_768,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
         probe.browser_automation_available = false;
-        probe.local_toolchain.retain(|feature| feature.as_str() != "browser-automation");
+        probe
+            .local_toolchain
+            .retain(|feature| feature.as_str() != "browser-automation");
 
         let decision = resolve_runtime_target(&probe, RuntimeJobLane::BrowserOperator);
 
@@ -103,20 +162,43 @@ mod tests {
 
     #[test]
     fn sidecar_manifest_reports_renderer_and_physics_capabilities() {
-        let probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        let probe = build_probe_from_signals(
+            "test-device",
+            true,
+            true,
+            32_768,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
         let manifest = build_sidecar_capability_manifest(&probe);
 
-        assert!(manifest.iter().any(|entry| entry.kind.as_str() == "wgpu-renderer" && entry.available));
-        assert!(manifest.iter().any(|entry| entry.kind.as_str() == "rapier-physics" && entry.available));
+        assert!(manifest
+            .iter()
+            .any(|entry| entry.kind.as_str() == "wgpu-renderer" && entry.available));
+        assert!(manifest
+            .iter()
+            .any(|entry| entry.kind.as_str() == "rapier-physics" && entry.available));
     }
 
     #[test]
     fn local_probe_reports_runtime_engine_spine_fields() {
-        let probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        let probe = build_probe_from_signals(
+            "test-device",
+            true,
+            true,
+            32_768,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
 
         assert!(probe.supports_offscreen_render);
-        assert!(probe.renderer_backends.contains(&LocalRuntimeRendererBackend::WgpuNative));
-        assert!(probe.media_tools.iter().all(|tool| matches!(tool, LocalRuntimeMediaTool::Ffmpeg | LocalRuntimeMediaTool::Ffprobe)));
+        assert!(probe
+            .renderer_backends
+            .contains(&LocalRuntimeRendererBackend::WgpuNative));
+        assert!(probe.media_tools.iter().all(|tool| matches!(
+            tool,
+            LocalRuntimeMediaTool::Ffmpeg | LocalRuntimeMediaTool::Ffprobe
+        )));
         assert!(probe.asset_tools.iter().all(|tool| matches!(
             tool,
             LocalRuntimeAssetTool::GltfTransform
@@ -164,7 +246,14 @@ mod tests {
 
     #[test]
     fn viewport_render_without_offscreen_support_routes_to_cloud_sandbox() {
-        let mut probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        let mut probe = build_probe_from_signals(
+            "test-device",
+            true,
+            true,
+            32_768,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
         probe.supports_offscreen_render = false;
         probe.renderer_backends.clear();
 
@@ -190,8 +279,13 @@ mod tests {
             60,
         );
         assert_eq!(render_contract.kind, "aethel.wgpu.render");
-        assert_eq!(render_contract.idempotency_key, "project-native-render:render-final-a:2026-05-14T14:00:00.000Z");
-        assert!(render_contract.accepted_targets.contains(&"local-native".to_string()));
+        assert_eq!(
+            render_contract.idempotency_key,
+            "project-native-render:render-final-a:2026-05-14T14:00:00.000Z"
+        );
+        assert!(render_contract
+            .accepted_targets
+            .contains(&"local-native".to_string()));
         assert_eq!(render_contract.browser_role, "preview-only");
         assert!(render_contract.require_offscreen_render);
         assert!(render_contract.require_performance_report_artifact);
@@ -202,7 +296,14 @@ mod tests {
 
     #[test]
     fn playtest_missing_renderer_sidecar_falls_back_to_cloud() {
-        let mut probe = build_probe_from_signals("test-device", false, false, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        let mut probe = build_probe_from_signals(
+            "test-device",
+            false,
+            false,
+            32_768,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
         probe.gpu_available = false;
         probe.web_gpu_available = false;
         probe.native_graphics_backends.clear();
@@ -217,7 +318,14 @@ mod tests {
 
     #[test]
     fn asset_import_requires_optimizer_and_media_probe_sidecars() {
-        let mut probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        let mut probe = build_probe_from_signals(
+            "test-device",
+            true,
+            true,
+            32_768,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
         probe.local_toolchain.clear();
         probe.asset_tools.clear();
         probe.media_tools.clear();
@@ -225,35 +333,74 @@ mod tests {
         let missing = missing_required_sidecars(&probe, RuntimeJobLane::AssetImport);
         let decision = resolve_runtime_target(&probe, RuntimeJobLane::AssetImport);
 
-        assert!(missing.iter().any(|kind| kind.as_str() == "asset-optimizer"));
+        assert!(missing
+            .iter()
+            .any(|kind| kind.as_str() == "asset-optimizer"));
         assert!(missing.iter().any(|kind| kind.as_str() == "ffprobe"));
         assert_eq!(decision.target, RuntimeExecutionTarget::CloudSandbox);
     }
 
     #[test]
     fn build_export_requires_native_compiler_sidecar() {
-        let mut probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+        let mut probe = build_probe_from_signals(
+            "test-device",
+            true,
+            true,
+            32_768,
+            ThermalState::Nominal,
+            StoragePressure::Ok,
+        );
         probe.local_toolchain.retain(|feature| {
             !matches!(
                 feature,
-                LocalRuntimeToolchainFeature::ZigToolchain | LocalRuntimeToolchainFeature::ZigCCompiler
+                LocalRuntimeToolchainFeature::ZigToolchain
+                    | LocalRuntimeToolchainFeature::ZigCCompiler
             )
         });
 
         let missing = missing_required_sidecars(&probe, RuntimeJobLane::BuildExport);
         let decision = resolve_runtime_target(&probe, RuntimeJobLane::BuildExport);
 
-        assert!(missing.iter().any(|kind| kind.as_str() == "native-compiler"));
+        assert!(missing
+            .iter()
+            .any(|kind| kind.as_str() == "native-compiler"));
         assert_eq!(decision.target, RuntimeExecutionTarget::CloudSandbox);
         assert!(decision.reason.contains("native-compiler"));
     }
 
     #[test]
+    fn native_kernel_manifest_blocks_unproven_native_claims() {
+        let manifest = build_native_kernel_manifest();
+        assert_eq!(
+            validate_native_kernel_manifest(&manifest),
+            Vec::<String>::new()
+        );
+        assert!(manifest
+            .capabilities
+            .iter()
+            .all(|capability| capability.state != NativeKernelState::Available));
+        assert!(manifest
+            .prohibited_claims
+            .contains(&"signed installer ready"));
+        assert!(manifest.crash_state.requires_user_review);
+    }
+
+    #[test]
     fn held_job_is_stored_with_blocker() {
-        let probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Critical, StoragePressure::Ok);
+        let probe = build_probe_from_signals(
+            "test-device",
+            true,
+            true,
+            32_768,
+            ThermalState::Critical,
+            StoragePressure::Ok,
+        );
         let decision = resolve_runtime_target(&probe, RuntimeJobLane::BrowserOperator);
         let mut store = RuntimeJobStore::default();
-        let status = store.create(RuntimeJobRequest::fixture(RuntimeJobLane::BrowserOperator), decision);
+        let status = store.create(
+            RuntimeJobRequest::fixture(RuntimeJobLane::BrowserOperator),
+            decision,
+        );
         assert_eq!(status.target, RuntimeExecutionTarget::Held);
         assert!(status.blocker.is_some());
     }
@@ -270,20 +417,39 @@ mod tests {
     fn persisted_running_jobs_recover_as_held_after_restart() {
         let path = temp_snapshot_path("recover-running");
         let job_id = {
-            let probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+            let probe = build_probe_from_signals(
+                "test-device",
+                true,
+                true,
+                32_768,
+                ThermalState::Nominal,
+                StoragePressure::Ok,
+            );
             let decision = resolve_runtime_target(&probe, RuntimeJobLane::MemoryIndexing);
-            let mut store = RuntimeJobStore::from_persistence_path(&path).expect("create persistent job store");
-            let status = store.create(RuntimeJobRequest::fixture(RuntimeJobLane::MemoryIndexing), decision);
+            let mut store =
+                RuntimeJobStore::from_persistence_path(&path).expect("create persistent job store");
+            let status = store.create(
+                RuntimeJobRequest::fixture(RuntimeJobLane::MemoryIndexing),
+                decision,
+            );
             assert_eq!(status.state, RuntimeJobState::Running);
             assert!(path.exists());
             status.id
         };
 
-        let recovered = RuntimeJobStore::from_persistence_path(&path).expect("recover persistent job store");
+        let recovered =
+            RuntimeJobStore::from_persistence_path(&path).expect("recover persistent job store");
         let status = recovered.get(&job_id).expect("recovered job exists");
         assert_eq!(status.state, RuntimeJobState::Held);
-        assert!(status.blocker.as_deref().unwrap_or_default().contains("Recovered after Studio Local restart"));
-        assert!(status.compact_log.iter().any(|line| line.contains("Recovered after Studio Local restart")));
+        assert!(status
+            .blocker
+            .as_deref()
+            .unwrap_or_default()
+            .contains("Recovered after Studio Local restart"));
+        assert!(status
+            .compact_log
+            .iter()
+            .any(|line| line.contains("Recovered after Studio Local restart")));
         assert!(recovered.last_persistence_error().is_none());
 
         let _ = fs::remove_file(path);
@@ -293,20 +459,34 @@ mod tests {
     fn persisted_cancelled_jobs_stay_cancelled_after_restart() {
         let path = temp_snapshot_path("recover-cancelled");
         let job_id = {
-            let probe = build_probe_from_signals("test-device", true, true, 32_768, ThermalState::Nominal, StoragePressure::Ok);
+            let probe = build_probe_from_signals(
+                "test-device",
+                true,
+                true,
+                32_768,
+                ThermalState::Nominal,
+                StoragePressure::Ok,
+            );
             let decision = resolve_runtime_target(&probe, RuntimeJobLane::MemoryIndexing);
-            let mut store = RuntimeJobStore::from_persistence_path(&path).expect("create persistent job store");
-            let status = store.create(RuntimeJobRequest::fixture(RuntimeJobLane::MemoryIndexing), decision);
+            let mut store =
+                RuntimeJobStore::from_persistence_path(&path).expect("create persistent job store");
+            let status = store.create(
+                RuntimeJobRequest::fixture(RuntimeJobLane::MemoryIndexing),
+                decision,
+            );
             store.cancel(&status.id).expect("cancel job");
             status.id
         };
 
-        let recovered = RuntimeJobStore::from_persistence_path(&path).expect("recover persistent job store");
+        let recovered =
+            RuntimeJobStore::from_persistence_path(&path).expect("recover persistent job store");
         let status = recovered.get(&job_id).expect("recovered job exists");
         assert_eq!(status.state, RuntimeJobState::Cancelled);
-        assert!(!status.compact_log.iter().any(|line| line.contains("Recovered after Studio Local restart")));
+        assert!(!status
+            .compact_log
+            .iter()
+            .any(|line| line.contains("Recovered after Studio Local restart")));
 
         let _ = fs::remove_file(path);
     }
-
 }

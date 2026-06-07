@@ -84,7 +84,7 @@ export const PRODUCT_SURFACE_REGISTRY: readonly ProductSurfaceDefinition[] = [
     evidence: 'Studio is compressed into five groups and preview routes through the canonical surface.',
     detailPolicy: 'drawer',
     canonicalRoutes: ['/studio', '/nexus'],
-    hiddenLegacyRoutes: ['/preview', '/live-preview', '/vr-preview'],
+    hiddenLegacyRoutes: ['/preview', '/live-preview', '/vr-preview', '/studio/audio', '/studio/cinematic'],
     heavyRuntimePolicy: 'dynamic-only',
   },
   {
@@ -124,8 +124,8 @@ export const V28_NAVIGATION_RATCHETS = {
   visibleDashboardTabs: 3,
   visibleAdminAreas: ADMIN_CONSOLIDATED_SECTIONS.length,
   visibleStudioGroups: 5,
-  maxAdminPhysicalRoutes: 12,
-  maxStudioPhysicalRoutes: 7,
+  maxAdminPhysicalRoutes: 6,
+  maxStudioPhysicalRoutes: 6,
   forbiddenPublicFirstFoldCopy: [
     'readiness',
     'cockpit',

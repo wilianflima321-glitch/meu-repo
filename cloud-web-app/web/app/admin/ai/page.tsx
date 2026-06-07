@@ -5,6 +5,7 @@ import { Activity, Cpu, Gauge } from 'lucide-react';
 
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
+import { AiAgentsAdminPanel } from '../ai-agents/AiAgentsAdminPanel';
 import { AiTrainingAdminPanel } from '../ai-training/AiTrainingAdminPanel';
 import { AiMonitorAdminPanel } from '../ai-monitor/AiMonitorAdminPanel';
 
@@ -29,6 +30,7 @@ export default function AdminAI() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [showAgentsPanel, setShowAgentsPanel] = useState(false);
   const [showMonitorPanel, setShowMonitorPanel] = useState(false);
   const [showTrainingPanel, setShowTrainingPanel] = useState(false);
 
@@ -59,6 +61,7 @@ export default function AdminAI() {
 
   useEffect(() => {
     const legacy = new URLSearchParams(window.location.search).get('legacy');
+    if (legacy === 'agents') setShowAgentsPanel(true);
     if (legacy === 'monitor') setShowMonitorPanel(true);
     if (legacy === 'training') setShowTrainingPanel(true);
   }, []);
@@ -199,6 +202,20 @@ export default function AdminAI() {
           {saving ? 'Saving...' : 'Save changes'}
         </button>
       </div>
+
+      <details
+        id="agents"
+        className="mt-6 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] p-4"
+        open={showAgentsPanel}
+        onToggle={(event) => setShowAgentsPanel(event.currentTarget.open)}
+      >
+        <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+          Agent fleet
+        </summary>
+        <div className="mt-4">
+          <AiAgentsAdminPanel />
+        </div>
+      </details>
 
       <details
         id="monitor"

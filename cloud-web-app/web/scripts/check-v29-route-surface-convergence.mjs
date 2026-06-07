@@ -31,6 +31,7 @@ function requirePattern(relativePath, pattern, reason) {
 
 const contract = read('lib/runtime/v29-internal-spine.ts')
 const productRegistry = read('lib/routes/product-surface-registry.ts')
+const adminConsolidation = read('lib/admin/admin-consolidation.ts')
 const publicConsolidation = read('lib/navigation/public-route-consolidation.ts')
 const workbenchConvergence = read('lib/routes/workbench-convergence.ts')
 const middleware = read('middleware.ts')
@@ -58,7 +59,7 @@ for (const token of ['primaryAction', 'evidence', 'detailPolicy', 'heavyRuntimeP
 
 requirePattern('lib/routes/product-surface-registry.ts', /visibleDashboardTabs:\s*3/, 'dashboard primary tab budget')
 requirePattern('lib/routes/product-surface-registry.ts', /visibleStudioGroups:\s*5/, 'studio group budget')
-requirePattern('lib/routes/product-surface-registry.ts', /maxAdminPhysicalRoutes:\s*12/, 'admin route ratchet')
+requirePattern('lib/routes/product-surface-registry.ts', /maxAdminPhysicalRoutes:\s*6/, 'admin route ratchet')
 
 const publicCompatibilityRoutes = [
   ['/contact', '/help'],
@@ -101,6 +102,41 @@ for (const [route, targetToken] of workbenchLegacyRoutes) {
   if (exists(physicalRoute)) failures.push(`${physicalRoute}: hidden workbench route must not be a standalone page`)
 }
 
+const studioCompatibilityRoutes = [
+  ['/studio/audio', '/studio/film?tool=audio'],
+  ['/studio/cinematic', '/studio/film?tool=cinematic'],
+]
+
+for (const [route, target] of studioCompatibilityRoutes) {
+  if (!productRegistry.includes(route)) failures.push(`product registry must mark ${route} as hidden studio compatibility`)
+  const middlewarePattern = new RegExp(`'${route.replace('/', '\\/')}':\\s*'${target.replace('/', '\\/').replace('?', '\\?')}'`)
+  if (!middlewarePattern.test(middleware)) failures.push(`middleware missing ${route} -> ${target}`)
+  const physicalRoute = `app/${route.slice(1)}/page.tsx`
+  if (exists(physicalRoute)) failures.push(`${physicalRoute}: studio compatibility route must not be a standalone page`)
+}
+
+const adminCompatibilityRoutes = [
+  ['/admin/ai-agents', '/admin/ai?legacy=agents'],
+  ['/admin/apis', '/admin/monitoring?legacy=apis'],
+  ['/admin/collaboration', '/admin/feature-flags?legacy=collaboration'],
+  ['/admin/compliance', '/admin/security?legacy=compliance'],
+  ['/admin/ide-settings', '/admin/feature-flags?legacy=ide-settings'],
+  ['/admin/moderation', '/admin/security?legacy=moderation'],
+]
+
+for (const [route, target] of adminCompatibilityRoutes) {
+  if (!adminConsolidation.includes(`'${route}': '${target}'`)) failures.push(`admin consolidation missing ${route} -> ${target}`)
+  const physicalRoute = `app/${route.slice(1)}/page.tsx`
+  if (exists(physicalRoute)) failures.push(`${physicalRoute}: admin compatibility route must not be a standalone page`)
+}
+
+if (!middleware.includes('const from = `${pathname}${req.nextUrl.search}`') || !middleware.includes("url.search = '';")) {
+  failures.push('middleware must preserve canonical protected route search inside from and clear stray login query params')
+}
+if (!/getAdminLegacyRedirectTarget\(pathname\)[\s\S]*if \(!token\)/.test(middleware)) {
+  failures.push('middleware must canonicalize admin compatibility routes before auth login preserves from')
+}
+
 const publicNav = read('lib/navigation/surfaces.ts')
 if ((publicNav.match(/PUBLIC_NAV_LINKS/g)?.length ?? 0) < 1) failures.push('public navigation registry missing')
 for (const forbidden of ['/contact', '/customers', '/roadmap', '/security-acknowledgments']) {
@@ -118,7 +154,7 @@ if (!totalSpineGate.includes('check-v29-route-surface-convergence.mjs')) {
 
 const reportDir = path.join(ROOT, '.next', 'aethel-audits')
 fs.mkdirSync(reportDir, { recursive: true })
-fs.writeFileSync(path.join(reportDir, 'V29_ROUTE_SURFACE_CONVERGENCE.md'), `# V29 Route Surface Convergence\n\nSurfaces: ${requiredSurfaces.join(', ')}\nCompatibility routes: ${publicCompatibilityRoutes.map(([route, target]) => `${route} -> ${target}`).join(', ')}\nFailures: ${failures.length}\n`)
+fs.writeFileSync(path.join(reportDir, 'V29_ROUTE_SURFACE_CONVERGENCE.md'), `# V29 Route Surface Convergence\n\nSurfaces: ${requiredSurfaces.join(', ')}\nPublic compatibility routes: ${publicCompatibilityRoutes.map(([route, target]) => `${route} -> ${target}`).join(', ')}\nStudio compatibility routes: ${studioCompatibilityRoutes.map(([route, target]) => `${route} -> ${target}`).join(', ')}\nAdmin compatibility routes: ${adminCompatibilityRoutes.map(([route, target]) => `${route} -> ${target}`).join(', ')}\nFailures: ${failures.length}\n`)
 
 if (failures.length) {
   console.error('[v29-route-surface-convergence] FAIL')
@@ -126,4 +162,4 @@ if (failures.length) {
   process.exit(1)
 }
 
-console.log(`[v29-route-surface-convergence] PASS surfaces=${requiredSurfaces.length} publicCompatibility=${publicCompatibilityRoutes.length}`)
+console.log(`[v29-route-surface-convergence] PASS surfaces=${requiredSurfaces.length} publicCompatibility=${publicCompatibilityRoutes.length} studioCompatibility=${studioCompatibilityRoutes.length} adminCompatibility=${adminCompatibilityRoutes.length}`)

@@ -1,4 +1,4 @@
-﻿use std::collections::BTreeMap;
+use std::collections::BTreeMap;
 use std::env;
 use std::process::Command;
 use std::thread;
@@ -7,8 +7,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::contracts::{
     LocalRuntimeAssetTool, LocalRuntimeMediaTool, LocalRuntimeProbeReport,
     LocalRuntimeRendererBackend, LocalRuntimeShaderTool, LocalRuntimeToolchainFeature,
-    NativeAiExecutionProvider, NativeGraphicsBackend, RuntimeExecutionTarget,
-    StoragePressure, ThermalState, STUDIO_LOCAL_CONTRACT_VERSION,
+    NativeAiExecutionProvider, NativeGraphicsBackend, RuntimeExecutionTarget, StoragePressure,
+    ThermalState, STUDIO_LOCAL_CONTRACT_VERSION,
 };
 
 fn command_output(command: &str, arg: &str) -> Option<String> {
@@ -19,7 +19,11 @@ fn command_output(command: &str, arg: &str) -> Option<String> {
     let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
     let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
     let combined = if stdout.is_empty() { stderr } else { stdout };
-    combined.lines().next().map(|line| line.trim().to_string()).filter(|line| !line.is_empty())
+    combined
+        .lines()
+        .next()
+        .map(|line| line.trim().to_string())
+        .filter(|line| !line.is_empty())
 }
 
 fn command_exists(command: &str) -> bool {
@@ -85,7 +89,9 @@ fn parse_toolchain_feature(value: &str) -> Option<LocalRuntimeToolchainFeature> 
         "ffmpeg" => Some(LocalRuntimeToolchainFeature::Ffmpeg),
         "ffprobe" => Some(LocalRuntimeToolchainFeature::Ffprobe),
         "rapier" => Some(LocalRuntimeToolchainFeature::Rapier),
-        "browser-automation" | "browser" | "chrome" | "chromium" => Some(LocalRuntimeToolchainFeature::BrowserAutomation),
+        "browser-automation" | "browser" | "chrome" | "chromium" => {
+            Some(LocalRuntimeToolchainFeature::BrowserAutomation)
+        }
         "asset-optimizer" | "asset" => Some(LocalRuntimeToolchainFeature::AssetOptimizer),
         "shader-compiler" | "shader" => Some(LocalRuntimeToolchainFeature::ShaderCompiler),
         "meshoptimizer" | "meshopt" => Some(LocalRuntimeToolchainFeature::Meshoptimizer),
@@ -94,12 +100,20 @@ fn parse_toolchain_feature(value: &str) -> Option<LocalRuntimeToolchainFeature> 
         "openusd" | "usd" | "usdcat" => Some(LocalRuntimeToolchainFeature::OpenUsd),
         "blender-headless" | "blender" => Some(LocalRuntimeToolchainFeature::BlenderHeadless),
         "wgpu-native" | "wgpu" => Some(LocalRuntimeToolchainFeature::WgpuNative),
-        "recast-detour" | "recast" | "detour" | "recast-cli" => Some(LocalRuntimeToolchainFeature::RecastDetour),
+        "recast-detour" | "recast" | "detour" | "recast-cli" => {
+            Some(LocalRuntimeToolchainFeature::RecastDetour)
+        }
         "zig-toolchain" | "zig" => Some(LocalRuntimeToolchainFeature::ZigToolchain),
         "zig-c-compiler" | "zig-cc" | "zig-cxx" => Some(LocalRuntimeToolchainFeature::ZigCCompiler),
-        "ozz-animation" | "ozz" | "ozz-animation-adapter" => Some(LocalRuntimeToolchainFeature::OzzAnimation),
-        "unreal-export-bridge" | "unreal" | "aethel-unreal-bridge" => Some(LocalRuntimeToolchainFeature::UnrealExportBridge),
-        "unity-export-bridge" | "unity" | "aethel-unity-bridge" => Some(LocalRuntimeToolchainFeature::UnityExportBridge),
+        "ozz-animation" | "ozz" | "ozz-animation-adapter" => {
+            Some(LocalRuntimeToolchainFeature::OzzAnimation)
+        }
+        "unreal-export-bridge" | "unreal" | "aethel-unreal-bridge" => {
+            Some(LocalRuntimeToolchainFeature::UnrealExportBridge)
+        }
+        "unity-export-bridge" | "unity" | "aethel-unity-bridge" => {
+            Some(LocalRuntimeToolchainFeature::UnityExportBridge)
+        }
         "godot-export-bridge" | "godot" => Some(LocalRuntimeToolchainFeature::GodotExportBridge),
         _ => None,
     }
@@ -178,7 +192,10 @@ fn default_toolchain(
     }
 
     if browser_automation_available {
-        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::BrowserAutomation);
+        push_unique(
+            &mut toolchain,
+            LocalRuntimeToolchainFeature::BrowserAutomation,
+        );
     }
 
     if command_exists("gltf-transform") {
@@ -197,7 +214,10 @@ fn default_toolchain(
         push_unique(&mut toolchain, LocalRuntimeToolchainFeature::OpenUsd);
     }
     if command_exists("blender") {
-        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::BlenderHeadless);
+        push_unique(
+            &mut toolchain,
+            LocalRuntimeToolchainFeature::BlenderHeadless,
+        );
     }
     if command_exists("recast-cli") {
         push_unique(&mut toolchain, LocalRuntimeToolchainFeature::RecastDetour);
@@ -212,19 +232,30 @@ fn default_toolchain(
         push_unique(&mut toolchain, LocalRuntimeToolchainFeature::OzzAnimation);
     }
     if command_exists("aethel-unreal-bridge") {
-        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::UnrealExportBridge);
+        push_unique(
+            &mut toolchain,
+            LocalRuntimeToolchainFeature::UnrealExportBridge,
+        );
     }
     if command_exists("aethel-unity-bridge") {
-        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::UnityExportBridge);
+        push_unique(
+            &mut toolchain,
+            LocalRuntimeToolchainFeature::UnityExportBridge,
+        );
     }
     if command_exists("godot") {
-        push_unique(&mut toolchain, LocalRuntimeToolchainFeature::GodotExportBridge);
+        push_unique(
+            &mut toolchain,
+            LocalRuntimeToolchainFeature::GodotExportBridge,
+        );
     }
 
     toolchain
 }
 
-fn default_renderer_backends(native_graphics_backends: &[NativeGraphicsBackend]) -> Vec<LocalRuntimeRendererBackend> {
+fn default_renderer_backends(
+    native_graphics_backends: &[NativeGraphicsBackend],
+) -> Vec<LocalRuntimeRendererBackend> {
     if native_graphics_backends.is_empty() {
         Vec::new()
     } else {
@@ -322,16 +353,24 @@ fn tool_versions() -> BTreeMap<String, String> {
         ("dxc", "--version"),
     ]
     .iter()
-    .filter_map(|(command, arg)| command_output(command, arg).map(|version| ((*command).to_string(), version)))
+    .filter_map(|(command, arg)| {
+        command_output(command, arg).map(|version| ((*command).to_string(), version))
+    })
     .collect()
 }
 
 fn parse_env_u64(name: &str) -> Option<u64> {
-    env::var(name).ok().and_then(|value| value.parse::<u64>().ok()).filter(|value| *value > 0)
+    env::var(name)
+        .ok()
+        .and_then(|value| value.parse::<u64>().ok())
+        .filter(|value| *value > 0)
 }
 
 fn parse_env_u32(name: &str) -> Option<u32> {
-    env::var(name).ok().and_then(|value| value.parse::<u32>().ok()).filter(|value| *value > 0)
+    env::var(name)
+        .ok()
+        .and_then(|value| value.parse::<u32>().ok())
+        .filter(|value| *value > 0)
 }
 
 pub fn build_probe_from_signals(
@@ -346,16 +385,28 @@ pub fn build_probe_from_signals(
     let onnx_runtime_available = command_exists("onnxruntime") || command_exists("ort");
     let ffmpeg_available = command_exists("ffmpeg");
     let rapier_available = true;
-    let browser_automation_available = command_exists("chrome") || command_exists("chromium") || command_exists("msedge");
+    let browser_automation_available =
+        command_exists("chrome") || command_exists("chromium") || command_exists("msedge");
     let native_graphics_backends = default_graphics_backends(gpu_available);
     let renderer_backends = default_renderer_backends(&native_graphics_backends);
-    let supports_offscreen_render = !renderer_backends.is_empty() && thermal_state != ThermalState::Critical;
-    let ai_execution_providers = default_ai_execution_providers(gpu_available, npu_available, onnx_runtime_available);
-    let mut local_toolchain = default_toolchain(ffmpeg_available, rapier_available, browser_automation_available);
+    let supports_offscreen_render =
+        !renderer_backends.is_empty() && thermal_state != ThermalState::Critical;
+    let ai_execution_providers =
+        default_ai_execution_providers(gpu_available, npu_available, onnx_runtime_available);
+    let mut local_toolchain = default_toolchain(
+        ffmpeg_available,
+        rapier_available,
+        browser_automation_available,
+    );
     if !renderer_backends.is_empty() {
-        push_unique(&mut local_toolchain, LocalRuntimeToolchainFeature::WgpuNative);
+        push_unique(
+            &mut local_toolchain,
+            LocalRuntimeToolchainFeature::WgpuNative,
+        );
     }
-    let preferred_executor = if thermal_state == ThermalState::Critical || storage_pressure == StoragePressure::Critical {
+    let preferred_executor = if thermal_state == ThermalState::Critical
+        || storage_pressure == StoragePressure::Critical
+    {
         RuntimeExecutionTarget::Held
     } else if !native_graphics_backends.is_empty() || !ai_execution_providers.is_empty() {
         RuntimeExecutionTarget::LocalNative
@@ -371,7 +422,9 @@ pub fn build_probe_from_signals(
         device_id: device_id.to_string(),
         os: env::consts::OS.to_string(),
         arch: env::consts::ARCH.to_string(),
-        cpu_logical_cores: thread::available_parallelism().map(|cores| cores.get()).unwrap_or(1),
+        cpu_logical_cores: thread::available_parallelism()
+            .map(|cores| cores.get())
+            .unwrap_or(1),
         total_memory_mb: None,
         available_memory_mb: Some(available_memory_mb),
         storage_free_mb: None,
@@ -406,8 +459,12 @@ pub fn build_probe_from_signals(
 }
 
 pub fn collect_local_probe(device_id: &str) -> LocalRuntimeProbeReport {
-    let gpu_available = env::var("AETHEL_LOCAL_GPU_AVAILABLE").map(|value| value == "1").unwrap_or(false);
-    let npu_available = env::var("AETHEL_LOCAL_NPU_AVAILABLE").map(|value| value == "1").unwrap_or(false);
+    let gpu_available = env::var("AETHEL_LOCAL_GPU_AVAILABLE")
+        .map(|value| value == "1")
+        .unwrap_or(false);
+    let npu_available = env::var("AETHEL_LOCAL_NPU_AVAILABLE")
+        .map(|value| value == "1")
+        .unwrap_or(false);
     let available_memory_mb = env::var("AETHEL_LOCAL_AVAILABLE_MEMORY_MB")
         .ok()
         .and_then(|value| value.parse::<u64>().ok())

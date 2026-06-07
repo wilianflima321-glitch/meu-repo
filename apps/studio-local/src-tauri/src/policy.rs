@@ -6,18 +6,25 @@ use crate::sidecars::{missing_required_sidecars, sidecar_names};
 
 fn has_native_graphics(probe: &LocalRuntimeProbeReport) -> bool {
     probe.supports_offscreen_render
-        && (probe.gpu_available || probe.web_gpu_available || !probe.native_graphics_backends.is_empty())
+        && (probe.gpu_available
+            || probe.web_gpu_available
+            || !probe.native_graphics_backends.is_empty())
 }
 
 fn has_ai_execution_provider(probe: &LocalRuntimeProbeReport) -> bool {
-    probe.onnx_runtime_available || probe.direct_ml_available || probe.web_nn_available || !probe.ai_execution_providers.is_empty()
+    probe.onnx_runtime_available
+        || probe.direct_ml_available
+        || probe.web_nn_available
+        || !probe.ai_execution_providers.is_empty()
 }
 
 pub fn resolve_runtime_target(
     probe: &LocalRuntimeProbeReport,
     lane: RuntimeJobLane,
 ) -> RuntimeExecutionDecision {
-    if probe.thermal_state == ThermalState::Critical || probe.storage_pressure == StoragePressure::Critical {
+    if probe.thermal_state == ThermalState::Critical
+        || probe.storage_pressure == StoragePressure::Critical
+    {
         return RuntimeExecutionDecision {
             lane,
             target: RuntimeExecutionTarget::Held,
@@ -97,7 +104,10 @@ pub fn resolve_runtime_target(
         };
     }
 
-    if lane.is_heavy() && (probe.npu_available || probe.gpu_available) && probe.preferred_executor == RuntimeExecutionTarget::LocalNative {
+    if lane.is_heavy()
+        && (probe.npu_available || probe.gpu_available)
+        && probe.preferred_executor == RuntimeExecutionTarget::LocalNative
+    {
         return RuntimeExecutionDecision {
             lane,
             target: RuntimeExecutionTarget::LocalNative,
@@ -113,7 +123,8 @@ pub fn resolve_runtime_target(
             target: RuntimeExecutionTarget::CloudSandbox,
             can_start: true,
             requires_human_approval: lane.requires_human_approval(),
-            reason: "Device memory is constrained; isolate heavy work in cloud sandbox.".to_string(),
+            reason: "Device memory is constrained; isolate heavy work in cloud sandbox."
+                .to_string(),
         };
     }
 
@@ -122,6 +133,7 @@ pub fn resolve_runtime_target(
         target: RuntimeExecutionTarget::LocalWorker,
         can_start: true,
         requires_human_approval: lane.requires_human_approval(),
-        reason: "No native accelerator was confirmed; route work to local worker lane when safe.".to_string(),
+        reason: "No native accelerator was confirmed; route work to local worker lane when safe."
+            .to_string(),
     }
 }

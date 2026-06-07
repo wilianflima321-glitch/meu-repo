@@ -9,7 +9,8 @@ import {
   ModernIDEShellPreviewReveal,
   ModernIDEShellSidebarColumn,
 } from './ModernIDEShellSideColumns';
-import type { BottomPanelMode, PanelState, PreviewMode } from './types';
+import { getWorkbenchRegionDefinition } from './types';
+import type { BottomPanelMode, PanelState, PreviewMode, WorkbenchRegionId } from './types';
 
 interface ModernIDEShellPanelsProps {
   slots: {
@@ -49,6 +50,31 @@ function getPreviewPanelLabel(activePreviewMode: PreviewMode) {
   }
 }
 
+function getRuntimeFailureSmokeScenario() {
+  if (typeof window === 'undefined') return null;
+  return new URLSearchParams(window.location.search).get('aethelRuntimeFailureSmoke');
+}
+
+function regionLabel(region: WorkbenchRegionId) {
+  return getWorkbenchRegionDefinition(region).label;
+}
+
+function RuntimeFailureSmokeFault({
+  scenarioId,
+  target,
+  children,
+}: {
+  scenarioId: string;
+  target: string;
+  children: React.ReactNode;
+}) {
+  if (getRuntimeFailureSmokeScenario() === scenarioId) {
+    throw new Error(`AETHEL_RUNTIME_FAILURE_SMOKE:${scenarioId}:${target}`);
+  }
+
+  return <>{children}</>;
+}
+
 export function ModernIDEShellPanels({
   slots,
   panelState,
@@ -69,11 +95,23 @@ export function ModernIDEShellPanels({
   const sidebarVisible = panelState.sidebar.open && sidebarOpen;
   const previewVisible = panelState.preview.open && !isCompact;
   const safeSlots = {
-    sidebar: <PanelErrorBoundary panelName="Explorer">{slots.sidebar}</PanelErrorBoundary>,
-    editor: <EditorErrorBoundary>{slots.editor}</EditorErrorBoundary>,
-    preview: <PanelErrorBoundary panelName={previewPanelLabel}>{slots.preview}</PanelErrorBoundary>,
-    chat: <PanelErrorBoundary panelName="AI Console">{slots.chat}</PanelErrorBoundary>,
-    terminal: <PanelErrorBoundary panelName="Terminal">{slots.terminal}</PanelErrorBoundary>,
+    sidebar: <PanelErrorBoundary panelName={regionLabel('sidebar')}>{slots.sidebar}</PanelErrorBoundary>,
+    editor: (
+      <EditorErrorBoundary>
+        <RuntimeFailureSmokeFault scenarioId="ide-region-crash-isolated" target="editor">
+          {slots.editor}
+        </RuntimeFailureSmokeFault>
+      </EditorErrorBoundary>
+    ),
+    preview: (
+      <PanelErrorBoundary panelName={previewPanelLabel}>
+        <RuntimeFailureSmokeFault scenarioId="preview-render-fallback" target="preview">
+          {slots.preview}
+        </RuntimeFailureSmokeFault>
+      </PanelErrorBoundary>
+    ),
+    chat: <PanelErrorBoundary panelName={regionLabel('chat')}>{slots.chat}</PanelErrorBoundary>,
+    terminal: <PanelErrorBoundary panelName={regionLabel('terminal')}>{slots.terminal}</PanelErrorBoundary>,
   };
 
   return (

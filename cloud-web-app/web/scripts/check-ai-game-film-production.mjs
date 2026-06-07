@@ -37,6 +37,20 @@ function requirePattern(relativePath, pattern, reason) {
   if (!pattern.test(content)) failures.push(`${relativePath}: missing ${pattern} (${reason})`)
 }
 
+function requireStudioRouteContract(route) {
+  const routesPath = 'app/studio/creative-studio-routes.ts'
+  if (!exists(routesPath)) {
+    failures.push(`${routesPath}: missing (${route} Studio contract)`)
+    return
+  }
+  const routesContent = read(routesPath)
+  const routeListed = new RegExp(`href:\\s*'${route}'`).test(routesContent)
+  const routeRedirected = routesContent.includes(`'${route}': '/studio/`)
+  if (!routeListed && !routeRedirected) {
+    failures.push(`${routesPath}: missing href or governed redirect for ${route}`)
+  }
+}
+
 function countFiles(relativePath, predicate) {
   const dir = file(relativePath)
   if (!fs.existsSync(dir)) return 0
@@ -70,11 +84,12 @@ const creativeRoutes = [
   '/studio/sprite',
   '/studio/film',
   '/studio/audio',
+  '/studio/cinematic',
 ]
 
 for (const route of creativeRoutes) {
   if (!routeHasGovernedSurface(route)) failures.push(`${route}: missing physical page or governed redirect`)
-  requirePattern('app/studio/creative-studio-routes.ts', new RegExp(`href:\\s*'${route}'`), `${route} must be listed in the Studio hub`)
+  requireStudioRouteContract(route)
   requirePattern('lib/routes/route-maturity-registry.ts', new RegExp(`path:\\s*'${route}'`), `${route} must have an honest maturity entry`)
 }
 

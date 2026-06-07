@@ -10,7 +10,8 @@ use crate::contracts::{
     RuntimeJobState, RuntimeJobStatus, STUDIO_LOCAL_CONTRACT_VERSION,
 };
 
-const RECOVERED_JOB_BLOCKER: &str = "Recovered after Studio Local restart. Awaiting user or cloud confirmation before resuming.";
+const RECOVERED_JOB_BLOCKER: &str =
+    "Recovered after Studio Local restart. Awaiting user or cloud confirmation before resuming.";
 
 impl RuntimeJobRequest {
     pub fn fixture(lane: RuntimeJobLane) -> Self {
@@ -25,7 +26,8 @@ impl RuntimeJobRequest {
             allowed_paths: vec!["/**".to_string()],
             denied_paths: vec!["/.git/**".to_string()],
             evidence_required: vec!["mission-ledger".to_string(), "validation-graph".to_string()],
-            rollback_plan: "Cancel job and preserve previous Mission Ledger checkpoint.".to_string(),
+            rollback_plan: "Cancel job and preserve previous Mission Ledger checkpoint."
+                .to_string(),
             max_cost_usd: 0.0,
             requires_human_approval: lane.requires_human_approval(),
         }
@@ -67,7 +69,11 @@ impl RuntimeJobStore {
         Ok(store)
     }
 
-    pub fn create(&mut self, request: RuntimeJobRequest, decision: RuntimeExecutionDecision) -> RuntimeJobStatus {
+    pub fn create(
+        &mut self,
+        request: RuntimeJobRequest,
+        decision: RuntimeExecutionDecision,
+    ) -> RuntimeJobStatus {
         self.next_id += 1;
         let id = format!("local-job-{}", self.next_id);
         let state = if !decision.can_start {
@@ -87,7 +93,11 @@ impl RuntimeJobStore {
             progress: 0,
             compact_log: vec![decision.reason.clone()],
             evidence_refs: Vec::new(),
-            blocker: if decision.can_start { None } else { Some(decision.reason) },
+            blocker: if decision.can_start {
+                None
+            } else {
+                Some(decision.reason)
+            },
         };
 
         self.jobs.insert(id, status.clone());
@@ -103,7 +113,8 @@ impl RuntimeJobStore {
         let updated = {
             let job = self.jobs.get_mut(id)?;
             job.state = RuntimeJobState::Cancelled;
-            job.compact_log.push("Cancelled by user or cloud policy.".to_string());
+            job.compact_log
+                .push("Cancelled by user or cloud policy.".to_string());
             job.clone()
         };
         self.persist_or_record();
@@ -134,9 +145,13 @@ impl RuntimeJobStore {
             return Ok(());
         }
 
-        let snapshot = serde_json::from_str::<RuntimeJobStoreSnapshot>(&contents).map_err(|error| {
-            io::Error::new(io::ErrorKind::InvalidData, format!("invalid Studio Local job snapshot: {error}"))
-        })?;
+        let snapshot =
+            serde_json::from_str::<RuntimeJobStoreSnapshot>(&contents).map_err(|error| {
+                io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("invalid Studio Local job snapshot: {error}"),
+                )
+            })?;
 
         self.next_id = snapshot.next_id;
         self.jobs.clear();
@@ -173,7 +188,10 @@ impl RuntimeJobStore {
             jobs: self.list(),
         };
         let serialized = serde_json::to_string_pretty(&snapshot).map_err(|error| {
-            io::Error::new(io::ErrorKind::InvalidData, format!("failed to serialize Studio Local job snapshot: {error}"))
+            io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("failed to serialize Studio Local job snapshot: {error}"),
+            )
         })?;
 
         let temp_path = temporary_snapshot_path(path);
@@ -191,7 +209,10 @@ impl RuntimeJobStore {
 }
 
 fn temporary_snapshot_path(path: &Path) -> PathBuf {
-    let file_name = path.file_name().and_then(|value| value.to_str()).unwrap_or("jobs.json");
+    let file_name = path
+        .file_name()
+        .and_then(|value| value.to_str())
+        .unwrap_or("jobs.json");
     path.with_file_name(format!("{file_name}.tmp"))
 }
 
@@ -200,10 +221,17 @@ fn job_sequence_number(id: &str) -> Option<u64> {
 }
 
 fn recover_interrupted_job(job: &mut RuntimeJobStatus) {
-    if matches!(job.state, RuntimeJobState::Queued | RuntimeJobState::Running | RuntimeJobState::NeedsApproval) {
+    if matches!(
+        job.state,
+        RuntimeJobState::Queued | RuntimeJobState::Running | RuntimeJobState::NeedsApproval
+    ) {
         job.state = RuntimeJobState::Held;
         job.blocker = Some(RECOVERED_JOB_BLOCKER.to_string());
-        if !job.compact_log.iter().any(|line| line == RECOVERED_JOB_BLOCKER) {
+        if !job
+            .compact_log
+            .iter()
+            .any(|line| line == RECOVERED_JOB_BLOCKER)
+        {
             job.compact_log.push(RECOVERED_JOB_BLOCKER.to_string());
         }
     }
