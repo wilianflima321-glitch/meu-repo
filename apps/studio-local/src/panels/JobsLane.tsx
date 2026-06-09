@@ -1,4 +1,5 @@
 import type { RuntimeAdapter, RuntimeLane } from '../../../../packages/aethel-ide-shared/src/runtime-adapter/types'
+import { useState } from 'react'
 
 export type JobRecord = {
   id: string
@@ -18,19 +19,38 @@ type JobsLaneProps = {
 const LANES = ['asset-import', 'viewport-render', 'render-queue', 'playtest'] as const
 
 export function JobsLane({ adapter, jobs, onJobsChange }: JobsLaneProps) {
+  const [error, setError] = useState<string | null>(null)
+
   async function route(kind: string) {
-    const result = await adapter.runtime.routeJob(kind) as JobRecord
-    onJobsChange([
-      {
-        id: result.id ?? `${kind}-${Date.now()}`,
-        kind,
-        lane: result.lane,
-        reason: result.reason,
-        state: result.state ?? 'held',
-        requiresHumanApproval: result.requiresHumanApproval,
-      },
-      ...jobs,
-    ])
+    try {
+      const result = await adapter.runtime.routeJob(kind) as JobRecord
+      setError(null)
+      onJobsChange([
+        {
+          id: result.id ?? `${kind}-${Date.now()}`,
+          kind,
+          lane: result.lane,
+          reason: result.reason,
+          state: result.state ?? 'held',
+          requiresHumanApproval: result.requiresHumanApproval,
+        },
+        ...jobs,
+      ])
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : 'Studio Local bridge failed to route this job.'
+      setError(reason)
+      onJobsChange([
+        {
+          id: `${kind}-blocked-${Date.now()}`,
+          kind,
+          lane: 'held',
+          reason,
+          state: 'blocked',
+          requiresHumanApproval: true,
+        },
+        ...jobs,
+      ])
+    }
   }
 
   return (
@@ -46,6 +66,7 @@ export function JobsLane({ adapter, jobs, onJobsChange }: JobsLaneProps) {
           </button>
         ))}
       </div>
+      {error ? <p className="error-note">{error}</p> : null}
       <div className="table-list" role="table" aria-label="Recent job routing receipts">
         {jobs.length ? jobs.map((job) => (
           <div key={job.id} className="table-row" data-state={job.state} role="row">

@@ -8,6 +8,8 @@ const scripts = [
   'check-v29-total-spine.mjs',
   'check-v30-internal-contracts.mjs',
   'check-v30-lockfile-reproducibility.mjs',
+  'check-studio-local-web-shell.mjs',
+  'check-agents-window-composition.mjs',
   'check-v30-no-new-fragmentation.mjs',
   'check-v30-heavy-runtime-boundaries.mjs',
   'codemod-three-imports.mjs',

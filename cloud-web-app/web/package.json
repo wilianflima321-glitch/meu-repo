@@ -242,7 +242,8 @@
     "qa:v30-heavy-runtime-boundaries": "node scripts/check-v30-heavy-runtime-boundaries.mjs",
     "qa:v30-quality-scorecard": "node scripts/check-v30-quality-scorecard.mjs",
     "qa:v30-story-coverage-ratchet": "node scripts/check-v30-story-coverage-ratchet.mjs",
-    "qa:v30-three-import-ratchet": "node scripts/codemod-three-imports.mjs --verify --max=125"
+    "qa:v30-three-import-ratchet": "node scripts/codemod-three-imports.mjs --verify --max=125",
+    "qa:studio-local-web-shell": "node scripts/check-studio-local-web-shell.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",

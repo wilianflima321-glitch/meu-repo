@@ -31,6 +31,7 @@ if (agentsWindowLines > 180) {
 }
 
 const requiredFiles = [
+  'components/agents/AgentsWorkspaceContainer.tsx',
   'components/agents/window/types.ts',
   'components/agents/window/agent-window-api.ts',
   'components/agents/window/AgentCard.tsx',
@@ -44,6 +45,10 @@ for (const file of requiredFiles) read(file)
 
 requirePattern('components/agents/AgentsWindow.tsx', /AgentReplayPanel/, 'AgentsWindow must delegate replay UI')
 requirePattern('components/agents/AgentsWindow.tsx', /AgentFleetPanel/, 'AgentsWindow must delegate fleet UI')
+requirePattern('components/agents/AgentsWorkspaceContainer.tsx', /AgentsWindow/, 'workspace container must expose AgentsWindow')
+requirePattern('components/agents/AgentsWorkspaceContainer.tsx', /AIChatPanelPro/, 'workspace container must keep the composer while migration is in progress')
+requirePattern('components/ide/fullscreen/FullscreenIDEWorkspace.tsx', /AgentsWorkspaceContainer/, 'IDE workbench must use the canonical agents workspace container')
+requirePattern('components/ide/AIChatPanelContainer.tsx', /AgentsWorkspaceContainer/, 'legacy AIChatPanelContainer must stay a compatibility wrapper')
 requirePattern('components/agents/window/AgentReplayPanel.tsx', /BrowserOperatorReplay/, 'replay panel must keep governed replay evidence visible')
 requirePattern('components/agents/window/AgentTrustStrip.tsx', /CostMeter remains the source of truth/, 'trust strip must be honest about missing per-agent cost')
 requirePattern('components/agents/window/AgentTrustStrip.tsx', /Read receipts/, 'trust strip must show read receipt status')
@@ -51,6 +56,11 @@ requirePattern('components/agents/window/AgentTrustStrip.tsx', /Scope locks/, 't
 requirePattern('components/agents/window/AgentReplayPanel.tsx', /No replay yet|Replay is ready when evidence exists/, 'replay empty state must be honest')
 requirePattern('components/agents/window/agent-window-api.ts', /fetchBrowserOperatorRuns/, 'recent replay discovery must stay in API helper')
 requirePattern('components/agents/window/AgentFleetPanel.tsx', /Pause fleet/, 'fleet panel must keep pause control visible')
+
+const workspace = read('components/ide/fullscreen/FullscreenIDEWorkspace.tsx')
+if (/AIChatPanelContainer/.test(workspace)) {
+  failures.push('components/ide/fullscreen/FullscreenIDEWorkspace.tsx: must not import legacy AIChatPanelContainer')
+}
 
 if (failures.length) {
   console.error('[agents-window-composition] FAIL')

@@ -154,6 +154,15 @@ a {
   line-height: 1.55;
 }
 
+.panel .error-note {
+  border: 1px solid color-mix(in srgb, var(--error) 34%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  color: var(--error);
+  margin: 0 0 12px;
+  padding: 9px 10px;
+}
+
 .panel a {
   display: inline-flex;
   margin-top: 10px;
