@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { SurfaceQualityShell } from '@/components/product/SurfaceQualityShell'
 import EngineSpineReadinessPanel from '@/components/studio/EngineSpineReadinessPanel'
@@ -38,8 +39,12 @@ export default function CreativeStudioPage() {
             secondaryAction={<a href="#studio-runboard" className="rounded-full border border-[var(--aethel-border-subtle)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)]">Validate plan</a>}
           >
             <div id="studio-runboard" className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
-              <StudioMissionControl />
-              <EngineSpineReadinessPanel />
+              <Suspense fallback={<div className="h-64 rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
+                <StudioMissionControl />
+              </Suspense>
+              <Suspense fallback={<div className="h-64 rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
+                <EngineSpineReadinessPanel />
+              </Suspense>
             </div>
           </SurfaceQualityShell>
 

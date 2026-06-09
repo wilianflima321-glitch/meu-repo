@@ -14,32 +14,34 @@ import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 const MODELS = DEFAULT_MODELS
 
-type PreviewInspectRequestDetail = {
+type Rail = 'composer' | 'agents'
+
+type PreviewInspectDetail = {
   message?: string
   projectId?: string
   filePath?: string
   title?: string
   source?: string
-  elementInfo?: {
-    tag: string
-    id?: string
-    className?: string
-    textContent?: string
-  }
+  elementInfo?: { tag: string; id?: string; className?: string; textContent?: string }
 }
 
-type AIChatPanelContainerProps = {
-  projectId?: string
-}
+type Props = { projectId?: string }
 
-export default function AIChatPanelContainer({ projectId: workspaceProjectId }: AIChatPanelContainerProps) {
+const RAILS: { id: Rail; label: string; shortcut: string }[] = [
+  { id: 'composer', label: 'Copilot', shortcut: 'Alt+C' },
+  { id: 'agents', label: 'Agents', shortcut: 'Alt+A' },
+]
+
+export default function AIChatPanelContainer({ projectId: workspaceProjectId }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [currentModel, setCurrentModel] = useState(MODELS[0].id)
   const [isLoading, setIsLoading] = useState(false)
   const [projectId, setProjectId] = useState<string | undefined>(workspaceProjectId)
   const [mission, setMission] = useState<string | null>(null)
   const [source, setSource] = useState<string | null>(null)
-  const [activeRail, setActiveRail] = useState<'composer' | 'agents'>('composer')
+  const [activeRail, setActiveRail] = useState<Rail>('composer')
+  const [designMode, setDesignMode] = useState(false)
+
   const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   useAIChatSessionContext({
@@ -66,84 +68,144 @@ export default function AIChatPanelContainer({ projectId: workspaceProjectId }: 
     })
 
   const handleIntent = useCallback(
-    (prompt: string) => {
-      void handleSendMessage(prompt)
-    },
-    [handleSendMessage]
+    (prompt: string) => { void handleSendMessage(prompt) },
+    [handleSendMessage],
   )
 
   useEffect(() => {
-    const onPreviewInspectRequest = (event: Event) => {
-      const detail = (event as CustomEvent<PreviewInspectRequestDetail>).detail
+    window.dispatchEvent(new CustomEvent('aethel.preview.designMode', {
+      detail: { enabled: designMode, source: 'ai-chat' },
+    }))
+
+    return () => {
+      window.dispatchEvent(new CustomEvent('aethel.preview.designMode', {
+        detail: { enabled: false, source: 'ai-chat' },
+      }))
+    }
+  }, [designMode])
+
+  // Preview inspector bridge. It stays inert until Design Mode is armed.
+  useEffect(() => {
+    const handler = (event: Event) => {
+      if (!designMode) return
+
+      const detail = (event as CustomEvent<PreviewInspectDetail>).detail
       if (!detail?.message) return
 
-      const element = detail.elementInfo
-      const selector = element
-        ? [element.tag, element.id ? `#${element.id}` : '', element.className ? `.${element.className}` : ''].join('')
-        : 'selected preview element'
+      const el = detail.elementInfo
+      const selector = el
+        ? [el.tag, el.id ? `#${el.id}` : '', el.className ? `.${el.className}` : ''].join('')
+        : 'selected element'
       const prompt = [
-        `Preview inspector request: ${detail.message}`,
+        `Design inspect: ${detail.message}`,
         `Target: ${selector}`,
         detail.filePath ? `File: ${detail.filePath}` : null,
-        element?.textContent ? `Visible text: ${element.textContent}` : null,
-        'Return a scoped proposal with the smallest safe diff, validation steps, rollback note, and evidence impact.',
-      ]
-        .filter(Boolean)
-        .join('\n')
+        el?.textContent ? `Visible text: "${el.textContent}"` : null,
+        'Return the smallest safe diff with validation steps, rollback note, and evidence.',
+      ].filter(Boolean).join('\n')
 
       setActiveRail('composer')
-      setSource(detail.source || 'preview-inspector')
+      setSource(detail.source ?? 'design-inspector')
       setMission(detail.message)
       if (detail.projectId) setProjectId(detail.projectId)
       void handleSendMessage(prompt)
     }
 
-    window.addEventListener('aethel.preview.inspectRequest', onPreviewInspectRequest)
-    return () => window.removeEventListener('aethel.preview.inspectRequest', onPreviewInspectRequest)
-  }, [handleSendMessage])
+    window.addEventListener('aethel.preview.inspectRequest', handler)
+    return () => window.removeEventListener('aethel.preview.inspectRequest', handler)
+  }, [designMode, handleSendMessage])
 
-  const rails = [
-    { id: 'composer' as const, label: 'Copilot' },
-    { id: 'agents' as const, label: 'Agents' },
-  ]
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!e.altKey) return
+      if (e.key.toLowerCase() === 'c') { e.preventDefault(); setActiveRail('composer') }
+      if (e.key.toLowerCase() === 'a') { e.preventDefault(); setActiveRail('agents') }
+      if (e.key.toLowerCase() === 'd') { e.preventDefault(); setDesignMode((v) => !v) }
+    }
+
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-col" data-ai-cockpit-rail="compact">
       <div
-        className="flex items-center justify-between gap-2 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_84%,transparent)] px-3 py-2"
+        className="flex shrink-0 items-center justify-between gap-2 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_84%,transparent)] px-2.5 py-1.5"
         role="tablist"
-        aria-label="AI side rail"
-        data-ai-cockpit-rail="compact"
+        aria-label="AI panel rail"
       >
-        <div className="flex items-center gap-1 rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)] p-1">
-          {rails.map((rail) => {
-            const active = activeRail === rail.id
+        <div className="flex items-center gap-1 rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)] p-0.5">
+          {RAILS.map(({ id, label }) => {
+            const active = activeRail === id
             return (
               <button
-                key={rail.id}
+                key={id}
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => setActiveRail(rail.id)}
-                className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] ${focusClass} ${
+                onClick={() => setActiveRail(id)}
+                title={`${label} (${RAILS.find((rail) => rail.id === id)?.shortcut ?? ''})`}
+                className={[
+                  'rounded-lg px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.13em] transition-all',
+                  focusClass,
                   active
                     ? 'bg-[var(--aethel-surface-elevated)] text-[var(--aethel-text-primary)] shadow-[var(--aethel-shadow-soft)]'
-                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-                }`}
+                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]',
+                ].join(' ')}
               >
-                {rail.label}
+                {label}
               </button>
             )
           })}
         </div>
-        <div className="hidden items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)] sm:flex">
-          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1">cost metered</span>
-          <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1">replay ready</span>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            title="Design Mode: arm preview inspect events (Alt+D)"
+            onClick={() => setDesignMode((v) => !v)}
+            aria-pressed={designMode}
+            className={[
+              'rounded-md border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition-all',
+              focusClass,
+              designMode
+                ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_14%,transparent)] text-[var(--aethel-primary-light)]'
+                : 'border-[var(--aethel-border-subtle)] text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]',
+            ].join(' ')}
+          >
+            {designMode ? 'Design' : 'Inspect'}
+          </button>
+
+          <div className="hidden items-center gap-1 sm:flex">
+            <span className="rounded-full border border-[var(--aethel-border-subtle)] px-1.5 py-0.5 text-[9px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
+              cost metered
+            </span>
+            <span className="rounded-full border border-[var(--aethel-border-subtle)] px-1.5 py-0.5 text-[9px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
+              replay ready
+            </span>
+          </div>
         </div>
       </div>
 
+      {designMode && (
+        <div className="flex shrink-0 items-center gap-2 border-b border-[color-mix(in_srgb,var(--aethel-primary)_22%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_8%,transparent)] px-3 py-2">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--aethel-primary-light)]" aria-hidden="true" />
+          <p className="text-[11px] text-[var(--aethel-primary-light)]">
+            <strong className="font-semibold">Design Mode active</strong> - preview inspect events create scoped edit requests here.
+          </p>
+          <button
+            type="button"
+            onClick={() => setDesignMode(false)}
+            className={`ml-auto rounded text-[10px] text-[var(--aethel-primary-light)] hover:opacity-70 ${focusClass}`}
+            aria-label="Exit Design Mode"
+          >
+            Exit
+          </button>
+        </div>
+      )}
+
       {activeRail === 'agents' ? (
-        <AgentsWindow projectId={projectId} />
+        <AgentsWindow projectId={projectId} className="min-h-0 flex-1" />
       ) : (
         <>
           {(mission || source || projectId) && (
@@ -155,6 +217,7 @@ export default function AIChatPanelContainer({ projectId: workspaceProjectId }: 
               onIntent={handleIntent}
             />
           )}
+
           {providerGate && (
             <div className="mx-3 mt-3 space-y-2">
               <AIProviderSetupGuide
@@ -165,26 +228,28 @@ export default function AIChatPanelContainer({ projectId: workspaceProjectId }: 
                 settingsHref={providerGate.setupUrl}
               />
               {!providerStatus?.configured && !providerStatus?.demoModeEnabled && (
-                <div className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-info-light)]">
-                  Local demo available: you can send up to{' '}
-                  {typeof providerStatus?.demoDailyLimit === 'number' ? providerStatus.demoDailyLimit : 5} guided replies per day without a live provider.
+                <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-info-light)]">
+                  Demo available:{' '}
+                  {typeof providerStatus?.demoDailyLimit === 'number' ? providerStatus.demoDailyLimit : 5} guided replies/day without a provider.
                 </div>
               )}
             </div>
           )}
+
           {lastFailedMessage && !isLoading && (
-            <div className="mx-3 mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-error-light)]">
-              <span>Failed to process the last message.</span>
+            <div className="mx-3 mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-error-light)]">
+              <span>Last message failed to send.</span>
               <button
                 type="button"
                 onClick={() => void handleSendMessage(lastFailedMessage)}
-                aria-label="Retry the last failed message"
-                className={`rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] ${focusClass}`}
+                aria-label="Retry failed message"
+                className={`rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] hover:opacity-80 ${focusClass}`}
               >
                 Retry
               </button>
             </div>
           )}
+
           <div className="min-h-0 flex-1">
             <AIChatPanelPro
               messages={messages}

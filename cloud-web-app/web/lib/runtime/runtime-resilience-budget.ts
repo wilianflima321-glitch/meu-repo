@@ -1,4 +1,4 @@
-﻿import { type GovernedRuntimeState } from '@/lib/product/workspace-blueprint'
+import { type GovernedRuntimeState } from '@/lib/product/workspace-blueprint'
 
 export type RuntimeResilienceSurfaceId =
   | 'ide-shell'

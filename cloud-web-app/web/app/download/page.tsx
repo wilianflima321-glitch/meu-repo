@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 import type { StudioLocalPlatformId } from '@/lib/studio-local/release-manifest'
@@ -39,7 +39,9 @@ export default function DownloadPage() {
           <summary className="cursor-pointer list-none text-sm font-semibold text-[var(--aethel-text-secondary)]">
             Release status
           </summary>
-          <DownloadStatusCallout />
+          <Suspense fallback={<div className="mt-3 h-16 animate-pulse rounded-xl bg-[var(--aethel-surface-secondary)]" />}>
+            <DownloadStatusCallout />
+          </Suspense>
         </details>
       </main>
 

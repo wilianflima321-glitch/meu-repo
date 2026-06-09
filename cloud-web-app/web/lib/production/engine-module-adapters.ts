@@ -61,7 +61,6 @@ export type EngineModuleAdapterSurface =
   | '/studio/animation'
   | '/studio/level'
   | '/studio/vfx'
-  | '/studio/audio'
   | '/studio/quest';
 
 export type EngineModuleRuntimeBoundary = 'summary-adapter' | 'type-contract' | 'render-gated' | 'worker-held';

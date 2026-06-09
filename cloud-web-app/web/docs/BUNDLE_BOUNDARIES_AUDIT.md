@@ -1,7 +1,7 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2390
+- Files scanned: 2411
 - Failures: 0
 
 ## Counts
@@ -11,7 +11,7 @@ Generated: deterministic local scan
 - monacoEditorDirect: 0 (max 0)
 - monacoReactDirect: 0 (max 0)
 - framerMotionDirect: 0 (max 0)
-- dynamicImportsMin: 268 (min 100)
+- dynamicImportsMin: 254 (min 100)
 
 ## Top Offenders
 ### threeDirect
@@ -155,6 +155,7 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/postprocessing/system/default-export.ts statically imports ./tonemapping-pass -> lib/postprocessing/system/tonemapping-pass.ts
 - lib/postprocessing/system/default-export.ts statically imports ./vignette-pass -> lib/postprocessing/system/vignette-pass.ts
 - lib/scene/scene-serializer-runtime/react.ts statically imports ./serializer -> lib/scene/scene-serializer-runtime/serializer.ts
+- lib/video-encoder-real.ts statically imports ./video-encoder-muxers -> lib/video-encoder-muxers.ts
 
 ## Public Route Import Violations
 - none

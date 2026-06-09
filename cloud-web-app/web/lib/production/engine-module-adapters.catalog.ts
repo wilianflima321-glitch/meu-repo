@@ -91,7 +91,7 @@ export const ENGINE_MODULE_ADAPTERS: EngineModuleAdapter[] = [
   },
   {
     modulePath: 'lib/engine/audio-manager.ts',
-    ownerSurface: '/studio/audio',
+    ownerSurface: '/studio/film',
     contractKind: 'audio-mix-summary',
     runtimeBoundary: 'summary-adapter',
     exportedContracts: ['AudioSourceConfig', 'AudioGroupConfig', 'AudioSnapshot'],
@@ -99,7 +99,7 @@ export const ENGINE_MODULE_ADAPTERS: EngineModuleAdapter[] = [
   },
   {
     modulePath: 'lib/audio/spatial-audio-system.ts',
-    ownerSurface: '/studio/audio',
+    ownerSurface: '/studio/film',
     contractKind: 'spatial-audio-review',
     runtimeBoundary: 'summary-adapter',
     exportedContracts: ['AudioSettings', 'SoundSettings', 'ReverbSettings'],
@@ -235,7 +235,7 @@ export const ENGINE_MODULE_ADAPTERS: EngineModuleAdapter[] = [
   },
   {
     modulePath: 'lib/ai-audio-engine.ts',
-    ownerSurface: '/studio/audio',
+    ownerSurface: '/studio/film',
     contractKind: 'ai-audio-emotion-review',
     runtimeBoundary: 'summary-adapter',
     exportedContracts: ['AIEmotionalAudioSystem', 'EmotionAnalyzer', 'ContextTracker'],
@@ -259,7 +259,7 @@ export const ENGINE_MODULE_ADAPTERS: EngineModuleAdapter[] = [
   },
   {
     modulePath: 'lib/audio-engine.ts',
-    ownerSurface: '/studio/audio',
+    ownerSurface: '/studio/film',
     contractKind: 'browser-audio-engine-boundary',
     runtimeBoundary: 'summary-adapter',
     exportedContracts: ['AethelAudioEngine', 'AudioTrack', 'ChannelConfig'],

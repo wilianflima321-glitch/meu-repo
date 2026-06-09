@@ -234,7 +234,14 @@
     "qa:v29-sidecar-install-manifest": "node scripts/check-v29-sidecar-install-manifest.mjs",
     "runtime:v29-failure-smoke": "node scripts/run-v29-runtime-failure-smoke-runner.mjs",
     "runtime:v29-failure-smoke:local": "node scripts/run-v29-runtime-failure-smoke-local.mjs",
-    "qa:v29-sidecar-evidence-package-integration": "node scripts/check-v29-sidecar-evidence-package-integration.mjs"
+    "qa:v29-sidecar-evidence-package-integration": "node scripts/check-v29-sidecar-evidence-package-integration.mjs",
+    "qa:v30-lockfile-reproducibility": "node scripts/check-v30-lockfile-reproducibility.mjs",
+    "qa:v30-no-new-fragmentation": "node scripts/check-v30-no-new-fragmentation.mjs",
+    "qa:v30-total-spine": "node scripts/check-v30-total-spine.mjs",
+    "qa:v30-internal-contracts": "node scripts/check-v30-internal-contracts.mjs",
+    "qa:v30-heavy-runtime-boundaries": "node scripts/check-v30-heavy-runtime-boundaries.mjs",
+    "qa:v30-quality-scorecard": "node scripts/check-v30-quality-scorecard.mjs",
+    "qa:v30-story-coverage-ratchet": "node scripts/check-v30-story-coverage-ratchet.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",

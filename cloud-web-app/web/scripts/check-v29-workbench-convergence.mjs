@@ -20,7 +20,10 @@ if (!exists('components/ide/AIChatPanelPro.tsx')) failures.push('canonical agent
 if (!exists('components/ide/fullscreen/WorkbenchPreviewPane.tsx')) failures.push('canonical preview/runtime pane is missing')
 if (exists('components/ide/IDELayout.tsx')) failures.push('IDELayout.tsx must stay deleted or redirect-only outside components/ide')
 
-const topLevelIde = fs.readdirSync(path.join(ROOT, 'components/ide')).filter((name) => /Shell|IDELayout|FullscreenIDE|WorkbenchRedirect/.test(name))
+const topLevelIde = fs
+  .readdirSync(path.join(ROOT, 'components/ide'))
+  .filter((name) => /Shell|IDELayout|FullscreenIDE|WorkbenchRedirect/.test(name))
+  .filter((name) => !/\.stories\.(t|j)sx?$/.test(name))
 const allowed = new Set(['ModernIDEShell.tsx', 'FullscreenIDE.tsx', 'WorkbenchRedirect.tsx'])
 for (const name of topLevelIde) {
   if (!allowed.has(name) && !fs.statSync(path.join(ROOT, 'components/ide', name)).isDirectory()) {

@@ -148,7 +148,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/engine/audio-manager.ts',
     decision: 'wire',
-    ownerSurface: '/studio/audio',
+    ownerSurface: '/studio/film',
     reason: 'Game and film quality needs audio mix evidence; audio runtime contracts must be visible without autoplaying or mutating browser audio graphs.',
     risks: ['creative-gap', 'dead-code'],
     status: 'adapter-wired',
@@ -160,7 +160,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/audio/spatial-audio-system.ts',
     decision: 'wire',
-    ownerSurface: '/studio/audio',
+    ownerSurface: '/studio/film',
     reason: 'Spatial audio is a quality differentiator for games and films, but it needs listener, reverb, and headset-review evidence before release claims.',
     risks: ['creative-gap', 'bundle-risk'],
     status: 'adapter-wired',
@@ -364,7 +364,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/ai-audio-engine.ts',
     decision: 'wire',
-    ownerSurface: '/studio/audio',
+    ownerSurface: '/studio/film',
     reason: 'AI emotional audio is valuable for film/game polish, but it must remain review and consent gated rather than silently generating final mix claims.',
     risks: ['creative-gap', 'parallel-runtime'],
     status: 'adapter-wired',
@@ -400,7 +400,7 @@ export const ENGINE_MODULE_INTEGRATION_DECISIONS: EngineModuleIntegrationDecisio
   {
     modulePath: 'lib/audio-engine.ts',
     decision: 'wire',
-    ownerSurface: '/studio/audio',
+    ownerSurface: '/studio/film',
     reason: 'Browser audio playback should be governed by channel, peak-level, and autoplay-safe evidence instead of hidden runtime side effects.',
     risks: ['parallel-runtime', 'bundle-risk'],
     status: 'adapter-wired',

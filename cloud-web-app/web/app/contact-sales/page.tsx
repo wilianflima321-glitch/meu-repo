@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 
 import ContactSalesContent from './contact-sales-content'
@@ -16,5 +17,9 @@ export default function ContactSalesPage({
   const rawSource = searchParams?.source
   const initialSource = Array.isArray(rawSource) ? rawSource[0] ?? '' : rawSource ?? ''
 
-  return <ContactSalesContent initialSource={initialSource} />
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[var(--aethel-surface-primary)]" />}>
+      <ContactSalesContent initialSource={initialSource} />
+    </Suspense>
+  )
 }

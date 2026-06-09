@@ -98,7 +98,14 @@
     "qa:heavy-render-runtime-safety": "node tools/check-heavy-render-runtime-safety.mjs",
     "qa:studio-session-runtime": "node tools/check-studio-session-runtime-gate.mjs",
     "cli:help": "node packages/aethel-cli/src/index.mjs --help",
-    "qa:ecosystem-skeletons": "node tools/check-ecosystem-skeletons.mjs"
+    "qa:ecosystem-skeletons": "node tools/check-ecosystem-skeletons.mjs",
+    "qa:v30-lockfile-reproducibility": "npm --prefix cloud-web-app/web run qa:v30-lockfile-reproducibility",
+    "qa:v30-no-new-fragmentation": "npm --prefix cloud-web-app/web run qa:v30-no-new-fragmentation",
+    "qa:v30-total-spine": "npm --prefix cloud-web-app/web run qa:v30-total-spine",
+    "qa:v30-internal-contracts": "npm --prefix cloud-web-app/web run qa:v30-internal-contracts",
+    "qa:v30-heavy-runtime-boundaries": "npm --prefix cloud-web-app/web run qa:v30-heavy-runtime-boundaries",
+    "qa:v30-quality-scorecard": "npm --prefix cloud-web-app/web run qa:v30-quality-scorecard",
+    "qa:v30-story-coverage-ratchet": "npm --prefix cloud-web-app/web run qa:v30-story-coverage-ratchet"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
@@ -127,22 +134,17 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@theia/filesystem": "^1.66.2",
     "openai": "^4.52.0",
     "@anthropic-ai/sdk": "^0.24.0",
     "@google/generative-ai": "^0.12.0",
     "groq-sdk": "^0.5.0",
     "playwright": "^1.40.0",
     "playwright-extra": "^4.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "ccxt": "^4.2.0",
-    "technicalindicators": "^3.1.0",
     "dotenv": "^16.4.5",
     "axios": "^1.6.8",
     "ws": "^8.16.0",
     "uuid": "^9.0.1",
-    "crypto-js": "^4.2.0",
-    "inversify": "^6.0.2",
-    "reflect-metadata": "^0.2.2"
+    "inversify": "^6.0.2"
   }
 }

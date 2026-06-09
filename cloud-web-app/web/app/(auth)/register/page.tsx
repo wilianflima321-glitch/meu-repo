@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import nextDynamic from 'next/dynamic';
 
 export const dynamic = 'force-dynamic'
@@ -18,5 +19,9 @@ const RegisterPageV2 = nextDynamic(() => import('./register-v2'), {
 })
 
 export default function RegisterPage() {
-  return <RegisterPageV2 />
+  return (
+    <Suspense fallback={<RegisterPageFallback />}>
+      <RegisterPageV2 />
+    </Suspense>
+  )
 }

@@ -1,4 +1,4 @@
-﻿import { type RuntimeResilienceSurfaceId, type RuntimeRecoveryMode } from '@/lib/runtime/runtime-resilience-budget'
+import { type RuntimeResilienceSurfaceId, type RuntimeRecoveryMode } from '@/lib/runtime/runtime-resilience-budget'
 
 export type RuntimeResilienceEventKind =
   | 'region-error'

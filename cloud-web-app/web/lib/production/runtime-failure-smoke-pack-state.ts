@@ -1,4 +1,4 @@
-﻿import type { RuntimeFailureSmokePackReport } from '@/lib/runtime/runtime-failure-smoke-pack'
+import type { RuntimeFailureSmokePackReport } from '@/lib/runtime/runtime-failure-smoke-pack'
 
 export const RUNTIME_FAILURE_SMOKE_PACK_SETTINGS_KEY = 'aethelRuntimeFailureSmokePacks'
 export const RUNTIME_FAILURE_SMOKE_PACK_HISTORY_LIMIT = 12

@@ -84,7 +84,7 @@ const limits = {
   apiRoutes: 379,
   adminPages: 7,
   studioPages: 6,
-  filesOver500Lines: 218,
+    filesOver500Lines: 215,
   storyFiles: 30,
   testFiles: 206,
   filesOver800Lines: 0,

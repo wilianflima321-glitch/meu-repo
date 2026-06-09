@@ -53,7 +53,6 @@ apps/studio-local/src-tauri/gen/
 
 # Local data
 data.json
-package-lock.json
 *.zip
 *.patch
 *.bundle

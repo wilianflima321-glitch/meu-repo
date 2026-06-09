@@ -105,6 +105,7 @@ export interface V29DesktopBridgeCommandContract {
 export interface CreativeToolchainContract {
   version: 1
   canonicalShell: string
+  canonicalWorkbenchShell: string
   chrome: string
   inspector: string
   outliner: string
@@ -116,13 +117,11 @@ export interface CreativeToolchainContract {
   publishPolicy: 'human-review-required'
   prohibitedClaims: string[]
 }
-
 export interface PrismaModelCoverageRule {
   status: V29PrismaCoverageStatus
   owner: string
   requiredEvidence: string[]
 }
-
 export interface PrismaModelCoverageMatrix {
   version: 1
   totalModels: number
@@ -217,7 +216,7 @@ export const V29_SUBSYSTEM_OWNERSHIP: V29SubsystemOwnership[] = [
   {
     subsystem: 'creative-tools',
     owner: 'creative tools owner',
-    canonicalEntrypoint: 'cloud-web-app/web/app/studio/CreativeStudioShell.tsx',
+    canonicalEntrypoint: 'cloud-web-app/web/components/studio/CreativeWorkbenchShell.tsx',
     userSurface: '/studio',
     gates: ['qa:v29-creative-toolchain-contract', 'qa:engine-spine-modules'],
     status: 'needs-review',
@@ -431,6 +430,7 @@ export const V29_DESKTOP_BRIDGE_COMMAND_CONTRACT: V29DesktopBridgeCommandContrac
 export const V29_CREATIVE_TOOLCHAIN_CONTRACT: CreativeToolchainContract = {
   version: 1,
   canonicalShell: 'cloud-web-app/web/app/studio/CreativeStudioShell.tsx',
+  canonicalWorkbenchShell: 'cloud-web-app/web/components/studio/CreativeWorkbenchShell.tsx',
   chrome: 'cloud-web-app/web/components/viewport/ViewportChrome.tsx',
   inspector: 'cloud-web-app/web/components/viewport/SceneViewportInspector.tsx',
   outliner: 'cloud-web-app/web/components/viewport/SceneViewportOutliner.tsx',

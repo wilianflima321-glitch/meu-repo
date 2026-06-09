@@ -1,4 +1,4 @@
-﻿import type { RuntimeFailureSmokeScenarioId } from '@/lib/runtime/runtime-failure-smoke-pack'
+import type { RuntimeFailureSmokeScenarioId } from '@/lib/runtime/runtime-failure-smoke-pack'
 
 export type RuntimeFailureSmokeFixtureSurface =
   | 'ide'
