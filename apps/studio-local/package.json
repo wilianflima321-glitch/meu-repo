@@ -1,11 +1,27 @@
-﻿{
+{
   "name": "@aethel/studio-local",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
+    "vite:dev": "vite --host 127.0.0.1",
+    "vite:build": "vite build",
+    "typecheck": "tsc --noEmit",
     "dev": "node ./tools/check-studio-local-prereqs.mjs --mode dev && npx tauri dev",
     "build": "node ./tools/check-studio-local-prereqs.mjs --mode build && npx tauri build",
     "test": "node ./tools/check-studio-local-prereqs.mjs --mode test && cargo test --manifest-path src-tauri/Cargo.toml"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
   }
 }

@@ -18,7 +18,9 @@ for (const token of ['STUDIO_LOCAL_DESKTOP_MANIFEST', 'tauri-web-shell', 'absorb
   if (!desktopManifest.includes(token)) failures.push(`desktop manifest missing ${token}`)
 }
 for (const required of [
-  '../../apps/studio-local/src/index.html',
+  '../../apps/studio-local/index.html',
+  '../../apps/studio-local/src/main.tsx',
+  '../../apps/studio-local/src/StudioLocalApp.tsx',
   '../../apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts',
   '../../apps/studio-local/src-tauri/src/probe.rs',
   '../../apps/studio-local/src-tauri/src/policy.rs',

@@ -4,9 +4,10 @@
   "version": "0.1.0",
   "identifier": "dev.aethel.studio.local",
   "build": {
-    "beforeDevCommand": "npm --prefix ../../cloud-web-app/web run dev",
-    "devUrl": "http://localhost:3000",
-    "frontendDist": "../src"
+    "beforeDevCommand": "npm run vite:dev",
+    "beforeBuildCommand": "npm run vite:build",
+    "devUrl": "http://127.0.0.1:1420",
+    "frontendDist": "../dist"
   },
   "app": {
     "windows": [
@@ -29,12 +30,12 @@
         "worker-src": "'self' blob:"
       },
       "devCsp": {
-        "default-src": "'self' http://localhost:3000",
-        "connect-src": "ipc: http://ipc.localhost http://localhost:3000 ws://localhost:3000 http://127.0.0.1:* ws://127.0.0.1:*",
-        "font-src": "'self' data: http://localhost:3000",
-        "img-src": "'self' blob: data: http://localhost:3000",
-        "style-src": "'self' 'unsafe-inline' http://localhost:3000",
-        "script-src": "'self' 'unsafe-inline' 'unsafe-eval' http://localhost:3000",
+        "default-src": "'self' http://127.0.0.1:1420",
+        "connect-src": "ipc: http://ipc.localhost http://127.0.0.1:1420 ws://127.0.0.1:1420 http://127.0.0.1:* ws://127.0.0.1:*",
+        "font-src": "'self' data: http://127.0.0.1:1420",
+        "img-src": "'self' blob: data: http://127.0.0.1:1420",
+        "style-src": "'self' 'unsafe-inline' http://127.0.0.1:1420",
+        "script-src": "'self' 'unsafe-inline' 'unsafe-eval' http://127.0.0.1:1420",
         "worker-src": "'self' blob:"
       }
     }

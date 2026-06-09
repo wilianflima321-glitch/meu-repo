@@ -22,7 +22,11 @@ export type StudioLocalAiCompleteResult = {
   reason: string;
 };
 
-export function createDesktopAdapter(invoke: TauriInvoke): RuntimeAdapter {
+const unavailableInvoke: TauriInvoke = async (command) => {
+  throw new Error(`Studio Local bridge command is unavailable outside Tauri: ${command}`);
+};
+
+export function createDesktopAdapter(invoke: TauriInvoke = unavailableInvoke): RuntimeAdapter {
   return {
     fs: {
       read: (path) => invoke<string>('fs_read', { path }),

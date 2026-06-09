@@ -79,7 +79,7 @@ export interface DesktopSidecarCapability {
 export interface DesktopCapabilityManifest {
   version: 1
   desktopTarget: 'tauri-web-shell'
-  canonicalShell: 'apps/studio-local/src/index.html'
+  canonicalShell: 'apps/studio-local/index.html'
   bridgeEntrypoint: 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts'
   runtimeTemplatesPolicy: 'absorb-into-studio-local'
   updateChannels: ['stable', 'beta', 'nightly']
@@ -207,7 +207,7 @@ export const V29_SUBSYSTEM_OWNERSHIP: V29SubsystemOwnership[] = [
   {
     subsystem: 'desktop-studio-local',
     owner: 'runtime/native owner',
-    canonicalEntrypoint: 'apps/studio-local/src/index.html',
+    canonicalEntrypoint: 'apps/studio-local/index.html',
     userSurface: 'Aethel Studio Local',
     gates: ['qa:v29-desktop-capability-manifest', 'qa:v29-desktop-bridge-commands', 'qa:studio-local-release-readiness'],
     status: 'held',
@@ -277,7 +277,7 @@ export const V29_WORKBENCH_CONVERGENCE: WorkbenchConvergenceReport = {
 export const V29_DESKTOP_CAPABILITY_MANIFEST: DesktopCapabilityManifest = {
   version: 1,
   desktopTarget: 'tauri-web-shell',
-  canonicalShell: 'apps/studio-local/src/index.html',
+  canonicalShell: 'apps/studio-local/index.html',
   bridgeEntrypoint: 'apps/studio-local/src/desktop-bridge/createDesktopAdapter.ts',
   runtimeTemplatesPolicy: 'absorb-into-studio-local',
   updateChannels: ['stable', 'beta', 'nightly'],

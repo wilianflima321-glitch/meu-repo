@@ -18,6 +18,7 @@ import {
   ToolbarBtn,
   type CreativeWorkbenchEvidence,
 } from './CreativeWorkbenchShell.parts'
+import { readClientJson, writeClientJson } from '@/lib/storage/safe-client-storage'
 import { cn } from '@/lib/utils'
 
 export type { CreativeWorkbenchEvidence, CreativeWorkbenchSlotStatus } from './CreativeWorkbenchShell.parts'
@@ -68,6 +69,12 @@ const CONSTRAINTS = {
   timelineH: { min: 100, max: 300 },
 }
 
+const DEFAULT_EVIDENCE: CreativeWorkbenchEvidence = {
+  label: 'Evidence held',
+  status: 'held',
+  detail: 'No evidence package was provided for this workbench surface yet.',
+}
+
 // --- Persistence --------------------------------------------------------------
 
 function layoutKey(mode: string) {
@@ -75,19 +82,11 @@ function layoutKey(mode: string) {
 }
 
 function loadLayout(mode: string): PanelState {
-  try {
-    const raw = localStorage.getItem(layoutKey(mode))
-    if (!raw) return DEFAULTS
-    return { ...DEFAULTS, ...JSON.parse(raw) }
-  } catch {
-    return DEFAULTS
-  }
+  return { ...DEFAULTS, ...readClientJson<Partial<PanelState>>(layoutKey(mode), {}) }
 }
 
 function saveLayout(mode: string, state: PanelState) {
-  try {
-    localStorage.setItem(layoutKey(mode), JSON.stringify(state))
-  } catch { /* quota exceeded - silent */ }
+  writeClientJson(layoutKey(mode), state)
 }
 
 // --- Drag-resize hook ---------------------------------------------------------
@@ -221,6 +220,7 @@ export function CreativeWorkbenchShell({
   const leftOpen  = (!!outliner && st.outliner)  || (!!assetBrowser && st.assetBrowser)
   const rightOpen = (!!inspector && st.inspector) || (!!renderQueue && st.renderQueue)
   const timelineOpen = !!timeline && st.timeline
+  const evidenceItems = evidence.length > 0 ? evidence : [DEFAULT_EVIDENCE]
 
   const mobilePanels = [
     outliner     && st.outliner     && { label: 'Outliner',      key: 'outliner'     as const, node: outliner },
@@ -374,11 +374,10 @@ export function CreativeWorkbenchShell({
       </div>
 
       {/* -- Evidence footer -------------------------------------------------- */}
-      {(evidence.length > 0 || reviewEvidence) && (
+      {(evidenceItems.length > 0 || reviewEvidence) && (
         <footer className="flex shrink-0 flex-wrap items-center gap-3 border-t border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_12%,transparent)] px-3 py-2">
           <div className="flex flex-1 flex-wrap items-center gap-1.5">
-            {evidence.length > 0 ? (
-              evidence.map((item) => (
+            {evidenceItems.map((item) => (
                 <span
                   key={item.label}
                   title={item.detail}
@@ -387,10 +386,7 @@ export function CreativeWorkbenchShell({
                   <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', STATUS_DOT[item.status])} aria-hidden="true" />
                   {item.label}
                 </span>
-              ))
-            ) : (
-              <span className="text-[11px] text-[var(--aethel-text-quaternary)]">No evidence receipts.</span>
-            )}
+              ))}
           </div>
           {reviewEvidence && <div className="shrink-0">{reviewEvidence}</div>}
         </footer>

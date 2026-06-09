@@ -10,7 +10,7 @@ export interface StudioLocalDesktopCapability {
 export interface StudioLocalDesktopManifest {
   version: 1
   target: 'tauri-web-shell'
-  shell: 'src/index.html'
+  shell: 'index.html'
   bridge: 'src/desktop-bridge/createDesktopAdapter.ts'
   runtimeTemplatesPolicy: 'absorbed-by-studio-local'
   updateChannels: ['stable', 'beta', 'nightly']
@@ -21,7 +21,7 @@ export interface StudioLocalDesktopManifest {
 export const STUDIO_LOCAL_DESKTOP_MANIFEST: StudioLocalDesktopManifest = {
   version: 1,
   target: 'tauri-web-shell',
-  shell: 'src/index.html',
+  shell: 'index.html',
   bridge: 'src/desktop-bridge/createDesktopAdapter.ts',
   runtimeTemplatesPolicy: 'absorbed-by-studio-local',
   updateChannels: ['stable', 'beta', 'nightly'],
