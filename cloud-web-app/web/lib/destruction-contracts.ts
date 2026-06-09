@@ -1,9 +1,7 @@
 // @aethel-heavy-async-boundary Studio/render-gated runtime; do not import from public route shells.
 /**
  * Shared destruction runtime contracts.
- */
-
-import * as THREE from 'three';
+ */import type * as THREE from 'three';
 
 // ============================================================================
 // TIPOS E INTERFACES

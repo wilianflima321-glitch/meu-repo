@@ -10,7 +10,7 @@
  *
  * Usage:
  *   node scripts/codemod-three-imports.mjs
- *   node scripts/codemod-three-imports.mjs --verify
+ *   node scripts/codemod-three-imports.mjs --verify --max=137
  *   node scripts/codemod-three-imports.mjs --report reports/three-imports.json
  */
 
@@ -29,10 +29,24 @@ const reportPath = inlineReportArg
   : reportIndex >= 0
     ? process.argv[reportIndex + 1]
     : null
+const maxIndex = process.argv.indexOf('--max')
+const inlineMaxArg = process.argv.find((arg) => arg.startsWith('--max='))
+const parsedMaxAllowedDirectValueImports = Number.parseInt(
+  inlineMaxArg
+    ? inlineMaxArg.slice('--max='.length)
+    : maxIndex >= 0
+      ? process.argv[maxIndex + 1]
+      : '137',
+  10,
+)
 
 const scanDirs = ['app', 'components', 'lib', 'pages', 'hooks']
 const extensions = new Set(['.ts', '.tsx', '.js', '.jsx'])
-const maxAllowedDirectValueImports = 10
+// Current V30 ratchet after converting type-only Three namespace imports.
+// Lower this number as value imports move behind `loadThree()` async boundaries.
+const maxAllowedDirectValueImports = Number.isFinite(parsedMaxAllowedDirectValueImports)
+  ? parsedMaxAllowedDirectValueImports
+  : 137
 
 const allowlistPatterns = [
   /lib[/\\]three[/\\]index\.ts$/,

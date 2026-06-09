@@ -1,5 +1,4 @@
-// @aethel-heavy-async-boundary Studio/render-gated cloth collision runtime.
-import * as THREE from 'three';
+// @aethel-heavy-async-boundary Studio/render-gated cloth collision runtime.import type * as THREE from 'three';
 import type { ClothCollider, ClothParticle } from './cloth-simulation-contracts';
 
 export class ClothCollisionHandler {

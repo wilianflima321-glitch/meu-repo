@@ -1,5 +1,5 @@
 // @aethel-heavy-async-boundary render-gated post-processing runtime.
-import * as THREE from 'three';
+import type * as THREE from 'three';
 
 export abstract class PostProcessingPass {
   abstract name: string;

@@ -1,5 +1,4 @@
-// @aethel-heavy-async-boundary Studio/engine ECS contracts; keep runtime imports behind engine boundaries.
-import * as THREE from 'three';
+// @aethel-heavy-async-boundary Studio/engine ECS contracts; keep runtime imports behind engine boundaries.import type * as THREE from 'three';
 
 export type EntityId = string;
 export type ComponentType = string;

@@ -3,8 +3,7 @@
  * React hooks and provider for governed level streaming.
  */
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';import type * as THREE from 'three';
 import type { LevelState, StreamingConfig, StreamingMetrics, TransitionConfig } from './level-streaming-system';
 import { LevelStreamingManager } from './level-streaming-system';
 

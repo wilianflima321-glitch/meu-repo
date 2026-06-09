@@ -1,5 +1,4 @@
-// @aethel-heavy-async-boundary Studio/camera React runtime.
-import * as THREE from 'three';
+// @aethel-heavy-async-boundary Studio/camera React runtime.import type * as THREE from 'three';
 import { useState, useRef, useEffect, useContext, createContext, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { CameraController } from './camera-system';

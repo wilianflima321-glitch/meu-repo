@@ -1,9 +1,7 @@
 // @aethel-heavy-async-boundary Studio/engine runtime module; never import from public/dashboard/admin route shells.
 /**
  * Shader source for sparse virtual texture sampling and feedback.
- */
-
-import * as THREE from 'three';
+ */import type * as THREE from 'three';
 
 // ============================================================================
 // VIRTUAL TEXTURE SHADER

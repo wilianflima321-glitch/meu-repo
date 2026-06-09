@@ -1,9 +1,7 @@
 // @aethel-heavy-async-boundary Studio/engine runtime module; never import from public/dashboard/admin route shells.
 /**
  * Singleton accessors for the destruction manager.
- */
-
-import * as THREE from 'three';
+ */import type * as THREE from 'three';
 import { DestructionManager } from './destruction-system';
 
 // ============================================================================

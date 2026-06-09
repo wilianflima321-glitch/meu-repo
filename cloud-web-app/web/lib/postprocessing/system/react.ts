@@ -1,7 +1,6 @@
 'use client';
 // @aethel-heavy-async-boundary render-gated post-processing runtime.
-
-import * as THREE from 'three';
+import type * as THREE from 'three';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BloomPass } from './bloom-pass';
 import { ChromaticAberrationPass } from './chromatic-aberration-pass';

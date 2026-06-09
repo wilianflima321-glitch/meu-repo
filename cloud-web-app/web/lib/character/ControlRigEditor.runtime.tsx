@@ -4,8 +4,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Environment, GizmoHelper, GizmoViewport, Grid, OrbitControls } from '@react-three/drei';
-import * as THREE from 'three';
+import { Environment, GizmoHelper, GizmoViewport, Grid, OrbitControls } from '@react-three/drei';import type * as THREE from 'three';
 import {
   Bone,
   Download,

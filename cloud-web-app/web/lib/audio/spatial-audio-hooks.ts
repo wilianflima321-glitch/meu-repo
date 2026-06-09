@@ -3,8 +3,7 @@
  * React hooks for the spatial audio runtime.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
+import { useCallback, useEffect, useRef, useState } from 'react';import type * as THREE from 'three';
 import type { AudioSettings, SoundSettings } from './spatial-audio-contracts';
 import { AudioSource } from './spatial-audio-source';
 import { SpatialAudioManager } from './spatial-audio-system';
