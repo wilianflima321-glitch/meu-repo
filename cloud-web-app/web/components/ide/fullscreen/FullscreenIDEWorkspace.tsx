@@ -3,7 +3,7 @@
 import type * as monacoEditor from 'monaco-editor';
 import type { ReactNode, RefObject } from 'react';
 
-import AgentsWorkspaceContainer from '@/components/agents/AgentsWorkspaceContainer';
+import { AgentsWorkspaceContainer } from '@/components/agents';
 import CommandPaletteProvider, { type FileItem } from '@/components/ide/CommandPalette';
 import CostMeter from '@/components/cost/CostMeter';
 import { EditorApplyBridgeProvider } from '@/components/ide/EditorApplyBridgeContext';

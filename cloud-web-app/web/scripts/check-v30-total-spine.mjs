@@ -10,6 +10,7 @@ const scripts = [
   'check-v30-lockfile-reproducibility.mjs',
   'check-studio-local-web-shell.mjs',
   'check-agents-window-composition.mjs',
+  'check-agent-ui-boundaries.mjs',
   'check-v30-no-new-fragmentation.mjs',
   'check-v30-heavy-runtime-boundaries.mjs',
   'codemod-three-imports.mjs',

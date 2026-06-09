@@ -114,6 +114,7 @@
     "qa:auth-provider-breadth": "node scripts/check-auth-provider-breadth.mjs",
     "qa:studio-maturity-headers": "node scripts/check-studio-maturity-headers.mjs",
     "qa:agents-window-composition": "node scripts/check-agents-window-composition.mjs",
+    "qa:agent-ui-boundaries": "node scripts/check-agent-ui-boundaries.mjs",
     "qa:game-asset-quality-pipeline": "node scripts/check-game-asset-quality-pipeline.mjs",
     "qa:viewport-asset-quality-ui": "node scripts/check-viewport-asset-quality-ui.mjs",
     "qa:ai-quality-orchestrator": "node scripts/check-ai-quality-orchestrator.mjs",

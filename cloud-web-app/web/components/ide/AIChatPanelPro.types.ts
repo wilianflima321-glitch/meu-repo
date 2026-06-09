@@ -1,5 +1,4 @@
-import type { AIChatConsoleMode } from '@/components/ai-chat/presets'
-import type { AIChatResearchArtifact, AIChatTraceArtifact } from '@/components/ai-chat/ai-chat-evidence'
+import type { AIChatConsoleMode, AIChatResearchArtifact, AIChatTraceArtifact } from '@/components/agents'
 import {
   OPENROUTER_BEST_MODELS_SORTED,
   OPENROUTER_BUDGET_MODELS_SORTED,

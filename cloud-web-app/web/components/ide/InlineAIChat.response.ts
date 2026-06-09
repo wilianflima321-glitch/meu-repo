@@ -1,4 +1,4 @@
-import { buildTraceArtifact, type AIChatTraceArtifact } from "@/components/ai-chat/ai-chat-evidence";
+import { buildTraceArtifact, type AIChatTraceArtifact } from "@/components/agents";
 import type {
   InlineAIFileContext,
   InlineAIMessage,

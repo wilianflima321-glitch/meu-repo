@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import type { AIChatTraceArtifact } from "@/components/ai-chat/ai-chat-evidence";
+import type { AIChatTraceArtifact } from "@/components/agents";
 
 export interface InlineAIFileContext {
   path: string;

@@ -31,7 +31,11 @@ if (agentsWindowLines > 180) {
 }
 
 const requiredFiles = [
+  'components/agents/index.ts',
+  'components/agents/AgentEvidenceCard.tsx',
   'components/agents/AgentsWorkspaceContainer.tsx',
+  'components/agents/evidence.ts',
+  'components/agents/presets.ts',
   'components/agents/window/types.ts',
   'components/agents/window/agent-window-api.ts',
   'components/agents/window/AgentCard.tsx',
@@ -45,6 +49,9 @@ for (const file of requiredFiles) read(file)
 
 requirePattern('components/agents/AgentsWindow.tsx', /AgentReplayPanel/, 'AgentsWindow must delegate replay UI')
 requirePattern('components/agents/AgentsWindow.tsx', /AgentFleetPanel/, 'AgentsWindow must delegate fleet UI')
+requirePattern('components/agents/index.ts', /AgentsWorkspaceContainer/, 'agents barrel must expose the workspace container')
+requirePattern('components/agents/index.ts', /AgentEvidenceCard/, 'agents barrel must expose evidence cards')
+requirePattern('components/agents/index.ts', /AIChatTraceArtifact/, 'agents barrel must expose evidence types')
 requirePattern('components/agents/AgentsWorkspaceContainer.tsx', /AgentsWindow/, 'workspace container must expose AgentsWindow')
 requirePattern('components/agents/AgentsWorkspaceContainer.tsx', /AIChatPanelPro/, 'workspace container must keep the composer while migration is in progress')
 requirePattern('components/ide/fullscreen/FullscreenIDEWorkspace.tsx', /AgentsWorkspaceContainer/, 'IDE workbench must use the canonical agents workspace container')
