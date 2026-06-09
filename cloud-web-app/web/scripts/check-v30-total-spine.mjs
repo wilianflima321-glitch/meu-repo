@@ -20,7 +20,7 @@ const scriptsDir = dirname(fileURLToPath(import.meta.url))
 for (const script of scripts) {
   const args =
     script === 'codemod-three-imports.mjs'
-      ? [join(scriptsDir, script), '--verify', '--max=136']
+      ? [join(scriptsDir, script), '--verify', '--max=135']
       : [join(scriptsDir, script)]
   const result = spawnSync(process.execPath, args, { stdio: 'inherit' })
   if (result.status !== 0) process.exit(result.status ?? 1)

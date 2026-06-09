@@ -1,5 +1,6 @@
-// @aethel-heavy-async-boundary Studio/render material contracts and defaults.
-import * as THREE from 'three';
+// Studio/render material contracts. Keep this module type-only so it never pulls
+// Three.js into non-render import graphs.
+import type * as THREE from 'three';
 
 export type MaterialType =
   | 'standard'
@@ -148,40 +149,3 @@ export interface AdvancedPBRParams {
   iridescenceMap?: THREE.Texture;
   iridescenceThicknessMap?: THREE.Texture;
 }
-
-export const DEFAULT_PBR_PARAMS: AdvancedPBRParams = {
-  albedo: new THREE.Color(1, 1, 1),
-  metallic: 0,
-  roughness: 0.5,
-  normalScale: 1,
-  aoIntensity: 1,
-  emissive: new THREE.Color(0, 0, 0),
-  emissiveIntensity: 1,
-  clearcoat: 0,
-  clearcoatRoughness: 0,
-  clearcoatNormalScale: 1,
-  sheen: 0,
-  sheenRoughness: 1,
-  sheenColor: new THREE.Color(1, 1, 1),
-  transmission: 0,
-  thickness: 0,
-  attenuationDistance: Infinity,
-  attenuationColor: new THREE.Color(1, 1, 1),
-  ior: 1.5,
-  anisotropy: 0,
-  anisotropyRotation: 0,
-  detailTiling: 1,
-  detailStrength: 1,
-  heightScale: 0.1,
-  parallaxSteps: 8,
-  alphaTest: 0,
-  alphaToCoverage: false,
-  transparent: false,
-  opacity: 1,
-  subsurface: 0,
-  subsurfaceColor: new THREE.Color(1, 1, 1),
-  subsurfaceRadius: new THREE.Vector3(1, 1, 1),
-  iridescence: 0,
-  iridescenceIOR: 1.3,
-  iridescenceThicknessRange: [100, 400],
-};
