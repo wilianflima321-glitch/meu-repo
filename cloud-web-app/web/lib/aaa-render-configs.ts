@@ -1,5 +1,5 @@
-// @aethel-heavy-async-boundary Studio/render-gated constants; paired with aaa-render-system.
-import * as THREE from 'three'
+// Studio/render-gated constants; keep this module serializable and Three-free at runtime.
+import type * as THREE from 'three'
 
 export type RenderPipelineType = 'forward' | 'deferred' | 'forwardPlus' | 'tiled'
 
@@ -17,18 +17,26 @@ export interface RenderPipelineConfig {
   outputColorSpace: THREE.ColorSpace
 }
 
+// Values mirror Three.js constants, but keeping them local prevents this config
+// module from pulling the renderer package into non-render import graphs.
+const ACES_FILMIC_TONE_MAPPING = 4 as THREE.ToneMapping
+const LINEAR_TONE_MAPPING = 1 as THREE.ToneMapping
+const BASIC_SHADOW_MAP = 0 as THREE.ShadowMapType
+const PCF_SOFT_SHADOW_MAP = 2 as THREE.ShadowMapType
+const SRGB_COLOR_SPACE = 'srgb' as THREE.ColorSpace
+
 export const DEFAULT_PIPELINE_CONFIG: RenderPipelineConfig = {
   type: 'forwardPlus',
   hdr: true,
   multisampling: true,
   samples: 4,
-  toneMapping: THREE.ACESFilmicToneMapping,
+  toneMapping: ACES_FILMIC_TONE_MAPPING,
   toneMappingExposure: 1.0,
   shadowMapEnabled: true,
-  shadowMapType: THREE.PCFSoftShadowMap,
+  shadowMapType: PCF_SOFT_SHADOW_MAP,
   shadowMapSize: 2048,
   physicallyCorrectLights: true,
-  outputColorSpace: THREE.SRGBColorSpace,
+  outputColorSpace: SRGB_COLOR_SPACE,
 }
 
 export const LITE_PIPELINE_CONFIG: RenderPipelineConfig = {
@@ -36,13 +44,13 @@ export const LITE_PIPELINE_CONFIG: RenderPipelineConfig = {
   hdr: true,
   multisampling: false,
   samples: 1,
-  toneMapping: THREE.ACESFilmicToneMapping,
+  toneMapping: ACES_FILMIC_TONE_MAPPING,
   toneMappingExposure: 1.0,
   shadowMapEnabled: true,
-  shadowMapType: THREE.BasicShadowMap,
+  shadowMapType: BASIC_SHADOW_MAP,
   shadowMapSize: 1024,
   physicallyCorrectLights: true,
-  outputColorSpace: THREE.SRGBColorSpace,
+  outputColorSpace: SRGB_COLOR_SPACE,
 }
 
 export const MOBILE_PIPELINE_CONFIG: RenderPipelineConfig = {
@@ -50,13 +58,13 @@ export const MOBILE_PIPELINE_CONFIG: RenderPipelineConfig = {
   hdr: false,
   multisampling: false,
   samples: 1,
-  toneMapping: THREE.LinearToneMapping,
+  toneMapping: LINEAR_TONE_MAPPING,
   toneMappingExposure: 1.0,
   shadowMapEnabled: true,
-  shadowMapType: THREE.BasicShadowMap,
+  shadowMapType: BASIC_SHADOW_MAP,
   shadowMapSize: 512,
   physicallyCorrectLights: false,
-  outputColorSpace: THREE.SRGBColorSpace,
+  outputColorSpace: SRGB_COLOR_SPACE,
 }
 
 export interface GBuffer {
