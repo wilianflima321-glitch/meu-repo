@@ -1,11 +1,10 @@
 // @aethel-heavy-async-boundary Studio/engine runtime module; never import from public/dashboard/admin route shells.
-import * as THREE from 'three';
 
 export class FoveatedRenderingManager {
   private enabled: boolean = false;
   private foveationLevel: number = 0; // 0-4
   private dynamicFoveation: boolean = true;
-  private gazePoint: THREE.Vector2 = new THREE.Vector2(0.5, 0.5);
+  private gazePoint: [number, number] = [0.5, 0.5];
   private innerRadius: number = 0.2;
   private outerRadius: number = 0.6;
   constructor() {}
@@ -22,7 +21,7 @@ export class FoveatedRenderingManager {
     this.foveationLevel = Math.max(0, Math.min(4, level));
   }
   updateGazePoint(x: number, y: number): void {
-    this.gazePoint.set(x, y);
+    this.gazePoint = [x, y];
   }
   applyToLayer(layer: XRWebGLLayer | any): void {
     if (!this.enabled) return;
