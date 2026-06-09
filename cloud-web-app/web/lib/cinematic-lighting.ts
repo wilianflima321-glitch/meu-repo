@@ -18,9 +18,25 @@
 import * as THREE from 'three';
 
 import type { AdvancedLightConfig, AreaLightShape, LightType } from './cinematic-lighting.types';
-import { DEFAULT_LIGHT_CONFIG } from './cinematic-lighting.defaults';
 export type { AdvancedLightConfig, AreaLightShape, LightType } from './cinematic-lighting.types';
-export { DEFAULT_LIGHT_CONFIG } from './cinematic-lighting.defaults';
+
+export const DEFAULT_LIGHT_CONFIG: AdvancedLightConfig = {
+  type: 'point',
+  color: new THREE.Color(1, 1, 1),
+  intensity: 1.0,
+  temperature: 6500,
+  castShadow: true,
+  shadowBias: -0.0001,
+  shadowNormalBias: 0.02,
+  shadowRadius: 1,
+  shadowMapSize: 1024,
+  volumetric: false,
+  volumetricIntensity: 1.0,
+  volumetricSamples: 32,
+  range: 100,
+  decay: 2,
+  animated: false,
+};
 
 // ============================================================================
 // CINEMATIC LIGHT CLASS
