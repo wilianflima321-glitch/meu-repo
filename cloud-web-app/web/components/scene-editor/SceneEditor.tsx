@@ -6,7 +6,7 @@ import { useState, useCallback, useEffect } from 'react';
 import StudioEngineModuleMiniPanel from '@/components/studio/StudioEngineModuleMiniPanel';
 import { SceneViewportCanvas } from '@/lib/scene-editor/SceneEditor.canvas-runtime';
 import { PropertiesPanel } from './ScenePropertiesPanel';
-import { PRIMITIVE_GEOMETRIES } from './scene-editor-models';
+import { PRIMITIVE_GEOMETRY_TYPES } from './scene-editor-models';
 import type { SceneEditorProps, SceneObject, TransformMode } from './scene-editor-models';
 
 export type { SceneEditorProps, SceneObject, SnapSettings, TransformMode } from './scene-editor-models';
@@ -121,7 +121,7 @@ function HierarchyPanel({
               <div style={{ padding: '4px 12px', color: 'var(--aethel-text-tertiary)', fontSize: '11px' }}>
                 3D Objects
               </div>
-              {Object.keys(PRIMITIVE_GEOMETRIES).map(geom => (
+              {PRIMITIVE_GEOMETRY_TYPES.map(geom => (
                 <button type="button"
                   key={geom}
                   onClick={() => {

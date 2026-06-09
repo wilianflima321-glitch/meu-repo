@@ -18,16 +18,26 @@ import { GameSimulation } from "@/lib/scene-editor/GameSimulation.runtime";
 import { AAAPostProcessing } from "@/components/scene-editor/AAAPostProcessing";
 import {
   DEFAULT_SNAP_SETTINGS,
-  PRIMITIVE_GEOMETRIES,
   snapPosition,
   snapRotation,
   snapScale,
 } from "@/components/scene-editor/scene-editor-models";
 import type {
+  PrimitiveGeometryType,
   SceneObject,
   SnapSettings,
   TransformMode,
 } from "@/components/scene-editor/scene-editor-models";
+
+const PRIMITIVE_GEOMETRIES: Record<PrimitiveGeometryType, () => THREE.BufferGeometry> = {
+  box: () => new THREE.BoxGeometry(1, 1, 1),
+  sphere: () => new THREE.SphereGeometry(0.5, 32, 32),
+  cylinder: () => new THREE.CylinderGeometry(0.5, 0.5, 1, 32),
+  cone: () => new THREE.ConeGeometry(0.5, 1, 32),
+  torus: () => new THREE.TorusGeometry(0.5, 0.2, 16, 32),
+  plane: () => new THREE.PlaneGeometry(1, 1),
+  capsule: () => new THREE.CapsuleGeometry(0.25, 0.5, 8, 16),
+};
 
 interface SceneObjectMeshProps {
   object: SceneObject;
@@ -54,7 +64,7 @@ function SceneObjectMesh({
   const groupRef = useRef<THREE.Group>(null);
   const geometry =
     PRIMITIVE_GEOMETRIES[
-      object.properties.geometry as keyof typeof PRIMITIVE_GEOMETRIES
+      object.properties.geometry as PrimitiveGeometryType
     ]?.() || new THREE.BoxGeometry(1, 1, 1);
   const materialColor = (object.properties.color as number) || 0x4a90d9;
 

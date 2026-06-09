@@ -1,7 +1,5 @@
 // @aethel-heavy-async-boundary: transitive runtime helpers loaded through SceneEditor.
 
-import * as THREE from 'three';
-
 export type TransformMode = 'translate' | 'rotate' | 'scale';
 export interface SceneObject {
   id: string;
@@ -18,15 +16,8 @@ export interface SceneEditorProps {
   onChange?: (scene: SceneObject[]) => void;
   onSelect?: (objectId: string | null) => void;
 }
-export const PRIMITIVE_GEOMETRIES = {
-  box: () => new THREE.BoxGeometry(1, 1, 1),
-  sphere: () => new THREE.SphereGeometry(0.5, 32, 32),
-  cylinder: () => new THREE.CylinderGeometry(0.5, 0.5, 1, 32),
-  cone: () => new THREE.ConeGeometry(0.5, 1, 32),
-  torus: () => new THREE.TorusGeometry(0.5, 0.2, 16, 32),
-  plane: () => new THREE.PlaneGeometry(1, 1),
-  capsule: () => new THREE.CapsuleGeometry(0.25, 0.5, 8, 16),
-};
+export const PRIMITIVE_GEOMETRY_TYPES = ['box', 'sphere', 'cylinder', 'cone', 'torus', 'plane', 'capsule'] as const;
+export type PrimitiveGeometryType = (typeof PRIMITIVE_GEOMETRY_TYPES)[number];
 export interface SnapSettings {
   enabled: boolean;
   gridSize: number;

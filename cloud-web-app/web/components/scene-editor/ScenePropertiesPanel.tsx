@@ -1,6 +1,6 @@
 'use client';
 
-import { PRIMITIVE_GEOMETRIES } from './scene-editor-models';
+import { PRIMITIVE_GEOMETRY_TYPES } from './scene-editor-models';
 import type { SceneObject } from './scene-editor-models';
 
 interface PropertiesPanelProps {
@@ -218,7 +218,7 @@ export function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
                   color: 'var(--aethel-text-primary)',
                 }}
               >
-                {Object.keys(PRIMITIVE_GEOMETRIES).map(g => (
+                {PRIMITIVE_GEOMETRY_TYPES.map(g => (
                   <option key={g} value={g}>{g}</option>
                 ))}
               </select>
