@@ -10,9 +10,7 @@
 
 import * as THREE from 'three';
 import { EventEmitter } from 'events';
-import { createDefaultCameraConfig, createDefaultFollowSettings, createDefaultOrbitSettings } from './camera-system.defaults';
 import { easingFunctions } from './camera-system.easing';
-import { CameraPathBuilder } from './camera-path-builder';
 import { CameraProvider, useCameraController, useCameraFollow, useCameraMode, useCameraShake, useCameraUpdate } from './camera-system-react';
 import type {
   CameraConfig,
@@ -25,8 +23,6 @@ import type {
   ShakeSettings,
 } from './camera-system.contracts';
 
-export { CameraPathBuilder } from './camera-path-builder';
-export { createDefaultCameraConfig, createDefaultFollowSettings, createDefaultOrbitSettings } from './camera-system.defaults';
 export { CameraProvider, useCameraController, useCameraFollow, useCameraMode, useCameraShake, useCameraUpdate } from './camera-system-react';
 export { easingFunctions } from './camera-system.easing';
 export type {
@@ -40,17 +36,96 @@ export type {
   ShakeSettings,
 } from './camera-system.contracts';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+export function createDefaultCameraConfig(config: Partial<CameraConfig> = {}): CameraConfig {
+  const aspect = typeof window === 'undefined' ? 16 / 9 : window.innerWidth / window.innerHeight;
 
-// ============================================================================
-// EASING FUNCTIONS
-// ============================================================================
+  return {
+    fov: 60,
+    near: 0.1,
+    far: 1000,
+    aspect,
+    ...config,
+  };
+}
 
-// ============================================================================
-// CAMERA CONTROLLER
-// ============================================================================
+export function createDefaultFollowSettings(): FollowSettings {
+  return {
+    target: null,
+    offset: new THREE.Vector3(0, 5, 10),
+    lookAtOffset: new THREE.Vector3(0, 1, 0),
+    smoothing: 0.1,
+    lookAhead: 0,
+  };
+}
+
+export function createDefaultOrbitSettings(): OrbitSettings {
+  return {
+    target: new THREE.Vector3(0, 0, 0),
+    distance: 10,
+    minDistance: 2,
+    maxDistance: 50,
+    azimuthAngle: 0,
+    polarAngle: Math.PI / 4,
+    minPolarAngle: 0.1,
+    maxPolarAngle: Math.PI - 0.1,
+    rotationSpeed: 0.005,
+    zoomSpeed: 0.1,
+    enableDamping: true,
+    dampingFactor: 0.05,
+  };
+}
+
+export class CameraPathBuilder {
+  private path: Partial<CameraPath> = {
+    points: [],
+    loop: false,
+    easing: 'easeInOutQuad',
+  };
+
+  static create(id: string): CameraPathBuilder {
+    return new CameraPathBuilder().id(id);
+  }
+
+  id(id: string): this {
+    this.path.id = id;
+    return this;
+  }
+
+  duration(seconds: number): this {
+    this.path.duration = seconds;
+    return this;
+  }
+
+  loop(loop = true): this {
+    this.path.loop = loop;
+    return this;
+  }
+
+  easing(easing: EasingType): this {
+    this.path.easing = easing;
+    return this;
+  }
+
+  point(position: { x: number; y: number; z: number }, lookAt: { x: number; y: number; z: number }, time: number, fov?: number): this {
+    this.path.points!.push({
+      position: new THREE.Vector3(position.x, position.y, position.z),
+      lookAt: new THREE.Vector3(lookAt.x, lookAt.y, lookAt.z),
+      time,
+      fov,
+    });
+    return this;
+  }
+
+  build(): CameraPath {
+    if (!this.path.id) throw new Error('Path ID is required');
+    if (!this.path.duration) throw new Error('Duration is required');
+    if (this.path.points!.length < 2) throw new Error('At least 2 points required');
+
+    this.path.points!.sort((a, b) => a.time - b.time);
+
+    return this.path as CameraPath;
+  }
+}
 
 export class CameraController extends EventEmitter {
   private camera: THREE.PerspectiveCamera;
