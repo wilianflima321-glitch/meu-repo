@@ -10,6 +10,8 @@ import {
 import { BORDER_SECONDARY } from './chromeStyles';
 import type { BottomPanelMode, PanelState } from './types';
 
+export type AgentRunStatus = 'idle' | 'running' | 'error';
+
 export interface IDEHeaderProps {
   projectName: string;
   activeFileName?: string;
@@ -23,6 +25,65 @@ export interface IDEHeaderProps {
   onRunPrimaryAction?: () => void;
   onOpenSettings?: () => void;
   onOpenCommandPalette?: (mode: 'commands' | 'files') => void;
+  /** Ambient agent status: shows a pulse dot in the header when agents are active */
+  agentStatus?: AgentRunStatus;
+}
+
+/** Small ambient indicator shown next to the Deploy/Run cluster */
+function AgentStatusPill({ status }: { status: AgentRunStatus }) {
+  if (status === 'idle') return null;
+
+  const styles: Record<Exclude<AgentRunStatus, 'idle'>, React.CSSProperties> = {
+    running: {
+      background: 'color-mix(in srgb, var(--aethel-success) 14%, transparent)',
+      border: '1px solid color-mix(in srgb, var(--aethel-success) 32%, transparent)',
+      color: 'var(--aethel-success-light)',
+    },
+    error: {
+      background: 'color-mix(in srgb, var(--aethel-error) 14%, transparent)',
+      border: '1px solid color-mix(in srgb, var(--aethel-error) 32%, transparent)',
+      color: 'var(--aethel-error-light)',
+    },
+  };
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+        padding: '4px 10px',
+        borderRadius: '999px',
+        fontSize: '10px',
+        fontWeight: 600,
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+        ...styles[status],
+      }}
+      aria-live="polite"
+      aria-label={status === 'running' ? 'Agent running' : 'Agent error'}
+    >
+      <span
+        style={{
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          flexShrink: 0,
+          background: 'currentColor',
+          animation: status === 'running' ? 'agentPulse 1.4s ease-in-out infinite' : 'none',
+        }}
+        aria-hidden="true"
+      />
+      <style>{`
+        @keyframes agentPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+      `}</style>
+      {status === 'running' ? 'Agent' : 'Error'}
+    </div>
+  );
 }
 
 export function IDEHeader({
@@ -38,6 +99,7 @@ export function IDEHeader({
   onRunPrimaryAction,
   onOpenSettings,
   onOpenCommandPalette,
+  agentStatus = 'idle',
 }: IDEHeaderProps) {
   const headerStyle: React.CSSProperties = {
     display: 'flex',
@@ -69,11 +131,15 @@ export function IDEHeader({
         />
       )}
 
-      <HeaderPrimaryActions
-        projectName={projectName}
-        onRunPrimaryAction={onRunPrimaryAction}
-        onOpenSettings={onOpenSettings}
-      />
+      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'], flexShrink: 0 }}>
+        {/* Ambient agent status: minimal, non-intrusive */}
+        <AgentStatusPill status={agentStatus} />
+        <HeaderPrimaryActions
+          projectName={projectName}
+          onRunPrimaryAction={onRunPrimaryAction}
+          onOpenSettings={onOpenSettings}
+        />
+      </div>
     </header>
   );
 }

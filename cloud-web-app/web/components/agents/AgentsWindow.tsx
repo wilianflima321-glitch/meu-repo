@@ -82,6 +82,16 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
     })
   }, [currentProjectId, data, mutate])
 
+  const takeoverFleet = useCallback(async () => {
+    if (!currentProjectId || !data || data.paused) return
+    await mutate(patchAgentFleet(currentProjectId, { paused: true }), {
+      optimisticData: { ...data, paused: true },
+      rollbackOnError: true,
+      populateCache: true,
+      revalidate: false,
+    })
+  }, [currentProjectId, data, mutate])
+
   if (!currentProjectId) {
     return <AgentWindowNoProject className={className} />
   }
@@ -136,6 +146,7 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
           latestReplayRun={latestReplayRun}
           onTogglePause={() => void togglePause()}
           onRefresh={() => void mutate()}
+          onTakeover={() => void takeoverFleet()}
           focusClass={focusClass}
         />
       )}

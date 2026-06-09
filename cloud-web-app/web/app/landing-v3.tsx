@@ -35,6 +35,7 @@ export default function LandingPageV3() {
       <PublicHeader />
 
       <main id="main-content">
+        {/* Hero */}
         <section
           data-landing-minimal-hero
           className="mx-auto max-w-6xl px-4 pb-16 pt-20 sm:px-6 lg:px-8 lg:pb-20 lg:pt-28"
@@ -60,26 +61,23 @@ export default function LandingPageV3() {
           </div>
         </section>
 
+        {/* Screenshot */}
         <section data-landing-product-proof className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
           <div className="overflow-hidden rounded-[34px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-[0_30px_110px_rgba(2,6,23,0.42)]">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3 sm:px-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-                FIG 1 - Studio Home
-              </p>
-              <div className="flex flex-wrap items-center gap-2">
-                {PROOF_POINTS.map((point) => (
-                  <span
-                    key={point.label}
-                    className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_48%,transparent)] px-3 py-1 text-[11px] font-semibold text-[var(--aethel-text-secondary)]"
-                  >
-                    {point.label}: {point.value}
-                  </span>
-                ))}
-              </div>
+            {/* Proof point pills: no internal labels */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-[var(--aethel-border-subtle)] px-4 py-3 sm:px-5">
+              {PROOF_POINTS.map((point) => (
+                <span
+                  key={point.label}
+                  className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_48%,transparent)] px-3 py-1 text-[11px] font-semibold text-[var(--aethel-text-secondary)]"
+                >
+                  {point.label}: {point.value}
+                </span>
+              ))}
             </div>
             <Image
               src="/product-proof/studio-home.png"
-              alt="Aethel Studio Home showing the active project, agent state, receipts, preview, and next actions."
+              alt="Aethel Studio showing the active project, agent status, receipts, live preview, and next actions."
               width={1500}
               height={900}
               sizes="(min-width: 1280px) 1180px, calc(100vw - 32px)"
@@ -88,10 +86,13 @@ export default function LandingPageV3() {
           </div>
         </section>
 
+        {/* Start points */}
         <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
           <div className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Start points</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+        {/* Start points */}
+              </p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--aethel-text-primary)] sm:text-4xl">
                 Choose the entry, then open deeper tools only when needed.
               </h2>
@@ -120,12 +121,15 @@ export default function LandingPageV3() {
           </div>
         </section>
 
+        {/* Final CTA */}
         <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
           <div className="rounded-[34px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] p-6 shadow-[0_24px_80px_rgba(2,6,23,0.28)] sm:p-8 lg:flex lg:items-center lg:justify-between lg:gap-8">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Next step</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                Get started
+              </p>
               <h2 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight text-[var(--aethel-text-primary)]">
-                Start light. Keep receipts close. Open deeper tools only when the work needs them.
+                Start light. Keep receipts close.
               </h2>
             </div>
             <div className="mt-5 flex flex-wrap gap-3 lg:mt-0 lg:justify-end">
@@ -133,7 +137,7 @@ export default function LandingPageV3() {
                 href="/dashboard?onboarding=1&source=landing-primary-cta"
                 className="inline-flex items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-5 py-3 text-sm font-semibold text-[var(--aethel-surface-primary)] transition hover:bg-[var(--aethel-text-secondary)]"
               >
-                Continue in dashboard
+                Open dashboard
               </Link>
               <Link
                 href="/ide"
