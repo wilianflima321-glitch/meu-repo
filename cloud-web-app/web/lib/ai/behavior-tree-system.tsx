@@ -15,7 +15,7 @@
 import { EventEmitter } from 'events';
 // @aethel-heavy-async-boundary
 import * as THREE from 'three';
-import { Blackboard } from './behavior-tree-blackboard'
+import { Blackboard, configureBlackboardValueFactories } from './behavior-tree-blackboard'
 import type { AgentConfig, NavPath, NodeStatus, PerceptionTarget } from './behavior-tree-contracts'
 import type { BehaviorContext, BTNode } from './behavior-tree-types'
 import {
@@ -59,6 +59,11 @@ export {
   TimeoutNode,
   WaitNode,
 } from './behavior-tree-nodes'
+
+configureBlackboardValueFactories({
+  vector3: (x, y, z) => new THREE.Vector3(x, y, z),
+  quaternion: (x, y, z, w) => new THREE.Quaternion(x, y, z, w),
+})
 
 export class BehaviorTree {
   private root: BTNode;

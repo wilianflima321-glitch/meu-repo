@@ -1,5 +1,45 @@
 // @aethel-heavy-async-boundary: behavior tree serialization belongs to runtime/agent execution lanes.
-import * as THREE from 'three'
+
+type Vector3Like = { x: number; y: number; z: number; isVector3?: boolean; constructor?: { name?: string } }
+type QuaternionLike = { x: number; y: number; z: number; w: number; isQuaternion?: boolean; constructor?: { name?: string } }
+
+type BlackboardValueFactories = {
+  vector3?: (x: number, y: number, z: number) => unknown
+  quaternion?: (x: number, y: number, z: number, w: number) => unknown
+}
+
+const blackboardFactories: Required<BlackboardValueFactories> = {
+  vector3: (x, y, z) => ({ x, y, z }),
+  quaternion: (x, y, z, w) => ({ x, y, z, w }),
+}
+
+export function configureBlackboardValueFactories(factories: BlackboardValueFactories): void {
+  if (factories.vector3) blackboardFactories.vector3 = factories.vector3
+  if (factories.quaternion) blackboardFactories.quaternion = factories.quaternion
+}
+
+function isVector3Like(value: unknown): value is Vector3Like {
+  if (typeof value !== 'object' || value === null) return false
+  const candidate = value as Vector3Like
+  return (
+    typeof candidate.x === 'number' &&
+    typeof candidate.y === 'number' &&
+    typeof candidate.z === 'number' &&
+    (candidate.isVector3 === true || candidate.constructor?.name === 'Vector3')
+  )
+}
+
+function isQuaternionLike(value: unknown): value is QuaternionLike {
+  if (typeof value !== 'object' || value === null) return false
+  const candidate = value as QuaternionLike
+  return (
+    typeof candidate.x === 'number' &&
+    typeof candidate.y === 'number' &&
+    typeof candidate.z === 'number' &&
+    typeof candidate.w === 'number' &&
+    (candidate.isQuaternion === true || candidate.constructor?.name === 'Quaternion')
+  )
+}
 
 export class Blackboard {
   private data: Map<string, unknown> = new Map()
@@ -48,9 +88,9 @@ export class Blackboard {
   serialize(): Record<string, unknown> {
     const result: Record<string, unknown> = {}
     for (const [key, value] of this.data) {
-      if (value instanceof THREE.Vector3) {
+      if (isVector3Like(value)) {
         result[key] = { _type: 'Vector3', x: value.x, y: value.y, z: value.z }
-      } else if (value instanceof THREE.Quaternion) {
+      } else if (isQuaternionLike(value)) {
         result[key] = { _type: 'Quaternion', x: value.x, y: value.y, z: value.z, w: value.w }
       } else {
         result[key] = value
@@ -65,9 +105,9 @@ export class Blackboard {
       if (typeof value === 'object' && value !== null && '_type' in value) {
         const typed = value as { _type: string; x: number; y: number; z: number; w?: number }
         if (typed._type === 'Vector3') {
-          this.set(key, new THREE.Vector3(typed.x, typed.y, typed.z))
+          this.set(key, blackboardFactories.vector3(typed.x, typed.y, typed.z))
         } else if (typed._type === 'Quaternion') {
-          this.set(key, new THREE.Quaternion(typed.x, typed.y, typed.z, typed.w))
+          this.set(key, blackboardFactories.quaternion(typed.x, typed.y, typed.z, typed.w ?? 1))
         }
       } else {
         this.set(key, value)
