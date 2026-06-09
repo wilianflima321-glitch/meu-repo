@@ -7,26 +7,28 @@ import {
 } from './AIChatPanelPro.types'
 import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models'
 import { useEditorApplyBridge } from './EditorApplyBridgeContext'
-import { AIChatBenchmarkTelemetry } from '@/components/ai-chat/AIChatBenchmarkTelemetry'
-import { AIChatComposer } from '@/components/ai-chat/AIChatComposer'
-import { AIChatContextStrip } from '@/components/ai-chat/AIChatContextStrip'
-import { AIChatCostMeter } from '@/components/ai-chat/AIChatCostMeter'
-import { AIChatHeader } from '@/components/ai-chat/AIChatHeader'
-import { AIChatPendingDiffTray } from '@/components/ai-chat/AIChatPendingDiffTray'
-import { AIChatProposalPreview } from '@/components/ai-chat/AIChatProposalPreview'
-import { AIChatTimeline } from '@/components/ai-chat/AIChatTimeline'
-import { AIChatHistoryModeRail } from '@/components/ai-chat/AIChatHistoryModeRail'
-import { AIChatLedgerStrip } from '@/components/ai-chat/AIChatLedgerStrip'
-import { AIChatMessagesPane } from '@/components/ai-chat/AIChatMessagesPane'
-import { AIChatOpsSidebar } from '@/components/ai-chat/AIChatOpsSidebar'
-import { MODE_PRESETS } from '@/components/ai-chat/presets'
-import { useAIChatComposerState } from '@/components/ai-chat/useAIChatComposerState'
-import { useAIChatContextActions } from '@/components/ai-chat/useAIChatContextActions'
-import { useAIChatOpsState } from '@/components/ai-chat/useAIChatOpsState'
-import { useAIChatPanelUiState } from '@/components/ai-chat/useAIChatPanelUiState'
-import { useAIChatRunState } from '@/components/ai-chat/useAIChatRunState'
-import { useAIChatHistoryMode } from '@/components/ai-chat/useAIChatHistoryMode'
-import { useAIChatSpeechPlayback } from '@/components/ai-chat/useAIChatSpeechPlayback'
+import {
+  AIChatBenchmarkTelemetry,
+  AIChatComposer,
+  AIChatContextStrip,
+  AIChatCostMeter,
+  AIChatHeader,
+  AIChatHistoryModeRail,
+  AIChatLedgerStrip,
+  AIChatMessagesPane,
+  AIChatOpsSidebar,
+  AIChatPendingDiffTray,
+  AIChatProposalPreview,
+  AIChatTimeline,
+  MODE_PRESETS,
+  useAIChatComposerState,
+  useAIChatContextActions,
+  useAIChatHistoryMode,
+  useAIChatOpsState,
+  useAIChatPanelUiState,
+  useAIChatRunState,
+  useAIChatSpeechPlayback,
+} from '@/components/agents/legacy-chat-panel'
 
 export default function AIChatPanelPro({
   messages = [],

@@ -21,8 +21,8 @@ const ALLOWED_EXTERNAL_IMPORTERS = new Set([
   'components/agents/AgentEvidenceCard.tsx',
   'components/agents/evidence.ts',
   'components/agents/presets.ts',
+  'components/agents/legacy-chat-panel.ts',
   'components/agents/AgentsWorkspaceContainer.tsx',
-  'components/ide/AIChatPanelPro.tsx',
 ])
 
 const FORBIDDEN_PREFIXES = [
@@ -92,8 +92,8 @@ if (externalImporters.length > ALLOWED_EXTERNAL_IMPORTERS.size) {
   failures.push(`external ai-chat importers exceeded ${ALLOWED_EXTERNAL_IMPORTERS.size}: ${externalImporters.length}`)
 }
 
-if (nonAgentExternalImporters.length > 1) {
-  failures.push(`non-agent ai-chat importers exceeded 1: ${nonAgentExternalImporters.length} (${nonAgentExternalImporters.join(', ')})`)
+if (nonAgentExternalImporters.length > 0) {
+  failures.push(`non-agent ai-chat importers exceeded 0: ${nonAgentExternalImporters.length} (${nonAgentExternalImporters.join(', ')})`)
 }
 
 for (const importer of forbiddenImporters) {
