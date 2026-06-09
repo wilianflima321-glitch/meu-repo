@@ -6,9 +6,13 @@
  * behind Studio/runtime boundaries instead of public route imports.
  */
 
-import * as THREE from 'three';
+import type { Vector3 } from 'three';
 import type { TerrainChunk, SculptBrush } from './types';
 import type { TerrainEngine } from './engine';
+
+function lerp(start: number, end: number, alpha: number): number {
+  return start + (end - start) * alpha;
+}
 
 export class TerrainSculptor {
   private terrain: TerrainEngine;
@@ -41,7 +45,7 @@ export class TerrainSculptor {
     this.isActive = false;
   }
 
-  sculpt(position: THREE.Vector3, deltaTime: number): void {
+  sculpt(position: Vector3, deltaTime: number): void {
     if (!this.isActive) return;
 
     const config = this.terrain.getConfig();
@@ -55,7 +59,7 @@ export class TerrainSculptor {
     this.terrain.updateChunks(chunks.map(c => c.id));
   }
 
-  private sculptChunk(chunk: TerrainChunk, center: THREE.Vector3, deltaTime: number): void {
+  private sculptChunk(chunk: TerrainChunk, center: Vector3, deltaTime: number): void {
     const config = this.terrain.getConfig();
     const heightWidth = Math.sqrt(chunk.heightData.length);
     const cellSize = config.chunkSize / heightWidth;
@@ -96,7 +100,7 @@ export class TerrainSculptor {
               break;
             case 'flatten':
               const targetHeight = center.y / config.heightScale;
-              chunk.heightData[idx] = THREE.MathUtils.lerp(
+              chunk.heightData[idx] = lerp(
                 chunk.heightData[idx],
                 targetHeight,
                 strength
@@ -151,7 +155,7 @@ export class TerrainSculptor {
     }
 
     const average = sum / count;
-    return THREE.MathUtils.lerp(data[idx], average, strength);
+    return lerp(data[idx], average, strength);
   }
 }
 

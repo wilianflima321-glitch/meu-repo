@@ -4,7 +4,6 @@
 
 import { TransformControls } from '@react-three/drei'
 import type { ReactElement } from 'react'
-import { MathUtils } from 'three'
 import {
   getGizmoConstraintAxes,
   getGizmoPivotLabel,
@@ -29,6 +28,10 @@ type TransformGizmoProfessionalProps = {
   onDragStateChange?: (dragging: boolean) => void
   onObjectChange?: () => void
   children: ReactElement
+}
+
+function degToRad(value: number): number {
+  return (value * Math.PI) / 180
 }
 
 export default function TransformGizmoProfessional({
@@ -59,7 +62,7 @@ export default function TransformGizmoProfessional({
       showY={axes.showY}
       showZ={axes.showZ}
       translationSnap={snapEnabled && mode === 'translate' ? translationSnap : undefined}
-      rotationSnap={snapEnabled && mode === 'rotate' ? MathUtils.degToRad(rotationSnapDegrees) : undefined}
+      rotationSnap={snapEnabled && mode === 'rotate' ? degToRad(rotationSnapDegrees) : undefined}
       scaleSnap={snapEnabled && mode === 'scale' ? scaleSnap : undefined}
       userData={{
         aethelConstraint: constraint,
