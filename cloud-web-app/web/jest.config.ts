@@ -68,7 +68,7 @@ const config: Config = {
     'components/agents/chat/activity/RunCard.tsx',
     'components/agents/evidence-artifacts.ts',
     'components/agents/chat/utils.ts',
-    'components/ai-chat/useAIChatOpsArtifacts.ts',
+    'components/agents/chat/ops/useAIChatOpsArtifacts.ts',
     'components/collaboration/CollaboratorsBar.tsx',
     'components/ide/fullscreen/WorkbenchEditorToolbar.tsx',
     'components/ide/fullscreen/WorkbenchPreviewProposalOverlay.tsx',

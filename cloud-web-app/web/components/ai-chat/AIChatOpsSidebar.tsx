@@ -10,7 +10,7 @@ import { AgentEvidencePanel } from '@/components/agents/AgentEvidencePanel'
 import { AIChatRulesPanel } from '@/components/agents/chat/rules/AIChatRulesPanel'
 import type { AIChatEvidenceArtifact } from '@/components/agents/evidence'
 import { OPS_TABS, type AIChatOpsTab } from '@/components/agents/chat/presets'
-import { useAIChatOpsArtifacts, type AIChatApprovalChange } from './useAIChatOpsArtifacts'
+import { useAIChatOpsArtifacts, type AIChatApprovalChange } from '@/components/agents/chat/ops'
 
 const MonacoChatDiffPanel = dynamic(
   () => import('@/components/ide/MonacoChatDiffPanel').then((module) => module.MonacoChatDiffPanel),
