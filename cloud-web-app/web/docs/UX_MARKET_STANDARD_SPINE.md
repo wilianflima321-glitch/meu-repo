@@ -461,7 +461,7 @@ AI Copilot chrome must stay calm: no decorative gradients in the header/banner, 
 | `components/agents/chat/header/AIChatModeMenu.tsx` | 0 | included |
 | `components/agents/chat/header/AIChatHeaderActions.tsx` | 0 | included |
 | `components/agents/chat/header/AIChatAgentLane.tsx` | 0 | included |
-| `components/ai-chat/AIChatComposer.tsx` | 0 | included |
+| `components/agents/chat/composer/AIChatComposer.tsx` | 0 | included |
 | `components/agents/chat/session/AIChatSessionBanner.tsx` | 0 | included |
 | `[combined]` | 0 | ok |
 
@@ -484,7 +484,7 @@ IDE chat, live mode, history, tool calls, and context panels must not mix Portug
 
 | File | Count | Note |
 | --- | ---: | --- |
-| `components/ai-chat/AIChatComposer.tsx` | 0 | ok |
+| `components/agents/chat/composer/AIChatComposer.tsx` | 0 | ok |
 | `components/agents/chat/header/AIChatHeader.tsx` | 0 | ok |
 | `components/agents/chat/header/AIChatModeMenu.tsx` | 0 | ok |
 | `components/agents/chat/header/AIChatModelPicker.tsx` | 0 | ok |

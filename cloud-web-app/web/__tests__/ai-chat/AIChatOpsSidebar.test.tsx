@@ -1,7 +1,7 @@
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { AIChatOpsSidebar } from '../../components/ai-chat/AIChatOpsSidebar'
+import { AIChatOpsSidebar } from '@/components/agents/chat/ops'
 
 describe('AIChatOpsSidebar', () => {
   beforeEach(() => {
@@ -63,7 +63,7 @@ describe('AIChatOpsSidebar', () => {
       )
 
       expect(screen.getByText('src/app.tsx')).toBeInTheDocument()
-      fireEvent.click(screen.getByRole('button', { name: /Aplicar tudo/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Apply all/i }))
 
       await waitFor(() => {
         expect(onAcceptDiff).toHaveBeenCalledWith('const value = 2')
@@ -85,8 +85,8 @@ describe('AIChatOpsSidebar', () => {
         latestEvidence={{
           kind: 'trace',
           traceId: 'trace_1234abcd',
-          summary: 'Resposta gerada com evidencias e tool runs.',
-          decision: 'Executar multi-role.',
+          summary: 'Generated response with receipts and tool runs.',
+          decision: 'Run multi-role execution.',
           reasons: [],
           tradeoffs: [],
           evidence: [{ kind: 'context', label: 'historyContextMessages=4' }],
@@ -97,8 +97,8 @@ describe('AIChatOpsSidebar', () => {
       />
     )
 
-    expect(screen.getByText(/Evidence workflow/i)).toBeInTheDocument()
-    expect(screen.getByText(/Resposta gerada com evidencias/i)).toBeInTheDocument()
+    expect(screen.getByText(/Receipts workflow/i)).toBeInTheDocument()
+    expect(screen.getByText(/Generated response with receipts/i)).toBeInTheDocument()
     expect(screen.getByText(/historyContextMessages=4/i)).toBeInTheDocument()
   })
 })

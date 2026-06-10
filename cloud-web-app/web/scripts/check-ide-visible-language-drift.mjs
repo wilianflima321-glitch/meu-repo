@@ -46,7 +46,7 @@ const FILES = [
   'components/preview/previewRuntimeState.ts',
   'components/preview/usePreviewRuntime.ts',
   'hooks/usePreviewRuntimeManager.ts',
-  'components/ai-chat/AIChatComposer.tsx',
+  'components/agents/chat/composer/AIChatComposer.tsx',
   'components/agents/chat/header/AIChatHeader.tsx',
   'components/agents/chat/header/AIChatModeMenu.tsx',
   'components/agents/chat/header/AIChatModelPicker.tsx',

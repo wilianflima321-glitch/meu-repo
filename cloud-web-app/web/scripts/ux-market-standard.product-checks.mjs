@@ -182,7 +182,7 @@ export const PRODUCT_UX_CHECKS = [
       'components/agents/chat/header/AIChatModeMenu.tsx',
       'components/agents/chat/header/AIChatHeaderActions.tsx',
       'components/agents/chat/header/AIChatAgentLane.tsx',
-      'components/ai-chat/AIChatComposer.tsx',
+      'components/agents/chat/composer/AIChatComposer.tsx',
       'components/agents/chat/session/AIChatSessionBanner.tsx',
     ],
     combined: true,
@@ -225,7 +225,7 @@ export const PRODUCT_UX_CHECKS = [
     description:
       'IDE chat, live mode, history, tool calls, and context panels must not mix Portuguese fallback copy into the premium AI cockpit.',
     files: [
-      'components/ai-chat/AIChatComposer.tsx',
+      'components/agents/chat/composer/AIChatComposer.tsx',
       'components/agents/chat/header/AIChatHeader.tsx',
       'components/agents/chat/header/AIChatModeMenu.tsx',
       'components/agents/chat/header/AIChatModelPicker.tsx',

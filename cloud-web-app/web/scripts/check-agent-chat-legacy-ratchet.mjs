@@ -6,8 +6,8 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const AI_CHAT_DIR = path.join(ROOT, 'components', 'ai-chat')
 const failures = []
-const MAX_AI_CHAT_FILES = 4
-const MAX_AI_CHAT_LINES = 1230
+const MAX_AI_CHAT_FILES = 0
+const MAX_AI_CHAT_LINES = 0
 const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/AgentEvidenceCard.tsx',
   'components/agents/AgentEvidencePanel.tsx',
@@ -22,9 +22,13 @@ const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/activity/LiveConversationPanel.tsx',
   'components/agents/chat/activity/RunCard.tsx',
   'components/agents/chat/composer.ts',
+  'components/agents/chat/composer/AIChatComposer.tsx',
+  'components/agents/chat/composer/useAIChatComposerState.ts',
   'components/agents/chat/context/index.ts',
   'components/agents/chat/context/useAIChatContextActions.ts',
   'components/agents/chat/context/useChatContextPreviews.ts',
+  'components/agents/chat/controller/index.ts',
+  'components/agents/chat/controller/useAIChatController.ts',
   'components/agents/chat/header/index.ts',
   'components/agents/chat/header/AIChatAgentLane.tsx',
   'components/agents/chat/header/AIChatHeader.tsx',
@@ -38,6 +42,7 @@ const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/ledger/AIChatLedgerStrip.tsx',
   'components/agents/chat/messages/index.ts',
   'components/agents/chat/ops/index.ts',
+  'components/agents/chat/ops/AIChatOpsSidebar.tsx',
   'components/agents/chat/ops/useAIChatOpsArtifacts.ts',
   'components/agents/chat/messages/AIChatMessagesPane.tsx',
   'components/agents/chat/messages/MessageBubble.tsx',
@@ -91,7 +96,6 @@ function read(relativePath) {
 
 function listTsFiles(dir) {
   if (!fs.existsSync(dir)) {
-    failures.push('components/ai-chat: missing legacy directory while migration is still in progress')
     return []
   }
   return fs
@@ -227,6 +231,24 @@ for (const file of ['useAIChatOpsArtifacts.ts']) {
   }
 }
 
+for (const file of ['AIChatOpsSidebar.tsx']) {
+  if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
+    failures.push(`components/ai-chat/${file}: ops sidebar must stay absorbed into components/agents/chat/ops`)
+  }
+}
+
+for (const file of ['useAIChatController.ts']) {
+  if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
+    failures.push(`components/ai-chat/${file}: chat controller must stay absorbed into components/agents/chat/controller`)
+  }
+}
+
+for (const file of ['AIChatComposer.tsx', 'useAIChatComposerState.ts']) {
+  if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
+    failures.push(`components/ai-chat/${file}: composer must stay absorbed into components/agents/chat/composer`)
+  }
+}
+
 for (const file of ['AgentBoard.tsx', 'AIChatActivityDeck.tsx', 'AIChatTimeline.tsx', 'LiveConversationPanel.tsx', 'RunCard.tsx']) {
   if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
     failures.push(`components/ai-chat/${file}: agent activity UI must stay absorbed into components/agents/chat/activity`)
@@ -241,7 +263,7 @@ if (legacyAlias !== "export * from './chat'") {
 }
 
 const agentChatIndex = read('components/agents/chat/index.ts')
-for (const token of ['activity', 'composer', 'context', 'header', 'economics', 'ledger', 'messages', 'ops', 'panels', 'presets', 'review', 'rules', 'session', 'session-types', 'shell', 'state', 'telemetry', 'voice']) {
+for (const token of ['activity', 'composer', 'context', 'controller', 'header', 'economics', 'ledger', 'messages', 'ops', 'panels', 'presets', 'review', 'rules', 'session', 'session-types', 'shell', 'state', 'telemetry', 'voice']) {
   if (!agentChatIndex.includes(token)) {
     failures.push(`components/agents/chat/index.ts: missing ${token} export`)
   }

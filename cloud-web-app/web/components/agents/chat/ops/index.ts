@@ -1,3 +1,4 @@
+export { AIChatOpsSidebar } from './AIChatOpsSidebar'
 export {
   useAIChatOpsArtifacts,
   type AIChatApprovalChange,
