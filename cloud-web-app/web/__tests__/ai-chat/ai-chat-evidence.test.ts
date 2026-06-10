@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildResearchArtifactFromPayload, buildTraceArtifactFromSummary } from '@/components/ai-chat/ai-chat-evidence'
+import { buildResearchArtifactFromPayload, buildTraceArtifactFromSummary } from '@/components/agents/evidence'
 
 describe('ai-chat-evidence helpers', () => {
   it('builds a trace artifact from persisted trace summary data', () => {

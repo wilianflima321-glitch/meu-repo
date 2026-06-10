@@ -3,7 +3,7 @@
 import { useEffect, type Dispatch, type SetStateAction } from 'react'
 import { analytics } from '@/lib/analytics'
 import { buildResearchPrompt, consumeResearchHandoff } from '@/lib/research-handoff'
-import { buildResearchArtifactFromPayload } from '@/components/ai-chat/ai-chat-evidence'
+import { buildResearchArtifactFromPayload } from '@/components/agents/evidence'
 import {
   buildDashboardLaunchSystemContext,
   consumeDashboardLaunchMission,

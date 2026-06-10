@@ -1,6 +1,6 @@
 import { SearchCheck } from 'lucide-react'
 import { AIChatEvidenceCard } from '@/components/ai-chat/AIChatEvidenceCard'
-import type { AIChatEvidenceArtifact } from '@/components/ai-chat/ai-chat-evidence'
+import type { AIChatEvidenceArtifact } from '@/components/agents/evidence'
 
 interface AIChatEvidencePanelProps {
   latestArtifact?: AIChatEvidenceArtifact | null

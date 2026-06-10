@@ -1,5 +1,5 @@
 import { AlertTriangle, BookOpenText, Gauge, Link2, SearchCheck, ShieldCheck, Wrench } from 'lucide-react'
-import type { AIChatEvidenceArtifact } from '@/components/ai-chat/ai-chat-evidence'
+import type { AIChatEvidenceArtifact } from '@/components/agents/evidence'
 
 interface AIChatEvidenceCardProps {
   artifact: AIChatEvidenceArtifact

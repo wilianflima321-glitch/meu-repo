@@ -11,7 +11,7 @@ import {
   requestAdvancedChat,
 } from '@/lib/ai-chat-advanced-client'
 import type { AiProviderStatusResponse } from '@/lib/ai-provider-status-client'
-import { buildTraceArtifact } from '@/components/ai-chat/ai-chat-evidence'
+import { buildTraceArtifact } from '@/components/agents/evidence'
 import type { ChatMessage, ProviderGateState } from '@/components/agents/chat/session-types'
 import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
 import type { MessageContext } from '@/components/ide/AIChatPanelPro.types'

@@ -8,7 +8,7 @@ import { TaskOpsPanel } from '@/components/ide/TaskOpsPanel'
 import { AIChatEconomicsPanel } from './AIChatEconomicsPanel'
 import { AIChatEvidencePanel } from './AIChatEvidencePanel'
 import { AIChatRulesPanel } from './AIChatRulesPanel'
-import type { AIChatEvidenceArtifact } from './ai-chat-evidence'
+import type { AIChatEvidenceArtifact } from '@/components/agents/evidence'
 import { OPS_TABS, type AIChatOpsTab } from '@/components/agents/chat/presets'
 import { useAIChatOpsArtifacts, type AIChatApprovalChange } from './useAIChatOpsArtifacts'
 

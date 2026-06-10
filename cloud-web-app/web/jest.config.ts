@@ -66,7 +66,7 @@ const config: Config = {
     'components/agents/chat/activity/AIChatTimeline.tsx',
     'components/agents/chat/activity/AgentBoard.tsx',
     'components/agents/chat/activity/RunCard.tsx',
-    'components/ai-chat/ai-chat-evidence.ts',
+    'components/agents/evidence-artifacts.ts',
     'components/agents/chat/utils.ts',
     'components/ai-chat/useAIChatOpsArtifacts.ts',
     'components/collaboration/CollaboratorsBar.tsx',

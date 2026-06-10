@@ -2,9 +2,9 @@ export {
   buildResearchArtifactFromPayload,
   buildTraceArtifact,
   buildTraceArtifactFromSummary,
-} from '@/components/ai-chat/ai-chat-evidence'
+} from './evidence-artifacts'
 export type {
   AIChatEvidenceArtifact,
   AIChatResearchArtifact,
   AIChatTraceArtifact,
-} from '@/components/ai-chat/ai-chat-evidence'
+} from './evidence-artifacts'
