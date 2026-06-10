@@ -2,7 +2,7 @@ import React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { AIChatLedgerStrip } from '@/components/ai-chat/AIChatLedgerStrip'
+import { AIChatLedgerStrip } from '@/components/agents/chat/ledger'
 import type { ChatDiffFile } from '@/lib/ai/ai-apply-bridge'
 
 const pendingDiff: ChatDiffFile = {
@@ -31,7 +31,7 @@ describe('AIChatLedgerStrip', () => {
         latestEvidence={{
           kind: 'trace',
           traceId: 'trace-1',
-          summary: 'Trace pronta',
+          summary: 'Trace ready',
           reasons: ['A'],
           tradeoffs: [],
           evidence: [],

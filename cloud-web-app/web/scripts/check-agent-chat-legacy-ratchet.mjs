@@ -6,8 +6,8 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const AI_CHAT_DIR = path.join(ROOT, 'components', 'ai-chat')
 const failures = []
-const MAX_AI_CHAT_FILES = 38
-const MAX_AI_CHAT_LINES = 4450
+const MAX_AI_CHAT_FILES = 37
+const MAX_AI_CHAT_LINES = 4325
 const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/AgentEvidenceCard.tsx',
   'components/agents/evidence-artifacts.ts',
@@ -23,6 +23,8 @@ const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/composer.ts',
   'components/agents/chat/economics/index.ts',
   'components/agents/chat/economics/AIChatEconomicsPanel.tsx',
+  'components/agents/chat/ledger/index.ts',
+  'components/agents/chat/ledger/AIChatLedgerStrip.tsx',
   'components/agents/chat/panels.ts',
   'components/agents/chat/presets.ts',
   'components/agents/chat/session-types.ts',
@@ -101,6 +103,10 @@ if (fs.existsSync(path.join(AI_CHAT_DIR, 'AIChatEconomicsPanel.tsx'))) {
   failures.push('components/ai-chat/AIChatEconomicsPanel.tsx: economics panel must stay absorbed into components/agents/chat/economics')
 }
 
+if (fs.existsSync(path.join(AI_CHAT_DIR, 'AIChatLedgerStrip.tsx'))) {
+  failures.push('components/ai-chat/AIChatLedgerStrip.tsx: ledger strip must stay absorbed into components/agents/chat/ledger')
+}
+
 for (const file of ['AgentBoard.tsx', 'AIChatActivityDeck.tsx', 'AIChatTimeline.tsx', 'LiveConversationPanel.tsx', 'RunCard.tsx']) {
   if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
     failures.push(`components/ai-chat/${file}: agent activity UI must stay absorbed into components/agents/chat/activity`)
@@ -115,7 +121,7 @@ if (legacyAlias !== "export * from './chat'") {
 }
 
 const agentChatIndex = read('components/agents/chat/index.ts')
-for (const token of ['activity', 'composer', 'panels', 'presets', 'session-types', 'state']) {
+for (const token of ['activity', 'composer', 'economics', 'ledger', 'panels', 'presets', 'session-types', 'state']) {
   if (!agentChatIndex.includes(token)) {
     failures.push(`components/agents/chat/index.ts: missing ${token} export`)
   }

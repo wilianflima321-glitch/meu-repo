@@ -5,7 +5,7 @@
  *
  * Round 82: keeps coverage executable with a focused 70% ratchet over tested
  * production contracts, viewport modules, and canonical UI helpers.
- * primitives whose tests are already green â€” the goal is to ratchet
+ * primitives whose tests are already green - the goal is to ratchet
  * coverage up each round without hiding behind a broken coverage command.
  */
 
@@ -33,12 +33,12 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'text-summary', 'json', 'json-summary', 'html', 'lcov'],
       reportsDirectory: 'reports/coverage',
-      // Focused scope â€” expand as the test suite grows.
+      // Focused scope - expand as the test suite grows.
       include: [
         'components/agents/chat/AIChatCostMeter.tsx',
         'components/agents/chat/economics/AIChatEconomicsPanel.tsx',
         'components/agents/AgentEvidenceCard.tsx',
-        'components/ai-chat/AIChatLedgerStrip.tsx',
+        'components/agents/chat/ledger/AIChatLedgerStrip.tsx',
         'components/ai-chat/AIChatPendingDiffTray.tsx',
         'components/ai-chat/AIChatProposalPreview.tsx',
         'components/agents/chat/activity/AIChatTimeline.tsx',
@@ -88,7 +88,7 @@ export default defineConfig({
         '**/index.ts',
         '**/__tests__/**',
       ],
-      // Progressive thresholds â€” ratchet up each round. Do NOT lower these numbers.
+      // Progressive thresholds - ratchet up each round. Do NOT lower these numbers.
       thresholds: {
         statements: 70,
         branches: 70,
