@@ -1,6 +1,6 @@
 // @aethel-heavy-async-boundary Studio/viewport component runtime; imported through scene graph only.
 import * as THREE from 'three';
-import { Component } from './scene-graph';
+import { Component } from './scene-graph-node';
 
 export class MeshRenderer extends Component {
   public geometry: THREE.BufferGeometry | null = null;

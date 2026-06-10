@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 import type { TransformData } from './scene-graph-contracts'
-import type { SceneNode } from './scene-graph'
+import type { SceneNode } from './scene-graph-node'
 
 // @aethel-heavy-async-boundary Transform math belongs to the render-gated scene graph runtime.
 export class Transform {
