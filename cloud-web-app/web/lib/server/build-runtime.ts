@@ -1,17 +1,19 @@
 import type { ChildProcess } from 'child_process';
-import { spawn, exec } from 'child_process';
+import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
-import * as fs from 'fs/promises';
 import * as path from 'path';
-import { promisify } from 'util';
 import { collectArtifacts } from './build-runtime.artifacts';
 import { detectBuildTool } from './build-runtime.tool-detection';
 import {
   parseEsbuildErrors,
-  parseGoErrors,
   parseTscErrors,
   parseWebpackErrors,
 } from './build-runtime.diagnostics';
+import {
+  buildWithCargoStrategy,
+  buildWithCustomStrategy,
+  buildWithGoStrategy,
+} from './build-runtime.native-strategies';
 import type {
   BuildArtifact,
   BuildConfig,
@@ -34,8 +36,6 @@ export type {
   WebpackOptions,
 } from './build-runtime.types';
 import { resolveWorkspaceRoot } from './workspace-path';
-
-const execAsync = promisify(exec);
 
 // ============================================================================
 // BUILD RUNTIME CLASS
@@ -84,13 +84,13 @@ export class BuildRuntime extends EventEmitter {
           result = await this.buildWithWebpack(config, projectPath, diagnostics, artifacts);
           break;
         case 'cargo':
-          result = await this.buildWithCargo(config, projectPath, diagnostics, artifacts);
+          result = await buildWithCargoStrategy(this.createStrategyContext(config, projectPath, diagnostics, artifacts));
           break;
         case 'go':
-          result = await this.buildWithGo(config, projectPath, diagnostics, artifacts);
+          result = await buildWithGoStrategy(this.createStrategyContext(config, projectPath, diagnostics, artifacts));
           break;
         default:
-          result = await this.buildWithCustom(config, projectPath, diagnostics, artifacts);
+          result = await buildWithCustomStrategy(this.createStrategyContext(config, projectPath, diagnostics, artifacts));
       }
 
       result.duration = Date.now() - startTime;
@@ -453,246 +453,26 @@ export class BuildRuntime extends EventEmitter {
   }
 
   // ==========================================================================
-  // CARGO (RUST)
-  // ==========================================================================
-
-  private async buildWithCargo(
-    config: BuildConfig,
-    projectPath: string,
-    diagnostics: BuildDiagnostic[],
-    artifacts: BuildArtifact[]
-  ): Promise<BuildResult> {
-    const options = config.cargo || {};
-
-    const args = ['build', '--message-format=json'];
-
-    if (options.release || config.mode === 'production') {
-      args.push('--release');
-    }
-
-    if (options.target) {
-      args.push('--target', options.target);
-    }
-
-    if (options.features && options.features.length > 0) {
-      args.push('--features', options.features.join(','));
-    }
-
-    this.emitProgress('compiling', 30, 'Running Cargo build...');
-
-    return new Promise((resolve) => {
-      const proc = spawn('cargo', args, {
-        cwd: projectPath,
-        env: { ...process.env, ...config.env },
-      });
-
-      this.activeBuild = proc;
-
-      proc.stdout?.on('data', async (data: Buffer) => {
-        const lines = data.toString().split('\n').filter(l => l.trim());
-
-        for (const line of lines) {
-          try {
-            const msg = JSON.parse(line);
-
-            if (msg.reason === 'compiler-message') {
-              const level = msg.message.level;
-              const text = msg.message.message;
-              const span = msg.message.spans?.[0];
-
-              diagnostics.push({
-                type: level === 'error' ? 'error' : level === 'warning' ? 'warning' : 'info',
-                message: text,
-                file: span?.file_name,
-                line: span?.line_start,
-                column: span?.column_start,
-              });
-            } else if (msg.reason === 'compiler-artifact') {
-              for (const file of msg.filenames || []) {
-                const stats = await fs.stat(file).catch(() => null);
-                if (stats) {
-                  artifacts.push({
-                    name: path.basename(file),
-                    path: file,
-                    size: stats.size,
-                    type: file.endsWith('.exe') || !path.extname(file) ? 'executable' : 'library',
-                  });
-                }
-              }
-
-              this.emitProgress('compiling', 70, `Built: ${msg.target?.name}`);
-            } else if (msg.reason === 'build-finished') {
-              if (msg.success) {
-                this.emitProgress('complete', 100, 'Build successful!');
-              }
-            }
-          } catch {
-            // Not JSON, ignore
-          }
-        }
-      });
-
-      proc.stderr?.on('data', (data: Buffer) => {
-        const output = data.toString();
-        // Cargo outputs progress to stderr
-        this.emitProgress('compiling', 50, output.trim().slice(0, 100));
-      });
-
-      proc.on('close', (code) => {
-        resolve({
-          success: code === 0,
-          duration: 0,
-          artifacts,
-          diagnostics,
-        });
-      });
-    });
-  }
-
-  // ==========================================================================
-  // GO
-  // ==========================================================================
-
-  private async buildWithGo(
-    config: BuildConfig,
-    projectPath: string,
-    diagnostics: BuildDiagnostic[],
-    artifacts: BuildArtifact[]
-  ): Promise<BuildResult> {
-    const outputPath = config.outputPath || './bin/app';
-
-    const args = ['build', '-o', outputPath];
-
-    if (config.mode === 'production') {
-      args.push('-ldflags', '-s -w'); // Strip debug info
-    }
-
-    this.emitProgress('compiling', 30, 'Running Go build...');
-
-    return new Promise((resolve) => {
-      const proc = spawn('go', args, {
-        cwd: projectPath,
-        env: { ...process.env, ...config.env },
-      });
-
-      this.activeBuild = proc;
-      let stderr = '';
-
-      proc.stdout?.on('data', (data: Buffer) => {
-        this.emitProgress('compiling', 50, data.toString().trim());
-      });
-
-      proc.stderr?.on('data', (data: Buffer) => {
-        stderr += data.toString();
-        parseGoErrors(data.toString(), diagnostics);
-      });
-
-      proc.on('close', async (code) => {
-        if (code === 0) {
-          this.emitProgress('complete', 100, 'Build successful!');
-
-          // Get artifact info
-          const fullPath = path.join(projectPath, outputPath);
-          const stats = await fs.stat(fullPath).catch(() => null);
-
-          if (stats) {
-            artifacts.push({
-              name: path.basename(outputPath),
-              path: fullPath,
-              size: stats.size,
-              type: 'executable',
-            });
-          }
-
-          resolve({
-            success: true,
-            duration: 0,
-            artifacts,
-            diagnostics,
-          });
-        } else {
-          resolve({
-            success: false,
-            duration: 0,
-            artifacts: [],
-            diagnostics,
-          });
-        }
-      });
-    });
-  }
-
-  // ==========================================================================
-  // CUSTOM
-  // ==========================================================================
-
-  private async buildWithCustom(
-    config: BuildConfig,
-    projectPath: string,
-    diagnostics: BuildDiagnostic[],
-    artifacts: BuildArtifact[]
-  ): Promise<BuildResult> {
-    const args = config.args || [];
-
-    if (args.length === 0) {
-      diagnostics.push({ type: 'error', message: 'No build command specified' });
-      return { success: false, duration: 0, artifacts: [], diagnostics };
-    }
-
-    const [cmd, ...cmdArgs] = args;
-
-    this.emitProgress('building', 30, `Running: ${cmd}`);
-
-    return new Promise((resolve) => {
-      const proc = spawn(cmd, cmdArgs, {
-        cwd: projectPath,
-        shell: true,
-        env: { ...process.env, ...config.env },
-      });
-
-      this.activeBuild = proc;
-
-      proc.stdout?.on('data', (data: Buffer) => {
-        this.emitProgress('building', 50, data.toString().trim().slice(0, 100));
-      });
-
-      proc.stderr?.on('data', (data: Buffer) => {
-        const err = data.toString().trim();
-        if (err) {
-          diagnostics.push({ type: 'warning', message: err });
-        }
-      });
-
-      proc.on('close', async (code) => {
-        if (code === 0) {
-          this.emitProgress('complete', 100, 'Build successful!');
-
-          if (config.outputPath) {
-            const outDir = path.join(projectPath, config.outputPath);
-            await collectArtifacts(outDir, artifacts);
-          }
-
-          resolve({
-            success: true,
-            duration: 0,
-            artifacts,
-            diagnostics,
-          });
-        } else {
-          resolve({
-            success: false,
-            duration: 0,
-            artifacts: [],
-            diagnostics,
-          });
-        }
-      });
-    });
-  }
-
-  // ==========================================================================
   // UTILITIES
   // ==========================================================================
+
+  private createStrategyContext(
+    config: BuildConfig,
+    projectPath: string,
+    diagnostics: BuildDiagnostic[],
+    artifacts: BuildArtifact[]
+  ) {
+    return {
+      artifacts,
+      config,
+      diagnostics,
+      emitProgress: this.emitProgress.bind(this),
+      projectPath,
+      setActiveBuild: (process: ChildProcess) => {
+        this.activeBuild = process;
+      },
+    };
+  }
 
   private emitProgress(phase: string, progress: number, message: string): void {
     this.emit('progress', { buildId: this.buildId, phase, progress, message });
