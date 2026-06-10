@@ -2,11 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import AgentsWindow from '@/components/agents/AgentsWindow'
-import AIChatSessionBanner from '@/components/ai-chat/AIChatSessionBanner'
+import { AIChatSessionBanner, useAIChatSessionContext, useAIProviderPreflight } from '@/components/agents/chat/session'
 import type { ChatMessage } from '@/components/agents/chat/session-types'
 import { useAIChatController } from '@/components/ai-chat/useAIChatController'
-import { useAIChatSessionContext } from '@/components/ai-chat/useAIChatSessionContext'
-import { useAIProviderPreflight } from '@/components/ai-chat/useAIProviderPreflight'
 import AIChatPanelPro from '@/components/ide/AIChatPanelPro'
 import AIProviderSetupGuide from '@/components/ai/AIProviderSetupGuide'
 import { DEFAULT_MODELS } from '@/components/ide/AIChatPanelPro.types'

@@ -387,7 +387,7 @@ Dashboard and IDE cockpit surfaces must not mix Portuguese fallback copy into th
 | `components/ide/InlineAIChatMessageSurface.tsx` | 0 | ok |
 | `components/ide/InlineAIChatSections.tsx` | 0 | ok |
 | `components/ide/AIChatPanelContainer.tsx` | 0 | ok |
-| `components/ai-chat/useAIChatSessionContext.ts` | 0 | ok |
+| `components/agents/chat/session/useAIChatSessionContext.ts` | 0 | ok |
 | `components/ide/fullscreen/useWorkbenchEntryConvergence.ts` | 0 | ok |
 | `components/ide/fullscreen/workbench-entry-triage.ts` | 0 | ok |
 | `components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts` | 0 | ok |
@@ -449,7 +449,7 @@ Session handoff shortcuts should stay compact like premium copilot chips, not th
 
 | File | Count | Note |
 | --- | ---: | --- |
-| `components/ai-chat/AIChatSessionBanner.tsx` | 0 | ok |
+| `components/agents/chat/session/AIChatSessionBanner.tsx` | 0 | ok |
 
 ### ai-copilot-calm-chrome
 
@@ -462,7 +462,7 @@ AI Copilot chrome must stay calm: no decorative gradients in the header/banner, 
 | `components/ai-chat/AIChatHeaderActions.tsx` | 0 | included |
 | `components/ai-chat/AIChatAgentLane.tsx` | 0 | included |
 | `components/ai-chat/AIChatComposer.tsx` | 0 | included |
-| `components/ai-chat/AIChatSessionBanner.tsx` | 0 | included |
+| `components/agents/chat/session/AIChatSessionBanner.tsx` | 0 | included |
 | `[combined]` | 0 | ok |
 
 ### ide-visible-language-drift
@@ -491,7 +491,7 @@ IDE chat, live mode, history, tool calls, and context panels must not mix Portug
 | `components/ai-chat/AIChatHeaderActions.tsx` | 0 | ok |
 | `components/ai-chat/AIChatAgentLane.tsx` | 0 | ok |
 | `components/agents/chat/messages/AIChatMessagesPane.tsx` | 0 | ok |
-| `components/ai-chat/AIChatSessionBanner.tsx` | 0 | ok |
+| `components/agents/chat/session/AIChatSessionBanner.tsx` | 0 | ok |
 | `components/agents/chat/messages/MessageBubbleActionBar.tsx` | 0 | ok |
 | `components/ide/AIChatContextPanels.tsx` | 0 | ok |
 | `components/ide/AIChatPanelChrome.tsx` | 0 | ok |
@@ -775,7 +775,7 @@ IDE Copilot must consume Studio Home missions as real session context, not leave
 
 | File | Count | Note |
 | --- | ---: | --- |
-| `components/ai-chat/useAIChatSessionContext.ts` | 0 | included |
+| `components/agents/chat/session/useAIChatSessionContext.ts` | 0 | included |
 | `components/dashboard/dashboard-launch-handoff.ts` | 0 | included |
 | `[combined]` | 0 | ok |
 

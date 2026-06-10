@@ -25,7 +25,7 @@ export const PRODUCT_UX_CHECKS = [
       'components/ide/InlineAIChatMessageSurface.tsx',
       'components/ide/InlineAIChatSections.tsx',
       'components/ide/AIChatPanelContainer.tsx',
-      'components/ai-chat/useAIChatSessionContext.ts',
+      'components/agents/chat/session/useAIChatSessionContext.ts',
       'components/ide/fullscreen/useWorkbenchEntryConvergence.ts',
       'components/ide/fullscreen/workbench-entry-triage.ts',
       'components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts',
@@ -162,7 +162,7 @@ export const PRODUCT_UX_CHECKS = [
     id: 'ai-session-intent-compression',
     description:
       'Session handoff shortcuts should stay compact like premium copilot chips, not three explanatory cards.',
-    files: ['components/ai-chat/AIChatSessionBanner.tsx'],
+    files: ['components/agents/chat/session/AIChatSessionBanner.tsx'],
     test: (content, { read } = {}) => {
       const required = [
         'Quick intents',
@@ -183,7 +183,7 @@ export const PRODUCT_UX_CHECKS = [
       'components/ai-chat/AIChatHeaderActions.tsx',
       'components/ai-chat/AIChatAgentLane.tsx',
       'components/ai-chat/AIChatComposer.tsx',
-      'components/ai-chat/AIChatSessionBanner.tsx',
+      'components/agents/chat/session/AIChatSessionBanner.tsx',
     ],
     combined: true,
     test: (content, { read } = {}) => {
@@ -232,7 +232,7 @@ export const PRODUCT_UX_CHECKS = [
       'components/ai-chat/AIChatHeaderActions.tsx',
       'components/ai-chat/AIChatAgentLane.tsx',
       'components/agents/chat/messages/AIChatMessagesPane.tsx',
-      'components/ai-chat/AIChatSessionBanner.tsx',
+      'components/agents/chat/session/AIChatSessionBanner.tsx',
       'components/agents/chat/messages/MessageBubbleActionBar.tsx',
       'components/ide/AIChatContextPanels.tsx',
       'components/ide/AIChatPanelChrome.tsx',

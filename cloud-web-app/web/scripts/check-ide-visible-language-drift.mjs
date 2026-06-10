@@ -53,7 +53,7 @@ const FILES = [
   'components/ai-chat/AIChatHeaderActions.tsx',
   'components/ai-chat/AIChatAgentLane.tsx',
   'components/agents/chat/messages/AIChatMessagesPane.tsx',
-  'components/ai-chat/AIChatSessionBanner.tsx',
+  'components/agents/chat/session/AIChatSessionBanner.tsx',
   'components/agents/chat/messages/MessageBubble.tsx',
   'components/agents/chat/messages/MessageBubbleActionBar.tsx',
   'components/ide/AIChatPanelChrome.tsx',

@@ -338,7 +338,7 @@ export const WORKSPACE_UX_CHECKS = [
     description:
       'IDE Copilot must consume Studio Home missions as real session context, not leave dashboard prompts stranded between surfaces.',
     files: [
-      'components/ai-chat/useAIChatSessionContext.ts',
+      'components/agents/chat/session/useAIChatSessionContext.ts',
       'components/dashboard/dashboard-launch-handoff.ts',
     ],
     combined: true,
