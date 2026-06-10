@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import type {
   SpeechRecognitionEventExtended,
   SpeechRecognitionInstance,
-} from '../ide/AIChatPanelPro.types';
+} from '@/components/ide/AIChatPanelPro.types';
 
 type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
 
@@ -12,6 +12,18 @@ type WindowWithSpeechRecognition = Window & {
   SpeechRecognition?: SpeechRecognitionConstructor;
   webkitSpeechRecognition?: SpeechRecognitionConstructor;
 };
+
+function getPreferredSpeechLanguage() {
+  if (typeof document !== 'undefined' && document.documentElement.lang) {
+    return document.documentElement.lang;
+  }
+
+  if (typeof navigator !== 'undefined' && navigator.language) {
+    return navigator.language;
+  }
+
+  return 'en-US';
+}
 
 /**
  * Voice-recording hook extracted from AIChatPanelPro.
@@ -40,7 +52,7 @@ export function useVoiceRecording() {
     try {
       const formData = new FormData();
       formData.append('audio', blob, 'voice-input.webm');
-      formData.append('language', 'pt-BR');
+      formData.append('language', getPreferredSpeechLanguage());
 
       const response = await fetch('/api/ai/voice/transcribe', {
         method: 'POST',
@@ -75,7 +87,7 @@ export function useVoiceRecording() {
         recognitionRef.current = new SpeechRecognitionAPI();
         recognitionRef.current.continuous = true;
         recognitionRef.current.interimResults = true;
-        recognitionRef.current.lang = 'pt-BR';
+        recognitionRef.current.lang = getPreferredSpeechLanguage();
         recognitionRef.current.onresult = (event: SpeechRecognitionEventExtended) => {
           let interimTranscript = '';
           let finalTranscript = '';

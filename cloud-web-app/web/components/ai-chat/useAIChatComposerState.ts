@@ -17,7 +17,7 @@ import type {
 } from '@/components/ide/AIChatPanelPro.types'
 import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
 import { useChatContextPreviews } from './useChatContextPreviews'
-import { useVoiceRecording } from './useVoiceRecording'
+import { useVoiceRecording } from '@/components/agents/chat/voice'
 
 interface UseAIChatComposerStateParams {
   allowAttachments: boolean
