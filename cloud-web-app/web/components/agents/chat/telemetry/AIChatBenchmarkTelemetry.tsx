@@ -1,7 +1,7 @@
 'use client'
 
 import { AIChatActivityDeck } from '@/components/agents/chat/activity'
-import { AIChatQuickPromptStrip } from '@/components/ai-chat/AIChatQuickPromptStrip'
+import { AIChatQuickPromptStrip } from './AIChatQuickPromptStrip'
 import type { AgentInfo } from '@/components/agents/chat/activity'
 import type { AIChatConsoleMode, QuickPromptDefinition } from '@/components/agents/chat/presets'
 

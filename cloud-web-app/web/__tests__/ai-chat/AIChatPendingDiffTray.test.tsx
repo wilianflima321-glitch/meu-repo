@@ -2,7 +2,7 @@ import React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { AIChatPendingDiffTray } from '@/components/ai-chat/AIChatPendingDiffTray'
+import { AIChatPendingDiffTray } from '@/components/agents/chat/review'
 
 const pendingDiff = {
   path: '/src/app/page.tsx',

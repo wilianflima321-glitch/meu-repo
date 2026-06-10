@@ -6,8 +6,8 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const AI_CHAT_DIR = path.join(ROOT, 'components', 'ai-chat')
 const failures = []
-const MAX_AI_CHAT_FILES = 36
-const MAX_AI_CHAT_LINES = 4290
+const MAX_AI_CHAT_FILES = 32
+const MAX_AI_CHAT_LINES = 4050
 const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/AgentEvidenceCard.tsx',
   'components/agents/AgentEvidencePanel.tsx',
@@ -28,8 +28,14 @@ const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/ledger/AIChatLedgerStrip.tsx',
   'components/agents/chat/panels.ts',
   'components/agents/chat/presets.ts',
+  'components/agents/chat/review/index.ts',
+  'components/agents/chat/review/AIChatPendingDiffTray.tsx',
+  'components/agents/chat/review/AIChatProposalPreview.tsx',
   'components/agents/chat/session-types.ts',
   'components/agents/chat/state.ts',
+  'components/agents/chat/telemetry/index.ts',
+  'components/agents/chat/telemetry/AIChatBenchmarkTelemetry.tsx',
+  'components/agents/chat/telemetry/AIChatQuickPromptStrip.tsx',
   'components/agents/chat/utils.ts',
   'components/agents/legacy-chat-panel.ts',
 ]
@@ -112,6 +118,18 @@ if (fs.existsSync(path.join(AI_CHAT_DIR, 'AIChatLedgerStrip.tsx'))) {
   failures.push('components/ai-chat/AIChatLedgerStrip.tsx: ledger strip must stay absorbed into components/agents/chat/ledger')
 }
 
+for (const file of ['AIChatBenchmarkTelemetry.tsx', 'AIChatQuickPromptStrip.tsx']) {
+  if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
+    failures.push(`components/ai-chat/${file}: telemetry and quick prompts must stay absorbed into components/agents/chat/telemetry`)
+  }
+}
+
+for (const file of ['AIChatPendingDiffTray.tsx', 'AIChatProposalPreview.tsx']) {
+  if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
+    failures.push(`components/ai-chat/${file}: proposal review UI must stay absorbed into components/agents/chat/review`)
+  }
+}
+
 for (const file of ['AgentBoard.tsx', 'AIChatActivityDeck.tsx', 'AIChatTimeline.tsx', 'LiveConversationPanel.tsx', 'RunCard.tsx']) {
   if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
     failures.push(`components/ai-chat/${file}: agent activity UI must stay absorbed into components/agents/chat/activity`)
@@ -126,7 +144,7 @@ if (legacyAlias !== "export * from './chat'") {
 }
 
 const agentChatIndex = read('components/agents/chat/index.ts')
-for (const token of ['activity', 'composer', 'economics', 'ledger', 'panels', 'presets', 'session-types', 'state']) {
+for (const token of ['activity', 'composer', 'economics', 'ledger', 'panels', 'presets', 'review', 'session-types', 'state', 'telemetry']) {
   if (!agentChatIndex.includes(token)) {
     failures.push(`components/agents/chat/index.ts: missing ${token} export`)
   }

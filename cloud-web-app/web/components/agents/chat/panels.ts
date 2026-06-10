@@ -1,4 +1,3 @@
-export { AIChatBenchmarkTelemetry } from '@/components/ai-chat/AIChatBenchmarkTelemetry'
 export { AIChatContextStrip } from '@/components/ai-chat/AIChatContextStrip'
 export { AIChatCostMeter } from './AIChatCostMeter'
 export { AIChatHeader } from '@/components/ai-chat/AIChatHeader'
@@ -6,6 +5,6 @@ export { AIChatHistoryModeRail } from '@/components/ai-chat/AIChatHistoryModeRai
 export { AIChatLedgerStrip } from './ledger'
 export { AIChatMessagesPane } from '@/components/ai-chat/AIChatMessagesPane'
 export { AIChatOpsSidebar } from '@/components/ai-chat/AIChatOpsSidebar'
-export { AIChatPendingDiffTray } from '@/components/ai-chat/AIChatPendingDiffTray'
-export { AIChatProposalPreview } from '@/components/ai-chat/AIChatProposalPreview'
+export { AIChatPendingDiffTray, AIChatProposalPreview } from './review'
+export { AIChatBenchmarkTelemetry } from './telemetry'
 export { AIChatTimeline } from './activity'

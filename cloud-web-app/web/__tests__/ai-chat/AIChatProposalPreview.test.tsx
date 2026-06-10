@@ -2,7 +2,7 @@ import React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { AIChatProposalPreview } from '@/components/ai-chat/AIChatProposalPreview'
+import { AIChatProposalPreview } from '@/components/agents/chat/review'
 
 vi.mock('@/components/ide/MonacoChatDiffPanel', () => ({
   MonacoChatDiffPanel: ({
@@ -37,7 +37,7 @@ const pendingDiff = {
 }
 
 describe('AIChatProposalPreview', () => {
-  it('renders an inline proposal review surface with apply/reject actions', () => {
+  it('renders an inline proposal review surface with apply/reject actions', async () => {
     const onAcceptDiff = vi.fn()
     const onRejectDiff = vi.fn()
 
@@ -53,8 +53,8 @@ describe('AIChatProposalPreview', () => {
     expect(screen.getByText('page.tsx')).toBeInTheDocument()
     expect(screen.getByText('2 changed lines ready before apply')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'apply from preview' }))
-    fireEvent.click(screen.getByRole('button', { name: 'reject from preview' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'apply from preview' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'reject from preview' }))
 
     expect(onAcceptDiff).toHaveBeenCalledWith('patched output')
     expect(onRejectDiff).toHaveBeenCalledTimes(1)
