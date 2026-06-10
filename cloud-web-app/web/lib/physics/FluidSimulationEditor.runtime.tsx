@@ -29,7 +29,6 @@ import {
   GizmoHelper,
   GizmoViewport,
 } from '@react-three/drei';
-import * as THREE from 'three';
 import {
   Droplet,
   RotateCcw,
