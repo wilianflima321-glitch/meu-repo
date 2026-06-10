@@ -10,9 +10,7 @@
  * - Human-in-the-loop controls
  */
 
-import { aiService } from '@/lib/ai-service';
-import { toolsRegistry, executeTool } from '@/lib/ai-tools-registry';
-import '@/lib/ai-web-tools'
+import { executeTool } from '@/lib/ai-tools-registry';
 import { EventEmitter } from 'events';
 
 import type {
@@ -27,12 +25,13 @@ import type {
   AgentPlan,
   AgentThinking,
   AgentReflection,
-  AgentReview,
   AgentToolDescriptor
 } from './agent-mode-contracts';
 
-import { CORE_AGENT_TOOL_DESCRIPTORS } from './agent-mode-default-tools';
-import { EXECUTOR_PROMPT, PLANNER_PROMPT, REFLECTOR_PROMPT } from './agent-mode-prompts';
+import { planAgentTask, reflectAgentAction, thinkAgentNextStep } from './agent-mode-ai-phases';
+import { AgentMemoryStore } from './agent-mode-memory';
+import { reviewAgentExecution } from './agent-mode-review';
+import { getAvailableAgentTools } from './agent-mode-tools';
 
 export type {
   AgentTask,
@@ -45,10 +44,6 @@ export type {
   AgentAction
 } from './agent-mode-contracts';
 
-function parseJsonObject<T>(raw: string): T {
-  return JSON.parse(raw) as T;
-}
-
 // ============================================================================
 // AUTONOMOUS AGENT CLASS
 // ============================================================================
@@ -56,7 +51,7 @@ function parseJsonObject<T>(raw: string): T {
 export class AutonomousAgent extends EventEmitter {
   private config: AgentConfig;
   private toolContextProvider: AgentToolContextProvider | null = null;
-  private memory: AgentMemory;
+  private memoryStore: AgentMemoryStore;
   private currentTask: AgentTask | null = null;
   private steps: AgentStep[] = [];
   private isRunning: boolean = false;
@@ -79,11 +74,7 @@ export class AutonomousAgent extends EventEmitter {
 
     this.toolContextProvider = config.toolContextProvider || null;
 
-    this.memory = {
-      shortTerm: [],
-      longTerm: [],
-      working: new Map(),
-    };
+    this.memoryStore = new AgentMemoryStore();
   }
 
   /**
@@ -123,7 +114,7 @@ export class AutonomousAgent extends EventEmitter {
         subtasks: [],
       }));
 
-      this.addMemory('fact', `Plano criado: ${plan.approach}`, { plan });
+      this.addMemory('fact', `Plan created: ${plan.approach}`, { plan });
 
       // Phase 2: Execution
       task.status = 'executing';
@@ -135,7 +126,7 @@ export class AutonomousAgent extends EventEmitter {
       task.status = 'reviewing';
       this.emit('task:reviewing', task);
 
-      const review = await this.reviewExecution(task);
+      const review = reviewAgentExecution(task, this.steps, this.iterationCount);
 
       if (review.success) {
         task.status = 'completed';
@@ -164,49 +155,13 @@ export class AutonomousAgent extends EventEmitter {
    * Planning phase - decomposes the task
    */
   private async planTask(task: AgentTask): Promise<AgentPlan> {
-    const step = this.addStep(task.id, 'plan', 'Analisando tarefa e criando plano...');
-
-    const availableTools = this.getAvailableTools();
-
-    const response = await aiService.chat({
-      messages: [
-        { role: 'system', content: PLANNER_PROMPT },
-        {
-          role: 'user',
-          content: `TASK: ${task.description}\n\nAVAILABLE TOOLS:\n${availableTools.map(t => `- ${t.name}: ${t.description}`).join('\n')}`
-        },
-      ],
-      temperature: 0.3,
-      maxTokens: this.config.thinkingBudget,
+    return planAgentTask({
+      addStep: (taskId, type, content) => this.addStep(taskId, type, content),
+      onPlanned: (plan) => this.emit('agent:planned', { task, plan }),
+      task,
+      thinkingBudget: this.config.thinkingBudget,
+      tools: this.getAvailableTools(),
     });
-
-    try {
-      const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('Invalid plan format');
-
-      const plan = parseJsonObject<AgentPlan>(jsonMatch[0]);
-      step.content = `Plano criado: ${plan.subtasks.length} subtarefas`;
-
-      this.emit('agent:planned', { task, plan });
-
-      return plan;
-    } catch (e) {
-      // Fallback: single task
-      return {
-        analysis: 'Simple task, direct execution',
-        approach: 'Sequential execution',
-        subtasks: [{
-          id: '1',
-          description: task.description,
-          tools: [],
-          dependencies: [],
-          estimatedSteps: 5,
-          riskLevel: 'medium',
-        }],
-        successCriteria: 'Task completed without errors',
-        potentialIssues: [],
-      };
-    }
   }
 
   /**
@@ -297,46 +252,14 @@ export class AutonomousAgent extends EventEmitter {
    * Thinks about the next step
    */
   private async think(task: AgentTask, subtask: AgentTask): Promise<AgentThinking> {
-    const step = this.addStep(task.id, 'think', 'Thinking about the next step...');
-
-    const context = this.buildContext(task, subtask);
-    const tools = this.getAvailableTools();
-    const memory = this.getRelevantMemory(subtask.description);
-
-    const prompt = EXECUTOR_PROMPT
-      .replace('{context}', context)
-      .replace('{task}', subtask.description)
-      .replace('{tools}', tools.map(t => `- ${t.name}: ${t.description}\n  Input: ${JSON.stringify(t.inputSchema)}`).join('\n\n'))
-      .replace('{memory}', memory.map(m => `- [${m.type}] ${m.content}`).join('\n'));
-
-    const response = await aiService.chat({
-      messages: [
-        { role: 'system', content: prompt },
-        { role: 'user', content: 'What is the next step?' },
-      ],
-      temperature: 0.2,
-      maxTokens: 2000,
+    return thinkAgentNextStep({
+      addStep: (taskId, type, content) => this.addStep(taskId, type, content),
+      context: this.buildContext(task, subtask),
+      memory: this.getRelevantMemory(subtask.description),
+      subtask,
+      task,
+      tools: this.getAvailableTools(),
     });
-
-    try {
-      const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('Invalid thinking format');
-
-      const thinking = parseJsonObject<AgentThinking>(jsonMatch[0]);
-      step.content = thinking.thinking;
-
-      return thinking;
-    } catch (e) {
-      return {
-        thinking: 'Erro ao processar pensamento',
-        action: {
-          type: 'error',
-          reason: 'Failed to parse thinking response',
-        },
-        confidence: 0,
-        nextSteps: [],
-      };
-    }
   }
 
   /**
@@ -352,7 +275,7 @@ export class AutonomousAgent extends EventEmitter {
       ...(action.input || {}),
       ...(providedContext || {}),
     };
-    const step = this.addStep(taskId, 'execute', `Executando ${action.tool}...`);
+    const step = this.addStep(taskId, 'execute', `Executing ${action.tool}...`);
 
     const toolCall: ToolCall = {
       id: this.generateId(),
@@ -375,7 +298,7 @@ export class AutonomousAgent extends EventEmitter {
 
       this.emit('tool:completed', toolCall);
 
-      this.addMemory('success', `Tool ${action.tool} executada com sucesso`, {
+      this.addMemory('success', `Tool ${action.tool} executed successfully`, {
         tool: action.tool,
         input,
         output: result,
@@ -389,7 +312,7 @@ export class AutonomousAgent extends EventEmitter {
 
       this.emit('tool:failed', toolCall);
 
-      this.addMemory('error', `Tool ${action.tool} falhou: ${toolCall.error}`, {
+      this.addMemory('error', `Tool ${action.tool} failed: ${toolCall.error}`, {
         tool: action.tool,
         input,
         error: toolCall.error,
@@ -413,7 +336,7 @@ export class AutonomousAgent extends EventEmitter {
       }
       return context
     } catch (error) {
-      this.addMemory('error', `Tool context provider falhou: ${error instanceof Error ? error.message : 'unknown'}`)
+      this.addMemory('error', `Tool context provider failed: ${error instanceof Error ? error.message : 'unknown'}`)
       return null
     }
   }
@@ -422,46 +345,13 @@ export class AutonomousAgent extends EventEmitter {
    * Reflects on an action result
    */
   private async reflect(task: AgentTask, action: AgentAction, result: unknown): Promise<AgentReflection> {
-    const step = this.addStep(task.id, 'reflect', 'Analisando resultado...');
-
-    const history = this.steps.slice(-10).map(s =>
-      `[${s.type}] ${s.content}`
-    ).join('\n');
-
-    const prompt = REFLECTOR_PROMPT
-      .replace('{task}', task.description)
-      .replace('{action}', JSON.stringify(action))
-      .replace('{result}', JSON.stringify(result))
-      .replace('{history}', history);
-
-    const response = await aiService.chat({
-      messages: [
-        { role: 'system', content: prompt },
-        { role: 'user', content: 'Analyze the result and decide the next step.' },
-      ],
-      temperature: 0.2,
-      maxTokens: 1500,
+    return reflectAgentAction({
+      action,
+      addStep: (taskId, type, content) => this.addStep(taskId, type, content),
+      result,
+      steps: this.steps,
+      task,
     });
-
-    try {
-      const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('Invalid reflection format');
-
-      const reflection = parseJsonObject<AgentReflection>(jsonMatch[0]);
-      step.content = reflection.assessment;
-
-      return reflection;
-    } catch (e) {
-      return {
-        assessment: 'Failed to process reflection',
-        success: false,
-        progress: 0,
-        issues: ['Failed to parse reflection'],
-        corrections: [],
-        nextAction: 'abort',
-        adjustments: '',
-      };
-    }
   }
 
   /**
@@ -478,37 +368,6 @@ export class AutonomousAgent extends EventEmitter {
     step.content = `Corrections applied: ${reflection.corrections.join(', ')}`;
 
     this.emit('agent:self_corrected', { task, reflection });
-  }
-
-  /**
-   * Final execution review
-   */
-  private async reviewExecution(task: AgentTask): Promise<AgentReview> {
-    const completedSubtasks = task.subtasks.filter(st => st.status === 'completed');
-    const failedSubtasks = task.subtasks.filter(st => st.status === 'failed');
-
-    if (failedSubtasks.length > 0) {
-      return {
-        success: false,
-        error: `${failedSubtasks.length} subtarefas falharam`,
-      };
-    }
-
-    if (completedSubtasks.length === task.subtasks.length) {
-      return {
-        success: true,
-        result: {
-          completedSubtasks: completedSubtasks.length,
-          totalSteps: this.steps.length,
-          iterations: this.iterationCount,
-        },
-      };
-    }
-
-    return {
-      success: false,
-      error: 'Execution incomplete',
-    };
   }
 
   /**
@@ -551,86 +410,19 @@ export class AutonomousAgent extends EventEmitter {
   }
 
   private addMemory(type: MemoryEntry['type'], content: string, metadata?: Record<string, unknown>): void {
-    const entry: MemoryEntry = {
-      id: this.generateId(),
-      type,
-      content,
-      metadata,
-      timestamp: new Date(),
-      relevance: 1.0,
-    };
-
-    this.memory.shortTerm.push(entry);
-
-    // Keep short-term memory bounded
-    if (this.memory.shortTerm.length > 100) {
-      const oldest = this.memory.shortTerm.shift();
-      if (oldest && oldest.relevance > 0.5) {
-        this.memory.longTerm.push(oldest);
-      }
-    }
+    this.memoryStore.add(type, content, metadata);
   }
 
   private getRelevantMemory(query: string): MemoryEntry[] {
-    // Simple relevance - in production, use embeddings
-    const allMemory = [...this.memory.shortTerm, ...this.memory.longTerm];
-    return allMemory
-      .filter(m => m.content.toLowerCase().includes(query.toLowerCase().slice(0, 20)))
-      .slice(-10);
+    return this.memoryStore.relevant(query);
   }
 
   private buildContext(task: AgentTask, subtask: AgentTask): string {
-    const context = [
-      `Tarefa principal: ${task.description}`,
-      `Subtarefa atual: ${subtask.description}`,
-      `Progresso: ${task.subtasks.filter(st => st.status === 'completed').length}/${task.subtasks.length}`,
-      `Iteration: ${this.iterationCount}/${this.config.maxIterations}`,
-    ];
-
-    // Add working memory
-    this.memory.working.forEach((value, key) => {
-      context.push(`${key}: ${JSON.stringify(value)}`);
-    });
-
-    return context.join('\n');
+    return this.memoryStore.buildContext(task, subtask, this.iterationCount, this.config.maxIterations);
   }
 
   private getAvailableTools(): AgentToolDescriptor[] {
-    // Get tools from registry dynamically
-    const registeredTools: AgentToolDescriptor[] = [];
-
-    // Try to get tools from MCP server if available
-    try {
-      // Dynamically import MCP server tools
-      const mcpTools = toolsRegistry?.getAll?.() || [];
-      for (const tool of mcpTools) {
-        const inputSchema = {
-          type: 'object',
-          properties: tool.parameters.reduce((acc, param) => {
-            acc[param.name] = {
-              type: param.type,
-              description: param.description,
-              ...(param.enum ? { enum: param.enum } : {}),
-            };
-            return acc;
-          }, {} as Record<string, unknown>),
-          required: tool.parameters.filter((p) => p.required).map((p) => p.name),
-        };
-        registeredTools.push({
-          name: tool.name,
-          description: tool.description,
-          inputSchema
-        });
-      }
-    } catch {
-      // MCP not available, use core tools
-    }
-
-    // Core tools always available when MCP has not provided a runtime catalog.
-    if (registeredTools.length === 0) {
-      registeredTools.push(...CORE_AGENT_TOOL_DESCRIPTORS);
-    }
-    return registeredTools;
+    return getAvailableAgentTools();
   }
 
   private generateId(): string {
@@ -688,11 +480,7 @@ export class AutonomousAgent extends EventEmitter {
   }
 
   getMemory(): AgentMemory {
-    return {
-      shortTerm: [...this.memory.shortTerm],
-      longTerm: [...this.memory.longTerm],
-      working: new Map(this.memory.working),
-    };
+    return this.memoryStore.snapshot();
   }
 }
 
