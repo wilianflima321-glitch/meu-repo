@@ -1,7 +1,7 @@
 'use client'
 
 import { Check, Copy } from 'lucide-react'
-import { MessageBubbleCodeActions } from '@/components/ai-chat/MessageBubbleCodeActions'
+import { MessageBubbleCodeActions } from './MessageBubbleCodeActions'
 
 interface MessageBubbleContentProps {
   content: string

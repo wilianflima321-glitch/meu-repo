@@ -490,9 +490,9 @@ IDE chat, live mode, history, tool calls, and context panels must not mix Portug
 | `components/ai-chat/AIChatModelPicker.tsx` | 0 | ok |
 | `components/ai-chat/AIChatHeaderActions.tsx` | 0 | ok |
 | `components/ai-chat/AIChatAgentLane.tsx` | 0 | ok |
-| `components/ai-chat/AIChatMessagesPane.tsx` | 0 | ok |
+| `components/agents/chat/messages/AIChatMessagesPane.tsx` | 0 | ok |
 | `components/ai-chat/AIChatSessionBanner.tsx` | 0 | ok |
-| `components/ai-chat/MessageBubbleActionBar.tsx` | 0 | ok |
+| `components/agents/chat/messages/MessageBubbleActionBar.tsx` | 0 | ok |
 | `components/ide/AIChatContextPanels.tsx` | 0 | ok |
 | `components/ide/AIChatPanelChrome.tsx` | 0 | ok |
 | `components/agents/AgentsWindow.tsx` | 0 | ok |

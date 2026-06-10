@@ -76,6 +76,6 @@ export function writeUxMarketStandardReport({
   lines.push('- Locale mixing is blocked on the landing spine until i18n owns route-level language selection.')
   lines.push('')
 
-  fs.writeFileSync(reportFile, `${lines.join('\n')}\n`, 'utf8')
+  fs.writeFileSync(reportFile, `${lines.join('\n').trimEnd()}\n`, 'utf8')
   return rel(root, reportFile)
 }

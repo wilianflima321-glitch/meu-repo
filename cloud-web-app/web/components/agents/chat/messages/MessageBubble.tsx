@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import { Bot, File, ImageIcon, Mic, User } from 'lucide-react'
-import type { Message } from '../ide/AIChatPanelPro.types'
-import { ThinkingDisplay, ToolCallDisplay } from '../ide/AIChatPanelChrome'
-import { MessageBubbleActionBar } from '@/components/ai-chat/MessageBubbleActionBar'
-import { MessageBubbleContent } from '@/components/ai-chat/MessageBubbleContent'
+import type { Message } from '@/components/ide/AIChatPanelPro.types'
+import { ThinkingDisplay, ToolCallDisplay } from '@/components/ide/AIChatPanelChrome'
+import { MessageBubbleActionBar } from './MessageBubbleActionBar'
+import { MessageBubbleContent } from './MessageBubbleContent'
 import { AgentEvidenceCard } from '@/components/agents/AgentEvidenceCard'
-import { useMessageBubbleCopyActions } from '@/components/ai-chat/useMessageBubbleCopyActions'
+import { useMessageBubbleCopyActions } from './useMessageBubbleCopyActions'
 
 export interface MessageBubbleProps {
   message: Message
@@ -17,7 +17,7 @@ export interface MessageBubbleProps {
 }
 
 /**
- * Single chat message bubble — renders markdown/code blocks, tool calls,
+ * Single chat message bubble - renders markdown/code blocks, tool calls,
  * thinking panels, plus benchmark-like hover actions for code and reply controls.
  */
 export function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleProps) {

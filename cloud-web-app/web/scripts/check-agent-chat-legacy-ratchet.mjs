@@ -6,8 +6,8 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const AI_CHAT_DIR = path.join(ROOT, 'components', 'ai-chat')
 const failures = []
-const MAX_AI_CHAT_FILES = 30
-const MAX_AI_CHAT_LINES = 3900
+const MAX_AI_CHAT_FILES = 24
+const MAX_AI_CHAT_LINES = 3215
 const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/AgentEvidenceCard.tsx',
   'components/agents/AgentEvidencePanel.tsx',
@@ -26,6 +26,13 @@ const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/economics/AIChatEconomicsPanel.tsx',
   'components/agents/chat/ledger/index.ts',
   'components/agents/chat/ledger/AIChatLedgerStrip.tsx',
+  'components/agents/chat/messages/index.ts',
+  'components/agents/chat/messages/AIChatMessagesPane.tsx',
+  'components/agents/chat/messages/MessageBubble.tsx',
+  'components/agents/chat/messages/MessageBubbleActionBar.tsx',
+  'components/agents/chat/messages/MessageBubbleCodeActions.tsx',
+  'components/agents/chat/messages/MessageBubbleContent.tsx',
+  'components/agents/chat/messages/useMessageBubbleCopyActions.ts',
   'components/agents/chat/panels.ts',
   'components/agents/chat/presets.ts',
   'components/agents/chat/review/index.ts',
@@ -139,6 +146,19 @@ for (const file of ['AIChatContextStrip.tsx', 'AIChatHistoryModeRail.tsx']) {
   }
 }
 
+for (const file of [
+  'AIChatMessagesPane.tsx',
+  'MessageBubble.tsx',
+  'MessageBubbleActionBar.tsx',
+  'MessageBubbleCodeActions.tsx',
+  'MessageBubbleContent.tsx',
+  'useMessageBubbleCopyActions.ts',
+]) {
+  if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
+    failures.push(`components/ai-chat/${file}: conversation message UI must stay absorbed into components/agents/chat/messages`)
+  }
+}
+
 for (const file of ['AgentBoard.tsx', 'AIChatActivityDeck.tsx', 'AIChatTimeline.tsx', 'LiveConversationPanel.tsx', 'RunCard.tsx']) {
   if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
     failures.push(`components/ai-chat/${file}: agent activity UI must stay absorbed into components/agents/chat/activity`)
@@ -153,7 +173,7 @@ if (legacyAlias !== "export * from './chat'") {
 }
 
 const agentChatIndex = read('components/agents/chat/index.ts')
-for (const token of ['activity', 'composer', 'economics', 'ledger', 'panels', 'presets', 'review', 'session-types', 'shell', 'state', 'telemetry']) {
+for (const token of ['activity', 'composer', 'economics', 'ledger', 'messages', 'panels', 'presets', 'review', 'session-types', 'shell', 'state', 'telemetry']) {
   if (!agentChatIndex.includes(token)) {
     failures.push(`components/agents/chat/index.ts: missing ${token} export`)
   }

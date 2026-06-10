@@ -2,7 +2,7 @@
 
 import type { Ref } from 'react'
 import { Bot, Radio } from 'lucide-react'
-import { MessageBubble } from '@/components/ai-chat/MessageBubble'
+import { MessageBubble } from './MessageBubble'
 import type { Message } from '@/components/ide/AIChatPanelPro.types'
 import type { AIChatModePreset } from '@/components/agents/chat/presets'
 
