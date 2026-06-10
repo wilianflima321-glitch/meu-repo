@@ -1,26 +1,35 @@
 import { logger } from '@/lib/observability/logger';
 import { EventEmitter } from 'events';
 import {
-  applyGrain,
-  applyVignette,
-  applyWatermark,
   canvasToBlob,
   createMediaEntry,
   flashScreen,
   generateCaptureFilename,
 } from './canvas-utils';
+import { createDefaultCaptureConfig, createDefaultPhotoModeSettings } from './runtime-defaults';
+import {
+  copyScreenshotToClipboard,
+  downloadCapturedMedia,
+  serializeGalleryMetadata,
+  shareCapturedMedia,
+} from './runtime-media-actions';
+import {
+  addCapturedMediaToGallery,
+  getSortedCapturedMedia,
+  revokeCapturedMediaUrls,
+} from './runtime-gallery';
+import { getCaptureAudioStream, generateVideoThumbnail } from './runtime-recording';
+import { ReplayBufferRuntime } from './runtime-replay';
+import { createProcessedCaptureCanvas } from './runtime-screenshot';
 import {
   type CapturedMedia,
   type CaptureConfig,
   type CaptureState,
-  type GifOptions,
   type PhotoModeSettings,
   PHOTO_FILTER_PRESETS,
   type ReplayBufferOptions,
-  type ScreenshotEffect,
   type ScreenshotOptions,
   type VideoRecordingOptions,
-  type WatermarkConfig,
 } from './types';
 
 export class CaptureSystem extends EventEmitter {
@@ -31,8 +40,7 @@ export class CaptureSystem extends EventEmitter {
   private gallery: Map<string, CapturedMedia> = new Map();
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
-  private replayBuffer: Blob[] = [];
-  private replayInterval: ReturnType<typeof setInterval> | null = null;
+  private replayBuffer = new ReplayBufferRuntime();
   private photoMode: PhotoModeSettings;
   private canvas: HTMLCanvasElement | null = null;
   private recordingStartTime = 0;
@@ -40,25 +48,8 @@ export class CaptureSystem extends EventEmitter {
   constructor(config: Partial<CaptureConfig> = {}) {
     super();
     
-    this.config = {
-      defaultImageFormat: 'png',
-      defaultImageQuality: 0.92,
-      defaultVideoFormat: 'webm',
-      defaultVideoFrameRate: 30,
-      defaultVideoBitrate: 5000000,
-      autoSave: true,
-      saveDirectory: 'captures',
-      filenamePattern: '{game}_{type}_{timestamp}',
-      captureSound: true,
-      flashEffect: true,
-      notifyOnCapture: true,
-      maxGallerySize: 100,
-      replayBufferEnabled: false,
-      replayBufferDuration: 30,
-      ...config,
-    };
-    
-    this.photoMode = this.getDefaultPhotoModeSettings();
+    this.config = createDefaultCaptureConfig(config);
+    this.photoMode = createDefaultPhotoModeSettings();
     this.loadGallery();
   }
   
@@ -112,7 +103,7 @@ export class CaptureSystem extends EventEmitter {
       
       // Apply resizing if needed
       if (width || height || effects.length > 0 || watermark) {
-        captureCanvas = this.createProcessedCanvas(
+        captureCanvas = createProcessedCaptureCanvas(
           this.canvas,
           width,
           height,
@@ -154,65 +145,6 @@ export class CaptureSystem extends EventEmitter {
     }
   }
   
-  private createProcessedCanvas(
-    source: HTMLCanvasElement,
-    width?: number,
-    height?: number,
-    effects: ScreenshotEffect[] = [],
-    watermark?: WatermarkConfig
-  ): HTMLCanvasElement {
-    const targetWidth = width || source.width;
-    const targetHeight = height || source.height;
-    
-    const canvas = document.createElement('canvas');
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    
-    const ctx = canvas.getContext('2d')!;
-    
-    // Build filter string
-    const filters = effects.map(effect => {
-      switch (effect.type) {
-        case 'brightness': return `brightness(${effect.value})`;
-        case 'contrast': return `contrast(${effect.value})`;
-        case 'saturation': return `saturate(${effect.value})`;
-        case 'blur': return `blur(${effect.value}px)`;
-        case 'grayscale': return `grayscale(${effect.value})`;
-        case 'sepia': return `sepia(${effect.value})`;
-        default: return '';
-      }
-    }).filter(Boolean).join(' ');
-    
-    if (filters) {
-      ctx.filter = filters;
-    }
-    
-    // Draw source
-    ctx.drawImage(source, 0, 0, targetWidth, targetHeight);
-    
-    // Reset filter for watermark
-    ctx.filter = 'none';
-    
-    // Apply vignette
-    const vignette = effects.find(e => e.type === 'vignette');
-    if (vignette) {
-      applyVignette(ctx, targetWidth, targetHeight, vignette.value);
-    }
-    
-    // Apply grain
-    const grain = effects.find(e => e.type === 'grain');
-    if (grain) {
-      applyGrain(ctx, targetWidth, targetHeight, grain.value);
-    }
-    
-    // Apply watermark
-    if (watermark) {
-      applyWatermark(ctx, targetWidth, targetHeight, watermark);
-    }
-    
-    return canvas;
-  }
-  
   async startRecording(options: VideoRecordingOptions = {}): Promise<boolean> {
     if (this.state !== 'idle') {
       logger.warn('Already recording');
@@ -239,7 +171,7 @@ export class CaptureSystem extends EventEmitter {
       
       // Add audio tracks if needed
       if (audio || microphone) {
-        const audioStream = await this.getAudioStream(audio, microphone);
+        const audioStream = await getCaptureAudioStream(audio, microphone);
         if (audioStream) {
           audioStream.getAudioTracks().forEach(track => stream.addTrack(track));
         }
@@ -343,7 +275,7 @@ export class CaptureSystem extends EventEmitter {
       });
       
       // Generate thumbnail
-      media.thumbnail = await this.generateVideoThumbnail(blob);
+      media.thumbnail = await generateVideoThumbnail(blob);
       
       this.addToGallery(media);
       
@@ -362,118 +294,24 @@ export class CaptureSystem extends EventEmitter {
     }
   }
   
-  private async getAudioStream(systemAudio: boolean, microphone: boolean): Promise<MediaStream | null> {
-    const constraints: MediaStreamConstraints = {};
-    
-    if (microphone) {
-      constraints.audio = true;
-    }
-    
-    try {
-      if (systemAudio && 'getDisplayMedia' in navigator.mediaDevices) {
-        const displayStream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: true });
-        const audioTracks = displayStream.getAudioTracks();
-        displayStream.getVideoTracks().forEach(t => t.stop());
-        
-        if (audioTracks.length > 0) {
-          const stream = new MediaStream(audioTracks);
-          
-          if (microphone) {
-            const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            micStream.getAudioTracks().forEach(t => stream.addTrack(t));
-          }
-          
-          return stream;
-        }
-      }
-      
-      if (microphone) {
-        return await navigator.mediaDevices.getUserMedia({ audio: true });
-      }
-      
-      return null;
-    } catch (error) {
-      logger.warn('Failed to get audio stream:', error);
-      return null;
-    }
-  }
-  
-  private async generateVideoThumbnail(blob: Blob): Promise<string> {
-    return new Promise((resolve) => {
-      const video = document.createElement('video');
-      video.src = URL.createObjectURL(blob);
-      video.currentTime = 0.5;
-      
-      video.onloadeddata = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        const ctx = canvas.getContext('2d')!;
-        ctx.drawImage(video, 0, 0);
-        
-        const thumbnail = canvas.toDataURL('image/jpeg', 0.7);
-        URL.revokeObjectURL(video.src);
-        resolve(thumbnail);
-      };
-      
-      video.onerror = () => {
-        resolve('');
-      };
-    });
-  }
-  
   // ============================================================================
   // REPLAY BUFFER
   // ============================================================================
   
   startReplayBuffer(options: ReplayBufferOptions): void {
     if (!this.canvas) return;
-    
-    this.stopReplayBuffer();
-    
-    const { duration, frameRate = 30 } = options;
-    const maxFrames = duration * frameRate;
-    
-    this.replayBuffer = [];
-    
-    this.replayInterval = setInterval(async () => {
-      if (!this.canvas) return;
-      
-      const blob = await canvasToBlob(this.canvas, 'image/jpeg', 0.8);
-      this.replayBuffer.push(blob);
-      
-      // Keep only last N frames
-      while (this.replayBuffer.length > maxFrames) {
-        this.replayBuffer.shift();
-      }
-    }, 1000 / frameRate);
-    
-    this.emit('replayBufferStart', duration);
+    this.replayBuffer.start(this.canvas, options);
+    this.emit('replayBufferStart', options.duration);
   }
   
   stopReplayBuffer(): void {
-    if (this.replayInterval) {
-      clearInterval(this.replayInterval);
-      this.replayInterval = null;
-    }
-    this.replayBuffer = [];
+    this.replayBuffer.stop();
     this.emit('replayBufferStop');
   }
   
   async saveReplayBuffer(): Promise<CapturedMedia | null> {
-    if (this.replayBuffer.length === 0) return null;
-    
-    // Convert frames to video (simplified - real implementation would use proper video encoding)
-    const blob = new Blob(this.replayBuffer, { type: 'video/webm' });
-    
-    const media = createMediaEntry('video', blob, {
-      width: this.canvas?.width ?? 0,
-      height: this.canvas?.height ?? 0,
-      format: 'webm',
-      filename: generateCaptureFilename('replay', 'webm'),
-      duration: this.replayBuffer.length / 30,
-    });
+    const media = this.replayBuffer.save(this.canvas);
+    if (!media) return null;
     
     this.addToGallery(media);
     this.emit('replaySaved', media);
@@ -491,7 +329,7 @@ export class CaptureSystem extends EventEmitter {
   }
   
   exitPhotoMode(): void {
-    this.photoMode = this.getDefaultPhotoModeSettings();
+    this.photoMode = createDefaultPhotoModeSettings();
     this.emit('photoModeExit');
   }
   
@@ -510,45 +348,23 @@ export class CaptureSystem extends EventEmitter {
     this.emit('filterPresetApply', preset);
   }
   
-  private getDefaultPhotoModeSettings(): PhotoModeSettings {
-    return {
-      enabled: false,
-      fov: 60,
-      dof: { enabled: false, focus: 10, aperture: 2.8 },
-      exposure: 1,
-      contrast: 1,
-      saturation: 1,
-      vignette: 0,
-      grain: 0,
-      filterPreset: null,
-      cameraPosition: { x: 0, y: 0, z: 0 },
-      cameraRotation: { x: 0, y: 0, z: 0 },
-      hideUI: true,
-      freezeTime: true,
-    };
-  }
-  
   // ============================================================================
   // GALLERY
   // ============================================================================
   
   private addToGallery(media: CapturedMedia): void {
-    this.gallery.set(media.id, media);
-    
-    // Limit gallery size
-    while (this.gallery.size > this.config.maxGallerySize) {
-      const oldest = Array.from(this.gallery.values())
-        .sort((a, b) => a.timestamp - b.timestamp)[0];
-      this.deleteMedia(oldest.id);
-    }
-    
+    addCapturedMediaToGallery({
+      deleteMedia: (id) => this.deleteMedia(id),
+      gallery: this.gallery,
+      maxGallerySize: this.config.maxGallerySize,
+      media,
+    });
     this.saveGallery();
     this.emit('galleryUpdate', this.getGallery());
   }
   
   getGallery(): CapturedMedia[] {
-    return Array.from(this.gallery.values())
-      .sort((a, b) => b.timestamp - a.timestamp);
+    return getSortedCapturedMedia(this.gallery);
   }
   
   getMedia(id: string): CapturedMedia | undefined {
@@ -568,9 +384,7 @@ export class CaptureSystem extends EventEmitter {
   }
   
   clearGallery(): void {
-    for (const media of this.gallery.values()) {
-      URL.revokeObjectURL(media.url);
-    }
+    revokeCapturedMediaUrls(this.gallery.values());
     this.gallery.clear();
     this.saveGallery();
     this.emit('galleryClear');
@@ -579,20 +393,7 @@ export class CaptureSystem extends EventEmitter {
   private saveGallery(): void {
     if (typeof localStorage === 'undefined') return;
     
-    // Save metadata only (not blobs)
-    const metadata = Array.from(this.gallery.values()).map(m => ({
-      id: m.id,
-      type: m.type,
-      filename: m.filename,
-      timestamp: m.timestamp,
-      width: m.width,
-      height: m.height,
-      size: m.size,
-      format: m.format,
-      duration: m.duration,
-    }));
-    
-    localStorage.setItem('aethel_capture_gallery', JSON.stringify(metadata));
+    localStorage.setItem('aethel_capture_gallery', serializeGalleryMetadata(this.gallery.values()));
   }
   
   private loadGallery(): void {
@@ -608,11 +409,7 @@ export class CaptureSystem extends EventEmitter {
     const media = this.gallery.get(id);
     if (!media) return;
     
-    const link = document.createElement('a');
-    link.href = media.url;
-    link.download = media.filename;
-    link.click();
-    
+    downloadCapturedMedia(media);
     this.emit('mediaDownload', media);
   }
   
@@ -620,40 +417,22 @@ export class CaptureSystem extends EventEmitter {
     const media = this.gallery.get(id);
     if (!media) return false;
     
-    if (!navigator.share) {
-      logger.warn('Web Share API not supported');
-      return false;
-    }
-    
-    try {
-      const file = new File([media.blob], media.filename, { type: media.blob.type });
-      
-      await navigator.share({
-        title: 'Game Capture',
-        files: [file],
-      });
-      
+    if (await shareCapturedMedia(media)) {
       this.emit('mediaShare', media);
       return true;
-    } catch (error) {
-      logger.error('Share failed:', error);
-      return false;
     }
+    return false;
   }
   
   async copyToClipboard(id: string): Promise<boolean> {
     const media = this.gallery.get(id);
-    if (!media || media.type !== 'screenshot') return false;
-    
-    try {
-      const item = new ClipboardItem({ [media.blob.type]: media.blob });
-      await navigator.clipboard.write([item]);
+    if (!media) return false;
+
+    if (await copyScreenshotToClipboard(media)) {
       this.emit('mediaCopy', media);
       return true;
-    } catch (error) {
-      logger.error('Copy to clipboard failed:', error);
-      return false;
     }
+    return false;
   }
   
   // ============================================================================
@@ -699,10 +478,7 @@ export class CaptureSystem extends EventEmitter {
     this.stopReplayBuffer();
     this.stopRecording();
     
-    for (const media of this.gallery.values()) {
-      URL.revokeObjectURL(media.url);
-    }
-    
+    revokeCapturedMediaUrls(this.gallery.values());
     this.gallery.clear();
     this.removeAllListeners();
     CaptureSystem.instance = null;
