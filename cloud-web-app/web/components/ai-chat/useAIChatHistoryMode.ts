@@ -1,18 +1,9 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import type { AIChatTimelineItem } from '@/components/agents/chat/activity'
 import type { ChatThread, Message } from '@/components/ide/AIChatPanelPro.types'
 import { formatTime } from '@/components/agents/chat/utils'
-
-export type AIChatTimelineTone = 'user' | 'assistant' | 'system' | 'live'
-
-export interface AIChatTimelineItem {
-  id: string
-  tone: AIChatTimelineTone
-  title: string
-  summary: string
-  meta: string
-}
 
 interface UseAIChatHistoryModeParams {
   activeThreadId?: string

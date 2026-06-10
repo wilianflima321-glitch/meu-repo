@@ -6,8 +6,8 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const AI_CHAT_DIR = path.join(ROOT, 'components', 'ai-chat')
 const failures = []
-const MAX_AI_CHAT_FILES = 42
-const MAX_AI_CHAT_LINES = 5225
+const MAX_AI_CHAT_FILES = 41
+const MAX_AI_CHAT_LINES = 5110
 const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/index.ts',
   'components/agents/chat/AIChatCostMeter.tsx',
@@ -15,6 +15,7 @@ const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/activity/index.ts',
   'components/agents/chat/activity/AgentBoard.tsx',
   'components/agents/chat/activity/AIChatActivityDeck.tsx',
+  'components/agents/chat/activity/AIChatTimeline.tsx',
   'components/agents/chat/activity/LiveConversationPanel.tsx',
   'components/agents/chat/activity/RunCard.tsx',
   'components/agents/chat/composer.ts',
@@ -84,7 +85,7 @@ if (fs.existsSync(path.join(AI_CHAT_DIR, 'AIChatCostMeter.tsx'))) {
   failures.push('components/ai-chat/AIChatCostMeter.tsx: cost meter must stay absorbed into components/agents/chat')
 }
 
-for (const file of ['AgentBoard.tsx', 'AIChatActivityDeck.tsx', 'LiveConversationPanel.tsx', 'RunCard.tsx']) {
+for (const file of ['AgentBoard.tsx', 'AIChatActivityDeck.tsx', 'AIChatTimeline.tsx', 'LiveConversationPanel.tsx', 'RunCard.tsx']) {
   if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
     failures.push(`components/ai-chat/${file}: agent activity UI must stay absorbed into components/agents/chat/activity`)
   }

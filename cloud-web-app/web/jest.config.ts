@@ -63,7 +63,7 @@ const config: Config = {
     'components/ai-chat/AIChatLedgerStrip.tsx',
     'components/ai-chat/AIChatPendingDiffTray.tsx',
     'components/ai-chat/AIChatProposalPreview.tsx',
-    'components/ai-chat/AIChatTimeline.tsx',
+    'components/agents/chat/activity/AIChatTimeline.tsx',
     'components/agents/chat/activity/AgentBoard.tsx',
     'components/agents/chat/activity/RunCard.tsx',
     'components/ai-chat/ai-chat-evidence.ts',

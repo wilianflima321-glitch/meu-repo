@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { Bot, History, Radio, Sparkles, UserRound } from 'lucide-react'
-import type { AIChatTimelineItem } from './useAIChatHistoryMode'
+import type { AIChatTimelineItem } from './timeline-types'
 
 interface AIChatTimelineProps {
   activeThreadTitle?: string | null
