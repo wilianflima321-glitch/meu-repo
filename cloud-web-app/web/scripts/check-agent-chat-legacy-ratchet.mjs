@@ -21,7 +21,7 @@ const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/activity/AIChatTimeline.tsx',
   'components/agents/chat/activity/LiveConversationPanel.tsx',
   'components/agents/chat/activity/RunCard.tsx',
-  'components/agents/chat/composer.ts',
+  'components/agents/chat/composer/index.ts',
   'components/agents/chat/composer/AIChatComposer.tsx',
   'components/agents/chat/composer/useAIChatComposerState.ts',
   'components/agents/chat/context/index.ts',

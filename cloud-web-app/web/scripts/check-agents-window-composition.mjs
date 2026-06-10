@@ -36,7 +36,7 @@ const requiredFiles = [
   'components/agents/AgentsWorkspaceContainer.tsx',
   'components/agents/evidence.ts',
   'components/agents/chat/index.ts',
-  'components/agents/chat/composer.ts',
+  'components/agents/chat/composer/index.ts',
   'components/agents/chat/panels.ts',
   'components/agents/chat/presets.ts',
   'components/agents/chat/session-types.ts',
@@ -67,7 +67,7 @@ requirePattern('components/agents/chat/index.ts', /presets/, 'agent chat index m
 requirePattern('components/agents/chat/index.ts', /session-types/, 'agent chat index must export session types')
 requirePattern('components/agents/chat/index.ts', /state/, 'agent chat index must export state grammar')
 requirePattern('components/agents/chat/index.ts', /utils/, 'agent chat index must export utility grammar')
-requirePattern('components/agents/chat/composer.ts', /AIChatComposer/, 'agent chat composer adapter must expose composer')
+requirePattern('components/agents/chat/composer/index.ts', /AIChatComposer/, 'agent chat composer adapter must expose composer')
 requirePattern('components/agents/chat/panels.ts', /AIChatMessagesPane/, 'agent chat panels adapter must expose message pane')
 requirePattern('components/agents/chat/presets.ts', /MODE_PRESETS/, 'agent chat presets must expose mode presets')
 requirePattern('components/agents/chat/session-types.ts', /ProviderGateState/, 'agent chat session types must expose provider gate state')
