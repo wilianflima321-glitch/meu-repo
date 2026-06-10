@@ -7,8 +7,11 @@
 
 import { createComponentLogger } from '@/lib/observability/logger';
 import { EventEmitter } from 'events';
-import { DEFAULT_PROFILES, STANDARD_AXIS_MAP, STANDARD_BUTTON_MAP } from './profiles';
-import type { AxisMapping, ButtonMapping, ButtonState, ConnectedController, ControllerMapperConfig, ControllerProfile, ControllerState, GameAction, GamepadAxis, GamepadButton } from './types';
+import { DEFAULT_PROFILES } from './profiles';
+import { processMappedAxisValue, updateControllerStateFromGamepad } from './polling';
+import { readCustomControllerProfiles, writeCustomControllerProfiles } from './profile-storage';
+import { DEFAULT_CONTROLLER_MAPPER_CONFIG, createConnectedController, detectBestControllerProfile } from './state';
+import type { ButtonState, ConnectedController, ControllerMapperConfig, ControllerProfile, GameAction, GamepadAxis, GamepadButton } from './types';
 
 const log = createComponentLogger('input/controller-mapper');
 
@@ -26,15 +29,7 @@ export class ControllerMapper extends EventEmitter {
     super();
     
     this.config = {
-      pollInterval: 16, // ~60fps
-      defaultDeadzone: 0.15,
-      defaultSensitivity: 1.0,
-      doubleTapWindow: 300,
-      holdDuration: 500,
-      triggerThreshold: 0.5,
-      autoConnectProfile: true,
-      maxControllers: 4,
-      enableDebug: false,
+      ...DEFAULT_CONTROLLER_MAPPER_CONFIG,
       ...config,
     };
     
@@ -60,10 +55,6 @@ export class ControllerMapper extends EventEmitter {
     return ControllerMapper.instance;
   }
   
-  // ============================================================================
-  // GAMEPAD EVENTS
-  // ============================================================================
-  
   private handleGamepadConnected(e: GamepadEvent): void {
     const gamepad = e.gamepad;
     
@@ -72,12 +63,12 @@ export class ControllerMapper extends EventEmitter {
       return;
     }
     
-    const controller = this.createController(gamepad);
+    const controller = createConnectedController(gamepad);
     this.controllers.set(controller.id, controller);
     
     // Auto-assign profile
     if (this.config.autoConnectProfile) {
-      const profile = this.detectBestProfile(controller);
+      const profile = detectBestControllerProfile(controller, this.profiles);
       if (profile) {
         this.assignProfile(controller.id, profile.id);
       }
@@ -108,78 +99,6 @@ export class ControllerMapper extends EventEmitter {
       this.stop();
     }
   }
-  
-  private createController(gamepad: Gamepad): ConnectedController {
-    // Parse vendor/product from id
-    const idMatch = gamepad.id.match(/Vendor:\s*([0-9a-f]+)\s*Product:\s*([0-9a-f]+)/i);
-    const vendor = idMatch?.[1] || 'unknown';
-    const product = idMatch?.[2] || 'unknown';
-    
-    // Check for haptic support
-    const hasHaptics = 'vibrationActuator' in gamepad || 
-      (gamepad as any).hapticActuators?.length > 0;
-    
-    return {
-      id: `controller_${gamepad.index}_${Date.now()}`,
-      index: gamepad.index,
-      name: gamepad.id,
-      vendor,
-      product,
-      connected: gamepad.connected,
-      mapping: gamepad.mapping,
-      axes: gamepad.axes.length,
-      buttons: gamepad.buttons.length,
-      hapticActuators: hasHaptics,
-      profile: null,
-      state: this.createInitialState(),
-    };
-  }
-  
-  private createInitialState(): ControllerState {
-    const buttons = new Map<GamepadButton, ButtonState>();
-    const axes = new Map<GamepadAxis, number>();
-    
-    for (const button of Object.values(STANDARD_BUTTON_MAP)) {
-      buttons.set(button, {
-        pressed: false,
-        value: 0,
-        pressedAt: 0,
-        lastPressedAt: 0,
-        tapCount: 0,
-      });
-    }
-    
-    for (const axis of Object.values(STANDARD_AXIS_MAP)) {
-      axes.set(axis, 0);
-    }
-    
-    // Triggers as axes
-    axes.set('LT', 0);
-    axes.set('RT', 0);
-    
-    return { buttons, axes, timestamp: 0 };
-  }
-  
-  private detectBestProfile(controller: ConnectedController): ControllerProfile | null {
-    // Simple detection based on controller name
-    const name = controller.name.toLowerCase();
-    
-    if (name.includes('xbox') || name.includes('xinput')) {
-      return this.profiles.get('default-fps') || null;
-    }
-    if (name.includes('playstation') || name.includes('dualshock') || name.includes('dualsense')) {
-      return this.profiles.get('default-fps') || null;
-    }
-    if (name.includes('switch') || name.includes('pro controller')) {
-      return this.profiles.get('default-fps') || null;
-    }
-    
-    return this.profiles.get('default-fps') || null;
-  }
-  
-  // ============================================================================
-  // POLLING
-  // ============================================================================
   
   start(): void {
     if (this.running) return;
@@ -215,98 +134,13 @@ export class ControllerMapper extends EventEmitter {
   
   private updateControllerState(controller: ConnectedController, gamepad: Gamepad): void {
     const profile = controller.profile ? this.profiles.get(controller.profile) ?? null : null;
-    const now = performance.now();
-    
-    // Update buttons
-    for (let i = 0; i < gamepad.buttons.length; i++) {
-      const button = STANDARD_BUTTON_MAP[i];
-      if (!button) continue;
-      
-      const gpButton = gamepad.buttons[i];
-      const state = controller.state.buttons.get(button)!;
-      const wasPressed = state.pressed;
-      
-      // Update state
-      state.value = gpButton.value;
-      state.touched = gpButton.touched ?? false;
-      
-      // Press event
-      if (gpButton.pressed && !wasPressed) {
-        state.pressed = true;
-        state.lastPressedAt = state.pressedAt;
-        state.pressedAt = now;
-        
-        // Double tap detection
-        if (now - state.lastPressedAt < this.config.doubleTapWindow) {
-          state.tapCount++;
-        } else {
-          state.tapCount = 1;
-        }
-        
-        this.handleButtonPress(controller, button, state, profile);
-      }
-      
-      // Release event
-      if (!gpButton.pressed && wasPressed) {
-        state.pressed = false;
-        this.handleButtonRelease(controller, button, state, profile);
-      }
-      
-      // Hold event
-      if (gpButton.pressed && wasPressed) {
-        const holdDuration = now - state.pressedAt;
-        if (holdDuration >= this.config.holdDuration) {
-          this.handleButtonHold(controller, button, state, profile, holdDuration);
-        }
-      }
-    }
-    
-    // Update axes
-    for (let i = 0; i < gamepad.axes.length; i++) {
-      const axis = STANDARD_AXIS_MAP[i];
-      if (!axis) continue;
-      
-      let value = gamepad.axes[i];
-      
-      // Apply deadzone
-      const deadzone = profile?.globalDeadzone ?? this.config.defaultDeadzone;
-      if (Math.abs(value) < deadzone) {
-        value = 0;
-      } else {
-        // Rescale to 0-1 range after deadzone
-        value = Math.sign(value) * ((Math.abs(value) - deadzone) / (1 - deadzone));
-      }
-      
-      controller.state.axes.set(axis, value);
-      
-      if (value !== 0) {
-        this.handleAxisMove(controller, axis, value, profile);
-      }
-    }
-    
-    // Triggers as axes (for profiles that need analog triggers)
-    const ltButton = gamepad.buttons[6];
-    const rtButton = gamepad.buttons[7];
-    
-    if (ltButton) {
-      controller.state.axes.set('LT', ltButton.value);
-      if (ltButton.value > 0) {
-        this.handleAxisMove(controller, 'LT', ltButton.value, profile);
-      }
-    }
-    if (rtButton) {
-      controller.state.axes.set('RT', rtButton.value);
-      if (rtButton.value > 0) {
-        this.handleAxisMove(controller, 'RT', rtButton.value, profile);
-      }
-    }
-    
-    controller.state.timestamp = now;
+    updateControllerStateFromGamepad(controller, gamepad, profile, this.config, {
+      buttonPress: this.handleButtonPress.bind(this),
+      buttonRelease: this.handleButtonRelease.bind(this),
+      buttonHold: this.handleButtonHold.bind(this),
+      axisMove: this.handleAxisMove.bind(this),
+    });
   }
-  
-  // ============================================================================
-  // INPUT HANDLING
-  // ============================================================================
   
   private handleButtonPress(
     controller: ConnectedController,
@@ -382,44 +216,17 @@ export class ControllerMapper extends EventEmitter {
       const sensitivity = mapping.sensitivity ?? profile?.globalSensitivity ?? 1.0;
       processedValue *= sensitivity;
       
-      // Apply curve
-      processedValue = this.applyCurve(processedValue, mapping.curve, mapping.customCurve);
-      
+      processedValue = processMappedAxisValue(processedValue, profile, mapping);
       this.triggerAction(mapping.action, processedValue, controller.id);
     }
     
     this.emit('axisMove', { controller: controller.id, axis, value });
   }
   
-  private applyCurve(
-    value: number, 
-    curve?: string, 
-    customCurve?: (v: number) => number
-  ): number {
-    const sign = Math.sign(value);
-    const abs = Math.abs(value);
-    
-    switch (curve) {
-      case 'exponential':
-        return sign * (abs * abs);
-      case 'cubic':
-        return sign * (abs * abs * abs);
-      case 'custom':
-        return customCurve ? customCurve(value) : value;
-      case 'linear':
-      default:
-        return value;
-    }
-  }
-  
-  private triggerAction(action: GameAction, value: number, controllerId: string): void {
+private triggerAction(action: GameAction, value: number, controllerId: string): void {
     this.activeActions.set(action, value);
     this.emit('action', { action, value, controller: controllerId });
   }
-  
-  // ============================================================================
-  // PROFILE MANAGEMENT
-  // ============================================================================
   
   createProfile(profile: Omit<ControllerProfile, 'id' | 'created' | 'modified'>): ControllerProfile {
     const now = Date.now();
@@ -507,33 +314,14 @@ export class ControllerMapper extends EventEmitter {
   }
   
   private saveProfiles(): void {
-    if (typeof localStorage === 'undefined') return;
-    
-    const customProfiles = Array.from(this.profiles.values())
-      .filter(p => !p.id.startsWith('default-'));
-    
-    localStorage.setItem('aethel_controller_profiles', JSON.stringify(customProfiles));
+    writeCustomControllerProfiles(this.profiles.values());
   }
   
   private loadProfiles(): void {
-    if (typeof localStorage === 'undefined') return;
-    
-    try {
-      const saved = localStorage.getItem('aethel_controller_profiles');
-      if (saved) {
-        const profiles: ControllerProfile[] = JSON.parse(saved);
-        for (const profile of profiles) {
-          this.profiles.set(profile.id, profile);
-        }
-      }
-    } catch (e) {
-      this.log('Failed to load profiles');
+    for (const profile of readCustomControllerProfiles()) {
+      this.profiles.set(profile.id, profile);
     }
   }
-  
-  // ============================================================================
-  // BUTTON REMAPPING
-  // ============================================================================
   
   async remapButton(
     profileId: string, 
@@ -572,10 +360,6 @@ export class ControllerMapper extends EventEmitter {
     });
   }
   
-  // ============================================================================
-  // VIBRATION
-  // ============================================================================
-  
   vibrate(
     controllerId: string | 'all',
     duration: number,
@@ -611,10 +395,6 @@ export class ControllerMapper extends EventEmitter {
       }
     }
   }
-  
-  // ============================================================================
-  // GETTERS
-  // ============================================================================
   
   getController(id: string): ConnectedController | undefined {
     return this.controllers.get(id);
@@ -652,10 +432,6 @@ export class ControllerMapper extends EventEmitter {
     return this.running;
   }
   
-  // ============================================================================
-  // UTILITIES
-  // ============================================================================
-  
   private log(message: string): void {
     if (this.config.enableDebug) {
       log.info(`[ControllerMapper] ${message}`);
@@ -670,10 +446,6 @@ export class ControllerMapper extends EventEmitter {
   getConfig(): ControllerMapperConfig {
     return { ...this.config };
   }
-  
-  // ============================================================================
-  // CLEANUP
-  // ============================================================================
   
   dispose(): void {
     this.stop();
@@ -690,7 +462,3 @@ export class ControllerMapper extends EventEmitter {
     ControllerMapper.instance = null;
   }
 }
-
-// ============================================================================
-// REACT HOOKS
-// ============================================================================
