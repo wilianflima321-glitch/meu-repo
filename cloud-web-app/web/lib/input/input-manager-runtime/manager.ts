@@ -1,14 +1,11 @@
-/**
- * Input Manager - split runtime modules.
- *
- * Keyboard, mouse, touch, and gamepad runtime is isolated from public shells so
- * game/editor surfaces can load it only when interactive controls are needed.
- */
-
 import { EventEmitter } from 'events';
-import { GAMEPAD_AXIS_MAP, GAMEPAD_BUTTON_MAP, MOUSE_BUTTON_MAP } from './constants';
+import { MOUSE_BUTTON_MAP } from './constants';
+import { getBindingValue as getRuntimeBindingValue, updateAxisValue } from './axis';
+import { cleanInputBuffer, createInputBufferEntry, inputBufferHasCombo } from './buffer';
 import { registerDefaultInputMappings } from './default-mappings';
 import { bindInputRuntimeEvents } from './event-bindings';
+import { connectGamepad, disconnectGamepad, updateGamepadSnapshots } from './gamepad';
+import { detectTouchGestures } from './gestures';
 import { createInputSnapshot, hydrateInputMappings, serializeInputMappings } from './state';
 import type { GamepadAxis, GamepadButton, Gesture, InputAction, InputAxis, InputBinding, InputBuffer, InputDeviceType, InputState, KeyCode, MouseButton, Touch } from './types';
 
@@ -50,10 +47,6 @@ export class InputManager extends EventEmitter {
     super();
     this.setupDefaultMappings();
   }
-
-  // ============================================================================
-  // INITIALIZATION
-  // ============================================================================
 
   initialize(element: HTMLElement | Window = window): void {
     this.detachRuntimeEvents?.();
@@ -98,10 +91,6 @@ export class InputManager extends EventEmitter {
     this.animationFrameId = requestAnimationFrame(update);
   }
 
-  // ============================================================================
-  // KEYBOARD HANDLERS
-  // ============================================================================
-
   private handleKeyDown(e: KeyboardEvent): void {
     if (!this.enabled) return;
 
@@ -133,10 +122,6 @@ export class InputManager extends EventEmitter {
       meta: e.metaKey,
     };
   }
-
-  // ============================================================================
-  // MOUSE HANDLERS
-  // ============================================================================
 
   private handleMouseDown(e: MouseEvent): void {
     if (!this.enabled) return;
@@ -191,10 +176,6 @@ export class InputManager extends EventEmitter {
       e.preventDefault();
     }
   }
-
-  // ============================================================================
-  // TOUCH HANDLERS
-  // ============================================================================
 
   private handleTouchStart(e: TouchEvent): void {
     if (!this.enabled) return;
@@ -255,124 +236,28 @@ export class InputManager extends EventEmitter {
   }
 
   private detectGestures(): void {
-    const activeTouches = Array.from(this.touches.values());
-
-    // Detect pinch/zoom
-    if (activeTouches.length === 2) {
-      const t1 = activeTouches[0];
-      const t2 = activeTouches[1];
-
-      const currentDist = Math.hypot(
-        t1.position.x - t2.position.x,
-        t1.position.y - t2.position.y
-      );
-
-      const startDist = Math.hypot(
-        t1.startPosition.x - t2.startPosition.x,
-        t1.startPosition.y - t2.startPosition.y
-      );
-
-      if (startDist > 0) {
-        const scale = currentDist / startDist;
-        if (Math.abs(scale - 1) > 0.1) {
-          this.gestures.push({
-            type: 'pinch',
-            scale,
-            position: {
-              x: (t1.position.x + t2.position.x) / 2,
-              y: (t1.position.y + t2.position.y) / 2,
-            },
-          });
-        }
-      }
-    }
+    this.gestures.push(...detectTouchGestures(this.touches.values()));
   }
-
-  // ============================================================================
-  // GAMEPAD HANDLERS
-  // ============================================================================
 
   private handleGamepadConnected(e: GamepadEvent): void {
     const gamepad = e.gamepad;
-    this.gamepads.set(gamepad.index, gamepad);
-    this.gamepadButtonState.set(gamepad.index, new Map());
-    this.gamepadAxisState.set(gamepad.index, new Map());
-
+    connectGamepad(gamepad, this.getGamepadRuntimeState());
     this.emit('gamepadConnected', { index: gamepad.index, id: gamepad.id });
   }
 
   private handleGamepadDisconnected(e: GamepadEvent): void {
     const gamepad = e.gamepad;
-    this.gamepads.delete(gamepad.index);
-    this.gamepadButtonState.delete(gamepad.index);
-    this.gamepadAxisState.delete(gamepad.index);
-
+    disconnectGamepad(gamepad, this.getGamepadRuntimeState());
     this.emit('gamepadDisconnected', { index: gamepad.index, id: gamepad.id });
   }
 
   private updateGamepads(): void {
-    const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-
-    for (const gamepad of gamepads) {
-      if (!gamepad) continue;
-
-      this.gamepads.set(gamepad.index, gamepad);
-
-      // Update buttons
-      let buttonState = this.gamepadButtonState.get(gamepad.index);
-      if (!buttonState) {
-        buttonState = new Map();
-        this.gamepadButtonState.set(gamepad.index, buttonState);
-      }
-
-      for (let i = 0; i < gamepad.buttons.length; i++) {
-        const button = GAMEPAD_BUTTON_MAP[i];
-        if (!button) continue;
-
-        const pressed = gamepad.buttons[i].pressed;
-        const wasPressed = buttonState.get(button);
-
-        if (pressed !== wasPressed) {
-          buttonState.set(button, pressed);
-
-          if (pressed) {
-            this.addToBuffer(`gamepad_${button}`, 'gamepad');
-            this.emit('gamepadButtonDown', { gamepadIndex: gamepad.index, button });
-          } else {
-            this.emit('gamepadButtonUp', { gamepadIndex: gamepad.index, button });
-          }
-
-          this.checkActionTriggers('gamepad', button, pressed);
-        }
-      }
-
-      // Update axes
-      let axisState = this.gamepadAxisState.get(gamepad.index);
-      if (!axisState) {
-        axisState = new Map();
-        this.gamepadAxisState.set(gamepad.index, axisState);
-      }
-
-      for (let i = 0; i < gamepad.axes.length; i++) {
-        const axis = GAMEPAD_AXIS_MAP[i];
-        if (!axis) continue;
-
-        axisState.set(axis, gamepad.axes[i]);
-      }
-
-      // Triggers as axes
-      if (gamepad.buttons[6]) {
-        axisState.set('lt', gamepad.buttons[6].value);
-      }
-      if (gamepad.buttons[7]) {
-        axisState.set('rt', gamepad.buttons[7].value);
-      }
-    }
+    updateGamepadSnapshots(navigator.getGamepads ? navigator.getGamepads() : [], this.getGamepadRuntimeState(), {
+      emit: (eventName, payload) => this.emit(eventName, payload),
+      addToBuffer: (input, device) => this.addToBuffer(input, device),
+      checkActionTriggers: (device, input, pressed) => this.checkActionTriggers(device, input, pressed),
+    });
   }
-
-  // ============================================================================
-  // ACTION SYSTEM
-  // ============================================================================
 
   registerAction(action: InputAction): void {
     this.actions.set(action.name, action);
@@ -452,90 +337,27 @@ export class InputManager extends EventEmitter {
 
   private updateAxes(deltaTime: number): void {
     for (const [name, axis] of this.axes) {
-      let targetValue = 0;
-      const gravity = axis.gravity ?? 3;
-      const sensitivity = axis.sensitivity ?? 3;
-
-      // Check positive bindings
-      for (const binding of axis.positiveBindings) {
-        const value = this.getBindingValue(binding);
-        targetValue += value * (binding.scale ?? 1);
-      }
-
-      // Check negative bindings
-      for (const binding of axis.negativeBindings) {
-        const value = this.getBindingValue(binding);
-        targetValue -= value * (binding.scale ?? 1);
-      }
-
-      // Apply deadzone
-      const deadzone = axis.deadzone ?? 0.1;
-      if (Math.abs(targetValue) < deadzone) {
-        targetValue = 0;
-      }
-
-      // Get current value
-      let currentValue = this.axisValues.get(name) ?? 0;
-
-      // Apply snap (when direction changes, reset to 0)
-      if (axis.snap && targetValue !== 0 && Math.sign(targetValue) !== Math.sign(currentValue)) {
-        currentValue = 0;
-      }
-
-      // Smoothly interpolate
-      if (targetValue !== 0) {
-        // Move towards target
-        const diff = targetValue - currentValue;
-        currentValue += diff * sensitivity * deltaTime;
-        currentValue = Math.max(-1, Math.min(1, currentValue));
-      } else {
-        // Apply gravity (return to 0)
-        if (currentValue > 0) {
-          currentValue = Math.max(0, currentValue - gravity * deltaTime);
-        } else if (currentValue < 0) {
-          currentValue = Math.min(0, currentValue + gravity * deltaTime);
-        }
-      }
-
-      this.axisValues.set(name, currentValue);
+      this.axisValues.set(name, updateAxisValue({
+        axis,
+        currentValue: this.axisValues.get(name) ?? 0,
+        deltaTime,
+        getValue: (binding) => this.getBindingValue(binding),
+      }));
     }
   }
 
   private getBindingValue(binding: InputBinding): number {
-    switch (binding.device) {
-      case 'keyboard':
-        return this.keyState.get(binding.key!) ? 1 : 0;
-
-      case 'mouse':
-        return this.mouseButtonState.get(binding.button as MouseButton) ? 1 : 0;
-
-      case 'gamepad':
-        if (binding.axis) {
-          // Get first connected gamepad
-          const axisState = this.gamepadAxisState.values().next().value;
-          if (axisState) {
-            let value = axisState.get(binding.axis) ?? 0;
-            const deadzone = binding.deadzone ?? 0.1;
-            if (Math.abs(value) < deadzone) value = 0;
-            return value;
-          }
-        }
-        if (binding.button) {
-          const buttonState = this.gamepadButtonState.values().next().value;
-          if (buttonState) {
-            return buttonState.get(binding.button as GamepadButton) ? 1 : 0;
-          }
-        }
-        return 0;
-
-      default:
-        return 0;
-    }
+    return getRuntimeBindingValue(binding, {
+      keyState: this.keyState,
+      mouseButtonState: this.mouseButtonState,
+      gamepadButtonState: this.gamepadButtonState,
+      gamepadAxisState: this.gamepadAxisState,
+    });
   }
 
-  // ============================================================================
-  // INPUT QUERIES
-  // ============================================================================
+  private getGamepadRuntimeState() {
+    return { gamepads: this.gamepads, gamepadButtonState: this.gamepadButtonState, gamepadAxisState: this.gamepadAxisState };
+  }
 
   isKeyPressed(key: KeyCode): boolean {
     return this.keyState.get(key) ?? false;
@@ -592,42 +414,17 @@ export class InputManager extends EventEmitter {
     return [...this.gestures];
   }
 
-  // ============================================================================
-  // INPUT BUFFER (for combos)
-  // ============================================================================
-
   private addToBuffer(input: string, device: InputDeviceType): void {
-    this.inputBuffer.push({
-      action: input,
-      timestamp: performance.now(),
-      device,
-    });
+    this.inputBuffer.push(createInputBufferEntry(input, device));
   }
 
   private cleanInputBuffer(): void {
-    const now = performance.now();
-    this.inputBuffer = this.inputBuffer.filter(
-      (item) => now - item.timestamp < this.bufferDuration
-    );
+    this.inputBuffer = cleanInputBuffer(this.inputBuffer, this.bufferDuration);
   }
 
   checkCombo(sequence: string[]): boolean {
-    if (sequence.length > this.inputBuffer.length) return false;
-
-    const recentInputs = this.inputBuffer.slice(-sequence.length);
-
-    for (let i = 0; i < sequence.length; i++) {
-      if (recentInputs[i].action !== sequence[i]) {
-        return false;
-      }
-    }
-
-    return true;
+    return inputBufferHasCombo(this.inputBuffer, sequence);
   }
-
-  // ============================================================================
-  // CONFIGURATION
-  // ============================================================================
 
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
@@ -650,17 +447,9 @@ export class InputManager extends EventEmitter {
     this.bufferDuration = ms;
   }
 
-  // ============================================================================
-  // DEFAULT MAPPINGS
-  // ============================================================================
-
   private setupDefaultMappings(): void {
     registerDefaultInputMappings(this);
   }
-
-  // ============================================================================
-  // SERIALIZATION
-  // ============================================================================
 
   exportMappings(): { actions: InputAction[]; axes: InputAxis[] } {
     return serializeInputMappings(this.actions, this.axes);
@@ -675,10 +464,6 @@ export class InputManager extends EventEmitter {
     this.emit('mappingsImported', { data });
   }
 
-  // ============================================================================
-  // STATE
-  // ============================================================================
-
   getState(): InputState {
     return createInputSnapshot(this.actions, this.axisValues, {
       isActionPressed: (actionName) => this.isActionPressed(actionName),
@@ -688,10 +473,6 @@ export class InputManager extends EventEmitter {
       getTouches: () => this.getTouches(),
     });
   }
-
-  // ============================================================================
-  // CLEANUP
-  // ============================================================================
 
   dispose(): void {
     if (this.animationFrameId !== null) {
@@ -714,7 +495,3 @@ export class InputManager extends EventEmitter {
     this.emit('disposed');
   }
 }
-
-// ============================================================================
-// REACT HOOKS
-// ============================================================================
