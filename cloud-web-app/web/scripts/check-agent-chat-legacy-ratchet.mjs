@@ -6,8 +6,8 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const AI_CHAT_DIR = path.join(ROOT, 'components', 'ai-chat')
 const failures = []
-const MAX_AI_CHAT_FILES = 11
-const MAX_AI_CHAT_LINES = 1950
+const MAX_AI_CHAT_FILES = 5
+const MAX_AI_CHAT_LINES = 1350
 const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/AgentEvidenceCard.tsx',
   'components/agents/AgentEvidencePanel.tsx',
@@ -25,6 +25,13 @@ const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/context/index.ts',
   'components/agents/chat/context/useAIChatContextActions.ts',
   'components/agents/chat/context/useChatContextPreviews.ts',
+  'components/agents/chat/header/index.ts',
+  'components/agents/chat/header/AIChatAgentLane.tsx',
+  'components/agents/chat/header/AIChatHeader.tsx',
+  'components/agents/chat/header/AIChatHeader.types.ts',
+  'components/agents/chat/header/AIChatHeaderActions.tsx',
+  'components/agents/chat/header/AIChatModeMenu.tsx',
+  'components/agents/chat/header/AIChatModelPicker.tsx',
   'components/agents/chat/economics/index.ts',
   'components/agents/chat/economics/AIChatEconomicsPanel.tsx',
   'components/agents/chat/ledger/index.ts',
@@ -206,6 +213,12 @@ for (const file of ['useAIChatContextActions.ts', 'useChatContextPreviews.ts']) 
   }
 }
 
+for (const file of ['AIChatAgentLane.tsx', 'AIChatHeader.tsx', 'AIChatHeader.types.ts', 'AIChatHeaderActions.tsx', 'AIChatModeMenu.tsx', 'AIChatModelPicker.tsx']) {
+  if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
+    failures.push(`components/ai-chat/${file}: chat chrome must stay absorbed into components/agents/chat/header`)
+  }
+}
+
 for (const file of ['AgentBoard.tsx', 'AIChatActivityDeck.tsx', 'AIChatTimeline.tsx', 'LiveConversationPanel.tsx', 'RunCard.tsx']) {
   if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
     failures.push(`components/ai-chat/${file}: agent activity UI must stay absorbed into components/agents/chat/activity`)
@@ -220,7 +233,7 @@ if (legacyAlias !== "export * from './chat'") {
 }
 
 const agentChatIndex = read('components/agents/chat/index.ts')
-for (const token of ['activity', 'composer', 'context', 'economics', 'ledger', 'messages', 'panels', 'presets', 'review', 'rules', 'session', 'session-types', 'shell', 'state', 'telemetry', 'voice']) {
+for (const token of ['activity', 'composer', 'context', 'header', 'economics', 'ledger', 'messages', 'panels', 'presets', 'review', 'rules', 'session', 'session-types', 'shell', 'state', 'telemetry', 'voice']) {
   if (!agentChatIndex.includes(token)) {
     failures.push(`components/agents/chat/index.ts: missing ${token} export`)
   }

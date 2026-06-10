@@ -145,7 +145,7 @@ export const PRODUCT_UX_CHECKS = [
     id: 'ai-conversation-live-readiness',
     description:
       'AI Copilot must expose a compact conversation lane for native audio readiness, barge-in, transcript, and governed tool use.',
-    files: ['components/ai-chat/AIChatAgentLane.tsx'],
+    files: ['components/agents/chat/header/AIChatAgentLane.tsx'],
     test: (content, { read } = {}) => {
       const required = [
         'Agent lane',
@@ -178,10 +178,10 @@ export const PRODUCT_UX_CHECKS = [
     description:
       'AI Copilot chrome must stay calm: no decorative gradients in the header/banner, composer details are progressive, and compact state markers remain explicit.',
     files: [
-      'components/ai-chat/AIChatHeader.tsx',
-      'components/ai-chat/AIChatModeMenu.tsx',
-      'components/ai-chat/AIChatHeaderActions.tsx',
-      'components/ai-chat/AIChatAgentLane.tsx',
+      'components/agents/chat/header/AIChatHeader.tsx',
+      'components/agents/chat/header/AIChatModeMenu.tsx',
+      'components/agents/chat/header/AIChatHeaderActions.tsx',
+      'components/agents/chat/header/AIChatAgentLane.tsx',
       'components/ai-chat/AIChatComposer.tsx',
       'components/agents/chat/session/AIChatSessionBanner.tsx',
     ],
@@ -226,11 +226,11 @@ export const PRODUCT_UX_CHECKS = [
       'IDE chat, live mode, history, tool calls, and context panels must not mix Portuguese fallback copy into the premium AI cockpit.',
     files: [
       'components/ai-chat/AIChatComposer.tsx',
-      'components/ai-chat/AIChatHeader.tsx',
-      'components/ai-chat/AIChatModeMenu.tsx',
-      'components/ai-chat/AIChatModelPicker.tsx',
-      'components/ai-chat/AIChatHeaderActions.tsx',
-      'components/ai-chat/AIChatAgentLane.tsx',
+      'components/agents/chat/header/AIChatHeader.tsx',
+      'components/agents/chat/header/AIChatModeMenu.tsx',
+      'components/agents/chat/header/AIChatModelPicker.tsx',
+      'components/agents/chat/header/AIChatHeaderActions.tsx',
+      'components/agents/chat/header/AIChatAgentLane.tsx',
       'components/agents/chat/messages/AIChatMessagesPane.tsx',
       'components/agents/chat/session/AIChatSessionBanner.tsx',
       'components/agents/chat/messages/MessageBubbleActionBar.tsx',

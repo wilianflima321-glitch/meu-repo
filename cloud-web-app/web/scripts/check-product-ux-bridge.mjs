@@ -67,7 +67,7 @@ const SURFACES = [
   },
   {
     id: 'ai-chat-header-refactor-candidate',
-    file: 'components/ai-chat/AIChatHeader.tsx',
+    file: 'components/agents/chat/header/AIChatHeader.tsx',
     expectations: ['AIChatHeader'],
     warningOnly: true,
     why: 'Copilot header should stay compact: mode, model, one primary action, overflow for the rest.',

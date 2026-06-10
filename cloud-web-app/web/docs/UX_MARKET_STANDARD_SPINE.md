@@ -441,7 +441,7 @@ AI Copilot must expose a compact conversation lane for native audio readiness, b
 
 | File | Count | Note |
 | --- | ---: | --- |
-| `components/ai-chat/AIChatAgentLane.tsx` | 0 | ok |
+| `components/agents/chat/header/AIChatAgentLane.tsx` | 0 | ok |
 
 ### ai-session-intent-compression
 
@@ -457,10 +457,10 @@ AI Copilot chrome must stay calm: no decorative gradients in the header/banner, 
 
 | File | Count | Note |
 | --- | ---: | --- |
-| `components/ai-chat/AIChatHeader.tsx` | 0 | included |
-| `components/ai-chat/AIChatModeMenu.tsx` | 0 | included |
-| `components/ai-chat/AIChatHeaderActions.tsx` | 0 | included |
-| `components/ai-chat/AIChatAgentLane.tsx` | 0 | included |
+| `components/agents/chat/header/AIChatHeader.tsx` | 0 | included |
+| `components/agents/chat/header/AIChatModeMenu.tsx` | 0 | included |
+| `components/agents/chat/header/AIChatHeaderActions.tsx` | 0 | included |
+| `components/agents/chat/header/AIChatAgentLane.tsx` | 0 | included |
 | `components/ai-chat/AIChatComposer.tsx` | 0 | included |
 | `components/agents/chat/session/AIChatSessionBanner.tsx` | 0 | included |
 | `[combined]` | 0 | ok |
@@ -485,11 +485,11 @@ IDE chat, live mode, history, tool calls, and context panels must not mix Portug
 | File | Count | Note |
 | --- | ---: | --- |
 | `components/ai-chat/AIChatComposer.tsx` | 0 | ok |
-| `components/ai-chat/AIChatHeader.tsx` | 0 | ok |
-| `components/ai-chat/AIChatModeMenu.tsx` | 0 | ok |
-| `components/ai-chat/AIChatModelPicker.tsx` | 0 | ok |
-| `components/ai-chat/AIChatHeaderActions.tsx` | 0 | ok |
-| `components/ai-chat/AIChatAgentLane.tsx` | 0 | ok |
+| `components/agents/chat/header/AIChatHeader.tsx` | 0 | ok |
+| `components/agents/chat/header/AIChatModeMenu.tsx` | 0 | ok |
+| `components/agents/chat/header/AIChatModelPicker.tsx` | 0 | ok |
+| `components/agents/chat/header/AIChatHeaderActions.tsx` | 0 | ok |
+| `components/agents/chat/header/AIChatAgentLane.tsx` | 0 | ok |
 | `components/agents/chat/messages/AIChatMessagesPane.tsx` | 0 | ok |
 | `components/agents/chat/session/AIChatSessionBanner.tsx` | 0 | ok |
 | `components/agents/chat/messages/MessageBubbleActionBar.tsx` | 0 | ok |

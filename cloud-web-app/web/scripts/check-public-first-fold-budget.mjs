@@ -66,9 +66,9 @@ const FIRST_FOLD_SURFACES = [
   'app/contact-sales/contact-sales-content.tsx',
   'app/contact-sales/contact-sales.parts.tsx',
   'app/(auth)/login/login-v2.tsx',
-  'components/ai-chat/AIChatHeader.tsx',
-  'components/ai-chat/AIChatHeaderActions.tsx',
-  'components/ai-chat/AIChatModeMenu.tsx',
+  'components/agents/chat/header/AIChatHeader.tsx',
+  'components/agents/chat/header/AIChatHeaderActions.tsx',
+  'components/agents/chat/header/AIChatModeMenu.tsx',
   'components/viewport/ViewportAICommandPanel.tsx',
   'components/viewport/ViewportTopToolbar.tsx',
   'components/viewport/SceneViewportInspector.tsx',
@@ -282,12 +282,12 @@ requirePattern(
   'viewport AI/playtest prompt examples must stay behind disclosure',
 )
 requirePattern(
-  'components/ai-chat/AIChatModeMenu.tsx',
+  'components/agents/chat/header/AIChatModeMenu.tsx',
   /data-ai-copilot-mode-menu="progressive"/,
   'copilot mode switcher must stay as one compact menu',
 )
 requirePattern(
-  'components/ai-chat/AIChatHeaderActions.tsx',
+  'components/agents/chat/header/AIChatHeaderActions.tsx',
   /data-ai-copilot-actions-menu="progressive"/,
   'copilot secondary actions must stay in an overflow menu',
 )
