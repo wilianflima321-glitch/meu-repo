@@ -58,7 +58,7 @@ const config: Config = {
     // Focused, high-signal scope: modules with real tests and production impact.
     // Expand this list as the test suite grows; do not dilute it with untested bulk.
     'components/agents/chat/AIChatCostMeter.tsx',
-    'components/ai-chat/AIChatEconomicsPanel.tsx',
+    'components/agents/chat/economics/AIChatEconomicsPanel.tsx',
     'components/agents/AgentEvidenceCard.tsx',
     'components/ai-chat/AIChatLedgerStrip.tsx',
     'components/ai-chat/AIChatPendingDiffTray.tsx',

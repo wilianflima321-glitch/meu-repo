@@ -2,7 +2,7 @@ import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { SWRConfig } from 'swr'
-import { AIChatEconomicsPanel } from '../../components/ai-chat/AIChatEconomicsPanel'
+import { AIChatEconomicsPanel } from '../../components/agents/chat/economics'
 
 const apiMocks = vi.hoisted(() => ({
   getStudioCostLive: vi.fn(),
@@ -25,7 +25,7 @@ describe('AIChatEconomicsPanel', () => {
     vi.clearAllMocks()
   })
 
-  it('renders wallet, run estimate, and economics guidance when live data is available', async () => {
+  it('renders wallet, run estimate, and cost guidance when live data is available', async () => {
     apiMocks.getStudioCostLive.mockResolvedValue({
       status: 'attention',
       projectId: 'proj-77',
@@ -63,31 +63,29 @@ describe('AIChatEconomicsPanel', () => {
         avgCostPerRequestUsd: 0.37,
         updatedAt: '2026-04-28T15:00:00.000Z',
       },
-      guidance: ['Budget em alerta: priorize review-first, menos agentes e menos web research antes da proxima wave.'],
+      guidance: ['Budget is under attention: use review-first execution, fewer agents, and less web research before the next wave.'],
     })
 
     renderPanel({ projectId: 'proj-77', currentRunEstimate: 0.42 })
 
     await waitFor(() => {
-      expect(screen.getByText(/Economics plane/i)).toBeInTheDocument()
+      expect(screen.getByText(/Cost guard/i)).toBeInTheDocument()
     })
 
     expect(screen.getByText('240')).toBeInTheDocument()
     expect(screen.getByText('$0.420')).toBeInTheDocument()
     expect(screen.getByText(/STRIPE_PORTAL_DISABLED/i)).toBeInTheDocument()
-    expect(screen.getByText(/Budget em alerta/i)).toBeInTheDocument()
+    expect(screen.getByText(/Budget is under attention/i)).toBeInTheDocument()
   })
 
-  it('renders an unavailable state when the economics plane request fails', async () => {
+  it('renders an unavailable state when the cost guard request fails', async () => {
     apiMocks.getStudioCostLive.mockRejectedValue(new Error('offline'))
 
     renderPanel({ projectId: 'proj-404' })
 
     await waitFor(() => {
-      expect(screen.getByText(/Economics plane indisponivel/i)).toBeInTheDocument()
+      expect(screen.getByText(/Cost guard unavailable/i)).toBeInTheDocument()
     })
-    expect(
-      screen.getByText(/Nao foi possivel carregar custo ao vivo, wallet e readiness de billing nesta superficie/i)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/Could not load live cost, wallet, and payment setup/i)).toBeInTheDocument()
   })
 })

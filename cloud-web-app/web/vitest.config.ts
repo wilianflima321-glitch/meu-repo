@@ -36,7 +36,7 @@ export default defineConfig({
       // Focused scope â€” expand as the test suite grows.
       include: [
         'components/agents/chat/AIChatCostMeter.tsx',
-        'components/ai-chat/AIChatEconomicsPanel.tsx',
+        'components/agents/chat/economics/AIChatEconomicsPanel.tsx',
         'components/agents/AgentEvidenceCard.tsx',
         'components/ai-chat/AIChatLedgerStrip.tsx',
         'components/ai-chat/AIChatPendingDiffTray.tsx',
