@@ -6,8 +6,8 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const AI_CHAT_DIR = path.join(ROOT, 'components', 'ai-chat')
 const failures = []
-const MAX_AI_CHAT_FILES = 19
-const MAX_AI_CHAT_LINES = 2825
+const MAX_AI_CHAT_FILES = 18
+const MAX_AI_CHAT_LINES = 2790
 const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/AgentEvidenceCard.tsx',
   'components/agents/AgentEvidencePanel.tsx',
@@ -51,6 +51,8 @@ const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/shell/AIChatHistoryModeRail.tsx',
   'components/agents/chat/state.ts',
   'components/agents/chat/telemetry/index.ts',
+  'components/agents/chat/voice/index.ts',
+  'components/agents/chat/voice/useAIChatSpeechPlayback.ts',
   'components/agents/chat/telemetry/AIChatBenchmarkTelemetry.tsx',
   'components/agents/chat/telemetry/AIChatQuickPromptStrip.tsx',
   'components/agents/chat/utils.ts',
@@ -178,6 +180,12 @@ for (const file of ['AIChatRulesPanel.tsx', 'useAIChatProjectRules.ts']) {
   }
 }
 
+for (const file of ['useAIChatSpeechPlayback.ts']) {
+  if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
+    failures.push(`components/ai-chat/${file}: speech playback must stay absorbed into components/agents/chat/voice`)
+  }
+}
+
 for (const file of ['AgentBoard.tsx', 'AIChatActivityDeck.tsx', 'AIChatTimeline.tsx', 'LiveConversationPanel.tsx', 'RunCard.tsx']) {
   if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
     failures.push(`components/ai-chat/${file}: agent activity UI must stay absorbed into components/agents/chat/activity`)
@@ -192,7 +200,7 @@ if (legacyAlias !== "export * from './chat'") {
 }
 
 const agentChatIndex = read('components/agents/chat/index.ts')
-for (const token of ['activity', 'composer', 'economics', 'ledger', 'messages', 'panels', 'presets', 'review', 'rules', 'session', 'session-types', 'shell', 'state', 'telemetry']) {
+for (const token of ['activity', 'composer', 'economics', 'ledger', 'messages', 'panels', 'presets', 'review', 'rules', 'session', 'session-types', 'shell', 'state', 'telemetry', 'voice']) {
   if (!agentChatIndex.includes(token)) {
     failures.push(`components/agents/chat/index.ts: missing ${token} export`)
   }

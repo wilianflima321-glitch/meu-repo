@@ -16,7 +16,7 @@ export function useAIChatSpeechPlayback({ messages }: UseAIChatSpeechPlaybackPar
 
     window.speechSynthesis.cancel()
     speechSynthRef.current = new SpeechSynthesisUtterance(text)
-    speechSynthRef.current.lang = 'pt-BR'
+    speechSynthRef.current.lang = document.documentElement.lang || navigator.language || 'en-US'
     speechSynthRef.current.onend = () => setIsSpeaking(false)
     speechSynthRef.current.onerror = () => setIsSpeaking(false)
     window.speechSynthesis.speak(speechSynthRef.current)
