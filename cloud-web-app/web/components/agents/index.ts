@@ -1,6 +1,7 @@
 export { default as AgentsWindow } from './AgentsWindow'
 export { default as AgentsWorkspaceContainer } from './AgentsWorkspaceContainer'
 export { AgentEvidenceCard } from './AgentEvidenceCard'
+export { AgentEvidencePanel } from './AgentEvidencePanel'
 export {
   buildResearchArtifactFromPayload,
   buildTraceArtifact,

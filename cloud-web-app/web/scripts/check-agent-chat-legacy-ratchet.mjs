@@ -6,10 +6,11 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const AI_CHAT_DIR = path.join(ROOT, 'components', 'ai-chat')
 const failures = []
-const MAX_AI_CHAT_FILES = 37
-const MAX_AI_CHAT_LINES = 4325
+const MAX_AI_CHAT_FILES = 36
+const MAX_AI_CHAT_LINES = 4290
 const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/AgentEvidenceCard.tsx',
+  'components/agents/AgentEvidencePanel.tsx',
   'components/agents/evidence-artifacts.ts',
   'components/agents/chat/index.ts',
   'components/agents/chat/AIChatCostMeter.tsx',
@@ -97,6 +98,10 @@ if (fs.existsSync(path.join(AI_CHAT_DIR, 'ai-chat-evidence.ts'))) {
 
 if (fs.existsSync(path.join(AI_CHAT_DIR, 'AIChatEvidenceCard.tsx'))) {
   failures.push('components/ai-chat/AIChatEvidenceCard.tsx: evidence card must stay absorbed into components/agents/AgentEvidenceCard.tsx')
+}
+
+if (fs.existsSync(path.join(AI_CHAT_DIR, 'AIChatEvidencePanel.tsx'))) {
+  failures.push('components/ai-chat/AIChatEvidencePanel.tsx: evidence panel must stay absorbed into components/agents/AgentEvidencePanel.tsx')
 }
 
 if (fs.existsSync(path.join(AI_CHAT_DIR, 'AIChatEconomicsPanel.tsx'))) {

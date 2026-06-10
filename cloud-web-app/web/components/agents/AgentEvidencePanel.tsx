@@ -2,11 +2,11 @@ import { SearchCheck } from 'lucide-react'
 import { AgentEvidenceCard } from '@/components/agents/AgentEvidenceCard'
 import type { AIChatEvidenceArtifact } from '@/components/agents/evidence'
 
-interface AIChatEvidencePanelProps {
+interface AgentEvidencePanelProps {
   latestArtifact?: AIChatEvidenceArtifact | null
 }
 
-export function AIChatEvidencePanel({ latestArtifact }: AIChatEvidencePanelProps) {
+export function AgentEvidencePanel({ latestArtifact }: AgentEvidencePanelProps) {
   if (!latestArtifact) {
     return (
       <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 p-4 text-center text-[11px] text-[var(--aethel-text-tertiary)]">

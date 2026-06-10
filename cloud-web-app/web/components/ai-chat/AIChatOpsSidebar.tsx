@@ -6,7 +6,7 @@ import { ApprovalCard } from '@/components/ide/ApprovalCard'
 import { MemoryPanel } from '@/components/ide/MemoryPanel'
 import { TaskOpsPanel } from '@/components/ide/TaskOpsPanel'
 import { AIChatEconomicsPanel } from '@/components/agents/chat/economics'
-import { AIChatEvidencePanel } from './AIChatEvidencePanel'
+import { AgentEvidencePanel } from '@/components/agents/AgentEvidencePanel'
 import { AIChatRulesPanel } from './AIChatRulesPanel'
 import type { AIChatEvidenceArtifact } from '@/components/agents/evidence'
 import { OPS_TABS, type AIChatOpsTab } from '@/components/agents/chat/presets'
@@ -126,7 +126,7 @@ export function AIChatOpsSidebar({
 
         {opsTab === 'rules' && <AIChatRulesPanel projectId={projectId} />}
 
-        {opsTab === 'evidence' && <AIChatEvidencePanel latestArtifact={latestEvidence} />}
+        {opsTab === 'evidence' && <AgentEvidencePanel latestArtifact={latestEvidence} />}
 
         {opsTab === 'economics' && (
           <AIChatEconomicsPanel
