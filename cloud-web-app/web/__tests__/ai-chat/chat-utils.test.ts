@@ -1,22 +1,20 @@
 /**
- * Tests for ai-chat/chat-utils.
+ * Tests for the canonical agent chat utilities.
  *
  * Covers:
- *  - formatTime() renders a 2-digit 24h pt-BR time.
- *  - formatCost() tiers: >=10 → $X, >=1 → $X.XX, else → $X.XXXX.
+ *  - formatTime() renders a 2-digit 24h time.
+ *  - formatCost() tiers: >=10 -> $X, >=1 -> $X.XX, else -> $X.XXXX.
  *  - formatCost() returns null for NaN.
  */
 
 import { describe, it, expect } from 'vitest';
-import { formatTime, formatCost } from '../../components/ai-chat/chat-utils';
+import { formatTime, formatCost } from '../../components/agents/chat/utils';
 
-describe('chat-utils', () => {
+describe('agent chat utils', () => {
   describe('formatTime', () => {
     it('renders hours and minutes in HH:MM (24h)', () => {
-      // 09:05 local
       const d = new Date();
       d.setHours(9, 5, 0, 0);
-      // pt-BR uses 24h and a leading zero for minutes.
       expect(formatTime(d)).toMatch(/^\d{2}:\d{2}$/);
     });
 

@@ -1,7 +1,7 @@
 /**
  * Jest Configuration - Aethel Engine Web App
  * 
- * Configuração otimizada para Next.js com cobertura de código.
+ * ConfiguraÃ§Ã£o otimizada para Next.js com cobertura de cÃ³digo.
  */
 
 import type { Config } from 'jest';
@@ -47,7 +47,7 @@ const config: Config = {
     '/node_modules/(?!(three|@react-three|postprocessing)/)',
   ],
   
-  // Coverage configuration — Round 81 enables coverage with progressive
+  // Coverage configuration â€” Round 81 enables coverage with progressive
   // thresholds so every PR nudges the codebase toward the 70% floor without
   // failing the current green build. Ratchet these numbers up as new tests land.
   collectCoverage: process.env.CI === 'true' || process.env.COVERAGE === '1',
@@ -67,7 +67,7 @@ const config: Config = {
     'components/ai-chat/AgentBoard.tsx',
     'components/ai-chat/RunCard.tsx',
     'components/ai-chat/ai-chat-evidence.ts',
-    'components/ai-chat/chat-utils.ts',
+    'components/agents/chat/utils.ts',
     'components/ai-chat/useAIChatOpsArtifacts.ts',
     'components/collaboration/CollaboratorsBar.tsx',
     'components/ide/fullscreen/WorkbenchEditorToolbar.tsx',
@@ -104,7 +104,7 @@ const config: Config = {
     '!**/__tests__/**',
   ],
   coverageThreshold: {
-    // Global floor — now enforces the 70% market-grade floor on the focused scope
+    // Global floor â€” now enforces the 70% market-grade floor on the focused scope
     // and ratchets up each round. Do NOT lower these numbers.
     global: {
       statements: 70,
@@ -113,7 +113,7 @@ const config: Config = {
       lines: 70,
     },
     // Per-file ratchets for modules we already cover well.
-    './components/ai-chat/chat-utils.ts': {
+    './components/agents/chat/utils.ts': {
       statements: 90,
       branches: 80,
       functions: 100,

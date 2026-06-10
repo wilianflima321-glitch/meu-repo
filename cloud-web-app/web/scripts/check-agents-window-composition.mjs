@@ -39,6 +39,7 @@ const requiredFiles = [
   'components/agents/chat/composer.ts',
   'components/agents/chat/panels.ts',
   'components/agents/chat/state.ts',
+  'components/agents/chat/utils.ts',
   'components/agents/legacy-chat-panel.ts',
   'components/agents/presets.ts',
   'components/agents/window/types.ts',
@@ -61,9 +62,11 @@ requirePattern('components/agents/legacy-chat-panel.ts', /export \* from ['"]\.\
 requirePattern('components/agents/chat/index.ts', /composer/, 'agent chat index must export composer grammar')
 requirePattern('components/agents/chat/index.ts', /panels/, 'agent chat index must export panel grammar')
 requirePattern('components/agents/chat/index.ts', /state/, 'agent chat index must export state grammar')
+requirePattern('components/agents/chat/index.ts', /utils/, 'agent chat index must export utility grammar')
 requirePattern('components/agents/chat/composer.ts', /AIChatComposer/, 'agent chat composer adapter must expose composer')
 requirePattern('components/agents/chat/panels.ts', /AIChatMessagesPane/, 'agent chat panels adapter must expose message pane')
 requirePattern('components/agents/chat/state.ts', /useAIChatRunState/, 'agent chat state adapter must expose run state')
+requirePattern('components/agents/chat/utils.ts', /formatCost/, 'agent chat utilities must expose cost formatting')
 requirePattern('components/agents/AgentsWorkspaceContainer.tsx', /AgentsWindow/, 'workspace container must expose AgentsWindow')
 requirePattern('components/agents/AgentsWorkspaceContainer.tsx', /AIChatPanelPro/, 'workspace container must keep the composer while migration is in progress')
 requirePattern('components/ide/fullscreen/FullscreenIDEWorkspace.tsx', /AgentsWorkspaceContainer/, 'IDE workbench must use the canonical agents workspace container')

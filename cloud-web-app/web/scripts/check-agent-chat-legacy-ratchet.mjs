@@ -6,13 +6,14 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const AI_CHAT_DIR = path.join(ROOT, 'components', 'ai-chat')
 const failures = []
-const MAX_AI_CHAT_FILES = 51
-const MAX_AI_CHAT_LINES = 6100
+const MAX_AI_CHAT_FILES = 50
+const MAX_AI_CHAT_LINES = 6080
 const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/index.ts',
   'components/agents/chat/composer.ts',
   'components/agents/chat/panels.ts',
   'components/agents/chat/state.ts',
+  'components/agents/chat/utils.ts',
   'components/agents/legacy-chat-panel.ts',
 ]
 
@@ -52,6 +53,10 @@ if (aiChatFiles.length > MAX_AI_CHAT_FILES) {
 
 if (totalLines > MAX_AI_CHAT_LINES) {
   failures.push(`components/ai-chat line budget exceeded ${MAX_AI_CHAT_LINES}: ${totalLines}`)
+}
+
+if (fs.existsSync(path.join(AI_CHAT_DIR, 'chat-utils.ts'))) {
+  failures.push('components/ai-chat/chat-utils.ts: utility must stay absorbed into components/agents/chat/utils.ts')
 }
 
 for (const file of REQUIRED_AGENT_CHAT_FILES) read(file)

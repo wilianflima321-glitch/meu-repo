@@ -5,7 +5,7 @@
  *
  * Round 82: keeps coverage executable with a focused 70% ratchet over tested
  * production contracts, viewport modules, and canonical UI helpers.
- * primitives whose tests are already green — the goal is to ratchet
+ * primitives whose tests are already green â€” the goal is to ratchet
  * coverage up each round without hiding behind a broken coverage command.
  */
 
@@ -33,7 +33,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'text-summary', 'json', 'json-summary', 'html', 'lcov'],
       reportsDirectory: 'reports/coverage',
-      // Focused scope — expand as the test suite grows.
+      // Focused scope â€” expand as the test suite grows.
       include: [
         'components/ai-chat/AIChatCostMeter.tsx',
         'components/ai-chat/AIChatEconomicsPanel.tsx',
@@ -45,7 +45,7 @@ export default defineConfig({
         'components/ai-chat/AgentBoard.tsx',
         'components/ai-chat/RunCard.tsx',
         'components/ai-chat/ai-chat-evidence.ts',
-        'components/ai-chat/chat-utils.ts',
+        'components/agents/chat/utils.ts',
         'components/ai-chat/useAIChatOpsArtifacts.ts',
         'components/collaboration/CollaboratorsBar.tsx',
         'components/ide/fullscreen/WorkbenchEditorToolbar.tsx',
@@ -88,14 +88,14 @@ export default defineConfig({
         '**/index.ts',
         '**/__tests__/**',
       ],
-      // Progressive thresholds — ratchet up each round. Do NOT lower these numbers.
+      // Progressive thresholds â€” ratchet up each round. Do NOT lower these numbers.
       thresholds: {
         statements: 70,
         branches: 70,
         functions: 70,
         lines: 70,
         // Per-file ratchets for modules already well-covered.
-        'components/ai-chat/chat-utils.ts': {
+        'components/agents/chat/utils.ts': {
           statements: 90,
           branches: 80,
           functions: 100,

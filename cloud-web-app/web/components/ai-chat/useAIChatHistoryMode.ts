@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react'
 import type { ChatThread, Message } from '@/components/ide/AIChatPanelPro.types'
-import { formatTime } from './chat-utils'
+import { formatTime } from '@/components/agents/chat/utils'
 
 export type AIChatTimelineTone = 'user' | 'assistant' | 'system' | 'live'
 

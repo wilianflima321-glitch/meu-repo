@@ -1,7 +1,7 @@
 'use client'
 
 import { Check, ChevronDown, Sparkles } from 'lucide-react'
-import { formatCost } from './chat-utils'
+import { formatCost } from '@/components/agents/chat/utils'
 import type { AIChatModelPickerProps } from './AIChatHeader.types'
 
 export function AIChatModelPicker({

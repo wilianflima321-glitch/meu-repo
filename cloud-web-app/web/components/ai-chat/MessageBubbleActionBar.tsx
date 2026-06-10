@@ -1,7 +1,7 @@
 'use client'
 
 import { Check, Copy, RefreshCw, Sparkles, ThumbsDown, ThumbsUp, Zap } from 'lucide-react'
-import { formatTime } from './chat-utils'
+import { formatTime } from '@/components/agents/chat/utils'
 
 interface MessageBubbleActionBarProps {
   copied: boolean
