@@ -6,7 +6,7 @@ import type {
   ModelOption,
 } from '@/components/ide/AIChatPanelPro.types'
 import { createComponentLogger } from '@/lib/observability/logger'
-import type { AgentInfo } from './AgentBoard'
+import type { AgentInfo } from '@/components/agents/chat/activity'
 
 const log = createComponentLogger('AIChatPanelPro')
 

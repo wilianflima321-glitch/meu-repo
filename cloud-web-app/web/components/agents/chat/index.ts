@@ -1,4 +1,5 @@
 export { MODE_PRESETS } from './presets'
+export * from './activity'
 export * from './composer'
 export * from './panels'
 export * from './session-types'

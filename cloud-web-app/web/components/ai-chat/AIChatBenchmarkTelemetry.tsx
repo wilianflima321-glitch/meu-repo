@@ -1,8 +1,8 @@
 'use client'
 
-import { AIChatActivityDeck } from '@/components/ai-chat/AIChatActivityDeck'
+import { AIChatActivityDeck } from '@/components/agents/chat/activity'
 import { AIChatQuickPromptStrip } from '@/components/ai-chat/AIChatQuickPromptStrip'
-import type { AgentInfo } from '@/components/ai-chat/AgentBoard'
+import type { AgentInfo } from '@/components/agents/chat/activity'
 import type { AIChatConsoleMode, QuickPromptDefinition } from '@/components/agents/chat/presets'
 
 interface AIChatBenchmarkTelemetryProps {

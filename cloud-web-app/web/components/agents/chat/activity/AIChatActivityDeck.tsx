@@ -1,8 +1,8 @@
 'use client'
 
-import { AgentBoard, type AgentInfo } from '@/components/ai-chat/AgentBoard'
-import { LiveConversationPanel } from '@/components/ai-chat/LiveConversationPanel'
-import { RunCard } from '@/components/ai-chat/RunCard'
+import { AgentBoard, type AgentInfo } from './AgentBoard'
+import { LiveConversationPanel } from './LiveConversationPanel'
+import { RunCard } from './RunCard'
 import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
 
 interface AIChatActivityDeckProps {
