@@ -2,7 +2,7 @@
 
 import { RefreshCw, Save, ScrollText, Sparkles } from 'lucide-react'
 
-import { useAIChatProjectRules } from '@/components/ai-chat/useAIChatProjectRules'
+import { useAIChatProjectRules } from '@/components/agents/chat/rules/useAIChatProjectRules'
 
 export function AIChatRulesPanel({ projectId }: { projectId?: string }) {
   const {
