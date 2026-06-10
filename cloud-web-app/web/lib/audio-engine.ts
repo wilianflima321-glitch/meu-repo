@@ -17,20 +17,25 @@
  * - Playlist e queue system
  * - Ducking automático para diálogos
  */
-import { Howl, Howler } from 'howler';
+import { Howler } from 'howler';
 
-import {createComponentLogger, logger} from '@/lib/observability/logger'
-import { DEFAULT_AUDIO_CHANNELS, DEFAULT_CROSSFADE_DURATION_MS, createDefaultChannelConfig, type AudioContextWindow } from './audio-engine.defaults';
+import { AethelAudioEngineCore } from './audio-engine-core';
+import {
+    calculateChannelOutputVolume,
+    calculateDuckedVolume,
+    calculateInstanceVolume,
+    clampVolume,
+    hasPlayingVoice,
+    nextPlaylistIndex,
+    previousPlaylistIndex,
+    shufflePlaylist,
+} from './audio-engine.mix';
 import type {
     AudioChannel,
-    AudioEffect,
     AudioInstance,
     AudioTrack,
     ChannelConfig,
-    PlayOptions,
 } from './audio-engine.types';
-
-const log = createComponentLogger('audio-engine')
 
 export type {
     AudioChannel,
@@ -45,333 +50,7 @@ export type {
 // AUDIO ENGINE CLASS
 // ============================================================================
 
-class AethelAudioEngine {
-    private tracks: Map<string, AudioTrack> = new Map();
-    private instances: Map<string, AudioInstance> = new Map();
-    private channels: Map<AudioChannel, ChannelConfig> = new Map();
-    private playlist: string[] = [];
-    private playlistIndex = 0;
-    private playlistShuffle = false;
-    private crossfadeDuration = DEFAULT_CROSSFADE_DURATION_MS;
-    private duckingEnabled = true;
-    private listeners: Map<string, Set<(data: unknown) => void>> = new Map();
-    private audioContext: AudioContext | null = null;
-    private masterGain: GainNode | null = null;
-    private effects: Map<AudioChannel, AudioEffect[]> = new Map();
-
-    constructor() {
-        this.initializeChannels();
-        this.initializeWebAudio();
-
-        log.info('🎵 Aethel Audio Engine initialized');
-    }
-
-    private initializeChannels(): void {
-        DEFAULT_AUDIO_CHANNELS.forEach(channel => {
-            this.channels.set(channel, createDefaultChannelConfig(channel));
-        });
-    }
-
-    private initializeWebAudio(): void {
-        try {
-            const AudioContextCtor = window.AudioContext || (window as AudioContextWindow).webkitAudioContext;
-            if (!AudioContextCtor) {
-                throw new Error('Web Audio API not available');
-            }
-            this.audioContext = new AudioContextCtor();
-            this.masterGain = this.audioContext.createGain();
-            this.masterGain.connect(this.audioContext.destination);
-
-            // Resume on user interaction
-            const resumeAudio = () => {
-                if (this.audioContext?.state === 'suspended') {
-                    this.audioContext.resume();
-                }
-                document.removeEventListener('click', resumeAudio);
-                document.removeEventListener('keydown', resumeAudio);
-            };
-
-            document.addEventListener('click', resumeAudio);
-            document.addEventListener('keydown', resumeAudio);
-        } catch (err) {
-            logger.warn('Web Audio API not available:', err);
-        }
-    }
-
-    // ========================================================================
-    // EVENT SYSTEM
-    // ========================================================================
-
-    public on<T = unknown>(event: string, callback: (data: T) => void): () => void {
-        if (!this.listeners.has(event)) {
-            this.listeners.set(event, new Set());
-        }
-        this.listeners.get(event)!.add(callback as (data: unknown) => void);
-
-        return () => {
-            this.listeners.get(event)?.delete(callback as (data: unknown) => void);
-        };
-    }
-
-    private emit(event: string, data: unknown): void {
-        this.listeners.get(event)?.forEach(cb => cb(data));
-    }
-
-    // ========================================================================
-    // TRACK MANAGEMENT
-    // ========================================================================
-
-    /**
-     * Registra uma track para uso futuro
-     */
-    public register(track: AudioTrack): void {
-        this.tracks.set(track.id, track);
-        this.emit('track-registered', track);
-
-        // Preload if requested
-        if (track.preload) {
-            this.preload(track.id);
-        }
-    }
-
-    /**
-     * Registra múltiplas tracks
-     */
-    public registerBatch(tracks: AudioTrack[]): void {
-        tracks.forEach(track => this.register(track));
-    }
-
-    /**
-     * Remove uma track
-     */
-    public unregister(trackId: string): void {
-        const track = this.tracks.get(trackId);
-        if (!track) return;
-
-        // Stop any playing instances
-        this.stopByTrack(trackId);
-
-        this.tracks.delete(trackId);
-        this.emit('track-unregistered', { trackId });
-    }
-
-    /**
-     * Preload uma track
-     */
-    public preload(trackId: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            const track = this.tracks.get(trackId);
-            if (!track) {
-                reject(new Error(`Track not found: ${trackId}`));
-                return;
-            }
-
-            const howl = new Howl({
-                src: Array.isArray(track.src) ? track.src : [track.src],
-                volume: 0,
-                preload: true,
-                format: track.format,
-                onload: () => {
-                    howl.unload();
-                    resolve();
-                },
-                onloaderror: (_, error) => {
-                    reject(error);
-                }
-            });
-        });
-    }
-
-    // ========================================================================
-    // PLAYBACK
-    // ========================================================================
-
-    /**
-     * Reproduz uma track
-     */
-    public play(trackId: string, options: PlayOptions = {}): string {
-        const track = this.tracks.get(trackId);
-        if (!track) {
-            throw new Error(`Track not found: ${trackId}`);
-        }
-
-        // Generate instance ID
-        const instanceId = `${trackId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-        // Calculate effective volume
-        const channelConfig = this.channels.get(track.channel)!;
-        const masterConfig = this.channels.get('master')!;
-        const effectiveVolume = (options.volume ?? track.volume) *
-                               channelConfig.volume *
-                               masterConfig.volume;
-
-        // Create Howl instance
-        const howl = new Howl({
-            src: Array.isArray(track.src) ? track.src : [track.src],
-            volume: options.fade ? 0 : effectiveVolume,
-            loop: options.loop ?? track.loop,
-            sprite: track.sprite,
-            html5: track.html5,
-            format: track.format,
-            rate: options.rate || 1,
-            onplay: (soundId) => {
-                const instance = this.instances.get(instanceId);
-                if (instance) {
-                    instance.soundId = soundId;
-                    instance.state = 'playing';
-                }
-                this.emit('play', { instanceId, trackId });
-                this.updateDucking();
-            },
-            onpause: () => {
-                const instance = this.instances.get(instanceId);
-                if (instance) instance.state = 'paused';
-                this.emit('pause', { instanceId, trackId });
-            },
-            onstop: () => {
-                const instance = this.instances.get(instanceId);
-                if (instance) instance.state = 'stopped';
-                this.emit('stop', { instanceId, trackId });
-                this.updateDucking();
-            },
-            onend: () => {
-                const instance = this.instances.get(instanceId);
-                if (instance) instance.state = 'ended';
-                this.emit('end', { instanceId, trackId });
-                options.onEnd?.();
-
-                // Handle playlist
-                if (track.channel === 'bgm' && this.playlist.length > 0) {
-                    this.playNextInPlaylist();
-                }
-
-                // Cleanup
-                if (!howl.loop()) {
-                    this.instances.delete(instanceId);
-                }
-
-                this.updateDucking();
-            },
-            onload: () => {
-                options.onLoad?.();
-            },
-            onloaderror: (_, error) => {
-                options.onError?.(error);
-                this.emit('error', { instanceId, trackId, error });
-            }
-        });
-
-        // Create instance
-        const instance: AudioInstance = {
-            id: instanceId,
-            trackId,
-            howl,
-            channel: track.channel,
-            state: 'loading',
-            position: options.position
-        };
-
-        this.instances.set(instanceId, instance);
-
-        // Play
-        const soundId = options.sprite
-            ? howl.play(options.sprite)
-            : howl.play();
-
-        instance.soundId = soundId;
-
-        // Apply 3D position if provided
-        if (options.position) {
-            howl.pos(options.position.x, options.position.y, options.position.z, soundId);
-        }
-
-        // Fade in if requested
-        if (options.fade) {
-            howl.fade(0, effectiveVolume, options.fade, soundId);
-        }
-
-        return instanceId;
-    }
-
-    /**
-     * Pausa uma instância
-     */
-    public pause(instanceId: string): void {
-        const instance = this.instances.get(instanceId);
-        if (instance) {
-            instance.howl.pause(instance.soundId);
-        }
-    }
-
-    /**
-     * Resume uma instância pausada
-     */
-    public resume(instanceId?: string): void {
-        if (instanceId) {
-            const instance = this.instances.get(instanceId);
-            if (instance && instance.state === 'paused') {
-                instance.howl.play(instance.soundId);
-            }
-            return;
-        }
-
-        Howler.mute(false);
-        this.audioContext?.resume();
-        this.emit('resumed', {});
-    }
-
-    /**
-     * Para uma instância
-     */
-    public stop(instanceId: string, fade?: number): void {
-        const instance = this.instances.get(instanceId);
-        if (!instance) return;
-
-        if (fade) {
-            instance.howl.fade(instance.howl.volume(), 0, fade, instance.soundId);
-            setTimeout(() => {
-                instance.howl.stop(instance.soundId);
-                instance.howl.unload();
-                this.instances.delete(instanceId);
-            }, fade);
-        } else {
-            instance.howl.stop(instance.soundId);
-            instance.howl.unload();
-            this.instances.delete(instanceId);
-        }
-    }
-
-    /**
-     * Para todas as instâncias de uma track
-     */
-    public stopByTrack(trackId: string, fade?: number): void {
-        this.instances.forEach((instance, id) => {
-            if (instance.trackId === trackId) {
-                this.stop(id, fade);
-            }
-        });
-    }
-
-    /**
-     * Para todas as instâncias de um canal
-     */
-    public stopChannel(channel: AudioChannel, fade?: number): void {
-        this.instances.forEach((instance, id) => {
-            if (instance.channel === channel) {
-                this.stop(id, fade);
-            }
-        });
-    }
-
-    /**
-     * Para tudo
-     */
-    public stopAll(fade?: number): void {
-        this.instances.forEach((_, id) => {
-            this.stop(id, fade);
-        });
-    }
-
+class AethelAudioEngine extends AethelAudioEngineCore {
     // ========================================================================
     // VOLUME & MIXING
     // ========================================================================
@@ -383,7 +62,7 @@ class AethelAudioEngine {
         const config = this.channels.get(channel);
         if (!config) return;
 
-        config.volume = Math.max(0, Math.min(1, volume));
+        config.volume = clampVolume(volume);
         this.updateChannelVolumes(channel);
         this.emit('channel-volume', { channel, volume: config.volume });
     }
@@ -424,7 +103,11 @@ class AethelAudioEngine {
 
         const channelConfig = this.channels.get(instance.channel)!;
         const masterConfig = this.channels.get('master')!;
-        const effectiveVolume = volume * channelConfig.volume * masterConfig.volume;
+        const effectiveVolume = calculateInstanceVolume({
+            volume,
+            channel: channelConfig,
+            master: masterConfig,
+        });
 
         if (fade) {
             instance.howl.fade(instance.howl.volume(), effectiveVolume, fade, instance.soundId);
@@ -440,9 +123,10 @@ class AethelAudioEngine {
         this.instances.forEach(instance => {
             if (instance.channel === channel || channel === 'master') {
                 const instChannel = this.channels.get(instance.channel)!;
-                const volume = instChannel.muted || masterConfig.muted
-                    ? 0
-                    : instChannel.volume * masterConfig.volume;
+                const volume = calculateChannelOutputVolume({
+                    channel: instChannel,
+                    master: masterConfig,
+                });
 
                 instance.howl.volume(volume, instance.soundId);
             }
@@ -453,30 +137,26 @@ class AethelAudioEngine {
     // DUCKING (Auto-lower BGM when voice plays)
     // ========================================================================
 
-    private updateDucking(): void {
+    protected override updateDucking(): void {
         if (!this.duckingEnabled) return;
 
         // Check if any voice is playing
-        let voicePlaying = false;
-        this.instances.forEach(instance => {
-            if (instance.channel === 'voice' && instance.state === 'playing') {
-                voicePlaying = true;
-            }
-        });
+        const voicePlaying = hasPlayingVoice(this.instances.values());
 
         // Duck other channels
         this.channels.forEach((config, channel) => {
             if (config.ducking > 0) {
-                const targetVolume = voicePlaying
-                    ? config.volume * (1 - config.ducking)
-                    : config.volume;
-
                 this.instances.forEach(instance => {
                     if (instance.channel === channel) {
                         const masterConfig = this.channels.get('master')!;
+                        const targetVolume = calculateDuckedVolume({
+                            channel: config,
+                            master: masterConfig,
+                            voicePlaying,
+                        });
                         instance.howl.fade(
                             instance.howl.volume(),
-                            targetVolume * masterConfig.volume,
+                            targetVolume,
                             200,
                             instance.soundId
                         );
@@ -544,7 +224,7 @@ class AethelAudioEngine {
         this.playlistIndex = 0;
 
         if (shuffle) {
-            this.shufflePlaylist();
+            this.playlist = shufflePlaylist(this.playlist);
         }
 
         this.emit('playlist-set', { tracks: this.playlist, shuffle });
@@ -570,7 +250,7 @@ class AethelAudioEngine {
      * Próxima música da playlist
      */
     public playNextInPlaylist(): void {
-        this.playlistIndex = (this.playlistIndex + 1) % this.playlist.length;
+        this.playlistIndex = nextPlaylistIndex(this.playlistIndex, this.playlist.length);
 
         // Crossfade
         this.stopChannel('bgm', this.crossfadeDuration);
@@ -586,9 +266,7 @@ class AethelAudioEngine {
      * Música anterior da playlist
      */
     public playPreviousInPlaylist(): void {
-        this.playlistIndex = this.playlistIndex === 0
-            ? this.playlist.length - 1
-            : this.playlistIndex - 1;
+        this.playlistIndex = previousPlaylistIndex(this.playlistIndex, this.playlist.length);
 
         this.stopChannel('bgm', this.crossfadeDuration);
 
@@ -597,13 +275,6 @@ class AethelAudioEngine {
                 fade: this.crossfadeDuration / 2
             });
         }, this.crossfadeDuration / 2);
-    }
-
-    private shufflePlaylist(): void {
-        for (let i = this.playlist.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [this.playlist[i], this.playlist[j]] = [this.playlist[j], this.playlist[i]];
-        }
     }
 
     /**
