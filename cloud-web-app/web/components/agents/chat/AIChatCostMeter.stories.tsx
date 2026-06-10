@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { AIChatCostMeter } from './panels'
+import { AIChatCostMeter } from './AIChatCostMeter'
 
 const meta: Meta<typeof AIChatCostMeter> = {
   title: 'Agents/Chat/CostMeter',

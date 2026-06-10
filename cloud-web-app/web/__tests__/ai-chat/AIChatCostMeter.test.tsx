@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { SWRConfig } from 'swr'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { AIChatCostMeter } from '@/components/ai-chat/AIChatCostMeter'
+import { AIChatCostMeter } from '@/components/agents/chat/AIChatCostMeter'
 
 const apiMocks = vi.hoisted(() => ({
   getStudioCostLive: vi.fn(),

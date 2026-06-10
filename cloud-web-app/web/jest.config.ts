@@ -57,7 +57,7 @@ const config: Config = {
   collectCoverageFrom: [
     // Focused, high-signal scope: modules with real tests and production impact.
     // Expand this list as the test suite grows; do not dilute it with untested bulk.
-    'components/ai-chat/AIChatCostMeter.tsx',
+    'components/agents/chat/AIChatCostMeter.tsx',
     'components/ai-chat/AIChatEconomicsPanel.tsx',
     'components/ai-chat/AIChatEvidenceCard.tsx',
     'components/ai-chat/AIChatLedgerStrip.tsx',

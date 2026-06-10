@@ -1,6 +1,6 @@
 export { AIChatBenchmarkTelemetry } from '@/components/ai-chat/AIChatBenchmarkTelemetry'
 export { AIChatContextStrip } from '@/components/ai-chat/AIChatContextStrip'
-export { AIChatCostMeter } from '@/components/ai-chat/AIChatCostMeter'
+export { AIChatCostMeter } from './AIChatCostMeter'
 export { AIChatHeader } from '@/components/ai-chat/AIChatHeader'
 export { AIChatHistoryModeRail } from '@/components/ai-chat/AIChatHistoryModeRail'
 export { AIChatLedgerStrip } from '@/components/ai-chat/AIChatLedgerStrip'
