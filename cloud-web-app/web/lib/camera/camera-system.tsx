@@ -8,15 +8,37 @@
  * @module lib/camera/camera-system
  */
 
-import * as THREE from 'three';
 import { EventEmitter } from 'events';
+import { THREE } from '../three/static';
 import { easingFunctions } from './camera-system.easing';
+import {
+  CameraPathBuilder,
+  applyCameraPathFrame,
+  applyCameraTransitionFrame,
+  createDefaultCameraConfig,
+  createDefaultFollowSettings,
+  createCameraTransitionEnd,
+  createDefaultOrbitSettings,
+  getCameraRay,
+  isObjectInCameraFrustum,
+  screenToWorld as projectScreenToWorld,
+  type CameraFovAnimation,
+  type CameraTransitionFrame,
+  updateCameraFovAnimation,
+  updateCameraShakeOffset,
+  updateFirstPersonCamera,
+  updateFollowCamera,
+  updateOrbitCamera,
+  updateSideScrollerCamera,
+  updateThirdPersonCamera,
+  updateTopDownCamera,
+  worldToScreen as projectWorldToScreen,
+} from './camera-system-runtime';
 import { CameraProvider, useCameraController, useCameraFollow, useCameraMode, useCameraShake, useCameraUpdate } from './camera-system-react';
 import type {
   CameraConfig,
   CameraMode,
   CameraPath,
-  CameraPathPoint,
   EasingType,
   FollowSettings,
   OrbitSettings,
@@ -25,107 +47,24 @@ import type {
 
 export { CameraProvider, useCameraController, useCameraFollow, useCameraMode, useCameraShake, useCameraUpdate } from './camera-system-react';
 export { easingFunctions } from './camera-system.easing';
+export {
+  CameraPathBuilder,
+  applyCameraPathFrame,
+  applyCameraTransitionFrame,
+  createDefaultCameraConfig,
+  createDefaultFollowSettings,
+  createCameraTransitionEnd,
+  createDefaultOrbitSettings,
+} from './camera-system-runtime';
 export type {
   CameraConfig,
   CameraMode,
   CameraPath,
-  CameraPathPoint,
   EasingType,
   FollowSettings,
   OrbitSettings,
   ShakeSettings,
 } from './camera-system.contracts';
-
-export function createDefaultCameraConfig(config: Partial<CameraConfig> = {}): CameraConfig {
-  const aspect = typeof window === 'undefined' ? 16 / 9 : window.innerWidth / window.innerHeight;
-
-  return {
-    fov: 60,
-    near: 0.1,
-    far: 1000,
-    aspect,
-    ...config,
-  };
-}
-
-export function createDefaultFollowSettings(): FollowSettings {
-  return {
-    target: null,
-    offset: new THREE.Vector3(0, 5, 10),
-    lookAtOffset: new THREE.Vector3(0, 1, 0),
-    smoothing: 0.1,
-    lookAhead: 0,
-  };
-}
-
-export function createDefaultOrbitSettings(): OrbitSettings {
-  return {
-    target: new THREE.Vector3(0, 0, 0),
-    distance: 10,
-    minDistance: 2,
-    maxDistance: 50,
-    azimuthAngle: 0,
-    polarAngle: Math.PI / 4,
-    minPolarAngle: 0.1,
-    maxPolarAngle: Math.PI - 0.1,
-    rotationSpeed: 0.005,
-    zoomSpeed: 0.1,
-    enableDamping: true,
-    dampingFactor: 0.05,
-  };
-}
-
-export class CameraPathBuilder {
-  private path: Partial<CameraPath> = {
-    points: [],
-    loop: false,
-    easing: 'easeInOutQuad',
-  };
-
-  static create(id: string): CameraPathBuilder {
-    return new CameraPathBuilder().id(id);
-  }
-
-  id(id: string): this {
-    this.path.id = id;
-    return this;
-  }
-
-  duration(seconds: number): this {
-    this.path.duration = seconds;
-    return this;
-  }
-
-  loop(loop = true): this {
-    this.path.loop = loop;
-    return this;
-  }
-
-  easing(easing: EasingType): this {
-    this.path.easing = easing;
-    return this;
-  }
-
-  point(position: { x: number; y: number; z: number }, lookAt: { x: number; y: number; z: number }, time: number, fov?: number): this {
-    this.path.points!.push({
-      position: new THREE.Vector3(position.x, position.y, position.z),
-      lookAt: new THREE.Vector3(lookAt.x, lookAt.y, lookAt.z),
-      time,
-      fov,
-    });
-    return this;
-  }
-
-  build(): CameraPath {
-    if (!this.path.id) throw new Error('Path ID is required');
-    if (!this.path.duration) throw new Error('Duration is required');
-    if (this.path.points!.length < 2) throw new Error('At least 2 points required');
-
-    this.path.points!.sort((a, b) => a.time - b.time);
-
-    return this.path as CameraPath;
-  }
-}
 
 export class CameraController extends EventEmitter {
   private camera: THREE.PerspectiveCamera;
@@ -153,8 +92,8 @@ export class CameraController extends EventEmitter {
 
   // Transition
   private isTransitioning = false;
-  private transitionStart: { position: THREE.Vector3; quaternion: THREE.Quaternion; fov: number } | null = null;
-  private transitionEnd: { position: THREE.Vector3; quaternion: THREE.Quaternion; fov: number } | null = null;
+  private transitionStart: CameraTransitionFrame | null = null;
+  private transitionEnd: CameraTransitionFrame | null = null;
   private transitionDuration = 1;
   private transitionProgress = 0;
   private transitionEasing: EasingType = 'easeInOutQuad';
@@ -187,10 +126,6 @@ export class CameraController extends EventEmitter {
     );
   }
 
-  // ============================================================================
-  // GETTERS
-  // ============================================================================
-
   getCamera(): THREE.PerspectiveCamera {
     return this.camera;
   }
@@ -215,10 +150,6 @@ export class CameraController extends EventEmitter {
     return this.camera.fov;
   }
 
-  // ============================================================================
-  // MODE CONTROL
-  // ============================================================================
-
   setMode(mode: CameraMode, transition = true, duration = 1): void {
     if (this.mode === mode) return;
 
@@ -227,10 +158,6 @@ export class CameraController extends EventEmitter {
 
     this.emit('modeChanged', { from: oldMode, to: mode });
   }
-
-  // ============================================================================
-  // FOLLOW MODE
-  // ============================================================================
 
   setFollowTarget(target: THREE.Object3D | null, settings?: Partial<FollowSettings>): void {
     this.followSettings.target = target;
@@ -252,41 +179,14 @@ export class CameraController extends EventEmitter {
     this.followSettings.smoothing = Math.max(0.01, Math.min(1, smoothing));
   }
 
-  private updateFollow(deltaTime: number): void {
-    const { target, offset, lookAtOffset, smoothing, lookAhead } = this.followSettings;
-    if (!target) return;
-
-    // Calculate target velocity for look-ahead
-    if (lookAhead && lookAhead > 0) {
-      this.targetVelocity.copy(target.position).sub(this.lastTargetPosition);
-      this.lastTargetPosition.copy(target.position);
-    }
-
-    // Calculate desired position
-    const desiredPosition = new THREE.Vector3();
-
-    // Transform offset by target's rotation
-    const worldOffset = offset.clone();
-    worldOffset.applyQuaternion(target.quaternion);
-
-    desiredPosition.copy(target.position).add(worldOffset);
-
-    // Add look-ahead
-    if (lookAhead && lookAhead > 0) {
-      desiredPosition.add(this.targetVelocity.clone().multiplyScalar(lookAhead));
-    }
-
-    // Smooth interpolation
-    this.camera.position.lerp(desiredPosition, smoothing);
-
-    // Look at target
-    const lookAtTarget = target.position.clone().add(lookAtOffset);
-    this.camera.lookAt(lookAtTarget);
+  private updateFollow(_deltaTime: number): void {
+    updateFollowCamera({
+      camera: this.camera,
+      settings: this.followSettings,
+      targetVelocity: this.targetVelocity,
+      lastTargetPosition: this.lastTargetPosition,
+    });
   }
-
-  // ============================================================================
-  // ORBIT MODE
-  // ============================================================================
 
   setOrbitTarget(target: THREE.Vector3): void {
     this.orbitSettings.target.copy(target);
@@ -320,108 +220,25 @@ export class CameraController extends EventEmitter {
     );
   }
 
-  private updateOrbit(deltaTime: number): void {
-    const { target, distance, azimuthAngle, polarAngle, enableDamping, dampingFactor } = this.orbitSettings;
-
-    // Calculate position from spherical coordinates
-    const x = target.x + distance * Math.sin(polarAngle) * Math.cos(azimuthAngle);
-    const y = target.y + distance * Math.cos(polarAngle);
-    const z = target.z + distance * Math.sin(polarAngle) * Math.sin(azimuthAngle);
-
-    const desiredPosition = new THREE.Vector3(x, y, z);
-
-    if (enableDamping) {
-      this.camera.position.lerp(desiredPosition, dampingFactor);
-    } else {
-      this.camera.position.copy(desiredPosition);
-    }
-
-    this.camera.lookAt(target);
+  private updateOrbit(_deltaTime: number): void {
+    updateOrbitCamera(this.camera, this.orbitSettings);
   }
 
-  // ============================================================================
-  // FIRST/THIRD PERSON
-  // ============================================================================
-
-  private updateFirstPerson(deltaTime: number): void {
-    const { target, lookAtOffset } = this.followSettings;
-    if (!target) return;
-
-    // Camera at target position with offset (usually at eye level)
-    this.camera.position.copy(target.position).add(lookAtOffset);
-
-    // Copy target's rotation
-    this.camera.quaternion.copy(target.quaternion);
+  private updateFirstPerson(_deltaTime: number): void {
+    updateFirstPersonCamera(this.camera, this.followSettings);
   }
 
-  private updateThirdPerson(deltaTime: number): void {
-    // Combine follow and orbit behavior
-    const { target, offset, smoothing } = this.followSettings;
-    if (!target) return;
-
-    // Use orbit angles but follow target
-    const { distance, azimuthAngle, polarAngle } = this.orbitSettings;
-
-    const x = target.position.x + distance * Math.sin(polarAngle) * Math.cos(azimuthAngle);
-    const y = target.position.y + distance * Math.cos(polarAngle);
-    const z = target.position.z + distance * Math.sin(polarAngle) * Math.sin(azimuthAngle);
-
-    const desiredPosition = new THREE.Vector3(x, y, z);
-
-    this.camera.position.lerp(desiredPosition, smoothing);
-    this.camera.lookAt(target.position);
+  private updateThirdPerson(_deltaTime: number): void {
+    updateThirdPersonCamera(this.camera, this.followSettings, this.orbitSettings);
   }
 
-  // ============================================================================
-  // TOP-DOWN / SIDE-SCROLLER
-  // ============================================================================
-
-  private updateTopDown(deltaTime: number): void {
-    const { target, offset, smoothing } = this.followSettings;
-    if (!target) return;
-
-    // Position directly above target
-    const desiredPosition = new THREE.Vector3(
-      target.position.x,
-      target.position.y + offset.y,
-      target.position.z
-    );
-
-    this.camera.position.lerp(desiredPosition, smoothing);
-    this.camera.lookAt(target.position);
+  private updateTopDown(_deltaTime: number): void {
+    updateTopDownCamera(this.camera, this.followSettings);
   }
 
-  private updateSideScroller(deltaTime: number): void {
-    const { target, offset, smoothing, deadZone } = this.followSettings;
-    if (!target) return;
-
-    // Position to the side of target
-    const desiredPosition = new THREE.Vector3(
-      target.position.x + offset.x,
-      target.position.y + offset.y,
-      target.position.z + offset.z
-    );
-
-    // Apply dead zone
-    if (deadZone) {
-      const deltaX = desiredPosition.x - this.camera.position.x;
-      const deltaY = desiredPosition.y - this.camera.position.y;
-
-      if (Math.abs(deltaX) < deadZone.x) {
-        desiredPosition.x = this.camera.position.x;
-      }
-      if (Math.abs(deltaY) < deadZone.y) {
-        desiredPosition.y = this.camera.position.y;
-      }
-    }
-
-    this.camera.position.lerp(desiredPosition, smoothing);
-    this.camera.lookAt(new THREE.Vector3(target.position.x, target.position.y, target.position.z - 1));
+  private updateSideScroller(_deltaTime: number): void {
+    updateSideScrollerCamera(this.camera, this.followSettings);
   }
-
-  // ============================================================================
-  // CAMERA SHAKE
-  // ============================================================================
 
   shake(settings: Partial<ShakeSettings> = {}): void {
     this.shakeIntensity = settings.intensity ?? 0.5;
@@ -446,33 +263,21 @@ export class CameraController extends EventEmitter {
     if (this.shakeIntensity <= 0) return;
 
     this.shakeElapsed += deltaTime;
-
     if (this.shakeElapsed >= this.shakeDuration) {
       this.stopShake();
       return;
     }
 
-    // Calculate intensity with decay
-    let currentIntensity = this.shakeIntensity;
-    if (this.shakeDecay) {
-      currentIntensity *= 1 - (this.shakeElapsed / this.shakeDuration);
-    }
-
-    // Perlin-like noise for smooth shake
-    const time = this.shakeElapsed * this.shakeFrequency;
-
-    this.shakeOffset.set(
-      (Math.sin(time * 1.1) + Math.sin(time * 2.3)) * currentIntensity * 0.5,
-      (Math.sin(time * 1.7) + Math.sin(time * 1.9)) * currentIntensity * 0.5,
-      (Math.sin(time * 2.1) + Math.sin(time * 1.3)) * currentIntensity * 0.5
-    );
-
+    updateCameraShakeOffset({
+      offset: this.shakeOffset,
+      elapsed: this.shakeElapsed,
+      duration: this.shakeDuration,
+      frequency: this.shakeFrequency,
+      intensity: this.shakeIntensity,
+      decay: this.shakeDecay,
+    });
     this.camera.position.add(this.shakeOffset);
   }
-
-  // ============================================================================
-  // CAMERA PATHS
-  // ============================================================================
 
   playPath(path: CameraPath, onComplete?: () => void): void {
     this.currentPath = path;
@@ -513,39 +318,13 @@ export class CameraController extends EventEmitter {
       }
     }
 
-    // Find the two points to interpolate between
-    const t = easingFunctions[path.easing](this.pathProgress);
-
-    let p1: CameraPathPoint | null = null;
-    let p2: CameraPathPoint | null = null;
-
-    for (let i = 0; i < path.points.length - 1; i++) {
-      if (t >= path.points[i].time && t <= path.points[i + 1].time) {
-        p1 = path.points[i];
-        p2 = path.points[i + 1];
-        break;
-      }
-    }
-
-    if (!p1 || !p2) return;
-
-    // Interpolate between points
-    const segmentT = (t - p1.time) / (p2.time - p1.time);
-
-    this.camera.position.lerpVectors(p1.position, p2.position, segmentT);
-
-    const lookAt = new THREE.Vector3().lerpVectors(p1.lookAt, p2.lookAt, segmentT);
-    this.camera.lookAt(lookAt);
-
-    if (p1.fov !== undefined && p2.fov !== undefined) {
-      this.camera.fov = p1.fov + (p2.fov - p1.fov) * segmentT;
-      this.camera.updateProjectionMatrix();
-    }
+    applyCameraPathFrame({
+      camera: this.camera,
+      path,
+      progress: this.pathProgress,
+      easing: easingFunctions[path.easing],
+    });
   }
-
-  // ============================================================================
-  // TRANSITIONS
-  // ============================================================================
 
   transitionTo(
     position: THREE.Vector3,
@@ -561,25 +340,12 @@ export class CameraController extends EventEmitter {
     this.transitionProgress = 0;
     this.transitionDuration = options.duration ?? 1;
     this.transitionEasing = options.easing ?? 'easeInOutQuad';
-
-    // Store start state
     this.transitionStart = {
       position: this.camera.position.clone(),
       quaternion: this.camera.quaternion.clone(),
       fov: this.camera.fov,
     };
-
-    // Calculate end state
-    const endCamera = new THREE.PerspectiveCamera();
-    endCamera.position.copy(position);
-    endCamera.lookAt(lookAt);
-
-    this.transitionEnd = {
-      position: position.clone(),
-      quaternion: endCamera.quaternion.clone(),
-      fov: options.fov ?? this.camera.fov,
-    };
-
+    this.transitionEnd = createCameraTransitionEnd(position, lookAt, options.fov ?? this.camera.fov);
     this.emit('transitionStarted');
 
     if (options.onComplete) {
@@ -591,42 +357,25 @@ export class CameraController extends EventEmitter {
     }
   }
 
+
   private updateTransition(deltaTime: number): void {
     if (!this.isTransitioning || !this.transitionStart || !this.transitionEnd) return;
 
     this.transitionProgress += deltaTime / this.transitionDuration;
-
     if (this.transitionProgress >= 1) {
       this.transitionProgress = 1;
       this.isTransitioning = false;
       this.emit('transitionCompleted');
     }
 
-    const t = easingFunctions[this.transitionEasing](this.transitionProgress);
-
-    // Interpolate position
-    this.camera.position.lerpVectors(
-      this.transitionStart.position,
-      this.transitionEnd.position,
-      t
-    );
-
-    // Slerp quaternion
-    this.camera.quaternion.slerpQuaternions(
-      this.transitionStart.quaternion,
-      this.transitionEnd.quaternion,
-      t
-    );
-
-    // Interpolate FOV
-    this.camera.fov = this.transitionStart.fov +
-      (this.transitionEnd.fov - this.transitionStart.fov) * t;
-    this.camera.updateProjectionMatrix();
+    applyCameraTransitionFrame({
+      camera: this.camera,
+      start: this.transitionStart,
+      end: this.transitionEnd,
+      progress: this.transitionProgress,
+      easing: easingFunctions[this.transitionEasing],
+    });
   }
-
-  // ============================================================================
-  // FOV CONTROL
-  // ============================================================================
 
   setFOV(fov: number, animate = false, duration = 0.5): void {
     if (animate) {
@@ -637,7 +386,7 @@ export class CameraController extends EventEmitter {
     }
   }
 
-  private fovAnimation: { start: number; end: number; duration: number; elapsed: number } | null = null;
+  private fovAnimation: CameraFovAnimation | null = null;
 
   private animateFOV(targetFov: number, duration: number): void {
     this.fovAnimation = {
@@ -651,37 +400,25 @@ export class CameraController extends EventEmitter {
   private updateFOVAnimation(deltaTime: number): void {
     if (!this.fovAnimation) return;
 
-    this.fovAnimation.elapsed += deltaTime;
-    const t = Math.min(1, this.fovAnimation.elapsed / this.fovAnimation.duration);
-    const eased = easingFunctions.easeInOutQuad(t);
-
-    this.camera.fov = this.fovAnimation.start +
-      (this.fovAnimation.end - this.fovAnimation.start) * eased;
-    this.camera.updateProjectionMatrix();
-
-    if (t >= 1) {
-      this.fovAnimation = null;
-    }
+    this.fovAnimation = updateCameraFovAnimation({
+      camera: this.camera,
+      animation: this.fovAnimation,
+      deltaTime,
+      easing: easingFunctions.easeInOutQuad,
+    });
   }
 
-  // ============================================================================
-  // UPDATE
-  // ============================================================================
-
   update(deltaTime: number): void {
-    // Handle transitions first
     if (this.isTransitioning) {
       this.updateTransition(deltaTime);
       return;
     }
 
-    // Handle path playback
     if (this.pathPlaying) {
       this.updatePath(deltaTime);
       return;
     }
 
-    // Update based on mode
     switch (this.mode) {
       case 'follow':
         this.updateFollow(deltaTime);
@@ -701,19 +438,13 @@ export class CameraController extends EventEmitter {
       case 'side_scroller':
         this.updateSideScroller(deltaTime);
         break;
-      // 'free', 'fixed', 'cinematic' don't auto-update
     }
 
     // Apply shake
     this.updateShake(deltaTime);
 
-    // Update FOV animation
     this.updateFOVAnimation(deltaTime);
   }
-
-  // ============================================================================
-  // UTILITIES
-  // ============================================================================
 
   setAspect(aspect: number): void {
     this.camera.aspect = aspect;
@@ -725,50 +456,19 @@ export class CameraController extends EventEmitter {
   }
 
   worldToScreen(worldPos: THREE.Vector3, screenWidth: number, screenHeight: number): THREE.Vector2 {
-    const projected = worldPos.clone().project(this.camera);
-
-    return new THREE.Vector2(
-      (projected.x + 1) * screenWidth / 2,
-      (-projected.y + 1) * screenHeight / 2
-    );
+    return projectWorldToScreen(this.camera, worldPos, screenWidth, screenHeight);
   }
 
   screenToWorld(screenPos: THREE.Vector2, screenWidth: number, screenHeight: number, depth = 0.5): THREE.Vector3 {
-    const ndc = new THREE.Vector3(
-      (screenPos.x / screenWidth) * 2 - 1,
-      -(screenPos.y / screenHeight) * 2 + 1,
-      depth
-    );
-
-    return ndc.unproject(this.camera);
+    return projectScreenToWorld(this.camera, screenPos, screenWidth, screenHeight, depth);
   }
 
   getRay(screenPos: THREE.Vector2, screenWidth: number, screenHeight: number): THREE.Raycaster {
-    const raycaster = new THREE.Raycaster();
-    const ndc = new THREE.Vector2(
-      (screenPos.x / screenWidth) * 2 - 1,
-      -(screenPos.y / screenHeight) * 2 + 1
-    );
-
-    raycaster.setFromCamera(ndc, this.camera);
-    return raycaster;
+    return getCameraRay(this.camera, screenPos, screenWidth, screenHeight);
   }
 
   isInFrustum(object: THREE.Object3D): boolean {
-    const frustum = new THREE.Frustum();
-    const matrix = new THREE.Matrix4().multiplyMatrices(
-      this.camera.projectionMatrix,
-      this.camera.matrixWorldInverse
-    );
-    frustum.setFromProjectionMatrix(matrix);
-
-    if (object instanceof THREE.Mesh && object.geometry.boundingSphere) {
-      const sphere = object.geometry.boundingSphere.clone();
-      sphere.applyMatrix4(object.matrixWorld);
-      return frustum.intersectsSphere(sphere);
-    }
-
-    return frustum.containsPoint(object.position);
+    return isObjectInCameraFrustum(this.camera, object);
   }
 
   dispose(): void {
@@ -781,6 +481,8 @@ export class CameraController extends EventEmitter {
 const __defaultExport = {
   CameraController,
   CameraPathBuilder,
+  applyCameraPathFrame,
+  applyCameraTransitionFrame,
   CameraProvider,
   useCameraController,
   useCameraUpdate,
