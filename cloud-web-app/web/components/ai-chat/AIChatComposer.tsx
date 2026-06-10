@@ -9,7 +9,7 @@ import type {
   CodebaseContextPreview,
   MentionContextPreviewBlock,
 } from '@/components/ide/AIChatPanelPro.types'
-import type { UseChatContextPreviewsReturn } from './useChatContextPreviews'
+import type { UseChatContextPreviewsReturn } from '@/components/agents/chat/context'
 import {
   MentionChip,
   SuggestionList,

@@ -16,7 +16,7 @@ import type {
   CodebaseContextPreview,
 } from '@/components/ide/AIChatPanelPro.types'
 import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
-import { useChatContextPreviews } from './useChatContextPreviews'
+import { useChatContextPreviews } from '@/components/agents/chat/context'
 import { useVoiceRecording } from '@/components/agents/chat/voice'
 
 interface UseAIChatComposerStateParams {

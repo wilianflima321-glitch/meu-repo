@@ -5,7 +5,7 @@ import type { Mention } from '@/lib/copilot/mention-parser';
 import type {
   CodebaseContextPreview,
   MentionContextPreviewBlock,
-} from '../ide/AIChatPanelPro.types';
+} from '@/components/ide/AIChatPanelPro.types';
 
 interface MentionContextPreviewState {
   loading: boolean;
