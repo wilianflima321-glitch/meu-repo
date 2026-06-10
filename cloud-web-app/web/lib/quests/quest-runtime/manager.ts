@@ -7,7 +7,20 @@
 
 import { logger } from '@/lib/observability/logger';
 import { EventEmitter } from 'events';
-import type { ObjectiveProgress, QuestCategory, QuestDefinition, QuestInstance, QuestJournalEntry, QuestPriority, QuestReward, QuestState } from './types';
+import { buildQuestJournal } from './manager-journal';
+import {
+  applyQuestManagerState,
+  createObjectiveProgress,
+  createQuestInstance,
+  requiredObjectivesComplete,
+  resetQuestInstance,
+  serializeQuestManagerState,
+} from './manager-state';
+import { findLocationObjectiveUpdates, findObjectiveUpdatesByTarget } from './manager-objectives';
+import { grantQuestRewards } from './manager-rewards';
+import { selectHighestPriorityQuest } from './manager-tracking';
+import { findExpiredQuestIds } from './manager-timers';
+import type { QuestCategory, QuestDefinition, QuestInstance, QuestJournalEntry, QuestState } from './types';
 
 export class QuestManager extends EventEmitter {
   private definitions: Map<string, QuestDefinition> = new Map();
@@ -36,23 +49,7 @@ export class QuestManager extends EventEmitter {
     
     this.definitions.set(definition.id, definition);
     
-    // Create initial instance
-    this.instances.set(definition.id, {
-      definition,
-      state: definition.prerequisites?.length ? 'locked' : 'available',
-      objectiveProgress: new Map(
-        definition.objectives.map((obj) => [
-          obj.id,
-          { currentAmount: 0, completed: false },
-        ])
-      ),
-      startedAt: null,
-      completedAt: null,
-      failedAt: null,
-      expiresAt: null,
-      tracked: false,
-      repeatCount: 0,
-    });
+    this.instances.set(definition.id, createQuestInstance(definition));
     
     this.emit('questRegistered', { questId: definition.id, definition });
   }
@@ -93,12 +90,7 @@ export class QuestManager extends EventEmitter {
     }
     
     // Reset progress
-    for (const [objId] of instance.objectiveProgress) {
-      instance.objectiveProgress.set(objId, {
-        currentAmount: 0,
-        completed: false,
-      });
-    }
+    instance.objectiveProgress = createObjectiveProgress(instance.definition);
     
     this.activeQuestIds.add(questId);
     
@@ -156,13 +148,9 @@ export class QuestManager extends EventEmitter {
     const instance = this.instances.get(questId);
     if (!instance || instance.state !== 'active') return false;
     
-    // Check all required objectives completed
-    for (const [objId, progress] of instance.objectiveProgress) {
-      const objDef = instance.definition.objectives.find((o) => o.id === objId);
-      if (objDef && !objDef.optional && !progress.completed) {
-        logger.warn(`Quest ${questId} has incomplete required objective: ${objId}`);
-        return false;
-      }
+    if (!requiredObjectivesComplete(instance)) {
+      logger.warn(`Quest ${questId} has incomplete required objectives`);
+      return false;
     }
     
     instance.state = 'completed';
@@ -201,7 +189,9 @@ export class QuestManager extends EventEmitter {
     }
     
     // Grant rewards
-    const rewards = this.grantRewards(instance.definition.rewards);
+    const rewards = grantQuestRewards(instance.definition.rewards, (reward) => {
+      this.emit('rewardGranted', { reward });
+    });
     
     // Unlock dependent quests
     if (instance.definition.unlocks) {
@@ -232,19 +222,7 @@ export class QuestManager extends EventEmitter {
     
     setTimeout(() => {
       if (instance.state === 'turned_in' || instance.state === 'failed') {
-        instance.state = 'available';
-        instance.startedAt = null;
-        instance.completedAt = null;
-        instance.failedAt = null;
-        instance.expiresAt = null;
-        
-        for (const [objId] of instance.objectiveProgress) {
-          instance.objectiveProgress.set(objId, {
-            currentAmount: 0,
-            completed: false,
-          });
-        }
-        
+        resetQuestInstance(instance);
         this.emit('questReset', { questId });
       }
     }, cooldown);
@@ -303,76 +281,32 @@ export class QuestManager extends EventEmitter {
   
   // Convenience methods for common objective types
   recordKill(targetId: string, count = 1): void {
-    for (const [questId, instance] of this.instances) {
-      if (instance.state !== 'active') continue;
-      
-      for (const obj of instance.definition.objectives) {
-        if (obj.type === 'kill' && obj.target === targetId) {
-          this.updateObjective(questId, obj.id, count);
-        }
-      }
+    for (const update of findObjectiveUpdatesByTarget(this.instances, targetId, ['kill'], count)) {
+      this.updateObjective(update.questId, update.objectiveId, update.amount);
     }
   }
   
   recordCollection(itemId: string, count = 1): void {
-    for (const [questId, instance] of this.instances) {
-      if (instance.state !== 'active') continue;
-      
-      for (const obj of instance.definition.objectives) {
-        if (obj.type === 'collect' && obj.target === itemId) {
-          this.updateObjective(questId, obj.id, count);
-        }
-      }
+    for (const update of findObjectiveUpdatesByTarget(this.instances, itemId, ['collect'], count)) {
+      this.updateObjective(update.questId, update.objectiveId, update.amount);
     }
   }
   
   recordInteraction(targetId: string): void {
-    for (const [questId, instance] of this.instances) {
-      if (instance.state !== 'active') continue;
-      
-      for (const obj of instance.definition.objectives) {
-        if (
-          (obj.type === 'interact' || obj.type === 'talk') &&
-          obj.target === targetId
-        ) {
-          this.updateObjective(questId, obj.id, 1);
-        }
-      }
+    for (const update of findObjectiveUpdatesByTarget(this.instances, targetId, ['interact', 'talk'])) {
+      this.updateObjective(update.questId, update.objectiveId, update.amount);
     }
   }
   
   recordLocationReached(locationId: string): void {
-    for (const [questId, instance] of this.instances) {
-      if (instance.state !== 'active') continue;
-      
-      for (const obj of instance.definition.objectives) {
-        if (
-          (obj.type === 'reach' || obj.type === 'explore') &&
-          obj.target === locationId
-        ) {
-          this.updateObjective(questId, obj.id, 1);
-        }
-      }
+    for (const update of findObjectiveUpdatesByTarget(this.instances, locationId, ['reach', 'explore'])) {
+      this.updateObjective(update.questId, update.objectiveId, update.amount);
     }
   }
   
   checkPosition(position: { x: number; y: number; z: number }): void {
-    for (const [questId, instance] of this.instances) {
-      if (instance.state !== 'active') continue;
-      
-      for (const obj of instance.definition.objectives) {
-        if (obj.type === 'reach' && obj.location) {
-          const dist = Math.sqrt(
-            Math.pow(position.x - obj.location.x, 2) +
-            Math.pow(position.y - obj.location.y, 2) +
-            Math.pow(position.z - obj.location.z, 2)
-          );
-          
-          if (dist <= (obj.location.radius || 5)) {
-            this.updateObjective(questId, obj.id, 1);
-          }
-        }
-      }
+    for (const update of findLocationObjectiveUpdates(this.instances, position)) {
+      this.updateObjective(update.questId, update.objectiveId, update.amount);
     }
   }
   
@@ -384,17 +318,7 @@ export class QuestManager extends EventEmitter {
     const instance = this.instances.get(questId);
     if (!instance || instance.state !== 'active') return;
     
-    let allComplete = true;
-    
-    for (const [objId, progress] of instance.objectiveProgress) {
-      const objDef = instance.definition.objectives.find((o) => o.id === objId);
-      if (objDef && !objDef.optional && !progress.completed) {
-        allComplete = false;
-        break;
-      }
-    }
-    
-    if (allComplete) {
+    if (requiredObjectivesComplete(instance)) {
       this.completeQuest(questId);
     }
   }
@@ -454,28 +378,7 @@ export class QuestManager extends EventEmitter {
   }
   
   private autoSelectTrackedQuest(): void {
-    // Track highest priority active quest
-    let bestQuest: string | null = null;
-    let bestPriority = -1;
-    
-    const priorityOrder: Record<QuestPriority, number> = {
-      critical: 3,
-      high: 2,
-      normal: 1,
-      low: 0,
-    };
-    
-    for (const questId of this.activeQuestIds) {
-      const instance = this.instances.get(questId);
-      if (!instance) continue;
-      
-      const priority = priorityOrder[instance.definition.priority || 'normal'];
-      if (priority > bestPriority) {
-        bestPriority = priority;
-        bestQuest = questId;
-      }
-    }
-    
+    const bestQuest = selectHighestPriorityQuest(this.activeQuestIds, this.instances);
     if (bestQuest) {
       this.trackQuest(bestQuest);
     }
@@ -484,22 +387,6 @@ export class QuestManager extends EventEmitter {
   getTrackedQuest(): QuestInstance | null {
     if (!this.trackedQuestId) return null;
     return this.instances.get(this.trackedQuestId) || null;
-  }
-  
-  // ============================================================================
-  // REWARDS
-  // ============================================================================
-  
-  private grantRewards(rewards: QuestReward[]): QuestReward[] {
-    const granted: QuestReward[] = [];
-    
-    for (const reward of rewards) {
-      // In a real implementation, this would integrate with inventory, currency, etc.
-      this.emit('rewardGranted', { reward });
-      granted.push(reward);
-    }
-    
-    return granted;
   }
   
   // ============================================================================
@@ -543,59 +430,7 @@ export class QuestManager extends EventEmitter {
   // ============================================================================
   
   getJournal(): QuestJournalEntry[] {
-    const entries: QuestJournalEntry[] = [];
-    
-    for (const instance of this.instances.values()) {
-      if (instance.state !== 'active' && instance.state !== 'completed') continue;
-      
-      const objectives = instance.definition.objectives
-        .filter((obj) => !obj.hidden)
-        .sort((a, b) => (a.order || 0) - (b.order || 0))
-        .map((obj) => ({
-          definition: obj,
-          progress: instance.objectiveProgress.get(obj.id)!,
-        }));
-      
-      entries.push({
-        quest: instance.definition,
-        state: instance.state,
-        objectives,
-        tracked: instance.tracked,
-        timeRemaining: instance.expiresAt 
-          ? Math.max(0, instance.expiresAt - Date.now())
-          : undefined,
-      });
-    }
-    
-    // Sort by priority and category
-    const priorityOrder: Record<QuestPriority, number> = {
-      critical: 3,
-      high: 2,
-      normal: 1,
-      low: 0,
-    };
-    
-    const categoryOrder: Record<QuestCategory, number> = {
-      main: 6,
-      side: 5,
-      daily: 4,
-      weekly: 3,
-      event: 2,
-      repeatable: 1,
-      hidden: 0,
-    };
-    
-    entries.sort((a, b) => {
-      const pA = priorityOrder[a.quest.priority || 'normal'];
-      const pB = priorityOrder[b.quest.priority || 'normal'];
-      if (pA !== pB) return pB - pA;
-      
-      const cA = categoryOrder[a.quest.category];
-      const cB = categoryOrder[b.quest.category];
-      return cB - cA;
-    });
-    
-    return entries;
+    return buildQuestJournal(this.instances.values());
   }
   
   // ============================================================================
@@ -618,14 +453,8 @@ export class QuestManager extends EventEmitter {
   }
   
   private checkTimers(): void {
-    const now = Date.now();
-    
-    for (const [questId, instance] of this.instances) {
-      if (instance.state !== 'active') continue;
-      
-      if (instance.expiresAt && now >= instance.expiresAt) {
-        this.failQuest(questId, 'Time expired');
-      }
+    for (const questId of findExpiredQuestIds(this.instances)) {
+      this.failQuest(questId, 'Time expired');
     }
   }
   
@@ -634,51 +463,18 @@ export class QuestManager extends EventEmitter {
   // ============================================================================
   
   save(): string {
-    const data = {
-      completedQuests: Array.from(this.completedQuests),
-      instances: Array.from(this.instances.entries()).map(([id, inst]) => ({
-        id,
-        state: inst.state,
-        progress: Array.from(inst.objectiveProgress.entries()),
-        startedAt: inst.startedAt,
-        completedAt: inst.completedAt,
-        failedAt: inst.failedAt,
-        expiresAt: inst.expiresAt,
-        tracked: inst.tracked,
-        repeatCount: inst.repeatCount,
-      })),
+    return serializeQuestManagerState({
+      completedQuests: this.completedQuests,
+      instances: this.instances,
       trackedQuestId: this.trackedQuestId,
-    };
-    
-    return JSON.stringify(data);
+    });
   }
   
   load(json: string): void {
-    const data = JSON.parse(json);
-    
-    this.completedQuests = new Set(data.completedQuests);
-    this.trackedQuestId = data.trackedQuestId;
-    
-    for (const saved of data.instances) {
-      const instance = this.instances.get(saved.id);
-      if (!instance) continue;
-      
-      instance.state = saved.state;
-      instance.startedAt = saved.startedAt;
-      instance.completedAt = saved.completedAt;
-      instance.failedAt = saved.failedAt;
-      instance.expiresAt = saved.expiresAt;
-      instance.tracked = saved.tracked;
-      instance.repeatCount = saved.repeatCount;
-      
-      for (const [objId, progress] of saved.progress) {
-        instance.objectiveProgress.set(objId, progress);
-      }
-      
-      if (instance.state === 'active') {
-        this.activeQuestIds.add(saved.id);
-      }
-    }
+    const state = applyQuestManagerState(json, this.instances);
+    this.completedQuests = state.completedQuests;
+    this.trackedQuestId = state.trackedQuestId;
+    this.activeQuestIds = state.activeQuestIds;
     
     this.emit('loaded');
   }
@@ -701,7 +497,3 @@ export class QuestManager extends EventEmitter {
     this.removeAllListeners();
   }
 }
-
-// ============================================================================
-// QUEST BUILDER
-// ============================================================================
