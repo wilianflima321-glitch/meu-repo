@@ -1,36 +1,27 @@
-/**
- * AETHEL ENGINE - Pixel Streaming System
- *
- * WebRTC-based remote rendering for AAA graphics. Allows running heavy render
- * workloads on cloud GPU instances and streaming them to any browser.
- *
- * This package is intentionally split by responsibility:
- * - types: shared contracts
- * - codec: quality, SDP, stats, adaptive bitrate
- * - signaling: WebSocket signaling lifecycle
- * - session: WebRTC session and input transport
- * - cost: cloud-stream cost estimates
- * - react: client hook
- *
- * @module PixelStreaming
- * @version 2.1.0
- */
-
 import { logger } from '@/lib/observability/logger';
 import {
     AdaptiveQualityController,
-    calculateQualityScore,
     DEFAULT_CONFIG,
-    findStats,
     getSupportedCodecs,
-    isCandidatePairStats,
-    isCodecStats,
-    isInboundVideoStats,
     LatencyEstimator,
     prioritizeSdpCodec,
 } from './codec';
 import { PixelStreamingSignalingClient } from './signaling';
+import {
+    attachPixelStreamingInputHandlers,
+    createGamepadInput,
+    createKeyboardInput,
+    createMouseInput,
+    createTouchInput,
+    encodeInputBatch,
+} from './session-input';
+import { attachIncomingPixelStreamTrack } from './session-media';
+import {
+    createClientHelloMessage,
+    routePixelStreamingSignalingMessage,
+} from './session-signaling';
 import { createInitialStreamingStats, createRtcPeerConfig } from './session-state';
+import { applyQualityChangeMessage, collectPeerConnectionStats } from './session-stats';
 import type {
     EventCallback,
     InputMessage,
@@ -59,6 +50,7 @@ export class PixelStreamingClient {
     private eventListeners: Map<StreamingEventType, Set<EventCallback>> = new Map();
     private inputBuffer: InputMessage[] = [];
     private inputFlushInterval: NodeJS.Timeout | null = null;
+    private inputDetach: (() => void) | null = null;
 
     private qualityController: AdaptiveQualityController;
     private latencyEstimator: LatencyEstimator;
@@ -99,6 +91,7 @@ export class PixelStreamingClient {
      * Disconnect from the streaming server
      */
     async disconnect(): Promise<void> {
+        this.detachInputHandlers();
         this.stopInputCapture();
         this.stopStatsCollection();
 
@@ -201,35 +194,16 @@ export class PixelStreamingClient {
     }
 
     private handleIncomingTrack(event: RTCTrackEvent): void {
-        const track = event.track;
-        const stream = event.streams[0];
-
-        if (track.kind === 'video') {
-            if (!this.videoElement) {
-                this.videoElement = document.createElement('video');
-                this.videoElement.autoplay = true;
-                this.videoElement.playsInline = true;
-                this.videoElement.muted = true; // Mute video element, audio comes separately
-            }
-
-            this.videoElement.srcObject = stream;
-
-            // Start playback
-            this.videoElement.play().catch(err => {
-                logger.error('[PixelStreaming] Video playback failed:', err);
-            });
-
-        } else if (track.kind === 'audio' && this.config.audioEnabled) {
-            if (!this.audioElement) {
-                this.audioElement = document.createElement('audio');
-                this.audioElement.autoplay = true;
-            }
-
-            this.audioElement.srcObject = new MediaStream([track]);
-            this.audioElement.play().catch(err => {
-                logger.error('[PixelStreaming] Audio playback failed:', err);
-            });
-        }
+        const media = attachIncomingPixelStreamTrack({
+            audioElement: this.audioElement,
+            audioEnabled: this.config.audioEnabled,
+            event,
+            onAudioPlaybackError: (error) => logger.error('[PixelStreaming] Audio playback failed:', error),
+            onVideoPlaybackError: (error) => logger.error('[PixelStreaming] Video playback failed:', error),
+            videoElement: this.videoElement,
+        });
+        this.audioElement = media.audioElement;
+        this.videoElement = media.videoElement;
     }
 
     // ========================================================================
@@ -238,57 +212,21 @@ export class PixelStreamingClient {
 
     private onSignalingOpen(): void {
         this.reconnectAttempts = 0;
-
-        // Send client capabilities
-        this.sendSignaling({
-            type: 'client-hello',
-            capabilities: {
-                codecs: this.getSupportedCodecs(),
-                maxResolution: { width: 3840, height: 2160 },
-                maxFps: 120,
-                lowLatency: this.config.lowLatencyMode,
-                audio: this.config.audioEnabled
-            },
-            config: {
-                width: this.config.width,
-                height: this.config.height,
-                fps: this.config.targetFps,
-                bitrate: this.config.initialBitrate,
-                codec: this.config.codec
-            }
-        });
+        this.sendSignaling(createClientHelloMessage(this.config, getSupportedCodecs()));
     }
 
     private onSignalingMessage(event: MessageEvent): void {
-        try {
-            const message = JSON.parse(event.data);
-
-            switch (message.type) {
-                case 'offer':
-                    this.handleOffer(message.sdp);
-                    break;
-
-                case 'ice-candidate':
-                    if (this.pc && message.candidate) {
-                        this.pc.addIceCandidate(new RTCIceCandidate(message.candidate));
-                    }
-                    break;
-
-                case 'quality-change':
-                    this.handleQualityChange(message);
-                    break;
-
-                case 'server-stats':
-                    this.handleServerStats(message);
-                    break;
-
-                case 'error':
-                    this.emitEvent('error', { message: message.message });
-                    break;
-            }
-        } catch (error) {
-            logger.error('[PixelStreaming] Failed to parse signaling message:', error);
-        }
+        void routePixelStreamingSignalingMessage(
+            event.data,
+            {
+                addIceCandidate: (candidate) => this.pc?.addIceCandidate(new RTCIceCandidate(candidate)),
+                emitError: (message) => this.emitEvent('error', { message }),
+                handleOffer: (sdp) => this.handleOffer(sdp),
+                handleQualityChange: (message) => this.handleQualityChange(message),
+                handleServerStats: (message) => this.handleServerStats(message),
+            },
+            (error) => logger.error('[PixelStreaming] Failed to parse signaling message:', error)
+        );
     }
 
     private onSignalingError(error: Event): void {
@@ -328,96 +266,30 @@ export class PixelStreamingClient {
      * Send mouse input to the stream
      */
     sendMouseInput(event: MouseEvent, type: 'move' | 'down' | 'up' | 'wheel'): void {
-        if (!this.videoElement) return;
-
-        const rect = this.videoElement.getBoundingClientRect();
-        const scaleX = this.stats.resolution.width / rect.width;
-        const scaleY = this.stats.resolution.height / rect.height;
-
-        const input: InputMessage = {
-            type: 'mouse',
-            data: {
-                event: type,
-                x: (event.clientX - rect.left) * scaleX,
-                y: (event.clientY - rect.top) * scaleY,
-                button: event.button,
-                deltaX: type === 'wheel' ? (event as WheelEvent).deltaX : undefined,
-                deltaY: type === 'wheel' ? (event as WheelEvent).deltaY : undefined
-            },
-            timestamp: performance.now()
-        };
-
-        this.inputBuffer.push(input);
+        const input = createMouseInput(event, type, this.videoElement, this.stats);
+        if (input) this.inputBuffer.push(input);
     }
 
     /**
      * Send keyboard input to the stream
      */
     sendKeyboardInput(event: KeyboardEvent, type: 'down' | 'up'): void {
-        const input: InputMessage = {
-            type: 'keyboard',
-            data: {
-                event: type,
-                code: event.code,
-                key: event.key,
-                repeat: event.repeat,
-                modifiers: {
-                    ctrl: event.ctrlKey,
-                    alt: event.altKey,
-                    shift: event.shiftKey,
-                    meta: event.metaKey
-                }
-            },
-            timestamp: performance.now()
-        };
-
-        this.inputBuffer.push(input);
+        this.inputBuffer.push(createKeyboardInput(event, type));
     }
 
     /**
      * Send touch input to the stream
      */
     sendTouchInput(event: TouchEvent, type: 'start' | 'move' | 'end' | 'cancel'): void {
-        if (!this.videoElement) return;
-
-        const rect = this.videoElement.getBoundingClientRect();
-        const scaleX = this.stats.resolution.width / rect.width;
-        const scaleY = this.stats.resolution.height / rect.height;
-
-        const touches = Array.from(event.touches).map(touch => ({
-            id: touch.identifier,
-            x: (touch.clientX - rect.left) * scaleX,
-            y: (touch.clientY - rect.top) * scaleY,
-            force: touch.force
-        }));
-
-        const input: InputMessage = {
-            type: 'touch',
-            data: {
-                event: type,
-                touches
-            },
-            timestamp: performance.now()
-        };
-
-        this.inputBuffer.push(input);
+        const input = createTouchInput(event, type, this.videoElement, this.stats);
+        if (input) this.inputBuffer.push(input);
     }
 
     /**
      * Send gamepad input to the stream
      */
     sendGamepadInput(gamepad: Gamepad): void {
-        const input: InputMessage = {
-            type: 'gamepad',
-            data: {
-                index: gamepad.index,
-                buttons: gamepad.buttons.map(b => b.value),
-                axes: Array.from(gamepad.axes)
-            },
-            timestamp: performance.now()
-        };
-
-        this.inputBuffer.push(input);
+        this.inputBuffer.push(createGamepadInput(gamepad));
     }
 
     private flushInputBuffer(): void {
@@ -426,7 +298,7 @@ export class PixelStreamingClient {
 
         try {
             // Send as binary for efficiency
-            const data = this.encodeInputBatch(this.inputBuffer);
+            const data = encodeInputBatch(this.inputBuffer);
             this.dataChannel.send(data);
 
             // Track latency
@@ -437,38 +309,6 @@ export class PixelStreamingClient {
         }
 
         this.inputBuffer = [];
-    }
-
-    private encodeInputBatch(inputs: InputMessage[]): ArrayBuffer {
-        // Binary encoding for minimal latency
-        // Format: [count:u16][type:u8][timestamp:f64][...data]
-
-        const buffer = new ArrayBuffer(2 + inputs.length * 64); // Estimate
-        const view = new DataView(buffer);
-        let offset = 0;
-
-        view.setUint16(offset, inputs.length, true);
-        offset += 2;
-
-        for (const input of inputs) {
-            const typeCode = { mouse: 0, keyboard: 1, touch: 2, gamepad: 3 }[input.type];
-            view.setUint8(offset, typeCode);
-            offset += 1;
-
-            view.setFloat64(offset, input.timestamp, true);
-            offset += 8;
-
-            // Encode data based on type (simplified)
-            const dataStr = JSON.stringify(input.data);
-            const dataBytes = new TextEncoder().encode(dataStr);
-            view.setUint16(offset, dataBytes.length, true);
-            offset += 2;
-
-            new Uint8Array(buffer, offset, dataBytes.length).set(dataBytes);
-            offset += dataBytes.length;
-        }
-
-        return buffer.slice(0, offset);
     }
 
     // ========================================================================
@@ -492,51 +332,13 @@ export class PixelStreamingClient {
         if (!this.pc) return;
 
         try {
-            const stats = await this.pc.getStats();
-            const inboundRtp = findStats(stats, isInboundVideoStats);
-            const candidatePair = findStats(stats, isCandidatePairStats);
-
-            if (inboundRtp) {
-                this.stats.framesDecoded = inboundRtp.framesDecoded || 0;
-                this.stats.framesDropped = inboundRtp.framesDropped || 0;
-                this.stats.bytesReceived = inboundRtp.bytesReceived || 0;
-                this.stats.jitter = (inboundRtp.jitter || 0) * 1000;
-
-                // Calculate FPS from decoded frames
-                const fps = inboundRtp.framesPerSecond || this.config.targetFps;
-                this.stats.fps = Math.round(fps);
-
-                // Get codec info
-                if (inboundRtp.codecId) {
-                    stats.forEach((report: RTCStats) => {
-                        if (report.id === inboundRtp.codecId && isCodecStats(report)) {
-                            this.stats.codec = report.mimeType?.split('/')[1] || this.config.codec;
-                        }
-                    });
-                }
-            }
-
-            if (candidatePair) {
-                this.stats.rtt = candidatePair.currentRoundTripTime ?
-                    candidatePair.currentRoundTripTime * 1000 : 0;
-
-                // Calculate bitrate from bytes
-                const bytesNow = candidatePair.bytesReceived || 0;
-                this.stats.bitrate = Math.round((bytesNow / 1024) * 8); // kbps
-            }
-
-            // Calculate quality score
-            this.stats.qualityScore = this.calculateQualityScore();
-
-            // Update latency estimate
+            await collectPeerConnectionStats(this.pc, this.stats, this.config);
             this.latencyEstimator.update(this.stats.rtt);
 
-            // Check for latency warnings
             if (this.stats.rtt > 100) {
                 this.emitEvent('latency-warning', { rtt: this.stats.rtt });
             }
 
-            // Apply adaptive quality
             if (this.config.adaptiveBitrate) {
                 this.qualityController.adjust(this.stats);
             }
@@ -548,22 +350,8 @@ export class PixelStreamingClient {
         }
     }
 
-    private calculateQualityScore(): number {
-        return calculateQualityScore(this.stats, this.config.targetFps);
-    }
-
     private handleQualityChange(message: QualityChangeMessage): void {
-        if (message.resolution) {
-            this.stats.resolution = message.resolution;
-        }
-        if (message.bitrate) {
-            this.stats.bitrate = message.bitrate;
-        }
-
-        this.emitEvent('quality-changed', {
-            resolution: this.stats.resolution,
-            bitrate: this.stats.bitrate
-        });
+        this.emitEvent('quality-changed', applyQualityChangeMessage(this.stats, message));
     }
 
     private handleServerStats(message: ServerStatsMessage): void {
@@ -579,10 +367,6 @@ export class PixelStreamingClient {
     // ========================================================================
     // UTILITIES
     // ========================================================================
-
-    private getSupportedCodecs(): string[] {
-        return getSupportedCodecs();
-    }
 
     private handleConnectionFailure(): void {
         this.isStreaming = false;
@@ -611,30 +395,19 @@ export class PixelStreamingClient {
      */
     attachTo(container: HTMLElement): void {
         if (this.videoElement) {
+            this.detachInputHandlers();
             container.appendChild(this.videoElement);
-
-            // Set up input event listeners
-            container.addEventListener('mousemove', (e) => this.sendMouseInput(e, 'move'));
-            container.addEventListener('mousedown', (e) => this.sendMouseInput(e, 'down'));
-            container.addEventListener('mouseup', (e) => this.sendMouseInput(e, 'up'));
-            container.addEventListener('wheel', (e) => this.sendMouseInput(e as MouseEvent, 'wheel'));
-
-            container.addEventListener('keydown', (e) => this.sendKeyboardInput(e, 'down'));
-            container.addEventListener('keyup', (e) => this.sendKeyboardInput(e, 'up'));
-
-            container.addEventListener('touchstart', (e) => this.sendTouchInput(e, 'start'));
-            container.addEventListener('touchmove', (e) => this.sendTouchInput(e, 'move'));
-            container.addEventListener('touchend', (e) => this.sendTouchInput(e, 'end'));
-            container.addEventListener('touchcancel', (e) => this.sendTouchInput(e, 'cancel'));
-
-            // Make container focusable for keyboard events
-            container.tabIndex = 0;
-
-            // Handle cursor visibility
-            if (this.config.cursorMode === 'hidden') {
-                container.style.cursor = 'none';
-            }
+            this.inputDetach = attachPixelStreamingInputHandlers(container, this.config, {
+                keyboard: (event, type) => this.sendKeyboardInput(event, type),
+                mouse: (event, type) => this.sendMouseInput(event, type),
+                touch: (event, type) => this.sendTouchInput(event, type),
+            });
         }
+    }
+
+    private detachInputHandlers(): void {
+        this.inputDetach?.();
+        this.inputDetach = null;
     }
 
     /**
