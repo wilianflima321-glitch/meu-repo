@@ -5,21 +5,13 @@
  * Substitui todas as simulações por comunicação real com debuggers.
  */
 
-import { EventEmitter } from 'events';
-import {
-  fetchDebugAdapterEvents,
-  sendDebugAdapterRequest,
-  startDebugAdapterSession,
-} from './real-debug-adapter-transport';
+import { RealDebugAdapterCore } from './real-debug-adapter-core';
 
 import type {
   Breakpoint,
   Capabilities,
   ColumnDescriptor,
   CompletionsResponse,
-  DebugAdapterState,
-  DebugConfiguration,
-  DebugEvent,
   EvaluateResponse,
   LoadedSourcesResponse,
   ReadMemoryResponse,
@@ -32,7 +24,6 @@ import type {
   SourceResponse,
   StackFrame,
   StackTraceResponse,
-  StoppedReason,
   Thread,
   ThreadsResponse,
   Variable,
@@ -71,150 +62,7 @@ export type {
   WriteMemoryResponse,
 } from './real-debug-adapter-contracts';
 
-export class RealDebugAdapter extends EventEmitter {
-  private sessionId: string | null = null;
-  private config: DebugConfiguration;
-  private capabilities: Capabilities = {};
-  private state: DebugAdapterState = 'idle';
-  private threads: Thread[] = [];
-  private currentThreadId: number = 1;
-  private breakpoints: Map<string, Breakpoint[]> = new Map();
-  private eventPollingInterval: NodeJS.Timeout | null = null;
-  private lastEventSeq: number = 0;
-
-  constructor(config: DebugConfiguration) {
-    super();
-    this.config = config;
-  }
-
-  // ==========================================================================
-  // Session Management
-  // ==========================================================================
-
-  async initialize(): Promise<Capabilities> {
-    if (this.state !== 'idle') {
-      throw new Error(`Cannot initialize in state: ${this.state}`);
-    }
-
-    this.state = 'initializing';
-
-    try {
-      this.sessionId = await startDebugAdapterSession(this.config);
-
-      // Send initialize request
-      this.capabilities = await this.sendRequest('initialize', {
-        clientID: 'aethel-ide',
-        clientName: 'Aethel Engine IDE',
-        adapterID: this.config.type,
-        pathFormat: 'path',
-        linesStartAt1: true,
-        columnsStartAt1: true,
-        supportsVariableType: true,
-        supportsVariablePaging: true,
-        supportsRunInTerminalRequest: true,
-        supportsMemoryReferences: true,
-        supportsProgressReporting: true,
-        supportsInvalidatedEvent: true,
-      });
-
-      // Start event polling
-      this.startEventPolling();
-
-      this.emit('initialized', this.capabilities);
-
-      return this.capabilities;
-    } catch (error) {
-      this.state = 'idle';
-      throw error;
-    }
-  }
-
-  async launch(): Promise<void> {
-    if (!this.sessionId) {
-      throw new Error('Debug session not initialized');
-    }
-
-    // Build launch configuration
-    const launchArgs: Record<string, unknown> = {
-      type: this.config.type,
-      request: 'launch',
-      name: this.config.name,
-      program: this.config.program,
-      args: this.config.args,
-      cwd: this.config.cwd,
-      env: this.config.env,
-      stopOnEntry: this.config.stopOnEntry,
-    };
-
-    // Add type-specific options
-    if (this.config.type === 'python') {
-      if (this.config.pythonPath) launchArgs.pythonPath = this.config.pythonPath;
-      if (this.config.module) launchArgs.module = this.config.module;
-      if (this.config.django) launchArgs.django = true;
-      if (this.config.flask) launchArgs.flask = true;
-    } else if (this.config.type === 'node' || this.config.type === 'nodejs') {
-      if (this.config.runtimeExecutable) launchArgs.runtimeExecutable = this.config.runtimeExecutable;
-      if (this.config.runtimeArgs) launchArgs.runtimeArgs = this.config.runtimeArgs;
-      if (this.config.skipFiles) launchArgs.skipFiles = this.config.skipFiles;
-    } else if (this.config.type === 'go') {
-      if (this.config.mode) launchArgs.mode = this.config.mode;
-    }
-
-    await this.sendRequest('launch', launchArgs);
-    await this.sendRequest('configurationDone', {});
-
-    this.state = 'running';
-    this.emit('launched');
-  }
-
-  async attach(): Promise<void> {
-    if (!this.sessionId) {
-      throw new Error('Debug session not initialized');
-    }
-
-    await this.sendRequest('attach', {
-      type: this.config.type,
-      host: this.config.host || 'localhost',
-      port: this.config.port,
-    });
-
-    await this.sendRequest('configurationDone', {});
-
-    this.state = 'running';
-    this.emit('attached');
-  }
-
-  async disconnect(terminateDebuggee: boolean = true): Promise<void> {
-    if (!this.sessionId) return;
-
-    this.stopEventPolling();
-
-    try {
-      await this.sendRequest('disconnect', { terminateDebuggee });
-    } catch {
-      // Ignore errors during disconnect
-    }
-
-    // Stop session on server
-    try {
-      await fetch('/api/dap/session/stop', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: this.sessionId }),
-      });
-    } catch {
-      // Ignore
-    }
-
-    this.state = 'terminated';
-    this.sessionId = null;
-    this.emit('terminated');
-  }
-
-  async terminate(): Promise<void> {
-    await this.disconnect(true);
-  }
-
+export class RealDebugAdapter extends RealDebugAdapterCore {
   // ==========================================================================
   // Execution Control
   // ==========================================================================
@@ -568,162 +416,6 @@ export class RealDebugAdapter extends EventEmitter {
     });
   }
 
-  // ==========================================================================
-  // State Getters
-  // ==========================================================================
-
-  getState(): DebugAdapterState {
-    return this.state;
-  }
-
-  getCapabilities(): Capabilities {
-    return this.capabilities;
-  }
-
-  getConfiguration(): DebugConfiguration {
-    return this.config;
-  }
-
-  getCurrentThreadId(): number {
-    return this.currentThreadId;
-  }
-
-  setCurrentThreadId(threadId: number): void {
-    this.currentThreadId = threadId;
-  }
-
-  isRunning(): boolean {
-    return this.state === 'running';
-  }
-
-  isPaused(): boolean {
-    return this.state === 'paused';
-  }
-
-  isTerminated(): boolean {
-    return this.state === 'terminated';
-  }
-
-  // ==========================================================================
-  // Internal Methods
-  // ==========================================================================
-
-  private async sendRequest<T = Record<string, unknown>>(command: string, args: Record<string, unknown>): Promise<T> {
-    return sendDebugAdapterRequest<T>(this.sessionId, command, args);
-  }
-
-  private startEventPolling(): void {
-    if (this.eventPollingInterval) return;
-
-    this.eventPollingInterval = setInterval(async () => {
-      if (!this.sessionId) return;
-
-      try {
-        const events = await fetchDebugAdapterEvents(this.sessionId, this.lastEventSeq);
-        for (const event of events) {
-          this.handleEvent(event);
-          const eventSeq = event.seq ?? this.lastEventSeq;
-          if (eventSeq > this.lastEventSeq) {
-            this.lastEventSeq = eventSeq;
-          }
-        }
-      } catch {
-        // Ignore polling errors
-      }
-    }, 100); // Poll every 100ms
-  }
-
-  private stopEventPolling(): void {
-    if (this.eventPollingInterval) {
-      clearInterval(this.eventPollingInterval);
-      this.eventPollingInterval = null;
-    }
-  }
-
-  private handleEvent(event: DebugEvent): void {
-    const { event: eventType, body } = event;
-
-    switch (eventType) {
-      case 'initialized':
-        this.emit('initialized', this.capabilities);
-        break;
-
-      case 'stopped':
-        this.state = 'paused';
-        if (body?.threadId) {
-          this.currentThreadId = body.threadId as number;
-        }
-        this.emit('stopped', {
-          reason: body?.reason as StoppedReason || 'pause',
-          threadId: body?.threadId,
-          text: body?.text,
-          allThreadsStopped: body?.allThreadsStopped,
-          preserveFocusHint: body?.preserveFocusHint,
-        });
-        break;
-
-      case 'continued':
-        this.state = 'running';
-        this.emit('continued', {
-          threadId: body?.threadId,
-          allThreadsContinued: body?.allThreadsContinued,
-        });
-        break;
-
-      case 'thread':
-        if (body?.reason === 'started') {
-          this.emit('threadStarted', { threadId: body?.threadId });
-        } else if (body?.reason === 'exited') {
-          this.emit('threadExited', { threadId: body?.threadId });
-        }
-        break;
-
-      case 'output':
-        this.emit('output', {
-          category: body?.category || 'console',
-          output: body?.output || '',
-          source: body?.source,
-          line: body?.line,
-          column: body?.column,
-        });
-        break;
-
-      case 'breakpoint':
-        this.emit('breakpointChanged', {
-          reason: body?.reason,
-          breakpoint: body?.breakpoint,
-        });
-        break;
-
-      case 'module':
-        this.emit('moduleLoaded', body);
-        break;
-
-      case 'loadedSource':
-        this.emit('sourceLoaded', body);
-        break;
-
-      case 'process':
-        this.emit('process', {
-          name: body?.name,
-          startMethod: body?.startMethod,
-        });
-        break;
-
-      case 'exited':
-        this.emit('exited', { exitCode: body?.exitCode });
-        break;
-
-      case 'terminated':
-        this.state = 'terminated';
-        this.stopEventPolling();
-        this.emit('terminated');
-        break;
-
-      default:
-        this.emit('event', event);
-    }
-  }
 }
 
 export { DebugSessionManager, debugManager } from './real-debug-session-manager';
