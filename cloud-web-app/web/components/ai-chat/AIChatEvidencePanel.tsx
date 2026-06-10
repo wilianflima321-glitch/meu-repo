@@ -1,5 +1,5 @@
 import { SearchCheck } from 'lucide-react'
-import { AIChatEvidenceCard } from '@/components/ai-chat/AIChatEvidenceCard'
+import { AgentEvidenceCard } from '@/components/agents/AgentEvidenceCard'
 import type { AIChatEvidenceArtifact } from '@/components/agents/evidence'
 
 interface AIChatEvidencePanelProps {
@@ -30,7 +30,7 @@ export function AIChatEvidencePanel({ latestArtifact }: AIChatEvidencePanelProps
         </p>
       </div>
 
-      <AIChatEvidenceCard artifact={latestArtifact} />
+      <AgentEvidenceCard artifact={latestArtifact} />
     </div>
   )
 }

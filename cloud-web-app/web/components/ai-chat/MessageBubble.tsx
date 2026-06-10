@@ -6,7 +6,7 @@ import type { Message } from '../ide/AIChatPanelPro.types'
 import { ThinkingDisplay, ToolCallDisplay } from '../ide/AIChatPanelChrome'
 import { MessageBubbleActionBar } from '@/components/ai-chat/MessageBubbleActionBar'
 import { MessageBubbleContent } from '@/components/ai-chat/MessageBubbleContent'
-import { AIChatEvidenceCard } from '@/components/ai-chat/AIChatEvidenceCard'
+import { AgentEvidenceCard } from '@/components/agents/AgentEvidenceCard'
 import { useMessageBubbleCopyActions } from '@/components/ai-chat/useMessageBubbleCopyActions'
 
 export interface MessageBubbleProps {
@@ -96,7 +96,7 @@ export function MessageBubble({ message, onCopy, onRegenerate, onRate }: Message
 
         {!isUser && evidenceArtifact ? (
           <div className="mt-2 max-w-full">
-            <AIChatEvidenceCard artifact={evidenceArtifact} compact />
+            <AgentEvidenceCard artifact={evidenceArtifact} compact />
           </div>
         ) : null}
 

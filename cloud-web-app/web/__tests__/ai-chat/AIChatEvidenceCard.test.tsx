@@ -1,16 +1,16 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { AIChatEvidenceCard } from '@/components/ai-chat/AIChatEvidenceCard'
+import { AgentEvidenceCard } from '@/components/agents/AgentEvidenceCard'
 
-describe('AIChatEvidenceCard', () => {
+describe('AgentEvidenceCard', () => {
   it('renders research artifacts with sources and credibility', () => {
     render(
-      <AIChatEvidenceCard
+      <AgentEvidenceCard
         artifact={{
           kind: 'research',
-          query: 'Benchmark de preview review',
-          summary: 'Comparativo honesto entre Vercel, v0 e Replit.',
+          query: 'Preview review benchmark',
+          summary: 'Honest comparison between Vercel, v0, and Replit.',
           generatedAt: '2026-04-28T16:45:00.000Z',
           averageCredibility: 0.84,
           sources: [
@@ -24,8 +24,8 @@ describe('AIChatEvidenceCard', () => {
       />
     )
 
-    expect(screen.getByText('Benchmark de preview review')).toBeInTheDocument()
-    expect(screen.getByText(/credibilidade media 84%/i)).toBeInTheDocument()
+    expect(screen.getByText('Preview review benchmark')).toBeInTheDocument()
+    expect(screen.getByText((_, element) => element?.textContent === 'average credibility 84%')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Vercel sharing preview deployments/i })).toHaveAttribute(
       'href',
       'https://vercel.com/docs/deployments/sharing-deployments'
@@ -34,24 +34,24 @@ describe('AIChatEvidenceCard', () => {
 
   it('renders execution traces with telemetry and evidence counts', () => {
     render(
-      <AIChatEvidenceCard
+      <AgentEvidenceCard
         artifact={{
           kind: 'trace',
           traceId: 'trace_abcdef123456',
-          summary: 'Resposta gerada com trace detalhada.',
-          decision: 'Executar resposta consolidada.',
-          reasons: ['Planejamento separado'],
+          summary: 'Response generated with detailed trace.',
+          decision: 'Run the consolidated response.',
+          reasons: ['Planning is separated'],
           tradeoffs: [],
           evidence: [{ kind: 'context', label: 'historyContextMessages=6' }],
-          riskChecks: [{ risk: 'build parity', status: 'warn', mitigation: 'rodar probe' }],
+          riskChecks: [{ risk: 'build parity', status: 'warn', mitigation: 'run probe' }],
           toolRuns: [{ toolName: 'searchWeb', status: 'ok', durationMs: 320 }],
           telemetry: { provider: 'openrouter', model: 'openai/gpt-4.1', tokensUsed: 920, latencyMs: 1400 },
         }}
       />
     )
 
-    expect(screen.getByText('Resposta gerada com trace detalhada.')).toBeInTheDocument()
-    expect(screen.getByText(/1 evidencias/i)).toBeInTheDocument()
+    expect(screen.getByText('Response generated with detailed trace.')).toBeInTheDocument()
+    expect(screen.getByText((_, element) => element?.textContent === '1 evidence items')).toBeInTheDocument()
     expect(screen.getByText(/openrouter/i)).toBeInTheDocument()
     expect(screen.getByText(/searchWeb/i)).toBeInTheDocument()
     expect(screen.getByText(/build parity/i)).toBeInTheDocument()

@@ -37,7 +37,7 @@ export default defineConfig({
       include: [
         'components/agents/chat/AIChatCostMeter.tsx',
         'components/ai-chat/AIChatEconomicsPanel.tsx',
-        'components/ai-chat/AIChatEvidenceCard.tsx',
+        'components/agents/AgentEvidenceCard.tsx',
         'components/ai-chat/AIChatLedgerStrip.tsx',
         'components/ai-chat/AIChatPendingDiffTray.tsx',
         'components/ai-chat/AIChatProposalPreview.tsx',

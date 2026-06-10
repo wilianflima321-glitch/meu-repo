@@ -59,7 +59,7 @@ const config: Config = {
     // Expand this list as the test suite grows; do not dilute it with untested bulk.
     'components/agents/chat/AIChatCostMeter.tsx',
     'components/ai-chat/AIChatEconomicsPanel.tsx',
-    'components/ai-chat/AIChatEvidenceCard.tsx',
+    'components/agents/AgentEvidenceCard.tsx',
     'components/ai-chat/AIChatLedgerStrip.tsx',
     'components/ai-chat/AIChatPendingDiffTray.tsx',
     'components/ai-chat/AIChatProposalPreview.tsx',
