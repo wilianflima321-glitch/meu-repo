@@ -5,377 +5,43 @@
  * including breakpoints, stepping, variable inspection, etc.
  */
 
-import { EventEmitter } from 'events';
+import { DapTransportClient } from './dap-client.transport';
+import type {
+  AttachRequestArguments,
+  Breakpoint,
+  BreakpointEventBody,
+  DapClientEvents,
+  LaunchRequestArguments,
+  OutputEventBody,
+  Scope,
+  Source,
+  StackFrame,
+  StoppedEventBody,
+  Thread,
+  Variable,
+} from './dap-client.contracts';
 
-import {createComponentLogger, logger} from '@/lib/observability/logger'
-
-const log = createComponentLogger('dap-client')
-
-// DAP Message Types
-interface DapMessage {
-  seq: number;
-  type: 'request' | 'response' | 'event';
-}
-
-interface DapRequest extends DapMessage {
-  type: 'request';
-  command: string;
-  arguments?: Record<string, unknown>;
-}
-
-interface DapResponse extends DapMessage {
-  type: 'response';
-  request_seq: number;
-  success: boolean;
-  command: string;
-  message?: string;
-  body?: Record<string, unknown>;
-}
-
-interface DapEvent extends DapMessage {
-  type: 'event';
-  event: string;
-  body?: Record<string, unknown>;
-}
-
-// DAP Types
-export interface Source {
-  name?: string;
-  path?: string;
-  sourceReference?: number;
-}
-
-export interface Breakpoint {
-  id?: number;
-  verified: boolean;
-  message?: string;
-  source?: Source;
-  line?: number;
-  column?: number;
-  endLine?: number;
-  endColumn?: number;
-}
-
-export interface StackFrame {
-  id: number;
-  name: string;
-  source?: Source;
-  line: number;
-  column: number;
-  endLine?: number;
-  endColumn?: number;
-  moduleId?: number | string;
-  presentationHint?: 'normal' | 'label' | 'subtle';
-}
-
-export interface Thread {
-  id: number;
-  name: string;
-}
-
-export interface Scope {
-  name: string;
-  variablesReference: number;
-  namedVariables?: number;
-  indexedVariables?: number;
-  expensive: boolean;
-  source?: Source;
-  line?: number;
-  column?: number;
-  endLine?: number;
-  endColumn?: number;
-}
-
-export interface Variable {
-  name: string;
-  value: string;
-  type?: string;
-  variablesReference: number;
-  namedVariables?: number;
-  indexedVariables?: number;
-  evaluateName?: string;
-  memoryReference?: string;
-}
-
-export interface StoppedEventBody {
-  reason: 'step' | 'breakpoint' | 'exception' | 'pause' | 'entry' | 'goto' | 'function breakpoint' | 'data breakpoint' | 'instruction breakpoint' | string;
-  description?: string;
-  threadId?: number;
-  preserveFocusHint?: boolean;
-  text?: string;
-  allThreadsStopped?: boolean;
-  hitBreakpointIds?: number[];
-}
-
-export interface OutputEventBody {
-  category?: 'console' | 'important' | 'stdout' | 'stderr' | 'telemetry';
-  output: string;
-  group?: 'start' | 'startCollapsed' | 'end';
-  variablesReference?: number;
-  source?: Source;
-  line?: number;
-  column?: number;
-  data?: unknown;
-}
-
-export interface BreakpointEventBody {
-  reason: 'changed' | 'new' | 'removed';
-  breakpoint: Breakpoint;
-}
-
-// Launch/Attach configuration
-export interface LaunchRequestArguments {
-  program: string;
-  args?: string[];
-  cwd?: string;
-  env?: Record<string, string>;
-  stopOnEntry?: boolean;
-  console?: 'internalConsole' | 'integratedTerminal' | 'externalTerminal';
-}
-
-export interface AttachRequestArguments {
-  processId?: number;
-  port?: number;
-  host?: string;
-}
-
-// Event types emitted by the client
-export interface DapClientEvents {
-  initialized: () => void;
-  stopped: (body: StoppedEventBody) => void;
-  continued: (threadId: number) => void;
-  exited: (exitCode: number) => void;
-  terminated: () => void;
-  thread: (reason: 'started' | 'exited', threadId: number) => void;
-  output: (body: OutputEventBody) => void;
-  breakpoint: (body: BreakpointEventBody) => void;
-  module: (reason: 'new' | 'changed' | 'removed', module: unknown) => void;
-  loadedSource: (reason: 'new' | 'changed' | 'removed', source: Source) => void;
-  process: (name: string, startMethod?: string) => void;
-  capabilities: (capabilities: Record<string, unknown>) => void;
-  connected: () => void;
-  disconnected: () => void;
-  error: (error: Error) => void;
-}
+export type {
+  AttachRequestArguments,
+  Breakpoint,
+  BreakpointEventBody,
+  DapClientEvents,
+  LaunchRequestArguments,
+  OutputEventBody,
+  Scope,
+  Source,
+  StackFrame,
+  StoppedEventBody,
+  Thread,
+  Variable,
+} from './dap-client.contracts';
 
 /**
  * DAP Client for debugging
  */
-export class DapClient extends EventEmitter {
-  private ws: WebSocket | null = null;
-  private seq = 0;
-  private pendingRequests = new Map<number, { resolve: (value: DapResponse) => void; reject: (error: Error) => void }>();
-  private capabilities: Record<string, unknown> = {};
-  private isInitialized = false;
+export class DapClient extends DapTransportClient {
   private threads: Thread[] = [];
   private breakpoints = new Map<string, Breakpoint[]>(); // uri -> breakpoints
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-
-  constructor(private wsUrl: string = 'ws://localhost:3001/debug') {
-    super();
-  }
-
-  /**
-   * Connect to DAP server
-   */
-  async connect(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.ws = new WebSocket(this.wsUrl);
-
-      this.ws.onopen = () => {
-        log.info('[DAP Client] Connected to debug server');
-        this.reconnectAttempts = 0;
-        this.emit('connected');
-        resolve();
-      };
-
-      this.ws.onclose = () => {
-        log.info('[DAP Client] Disconnected from debug server');
-        this.emit('disconnected');
-        this.handleDisconnect();
-      };
-
-      this.ws.onerror = (error) => {
-        logger.error('[DAP Client] WebSocket error:', error);
-        reject(new Error('Failed to connect to debug server'));
-      };
-
-      this.ws.onmessage = (event) => {
-        this.handleMessage(JSON.parse(event.data));
-      };
-    });
-  }
-
-  /**
-   * Handle disconnection
-   */
-  private async handleDisconnect(): Promise<void> {
-    this.isInitialized = false;
-    
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      const delay = 1000 * Math.pow(2, this.reconnectAttempts - 1);
-      log.info(`[DAP Client] Attempting reconnect in ${delay}ms`);
-      
-      setTimeout(async () => {
-        try {
-          await this.connect();
-        } catch (error) {
-          logger.error('[DAP Client] Reconnect failed:', error);
-        }
-      }, delay);
-    }
-  }
-
-  /**
-   * Send a request to DAP server
-   */
-  private sendRequest<T extends Record<string, unknown> = Record<string, unknown>>(
-    command: string,
-    args?: Record<string, unknown>
-  ): Promise<T> {
-    return new Promise((resolve, reject) => {
-      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-        reject(new Error('WebSocket not connected'));
-        return;
-      }
-
-      const seq = ++this.seq;
-      const request: DapRequest = {
-        seq,
-        type: 'request',
-        command,
-        arguments: args,
-      };
-
-      this.pendingRequests.set(seq, {
-        resolve: (response: DapResponse) => resolve(response.body as T),
-        reject,
-      });
-
-      this.ws.send(JSON.stringify(request));
-
-      // Timeout after 30 seconds
-      setTimeout(() => {
-        if (this.pendingRequests.has(seq)) {
-          this.pendingRequests.delete(seq);
-          reject(new Error(`Request ${command} timed out`));
-        }
-      }, 30000);
-    });
-  }
-
-  /**
-   * Handle incoming DAP message
-   */
-  private handleMessage(message: DapResponse | DapEvent): void {
-    if (message.type === 'response') {
-      const response = message as DapResponse;
-      const pending = this.pendingRequests.get(response.request_seq);
-      
-      if (pending) {
-        this.pendingRequests.delete(response.request_seq);
-        if (response.success) {
-          pending.resolve(response);
-        } else {
-          pending.reject(new Error(response.message || 'Request failed'));
-        }
-      }
-    } else if (message.type === 'event') {
-      this.handleEvent(message as DapEvent);
-    }
-  }
-
-  /**
-   * Handle DAP events
-   */
-  private handleEvent(event: DapEvent): void {
-    const body = event.body || {};
-
-    switch (event.event) {
-      case 'initialized':
-        this.isInitialized = true;
-        this.emit('initialized');
-        break;
-
-      case 'stopped':
-        this.emit('stopped', body as unknown as StoppedEventBody);
-        break;
-
-      case 'continued':
-        this.emit('continued', (body as { threadId: number }).threadId);
-        break;
-
-      case 'exited':
-        this.emit('exited', (body as { exitCode: number }).exitCode);
-        break;
-
-      case 'terminated':
-        this.emit('terminated');
-        break;
-
-      case 'thread':
-        const threadBody = body as { reason: 'started' | 'exited'; threadId: number };
-        this.emit('thread', threadBody.reason, threadBody.threadId);
-        break;
-
-      case 'output':
-        this.emit('output', body as unknown as OutputEventBody);
-        break;
-
-      case 'breakpoint':
-        this.emit('breakpoint', body as unknown as BreakpointEventBody);
-        break;
-
-      case 'module':
-        const moduleBody = body as { reason: 'new' | 'changed' | 'removed'; module: unknown };
-        this.emit('module', moduleBody.reason, moduleBody.module);
-        break;
-
-      case 'loadedSource':
-        const sourceBody = body as { reason: 'new' | 'changed' | 'removed'; source: Source };
-        this.emit('loadedSource', sourceBody.reason, sourceBody.source);
-        break;
-
-      case 'process':
-        const processBody = body as { name: string; startMethod?: string };
-        this.emit('process', processBody.name, processBody.startMethod);
-        break;
-
-      case 'capabilities':
-        this.capabilities = { ...this.capabilities, ...(body as { capabilities: Record<string, unknown> }).capabilities };
-        this.emit('capabilities', this.capabilities);
-        break;
-
-      default:
-        log.info('[DAP Client] Unknown event:', event.event, body);
-    }
-  }
-
-  /**
-   * Initialize debug session
-   */
-  async initialize(): Promise<Record<string, unknown>> {
-    const response = await this.sendRequest<{ capabilities?: Record<string, unknown> }>('initialize', {
-      clientID: 'aethel-engine',
-      clientName: 'Aethel Engine IDE',
-      adapterID: 'aethel',
-      pathFormat: 'path',
-      linesStartAt1: true,
-      columnsStartAt1: true,
-      supportsVariableType: true,
-      supportsVariablePaging: true,
-      supportsRunInTerminalRequest: true,
-      supportsMemoryReferences: true,
-      supportsProgressReporting: true,
-      supportsInvalidatedEvent: true,
-      supportsMemoryEvent: true,
-    });
-
-    this.capabilities = response.capabilities || {};
-    return this.capabilities;
-  }
 
   /**
    * Launch a debug session
@@ -669,32 +335,6 @@ export class DapClient extends EventEmitter {
    */
   getAllBreakpoints(): Map<string, Breakpoint[]> {
     return new Map(this.breakpoints);
-  }
-
-  /**
-   * Check if initialized
-   */
-  get initialized(): boolean {
-    return this.isInitialized;
-  }
-
-  /**
-   * Get server capabilities
-   */
-  getCapabilities(): Record<string, unknown> {
-    return { ...this.capabilities };
-  }
-
-  /**
-   * Close connection
-   */
-  close(): void {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
-    this.pendingRequests.clear();
-    this.isInitialized = false;
   }
 }
 
