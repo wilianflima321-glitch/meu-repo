@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import type { EditorApplyBridgeContextValue } from '@/components/ide/EditorApplyBridgeContext'
-import type { AIChatOpsTab } from './presets'
+import type { AIChatOpsTab } from '@/components/agents/chat/presets'
 
 interface UseAIChatOpsStateParams {
   editorBridge: EditorApplyBridgeContextValue | null

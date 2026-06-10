@@ -5,7 +5,7 @@ import { ClipboardList, Code2, DollarSign, Radio, SearchCheck } from 'lucide-rea
 import type { ChatDiffFile } from '@/lib/ai/ai-apply-bridge'
 
 import type { AIChatEvidenceArtifact } from './ai-chat-evidence'
-import type { AIChatConsoleMode } from './presets'
+import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
 
 interface AIChatLedgerStripProps {
   agentCount: number

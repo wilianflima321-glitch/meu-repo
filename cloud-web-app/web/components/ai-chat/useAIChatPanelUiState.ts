@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import type { Message } from '@/components/ide/AIChatPanelPro.types'
-import type { AIChatConsoleMode } from './presets'
+import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
 
 type UseAIChatPanelUiStateParams = {
   messages?: Message[]

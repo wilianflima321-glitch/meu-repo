@@ -15,7 +15,7 @@ import type {
   Attachment,
   CodebaseContextPreview,
 } from '@/components/ide/AIChatPanelPro.types'
-import type { AIChatConsoleMode } from './presets'
+import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
 import { useChatContextPreviews } from './useChatContextPreviews'
 import { useVoiceRecording } from './useVoiceRecording'
 

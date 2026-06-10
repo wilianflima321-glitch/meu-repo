@@ -16,7 +16,7 @@ import {
   type Mention,
   type MentionSuggestion,
 } from '@/lib/copilot/mention-parser'
-import type { AIChatModePreset } from './presets'
+import type { AIChatModePreset } from '@/components/agents/chat/presets'
 
 interface AIChatComposerProps {
   input: string

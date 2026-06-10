@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronDown } from 'lucide-react'
-import { CONSOLE_MODES } from './presets'
+import { CONSOLE_MODES } from '@/components/agents/chat/presets'
 import type { AIChatModeMenuProps } from './AIChatHeader.types'
 
 export function AIChatModeMenu({

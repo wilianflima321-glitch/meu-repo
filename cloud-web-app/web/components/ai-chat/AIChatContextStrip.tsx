@@ -1,7 +1,7 @@
 'use client'
 
 import { Bot, Brain, Loader2, Radio, Target } from 'lucide-react'
-import { CONSOLE_MODES, type AIChatConsoleMode, type AIChatModePreset } from './presets'
+import { CONSOLE_MODES, type AIChatConsoleMode, type AIChatModePreset } from '@/components/agents/chat/presets'
 
 interface AIChatContextStripProps {
   agentCount: number

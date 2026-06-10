@@ -3,7 +3,7 @@
 import { AgentBoard, type AgentInfo } from '@/components/ai-chat/AgentBoard'
 import { LiveConversationPanel } from '@/components/ai-chat/LiveConversationPanel'
 import { RunCard } from '@/components/ai-chat/RunCard'
-import type { AIChatConsoleMode } from './presets'
+import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
 
 interface AIChatActivityDeckProps {
   consoleMode: AIChatConsoleMode

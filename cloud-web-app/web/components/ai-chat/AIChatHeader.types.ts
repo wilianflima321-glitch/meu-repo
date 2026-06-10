@@ -1,5 +1,5 @@
 import type { ModelOption } from '@/components/ide/AIChatPanelPro.types'
-import type { AIChatConsoleMode } from './presets'
+import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
 
 export interface AIChatHeaderProps {
   consoleMode: AIChatConsoleMode

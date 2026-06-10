@@ -1,6 +1,6 @@
 'use client'
 
-import type { QuickPromptDefinition } from './presets'
+import type { QuickPromptDefinition } from '@/components/agents/chat/presets'
 
 interface AIChatQuickPromptStripProps {
   onQuickPrompt: (prompt: string) => void

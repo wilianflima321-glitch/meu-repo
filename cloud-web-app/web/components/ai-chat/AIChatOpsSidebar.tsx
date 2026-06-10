@@ -9,7 +9,7 @@ import { AIChatEconomicsPanel } from './AIChatEconomicsPanel'
 import { AIChatEvidencePanel } from './AIChatEvidencePanel'
 import { AIChatRulesPanel } from './AIChatRulesPanel'
 import type { AIChatEvidenceArtifact } from './ai-chat-evidence'
-import { OPS_TABS, type AIChatOpsTab } from './presets'
+import { OPS_TABS, type AIChatOpsTab } from '@/components/agents/chat/presets'
 import { useAIChatOpsArtifacts, type AIChatApprovalChange } from './useAIChatOpsArtifacts'
 
 const MonacoChatDiffPanel = dynamic(
