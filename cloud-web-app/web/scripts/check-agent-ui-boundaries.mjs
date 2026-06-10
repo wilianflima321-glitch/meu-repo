@@ -21,7 +21,9 @@ const ALLOWED_EXTERNAL_IMPORTERS = new Set([
   'components/agents/AgentEvidenceCard.tsx',
   'components/agents/evidence.ts',
   'components/agents/presets.ts',
-  'components/agents/legacy-chat-panel.ts',
+  'components/agents/chat/composer.ts',
+  'components/agents/chat/panels.ts',
+  'components/agents/chat/state.ts',
   'components/agents/AgentsWorkspaceContainer.tsx',
 ])
 
@@ -118,6 +120,28 @@ if (workbench) {
   }
   if (/AIChatPanelContainer/.test(workbench)) {
     failures.push('components/ide/fullscreen/FullscreenIDEWorkspace.tsx: must not import legacy AIChatPanelContainer')
+  }
+}
+
+const proPanel = read('components/ide/AIChatPanelPro.tsx')
+if (proPanel) {
+  if (!/@\/components\/agents\/chat['"]/.test(proPanel)) {
+    failures.push('components/ide/AIChatPanelPro.tsx: chat panel must import legacy pieces through components/agents/chat')
+  }
+  if (IMPORT_RE.test(proPanel)) {
+    failures.push('components/ide/AIChatPanelPro.tsx: must not import components/ai-chat directly')
+    IMPORT_RE.lastIndex = 0
+  }
+}
+
+const legacyChatPanel = read('components/agents/legacy-chat-panel.ts')
+if (legacyChatPanel) {
+  if (!/export \* from ['"]\.\/chat['"]/.test(legacyChatPanel.trim())) {
+    failures.push('components/agents/legacy-chat-panel.ts: must stay a thin alias to ./chat')
+  }
+  if (IMPORT_RE.test(legacyChatPanel)) {
+    failures.push('components/agents/legacy-chat-panel.ts: must not import components/ai-chat directly')
+    IMPORT_RE.lastIndex = 0
   }
 }
 

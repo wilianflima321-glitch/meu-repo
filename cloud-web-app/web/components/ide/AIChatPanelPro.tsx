@@ -28,7 +28,7 @@ import {
   useAIChatPanelUiState,
   useAIChatRunState,
   useAIChatSpeechPlayback,
-} from '@/components/agents/legacy-chat-panel'
+} from '@/components/agents/chat'
 
 export default function AIChatPanelPro({
   messages = [],
