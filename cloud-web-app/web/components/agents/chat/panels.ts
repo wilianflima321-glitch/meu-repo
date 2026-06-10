@@ -1,7 +1,6 @@
-export { AIChatContextStrip } from '@/components/ai-chat/AIChatContextStrip'
+export { AIChatContextStrip, AIChatHistoryModeRail } from './shell'
 export { AIChatCostMeter } from './AIChatCostMeter'
 export { AIChatHeader } from '@/components/ai-chat/AIChatHeader'
-export { AIChatHistoryModeRail } from '@/components/ai-chat/AIChatHistoryModeRail'
 export { AIChatLedgerStrip } from './ledger'
 export { AIChatMessagesPane } from '@/components/ai-chat/AIChatMessagesPane'
 export { AIChatOpsSidebar } from '@/components/ai-chat/AIChatOpsSidebar'
