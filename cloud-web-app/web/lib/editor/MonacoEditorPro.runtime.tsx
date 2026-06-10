@@ -9,10 +9,8 @@ import {
   configureMonacoEditor,
   registerMonacoEditorActions,
 } from '@/components/editor/MonacoEditorPro.actions';
-import { resolveAuthoritativeDocumentSymbols } from '@/components/editor/MonacoEditorPro.symbols';
 import { registerAethelMonacoTheme } from '@/components/editor/MonacoEditorPro.theme';
 import { MonacoEditorDecorationsStyle } from '@/components/editor/MonacoEditorPro.styles';
-import { mapMonacoMarkersToDiagnostics } from '@/components/editor/MonacoEditorPro.diagnostics';
 import {
   InlineChatPopover,
   InlineEditFeedbackBanner,
@@ -20,18 +18,20 @@ import {
   MonacoEditorLoading,
   type InlineEditFeedbackState,
 } from '@/components/editor/MonacoEditorPro.shell';
-import { getAuthHeaders, submitChangeFeedback } from '@/lib/ai/change-feedback-client';
+import {
+  useMonacoCommentDecorations,
+  useMonacoDiagnosticsPublishing,
+  useMonacoDocumentSymbols,
+  useMonacoErrorDecorations,
+  useMonacoGitDecorations,
+  useMonacoRevealLocation,
+} from '@/lib/editor/MonacoEditorPro.effects';
+import { validateAndPersistInlineEdit } from '@/lib/editor/MonacoEditorPro.inline-apply';
 import { createComponentLogger } from '@/lib/observability/logger';
 import { useFileComments, type InlineComment, type InlineCommentAuthor } from '@/hooks/useFileComments';
 
 
-import type {
-  ChangeApplyResponse,
-  ChangeValidationResponse,
-  Diagnostic,
-  GitChange,
-  MonacoEditorProps,
-} from '@/components/editor/MonacoEditorPro.types';
+import type { Diagnostic, GitChange, MonacoEditorProps } from '@/components/editor/MonacoEditorPro.types';
 export type { Diagnostic, GitChange, MonacoEditorProps } from '@/components/editor/MonacoEditorPro.types';
 
 const log = createComponentLogger('MonacoEditorPro');
@@ -302,194 +302,43 @@ export function MonacoEditorPro({
     };
   }, []);
 
-  useEffect(() => {
-    if (!editorRef.current || !monacoRef.current || !onDiagnosticsChange) return;
-
-    const editor = editorRef.current;
-    const monaco = monacoRef.current;
-    const model = editor.getModel();
-    if (!model) return;
-
-    const publishMarkers = () => {
-      const markers = monaco.editor.getModelMarkers({ resource: model.uri });
-      onDiagnosticsChange(mapMonacoMarkersToDiagnostics(markers));
-    };
-
-    publishMarkers();
-
-    const markerListener = monaco.editor.onDidChangeMarkers((resources: readonly monacoEditor.Uri[]) => {
-      if (resources.some((resource) => resource.toString() === model.uri.toString())) {
-        publishMarkers();
-      }
-    });
-
-    return () => {
-      markerListener.dispose();
-      onDiagnosticsChange([]);
-    };
-  }, [language, onDiagnosticsChange, path]);
-
-  useEffect(() => {
-    if (!editorRef.current || !monacoRef.current || !onDocumentSymbolsChange) return;
-
-    const editor = editorRef.current;
-    const monaco = monacoRef.current;
-    const model = editor.getModel();
-    if (!model) return;
-
-    const targetPath = path?.trim() || model.uri.path || model.uri.toString();
-    const requestVersion = ++symbolRequestVersionRef.current;
-    let cancelled = false;
-
-    const timerId = window.setTimeout(async () => {
-      try {
-        const symbols = await resolveAuthoritativeDocumentSymbols(monaco, model);
-        if (cancelled || requestVersion !== symbolRequestVersionRef.current) return;
-
-        onDocumentSymbolsChange({
-          path: targetPath,
-          symbols: symbols ?? [],
-          authoritative: symbols !== null,
-        });
-      } catch (error) {
-        if (cancelled || requestVersion !== symbolRequestVersionRef.current) return;
-        log.warn('Failed to resolve document symbols.', error);
-        onDocumentSymbolsChange({
-          path: targetPath,
-          symbols: [],
-          authoritative: false,
-        });
-      }
-    }, 120);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timerId);
-    };
-  }, [language, onDocumentSymbolsChange, path, value]);
-
-  useEffect(() => {
-    const handleRevealLocation = (event: Event) => {
-      const detail = (event as CustomEvent<{ path?: string; line?: number; column?: number }>).detail;
-      const targetPath = detail?.path?.trim();
-
-      if (targetPath && path) {
-        const normalize = (value: string) => value.replace(/\\/g, '/');
-        if (normalize(targetPath) !== normalize(path)) return;
-      }
-
-      const editor = editorRef.current;
-      if (!editor) return;
-
-      const lineNumber = Math.max(1, Number(detail?.line || 1));
-      const column = Math.max(1, Number(detail?.column || 1));
-
-      editor.setPosition({ lineNumber, column });
-      editor.revealPositionInCenter({ lineNumber, column });
-      editor.focus();
-    };
-
-    window.addEventListener('aethel.editor.revealLocation', handleRevealLocation as EventListener);
-    return () => {
-      window.removeEventListener('aethel.editor.revealLocation', handleRevealLocation as EventListener);
-    };
-  }, [path]);
-
-  useEffect(() => {
-    if (!editorRef.current || !monacoRef.current || !enableErrorDecorations) return;
-
-    const editor = editorRef.current;
-    const monaco = monacoRef.current;
-
-    const decorations: monacoEditor.editor.IModelDeltaDecoration[] = diagnostics.map(diag => {
-      const severity = {
-        error: monaco.MarkerSeverity.Error,
-        warning: monaco.MarkerSeverity.Warning,
-        info: monaco.MarkerSeverity.Info,
-        hint: monaco.MarkerSeverity.Hint,
-      }[diag.severity];
-
-      const className = {
-        error: 'editor-error-decoration',
-        warning: 'editor-warning-decoration',
-        info: 'editor-info-decoration',
-        hint: 'editor-hint-decoration',
-      }[diag.severity];
-
-      return {
-        range: new monaco.Range(
-          diag.line,
-          diag.column,
-          diag.endLine || diag.line,
-          diag.endColumn || diag.column + 1
-        ),
-        options: {
-          inlineClassName: className,
-          hoverMessage: { value: `**${diag.severity.toUpperCase()}**: ${diag.message}` },
-          overviewRuler: {
-            color: diag.severity === 'error' ? 'var(--aethel-error-light)' : 'var(--aethel-warning-light)',
-            position: monaco.editor.OverviewRulerLane.Right,
-          },
-        },
-      };
-    });
-
-    decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
-  }, [diagnostics, enableErrorDecorations]);
-
-  useEffect(() => {
-    if (!editorRef.current || !monacoRef.current || !enableGitDecorations) return;
-
-    const editor = editorRef.current;
-    const monaco = monacoRef.current;
-
-    const gitDecorations: monacoEditor.editor.IModelDeltaDecoration[] = gitChanges.map(change => {
-      const glyphClass = {
-        added: 'git-glyph-added',
-        modified: 'git-glyph-modified',
-        deleted: 'git-glyph-deleted',
-      }[change.type];
-
-      return {
-        range: new monaco.Range(change.startLine, 1, change.endLine, 1),
-        options: {
-          isWholeLine: true,
-          linesDecorationsClassName: glyphClass,
-        },
-      };
-    });
-
-    editor.deltaDecorations([], gitDecorations);
-  }, [gitChanges, enableGitDecorations]);
-
-  useEffect(() => {
-    if (!editorRef.current || !monacoRef.current) return;
-
-    const editor = editorRef.current;
-    const monaco = monacoRef.current;
-    const activeComments = sortedComments.filter((comment) => !comment.resolved);
-
-    const commentDecorations: monacoEditor.editor.IModelDeltaDecoration[] = activeComments.map((comment) => ({
-      range: new monaco.Range(comment.line, 1, comment.line, 1),
-      options: {
-        isWholeLine: false,
-        glyphMarginClassName: 'aethel-inline-comment-glyph',
-        glyphMarginHoverMessage: {
-          value: `**${comment.authorName}**: ${comment.text}`,
-        },
-        overviewRuler: {
-          color: 'var(--aethel-info-light)',
-          position: monaco.editor.OverviewRulerLane.Center,
-        },
-      },
-    }));
-
-    commentDecorationsRef.current = editor.deltaDecorations(commentDecorationsRef.current, commentDecorations);
-
-    return () => {
-      commentDecorationsRef.current = editor.deltaDecorations(commentDecorationsRef.current, []);
-    };
-  }, [sortedComments]);
+  useMonacoDiagnosticsPublishing({
+    editorRef,
+    language,
+    monacoRef,
+    onDiagnosticsChange,
+    path,
+  });
+  useMonacoDocumentSymbols({
+    editorRef,
+    language,
+    log,
+    monacoRef,
+    onDocumentSymbolsChange,
+    path,
+    symbolRequestVersionRef,
+    value,
+  });
+  useMonacoRevealLocation({ editorRef, path });
+  useMonacoErrorDecorations({
+    decorationsRef,
+    diagnostics,
+    editorRef,
+    enableErrorDecorations,
+    monacoRef,
+  });
+  useMonacoGitDecorations({
+    editorRef,
+    enableGitDecorations,
+    gitChanges,
+    monacoRef,
+  });
+  useMonacoCommentDecorations({
+    commentDecorationsRef,
+    editorRef,
+    monacoRef,
+    sortedComments,
+  });
 
   const handleInlineEditApply = useCallback(async (newCode: string) => {
     if (!editorRef.current || !editorSelection.range) return false;
@@ -497,158 +346,20 @@ export function MonacoEditorPro({
     setInlineEditNeedsFullAccess(false);
 
     const editor = editorRef.current;
-    const model = editor.getModel();
-    if (!model) return false;
-
     const range = editorSelection.range;
-    const originalSnippet = model.getValueInRange(range);
-
-    const startOffset = model.getOffsetAt({
-      lineNumber: range.startLineNumber,
-      column: range.startColumn,
+    const result = await validateAndPersistInlineEdit({
+      editor,
+      fullAccessActive,
+      language,
+      log,
+      newCode,
+      onAiApplyResult,
+      path,
+      range,
+      setInlineEditFeedback,
+      setInlineEditNeedsFullAccess,
     });
-    const endOffset = model.getOffsetAt({
-      lineNumber: range.endLineNumber,
-      column: range.endColumn,
-    });
-    const currentDocument = model.getValue();
-    const nextDocument = `${currentDocument.slice(0, startOffset)}${newCode}${currentDocument.slice(endOffset)}`;
-
-    try {
-      const validationResponse = await fetch('/api/ai/change/validate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify({
-          original: originalSnippet,
-          modified: newCode,
-          fullDocument: nextDocument,
-          language,
-          filePath: path,
-        }),
-      });
-
-      if (!validationResponse.ok) {
-        log.warn('Inline edit validation request failed.', await validationResponse.text());
-        setInlineEditFeedback({
-          type: 'error',
-          message: 'Validation request failed before apply.',
-        });
-        return false;
-      }
-
-      const validation = (await validationResponse.json()) as ChangeValidationResponse;
-      if (!validation?.canApply) {
-        const firstFailure = Array.isArray(validation?.checks)
-          ? validation.checks.find((check) => check?.status === 'fail')
-          : null;
-        const reason = firstFailure?.message || 'Validation blocked this patch.';
-        log.warn('Inline edit blocked.', { reason });
-        setInlineEditFeedback({
-          type: 'error',
-          message: `Patch blocked: ${reason}`,
-        });
-        return false;
-      }
-
-      const normalizedPath = path || '';
-      if (!normalizedPath.trim()) {
-        setInlineEditFeedback({
-          type: 'error',
-          message: 'Inline apply requires a file path bound to this editor model.',
-        });
-        return false;
-      }
-
-      const applyResponse = await fetch('/api/ai/change/apply', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify({
-          filePath: normalizedPath,
-          original: currentDocument,
-          modified: nextDocument,
-          fullDocument: nextDocument,
-          language,
-          enforceOriginalMatch: true,
-          approvedHighRisk: Boolean(fullAccessActive),
-        }),
-      });
-
-      const applyPayload = (await applyResponse.json().catch(() => ({}))) as ChangeApplyResponse;
-      const applyMetadata =
-        applyPayload && typeof applyPayload === 'object' && applyPayload.metadata && typeof applyPayload.metadata === 'object'
-          ? (applyPayload.metadata as Record<string, unknown>)
-          : null;
-      const runId =
-        applyMetadata && typeof applyMetadata.runId === 'string'
-          ? applyMetadata.runId
-          : undefined;
-
-      if (!applyResponse.ok) {
-        const baseMessage =
-          applyPayload.message || applyPayload.error || `Apply failed with status ${applyResponse.status}.`;
-        const message =
-          applyPayload.error === 'FULL_ACCESS_GRANT_REQUIRED'
-            ? `${baseMessage} Ative Full Access temporario antes de override high-risk.`
-            : baseMessage;
-        setInlineEditFeedback({
-          type: 'error',
-          message,
-        });
-        if (
-          applyPayload.error === 'FULL_ACCESS_GRANT_REQUIRED' ||
-          applyPayload.error === 'HIGH_RISK_APPROVAL_REQUIRED'
-        ) {
-          setInlineEditNeedsFullAccess(true);
-        }
-        log.warn('Inline edit apply rejected.', { message, runId });
-        if (runId) {
-          void submitChangeFeedback({
-            runId,
-            feedback: 'needs_work',
-            reason: applyPayload.error || 'APPLY_REJECTED',
-            notes: message,
-            filePath: normalizedPath,
-            runSource: 'production',
-          });
-        }
-        return false;
-      }
-
-      const rollbackToken =
-        applyMetadata && typeof applyMetadata.rollbackToken === 'string'
-          ? applyMetadata.rollbackToken
-          : undefined;
-
-      onAiApplyResult?.({
-        runId,
-        rollbackToken,
-        message: applyPayload.message || 'Apply succeeded.',
-        filePath: normalizedPath,
-      });
-      if (runId) {
-        void submitChangeFeedback({
-          runId,
-          feedback: 'accepted',
-          reason: 'APPLY_CONFIRMED',
-          notes: 'Inline edit applied successfully in MonacoEditorPro.',
-          filePath: normalizedPath,
-          runSource: 'production',
-        });
-      }
-    } catch (error) {
-      log.error('Inline edit validation error.', error);
-      setInlineEditFeedback({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Inline edit request failed.',
-      });
-      return false;
-    }
+    if (!result.ok) return false;
 
     editor.executeEdits('aethel.inlineEdit', [
       {
@@ -659,15 +370,15 @@ export function MonacoEditorPro({
 
     onChange?.(editor.getValue(), {
       changes: [],
-      eol: model.getEOL(),
+      eol: result.model.getEOL(),
       isEolChange: false,
       isFlush: false,
       isRedoing: false,
       isUndoing: false,
-      versionId: model.getVersionId(),
+      versionId: result.model.getVersionId(),
       detailedReasonsChangeLengths: [],
     });
-    onSave?.(nextDocument);
+    onSave?.(result.nextDocument);
     setInlineEditFeedback({
       type: 'success',
       message: 'Patch aplicado e persistido.',
