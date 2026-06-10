@@ -40,7 +40,7 @@ const requiredFiles = [
   'components/agents/chat/panels.ts',
   'components/agents/chat/presets.ts',
   'components/agents/chat/session-types.ts',
-  'components/agents/chat/state.ts',
+  'components/agents/chat/state/index.ts',
   'components/agents/chat/utils.ts',
   'components/agents/legacy-chat-panel.ts',
   'components/agents/presets.ts',
@@ -71,7 +71,7 @@ requirePattern('components/agents/chat/composer.ts', /AIChatComposer/, 'agent ch
 requirePattern('components/agents/chat/panels.ts', /AIChatMessagesPane/, 'agent chat panels adapter must expose message pane')
 requirePattern('components/agents/chat/presets.ts', /MODE_PRESETS/, 'agent chat presets must expose mode presets')
 requirePattern('components/agents/chat/session-types.ts', /ProviderGateState/, 'agent chat session types must expose provider gate state')
-requirePattern('components/agents/chat/state.ts', /useAIChatRunState/, 'agent chat state adapter must expose run state')
+requirePattern('components/agents/chat/state/index.ts', /useAIChatRunState/, 'agent chat state adapter must expose run state')
 requirePattern('components/agents/chat/utils.ts', /formatCost/, 'agent chat utilities must expose cost formatting')
 requirePattern('components/agents/AgentsWorkspaceContainer.tsx', /AgentsWindow/, 'workspace container must expose AgentsWindow')
 requirePattern('components/agents/AgentsWorkspaceContainer.tsx', /AIChatPanelPro/, 'workspace container must keep the composer while migration is in progress')

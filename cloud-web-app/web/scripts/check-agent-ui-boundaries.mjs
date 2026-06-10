@@ -23,7 +23,6 @@ const ALLOWED_EXTERNAL_IMPORTERS = new Set([
   'components/agents/presets.ts',
   'components/agents/chat/composer.ts',
   'components/agents/chat/panels.ts',
-  'components/agents/chat/state.ts',
   'components/agents/AgentsWorkspaceContainer.tsx',
 ])
 

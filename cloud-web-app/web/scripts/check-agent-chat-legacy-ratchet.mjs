@@ -6,8 +6,8 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const AI_CHAT_DIR = path.join(ROOT, 'components', 'ai-chat')
 const failures = []
-const MAX_AI_CHAT_FILES = 17
-const MAX_AI_CHAT_LINES = 2640
+const MAX_AI_CHAT_FILES = 13
+const MAX_AI_CHAT_LINES = 2225
 const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/AgentEvidenceCard.tsx',
   'components/agents/AgentEvidencePanel.tsx',
@@ -49,7 +49,11 @@ const REQUIRED_AGENT_CHAT_FILES = [
   'components/agents/chat/shell/index.ts',
   'components/agents/chat/shell/AIChatContextStrip.tsx',
   'components/agents/chat/shell/AIChatHistoryModeRail.tsx',
-  'components/agents/chat/state.ts',
+  'components/agents/chat/state/index.ts',
+  'components/agents/chat/state/useAIChatHistoryMode.ts',
+  'components/agents/chat/state/useAIChatOpsState.ts',
+  'components/agents/chat/state/useAIChatPanelUiState.ts',
+  'components/agents/chat/state/useAIChatRunState.ts',
   'components/agents/chat/telemetry/index.ts',
   'components/agents/chat/voice/index.ts',
   'components/agents/chat/voice/useAIChatSpeechPlayback.ts',
@@ -184,6 +188,12 @@ for (const file of ['AIChatRulesPanel.tsx', 'useAIChatProjectRules.ts']) {
 for (const file of ['useAIChatSpeechPlayback.ts', 'useVoiceRecording.ts']) {
   if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
     failures.push(`components/ai-chat/${file}: voice hooks must stay absorbed into components/agents/chat/voice`)
+  }
+}
+
+for (const file of ['useAIChatHistoryMode.ts', 'useAIChatOpsState.ts', 'useAIChatPanelUiState.ts', 'useAIChatRunState.ts']) {
+  if (fs.existsSync(path.join(AI_CHAT_DIR, file))) {
+    failures.push(`components/ai-chat/${file}: panel state hooks must stay absorbed into components/agents/chat/state`)
   }
 }
 
