@@ -7,7 +7,7 @@ import {
   type AiProviderStatusResponse,
   fetchAiProviderStatus,
 } from '@/lib/ai-provider-status-client'
-import type { ProviderGateState } from '@/components/ai-chat/ai-chat-container.types'
+import type { ProviderGateState } from '@/components/agents/chat/session-types'
 
 export function useAIProviderPreflight() {
   const [providerGate, setProviderGate] = useState<ProviderGateState | null>(null)

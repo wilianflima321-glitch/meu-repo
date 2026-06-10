@@ -1,4 +1,4 @@
-import type { AIChatResearchArtifact, AIChatTraceArtifact } from '@/components/ai-chat/ai-chat-evidence'
+import type { AIChatResearchArtifact, AIChatTraceArtifact } from '@/components/agents'
 
 export type ChatMessage = {
   id: string

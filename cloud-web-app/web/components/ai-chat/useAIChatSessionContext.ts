@@ -8,7 +8,7 @@ import {
   buildDashboardLaunchSystemContext,
   consumeDashboardLaunchMission,
 } from '@/components/dashboard/dashboard-launch-handoff'
-import type { ChatMessage } from '@/components/ai-chat/ai-chat-container.types'
+import type { ChatMessage } from '@/components/agents/chat/session-types'
 
 type UseAIChatSessionContextArgs = {
   currentModel: string

@@ -12,7 +12,7 @@ import {
 } from '@/lib/ai-chat-advanced-client'
 import type { AiProviderStatusResponse } from '@/lib/ai-provider-status-client'
 import { buildTraceArtifact } from '@/components/ai-chat/ai-chat-evidence'
-import type { ChatMessage, ProviderGateState } from '@/components/ai-chat/ai-chat-container.types'
+import type { ChatMessage, ProviderGateState } from '@/components/agents/chat/session-types'
 import type { AIChatConsoleMode } from '@/components/ai-chat/presets'
 import type { MessageContext } from '@/components/ide/AIChatPanelPro.types'
 

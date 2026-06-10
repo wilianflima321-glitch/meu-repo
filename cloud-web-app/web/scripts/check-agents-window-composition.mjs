@@ -38,6 +38,7 @@ const requiredFiles = [
   'components/agents/chat/index.ts',
   'components/agents/chat/composer.ts',
   'components/agents/chat/panels.ts',
+  'components/agents/chat/session-types.ts',
   'components/agents/chat/state.ts',
   'components/agents/chat/utils.ts',
   'components/agents/legacy-chat-panel.ts',
@@ -61,10 +62,12 @@ requirePattern('components/agents/index.ts', /AIChatTraceArtifact/, 'agents barr
 requirePattern('components/agents/legacy-chat-panel.ts', /export \* from ['"]\.\/chat['"]/, 'legacy chat adapter must stay a thin alias to agent chat grammar')
 requirePattern('components/agents/chat/index.ts', /composer/, 'agent chat index must export composer grammar')
 requirePattern('components/agents/chat/index.ts', /panels/, 'agent chat index must export panel grammar')
+requirePattern('components/agents/chat/index.ts', /session-types/, 'agent chat index must export session types')
 requirePattern('components/agents/chat/index.ts', /state/, 'agent chat index must export state grammar')
 requirePattern('components/agents/chat/index.ts', /utils/, 'agent chat index must export utility grammar')
 requirePattern('components/agents/chat/composer.ts', /AIChatComposer/, 'agent chat composer adapter must expose composer')
 requirePattern('components/agents/chat/panels.ts', /AIChatMessagesPane/, 'agent chat panels adapter must expose message pane')
+requirePattern('components/agents/chat/session-types.ts', /ProviderGateState/, 'agent chat session types must expose provider gate state')
 requirePattern('components/agents/chat/state.ts', /useAIChatRunState/, 'agent chat state adapter must expose run state')
 requirePattern('components/agents/chat/utils.ts', /formatCost/, 'agent chat utilities must expose cost formatting')
 requirePattern('components/agents/AgentsWorkspaceContainer.tsx', /AgentsWindow/, 'workspace container must expose AgentsWindow')
