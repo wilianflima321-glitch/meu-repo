@@ -3,7 +3,9 @@
  * GPU particle runtime for emitters, forces, collisions and shader-driven effects.
  */
 
-import * as THREE from 'three';
+import THREE from './particle-system-real-runtime';
+import { createDefaultParticleEmitterConfig } from './particle-system-real.defaults';
+import { applyParticleForce, resolveParticleCollisions, sampleEmissionPosition } from './particle-system-real.helpers';
 import type {
   ParticleCollider,
   ParticleData,
@@ -12,6 +14,8 @@ import type {
 } from './particle-system-real.types';
 import { PARTICLE_FRAGMENT_SHADER, PARTICLE_VERTEX_SHADER } from './particle-system-real-shaders';
 export { ParticlePresets } from './particle-system-real-presets';
+export { createDefaultParticleEmitterConfig } from './particle-system-real.defaults';
+export { applyParticleForce, resolveParticleCollisions, sampleEmissionPosition } from './particle-system-real.helpers';
 export type {
   EmitterShape,
   ParticleCollider,
@@ -42,27 +46,7 @@ export class ParticleEmitter extends THREE.Object3D {
   constructor(config: Partial<ParticleEmitterConfig> = {}) {
     super();
 
-    this.config = {
-      maxParticles: 10000,
-      emissionRate: 100,
-      lifetime: { min: 1, max: 3 },
-      startSize: { min: 10, max: 20 },
-      endSize: { min: 5, max: 10 },
-      startColor: new THREE.Color(1, 1, 1),
-      endColor: new THREE.Color(1, 1, 1),
-      startOpacity: 1,
-      endOpacity: 0,
-      velocity: {
-        min: new THREE.Vector3(-1, 2, -1),
-        max: new THREE.Vector3(1, 5, 1),
-      },
-      acceleration: new THREE.Vector3(0, -9.8, 0),
-      angularVelocity: { min: -1, max: 1 },
-      blendMode: 'additive',
-      shape: { type: 'point' },
-      worldSpace: true,
-      ...config,
-    };
+    this.config = createDefaultParticleEmitterConfig(config);
 
     this.initParticleData();
     this.initGeometry();
@@ -212,73 +196,7 @@ export class ParticleEmitter extends THREE.Object3D {
     this.particleData.alive[index] = 1;
   }
 
-  private getEmissionPosition(): THREE.Vector3 {
-    const shape = this.config.shape;
-
-    switch (shape.type) {
-      case 'point':
-        return new THREE.Vector3(0, 0, 0);
-
-      case 'sphere': {
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
-        const r = Math.cbrt(Math.random()) * shape.radius;
-        return new THREE.Vector3(
-          r * Math.sin(phi) * Math.cos(theta),
-          r * Math.sin(phi) * Math.sin(theta),
-          r * Math.cos(phi)
-        );
-      }
-
-      case 'box':
-        return new THREE.Vector3(
-          (Math.random() - 0.5) * shape.size.x,
-          (Math.random() - 0.5) * shape.size.y,
-          (Math.random() - 0.5) * shape.size.z
-        );
-
-      case 'cone': {
-        const t = Math.random();
-        const r = t * shape.radius;
-        const theta = Math.random() * Math.PI * 2;
-        return new THREE.Vector3(
-          r * Math.cos(theta),
-          t * shape.height,
-          r * Math.sin(theta)
-        );
-      }
-
-      case 'circle': {
-        const theta = Math.random() * Math.PI * 2;
-        const r = Math.sqrt(Math.random()) * shape.radius;
-        return new THREE.Vector3(r * Math.cos(theta), 0, r * Math.sin(theta));
-      }
-
-      case 'mesh': {
-        // Pick random triangle and random point on it
-        const positions = shape.geometry.getAttribute('position');
-        const count = positions.count / 3;
-        const triIndex = Math.floor(Math.random() * count) * 3;
-
-        const a = new THREE.Vector3().fromBufferAttribute(positions, triIndex);
-        const b = new THREE.Vector3().fromBufferAttribute(positions, triIndex + 1);
-        const c = new THREE.Vector3().fromBufferAttribute(positions, triIndex + 2);
-
-        const r1 = Math.random();
-        const r2 = Math.random();
-        const sqrtR1 = Math.sqrt(r1);
-
-        return a.multiplyScalar(1 - sqrtR1)
-          .add(b.multiplyScalar(sqrtR1 * (1 - r2)))
-          .add(c.multiplyScalar(sqrtR1 * r2));
-      }
-
-      default:
-        return new THREE.Vector3();
-    }
-  }
-
-  private updateParticles(deltaTime: number): void {
+    private updateParticles(deltaTime: number): void {
     const acc = this.config.acceleration;
 
     for (let i = 0; i < this.config.maxParticles; i++) {
@@ -306,7 +224,7 @@ export class ParticleEmitter extends THREE.Object3D {
       const pz = this.particleData.position[i3 + 2];
 
       for (const force of this.forces) {
-        const { fx: dfx, fy: dfy, fz: dfz } = this.applyForce(force, px, py, pz, deltaTime);
+        const { fx: dfx, fy: dfy, fz: dfz } = applyParticleForce(force, px, py, pz, deltaTime);
         fx += dfx;
         fy += dfy;
         fz += dfz;
@@ -323,7 +241,7 @@ export class ParticleEmitter extends THREE.Object3D {
       this.particleData.position[i3 + 2] += this.particleData.velocity[i3 + 2] * deltaTime;
 
       // Check collisions
-      this.checkCollisions(i);
+      resolveParticleCollisions(i, this.particleData, this.colliders);
 
       // Update rotation
       this.particleData.rotation[i] += this.particleData.angularVelocity[i] * deltaTime;
@@ -358,188 +276,7 @@ export class ParticleEmitter extends THREE.Object3D {
     }
   }
 
-  private applyForce(
-    force: ParticleForce,
-    px: number,
-    py: number,
-    pz: number,
-    _deltaTime: number
-  ): { fx: number; fy: number; fz: number } {
-    switch (force.type) {
-      case 'gravity':
-        return {
-          fx: (force.direction?.x || 0) * force.strength,
-          fy: (force.direction?.y || -1) * force.strength,
-          fz: (force.direction?.z || 0) * force.strength,
-        };
-
-      case 'wind':
-        return {
-          fx: (force.direction?.x || 1) * force.strength,
-          fy: (force.direction?.y || 0) * force.strength,
-          fz: (force.direction?.z || 0) * force.strength,
-        };
-
-      case 'vortex': {
-        if (!force.position) return { fx: 0, fy: 0, fz: 0 };
-        const dx = px - force.position.x;
-        const dz = pz - force.position.z;
-        const dist = Math.sqrt(dx * dx + dz * dz);
-        const strength = force.strength / Math.max(dist, 0.1);
-        return {
-          fx: -dz * strength,
-          fy: 0,
-          fz: dx * strength,
-        };
-      }
-
-      case 'turbulence': {
-        const freq = force.frequency || 1;
-        return {
-          fx: (Math.sin(px * freq + py * freq) * 2 - 1) * force.strength,
-          fy: (Math.sin(py * freq + pz * freq) * 2 - 1) * force.strength,
-          fz: (Math.sin(pz * freq + px * freq) * 2 - 1) * force.strength,
-        };
-      }
-
-      case 'attractor': {
-        if (!force.position) return { fx: 0, fy: 0, fz: 0 };
-        const dx = force.position.x - px;
-        const dy = force.position.y - py;
-        const dz = force.position.z - pz;
-        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        const strength = force.strength / Math.max(dist * dist, 0.01);
-        return {
-          fx: dx * strength,
-          fy: dy * strength,
-          fz: dz * strength,
-        };
-      }
-
-      case 'repulsor': {
-        if (!force.position) return { fx: 0, fy: 0, fz: 0 };
-        const dx = px - force.position.x;
-        const dy = py - force.position.y;
-        const dz = pz - force.position.z;
-        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        const strength = force.strength / Math.max(dist * dist, 0.01);
-        return {
-          fx: dx * strength,
-          fy: dy * strength,
-          fz: dz * strength,
-        };
-      }
-
-      default:
-        return { fx: 0, fy: 0, fz: 0 };
-    }
-  }
-
-  private checkCollisions(index: number): void {
-    const i3 = index * 3;
-
-    const px = this.particleData.position[i3];
-    const py = this.particleData.position[i3 + 1];
-    const pz = this.particleData.position[i3 + 2];
-
-    for (const collider of this.colliders) {
-      switch (collider.type) {
-        case 'plane': {
-          const normal = collider.normal || new THREE.Vector3(0, 1, 0);
-          const d = (px - collider.position.x) * normal.x +
-                    (py - collider.position.y) * normal.y +
-                    (pz - collider.position.z) * normal.z;
-
-          if (d < 0) {
-            // Move particle back to surface
-            this.particleData.position[i3] -= d * normal.x;
-            this.particleData.position[i3 + 1] -= d * normal.y;
-            this.particleData.position[i3 + 2] -= d * normal.z;
-
-            // Reflect velocity
-            const vn = this.particleData.velocity[i3] * normal.x +
-                       this.particleData.velocity[i3 + 1] * normal.y +
-                       this.particleData.velocity[i3 + 2] * normal.z;
-
-            this.particleData.velocity[i3] -= (1 + collider.bounce) * vn * normal.x;
-            this.particleData.velocity[i3 + 1] -= (1 + collider.bounce) * vn * normal.y;
-            this.particleData.velocity[i3 + 2] -= (1 + collider.bounce) * vn * normal.z;
-
-            // Apply friction
-            this.particleData.velocity[i3] *= (1 - collider.friction);
-            this.particleData.velocity[i3 + 1] *= (1 - collider.friction);
-            this.particleData.velocity[i3 + 2] *= (1 - collider.friction);
-          }
-          break;
-        }
-
-        case 'sphere': {
-          const dx = px - collider.position.x;
-          const dy = py - collider.position.y;
-          const dz = pz - collider.position.z;
-          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-          if (dist < (collider.radius || 1)) {
-            // Push particle out
-            const nx = dx / dist;
-            const ny = dy / dist;
-            const nz = dz / dist;
-
-            this.particleData.position[i3] = collider.position.x + nx * (collider.radius || 1);
-            this.particleData.position[i3 + 1] = collider.position.y + ny * (collider.radius || 1);
-            this.particleData.position[i3 + 2] = collider.position.z + nz * (collider.radius || 1);
-
-            // Reflect velocity
-            const vn = this.particleData.velocity[i3] * nx +
-                       this.particleData.velocity[i3 + 1] * ny +
-                       this.particleData.velocity[i3 + 2] * nz;
-
-            this.particleData.velocity[i3] -= (1 + collider.bounce) * vn * nx;
-            this.particleData.velocity[i3 + 1] -= (1 + collider.bounce) * vn * ny;
-            this.particleData.velocity[i3 + 2] -= (1 + collider.bounce) * vn * nz;
-          }
-          break;
-        }
-
-        case 'box': {
-          const size = collider.size || new THREE.Vector3(1, 1, 1);
-          const halfSize = size.clone().multiplyScalar(0.5);
-
-          const local = new THREE.Vector3(
-            px - collider.position.x,
-            py - collider.position.y,
-            pz - collider.position.z
-          );
-
-          if (Math.abs(local.x) < halfSize.x &&
-              Math.abs(local.y) < halfSize.y &&
-              Math.abs(local.z) < halfSize.z) {
-            // Inside box - find closest face and push out
-            const distX = halfSize.x - Math.abs(local.x);
-            const distY = halfSize.y - Math.abs(local.y);
-            const distZ = halfSize.z - Math.abs(local.z);
-
-            if (distX < distY && distX < distZ) {
-              const sign = Math.sign(local.x);
-              this.particleData.position[i3] = collider.position.x + sign * halfSize.x;
-              this.particleData.velocity[i3] *= -collider.bounce;
-            } else if (distY < distZ) {
-              const sign = Math.sign(local.y);
-              this.particleData.position[i3 + 1] = collider.position.y + sign * halfSize.y;
-              this.particleData.velocity[i3 + 1] *= -collider.bounce;
-            } else {
-              const sign = Math.sign(local.z);
-              this.particleData.position[i3 + 2] = collider.position.z + sign * halfSize.z;
-              this.particleData.velocity[i3 + 2] *= -collider.bounce;
-            }
-          }
-          break;
-        }
-      }
-    }
-  }
-
-  private updateBuffers(): void {
+      private updateBuffers(): void {
     const posAttr = this.geometry.getAttribute('position') as THREE.BufferAttribute;
     const velAttr = this.geometry.getAttribute('velocity') as THREE.BufferAttribute;
     const colorAttr = this.geometry.getAttribute('particleColor') as THREE.BufferAttribute;
