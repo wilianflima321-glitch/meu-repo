@@ -19,6 +19,13 @@ import * as THREE from 'three';
 import { AssetCache } from './level-streaming-cache';
 import { LevelLoader } from './level-streaming-loader';
 import { StreamingProvider, useLevelState, useLevelStreaming } from './level-streaming-react';
+import {
+  calculateStreamingPriority,
+  DEFAULT_STREAMING_CONFIG,
+  disposeStreamingObject,
+  getDistanceToLevelDefinition,
+  sortStreamingLoadQueue,
+} from './level-streaming-runtime';
 import type {
   LevelDefinition,
   LevelInstance,
@@ -71,16 +78,7 @@ export class LevelStreamingManager extends EventEmitter {
   constructor(config: Partial<StreamingConfig> = {}) {
     super();
 
-    this.config = {
-      maxConcurrentLoads: 2,
-      streamingDistance: 100,
-      unloadDistance: 150,
-      preloadDistance: 200,
-      memoryBudgetMB: 1024,
-      checkInterval: 500,
-      minLoadTimeMs: 500,
-      ...config,
-    };
+    this.config = { ...DEFAULT_STREAMING_CONFIG, ...config };
 
     this.assetCache = new AssetCache(this.config.memoryBudgetMB);
     this.levelLoader = new LevelLoader();
@@ -172,25 +170,11 @@ export class LevelStreamingManager extends EventEmitter {
   }
 
   private getDistanceToLevel(definition: LevelDefinition): number {
-    if (!definition.bounds) {
-      return Infinity;
-    }
-
-    const bounds = definition.bounds;
-    const center = new THREE.Vector3(
-      (bounds.min.x + bounds.max.x) / 2,
-      (bounds.min.y + bounds.max.y) / 2,
-      (bounds.min.z + bounds.max.z) / 2
-    );
-
-    return this.playerPosition.distanceTo(center);
+    return getDistanceToLevelDefinition(definition, this.playerPosition);
   }
 
   private calculatePriority(distance: number): StreamingPriority {
-    if (distance <= this.config.streamingDistance * 0.5) return 'critical';
-    if (distance <= this.config.streamingDistance) return 'high';
-    if (distance <= this.config.preloadDistance * 0.75) return 'normal';
-    return 'low';
+    return calculateStreamingPriority(this.config, distance);
   }
 
   // ============================================================================
@@ -216,15 +200,7 @@ export class LevelStreamingManager extends EventEmitter {
   }
 
   private sortLoadQueue(): void {
-    const priorityOrder: Record<StreamingPriority, number> = {
-      critical: 4,
-      high: 3,
-      normal: 2,
-      low: 1,
-      background: 0,
-    };
-
-    this.loadQueue.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
+    sortStreamingLoadQueue(this.loadQueue);
   }
 
   private async processLoadQueue(): Promise<void> {
@@ -387,7 +363,7 @@ export class LevelStreamingManager extends EventEmitter {
 
     // Dispose of scene resources
     if (instance.scene) {
-      this.disposeObject(instance.scene);
+      disposeStreamingObject(instance.scene);
       instance.scene = null;
     }
 
@@ -403,39 +379,6 @@ export class LevelStreamingManager extends EventEmitter {
 
     this.emit('levelUnloaded', { levelId });
   }
-
-  private disposeObject(object: THREE.Object3D): void {
-    object.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        child.geometry?.dispose();
-
-        if (Array.isArray(child.material)) {
-          for (const material of child.material) {
-            this.disposeMaterial(material);
-          }
-        } else if (child.material) {
-          this.disposeMaterial(child.material);
-        }
-      }
-    });
-  }
-
-  private disposeMaterial(material: THREE.Material): void {
-    material.dispose();
-
-    // Dispose textures
-    const mat = material as THREE.MeshStandardMaterial;
-    mat.map?.dispose();
-    mat.normalMap?.dispose();
-    mat.roughnessMap?.dispose();
-    mat.metalnessMap?.dispose();
-    mat.aoMap?.dispose();
-    mat.emissiveMap?.dispose();
-  }
-
-  // ============================================================================
-  // LEVEL TRANSITIONS
-  // ============================================================================
 
   async transitionToLevel(
     levelId: string,
