@@ -8,6 +8,23 @@ export const AGENT_FLEET_SETTINGS_KEY = 'aethelAgentFleetPreferences'
 
 export type AgentFleetMode = 'coordinator-first' | 'selected-agent' | 'review-only'
 export type AgentFleetMemberStatus = 'ready' | 'attention' | 'blocked' | 'paused'
+export type AgentFleetControlAction = 'pause' | 'resume' | 'takeover' | 'stop'
+
+export interface AgentFleetControlReceipt {
+  action: AgentFleetControlAction
+  status: 'available' | 'human_review_required'
+  recordedAt: string
+  label: string
+  detail: string
+}
+
+export interface AgentFleetCostReceipt {
+  status: 'available' | 'held'
+  sessionCostCents?: number
+  budgetRemainingCents?: number
+  label: string
+  detail: string
+}
 
 export interface AgentFleetPreferences {
   version: 1
@@ -16,6 +33,7 @@ export interface AgentFleetPreferences {
   paused: boolean
   mode: AgentFleetMode
   updatedAt: string
+  lastControlReceipt?: AgentFleetControlReceipt
 }
 
 export interface AgentFleetMemberSnapshot {
@@ -50,6 +68,8 @@ export interface AgentFleetSnapshot {
     switcherHint: string
   }
   controls: string[]
+  costReceipt: AgentFleetCostReceipt
+  lastControlReceipt?: AgentFleetControlReceipt
   members: AgentFleetMemberSnapshot[]
   blockers: string[]
   activeLockCount: number
@@ -63,6 +83,7 @@ export type AgentFleetPreferencesPatch = Partial<{
   enabledAgents: string[]
   paused: boolean
   mode: AgentFleetMode
+  action: AgentFleetControlAction
 }>
 
 const DEFAULT_CENTRAL_AGENT = 'Producer Agent'
@@ -109,6 +130,59 @@ function normalizeMode(value: unknown, fallback: AgentFleetMode): AgentFleetMode
   return typeof value === 'string' && modes.includes(value as AgentFleetMode) ? (value as AgentFleetMode) : fallback
 }
 
+function normalizeControlAction(value: unknown): AgentFleetControlAction | undefined {
+  return value === 'pause' || value === 'resume' || value === 'takeover' || value === 'stop' ? value : undefined
+}
+
+function normalizeControlReceipt(value: unknown): AgentFleetControlReceipt | undefined {
+  if (!isRecord(value)) return undefined
+  const action = normalizeControlAction(value.action)
+  const recordedAt = typeof value.recordedAt === 'string' ? value.recordedAt : null
+  const label = typeof value.label === 'string' ? value.label : null
+  const detail = typeof value.detail === 'string' ? value.detail : null
+  const status = value.status === 'human_review_required' ? 'human_review_required' : value.status === 'available' ? 'available' : null
+  if (!action || !recordedAt || !label || !detail || !status) return undefined
+  return { action, status, recordedAt, label, detail }
+}
+
+export function buildAgentFleetControlReceipt(action: AgentFleetControlAction, now?: string): AgentFleetControlReceipt {
+  const recordedAt = isoNow(now)
+  if (action === 'resume') {
+    return {
+      action,
+      status: 'available',
+      recordedAt,
+      label: 'Fleet resumed',
+      detail: 'New agent work may continue under the current mode and evidence gates.',
+    }
+  }
+  if (action === 'pause') {
+    return {
+      action,
+      status: 'human_review_required',
+      recordedAt,
+      label: 'Fleet paused',
+      detail: 'New agent work is held until a human resumes the fleet.',
+    }
+  }
+  if (action === 'takeover') {
+    return {
+      action,
+      status: 'human_review_required',
+      recordedAt,
+      label: 'Human takeover',
+      detail: 'New agent work is held and the workspace is in review mode.',
+    }
+  }
+  return {
+    action,
+    status: 'human_review_required',
+    recordedAt,
+    label: 'Stop requested',
+    detail: 'New agent work is stopped; already-applied changes still require evidence review.',
+  }
+}
+
 export function buildDefaultAgentFleetPreferences(now?: string): AgentFleetPreferences {
   return {
     version: 1,
@@ -133,6 +207,7 @@ export function readAgentFleetPreferencesFromSettings(settings: unknown): AgentF
     paused: raw.paused === true,
     mode: normalizeMode(raw.mode, 'coordinator-first'),
     updatedAt: normalizeAgentName(raw.updatedAt, isoNow()),
+    lastControlReceipt: normalizeControlReceipt(raw.lastControlReceipt),
   }
 }
 
@@ -152,13 +227,31 @@ export function mergeAgentFleetPreferences(
   now?: string
 ): AgentFleetPreferences {
   const centralAgent = normalizeAgentName(patch.centralAgent, current.centralAgent)
+  const action = normalizeControlAction(patch.action)
+  const actionDrivenPatch: Partial<Pick<AgentFleetPreferences, 'paused' | 'mode' | 'lastControlReceipt'>> =
+    action === 'resume'
+      ? { paused: false, mode: current.mode, lastControlReceipt: buildAgentFleetControlReceipt(action, now) }
+      : action === 'pause'
+        ? { paused: true, mode: current.mode, lastControlReceipt: buildAgentFleetControlReceipt(action, now) }
+        : action === 'takeover' || action === 'stop'
+          ? { paused: true, mode: 'review-only' as AgentFleetMode, lastControlReceipt: buildAgentFleetControlReceipt(action, now) }
+          : {}
   return {
     version: 1,
     centralAgent,
     enabledAgents: normalizeEnabledAgents(patch.enabledAgents ?? current.enabledAgents, centralAgent),
-    paused: typeof patch.paused === 'boolean' ? patch.paused : current.paused,
-    mode: normalizeMode(patch.mode, current.mode),
+    paused: actionDrivenPatch.paused ?? (typeof patch.paused === 'boolean' ? patch.paused : current.paused),
+    mode: actionDrivenPatch.mode ?? normalizeMode(patch.mode, current.mode),
     updatedAt: isoNow(now),
+    lastControlReceipt: actionDrivenPatch.lastControlReceipt ?? current.lastControlReceipt,
+  }
+}
+
+function buildHeldCostReceipt(): AgentFleetCostReceipt {
+  return {
+    status: 'held',
+    label: 'Cost pending',
+    detail: 'Fleet-level cost is held until the metering ledger is attached to this snapshot.',
   }
 }
 
@@ -374,6 +467,8 @@ export function buildAgentFleetSnapshot(input: {
       'Review evidence',
       'Open Mission Ledger',
     ],
+    costReceipt: buildHeldCostReceipt(),
+    lastControlReceipt: preferences.lastControlReceipt,
     members,
     blockers,
     activeLockCount,

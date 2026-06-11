@@ -3,7 +3,7 @@
 export { BottomDock } from './chromeBottomDock';
 export type { BottomDockProps } from './chromeBottomDock';
 export { IDEHeader } from './chromeHeader';
-export type { IDEHeaderProps } from './chromeHeader';
+export type { IDEHeaderProps, AgentRunStatus } from './chromeHeader';
 export { ModernIDELoading } from './chromeLoading';
 export { MobileBottomBar } from './chromeMobileBottomBar';
 export type { MobileBottomBarProps } from './chromeMobileBottomBar';

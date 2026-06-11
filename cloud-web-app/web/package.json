@@ -245,7 +245,10 @@
     "qa:v30-quality-scorecard": "node scripts/check-v30-quality-scorecard.mjs",
     "qa:v30-story-coverage-ratchet": "node scripts/check-v30-story-coverage-ratchet.mjs",
     "qa:v30-three-import-ratchet": "node scripts/codemod-three-imports.mjs --verify --max=125",
-    "qa:studio-local-web-shell": "node scripts/check-studio-local-web-shell.mjs"
+    "qa:studio-local-web-shell": "node scripts/check-studio-local-web-shell.mjs",
+    "qa:visual-regression:shells": "playwright test tests/visual-regression/shells.spec.ts",
+    "qa:visual-regression:public": "playwright test tests/visual-regression/public-surfaces.spec.ts",
+    "qa:visual-regression:premium": "npm run qa:visual-regression:shells && npm run qa:visual-regression:public"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",

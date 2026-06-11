@@ -9,6 +9,8 @@ import type {
   AgentFleetMemberSnapshot,
   AgentFleetMemberStatus,
   AgentFleetSnapshot,
+  AgentFleetCostReceipt,
+  AgentFleetControlReceipt,
   BrowserOperatorRunSummary,
 } from './types'
 
@@ -17,8 +19,6 @@ type AgentFleetPanelProps = {
   grouped: Record<AgentFleetMemberStatus, AgentFleetMemberSnapshot[]>
   topMembers: AgentFleetMemberSnapshot[]
   latestReplayRun?: BrowserOperatorRunSummary
-  sessionCostCents?: number
-  budgetRemainingCents?: number
   onTogglePause: () => void
   onRefresh: () => void
   onStop?: () => void
@@ -43,20 +43,29 @@ function calculateFleetHealth(grouped: Record<AgentFleetMemberStatus, AgentFleet
   return clamp(weighted / total)
 }
 
-function CostMeter({
-  sessionCostCents,
-  budgetRemainingCents,
-}: {
-  sessionCostCents?: number
-  budgetRemainingCents?: number
-}) {
-  if (sessionCostCents === undefined && budgetRemainingCents === undefined) return null
+function CostMeter({ receipt }: { receipt: AgentFleetCostReceipt }) {
+  if (receipt.status !== 'available') {
+    return (
+      <div
+        className="flex items-center justify-between gap-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] px-3 py-2"
+        title={receipt.detail}
+      >
+        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+          Cost
+        </span>
+        <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-quaternary)]">
+          Held
+        </span>
+      </div>
+    )
+  }
 
-  const sessionUSD = ((sessionCostCents ?? 0) / 100).toFixed(2)
-  const hasBudget = budgetRemainingCents !== undefined
-  const budgetUSD = hasBudget ? (budgetRemainingCents / 100).toFixed(2) : null
-  const totalBudget = (sessionCostCents ?? 0) + (budgetRemainingCents ?? 0)
-  const usedFraction = hasBudget && totalBudget > 0 ? Math.min((sessionCostCents ?? 0) / totalBudget, 1) : null
+  const sessionCostCents = receipt.sessionCostCents ?? 0
+  const sessionUSD = (sessionCostCents / 100).toFixed(2)
+  const hasBudget = receipt.budgetRemainingCents !== undefined
+  const budgetUSD = hasBudget ? (receipt.budgetRemainingCents! / 100).toFixed(2) : null
+  const totalBudget = sessionCostCents + (receipt.budgetRemainingCents ?? 0)
+  const usedFraction = hasBudget && totalBudget > 0 ? Math.min(sessionCostCents / totalBudget, 1) : null
 
   return (
     <div className="flex items-center gap-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] px-3 py-2">
@@ -89,6 +98,18 @@ function CostMeter({
         </div>
       ) : null}
     </div>
+  )
+}
+
+function ControlReceiptPill({ receipt }: { receipt?: AgentFleetControlReceipt }) {
+  if (!receipt) return null
+  return (
+    <span
+      title={receipt.detail}
+      className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-quaternary)]"
+    >
+      {receipt.label}
+    </span>
   )
 }
 
@@ -144,8 +165,6 @@ export function AgentFleetPanel({
   grouped,
   topMembers,
   latestReplayRun,
-  sessionCostCents,
-  budgetRemainingCents,
   onTogglePause,
   onRefresh,
   onStop,
@@ -153,7 +172,6 @@ export function AgentFleetPanel({
   focusClass,
 }: AgentFleetPanelProps) {
   const isRunning = !data.paused && topMembers.some((member) => member.status === 'ready' || member.status === 'attention')
-  const hasCostReceipt = sessionCostCents !== undefined || budgetRemainingCents !== undefined
   const fleetHealth = calculateFleetHealth(grouped)
 
   return (
@@ -233,11 +251,12 @@ export function AgentFleetPanel({
           <span className="ml-auto rounded-full border border-[var(--aethel-border-subtle)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-quaternary)]">
             {data.mode}
           </span>
+          <ControlReceiptPill receipt={data.lastControlReceipt} />
         </div>
       </header>
 
-      <div className={cn('grid gap-2', hasCostReceipt ? 'grid-cols-2' : 'grid-cols-1')}>
-        {hasCostReceipt ? <CostMeter sessionCostCents={sessionCostCents} budgetRemainingCents={budgetRemainingCents} /> : null}
+      <div className="grid gap-2 md:grid-cols-2">
+        <CostMeter receipt={data.costReceipt} />
         <FleetHealthBar score={fleetHealth} />
       </div>
 

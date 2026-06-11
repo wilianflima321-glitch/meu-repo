@@ -3,15 +3,20 @@ import nextDynamic from 'next/dynamic'
 
 export const dynamic = 'force-dynamic'
 
+// Silent skeleton — no text, no labels, just a loading boundary
 function AdminLayoutFallback() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--aethel-surface-primary)] px-6 py-10 text-[var(--aethel-text-primary)]">
-      <div className="w-full max-w-md rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
-        <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Loading admin operations</p>
-        <p className="mt-2 text-xs text-[var(--aethel-text-secondary)]">
-          Preparing navigation, workspace status, and operating panels.
-        </p>
-      </div>
+    <div
+      role="status"
+      aria-busy="true"
+      aria-label="Loading"
+      className="flex min-h-screen items-center justify-center bg-[var(--aethel-surface-primary)]"
+    >
+      <div
+        className="h-8 w-8 animate-pulse rounded-full bg-[var(--aethel-surface-secondary)]"
+        aria-hidden="true"
+      />
+      <span className="sr-only">Loading admin area</span>
     </div>
   )
 }

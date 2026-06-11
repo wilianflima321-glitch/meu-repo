@@ -17,6 +17,7 @@ import {
   mergeAgentFleetPreferences,
   readAgentFleetPreferencesFromSettings,
   writeAgentFleetPreferencesToSettings,
+  type AgentFleetControlAction,
   type AgentFleetMode,
 } from '@/lib/production/agent-fleet-session'
 import { readRepositoryCartographyManifestFromSettings } from '@/lib/production/repository-cartography'
@@ -34,6 +35,7 @@ type RouteContext = {
 }
 
 const modes: AgentFleetMode[] = ['coordinator-first', 'selected-agent', 'review-only']
+const actions: AgentFleetControlAction[] = ['pause', 'resume', 'takeover', 'stop']
 
 async function loadProjectForAgentFleet(projectId: string, userId: string) {
   return prisma.project.findFirst({
@@ -75,8 +77,11 @@ function parseBody(value: unknown) {
   const mode = typeof value.mode === 'string' && modes.includes(value.mode as AgentFleetMode)
     ? (value.mode as AgentFleetMode)
     : undefined
+  const action = typeof value.action === 'string' && actions.includes(value.action as AgentFleetControlAction)
+    ? (value.action as AgentFleetControlAction)
+    : undefined
 
-  return { centralAgent, enabledAgents, paused, mode }
+  return { centralAgent, enabledAgents, paused, mode, action }
 }
 
 export async function GET(request: NextRequest, { params }: RouteContext) {

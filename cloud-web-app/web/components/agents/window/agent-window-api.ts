@@ -3,6 +3,7 @@ import type {
   AgentFleetMemberStatus,
   AgentFleetResponse,
   AgentFleetSnapshot,
+  AgentFleetControlAction,
   BrowserOperatorRunsResponse,
   BrowserOperatorRunSummary,
   ResearchNavigationMeshSnapshot,
@@ -23,7 +24,7 @@ export async function fetchAgentFleet(projectId: string): Promise<AgentFleetSnap
 
 export async function patchAgentFleet(
   projectId: string,
-  patch: Partial<Pick<AgentFleetSnapshot, 'paused'>>,
+  patch: Partial<Pick<AgentFleetSnapshot, 'paused' | 'mode'>> & { action?: AgentFleetControlAction },
 ): Promise<AgentFleetSnapshot> {
   const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/production-state/agent-fleet`, {
     method: 'PATCH',

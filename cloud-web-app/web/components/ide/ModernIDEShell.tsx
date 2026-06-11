@@ -18,6 +18,7 @@ import {
   StatusBar,
   SURFACE_PRIMARY,
   TEXT_PRIMARY,
+  type AgentRunStatus,
 } from './modern-shell/ModernIDEShellChrome';
 import { ModernIDEShellPanels } from './modern-shell/ModernIDEShellPanels';
 import type {
@@ -71,6 +72,7 @@ interface ModernIDEShellProps {
   onSelectPreviewMode?: (mode: PreviewMode) => void;
   onSelectBottomPanel?: (panel: BottomPanelMode) => void;
   onToggleDiagnostics?: () => void;
+  agentStatus?: AgentRunStatus;
   activeSidebarTab?: SidebarTab;
   activePreviewMode?: PreviewMode;
   activeBottomPanel?: BottomPanelMode;
@@ -98,6 +100,7 @@ export function ModernIDEShell({
   onSelectPreviewMode,
   onSelectBottomPanel,
   onToggleDiagnostics,
+  agentStatus = 'idle',
   activeSidebarTab = 'explorer',
   activePreviewMode = 'runtime',
   activeBottomPanel = 'chat',
@@ -150,6 +153,7 @@ export function ModernIDEShell({
         onRunPrimaryAction={onRunPrimaryAction}
         onOpenSettings={onOpenSettings}
         onOpenCommandPalette={onOpenCommandPalette}
+        agentStatus={agentStatus}
       />
 
       {banner ? (

@@ -64,6 +64,11 @@ const FLEET_IDLE: AgentFleetSnapshot = {
   blockers: [],
   activeLockCount: 1,
   staleSurfaceCount: 0,
+  costReceipt: {
+    status: 'held',
+    label: 'Cost pending',
+    detail: 'Fleet-level cost is held until the metering ledger is attached to this snapshot.',
+  },
   nextAction: 'Assign a task to start',
 }
 

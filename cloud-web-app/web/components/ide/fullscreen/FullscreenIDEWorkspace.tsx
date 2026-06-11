@@ -2,13 +2,16 @@
 
 import type * as monacoEditor from 'monaco-editor';
 import type { ReactNode, RefObject } from 'react';
+import useSWR from 'swr';
 
 import { AgentsWorkspaceContainer } from '@/components/agents';
+import { fetchAgentFleet } from '@/components/agents/window/agent-window-api';
 import CommandPaletteProvider, { type FileItem } from '@/components/ide/CommandPalette';
 import CostMeter from '@/components/cost/CostMeter';
 import { EditorApplyBridgeProvider } from '@/components/ide/EditorApplyBridgeContext';
 import { IdeWorkbenchCommandExtras } from '@/components/ide/IdeWorkbenchCommandExtras';
 import { ModernIDEShell } from '@/components/ide/ModernIDEShell';
+import type { AgentRunStatus } from '@/components/ide/modern-shell/ModernIDEShellChrome';
 import type { StatusBarProps } from '@/components/ide/modern-shell/chromeStatusBar';
 import { WorkbenchEditorPane, type WorkbenchEditorPaneProps } from '@/components/ide/fullscreen/WorkbenchEditorPane';
 import { WorkbenchPreviewPane, type WorkbenchPreviewPaneProps } from '@/components/ide/fullscreen/WorkbenchPreviewPane';
@@ -25,6 +28,17 @@ type SidebarFileEntry = {
   path: string;
   type: 'file' | 'folder';
 };
+
+function resolveAgentStatus(input: {
+  fleet?: Awaited<ReturnType<typeof fetchAgentFleet>>;
+  error?: unknown;
+}): AgentRunStatus {
+  if (input.error) return 'error';
+  const fleet = input.fleet;
+  if (!fleet || fleet.paused) return 'idle';
+  const active = fleet.members.some((member) => member.status === 'ready' || member.status === 'attention');
+  return active ? 'running' : 'idle';
+}
 
 export type FullscreenIDEWorkspaceProps = {
   projectId: string;
@@ -107,6 +121,13 @@ export function FullscreenIDEWorkspace({
   editorPaneProps,
   previewPaneProps,
 }: FullscreenIDEWorkspaceProps) {
+  const { data: agentFleet, error: agentFleetError } = useSWR(
+    ['agent-fleet', projectId],
+    () => fetchAgentFleet(projectId),
+    { refreshInterval: 30000, revalidateOnFocus: false },
+  );
+  const agentStatus = resolveAgentStatus({ fleet: agentFleet, error: agentFleetError });
+
   return (
     <CommandPaletteProvider
       onOpenFile={onPaletteOpenFile}
@@ -156,6 +177,7 @@ export function FullscreenIDEWorkspace({
             onSelectPreviewMode={onSelectPreviewMode}
             onSelectBottomPanel={onSelectBottomPanel}
             onToggleDiagnostics={onToggleDiagnostics}
+            agentStatus={agentStatus}
             activeSidebarTab={sidebarTab}
             activePreviewMode={previewMode}
           >

@@ -74,7 +74,8 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
 
   const togglePause = useCallback(async () => {
     if (!currentProjectId || !data) return
-    await mutate(patchAgentFleet(currentProjectId, { paused: !data.paused }), {
+    const action = data.paused ? 'resume' : 'pause'
+    await mutate(patchAgentFleet(currentProjectId, { action }), {
       optimisticData: { ...data, paused: !data.paused },
       rollbackOnError: true,
       populateCache: true,
@@ -84,8 +85,18 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
 
   const takeoverFleet = useCallback(async () => {
     if (!currentProjectId || !data || data.paused) return
-    await mutate(patchAgentFleet(currentProjectId, { paused: true }), {
-      optimisticData: { ...data, paused: true },
+    await mutate(patchAgentFleet(currentProjectId, { action: 'takeover' }), {
+      optimisticData: { ...data, paused: true, mode: 'review-only' },
+      rollbackOnError: true,
+      populateCache: true,
+      revalidate: false,
+    })
+  }, [currentProjectId, data, mutate])
+
+  const stopFleet = useCallback(async () => {
+    if (!currentProjectId || !data || data.paused) return
+    await mutate(patchAgentFleet(currentProjectId, { action: 'stop' }), {
+      optimisticData: { ...data, paused: true, mode: 'review-only' },
       rollbackOnError: true,
       populateCache: true,
       revalidate: false,
@@ -146,6 +157,7 @@ export function AgentsWindow({ projectId, className }: AgentsWindowProps) {
           latestReplayRun={latestReplayRun}
           onTogglePause={() => void togglePause()}
           onRefresh={() => void mutate()}
+          onStop={() => void stopFleet()}
           onTakeover={() => void takeoverFleet()}
           focusClass={focusClass}
         />

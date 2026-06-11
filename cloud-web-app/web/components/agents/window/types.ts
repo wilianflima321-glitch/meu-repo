@@ -1,4 +1,21 @@
 export type AgentFleetMemberStatus = 'ready' | 'attention' | 'blocked' | 'paused'
+export type AgentFleetControlAction = 'pause' | 'resume' | 'takeover' | 'stop'
+
+export type AgentFleetControlReceipt = {
+  action: AgentFleetControlAction
+  status: 'available' | 'human_review_required'
+  recordedAt: string
+  label: string
+  detail: string
+}
+
+export type AgentFleetCostReceipt = {
+  status: 'available' | 'held'
+  sessionCostCents?: number
+  budgetRemainingCents?: number
+  label: string
+  detail: string
+}
 
 export type AgentFleetMemberSnapshot = {
   agent: string
@@ -27,6 +44,8 @@ export type AgentFleetSnapshot = {
   blockers: string[]
   activeLockCount: number
   staleSurfaceCount: number
+  costReceipt: AgentFleetCostReceipt
+  lastControlReceipt?: AgentFleetControlReceipt
   nextAction: string
 }
 
