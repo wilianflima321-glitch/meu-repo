@@ -10,7 +10,9 @@ import { logger } from '@/lib/observability/logger';
 
 import { EventEmitter } from 'events';
 import { DialogueBuilder } from './dialogue-builder';
+import { createDialogueDisplayData } from './dialogue-display';
 import { ConditionEvaluator, DialogueTextProcessor, DialogueVariableStore } from './dialogue-runtime-parts';
+import { DialogueTypewriter } from './dialogue-typewriter';
 import type {
   DialogueCharacter,
   DialogueChoice,
@@ -53,12 +55,8 @@ export class DialogueManager extends EventEmitter {
     visitedChoices: new Set(),
   };
 
-  private typewriterSpeed = 50;
   private autoAdvanceDelay = 2000;
-  private isTyping = false;
-  private currentText = '';
-  private displayedText = '';
-  private typewriterInterval: NodeJS.Timeout | null = null;
+  private typewriter = new DialogueTypewriter();
 
   constructor() {
     super();
@@ -142,7 +140,7 @@ export class DialogueManager extends EventEmitter {
     if (!this.state.isActive || !this.state.currentNode) return;
 
     // If still typing, complete the text
-    if (this.isTyping) {
+    if (this.typewriter.isTyping()) {
       this.completeTypewriter();
       return;
     }
@@ -247,11 +245,8 @@ export class DialogueManager extends EventEmitter {
     const speaker = node.speaker ? conversation.characters[node.speaker] : null;
     const text = node.text ? this.textProcessor.processText(node.text, node.textKey) : '';
 
-    this.currentText = text;
-    this.displayedText = '';
-
     // Start typewriter effect
-    this.startTypewriter();
+    this.startTypewriter(text);
 
     this.emit('nodeDisplayed', {
       node,
@@ -319,39 +314,24 @@ export class DialogueManager extends EventEmitter {
   // TYPEWRITER
   // ============================================================================
 
-  private startTypewriter(): void {
-    this.stopTypewriter();
-    this.isTyping = true;
-
-    let charIndex = 0;
-
-    this.typewriterInterval = setInterval(() => {
-      if (charIndex < this.currentText.length) {
-        this.displayedText = this.currentText.substring(0, charIndex + 1);
-        charIndex++;
-        this.emit('textUpdated', { text: this.displayedText, complete: false });
-      } else {
-        this.completeTypewriter();
-      }
-    }, this.typewriterSpeed);
+  private startTypewriter(text: string): void {
+    this.typewriter.start(text, (displayedText, complete) => {
+      this.emit('textUpdated', { text: displayedText, complete });
+    });
   }
 
   private stopTypewriter(): void {
-    if (this.typewriterInterval) {
-      clearInterval(this.typewriterInterval);
-      this.typewriterInterval = null;
-    }
-    this.isTyping = false;
+    this.typewriter.stop();
   }
 
   private completeTypewriter(): void {
-    this.stopTypewriter();
-    this.displayedText = this.currentText;
-    this.emit('textUpdated', { text: this.displayedText, complete: true });
+    this.typewriter.complete((displayedText, complete) => {
+      this.emit('textUpdated', { text: displayedText, complete });
+    });
   }
 
   setTypewriterSpeed(charsPerSecond: number): void {
-    this.typewriterSpeed = 1000 / charsPerSecond;
+    this.typewriter.setCharsPerSecond(charsPerSecond);
   }
 
   // ============================================================================
@@ -416,33 +396,15 @@ export class DialogueManager extends EventEmitter {
 
     if (!node || !conversation) return null;
 
-    const speaker = node.speaker ? conversation.characters[node.speaker] : null;
-
-    let choices: DialogueDisplayData['choices'] = [];
-
-    if (node.type === 'choice' && node.choices) {
-      choices = node.choices.map((choice) => {
-        const available = !choice.conditions || this.conditionEvaluator.evaluateAll(choice.conditions);
-        const visitedKey = `${this.state.currentConversation}.${node.id}.${choice.id}`;
-
-        return {
-          id: choice.id,
-          text: this.textProcessor.processText(choice.text, choice.textKey),
-          available,
-          visited: this.state.visitedChoices.has(visitedKey),
-        };
-      });
-    }
-
-    return {
-      speaker,
-      text: this.displayedText,
-      expression: node.expression || 'default',
-      voiceClip: node.voiceClip || null,
-      choices,
-      canContinue: !this.isTyping && (node.type !== 'choice' || choices.length === 0),
-      isComplete: !this.isTyping,
-    };
+    return createDialogueDisplayData({
+      isTyping: this.typewriter.isTyping(),
+      displayedText: this.typewriter.getDisplayedText(),
+      state: this.state,
+      node,
+      conversation,
+      conditionEvaluator: this.conditionEvaluator,
+      textProcessor: this.textProcessor,
+    });
   }
 
   isActive(): boolean {
@@ -519,106 +481,8 @@ export class DialogueManager extends EventEmitter {
 // REACT HOOKS
 // ============================================================================
 
-import { useState, useRef, useEffect, useContext, createContext, useCallback } from 'react';
-
-const DialogueContext = createContext<DialogueManager | null>(null);
-
-export function DialogueProvider({ children }: { children: React.ReactNode }) {
-  const managerRef = useRef<DialogueManager>(new DialogueManager());
-
-  useEffect(() => {
-    const manager = managerRef.current;
-    return () => {
-      manager.dispose();
-    };
-  }, []);
-
-  return (
-    <DialogueContext.Provider value={managerRef.current}>
-      {children}
-    </DialogueContext.Provider>
-  );
-}
-
-export function useDialogue() {
-  const manager = useContext(DialogueContext);
-  if (!manager) {
-    throw new Error('useDialogue must be used within a DialogueProvider');
-  }
-
-  const [displayData, setDisplayData] = useState<DialogueDisplayData | null>(null);
-  const [isActive, setIsActive] = useState(false);
-
-  useEffect(() => {
-    const updateDisplay = () => {
-      setDisplayData(manager.getDisplayData());
-      setIsActive(manager.isActive());
-    };
-
-    manager.on('conversationStarted', updateDisplay);
-    manager.on('conversationEnded', updateDisplay);
-    manager.on('nodeDisplayed', updateDisplay);
-    manager.on('textUpdated', updateDisplay);
-    manager.on('choiceSelected', updateDisplay);
-
-    return () => {
-      manager.off('conversationStarted', updateDisplay);
-      manager.off('conversationEnded', updateDisplay);
-      manager.off('nodeDisplayed', updateDisplay);
-      manager.off('textUpdated', updateDisplay);
-      manager.off('choiceSelected', updateDisplay);
-    };
-  }, [manager]);
-
-  const startConversation = useCallback((conversationId: string, startNode?: string) => {
-    return manager.startConversation(conversationId, startNode);
-  }, [manager]);
-
-  const continueDialogue = useCallback(() => {
-    manager.continue();
-  }, [manager]);
-
-  const selectChoice = useCallback((choiceId: string) => {
-    manager.selectChoice(choiceId);
-  }, [manager]);
-
-  const endConversation = useCallback(() => {
-    manager.endConversation();
-  }, [manager]);
-
-  return {
-    manager,
-    displayData,
-    isActive,
-    startConversation,
-    continue: continueDialogue,
-    selectChoice,
-    endConversation,
-    loadConversation: manager.loadConversation.bind(manager),
-    setVariable: manager.getVariableStore().setVariable.bind(manager.getVariableStore()),
-    getVariable: manager.getVariableStore().getVariable.bind(manager.getVariableStore()),
-    setFlag: manager.getVariableStore().setFlag.bind(manager.getVariableStore()),
-    hasFlag: manager.getVariableStore().hasFlag.bind(manager.getVariableStore()),
-  };
-}
-
-export function useDialogueEvents(eventType: string, handler: (event: DialogueEvent) => void) {
-  const { manager } = useDialogue();
-
-  useEffect(() => {
-    const wrappedHandler = ({ event }: { event: DialogueEvent }) => {
-      if (event.type === eventType || eventType === '*') {
-        handler(event);
-      }
-    };
-
-    manager.on('dialogueEvent', wrappedHandler);
-
-    return () => {
-      manager.off('dialogueEvent', wrappedHandler);
-    };
-  }, [manager, eventType, handler]);
-}
+import { DialogueProvider, useDialogue, useDialogueEvents } from './dialogue-react';
+export { DialogueProvider, useDialogue, useDialogueEvents } from './dialogue-react';
 
 const __defaultExport = {
   DialogueManager,
