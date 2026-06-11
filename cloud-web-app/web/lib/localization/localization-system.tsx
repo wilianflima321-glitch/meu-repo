@@ -443,187 +443,30 @@ export class LocalizationManager extends EventEmitter {
 // TRANSLATION KEY BUILDER
 // ============================================================================
 
-export class TranslationKeyBuilder {
-  private translations: TranslationNamespace = {};
-
-  add(key: string, value: string | TranslationPluralForm, options?: { context?: string; description?: string }): this {
-    const parts = key.split('.');
-    let current = this.translations;
-
-    for (let i = 0; i < parts.length - 1; i++) {
-      if (!current[parts[i]]) {
-        current[parts[i]] = {};
-      }
-      current = current[parts[i]] as TranslationNamespace;
-    }
-
-    const lastKey = parts[parts.length - 1];
-
-    if (options?.context || options?.description) {
-      current[lastKey] = {
-        value,
-        context: options.context,
-        description: options.description,
-      };
-    } else {
-      current[lastKey] = value as string;
-    }
-
-    return this;
-  }
-
-  addPlural(key: string, forms: TranslationPluralForm): this {
-    return this.add(key, forms);
-  }
-
-  build(): TranslationNamespace {
-    return this.translations;
-  }
-
-  toJSON(): string {
-    return JSON.stringify(this.translations, null, 2);
-  }
-}
+import { TranslationKeyBuilder } from './localization-key-builder';
+export { TranslationKeyBuilder } from './localization-key-builder';
 
 // ============================================================================
 // REACT HOOKS
 // ============================================================================
 
-import { useState, useRef, useEffect, useContext, createContext, useCallback, useMemo } from 'react';
+import {
+  LocalizationProvider,
+  useFormattedDate,
+  useFormattedNumber,
+  useLocalization,
+  useTranslation,
+  withLocalization,
+} from './localization-react';
 
-const LocalizationContext = createContext<LocalizationManager | null>(null);
-
-export interface LocalizationProviderProps {
-  children: React.ReactNode;
-  defaultLocale?: LocaleCode;
-  translations?: TranslationData[];
-}
-
-export function LocalizationProvider({
-  children,
-  defaultLocale = 'en-US',
-  translations = [],
-}: LocalizationProviderProps) {
-  const managerRef = useRef<LocalizationManager>(new LocalizationManager(defaultLocale));
-
-  useEffect(() => {
-    for (const data of translations) {
-      managerRef.current.loadTranslations(data);
-    }
-  }, [translations]);
-
-  useEffect(() => {
-    const manager = managerRef.current;
-    return () => {
-      manager.dispose();
-    };
-  }, []);
-
-  return (
-    <LocalizationContext.Provider value={managerRef.current}>
-      {children}
-    </LocalizationContext.Provider>
-  );
-}
-
-export function useLocalization() {
-  const manager = useContext(LocalizationContext);
-  if (!manager) {
-    throw new Error('useLocalization must be used within a LocalizationProvider');
-  }
-
-  const [locale, setLocaleState] = useState(manager.getLocale());
-  const [direction, setDirection] = useState(manager.getDirection());
-
-  useEffect(() => {
-    const handleChange = ({ currentLocale, direction: dir }: { currentLocale: LocaleCode; direction: 'ltr' | 'rtl' }) => {
-      setLocaleState(currentLocale);
-      setDirection(dir);
-    };
-
-    manager.on('localeChanged', handleChange);
-
-    return () => {
-      manager.off('localeChanged', handleChange);
-    };
-  }, [manager]);
-
-  const setLocale = useCallback((newLocale: LocaleCode) => {
-    manager.setLocale(newLocale);
-  }, [manager]);
-
-  const t = useCallback((key: string, options?: FormatOptions) => {
-    return manager.t(key, options);
-  }, [manager]);
-
-  const formatNumber = useCallback((value: number, options?: Intl.NumberFormatOptions) => {
-    return manager.formatNumber(value, options);
-  }, [manager]);
-
-  const formatCurrency = useCallback((value: number, currency?: string) => {
-    return manager.formatCurrency(value, currency);
-  }, [manager]);
-
-  const formatDate = useCallback((date: Date | number, options?: Intl.DateTimeFormatOptions) => {
-    return manager.formatDate(date, options);
-  }, [manager]);
-
-  const formatRelativeTime = useCallback((date: Date | number) => {
-    return manager.formatRelativeTime(date);
-  }, [manager]);
-
-  return {
-    manager,
-    locale,
-    direction,
-    isRTL: direction === 'rtl',
-    setLocale,
-    t,
-    formatNumber,
-    formatCurrency,
-    formatDate,
-    formatRelativeTime,
-    availableLocales: manager.getAvailableLocales(),
-    localeInfo: manager.getLocaleInfo(),
-  };
-}
-
-export function useTranslation(namespace = 'default') {
-  const { manager, locale } = useLocalization();
-
-  const t = useCallback((key: string, options?: Omit<FormatOptions, 'namespace'>) => {
-    return manager.t(key, { ...options, namespace });
-  }, [manager, namespace]);
-
-  const exists = useCallback((key: string) => {
-    return manager.exists(key, namespace);
-  }, [manager, namespace]);
-
-  return { t, exists, locale };
-}
-
-export function useFormattedNumber(value: number, options?: Intl.NumberFormatOptions): string {
-  const { formatNumber } = useLocalization();
-  return useMemo(() => formatNumber(value, options), [value, options, formatNumber]);
-}
-
-export function useFormattedDate(date: Date | number, options?: Intl.DateTimeFormatOptions): string {
-  const { formatDate } = useLocalization();
-  return useMemo(() => formatDate(date, options), [date, options, formatDate]);
-}
-
-// ============================================================================
-// HOC FOR CLASS COMPONENTS
-// ============================================================================
-
-export function withLocalization<P extends object>(
-  WrappedComponent: React.ComponentType<P & ReturnType<typeof useLocalization>>
-) {
-  return function WithLocalizationComponent(props: P) {
-    const localization = useLocalization();
-    return <WrappedComponent {...props} {...localization} />;
-  };
-}
+export {
+  LocalizationProvider,
+  useFormattedDate,
+  useFormattedNumber,
+  useLocalization,
+  useTranslation,
+  withLocalization,
+} from './localization-react';
 
 const __defaultExport = {
   LocalizationManager,
