@@ -1,13 +1,12 @@
 // @aethel-heavy-async-boundary
-// Asset import pipeline for Studio/runtime jobs.
 import * as THREE from 'three';
 import { GLTFLoader, GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js';
-
+import { AudioImporter } from './asset-import-pipeline-audio';
 import { getAssetType, getSupportedFormats, isSupported, SUPPORTED_FORMATS } from './asset-import-pipeline-contracts';
+import { TextureImporter } from './asset-import-pipeline-texture';
 import {
   createAssetImportId,
   getImportDisplayName,
@@ -21,10 +20,6 @@ import type { AssetMetadata, AssetType, ImportOptions, ImportProgress, ImportPro
 export { getAssetType, getSupportedFormats, isSupported, SUPPORTED_FORMATS } from './asset-import-pipeline-contracts';
 export type { AssetMetadata, AssetType, ImportOptions, ImportProgress, ImportProgressCallback, ImportedAsset, ImportStatus } from './asset-import-pipeline-contracts';
 
-// ============================================================================
-// MODEL IMPORTER
-// ============================================================================
-
 class ModelImporter {
   private gltfLoader: GLTFLoader;
   private fbxLoader: FBXLoader;
@@ -37,7 +32,6 @@ class ModelImporter {
     this.objLoader = new OBJLoader();
     this.dracoLoader = new DRACOLoader();
 
-    // Setup Draco decoder
     this.dracoLoader.setDecoderPath('/draco/');
     this.gltfLoader.setDRACOLoader(this.dracoLoader);
   }
@@ -79,7 +73,6 @@ class ModelImporter {
           throw new Error(`Unsupported model format: ${ext}`);
       }
 
-      // Apply import options
       if (options.scale && options.scale !== 1) {
         result.scale.multiplyScalar(options.scale);
       }
@@ -88,7 +81,6 @@ class ModelImporter {
         result.rotation.x = -Math.PI / 2;
       }
 
-      // Process mesh
       const metadata = this.extractMetadata(result, animations);
 
       if (options.optimizeMesh) {
@@ -107,7 +99,6 @@ class ModelImporter {
         metadata.bounds = { min: box.min, max: box.max };
       }
 
-      // Generate thumbnail
       let thumbnail: string | undefined;
       if (options.createThumbnail) {
         onProgress?.({ stage: 'processing', progress: 95, message: 'Generating thumbnail...' });
@@ -221,10 +212,8 @@ class ModelImporter {
       if (child instanceof THREE.Mesh) {
         const geometry = child.geometry;
 
-        // Merge vertices
         geometry.computeVertexNormals();
 
-        // Compute bounding box/sphere
         geometry.computeBoundingBox();
         geometry.computeBoundingSphere();
       }
@@ -255,7 +244,6 @@ class ModelImporter {
     const clone = object.clone();
     scene.add(clone);
 
-    // Center and fit object
     const box = new THREE.Box3().setFromObject(clone);
     const center = box.getCenter(new THREE.Vector3());
     const boxSize = box.getSize(new THREE.Vector3());
@@ -275,282 +263,6 @@ class ModelImporter {
   }
 
 }
-
-// ============================================================================
-// TEXTURE IMPORTER
-// ============================================================================
-
-class TextureImporter {
-  private textureLoader: THREE.TextureLoader;
-  private ktx2Loader: KTX2Loader;
-
-  constructor() {
-    this.textureLoader = new THREE.TextureLoader();
-    this.ktx2Loader = new KTX2Loader();
-  }
-
-  async import(
-    file: File | string,
-    options: ImportOptions,
-    onProgress?: ImportProgressCallback
-  ): Promise<ImportedAsset> {
-    const filename = getImportFileName(file);
-    const ext = getImportExtension(filename);
-
-    onProgress?.({ stage: 'loading', progress: 0, message: 'Loading texture...' });
-
-    const url = typeof file === 'string' ? file : URL.createObjectURL(file);
-
-    try {
-      let texture: THREE.Texture;
-
-      if (ext === '.ktx2') {
-        texture = await this.loadKTX2(url);
-      } else {
-        texture = await this.loadTexture(url, onProgress);
-      }
-
-      // Apply import options
-      if (options.generateMipmaps !== false) {
-        texture.generateMipmaps = true;
-      }
-
-      if (options.flipY === false) {
-        texture.flipY = false;
-      }
-
-      // Get image dimensions
-      const image = texture.image;
-      let width = 0, height = 0;
-
-      if (image instanceof HTMLImageElement) {
-        width = image.naturalWidth;
-        height = image.naturalHeight;
-      } else if (image instanceof ImageBitmap) {
-        width = image.width;
-        height = image.height;
-      }
-
-      // Resize if needed
-      if (options.maxTextureSize && (width > options.maxTextureSize || height > options.maxTextureSize)) {
-        onProgress?.({ stage: 'processing', progress: 70, message: 'Resizing texture...' });
-        texture = await this.resizeTexture(texture, options.maxTextureSize);
-        width = Math.min(width, options.maxTextureSize);
-        height = Math.min(height, options.maxTextureSize);
-      }
-
-      // Determine if has alpha
-      const hasAlpha = ['.png', '.webp', '.tga'].includes(ext);
-      const isHDR = ['.hdr', '.exr'].includes(ext);
-
-      // Generate thumbnail
-      let thumbnail: string | undefined;
-      if (options.createThumbnail && image instanceof HTMLImageElement) {
-        onProgress?.({ stage: 'processing', progress: 90, message: 'Generating thumbnail...' });
-        thumbnail = this.generateThumbnail(image, options.thumbnailSize || 128);
-      }
-
-      onProgress?.({ stage: 'completed', progress: 100, message: 'Import complete!' });
-
-      return {
-        id: createAssetImportId('texture'),
-        name: getImportDisplayName(filename),
-        type: 'texture',
-        originalPath: filename,
-        size: typeof file === 'string' ? 0 : file.size,
-        format: ext.substring(1).toUpperCase(),
-        importDate: new Date(),
-        thumbnail,
-        metadata: {
-          width,
-          height,
-          channels: hasAlpha ? 4 : 3,
-          hasAlpha,
-          isHDR,
-        },
-        data: texture,
-      };
-    } finally {
-      if (typeof file !== 'string') {
-        URL.revokeObjectURL(url);
-      }
-    }
-  }
-
-  private loadTexture(url: string, onProgress?: ImportProgressCallback): Promise<THREE.Texture> {
-    return new Promise((resolve, reject) => {
-      this.textureLoader.load(
-        url,
-        resolve,
-        (xhr) => {
-          const progress = (xhr.loaded / xhr.total) * 60;
-          onProgress?.({ stage: 'loading', progress, message: 'Loading texture...' });
-        },
-        reject
-      );
-    });
-  }
-
-  private loadKTX2(url: string): Promise<THREE.Texture> {
-    return this.ktx2Loader.loadAsync(url);
-  }
-
-  private async resizeTexture(texture: THREE.Texture, maxSize: number): Promise<THREE.Texture> {
-    const image = texture.image as HTMLImageElement;
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-
-    const ratio = Math.min(maxSize / image.width, maxSize / image.height);
-    canvas.width = image.width * ratio;
-    canvas.height = image.height * ratio;
-
-    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-    const newTexture = new THREE.CanvasTexture(canvas);
-    newTexture.copy(texture);
-
-    return newTexture;
-  }
-
-  private generateThumbnail(image: HTMLImageElement, size: number): string {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-
-    const ratio = Math.min(size / image.naturalWidth, size / image.naturalHeight);
-    canvas.width = image.naturalWidth * ratio;
-    canvas.height = image.naturalHeight * ratio;
-
-    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-    return canvas.toDataURL('image/png');
-  }
-
-}
-
-// ============================================================================
-// AUDIO IMPORTER
-// ============================================================================
-
-class AudioImporter {
-  private audioContext: AudioContext | null = null;
-
-  private getAudioContext(): AudioContext {
-    if (!this.audioContext) {
-      this.audioContext = new AudioContext();
-    }
-    return this.audioContext;
-  }
-
-  async import(
-    file: File | string,
-    options: ImportOptions,
-    onProgress?: ImportProgressCallback
-  ): Promise<ImportedAsset> {
-    const filename = getImportFileName(file);
-    const ext = getImportExtension(filename);
-
-    onProgress?.({ stage: 'loading', progress: 0, message: 'Loading audio...' });
-
-    let arrayBuffer: ArrayBuffer;
-
-    if (typeof file === 'string') {
-      const response = await fetch(file);
-      arrayBuffer = await response.arrayBuffer();
-    } else {
-      arrayBuffer = await file.arrayBuffer();
-    }
-
-    onProgress?.({ stage: 'processing', progress: 50, message: 'Decoding audio...' });
-
-    const audioContext = this.getAudioContext();
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-    let processedBuffer = audioBuffer;
-
-    // Convert to mono if requested
-    if (options.convertToMono && audioBuffer.numberOfChannels > 1) {
-      onProgress?.({ stage: 'processing', progress: 70, message: 'Converting to mono...' });
-      processedBuffer = this.convertToMono(audioBuffer);
-    }
-
-    // Normalize if requested
-    if (options.normalize) {
-      onProgress?.({ stage: 'processing', progress: 85, message: 'Normalizing audio...' });
-      processedBuffer = this.normalize(processedBuffer);
-    }
-
-    onProgress?.({ stage: 'completed', progress: 100, message: 'Import complete!' });
-
-    return {
-      id: createAssetImportId('audio'),
-      name: getImportDisplayName(filename),
-      type: 'audio',
-      originalPath: filename,
-      size: arrayBuffer.byteLength,
-      format: ext.substring(1).toUpperCase(),
-      importDate: new Date(),
-      metadata: {
-        duration: processedBuffer.duration,
-        channels_audio: processedBuffer.numberOfChannels,
-        sampleRate: processedBuffer.sampleRate,
-      },
-      data: processedBuffer,
-    };
-  }
-
-  private convertToMono(buffer: AudioBuffer): AudioBuffer {
-    const audioContext = this.getAudioContext();
-    const monoBuffer = audioContext.createBuffer(1, buffer.length, buffer.sampleRate);
-    const monoData = monoBuffer.getChannelData(0);
-
-    // Mix all channels
-    for (let i = 0; i < buffer.length; i++) {
-      let sum = 0;
-      for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
-        sum += buffer.getChannelData(channel)[i];
-      }
-      monoData[i] = sum / buffer.numberOfChannels;
-    }
-
-    return monoBuffer;
-  }
-
-  private normalize(buffer: AudioBuffer): AudioBuffer {
-    const audioContext = this.getAudioContext();
-    const normalizedBuffer = audioContext.createBuffer(
-      buffer.numberOfChannels,
-      buffer.length,
-      buffer.sampleRate
-    );
-
-    // Find max amplitude
-    let maxAmplitude = 0;
-    for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
-      const data = buffer.getChannelData(channel);
-      for (let i = 0; i < data.length; i++) {
-        maxAmplitude = Math.max(maxAmplitude, Math.abs(data[i]));
-      }
-    }
-
-    // Normalize
-    const gain = maxAmplitude > 0 ? 1 / maxAmplitude : 1;
-    for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
-      const sourceData = buffer.getChannelData(channel);
-      const destData = normalizedBuffer.getChannelData(channel);
-      for (let i = 0; i < sourceData.length; i++) {
-        destData[i] = sourceData[i] * gain;
-      }
-    }
-
-    return normalizedBuffer;
-  }
-
-}
-
-// ============================================================================
-// MAIN IMPORT PIPELINE
-// ============================================================================
 
 export class AssetImportPipeline {
   private modelImporter: ModelImporter;
@@ -587,7 +299,6 @@ export class AssetImportPipeline {
       case 'audio':
         return this.audioImporter.import(file, defaultOptions, onProgress);
       default:
-        // Generic file import
         return this.importGeneric(file, assetType, defaultOptions, onProgress);
     }
   }
@@ -672,10 +383,6 @@ export class AssetImportPipeline {
   }
 }
 
-// ============================================================================
-// SINGLETON INSTANCE
-// ============================================================================
-
 let pipelineInstance: AssetImportPipeline | null = null;
 
 export function getAssetImportPipeline(): AssetImportPipeline {
@@ -684,10 +391,6 @@ export function getAssetImportPipeline(): AssetImportPipeline {
   }
   return pipelineInstance;
 }
-
-// ============================================================================
-// EXPORT
-// ============================================================================
 
 const assetImportPipelineModule = {
   AssetImportPipeline,

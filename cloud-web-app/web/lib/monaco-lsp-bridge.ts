@@ -1,23 +1,16 @@
 // @aethel-heavy-async-boundary IDE/Monaco runtime module; never import from public/dashboard/admin route shells.
-/**
- * Monaco LSP Bridge
- *
- * Connects Monaco Editor to the LSP server via WebSocket for real-time
- * language intelligence features like autocomplete, hover, go-to-definition, etc.
- */
 
 import * as monaco from 'monaco-editor';
 
 import { createComponentLogger, logger } from '@/lib/observability/logger';
-import { DEFAULT_LSP_ROOT_URI, DEFAULT_LSP_WORKSPACE_FOLDERS, DEFAULT_LSP_WS_URL, LSP_CLIENT_CAPABILITIES, LSP_REQUEST_TIMEOUT_MS, SUPPORTED_LSP_LANGUAGES } from './monaco-lsp-bridge.config';
-import { LSP_COMPLETION_KIND_MAP, LSP_SEVERITY_MAP } from './monaco-lsp-bridge.maps';
+import { DEFAULT_LSP_ROOT_URI, DEFAULT_LSP_WORKSPACE_FOLDERS, DEFAULT_LSP_WS_URL, LSP_CLIENT_CAPABILITIES, LSP_REQUEST_TIMEOUT_MS } from './monaco-lsp-bridge.config';
+import { toMonacoCompletionItem, toMonacoHoverContents, toMonacoRange } from './monaco-lsp-bridge.converters';
+import { LSP_SEVERITY_MAP } from './monaco-lsp-bridge.maps';
+import { registerMonacoLspProviders } from './monaco-lsp-bridge.providers';
 import type { CompletionItem, Diagnostic, Hover, Location, LspMessage, Range, TextDocumentPositionParams } from './monaco-lsp-bridge.types';
 
 const log = createComponentLogger('monaco-lsp-bridge');
 
-/**
- * Monaco LSP Bridge - connects Monaco Editor to LSP server
- */
 export class MonacoLspBridge {
   private ws: WebSocket | null = null;
   private requestId = 0;
@@ -31,18 +24,20 @@ export class MonacoLspBridge {
 
   constructor(private wsUrl: string = DEFAULT_LSP_WS_URL) {}
 
-  /**
-   * Initialize the bridge and connect to LSP server
-   */
   async initialize(): Promise<void> {
     await this.connect();
     await this.initializeLsp();
-    this.registerProviders();
+    this.disposables.push(...registerMonacoLspProviders({
+      provideCompletionItems: (model, position, context) => this.provideCompletionItems(model, position, context),
+      provideHover: (model, position) => this.provideHover(model, position),
+      provideDefinition: (model, position) => this.provideDefinition(model, position),
+      provideReferences: (model, position, context) => this.provideReferences(model, position, context),
+      provideSignatureHelp: (model, position) => this.provideSignatureHelp(model, position),
+      provideDocumentFormatting: (model, options) => this.provideDocumentFormatting(model, options),
+      provideRenameEdits: (model, position, newName) => this.provideRenameEdits(model, position, newName),
+    }));
   }
 
-  /**
-   * Connect to WebSocket server
-   */
   private connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket(this.wsUrl);
@@ -69,9 +64,6 @@ export class MonacoLspBridge {
     });
   }
 
-  /**
-   * Handle disconnection and attempt reconnect
-   */
   private async handleDisconnect(): Promise<void> {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
@@ -82,7 +74,6 @@ export class MonacoLspBridge {
         try {
           await this.connect();
           await this.initializeLsp();
-          // Re-sync open documents
           for (const [uri, doc] of this.openDocuments) {
             await this.didOpen(uri, doc.languageId, ''); // Need to get content from Monaco
           }
@@ -93,9 +84,6 @@ export class MonacoLspBridge {
     }
   }
 
-  /**
-   * Send LSP initialize request
-   */
   private async initializeLsp(): Promise<void> {
     const result = await this.sendRequest<{ capabilities: Record<string, unknown> }>('initialize', {
       processId: null,
@@ -109,9 +97,6 @@ export class MonacoLspBridge {
     log.info('[LSP Bridge] LSP initialized with capabilities:', this.serverCapabilities);
   }
 
-  /**
-   * Send a request to LSP server
-   */
   private sendRequest<T = unknown>(method: string, params: unknown): Promise<T> {
     return new Promise((resolve, reject) => {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
@@ -130,7 +115,6 @@ export class MonacoLspBridge {
       this.pendingRequests.set(id, { resolve: resolve as (value: unknown) => void, reject });
       this.ws.send(JSON.stringify(message));
 
-      // Timeout after 10 seconds
       setTimeout(() => {
         if (this.pendingRequests.has(id)) {
           this.pendingRequests.delete(id);
@@ -140,9 +124,6 @@ export class MonacoLspBridge {
     });
   }
 
-  /**
-   * Send a notification to LSP server
-   */
   private sendNotification(method: string, params: unknown): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       logger.warn('[LSP Bridge] Cannot send notification, not connected');
@@ -158,11 +139,7 @@ export class MonacoLspBridge {
     this.ws.send(JSON.stringify(message));
   }
 
-  /**
-   * Handle incoming LSP message
-   */
   private handleMessage(message: LspMessage): void {
-    // Response to a request
     if (message.id !== undefined && (message.result !== undefined || message.error !== undefined)) {
       const pending = this.pendingRequests.get(message.id);
       if (pending) {
@@ -176,15 +153,11 @@ export class MonacoLspBridge {
       return;
     }
 
-    // Server notification
     if (message.method) {
       this.handleNotification(message.method, message.params);
     }
   }
 
-  /**
-   * Handle server notifications
-   */
   private handleNotification(method: string, params: unknown): void {
     switch (method) {
       case 'textDocument/publishDiagnostics':
@@ -199,9 +172,6 @@ export class MonacoLspBridge {
     }
   }
 
-  /**
-   * Handle diagnostics from LSP
-   */
   private handleDiagnostics(params: { uri: string; diagnostics: Diagnostic[] }): void {
     const model = monaco.editor.getModels().find(m => m.uri.toString() === params.uri);
     if (!model) return;
@@ -220,81 +190,6 @@ export class MonacoLspBridge {
     monaco.editor.setModelMarkers(model, 'lsp', markers);
   }
 
-  /**
-   * Register Monaco providers
-   */
-  private registerProviders(): void {
-    for (const language of SUPPORTED_LSP_LANGUAGES) {
-      // Completion provider
-      this.disposables.push(
-        monaco.languages.registerCompletionItemProvider(language, {
-          triggerCharacters: ['.', ':', '<', '"', '/', '@', '#'],
-          provideCompletionItems: async (model, position, context) => {
-            return this.provideCompletionItems(model, position, context);
-          },
-        })
-      );
-
-      // Hover provider
-      this.disposables.push(
-        monaco.languages.registerHoverProvider(language, {
-          provideHover: async (model, position) => {
-            return this.provideHover(model, position);
-          },
-        })
-      );
-
-      // Definition provider
-      this.disposables.push(
-        monaco.languages.registerDefinitionProvider(language, {
-          provideDefinition: async (model, position) => {
-            return this.provideDefinition(model, position);
-          },
-        })
-      );
-
-      // References provider
-      this.disposables.push(
-        monaco.languages.registerReferenceProvider(language, {
-          provideReferences: async (model, position, context) => {
-            return this.provideReferences(model, position, context);
-          },
-        })
-      );
-
-      // Signature help provider
-      this.disposables.push(
-        monaco.languages.registerSignatureHelpProvider(language, {
-          signatureHelpTriggerCharacters: ['(', ','],
-          provideSignatureHelp: async (model, position) => {
-            return this.provideSignatureHelp(model, position);
-          },
-        })
-      );
-
-      // Document formatting provider
-      this.disposables.push(
-        monaco.languages.registerDocumentFormattingEditProvider(language, {
-          provideDocumentFormattingEdits: async (model, options) => {
-            return this.provideDocumentFormatting(model, options);
-          },
-        })
-      );
-
-      // Rename provider
-      this.disposables.push(
-        monaco.languages.registerRenameProvider(language, {
-          provideRenameEdits: async (model, position, newName) => {
-            return this.provideRenameEdits(model, position, newName);
-          },
-        })
-      );
-    }
-  }
-
-  /**
-   * Notify LSP of document open
-   */
   async didOpen(uri: string, languageId: string, text: string): Promise<void> {
     const version = 1;
     this.openDocuments.set(uri, { version, languageId });
@@ -304,9 +199,6 @@ export class MonacoLspBridge {
     });
   }
 
-  /**
-   * Notify LSP of document change
-   */
   didChange(uri: string, text: string): void {
     const doc = this.openDocuments.get(uri);
     if (!doc) return;
@@ -318,9 +210,6 @@ export class MonacoLspBridge {
     });
   }
 
-  /**
-   * Notify LSP of document close
-   */
   didClose(uri: string): void {
     this.openDocuments.delete(uri);
     this.sendNotification('textDocument/didClose', {
@@ -328,9 +217,6 @@ export class MonacoLspBridge {
     });
   }
 
-  /**
-   * Notify LSP of document save
-   */
   didSave(uri: string, text?: string): void {
     this.sendNotification('textDocument/didSave', {
       textDocument: { uri },
@@ -338,9 +224,6 @@ export class MonacoLspBridge {
     });
   }
 
-  /**
-   * Provide completion items
-   */
   private async provideCompletionItems(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
@@ -356,7 +239,7 @@ export class MonacoLspBridge {
       const items = Array.isArray(result) ? result : result?.items || [];
 
       return {
-        suggestions: items.map(item => this.convertCompletionItem(item, model, position)),
+        suggestions: items.map(item => toMonacoCompletionItem(item, position)),
       };
     } catch (error) {
       logger.error('[LSP Bridge] Completion error:', error);
@@ -364,49 +247,6 @@ export class MonacoLspBridge {
     }
   }
 
-  /**
-   * Convert LSP completion item to Monaco
-   */
-  private convertCompletionItem(
-    item: CompletionItem,
-    model: monaco.editor.ITextModel,
-    position: monaco.Position
-  ): monaco.languages.CompletionItem {
-    const range = item.textEdit?.range
-      ? this.convertRange(item.textEdit.range)
-      : {
-          startLineNumber: position.lineNumber,
-          startColumn: position.column,
-          endLineNumber: position.lineNumber,
-          endColumn: position.column,
-        };
-
-    let documentation: string | monaco.IMarkdownString | undefined;
-    if (typeof item.documentation === 'string') {
-      documentation = item.documentation;
-    } else if (item.documentation && typeof item.documentation === 'object' && 'value' in item.documentation) {
-      documentation = { value: item.documentation.value };
-    }
-
-    return {
-      label: item.label,
-      kind: LSP_COMPLETION_KIND_MAP[item.kind || 1] || monaco.languages.CompletionItemKind.Text,
-      detail: item.detail,
-      documentation,
-      insertText: item.insertText || (item.textEdit?.newText) || item.label,
-      insertTextRules: item.insertTextFormat === 2
-        ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        : undefined,
-      range,
-      sortText: item.sortText,
-      filterText: item.filterText,
-      preselect: item.preselect,
-    };
-  }
-
-  /**
-   * Provide hover information
-   */
   private async provideHover(
     model: monaco.editor.ITextModel,
     position: monaco.Position
@@ -420,25 +260,9 @@ export class MonacoLspBridge {
       const result = await this.sendRequest<Hover | null>('textDocument/hover', params);
       if (!result) return null;
 
-      const contents: monaco.IMarkdownString[] = [];
-
-      if (typeof result.contents === 'string') {
-        contents.push({ value: result.contents });
-      } else if (Array.isArray(result.contents)) {
-        for (const c of result.contents) {
-          if (typeof c === 'string') {
-            contents.push({ value: c });
-          } else {
-            contents.push({ value: `\`\`\`${c.language}\n${c.value}\n\`\`\`` });
-          }
-        }
-      } else if ('value' in result.contents) {
-        contents.push({ value: result.contents.value });
-      }
-
       return {
-        contents,
-        range: result.range ? this.convertRange(result.range) : undefined,
+        contents: toMonacoHoverContents(result),
+        range: result.range ? toMonacoRange(result.range) : undefined,
       };
     } catch (error) {
       logger.error('[LSP Bridge] Hover error:', error);
@@ -446,9 +270,6 @@ export class MonacoLspBridge {
     }
   }
 
-  /**
-   * Provide definition locations
-   */
   private async provideDefinition(
     model: monaco.editor.ITextModel,
     position: monaco.Position
@@ -465,7 +286,7 @@ export class MonacoLspBridge {
       const locations = Array.isArray(result) ? result : [result];
       return locations.map(loc => ({
         uri: monaco.Uri.parse(loc.uri),
-        range: this.convertRange(loc.range),
+        range: toMonacoRange(loc.range),
       }));
     } catch (error) {
       logger.error('[LSP Bridge] Definition error:', error);
@@ -473,9 +294,6 @@ export class MonacoLspBridge {
     }
   }
 
-  /**
-   * Provide references
-   */
   private async provideReferences(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
@@ -493,7 +311,7 @@ export class MonacoLspBridge {
 
       return result.map(loc => ({
         uri: monaco.Uri.parse(loc.uri),
-        range: this.convertRange(loc.range),
+        range: toMonacoRange(loc.range),
       }));
     } catch (error) {
       logger.error('[LSP Bridge] References error:', error);
@@ -501,9 +319,6 @@ export class MonacoLspBridge {
     }
   }
 
-  /**
-   * Provide signature help
-   */
   private async provideSignatureHelp(
     model: monaco.editor.ITextModel,
     position: monaco.Position
@@ -544,9 +359,6 @@ export class MonacoLspBridge {
     }
   }
 
-  /**
-   * Provide document formatting
-   */
   private async provideDocumentFormatting(
     model: monaco.editor.ITextModel,
     options: monaco.languages.FormattingOptions
@@ -564,7 +376,7 @@ export class MonacoLspBridge {
       if (!result) return null;
 
       return result.map(edit => ({
-        range: this.convertRange(edit.range),
+        range: toMonacoRange(edit.range),
         text: edit.newText,
       }));
     } catch (error) {
@@ -573,9 +385,6 @@ export class MonacoLspBridge {
     }
   }
 
-  /**
-   * Provide rename edits
-   */
   private async provideRenameEdits(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
@@ -603,7 +412,7 @@ export class MonacoLspBridge {
             edits.push({
               resource: monaco.Uri.parse(uri),
               textEdit: {
-                range: this.convertRange(change.range),
+                range: toMonacoRange(change.range),
                 text: change.newText,
               },
               versionId: undefined,
@@ -618,7 +427,7 @@ export class MonacoLspBridge {
             edits.push({
               resource: monaco.Uri.parse(docChange.textDocument.uri),
               textEdit: {
-                range: this.convertRange(edit.range),
+                range: toMonacoRange(edit.range),
                 text: edit.newText,
               },
               versionId: undefined,
@@ -634,21 +443,6 @@ export class MonacoLspBridge {
     }
   }
 
-  /**
-   * Convert LSP range to Monaco range
-   */
-  private convertRange(range: Range): monaco.IRange {
-    return {
-      startLineNumber: range.start.line + 1,
-      startColumn: range.start.character + 1,
-      endLineNumber: range.end.line + 1,
-      endColumn: range.end.character + 1,
-    };
-  }
-
-  /**
-   * Dispose all resources
-   */
   dispose(): void {
     for (const disposable of this.disposables) {
       disposable.dispose();
@@ -665,12 +459,8 @@ export class MonacoLspBridge {
   }
 }
 
-// Singleton instance
 let bridgeInstance: MonacoLspBridge | null = null;
 
-/**
- * Get or create LSP bridge instance
- */
 export function getLspBridge(wsUrl?: string): MonacoLspBridge {
   if (!bridgeInstance) {
     bridgeInstance = new MonacoLspBridge(wsUrl);
@@ -678,9 +468,6 @@ export function getLspBridge(wsUrl?: string): MonacoLspBridge {
   return bridgeInstance;
 }
 
-/**
- * Initialize LSP bridge
- */
 export async function initializeLspBridge(wsUrl?: string): Promise<MonacoLspBridge> {
   const bridge = getLspBridge(wsUrl);
   await bridge.initialize();
