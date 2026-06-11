@@ -1,6 +1,6 @@
 'use client';
 
-import type { BrushMode, BrushSettings, SculptOperation, TerrainLayer } from '@/lib/engine/LandscapeEditor.runtime';
+import type { BrushMode, BrushSettings, SculptOperation, TerrainLayer } from '@/lib/engine/LandscapeEditor.types';
 
 interface ToolbarProps {
   brushSettings: BrushSettings;
