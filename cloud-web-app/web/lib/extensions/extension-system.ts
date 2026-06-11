@@ -8,6 +8,8 @@
 import { EventEmitter } from 'events';
 import { createComponentLogger } from '@/lib/observability/logger';
 import { ExtensionKind, ExtensionMode } from './extension-contracts';
+import { ExtensionMarketplace } from './extension-marketplace';
+import { createExtensionContext } from './extension-context-factory';
 import type {
   EnvironmentVariableCollection,
   EnvironmentVariableMutator,
@@ -17,7 +19,6 @@ import type {
   ExtensionContext,
   ExtensionManifest,
   LoadedExtension,
-  MarketplaceExtension,
   Memento,
   SearchResult,
   SecretStorage,
@@ -422,104 +423,12 @@ export class ExtensionHost extends EventEmitter {
   // ==========================================================================
 
   private createExtensionContext(id: string, manifest: ExtensionManifest, extensionPath: string): ExtensionContext {
-    const globalStoragePath = `/extensions/${id}/globalStorage`;
-    const storagePath = `/workspace/extensions/${id}/storage`;
-    const logPath = `/extensions/${id}/logs`;
-
-    const globalState = this.createMemento(`${id}:global`);
-    const workspaceState = this.createMemento(`${id}:workspace`);
-    const secrets = this.createSecretStorage(id);
-    const subscriptions: { dispose(): void }[] = [];
-
-    const context: ExtensionContext = {
-      extensionId: id,
-      extensionUri: extensionPath,
+    return createExtensionContext({
+      id,
+      manifest,
       extensionPath,
-      globalStoragePath,
-      storagePath,
-      logPath,
-      globalState,
-      workspaceState,
-      secrets,
-      subscriptions,
-      extensionMode: ExtensionMode.Production,
-      environmentVariableCollection: this.createEnvVarCollection(),
-      extension: {
-        id,
-        extensionUri: extensionPath,
-        extensionPath,
-        isActive: false,
-        packageJSON: manifest,
-        extensionKind: ExtensionKind.UI,
-        exports: null,
-        activate: () => this.activateExtension(id),
-      },
-      globalStorageUri: { fsPath: globalStoragePath, path: globalStoragePath },
-      storageUri: { fsPath: storagePath, path: storagePath },
-      logUri: { fsPath: logPath, path: logPath },
-    };
-
-    return context;
-  }
-
-  private createMemento(key: string): Memento {
-    const storage = new Map<string, unknown>();
-    const syncKeys = new Set<string>();
-
-    return {
-      keys: () => Array.from(storage.keys()),
-      get: <T>(k: string, defaultValue?: T): T | undefined => {
-        return storage.has(k) ? storage.get(k) as T : defaultValue;
-      },
-      update: async (k: string, value: unknown) => {
-        if (value === undefined) {
-          storage.delete(k);
-        } else {
-          storage.set(k, value);
-        }
-      },
-      setKeysForSync: (keys: readonly string[]) => {
-        syncKeys.clear();
-        keys.forEach(k => syncKeys.add(k));
-      },
-    };
-  }
-
-  private createSecretStorage(extensionId: string): SecretStorage {
-    const secrets = new Map<string, string>();
-    const listeners = new Set<(e: { key: string }) => void>();
-
-    return {
-      get: async (key: string) => secrets.get(key),
-      store: async (key: string, value: string) => {
-        secrets.set(key, value);
-        listeners.forEach(l => l({ key }));
-      },
-      delete: async (key: string) => {
-        secrets.delete(key);
-        listeners.forEach(l => l({ key }));
-      },
-      onDidChange: (listener) => {
-        listeners.add(listener);
-        return { dispose: () => listeners.delete(listener) };
-      },
-    };
-  }
-
-  private createEnvVarCollection(): EnvironmentVariableCollection {
-    const vars = new Map<string, EnvironmentVariableMutator>();
-
-    return {
-      persistent: true,
-      description: undefined,
-      replace: (variable, value, options) => vars.set(variable, { value, type: 1, options }),
-      append: (variable, value, options) => vars.set(variable, { value, type: 2, options }),
-      prepend: (variable, value, options) => vars.set(variable, { value, type: 3, options }),
-      get: (variable) => vars.get(variable),
-      forEach: (callback) => vars.forEach((v, k) => callback(k, v, vars)),
-      delete: (variable) => { vars.delete(variable); },
-      clear: () => vars.clear(),
-    };
+      activateExtension: (extensionId) => this.activateExtension(extensionId),
+    });
   }
 
   // ==========================================================================
@@ -543,61 +452,7 @@ export class ExtensionHost extends EventEmitter {
   }
 }
 
-// ============================================================================
-// EXTENSION MARKETPLACE
-// ============================================================================
-
-export class ExtensionMarketplace extends EventEmitter {
-  private baseUrl: string;
-
-  constructor(baseUrl: string = 'https://marketplace.aethel.dev/api') {
-    super();
-    this.baseUrl = baseUrl;
-  }
-
-  async search(query: string, options?: {
-    category?: string;
-    sortBy?: 'relevance' | 'downloads' | 'rating' | 'updated';
-    sortOrder?: 'asc' | 'desc';
-    pageSize?: number;
-    pageNumber?: number;
-  }): Promise<SearchResult> {
-    // Browser builds expose an empty marketplace until the provider contract is configured.
-    return {
-      extensions: [],
-      totalCount: 0,
-      pageSize: options?.pageSize || 20,
-      pageNumber: options?.pageNumber || 1,
-    };
-  }
-
-  async getExtension(id: string): Promise<MarketplaceExtension | null> {
-    // Provider unavailable: do not invent marketplace metadata.
-    return null;
-  }
-
-  async getExtensionVersions(id: string): Promise<string[]> {
-    return [];
-  }
-
-  async downloadExtension(id: string, version?: string): Promise<ArrayBuffer> {
-    throw new Error('EXTENSION_MARKETPLACE_PROVIDER_UNAVAILABLE');
-  }
-
-  async installExtension(id: string, version?: string): Promise<void> {
-    const data = await this.downloadExtension(id, version);
-    // Unpack and install
-    this.emit('extensionInstalled', { id, version });
-  }
-
-  async getInstalled(): Promise<string[]> {
-    return [];
-  }
-
-  async getOutdated(): Promise<{ id: string; currentVersion: string; latestVersion: string }[]> {
-    return [];
-  }
-}
+export { ExtensionMarketplace } from './extension-marketplace';
 
 // ============================================================================
 // SINGLETONS
