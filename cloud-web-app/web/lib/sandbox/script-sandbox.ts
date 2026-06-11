@@ -1,6 +1,7 @@
 import { logger } from '@/lib/observability/logger';
+import { executeScriptInProcess } from './script-sandbox-in-process';
 import { DANGEROUS_PATTERNS, sanitizeOutput, validateScript } from './script-sandbox-guards';
-import { AethelGameAPIs } from './script-sandbox-game-apis';
+import { generateSandboxWorkerCode } from './script-sandbox-worker';
 /**
  * Script Sandbox - isolated user-script execution.
  *
@@ -13,7 +14,7 @@ import { AethelGameAPIs } from './script-sandbox-game-apis';
 export { DANGEROUS_PATTERNS, sanitizeOutput, validateScript } from './script-sandbox-guards';
 export { AethelGameAPIs } from './script-sandbox-game-apis';
 export type { AllowedAPI, SandboxConfig, SandboxLog, SandboxMessage, SandboxResult } from './script-sandbox.types';
-import type { AllowedAPI, SandboxConfig, SandboxLog, SandboxMessage, SandboxResult } from './script-sandbox.types';
+import type { SandboxConfig, SandboxMessage, SandboxResult } from './script-sandbox.types';
 
 // ============================================================================
 // TYPES
@@ -90,7 +91,7 @@ export class ScriptSandbox {
     return new Promise((resolve, reject) => {
       try {
         // Criar Worker com código inline
-        const workerCode = this.generateWorkerCode();
+        const workerCode = generateSandboxWorkerCode();
         const blob = new Blob([workerCode], { type: 'application/javascript' });
         const workerUrl = URL.createObjectURL(blob);
 
@@ -226,7 +227,6 @@ export class ScriptSandbox {
     if (!this.isReady) {
       await this.initialize();
     }
-
 
     // Validar código
     const validation = this.validateCode(code);
@@ -433,233 +433,6 @@ export class ScriptSandbox {
   private isMockWorker(): boolean {
     return hasSimulatedWorker(this.worker);
   }
-
-  private executeInProcess(code: string, context?: Record<string, unknown>): SandboxResult {
-    const startTime = Date.now();
-    const logs: SandboxLog[] = [];
-
-    const mockConsole = {
-      log: (...args: unknown[]) => logs.push({ level: 'log', message: args.map(String).join(' '), timestamp: Date.now() }),
-      warn: (...args: unknown[]) => logs.push({ level: 'warn', message: args.map(String).join(' '), timestamp: Date.now() }),
-      error: (...args: unknown[]) => logs.push({ level: 'error', message: args.map(String).join(' '), timestamp: Date.now() }),
-      info: (...args: unknown[]) => logs.push({ level: 'info', message: args.map(String).join(' '), timestamp: Date.now() }),
-    };
-
-    const infiniteLoopPattern = /while\s*\(\s*true\s*\)|for\s*\(\s*;\s*;\s*\)/;
-    if (infiniteLoopPattern.test(code)) {
-      return {
-        success: false,
-        error: `timeout após ${this.config.timeout}ms`,
-        executionTime: this.config.timeout,
-        memoryUsed: 0,
-        logs,
-      };
-    }
-
-    const scope: Record<string, unknown> = {
-      ...this.config.globals,
-      ...context,
-    };
-
-    const addIfAllowed = (api: AllowedAPI, key: string, value: unknown) => {
-      if (this.config.allowedAPIs.includes(api)) {
-        scope[key] = value;
-      }
-    };
-
-    addIfAllowed('console', 'console', mockConsole);
-    addIfAllowed('math', 'Math', Math);
-    addIfAllowed('json', 'JSON', JSON);
-    addIfAllowed('date', 'Date', Date);
-    addIfAllowed('array', 'Array', Array);
-    addIfAllowed('object', 'Object', Object);
-    addIfAllowed('string', 'String', String);
-    addIfAllowed('number', 'Number', Number);
-    addIfAllowed('boolean', 'Boolean', Boolean);
-
-    if (this.config.allowedAPIs.includes('number')) {
-      scope.parseInt = parseInt;
-      scope.parseFloat = parseFloat;
-      scope.isNaN = isNaN;
-      scope.isFinite = isFinite;
-    }
-
-    if (this.config.allowedAPIs.includes('aethel-game')) {
-      scope.Aethel = AethelGameAPIs;
-    }
-
-    try {
-      const scopeKeys = Object.keys(scope);
-      const scopeValues = Object.values(scope);
-      const fn = new Function(...scopeKeys, `"use strict";\n${code}`);
-      let result = fn(...scopeValues);
-      const looksLikeExpression = !/\b(return|if|for|while|switch|try|catch|function|class)\b/.test(code)
-        && !/[;\n]/.test(code)
-        && !/[()]/.test(code);
-      if (result === undefined && looksLikeExpression) {
-        const exprFn = new Function(...scopeKeys, `"use strict";\nreturn (${code});`);
-        result = exprFn(...scopeValues);
-      }
-      return {
-        success: true,
-        result: sanitizeOutput(result),
-        executionTime: Date.now() - startTime,
-        memoryUsed: Array.isArray(result) ? Math.max(1, result.length * 8) : 1024,
-        logs,
-      };
-    } catch (error: unknown) {
-      const rawMessage = error instanceof Error ? error.message : 'Execution error';
-      const message = error instanceof SyntaxError || /Unexpected token/.test(rawMessage)
-        ? `SyntaxError: ${rawMessage}`
-        : rawMessage;
-      return {
-        success: false,
-        error: message,
-        executionTime: Date.now() - startTime,
-        memoryUsed: 0,
-        logs,
-      };
-    }
-  }
-
-  private generateWorkerCode(): string {
-    // Este código roda DENTRO do Web Worker, isolado do main thread
-    return `
-      'use strict';
-
-      // Remover acesso a APIs perigosas
-      const _postMessage = postMessage;
-
-      // APIs permitidas (será filtrado por execução)
-      const safeAPIs = {
-        console: {
-          log: (...args) => collectLog('log', args),
-          warn: (...args) => collectLog('warn', args),
-          error: (...args) => collectLog('error', args),
-          info: (...args) => collectLog('info', args),
-        },
-        Math: Math,
-        JSON: {
-          parse: JSON.parse,
-          stringify: JSON.stringify,
-        },
-        Date: Date,
-        Array: Array,
-        Object: Object,
-        String: String,
-        Number: Number,
-        Boolean: Boolean,
-        parseInt: parseInt,
-        parseFloat: parseFloat,
-        isNaN: isNaN,
-        isFinite: isFinite,
-      };
-
-      let executionLogs = [];
-
-      function collectLog(level, args) {
-        const message = args.map(arg => {
-          try {
-            return typeof arg === 'object' ? JSON.stringify(arg) : String(arg);
-          } catch {
-            return '[Circular]';
-          }
-        }).join(' ');
-
-        executionLogs.push({
-          level,
-          message,
-          timestamp: Date.now(),
-        });
-      }
-
-      // Executar código de forma segura
-      function safeExecute(code, context, allowedAPIs) {
-        executionLogs = [];
-        const startTime = (self.performance?.now?.() ?? Date.now());
-        const startMemory = 0; // Estimativa
-
-        try {
-          // Construir escopo seguro
-          const scope = { ...context };
-
-          // Adicionar APIs permitidas
-          const apiMap = {
-            console: 'console',
-            math: 'Math',
-            json: 'JSON',
-            date: 'Date',
-            array: 'Array',
-            object: 'Object',
-            string: 'String',
-            number: 'Number',
-            boolean: 'Boolean',
-          };
-
-          for (const api of allowedAPIs) {
-            const mapped = apiMap[api];
-            if (mapped && safeAPIs[mapped]) {
-              scope[mapped] = safeAPIs[mapped];
-            }
-            if (api === 'number') {
-              scope.parseInt = safeAPIs.parseInt;
-              scope.parseFloat = safeAPIs.parseFloat;
-              scope.isNaN = safeAPIs.isNaN;
-              scope.isFinite = safeAPIs.isFinite;
-            }
-          }
-
-          // Criar função com escopo limitado
-          const scopeKeys = Object.keys(scope);
-          const scopeValues = Object.values(scope);
-
-          // Adicionar "use strict" e envolver em try-catch interno
-          const wrappedCode = '"use strict";\\n' + code;
-
-          // Criar e executar função
-          const fn = new Function(...scopeKeys, wrappedCode);
-          const result = fn(...scopeValues);
-
-          return {
-            success: true,
-            result: result,
-            executionTime: (self.performance?.now?.() ?? Date.now()) - startTime,
-            memoryUsed: startMemory,
-            logs: executionLogs,
-          };
-        } catch (error) {
-          return {
-            success: false,
-            error: error.message || 'Unknown error',
-            executionTime: (self.performance?.now?.() ?? Date.now()) - startTime,
-            memoryUsed: startMemory,
-            logs: executionLogs,
-          };
-        }
-      }
-
-      // Handler de mensagens
-      self.onmessage = function(event) {
-        const { type, payload } = event.data;
-
-        if (type === 'execute') {
-          const { id, code, context, allowedAPIs, memoryLimit } = payload;
-
-          // Executar com segurança
-          const result = safeExecute(code, context, allowedAPIs);
-
-          // Enviar resultado
-          _postMessage({
-            type: 'result',
-            payload: { id, result },
-          });
-        }
-      };
-
-      // Sinalizar que está pronto
-      _postMessage({ type: 'ready' });
-    `;
-  }
 }
 
 // ============================================================================
@@ -689,6 +462,5 @@ export async function safeExecute(
   const sandbox = getSandbox(config);
   return sandbox.execute(code, context);
 }
-
 
 export default ScriptSandbox;

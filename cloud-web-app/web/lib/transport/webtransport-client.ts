@@ -1,22 +1,12 @@
-/**
- * AETHEL ENGINE - WebTransport Layer
- * ===================================
- *
- * Camada de transporte de última geração para substituir WebSocket.
- * WebTransport oferece:
- * - Baixa latência (baseado em QUIC/HTTP3)
- * - Streams bidirecionais multiplexados
- * - Datagramas não confiáveis (ideal para jogos)
- * - Melhor performance que WebSocket
- *
- * Fallback automático para WebSocket em navegadores sem suporte.
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebTransport
- */
-
 import { EventEmitter } from 'events';
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import {
+  acceptTransportStreams,
+  createWebSocketConnection,
+  createWebTransportConnection,
+  readTransportDatagrams,
+} from './webtransport-client.connection'
 import { createInitialTransportStats, resolveTransportConfig } from './webtransport-client.defaults'
 import type {
   StreamOptions,
@@ -31,25 +21,11 @@ export type * from './webtransport-client.types'
 
 const log = createComponentLogger('transport/webtransport-client')
 
-// ============================================================================
-// WEBTRANSPORT SUPPORT DETECTION
-// ============================================================================
-
 export function isWebTransportSupported(): boolean {
   if (typeof window === 'undefined') return false;
   return 'WebTransport' in window;
 }
 
-// ============================================================================
-// UNIFIED TRANSPORT CLIENT
-// ============================================================================
-
-/**
- * UnifiedTransportClient - Abstração sobre WebTransport/WebSocket
- *
- * Usa WebTransport quando disponível, com fallback automático para WebSocket.
- * API unificada para ambos os protocolos.
- */
 export class UnifiedTransportClient extends EventEmitter {
   private config: Required<TransportConfig>;
   private transport: WebTransport | null = null;
@@ -61,15 +37,12 @@ export class UnifiedTransportClient extends EventEmitter {
   private connectionStartTime = 0;
   private sequence = 0;
 
-  // Stats tracking
   private stats: TransportStats = createInitialTransportStats();
 
-  // RTT calculation
   private rttSamples: number[] = [];
   private pendingPings = new Map<number, number>();
   private pingInterval: ReturnType<typeof setInterval> | null = null;
 
-  // Streams (WebTransport only)
   private streams = new Map<string, {
     readable: ReadableStream;
     writable: WritableStream;
@@ -77,7 +50,6 @@ export class UnifiedTransportClient extends EventEmitter {
     reader?: ReadableStreamDefaultReader;
   }>();
 
-  // Datagram support (WebTransport only)
   private datagramWriter: WritableStreamDefaultWriter | null = null;
   private datagramReader: ReadableStreamDefaultReader | null = null;
 
@@ -86,13 +58,6 @@ export class UnifiedTransportClient extends EventEmitter {
     this.config = resolveTransportConfig(config);
   }
 
-  // ============================================================================
-  // PUBLIC API
-  // ============================================================================
-
-  /**
-   * Connect to server using best available transport
-   */
   async connect(): Promise<void> {
     if (this.state === 'connected' || this.state === 'connecting') {
       return;
@@ -101,7 +66,6 @@ export class UnifiedTransportClient extends EventEmitter {
     this.setState('connecting');
     this.connectionStartTime = Date.now();
 
-    // Try WebTransport first (unless forced to WebSocket)
     if (!this.config.forceWebSocket && isWebTransportSupported()) {
       try {
         await this.connectWebTransport();
@@ -111,49 +75,38 @@ export class UnifiedTransportClient extends EventEmitter {
       }
     }
 
-    // Fallback to WebSocket
     await this.connectWebSocket();
   }
 
-  /**
-   * Disconnect from server
-   */
   async disconnect(): Promise<void> {
     this.setState('closed');
     this.clearTimers();
 
-    // Close streams
     for (const [id, stream] of this.streams) {
       try {
         await stream.writer?.close();
-      } catch { /* ignore */ }
+      } catch {}
       this.streams.delete(id);
     }
 
-    // Close datagram handlers
     if (this.datagramWriter) {
-      try { await this.datagramWriter.close(); } catch { /* ignore */ }
+      try { await this.datagramWriter.close(); } catch {}
       this.datagramWriter = null;
     }
 
-    // Close transport
     if (this.transport) {
-      try { this.transport.close(); } catch { /* ignore */ }
+      try { this.transport.close(); } catch {}
       this.transport = null;
     }
 
-    // Close websocket
     if (this.websocket) {
-      try { this.websocket.close(1000, 'Client disconnecting'); } catch { /* ignore */ }
+      try { this.websocket.close(1000, 'Client disconnecting'); } catch {}
       this.websocket = null;
     }
 
     this.emit('disconnected');
   }
 
-  /**
-   * Send a reliable message (ordered, guaranteed delivery)
-   */
   async send(type: string, payload: unknown, channel = 'default'): Promise<void> {
     const message: TransportMessage = {
       type,
@@ -167,13 +120,8 @@ export class UnifiedTransportClient extends EventEmitter {
     await this.sendMessage(message, true);
   }
 
-  /**
-   * Send an unreliable datagram (unordered, may be dropped)
-   * Ideal for frequent game state updates where latest data is preferred
-   */
   async sendDatagram(type: string, payload: unknown): Promise<void> {
     if (this.transportType !== 'webtransport' || !this.datagramWriter) {
-      // Fallback to reliable send for WebSocket
       await this.send(type, payload, 'datagram');
       return;
     }
@@ -194,14 +142,10 @@ export class UnifiedTransportClient extends EventEmitter {
       this.stats.messagesSent++;
     } catch (error) {
       this.stats.datagramsLost++;
-      // Datagrams are unreliable, don't throw
       this.log('Datagram dropped:', error);
     }
   }
 
-  /**
-   * Create a bidirectional stream for high-bandwidth data
-   */
   async createStream(options: StreamOptions): Promise<{
     send: (data: ArrayBuffer | string) => Promise<void>;
     receive: () => AsyncGenerator<ArrayBuffer>;
@@ -249,15 +193,12 @@ export class UnifiedTransportClient extends EventEmitter {
       close: async () => {
         try {
           await writer?.close();
-        } catch { /* ignore */ }
+        } catch {}
         this.streams.delete(options.id);
       },
     };
   }
 
-  /**
-   * Get current connection statistics
-   */
   getStats(): TransportStats {
     return {
       ...this.stats,
@@ -267,41 +208,18 @@ export class UnifiedTransportClient extends EventEmitter {
     };
   }
 
-  /**
-   * Get current transport type
-   */
   getTransportType(): TransportType {
     return this.transportType;
   }
 
-  /**
-   * Check if connected
-   */
   isConnected(): boolean {
     return this.state === 'connected';
   }
 
-  // ============================================================================
-  // WEBTRANSPORT CONNECTION
-  // ============================================================================
-
   private async connectWebTransport(): Promise<void> {
     this.log('Connecting via WebTransport...');
 
-    // Use global WebTransport API (available in modern browsers)
-    const WebTransportClass = (globalThis as any).WebTransport;
-    const transport = new WebTransportClass(this.config.url, {
-      congestionControl: this.config.congestionControl,
-      serverCertificateHashes: [], // For development, would need proper certs in prod
-    });
-
-    // Wait for connection with timeout
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Connection timeout')), this.config.connectionTimeout);
-    });
-
-    await Promise.race([transport.ready, timeoutPromise]);
-
+    const transport = await createWebTransportConnection(this.config);
     this.transport = transport;
     this.transportType = 'webtransport';
     this.setState('connected');
@@ -309,123 +227,30 @@ export class UnifiedTransportClient extends EventEmitter {
 
     this.log('WebTransport connected');
 
-    // Setup datagram handlers
+    const handlers = this.createConnectionHandlers();
     if (this.config.useDatagrams && transport.datagrams) {
       this.datagramWriter = transport.datagrams.writable.getWriter();
       this.datagramReader = transport.datagrams.readable.getReader();
-      this.readDatagrams();
+      readTransportDatagrams(this.datagramReader, handlers);
     }
 
-    // Setup incoming streams
-    this.acceptIncomingStreams(transport);
+    acceptTransportStreams(transport, handlers);
 
-    // Handle connection close
     transport.closed.then(() => {
       this.handleDisconnect('WebTransport closed');
     }).catch((error: Error) => {
       this.handleDisconnect(`WebTransport error: ${error.message}`);
     });
 
-    // Start ping/pong for RTT measurement
     this.startPingPong();
-
     this.emit('connected', { transport: 'webtransport' });
   }
-
-  private async readDatagrams(): Promise<void> {
-    if (!this.datagramReader) return;
-
-    try {
-      while (true) {
-        const { value, done } = await this.datagramReader.read();
-        if (done) break;
-
-        this.stats.bytesReceived += value.byteLength;
-        this.stats.messagesReceived++;
-
-        try {
-          const message = this.decodeMessage(value);
-          this.handleMessage(message);
-        } catch (error) {
-          this.log('Failed to decode datagram:', error);
-        }
-      }
-    } catch (error) {
-      this.log('Datagram reader error:', error);
-    }
-  }
-
-  private async acceptIncomingStreams(transport: WebTransport): Promise<void> {
-    // Handle incoming bidirectional streams
-    const bidiReader = transport.incomingBidirectionalStreams.getReader();
-    (async () => {
-      try {
-        while (true) {
-          const { value: stream, done } = await bidiReader.read();
-          if (done) break;
-          this.emit('stream', stream);
-        }
-      } catch (error) {
-        this.log('Incoming stream error:', error);
-      }
-    })();
-
-    // Handle incoming unidirectional streams
-    const uniReader = transport.incomingUnidirectionalStreams.getReader();
-    (async () => {
-      try {
-        while (true) {
-          const { value: stream, done } = await uniReader.read();
-          if (done) break;
-          this.handleIncomingStream(stream);
-        }
-      } catch (error) {
-        this.log('Incoming uni stream error:', error);
-      }
-    })();
-  }
-
-  private async handleIncomingStream(stream: ReadableStream): Promise<void> {
-    const reader = stream.getReader();
-    try {
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-
-        this.stats.bytesReceived += value.byteLength;
-
-        try {
-          const message = this.decodeMessage(value);
-          this.handleMessage(message);
-        } catch (error) {
-          this.log('Failed to decode stream message:', error);
-        }
-      }
-    } catch (error) {
-      this.log('Stream read error:', error);
-    } finally {
-      reader.releaseLock();
-    }
-  }
-
-  // ============================================================================
-  // WEBSOCKET CONNECTION (FALLBACK)
-  // ============================================================================
 
   private async connectWebSocket(): Promise<void> {
     this.log('Connecting via WebSocket...');
 
-    return new Promise((resolve, reject) => {
-      const ws = new WebSocket(this.config.fallbackUrl);
-      ws.binaryType = 'arraybuffer';
-
-      const timeout = setTimeout(() => {
-        ws.close();
-        reject(new Error('Connection timeout'));
-      }, this.config.connectionTimeout);
-
-      ws.onopen = () => {
-        clearTimeout(timeout);
+    await createWebSocketConnection(this.config, {
+      onOpen: (ws) => {
         this.websocket = ws;
         this.transportType = 'websocket';
         this.setState('connected');
@@ -433,56 +258,57 @@ export class UnifiedTransportClient extends EventEmitter {
 
         this.log('WebSocket connected');
         this.startPingPong();
-
         this.emit('connected', { transport: 'websocket' });
-        resolve();
-      };
-
-      ws.onerror = (error) => {
-        clearTimeout(timeout);
-        reject(error);
-      };
-
-      ws.onclose = (event) => {
+      },
+      onClose: (event) => {
         this.handleDisconnect(`WebSocket closed: ${event.code} ${event.reason}`);
-      };
+      },
+      onBinaryMessage: (data) => {
+        this.stats.bytesReceived += data.byteLength;
+        this.stats.messagesReceived++;
 
-      ws.onmessage = (event) => {
-        if (event.data instanceof ArrayBuffer) {
-          this.stats.bytesReceived += event.data.byteLength;
-          this.stats.messagesReceived++;
-
-          try {
-            const message = this.decodeMessage(new Uint8Array(event.data));
-            this.handleMessage(message);
-          } catch (error) {
-            this.log('Failed to decode WebSocket message:', error);
-          }
-        } else if (typeof event.data === 'string') {
-          this.stats.bytesReceived += event.data.length;
-          this.stats.messagesReceived++;
-
-          try {
-            const message = JSON.parse(event.data) as TransportMessage;
-            this.handleMessage(message);
-          } catch (error) {
-            this.log('Failed to parse WebSocket message:', error);
-          }
+        try {
+          this.handleMessage(this.decodeMessage(new Uint8Array(data)));
+        } catch (error) {
+          this.log('Failed to decode WebSocket message:', error);
         }
-      };
+      },
+      onTextMessage: (data) => {
+        this.stats.bytesReceived += data.length;
+        this.stats.messagesReceived++;
+
+        try {
+          this.handleMessage(JSON.parse(data) as TransportMessage);
+        } catch (error) {
+          this.log('Failed to parse WebSocket message:', error);
+        }
+      },
     });
   }
 
-  // ============================================================================
-  // MESSAGE HANDLING
-  // ============================================================================
+  private createConnectionHandlers() {
+    return {
+      decodeMessage: (data: Uint8Array) => this.decodeMessage(data),
+      handleMessage: (message: TransportMessage) => this.handleMessage(message),
+      onBytesReceived: (byteLength: number) => {
+        this.stats.bytesReceived += byteLength;
+      },
+      onMessageReceived: () => {
+        this.stats.messagesReceived++;
+      },
+      onStream: (stream: WebTransportBidirectionalStream) => {
+        this.emit('stream', stream);
+      },
+      onDisconnect: (reason: string) => this.handleDisconnect(reason),
+      log: (...args: unknown[]) => this.log(...args),
+    };
+  }
 
   private async sendMessage(message: TransportMessage, reliable: boolean): Promise<void> {
     const data = this.encodeMessage(message);
 
     if (this.transportType === 'webtransport' && this.transport) {
       if (reliable) {
-        // Use a stream for reliable delivery
         const stream = await this.transport.createUnidirectionalStream();
         const writer = stream.getWriter();
         await writer.write(data);
@@ -501,7 +327,6 @@ export class UnifiedTransportClient extends EventEmitter {
   }
 
   private handleMessage(message: TransportMessage): void {
-    // Handle internal messages
     if (message.type === 'pong') {
       const sentTime = this.pendingPings.get(message.sequence);
       if (sentTime) {
@@ -517,7 +342,6 @@ export class UnifiedTransportClient extends EventEmitter {
       return;
     }
 
-    // Emit message to listeners
     this.emit('message', message);
     this.emit(`message:${message.type}`, message.payload);
     this.emit(`channel:${message.channel}`, message);
@@ -533,10 +357,6 @@ export class UnifiedTransportClient extends EventEmitter {
     return JSON.parse(json);
   }
 
-  // ============================================================================
-  // RTT & LATENCY
-  // ============================================================================
-
   private startPingPong(): void {
     this.pingInterval = setInterval(() => {
       if (this.state !== 'connected') return;
@@ -546,7 +366,6 @@ export class UnifiedTransportClient extends EventEmitter {
 
       this.send('ping', { clientTime: Date.now() }, 'system').catch(() => {});
 
-      // Clean old pending pings (timeout)
       const now = Date.now();
       for (const [s, time] of this.pendingPings) {
         if (now - time > 5000) {
@@ -562,12 +381,10 @@ export class UnifiedTransportClient extends EventEmitter {
       this.rttSamples.shift();
     }
 
-    // Calculate average RTT
     const sum = this.rttSamples.reduce((a, b) => a + b, 0);
     this.stats.rtt = Math.round(sum / this.rttSamples.length);
     this.stats.avgLatency = this.stats.rtt / 2;
 
-    // Calculate jitter (variation in latency)
     if (this.rttSamples.length >= 2) {
       let jitterSum = 0;
       for (let i = 1; i < this.rttSamples.length; i++) {
@@ -578,10 +395,6 @@ export class UnifiedTransportClient extends EventEmitter {
 
     this.emit('rtt', this.stats.rtt);
   }
-
-  // ============================================================================
-  // RECONNECTION
-  // ============================================================================
 
   private handleDisconnect(reason: string): void {
     if (this.state === 'closed') return;
@@ -616,10 +429,6 @@ export class UnifiedTransportClient extends EventEmitter {
     }, delay);
   }
 
-  // ============================================================================
-  // UTILITIES
-  // ============================================================================
-
   private setState(state: TransportState): void {
     const oldState = this.state;
     this.state = state;
@@ -647,15 +456,8 @@ export class UnifiedTransportClient extends EventEmitter {
   }
 }
 
-// ============================================================================
-// SINGLETON & FACTORY
-// ============================================================================
-
 let defaultTransport: UnifiedTransportClient | null = null;
 
-/**
- * Get the default transport client instance
- */
 export function getTransport(): UnifiedTransportClient {
   if (!defaultTransport) {
     throw new Error('Transport not initialized. Call initTransport() first.');
@@ -663,9 +465,6 @@ export function getTransport(): UnifiedTransportClient {
   return defaultTransport;
 }
 
-/**
- * Initialize the default transport client
- */
 export function initTransport(config: TransportConfig): UnifiedTransportClient {
   if (defaultTransport) {
     defaultTransport.disconnect();
@@ -674,40 +473,21 @@ export function initTransport(config: TransportConfig): UnifiedTransportClient {
   return defaultTransport;
 }
 
-/**
- * Create a new transport client (for multiple connections)
- */
 export function createTransport(config: TransportConfig): UnifiedTransportClient {
   return new UnifiedTransportClient(config);
 }
 
-// ============================================================================
-// REACT HOOK
-// ============================================================================
-
 export interface UseTransportOptions extends TransportConfig {
-  /** Auto-connect on mount */
   autoConnect?: boolean;
 }
 
 export interface UseTransportResult {
-  /** Transport client instance */
   transport: UnifiedTransportClient | null;
-  /** Connection state */
   state: TransportState;
-  /** Transport type in use */
   type: TransportType;
-  /** Connection statistics */
   stats: TransportStats;
-  /** Connect to server */
   connect: () => Promise<void>;
-  /** Disconnect from server */
   disconnect: () => Promise<void>;
-  /** Send reliable message */
   send: (type: string, payload: unknown, channel?: string) => Promise<void>;
-  /** Send unreliable datagram */
   sendDatagram: (type: string, payload: unknown) => Promise<void>;
 }
-
-// UseTransportOptions and UseTransportResult are defined above as interfaces
-// and can be imported directly from this module
