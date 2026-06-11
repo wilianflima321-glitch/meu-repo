@@ -22,6 +22,7 @@ import type {
   EventCategory,
   PerformanceMetric,
 } from './analytics.types'
+import { MetricsAggregator } from './analytics-metrics'
 export type {
   AnalyticsEvent,
   DashboardMetrics,

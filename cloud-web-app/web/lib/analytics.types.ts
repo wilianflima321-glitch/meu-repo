@@ -170,3 +170,17 @@ export interface DashboardMetrics {
   uptime: number;
 }
 
+export interface MetricsQuery {
+  startDate: Date;
+  endDate: Date;
+  granularity?: 'hour' | 'day' | 'week' | 'month';
+  filters?: Record<string, string | number | boolean>;
+}
+
+export interface TimeSeriesData {
+  timestamp: Date;
+  value: number;
+  label?: string;
+  metadata?: Record<string, unknown>;
+}
+

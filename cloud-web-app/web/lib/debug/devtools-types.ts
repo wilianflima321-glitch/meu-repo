@@ -49,7 +49,7 @@ export interface ConsoleEntry {
   stack?: string;
 }
 
-interface DevToolsContextValue {
+export interface DevToolsContextValue {
   /** Is DevTools panel visible */
   isOpen: boolean;
   /** Toggle DevTools panel */

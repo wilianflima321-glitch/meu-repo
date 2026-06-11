@@ -54,6 +54,3 @@ export function detectOptimalQuality(): QualityPreset {
   // Default to medium
   return 'medium';
 }
-
-export default useRenderPipeline;
-
