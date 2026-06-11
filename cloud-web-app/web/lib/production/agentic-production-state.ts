@@ -1,116 +1,36 @@
+import type {
+  AgenticProductionState,
+  AgenticProductionStatePatch,
+  MissionLedgerEntry,
+  MissionLedgerState,
+  ProductionDomain,
+  ProductionGraphs,
+  ProductionGraphKey,
+  ProductionGraphNode,
+  ProductionNodeStatus,
+  ProductionReadinessSummary,
+  ProductionRuntimePolicy,
+  ProductionRuntimeTarget,
+  ProjectBrainDecision,
+  ProjectBrainMemory,
+} from './agentic-production-state.types'
+export type {
+  AgenticProductionState,
+  AgenticProductionStatePatch,
+  MissionLedgerEntry,
+  MissionLedgerState,
+  ProductionDomain,
+  ProductionGraphs,
+  ProductionGraphKey,
+  ProductionGraphNode,
+  ProductionNodeStatus,
+  ProductionReadinessSummary,
+  ProductionRuntimePolicy,
+  ProductionRuntimeTarget,
+  ProjectBrainDecision,
+  ProjectBrainMemory,
+} from './agentic-production-state.types'
 export const PRODUCTION_STATE_SETTINGS_KEY = 'aethelProductionState'
-
-export type ProductionDomain = 'web-app' | 'code' | 'game-film' | 'game' | 'film' | 'mixed'
-
-export type ProductionGraphKey =
-  | 'assetGraph'
-  | 'sceneWorldGraph'
-  | 'gameplayGraph'
-  | 'shotFilmGraph'
-  | 'validationGraph'
-  | 'evidenceGraph'
-  | 'releaseGraph'
-
-export type ProductionNodeStatus = 'missing' | 'draft' | 'needs-review' | 'ready' | 'blocked'
-
-export type MissionLedgerState =
-  | 'planned'
-  | 'running'
-  | 'needs-approval'
-  | 'blocked'
-  | 'paused'
-  | 'complete'
-
-export type ProductionRuntimeTarget = 'local-native' | 'local-worker' | 'local-main-safe' | 'cloud-sandbox' | 'held'
-
-export interface ProductionGraphNode {
-  id: string
-  label: string
-  status: ProductionNodeStatus
-  ownerAgent: string
-  evidenceRefs: string[]
-  blockers: string[]
-  updatedAt: string
-}
-
-export interface ProjectBrainDecision {
-  id: string
-  title: string
-  rationale: string
-  ownerAgent: string
-  createdAt: string
-}
-
-export interface ProjectBrainMemory {
-  objective: string
-  domain: ProductionDomain
-  audience: string
-  creativeBible: {
-    style: string
-    tone: string
-    story: string
-    continuity: string[]
-  }
-  technicalBible: {
-    runtimeTargets: ProductionRuntimeTarget[]
-    constraints: string[]
-    performanceBudget: string
-  }
-  risks: string[]
-  decisions: ProjectBrainDecision[]
-}
-
-export interface MissionLedgerEntry {
-  id: string
-  phase: string
-  ownerAgent: string
-  state: MissionLedgerState
-  summary: string
-  acceptance: string[]
-  evidenceRefs: string[]
-  rollbackPlan: string
-  nextAction: string
-  estimatedCostUsd: number
-  updatedAt: string
-}
-
-export type ProductionGraphs = Record<ProductionGraphKey, ProductionGraphNode[]>
-
-export interface ProductionRuntimePolicy {
-  preferredTarget: ProductionRuntimeTarget
-  fallbackTarget: ProductionRuntimeTarget
-  localAcceleration: 'prefer-npu' | 'prefer-gpu' | 'balanced' | 'cloud-first'
-  requiresHumanApproval: boolean
-  maxConcurrentHeavyJobs: number
-}
-
-export interface AgenticProductionState {
-  version: 1
-  updatedAt: string
-  brain: ProjectBrainMemory
-  ledger: MissionLedgerEntry[]
-  graphs: ProductionGraphs
-  runtimePolicy: ProductionRuntimePolicy
-}
-
-export type AgenticProductionStatePatch = Partial<{
-  brain: Partial<ProjectBrainMemory>
-  ledger: MissionLedgerEntry[]
-  graphs: Partial<Record<ProductionGraphKey, ProductionGraphNode[]>>
-  runtimePolicy: Partial<ProductionRuntimePolicy>
-}>
-
-export interface ProductionReadinessSummary {
-  ready: boolean
-  graphCoverage: number
-  readyGraphCount: number
-  totalGraphCount: number
-  evidenceCount: number
-  blockedCount: number
-  needsHumanApproval: boolean
-  nextAction: string
-}
-
 export const productionGraphLabels: Record<ProductionGraphKey, string> = {
   assetGraph: 'Asset Graph',
   sceneWorldGraph: 'Scene/World Graph',
@@ -120,9 +40,7 @@ export const productionGraphLabels: Record<ProductionGraphKey, string> = {
   evidenceGraph: 'Evidence Graph',
   releaseGraph: 'Release Graph',
 }
-
 const productionGraphKeys = Object.keys(productionGraphLabels) as ProductionGraphKey[]
-
 const productionNodeStatuses: ProductionNodeStatus[] = ['missing', 'draft', 'needs-review', 'ready', 'blocked']
 const missionLedgerStates: MissionLedgerState[] = [
   'planned',
@@ -145,36 +63,28 @@ const localAccelerationModes: ProductionRuntimePolicy['localAcceleration'][] = [
   'balanced',
   'cloud-first',
 ]
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 }
-
 function pickString(value: unknown, fallback: string): string {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : fallback
 }
-
 function pickNumber(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback
 }
-
 function pickBoolean(value: unknown, fallback: boolean): boolean {
   return typeof value === 'boolean' ? value : fallback
 }
-
 function pickStringArray(value: unknown, fallback: string[] = []): string[] {
   if (!Array.isArray(value)) return fallback
   return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
 }
-
 function pickEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
   return typeof value === 'string' && allowed.includes(value as T) ? (value as T) : fallback
 }
-
 function isoNow(now?: string): string {
   return now ?? new Date().toISOString()
 }
-
 function domainFromProjectType(projectType?: string | null): ProductionDomain {
   switch (projectType) {
     case 'web':
@@ -193,7 +103,6 @@ function domainFromProjectType(projectType?: string | null): ProductionDomain {
       return 'mixed'
   }
 }
-
 function buildDefaultGraphNode(key: ProductionGraphKey, now: string): ProductionGraphNode {
   return {
     id: key,
@@ -212,7 +121,6 @@ function buildDefaultGraphNode(key: ProductionGraphKey, now: string): Production
     updatedAt: now,
   }
 }
-
 function normalizeGraphNode(input: unknown, fallback: ProductionGraphNode): ProductionGraphNode {
   if (!isRecord(input)) return fallback
   return {
@@ -225,7 +133,6 @@ function normalizeGraphNode(input: unknown, fallback: ProductionGraphNode): Prod
     updatedAt: pickString(input.updatedAt, fallback.updatedAt),
   }
 }
-
 function normalizeLedgerEntry(input: unknown, fallback: MissionLedgerEntry): MissionLedgerEntry {
   if (!isRecord(input)) return fallback
   return {
@@ -242,7 +149,6 @@ function normalizeLedgerEntry(input: unknown, fallback: MissionLedgerEntry): Mis
     updatedAt: pickString(input.updatedAt, fallback.updatedAt),
   }
 }
-
 function normalizeDecision(input: unknown, fallback: ProjectBrainDecision): ProjectBrainDecision {
   if (!isRecord(input)) return fallback
   return {
@@ -253,7 +159,6 @@ function normalizeDecision(input: unknown, fallback: ProjectBrainDecision): Proj
     createdAt: pickString(input.createdAt, fallback.createdAt),
   }
 }
-
 export function buildDefaultAgenticProductionState(input: {
   projectName?: string | null
   projectType?: string | null
@@ -263,7 +168,6 @@ export function buildDefaultAgenticProductionState(input: {
   const objective = input.projectName
     ? `Deliver ${input.projectName} with evidence-first AI production.`
     : 'Define one concrete mission before agents start production.'
-
   return {
     version: 1,
     updatedAt: now,
@@ -321,14 +225,12 @@ export function buildDefaultAgenticProductionState(input: {
     },
   }
 }
-
 export function readAgenticProductionStateFromSettings(settings: unknown): AgenticProductionState | null {
   if (!isRecord(settings)) return null
   const candidate = settings[PRODUCTION_STATE_SETTINGS_KEY]
   if (!isRecord(candidate)) return null
   return normalizeAgenticProductionState(candidate)
 }
-
 export function writeAgenticProductionStateToSettings(
   settings: unknown,
   state: AgenticProductionState
@@ -338,14 +240,12 @@ export function writeAgenticProductionStateToSettings(
     [PRODUCTION_STATE_SETTINGS_KEY]: state,
   }
 }
-
 const releaseApprovalEvidencePatterns = [
   /human[-_ ]?approval/i,
   /release[-_ ]?approval/i,
   /approval[-_: ]?record/i,
   /approved[-_: ]?release/i,
 ]
-
 function hasReleaseApprovalEvidence(state: AgenticProductionState): boolean {
   const graphEvidence = state.graphs.releaseGraph.flatMap((node) => node.evidenceRefs)
   const ledgerEvidence = state.ledger.flatMap((entry) => entry.evidenceRefs)
@@ -353,11 +253,9 @@ function hasReleaseApprovalEvidence(state: AgenticProductionState): boolean {
     releaseApprovalEvidencePatterns.some((pattern) => pattern.test(ref))
   )
 }
-
 function uniqueStrings(values: string[]): string[] {
   return Array.from(new Set(values.filter((value) => value.trim().length > 0)))
 }
-
 export function enforceProductionReleaseGuard(state: AgenticProductionState): AgenticProductionState {
   const releaseApproved = hasReleaseApprovalEvidence(state)
   const releaseGraph = state.graphs.releaseGraph.map((node) => {
@@ -371,7 +269,6 @@ export function enforceProductionReleaseGuard(state: AgenticProductionState): Ag
       ]),
     }
   })
-
   return {
     ...state,
     graphs: {
@@ -384,16 +281,13 @@ export function enforceProductionReleaseGuard(state: AgenticProductionState): Ag
     },
   }
 }
-
 export function normalizeAgenticProductionState(input: unknown): AgenticProductionState {
   const fallback = buildDefaultAgenticProductionState()
   if (!isRecord(input)) return fallback
-
   const brainInput = isRecord(input.brain) ? input.brain : {}
   const creativeBibleInput = isRecord(brainInput.creativeBible) ? brainInput.creativeBible : {}
   const technicalBibleInput = isRecord(brainInput.technicalBible) ? brainInput.technicalBible : {}
   const runtimePolicyInput = isRecord(input.runtimePolicy) ? input.runtimePolicy : {}
-
   const graphsInput = isRecord(input.graphs) ? input.graphs : {}
   const graphs = productionGraphKeys.reduce((nextGraphs, key) => {
     const fallbackNode = buildDefaultGraphNode(key, fallback.updatedAt)
@@ -404,10 +298,8 @@ export function normalizeAgenticProductionState(input: unknown): AgenticProducti
         : [fallbackNode]
     return nextGraphs
   }, {} as ProductionGraphs)
-
   const ledgerInput = Array.isArray(input.ledger) ? input.ledger : []
   const ledgerFallback = fallback.ledger[0]
-
   const normalized: AgenticProductionState = {
     version: 1,
     updatedAt: pickString(input.updatedAt, fallback.updatedAt),
@@ -464,18 +356,14 @@ export function normalizeAgenticProductionState(input: unknown): AgenticProducti
       ),
     },
   }
-
   return enforceProductionReleaseGuard(normalized)
 }
-
 export function coerceAgenticProductionStatePatch(input: unknown): AgenticProductionStatePatch {
   if (!isRecord(input)) return {}
   const patch: AgenticProductionStatePatch = {}
-
   if (isRecord(input.brain)) {
     patch.brain = input.brain as Partial<ProjectBrainMemory>
   }
-
   if (Array.isArray(input.ledger)) {
     patch.ledger = input.ledger.map((entry, index) =>
       normalizeLedgerEntry(entry, {
@@ -493,7 +381,6 @@ export function coerceAgenticProductionStatePatch(input: unknown): AgenticProduc
       })
     )
   }
-
   if (isRecord(input.graphs)) {
     const graphsInput = input.graphs
     patch.graphs = productionGraphKeys.reduce<Partial<Record<ProductionGraphKey, ProductionGraphNode[]>>>((graphs, key) => {
@@ -505,14 +392,11 @@ export function coerceAgenticProductionStatePatch(input: unknown): AgenticProduc
       return graphs
     }, {})
   }
-
   if (isRecord(input.runtimePolicy)) {
     patch.runtimePolicy = input.runtimePolicy as Partial<ProductionRuntimePolicy>
   }
-
   return patch
 }
-
 export function mergeAgenticProductionState(
   current: AgenticProductionState,
   patch: AgenticProductionStatePatch,
@@ -543,13 +427,11 @@ export function mergeAgenticProductionState(
       ...(patch.runtimePolicy ?? {}),
     },
   })
-
   return enforceProductionReleaseGuard({
     ...merged,
     updatedAt: now,
   })
 }
-
 export function buildProductionReadinessSummary(state: AgenticProductionState): ProductionReadinessSummary {
   const guardedState = enforceProductionReleaseGuard(state)
   const allNodes = productionGraphKeys.flatMap((key) => guardedState.graphs[key])
@@ -565,7 +447,6 @@ export function buildProductionReadinessSummary(state: AgenticProductionState): 
     evidenceCount > 0 &&
     blockedCount === 0 &&
     !guardedState.runtimePolicy.requiresHumanApproval
-
   return {
     ready,
     graphCoverage,
