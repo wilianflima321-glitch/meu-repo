@@ -6,7 +6,8 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Handle, Node, Edge, NodeTypes, Position } from '@xyflow/react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import type { EmitterConfig, Particle, ParticleEmitter } from '@/lib/engine/NiagaraVFX.runtime';
+import type { ParticleEmitter } from '@/lib/engine/NiagaraParticleEmitter.runtime';
+import type { EmitterConfig, Particle } from '@/lib/engine/NiagaraVFX.types';
 
 interface ParticleRendererProps {
   emitters: ParticleEmitter[];
