@@ -15,6 +15,15 @@ import {
   type QuestPrerequisite,
   type QuestReward,
 } from './quest-mission-contracts';
+import {
+  createQuestFromJSON,
+  createQuestMarkers,
+  deserializeQuestRuntime,
+  getLocalizedObjectiveDescription,
+  getLocalizedQuestDescription,
+  getLocalizedQuestName,
+  serializeQuestRuntime,
+} from './quest-mission-runtime';
 export {
   isCustomObjectiveData,
   ObjectiveState,
@@ -57,42 +66,7 @@ export class QuestManager {
     this.chains.set(chain.id, chain);
   }
   loadFromJSON(json: QuestJSON): Quest {
-    const quest: Quest = {
-      id: json.id,
-      name: json.name,
-      localizedName: json.localizedName,
-      description: json.description,
-      localizedDescription: json.localizedDescription,
-      category: json.category || 'main',
-      state: QuestState.UNKNOWN,
-      objectives: new Map(),
-      rewards: json.rewards || [],
-      prerequisites: json.prerequisites || [],
-      requiredLevel: json.requiredLevel,
-      repeatable: json.repeatable || false,
-      repeatCooldown: json.repeatCooldown,
-      timeLimit: json.timeLimit,
-      chainId: json.chainId,
-      chainOrder: json.chainOrder,
-      nextQuestId: json.nextQuestId,
-      icon: json.icon,
-      markerColor: json.markerColor || '#ffcc00',
-      priority: json.priority || 0,
-      isTracked: false,
-      questGiverId: json.questGiverId,
-      turnInId: json.turnInId,
-    };
-    for (const objData of json.objectives || []) {
-      const objective: QuestObjective = {
-        ...objData,
-        currentCount: 0,
-        state: ObjectiveState.INACTIVE,
-        targetLocation: objData.targetLocation ?
-          new THREE.Vector3(objData.targetLocation.x, objData.targetLocation.y, objData.targetLocation.z) :
-          undefined,
-      };
-      quest.objectives.set(objective.id, objective);
-    }
+    const quest = createQuestFromJSON(json);
     this.registerQuest(quest);
     return quest;
   }
@@ -298,84 +272,61 @@ export class QuestManager {
       this.completeQuest(questId);
     }
   }
-  onEnemyKilled(enemyId: string, enemyType: string): void {
+  private forEachActiveObjective(
+    type: ObjectiveType,
+    callback: (questId: string, objectiveId: string, objective: QuestObjective) => void,
+  ): void {
     for (const [questId, quest] of this.quests) {
       if (quest.state !== QuestState.ACTIVE) continue;
-      for (const [objId, obj] of quest.objectives) {
-        if (obj.state !== ObjectiveState.ACTIVE) continue;
-        if (obj.type !== ObjectiveType.KILL) continue;
-        if (obj.targetId === enemyId || obj.targetId === enemyType) {
-          this.addObjectiveProgress(questId, objId);
+      for (const [objectiveId, objective] of quest.objectives) {
+        if (objective.state === ObjectiveState.ACTIVE && objective.type === type) {
+          callback(questId, objectiveId, objective);
         }
       }
     }
+  }
+  onEnemyKilled(enemyId: string, enemyType: string): void {
+    this.forEachActiveObjective(ObjectiveType.KILL, (questId, objectiveId, objective) => {
+      if (objective.targetId === enemyId || objective.targetId === enemyType) {
+        this.addObjectiveProgress(questId, objectiveId);
+      }
+    });
   }
   onItemCollected(itemId: string, amount: number = 1): void {
-    for (const [questId, quest] of this.quests) {
-      if (quest.state !== QuestState.ACTIVE) continue;
-      for (const [objId, obj] of quest.objectives) {
-        if (obj.state !== ObjectiveState.ACTIVE) continue;
-        if (obj.type !== ObjectiveType.COLLECT) continue;
-        if (obj.targetId === itemId) {
-          this.addObjectiveProgress(questId, objId, amount);
-        }
+    this.forEachActiveObjective(ObjectiveType.COLLECT, (questId, objectiveId, objective) => {
+      if (objective.targetId === itemId) {
+        this.addObjectiveProgress(questId, objectiveId, amount);
       }
-    }
+    });
   }
   onNPCTalked(npcId: string): void {
-    for (const [questId, quest] of this.quests) {
-      if (quest.state !== QuestState.ACTIVE) continue;
-      for (const [objId, obj] of quest.objectives) {
-        if (obj.state !== ObjectiveState.ACTIVE) continue;
-        if (obj.type !== ObjectiveType.TALK) continue;
-        if (obj.targetId === npcId) {
-          this.completeObjective(questId, objId);
-        }
+    this.forEachActiveObjective(ObjectiveType.TALK, (questId, objectiveId, objective) => {
+      if (objective.targetId === npcId) {
+        this.completeObjective(questId, objectiveId);
       }
-    }
+    });
   }
   onLocationReached(position: THREE.Vector3): void {
-    for (const [questId, quest] of this.quests) {
-      if (quest.state !== QuestState.ACTIVE) continue;
-      for (const [objId, obj] of quest.objectives) {
-        if (obj.state !== ObjectiveState.ACTIVE) continue;
-        if (obj.type !== ObjectiveType.REACH) continue;
-        if (obj.targetLocation) {
-          const distance = position.distanceTo(obj.targetLocation);
-          if (distance <= (obj.targetRadius || 5)) {
-            this.completeObjective(questId, objId);
-          }
-        }
+    this.forEachActiveObjective(ObjectiveType.REACH, (questId, objectiveId, objective) => {
+      if (objective.targetLocation && position.distanceTo(objective.targetLocation) <= (objective.targetRadius || 5)) {
+        this.completeObjective(questId, objectiveId);
       }
-    }
+    });
   }
   onObjectInteracted(objectId: string): void {
-    for (const [questId, quest] of this.quests) {
-      if (quest.state !== QuestState.ACTIVE) continue;
-      for (const [objId, obj] of quest.objectives) {
-        if (obj.state !== ObjectiveState.ACTIVE) continue;
-        if (obj.type !== ObjectiveType.INTERACT) continue;
-        if (obj.targetId === objectId) {
-          this.completeObjective(questId, objId);
-        }
+    this.forEachActiveObjective(ObjectiveType.INTERACT, (questId, objectiveId, objective) => {
+      if (objective.targetId === objectId) {
+        this.completeObjective(questId, objectiveId);
       }
-    }
+    });
   }
   onCustomEvent(eventName: string, data: QuestCustomData): void {
-    for (const [questId, quest] of this.quests) {
-      if (quest.state !== QuestState.ACTIVE) continue;
-      for (const [objId, obj] of quest.objectives) {
-        if (obj.state !== ObjectiveState.ACTIVE) continue;
-        if (obj.type !== ObjectiveType.CUSTOM) continue;
-        const customData = isCustomObjectiveData(obj.customData) ? obj.customData : {};
-        if (customData.eventName === eventName) {
-          const matcher = customData.matcher;
-          if (!matcher || matcher(data)) {
-            this.addObjectiveProgress(questId, objId);
-          }
-        }
+    this.forEachActiveObjective(ObjectiveType.CUSTOM, (questId, objectiveId, objective) => {
+      const customData = isCustomObjectiveData(objective.customData) ? objective.customData : {};
+      if (customData.eventName === eventName && (!customData.matcher || customData.matcher(data))) {
+        this.addObjectiveProgress(questId, objectiveId);
       }
-    }
+    });
   }
   update(deltaTime: number): void {
     for (const [questId, quest] of this.quests) {
@@ -406,42 +357,7 @@ export class QuestManager {
     this.onRewardGranted?.(quest, reward);
   }
   private updateMarkers(quest: Quest): void {
-    const markers: QuestMarker[] = [];
-    if (quest.state === QuestState.AVAILABLE && quest.questGiverId) {
-      markers.push({
-        questId: quest.id,
-        position: new THREE.Vector3(), // Get from NPC
-        type: 'quest_giver',
-        icon: '!',
-        color: quest.markerColor || '#ffcc00',
-      });
-    }
-    if (quest.state === QuestState.ACTIVE) {
-      for (const [objId, obj] of quest.objectives) {
-        if (obj.state !== ObjectiveState.ACTIVE) continue;
-        if (obj.hidden) continue;
-        if (obj.targetLocation) {
-          markers.push({
-            questId: quest.id,
-            objectiveId: objId,
-            position: obj.targetLocation,
-            type: 'objective',
-            icon: '◆',
-            color: quest.markerColor || '#ffcc00',
-          });
-        }
-      }
-    }
-    if (quest.state === QuestState.COMPLETED && quest.turnInId) {
-      markers.push({
-        questId: quest.id,
-        position: new THREE.Vector3(), // Get from NPC
-        type: 'turn_in',
-        icon: '?',
-        color: '#00ff00',
-      });
-    }
-    this.markers.set(quest.id, markers);
+    this.markers.set(quest.id, createQuestMarkers(quest));
   }
   getMarkers(questId?: string): QuestMarker[] {
     if (questId) {
@@ -520,22 +436,13 @@ export class QuestManager {
             ...this.getQuestsByState(QuestState.TURNED_IN)];
   }
   getQuestName(quest: Quest): string {
-    if (quest.localizedName?.[this.currentLanguage]) {
-      return quest.localizedName[this.currentLanguage];
-    }
-    return quest.name;
+    return getLocalizedQuestName(quest, this.currentLanguage);
   }
   getQuestDescription(quest: Quest): string {
-    if (quest.localizedDescription?.[this.currentLanguage]) {
-      return quest.localizedDescription[this.currentLanguage];
-    }
-    return quest.description;
+    return getLocalizedQuestDescription(quest, this.currentLanguage);
   }
   getObjectiveDescription(obj: QuestObjective): string {
-    if (obj.localizedDescription?.[this.currentLanguage]) {
-      return obj.localizedDescription[this.currentLanguage];
-    }
-    return obj.description;
+    return getLocalizedObjectiveDescription(obj, this.currentLanguage);
   }
   getObjectiveProgress(questId: string, objectiveId: string): { current: number; required: number } | null {
     const quest = this.quests.get(questId);
@@ -578,42 +485,12 @@ export class QuestManager {
     this.onRewardGranted = callback;
   }
   serialize(): string {
-    const data = {
-      quests: Array.from(this.quests.entries()).map(([id, quest]) => ({
-        id,
-        state: quest.state,
-        isTracked: quest.isTracked,
-        startTime: quest.startTime,
-        lastCompletedTime: quest.lastCompletedTime,
-        objectives: Array.from(quest.objectives.entries()).map(([objId, obj]) => ({
-          id: objId,
-          currentCount: obj.currentCount,
-          state: obj.state,
-        })),
-      })),
-      journal: this.journal,
-    };
-    return JSON.stringify(data);
+    return serializeQuestRuntime(this.quests, this.journal);
   }
   deserialize(json: string): void {
-    const data = JSON.parse(json);
-    for (const questData of data.quests) {
-      const quest = this.quests.get(questData.id);
-      if (!quest) continue;
-      quest.state = questData.state;
-      quest.isTracked = questData.isTracked;
-      quest.startTime = questData.startTime;
-      quest.lastCompletedTime = questData.lastCompletedTime;
-      for (const objData of questData.objectives) {
-        const obj = quest.objectives.get(objData.id);
-        if (!obj) continue;
-        obj.currentCount = objData.currentCount;
-        obj.state = objData.state;
-      }
-      this.updateMarkers(quest);
-    }
-    this.journal = data.journal;
+    this.journal = deserializeQuestRuntime(json, this.quests, (quest) => this.updateMarkers(quest));
   }
+
 }
 export const createQuestManager = (): QuestManager => {
   return new QuestManager();
