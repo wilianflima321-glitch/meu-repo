@@ -1,25 +1,22 @@
 'use client';
 // @aethel-heavy-async-boundary
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
 import { DEFAULT_GRADIENT, DEFAULT_REGIONS, HAIR_PRESETS, type BrushSettings, type BrushTool, type ClumpingSettings, type CurlSettings, type GradientStop, type HairData, type HairPreset, type HairRegion, type LODSettings, type PhysicsSettings } from '@/components/character/hair-fur-model';
-import { BrushPreview, GradientPicker, HairStrands3D, HeadMesh, LODPreview, Slider, readOrbitDistance } from '@/lib/character/HairFurEditor.parts-runtime';
+import { GradientPicker, Slider } from '@/lib/character/HairFurEditor.parts-runtime';
+import {
+  exportHairRuntimeData,
+  HAIR_BRUSH_ICONS,
+  HAIR_BRUSH_LABELS,
+  HAIR_EDITOR_TABS,
+  type HairEditorTabId,
+} from './HairFurEditor.config-runtime';
+import { HairExportFooter, HairPresetBar } from './HairFurEditor.panel-runtime';
+import { HairFurViewport } from './HairFurEditor.viewport-runtime';
 
 export interface HairFurEditorProps {
   characterId: string;
   onHairUpdate?: (hairData: HairData) => void;
 }
-
-type HairEditorTabId = 'general' | 'style' | 'physics' | 'lod' | 'brush';
-
-const HAIR_EDITOR_TABS: Array<{ id: HairEditorTabId; label: string }> = [
-  { id: 'general', label: 'General' },
-  { id: 'style', label: 'Style' },
-  { id: 'physics', label: 'Physics' },
-  { id: 'lod', label: 'LOD' },
-  { id: 'brush', label: 'Brush' },
-];
 
 export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEditorProps) {
   const [strandCount, setStrandCount] = useState(10000);
@@ -89,109 +86,30 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
     setPreset('custom');
   }, []);
   const exportAsCards = useCallback(() => {
-    const exportData = {
-      type: 'hair_cards',
-      characterId,
-      ...hairData,
-      cardCount: lod.cardCount,
-      exportedAt: new Date().toISOString(),
-    };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${characterId}_hair_cards.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [characterId, hairData, lod.cardCount]);
+    exportHairRuntimeData({ type: 'hair_cards', characterId, hairData, lod });
+  }, [characterId, hairData, lod]);
   const exportAsStrands = useCallback(() => {
-    const exportData = {
-      type: 'hair_strands',
-      characterId,
-      ...hairData,
-      exportedAt: new Date().toISOString(),
-    };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${characterId}_hair_strands.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportHairRuntimeData({ type: 'hair_strands', characterId, hairData });
   }, [characterId, hairData]);
-  const brushIcons: Record<BrushTool, string> = {
-    comb: 'C',
-    cut: 'X',
-    add: '+',
-    length: 'L',
-  };
   return (
     <div className="w-full h-full min-h-screen bg-gradient-to-br from-[var(--aethel-surface-primary)] via-[var(--aethel-surface-secondary)] to-[var(--aethel-surface-primary)] flex">
-      {/* 3D Viewport */}
-      <div className="flex-1 relative">
-        <Canvas
-          camera={{ position: [0, 1, 3], fov: 50 }}
-          onPointerMissed={() => setBrushActive(false)}
-          className="w-full h-full"
-        >
-          <ambientLight intensity={0.4} />
-          <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow />
-          <directionalLight position={[-3, 3, -3]} intensity={0.3} />
-          <pointLight position={[0, 2, 0]} intensity={0.5} color="rgb(255 245 230)" />
-          <HeadMesh />
-          <HairStrands3D
-            strandCount={strandCount}
-            regions={regions}
-            clumping={clumping}
-            curl={curl}
-            gradient={gradient}
-            physics={physics}
-            animatePhysics={animatePhysics}
-          />
-          <BrushPreview brush={brush} active={brushActive} />
-          <OrbitControls
-            enablePan={true}
-            enableZoom={true}
-            minDistance={1}
-            maxDistance={10}
-            onChange={(e) => {
-              if (e?.target) {
-                setCameraDistance(readOrbitDistance(e.target));
-              }
-            }}
-          />
-          <gridHelper args={[10, 10, 'rgb(31 41 51)', 'rgb(20 26 36)']} position={[0, -0.5, 0]} />
-        </Canvas>
-        {/* Viewport Overlay - Stats */}
-        <div className="absolute top-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] backdrop-blur-sm rounded-lg p-3 text-sm space-y-1">
-          <div className="text-[var(--aethel-text-tertiary)]">
-            Strands: <span className="text-[var(--aethel-info-light)] font-mono">{strandCount.toLocaleString()}</span>
-          </div>
-          <div className="text-[var(--aethel-text-tertiary)]">
-            Preset: <span className="text-[var(--aethel-info-light)] capitalize">{preset}</span>
-          </div>
-          <div className="text-[var(--aethel-text-tertiary)]">
-            Physics: <span className={animatePhysics ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'}>{animatePhysics ? 'Active' : 'Paused'}</span>
-          </div>
-        </div>
-        {/* Viewport Overlay - Controls */}
-        <div className="absolute bottom-4 left-4 flex gap-2">
-          <button type="button" aria-label={animatePhysics ? 'Pause hair physics simulation' : 'Resume hair physics simulation'}
-            onClick={() => setAnimatePhysics(!animatePhysics)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              animatePhysics
-                ? 'bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]'
-                : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-            }`}
-          >
-            {animatePhysics ? 'Pause physics' : 'Animate physics'}
-          </button>
-        </div>
-        {/* Viewport Overlay - LOD */}
-        <div className="absolute bottom-4 right-4 w-64">
-          <LODPreview lod={lod} currentDistance={cameraDistance} />
-        </div>
-      </div>
+      <HairFurViewport
+        strandCount={strandCount}
+        regions={regions}
+        clumping={clumping}
+        curl={curl}
+        gradient={gradient}
+        physics={physics}
+        lod={lod}
+        preset={preset}
+        brush={brush}
+        brushActive={brushActive}
+        animatePhysics={animatePhysics}
+        cameraDistance={cameraDistance}
+        onBrushInactive={() => setBrushActive(false)}
+        onCameraDistanceChange={setCameraDistance}
+        onAnimatePhysicsChange={setAnimatePhysics}
+      />
       {/* Control Panel */}
       <div className="w-96 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_95%,transparent)] backdrop-blur-sm border-l border-[var(--aethel-border-primary)] flex flex-col overflow-hidden">
         {/* Header */}
@@ -201,30 +119,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
           </h2>
           <p className="text-sm text-[var(--aethel-text-tertiary)] mt-1">Character: {characterId}</p>
         </div>
-        {/* Preset Bar */}
-        <div className="p-4 border-b border-[var(--aethel-border-primary)]">
-          <label className="text-sm font-medium text-[var(--aethel-text-secondary)] block mb-2">Presets</label>
-          <div className="flex flex-wrap gap-2">
-            {(Object.keys(HAIR_PRESETS) as HairPreset[]).map((p) => (
-              <button type="button" aria-label={`Aplicar preset ${p} no cabelo`}
-                key={p}
-                onClick={() => applyPreset(p)}
-                className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
-                  preset === p
-                    ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                    : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
-                }`}
-              >
-                {p === 'straight' && 'Straight'}
-                {p === 'wavy' && 'Wavy'}
-                {p === 'curly' && 'Curly'}
-                {p === 'afro' && 'Afro'}
-                {p === 'fur' && 'Fur'}
-                {p === 'custom' && 'Custom'}
-              </button>
-            ))}
-          </div>
-        </div>
+        <HairPresetBar preset={preset} onPresetChange={applyPreset} />
         {/* Tab Navigation */}
         <div className="flex border-b border-[var(--aethel-border-primary)]">
           {HAIR_EDITOR_TABS.map((tab) => (
@@ -241,7 +136,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
             </button>
           ))}
         </div>
-        {/* Tab Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* General Tab */}
           {activeTab === 'general' && (
@@ -543,7 +437,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-[var(--aethel-info-light)] uppercase tracking-wider">Groom Tools</h3>
                 <div className="grid grid-cols-2 gap-2">
-                  {(Object.keys(brushIcons) as BrushTool[]).map((tool) => (
+                  {(Object.keys(HAIR_BRUSH_ICONS) as BrushTool[]).map((tool) => (
                     <button type="button" aria-label={`Select ${tool} groom tool`}
                       key={tool}
                       onClick={() => setBrush((prev) => ({ ...prev, tool }))}
@@ -553,13 +447,8 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                           : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
                       }`}
                     >
-                      <span className="text-xl">{brushIcons[tool]}</span>
-                      <span className="text-sm capitalize">
-                        {tool === 'comb' && 'Comb'}
-                        {tool === 'cut' && 'Cut'}
-                        {tool === 'add' && 'Add'}
-                        {tool === 'length' && 'Length'}
-                      </span>
+                      <span className="text-xl">{HAIR_BRUSH_ICONS[tool]}</span>
+                      <span className="text-sm capitalize">{HAIR_BRUSH_LABELS[tool]}</span>
                     </button>
                   ))}
                 </div>
@@ -603,29 +492,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
             </>
           )}
         </div>
-        {/* Export Footer */}
-        <div className="p-4 border-t border-[var(--aethel-border-primary)] space-y-3">
-          <h3 className="text-sm font-semibold text-[var(--aethel-text-secondary)]">Export for Runtime</h3>
-          <div className="flex gap-2">
-            <button type="button" aria-label="Export hair as cards"
-              onClick={exportAsCards}
-              className="flex-1 px-4 py-2.5 bg-[var(--aethel-warning)] hover:bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)] rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-            >
-              <span className="text-[var(--aethel-warning-light)]">Cards</span>
-              <span>Cards</span>
-            </button>
-            <button type="button" aria-label="Export hair as strands"
-              onClick={exportAsStrands}
-              className="flex-1 px-4 py-2.5 bg-[var(--aethel-info)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-            >
-              <span className="text-[var(--aethel-info-light)]">Strands</span>
-              <span>Strands</span>
-            </button>
-          </div>
-          <p className="text-xs text-[var(--aethel-text-tertiary)] text-center">
-            Cards: best performance | Strands: highest quality
-          </p>
-        </div>
+        <HairExportFooter onExportCards={exportAsCards} onExportStrands={exportAsStrands} />
       </div>
     </div>
   );
