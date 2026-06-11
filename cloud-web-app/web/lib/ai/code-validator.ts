@@ -15,46 +15,13 @@ import { execFile } from 'child_process';
 import { promisify } from 'util';
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import type { ValidationError, ValidationResult, ValidatorConfig } from './code-validator.contracts';
+import { createValidationSummary, parseESLintJsonResults, parseTypeScriptDiagnostics } from './code-validator.parsers';
+
+export type { ValidationError, ValidationResult, ValidatorConfig } from './code-validator.contracts';
+export { formatErrorsForAI, generateFixInstructions } from './code-validator-formatting';
 
 const execFileAsync = promisify(execFile);
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface ValidationError {
-  type: 'lint' | 'typescript' | 'syntax' | 'test';
-  severity: 'error' | 'warning';
-  message: string;
-  file: string;
-  line?: number;
-  column?: number;
-  rule?: string;
-  suggestion?: string;
-}
-
-export interface ValidationResult {
-  success: boolean;
-  errors: ValidationError[];
-  warnings: ValidationError[];
-  summary: {
-    totalErrors: number;
-    totalWarnings: number;
-    lintErrors: number;
-    tsErrors: number;
-    testFailures: number;
-  };
-  autoFixable: ValidationError[];
-}
-
-export interface ValidatorConfig {
-  workspacePath: string;
-  enableLint?: boolean;
-  enableTypeCheck?: boolean;
-  enableTests?: boolean;
-  autoFix?: boolean;
-  timeout?: number;
-}
 
 // ============================================================================
 // CODE VALIDATOR CLASS
@@ -142,13 +109,7 @@ export class CodeValidator {
       success: errors.length === 0,
       errors,
       warnings,
-      summary: {
-        totalErrors: errors.length,
-        totalWarnings: warnings.length,
-        lintErrors: errors.filter(e => e.type === 'lint').length,
-        tsErrors: errors.filter(e => e.type === 'typescript').length,
-        testFailures: errors.filter(e => e.type === 'test').length,
-      },
+      summary: createValidationSummary(errors, warnings),
       autoFixable,
     };
   }
@@ -172,13 +133,7 @@ export class CodeValidator {
       success: allErrors.length === 0,
       errors: allErrors,
       warnings: allWarnings,
-      summary: {
-        totalErrors: allErrors.length,
-        totalWarnings: allWarnings.length,
-        lintErrors: allErrors.filter(e => e.type === 'lint').length,
-        tsErrors: allErrors.filter(e => e.type === 'typescript').length,
-        testFailures: allErrors.filter(e => e.type === 'test').length,
-      },
+      summary: createValidationSummary(allErrors, allWarnings),
       autoFixable: allAutoFixable,
     };
   }
@@ -207,13 +162,7 @@ export class CodeValidator {
       success: errors.length === 0,
       errors,
       warnings,
-      summary: {
-        totalErrors: errors.length,
-        totalWarnings: warnings.length,
-        lintErrors: errors.filter(e => e.type === 'lint').length,
-        tsErrors: errors.filter(e => e.type === 'typescript').length,
-        testFailures: 0,
-      },
+      summary: createValidationSummary(errors, warnings),
       autoFixable: [],
     };
   }
@@ -286,12 +235,10 @@ export class CodeValidator {
     warnings: ValidationError[];
     autoFixable: ValidationError[];
   }> {
-    const errors: ValidationError[] = [];
-    const warnings: ValidationError[] = [];
-    const autoFixable: ValidationError[] = [];
+    const empty = { errors: [], warnings: [], autoFixable: [] };
 
     if (!this.eslintPath) {
-      return { errors, warnings, autoFixable };
+      return empty;
     }
 
     try {
@@ -305,64 +252,20 @@ export class CodeValidator {
         timeout: this.config.timeout,
       });
 
-      const results = JSON.parse(stdout);
-      
-      for (const result of results) {
-        for (const msg of result.messages || []) {
-          const error: ValidationError = {
-            type: 'lint',
-            severity: msg.severity === 2 ? 'error' : 'warning',
-            message: msg.message,
-            file: result.filePath,
-            line: msg.line,
-            column: msg.column,
-            rule: msg.ruleId,
-            suggestion: msg.fix ? 'Auto-fixable' : undefined,
-          };
-
-          if (msg.severity === 2) {
-            errors.push(error);
-          } else {
-            warnings.push(error);
-          }
-
-          if (msg.fix) {
-            autoFixable.push(error);
-          }
-        }
-      }
+      return parseESLintJsonResults(stdout, true);
     } catch (e: unknown) {
-      // ESLint returns non-zero exit code when there are errors
-      // Try to parse stdout anyway
-      const execError = e as { stdout?: string; message?: string };
-      if (execError.stdout) {
-        try {
-          const results = JSON.parse(execError.stdout);
-          for (const result of results) {
-            for (const msg of result.messages || []) {
-              const error: ValidationError = {
-                type: 'lint',
-                severity: msg.severity === 2 ? 'error' : 'warning',
-                message: msg.message,
-                file: result.filePath,
-                line: msg.line,
-                column: msg.column,
-                rule: msg.ruleId,
-              };
-              if (msg.severity === 2) {
-                errors.push(error);
-              } else {
-                warnings.push(error);
-              }
-            }
-          }
-        } catch {
-          logger.error('[CodeValidator] Failed to parse ESLint output');
-        }
+      const execError = e as { stdout?: string };
+      if (!execError.stdout) {
+        return empty;
+      }
+
+      try {
+        return parseESLintJsonResults(execError.stdout, false);
+      } catch {
+        logger.error('[CodeValidator] Failed to parse ESLint output');
+        return empty;
       }
     }
-
-    return { errors, warnings, autoFixable };
   }
 
   async runESLintAutoFix(content: string, filePath: string): Promise<string> {
@@ -390,11 +293,8 @@ export class CodeValidator {
     errors: ValidationError[];
     warnings: ValidationError[];
   }> {
-    const errors: ValidationError[] = [];
-    const warnings: ValidationError[] = [];
-
     if (!this.eslintPath) {
-      return { errors, warnings };
+      return { errors: [], warnings: [] };
     }
 
     try {
@@ -403,41 +303,20 @@ export class CodeValidator {
         ['--format', 'json', '.'],
         {
           cwd: this.config.workspacePath,
-          timeout: this.config.timeout * 3, // More time for full project
+          timeout: this.config.timeout * 3,
         }
       );
 
-      const results = JSON.parse(stdout);
-      for (const result of results) {
-        for (const msg of result.messages || []) {
-          const error: ValidationError = {
-            type: 'lint',
-            severity: msg.severity === 2 ? 'error' : 'warning',
-            message: msg.message,
-            file: result.filePath,
-            line: msg.line,
-            column: msg.column,
-            rule: msg.ruleId,
-          };
-          if (msg.severity === 2) {
-            errors.push(error);
-          } else {
-            warnings.push(error);
-          }
-        }
-      }
+      const { errors, warnings } = parseESLintJsonResults(stdout);
+      return { errors, warnings };
     } catch {
-      // Errors handled in runESLint
+      return { errors: [], warnings: [] };
     }
-
-    return { errors, warnings };
   }
 
   private async runTypeCheck(filePath: string): Promise<ValidationError[]> {
-    const errors: ValidationError[] = [];
-
     if (!this.tscPath) {
-      return errors;
+      return [];
     }
 
     try {
@@ -449,36 +328,16 @@ export class CodeValidator {
           timeout: this.config.timeout,
         }
       );
+      return [];
     } catch (e: unknown) {
       const execError = e as { stdout?: string; stderr?: string };
-      const output = execError.stdout || execError.stderr || '';
-      
-      // Parse TypeScript error output
-      // Format: file(line,col): error TSxxxx: message
-      const errorPattern = /(.+)\((\d+),(\d+)\):\s+(error|warning)\s+TS(\d+):\s+(.+)/g;
-      let match;
-      
-      while ((match = errorPattern.exec(output)) !== null) {
-        errors.push({
-          type: 'typescript',
-          severity: match[4] as 'error' | 'warning',
-          message: match[6],
-          file: match[1],
-          line: parseInt(match[2]),
-          column: parseInt(match[3]),
-          rule: `TS${match[5]}`,
-        });
-      }
+      return parseTypeScriptDiagnostics(execError.stdout || execError.stderr || '');
     }
-
-    return errors;
   }
 
   private async runTypeCheckProject(): Promise<ValidationError[]> {
-    const errors: ValidationError[] = [];
-
     if (!this.tscPath) {
-      return errors;
+      return [];
     }
 
     try {
@@ -487,30 +346,14 @@ export class CodeValidator {
         ['--noEmit', '--pretty', 'false'],
         {
           cwd: this.config.workspacePath,
-          timeout: this.config.timeout * 5, // TypeScript can be slow
+          timeout: this.config.timeout * 5,
         }
       );
+      return [];
     } catch (e: unknown) {
       const execError = e as { stdout?: string; stderr?: string };
-      const output = execError.stdout || execError.stderr || '';
-      
-      const errorPattern = /(.+)\((\d+),(\d+)\):\s+(error|warning)\s+TS(\d+):\s+(.+)/g;
-      let match;
-      
-      while ((match = errorPattern.exec(output)) !== null) {
-        errors.push({
-          type: 'typescript',
-          severity: match[4] as 'error' | 'warning',
-          message: match[6],
-          file: match[1],
-          line: parseInt(match[2]),
-          column: parseInt(match[3]),
-          rule: `TS${match[5]}`,
-        });
-      }
+      return parseTypeScriptDiagnostics(execError.stdout || execError.stderr || '');
     }
-
-    return errors;
   }
 
   private async runRelatedTests(filePath: string): Promise<ValidationError[]> {
@@ -611,74 +454,4 @@ export async function getValidator(workspacePath: string): Promise<CodeValidator
     await validatorInstance.initialize();
   }
   return validatorInstance;
-}
-
-// ============================================================================
-// HELPER FUNCTIONS FOR AGENT INTEGRATION
-// ============================================================================
-
-/**
- * Format validation errors for AI context
- */
-export function formatErrorsForAI(result: ValidationResult): string {
-  if (result.success) {
-    return '✅ Code validation passed. No errors found.';
-  }
-
-  const lines: string[] = [
-    `❌ Code validation failed with ${result.summary.totalErrors} error(s):`,
-    '',
-  ];
-
-  for (const error of result.errors) {
-    const location = error.line ? `:${error.line}:${error.column || 0}` : '';
-    lines.push(`• [${error.type.toUpperCase()}] ${error.file}${location}`);
-    lines.push(`  ${error.message}`);
-    if (error.rule) {
-      lines.push(`  Rule: ${error.rule}`);
-    }
-    if (error.suggestion) {
-      lines.push(`  💡 ${error.suggestion}`);
-    }
-    lines.push('');
-  }
-
-  if (result.autoFixable.length > 0) {
-    lines.push(`💡 ${result.autoFixable.length} error(s) can be auto-fixed.`);
-  }
-
-  return lines.join('\n');
-}
-
-/**
- * Generate fix instructions for AI
- */
-export function generateFixInstructions(result: ValidationResult): string {
-  if (result.success) {
-    return '';
-  }
-
-  const instructions: string[] = [
-    'Please fix the following issues in the code:',
-    '',
-  ];
-
-  // Group by file
-  const byFile = new Map<string, ValidationError[]>();
-  for (const error of result.errors) {
-    const existing = byFile.get(error.file) || [];
-    existing.push(error);
-    byFile.set(error.file, existing);
-  }
-
-  for (const [file, errors] of byFile) {
-    instructions.push(`## ${file}`);
-    for (const error of errors) {
-      const location = error.line ? ` (line ${error.line})` : '';
-      instructions.push(`- ${error.message}${location}`);
-    }
-    instructions.push('');
-  }
-
-  return instructions.join('\n');
 }

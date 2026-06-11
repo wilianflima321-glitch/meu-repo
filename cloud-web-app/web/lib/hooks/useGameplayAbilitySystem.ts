@@ -26,6 +26,7 @@ import {
 } from '../gameplay-ability-system';
 
 import type { AbilityState, AttributeState, EffectState, GASStats, UseGASOptions, UseGASReturn } from './useGameplayAbilitySystem.types';
+import { syncGameplayAbilityState } from './useGameplayAbilitySystem.state';
 
 export type { AbilityState, AttributeState, EffectState, GASStats, UseGASOptions, UseGASReturn } from './useGameplayAbilitySystem.types';
 
@@ -135,98 +136,19 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
   const syncState = useCallback(() => {
     if (!systemRef.current) return;
 
-    const system = systemRef.current;
+    const snapshot = syncGameplayAbilityState(
+      systemRef.current,
+      prevAttributesRef.current,
+      eventsRef.current,
+    );
 
-    // Sincronizar atributos
-    const newAttributes = new Map<string, AttributeState>();
-    const attrNames = system.attributes.getAttributeNames();
-
-    for (const name of attrNames) {
-      const current = system.attributes.getAttribute(name);
-      const base = system.attributes.getBaseValue(name);
-
-      // Check for changes
-      const prevValue = prevAttributesRef.current.get(name);
-      if (prevValue !== undefined && prevValue !== current) {
-        eventsRef.current.onAttributeChanged?.(name, prevValue, current);
-      }
-      prevAttributesRef.current.set(name, current);
-
-      // Calcular porcentagem para atributos com máximo
-      let percentage: number | undefined;
-      if (name.toLowerCase().includes('health') || name.toLowerCase().includes('mana')) {
-        const maxName = name.replace(/current/i, 'max').replace(/^(health|mana)$/i, 'max$1');
-        const max = system.attributes.getAttribute(maxName);
-        if (max > 0) {
-          percentage = (current / max) * 100;
-        }
-      }
-
-      newAttributes.set(name, {
-        name,
-        baseValue: base,
-        currentValue: current,
-        percentage,
-      });
-    }
-    setAttributeStates(newAttributes);
-
-    // Sincronizar habilidades
-    const newAbilities = new Map<string, AbilityState>();
-    const abilities = system.getAbilities();
-
-    for (const ability of abilities) {
-      const spec = ability.spec;
-      const cooldownRemaining = system.getCooldownRemaining(spec.id);
-      const cooldownTotal = spec.cooldown?.duration ?? 0;
-      const canActivate = system.canActivateAbility(spec.id);
-
-      // Calcular custos
-      const costs = spec.costs.map(cost => ({
-        attribute: cost.attribute,
-        value: cost.value,
-        available: system.attributes.getAttribute(cost.attribute),
-      }));
-
-      newAbilities.set(spec.id, {
-        id: spec.id,
-        name: spec.name,
-        description: spec.description,
-        icon: spec.icon,
-        isActive: ability.isActive,
-        isOnCooldown: cooldownRemaining > 0,
-        cooldownRemaining,
-        cooldownTotal,
-        canActivate,
-        costs,
-      });
-    }
-    setAbilityStates(newAbilities);
-
-    // Sincronizar efeitos ativos
-    const effects = system.getActiveEffects();
-    const newEffects: EffectState[] = effects.map(effect => ({
-      id: effect.spec.id,
-      name: effect.spec.name,
-      description: effect.spec.description,
-      remainingDuration: effect.remainingDuration,
-      stackCount: effect.stackCount,
-      isPeriodic: effect.spec.period !== undefined,
-      isInfinite: effect.spec.durationType === 'infinite',
-    }));
-    setActiveEffects(newEffects);
-
-    // Sincronizar tags
-    const currentTags = system.tags.getTags();
-    setTags(currentTags);
-
-    // Atualizar stats
+    setAttributeStates(snapshot.attributeStates);
+    setAbilityStates(snapshot.abilityStates);
+    setActiveEffects(snapshot.activeEffects);
+    setTags(snapshot.tags);
     setStats(prev => ({
       ...prev,
-      totalAbilities: abilities.length,
-      activeAbilities: Array.from(newAbilities.values()).filter(a => a.isActive).length,
-      activeEffects: newEffects.length,
-      totalTags: currentTags.length,
+      ...snapshot.statsPatch,
     }));
   }, []);
 
@@ -524,162 +446,6 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
   ]);
 }
 
-// ============================================================================
-// PRESET ABILITIES
-// ============================================================================
-
-/**
- * Habilidades predefinidas para uso rápido
- */
-export const PRESET_ABILITIES = {
-  /** Fireball - Dano de área com DOT */
-  fireball: (): GameplayAbilitySpec => ({
-    id: 'ability.fireball',
-    name: 'Fireball',
-    description: 'Lança uma bola de fogo que causa dano em área',
-    icon: '🔥',
-    activationType: 'triggered',
-    targetingMode: 'aoe',
-    costs: [{ attribute: 'mana', value: 30 }],
-    cooldown: { duration: 5, tags: [GameplayTag.fromString('cooldown.fire')] },
-    tags: {
-      ability: [GameplayTag.fromString('ability.fire'), GameplayTag.fromString('ability.magic')],
-      cancel: [],
-      block: [GameplayTag.fromString('state.silenced')],
-      activation: { required: [], blocked: [GameplayTag.fromString('state.stunned')] },
-    },
-    effects: [{
-      id: 'effect.burn',
-      name: 'Burning',
-      description: 'Causa dano ao longo do tempo',
-      durationType: 'duration',
-      duration: 4,
-      period: 1,
-      modifiers: [],
-      grantedTags: [GameplayTag.fromString('debuff.burning')],
-      applicationTags: [],
-      removalTags: [],
-      requiredTags: [],
-      blockedTags: [],
-      stackingPolicy: 'refresh',
-      maxStacks: 3,
-    }],
-    range: 20,
-    aoeRadius: 5,
-  }),
-
-  /** Heal - Cura instantânea */
-  heal: (): GameplayAbilitySpec => ({
-    id: 'ability.heal',
-    name: 'Heal',
-    description: 'Restaura pontos de vida',
-    icon: '💚',
-    activationType: 'triggered',
-    targetingMode: 'self',
-    costs: [{ attribute: 'mana', value: 20 }],
-    cooldown: { duration: 3, tags: [GameplayTag.fromString('cooldown.heal')] },
-    tags: {
-      ability: [GameplayTag.fromString('ability.heal'), GameplayTag.fromString('ability.magic')],
-      cancel: [],
-      block: [],
-      activation: { required: [], blocked: [GameplayTag.fromString('state.stunned')] },
-    },
-    effects: [{
-      id: 'effect.healing',
-      name: 'Healing',
-      description: 'Restaura vida instantaneamente',
-      durationType: 'instant',
-      modifiers: [{
-        id: 'mod.heal',
-        attribute: 'health',
-        operation: 'add',
-        value: 50,
-      }],
-      grantedTags: [],
-      applicationTags: [],
-      removalTags: [],
-      requiredTags: [],
-      blockedTags: [],
-      stackingPolicy: 'none',
-      maxStacks: 1,
-    }],
-  }),
-
-  /** Sprint - Buff de velocidade temporário */
-  sprint: (): GameplayAbilitySpec => ({
-    id: 'ability.sprint',
-    name: 'Sprint',
-    description: 'Aumenta a velocidade de movimento temporariamente',
-    icon: '⚡',
-    activationType: 'triggered',
-    targetingMode: 'self',
-    costs: [{ attribute: 'stamina', value: 25 }],
-    cooldown: { duration: 10, tags: [GameplayTag.fromString('cooldown.movement')] },
-    tags: {
-      ability: [GameplayTag.fromString('ability.movement')],
-      cancel: [],
-      block: [],
-      activation: { required: [], blocked: [GameplayTag.fromString('state.rooted')] },
-    },
-    effects: [{
-      id: 'effect.sprint',
-      name: 'Sprinting',
-      description: 'Velocidade aumentada em 50%',
-      durationType: 'duration',
-      duration: 5,
-      modifiers: [{
-        id: 'mod.speed',
-        attribute: 'moveSpeed',
-        operation: 'multiply',
-        value: 1.5,
-      }],
-      grantedTags: [GameplayTag.fromString('buff.speed')],
-      applicationTags: [],
-      removalTags: [],
-      requiredTags: [],
-      blockedTags: [],
-      stackingPolicy: 'refresh',
-      maxStacks: 1,
-    }],
-  }),
-
-  /** Shield - Escudo absorvedor de dano */
-  shield: (): GameplayAbilitySpec => ({
-    id: 'ability.shield',
-    name: 'Shield',
-    description: 'Cria um escudo que absorve dano',
-    icon: '🛡️',
-    activationType: 'triggered',
-    targetingMode: 'self',
-    costs: [{ attribute: 'mana', value: 40 }],
-    cooldown: { duration: 15, tags: [GameplayTag.fromString('cooldown.defensive')] },
-    tags: {
-      ability: [GameplayTag.fromString('ability.defensive')],
-      cancel: [],
-      block: [],
-      activation: { required: [], blocked: [] },
-    },
-    effects: [{
-      id: 'effect.shield',
-      name: 'Shielded',
-      description: 'Absorve até 100 pontos de dano',
-      durationType: 'duration',
-      duration: 10,
-      modifiers: [{
-        id: 'mod.shield',
-        attribute: 'defense',
-        operation: 'add',
-        value: 100,
-      }],
-      grantedTags: [GameplayTag.fromString('buff.shielded')],
-      applicationTags: [],
-      removalTags: [],
-      requiredTags: [],
-      blockedTags: [],
-      stackingPolicy: 'override',
-      maxStacks: 1,
-    }],
-  }),
-};
+export { PRESET_ABILITIES } from './useGameplayAbilitySystem.presets';
 
 export default useGameplayAbilitySystem;
