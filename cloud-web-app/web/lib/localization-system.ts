@@ -1,275 +1,27 @@
 import { logger } from '@/lib/observability/logger';
-/**
- * LOCALIZATION SYSTEM - Aethel Engine
- *
- * Sistema completo de localização para jogos.
- *
- * FEATURES:
- * - Multi-language support
- * - String interpolation
- * - Pluralization
- * - Date/time formatting
- * - Number formatting
- * - Currency formatting
- * - RTL language support
- * - Dynamic loading
- * - Fallback languages
- * - Context-aware translations
- */
 
-// ============================================================================
-// TYPES
-// ============================================================================
+import { defaultLocales } from './localization-system.defaults';
+import { interpolate } from './localization-system.utils';
+import type {
+  LocaleConfig,
+  LocalizationData,
+  PluralCategory,
+  TranslationDictionary,
+  TranslationEntry,
+  TranslationNode,
+} from './localization-system.types';
 
-export interface LocaleConfig {
-  code: string;           // e.g., 'en-US', 'pt-BR'
-  name: string;           // e.g., 'English (US)', 'Português (Brasil)'
-  nativeName: string;     // e.g., 'English', 'Português'
-  direction: 'ltr' | 'rtl';
-  fallback?: string;
-  dateFormat: string;
-  timeFormat: string;
-  numberFormat: {
-    decimal: string;
-    thousands: string;
-  };
-  currency: {
-    code: string;
-    symbol: string;
-    position: 'before' | 'after';
-  };
-  pluralRules: (n: number) => PluralCategory;
-}
-
-export type PluralCategory = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';
-
-export interface TranslationEntry {
-  value: string | string[] | Partial<Record<PluralCategory, string>>;
-  context?: string;
-  description?: string;
-}
-
-export type TranslationNode = TranslationEntry | string | { [key: string]: TranslationNode };
-
-export type TranslationDictionary = Record<string, TranslationNode>;
-
-export interface LocalizationData {
-  locale: string;
-  translations: TranslationDictionary;
-  metadata?: {
-    version?: string;
-    author?: string;
-    lastUpdated?: string;
-  };
-}
-
-// ============================================================================
-// PLURAL RULES
-// ============================================================================
-
-const pluralRules: Record<string, (n: number) => PluralCategory> = {
-  // English, German, Spanish, etc.
-  'en': (n) => n === 1 ? 'one' : 'other',
-  'de': (n) => n === 1 ? 'one' : 'other',
-  'es': (n) => n === 1 ? 'one' : 'other',
-  'it': (n) => n === 1 ? 'one' : 'other',
-  'nl': (n) => n === 1 ? 'one' : 'other',
-
-  // French, Portuguese
-  'fr': (n) => n === 0 || n === 1 ? 'one' : 'other',
-  'pt': (n) => n === 0 || n === 1 ? 'one' : 'other',
-
-  // Russian, Ukrainian, Polish, etc.
-  'ru': (n) => {
-    if (n % 10 === 1 && n % 100 !== 11) return 'one';
-    if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) return 'few';
-    return 'many';
-  },
-  'pl': (n) => {
-    if (n === 1) return 'one';
-    if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) return 'few';
-    return 'many';
-  },
-
-  // Arabic
-  'ar': (n) => {
-    if (n === 0) return 'zero';
-    if (n === 1) return 'one';
-    if (n === 2) return 'two';
-    if (n % 100 >= 3 && n % 100 <= 10) return 'few';
-    if (n % 100 >= 11) return 'many';
-    return 'other';
-  },
-
-  // Japanese, Chinese, Korean (no plural)
-  'ja': () => 'other',
-  'zh': () => 'other',
-  'ko': () => 'other'
-};
-
-// ============================================================================
-// DEFAULT LOCALES
-// ============================================================================
-
-const defaultLocales: Record<string, LocaleConfig> = {
-  'en-US': {
-    code: 'en-US',
-    name: 'English (US)',
-    nativeName: 'English',
-    direction: 'ltr',
-    dateFormat: 'MM/DD/YYYY',
-    timeFormat: 'h:mm A',
-    numberFormat: { decimal: '.', thousands: ',' },
-    currency: { code: 'USD', symbol: '$', position: 'before' },
-    pluralRules: pluralRules['en']
-  },
-  'en-GB': {
-    code: 'en-GB',
-    name: 'English (UK)',
-    nativeName: 'English',
-    direction: 'ltr',
-    fallback: 'en-US',
-    dateFormat: 'DD/MM/YYYY',
-    timeFormat: 'HH:mm',
-    numberFormat: { decimal: '.', thousands: ',' },
-    currency: { code: 'GBP', symbol: '£', position: 'before' },
-    pluralRules: pluralRules['en']
-  },
-  'pt-BR': {
-    code: 'pt-BR',
-    name: 'Português (Brasil)',
-    nativeName: 'Português',
-    direction: 'ltr',
-    fallback: 'en-US',
-    dateFormat: 'DD/MM/YYYY',
-    timeFormat: 'HH:mm',
-    numberFormat: { decimal: ',', thousands: '.' },
-    currency: { code: 'BRL', symbol: 'R$', position: 'before' },
-    pluralRules: pluralRules['pt']
-  },
-  'es-ES': {
-    code: 'es-ES',
-    name: 'Español (España)',
-    nativeName: 'Español',
-    direction: 'ltr',
-    fallback: 'en-US',
-    dateFormat: 'DD/MM/YYYY',
-    timeFormat: 'HH:mm',
-    numberFormat: { decimal: ',', thousands: '.' },
-    currency: { code: 'EUR', symbol: '€', position: 'after' },
-    pluralRules: pluralRules['es']
-  },
-  'fr-FR': {
-    code: 'fr-FR',
-    name: 'Français (France)',
-    nativeName: 'Français',
-    direction: 'ltr',
-    fallback: 'en-US',
-    dateFormat: 'DD/MM/YYYY',
-    timeFormat: 'HH:mm',
-    numberFormat: { decimal: ',', thousands: ' ' },
-    currency: { code: 'EUR', symbol: '€', position: 'after' },
-    pluralRules: pluralRules['fr']
-  },
-  'de-DE': {
-    code: 'de-DE',
-    name: 'Deutsch (Deutschland)',
-    nativeName: 'Deutsch',
-    direction: 'ltr',
-    fallback: 'en-US',
-    dateFormat: 'DD.MM.YYYY',
-    timeFormat: 'HH:mm',
-    numberFormat: { decimal: ',', thousands: '.' },
-    currency: { code: 'EUR', symbol: '€', position: 'after' },
-    pluralRules: pluralRules['de']
-  },
-  'it-IT': {
-    code: 'it-IT',
-    name: 'Italiano (Italia)',
-    nativeName: 'Italiano',
-    direction: 'ltr',
-    fallback: 'en-US',
-    dateFormat: 'DD/MM/YYYY',
-    timeFormat: 'HH:mm',
-    numberFormat: { decimal: ',', thousands: '.' },
-    currency: { code: 'EUR', symbol: '€', position: 'after' },
-    pluralRules: pluralRules['it']
-  },
-  'ja-JP': {
-    code: 'ja-JP',
-    name: '日本語 (日本)',
-    nativeName: '日本語',
-    direction: 'ltr',
-    fallback: 'en-US',
-    dateFormat: 'YYYY/MM/DD',
-    timeFormat: 'HH:mm',
-    numberFormat: { decimal: '.', thousands: ',' },
-    currency: { code: 'JPY', symbol: '¥', position: 'before' },
-    pluralRules: pluralRules['ja']
-  },
-  'zh-CN': {
-    code: 'zh-CN',
-    name: '中文 (简体)',
-    nativeName: '简体中文',
-    direction: 'ltr',
-    fallback: 'en-US',
-    dateFormat: 'YYYY/MM/DD',
-    timeFormat: 'HH:mm',
-    numberFormat: { decimal: '.', thousands: ',' },
-    currency: { code: 'CNY', symbol: '¥', position: 'before' },
-    pluralRules: pluralRules['zh']
-  },
-  'ko-KR': {
-    code: 'ko-KR',
-    name: '한국어 (대한민국)',
-    nativeName: '한국어',
-    direction: 'ltr',
-    fallback: 'en-US',
-    dateFormat: 'YYYY/MM/DD',
-    timeFormat: 'HH:mm',
-    numberFormat: { decimal: '.', thousands: ',' },
-    currency: { code: 'KRW', symbol: '₩', position: 'before' },
-    pluralRules: pluralRules['ko']
-  },
-  'ru-RU': {
-    code: 'ru-RU',
-    name: 'Русский (Россия)',
-    nativeName: 'Русский',
-    direction: 'ltr',
-    fallback: 'en-US',
-    dateFormat: 'DD.MM.YYYY',
-    timeFormat: 'HH:mm',
-    numberFormat: { decimal: ',', thousands: ' ' },
-    currency: { code: 'RUB', symbol: '₽', position: 'after' },
-    pluralRules: pluralRules['ru']
-  },
-  'ar-SA': {
-    code: 'ar-SA',
-    name: 'العربية (السعودية)',
-    nativeName: 'العربية',
-    direction: 'rtl',
-    fallback: 'en-US',
-    dateFormat: 'DD/MM/YYYY',
-    timeFormat: 'HH:mm',
-    numberFormat: { decimal: '٫', thousands: '٬' },
-    currency: { code: 'SAR', symbol: 'ر.س', position: 'after' },
-    pluralRules: pluralRules['ar']
-  }
-};
-
-// ============================================================================
-// STRING INTERPOLATION
-// ============================================================================
-
-function interpolate(template: string, values: Record<string, any>): string {
-  return template.replace(/\{(\w+)\}/g, (match, key) => {
-    return values.hasOwnProperty(key) ? String(values[key]) : match;
-  });
-}
-
-// ============================================================================
-// LOCALIZATION MANAGER
-// ============================================================================
+export type {
+  LocaleConfig,
+  LocalizationData,
+  PluralCategory,
+  TranslationDictionary,
+  TranslationEntry,
+  TranslationNode,
+} from './localization-system.types';
+export { defaultLocales, pluralRules } from './localization-system.defaults';
+export { interpolate } from './localization-system.utils';
+export { createI18n, type I18nContextValue } from './localization-system.integration';
 
 export class LocalizationManager {
   private currentLocale: string = 'en-US';
@@ -673,33 +425,6 @@ export class LocalizationManager {
 // ============================================================================
 // REACT INTEGRATION (if React is available)
 // ============================================================================
-
-export interface I18nContextValue {
-  t: (key: string, values?: Record<string, any>) => string;
-  tp: (key: string, count: number, values?: Record<string, any>) => string;
-  locale: string;
-  setLocale: (locale: string) => void;
-  formatNumber: (value: number, decimals?: number) => string;
-  formatCurrency: (value: number) => string;
-  formatDate: (date: Date, format?: string) => string;
-  formatTime: (date: Date, format?: string) => string;
-  direction: 'ltr' | 'rtl';
-}
-
-// Hook-like function for non-React usage
-export function createI18n(manager: LocalizationManager): I18nContextValue {
-  return {
-    t: (key, values) => manager.t(key, values),
-    tp: (key, count, values) => manager.tp(key, count, values),
-    locale: manager.getLocale(),
-    setLocale: (locale) => manager.setLocale(locale),
-    formatNumber: (value, decimals) => manager.formatNumber(value, decimals),
-    formatCurrency: (value) => manager.formatCurrency(value),
-    formatDate: (date, format) => manager.formatDate(date, format),
-    formatTime: (date, format) => manager.formatTime(date, format),
-    direction: manager.getTextDirection()
-  };
-}
 
 export { defaultEnglishTranslations } from './localization-system.default-en';
 
