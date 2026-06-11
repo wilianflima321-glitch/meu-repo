@@ -1,177 +1,44 @@
 import { createComponentLogger } from '@/lib/observability/logger'
+import { readExtensionState, writeExtensionState } from './extension-loader-storage'
+import type {
+  CommandContribution,
+  DebuggerContribution,
+  ExtensionContext,
+  ExtensionContributions,
+  ExtensionManifest,
+  ExtensionModule,
+  KeybindingContribution,
+  LanguageContribution,
+  LoadedExtension,
+  ThemeContribution,
+} from './extension-loader-types'
+
+export type {
+  CommandContribution,
+  ConfigurationContribution,
+  DebuggerContribution,
+  ExtensionContext,
+  ExtensionContributions,
+  ExtensionManifest,
+  ExtensionModule,
+  ExtensionStateStore,
+  GrammarContribution,
+  KeybindingContribution,
+  LanguageContribution,
+  LoadedExtension,
+  MenuContribution,
+  TaskDefinitionContribution,
+  ThemeContribution,
+  ViewContribution,
+  ViewsContainerContribution,
+} from './extension-loader-types'
 
 const log = createComponentLogger('extensions/extension-loader')
-
-type ExtensionStorageRecord = Record<string, unknown>;
-
-export interface ExtensionStateStore {
-  get: (key: string) => unknown;
-  update: (key: string, value: unknown) => void;
-}
-
-export interface ExtensionContext {
-  subscriptions: unknown[];
-  extensionPath: string;
-  extensionUri: string;
-  globalState: ExtensionStateStore;
-  workspaceState: ExtensionStateStore;
-  asAbsolutePath: (relativePath: string) => string;
-}
-
-export interface ExtensionModule {
-  activate?: (context: ExtensionContext) => unknown | Promise<unknown>;
-  deactivate?: () => unknown | Promise<unknown>;
-  [key: string]: unknown;
-}
-
-function asStorageRecord(value: unknown): ExtensionStorageRecord {
-  return value && typeof value === 'object' && !Array.isArray(value) ? (value as ExtensionStorageRecord) : {};
-}
-
 
 /**
  * Extension Loader
  * Loads and manages VS Code compatible extensions
  */
-
-export interface ExtensionManifest {
-  name: string;
-  displayName: string;
-  version: string;
-  publisher: string;
-  description: string;
-  main?: string;
-  browser?: string;
-  contributes?: ExtensionContributions;
-  activationEvents?: string[];
-  engines: {
-    vscode: string;
-  };
-  categories?: string[];
-  keywords?: string[];
-  icon?: string;
-  repository?: {
-    type: string;
-    url: string;
-  };
-  license?: string;
-}
-
-export interface ExtensionContributions {
-  commands?: CommandContribution[];
-  languages?: LanguageContribution[];
-  grammars?: GrammarContribution[];
-  themes?: ThemeContribution[];
-  keybindings?: KeybindingContribution[];
-  menus?: MenuContribution[];
-  views?: ViewContribution[];
-  viewsContainers?: ViewsContainerContribution[];
-  configuration?: ConfigurationContribution;
-  debuggers?: DebuggerContribution[];
-  taskDefinitions?: TaskDefinitionContribution[];
-}
-
-export interface CommandContribution {
-  command: string;
-  title: string;
-  category?: string;
-  icon?: string;
-}
-
-export interface LanguageContribution {
-  id: string;
-  aliases?: string[];
-  extensions?: string[];
-  filenames?: string[];
-  configuration?: string;
-}
-
-export interface GrammarContribution {
-  language: string;
-  scopeName: string;
-  path: string;
-}
-
-export interface ThemeContribution {
-  label: string;
-  uiTheme: 'vs' | 'vs-dark' | 'hc-black';
-  path: string;
-}
-
-export interface KeybindingContribution {
-  command: string;
-  key: string;
-  when?: string;
-  mac?: string;
-  linux?: string;
-  win?: string;
-}
-
-export interface MenuContribution {
-  [key: string]: Array<{
-    command: string;
-    when?: string;
-    group?: string;
-  }>;
-}
-
-export interface ViewContribution {
-  [key: string]: Array<{
-    id: string;
-    name: string;
-    when?: string;
-  }>;
-}
-
-export interface ViewsContainerContribution {
-  [key: string]: Array<{
-    id: string;
-    title: string;
-    icon: string;
-  }>;
-}
-
-export interface ConfigurationContribution {
-  title?: string;
-  properties: {
-    [key: string]: {
-      type: string;
-      default?: unknown;
-      description?: string;
-      enum?: unknown[];
-      enumDescriptions?: string[];
-    };
-  };
-}
-
-export interface DebuggerContribution {
-  type: string;
-  label: string;
-  program?: string;
-  runtime?: string;
-  configurationAttributes?: unknown;
-}
-
-export interface TaskDefinitionContribution {
-  type: string;
-  required?: string[];
-  properties?: {
-    [key: string]: {
-      type: string;
-      description?: string;
-    };
-  };
-}
-
-export interface LoadedExtension {
-  id: string;
-  manifest: ExtensionManifest;
-  extensionPath: string;
-  isActive: boolean;
-  exports?: unknown;
-  module?: ExtensionModule;
-  activationPromise?: Promise<void>;
-}
 
 export class ExtensionLoader {
   private extensions: Map<string, LoadedExtension> = new Map();
@@ -233,16 +100,6 @@ export class ExtensionLoader {
   private async importExtensionModule(moduleUrl: string): Promise<ExtensionModule> {
     // webpackIgnore evita que o bundler tente resolver paths arbitrários em build-time.
     return (await import(/* webpackIgnore: true */ moduleUrl)) as ExtensionModule;
-  }
-
-  private getStorage(): Storage | null {
-    try {
-      if (typeof window === 'undefined') return null;
-      if (!window.localStorage) return null;
-      return window.localStorage;
-    } catch {
-      return null;
-    }
   }
 
   async loadExtension(extensionPath: string): Promise<LoadedExtension> {
@@ -561,79 +418,19 @@ export class ExtensionLoader {
   }
 
   private getGlobalState(extensionId: string, key: string): unknown {
-    const storage = this.getStorage();
-    if (!storage) return undefined;
-
-    const raw = storage.getItem(`${ExtensionLoader.GLOBAL_STATE_PREFIX}${extensionId}`);
-    if (!raw) return undefined;
-    try {
-      const data = asStorageRecord(JSON.parse(raw));
-      return data[key];
-    } catch {
-      return undefined;
-    }
+    return readExtensionState(ExtensionLoader.GLOBAL_STATE_PREFIX, extensionId, key);
   }
 
   private updateGlobalState(extensionId: string, key: string, value: unknown): void {
-    const storage = this.getStorage();
-    if (!storage) return;
-
-    const storageKey = `${ExtensionLoader.GLOBAL_STATE_PREFIX}${extensionId}`;
-    const raw = storage.getItem(storageKey);
-    let data: ExtensionStorageRecord = {};
-
-    if (raw) {
-      try {
-        data = asStorageRecord(JSON.parse(raw));
-      } catch {
-        data = {};
-      }
-    }
-
-    data[key] = value;
-    try {
-      storage.setItem(storageKey, JSON.stringify(data));
-    } catch {
-      // ignore quota / serialization issues
-    }
+    writeExtensionState(ExtensionLoader.GLOBAL_STATE_PREFIX, extensionId, key, value);
   }
 
   private getWorkspaceState(extensionId: string, key: string): unknown {
-    const storage = this.getStorage();
-    if (!storage) return undefined;
-
-    const raw = storage.getItem(`${ExtensionLoader.WORKSPACE_STATE_PREFIX}${extensionId}`);
-    if (!raw) return undefined;
-    try {
-      const data = asStorageRecord(JSON.parse(raw));
-      return data[key];
-    } catch {
-      return undefined;
-    }
+    return readExtensionState(ExtensionLoader.WORKSPACE_STATE_PREFIX, extensionId, key);
   }
 
   private updateWorkspaceState(extensionId: string, key: string, value: unknown): void {
-    const storage = this.getStorage();
-    if (!storage) return;
-
-    const storageKey = `${ExtensionLoader.WORKSPACE_STATE_PREFIX}${extensionId}`;
-    const raw = storage.getItem(storageKey);
-    let data: ExtensionStorageRecord = {};
-
-    if (raw) {
-      try {
-        data = asStorageRecord(JSON.parse(raw));
-      } catch {
-        data = {};
-      }
-    }
-
-    data[key] = value;
-    try {
-      storage.setItem(storageKey, JSON.stringify(data));
-    } catch {
-      // ignore quota / serialization issues
-    }
+    writeExtensionState(ExtensionLoader.WORKSPACE_STATE_PREFIX, extensionId, key, value);
   }
 
   // Getters utilitários (para UI/diagnóstico)

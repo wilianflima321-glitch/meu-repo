@@ -1,4 +1,3 @@
-import { logger } from '@/lib/observability/logger';
 /**
  * Sistema de Backup e Recovery - Aethel Engine
  *
@@ -28,10 +27,13 @@ import type {
   RecoveryPoint,
 } from './backup-system.types';
 import {
-  generateBackupChecksum,
-  generateBackupEncryptionKey,
-  generateBackupId,
-} from './backup-system.utils';
+  applyBackupRestoration,
+  calculateFileVersionDiff,
+  calculateNextBackupRun,
+  downloadBackupData,
+  processBackupRecord,
+} from './backup-system-runtime';
+import { generateBackupChecksum, generateBackupId } from './backup-system.utils';
 import { useBackups, useFileVersions } from './backup-system.hooks';
 
 export { useBackups, useFileVersions } from './backup-system.hooks';
@@ -118,97 +120,9 @@ export class BackupManager {
     this.backups.set(id, backup);
 
     // Inicia processo de backup async
-    this.processBackup(backup, options).catch((error) => logger.error(error));
+    processBackupRecord(backup, options).catch(() => undefined);
 
     return backup;
-  }
-
-  /**
-   * Processa o backup (coleta dados, comprime, etc)
-   */
-  private async processBackup(
-    backup: BackupMetadata,
-    options?: { compress?: boolean; encrypt?: boolean }
-  ): Promise<void> {
-    backup.status = 'in_progress';
-
-    try {
-      // Coleta dados do projeto
-      const data = (await this.collectBackupData(backup.userId, backup.projectId)) as {
-        files?: unknown[];
-        assets?: unknown[];
-        projects?: Array<{ id: string }>;
-      };
-
-      // Calcula tamanho
-      const jsonData = JSON.stringify(data);
-      backup.size = new Blob([jsonData]).size;
-      backup.contents.files = data.files?.length || 0;
-      backup.contents.assets = data.assets?.length || 0;
-      backup.contents.projects = data.projects?.map((p: { id: string }) => p.id) || [];
-
-      // Compresses when needed
-      if (options?.compress) {
-        backup.compressedSize = Math.floor(backup.size * 0.3); // Estimativa
-      } else {
-        backup.compressedSize = backup.size;
-      }
-
-      // Gera checksum
-      backup.checksum = await generateBackupChecksum(jsonData);
-
-      // Encrypts when needed
-      if (options?.encrypt) {
-        backup.encryptionKey = generateBackupEncryptionKey();
-      }
-
-      // Salva no storage
-      await this.saveBackupData(backup.id, data, options);
-
-      backup.status = 'completed';
-      backup.completedAt = new Date();
-
-    } catch (error) {
-      backup.status = 'failed';
-      logger.error('[Backup] Failed:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Coleta dados para backup
-   */
-  private async collectBackupData(
-    userId: string,
-    projectId?: string
-  ): Promise<Record<string, unknown>> {
-    // In production, this would run real database queries
-    const response = await fetch(`/api/backup/collect`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, projectId }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to collect backup data');
-    }
-
-    return response.json();
-  }
-
-  /**
-   * Salva dados do backup
-   */
-  private async saveBackupData(
-    backupId: string,
-    data: Record<string, unknown>,
-    options?: { compress?: boolean; encrypt?: boolean }
-  ): Promise<void> {
-    await fetch(`/api/backup/save`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ backupId, data, options }),
-    });
   }
 
   /**
@@ -293,10 +207,10 @@ export class BackupManager {
     }
 
     // Baixa dados do backup
-    const backupData = await this.downloadBackupData(backupId);
+    const backupData = await downloadBackupData(backupId);
 
     // Applies restore
-    const result = await this.applyRestoration(backupData, options);
+    const result = await applyBackupRestoration(backupData, options);
 
     return result;
   }
@@ -323,7 +237,7 @@ export class BackupManager {
     }
 
     // Verifica checksum
-    const data = await this.downloadBackupData(backupId);
+    const data = await downloadBackupData(backupId);
     const currentChecksum = await generateBackupChecksum(JSON.stringify(data));
 
     if (currentChecksum !== backup.checksum) {
@@ -340,52 +254,6 @@ export class BackupManager {
       valid: errors.length === 0,
       errors,
       warnings,
-    };
-  }
-
-  /**
-   * Baixa dados do backup
-   */
-  private async downloadBackupData(backupId: string): Promise<Record<string, unknown>> {
-    const response = await fetch(`/api/backup/${backupId}/download`);
-    if (!response.ok) {
-      throw new Error('Failed to download backup data');
-    }
-    return response.json();
-  }
-
-  /**
-   * Applies restore
-   */
-  private async applyRestoration(
-    data: Record<string, unknown>,
-    options: RecoveryOptions
-  ): Promise<{ success: boolean; restoredItems: number; errors: string[] }> {
-    const errors: string[] = [];
-    let restoredItems = 0;
-
-    try {
-      const response = await fetch('/api/backup/restore', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data, options }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Restore API failed');
-      }
-
-      const result = await response.json();
-      restoredItems = result.restoredItems || 0;
-
-    } catch (error) {
-      errors.push(error instanceof Error ? error.message : 'Unknown error');
-    }
-
-    return {
-      success: errors.length === 0,
-      restoredItems,
-      errors,
     };
   }
 
@@ -421,7 +289,7 @@ export class BackupManager {
     // Calculates diff when a previous version exists
     if (lastVersion) {
       const previousContent = await this.getVersionContent(lastVersion.id);
-      version.changes = this.calculateDiff(previousContent, content);
+      version.changes = calculateFileVersionDiff(previousContent, content);
     }
 
     versions.push(version);
@@ -477,40 +345,6 @@ export class BackupManager {
     if (versions && versions.length > keepLast) {
       this.versions.set(fileId, versions.slice(-keepLast));
     }
-  }
-
-  /**
-   * Calculates diff between two contents
-   */
-  private calculateDiff(
-    oldContent: string,
-    newContent: string
-  ): FileVersion['changes'] {
-    const oldLines = oldContent.split('\n');
-    const newLines = newContent.split('\n');
-
-    // Simplified calculation
-    let added = 0;
-    let removed = 0;
-
-    const maxLen = Math.max(oldLines.length, newLines.length);
-    for (let i = 0; i < maxLen; i++) {
-      if (oldLines[i] !== newLines[i]) {
-        if (i >= oldLines.length) {
-          added++;
-        } else if (i >= newLines.length) {
-          removed++;
-        } else {
-          added++;
-          removed++;
-        }
-      }
-    }
-
-    return {
-      linesAdded: added,
-      linesRemoved: removed,
-    };
   }
 
   // ==========================================================================
@@ -582,7 +416,7 @@ export class BackupManager {
     config: Omit<BackupSchedule, 'id' | 'lastRun' | 'nextRun'>
   ): BackupSchedule {
     const id = generateBackupId('schedule');
-    const nextRun = this.calculateNextRun(config);
+    const nextRun = calculateNextBackupRun(config);
 
     const schedule: BackupSchedule = {
       id,
@@ -603,7 +437,7 @@ export class BackupManager {
     if (schedule) {
       Object.assign(schedule, updates);
       if (updates.frequency || updates.time || updates.dayOfWeek || updates.dayOfMonth) {
-        schedule.nextRun = this.calculateNextRun(schedule);
+        schedule.nextRun = calculateNextBackupRun(schedule);
       }
     }
   }
@@ -621,41 +455,6 @@ export class BackupManager {
   listSchedules(userId: string): BackupSchedule[] {
     return Array.from(this.schedules.values())
       .filter(s => s.userId === userId);
-  }
-
-  /**
-   * Calculates next run
-   */
-  private calculateNextRun(config: Partial<BackupSchedule>): Date {
-    const now = new Date();
-    const next = new Date(now);
-
-    switch (config.frequency) {
-      case 'hourly':
-        next.setHours(next.getHours() + 1, 0, 0, 0);
-        break;
-      case 'daily':
-        if (config.time) {
-          const [hours, minutes] = config.time.split(':').map(Number);
-          next.setHours(hours, minutes, 0, 0);
-          if (next <= now) next.setDate(next.getDate() + 1);
-        } else {
-          next.setDate(next.getDate() + 1);
-        }
-        break;
-      case 'weekly':
-        if (config.dayOfWeek !== undefined) {
-          next.setDate(next.getDate() + ((7 + config.dayOfWeek - next.getDay()) % 7 || 7));
-        }
-        break;
-      case 'monthly':
-        if (config.dayOfMonth) {
-          next.setMonth(next.getMonth() + 1, config.dayOfMonth);
-        }
-        break;
-    }
-
-    return next;
   }
 
 }
