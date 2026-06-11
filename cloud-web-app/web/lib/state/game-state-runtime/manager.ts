@@ -6,8 +6,10 @@
  */
 
 import { EventEmitter } from 'events';
-import { Checksum } from './checksum';
-import { Compressor } from './compressor';
+import { downloadSaveData, readUploadedSaveFile } from './browser-transfer';
+import { createDefaultGameState } from './default-state';
+import { cloneGameState } from './serialization';
+import { createSaveMetadata, packSaveData, unpackSaveData, validatePackedSaveData } from './save-packaging';
 import { IndexedDBAdapter } from './storage-adapters';
 import type { AutoSaveConfig, GameState, MigrationFunction, SaveData, SaveMetadata, SaveSlot, StorageAdapter } from './types';
 
@@ -54,17 +56,13 @@ export class GameStateManager extends EventEmitter {
       throw new Error('No game state to save');
     }
     
-    const metadata: SaveMetadata = {
-      id: `save_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      name,
+    const metadata = createSaveMetadata({
       slotIndex,
-      version: 1,
-      timestamp: Date.now(),
+      name,
       playTime: this.getPlayTime(),
+      gameState: this.currentGameState,
       thumbnail,
-      location: this.currentGameState.world.currentScene,
-      playerLevel: this.currentGameState.player.level,
-    };
+    });
     
     const saveData: SaveData = {
       metadata,
@@ -73,21 +71,7 @@ export class GameStateManager extends EventEmitter {
       checksum: '',
     };
     
-    // Serialize and compress
-    const serialized = JSON.stringify({
-      metadata: saveData.metadata,
-      gameState: this.serializeGameState(saveData.gameState),
-    });
-    
-    const compressed = await Compressor.compress(serialized);
-    saveData.checksum = Checksum.calculate(compressed);
-    
-    const finalData = JSON.stringify({
-      compressed: true,
-      checksum: saveData.checksum,
-      data: compressed,
-    });
-    
+    const finalData = await packSaveData(saveData);
     await this.storage.save(`slot_${slotIndex}`, finalData);
     
     this.emit('saved', { metadata, slotIndex });
@@ -102,19 +86,8 @@ export class GameStateManager extends EventEmitter {
       throw new Error(`No save data found in slot ${slotIndex}`);
     }
     
-    const parsed = JSON.parse(rawData);
-    
-    // Verify checksum
-    if (!Checksum.verify(parsed.data, parsed.checksum)) {
-      throw new Error('Save data corrupted - checksum mismatch');
-    }
-    
-    // Decompress
-    const decompressed = await Compressor.decompress(parsed.data);
-    const saveData = JSON.parse(decompressed);
-    
-    // Deserialize game state
-    let gameState = this.deserializeGameState(saveData.gameState);
+    const saveData = await unpackSaveData(rawData);
+    let gameState = saveData.gameState;
     
     // Apply migrations if needed
     gameState = this.migrateState(gameState);
@@ -140,9 +113,7 @@ export class GameStateManager extends EventEmitter {
       
       if (rawData) {
         try {
-          const parsed = JSON.parse(rawData);
-          const decompressed = await Compressor.decompress(parsed.data);
-          const saveData = JSON.parse(decompressed);
+          const saveData = await unpackSaveData(rawData);
           
           slots.push({
             index: i,
@@ -166,9 +137,7 @@ export class GameStateManager extends EventEmitter {
     if (!rawData) return null;
     
     try {
-      const parsed = JSON.parse(rawData);
-      const decompressed = await Compressor.decompress(parsed.data);
-      const saveData = JSON.parse(decompressed);
+      const saveData = await unpackSaveData(rawData);
       return saveData.metadata;
     } catch {
       return null;
@@ -247,7 +216,7 @@ export class GameStateManager extends EventEmitter {
   createCheckpoint(id: string): void {
     if (!this.currentGameState) return;
     
-    const checkpoint = this.cloneGameState(this.currentGameState);
+    const checkpoint = cloneGameState(this.currentGameState);
     this.checkpoints.set(id, checkpoint);
     
     this.emit('checkpointCreated', { id });
@@ -257,7 +226,7 @@ export class GameStateManager extends EventEmitter {
     const checkpoint = this.checkpoints.get(id);
     
     if (checkpoint) {
-      this.currentGameState = this.cloneGameState(checkpoint);
+      this.currentGameState = cloneGameState(checkpoint);
       this.emit('checkpointLoaded', { id });
       return this.currentGameState;
     }
@@ -280,7 +249,7 @@ export class GameStateManager extends EventEmitter {
   // ============================================================================
   
   newGame(): GameState {
-    this.currentGameState = this.createDefaultGameState();
+    this.currentGameState = createDefaultGameState(this.currentVersion);
     this.playTimeStart = Date.now();
     
     this.emit('newGame', { gameState: this.currentGameState });
@@ -459,90 +428,6 @@ export class GameStateManager extends EventEmitter {
   }
   
   // ============================================================================
-  // SERIALIZATION
-  // ============================================================================
-  
-  private serializeGameState(state: GameState): unknown {
-    return {
-      ...state,
-      customSections: Object.fromEntries(state.customSections),
-    };
-  }
-  
-  private deserializeGameState(data: unknown): GameState {
-    const parsed = data as any;
-    
-    return {
-      ...parsed,
-      customSections: new Map(Object.entries(parsed.customSections || {})),
-    };
-  }
-  
-  private cloneGameState(state: GameState): GameState {
-    return JSON.parse(JSON.stringify({
-      ...state,
-      customSections: Object.fromEntries(state.customSections),
-    }));
-  }
-  
-  private createDefaultGameState(): GameState {
-    return {
-      version: this.currentVersion,
-      player: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        health: 100,
-        maxHealth: 100,
-        mana: 100,
-        maxMana: 100,
-        stamina: 100,
-        maxStamina: 100,
-        experience: 0,
-        level: 1,
-        stats: {
-          strength: 10,
-          dexterity: 10,
-          intelligence: 10,
-          vitality: 10,
-        },
-        skills: {},
-        buffs: [],
-        equipment: {},
-      },
-      world: {
-        currentScene: 'starting_area',
-        discoveredLocations: ['starting_area'],
-        unlockedAreas: ['starting_area'],
-        worldTime: 0,
-        entities: [],
-        destructibles: {},
-        switches: {},
-        doors: {},
-        npcs: {},
-      },
-      inventory: {
-        items: [],
-        currency: { gold: 0, gems: 0 },
-        maxSlots: 30,
-        equippedItems: {},
-      },
-      quests: {
-        activeQuests: [],
-        completedQuests: [],
-        failedQuests: [],
-        questVariables: {},
-      },
-      settings: {
-        difficulty: 'normal',
-        language: 'en',
-        subtitles: true,
-        hints: true,
-      },
-      customSections: new Map(),
-    };
-  }
-  
-  // ============================================================================
   // EXPORT/IMPORT
   // ============================================================================
   
@@ -559,16 +444,7 @@ export class GameStateManager extends EventEmitter {
   async importSave(slotIndex: number, data: string): Promise<void> {
     // Validate data
     try {
-      const parsed = JSON.parse(data);
-      
-      if (!parsed.data || !parsed.checksum) {
-        throw new Error('Invalid save data format');
-      }
-      
-      if (!Checksum.verify(parsed.data, parsed.checksum)) {
-        throw new Error('Save data corrupted');
-      }
-      
+      validatePackedSaveData(data);
       await this.storage.save(`slot_${slotIndex}`, data);
       
       this.emit('imported', { slotIndex });
@@ -582,41 +458,12 @@ export class GameStateManager extends EventEmitter {
     const metadata = await this.getSlotMetadata(slotIndex);
     const filename = `save_${metadata?.name || slotIndex}_${Date.now()}.sav`;
     
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    
-    URL.revokeObjectURL(url);
+    downloadSaveData({ data, filename });
   }
   
   async uploadSave(slotIndex: number): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.sav,.json';
-      
-      input.onchange = async () => {
-        const file = input.files?.[0];
-        if (!file) {
-          reject(new Error('No file selected'));
-          return;
-        }
-        
-        try {
-          const data = await file.text();
-          await this.importSave(slotIndex, data);
-          resolve();
-        } catch (error) {
-          reject(error);
-        }
-      };
-      
-      input.click();
-    });
+    const data = await readUploadedSaveFile();
+    await this.importSave(slotIndex, data);
   }
   
   // ============================================================================
