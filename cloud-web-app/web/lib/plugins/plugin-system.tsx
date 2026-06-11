@@ -1,20 +1,3 @@
-/**
- * Plugin & Mod System - Sistema de Plugins/Mods
- *
- * Sistema completo com:
- * - Plugin loading
- * - Sandboxed execution
- * - Hot reloading
- * - Dependency management
- * - API exposure
- * - Event hooks
- * - Config management
- * - Asset loading
- * - Mod compatibility
- *
- * @module lib/plugins/plugin-system
- */
-
 import { EventEmitter } from 'events';
 
 import {createComponentLogger, logger} from '@/lib/observability/logger'
@@ -26,109 +9,29 @@ import {
   usePluginLoader,
   usePlugins,
 } from './plugin-system-react'
+import { PluginSandbox } from './plugin-system-sandbox'
+import {
+  assertPluginConflicts,
+  assertPluginDependencies,
+  assertPluginPermissions,
+  createPluginLoaderConfig,
+  initializePluginConfig,
+} from './plugin-system-runtime'
 import type {
   HookCallback,
   ModPackage,
   Plugin,
   PluginAPI,
-  PluginConfigSchema,
   PluginInstance,
   PluginLoaderConfig,
   PluginManifest,
-  PluginPermission,
 } from './plugin-system.types'
 
 export type * from './plugin-system.types'
 
 const log = createComponentLogger('plugins/plugin-system')
 
-// ============================================================================
-// PLUGIN SANDBOX
-// ============================================================================
-
-export class PluginSandbox {
-  private allowedGlobals: Set<string>;
-  private api: PluginAPI;
-
-  constructor(api: PluginAPI, permissions: PluginPermission[]) {
-    this.api = api;
-    this.allowedGlobals = new Set([
-      // Always allowed
-      'console',
-      'Math',
-      'JSON',
-      'Date',
-      'Array',
-      'Object',
-      'String',
-      'Number',
-      'Boolean',
-      'Map',
-      'Set',
-      'Promise',
-      'Symbol',
-      'RegExp',
-      'Error',
-      'setTimeout',
-      'clearTimeout',
-      'setInterval',
-      'clearInterval',
-      'requestAnimationFrame',
-      'cancelAnimationFrame',
-    ]);
-
-    // Add permission-based globals
-    if (permissions.includes('network')) {
-      this.allowedGlobals.add('fetch');
-      this.allowedGlobals.add('WebSocket');
-    }
-
-    if (permissions.includes('storage')) {
-      this.allowedGlobals.add('localStorage');
-      this.allowedGlobals.add('sessionStorage');
-    }
-  }
-
-  createContext(): Record<string, unknown> {
-    const context: Record<string, unknown> = {
-      api: this.api,
-    };
-
-    // Copy allowed globals
-    for (const name of this.allowedGlobals) {
-      if (name in globalThis) {
-        context[name] = (globalThis as Record<string, unknown>)[name];
-      }
-    }
-
-    return context;
-  }
-
-  execute(code: string, context: Record<string, unknown>): unknown {
-    const contextKeys = Object.keys(context);
-    const contextValues = Object.values(context);
-
-    // Create sandboxed function
-    const fn = new Function(...contextKeys, `"use strict"; return (${code});`);
-
-    return fn(...contextValues);
-  }
-
-  async executeAsync(code: string, context: Record<string, unknown>): Promise<unknown> {
-    const contextKeys = Object.keys(context);
-    const contextValues = Object.values(context);
-
-    // Create async sandboxed function
-    const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-    const fn = new AsyncFunction(...contextKeys, `"use strict"; return (${code});`);
-
-    return fn(...contextValues);
-  }
-}
-
-// ============================================================================
-// PLUGIN LOADER
-// ============================================================================
+export { PluginSandbox } from './plugin-system-sandbox'
 
 export class PluginLoader extends EventEmitter {
   private config: PluginLoaderConfig;
@@ -139,19 +42,8 @@ export class PluginLoader extends EventEmitter {
   constructor(config: Partial<PluginLoaderConfig> = {}) {
     super();
 
-    this.config = {
-      pluginDirectory: '/plugins',
-      enableHotReload: true,
-      sandbox: true,
-      maxLoadTime: 5000,
-      allowedPermissions: ['storage', 'input', 'entities', 'ui'],
-      ...config,
-    };
+    this.config = createPluginLoaderConfig(config);
   }
-
-  // ============================================================================
-  // PLUGIN LOADING
-  // ============================================================================
 
   async loadPlugin(manifestOrPath: PluginManifest | string): Promise<Plugin> {
     let manifest: PluginManifest;
@@ -168,18 +60,18 @@ export class PluginLoader extends EventEmitter {
     }
 
     // Validate permissions
-    this.validatePermissions(manifest.permissions || []);
+    assertPluginPermissions(manifest.permissions || [], this.config.allowedPermissions);
 
     // Check dependencies
-    await this.checkDependencies(manifest);
+    await assertPluginDependencies(manifest, this.plugins);
 
     // Check conflicts
-    this.checkConflicts(manifest);
+    assertPluginConflicts(manifest, this.plugins);
 
     const plugin: Plugin = {
       manifest,
       state: 'loading',
-      config: this.initializeConfig(manifest.config),
+      config: initializePluginConfig(manifest.config),
       loadOrder: this.loadOrderCounter++,
       errors: [],
     };
@@ -254,10 +146,6 @@ export class PluginLoader extends EventEmitter {
       return pluginModule as PluginInstance;
     }
   }
-
-  // ============================================================================
-  // PLUGIN LIFECYCLE
-  // ============================================================================
 
   async enablePlugin(id: string): Promise<void> {
     const plugin = this.plugins.get(id);
@@ -362,10 +250,6 @@ export class PluginLoader extends EventEmitter {
     return newPlugin;
   }
 
-  // ============================================================================
-  // PLUGIN API
-  // ============================================================================
-
   private createPluginAPI(pluginId: string): PluginAPI {
     const loader = this;
 
@@ -430,10 +314,6 @@ export class PluginLoader extends EventEmitter {
     };
   }
 
-  // ============================================================================
-  // HOOKS
-  // ============================================================================
-
   private hookOwners: Map<HookCallback, string> = new Map();
 
   registerHook(name: string, callback: HookCallback, pluginId: string): void {
@@ -478,88 +358,6 @@ export class PluginLoader extends EventEmitter {
     return results;
   }
 
-  // ============================================================================
-  // DEPENDENCY MANAGEMENT
-  // ============================================================================
-
-  private async checkDependencies(manifest: PluginManifest): Promise<void> {
-    const deps = manifest.dependencies || [];
-
-    for (const dep of deps) {
-      const plugin = this.plugins.get(dep.id);
-
-      if (!plugin) {
-        if (dep.optional) {
-          logger.warn(`Optional dependency ${dep.id} not found for ${manifest.id}`);
-          continue;
-        }
-        throw new Error(`Missing dependency: ${dep.id}`);
-      }
-
-      if (!this.checkVersion(plugin.manifest.version, dep.version)) {
-        throw new Error(
-          `Dependency version mismatch: ${dep.id} requires ${dep.version}, found ${plugin.manifest.version}`
-        );
-      }
-    }
-  }
-
-  private checkConflicts(manifest: PluginManifest): void {
-    const conflicts = manifest.conflicts || [];
-
-    for (const conflictId of conflicts) {
-      if (this.plugins.has(conflictId)) {
-        throw new Error(`Plugin ${manifest.id} conflicts with ${conflictId}`);
-      }
-    }
-  }
-
-  private checkVersion(actual: string, required: string): boolean {
-    // Simple semver check (major.minor.patch)
-    const [aMajor, aMinor] = actual.split('.').map(Number);
-    const [rMajor, rMinor] = required.replace(/[^0-9.]/g, '').split('.').map(Number);
-
-    // Check if actual version is >= required
-    if (required.startsWith('^')) {
-      // Compatible with same major
-      return aMajor === rMajor && aMinor >= rMinor;
-    } else if (required.startsWith('~')) {
-      // Compatible with same major.minor
-      return aMajor === rMajor && aMinor === rMinor;
-    } else {
-      // Exact match
-      return aMajor === rMajor && aMinor >= rMinor;
-    }
-  }
-
-  // ============================================================================
-  // PERMISSION VALIDATION
-  // ============================================================================
-
-  private validatePermissions(permissions: PluginPermission[]): void {
-    for (const permission of permissions) {
-      if (!this.config.allowedPermissions.includes(permission)) {
-        throw new Error(`Permission not allowed: ${permission}`);
-      }
-    }
-  }
-
-  // ============================================================================
-  // CONFIG MANAGEMENT
-  // ============================================================================
-
-  private initializeConfig(schema?: PluginConfigSchema): Record<string, unknown> {
-    if (!schema) return {};
-
-    const config: Record<string, unknown> = {};
-
-    for (const [key, def] of Object.entries(schema)) {
-      config[key] = def.default;
-    }
-
-    return config;
-  }
-
   getPluginConfig(id: string): Record<string, unknown> | undefined {
     return this.plugins.get(id)?.config;
   }
@@ -574,10 +372,6 @@ export class PluginLoader extends EventEmitter {
     plugin.instance?.onConfigChange?.(key, value);
     this.emit('configChanged', { pluginId: id, key, value, oldValue });
   }
-
-  // ============================================================================
-  // PLUGIN QUERIES
-  // ============================================================================
 
   getPlugin(id: string): Plugin | undefined {
     return this.plugins.get(id);
@@ -594,10 +388,6 @@ export class PluginLoader extends EventEmitter {
   isPluginEnabled(id: string): boolean {
     return this.plugins.get(id)?.state === 'enabled';
   }
-
-  // ============================================================================
-  // MOD PACKS
-  // ============================================================================
 
   async loadModPack(pack: ModPackage): Promise<void> {
     const loadOrder = pack.loadOrder || pack.plugins;
@@ -637,10 +427,6 @@ export class PluginLoader extends EventEmitter {
     this.emit('modPackUnloaded', pack);
   }
 
-  // ============================================================================
-  // HOT RELOAD
-  // ============================================================================
-
   private watchedPlugins: Set<string> = new Set();
 
   watchPlugin(id: string): void {
@@ -653,10 +439,6 @@ export class PluginLoader extends EventEmitter {
   unwatchPlugin(id: string): void {
     this.watchedPlugins.delete(id);
   }
-
-  // ============================================================================
-  // CLEANUP
-  // ============================================================================
 
   async unloadAll(): Promise<void> {
     const plugins = this.getPlugins().reverse();
@@ -675,10 +457,6 @@ export class PluginLoader extends EventEmitter {
     this.removeAllListeners();
   }
 }
-
-// ============================================================================
-// REACT HOOKS
-// ============================================================================
 
 export {
   PluginProvider,
