@@ -31,37 +31,11 @@ export class WorldStreamingSystem extends EventEmitter {
   constructor(config: Partial<StreamingConfig> = {}) {
     super();
     
-    this.config = {
-      chunkSize: { x: 64, y: 64, z: 64 },
-      viewDistance: 500,
-      loadDistance: 600,
-      unloadDistance: 800,
-      maxLoadedChunks: 100,
-      maxConcurrentLoads: 4,
-      lodLevels: [
-        { level: 0, distance: 50, vertexReduction: 1, textureScale: 1, shadowsEnabled: true, animationsEnabled: true, updateFrequency: 60 },
-        { level: 1, distance: 100, vertexReduction: 0.5, textureScale: 0.5, shadowsEnabled: true, animationsEnabled: true, updateFrequency: 30 },
-        { level: 2, distance: 200, vertexReduction: 0.25, textureScale: 0.25, shadowsEnabled: false, animationsEnabled: true, updateFrequency: 15 },
-        { level: 3, distance: 400, vertexReduction: 0.1, textureScale: 0.125, shadowsEnabled: false, animationsEnabled: false, updateFrequency: 10 },
-        { level: 4, distance: 600, vertexReduction: 0.05, textureScale: 0.0625, shadowsEnabled: false, animationsEnabled: false, updateFrequency: 5 },
-      ],
-      prefetchEnabled: true,
-      prefetchDistance: 200,
-      memoryBudgetMB: 512,
-      enableOcclusionCulling: true,
-      updateInterval: 100,
-      priorityBoostForVisible: 2.0,
-      ...config,
-    };
+    this.config = createDefaultStreamingConfig(config);
     
-    // Initialize octree with world bounds
-    const worldBounds: BoundingBox = {
-      min: { x: -10000, y: -1000, z: -10000 },
-      max: { x: 10000, y: 1000, z: 10000 },
-    };
-    this.octree = new Octree(worldBounds);
+    this.octree = new Octree(WORLD_STREAMING_BOUNDS);
     
-    this.stats = this.createEmptyStats();
+    this.stats = createEmptyStreamingStats(this.config.memoryBudgetMB);
   }
   
   static getInstance(): WorldStreamingSystem {
@@ -71,9 +45,6 @@ export class WorldStreamingSystem extends EventEmitter {
     return WorldStreamingSystem.instance;
   }
   
-  // ============================================================================
-  // INITIALIZATION
-  // ============================================================================
   
   setChunkLoader(loader: ChunkLoader): void {
     this.chunkLoader = loader;
@@ -98,34 +69,15 @@ export class WorldStreamingSystem extends EventEmitter {
     this.emit('stopped');
   }
   
-  // ============================================================================
-  // CHUNK MANAGEMENT
-  // ============================================================================
   
   registerChunk(position: Vector3, data?: unknown): WorldChunk {
-    const id = this.getChunkId(position);
+    const id = getChunkId(position, this.config.chunkSize);
     
     if (this.chunks.has(id)) {
       return this.chunks.get(id)!;
     }
     
-    const chunk: WorldChunk = {
-      id,
-      position,
-      size: { ...this.config.chunkSize },
-      bounds: this.calculateChunkBounds(position),
-      state: 'unloaded',
-      lodLevel: 4,
-      priority: 0,
-      data,
-      neighbors: this.findNeighborIds(position),
-      lastAccessTime: Date.now(),
-      loadTime: 0,
-      memorySize: 0,
-      entities: [],
-      terrainMesh: null,
-      collisionMesh: null,
-    };
+    const chunk = createRegisteredWorldChunk(position, this.config, data);
     
     this.chunks.set(id, chunk);
     this.octree.insert(chunk);
@@ -149,49 +101,6 @@ export class WorldStreamingSystem extends EventEmitter {
     return true;
   }
   
-  private getChunkId(position: Vector3): string {
-    const cx = Math.floor(position.x / this.config.chunkSize.x);
-    const cy = Math.floor(position.y / this.config.chunkSize.y);
-    const cz = Math.floor(position.z / this.config.chunkSize.z);
-    return `chunk_${cx}_${cy}_${cz}`;
-  }
-  
-  private calculateChunkBounds(position: Vector3): BoundingBox {
-    const { chunkSize } = this.config;
-    const cx = Math.floor(position.x / chunkSize.x) * chunkSize.x;
-    const cy = Math.floor(position.y / chunkSize.y) * chunkSize.y;
-    const cz = Math.floor(position.z / chunkSize.z) * chunkSize.z;
-    
-    return {
-      min: { x: cx, y: cy, z: cz },
-      max: { x: cx + chunkSize.x, y: cy + chunkSize.y, z: cz + chunkSize.z },
-    };
-  }
-  
-  private findNeighborIds(position: Vector3): string[] {
-    const { chunkSize } = this.config;
-    const neighbors: string[] = [];
-    
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dz = -1; dz <= 1; dz++) {
-          if (dx === 0 && dy === 0 && dz === 0) continue;
-          
-          neighbors.push(this.getChunkId({
-            x: position.x + dx * chunkSize.x,
-            y: position.y + dy * chunkSize.y,
-            z: position.z + dz * chunkSize.z,
-          }));
-        }
-      }
-    }
-    
-    return neighbors;
-  }
-  
-  // ============================================================================
-  // STREAMING UPDATE
-  // ============================================================================
   
   setViewerPosition(position: Vector3, direction?: Vector3): void {
     this.viewerPosition = position;
@@ -235,8 +144,8 @@ export class WorldStreamingSystem extends EventEmitter {
   
   private updateChunkPriorities(): void {
     for (const chunk of this.chunks.values()) {
-      const distance = this.getChunkDistance(chunk);
-      const viewAngle = this.getChunkViewAngle(chunk);
+      const distance = getChunkDistance(chunk, this.viewerPosition);
+      const viewAngle = getChunkViewAngle(chunk, this.viewerPosition, this.viewerDirection);
       
       // Base priority is inverse of distance
       let priority = 1 / (distance + 1);
@@ -252,13 +161,13 @@ export class WorldStreamingSystem extends EventEmitter {
       chunk.priority = priority;
       
       // Update LOD level
-      chunk.lodLevel = this.calculateLODLevel(distance);
+      chunk.lodLevel = this.calculateLODLevel(entityDistance);
     }
   }
   
   private queueChunkOperations(): void {
     for (const chunk of this.chunks.values()) {
-      const distance = this.getChunkDistance(chunk);
+      const distance = getChunkDistance(chunk, this.viewerPosition);
       
       // Queue for loading
       if (distance <= this.config.loadDistance && chunk.state === 'unloaded') {
@@ -354,9 +263,6 @@ export class WorldStreamingSystem extends EventEmitter {
     }
   }
   
-  // ============================================================================
-  // CHUNK LOADING/UNLOADING
-  // ============================================================================
   
   private async loadChunk(chunk: WorldChunk): Promise<void> {
     if (chunk.state !== 'unloaded') return;
@@ -416,9 +322,6 @@ export class WorldStreamingSystem extends EventEmitter {
     this.emit('chunkUnloaded', chunk);
   }
   
-  // ============================================================================
-  // LOD MANAGEMENT
-  // ============================================================================
   
   private calculateLODLevel(distance: number): LODLevel {
     for (const lod of this.config.lodLevels) {
@@ -430,14 +333,14 @@ export class WorldStreamingSystem extends EventEmitter {
   }
   
   registerEntity(entityId: string, position: Vector3): void {
-    const distance = this.distance(position, this.viewerPosition);
-    const lodLevel = this.calculateLODLevel(distance);
+    const entityDistance = vectorDistance(position, this.viewerPosition);
+    const lodLevel = this.calculateLODLevel(entityDistance);
     
     this.entityLODs.set(entityId, {
       entityId,
       currentLOD: lodLevel,
       targetLOD: lodLevel,
-      distance,
+      distance: entityDistance,
       isVisible: true,
       lastUpdate: Date.now(),
     });
@@ -451,7 +354,7 @@ export class WorldStreamingSystem extends EventEmitter {
     const entity = this.entityLODs.get(entityId);
     if (!entity) return;
     
-    entity.distance = this.distance(position, this.viewerPosition);
+    entity.distance = vectorDistance(position, this.viewerPosition);
     entity.targetLOD = this.calculateLODLevel(entity.distance);
   }
   
@@ -486,19 +389,16 @@ export class WorldStreamingSystem extends EventEmitter {
     return this.config.lodLevels[level];
   }
   
-  // ============================================================================
-  // OCCLUSION CULLING
-  // ============================================================================
   
   isChunkVisible(chunk: WorldChunk): boolean {
     if (!this.config.enableOcclusionCulling) return true;
     
     // Simple frustum check
-    const viewAngle = this.getChunkViewAngle(chunk);
+    const viewAngle = getChunkViewAngle(chunk, this.viewerPosition, this.viewerDirection);
     if (viewAngle > Math.PI * 0.6) return false; // Behind viewer
     
     // Distance check
-    const distance = this.getChunkDistance(chunk);
+    const distance = getChunkDistance(chunk, this.viewerPosition);
     if (distance > this.config.viewDistance) return false;
     
     return true;
@@ -509,12 +409,9 @@ export class WorldStreamingSystem extends EventEmitter {
       .filter(c => c.state === 'loaded' && this.isChunkVisible(c));
   }
   
-  // ============================================================================
-  // QUERIES
-  // ============================================================================
   
   getChunkAtPosition(position: Vector3): WorldChunk | undefined {
-    const id = this.getChunkId(position);
+    const id = getChunkId(position, this.config.chunkSize);
     return this.chunks.get(id);
   }
   
@@ -530,66 +427,6 @@ export class WorldStreamingSystem extends EventEmitter {
     return this.chunks.get(id);
   }
   
-  // ============================================================================
-  // UTILITIES
-  // ============================================================================
-  
-  private getChunkDistance(chunk: WorldChunk): number {
-    const center = this.getChunkCenter(chunk);
-    return this.distance(center, this.viewerPosition);
-  }
-  
-  private getChunkCenter(chunk: WorldChunk): Vector3 {
-    return {
-      x: (chunk.bounds.min.x + chunk.bounds.max.x) / 2,
-      y: (chunk.bounds.min.y + chunk.bounds.max.y) / 2,
-      z: (chunk.bounds.min.z + chunk.bounds.max.z) / 2,
-    };
-  }
-  
-  private getChunkViewAngle(chunk: WorldChunk): number {
-    const center = this.getChunkCenter(chunk);
-    const toChunk = {
-      x: center.x - this.viewerPosition.x,
-      y: center.y - this.viewerPosition.y,
-      z: center.z - this.viewerPosition.z,
-    };
-    
-    const dot = this.dot(this.normalize(toChunk), this.viewerDirection);
-    return Math.acos(Math.max(-1, Math.min(1, dot)));
-  }
-  
-  private distance(a: Vector3, b: Vector3): number {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-    const dz = a.z - b.z;
-    return Math.sqrt(dx * dx + dy * dy + dz * dz);
-  }
-  
-  private normalize(v: Vector3): Vector3 {
-    const len = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-    if (len === 0) return { x: 0, y: 0, z: 0 };
-    return { x: v.x / len, y: v.y / len, z: v.z / len };
-  }
-  
-  private dot(a: Vector3, b: Vector3): number {
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-  }
-  
-  private createEmptyStats(): StreamingStats {
-    return {
-      loadedChunks: 0,
-      loadingChunks: 0,
-      totalChunks: 0,
-      memoryUsedMB: 0,
-      memoryBudgetMB: this.config.memoryBudgetMB,
-      chunksLoadedThisFrame: 0,
-      chunksUnloadedThisFrame: 0,
-      averageLoadTime: 0,
-      visibleChunks: 0,
-      culledChunks: 0,
-    };
-  }
   
   private updateStats(): void {
     const loaded = Array.from(this.chunks.values()).filter(c => c.state === 'loaded');
@@ -620,9 +457,6 @@ export class WorldStreamingSystem extends EventEmitter {
     return { ...this.config };
   }
   
-  // ============================================================================
-  // CLEANUP
-  // ============================================================================
   
   dispose(): void {
     this.stop();
@@ -643,6 +477,3 @@ export class WorldStreamingSystem extends EventEmitter {
     WorldStreamingSystem.instance = null;
   }
 }
-
-// ============================================================================
-// CHUNK LOADER INTERFACE
