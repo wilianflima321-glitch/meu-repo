@@ -3,16 +3,13 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import type { RawData } from 'ws';
 import { EventEmitter } from 'events';
-import { createServer, IncomingMessage, Server as HttpServer } from 'http';
+import { IncomingMessage, Server as HttpServer } from 'http';
 import { createRequire } from 'module';
 import * as Y from 'yjs';
 
 import type { TerminalPtyManager } from './terminal-pty-runtime';
 import { eventBus } from './websocket/event-bus';
-import { handleRuntimeHttpRequest } from './websocket/http-routes';
-import { routeModernWebSocketMessage } from './websocket/modern-message-router';
 import { handleTerminalCreate, handleTerminalInput, handleTerminalKill, handleTerminalResize, setupTerminalEvents } from './websocket/terminal-handlers';
-import { createClientId, createConnectionId } from './websocket/ids';
 import type { ParsedWebSocketUrl } from './websocket-runtime-codecs';
 import { handleLegacyExportConnection } from './websocket/legacy-export-handler';
 import { handleLegacyCollaborationSocket } from './websocket/legacy-collaboration-handler';
@@ -29,12 +26,18 @@ import {
   getWebSocketRuntimeStats,
   getWebSocketStatsPayload,
 } from './websocket-server-snapshots';
-import type {
-  ConnectionInfo,
-  WsChannel,
-  WsClient,
-  WsMessage,
-} from './websocket-runtime-contracts';
+import { handleCollabChat, handleCollabJoin, handleCollabOperation } from './websocket-server-collaboration';
+import { createFileChangeMessage, type FileChangeEvent } from './websocket-server-file-events';
+import { startWebSocketRuntime, stopWebSocketRuntime } from './websocket-server-lifecycle';
+import {
+  authenticateModernQuery,
+  createModernMessageHandlers,
+  createModernWebSocketClient,
+  routeModernMessage,
+  sendModernWelcome,
+} from './websocket-server-modern';
+import { createWebSocketConnectionInfo, routeLegacyWebSocketConnection } from './websocket-server-routing';
+import type { ConnectionInfo, WsChannel, WsClient, WsMessage } from './websocket-runtime-contracts';
 
 const require = createRequire(import.meta.url);
 const { ensureUserIdentity, handleClientAuth } = require('./websocket/auth.ts') as typeof import('./websocket/auth');
@@ -56,22 +59,13 @@ const { createComponentLogger } = require('../observability/logger.ts') as typeo
 const { getTerminalPtyManager } = require('./terminal-pty-runtime.ts') as typeof import('./terminal-pty-runtime');
 const { WS_MESSAGE_TYPES } = require('./websocket-runtime-contracts.ts') as typeof import('./websocket-runtime-contracts');
 const {
-  asWsRecord,
   parseWebSocketRequestUrl,
-  readString,
   resolveHost,
   resolvePort,
 } = require('./websocket-runtime-codecs.ts') as typeof import('./websocket-runtime-codecs');
 const {
   isHttpOnlyPath,
-  isLegacyAiPath,
-  isLegacyCollaborationPath,
-  isLegacyDapPath,
-  isLegacyExportPath,
-  isLegacyLspPath,
-  isLegacyTerminalPath,
   isModernRuntimePath,
-  resolveConnectionType,
 } = require('./websocket-runtime-routing.ts') as typeof import('./websocket-runtime-routing');
 const { initYWebsocket } = require('./websocket-yjs-bootstrap.ts') as typeof import('./websocket-yjs-bootstrap');
 
@@ -112,83 +106,53 @@ export class AethelWebSocketServer extends EventEmitter {
 
     await initYWebsocket();
 
-    return new Promise((resolve, reject) => {
-      this.httpServer = createServer((req, res) =>
-        handleRuntimeHttpRequest(req, res, {
-          health: () => this.getHealthPayload(),
-          stats: () => this.getStatsPayload(),
-          metrics: () => this.getMetricsPayload(),
-        })
-      );
-
-      this.wss = new WebSocketServer({ server: this.httpServer });
-      this.wss.on('connection', (ws, request) => this.handleConnection(ws, request));
-      this.wss.on('error', (error) => this.emit('error', error));
-
-      this.httpServer.on('error', reject);
-      this.httpServer.listen(this.port, this.host, () => {
+    const runtime = await startWebSocketRuntime({
+      port: this.port,
+      host: this.host,
+      health: () => this.getHealthPayload(),
+      stats: () => this.getStatsPayload(),
+      metrics: () => this.getMetricsPayload(),
+      onConnection: (ws, request) => this.handleConnection(ws, request),
+      onError: (error) => this.emit('error', error),
+      onListening: () => {
         log.info(`Aethel WebSocket server listening on ws://${this.host}:${this.port}`);
         this.startPingInterval();
         this.emit('started', { port: this.port, host: this.host });
-        resolve();
-      });
+      },
     });
+
+    this.httpServer = runtime.httpServer;
+    this.wss = runtime.wss;
   }
 
   async stop(): Promise<void> {
     this.stopPingInterval();
 
-    for (const ws of this.connections.keys()) {
-      try {
-        ws.close(1001, 'Server shutting down');
-      } catch {
-      }
-    }
+    await stopWebSocketRuntime({
+      connections: this.connections,
+      clients: this.clients,
+      channels: this.channels,
+      legacyRooms: this.legacyRooms,
+      collaborationDocs: this.collaborationDocs,
+      wss: this.wss,
+      httpServer: this.httpServer,
+    });
 
-    this.clients.clear();
-    this.channels.clear();
-    this.connections.clear();
-    this.legacyRooms.clear();
-    this.collaborationDocs.clear();
-
-    if (this.wss) {
-      await new Promise<void>((resolve) => {
-        this.wss!.close(() => resolve());
-      });
-      this.wss = null;
-    }
-
-    if (this.httpServer) {
-      await new Promise<void>((resolve) => {
-        this.httpServer!.close(() => resolve());
-      });
-      this.httpServer = null;
-    }
-
+    this.wss = null;
+    this.httpServer = null;
     this.emit('stopped');
   }
 
   private handleConnection(ws: WebSocket, request: IncomingMessage): void {
     const parsedUrl = parseWebSocketRequestUrl(request.url || '/');
     const pathname = parsedUrl.pathname;
-    const query = parsedUrl.query;
-
     if (isHttpOnlyPath(pathname)) {
       this.sendRaw(ws, { type: 'error', error: 'Use HTTP for this path.' });
       ws.close(1008, 'Unsupported WebSocket path');
       return;
     }
 
-    const info: ConnectionInfo = {
-      id: createConnectionId(),
-      type: resolveConnectionType(pathname),
-      path: pathname,
-      mode: isModernRuntimePath(pathname) ? 'modern' : 'legacy',
-      userId: typeof query.userId === 'string' ? query.userId : undefined,
-      sessionId: typeof query.sessionId === 'string' ? query.sessionId : undefined,
-      createdAt: Date.now(),
-    };
-
+    const info = createWebSocketConnectionInfo({ pathname, parsedUrl });
     this.connections.set(ws, info);
 
     ws.on('close', () => this.handleSocketClose(ws));
@@ -208,37 +172,40 @@ export class AethelWebSocketServer extends EventEmitter {
       return;
     }
 
-    if (isLegacyExportPath(pathname)) {
-      void this.handleExportConnection(ws, pathname);
-      return;
-    }
-
-    if (isLegacyTerminalPath(pathname)) {
-      this.handleLegacyTerminalConnection(ws, info);
-      return;
-    }
-
-    if (isLegacyLspPath(pathname)) {
-      this.handleLegacyLspConnection(ws, info);
-      return;
-    }
-
-    if (isLegacyAiPath(pathname)) {
-      this.handleLegacyAiConnection(ws);
-      return;
-    }
-
-    if (isLegacyDapPath(pathname)) {
-      this.handleLegacyDapConnection(ws);
-      return;
-    }
-
-    if (isLegacyCollaborationPath(pathname)) {
-      this.handleLegacyCollaborationConnection(ws, request, pathname);
-      return;
-    }
-
-    this.handleLegacyGeneralConnection(ws, info);
+    routeLegacyWebSocketConnection({
+      ws,
+      request,
+      pathname,
+      info,
+      handleExportConnection: (socket, pathName) => void handleLegacyExportConnection({
+        ws: socket,
+        pathname: pathName,
+        sendRaw: (targetSocket, message) => this.sendRaw(targetSocket, message),
+      }),
+      handleLegacyTerminalConnection: (socket, connectionInfo) =>
+        handleLegacyTerminalSocket(socket, connectionInfo, (targetSocket, message) => this.sendRaw(targetSocket, message)),
+      handleLegacyLspConnection: (socket, connectionInfo) =>
+        handleLegacyLspSocket(socket, connectionInfo, (targetSocket, message) => this.sendRaw(targetSocket, message)),
+      handleLegacyAiConnection: (socket) =>
+        handleLegacyAiSocket(socket, (targetSocket, message) => this.sendRaw(targetSocket, message)),
+      handleLegacyDapConnection: (socket) =>
+        handleLegacyDapSocket(socket, (targetSocket, message) => this.sendRaw(targetSocket, message)),
+      handleLegacyCollaborationConnection: (socket, req, pathName) => handleLegacyCollaborationSocket({
+        ws: socket,
+        request: req,
+        pathname: pathName,
+        docs: this.collaborationDocs,
+        legacyRooms: this.legacyRooms,
+        broadcastToLegacyRoom: (roomName, message, exclude) => this.broadcastToLegacyRoom(roomName, message, exclude),
+      }),
+      handleLegacyGeneralConnection: (socket, connectionInfo) => handleLegacyGeneralSocket({
+        ws: socket,
+        info: connectionInfo,
+        legacyRooms: this.legacyRooms,
+        sendRaw: (targetSocket, message) => this.sendRaw(targetSocket, message),
+        broadcastToLegacyRoom: (roomName, message, exclude) => this.broadcastToLegacyRoom(roomName, message, exclude),
+      }),
+    });
   }
 
   private handleSocketClose(ws: WebSocket): void {
@@ -276,26 +243,11 @@ export class AethelWebSocketServer extends EventEmitter {
     parsedUrl: ParsedWebSocketUrl,
     info: ConnectionInfo
   ): void {
-    const clientId = createClientId();
     const query = parsedUrl.query;
-    const client: WsClient = {
-      id: clientId,
-      userId: info.userId || '',
-      ws,
-      channels: new Set(),
-      connectedAt: Date.now(),
-      lastPing: Date.now(),
-      isAlive: true,
-      metadata: {
-        ip: request.socket.remoteAddress,
-        userAgent: request.headers['user-agent'],
-        query,
-        path: info.path,
-      },
-    };
+    const client = createModernWebSocketClient({ ws, request, parsedUrl, info });
 
-    info.clientId = clientId;
-    this.clients.set(clientId, client);
+    info.clientId = client.id;
+    this.clients.set(client.id, client);
 
     ws.on('message', (data) => this.handleModernMessage(client, data));
     ws.on('pong', () => {
@@ -303,47 +255,41 @@ export class AethelWebSocketServer extends EventEmitter {
       client.isAlive = true;
     });
 
-    this.sendToClient(client, {
-      type: 'welcome',
-      channel: 'system',
-      payload: {
-        clientId,
-        serverTime: Date.now(),
-        version: '2.1.0',
-      },
+    sendModernWelcome({ client, sendToClient: (targetClient, message) => this.sendToClient(targetClient, message) });
+    authenticateModernQuery({
+      client,
+      query,
+      authenticate: (targetClient, payload, emitEvent) =>
+        handleClientAuth(targetClient, payload, emitEvent, (event) => this.emit('authenticated', event)),
     });
 
-    const queryToken = typeof query.token === 'string' ? query.token : undefined;
-    const queryUserId = typeof query.userId === 'string' ? query.userId : undefined;
-    if (queryToken || queryUserId) {
-      handleClientAuth(client, { token: queryToken, userId: queryUserId }, false, (event) =>
-        this.emit('authenticated', event)
-      );
-    }
-
-    this.emit('connection', { clientId, connectionId: info.id });
+    this.emit('connection', { clientId: client.id, connectionId: info.id });
   }
 
   private handleModernMessage(client: WsClient, data: RawData): void {
-    routeModernWebSocketMessage(client, data, {
-      sendError: (targetClient, error) => this.sendError(targetClient, error),
-      sendToClient: (targetClient, message) => this.sendToClient(targetClient, message),
-      authenticate: (targetClient, payload) =>
-        handleClientAuth(targetClient, payload, true, (event) => this.emit('authenticated', event)),
-      subscribe: (targetClient, channel, payload) => this.subscribeToChannel(targetClient, channel, payload),
-      unsubscribe: (targetClient, channel) => this.unsubscribeFromChannel(targetClient, channel),
-      terminalCreate: (targetClient, payload) => void this.handleTerminalCreate(targetClient, payload),
-      terminalInput: (targetClient, payload) => this.handleTerminalInput(targetClient, payload),
-      terminalResize: (targetClient, payload) => this.handleTerminalResize(targetClient, payload),
-      terminalKill: (targetClient, payload) => void this.handleTerminalKill(targetClient, payload),
-      collabJoin: (targetClient, payload) => this.handleCollabJoin(targetClient, payload),
-      collabOperation: (targetClient, channel, payload) => this.handleCollabOperation(targetClient, channel, payload),
-      collabChat: (targetClient, channel, payload) => this.handleCollabChat(targetClient, channel, payload),
-      broadcastToChannel: (channel, message, excludeClientId) =>
-        this.broadcastToChannel(channel, message, excludeClientId),
-      broadcastToAll: (message, excludeClientId) => this.broadcastToAll(message, excludeClientId),
-      unhandled: (targetClient, message, rawMessage) =>
-        this.emit('message', { client: targetClient, message, rawMessage }),
+    routeModernMessage({
+      client,
+      data,
+      handlers: createModernMessageHandlers({
+        sendError: (targetClient, error) => this.sendError(targetClient, error),
+        sendToClient: (targetClient, message) => this.sendToClient(targetClient, message),
+        authenticate: (targetClient, payload) =>
+          handleClientAuth(targetClient, payload, true, (event) => this.emit('authenticated', event)),
+        subscribe: (targetClient, channel, payload) => this.subscribeToChannel(targetClient, channel, payload),
+        unsubscribe: (targetClient, channel) => this.unsubscribeFromChannel(targetClient, channel),
+        terminalCreate: (targetClient, payload) => void this.handleTerminalCreate(targetClient, payload),
+        terminalInput: (targetClient, payload) => this.handleTerminalInput(targetClient, payload),
+        terminalResize: (targetClient, payload) => this.handleTerminalResize(targetClient, payload),
+        terminalKill: (targetClient, payload) => void this.handleTerminalKill(targetClient, payload),
+        collabJoin: (targetClient, payload) => this.handleCollabJoin(targetClient, payload),
+        collabOperation: (targetClient, channel, payload) => this.handleCollabOperation(targetClient, channel, payload),
+        collabChat: (targetClient, channel, payload) => this.handleCollabChat(targetClient, channel, payload),
+        broadcastToChannel: (channel, message, excludeClientId) =>
+          this.broadcastToChannel(channel, message, excludeClientId),
+        broadcastToAll: (message, excludeClientId) => this.broadcastToAll(message, excludeClientId),
+        unhandled: (targetClient, message, rawMessage) =>
+          this.emit('message', { client: targetClient, message, rawMessage }),
+      }),
     });
   }
 
@@ -397,105 +343,35 @@ export class AethelWebSocketServer extends EventEmitter {
   }
 
   private handleCollabJoin(client: WsClient, payload: unknown): void {
-    const data = asWsRecord(payload);
-    const documentId = readString(data.documentId) || 'default';
-    const userId = ensureUserIdentity(client, readString(data.userId));
-    const channelName = `collab:${documentId}`;
-
-    this.subscribeToChannel(client, channelName, {
-      metadata: { documentId },
+    handleCollabJoin({
+      client,
+      payload,
+      ensureUserIdentity,
+      subscribeToChannel: (targetClient, channelName, options) =>
+        this.subscribeToChannel(targetClient, channelName, options),
+      broadcastToChannel: (channelName, message, excludeClientId) =>
+        this.broadcastToChannel(channelName, message, excludeClientId),
     });
-
-    this.broadcastToChannel(
-      channelName,
-      {
-        type: WS_MESSAGE_TYPES.COLLAB_AWARENESS,
-        channel: channelName,
-        payload: {
-          type: 'join',
-          userId: userId || client.id,
-          userName: data.userName,
-          color: data.color,
-          clientId: client.id,
-        },
-      },
-      client.id
-    );
   }
 
   private handleCollabOperation(client: WsClient, channel: string, payload: unknown): void {
-    const data = asWsRecord(payload);
-    this.broadcastToChannel(
+    handleCollabOperation({
+      client,
       channel,
-      {
-        type: WS_MESSAGE_TYPES.COLLAB_OPERATION,
-        channel,
-        payload: {
-          ...data,
-          clientId: client.id,
-          timestamp: Date.now(),
-        },
-      },
-      client.id
-    );
+      payload,
+      broadcastToChannel: (channelName, message, excludeClientId) =>
+        this.broadcastToChannel(channelName, message, excludeClientId),
+    });
   }
 
   private handleCollabChat(client: WsClient, channel: string, payload: unknown): void {
-    const data = asWsRecord(payload);
-    const userId = ensureUserIdentity(client, readString(data.userId));
-    this.broadcastToChannel(channel, {
-      type: WS_MESSAGE_TYPES.COLLAB_CHAT,
+    handleCollabChat({
+      client,
       channel,
-      payload: {
-        ...data,
-        userId: userId || client.id,
-        timestamp: Date.now(),
-      },
-    });
-  }
-
-  private async handleExportConnection(ws: WebSocket, pathname: string): Promise<void> {
-    return handleLegacyExportConnection({
-      ws,
-      pathname,
-      sendRaw: (socket, message) => this.sendRaw(socket, message),
-    });
-  }
-
-  private handleLegacyCollaborationConnection(ws: WebSocket, request: IncomingMessage, pathname: string): void {
-    handleLegacyCollaborationSocket({
-      ws,
-      request,
-      pathname,
-      docs: this.collaborationDocs,
-      legacyRooms: this.legacyRooms,
-      broadcastToLegacyRoom: (roomName, message, exclude) => this.broadcastToLegacyRoom(roomName, message, exclude),
-    });
-  }
-
-  private handleLegacyTerminalConnection(ws: WebSocket, info: ConnectionInfo): void {
-    handleLegacyTerminalSocket(ws, info, (socket, message) => this.sendRaw(socket, message));
-  }
-
-  private handleLegacyLspConnection(ws: WebSocket, info: ConnectionInfo): void {
-    handleLegacyLspSocket(ws, info, (socket, message) => this.sendRaw(socket, message));
-  }
-
-  private handleLegacyAiConnection(ws: WebSocket): void {
-    handleLegacyAiSocket(ws, (socket, message) => this.sendRaw(socket, message));
-  }
-
-  private handleLegacyDapConnection(ws: WebSocket): void {
-    handleLegacyDapSocket(ws, (socket, message) => this.sendRaw(socket, message));
-  }
-
-  private handleLegacyGeneralConnection(ws: WebSocket, info: ConnectionInfo): void {
-    handleLegacyGeneralSocket({
-      ws,
-      info,
-      legacyRooms: this.legacyRooms,
-      sendRaw: (socket, message) => this.sendRaw(socket, message),
-      broadcastToLegacyRoom: (roomName, message, exclude) => this.broadcastToLegacyRoom(roomName, message, exclude),
+      payload,
+      ensureUserIdentity,
+      broadcastToChannel: (channelName, message, excludeClientId) =>
+        this.broadcastToChannel(channelName, message, excludeClientId),
     });
   }
 
@@ -534,27 +410,10 @@ export class AethelWebSocketServer extends EventEmitter {
 
   notifyFileChange(
     workspaceId: string,
-    event: {
-      type: 'changed' | 'created' | 'deleted' | 'renamed';
-      path: string;
-      oldPath?: string;
-    }
+    event: FileChangeEvent
   ): void {
     const channelName = `files:${workspaceId}`;
-    const messageType =
-      event.type === 'changed'
-        ? WS_MESSAGE_TYPES.FILE_CHANGED
-        : event.type === 'created'
-          ? WS_MESSAGE_TYPES.FILE_CREATED
-          : event.type === 'deleted'
-            ? WS_MESSAGE_TYPES.FILE_DELETED
-            : WS_MESSAGE_TYPES.FILE_RENAMED;
-
-    this.broadcastToChannel(channelName, {
-      type: messageType,
-      channel: channelName,
-      payload: event,
-    });
+    this.broadcastToChannel(channelName, createFileChangeMessage(channelName, event));
   }
 
   private startPingInterval(): void {

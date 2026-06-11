@@ -5,8 +5,10 @@ import { Worker } from 'worker_threads';
 import { EventEmitter } from 'events';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as vm from 'vm';
 import { ExtensionAPI } from './extension-host/api';
+import { emitExtensionContributions } from './extension-host-runtime-contributions';
+import { createExtensionContext } from './extension-host-runtime-context';
+import { executeExtensionModule } from './extension-host-runtime-loader';
 import type {
   ConfigurationReader,
   Disposable,
@@ -16,7 +18,6 @@ import type {
   EventListener,
   Extension,
   ExtensionCallback,
-  ExtensionContext,
   ExtensionManifest,
   InputBoxOptions,
   OutputChannel,
@@ -61,8 +62,6 @@ export type {
   ExtensionContext,
   ExtensionManifest,
 } from './extension-host/types';
-
-const nativeRequire = eval('require') as NodeRequire;
 
 // ============================================================================
 // Extension Host Runtime
@@ -120,7 +119,7 @@ export class ExtensionHostRuntime extends EventEmitter {
     
     // Process contributions
     if (manifest.contributes) {
-      this.processContributions(extension);
+      emitExtensionContributions(this, extension);
     }
     
     this.emit('extensionLoaded', extension);
@@ -150,7 +149,7 @@ export class ExtensionHostRuntime extends EventEmitter {
     }
     
     // Create extension context
-    const context = this.createExtensionContext(extension);
+    const context = createExtensionContext(extension);
     
     // Create API instance
     const api = new ExtensionAPI(this, extensionId);
@@ -158,38 +157,12 @@ export class ExtensionHostRuntime extends EventEmitter {
     // Load and execute extension
     try {
       const code = fs.readFileSync(fullPath, 'utf-8');
-      
-      // Create sandbox
-      const sandbox = {
-        exports: {},
-        module: { exports: {} },
-        require: this.createRequire(extension.extensionPath),
-        console,
-        setTimeout,
-        setInterval,
-        clearTimeout,
-        clearInterval,
-        setImmediate,
-        clearImmediate,
-        Buffer,
-        process: {
-          env: process.env,
-          platform: process.platform,
-          arch: process.arch,
-          version: process.version,
-          cwd: () => extension.extensionPath,
-        },
-        vscode: api,
-        aethel: api,
-      };
-      
-      const script = new vm.Script(code, { filename: fullPath });
-      const vmContext = vm.createContext(sandbox);
-      script.runInContext(vmContext);
-      
-      // Get exports (cast needed for dynamic module)
-      type ExtModule = { activate?: (ctx: ExtensionContext) => unknown | Promise<unknown>; deactivate?: () => void | Promise<void> };
-      const extensionModule = (sandbox.module.exports || sandbox.exports) as ExtModule;
+      const extensionModule = executeExtensionModule({
+        code,
+        filename: fullPath,
+        extensionPath: extension.extensionPath,
+        api,
+      });
       
       // Call activate
       if (extensionModule.activate && typeof extensionModule.activate === 'function') {
@@ -239,188 +212,6 @@ export class ExtensionHostRuntime extends EventEmitter {
     this.extensions.delete(extensionId);
     this.disposables.delete(extensionId);
     this.emit('extensionUnloaded', extensionId);
-  }
-  
-  // ==========================================================================
-  // Contributions Processing
-  // ==========================================================================
-  
-  private processContributions(extension: Extension): void {
-    const contrib = extension.manifest.contributes;
-    if (!contrib) return;
-    
-    // Commands
-    if (contrib.commands) {
-      for (const cmd of contrib.commands) {
-        this.emit('commandContributed', {
-          extensionId: extension.id,
-          command: cmd,
-        });
-      }
-    }
-    
-    // Keybindings
-    if (contrib.keybindings) {
-      for (const kb of contrib.keybindings) {
-        this.emit('keybindingContributed', {
-          extensionId: extension.id,
-          keybinding: kb,
-        });
-      }
-    }
-    
-    // Configuration
-    if (contrib.configuration) {
-      this.emit('configurationContributed', {
-        extensionId: extension.id,
-        configuration: contrib.configuration,
-      });
-    }
-    
-    // Themes
-    if (contrib.themes) {
-      for (const theme of contrib.themes) {
-        this.emit('themeContributed', {
-          extensionId: extension.id,
-          theme: {
-            ...theme,
-            path: path.join(extension.extensionPath, theme.path),
-          },
-        });
-      }
-    }
-    
-    // Languages
-    if (contrib.languages) {
-      for (const lang of contrib.languages) {
-        this.emit('languageContributed', {
-          extensionId: extension.id,
-          language: lang,
-        });
-      }
-    }
-    
-    // Grammars
-    if (contrib.grammars) {
-      for (const grammar of contrib.grammars) {
-        this.emit('grammarContributed', {
-          extensionId: extension.id,
-          grammar: {
-            ...grammar,
-            path: path.join(extension.extensionPath, grammar.path),
-          },
-        });
-      }
-    }
-    
-    // Snippets
-    if (contrib.snippets) {
-      for (const snippet of contrib.snippets) {
-        this.emit('snippetContributed', {
-          extensionId: extension.id,
-          snippet: {
-            ...snippet,
-            path: path.join(extension.extensionPath, snippet.path),
-          },
-        });
-      }
-    }
-    
-    // Views
-    if (contrib.views) {
-      for (const [containerId, views] of Object.entries(contrib.views)) {
-        for (const view of views) {
-          this.emit('viewContributed', {
-            extensionId: extension.id,
-            containerId,
-            view,
-          });
-        }
-      }
-    }
-    
-    // View Containers
-    if (contrib.viewsContainers) {
-      for (const [location, containers] of Object.entries(contrib.viewsContainers)) {
-        for (const container of containers) {
-          this.emit('viewContainerContributed', {
-            extensionId: extension.id,
-            location,
-            container: {
-              ...container,
-              icon: path.join(extension.extensionPath, container.icon),
-            },
-          });
-        }
-      }
-    }
-    
-    // Debuggers
-    if (contrib.debuggers) {
-      for (const dbg of contrib.debuggers) {
-        this.emit('debuggerContributed', {
-          extensionId: extension.id,
-          debugger: dbg,
-        });
-      }
-    }
-  }
-  
-  // ==========================================================================
-  // Context Creation
-  // ==========================================================================
-  
-  private createExtensionContext(extension: Extension): ExtensionContext {
-    const globalStoragePath = path.join(process.env.HOME || '', '.aethel', 'extensions', extension.id, 'global');
-    const workspaceStoragePath = path.join(process.env.HOME || '', '.aethel', 'extensions', extension.id, 'workspace');
-    const logPath = path.join(process.env.HOME || '', '.aethel', 'logs', extension.id);
-    
-    // Ensure directories exist
-    [globalStoragePath, workspaceStoragePath, logPath].forEach(dir => {
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-    });
-    
-    const globalState = new Map<string, unknown>();
-    const workspaceState = new Map<string, unknown>();
-    const secrets = new Map<string, string>();
-    
-    return {
-      extensionPath: extension.extensionPath,
-      extensionUri: `file://${extension.extensionPath}`,
-      globalStoragePath,
-      workspaceStoragePath,
-      logPath,
-      subscriptions: [],
-      globalState: {
-        get: <T>(key: string, defaultValue?: T) => (globalState.get(key) as T | undefined) ?? defaultValue,
-        update: async (key: string, value: unknown) => { globalState.set(key, value); },
-        keys: () => Array.from(globalState.keys()),
-      },
-      workspaceState: {
-        get: <T>(key: string, defaultValue?: T) => (workspaceState.get(key) as T | undefined) ?? defaultValue,
-        update: async (key: string, value: unknown) => { workspaceState.set(key, value); },
-        keys: () => Array.from(workspaceState.keys()),
-      },
-      secrets: {
-        get: async (key: string) => secrets.get(key),
-        store: async (key: string, value: string) => { secrets.set(key, value); },
-        delete: async (key: string) => { secrets.delete(key); },
-      },
-      asAbsolutePath: (relativePath: string) => path.join(extension.extensionPath, relativePath),
-    };
-  }
-  
-  private createRequire(basePath: string): (id: string) => unknown {
-    return (id: string) => {
-      // Handle relative paths
-      if (id.startsWith('.')) {
-        return nativeRequire(path.join(basePath, id)) as unknown;
-      }
-
-      return nativeRequire(id) as unknown;
-    };
   }
   
   // ==========================================================================
