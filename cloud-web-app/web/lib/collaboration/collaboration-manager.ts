@@ -20,104 +20,11 @@ import { WebsocketProvider } from 'y-websocket';
 import * as monaco from 'monaco-editor';
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import { bindCollaborativeMonacoEditor } from './collaboration-monaco-binding';
+import type { ChatMessage, CollaborationSession, Collaborator, MonacoBindingLike, SessionSettings } from './collaboration-types';
+import { calculateReconnectDelay, createCollaborationMessageId, createCollaborationSessionId, getColorForCollaborator } from './collaboration-utils';
 
 const log = createComponentLogger('collaboration/collaboration-manager')
-
-// Dynamic import for y-monaco (optional dependency)
-let MonacoBinding: typeof import('y-monaco').MonacoBinding | null = null;
-
-// Try to load y-monaco if available
-try {
-  const yMonaco = require('y-monaco') as { MonacoBinding: typeof import('y-monaco').MonacoBinding };
-  MonacoBinding = yMonaco.MonacoBinding;
-  log.info('[Collaboration] y-monaco loaded successfully');
-} catch {
-  log.info('[Collaboration] y-monaco not available, using fallback sync');
-}
-
-// Types
-export interface Collaborator {
-  id: string;
-  name: string;
-  email?: string;
-  avatar?: string;
-  color: string;
-  cursor?: {
-    line: number;
-    column: number;
-  };
-  selection?: {
-    startLine: number;
-    startColumn: number;
-    endLine: number;
-    endColumn: number;
-  };
-  activeFile?: string;
-  lastSeen: number;
-  isOnline: boolean;
-}
-
-export interface CollaborationSession {
-  id: string;
-  name: string;
-  projectId: string;
-  createdAt: string;
-  createdBy: string;
-  collaborators: Collaborator[];
-  settings: SessionSettings;
-}
-
-export interface SessionSettings {
-  allowAnonymous: boolean;
-  maxCollaborators: number;
-  autoFollow: boolean;
-  showCursors: boolean;
-  showSelections: boolean;
-  chatEnabled: boolean;
-  voiceEnabled: boolean;
-}
-
-export interface ChatMessage {
-  id: string;
-  userId: string;
-  userName: string;
-  message: string;
-  timestamp: number;
-  type: 'text' | 'system' | 'code';
-  codeSnippet?: {
-    language: string;
-    code: string;
-    file?: string;
-    line?: number;
-  };
-}
-
-export interface CollaborationEvents {
-  connected: () => void;
-  disconnected: () => void;
-  sessionJoined: (session: CollaborationSession) => void;
-  sessionLeft: () => void;
-  collaboratorJoined: (collaborator: Collaborator) => void;
-  collaboratorLeft: (collaborator: Collaborator) => void;
-  collaboratorUpdated: (collaborator: Collaborator) => void;
-  cursorMoved: (userId: string, cursor: { line: number; column: number }) => void;
-  selectionChanged: (userId: string, selection: { startLine: number; startColumn: number; endLine: number; endColumn: number } | null) => void;
-  chatMessage: (message: ChatMessage) => void;
-  documentSynced: (uri: string) => void;
-  error: (error: Error) => void;
-}
-
-// Color palette for collaborators
-const COLLABORATOR_COLORS = [
-  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-  '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
-  '#F8B500', '#00CED1', '#FF69B4', '#32CD32', '#FFD700',
-];
-
-// Type for Monaco binding (simplified until y-monaco is installed)
-interface MonacoBindingLike {
-  destroy: () => void;
-}
 
 /**
  * Collaboration Manager - handles all real-time collaboration
@@ -151,26 +58,14 @@ export class CollaborationManager extends EventEmitter {
     this.wsUrl = options.wsUrl || 'ws://localhost:3001/collaboration';
     this.userId = options.userId;
     this.userName = options.userName;
-    this.userColor = this.getColorForUser(options.userId);
-  }
-
-  /**
-   * Get consistent color for a user
-   */
-  private getColorForUser(userId: string): string {
-    let hash = 0;
-    for (let i = 0; i < userId.length; i++) {
-      hash = ((hash << 5) - hash) + userId.charCodeAt(i);
-      hash = hash & hash;
-    }
-    return COLLABORATOR_COLORS[Math.abs(hash) % COLLABORATOR_COLORS.length];
+    this.userColor = getColorForCollaborator(options.userId);
   }
 
   /**
    * Create a new collaboration session
    */
   async createSession(projectId: string, name: string, settings?: Partial<SessionSettings>): Promise<CollaborationSession> {
-    const sessionId = this.generateSessionId();
+    const sessionId = createCollaborationSessionId();
 
     const session: CollaborationSession = {
       id: sessionId,
@@ -291,7 +186,6 @@ export class CollaborationManager extends EventEmitter {
     this.collaborators.clear();
     this.chatHistory = [];
 
-    const session = this.currentSession;
     this.currentSession = null;
 
     this.emit('sessionLeft');
@@ -305,84 +199,17 @@ export class CollaborationManager extends EventEmitter {
       throw new Error('Not connected to a session');
     }
 
-    // Get or create Y.Text for this file
-    const yText = this.ydoc.getText(uri);
-
-    // Use real MonacoBinding if y-monaco is available
-    if (MonacoBinding) {
-      const binding = new MonacoBinding(
-        yText,
-        editor.getModel()!,
-        new Set([editor]),
-        this.wsProvider.awareness
-      );
-
-      this.monacoBindings.set(uri, {
-        destroy: () => binding.destroy()
-      });
-
-      log.info(`[Collaboration] Monaco binding created for ${uri} (y-monaco)`);
-    } else {
-      // Fallback: Manual sync without y-monaco
-      const disposables: monaco.IDisposable[] = [];
-
-      // Sync initial content
-      const model = editor.getModel();
-      if (model && yText.toString() === '') {
-        yText.insert(0, model.getValue());
-      }
-
-      // Listen for local changes
-      const localChangeHandler = model?.onDidChangeContent((e) => {
-        this.ydoc?.transact(() => {
-          e.changes.forEach(change => {
-            const offset = model.getOffsetAt({
-              lineNumber: change.range.startLineNumber,
-              column: change.range.startColumn
-            });
-
-            if (change.rangeLength > 0) {
-              yText.delete(offset, change.rangeLength);
-            }
-            if (change.text) {
-              yText.insert(offset, change.text);
-            }
-          });
-        }, this);
-      });
-
-      if (localChangeHandler) {
-        disposables.push(localChangeHandler);
-      }
-
-      // Listen for remote changes
-      const remoteChangeHandler = () => {
-        const currentContent = yText.toString();
-        if (model && model.getValue() !== currentContent) {
-          model.setValue(currentContent);
-        }
-      };
-      yText.observe(remoteChangeHandler);
-
-      this.monacoBindings.set(uri, {
-        destroy: () => {
-          disposables.forEach(d => d.dispose());
-          yText.unobserve(remoteChangeHandler);
-        }
-      });
-
-      log.info(`[Collaboration] Monaco binding created for ${uri} (fallback sync)`);
-    }
-
-    // Track cursor/selection changes
-    editor.onDidChangeCursorPosition((e) => {
-      this.updateCursor(uri, e.position.lineNumber, e.position.column);
+    const binding = bindCollaborativeMonacoEditor({
+      ydoc: this.ydoc,
+      wsProvider: this.wsProvider,
+      editor,
+      uri,
+      source: this,
+      updateCursor: (file, line, column) => this.updateCursor(file, line, column),
+      updateSelection: (file, selection) => this.updateSelection(file, selection),
     });
 
-    editor.onDidChangeCursorSelection((e) => {
-      this.updateSelection(uri, e.selection);
-    });
-
+    this.monacoBindings.set(uri, binding);
     this.emit('documentSynced', uri);
   }
 
@@ -443,7 +270,7 @@ export class CollaborationManager extends EventEmitter {
     const chatArray = this.ydoc.getArray<ChatMessage>('chat');
 
     const chatMessage: ChatMessage = {
-      id: this.generateMessageId(),
+      id: createCollaborationMessageId(),
       userId: this.userId,
       userName: this.userName,
       message,
@@ -561,27 +388,13 @@ export class CollaborationManager extends EventEmitter {
     }
 
     this.reconnectAttempts++;
-    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts - 1), 30000);
+    const delay = calculateReconnectDelay(this.reconnectAttempts);
 
     setTimeout(() => {
       if (!this.isConnected && this.wsProvider) {
         this.wsProvider.connect();
       }
     }, delay);
-  }
-
-  /**
-   * Generate session ID
-   */
-  private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  /**
-   * Generate message ID
-   */
-  private generateMessageId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**

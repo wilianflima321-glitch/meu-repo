@@ -8,9 +8,22 @@
 import { logger } from '@/lib/observability/logger';
 import { EventEmitter } from 'events';
 import { CompressedSerializer, JSONSerializer } from './serializers';
+import {
+  createDefaultPlayerState,
+  createDefaultSettings,
+  createDefaultStatistics,
+  createDefaultWorldState,
+} from './defaults';
+import {
+  deleteSaveSlot,
+  loadSaveIndex,
+  readSaveSlot,
+  saveSaveIndex,
+  writeSaveSlot,
+} from './local-storage';
 import { SaveMigrator } from './migration';
 import { SaveValidator } from './validator';
-import type { CloudProvider, GameState, PlayerState, SaveData, SaveManagerConfig, SaveMetadata, SaveSerializer, SaveSlot, SaveStatus, SaveType, SettingsState, StatisticsState, WorldState } from './types';
+import type { CloudProvider, GameState, SaveData, SaveManagerConfig, SaveMetadata, SaveSerializer, SaveSlot, SaveStatus, SaveType } from './types';
 
 export class SaveManager extends EventEmitter {
   private static instance: SaveManager | null = null;
@@ -78,15 +91,8 @@ export class SaveManager extends EventEmitter {
   }
   
   private loadSavesFromStorage(): void {
-    if (typeof localStorage === 'undefined') return;
-    
     try {
-      const indexData = localStorage.getItem(`${this.config.storageKey}_index`);
-      if (!indexData) return;
-      
-      const index: SaveMetadata[] = JSON.parse(indexData);
-      
-      for (const metadata of index) {
+      for (const metadata of loadSaveIndex(this.config.storageKey)) {
         if (metadata.slotIndex >= 0 && metadata.slotIndex < this.slots.length) {
           this.slots[metadata.slotIndex] = {
             index: metadata.slotIndex,
@@ -104,16 +110,9 @@ export class SaveManager extends EventEmitter {
   }
   
   private saveSaveIndex(): void {
-    if (typeof localStorage === 'undefined') return;
-    
-    const index = this.slots
+    saveSaveIndex(this.config.storageKey, this.slots
       .filter(s => s.occupied && s.metadata)
-      .map(s => s.metadata);
-    
-    localStorage.setItem(
-      `${this.config.storageKey}_index`,
-      JSON.stringify(index)
-    );
+      .map(s => s.metadata));
   }
   
   
@@ -144,95 +143,13 @@ export class SaveManager extends EventEmitter {
     }
     
     return {
-      player: this.createDefaultPlayerState(),
-      world: this.createDefaultWorldState(),
+      player: createDefaultPlayerState(),
+      world: createDefaultWorldState(),
       quests: [],
       inventory: { items: [], currency: {}, capacity: 100 },
-      settings: this.createDefaultSettings(),
-      statistics: this.createDefaultStatistics(),
+      settings: createDefaultSettings(),
+      statistics: createDefaultStatistics(),
       custom,
-    };
-  }
-  
-  private createDefaultPlayerState(): PlayerState {
-    return {
-      id: 'player_1',
-      name: 'Player',
-      position: { x: 0, y: 0, z: 0 },
-      rotation: { x: 0, y: 0, z: 0, w: 1 },
-      health: 100,
-      maxHealth: 100,
-      level: 1,
-      experience: 0,
-      attributes: {},
-      skills: {},
-      abilities: [],
-      equipment: {},
-      statusEffects: [],
-    };
-  }
-  
-  private createDefaultWorldState(): WorldState {
-    return {
-      scene: 'main',
-      time: 0,
-      weather: 'clear',
-      entities: [],
-      triggers: {},
-      doors: {},
-      containers: {},
-      npcs: {},
-    };
-  }
-  
-  private createDefaultSettings(): SettingsState {
-    return {
-      audio: {
-        masterVolume: 1,
-        musicVolume: 0.8,
-        sfxVolume: 1,
-        voiceVolume: 1,
-        ambientVolume: 0.7,
-        muted: false,
-      },
-      video: {
-        resolution: { width: 1920, height: 1080 },
-        fullscreen: true,
-        vsync: true,
-        fpsLimit: 60,
-        quality: 'high',
-        shadows: true,
-        antialiasing: true,
-        motionBlur: false,
-        bloom: true,
-      },
-      controls: {
-        keybindings: {},
-        mouseSensitivity: 1,
-        invertY: false,
-        gamepadEnabled: true,
-        vibration: true,
-      },
-      gameplay: {
-        difficulty: 'normal',
-        autoAim: false,
-        subtitles: true,
-        hints: true,
-        language: 'en',
-      },
-    };
-  }
-  
-  private createDefaultStatistics(): StatisticsState {
-    return {
-      totalPlayTime: 0,
-      deaths: 0,
-      kills: 0,
-      distanceTraveled: 0,
-      itemsCollected: 0,
-      questsCompleted: 0,
-      achievementsUnlocked: [],
-      custom: {},
     };
   }
   
@@ -364,10 +281,7 @@ export class SaveManager extends EventEmitter {
     data: string,
     metadata: SaveMetadata
   ): void {
-    if (typeof localStorage === 'undefined') return;
-    
-    const key = `${this.config.storageKey}_${slotIndex}`;
-    localStorage.setItem(key, data);
+    writeSaveSlot(this.config.storageKey, slotIndex, data);
   }
   
   private generateSaveId(): string {
@@ -438,10 +352,7 @@ export class SaveManager extends EventEmitter {
   }
   
   private loadFromStorage(slotIndex: number): string | null {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const key = `${this.config.storageKey}_${slotIndex}`;
-    return localStorage.getItem(key);
+    return readSaveSlot(this.config.storageKey, slotIndex);
   }
   
   
@@ -453,10 +364,7 @@ export class SaveManager extends EventEmitter {
       throw new Error('Slot is locked');
     }
     
-    if (typeof localStorage !== 'undefined') {
-      const key = `${this.config.storageKey}_${slotIndex}`;
-      localStorage.removeItem(key);
-    }
+    deleteSaveSlot(this.config.storageKey, slotIndex);
     
     if (this.cloudProvider && slot.metadata) {
       try {
