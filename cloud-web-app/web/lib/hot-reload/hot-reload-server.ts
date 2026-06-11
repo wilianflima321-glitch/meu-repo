@@ -7,6 +7,14 @@ import { extname, relative, resolve, normalize } from 'path';
 import { parse as parseUrl } from 'url';
 import { createComponentLogger, logger } from '@/lib/observability/logger';
 import { DEFAULT_OPTIONS } from './hot-reload-contracts';
+import {
+  createEsbuildAdapter,
+  createEsbuildHotReloadServerWith,
+  createViteAdapter,
+  createViteHotReloadServerWith,
+  createWebpackAdapter,
+  createWebpackHotReloadServerWith,
+} from './hot-reload-adapters';
 import type {
   BuildResult,
   BundlerAdapter,
@@ -232,33 +240,15 @@ export class HotReloadServer extends EventEmitter {
   }
   /** Create Webpack integration */
   static createWebpackAdapter(): BundlerAdapter {
-    return {
-      name: 'webpack',
-      acceptsHMR: (filePath: string) => {
-        const ext = extname(filePath).toLowerCase();
-        return ['.js', '.jsx', '.ts', '.tsx', '.vue', '.css', '.scss', '.sass', '.less'].includes(ext);
-      }
-    };
+    return createWebpackAdapter();
   }
   /** Create Vite integration */
   static createViteAdapter(): BundlerAdapter {
-    return {
-      name: 'vite',
-      acceptsHMR: (filePath: string) => {
-        const ext = extname(filePath).toLowerCase();
-        return ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte', '.css', '.scss', '.sass', '.less'].includes(ext);
-      }
-    };
+    return createViteAdapter();
   }
   /** Create esbuild integration */
   static createEsbuildAdapter(): BundlerAdapter {
-    return {
-      name: 'esbuild',
-      acceptsHMR: (filePath: string) => {
-        const ext = extname(filePath).toLowerCase();
-        return ['.js', '.jsx', '.ts', '.tsx', '.css'].includes(ext);
-      }
-    };
+    return createEsbuildAdapter();
   }
   private setupWebSocketServer(): void {
     if (!this.wss) return;
@@ -573,29 +563,14 @@ export function createHotReloadServer(options?: Partial<HotReloadServerOptions>)
 }
 /** Create a Hot Reload Server with Webpack integration */
 export function createWebpackHotReloadServer(options?: Partial<HotReloadServerOptions>): HotReloadServer {
-  const server = new HotReloadServer({
-    ...options,
-    bundler: 'webpack'
-  });
-  server.setBundlerAdapter(HotReloadServer.createWebpackAdapter());
-  return server;
+  return createWebpackHotReloadServerWith(HotReloadServer, options);
 }
 /** Create a Hot Reload Server with Vite integration */
 export function createViteHotReloadServer(options?: Partial<HotReloadServerOptions>): HotReloadServer {
-  const server = new HotReloadServer({
-    ...options,
-    bundler: 'vite'
-  });
-  server.setBundlerAdapter(HotReloadServer.createViteAdapter());
-  return server;
+  return createViteHotReloadServerWith(HotReloadServer, options);
 }
 /** Create a Hot Reload Server with esbuild integration */
 export function createEsbuildHotReloadServer(options?: Partial<HotReloadServerOptions>): HotReloadServer {
-  const server = new HotReloadServer({
-    ...options,
-    bundler: 'esbuild'
-  });
-  server.setBundlerAdapter(HotReloadServer.createEsbuildAdapter());
-  return server;
+  return createEsbuildHotReloadServerWith(HotReloadServer, options);
 }
 export default HotReloadServer;

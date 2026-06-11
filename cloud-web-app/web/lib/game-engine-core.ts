@@ -62,84 +62,9 @@ export type {
 // BASE CLASS PARA SCRIPTS
 // ============================================================================
 
-export abstract class GameScript {
-  protected entity!: Entity;
-  protected world!: World;
-  protected transform!: TransformComponent;
-
-  _init(entity: Entity, world: World): void {
-    this.entity = entity;
-    this.world = world;
-    this.transform = world.getComponent<TransformComponent>(entity.id, 'transform')!;
-  }
-
-  // Lifecycle methods - override these
-  awake(): void {}
-  start(): void {}
-  update(_deltaTime: number): void {}
-  fixedUpdate(_fixedDeltaTime: number): void {}
-  lateUpdate(_deltaTime: number): void {}
-  onDestroy(): void {}
-
-  // Collision callbacks
-  onCollisionEnter(_other: Entity, _contact: CollisionContact): void {}
-  onCollisionStay(_other: Entity, _contact: CollisionContact): void {}
-  onCollisionExit(_other: Entity): void {}
-  onTriggerEnter(_other: Entity): void {}
-  onTriggerStay(_other: Entity): void {}
-  onTriggerExit(_other: Entity): void {}
-
-  // Helper methods
-  protected getComponent<T extends Component>(type: ComponentType): T | undefined {
-    return this.world.getComponent<T>(this.entity.id, type);
-  }
-
-  protected addComponent<T extends Component>(component: Omit<T, 'entityId'>): T {
-    return this.world.addComponent<T>(this.entity.id, component as T);
-  }
-
-  protected findEntity(name: string): Entity | undefined {
-    return this.world.findEntity(name);
-  }
-
-  protected findEntitiesWithTag(tag: string): Entity[] {
-    return this.world.findEntitiesWithTag(tag);
-  }
-
-  protected instantiate(prefabName: string, position?: THREE.Vector3): Entity {
-    return this.world.instantiate(prefabName, position);
-  }
-
-  protected destroy(entity?: Entity, delay?: number): void {
-    this.world.destroy(entity || this.entity, delay);
-  }
-}
-
-export interface ScriptComponent extends Component {
-  type: 'script';
-  scriptName: string;
-  properties: Record<string, unknown>;
-  instance?: GameScript;
-}
-
-// Tipo união de todos componentes
-export type AnyComponent =
-  | TransformComponent
-  | MeshComponent
-  | RigidbodyComponent
-  | ColliderComponent
-  | CameraComponent
-  | LightComponent
-  | AudioSourceComponent
-  | AnimatorComponent
-  | ScriptComponent
-  | SpriteComponent
-  | UIComponent
-  | ParticleSystemComponent;
-
-// ============================================================================
-// WORLD - GERENCIADOR CENTRAL
-// ============================================================================
+export { GameScript } from './game-engine-scripting';
+export type { AnyComponent, ScriptComponent } from './game-engine-scripting';
+import { GameScript, type ScriptComponent } from './game-engine-scripting';
 
 export class World {
   private entities: Map<EntityId, Entity> = new Map();
@@ -510,80 +435,8 @@ export class World {
 // BUILT-IN SYSTEMS
 // ============================================================================
 
-export class TransformSystem implements System {
-  name = 'TransformSystem';
-  requiredComponents = ['transform'];
-  priority = 0;
-
-  update(entities: Entity[]): void {
-    // Atualizar transforms hierárquicos
-    const roots = entities.filter(e => !e.parent);
-    roots.forEach(entity => this.updateTransformHierarchy(entity, entities));
-  }
-
-  private updateTransformHierarchy(
-    entity: Entity,
-    allEntities: Entity[],
-    parentMatrix?: THREE.Matrix4
-  ): void {
-    // Aqui você atualizaria as transforms world baseado nas locais
-    // Simplificado por brevidade
-    entity.children.forEach(childId => {
-      const child = allEntities.find(e => e.id === childId);
-      if (child) {
-        this.updateTransformHierarchy(child, allEntities, parentMatrix);
-      }
-    });
-  }
-}
-
-export class PhysicsSystem implements System {
-  name = 'PhysicsSystem';
-  requiredComponents = ['transform', 'rigidbody'];
-  priority = 10;
-
-  private world?: World;
-
-  constructor(world: World) {
-    this.world = world;
-  }
-
-  update(entities: Entity[], deltaTime: number): void {
-    if (!this.world) return;
-
-    entities.forEach(entity => {
-      const transform = this.world!.getComponent<TransformComponent>(entity.id, 'transform')!;
-      const rb = this.world!.getComponent<RigidbodyComponent>(entity.id, 'rigidbody')!;
-
-      if (rb.isKinematic) return;
-
-      // Aplicar gravidade
-      if (rb.useGravity) {
-        rb.velocity.add(
-          this.world!.physics.gravity.clone().multiplyScalar(deltaTime)
-        );
-      }
-
-      // Aplicar drag
-      rb.velocity.multiplyScalar(1 - rb.drag * deltaTime);
-      rb.angularVelocity.multiplyScalar(1 - rb.angularDrag * deltaTime);
-
-      // Atualizar posição
-      if (!rb.constraints.freezePositionX) transform.position.x += rb.velocity.x * deltaTime;
-      if (!rb.constraints.freezePositionY) transform.position.y += rb.velocity.y * deltaTime;
-      if (!rb.constraints.freezePositionZ) transform.position.z += rb.velocity.z * deltaTime;
-
-      // Atualizar rotação
-      if (!rb.constraints.freezeRotationX) transform.rotation.x += rb.angularVelocity.x * deltaTime;
-      if (!rb.constraints.freezeRotationY) transform.rotation.y += rb.angularVelocity.y * deltaTime;
-      if (!rb.constraints.freezeRotationZ) transform.rotation.z += rb.angularVelocity.z * deltaTime;
-    });
-  }
-}
-
-// ============================================================================
-// SINGLETON WORLD
-// ============================================================================
+export { PhysicsSystem, TransformSystem } from './game-engine-systems';
+import { PhysicsSystem, TransformSystem } from './game-engine-systems';
 
 let worldInstance: World | null = null;
 

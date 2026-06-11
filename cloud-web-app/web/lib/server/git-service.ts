@@ -4,9 +4,9 @@
  * Git execution wrapper with parser helpers kept out of the command surface.
  */
 
-import { spawn, ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import * as path from 'path';
+import { GitCommandRunner } from './git-service-runner';
 import {
   parseGitBlame,
   parseGitBranches,
@@ -28,13 +28,12 @@ export type { GitBlame, GitBranch, GitCommit, GitConfig, GitDiff, GitDiffHunk, G
 
 export class GitService extends EventEmitter {
   private repoPath: string;
-  private gitPath: string;
-  private runningProcesses: Map<string, ChildProcess> = new Map();
+  private runner: GitCommandRunner;
 
   constructor(repoPath: string, gitPath: string = 'git') {
     super();
     this.repoPath = path.resolve(repoPath);
-    this.gitPath = gitPath;
+    this.runner = new GitCommandRunner(this.repoPath, gitPath);
   }
 
   // ==========================================================================
@@ -45,52 +44,7 @@ export class GitService extends EventEmitter {
     args: string[],
     options: { cwd?: string; timeout?: number } = {}
   ): Promise<{ stdout: string; stderr: string }> {
-    const cwd = options.cwd || this.repoPath;
-    const timeout = options.timeout || 30000;
-
-    return new Promise((resolve, reject) => {
-      const proc = spawn(this.gitPath, args, {
-        cwd,
-        env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
-        stdio: ['pipe', 'pipe', 'pipe'],
-      });
-
-      const id = `git_${Date.now()}`;
-      this.runningProcesses.set(id, proc);
-
-      let stdout = '';
-      let stderr = '';
-
-      proc.stdout.on('data', (data) => {
-        stdout += data.toString();
-      });
-
-      proc.stderr.on('data', (data) => {
-        stderr += data.toString();
-      });
-
-      const timer = setTimeout(() => {
-        proc.kill('SIGTERM');
-        reject(new Error(`Git command timed out: git ${args.join(' ')}`));
-      }, timeout);
-
-      proc.on('close', (code) => {
-        clearTimeout(timer);
-        this.runningProcesses.delete(id);
-
-        if (code === 0) {
-          resolve({ stdout, stderr });
-        } else {
-          reject(new Error(stderr || `Git command failed with code ${code}`));
-        }
-      });
-
-      proc.on('error', (error) => {
-        clearTimeout(timer);
-        this.runningProcesses.delete(id);
-        reject(error);
-      });
-    });
+    return this.runner.runCommand(args, options);
   }
 
   // ==========================================================================
@@ -561,10 +515,7 @@ export class GitService extends EventEmitter {
   // ==========================================================================
 
   cancel(): void {
-    for (const [id, proc] of this.runningProcesses) {
-      proc.kill('SIGTERM');
-    }
-    this.runningProcesses.clear();
+    this.runner.cancel();
   }
 
   destroy(): void {
