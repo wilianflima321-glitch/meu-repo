@@ -1,297 +1,49 @@
 'use client';
 
-/**
- * AethelProvider - Provider Centralizado do Aethel Engine
- * 
- * Gerencia estado global da aplicação:
- * - Autenticação e usuário
- * - Wallet e billing
- * - AI sessions e thinking
- * - Onboarding progress
- * - WebSocket connections
- * - Theme e preferences
- * 
- * @module lib/providers/AethelProvider
- */
-import React, { 
-  createContext, 
-  useContext, 
-  useReducer, 
-  useEffect, 
+import React, {
   useCallback,
+  useEffect,
   useMemo,
+  useReducer,
   useRef,
-  type ReactNode 
+  type ReactNode,
 } from 'react';
 import useSWR from 'swr';
+import { AethelContext } from './aethel-provider.context';
+import type {
+  AethelContextValue,
+  AIThinkingStep,
+  Notification,
+  Preferences,
+  RealtimeMessage,
+  User,
+  WalletState,
+} from './aethel-provider.contracts';
+import { getNextStep, getPlanLabel, getPlanLimit, initialState } from './aethel-provider.defaults';
+import { aethelReducer } from './aethel-provider.reducer';
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
-  plan: 'free' | 'starter' | 'pro' | 'enterprise';
-  createdAt: string;
-}
-
-export interface WalletState {
-  balance: number;
-  reserved: number;
-  plan: 'free' | 'starter' | 'pro' | 'enterprise';
-  planLabel: string;
-  monthlyUsage: number;
-  monthlyLimit: number;
-  lowBalanceWarning: boolean;
-  lastUpdated: string;
-}
-
-export interface AISession {
-  id: string;
-  status: 'idle' | 'thinking' | 'generating' | 'complete' | 'error';
-  prompt?: string;
-  steps: AIThinkingStep[];
-  startTime?: number;
-  endTime?: number;
-}
-
-export interface AIThinkingStep {
-  id: string;
-  type: string;
-  title: string;
-  content: string;
-  status: 'pending' | 'active' | 'complete' | 'error';
-  timestamp: number;
-  duration?: number;
-}
-
-export interface OnboardingState {
-  isComplete: boolean;
-  currentStep: string;
-  completedSteps: string[];
-  totalXP: number;
-  level: number;
-  showWizard: boolean;
-}
-
-export interface Preferences {
-  theme: 'dark' | 'light' | 'system';
-  language: string;
-  reducedMotion: boolean;
-  soundEnabled: boolean;
-  autoSave: boolean;
-  telemetry: boolean;
-}
-
-export interface AethelState {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  wallet: WalletState | null;
-  aiSession: AISession;
-  onboarding: OnboardingState;
-  preferences: Preferences;
-  wsConnected: boolean;
-  notifications: Notification[];
-}
-
-interface Notification {
-  id: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  title: string;
-  message: string;
-  timestamp: number;
-  read: boolean;
-}
-
-type RealtimeMessage = {
-  type?: string;
-  balance?: number;
-  step?: AIThinkingStep;
-  stepId?: string;
-  updates?: Partial<AIThinkingStep>;
-  result?: unknown;
-  notification?: Notification;
-};
-
-type AethelAction =
-  | { type: 'SET_USER'; payload: User | null }
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'UPDATE_WALLET'; payload: Partial<WalletState> }
-  | { type: 'START_AI_SESSION'; payload: { id: string; prompt: string } }
-  | { type: 'ADD_AI_STEP'; payload: AIThinkingStep }
-  | { type: 'UPDATE_AI_STEP'; payload: { stepId: string; updates: Partial<AIThinkingStep> } }
-  | { type: 'COMPLETE_AI_SESSION'; payload: { result?: unknown } }
-  | { type: 'UPDATE_ONBOARDING'; payload: Partial<OnboardingState> }
-  | { type: 'SET_PREFERENCES'; payload: Partial<Preferences> }
-  | { type: 'SET_WS_CONNECTED'; payload: boolean }
-  | { type: 'ADD_NOTIFICATION'; payload: Notification }
-  | { type: 'MARK_NOTIFICATION_READ'; payload: string }
-  | { type: 'CLEAR_NOTIFICATIONS' };
-
-// ============================================================================
-// INITIAL STATE
-// ============================================================================
-
-const DEFAULT_PREFERENCES: Preferences = {
-  theme: 'dark',
-  language: 'pt-BR',
-  reducedMotion: false,
-  soundEnabled: true,
-  autoSave: true,
-  telemetry: true,
-};
-
-const initialState: AethelState = {
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
-  wallet: null,
-  aiSession: {
-    id: '',
-    status: 'idle',
-    steps: [],
-  },
-  onboarding: {
-    isComplete: false,
-    currentStep: 'welcome',
-    completedSteps: [],
-    totalXP: 0,
-    level: 1,
-    showWizard: false,
-  },
-  preferences: DEFAULT_PREFERENCES,
-  wsConnected: false,
-  notifications: [],
-};
-
-// ============================================================================
-// REDUCER
-// ============================================================================
-
-function aethelReducer(state: AethelState, action: AethelAction): AethelState {
-  switch (action.type) {
-    case 'SET_USER':
-      return {
-        ...state,
-        user: action.payload,
-        isAuthenticated: !!action.payload,
-        isLoading: false,
-      };
-
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-
-    case 'UPDATE_WALLET':
-      return {
-        ...state,
-        wallet: state.wallet 
-          ? { ...state.wallet, ...action.payload }
-          : action.payload as WalletState,
-      };
-
-    case 'START_AI_SESSION':
-      return {
-        ...state,
-        aiSession: {
-          id: action.payload.id,
-          status: 'thinking',
-          prompt: action.payload.prompt,
-          steps: [],
-          startTime: Date.now(),
-        },
-      };
-
-    case 'ADD_AI_STEP':
-      return {
-        ...state,
-        aiSession: {
-          ...state.aiSession,
-          steps: [...state.aiSession.steps, action.payload],
-        },
-      };
-
-    case 'UPDATE_AI_STEP':
-      return {
-        ...state,
-        aiSession: {
-          ...state.aiSession,
-          steps: state.aiSession.steps.map(step =>
-            step.id === action.payload.stepId
-              ? { ...step, ...action.payload.updates }
-              : step
-          ),
-        },
-      };
-
-    case 'COMPLETE_AI_SESSION':
-      return {
-        ...state,
-        aiSession: {
-          ...state.aiSession,
-          status: 'complete',
-          endTime: Date.now(),
-        },
-      };
-
-    case 'UPDATE_ONBOARDING':
-      return {
-        ...state,
-        onboarding: { ...state.onboarding, ...action.payload },
-      };
-
-    case 'SET_PREFERENCES':
-      return { ...state, preferences: { ...state.preferences, ...action.payload } };
-
-    case 'SET_WS_CONNECTED':
-      return { ...state, wsConnected: action.payload };
-
-    case 'ADD_NOTIFICATION':
-      return {
-        ...state,
-        notifications: [action.payload, ...state.notifications].slice(0, 50),
-      };
-
-    case 'MARK_NOTIFICATION_READ':
-      return {
-        ...state,
-        notifications: state.notifications.map(n =>
-          n.id === action.payload ? { ...n, read: true } : n
-        ),
-      };
-
-    case 'CLEAR_NOTIFICATIONS':
-      return { ...state, notifications: [] };
-
-    default:
-      return state;
-  }
-}
-
-// ============================================================================
-// CONTEXT
-// ============================================================================
-
-interface AethelContextValue {
-  state: AethelState;
-  dispatch: React.Dispatch<AethelAction>;
-  // Convenience methods
-  updateWallet: (data: Partial<WalletState>) => void;
-  startAISession: (prompt: string) => string;
-  completeOnboardingStep: (step: string) => void;
-  setTheme: (theme: 'dark' | 'light' | 'system') => void;
-  showNotification: (type: Notification['type'], title: string, message: string) => void;
-  refreshWallet: () => void;
-}
-
-const AethelContext = createContext<AethelContextValue | null>(null);
-
-// ============================================================================
-// PROVIDER
-// ============================================================================
+export type {
+  AethelAction,
+  AethelContextValue,
+  AethelState,
+  AISession,
+  AIThinkingStep,
+  Notification,
+  OnboardingState,
+  Preferences,
+  RealtimeMessage,
+  User,
+  WalletState,
+} from './aethel-provider.contracts';
+export {
+  useAethel,
+  useAISession,
+  useNotifications,
+  useOnboarding,
+  usePreferences,
+  useUser,
+  useWallet,
+} from './aethel-provider.hooks';
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
@@ -573,122 +325,6 @@ export function AethelProvider({ children, runtimeReady = true }: AethelProvider
       {children}
     </AethelContext.Provider>
   );
-}
-
-// ============================================================================
-// HOOKS
-// ============================================================================
-
-export function useAethel() {
-  const context = useContext(AethelContext);
-  if (!context) {
-    throw new Error('useAethel must be used within AethelProvider');
-  }
-  return context;
-}
-
-export function useUser() {
-  const { state } = useAethel();
-  return { user: state.user, isAuthenticated: state.isAuthenticated, isLoading: state.isLoading };
-}
-
-export function useWallet() {
-  const { state, updateWallet, refreshWallet } = useAethel();
-  return { wallet: state.wallet, updateWallet, refreshWallet };
-}
-
-export function useAISession() {
-  const { state, startAISession } = useAethel();
-  return { session: state.aiSession, startSession: startAISession };
-}
-
-export function useOnboarding() {
-  const { state, completeOnboardingStep, dispatch } = useAethel();
-  
-  const closeWizard = useCallback(() => {
-    dispatch({ type: 'UPDATE_ONBOARDING', payload: { showWizard: false } });
-    localStorage.setItem('aethel_onboarding_complete', 'true');
-  }, [dispatch]);
-
-  return {
-    onboarding: state.onboarding,
-    completeStep: completeOnboardingStep,
-    closeWizard,
-  };
-}
-
-export function usePreferences() {
-  const { state, dispatch, setTheme } = useAethel();
-  
-  const updatePreferences = useCallback((prefs: Partial<Preferences>) => {
-    dispatch({ type: 'SET_PREFERENCES', payload: prefs });
-  }, [dispatch]);
-
-  return {
-    preferences: state.preferences,
-    updatePreferences,
-    setTheme,
-  };
-}
-
-export function useNotifications() {
-  const { state, dispatch, showNotification } = useAethel();
-
-  const markRead = useCallback((id: string) => {
-    dispatch({ type: 'MARK_NOTIFICATION_READ', payload: id });
-  }, [dispatch]);
-
-  const clearAll = useCallback(() => {
-    dispatch({ type: 'CLEAR_NOTIFICATIONS' });
-  }, [dispatch]);
-
-  return {
-    notifications: state.notifications,
-    unreadCount: state.notifications.filter(n => !n.read).length,
-    showNotification,
-    markRead,
-    clearAll,
-  };
-}
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
-function getPlanLabel(plan: string): string {
-  const labels: Record<string, string> = {
-    free: 'Free',
-    starter: 'Starter',
-    pro: 'Pro',
-    enterprise: 'Enterprise',
-  };
-  return labels[plan] || 'Free';
-}
-
-function getPlanLimit(plan: string): number {
-  const limits: Record<string, number> = {
-    free: 500,
-    starter: 5000,
-    pro: 50000,
-    enterprise: 500000,
-  };
-  return limits[plan] || 500;
-}
-
-function getNextStep(current: string): string {
-  const steps = [
-    'welcome',
-    'dependency_check',
-    'profile_setup',
-    'first_project',
-    'explore_editor',
-    'try_ai',
-    'invite_team',
-    'publish_first',
-    'completed',
-  ];
-  const idx = steps.indexOf(current);
-  return steps[idx + 1] || 'completed';
 }
 
 export default AethelProvider;
