@@ -1,4 +1,4 @@
-import type { Color } from './SpriteEditor'
+import type { Color } from './SpriteEditor.types'
 
 export const DEFAULT_PALETTE: Color[] = [
   // Row 1: Grayscale

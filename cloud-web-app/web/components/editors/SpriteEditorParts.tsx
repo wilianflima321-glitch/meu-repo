@@ -2,17 +2,8 @@
 
 import React from 'react';
 import { Copy, Eye, EyeOff, Layers, Lock, Pause, Play, Plus, SkipBack, SkipForward, Trash2, Unlock } from 'lucide-react';
-import type { Color, Frame, Layer } from './SpriteEditor';
-
-const colorToHex = (color: Color): string => {
-  const r = color.r.toString(16).padStart(2, '0');
-  const g = color.g.toString(16).padStart(2, '0');
-  const b = color.b.toString(16).padStart(2, '0');
-  const a = Math.round(color.a * 255).toString(16).padStart(2, '0');
-  return `#${r}${g}${b}${a}`;
-};
-
-const colorToRgba = (color: Color): string => `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
+import type { Color, Frame, Layer } from './SpriteEditor.types';
+import { colorToHex, colorToRgba } from './SpriteEditor.utils';
 
 interface ToolButtonProps {
   icon: React.ReactNode
@@ -103,7 +94,7 @@ export function LayerPanel({
           <Layers className="w-4 h-4" />
           Layers
         </span>
-        <button type="button" aria-label="Add camada"
+        <button type="button" aria-label="Add layer"
           onClick={onAddLayer}
           className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           title="Add Layer"
@@ -121,7 +112,7 @@ export function LayerPanel({
             }`}
             onClick={() => onSelectLayer(layer.id)}
           >
-            <button type="button" aria-label={`${layer.visible ? 'Ocultar' : 'Mostrar'} camada ${layer.name}`}
+            <button type="button" aria-label={`${layer.visible ? 'Hide' : 'Show'} layer ${layer.name}`}
               onClick={(e) => {
                 e.stopPropagation()
                 onToggleVisibility(layer.id)
@@ -131,7 +122,7 @@ export function LayerPanel({
               {layer.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
             </button>
 
-            <button type="button" aria-label={`${layer.locked ? 'Desbloquear' : 'Bloquear'} camada ${layer.name}`}
+            <button type="button" aria-label={`${layer.locked ? 'Unlock' : 'Lock'} layer ${layer.name}`}
               onClick={(e) => {
                 e.stopPropagation()
                 onToggleLock(layer.id)
@@ -144,7 +135,7 @@ export function LayerPanel({
             <span className="flex-1 text-sm text-[var(--aethel-text-primary)] truncate">{layer.name}</span>
 
             <div className="flex items-center gap-1">
-              <button type="button" aria-label={`Duplicar camada ${layer.name}`}
+              <button type="button" aria-label={`Duplicate layer ${layer.name}`}
                 onClick={(e) => {
                   e.stopPropagation()
                   onDuplicateLayer(layer.id)
@@ -154,7 +145,7 @@ export function LayerPanel({
               >
                 <Copy className="w-3 h-3" />
               </button>
-              <button type="button" aria-label={`Delete camada ${layer.name}`}
+              <button type="button" aria-label={`Delete layer ${layer.name}`}
                 onClick={(e) => {
                   e.stopPropagation()
                   onDeleteLayer(layer.id)
@@ -207,7 +198,7 @@ export function Timeline({
     <div className="flex flex-col bg-[var(--aethel-surface-secondary)] border-t border-[var(--aethel-border-primary)]">
       {/* Playback controls */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)]">
-        <button type="button" aria-label="Ir para frame anterior"
+        <button type="button" aria-label="Go to previous frame"
           onClick={onPrevFrame}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Previous Frame"

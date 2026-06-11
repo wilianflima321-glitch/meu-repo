@@ -1,172 +1,15 @@
 'use client'
 
-/**
- * Sprite Editor - Professional Pixel Art & Sprite Animation Tool
- * Similar to Aseprite/Piskel with game engine integration
- *
- * Features:
- * - Pixel-perfect drawing tools
- * - Animation timeline with onion skinning
- * - Layer management
- * - Sprite sheet export
- * - Tileset mode
- * - Palette management
- */
-
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
-import {
-  Pencil,
-  Eraser,
-  PaintBucket,
-  Pipette,
-  Square,
-  Circle,
-  Move,
-  ZoomIn,
-  ZoomOut,
-  Undo,
-  Redo,
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Plus,
-  Trash2,
-  Copy,
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock,
-  Grid,
-  Layers,
-  Palette,
-  Download,
-  Upload,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  Maximize2,
-  RotateCw,
-  FlipHorizontal,
-  FlipVertical,
-} from 'lucide-react'
-import { ColorSwatch, LayerPanel, Timeline, ToolButton } from './SpriteEditorParts'
+import { LayerPanel, Timeline } from './SpriteEditorParts'
+import { SpriteCanvasStage, SpriteEditorHeader, SpriteEditorToolbar, SpritePalettePanel } from './SpriteEditorChrome'
 import { DEFAULT_PALETTE } from './SpriteEditor.defaults'
-
-// ============= Types =============
-
-export interface Color {
-  r: number
-  g: number
-  b: number
-  a: number
-}
-
-export interface Pixel {
-  x: number
-  y: number
-  color: Color
-}
-
-export interface Layer {
-  id: string
-  name: string
-  visible: boolean
-  locked: boolean
-  opacity: number
-  blendMode: BlendMode
-  pixels: Map<string, Color> // key: "x,y"
-}
-
-export interface Frame {
-  id: string
-  duration: number // ms
-  layers: Layer[]
-}
-
-export interface Animation {
-  id: string
-  name: string
-  frames: Frame[]
-}
-
-export type Tool = 'pencil' | 'eraser' | 'fill' | 'eyedropper' | 'rectangle' | 'circle' | 'line' | 'select' | 'move'
-export type BlendMode = 'normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten'
-
-export interface SpriteEditorState {
-  width: number
-  height: number
-  animations: Animation[]
-  currentAnimationId: string
-  currentFrameIndex: number
-  currentLayerId: string
-  tool: Tool
-  primaryColor: Color
-  secondaryColor: Color
-  brushSize: number
-  zoom: number
-  showGrid: boolean
-  gridSize: number
-  onionSkinning: boolean
-  onionSkinFrames: number
-  palette: Color[]
-}
-
-// ============= Utility Functions =============
-
-const colorToHex = (color: Color): string => {
-  const r = color.r.toString(16).padStart(2, '0')
-  const g = color.g.toString(16).padStart(2, '0')
-  const b = color.b.toString(16).padStart(2, '0')
-  const a = Math.round(color.a * 255).toString(16).padStart(2, '0')
-  return `#${r}${g}${b}${a}`
-}
-
-const hexToColor = (hex: string): Color => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(hex)
-  if (result) {
-    return {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16),
-      a: result[4] ? parseInt(result[4], 16) / 255 : 1,
-    }
-  }
-  return { r: 0, g: 0, b: 0, a: 1 }
-}
-
-const colorToRgba = (color: Color): string => {
-  return `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`
-}
-
-const createEmptyLayer = (id: string, name: string): Layer => ({
-  id,
-  name,
-  visible: true,
-  locked: false,
-  opacity: 1,
-  blendMode: 'normal',
-  pixels: new Map(),
-})
-
-const createEmptyFrame = (id: string, layerId: string): Frame => ({
-  id,
-  duration: 100,
-  layers: [createEmptyLayer(layerId, 'Layer 1')],
-})
-
-// ============= Default Palette =============
-
-// ============= Tool Button Component =============
-
-// ============= Main Sprite Editor Component =============
+import type { Color, Layer, SpriteEditorState, Tool } from './SpriteEditor.types'
+import { colorToRgba, createEmptyFrame, createEmptyLayer } from './SpriteEditor.utils'
 
 export default function SpriteEditor() {
-  // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null)
 
-  // State
   const [state, setState] = useState<SpriteEditorState>({
     width: 32,
     height: 32,
@@ -189,11 +32,9 @@ export default function SpriteEditor() {
     onionSkinFrames: 2,
     palette: DEFAULT_PALETTE,
   })
-
   const [isPlaying, setIsPlaying] = useState(false)
   const [isDrawing, setIsDrawing] = useState(false)
   const [lastPos, setLastPos] = useState<{ x: number; y: number } | null>(null)
-
   // History for undo/redo
   const [history, setHistory] = useState<Layer[][]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
@@ -576,95 +417,37 @@ export default function SpriteEditor() {
 
   return (
     <div className="flex flex-col h-full bg-[var(--aethel-surface-primary)]">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Sprite Editor</span>
-          <span className="text-xs text-[var(--aethel-text-tertiary)]">{state.width} × {state.height}</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button type="button" aria-label="Export sprite" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Export">
-            <Download className="w-4 h-4" />
-          </button>
-          <button type="button" aria-label="Import sprite" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Import">
-            <Upload className="w-4 h-4" />
-          </button>
-          <button type="button" aria-label="Open sprite editor settings" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Settings">
-            <Settings className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+      <SpriteEditorHeader width={state.width} height={state.height} />
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Left toolbar */}
-        <div className="flex flex-col gap-1 p-2 bg-[var(--aethel-surface-secondary)] border-r border-[var(--aethel-border-primary)]">
-          <ToolButton icon={<Pencil className="w-4 h-4" />} active={state.tool === 'pencil'} onClick={() => setState(s => ({ ...s, tool: 'pencil' }))} tooltip="Pencil" shortcut="B" />
-          <ToolButton icon={<Eraser className="w-4 h-4" />} active={state.tool === 'eraser'} onClick={() => setState(s => ({ ...s, tool: 'eraser' }))} tooltip="Eraser" shortcut="E" />
-          <ToolButton icon={<PaintBucket className="w-4 h-4" />} active={state.tool === 'fill'} onClick={() => setState(s => ({ ...s, tool: 'fill' }))} tooltip="Fill" shortcut="G" />
-          <ToolButton icon={<Pipette className="w-4 h-4" />} active={state.tool === 'eyedropper'} onClick={() => setState(s => ({ ...s, tool: 'eyedropper' }))} tooltip="Eyedropper" shortcut="I" />
-          <ToolButton icon={<Square className="w-4 h-4" />} active={state.tool === 'rectangle'} onClick={() => setState(s => ({ ...s, tool: 'rectangle' }))} tooltip="Rectangle" shortcut="R" />
-          <ToolButton icon={<Circle className="w-4 h-4" />} active={state.tool === 'circle'} onClick={() => setState(s => ({ ...s, tool: 'circle' }))} tooltip="Circle" shortcut="C" />
+        <SpriteEditorToolbar
+          tool={state.tool}
+          showGrid={state.showGrid}
+          primaryColor={state.primaryColor}
+          secondaryColor={state.secondaryColor}
+          onSetTool={(tool) => setState((current) => ({ ...current, tool }))}
+          onZoomIn={() => setState((current) => ({ ...current, zoom: Math.min(32, current.zoom + 2) }))}
+          onZoomOut={() => setState((current) => ({ ...current, zoom: Math.max(2, current.zoom - 2) }))}
+          onToggleGrid={() => setState((current) => ({ ...current, showGrid: !current.showGrid }))}
+        />
 
-          <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
+        <SpriteCanvasStage
+          canvasRef={canvasRef}
+          width={state.width}
+          height={state.height}
+          zoom={state.zoom}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+        />
 
-          <ToolButton icon={<Undo className="w-4 h-4" />} active={false} onClick={() => {}} tooltip="Undo" shortcut="Ctrl+Z" />
-          <ToolButton icon={<Redo className="w-4 h-4" />} active={false} onClick={() => {}} tooltip="Redo" shortcut="Ctrl+Y" />
-
-          <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
-
-          <ToolButton icon={<ZoomIn className="w-4 h-4" />} active={false} onClick={() => setState(s => ({ ...s, zoom: Math.min(32, s.zoom + 2) }))} tooltip="Zoom In" shortcut="+" />
-          <ToolButton icon={<ZoomOut className="w-4 h-4" />} active={false} onClick={() => setState(s => ({ ...s, zoom: Math.max(2, s.zoom - 2) }))} tooltip="Zoom Out" shortcut="-" />
-          <ToolButton icon={<Grid className="w-4 h-4" />} active={state.showGrid} onClick={() => setState(s => ({ ...s, showGrid: !s.showGrid }))} tooltip="Toggle Grid" />
-
-          <div className="flex-1" />
-
-          {/* Color selectors */}
-          <div className="relative">
-            <ColorSwatch color={state.primaryColor} size="lg" />
-            <div className="absolute bottom-0 right-0">
-              <ColorSwatch color={state.secondaryColor} size="md" />
-            </div>
-          </div>
-        </div>
-
-        {/* Canvas area */}
-        <div className="flex-1 flex items-center justify-center bg-[var(--aethel-surface-primary)] overflow-auto">
-          <canvas
-            ref={canvasRef}
-            width={state.width * state.zoom}
-            height={state.height * state.zoom}
-            className="cursor-crosshair"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onContextMenu={(e) => e.preventDefault()}
-          />
-        </div>
-
-        {/* Right panel - Layers & Palette */}
         <div className="w-64 flex flex-col">
-          {/* Palette */}
-          <div className="p-3 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
-            <div className="flex items-center gap-2 mb-2">
-              <Palette className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-              <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Palette</span>
-            </div>
-            <div className="grid grid-cols-8 gap-1">
-              {state.palette.map((color, idx) => (
-                <ColorSwatch
-                  key={idx}
-                  color={color}
-                  size="sm"
-                  onClick={() => setState(s => ({ ...s, primaryColor: color }))}
-                  onRightClick={() => setState(s => ({ ...s, secondaryColor: color }))}
-                />
-              ))}
-            </div>
-          </div>
+          <SpritePalettePanel
+            palette={state.palette}
+            onPrimaryColor={(color) => setState((current) => ({ ...current, primaryColor: color }))}
+            onSecondaryColor={(color) => setState((current) => ({ ...current, secondaryColor: color }))}
+          />
 
-          {/* Layers */}
           <LayerPanel
             layers={currentFrame.layers}
             currentLayerId={state.currentLayerId}
@@ -697,7 +480,6 @@ export default function SpriteEditor() {
         </div>
       </div>
 
-      {/* Timeline */}
       <Timeline
         frames={currentAnimation.frames}
         currentFrameIndex={state.currentFrameIndex}
