@@ -14,6 +14,10 @@
  */
 
 import * as THREE from 'three';
+import { applyExplosionDamage, propagateDestructionDamage } from './destruction-damage-runtime';
+import { createDestructibleConfig } from './destruction-defaults';
+import { createDestructionFragments } from './destruction-fragment-factory';
+import { deactivateDestructionFragment, spawnDestructionDust, updateDestructionFragment } from './destruction-fragment-runtime';
 
 // ============================================================================
 // TIPOS E INTERFACES
@@ -60,17 +64,7 @@ export class DestructibleObject {
     this.originalGeometry = mesh.geometry.clone();
     this.originalMaterial = mesh.material as THREE.Material;
 
-    this.config = {
-      maxHealth: 100,
-      fractureLevels: 3,
-      fragmentCount: 8,
-      debrisLifetime: 5,
-      impactPropagation: 2.0,
-      enablePhysics: true,
-      enableSound: true,
-      enableVFX: true,
-      ...config,
-    };
+    this.config = createDestructibleConfig(config);
 
     this.health = this.config.maxHealth;
     this.fractureGenerator = new VoronoiFractureGenerator(Math.random() * 99999);
@@ -141,95 +135,26 @@ export class DestructibleObject {
   }
 
   private fracture(impactPoint: THREE.Vector3, impactForce: number, complete: boolean): void {
-    // Get bounding box
-    this.mesh.geometry.computeBoundingBox();
-    const bounds = this.mesh.geometry.boundingBox!.clone();
+    const fragments = createDestructionFragments({
+      id: this.id,
+      mesh: this.mesh,
+      material: this.originalMaterial,
+      config: this.config,
+      impactPoint,
+      impactForce,
+      complete,
+      fractureGenerator: this.fractureGenerator,
+    });
 
-    // Transform bounds to world space
-    bounds.applyMatrix4(this.mesh.matrixWorld);
-
-    // Generate Voronoi points (biased toward impact)
-    const fragmentCount = complete
-      ? this.config.fragmentCount
-      : Math.ceil(this.config.fragmentCount / 2);
-
-    const points = this.generateBiasedPoints(bounds, impactPoint, fragmentCount);
-    const cells = this.fractureGenerator.generateCells(points, bounds);
-
-    // Create fragment meshes
-    for (let i = 0; i < cells.length; i++) {
-      const cell = cells[i];
-      const fragmentGeometry = this.fractureGenerator.cellToGeometry(cell);
-
-      // Center geometry
-      fragmentGeometry.computeBoundingBox();
-      const center = new THREE.Vector3();
-      fragmentGeometry.boundingBox!.getCenter(center);
-      fragmentGeometry.translate(-center.x, -center.y, -center.z);
-
-      const fragmentMaterial = this.originalMaterial.clone();
-      const fragmentMesh = new THREE.Mesh(fragmentGeometry, fragmentMaterial);
-
-      fragmentMesh.position.copy(center);
-      fragmentMesh.castShadow = this.mesh.castShadow;
-      fragmentMesh.receiveShadow = this.mesh.receiveShadow;
-
-      // Calculate velocity based on impact
-      const toFragment = center.clone().sub(impactPoint).normalize();
-      const velocityMagnitude = impactForce * (0.5 + Math.random() * 0.5);
-
-      const fragment: FragmentData = {
-        id: `${this.id}_frag_${i}`,
-        mesh: fragmentMesh,
-        velocity: toFragment.multiplyScalar(velocityMagnitude),
-        angularVelocity: new THREE.Vector3(
-          (Math.random() - 0.5) * 5,
-          (Math.random() - 0.5) * 5,
-          (Math.random() - 0.5) * 5
-        ),
-        mass: 1,
-        lifetime: this.config.debrisLifetime,
-        spawnTime: Date.now() / 1000,
-        active: true,
-      };
-
+    for (const fragment of fragments) {
       this.fragments.push(fragment);
-      this.scene.add(fragmentMesh);
+      this.scene.add(fragment.mesh);
     }
 
     if (complete) {
       // Hide original mesh
       this.mesh.visible = false;
     }
-  }
-
-  private generateBiasedPoints(
-    bounds: THREE.Box3,
-    impactPoint: THREE.Vector3,
-    count: number
-  ): THREE.Vector3[] {
-    const points: THREE.Vector3[] = [];
-    const size = new THREE.Vector3();
-    bounds.getSize(size);
-
-    // Add impact point
-    points.push(impactPoint.clone());
-
-    // Add random points biased toward impact
-    for (let i = 1; i < count; i++) {
-      const bias = Math.random() < 0.6 ? 0.3 : 1.0; // 60% near impact
-      const point = new THREE.Vector3(
-        bounds.min.x + Math.random() * size.x,
-        bounds.min.y + Math.random() * size.y,
-        bounds.min.z + Math.random() * size.z
-      );
-
-      // Bias toward impact
-      point.lerp(impactPoint, 1 - bias);
-      points.push(point);
-    }
-
-    return points;
   }
 
   private destroy(impactPoint: THREE.Vector3, impactForce: number): void {
@@ -243,103 +168,25 @@ export class DestructibleObject {
   }
 
   private spawnDestructionVFX(position: THREE.Vector3): void {
-    // Create dust particles
-    const particleCount = 50;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const velocities = new Float32Array(particleCount * 3);
-
-    for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = position.x;
-      positions[i * 3 + 1] = position.y;
-      positions[i * 3 + 2] = position.z;
-
-      velocities[i * 3] = (Math.random() - 0.5) * 5;
-      velocities[i * 3 + 1] = Math.random() * 3;
-      velocities[i * 3 + 2] = (Math.random() - 0.5) * 5;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-    const material = new THREE.PointsMaterial({
-      color: 0x888888,
-      size: 0.5,
-      transparent: true,
-      opacity: 0.7,
-      depthWrite: false,
-    });
-
-    const particles = new THREE.Points(geometry, material);
-    this.scene.add(particles);
-
-    // Store for animation (in real implementation)
-    // This would be handled by the particle system
-    setTimeout(() => {
-      this.scene.remove(particles);
-      geometry.dispose();
-      material.dispose();
-    }, 2000);
+    spawnDestructionDust(this.scene, position);
   }
 
   update(deltaTime: number): void {
-    const gravity = new THREE.Vector3(0, -9.81, 0);
     const currentTime = Date.now() / 1000;
 
     for (const fragment of this.fragments) {
-      if (!fragment.active) continue;
-
-      // Check lifetime
-      const age = currentTime - fragment.spawnTime;
-      if (age > fragment.lifetime) {
-        this.deactivateFragment(fragment);
-        continue;
-      }
-
-      // Apply physics
-      if (this.config.enablePhysics) {
-        // Apply gravity
-        fragment.velocity.addScaledVector(gravity, deltaTime);
-
-        // Apply drag
-        fragment.velocity.multiplyScalar(0.99);
-        fragment.angularVelocity.multiplyScalar(0.98);
-
-        // Update position
-        fragment.mesh.position.addScaledVector(fragment.velocity, deltaTime);
-
-        // Update rotation
-        fragment.mesh.rotation.x += fragment.angularVelocity.x * deltaTime;
-        fragment.mesh.rotation.y += fragment.angularVelocity.y * deltaTime;
-        fragment.mesh.rotation.z += fragment.angularVelocity.z * deltaTime;
-
-        // Simple ground collision
-        if (fragment.mesh.position.y < 0) {
-          fragment.mesh.position.y = 0;
-          fragment.velocity.y *= -0.3; // Bounce with energy loss
-          fragment.velocity.x *= 0.7;
-          fragment.velocity.z *= 0.7;
-          fragment.angularVelocity.multiplyScalar(0.5);
-        }
-      }
-
-      // Fade out near end of lifetime
-      const fadeStart = fragment.lifetime * 0.7;
-      if (age > fadeStart) {
-        const fadeProgress = (age - fadeStart) / (fragment.lifetime - fadeStart);
-        const material = fragment.mesh.material as THREE.MeshStandardMaterial;
-        if (material.transparent !== true) {
-          material.transparent = true;
-        }
-        material.opacity = 1 - fadeProgress;
-      }
+      updateDestructionFragment({
+        fragment,
+        deltaTime,
+        enablePhysics: this.config.enablePhysics,
+        currentTime,
+        deactivate: (targetFragment) => this.deactivateFragment(targetFragment),
+      });
     }
   }
 
   private deactivateFragment(fragment: FragmentData): void {
-    fragment.active = false;
-    this.scene.remove(fragment.mesh);
-    fragment.mesh.geometry.dispose();
-    (fragment.mesh.material as THREE.Material).dispose();
+    deactivateDestructionFragment({ fragment, scene: this.scene });
   }
 
   cleanup(): void {
@@ -457,27 +304,13 @@ export class DestructionManager {
     radius: number,
     excludeId: string
   ): void {
-    for (const [id, destructible] of this.destructibles) {
-      if (id === excludeId || destructible.isDestroyed()) continue;
-
-      const position = destructible.getMesh().position;
-      const distance = position.distanceTo(center);
-
-      if (distance < radius) {
-        const falloff = 1 - (distance / radius);
-        const propagatedDamage = damage * falloff;
-
-        if (propagatedDamage > 1) {
-          const direction = position.clone().sub(center).normalize();
-          destructible.applyDamage(
-            propagatedDamage,
-            position.clone().sub(direction.multiplyScalar(0.1)),
-            direction.negate(),
-            propagatedDamage * 0.5
-          );
-        }
-      }
-    }
+    propagateDestructionDamage({
+      destructibles: this.destructibles,
+      center,
+      damage,
+      radius,
+      excludeId,
+    });
   }
 
   applyExplosion(
@@ -485,31 +318,12 @@ export class DestructionManager {
     damage: number,
     radius: number
   ): DestructionEvent[] {
-    const events: DestructionEvent[] = [];
-
-    for (const [id, destructible] of this.destructibles) {
-      if (destructible.isDestroyed()) continue;
-
-      const position = destructible.getMesh().position;
-      const distance = position.distanceTo(center);
-
-      if (distance < radius) {
-        const falloff = 1 - (distance / radius);
-        const explosionDamage = damage * falloff;
-        const direction = position.clone().sub(center).normalize();
-
-        const event = destructible.applyDamage(
-          explosionDamage,
-          position.clone().sub(direction.multiplyScalar(0.5)),
-          direction.negate(),
-          explosionDamage
-        );
-
-        events.push(event);
-      }
-    }
-
-    return events;
+    return applyExplosionDamage({
+      destructibles: this.destructibles,
+      center,
+      damage,
+      radius,
+    });
   }
 
   raycastDamage(
