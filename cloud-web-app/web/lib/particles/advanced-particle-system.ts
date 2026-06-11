@@ -1,25 +1,20 @@
 // @aethel-heavy-async-boundary Advanced particle simulation is a Studio/runtime module, not a public shell dependency.
 import * as THREE from 'three';
 import { EventEmitter } from 'events';
-import { createFireParticleSettings, createSmokeParticleSettings, createSparkParticleSettings } from './advanced-particle-presets';
+import { ParticleSystemManager } from './advanced-particle-system-manager';
 import { ParticlePool } from './advanced-particle-pool';
+import { evaluateColorGradient, evaluateCurve, noise3D, randomBetween, randomRange } from './advanced-particle-math';
 import { createParticleMaterial } from './advanced-particle-material';
 import type {
   CollisionSettings,
-  ColorStop,
   EmitterSettings,
-  FloatCurve,
-  FloatRange,
   Particle,
   ParticleSystemSettings,
 } from './advanced-particle-system-types';
 export type {
   CollisionSettings,
-  ColorStop,
   EmitterSettings,
   EmitterShape,
-  FloatCurve,
-  FloatRange,
   ModifierSettings,
   Particle,
   ParticleSettings,
@@ -28,6 +23,11 @@ export type {
   SubEmitterSettings,
   Vector3Range,
 } from './advanced-particle-system-types';
+
+export function createParticleGroup(): THREE.Group {
+  return new THREE.Group();
+}
+
 export class ParticleEmitter extends EventEmitter {
   private settings: ParticleSystemSettings;
   private pool: ParticlePool;
@@ -180,18 +180,18 @@ export class ParticleEmitter extends EventEmitter {
     particle.position.copy(this.getEmissionPosition());
 
     const direction = this.getEmissionDirection(particle.position);
-    const speed = this.randomRange(settings.startSpeed);
+    const speed = randomRange(settings.startSpeed);
     particle.velocity.copy(direction).multiplyScalar(speed);
 
     const rand = settings.velocityRandomness;
-    particle.velocity.x += this.randomBetween(rand.min.x, rand.max.x);
-    particle.velocity.y += this.randomBetween(rand.min.y, rand.max.y);
-    particle.velocity.z += this.randomBetween(rand.min.z, rand.max.z);
+    particle.velocity.x += randomBetween(rand.min.x, rand.max.x);
+    particle.velocity.y += randomBetween(rand.min.y, rand.max.y);
+    particle.velocity.z += randomBetween(rand.min.z, rand.max.z);
 
     particle.age = 0;
-    particle.lifetime = this.randomRange(settings.lifetime);
-    particle.size = this.randomRange(settings.startSize);
-    particle.rotation = this.randomRange(settings.startRotation) * Math.PI / 180;
+    particle.lifetime = randomRange(settings.lifetime);
+    particle.size = randomRange(settings.startSize);
+    particle.rotation = randomRange(settings.startRotation) * Math.PI / 180;
     particle.speed = speed;
 
     if (settings.startColor.length > 0) {
@@ -329,17 +329,17 @@ export class ParticleEmitter extends EventEmitter {
       particle.velocity.multiplyScalar(dragFactor);
 
       if (modifiers.turbulenceStrength > 0) {
-        const noiseX = this.noise3D(
+        const noiseX = noise3D(
           particle.position.x * modifiers.turbulenceFrequency + this.noiseOffset,
           particle.position.y * modifiers.turbulenceFrequency,
           particle.position.z * modifiers.turbulenceFrequency + this.time * modifiers.turbulenceScrollSpeed
         );
-        const noiseY = this.noise3D(
+        const noiseY = noise3D(
           particle.position.x * modifiers.turbulenceFrequency + 100,
           particle.position.y * modifiers.turbulenceFrequency + this.noiseOffset,
           particle.position.z * modifiers.turbulenceFrequency + this.time * modifiers.turbulenceScrollSpeed
         );
-        const noiseZ = this.noise3D(
+        const noiseZ = noise3D(
           particle.position.x * modifiers.turbulenceFrequency + 200,
           particle.position.y * modifiers.turbulenceFrequency + 200,
           particle.position.z * modifiers.turbulenceFrequency + this.noiseOffset + this.time * modifiers.turbulenceScrollSpeed
@@ -392,12 +392,12 @@ export class ParticleEmitter extends EventEmitter {
       particle.position.z += particle.velocity.z * deltaTime;
 
       if (settings.sizeOverLifetime && settings.sizeOverLifetime.length > 0) {
-        const sizeMultiplier = this.evaluateCurve(settings.sizeOverLifetime, normalizedAge);
+        const sizeMultiplier = evaluateCurve(settings.sizeOverLifetime, normalizedAge);
         particle.size *= sizeMultiplier;
       }
 
       if (settings.colorOverLifetime && settings.colorOverLifetime.length > 0) {
-        const color = this.evaluateColorGradient(settings.colorOverLifetime, normalizedAge);
+        const color = evaluateColorGradient(settings.colorOverLifetime, normalizedAge);
         particle.color.setRGB(color.r, color.g, color.b);
         particle.alpha = color.a;
       }
@@ -477,88 +477,6 @@ export class ParticleEmitter extends EventEmitter {
     this.geometry.setDrawRange(0, index);
   }
 
-  private randomRange(range: FloatRange): number {
-    return range.min + Math.random() * (range.max - range.min);
-  }
-
-  private randomBetween(min: number, max: number): number {
-    return min + Math.random() * (max - min);
-  }
-
-  private evaluateCurve(curve: FloatCurve[], t: number): number {
-    if (curve.length === 0) return 1;
-    if (curve.length === 1) return curve[0].value;
-
-    for (let i = 0; i < curve.length - 1; i++) {
-      if (t >= curve[i].time && t <= curve[i + 1].time) {
-        const localT = (t - curve[i].time) / (curve[i + 1].time - curve[i].time);
-        return curve[i].value + (curve[i + 1].value - curve[i].value) * localT;
-      }
-    }
-
-    return curve[curve.length - 1].value;
-  }
-
-  private evaluateColorGradient(
-    gradient: ColorStop[],
-    t: number
-  ): { r: number; g: number; b: number; a: number } {
-    if (gradient.length === 0) return { r: 1, g: 1, b: 1, a: 1 };
-    if (gradient.length === 1) return gradient[0].color;
-
-    for (let i = 0; i < gradient.length - 1; i++) {
-      if (t >= gradient[i].time && t <= gradient[i + 1].time) {
-        const localT = (t - gradient[i].time) / (gradient[i + 1].time - gradient[i].time);
-        const a = gradient[i].color;
-        const b = gradient[i + 1].color;
-        return {
-          r: a.r + (b.r - a.r) * localT,
-          g: a.g + (b.g - a.g) * localT,
-          b: a.b + (b.b - a.b) * localT,
-          a: a.a + (b.a - a.a) * localT,
-        };
-      }
-    }
-
-    return gradient[gradient.length - 1].color;
-  }
-
-  private noise3D(x: number, y: number, z: number): number {
-    const p = [151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225];
-    const X = Math.floor(x) & 15;
-    const Y = Math.floor(y) & 15;
-    const Z = Math.floor(z) & 15;
-    x -= Math.floor(x);
-    y -= Math.floor(y);
-    z -= Math.floor(z);
-    const u = this.fade(x);
-    const v = this.fade(y);
-    const w = this.fade(z);
-    const A = p[X] + Y;
-    const B = p[X + 1] + Y;
-    return this.lerp(
-      this.lerp(
-        this.lerp(p[p[A] + Z] / 255, p[p[B] + Z] / 255, u),
-        this.lerp(p[p[A + 1] + Z] / 255, p[p[B + 1] + Z] / 255, u),
-        v
-      ),
-      this.lerp(
-        this.lerp(p[p[A] + Z + 1] / 255, p[p[B] + Z + 1] / 255, u),
-        this.lerp(p[p[A + 1] + Z + 1] / 255, p[p[B + 1] + Z + 1] / 255, u),
-        v
-      ),
-      w
-    ) * 2 - 1;
-  }
-
-  private fade(t: number): number {
-    return t * t * t * (t * (t * 6 - 15) + 10);
-  }
-
-  private lerp(a: number, b: number, t: number): number {
-    return a + t * (b - a);
-  }
-
   getSettings(): ParticleSystemSettings {
     return this.settings;
   }
@@ -570,110 +488,7 @@ export class ParticleEmitter extends EventEmitter {
   }
 }
 
-export class ParticleSystemManager extends EventEmitter {
-  private emitters: Map<string, ParticleEmitter> = new Map();
-  private group: THREE.Group = new THREE.Group();
-
-  constructor() {
-    super();
-  }
-
-  createEmitter(settings: ParticleSystemSettings): ParticleEmitter {
-    const emitter = new ParticleEmitter(settings);
-    this.emitters.set(settings.id, emitter);
-
-    const mesh = emitter.getMesh();
-    if (mesh) {
-      this.group.add(mesh);
-    }
-
-    this.emit('emitterCreated', { emitter, settings });
-    return emitter;
-  }
-
-  removeEmitter(id: string): void {
-    const emitter = this.emitters.get(id);
-    if (!emitter) return;
-
-    const mesh = emitter.getMesh();
-    if (mesh) {
-      this.group.remove(mesh);
-    }
-
-    emitter.dispose();
-    this.emitters.delete(id);
-
-    this.emit('emitterRemoved', { id });
-  }
-
-  getEmitter(id: string): ParticleEmitter | undefined {
-    return this.emitters.get(id);
-  }
-
-  getAllEmitters(): ParticleEmitter[] {
-    return Array.from(this.emitters.values());
-  }
-
-  getGroup(): THREE.Group {
-    return this.group;
-  }
-
-  playAll(): void {
-    for (const emitter of this.emitters.values()) {
-      emitter.play();
-    }
-  }
-
-  stopAll(): void {
-    for (const emitter of this.emitters.values()) {
-      emitter.stop();
-    }
-  }
-
-  pauseAll(): void {
-    for (const emitter of this.emitters.values()) {
-      emitter.pause();
-    }
-  }
-
-  update(deltaTime: number): void {
-    for (const emitter of this.emitters.values()) {
-      emitter.update(deltaTime);
-    }
-  }
-
-  getTotalParticleCount(): number {
-    let total = 0;
-    for (const emitter of this.emitters.values()) {
-      total += emitter.getActiveParticleCount();
-    }
-    return total;
-  }
-
-  createFireEffect(position: { x: number; y: number; z: number }): ParticleEmitter {
-    return this.createEmitter(createFireParticleSettings(position));
-  }
-
-  createSmokeEffect(position: { x: number; y: number; z: number }): ParticleEmitter {
-    return this.createEmitter(createSmokeParticleSettings(position));
-  }
-
-  createSparkEffect(position: { x: number; y: number; z: number }): ParticleEmitter {
-    return this.createEmitter(createSparkParticleSettings(position));
-  }
-
-  dispose(): void {
-    for (const emitter of this.emitters.values()) {
-      emitter.dispose();
-    }
-    this.emitters.clear();
-
-    while (this.group.children.length > 0) {
-      this.group.remove(this.group.children[0]);
-    }
-  }
-}
-
+export { ParticleSystemManager } from './advanced-particle-system-manager';
 export { useParticleSystem } from './advanced-particle-system-react';
 
 const __defaultExport = {

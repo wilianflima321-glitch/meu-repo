@@ -1,19 +1,4 @@
-/**
- * Profiler & Timeline System - Profiler Avançado
- *
- * Sistema completo com:
- * - CPU profiling
- * - Memory profiling
- * - Frame timeline
- * - GPU timing (WebGL)
- * - Call stack analysis
- * - Flame graphs
- * - Sampling profiler
- * - Custom markers
- * - Performance budgets
- *
- * @module lib/debug/profiler-system
- */
+/** Runtime profiler entrypoint. Heavy export helpers live in sibling modules. */
 
 import { EventEmitter } from 'events';
 import type {
@@ -26,7 +11,10 @@ import type {
   ProfilerMarker,
   ProfilerSample,
 } from './profiler-contracts';
+import { collectBudgetViolations } from './profiler-budget';
 import { createDefaultProfilerConfig, createEmptyFrameMetrics } from './profiler-defaults';
+import { buildChromeTraceEvents, buildFlameGraph, type FlameGraphNode } from './profiler-exporters';
+import { getMemoryTrend } from './profiler-memory';
 import { Profile, ProfileAsync } from './profiler-decorators';
 import { TimelineBase } from './profiler-timeline';
 import {
@@ -39,6 +27,8 @@ import {
   useTimeline,
 } from './profiler-system-react';
 
+export type { FlameGraphNode } from './profiler-exporters';
+
 export type {
   BudgetViolation,
   FrameMetrics,
@@ -49,14 +39,6 @@ export type {
   ProfilerMarker,
   ProfilerSample,
 } from './profiler-contracts';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-// ============================================================================
-// PROFILER
-// ============================================================================
 
 export class Profiler extends EventEmitter {
   private static instance: Profiler | null = null;
@@ -96,10 +78,6 @@ export class Profiler extends EventEmitter {
     return Profiler.instance;
   }
 
-  // ============================================================================
-  // RECORDING CONTROL
-  // ============================================================================
-
   startRecording(): void {
     this.frames = [];
     this.markers = [];
@@ -130,10 +108,6 @@ export class Profiler extends EventEmitter {
   isActive(): boolean {
     return this.isRecording && !this.isPaused;
   }
-
-  // ============================================================================
-  // FRAME MANAGEMENT
-  // ============================================================================
 
   beginFrame(): void {
     if (!this.isActive()) return;
@@ -170,10 +144,6 @@ export class Profiler extends EventEmitter {
     this.emit('frameEnded', this.currentFrame);
     this.currentFrame = null;
   }
-
-  // ============================================================================
-  // SAMPLING
-  // ============================================================================
 
   beginSample(name: string, category = 'default'): string {
     if (!this.isActive() || !this.currentFrame) return '';
@@ -250,10 +220,6 @@ export class Profiler extends EventEmitter {
     }
   }
 
-  // ============================================================================
-  // SCOPED PROFILING
-  // ============================================================================
-
   scope<T>(name: string, fn: () => T, category = 'default'): T {
     const id = this.beginSample(name, category);
     try {
@@ -271,10 +237,6 @@ export class Profiler extends EventEmitter {
       this.endSample(id);
     }
   }
-
-  // ============================================================================
-  // MARKERS
-  // ============================================================================
 
   addMarker(name: string, color?: string, data?: Record<string, unknown>): void {
     if (!this.isActive()) return;
@@ -295,10 +257,6 @@ export class Profiler extends EventEmitter {
     return [...this.markers];
   }
 
-  // ============================================================================
-  // RENDER METRICS
-  // ============================================================================
-
   setMetric(metric: keyof FrameMetrics, value: number): void {
     if (!this.currentFrame) return;
     this.currentFrame.metrics[metric] = value;
@@ -308,10 +266,6 @@ export class Profiler extends EventEmitter {
     if (!this.currentFrame) return;
     (this.currentFrame.metrics[metric] as number) += delta;
   }
-
-  // ============================================================================
-  // GPU PROFILING
-  // ============================================================================
 
   setGLContext(gl: WebGL2RenderingContext): void {
     this.gl = gl;
@@ -359,10 +313,6 @@ export class Profiler extends EventEmitter {
     return this.gpuQueryResults.get(name) || 0;
   }
 
-  // ============================================================================
-  // MEMORY PROFILING
-  // ============================================================================
-
   captureMemorySnapshot(): MemorySnapshot | null {
     const now = performance.now();
 
@@ -403,27 +353,8 @@ export class Profiler extends EventEmitter {
   }
 
   getMemoryTrend(): { growing: boolean; rate: number } {
-    if (this.memorySnapshots.length < 2) {
-      return { growing: false, rate: 0 };
-    }
-
-    const recent = this.memorySnapshots.slice(-10);
-    const first = recent[0];
-    const last = recent[recent.length - 1];
-
-    const delta = last.heapUsed - first.heapUsed;
-    const timeDelta = last.timestamp - first.timestamp;
-    const rate = delta / timeDelta * 1000; // bytes per second
-
-    return {
-      growing: rate > 1000, // More than 1KB/s
-      rate,
-    };
+    return getMemoryTrend(this.memorySnapshots);
   }
-
-  // ============================================================================
-  // BUDGET CHECKING
-  // ============================================================================
 
   addBudget(budget: PerformanceBudget): void {
     this.config.budgets.push(budget);
@@ -437,40 +368,15 @@ export class Profiler extends EventEmitter {
   }
 
   private checkBudgets(frame: ProfilerFrame): void {
-    for (const budget of this.config.budgets) {
-      const value = budget.metric === 'frameTime'
-        ? frame.duration
-        : frame.metrics[budget.metric];
-
-      if (value > budget.critical) {
-        const violation: BudgetViolation = {
-          budget,
-          actualValue: value,
-          frameNumber: frame.frameNumber,
-          severity: 'critical',
-        };
-        this.budgetViolations.push(violation);
-        this.emit('budgetViolation', violation);
-      } else if (value > budget.limit) {
-        const violation: BudgetViolation = {
-          budget,
-          actualValue: value,
-          frameNumber: frame.frameNumber,
-          severity: 'warning',
-        };
-        this.budgetViolations.push(violation);
-        this.emit('budgetViolation', violation);
-      }
+    for (const violation of collectBudgetViolations(frame, this.config.budgets)) {
+      this.budgetViolations.push(violation);
+      this.emit('budgetViolation', violation);
     }
   }
 
   getBudgetViolations(): BudgetViolation[] {
     return [...this.budgetViolations];
   }
-
-  // ============================================================================
-  // DATA ACCESS
-  // ============================================================================
 
   getFrames(): ProfilerFrame[] {
     return [...this.frames];
@@ -507,10 +413,6 @@ export class Profiler extends EventEmitter {
     return sum / recent.length;
   }
 
-  // ============================================================================
-  // FLAME GRAPH DATA
-  // ============================================================================
-
   getFlameGraphData(frameNumber?: number): FlameGraphNode {
     const frame = frameNumber !== undefined
       ? this.frames.find(f => f.frameNumber === frameNumber)
@@ -520,48 +422,8 @@ export class Profiler extends EventEmitter {
       return { name: 'root', value: 0, children: [] };
     }
 
-    return this.buildFlameGraph(frame);
+    return buildFlameGraph(frame);
   }
-
-  private buildFlameGraph(frame: ProfilerFrame): FlameGraphNode {
-    const root: FlameGraphNode = {
-      name: `Frame ${frame.frameNumber}`,
-      value: frame.duration,
-      children: [],
-    };
-
-    const nodeMap = new Map<string, FlameGraphNode>();
-    nodeMap.set('root', root);
-
-    // Sort samples by depth first, then by start time
-    const sortedSamples = [...frame.samples].sort((a, b) => {
-      if (a.depth !== b.depth) return a.depth - b.depth;
-      return a.startTime - b.startTime;
-    });
-
-    for (const sample of sortedSamples) {
-      const node: FlameGraphNode = {
-        name: sample.name,
-        value: sample.duration,
-        children: [],
-        category: sample.category,
-      };
-
-      nodeMap.set(sample.id, node);
-
-      const parentNode = sample.parent
-        ? nodeMap.get(sample.parent)
-        : root;
-
-      parentNode?.children.push(node);
-    }
-
-    return root;
-  }
-
-  // ============================================================================
-  // EXPORT
-  // ============================================================================
 
   exportToJSON(): string {
     return JSON.stringify({
@@ -573,37 +435,8 @@ export class Profiler extends EventEmitter {
   }
 
   exportToChrome(): object {
-    // Export in Chrome DevTools trace format
-    const events: ChromeTraceEvent[] = [];
-
-    for (const frame of this.frames) {
-      for (const sample of frame.samples) {
-        events.push({
-          name: sample.name,
-          cat: sample.category,
-          ph: 'B', // Begin
-          ts: sample.startTime * 1000, // Convert to microseconds
-          pid: 1,
-          tid: 1,
-        });
-
-        events.push({
-          name: sample.name,
-          cat: sample.category,
-          ph: 'E', // End
-          ts: sample.endTime * 1000,
-          pid: 1,
-          tid: 1,
-        });
-      }
-    }
-
-    return { traceEvents: events };
+    return { traceEvents: buildChromeTraceEvents(this.frames) };
   }
-
-  // ============================================================================
-  // CLEANUP
-  // ============================================================================
 
   clear(): void {
     this.frames = [];
@@ -630,46 +463,13 @@ export class Profiler extends EventEmitter {
   }
 }
 
-// ============================================================================
-// FLAME GRAPH TYPES
-// ============================================================================
-
-export interface FlameGraphNode {
-  name: string;
-  value: number;
-  children: FlameGraphNode[];
-  category?: string;
-}
-
-interface ChromeTraceEvent {
-  name: string;
-  cat: string;
-  ph: string;
-  ts: number;
-  pid: number;
-  tid: number;
-  args?: Record<string, unknown>;
-}
-
-// ============================================================================
-// TIMELINE
-// ============================================================================
-
 export class Timeline extends TimelineBase {
   constructor(profiler?: Profiler) {
     super(profiler || Profiler.getInstance());
   }
 }
 
-// ============================================================================
-// PROFILER DECORATORS
-// ============================================================================
-
 export { Profile, ProfileAsync } from './profiler-decorators';
-
-// ============================================================================
-// REACT HOOKS
-// ============================================================================
 
 export {
   ProfilerProvider,

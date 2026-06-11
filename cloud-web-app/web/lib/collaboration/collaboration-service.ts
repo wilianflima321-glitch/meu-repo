@@ -1,146 +1,24 @@
-/**
- * Aethel Engine - Real-time Collaboration Service
- * 
- * Serviço de colaboração em tempo real usando CRDT (Conflict-free Replicated Data Types)
- * para edição colaborativa de código sem conflitos.
- * 
- * Features:
- * - CRDT-based text synchronization (Yjs)
- * - Awareness protocol (cursors, selections, presence)
- * - Document persistence
- * - Room management
- * - User presence tracking
- */
+/** Real-time CRDT collaboration service backed by Yjs. */
 
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import { EventEmitter } from 'events';
 
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface CollaborationUser {
-  id: string;
-  name: string;
-  color: string;
-  avatar?: string;
-  cursor?: CursorPosition;
-  selection?: SelectionRange;
-  lastActive: number;
-}
-
-export interface CursorPosition {
-  line: number;
-  column: number;
-  file: string;
-}
-
-export interface SelectionRange {
-  start: { line: number; column: number };
-  end: { line: number; column: number };
-  file: string;
-}
-
-export interface CollaborationRoom {
-  id: string;
-  name: string;
-  documentId: string;
-  users: Map<string, CollaborationUser>;
-  createdAt: number;
-  ownerId: string;
-}
-
-export interface DocumentChange {
-  type: 'insert' | 'delete' | 'replace';
-  position: number;
-  text?: string;
-  length?: number;
-  userId: string;
-  timestamp: number;
-}
-
-export interface CollaborationOptions {
-  serverUrl?: string;
-  roomId: string;
-  documentId: string;
-  userId: string;
-  userName: string;
-  userColor?: string;
-  persistenceEnabled?: boolean;
-  autoConnect?: boolean;
-}
-
-export interface TextOperation {
-  retain?: number;
-  insert?: string;
-  delete?: number;
-  attributes?: Record<string, unknown>;
-}
-
-export interface CollaborationComment {
-  id: string;
-  fileId: string;
-  line: number;
-  text: string;
-  userId: string;
-  userName: string;
-  userColor: string;
-  parentId?: string;
-  createdAt: number;
-  resolved: boolean;
-  resolvedAt?: number;
-}
-
-interface AwarenessChange {
-  added: number[];
-  updated: number[];
-  removed: number[];
-}
-
-interface AwarenessState {
-  user?: Partial<CollaborationUser> & Pick<CollaborationUser, 'id' | 'name' | 'color'>;
-  cursor?: CursorPosition;
-  selection?: SelectionRange;
-  lastActive?: number;
-}
-
-interface YTextDeltaOperation {
-  retain?: number;
-  insert?: string;
-  delete?: number;
-}
-
-// ============================================================================
-// Color Generator for Users
-// ============================================================================
-
-const USER_COLORS = [
-  '#f38ba8', // Red
-  '#fab387', // Peach
-  '#f9e2af', // Yellow
-  '#a6e3a1', // Green
-  '#94e2d5', // Teal
-  '#89dceb', // Sky
-  '#89b4fa', // Blue
-  '#cba6f7', // Mauve
-  '#f5c2e7', // Pink
-  '#b4befe', // Lavender
-];
-
-function generateUserColor(userId: string): string {
-  let hash = 0;
-  for (let i = 0; i < userId.length; i++) {
-    hash = ((hash << 5) - hash) + userId.charCodeAt(i);
-    hash |= 0;
-  }
-  return USER_COLORS[Math.abs(hash) % USER_COLORS.length];
-}
-
-// ============================================================================
-// Collaboration Service
-// ============================================================================
+import { addCollaborationComment, getCollaborationComments, resolveCollaborationComment } from './collaboration-comments';
+import { generateUserColor } from './collaboration-service-colors';
+import type {
+  AwarenessChange,
+  AwarenessState,
+  CollaborationComment,
+  CollaborationOptions,
+  CollaborationUser,
+  CursorPosition,
+  DocumentChange,
+  SelectionRange,
+  TextOperation,
+  YTextDeltaOperation,
+} from './collaboration-service-contracts';
 
 export class CollaborationService extends EventEmitter {
   private ydoc: Y.Doc;
@@ -183,9 +61,6 @@ export class CollaborationService extends EventEmitter {
     }
   }
   
-  // ==========================================================================
-  // Connection Management
-  // ==========================================================================
   
   connect(): void {
     if (this.provider) {
@@ -241,9 +116,6 @@ export class CollaborationService extends EventEmitter {
     this.emit('disconnected');
   }
   
-  // ==========================================================================
-  // Persistence
-  // ==========================================================================
   
   private setupPersistence(): void {
     this.persistence = new IndexeddbPersistence(
@@ -256,9 +128,6 @@ export class CollaborationService extends EventEmitter {
     });
   }
   
-  // ==========================================================================
-  // Document Operations
-  // ==========================================================================
   
   getText(fileId: string): Y.YText {
     if (!this.texts.has(fileId)) {
@@ -327,9 +196,6 @@ export class CollaborationService extends EventEmitter {
     this.updateLastActive();
   }
   
-  // ==========================================================================
-  // Cursor & Selection
-  // ==========================================================================
   
   setCursor(file: string, line: number, column: number): void {
     if (!this.provider) return;
@@ -378,9 +244,6 @@ export class CollaborationService extends EventEmitter {
     this.provider.awareness.setLocalStateField('selection', null);
   }
   
-  // ==========================================================================
-  // User Presence
-  // ==========================================================================
   
   getUsers(): CollaborationUser[] {
     if (!this.provider) return [this.localUser];
@@ -434,9 +297,6 @@ export class CollaborationService extends EventEmitter {
     }, 100);
   }
   
-  // ==========================================================================
-  // Event Handlers
-  // ==========================================================================
   
   private setupYjsObservers(): void {
     this.ydoc.on('update', (update: Uint8Array, origin: unknown) => {
@@ -506,9 +366,6 @@ export class CollaborationService extends EventEmitter {
     this.emit('awarenessChange', { users, changes });
   }
   
-  // ==========================================================================
-  // Undo/Redo
-  // ==========================================================================
   
   private undoManagers: Map<string, Y.UndoManager> = new Map();
   
@@ -540,13 +397,6 @@ export class CollaborationService extends EventEmitter {
     return this.getUndoManager(fileId).canRedo();
   }
   
-  // ==========================================================================
-  // Comments & Annotations
-  // ==========================================================================
-  
-  private getComments(fileId: string): Y.YArray<CollaborationComment> {
-    return this.ydoc.getArray(`comments:${fileId}`);
-  }
   
   addComment(
     fileId: string,
@@ -554,51 +404,21 @@ export class CollaborationService extends EventEmitter {
     text: string,
     parentId?: string
   ): string {
-    const comments = this.getComments(fileId);
-    const id = `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    comments.push([{
-      id,
-      fileId,
-      line,
-      text,
-      userId: this.localUser.id,
-      userName: this.localUser.name,
-      userColor: this.localUser.color,
-      parentId,
-      createdAt: Date.now(),
-      resolved: false,
-    }]);
-    
+    const id = addCollaborationComment(this.ydoc, this.localUser, fileId, line, text, parentId);
     this.emit('commentAdded', { id, fileId, line, text });
-    
     return id;
   }
-  
+
   resolveComment(fileId: string, commentId: string): void {
-    const comments = this.getComments(fileId);
-    
-    for (let i = 0; i < comments.length; i++) {
-      const comment = comments.get(i);
-      if (comment.id === commentId) {
-        const updated = { ...comment, resolved: true, resolvedAt: Date.now() };
-        comments.delete(i, 1);
-        comments.insert(i, [updated]);
-        
-        this.emit('commentResolved', { id: commentId, fileId });
-        break;
-      }
+    if (resolveCollaborationComment(this.ydoc, fileId, commentId)) {
+      this.emit('commentResolved', { id: commentId, fileId });
     }
   }
-  
+
   getFileComments(fileId: string): CollaborationComment[] {
-    return this.getComments(fileId).toArray();
+    return getCollaborationComments(this.ydoc, fileId).toArray();
   }
-  
-  // ==========================================================================
-  // Versioning & History
-  // ==========================================================================
-  
+
   createSnapshot(name: string): Uint8Array {
     const snapshot = Y.encodeStateAsUpdate(this.ydoc);
     
@@ -617,9 +437,6 @@ export class CollaborationService extends EventEmitter {
     return Y.encodeStateVector(this.ydoc);
   }
   
-  // ==========================================================================
-  // Utility
-  // ==========================================================================
   
   isConnected(): boolean {
     return this.connected;
@@ -651,30 +468,19 @@ export class CollaborationService extends EventEmitter {
   }
 }
 
-// ============================================================================
-// Factory
-// ============================================================================
-
-let collaborationInstances: Map<string, CollaborationService> = new Map();
-
-export function getCollaborationService(options: CollaborationOptions): CollaborationService {
-  const key = `${options.roomId}:${options.documentId}`;
-  
-  if (!collaborationInstances.has(key)) {
-    const service = new CollaborationService(options);
-    collaborationInstances.set(key, service);
-    
-    service.on('destroy', () => {
-      collaborationInstances.delete(key);
-    });
-  }
-  
-  return collaborationInstances.get(key)!;
-}
-
-export function destroyAllCollaborationServices(): void {
-  collaborationInstances.forEach(service => service.destroy());
-  collaborationInstances.clear();
-}
+export type {
+  AwarenessChange,
+  AwarenessState,
+  CollaborationComment,
+  CollaborationOptions,
+  CollaborationRoom,
+  CollaborationUser,
+  CursorPosition,
+  DocumentChange,
+  SelectionRange,
+  TextOperation,
+  YTextDeltaOperation,
+} from './collaboration-service-contracts';
+export { destroyAllCollaborationServices, getCollaborationService } from './collaboration-service-factory';
 
 export default CollaborationService;
