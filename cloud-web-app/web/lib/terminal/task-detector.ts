@@ -2,77 +2,13 @@ import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('terminal/task-detector')
 
+import type { Task, TaskDetector } from './task-detector-contracts';
+import { CargoTaskDetector, GoTaskDetector, MakefileTaskDetector, PythonTaskDetector } from './task-detectors-extra';
+import { readTaskWorkspaceFile } from './task-detector-utils';
+export type { Task, TaskDetector } from './task-detector-contracts';
 
-/**
- * Task Auto-detection
- * Automatically detects tasks from various build systems
- */
+export const readWorkspaceFile = readTaskWorkspaceFile;
 
-export interface Task {
-  id: string;
-  label: string;
-  type: string;
-  command: string;
-  args: string[];
-  cwd?: string;
-  env?: Record<string, string>;
-  problemMatcher?: string[];
-  group?: 'build' | 'test' | 'clean' | 'run';
-  isBackground?: boolean;
-  presentation?: {
-    reveal?: 'always' | 'silent' | 'never';
-    panel?: 'shared' | 'dedicated' | 'new';
-    clear?: boolean;
-  };
-}
-
-export interface TaskDetector {
-  name: string;
-  detect(workspaceRoot: string): Promise<Task[]>;
-  isAvailable(workspaceRoot: string): Promise<boolean>;
-}
-
-function getAuthToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    return window.localStorage.getItem('aethel-token');
-  } catch {
-    return null;
-  }
-}
-
-function normalizePath(path: string): string {
-  if (!path) return '/';
-  const p = path.startsWith('/') ? path : `/${path}`;
-  return p.replace(/\\/g, '/');
-}
-
-async function readWorkspaceFile(path: string): Promise<string> {
-  const token = getAuthToken();
-  const url = `/api/files/read?path=${encodeURIComponent(normalizePath(path))}`;
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw Object.assign(new Error(text || `HTTP ${res.status}`), { status: res.status, path });
-  }
-
-  const data = (await res.json().catch(() => null)) as any;
-  if (!data || typeof data.content !== 'string') {
-    throw Object.assign(new Error('Resposta inválida ao ler arquivo.'), { status: 502, path });
-  }
-
-  return data.content;
-}
-
-/**
- * NPM Task Detector
- */
 export class NPMTaskDetector implements TaskDetector {
   name = 'npm';
 
@@ -156,9 +92,6 @@ export class NPMTaskDetector implements TaskDetector {
   }
 }
 
-/**
- * Maven Task Detector
- */
 export class MavenTaskDetector implements TaskDetector {
   name = 'maven';
 
@@ -222,9 +155,6 @@ export class MavenTaskDetector implements TaskDetector {
   }
 }
 
-/**
- * Gradle Task Detector
- */
 export class GradleTaskDetector implements TaskDetector {
   name = 'gradle';
 
@@ -291,327 +221,8 @@ export class GradleTaskDetector implements TaskDetector {
   }
 }
 
-/**
- * Go Task Detector
- */
-export class GoTaskDetector implements TaskDetector {
-  name = 'go';
+export { CargoTaskDetector, GoTaskDetector, MakefileTaskDetector, PythonTaskDetector } from './task-detectors-extra';
 
-  async detect(workspaceRoot: string): Promise<Task[]> {
-    try {
-      const goModPath = `${workspaceRoot}/go.mod`;
-      await this.readFile(goModPath);
-
-      const tasks: Task[] = [
-        {
-          id: 'go:build',
-          label: 'go: build',
-          type: 'go',
-          command: 'go',
-          args: ['build', './...'],
-          cwd: workspaceRoot,
-          problemMatcher: ['$go'],
-          group: 'build',
-        },
-        {
-          id: 'go:test',
-          label: 'go: test',
-          type: 'go',
-          command: 'go',
-          args: ['test', './...'],
-          cwd: workspaceRoot,
-          problemMatcher: ['$go'],
-          group: 'test',
-        },
-        {
-          id: 'go:run',
-          label: 'go: run',
-          type: 'go',
-          command: 'go',
-          args: ['run', '.'],
-          cwd: workspaceRoot,
-          problemMatcher: ['$go'],
-          group: 'run',
-        },
-        {
-          id: 'go:clean',
-          label: 'go: clean',
-          type: 'go',
-          command: 'go',
-          args: ['clean'],
-          cwd: workspaceRoot,
-          group: 'clean',
-        },
-        {
-          id: 'go:mod-tidy',
-          label: 'go: mod tidy',
-          type: 'go',
-          command: 'go',
-          args: ['mod', 'tidy'],
-          cwd: workspaceRoot,
-        },
-      ];
-
-      return tasks;
-    } catch (error) {
-      logger.error('[Go Detector] Error detecting tasks:', error);
-      return [];
-    }
-  }
-
-  async isAvailable(workspaceRoot: string): Promise<boolean> {
-    try {
-      const goModPath = `${workspaceRoot}/go.mod`;
-      await this.readFile(goModPath);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  private async readFile(path: string): Promise<string> {
-    return readWorkspaceFile(path);
-  }
-}
-
-/**
- * Cargo (Rust) Task Detector
- */
-export class CargoTaskDetector implements TaskDetector {
-  name = 'cargo';
-
-  async detect(workspaceRoot: string): Promise<Task[]> {
-    try {
-      const cargoTomlPath = `${workspaceRoot}/Cargo.toml`;
-      await this.readFile(cargoTomlPath);
-
-      const tasks: Task[] = [
-        {
-          id: 'cargo:build',
-          label: 'cargo: build',
-          type: 'cargo',
-          command: 'cargo',
-          args: ['build'],
-          cwd: workspaceRoot,
-          problemMatcher: ['$rustc'],
-          group: 'build',
-        },
-        {
-          id: 'cargo:build-release',
-          label: 'cargo: build --release',
-          type: 'cargo',
-          command: 'cargo',
-          args: ['build', '--release'],
-          cwd: workspaceRoot,
-          problemMatcher: ['$rustc'],
-          group: 'build',
-        },
-        {
-          id: 'cargo:test',
-          label: 'cargo: test',
-          type: 'cargo',
-          command: 'cargo',
-          args: ['test'],
-          cwd: workspaceRoot,
-          problemMatcher: ['$rustc'],
-          group: 'test',
-        },
-        {
-          id: 'cargo:run',
-          label: 'cargo: run',
-          type: 'cargo',
-          command: 'cargo',
-          args: ['run'],
-          cwd: workspaceRoot,
-          problemMatcher: ['$rustc'],
-          group: 'run',
-        },
-        {
-          id: 'cargo:clean',
-          label: 'cargo: clean',
-          type: 'cargo',
-          command: 'cargo',
-          args: ['clean'],
-          cwd: workspaceRoot,
-          group: 'clean',
-        },
-        {
-          id: 'cargo:check',
-          label: 'cargo: check',
-          type: 'cargo',
-          command: 'cargo',
-          args: ['check'],
-          cwd: workspaceRoot,
-          problemMatcher: ['$rustc'],
-        },
-      ];
-
-      return tasks;
-    } catch (error) {
-      logger.error('[Cargo Detector] Error detecting tasks:', error);
-      return [];
-    }
-  }
-
-  async isAvailable(workspaceRoot: string): Promise<boolean> {
-    try {
-      const cargoTomlPath = `${workspaceRoot}/Cargo.toml`;
-      await this.readFile(cargoTomlPath);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  private async readFile(path: string): Promise<string> {
-    return readWorkspaceFile(path);
-  }
-}
-
-/**
- * Makefile Task Detector
- */
-export class MakefileTaskDetector implements TaskDetector {
-  name = 'make';
-
-  async detect(workspaceRoot: string): Promise<Task[]> {
-    try {
-      const makefilePath = `${workspaceRoot}/Makefile`;
-      const content = await this.readFile(makefilePath);
-
-      const tasks: Task[] = [];
-      const targetRegex = /^([a-zA-Z0-9_-]+):/gm;
-      let match;
-
-      while ((match = targetRegex.exec(content)) !== null) {
-        const target = match[1];
-        
-        // Skip special targets
-        if (target.startsWith('.') || target === 'PHONY') {
-          continue;
-        }
-
-        tasks.push({
-          id: `make:${target}`,
-          label: `make: ${target}`,
-          type: 'make',
-          command: 'make',
-          args: [target],
-          cwd: workspaceRoot,
-          problemMatcher: ['$gcc'],
-          group: this.getGroup(target),
-          presentation: {
-            reveal: 'always',
-            panel: 'shared',
-          },
-        });
-      }
-
-      return tasks;
-    } catch (error) {
-      logger.error('[Makefile Detector] Error detecting tasks:', error);
-      return [];
-    }
-  }
-
-  async isAvailable(workspaceRoot: string): Promise<boolean> {
-    try {
-      const makefilePath = `${workspaceRoot}/Makefile`;
-      await this.readFile(makefilePath);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  private getGroup(target: string): Task['group'] {
-    if (target === 'build' || target === 'all' || target === 'compile') {
-      return 'build';
-    }
-    if (target === 'test') {
-      return 'test';
-    }
-    if (target === 'clean') {
-      return 'clean';
-    }
-    if (target === 'run') {
-      return 'run';
-    }
-    return undefined;
-  }
-
-  private async readFile(path: string): Promise<string> {
-    return readWorkspaceFile(path);
-  }
-}
-
-/**
- * Python Task Detector
- */
-export class PythonTaskDetector implements TaskDetector {
-  name = 'python';
-
-  async detect(workspaceRoot: string): Promise<Task[]> {
-    try {
-      const setupPyPath = `${workspaceRoot}/setup.py`;
-      await this.readFile(setupPyPath);
-
-      const tasks: Task[] = [
-        {
-          id: 'python:install',
-          label: 'python: install',
-          type: 'python',
-          command: 'pip',
-          args: ['install', '-e', '.'],
-          cwd: workspaceRoot,
-          group: 'build',
-        },
-        {
-          id: 'python:test',
-          label: 'python: test',
-          type: 'python',
-          command: 'pytest',
-          args: [],
-          cwd: workspaceRoot,
-          problemMatcher: ['$pytest'],
-          group: 'test',
-        },
-        {
-          id: 'python:lint',
-          label: 'python: lint',
-          type: 'python',
-          command: 'pylint',
-          args: ['src'],
-          cwd: workspaceRoot,
-          problemMatcher: ['$pylint'],
-        },
-      ];
-
-      return tasks;
-    } catch (error) {
-      logger.error('[Python Detector] Error detecting tasks:', error);
-      return [];
-    }
-  }
-
-  async isAvailable(workspaceRoot: string): Promise<boolean> {
-    try {
-      const setupPyPath = `${workspaceRoot}/setup.py`;
-      await this.readFile(setupPyPath);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  private async readFile(path: string): Promise<string> {
-    return readWorkspaceFile(path);
-  }
-}
-
-/**
- * Task Detection Manager
- */
 export class TaskDetectionManager {
   private detectors: TaskDetector[] = [
     new NPMTaskDetector(),
@@ -623,9 +234,6 @@ export class TaskDetectionManager {
     new PythonTaskDetector(),
   ];
 
-  /**
-   * Detect all tasks in workspace
-   */
   async detectAllTasks(workspaceRoot: string): Promise<Task[]> {
     const allTasks: Task[] = [];
 
@@ -645,23 +253,16 @@ export class TaskDetectionManager {
     return allTasks;
   }
 
-  /**
-   * Get available detectors
-   */
   getAvailableDetectors(): string[] {
     return this.detectors.map(d => d.name);
   }
 
-  /**
-   * Add custom detector
-   */
   addDetector(detector: TaskDetector): void {
     this.detectors.push(detector);
     log.info(`[Task Detection] Added custom detector: ${detector.name}`);
   }
 }
 
-// Singleton instance
 let taskDetectionManagerInstance: TaskDetectionManager | null = null;
 
 export function getTaskDetectionManager(): TaskDetectionManager {

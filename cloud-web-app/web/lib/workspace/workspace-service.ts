@@ -1,20 +1,16 @@
 import { logger } from '@/lib/observability/logger';
-/**
- * Workspace API Service
- * Complete workspace management for the Aethel Engine IDE
- */
-
 import { EventEmitter } from 'events';
 
 import { performWorkspaceFileOperation } from './workspace-file-backend';
+import { createWorkspaceFolder, deleteWorkspaceFolder, fileInfoFromStatResponse, listWorkspaceFolder, listWorkspaceFolderRecursive } from './workspace-folder-operations';
+import { getWorkspaceConfigurationFromMaps } from './workspace-configuration';
 import {
   createDefaultWorkspaceConfiguration,
-  extractWorkspaceFileName,
   extractWorkspaceFolderName,
   matchesWorkspacePattern,
   normalizeWorkspaceUri,
 } from './workspace-service.helpers';
-import { buildSearchRegex, findMatches, matchesSearchPattern } from './workspace-search';
+import { runWorkspaceSearch } from './workspace-search-runner';
 import {
   clearRecentFilesState,
   getRecentFilesState,
@@ -28,7 +24,6 @@ import {
 } from './workspace-service-state';
 import { WorkspaceError } from './workspace-service.types';
 import type {
-  ConfigurationInspect,
   DirtyFile,
   FileChangeEvent,
   FileInfo,
@@ -43,7 +38,6 @@ import type {
 } from './workspace-service.types';
 
 export type {
-  ConfigurationInspect,
   DirtyFile,
   FileChangeEvent,
   FileInfo,
@@ -76,10 +70,6 @@ export class WorkspaceService extends EventEmitter {
     this.setMaxListeners(100);
     this.configurations.set('default', createDefaultWorkspaceConfiguration());
   }
-
-  // ==========================================================================
-  // Workspace Folder Management
-  // ==========================================================================
 
   public addWorkspaceFolder(uri: string, name?: string): WorkspaceFolder {
     const existingFolder = this.workspaceFolders.get(uri);
@@ -136,9 +126,6 @@ export class WorkspaceService extends EventEmitter {
       folder.index = index++;
     }
   }
-// ==========================================================================
-  // File Operations
-  // ==========================================================================
 
   public async readFile(uri: string): Promise<string> {
     const normalizedUri = normalizeWorkspaceUri(uri);
@@ -275,100 +262,29 @@ export class WorkspaceService extends EventEmitter {
 
     try {
       const response = await performWorkspaceFileOperation('stat', normalizedUri);
-      return {
-        name: extractWorkspaceFileName(normalizedUri),
-        path: normalizedUri,
-        isDirectory: response.isDirectory,
-        size: response.size,
-        modified: new Date(response.modified),
-        created: response.created ? new Date(response.created) : undefined,
-        readonly: response.readonly,
-      };
+      return fileInfoFromStatResponse(normalizedUri, response);
     } catch (error) {
       throw this.createFileError('STAT_ERROR', `Failed to get file info: ${normalizedUri}`, error);
     }
   }
-// ==========================================================================
-  // Folder Operations
-  // ==========================================================================
 
   public async createFolder(uri: string): Promise<void> {
-    const normalizedUri = normalizeWorkspaceUri(uri);
-
-    try {
-      await performWorkspaceFileOperation('mkdir', normalizedUri);
-      this.emitFileChange('created', normalizedUri);
-    } catch (error) {
-      throw this.createFileError('MKDIR_ERROR', `Failed to create folder: ${normalizedUri}`, error);
-    }
+    const normalizedUri = await createWorkspaceFolder(uri);
+    this.emitFileChange('created', normalizedUri);
   }
 
   public async deleteFolder(uri: string, recursive = false): Promise<void> {
-    const normalizedUri = normalizeWorkspaceUri(uri);
-
-    try {
-      if (recursive) {
-        const entries = await this.listFolder(normalizedUri);
-
-        for (const entry of entries) {
-          if (entry.isDirectory) {
-            await this.deleteFolder(entry.path, true);
-          } else {
-            await this.deleteFile(entry.path);
-          }
-        }
-      }
-
-      await performWorkspaceFileOperation('rmdir', normalizedUri);
-      this.emitFileChange('deleted', normalizedUri);
-    } catch (error) {
-      if (error instanceof WorkspaceError) throw error;
-      throw this.createFileError('RMDIR_ERROR', `Failed to delete folder: ${normalizedUri}`, error);
-    }
+    const normalizedUri = await deleteWorkspaceFolder(uri, recursive, fileUri => this.deleteFile(fileUri));
+    this.emitFileChange('deleted', normalizedUri);
   }
 
   public async listFolder(uri: string): Promise<FileInfo[]> {
-    const normalizedUri = normalizeWorkspaceUri(uri);
-
-    try {
-      const response = await performWorkspaceFileOperation('readdir', normalizedUri);
-
-      return response.entries.map((entry: { name: string; isDirectory: boolean; size: number; modified: string }) => ({
-        name: entry.name,
-        path: `${normalizedUri}/${entry.name}`,
-        isDirectory: entry.isDirectory,
-        size: entry.size,
-        modified: new Date(entry.modified),
-      }));
-    } catch (error) {
-      throw this.createFileError('READDIR_ERROR', `Failed to list folder: ${normalizedUri}`, error);
-    }
+    return listWorkspaceFolder(uri);
   }
 
   public async listFolderRecursive(uri: string, maxDepth = 10): Promise<FileInfo[]> {
-    const results: FileInfo[] = [];
-
-    const traverse = async (currentUri: string, depth: number): Promise<void> => {
-      if (depth > maxDepth) return;
-
-      const entries = await this.listFolder(currentUri);
-
-      for (const entry of entries) {
-        results.push(entry);
-
-        if (entry.isDirectory) {
-          await traverse(entry.path, depth + 1);
-        }
-      }
-    };
-
-    await traverse(normalizeWorkspaceUri(uri), 0);
-    return results;
+    return listWorkspaceFolderRecursive(uri, maxDepth);
   }
-
-  // ==========================================================================
-  // File Watching
-  // ==========================================================================
 
   public watch(pattern: string, recursive = true): FileWatcher {
     const watcherId = `watcher_${++this.watcherIdCounter}`;
@@ -461,47 +377,13 @@ export class WorkspaceService extends EventEmitter {
       }
     }
   }
-// ==========================================================================
-  // Configuration Management
-  // ==========================================================================
 
   public getConfiguration(section?: string): WorkspaceConfiguration {
-    const configMap = this.configurations.get(section || 'default') || new Map();
-
-    return {
-      get: <T>(key: string, defaultValue?: T): T | undefined => {
-        const value = configMap.get(key);
-        return value !== undefined ? (value as T) : defaultValue;
-      },
-      has: (key: string): boolean => {
-        return configMap.has(key);
-      },
-      update: async (key: string, value: unknown, global = false): Promise<void> => {
-        const targetSection = global ? 'global' : (section || 'default');
-        let targetMap = this.configurations.get(targetSection);
-
-        if (!targetMap) {
-          targetMap = new Map();
-          this.configurations.set(targetSection, targetMap);
-        }
-
-        targetMap.set(key, value);
-        this.emit('configurationChanged', { section: targetSection, key, value });
-      },
-      inspect: <T>(key: string): ConfigurationInspect<T> | undefined => {
-        const globalConfig = this.configurations.get('global');
-        const workspaceConfig = this.configurations.get('default');
-        const sectionConfig = section ? this.configurations.get(section) : undefined;
-
-        return {
-          key,
-          defaultValue: undefined,
-          globalValue: globalConfig?.get(key) as T | undefined,
-          workspaceValue: workspaceConfig?.get(key) as T | undefined,
-          workspaceFolderValue: sectionConfig?.get(key) as T | undefined,
-        };
-      },
-    };
+    return getWorkspaceConfigurationFromMaps(
+      this.configurations,
+      section,
+      payload => this.emit('configurationChanged', payload),
+    );
   }
 
   public async updateConfiguration(
@@ -512,58 +394,15 @@ export class WorkspaceService extends EventEmitter {
     const config = this.getConfiguration(section);
     await config.update(key, value);
   }
-// ==========================================================================
-  // Search Operations
-  // ==========================================================================
 
   public async search(options: SearchOptions): Promise<SearchResult[]> {
-    const results: SearchResult[] = [];
-    const folders = this.getWorkspaceFolders();
-
-    if (folders.length === 0) {
-      return results;
-    }
-
-    const searchRegex = buildSearchRegex(options);
-    let totalMatches = 0;
-    const maxResults = options.maxResults || 1000;
-
-    for (const folder of folders) {
-      if (totalMatches >= maxResults) break;
-
-      try {
-        const files = await this.listFolderRecursive(folder.uri);
-
-        for (const file of files) {
-          if (totalMatches >= maxResults) break;
-          if (file.isDirectory) continue;
-          if (!matchesSearchPattern(file.path, options.includePattern, options.excludePattern, matchesWorkspacePattern)) {
-            continue;
-          }
-
-          try {
-            const content = await this.readFile(file.path);
-            const matches = findMatches(content, searchRegex);
-
-            if (matches.length > 0) {
-              results.push({ uri: file.path, matches });
-              totalMatches += matches.length;
-            }
-          } catch {
-            // Skip files that can't be read
-          }
-        }
-      } catch {
-        // Skip folders that can't be listed
-      }
-    }
-
-    return results;
+    return runWorkspaceSearch(
+      options,
+      this.getWorkspaceFolders(),
+      uri => this.listFolderRecursive(uri),
+      uri => this.readFile(uri),
+    );
   }
-
-  // ==========================================================================
-  // Recent Files Tracking
-  // ==========================================================================
 
   public trackRecentFile(uri: string, pinned = false): void {
     trackRecentFileState(this.recentFiles, uri, pinned, this.maxRecentFiles);
@@ -590,10 +429,6 @@ export class WorkspaceService extends EventEmitter {
       this.emit('recentFilesChanged', this.getRecentFiles());
     }
   }
-
-  // ==========================================================================
-  // Dirty Files Tracking
-  // ==========================================================================
 
   public markDirty(uri: string, originalContent: string, currentContent: string): void {
     markDirtyState(this.dirtyFiles, uri, originalContent, currentContent);
@@ -636,17 +471,9 @@ export class WorkspaceService extends EventEmitter {
     }
   }
 
-  // ==========================================================================
-  // Internal Helpers
-  // ==========================================================================
-
   private createFileError(code: string, message: string, cause?: unknown): WorkspaceError {
     return new WorkspaceError(code, message, cause);
   }
-
-  // ==========================================================================
-  // Cleanup
-  // ==========================================================================
 
   public dispose(): void {
     for (const entry of this.fileWatchers.values()) {
@@ -665,10 +492,6 @@ export class WorkspaceService extends EventEmitter {
     this.removeAllListeners();
   }
 }
-
-// ============================================================================
-// Singleton Instance
-// ============================================================================
 
 export const workspaceService = new WorkspaceService();
 
