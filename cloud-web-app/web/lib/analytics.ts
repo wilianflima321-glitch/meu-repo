@@ -15,181 +15,24 @@ const log = createComponentLogger('analytics')
  * NÃO É MOCK - Sistema real e funcional!
  */
 
-// ============================================================================
-// TIPOS
-// ============================================================================
-
-export type EventCategory = 
-  | 'user'
-  | 'project'
-  | 'ai'
-  | 'engine'
-  | 'billing'
-  | 'collaboration'
-  | 'marketplace'
-  | 'performance'
-  | 'error';
-
-export type EventAction =
-  // User
-  | 'login'
-  | 'logout'
-  | 'register'
-  | 'profile_update'
-  | 'settings_change'
-  | 'plan_upgrade'
-  | 'plan_downgrade'
-  | 'auth_intent'
-  | 'oauth_start'
-  | 'cta_click'
-  | 'contact_sales_start'
-  
-  // Project
-  | 'project_create'
-  | 'project_open'
-  | 'project_save'
-  | 'project_delete'
-  | 'project_export'
-  | 'project_share'
-  | 'mission_submit'
-  | 'mission_handoff'
-  | 'workspace_create'
-  | 'onboarding_start'
-  
-  // AI
-  | 'ai_chat'
-  | 'ai_stream'
-  | 'ai_complete'
-  | 'ai_error'
-  | 'ai_feedback'
-  
-  // Engine
-  | 'editor_open'
-  | 'editor_close'
-  | 'blueprint_create'
-  | 'vfx_create'
-  | 'terrain_edit'
-  | 'animation_create'
-  | 'build_start'
-  | 'build_complete'
-  | 'deploy_click'
-  | 'deploy_success'
-  | 'deploy_failure'
-  | 'play_start'
-  | 'play_stop'
-  
-  // Billing
-  | 'pricing_view'
-  | 'pricing_cycle_change'
-  | 'checkout_start'
-  | 'checkout_complete'
-  | 'checkout_cancel'
-  | 'payment_success'
-  | 'payment_failed'
-  
-  // Collaboration
-  | 'invite_send'
-  | 'invite_accept'
-  | 'collab_join'
-  | 'collab_leave'
-  | 'comment_add'
-  
-  // Marketplace
-  | 'marketplace_browse'
-  | 'marketplace_search'
-  | 'marketplace_view'
-  | 'marketplace_purchase'
-  | 'marketplace_download'
-  
-  // Performance
-  | 'page_load'
-  | 'api_latency'
-  | 'render_time'
-  
-  // Error
-  | 'error_client'
-  | 'error_server'
-  | 'error_api';
-
-export interface AnalyticsEvent {
-  id: string;
-  timestamp: Date;
-  category: EventCategory;
-  action: EventAction;
-  label?: string;
-  value?: number;
-  userId?: string;
-  sessionId?: string;
-  projectId?: string;
-  metadata?: Record<string, unknown>;
-  
-  // Contexto
-  userAgent?: string;
-  referrer?: string;
-  url?: string;
-  screenResolution?: string;
-  language?: string;
-  timezone?: string;
-}
-
-export interface PerformanceMetric {
-  id: string;
-  timestamp: Date;
-  name: string;
-  value: number;
-  unit: 'ms' | 's' | 'bytes' | 'count' | 'percent';
-  tags?: Record<string, string>;
-}
-
-export interface UserMetrics {
-  userId: string;
-  
-  // Engagement
-  totalSessions: number;
-  totalTimeSpent: number; // seconds
-  lastActive: Date;
-  
-  // Usage
-  projectsCreated: number;
-  filesCreated: number;
-  aiMessagesCount: number;
-  aiTokensUsed: number;
-  buildCount: number;
-  
-  // Monetization
-  plan: string;
-  totalSpent: number;
-  mrr: number; // Monthly Recurring Revenue
-  ltv: number; // Lifetime Value
-}
-
-export interface DashboardMetrics {
-  // Users
-  totalUsers: number;
-  activeUsersToday: number;
-  activeUsersWeek: number;
-  activeUsersMonth: number;
-  newUsersToday: number;
-  churnRate: number;
-  
-  // Revenue
-  mrrTotal: number;
-  arrTotal: number;
-  avgRevenuePerUser: number;
-  conversionRate: number;
-  
-  // Usage
-  totalProjects: number;
-  totalFiles: number;
-  totalAssets: number;
-  totalAIRequests: number;
-  totalAITokens: number;
-  
-  // Performance
-  avgApiLatency: number;
-  errorRate: number;
-  uptime: number;
-}
+import type {
+  AnalyticsEvent,
+  DashboardMetrics,
+  EventAction,
+  EventCategory,
+  PerformanceMetric,
+} from './analytics.types'
+export type {
+  AnalyticsEvent,
+  DashboardMetrics,
+  EventAction,
+  EventCategory,
+  MetricsQuery,
+  PerformanceMetric,
+  TimeSeriesData,
+  UserMetrics,
+} from './analytics.types'
+export { MetricsAggregator } from './analytics-metrics'
 
 // ============================================================================
 // ANALYTICS TRACKER
@@ -470,109 +313,6 @@ export function useAnalytics() {
     setUser: tracker.setUser.bind(tracker),
     clearUser: tracker.clearUser.bind(tracker),
   };
-}
-
-// ============================================================================
-// MÉTRICAS DO DASHBOARD (SERVER-SIDE)
-// ============================================================================
-
-export interface MetricsQuery {
-  startDate?: Date;
-  endDate?: Date;
-  granularity?: 'hour' | 'day' | 'week' | 'month';
-  category?: EventCategory;
-  userId?: string;
-}
-
-export interface TimeSeriesData {
-  timestamp: Date;
-  value: number;
-}
-
-export class MetricsAggregator {
-  /**
-   * Calcula métricas do dashboard
-   */
-  static async getDashboardMetrics(): Promise<DashboardMetrics> {
-    // Em produção, isso seria calculado do banco de dados
-    return {
-      totalUsers: 0,
-      activeUsersToday: 0,
-      activeUsersWeek: 0,
-      activeUsersMonth: 0,
-      newUsersToday: 0,
-      churnRate: 0,
-      mrrTotal: 0,
-      arrTotal: 0,
-      avgRevenuePerUser: 0,
-      conversionRate: 0,
-      totalProjects: 0,
-      totalFiles: 0,
-      totalAssets: 0,
-      totalAIRequests: 0,
-      totalAITokens: 0,
-      avgApiLatency: 0,
-      errorRate: 0,
-      uptime: 99.9,
-    };
-  }
-  
-  /**
-   * Obtém série temporal de uma métrica
-   */
-  static async getTimeSeries(
-    metric: string,
-    query: MetricsQuery
-  ): Promise<TimeSeriesData[]> {
-    // Implementação real usaria o banco de dados
-    return [];
-  }
-  
-  /**
-   * Calcula métricas de um usuário específico
-   */
-  static async getUserMetrics(userId: string): Promise<UserMetrics> {
-    return {
-      userId,
-      totalSessions: 0,
-      totalTimeSpent: 0,
-      lastActive: new Date(),
-      projectsCreated: 0,
-      filesCreated: 0,
-      aiMessagesCount: 0,
-      aiTokensUsed: 0,
-      buildCount: 0,
-      plan: 'free',
-      totalSpent: 0,
-      mrr: 0,
-      ltv: 0,
-    };
-  }
-  
-  /**
-   * Calcula cohort analysis
-   */
-  static async getCohortAnalysis(
-    startDate: Date,
-    endDate: Date,
-    granularity: 'day' | 'week' | 'month' = 'week'
-  ): Promise<{ cohort: string; retention: number[] }[]> {
-    return [];
-  }
-  
-  /**
-   * Calcula funil de conversão
-   */
-  static async getConversionFunnel(
-    steps: EventAction[],
-    query: MetricsQuery
-  ): Promise<{ step: string; count: number; rate: number }[]> {
-    return steps.map((step, index) => ({
-      step,
-      count: 0,
-      rate: index === 0 ? 100 : 0,
-    }));
-  }
 }
 
 // ============================================================================

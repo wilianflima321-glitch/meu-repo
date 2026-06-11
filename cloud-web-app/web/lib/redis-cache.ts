@@ -1,119 +1,12 @@
-import {createComponentLogger, logger} from '@/lib/observability/logger'
+import { createComponentLogger, logger } from '@/lib/observability/logger'
 import { MemoryCache } from './redis-cache-memory'
+import { redisCacheConfig as config } from './redis-cache.config'
+import { createCachedDecorator } from './redis-cache-decorator'
+import { loadIORedis } from './redis-cache-loader'
+import type { CacheOptions, CacheStats, RedisLike } from './redis-cache.types'
+export type { AsyncCacheable, CacheConfig, CacheEntry, CacheOptions, CacheStats, RedisLike } from './redis-cache.types'
 
 const log = createComponentLogger('redis-cache')
-
-
-/**
- * Redis Cache Layer - Cache Distribuído
- *
- * Sistema de cache distribuído para:
- * - Sessions de usuário
- * - Respostas de API
- * - Dados frequentemente acessados
- * - Rate limiting global
- *
- * Suporta fallback para cache in-memory se Redis não estiver disponível.
- *
- * DEPENDÊNCIAS OPCIONAIS:
- * npm install ioredis
- */
-
-// ============================================================================
-// LAZY LOAD - Dependências opcionais
-// ============================================================================
-
-interface RedisLike {
-  get(key: string): Promise<string | null>;
-  setex(key: string, ttl: number, value: string): Promise<unknown>;
-  del(...keys: string[]): Promise<number>;
-  keys(pattern: string): Promise<string[]>;
-  smembers(key: string): Promise<string[]>;
-  sadd(key: string, value: string): Promise<unknown>;
-  exists(key: string): Promise<number>;
-  expire(key: string, ttl: number): Promise<number>;
-  incrby(key: string, amount: number): Promise<number>;
-  zadd(key: string, score: number, member: string): Promise<number>;
-  zcard(key: string): Promise<number>;
-  zrevrange(key: string, start: number, stop: number): Promise<string[]>;
-  dbsize(): Promise<number>;
-  info(section: string): Promise<string>;
-  ping(): Promise<unknown>;
-  connect(): Promise<void>;
-  quit(): Promise<void>;
-  on(event: 'connect' | 'close', callback: () => void): void;
-  on(event: 'error', callback: (error: Error) => void): void;
-}
-
-type IORedisConstructor = new (options: Record<string, unknown>) => RedisLike;
-type AsyncCacheable = (...args: unknown[]) => Promise<unknown>;
-
-let IORedisModule: IORedisConstructor | null = null;
-let loadAttempted = false;
-
-async function loadIORedis(): Promise<IORedisConstructor | null> {
-  if (loadAttempted) return IORedisModule;
-  loadAttempted = true;
-
-  try {
-    IORedisModule = await eval('import("ioredis")').then((module: unknown) => {
-      const candidate = module as { default?: IORedisConstructor };
-      return candidate.default ?? (module as IORedisConstructor);
-    });
-    return IORedisModule;
-  } catch {
-    logger.warn('[RedisCache] ioredis not installed. Using in-memory fallback.');
-    return null;
-  }
-}
-
-// ============================================================================
-// CONFIGURAÇÃO
-// ============================================================================
-
-interface CacheConfig {
-  host: string;
-  port: number;
-  password?: string;
-  keyPrefix: string;
-  defaultTTL: number; // segundos
-  maxMemoryFallback: number; // bytes
-}
-
-const config: CacheConfig = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD || undefined,
-  keyPrefix: 'aethel:cache:',
-  defaultTTL: 3600, // 1 hour
-  maxMemoryFallback: 100 * 1024 * 1024, // 100MB
-};
-
-// ============================================================================
-// TIPOS
-// ============================================================================
-
-export interface CacheEntry<T = unknown> {
-  value: T;
-  ttl: number;
-  createdAt: number;
-  tags?: string[];
-}
-
-export interface CacheStats {
-  hits: number;
-  misses: number;
-  sets: number;
-  deletes: number;
-  size: number;
-  memoryUsage: number;
-  isRedisConnected: boolean;
-}
-
-export interface CacheOptions {
-  ttl?: number;
-  tags?: string[];
-}
 
 // ============================================================================
 // CLASSE PRINCIPAL: REDIS CACHE
@@ -571,38 +464,7 @@ export { CacheKeys } from './redis-cache-keys'
 // DECORATORS / HOC PARA CACHING
 // ============================================================================
 
-/**
- * Decorator para cachear resultado de função
- */
-export function cached<T extends AsyncCacheable>(
-  keyGenerator: (...args: Parameters<T>) => string,
-  options?: CacheOptions
-) {
-  return function (_target: object, _propertyKey: string, descriptor: TypedPropertyDescriptor<T>) {
-    const originalMethod = descriptor.value;
-    if (!originalMethod) return descriptor;
-
-    descriptor.value = async function (this: unknown, ...args: Parameters<T>) {
-      const key = keyGenerator(...args);
-
-      // Tenta obter do cache
-      const cached = await cache.get(key);
-      if (cached !== null) {
-        return cached;
-      }
-
-      // Executa método original
-      const result = await originalMethod.apply(this, args);
-
-      // Cacheia resultado
-      await cache.set(key, result, options);
-
-      return result as Awaited<ReturnType<T>>;
-    } as T;
-
-    return descriptor;
-  };
-}
+export const cached = createCachedDecorator(cache)
 
 // ============================================================================
 // EXPORTS
