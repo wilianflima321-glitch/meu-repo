@@ -16,12 +16,18 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { EventEmitter } from 'events';
-import { createWriteStream, createReadStream } from 'fs';
-import { pipeline } from 'stream/promises';
-import { createGunzip } from 'zlib';
 import { resolveWorkspaceRoot } from './workspace-path';
 
 import { OPEN_VSX, VSCODE_MARKETPLACE } from './marketplace-runtime.contracts';
+import { searchMarketplaceExtensions } from './marketplace-runtime-search';
+import {
+  downloadMarketplaceFile,
+  extractMarketplaceVsix,
+  findVsCodeMarketplaceAsset,
+  isNewerMarketplaceVersion,
+  loadMarketplaceManifest,
+  parseVsCodeMarketplaceProperties,
+} from './marketplace-runtime-utils';
 import type { Extension, ExtensionManifest, ExtensionVersion, InstallResult, InstalledExtension, MarketplaceConfig, OpenVsxExtension, OpenVsxSearchResponse, SearchResult, VsCodeExtension, VsCodeResultMetadata, VsCodeSearchResponse, VsCodeStatistic } from './marketplace-runtime.contracts';
 
 export type { Extension, ExtensionManifest, ExtensionVersion, InstallResult, InstalledExtension, SearchResult } from './marketplace-runtime.contracts';
@@ -59,160 +65,13 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
   // SEARCH
   // ==========================================================================
 
-  /**
-   * Busca extensões no marketplace
-   */
   async search(query: string, options?: {
     category?: string;
     sortBy?: 'relevance' | 'downloads' | 'rating' | 'updated';
     pageSize?: number;
     pageNumber?: number;
   }): Promise<SearchResult> {
-    const {
-      category,
-      sortBy = 'relevance',
-      pageSize = 20,
-      pageNumber = 1,
-    } = options || {};
-
-    if (this.marketplace.name === 'Open VSX') {
-      return this.searchOpenVSX(query, category, sortBy, pageSize, pageNumber);
-    } else {
-      return this.searchVSCodeMarketplace(query, category, sortBy, pageSize, pageNumber);
-    }
-  }
-
-  private async searchOpenVSX(
-    query: string,
-    category: string | undefined,
-    sortBy: string,
-    pageSize: number,
-    pageNumber: number
-  ): Promise<SearchResult> {
-    const params = new URLSearchParams({
-      query,
-      size: pageSize.toString(),
-      offset: ((pageNumber - 1) * pageSize).toString(),
-      sortBy: sortBy === 'downloads' ? 'downloadCount' : sortBy === 'rating' ? 'averageRating' : sortBy,
-      sortOrder: 'desc',
-    });
-
-    if (category) {
-      params.set('category', category);
-    }
-
-    const response = await fetch(`${this.marketplace.searchUrl}?${params}`);
-
-    if (!response.ok) {
-      throw new Error(`Search failed: ${response.statusText}`);
-    }
-
-    const data = await response.json() as OpenVsxSearchResponse;
-
-    const extensions: Extension[] = (data.extensions || []).map((ext: OpenVsxExtension) => ({
-      id: `${ext.namespace}.${ext.name}`,
-      name: ext.name,
-      displayName: ext.displayName || ext.name,
-      publisher: ext.namespace,
-      version: ext.version,
-      description: ext.description || '',
-      categories: ext.categories || [],
-      tags: ext.tags || [],
-      icon: ext.files?.icon,
-      repository: ext.repository,
-      license: ext.license,
-      downloadCount: ext.downloadCount || 0,
-      rating: ext.averageRating || 0,
-      ratingCount: ext.reviewCount || 0,
-      verified: ext.verified || false,
-      preview: ext.preview || false,
-      deprecated: ext.deprecated || false,
-      engines: ext.engines || {},
-      publishedAt: new Date(ext.publishedDate || ext.timestamp || Date.now()),
-      updatedAt: new Date(ext.lastUpdated || ext.timestamp || Date.now()),
-    }));
-
-    return {
-      extensions,
-      totalCount: data.totalSize || extensions.length,
-      pageNumber,
-      pageSize,
-    };
-  }
-
-  private async searchVSCodeMarketplace(
-    query: string,
-    category: string | undefined,
-    sortBy: string,
-    pageSize: number,
-    pageNumber: number
-  ): Promise<SearchResult> {
-    // VS Code Marketplace uses a different API format
-    const body = {
-      filters: [{
-        criteria: [
-          { filterType: 8, value: 'Microsoft.VisualStudio.Code' },
-          { filterType: 10, value: query },
-          ...(category ? [{ filterType: 5, value: category }] : []),
-        ],
-        pageNumber,
-        pageSize,
-        sortBy: sortBy === 'downloads' ? 4 : sortBy === 'rating' ? 12 : sortBy === 'updated' ? 1 : 0,
-        sortOrder: 2,
-      }],
-      assetTypes: [],
-      flags: 914,
-    };
-
-    const response = await fetch(this.marketplace.searchUrl, {
-      method: 'POST',
-      headers: this.marketplace.headers,
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Search failed: ${response.statusText}`);
-    }
-
-    const data = await response.json() as VsCodeSearchResponse;
-    const results = data.results?.[0];
-
-    const extensions: Extension[] = (results?.extensions || []).map((ext: VsCodeExtension) => {
-      const latestVersion = ext.versions?.[0];
-      const properties = this.parseProperties(latestVersion?.properties || []);
-      const installStatistic = ext.statistics?.find((statistic: VsCodeStatistic) => statistic.statisticName === 'install');
-      const ratingStatistic = ext.statistics?.find((statistic: VsCodeStatistic) => statistic.statisticName === 'averagerating');
-      const ratingCountStatistic = ext.statistics?.find((statistic: VsCodeStatistic) => statistic.statisticName === 'ratingcount');
-
-      return {
-        id: `${ext.publisher.publisherName}.${ext.extensionName}`,
-        name: ext.extensionName,
-        displayName: ext.displayName || ext.extensionName,
-        publisher: ext.publisher.publisherName,
-        version: latestVersion?.version || '0.0.0',
-        description: ext.shortDescription || '',
-        categories: ext.categories || [],
-        tags: ext.tags || [],
-        icon: this.findAsset(latestVersion?.files, 'Microsoft.VisualStudio.Services.Icons.Default'),
-        repository: properties['Microsoft.VisualStudio.Services.Links.Source'],
-        downloadCount: installStatistic?.value || 0,
-        rating: ratingStatistic?.value || 0,
-        ratingCount: ratingCountStatistic?.value || 0,
-        verified: ext.publisher.isDomainVerified || false,
-        preview: ext.flags?.includes('preview') || false,
-        deprecated: ext.flags?.includes('deprecated') || false,
-        engines: { vscode: properties['Microsoft.VisualStudio.Code.Engine'] },
-        publishedAt: new Date(ext.publishedDate || Date.now()),
-        updatedAt: new Date(ext.lastUpdated || Date.now()),
-      };
-    });
-
-    return {
-      extensions,
-      totalCount: results?.resultMetadata?.find((metadata: VsCodeResultMetadata) => metadata.metadataType === 'ResultCount')?.metadataItems?.[0]?.count || extensions.length,
-      pageNumber,
-      pageSize,
-    };
+    return searchMarketplaceExtensions(this.marketplace, query, options);
   }
 
   // ==========================================================================
@@ -319,18 +178,18 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
 
       // Download VSIX
       const vsixPath = path.join(this.cacheDir, `${extensionId}-${version || 'latest'}.vsix`);
-      await this.downloadFile(downloadUrl, vsixPath);
+      await downloadMarketplaceFile(downloadUrl, vsixPath);
 
       this.emit('installProgress', { extensionId, phase: 'extracting', progress: 50 });
 
       // Extract VSIX
       const installPath = path.join(this.extensionsPath, extensionId);
-      await this.extractVsix(vsixPath, installPath);
+      await extractMarketplaceVsix(vsixPath, installPath);
 
       this.emit('installProgress', { extensionId, phase: 'loading', progress: 80 });
 
       // Load manifest
-      const manifest = await this.loadManifest(installPath);
+      const manifest = await loadMarketplaceManifest(installPath);
 
       // Create installed extension record
       const installed: InstalledExtension = {
@@ -493,7 +352,7 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
       try {
         const details = await this.getExtensionDetails(extension.id);
 
-        if (details && this.isNewerVersion(details.version, extension.version)) {
+        if (details && isNewerMarketplaceVersion(details.version, extension.version)) {
           updates.push({ extension, latestVersion: details.version });
         }
       } catch {
@@ -516,7 +375,7 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
 
       for (const ext of list) {
         try {
-          const manifest = await this.loadManifest(ext.installPath);
+          const manifest = await loadMarketplaceManifest(ext.installPath);
 
           this.installedExtensions.set(ext.id, {
             ...ext,
@@ -553,103 +412,7 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
     await fs.writeFile(listPath, JSON.stringify(list, null, 2));
   }
 
-  private async downloadFile(url: string, destPath: string): Promise<void> {
-    const response = await fetch(url);
 
-    if (!response.ok) {
-      throw new Error(`Download failed: ${response.statusText}`);
-    }
-
-    if (!response.body) {
-      throw new Error('No response body');
-    }
-
-    await fs.mkdir(path.dirname(destPath), { recursive: true });
-
-    const fileStream = createWriteStream(destPath);
-    const reader = response.body.getReader();
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      fileStream.write(Buffer.from(value));
-    }
-
-    fileStream.end();
-
-    await new Promise<void>((resolve, reject) => {
-      fileStream.on('finish', () => resolve());
-      fileStream.on('error', reject);
-    });
-  }
-
-  private async extractVsix(vsixPath: string, destPath: string): Promise<void> {
-    // VSIX is a ZIP file - adm-zip uses CommonJS export = syntax
-    type AdmZipConstructor = new (input: string) => {
-      getEntries(): Array<{
-        entryName: string
-        isDirectory: boolean
-        getData(): Buffer
-      }>
-    }
-    const AdmZipModule = (await import('adm-zip')) as unknown as { default?: AdmZipConstructor } & AdmZipConstructor;
-    const AdmZip = AdmZipModule.default || AdmZipModule;
-
-    const zip = new AdmZip(vsixPath);
-
-    await fs.mkdir(destPath, { recursive: true });
-
-    // Extract extension folder (inside ZIP)
-    for (const entry of zip.getEntries()) {
-      if (entry.entryName.startsWith('extension/')) {
-        const relativePath = entry.entryName.replace('extension/', '');
-
-        if (!relativePath) continue;
-
-        const fullPath = path.join(destPath, relativePath);
-
-        if (entry.isDirectory) {
-          await fs.mkdir(fullPath, { recursive: true });
-        } else {
-          await fs.mkdir(path.dirname(fullPath), { recursive: true });
-          await fs.writeFile(fullPath, entry.getData());
-        }
-      }
-    }
-  }
-
-  private async loadManifest(extensionPath: string): Promise<ExtensionManifest> {
-    const manifestPath = path.join(extensionPath, 'package.json');
-    const content = await fs.readFile(manifestPath, 'utf-8');
-    return JSON.parse(content);
-  }
-
-  private parseProperties(properties: Array<{ key: string; value: string }>): Record<string, string> {
-    const result: Record<string, string> = {};
-    for (const prop of properties) {
-      result[prop.key] = prop.value;
-    }
-    return result;
-  }
-
-  private findAsset(files: Array<{ assetType: string; source: string }> | undefined, assetType: string): string | undefined {
-    return files?.find(f => f.assetType === assetType)?.source;
-  }
-
-  private isNewerVersion(version1: string, version2: string): boolean {
-    const v1Parts = version1.split('.').map(Number);
-    const v2Parts = version2.split('.').map(Number);
-
-    for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
-      const v1 = v1Parts[i] || 0;
-      const v2 = v2Parts[i] || 0;
-
-      if (v1 > v2) return true;
-      if (v1 < v2) return false;
-    }
-
-    return false;
-  }
 }
 
 // ============================================================================
