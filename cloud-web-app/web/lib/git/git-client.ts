@@ -3,90 +3,9 @@
  * Provides git operations for source control management
  */
 
-export interface GitStatus {
-  branch: string;
-  ahead: number;
-  behind: number;
-  staged: GitFileStatus[];
-  unstaged: GitFileStatus[];
-  untracked: GitFileStatus[];
-  conflicted: GitFileStatus[];
-}
-
-export interface GitFileStatus {
-  path: string;
-  status: 'added' | 'modified' | 'deleted' | 'renamed' | 'copied' | 'untracked' | 'conflicted';
-  oldPath?: string;
-}
-
-export interface GitCommit {
-  hash: string;
-  author: string;
-  email: string;
-  date: Date;
-  message: string;
-  parents: string[];
-}
-
-export interface GitBranch {
-  name: string;
-  current: boolean;
-  remote?: string;
-  upstream?: string;
-}
-
-export interface GitRemote {
-  name: string;
-  url: string;
-  fetch: string;
-  push: string;
-}
-
-export interface GitDiff {
-  path: string;
-  oldPath?: string;
-  status?: string;
-  additions?: number;
-  deletions?: number;
-  patch?: string;
-  hunks: GitDiffHunk[];
-}
-
-export interface GitDiffHunk {
-  oldStart: number;
-  oldLines: number;
-  newStart: number;
-  newLines: number;
-  lines: GitDiffLine[];
-}
-
-export interface GitDiffLine {
-  type: 'context' | 'addition' | 'deletion';
-  content: string;
-  oldLineNumber?: number;
-  newLineNumber?: number;
-}
-
-export interface GitConflict {
-  path: string;
-  ours: string;
-  theirs: string;
-  base?: string;
-}
-
-type RawGitCommit = Omit<GitCommit, 'date'> & { date: string | number | Date };
-type RawGitBlame = {
-  line: number;
-  hash: string;
-  author: string;
-  date: string | number | Date;
-  content: string;
-};
-type RawGitStash = {
-  index: number;
-  message: string;
-  date: string | number | Date;
-};
+import { normalizeGitBlame, normalizeGitCommits, normalizeGitStashes, postGitApi, postGitApiVoid } from './git-client-request';
+import type { GitBranch, GitCommit, GitConflict, GitDiff, GitRemote, GitStatus, RawGitBlame, RawGitCommit, RawGitStash } from './git-client.types';
+export type { GitBranch, GitCommit, GitConflict, GitDiff, GitDiffHunk, GitDiffLine, GitFileStatus, GitRemote, GitStatus } from './git-client.types';
 
 export class GitClient {
   private workspaceRoot: string;
@@ -107,19 +26,11 @@ export class GitClient {
   }
 
   async add(paths: string[]): Promise<void> {
-    await fetch('/api/git/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, paths })
-    });
+    await postGitApiVoid('/api/git/add', { cwd: this.workspaceRoot, paths });
   }
 
   async reset(paths: string[]): Promise<void> {
-    await fetch('/api/git/reset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, paths })
-    });
+    await postGitApiVoid('/api/git/reset', { cwd: this.workspaceRoot, paths });
   }
 
   /**
@@ -187,22 +98,14 @@ export class GitClient {
    * Cherry-pick
    */
   async cherryPick(commitHash: string): Promise<void> {
-    await fetch('/api/git/cherry-pick', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, commitHash })
-    });
+    await postGitApiVoid('/api/git/cherry-pick', { cwd: this.workspaceRoot, commitHash });
   }
 
   /**
    * Rebase operations
    */
   async rebaseLegacy(branch: string, interactive?: boolean): Promise<void> {
-    await fetch('/api/git/rebase', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, branch, interactive })
-    });
+    await postGitApiVoid('/api/git/rebase', { cwd: this.workspaceRoot, branch, interactive });
   }
 
   async rebaseContinue(): Promise<void> {
@@ -280,19 +183,11 @@ export class GitClient {
    * Submodule operations
    */
   async submoduleInit(): Promise<void> {
-    await fetch('/api/git/submodule', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, action: 'init' })
-    });
+    await postGitApiVoid('/api/git/submodule', { cwd: this.workspaceRoot, action: 'init' });
   }
 
   async submoduleUpdate(): Promise<void> {
-    await fetch('/api/git/submodule', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, action: 'update' })
-    });
+    await postGitApiVoid('/api/git/submodule', { cwd: this.workspaceRoot, action: 'update' });
   }
 
   async submoduleAdd(url: string, path: string): Promise<void> {
@@ -399,11 +294,7 @@ export class GitClient {
   }
 
   async fetch(remote: string = 'origin', prune: boolean = true): Promise<void> {
-    await fetch('/api/git/fetch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, remote, prune })
-    });
+    await postGitApiVoid('/api/git/fetch', { cwd: this.workspaceRoot, remote, prune });
   }
 
   async branches(includeRemote: boolean = false): Promise<GitBranch[]> {
@@ -418,57 +309,33 @@ export class GitClient {
   }
 
   async createBranch(name: string, startPoint?: string): Promise<void> {
-    await fetch('/api/git/branch/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, name, startPoint })
-    });
+    await postGitApiVoid('/api/git/branch/create', { cwd: this.workspaceRoot, name, startPoint });
   }
 
   async deleteBranch(name: string, force: boolean = false): Promise<void> {
-    await fetch('/api/git/branch/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, name, force })
-    });
+    await postGitApiVoid('/api/git/branch/delete', { cwd: this.workspaceRoot, name, force });
   }
 
   async checkout(branch: string, create: boolean = false): Promise<void> {
-    await fetch('/api/git/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, branch, create })
-    });
+    await postGitApiVoid('/api/git/checkout', { cwd: this.workspaceRoot, branch, create });
   }
 
   async merge(branch: string, noFastForward: boolean = false): Promise<void> {
-    await fetch('/api/git/merge', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, branch, noFastForward })
-    });
+    await postGitApiVoid('/api/git/merge', { cwd: this.workspaceRoot, branch, noFastForward });
   }
 
   async rebase(branch: string, interactive: boolean = false): Promise<void> {
-    await fetch('/api/git/rebase', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, branch, interactive })
-    });
+    await postGitApiVoid('/api/git/rebase', { cwd: this.workspaceRoot, branch, interactive });
   }
 
   async log(limit: number = 50, skip: number = 0, branch?: string): Promise<GitCommit[]> {
-    const response = await fetch('/api/git/log', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, limit, skip, branch })
+    const data = await postGitApi<{ commits?: RawGitCommit[] }>('/api/git/log', {
+      cwd: this.workspaceRoot,
+      limit,
+      skip,
+      branch,
     });
-
-    const data = await response.json() as { commits?: RawGitCommit[] };
-    return (data.commits ?? []).map((c) => ({
-      ...c,
-      date: new Date(c.date)
-    }));
+    return normalizeGitCommits(data.commits);
   }
 
   async show(hash: string): Promise<{ commit: GitCommit; diff: GitDiff[] }> {
@@ -506,33 +373,19 @@ export class GitClient {
     date: Date;
     content: string;
   }>> {
-    const response = await fetch('/api/git/blame', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, path })
+    const data = await postGitApi<{ blame?: RawGitBlame[] }>('/api/git/blame', {
+      cwd: this.workspaceRoot,
+      path,
     });
-
-    const data = await response.json() as { blame?: RawGitBlame[] };
-    return (data.blame ?? []).map((b) => ({
-      ...b,
-      date: new Date(b.date)
-    }));
+    return normalizeGitBlame(data.blame);
   }
 
   async stash(message?: string): Promise<void> {
-    await fetch('/api/git/stash/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, message })
-    });
+    await postGitApiVoid('/api/git/stash/save', { cwd: this.workspaceRoot, message });
   }
 
   async stashPop(index: number = 0): Promise<void> {
-    await fetch('/api/git/stash/pop', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, index })
-    });
+    await postGitApiVoid('/api/git/stash/pop', { cwd: this.workspaceRoot, index });
   }
 
   async stashList(): Promise<Array<{
@@ -540,17 +393,10 @@ export class GitClient {
     message: string;
     date: Date;
   }>> {
-    const response = await fetch('/api/git/stash/list', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot })
+    const data = await postGitApi<{ stashes?: RawGitStash[] }>('/api/git/stash/list', {
+      cwd: this.workspaceRoot,
     });
-
-    const data = await response.json() as { stashes?: RawGitStash[] };
-    return (data.stashes ?? []).map((s) => ({
-      ...s,
-      date: new Date(s.date)
-    }));
+    return normalizeGitStashes(data.stashes);
   }
 
   async remotes(): Promise<GitRemote[]> {
@@ -565,19 +411,11 @@ export class GitClient {
   }
 
   async addRemote(name: string, url: string): Promise<void> {
-    await fetch('/api/git/remote/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, name, url })
-    });
+    await postGitApiVoid('/api/git/remote/add', { cwd: this.workspaceRoot, name, url });
   }
 
   async removeRemote(name: string): Promise<void> {
-    await fetch('/api/git/remote/remove', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, name })
-    });
+    await postGitApiVoid('/api/git/remote/remove', { cwd: this.workspaceRoot, name });
   }
 
   async getConflicts(): Promise<GitConflict[]> {
@@ -600,11 +438,7 @@ export class GitClient {
   }
 
   async init(bare: boolean = false): Promise<void> {
-    await fetch('/api/git/init', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, bare })
-    });
+    await postGitApiVoid('/api/git/init', { cwd: this.workspaceRoot, bare });
   }
 
   async clone(url: string, directory?: string): Promise<void> {

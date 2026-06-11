@@ -21,36 +21,20 @@
  * - Export para runtime format
  */
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { Canvas } from '@react-three/fiber';
-import {
-  OrbitControls,
-  Grid,
-  Environment,
-  GizmoHelper,
-  GizmoViewport,
-} from '@react-three/drei';
 import {
   Droplet,
-  RotateCcw,
-  Settings,
   Download,
   Upload,
-  Eye,
-  EyeOff,
   Box,
   ArrowDown,
   Palette,
   Waves,
   Thermometer,
   Wind,
-  Layers,
   Zap,
   Target,
-  Move,
-  Maximize,
   RefreshCw,
   FileOutput,
-  Pipette,
 } from 'lucide-react';
 
 // ============================================================================
@@ -58,8 +42,6 @@ import {
 // ============================================================================
 
 import {
-
-
   FLUID_PRESETS,
   SPHFluidSimulation,
   type FluidEditorState,
@@ -68,7 +50,10 @@ import {
   type FluidPreset,
   type FluidToolType,
 } from '@/lib/physics/fluid-simulation-core';
-import { BoundaryBox, CollapsibleSection, ColorPicker, FlowArrows, FluidParticles3D, SimulationStats, Slider, Toolbar, Vector3Input } from '@/lib/physics/FluidSimulationPanels.runtime';
+import { CollapsibleSection, ColorPicker, Slider, Toolbar, Vector3Input } from '@/lib/physics/FluidSimulationPanels.runtime';
+import { bakeFluidToMesh, exportFluidConfiguration, importFluidConfiguration } from './FluidSimulationEditor.actions-runtime';
+import { createDefaultFluidEditorState, createDefaultFluidParams } from './FluidSimulationEditor.config-runtime';
+import { FluidSimulationViewport } from './FluidSimulationEditor.viewport-runtime';
 import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('FluidSimulationEditor')
@@ -95,37 +80,9 @@ export default function FluidSimulationEditor({
   onFluidUpdate,
   onExport,
 }: FluidSimulationEditorProps) {
-  // Default fluid parameters
-  const defaultParams: FluidParams = {
-    particleCount: 500,
-    viscosity: 0.01,
-    surfaceTension: 0.07,
-    restDensity: 1000,
-    stiffness: 200,
-    particleRadius: 0.05,
-    smoothingRadius: 0.2,
-    color: 'rgb(59 130 246)',
-    opacity: 0.7,
-    gravity: { x: 0, y: -9.81, z: 0 },
-    boundarySize: { x: 3, y: 3, z: 3 },
-    boundaryPosition: { x: 0, y: 1.5, z: 0 },
-    flowDirection: { x: 1, y: 0, z: 0 },
-    flowStrength: 0,
-    temperature: 20,
-    enableSurfaceMeshing: false,
-    meshResolution: 32,
-  };
-
   // State
-  const [params, setParams] = useState<FluidParams>({ ...defaultParams, ...initialParams });
-  const [editorState, setEditorState] = useState<FluidEditorState>({
-    isSimulating: false,
-    showBoundary: true,
-    showFlowArrows: true,
-    showVelocityColors: false,
-    showDensityColors: false,
-    currentPreset: null,
-  });
+  const [params, setParams] = useState<FluidParams>(() => createDefaultFluidParams(initialParams));
+  const [editorState, setEditorState] = useState<FluidEditorState>(() => createDefaultFluidEditorState());
   const [selectedTool, setSelectedTool] = useState<FluidToolType>('view');
   const [isBaking, setIsBaking] = useState(false);
 
@@ -180,63 +137,21 @@ export default function FluidSimulationEditor({
   // Bake to mesh (placeholder - would generate a mesh from particles)
   const bakeToMesh = useCallback(async () => {
     setIsBaking(true);
-
-    // Simulate baking process
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // In a real implementation, this would use marching cubes or similar
-    // to generate a mesh from the particle positions
-    log.info('Baking fluid to mesh with resolution:', params.meshResolution);
-
+    await bakeFluidToMesh({ meshResolution: params.meshResolution, log });
     setIsBaking(false);
   }, [params.meshResolution]);
 
   // Export configuration
   const handleExport = useCallback(() => {
-    const exportData = {
-      params,
-      metadata: {
-        volumeId,
-        timestamp: Date.now(),
-        version: '1.0',
-      },
-    };
-
-    onExport?.({ params });
-
-    // Also trigger download
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `fluid_${volumeId || 'config'}_${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportFluidConfiguration({ params, volumeId, onExport });
   }, [params, volumeId, onExport]);
 
   // Import configuration
   const handleImport = useCallback(() => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = JSON.parse(e.target?.result as string);
-          if (data.params) {
-            setParams((prev) => ({ ...prev, ...data.params }));
-          }
-        } catch (err) {
-          logger.error('Failed to import fluid config:', err);
-        }
-      };
-      reader.readAsText(file);
-    };
-    input.click();
+    importFluidConfiguration({
+      onParams: (nextParams) => setParams((prev) => ({ ...prev, ...nextParams })),
+      onError: (error) => logger.error('Failed to import fluid config:', error),
+    });
   }, []);
 
   return (
@@ -252,96 +167,12 @@ export default function FluidSimulationEditor({
         />
       </div>
 
-      {/* 3D Viewport */}
-      <div className="flex-1 relative">
-        <Canvas camera={{ position: [5, 5, 5], fov: 50 }} shadows>
-          <color attach="background" args={[0x0f172a]} />
-
-          <ambientLight intensity={0.4} />
-          <directionalLight
-            position={[10, 10, 5]}
-            intensity={1}
-            castShadow
-            shadow-mapSize={[2048, 2048]}
-          />
-          <pointLight position={[-5, 5, -5]} intensity={0.5} color={0x0ea5e9} />
-
-          {/* Fluid particles */}
-          <FluidParticles3D
-            simulation={simulationRef.current}
-            params={params}
-            editorState={editorState}
-          />
-
-          {/* Boundary box */}
-          <BoundaryBox
-            params={params}
-            visible={editorState.showBoundary}
-          />
-
-          {/* Flow arrows */}
-          <FlowArrows
-            params={params}
-            visible={editorState.showFlowArrows}
-          />
-
-          <Grid infiniteGrid fadeDistance={30} />
-          <OrbitControls makeDefault />
-          <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
-            <GizmoViewport />
-          </GizmoHelper>
-          <Environment preset="warehouse" />
-        </Canvas>
-
-        {/* Viewport info overlay */}
-        <div className="absolute top-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] p-3 rounded">
-          <div className="text-xs text-[var(--aethel-text-secondary)] mb-2">Simulation Status</div>
-          <SimulationStats simulation={simulationRef.current} params={params} />
-
-          <div className="mt-2 pt-2 border-t border-[var(--aethel-border-secondary)]">
-            <div className="flex items-center gap-2 text-xs">
-              <div className={`w-2 h-2 rounded-full ${editorState.isSimulating ? 'bg-[var(--aethel-success)] animate-pulse' : 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)]'}`} />
-              <span>{editorState.isSimulating ? 'Running' : 'Paused'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* View toggles */}
-        <div className="absolute top-4 right-80 flex flex-col gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] p-2 rounded">
-          <button type="button"
-            onClick={() => setEditorState((p) => ({ ...p, showBoundary: !p.showBoundary }))}
-            className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showBoundary ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-            }`}
-          >
-            <Box className="w-3 h-3" /> Boundary
-          </button>
-          <button type="button"
-            onClick={() => setEditorState((p) => ({ ...p, showFlowArrows: !p.showFlowArrows }))}
-            className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showFlowArrows ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-            }`}
-          >
-            <Wind className="w-3 h-3" /> Flow
-          </button>
-          <button type="button"
-            onClick={() => setEditorState((p) => ({ ...p, showVelocityColors: !p.showVelocityColors }))}
-            className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showVelocityColors ? 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-            }`}
-          >
-            <Zap className="w-3 h-3" /> Velocity
-          </button>
-          <button type="button"
-            onClick={() => setEditorState((p) => ({ ...p, showDensityColors: !p.showDensityColors }))}
-            className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showDensityColors ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-            }`}
-          >
-            <Layers className="w-3 h-3" /> Density
-          </button>
-        </div>
-      </div>
+      <FluidSimulationViewport
+        simulation={simulationRef.current}
+        params={params}
+        editorState={editorState}
+        setEditorState={setEditorState}
+      />
 
       {/* Settings Panel */}
       <div className="w-72 bg-[var(--aethel-surface-tertiary)] border-l border-[var(--aethel-border-secondary)] overflow-y-auto">
