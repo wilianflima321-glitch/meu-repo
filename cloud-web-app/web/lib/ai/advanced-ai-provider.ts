@@ -17,6 +17,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { EventEmitter } from 'events';
 import { OPENROUTER_MODELS } from './openrouter-models';
 import { convertToAnthropic, convertToGoogle, convertToOpenAI } from './advanced-ai-provider-adapters';
+import { completeOpenAICompatible } from './advanced-ai-provider-openai-compatible';
+import { initializeAdvancedAIClients, selectDefaultAdvancedAIModel } from './advanced-ai-provider-registry';
 
 import type {
   CompletionOptions,
@@ -39,43 +41,7 @@ export type {
   ToolDefinition,
   ToolResult,
 } from './advanced-ai-provider-contracts';
-
-type CompletionFinishReason = CompletionResponse['finishReason'];
-
-function normalizeFinishReason(reason: unknown): CompletionFinishReason {
-  switch (reason) {
-    case 'stop':
-    case 'length':
-    case 'tool_calls':
-    case 'content_filter':
-      return reason;
-    case 'end_turn':
-    case 'stop_sequence':
-      return 'stop';
-    case 'max_tokens':
-      return 'length';
-    case 'tool_use':
-      return 'tool_calls';
-    default:
-      return 'stop';
-  }
-}
-
-function readToolArguments(input: unknown): Record<string, unknown> {
-  if (!input || typeof input !== 'object' || Array.isArray(input)) {
-    return {};
-  }
-
-  return input as Record<string, unknown>;
-}
-
-function parseToolArguments(raw: string): Record<string, unknown> {
-  try {
-    return readToolArguments(JSON.parse(raw));
-  } catch {
-    return {};
-  }
-}
+import { normalizeFinishReason, parseToolArguments, readToolArguments } from './advanced-ai-provider-normalizers';
 
 // ============================================================================
 // ADVANCED AI PROVIDER
@@ -97,33 +63,13 @@ export class AdvancedAIProvider extends EventEmitter {
 
   constructor() {
     super();
-    this.initializeClients();
+    const clients = initializeAdvancedAIClients();
+    this.openai = clients.openai;
+    this.openrouter = clients.openrouter;
+    this.anthropic = clients.anthropic;
+    this.google = clients.google;
   }
 
-  private initializeClients(): void {
-    if (process.env.OPENAI_API_KEY) {
-      this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    }
-
-    if (process.env.OPENROUTER_API_KEY) {
-      this.openrouter = new OpenAI({
-        apiKey: process.env.OPENROUTER_API_KEY,
-        baseURL: 'https://openrouter.ai/api/v1',
-        defaultHeaders: {
-          'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://aethel.local',
-          'X-Title': 'Aethel Engine',
-        },
-      });
-    }
-
-    if (process.env.ANTHROPIC_API_KEY) {
-      this.anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    }
-
-    if (process.env.GOOGLE_API_KEY) {
-      this.google = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    }
-  }
 
   /**
    * Get available models based on configured API keys
@@ -220,10 +166,10 @@ export class AdvancedAIProvider extends EventEmitter {
 
     switch (info.provider) {
       case 'openai':
-        response = await this.completeOpenAI(messages, { ...options, model });
+        response = await completeOpenAICompatible(this.openai, 'openai', messages, { ...options, model });
         break;
       case 'openrouter':
-        response = await this.completeOpenRouter(messages, { ...options, model });
+        response = await completeOpenAICompatible(this.openrouter, 'openrouter', messages, { ...options, model });
         break;
       case 'anthropic':
         response = await this.completeAnthropic(messages, { ...options, model });
@@ -274,61 +220,6 @@ export class AdvancedAIProvider extends EventEmitter {
   }
 
   /**
-   * OpenAI completion
-   */
-  private async completeOpenAI(
-    messages: Message[],
-    options: CompletionOptions
-  ): Promise<CompletionResponse> {
-    if (!this.openai) throw new Error('OpenAI not configured');
-
-    const openaiMessages = convertToOpenAI(messages);
-    const tools = options.tools?.map(t => ({
-      type: 'function' as const,
-      function: {
-        name: t.name,
-        description: t.description,
-        parameters: t.parameters,
-      },
-    }));
-
-    const response = await this.openai.chat.completions.create({
-      model: options.model!,
-      messages: openaiMessages,
-      temperature: options.temperature,
-      max_tokens: options.maxTokens,
-      top_p: options.topP,
-      frequency_penalty: options.frequencyPenalty,
-      presence_penalty: options.presencePenalty,
-      stop: options.stop,
-      tools: tools?.length ? tools : undefined,
-      tool_choice: options.toolChoice,
-      response_format: options.responseFormat,
-    });
-
-    const choice = response.choices[0];
-    const toolCalls = choice.message.tool_calls?.map(tc => ({
-      id: tc.id,
-      name: tc.function.name,
-      arguments: parseToolArguments(tc.function.arguments),
-    }));
-
-    return {
-      content: choice.message.content || '',
-      toolCalls,
-      finishReason: normalizeFinishReason(choice.finish_reason),
-      usage: {
-        promptTokens: response.usage?.prompt_tokens || 0,
-        completionTokens: response.usage?.completion_tokens || 0,
-        totalTokens: response.usage?.total_tokens || 0,
-      },
-      model: response.model,
-      provider: 'openai',
-      latencyMs: 0,
-    };
-  }
-
-  /**
    * OpenAI streaming
    */
   private async *streamOpenAI(
@@ -353,61 +244,6 @@ export class AdvancedAIProvider extends EventEmitter {
         yield { content };
       }
     }
-  }
-
-  /**
-   * OpenRouter completion via OpenAI-compatible API
-   */
-  private async completeOpenRouter(
-    messages: Message[],
-    options: CompletionOptions
-  ): Promise<CompletionResponse> {
-    if (!this.openrouter) throw new Error('OpenRouter not configured');
-
-    const openaiMessages = convertToOpenAI(messages);
-    const tools = options.tools?.map(t => ({
-      type: 'function' as const,
-      function: {
-        name: t.name,
-        description: t.description,
-        parameters: t.parameters,
-      },
-    }));
-
-    const response = await this.openrouter.chat.completions.create({
-      model: options.model!,
-      messages: openaiMessages,
-      temperature: options.temperature,
-      max_tokens: options.maxTokens,
-      top_p: options.topP,
-      frequency_penalty: options.frequencyPenalty,
-      presence_penalty: options.presencePenalty,
-      stop: options.stop,
-      tools: tools?.length ? tools : undefined,
-      tool_choice: options.toolChoice,
-      response_format: options.responseFormat,
-    });
-
-    const choice = response.choices[0];
-    const toolCalls = choice.message.tool_calls?.map(tc => ({
-      id: tc.id,
-      name: tc.function.name,
-      arguments: parseToolArguments(tc.function.arguments),
-    }));
-
-    return {
-      content: choice.message.content || '',
-      toolCalls,
-      finishReason: normalizeFinishReason(choice.finish_reason),
-      usage: {
-        promptTokens: response.usage?.prompt_tokens || 0,
-        completionTokens: response.usage?.completion_tokens || 0,
-        totalTokens: response.usage?.total_tokens || 0,
-      },
-      model: response.model,
-      provider: 'openrouter',
-      latencyMs: 0,
-    };
   }
 
   /**
@@ -436,6 +272,7 @@ export class AdvancedAIProvider extends EventEmitter {
       }
     }
   }
+
 
   /**
    * Anthropic completion
@@ -614,11 +451,12 @@ export class AdvancedAIProvider extends EventEmitter {
    * Select default model based on available providers
    */
   private selectDefaultModel(): string {
-    if (this.openrouter) return 'google/gemini-3.1-flash-lite-preview';
-    if (this.google) return 'gemini-1.5-flash';
-    if (this.openai) return 'gpt-4o-mini';
-    if (this.anthropic) return 'claude-3-5-haiku-20241022';
-    throw new Error('No AI provider configured');
+    return selectDefaultAdvancedAIModel({
+      openai: this.openai,
+      openrouter: this.openrouter,
+      anthropic: this.anthropic,
+      google: this.google,
+    });
   }
 
   /**
