@@ -1,14 +1,8 @@
-/**
- * Weather System
- *
- * Governed environment runtime for weather states, transitions, wind,
- * precipitation, lightning, fog, and biome-aware presentation.
- *
- * @module lib/environment/weather-system
- */
+/** Weather runtime controller for Studio environment systems. */
 
 import { EventEmitter } from 'events';
 import { DEFAULT_WEATHER_PRESETS } from './weather-system.presets';
+import { WeatherProvider, useLightning, useWeather, useWeatherState, useWeatherTransition, useWind } from './weather-system-react';
 import type {
   CloudLayer,
   LightningBolt,
@@ -20,7 +14,6 @@ import type {
   WeatherType,
   WindZone,
 } from './weather-system.contracts';
-
 export { DEFAULT_WEATHER_PRESETS } from './weather-system.presets';
 export type {
   CloudLayer,
@@ -33,18 +26,6 @@ export type {
   WeatherType,
   WindZone,
 } from './weather-system.contracts';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-// ============================================================================
-// WEATHER PRESETS
-// ============================================================================
-
-// ============================================================================
-// WEATHER SYSTEM
-// ============================================================================
 
 export class WeatherSystem extends EventEmitter {
   private static instance: WeatherSystem | null = null;
@@ -97,10 +78,6 @@ export class WeatherSystem extends EventEmitter {
     return WeatherSystem.instance;
   }
 
-  // ============================================================================
-  // LIFECYCLE
-  // ============================================================================
-
   start(): void {
     this.isRunning = true;
     this.lastUpdate = performance.now();
@@ -152,10 +129,6 @@ export class WeatherSystem extends EventEmitter {
 
     this.emit('update', this.currentState);
   }
-
-  // ============================================================================
-  // WEATHER TRANSITIONS
-  // ============================================================================
 
   setWeather(type: WeatherType, immediate = false): void {
     if (immediate) {
@@ -254,10 +227,6 @@ export class WeatherSystem extends EventEmitter {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
-  // ============================================================================
-  // STATE CREATION
-  // ============================================================================
-
   private createStateFromPreset(type: WeatherType): WeatherState {
     const preset = this.presets.get(type) || DEFAULT_WEATHER_PRESETS.clear;
 
@@ -276,10 +245,6 @@ export class WeatherSystem extends EventEmitter {
       fogDensity: preset.fogDensity ?? 0,
     };
   }
-
-  // ============================================================================
-  // CLOUD SYSTEM
-  // ============================================================================
 
   private initializeCloudLayers(): void {
     this.cloudLayers = [
@@ -314,10 +279,6 @@ export class WeatherSystem extends EventEmitter {
   getCloudLayers(): CloudLayer[] {
     return [...this.cloudLayers];
   }
-
-  // ============================================================================
-  // WIND SYSTEM
-  // ============================================================================
 
   private updateWind(deltaTime: number): void {
     // Add random gusts
@@ -374,10 +335,6 @@ export class WeatherSystem extends EventEmitter {
 
     return baseWind;
   }
-
-  // ============================================================================
-  // LIGHTNING SYSTEM
-  // ============================================================================
 
   private updateLightning(deltaTime: number): void {
     this.lightningTimer += deltaTime;
@@ -443,10 +400,6 @@ export class WeatherSystem extends EventEmitter {
     return [...this.activeLightning];
   }
 
-  // ============================================================================
-  // WETNESS SYSTEM
-  // ============================================================================
-
   private updateWetness(deltaTime: number): void {
     if (this.currentState.precipitation > 0) {
       // Increase wetness when raining
@@ -462,10 +415,6 @@ export class WeatherSystem extends EventEmitter {
       this.currentState.wetness = Math.max(0, this.currentState.wetness - dryRate * deltaTime);
     }
   }
-
-  // ============================================================================
-  // GETTERS
-  // ============================================================================
 
   getState(): WeatherState {
     return { ...this.currentState };
@@ -507,10 +456,6 @@ export class WeatherSystem extends EventEmitter {
     return this.transition?.progress ?? 0;
   }
 
-  // ============================================================================
-  // PRESETS
-  // ============================================================================
-
   addPreset(type: WeatherType, preset: WeatherPreset): void {
     this.presets.set(type, preset);
   }
@@ -523,10 +468,6 @@ export class WeatherSystem extends EventEmitter {
     return Array.from(this.presets.values());
   }
 
-  // ============================================================================
-  // CLEANUP
-  // ============================================================================
-
   dispose(): void {
     this.stop();
     this.presets.clear();
@@ -537,131 +478,7 @@ export class WeatherSystem extends EventEmitter {
   }
 }
 
-// ============================================================================
-// REACT HOOKS
-// ============================================================================
-
-import { useState, useEffect, useContext, createContext, useCallback, useMemo } from 'react';
-
-interface WeatherContextValue {
-  system: WeatherSystem;
-}
-
-const WeatherContext = createContext<WeatherContextValue | null>(null);
-
-export function WeatherProvider({
-  children,
-  config,
-}: {
-  children: React.ReactNode;
-  config?: Partial<WeatherConfig>;
-}) {
-  const value = useMemo(() => ({
-    system: new WeatherSystem(config),
-  }), [config]);
-
-  useEffect(() => {
-    value.system.start();
-
-    return () => {
-      value.system.dispose();
-    };
-  }, [value]);
-
-  return (
-    <WeatherContext.Provider value={value}>
-      {children}
-    </WeatherContext.Provider>
-  );
-}
-
-export function useWeather() {
-  const context = useContext(WeatherContext);
-  if (!context) {
-    return WeatherSystem.getInstance();
-  }
-  return context.system;
-}
-
-export function useWeatherState() {
-  const weather = useWeather();
-  const [state, setState] = useState<WeatherState>(weather.getState());
-
-  useEffect(() => {
-    const update = (s: WeatherState) => setState({ ...s });
-    weather.on('update', update);
-    weather.on('weatherChanged', update);
-
-    return () => {
-      weather.off('update', update);
-      weather.off('weatherChanged', update);
-    };
-  }, [weather]);
-
-  return state;
-}
-
-export function useWeatherTransition() {
-  const weather = useWeather();
-  const [progress, setProgress] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
-  useEffect(() => {
-    const onStart = () => setIsTransitioning(true);
-    const onProgress = (p: number) => setProgress(p);
-    const onComplete = () => {
-      setIsTransitioning(false);
-      setProgress(0);
-    };
-
-    weather.on('transitionStarted', onStart);
-    weather.on('transitionProgress', onProgress);
-    weather.on('transitionComplete', onComplete);
-
-    return () => {
-      weather.off('transitionStarted', onStart);
-      weather.off('transitionProgress', onProgress);
-      weather.off('transitionComplete', onComplete);
-    };
-  }, [weather]);
-
-  const setWeather = useCallback((type: WeatherType, immediate = false) => {
-    weather.setWeather(type, immediate);
-  }, [weather]);
-
-  return { progress, isTransitioning, setWeather };
-}
-
-export function useWind() {
-  const weather = useWeather();
-
-  const getWindAt = useCallback((x: number, y: number, z: number) => {
-    return weather.getWindAtPosition(x, y, z);
-  }, [weather]);
-
-  return { getWindAt };
-}
-
-export function useLightning() {
-  const weather = useWeather();
-  const [lastBolt, setLastBolt] = useState<LightningBolt | null>(null);
-  const [lastThunder, setLastThunder] = useState<{ distance: number; intensity: number } | null>(null);
-
-  useEffect(() => {
-    const onLightning = (bolt: LightningBolt) => setLastBolt(bolt);
-    const onThunder = (data: { distance: number; intensity: number }) => setLastThunder(data);
-
-    weather.on('lightning', onLightning);
-    weather.on('thunder', onThunder);
-
-    return () => {
-      weather.off('lightning', onLightning);
-      weather.off('thunder', onThunder);
-    };
-  }, [weather]);
-
-  return { lastBolt, lastThunder };
-}
+export { WeatherProvider, useLightning, useWeather, useWeatherState, useWeatherTransition, useWind } from './weather-system-react';
 
 const __defaultExport = {
   WeatherSystem,
