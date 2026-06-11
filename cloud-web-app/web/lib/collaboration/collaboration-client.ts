@@ -1,209 +1,37 @@
 /**
  * Aethel Real-Time Collaboration System
- * 
- * Sistema completo de colaboração em tempo real com CRDT,
- * awareness, cursores e chat integrado.
+ *
+ * Canonical collaboration client entrypoint. Contracts, CRDT document logic and
+ * user color helpers live in sibling modules to keep this runtime maintainable.
  */
 
 import { EventEmitter } from 'events';
+import type {
+  CRDTCharacter,
+  ChatMessage,
+  CollaborationUser,
+  CursorPosition,
+  SelectionRange,
+  SessionSettings,
+  WebSocketMessage,
+} from './collaboration-contracts';
+import { CRDTDocument } from './crdt-document';
+import { getUserColor } from './collaboration-user-colors';
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface CollaborationUser {
-  id: string;
-  name: string;
-  email?: string;
-  avatar?: string;
-  color: string;
-  cursor?: CursorPosition;
-  selection?: SelectionRange;
-  lastActivity: number;
-  permissions: CollaborationPermission[];
-}
-
-export interface CursorPosition {
-  line: number;
-  column: number;
-  fileUri: string;
-}
-
-export interface SelectionRange {
-  start: { line: number; column: number };
-  end: { line: number; column: number };
-  fileUri: string;
-}
-
-export type CollaborationPermission = 'read' | 'write' | 'admin';
-
-export interface DocumentOperation {
-  id: string;
-  type: 'insert' | 'delete' | 'replace';
-  fileUri: string;
-  position: { line: number; column: number };
-  text?: string;
-  length?: number;
-  userId: string;
-  timestamp: number;
-  version: number;
-}
-
-export interface ChatMessage {
-  id: string;
-  userId: string;
-  text: string;
-  timestamp: number;
-  replyTo?: string;
-  reactions: Record<string, string[]>;
-}
-
-export interface CollaborationSession {
-  id: string;
-  name: string;
-  host: string;
-  users: CollaborationUser[];
-  createdAt: number;
-  settings: SessionSettings;
-}
-
-export interface SessionSettings {
-  maxUsers: number;
-  allowAnonymous: boolean;
-  requireApproval: boolean;
-  readOnlyMode: boolean;
-  chatEnabled: boolean;
-  voiceEnabled: boolean;
-}
-
-export interface WebSocketMessage {
-  type: string;
-  payload: unknown;
-  sessionId: string;
-  userId: string;
-  timestamp: number;
-}
-
-// ============================================================================
-// CRDT OPERATIONS
-// ============================================================================
-
-interface CRDTCharacter {
-  id: string;
-  value: string;
-  visible: boolean;
-  position: number[];
-  userId: string;
-  timestamp: number;
-}
-
-export class CRDTDocument {
-  private characters: CRDTCharacter[] = [];
-  private siteId: string;
-  private clock: number = 0;
-  
-  constructor(siteId: string) {
-    this.siteId = siteId;
-  }
-  
-  generatePosition(index: number): number[] {
-    const prevPos = index > 0 ? this.characters[index - 1]?.position || [0] : [0];
-    const nextPos = this.characters[index]?.position || [prevPos[0] + 2];
-    
-    // Generate position between prev and next
-    const newPos: number[] = [];
-    let i = 0;
-    
-    while (i < prevPos.length || i < nextPos.length) {
-      const p = prevPos[i] || 0;
-      const n = nextPos[i] || p + 2;
-      
-      if (n - p > 1) {
-        newPos.push(Math.floor((p + n) / 2));
-        break;
-      } else {
-        newPos.push(p);
-        i++;
-      }
-    }
-    
-    if (newPos.length === 0) {
-      newPos.push(Math.floor((prevPos[prevPos.length - 1] || 0 + nextPos[0] || 2) / 2));
-    }
-    
-    return newPos;
-  }
-  
-  localInsert(index: number, char: string): CRDTCharacter {
-    const position = this.generatePosition(index);
-    const id = `${this.siteId}:${++this.clock}`;
-    
-    const character: CRDTCharacter = {
-      id,
-      value: char,
-      visible: true,
-      position,
-      userId: this.siteId,
-      timestamp: Date.now(),
-    };
-    
-    this.characters.splice(index, 0, character);
-    return character;
-  }
-  
-  localDelete(index: number): CRDTCharacter | null {
-    if (index >= this.characters.length) return null;
-    
-    const char = this.characters[index];
-    char.visible = false;
-    return char;
-  }
-  
-  remoteInsert(char: CRDTCharacter): void {
-    const index = this.findInsertIndex(char.position);
-    this.characters.splice(index, 0, char);
-  }
-  
-  remoteDelete(charId: string): void {
-    const char = this.characters.find(c => c.id === charId);
-    if (char) {
-      char.visible = false;
-    }
-  }
-  
-  private findInsertIndex(position: number[]): number {
-    for (let i = 0; i < this.characters.length; i++) {
-      if (this.comparePositions(position, this.characters[i].position) < 0) {
-        return i;
-      }
-    }
-    return this.characters.length;
-  }
-  
-  private comparePositions(a: number[], b: number[]): number {
-    for (let i = 0; i < Math.max(a.length, b.length); i++) {
-      const av = a[i] || 0;
-      const bv = b[i] || 0;
-      if (av !== bv) return av - bv;
-    }
-    return 0;
-  }
-  
-  toString(): string {
-    return this.characters
-      .filter(c => c.visible)
-      .map(c => c.value)
-      .join('');
-  }
-  
-  getVersion(): number {
-    return this.clock;
-  }
-}
-
-// ============================================================================
-// COLLABORATION CLIENT
-// ============================================================================
+export type {
+  CRDTCharacter,
+  ChatMessage,
+  CollaborationPermission,
+  CollaborationSession,
+  CollaborationUser,
+  CursorPosition,
+  DocumentOperation,
+  SelectionRange,
+  SessionSettings,
+  WebSocketMessage,
+} from './collaboration-contracts';
+export { CRDTDocument } from './crdt-document';
+export { getUserColor } from './collaboration-user-colors';
 
 export class CollaborationClient extends EventEmitter {
   private ws: WebSocket | null = null;
@@ -656,34 +484,6 @@ export class CollaborationClient extends EventEmitter {
     return this.sessionId;
   }
 }
-
-// ============================================================================
-// USER COLORS
-// ============================================================================
-
-const USER_COLORS = [
-  '#f38ba8', // Red
-  '#fab387', // Peach
-  '#f9e2af', // Yellow
-  '#a6e3a1', // Green
-  '#94e2d5', // Teal
-  '#89b4fa', // Blue
-  '#cba6f7', // Mauve
-  '#f5c2e7', // Pink
-];
-
-export function getUserColor(userId: string): string {
-  let hash = 0;
-  for (let i = 0; i < userId.length; i++) {
-    hash = ((hash << 5) - hash) + userId.charCodeAt(i);
-    hash = hash & hash;
-  }
-  return USER_COLORS[Math.abs(hash) % USER_COLORS.length];
-}
-
-// ============================================================================
-// SINGLETON
-// ============================================================================
 
 let collaborationClient: CollaborationClient | null = null;
 
