@@ -25,6 +25,28 @@ export interface TextEdit {
   newText: string;
 }
 
+import {
+  analyzeImports,
+  analyzeVariables,
+  canExtractConstant,
+  canExtractMethod,
+  canExtractVariable,
+  extractExportName,
+  findFirstNonImportLine,
+  findInsertionPoint,
+  findOccurrences,
+  findVariableDeclaration,
+  findVariableUsages,
+  generateMethodCall,
+  generateMethodSignature,
+  getIndentation,
+  getSelectedLines,
+  getSelectedText,
+  indentCode,
+  isNameUsed,
+  isUsedAfter,
+} from './refactoring-utils';
+
 export class RefactoringManager {
   /**
    * Get available refactorings for range
@@ -33,7 +55,7 @@ export class RefactoringManager {
     const actions: RefactoringAction[] = [];
 
     // Extract method/function
-    if (this.canExtractMethod(range)) {
+    if (canExtractMethod(range)) {
       actions.push({
         id: 'extract-method',
         title: 'Extract Method',
@@ -44,7 +66,7 @@ export class RefactoringManager {
     }
 
     // Extract variable
-    if (this.canExtractVariable(range)) {
+    if (canExtractVariable(range)) {
       actions.push({
         id: 'extract-variable',
         title: 'Extract Variable',
@@ -55,7 +77,7 @@ export class RefactoringManager {
     }
 
     // Extract constant
-    if (this.canExtractConstant(range)) {
+    if (canExtractConstant(range)) {
       actions.push({
         id: 'extract-constant',
         title: 'Extract Constant',
@@ -110,22 +132,22 @@ export class RefactoringManager {
    */
   async extractMethod(uri: string, range: Range, content: string, methodName: string): Promise<WorkspaceEdit> {
     const lines = content.split('\n');
-    const selectedLines = this.getSelectedLines(lines, range);
+    const selectedLines = getSelectedLines(lines, range);
     const selectedText = selectedLines.join('\n');
 
     // Analyze variables used in selection
-    const variables = this.analyzeVariables(selectedText);
+    const variables = analyzeVariables(selectedText);
     const params = variables.used.filter(v => !variables.declared.includes(v));
-    const returnVars = variables.declared.filter(v => this.isUsedAfter(v, lines, range.end.line));
+    const returnVars = variables.declared.filter(v => isUsedAfter(v, lines, range.end.line));
 
     // Generate method
-    const methodSignature = this.generateMethodSignature(methodName, params, returnVars);
-    const methodBody = this.indentCode(selectedText, 1);
+    const methodSignature = generateMethodSignature(methodName, params, returnVars);
+    const methodBody = indentCode(selectedText, 1);
     const returnStatement = returnVars.length > 0 ? `\n\treturn ${returnVars.join(', ')};` : '';
     const newMethod = `\n${methodSignature} {\n${methodBody}${returnStatement}\n}\n`;
 
     // Generate method call
-    const methodCall = this.generateMethodCall(methodName, params, returnVars);
+    const methodCall = generateMethodCall(methodName, params, returnVars);
 
     // Create edits
     const edits: TextEdit[] = [];
@@ -137,7 +159,7 @@ export class RefactoringManager {
     });
 
     // Insert new method after current function
-    const insertLine = this.findInsertionPoint(lines, range.start.line);
+    const insertLine = findInsertionPoint(lines, range.start.line);
     edits.push({
       range: {
         start: { line: insertLine, character: 0 },
@@ -154,10 +176,10 @@ export class RefactoringManager {
    */
   async extractVariable(uri: string, range: Range, content: string, variableName: string): Promise<WorkspaceEdit> {
     const lines = content.split('\n');
-    const selectedText = this.getSelectedText(lines, range);
+    const selectedText = getSelectedText(lines, range);
 
     // Find all occurrences of the expression
-    const occurrences = this.findOccurrences(lines, selectedText, range);
+    const occurrences = findOccurrences(lines, selectedText, range);
 
     // Create variable declaration
     const declaration = `const ${variableName} = ${selectedText};\n`;
@@ -167,7 +189,7 @@ export class RefactoringManager {
 
     // Insert variable declaration before first occurrence
     const insertLine = range.start.line;
-    const indent = this.getIndentation(lines[insertLine]);
+    const indent = getIndentation(lines[insertLine]);
     edits.push({
       range: {
         start: { line: insertLine, character: 0 },
@@ -192,13 +214,13 @@ export class RefactoringManager {
    */
   async extractConstant(uri: string, range: Range, content: string, constantName: string): Promise<WorkspaceEdit> {
     const lines = content.split('\n');
-    const selectedText = this.getSelectedText(lines, range);
+    const selectedText = getSelectedText(lines, range);
 
     // Create constant declaration at top of file
     const declaration = `const ${constantName} = ${selectedText};\n\n`;
 
     // Find first non-import line
-    const insertLine = this.findFirstNonImportLine(lines);
+    const insertLine = findFirstNonImportLine(lines);
 
     // Create edits
     const edits: TextEdit[] = [];
@@ -228,13 +250,13 @@ export class RefactoringManager {
     const lines = content.split('\n');
     
     // Find variable declaration
-    const declaration = this.findVariableDeclaration(lines, range);
+    const declaration = findVariableDeclaration(lines, range);
     if (!declaration) {
       throw new Error('No variable declaration found');
     }
 
     // Find all usages
-    const usages = this.findVariableUsages(lines, declaration.name, declaration.line);
+    const usages = findVariableUsages(lines, declaration.name, declaration.line);
 
     // Create edits
     const edits: TextEdit[] = [];
@@ -264,7 +286,7 @@ export class RefactoringManager {
    */
   async convertToArrowFunction(uri: string, range: Range, content: string): Promise<WorkspaceEdit> {
     const lines = content.split('\n');
-    const functionText = this.getSelectedText(lines, range);
+    const functionText = getSelectedText(lines, range);
 
     // Parse function
     const match = functionText.match(/function\s+(\w+)?\s*\(([^)]*)\)\s*{([\s\S]*)}/);
@@ -297,7 +319,7 @@ export class RefactoringManager {
    */
   async convertToAsyncAwait(uri: string, range: Range, content: string): Promise<WorkspaceEdit> {
     const lines = content.split('\n');
-    const selectedText = this.getSelectedText(lines, range);
+    const selectedText = getSelectedText(lines, range);
 
     // Convert .then() chains to async/await
     let converted = selectedText;
@@ -326,16 +348,16 @@ export class RefactoringManager {
    */
   async moveToNewFile(uri: string, range: Range, content: string, newFileName: string): Promise<WorkspaceEdit> {
     const lines = content.split('\n');
-    const selectedText = this.getSelectedText(lines, range);
+    const selectedText = getSelectedText(lines, range);
 
     // Analyze imports needed
-    const imports = this.analyzeImports(selectedText, content);
+    const imports = analyzeImports(selectedText, content);
 
     // Generate new file content
     const newFileContent = `${imports}\n\n${selectedText}\n`;
 
     // Generate export statement
-    const exportName = this.extractExportName(selectedText);
+    const exportName = extractExportName(selectedText);
     const exportStatement = `export { ${exportName} } from './${newFileName}';\n`;
 
     // Create edits
@@ -402,7 +424,7 @@ export class RefactoringManager {
     // Remove unused imports (simple check)
     const used = sorted.filter(imp => {
       const importedNames = this.extractImportedNames(imp.text);
-      return importedNames.some(name => this.isNameUsed(name, lines, imp.line));
+      return importedNames.some(name => isNameUsed(name, lines, imp.line));
     });
 
     // Create edits
@@ -433,221 +455,7 @@ export class RefactoringManager {
     return { changes: { [uri]: edits } };
   }
 
-  // Helper methods
 
-  private canExtractMethod(range: Range): boolean {
-    return range.end.line > range.start.line || 
-           (range.end.line === range.start.line && range.end.character - range.start.character > 10);
-  }
-
-  private canExtractVariable(range: Range): boolean {
-    return range.end.line === range.start.line && range.end.character - range.start.character > 3;
-  }
-
-  private canExtractConstant(range: Range): boolean {
-    return this.canExtractVariable(range);
-  }
-
-  private getSelectedLines(lines: string[], range: Range): string[] {
-    return lines.slice(range.start.line, range.end.line + 1);
-  }
-
-  private getSelectedText(lines: string[], range: Range): string {
-    if (range.start.line === range.end.line) {
-      return lines[range.start.line].substring(range.start.character, range.end.character);
-    }
-    
-    const selected: string[] = [];
-    selected.push(lines[range.start.line].substring(range.start.character));
-    for (let i = range.start.line + 1; i < range.end.line; i++) {
-      selected.push(lines[i]);
-    }
-    selected.push(lines[range.end.line].substring(0, range.end.character));
-    return selected.join('\n');
-  }
-
-  private analyzeVariables(code: string): { declared: string[]; used: string[] } {
-    const declared: string[] = [];
-    const used: string[] = [];
-
-    // Simple variable detection (can be enhanced with AST)
-    const declareMatch = code.matchAll(/(?:const|let|var)\s+(\w+)/g);
-    for (const match of declareMatch) {
-      declared.push(match[1]);
-    }
-
-    const useMatch = code.matchAll(/\b(\w+)\b/g);
-    for (const match of useMatch) {
-      if (!declared.includes(match[1]) && !this.isKeyword(match[1])) {
-        used.push(match[1]);
-      }
-    }
-
-    return { declared, used: [...new Set(used)] };
-  }
-
-  private isUsedAfter(variable: string, lines: string[], afterLine: number): boolean {
-    for (let i = afterLine + 1; i < lines.length; i++) {
-      if (lines[i].includes(variable)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private generateMethodSignature(name: string, params: string[], returnVars: string[]): string {
-    const paramList = params.join(', ');
-    const returnType = returnVars.length > 1 ? `[${returnVars.join(', ')}]` : returnVars[0] || 'void';
-    return `function ${name}(${paramList})`;
-  }
-
-  private generateMethodCall(name: string, params: string[], returnVars: string[]): string {
-    const paramList = params.join(', ');
-    if (returnVars.length === 0) {
-      return `${name}(${paramList});`;
-    } else if (returnVars.length === 1) {
-      return `const ${returnVars[0]} = ${name}(${paramList});`;
-    } else {
-      return `const [${returnVars.join(', ')}] = ${name}(${paramList});`;
-    }
-  }
-
-  private indentCode(code: string, level: number): string {
-    const indent = '\t'.repeat(level);
-    return code.split('\n').map(line => indent + line).join('\n');
-  }
-
-  private getIndentation(line: string): string {
-    const match = line.match(/^(\s*)/);
-    return match ? match[1] : '';
-  }
-
-  private findInsertionPoint(lines: string[], currentLine: number): number {
-    // Find end of current function
-    let braceCount = 0;
-    for (let i = currentLine; i < lines.length; i++) {
-      for (const char of lines[i]) {
-        if (char === '{') braceCount++;
-        if (char === '}') braceCount--;
-        if (braceCount === 0 && char === '}') {
-          return i + 1;
-        }
-      }
-    }
-    return lines.length;
-  }
-
-  private findOccurrences(lines: string[], text: string, excludeRange: Range): Range[] {
-    const occurrences: Range[] = [];
-    const escapedText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(escapedText, 'g');
-
-    for (let i = 0; i < lines.length; i++) {
-      let match;
-      while ((match = regex.exec(lines[i])) !== null) {
-        const range: Range = {
-          start: { line: i, character: match.index },
-          end: { line: i, character: match.index + text.length },
-        };
-        
-        // Exclude the original selection
-        if (i !== excludeRange.start.line || match.index !== excludeRange.start.character) {
-          occurrences.push(range);
-        }
-      }
-    }
-
-    return occurrences;
-  }
-
-  private findFirstNonImportLine(lines: string[]): number {
-    for (let i = 0; i < lines.length; i++) {
-      const trimmed = lines[i].trim();
-      if (trimmed && !trimmed.startsWith('import ') && !trimmed.startsWith('//')) {
-        return i;
-      }
-    }
-    return 0;
-  }
-
-  private findVariableDeclaration(lines: string[], range: Range): { name: string; value: string; line: number } | null {
-    const line = lines[range.start.line];
-    const match = line.match(/(?:const|let|var)\s+(\w+)\s*=\s*(.+);/);
-    if (match) {
-      return {
-        name: match[1],
-        value: match[2],
-        line: range.start.line,
-      };
-    }
-    return null;
-  }
-
-  private findVariableUsages(lines: string[], variableName: string, afterLine: number): Range[] {
-    const usages: Range[] = [];
-    const regex = new RegExp(`\\b${variableName}\\b`, 'g');
-
-    for (let i = afterLine + 1; i < lines.length; i++) {
-      let match;
-      while ((match = regex.exec(lines[i])) !== null) {
-        usages.push({
-          start: { line: i, character: match.index },
-          end: { line: i, character: match.index + variableName.length },
-        });
-      }
-    }
-
-    return usages;
-  }
-
-  private analyzeImports(code: string, fullContent: string): string {
-    // Extract imports needed for the code
-    const imports: string[] = [];
-    const lines = fullContent.split('\n');
-    
-    for (const line of lines) {
-      if (line.trim().startsWith('import ')) {
-        const importedNames = this.extractImportedNames(line);
-        if (importedNames.some(name => code.includes(name))) {
-          imports.push(line);
-        }
-      }
-    }
-
-    return imports.join('\n');
-  }
-
-  private extractImportedNames(importLine: string): string[] {
-    const match = importLine.match(/import\s+{([^}]+)}/);
-    if (match) {
-      return match[1].split(',').map(s => s.trim());
-    }
-    const defaultMatch = importLine.match(/import\s+(\w+)/);
-    if (defaultMatch) {
-      return [defaultMatch[1]];
-    }
-    return [];
-  }
-
-  private extractExportName(code: string): string {
-    const match = code.match(/(?:function|class|const|let|var)\s+(\w+)/);
-    return match ? match[1] : 'exported';
-  }
-
-  private isNameUsed(name: string, lines: string[], skipLine: number): boolean {
-    for (let i = 0; i < lines.length; i++) {
-      if (i === skipLine) continue;
-      if (lines[i].includes(name)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private isKeyword(word: string): boolean {
-    const keywords = ['if', 'else', 'for', 'while', 'return', 'function', 'const', 'let', 'var', 'class', 'import', 'export'];
-    return keywords.includes(word);
-  }
 }
 
 // Singleton instance
