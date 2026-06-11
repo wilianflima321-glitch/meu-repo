@@ -1,4 +1,4 @@
-import type { QualityPreset } from './useRenderPipeline';
+import type { QualityPreset } from './useRenderPipeline.types';
 import {
   DEFAULT_GI_CONFIG,
   DEFAULT_PIPELINE_CONFIG,
