@@ -1,3 +1,9 @@
+import type { ToolResult } from './ai-tools-registry';
+import {
+  getBrowserOperatorRuntimeBlock,
+  type BrowserOperatorRuntimeContext,
+} from './device/browser-operator-tool-guard';
+
 export interface SearchResult {
   title: string;
   url: string;
@@ -59,7 +65,7 @@ function getBrowserOperatorRuntimeContextFromParams(
   }
 }
 
-function getRuntimeBlockedToolResult(
+export function getRuntimeBlockedToolResult(
   params: Record<string, unknown>
 ): ToolResult | null {
   const block = getBrowserOperatorRuntimeBlock(

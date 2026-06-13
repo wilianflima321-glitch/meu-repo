@@ -1,9 +1,9 @@
 import { AttributeSet } from './gameplay-attributes';
 import { GameplayTag, GameplayTagContainer } from './gameplay-tags';
+import type { AttributeDefinition } from './gameplay-attributes';
 import type {
   ActiveAbility,
   ActiveGameplayEffect,
-  AttributeDefinition,
   GameplayAbilitySpec,
   GameplayEffectSpec,
 } from './gameplay-ability-contracts';

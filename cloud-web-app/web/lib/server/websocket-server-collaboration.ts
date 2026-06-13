@@ -1,11 +1,11 @@
-import type { WsClient, WsMessage } from './websocket-runtime-contracts';
-import { WS_MESSAGE_TYPES } from './websocket-runtime-contracts';
-import { asWsRecord, readString } from './websocket-runtime-codecs';
+import type { WsClient, WsMessage } from './websocket-runtime-contracts.ts';
+import { WS_MESSAGE_TYPES } from './websocket-runtime-contracts.ts';
+import { asWsRecord, readString } from './websocket-runtime-codecs.ts';
 
 export function handleCollabJoin(input: {
   client: WsClient;
   payload: unknown;
-  ensureUserIdentity: (client: WsClient, requestedUserId?: string) => string | undefined;
+  ensureUserIdentity: (client: WsClient, requestedUserId?: string) => string | null;
   subscribeToChannel: (client: WsClient, channelName: string, options?: unknown) => void;
   broadcastToChannel: (channelName: string, message: WsMessage, excludeClientId?: string) => void;
 }): void {
@@ -61,7 +61,7 @@ export function handleCollabChat(input: {
   client: WsClient;
   channel: string;
   payload: unknown;
-  ensureUserIdentity: (client: WsClient, requestedUserId?: string) => string | undefined;
+  ensureUserIdentity: (client: WsClient, requestedUserId?: string) => string | null;
   broadcastToChannel: (channelName: string, message: WsMessage, excludeClientId?: string) => void;
 }): void {
   const data = asWsRecord(input.payload);

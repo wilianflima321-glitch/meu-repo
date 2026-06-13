@@ -165,18 +165,18 @@ export function DashboardShell({
                   </span>
                 ) : null}
                 <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
-                  Studio Home
+                  Workspace
                 </span>
               </div>
               <h2 className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)] sm:text-lg">
-                Continue the mission inside Studio without switching products mid-flow.
+                Continue where you left off.
               </h2>
               <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
                 {entryMission
                   ? entryMission
                   : entrySource
                     ? entryLane.description
-                    : 'Studio Home points to the next action. Deep tools expand only when the task truly needs them.'}
+                    : 'Pick up from the latest project activity. Deep tools expand only when the task needs them.'}
               </p>
             </div>
 

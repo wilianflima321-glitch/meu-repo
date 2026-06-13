@@ -1,6 +1,6 @@
-import type { TerminalPtyManager, TerminalSessionConfig } from '../terminal-pty-runtime';
-import type { WsClient, WsMessage } from '../websocket-runtime-contracts';
-import { WS_MESSAGE_TYPES } from '../websocket-runtime-contracts';
+import type { TerminalPtyManager, TerminalSessionConfig } from '../terminal-pty-runtime.ts';
+import type { WsClient, WsMessage } from '../websocket-runtime-contracts.ts';
+import { WS_MESSAGE_TYPES } from '../websocket-runtime-contracts.ts';
 import {
   asTerminalPayload,
   asWsRecord,
@@ -8,8 +8,8 @@ import {
   readString,
   readStringArray,
   readStringMap,
-} from '../websocket-runtime-codecs';
-import { createClientId } from './ids';
+} from '../websocket-runtime-codecs.ts';
+import { createClientId } from './ids.ts';
 
 type TerminalHandlerContext = {
   terminalManager: TerminalPtyManager;

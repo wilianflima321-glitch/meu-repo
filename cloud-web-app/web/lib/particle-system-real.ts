@@ -143,7 +143,7 @@ export class ParticleEmitter extends THREE.Object3D {
     if (index === -1) return; // No free slots
 
     // Set position based on shape
-    const pos = this.getEmissionPosition();
+    const pos = sampleEmissionPosition(this.config.shape);
     const i3 = index * 3;
     const i4 = index * 4;
 

@@ -14,7 +14,7 @@ import {
   lerp,
   lerpColor,
 } from './day-night-calculations';
-import type { CelestialBody, DayNightConfig, SkyState, TimeState } from './day-night-contracts';
+import type { CelestialBody, DayNightConfig, Season, SkyState, TimeState } from './day-night-contracts';
 import { SKY_PRESETS } from './day-night-presets';
 import {
   DayNightProvider,
@@ -253,7 +253,7 @@ export class DayNightCycle extends EventEmitter {
     const starVisibility = timeState.isDaytime ? 0 : Math.max(0, 1 - (timeState.sunAltitude + 12) / 12);
 
     // Moon lighting
-    const moonIllum = this.getMoonIllumination(getMoonPhaseOffset(this.currentDay, this.currentYear));
+    const moonIllum = getMoonIllumination(getMoonPhaseOffset(this.currentDay, this.currentYear));
     const moonIntensity = timeState.moonAltitude > 0 ? moonIllum * 0.15 : 0;
 
     this.cachedSkyState = {

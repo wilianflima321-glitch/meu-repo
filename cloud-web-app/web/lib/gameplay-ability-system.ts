@@ -1,22 +1,26 @@
+import { AbilitySystemComponent } from './gameplay-ability-component';
+import { AttributeSet } from './gameplay-attributes';
 import { buildCommonAttributes, buildCommonTags, buildSampleAbilities } from './gameplay-ability-presets';
 import { GameplayTag, GameplayTagContainer } from './gameplay-tags';
+import type { AttributeDefinition } from './gameplay-attributes';
+import type { GameplayAbilitySpec } from './gameplay-ability-contracts';
+
 export { AbilitySystemComponent } from './gameplay-ability-component';
+export { AttributeSet } from './gameplay-attributes';
+export { GameplayTag, GameplayTagContainer } from './gameplay-tags';
+export type { AttributeDefinition, AttributeModifier } from './gameplay-attributes';
 export type {
   AbilityActivationType,
   AbilityCooldown,
   AbilityCost,
   ActiveAbility,
   ActiveGameplayEffect,
-  AttributeDefinition,
-  AttributeModifier,
   AttributeModifierOp,
   GameplayAbilitySpec,
   GameplayEffectDurationType,
   GameplayEffectSpec,
   TargetingMode,
 } from './gameplay-ability-contracts';
-export { AttributeSet } from './gameplay-attributes';
-export { GameplayTag, GameplayTagContainer } from './gameplay-tags';
 
 
 /**

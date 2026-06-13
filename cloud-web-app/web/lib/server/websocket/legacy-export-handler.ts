@@ -1,7 +1,7 @@
 import { WebSocket } from 'ws';
-import { getQueueRedis } from '../../redis-queue';
-import type { LegacyExportState } from '../websocket-runtime-contracts';
-import { asWsRecord, readString } from '../websocket-runtime-codecs';
+import { getQueueRedis } from '../../redis-queue.ts';
+import type { LegacyExportState } from '../websocket-runtime-contracts.ts';
+import { asWsRecord, readString } from '../websocket-runtime-codecs.ts';
 
 type LegacyExportHandlerParams = {
   ws: WebSocket;

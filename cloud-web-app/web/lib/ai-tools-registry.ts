@@ -15,6 +15,9 @@ import { assertProjectOwnership } from '@/lib/copilot/project-resolver';
 import { loadAgentHandoffContext } from '@/lib/production/agent-handoff-context';
 import { evaluateAgentApplyScope } from '@/lib/production/agent-scope-enforcement';
 import { acquireAgentSurfaceLocks } from '@/lib/production/agent-surface-locks';
+import { evaluateGovernedAgentToolJob } from '@/lib/production/agent-tool-job-runner';
+import { mapToolNameToCanonical } from '@/lib/production/agent-tool-name-adapter';
+import { getProjectFileStore } from '@/lib/server/project-file-store';
 import type { Prisma } from '@prisma/client';
 import type { AITool, ToolCategory, ToolResult } from './ai-tools-registry-types';
 import {
@@ -145,6 +148,50 @@ async function enforceAgentToolScope(
   };
 }
 
+/**
+ * Observe-mode governance: routes the tool invocation through the governed
+ * kernel (tool bus + evidence readiness) and records the decision to the audit
+ * trail. Best-effort and non-blocking — it never changes tool behavior, but it
+ * closes the observability loop so we can see exactly which agent tool calls
+ * would be held under enforcement and why.
+ */
+async function recordGovernedToolObservation(
+  toolName: string,
+  params: Record<string, unknown>
+): Promise<void> {
+  let context: ReturnType<typeof getContext>
+  try {
+    context = getContext(params)
+  } catch {
+    return
+  }
+  if (!context.projectId) return
+
+  const mapping = mapToolNameToCanonical(toolName)
+  const paths = pathsForScopedTool(toolName, params)
+  const agent = requestedAgentForTool(params, context) ?? 'agent-tool-registry'
+  const decision = evaluateGovernedAgentToolJob({
+    toolId: mapping.toolId,
+    mode: mapping.mode,
+    projectId: context.projectId,
+    agent,
+    mission: `Agent tool: ${toolName}`,
+    intent: `Execute ${toolName}`,
+    targetPaths: paths,
+    enforcement: 'observe',
+  })
+
+  await audit(context.userId, 'ai_tool.governed_observe', context.projectId, {
+    toolName,
+    canonicalTool: mapping.toolId,
+    mode: mapping.mode,
+    mutating: mapping.mutating,
+    toolStatus: decision.toolDecision.status,
+    ready: decision.ready,
+    missingEvidence: decision.evidenceReadiness.missingKinds,
+  })
+}
+
 async function audit(userId: string | null, action: string, resource?: string, metadata?: unknown): Promise<void> {
   try {
     await prisma.auditLog.create({
@@ -204,6 +251,8 @@ class AIToolsRegistry {
 
       const scopeBlock = await enforceAgentToolScope(name, params);
       if (scopeBlock) return scopeBlock;
+
+      await recordGovernedToolObservation(name, params).catch(() => {});
 
       return await tool.execute(params);
     } catch (error) {
@@ -310,15 +359,29 @@ aiTools.register({
           ? params.language
           : inferLanguageFromPath(path);
 
-      const row = await prisma.file.upsert({
-        where: { projectId_path: { projectId: ctx.projectId, path } },
-        update: { content, ...(language ? { language } : {}) },
-        create: { projectId: ctx.projectId, path, content, ...(language ? { language } : {}) },
-        select: { id: true, path: true, updatedAt: true },
-      });
+      const store = getProjectFileStore();
+      const record = await store.write(
+        { userId: ctx.userId, projectId: ctx.projectId, path },
+        content,
+        language ? { language } : undefined
+      );
 
-      await audit(ctx.userId, 'files.write', row.id, { projectId: ctx.projectId, path, op: 'create_file' });
-      return { success: true, data: { fileId: row.id, path: row.path, created: true, updatedAt: row.updatedAt } };
+      await audit(ctx.userId, 'files.write', record.id ?? record.path, {
+        projectId: ctx.projectId,
+        path: record.path,
+        op: 'create_file',
+        backend: store.backend,
+      });
+      return {
+        success: true,
+        data: {
+          fileId: record.id ?? record.path,
+          path: record.path,
+          created: true,
+          updatedAt: record.updatedAt,
+          backend: store.backend,
+        },
+      };
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : 'Erro ao criar arquivo' };
     }
@@ -349,10 +412,9 @@ aiTools.register({
       const target = String(params.target ?? '');
       const insertContent = String(params.content ?? '');
 
-      const file = await prisma.file.findFirst({
-        where: { projectId: ctx.projectId, OR: [{ path }, { path: path.replace(/^\//, '') }] },
-        select: { id: true, path: true, content: true, language: true },
-      });
+      const store = getProjectFileStore();
+      const ref = { userId: ctx.userId, projectId: ctx.projectId, path };
+      const file = await store.read(ref);
       if (!file) return { success: false, error: `Arquivo não encontrado: ${path}` };
       const current = String(file.content ?? '');
       let next = current;
@@ -378,21 +440,25 @@ aiTools.register({
       }
 
       next = clampContent(next, 1_000_000);
-      const updated = await prisma.file.update({
-        where: { id: file.id },
-        data: { content: next },
-        select: { id: true, path: true, updatedAt: true },
+      const updated = await store.write(ref, next, {
+        language: file.language ?? inferLanguageFromPath(path),
       });
 
-      await audit(ctx.userId, 'files.patch', updated.id, { projectId: ctx.projectId, path: updated.path, op: operation });
+      await audit(ctx.userId, 'files.patch', updated.id ?? updated.path, {
+        projectId: ctx.projectId,
+        path: updated.path,
+        op: operation,
+        backend: store.backend,
+      });
       return {
         success: true,
         data: {
-          fileId: updated.id,
+          fileId: updated.id ?? updated.path,
           path: updated.path,
           operation,
           applied,
           updatedAt: updated.updatedAt,
+          backend: store.backend,
         },
       };
     } catch (error) {

@@ -37,7 +37,13 @@ function requirePatternAny(relativePaths, pattern, reason) {
   if (!pattern.test(content)) failures.push(`${relativePaths.join(', ')}: missing pattern ${pattern} (${reason})`)
 }
 
-const agentToolRegistryFiles = ['lib/production/agent-tool-bus.ts', 'lib/production/agent-tool-bus-catalog.ts']
+const agentToolRegistryFiles = [
+  'lib/production/agent-tool-bus.ts',
+  'lib/production/agent-tool-bus-catalog.ts',
+  'lib/production/agent-tool-bus-catalog.data.ts',
+  'lib/production/agent-tool-bus-catalog.core-data.ts',
+  'lib/production/agent-tool-bus-catalog.runtime-data.ts',
+]
 requireFile('lib/production/agent-tool-bus.ts', 'agents need a canonical tool bus')
 requireFile('lib/production/agent-tool-bus-catalog.ts', 'canonical tool contracts may live in the catalog split')
 requirePattern('lib/production/agent-tool-bus.ts', /getCanonicalAgentTools/, 'tool bus must expose the canonical registry')
@@ -84,7 +90,15 @@ requireFile('lib/production/deep-spine-scan.ts', 'agents need a governed pente-f
 requirePattern('lib/production/deep-spine-scan.ts', /DeepSpineScanManifest/, 'deep scan must expose a manifest contract')
 requirePattern('lib/production/deep-spine-scan.ts', /buildMultiResolutionProjectMemory/, 'deep scan must reuse multi-resolution memory')
 requirePattern('lib/production/deep-spine-scan.ts', /metadata-first/, 'deep scan must keep external sources metadata-first')
-requirePattern('lib/production/deep-spine-scan.ts', /safeAutofix:\s*false/, 'deep scan must never auto-fix from scan findings')
+requirePatternAny(
+  [
+    'lib/production/deep-spine-scan.ts',
+    'lib/production/deep-spine-scan.findings.ts',
+    'lib/production/deep-spine-scan.contracts.ts',
+  ],
+  /safeAutofix:\s*false/,
+  'deep scan must never auto-fix from scan findings'
+)
 requirePatternAny(agentToolRegistryFiles, /tool\('deep-spine-scan'/, 'deep scan must be governed by the Agent Tool Bus')
 requirePattern('package.json', /qa:deep-spine-scan/, 'package scripts must expose deep spine scan QA')
 
@@ -102,6 +116,37 @@ requireFile('__tests__/production/multi-resolution-project-memory.test.ts', 'mul
 requirePattern('__tests__/production/multi-resolution-project-memory.test.ts', /GB-scale repository/, 'tests must cover huge repo memory policy')
 requireFile('__tests__/production/task-evidence-ledger.test.ts', 'task evidence ledger tests must exist')
 requirePattern('__tests__/production/task-evidence-ledger.test.ts', /required evidence/, 'tests must cover evidence readiness')
+
+// Governed execution kernel: the loop (tool bus -> evidence -> execution -> receipt) must be wired, not just defined.
+requireFile('lib/production/agent-tool-job-runner.ts', 'agents need a governed execution kernel that closes the spine loop')
+requirePattern('lib/production/agent-tool-job-runner.ts', /evaluateAgentToolInvocation/, 'kernel must consult the tool bus before execution')
+requirePattern('lib/production/agent-tool-job-runner.ts', /evaluateTaskEvidenceReadiness/, 'kernel must gate on task evidence readiness')
+requirePattern('lib/production/agent-tool-job-runner.ts', /recordGovernedToolExecution/, 'kernel must record execution receipts to close the loop')
+requirePattern('lib/server/ai-change-apply/executor.ts', /evaluateGovernedAgentToolJob/, 'apply executor must route through the governed kernel in production')
+requirePattern('lib/server/ai-change-apply/executor.ts', /recordGovernedToolExecution/, 'apply executor must record a governed execution receipt')
+requireFile('__tests__/production/agent-tool-job-runner.test.ts', 'governed execution kernel tests must exist')
+requirePattern('__tests__/production/agent-tool-job-runner.test.ts', /enforced/, 'kernel tests must cover enforced blocking')
+
+requireFile('lib/production/task-evidence-ledger-store.ts', 'governed evidence ledgers must be durable beyond a single request')
+requirePattern('lib/production/task-evidence-ledger-store.ts', /writeTaskEvidenceLedgerToSettings/, 'store must persist ledgers into project settings')
+requireFile('lib/server/ai-change-apply/persist-governed-evidence.ts', 'apply path needs a best-effort durable evidence writer')
+requirePattern('lib/server/ai-change-apply/executor.ts', /persistGovernedTaskEvidence/, 'apply executor must persist the governed evidence ledger after a successful write')
+requireFile('__tests__/production/task-evidence-ledger-store.test.ts', 'evidence ledger store tests must exist')
+
+requireFile('lib/server/project-file-store/index.ts', 'project files need one unified source-of-truth store')
+requireFile('lib/server/project-file-store/disk-store.ts', 'unified store needs a disk backend for local/desktop')
+requireFile('lib/server/project-file-store/db-store.ts', 'unified store needs a db backend for serverless')
+requirePattern('lib/server/project-file-store/index.ts', /selectProjectFileBackend/, 'store must select backend by runtime')
+requirePattern('lib/ai-tools-registry.ts', /getProjectFileStore/, 'agent file tools must write through the unified ProjectFileStore (single source of truth)')
+requireFile('__tests__/server/project-file-store.test.ts', 'unified project file store tests must exist')
+requirePattern('lib/server/ai-change-apply/executor.ts', /mirrorAppliedChangesToCanonicalStore/, 'apply pipeline must keep the canonical file store in sync after a successful write')
+requireFile('lib/server/ai-change-apply/mirror-canonical-store.ts', 'apply pipeline needs a canonical-store mirror for serverless/db runtimes')
+
+requireFile('lib/server/agent-context/assemble-agent-context.ts', 'agents need task-relevant repository context wired into the loop')
+requirePattern('lib/server/agent-context/assemble-agent-context.ts', /searchSemanticCodebase/, 'agent context must use semantic retrieval')
+requirePattern('lib/server/agent-context/assemble-agent-context.ts', /mustReadFirst/, 'agent context must use cartography mustReadFirst')
+requirePattern('lib/ai-agent-system.ts', /assembleAgentContext/, 'AgentExecutor must inject assembled repository context into its prompt')
+requireFile('__tests__/server/assemble-agent-context.test.ts', 'agent context assembler tests must exist')
 
 requirePattern('package.json', /qa:internal-spine/, 'package scripts must expose internal spine QA')
 requirePattern('package.json', /qa:enterprise-gate[\s\S]*qa:internal-spine/, 'enterprise gate must include internal spine QA')

@@ -79,6 +79,7 @@ export type {
   Camera,
   Clock,
   Color,
+  CubeTexture,
   DirectionalLight,
   Euler,
   Group,
@@ -97,6 +98,7 @@ export type {
   Quaternion,
   Raycaster,
   Scene,
+  ShaderMaterial,
   Sphere,
   SpotLight,
   Texture,
@@ -104,4 +106,5 @@ export type {
   Vector3,
   Vector4,
   WebGLRenderer,
+  WebGLRenderTarget,
 } from 'three'

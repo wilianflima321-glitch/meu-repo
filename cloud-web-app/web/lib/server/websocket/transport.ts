@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
 
-import type { WsClient, WsMessage } from '../websocket-runtime-contracts';
+import type { WsClient, WsMessage } from '../websocket-runtime-contracts.ts';
 
 export function sendToClient(client: WsClient, message: WsMessage): void {
   if (client.ws.readyState !== WebSocket.OPEN) {

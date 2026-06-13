@@ -36,6 +36,7 @@ vi.mock('@/lib/observability/logger', () => ({
 }));
 
 vi.mock('@/lib/redis-queue', () => redisQueueMock);
+vi.mock('../../lib/redis-queue.ts', () => redisQueueMock);
 
 function request(path: string, port: number): Promise<{ statusCode: number; headers: Record<string, string | string[] | undefined>; body: string }> {
   return new Promise((resolve, reject) => {

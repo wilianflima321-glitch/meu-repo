@@ -1,5 +1,17 @@
 'use client'
 
+/**
+ * Nexus — Research, multimodal orchestration and director workspace.
+ *
+ * V31 fix: removed all hardcoded fake project/asset placeholder data.
+ * Left sidebar now shows honest empty state until a real project is selected.
+ * canvasMode and isAIPainting removed as dead state — neither had a setter.
+ * NexusCanvasV2 props cleaned: paintingProgress 0 by default, not hardcoded.
+ *
+ * Next: integrate with projects API so sidebar shows real project context.
+ * Ticket: D5 (sandbox provider) + A4 (nexus → research surface)
+ */
+
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import NexusChatMultimodal from '@/components/nexus/NexusChatMultimodal'
@@ -8,11 +20,7 @@ import DirectorMode from '@/components/nexus/DirectorMode'
 import StudioLayout from '@/components/studio/StudioLayout'
 import { isNavLinkActive, STUDIO_PRIMARY_LINKS } from '@/lib/navigation/surfaces'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
-import {
-  Activity,
-  Layout,
-  Shield,
-} from 'lucide-react'
+import { FolderOpen } from 'lucide-react'
 import Link from 'next/link'
 
 const NexusCanvasV2 = dynamic(() => import('@/components/nexus/NexusCanvasV2'), {
@@ -30,117 +38,111 @@ function studioLinkClass(active: boolean): string {
     : 'rounded-md border border-transparent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)]'
 }
 
+/** Honest empty state — shown until the projects API returns real data. */
+function SidebarEmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 p-6 text-center">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]">
+        <FolderOpen size={18} className="text-[var(--aethel-text-tertiary)]" />
+      </div>
+      <div>
+        <p className="text-xs font-semibold text-[var(--aethel-text-secondary)]">No project selected</p>
+        <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">
+          Open a project from the dashboard to load context here.
+        </p>
+      </div>
+      <Link
+        href="/dashboard"
+        className="mt-1 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-1.5 text-[11px] font-semibold text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
+      >
+        Go to dashboard
+      </Link>
+    </div>
+  )
+}
+
+type RightPanel = 'chat' | 'research' | 'director'
+
+const PANEL_LABELS: Record<RightPanel, string> = {
+  chat: 'Chat',
+  research: 'Research',
+  director: 'Director',
+}
+
 export default function NexusPage() {
   const pathname = useBrowserPathname()
-  const [isAIPainting] = useState(false)
-  const [canvasMode] = useState<'3d' | 'ui' | 'code'>('3d')
-  const [rightPanelMode, setRightPanelMode] = useState<'chat' | 'research' | 'director'>('chat')
+  const [rightPanelMode, setRightPanelMode] = useState<RightPanel>('chat')
 
-  const actions = (
-    <div className="flex items-center gap-4">
-      <div className="mr-4 flex items-center rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-1">
-        <button type="button"
-          onClick={() => setRightPanelMode('chat')}
+  const panelNav = (
+    <div className="flex items-center rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-1">
+      {(Object.keys(PANEL_LABELS) as RightPanel[]).map((mode) => (
+        <button
+          key={mode}
+          type="button"
+          onClick={() => setRightPanelMode(mode)}
           className={`rounded px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
-            rightPanelMode === 'chat' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+            rightPanelMode === mode
+              ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
+              : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
           }`}
+          aria-pressed={rightPanelMode === mode}
         >
-          Nexus Chat
+          {PANEL_LABELS[mode]}
         </button>
-        <button type="button"
-          onClick={() => setRightPanelMode('research')}
-          className={`rounded px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
-            rightPanelMode === 'research' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-          }`}
-        >
-          Research
-        </button>
-        <button type="button"
-          onClick={() => setRightPanelMode('director')}
-          className={`rounded px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
-            rightPanelMode === 'director' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-          }`}
-        >
-          Director
-        </button>
-      </div>
-      <button type="button" className="rounded-lg bg-[var(--aethel-primary-dark)] px-4 py-1.5 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg shadow-blue-900/20 transition-all hover:bg-[var(--aethel-primary)]">
-        Deploy
-      </button>
+      ))}
     </div>
   )
 
   return (
     <StudioLayout
       title="Nexus"
-      subtitle="Multimodal orchestration, research, and real-time review."
-      actions={actions}
+      subtitle="Research, multimodal orchestration and review."
+      actions={panelNav}
       padded={false}
       maxWidth="full"
       className="flex h-[calc(100vh-116px)] flex-col overflow-hidden"
     >
-      {/* Sub-navigation for Nexus contexts */}
-      <div className="flex items-center gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-6 py-2">
+      {/* Surface navigation */}
+      <nav
+        aria-label="Studio surfaces"
+        className="flex items-center gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-6 py-2"
+      >
         {STUDIO_PRIMARY_LINKS.map((link) => (
           <Link key={link.href} href={link.href} className={studioLinkClass(isNavLinkActive(pathname, link))}>
             {link.label}
           </Link>
         ))}
-      </div>
+      </nav>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar: Assets & Context */}
-        <div className="hidden w-64 flex-col border-r border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/30 lg:flex">
+        {/* Left sidebar — project context (real data pending project API integration) */}
+        <aside className="hidden w-64 flex-col border-r border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/30 lg:flex">
           <div className="border-b border-[var(--aethel-border-primary)] p-4">
-            <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Project context</h2>
-            <div className="space-y-1">
-              <button type="button" className="flex w-full items-center gap-3 rounded-lg border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/5 px-3 py-2 text-xs text-[var(--aethel-primary-light)]">
-                <Layout size={14} /> <span>Aethel Engine V2</span>
-              </button>
-              <button type="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)]">
-                <Activity size={14} /> <span>Reality Matrix</span>
-              </button>
-              <button type="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)]">
-                <Shield size={14} /> <span>Quality Gates</span>
-              </button>
-            </div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+              Project context
+            </p>
           </div>
-          <div className="flex-1 overflow-y-auto p-4">
-            <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Live assets</h2>
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((item) => (
-                <div
-                  key={item}
-                  className="group flex cursor-pointer items-center gap-3 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2 transition-all hover:border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]"
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded bg-[var(--aethel-surface-tertiary)] font-mono text-[10px] text-[var(--aethel-text-tertiary)] transition-colors group-hover:bg-[var(--aethel-primary-dark)]/20 group-hover:text-[var(--aethel-primary-light)]">
-                    3D
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[10px] font-bold transition-colors group-hover:text-[var(--aethel-primary-light)]">Asset_Prototype_0{item}.obj</p>
-                    <p className="text-[9px] uppercase text-[var(--aethel-text-tertiary)]">Optimized</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="flex-1 overflow-y-auto">
+            {/* Empty state — replace with real project list from /api/projects */}
+            <SidebarEmptyState />
           </div>
-        </div>
+        </aside>
 
-        {/* Main Canvas Area */}
-        <div className="flex flex-1 flex-col bg-[var(--aethel-surface-primary)] p-4">
+        {/* Main canvas — NexusCanvasV2 with no hardcoded state */}
+        <main className="flex flex-1 flex-col bg-[var(--aethel-surface-primary)] p-4">
           <NexusCanvasV2
-            renderMode={canvasMode === '3d' && !isAIPainting ? 'draft' : 'cinematic'}
-            isAIPainting={isAIPainting}
-            paintingProgress={isAIPainting ? 75 : 0}
+            renderMode="draft"
+            isAIPainting={false}
+            paintingProgress={0}
           />
-        </div>
+        </main>
 
-        {/* Right Panel: Chat / Research / Director */}
-        <div className="z-10 flex w-96 flex-col border-l border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] shadow-[-20px_0_40px_rgba(0,0,0,0.5)]">
+        {/* Right panel — Chat / Research / Director */}
+        <aside className="z-10 flex w-96 flex-col border-l border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]">
           {rightPanelMode === 'chat' && <NexusChatMultimodal />}
           {rightPanelMode === 'research' && <AethelResearch />}
           {rightPanelMode === 'director' && <DirectorMode />}
-        </div>
+        </aside>
       </div>
     </StudioLayout>
   )

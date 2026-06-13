@@ -2,7 +2,7 @@
 
 import { logger } from '@/lib/observability/logger';
 import { THREE } from './pbr-three-namespace';
-import type { Box3, Color } from '@/lib/three';
+import type { Box3, Color, Vector3 } from '@/lib/three';
 import type { PostProcessSettings, PostProcessVolume } from './post-process-volume.contracts';
 import { DEFAULT_POST_PROCESS_SETTINGS, POST_PROCESS_PRESETS } from './post-process-volume.presets';
 
@@ -189,7 +189,7 @@ export class PostProcessVolumeManager {
       } else if (typeof sourceValue === 'number') {
         // Number: lerp
         (target as any)[key] = THREE.MathUtils.lerp(targetValue as number, sourceValue, weight);
-      } else if (sourceValue instanceof Color) {
+      } else if (sourceValue instanceof THREE.Color) {
         // Color: lerp
         const targetColor = (targetValue as Color).clone();
         (target as any)[key] = targetColor.lerp(sourceValue, weight);
@@ -216,7 +216,7 @@ export class PostProcessVolumeManager {
       const aVal = a[key];
       const bVal = b[key];
 
-      if (aVal instanceof Color) {
+      if (aVal instanceof THREE.Color) {
         if (!aVal.equals(bVal as Color)) return false;
       } else if (aVal !== bVal) {
         return false;

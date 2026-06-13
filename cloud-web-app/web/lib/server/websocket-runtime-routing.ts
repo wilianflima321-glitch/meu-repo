@@ -1,4 +1,4 @@
-import type { ConnectionType } from './websocket-runtime-contracts';
+import type { ConnectionType } from './websocket-runtime-contracts.ts';
 
 const HTTP_ONLY_PATHS = new Set(['/health', '/stats', '/metrics']);
 const MODERN_RUNTIME_PATHS = new Set(['/', '/ws']);

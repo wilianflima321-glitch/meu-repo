@@ -94,8 +94,8 @@ describe('RuntimePreviewSurface', () => {
       />,
     )
 
-    expect(screen.getByText('Preview em execucao')).toBeInTheDocument()
-    expect(screen.queryByText('Preview degradado')).not.toBeInTheDocument()
+    expect(screen.getByText('Preview running')).toBeInTheDocument()
+    expect(screen.queryByText('Preview degraded')).not.toBeInTheDocument()
     expect(previewPanelSpy).toHaveBeenCalled()
   })
 
@@ -114,8 +114,8 @@ describe('RuntimePreviewSurface', () => {
       />,
     )
 
-    expect(screen.getByText('Preview degradado')).toBeInTheDocument()
-    expect(screen.getByText('Fallback inline')).toBeInTheDocument()
+    expect(screen.getByText('Preview degraded')).toBeInTheDocument()
+    expect(screen.getByText('local preview')).toBeInTheDocument()
     expect(screen.getByTestId('preview-panel')).toHaveAttribute('data-inline', 'yes')
   })
 
@@ -137,10 +137,10 @@ describe('RuntimePreviewSurface', () => {
       />,
     )
 
-    expect(screen.getAllByText('Falha no preview').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Preview failure').length).toBeGreaterThan(0)
     expect(screen.getByText('E2B_API_KEY nao configurada.')).toBeInTheDocument()
     expect(screen.getByText(/Configure o provider antes de compartilhar review remoto/i)).toBeInTheDocument()
-    expect(screen.getByText(/provider e2b/i)).toBeInTheDocument()
-    expect(screen.getByText(/env E2B_API_KEY/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/managed sandbox/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/E2B_API_KEY/i).length).toBeGreaterThan(0)
   })
 })

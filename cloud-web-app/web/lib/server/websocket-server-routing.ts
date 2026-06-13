@@ -1,8 +1,8 @@
 import type { IncomingMessage } from 'http';
 import type { WebSocket } from 'ws';
-import { createConnectionId } from './websocket/ids';
-import type { ParsedWebSocketUrl } from './websocket-runtime-codecs';
-import type { ConnectionInfo } from './websocket-runtime-contracts';
+import { createConnectionId } from './websocket/ids.ts';
+import type { ParsedWebSocketUrl } from './websocket-runtime-codecs.ts';
+import type { ConnectionInfo } from './websocket-runtime-contracts.ts';
 import {
   isLegacyAiPath,
   isLegacyCollaborationPath,
@@ -12,7 +12,7 @@ import {
   isLegacyTerminalPath,
   isModernRuntimePath,
   resolveConnectionType,
-} from './websocket-runtime-routing';
+} from './websocket-runtime-routing.ts';
 
 export function createWebSocketConnectionInfo(input: {
   pathname: string;

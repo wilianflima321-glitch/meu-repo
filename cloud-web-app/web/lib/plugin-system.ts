@@ -1,6 +1,6 @@
 import {createComponentLogger, logger} from '@/lib/observability/logger'
 import { BUILTIN_PLUGINS } from './plugin-system-builtins';
-import type { Plugin, PluginContext, PluginInstance, StateStorage, ThemeContribution } from './plugin-system-types';
+import type { Plugin, PluginCategory, PluginContext, PluginInstance, StateStorage, ThemeContribution } from './plugin-system-types';
 
 export type {
   AIToolContribution,

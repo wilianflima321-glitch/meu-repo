@@ -1,13 +1,9 @@
 import jwt from 'jsonwebtoken';
-import { createRequire } from 'module';
 
-import type { DecodedAuthPayload, WsClient, WsMetadata } from '../websocket-runtime-contracts';
-
-const require = createRequire(import.meta.url);
-const { createComponentLogger } = require('../../observability/logger.ts') as typeof import('../../observability/logger');
-const { WS_MESSAGE_TYPES } = require('../websocket-runtime-contracts.ts') as typeof import('../websocket-runtime-contracts');
-const { asWsRecord, readString } = require('../websocket-runtime-codecs.ts') as typeof import('../websocket-runtime-codecs');
-const { sendToClient } = require('./transport.ts') as typeof import('./transport');
+import { createComponentLogger } from '../../observability/logger.ts';
+import { WS_MESSAGE_TYPES, type DecodedAuthPayload, type WsClient, type WsMetadata } from '../websocket-runtime-contracts.ts';
+import { asWsRecord, readString } from '../websocket-runtime-codecs.ts';
+import { sendToClient } from './transport.ts';
 
 const log = createComponentLogger('server/websocket-auth');
 

@@ -1,5 +1,6 @@
 import type { GameplayTag } from './gameplay-tags';
 import type { AbilitySystemComponent } from './gameplay-ability-component';
+import type { AttributeModifier } from './gameplay-attributes';
 
 // ============================================================================
 // TIPOS BASE

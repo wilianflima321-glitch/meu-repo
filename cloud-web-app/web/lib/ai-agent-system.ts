@@ -15,6 +15,7 @@ import { logger } from '@/lib/observability/logger';
 
 import { aiTools, AITool, ToolResult, Artifact } from './ai-tools-registry';
 import { aiService } from './ai-service';
+import { assembleAgentContext } from '@/lib/server/agent-context/assemble-agent-context';
 import { getSandbox, safeExecute, AethelGameAPIs, type SandboxResult } from './sandbox';
 import {
   buildGameScopePlan,
@@ -221,6 +222,7 @@ export class AgentExecutor {
   private agent: Agent;
   private execution: AgentExecution;
   private availableTools: AITool[];
+  private retrievedContext = '';
 
   constructor(agentId: string) {
     const agent = AGENTS[agentId];
@@ -244,6 +246,7 @@ export class AgentExecutor {
     this.execution.status = 'running';
     this.execution.steps = [];
     this.execution.artifacts = [];
+    this.retrievedContext = await this.loadRepositoryContext(task);
 
     try {
       let iteration = 0;
@@ -318,6 +321,21 @@ export class AgentExecutor {
     return this.execution;
   }
 
+  private async loadRepositoryContext(task: AgentTask): Promise<string> {
+    const ctx = task.executionContext;
+    if (!ctx?.userId || !ctx.projectId) return '';
+    try {
+      const assembled = await assembleAgentContext({
+        userId: ctx.userId,
+        projectId: ctx.projectId,
+        query: `${task.description}\n${task.context ?? ''}`.trim(),
+      });
+      return assembled.text;
+    } catch {
+      return '';
+    }
+  }
+
   private buildPrompt(task: AgentTask, iteration: number): string {
     const toolDescriptions = this.availableTools.map(tool => 
       `- ${tool.name}: ${tool.description}`
@@ -334,6 +352,7 @@ ${step.observation ? `Observation: ${step.observation}` : ''}`
 ${task.description}
 
 ${task.context ? `# Context\n${task.context}\n` : ''}
+${this.retrievedContext ? `# Repository Context\n${this.retrievedContext}\n` : ''}
 ${task.constraints ? `# Constraints\n${task.constraints.join('\n')}\n` : ''}
 
 # Available Tools

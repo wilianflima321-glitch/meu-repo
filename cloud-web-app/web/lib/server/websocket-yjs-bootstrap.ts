@@ -1,13 +1,11 @@
 import type { IncomingMessage } from 'http';
-import { createRequire } from 'module';
 import { dirname, join } from 'path';
 import { pathToFileURL } from 'url';
 import type { WebSocket } from 'ws';
 
-import type { WsRecord } from './websocket-runtime-contracts';
+import { createComponentLogger } from '../observability/logger.ts';
+import type { WsRecord } from './websocket-runtime-contracts.ts';
 
-const require = createRequire(import.meta.url);
-const { createComponentLogger } = require('../observability/logger.ts') as typeof import('../observability/logger');
 const log = createComponentLogger('server/websocket-yjs-bootstrap');
 
 type SetupWSConnection = (conn: WebSocket, req: IncomingMessage, options?: WsRecord) => void;

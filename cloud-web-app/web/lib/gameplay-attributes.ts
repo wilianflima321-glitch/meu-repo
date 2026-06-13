@@ -1,4 +1,4 @@
-import type { AttributeDefinition, AttributeModifier } from './gameplay-ability-contracts';
+import type { AttributeModifierOp } from './gameplay-ability-contracts';
 
 // ============================================================================
 // ATTRIBUTES

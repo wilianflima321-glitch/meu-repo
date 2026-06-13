@@ -241,7 +241,7 @@ export class ScriptSandbox {
     }
 
     if (this.isMockWorker()) {
-      return this.executeInProcess(code, context);
+      return executeScriptInProcess(code, this.config, context);
     }
 
     // Criar ID único para esta execução

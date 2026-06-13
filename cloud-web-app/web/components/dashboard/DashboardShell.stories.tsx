@@ -1,118 +1,63 @@
+/**
+ * DashboardShell.stories.tsx — V31 Wave B3
+ *
+ * Canonical dashboard shell stories.
+ * Shows the 4 real states users encounter after login.
+ */
+
 import type { Meta, StoryObj } from '@storybook/react'
 import { DashboardShell } from './DashboardShell'
+import type { DashboardShellProps } from './DashboardShell'
 
-const noop = () => {}
-const noopAsync = async () => {}
-
-const projects = [
-  { id: 1, name: 'Acme Workspace', type: 'web', status: 'active', settings: null },
-]
-
-const firstValueSessionSummary = {
-  startedAt: null,
-  completedAt: null,
-  durationMs: null,
-  targetMs: 90_000,
-  status: 'in_progress' as const,
-  milestones: {
-    firstProjectCreatedAt: null,
-    firstAiSuccessAt: null,
-    firstIdeOpenedAt: null,
-  },
-}
-
-const overviewProps: Parameters<typeof DashboardShell>[0]['dashboardMainProps']['overviewProps'] = {
-  aiActivity: 'Agent lane ready for the active workspace.',
-  projects,
-  livePreviewSuggestions: ['Tighten the hero copy', 'Add a review receipt'],
-  authReady: true,
-  hasToken: true,
-  backendOnline: true,
-  aiProviderConfigured: true,
-  currentPlanName: 'Pro',
-  onOpenProjects: noop,
-  onOpenAiChat: noop,
-  onOpenIde: noop,
-  onOpenBilling: noop,
-  onRefreshWallet: noop,
-  lastWalletUpdate: null,
-  walletLoading: false,
-  walletError: null,
-  walletData: undefined,
-  walletTransactions: [],
-  formatCurrencyLabel: (currency?: string | null) => currency ?? 'credits',
-  connectivityData: undefined,
-  connectivityLoading: false,
-  connectivityError: null,
-  connectivityServices: [],
-  formatConnectivityStatus: (status?: string | null) => status ?? 'not configured',
-  miniPreviewExpanded: false,
-  onToggleMiniPreviewExpanded: noop,
-  onMagicWandSelect: noop,
-  onSendSuggestion: noopAsync,
-  isGenerating: false,
-}
-
-const projectsProps: Parameters<typeof DashboardShell>[0]['dashboardMainProps']['projectsProps'] = {
-  projects,
-  newProjectName: 'New workspace',
-  newProjectType: 'web',
-  entryMission: null,
-  onDeleteProject: noop,
-  onCreateProject: noop,
-  onProjectNameChange: noop,
-  onProjectTypeChange: noop,
-  onApplyDirectorNote: noop,
-  onOpenAiChat: noop,
-  onOpenIde: noop,
-}
-
-const dashboardMainPropsStub: Parameters<typeof DashboardShell>[0]['dashboardMainProps'] = {
-  activeTab: 'overview',
-  showFirstValueGuide: false,
-  firstProjectCreated: true,
-  firstValueAiSuccess: true,
-  firstValueOpenedIde: false,
-  firstValueSessionSummary,
-  onFirstValueStartTemplate: noop,
-  onFirstValueCreateProject: noop,
-  onFirstValueConfigureAI: noop,
-  onFirstValueOpenAIChat: noop,
-  onFirstValueOpenIdePreview: noop,
-  onFirstValueDismiss: noop,
-  overviewProps,
-  projectsProps,
-}
-
-const baseArgs: Parameters<typeof DashboardShell>[0] = {
+// ── Shared defaults ───────────────────────────────────────────────────────────
+// These cover all required props with safe no-op values so each story
+// only overrides what it actually varies.
+const BASE_PROPS: DashboardShellProps = {
   theme: 'dark',
   isTrialActive: false,
   showTrialBanner: false,
   trialDaysLeft: 0,
-  onDismissTrialBanner: noop,
-  onUpgradeTrial: noop,
-  sidebarOpen: true,
+  onDismissTrialBanner: () => {},
+  onUpgradeTrial: () => {},
+  authErrorText: null,
+  billingErrorText: null,
+  sidebarOpen: false,
   activeTab: 'overview',
   sessionFilter: 'all',
-  onToggleSidebar: noop,
-  onCloseSidebar: noop,
-  onResetDashboard: noop,
-  onToggleTheme: noop,
+  onToggleSidebar: () => {},
+  onCloseSidebar: () => {},
+  onResetDashboard: () => {},
+  onToggleTheme: () => {},
   backendOnline: true,
   aiProviderConfigured: true,
-  onOpenProviderSettings: noop,
+  onOpenProviderSettings: () => {},
   fullAccessActive: false,
-  onToggleFullAccess: noop,
-  onOpenIde: noop,
-  onCreateNewSession: noop,
-  onSelectSessionFilter: noop,
-  onSelectTab: noop,
+  fullAccessExpiresAt: null,
+  fullAccessBusy: false,
+  onToggleFullAccess: () => {},
+  onOpenIde: () => {},
+  onCreateNewSession: () => {},
+  onSelectSessionFilter: () => {},
+  onSelectTab: () => {},
+  entryMission: null,
+  entrySource: null,
+  onResumeEntryMission: undefined,
+  onDismissEntryIntent: undefined,
   showOnboardingWizard: false,
-  onOnboardingComplete: noop,
-  onOnboardingSkip: noop,
-  dashboardMainProps: dashboardMainPropsStub,
+  onOnboardingComplete: () => {},
+  onOnboardingSkip: () => {},
+  dashboardMainProps: {
+    activeTab: 'overview',
+    sessionFilter: 'all',
+    onSelectTab: () => {},
+    onSelectSessionFilter: () => {},
+    onOpenIde: () => {},
+    onCreateNewSession: () => {},
+  } as any,
+  toast: null,
 }
 
+// ── Meta ──────────────────────────────────────────────────────────────────────
 const meta = {
   title: 'Shells/DashboardShell',
   component: DashboardShell,
@@ -120,74 +65,96 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'Canonical dashboard shell. Keeps primary navigation to Overview, Projects, and Activity while secondary flows live in their dedicated product areas.',
+        component: `
+**DashboardShell** — canonical post-login workspace shell.
+
+Three visible paths: Overview, Projects, Activity. No card wall.
+Props note: this shell has 35+ props because it owns all dashboard state —
+consider splitting into DashboardHeader + DashboardLayout in a future wave.
+
+V31 status: ✅ copy cleaned (no "mission"/"Studio Home") | ⚠️ prop surface too large
+        `.trim(),
       },
     },
   },
-  decorators: [
-    (Story) => (
-      <div style={{ height: '100vh', width: '100vw' }}>
-        <Story />
-      </div>
-    ),
-  ],
+  tags: ['autodocs'],
 } satisfies Meta<typeof DashboardShell>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
+// ── Stories ───────────────────────────────────────────────────────────────────
+
+/**
+ * Default — user lands here after login. No active trial, no errors.
+ * This is the highest-traffic state.
+ */
 export const Default: Story = {
-  name: 'Default authenticated',
-  args: baseArgs,
+  name: 'Default — post-login',
+  args: { ...BASE_PROPS },
 }
 
+/**
+ * Trial active — user is on a free trial, N days remaining.
+ * Trial banner appears at the top.
+ */
 export const TrialActive: Story = {
-  name: 'Trial active',
+  name: 'Trial active — 7 days left',
   args: {
-    ...baseArgs,
+    ...BASE_PROPS,
     isTrialActive: true,
     showTrialBanner: true,
     trialDaysLeft: 7,
   },
 }
 
-export const OnboardingOpen: Story = {
-  name: 'Onboarding wizard',
+/**
+ * AI provider not configured — the most common friction point
+ * after initial signup. Should show a clear, non-blocking notice.
+ */
+export const AIProviderMissing: Story = {
+  name: 'AI provider not configured',
   args: {
-    ...baseArgs,
+    ...BASE_PROPS,
+    aiProviderConfigured: false,
+  },
+}
+
+/**
+ * Entry context — user arrived from an agent link or notification.
+ * Entry banner shows "Continue where you left off" with project context.
+ */
+export const EntryContext: Story = {
+  name: 'Entry context — resume from notification',
+  args: {
+    ...BASE_PROPS,
+    entryMission: 'Finish auth module refactor — 3 files changed, tests pending.',
+    entrySource: 'agent',
+    onResumeEntryMission: () => {},
+    onDismissEntryIntent: () => {},
+  },
+}
+
+/**
+ * Onboarding wizard — first-time user flow.
+ * The wizard takes over the main content area.
+ */
+export const OnboardingActive: Story = {
+  name: 'Onboarding — first-time user',
+  args: {
+    ...BASE_PROPS,
     showOnboardingWizard: true,
   },
 }
 
-export const ProviderNotConfigured: Story = {
-  name: 'Provider not configured',
+/**
+ * Auth error — usually a session expiry or provider mismatch.
+ * Error strip appears below topbar, does not block the UI.
+ */
+export const AuthError: Story = {
+  name: 'Auth error — session expired',
   args: {
-    ...baseArgs,
-    aiProviderConfigured: false,
-    dashboardMainProps: {
-      ...dashboardMainPropsStub,
-      overviewProps: {
-        ...overviewProps,
-        aiProviderConfigured: false,
-      },
-    },
-  },
-}
-
-export const BackendOffline: Story = {
-  name: 'Backend offline',
-  args: {
-    ...baseArgs,
-    backendOnline: false,
-    aiProviderConfigured: false,
-    dashboardMainProps: {
-      ...dashboardMainPropsStub,
-      overviewProps: {
-        ...overviewProps,
-        backendOnline: false,
-        aiProviderConfigured: false,
-      },
-    },
+    ...BASE_PROPS,
+    authErrorText: 'Session expired. Please sign in again.',
   },
 }

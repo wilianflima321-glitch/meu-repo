@@ -1,9 +1,9 @@
 import type { IncomingMessage } from 'http';
 import type { RawData, WebSocket } from 'ws';
-import { createClientId } from './websocket/ids';
-import { routeModernWebSocketMessage } from './websocket/modern-message-router';
-import type { ParsedWebSocketUrl } from './websocket-runtime-codecs';
-import type { ConnectionInfo, WsClient, WsMessage } from './websocket-runtime-contracts';
+import { createClientId } from './websocket/ids.ts';
+import { routeModernWebSocketMessage } from './websocket/modern-message-router.ts';
+import type { ParsedWebSocketUrl } from './websocket-runtime-codecs.ts';
+import type { ConnectionInfo, WsClient, WsMessage } from './websocket-runtime-contracts.ts';
 
 export function createModernWebSocketClient(input: {
   ws: WebSocket;

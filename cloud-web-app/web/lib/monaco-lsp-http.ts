@@ -20,6 +20,7 @@ import type {
 } from './monaco-lsp-http.converters';
 import {
   getMarkerSeverity,
+  hasStringValue,
   toMonacoCompletionItem,
   toMonacoHover,
   toMonacoRange,

@@ -1,4 +1,6 @@
 // @aethel-heavy-async-boundary Studio/engine runtime module; never import from public/dashboard/admin route shells.
+import * as THREE from 'three';
+
 import { logger } from '@/lib/observability/logger';
 
 import { FoveatedRenderingManager } from './webxr-vr-foveated-rendering';
@@ -6,6 +8,7 @@ import { ControllerTracker, HandTracker } from './webxr-vr-input';
 import { GrabbingSystem } from './webxr-vr-grabbing';
 import { HapticsManager } from './webxr-vr-haptics';
 import { TeleportationSystem } from './webxr-vr-teleportation';
+import { XR_HAND_JOINTS } from './webxr-vr-contracts';
 import type { XRConfig, XRControllerState, XRFeature, XRHandState } from './webxr-vr-contracts';
 
 export class WebXRSystem {

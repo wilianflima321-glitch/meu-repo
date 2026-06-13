@@ -1,8 +1,8 @@
 import type { RawData } from 'ws';
 
-import { asWsRecord, normalizeMessageType } from '../websocket-runtime-codecs';
-import { WS_MESSAGE_TYPES } from '../websocket-runtime-contracts';
-import type { WsClient, WsMessage, WsRecord } from '../websocket-runtime-contracts';
+import { asWsRecord, normalizeMessageType } from '../websocket-runtime-codecs.ts';
+import { WS_MESSAGE_TYPES } from '../websocket-runtime-contracts.ts';
+import type { WsClient, WsMessage, WsRecord } from '../websocket-runtime-contracts.ts';
 
 export interface ModernMessageRouterHandlers {
   sendError: (client: WsClient, error: string) => void;

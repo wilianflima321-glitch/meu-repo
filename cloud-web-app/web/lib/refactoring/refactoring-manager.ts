@@ -35,6 +35,7 @@ import {
   findFirstNonImportLine,
   findInsertionPoint,
   findOccurrences,
+  extractImportedNames,
   findVariableDeclaration,
   findVariableUsages,
   generateMethodCall,
@@ -423,7 +424,7 @@ export class RefactoringManager {
 
     // Remove unused imports (simple check)
     const used = sorted.filter(imp => {
-      const importedNames = this.extractImportedNames(imp.text);
+      const importedNames = extractImportedNames(imp.text);
       return importedNames.some(name => isNameUsed(name, lines, imp.line));
     });
 

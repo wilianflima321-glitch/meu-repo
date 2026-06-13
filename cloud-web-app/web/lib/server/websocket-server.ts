@@ -4,76 +4,80 @@ import { WebSocketServer, WebSocket } from 'ws';
 import type { RawData } from 'ws';
 import { EventEmitter } from 'events';
 import { IncomingMessage, Server as HttpServer } from 'http';
-import { createRequire } from 'module';
 import * as Y from 'yjs';
 
-import type { TerminalPtyManager } from './terminal-pty-runtime';
-import { eventBus } from './websocket/event-bus';
-import { handleTerminalCreate, handleTerminalInput, handleTerminalKill, handleTerminalResize, setupTerminalEvents } from './websocket/terminal-handlers';
-import type { ParsedWebSocketUrl } from './websocket-runtime-codecs';
-import { handleLegacyExportConnection } from './websocket/legacy-export-handler';
-import { handleLegacyCollaborationSocket } from './websocket/legacy-collaboration-handler';
+import { createComponentLogger } from '../observability/logger.ts';
+import { getTerminalPtyManager, type TerminalPtyManager } from './terminal-pty-runtime.ts';
+import {
+  parseWebSocketRequestUrl,
+  resolveHost,
+  resolvePort,
+  type ParsedWebSocketUrl,
+} from './websocket-runtime-codecs.ts';
+import {
+  WS_MESSAGE_TYPES,
+  type ConnectionInfo,
+  type WsChannel,
+  type WsClient,
+  type WsMessage,
+} from './websocket-runtime-contracts.ts';
+import { isHttpOnlyPath, isModernRuntimePath } from './websocket-runtime-routing.ts';
+import { ensureUserIdentity, handleClientAuth } from './websocket/auth.ts';
+import { eventBus } from './websocket/event-bus.ts';
+import { handleLegacyCollaborationSocket } from './websocket/legacy-collaboration-handler.ts';
+import { handleLegacyExportConnection } from './websocket/legacy-export-handler.ts';
 import {
   handleLegacyAiSocket,
   handleLegacyDapSocket,
   handleLegacyGeneralSocket,
   handleLegacyLspSocket,
   handleLegacyTerminalSocket,
-} from './websocket/legacy-simple-handlers';
+} from './websocket/legacy-simple-handlers.ts';
+import { startHeartbeat } from './websocket/presence.ts';
 import {
-  getWebSocketHealthPayload,
-  getWebSocketMetricsPayload,
-  getWebSocketRuntimeStats,
-  getWebSocketStatsPayload,
-} from './websocket-server-snapshots';
-import { handleCollabChat, handleCollabJoin, handleCollabOperation } from './websocket-server-collaboration';
-import { createFileChangeMessage, type FileChangeEvent } from './websocket-server-file-events';
-import { startWebSocketRuntime, stopWebSocketRuntime } from './websocket-server-lifecycle';
+  broadcastToAll as broadcastToAllChannels,
+  broadcastToChannel as broadcastToRoomChannel,
+  broadcastToLegacyRoom as broadcastToLegacyRoomClients,
+  removeSocketFromLegacyRooms,
+  subscribeToChannel as subscribeClientToChannel,
+  unsubscribeFromChannel as unsubscribeClientFromChannel,
+} from './websocket/rooms.ts';
+import {
+  handleTerminalCreate,
+  handleTerminalInput,
+  handleTerminalKill,
+  handleTerminalResize,
+  setupTerminalEvents,
+} from './websocket/terminal-handlers.ts';
+import {
+  sendError as sendTransportError,
+  sendRaw as sendRawTransport,
+  sendToClient as sendTransportToClient,
+} from './websocket/transport.ts';
+import { initYWebsocket } from './websocket-yjs-bootstrap.ts';
+import { handleCollabChat, handleCollabJoin, handleCollabOperation } from './websocket-server-collaboration.ts';
+import { createFileChangeMessage, type FileChangeEvent } from './websocket-server-file-events.ts';
+import { startWebSocketRuntime, stopWebSocketRuntime } from './websocket-server-lifecycle.ts';
 import {
   authenticateModernQuery,
   createModernMessageHandlers,
   createModernWebSocketClient,
   routeModernMessage,
   sendModernWelcome,
-} from './websocket-server-modern';
-import { createWebSocketConnectionInfo, routeLegacyWebSocketConnection } from './websocket-server-routing';
-import type { ConnectionInfo, WsChannel, WsClient, WsMessage } from './websocket-runtime-contracts';
-
-const require = createRequire(import.meta.url);
-const { ensureUserIdentity, handleClientAuth } = require('./websocket/auth.ts') as typeof import('./websocket/auth');
-const { startHeartbeat } = require('./websocket/presence.ts') as typeof import('./websocket/presence');
-const {
-  broadcastToAll: broadcastToAllChannels,
-  broadcastToChannel: broadcastToRoomChannel,
-  broadcastToLegacyRoom: broadcastToLegacyRoomClients,
-  removeSocketFromLegacyRooms,
-  subscribeToChannel: subscribeClientToChannel,
-  unsubscribeFromChannel: unsubscribeClientFromChannel,
-} = require('./websocket/rooms.ts') as typeof import('./websocket/rooms');
-const {
-  sendError: sendTransportError,
-  sendRaw: sendRawTransport,
-  sendToClient: sendTransportToClient,
-} = require('./websocket/transport.ts') as typeof import('./websocket/transport');
-const { createComponentLogger } = require('../observability/logger.ts') as typeof import('../observability/logger');
-const { getTerminalPtyManager } = require('./terminal-pty-runtime.ts') as typeof import('./terminal-pty-runtime');
-const { WS_MESSAGE_TYPES } = require('./websocket-runtime-contracts.ts') as typeof import('./websocket-runtime-contracts');
-const {
-  parseWebSocketRequestUrl,
-  resolveHost,
-  resolvePort,
-} = require('./websocket-runtime-codecs.ts') as typeof import('./websocket-runtime-codecs');
-const {
-  isHttpOnlyPath,
-  isModernRuntimePath,
-} = require('./websocket-runtime-routing.ts') as typeof import('./websocket-runtime-routing');
-const { initYWebsocket } = require('./websocket-yjs-bootstrap.ts') as typeof import('./websocket-yjs-bootstrap');
+} from './websocket-server-modern.ts';
+import { createWebSocketConnectionInfo, routeLegacyWebSocketConnection } from './websocket-server-routing.ts';
+import {
+  getWebSocketHealthPayload,
+  getWebSocketMetricsPayload,
+  getWebSocketRuntimeStats,
+  getWebSocketStatsPayload,
+} from './websocket-server-snapshots.ts';
 
 const log = createComponentLogger('server/websocket-server');
 
 export { WS_MESSAGE_TYPES };
-export { eventBus } from './websocket/event-bus';
-export type { WsClient, WsChannel, WsMessage } from './websocket-runtime-contracts';
+export { eventBus };
+export type { WsClient, WsChannel, WsMessage } from './websocket-runtime-contracts.ts';
 
 export class AethelWebSocketServer extends EventEmitter {
   private wss: WebSocketServer | null = null;

@@ -27,14 +27,12 @@ describe('PreviewRuntimeTrustNotice', () => {
     )
 
     expect(screen.getByText('managed runtime')).toBeInTheDocument()
-    expect(screen.getByText('Runtime reachable')).toBeInTheDocument()
-    expect(screen.getByText('Readiness partial')).toBeInTheDocument()
-    expect(screen.getByText('Artifact proposal')).toBeInTheDocument()
-    expect(screen.getByText('Next move: Open review target')).toBeInTheDocument()
-    expect(screen.getByText('Runtime is reachable, but readiness is still tightening.')).toBeInTheDocument()
-    expect(
-      screen.queryByText(/Use a proxima acao recomendada para restaurar parity de runtime/i),
-    ).not.toBeInTheDocument()
+    expect(screen.getByText('reachable')).toBeInTheDocument()
+    expect(screen.getByText('partial')).toBeInTheDocument()
+    expect(screen.getByText('proposal')).toBeInTheDocument()
+    expect(screen.getByText(/Next: Open review target/i)).toBeInTheDocument()
+    expect(screen.getByText('Live preview is reachable; one check is still pending.')).toBeInTheDocument()
+    expect(screen.getByText('Missing preview evidence')).toBeInTheDocument()
   })
 
   it('surfaces the degraded reason when compact trust is warning-grade', () => {
@@ -49,7 +47,7 @@ describe('PreviewRuntimeTrustNotice', () => {
       />,
     )
 
-    expect(screen.getByText('Inline fallback active.')).toBeInTheDocument()
+    expect(screen.getByText('Local preview active.')).toBeInTheDocument()
     expect(screen.getByText('Runtime handshake failed')).toBeInTheDocument()
   })
 })

@@ -76,7 +76,7 @@ describe('WorkbenchPreviewRuntimeSurface', () => {
     expect(screen.getByTestId('trust-notice')).toHaveAttribute('data-artifact', 'live')
     expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-state', 'healthy')
     expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-show-lifecycle', 'no')
-    expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-title', 'Previa ao vivo')
+    expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-title', 'Live preview')
     expect(screen.getByTestId('canonical-preview')).toHaveAttribute(
       'data-content',
       'export default function App() { return null }',
@@ -107,7 +107,7 @@ describe('WorkbenchPreviewRuntimeSurface', () => {
     )
 
     expect(screen.getByTestId('trust-notice')).toHaveAttribute('data-artifact', 'proposal')
-    expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-title', 'Previa da proposta')
+    expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-title', 'Proposal preview')
     expect(screen.getByTestId('canonical-preview')).toHaveAttribute(
       'data-content',
       'export default function App() { return <main>Proposal</main> }',

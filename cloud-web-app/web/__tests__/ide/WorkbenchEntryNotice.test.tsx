@@ -1,11 +1,5 @@
 /**
  * Tests for ide/fullscreen/WorkbenchEntryNotice.
- *
- * Covers:
- *  - Renders the notice title + description.
- *  - Applies warning styles when tone === 'warning'.
- *  - Dismiss button fires onDismiss.
- *  - Dismiss button has a Portuguese aria-label for screen readers.
  */
 
 import React from 'react';
@@ -33,17 +27,17 @@ describe('WorkbenchEntryNotice', () => {
         onDismiss={onDismiss}
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: /fechar aviso do workbench/i }));
+    fireEvent.click(screen.getByRole('button', { name: /close workbench notice/i }));
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the dismiss button with a portuguese aria-label', () => {
+  it('renders the dismiss button with an accessible aria-label', () => {
     render(
       <WorkbenchEntryNotice
         notice={{ tone: 'warning', title: 'Atenção', description: 'desc' }}
         onDismiss={() => {}}
       />,
     );
-    expect(screen.getByLabelText('Fechar aviso do workbench')).toBeInTheDocument();
+    expect(screen.getByLabelText('Close workbench notice')).toBeInTheDocument();
   });
 });

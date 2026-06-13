@@ -30,7 +30,6 @@ import {
   shouldExclude,
 } from './search-runtime.helpers';
 import { searchWithRipgrep } from './search-runtime-ripgrep';
-
 export type {
   SearchOptions,
   SearchMatch,
@@ -41,26 +40,18 @@ export type {
   FileMatch,
   WorkspaceSymbolSearchResult,
 } from './search-runtime.types';
-
-
 import {createComponentLogger} from '@/lib/observability/logger'
-
 const log = createComponentLogger('server/search-runtime')
-
 const execAsync = promisify(exec);
-
 // ============================================================================
 // SEARCH RUNTIME CLASS
 // ============================================================================
-
 export class SearchRuntime extends EventEmitter {
   private ripgrepPath: string | null = null;
   private ripgrepChecked = false;
-
   constructor() {
     super();
   }
-
   /**
    * Detects whether ripgrep is available on the system
    */
@@ -68,9 +59,7 @@ export class SearchRuntime extends EventEmitter {
     if (this.ripgrepChecked) {
       return this.ripgrepPath !== null;
     }
-
     this.ripgrepChecked = true;
-
     for (const candidate of getRipgrepCandidates()) {
       try {
         await execAsync(`"${candidate}" --version`);
@@ -81,18 +70,14 @@ export class SearchRuntime extends EventEmitter {
         // Continue trying
       }
     }
-
     log.info('[SearchRuntime] Ripgrep not found, using Node.js fallback');
     return false;
   }
-
   // ==========================================================================
   // TEXT SEARCH
   // ==========================================================================
-
   async search(options: SearchOptions): Promise<SearchResult> {
     const startTime = performance.now();
-
     const {
       query,
       workspaceRoot,
@@ -105,15 +90,11 @@ export class SearchRuntime extends EventEmitter {
       useGitignore = true,
       contextLines = 2,
     } = options;
-
     const resolvedRoot = resolveWorkspaceRoot(workspaceRoot);
-
     // Prefer ripgrep when available.
     const hasRipgrep = await this.checkRipgrep();
-
     let matches: SearchMatch[];
     let truncated = false;
-
     if (hasRipgrep && this.ripgrepPath) {
       const result = await searchWithRipgrep(this.ripgrepPath, {
         query,
@@ -145,10 +126,8 @@ export class SearchRuntime extends EventEmitter {
       matches = result.matches;
       truncated = result.truncated;
     }
-
     // Calculate statistics
     const fileSet = new Set(matches.map(m => m.file));
-
     const result: SearchResult = {
       matches,
       fileCount: fileSet.size,
@@ -156,11 +135,9 @@ export class SearchRuntime extends EventEmitter {
       duration: performance.now() - startTime,
       truncated,
     };
-
     this.emit('searchComplete', result);
     return result;
   }
-
   /**
    * Search using Node.js as the universal fallback.
    */
@@ -177,24 +154,19 @@ export class SearchRuntime extends EventEmitter {
       useGitignore,
       contextLines = 2,
     } = options;
-
     const matches: SearchMatch[] = [];
     let truncated = false;
-
     // Create search regex.
     let searchPattern: RegExp;
     try {
       let pattern = isRegex ? query : escapeRegex(query);
-
       if (isWholeWord) {
         pattern = `\\b${pattern}\\b`;
       }
-
       searchPattern = new RegExp(pattern, isCaseSensitive ? 'g' : 'gi');
     } catch (error) {
       throw new Error(`Invalid search pattern: ${error}`);
     }
-
     // Default exclusion patterns
     const defaultExcludes = [
       'node_modules',
@@ -207,13 +179,11 @@ export class SearchRuntime extends EventEmitter {
       '*.min.css',
       '*.map',
     ];
-
     // Parse include/exclude patterns
     const includeGlobs = includePattern ? includePattern.split(',').map(p => p.trim()) : [];
     const excludeGlobs = excludePattern
       ? [...excludePattern.split(',').map(p => p.trim()), ...defaultExcludes]
       : defaultExcludes;
-
     // Load .gitignore when enabled.
     let gitignorePatterns: string[] = [];
     if (useGitignore) {
@@ -228,31 +198,25 @@ export class SearchRuntime extends EventEmitter {
         // .gitignore doesn't exist
       }
     }
-
     // Walk directory
     const walkDir = async (dir: string): Promise<void> => {
       if (matches.length >= maxResults!) {
         truncated = true;
         return;
       }
-
       try {
         const entries = await fs.readdir(dir, { withFileTypes: true });
-
         for (const entry of entries) {
           if (matches.length >= maxResults!) {
             truncated = true;
             return;
           }
-
           const fullPath = path.join(dir, entry.name);
           const relativePath = path.relative(workspaceRoot, fullPath);
-
           // Check exclusions
           if (shouldExclude(relativePath, entry.name, excludeGlobs, gitignorePatterns)) {
             continue;
           }
-
           if (entry.isDirectory()) {
             await walkDir(fullPath);
           } else if (entry.isFile()) {
@@ -260,12 +224,10 @@ export class SearchRuntime extends EventEmitter {
             if (includeGlobs.length > 0 && !matchesGlob(relativePath, includeGlobs)) {
               continue;
             }
-
             // Skip binary files
             if (isBinaryFile(entry.name)) {
               continue;
             }
-
             // Search in file
             await this.searchInFile(fullPath, relativePath, searchPattern, contextLines, matches, maxResults!);
           }
@@ -274,12 +236,9 @@ export class SearchRuntime extends EventEmitter {
         // Skip directories we can't read
       }
     };
-
     await walkDir(workspaceRoot);
-
     return { matches, truncated };
   }
-
   /**
    * Searches a single file
    */
@@ -294,18 +253,14 @@ export class SearchRuntime extends EventEmitter {
     try {
       const content = await fs.readFile(fullPath, 'utf-8');
       const lines = content.split('\n');
-
       for (let i = 0; i < lines.length && matches.length < maxResults; i++) {
         const line = lines[i];
         let match: RegExpExecArray | null;
-
         // Reset regex lastIndex
         pattern.lastIndex = 0;
-
         while ((match = pattern.exec(line)) !== null && matches.length < maxResults) {
           const contextBefore: string[] = [];
           const contextAfter: string[] = [];
-
           // Get context lines
           for (let j = Math.max(0, i - contextLines); j < i; j++) {
             contextBefore.push(lines[j]);
@@ -313,7 +268,6 @@ export class SearchRuntime extends EventEmitter {
           for (let j = i + 1; j <= Math.min(lines.length - 1, i + contextLines); j++) {
             contextAfter.push(lines[j]);
           }
-
           matches.push({
             file: relativePath,
             line: i + 1,
@@ -324,7 +278,6 @@ export class SearchRuntime extends EventEmitter {
             contextBefore,
             contextAfter,
           });
-
           // Prevent infinite loop for zero-length matches
           if (match[0].length === 0) {
             pattern.lastIndex++;
@@ -335,11 +288,9 @@ export class SearchRuntime extends EventEmitter {
       // Skip files we can't read
     }
   }
-
   // ==========================================================================
   // REPLACE
   // ==========================================================================
-
   async replace(options: ReplaceOptions): Promise<ReplaceResult> {
     const {
       query,
@@ -352,7 +303,6 @@ export class SearchRuntime extends EventEmitter {
       excludePattern,
       preserveCase = false,
     } = options;
-
     // First, find all matches
     const searchResult = await this.search({
       query,
@@ -365,7 +315,6 @@ export class SearchRuntime extends EventEmitter {
       maxResults: 100000, // Higher limit for replace
       useGitignore: true,
     });
-
     // Group matches by file
     const matchesByFile = new Map<string, SearchMatch[]>();
     for (const match of searchResult.matches) {
@@ -373,28 +322,23 @@ export class SearchRuntime extends EventEmitter {
       existing.push(match);
       matchesByFile.set(match.file, existing);
     }
-
     const resolvedRoot = resolveWorkspaceRoot(workspaceRoot);
     const errors: Array<{ file: string; error: string }> = [];
     let filesModified = 0;
     let replacementsCount = 0;
-
     // Process each file
     for (const [file, fileMatches] of matchesByFile) {
       try {
         const fullPath = path.join(resolvedRoot, file);
         let content = await fs.readFile(fullPath, 'utf-8');
-
         // Create search pattern
         let pattern = isRegex ? query : escapeRegex(query);
         if (isWholeWord) {
           pattern = `\\b${pattern}\\b`;
         }
         const searchPattern = new RegExp(pattern, isCaseSensitive ? 'g' : 'gi');
-
         // Replace
         const originalContent = content;
-
         if (preserveCase) {
           content = content.replace(searchPattern, (match) => {
             return preserveCaseReplace(match, replacement);
@@ -402,16 +346,13 @@ export class SearchRuntime extends EventEmitter {
         } else {
           content = content.replace(searchPattern, replacement);
         }
-
         // Count replacements
         const matchCount = fileMatches.length;
-
         // Write if changed
         if (content !== originalContent) {
           await fs.writeFile(fullPath, content, 'utf-8');
           filesModified++;
           replacementsCount += matchCount;
-
           this.emit('fileModified', { file, replacements: matchCount });
         }
       } catch (error) {
@@ -421,21 +362,17 @@ export class SearchRuntime extends EventEmitter {
         });
       }
     }
-
     const result: ReplaceResult = {
       filesModified,
       replacementsCount,
       errors,
     };
-
     this.emit('replaceComplete', result);
     return result;
   }
-
   // ==========================================================================
   // FILE SEARCH (Quick Open)
   // ==========================================================================
-
   async searchFiles(options: FileSearchOptions): Promise<FileMatch[]> {
     const {
       query,
@@ -443,11 +380,9 @@ export class SearchRuntime extends EventEmitter {
       maxResults = 100,
       includeHidden = false,
     } = options;
-
     const resolvedRoot = resolveWorkspaceRoot(workspaceRoot);
     const matches: FileMatch[] = [];
     const queryLower = query.toLowerCase();
-
     // Default exclusions
     const excludes = [
       'node_modules',
@@ -457,35 +392,27 @@ export class SearchRuntime extends EventEmitter {
       '.next',
       '__pycache__',
     ];
-
     const walkDir = async (dir: string): Promise<void> => {
       if (matches.length >= maxResults) return;
-
       try {
         const entries = await fs.readdir(dir, { withFileTypes: true });
-
         for (const entry of entries) {
           if (matches.length >= maxResults) return;
-
           const fullPath = path.join(dir, entry.name);
           const relativePath = path.relative(resolvedRoot, fullPath);
-
           // Skip hidden unless requested
           if (!includeHidden && entry.name.startsWith('.')) {
             continue;
           }
-
           // Skip exclusions
           if (excludes.some(e => relativePath.includes(e))) {
             continue;
           }
-
           if (entry.isDirectory()) {
             await walkDir(fullPath);
           } else if (entry.isFile()) {
             // Fuzzy match
             const score = fuzzyMatch(queryLower, relativePath.toLowerCase());
-
             if (score > 0) {
               matches.push({
                 path: relativePath,
@@ -499,25 +426,18 @@ export class SearchRuntime extends EventEmitter {
         // Skip directories we can't read
       }
     };
-
     await walkDir(resolvedRoot);
-
     // Sort by score descending
     matches.sort((a, b) => b.score - a.score);
-
     return matches.slice(0, maxResults);
   }
-
   // ==========================================================================
   // SYMBOL SEARCH (Workspace Symbols)
   // ==========================================================================
-
   async searchSymbols(options: { query: string; workspaceRoot: string; language?: string }): Promise<WorkspaceSymbolSearchResult[]> {
     // This would typically delegate to LSP workspace/symbol
     // For now, we do a simple grep for common patterns
-
     const { query, workspaceRoot, language } = options;
-
     // Pattern for common symbol definitions
     const patterns = [
       `function\\s+${query}`,
@@ -530,9 +450,7 @@ export class SearchRuntime extends EventEmitter {
       `def\\s+${query}`,  // Python
       `async\\s+function\\s+${query}`,
     ];
-
     const combinedPattern = patterns.join('|');
-
     const result = await this.search({
       query: combinedPattern,
       workspaceRoot,
@@ -540,7 +458,6 @@ export class SearchRuntime extends EventEmitter {
       isCaseSensitive: false,
       maxResults: 100,
     });
-
     // Transform to symbol format
     return result.matches.map(m => ({
       name: query,
@@ -556,18 +473,14 @@ export class SearchRuntime extends EventEmitter {
     }));
   }
 }
-
 // ============================================================================
 // SINGLETON
 // ============================================================================
-
 let searchRuntime: SearchRuntime | null = null;
-
 export function getSearchRuntime(): SearchRuntime {
   if (!searchRuntime) {
     searchRuntime = new SearchRuntime();
   }
   return searchRuntime;
 }
-
 export { SearchRuntime as default };

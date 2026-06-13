@@ -1,10 +1,11 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { EvidenceCenter } from '@/components/evidence/EvidenceCenter'
+import PremiumLoadingState from '@/components/ui/PremiumLoadingState'
 
 export const metadata: Metadata = {
-  title: 'Evidence Center | Aethel',
-  description: 'Protected project evidence, blockers, and next actions.',
+  title: 'Evidence | Aethel',
+  description: 'Project evidence, blockers, and next actions.',
 }
 
 export default function EvidencePage({
@@ -13,13 +14,7 @@ export default function EvidencePage({
   searchParams?: { projectId?: string }
 }) {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-[var(--aethel-surface-primary)] px-6 py-10 text-[var(--aethel-text-secondary)]">
-          Loading evidence center...
-        </div>
-      }
-    >
+    <Suspense fallback={<PremiumLoadingState variant="route" />}>
       <EvidenceCenter initialProjectId={searchParams?.projectId} />
     </Suspense>
   )

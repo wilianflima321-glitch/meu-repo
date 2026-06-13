@@ -1,5 +1,5 @@
-import type { WsMessage } from './websocket-runtime-contracts';
-import { WS_MESSAGE_TYPES } from './websocket-runtime-contracts';
+import type { WsMessage } from './websocket-runtime-contracts.ts';
+import { WS_MESSAGE_TYPES } from './websocket-runtime-contracts.ts';
 
 export type FileChangeEvent = {
   type: 'changed' | 'created' | 'deleted' | 'renamed';

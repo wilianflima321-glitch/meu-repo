@@ -60,7 +60,7 @@ export interface Diagnostic {
   message: string;
 }
 
-function hasStringValue(value: unknown): value is { value: string } {
+export function hasStringValue(value: unknown): value is { value: string } {
   return value !== null && typeof value === 'object' && 'value' in value && typeof value.value === 'string';
 }
 

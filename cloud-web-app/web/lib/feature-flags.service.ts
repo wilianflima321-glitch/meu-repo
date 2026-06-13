@@ -1,6 +1,6 @@
 import { logger } from '@/lib/observability/logger';
 import { DefaultFeatureFlags } from './feature-flags.defaults';
-import type { EvaluationResult, ExperimentResult, FeatureFlag, FeatureRule, UserContext } from './feature-flags.types';
+import type { Environment, EvaluationResult, ExperimentResult, FeatureFlag, FeatureRule, UserContext } from './feature-flags.types';
 
 export class FeatureFlagService {
   private static instance: FeatureFlagService;

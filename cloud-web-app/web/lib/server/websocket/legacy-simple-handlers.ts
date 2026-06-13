@@ -1,10 +1,10 @@
 import type { WebSocket } from 'ws'
 
-import { createComponentLogger } from '@/lib/observability/logger'
-import type { ConnectionInfo } from '../websocket-runtime-contracts'
-import { asWsRecord } from '../websocket-runtime-codecs'
-import { eventBus } from './event-bus'
-import { addLegacyRoomClient, removeLegacyRoomClient } from './rooms'
+import { createComponentLogger } from '../../observability/logger.ts'
+import type { ConnectionInfo } from '../websocket-runtime-contracts.ts'
+import { asWsRecord } from '../websocket-runtime-codecs.ts'
+import { eventBus } from './event-bus.ts'
+import { addLegacyRoomClient, removeLegacyRoomClient } from './rooms.ts'
 
 const log = createComponentLogger('server/websocket/legacy-simple-handlers')
 

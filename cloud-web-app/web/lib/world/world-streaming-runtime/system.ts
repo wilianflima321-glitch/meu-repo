@@ -9,6 +9,9 @@ import { logger } from '@/lib/observability/logger';
 import { EventEmitter } from 'events';
 import { Octree } from './octree';
 import { PriorityQueue } from './priority-queue';
+import { createDefaultStreamingConfig, createEmptyStreamingStats, WORLD_STREAMING_BOUNDS } from './defaults';
+import { createRegisteredWorldChunk } from './chunk-factory';
+import { distance as vectorDistance, getChunkDistance, getChunkId, getChunkViewAngle } from './geometry';
 import type { BoundingBox, ChunkLoader, EntityLOD, LODLevel, LODConfig, StreamingConfig, StreamingStats, Vector3, WorldChunk } from './types';
 
 export class WorldStreamingSystem extends EventEmitter {
@@ -161,7 +164,7 @@ export class WorldStreamingSystem extends EventEmitter {
       chunk.priority = priority;
       
       // Update LOD level
-      chunk.lodLevel = this.calculateLODLevel(entityDistance);
+      chunk.lodLevel = this.calculateLODLevel(distance);
     }
   }
   

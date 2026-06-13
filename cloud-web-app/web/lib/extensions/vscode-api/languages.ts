@@ -16,9 +16,7 @@ import type {
   SignatureHelpProvider,
   WorkspaceSymbolProvider,
 } from './languages.types'
-
 const log = createComponentLogger('extensions/vscode-api/languages')
-
 export type {
   CodeActionProvider,
   CodeLensProvider,
@@ -36,7 +34,6 @@ export type {
   SignatureHelpProvider,
   WorkspaceSymbolProvider,
 } from './languages.types'
-
 class LanguagesAPI {
   private completionProviders: Map<string, CompletionItemProvider[]> = new Map();
   private hoverProviders: Map<string, HoverProvider[]> = new Map();
@@ -51,7 +48,6 @@ class LanguagesAPI {
   private renameProviders: Map<string, RenameProvider[]> = new Map();
   private signatureHelpProviders: Map<string, SignatureHelpProvider[]> = new Map();
   private diagnosticCollections: Map<string, DiagnosticCollection> = new Map();
-
   /**
    * Register completion item provider
    */
@@ -61,16 +57,13 @@ class LanguagesAPI {
     ...triggerCharacters: string[]
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
-
     for (const language of languages) {
       if (!this.completionProviders.has(language)) {
         this.completionProviders.set(language, []);
       }
       this.completionProviders.get(language)!.push(provider);
     }
-
     log.info('[Languages] Registered completion provider for:', languages, 'triggers:', triggerCharacters);
-
     return {
       dispose: () => {
         for (const language of languages) {
@@ -83,7 +76,6 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Register hover provider
    */
@@ -92,16 +84,13 @@ class LanguagesAPI {
     provider: HoverProvider
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
-
     for (const language of languages) {
       if (!this.hoverProviders.has(language)) {
         this.hoverProviders.set(language, []);
       }
       this.hoverProviders.get(language)!.push(provider);
     }
-
     log.info('[Languages] Registered hover provider for:', languages);
-
     return {
       dispose: () => {
         for (const language of languages) {
@@ -114,7 +103,6 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Register definition provider
    */
@@ -123,16 +111,13 @@ class LanguagesAPI {
     provider: DefinitionProvider
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
-
     for (const language of languages) {
       if (!this.definitionProviders.has(language)) {
         this.definitionProviders.set(language, []);
       }
       this.definitionProviders.get(language)!.push(provider);
     }
-
     log.info('[Languages] Registered definition provider for:', languages);
-
     return {
       dispose: () => {
         for (const language of languages) {
@@ -145,7 +130,6 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Register reference provider
    */
@@ -154,16 +138,13 @@ class LanguagesAPI {
     provider: ReferenceProvider
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
-
     for (const language of languages) {
       if (!this.referenceProviders.has(language)) {
         this.referenceProviders.set(language, []);
       }
       this.referenceProviders.get(language)!.push(provider);
     }
-
     log.info('[Languages] Registered reference provider for:', languages);
-
     return {
       dispose: () => {
         for (const language of languages) {
@@ -176,7 +157,6 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Register document symbol provider
    */
@@ -185,16 +165,13 @@ class LanguagesAPI {
     provider: DocumentSymbolProvider
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
-
     for (const language of languages) {
       if (!this.documentSymbolProviders.has(language)) {
         this.documentSymbolProviders.set(language, []);
       }
       this.documentSymbolProviders.get(language)!.push(provider);
     }
-
     log.info('[Languages] Registered document symbol provider for:', languages);
-
     return {
       dispose: () => {
         for (const language of languages) {
@@ -207,7 +184,6 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Register workspace symbol provider
    */
@@ -216,7 +192,6 @@ class LanguagesAPI {
   ): { dispose: () => void } {
     this.workspaceSymbolProviders.push(provider);
     log.info('[Languages] Registered workspace symbol provider');
-
     return {
       dispose: () => {
         const index = this.workspaceSymbolProviders.indexOf(provider);
@@ -224,7 +199,6 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Register code action provider
    */
@@ -234,16 +208,13 @@ class LanguagesAPI {
     metadata?: LanguageApiValue
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
-
     for (const language of languages) {
       if (!this.codeActionProviders.has(language)) {
         this.codeActionProviders.set(language, []);
       }
       this.codeActionProviders.get(language)!.push(provider);
     }
-
     log.info('[Languages] Registered code action provider for:', languages);
-
     return {
       dispose: () => {
         for (const language of languages) {
@@ -256,7 +227,6 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Register code lens provider
    */
@@ -265,16 +235,13 @@ class LanguagesAPI {
     provider: CodeLensProvider
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
-
     for (const language of languages) {
       if (!this.codeLensProviders.has(language)) {
         this.codeLensProviders.set(language, []);
       }
       this.codeLensProviders.get(language)!.push(provider);
     }
-
     log.info('[Languages] Registered code lens provider for:', languages);
-
     return {
       dispose: () => {
         for (const language of languages) {
@@ -287,7 +254,6 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Register document formatting edit provider
    */
@@ -296,16 +262,13 @@ class LanguagesAPI {
     provider: DocumentFormattingEditProvider
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
-
     for (const language of languages) {
       if (!this.formattingProviders.has(language)) {
         this.formattingProviders.set(language, []);
       }
       this.formattingProviders.get(language)!.push(provider);
     }
-
     log.info('[Languages] Registered formatting provider for:', languages);
-
     return {
       dispose: () => {
         for (const language of languages) {
@@ -318,7 +281,6 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Register document range formatting edit provider
    */
@@ -327,16 +289,13 @@ class LanguagesAPI {
     provider: DocumentRangeFormattingEditProvider
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
-
     for (const language of languages) {
       if (!this.rangeFormattingProviders.has(language)) {
         this.rangeFormattingProviders.set(language, []);
       }
       this.rangeFormattingProviders.get(language)!.push(provider);
     }
-
     log.info('[Languages] Registered range formatting provider for:', languages);
-
     return {
       dispose: () => {
         for (const language of languages) {
@@ -349,7 +308,6 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Register rename provider
    */
@@ -358,16 +316,13 @@ class LanguagesAPI {
     provider: RenameProvider
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
-
     for (const language of languages) {
       if (!this.renameProviders.has(language)) {
         this.renameProviders.set(language, []);
       }
       this.renameProviders.get(language)!.push(provider);
     }
-
     log.info('[Languages] Registered rename provider for:', languages);
-
     return {
       dispose: () => {
         for (const language of languages) {
@@ -380,7 +335,6 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Register signature help provider
    */
@@ -390,16 +344,13 @@ class LanguagesAPI {
     ...triggerCharacters: string[]
   ): { dispose: () => void } {
     const languages = Array.isArray(selector) ? selector : [selector];
-
     for (const language of languages) {
       if (!this.signatureHelpProviders.has(language)) {
         this.signatureHelpProviders.set(language, []);
       }
       this.signatureHelpProviders.get(language)!.push(provider);
     }
-
     log.info('[Languages] Registered signature help provider for:', languages, 'triggers:', triggerCharacters);
-
     return {
       dispose: () => {
         for (const language of languages) {
@@ -412,14 +363,12 @@ class LanguagesAPI {
       },
     };
   }
-
   /**
    * Create diagnostic collection
    */
   createDiagnosticCollection(name?: string): DiagnosticCollection {
     const collectionName = name || `collection-${this.diagnosticCollections.size}`;
     const diagnostics = new Map<string, LanguageApiList>();
-
     const collection: DiagnosticCollection = {
       name: collectionName,
       set: (uriOrEntries: string | Array<[string, LanguageApiList]>, diagnosticsArray?: LanguageApiList) => {
@@ -453,13 +402,10 @@ class LanguagesAPI {
         log.info('[Languages] Disposed diagnostic collection:', collectionName);
       },
     };
-
     this.diagnosticCollections.set(collectionName, collection);
     log.info('[Languages] Created diagnostic collection:', collectionName);
-
     return collection;
   }
-
   /**
    * Get languages
    */
@@ -471,7 +417,6 @@ class LanguagesAPI {
       'yaml', 'xml', 'shellscript', 'plaintext',
     ];
   }
-
   /**
    * Set language configuration
    */
@@ -480,46 +425,37 @@ class LanguagesAPI {
     configuration: LanguageApiValue
   ): { dispose: () => void } {
     log.info('[Languages] Set language configuration for:', language);
-
     return {
       dispose: () => {
         log.info('[Languages] Disposed language configuration for:', language);
       },
     };
   }
-
   /**
    * Get providers for language
    */
   getCompletionProviders(language: string): CompletionItemProvider[] {
     return this.completionProviders.get(language) || [];
   }
-
   getHoverProviders(language: string): HoverProvider[] {
     return this.hoverProviders.get(language) || [];
   }
-
   getDefinitionProviders(language: string): DefinitionProvider[] {
     return this.definitionProviders.get(language) || [];
   }
-
   getReferenceProviders(language: string): ReferenceProvider[] {
     return this.referenceProviders.get(language) || [];
   }
-
   getCodeActionProviders(language: string): CodeActionProvider[] {
     return this.codeActionProviders.get(language) || [];
   }
 }
-
 // Singleton instance
 let languagesInstance: LanguagesAPI | null = null;
-
 export function getLanguagesAPI(): LanguagesAPI {
   if (!languagesInstance) {
     languagesInstance = new LanguagesAPI();
   }
   return languagesInstance;
 }
-
 export const languages = getLanguagesAPI();

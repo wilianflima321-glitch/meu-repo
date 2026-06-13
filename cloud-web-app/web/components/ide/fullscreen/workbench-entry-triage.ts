@@ -223,11 +223,17 @@ export function resolveWorkbenchEntryProfile(params: {
             preview: { open: true, size: 34 },
             chat: { open: true, size: 24 },
           },
-          notice: {
-            tone: 'info' as const,
-            title: 'Project opened in Studio',
-            description: 'AI, artifact, diff, and review stay in one focused flow.',
-          },
+          notice: mission
+            ? {
+                tone: 'info' as const,
+                title: 'Missao em foco',
+                description: mission,
+              }
+            : {
+                tone: 'info' as const,
+                title: 'Project opened in Studio',
+                description: 'AI, artifact, diff, and review stay in one focused flow.',
+              },
         }
       : ENTRY_PROFILES[laneId];
 

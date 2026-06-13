@@ -1,6 +1,6 @@
 import type { WebSocket } from 'ws';
-import { buildHealthPayload, buildMetricsPayload, buildStatsPayload } from './websocket/presence';
-import type { ConnectionInfo, WsChannel, WsClient } from './websocket-runtime-contracts';
+import { buildHealthPayload, buildMetricsPayload, buildStatsPayload } from './websocket/presence.ts';
+import type { ConnectionInfo, WsChannel, WsClient } from './websocket-runtime-contracts.ts';
 
 export interface WebSocketServerSnapshotSource {
   connections: Map<WebSocket, ConnectionInfo>;

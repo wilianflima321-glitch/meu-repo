@@ -1,11 +1,7 @@
 import type { RawData } from 'ws';
-import { createRequire } from 'module';
 import type { ParsedUrlQuery } from 'querystring';
 
-import type { TerminalRuntimePayload, WsRecord } from './websocket-runtime-contracts';
-
-const require = createRequire(import.meta.url);
-const { WS_MESSAGE_TYPES } = require('./websocket-runtime-contracts.ts') as typeof import('./websocket-runtime-contracts');
+import { WS_MESSAGE_TYPES, type TerminalRuntimePayload, type WsRecord } from './websocket-runtime-contracts.ts';
 
 export interface ParsedWebSocketUrl {
   pathname: string

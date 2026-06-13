@@ -89,7 +89,7 @@ export function acceptTransportStreams(
 }
 
 async function readIncomingStream(
-  stream: WebTransportReceiveStream,
+  stream: ReadableStream<Uint8Array>,
   handlers: TransportConnectionHandlers,
 ): Promise<void> {
   const reader = stream.getReader();

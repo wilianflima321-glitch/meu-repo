@@ -24,6 +24,8 @@ export type ApplyBody = ApplyChangeInput & {
   agent?: string
   enforceAgentScope?: boolean
   enforceReadReceipts?: boolean
+  /** When true, the governed tool bus blocks apply unless the diff-proposal job is fully evidenced. */
+  enforceToolBus?: boolean
   approvedHighRisk?: boolean
   changes?: ApplyChangeInput[]
   executionMode?: ApplyExecutionMode

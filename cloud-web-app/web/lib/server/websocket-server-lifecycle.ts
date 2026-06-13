@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type Server as HttpServer } from 'http';
 import { WebSocket, WebSocketServer } from 'ws';
-import { handleRuntimeHttpRequest } from './websocket/http-routes';
+import { handleRuntimeHttpRequest } from './websocket/http-routes.ts';
 
 export async function startWebSocketRuntime(input: {
   port: number;

@@ -2,11 +2,11 @@ import type { IncomingMessage } from 'http'
 import type { WebSocket } from 'ws'
 import * as Y from 'yjs'
 
-import { createComponentLogger } from '@/lib/observability/logger'
-import { toUint8Array } from '../websocket-runtime-codecs'
-import { resolveCollaborationRoomName } from '../websocket-runtime-routing'
-import { getYWebsocketSetup } from '../websocket-yjs-bootstrap'
-import { addLegacyRoomClient } from './rooms'
+import { createComponentLogger } from '../../observability/logger.ts'
+import { toUint8Array } from '../websocket-runtime-codecs.ts'
+import { resolveCollaborationRoomName } from '../websocket-runtime-routing.ts'
+import { getYWebsocketSetup } from '../websocket-yjs-bootstrap.ts'
+import { addLegacyRoomClient } from './rooms.ts'
 
 const log = createComponentLogger('server/websocket/legacy-collaboration-handler')
 

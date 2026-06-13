@@ -1,9 +1,14 @@
 import { EventEmitter } from 'events';
 import { BoxCollider, CapsuleCollider, Collider, PlaneCollider, SphereCollider } from './physics-colliders';
 import { Quat, Vec3, type AABB, type BodyType, type ColliderConfig, type PhysicsConfig, type Quaternion, type RigidBodyConfig, type Vector3 } from './physics-math';
+import { RigidBody } from './physics-body';
+import { AABBBroadphase, CollisionDetector, ContactConstraint, type CollisionInfo } from './physics-collision';
 
 export { BoxCollider, CapsuleCollider, Collider, PlaneCollider, SphereCollider } from './physics-colliders';
 export { Quat, Vec3 } from './physics-math';
+export { RigidBody } from './physics-body';
+export { AABBBroadphase, CollisionDetector, ContactConstraint } from './physics-collision';
+export type { CollisionInfo } from './physics-collision';
 export type { AABB, BodyType, ColliderConfig, ColliderType, PhysicsConfig, Quaternion, RigidBodyConfig, Transform, Vector, Vector2, Vector3 } from './physics-math';
 
 export interface RaycastResult {

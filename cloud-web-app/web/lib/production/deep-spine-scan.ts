@@ -58,6 +58,7 @@ import {
   normalizeScope,
   scanIdFor,
   selectArtifactsForBudget,
+  slugify,
   unique,
 } from './deep-spine-scan.utils'
 import {

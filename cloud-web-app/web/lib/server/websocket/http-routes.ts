@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 
-import { normalizePath, parseWebSocketRequestUrl } from '../websocket-runtime-codecs';
+import { normalizePath, parseWebSocketRequestUrl } from '../websocket-runtime-codecs.ts';
 
 export interface RuntimeHttpRoutes {
   health: () => unknown;

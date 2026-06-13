@@ -27,7 +27,7 @@ export default function CreativeStudioPage() {
       <div className="h-full overflow-y-auto bg-[var(--aethel-surface-primary)] px-4 py-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <SurfaceQualityShell
-            eyebrow="Studio runboard"
+            eyebrow="Studio"
             title="Plan, validate, then open the right editor."
             subtitle="Preview in the browser. Use local or cloud only when the required setup is actually ready."
             status={[
@@ -36,16 +36,19 @@ export default function CreativeStudioPage() {
               { label: 'Cloud review locked', tone: 'neutral' },
             ]}
             primaryAction={<a href="#studio-primary-surfaces" className="rounded-full bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)]">Open editor</a>}
-            secondaryAction={<a href="#studio-runboard" className="rounded-full border border-[var(--aethel-border-subtle)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)]">Validate plan</a>}
+            secondaryAction={<a href="#studio-status" className="rounded-full border border-[var(--aethel-border-subtle)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)]">Status</a>}
           >
-            <div id="studio-runboard" className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
-              <Suspense fallback={<div className="h-64 rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
-                <StudioMissionControl />
-              </Suspense>
-              <Suspense fallback={<div className="h-64 rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
-                <EngineSpineReadinessPanel />
-              </Suspense>
-            </div>
+            <Suspense fallback={<div className="h-32 rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
+              <StudioMissionControl />
+            </Suspense>
+            <details id="studio-status" className="mt-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)]">
+              <summary className="cursor-pointer list-none px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]">Engine module status</summary>
+              <div className="px-5 pb-5">
+                <Suspense fallback={<div className="h-48 rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
+                  <EngineSpineReadinessPanel />
+                </Suspense>
+              </div>
+            </details>
           </SurfaceQualityShell>
 
           <div id="studio-primary-surfaces" className="mt-8" />
@@ -56,7 +59,7 @@ export default function CreativeStudioPage() {
                 Core editors
               </p>
               <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">
-                Choose the editor that moves the mission forward.
+                Choose the right editor.
               </h3>
             </div>
             <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
@@ -109,7 +112,7 @@ export default function CreativeStudioPage() {
                     Advanced editors
                   </p>
                   <h3 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">
-                    Open specialized editors only when the mission asks for them.
+                    Specialized editors for advanced needs.
                   </h3>
                 </div>
                 <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">

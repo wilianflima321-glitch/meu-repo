@@ -78,7 +78,7 @@ export function WorkbenchPreviewModeHeader({
               title={activeFile.path}
               className="max-w-[200px] truncate rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-2.5 py-0.5 text-[10px] text-[var(--aethel-text-tertiary)]"
             >
-              {activeFile.name ?? activeFile.path.split('/').pop()}
+              {activeFile.path.split('/').pop()}
             </span>
           )}
           {missionParam?.trim() && (

@@ -21,6 +21,7 @@ import {
 
 import { WEB_CONFIG } from './ai-web-tools.config';
 import { fetchUrl } from './ai-web-tools-page';
+import { getRuntimeBlockedToolResult } from './ai-web-tools.types';
 import type { MdnSearchResponse, SearchResult, SerperSearchResponse, TavilySearchResponse, WebPageContent } from './ai-web-tools.types';
 // ============================================================================
 // FUNÇÕES DE BUSCA

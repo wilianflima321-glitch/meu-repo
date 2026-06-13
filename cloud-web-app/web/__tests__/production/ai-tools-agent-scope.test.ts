@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const dbMocks = vi.hoisted(() => ({
   prisma: {
@@ -63,16 +63,30 @@ function buildGameplayPacket() {
 }
 
 describe('ai tools agent scope enforcement', () => {
+  let savedFileStore: string | undefined
+
   beforeEach(() => {
     vi.clearAllMocks()
+    // These cases assert DB persistence (prisma.file.upsert); pin the unified
+    // file store to the db backend so the assertions stay valid regardless of
+    // the host runtime where the suite runs.
+    savedFileStore = process.env.AETHEL_FILE_STORE
+    process.env.AETHEL_FILE_STORE = 'db'
     clearAgentSurfaceLocksForTests()
     projectResolverMocks.assertProjectOwnership.mockResolvedValue(undefined)
     dbMocks.prisma.auditLog.create.mockResolvedValue({ id: 'audit-1' })
     dbMocks.prisma.file.upsert.mockResolvedValue({
       id: 'file-1',
       path: '/src/game/combat/BossController.ts',
+      content: 'export const boss = true',
+      language: 'typescript',
       updatedAt: new Date(now),
     })
+  })
+
+  afterEach(() => {
+    if (savedFileStore === undefined) delete process.env.AETHEL_FILE_STORE
+    else process.env.AETHEL_FILE_STORE = savedFileStore
   })
 
   it('blocks scoped write tools when Repository Cartography is missing', async () => {

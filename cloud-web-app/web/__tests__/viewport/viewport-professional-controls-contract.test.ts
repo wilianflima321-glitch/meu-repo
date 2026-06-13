@@ -13,7 +13,7 @@ describe('viewport professional controls contract', () => {
     expect(source.split(/\r?\n/).length).toBeLessThanOrEqual(350)
     expect(source).toContain('SceneViewportInspector')
     expect(source).toContain('SceneViewportOutliner')
-    expect(inspectorSource).toContain('Pivot & Constraints')
+    expect(inspectorSource).toContain('Advanced gizmo')
     expect(outlinerSource).toContain('Hierarchy')
   })
 

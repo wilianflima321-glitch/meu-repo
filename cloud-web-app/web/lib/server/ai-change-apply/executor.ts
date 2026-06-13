@@ -16,6 +16,14 @@ import {
 import { getRequestedChanges, normalizeExecutionMode } from './request'
 import { buildPreparedChange } from './preflight'
 import { enforceAgentApplyGuards } from './agent-guards'
+import {
+  evaluateGovernedAgentToolJob,
+  recordGovernedToolExecution,
+  type GovernedAgentToolJobDecision,
+} from '@/lib/production/agent-tool-job-runner'
+import { summarizeTaskEvidenceLedger } from '@/lib/production/task-evidence-ledger'
+import { persistGovernedTaskEvidence } from './persist-governed-evidence'
+import { mirrorAppliedChangesToCanonicalStore } from './mirror-canonical-store'
 
 export async function applyAiChanges(params: {
   request: NextRequest
@@ -171,6 +179,60 @@ export async function applyAiChanges(params: {
     snapshots.push({ prepared, snapshot })
   }
 
+  const toolBusEnforced = body.enforceToolBus === true
+  const governedDecision: GovernedAgentToolJobDecision = evaluateGovernedAgentToolJob({
+    toolId: 'diff-proposal',
+    mode: 'Builder',
+    projectId,
+    agent: typeof body.agent === 'string' && body.agent.length > 0 ? body.agent : 'workspace-apply',
+    mission: `Apply ${snapshots.length} file change(s)`,
+    intent: `Apply ${snapshots.length} file change(s)`,
+    taskId: runId,
+    targetPaths: snapshots.map((entry) => entry.prepared.virtualPath),
+    idempotencyKey: runId,
+    rollbackRef: snapshots[0]?.snapshot.token ?? null,
+    readReceiptRefs: readReceiptDecision?.allowed ? readReceiptDecision.metadata.acceptedReceiptIds : undefined,
+    scopeLockRef: surfaceLockDecision?.allowed ? surfaceLockDecision.lock.id : undefined,
+    maxCostUsd: 0,
+    enforcement: toolBusEnforced ? 'enforced' : 'observe',
+  })
+
+  if (toolBusEnforced && !governedDecision.allowed) {
+    await appendChangeRunLedgerEvent({
+      eventType: 'apply_blocked',
+      capability: CAPABILITY,
+      userId,
+      projectId,
+      filePath: snapshots[0]?.prepared.virtualPath || 'tool-bus',
+      outcome: 'blocked',
+      metadata: {
+        runId,
+        reason: 'TOOL_BUS_BLOCKED',
+        runSource: RUN_SOURCE,
+        blockers: governedDecision.blockers,
+        toolStatus: governedDecision.toolDecision.status,
+        missingEvidence: governedDecision.evidenceReadiness.missingKinds,
+      },
+    }).catch(() => {})
+
+    return capabilityResponse({
+      error: 'TOOL_BUS_BLOCKED',
+      message:
+        'Governed tool bus blocked apply. Provide read receipts, scope lock, and rollback evidence before retrying.',
+      status: 409,
+      capability: CAPABILITY,
+      capabilityStatus: 'PARTIAL',
+      metadata: {
+        runId,
+        runSource: RUN_SOURCE,
+        projectId,
+        blockers: governedDecision.blockers,
+        toolStatus: governedDecision.toolDecision.status,
+        missingEvidence: governedDecision.evidenceReadiness.missingKinds,
+      },
+    })
+  }
+
   const applied: Array<{ prepared: PreparedApplyChange; snapshot: RollbackSnapshotRecord }> = []
   for (const entry of snapshots) {
     try {
@@ -269,6 +331,29 @@ export async function applyAiChanges(params: {
     }).catch(() => {})
   }
 
+  const governedLedger = recordGovernedToolExecution(governedDecision, {
+    status: 'success',
+    appliedPaths: snapshots.map((entry) => entry.prepared.virtualPath),
+    rollbackRefs: snapshots.map((entry) => entry.snapshot.token),
+    validationVerdict: preparedChanges[0]?.validation.verdict,
+  })
+
+  const evidencePersisted = await persistGovernedTaskEvidence({
+    userId,
+    projectId,
+    ledger: governedLedger,
+  }).catch(() => false)
+
+  const canonicalMirror = await mirrorAppliedChangesToCanonicalStore({
+    userId,
+    projectId,
+    changes: snapshots.map((entry) => ({
+      virtualPath: entry.prepared.virtualPath,
+      content: entry.prepared.nextDocument,
+      language: entry.prepared.language,
+    })),
+  })
+
   return capabilityResponse({
     error: 'NONE',
     message: snapshots.length === 1 ? 'Change applied successfully.' : `Applied ${snapshots.length} changes successfully.`,
@@ -284,6 +369,16 @@ export async function applyAiChanges(params: {
       changeCount: snapshots.length,
       changes: changeSummary,
       rollbackToken: snapshots.length === 1 ? snapshots[0].snapshot.token : undefined,
+      governance: {
+        toolStatus: governedDecision.toolDecision.status,
+        enforced: toolBusEnforced,
+        ready: governedDecision.ready,
+        missingEvidence: governedDecision.evidenceReadiness.missingKinds,
+        evidenceSummary: summarizeTaskEvidenceLedger(governedLedger),
+        evidencePersisted,
+        canonicalBackend: canonicalMirror.backend,
+        canonicalMirrored: canonicalMirror.mirrored,
+      },
       readReceipts: readReceiptDecision?.allowed
         ? {
             enforcement: readReceiptDecision.enforcement,

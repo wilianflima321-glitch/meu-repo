@@ -1,4 +1,4 @@
-import type { RigidBody } from './physics-engine';
+import type { RigidBody } from './physics-body';
 import { Vec3, type AABB, type ColliderType, type Vector3 } from './physics-math';
 
 export abstract class Collider {
