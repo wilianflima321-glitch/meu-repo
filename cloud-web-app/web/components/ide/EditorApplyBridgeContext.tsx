@@ -22,6 +22,7 @@ import {
   type ApplyBridgeResult,
   type ChatDiffFile,
 } from '@/lib/ai/ai-apply-bridge'
+import { useApplyGhostPreview } from '@/components/ide/useApplyGhostPreview'
 
 export type EditorApplyBridgeContextValue = {
   activeFilePath: string | null
@@ -72,6 +73,9 @@ export function EditorApplyBridgeProvider({
   const pendingCreateFileRequestRef = useRef<PendingCreateFileRequest | null>(null)
 
   const clearPendingDiff = useCallback(() => setPendingDiff(null), [])
+
+  // Frente A40: paint the staged diff as a holographic ghost on the editor.
+  useApplyGhostPreview(editorRef, pendingDiff, activeFilePath)
 
   const persistActiveFileFromModel = useCallback(async () => {
     const path = activeFilePath

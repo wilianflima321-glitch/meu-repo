@@ -390,6 +390,23 @@
 }
 
 /* ============================================================================
+ * FRENTE A40 — APPLY GHOST PREVIEW (Monaco decorations)
+ * Lines staged for removal by a pending AI diff. Added lines are rendered as
+ * green view zones styled inline in useApplyGhostPreview.ts.
+ * ============================================================================ */
+.aethel-apply-ghost-removed {
+  background: color-mix(in srgb, var(--aethel-error) 14%, transparent) !important;
+  box-shadow: inset 2px 0 0 0 color-mix(in srgb, var(--aethel-error) 70%, transparent);
+}
+
+.aethel-apply-ghost-removed-glyph {
+  background: color-mix(in srgb, var(--aethel-error) 60%, transparent);
+  width: 4px !important;
+  margin-left: 3px;
+  border-radius: 2px;
+}
+
+/* ============================================================================
  * PRINT STYLES
  * ============================================================================ */
 @media print {
