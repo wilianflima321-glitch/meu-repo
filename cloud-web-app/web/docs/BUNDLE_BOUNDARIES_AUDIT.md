@@ -1,7 +1,7 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2411
+- Files scanned: 2775
 - Failures: 0
 
 ## Counts
@@ -11,7 +11,7 @@ Generated: deterministic local scan
 - monacoEditorDirect: 0 (max 0)
 - monacoReactDirect: 0 (max 0)
 - framerMotionDirect: 0 (max 0)
-- dynamicImportsMin: 254 (min 100)
+- dynamicImportsMin: 242 (min 100)
 
 ## Top Offenders
 ### threeDirect
@@ -32,13 +32,10 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 ### threeDirect
 - lib/aaa-asset-pipeline-runtime/importer.ts (1)
 - lib/aaa-asset-pipeline-runtime/optimizer.ts (1)
-- lib/aaa-material-system.contracts.ts (1)
 - lib/aaa-material-system.ts (1)
-- lib/aaa-render-configs.ts (1)
 - lib/aaa-render-quality-config.ts (1)
 - lib/aaa-render-system.ts (1)
 - lib/aaa-renderer-impl.ts (1)
-- lib/ai/behavior-tree-blackboard.ts (1)
 - lib/ai/behavior-tree-system.tsx (1)
 - lib/ai-content-generation-mesh.ts (1)
 - lib/ai-content-generation.ts (1)
@@ -50,20 +47,24 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/assets/asset-importer.ts (1)
 - lib/assets/asset-preview-mesh-runtime.tsx (1)
 - lib/assets/content-browser-loader.ts (1)
-- lib/audio/spatial-audio-hooks.ts (1)
 - lib/audio/spatial-audio-source.ts (1)
-- lib/audio/spatial-audio-system.ts (1)
-- lib/camera/camera-path-builder.ts (1)
-- lib/camera/camera-system-react.tsx (1)
+- lib/character/control-rig-model.ts (1)
+- lib/character/ControlRigEditor.parts-runtime.tsx (1)
+- lib/character/FacialAnimationEditor.parts-runtime.tsx (1)
+- lib/character/HairFurEditor.parts-runtime.tsx (1)
+- lib/cinematic-lighting-probes.ts (1)
+- lib/cinematic-lighting-time-of-day.ts (1)
+- lib/cinematic-lighting.ts (1)
 ### reactThreeFiberDirect
 - lib/assets/asset-preview-mesh-runtime.tsx (1)
 - lib/camera/camera-system-react.tsx (1)
 - lib/character/ControlRigEditor.runtime.tsx (1)
 - lib/character/FacialAnimationEditor.parts-runtime.tsx (1)
 - lib/character/HairFurEditor.parts-runtime.tsx (1)
-- lib/character/HairFurEditor.runtime.tsx (1)
+- lib/character/HairFurEditor.viewport-runtime.tsx (1)
 - lib/engine/GameViewport.runtime.tsx (1)
 - lib/engine/LandscapeEditor.runtime.tsx (1)
+- lib/engine/LandscapeEditor.scene-runtime.tsx (1)
 - lib/engine/LevelEditor.viewport-runtime.tsx (1)
 - lib/engine/NiagaraVFX.runtime.tsx (1)
 - lib/engine/NiagaraVFXPanels.runtime.tsx (1)
@@ -75,21 +76,20 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/physics/ClothSimulationPanels.runtime.tsx (1)
 - lib/physics/DestructionEditor.runtime.tsx (1)
 - lib/physics/DestructionEditorMesh.runtime.tsx (1)
-- lib/physics/FluidSimulationEditor.runtime.tsx (1)
+- lib/physics/FluidSimulationEditor.viewport-runtime.tsx (1)
 - lib/physics/FluidSimulationPanels.runtime.tsx (1)
 - lib/scene-editor/GameSimulation.runtime.tsx (1)
 - lib/scene-editor/SceneEditor.canvas-runtime.tsx (1)
 - lib/terrain/TerrainSculptingEditor.runtime.tsx (1)
-- lib/terrain/TerrainSculptingEditor.scene-runtime.tsx (1)
 ### reactThreeDreiDirect
 - lib/assets/asset-preview-mesh-runtime.tsx (1)
 - lib/character/ControlRigEditor.parts-runtime.tsx (1)
 - lib/character/ControlRigEditor.runtime.tsx (1)
 - lib/character/FacialAnimationEditor.parts-runtime.tsx (1)
 - lib/character/HairFurEditor.parts-runtime.tsx (1)
-- lib/character/HairFurEditor.runtime.tsx (1)
+- lib/character/HairFurEditor.viewport-runtime.tsx (1)
 - lib/engine/GameViewport.runtime.tsx (1)
-- lib/engine/LandscapeEditor.runtime.tsx (1)
+- lib/engine/LandscapeEditor.scene-runtime.tsx (1)
 - lib/engine/LevelEditor.viewport-runtime.tsx (1)
 - lib/engine/NiagaraVFX.runtime.tsx (1)
 - lib/environment/FoliagePainterRuntime.tsx (1)
@@ -99,7 +99,7 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/physics/ClothSimulationPanels.runtime.tsx (1)
 - lib/physics/DestructionEditor.runtime.tsx (1)
 - lib/physics/DestructionEditorMesh.runtime.tsx (1)
-- lib/physics/FluidSimulationEditor.runtime.tsx (1)
+- lib/physics/FluidSimulationEditor.viewport-runtime.tsx (1)
 - lib/physics/FluidSimulationPanels.runtime.tsx (1)
 - lib/scene-editor/SceneEditor.canvas-runtime.tsx (1)
 - lib/terrain/TerrainSculptingEditor.runtime.tsx (1)
@@ -109,7 +109,10 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/viewport/ViewportSceneObjectMesh.tsx (1)
 ### monacoEditorDirect
 - lib/collaboration/collaboration-manager.ts (1)
+- lib/collaboration/collaboration-monaco-binding.ts (1)
+- lib/monaco-lsp-bridge.converters.ts (1)
 - lib/monaco-lsp-bridge.maps.ts (1)
+- lib/monaco-lsp-bridge.providers.ts (1)
 - lib/monaco-lsp-bridge.ts (1)
 ### monacoReactDirect
 - lib/editor/MonacoChatDiffPanel.runtime.tsx (1)
@@ -128,6 +131,7 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/animation/animation-runtime/react.ts statically imports ./player -> lib/animation/animation-runtime/player.ts
 - lib/animation/animation-runtime/state-machine.ts statically imports ./player -> lib/animation/animation-runtime/player.ts
 - lib/assets/asset-importer.react.ts statically imports ./asset-importer -> lib/assets/asset-importer.ts
+- lib/cloth-simulation-manager.ts statically imports ./cloth-simulation -> lib/cloth-simulation.ts
 - lib/cutscene/system/default-export.ts statically imports ./player -> lib/cutscene/system/player.ts
 - lib/cutscene/system/manager.ts statically imports ./player -> lib/cutscene/system/player.ts
 - lib/dialogue-cutscene/factories.ts statically imports ./cutscene-system -> lib/dialogue-cutscene/cutscene-system.ts
@@ -137,6 +141,7 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/ecs/prefab-system/react.tsx statically imports ./component-registry -> lib/ecs/prefab-system/component-registry.ts
 - lib/ecs/prefab-system/react.tsx statically imports ./prefab-manager -> lib/ecs/prefab-system/prefab-manager.ts
 - lib/engine/asset-pipeline-runtime/manager.ts statically imports ./loaders -> lib/engine/asset-pipeline-runtime/loaders.ts
+- lib/engine/audio-group.ts statically imports ./audio-source -> lib/engine/audio-source.ts
 - lib/engine/audio-manager.ts statically imports ./audio-source -> lib/engine/audio-source.ts
 - lib/fluid-simulation-runtime/factories.ts statically imports ./flip -> lib/fluid-simulation-runtime/flip.ts
 - lib/fluid-simulation-runtime/factories.ts statically imports ./pbf -> lib/fluid-simulation-runtime/pbf.ts
@@ -146,7 +151,11 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/materials/material-editor-runtime/editor.ts statically imports ./factory -> lib/materials/material-editor-runtime/factory.ts
 - lib/networking/multiplayer-runtime/default-export.ts statically imports ./network-manager -> lib/networking/multiplayer-runtime/network-manager.ts
 - lib/networking/multiplayer-runtime/react.tsx statically imports ./network-manager -> lib/networking/multiplayer-runtime/network-manager.ts
+- lib/particle-system-real.defaults.ts statically imports ./particle-system-real-runtime -> lib/particle-system-real-runtime.ts
+- lib/particle-system-real.helpers.ts statically imports ./particle-system-real-runtime -> lib/particle-system-real-runtime.ts
 - lib/particles/advanced-particle-system-react.ts statically imports ./advanced-particle-system -> lib/particles/advanced-particle-system.ts
+- lib/physics/ClothSimulationEditor.settings.tsx statically imports @/lib/physics/ClothSimulationEditor.vectors -> lib/physics/ClothSimulationEditor.vectors.ts
+- lib/physics/ClothSimulationEditor.settings.tsx statically imports @/lib/physics/ClothSimulationPanels.runtime -> lib/physics/ClothSimulationPanels.runtime.tsx
 - lib/postprocessing/system/default-export.ts statically imports ./bloom-pass -> lib/postprocessing/system/bloom-pass.ts
 - lib/postprocessing/system/default-export.ts statically imports ./chromatic-aberration-pass -> lib/postprocessing/system/chromatic-aberration-pass.ts
 - lib/postprocessing/system/default-export.ts statically imports ./color-grading-pass -> lib/postprocessing/system/color-grading-pass.ts

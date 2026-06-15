@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary Three.js runtime module; never import from public/dashboard/admin route shells.
 import * as THREE from 'three';
 import type { DestructibleConfig, FragmentData } from './destruction-contracts';
 import { VoronoiFractureGenerator } from './destruction-fracture-generator';

@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary IDE/Monaco runtime module; never import from public/dashboard/admin route shells.
 import * as Y from 'yjs';
 import type { WebsocketProvider } from 'y-websocket';
 import * as monaco from 'monaco-editor';

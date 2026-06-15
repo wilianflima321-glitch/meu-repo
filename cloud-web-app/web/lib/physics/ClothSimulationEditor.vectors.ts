@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary Three.js runtime module; never import from public/dashboard/admin route shells.
 import { Vector3 } from 'three';
 import type { ClothCollider, ClothConfig } from '@/lib/cloth-simulation';
 
