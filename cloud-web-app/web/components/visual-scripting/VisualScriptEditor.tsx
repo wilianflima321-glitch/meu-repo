@@ -36,23 +36,19 @@ export type { PortDefinition } from './visual-node-catalog';
 
 export type VisualNodeType = Node<VisualNodeData>;
 
+// Token references kept only for ReactFlow props that require raw color
+// strings (edge stroke, minimap, background). All structural styling lives
+// in Tailwind classes that resolve the same `--aethel-*` tokens.
 const ui = {
   surface: 'var(--aethel-surface-secondary)',
   surfaceAlt: 'var(--aethel-surface-tertiary)',
   surfaceDeep: 'var(--aethel-surface-primary)',
-  surfaceMuted: 'var(--aethel-surface-quaternary)',
-  border: 'var(--aethel-border-primary)',
   borderStrong: 'var(--aethel-border-secondary)',
   text: 'var(--aethel-text-primary)',
-  textMuted: 'var(--aethel-text-tertiary)',
-  textDim: 'var(--aethel-text-quaternary)',
-  focus: 'var(--aethel-primary)',
-  success: 'var(--aethel-success)',
-  error: 'var(--aethel-error)',
-  warning: 'var(--aethel-warning)',
-  info: 'var(--aethel-info)',
 };
 
+// Port colors are data-driven (depend on the port's data type) and therefore
+// must stay as inline style values rather than static Tailwind classes.
 const portColors: Record<string, string> = {
   exec: 'var(--aethel-text-primary)',
   boolean: 'var(--aethel-error)',
@@ -108,7 +104,7 @@ function VisualNode({ data }: VisualNodeProps) {
                 type={port.type === 'number' ? 'number' : 'text'}
                 defaultValue={values[port.id] as string ?? port.default}
                 onChange={(e) => onValueChange?.(port.id, e.target.value)}
-                aria-label={`Valor da entrada ${port.label}`}
+                aria-label={`Value for input ${port.label}`}
                 className="ml-auto w-[70px] px-1.5 py-0.5 text-[10px] bg-[var(--aethel-surface-quaternary)] rounded border border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)]"
               />
             )}
@@ -159,14 +155,14 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
     return cats;
   }, []);
   const categoryLabels: Record<NodeCategory, string> = {
-    event: 'Eventos',
-    action: 'Acoes',
-    condition: 'Condicoes',
-    variable: 'Variaveis',
-    math: 'Matematica',
-    flow: 'Fluxo',
+    event: 'Events',
+    action: 'Actions',
+    condition: 'Conditions',
+    variable: 'Variables',
+    math: 'Math',
+    flow: 'Flow',
     input: 'Input',
-    physics: 'Fisica',
+    physics: 'Physics',
     audio: 'Audio',
     ui: 'UI',
   };
@@ -186,78 +182,42 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
     return filtered;
   }, [categories, searchTerm]);
   return (
-    <div
-      style={{
-        width: '250px',
-        background: ui.surface,
-        borderRight: `1px solid ${ui.border}`,
-        overflowY: 'auto',
-        height: '100%',
-      }}
-    >
-      <div style={{ padding: '12px' }}>
+    <div className="h-full w-[250px] overflow-y-auto border-r border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]">
+      <div className="p-3">
         <input
           type="text"
           placeholder="Search nodes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           aria-label="Search nodes in the palette"
-          style={{
-            width: '100%',
-            background: ui.surfaceAlt,
-            fontSize: '13px',
-            padding: '10px 12px',
-            border: `1px solid ${ui.border}`,
-            borderRadius: '8px',
-            color: ui.text,
-          }}
+          className="w-full rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-2.5 text-[13px] text-[var(--aethel-text-primary)]"
         />
       </div>
       {Array.from(filteredCategories).map(([category, nodes]) => (
         <div key={category}>
-          <button type="button"
+          <button
+            type="button"
             onClick={() =>
               setExpandedCategory(expandedCategory === category ? null : category)
             }
-            aria-label={`${expandedCategory === category ? 'Recolher' : 'Expandir'} categoria ${categoryLabels[category]}`}
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              background: expandedCategory === category ? ui.surfaceAlt : 'transparent',
-              borderRadius: 0,
-              border: 'none',
-              color: ui.text,
-              textAlign: 'left',
-              fontSize: '13px',
-              fontWeight: 600,
-              justifyContent: 'space-between',
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-            }}
+            aria-label={`${expandedCategory === category ? 'Collapse' : 'Expand'} ${categoryLabels[category]} category`}
+            className={`flex w-full cursor-pointer items-center justify-between border-none px-3 py-2.5 text-left text-[13px] font-semibold text-[var(--aethel-text-primary)] ${
+              expandedCategory === category ? 'bg-[var(--aethel-surface-tertiary)]' : 'bg-transparent'
+            }`}
           >
             <span>{categoryLabels[category]}</span>
-            <span style={{ color: ui.textDim }}>({nodes.length})</span>
+            <span className="text-[var(--aethel-text-quaternary)]">({nodes.length})</span>
           </button>
           {expandedCategory === category && (
-            <div style={{ padding: '4px 8px' }}>
+            <div className="px-2 py-1">
               {nodes.map((node) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={node.type}
                   onClick={() => onAddNode(node)}
-                  aria-label={`Add no ${node.label}`}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    marginBottom: '4px',
-                    background: node.color,
-                    border: `1px solid ${ui.border}`,
-                    borderRadius: '6px',
-                    color: ui.text,
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                  }}
+                  aria-label={`Add ${node.label} node`}
+                  className="mb-1 w-full cursor-pointer rounded-md border border-[var(--aethel-border-primary)] p-2 text-left text-[12px] text-[var(--aethel-text-primary)]"
+                  style={{ background: node.color }}
                   title={node.description}
                 >
                   {node.label}
@@ -311,14 +271,14 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
     return cats;
   }, []);
   const categoryLabels: Record<NodeCategory, string> = {
-    event: 'Eventos',
-    action: 'Acoes',
-    condition: 'Condicoes',
-    variable: 'Variaveis',
-    math: 'Matematica',
-    flow: 'Fluxo',
+    event: 'Events',
+    action: 'Actions',
+    condition: 'Conditions',
+    variable: 'Variables',
+    math: 'Math',
+    flow: 'Flow',
     input: 'Input',
-    physics: 'Fisica',
+    physics: 'Physics',
     audio: 'Audio',
     ui: 'UI',
   };
@@ -337,21 +297,10 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
   return (
     <div
       ref={menuRef}
-      style={{
-        position: 'fixed',
-        left: x,
-        top: y,
-        width: '280px',
-        maxHeight: '400px',
-        background: ui.surface,
-        border: `1px solid ${ui.borderStrong}`,
-        borderRadius: '10px',
-        boxShadow: 'var(--aethel-shadow-lg)',
-        overflow: 'hidden',
-        zIndex: 1000,
-      }}
+      className="fixed z-[1000] max-h-[400px] w-[280px] overflow-hidden rounded-[10px] border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] shadow-[var(--aethel-shadow-lg)]"
+      style={{ left: x, top: y }}
     >
-      <div style={{ padding: '12px', borderBottom: `1px solid ${ui.border}` }}>
+      <div className="border-b border-[var(--aethel-border-primary)] p-3">
         <input
           ref={inputRef}
           type="text"
@@ -359,51 +308,31 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           aria-label="Search nodes to add to the canvas"
-          style={{
-            width: '100%',
-            padding: '10px 12px',
-            background: ui.surfaceAlt,
-            fontSize: '14px',
-            border: `1px solid ${ui.border}`,
-            borderRadius: '8px',
-            color: ui.text,
-          }}
+          className="w-full rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-2.5 text-[14px] text-[var(--aethel-text-primary)]"
         />
-        <div style={{ fontSize: '11px', color: ui.textDim, marginTop: '6px' }}>
+        <div className="mt-1.5 text-[11px] text-[var(--aethel-text-quaternary)]">
           Right-click the canvas to open this menu
         </div>
       </div>
-      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+      <div className="max-h-[300px] overflow-y-auto">
         {filteredNodes ? (
-          <div style={{ padding: '8px' }}>
+          <div className="p-2">
             {filteredNodes.length === 0 ? (
-              <div style={{ padding: '16px', textAlign: 'center', color: ui.textDim }}>
-                No no encontrado
+              <div className="p-4 text-center text-[var(--aethel-text-quaternary)]">
+                No nodes found
               </div>
             ) : (
               filteredNodes.map((node) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={node.type}
                   onClick={() => handleAddNode(node)}
-                  aria-label={`Create no ${node.label}`}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    marginBottom: '4px',
-                    background: node.color,
-                    border: `1px solid ${ui.border}`,
-                    borderRadius: '8px',
-                    color: ui.text,
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '2px',
-                  }}
+                  aria-label={`Create ${node.label} node`}
+                  className="mb-1 flex w-full cursor-pointer flex-col gap-0.5 rounded-lg border border-[var(--aethel-border-primary)] px-3 py-2.5 text-left text-[13px] text-[var(--aethel-text-primary)]"
+                  style={{ background: node.color }}
                 >
-                  <span style={{ fontWeight: 600 }}>{node.label}</span>
-                  <span style={{ fontSize: '11px', opacity: 0.8 }}>{node.description}</span>
+                  <span className="font-semibold">{node.label}</span>
+                  <span className="text-[11px] opacity-80">{node.description}</span>
                 </button>
               ))
             )}
@@ -411,51 +340,29 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
         ) : (
           Array.from(categories).map(([category, nodes]) => (
             <div key={category}>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() =>
                   setExpandedCategory(expandedCategory === category ? null : category)
                 }
-                aria-label={`${expandedCategory === category ? 'Recolher' : 'Expandir'} categoria ${categoryLabels[category]} no menu contextual`}
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  background: expandedCategory === category ? ui.surfaceAlt : 'transparent',
-                  borderRadius: 0,
-                  borderBottom: `1px solid ${ui.border}`,
-                  borderLeft: 'none',
-                  borderRight: 'none',
-                  borderTop: 'none',
-                  color: ui.text,
-                  textAlign: 'left',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
+                aria-label={`${expandedCategory === category ? 'Collapse' : 'Expand'} ${categoryLabels[category]} category in the context menu`}
+                className={`flex w-full items-center justify-between border-b border-[var(--aethel-border-primary)] px-3.5 py-2.5 text-left text-[13px] font-medium text-[var(--aethel-text-primary)] ${
+                  expandedCategory === category ? 'bg-[var(--aethel-surface-tertiary)]' : 'bg-transparent'
+                }`}
               >
                 <span>{categoryLabels[category]}</span>
-                <span style={{ color: ui.textDim }}>{nodes.length}</span>
+                <span className="text-[var(--aethel-text-quaternary)]">{nodes.length}</span>
               </button>
               {expandedCategory === category && (
-                <div style={{ padding: '6px 10px', background: ui.surfaceDeep }}>
+                <div className="bg-[var(--aethel-surface-primary)] px-2.5 py-1.5">
                   {nodes.map((node) => (
-                    <button type="button"
+                    <button
+                      type="button"
                       key={node.type}
                       onClick={() => handleAddNode(node)}
-                      aria-label={`Add no ${node.label} a partir do menu contextual`}
-                      style={{
-                        width: '100%',
-                        padding: '8px 10px',
-                        marginBottom: '4px',
-                        background: node.color,
-                        border: `1px solid ${ui.border}`,
-                        borderRadius: '6px',
-                        color: ui.text,
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                      }}
+                      aria-label={`Add ${node.label} node from the context menu`}
+                      className="mb-1 w-full cursor-pointer rounded-md border border-[var(--aethel-border-primary)] px-2.5 py-2 text-left text-[12px] text-[var(--aethel-text-primary)]"
+                      style={{ background: node.color }}
                       title={node.description}
                     >
                       {node.label}
@@ -573,11 +480,11 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
     onChange?.(compileScript());
   }, [nodes, edges, onChange, compileScript]);
   return (
-    <div style={{ display: 'flex', height: '100%', width: '100%' }}>
+    <div className="flex h-full w-full">
       <NodePalette onAddNode={handleAddNode} />
       <div
         ref={reactFlowWrapper}
-        style={{ flex: 1 }}
+        className="flex-1"
         onContextMenu={handleContextMenu}
       >
         <ReactFlow
@@ -600,38 +507,24 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
             style={{ background: ui.surface }}
           />
           <Panel position="top-right">
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button type="button"
+            <div className="flex gap-2">
+              <button
+                type="button"
                 onClick={() => {
                   const json = JSON.stringify(compileScript(), null, 2);
                   log.info('Compiled Script:', json);
                   navigator.clipboard.writeText(json);
                 }}
                 aria-label="Save visual script and copy JSON"
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: `1px solid ${ui.borderStrong}`,
-                  background: ui.focus,
-                  color: ui.text,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
+                className="cursor-pointer rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-primary)] px-4 py-2 font-semibold text-[var(--aethel-text-primary)]"
               >
                 Save
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleClearGraph}
                 aria-label="Clear all visual script nodes"
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: `1px solid ${ui.borderStrong}`,
-                  background: ui.error,
-                  color: ui.text,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
+                className="cursor-pointer rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-error)] px-4 py-2 font-semibold text-[var(--aethel-text-primary)]"
               >
                 Clear
               </button>

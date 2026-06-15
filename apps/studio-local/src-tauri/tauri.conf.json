@@ -16,7 +16,11 @@
         "width": 1440,
         "height": 960,
         "minWidth": 960,
-        "minHeight": 640
+        "minHeight": 640,
+        "decorations": false,
+        "transparent": true,
+        "fullscreen": false,
+        "resizable": true
       }
     ],
     "security": {

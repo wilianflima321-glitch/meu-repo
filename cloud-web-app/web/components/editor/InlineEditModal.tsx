@@ -48,8 +48,8 @@ interface EditSuggestion {
 
 const QUICK_ACTIONS = [
   { id: 'refactor', label: 'Refactor', icon: RefreshCw, prompt: 'Refactor this code to be cleaner and more readable' },
-  { id: 'optimize', label: 'Otimizar', icon: Wand2, prompt: 'Optimize this code for better performance' },
-  { id: 'fix', label: 'Corrigir', icon: AlertCircle, prompt: 'Fix bugs and issues in this code' },
+  { id: 'optimize', label: 'Optimize', icon: Wand2, prompt: 'Optimize this code for better performance' },
+  { id: 'fix', label: 'Fix', icon: AlertCircle, prompt: 'Fix bugs and issues in this code' },
   { id: 'types', label: 'Add Types', icon: Code, prompt: 'Add TypeScript types to this code' },
 ];
 
@@ -71,7 +71,7 @@ export function InlineEditModal({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [recentCommands] = useState<string[]>([
     'Add error handling',
-    'Converta para async/await',
+    'Convert to async/await',
     'Extract to a separate function',
     'Add JSDoc comments',
   ]);
