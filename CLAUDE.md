@@ -8,6 +8,7 @@
 4. **`docs/architecture/aethel_architecture_philosophy.md`** — Leis 1-5. Visão 2030 = NÃO executar.
 5. **`docs/architecture/audit_frontend_ui_ux.md`** — Frentes A1-A50.
 6. **`docs/architecture/audit_backend_spine.md`** — Frentes 1-50 + B51-B58 + U56-U58 + C59-C63 + R64-R66 + M67-M69 + I70-I72.
+7. **`docs/architecture/AUDITORIA_V33_CRITICA_DOS_3_MDS.md`** — correções obrigatórias + §0-R reconciliação (estado real). Leia ANTES de executar qualquer frente.
 
 ## Decisão arquitetural V33 — R3F vs WebGPU
 
