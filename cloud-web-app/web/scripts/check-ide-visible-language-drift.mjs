@@ -6,7 +6,7 @@ import path from 'node:path'
 const ROOT = process.cwd()
 const FILES = [
   'components/ui/CookieConsent.tsx',
-  'components/Onboarding.tsx',
+  'components/onboarding/Onboarding.tsx',
   'components/ide/fullscreen/WorkbenchEditorToolbar.tsx',
   'components/ide/fullscreen/WorkbenchPreviewPane.tsx',
   'components/ide/modern-shell/chromeHeaderParts.tsx',
@@ -61,9 +61,6 @@ const FILES = [
   'components/ide/CommandPalette.parts.tsx',
   'components/ide/ConsoleIntegration.tsx',
   'components/visual-scripting/VisualScriptEditor.tsx',
-  'components/nexus/AethelResearch.tsx',
-  'components/nexus/NexusChatMultimodal.tsx',
-  'components/nexus/NexusCanvasV2.tsx',
   'components/ai/DirectorNotePanel.tsx',
   'components/engine/ProjectSettings.tsx',
   'components/engine/LevelEditor.tsx',
@@ -77,7 +74,6 @@ const FILES = [
   'components/engine/AbilityEditor.tsx',
   'components/dashboard/tabs/ProjectsTab.tsx',
   'components/dashboard/useDashboardActions.ts',
-  'app/nexus/page.tsx',
 ]
 
 const DRIFT =

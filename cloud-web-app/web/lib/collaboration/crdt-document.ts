@@ -1,4 +1,4 @@
-﻿import type { CRDTCharacter } from './collaboration-contracts';
+import type { CRDTCharacter } from './collaboration-contracts';
 
 export class CRDTDocument {
   private characters: CRDTCharacter[] = [];

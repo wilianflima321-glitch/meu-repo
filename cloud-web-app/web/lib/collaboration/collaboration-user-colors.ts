@@ -1,4 +1,4 @@
-﻿const USER_COLORS = [
+const USER_COLORS = [
   '#f38ba8',
   '#fab387',
   '#f9e2af',

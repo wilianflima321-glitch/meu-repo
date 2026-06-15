@@ -1,4 +1,4 @@
-﻿// @aethel-heavy-async-boundary
+// @aethel-heavy-async-boundary
 
 import { THREE } from './pbr-three-namespace';
 import { PBR_FRAGMENT_SHADER, PBR_VERTEX_SHADER } from './pbr-shader-sources';

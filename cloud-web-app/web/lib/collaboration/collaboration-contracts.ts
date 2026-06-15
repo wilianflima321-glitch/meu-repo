@@ -1,4 +1,4 @@
-﻿export interface CollaborationUser {
+export interface CollaborationUser {
   id: string;
   name: string;
   email?: string;

@@ -1,4 +1,4 @@
-﻿// @aethel-heavy-async-boundary
+// @aethel-heavy-async-boundary
 
 import * as THREE from 'three';
 

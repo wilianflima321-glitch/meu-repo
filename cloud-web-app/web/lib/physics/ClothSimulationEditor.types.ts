@@ -1,4 +1,4 @@
-﻿import type { ClothConfig } from '@/lib/cloth-simulation';
+import type { ClothConfig } from '@/lib/cloth-simulation';
 
 export type ClothToolType =
   | 'select'

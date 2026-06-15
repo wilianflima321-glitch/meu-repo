@@ -1,4 +1,4 @@
-﻿import type { AethelAction, AethelState, WalletState } from './aethel-provider.contracts';
+import type { AethelAction, AethelState, WalletState } from './aethel-provider.contracts';
 
 export function aethelReducer(state: AethelState, action: AethelAction): AethelState {
   switch (action.type) {

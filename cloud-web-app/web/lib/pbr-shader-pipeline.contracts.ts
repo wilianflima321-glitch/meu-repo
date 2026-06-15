@@ -1,4 +1,4 @@
-﻿import type { Color, CubeTexture, Texture, Vector2 } from '@/lib/three';
+import type { Color, CubeTexture, Texture, Vector2 } from '@/lib/three';
 
 export interface PBRMaterialParams {
   albedo: Color | Texture;

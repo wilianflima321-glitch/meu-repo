@@ -1,4 +1,4 @@
-﻿import type { ErrorInfo, ReactNode } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 
 export interface ErrorReport {
   id: string;

@@ -1,4 +1,4 @@
-﻿import { EventEmitter } from 'events';
+import { EventEmitter } from 'events';
 import type { DebugAdapterConfig } from './debug-adapter-contracts';
 import { DebugAdapter } from './debug-adapter-core';
 

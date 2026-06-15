@@ -1,4 +1,4 @@
-﻿import { createContext, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import type { ErrorBoundaryContextValue } from './ErrorBoundary.contracts';
 
 export const ErrorBoundaryContext = createContext<ErrorBoundaryContextValue | null>(null);

@@ -1,4 +1,4 @@
-﻿import type { ClothPreset } from '@/lib/physics/ClothSimulationEditor.types';
+import type { ClothPreset } from '@/lib/physics/ClothSimulationEditor.types';
 
 export const CLOTH_PRESETS: ClothPreset[] = [
   {

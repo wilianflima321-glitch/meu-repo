@@ -1,4 +1,4 @@
-﻿import type { HapticsConfig } from './haptics-system.contracts';
+import type { HapticsConfig } from './haptics-system.contracts';
 
 export function createDefaultHapticsConfig(config: Partial<HapticsConfig> = {}): HapticsConfig {
   return {

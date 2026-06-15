@@ -1,4 +1,4 @@
-﻿// @aethel-heavy-async-boundary
+// @aethel-heavy-async-boundary
 
 import { THREE } from './pbr-three-namespace';
 import type { PostProcessSettings } from './post-process-volume.contracts';

@@ -1,4 +1,4 @@
-﻿import type { ErrorInfo } from 'react';
+import type { ErrorInfo } from 'react';
 import { createComponentLogger } from '@/lib/observability/logger';
 import type { ErrorReport } from './ErrorBoundary.contracts';
 

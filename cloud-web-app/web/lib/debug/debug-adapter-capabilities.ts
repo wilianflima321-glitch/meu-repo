@@ -1,4 +1,4 @@
-﻿import type { Capabilities } from './debug-adapter-contracts';
+import type { Capabilities } from './debug-adapter-contracts';
 
 export function getCapabilitiesForDebugType(type: string): Capabilities {
   const base: Capabilities = {

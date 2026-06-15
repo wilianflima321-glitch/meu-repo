@@ -1,4 +1,4 @@
-﻿import { Vector3 } from 'three';
+import { Vector3 } from 'three';
 import type { ClothCollider, ClothConfig } from '@/lib/cloth-simulation';
 
 export function createClothVector(x: number, y: number, z: number): Vector3 {

@@ -1,4 +1,4 @@
-﻿import type { Box3, Color } from '@/lib/three';
+import type { Box3, Color } from '@/lib/three';
 
 export interface PostProcessSettings {
   bloomEnabled: boolean;

@@ -1,4 +1,4 @@
-﻿import type { AethelState, Preferences } from './aethel-provider.contracts';
+import type { AethelState, Preferences } from './aethel-provider.contracts';
 
 export const DEFAULT_PREFERENCES: Preferences = {
   theme: 'dark',

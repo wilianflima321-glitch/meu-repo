@@ -1,4 +1,4 @@
-﻿import type { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { Box, Circle, Download, Eye, Layers, Settings, Wind, Zap } from 'lucide-react';
 import type { ClothCollider, ClothConfig } from '@/lib/cloth-simulation';
 import { CLOTH_PRESETS } from '@/lib/physics/ClothSimulationEditor.presets';

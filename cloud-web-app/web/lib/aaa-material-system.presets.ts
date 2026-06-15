@@ -1,4 +1,4 @@
-﻿import type * as ThreeTypes from 'three';
+import type * as ThreeTypes from 'three';
 import type { AdvancedPBRParams } from './aaa-material-system.contracts';
 
 export function createMaterialPresetMap(three: typeof ThreeTypes): Map<string, Partial<AdvancedPBRParams>> {

@@ -1,4 +1,4 @@
-﻿// @aethel-heavy-async-boundary Studio/render-gated runtime; do not import from public route shells.
+// @aethel-heavy-async-boundary Studio/render-gated runtime; do not import from public route shells.
 
 import * as THREE from 'three';
 import type { AdvancedPBRParams, ShaderGraph, ShaderNode } from './aaa-material-system.contracts';
