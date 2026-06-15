@@ -62,13 +62,27 @@
   `workers/physics-worker.ts`). O motor TS `lib/engine/physics-engine.ts` está
   **órfão (0 imports)** e recebeu banner `@deprecated`. Física nativa do desktop = Wave 5 / Frente 9.
 
+### Frente A40 — estado
+- ✅ FEITO 2026-06-15: ghost preview holográfico do diff staged no Monaco.
+  - `lib/ai/diff-line-ops.ts` (LCS) → ranges removidos + blocos adicionados.
+  - `components/ide/useApplyGhostPreview.ts` pinta decorations (linhas removidas, vermelho)
+    + view zones verdes (adições) enquanto há `pendingDiff` no arquivo ativo; auto-limpa.
+  - Bônus: `buildChatDiffFile` agora gera diff unificado real (LCS) — contagens de
+    "linhas alteradas" deixaram de ser infladas (chat ledger, proposal, tray, overlay).
+
+### Frente 44 (deep-context-manager) — reclassificada
+- O audit dizia "stub de 78 LoC". REAL: `lib/ai/deep-context-manager.ts` tem **319 LoC**
+  e já é um banco de memória semântica evidence-gated com scoring/recall. NÃO é stub.
+  O que o audit pedia (skeleton AST / slice de símbolo via `web-tree-sitter`) é um
+  **concern de contexto de código** separado, com dep WASM frágil — adiar até haver
+  integração real no pipeline de tools (não criar dead code).
+
 ### O que GENUINAMENTE falta (bulk real, por ordem de valor)
-1. **Frente 44 / B2** — expandir `lib/ai/deep-context-manager.ts` (hoje 277 LoC) para RAG AST com `web-tree-sitter`.
-2. **Frente 3** — quebrar god-file `lib/server/websocket-server.ts` (1443 LoC).
-3. **Frente A40** — ghost previews (Monaco decorations) em `EditorApplyBridgeContext.tsx`.
-4. **Wave 5 (B51/B52/B54 + Frente 7 wgpu)** — desktop nativo wgpu/git2/rocksdb no `Cargo.toml`.
+1. **Frente 3** — quebrar god-file `lib/server/websocket-server.ts` (1443 LoC). Refactor grande/arriscado.
+2. **Frente 44 / B2** — contexto AST de código (`web-tree-sitter`) — só com integração real no `tools-registry`.
+3. **Wave 5 (B51/B52/B54 + Frente 7 wgpu)** — desktop nativo wgpu/git2/rocksdb no `Cargo.toml`.
    Esforço grande (~10 dias). NÃO iniciar em batch rápido.
-5. **N3** — arquivar `client/` + `shared/` (seguro: zero imports do produto). **Preservar `runtime-templates/`.**
+4. **N3** — arquivar `client/` + `shared/` (seguro: zero imports do produto). **Preservar `runtime-templates/`.**
 
 ---
 
