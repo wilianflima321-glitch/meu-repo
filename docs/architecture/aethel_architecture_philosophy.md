@@ -26,59 +26,34 @@ No universo Aethel, as Inteligências Artificiais não são entidades mágicas q
 Engines web e híbridas têm a tendência de "engolir" erros e deixar o sistema em um estado semi-quebrado, onde um botão para de funcionar mas o resto parece normal.
 - **Deixe Quebrar (Let it Crash):** Aethel segue o modelo *Erlang/Actor*. Se uma thread do Worker de Física entrar em um estado corrompido, ela não tenta "remendar" o erro. A thread sofre pânico intencional e morre.
 - **Auto-Cura Oculta (Self-Healing):** O Orquestrador principal intercepta a morte dessa thread, reinicia a simulação imediatamente partindo do último *Snapshot* do ECS salvo no Yjs, e simultaneamente joga o *Stack Trace* do erro na mesa de um Agente de IA para criar o *hot-fix*. O usuário vê, no máximo, um engasgo de 1 frame.
-> **Lei 4:** O estado da Engine deve ser perfeitamente reproduzível. Um travamento completo seguido de uma reinicialização não deve resultar em absolutamente nenhuma perda de dados.
-
+> **Lei 4 — DEPENDÊNCIAS:**
+>
+> Antes de "Auto-Cura" funcionar:
+> 1. Frente 31 (Memory Layout SoA com SharedArrayBuffer)
+> 2. Frente 66 (Snapshotting Contínuo)
+> 3. Integração ECS↔Yjs (não existe hoje — só Monaco↔Yjs)
 ## 5. A Verdade Única: O Virtual File System (VFS)
 Caminhos locais (C:/Users/.../textura.png) são veneno para a portabilidade.
 - **Absolutismo de UUID:** Absolutamente todos os recursos de projeto não são "arquivos", mas *Objetos Binários* mapeados por UUIDs.
 - O sistema de Banco de Dados local (RocksDB/Sled em Rust) atua como a única ponte entre o código, os bytes do arquivo e a placa de vídeo (Zero-Copy). O Prisma existe apenas para autenticação e nuvem.
-> **Lei 5:** Mudanças feitas localmente são a Fonte da Verdade. O processo de Sincronização em Nuvem em Background puxa esses bytes nativos e gera pacotes `Yjs Deltas` transparentes para manter a compatibilidade Web.
-
+> **Lei 5 — ESTADO ATUAL: ASPIRACIONAL**
+>
+> A implementação completa exige adicionar ao `apps/studio-local/src-tauri/Cargo.toml`:
+> - `rocksdb = "0.21"` OU `sled = "0.34"`
+> - `uuid = { version = "1.6", features = ["v4"] }`
+> - `memmap2 = "0.9"`
+>
+> Implementação real fica em `apps/studio-local/src-tauri/src/vfs.rs` (arquivo a criar).
+> Esta lei só vale após as Frentes 35 (Ingestão Rust) e 48 (Asset Registry).
 ---
 
-## 6. Visão 2030: O Próximo Salto Tecnológico (Beyond AAA)
-Se (e quando) conquistarmos as 90 Frentes do *Master Plan*, a Aethel Engine atingirá a paridade com a Unreal Engine 5. Mas para **superar** os concorrentes no futuro e ditar as regras da próxima década, a arquitetura interna precisará dar saltos quânticos de robustez. Abaixo estão as diretrizes de vanguarda para o futuro da plataforma:
+# Lei 6: O Que NÃO Fazer Agora
 
-### 6.1. Neural Geometry e Gaussian Splatting (A Morte do Polígono)
-No futuro, armazenar bilhões de triângulos no disco será obsoleto.
-- **O Salto:** A engine abandonará o pipeline clássico de malhas (Meshes). Em vez de baixar um modelo `.obj` de 2GB de um castelo, a engine armazenará os *pesos de uma pequena Rede Neural* (NeRFs) ou uma nuvem de pontos (3D Gaussian Splatting).
-- **A Robustez:** A Placa de Vídeo rodará inferência de IA em tempo real para "alucinar" o castelo perfeitamente em qualquer resolução (4K ou 8K) pesando apenas alguns megabytes. Fim da contagem de polígonos.
-
-### 6.2. DirectStorage API & GPU Decompression (Zero-Copy Absoluto)
-Atualmente, para carregar uma textura do SSD, o disco envia para a Memória RAM, o processador (CPU) descomprime, e envia para a Placa de Vídeo (VRAM). Esse é o maior gargalo do mundo aberto.
-- **O Salto:** Implementação profunda da API *DirectStorage* da Microsoft no Kernel Rust.
-- **A Robustez:** A GPU lerá os dados comprimidos **direto do SSD NVMe** pelas pistas PCIe e descomprimirá na própria GPU. O processador (CPU) fica 100% livre para calcular apenas a lógica de IA e Física. Telas de loading deixam de existir pelas leis da física.
-
-### 6.3. Arquitetura MMO Distribuída (Serverless Spatial Mesh)
-Bancar servidores na Amazon (AWS) para 10.000 jogadores num mundo massivo custa milhões de dólares e gera lag.
-- **O Salto:** Aethel implementará uma malha P2P espacial (*SpatialOS-style*). Não existe "O Servidor Central". 
-- **A Robustez:** O computador de cada jogador rodando o jogo simulará automaticamente a física num raio de 50 metros ao redor dele. A engine conecta as "bolhas" de todos os jogadores via WebRTC invisível. Se 1.000 jogadores se encontram num campo, os mil PCs dividem a carga do servidor matematicamente. MMOs infinitos com zero custo de servidor.
-
-### 6.4. Síntese de Áudio Neural Dinâmica
-Jogos gigantes pesam 150GB hoje porque guardam milhares de arquivos de áudio pesados (passos na areia, vento, tiros).
-- **O Salto:** O VFS não guardará mais arquivos `.ogg`. A engine terá um micro-sintetizador neural acoplado.
-- **A Robustez:** Em vez de reproduzir um som gravado de um "carro batendo em metal", o desenvolvedor invoca a função `Audio.synthesize("car clash metal, rusty, heavy impact")`. O processador neural (NPU) do PC do jogador **sintetiza a onda sonora perfeitamente na hora**. Jogos de 150GB cairão para 10GB.
-
-### 6.5. Verificação Formal de Código (A Engine Imortal)
-Garantir que um software não crashe usando testes automatizados (Testes Unitários) é coisa do presente.
-- **O Salto:** O núcleo da física e de alocação de memória da Aethel (em Rust) usará **Verificação Formal** (Provas Matemáticas via ferramentas como TLA+ ou Coq).
-- **A Robustez:** A engine é comprovada matematicamente. É impossível ocorrer um *Segfault* (violação de acesso de memória). A estabilidade do motor gráfico se igualará aos sistemas de aviação militar (que nunca podem travar em voo).
+NeRFs, DirectStorage, MMO P2P Spatial Mesh, Audio Neural e Verificação Formal
+são alvos de **5–7 anos**. Claude NÃO deve abrir PR sobre esses tópicos no sprint atual.
+Eles existem apenas para guiar decisões arquiteturais (ex.: "isto bloqueia DirectStorage? evitar.").
 
 ---
 
 ### O FIM DO ACHISMO
 Este documento sela o conceito da "Robustez Interna". Programadores (Humanos ou IAs) que implementam na Aethel não precisam mais perder horas em debates arquitetônicos. As fundações de **Performance, Segurança e Autonomia** estão gravadas nestas leis absolutas.
-
----
-
-# ⚠️ PILAR 5: THE MULTIMODAL BYPASS (O "LADRÃO DE JOGOS")
-### 🔴 O Paradoxo da Escala "AAA"
-Se um usuário pedir: *"Crie um jogo nível Red Dead Redemption, com física de cavalos, neve deformável e IA de NPCs sistêmica"*... Se os agentes tentarem **digitar o código** para isso do zero (arquivo por arquivo), demorará semanas, custará milhares de dólares em tokens de API, e o contexto da LLM vai colapsar. **Escrever código do zero para mecânicas estabelecidas é o caminho errado.**
-
-### ⚡ A Solução Aethel: Ingestão Multimodal Reversa
-A Aethel Engine não tenta escrever o próximo "God of War" do zero. Ela usa o `AgentOrchestrator` (já implementado em `ai-agent-system.ts`) para **clonar e reengenhar**.
-- **Video-to-Mechanic:** O usuário fornece um vídeo do Kratos arremessando o machado. O `vision-agent` analisa a parábola, os tempos de frame e o *hitbox*, traduzindo o vídeo diretamente para Nodos de Visual Scripting e curvas matematicas do Rust. Sem digitar código.
-- **Project Scanning:** Se o usuário fizer upload de um projeto gigante de Unity/Unreal (com GBs de imagens, scripts e sons), o agente não lê o código linha por linha. O `native_kernel` em Rust usa `rg` (ripgrep) e AST Parsers para mapear os componentes e traduzi-los automaticamente para o formato da Aethel (ECS).
-- **Asset Morphing:** Em vez de gerar texturas gigantes do zero (lento), a Engine baixa *Megascans* genéricos da internet e o `artist-agent` aplica um filtro/morphing em WebGPU para adequar ao estilo do jogo (ex: transformar texturas fotorealistas em *Cel-Shading*).
-
-**A Regra de Ouro da Produção AAA na Aethel:** A IA *sintetiza* de referências multimídia e converte em código compilado. Ela nunca "digita" um mundo gigante do zero. Ela escaneia, assimila e ajusta.

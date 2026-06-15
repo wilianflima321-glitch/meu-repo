@@ -1,63 +1,51 @@
-# Aethel Engine — Cursor Rules
+# Aethel Engine — Cursor/Claude Rules (V33)
 
-You are working on the Aethel Engine repository: a multi-agent IDE + creative studio.
-These rules complement `.aethelrules` (the canonical project constraints). When in
-doubt, `.aethelrules` wins.
+## Estrutura
+- **Produto real:** `cloud-web-app/web/` (Next 14 App Router)
+- **Desktop:** `apps/studio-local/` (Tauri 2 + Rust)
+- **Código morto (NÃO TOCAR):** `src/`, `client/`, `lib/` raiz, `components/` raiz, `runtime-templates/`
+- **Path alias:** `@/` → `cloud-web-app/web/`
 
-## Repository layout (validated)
-- **Real product (Next.js 14 App Router):** `cloud-web-app/web/`
-- **Desktop app (Tauri 2 + Rust, FE incomplete):** `apps/studio-local/`
-- **Design tokens:** `cloud-web-app/web/lib/design-tokens.ts` + `cloud-web-app/web/app/globals.css`
-- **UI primitives:** `cloud-web-app/web/components/ui/`
-- **Database:** Prisma at `cloud-web-app/web/prisma/schema.prisma`
-- **Unused root trees (do NOT import from the web app):** `src/`, `client/`, root `lib/`,
-  root `components/`, `runtime-templates/`, `cloud-admin-ia/`, `shared/`. The web app
-  imports nothing from these (verified). Do not wire them back in.
+## Decisão arquitetural V33
+- Web: React Three Fiber (manter)
+- Desktop: wgpu Rust nativo (a construir do zero, sem refletir o R3F)
 
-## Stack
-- Next.js 14 App Router (server components by default; `'use client'` only when you need
-  state, effects, or event handlers).
-- TypeScript strict mode is ON. No `any` in new code without a `// TODO(strict):` note.
-  Never use `@ts-ignore` to silence real errors.
-- Tailwind via design tokens (`var(--aethel-*)`). NEVER hard-code hex colors in TSX.
-- Monaco (editor), xterm (terminal), Three/R3F (3D), Yjs (collab), Zustand (state),
-  React Query/SWR (server state), Prisma + PostgreSQL + Redis (Upstash).
+## Stack canônico
+- Next 14 App Router | React 18 | TypeScript strict
+- Tailwind 4 + tokens `var(--aethel-*)`
+- Monaco | xterm | Three/R3F/Drei | Yjs
+- Zustand state | React Query | Prisma
+- Logger: `createComponentLogger` (NUNCA console.log)
 
-## Hard limits (from .aethelrules)
-- **Max 500 LoC per component file.** Split before adding features above that.
-- No `console.log` / `console.info` / `console.debug`. Use
-  `createComponentLogger('<module>')` from `lib/observability/logger.ts`.
-  (`console.warn` / `console.error` allowed only on framework-sensitive paths.)
-- Every button needs an accessible name (text, `aria-label`, or `aria-labelledby`).
-- Every new UI component ships a `*.stories.tsx`.
-- Do NOT set `images.unoptimized: true` in `next.config.js` (Next/Image stays on).
-- Project-relative paths only — never absolute OS paths.
+## Limites
+- Componente: ≤ 500 LoC
+- Sem PT-BR em UI (usar react-i18next)
+- Sem hex colors em TSX (usar tokens)
+- Sem `dangerouslySetInnerHTML` sem audit
 
-## Refactoring discipline (IMPORTANT — learned the hard way)
-The repo has many `chore: split … internals` commits that broke `tsc` by moving symbols
-into sibling files without re-importing them. When you split a file:
-1. After moving a function/type/class, ADD the import in every file that still uses it
-   (or re-export it from the original module path to keep consumers working).
-2. Watch for symbols used as VALUES vs TYPES — a `import type { X }` cannot be used as a
-   value (e.g. `new X()` or `instanceof X`).
-3. Run `npm run typecheck` in `cloud-web-app/web/` after EVERY split. Do not batch many
-   splits before checking.
+## Quality gates pré-PR
+```bash
+cd cloud-web-app/web
+npm run typecheck && npm run lint && npm run test
+npm run qa:design-system-consistency
+npm run qa:hardcoded-colors
+npm run qa:button-types
+```
 
-## Quality gates (run in cloud-web-app/web/ before considering work done)
-- `npm run typecheck`  ← keep at 0 errors
-- `npm run lint`       ← keep at 0 warnings/errors
-- `npm run test`
-- Relevant `npm run qa:*` gates for the area you touched.
+## Arquivos canônicos importantes
+- Physics: `lib/engine/physics-engine.ts` (TS) + `lib/physics-engine-real.ts` (Rapier) + `workers/physics-worker.ts`
+- Render: `lib/aaa-render-system.ts` (Three.js, 1051 LoC)
+- Ledger: `lib/production/task-evidence-ledger.ts` (NÃO `lib/ai/agent-run-ledger.ts`)
+- Context: `lib/ai/deep-context-manager.ts` (78 LoC — expandir, é stub)
+- WebSocket: `lib/server/websocket-server.ts` (1443 LoC — quebrar)
+- ECS: `lib/ecs-dots-system.ts` (1055 LoC)
+- Visual Script: `lib/visual-script/runtime.ts` (1087 LoC) + `components/visual-scripting/VisualScriptEditor.tsx` (689 LoC)
+- Monaco: `components/editor/MonacoEditorPro.tsx` + `.actions.ts` + `.symbols.ts` + `.theme.ts` (não `.runtime.tsx` — não existe)
 
-## Anti-patterns to avoid
-- New `*Shell.tsx` files (consolidate into the canonical shells instead).
-- New duplicate `Chat` / `Agent` / `Nexus` components — extend the existing ones.
-- Stub pages that only wrap a component for a route that has no real editor.
-  (Thin route files that delegate to a real shared client, e.g.
-  `StudioGroupedEditorClient`, are fine.)
-- PT-BR strings in user-facing UI. Product UI is English; use i18n for translations.
-
-## When adding a feature
-1. Search for an existing component first (`components/ui`, `components/*`).
-2. Extend it if it exists; otherwise create in the smallest appropriate scope.
-3. Add a Storybook story for UI primitives.
+## Forbiddens
+- Criar `MonacoEditorPro.runtime.tsx`
+- Criar `lib/ai/agent-run-ledger.ts`
+- Criar `lib/scene-graph-node.ts`
+- Editar `aaa-render-system.ts` "preenchendo TODOs" (tem 0)
+- Misturar PT-BR e EN em mesma UI
+- Auditoria V34 sem permissão explícita
