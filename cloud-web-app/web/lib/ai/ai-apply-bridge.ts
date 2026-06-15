@@ -1,4 +1,5 @@
 import type { StandaloneCodeEditorLike } from '@/lib/editor/editor-structural-types'
+import { diffLineOps } from '@/lib/ai/diff-line-ops'
 
 /** Diff em memoria para staging; `buildChatDiffFile` alimenta o painel Diff do chat. */
 export type ChatDiffLine = {
@@ -77,27 +78,31 @@ export function replaceEntireDocument(
   return { ok: true }
 }
 
-/** Diff simples para blocos de chat; suficiente para staging inicial. */
+/**
+ * Builds a real unified line diff (LCS based) for the chat/proposal panels, so
+ * "lines changed" counts reflect only actual edits instead of treating the whole
+ * file as removed + re-added.
+ */
 export function buildChatDiffFile(path: string, oldContent: string, newContent: string): ChatDiffFile {
   if (oldContent === newContent) {
     return {
       path,
       oldContent,
       newContent,
-      lines: [{ lineNumber: 1, content: '(sem alteracoes)', type: 'context' }],
+      lines: [{ lineNumber: 1, content: '(no changes)', type: 'context' }],
     }
   }
 
-  const lines: ChatDiffLine[] = []
-  let lineNumber = 1
-
-  for (const line of oldContent.split('\n')) {
-    lines.push({ lineNumber: lineNumber++, content: line, type: 'removed' })
-  }
-
-  for (const line of newContent.split('\n')) {
-    lines.push({ lineNumber: lineNumber++, content: line, type: 'added' })
-  }
+  const { ops } = diffLineOps(oldContent, newContent)
+  const lines: ChatDiffLine[] = ops.map((op): ChatDiffLine => {
+    if (op.type === 'equal') {
+      return { lineNumber: op.newLine, content: op.text, type: 'unchanged' }
+    }
+    if (op.type === 'del') {
+      return { lineNumber: op.oldLine, content: op.text, type: 'removed' }
+    }
+    return { lineNumber: op.newLine, content: op.text, type: 'added' }
+  })
 
   return { path, oldContent, newContent, lines }
 }

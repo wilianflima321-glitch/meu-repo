@@ -1,9 +1,16 @@
 /**
- * Line-level diff helpers for the Frente A40 "ghost preview" of a staged AI
- * change. Produces line ranges to mark as removed (in the current editor model)
- * and blocks of inserted lines to render as green ghost view zones, so the user
- * sees the pending change holographically before it is applied.
+ * Line-level diff helpers shared by the staged-change UI:
+ *   - `diffLineOps` produces an ordered equal/del/ins op list (LCS based);
+ *   - `computeGhostDiffHunks` (Frente A40) turns that into removed line ranges +
+ *     inserted blocks for the holographic Monaco ghost preview;
+ *   - `buildChatDiffFile` (ai-apply-bridge) maps the same ops into a unified diff
+ *     for the chat/proposal panels.
  */
+
+export type DiffLineOp =
+  | { type: 'equal'; oldLine: number; newLine: number; text: string }
+  | { type: 'del'; oldLine: number; text: string }
+  | { type: 'ins'; newLine: number; text: string }
 
 export type GhostRemovedRange = {
   /** 1-based start line in the current (old) model. */
@@ -26,11 +33,6 @@ export type GhostDiffHunks = {
   approximate: boolean
 }
 
-type DiffOp =
-  | { type: 'equal'; oldLine: number }
-  | { type: 'del'; oldLine: number }
-  | { type: 'ins'; text: string }
-
 function splitLines(text: string): string[] {
   // Normalize CRLF so diffs are not polluted by line-ending differences.
   return text.replace(/\r\n/g, '\n').split('\n')
@@ -38,12 +40,25 @@ function splitLines(text: string): string[] {
 
 /**
  * Classic Longest Common Subsequence diff over lines. Returns an ordered op
- * list (equal/del/ins). O(n*m) time and space — guarded by `maxCells`.
+ * list (equal/del/ins). O(n*m) time and space — guarded by `maxCells`, beyond
+ * which it falls back to "delete all old, insert all new".
  */
-function lcsLineDiff(oldLines: string[], newLines: string[], maxCells: number): DiffOp[] | null {
+export function diffLineOps(oldText: string, newText: string, maxCells = 4_000_000): {
+  ops: DiffLineOp[]
+  approximate: boolean
+} {
+  const oldLines = splitLines(oldText)
+  const newLines = splitLines(newText)
   const n = oldLines.length
   const m = newLines.length
-  if ((n + 1) * (m + 1) > maxCells) return null
+
+  if ((n + 1) * (m + 1) > maxCells) {
+    const ops: DiffLineOp[] = [
+      ...oldLines.map((text, i): DiffLineOp => ({ type: 'del', oldLine: i + 1, text })),
+      ...newLines.map((text, j): DiffLineOp => ({ type: 'ins', newLine: j + 1, text })),
+    ]
+    return { ops, approximate: true }
+  }
 
   // dp[i][j] = LCS length of oldLines[i..] and newLines[j..]
   const dp: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(m + 1).fill(0))
@@ -55,25 +70,31 @@ function lcsLineDiff(oldLines: string[], newLines: string[], maxCells: number): 
     }
   }
 
-  const ops: DiffOp[] = []
+  const ops: DiffLineOp[] = []
   let i = 0
   let j = 0
   while (i < n && j < m) {
     if (oldLines[i] === newLines[j]) {
-      ops.push({ type: 'equal', oldLine: i + 1 })
+      ops.push({ type: 'equal', oldLine: i + 1, newLine: j + 1, text: oldLines[i] })
       i++
       j++
     } else if (dp[i + 1][j] >= dp[i][j + 1]) {
-      ops.push({ type: 'del', oldLine: i + 1 })
+      ops.push({ type: 'del', oldLine: i + 1, text: oldLines[i] })
       i++
     } else {
-      ops.push({ type: 'ins', text: newLines[j] })
+      ops.push({ type: 'ins', newLine: j + 1, text: newLines[j] })
       j++
     }
   }
-  while (i < n) ops.push({ type: 'del', oldLine: i++ + 1 })
-  while (j < m) ops.push({ type: 'ins', text: newLines[j++] })
-  return ops
+  while (i < n) {
+    ops.push({ type: 'del', oldLine: i + 1, text: oldLines[i] })
+    i++
+  }
+  while (j < m) {
+    ops.push({ type: 'ins', newLine: j + 1, text: newLines[j] })
+    j++
+  }
+  return { ops, approximate: false }
 }
 
 export function computeGhostDiffHunks(
@@ -85,19 +106,7 @@ export function computeGhostDiffHunks(
     return { changed: false, removedRanges: [], additions: [], approximate: false }
   }
 
-  const oldLines = splitLines(oldText)
-  const newLines = splitLines(newText)
-  const ops = lcsLineDiff(oldLines, newLines, maxCells)
-
-  if (!ops) {
-    // Fallback for very large files: mark the whole document as replaced.
-    return {
-      changed: true,
-      removedRanges: oldLines.length > 0 ? [{ startLine: 1, endLine: oldLines.length }] : [],
-      additions: [{ afterLine: oldLines.length, lines: newLines }],
-      approximate: true,
-    }
-  }
+  const { ops, approximate } = diffLineOps(oldText, newText, maxCells)
 
   const removedRanges: GhostRemovedRange[] = []
   const additions: GhostAddition[] = []
@@ -147,5 +156,5 @@ export function computeGhostDiffHunks(
   flushRemoval()
   flushAddition()
 
-  return { changed: true, removedRanges, additions, approximate: false }
+  return { changed: true, removedRanges, additions, approximate }
 }
