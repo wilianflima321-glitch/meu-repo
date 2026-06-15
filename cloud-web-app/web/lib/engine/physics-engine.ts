@@ -1,3 +1,16 @@
+/**
+ * @deprecated Frente N5 — Physics engine dualization.
+ *
+ * This is the legacy pure-TypeScript physics engine. It is NOT wired into any
+ * runtime path (zero imports across the product). The canonical, governed
+ * physics path is Rapier:
+ *   - `lib/physics-engine-real.ts`  — Rapier wrapper (PhysicsWorld, initPhysicsEngine)
+ *   - `workers/physics-worker.ts`   — Rapier WASM running off the main thread
+ *
+ * Do NOT build new features on this module. New simulation work must target the
+ * Rapier path above. Kept temporarily for reference until the desktop native
+ * physics track (Wave 5 / Frente 9) lands.
+ */
 import { EventEmitter } from 'events';
 import { BoxCollider, CapsuleCollider, Collider, PlaneCollider, SphereCollider } from './physics-colliders';
 import { Quat, Vec3, type AABB, type BodyType, type ColliderConfig, type PhysicsConfig, type Quaternion, type RigidBodyConfig, type Vector3 } from './physics-math';

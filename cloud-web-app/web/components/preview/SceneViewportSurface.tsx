@@ -49,6 +49,7 @@ export default function SceneViewportSurface({
     handleExportViewport,
     openWorkflowTool,
     handleTogglePlay,
+    handleObjectTransformChange,
   } = viewportState;
 
   return (
@@ -101,6 +102,7 @@ export default function SceneViewportSurface({
           onGizmoPivotModeChange={setGizmoPivotMode}
           onSnapEnabledChange={setSnapEnabled}
           onTogglePlayTest={handleTogglePlay}
+          onObjectTransformChange={handleObjectTransformChange}
         />
       }
       bottom={

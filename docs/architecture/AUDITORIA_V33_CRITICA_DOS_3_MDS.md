@@ -49,20 +49,26 @@
 - 31 → 9 estilos inline (os 9 restantes são data-driven/ReactFlow, não tokenizáveis).
 - Labels/aria-labels/empty-state PT-BR → EN.
 
-### Frente A5 / A8 — estado
+### Frente A5 / A7 / A8 — estado
 - **A5** (dropzone viewport): ✅ JÁ usava tokens (`ViewportAssetDropOverlay`).
 - **A8** (Outliner virtualizado): ✅ FEITO 2026-06-15 — `SceneViewportOutliner` usa
   `@tanstack/react-virtual` (`useVirtualizer` + `measureElement`).
+- **A7** (Inspector scrubbing + math): ✅ FEITO 2026-06-15 — `SceneViewportInspector`
+  edita Position/Rotation/Scale via `Vector3Input` (drag-scrub + expressões math + EN).
+  Corrigido bug de cor de eixo no `Vector3Input` (classe Tailwind concatenada dinamicamente).
+
+### Frente N5 — estado
+- ✅ FEITO 2026-06-15: Rapier é o caminho canônico (`lib/physics-engine-real.ts` +
+  `workers/physics-worker.ts`). O motor TS `lib/engine/physics-engine.ts` está
+  **órfão (0 imports)** e recebeu banner `@deprecated`. Física nativa do desktop = Wave 5 / Frente 9.
 
 ### O que GENUINAMENTE falta (bulk real, por ordem de valor)
-1. **N5** — unificar os dois motores de física (decisão: Rapier worker como oficial; `@deprecated` no TS).
-2. **Frente 44 / B2** — expandir `lib/ai/deep-context-manager.ts` (hoje 277 LoC) para RAG AST com `web-tree-sitter`.
-3. **Frente 3** — quebrar god-file `lib/server/websocket-server.ts` (1443 LoC).
-4. **Frente A40** — ghost previews (Monaco decorations) em `EditorApplyBridgeContext.tsx`.
-5. **Frente A7** — fiar `ScrubbableInput` no Inspector real.
-6. **Wave 5 (B51/B52/B54 + Frente 7 wgpu)** — desktop nativo wgpu/git2/rocksdb no `Cargo.toml`.
+1. **Frente 44 / B2** — expandir `lib/ai/deep-context-manager.ts` (hoje 277 LoC) para RAG AST com `web-tree-sitter`.
+2. **Frente 3** — quebrar god-file `lib/server/websocket-server.ts` (1443 LoC).
+3. **Frente A40** — ghost previews (Monaco decorations) em `EditorApplyBridgeContext.tsx`.
+4. **Wave 5 (B51/B52/B54 + Frente 7 wgpu)** — desktop nativo wgpu/git2/rocksdb no `Cargo.toml`.
    Esforço grande (~10 dias). NÃO iniciar em batch rápido.
-7. **N3** — arquivar `client/` + `shared/` (seguro: zero imports do produto). **Preservar `runtime-templates/`.**
+5. **N3** — arquivar `client/` + `shared/` (seguro: zero imports do produto). **Preservar `runtime-templates/`.**
 
 ---
 

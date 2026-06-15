@@ -35,8 +35,12 @@ interface ScrubbableInputProps {
   disabled?: boolean;
   /** Custom class name */
   className?: string;
+  /** Class applied to the label/scrub-handle (e.g., axis color) */
+  labelClassName?: string;
   /** Unit suffix (e.g., "px", "°", "%") */
   suffix?: string;
+  /** Accessible label for the value input */
+  ariaLabel?: string;
 }
 
 /**
@@ -75,7 +79,9 @@ export function ScrubbableInput({
   precision = 2,
   disabled = false,
   className,
+  labelClassName,
   suffix,
+  ariaLabel,
 }: ScrubbableInputProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
@@ -198,6 +204,7 @@ export function ScrubbableInput({
             'bg-[var(--aethel-surface-primary)]',
             'rounded-l-md',
             !disabled && !isEditing && 'cursor-ew-resize hover:text-[var(--aethel-info-light)]',
+            labelClassName,
           )}
         >
           {label}
@@ -213,6 +220,7 @@ export function ScrubbableInput({
           onChange={(e) => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={commitEdit}
+          aria-label={ariaLabel ?? label}
           className={cn(
             'w-full min-w-[48px] px-1.5 py-0.5 bg-transparent',
             'text-[var(--aethel-text-primary)]',
@@ -251,6 +259,8 @@ export function Vector3Input({
   labels = ['X', 'Y', 'Z'],
   step = 0.01,
   precision = 3,
+  suffix,
+  ariaLabelPrefix,
   className,
 }: {
   value: [number, number, number];
@@ -259,12 +269,16 @@ export function Vector3Input({
   labels?: [string, string, string];
   step?: number;
   precision?: number;
+  suffix?: string;
+  ariaLabelPrefix?: string;
   className?: string;
 }) {
+  // Axis colors follow the Aethel gizmo spec (X red, Y green, Z blue).
+  // Use static class strings so Tailwind's JIT can detect them at build time.
   const labelColors = [
-    'text-[var(--aethel-error-light)]',   // X = Red
-    'text-[var(--aethel-success-light)]',  // Y = Green
-    'text-[var(--aethel-info-light)]',     // Z = Blue
+    'text-[var(--aethel-error-light)]',
+    'text-[var(--aethel-success-light)]',
+    'text-[var(--aethel-info-light)]',
   ];
 
   return (
@@ -286,7 +300,10 @@ export function Vector3Input({
           }}
           step={step}
           precision={precision}
-          className={cn('[&_span:first-child]:' + labelColors[i])}
+          suffix={suffix}
+          ariaLabel={ariaLabelPrefix ? `${ariaLabelPrefix} ${labels[i]}` : labels[i]}
+          labelClassName={labelColors[i]}
+          className="flex-1"
         />
       ))}
     </div>

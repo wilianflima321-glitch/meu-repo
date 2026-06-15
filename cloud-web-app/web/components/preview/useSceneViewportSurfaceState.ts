@@ -89,6 +89,20 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
     );
   }, []);
 
+  const handleObjectTransformChange = useCallback(
+    (
+      objectId: string,
+      patch: Partial<Pick<ViewportSceneObject, 'position' | 'rotation' | 'scale'>>
+    ) => {
+      setObjects((current) =>
+        current.map((object) =>
+          object.id === objectId && !object.locked ? { ...object, ...patch } : object
+        )
+      );
+    },
+    []
+  );
+
   const handleFacialMetricsChange = useCallback((blendShapeCount: number, expressionIntensity: number) => {
     setFacialBlendShapeCount(blendShapeCount);
     setFacialExpressionIntensity(expressionIntensity);
@@ -194,5 +208,6 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
     handleVisualScriptChange,
     handleFacialMetricsChange,
     handleHairSignatureChange,
+    handleObjectTransformChange,
   };
 }

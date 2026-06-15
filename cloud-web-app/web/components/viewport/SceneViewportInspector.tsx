@@ -27,10 +27,21 @@ import {
   type GizmoPivotMode,
 } from '@/lib/viewport/gizmo-elite-controls'
 import { ViewportAssetQualityCard } from '@/components/viewport/ViewportAssetQualityCard'
+import { Vector3Input } from '@/components/ui/ScrubbableInput'
 
 function radToDeg(value: number) {
   return (value * 180) / Math.PI
 }
+
+function degToRad(value: number) {
+  return (value * Math.PI) / 180
+}
+
+export type ViewportTransformPatch = Partial<
+  Pick<ViewportSceneObject, 'position' | 'rotation' | 'scale'>
+>
+
+const transformLabelClass = 'mb-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]'
 
 const iconButton = 'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] p-2 text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]'
 const activeButton = 'inline-flex items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--aethel-primary)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] p-2 text-[var(--aethel-primary-light)] transition hover:brightness-110'
@@ -62,6 +73,7 @@ export function SceneViewportInspector({
   onGizmoPivotModeChange,
   onSnapEnabledChange,
   onTogglePlayTest,
+  onObjectTransformChange,
 }: {
   selectedObject: ViewportSceneObject | null
   selectedIds: string[]
@@ -87,8 +99,10 @@ export function SceneViewportInspector({
   onGizmoPivotModeChange: (pivotMode: GizmoPivotMode) => void
   onSnapEnabledChange: (enabled: boolean) => void
   onTogglePlayTest: () => void
+  onObjectTransformChange?: (objectId: string, patch: ViewportTransformPatch) => void
 }) {
   const formatter = useCallback((value: number) => value.toFixed(2), [])
+  const editable = Boolean(onObjectTransformChange && selectedObject && !selectedObject.locked)
   const eliteState = buildGizmoEliteControlState({
     mode: transformMode,
     space: transformSpace,
@@ -273,18 +287,66 @@ export function SceneViewportInspector({
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Transform</p>
           {selectedObject ? (
             <div className="space-y-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-3 text-xs text-[var(--aethel-text-secondary)]">
-              <div>
-                <p className="mb-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">Position</p>
-                <p>{selectedObject.position.map(formatter).join(' / ')}</p>
-              </div>
-              <div>
-                <p className="mb-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">Rotation</p>
-                <p>{selectedObject.rotation.map((value) => `${formatter(radToDeg(value))} deg`).join(' / ')}</p>
-              </div>
-              <div>
-                <p className="mb-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">Scale</p>
-                <p>{selectedObject.scale.map(formatter).join(' / ')}</p>
-              </div>
+              {editable && onObjectTransformChange ? (
+                <>
+                  <div>
+                    <p className={transformLabelClass}>Position</p>
+                    <Vector3Input
+                      value={selectedObject.position}
+                      step={0.01}
+                      precision={3}
+                      ariaLabelPrefix="Position"
+                      onChange={(next) => onObjectTransformChange(selectedObject.id, { position: next })}
+                    />
+                  </div>
+                  <div>
+                    <p className={transformLabelClass}>Rotation (deg)</p>
+                    <Vector3Input
+                      value={selectedObject.rotation.map(radToDeg) as [number, number, number]}
+                      step={1}
+                      precision={1}
+                      suffix="°"
+                      ariaLabelPrefix="Rotation"
+                      onChange={(next) =>
+                        onObjectTransformChange(selectedObject.id, {
+                          rotation: next.map(degToRad) as [number, number, number],
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <p className={transformLabelClass}>Scale</p>
+                    <Vector3Input
+                      value={selectedObject.scale}
+                      step={0.01}
+                      precision={3}
+                      ariaLabelPrefix="Scale"
+                      onChange={(next) => onObjectTransformChange(selectedObject.id, { scale: next })}
+                    />
+                  </div>
+                  <p className="text-[10px] text-[var(--aethel-text-quaternary)]">
+                    Drag a label to scrub · double-click to type a value or math (e.g. 10 * 2.5).
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <p className={transformLabelClass}>Position</p>
+                    <p>{selectedObject.position.map(formatter).join(' / ')}</p>
+                  </div>
+                  <div>
+                    <p className={transformLabelClass}>Rotation</p>
+                    <p>{selectedObject.rotation.map((value) => `${formatter(radToDeg(value))} deg`).join(' / ')}</p>
+                  </div>
+                  <div>
+                    <p className={transformLabelClass}>Scale</p>
+                    <p>{selectedObject.scale.map(formatter).join(' / ')}</p>
+                  </div>
+                  {selectedObject.locked ? (
+                    <p className="text-[10px] text-[var(--aethel-warning-light)]">Object locked — unlock to edit transform.</p>
+                  ) : null}
+                </>
+              )}
               {selectedObject.asset ? (
                 <ViewportAssetQualityCard asset={selectedObject.asset} />
               ) : null}
