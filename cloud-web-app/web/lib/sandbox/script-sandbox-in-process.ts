@@ -20,7 +20,7 @@ export function executeScriptInProcess(
   if (/while\s*\(\s*true\s*\)|for\s*\(\s*;\s*;\s*\)/.test(code)) {
     return {
       success: false,
-      error: `timeout apÃ³s ${config.timeout}ms`,
+      error: `timeout after ${config.timeout}ms`,
       executionTime: config.timeout,
       memoryUsed: 0,
       logs,

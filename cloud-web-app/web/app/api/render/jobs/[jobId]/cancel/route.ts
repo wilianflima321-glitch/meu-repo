@@ -6,8 +6,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger'
 
 export const runtime = 'nodejs'
+
+const log = createComponentLogger('api/render/jobs/[jobId]/cancel')
 
 export async function POST(
   req: NextRequest,
@@ -41,7 +44,7 @@ export async function POST(
 
     return NextResponse.json({ cancelled: true, job })
   } catch (error) {
-    console.error('[POST /api/render/jobs/[jobId]/cancel]', error)
+    log.error('POST /api/render/jobs/[jobId]/cancel failed', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

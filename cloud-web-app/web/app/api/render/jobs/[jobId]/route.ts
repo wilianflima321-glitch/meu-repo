@@ -6,8 +6,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger'
 
 export const runtime = 'nodejs'
+
+const log = createComponentLogger('api/render/jobs/[jobId]')
 
 export async function GET(
   req: NextRequest,
@@ -51,7 +54,7 @@ export async function GET(
 
     return NextResponse.json({ job })
   } catch (error) {
-    console.error('[GET /api/render/jobs/[jobId]]', error)
+    log.error('GET /api/render/jobs/[jobId] failed', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

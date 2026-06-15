@@ -61,7 +61,7 @@ export function parseModelSelection(
 }
 
 // ============================================================================
-// PRICING POR MILHÃO DE TOKENS (Dezembro 2024)
+// PRICING PER MILLION TOKENS (December 2024)
 // ============================================================================
 
 const OPENROUTER_PRICING = Object.fromEntries(

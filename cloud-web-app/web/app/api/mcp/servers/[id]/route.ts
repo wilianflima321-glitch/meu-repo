@@ -8,8 +8,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger'
 
 export const runtime = 'nodejs'
+
+const log = createComponentLogger('api/mcp/servers/[id]')
 
 export async function GET(
   req: NextRequest,
@@ -32,7 +35,7 @@ export async function GET(
 
     return NextResponse.json({ server })
   } catch (error) {
-    console.error('[GET /api/mcp/servers/[id]]', error)
+    log.error('GET /api/mcp/servers/[id] failed', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -74,7 +77,7 @@ export async function PATCH(
 
     return NextResponse.json({ server })
   } catch (error) {
-    console.error('[PATCH /api/mcp/servers/[id]]', error)
+    log.error('PATCH /api/mcp/servers/[id] failed', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -93,7 +96,7 @@ export async function DELETE(
 
     return NextResponse.json({ deleted: true })
   } catch (error) {
-    console.error('[DELETE /api/mcp/servers/[id]]', error)
+    log.error('DELETE /api/mcp/servers/[id] failed', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

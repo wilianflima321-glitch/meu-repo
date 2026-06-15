@@ -55,7 +55,7 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
             <span className="font-medium text-sm text-[var(--aethel-text-primary)] truncate">{data.title}</span>
             {data.isMainQuest && <Star className="w-3 h-3 text-[var(--aethel-warning-light)] flex-shrink-0" />}
           </div>
-          <div className="text-[10px] text-[var(--aethel-text-tertiary)]">Lvl {data.level} â€¢ {category?.name}</div>
+          <div className="text-[10px] text-[var(--aethel-text-tertiary)]">Lvl {data.level} • {category?.name}</div>
         </div>
         {stateIcons[data.state]}
       </div>

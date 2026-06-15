@@ -7,8 +7,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger'
 
 export const runtime = 'nodejs'
+
+const log = createComponentLogger('api/mcp/servers')
 
 export async function GET(req: NextRequest) {
   const userId = req.headers.get('x-user-id')
@@ -45,7 +48,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ servers })
   } catch (error) {
-    console.error('[GET /api/mcp/servers]', error)
+    log.error('GET /api/mcp/servers failed', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -96,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ server }, { status: 201 })
   } catch (error) {
-    console.error('[POST /api/mcp/servers]', error)
+    log.error('POST /api/mcp/servers failed', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
