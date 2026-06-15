@@ -65,6 +65,10 @@ export interface AgentConfig {
   enableParallelExecution: boolean;
   model: string;
   toolContextProvider?: AgentToolContextProvider | null;
+  repositoryContext?: {
+    userId: string;
+    projectId: string;
+  } | null;
 }
 
 export type AgentToolContextProvider = (

@@ -30,6 +30,7 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/billing', maturity: 'GA', label: 'Billing' },
   { path: '/status', maturity: 'GA', label: 'Status Page' },
   { path: '/honest-status', maturity: 'GA', label: 'Honest Status' },
+  { path: '/evidence', maturity: 'GA', label: 'Evidence Center', notes: 'Live production-state and release evidence packages' },
   { path: '/privacy', maturity: 'GA', label: 'Privacy' },
   { path: '/terms', maturity: 'GA', label: 'Terms' },
 

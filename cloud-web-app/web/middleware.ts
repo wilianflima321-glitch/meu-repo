@@ -250,7 +250,11 @@ const PUBLIC_ROUTE_REDIRECTS: Record<string, string> = {
   '/health': '/status',
 };
 
+// BACKLOG §9 defect #10 + STRATEGY TRACK B #8:
+// /nexus is deprecated — permanently redirect to Film Studio (Director tool).
+// All other studio sub-tool URLs are canonicalized here.
 const STUDIO_LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
+  '/nexus': '/studio/film',
   '/studio/scene': '/studio/level?tool=scene',
   '/studio/material': '/studio/level?tool=material',
   '/studio/terrain': '/studio/level?tool=terrain',
@@ -403,6 +407,13 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!pathname.startsWith('/api') && req.method === 'GET') {
+    if (pathname === '/nexus') {
+      const url = req.nextUrl.clone();
+      url.pathname = '/studio';
+      url.search = '?group=Film&tool=director';
+      return withSecurityHeaders(NextResponse.redirect(url, 308), req, requestId);
+    }
+
     const adminLegacyTarget = getAdminLegacyRedirectTarget(pathname);
     if (adminLegacyTarget) {
       const url = req.nextUrl.clone();

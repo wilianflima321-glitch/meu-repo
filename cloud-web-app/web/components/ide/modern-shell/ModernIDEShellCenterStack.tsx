@@ -1,13 +1,11 @@
 'use client';
 
 import React from 'react';
-import { MessageSquare, TerminalSquare, X } from 'lucide-react';
+import { TerminalSquare, X } from 'lucide-react';
 import { ResizeHandle } from './ModernIDEShellChrome';
 import {
   BORDER_SECONDARY,
   SURFACE_PRIMARY,
-  TEXT_PRIMARY,
-  TEXT_SECONDARY,
   chromeBarHeight,
   chromeBarPadding,
   iconButtonStyle,
@@ -29,26 +27,41 @@ interface ModernIDEShellCenterStackProps {
   startVerticalResize: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-// Panel tabs: labels users actually understand
-const bottomPanelTabs: ReadonlyArray<{
-  id: BottomPanelMode;
-  icon: React.ReactNode;
+/**
+ * Bottom dock chrome bar — shared between Agents and Terminal columns.
+ */
+function DockColumnHeader({
+  label,
+  onClose,
+  ariaLabel,
+}: {
   label: string;
+  onClose: () => void;
   ariaLabel: string;
-}> = [
-  {
-    id: 'chat',
-    icon: <MessageSquare size={14} />,
-    label: 'Copilot',
-    ariaLabel: 'AI Copilot panel',
-  },
-  {
-    id: 'terminal',
-    icon: <TerminalSquare size={14} />,
-    label: 'Terminal',
-    ariaLabel: 'Terminal panel',
-  },
-];
+}) {
+  return (
+    <div
+      className="flex items-center justify-between shrink-0 border-b border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/2 gap-2"
+      style={{
+        padding: chromeBarPadding,
+        minHeight: chromeBarHeight,
+      }}
+    >
+      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-secondary)]">
+        {label}
+      </span>
+      <button
+        type="button"
+        onClick={onClose}
+        style={iconButtonStyle}
+        aria-label={ariaLabel}
+        title={`Close ${label}`}
+      >
+        <X size={14} />
+      </button>
+    </div>
+  );
+}
 
 export function ModernIDEShellCenterStack({
   editor,
@@ -56,17 +69,12 @@ export function ModernIDEShellCenterStack({
   terminal,
   chatOpen,
   chatSize,
-  activeBottomPanel,
   isCompact,
   editorColumnRef,
   setChatSize,
   toggleChat,
-  onSelectBottomPanel,
   startVerticalResize,
 }: ModernIDEShellCenterStackProps) {
-  const activePanelMeta = bottomPanelTabs.find((tab) => tab.id === activeBottomPanel) ?? bottomPanelTabs[0];
-  const activeBottomContent = activeBottomPanel === 'terminal' ? terminal : chat;
-
   return (
     <div
       ref={editorColumnRef}
@@ -91,11 +99,11 @@ export function ModernIDEShellCenterStack({
         {editor}
       </div>
 
-      {/* Bottom panel (Copilot / Terminal) */}
+      {/* Bottom dock — Agents (55%) | Terminal (45%) simultaneously */}
       {chatOpen && !isCompact && (
         <>
           <ResizeHandle
-            ariaLabel={`Resize ${activePanelMeta.label}`}
+            ariaLabel="Resize bottom dock"
             orientation="horizontal"
             onMouseDown={startVerticalResize}
             onAdjust={(delta) => setChatSize(chatSize + delta)}
@@ -104,91 +112,49 @@ export function ModernIDEShellCenterStack({
             valueMax={45}
           />
           <div
+            className="flex flex-row overflow-hidden shrink-0 border-t border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-elevated)]"
             style={{
               height: `${chatSize}%`,
-              minHeight: '136px',
-              maxHeight: '42%',
-              borderTop: `1px solid ${BORDER_SECONDARY}`,
-              background: 'rgba(15, 23, 42, 0.82)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              flexShrink: 0,
+              minHeight: '140px',
+              maxHeight: '44%',
             }}
+            aria-label="Bottom dock: Agents and Terminal"
           >
-            {/* Panel chrome bar */}
+            {/* === Agents Window — 55% === */}
             <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: chromeBarPadding,
-                minHeight: chromeBarHeight,
-                borderBottom: `1px solid ${BORDER_SECONDARY}`,
-                background: 'rgba(255, 255, 255, 0.02)',
-                gap: '8px',
-              }}
+              className="flex flex-col overflow-hidden border-r border-[var(--aethel-border-secondary)] min-w-0 flex-[0_0_55%]"
+              aria-label="Agents Window"
             >
-              {/* Tab switcher: minimal, no description text */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '3px',
-                  border: `1px solid ${BORDER_SECONDARY}`,
-                  borderRadius: '999px',
-                  background: 'rgba(15, 23, 42, 0.5)',
-                }}
-                role="tablist"
-                aria-label="Bottom panel tabs"
-              >
-                {bottomPanelTabs.map((tab) => {
-                  const active = tab.id === activeBottomPanel;
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={active}
-                      aria-label={tab.ariaLabel}
-                      onClick={() => onSelectBottomPanel?.(tab.id)}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '5px',
-                        padding: '5px 10px',
-                        borderRadius: '999px',
-                        border: 'none',
-                        cursor: 'pointer',
-                        background: active ? 'rgba(59, 130, 246, 0.18)' : 'transparent',
-                        color: active ? TEXT_PRIMARY : TEXT_SECONDARY,
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        transition: 'all 0.12s',
-                      }}
-                    >
-                      {tab.icon}
-                      {tab.label}
-                    </button>
-                  );
-                })}
+              <DockColumnHeader
+                label="Agents"
+                onClose={toggleChat}
+                ariaLabel="Close bottom dock"
+              />
+              <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+                {chat}
               </div>
-
-              {/* Close */}
-              <button
-                type="button"
-                onClick={toggleChat}
-                style={iconButtonStyle}
-                aria-label={`Close ${activePanelMeta.label}`}
-              >
-                <X size={14} />
-              </button>
             </div>
 
-            {/* Panel content */}
-            <div style={{ flex: 1, overflow: 'auto' }}>
-              {activeBottomContent}
+            {/* === Terminal — 45% === */}
+            <div
+              className="flex flex-col overflow-hidden min-w-0 flex-[0_0_45%]"
+              aria-label="Terminal"
+            >
+              <div
+                className="flex items-center gap-[6px] shrink-0 border-b border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/2"
+                style={{
+                  padding: chromeBarPadding,
+                  minHeight: chromeBarHeight,
+                }}
+              >
+                <TerminalSquare size={12} className="text-[var(--aethel-text-tertiary)]" />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-secondary)]">
+                  Terminal
+                </span>
+              </div>
+              <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+                {terminal}
+              </div>
             </div>
           </div>
         </>

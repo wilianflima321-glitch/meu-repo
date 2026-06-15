@@ -171,6 +171,7 @@ fn main() {
             desktop_commands::fs_read,
             desktop_commands::fs_write,
             desktop_commands::fs_list,
+            desktop_commands::fs_watch,
             desktop_commands::terminal_create,
             desktop_commands::terminal_write,
             desktop_commands::terminal_close,

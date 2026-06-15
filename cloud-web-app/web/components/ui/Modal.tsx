@@ -1,6 +1,19 @@
 'use client'
 
-import { Fragment, type ReactNode, useEffect, useCallback } from 'react'
+/**
+ * Modal — Frente A29 (Focus Trap) + Glassmorphism
+ *
+ * Professional modal with:
+ * - Real focus trap (Tab/Shift+Tab cycling)
+ * - createPortal to document.body
+ * - backdrop-blur-md
+ * - Escape to close
+ * - Body scroll lock
+ * - Accessible ARIA attributes
+ */
+
+import React, { Fragment, type ReactNode, useEffect, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { Button } from './Button'
 
@@ -25,6 +38,71 @@ const sizeClasses = {
   full: 'max-w-4xl',
 }
 
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'textarea:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+/**
+ * Traps focus within the given container element.
+ * Tab cycles forward, Shift+Tab cycles backward.
+ */
+function useFocusTrap(containerRef: React.RefObject<HTMLDivElement | null>, isActive: boolean) {
+  useEffect(() => {
+    if (!isActive || !containerRef.current) return;
+
+    const container = containerRef.current;
+
+    // Store previously focused element to restore on close
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+
+    // Focus the first focusable element
+    const focusableElements = container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+    if (focusableElements.length > 0) {
+      focusableElements[0].focus();
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+
+      const focusables = Array.from(
+        container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+      );
+
+      if (focusables.length === 0) return;
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+
+      if (event.shiftKey) {
+        // Shift+Tab: if on first, wrap to last
+        if (document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else {
+        // Tab: if on last, wrap to first
+        if (document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    container.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      container.removeEventListener('keydown', handleKeyDown);
+      // Restore focus on unmount
+      previouslyFocused?.focus();
+    };
+  }, [isActive, containerRef]);
+}
+
 export function Modal({
   isOpen,
   onClose,
@@ -37,6 +115,11 @@ export function Modal({
   closeOnEscape = true,
   footer,
 }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus trap
+  useFocusTrap(dialogRef, isOpen);
+
   // Handle escape key
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -47,6 +130,7 @@ export function Modal({
     [closeOnEscape, onClose]
   )
 
+  // Escape listener + body scroll lock
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown)
@@ -61,11 +145,11 @@ export function Modal({
 
   if (!isOpen) return null
 
-  return (
+  const modalContent = (
     <Fragment>
-      {/* Backdrop */}
+      {/* Backdrop with blur */}
       <div
-        className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm animate-in fade-in duration-200"
+        className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-md animate-in fade-in duration-200"
         onClick={closeOnOverlayClick ? onClose : undefined}
         aria-hidden="true"
       />
@@ -73,6 +157,7 @@ export function Modal({
       {/* Modal Container */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby={title ? 'modal-title' : undefined}
@@ -122,7 +207,7 @@ export function Modal({
                   "
                   aria-label="Close modal"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5" strokeWidth={1.5} />
                 </button>
               )}
             </div>
@@ -151,6 +236,13 @@ export function Modal({
       </div>
     </Fragment>
   )
+
+  // Render via portal to document.body
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body)
+  }
+
+  return modalContent
 }
 
 /* Confirmation Modal Variant */
@@ -177,7 +269,7 @@ export function ConfirmModal({
   variant = 'info',
   loading = false,
 }: ConfirmModalProps) {
-  const confirmVariant = variant === 'danger' ? 'danger' : variant === 'warning' ? 'primary' : 'primary'
+  const confirmVariant = variant === 'danger' ? 'danger' : 'primary'
 
   return (
     <Modal

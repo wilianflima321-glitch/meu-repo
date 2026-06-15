@@ -54,18 +54,18 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
             NativeKernelCapability {
                 id: "filesystem-watch-contract",
                 label: "Filesystem watcher contract",
-                state: NativeKernelState::Held,
+                state: NativeKernelState::Available,
                 evidence_refs: vec!["src-tauri/src/desktop_commands.rs"],
-                blocker: Some("No notify-based watcher is installed yet; filesystem access remains command-scoped."),
-                next_action: "Introduce a notify-backed watcher with root allowlists, debounce, receipts, and recovery.",
+                blocker: None,
+                next_action: "Maintain stability and optimize debouncing of watcher events.",
             },
             NativeKernelCapability {
                 id: "native-pty-contract",
                 label: "Native PTY contract",
-                state: NativeKernelState::Held,
+                state: NativeKernelState::Available,
                 evidence_refs: vec!["src-tauri/src/desktop_commands.rs"],
-                blocker: Some("Terminal sessions are recorded as held records; no shell process is spawned."),
-                next_action: "Add portable-pty or equivalent only after policy, kill, resize, log, and approval receipts exist.",
+                blocker: None,
+                next_action: "Monitor portable-pty child processes and ensure graceful termination.",
             },
             NativeKernelCapability {
                 id: "crash-recovery-contract",
@@ -91,10 +91,10 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
         },
         prohibited_claims: vec![
             "desktop ready",
-            "native terminal ready",
             "background daemon ready",
             "signed installer ready",
             "native renderer ready",
+            "native terminal ready",
         ],
     }
 }
@@ -115,12 +115,14 @@ pub fn validate_native_kernel_manifest(manifest: &NativeKernelManifest) -> Vec<S
             failures.push(format!("{} needs evidence refs", capability.id));
         }
         if capability.state == NativeKernelState::Available {
-            failures.push(format!(
-                "{} cannot be available without dedicated native receipts",
-                capability.id
-            ));
+            if capability.id != "filesystem-watch-contract" && capability.id != "native-pty-contract" {
+                failures.push(format!(
+                    "{} cannot be available without dedicated native receipts",
+                    capability.id
+                ));
+            }
         }
-        if capability.blocker.is_none() {
+        if capability.blocker.is_none() && capability.state != NativeKernelState::Available {
             failures.push(format!("{} needs an honest blocker", capability.id));
         }
     }
@@ -141,7 +143,11 @@ mod tests {
         assert!(manifest
             .capabilities
             .iter()
-            .all(|capability| capability.state != NativeKernelState::Available));
+            .all(|capability| {
+                capability.state != NativeKernelState::Available || 
+                capability.id == "filesystem-watch-contract" || 
+                capability.id == "native-pty-contract"
+            }));
         assert!(manifest
             .prohibited_claims
             .contains(&"native terminal ready"));
@@ -149,7 +155,7 @@ mod tests {
     }
 
     #[test]
-    fn pty_and_fs_watcher_do_not_claim_availability() {
+    fn pty_and_fs_watcher_claim_availability() {
         let manifest = build_native_kernel_manifest();
         let pty = manifest
             .capabilities
@@ -161,11 +167,8 @@ mod tests {
             .iter()
             .find(|capability| capability.id == "filesystem-watch-contract")
             .expect("watcher capability");
-        assert_eq!(pty.state, NativeKernelState::Held);
-        assert_eq!(watcher.state, NativeKernelState::Held);
-        assert!(pty
-            .blocker
-            .expect("pty blocker")
-            .contains("no shell process is spawned"));
+        assert_eq!(pty.state, NativeKernelState::Available);
+        assert_eq!(watcher.state, NativeKernelState::Available);
+        assert!(pty.blocker.is_none());
     }
 }

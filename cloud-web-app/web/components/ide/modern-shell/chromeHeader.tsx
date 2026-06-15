@@ -10,7 +10,14 @@ import {
 import { BORDER_SECONDARY } from './chromeStyles';
 import type { BottomPanelMode, PanelState } from './types';
 
-export type AgentRunStatus = 'idle' | 'running' | 'error';
+export type AgentRunStatus =
+  | 'idle'
+  | 'queued'
+  | 'running'
+  | 'paused'
+  | 'awaiting-approval'
+  | 'done-pending-review'
+  | 'error';
 
 export interface IDEHeaderProps {
   projectName: string;
@@ -34,16 +41,54 @@ function AgentStatusPill({ status }: { status: AgentRunStatus }) {
   if (status === 'idle') return null;
 
   const styles: Record<Exclude<AgentRunStatus, 'idle'>, React.CSSProperties> = {
+    queued: {
+      background: 'color-mix(in srgb, var(--aethel-info) 14%, transparent)',
+      border: '1px solid color-mix(in srgb, var(--aethel-info) 32%, transparent)',
+      color: 'var(--aethel-info-light)',
+    },
     running: {
       background: 'color-mix(in srgb, var(--aethel-success) 14%, transparent)',
       border: '1px solid color-mix(in srgb, var(--aethel-success) 32%, transparent)',
       color: 'var(--aethel-success-light)',
+    },
+    paused: {
+      background: 'color-mix(in srgb, var(--aethel-warning) 14%, transparent)',
+      border: '1px solid color-mix(in srgb, var(--aethel-warning) 32%, transparent)',
+      color: 'var(--aethel-warning-light)',
+    },
+    'awaiting-approval': {
+      background: 'color-mix(in srgb, var(--aethel-warning) 14%, transparent)',
+      border: '1px solid color-mix(in srgb, var(--aethel-warning) 36%, transparent)',
+      color: 'var(--aethel-warning-light)',
+    },
+    'done-pending-review': {
+      background: 'color-mix(in srgb, var(--aethel-info) 14%, transparent)',
+      border: '1px solid color-mix(in srgb, var(--aethel-info) 32%, transparent)',
+      color: 'var(--aethel-info-light)',
     },
     error: {
       background: 'color-mix(in srgb, var(--aethel-error) 14%, transparent)',
       border: '1px solid color-mix(in srgb, var(--aethel-error) 32%, transparent)',
       color: 'var(--aethel-error-light)',
     },
+  };
+
+  const labels: Record<Exclude<AgentRunStatus, 'idle'>, string> = {
+    queued: 'Queued',
+    running: 'Agent',
+    paused: 'Paused',
+    'awaiting-approval': 'Approval',
+    'done-pending-review': 'Review',
+    error: 'Error',
+  };
+
+  const ariaLabels: Record<Exclude<AgentRunStatus, 'idle'>, string> = {
+    queued: 'Agent queued',
+    running: 'Agent running',
+    paused: 'Agent paused',
+    'awaiting-approval': 'Agent awaiting approval',
+    'done-pending-review': 'Agent done pending review',
+    error: 'Agent error',
   };
 
   return (
@@ -62,7 +107,7 @@ function AgentStatusPill({ status }: { status: AgentRunStatus }) {
         ...styles[status],
       }}
       aria-live="polite"
-      aria-label={status === 'running' ? 'Agent running' : 'Agent error'}
+      aria-label={ariaLabels[status]}
     >
       <span
         style={{
@@ -71,7 +116,7 @@ function AgentStatusPill({ status }: { status: AgentRunStatus }) {
           borderRadius: '50%',
           flexShrink: 0,
           background: 'currentColor',
-          animation: status === 'running' ? 'agentPulse 1.4s ease-in-out infinite' : 'none',
+          animation: status === 'running' || status === 'queued' ? 'agentPulse 1.4s ease-in-out infinite' : 'none',
         }}
         aria-hidden="true"
       />
@@ -81,7 +126,7 @@ function AgentStatusPill({ status }: { status: AgentRunStatus }) {
           50% { opacity: 0.3; }
         }
       `}</style>
-      {status === 'running' ? 'Agent' : 'Error'}
+      {labels[status]}
     </div>
   );
 }

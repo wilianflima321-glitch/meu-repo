@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { AgentsWindow } from '@/components/agents/AgentsWindow';
 import { EditorErrorBoundary, PanelErrorBoundary } from '@/components/error/ErrorBoundary';
 import { ResizeHandle } from './ModernIDEShellChrome';
 import { ModernIDEShellCenterStack } from './ModernIDEShellCenterStack';
@@ -110,7 +111,7 @@ export function ModernIDEShellPanels({
         </RuntimeFailureSmokeFault>
       </PanelErrorBoundary>
     ),
-    chat: <PanelErrorBoundary panelName={regionLabel('chat')}>{slots.chat}</PanelErrorBoundary>,
+    chat: <PanelErrorBoundary panelName={AgentsWindow.name}>{slots.chat}</PanelErrorBoundary>,
     terminal: <PanelErrorBoundary panelName={regionLabel('terminal')}>{slots.terminal}</PanelErrorBoundary>,
   };
 

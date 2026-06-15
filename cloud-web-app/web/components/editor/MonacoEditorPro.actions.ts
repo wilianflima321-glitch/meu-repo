@@ -142,6 +142,35 @@ export function registerMonacoEditorActions(
         config.openInlineEdit('', config.language, config.path);
       },
     });
+
+    // Frente 1: Inline Composer (Ctrl+K) — triggers the InlineComposerWidget
+    // This action is the entry point for Cursor-style inline code generation
+    editor.addAction({
+      id: 'aethel.inline-composer',
+      label: 'Inline Composer (AI)',
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyK],
+      run: () => {
+        const selection = editor.getSelection();
+        const model = editor.getModel();
+        const position = editor.getPosition();
+
+        if (selection && model) {
+          const selectedText = model.getValueInRange(selection);
+          config.openInlineEdit(selectedText, config.language, config.path, {
+            line: selection.startLineNumber,
+            column: selection.startColumn,
+          });
+          return;
+        }
+
+        if (position) {
+          config.openInlineEdit('', config.language, config.path, {
+            line: position.lineNumber,
+            column: position.column,
+          });
+        }
+      },
+    });
   }
 
   if (config.onOpenInlineChat) {

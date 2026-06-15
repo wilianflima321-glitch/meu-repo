@@ -5,6 +5,9 @@
  *
  * Professional error handling with recovery, reporting, and user-friendly UI.
  * Captures React errors, async errors, and provides graceful degradation.
+ *
+ * Frente R64: Enhanced with crash-recovery receipts, crash count tracking,
+ * and auto-retry with exponential backoff (Let-it-Crash pattern).
  */
 import React, {
   Component,
@@ -25,15 +28,18 @@ export { ErrorReporterService, errorBoundaryLog, errorReporter } from './ErrorBo
 export { useErrorBoundary } from './ErrorBoundary.context';
 
 // ============================================================================
-// Error Fallback UI
+// Error Boundary Component — Frente R64 (Let-it-Crash + Auto-Recovery)
 // ============================================================================
-
-// ============================================================================
-// Error Boundary Component
-// ============================================================================
-
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  private crashCount = 0;
+  private lastCrashTime = 0;
+  private retryTimerId: ReturnType<typeof setTimeout> | null = null;
+
+  private static readonly MAX_AUTO_RETRIES = 3;
+  private static readonly BACKOFF_BASE_MS = 500;
+  private static readonly CRASH_RESET_WINDOW_MS = 30_000;
+
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -51,16 +57,56 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    const now = Date.now();
+
+    // Reset crash count if enough time has passed since last crash
+    if (now - this.lastCrashTime > ErrorBoundary.CRASH_RESET_WINDOW_MS) {
+      this.crashCount = 0;
+    }
+
+    this.crashCount++;
+    this.lastCrashTime = now;
+
     this.setState({ errorInfo });
 
-    // Report error
-    errorReporter.report(error, undefined, errorInfo);
+    // Frente R64: Emit structured crash receipt for observability
+    const crashReceipt = {
+      timestamp: new Date().toISOString(),
+      crashCount: this.crashCount,
+      errorName: error.name,
+      errorMessage: error.message,
+      componentStack: errorInfo.componentStack?.slice(0, 500),
+      level: this.props.level || 'critical',
+      willAutoRetry: this.crashCount < ErrorBoundary.MAX_AUTO_RETRIES,
+    };
+
+    // Report error with crash receipt context
+    errorReporter.report(error, { crashReceipt }, errorInfo);
 
     // Call custom error handler
     this.props.onError?.(error, errorInfo);
+
+    // Auto-retry with exponential backoff (Let-it-Crash pattern)
+    if (this.crashCount < ErrorBoundary.MAX_AUTO_RETRIES) {
+      const backoffMs = ErrorBoundary.BACKOFF_BASE_MS * Math.pow(4, this.crashCount - 1);
+      this.retryTimerId = setTimeout(() => {
+        this.reset();
+      }, backoffMs);
+    }
+  }
+
+  componentWillUnmount(): void {
+    if (this.retryTimerId) {
+      clearTimeout(this.retryTimerId);
+    }
   }
 
   reset = (): void => {
+    if (this.retryTimerId) {
+      clearTimeout(this.retryTimerId);
+      this.retryTimerId = null;
+    }
+
     this.setState({
       hasError: false,
       error: null,
@@ -75,7 +121,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     const { children, fallback, showDetails, level } = this.props;
 
     if (hasError && error) {
-      // Custom fallback
       if (typeof fallback === 'function') {
         return fallback(error, this.reset);
       }
@@ -84,7 +129,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         return fallback;
       }
 
-      // Default fallback
       return (
         <ErrorFallback
           error={error}
@@ -209,7 +253,7 @@ export const EditorErrorBoundary: React.FC<{ children: ReactNode }> = ({ childre
             <p className="text-sm text-[var(--aethel-text-secondary)] mb-3">Failed to render editor</p>
             <button type="button" aria-label="Retry compact error boundary"
               onClick={reset}
-              className="px-3 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded"
+              className="px-3 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] rounded transition-colors"
             >
               Retry
             </button>
@@ -282,7 +326,7 @@ export const AsyncErrorBoundary: React.FC<{
                 reset();
                 setTimeout(() => setIsRetrying(false), 100);
               }}
-              className="px-3 py-1 text-xs bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
+              className="px-3 py-1 text-xs bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
             >
               Retry
             </button>

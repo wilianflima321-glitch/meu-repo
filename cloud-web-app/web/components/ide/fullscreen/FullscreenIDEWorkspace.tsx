@@ -35,9 +35,13 @@ function resolveAgentStatus(input: {
 }): AgentRunStatus {
   if (input.error) return 'error';
   const fleet = input.fleet;
-  if (!fleet || fleet.paused) return 'idle';
-  const active = fleet.members.some((member) => member.status === 'ready' || member.status === 'attention');
-  return active ? 'running' : 'idle';
+  if (!fleet) return 'idle';
+  if (fleet.paused) return 'paused';
+  if (fleet.members.some((member) => member.status === 'blocked')) return 'awaiting-approval';
+  if (fleet.members.some((member) => member.status === 'attention')) return 'queued';
+  if (fleet.members.some((member) => member.status === 'paused')) return 'paused';
+  if (fleet.members.some((member) => member.status === 'ready')) return 'running';
+  return 'done-pending-review';
 }
 
 export type FullscreenIDEWorkspaceProps = {

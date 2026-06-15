@@ -164,7 +164,13 @@ export function evaluateGovernedAgentToolJob(
   input: GovernedAgentToolJobInput
 ): GovernedAgentToolJobDecision {
   const now = input.now ?? new Date().toISOString()
-  const enforcement: GovernedToolJobEnforcement = input.enforcement ?? 'observe'
+  // BACKLOG §9 defect #25 / STRATEGY TRACK D #13:
+  // Default to 'enforced' in production so the tool-bus is a hard gate, not an observer.
+  // In development/test, fall back to 'observe' to prevent blocking local iteration.
+  const productionDefault: GovernedToolJobEnforcement =
+    process.env.NODE_ENV === 'production' ? 'enforced' : 'observe'
+  const enforcement: GovernedToolJobEnforcement = input.enforcement ?? productionDefault
+
   const taskId = resolveTaskId(input)
 
   const toolDecision = evaluateAgentToolInvocation(buildAgentToolInvocation(input))

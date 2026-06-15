@@ -20,6 +20,7 @@ import {
   evaluateGovernedAgentToolJob,
   recordGovernedToolExecution,
   type GovernedAgentToolJobDecision,
+  type GovernedToolJobEnforcement,
 } from '@/lib/production/agent-tool-job-runner'
 import { summarizeTaskEvidenceLedger } from '@/lib/production/task-evidence-ledger'
 import { persistGovernedTaskEvidence } from './persist-governed-evidence'
@@ -179,7 +180,14 @@ export async function applyAiChanges(params: {
     snapshots.push({ prepared, snapshot })
   }
 
-  const toolBusEnforced = body.enforceToolBus === true
+  const enforcement: GovernedToolJobEnforcement =
+    process.env.NODE_ENV === 'production'
+      ? body.enforceToolBus === false
+        ? 'observe'
+        : 'enforced'
+      : body.enforceToolBus === true
+        ? 'enforced'
+        : 'observe'
   const governedDecision: GovernedAgentToolJobDecision = evaluateGovernedAgentToolJob({
     toolId: 'diff-proposal',
     mode: 'Builder',
@@ -194,10 +202,10 @@ export async function applyAiChanges(params: {
     readReceiptRefs: readReceiptDecision?.allowed ? readReceiptDecision.metadata.acceptedReceiptIds : undefined,
     scopeLockRef: surfaceLockDecision?.allowed ? surfaceLockDecision.lock.id : undefined,
     maxCostUsd: 0,
-    enforcement: toolBusEnforced ? 'enforced' : 'observe',
+    enforcement,
   })
 
-  if (toolBusEnforced && !governedDecision.allowed) {
+  if (enforcement === 'enforced' && !governedDecision.allowed) {
     await appendChangeRunLedgerEvent({
       eventType: 'apply_blocked',
       capability: CAPABILITY,
@@ -371,7 +379,7 @@ export async function applyAiChanges(params: {
       rollbackToken: snapshots.length === 1 ? snapshots[0].snapshot.token : undefined,
       governance: {
         toolStatus: governedDecision.toolDecision.status,
-        enforced: toolBusEnforced,
+        enforced: enforcement === 'enforced',
         ready: governedDecision.ready,
         missingEvidence: governedDecision.evidenceReadiness.missingKinds,
         evidenceSummary: summarizeTaskEvidenceLedger(governedLedger),

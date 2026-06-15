@@ -12,6 +12,7 @@ import {
   type AgentSnapshot,
 } from '@/lib/server/agent-store';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { createAgentToolContextProvider } from '@/lib/server/agent-context/create-agent-tool-context-provider';
 import {
   AI_AGENT_RATE_LIMIT,
   enforceAiCoreRateLimit,
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
     }
     
     const body = await req.json();
-    const { action, sessionId, task, input, config } = body;
+    const { action, sessionId, task, input, config, projectId: bodyProjectId } = body;
     
     // Validar action
     const validActions = ['start', 'status', 'pause', 'resume', 'stop', 'input', 'approve', 'reject'];
@@ -149,10 +150,18 @@ export async function POST(req: NextRequest) {
         }
 
         // Create new agent
-        const agent = new AutonomousAgent(config || {
+        const projectId = typeof bodyProjectId === 'string' && bodyProjectId.length > 0 ? bodyProjectId : undefined;
+        const agent = new AutonomousAgent({
           autonomyLevel: 'semi-autonomous',
           requireApproval: true,
           enableSelfCorrection: true,
+          ...(config && typeof config === 'object' ? config : {}),
+          repositoryContext: projectId ? { userId: auth.userId, projectId } : null,
+          toolContextProvider: createAgentToolContextProvider({
+            userId: auth.userId,
+            projectId,
+            agent: 'autonomous-agent',
+          }),
         });
         
         const newSessionId = sessionId || `agent-${Date.now()}`;

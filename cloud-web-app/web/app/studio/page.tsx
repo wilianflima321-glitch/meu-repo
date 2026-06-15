@@ -1,10 +1,9 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { SurfaceQualityShell } from '@/components/product/SurfaceQualityShell'
+import { CreativeWorkbenchShell } from '@/components/studio/CreativeWorkbenchShell'
 import EngineSpineReadinessPanel from '@/components/studio/EngineSpineReadinessPanel'
-import CreativeStudioShell from './CreativeStudioShell'
-import { CREATIVE_STUDIO_ROUTES, groupCreativeStudioRoutes, isPrimaryCreativeStudioRoute, getCreativeStudioRouteNavigationHref } from './creative-studio-routes'
 import StudioMissionControl from './StudioMissionControl'
+import { CREATIVE_STUDIO_ROUTES, groupCreativeStudioRoutes, isPrimaryCreativeStudioRoute, getCreativeStudioRouteNavigationHref } from './creative-studio-routes'
 
 const DOMAIN_LABELS = {
   world: 'Game and world',
@@ -17,42 +16,50 @@ const primaryStudioRoutes = CREATIVE_STUDIO_ROUTES.filter(isPrimaryCreativeStudi
 const advancedStudioRoutes = CREATIVE_STUDIO_ROUTES.filter((route) => !isPrimaryCreativeStudioRoute(route))
 const advancedStudioGroups = groupCreativeStudioRoutes(advancedStudioRoutes)
 
-export default function CreativeStudioPage() {
+// --- Studio hub outliner: editor list ----------------------------------------
+function StudioHubOutliner() {
   return (
-    <CreativeStudioShell
-      title="Creative Studio"
-      subtitle="Plan creative work, validate it, then open the editor that matters."
-      activeHref="/studio"
-    >
-      <div className="h-full overflow-y-auto bg-[var(--aethel-surface-primary)] px-4 py-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <SurfaceQualityShell
-            eyebrow="Studio"
-            title="Plan, validate, then open the right editor."
-            subtitle="Preview in the browser. Use local or cloud only when the required setup is actually ready."
-            status={[
-              { label: 'Preview ready', tone: 'available' },
-              { label: 'Local tools optional', tone: 'neutral' },
-              { label: 'Cloud review locked', tone: 'neutral' },
-            ]}
-            primaryAction={<a href="#studio-primary-surfaces" className="rounded-full bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)]">Open editor</a>}
-            secondaryAction={<a href="#studio-status" className="rounded-full border border-[var(--aethel-border-subtle)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)]">Status</a>}
-          >
-            <Suspense fallback={<div className="h-32 rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
-              <StudioMissionControl />
-            </Suspense>
-            <details id="studio-status" className="mt-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)]">
-              <summary className="cursor-pointer list-none px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]">Engine module status</summary>
-              <div className="px-5 pb-5">
-                <Suspense fallback={<div className="h-48 rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
-                  <EngineSpineReadinessPanel />
-                </Suspense>
-              </div>
-            </details>
-          </SurfaceQualityShell>
+    <div className="space-y-1 text-[11px]">
+      <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+        Editors
+      </p>
+      {primaryStudioRoutes.map((route) => (
+        <Link
+          key={route.href}
+          href={getCreativeStudioRouteNavigationHref(route)}
+          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[10px] font-medium text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]"
+        >
+          <span className="truncate">{route.label}</span>
+          <span className="ml-auto shrink-0 text-[9px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
+            {route.maturity}
+          </span>
+        </Link>
+      ))}
+    </div>
+  )
+}
 
-          <div id="studio-primary-surfaces" className="mt-8" />
+// --- Studio hub inspector: engine readiness -----------------------------------
+function StudioHubInspector() {
+  return (
+    <Suspense fallback={<div className="h-24 animate-pulse rounded-lg bg-[var(--aethel-surface-secondary)]" />}>
+      <EngineSpineReadinessPanel />
+    </Suspense>
+  )
+}
 
+// --- Studio hub viewport: mission control + editor grid ----------------------
+function StudioHubViewport() {
+  return (
+    <div className="h-full overflow-y-auto bg-[var(--aethel-surface-primary)] px-4 py-6 lg:px-8">
+      <div className="mx-auto max-w-5xl space-y-8">
+        {/* Mission control */}
+        <Suspense fallback={<div className="h-32 animate-pulse rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
+          <StudioMissionControl />
+        </Suspense>
+
+        {/* Primary editors */}
+        <section>
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
@@ -67,7 +74,10 @@ export default function CreativeStudioPage() {
             </span>
           </div>
 
-          <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-[0_18px_70px_rgba(0,0,0,0.14)]" data-studio-surface-board="operator-density" data-studio-primary-lanes="5">
+          <div
+            className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
+            data-studio-surface-board="operator-density"
+          >
             <div className="grid grid-cols-[minmax(170px,1fr)_112px_96px_minmax(130px,0.55fr)] gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)] max-md:hidden">
               <span>Editor</span>
               <span>Domain</span>
@@ -103,72 +113,99 @@ export default function CreativeStudioPage() {
               </Link>
             ))}
           </div>
+        </section>
 
-          <details className="mt-5 rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] p-4 shadow-[0_18px_70px_rgba(0,0,0,0.18)]">
-            <summary className="cursor-pointer list-none">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-                    Advanced editors
-                  </p>
-                  <h3 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">
-                    Specialized editors for advanced needs.
-                  </h3>
-                </div>
-                <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
-                  {advancedStudioRoutes.length} available
-                </span>
+        {/* Advanced editors */}
+        <details className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] p-4 shadow-[0_18px_70px_rgba(0,0,0,0.18)]">
+          <summary className="cursor-pointer list-none">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                  Advanced editors
+                </p>
+                <h3 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">
+                  Specialized editors for advanced needs.
+                </h3>
               </div>
-            </summary>
-            <div className="mt-4 space-y-4">
-              {advancedStudioGroups.map((group) => (
-                <section
-                  key={group.id}
-                  className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_34%,transparent)] p-3"
-                  data-studio-editor-group={group.id}
-                >
-                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <h4 className="text-sm font-semibold text-[var(--aethel-text-primary)]">{group.label}</h4>
-                      <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">{group.description}</p>
-                    </div>
-                    <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
-                      {group.routes.length} editor{group.routes.length === 1 ? '' : 's'}
-                    </span>
-                  </div>
-                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                    {group.routes.map((route) => (
-                      <Link
-                        key={route.href}
-                        href={getCreativeStudioRouteNavigationHref(route)}
-                        className="group flex h-full flex-col rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_42%,transparent)] p-4 transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-                        aria-label={`Open ${route.label}`}
-                        data-studio-editor-group={route.group}
-                        data-studio-editor-route={route.href}
-                      >
-                        <div className="mb-3 flex items-center justify-between gap-3">
-                          <span className="rounded-full border border-[var(--aethel-border-secondary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
-                            {DOMAIN_LABELS[route.domain]}
-                          </span>
-                          <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">
-                            {route.maturity}
-                          </span>
-                        </div>
-                        <h4 className="text-base font-semibold text-[var(--aethel-text-primary)] transition-colors group-hover:text-[var(--aethel-primary-light)]">
-                          {route.label}
-                        </h4>
-                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">
-                          {route.description}
-                        </p>
-                      </Link>
-                    ))}
-                  </div>
-                </section>
-              ))}
+              <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
+                {advancedStudioRoutes.length} available
+              </span>
             </div>
-          </details>
-        </div>
+          </summary>
+          <div className="mt-4 space-y-4">
+            {advancedStudioGroups.map((group) => (
+              <section
+                key={group.id}
+                className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_34%,transparent)] p-3"
+                data-studio-editor-group={group.id}
+              >
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h4 className="text-sm font-semibold text-[var(--aethel-text-primary)]">{group.label}</h4>
+                    <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-tertiary)]">{group.description}</p>
+                  </div>
+                  <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                    {group.routes.length} editor{group.routes.length === 1 ? '' : 's'}
+                  </span>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {group.routes.map((route) => (
+                    <Link
+                      key={route.href}
+                      href={getCreativeStudioRouteNavigationHref(route)}
+                      className="group flex h-full flex-col rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_42%,transparent)] p-4 transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                      aria-label={`Open ${route.label}`}
+                      data-studio-editor-group={route.group}
+                      data-studio-editor-route={route.href}
+                    >
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <span className="rounded-full border border-[var(--aethel-border-secondary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                          {DOMAIN_LABELS[route.domain]}
+                        </span>
+                        <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">
+                          {route.maturity}
+                        </span>
+                      </div>
+                      <h4 className="text-base font-semibold text-[var(--aethel-text-primary)] transition-colors group-hover:text-[var(--aethel-primary-light)]">
+                        {route.label}
+                      </h4>
+                      <p className="mt-2 line-clamp-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">
+                        {route.description}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </details>
       </div>
-    </CreativeStudioShell>
+    </div>
+  )
+}
+
+// --- Page -------------------------------------------------------------------
+export default function CreativeStudioPage() {
+  return (
+    <CreativeWorkbenchShell
+      title="Creative Studio"
+      mode="World"
+      primaryAction={
+        <a
+          href="#studio-primary-surfaces"
+          className="rounded-full bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)]"
+        >
+          Open editor
+        </a>
+      }
+      evidence={[
+        { label: 'Preview ready', status: 'available', detail: 'Browser preview available for all editors.' },
+        { label: 'Local tools optional', status: 'needs-review', detail: 'Local tools are optional — not required for preview.' },
+        { label: 'Cloud review locked', status: 'held', detail: 'Cloud review requires a submitted receipt.' },
+      ]}
+      outliner={<StudioHubOutliner />}
+      inspector={<StudioHubInspector />}
+      viewport={<StudioHubViewport />}
+    />
   )
 }

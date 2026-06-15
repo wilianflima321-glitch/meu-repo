@@ -5,7 +5,7 @@ export function ViewportAssetDropOverlay({ active }: { active: boolean }) {
 
   return (
     <div className="pointer-events-none absolute inset-4 z-30 grid place-items-center rounded-3xl border border-dashed border-[color-mix(in_srgb,var(--aethel-primary)_56%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_72%,transparent)] shadow-[inset_0_0_80px_rgba(0,0,0,0.42)] backdrop-blur-md">
-      <div className="max-w-sm rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.9)] px-5 py-4 text-center">
+      <div className="max-w-sm rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-elevated)_90%,transparent)] px-5 py-4 text-center">
         <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">
           Drop assets into the Scene Graph
         </p>

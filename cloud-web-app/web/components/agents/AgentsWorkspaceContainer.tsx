@@ -26,7 +26,7 @@ type PreviewInspectDetail = {
 export type AgentsWorkspaceContainerProps = { projectId?: string }
 
 const RAILS: { id: Rail; label: string; shortcut: string }[] = [
-  { id: 'composer', label: 'Copilot', shortcut: 'Alt+C' },
+  { id: 'composer', label: 'Composer', shortcut: 'Alt+C' },
   { id: 'agents', label: 'Agents', shortcut: 'Alt+A' },
 ]
 
@@ -37,7 +37,7 @@ export default function AgentsWorkspaceContainer({ projectId: workspaceProjectId
   const [projectId, setProjectId] = useState<string | undefined>(workspaceProjectId)
   const [mission, setMission] = useState<string | null>(null)
   const [source, setSource] = useState<string | null>(null)
-  const [activeRail, setActiveRail] = useState<Rail>('composer')
+  const [activeRail, setActiveRail] = useState<Rail>('agents')
   const [designMode, setDesignMode] = useState(false)
 
   const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`

@@ -1,7 +1,7 @@
 'use client'
 
-import { DashboardShell } from './dashboard/DashboardShell'
-import { DashboardLoadingScreen } from './dashboard/DashboardLoadingScreen'
+import { DashboardShell } from './DashboardShell'
+import { DashboardLoadingScreen } from './DashboardLoadingScreen'
 import { useAethelDashboardRuntime } from './useAethelDashboardRuntime'
 
 export default function AethelDashboardRuntime() {

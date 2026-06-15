@@ -36,7 +36,7 @@ export type CreativeWorkbenchShellProps = {
   assetBrowser?: ReactNode
   renderQueue?: ReactNode
   reviewEvidence?: ReactNode
-  evidence?: CreativeWorkbenchEvidence[]
+  evidence: CreativeWorkbenchEvidence[]
   className?: string
 }
 
@@ -148,7 +148,7 @@ export function CreativeWorkbenchShell({
   assetBrowser,
   renderQueue,
   reviewEvidence,
-  evidence = [],
+  evidence,
   className,
 }: CreativeWorkbenchShellProps) {
   // -- State (loaded from localStorage on mount) ----------------------------

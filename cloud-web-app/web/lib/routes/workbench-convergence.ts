@@ -21,6 +21,10 @@ export const ASPIRATIONAL_LABS_FALLBACK = '/dashboard?notice=labs-hidden'
  * Routes that should open inside the IDE. The value points to the `entry`
  * understood by `FullscreenIDE`.
  */
+export const STUDIO_CONVERGENCE_REDIRECTS: Record<string, string> = {
+  '/nexus': '/studio/film?tool=director',
+}
+
 export const IDE_CONVERGENCE_REDIRECTS: Record<string, string> = {
   '/ai-command': '/ide?entry=ai-command',
   '/chat': '/ide?entry=chat',
@@ -60,6 +64,15 @@ export function resolveWorkbenchConvergenceRedirect(
 
   if (!shouldShowAspirationalRoutes() && ASPIRATIONAL_LAB_EXACT_PATHS.has(normalized)) {
     return { target: ASPIRATIONAL_LABS_FALLBACK, reason: 'lab' }
+  }
+
+  const studioTarget =
+    STUDIO_CONVERGENCE_REDIRECTS[normalized]
+    ?? (normalized === '/nexus' || normalized.startsWith('/nexus/')
+      ? STUDIO_CONVERGENCE_REDIRECTS['/nexus']
+      : undefined)
+  if (studioTarget) {
+    return { target: studioTarget, reason: 'ide' }
   }
 
   const ideTarget = IDE_CONVERGENCE_REDIRECTS[normalized]

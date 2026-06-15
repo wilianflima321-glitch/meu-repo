@@ -5,7 +5,12 @@ import { useSearchParams } from 'next/navigation';
 
 import FileExplorerPro from '@/components/ide/FileExplorerPro';
 import { GitIntegration } from '@/components/ide/GitIntegration';
-import AethelResearch from '@/components/nexus/AethelResearch';
+const AethelResearch = () => (
+  <div className="flex h-full items-center justify-center p-4 text-center text-xs text-[var(--aethel-text-tertiary)]">
+    Research module (Nexus) deprecated.
+  </div>
+);
+
 import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 import {
   describeWorkbenchEntryProfile,

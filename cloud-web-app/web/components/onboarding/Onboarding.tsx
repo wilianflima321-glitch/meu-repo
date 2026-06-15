@@ -1,9 +1,9 @@
 'use client'
 
-export { OnboardingProvider, useOnboarding } from './onboarding/OnboardingProvider'
-export { WelcomeModal } from './onboarding/WelcomeModal'
-export { OnboardingChecklist } from './onboarding/OnboardingChecklist'
-export { AchievementBadge, AchievementToast, AchievementsPanel } from './onboarding/Achievements'
+export { OnboardingProvider, useOnboarding } from './OnboardingProvider'
+export { WelcomeModal } from './WelcomeModal'
+export { OnboardingChecklist } from './OnboardingChecklist'
+export { AchievementBadge, AchievementToast, AchievementsPanel } from './Achievements'
 export type {
   Achievement,
   DependencyInfo,
@@ -11,4 +11,4 @@ export type {
   OnboardingState,
   OnboardingStep,
   SystemHealthReport,
-} from './onboarding/types'
+} from './types'

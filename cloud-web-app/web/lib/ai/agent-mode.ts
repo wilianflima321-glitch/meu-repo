@@ -52,6 +52,7 @@ export class AutonomousAgent extends EventEmitter {
   private config: AgentConfig;
   private toolContextProvider: AgentToolContextProvider | null = null;
   private memoryStore: AgentMemoryStore;
+  private repositoryContextText = '';
   private currentTask: AgentTask | null = null;
   private steps: AgentStep[] = [];
   private isRunning: boolean = false;
@@ -77,6 +78,29 @@ export class AutonomousAgent extends EventEmitter {
     this.memoryStore = new AgentMemoryStore();
   }
 
+  private async loadRepositoryContext(query: string): Promise<void> {
+    const ctx = this.config.repositoryContext;
+    if (!ctx?.userId || !ctx.projectId) return;
+
+    try {
+      const { assembleAgentContext } = await import('@/lib/server/agent-context/assemble-agent-context');
+      const assembled = await assembleAgentContext({
+        userId: ctx.userId,
+        projectId: ctx.projectId,
+        query,
+      });
+      if (!assembled.text) return;
+      this.repositoryContextText = assembled.text;
+      this.addMemory('context', assembled.text, {
+        mustReadFirst: assembled.mustReadFirst,
+        retrievedFiles: assembled.retrievedFiles,
+        semanticReady: assembled.semanticReady,
+      });
+    } catch {
+      // Best-effort: never break autonomous execution.
+    }
+  }
+
   /**
    * Starts task execution
    */
@@ -99,6 +123,8 @@ export class AutonomousAgent extends EventEmitter {
     this.emit('task:started', task);
 
     try {
+      await this.loadRepositoryContext(task.description);
+
       // Phase 1: Planning
       task.status = 'planning';
       this.emit('task:planning', task);
@@ -418,7 +444,9 @@ export class AutonomousAgent extends EventEmitter {
   }
 
   private buildContext(task: AgentTask, subtask: AgentTask): string {
-    return this.memoryStore.buildContext(task, subtask, this.iterationCount, this.config.maxIterations);
+    const base = this.memoryStore.buildContext(task, subtask, this.iterationCount, this.config.maxIterations);
+    if (!this.repositoryContextText) return base;
+    return `# Repository Context\n${this.repositoryContextText}\n\n${base}`;
   }
 
   private getAvailableTools(): AgentToolDescriptor[] {

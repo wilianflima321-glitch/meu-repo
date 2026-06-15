@@ -2,13 +2,16 @@
 
 import { useMemo, useState } from 'react'
 import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser'
-import { ArrowLeft, KeyRound } from 'lucide-react'
+import { ArrowLeft, KeyRound, Mail, ChevronRight, Lock } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
 import TurnstileField, { isTurnstileClientConfigured } from '@/components/auth/TurnstileField'
 import { analytics } from '@/lib/analytics'
 import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
+
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
 
 type AuthResponse = {
   access_token?: string
@@ -39,7 +42,7 @@ const OAUTH_PROVIDERS: Array<{ id: OAuthProvider; label: string; mark: string }>
 
 function AuthProviderMark({ mark }: { mark: string }) {
   return (
-    <span className="grid h-6 w-6 place-items-center border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[10px] font-bold tracking-[-0.02em] text-[var(--aethel-text-primary)]">
+    <span className="grid h-6 w-6 place-items-center border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[10px] font-bold tracking-[-0.02em] text-[var(--aethel-text-primary)] rounded">
       {mark}
     </span>
   )
@@ -56,6 +59,7 @@ export default function LoginPageV2() {
   const [formError, setFormError] = useState<string | null>(null)
   const [authNotice, setAuthNotice] = useState<string | null>(null)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const [loginMode, setLoginMode] = useState<'magic' | 'password'>('magic')
 
   const nextTarget = useMemo(() => {
     const requested = searchParams.get('next')?.trim() || searchParams.get('from')?.trim()
@@ -205,99 +209,172 @@ export default function LoginPageV2() {
 
         <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-[1120px] items-center">
           <div className="grid w-full gap-5 lg:grid-cols-[420px_minmax(0,1fr)] lg:items-stretch">
-            <section className="mx-auto w-full max-w-[430px] border-y border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-6 py-7 lg:mx-0">
-              <div className="mb-7 flex items-center justify-between gap-3">
+            <section className="mx-auto w-full max-w-[430px] rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-8 py-8 shadow-2xl backdrop-blur-md lg:mx-0">
+              <div className="mb-8 flex items-center justify-between gap-3">
                 <Link href="/" className="inline-flex items-center gap-2 px-1 text-sm text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Link>
-                <span className="border-l border-[color-mix(in_srgb,var(--aethel-success)_38%,transparent)] pl-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-success-light)]">Studio</span>
+                <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-success-light)] border border-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)]">Studio</span>
               </div>
 
-              <div className="mb-7">
-                <div className="mb-4 flex items-center gap-3">
-                  <Image src="/branding/aethel-mark.svg" alt="Aethel" width={36} height={36} sizes="36px" className="shadow-[0_0_0_1px_var(--aethel-border-primary)]" priority />
-                  <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">Aethel Studio</span>
+              <div className="mb-8">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--aethel-surface-tertiary)] to-[var(--aethel-surface-primary)] shadow-[0_0_0_1px_var(--aethel-border-primary)]">
+                    <Image src="/branding/aethel-mark.svg" alt="Aethel" width={24} height={24} priority />
+                  </div>
                 </div>
-                <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[var(--aethel-text-primary)]">Sign in</h1>
+                <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[var(--aethel-text-primary)]">Welcome back</h1>
                 <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">Resume your workspace with context intact.</p>
               </div>
 
-              <div className="mb-5">
+              <div className="mb-6">
                 <TurnstileField action="login" onTokenChange={setTurnstileToken} />
               </div>
 
-              <div className="mb-5 grid gap-2 border-y border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/32 py-3" aria-label="Fast sign-in options">
+              {formError && (
+                <div id="login-form-error" className="mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)]" role="alert" aria-live="polite">
+                  {formError}
+                </div>
+              )}
+              {authNotice && (
+                <div id="login-form-notice" className="mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-success-light)]" role="status" aria-live="polite">
+                  {authNotice}
+                </div>
+              )}
+
+              {/* Login Method Tabs */}
+              <div className="mb-6 flex rounded-lg bg-[var(--aethel-surface-primary)]/50 p-1 shadow-inner border border-[var(--aethel-border-subtle)]">
                 <button
                   type="button"
-                  onClick={handlePasskeyLogin}
-                  disabled={isPasskeySubmitting || isSubmitting || isHumanVerificationPending}
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 bg-[var(--aethel-info)] text-sm font-semibold text-slate-950 transition hover:bg-[var(--aethel-info-light)] disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={() => setLoginMode('magic')}
+                  className={`flex-1 rounded-md py-2 text-xs font-semibold transition-all ${
+                    loginMode === 'magic'
+                      ? 'bg-[var(--aethel-surface-elevated)] text-[var(--aethel-text-primary)] shadow-sm border border-[var(--aethel-border-secondary)]'
+                      : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                  }`}
                 >
-                  <KeyRound className="h-4 w-4" /> {isPasskeySubmitting ? 'Waiting for passkey...' : 'Continue with passkey'}
+                  Fast Sign-in
                 </button>
                 <button
                   type="button"
-                  onClick={handleMagicLink}
-                  disabled={isMagicLinkSubmitting || isSubmitting || isHumanVerificationPending}
-                  className="inline-flex h-11 w-full items-center justify-center border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 px-3 text-xs font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={() => setLoginMode('password')}
+                  className={`flex-1 rounded-md py-2 text-xs font-semibold transition-all ${
+                    loginMode === 'password'
+                      ? 'bg-[var(--aethel-surface-elevated)] text-[var(--aethel-text-primary)] shadow-sm border border-[var(--aethel-border-secondary)]'
+                      : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                  }`}
                 >
-                  {isMagicLinkSubmitting ? 'Sending magic link...' : 'Send magic link'}
+                  Password
                 </button>
-                <p className="text-center text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
-                  Passkey or magic link first.
-                </p>
               </div>
 
-              <form id="login-form" onSubmit={handleLogin} className="space-y-4" noValidate aria-describedby={formError ? 'login-form-error' : undefined}>
-                <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Email</label>
-                  <input id="email" name="email" type="email" autoComplete="email webauthn" value={email} onChange={(event) => setEmail(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none transition placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="you@company.com" />
-                </div>
-                {formError ? <div id="login-form-error" className="border-l border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)]" role="alert" aria-live="polite">{formError}</div> : null}
-                {authNotice ? <div id="login-form-notice" className="border-l border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-success-light)]" role="status" aria-live="polite">{authNotice}</div> : null}
-                <details className="border-y border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/26 py-3">
-                  <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-secondary)]">
-                    Use password fallback
-                  </summary>
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-center justify-between gap-3">
+              {/* Email Input - Shared across both modes */}
+              <form id="login-form" onSubmit={loginMode === 'password' ? handleLogin : (e) => e.preventDefault()} className="space-y-5" noValidate>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  label="Email address"
+                  autoComplete="email webauthn"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                  placeholder="you@company.com"
+                  icon={<Mail className="h-4 w-4" />}
+                />
+
+                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${loginMode === 'password' ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="pt-2 pb-1">
+                    <div className="mb-2 flex items-center justify-between">
                       <label htmlFor="password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Password</label>
-                      <Link href="/forgot-password" className="text-xs font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)]">Forgot password?</Link>
+                      <Link href="/forgot-password" className="text-xs font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-info)] transition-colors">Forgot password?</Link>
                     </div>
-                    <input id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} aria-invalid={Boolean(formError)} className="h-12 w-full rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none transition placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="Enter your password" />
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      placeholder="Enter your password"
+                      icon={<Lock className="h-4 w-4" />}
+                      required={loginMode === 'password'}
+                    />
                   </div>
-                  <button type="submit" disabled={isSubmitting || isHumanVerificationPending} className="mt-3 h-12 w-full bg-[var(--aethel-info)] text-sm font-semibold text-slate-950 transition hover:bg-[var(--aethel-info-light)] disabled:cursor-not-allowed disabled:opacity-60">
-                    {isSubmitting ? 'Signing in...' : 'Continue with password'}
-                  </button>
-                </details>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    fullWidth
+                    size="lg"
+                    loading={isSubmitting}
+                    disabled={isHumanVerificationPending}
+                    className="mt-4"
+                  >
+                    Continue with password
+                  </Button>
+                </div>
+
+                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${loginMode === 'magic' ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="space-y-3 pt-2">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      fullWidth
+                      size="lg"
+                      onClick={handlePasskeyLogin}
+                      loading={isPasskeySubmitting}
+                      disabled={isSubmitting || isMagicLinkSubmitting || isHumanVerificationPending}
+                      icon={<KeyRound className="h-4 w-4" />}
+                    >
+                      Continue with Passkey
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      fullWidth
+                      size="lg"
+                      onClick={handleMagicLink}
+                      loading={isMagicLinkSubmitting}
+                      disabled={isSubmitting || isPasskeySubmitting || isHumanVerificationPending}
+                    >
+                      Send Magic Link
+                    </Button>
+                  </div>
+                </div>
               </form>
 
-              <details className="my-5 border-y border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/24 py-3">
-                <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-secondary)]">
-                  More sign-in options
-                </summary>
-                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              <div className="mt-8 pt-6 border-t border-[var(--aethel-border-subtle)]">
+                <p className="mb-4 text-xs font-medium uppercase tracking-wider text-[var(--aethel-text-tertiary)] text-center">
+                  Or continue with
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
                   {OAUTH_PROVIDERS.map((provider) => (
-                    <button
+                    <Button
                       key={provider.id}
                       type="button"
+                      variant="secondary"
+                      size="sm"
                       onClick={() => startOAuth(provider.id)}
-                      className="inline-flex h-11 items-center justify-center gap-2 border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"
+                      className="justify-start px-4"
+                      icon={<AuthProviderMark mark={provider.mark} />}
                     >
-                      <AuthProviderMark mark={provider.mark} />
                       {provider.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
+              </div>
+
+              <div className="mt-8 flex flex-col items-center gap-3">
                 <Link
                   href="/contact-sales?intent=sso"
-                  className="mt-2 inline-flex min-h-10 w-full items-center justify-center border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] px-3 text-xs font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_42%,transparent)]"
+                  className="group flex items-center gap-1.5 text-xs font-medium text-[var(--aethel-info-light)] transition hover:text-[var(--aethel-info)]"
                 >
-                  Team SSO / SAML for enterprise
+                  Team SSO / SAML for enterprise <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                 </Link>
-              </details>
-
-              <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">No account yet? <Link href="/register" className="font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)]">Create one</Link></p>
+                <p className="text-sm text-[var(--aethel-text-secondary)]">
+                  No account yet? <Link href="/register" className="font-semibold text-[var(--aethel-text-primary)] hover:underline">Create one</Link>
+                </p>
+              </div>
             </section>
 
             <AuthExperiencePanel eyebrow="Operational access" domainLabel="Apps + Research" title="Enter once. Keep moving." description="Sign in, reopen the workspace, and continue from the latest activity." highlights={LOGIN_HIGHLIGHTS} stats={LOGIN_STATS} />

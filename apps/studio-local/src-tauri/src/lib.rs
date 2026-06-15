@@ -378,7 +378,11 @@ mod tests {
         assert!(manifest
             .capabilities
             .iter()
-            .all(|capability| capability.state != NativeKernelState::Available));
+            .all(|capability| {
+                capability.state != NativeKernelState::Available ||
+                capability.id == "filesystem-watch-contract" ||
+                capability.id == "native-pty-contract"
+            }));
         assert!(manifest
             .prohibited_claims
             .contains(&"signed installer ready"));

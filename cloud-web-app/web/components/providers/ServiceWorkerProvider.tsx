@@ -10,7 +10,7 @@
  */
 import { createContext, useContext, ReactNode, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { useServiceWorker, type UseServiceWorkerReturn } from '../hooks/useServiceWorker';
+import { useServiceWorker, type UseServiceWorkerReturn } from '@/hooks/useServiceWorker';
 import { createComponentLogger } from '@/lib/observability/logger';
 
 const log = createComponentLogger('ServiceWorkerProvider');

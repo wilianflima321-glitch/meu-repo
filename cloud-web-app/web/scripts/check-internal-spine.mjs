@@ -148,6 +148,14 @@ requirePattern('lib/server/agent-context/assemble-agent-context.ts', /mustReadFi
 requirePattern('lib/ai-agent-system.ts', /assembleAgentContext/, 'AgentExecutor must inject assembled repository context into its prompt')
 requireFile('__tests__/server/assemble-agent-context.test.ts', 'agent context assembler tests must exist')
 
+requireFile('__tests__/server/create-agent-tool-context-provider.test.ts', 'AutonomousAgent tool context provider tests must exist')
+requireFile('__tests__/routes/workbench-convergence.test.ts', 'workbench convergence redirect tests must exist')
+requireFile('lib/server/agent-context/create-agent-tool-context-provider.ts', 'AutonomousAgent needs a governed tool context provider')
+requirePattern('lib/ai/agent-mode.ts', /assembleAgentContext|loadRepositoryContext/, 'AutonomousAgent must load assembled repository context')
+requirePattern('lib/server/ai-change-apply/executor.ts', /NODE_ENV === 'production'[\s\S]*enforced/, 'production apply must default to enforced tool bus')
+requirePattern('package.json', /qa:phase-a-store-coverage/, 'package scripts must expose phase-a store coverage gate')
+requirePattern('package.json', /qa:evidence-ledger-coverage/, 'package scripts must expose evidence ledger coverage gate')
+
 requirePattern('package.json', /qa:internal-spine/, 'package scripts must expose internal spine QA')
 requirePattern('package.json', /qa:enterprise-gate[\s\S]*qa:internal-spine/, 'enterprise gate must include internal spine QA')
 requirePattern('scripts/check-product-quality-progress.mjs', /internal-spine/, 'product quality gate must require internal spine QA')

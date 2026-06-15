@@ -54,13 +54,13 @@ const ui = {
 };
 
 const portColors: Record<string, string> = {
-  exec: ui.text,
-  boolean: ui.error,
-  number: ui.success,
-  string: ui.warning,
+  exec: 'var(--aethel-text-primary)',
+  boolean: 'var(--aethel-error)',
+  number: 'var(--aethel-success)',
+  string: 'var(--aethel-warning)',
   vector3: 'var(--aethel-accent)',
-  object: ui.info,
-  any: ui.textDim,
+  object: 'var(--aethel-info)',
+  any: 'var(--aethel-text-quaternary)',
 };
 
 interface VisualNodeProps {
@@ -75,37 +75,17 @@ function VisualNode({ data }: VisualNodeProps) {
   const { definition, values = {}, onValueChange } = data;
   return (
     <div
-      className="visual-node"
-      style={{
-        background: definition.color,
-        borderRadius: '10px',
-        minWidth: '180px',
-        boxShadow: 'var(--aethel-shadow-md)',
-        border: `1px solid ${ui.border}`,
-      }}
+      className="visual-node rounded-[10px] min-w-[180px] shadow-[var(--aethel-shadow-md)] border border-[var(--aethel-border-primary)]"
+      style={{ background: definition.color }}
     >
-      <div
-        style={{
-          padding: '8px 12px',
-          borderBottom: `1px solid ${ui.borderStrong}`,
-          fontWeight: 600,
-          color: ui.text,
-          fontSize: '12px',
-          letterSpacing: '0.02em',
-        }}
-      >
+      <div className="px-3 py-2 border-b border-[var(--aethel-border-secondary)] font-semibold text-[var(--aethel-text-primary)] text-xs tracking-[0.02em]">
         {definition.label}
       </div>
-      <div style={{ padding: '8px 0' }}>
+      <div className="py-2">
         {definition.inputs.map((port) => (
           <div
             key={port.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '4px 12px',
-              position: 'relative',
-            }}
+            className="flex items-center px-3 py-1 relative"
           >
             <Handle
               type="target"
@@ -116,11 +96,11 @@ function VisualNode({ data }: VisualNodeProps) {
                 width: port.type === 'exec' ? '12px' : '8px',
                 height: port.type === 'exec' ? '12px' : '8px',
                 borderRadius: port.type === 'exec' ? '2px' : '50%',
-                border: `2px solid ${ui.text}`,
+                border: '2px solid var(--aethel-text-primary)',
                 left: '-6px',
               }}
             />
-            <span style={{ color: ui.text, fontSize: '11px', marginLeft: '8px' }}>
+            <span className="text-[var(--aethel-text-primary)] text-[11px] ml-2">
               {port.label}
             </span>
             {port.type !== 'exec' && port.type !== 'object' && (
@@ -129,34 +109,19 @@ function VisualNode({ data }: VisualNodeProps) {
                 defaultValue={values[port.id] as string ?? port.default}
                 onChange={(e) => onValueChange?.(port.id, e.target.value)}
                 aria-label={`Valor da entrada ${port.label}`}
-                style={{
-                  marginLeft: 'auto',
-                  width: '70px',
-                  padding: '2px 6px',
-                  fontSize: '10px',
-                  background: ui.surfaceMuted,
-                  borderRadius: '4px',
-                  border: `1px solid ${ui.border}`,
-                  color: ui.text,
-                }}
+                className="ml-auto w-[70px] px-1.5 py-0.5 text-[10px] bg-[var(--aethel-surface-quaternary)] rounded border border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)]"
               />
             )}
           </div>
         ))}
       </div>
-      <div style={{ padding: '8px 0' }}>
+      <div className="py-2">
         {definition.outputs.map((port) => (
           <div
             key={port.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              padding: '4px 12px',
-              position: 'relative',
-            }}
+            className="flex items-center justify-end px-3 py-1 relative"
           >
-            <span style={{ color: ui.text, fontSize: '11px', marginRight: '8px' }}>
+            <span className="text-[var(--aethel-text-primary)] text-[11px] mr-2">
               {port.label}
             </span>
             <Handle
@@ -168,7 +133,7 @@ function VisualNode({ data }: VisualNodeProps) {
                 width: port.type === 'exec' ? '12px' : '8px',
                 height: port.type === 'exec' ? '12px' : '8px',
                 borderRadius: port.type === 'exec' ? '2px' : '50%',
-                border: `2px solid ${ui.text}`,
+                border: '2px solid var(--aethel-text-primary)',
                 right: '-6px',
               }}
             />

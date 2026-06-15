@@ -60,6 +60,8 @@
     "qa:research-navigation-mesh": "node scripts/check-research-navigation-mesh.mjs",
     "qa:agent-read-receipts": "node scripts/check-agent-read-receipts.mjs",
     "qa:internal-spine": "node scripts/check-internal-spine.mjs",
+    "qa:phase-a-store-coverage": "node scripts/check-phase-a-store-coverage.mjs",
+    "qa:evidence-ledger-coverage": "node scripts/check-evidence-ledger-coverage.mjs",
     "qa:deep-spine-scan": "node scripts/check-deep-spine-scan.mjs",
     "qa:coverage-ratchet": "node scripts/check-coverage-ratchet.mjs",
     "qa:console-ratchet": "node scripts/check-console-ratchet.mjs",

@@ -7,9 +7,13 @@ import { Timeline3D } from '@/components/ide/Timeline3D';
 import { PreviewSkeleton } from '@/components/preview/PreviewLifecycleChrome';
 import { ViewportWorkbenchShell } from './ViewportWorkbenchShell';
 
-const NexusCanvasV2 = dynamic(
-  () => import('@/components/nexus/NexusCanvasV2').then((mod) => mod.NexusCanvasV2),
-  { ssr: false, loading: () => <PreviewSkeleton /> }
+const NexusCanvasV2 = ({ renderMode }: { renderMode: 'draft' | 'cinematic' }) => (
+  <div className="flex h-full w-full items-center justify-center bg-[var(--aethel-surface-primary)]">
+    <div className="text-center text-xs text-[var(--aethel-text-secondary)]">
+      Canvas mode (Nexus) deprecated.
+      <div className="mt-1 text-[10px] text-[var(--aethel-text-tertiary)]">Render Mode: {renderMode}</div>
+    </div>
+  </div>
 );
 
 export default function CanvasViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic' }) {

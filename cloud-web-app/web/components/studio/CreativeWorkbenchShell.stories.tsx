@@ -116,6 +116,7 @@ V31 status: ✅ shell exists | ⚠️ 3/5 studio pages still use StudioGroupedEd
       </button>
     ),
     viewport: <MockViewport label="Viewport" />,
+    evidence: [{ label: 'Storybook fixture', status: 'needs-review', detail: 'Deterministic shell story evidence.' }],
   },
 } satisfies Meta<typeof CreativeWorkbenchShell>
 

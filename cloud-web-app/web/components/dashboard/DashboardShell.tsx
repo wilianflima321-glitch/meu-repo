@@ -12,6 +12,8 @@ import OnboardingWizard from '../onboarding/OnboardingWizard'
 import { DashboardToast } from './DashboardToast'
 import { DashboardRoutingNotice } from './DashboardRoutingNotice'
 import { resolveDashboardEntryLane } from './aethel-dashboard-entry-triage'
+import { DashboardAlertBanners } from './DashboardAlertBanners'
+import { DashboardEntryIntentBanner } from './DashboardEntryIntentBanner'
 import { MobileBottomNav } from '@/components/ui/MobileResponsiveLayout'
 
 type OnboardingCompleteHandler = ComponentProps<typeof OnboardingWizard>['onComplete']
@@ -134,75 +136,19 @@ export function DashboardShell({
         onOpenIde={onOpenIde}
       />
 
-      {(authErrorText || billingErrorText) && (
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-3 sm:px-6">
-          <div className="flex flex-wrap gap-3 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-3 text-xs text-[var(--aethel-text-secondary)]">
-            {authErrorText && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-1 text-xs text-[var(--aethel-error-light)]">
-                Auth: {authErrorText}
-              </span>
-            )}
-            {billingErrorText && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-1 text-xs text-[var(--aethel-warning-light)]">
-                Billing: {billingErrorText}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
+      <DashboardAlertBanners 
+        authErrorText={authErrorText} 
+        billingErrorText={billingErrorText} 
+      />
 
-      {(entryMission || entrySource) && (
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-3 sm:px-6">
-          <div className="flex flex-col gap-3 rounded-[24px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] px-4 py-4 shadow-[0_20px_60px_rgba(2,6,23,0.22)] md:flex-row md:items-center md:justify-between">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info)]">
-                  Primary flow
-                </span>
-                {entrySource ? (
-                  <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
-                    {entryLane.label}
-                  </span>
-                ) : null}
-                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
-                  Workspace
-                </span>
-              </div>
-              <h2 className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)] sm:text-lg">
-                Continue where you left off.
-              </h2>
-              <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                {entryMission
-                  ? entryMission
-                  : entrySource
-                    ? entryLane.description
-                    : 'Pick up from the latest project activity. Deep tools expand only when the task needs them.'}
-              </p>
-            </div>
-
-            <div className="flex shrink-0 flex-wrap gap-2">
-              {onResumeEntryMission ? (
-                <button
-                  type="button"
-                  onClick={onResumeEntryMission}
-                  className="inline-flex items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)] transition hover:bg-[var(--aethel-text-secondary)]"
-                >
-                  Resume in AI Chat
-                </button>
-              ) : null}
-              {onDismissEntryIntent ? (
-                <button
-                  type="button"
-                  onClick={onDismissEntryIntent}
-                  className="inline-flex items-center justify-center rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"
-                >
-                  Hide context
-                </button>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      )}
+      <DashboardEntryIntentBanner
+        entryMission={entryMission}
+        entrySource={entrySource}
+        entryLaneLabel={entryLane.label}
+        entryLaneDescription={entryLane.description}
+        onResumeEntryMission={onResumeEntryMission}
+        onDismissEntryIntent={onDismissEntryIntent}
+      />
 
       <div className="relative z-10 flex flex-1 overflow-hidden">
         {sidebarOpen && (

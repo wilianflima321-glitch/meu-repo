@@ -4,28 +4,28 @@ import { useSWRConfig } from 'swr'
 import { analytics, type EventAction, type EventCategory } from '@/lib/analytics'
 import {
   type ToastType,
-} from './dashboard/aethel-dashboard-model'
+} from './aethel-dashboard-model'
 import {
   DEFAULT_PROJECTS,
   formatConnectivityStatus as formatConnectivityStatusLabel,
   formatCurrencyLabel,
   formatStatusLabel,
   getScopedKeys,
-} from './dashboard/aethel-dashboard-defaults'
-import { resolveIdeHandoffParams } from './dashboard/aethel-dashboard-ide-handoff'
+} from './aethel-dashboard-defaults'
+import { resolveIdeHandoffParams } from './aethel-dashboard-ide-handoff'
 import {
   PREVIEW_RUNTIME_URL_STORAGE_KEY,
-} from './dashboard/aethel-dashboard-core-types'
-import { useFirstValueTracking } from './dashboard/useFirstValueTracking'
-import { useDashboardMissionSeed } from './dashboard/useDashboardMissionSeed'
-import { useDashboardStoragePersistence } from './dashboard/useDashboardStoragePersistence'
-import { useDashboardEntryIntent } from './dashboard/useDashboardEntryIntent'
-import { useDashboardUiState } from './dashboard/useDashboardUiState'
-import { useDashboardActions } from './dashboard/useDashboardActions'
-import { useDashboardDerivedState } from './dashboard/useDashboardDerivedState'
-import { useDashboardRemoteData } from './dashboard/useDashboardRemoteData'
-import { useDashboardCopilotSync } from './dashboard/useDashboardCopilotSync'
-import { useDashboardRuntimeLifecycle } from './dashboard/useDashboardRuntimeLifecycle'
+} from './aethel-dashboard-core-types'
+import { useFirstValueTracking } from './useFirstValueTracking'
+import { useDashboardMissionSeed } from './useDashboardMissionSeed'
+import { useDashboardStoragePersistence } from './useDashboardStoragePersistence'
+import { useDashboardEntryIntent } from './useDashboardEntryIntent'
+import { useDashboardUiState } from './useDashboardUiState'
+import { useDashboardActions } from './useDashboardActions'
+import { useDashboardDerivedState } from './useDashboardDerivedState'
+import { useDashboardRemoteData } from './useDashboardRemoteData'
+import { useDashboardCopilotSync } from './useDashboardCopilotSync'
+import { useDashboardRuntimeLifecycle } from './useDashboardRuntimeLifecycle'
 
 export function useAethelDashboardRuntime() {
   const { mutate } = useSWRConfig()

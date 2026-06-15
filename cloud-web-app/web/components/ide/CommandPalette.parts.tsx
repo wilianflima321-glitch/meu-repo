@@ -224,8 +224,8 @@ export function createDefaultCommands(handlers: {
     },
     {
       id: 'ai.chat',
-      label: 'Open AI panel',
-      description: 'Open AI panel on the right',
+      label: 'Open agents panel',
+      description: 'Open the agents panel in the IDE workbench',
       category: 'ai',
       shortcut: 'Ctrl+I',
       action: handlers.aiChat || (() => {}),
