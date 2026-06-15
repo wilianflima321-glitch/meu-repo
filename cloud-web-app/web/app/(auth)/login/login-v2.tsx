@@ -269,7 +269,13 @@ export default function LoginPageV2() {
               </div>
 
               {/* Email Input - Shared across both modes */}
-              <form id="login-form" onSubmit={loginMode === 'password' ? handleLogin : (e) => e.preventDefault()} className="space-y-5" noValidate>
+              <form
+                id="login-form"
+                onSubmit={loginMode === 'password' ? handleLogin : (e) => e.preventDefault()}
+                className="space-y-5"
+                noValidate
+                aria-describedby={formError ? 'login-form-error' : undefined}
+              >
                 <Input
                   id="email"
                   name="email"

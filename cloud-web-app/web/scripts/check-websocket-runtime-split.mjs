@@ -42,13 +42,14 @@ if (countLines(server) > 1120) failures.push(`lib/server/websocket-server.ts mus
 if (/import\s+jwt\s+from\s+['"]jsonwebtoken/.test(server)) failures.push('websocket-server.ts must not own JWT/auth policy')
 if (/function\s+verifyJwtToken|private\s+verifyJwtToken|private\s+handleAuth/.test(server)) failures.push('auth lifecycle must live in websocket/auth.ts')
 if (/function\s+sendRaw\s*\(|private\s+sendRaw\s*\([^)]*\)\s*:\s*void\s*{\s*if\s*\(/s.test(server)) failures.push('raw transport implementation must live in websocket/transport.ts')
-if (/getConnectionCounts\s*\(|buildMetricsPayload\s*\(/.test(server) && !server.includes("require('./websocket/presence.ts')")) failures.push('presence metrics must route through websocket/presence.ts')
+if (/getConnectionCounts\s*\(|buildMetricsPayload\s*\(/.test(server) && !server.includes('./websocket/presence.ts')) failures.push('presence metrics must route through websocket/presence.ts')
 
+// Boundary dependencies may be referenced via ESM `import ... from` or CJS `require()`.
 const requiredServerDeps = [
-  "require('./websocket/auth.ts')",
-  "require('./websocket/transport.ts')",
-  "require('./websocket/rooms.ts')",
-  "require('./websocket/presence.ts')",
+  './websocket/auth.ts',
+  './websocket/transport.ts',
+  './websocket/rooms.ts',
+  './websocket/presence.ts',
 ]
 for (const dep of requiredServerDeps) {
   if (!server.includes(dep)) failures.push(`websocket-server.ts missing boundary dependency ${dep}`)
