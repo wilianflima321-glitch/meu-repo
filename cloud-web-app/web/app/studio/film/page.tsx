@@ -13,8 +13,16 @@ import { CreativeStudioLoading } from '../CreativeStudioShell'
 // Lazy-load the director tool (Film group primary tool)
 // Lazy-load the director tool (Film group primary tool)
 const DirectorMode = () => (
-  <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
-    Director Mode (Nexus Deprecated)
+  <div className="flex h-full flex-col items-center justify-center bg-[var(--aethel-surface-primary)] p-8 text-center">
+    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)]">
+      <svg className="h-8 w-8 text-[var(--aethel-warning)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+    </div>
+    <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Director Mode Held</h3>
+    <p className="max-w-md text-sm text-[var(--aethel-text-secondary)]">
+      The advanced timeline and camera control features are temporarily held until the new Native Desktop bindings (wgpu) are finalized.
+    </p>
   </div>
 )
 
