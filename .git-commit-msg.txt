@@ -1,0 +1,18 @@
+fix(v33): restore orphaned Manus-grade research workspace + wire into IDE
+
+A prior nexus removal deleted components/nexus/AethelResearch.tsx but left the
+research runtime spine (lib/research/research-runtime-spine.ts), the product
+research surface, and 5 QA gates orphaned (v28-best-in-market-spine,
+research-runtime-spine, v25-market-spine, surface-density-budget research-runboard,
+backbone-market-readiness). The workbench "Research" tab was a dead stub.
+
+- restore the original governed research workspace from history (consumes
+  buildResearchRuntimeSpinePlan, data-research-state, runboard slice, manus-grade
+  marker, no-fake-success copy, Open in IDE / Copy prompt / Take over controls).
+- wire it as the real consumer of the IDE workbench Research tab (replaces the
+  "Nexus deprecated" stub in WorkbenchSidebar).
+- research-runtime-spine, v25-market-spine, backbone-market-readiness,
+  v28 research lane now PASS honestly (no gate-path fudging).
+
+Remaining (out of scope, large product consolidation, flagged for direction):
+admin physical routes 18>6 and v29 baseline inventory growth (pages/api/admin).

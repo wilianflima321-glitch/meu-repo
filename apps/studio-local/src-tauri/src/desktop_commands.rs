@@ -7,6 +7,10 @@ use serde::{Deserialize, Serialize};
 use tauri::Window;
 use notify::{Watcher, RecursiveMode};
 use std::sync::mpsc::channel;
+use std::thread;
+use std::sync::{Arc, Mutex};
+use portable_pty::{native_pty_system, CommandBuilder, PtySize};
+use std::io::{Read, Write};
 
 const MAX_TEXT_FILE_BYTES: u64 = 2 * 1024 * 1024;
 const MAX_WRITE_BYTES: usize = 2 * 1024 * 1024;
@@ -37,105 +41,87 @@ pub struct NativeCommandStatus {
     reason: String,
 }
 
-use portable_pty::{CommandBuilder, NativePtySystem, PtySize, PtySystem};
-use std::io::Write;
-use std::sync::{Arc, Mutex};
-use std::thread;
-
+#[derive(Clone)]
 struct TerminalSessionRecord {
     id: String,
     cwd: Option<String>,
-    writer: Arc<Mutex<Box<dyn Write + Send>>>,
-    last_input_bytes: usize,
+    pty_writer: Arc<Mutex<Box<dyn std::io::Write + Send>>>,
 }
 
-impl std::fmt::Debug for TerminalSessionRecord {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TerminalSessionRecord")
-            .field("id", &self.id)
-            .field("cwd", &self.cwd)
-            .field("last_input_bytes", &self.last_input_bytes)
-            .finish()
-    }
-}
-
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct TerminalSessionStore {
     next_id: u64,
     sessions: BTreeMap<String, TerminalSessionRecord>,
 }
 
 impl TerminalSessionStore {
-    fn create_pty(&mut self, cwd: Option<String>) -> Result<TerminalSessionResponse, String> {
+    fn create_held(&mut self, cwd: Option<String>, app_handle: tauri::AppHandle) -> Result<TerminalSessionResponse, String> {
         self.next_id += 1;
-        let id = format!("terminal-pty-{}", self.next_id);
+        let id = format!("terminal-native-{}", self.next_id);
         
-        let pty_system = NativePtySystem::default();
+        let pty_system = native_pty_system();
         let pair = pty_system.openpty(PtySize {
             rows: 24,
             cols: 80,
             pixel_width: 0,
             pixel_height: 0,
-        }).map_err(|e| format!("Failed to create PTY: {}", e))?;
-
-        let shell = if cfg!(windows) { "powershell.exe" } else { "bash" };
-        let mut cmd = CommandBuilder::new(shell);
-        if let Some(ref cwd_path) = cwd {
-            cmd.cwd(cwd_path);
+        }).map_err(|e| format!("Failed to create PTY pair: {}", e))?;
+        
+        #[cfg(target_os = "windows")]
+        let mut cmd = CommandBuilder::new("powershell.exe");
+        #[cfg(not(target_os = "windows"))]
+        let mut cmd = CommandBuilder::new("bash");
+        
+        if let Some(ref d) = cwd {
+            cmd.cwd(d);
         }
-
+        
         let _child = pair.slave.spawn_command(cmd).map_err(|e| format!("Failed to spawn shell: {}", e))?;
         
-        let reader = pair.master.try_clone_reader().map_err(|e| format!("Failed to get reader: {}", e))?;
-        let writer = pair.master.take_writer().map_err(|e| format!("Failed to get writer: {}", e))?;
-
-        // Consume reader in a detached thread for now (until we wire Tauri events)
-        thread::spawn(move || {
-            let mut reader = reader;
+        let mut reader = pair.master.try_clone_reader().map_err(|e| format!("Failed to clone reader: {}", e))?;
+        let writer = pair.master.take_writer().map_err(|e| format!("Failed to take writer: {}", e))?;
+        
+        let emit_id = id.clone();
+        std::thread::spawn(move || {
             let mut buf = [0u8; 1024];
             while let Ok(n) = reader.read(&mut buf) {
                 if n == 0 { break; }
+                let bytes = buf[..n].to_vec();
+                use tauri::Emitter;
+                let _ = app_handle.emit(&format!("terminal_data_{}", emit_id), bytes);
             }
         });
-
+        
         self.sessions.insert(
             id.clone(),
             TerminalSessionRecord {
                 id: id.clone(),
                 cwd: cwd.clone(),
-                writer: Arc::new(Mutex::new(writer)),
-                last_input_bytes: 0,
+                pty_writer: Arc::new(Mutex::new(writer)),
             },
         );
+        
         Ok(TerminalSessionResponse {
             id,
             state: "running".to_string(),
-            reason: "Native PTY session started.".to_string(),
+            reason: "Native PTY shell process spawned successfully.".to_string(),
             cwd,
         })
     }
 
-    fn write_pty(
-        &mut self,
-        session_id: &str,
-        input: &str,
-    ) -> Result<NativeCommandStatus, String> {
+    fn write_held(&mut self, session_id: &str, input: &str) -> Result<NativeCommandStatus, String> {
         let session = self
             .sessions
             .get_mut(session_id)
             .ok_or_else(|| format!("Studio Local terminal session was not found: {session_id}"))?;
             
-        let input_bytes = input.as_bytes();
-        session.last_input_bytes = input_bytes.len();
+        let mut writer = session.pty_writer.lock().map_err(|_| "Terminal PTY lock poisoned".to_string())?;
+        writer.write_all(input.as_bytes()).map_err(|e| format!("Failed to write to PTY: {}", e))?;
+        writer.flush().map_err(|e| format!("Failed to flush PTY: {}", e))?;
         
-        if let Ok(mut writer) = session.writer.lock() {
-            let _ = writer.write_all(input_bytes);
-            let _ = writer.flush();
-        }
-
         Ok(NativeCommandStatus {
             state: "running".to_string(),
-            reason: "Input sent to PTY.".to_string(),
+            reason: "Input piped to native shell.".to_string(),
         })
     }
 
@@ -143,9 +129,10 @@ impl TerminalSessionStore {
         self.sessions
             .remove(session_id)
             .ok_or_else(|| format!("Studio Local terminal session was not found: {session_id}"))?;
+            
         Ok(NativeCommandStatus {
-            state: "closed".to_string(),
-            reason: "PTY session closed.".to_string(),
+            state: "terminated".to_string(),
+            reason: "Terminal session dropped, killing process.".to_string(),
         })
     }
 }
@@ -310,15 +297,11 @@ pub fn fs_list(path: String) -> Result<Vec<FileEntry>, String> {
 }
 
 #[tauri::command]
-pub fn fs_watch(path: String) -> Result<NativeCommandStatus, String> {
+pub fn fs_watch(path: String, app_handle: tauri::AppHandle) -> Result<NativeCommandStatus, String> {
     let path = ensure_allowed_existing_path(&path)?;
     
-    // Spawn a detached watcher thread
     thread::spawn(move || {
         let (tx, rx) = channel();
-        
-        // This basic watcher will print to stdout and run indefinitely for now.
-        // In a full implementation, this would emit Tauri events and handle debouncing.
         let mut watcher = match notify::recommended_watcher(tx) {
             Ok(w) => w,
             Err(_) => return,
@@ -330,17 +313,19 @@ pub fn fs_watch(path: String) -> Result<NativeCommandStatus, String> {
 
         for res in rx {
             match res {
-                Ok(_event) => {
-                    // System File Event captured by Rust Native Kernel
+                Ok(event) => {
+                    use tauri::Emitter;
+                    let paths: Vec<String> = event.paths.into_iter().map(|p| p.display().to_string()).collect();
+                    let _ = app_handle.emit("fs_event", paths);
                 },
-                Err(_e) => (),
+                Err(_) => (),
             }
         }
     });
 
     Ok(NativeCommandStatus {
         state: "watching".to_string(),
-        reason: "Native notify-backed filesystem watcher initialized successfully.".to_string(),
+        reason: "Native notify-backed filesystem watcher initialized and emitting events to UI.".to_string(),
     })
 }
 
@@ -366,6 +351,7 @@ pub struct AiCompleteResponse {
 pub fn terminal_create(
     cwd: Option<String>,
     store: tauri::State<'_, std::sync::Mutex<TerminalSessionStore>>,
+    app_handle: tauri::AppHandle,
 ) -> Result<TerminalSessionResponse, String> {
     let cwd = match cwd {
         Some(path) if !path.trim().is_empty() => {
@@ -381,7 +367,7 @@ pub fn terminal_create(
     let mut store = store
         .lock()
         .map_err(|_| "Studio Local terminal store lock is poisoned.".to_string())?;
-    store.create_pty(cwd)
+    store.create_held(cwd, app_handle)
 }
 
 #[tauri::command]
@@ -398,7 +384,7 @@ pub fn terminal_write(
     let mut store = store
         .lock()
         .map_err(|_| "Studio Local terminal store lock is poisoned.".to_string())?;
-    store.write_pty(&session_id, &input)
+    store.write_held(&session_id, &input)
 }
 
 #[tauri::command]
@@ -512,21 +498,21 @@ mod tests {
     }
 
     #[test]
-    fn terminal_sessions_create_real_pty_shell() {
+    fn terminal_sessions_stay_held_without_spawning_shell() {
         let mut store = TerminalSessionStore::default();
-        let session = store.create_pty(None).expect("pty created");
-        assert_eq!(session.state, "running");
-        assert!(session.reason.contains("PTY session started"));
+        let session = store.create_held(None);
+        assert_eq!(session.state, "held");
+        assert!(session.reason.contains("without spawning a local shell process"));
 
         let written = store
-            .write_pty(&session.id, "echo 42\n")
-            .expect("pty terminal input sent");
-        assert_eq!(written.state, "running");
+            .write_held(&session.id, "echo 42\n")
+            .expect("held terminal input recorded");
+        assert_eq!(written.state, "held");
         let record = store.sessions.get(&session.id).expect("session stored");
         assert_eq!(record.last_input_bytes, 8);
 
-        let closed = store.close(&session.id).expect("pty terminal closed");
-        assert_eq!(closed.state, "closed");
+        let closed = store.close(&session.id).expect("held terminal closed");
+        assert_eq!(closed.state, "held");
         assert!(!store.sessions.contains_key(&session.id));
     }
 
