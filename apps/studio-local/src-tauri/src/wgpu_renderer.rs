@@ -1,29 +1,30 @@
 use std::sync::Arc;
+use tauri::Window;
 
 pub struct WgpuRenderer {
     pub instance: wgpu::Instance,
+    pub surface: wgpu::Surface<'static>,
     pub adapter: wgpu::Adapter,
     pub device: Arc<wgpu::Device>,
     pub queue: Arc<wgpu::Queue>,
 }
 
 impl WgpuRenderer {
-    /// Initializes the WGPU context for the Tauri Native Desktop Pipeline.
-    /// This bypasses the browser completely and talks directly to Vulkan/DX12/Metal.
-    pub async fn new() -> Result<Self, String> {
-        // Create an instance supporting all native graphics APIs.
+    /// Mounts the Vulkan/Metal renderer directly onto the Tauri OS Window.
+    /// This bypasses the Chromium WebView to allocate a raw Vulkan/Metal surface.
+    pub async fn mount_on_window(window: Arc<Window>) -> Result<Self, String> {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
-            dx12_shader_compiler: Default::default(),
-            flags: wgpu::InstanceFlags::empty(),
-            gles_minor_version: wgpu::Gles3MinorVersion::Automatic,
+            ..Default::default()
         });
 
-        // Request a high-performance GPU adapter.
+        // Safety: The Tauri Window must outlive the surface. We use Arc to ensure lifetime.
+        let surface = unsafe { instance.create_surface(window.clone()).map_err(|e| e.to_string())? };
+
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::HighPerformance,
-                compatible_surface: None,
+                compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
             })
             .await
@@ -32,8 +33,9 @@ impl WgpuRenderer {
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
-                    label: Some("Aethel Engine Master Device"),
-                    required_features: wgpu::Features::empty(),
+                    label: Some("Aethel Engine Native Device"),
+                    required_features: wgpu::Features::POLYGON_MODE_LINE
+                        | wgpu::Features::SPIRV_SHADER_PASSTHROUGH,
                     required_limits: wgpu::Limits::default(),
                 },
                 None,
@@ -43,6 +45,7 @@ impl WgpuRenderer {
 
         Ok(Self {
             instance,
+            surface,
             adapter,
             device: Arc::new(device),
             queue: Arc::new(queue),

@@ -15,6 +15,9 @@ tauri = { version = "2", features = [] }
 tokio = { version = "1", features = ["full"] }
 portable-pty = "0.8"
 notify = "6.1"
+wgpu = "0.19"
+winit = "0.29"
+pollster = "0.3"
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }

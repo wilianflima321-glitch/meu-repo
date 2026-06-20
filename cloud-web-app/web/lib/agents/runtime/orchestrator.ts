@@ -6,6 +6,7 @@ import { buildAgentRoleEvalSuite, validateAgentRoleEvalSuite, type AgentRoleEval
 import { buildAgentRoleManifest, validateAgentRoleManifest } from '@/lib/agents/runtime/tool-registry'
 import type { AgentRuntimeExecutionPlan, AgentRuntimeReceipt, AgentRuntimeRoleManifest, AgentRuntimeSandboxProvider } from '@/lib/agents/runtime/types'
 import { uniqueAgentRuntimeValues } from '@/lib/agents/runtime/types'
+import { runAgentMission } from './langgraph'
 
 export type BuildAgentRuntimeExecutionPlanInput = {
   roles?: AgentType[]
@@ -54,7 +55,7 @@ export function buildAgentRuntimeExecutionPlan(input: BuildAgentRuntimeExecution
     blockers,
     nextAction: blockers.length > 0
       ? 'Attach tool, memory, sandbox, browser replay, eval, and approval receipts before agent apply claims.'
-      : 'Request human review; keep apply/deploy behind approval even when receipts are present.',
+      : 'LangGraph Autonomy Ready: Trigger runAgentMission() to enter cyclic execution loop.',
   }
 }
 

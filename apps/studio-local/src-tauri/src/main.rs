@@ -13,6 +13,8 @@ use serde::Serialize;
 use tauri::State;
 
 mod desktop_commands;
+mod wgpu_renderer;
+use tauri::Manager;
 
 const LOCAL_DEVICE_ID: &str = "local-device";
 
@@ -165,6 +167,16 @@ fn jobs_cancel(
 
 fn main() {
     tauri::Builder::default()
+        .setup(|app| {
+            let window = app.get_webview_window("main").unwrap();
+            let window_arc = std::sync::Arc::new(window);
+            tauri::async_runtime::spawn(async move {
+                println!("[Aethel] Injecting Native WGPU Surface...");
+                let _renderer = crate::wgpu_renderer::WgpuRenderer::mount_on_window(window_arc).await.unwrap();
+                println!("[Aethel] Native Engine Ready.");
+            });
+            Ok(())
+        })
         .manage(Mutex::new(RuntimeJobStore::default()))
         .manage(Mutex::new(desktop_commands::TerminalSessionStore::default()))
         .invoke_handler(tauri::generate_handler![
