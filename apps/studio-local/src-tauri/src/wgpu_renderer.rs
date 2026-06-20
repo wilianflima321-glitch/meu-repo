@@ -10,6 +10,22 @@ pub struct WgpuRenderer {
 }
 
 impl WgpuRenderer {
+    /// Compiles and creates a Compute Pipeline from a raw WGSL shader string.
+    pub fn create_compute_pipeline(&self, shader_source: &str, entry_point: &str) -> wgpu::ComputePipeline {
+        let shader = self.device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("Aethel Compute Shader"),
+            source: wgpu::ShaderSource::Wgsl(shader_source.into()),
+        });
+
+        self.device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+            label: Some("Aethel Compute Pipeline"),
+            layout: None,
+            module: &shader,
+            entry_point,
+            compilation_options: Default::default(),
+        })
+    }
+
     /// Mounts the Vulkan/Metal renderer directly onto the Tauri OS Window.
     /// This bypasses the Chromium WebView to allocate a raw Vulkan/Metal surface.
     pub async fn mount_on_window(window: Arc<Window>) -> Result<Self, String> {
