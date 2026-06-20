@@ -157,7 +157,7 @@ export class ExtensionHostRuntime extends EventEmitter {
     // Load and execute extension
     try {
       const code = fs.readFileSync(fullPath, 'utf-8');
-      const extensionModule = executeExtensionModule({
+      const extensionModule = await executeExtensionModule({
         code,
         filename: fullPath,
         extensionPath: extension.extensionPath,

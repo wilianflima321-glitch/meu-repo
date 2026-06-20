@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const ROOT = process.cwd()
-const DASHBOARD_FILE = path.join(ROOT, 'components', 'AethelDashboardRuntime.tsx')
+const DASHBOARD_FILE = path.join(ROOT, 'components', 'dashboard', 'AethelDashboardRuntime.tsx')
 const MAX_LINES = 1200
 
 function fail(message) {

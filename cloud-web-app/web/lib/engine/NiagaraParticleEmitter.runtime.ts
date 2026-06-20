@@ -37,16 +37,22 @@ export class ParticleEmitter {
         continue;
       }
       const normalizedAge = p.age / p.lifetime;
-      p.velocity.add(this.config.gravity.clone().multiplyScalar(deltaTime));
+      // Apply gravity
+      p.velocity.x += this.config.gravity.x * deltaTime;
+      p.velocity.y += this.config.gravity.y * deltaTime;
+      p.velocity.z += this.config.gravity.z * deltaTime;
+
+      // Apply drag
       p.velocity.multiplyScalar(1 - this.config.drag * deltaTime);
+
+      // Apply turbulence
       if (this.config.turbulence.strength > 0) {
-        const turb = new THREE.Vector3(
-          Math.sin(this.systemTime * this.config.turbulence.frequency + p.position.x),
-          Math.cos(this.systemTime * this.config.turbulence.frequency + p.position.y),
-          Math.sin(this.systemTime * this.config.turbulence.frequency + p.position.z)
-        ).multiplyScalar(this.config.turbulence.strength * deltaTime);
-        p.velocity.add(turb);
+        p.velocity.x += Math.sin(this.systemTime * this.config.turbulence.frequency + p.position.x) * this.config.turbulence.strength * deltaTime;
+        p.velocity.y += Math.cos(this.systemTime * this.config.turbulence.frequency + p.position.y) * this.config.turbulence.strength * deltaTime;
+        p.velocity.z += Math.sin(this.systemTime * this.config.turbulence.frequency + p.position.z) * this.config.turbulence.strength * deltaTime;
       }
+
+      // Calculate velocity multiplier over life
       let velocityMult = 1;
       for (let j = 0; j < this.config.velocityOverLife.length - 1; j++) {
         const curr = this.config.velocityOverLife[j];
@@ -57,7 +63,11 @@ export class ParticleEmitter {
           break;
         }
       }
-      p.position.add(p.velocity.clone().multiplyScalar(deltaTime * velocityMult));
+
+      // Update position
+      p.position.x += p.velocity.x * deltaTime * velocityMult;
+      p.position.y += p.velocity.y * deltaTime * velocityMult;
+      p.position.z += p.velocity.z * deltaTime * velocityMult;
       for (let j = 0; j < this.config.sizeOverLife.length - 1; j++) {
         const curr = this.config.sizeOverLife[j];
         const next = this.config.sizeOverLife[j + 1];
@@ -94,7 +104,7 @@ export class ParticleEmitter {
       age: 0,
       lifetime: THREE.MathUtils.randFloat(this.config.lifetime.min, this.config.lifetime.max),
       size: THREE.MathUtils.randFloat(this.config.initialSize.min, this.config.initialSize.max),
-      color: this.config.initialColor.clone(),
+      color: new THREE.Color().copy(this.config.initialColor),
       alpha: 1,
       rotation: THREE.MathUtils.randFloat(this.config.initialRotation.min, this.config.initialRotation.max),
       rotationRate: THREE.MathUtils.randFloat(this.config.rotationRate.min, this.config.rotationRate.max),

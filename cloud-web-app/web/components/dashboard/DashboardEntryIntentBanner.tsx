@@ -21,7 +21,7 @@ export function DashboardEntryIntentBanner({
 
   return (
     <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-3 sm:px-6">
-      <div className="flex flex-col gap-3 rounded-[24px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] px-4 py-4 shadow-[0_20px_60px_rgba(2,6,23,0.22)] md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] px-4 py-4 shadow-[var(--aethel-shadow-lg)] md:flex-row md:items-center md:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info)]">
@@ -53,9 +53,9 @@ export function DashboardEntryIntentBanner({
             <button
               type="button"
               onClick={onResumeEntryMission}
-              className="inline-flex items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)] transition hover:bg-[var(--aethel-text-secondary)]"
+              className="inline-flex items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[var(--aethel-shadow-md)] transition hover:bg-[var(--aethel-text-secondary)]"
             >
-              Resume in AI Chat
+              Resume Workspace
             </button>
           ) : null}
           {onDismissEntryIntent ? (

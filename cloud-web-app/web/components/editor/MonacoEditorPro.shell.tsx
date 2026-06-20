@@ -104,22 +104,36 @@ export function InlineChatPopover({
   activeFile,
   projectContext,
   onClose,
+  position,
 }: {
   activeFile: InlineChatProps['activeFile'];
   projectContext: InlineChatProps['projectContext'];
   onClose: InlineChatProps['onClose'];
+  position?: { top: number; left: number };
 }) {
   return (
     <div
-      className="absolute bottom-4 right-4 z-40 h-[min(720px,calc(100%-2rem))] w-[min(560px,calc(100%-2rem))] overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] shadow-[0_28px_96px_rgba(0,0,0,0.55)]"
+      className="absolute z-50 overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[var(--aethel-surface-primary)] shadow-[0_12px_48px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.05)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      style={{
+        top: position ? `${position.top}px` : 'auto',
+        bottom: position ? 'auto' : '1rem',
+        left: position ? `${Math.max(16, position.left - 280)}px` : 'auto',
+        right: position ? 'auto' : '1rem',
+        width: '560px',
+        maxHeight: '400px',
+        transform: position ? 'translateY(16px)' : 'none',
+      }}
       role="dialog"
       aria-label="Inline AI Chat"
     >
-      <InlineAIChat
-        activeFile={activeFile}
-        projectContext={projectContext}
-        onClose={onClose}
-      />
+      <div className="absolute inset-0 pointer-events-none rounded-2xl border border-[var(--aethel-info)] opacity-20 blur-sm" />
+      <div className="relative z-10 w-full h-full flex flex-col">
+        <InlineAIChat
+          activeFile={activeFile}
+          projectContext={projectContext}
+          onClose={onClose}
+        />
+      </div>
     </div>
   );
 }

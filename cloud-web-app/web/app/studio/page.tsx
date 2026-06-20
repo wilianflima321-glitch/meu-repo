@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { CreativeWorkbenchShell } from '@/components/studio/CreativeWorkbenchShell'
 import EngineSpineReadinessPanel from '@/components/studio/EngineSpineReadinessPanel'
+import { SurfaceQualityShell } from '@/components/product/SurfaceQualityShell'
 import StudioMissionControl from './StudioMissionControl'
 import { CREATIVE_STUDIO_ROUTES, groupCreativeStudioRoutes, isPrimaryCreativeStudioRoute, getCreativeStudioRouteNavigationHref } from './creative-studio-routes'
 
@@ -54,9 +55,20 @@ function StudioHubViewport() {
     <div className="h-full overflow-y-auto bg-[var(--aethel-surface-primary)] px-4 py-6 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-8">
         {/* Mission control */}
-        <Suspense fallback={<div className="h-32 animate-pulse rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
-          <StudioMissionControl />
-        </Suspense>
+        <SurfaceQualityShell
+          eyebrow="Operations"
+          title="Studio runboard"
+          subtitle="Resume the active mission, review runtime truth, then Validate plan before handoff."
+          density="compact"
+          status={[
+            { label: 'Editors', value: `${primaryStudioRoutes.length} core`, tone: 'available' },
+            { label: 'Session', value: 'Resumable', tone: 'needs-review' },
+          ]}
+        >
+          <Suspense fallback={<div className="h-32 animate-pulse rounded-2xl bg-[var(--aethel-surface-secondary)]" />}>
+            <StudioMissionControl />
+          </Suspense>
+        </SurfaceQualityShell>
 
         {/* Primary editors */}
         <section>
@@ -66,7 +78,7 @@ function StudioHubViewport() {
                 Core editors
               </p>
               <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">
-                Choose the right editor.
+                Choose the editor that moves the mission forward.
               </h3>
             </div>
             <span className="rounded-full border border-[var(--aethel-border-subtle)] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
@@ -77,6 +89,7 @@ function StudioHubViewport() {
           <div
             className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
             data-studio-surface-board="operator-density"
+            data-studio-primary-lanes="5"
           >
             <div className="grid grid-cols-[minmax(170px,1fr)_112px_96px_minmax(130px,0.55fr)] gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)] max-md:hidden">
               <span>Editor</span>

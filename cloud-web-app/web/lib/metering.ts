@@ -1,5 +1,6 @@
 import { prisma } from './db';
 import { type PlanLimits } from './plans';
+import { applyTokenWeight } from './ai/model-cost-weights';
 
 type WindowId = 'hour' | 'day' | 'month';
 
@@ -120,17 +121,22 @@ export async function acquireConcurrencyLease(params: {
 
 export async function releaseConcurrencyLease(leaseId: string): Promise<void> {
 	if (!leaseId || leaseId === 'unlimited') return;
-	await (prisma as any).concurrencyLease.delete({ where: { id: leaseId } }).catch(() => {});
+	await (prisma as any).concurrencyLease.delete({ where: { id: leaseId } }).catch(() => { });
 }
 
 export async function consumeMeteredUsage(params: {
 	userId: string;
 	limits: PlanLimits;
 	cost: MeteringCost;
+	modelId?: string;
 }): Promise<MeteringDecision> {
-	const { userId, limits } = params;
+	const { userId, limits, modelId } = params;
 	const requestCost = clampInt(params.cost.requests ?? 1, 1);
-	const tokenCost = clampInt(params.cost.tokens ?? 0, 0);
+	let tokenCost = clampInt(params.cost.tokens ?? 0, 0);
+
+	if (modelId) {
+		tokenCost = applyTokenWeight(tokenCost, modelId);
+	}
 
 	const now = new Date();
 	const hourStart = utcWindowStart(now, 'hour');
@@ -140,121 +146,126 @@ export async function consumeMeteredUsage(params: {
 	const dayEnd = utcWindowEnd(dayStart, 'day');
 	const monthEnd = utcWindowEnd(monthStart, 'month');
 
-	return prisma.$transaction(async (tx) => {
-		const txAny = tx as any;
-		const [hourBucket, dayBucket, monthBucket] = await Promise.all([
-			txAny.usageBucket.upsert({
-				where: { userId_window_windowStart: { userId, window: 'hour', windowStart: hourStart } },
-				update: {},
-				create: {
-					userId,
-					window: 'hour',
-					windowStart: hourStart,
-					windowEnd: hourEnd,
-				},
-			}),
-			txAny.usageBucket.upsert({
-				where: { userId_window_windowStart: { userId, window: 'day', windowStart: dayStart } },
-				update: {},
-				create: {
-					userId,
-					window: 'day',
-					windowStart: dayStart,
-					windowEnd: dayEnd,
-				},
-			}),
-			txAny.usageBucket.upsert({
-				where: { userId_window_windowStart: { userId, window: 'month', windowStart: monthStart } },
-				update: {},
-				create: {
-					userId,
-					window: 'month',
-					windowStart: monthStart,
-					windowEnd: monthEnd,
-				},
-			}),
-		]);
+	// BYOK Bypass
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { byokKey: true }
+	});
 
-		// Checks (antes de incrementar)
-		if (!unlimited(limits.requestsPerHour) && hourBucket.requests + requestCost > limits.requestsPerHour) {
-			const retryAfterSeconds = Math.max(1, Math.ceil((hourBucket.windowEnd.getTime() - now.getTime()) / 1000));
-			const err: RateLimitedError = Object.assign(
-				new Error('RATE_LIMITED: limite de requisições por hora atingido.'),
-				{
-					code: 'RATE_LIMITED' as const,
-					limitType: 'requestsPerHour' as const,
-					retryAfterSeconds,
-					resetAt: hourBucket.windowEnd.toISOString(),
-				}
-			);
-			throw err;
-		}
-
-		if (tokenCost > 0 && !unlimited(limits.tokensPerDay) && dayBucket.tokens + tokenCost > limits.tokensPerDay) {
-			const retryAfterSeconds = Math.max(1, Math.ceil((dayBucket.windowEnd.getTime() - now.getTime()) / 1000));
-			const err: RateLimitedError = Object.assign(
-				new Error('RATE_LIMITED: cota diária de tokens atingida.'),
-				{
-					code: 'RATE_LIMITED' as const,
-					limitType: 'tokensPerDay' as const,
-					retryAfterSeconds,
-					resetAt: dayBucket.windowEnd.toISOString(),
-				}
-			);
-			throw err;
-		}
-
-		if (tokenCost > 0 && !unlimited(limits.tokensPerMonth) && monthBucket.tokens + tokenCost > limits.tokensPerMonth) {
-			// Mensagem sugere upgrade (mensal geralmente é limite de plano)
-			const retryAfterSeconds = Math.max(1, Math.ceil((monthBucket.windowEnd.getTime() - now.getTime()) / 1000));
-			const err: RateLimitedError = Object.assign(
-				new Error('RATE_LIMITED: cota mensal de tokens atingida. Faça upgrade do plano para continuar.'),
-				{
-					code: 'RATE_LIMITED' as const,
-					limitType: 'tokensPerMonth' as const,
-					retryAfterSeconds,
-					resetAt: monthBucket.windowEnd.toISOString(),
-				}
-			);
-			throw err;
-		}
-
-		// Incrementa contadores (após checks)
-		await Promise.all([
-			txAny.usageBucket.update({
-				where: { id: hourBucket.id },
-				data: { requests: { increment: requestCost } },
-			}),
-			txAny.usageBucket.update({
-				where: { id: dayBucket.id },
-				data: {
-					requests: { increment: requestCost },
-					tokens: tokenCost > 0 ? { increment: tokenCost } : undefined,
-				},
-			}),
-			txAny.usageBucket.update({
-				where: { id: monthBucket.id },
-				data: {
-					requests: { increment: requestCost },
-					tokens: tokenCost > 0 ? { increment: tokenCost } : undefined,
-				},
-			}),
-		]);
-
-		const remaining: MeteringDecision['remaining'] = {
-			requestsPerHour: unlimited(limits.requestsPerHour) ? -1 : Math.max(0, limits.requestsPerHour - (hourBucket.requests + requestCost)),
-			tokensPerDay: unlimited(limits.tokensPerDay) ? -1 : Math.max(0, limits.tokensPerDay - (dayBucket.tokens + tokenCost)),
-			tokensPerMonth: unlimited(limits.tokensPerMonth) ? -1 : Math.max(0, limits.tokensPerMonth - (monthBucket.tokens + tokenCost)),
-		};
-
+	if (user?.byokKey) {
 		return {
 			allowed: true,
-			remaining,
-			resetAt: {
-				hour: hourBucket.windowEnd,
-				day: dayBucket.windowEnd,
-				month: monthBucket.windowEnd,
-			},
+			remaining: { requestsPerHour: -1, tokensPerDay: -1, tokensPerMonth: -1 },
+			resetAt: { hour: hourEnd, day: dayEnd, month: monthEnd },
 		};
-	});
+	}
+
+	// Lock contention optimization: execute upserts in parallel without a single blocking $transaction.
+	// This drastically reduces row-lock time and prevents deadlocks under heavy parallel agent load.
+	const [hourBucket, dayBucket, monthBucket] = await Promise.all([
+		prisma.usageBucket.upsert({
+			where: { userId_window_windowStart: { userId, window: 'hour', windowStart: hourStart } },
+			update: { requests: { increment: requestCost } },
+			create: {
+				userId,
+				window: 'hour',
+				windowStart: hourStart,
+				windowEnd: hourEnd,
+				requests: requestCost,
+			},
+		}),
+		prisma.usageBucket.upsert({
+			where: { userId_window_windowStart: { userId, window: 'day', windowStart: dayStart } },
+			update: {
+				requests: { increment: requestCost },
+				tokens: tokenCost > 0 ? { increment: tokenCost } : undefined,
+			},
+			create: {
+				userId,
+				window: 'day',
+				windowStart: dayStart,
+				windowEnd: dayEnd,
+				requests: requestCost,
+				tokens: tokenCost,
+			},
+		}),
+		prisma.usageBucket.upsert({
+			where: { userId_window_windowStart: { userId, window: 'month', windowStart: monthStart } },
+			update: {
+				requests: { increment: requestCost },
+				tokens: tokenCost > 0 ? { increment: tokenCost } : undefined,
+			},
+			create: {
+				userId,
+				window: 'month',
+				windowStart: monthStart,
+				windowEnd: monthEnd,
+				requests: requestCost,
+				tokens: tokenCost,
+			},
+		})
+	]);
+
+	// Checks (pós-incremento)
+	if (limits.requestsPerDay && !unlimited(limits.requestsPerDay) && dayBucket.requests > limits.requestsPerDay) {
+		const retryAfterSeconds = Math.max(1, Math.ceil((dayBucket.windowEnd.getTime() - now.getTime()) / 1000));
+		const err: RateLimitedError = Object.assign(
+			new Error('RATE_LIMITED: limite diário de requisições atingido.'),
+			{
+				code: 'RATE_LIMITED' as const,
+				limitType: 'requestsPerHour' as const,
+				retryAfterSeconds,
+				resetAt: dayBucket.windowEnd.toISOString(),
+			}
+		);
+		throw err;
+	}
+
+	if (tokenCost > 0 && !unlimited(limits.tokensPerDay) && dayBucket.tokens > limits.tokensPerDay) {
+		const retryAfterSeconds = Math.max(1, Math.ceil((dayBucket.windowEnd.getTime() - now.getTime()) / 1000));
+		const err: RateLimitedError = Object.assign(
+			new Error('RATE_LIMITED: cota diária de tokens atingida.'),
+			{
+				code: 'RATE_LIMITED' as const,
+				limitType: 'tokensPerDay' as const,
+				retryAfterSeconds,
+				resetAt: dayBucket.windowEnd.toISOString(),
+			}
+		);
+		throw err;
+	}
+
+	if (tokenCost > 0 && !unlimited(limits.tokensPerMonth) && monthBucket.tokens > limits.tokensPerMonth) {
+		const retryAfterSeconds = Math.max(1, Math.ceil((monthBucket.windowEnd.getTime() - now.getTime()) / 1000));
+		const err: RateLimitedError = Object.assign(
+			new Error('RATE_LIMITED: cota mensal de tokens atingida. Faça upgrade do plano para continuar.'),
+			{
+				code: 'RATE_LIMITED' as const,
+				limitType: 'tokensPerMonth' as const,
+				retryAfterSeconds,
+				resetAt: monthBucket.windowEnd.toISOString(),
+			}
+		);
+		throw err;
+	}
+
+	const remaining: MeteringDecision['remaining'] = {
+		requestsPerHour: limits.requestsPerDay && unlimited(limits.requestsPerDay) ? -1 : Math.max(0, (limits.requestsPerDay ?? 999999) - dayBucket.requests),
+		tokensPerDay: unlimited(limits.tokensPerDay) ? -1 : Math.max(0, limits.tokensPerDay - dayBucket.tokens),
+		tokensPerMonth: unlimited(limits.tokensPerMonth) ? -1 : Math.max(0, limits.tokensPerMonth - monthBucket.tokens),
+	};
+
+	return {
+		allowed: true,
+		remaining,
+		resetAt: {
+			hour: hourBucket.windowEnd,
+			day: dayBucket.windowEnd,
+			month: monthBucket.windowEnd,
+		},
+	};
+}
+
+export function weightedTokensFromUsage(rawTokens: number, modelId: string): number {
+	return applyTokenWeight(rawTokens, modelId);
 }

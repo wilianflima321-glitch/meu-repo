@@ -3,13 +3,23 @@ import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { aiService, type LLMProvider, type Message } from '@/lib/ai-service';
+import { checkModelAccess, recordTokenUsage } from '@/lib/plan-limits';
 import {
 	acquireConcurrencyLease,
 	estimateTokensFromText,
 	consumeMeteredUsage,
 	releaseConcurrencyLease,
 } from '@/lib/metering';
-import { checkModelAccess } from '@/lib/plan-limits';
+
+import {
+  reserveCredits,
+  settleCredits,
+  cancelReservation,
+  checkCreditQuota,
+  createInsufficientCreditsResponse,
+  calculateTokenCost,
+} from '@/lib/credit-wallet';
+import { applyTokenWeight } from '@/lib/ai/model-cost-weights';
 import { capabilityResponse } from '@/lib/server/capability-response';
 import { buildAiProviderSetupMetadata } from '@/lib/capability-constants';
 import {
@@ -19,7 +29,7 @@ import {
 	isAiDemoModeEnabled,
 } from '@/lib/server/ai-demo-mode';
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
-import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
+import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit, AI_BYOK_RATE_LIMIT } from '@/lib/server/ai-core-rate-limit';
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
 
 function getBackendBaseUrl(): string | null {
@@ -102,6 +112,28 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		const estimatedPromptTokens = estimateTokensFromText(promptText);
 		const estimatedTotalTokens = estimatedPromptTokens + maxTokens;
 
+		const isByok = req.headers.get('x-aethel-byok-active') === '1';
+
+		if (isByok) {
+			const rateLimitedByok = enforceAiCoreRateLimit({
+				req,
+				capability: 'AI_STREAM',
+				route: '/api/ai/stream',
+				config: AI_BYOK_RATE_LIMIT,
+			});
+			if (rateLimitedByok) return rateLimitedByok;
+		}
+
+		if (model && !isByok) {
+			const modelCheck = await checkModelAccess(auth.userId, model);
+			if (!modelCheck.allowed) {
+				return NextResponse.json(
+					{ error: modelCheck.code || 'MODEL_NOT_ALLOWED', message: modelCheck.reason || 'Model not allowed' },
+					{ status: 403 }
+				);
+			}
+		}
+
 		const lease = await acquireConcurrencyLease({
 			userId: auth.userId,
 			key: 'api/ai/stream',
@@ -110,19 +142,30 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		});
 		leaseId = lease?.leaseId ?? null;
 
-		const decision = await consumeMeteredUsage({
-			userId: auth.userId,
-			limits: entitlements.plan.limits,
-			cost: { requests: 1, tokens: estimatedTotalTokens },
-		});
+		let decision: any = null;
+		let reservation: any = null;
 
-		if (model) {
-			const modelCheck = await checkModelAccess(auth.userId, model);
-			if (!modelCheck.allowed) {
-				return NextResponse.json(
-					{ error: modelCheck.code || 'MODEL_NOT_ALLOWED', message: modelCheck.reason || 'Model not allowed' },
-					{ status: 403 }
-				);
+		if (!isByok) {
+			decision = await consumeMeteredUsage({
+				userId: auth.userId,
+				limits: entitlements.plan.limits,
+				cost: { requests: 1, tokens: 0 },
+				modelId: model || undefined,
+			});
+
+			const modelName = model || 'openai/gpt-4o-mini';
+			const estimatedTotalTokensWeighted = applyTokenWeight(estimatedTotalTokens, modelName);
+			const estimatedCostCredits = calculateTokenCost('chat', estimatedTotalTokensWeighted);
+
+			reservation = await reserveCredits(
+				auth.userId,
+				'chat',
+				estimatedCostCredits
+			);
+
+			if (!reservation) {
+				const check = await checkCreditQuota(auth.userId, 'chat', estimatedCostCredits);
+				return NextResponse.json(createInsufficientCreditsResponse(check), { status: 402 });
 			}
 		}
 
@@ -139,6 +182,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			});
 
 			if (!upstream.ok || !upstream.body) {
+				if (reservation) {
+					await cancelReservation(reservation.reservationId).catch(() => {});
+					reservation = null;
+				}
 				const text = await upstream.text().catch(() => '');
 				return new NextResponse(text || JSON.stringify({ error: 'UPSTREAM_ERROR' }), {
 					status: upstream.status,
@@ -148,10 +195,39 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 			const { readable, writable } = new TransformStream();
 			releaseOnFinally = false;
+
+			let totalBytes = 0;
+			const transformStream = new TransformStream({
+				transform(chunk, controller) {
+					totalBytes += chunk.byteLength || chunk.length || 0;
+					controller.enqueue(chunk);
+				},
+				async flush() {
+					if (reservation) {
+						const actualTokens = Math.max(1, Math.ceil(totalBytes / 4));
+						const actualWeighted = applyTokenWeight(actualTokens, model || 'openai/gpt-4o-mini');
+						const actualCost = calculateTokenCost('chat', actualWeighted);
+						await settleCredits(reservation.reservationId, actualCost, { actualTokens });
+						await recordTokenUsage(auth.userId, actualWeighted).catch(() => {});
+						reservation = null;
+					}
+				}
+			});
+
 			upstream.body
+				.pipeThrough(transformStream)
 				.pipeTo(writable)
-				.catch(() => {})
+				.catch(async () => {
+					if (reservation) {
+						await cancelReservation(reservation.reservationId).catch(() => {});
+						reservation = null;
+					}
+				})
 				.finally(async () => {
+					if (reservation) {
+						await cancelReservation(reservation.reservationId).catch(() => {});
+						reservation = null;
+					}
 					if (leaseId) await releaseConcurrencyLease(leaseId);
 				});
 
@@ -160,13 +236,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 				headers: {
 					'Content-Type': upstream.headers.get('content-type') || 'text/plain; charset=utf-8',
 					'Cache-Control': 'no-store',
-					...(decision.remaining?.requestsPerHour !== undefined
-						? { 'X-Usage-Remaining-RequestsPerHour': String(decision.remaining.requestsPerHour) }
+					...(decision?.remaining?.requestsPerDay !== undefined
+						? { 'X-Usage-Remaining-RequestsPerDay': String(decision.remaining.requestsPerDay) }
 						: {}),
-					...(decision.remaining?.tokensPerDay !== undefined
+					...(decision?.remaining?.tokensPerDay !== undefined
 						? { 'X-Usage-Remaining-TokensPerDay': String(decision.remaining.tokensPerDay) }
 						: {}),
-					...(decision.remaining?.tokensPerMonth !== undefined
+					...(decision?.remaining?.tokensPerMonth !== undefined
 						? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
 						: {}),
 				},
@@ -180,13 +256,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 				message: 'AI provider not configured. Configure a real provider to run streaming chat.',
 				missingEnv: ['OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY'],
 			})
-			if (blocked) return blocked
+			if (blocked) {
+				if (reservation) {
+					await cancelReservation(reservation.reservationId).catch(() => {});
+					reservation = null;
+				}
+				return blocked;
+			}
 			if (isAiDemoModeEnabled()) {
 				const demoUsage = await consumeAiDemoUsage({
 					userId: auth.userId,
 					route: '/api/ai/stream',
 				});
 				if (!demoUsage.allowed) {
+					if (reservation) {
+						await cancelReservation(reservation.reservationId).catch(() => {});
+						reservation = null;
+					}
 					return capabilityResponse({
 						error: 'AI_DEMO_LIMIT_REACHED',
 						status: 429,
@@ -203,6 +289,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 							demoResetAt: demoUsage.resetAt,
 						},
 					});
+				}
+
+				if (reservation) {
+					await settleCredits(reservation.reservationId, 0, { actualTokens: 0 });
+					reservation = null;
 				}
 
 				const encoder = new TextEncoder();
@@ -227,6 +318,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 				});
 			}
 
+			if (reservation) {
+				await cancelReservation(reservation.reservationId).catch(() => {});
+				reservation = null;
+			}
+
 			return capabilityResponse({
 				error: 'AI_PROVIDER_NOT_CONFIGURED',
 				status: 503,
@@ -239,6 +335,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		}
 
 		const encoder = new TextEncoder();
+		let accumulatedText = '';
 		const readable = new ReadableStream({
 			async start(controller) {
 				try {
@@ -249,10 +346,25 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 						provider,
 						maxTokens: maxTokens > 0 ? maxTokens : undefined,
 					})) {
+						accumulatedText += chunk;
 						controller.enqueue(encoder.encode(chunk));
 					}
+
+					if (reservation) {
+						const actualTokens = estimateTokensFromText(accumulatedText);
+						const actualWeighted = applyTokenWeight(actualTokens, model || 'openai/gpt-4o-mini');
+						const actualCost = calculateTokenCost('chat', actualWeighted);
+						await settleCredits(reservation.reservationId, actualCost, { actualTokens });
+						await recordTokenUsage(auth.userId, actualWeighted).catch(() => {});
+						reservation = null;
+					}
+
 					controller.close();
 				} catch (streamError) {
+					if (reservation) {
+						await cancelReservation(reservation.reservationId).catch(() => {});
+						reservation = null;
+					}
 					controller.error(streamError);
 				} finally {
 					if (leaseId) {
@@ -261,6 +373,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 					}
 				}
 			},
+			async cancel() {
+				if (reservation) {
+					await cancelReservation(reservation.reservationId).catch(() => {});
+					reservation = null;
+				}
+				if (leaseId) {
+					await releaseConcurrencyLease(leaseId);
+					leaseId = null;
+				}
+			}
 		});
 		releaseOnFinally = false;
 
@@ -269,13 +391,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			headers: {
 				'Content-Type': 'text/plain; charset=utf-8',
 				'Cache-Control': 'no-store',
-				...(decision.remaining?.requestsPerHour !== undefined
-					? { 'X-Usage-Remaining-RequestsPerHour': String(decision.remaining.requestsPerHour) }
+				...(decision?.remaining?.requestsPerDay !== undefined
+					? { 'X-Usage-Remaining-RequestsPerDay': String(decision.remaining.requestsPerDay) }
 					: {}),
-				...(decision.remaining?.tokensPerDay !== undefined
+				...(decision?.remaining?.tokensPerDay !== undefined
 					? { 'X-Usage-Remaining-TokensPerDay': String(decision.remaining.tokensPerDay) }
 					: {}),
-				...(decision.remaining?.tokensPerMonth !== undefined
+				...(decision?.remaining?.tokensPerMonth !== undefined
 					? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
 					: {}),
 			},

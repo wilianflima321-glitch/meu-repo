@@ -52,10 +52,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate plan exists.
-    const validPlans = ['starter', 'basic', 'pro', 'studio', 'enterprise'];
+    const validPlans = ['starter', 'pro', 'studio', 'enterprise'];
     if (!validPlans.includes(planId)) {
       return NextResponse.json(
-        { error: 'Invalid plan ID. Valid plans: starter, basic, pro, studio, enterprise' },
+        { error: 'Invalid plan ID. Valid plans: starter, pro, studio, enterprise' },
         { status: 400 }
       );
     }
@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
 
     if ((error as any)?.code === 'INVALID_PLAN') {
       return NextResponse.json(
-        { error: 'Invalid plan ID. Valid plans: starter, basic, pro, studio, enterprise' },
+        { error: 'Invalid plan ID. Valid plans: starter, pro, studio, enterprise' },
         { status: 400 }
       );
     }

@@ -280,7 +280,7 @@ rejectPattern(
 )
 requirePattern(
   'components/ide/fullscreen/FullscreenIDEWorkspace.tsx',
-  /<ModernIDEShell[\s\S]*sidebar:[\s\S]*<WorkbenchSidebar[\s\S]*chat:\s*<AIChatPanelContainer[\s\S]*terminal:\s*<MultiTerminalPanel[\s\S]*editor:\s*<WorkbenchEditorPane[\s\S]*preview:\s*<WorkbenchPreviewPane/,
+  /<ModernIDEShell[\s\S]*sidebar:[\s\S]*<WorkbenchSidebar[\s\S]*chat:\s*<AgentsWorkspaceContainer[\s\S]*terminal:\s*<MultiTerminalPanel[\s\S]*editor:\s*<WorkbenchEditorPane[\s\S]*preview:\s*<WorkbenchPreviewPane/,
   'fullscreen IDE must compose sidebar, agent sidecar, terminal, editor, and preview through the canonical shell',
 )
 requirePattern(
@@ -380,8 +380,8 @@ requirePattern(
 )
 requirePattern(
   'components/ide/fullscreen/WorkbenchPreviewModeHeader.tsx',
-  /contextTitle[\s\S]*activeSurface\.detailPolicy[\s\S]*xl:inline-flex[\s\S]*2xl:inline-flex/,
-  'preview mode chrome must keep detailed mission/file context out of the default dense viewport',
+  /activeSurface[\s\S]*tooltipTitle[\s\S]*hidden items-center gap-2 xl:flex/,
+  'preview mode chrome must keep detailed mission/file context in tooltips, not dense visible copy',
 )
 rejectPattern(
   'components/ide/fullscreen/WorkbenchPreviewModeHeader.tsx',

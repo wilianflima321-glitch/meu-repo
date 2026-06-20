@@ -3,6 +3,8 @@ import { aiService } from '@/lib/ai-service'
 import type { ToolResult } from '@/lib/ai-tools-registry'
 import { AGENTS } from '@/lib/ai-agent-system'
 import { checkAIQuota, recordTokenUsage, checkModelAccess, checkFeatureAccess, getPlanLimits } from '@/lib/plan-limits'
+import { reserveCredits, settleCredits, checkCreditQuota, cancelReservation, calculateTokenCost } from '@/lib/credit-wallet'
+import { applyTokenWeight } from '@/lib/ai/model-cost-weights'
 import { prisma } from '@/lib/prisma'
 import { createAITraceId } from '@/lib/ai-internal-trace'
 import { persistAITrace } from '@/lib/ai-trace-store'
@@ -164,9 +166,25 @@ export async function handleAdvancedChatRequest(params: {
     )
   }
 
+  const estimatedWeighted = applyTokenWeight(estimatedTokens, model || 'openai/gpt-4o-mini')
+  const estimatedCost = calculateTokenCost('chat', estimatedWeighted)
+  let reservation: any = null
+  
+  if (!agentId || !AGENTS[agentId]) {
+    reservation = await reserveCredits(userId, 'chat', estimatedCost)
+    if (!reservation) {
+      const creditCheck = await checkCreditQuota(userId, 'chat', estimatedCost)
+      return NextResponse.json(
+        { error: 'INSUFFICIENT_CREDITS', message: creditCheck.reason || 'Insufficient credits' },
+        { status: 402 }
+      )
+    }
+  }
+
   if (agentCount > 1) {
     const agentsFeature = await checkFeatureAccess(userId, 'agents')
     if (!agentsFeature.allowed) {
+      if (reservation) await cancelReservation(reservation.reservationId)
       return NextResponse.json(
         { error: agentsFeature.code || 'FEATURE_NOT_ALLOWED', message: agentsFeature.reason || 'Agents not available in your plan' },
         { status: 403 }
@@ -174,6 +192,7 @@ export async function handleAdvancedChatRequest(params: {
     }
 
     if (agentCount > limits.maxAgents) {
+      if (reservation) await cancelReservation(reservation.reservationId)
       return NextResponse.json(
         {
           error: 'AGENTS_LIMIT_EXCEEDED',
@@ -185,6 +204,7 @@ export async function handleAdvancedChatRequest(params: {
     }
 
     if (stream) {
+      if (reservation) await cancelReservation(reservation.reservationId)
       return NextResponse.json(
         { error: 'STREAM_NOT_SUPPORTED_FOR_MULTI_ROLE', message: 'Streaming is not supported in multi-role mode yet.' },
         { status: 400 }
@@ -195,6 +215,7 @@ export async function handleAdvancedChatRequest(params: {
   if (agentCount <= 1) {
     const modelAccess = await checkModelAccess(userId, model)
     if (!modelAccess.allowed) {
+      if (reservation) await cancelReservation(reservation.reservationId)
       return NextResponse.json(
         { error: modelAccess.reason || `Model ${model} not available` },
         { status: 403 }
@@ -203,6 +224,7 @@ export async function handleAdvancedChatRequest(params: {
 
     const missingProvider = getMissingProviderForModel(model, availableProviders)
     if (missingProvider) {
+      if (reservation) await cancelReservation(reservation.reservationId)
       return capabilityResponse({
         error: 'AI_PROVIDER_NOT_CONFIGURED',
         status: 503,
@@ -232,6 +254,7 @@ export async function handleAdvancedChatRequest(params: {
     for (const item of needed) {
       const access = await checkModelAccess(userId, item.model)
       if (!access.allowed) {
+        if (reservation) await cancelReservation(reservation.reservationId)
         return NextResponse.json(
           { error: access.code || 'MODEL_NOT_ALLOWED', message: access.reason || `Model ${item.model} not available`, role: item.role },
           { status: 403 }
@@ -240,6 +263,7 @@ export async function handleAdvancedChatRequest(params: {
 
       const missingProvider = getMissingProviderForModel(item.model, availableProviders)
       if (missingProvider) {
+        if (reservation) await cancelReservation(reservation.reservationId)
         return capabilityResponse({
           error: 'AI_PROVIDER_NOT_CONFIGURED',
           status: 503,
@@ -262,6 +286,7 @@ export async function handleAdvancedChatRequest(params: {
   if (agentId && AGENTS[agentId]) {
     const agentsFeature = await checkFeatureAccess(userId, 'agents')
     if (!agentsFeature.allowed) {
+      if (reservation) await cancelReservation(reservation.reservationId)
       return NextResponse.json(
         { error: agentsFeature.code || 'FEATURE_NOT_ALLOWED', message: agentsFeature.reason || 'Agents not available in your plan' },
         { status: 403 }
@@ -288,6 +313,7 @@ export async function handleAdvancedChatRequest(params: {
   })
 
   if (stream) {
+    if (reservation) await cancelReservation(reservation.reservationId)
     return handleStreamingResponse(userId, enhancedSystemMessage, messages, model, traceId, estimatedTokens)
   }
 
@@ -378,6 +404,13 @@ Critical: ${criticSummary.verdict} ${criticSummary.bullets?.slice(0, 3).join(' '
 
     response = { role: 'assistant', content: finalContent }
     await recordTokenUsage(userId, totalTokens)
+
+    if (reservation) {
+      const actualWeighted = applyTokenWeight(totalTokens, engineerModel || 'openai/gpt-4o-mini')
+      const actualCost = calculateTokenCost('chat', actualWeighted)
+      await settleCredits(reservation.reservationId, actualCost, { actualTokens: totalTokens })
+      reservation = null
+    }
 
     const latencyMs = (architectResult.latencyMs || 0) + (engineerResult.latencyMs || 0)
     const chatResponse: ChatResponse = {
@@ -486,6 +519,13 @@ Critical: ${criticSummary.verdict} ${criticSummary.bullets?.slice(0, 3).join(' '
   }
 
   await recordTokenUsage(userId, totalTokens)
+
+  if (reservation) {
+    const actualWeighted = applyTokenWeight(totalTokens, model || 'openai/gpt-4o-mini')
+    const actualCost = calculateTokenCost('chat', actualWeighted)
+    await settleCredits(reservation.reservationId, actualCost, { actualTokens: totalTokens })
+    reservation = null
+  }
 
   const chatResponse: ChatResponse = {
     message: response,

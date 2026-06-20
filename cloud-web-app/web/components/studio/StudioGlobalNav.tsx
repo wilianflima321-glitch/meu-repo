@@ -53,24 +53,24 @@ export default function StudioGlobalNav({ title, subtitle, rightSlot, className 
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <Link href="/dashboard" className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]">
+                <Link href="/dashboard" className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
                   Aethel
                 </Link>
-                <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">
                   Cloud Studio
                 </span>
               </div>
               {title ? <h1 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)] sm:text-xl">{title}</h1> : null}
               {subtitle ? <p className="mt-0.5 max-w-2xl text-xs text-[var(--aethel-text-tertiary)] sm:text-sm">{subtitle}</p> : null}
             </div>
-            <div className="hidden flex-wrap items-center gap-2 md:flex">
+            <div className="flex flex-wrap items-center gap-2">
               {!compact ? <NavLinkRow links={STUDIO_SECONDARY_LINKS} pathname={pathname} /> : null}
               {rightSlot}
             </div>
           </div>
 
           {!compact ? (
-            <nav aria-label="Studio primary navigation" className="hidden overflow-x-auto pb-1 md:block">
+            <nav aria-label="Studio primary navigation" className="block overflow-x-auto pb-1 no-scrollbar">
               <div className="flex min-w-max items-center gap-2">
                 <NavLinkRow links={STUDIO_PRIMARY_LINKS} pathname={pathname} />
               </div>

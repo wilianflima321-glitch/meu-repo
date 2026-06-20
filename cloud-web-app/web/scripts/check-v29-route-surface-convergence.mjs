@@ -122,6 +122,12 @@ const adminCompatibilityRoutes = [
   ['/admin/compliance', '/admin/security?legacy=compliance'],
   ['/admin/ide-settings', '/admin/feature-flags?legacy=ide-settings'],
   ['/admin/moderation', '/admin/security?legacy=moderation'],
+  ['/admin/ai-monitor', '/admin/ai?legacy=monitor'],
+  ['/admin/ai-training', '/admin/ai?legacy=training'],
+  ['/admin/infrastructure', '/admin/monitoring?legacy=infrastructure'],
+  ['/admin/marketplace', '/admin/finance?legacy=marketplace'],
+  ['/admin/payments', '/admin/finance?legacy=payments'],
+  ['/admin/roles', '/admin/users?legacy=roles'],
 ]
 
 for (const [route, target] of adminCompatibilityRoutes) {

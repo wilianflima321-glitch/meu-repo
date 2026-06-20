@@ -38,7 +38,9 @@ const getCSP = () => {
     // Images: self + data URIs + blob for canvas + external
     "img-src 'self' data: blob: https:",
     // Connect: APIs, WebSocket, external services
-    `connect-src 'self' ${isDev ? 'ws://localhost:* http://localhost:*' : ''} wss://*.aethel.dev https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.tavily.com https://api.serper.dev`,
+    // DEBT-CSP-001: Always allow loopback for Tauri desktop + local MCP servers.
+    // In production, the Tauri app runs a local HTTP/WS server that the IDE web view needs to reach.
+    `connect-src 'self' ws://localhost:* http://localhost:* ws://127.0.0.1:* http://127.0.0.1:* ws://[::1]:* http://[::1]:* ${isDev ? 'ws://0.0.0.0:* http://0.0.0.0:*' : ''} wss://*.aethel.dev https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.tavily.com https://api.serper.dev`,
     // Media
     "media-src 'self' blob:",
     // Workers for Monaco, Yjs, etc.
@@ -309,45 +311,38 @@ export async function middleware(req: NextRequest) {
              'anonymous';
 
   // 1) Rate limiting (API only)
+  // DEBT-FIN-004: Fail-Open strategy per contracts_planning §4
+  // If Upstash Redis is down, we allow the request through rather than
+  // blocking all users globally with a 503 (catastrophic SPOF).
+  let rateLimitStatus: 'normal' | 'fail-open' | 'not-configured' = 'normal';
+
   if (shouldApplyRateLimit && isApi && !pathname.startsWith('/api/billing/webhook') && !pathname.startsWith('/api/health')) {
     if (!upstashLimiters) {
-      if (process.env.NODE_ENV === 'production') {
-        return withSecurityHeaders(
-          NextResponse.json(
-            { error: 'RATE_LIMIT_NOT_CONFIGURED', message: 'Configure UPSTASH_REDIS_REST_URL/TOKEN.' },
-            { status: 503 }
-          ),
-          req,
-          requestId
-        );
+      rateLimitStatus = 'not-configured';
+      if (process.env.NODE_ENV === 'production' && !canUseLocalRateLimitFallback(req)) {
+        // In production without any fallback, log warning but DO NOT block users.
+        // This is a Fail-Open: better to let traffic through than kill the platform.
+        console.warn('[RateLimit Warning] Upstash Redis not configured. Running in Fail-Open mode.');
+        rateLimitStatus = 'fail-open';
       }
     } else {
       const limitName = getRateLimitName(pathname);
       let result: Awaited<ReturnType<Ratelimit['limit']>>;
       try {
         result = await upstashLimiters[limitName].limit(ip);
-      } catch {
-        if (canUseLocalRateLimitFallback(req)) {
-          result = {
-            success: true,
-            limit: 0,
-            remaining: 0,
-            reset: Date.now(),
-            pending: Promise.resolve(),
-          };
-        } else {
-          return withSecurityHeaders(
-            NextResponse.json(
-              {
-                error: 'RATE_LIMIT_BACKEND_UNAVAILABLE',
-                message: 'Rate limit backend is unavailable.',
-              },
-              { status: 503 }
-            ),
-            req,
-            requestId
-          );
-        }
+      } catch (error) {
+        // ── FAIL-OPEN: Redis failure should never block users ──
+        // Log the failure for monitoring but allow the request through.
+        console.warn(`[RateLimit Warning] Upstash Redis failed. Activating Fail-Open. Error: ${(error as Error)?.message ?? 'unknown'}`);
+
+        result = {
+          success: true,
+          limit: 100,
+          remaining: 99,
+          reset: Date.now() + 60000,
+          pending: Promise.resolve(),
+        };
+        rateLimitStatus = 'fail-open';
       }
       if (!result.success) {
         return withSecurityHeaders(
@@ -366,6 +361,7 @@ export async function middleware(req: NextRequest) {
                 'X-RateLimit-Remaining': String(result.remaining),
                 'X-RateLimit-Reset': String(result.reset),
                 'X-RateLimit-Type': limitName,
+                'X-RateLimit-Status': 'normal',
               },
             }
           ),

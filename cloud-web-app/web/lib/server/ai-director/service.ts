@@ -1,4 +1,4 @@
-import advancedAI from '@/lib/ai/advanced-ai-provider'
+import { aiService } from '@/lib/ai-service'
 import { createComponentLogger } from '@/lib/observability/logger'
 import { createLegacyHeuristicDirectorSession, detectDirectorProjectType } from './heuristic'
 import type { DirectorNote, DirectorProject, DirectorSession, DirectorSessionPayload } from './types'
@@ -45,11 +45,13 @@ async function analyzeProjectWithDirector(params: {
 }): Promise<DirectorSessionPayload> {
   const { projectId, project } = params
   try {
-    const response = await advancedAI.complete(buildDirectorMessages(project), {
+    const response = await aiService.chat({
+      messages: buildDirectorMessages(project),
       model: DEFAULT_DIRECTOR_MODEL,
-      responseFormat: { type: 'json_object' },
       temperature: 0.2,
       maxTokens: 1400,
+      taskKind: 'critic',
+      complexity: 'high'
     })
     const parsed = parseDirectorJson(response.content)
     const session = normalizeLlmDirectorResponse({ projectId, project, parsed })
@@ -60,7 +62,7 @@ async function analyzeProjectWithDirector(params: {
       provider: response.provider,
       model: response.model,
       latencyMs: response.latencyMs,
-      costEstimateUsd: estimateDirectorCost(response.usage.promptTokens, response.usage.completionTokens),
+      costEstimateUsd: response.cost ?? estimateDirectorCost(response.tokensUsed, 0),
       cacheStatus: 'miss',
     }
   } catch (error) {

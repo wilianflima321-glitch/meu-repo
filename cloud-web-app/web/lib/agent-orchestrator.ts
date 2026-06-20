@@ -1,7 +1,13 @@
 /**
  * Agent Orchestrator for Aethel Engine
  * Streams parallel agent messages with explicit cancellation semantics.
+ *
+ * AETHEL FUSION: All roles now route through agentLlmChat → intelligent-model-router
+ * instead of generating static guidance strings.
  */
+
+import { agentLlmChat } from '@/lib/ai/agent-llm-bridge'
+import { resolveTaskKindForRole } from '@/lib/ai/fusion-role-map'
 
 export const AGENT_ROLE_PROFILES = {
   architect: {
@@ -171,7 +177,8 @@ export const AGENT_ROLE_PROFILES = {
 export type AgentType = keyof typeof AGENT_ROLE_PROFILES
 export const SUPPORTED_AGENT_TYPES = Object.keys(AGENT_ROLE_PROFILES) as AgentType[]
 export const DEFAULT_AGENT_SET: AgentType[] = ['architect', 'designer', 'engineer']
-export const ORCHESTRATOR_EXECUTION_MODE = 'heuristic'
+// Gate out heuristic orchestrator in production (DEBT-AI-003)
+export const ORCHESTRATOR_EXECUTION_MODE = process.env.NODE_ENV === 'production' ? 'disabled' : 'heuristic'
 export const ORCHESTRATOR_CAPABILITY_STATUS = 'PARTIAL'
 export const ORCHESTRATOR_DISCLAIMER =
   'Heuristic advisory mode: role outputs are policy-driven guidance and still require deterministic validation before apply.'
@@ -346,47 +353,69 @@ export class AgentOrchestrator {
     queue.push({
       agentId: agent.id,
       agentType: agent.type,
-      content: `${agent.name} started.`,
+      content: `${agent.name} analyzing...`,
       thinking: `Task snippet: "${truncate(task.prompt, 96)}"`,
       timestamp: Date.now(),
       status: 'streaming',
     })
 
     this.agents.set(agent.id, { ...agent, status: 'executing' })
-    const response = this.generateAgentResponse(agent.type, task.prompt, task.priority)
-    const chunks = splitForStreaming(response)
 
-    for (const chunk of chunks) {
+    try {
+      const response = await this.callLlmForRole(agent.type, task.prompt, task.priority)
+
       if (state.cancelled) {
         this.agents.set(agent.id, { ...agent, status: 'idle' })
         return
       }
 
-      await delay(randomInt(35, 90))
+      const chunks = splitForStreaming(response)
+      for (const chunk of chunks) {
+        if (state.cancelled) {
+          this.agents.set(agent.id, { ...agent, status: 'idle' })
+          return
+        }
+        queue.push({
+          agentId: agent.id,
+          agentType: agent.type,
+          content: chunk,
+          timestamp: Date.now(),
+          status: 'streaming',
+        })
+      }
+
+      this.agents.set(agent.id, { ...agent, status: 'complete' })
       queue.push({
         agentId: agent.id,
         agentType: agent.type,
-        content: chunk,
+        content: 'Completed.',
         timestamp: Date.now(),
-        status: 'streaming',
+        status: 'complete',
+      })
+    } catch (error) {
+      this.agents.set(agent.id, { ...agent, status: 'error' })
+      queue.push({
+        agentId: agent.id,
+        agentType: agent.type,
+        content: error instanceof Error ? error.message : 'LLM call failed.',
+        timestamp: Date.now(),
+        status: 'error',
       })
     }
-
-    this.agents.set(agent.id, { ...agent, status: 'complete' })
-    queue.push({
-      agentId: agent.id,
-      agentType: agent.type,
-      content: 'Completed.',
-      timestamp: Date.now(),
-      status: 'complete',
-    })
   }
 
-  private generateAgentResponse(agentType: AgentType, prompt: string, priority: OrchestrationTask['priority']): string {
-    const taskHint = truncate(prompt, 120)
-
+  /**
+   * AETHEL FUSION: Real LLM call routed through the intelligent model router.
+   * Replaces the old static `generateAgentResponse()` placebo.
+   */
+  private async callLlmForRole(
+    agentType: AgentType,
+    prompt: string,
+    priority: OrchestrationTask['priority']
+  ): Promise<string> {
     const profile = AGENT_ROLE_PROFILES[agentType]
-    const base = profile.guidance(taskHint)
+    const taskHint = truncate(prompt, 120)
+    const roleGuidance = profile.guidance(taskHint)
 
     const priorityHint =
       priority === 'high'
@@ -395,7 +424,31 @@ export class AgentOrchestrator {
           ? 'Priority=low: focus on safe incremental closure.'
           : 'Priority=normal: balance reliability and speed.'
 
-    return `${base} ${priorityHint} ${ORCHESTRATOR_DISCLAIMER}`
+    const fusionConfig = resolveTaskKindForRole(agentType)
+
+    const systemPrompt = [
+      `You are the ${profile.name} role in a multi-agent orchestration.`,
+      `Your role: ${profile.role}`,
+      `Your scope: ${profile.scope}`,
+      roleGuidance,
+      priorityHint,
+      ORCHESTRATOR_DISCLAIMER,
+    ].join('\n')
+
+    const result = await agentLlmChat({
+      kind: fusionConfig.taskKind,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt },
+      ],
+      options: {
+        budget: fusionConfig.budget,
+        maxTokens: 2000,
+        temperature: 0.3,
+      },
+    })
+
+    return result.content
   }
 
   getAgentStatus(): Agent[] {
@@ -422,14 +475,6 @@ function splitForStreaming(input: string): string[] {
 function truncate(input: string, limit: number): string {
   if (input.length <= limit) return input
   return `${input.slice(0, Math.max(0, limit - 3))}...`
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
 let orchestrator: AgentOrchestrator | null = null

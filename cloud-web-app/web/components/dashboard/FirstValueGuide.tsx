@@ -48,7 +48,7 @@ export function FirstValueGuide({
   onOpenIdePreview,
   onDismiss,
 }: FirstValueGuideProps) {
-  const primaryButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-4 py-2 text-xs font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)] hover:bg-[var(--aethel-text-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const primaryButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-4 py-2 text-xs font-semibold text-[var(--aethel-surface-primary)] shadow-[var(--aethel-shadow-md)] hover:bg-[var(--aethel-text-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
   const secondaryButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-4 py-2 text-xs font-medium text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
   const ghostButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 

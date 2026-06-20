@@ -7,6 +7,9 @@ import {
   Search,
   Settings,
   Sparkles,
+  Layers,
+  Music,
+  Video
 } from 'lucide-react';
 import type { BottomPanelMode, PanelState } from './types';
 import {
@@ -98,10 +101,9 @@ export function HeaderIdentity({
       <button
         type="button"
         onClick={onToggleSidebar}
+        className="min-h-[44px] min-w-[44px] sm:min-h-[34px] sm:min-w-[34px]"
         style={{
           ...iconButtonStyle,
-          minWidth: '34px',
-          minHeight: '34px',
           color: TEXT_SECONDARY,
           display: 'flex',
           alignItems: 'center',
@@ -176,6 +178,9 @@ export function HeaderWorkspaceControls({
   headerExtras,
   onOpenCommandPalette,
 }: HeaderWorkspaceControlsProps) {
+  // Mock state para visualização dos contextos da Wave 12.0
+  const activeWorkspace: string = 'CODE';
+
   return (
     <div
       style={{
@@ -188,6 +193,56 @@ export function HeaderWorkspaceControls({
         scrollbarWidth: 'none',
       }}
     >
+      {/* Contextual Workspaces (Zen Bar) */}
+      <div style={{
+        display: 'flex',
+        background: 'rgba(0,0,0,0.4)',
+        borderRadius: tokens.radius.full,
+        border: `1px solid ${BORDER_SECONDARY}`,
+        padding: '2px',
+        gap: '2px'
+      }}>
+        <button style={{
+          ...iconButtonStyle,
+          borderRadius: tokens.radius.full,
+          background: activeWorkspace === 'CODE' ? 'rgba(255,255,255,0.1)' : 'transparent',
+          color: activeWorkspace === 'CODE' ? TEXT_PRIMARY : TEXT_TERTIARY,
+          padding: '4px 12px',
+          fontSize: '12px',
+          fontWeight: 600,
+          display: 'flex',
+          gap: '6px'
+        }}>
+          <Code2 size={14} /> CODE
+        </button>
+        <button style={{
+          ...iconButtonStyle,
+          borderRadius: tokens.radius.full,
+          background: activeWorkspace === 'SCENE' ? 'rgba(255,255,255,0.1)' : 'transparent',
+          color: activeWorkspace === 'SCENE' ? TEXT_PRIMARY : TEXT_TERTIARY,
+          padding: '4px 12px',
+          fontSize: '12px',
+          fontWeight: 600,
+          display: 'flex',
+          gap: '6px'
+        }}>
+          <Layers size={14} /> SCENE
+        </button>
+        <button style={{
+          ...iconButtonStyle,
+          borderRadius: tokens.radius.full,
+          background: activeWorkspace === 'AUDIO' ? 'rgba(255,255,255,0.1)' : 'transparent',
+          color: activeWorkspace === 'AUDIO' ? TEXT_PRIMARY : TEXT_TERTIARY,
+          padding: '4px 12px',
+          fontSize: '12px',
+          fontWeight: 600,
+          display: 'flex',
+          gap: '6px'
+        }}>
+          <Music size={14} /> AUDIO
+        </button>
+      </div>
+
       {headerExtras ? <div style={floatingClusterStyle}>{headerExtras}</div> : null}
 
       {onOpenCommandPalette ? (
@@ -230,10 +285,9 @@ export function HeaderPrimaryActions({
         type="button"
         onClick={onOpenSettings}
         disabled={!onOpenSettings}
+        className="min-h-[44px] min-w-[44px] sm:min-h-[34px] sm:min-w-[34px]"
         style={{
           ...iconButtonStyle,
-          minWidth: '34px',
-          minHeight: '34px',
           color: TEXT_SECONDARY,
           opacity: onOpenSettings ? 1 : 0.65,
           border: `1px solid ${BORDER_SECONDARY}`,

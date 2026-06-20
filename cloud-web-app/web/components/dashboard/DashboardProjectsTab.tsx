@@ -32,9 +32,9 @@ type ProjectTypeOption = {
 }
 
 const PANEL_CLASS =
-  'rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.16)]'
+  'rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] p-6 shadow-[var(--aethel-shadow-lg)]'
 const INPUT_CLASS = `h-12 w-full rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
-const PRIMARY_BUTTON_CLASS = `inline-flex min-h-11 items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)] hover:bg-[var(--aethel-text-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+const PRIMARY_BUTTON_CLASS = `inline-flex min-h-11 items-center justify-center rounded-2xl bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[var(--aethel-shadow-md)] hover:bg-[var(--aethel-text-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 const SECONDARY_BUTTON_CLASS = `inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 const DANGER_BUTTON_CLASS = `inline-flex min-h-10 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
@@ -178,7 +178,7 @@ export function DashboardProjectsTab({
         </div>
       </div>
 
-      <section className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] p-5 shadow-[0_20px_70px_rgba(2,6,23,0.18)]">
+      <section className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] p-5 shadow-[var(--aethel-shadow-lg)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Workspace stage</p>

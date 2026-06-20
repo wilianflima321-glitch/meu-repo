@@ -146,9 +146,10 @@ export function InlineAIComposer({
   return (
     <div
       style={{
-        padding: tokens.spacing['4'],
-        borderTop: `1px solid ${BORDER_SECONDARY}`,
-        background: mixColor(SURFACE_SECONDARY, 72),
+        padding: tokens.spacing['2'],
+        borderRadius: tokens.radius['2xl'],
+        background: mixColor(SURFACE_SECONDARY, 85),
+        backdropFilter: 'blur(12px)',
       }}
     >
       <div
@@ -172,14 +173,15 @@ export function InlineAIComposer({
       <div
         style={{
           display: 'flex',
-          alignItems: 'flex-end',
+          alignItems: 'center',
           gap: tokens.spacing['2'],
-          padding: tokens.spacing['3'],
+          padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
           background: SURFACE_PRIMARY,
           border: `1px solid ${isFocused ? BORDER_FOCUS : BORDER_SECONDARY}`,
-          borderRadius: tokens.radius.xl,
-          boxShadow: isFocused ? FOCUS_RING : 'none',
-          transition: `border-color ${tokens.animation.duration.fast}, box-shadow ${tokens.animation.duration.fast}`,
+          borderRadius: tokens.radius.full,
+          boxShadow: isFocused ? FOCUS_RING : (isLoading ? `0 0 15px ${PRIMARY_GRADIENT.split(' ')[1] || 'var(--aethel-primary)'}` : 'none'),
+          transition: `all ${tokens.animation.duration.normal} ease-out`,
+          animation: isLoading ? 'pulse 2s infinite' : 'none',
         }}
         onFocusCapture={() => setIsFocused(true)}
         onBlurCapture={(event) => {
@@ -216,39 +218,35 @@ export function InlineAIComposer({
           onClick={onSend}
           disabled={!hasInput || isLoading}
           style={{
-            padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
+            padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
             background: hasInput && !isLoading ? PRIMARY_GRADIENT : SURFACE_TERTIARY,
             border: 'none',
-            borderRadius: tokens.radius.lg,
+            borderRadius: tokens.radius.full,
             color: TEXT_PRIMARY,
             cursor: hasInput && !isLoading ? 'pointer' : 'not-allowed',
             opacity: hasInput && !isLoading ? 1 : 0.5,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: tokens.spacing['2'],
-            minWidth: '96px',
+            minWidth: '32px',
+            height: '32px',
           }}
         >
-          {isLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={16} />}
-          <span>{isLoading ? 'Sending' : 'Send'}</span>
+          {isLoading ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={14} />}
         </button>
       </div>
 
       <div
         style={{
-          marginTop: tokens.spacing['2'],
+          marginTop: tokens.spacing['1'],
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: tokens.spacing['2'],
-          flexWrap: 'wrap',
-          fontSize: tokens.typography.fontSize.xs,
+          justifyContent: 'center',
+          fontSize: '10px',
           color: TEXT_TERTIARY,
         }}
       >
-        <span>{hasInput ? `${input.trim().length} characters ready` : 'Nothing is applied automatically.'}</span>
-        <span>Enter sends | Shift+Enter adds a new line</span>
+        <span>Enter para enviar • Esc para fechar</span>
       </div>
     </div>
   )

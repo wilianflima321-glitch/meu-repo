@@ -3,17 +3,13 @@
 import { AethelViewport3D } from '@/components/viewport/AethelViewport3D';
 import { useGizmoTransformPersistence } from '@/hooks/useGizmoTransformPersistence';
 import type { GizmoAxisPlaneConstraint, GizmoPivotMode } from '@/lib/viewport/gizmo-elite-controls';
+import { useViewportStore } from '@/lib/viewport/useViewportStore';
 
 import SceneViewportWorkflowDrawer from './SceneViewportWorkflowDrawer';
 import type { useSceneViewportSurfaceState } from './useSceneViewportSurfaceState';
 
 type SceneViewportStageProps = Pick<
   ReturnType<typeof useSceneViewportSurfaceState>,
-  | 'objects'
-  | 'selectedIds'
-  | 'transformMode'
-  | 'transformSpace'
-  | 'snapEnabled'
   | 'creativeMode'
   | 'isPlaying'
   | 'timelineTime'
@@ -24,11 +20,6 @@ type SceneViewportStageProps = Pick<
   | 'hairHighlightColor'
   | 'hairVolumeIntensity'
   | 'handleTogglePlay'
-  | 'setObjects'
-  | 'setSelectedIds'
-  | 'setTransformMode'
-  | 'setTransformSpace'
-  | 'setSnapEnabled'
   | 'workflowTool'
   | 'selectedObject'
   | 'visualScript'
@@ -50,11 +41,6 @@ type SceneViewportStageProps = Pick<
 };
 
 export function SceneViewportStage({
-  objects,
-  selectedIds,
-  transformMode,
-  transformSpace,
-  snapEnabled,
   creativeMode,
   isPlaying,
   timelineTime,
@@ -65,11 +51,6 @@ export function SceneViewportStage({
   hairHighlightColor,
   hairVolumeIntensity,
   handleTogglePlay,
-  setObjects,
-  setSelectedIds,
-  setTransformMode,
-  setTransformSpace,
-  setSnapEnabled,
   workflowTool,
   selectedObject,
   visualScript,
@@ -89,6 +70,18 @@ export function SceneViewportStage({
   onGizmoPivotModeChange,
 }: SceneViewportStageProps) {
   const gizmoPersistence = useGizmoTransformPersistence(projectId);
+  const {
+    objects,
+    selectedIds,
+    transformMode,
+    transformSpace,
+    snapEnabled,
+    setObjects,
+    setSelectedIds,
+    setTransformMode,
+    setTransformSpace,
+    setSnapEnabled,
+  } = useViewportStore();
 
   return (
     <div className="relative h-full">

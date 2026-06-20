@@ -1,11 +1,11 @@
 import { OPENROUTER_MODELS } from './openrouter-models';
-import type { Provider } from './advanced-ai-provider-contracts';
+import type { LLMProvider } from '../ai-service.contracts';
 
 const OPENROUTER_MODEL_INFO = Object.fromEntries(
   OPENROUTER_MODELS.map((model) => [
     model.id,
     {
-      provider: 'openrouter' as Provider,
+      provider: 'openrouter' as LLMProvider,
       contextWindow: model.contextWindow,
       maxOutput: model.maxOutput,
       inputCost: model.inputCost,
@@ -18,7 +18,7 @@ const OPENROUTER_MODEL_INFO = Object.fromEntries(
 );
 
 export const MODEL_INFO: Record<string, {
-  provider: Provider;
+  provider: LLMProvider;
   contextWindow: number;
   maxOutput: number;
   inputCost: number;  // per 1M tokens

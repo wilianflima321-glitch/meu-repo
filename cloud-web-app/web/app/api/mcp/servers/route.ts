@@ -2,7 +2,7 @@
  * GET  /api/mcp/servers — list all registered MCP servers for the authenticated user
  * POST /api/mcp/servers — register a new MCP server
  *
- * BACKLOG §10.4 #27 / STRATEGY TRACK E #18
+ * DEBT-DB-001: Fixed — uses typed Prisma access (McpServer model exists in schema).
  */
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
@@ -20,36 +20,32 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // McpServer model is defined in BACKLOG §11 data layer — may not exist yet.
-    // If the model is missing, we return an empty list with a pending flag.
-    const servers = await (prisma as any).mcpServer
-      ?.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          name: true,
-          endpoint: true,
-          transport: true,
-          status: true,
-          lastSeenAt: true,
-          createdAt: true,
-        },
-      })
-      .catch(() => null)
-
-    if (servers === null) {
-      // Schema migration pending — return honest empty response
-      return NextResponse.json({
-        servers: [],
-        _meta: { schemaPending: true, message: 'McpServer Prisma model not yet migrated.' },
-      })
-    }
+    const servers = await prisma.mcpServer.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        endpoint: true,
+        transport: true,
+        status: true,
+        description: true,
+        lastSeenAt: true,
+        createdAt: true,
+      },
+    })
 
     return NextResponse.json({ servers })
   } catch (error) {
     log.error('GET /api/mcp/servers failed', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: 'MCP_SERVERS_FETCH_FAILED',
+        message: 'Failed to fetch MCP servers.',
+        details: process.env.NODE_ENV !== 'production' ? (error as Error)?.message : undefined,
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -76,30 +72,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'name and endpoint are required' }, { status: 400 })
   }
 
-  try {
-    const server = await (prisma as any).mcpServer
-      ?.create({
-        data: {
-          userId,
-          name,
-          endpoint,
-          transport,
-          description: description ?? null,
-          status: 'registered',
-        },
-      })
-      .catch(() => null)
+  // DEBT-DB-001: Web browser cannot use stdio transport — validate
+  // Only Desktop (Tauri) can use stdio; web clients must use SSE or WebSocket.
+  if (transport === 'stdio') {
+    return NextResponse.json(
+      {
+        error: 'INVALID_TRANSPORT',
+        message: 'stdio transport is only supported in Desktop (Tauri). Use "sse" or "websocket" for web.',
+      },
+      { status: 400 }
+    )
+  }
 
-    if (server === null) {
-      return NextResponse.json(
-        { error: 'Schema migration pending — McpServer model not yet available.' },
-        { status: 503 }
-      )
-    }
+  try {
+    const server = await prisma.mcpServer.create({
+      data: {
+        userId,
+        name,
+        endpoint,
+        transport,
+        description: description ?? null,
+        status: 'registered',
+      },
+    })
 
     return NextResponse.json({ server }, { status: 201 })
   } catch (error) {
     log.error('POST /api/mcp/servers failed', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: 'MCP_SERVER_CREATE_FAILED',
+        message: 'Failed to register MCP server.',
+        details: process.env.NODE_ENV !== 'production' ? (error as Error)?.message : undefined,
+      },
+      { status: 500 }
+    )
   }
 }
+

@@ -3,6 +3,8 @@ import { aiService } from '@/lib/ai-service'
 import { aiTools } from '@/lib/ai-tools-registry'
 import { AgentExecutor, AGENTS } from '@/lib/ai-agent-system'
 import { recordTokenUsage } from '@/lib/plan-limits'
+import { reserveCredits, settleCredits, cancelReservation, calculateTokenCost } from '@/lib/credit-wallet'
+import { applyTokenWeight } from '@/lib/ai/model-cost-weights'
 import { createAITraceId, type AITraceSummary } from '@/lib/ai-internal-trace'
 import { persistAITrace } from '@/lib/ai-trace-store'
 import { loadProjectRulesContext } from '@/lib/server/project-rules'
@@ -18,9 +20,14 @@ export async function handleAgentRequest(
   projectId: string | undefined,
   includeTrace: boolean
 ): Promise<NextResponse> {
+  let reservation: any = null;
   try {
     const lastMessage = messages[messages.length - 1]
     const projectRulesContext = await loadProjectRulesContext({ userId, projectId })
+
+    const estimatedTokensForReservation = 10000; // Agent runs are heavy, estimate 10k
+    const estimatedCost = calculateTokenCost('chat', applyTokenWeight(estimatedTokensForReservation, 'openai/gpt-4o-mini'));
+    reservation = await reserveCredits(userId, 'chat', estimatedCost);
 
     const executor = new AgentExecutor(agentId)
     const execution = await executor.execute({
@@ -43,6 +50,12 @@ ${projectRulesContext}`
     const traceId = createAITraceId()
     const estimatedTokens = execution.steps.length * 1000
     await recordTokenUsage(userId, estimatedTokens)
+
+    if (reservation) {
+      const actualWeighted = applyTokenWeight(estimatedTokens, 'openai/gpt-4o-mini');
+      const actualCost = calculateTokenCost('chat', actualWeighted);
+      await settleCredits(reservation.reservationId, actualCost, { actualTokens: estimatedTokens });
+    }
 
     const content = execution.finalAnswer || 'Task completed.'
     const artifactsSummary = execution.artifacts.length > 0
@@ -117,6 +130,9 @@ Artefatos criados: ${execution.artifacts.map((artifact) => artifact.name).join('
       traceSummary: includeTrace ? traceSummary : undefined,
     })
   } catch (error) {
+    if (reservation) {
+      await cancelReservation(reservation.reservationId).catch(() => {});
+    }
     logger.error('Agent execution error', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Agent execution failed' },
@@ -137,7 +153,12 @@ export async function handleStreamingResponse(
 
   const stream = new ReadableStream({
     async start(controller) {
+      let reservation: any = null;
       try {
+        const estimatedWeighted = applyTokenWeight(estimatedTokens, model || 'openai/gpt-4o-mini');
+        const estimatedCost = calculateTokenCost('chat', estimatedWeighted);
+        reservation = await reserveCredits(userId, 'chat', estimatedCost);
+
         const meta = JSON.stringify({ type: 'meta', traceId, model, estimatedTokens })
         controller.enqueue(encoder.encode(`data: ${meta}
 
@@ -162,6 +183,13 @@ export async function handleStreamingResponse(
 
         await recordTokenUsage(userId, result.tokensUsed)
 
+        if (reservation) {
+          const actualWeighted = applyTokenWeight(result.tokensUsed, model || 'openai/gpt-4o-mini');
+          const actualCost = calculateTokenCost('chat', actualWeighted);
+          await settleCredits(reservation.reservationId, actualCost, { actualTokens: result.tokensUsed });
+          reservation = null;
+        }
+
         persistAITrace({
           userId,
           kind: 'stream',
@@ -182,6 +210,9 @@ export async function handleStreamingResponse(
 `))
         controller.close()
       } catch (error) {
+        if (reservation) {
+          await cancelReservation(reservation.reservationId).catch(() => {});
+        }
         logger.error('Advanced chat streaming error', error, { traceId })
         const errorData = JSON.stringify({
           type: 'error',

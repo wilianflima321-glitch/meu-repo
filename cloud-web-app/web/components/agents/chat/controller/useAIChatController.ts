@@ -15,6 +15,7 @@ import { buildTraceArtifact } from '@/components/agents/evidence'
 import type { ChatMessage, ProviderGateState } from '@/components/agents/chat/session-types'
 import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
 import type { MessageContext } from '@/components/ide/AIChatPanelPro.types'
+import { useSceneDigest } from '@/lib/engine/useSceneDigest'
 
 type UseAIChatControllerArgs = {
   currentModel: string
@@ -168,6 +169,7 @@ export function useAIChatController({
 }: UseAIChatControllerArgs) {
   const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null)
   const requestAbortRef = useRef<AbortController | null>(null)
+  const sceneDigest = useSceneDigest()
 
   const tryServeLocalDemo = useCallback(
     (input: { message: string; profile: AdvancedProfile; tags?: string[]; reason: string }): boolean => {
@@ -257,7 +259,10 @@ export function useAIChatController({
       }
 
       const nextMessages = [...messages, userMessage]
-      const requestMessage = applyConsoleModeBias(normalizedMessage, context?.consoleMode)
+      let requestMessage = applyConsoleModeBias(normalizedMessage, context?.consoleMode)
+      if (sceneDigest) {
+        requestMessage += `\n\n[System Context - 3D Viewport State]\nCamera Position: ${sceneDigest.activeCameraPosition ? `[${sceneDigest.activeCameraPosition.map(v => v.toFixed(2)).join(', ')}]` : 'Unknown'}\nSelected Entities: ${sceneDigest.selectedEntities.length > 0 ? JSON.stringify(sceneDigest.selectedEntities) : 'None'}`
+      }
       const requestMessages = nextMessages.map((entry, index) => ({
         role: entry.role,
         content:
@@ -474,6 +479,7 @@ export function useAIChatController({
       setMessages,
       setProviderGate,
       tryServeLocalDemo,
+      sceneDigest,
     ]
   )
 

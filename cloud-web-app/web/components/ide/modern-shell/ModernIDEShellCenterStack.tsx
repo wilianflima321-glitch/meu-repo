@@ -99,8 +99,42 @@ export function ModernIDEShellCenterStack({
         {editor}
       </div>
 
-      {/* Bottom dock — Agents (55%) | Terminal (45%) simultaneously */}
+      {/* Floating Glassmorphism AI Chat (Wave 12.0) */}
       {chatOpen && !isCompact && (
+        <div
+          className="animate-in fade-in slide-in-from-right-4 duration-200"
+          style={{
+            position: 'absolute',
+            right: '24px',
+            top: '24px',
+            bottom: '24px',
+            width: '420px',
+            background: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderRadius: '16px',
+            border: `1px solid rgba(255,255,255,0.1)`,
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            zIndex: 50,
+          }}
+        >
+          <DockColumnHeader
+            label="Aethel Assistant (Cmd+J)"
+            onClose={toggleChat}
+            ariaLabel="Close AI Chat"
+          />
+          <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+            {chat}
+          </div>
+        </div>
+      )}
+
+      {/* Bottom dock — Terminal only now (since chat is floating) */}
+      {/* Terminal in Bottom Dock */}
+      {terminal && !isCompact && (
         <>
           <ResizeHandle
             ariaLabel="Resize bottom dock"
@@ -118,26 +152,11 @@ export function ModernIDEShellCenterStack({
               minHeight: '140px',
               maxHeight: '44%',
             }}
-            aria-label="Bottom dock: Agents and Terminal"
+            aria-label="Bottom dock: Terminal"
           >
-            {/* === Agents Window — 55% === */}
+            {/* === Terminal — 100% === */}
             <div
-              className="flex flex-col overflow-hidden border-r border-[var(--aethel-border-secondary)] min-w-0 flex-[0_0_55%]"
-              aria-label="Agents Window"
-            >
-              <DockColumnHeader
-                label="Agents"
-                onClose={toggleChat}
-                ariaLabel="Close bottom dock"
-              />
-              <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
-                {chat}
-              </div>
-            </div>
-
-            {/* === Terminal — 45% === */}
-            <div
-              className="flex flex-col overflow-hidden min-w-0 flex-[0_0_45%]"
+              className="flex flex-col overflow-hidden min-w-0 flex-1"
               aria-label="Terminal"
             >
               <div

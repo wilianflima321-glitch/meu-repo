@@ -10,6 +10,8 @@ export interface Message {
   content: string;
 }
 
+import type { TaskKind, TaskComplexity } from './ai/intelligent-model-router';
+
 export interface AIQueryOptions {
   provider?: LLMProvider;
   model?: string;
@@ -18,6 +20,10 @@ export interface AIQueryOptions {
   systemPrompt?: string;
   userId?: string; // Para tracking e shadow ban
   bypassEmergency?: boolean; // Para admin override
+  taskKind?: TaskKind;
+  complexity?: TaskComplexity;
+  apiKeyOverride?: string; // BYOK - Bring Your Own Key override
+  isBYOK?: boolean; // Se true, não desconta do ledger da Aethel
 }
 
 export interface AIResponse {

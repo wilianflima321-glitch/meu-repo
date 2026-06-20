@@ -83,9 +83,9 @@ forbidCspToken(csp, 'script-src', "'unsafe-eval'", 'production unsafe-eval')
 forbidCspToken(csp, 'script-src', 'https:', 'remote production scripts')
 forbidCspToken(csp, 'default-src', '*', 'wildcard default source')
 
-requireCspToken(devCsp, 'connect-src', 'http://localhost:3000', 'Next.js dev server')
-requireCspToken(devCsp, 'connect-src', 'ws://localhost:3000', 'Next.js dev websocket')
-requireCspToken(devCsp, 'script-src', "'unsafe-eval'", 'dev-only eval for Next.js tooling')
+requireCspToken(devCsp, 'connect-src', 'http://127.0.0.1:1420', 'Studio Local Vite dev server')
+requireCspToken(devCsp, 'connect-src', 'ws://127.0.0.1:1420', 'Studio Local Vite dev websocket')
+requireCspToken(devCsp, 'script-src', "'unsafe-eval'", 'dev-only eval for Vite tooling')
 
 if (tauri?.bundle?.windows?.signCommand && !tauri?.bundle?.windows?.signCommand.includes('%1')) {
   failures.push('tauri.conf.json: Windows signCommand must include the artifact placeholder %1')

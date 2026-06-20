@@ -206,7 +206,7 @@ export const PRODUCT_UX_CHECKS = [
       'Cookie consent, onboarding, command chrome, and viewport controls must not leak Portuguese into screenshots of the authenticated IDE.',
     files: [
       'components/ui/CookieConsent.tsx',
-      'components/Onboarding.tsx',
+      'components/onboarding/Onboarding.tsx',
       'components/ide/fullscreen/WorkbenchEditorToolbar.tsx',
       'components/ide/modern-shell/chromeHeaderParts.tsx',
       'components/ide/fullscreen/WorkbenchPreviewPane.tsx',

@@ -10,7 +10,7 @@ export class BVHBuilder {
   private maxTrianglesPerLeaf: number = 4;
   private maxDepth: number = 32;
 
-  build(meshes: THREE.Mesh[]): void {
+  async build(meshes: THREE.Mesh[]): Promise<void> {
     this.triangles = [];
     this.nodes = [];
     this.materials = [];
@@ -18,13 +18,14 @@ export class BVHBuilder {
     // Extract triangles from meshes
     for (const mesh of meshes) {
       this.extractTriangles(mesh);
+      await new Promise(r => setTimeout(r, 0)); // Yield to event loop
     }
 
     if (this.triangles.length === 0) return;
 
     // Build BVH
     const indices = this.triangles.map((_, i) => i);
-    this.buildNode(indices, 0);
+    await this.buildNode(indices, 0);
   }
 
   private extractTriangles(mesh: THREE.Mesh): void {
@@ -104,7 +105,12 @@ export class BVHBuilder {
     }
   }
 
-  private buildNode(indices: number[], depth: number): number {
+  private async buildNode(indices: number[], depth: number): Promise<number> {
+    // Yield to event loop occasionally to prevent blocking the main thread
+    if (depth > 0 && depth % 4 === 0) {
+      await new Promise(r => setTimeout(r, 0));
+    }
+
     const nodeIndex = this.nodes.length;
 
     // Calculate bounding box
@@ -155,8 +161,8 @@ export class BVHBuilder {
     const rightIndices = indices.slice(mid);
 
     // Recursively build children
-    node.leftChild = this.buildNode(leftIndices, depth + 1);
-    node.rightChild = this.buildNode(rightIndices, depth + 1);
+    node.leftChild = await this.buildNode(leftIndices, depth + 1);
+    node.rightChild = await this.buildNode(rightIndices, depth + 1);
 
     return nodeIndex;
   }

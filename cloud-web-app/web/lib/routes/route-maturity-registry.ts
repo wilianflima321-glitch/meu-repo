@@ -38,6 +38,7 @@ export const ROUTE_MATURITY_REGISTRY: RouteEntry[] = [
   { path: '/chat', maturity: 'BETA', label: 'AI Chat', notes: 'Converges into the IDE agent sidecar' },
   { path: '/admin', maturity: 'BETA', label: 'Admin Panel', notes: 'Visible navigation is compressed to six operator areas' },
   { path: '/marketplace', maturity: 'BETA', label: 'Marketplace', notes: 'Parcialmente funcional' },
+  { path: '/arcade', maturity: 'BETA', label: 'Arcade', notes: 'Published games showcase; playable once a Web export build is ready' },
   { path: '/team', maturity: 'BETA', label: 'Team Management' },
   { path: '/studio', maturity: 'BETA', label: 'Creative Studio', notes: 'Mission-first creative hub for game, film, VFX, material, animation, and audio routes' },
   { path: '/studio/level', maturity: 'BETA', label: 'Level Studio', notes: 'Wires the existing LevelEditor into the canonical Studio shell' },

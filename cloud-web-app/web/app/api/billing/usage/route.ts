@@ -141,7 +141,7 @@ export async function GET(req: NextRequest) {
           },
           apiCalls: {
             used: requestsUsed || 0,
-            limit: planLimits.requestsPerHour * 24 * 30, // Estimativa mensal baseada em hora
+            limit: planLimits.requestsPerDay * 30, // Estimativa mensal baseada em dia
           },
           collaborators: {
             used: collaboratorCount,

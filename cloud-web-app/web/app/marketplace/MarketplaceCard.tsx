@@ -7,6 +7,7 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import type { MarketplaceCardProps } from './marketplace-page.types'
+import { CANONICAL_FOCUS } from '@/lib/canonical-spacing'
 import {
   getExtensionBadge,
   isVerifiedExtension,
@@ -31,9 +32,9 @@ export function MarketplaceCard({
       : 'Awaiting provenance review')
 
   return (
-    <article className="flex h-full flex-col border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] p-5 shadow-[0_18px_60px_rgba(2,6,23,0.18)] transition hover:border-[var(--aethel-border-secondary)]">
+    <article className="flex h-full flex-col rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] p-5 shadow-[var(--aethel-shadow-md)] transition hover:border-[var(--aethel-border-secondary)]">
       <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] text-sm font-bold text-[var(--aethel-text-primary)]">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] text-sm font-bold text-[var(--aethel-text-primary)]">
           {getExtensionBadge(extension)}
         </div>
         <div className="min-w-0 flex-1">
@@ -86,26 +87,23 @@ export function MarketplaceCard({
       </details>
       <div className="mt-auto pt-5">
         {extension.installed ? (
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="flex items-center justify-between gap-3">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-success-light)]">
+              <CheckCircle2 className="h-3 w-3" /> Installed
+            </span>
             <button
               type="button"
               onClick={() => onUninstall(extension.id)}
-              className="inline-flex min-h-10 items-center justify-center border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 text-xs font-semibold text-[var(--aethel-error-light)] transition hover:brightness-110"
+              className={`inline-flex min-h-10 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 text-xs font-semibold text-[var(--aethel-error-light)] transition hover:brightness-110 ${CANONICAL_FOCUS}`}
             >
               Uninstall
-            </button>
-            <button
-              type="button"
-              className="inline-flex min-h-10 items-center justify-center border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_45%,transparent)] px-3 text-xs font-semibold text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
-            >
-              Configure
             </button>
           </div>
         ) : (
           <button
             type="button"
             onClick={() => onRequestInstall(extension.id)}
-            className="inline-flex min-h-10 w-full items-center justify-center bg-[var(--aethel-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-primary)] transition hover:brightness-110"
+            className={`inline-flex min-h-10 w-full items-center justify-center rounded-lg bg-[var(--aethel-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-inverse)] transition hover:brightness-110 ${CANONICAL_FOCUS}`}
           >
             Review install
           </button>

@@ -11,6 +11,7 @@ import {
   SettingsAIProvidersPanel,
   type ProviderStatusResponse,
 } from './_components/SettingsAIProvidersPanel'
+import AccountDataPanel from './_components/AccountDataPanel'
 
 type Tab = 'overview' | 'editor' | 'profile' | 'security' | 'billing' | 'api'
 
@@ -175,6 +176,7 @@ export default function SettingsPage() {
                   <TwoFactorSecurityPanel />
                 </div>
                 <UserAuditLogPanel />
+                <AccountDataPanel />
               </div>
             )}
 

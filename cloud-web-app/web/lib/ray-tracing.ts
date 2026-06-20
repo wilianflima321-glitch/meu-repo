@@ -27,6 +27,7 @@ export type { BVHNode, RayTracingConfig, RTMaterial, Triangle } from './ray-trac
 import { BVHBuilder } from './ray-tracing-bvh';
 import { Denoiser } from './ray-tracing-denoiser';
 import { createRayTracingMaterial } from './ray-tracing-material';
+import { createComponentLogger } from '@/lib/observability/logger';
 export { BVHBuilder } from './ray-tracing-bvh';
 export { Denoiser } from './ray-tracing-denoiser';
 
@@ -99,9 +100,12 @@ export class RayTracingPass {
       magFilter: THREE.LinearFilter
     });
 
-    // Build BVH
+    // Build BVH asynchronously
     this.bvh = new BVHBuilder();
-    this.rebuildBVH();
+    this.rebuildBVH().catch(e => {
+      const log = createComponentLogger('ray-tracing');
+      log.error('Initial BVH build failed:', e);
+    });
 
     // Create ray tracing material
     this.material = this.createMaterial();
@@ -115,7 +119,7 @@ export class RayTracingPass {
     this.quadCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   }
 
-  rebuildBVH(): void {
+  async rebuildBVH(): Promise<void> {
     const meshes: THREE.Mesh[] = [];
 
     this.scene.traverse((obj) => {
@@ -124,7 +128,7 @@ export class RayTracingPass {
       }
     });
 
-    this.bvh.build(meshes);
+    await this.bvh.build(meshes);
 
     // Update textures
     const textures = this.bvh.createDataTextures();
@@ -284,8 +288,8 @@ export class RayTracingManager {
     return result;
   }
 
-  rebuildAccelerationStructure(): void {
-    this.rayTracingPass.rebuildBVH();
+  async rebuildAccelerationStructure(): Promise<void> {
+    await this.rayTracingPass.rebuildBVH();
     this.rayTracingPass.invalidate();
   }
 

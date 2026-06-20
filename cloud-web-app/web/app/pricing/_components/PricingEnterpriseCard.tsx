@@ -12,7 +12,7 @@ export function PricingEnterpriseCard({ enterprisePlan, isAnnual }: PricingEnter
 
   return (
     <section className="mx-auto mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
-      <article className="overflow-hidden rounded-[28px] border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[var(--aethel-panel)] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
+      <article className="overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[var(--aethel-panel)] shadow-[var(--aethel-shadow-xl)]">
         <div className="grid gap-8 p-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:p-8">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">Enterprise</p>
@@ -30,7 +30,7 @@ export function PricingEnterpriseCard({ enterprisePlan, isAnnual }: PricingEnter
             </div>
           </div>
 
-          <div className="grid gap-4 rounded-[24px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_68%,transparent)] p-5 md:grid-cols-2">
+          <div className="grid gap-4 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_68%,transparent)] p-5 md:grid-cols-2">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Base price</p>
               <p className="mt-2 text-3xl font-bold text-[var(--aethel-text-primary)]">R${enterprisePlan.displayPriceBRL}</p>
@@ -38,7 +38,7 @@ export function PricingEnterpriseCard({ enterprisePlan, isAnnual }: PricingEnter
             </div>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Capacity</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{formatLimit(enterprisePlan.limits.projects)} projects, {formatStorage(enterprisePlan.limits.storage)} of storage, enterprise requests, and guided rollout.</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{formatLimit(enterprisePlan.limits.cloudProjectsMax)} projects, {formatStorage(enterprisePlan.limits.storage)} of storage, enterprise requests, and guided rollout.</p>
             </div>
             <div className="md:col-span-2">
               <ul className="space-y-2 text-sm text-[var(--aethel-text-secondary)]">

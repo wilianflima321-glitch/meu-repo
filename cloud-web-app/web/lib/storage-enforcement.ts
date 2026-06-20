@@ -85,10 +85,10 @@ export async function getStorageUsage(userId: string): Promise<StorageUsage> {
   const limit = STORAGE_LIMITS[plan];
 
   // Calcular uso real se não tiver cache
-  let used = user.storageUsed || 0;
+  let used = user.storageUsed ?? 0;
 
-  // Se não tem cache, calcular
-  if (!user.storageUsed) {
+  // Se não tem cache, calcular (0 é válido)
+  if (user.storageUsed === null || user.storageUsed === undefined) {
     used = await calculateStorageUsage(userId);
     
     // Atualizar cache

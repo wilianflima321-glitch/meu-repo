@@ -63,9 +63,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       )
     }
 
-    if (entitlements.plan.limits.projects !== -1) {
+    if (entitlements.plan.limits.cloudProjectsMax !== -1) {
       const existingProjectCount = await prisma.project.count({ where: { userId: user.userId } })
-      if (existingProjectCount >= entitlements.plan.limits.projects) {
+      if (existingProjectCount >= entitlements.plan.limits.cloudProjectsMax) {
         return NextResponse.json(
           {
             error: 'PROJECT_LIMIT_REACHED',

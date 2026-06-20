@@ -37,7 +37,17 @@ function requirePatternAny(relativePaths, pattern, reason) {
   if (!pattern.test(content)) failures.push(`${relativePaths.join(', ')}: missing pattern ${pattern} (${reason})`)
 }
 
-const agentToolRegistryFiles = ['lib/production/agent-tool-bus.ts', 'lib/production/agent-tool-bus-catalog.ts']
+const agentToolRegistryFiles = [
+  'lib/production/agent-tool-bus.ts',
+  'lib/production/agent-tool-bus-catalog.ts',
+  'lib/production/agent-tool-bus-catalog.data.ts',
+  'lib/production/agent-tool-bus-catalog.core-data.ts',
+  'lib/production/agent-tool-bus-catalog.runtime-data.ts',
+]
+const runtimeToolchainFiles = [
+  'lib/runtime/runtime-engine-spine.ts',
+  'lib/runtime/runtime-engine-toolchain-registry.ts',
+]
 
 requireFile('lib/runtime/runtime-engine-spine.ts', 'runtime engine spine contracts must exist')
 requirePattern('lib/runtime/runtime-engine-spine.ts', /hybrid|wgpu-native|cloud-renderer|browser-preview|held/i, 'runtime must model hybrid wgpu/browser/cloud targets')
@@ -46,7 +56,7 @@ requirePattern('lib/runtime/runtime-engine-spine.ts', /sha256-required-before-ex
 requirePattern('lib/runtime/runtime-engine-spine.ts', /gltf-transform/, 'glTF Transform must be in the curated toolchain')
 requirePattern('lib/runtime/runtime-engine-spine.ts', /meshoptimizer/, 'meshoptimizer must be in the curated toolchain')
 requirePattern('lib/runtime/runtime-engine-spine.ts', /ktx-software-basisu/, 'KTX/Basis must be in the curated toolchain')
-requirePattern('lib/runtime/runtime-engine-spine.ts', /ffmpeg/, 'FFmpeg must be in the curated media toolchain')
+requirePatternAny(runtimeToolchainFiles, /ffmpeg/, 'FFmpeg must be in the curated media toolchain')
 requirePattern('lib/runtime/runtime-engine-spine.ts', /openusd-tools/, 'OpenUSD tools must be metadata-first capable')
 requirePattern('lib/runtime/runtime-engine-spine.ts', /recast-detour/, 'Recast/Detour navmesh adapter must be in the optional toolchain')
 requirePattern('lib/runtime/runtime-engine-spine.ts', /rapier-physics/, 'Rapier physics adapter must be in the optional toolchain')

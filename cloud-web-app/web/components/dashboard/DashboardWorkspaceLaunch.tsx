@@ -90,12 +90,12 @@ export function DashboardWorkspaceLaunch({
 
   return (
     <section
-      className="overflow-hidden rounded-[34px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] shadow-[0_30px_100px_rgba(2,6,23,0.34)]"
+      className="overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] shadow-[var(--aethel-shadow-xl)]"
       data-dashboard-firebase-launch="workspace-entry"
       data-dashboard-command-card="one-glance"
     >
-      <div className="grid min-h-[460px] gap-0 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]">
-        <div className="flex min-h-[460px] flex-col justify-center px-5 py-7 sm:px-8 lg:px-12">
+      <div className="grid min-h-0 gap-0 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]">
+        <div className="flex min-h-0 flex-col justify-center px-5 py-7 sm:px-8 lg:px-12">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">
               Aethel Studio
@@ -118,7 +118,7 @@ export function DashboardWorkspaceLaunch({
           </div>
 
           <form
-            className="mt-9 overflow-hidden rounded-[24px] border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_62%,transparent)] shadow-[0_18px_60px_rgba(2,6,23,0.24)]"
+            className="mt-9 overflow-hidden rounded-2xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_62%,transparent)] shadow-[var(--aethel-shadow-lg)]"
             onSubmit={(event) => {
               event.preventDefault()
               launchWithCopilot()
@@ -199,7 +199,7 @@ export function DashboardWorkspaceLaunch({
                   key={project.id}
                   type="button"
                   onClick={launchIde}
-                  className="group flex w-full items-center justify-between gap-3 rounded-[20px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] px-4 py-3 text-left transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)]"
+                  className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] px-4 py-3 text-left transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)]"
                 >
                   <div className="min-w-0">
                     <div className="truncate text-sm font-semibold text-[var(--aethel-text-primary)]">{project.name}</div>
@@ -211,13 +211,13 @@ export function DashboardWorkspaceLaunch({
                 </button>
               ))
             ) : (
-              <div className="rounded-[20px] border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-4 py-5 text-sm text-[var(--aethel-text-secondary)]">
+              <div className="rounded-xl border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-4 py-5 text-sm text-[var(--aethel-text-secondary)]">
                 No workspace yet. Describe a mission and Copilot will create the first handoff.
               </div>
             )}
           </div>
 
-          <div className="mt-5 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-4 py-4">
+          <div className="mt-5 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-4 py-4">
             <div className="flex items-center justify-between gap-3">
               <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Next actions</p>
               <Bot className="h-4 w-4 text-[var(--aethel-text-quaternary)]" />

@@ -3,6 +3,8 @@ export type ToolExecutionContext = {
   projectId?: string
   agent?: string
   enforceAgentScope?: boolean
+  /** When true, mutating tools route through enforced tool-bus governance. */
+  enforceToolBus?: boolean
 }
 
 export function getContext(params: Record<string, unknown>): ToolExecutionContext {
@@ -15,10 +17,11 @@ export function getContext(params: Record<string, unknown>): ToolExecutionContex
   const projectId = typeof contextRecord.projectId === 'string' ? contextRecord.projectId.trim() : undefined
   const agent = typeof contextRecord.agent === 'string' ? contextRecord.agent.trim() : undefined
   const enforceAgentScope = contextRecord.enforceAgentScope === true
+  const enforceToolBus = contextRecord.enforceToolBus === true
   if (!userId) {
     throw Object.assign(new Error('MISSING_USER'), { code: 'MISSING_USER' })
   }
-  return { userId, projectId, agent, enforceAgentScope }
+  return { userId, projectId, agent, enforceAgentScope, enforceToolBus }
 }
 
 export function getStringParam(params: Record<string, unknown>, key: string, fallback = ''): string {

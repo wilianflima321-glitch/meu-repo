@@ -4,13 +4,23 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { aiService } from '@/lib/ai-service';
 import type { LLMProvider, Message } from '@/lib/ai-service';
-import { checkModelAccess } from '@/lib/plan-limits';
+import { checkModelAccess, recordTokenUsage } from '@/lib/plan-limits';
 import {
   acquireConcurrencyLease,
   estimateTokensFromText,
   consumeMeteredUsage,
   releaseConcurrencyLease,
 } from '@/lib/metering';
+
+import {
+  reserveCredits,
+  settleCredits,
+  cancelReservation,
+  checkCreditQuota,
+  createInsufficientCreditsResponse,
+  calculateTokenCost,
+} from '@/lib/credit-wallet';
+import { applyTokenWeight } from '@/lib/ai/model-cost-weights';
 import { capabilityResponse } from '@/lib/server/capability-response';
 import { buildAiProviderSetupMetadata } from '@/lib/capability-constants';
 import {
@@ -21,7 +31,7 @@ import {
   isAiDemoModeEnabled,
 } from '@/lib/server/ai-demo-mode';
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
-import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
+import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit, AI_BYOK_RATE_LIMIT } from '@/lib/server/ai-core-rate-limit';
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
 import { applyProjectRulesToMessages, loadProjectRulesContext } from '@/lib/server/project-rules'
 import {
@@ -96,6 +106,7 @@ function resolveBackendBaseUrl(): string | null {
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   let leaseId: string | null = null;
+  let reservation: any = null;
 
   try {
     const auth = requireAuth(req);
@@ -134,21 +145,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const estimatedPromptTokens = estimateTokensFromText(promptText);
     const estimatedTotalTokens = estimatedPromptTokens + maxTokens;
 
-    const lease = await acquireConcurrencyLease({
-      userId: auth.userId,
-      key: 'api/ai/chat',
-      concurrencyLimit: entitlements.plan.limits.concurrent,
-      ttlSeconds: 90,
-    });
-    leaseId = lease?.leaseId ?? null;
+    const isByok = req.headers.get('x-aethel-byok-active') === '1';
 
-    const decision = await consumeMeteredUsage({
-      userId: auth.userId,
-      limits: entitlements.plan.limits,
-      cost: { requests: 1, tokens: estimatedTotalTokens },
-    });
+    if (isByok) {
+      const rateLimitedByok = enforceAiCoreRateLimit({
+        req,
+        capability: 'AI_CHAT',
+        route: '/api/ai/chat',
+        config: AI_BYOK_RATE_LIMIT,
+      });
+      if (rateLimitedByok) return rateLimitedByok;
+    }
 
-    if (requestedModel) {
+    if (requestedModel && !isByok) {
       const modelCheck = await checkModelAccess(auth.userId, requestedModel)
       if (!modelCheck.allowed) {
         return NextResponse.json(
@@ -158,34 +167,90 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
     }
 
-    const backendBase = resolveBackendBaseUrl();
-    if (backendBase) {
-      const upstream = await fetch(`${backendBase}/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(req.headers.get('authorization') ? { Authorization: req.headers.get('authorization') as string } : {}),
-          'X-Aethel-User-Id': auth.userId,
-        },
-        body: JSON.stringify(body),
+    const lease = await acquireConcurrencyLease({
+      userId: auth.userId,
+      key: 'api/ai/chat',
+      concurrencyLimit: entitlements.plan.limits.concurrent,
+      ttlSeconds: 90,
+    });
+    leaseId = lease?.leaseId ?? null;
+
+    let decision: any = null;
+
+    if (!isByok) {
+      decision = await consumeMeteredUsage({
+        userId: auth.userId,
+        limits: entitlements.plan.limits,
+        cost: { requests: 1, tokens: 0 },
+        modelId: requestedModel || undefined,
       });
 
-      const text = await upstream.text();
-      return new NextResponse(text, {
-        status: upstream.status,
-        headers: {
-          'Content-Type': upstream.headers.get('content-type') || 'application/json',
-          ...(decision.remaining?.requestsPerHour !== undefined
-            ? { 'X-Usage-Remaining-RequestsPerHour': String(decision.remaining.requestsPerHour) }
-            : {}),
-          ...(decision.remaining?.tokensPerDay !== undefined
-            ? { 'X-Usage-Remaining-TokensPerDay': String(decision.remaining.tokensPerDay) }
-            : {}),
-          ...(decision.remaining?.tokensPerMonth !== undefined
-            ? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
-            : {}),
-        },
-      });
+      const modelName = requestedModel || 'openai/gpt-4o-mini';
+      const estimatedTotalTokensWeighted = applyTokenWeight(estimatedTotalTokens, modelName);
+      const estimatedCostCredits = calculateTokenCost('chat', estimatedTotalTokensWeighted);
+
+      reservation = await reserveCredits(
+        auth.userId,
+        'chat',
+        estimatedCostCredits
+      );
+
+      if (!reservation) {
+        const check = await checkCreditQuota(auth.userId, 'chat', estimatedCostCredits);
+        return NextResponse.json(createInsufficientCreditsResponse(check), { status: 402 });
+      }
+    }
+
+    const backendBase = resolveBackendBaseUrl();
+    if (backendBase) {
+      try {
+        const upstream = await fetch(`${backendBase}/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(req.headers.get('authorization') ? { Authorization: req.headers.get('authorization') as string } : {}),
+            'X-Aethel-User-Id': auth.userId,
+          },
+          body: JSON.stringify(body),
+        });
+
+        const text = await upstream.text();
+        let actualTokens = 0;
+        try {
+          const parsed = JSON.parse(text);
+          actualTokens = parsed.tokensUsed || 0;
+        } catch {}
+
+        if (reservation) {
+          const actualWeighted = applyTokenWeight(actualTokens || estimatedTotalTokens, requestedModel || 'openai/gpt-4o-mini');
+          const actualCost = calculateTokenCost('chat', actualWeighted);
+          await settleCredits(reservation.reservationId, actualCost, { actualTokens });
+          await recordTokenUsage(auth.userId, actualWeighted).catch(() => {});
+          reservation = null;
+        }
+
+        return new NextResponse(text, {
+          status: upstream.status,
+          headers: {
+            'Content-Type': upstream.headers.get('content-type') || 'application/json',
+            ...(decision?.remaining?.requestsPerDay !== undefined
+              ? { 'X-Usage-Remaining-RequestsPerDay': String(decision.remaining.requestsPerDay) }
+              : {}),
+            ...(decision?.remaining?.tokensPerDay !== undefined
+              ? { 'X-Usage-Remaining-TokensPerDay': String(decision.remaining.tokensPerDay) }
+              : {}),
+            ...(decision?.remaining?.tokensPerMonth !== undefined
+              ? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
+              : {}),
+          },
+        });
+      } catch (err) {
+        if (reservation) {
+          await cancelReservation(reservation.reservationId).catch(() => {});
+          reservation = null;
+        }
+        throw err;
+      }
     }
 
     if (aiService.getAvailableProviders().length === 0) {
@@ -195,13 +260,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         message: 'AI provider not configured. Configure a real provider to run AI chat.',
         missingEnv: ['OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY'],
       })
-      if (blocked) return blocked
+      if (blocked) {
+        if (reservation) {
+          await cancelReservation(reservation.reservationId).catch(() => {});
+          reservation = null;
+        }
+        return blocked;
+      }
       if (isAiDemoModeEnabled()) {
         const demoUsage = await consumeAiDemoUsage({
           userId: auth.userId,
           route: '/api/ai/chat',
         })
         if (!demoUsage.allowed) {
+          if (reservation) {
+            await cancelReservation(reservation.reservationId).catch(() => {});
+            reservation = null;
+          }
           return capabilityResponse({
             error: 'AI_DEMO_LIMIT_REACHED',
             status: 429,
@@ -219,6 +294,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             },
           })
         }
+
+        if (reservation) {
+          await settleCredits(reservation.reservationId, 0, { actualTokens: 0 });
+          reservation = null;
+        }
+
         const demo = demoRouteMetadata({ route: '/api/ai/chat', capability: 'AI_CHAT' });
         return NextResponse.json(
           {
@@ -236,13 +317,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           },
           {
             headers: {
-              ...(decision.remaining?.requestsPerHour !== undefined
-                ? { 'X-Usage-Remaining-RequestsPerHour': String(decision.remaining.requestsPerHour) }
+              ...(decision?.remaining?.requestsPerDay !== undefined
+                ? { 'X-Usage-Remaining-RequestsPerDay': String(decision.remaining.requestsPerDay) }
                 : {}),
-              ...(decision.remaining?.tokensPerDay !== undefined
+              ...(decision?.remaining?.tokensPerDay !== undefined
                 ? { 'X-Usage-Remaining-TokensPerDay': String(decision.remaining.tokensPerDay) }
                 : {}),
-              ...(decision.remaining?.tokensPerMonth !== undefined
+              ...(decision?.remaining?.tokensPerMonth !== undefined
                 ? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
                 : {}),
               'X-Aethel-AI-Demo-Mode': '1',
@@ -250,6 +331,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             },
           }
         );
+      }
+      if (reservation) {
+        await cancelReservation(reservation.reservationId).catch(() => {});
+        reservation = null;
       }
       return capabilityResponse({
         error: 'AI_PROVIDER_NOT_CONFIGURED',
@@ -265,6 +350,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (requestedModel) {
       const inferredProvider = requestedProvider || inferProviderFromModel(requestedModel)
       if (inferredProvider && !aiService.getAvailableProviders().includes(inferredProvider)) {
+        if (reservation) {
+          await cancelReservation(reservation.reservationId).catch(() => {});
+          reservation = null;
+        }
         return capabilityResponse({
           error: 'AI_PROVIDER_NOT_CONFIGURED',
           status: 503,
@@ -296,47 +385,67 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const aiMessagesWithHandoff = applyAgentHandoffContextToMessages(aiMessages, agentHandoff.context)
     const aiMessagesWithRules = applyProjectRulesToMessages(aiMessagesWithHandoff, projectRulesContext)
 
-    const response = await aiService.chat({
-      messages: aiMessagesWithRules,
-      model: requestedModel,
-      provider: requestedProvider,
-      temperature: readNumber(body.temperature),
-      maxTokens: resolvedMaxTokens,
-    });
+    try {
+      const response = await aiService.chat({
+        messages: aiMessagesWithRules,
+        model: requestedModel,
+        provider: requestedProvider,
+        temperature: readNumber(body.temperature),
+        maxTokens: resolvedMaxTokens,
+      });
 
-    return NextResponse.json(
-      {
-        content: response.content,
-        provider: response.provider,
-        model: response.model,
-        tokensUsed: response.tokensUsed,
-        latencyMs: response.latencyMs,
-        agentHandoff: agentHandoff.packet
-          ? {
-              agent: agentHandoff.agent,
-              status: agentHandoff.packet.status,
-              lane: agentHandoff.packet.workContract.lane,
-              scopeMode: agentHandoff.packet.workContract.scopeLock.mode,
-              hasManifest: agentHandoff.hasManifest,
-              manifestId: agentHandoff.packet.cartography.manifestId,
-            }
-          : undefined,
-      },
-      {
-        headers: {
-          ...(decision.remaining?.requestsPerHour !== undefined
-            ? { 'X-Usage-Remaining-RequestsPerHour': String(decision.remaining.requestsPerHour) }
-            : {}),
-          ...(decision.remaining?.tokensPerDay !== undefined
-            ? { 'X-Usage-Remaining-TokensPerDay': String(decision.remaining.tokensPerDay) }
-            : {}),
-          ...(decision.remaining?.tokensPerMonth !== undefined
-            ? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
-            : {}),
-        },
+      const actualTokens = response.tokensUsed || 0;
+      if (reservation) {
+        const actualWeighted = applyTokenWeight(actualTokens || estimatedTotalTokens, response.model || requestedModel || 'openai/gpt-4o-mini');
+        const actualCost = calculateTokenCost('chat', actualWeighted);
+        await settleCredits(reservation.reservationId, actualCost, { actualTokens });
+        await recordTokenUsage(auth.userId, actualWeighted).catch(() => {});
+        reservation = null;
       }
-    );
+
+      return NextResponse.json(
+        {
+          content: response.content,
+          provider: response.provider,
+          model: response.model,
+          tokensUsed: response.tokensUsed,
+          latencyMs: response.latencyMs,
+          agentHandoff: agentHandoff.packet
+            ? {
+                agent: agentHandoff.agent,
+                status: agentHandoff.packet.status,
+                lane: agentHandoff.packet.workContract.lane,
+                scopeMode: agentHandoff.packet.workContract.scopeLock.mode,
+                hasManifest: agentHandoff.hasManifest,
+                manifestId: agentHandoff.packet.cartography.manifestId,
+              }
+            : undefined,
+        },
+        {
+          headers: {
+            ...(decision?.remaining?.requestsPerDay !== undefined
+              ? { 'X-Usage-Remaining-RequestsPerDay': String(decision.remaining.requestsPerDay) }
+              : {}),
+            ...(decision?.remaining?.tokensPerDay !== undefined
+              ? { 'X-Usage-Remaining-TokensPerDay': String(decision.remaining.tokensPerDay) }
+              : {}),
+            ...(decision?.remaining?.tokensPerMonth !== undefined
+              ? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
+              : {}),
+          },
+        }
+      );
+    } catch (err) {
+      if (reservation) {
+        await cancelReservation(reservation.reservationId).catch(() => {});
+        reservation = null;
+      }
+      throw err;
+    }
   } catch (error) {
+    if (reservation) {
+      await cancelReservation(reservation.reservationId).catch(() => {});
+    }
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
 

@@ -122,7 +122,7 @@ const NAV_SECTIONS: NavSection[] = [
 function buildSidebarItemClass(isActive: boolean) {
   const base = 'flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left text-sm font-medium transition-all'
   return isActive
-    ? `${base} border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_12px_28px_rgba(2,6,23,0.18)]`
+    ? `${base} border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-primary)] shadow-[var(--aethel-shadow-md)]`
     : `${base} border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] hover:text-[var(--aethel-text-primary)]`
 }
 
@@ -170,7 +170,7 @@ export function AethelDashboardSidebar({
   return (
     <nav
       id="dashboard-sidebar"
-      className={`fixed z-50 h-full w-[292px] shrink-0 transform border-r border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] shadow-[0_30px_80px_rgba(0,0,0,0.30)] transition-transform duration-300 ease-in-out md:sticky md:top-[88px] md:h-[calc(100vh-104px)] md:rounded-r-3xl ${
+      className={`fixed z-50 h-full w-[292px] shrink-0 transform border-r border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] shadow-[var(--aethel-shadow-xl)] transition-transform duration-300 ease-in-out md:sticky md:top-[88px] md:h-[calc(100vh-104px)] md:rounded-r-3xl ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}
       aria-label="Primary Studio navigation"
@@ -215,7 +215,7 @@ export function AethelDashboardSidebar({
           <button
             type="button"
             onClick={onCreateNewSession}
-            className="inline-flex w-full min-w-9 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[var(--aethel-text-primary)] px-3 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_10px_24px_rgba(2,6,23,0.18)] transition hover:bg-[var(--aethel-text-secondary)] active:opacity-80"
+            className="inline-flex w-full min-w-9 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[var(--aethel-text-primary)] px-3 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[var(--aethel-shadow-md)] transition hover:bg-[var(--aethel-text-secondary)] active:opacity-80"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

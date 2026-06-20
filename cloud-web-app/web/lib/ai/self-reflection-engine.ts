@@ -1,15 +1,20 @@
 /**
- * AI SELF-REFLECTION ENGINE (O "CRÍTICO")
- * 
- * Este sistema atua como uma camada de "consciência" sobre a IA geradora.
- * Antes de qualquer mudança ser aplicada ao projeto (jogo/filme), este motor
- * analisa se a mudança faz sentido lógico, físico e narrativo.
- * 
- * OBJETIVO: Zero alucinações. Zero quebra de continuidade.
+ * AI SELF-REFLECTION ENGINE (the "critic")
+ *
+ * Acts as a verification layer over the generative AI. Before a proposed change
+ * is applied to a project (game/film), this engine checks whether the change is
+ * logically, physically, and narratively consistent, and whether it meets the
+ * quality bar.
+ *
+ * Honesty contract: this critic must never rubber-stamp. When it cannot actually
+ * verify a change (no AI provider configured, or the verifier returns an
+ * unparseable response), it FAILS CLOSED — the action is reported as unverified
+ * and not approved — instead of returning a fake `passed: true`.
  */
 
 import { aiService } from '../ai-service';
 
+import { getModelRobustnessProfile } from './model-robustness-profiles'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('ai/self-reflection-engine')
@@ -30,75 +35,155 @@ export interface ReflectionResult {
   approved: boolean;
   critique: string[];
   suggestions: string[];
-  confidenceScore: number; // 0.0 a 1.0
+  confidenceScore: number; // 0.0 to 1.0
+}
+
+interface CheckOutcome {
+  passed: boolean;
+  issues: string[];
+  suggestions: string[];
+  score: number;
 }
 
 export class SelfReflectionEngine {
-  
+
   /**
-   * O "Momento de Dúvida". A IA para e pensa: "Isso que eu vou fazer faz sentido?"
+   * The "moment of doubt": the critic stops and asks whether the proposed
+   * action actually makes sense before it is applied.
    */
   async reflectOnAction(action: ProposedAction, projectContext: ProjectReflectionContext): Promise<ReflectionResult> {
-    log.info(`[SelfReflection] Analisando ação: ${action.type}`);
+    log.info(`[SelfReflection] Reviewing action: ${action.type}`);
 
-    // 1. Verificar Leis da Física e Lógica do Mundo
+    if (aiService.getAvailableProviders().length === 0) {
+      return {
+        approved: false,
+        critique: ['Reflection could not run: no AI provider is configured. The action is unverified.'],
+        suggestions: ['Configure an AI provider to enable self-reflection before applying changes.'],
+        confidenceScore: 0,
+      };
+    }
+
     const physicsCheck = await this.checkPhysicsAndLogic(action, projectContext);
     if (!physicsCheck.passed) {
       return {
         approved: false,
-        critique: ['Violação de lógica física/mundo detectada.', ...physicsCheck.issues],
+        critique: ['World logic / physics violation detected.', ...physicsCheck.issues],
         suggestions: physicsCheck.suggestions,
-        confidenceScore: 0.1
+        confidenceScore: Math.min(0.3, physicsCheck.score),
       };
     }
 
-    // 2. Verificar Continuidade (Timeline/Memória)
     const continuityCheck = await this.checkContinuity(action, projectContext);
     if (!continuityCheck.passed) {
       return {
         approved: false,
-        critique: ['Erro de continuidade temporal/narrativa.', ...continuityCheck.issues],
+        critique: ['Temporal / narrative continuity error.', ...continuityCheck.issues],
         suggestions: continuityCheck.suggestions,
-        confidenceScore: 0.3
+        confidenceScore: Math.min(0.4, continuityCheck.score),
       };
     }
 
-    // 3. Verificar Qualidade de Código/Asset (Padrões AAA)
     const qualityCheck = await this.checkQualityStandards(action);
-    
     return {
       approved: qualityCheck.passed,
       critique: qualityCheck.issues,
       suggestions: qualityCheck.suggestions,
-      confidenceScore: qualityCheck.score
+      confidenceScore: qualityCheck.score,
     };
   }
 
-  private async checkPhysicsAndLogic(action: ProposedAction, context: ProjectReflectionContext): Promise<{passed: boolean, issues: string[], suggestions: string[]}> {
-    // Simulação: Aqui o agente consultaria as regras definidas no DeepContext
-    // Ex: "Se o jogo é medieval, não pode ter nave espacial"
-    
-    const prompt = `
-      Você é o Validador de Lógica.
-      Contexto do Mundo: ${JSON.stringify(context.worldRules || 'Standard Reality')}
-      Ação Proposta: ${JSON.stringify(action)}
-      
-      Essa ação quebra alguma regra física ou lógica estabelecida?
-      Responda JSON: { "passed": boolean, "issues": string[], "suggestions": string[] }
-    `;
-
-    // Conexão real com LLM seria aqui. Mockando para arquitetura inicial.
-    return { passed: true, issues: [], suggestions: [] };
+  /**
+   * Run a single JSON-structured verification through the LLM. Fails closed
+   * (passed=false) when the model is unavailable or returns an unparseable
+   * answer, so an unverifiable action is never silently approved.
+   */
+  private async runJsonCheck(systemPrompt: string, userPrompt: string, label: string): Promise<CheckOutcome> {
+    try {
+      const response = await aiService.query(userPrompt, undefined, {
+        systemPrompt,
+        temperature: 0,
+        maxTokens: 700,
+      });
+      const parsed = this.parseCheckResponse(response.content);
+      if (!parsed) {
+        log.warn(`[SelfReflection] ${label}: unparseable verifier response`);
+        return {
+          passed: false,
+          issues: [`${label}: verifier returned an unparseable response; treating as unverified.`],
+          suggestions: ['Retry the reflection or review the change manually.'],
+          score: 0.2,
+        };
+      }
+      return parsed;
+    } catch (error) {
+      log.error(`[SelfReflection] ${label} failed`, error instanceof Error ? error : undefined);
+      return {
+        passed: false,
+        issues: [`${label}: reflection call failed; action is unverified.`],
+        suggestions: ['Retry the reflection or review the change manually.'],
+        score: 0,
+      };
+    }
   }
 
-  private async checkContinuity(action: ProposedAction, context: ProjectReflectionContext): Promise<{passed: boolean, issues: string[], suggestions: string[]}> {
-    // Verifica se contradiz algo que já aconteceu
-    return { passed: true, issues: [], suggestions: [] };
+  private parseCheckResponse(content: string): CheckOutcome | null {
+    const match = content.match(/\{[\s\S]*\}/)
+    const repaired = match ? match[0] : content;
+    let raw: unknown;
+    try {
+      raw = JSON.parse(repaired);
+    } catch {
+      return null;
+    }
+    if (!raw || typeof raw !== 'object') return null;
+    const record = raw as Record<string, unknown>;
+    if (typeof record.passed !== 'boolean') return null;
+    const toStringArray = (value: unknown): string[] =>
+      Array.isArray(value) ? value.map((entry) => String(entry)).filter(Boolean) : [];
+    const score =
+      typeof record.score === 'number' && record.score >= 0 && record.score <= 1
+        ? record.score
+        : record.passed
+          ? 0.8
+          : 0.3;
+    return {
+      passed: record.passed,
+      issues: toStringArray(record.issues),
+      suggestions: toStringArray(record.suggestions),
+      score,
+    };
   }
 
-  private async checkQualityStandards(action: ProposedAction): Promise<{passed: boolean, issues: string[], suggestions: string[], score: number}> {
-    // Verifica syntax, best practices, ou qualidade visual
-    return { passed: true, issues: [], suggestions: [], score: 0.95 };
+  private async checkPhysicsAndLogic(action: ProposedAction, context: ProjectReflectionContext): Promise<CheckOutcome> {
+    const systemPrompt =
+      'You are the World Logic Validator. Decide whether a proposed change breaks the project\'s established physical or logical rules. ' +
+      'Respond ONLY with JSON: { "passed": boolean, "issues": string[], "suggestions": string[], "score": number }.';
+    const userPrompt = [
+      `World rules: ${JSON.stringify(context.worldRules ?? 'Standard reality')}`,
+      `Proposed action: ${JSON.stringify(action)}`,
+      'Does this action break any established physical or logical rule?',
+    ].join('\n');
+    return this.runJsonCheck(systemPrompt, userPrompt, 'physics-logic');
+  }
+
+  private async checkContinuity(action: ProposedAction, context: ProjectReflectionContext): Promise<CheckOutcome> {
+    const systemPrompt =
+      'You are the Continuity Validator. Decide whether a proposed change contradicts established timeline or narrative facts. ' +
+      'Respond ONLY with JSON: { "passed": boolean, "issues": string[], "suggestions": string[], "score": number }.';
+    const userPrompt = [
+      `Timeline / established facts: ${JSON.stringify(context.timeline ?? 'None provided')}`,
+      `Proposed action: ${JSON.stringify(action)}`,
+      'Does this action contradict anything already established?',
+    ].join('\n');
+    return this.runJsonCheck(systemPrompt, userPrompt, 'continuity');
+  }
+
+  private async checkQualityStandards(action: ProposedAction): Promise<CheckOutcome> {
+    const systemPrompt =
+      'You are the Quality Validator. Judge whether the proposed change meets professional quality standards (correctness, best practices, no fake/placeholder output). ' +
+      'Respond ONLY with JSON: { "passed": boolean, "issues": string[], "suggestions": string[], "score": number }.';
+    const userPrompt = `Proposed action: ${JSON.stringify(action)}\nDoes it meet professional quality standards?`;
+    return this.runJsonCheck(systemPrompt, userPrompt, 'quality');
   }
 }
 

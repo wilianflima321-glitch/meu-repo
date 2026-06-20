@@ -31,6 +31,7 @@ export interface ContextChunk {
   createdAt: string
   updatedAt: string
   embedding?: number[]
+  astDeclarations?: Array<{ type: string; name: string }>
 }
 
 export interface DeepContextMemorySnapshot {
@@ -154,10 +155,34 @@ export class DeepContextManager {
   private memoryBank: Map<string, ContextChunk> = new Map()
   private projectId: string
   private adapter: DeepContextPersistenceAdapter
+  private astWorker: Worker | null = null;
+  private pendingAstTasks: Map<string, { resolve: (res: any) => void, reject: (err: any) => void }> = new Map();
 
   constructor(options: { projectId?: string; adapter?: DeepContextPersistenceAdapter } = {}) {
     this.projectId = options.projectId ?? DEFAULT_PROJECT_ID
     this.adapter = options.adapter ?? new InMemoryDeepContextPersistenceAdapter()
+    
+    // Initialize Web Worker for AST parsing (client-side only)
+    if (typeof window !== 'undefined') {
+      try {
+        this.astWorker = new Worker(new URL('./tree-sitter-worker.ts', import.meta.url));
+        this.astWorker.onmessage = (e) => {
+          const { type, id, result, error } = e.data;
+          const task = this.pendingAstTasks.get(id);
+          if (task) {
+            this.pendingAstTasks.delete(id);
+            if (type.endsWith('_SUCCESS')) task.resolve(result);
+            else task.reject(new Error(error));
+          }
+        };
+        // Trigger init
+        const initId = crypto.randomUUID();
+        this.pendingAstTasks.set(initId, { resolve: () => log.info('AST Worker initialized'), reject: (err) => log.warn('AST Worker init failed', err) });
+        this.astWorker.postMessage({ type: 'INIT', id: initId });
+      } catch (err) {
+        log.warn('Failed to start AST Worker', err);
+      }
+    }
   }
 
   async initialize(projectId: string = this.projectId): Promise<DeepContextMemorySnapshot> {
@@ -198,6 +223,26 @@ export class DeepContextManager {
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
       embedding: options.embedding ?? existing?.embedding,
+    }
+
+    // AST Enrichment via Worker
+    if (this.astWorker && (category === 'code' || category === 'system')) {
+      try {
+        const taskId = crypto.randomUUID();
+        const astPromise = new Promise<any>((resolve, reject) => {
+          this.pendingAstTasks.set(taskId, { resolve, reject });
+        });
+        this.astWorker.postMessage({ type: 'PARSE', payload: { code: content }, id: taskId });
+        const declarations = await astPromise;
+        if (declarations && declarations.length > 0) {
+           chunk.astDeclarations = declarations.map((d: any) => ({ type: d.type, name: d.name }));
+           // Inject AST terms into tags automatically
+           const astTags = declarations.map((d: any) => d.name);
+           chunk.tags = normalizeTags([...chunk.tags, ...astTags]);
+        }
+      } catch (err) {
+        log.warn('AST parsing failed for chunk', id, err);
+      }
     }
 
     this.memoryBank.set(id, chunk)

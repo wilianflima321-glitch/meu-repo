@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import PublicFooter from '@/components/ui/PublicFooter'
 import PublicHeader from '@/components/ui/PublicHeader'
 import {
@@ -20,6 +20,7 @@ import {
   MarketplaceInstallReview,
   type MarketplaceTrustFilter,
 } from './marketplace-page.parts'
+import type { MarketplaceInstallFeedback } from './marketplace-page.types'
 
 function hasMarketplaceSort(value: string): value is MarketplaceSort {
   return MARKETPLACE_SORT_OPTIONS.some((option) => option.value === value)
@@ -36,7 +37,30 @@ export default function MarketplacePage() {
   const [sortBy, setSortBy] = useState<MarketplaceSort>('evidence')
   const [trustFilter, setTrustFilter] = useState<MarketplaceTrustFilter>('verified')
   const [reviewingExtensionId, setReviewingExtensionId] = useState<string | null>(null)
+  const [installPending, setInstallPending] = useState(false)
+  const [installFeedback, setInstallFeedback] = useState<MarketplaceInstallFeedback | null>(null)
   const normalizedSearch = normalizeSearch(searchQuery)
+
+  // Load the canonical "Catálogo Vivo": built-ins + curated packages with the
+  // caller's real install state merged in. Curated defaults render immediately
+  // and are replaced once the live catalog responds (best-effort).
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const response = await fetch('/api/marketplace/catalog', { headers: { Accept: 'application/json' } })
+        if (!response.ok) return
+        const data = (await response.json()) as { extensions?: Extension[] }
+        if (cancelled || !Array.isArray(data.extensions) || data.extensions.length === 0) return
+        setExtensions(data.extensions)
+      } catch {
+        // Best-effort only — never block the catalog on this.
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const filteredExtensions = useMemo(() => {
     return extensions
@@ -80,13 +104,102 @@ export default function MarketplacePage() {
     if (hasMarketplaceSort(value)) setSortBy(value)
   }
 
-  const handleInstall = (extensionId: string) => {
+  const handleRequestInstall = (extensionId: string) => {
+    setInstallFeedback(null)
+    setReviewingExtensionId(extensionId)
+  }
+
+  const redirectToLogin = (extensionId: string) => {
     const next = encodeURIComponent(`/marketplace?install=${extensionId}`)
     window.location.assign(`/login?next=${next}`)
   }
 
-  const handleUninstall = (extensionId: string) => {
+  const handleInstall = async (extensionId: string) => {
+    if (installPending) return
+    setInstallPending(true)
+    setInstallFeedback(null)
+
+    try {
+      const response = await fetch('/api/marketplace/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ extensionId }),
+      })
+
+      // Logged-out users are bounced to login (preserving their install intent).
+      if (response.status === 401) {
+        redirectToLogin(extensionId)
+        return
+      }
+
+      if (response.ok) {
+        setExtensions((prev) =>
+          prev.map((extension) =>
+            extension.id === extensionId ? { ...extension, installed: true } : extension,
+          ),
+        )
+        setInstallFeedback({ type: 'success', message: 'Installed. The extension is now active for your account.' })
+        setTimeout(() => {
+          setReviewingExtensionId(null)
+          setInstallFeedback(null)
+        }, 1200)
+        return
+      }
+
+      // Honest failure states — no placebo success.
+      const data = (await response.json().catch(() => null)) as { error?: string; message?: string } | null
+      if (response.status === 404) {
+        setInstallFeedback({
+          type: 'info',
+          message: 'This extension is in curated preview and is not yet available to install.',
+        })
+        return
+      }
+      // Entitlement gates throw FEATURE_NOT_AVAILABLE → 402; some flows use 403.
+      if (response.status === 402 || response.status === 403) {
+        setInstallFeedback({
+          type: 'error',
+          message: data?.error || data?.message || 'Your plan does not include marketplace installs yet.',
+        })
+        return
+      }
+      setInstallFeedback({
+        type: 'error',
+        message: data?.error || data?.message || 'Install failed. Please try again.',
+      })
+    } catch {
+      setInstallFeedback({ type: 'error', message: 'Network error. Check your connection and try again.' })
+    } finally {
+      setInstallPending(false)
+    }
+  }
+
+  const handleUninstall = async (extensionId: string) => {
+    // Optimistic flip with rollback on failure — honest, no silent no-op.
+    const previous = extensions
     setExtensions((prev) => prev.map((extension) => (extension.id === extensionId ? { ...extension, installed: false } : extension)))
+    try {
+      const response = await fetch('/api/marketplace/uninstall', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ extensionId }),
+      })
+      if (response.status === 401) {
+        redirectToLogin(extensionId)
+        return
+      }
+      if (!response.ok) {
+        setExtensions(previous)
+      }
+    } catch {
+      setExtensions(previous)
+    }
+  }
+
+  const handleCancelReview = () => {
+    if (installPending) return
+    setReviewingExtensionId(null)
+    setInstallFeedback(null)
   }
 
   return (
@@ -118,7 +231,7 @@ export default function MarketplacePage() {
                   <MarketplaceCard
                     key={extension.id}
                     extension={extension}
-                    onRequestInstall={setReviewingExtensionId}
+                    onRequestInstall={handleRequestInstall}
                     onUninstall={handleUninstall}
                   />
                 ))}
@@ -135,7 +248,9 @@ export default function MarketplacePage() {
       <MarketplaceInstallReview
         extension={reviewingExtension}
         onConfirmInstall={handleInstall}
-        onCancel={() => setReviewingExtensionId(null)}
+        onCancel={handleCancelReview}
+        pending={installPending}
+        feedback={installFeedback}
       />
 
       <PublicFooter />

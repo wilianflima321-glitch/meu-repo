@@ -12,6 +12,8 @@ const REQUIRED_FILES = [
   'components/evidence/EvidenceCenterReadySurface.tsx',
   'lib/studio/engine-spine-modules.ts',
   'lib/studio/engine-spine-modules.data.ts',
+  'lib/studio/engine-spine-modules.core-data.ts',
+  'lib/studio/engine-spine-modules.production-data.ts',
   'docs/ENGINE_MODULE_ADAPTER_COCKPIT_V22.md',
 ]
 
@@ -65,6 +67,8 @@ if (/from ['"]@\/lib\/(aaa-render-system|world|capture|networking|aaa-asset-pipe
 const moduleSource = [
   sources.get('lib/studio/engine-spine-modules.ts') ?? '',
   sources.get('lib/studio/engine-spine-modules.data.ts') ?? '',
+  sources.get('lib/studio/engine-spine-modules.core-data.ts') ?? '',
+  sources.get('lib/studio/engine-spine-modules.production-data.ts') ?? '',
 ].join('\n')
 const highWorkerHeld = [...moduleSource.matchAll(/risk:\s*'high'[\s\S]{0,260}?loadStrategy:\s*'worker-or-sidecar'|loadStrategy:\s*'worker-or-sidecar'[\s\S]{0,260}?risk:\s*'high'/g)].length
 if (highWorkerHeld < 2) {

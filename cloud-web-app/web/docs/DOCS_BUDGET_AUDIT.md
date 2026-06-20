@@ -5,9 +5,9 @@ This is a hard documentation budget. Historical archive markdown was removed fro
 
 | Scope | Count | Budget |
 | --- | ---: | ---: |
-| repoMarkdown | 336 | 336 |
-| rootDocs | 207 | 200 |
-| rootMaster | 134 | 134 |
+| repoMarkdown | 328 | 336 |
+| rootDocs | 199 | 200 |
+| rootMaster | 122 | 134 |
 | rootArchive | 0 | 0 |
 | interfaceBlueprints | 20 | 20 |
 | webDocs | 67 | 67 |
@@ -20,4 +20,4 @@ This is a hard documentation budget. Historical archive markdown was removed fro
 - Web `docs`: keep generated QA evidence, but do not let gates become a second archive.
 
 ## Failures
-- rootDocs=207 exceeds budget 200
+- none

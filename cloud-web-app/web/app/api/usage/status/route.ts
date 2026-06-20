@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
         limits: {
           tokensPerMonth: status.limits.tokensPerMonth,
           requestsPerDay: status.limits.requestsPerDay,
-          projectsMax: status.limits.projectsMax,
+          cloudProjectsMax: status.limits.cloudProjectsMax,
           storageGB: status.limits.storageGB,
           concurrentSessions: status.limits.concurrentSessions,
           maxAgents: status.limits.maxAgents,
@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
             limits: {
               tokensPerMonth: 100000,
               requestsPerDay: 12,
-              projectsMax: 10,
+              cloudProjectsMax: 10,
               storageGB: 0.25,
               concurrentSessions: 1,
               maxAgents: 1,

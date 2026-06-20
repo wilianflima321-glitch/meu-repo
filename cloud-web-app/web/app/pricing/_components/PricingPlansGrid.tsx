@@ -25,8 +25,8 @@ export function PricingPlansGrid({ corePlans, isAnnual }: PricingPlansGridProps)
 
       <div className="grid gap-5 lg:grid-cols-3">
         {featuredPlans.map((plan) => (
-          <article key={plan.id} className={`relative flex h-full flex-col rounded-[24px] border p-5 transition-all ${plan.popular ? 'border-[color-mix(in_srgb,var(--aethel-primary)_42%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-xl' : 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]'}`}>
-            {plan.popular ? <div className="absolute -top-3.5 left-6 rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_38%,transparent)] bg-[var(--aethel-surface-primary)] px-4 py-1 text-xs font-bold text-[var(--aethel-primary-light)] shadow-lg">Best balance</div> : null}
+          <article key={plan.id} className={`relative flex h-full flex-col rounded-2xl border p-5 transition-all ${plan.popular ? 'border-[color-mix(in_srgb,var(--aethel-primary)_42%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-[var(--aethel-shadow-xl)]' : 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]'}`}>
+            {plan.popular ? <div className="absolute -top-3.5 left-6 rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_38%,transparent)] bg-[var(--aethel-surface-primary)] px-4 py-1 text-xs font-bold text-[var(--aethel-primary-light)] shadow-[var(--aethel-shadow-md)]">Best balance</div> : null}
 
             <div className="mb-5">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">{plan.id}</p>
@@ -45,7 +45,7 @@ export function PricingPlansGrid({ corePlans, isAnnual }: PricingPlansGridProps)
 
             <div className="mb-5 grid grid-cols-2 gap-2">
               {[
-                { label: 'Projects', value: formatLimit(plan.limits.projects) },
+                { label: 'Projects', value: formatLimit(plan.limits.cloudProjectsMax) },
                 { label: 'Storage', value: formatStorage(plan.limits.storage) },
               ].map((item) => (
                 <div key={item.label} className="rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3">
@@ -77,7 +77,7 @@ export function PricingPlansGrid({ corePlans, isAnnual }: PricingPlansGridProps)
               </div>
             </details>
 
-            <Link href={plan.id === 'free' ? '/register?plan=free&intent=studio' : `/dashboard?tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`} className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${plan.popular ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] shadow-lg hover:bg-[var(--aethel-primary-dark)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)]'}`} data-analytics-category="billing" data-analytics-action={plan.id === 'free' ? 'onboarding_start' : 'checkout_start'} data-analytics-label={`pricing_plan:${plan.id}:${isAnnual ? 'year' : 'month'}`} data-analytics-source="pricing-plan-card">
+            <Link href={plan.id === 'free' ? '/register?plan=free&intent=studio' : `/dashboard?tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`} className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${plan.popular ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] shadow-[var(--aethel-shadow-md)] hover:bg-[var(--aethel-primary-dark)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)]'}`} data-analytics-category="billing" data-analytics-action={plan.id === 'free' ? 'onboarding_start' : 'checkout_start'} data-analytics-label={`pricing_plan:${plan.id}:${isAnnual ? 'year' : 'month'}`} data-analytics-source="pricing-plan-card">
               {plan.id === 'free' ? 'Start free' : `Select ${plan.name}`}
             </Link>
           </article>
@@ -85,7 +85,7 @@ export function PricingPlansGrid({ corePlans, isAnnual }: PricingPlansGridProps)
       </div>
 
       {supportingPlans.length > 0 ? (
-        <details className="mt-5 rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-4">
+        <details className="mt-5 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-4">
           <summary className="cursor-pointer list-none">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>

@@ -4,7 +4,7 @@ import type { PricingPlan } from './pricing-utils'
 export function PricingComparisonTable({ corePlans }: { corePlans: PricingPlan[] }) {
   return (
     <section className="mx-auto mt-12 max-w-7xl px-4 sm:px-6 lg:px-8">
-      <details className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[var(--aethel-panel)] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
+      <details className="overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-panel)] shadow-[var(--aethel-shadow-xl)]">
         <summary className="cursor-pointer list-none border-b border-[var(--aethel-border-primary)] px-6 py-5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Detailed comparison</p>
           <div className="mt-2 flex flex-wrap items-center justify-between gap-3">

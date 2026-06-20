@@ -45,7 +45,7 @@ export default function PublicFooter() {
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               {TRUST_SIGNALS.map((item) => (
-                <span key={item} className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+                <span key={item} className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
                   {item}
                 </span>
               ))}

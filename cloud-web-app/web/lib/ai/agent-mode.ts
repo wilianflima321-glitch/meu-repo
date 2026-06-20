@@ -32,6 +32,7 @@ import { planAgentTask, reflectAgentAction, thinkAgentNextStep } from './agent-m
 import { AgentMemoryStore } from './agent-mode-memory';
 import { reviewAgentExecution } from './agent-mode-review';
 import { getAvailableAgentTools } from './agent-mode-tools';
+import { createValidatedAgent } from './agent-validation-integration';
 
 export type {
   AgentTask,
@@ -516,12 +517,12 @@ export class AutonomousAgent extends EventEmitter {
 // SINGLETON INSTANCE
 // ============================================================================
 
-export const autonomousAgent = new AutonomousAgent({
-  maxIterations: 50,
+export const autonomousAgent = createValidatedAgent(new AutonomousAgent({
+  maxIterations: 10,
   maxRetries: 3,
   autonomyLevel: 'semi-autonomous',
   requireApproval: true,
   enableSelfCorrection: true,
-});
+}));
 
 export default AutonomousAgent;

@@ -17,7 +17,7 @@ export interface SemanticCodeSearchResult {
 }
 
 export interface SemanticCodeSearchReadiness {
-  status: 'ready' | 'partial'
+  status: 'ready' | 'partial' | 'blocked'
   source: 'local-persistent-cache'
   persistentIndex: true
   crossSessionMemory: true
@@ -452,7 +452,7 @@ export async function getSemanticCodeSearchReadiness(params: {
     maxResults: MAX_RESULTS,
     scope,
     blockers: [
-      'PRODUCTION_VECTOR_DB_NOT_CONFIGURED',
+      'LOCAL_TF_IDF_ONLY', // DEBT-SEARCH-002: Using hash-based TF-IDF, not neural embeddings. Functional but lower recall than a real vector DB.
     ],
   }
 }

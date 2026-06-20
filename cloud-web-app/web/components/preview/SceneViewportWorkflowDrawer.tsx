@@ -134,7 +134,7 @@ export default function SceneViewportWorkflowDrawer({
             <FacialAnimationEditor
               characterId={selectedObjectId ?? 'viewport-character'}
               onBlendShapeUpdate={(blendShapes) => {
-                const activeCount = Object.values(blendShapes).filter((value) => value > 0.01).length;
+                const activeCount = Object.values(blendShapes).filter((value) => (value as number) > 0.01).length;
                 onFacialMetricsChange(activeCount, deriveFacialExpressionIntensity(blendShapes));
               }}
             />

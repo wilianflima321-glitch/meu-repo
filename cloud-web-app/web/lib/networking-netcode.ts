@@ -202,7 +202,14 @@ export class RollbackNetcode {
   saveState(frame: number, states: Map<string, PlayerState>, inputs: Map<string, NetworkInput>): void {
     const stateCopy = new Map<string, PlayerState>();
     for (const [id, state] of states) {
-      stateCopy.set(id, JSON.parse(JSON.stringify(state)));
+      stateCopy.set(id, {
+        position: { x: state.position.x, y: state.position.y, z: state.position.z },
+        rotation: { x: state.rotation.x, y: state.rotation.y, z: state.rotation.z, w: state.rotation.w },
+        velocity: { x: state.velocity.x, y: state.velocity.y, z: state.velocity.z },
+        animation: state.animation,
+        health: state.health,
+        customData: Object.assign({}, state.customData) // Fast shallow clone for hot path
+      });
     }
     const inputCopy = new Map<string, NetworkInput>();
     for (const [id, input] of inputs) {
@@ -222,7 +229,13 @@ export class RollbackNetcode {
     }
   }
   rollback(toFrame: number): Map<string, PlayerState> | null {
-    const targetState = this.stateHistory.find(s => s.frame === toFrame);
+    let targetState: RollbackState | undefined;
+    for (let i = this.stateHistory.length - 1; i >= 0; i--) {
+      if (this.stateHistory[i].frame === toFrame) {
+        targetState = this.stateHistory[i];
+        break;
+      }
+    }
     if (!targetState) {
       logger.warn(`Cannot rollback to frame ${toFrame}: state not found`);
       return null;

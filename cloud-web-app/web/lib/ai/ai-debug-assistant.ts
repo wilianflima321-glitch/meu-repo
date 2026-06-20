@@ -1,5 +1,6 @@
 import { logger } from '@/lib/observability/logger';
 /**
+ * @deprecated Use the unified AutonomousAgent in `agent-mode.ts` (DEBT-AI-002, DEBT-AI-011).
  * AI Debug Assistant
  * Provides intelligent debugging assistance using Chat Orchestrator
  */

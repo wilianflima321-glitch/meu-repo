@@ -32,7 +32,7 @@ export const FAQ_ITEMS = [
 ]
 
 export const COMPARISON_ROWS = [
-  { label: 'Projects', getValue: (plan: PricingPlan) => formatLimit(plan.limits.projects) },
+  { label: 'Projects', getValue: (plan: PricingPlan) => formatLimit(plan.limits.cloudProjectsMax) },
   { label: 'Monthly tokens', getValue: (plan: PricingPlan) => formatLimit(plan.limits.tokensPerMonth) },
   { label: 'Storage', getValue: (plan: PricingPlan) => formatStorage(plan.limits.storage) },
   { label: 'Collaborators', getValue: (plan: PricingPlan) => formatLimit(plan.limits.collaborators) },

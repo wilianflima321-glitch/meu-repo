@@ -50,7 +50,7 @@ export default function ComparePage() {
       {/* Detail in drawer — collapsed by default */}
       <details className="mt-4 border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)]">
         <summary className="cursor-pointer list-none px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)] transition hover:text-[var(--aethel-text-secondary)]">
-          Detail
+          Details
         </summary>
         <div className="space-y-4 px-4 pb-4 pt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
           <Row label="Market focus"   value={card.marketFocus} />

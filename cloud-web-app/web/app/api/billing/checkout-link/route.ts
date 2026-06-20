@@ -7,7 +7,7 @@ import { createComponentLogger } from '@/lib/observability/logger';
 
 const routeLogger = createComponentLogger('api/billing/checkout-link/route');
 
-const SELF_SERVE_PLANS = new Set(['starter', 'basic', 'pro', 'studio']);
+const SELF_SERVE_PLANS = new Set(['starter', 'pro', 'studio']);
 
 export async function POST(req: NextRequest) {
   try {
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     if (!SELF_SERVE_PLANS.has(planId)) {
       return NextResponse.json(
-        { error: 'INVALID_PLAN', message: 'Valid self-serve plans: starter, basic, pro, studio' },
+        { error: 'INVALID_PLAN', message: 'Valid self-serve plans: starter, pro, studio' },
         { status: 400 }
       );
     }

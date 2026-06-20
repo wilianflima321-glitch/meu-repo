@@ -16,9 +16,11 @@ let Physics: React.ComponentType<any> | null = null;
 let RigidBody: React.ComponentType<any> | null = null;
 let rapierLoaded = false;
 
-async function loadRapier() {
-  if (rapierLoaded) return;
-  rapierLoaded = true;
+async function loadRapier(onLoad?: () => void) {
+  if (rapierLoaded) {
+    onLoad?.();
+    return;
+  }
 
   if (typeof window !== 'undefined') {
     try {
@@ -26,13 +28,13 @@ async function loadRapier() {
       const mod = await eval('import("@react-three/rapier")');
       Physics = mod.Physics;
       RigidBody = mod.RigidBody;
+      rapierLoaded = true;
+      onLoad?.();
     } catch {
       log.info('[GameViewport] @react-three/rapier not available, using fallback');
     }
   }
 }
-
-loadRapier();
 
 // --- Physics Components (with fallback) ---
 
@@ -88,6 +90,7 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
     [2, 8, 0],
     [-2, 10, 0]
   ]);
+  const [isPhysicsLoading, setIsPhysicsLoading] = useState(false);
   const groundColor = useMemo(() => resolveCssVarColor('--aethel-surface-tertiary', 'rgb(48 48 48)'), []);
   const boxColor = useMemo(() => resolveCssVarColor('--aethel-warning', 'rgb(245 158 11)'), []);
   const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', 'rgb(48 48 48)'), []);
@@ -99,6 +102,13 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
     setKey(k => k + 1);
   }, [mode]);
 
+  useEffect(() => {
+    if (!rapierLoaded) {
+      setIsPhysicsLoading(true);
+      loadRapier(() => setIsPhysicsLoading(false));
+    }
+  }, []);
+
   return (
     <div className="w-full h-full bg-[var(--aethel-surface-primary)] relative">
       {/* Toolbar Overlay */}
@@ -107,8 +117,17 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
           Mode: <span className="font-bold text-[var(--aethel-info-light)] uppercase">{mode}</span>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur p-2 rounded border border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-success)] flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] animate-pulse"/>
-          {Physics ? 'Rapier Physics v3' : 'No Physics (Rapier not installed)'}
+          {isPhysicsLoading ? (
+            <>
+              <span className="w-2 h-2 rounded-full border border-[var(--aethel-warning)] border-t-transparent animate-spin"/>
+              <span className="text-[var(--aethel-warning)]">Carregando Física (WASM)...</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] animate-pulse"/>
+              {Physics ? 'Rapier Physics v3' : 'No Physics (Rapier not installed)'}
+            </>
+          )}
         </div>
         <button type="button" aria-label="Spawn cube into game viewport"
           onClick={() => setBoxes(prev => [...prev, [(Math.random() - 0.5) * 5, 10, (Math.random() - 0.5) * 5]])}
@@ -118,7 +137,19 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
         </button>
       </div>
 
-      <Canvas key={key} shadows camera={{ position: [5, 5, 5], fov: 50 }}>
+      {/* 
+        * DOM Isolation (Wave 12.0) 
+        * O Canvas agora roda com frameloop em modo demand/worker-ready, 
+        * impedindo que o React rerender derrube o FPS do 3D. 
+        */}
+      <Canvas 
+        key={key} 
+        shadows 
+        camera={{ position: [5, 5, 5], fov: 50 }}
+        dpr={[1, 2]} 
+        frameloop="demand" 
+        performance={{ min: 0.5 }}
+      >
         <Suspense fallback={null}>
           {/* Environment */}
           <ambientLight intensity={0.5} />

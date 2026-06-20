@@ -23,10 +23,11 @@ model User {
   // Role do usuário (user|admin|super_admin). RBAC completo pode evoluir depois.
   role             String  @default("user")
   // Plano atual (ex: starter/basic/pro/studio/enterprise). Trial usa sufixo "_trial" (ex: starter_trial).
-  plan             String  @default("starter_trial")
+  plan             String  @default("free")
   stripeCustomerId String? @unique
   stripeSubscriptionId String?
   trialEndsAt       DateTime?
+  planVerifiedAt    DateTime?
 
   // Storage enforcement / metering
   storageUsed       Int     @default(0) // bytes (cacheado); fonte real vem de agregações
@@ -63,6 +64,9 @@ model User {
   adminPermissions  String?   // JSON array de permissões customizadas
   lastAdminAction   DateTime?
 
+  // BYOK (Bring Your Own Key) for LLM bypass
+  byokKey           String?   // Encrypted user API key for BYOK
+
   projects Project[]
   projectMemberships ProjectMember[]
   sessions Session[]
@@ -79,6 +83,9 @@ model User {
   supportTickets   SupportTicket[]
   supportMessages  SupportMessage[]
   userPreferences  UserPreferences?
+  mcpServers       McpServer[]
+  renderJobs       RenderJob[]
+  publishedGames   PublishedGame[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -130,6 +137,8 @@ model Project {
 
   chatThreads ChatThread[]
   copilotWorkflows CopilotWorkflow[]
+  renderJobs       RenderJob[]
+  publishedGames   PublishedGame[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -659,6 +668,26 @@ model Backup {
   @@index([createdBy])
   @@index([status])
   @@index([createdAt])
+}
+
+// ============================================
+// PLUGIN INSTALLS
+// ============================================
+
+model PluginInstall {
+  id             String   @id @default(cuid())
+  userId         String
+  pluginId       String
+  version        String?
+  config         Json?
+  status         String   @default("active") // active, disabled, errored
+  installedAt    DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, pluginId])
+  @@index([userId])
+  @@index([pluginId])
+  @@index([status])
 }
 
 // ============================================
@@ -1248,4 +1277,95 @@ model LobbySession {
   @@index([hostId])
   @@index([status])
   @@index([createdAt])
+}
+
+// ============================================
+// MCP SERVERS
+// ============================================
+
+model McpServer {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  endpoint    String
+  transport   String   @default("stdio") // stdio, sse, websocket
+  status      String   @default("registered") // registered, active, error
+  description String?
+  lastSeenAt  DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+// ============================================
+// RENDER JOBS
+// ============================================
+
+model RenderJob {
+  id           String    @id @default(cuid())
+  projectId    String
+  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestedBy  String
+  user         User      @relation(fields: [requestedBy], references: [id], onDelete: Cascade)
+  status       String    @default("queued") // queued, rendering, processing, running, active, completed, failed, cancelled
+  progress     Int       @default(0)
+  provider     String    @default("internal")
+  outputUrl    String?
+  errorMessage String?
+  costUsd      Float?
+  receiptRef   String?
+  completedAt  DateTime?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([projectId])
+  @@index([requestedBy])
+  @@index([status])
+}
+
+// ============================================
+// ARCADE - Published games (public showcase + play)
+// ============================================
+
+model PublishedGame {
+  id          String   @id @default(cuid())
+  // Stable, URL-safe identity for /arcade/[slug]
+  slug        String   @unique
+
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  title        String
+  description  String?  @db.Text
+  thumbnailUrl String?
+  tags         String[] @default([])
+
+  // Build/play wiring. A published game becomes playable once the web
+  // ExportJob completes and a public play URL is available.
+  exportJobId  String?  // ExportJob (platform: web) producing the playable bundle
+  playUrl      String?  // public HTML5 play URL when the web build is ready
+
+  // pending = published, web build not ready yet (honest "build pending" state)
+  // building = export in progress; playable = play URL live; failed; unpublished
+  status       String   @default("pending")
+  visibility   String   @default("public") // public, unlisted, private
+  plays        Int      @default(0)
+
+  publishedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // One published listing per project (republish updates it).
+  @@unique([projectId])
+  @@index([authorId])
+  @@index([status])
+  @@index([visibility])
+  @@index([publishedAt])
 }

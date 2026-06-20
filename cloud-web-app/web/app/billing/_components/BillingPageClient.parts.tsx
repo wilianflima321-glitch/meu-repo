@@ -34,7 +34,7 @@ export const fetcher = async <T,>(url: string): Promise<T> => {
   return response.json()
 }
 
-export const primaryPlanIds = ['basic', 'pro', 'studio']
+export const primaryPlanIds = ['starter', 'pro', 'studio']
 
 export const fallbackPlans: Plan[] = [
   {

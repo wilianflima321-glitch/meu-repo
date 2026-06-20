@@ -10,7 +10,7 @@ export function DashboardLoadingScreen({ theme: _theme }: DashboardLoadingScreen
   return (
     <div className="flex min-h-screen items-center justify-center bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <div
-        className={`rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-5 py-4 text-sm text-[var(--aethel-text-secondary)] shadow-[0_20px_70px_rgba(2,6,23,0.16)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
+        className={`rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-5 py-4 text-sm text-[var(--aethel-text-secondary)] shadow-[var(--aethel-shadow-lg)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
         role="status"
         aria-live="polite"
       >

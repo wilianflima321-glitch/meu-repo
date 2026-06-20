@@ -104,7 +104,7 @@ export default function RegisterPageV2() {
 
         <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-[1120px] items-center">
           <div className="grid w-full gap-5 lg:grid-cols-[460px_minmax(0,1fr)] lg:items-stretch">
-            <section className="mx-auto w-full max-w-[460px] border-y border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-6 py-7 lg:mx-0">
+            <section className="mx-auto w-full max-w-[460px] rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-8 py-8 shadow-[var(--aethel-shadow-xl)] backdrop-blur-md lg:mx-0">
               <div className="mb-7 flex items-center justify-between gap-3">
                 <Link href="/" className="inline-flex items-center gap-2 px-1 text-sm text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]"><ArrowLeft className="h-4 w-4" /> Back</Link>
                 <span className="border-l border-[color-mix(in_srgb,var(--aethel-primary)_42%,transparent)] pl-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-primary-light)]">{requestedPlan}</span>

@@ -10,6 +10,7 @@ interface AIChatCostMeterProps {
   currentRunEstimate?: number
   selectedModelName: string
   isAIWorking: boolean
+  isBYOK?: boolean // Wave 12.0: Sinalizador de VIP
   onOpenEconomics: () => void
 }
 
@@ -62,9 +63,9 @@ function clampPercent(value: number) {
 
 export function AIChatCostMeter({
   projectId,
-  currentRunEstimate,
   selectedModelName,
   isAIWorking,
+  isBYOK = false,
   onOpenEconomics,
 }: AIChatCostMeterProps) {
   const { data, error, isLoading } = useSWR(
@@ -110,9 +111,7 @@ export function AIChatCostMeter({
   }
 
   const monthlyPercent = clampPercent(data.budget.monthly.percent)
-  const runEstimate = typeof currentRunEstimate === 'number'
-    ? currentRunEstimate
-    : data.metrics.avgCostPerRequestUsd
+  const runEstimate = data.metrics.avgCostPerRequestUsd
   const tone = toneFor(data.status === 'ready' ? data.budget.monthly.status : data.status)
 
   return (
@@ -136,10 +135,17 @@ export function AIChatCostMeter({
             </span>
           </div>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-primary)_76%,transparent)]">
-            <div
-              className={`h-full rounded-full transition-[width] ${tone.bar}`}
-              style={{ width: `${monthlyPercent}%` }}
-            />
+            {isBYOK ? (
+               <div
+                 className={`h-full rounded-full transition-[width] bg-[#39ff14] shadow-[0_0_8px_#39ff14]`}
+                 style={{ width: `100%` }}
+               />
+            ) : (
+               <div
+                 className={`h-full rounded-full transition-[width] ${tone.bar}`}
+                 style={{ width: `${monthlyPercent}%` }}
+               />
+            )}
           </div>
         </div>
 
@@ -149,7 +155,9 @@ export function AIChatCostMeter({
               <Gauge className="h-3.5 w-3.5" />
               Run
             </span>
-            <strong className="mt-0.5 block text-[var(--aethel-text-primary)]">{formatUsd(runEstimate)}</strong>
+            <strong className="mt-0.5 block text-[var(--aethel-text-primary)]">
+              {isBYOK ? 'Bypass' : formatUsd(runEstimate)}
+            </strong>
           </span>
           <span className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] px-2.5 py-1.5">
             <span className="flex items-center gap-1 text-[var(--aethel-text-quaternary)]">

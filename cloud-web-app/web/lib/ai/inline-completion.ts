@@ -14,6 +14,7 @@
 import type * as monaco from 'monaco-editor';
 
 import {createComponentLogger, logger} from '@/lib/observability/logger'
+import { streamGhostText } from '@/lib/copilot/ghost-text-streamer'
 
 const log = createComponentLogger('ai/inline-completion')
 type MonacoApi = typeof import('monaco-editor');
@@ -152,19 +153,40 @@ export class InlineCompletionProvider implements monaco.languages.InlineCompleti
     return new Promise((resolve) => {
       this.debounceTimer = setTimeout(async () => {
         try {
-          const completion = await this.fetchCompletion(model, position, prefix, suffix, token);
+          const requestId = ++this.lastRequestId;
+          this.abortController = new AbortController();
+          const language = model.getLanguageId();
+          const fileName = model.uri.path.split('/').pop() || 'code';
           
-          if (completion) {
-            // Cache the result
+          let streamedCompletion = '';
+          
+          await streamGhostText({
+            prompt: this.buildPrompt(prefix, suffix, language, fileName),
+            maxTokens: this.config.maxTokens,
+            temperature: this.config.temperature,
+            provider: this.config.provider,
+            signal: this.abortController.signal,
+            onChunk: (text) => {
+              streamedCompletion = text;
+              this.currentGhostText = text;
+              // Ideally we'd trigger a Monaco update here for true live typing
+            },
+            onComplete: (text) => {
+              streamedCompletion = text;
+            },
+            onError: (err) => {
+              logger.error('[Inline Completion] Stream error:', err);
+            }
+          });
+
+          if (requestId === this.lastRequestId && streamedCompletion) {
             this.cache.set(cacheKey, {
-              completion,
+              completion: streamedCompletion,
               timestamp: Date.now(),
               prefix,
               suffix,
             });
-
-            this.currentGhostText = completion;
-            resolve(this.createInlineCompletions(completion, position, model));
+            resolve(this.createInlineCompletions(streamedCompletion, position, model));
           } else {
             resolve(null);
           }

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getToken } from '@/lib/auth';
 import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname';
 
-const SELF_SERVE_PLANS = new Set(['starter', 'basic', 'pro', 'studio']);
+const SELF_SERVE_PLANS = new Set(['starter', 'pro', 'studio']);
 const ALLOWED_INTERVALS = new Set(['month', 'year']);
 
 export default function BillingCheckoutContent() {

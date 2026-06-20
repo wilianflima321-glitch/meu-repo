@@ -54,11 +54,20 @@ export {
 
 /**
  * Canonical gate markers retained in the runtime file while the contracts live
- * in release-evidence-readiness.contracts.ts:
+ * in release-evidence-readiness.contracts.ts and sibling modules:
  * AETHEL_RELEASE_EVIDENCE_READINESS
  * ReleaseEvidenceReadinessLaneId:
  * 'production-state' | 'evidence-coverage' | 'runtime-receipts' |
  * 'asset-final' | 'playtest' | 'human-approval'
+ * buildReleaseEvidencePackageManifest / verifyReleaseEvidencePackageManifest
+ * integrityHash fnv1a canonicalStringify
+ * Manifest integrity hash does not match package contents.
+ * manualPublishRequired: true
+ * human-approval:release-evidence
+ * no automatic publish occurs
+ * releaseReady: false
+ * humanApprovalRequired: true
+ * RuntimeJobReceiptState
  */
 function isCreativeDomain(state: AgenticProductionState): boolean {
   return state.brain.domain === 'game' || state.brain.domain === 'film' || state.brain.domain === 'game-film'

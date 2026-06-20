@@ -59,7 +59,6 @@ export default function LoginPageV2() {
   const [formError, setFormError] = useState<string | null>(null)
   const [authNotice, setAuthNotice] = useState<string | null>(null)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
-  const [loginMode, setLoginMode] = useState<'magic' | 'password'>('magic')
 
   const nextTarget = useMemo(() => {
     const requested = searchParams.get('next')?.trim() || searchParams.get('from')?.trim()
@@ -79,8 +78,7 @@ export default function LoginPageV2() {
     return false
   }
 
-  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const submitPasswordLogin = async () => {
     if (!email.trim() || !password) {
       setFormError('Enter your email and password to continue.')
       return
@@ -209,7 +207,7 @@ export default function LoginPageV2() {
 
         <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-[1120px] items-center">
           <div className="grid w-full gap-5 lg:grid-cols-[420px_minmax(0,1fr)] lg:items-stretch">
-            <section className="mx-auto w-full max-w-[430px] rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-8 py-8 shadow-2xl backdrop-blur-md lg:mx-0">
+            <section className="mx-auto w-full max-w-[430px] rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-8 py-8 shadow-[var(--aethel-shadow-xl)] backdrop-blur-md lg:mx-0">
               <div className="mb-8 flex items-center justify-between gap-3">
                 <Link href="/" className="inline-flex items-center gap-2 px-1 text-sm text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]">
                   <ArrowLeft className="h-4 w-4" /> Back
@@ -225,6 +223,7 @@ export default function LoginPageV2() {
                 </div>
                 <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[var(--aethel-text-primary)]">Welcome back</h1>
                 <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">Resume your workspace with context intact.</p>
+                <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-tertiary)]">Passkey or magic link first.</p>
               </div>
 
               <div className="mb-6">
@@ -242,36 +241,9 @@ export default function LoginPageV2() {
                 </div>
               )}
 
-              {/* Login Method Tabs */}
-              <div className="mb-6 flex rounded-lg bg-[var(--aethel-surface-primary)]/50 p-1 shadow-inner border border-[var(--aethel-border-subtle)]">
-                <button
-                  type="button"
-                  onClick={() => setLoginMode('magic')}
-                  className={`flex-1 rounded-md py-2 text-xs font-semibold transition-all ${
-                    loginMode === 'magic'
-                      ? 'bg-[var(--aethel-surface-elevated)] text-[var(--aethel-text-primary)] shadow-sm border border-[var(--aethel-border-secondary)]'
-                      : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                  }`}
-                >
-                  Fast Sign-in
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLoginMode('password')}
-                  className={`flex-1 rounded-md py-2 text-xs font-semibold transition-all ${
-                    loginMode === 'password'
-                      ? 'bg-[var(--aethel-surface-elevated)] text-[var(--aethel-text-primary)] shadow-sm border border-[var(--aethel-border-secondary)]'
-                      : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                  }`}
-                >
-                  Password
-                </button>
-              </div>
-
-              {/* Email Input - Shared across both modes */}
               <form
                 id="login-form"
-                onSubmit={loginMode === 'password' ? handleLogin : (e) => e.preventDefault()}
+                onSubmit={(event) => event.preventDefault()}
                 className="space-y-5"
                 noValidate
                 aria-describedby={formError ? 'login-form-error' : undefined}
@@ -289,85 +261,89 @@ export default function LoginPageV2() {
                   icon={<Mail className="h-4 w-4" />}
                 />
 
-                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${loginMode === 'password' ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <div className="pt-2 pb-1">
-                    <div className="mb-2 flex items-center justify-between">
-                      <label htmlFor="password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Password</label>
-                      <Link href="/forgot-password" className="text-xs font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-info)] transition-colors">Forgot password?</Link>
-                    </div>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                      placeholder="Enter your password"
-                      icon={<Lock className="h-4 w-4" />}
-                      required={loginMode === 'password'}
-                    />
-                  </div>
+                <div className="space-y-3">
                   <Button
-                    type="submit"
+                    type="button"
                     variant="primary"
                     fullWidth
                     size="lg"
-                    loading={isSubmitting}
-                    disabled={isHumanVerificationPending}
-                    className="mt-4"
+                    onClick={handlePasskeyLogin}
+                    loading={isPasskeySubmitting}
+                    disabled={isSubmitting || isMagicLinkSubmitting || isHumanVerificationPending}
+                    icon={<KeyRound className="h-4 w-4" />}
                   >
-                    Continue with password
+                    Continue with passkey
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    fullWidth
+                    size="lg"
+                    onClick={handleMagicLink}
+                    loading={isMagicLinkSubmitting}
+                    disabled={isSubmitting || isPasskeySubmitting || isHumanVerificationPending}
+                  >
+                    Send magic link
                   </Button>
                 </div>
 
-                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${loginMode === 'magic' ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <div className="space-y-3 pt-2">
+                <details className="border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_40%,transparent)] px-4 py-3">
+                  <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-secondary)]">
+                    Use password fallback
+                  </summary>
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <div className="mb-2 flex items-center justify-between">
+                        <label htmlFor="password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Password</label>
+                        <Link href="/forgot-password" className="text-xs font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-info)] transition-colors">Forgot password?</Link>
+                      </div>
+                      <Input
+                        id="password"
+                        name="password"
+                        type="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        placeholder="Enter your password"
+                        icon={<Lock className="h-4 w-4" />}
+                      />
+                    </div>
                     <Button
                       type="button"
-                      variant="primary"
+                      variant="secondary"
                       fullWidth
                       size="lg"
-                      onClick={handlePasskeyLogin}
-                      loading={isPasskeySubmitting}
-                      disabled={isSubmitting || isMagicLinkSubmitting || isHumanVerificationPending}
-                      icon={<KeyRound className="h-4 w-4" />}
+                      onClick={() => void submitPasswordLogin()}
+                      loading={isSubmitting}
+                      disabled={isHumanVerificationPending}
                     >
-                      Continue with Passkey
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      fullWidth
-                      size="lg"
-                      onClick={handleMagicLink}
-                      loading={isMagicLinkSubmitting}
-                      disabled={isSubmitting || isPasskeySubmitting || isHumanVerificationPending}
-                    >
-                      Send Magic Link
+                      Use password fallback
                     </Button>
                   </div>
-                </div>
+                </details>
               </form>
 
               <div className="mt-8 pt-6 border-t border-[var(--aethel-border-subtle)]">
-                <p className="mb-4 text-xs font-medium uppercase tracking-wider text-[var(--aethel-text-tertiary)] text-center">
-                  Or continue with
-                </p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {OAUTH_PROVIDERS.map((provider) => (
-                    <Button
-                      key={provider.id}
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => startOAuth(provider.id)}
-                      className="justify-start px-4"
-                      icon={<AuthProviderMark mark={provider.mark} />}
-                    >
-                      {provider.label}
-                    </Button>
-                  ))}
-                </div>
+                <details className="group">
+                  <summary className="mb-4 cursor-pointer list-none text-center text-xs font-medium uppercase tracking-wider text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-secondary)]">
+                    More sign-in options
+                  </summary>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {OAUTH_PROVIDERS.map((provider) => (
+                      <Button
+                        key={provider.id}
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => startOAuth(provider.id)}
+                        className="justify-start px-4"
+                        icon={<AuthProviderMark mark={provider.mark} />}
+                      >
+                        {provider.label}
+                      </Button>
+                    ))}
+                  </div>
+                </details>
               </div>
 
               <div className="mt-8 flex flex-col items-center gap-3">

@@ -37,8 +37,15 @@ function requirePatternAny(relativePaths, pattern, reason) {
   if (!pattern.test(content)) failures.push(`${relativePaths.join(', ')}: missing pattern ${pattern} (${reason})`)
 }
 
-const agentToolRegistryFiles = ['lib/production/agent-tool-bus.ts', 'lib/production/agent-tool-bus-catalog.ts']
+const agentToolRegistryFiles = [
+  'lib/production/agent-tool-bus.ts',
+  'lib/production/agent-tool-bus-catalog.ts',
+  'lib/production/agent-tool-bus-catalog.data.ts',
+  'lib/production/agent-tool-bus-catalog.core-data.ts',
+  'lib/production/agent-tool-bus-catalog.runtime-data.ts',
+]
 const deepSpineContractFiles = ['lib/production/deep-spine-scan.ts', 'lib/production/deep-spine-scan.contracts.ts']
+const deepSpineScannerFiles = ['lib/production/deep-spine-scan.ts', 'lib/production/deep-spine-scan.findings.ts']
 
 requireFile('lib/production/deep-spine-scan.ts', 'Deep Spine Scan needs a production contract')
 requirePatternAny(deepSpineContractFiles, /export interface DeepSpineScanManifest/, 'manifest shape must be exported')
@@ -51,9 +58,9 @@ requirePattern('lib/production/deep-spine-scan.ts', /appendDeepSpineScanEvidence
 requirePattern('lib/production/deep-spine-scan.ts', /mergeDeepSpineScanIntoProductionState/, 'scanner must merge work packets into production state')
 requirePattern('lib/production/deep-spine-scan.ts', /readDeepSpineScanManifestFromSettings/, 'scanner must be readable from project settings')
 requirePattern('lib/production/deep-spine-scan.ts', /writeDeepSpineScanManifestToSettings/, 'scanner must be writable to project settings')
-requirePattern('lib/production/deep-spine-scan.ts', /safeAutofix:\s*false/, 'scan findings must not enable auto-fix')
-requirePattern('lib/production/deep-spine-scan.ts', /metadata-first/, 'external sources must stay metadata-first')
-requirePattern('lib/production/deep-spine-scan.ts', /browser main thread/, 'heavy jobs must be blocked from the browser main thread')
+requirePatternAny(deepSpineScannerFiles, /safeAutofix:\s*false/, 'scan findings must not enable auto-fix')
+requirePatternAny(deepSpineScannerFiles, /metadata-first/, 'external sources must stay metadata-first')
+requirePatternAny(deepSpineScannerFiles, /browser main thread/, 'heavy jobs must be blocked from the browser main thread')
 
 requirePattern('lib/production/parallel-agent-work-contract.ts', /'deep-spine-scan'/, 'agent work tools must declare deep-spine-scan')
 requirePattern('lib/production/parallel-agent-work-contract.ts', /deep-spine-scan[\s\S]*context-budget/, 'deep scan must be available before context-heavy work')

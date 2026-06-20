@@ -113,10 +113,10 @@ export default function LandingMissionBox() {
     <div className="mt-8 max-w-4xl">
       <form
         onSubmit={handleSubmit}
-        className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] p-3 shadow-[0_24px_80px_rgba(2,6,23,0.3)] sm:p-4"
+        className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] p-3 shadow-[var(--aethel-shadow-xl)] sm:p-4"
       >
-        <div className="flex flex-col gap-3 rounded-[24px] border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_76%,transparent)] p-3 sm:flex-row sm:items-center sm:p-4">
-          <div className="flex min-w-0 flex-1 items-center gap-3 rounded-[20px] px-2 py-2">
+        <div className="flex flex-col gap-3 rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_76%,transparent)] p-3 sm:flex-row sm:items-center sm:p-4">
+          <div className="flex min-w-0 flex-1 items-center gap-3 rounded-lg px-2 py-2">
             <Sparkles className="h-4.5 w-4.5 shrink-0 text-[var(--aethel-info-light)]" />
             <label htmlFor="landing-mission-input" className="sr-only">
               Describe what you want Aethel to build
@@ -128,7 +128,7 @@ export default function LandingMissionBox() {
               onChange={(event) => setInputValue(event.target.value)}
               placeholder={placeholder}
               disabled={isGenerating}
-              className="w-full bg-transparent text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] outline-none disabled:opacity-50 sm:text-[15px]"
+              className="w-full bg-transparent text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] outline-none disabled:opacity-50 sm:text-[15px]"
             />
           </div>
           <div className="flex items-center gap-2 sm:pl-2">

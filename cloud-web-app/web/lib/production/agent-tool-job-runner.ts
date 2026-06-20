@@ -164,11 +164,13 @@ export function evaluateGovernedAgentToolJob(
   input: GovernedAgentToolJobInput
 ): GovernedAgentToolJobDecision {
   const now = input.now ?? new Date().toISOString()
-  // BACKLOG §9 defect #25 / STRATEGY TRACK D #13:
-  // Default to 'enforced' in production so the tool-bus is a hard gate, not an observer.
-  // In development/test, fall back to 'observe' to prevent blocking local iteration.
+  const mutatingTools = ['diff-proposal', 'apply-write', 'git-commit', 'create-level'];
+  const isMutating = mutatingTools.includes(input.toolId as string);
+  
+  // Enforce mutating writes strictly in all environments (DEBT-AI-005)
+  // Non-mutating tools default to 'enforced' in production, 'observe' elsewhere.
   const productionDefault: GovernedToolJobEnforcement =
-    process.env.NODE_ENV === 'production' ? 'enforced' : 'observe'
+    isMutating || process.env.NODE_ENV === 'production' ? 'enforced' : 'observe'
   const enforcement: GovernedToolJobEnforcement = input.enforcement ?? productionDefault
 
   const taskId = resolveTaskId(input)

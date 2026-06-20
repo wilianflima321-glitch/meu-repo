@@ -62,7 +62,7 @@ const STATUS_BY_ERROR = {
   JOB_NOT_FOUND: 404,
   JOB_NOT_FAILED: 409,
   JOB_ACTIVE_CANNOT_CANCEL: 409,
-  JOB_ALREADY_FINALIZED: 400,
+  JOB_ALREADY_FINALIZED: 409,
 }
 
 const SKIP_SEGMENTS = new Set(['node_modules', '.next', 'dist', 'build'])

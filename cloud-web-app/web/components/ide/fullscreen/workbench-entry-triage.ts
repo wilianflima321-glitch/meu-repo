@@ -117,7 +117,7 @@ const ENTRY_PROFILES: Record<Exclude<WorkbenchEntryLaneId, 'general'>, Workbench
     },
     notice: {
       tone: 'info',
-      title: 'Ops lane centralizada',
+      title: 'Centralized ops lane',
       description: 'Growth / Ops opens with AI, context, and artifact in one flow to avoid bloated dashboards and weak continuity.',
     },
   },
@@ -137,7 +137,7 @@ const ENTRY_PROFILES: Record<Exclude<WorkbenchEntryLaneId, 'general'>, Workbench
     },
     notice: {
       tone: 'info',
-      title: 'Viewport dominante',
+      title: 'Viewport in command',
       description: 'Games opens with the 3D viewport in command so Studio feels like a production tool, not chat with a squeezed preview.',
     },
   },
@@ -157,7 +157,7 @@ const ENTRY_PROFILES: Record<Exclude<WorkbenchEntryLaneId, 'general'>, Workbench
     },
     notice: {
       tone: 'info',
-      title: 'Artifact review em foco',
+      title: 'Artifact review in focus',
       description: 'Films / Media opens with a dominant canvas and less chrome so review, composition, and handoff feel more professional.',
     },
   },
@@ -226,7 +226,7 @@ export function resolveWorkbenchEntryProfile(params: {
           notice: mission
             ? {
                 tone: 'info' as const,
-                title: 'Missao em foco',
+                title: 'Mission in focus',
                 description: mission,
               }
             : {

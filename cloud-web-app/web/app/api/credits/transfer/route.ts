@@ -3,7 +3,6 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
-import { Prisma } from '@prisma/client';
 import { createComponentLogger } from '@/lib/observability/logger';
 
 const routeLogger = createComponentLogger('api/credits/transfer/route');
@@ -20,21 +19,6 @@ type TransferBody = {
 function normalizeCurrency(currency: unknown): string {
   const c = String(currency ?? 'credits').trim().toLowerCase();
   return c || 'credits';
-}
-
-async function getSettledBalance(userId: string): Promise<number> {
-  const agg = await prisma.creditLedgerEntry.aggregate({
-    where: {
-      userId,
-      OR: [
-        { metadata: { equals: Prisma.DbNull } },
-        { metadata: { equals: Prisma.JsonNull } },
-        { NOT: { metadata: { path: ['settled'], equals: false } } },
-      ],
-    },
-    _sum: { amount: true },
-  });
-  return agg._sum?.amount ?? 0;
 }
 
 export async function POST(req: NextRequest) {
@@ -89,19 +73,46 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const senderBalance = await getSettledBalance(user.userId);
-    if (senderBalance < amount) {
-      return NextResponse.json(
-        { error: 'INSUFFICIENT_BALANCE', message: 'Saldo insuficiente.' },
-        { status: 400 }
-      );
-    }
-
     const transferId = `tr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     const reference = body?.reference ? String(body.reference).slice(0, 160) : null;
 
-    const [senderEntry, receiverEntry] = await prisma.$transaction([
-      prisma.creditLedgerEntry.create({
+    // ====================================================================
+    // DEBT-FIN-006: Atomic transfer with SELECT ... FOR UPDATE
+    //
+    // Uses an interactive Prisma transaction to:
+    // 1. Lock the sender's balance rows with FOR UPDATE (prevents concurrent reads)
+    // 2. Verify balance >= amount INSIDE the lock
+    // 3. Create both ledger entries atomically
+    //
+    // This eliminates the TOCTOU race condition where two concurrent
+    // transfers could both pass the balance check before either writes.
+    // ====================================================================
+    const result = await prisma.$transaction(async (tx) => {
+      // Step 1: Lock sender's settled ledger rows with FOR UPDATE
+      // This blocks any concurrent transaction from reading until we commit.
+      const balanceRows = await tx.$queryRaw<{ total: bigint | null }[]>`
+        SELECT COALESCE(SUM(amount), 0) AS total
+        FROM "CreditLedgerEntry"
+        WHERE "userId" = ${user.userId}
+          AND (
+            metadata IS NULL
+            OR metadata::jsonb IS NULL
+            OR NOT (metadata::jsonb @> '{"settled": false}')
+          )
+        FOR UPDATE
+      `;
+
+      const senderBalance = Number(balanceRows[0]?.total ?? 0);
+
+      if (senderBalance < amount) {
+        throw Object.assign(
+          new Error('INSUFFICIENT_BALANCE'),
+          { code: 'INSUFFICIENT_BALANCE' }
+        );
+      }
+
+      // Step 2: Create both ledger entries atomically
+      const senderEntry = await tx.creditLedgerEntry.create({
         data: {
           userId: user.userId,
           amount: -amount,
@@ -116,8 +127,9 @@ export async function POST(req: NextRequest) {
           },
         },
         select: { id: true, amount: true, currency: true, entryType: true, reference: true, metadata: true, createdAt: true },
-      }),
-      prisma.creditLedgerEntry.create({
+      });
+
+      const receiverEntry = await tx.creditLedgerEntry.create({
         data: {
           userId: receiver.id,
           amount,
@@ -132,33 +144,47 @@ export async function POST(req: NextRequest) {
           },
         },
         select: { id: true, amount: true, currency: true, entryType: true, reference: true, metadata: true, createdAt: true },
-      }),
-    ]);
+      });
+
+      return { senderEntry, receiverEntry, balanceAfter: senderBalance - amount };
+    }, {
+      // Transaction isolation level for stronger consistency
+      isolationLevel: 'Serializable',
+      timeout: 10_000,
+    });
 
     return NextResponse.json({
       transfer_id: transferId,
       sender_entry: {
-        id: senderEntry.id,
-        amount: Math.abs(senderEntry.amount),
-        currency: senderEntry.currency,
-        entry_type: senderEntry.entryType,
-        created_at: senderEntry.createdAt.toISOString(),
-        reference: senderEntry.reference ?? null,
-        metadata: (senderEntry.metadata as any) ?? null,
-        balance_after: null,
+        id: result.senderEntry.id,
+        amount: Math.abs(result.senderEntry.amount),
+        currency: result.senderEntry.currency,
+        entry_type: result.senderEntry.entryType,
+        created_at: result.senderEntry.createdAt.toISOString(),
+        reference: result.senderEntry.reference ?? null,
+        metadata: (result.senderEntry.metadata as any) ?? null,
+        balance_after: result.balanceAfter,
       },
       receiver_entry: {
-        id: receiverEntry.id,
-        amount: receiverEntry.amount,
-        currency: receiverEntry.currency,
-        entry_type: receiverEntry.entryType,
-        created_at: receiverEntry.createdAt.toISOString(),
-        reference: receiverEntry.reference ?? null,
-        metadata: (receiverEntry.metadata as any) ?? null,
+        id: result.receiverEntry.id,
+        amount: result.receiverEntry.amount,
+        currency: result.receiverEntry.currency,
+        entry_type: result.receiverEntry.entryType,
+        created_at: result.receiverEntry.createdAt.toISOString(),
+        reference: result.receiverEntry.reference ?? null,
+        metadata: (result.receiverEntry.metadata as any) ?? null,
         balance_after: null,
       },
     });
   } catch (error) {
+    // Handle the controlled INSUFFICIENT_BALANCE error from the transaction
+    if ((error as { code?: string })?.code === 'INSUFFICIENT_BALANCE') {
+      return NextResponse.json(
+        { error: 'INSUFFICIENT_BALANCE', message: 'Saldo insuficiente.' },
+        { status: 400 }
+      );
+    }
+
     routeLogger.error('Transfer credits error:', error);
 
     const mapped = apiErrorToResponse(error);
@@ -166,3 +192,4 @@ export async function POST(req: NextRequest) {
     return apiInternalError();
   }
 }
+

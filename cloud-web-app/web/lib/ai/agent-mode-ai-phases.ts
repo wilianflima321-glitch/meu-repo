@@ -1,4 +1,4 @@
-import { aiService } from '@/lib/ai-service';
+import { agentLlmChat } from './agent-llm-bridge';
 import type {
   AgentAction,
   AgentPlan,
@@ -27,7 +27,8 @@ export async function planAgentTask(params: {
   const { addStep, onPlanned, task, thinkingBudget, tools } = params;
   const step = addStep(task.id, 'plan', 'Analyzing task and creating plan...');
 
-  const response = await aiService.chat({
+  const response = await agentLlmChat({
+    kind: 'planning',
     messages: [
       { role: 'system', content: PLANNER_PROMPT },
       {
@@ -35,8 +36,7 @@ export async function planAgentTask(params: {
         content: `TASK: ${task.description}\n\nAVAILABLE TOOLS:\n${tools.map((tool) => `- ${tool.name}: ${tool.description}`).join('\n')}`,
       },
     ],
-    temperature: 0.3,
-    maxTokens: thinkingBudget,
+    options: { temperature: 0.3, maxTokens: thinkingBudget, budget: 'balanced' },
   });
 
   try {
@@ -82,13 +82,13 @@ export async function thinkAgentNextStep(params: {
     .replace('{tools}', tools.map((tool) => `- ${tool.name}: ${tool.description}\n  Input: ${JSON.stringify(tool.inputSchema)}`).join('\n\n'))
     .replace('{memory}', memory.map((entry) => `- [${entry.type}] ${entry.content}`).join('\n'));
 
-  const response = await aiService.chat({
+  const response = await agentLlmChat({
+    kind: 'tool-use',
     messages: [
       { role: 'system', content: prompt },
       { role: 'user', content: 'What is the next step?' },
     ],
-    temperature: 0.2,
-    maxTokens: 2000,
+    options: { temperature: 0.2, maxTokens: 2000, budget: 'balanced' },
   });
 
   try {
@@ -128,13 +128,13 @@ export async function reflectAgentAction(params: {
     .replace('{result}', JSON.stringify(result))
     .replace('{history}', history);
 
-  const response = await aiService.chat({
+  const response = await agentLlmChat({
+    kind: 'critic',
     messages: [
       { role: 'system', content: prompt },
       { role: 'user', content: 'Analyze the result and decide the next step.' },
     ],
-    temperature: 0.2,
-    maxTokens: 1500,
+    options: { temperature: 0.2, maxTokens: 1500, budget: 'max-quality' },
   });
 
   try {

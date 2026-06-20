@@ -3,7 +3,7 @@
  * PATCH  /api/mcp/servers/[id] — update MCP server
  * DELETE /api/mcp/servers/[id] — remove MCP server
  *
- * BACKLOG §10.4 #27 / STRATEGY TRACK E #18
+ * DEBT-DB-001/DB-003: Fixed — typed Prisma access.
  */
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
@@ -22,15 +22,12 @@ export async function GET(
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const server = await (prisma as any).mcpServer
-      ?.findFirst({ where: { id: params.id, userId } })
-      .catch(() => null)
+    const server = await prisma.mcpServer.findFirst({
+      where: { id: params.id, userId },
+    })
 
-    if (server === null) {
-      return NextResponse.json({ error: 'Schema migration pending or not found' }, { status: 404 })
-    }
     if (!server) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+      return NextResponse.json({ error: 'MCP server not found' }, { status: 404 })
     }
 
     return NextResponse.json({ server })
@@ -57,23 +54,25 @@ export async function PATCH(
   const { name, endpoint, transport, description, status } = body
 
   try {
-    const server = await (prisma as any).mcpServer
-      ?.update({
-        where: { id: params.id, userId },
-        data: {
-          ...(name !== undefined ? { name } : {}),
-          ...(endpoint !== undefined ? { endpoint } : {}),
-          ...(transport !== undefined ? { transport } : {}),
-          ...(description !== undefined ? { description } : {}),
-          ...(status !== undefined ? { status } : {}),
-          updatedAt: new Date(),
-        },
-      })
-      .catch(() => null)
-
-    if (server === null) {
-      return NextResponse.json({ error: 'Schema migration pending or not found' }, { status: 404 })
+    // Verify ownership first
+    const existing = await prisma.mcpServer.findFirst({
+      where: { id: params.id, userId },
+      select: { id: true },
+    })
+    if (!existing) {
+      return NextResponse.json({ error: 'MCP server not found' }, { status: 404 })
     }
+
+    const server = await prisma.mcpServer.update({
+      where: { id: params.id },
+      data: {
+        ...(name !== undefined ? { name: String(name) } : {}),
+        ...(endpoint !== undefined ? { endpoint: String(endpoint) } : {}),
+        ...(transport !== undefined ? { transport: String(transport) } : {}),
+        ...(description !== undefined ? { description: description ? String(description) : null } : {}),
+        ...(status !== undefined ? { status: String(status) } : {}),
+      },
+    })
 
     return NextResponse.json({ server })
   } catch (error) {
@@ -90,9 +89,16 @@ export async function DELETE(
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    await (prisma as any).mcpServer
-      ?.delete({ where: { id: params.id, userId } })
-      .catch(() => null)
+    // Verify ownership before deleting
+    const existing = await prisma.mcpServer.findFirst({
+      where: { id: params.id, userId },
+      select: { id: true },
+    })
+    if (!existing) {
+      return NextResponse.json({ error: 'MCP server not found' }, { status: 404 })
+    }
+
+    await prisma.mcpServer.delete({ where: { id: params.id } })
 
     return NextResponse.json({ deleted: true })
   } catch (error) {
@@ -100,3 +106,4 @@ export async function DELETE(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+

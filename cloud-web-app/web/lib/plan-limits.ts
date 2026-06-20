@@ -7,6 +7,7 @@
 
 import { prisma } from './db';
 import { OPENROUTER_BEST_MODELS, OPENROUTER_BUDGET_MODELS, OPENROUTER_FREE_MODELS } from './ai/openrouter-models';
+import { TokenLedger } from './server/financial-ledger';
 
 // ============================================================================
 // DEFINIÇÃO DE LIMITES POR PLANO
@@ -15,7 +16,7 @@ import { OPENROUTER_BEST_MODELS, OPENROUTER_BUDGET_MODELS, OPENROUTER_FREE_MODEL
 export interface PlanLimits {
   tokensPerMonth: number;
   requestsPerDay: number;
-  projectsMax: number;
+  cloudProjectsMax: number;
   storageGB: number;
   concurrentSessions: number;
   maxAgents: number;       // Máximo de agentes ativos (1/2/3...) por usuário/experiência
@@ -64,89 +65,93 @@ const STUDIO_MODELS = Array.from(new Set([...BUDGET_MODEL_IDS, ...STUDIO_BEST_MO
 export const PLAN_LIMITS: Record<string, PlanLimits> = {
   // Free - no card required, intentionally limited but useful for first value
   'free': {
-    tokensPerMonth: 100_000,
-    requestsPerDay: 100,
-    projectsMax: 10,
-    storageGB: 0.25,
+    tokensPerMonth: 200_000,
+    requestsPerDay: 50,
+    cloudProjectsMax: 1,
+    storageGB: 250 / 1024,
     concurrentSessions: 1,
-    maxAgents: 1,
-    maxTokensPerRequest: 2_000,
+    maxAgents: 3,
+    maxTokensPerRequest: 4_000,
     models: FREE_MODEL_IDS,
-    features: ['editor', 'preview', 'chat'],
+    features: ['editor', 'preview', 'chat', 'marketplace', 'extensions'],
   },
 
-  // Starter trial - 14-day onboarding ramp
+  // Starter trial - DEPRECATED (contracts_planning §9.2)
+  // Maps to Free limits. New signups go directly to Free.
+  // Kept only for legacy users who still have plan='starter_trial' in DB.
   'starter_trial': {
-    tokensPerMonth: 10_000,
-    requestsPerDay: 20,
-    projectsMax: 1,
-    storageGB: 0.5,
+    tokensPerMonth: 200_000,
+    requestsPerDay: 50,
+    cloudProjectsMax: 1,
+    storageGB: 250 / 1024,
     concurrentSessions: 1,
-    maxAgents: 1,
-    maxTokensPerRequest: 2_000,
-    models: STARTER_TRIAL_MODELS,
-    features: ['editor', 'preview'],
+    maxAgents: 3,
+    maxTokensPerRequest: 4_000,
+    models: FREE_MODEL_IDS,
+    features: ['editor', 'preview', 'chat', 'marketplace', 'extensions'],
   },
   
-  // Starter - $3/mês
+  // Starter — $9/mo (billing_security_analysis v2)
   'starter': {
-    tokensPerMonth: 500_000,
+    tokensPerMonth: 1_000_000,
     requestsPerDay: 720,
-    projectsMax: 3,
-    storageGB: 0.5,
+    cloudProjectsMax: 3,
+    storageGB: 2,
     concurrentSessions: 1,
-    maxAgents: 1,
+    maxAgents: 3,
     maxTokensPerRequest: 8_000,
     models: STARTER_MODELS,
-    features: ['editor', 'preview', 'chat'],
+    features: ['editor', 'preview', 'chat', 'marketplace', 'extensions'],
   },
   
-  // Basic - $9/mês
+  // Basic — legacy grandfathered (contracts_planning §6, Option A)
+  // Maps to FULL Pro+IA entitlements. Same $29 Price ID maintained in Stripe.
+  // @deprecated — no new checkouts allowed; existing users get Pro+IA rights.
   'basic': {
-    tokensPerMonth: 2_000_000,
-    requestsPerDay: 1440,
-    projectsMax: 10,
-    storageGB: 2,
-    concurrentSessions: 2,
-    maxAgents: 1,
-    maxTokensPerRequest: 16_000,
-    models: BUDGET_MODEL_IDS,
-    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'research'],
-  },
-  
-  // Pro - $29/mês
-  'pro': {
-    tokensPerMonth: 8_000_000,
+    tokensPerMonth: 4_500_000,
     requestsPerDay: 2880,
-    projectsMax: -1,
-    storageGB: 10,
+    cloudProjectsMax: -1,
+    storageGB: 14,
     concurrentSessions: 5,
     maxAgents: 3,
     maxTokensPerRequest: 32_000,
     models: PRO_MODELS,
-    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents', 'api'],
+    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents', 'api', 'marketplace', 'extensions'],
   },
   
-  // Studio - $79/mês
-  'studio': {
-    tokensPerMonth: 25_000_000,
-    requestsPerDay: 7200,
-    projectsMax: -1,
-    storageGB: 50,
-    concurrentSessions: 10,
+  // Pro — $29/mo (BYOK $15)
+  'pro': {
+    tokensPerMonth: 4_500_000,
+    requestsPerDay: 2880,
+    cloudProjectsMax: -1,
+    storageGB: 14,
+    concurrentSessions: 5,
     maxAgents: 3,
+    maxTokensPerRequest: 32_000,
+    models: PRO_MODELS,
+    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents', 'api', 'marketplace', 'extensions'],
+  },
+  
+  // Studio — $79/mo (BYOK $45)
+  'studio': {
+    tokensPerMonth: 18_000_000,
+    requestsPerDay: 7200,
+    cloudProjectsMax: -1,
+    storageGB: 60,
+    concurrentSessions: 10,
+    maxAgents: 10,
     maxTokensPerRequest: 64_000,
     models: STUDIO_MODELS,
-    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents', 'api', 'export', 'priority-support', 'webhooks'],
+    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents', 'api', 'export', 'priority-support', 'webhooks', 'marketplace', 'extensions'],
   },
   
   // Enterprise - custom
   'enterprise': {
     tokensPerMonth: 100_000_000,
-    requestsPerDay: 100000,
-    projectsMax: -1, // Ilimitado
+    requestsPerDay: -1,
+    cloudProjectsMax: -1, // Ilimitado
     storageGB: 1000,
-    concurrentSessions: 50,
+    concurrentSessions: -1,
     maxAgents: 10,
     maxTokensPerRequest: 200_000,
     models: ['*'], // Todos
@@ -310,9 +315,11 @@ export async function checkAIQuota(userId: string, estimatedTokens: number = 100
   
   const limits = getPlanLimits(user.plan);
   const usage = await getCurrentUsage(userId);
+  const pendingTokens = TokenLedger.getPendingTokens(userId);
+  const totalTokens = usage.tokensUsed + pendingTokens + estimatedTokens;
   
   // Verificar limite de tokens mensais
-  if (usage.tokensUsed + estimatedTokens > limits.tokensPerMonth) {
+  if (totalTokens > limits.tokensPerMonth) {
     return {
       allowed: false,
       reason: `Limite mensal de ${limits.tokensPerMonth.toLocaleString()} tokens atingido. Upgrade seu plano para continuar.`,
@@ -322,7 +329,8 @@ export async function checkAIQuota(userId: string, estimatedTokens: number = 100
   
   // Verificar limite de requisições diárias
   const dailyRequests = await getDailyRequestCount(userId);
-  if (dailyRequests >= limits.requestsPerDay) {
+  const pendingRequests = TokenLedger.getPendingRequests(userId);
+  if ((dailyRequests + pendingRequests) >= limits.requestsPerDay) {
     return {
       allowed: false,
       reason: `Limite diário de ${limits.requestsPerDay} requisições atingido. Tente novamente amanhã ou upgrade seu plano.`,
@@ -470,55 +478,11 @@ export async function getUsageStatus(userId: string): Promise<UsageStatus> {
 }
 
 /**
- * Registra uso de tokens
+ * Registra uso de tokens.
+ * Agora utiliza o Ledger Assíncrono (em memória) para evitar Deadlocks/Row Locks no banco.
  */
 export async function recordTokenUsage(userId: string, tokensUsed: number): Promise<void> {
-  const { start: monthStart, end: monthEnd } = getUtcMonthWindow();
-  const { start: dayStart, end: dayEnd } = getUtcDayWindow();
-
-  await prisma.$transaction([
-    prisma.usageBucket.upsert({
-      where: {
-        userId_window_windowStart: {
-          userId,
-          window: 'month',
-          windowStart: monthStart,
-        }
-      },
-      create: {
-        userId,
-        window: 'month',
-        windowStart: monthStart,
-        windowEnd: monthEnd,
-        tokens: tokensUsed,
-        requests: 1,
-      },
-      update: {
-        tokens: { increment: tokensUsed },
-        requests: { increment: 1 },
-      }
-    }),
-    prisma.usageBucket.upsert({
-      where: {
-        userId_window_windowStart: {
-          userId,
-          window: 'day',
-          windowStart: dayStart,
-        }
-      },
-      create: {
-        userId,
-        window: 'day',
-        windowStart: dayStart,
-        windowEnd: dayEnd,
-        tokens: tokensUsed,
-        requests: 1,
-      },
-      update: {
-        tokens: { increment: tokensUsed },
-        requests: { increment: 1 },
-      }
-    }),
-  ]);
+  // Apenas envia pro Singleton Ledger na RAM
+  TokenLedger.addUsage(userId, tokensUsed);
 }
 

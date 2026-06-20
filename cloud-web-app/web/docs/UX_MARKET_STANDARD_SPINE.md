@@ -472,7 +472,7 @@ Cookie consent, onboarding, command chrome, and viewport controls must not leak 
 | File | Count | Note |
 | --- | ---: | --- |
 | `components/ui/CookieConsent.tsx` | 0 | ok |
-| `components/Onboarding.tsx` | 0 | ok |
+| `components/onboarding/Onboarding.tsx` | 0 | ok |
 | `components/ide/fullscreen/WorkbenchEditorToolbar.tsx` | 0 | ok |
 | `components/ide/modern-shell/chromeHeaderParts.tsx` | 0 | ok |
 | `components/ide/fullscreen/WorkbenchPreviewPane.tsx` | 0 | ok |

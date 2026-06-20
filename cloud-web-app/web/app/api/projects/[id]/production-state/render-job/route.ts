@@ -143,6 +143,19 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
           message: 'Render contract captured, but the queue backend is unavailable.',
         }
       } else {
+        // Cria o registro persistente de RenderJob na base
+        const renderJob = await prisma.renderJob.create({
+          data: {
+            id: contract.id, // O job da queue e do prisma tem o mesmo ID
+            projectId: project.id,
+            requestedBy: user.userId,
+            status: 'queued',
+            progress: 0,
+            provider: 'internal-render-farm',
+            costUsd: contract.estimatedCostUsd ?? 0.0,
+          }
+        });
+
         const queued = await queueManager.addJob(
           QUEUE_NAMES.EXPORT,
           VIEWPORT_RENDER_QUEUE_JOB_TYPE,
@@ -155,7 +168,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
           }),
           {
             priority: contract.quality === 'final' ? 7 : contract.quality === 'review' ? 6 : 4,
-            jobId: contract.id,
+            jobId: renderJob.id,
           }
         )
         queue = queued

@@ -143,7 +143,7 @@ export function EditorApplyBridgeProvider({
   }, [])
 
   const handleCancelCreateFile = useCallback(() => {
-    resolveCreateFileRequest({ ok: false, message: 'Operacao cancelada.' })
+    resolveCreateFileRequest({ ok: false, message: 'Operation canceled.' })
   }, [resolveCreateFileRequest])
 
   const handleConfirmCreateFile = useCallback(async () => {
@@ -265,7 +265,7 @@ export function EditorApplyBridgeProvider({
             placeholder="/src/foo.ts"
             error={createFileError ?? undefined}
             disabled={createFileBusy}
-            hint="Exemplo: /src/lib/nova-feature.ts"
+            hint="Example: /src/lib/new-feature.ts"
           />
         </div>
       </Modal>

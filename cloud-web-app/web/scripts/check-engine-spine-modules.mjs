@@ -8,6 +8,8 @@ const REPO_ROOT = path.resolve(ROOT, '..', '..')
 const SOURCE_PATHS = [
   path.join(ROOT, 'lib', 'studio', 'engine-spine-modules.ts'),
   path.join(ROOT, 'lib', 'studio', 'engine-spine-modules.data.ts'),
+  path.join(ROOT, 'lib', 'studio', 'engine-spine-modules.core-data.ts'),
+  path.join(ROOT, 'lib', 'studio', 'engine-spine-modules.production-data.ts'),
 ]
 
 const REQUIRED_IDS = [

@@ -63,7 +63,7 @@ export default function LandingPageV3() {
 
         {/* Screenshot */}
         <section data-landing-product-proof className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-          <div className="overflow-hidden rounded-[34px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-[0_30px_110px_rgba(2,6,23,0.42)]">
+          <div className="overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-[var(--aethel-shadow-xl)]">
             {/* Proof point pills: no internal labels */}
             <div className="flex flex-wrap items-center gap-2 border-b border-[var(--aethel-border-subtle)] px-4 py-3 sm:px-5">
               {PROOF_POINTS.map((point) => (
@@ -91,7 +91,7 @@ export default function LandingPageV3() {
           <div className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-        {/* Start points */}
+                Start points
               </p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--aethel-text-primary)] sm:text-4xl">
                 Choose the entry, then open deeper tools only when needed.
@@ -101,13 +101,13 @@ export default function LandingPageV3() {
               </p>
             </div>
 
-            <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] p-4 shadow-[0_20px_70px_rgba(2,6,23,0.24)] sm:p-5">
+            <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] p-4 shadow-[var(--aethel-shadow-lg)] sm:p-5">
               <div className="grid gap-3 sm:grid-cols-3">
                 {START_MODES.map((mode) => (
                   <Link
                     key={mode.title}
                     href={mode.href}
-                    className="group rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_46%,transparent)] px-4 py-4 transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)]"
+                    className="group rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_46%,transparent)] px-4 py-4 transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)]"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">{mode.title}</span>
@@ -123,7 +123,7 @@ export default function LandingPageV3() {
 
         {/* Final CTA */}
         <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
-          <div className="rounded-[34px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] p-6 shadow-[0_24px_80px_rgba(2,6,23,0.28)] sm:p-8 lg:flex lg:items-center lg:justify-between lg:gap-8">
+          <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] p-6 shadow-[var(--aethel-shadow-xl)] sm:p-8 lg:flex lg:items-center lg:justify-between lg:gap-8">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
                 Get started

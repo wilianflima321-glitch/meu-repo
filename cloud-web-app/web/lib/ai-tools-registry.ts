@@ -15,7 +15,7 @@ import { assertProjectOwnership } from '@/lib/copilot/project-resolver';
 import { loadAgentHandoffContext } from '@/lib/production/agent-handoff-context';
 import { evaluateAgentApplyScope } from '@/lib/production/agent-scope-enforcement';
 import { acquireAgentSurfaceLocks } from '@/lib/production/agent-surface-locks';
-import { evaluateGovernedAgentToolJob } from '@/lib/production/agent-tool-job-runner';
+import { evaluateGovernedAgentToolJob, type GovernedToolJobEnforcement } from '@/lib/production/agent-tool-job-runner';
 import { mapToolNameToCanonical } from '@/lib/production/agent-tool-name-adapter';
 import { getProjectFileStore } from '@/lib/server/project-file-store';
 import type { Prisma } from '@prisma/client';
@@ -56,24 +56,32 @@ async function loadPathModifiedAt(projectId: string, paths: string[]): Promise<R
   }, {} as Record<string, Date>);
 }
 
+type AgentScopeGateResult = {
+  block: ToolResult | null;
+  scopeLockRef?: string;
+  manifestId?: string;
+};
+
 async function enforceAgentToolScope(
   toolName: string,
   params: Record<string, unknown>
-): Promise<ToolResult | null> {
+): Promise<AgentScopeGateResult> {
   const paths = pathsForScopedTool(toolName, params);
-  if (paths.length === 0) return null;
+  if (paths.length === 0) return { block: null };
 
   const context = getContext(params);
-  if (!shouldEnforceAgentScope(params, context)) return null;
+  if (!shouldEnforceAgentScope(params, context)) return { block: null };
 
   if (!context.projectId) {
     return {
-      success: false,
-      error: 'AGENT_SCOPE_PROJECT_REQUIRED',
-      data: {
-        message: 'Agent-scoped tool execution requires projectId in __aethelContext.',
-        toolName,
-        paths,
+      block: {
+        success: false,
+        error: 'AGENT_SCOPE_PROJECT_REQUIRED',
+        data: {
+          message: 'Agent-scoped tool execution requires projectId in __aethelContext.',
+          toolName,
+          paths,
+        },
       },
     };
   }
@@ -106,7 +114,13 @@ async function enforceAgentToolScope(
       reason: toolName,
     });
 
-    if (lockDecision.allowed) return null;
+    if (lockDecision.allowed) {
+      return {
+        block: null,
+        scopeLockRef: lockDecision.lock.id,
+        manifestId: handoff.packet?.cartography?.manifestId ?? undefined,
+      };
+    }
 
     await audit(context.userId, 'ai_tool.surface_locked', context.projectId, {
       toolName,
@@ -116,14 +130,16 @@ async function enforceAgentToolScope(
     });
 
     return {
-      success: false,
-      error: lockDecision.code,
-      data: {
-        message: lockDecision.message,
-        status: lockDecision.status,
-        toolName,
-        paths,
-        metadata: lockDecision.metadata,
+      block: {
+        success: false,
+        error: lockDecision.code,
+        data: {
+          message: lockDecision.message,
+          status: lockDecision.status,
+          toolName,
+          paths,
+          metadata: lockDecision.metadata,
+        },
       },
     };
   }
@@ -136,40 +152,56 @@ async function enforceAgentToolScope(
   });
 
   return {
-    success: false,
-    error: decision.code,
-    data: {
-      message: decision.message,
-      status: decision.status,
-      toolName,
-      paths,
-      metadata: decision.metadata,
+    block: {
+      success: false,
+      error: decision.code,
+      data: {
+        message: decision.message,
+        status: decision.status,
+        toolName,
+        paths,
+        metadata: decision.metadata,
+      },
     },
   };
 }
 
-/**
- * Observe-mode governance: routes the tool invocation through the governed
- * kernel (tool bus + evidence readiness) and records the decision to the audit
- * trail. Best-effort and non-blocking — it never changes tool behavior, but it
- * closes the observability loop so we can see exactly which agent tool calls
- * would be held under enforcement and why.
- */
-async function recordGovernedToolObservation(
-  toolName: string,
+function resolveToolEnforcement(
+  mapping: ReturnType<typeof mapToolNameToCanonical>,
+  context: ReturnType<typeof getContext>,
   params: Record<string, unknown>
-): Promise<void> {
-  let context: ReturnType<typeof getContext>
-  try {
-    context = getContext(params)
-  } catch {
-    return
-  }
-  if (!context.projectId) return
+): GovernedToolJobEnforcement | undefined {
+  const envOverride = process.env.AETHEL_AGENT_TOOL_ENFORCEMENT;
+  if (envOverride === 'enforced' || envOverride === 'observe') return envOverride;
+  if (params.__aethelEnforceToolBus === true || context.enforceToolBus) return 'enforced';
+  if (mapping.mutating && context.enforceAgentScope) return undefined; // production default
+  return 'observe';
+}
 
-  const mapping = mapToolNameToCanonical(toolName)
-  const paths = pathsForScopedTool(toolName, params)
-  const agent = requestedAgentForTool(params, context) ?? 'agent-tool-registry'
+/**
+ * Routes mutating agent tool calls through the governed kernel (tool bus +
+ * evidence readiness). Scoped writes use enforced mode in production; legacy
+ * unscoped calls stay in observe mode for backward compatibility.
+ */
+async function evaluateGovernedToolGate(
+  toolName: string,
+  params: Record<string, unknown>,
+  scopeGate: AgentScopeGateResult
+): Promise<ToolResult | null> {
+  let context: ReturnType<typeof getContext>;
+  try {
+    context = getContext(params);
+  } catch {
+    return null;
+  }
+  if (!context.projectId) return null;
+
+  const mapping = mapToolNameToCanonical(toolName);
+  const paths = pathsForScopedTool(toolName, params);
+  const agent = requestedAgentForTool(params, context) ?? 'agent-tool-registry';
+  const enforcement = resolveToolEnforcement(mapping, context, params);
+  const primaryPath = paths[0] ? normalizePath(paths[0]) : undefined;
+
   const decision = evaluateGovernedAgentToolJob({
     toolId: mapping.toolId,
     mode: mapping.mode,
@@ -178,18 +210,47 @@ async function recordGovernedToolObservation(
     mission: `Agent tool: ${toolName}`,
     intent: `Execute ${toolName}`,
     targetPaths: paths,
-    enforcement: 'observe',
-  })
+    idempotencyKey: scopeGate.scopeLockRef ?? `tool:${toolName}:${primaryPath ?? 'global'}`,
+    scopeLockRef: scopeGate.scopeLockRef ?? null,
+    rollbackRef: mapping.mutating && primaryPath ? `pre-write:${primaryPath}` : null,
+    readReceiptRefs: scopeGate.manifestId ? [`cartography:${scopeGate.manifestId}`] : undefined,
+    maxCostUsd: 0,
+    hasDiffEvidence: mapping.mutating,
+    enforcement,
+  });
 
-  await audit(context.userId, 'ai_tool.governed_observe', context.projectId, {
+  const auditAction =
+    enforcement === 'enforced' ? 'ai_tool.governed_enforced' : 'ai_tool.governed_observe';
+
+  await audit(context.userId, auditAction, context.projectId, {
     toolName,
     canonicalTool: mapping.toolId,
     mode: mapping.mode,
     mutating: mapping.mutating,
+    enforcement: decision.enforcement,
     toolStatus: decision.toolDecision.status,
     ready: decision.ready,
+    allowed: decision.allowed,
+    blockers: decision.blockers,
     missingEvidence: decision.evidenceReadiness.missingKinds,
-  })
+  });
+
+  if (!decision.allowed) {
+    return {
+      success: false,
+      error: 'TOOL_BUS_BLOCKED',
+      data: {
+        message:
+          'Governed tool bus blocked execution. Provide read receipts, scope lock, and rollback evidence before retrying.',
+        blockers: decision.blockers,
+        toolStatus: decision.toolDecision.status,
+        missingEvidence: decision.evidenceReadiness.missingKinds,
+        enforcement: decision.enforcement,
+      },
+    };
+  }
+
+  return null;
 }
 
 async function audit(userId: string | null, action: string, resource?: string, metadata?: unknown): Promise<void> {
@@ -249,10 +310,11 @@ class AIToolsRegistry {
         }
       }
 
-      const scopeBlock = await enforceAgentToolScope(name, params);
-      if (scopeBlock) return scopeBlock;
+      const scopeGate = await enforceAgentToolScope(name, params);
+      if (scopeGate.block) return scopeGate.block;
 
-      await recordGovernedToolObservation(name, params).catch(() => {});
+      const governedBlock = await evaluateGovernedToolGate(name, params, scopeGate);
+      if (governedBlock) return governedBlock;
 
       return await tool.execute(params);
     } catch (error) {

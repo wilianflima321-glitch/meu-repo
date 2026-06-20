@@ -146,7 +146,7 @@ export function buildDemoInlineEdit(args: { code?: string; instruction?: string 
   return {
     code: inputCode,
     explanation:
-      'Modo demo ativo: codigo mantido sem alteracoes para evitar apply enganoso. Configure provider real para gerar patch validavel.',
+      'Demo mode active: code kept unchanged to avoid misleading apply. Configure a real provider to generate a validatable patch.',
     confidence: 0.25,
   }
 }

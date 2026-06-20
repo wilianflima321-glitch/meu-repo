@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from './db';
 import type { AIOperationType } from './credit-wallet-costs';
-import { getCreditBalance } from './credit-wallet';
+
 import type { CreditCheckResult, CreditDeduction, CreditReservation } from './credit-wallet-types';
 import { asLegacyCreditPrisma } from './credit-wallet-types';
 
@@ -19,6 +19,7 @@ export class CreditWallet {
       return { total: 0, reserved: 0, available: 0 };
     }
 
+    const { getCreditBalance } = await import('./credit-wallet');
     const total = typeof user.credits === 'number' ? user.credits : await getCreditBalance(userId);
     const reserved = typeof user.reservedCredits === 'number' ? user.reservedCredits : 0;
     return { total, reserved, available: total - reserved };
@@ -37,6 +38,7 @@ export class CreditWallet {
       };
     }
 
+    const { getCreditBalance } = await import('./credit-wallet');
     const total = typeof user.credits === 'number' ? user.credits : await getCreditBalance(userId);
     const reserved = typeof user.reservedCredits === 'number' ? user.reservedCredits : 0;
     const available = total - reserved;

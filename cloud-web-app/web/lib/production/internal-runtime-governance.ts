@@ -221,16 +221,6 @@ export const INTERNAL_RUNTIME_GOVERNANCE_DECISIONS: InternalRuntimeGovernanceDec
     nextAction: 'Keep IDE-only and add redaction plus session receipts before exposing to agents.',
   },
   {
-    modulePath: 'lib/ai/advanced-ai-provider.ts',
-    decision: 'split',
-    ownerSurface: 'ai-provider-router',
-    boundary: 'server-only',
-    reason: 'Advanced provider routing is critical infrastructure and should be split by providers, policies, and metering.',
-    risks: ['agent-safety-risk', 'parallel-runtime'],
-    evidenceSignals: ['provider-choice', 'cost-receipt', 'fallback-reason'],
-    nextAction: 'Split provider clients, routing policy, rate limits, metering, and structured-output adapters.',
-  },
-  {
     modulePath: 'lib/ai-content-generation.ts',
     decision: 'hold',
     ownerSurface: 'generation-runtime',

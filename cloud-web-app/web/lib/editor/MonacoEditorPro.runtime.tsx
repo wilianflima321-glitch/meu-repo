@@ -90,6 +90,7 @@ export function MonacoEditorPro({
   const [inlineEditFeedback, setInlineEditFeedback] = useState<InlineEditFeedbackState | null>(null);
   const [inlineEditNeedsFullAccess, setInlineEditNeedsFullAccess] = useState(false);
   const [inlineChatOpen, setInlineChatOpen] = useState(false);
+  const [inlineChatPosition, setInlineChatPosition] = useState<{ top: number; left: number } | undefined>(undefined);
   const [inlineCommentLine, setInlineCommentLine] = useState<number | null>(null);
   const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
   const [commentDraft, setCommentDraft] = useState('');
@@ -242,6 +243,20 @@ export function MonacoEditorPro({
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 1.5,
         run: () => openInlineCommentComposer(),
+      }),
+      editor.addAction({
+        id: 'aethel.inlineComposer',
+        label: 'Aethel AI: Inline Composer',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
+        run: () => {
+          const position = editor.getPosition();
+          if (position) {
+            const top = editor.getTopForLineNumber(position.lineNumber) - editor.getScrollTop();
+            const left = editor.getOffsetForColumn(position.lineNumber, position.column) - editor.getScrollLeft();
+            setInlineChatPosition({ top, left });
+          }
+          setInlineChatOpen(true);
+        },
       }),
       editor.onMouseDown((event) => {
         if (event.target.type !== monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN) return;
@@ -440,6 +455,7 @@ export function MonacoEditorPro({
           activeFile={inlineChatActiveFile}
           projectContext={inlineChatProjectContext}
           onClose={() => setInlineChatOpen(false)}
+          position={inlineChatPosition}
         />
       )}
 

@@ -4,6 +4,7 @@ import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { getCatalogExtension, isBuiltinExtension } from '@/lib/marketplace/catalog';
 
 const routeLogger = createComponentLogger('api/marketplace/install/route');
 
@@ -11,16 +12,6 @@ interface InstallRequest {
   extensionId: string;
   projectId?: string;
 }
-
-// Lista de extensões built-in (sempre disponíveis)
-const BUILTIN_EXTENSION_IDS = [
-  'aethel.blueprint-editor',
-  'aethel.niagara-vfx',
-  'aethel.ai-assistant',
-  'aethel.landscape-editor',
-  'aethel.physics-engine',
-  'aethel.multiplayer',
-];
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,8 +28,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Extensões built-in são sempre instaladas automaticamente
-    if (BUILTIN_EXTENSION_IDS.includes(extensionId)) {
+    // Built-in extensions are always available; nothing to persist.
+    if (isBuiltinExtension(extensionId)) {
       return NextResponse.json({
         success: true,
         installed: true,
@@ -48,25 +39,33 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Verifica se extensão existe no marketplace
-    const marketplaceItem = await prisma.marketplaceItem.findFirst({
-      where: { id: extensionId },
-    });
+    // Resolve the install target against the canonical catalog (curated slugs)
+    // first, then fall back to a DB-backed MarketplaceItem (creator listings).
+    const catalogExtension = getCatalogExtension(extensionId);
+    let resolvedName = catalogExtension?.displayName ?? null;
+    let resolvedVersion = catalogExtension?.version ?? '1.0.0';
 
-    if (!marketplaceItem) {
-      return NextResponse.json(
-        { success: false, error: 'Extension not found' },
-        { status: 404 }
-      );
+    if (!catalogExtension) {
+      const marketplaceItem = await prisma.marketplaceItem.findFirst({
+        where: { id: extensionId },
+      });
+
+      if (!marketplaceItem) {
+        return NextResponse.json(
+          { success: false, error: 'Extension not found' },
+          { status: 404 }
+        );
+      }
+
+      resolvedName = marketplaceItem.title;
+      // Only DB-backed listings track a download counter.
+      await prisma.marketplaceItem.update({
+        where: { id: extensionId },
+        data: { downloads: { increment: 1 } },
+      });
     }
 
-    // Incrementa contador de downloads
-    await prisma.marketplaceItem.update({
-      where: { id: extensionId },
-      data: { downloads: { increment: 1 } },
-    });
-
-    // Persiste instalação (idempotente)
+    // Persist install (idempotent), keyed by the canonical extension id.
     await prisma.installedExtension.upsert({
       where: {
         userId_extensionId: {
@@ -84,7 +83,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Log de auditoria
     await prisma.auditLog.create({
       data: {
         userId: user.userId,
@@ -99,9 +97,9 @@ export async function POST(request: NextRequest) {
       installed: true,
       extensionId,
       extension: {
-        id: marketplaceItem.id,
-        name: marketplaceItem.title,
-        version: '1.0.0',
+        id: extensionId,
+        name: resolvedName,
+        version: resolvedVersion,
       },
     });
   } catch (error) {

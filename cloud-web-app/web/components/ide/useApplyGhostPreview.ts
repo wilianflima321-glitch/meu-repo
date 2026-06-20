@@ -112,12 +112,12 @@ export function useApplyGhostPreview(
     return () => {
       changeDisposable.dispose()
       decorationCollection.clear()
-      const currentEditor = editorRef.current
-      if (currentEditor) {
-        currentEditor.changeViewZones((accessor) => {
-          for (const id of zoneIds) accessor.removeZone(id)
-        })
-      }
+      // `editor` is the instance captured when this effect ran and owns the
+      // view zones created above, so removing them here is safe even if the ref
+      // has since pointed at a different editor.
+      editor.changeViewZones((accessor) => {
+        for (const id of zoneIds) accessor.removeZone(id)
+      })
     }
   }, [editorRef, pendingDiff, activeFilePath])
 }

@@ -338,6 +338,17 @@
 }
 
 /* ============================================================================
+ * MOBILE NAV CLEARANCE
+ * Scrollable surfaces tagged `has-mobile-nav` must reserve space so their last
+ * rows are not hidden behind the fixed bottom navigation (shown only < md).
+ * ============================================================================ */
+@media (max-width: 767px) {
+  .has-mobile-nav {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* ============================================================================
  * ACCESSIBILITY: Reduced Motion Support
  * Respects user's OS-level motion preferences per WCAG 2.1
  * ============================================================================ */

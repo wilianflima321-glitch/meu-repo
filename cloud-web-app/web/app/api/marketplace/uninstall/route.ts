@@ -4,6 +4,7 @@ import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { isBuiltinExtension } from '@/lib/marketplace/catalog';
 
 const routeLogger = createComponentLogger('api/marketplace/uninstall/route');
 
@@ -11,16 +12,6 @@ interface UninstallRequest {
   extensionId: string;
   projectId?: string;
 }
-
-// Extensões built-in (sempre disponíveis)
-const BUILTIN_EXTENSION_IDS = [
-  'aethel.blueprint-editor',
-  'aethel.niagara-vfx',
-  'aethel.ai-assistant',
-  'aethel.landscape-editor',
-  'aethel.physics-engine',
-  'aethel.multiplayer',
-];
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Built-in não desinstala (sempre disponível)
-    if (BUILTIN_EXTENSION_IDS.includes(extensionId)) {
+    if (isBuiltinExtension(extensionId)) {
       return NextResponse.json({
         success: true,
         uninstalled: false,

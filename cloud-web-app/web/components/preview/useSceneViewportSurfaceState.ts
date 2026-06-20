@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useViewportStore } from '@/lib/viewport/useViewportStore';
 
 import type { VFXGraph } from '@/components/editors/VFXGraphEditor';
 import type { VisualScript } from '@/components/visual-scripting/VisualScriptEditor';
@@ -31,13 +32,18 @@ import { useSceneViewportPlayback } from './useSceneViewportPlayback';
 import { useViewportExport } from './useViewportExport';
 
 export function useSceneViewportSurfaceState(projectId?: string | null, renderMode: 'draft' | 'cinematic' = 'draft') {
-  const [objects, setObjects] = useState<ViewportSceneObject[]>(viewportSeedObjects);
-  const [selectedIds, setSelectedIds] = useState<string[]>(
-    [viewportSeedObjects[0]?.id].filter(Boolean) as string[]
-  );
-  const [transformMode, setTransformMode] = useState<ViewportTransformMode>('translate');
-  const [transformSpace, setTransformSpace] = useState<ViewportTransformSpace>('world');
-  const [snapEnabled, setSnapEnabled] = useState(true);
+  const {
+    objects,
+    setObjects,
+    selectedIds,
+    setSelectedIds,
+    transformMode,
+    setTransformMode,
+    transformSpace,
+    setTransformSpace,
+    snapEnabled,
+    setSnapEnabled,
+  } = useViewportStore();
   const [workflowTool, setWorkflowTool] = useState<ViewportWorkflowTool | null>(null);
   const [facialBlendShapeCount, setFacialBlendShapeCount] = useState(0);
   const [facialExpressionIntensity, setFacialExpressionIntensity] = useState(0);
@@ -89,19 +95,8 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
     );
   }, []);
 
-  const handleObjectTransformChange = useCallback(
-    (
-      objectId: string,
-      patch: Partial<Pick<ViewportSceneObject, 'position' | 'rotation' | 'scale'>>
-    ) => {
-      setObjects((current) =>
-        current.map((object) =>
-          object.id === objectId && !object.locked ? { ...object, ...patch } : object
-        )
-      );
-    },
-    []
-  );
+  // handleObjectTransformChange agora está no store, mas mantemos compatibilidade caso algo precise
+  const { handleObjectTransformChange } = useViewportStore();
 
   const handleFacialMetricsChange = useCallback((blendShapeCount: number, expressionIntensity: number) => {
     setFacialBlendShapeCount(blendShapeCount);

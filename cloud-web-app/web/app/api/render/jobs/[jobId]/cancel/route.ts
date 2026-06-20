@@ -1,7 +1,7 @@
 /**
  * POST /api/render/jobs/[jobId]/cancel — cancel an in-progress render job
  *
- * BACKLOG §10.4 #29 — completes render job lifecycle (cancel endpoint)
+ * DEBT-RENDER-001: Fixed — typed Prisma access + authorization.
  *
  * Capability contract (RENDER_JOB_CANCEL): queued jobs can be cancelled now;
  * actively-rendering jobs cannot be signalled to stop until the provider cancel
@@ -29,24 +29,10 @@ export async function POST(
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const job = await (prisma as any).renderJob
-      ?.findFirst({
-        where: { id: params.jobId },
-        select: { id: true, status: true, requestedBy: true },
-      })
-      .catch(() => null)
-
-    // Model/backend unavailable (schema migration pending or driver missing).
-    if (job === null) {
-      return capabilityResponse({
-        error: 'QUEUE_BACKEND_UNAVAILABLE',
-        message: 'Render job backend is not available yet.',
-        status: 503,
-        capability: CAPABILITY,
-        capabilityStatus: 'PARTIAL',
-        metadata: { jobId: params.jobId },
-      })
-    }
+    const job = await prisma.renderJob.findFirst({
+      where: { id: params.jobId },
+      select: { id: true, status: true, requestedBy: true, projectId: true },
+    })
 
     if (!job) {
       return capabilityResponse({
@@ -57,6 +43,11 @@ export async function POST(
         capabilityStatus: 'PARTIAL',
         metadata: { jobId: params.jobId },
       })
+    }
+
+    // Authorization: only the job requester can cancel
+    if (job.requestedBy !== userId) {
+      return NextResponse.json({ error: 'Forbidden — only the job owner can cancel.' }, { status: 403 })
     }
 
     const status = String(job.status ?? '').toLowerCase()
@@ -83,27 +74,14 @@ export async function POST(
       })
     }
 
-    const cancelled = await (prisma as any).renderJob
-      ?.update({
-        where: { id: params.jobId },
-        data: {
-          status: 'cancelled',
-          completedAt: new Date(),
-          errorMessage: `Cancelled by user ${userId} at ${new Date().toISOString()}`,
-        },
-      })
-      .catch(() => null)
-
-    if (cancelled === null) {
-      return capabilityResponse({
-        error: 'QUEUE_BACKEND_UNAVAILABLE',
-        message: 'Render job backend rejected the cancel write.',
-        status: 503,
-        capability: CAPABILITY,
-        capabilityStatus: 'PARTIAL',
-        metadata: { jobId: params.jobId },
-      })
-    }
+    const cancelled = await prisma.renderJob.update({
+      where: { id: params.jobId },
+      data: {
+        status: 'cancelled',
+        completedAt: new Date(),
+        errorMessage: `Cancelled by user ${userId} at ${new Date().toISOString()}`,
+      },
+    })
 
     return NextResponse.json({
       success: true,
@@ -114,6 +92,13 @@ export async function POST(
     })
   } catch (error) {
     log.error('POST /api/render/jobs/[jobId]/cancel failed', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return capabilityResponse({
+      error: 'QUEUE_BACKEND_UNAVAILABLE',
+      message: 'Render job backend is not available or query failed.',
+      status: 503,
+      capability: CAPABILITY,
+      capabilityStatus: 'PARTIAL',
+      metadata: { jobId: params.jobId, error: String(error) },
+    })
   }
 }

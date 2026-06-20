@@ -54,7 +54,7 @@ function SurfaceFrame({ eyebrow, title, description, icon, children }: SurfaceFr
   return (
     <div className="space-y-4">
       <section
-        className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-5 py-5 shadow-[0_20px_70px_rgba(2,6,23,0.20)] sm:px-6"
+        className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-5 py-5 shadow-[var(--aethel-shadow-lg)] sm:px-6"
         aria-labelledby={headingId}
       >
         <div className="flex items-start justify-between gap-4">
@@ -87,7 +87,7 @@ function ActivityCard({
   children?: ReactNode
 }) {
   return (
-    <article className="rounded-[26px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] p-5 shadow-[0_18px_58px_rgba(2,6,23,0.18)]">
+    <article className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] p-5 shadow-[var(--aethel-shadow-lg)]">
       <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">{label}</p>
       <h3 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">{title}</h3>
       <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{body}</p>
@@ -213,15 +213,15 @@ function DashboardActivitySurface({ overviewProps, sourceTab }: { overviewProps:
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          <Link href="/evidence" className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] p-4 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
+          <Link href="/evidence" className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] p-4 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
             <span className="block font-semibold text-[var(--aethel-text-primary)]">Receipts</span>
             Receipts, blockers, release checks and runtime status.
           </Link>
-          <Link href="/studio" className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] p-4 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
+          <Link href="/studio" className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] p-4 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
             <span className="block font-semibold text-[var(--aethel-text-primary)]">Creative Studio</span>
             World, character, FX, film and logic lanes.
           </Link>
-          <button type="button" onClick={onOpenProjects} className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] p-4 text-left text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
+          <button type="button" onClick={onOpenProjects} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] p-4 text-left text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
             <span className="block font-semibold text-[var(--aethel-text-primary)]">Projects</span>
             Return to workspace selection and continuity.
           </button>

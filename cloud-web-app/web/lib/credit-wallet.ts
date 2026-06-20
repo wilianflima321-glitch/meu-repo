@@ -44,12 +44,14 @@ export { CreditWallet } from './credit-wallet-legacy';
 /**
  * Obtém saldo atual de créditos do usuário
  */
-export async function getCreditBalance(userId: string): Promise<number> {
+export async function getCreditBalance(userId: string, client: any = prisma): Promise<number> {
   if (!userId) return 0;
-  const result = await prisma.creditLedgerEntry.aggregate({
+  const now = new Date();
+
+  // Sum of all settled entries
+  const settledResult = await client.creditLedgerEntry.aggregate({
     where: {
       userId,
-      // Apenas entradas settled (não pendentes)
       OR: [
         { metadata: { equals: Prisma.DbNull } },
         { metadata: { equals: Prisma.JsonNull } },
@@ -59,19 +61,40 @@ export async function getCreditBalance(userId: string): Promise<number> {
     _sum: { amount: true },
   });
 
-  return result._sum?.amount ?? 0;
+  // Fetch active (unsettled and not expired) reservations
+  const activeReservationsResult = await client.creditLedgerEntry.findMany({
+    where: {
+      userId,
+      entryType: 'RESERVATION',
+      metadata: {
+        path: ['settled'],
+        equals: false,
+      },
+    },
+    select: { amount: true, metadata: true },
+  });
+
+  const activeReservationsTotal = activeReservationsResult
+    .filter((entry: any) => {
+      const meta = entry.metadata as any;
+      if (meta && typeof meta === 'object' && meta.expiresAt) {
+        return new Date(meta.expiresAt) > now;
+      }
+      return false;
+    })
+    .reduce((sum: number, entry: any) => sum + entry.amount, 0);
+
+  return (settledResult._sum?.amount ?? 0) + activeReservationsTotal;
 }
 
-/**
- * CIRCUIT BREAKER: Verifica se operação é permitida
- */
 export async function checkCreditQuota(
   userId: string,
   operationType: AIOperationType,
-  estimatedCost: number
+  estimatedCost: number,
+  client: any = prisma
 ): Promise<CreditCheckResult> {
   const normalizedCost = clampNonNegative(estimatedCost);
-  const balance = await getCreditBalance(userId);
+  const balance = await getCreditBalance(userId, client);
 
   if (balance < normalizedCost) {
     return {
@@ -106,46 +129,49 @@ export async function reserveCredits(
     return null;
   }
 
-  const check = await checkCreditQuota(userId, operationType, normalizedCost);
-
-  if (!check.allowed) {
-    return null;
-  }
-
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 5 * 60 * 1000); // 5 min TTL
   const reservationId = `credit_${userId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-  // Criar entrada pendente (negativa) com metadata.settled = false
-  await prisma.creditLedgerEntry.create({
-    data: {
-      userId,
-      amount: -normalizedCost,
-      currency: 'credits',
-      entryType: 'RESERVATION',
-      reference: reservationId,
-      metadata: {
-        settled: false,
-        operationType,
-        originalReference: reference,
-        expiresAt: expiresAt.toISOString(),
-      },
-    },
-  });
+  return await prisma.$transaction(async (tx) => {
+    // 1. Mutex: Lock the user row to prevent TOCTOU race conditions
+    await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
 
-  return {
-    reservationId,
-    userId,
-    amount: normalizedCost,
-    operationType,
-    createdAt: now,
-    expiresAt,
-  };
+    const check = await checkCreditQuota(userId, operationType, normalizedCost, tx);
+
+    if (!check.allowed) {
+      return null;
+    }
+
+    // Criar entrada pendente (negativa) com metadata.settled = false
+    await tx.creditLedgerEntry.create({
+      data: {
+        userId,
+        amount: -normalizedCost,
+        currency: 'credits',
+        entryType: 'RESERVATION',
+        reference: reservationId,
+        metadata: {
+          settled: false,
+          operationType,
+          originalReference: reference,
+          expiresAt: expiresAt.toISOString(),
+        },
+      },
+    });
+
+    return {
+      reservationId,
+      userId,
+      amount: normalizedCost,
+      operationType,
+      createdAt: now,
+      expiresAt,
+      reference,
+    };
+  });
 }
 
-/**
- * Confirma reserva e ajusta para custo real
- */
 export async function settleCredits(
   reservationId: string,
   actualCost: number,
@@ -232,28 +258,34 @@ export async function cancelReservation(reservationId: string): Promise<void> {
  */
 export async function deductCredits(params: CreditDeduction): Promise<boolean> {
   if (clampNonNegative(params.amount) <= 0) return false;
-  const check = await checkCreditQuota(params.userId, params.operationType, params.amount);
 
-  if (!check.allowed) {
-    return false;
-  }
+  return await prisma.$transaction(async (tx) => {
+    // Lock the user row to prevent TOCTOU race conditions
+    await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${params.userId} FOR UPDATE`;
 
-  await prisma.creditLedgerEntry.create({
-    data: {
-      userId: params.userId,
-      amount: -params.amount,
-      currency: 'credits',
-      entryType: 'USAGE',
-      reference: params.reference || `usage_${Date.now()}`,
-      metadata: {
-        settled: true,
-        operationType: params.operationType,
-        ...params.metadata,
+    const check = await checkCreditQuota(params.userId, params.operationType, params.amount, tx);
+
+    if (!check.allowed) {
+      return false;
+    }
+
+    await tx.creditLedgerEntry.create({
+      data: {
+        userId: params.userId,
+        amount: -params.amount,
+        currency: 'credits',
+        entryType: 'USAGE',
+        reference: params.reference || `usage_${Date.now()}`,
+        metadata: {
+          settled: true,
+          operationType: params.operationType,
+          ...params.metadata,
+        },
       },
-    },
-  });
+    });
 
-  return true;
+    return true;
+  });
 }
 
 /**
@@ -350,7 +382,14 @@ export async function withCreditControl<T>(
   reference?: string
 ): Promise<{ success: boolean; result?: T; error?: unknown; creditsUsed?: number }> {
   const normalizedCost = clampNonNegative(estimatedCost);
-  if (normalizedCost <= 0) {
+
+  // BYOK Bypass
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { byokKey: true }
+  });
+
+  if (user?.byokKey || normalizedCost <= 0) {
     const { result, actualTokens, actualCost } = await operation();
     const finalCost = actualCost ?? (actualTokens
       ? estimateCreditCost(operationType, { estimatedTokens: actualTokens })
@@ -359,7 +398,7 @@ export async function withCreditControl<T>(
     return {
       success: true,
       result,
-      creditsUsed: clampNonNegative(finalCost),
+      creditsUsed: user?.byokKey ? 0 : clampNonNegative(finalCost),
     };
   }
 
@@ -367,6 +406,7 @@ export async function withCreditControl<T>(
   const reservation = await reserveCredits(userId, operationType, normalizedCost, reference);
 
   if (!reservation) {
+    // Para retornar a resposta de erro rica, chamamos checkCreditQuota novamente (somente leitura)
     const check = await checkCreditQuota(userId, operationType, normalizedCost);
     return {
       success: false,

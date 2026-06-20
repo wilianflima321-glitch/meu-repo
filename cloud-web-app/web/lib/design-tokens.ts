@@ -201,7 +201,7 @@ export function getToken<T extends keyof Tokens>(
 // Predefined gradient combinations
 export const gradients = {
   // Primary brand gradient
-  brand: 'linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(14, 165, 233, 0.92))',
+  brand: 'linear-gradient(135deg, var(--aethel-accent, rgba(79, 70, 229, 0.95)), var(--aethel-info, rgba(14, 165, 233, 0.92)))',
   
   // Glass panel gradients
   glassSubtle: 'linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.82))',
@@ -209,8 +209,8 @@ export const gradients = {
   glassStrong: 'linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.94))',
   
   // Glow effects as gradients
-  glowCyan: 'radial-gradient(circle at top, rgba(6, 182, 212, 0.15), transparent 40%)',
-  glowIndigo: 'radial-gradient(circle at top, rgba(99, 102, 241, 0.15), transparent 40%)',
+  glowCyan: 'radial-gradient(circle at top, var(--aethel-info, rgba(6, 182, 212, 0.15)), transparent 40%)',
+  glowIndigo: 'radial-gradient(circle at top, var(--aethel-accent, rgba(99, 102, 241, 0.15)), transparent 40%)',
   
   // Mesh gradient backgrounds
   mesh: `

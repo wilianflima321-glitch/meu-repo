@@ -12,6 +12,7 @@ export class SceneManager extends EventEmitter {
   private _activeScene: Scene | null = null;
   private _loadingScene: Scene | null = null;
   private _componentRegistry: ComponentRegistry = new ComponentRegistry();
+  private _activeSelection: string[] = [];
   private constructor() {
     super();
   }
@@ -22,6 +23,11 @@ export class SceneManager extends EventEmitter {
     return this._instance;
   }
   get activeScene(): Scene | null { return this._activeScene; }
+  get activeSelection(): string[] { return this._activeSelection; }
+  setSelection(nodeIds: string[]) {
+    this._activeSelection = nodeIds;
+    this.emit('selectionChanged', this._activeSelection);
+  }
   get componentRegistry(): ComponentRegistry { return this._componentRegistry; }
   get scenes(): Scene[] { return Array.from(this._scenes.values()); }
   createScene(name: string): Scene {

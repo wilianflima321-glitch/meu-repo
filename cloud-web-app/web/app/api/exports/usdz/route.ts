@@ -5,6 +5,7 @@
  */
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { prisma } from '@/lib/db'
 
 export const runtime = 'nodejs'
 
@@ -24,7 +25,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'projectId is required' }, { status: 400 })
   }
 
-  const jobId = `export:usdz:${Date.now().toString(36)}`
+  const job = await prisma.renderJob.create({
+    data: {
+      projectId,
+      requestedBy: userId,
+      status: 'queued',
+      provider: 'internal',
+    }
+  })
+  const jobId = job.id
 
   return NextResponse.json({
     jobId,

@@ -31,9 +31,40 @@ class EmergencyController extends EventEmitter {
   private metricsCache: CostMetrics | null = null;
   private lastMetricsUpdate: number = 0;
   
+  // Ledger Assíncrono (Batching) para evitar Row Locks (DEBT-FIN-011)
+  private pendingLedgerEntries: any[] = [];
+  private ledgerFlushInterval: NodeJS.Timeout | null = null;
+  
   constructor() {
     super();
     this.state = this.getDefaultState();
+    this.startLedgerFlushInterval();
+  }
+  
+  private startLedgerFlushInterval() {
+    if (typeof window === 'undefined') {
+      // Executa apenas no backend
+      this.ledgerFlushInterval = setInterval(() => this.flushLedger(), 30_000);
+    }
+  }
+
+  private async flushLedger() {
+    if (this.pendingLedgerEntries.length === 0) return;
+    const entriesToProcess = [...this.pendingLedgerEntries];
+    this.pendingLedgerEntries = [];
+    
+    try {
+      if (entriesToProcess.length > 0) {
+        await prisma.creditLedgerEntry.createMany({
+          data: entriesToProcess,
+        });
+        log.info(`[EmergencyController] Flushed ${entriesToProcess.length} ledger entries to database.`);
+      }
+    } catch (error) {
+      logger.error('[EmergencyController] Failed to flush ledger entries:', error);
+      // Retorna para a fila em caso de falha transitória
+      this.pendingLedgerEntries.push(...entriesToProcess);
+    }
   }
   
   // ============================================================================
@@ -416,28 +447,25 @@ class EmergencyController extends EventEmitter {
     
     // Converte USD para créditos
     const credits = Math.ceil(totalCost * 1000);
+    if (credits === 0) return;
     
-    try {
-      await prisma.creditLedgerEntry.create({
-        data: {
-          userId,
-          amount: -credits,
-          entryType: 'ai_generation',
-          reference: `AI usage: ${model}`,
-          metadata: {
-            model,
-            inputTokens,
-            outputTokens,
-            costUSD: totalCost,
-          },
-        },
-      });
-    } catch (error) {
-      logger.error('[EmergencyController] Failed to track usage:', error);
-    }
+    // Adiciona na fila em memória ao invés de bater no DB (DEBT-FIN-011)
+    this.pendingLedgerEntries.push({
+      userId,
+      amount: -credits,
+      entryType: 'ai_generation',
+      reference: `AI usage: ${model}`,
+      metadata: {
+        model,
+        inputTokens,
+        outputTokens,
+        costUSD: totalCost,
+      },
+    });
     
     // Atualiza métricas (invalidando cache)
     this.lastMetricsUpdate = 0;
+    this.recordSpend(totalCost);
   }
 }
 

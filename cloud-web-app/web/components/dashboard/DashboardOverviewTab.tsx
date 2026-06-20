@@ -18,7 +18,7 @@ type Point3 = {
 const CanonicalPreviewSurface = dynamic(() => import('@/components/preview/CanonicalPreviewSurface'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full min-h-[260px] flex-col justify-between rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] px-6 py-5 text-sm text-[var(--aethel-text-secondary)]">
+    <div className="flex h-full min-h-[260px] flex-col justify-between rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] px-6 py-5 text-sm text-[var(--aethel-text-secondary)]">
       <div>
         <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Preview</p>
         <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">Warming up the artifact preview</p>
@@ -144,7 +144,7 @@ export function DashboardOverviewTab({
   const topConnectivityServices = connectivityServices.slice(0, 3)
 
   const panelClass =
-    'overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] p-5 shadow-[0_24px_80px_rgba(2,6,23,0.24)] sm:p-6'
+    'overflow-hidden rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] p-5 shadow-[var(--aethel-shadow-xl)] sm:p-6'
   const ghostButtonClass = `inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--aethel-border-subtle)] bg-transparent px-3 py-1 text-sm font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   return (
@@ -196,7 +196,7 @@ export function DashboardOverviewTab({
               </div>
               <Coins className="h-4.5 w-4.5 text-[var(--aethel-text-quaternary)]" />
             </div>
-            <div className="mt-4 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] px-4 py-4">
+            <div className="mt-4 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] px-4 py-4">
               <div className="text-2xl font-semibold text-[var(--aethel-text-primary)]">{walletSummary}</div>
               <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{walletFootnote}</p>
             </div>
@@ -220,7 +220,7 @@ export function DashboardOverviewTab({
               </div>
               <ShieldCheck className="h-4.5 w-4.5 text-[var(--aethel-text-quaternary)]" />
             </div>
-            <div className="mt-4 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] px-4 py-4">
+            <div className="mt-4 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] px-4 py-4">
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Overall status</span>
                 <span className={`rounded-full border px-2.5 py-1 text-xs ${toneClasses[connectivityData?.overall_status === 'healthy' ? 'positive' : connectivityData?.overall_status === 'degraded' ? 'warning' : connectivityData?.overall_status ? 'danger' : 'neutral']}`}>

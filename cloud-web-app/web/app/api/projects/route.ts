@@ -59,14 +59,18 @@ export async function POST(req: NextRequest) {
     }
 
     // Enforce limite de projetos
-    if (entitlements.plan.limits.projects !== -1) {
+    if (entitlements.plan.limits.cloudProjectsMax !== -1) {
       const count = await prisma.project.count({ where: { userId: user.userId } });
-      if (count >= entitlements.plan.limits.projects) {
+      if (count >= entitlements.plan.limits.cloudProjectsMax) {
         return NextResponse.json(
           {
-            error: 'PROJECT_LIMIT_REACHED',
-            message: `Plan project limit (${entitlements.plan.limits.projects}) reached. Upgrade.`,
+            error: 'CLOUD_PROJECT_LIMIT_REACHED',
+            message: `Cloud-synced project limit (${entitlements.plan.limits.cloudProjectsMax}) reached. Upgrade.`,
             plan: entitlements.plan.id,
+            cloudProjectsMax: entitlements.plan.limits.cloudProjectsMax,
+            cloudProjectsUsed: count,
+            localProjectsUnlimited: true,
+            upgradeUrl: '/billing'
           },
           { status: 402 }
         );

@@ -17,7 +17,7 @@ export function CompareHero() {
             Aethel vs the market, without fog.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--aethel-text-secondary)] sm:text-lg">
-            See fit, gaps, and the next best choice.
+            See fit, gaps, and the next best choice. The clean read by category.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link

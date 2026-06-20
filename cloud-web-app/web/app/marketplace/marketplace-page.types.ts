@@ -22,8 +22,15 @@ export type MarketplaceCardProps = {
   onUninstall: (extensionId: string) => void
 }
 
+export type MarketplaceInstallFeedback = {
+  type: 'error' | 'success' | 'info'
+  message: string
+}
+
 export type MarketplaceInstallReviewProps = {
   extension: Extension | null
   onConfirmInstall: (extensionId: string) => void
   onCancel: () => void
+  pending?: boolean
+  feedback?: MarketplaceInstallFeedback | null
 }

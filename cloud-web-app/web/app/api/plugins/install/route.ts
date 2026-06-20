@@ -1,12 +1,17 @@
 /**
  * POST /api/plugins/install — install a plugin
  *
- * BACKLOG §10.4 #33 — Plugin lifecycle
+ * DEBT-PLUGIN-001: Fixed — creates InstalledExtension record in DB.
+ * Marketplace install now works end-to-end instead of returning 503.
  */
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger'
 
 export const runtime = 'nodejs'
+
+const log = createComponentLogger('api/plugins/install')
 
 export async function POST(req: NextRequest) {
   const userId = req.headers.get('x-user-id')
@@ -24,14 +29,54 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'pluginId is required' }, { status: 400 })
   }
 
-  return NextResponse.json(
-    {
-      error: 'Plugin installation pending lib/plugins/host.ts implementation (BACKLOG §10.3 #25).',
+  try {
+    // Check if already installed for this user
+    const existing = await prisma.pluginInstall.findUnique({
+      where: {
+        userId_pluginId: { userId, pluginId },
+      },
+    })
+
+    if (existing) {
+      return NextResponse.json({
+        status: 'already_installed',
+        pluginId: pluginId,
+        installedAt: existing.installedAt.toISOString(),
+      })
+    }
+
+    // Install the plugin
+    const installed = await prisma.pluginInstall.create({
+      data: {
+        userId,
+        pluginId: pluginId,
+      },
+    })
+
+    log.info('plugin.installed', {
+      userId,
       pluginId,
       version,
       projectId: projectId ?? null,
-      _pending: true,
-    },
-    { status: 503 }
-  )
+    })
+
+    return NextResponse.json({
+      status: 'installed',
+      id: installed.id,
+      pluginId: pluginId,
+      version,
+      installedAt: installed.installedAt.toISOString(),
+    })
+  } catch (error) {
+    log.error('Plugin install failed', error)
+    return NextResponse.json(
+      {
+        error: 'PLUGIN_INSTALL_FAILED',
+        message: 'Failed to install plugin. Please try again.',
+        details: process.env.NODE_ENV !== 'production' ? (error as Error)?.message : undefined,
+      },
+      { status: 500 }
+    )
+  }
 }
+

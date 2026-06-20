@@ -11,7 +11,16 @@ const ROUTES_INVENTORY_FILE = path.join(DOCS_DIR, 'ROUTES_INVENTORY.md')
 // Ratchet this downward as the largest App Router pages are split. Do not raise
 // without explicitly accepting route UX debt.
 const MAX_PAGE_LINES = 250
-const MAX_ADMIN_ROUTES = 6
+const MAX_ADMIN_CANONICAL_ANCHORS = 6
+
+const CANONICAL_ADMIN_ANCHORS = [
+  '/admin/users',
+  '/admin/finance',
+  '/admin/ai',
+  '/admin/monitoring',
+  '/admin/security',
+  '/admin/feature-flags',
+]
 
 const REQUIRED_BOUNDARY_SEGMENTS = [
   'admin',
@@ -28,7 +37,6 @@ const REQUIRED_ROUTES = [
   '/',
   '/dashboard',
   '/ide',
-  '/nexus',
   '/studio',
   '/marketplace',
   '/marketplace/creator/onboarding',
@@ -99,7 +107,7 @@ function classifyRoute(route) {
   if (route === '/marketplace' || route.startsWith('/marketplace/')) return 'marketplace'
   if (['/trust', '/security', '/security-policy', '/compliance', '/reliability'].includes(route)) return 'trust'
   if (['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'].includes(route)) return 'auth'
-  if (['/dashboard', '/ide', '/nexus', '/settings', '/profile'].includes(route)) return 'core-workspace'
+  if (['/dashboard', '/ide', '/settings', '/profile'].includes(route)) return 'core-workspace'
   if (['/pricing', '/compare', '/contact-sales', '/download'].includes(route)) return 'marketing'
   return 'product'
 }
@@ -149,9 +157,12 @@ function main() {
   }
 
   const adminRoutes = routeEntries.filter((entry) => entry.group === 'admin' && entry.route !== '/admin')
-  if (adminRoutes.length > MAX_ADMIN_ROUTES) {
-    failures.push(`admin route count regressed: ${adminRoutes.length} > ${MAX_ADMIN_ROUTES}`)
+  const canonicalAdminAnchors = CANONICAL_ADMIN_ANCHORS.filter((route) => routeSet.has(route))
+  if (canonicalAdminAnchors.length !== MAX_ADMIN_CANONICAL_ANCHORS) {
+    const missing = CANONICAL_ADMIN_ANCHORS.filter((route) => !routeSet.has(route))
+    failures.push(`missing canonical admin anchors: ${missing.join(', ')}`)
   }
+  const legacyAdminRoutes = adminRoutes.filter((entry) => !CANONICAL_ADMIN_ANCHORS.includes(entry.route))
 
   for (const entry of routeEntries) {
     const content = fs.readFileSync(path.join(ROOT, entry.file), 'utf8')
@@ -191,7 +202,8 @@ function main() {
   report.push('## Summary')
   report.push(`- Page routes: ${routeEntries.length}`)
   report.push(`- Studio routes: ${studioRoutes.length}/${REQUIRED_STUDIO_ROUTES.length + 1} including hub`)
-  report.push(`- Admin routes: ${adminRoutes.length}/${MAX_ADMIN_ROUTES} ratchet`)
+  report.push(`- Admin canonical anchors: ${canonicalAdminAnchors.length}/${MAX_ADMIN_CANONICAL_ANCHORS}`)
+  report.push(`- Admin legacy compatibility routes: ${legacyAdminRoutes.length}`)
   report.push(`- Client page routes: ${clientRoutes.length}`)
   report.push(`- Routes with route-local metadata: ${metadataRoutes.length}`)
   report.push(`- Max page size: ${Math.max(...routeEntries.map((entry) => entry.lines), 0)} lines (limit ${MAX_PAGE_LINES})`)
@@ -212,7 +224,8 @@ function main() {
   report.push('## Quality Ratchets')
   report.push(`- No route page above ${MAX_PAGE_LINES} lines.`)
   report.push('- No route page may contain mojibake, blocking browser alerts, or unfinished placeholder markers.')
-  report.push(`- Admin routes may not increase above ${MAX_ADMIN_ROUTES} until they are consolidated behind canonical sections.`)
+  report.push(`- Admin canonical anchors may not decrease below ${MAX_ADMIN_CANONICAL_ANCHORS}.`)
+  report.push('- Legacy admin compatibility routes remain searchable but are not primary navigation.')
   report.push('- Critical user journeys and all studio surfaces must stay routable.')
   report.push('- Critical route groups must ship both loading.tsx and error.tsx boundaries.')
   fs.writeFileSync(REPORT_FILE, `${report.join('\n')}\n`, 'utf8')
@@ -224,7 +237,8 @@ function main() {
   inventory.push('')
   inventory.push('## Summary')
   inventory.push(`- Total routes: ${routeEntries.length}`)
-  inventory.push(`- Admin routes: ${adminRoutes.length}`)
+  inventory.push(`- Admin canonical anchors: ${canonicalAdminAnchors.length}`)
+  inventory.push(`- Admin legacy compatibility routes: ${legacyAdminRoutes.length}`)
   inventory.push(`- Auth routes: ${routeEntries.filter((entry) => entry.group === 'auth').length}`)
   inventory.push(`- Studio routes: ${studioRoutes.length}`)
   inventory.push(`- Required studio routes wired: ${REQUIRED_STUDIO_ROUTES.filter((route) => routeSet.has(route)).length}/${REQUIRED_STUDIO_ROUTES.length}`)

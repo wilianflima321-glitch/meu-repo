@@ -25,7 +25,7 @@ export function applySnippetAtCursor(
   code: string
 ): ApplyBridgeResult {
   const model = editor.getModel()
-  if (!model) return { ok: false, message: 'Editor sem modelo' }
+  if (!model) return { ok: false, message: 'Editor has no model' }
   const selection = editor.getSelection()
   if (selection && !selection.isEmpty()) {
     editor.executeEdits('aethel-chat-apply', [{ range: selection, text: code, forceMoveMarkers: true }])
@@ -34,7 +34,7 @@ export function applySnippetAtCursor(
   }
 
   const position = editor.getPosition()
-  if (!position) return { ok: false, message: 'Sem posicao do cursor' }
+  if (!position) return { ok: false, message: 'No cursor position' }
   const range = {
     startLineNumber: position.lineNumber,
     startColumn: position.column,
@@ -52,9 +52,9 @@ export function insertSnippetAtCursor(
   code: string
 ): ApplyBridgeResult {
   const model = editor.getModel()
-  if (!model) return { ok: false, message: 'Editor sem modelo' }
+  if (!model) return { ok: false, message: 'Editor has no model' }
   const position = editor.getPosition()
-  if (!position) return { ok: false, message: 'Sem posicao do cursor' }
+  if (!position) return { ok: false, message: 'No cursor position' }
   const range = {
     startLineNumber: position.lineNumber,
     startColumn: position.column,
@@ -71,7 +71,7 @@ export function replaceEntireDocument(
   code: string
 ): ApplyBridgeResult {
   const model = editor.getModel()
-  if (!model) return { ok: false, message: 'Editor sem modelo' }
+  if (!model) return { ok: false, message: 'Editor has no model' }
   const fullRange = model.getFullModelRange()
   editor.executeEdits('aethel-chat-replace-doc', [{ range: fullRange, text: code, forceMoveMarkers: true }])
   editor.focus()
@@ -106,3 +106,5 @@ export function buildChatDiffFile(path: string, oldContent: string, newContent: 
 
   return { path, oldContent, newContent, lines }
 }
+
+

@@ -1,4 +1,5 @@
 /**
+ * @deprecated Use the unified AutonomousAgent in `agent-mode.ts` (DEBT-AI-002, DEBT-AI-011).
  * Contrato do modo agente: leitura/escrita de arquivos, shell e revisao.
  * A execucao real vira em camadas sobre a ponte `ai-apply-bridge` e as APIs `/api/files/*`.
  */

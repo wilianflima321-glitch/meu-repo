@@ -86,11 +86,11 @@ export async function GET(request: NextRequest) {
       {
         resource: 'projects',
         used: projectsCount,
-        limit: limits.projectsMax,
-        unlimited: limits.projectsMax === -1,
-        remaining: limits.projectsMax === -1 ? -1 : Math.max(0, limits.projectsMax - projectsCount),
-        percentage: limits.projectsMax > 0
-          ? Math.min(100, Math.round((projectsCount / limits.projectsMax) * 100))
+        limit: limits.cloudProjectsMax,
+        unlimited: limits.cloudProjectsMax === -1,
+        remaining: limits.cloudProjectsMax === -1 ? -1 : Math.max(0, limits.cloudProjectsMax - projectsCount),
+        percentage: limits.cloudProjectsMax > 0
+          ? Math.min(100, Math.round((projectsCount / limits.cloudProjectsMax) * 100))
           : 0,
         period: 'month' as const,
       },
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
       limit = limits.storageGB < 0 ? -1 : Math.round(limits.storageGB * 1024);
     } else if (resource === 'projects') {
       currentUsage = projectsCount;
-      limit = limits.projectsMax;
+      limit = limits.cloudProjectsMax;
     } else if (resource === 'ai_requests_daily') {
       currentUsage = usageStatus.usage.requestsUsedToday;
       limit = limits.requestsPerDay;
