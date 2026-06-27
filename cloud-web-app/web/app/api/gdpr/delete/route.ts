@@ -32,7 +32,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // 1. Delete style embeddings (prompts + embeddings)
     if (scope.includes('embeddings') || scope.includes('prompts')) {
-      const deleted = await (prisma as any).styleEmbedding?.deleteMany?.({
+      const deleted = await prisma.styleEmbedding.deleteMany({
         where: { projectId: { in: await getUserProjectIds(user.userId) } },
       }).catch(() => ({ count: 0 }));
       report.styleEmbeddings = deleted?.count ?? 0;
@@ -40,15 +40,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // 2. Delete generated assets + their prompts
     if (scope.includes('generated_assets') || scope.includes('prompts')) {
-      const deleted = await (prisma as any).generatedAsset?.deleteMany?.({
-        where: { project: { userId: user.userId } },
+      const deleted = await prisma.generatedAsset.deleteMany({
+        where: { world: { project: { userId: user.userId } } },
       }).catch(() => ({ count: 0 }));
       report.generatedAssets = deleted?.count ?? 0;
     }
 
     // 3. Scrub prompt fields from world versions
     if (scope.includes('prompts')) {
-      await (prisma as any).worldVersion?.updateMany?.({
+      await prisma.worldVersion.updateMany({
         where: { world: { project: { userId: user.userId } } },
         data: { diffPayload: '[GDPR_DELETED]' },
       }).catch(() => null);

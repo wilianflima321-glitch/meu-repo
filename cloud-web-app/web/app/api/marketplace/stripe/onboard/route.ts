@@ -42,7 +42,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Look up existing Stripe account ID for this user
     const dbUser = await prisma.user.findUnique({
       where: { id: user.userId },
-      select: { id: true, email: true },
+      select: { id: true, email: true, stripeConnectAccountId: true },
     });
 
     if (!dbUser) {
@@ -50,8 +50,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // Check if user already has a Stripe account stored
-    // (in a full impl, store stripeAccountId in User model)
-    let accountId: string | null = null;
+    let accountId = dbUser.stripeConnectAccountId;
 
     if (!accountId) {
       // Create new Express account
@@ -62,6 +61,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         settings: { payouts: { schedule: { interval: 'monthly', monthly_anchor: 1 } } },
       });
       accountId = account.id;
+
+      // Save Stripe account ID to database
+      await prisma.user.update({
+        where: { id: user.userId },
+        data: { stripeConnectAccountId: accountId },
+      });
+
       log.info('Created Stripe Express account', { accountId, userId: user.userId });
     }
 

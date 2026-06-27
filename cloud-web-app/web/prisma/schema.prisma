@@ -67,6 +67,9 @@ model User {
   // BYOK (Bring Your Own Key) for LLM bypass
   byokKey           String?   // Encrypted user API key for BYOK
 
+  // Stripe Connect Account ID for creator payouts
+  stripeConnectAccountId String? @unique
+
   projects Project[]
   projectMemberships ProjectMember[]
   sessions Session[]

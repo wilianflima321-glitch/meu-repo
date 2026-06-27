@@ -74,7 +74,6 @@ async function moderateWithRekognition(imageBase64: string): Promise<VisionModer
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let rekognitionModule: any;
   try {
-    // @ts-expect-error — optional peer dependency
     rekognitionModule = await import('@aws-sdk/client-rekognition');
   } catch {
     throw new Error('@aws-sdk/client-rekognition is not installed. Run: npm install @aws-sdk/client-rekognition');
