@@ -61,7 +61,7 @@ const KILL_SWITCH_STORE = new Map<FeatureFlag, KillSwitch>([
 // Public helper — check a switch from any server-side code
 // ---------------------------------------------------------------------------
 
-export function isFeatureEnabled(flag: FeatureFlag): boolean {
+function isFeatureEnabled(flag: FeatureFlag): boolean {
   return !(KILL_SWITCH_STORE.get(flag)?.suspended ?? false);
 }
 

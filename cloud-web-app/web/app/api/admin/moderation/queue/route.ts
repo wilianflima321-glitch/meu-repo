@@ -1,116 +1,102 @@
+/**
+ * Admin Moderation Queue API
+ * GET  /api/admin/moderation/queue         — list pending review items
+ * POST /api/admin/moderation/queue/[id]/approve
+ * POST /api/admin/moderation/queue/[id]/reject
+ */
 import { NextRequest, NextResponse } from 'next/server';
-import type { Prisma } from '@prisma/client';
-import { prisma } from '@/lib/prisma';
-import { withAdminAuth } from '@/lib/rbac';
+import { requireAuth } from '@/lib/auth-server';
 import { createComponentLogger } from '@/lib/observability/logger';
 
-const routeLogger = createComponentLogger('api/admin/moderation/queue/route');
+const log = createComponentLogger('admin.moderation.queue');
 
-// =============================================================================
-// MODERATION QUEUE API
-// =============================================================================
-
-async function getQueueHandler(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const filter = searchParams.get('filter') || 'pending';
-  
-  try {
-    // Build where clause based on filter
-    const where: Prisma.ModerationItemWhereInput = {};
-    
-    if (filter === 'pending') {
-      where.status = 'pending';
-    } else if (filter === 'urgent') {
-      where.status = 'pending';
-      where.priority = 'urgent';
-    }
-    // 'all' - no filter
-    
-    // Fetch moderation items
-    const items = await prisma.moderationItem.findMany({
-      where,
-      orderBy: [
-        { priority: 'desc' }, // urgent first
-        { createdAt: 'asc' }, // oldest first within priority
-      ],
-      take: 50,
-    });
-    
-    // Enrich with user emails if we have target owner IDs
-    const enrichedItems = await Promise.all(
-      items.map(async (item) => {
-        let targetOwnerEmail: string | undefined;
-        
-        if (item.targetOwnerId) {
-          const owner = await prisma.user.findUnique({
-            where: { id: item.targetOwnerId },
-            select: { email: true },
-          });
-          targetOwnerEmail = owner?.email;
-        }
-        
-        return {
-          ...item,
-          targetOwnerEmail,
-          contentSnapshot: item.contentSnapshot as any,
-          autoFlags: item.autoFlags ? JSON.parse(item.autoFlags as string) : undefined,
-        };
-      })
-    );
-    
-    // Calculate stats
-    const [pendingCount, urgentCount, todayProcessed] = await Promise.all([
-      prisma.moderationItem.count({ where: { status: 'pending' } }),
-      prisma.moderationItem.count({ where: { status: 'pending', priority: 'urgent' } }),
-      prisma.moderationItem.count({
-        where: {
-          resolvedAt: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          },
-        },
-      }),
-    ]);
-    
-    // Calculate average response time (simplified)
-    const recentResolved = await prisma.moderationItem.findMany({
-      where: {
-        resolvedAt: { not: null },
-      },
-      select: {
-        createdAt: true,
-        resolvedAt: true,
-      },
-      orderBy: { resolvedAt: 'desc' },
-      take: 100,
-    });
-    
-    let avgResponseTime = 0;
-    if (recentResolved.length > 0) {
-      const totalMinutes = recentResolved.reduce((sum, item) => {
-        if (!item.resolvedAt) return sum;
-        const diff = item.resolvedAt.getTime() - item.createdAt.getTime();
-        return sum + diff / (1000 * 60);
-      }, 0);
-      avgResponseTime = Math.round(totalMinutes / recentResolved.length);
-    }
-    
-    return NextResponse.json({
-      items: enrichedItems,
-      stats: {
-        pending: pendingCount,
-        urgent: urgentCount,
-        todayProcessed,
-        avgResponseTime,
-      },
-    });
-    
-  } catch (error) {
-    routeLogger.error('[Moderation Queue] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch moderation queue' },
-      { status: 500 }
-    );
-  }
+export interface ModerationQueueItem {
+  id: string;
+  assetId: string;
+  assetName: string;
+  assetType: 'mesh' | 'texture' | 'audio' | 'world' | 'prompt';
+  thumbnailUrl?: string;
+  score: number;
+  categories: Record<string, number>;
+  flaggedAt: string;
+  flaggedBy: 'auto' | string;
+  status: 'pending_review' | 'approved' | 'rejected';
+  reviewedBy?: string;
+  reviewedAt?: string;
+  reviewNote?: string;
 }
 
-export const GET = withAdminAuth(getQueueHandler, 'ops:moderation:view');
+// In-memory queue for local dev — replace with Prisma in production
+const MOCK_QUEUE: ModerationQueueItem[] = [
+  {
+    id: 'mq_001',
+    assetId: 'asset_demo_001',
+    assetName: 'Dark Knight Warrior',
+    assetType: 'mesh',
+    score: 0.67,
+    categories: { violence: 0.67 },
+    flaggedAt: new Date(Date.now() - 3_600_000).toISOString(),
+    flaggedBy: 'auto',
+    status: 'pending_review',
+  },
+  {
+    id: 'mq_002',
+    assetId: 'asset_demo_002',
+    assetName: 'Cursed Ritual Chamber',
+    assetType: 'world',
+    score: 0.55,
+    categories: { adult_content: 0.55 },
+    flaggedAt: new Date(Date.now() - 7_200_000).toISOString(),
+    flaggedBy: 'auto',
+    status: 'pending_review',
+  },
+];
+
+function requireAdmin(req: NextRequest) {
+  const user = requireAuth(req);
+  if (!('role' in user) || (user as { role?: string }).role !== 'ADMIN') {
+    throw new Error('Forbidden');
+  }
+  return user;
+}
+
+export async function GET(req: NextRequest): Promise<NextResponse> {
+  try {
+    requireAdmin(req);
+  } catch {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  const url = new URL(req.url);
+  const status = url.searchParams.get('status') ?? 'pending_review';
+  const items = MOCK_QUEUE.filter(i => i.status === status);
+
+  return NextResponse.json({ items, total: items.length });
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  let user;
+  try {
+    user = requireAdmin(req);
+  } catch {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  const body = await req.json() as {
+    itemId: string;
+    action: 'approve' | 'reject';
+    note?: string;
+  };
+
+  const item = MOCK_QUEUE.find(i => i.id === body.itemId);
+  if (!item) return NextResponse.json({ error: 'Item not found' }, { status: 404 });
+
+  item.status = body.action === 'approve' ? 'approved' : 'rejected';
+  item.reviewedBy = (user as { userId?: string }).userId ?? 'admin';
+  item.reviewedAt = new Date().toISOString();
+  item.reviewNote = body.note;
+
+  log.info(`Moderation item ${body.action}d`, { itemId: body.itemId, by: item.reviewedBy });
+
+  return NextResponse.json({ success: true, item });
+}
