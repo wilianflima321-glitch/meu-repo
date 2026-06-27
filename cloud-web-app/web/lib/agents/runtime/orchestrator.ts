@@ -55,7 +55,7 @@ export function buildAgentRuntimeExecutionPlan(input: BuildAgentRuntimeExecution
     blockers,
     nextAction: blockers.length > 0
       ? 'Attach tool, memory, sandbox, browser replay, eval, and approval receipts before agent apply claims.'
-      : 'LangGraph Autonomy Ready: Trigger runAgentMission() to enter cyclic execution loop.',
+      : 'LangGraph Autonomy Ready: Trigger runAgentMission() to enter cyclic execution loop after operator approval.',
   }
 }
 

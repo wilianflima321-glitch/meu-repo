@@ -6,6 +6,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { PanelState as ModernPanelState } from '@/components/ide/ModernIDEShell';
 import type { BottomPanelMode } from '@/components/ide/modern-shell/types';
 import type { SidebarTab } from '@/components/ide/fullscreen/types';
+import { syncAuthFromServer } from '@/lib/auth-session-sync';
 
 type UseWorkbenchChromeParams = {
   lastProjectIdStorageKey: string;
@@ -138,7 +139,14 @@ export function useWorkbenchChrome({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    setHasToken(Boolean(window.localStorage.getItem('token')));
+    ;(async () => {
+      let tokenStr = window.localStorage.getItem('aethel-token');
+      if (!tokenStr) {
+        await syncAuthFromServer();
+        tokenStr = window.localStorage.getItem('aethel-token');
+      }
+      setHasToken(Boolean(tokenStr));
+    })();
   }, [setHasToken]);
 
   useEffect(() => {

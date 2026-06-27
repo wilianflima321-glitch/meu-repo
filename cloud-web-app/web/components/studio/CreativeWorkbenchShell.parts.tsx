@@ -101,20 +101,23 @@ export function Panel({
 }) {
   return (
     <section
-      className={cn(
-        'flex min-h-0 flex-col overflow-hidden rounded-xl border border-[var(--aethel-border-subtle)]',
-        'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)]',
-        className,
-      )}
+      className={cn('flex min-h-0 flex-col overflow-hidden rounded-lg', className)}
+      style={{
+        background: 'rgba(8,12,22,0.72)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid rgba(148,163,184,.10)',
+      }}
       aria-label={label}
     >
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between border-b border-[var(--aethel-border-subtle)] px-3 py-2 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-inset"
+        className="flex w-full items-center justify-between px-2.5 py-1.5 text-left transition-colors hover:bg-[rgba(255,255,255,.03)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-inset"
+        style={{ borderBottom: '1px solid rgba(148,163,184,.08)' }}
         aria-expanded={open}
       >
-        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+        <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">
           {label}
         </span>
         <svg
@@ -125,9 +128,9 @@ export function Panel({
         </svg>
       </button>
       {open && (
-        <div className="min-h-0 flex-1 overflow-auto p-2">
+        <div className="min-h-0 flex-1 overflow-auto">
           {children ?? (
-            <p className="px-1 py-2 text-[11px] leading-relaxed text-[var(--aethel-text-quaternary)]">
+            <p className="px-2 py-2 text-[11px] leading-relaxed text-[var(--aethel-text-quaternary)]">
               No content for this slot.
             </p>
           )}

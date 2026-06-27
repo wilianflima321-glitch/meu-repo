@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 // ============================================================================
-// TIPOS
+// TYPES
 // ============================================================================
 
 interface WalletSummary {
@@ -73,13 +73,13 @@ interface CreditWalletProps {
 type CreditWalletTabId = 'overview' | 'history' | 'purchase';
 
 const CREDIT_WALLET_TABS: Array<{ id: CreditWalletTabId; label: string; icon: React.ReactNode }> = [
-  { id: 'overview', label: 'Resumo', icon: <Coins className="w-4 h-4" /> },
-  { id: 'history', label: 'Historico', icon: <Clock className="w-4 h-4" /> },
-  { id: 'purchase', label: 'Comprar', icon: <CreditCard className="w-4 h-4" /> },
+  { id: 'overview', label: 'Overview', icon: <Coins className="w-4 h-4" /> },
+  { id: 'history', label: 'History', icon: <Clock className="w-4 h-4" /> },
+  { id: 'purchase', label: 'Buy Credits', icon: <CreditCard className="w-4 h-4" /> },
 ];
 
 // ============================================================================
-// PACOTES DE CREDITOS
+// CREDIT PACKAGES
 // ============================================================================
 
 const CREDIT_PACKAGES: CreditPackage[] = [
@@ -322,7 +322,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
       });
 
       if (!response.ok) {
-        throw new Error('Compra failed');
+        throw new Error('Purchase failed');
       }
 
       const { checkoutUrl } = await response.json();
@@ -383,8 +383,8 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             <Wallet className="w-5 h-5 text-[var(--aethel-warning-light)]" />
           </div>
           <div>
-            <h2 className="font-semibold text-[var(--aethel-text-primary)]">Carteira de creditos</h2>
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">Plano {wallet?.plan}</p>
+            <h2 className="font-semibold text-[var(--aethel-text-primary)]">Credit Wallet</h2>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Plan: {wallet?.plan}</p>
           </div>
         </div>
 
@@ -392,7 +392,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
         {isLowBalance && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] rounded-lg text-[var(--aethel-warning-light)] text-sm">
             <AlertCircle className="w-4 h-4" />
-            Saldo baixo
+            Low balance
           </div>
         )}
       </div>
@@ -426,22 +426,22 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             <div className="grid grid-cols-3 gap-4">
               <StatCard
                 icon={<Coins className="w-5 h-5" />}
-                label="Disponivel"
+                label="Available"
                 value={wallet.available.toLocaleString()}
-                subValue={wallet.reserved > 0 ? `${wallet.reserved} reservados` : undefined}
+                subValue={wallet.reserved > 0 ? `${wallet.reserved} reserved` : undefined}
                 color={isLowBalance ? 'warning' : 'default'}
               />
               <StatCard
                 icon={<Zap className="w-5 h-5" />}
-                label="Uso Mensal"
+                label="Monthly Usage"
                 value={wallet.monthlyUsage.toLocaleString()}
-                subValue={`de ${wallet.monthlyLimit.toLocaleString()}`}
+                subValue={`of ${wallet.monthlyLimit.toLocaleString()}`}
                 trend={usagePercent > 80 ? 'up' : 'neutral'}
                 color={usagePercent > 90 ? 'danger' : usagePercent > 70 ? 'warning' : 'default'}
               />
               <StatCard
                 icon={<Gift className="w-5 h-5" />}
-                label="bonus"
+                label="Bonus"
                 value={wallet.bonusCredits.toLocaleString()}
                 color="success"
               />
@@ -450,7 +450,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             {/* Usage Progress */}
             <div className="p-4 bg-[var(--aethel-surface-tertiary)] rounded-xl">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-[var(--aethel-text-tertiary)]">Uso mensal do plano</span>
+                <span className="text-sm text-[var(--aethel-text-tertiary)]">Monthly plan usage</span>
                 <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{usagePercent}%</span>
               </div>
               <div className="h-2 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">

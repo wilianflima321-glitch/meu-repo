@@ -100,6 +100,32 @@
     /* Typography */
     --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     --font-mono: var(--font-geist-mono), "SFMono-Regular", "Cascadia Code", ui-monospace, monospace;
+
+    /* ── SPRINT 3: Premium Neon & Glow Tokens ── */
+    --aethel-neon-cyan:    #22d3ee;
+    --aethel-neon-indigo:  #818cf8;
+    --aethel-neon-amber:   #fbbf24;
+    --aethel-neon-emerald: #34d399;
+    --aethel-neon-violet:  #a78bfa;
+
+    --aethel-glow-cyan:    0 0 8px rgba(34,211,238,.45),   0 0 24px rgba(34,211,238,.18);
+    --aethel-glow-indigo:  0 0 8px rgba(129,140,248,.45),  0 0 24px rgba(129,140,248,.18);
+    --aethel-glow-amber:   0 0 8px rgba(251,191,36,.55),   0 0 24px rgba(251,191,36,.22);
+    --aethel-glow-emerald: 0 0 8px rgba(52,211,153,.45),   0 0 24px rgba(52,211,153,.18);
+    --aethel-glow-violet:  0 0 8px rgba(167,139,250,.45),  0 0 24px rgba(167,139,250,.18);
+
+    /* Glass surfaces */
+    --aethel-glass-bg:     rgba(16, 22, 36, 0.72);
+    --aethel-glass-border: rgba(255, 255, 255, 0.08);
+    --aethel-glass-blur:   16px;
+
+    /* ── RGB channel tokens (enable rgba() neon glows without color-mix hacks) ── */
+    --aethel-info-rgb:     56, 189, 248;
+    --aethel-primary-rgb:  59, 130, 246;
+    --aethel-warning-rgb:  245, 158, 11;
+    --aethel-success-rgb:  34, 197, 94;
+    --aethel-accent-rgb:   139, 92, 246;
+    --aethel-error-rgb:    239, 68, 68;
   }
 
   html {
@@ -335,6 +361,87 @@
     border-color: var(--aethel-border-focus);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--aethel-info) 18%, transparent);
   }
+
+  /* ── L5 Glow utility family (use rgb tokens, composable with hover:) ── */
+  .aethel-glow-cyan {
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-info-rgb), 0.25),
+      0 0 16px rgba(var(--aethel-info-rgb), 0.18),
+      0 0 40px rgba(var(--aethel-info-rgb), 0.06);
+  }
+  .aethel-glow-primary {
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-primary-rgb), 0.28),
+      0 0 16px rgba(var(--aethel-primary-rgb), 0.18),
+      0 0 40px rgba(var(--aethel-primary-rgb), 0.06);
+  }
+  .aethel-glow-warning {
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-warning-rgb), 0.30),
+      0 0 16px rgba(var(--aethel-warning-rgb), 0.20),
+      0 0 40px rgba(var(--aethel-warning-rgb), 0.08);
+  }
+  .aethel-glow-success {
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-success-rgb), 0.25),
+      0 0 16px rgba(var(--aethel-success-rgb), 0.16),
+      0 0 40px rgba(var(--aethel-success-rgb), 0.05);
+  }
+  .aethel-glow-accent {
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-accent-rgb), 0.28),
+      0 0 16px rgba(var(--aethel-accent-rgb), 0.18),
+      0 0 40px rgba(var(--aethel-accent-rgb), 0.06);
+  }
+
+  /* ── Card lift: premium hover elevation pattern ── */
+  .aethel-card-lift {
+    transition: transform 160ms var(--aethel-ease-snappy), box-shadow 160ms var(--aethel-ease-snappy);
+  }
+  .aethel-card-lift:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-info-rgb), 0.22),
+      0 20px 40px -8px rgba(0, 0, 0, 0.35),
+      0 0 32px rgba(var(--aethel-info-rgb), 0.07);
+  }
+
+  /* ── Tab underline slide (CSS-only, no framer-motion dependency) ── */
+  .aethel-tab-indicator {
+    position: relative;
+  }
+  .aethel-tab-indicator::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 1px;
+    background: linear-gradient(90deg, var(--aethel-info), var(--aethel-primary));
+    box-shadow: 0 0 8px rgba(var(--aethel-info-rgb), 0.55);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 180ms var(--aethel-ease-snappy);
+  }
+  .aethel-tab-indicator[aria-selected="true"]::after {
+    transform: scaleX(1);
+  }
+
+  /* ── Glass panel (canonical glassmorphism card) ── */
+  .aethel-glass-panel {
+    background: color-mix(in srgb, var(--aethel-surface-secondary) 72%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--aethel-border-secondary);
+  }
+
+  /* ── Focus ring — checkbox/radio grade ── */
+  .aethel-focus-checkbox:focus-visible {
+    outline: 2px solid var(--aethel-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(var(--aethel-info-rgb), 0.18);
+  }
 }
 
 /* ============================================================================
@@ -345,21 +452,6 @@
 @media (max-width: 767px) {
   .has-mobile-nav {
     padding-bottom: calc(5rem + env(safe-area-inset-bottom));
-  }
-}
-
-/* ============================================================================
- * ACCESSIBILITY: Reduced Motion Support
- * Respects user's OS-level motion preferences per WCAG 2.1
- * ============================================================================ */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }
 
@@ -382,22 +474,108 @@
  * ============================================================================ */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0);    }
 }
-
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(100%); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0);    }
 }
-
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0);     }
 }
-
 @keyframes scaleIn {
   from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+/* ── SPRINT 3: Premium Animations ── */
+@keyframes aethel-glow-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(34,211,238,.30), 0 0 18px rgba(34,211,238,.10); }
+  50%       { box-shadow: 0 0 12px rgba(34,211,238,.55), 0 0 36px rgba(34,211,238,.25); }
+}
+@keyframes aethel-amber-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(251,191,36,.35), 0 0 18px rgba(251,191,36,.12); }
+  50%       { box-shadow: 0 0 14px rgba(251,191,36,.65), 0 0 40px rgba(251,191,36,.28); }
+}
+@keyframes aethel-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+@keyframes aethel-beacon {
+  0%   { opacity: 1;   transform: scale(1);   }
+  70%  { opacity: 0;   transform: scale(2.2); }
+  100% { opacity: 0;   transform: scale(2.2); }
+}
+@keyframes aethel-progress-stripe {
+  from { background-position: 0 0; }
+  to   { background-position: 32px 0; }
+}
+@keyframes aethel-spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes aethel-float {
+  0%, 100% { transform: translateY(0);    }
+  50%       { transform: translateY(-4px); }
+}
+@keyframes aethel-slide-right {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+
+/* ── Utility Classes ── */
+.animate-glow-cyan   { animation: aethel-glow-pulse  2s ease-in-out infinite; }
+.animate-glow-amber  { animation: aethel-amber-pulse 2s ease-in-out infinite; }
+.animate-float       { animation: aethel-float        3s ease-in-out infinite; }
+.animate-spin-slow   { animation: aethel-spin-slow    4s linear infinite; }
+.animate-slide-right { animation: aethel-slide-right .25s var(--aethel-ease-snappy) both; }
+
+.aethel-shimmer {
+  background: linear-gradient(90deg,
+    var(--aethel-surface-tertiary) 0%,
+    var(--aethel-surface-quaternary) 40%,
+    var(--aethel-surface-tertiary) 80%);
+  background-size: 600px 100%;
+  animation: aethel-shimmer 1.6s ease-in-out infinite;
+}
+
+.aethel-glass {
+  background:        var(--aethel-glass-bg);
+  border:            1px solid var(--aethel-glass-border);
+  backdrop-filter:   blur(var(--aethel-glass-blur));
+  -webkit-backdrop-filter: blur(var(--aethel-glass-blur));
+}
+
+.aethel-neon-border-cyan   { border-color: rgba(34,211,238,.35);  box-shadow: inset 0 0 0 1px rgba(34,211,238,.15); }
+.aethel-neon-border-amber  { border-color: rgba(251,191,36,.45);  box-shadow: inset 0 0 0 1px rgba(251,191,36,.20); }
+.aethel-neon-border-indigo { border-color: rgba(129,140,248,.35); box-shadow: inset 0 0 0 1px rgba(129,140,248,.15); }
+
+/* Progress bar — animated stripes for "rendering" state */
+.aethel-progress-stripe {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    rgba(255,255,255,.06) 8px,
+    rgba(255,255,255,.06) 16px
+  );
+  background-size: 32px 100%;
+  animation: aethel-progress-stripe .9s linear infinite;
+}
+
+/* Beacon dot (Live / Rendering indicator) */
+.aethel-beacon {
+  position: relative;
+  display: inline-flex;
+}
+.aethel-beacon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: currentColor;
+  animation: aethel-beacon 1.6s cubic-bezier(.215,.61,.355,1) infinite;
 }
 
 /* ============================================================================
@@ -415,6 +593,153 @@
   width: 4px !important;
   margin-left: 3px;
   border-radius: 2px;
+}
+
+/* ============================================================================
+ * AETHEL DESIGN SYSTEM — EXTENDED UTILITY CLASSES (Sprint Visual)
+ * ============================================================================ */
+
+/* Neon glow on interactive primary buttons */
+.aethel-btn-primary-neon {
+  background: linear-gradient(120deg, var(--aethel-primary), var(--aethel-info));
+  box-shadow: 0 0 0 0 rgba(59,130,246,0);
+  transition: box-shadow .25s ease, brightness .15s ease;
+}
+.aethel-btn-primary-neon:hover {
+  box-shadow: 0 0 16px rgba(59,130,246,.45), 0 0 40px rgba(34,211,238,.18);
+  filter: brightness(1.08);
+}
+.aethel-btn-primary-neon:active {
+  filter: brightness(.94);
+}
+
+/* Deep glassmorphism — studio panels, inspector, outliner */
+.aethel-panel {
+  background: rgba(10,14,24,0.82);
+  border: 1px solid rgba(148,163,184,.14);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+.aethel-panel-strong {
+  background: rgba(8,11,20,0.94);
+  border: 1px solid rgba(148,163,184,.18);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+/* Vault deep-shadow (BYOK / Security panels) */
+.aethel-vault {
+  background: rgba(6,9,18,0.96);
+  border: 1px solid rgba(59,130,246,.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    inset 0 -1px 0 rgba(0,0,0,.35),
+    0 0 0 1px rgba(0,0,0,.4),
+    0 24px 48px rgba(0,0,0,.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Neon top-line accent (used on active panels, rendering cards) */
+.aethel-neon-topline-cyan::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,.65) 40%, rgba(59,130,246,.50) 70%, transparent);
+  border-radius: 1px 1px 0 0;
+  pointer-events: none;
+}
+.aethel-neon-topline-amber::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(251,191,36,.65) 40%, rgba(234,179,8,.50) 70%, transparent);
+  border-radius: 1px 1px 0 0;
+  pointer-events: none;
+}
+
+/* Cyberpunk grid overlay (studio runboard) */
+.aethel-grid-overlay {
+  background-image:
+    linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Processing center card — render queue active state */
+.aethel-processing-card {
+  background: rgba(10,14,24,0.88);
+  border: 1px solid rgba(34,211,238,.22);
+  box-shadow: inset 0 0 20px rgba(34,211,238,.04), 0 4px 16px rgba(0,0,0,.45);
+}
+
+/* Collapsible step list indicator (AI reasoning trace) */
+.aethel-step-active {
+  border-left: 2px solid rgba(34,211,238,.70);
+  padding-left: 8px;
+  background: rgba(34,211,238,.05);
+  border-radius: 0 4px 4px 0;
+}
+.aethel-step-done {
+  border-left: 2px solid rgba(16,185,129,.45);
+  padding-left: 8px;
+}
+.aethel-step-pending {
+  border-left: 2px solid rgba(148,163,184,.18);
+  padding-left: 8px;
+}
+
+/* Reflection success tag (AI reasoning) */
+.aethel-tag-reflection {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(16,185,129,.15);
+  border: 1px solid rgba(16,185,129,.30);
+  color: #6ee7b7;
+}
+
+/* Native experimental badge keyframe (amber subtle pulse) */
+@keyframes aethel-amber-beacon {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .65; }
+}
+.animate-amber-beacon { animation: aethel-amber-beacon 1.8s ease-in-out infinite; }
+
+/* Sidebar slide-in animation for collapsible studio panels */
+@keyframes aethel-slide-in-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes aethel-slide-in-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.aethel-panel-enter-left  { animation: aethel-slide-in-left  .2s var(--aethel-ease-snappy) both; }
+.aethel-panel-enter-right { animation: aethel-slide-in-right .2s var(--aethel-ease-snappy) both; }
+
+/* Dense compact row (Unreal-style inspector rows) */
+.aethel-row-dense {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  transition: background .1s ease;
+}
+.aethel-row-dense:hover {
+  background: rgba(255,255,255,.03);
 }
 
 /* ============================================================================

@@ -1,14 +1,25 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import AgentsWindow from '@/components/agents/AgentsWindow'
 import { AIChatSessionBanner, useAIChatSessionContext, useAIProviderPreflight } from '@/components/agents/chat/session'
 import type { ChatMessage } from '@/components/agents/chat/session-types'
 import { useAIChatController } from '@/components/agents/chat/controller'
-import AIChatPanelPro from '@/components/ide/AIChatPanelPro'
 import AIProviderSetupGuide from '@/components/ai/AIProviderSetupGuide'
 import { DEFAULT_MODELS } from '@/components/ide/AIChatPanelPro.types'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
+
+// @aethel-heavy-async-boundary — AIChatPanelPro pulls in framer-motion, xterm, and
+// voice session hooks. Lazy-load it so the IDE shell renders before the AI panel hydrates.
+const AIChatPanelPro = dynamic(() => import('@/components/ide/AIChatPanelPro'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)]">
+      <div className="h-3 w-24 animate-pulse rounded-full bg-[var(--aethel-surface-secondary)]" />
+    </div>
+  ),
+})
 
 const MODELS = DEFAULT_MODELS
 
@@ -52,7 +63,7 @@ export default function AgentsWorkspaceContainer({ projectId: workspaceProjectId
   })
 
   const { providerGate, providerStatus, setProviderGate } = useAIProviderPreflight()
-  const { handleClearChat, handleSendMessage, handleStopGenerating, lastFailedMessage } =
+  const { handleClearChat, handleSendMessage, handleStopGenerating, lastFailedMessage, selectedAgentId, setSelectedAgentId } =
     useAIChatController({
       currentModel,
       isLoading,
@@ -260,6 +271,7 @@ export default function AgentsWorkspaceContainer({ projectId: workspaceProjectId
               onModelChange={setCurrentModel}
               allowAttachments={false}
               projectId={projectId}
+              onAgentSelect={setSelectedAgentId}
             />
           </div>
         </>

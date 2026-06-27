@@ -26,12 +26,9 @@ describe('HeaderWorkspaceControls', () => {
     )
 
     expect(screen.getByText('Command Center')).toBeInTheDocument()
-    expect(
-      screen.getByText('Pergunte, navegue e execute sem sair do cockpit.'),
-    ).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Abrir command center' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Abrir quick open de arquivos' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open command center' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open file quick open' }))
 
     expect(onOpenCommandPalette).toHaveBeenNthCalledWith(1, 'commands')
     expect(onOpenCommandPalette).toHaveBeenNthCalledWith(2, 'files')

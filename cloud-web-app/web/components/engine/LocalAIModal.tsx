@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { localInferenceManager } from '@/lib/ai/local-inference-manager';
+import { logger } from '@/lib/observability/logger';
 
 export const LocalAIModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,7 +44,7 @@ export const LocalAIModal: React.FC = () => {
     
     // Se a máquina não aguenta, apenas loga e fallback pra nuvem, nem incomoda o usuário
     if (!check.supported) {
-      console.warn('Fallback para Nuvem (Cloud API) ativado:', check.reason);
+      logger.warn('Fallback para Nuvem (Cloud API) ativado:', check.reason);
       return;
     }
 
@@ -55,9 +56,9 @@ export const LocalAIModal: React.FC = () => {
     // Simula inicialização do worker
     const worker = new Worker(new URL('@/lib/ai/mlc-worker.js', import.meta.url));
     try {
-      await localInferenceManager.loadModel(worker);
+      await localInferenceManager.loadModel(worker, 'Llama-3-8B-Instruct-q4f32_1-MLC');
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to load local AI model', err);
       setIsDownloading(false);
     }
   };
@@ -68,13 +69,13 @@ export const LocalAIModal: React.FC = () => {
   };
 
   if (!isOpen) {
-    // Botão apenas para debug/demonstração na UI
+    // Button only for debug/demonstration in the UI
     return (
       <button 
         onClick={triggerNPCFeature}
-        className="fixed bottom-4 right-4 bg-purple-600 text-white px-4 py-2 rounded shadow-lg hover:bg-purple-700 transition"
+        className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded shadow-lg hover:bg-blue-700 transition"
       >
-        Adicionar NPC Inteligente
+        Add Intelligent NPC
       </button>
     );
   }
@@ -85,21 +86,21 @@ export const LocalAIModal: React.FC = () => {
         
         {!isDownloading && !isCompleted ? (
           <>
-            <h2 className="text-2xl font-bold mb-4 text-purple-400">Ativar Motor Cognitivo Local?</h2>
+            <h2 className="text-2xl font-bold mb-4 text-blue-400">Activate Local Cognitive Engine?</h2>
             
             <p className="text-slate-300 mb-4">
-              Notamos que o seu PC possui uma placa de vídeo potente! 🚀
+              We noticed that your PC has a powerful GPU! 🚀
             </p>
             <p className="text-slate-300 mb-6">
-              Você pode baixar o nosso <strong>Cérebro de IA Local (4.5 GB)</strong> uma única vez. Isso vai 
-              <strong className="text-emerald-400"> zerar os seus custos de API</strong> com a OpenAI/Anthropic e remover completamente a latência, 
-              melhorando absurdamente o seu fluxo de trabalho para criar mapas, NPCs e cenários interativos.
+              You can download our <strong>Local AI Brain (4.5 GB)</strong> once. This will 
+              <strong className="text-emerald-400"> zero your API costs</strong> with OpenAI/Anthropic and completely remove latency, 
+              greatly improving your workflow for creating maps, NPCs, and interactive scenes.
             </p>
 
             <div className="bg-slate-800 p-4 rounded text-sm text-slate-400 mb-6 border border-slate-700">
-              <p>✔ Custo R$ 0.00 para NPCs em tempo real</p>
-              <p>✔ Funciona totalmente Offline</p>
-              <p>✔ A Interface do Aethel será ajustada automaticamente</p>
+              <p>✔ $0.00 cost for real-time NPCs</p>
+              <p>✔ Works fully offline</p>
+              <p>✔ Aethel&apos;s interface will be automatically adjusted</p>
             </div>
 
             <div className="flex justify-end gap-3">
@@ -107,39 +108,39 @@ export const LocalAIModal: React.FC = () => {
                 onClick={handleDecline}
                 className="px-4 py-2 text-slate-400 hover:text-white transition"
               >
-                Continuar na Nuvem (API)
+                Continue in the Cloud (API)
               </button>
               <button 
                 onClick={handleDownloadAccept}
-                className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded font-semibold transition"
+                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-semibold transition"
               >
-                Baixar IA Local (4.5 GB)
+                Download Local AI (4.5 GB)
               </button>
             </div>
           </>
         ) : isDownloading ? (
           <div className="text-center py-6">
-            <h2 className="text-xl font-bold mb-4 text-slate-200">Aprimorando sua Engine...</h2>
+            <h2 className="text-xl font-bold mb-4 text-slate-200">Enhancing your Engine...</h2>
             
             {/* Progress Bar */}
             <div className="w-full bg-slate-800 rounded-full h-4 mb-4 overflow-hidden border border-slate-700">
               <div 
-                className="bg-purple-500 h-4 rounded-full transition-all duration-300"
-                style={{ width: \`\${downloadProgress}%\` }}
+                className="bg-blue-500 h-4 rounded-full transition-all duration-300"
+                style={{ width: `${downloadProgress}%` }}
               ></div>
             </div>
             
             <p className="text-slate-400 text-sm">{downloadStatus}</p>
-            <p className="text-purple-400 mt-2 font-mono">{downloadProgress}% concluído</p>
+            <p className="text-blue-400 mt-2 font-mono">{downloadProgress}% completed</p>
           </div>
         ) : (
           <div className="text-center py-6">
             <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 flex items-center justify-center rounded-full mx-auto mb-4 text-3xl">
               ✓
             </div>
-            <h2 className="text-2xl font-bold mb-2 text-white">IA Local Ativada!</h2>
+            <h2 className="text-2xl font-bold mb-2 text-white">Local AI Activated!</h2>
             <p className="text-slate-400">
-              Sua IDE foi ajustada. Os painéis de custos foram ocultados e você agora tem inteligência infinita a custo zero.
+              Your IDE has been adjusted. Cost panels have been hidden, and you now have infinite intelligence at zero cost.
             </p>
           </div>
         )}

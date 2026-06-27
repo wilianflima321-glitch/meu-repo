@@ -8,6 +8,7 @@ import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
 import TurnstileField, { isTurnstileClientConfigured } from '@/components/auth/TurnstileField'
 import { analytics } from '@/lib/analytics'
 import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
+import { saveToken } from '@/lib/auth'
 
 type AuthResponse = {
   access_token?: string
@@ -46,6 +47,7 @@ export default function RegisterPageV2() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [acceptTerms, setAcceptTerms] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
@@ -66,6 +68,7 @@ export default function RegisterPageV2() {
     if (!email.trim() || !password) return setFormError('Enter your email and password to create the account.')
     if (password.length < 8) return setFormError('Use at least 8 characters for the password.')
     if (password !== confirmPassword) return setFormError('Passwords do not match.')
+    if (!acceptTerms) return setFormError('You must agree to the Terms of Service and Privacy Policy to create an account.')
     if (!requireHumanVerification()) return
 
     setIsSubmitting(true)
@@ -82,6 +85,9 @@ export default function RegisterPageV2() {
         analytics?.track?.('error', 'error_api', { metadata: { source: 'register-form', status: response.status } })
         return
       }
+      if (payload.access_token) {
+        saveToken(payload.access_token)
+      }
       analytics?.track?.('user', 'register', { metadata: { source: 'auth-register', planIntent: requestedPlan } })
       window.location.assign(`/dashboard?onboarding=1&source=register&mission=${encodeURIComponent(DEFAULT_MISSION)}`)
     } catch {
@@ -94,7 +100,7 @@ export default function RegisterPageV2() {
 
   const startOAuth = (provider: 'github' | 'google') => {
     analytics?.track?.('user', 'oauth_start', { label: provider, metadata: { source: 'register-form', planIntent: requestedPlan } })
-    window.location.href = `/api/auth/oauth/authorize?provider=${provider}`
+    window.location.href = `/api/auth/oauth/${provider}`
   }
 
   return (
@@ -120,9 +126,52 @@ export default function RegisterPageV2() {
                 <div className="space-y-2"><label htmlFor="name" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Name</label><input id="name" name="name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="Your name" /></div>
                 <div className="space-y-2"><label htmlFor="email" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Email</label><input id="email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="you@company.com" /></div>
                 <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><label htmlFor="password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Password</label><input id="password" name="password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="8+ characters" /></div><div className="space-y-2"><label htmlFor="confirm-password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Confirm</label><input id="confirm-password" name="confirm-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="Repeat password" /></div></div>
+                {/* Terms & Privacy consent — click-wrap required */}
+                <div className="flex items-start gap-3 py-1">
+                  <div className="flex h-5 items-center">
+                    <input
+                      id="accept-terms"
+                      name="acceptTerms"
+                      type="checkbox"
+                      checked={acceptTerms}
+                      onChange={(e) => setAcceptTerms(e.target.checked)}
+                      required
+                      aria-required="true"
+                      className="aethel-focus-checkbox h-4.5 w-4.5 cursor-pointer rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] text-[var(--aethel-info)] accent-[var(--aethel-info)] transition-shadow duration-150 checked:shadow-[0_0_8px_rgba(56,189,248,0.40)]"
+                    />
+                  </div>
+                  <label htmlFor="accept-terms" className="text-xs leading-5 text-[var(--aethel-text-secondary)] select-none cursor-pointer">
+                    I agree to the{' '}
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)] underline transition-colors"
+                    >
+                      Terms of Service
+                    </Link>{' '}
+                    and{' '}
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)] underline transition-colors"
+                    >
+                      Privacy Policy
+                    </Link>
+                    .
+                  </label>
+                </div>
+
                 <TurnstileField action="register" onTokenChange={setTurnstileToken} />
                 {formError ? <div id="register-form-error" className="border-l border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)]" role="alert" aria-live="polite">{formError}</div> : null}
-                <button type="submit" disabled={isSubmitting || isHumanVerificationPending} className="h-12 w-full bg-[var(--aethel-primary)] text-sm font-semibold text-white transition hover:bg-[var(--aethel-primary-light)] disabled:cursor-not-allowed disabled:opacity-60">{isSubmitting ? 'Creating account...' : 'Create account and open Studio'}</button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || isHumanVerificationPending || !acceptTerms}
+                  className="h-12 w-full bg-[var(--aethel-primary)] text-sm font-semibold text-white transition hover:bg-[var(--aethel-primary-light)] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSubmitting ? 'Creating account...' : 'Create account and open Studio'}
+                </button>
               </form>
 
               <div className="my-5 flex items-center gap-3"><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /><span className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">or</span><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /></div>

@@ -183,9 +183,48 @@ export class AAARenderer {
     this.camera.updateProjectionMatrix();
   }
 
-  render(dt: number) {
+  render(dt?: number): void;
+  render(scene: THREE.Scene, camera: THREE.Camera, dt?: number): void;
+  render(sceneOrDt?: THREE.Scene | number, camera?: THREE.Camera, dt?: number) {
     this.frameId += 1;
-    this.composer.render(dt);
+    const renderPass = this.composer.passes[0] as any;
+    
+    let activeScene: THREE.Scene = this.scene;
+    let activeCamera: THREE.Camera = this.camera;
+    let activeDt = dt;
+
+    if (sceneOrDt instanceof THREE.Scene) {
+      activeScene = sceneOrDt;
+      if (camera) {
+        activeCamera = camera;
+      }
+    } else if (typeof sceneOrDt === 'number') {
+      activeDt = sceneOrDt;
+    }
+
+    if (renderPass) {
+      if (activeScene) renderPass.scene = activeScene;
+      if (activeCamera) renderPass.camera = activeCamera;
+    }
+    this.composer.render(activeDt);
+  }
+
+  setSSAO(enabled: boolean, intensity: number = 1.0) {}
+  setSSR(enabled: boolean, intensity: number = 1.0) {}
+  setBloom(enabled: boolean, intensity: number = 1.0) {
+    this.config.bloom.enabled = enabled;
+    this.config.bloom.intensity = intensity;
+    if (this.bloomEffect) {
+      this.bloomEffect.intensity = intensity;
+      this.bloomEffect.blendMode.opacity.value = enabled ? 1.0 : 0.0;
+    }
+  }
+  setDOF(enabled: boolean, focusDistance: number = 10) {}
+  setMotionBlur(enabled: boolean, intensity: number = 0.5) {}
+  setAntialiasing(mode: 'none' | 'fxaa' | 'smaa' | 'taa' | 'msaa') {
+    if (this.smaaEffect) {
+      this.smaaEffect.blendMode.opacity.value = (mode === 'smaa') ? 1.0 : 0.0;
+    }
   }
 
   setConfig(config: PostProcessConfig) {

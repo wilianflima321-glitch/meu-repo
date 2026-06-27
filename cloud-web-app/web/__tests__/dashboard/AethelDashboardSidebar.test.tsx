@@ -25,20 +25,19 @@ describe('AethelDashboardSidebar', () => {
     )
 
     expect(screen.getAllByText('Studio Home').length).toBeGreaterThan(0)
-    expect(screen.getByText('AI Console')).toBeInTheDocument()
+    expect(screen.getByText('Activity')).toBeInTheDocument()
     expect(screen.getByText('Projects')).toBeInTheDocument()
 
     expect(screen.queryByText('Billing')).not.toBeInTheDocument()
-    expect(screen.queryByText('Content creation')).not.toBeInTheDocument()
+    expect(screen.queryByText('Agents in IDE')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /operations/i }))
     expect(screen.getByText('Billing')).toBeInTheDocument()
-    expect(screen.getByText('Wallet')).toBeInTheDocument()
+    expect(screen.getByText('Integrations')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: /explore/i }))
-    expect(screen.getByText('Templates')).toBeInTheDocument()
-    expect(screen.getByText('Content creation')).toBeInTheDocument()
-    expect(screen.getByText('Unreal')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /depth/i }))
+    expect(screen.getByText('Agents in IDE')).toBeInTheDocument()
+    expect(screen.getByText('Creative Studio')).toBeInTheDocument()
   })
 
   it('shows a visible studio depth action', () => {
@@ -57,7 +56,7 @@ describe('AethelDashboardSidebar', () => {
       />
     )
 
-    const studioButtons = screen.getAllByRole('button', { name: 'Expand Studio' })
+    const studioButtons = screen.getAllByRole('button', { name: 'Open IDE' })
     fireEvent.click(studioButtons[studioButtons.length - 1]!)
     expect(onOpenIde).toHaveBeenCalledTimes(1)
   })

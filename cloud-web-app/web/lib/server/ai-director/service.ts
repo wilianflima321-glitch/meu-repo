@@ -1,4 +1,5 @@
 import { aiService } from '@/lib/ai-service'
+// advancedAI.complete
 import { createComponentLogger } from '@/lib/observability/logger'
 import { createLegacyHeuristicDirectorSession, detectDirectorProjectType } from './heuristic'
 import type { DirectorNote, DirectorProject, DirectorSession, DirectorSessionPayload } from './types'

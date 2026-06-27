@@ -15,7 +15,7 @@ export class ParticleSystem {
     this.particleCount = count;
 
     // Compile shader
-    const module = device.createShaderModule({
+    const shaderModule = device.createShaderModule({
       label: 'Particle Compute Shader',
       code: shaderSource,
     });
@@ -24,7 +24,7 @@ export class ParticleSystem {
       label: 'Particle Compute Pipeline',
       layout: 'auto',
       compute: {
-        module,
+        module: shaderModule,
         entryPoint: 'main',
       },
     });

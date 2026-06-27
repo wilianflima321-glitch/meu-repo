@@ -19,6 +19,8 @@ export interface AIQueryOptions {
   maxTokens?: number;
   systemPrompt?: string;
   userId?: string; // Para tracking e shadow ban
+  /** When set, the service reads Project.settings.aiModel to select the preferred model. */
+  projectId?: string;
   bypassEmergency?: boolean; // Para admin override
   taskKind?: TaskKind;
   complexity?: TaskComplexity;

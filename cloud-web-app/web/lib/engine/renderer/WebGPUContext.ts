@@ -5,6 +5,8 @@
  * This class abstracts the adapter and device fetching to be used globally
  * by the rendering and compute pipelines.
  */
+import { logger } from '@/lib/observability/logger';
+
 export class WebGPUContext {
   private static adapter: GPUAdapter | null = null;
   private static device: GPUDevice | null = null;
@@ -37,7 +39,7 @@ export class WebGPUContext {
     });
 
     this.device.lost.then((info) => {
-      console.error(`WebGPU Device was lost: ${info.message}`);
+      logger.error(`WebGPU Device was lost: ${info.message}`);
       this.isInitialized = false;
       // TODO: Handle automatic context recovery
     });
@@ -52,10 +54,10 @@ export class WebGPUContext {
           deviceName = info.device;
         }
       } catch (e) {
-        console.warn('requestAdapterInfo fallback failed', e);
+        logger.warn('requestAdapterInfo fallback failed', e);
       }
     }
-    console.log(`[Aethel Engine] WebGPU Initialized on: ${deviceName}`);
+    logger.info(`[Aethel Engine] WebGPU Initialized on: ${deviceName}`);
   }
 
   public static getDevice(): GPUDevice {

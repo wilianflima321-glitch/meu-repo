@@ -15,7 +15,6 @@ import { logger } from '@/lib/observability/logger';
 
 import { aiTools, AITool, ToolResult, Artifact } from './ai-tools-registry';
 import { aiService } from './ai-service';
-import { agentLlmChat } from './ai/agent-llm-bridge';
 import { resolveTaskKindForRole } from './ai/fusion-role-map';
 import { assembleAgentContext } from '@/lib/server/agent-context/assemble-agent-context';
 import { getSandbox, safeExecute, AethelGameAPIs, type SandboxResult } from './sandbox';
@@ -389,17 +388,14 @@ ANSWER: [final answer if done]`;
     // AETHEL FUSION: Route through the intelligent model router
     // instead of hard-coding a model.
     const fusionConfig = resolveTaskKindForRole(this.agent.role);
-    const response = await agentLlmChat({
-      kind: fusionConfig.taskKind,
+    const response = await aiService.chat({
+      taskKind: fusionConfig.taskKind,
       messages: [
         { role: 'system', content: this.agent.systemPrompt },
         { role: 'user', content: prompt },
       ],
-      options: {
-        budget: this.agent.budget ?? fusionConfig.budget,
-        maxTokens: 4000,
-        temperature: 0.2,
-      },
+      maxTokens: 4000,
+      temperature: 0.2,
     });
 
     // Parse da resposta

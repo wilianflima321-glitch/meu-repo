@@ -139,6 +139,11 @@ model Project {
   copilotWorkflows CopilotWorkflow[]
   renderJobs       RenderJob[]
   publishedGames   PublishedGame[]
+  shareLinks       ProjectShareLink[]
+
+  // World engine relations (Sprint V32)
+  worlds         World[]
+  styleEmbeddings StyleEmbedding[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1302,6 +1307,36 @@ model McpServer {
 }
 
 // ============================================
+// PROJECT SHARING
+// ============================================
+
+model ProjectShareLink {
+  id           String    @id @default(cuid())
+  projectId    String
+  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  token        String    @unique @default(cuid())
+  type         String    @default("link") // link, email, team
+  permissions  String    @default("view") // view, edit, admin
+  invitedEmail String?
+  teamId       String?
+  createdBy    String
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([projectId])
+  @@index([token])
+  @@index([createdBy])
+}
+
+model SamlAssertionReplayGuard {
+  assertionId String   @id
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+// ============================================
 // RENDER JOBS
 // ============================================
 
@@ -1368,4 +1403,232 @@ model PublishedGame {
   @@index([status])
   @@index([visibility])
   @@index([publishedAt])
+}
+
+// ============================================
+// WORLD ENGINE — SPRINT V32
+// Relational models for large-scale, streaming
+// 3D worlds with AI-generated asset lineage.
+// ============================================
+
+/// Top-level world container. One Project may contain multiple World snapshots.
+model World {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+
+  /// Bounding box in world-space metres (JSON: {minX,minZ,maxX,maxZ})
+  bounds      Json?
+
+  /// Default biome applied to untagged regions
+  defaultBiome String?
+
+  /// Overall style embedding centroid (128-d array serialised as JSON float[])
+  styleEmbedding Json?
+
+  /// "active" | "archived" | "template"
+  status      String   @default("active")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  versions    WorldVersion[]
+  regions     WorldRegion[]
+  assets      GeneratedAsset[]
+  branches    WorldBranch[]
+
+  @@index([projectId])
+  @@index([status])
+}
+
+/// Immutable snapshot of a World at a point in time.
+/// Supports versioned diffs (binary patch) for rollback and collaboration.
+model WorldVersion {
+  id          String   @id @default(cuid())
+  worldId     String
+  world       World    @relation(fields: [worldId], references: [id], onDelete: Cascade)
+
+  /// Human-readable label e.g. "v1.3 — Darkwood region complete"
+  label       String?
+
+  /// Base version this one was built upon (null = first snapshot)
+  parentId    String?
+  parent      WorldVersion? @relation("WorldVersionTree", fields: [parentId], references: [id])
+  children    WorldVersion[] @relation("WorldVersionTree")
+
+  /// Binary diff from parent (stored as base64 or S3 key reference)
+  diffPayload  String?
+
+  /// Full scene JSON snapshot (used when diff chain is too long to replay)
+  snapshotJson Json?
+
+  createdBy   String
+  createdAt   DateTime @default(now())
+
+  @@index([worldId])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+/// A named spatial subdivision of a World.
+/// Enables streaming — only loaded regions are in memory.
+model WorldRegion {
+  id          String   @id @default(cuid())
+  worldId     String
+  world       World    @relation(fields: [worldId], references: [id], onDelete: Cascade)
+
+  name        String
+  /// Biome identifier (matches SoundscapeLayer biomeTags and StyleEmbedding tags)
+  biome       String?
+
+  /// Axis-aligned bounding box: {minX, minZ, maxX, maxZ} in world metres
+  bounds      Json
+
+  /// LOD configuration: {near, mid, far} polygon budget multipliers
+  lodConfig   Json?
+
+  /// "unloaded" | "loading" | "loaded" | "streaming"
+  loadStatus  String   @default("unloaded")
+
+  /// Compressed scene payload (msgpack / gltf binary, base64 or S3 key)
+  scenePayload String?
+
+  assets      GeneratedAsset[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([worldId])
+  @@index([biome])
+  @@index([loadStatus])
+}
+
+/// Tracks every AI-generated asset: its prompt, model, parameters, and
+/// quality score — the complete prompt→mesh genealogy required by the
+/// Generation Inspector.
+model GeneratedAsset {
+  id          String   @id @default(cuid())
+  worldId     String
+  world       World    @relation(fields: [worldId], references: [id], onDelete: Cascade)
+
+  regionId    String?
+  region      WorldRegion? @relation(fields: [regionId], references: [id])
+
+  /// Human-readable asset name
+  name        String
+
+  /// "mesh" | "material" | "texture" | "audio" | "narrative"
+  assetType   String
+
+  /// Source prompt used for generation
+  prompt      String
+
+  /// Negative prompt / exclusions
+  negativePrompt String?
+
+  /// Which AI model produced this (e.g. "meshy-v4", "tripo-v2", "sd-xl")
+  modelUsed   String
+
+  /// Generation hyper-parameters (JSON: temperature, steps, guidance_scale…)
+  parameters  Json?
+
+  /// Cosine-comparable 128-d style embedding (JSON float[])
+  styleEmbedding Json?
+
+  /// 0–1 coherence score from ReflectionLoop
+  qualityScore Float  @default(0)
+
+  /// S3 / CDN key for the generated file
+  storageKey  String?
+
+  /// Content hash (SHA-256) of the generated file for deduplication
+  contentHash String?
+
+  /// Asset this was derived from (remix / variation lineage)
+  parentAssetId String?
+  parentAsset   GeneratedAsset?  @relation("AssetLineage", fields: [parentAssetId], references: [id])
+  childAssets   GeneratedAsset[] @relation("AssetLineage")
+
+  /// Generation duration in milliseconds
+  durationMs  Int?
+
+  /// Credit cost charged for this generation
+  costCredits Float  @default(0)
+
+  /// Moderation status: "pending" | "approved" | "flagged" | "rejected"
+  moderationStatus String @default("pending")
+
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([worldId])
+  @@index([regionId])
+  @@index([assetType])
+  @@index([qualityScore])
+  @@index([moderationStatus])
+  @@index([contentHash])
+  @@index([createdBy])
+}
+
+/// Project-level style embedding registry.
+/// Enables fast cosine nearest-neighbour lookups without reading all assets.
+model StyleEmbedding {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  /// Links to a specific generated asset (optional — embeddings can be standalone)
+  assetId     String?
+
+  /// Biome / style tag bucket
+  tag         String
+
+  /// 128-d cosine-comparable vector (JSON float[])
+  embedding   Json
+
+  /// Source prompt that produced this embedding
+  prompt      String?
+
+  /// 0–1 quality score at time of indexing
+  qualityScore Float  @default(0)
+
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+  @@index([tag])
+  @@index([qualityScore])
+}
+
+/// Git-style branch for collaborative world editing.
+/// Enables multi-creator parallel work with merge conflict resolution.
+model WorldBranch {
+  id          String   @id @default(cuid())
+  worldId     String
+  world       World    @relation(fields: [worldId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+
+  /// SHA of the WorldVersion this branch was created from
+  baseVersionId String?
+
+  /// "open" | "merged" | "abandoned"
+  status      String   @default("open")
+
+  /// JSON diff summary produced by world-branch.ts for the merge review UI
+  mergeSummary Json?
+
+  createdBy   String
+  mergedBy    String?
+  mergedAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([worldId])
+  @@index([status])
+  @@index([createdBy])
 }

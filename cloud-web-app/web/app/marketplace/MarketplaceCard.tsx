@@ -32,9 +32,9 @@ export function MarketplaceCard({
       : 'Awaiting provenance review')
 
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] p-5 shadow-[var(--aethel-shadow-md)] transition hover:border-[var(--aethel-border-secondary)]">
+    <article className="flex h-full flex-col border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] p-5 shadow-[var(--aethel-shadow-md)] transition hover:border-[var(--aethel-border-secondary)]">
       <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] text-sm font-bold text-[var(--aethel-text-primary)]">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] text-sm font-bold text-[var(--aethel-text-primary)]">
           {getExtensionBadge(extension)}
         </div>
         <div className="min-w-0 flex-1">
@@ -94,7 +94,7 @@ export function MarketplaceCard({
             <button
               type="button"
               onClick={() => onUninstall(extension.id)}
-              className={`inline-flex min-h-10 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 text-xs font-semibold text-[var(--aethel-error-light)] transition hover:brightness-110 ${CANONICAL_FOCUS}`}
+              className={`inline-flex min-h-10 items-center justify-center border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 text-xs font-semibold text-[var(--aethel-error-light)] transition hover:brightness-110 ${CANONICAL_FOCUS}`}
             >
               Uninstall
             </button>
@@ -103,7 +103,7 @@ export function MarketplaceCard({
           <button
             type="button"
             onClick={() => onRequestInstall(extension.id)}
-            className={`inline-flex min-h-10 w-full items-center justify-center rounded-lg bg-[var(--aethel-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-inverse)] transition hover:brightness-110 ${CANONICAL_FOCUS}`}
+            className={`inline-flex min-h-10 w-full items-center justify-center bg-[var(--aethel-primary)] px-3 text-xs font-semibold text-[var(--aethel-text-inverse)] transition hover:brightness-110 ${CANONICAL_FOCUS}`}
           >
             Review install
           </button>

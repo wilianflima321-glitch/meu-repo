@@ -130,7 +130,7 @@ export async function POST(
         playUrl: game.playUrl,
         playable,
       },
-      // Honest guidance when the web build isn't ready yet.
+      // Honest guidance when the web build is not ready yet.
       hint: playable
         ? undefined
         : 'Published. Run a Web export to make this game playable in the browser.',

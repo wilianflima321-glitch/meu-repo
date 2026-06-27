@@ -20,20 +20,21 @@ import {
   defaultEnvironment,
   defaultObjects,
   resolveProjectIdFromClient,
-  simulatePhysics,
   type EnvironmentSettings,
   type LevelData,
   type LevelObject,
-  type PhysicsState,
   type SnapMode,
   type TransformMode,
   type ViewportMode,
 } from './level-editor-core';
+import { LevelEditorPhysicsSession } from './level-editor-physics-rapier';
+import { LevelEditorPlayRuntime } from './level-editor-play-runtime';
 import { LevelViewport } from '@/lib/engine/LevelEditor.viewport-runtime';
 import { DetailsPanelMini, OutlinerMini, Toolbar } from './LevelEditorPanels';
-import {createComponentLogger, logger} from '@/lib/observability/logger'
+import { getSimulationTargetFps, getSimulationTimeDilation, isSimulationGodMode } from '@/lib/settings/engine-settings';
+import { createComponentLogger } from '@/lib/observability/logger';
 
-const log = createComponentLogger('LevelEditor')
+const log = createComponentLogger('LevelEditor');
 const LEVEL_ENGINE_MODULES = ['world-streaming', 'quest-system', 'save-manager', 'inventory-system'] as const
 
 
@@ -56,10 +57,9 @@ export default function LevelEditor() {
 
   // Play Mode state
   const [savedObjects, setSavedObjects] = useState<LevelObject[] | null>(null);
-  const physicsStateRef = useRef<PhysicsState>({
-    velocities: new Map(),
-    angularVelocities: new Map(),
-  });
+  const physicsSessionRef = useRef<LevelEditorPhysicsSession | null>(null);
+  const playRuntimeRef = useRef<LevelEditorPlayRuntime | null>(null);
+  const physicsReadyRef = useRef(false);
   const lastTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number>(0);
 
@@ -75,10 +75,18 @@ export default function LevelEditor() {
     lastTimeRef.current = performance.now();
 
     const gameLoop = (currentTime: number) => {
-      const deltaTime = Math.min((currentTime - lastTimeRef.current) / 1000, 0.05);
+      const rawDelta = Math.min((currentTime - lastTimeRef.current) / 1000, 0.05);
       lastTimeRef.current = currentTime;
+      const dilation = getSimulationTimeDilation();
+      const targetFps = getSimulationTargetFps();
+      const deltaTime = (1 / targetFps) * dilation;
 
-      setObjects(prev => simulatePhysics(prev, physicsStateRef.current, deltaTime));
+      if (!isSimulationGodMode() && physicsReadyRef.current && physicsSessionRef.current) {
+        setObjects((prev) => physicsSessionRef.current!.step(prev, deltaTime));
+      } else if (!physicsReadyRef.current) {
+        // Accumulate time while Rapier boots; avoids a frozen first frame.
+        void rawDelta;
+      }
 
       if (isPlaying) {
         animationFrameRef.current = requestAnimationFrame(gameLoop);
@@ -95,16 +103,33 @@ export default function LevelEditor() {
   }, [isPlaying]);
 
   // Handle Play/Pause
-  const handlePlayPause = useCallback(() => {
+  const handlePlayPause = useCallback(async () => {
     if (!isPlaying) {
-      // Starting play - save current state
-      setSavedObjects(JSON.parse(JSON.stringify(objects)));
-      physicsStateRef.current = {
-        velocities: new Map(),
-        angularVelocities: new Map(),
-      };
+      setSavedObjects(JSON.parse(JSON.stringify(objects)) as LevelObject[]);
+      physicsReadyRef.current = false;
+
+      const physicsSession = new LevelEditorPhysicsSession();
+      const playRuntime = new LevelEditorPlayRuntime();
+      physicsSessionRef.current = physicsSession;
+      playRuntimeRef.current = playRuntime;
+
+      try {
+        await physicsSession.init(objects);
+        physicsReadyRef.current = true;
+        playRuntime.start(objects);
+      } catch (error) {
+        log.error('Failed to initialize Rapier play session', error);
+        physicsSessionRef.current = null;
+        playRuntimeRef.current = null;
+        return;
+      }
     } else {
-      // Stopping play - restore saved state
+      physicsSessionRef.current?.destroy();
+      physicsSessionRef.current = null;
+      playRuntimeRef.current?.stop();
+      playRuntimeRef.current = null;
+      physicsReadyRef.current = false;
+
       if (savedObjects) {
         setObjects(savedObjects);
         setSavedObjects(null);
@@ -264,7 +289,7 @@ export default function LevelEditor() {
           setObjects(data.objects || defaultObjects);
           return;
         } catch (e) {
-          logger.warn('Failed to parse cached level');
+          log.warn('Failed to parse cached level');
         }
       }
 

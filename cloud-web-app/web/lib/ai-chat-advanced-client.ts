@@ -156,6 +156,7 @@ export async function requestAdvancedChat(options: {
   model: string
   messages: ChatAdvancedMessage[]
   projectId?: string
+  agentId?: string
   headers?: Record<string, string>
   signal?: AbortSignal
   profileOverride?: AdvancedProfile
@@ -178,6 +179,7 @@ export async function requestAdvancedChat(options: {
         model: options.model,
         messages: options.messages,
         projectId: options.projectId,
+        agentId: options.agentId,
         qualityMode: payload.qualityMode,
         agentCount: payload.agentCount,
         enableWebResearch: payload.enableWebResearch,

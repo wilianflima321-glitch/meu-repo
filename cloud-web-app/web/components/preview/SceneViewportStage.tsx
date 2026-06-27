@@ -1,9 +1,13 @@
 'use client';
 
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AethelViewport3D } from '@/components/viewport/AethelViewport3D';
 import { useGizmoTransformPersistence } from '@/hooks/useGizmoTransformPersistence';
 import type { GizmoAxisPlaneConstraint, GizmoPivotMode } from '@/lib/viewport/gizmo-elite-controls';
 import { useViewportStore } from '@/lib/viewport/useViewportStore';
+import { FlyCameraHUD } from '@/components/viewport/FlyCameraHUD';
+import { ViewportContextMenu } from '@/components/viewport/ViewportContextMenu';
+import { ViewportDropGhost } from '@/components/viewport/ViewportDropGhost';
 
 import SceneViewportWorkflowDrawer from './SceneViewportWorkflowDrawer';
 import type { useSceneViewportSurfaceState } from './useSceneViewportSurfaceState';
@@ -83,8 +87,126 @@ export function SceneViewportStage({
     setSnapEnabled,
   } = useViewportStore();
 
+  // ── Fly-camera HUD ─────────────────────────────────────
+  const [isFlyCameraActive, setIsFlyCameraActive] = useState(false);
+  const [flySpeed, setFlySpeed] = useState(1);
+  const rightMouseDown = useRef(false);
+  const wasdActive = useRef(false);
+
+  useEffect(() => {
+    const onMouseDown = (e: MouseEvent) => { if (e.button === 2) rightMouseDown.current = true; };
+    const onMouseUp   = (e: MouseEvent) => {
+      if (e.button === 2) {
+        rightMouseDown.current = false;
+        if (!wasdActive.current) setIsFlyCameraActive(false);
+      }
+    };
+    const onKeyDown   = (e: KeyboardEvent) => {
+      if (['w', 'a', 's', 'd', 'q', 'e'].includes(e.key.toLowerCase()) && rightMouseDown.current) {
+        wasdActive.current = true;
+        setIsFlyCameraActive(true);
+      }
+    };
+    const onKeyUp     = (e: KeyboardEvent) => {
+      if (['w', 'a', 's', 'd', 'q', 'e'].includes(e.key.toLowerCase())) {
+        wasdActive.current = false;
+        if (!rightMouseDown.current) setIsFlyCameraActive(false);
+      }
+    };
+    const onWheel     = (e: WheelEvent) => {
+      if (rightMouseDown.current) {
+        setFlySpeed((prev) => Math.max(0.1, Math.min(10, prev - e.deltaY * 0.001)));
+      }
+    };
+    window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mouseup',   onMouseUp);
+    window.addEventListener('keydown',   onKeyDown);
+    window.addEventListener('keyup',     onKeyUp);
+    window.addEventListener('wheel',     onWheel, { passive: true });
+    return () => {
+      window.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('mouseup',   onMouseUp);
+      window.removeEventListener('keydown',   onKeyDown);
+      window.removeEventListener('keyup',     onKeyUp);
+      window.removeEventListener('wheel',     onWheel);
+    };
+  }, []);
+
+  // ── Context menu ────────────────────────────────────────
+  const [contextMenu, setContextMenu] = useState<{ isOpen: boolean; x: number; y: number }>({
+    isOpen: false, x: 0, y: 0,
+  });
+  const handleViewportContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ isOpen: true, x: e.clientX, y: e.clientY });
+  }, []);
+  const closeContextMenu = useCallback(() => setContextMenu((m) => ({ ...m, isOpen: false })), []);
+  const handleContextMenuAction = useCallback((id: string) => {
+    closeContextMenu();
+    if (id === 'delete' && selectedIds.length > 0) {
+      setObjects((prev) => prev.filter((o) => !selectedIds.includes(o.id)));
+    }
+    if (id === 'duplicate' && selectedIds.length > 0) {
+      setObjects((prev) => {
+        const copies = prev
+          .filter((o) => selectedIds.includes(o.id))
+          .map((o) => ({ ...o, id: `${o.id}-copy-${Date.now()}`, position: [o.position[0] + 1, o.position[1], o.position[2]] as [number, number, number] }));
+        return [...prev, ...copies];
+      });
+    }
+  }, [closeContextMenu, selectedIds, setObjects]);
+
+  // ── Drop ghost — wired to HTML5 drag events from asset browser ──────────
+  const [dropGhost, setDropGhost] = useState<{ active: boolean; x: number; y: number; label: string }>({
+    active: false, x: 0, y: 0, label: '',
+  });
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    const assetName = e.dataTransfer.types.includes('text/aethel-asset')
+      ? (e.dataTransfer.getData('text/aethel-asset') || 'Asset')
+      : e.dataTransfer.types.includes('text/plain')
+      ? (e.dataTransfer.getData('text/plain') || 'Asset')
+      : null;
+    if (!assetName) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    setDropGhost({ active: true, x: e.clientX, y: e.clientY, label: assetName });
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setDropGhost((g) => ({ ...g, active: false }));
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDropGhost({ active: false, x: 0, y: 0, label: '' });
+    const assetName = e.dataTransfer.getData('text/aethel-asset') || e.dataTransfer.getData('text/plain') || 'Dropped Asset';
+    if (!assetName) return;
+    // Spawn a placeholder object at centre of viewport
+    setObjects((prev) => [
+      ...prev,
+      {
+        id: `imported-${Date.now()}`,
+        name: assetName,
+        type: 'mesh' as const,
+        position: [0, 0, 0] as [number, number, number],
+        rotation: [0, 0, 0] as [number, number, number],
+        scale: [1, 1, 1] as [number, number, number],
+        visible: true,
+        locked: false,
+        color: '#60a5fa',
+      },
+    ]);
+  }, [setObjects]);
+
   return (
-    <div className="relative h-full">
+    <div
+      className="relative h-full"
+      onContextMenu={handleViewportContextMenu}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <AethelViewport3D
         objects={objects}
         selectedIds={selectedIds}
@@ -136,6 +258,27 @@ export function SceneViewportStage({
           onVisualScriptChange={handleVisualScriptChange}
         />
       ) : null}
+
+      {/* Fly-camera HUD */}
+      <FlyCameraHUD isActive={isFlyCameraActive} speed={flySpeed} />
+
+      {/* Viewport right-click context menu */}
+      <ViewportContextMenu
+        x={contextMenu.x}
+        y={contextMenu.y}
+        isOpen={contextMenu.isOpen}
+        objectName={selectedObject?.name}
+        onClose={closeContextMenu}
+        onAction={handleContextMenuAction}
+      />
+
+      {/* Asset drop ghost — follows cursor while dragging */}
+      <ViewportDropGhost
+        active={dropGhost.active}
+        cursorX={dropGhost.x}
+        cursorY={dropGhost.y}
+        label={dropGhost.label}
+      />
     </div>
   );
 }

@@ -30,12 +30,28 @@ export function PricingHero({ billingCycle, onBillingCycleChange }: PricingHeroP
             </Link>
           </div>
 
-          <div className="mt-8 inline-flex items-center gap-1 border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-1">
-            <CycleButton active={billingCycle === 'month'} onClick={() => onBillingCycleChange('month')}>Monthly</CycleButton>
-            <CycleButton active={billingCycle === 'year'} onClick={() => onBillingCycleChange('year')}>
-              Annual
-              <span className="bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] px-2 py-0.5 text-[10px] font-bold text-[var(--aethel-success)]">-20%</span>
-            </CycleButton>
+          {/* Sliding pill billing toggle (Vercel-style) */}
+          <div
+            role="group"
+            aria-label="Billing cycle"
+            className="mt-8 inline-flex items-center gap-0 rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-1 backdrop-blur-sm"
+          >
+            <div className="relative flex">
+              {/* sliding background pill */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 rounded-lg bg-[var(--aethel-surface-quaternary)] shadow-sm transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+                style={{
+                  left: billingCycle === 'month' ? '0%' : '50%',
+                  width: '50%',
+                }}
+              />
+              <CycleButton active={billingCycle === 'month'} onClick={() => onBillingCycleChange('month')}>Monthly</CycleButton>
+              <CycleButton active={billingCycle === 'year'} onClick={() => onBillingCycleChange('year')}>
+                Annual
+                <span className="ml-1.5 rounded bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] px-1.5 py-0.5 text-[9px] font-bold text-[var(--aethel-success)]">−20%</span>
+              </CycleButton>
+            </div>
           </div>
           <p className="mt-3 text-xs text-[var(--aethel-text-tertiary)]">Prices exclude taxes. Monthly or annual billing can be canceled anytime.</p>
         </div>
@@ -71,7 +87,12 @@ export function PricingHero({ billingCycle, onBillingCycleChange }: PricingHeroP
 
 function CycleButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button type="button" onClick={onClick} className={`flex items-center gap-2 px-5 py-2 text-sm font-medium transition-colors ${active ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`relative z-10 flex items-center gap-1.5 rounded-lg px-5 py-2 text-sm font-medium transition-colors duration-150 ${active ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'}`}
+    >
       {children}
     </button>
   )

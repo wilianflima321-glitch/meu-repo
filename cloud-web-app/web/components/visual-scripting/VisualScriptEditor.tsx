@@ -27,10 +27,11 @@ import {
   type NodeDefinition,
   type VisualNodeData,
 } from './visual-node-catalog';
-import { createComponentLogger } from '@/lib/observability/logger'
+import { BlueprintsAIInput } from './BlueprintsAIInput';
+import { requestAdvancedChat } from '@/lib/ai-chat-advanced-client';
+import { createComponentLogger } from '@/lib/observability/logger';
 
-const log = createComponentLogger('VisualScriptEditor')
-
+const log = createComponentLogger('VisualScriptEditor');
 
 export type { PortDefinition } from './visual-node-catalog';
 
@@ -165,6 +166,8 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
     physics: 'Physics',
     audio: 'Audio',
     ui: 'UI',
+    material: 'Material',
+    'world-gen': 'World Gen',
   };
   const filteredCategories = useMemo(() => {
     if (!searchTerm) return categories;
@@ -281,6 +284,8 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
     physics: 'Physics',
     audio: 'Audio',
     ui: 'UI',
+    material: 'Material',
+    'world-gen': 'World Gen',
   };
   const filteredNodes = useMemo(() => {
     if (!searchTerm) return null;
@@ -401,7 +406,20 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
     y: number;
     flowPosition: { x: number; y: number };
   } | null>(null);
+  const [blueprintAIOpen, setBlueprintAIOpen] = useState(false);
+  const [blueprintGenerating, setBlueprintGenerating] = useState(false);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'i') {
+        event.preventDefault();
+        setBlueprintAIOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
   const onConnect = useCallback(
     (connection: Connection) => {
       const newEdge: Edge = {
@@ -465,6 +483,23 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
       variables: script?.variables || [],
     };
   }, [nodes, edges, script]);
+  const handleBlueprintGenerate = useCallback(async (prompt: string) => {
+    setBlueprintGenerating(true);
+    try {
+      const result = await requestAdvancedChat({
+        message: `Generate blueprint nodes for: ${prompt}. Return actionable node graph instructions.`,
+        model: 'openrouter/auto',
+        messages: [{ role: 'user', content: prompt }],
+        profileOverride: { qualityMode: 'delivery', agentCount: 1, enableWebResearch: false },
+      });
+      log.info('Blueprint AI response received', { length: result.raw.length });
+    } catch (error) {
+      log.error('Blueprint AI generation failed', error);
+    } finally {
+      setBlueprintGenerating(false);
+      setBlueprintAIOpen(false);
+    }
+  }, []);
   const handleClearGraph = useCallback(async () => {
     const shouldClear = await openConfirmDialog({
       title: 'Clear graph',
@@ -541,6 +576,12 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
           onAddNode={handleAddNodeAtPosition}
         />
       )}
+      <BlueprintsAIInput
+        isOpen={blueprintAIOpen}
+        onClose={() => setBlueprintAIOpen(false)}
+        onGenerate={handleBlueprintGenerate}
+        isGenerating={blueprintGenerating}
+      />
     </div>
   );
 }

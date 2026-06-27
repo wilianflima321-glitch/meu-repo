@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { aiService, type LLMProvider, type Message } from '@/lib/ai-service';
@@ -31,6 +32,29 @@ import {
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
 import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit, AI_BYOK_RATE_LIMIT } from '@/lib/server/ai-core-rate-limit';
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
+
+const PROVIDER_HEADER_MAP: Record<string, string> = {
+  openai: 'x-aethel-byok-openai',
+  anthropic: 'x-aethel-byok-anthropic',
+  google: 'x-aethel-byok-google',
+  openrouter: 'x-aethel-byok-openrouter',
+  groq: 'x-aethel-byok-groq',
+};
+
+function inferProviderFromModel(model?: string): LLMProvider | undefined {
+  const raw = String(model || '').trim().toLowerCase()
+  if (!raw) return undefined
+  if (raw.startsWith('openrouter:')) return 'openrouter'
+  if (raw.startsWith('openai:')) return 'openai'
+  if (raw.startsWith('anthropic:')) return 'anthropic'
+  if (raw.startsWith('google:')) return 'google'
+  if (raw.startsWith('groq:')) return 'groq'
+  if (raw.startsWith('openai/') || raw.startsWith('anthropic/') || raw.startsWith('google/')) return 'openrouter'
+  if (raw.startsWith('gpt-')) return 'openai'
+  if (raw.startsWith('claude-')) return 'anthropic'
+  if (raw.startsWith('gemini-')) return 'google'
+  return undefined
+}
 
 function getBackendBaseUrl(): string | null {
 	const raw = process.env.NEXT_PUBLIC_API_URL;
@@ -112,7 +136,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		const estimatedPromptTokens = estimateTokensFromText(promptText);
 		const estimatedTotalTokens = estimatedPromptTokens + maxTokens;
 
-		const isByok = req.headers.get('x-aethel-byok-active') === '1';
+		const userRow = await prisma.user.findUnique({
+			where: { id: auth.userId },
+			select: { plan: true, byokKey: true }
+		});
+
+		const isByok = req.headers.get('x-aethel-byok-active') === '1' || !!userRow?.byokKey;
 
 		if (isByok) {
 			const rateLimitedByok = enforceAiCoreRateLimit({
@@ -131,6 +160,25 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 					{ error: modelCheck.code || 'MODEL_NOT_ALLOWED', message: modelCheck.reason || 'Model not allowed' },
 					{ status: 403 }
 				);
+			}
+		}
+
+		// Resolve BYOK key
+		let byokKey: string | undefined = undefined;
+		if (isByok) {
+			const resolvedProvider = provider || inferProviderFromModel(model);
+			if (resolvedProvider) {
+				const headerName = PROVIDER_HEADER_MAP[resolvedProvider];
+				byokKey = req.headers.get(headerName) || req.headers.get('x-aethel-byok-key') || undefined;
+			}
+			if (!byokKey && userRow?.byokKey) {
+				try {
+					const { decryptString } = await import('@/lib/server/crypto');
+					byokKey = decryptString(userRow.byokKey);
+				} catch (e) {
+					const { logger } = await import('@/lib/observability/logger');
+					logger.error('Failed to decrypt database BYOK key', e);
+				}
 			}
 		}
 
@@ -345,6 +393,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 						model,
 						provider,
 						maxTokens: maxTokens > 0 ? maxTokens : undefined,
+						userId: auth.userId,
+						isBYOK: isByok,
+						apiKeyOverride: byokKey,
 					})) {
 						accumulatedText += chunk;
 						controller.enqueue(encoder.encode(chunk));

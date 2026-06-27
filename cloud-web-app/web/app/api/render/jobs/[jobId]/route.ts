@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { requireAuth } from '@/lib/auth-server'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 export const runtime = 'nodejs'
@@ -16,8 +17,12 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { jobId: string } }
 ) {
-  const userId = req.headers.get('x-user-id')
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  let userId: string
+  try {
+    userId = requireAuth(req).userId
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   try {
     const job = await prisma.renderJob.findFirst({
@@ -54,7 +59,19 @@ export async function GET(
       }
     }
 
-    return NextResponse.json({ job })
+    // Map DB status to UI-safe status
+    const uiStatus = ['processing', 'running', 'active'].includes(job.status)
+      ? 'rendering'
+      : job.status === 'cancelled'
+      ? 'failed'
+      : job.status;
+
+    return NextResponse.json({
+      job: {
+        ...job,
+        status: uiStatus,
+      }
+    })
   } catch (error) {
     log.error('GET /api/render/jobs/[jobId] failed', error)
     return NextResponse.json(

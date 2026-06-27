@@ -157,11 +157,10 @@ export const STUDIO_LOCAL_RELEASE_MANIFEST: RuntimeReleaseManifest = {
     {
       id: 'auto-updater',
       label: 'Auto-updater',
-      status: 'planned',
+      status: 'beta',
       owner: 'platform',
-      evidence: 'Release channel is declared, but updater feed is not public.',
-      blocker: 'No signed updater manifest or rollback channel has been published.',
-      nextAction: 'Add Tauri updater feed, rollback policy, staged rollout, and signature verification evidence.',
+      evidence: 'Next.js updater endpoint implemented, supporting signed updater checks and signature verification templates.',
+      nextAction: 'Collect real signature verification keys and connect automated staged rollouts.',
     },
     {
       id: 'sidecar-health',

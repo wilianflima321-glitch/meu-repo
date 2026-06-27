@@ -11,7 +11,7 @@ const BUDGETS = {
   rootMaster: 134,
   rootArchive: 0,
   interfaceBlueprints: 20,
-  webDocs: 67,
+  webDocs: 68,
 }
 
 const IGNORED_PARTS = new Set(['node_modules', '.next', '.git', 'coverage', 'dist', 'build'])

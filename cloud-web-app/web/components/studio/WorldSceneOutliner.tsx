@@ -1,0 +1,289 @@
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import {
+  ChevronDown,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock,
+  Globe,
+  Folder,
+  Box,
+  Sun,
+  Camera,
+  Layers
+} from 'lucide-react'
+
+export interface SceneNode {
+  id: string
+  name: string
+  type: 'world' | 'group' | 'mesh' | 'light' | 'camera' | 'ambient' | string
+  children?: SceneNode[]
+  visible?: boolean
+  locked?: boolean
+}
+
+const DEFAULT_TREE: SceneNode = {
+  id: 'world-root',
+  name: 'World (Root)',
+  type: 'world',
+  visible: true,
+  locked: false,
+  children: [
+    {
+      id: 'group-lighting',
+      name: 'Lighting Group',
+      type: 'group',
+      visible: true,
+      locked: false,
+      children: [
+        { id: 'light-ambient', name: 'Ambient Light', type: 'ambient', visible: true, locked: false },
+        { id: 'light-directional', name: 'Directional Light (Sun)', type: 'light', visible: true, locked: false },
+        { id: 'light-sky', name: 'Skybox Environment', type: 'light', visible: true, locked: false }
+      ]
+    },
+    {
+      id: 'group-static-meshes',
+      name: 'Static Meshes',
+      type: 'group',
+      visible: true,
+      locked: false,
+      children: [
+        { id: 'mesh-terrain', name: 'Landscape Ground', type: 'mesh', visible: true, locked: false },
+        { id: 'mesh-castle-wall', name: 'Castle Wall Barrier', type: 'mesh', visible: true, locked: false },
+        { id: 'mesh-water-plane', name: 'Water Surface Plane', type: 'mesh', visible: false, locked: true }
+      ]
+    },
+    {
+      id: 'group-cameras',
+      name: 'Camera Rigging',
+      type: 'group',
+      visible: true,
+      locked: false,
+      children: [
+        { id: 'camera-main', name: 'Main Playtest Camera', type: 'camera', visible: true, locked: false },
+        { id: 'camera-cinematic', name: 'Cinematic Path Camera', type: 'camera', visible: true, locked: false }
+      ]
+    }
+  ]
+}
+
+interface WorldSceneOutlinerProps {
+  selectedId: string | null
+  onSelect: (node: SceneNode) => void
+  onFocus: (node: SceneNode) => void
+}
+
+export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
+  selectedId,
+  onSelect,
+  onFocus
+}) => {
+  const [tree, setTree] = useState<SceneNode>(DEFAULT_TREE)
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(
+    new Set(['world-root', 'group-lighting', 'group-static-meshes', 'group-cameras'])
+  )
+
+  // Flattened list of visible/expanded nodes for keyboard navigation
+  const [flatList, setFlatList] = useState<SceneNode[]>([])
+
+  useEffect(() => {
+    const list: SceneNode[] = []
+    const traverse = (node: SceneNode) => {
+      list.push(node)
+      if (node.children && expandedNodes.has(node.id)) {
+        node.children.forEach(traverse)
+      }
+    }
+    traverse(tree)
+    setFlatList(list)
+  }, [tree, expandedNodes])
+
+  const toggleExpand = (id: string) => {
+    setExpandedNodes((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  const updateNodeState = (id: string, key: 'visible' | 'locked', value: boolean) => {
+    const deepCloneAndModify = (node: SceneNode): SceneNode => {
+      if (node.id === id) {
+        return { ...node, [key]: value }
+      }
+      if (node.children) {
+        return {
+          ...node,
+          children: node.children.map(deepCloneAndModify)
+        }
+      }
+      return node
+    }
+    setTree((prev) => deepCloneAndModify(prev))
+  }
+
+  const getNodeIcon = (type: string) => {
+    switch (type) {
+      case 'world':
+        return <Globe size={13} className="text-sky-400" />
+      case 'group':
+        return <Folder size={13} className="text-amber-400 fill-amber-400/10" />
+      case 'mesh':
+        return <Box size={13} className="text-emerald-400" />
+      case 'ambient':
+      case 'light':
+        return <Sun size={13} className="text-yellow-400" />
+      case 'camera':
+        return <Camera size={13} className="text-blue-400" />
+      default:
+        return <Layers size={13} className="text-cyan-400" />
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent, node: SceneNode) => {
+    const index = flatList.findIndex((n) => n.id === node.id)
+    if (index === -1) return
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        if (index < flatList.length - 1) {
+          onSelect(flatList[index + 1])
+          document.getElementById(`outliner-node-${flatList[index + 1].id}`)?.focus()
+        }
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        if (index > 0) {
+          onSelect(flatList[index - 1])
+          document.getElementById(`outliner-node-${flatList[index - 1].id}`)?.focus()
+        }
+        break
+      case 'ArrowRight':
+        e.preventDefault()
+        if (node.children && !expandedNodes.has(node.id)) {
+          toggleExpand(node.id)
+        }
+        break
+      case 'ArrowLeft':
+        e.preventDefault()
+        if (node.children && expandedNodes.has(node.id)) {
+          toggleExpand(node.id)
+        }
+        break
+      case ' ':
+      case 'Enter':
+        e.preventDefault()
+        onSelect(node)
+        break
+    }
+  }
+
+  const renderBranch = (node: SceneNode, depth: number = 0) => {
+    const isExpanded = expandedNodes.has(node.id)
+    const isSelected = selectedId === node.id
+    const hasChildren = !!(node.children && node.children.length > 0)
+    const isVisible = node.visible !== false
+    const isLocked = !!node.locked
+
+    return (
+      <div key={node.id} className="flex flex-col">
+        {/* Node Row */}
+        <div
+          id={`outliner-node-${node.id}`}
+          tabIndex={0}
+          onKeyDown={(e) => handleKeyDown(e, node)}
+          onClick={() => onSelect(node)}
+          onDoubleClick={() => onFocus(node)}
+          className={`
+            group relative flex items-center justify-between px-2 py-1 select-none cursor-pointer
+            border-l-2 transition-all duration-150 text-[11px] font-mono
+            focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[var(--aethel-info)]
+            ${isSelected 
+              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] text-[var(--aethel-neon-cyan)] border-[var(--aethel-info)] shadow-[inset_4px_0_16px_rgba(56,189,248,0.07)]' 
+              : 'border-transparent text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]'
+            }
+          `}
+          style={{ paddingLeft: `${Math.max(8, depth * 14)}px` }}
+        >
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            {/* Chevron toggle */}
+            {hasChildren ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  toggleExpand(node.id)
+                }}
+                className="p-0.5 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]"
+              >
+                {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+              </button>
+            ) : (
+              <span className="w-5" />
+            )}
+
+            {/* Icon */}
+            {getNodeIcon(node.type)}
+
+            {/* Name */}
+            <span className="truncate">{node.name}</span>
+          </div>
+
+          {/* Visibility and Lock Action Buttons */}
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                updateNodeState(node.id, 'visible', !isVisible)
+              }}
+              title={isVisible ? 'Hide Node' : 'Show Node'}
+              className="p-0.5 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]"
+            >
+              {isVisible ? <Eye size={11} /> : <EyeOff size={11} className="text-amber-500/70" />}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                updateNodeState(node.id, 'locked', !isLocked)
+              }}
+              title={isLocked ? 'Unlock Node' : 'Lock Node'}
+              className="p-0.5 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]"
+            >
+              {isLocked ? <Lock size={11} className="text-red-400" /> : <Unlock size={11} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Child branches */}
+        {hasChildren && isExpanded && (
+          <div className="flex flex-col">
+            {node.children!.map((child) => renderBranch(child, depth + 1))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col h-full overflow-y-auto bg-[var(--aethel-bg-base)] scrollbar-none border border-[var(--aethel-glass-border)] rounded-xl py-1">
+      <div className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)] border-b border-[var(--aethel-glass-border)] mb-1">
+        Scene Hierarchy
+      </div>
+      <div className="flex flex-col min-h-0 flex-1">
+        {renderBranch(tree)}
+      </div>
+    </div>
+  )
+}
+
+export default WorldSceneOutliner

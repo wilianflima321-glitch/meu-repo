@@ -42,6 +42,6 @@ describe('workbench entry triage', () => {
     expect(profile.previewMode).toBe('runtime');
     expect(profile.bottomPanel).toBe('chat');
     expect(profile.panelState.chat.open).toBe(true);
-    expect(profile.notice?.title).toMatch(/missao/i);
+    expect(profile.notice?.title).toMatch(/miss/i);
   });
 });

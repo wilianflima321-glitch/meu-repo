@@ -38,8 +38,6 @@ describe('creative studio route contract', () => {
       '/studio/water',
       '/studio/sprite',
       '/studio/film',
-      '/studio/cinematic',
-      '/studio/audio',
     ])
 
     for (const href of ['/studio', ...CREATIVE_STUDIO_ROUTE_HREFS]) {
@@ -63,6 +61,8 @@ describe('creative studio route contract', () => {
       '/studio/cloth',
       '/studio/fluid',
       '/studio/sprite',
+      '/studio/audio',
+      '/studio/cinematic',
     ])
   })
 

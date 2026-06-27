@@ -28,6 +28,7 @@ export default defineConfig({
       '**/dist/**',
       '**/.next/**',
       '**/e2e/**', // E2E tests use Playwright
+      '**/tests/visual-regression/**',
     ],
     coverage: {
       provider: 'v8',

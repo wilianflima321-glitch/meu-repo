@@ -6,6 +6,7 @@
  */
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { listInstalledPlugins, installPlugin } from '@/lib/plugins/host'
 
 export const runtime = 'nodejs'
 
@@ -13,12 +14,11 @@ export async function GET(req: NextRequest) {
   const userId = req.headers.get('x-user-id')
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // TODO: query Prisma for user's installed plugins when PluginInstall model is ready
+  const plugins = await listInstalledPlugins(userId);
   return NextResponse.json({
-    plugins: [],
+    plugins,
     _meta: {
-      schemaPending: true,
-      message: 'Plugin runtime (lib/plugins/host.ts) not yet implemented. BACKLOG §10.3 #25.',
+      message: 'Plugin runtime active',
     },
   })
 }
@@ -39,13 +39,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'pluginId is required' }, { status: 400 })
   }
 
-  return NextResponse.json(
-    {
-      error: 'Plugin installation is pending implementation of lib/plugins/host.ts (BACKLOG §10.3 #25).',
-      pluginId,
-      version,
-      _pending: true,
-    },
-    { status: 503 }
-  )
+  try {
+    const install = await installPlugin(userId, pluginId, version);
+    return NextResponse.json(
+      {
+        success: true,
+        pluginId,
+        version,
+        install,
+      },
+      { status: 200 }
+    )
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to install plugin' }, { status: 500 });
+  }
 }

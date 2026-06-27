@@ -17,7 +17,7 @@
  * a single provider outage never blocks the user.
  */
 
-import { MODEL_INFO } from './advanced-ai-provider-model-info';
+import { MODEL_CONFIGS } from '../emergency-mode-models';
 import { OPENROUTER_MODEL_MAP, OPENROUTER_MODELS, EMERGENCY_FALLBACK_MODEL_ID } from './openrouter-models';
 import { detectModelFamily, getModelRobustnessProfile, type ModelFamily, type ModelWeaknessProfile } from './model-robustness-profiles';
 
@@ -30,7 +30,12 @@ export type TaskKind =
   | 'vision'
   | 'bulk-cheap'
   | 'critic'
-  | 'creative-writing';
+  | 'creative-writing'
+  | 'mesh-generation'
+  | 'texture-generation'
+  | 'world-layout'
+  | 'material-authoring'
+  | 'ecosystem-population';
 
 export type TaskComplexity = 'low' | 'medium' | 'high';
 export type RoutingBudget = 'economy' | 'balanced' | 'max-quality';
@@ -104,19 +109,19 @@ export function getModelCandidate(id: string): ModelCandidate | null {
       supportsJson: orm.supportsJson,
     };
   }
-  const info = MODEL_INFO[id];
+  const info = MODEL_CONFIGS[id];
   if (info) {
     return {
       id,
       family: detectModelFamily(id),
-      tier: inferTierFromCost(info.inputCost + info.outputCost),
-      contextWindow: info.contextWindow,
-      maxOutput: info.maxOutput,
-      inputCost: info.inputCost,
-      outputCost: info.outputCost,
-      supportsVision: Boolean(info.supportsVision),
-      supportsTools: Boolean(info.supportsTools),
-      supportsJson: Boolean(info.supportsJson),
+      tier: inferTierFromCost(info.inputCostPer1M + info.outputCostPer1M),
+      contextWindow: 128000,
+      maxOutput: 4000,
+      inputCost: info.inputCostPer1M,
+      outputCost: info.outputCostPer1M,
+      supportsVision: true,
+      supportsTools: true,
+      supportsJson: true,
     };
   }
   return null;
@@ -138,6 +143,11 @@ const TASK_WEAKNESS_WEIGHTS: Record<TaskKind, Partial<Record<keyof ModelWeakness
   'bulk-cheap': { toolJsonFragility: 0.5, hallucination: 0.5 },
   critic: { sycophancy: 0.45, hallucination: 0.4, laziness: 0.15 },
   'creative-writing': { hallucination: 0.3, verbosity: 0.4, sycophancy: 0.3 },
+  'mesh-generation': { hallucination: 0.5, laziness: 0.4 },
+  'texture-generation': { hallucination: 0.4, laziness: 0.3 },
+  'world-layout': { hallucination: 0.5, laziness: 0.3, toolJsonFragility: 0.2 },
+  'material-authoring': { hallucination: 0.4, laziness: 0.3 },
+  'ecosystem-population': { hallucination: 0.4, laziness: 0.4 },
 };
 
 const BUDGET_WEIGHTS: Record<RoutingBudget, { cost: number; reliability: number; capability: number }> = {

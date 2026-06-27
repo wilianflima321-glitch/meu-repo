@@ -13,7 +13,7 @@ import {
 
 function getBrowserToken(): string | null {
   if (typeof window === 'undefined') return null
-  return window.localStorage.getItem('token')
+  return window.localStorage.getItem('aethel-token')
 }
 
 export function useGizmoTransformPersistence(projectId?: string | null) {

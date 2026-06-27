@@ -1,5 +1,6 @@
 import type { RenderFarmJobSpec } from '@/lib/render-farm/queue/job-spec'
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs'
+import { logger } from '@/lib/observability/logger'
 
 /**
  * Dispatcher to AWS/Modal.com for Headless Render Jobs.
@@ -10,11 +11,10 @@ export async function dispatchCloudRenderJob(jobId: string, spec: RenderFarmJobS
   // Simulate payload creation for AWS Lambda / Modal.com
   const payload = {
     jobId,
-    sceneGraphUrl: \`s3://aethel-render-assets/\${spec.projectId}/scene.json\`,
     sceneGraphUrl: `s3://aethel-render-assets/${spec.projectId}/scene.json`,
-    resolution: spec.output.resolution,
-    fps: spec.output.framerate,
-    codec: spec.output.codec,
+    resolution: (spec as any).output?.resolution || '1920x1080',
+    fps: (spec as any).output?.framerate || 60,
+    codec: (spec as any).output?.codec || 'h264',
     webhookUrl: `https://api.aethel.com/webhooks/render-farm/complete`,
   }
 
@@ -28,9 +28,9 @@ export async function dispatchCloudRenderJob(jobId: string, spec: RenderFarmJobS
 
   try {
     await sqs.send(command)
-    console.log(`[Render Farm] Dispatched job ${jobId} to AWS SQS (Queue: ${process.env.RENDER_FARM_SQS_QUEUE_URL})`)
+    logger.info(`[Render Farm] Dispatched job ${jobId} to AWS SQS (Queue: ${process.env.RENDER_FARM_SQS_QUEUE_URL})`)
   } catch (error) {
-    console.error(`[Render Farm] Failed to dispatch job ${jobId} to AWS SQS`, error)
+    logger.error(`[Render Farm] Failed to dispatch job ${jobId} to AWS SQS`, error)
     throw error
   }
   
@@ -48,13 +48,13 @@ export async function dispatchCloudRenderJob(jobId: string, spec: RenderFarmJobS
 export async function handleRenderWebhook(jobId: string, awsResult: any) {
   if (awsResult.status === 'success') {
     // 1. Update DB state
-    console.log(\`[Render Farm] Job \${jobId} completed successfully. Artifact: \${awsResult.artifactUrl}\`)
+    logger.info(`[Render Farm] Job ${jobId} completed successfully. Artifact: ${awsResult.artifactUrl}`)
     
     // 2. Trigger Billing Accumulator
     const durationSec = awsResult.computeDurationSec || 120
     await chargeUserForGPUCompute(jobId, durationSec)
   } else {
-    console.error(\`[Render Farm] Job \${jobId} failed on AWS.\`, awsResult.error)
+    logger.error(`[Render Farm] Job ${jobId} failed on AWS.`, awsResult.error)
   }
 }
 
@@ -62,5 +62,5 @@ async function chargeUserForGPUCompute(jobId: string, secondsUsed: number) {
   // Plugs into redis-billing-accumulator.ts logic
   const costPerSecond = 0.005 // $0.005 per sec of AWS GPU
   const totalCost = secondsUsed * costPerSecond
-  console.log(\`[Billing] Charging \${totalCost.toFixed(3)} USD for Job \${jobId}\`)
+  logger.info(`[Billing] Charging ${totalCost.toFixed(3)} USD for Job ${jobId}`)
 }

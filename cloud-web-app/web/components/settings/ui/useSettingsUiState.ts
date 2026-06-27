@@ -4,14 +4,15 @@ import type { SettingDefinition, SettingsCategory } from './settings-types';
 
 interface UseSettingsUiStateOptions {
   settings: Map<string, SettingDefinition>;
+  initialCategoryFilter?: string;
 }
 
-export function useSettingsUiState({ settings }: UseSettingsUiStateOptions) {
+export function useSettingsUiState({ settings, initialCategoryFilter }: UseSettingsUiStateOptions) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(initialCategoryFilter ?? null);
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(['Text Editor', 'Workbench', 'Aethel Engine'])
+    new Set(['Text Editor', 'Workbench', 'Aethel Engine', ...(initialCategoryFilter ? [initialCategoryFilter] : [])])
   );
   const [showJSON, setShowJSON] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);

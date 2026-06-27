@@ -23,7 +23,7 @@ export function useWorkbenchPresence({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const rawToken = window.localStorage.getItem('token');
+    const rawToken = window.localStorage.getItem('aethel-token');
     if (!rawToken) {
       setCurrentUserId(null);
       return;

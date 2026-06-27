@@ -5,13 +5,18 @@
  */
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { prisma } from '@/lib/db'
+import { enqueueExportJob } from '@/lib/export/enqueue-export-job'
+import { requireAuth } from '@/lib/auth-server'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
-  const userId = req.headers.get('x-user-id')
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  let userId: string
+  try {
+    userId = requireAuth(req).userId
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   let body: {
     projectId?: string
@@ -36,15 +41,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'projectId is required' }, { status: 400 })
   }
 
-  const job = await prisma.renderJob.create({
-    data: {
-      projectId,
-      requestedBy: userId,
-      status: 'queued',
-      provider: 'internal',
-    }
+  const jobId = await enqueueExportJob({
+    format,
+    projectId,
+    userId,
   })
-  const jobId = job.id
 
   return NextResponse.json({
     jobId,
@@ -54,6 +55,6 @@ export async function POST(req: NextRequest) {
     includeAssets,
     includeHistory,
     message: `Project ${format} export queued. Poll /api/render/jobs/{jobId} for progress.`,
-    _pending: 'lib/export/formats/project-zip not yet wired — job is a receipt stub.',
+    pollUrl: `/api/render/jobs/${jobId}`,
   }, { status: 202 })
 }

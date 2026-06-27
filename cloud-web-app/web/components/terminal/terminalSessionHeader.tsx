@@ -1,13 +1,7 @@
 'use client';
 
 import React from 'react';
-import {
-  Maximize2,
-  Minimize2,
-  Search,
-  Split,
-  X,
-} from 'lucide-react';
+import { Maximize2, Minimize2, Search, Split, X, FlaskConical, Check, Wifi, WifiOff } from 'lucide-react';
 
 import { ShellSelector, TerminalTab } from './XTerminalChrome';
 import type { TerminalSession } from './terminalModels';
@@ -42,11 +36,23 @@ export function TerminalSessionHeader({
   onToggleMaximized,
   onClosePanel,
 }: TerminalSessionHeaderProps) {
-  const selectedShell = sessions.find((session) => session.id === activeSessionId)?.shell;
+  const selectedShell = sessions.find((s) => s.id === activeSessionId)?.shell;
 
   return (
-    <div className="flex items-center justify-between bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)] min-h-[35px]">
-      <div className="flex items-center overflow-x-auto flex-1" role="tablist">
+    <div
+      className="
+        flex items-center justify-between
+        min-h-[36px]
+        bg-[var(--aethel-surface-primary)]
+        border-b border-[var(--aethel-glass-border)]
+      "
+    >
+      {/* ── Tab strip ── */}
+      <div
+        className="flex items-center overflow-x-auto flex-1 scrollbar-none"
+        role="tablist"
+        aria-label="Terminal sessions"
+      >
         {sessions.map((session) => (
           <TerminalTab
             key={session.id}
@@ -59,50 +65,75 @@ export function TerminalSessionHeader({
         ))}
 
         <ShellSelector
-          onSelect={(shell) => {
-            void onCreateSession(shell.path);
-          }}
+          onSelect={(shell) => { void onCreateSession(shell.path); }}
           selectedShell={selectedShell}
         />
       </div>
 
-      <div className="flex items-center gap-1 px-2">
-        <div
-          className={`w-2 h-2 rounded-full mr-2 ${
-            isConnected
-              ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-              : 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
-          }`}
-          title={isConnected ? 'Connected' : 'Disconnected'}
-        />
+      {/* ── Right controls ── */}
+      <div className="flex items-center gap-0.5 px-2 flex-shrink-0 border-l border-[var(--aethel-glass-border)]">
 
+        {/* Native Experimental badge */}
+        <span
+          title="Terminal runs over WebSocket. Rust native shell is in development."
+          className="
+            inline-flex items-center gap-1 rounded border animate-glow-amber
+            border-amber-400/45 bg-amber-400/8 text-amber-400
+            px-1.5 py-0 text-[9px] font-mono font-medium uppercase tracking-widest
+            select-none mr-1
+          "
+        >
+          <FlaskConical className="h-2.5 w-2.5" aria-hidden />
+          Exp.
+        </span>
+
+        {/* Connection dot */}
+        <span
+          title={isConnected ? 'Connected' : 'Disconnected'}
+          className={`
+            aethel-beacon flex h-2 w-2 mr-1
+            ${isConnected ? 'text-emerald-400' : 'text-red-400'}
+          `}
+        >
+          <span
+            className={`block h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-red-400'}`}
+          />
+        </span>
+
+        <div className="h-3.5 w-px bg-[var(--aethel-glass-border)] mx-0.5" />
+
+        {/* Search toggle */}
         <TerminalIconButton
           onClick={onToggleSearch}
-          label="Toggle search"
+          label="Search terminal output (Ctrl+F)"
           aria-pressed={showSearch}
         >
-          <Search size={14} />
+          <Search
+            size={13}
+            className={showSearch ? 'text-[var(--aethel-neon-cyan)]' : ''}
+          />
         </TerminalIconButton>
 
+        {/* Split */}
         <TerminalIconButton
-          onClick={() => {
-            void onCreateSession();
-          }}
+          onClick={() => { void onCreateSession(); }}
           label="Split terminal"
         >
-          <Split size={14} />
+          <Split size={13} />
         </TerminalIconButton>
 
+        {/* Maximize */}
         <TerminalIconButton
           onClick={onToggleMaximized}
-          label={isMaximized ? 'Restore' : 'Maximize'}
+          label={isMaximized ? 'Restore terminal' : 'Maximize terminal'}
         >
-          {isMaximized ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          {isMaximized ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
         </TerminalIconButton>
 
+        {/* Close panel */}
         {onClosePanel && (
           <TerminalIconButton onClick={onClosePanel} label="Close terminal panel">
-            <X size={14} />
+            <X size={13} />
           </TerminalIconButton>
         )}
       </div>

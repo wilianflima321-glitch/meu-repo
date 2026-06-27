@@ -6,7 +6,7 @@ import { getScopedWorkspaceRoot } from '@/lib/server/workspace-scope'
 import { searchSemanticCodebase } from '@/lib/server/semantic-code-search'
 
 const CONTEXTUAL_TAG_PATTERN =
-  /@(file:[^\s]+|folder:[^\s]+|docs:[^\s]+|codebase|git:(?:diff|staged|status|log|blame:[^\s]+)|diff|error|errors|diagnostics)/gi
+  /@(file:[^\s]+|folder:[^\s]+|docs:[^\s]+|codebase|selection|terminal|function|git:(?:diff|staged|status|log|blame:[^\s]+)|diff|error|errors|diagnostics)/gi
 
 async function pathExists(target: string): Promise<boolean> {
   try {

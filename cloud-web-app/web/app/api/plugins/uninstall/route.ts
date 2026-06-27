@@ -5,6 +5,7 @@
  */
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { uninstallPlugin } from '@/lib/plugins/host'
 
 export const runtime = 'nodejs'
 
@@ -24,13 +25,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'pluginId is required' }, { status: 400 })
   }
 
-  return NextResponse.json(
-    {
-      error: 'Plugin uninstall pending lib/plugins/host.ts implementation (BACKLOG §10.3 #25).',
-      pluginId,
-      projectId: projectId ?? null,
-      _pending: true,
-    },
-    { status: 503 }
-  )
+  try {
+    await uninstallPlugin(userId, pluginId);
+    return NextResponse.json({ success: true, pluginId, projectId: projectId ?? null });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to uninstall plugin' }, { status: 500 });
+  }
 }

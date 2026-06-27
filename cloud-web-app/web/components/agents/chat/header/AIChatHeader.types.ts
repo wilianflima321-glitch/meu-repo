@@ -1,5 +1,6 @@
 import type { ModelOption } from '@/components/ide/AIChatPanelPro.types'
 import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
+import type { ActiveContextItem } from '@/components/ide/ActiveContextBadge'
 
 export interface AIChatHeaderProps {
   consoleMode: AIChatConsoleMode
@@ -24,6 +25,12 @@ export interface AIChatHeaderProps {
   onToggleSpeaking: () => void
   onClearChat?: () => void
   onToggleAdvancedControls: () => void
+  /** Active context items shown as chips in the header — replaces internal badge */
+  activeContextItems?: ActiveContextItem[]
+  /** Whether calm mode is active (hides telemetry panels by default) */
+  calmMode?: boolean
+  /** Toggle calm mode */
+  onToggleCalmMode?: () => void
 }
 
 export type AIChatModeMenuProps = Pick<

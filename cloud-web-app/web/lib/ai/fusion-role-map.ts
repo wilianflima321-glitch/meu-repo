@@ -6,7 +6,7 @@
  * across agent-orchestrator, ai-agent-system, and agent-mode.
  *
  * @see intelligent-model-router.ts for scoring logic
- * @see agent-llm-bridge.ts for the LLM call helper
+ * @see ai-service.ts for the LLM call helper
  */
 
 import type { TaskKind, RoutingBudget, TaskComplexity } from './intelligent-model-router';

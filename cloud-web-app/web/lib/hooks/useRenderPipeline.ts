@@ -19,6 +19,7 @@ import { DEFAULT_VOLUMETRIC_CONFIG, DEFAULT_SHADOW_CONFIG } from '../aaa-render-
 import type { GlobalIlluminationConfig, RenderPipelineConfig, ShadowConfig, VolumetricConfig } from '../aaa-render-system';
 import { QUALITY_PRESETS } from './useRenderPipeline.presets';
 import type { DynamicQualityConfig, GPUCapabilities, QualityPreset, RenderStats, UseRenderPipelineOptions, UseRenderPipelineReturn } from './useRenderPipeline.types';
+import { AAARenderer } from '../aaa-renderer-impl';
 
 // ============================================================================
 // AAA RENDERER INTERFACE (quando disponível)
@@ -34,17 +35,7 @@ export type {
   UseRenderPipelineReturn,
 } from './useRenderPipeline.types';
 
-interface AAARenderer {
-  render: (scene: THREE.Scene, camera: THREE.Camera) => void;
-  resize: (width: number, height: number) => void;
-  dispose: () => void;
-  setSSAO: (enabled: boolean, intensity: number) => void;
-  setSSR: (enabled: boolean, intensity: number) => void;
-  setBloom: (enabled: boolean, intensity: number) => void;
-  setDOF: (enabled: boolean, focusDistance: number) => void;
-  setMotionBlur: (enabled: boolean, intensity: number) => void;
-  setAntialiasing: (mode: 'none' | 'fxaa' | 'smaa' | 'taa' | 'msaa') => void;
-}
+
 
 // ============================================================================
 // TYPES
@@ -174,9 +165,8 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
         renderer: debugInfo ? (gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) as string) : 'Unknown',
       });
 
-      // Note: AAA renderer would be created here if fully implemented
-      // For now, use basic Three.js renderer
-      aaaRendererRef.current = null;
+      // Instantiate real AAARenderer
+      aaaRendererRef.current = new AAARenderer(canvas, canvas.clientWidth, canvas.clientHeight);
 
       setIsInitialized(true);
     } catch (error) {

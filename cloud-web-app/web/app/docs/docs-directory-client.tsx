@@ -94,7 +94,9 @@ export default function DocsDirectoryClient({
       <section className="mx-auto mt-12 max-w-6xl px-6">
         <div className="grid gap-x-10 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
           {filteredSections.map((section) => {
-            const Icon = docIcons[section.icon]
+            const Icon = (typeof section.icon === 'string'
+              ? docIcons[section.icon as keyof typeof docIcons]
+              : section.icon) || Book
             return (
               <article
                 key={section.title}

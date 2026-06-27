@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import type { AIRequest, AIResponse } from './useTheiaSystemsHooks'
+import { getByokHeaders } from '@/lib/ai'
 
 // ==================== useAI Hook ====================
 
@@ -112,9 +113,13 @@ export function useAI(): UseAIReturn {
 
 async function callAIBackend(request: AIRequest, signal: AbortSignal): Promise<AIResponse> {
     try {
+        const byokHeaders = getByokHeaders();
         const response = await fetch('/api/ai/chat', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                ...byokHeaders
+            },
             body: JSON.stringify(request),
             signal,
         });
@@ -138,9 +143,13 @@ async function streamAIBackend(
     signal: AbortSignal
 ): Promise<AIResponse> {
     try {
+        const byokHeaders = getByokHeaders();
         const response = await fetch('/api/ai/stream', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                ...byokHeaders
+            },
             body: JSON.stringify(request),
             signal,
         });

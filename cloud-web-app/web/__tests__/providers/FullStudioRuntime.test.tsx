@@ -74,7 +74,7 @@ vi.mock('@/components/error/ErrorBoundary', () => ({
   ),
 }))
 
-vi.mock('@/components/Onboarding', () => ({
+vi.mock('@/components/onboarding/Onboarding', () => ({
   OnboardingProvider: ({
     children,
     enabled,
@@ -98,7 +98,7 @@ vi.mock('@/components/providers/CoreUiProviders', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div data-testid="core-ui-providers">{children}</div>,
 }))
 
-vi.mock('@/components/ServiceWorkerProvider', () => ({
+vi.mock('@/components/providers/ServiceWorkerProvider', () => ({
   ServiceWorkerProvider: (props: { children?: React.ReactNode; enabled?: boolean }) => serviceWorkerProviderSpy(props),
 }))
 

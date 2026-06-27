@@ -6,6 +6,7 @@ import { Suspense, useCallback, useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Environment, GizmoHelper, GizmoViewport, Grid, Line, OrbitControls } from '@react-three/drei'
 import { EffectComposer, Outline, Selection } from '@react-three/postprocessing'
+import { isNaniteViewportEnabled } from '@/lib/settings/engine-settings'
 import { CameraPresetApplier } from '@/components/viewport/ViewportCameraPresetApplier'
 import type { ViewportCameraPreset } from '@/components/viewport/viewport-camera-presets'
 import type {
@@ -75,14 +76,47 @@ export function ViewportScene({
   }, [objects, onObjectsChange])
 
   const cinematicGlowIntensity = creativeMode === 'film' ? 0.28 : 0.16
+  const naniteEnabled = isNaniteViewportEnabled()
 
   return (
-    <Canvas
-      shadows
-      camera={{ position: [3.8, 2.4, 4.8], fov: 46 }}
-      onPointerMissed={() => onSelectionChange([])}
-      className="h-full w-full"
-    >
+    <div className="relative h-full w-full">
+      {naniteEnabled && (
+        <div
+          className="aethel-beacon pointer-events-none absolute right-2 top-2 z-10 flex items-center gap-1 rounded px-1.5 py-0.5"
+          style={{
+            background: 'rgba(0,229,255,0.12)',
+            border: '1px solid rgba(0,229,255,0.35)',
+            backdropFilter: 'blur(8px)',
+          }}
+          aria-label="Nanite virtualized geometry active"
+        >
+          <span
+            className="relative flex h-1.5 w-1.5"
+          >
+            <span
+              className="absolute inset-0 animate-ping rounded-full"
+              style={{ background: '#00e5ff', opacity: 0.6 }}
+            />
+            <span
+              className="relative inline-flex h-1.5 w-1.5 rounded-full"
+              style={{ background: '#00e5ff' }}
+            />
+          </span>
+          <span
+            className="text-[9px] font-bold uppercase tracking-[0.14em]"
+            style={{ color: '#00e5ff' }}
+          >
+            Nanite
+          </span>
+        </div>
+      )}
+      <Canvas
+        shadows
+        camera={{ position: [3.8, 2.4, 4.8], fov: 46 }}
+        onPointerMissed={() => onSelectionChange([])}
+        className="h-full w-full"
+        data-aethel-nanite={naniteEnabled ? 'enabled' : 'disabled'}
+      >
       <CameraPresetApplier
         preset={cameraPreset}
         focusTarget={focusTarget}
@@ -151,5 +185,6 @@ export function ViewportScene({
         <GizmoViewport axisColors={['red', 'lime', 'deepskyblue']} labelColor="white" />
       </GizmoHelper>
     </Canvas>
+    </div>
   )
 }

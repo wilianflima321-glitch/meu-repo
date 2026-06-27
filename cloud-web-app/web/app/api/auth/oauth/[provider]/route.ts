@@ -57,6 +57,7 @@ export async function GET(
   { params }: { params: { provider: string } }
 ) {
   const provider = params.provider as Provider;
+  const nextTarget = req.nextUrl.searchParams.get('next');
   
   if (!OAUTH_PROVIDERS[provider]) {
     return NextResponse.json(
@@ -104,6 +105,15 @@ export async function GET(
     maxAge: 60 * 10, // 10 minutes
     path: '/',
   });
+  if (nextTarget) {
+    response.cookies.set('oauth_next', nextTarget, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 10, // 10 minutes
+      path: '/',
+    });
+  }
 
   return response;
 }

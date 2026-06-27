@@ -168,6 +168,7 @@ export interface AIChatPanelProps {
   onToggleLiveMode?: () => void
   liveStatus?: 'idle' | 'listening' | 'thinking' | 'speaking'
   allowAttachments?: boolean
+  onAgentSelect?: (agentId: string) => void
   projectId?: string
   codebaseContextPreview?: CodebaseContextPreview
 }

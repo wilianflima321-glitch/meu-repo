@@ -16,6 +16,7 @@ interface UseAIChatRunStateParams {
   isLoading: boolean
   models: ModelOption[]
   onInterrupt?: () => void
+  onAgentSelect?: (agentId: string) => void
   onRegenerateResponse?: AIChatPanelProps['onRegenerateResponse']
   onSendMessage?: AIChatPanelProps['onSendMessage']
   streamingContent: string
@@ -28,6 +29,7 @@ export function useAIChatRunState({
   models,
   onInterrupt,
   onRegenerateResponse,
+  onAgentSelect,
   onSendMessage,
   streamingContent,
 }: UseAIChatRunStateParams) {
@@ -121,7 +123,8 @@ export function useAIChatRunState({
 
   const handleAgentClick = useCallback((agentId: string) => {
     log.info('Agent clicked', { agentId })
-  }, [])
+    onAgentSelect?.(agentId)
+  }, [onAgentSelect])
 
   const handleLiveInterrupt = useCallback(() => {
     log.info('Live interrupt triggered')

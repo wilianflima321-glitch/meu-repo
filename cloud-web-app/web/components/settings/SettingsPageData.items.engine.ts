@@ -68,6 +68,17 @@ export const ENGINE_SETTING_ITEMS: SettingItem[] = [
     requiresReload: true,
   },
   {
+    id: 'engine.nanite.viewport',
+    label: 'Nanite-style meshlets (viewport)',
+    description: 'Enable virtualized geometry path in the browser viewport when hardware allows',
+    type: 'toggle',
+    value: false,
+    defaultValue: false,
+    category: 'engine',
+    subcategory: 'rendering',
+    requiresReload: true,
+  },
+  {
     id: 'engine.vsync',
     label: 'VSync',
     description: 'Enable vertical sync',

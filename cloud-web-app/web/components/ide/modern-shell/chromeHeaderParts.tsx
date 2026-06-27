@@ -178,7 +178,7 @@ export function HeaderWorkspaceControls({
   headerExtras,
   onOpenCommandPalette,
 }: HeaderWorkspaceControlsProps) {
-  // Mock state para visualização dos contextos da Wave 12.0
+  // Mock state for previewing Wave 12.0 contexts
   const activeWorkspace: string = 'CODE';
 
   return (

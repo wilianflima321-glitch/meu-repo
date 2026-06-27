@@ -8,6 +8,11 @@ import type {
   TerminalCommandResponse,
 } from './response-schemas';
 import type { AethelToolHandler } from './response-schemas';
+import { getGitService } from '@/lib/server/git-service';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 const fsAdapter: FileSystemAdapter = {
   readFile: (...args) => getFileSystemAdapter().readFile(...args),
@@ -271,86 +276,80 @@ async (args): Promise<MCPToolResult> => {
     };
 
     try {
-      const response = await fetch('/api/terminal/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command, cwd, timeout }),
-      });
-
-      const data = await response.json() as TerminalCommandResponse;
-
+      const safeCwd = cwd || process.cwd();
+      const { stdout, stderr } = await execAsync(command, { cwd: safeCwd, timeout });
       return {
         content: [{
           type: 'text',
-          text: data.output || data.error || 'Comando executado'
+          text: stdout || stderr || 'Comando executado com sucesso'
         }],
-        isError: !!data.error,
+        isError: !!stderr,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
-        content: [{ type: 'text', text: `Erro ao executar comando: ${error}` }],
+        content: [{ type: 'text', text: `Erro ao executar comando: ${error.message || error}` }],
         isError: true
       };
     }
   },
-async (): Promise<MCPToolResult> => {
+async (args): Promise<MCPToolResult> => {
+    const { cwd } = args as { cwd?: string };
     try {
-      const response = await fetch('/api/git/status');
-      const data = await response.json() as GitStatusResponse;
+      const safeCwd = cwd || process.cwd();
+      const git = getGitService(safeCwd);
+      const status = await git.getStatus();
 
-      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+      return { content: [{ type: 'text', text: JSON.stringify(status, null, 2) }] };
     } catch (error) {
-      return { content: [{ type: 'text', text: `Erro: ${error}` }], isError: true };
+      return { content: [{ type: 'text', text: `Erro ao obter status do Git: ${error}` }], isError: true };
     }
   },
 async (args): Promise<MCPToolResult> => {
-    const { file, staged } = args as { file?: string; staged?: boolean };
+    const { file, staged, cwd } = args as { file?: string; staged?: boolean; cwd?: string };
 
     try {
-      const response = await fetch('/api/git/status');
-      const data = await response.json() as GitStatusResponse;
+      const safeCwd = cwd || process.cwd();
+      const git = getGitService(safeCwd);
+      const diffs = await git.getDiff({ staged, path: file });
 
       let diffText = '';
-
-      if (data.staged?.length) {
-        diffText += '=== STAGED ===\n';
-        diffText += data.staged.map((f) => `${f.status}: ${f.path}`).join('\n');
-        diffText += '\n\n';
+      if (diffs.length === 0) {
+        return { content: [{ type: 'text', text: 'Nenhuma mudança' }] };
       }
 
-      if (data.unstaged?.length && !staged) {
-        diffText += '=== UNSTAGED ===\n';
-        diffText += data.unstaged.map((f) => `${f.status}: ${f.path}`).join('\n');
+      for (const diff of diffs) {
+        diffText += `diff --git a/${diff.oldPath} b/${diff.newPath}\n`;
+        if (diff.hunks) {
+          for (const hunk of diff.hunks) {
+            diffText += `@@ -${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@\n`;
+            for (const line of hunk.lines) {
+              diffText += line.content + '\n';
+            }
+          }
+        }
       }
 
       return { content: [{ type: 'text', text: diffText || 'Nenhuma mudança' }] };
     } catch (error) {
-      return { content: [{ type: 'text', text: `Erro: ${error}` }], isError: true };
+      return { content: [{ type: 'text', text: `Erro ao obter diff do Git: ${error}` }], isError: true };
     }
   },
 async (args): Promise<MCPToolResult> => {
-    const { message, files } = args as { message: string; files?: string };
+    const { message, files, cwd } = args as { message: string; files?: string; cwd?: string };
 
     try {
+      const safeCwd = cwd || process.cwd();
+      const git = getGitService(safeCwd);
+
       if (files) {
-        await fetch('/api/git/add', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ files: files.split(',').map(f => f.trim()) }),
-        });
+        await git.stage(files.split(',').map(f => f.trim()));
       }
 
-      const response = await fetch('/api/git/commit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message }),
-      });
+      const hash = await git.commit(message);
 
-      const data = await response.json() as GitCommitResponse;
-
-      return { content: [{ type: 'text', text: data.message || 'Commit criado' }] };
+      return { content: [{ type: 'text', text: `Commit criado com hash: ${hash}` }] };
     } catch (error) {
-      return { content: [{ type: 'text', text: `Erro: ${error}` }], isError: true };
+      return { content: [{ type: 'text', text: `Erro ao fazer commit no Git: ${error}` }], isError: true };
     }
   },
 async (args): Promise<MCPToolResult> => {

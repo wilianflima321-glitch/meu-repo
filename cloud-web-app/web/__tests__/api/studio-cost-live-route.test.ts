@@ -148,7 +148,7 @@ describe('api/studio/cost/live route', () => {
       'Saldo baixo: revise o plano, faca top-up ou reduza o custo por execucao antes de abrir novas trilhas longas.'
     )
     expect(payload.guidance).toContain(
-      'Checkout ainda nao esta pronto: trate upgrades e publish como bloqueados ate o runtime de billing ficar pronto.'
+      'Checkout is not ready yet: treat upgrades and publishing as blocked until billing runtime is ready.'
     )
   })
 })

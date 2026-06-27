@@ -158,6 +158,9 @@ export const TerminalPanel: React.FC = () => {
             </div>
           ))}
         </div>
+        <div className="terminal-honesty-gate" style={{ fontSize: '11px', color: '#eab308', border: '1px solid #eab308', padding: '2px 6px', borderRadius: '4px', marginRight: '8px', opacity: 0.8 }}>
+          Native Experimental
+        </div>
         <div className="terminal-actions">
           <button
             className="action-button"

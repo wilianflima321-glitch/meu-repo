@@ -15,7 +15,7 @@ describe('dashboard entry triage', () => {
     })
 
     expect(lane.label).toBe('Research')
-    expect(seed.targetTab).toBe('ai-chat')
+    expect(seed.targetTab).toBe('activity')
     expect(seed.showFirstValueGuide).toBe(true)
   })
 
@@ -27,8 +27,8 @@ describe('dashboard entry triage', () => {
       onboarding: true,
     })
 
-    expect(lane.targetTab).toBe('connectivity')
-    expect(seed.targetTab).toBe('connectivity')
+    expect(lane.targetTab).toBe('activity')
+    expect(seed.targetTab).toBe('activity')
     expect(seed.toast?.message).toMatch(/Cloud \/ DevOps/i)
   })
 
@@ -39,7 +39,7 @@ describe('dashboard entry triage', () => {
       onboarding: true,
     })
 
-    expect(seed.targetTab).toBe('ai-chat')
+    expect(seed.targetTab).toBe('activity')
     expect(seed.chatSeed).toMatch(/Fix the failing deployment/i)
     expect(seed.toast?.type).toBe('info')
   })

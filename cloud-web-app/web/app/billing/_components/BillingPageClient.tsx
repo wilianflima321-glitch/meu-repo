@@ -58,7 +58,7 @@ export function BillingPageClient() {
 
     setSelectedPlan(planId)
     try {
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('aethel-token')
       if (!token) {
         toast.warning('Sign in to continue with a subscription.')
         window.location.href = '/login'

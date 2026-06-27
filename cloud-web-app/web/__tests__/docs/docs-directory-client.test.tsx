@@ -63,15 +63,15 @@ describe('DocsDirectoryClient', () => {
   it('filters sections and quick links from the search query', () => {
     render(<DocsDirectoryClient sections={sections} quickLinks={quickLinks} />)
 
-    expect(screen.getByText(/2 secoes publicas organizadas/i)).toBeInTheDocument()
+    expect(screen.getByText(/2 sections/i)).toBeInTheDocument()
 
-    fireEvent.change(screen.getByPlaceholderText(/buscar guia, modulo, api ou superficie/i), {
+    fireEvent.change(screen.getByPlaceholderText(/Search docs/i), {
       target: { value: 'api' },
     })
 
-    expect(screen.getByText(/1 secoes e 1 resultados para "api"/i)).toBeInTheDocument()
+    expect(screen.getByText(/1 sections and 1 results for "api"/i)).toBeInTheDocument()
     expect(screen.getByText('Referencia da API')).toBeInTheDocument()
     expect(screen.queryByText('Primeiros passos')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /limpar busca/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Clear search/i })).toBeInTheDocument()
   })
 })

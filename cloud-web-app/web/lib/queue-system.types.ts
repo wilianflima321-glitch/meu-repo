@@ -106,17 +106,21 @@ export interface EmailJobData {
 }
 
 export interface ExportJobData {
+  jobId: string;
   projectId: string;
   userId: string;
-  format: 'zip' | 'html5' | 'electron';
-  options: Record<string, unknown>;
+  format: string;
+  quality?: string;
+  sceneIds?: string[];
+  options?: Record<string, unknown>;
 }
 
 export interface AssetJobData {
   assetId: string;
-  userId: string;
-  operation: 'process' | 'thumbnail' | 'optimize' | 'convert';
-  options: Record<string, unknown>;
+  storageKey: string;
+  userId?: string;
+  operation?: 'process' | 'thumbnail' | 'optimize' | 'convert';
+  options?: Record<string, unknown>;
 }
 
 export interface AIBatchJobData {

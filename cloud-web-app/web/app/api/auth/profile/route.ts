@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { createComponentLogger } from '@/lib/observability/logger';
 import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback';
+import { encryptString } from '@/lib/server/crypto';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,7 @@ export async function GET(req: NextRequest) {
         mfaEnabled: true,
         twoFactorEnabled: true,
         role: true,
+        byokKey: true,
         userPreferences: {
           select: {
             language: true,
@@ -62,6 +64,7 @@ export async function GET(req: NextRequest) {
         language: user.userPreferences?.language ?? 'pt-BR',
         theme: (prefs.theme as string) || undefined,
         timezone: (prefs.timezone as string) || undefined,
+        byokSet: !!user.byokKey,
         notifications: {
           email: user.userPreferences?.emailNotifications ?? true,
           push: user.userPreferences?.chatNotifications ?? false,
@@ -121,12 +124,19 @@ export async function PATCH(req: NextRequest) {
     const timezone = typeof body?.timezone === 'string' ? body.timezone.trim() : undefined;
     const notifications = typeof body?.notifications === 'object' && body?.notifications ? body.notifications : undefined;
 
-    if (name || avatar) {
+    const byokKey = body?.byokKey !== undefined ? body.byokKey : undefined;
+
+    if (name !== undefined || avatar !== undefined || byokKey !== undefined) {
+      const encryptedKey = (typeof byokKey === 'string' && byokKey.trim().length > 0)
+        ? encryptString(byokKey.trim())
+        : (byokKey === null || (typeof byokKey === 'string' && byokKey.trim().length === 0)) ? null : undefined;
+
       await prisma.user.update({
         where: { id: authUser.userId },
         data: {
           ...(name !== undefined ? { name } : {}),
           ...(avatar !== undefined ? { avatar } : {}),
+          ...(encryptedKey !== undefined ? { byokKey: encryptedKey } : {}),
         },
       });
     }
@@ -179,6 +189,7 @@ export async function PATCH(req: NextRequest) {
         mfaEnabled: true,
         twoFactorEnabled: true,
         role: true,
+        byokKey: true,
         userPreferences: {
           select: {
             language: true,
@@ -210,6 +221,7 @@ export async function PATCH(req: NextRequest) {
         language: updated.userPreferences?.language ?? 'pt-BR',
         theme: (prefs.theme as string) || undefined,
         timezone: (prefs.timezone as string) || undefined,
+        byokSet: !!updated.byokKey,
         notifications: {
           email: updated.userPreferences?.emailNotifications ?? true,
           push: updated.userPreferences?.chatNotifications ?? false,

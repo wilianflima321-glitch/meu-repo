@@ -13,6 +13,31 @@ import {
 
 const routeLogger = createComponentLogger('api.ai.query');
 
+const PROVIDER_HEADER_MAP: Record<string, string> = {
+  openai: 'x-aethel-byok-openai',
+  anthropic: 'x-aethel-byok-anthropic',
+  google: 'x-aethel-byok-google',
+  openrouter: 'x-aethel-byok-openrouter',
+  groq: 'x-aethel-byok-groq',
+};
+
+type LLMProvider = 'openai' | 'openrouter' | 'anthropic' | 'google' | 'groq';
+
+function inferProviderFromModel(model?: string): LLMProvider | undefined {
+  const raw = String(model || '').trim().toLowerCase()
+  if (!raw) return undefined
+  if (raw.startsWith('openrouter:')) return 'openrouter'
+  if (raw.startsWith('openai:')) return 'openai'
+  if (raw.startsWith('anthropic:')) return 'anthropic'
+  if (raw.startsWith('google:')) return 'google'
+  if (raw.startsWith('groq:')) return 'groq'
+  if (raw.startsWith('openai/') || raw.startsWith('anthropic/') || raw.startsWith('google/')) return 'openrouter'
+  if (raw.startsWith('gpt-')) return 'openai'
+  if (raw.startsWith('claude-')) return 'anthropic'
+  if (raw.startsWith('gemini-')) return 'google'
+  return undefined
+}
+
 /**
  * AI Query API - Conexão REAL com LLMs
  * POST /api/ai/query
@@ -44,10 +69,15 @@ export async function POST(req: NextRequest) {
     // =========================================
     
     // 1. Verificar quota de tokens (cap por request)
-    const userRow = await prisma.user.findUnique({ where: { id: user.userId }, select: { plan: true } });
+    const userRow = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { plan: true, byokKey: true }
+    });
     const limits = getPlanLimits(userRow?.plan || 'starter_trial');
     const estimatedTokens = Math.max(600, Math.ceil(String(query).length / 4) + 600);
-    if (estimatedTokens > limits.maxTokensPerRequest) {
+    const isByok = req.headers.get('x-aethel-byok-active') === '1' || !!userRow?.byokKey;
+
+    if (estimatedTokens > limits.maxTokensPerRequest && !isByok) {
       return NextResponse.json(
         {
           error: 'REQUEST_TOO_LARGE',
@@ -59,17 +89,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const quotaCheck = await checkAIQuota(user.userId, estimatedTokens);
-    if (!quotaCheck.allowed) {
-      return NextResponse.json({
-        error: quotaCheck.code,
-        message: quotaCheck.reason,
-        upgradeUrl: '/pricing',
-      }, { status: 429 }); // 429 = Too Many Requests
+    if (!isByok) {
+      const quotaCheck = await checkAIQuota(user.userId, estimatedTokens);
+      if (!quotaCheck.allowed) {
+        return NextResponse.json({
+          error: quotaCheck.code,
+          message: quotaCheck.reason,
+          upgradeUrl: '/pricing',
+        }, { status: 429 }); // 429 = Too Many Requests
+      }
     }
     
     // 2. Verificar acesso ao modelo solicitado
-    if (model) {
+    if (model && !isByok) {
       const modelCheck = await checkModelAccess(user.userId, model);
       if (!modelCheck.allowed) {
         // Mostrar modelos disponíveis no plano atual do usuário.
@@ -79,6 +111,24 @@ export async function POST(req: NextRequest) {
           availableModels: limits.models,
           upgradeUrl: '/pricing',
         }, { status: 403 });
+      }
+    }
+
+    // Resolve BYOK key
+    let byokKey: string | undefined = undefined;
+    if (isByok) {
+      const resolvedProvider = provider || inferProviderFromModel(model);
+      if (resolvedProvider) {
+        const headerName = PROVIDER_HEADER_MAP[resolvedProvider];
+        byokKey = req.headers.get(headerName) || req.headers.get('x-aethel-byok-key') || undefined;
+      }
+      if (!byokKey && userRow?.byokKey) {
+        try {
+          const { decryptString } = await import('@/lib/server/crypto');
+          byokKey = decryptString(userRow.byokKey);
+        } catch (e) {
+          routeLogger.error('Failed to decrypt database BYOK key', e);
+        }
       }
     }
 
@@ -102,17 +152,22 @@ export async function POST(req: NextRequest) {
     const response = await aiService.query(query, context, {
       provider,
       model,
+      userId: user.userId,
+      isBYOK: isByok,
+      apiKeyOverride: byokKey,
     });
 
     // =========================================
     // REGISTRAR USO COM SERVIÇO CENTRALIZADO
     // =========================================
     
-    try {
-      await recordTokenUsage(user.userId, response.tokensUsed);
-    } catch (dbError) {
-      routeLogger.warn('[AI Query] Failed to record usage', dbError);
-      // Não falhar a request por causa de erro de tracking
+    if (!isByok) {
+      try {
+        await recordTokenUsage(user.userId, response.tokensUsed);
+      } catch (dbError) {
+        routeLogger.warn('[AI Query] Failed to record usage', dbError);
+        // Não falhar a request por causa de erro de tracking
+      }
     }
 
     const evidence: NonNullable<AITraceSummary['evidence']> = [

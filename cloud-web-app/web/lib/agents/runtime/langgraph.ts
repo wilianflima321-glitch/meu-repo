@@ -1,44 +1,37 @@
-import { StateGraph, START, END } from '@langchain/langgraph'
+import { StateGraph, Annotation, START, END } from '@langchain/langgraph'
 import { BaseMessage, AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
 import { replaceFunctionBlockTool } from './tools/replace-function-block'
 import type { AgentType } from '@/lib/agent-orchestrator'
 
-export interface AgentGraphState {
-  messages: BaseMessage[]
-  role: AgentType
-  missionScope: string
-  currentPhase: 'planning' | 'coding' | 'verifying' | 'refactoring'
-  circuitBreakerTokens: number
-  astErrors: string[]
-}
-
-const graphStateChannels = {
-  messages: {
-    value: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
+export const StateAnnotation = Annotation.Root({
+  messages: Annotation<BaseMessage[]>({
+    reducer: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
     default: () => [],
-  },
-  role: {
-    value: (x: AgentType, y: AgentType) => y ?? x,
+  }),
+  role: Annotation<AgentType>({
+    reducer: (x: AgentType, y: AgentType) => y ?? x,
     default: () => 'engineer' as AgentType,
-  },
-  missionScope: {
-    value: (x: string, y: string) => y ?? x,
+  }),
+  missionScope: Annotation<string>({
+    reducer: (x: string, y: string) => y ?? x,
     default: () => '',
-  },
-  currentPhase: {
-    value: (x: string, y: string) => y ?? x,
+  }),
+  currentPhase: Annotation<string>({
+    reducer: (x: string, y: string) => y ?? x,
     default: () => 'planning',
-  },
-  circuitBreakerTokens: {
-    value: (x: number, y: number) => x + y,
+  }),
+  circuitBreakerTokens: Annotation<number>({
+    reducer: (x: number, y: number) => x + y,
     default: () => 0,
-  },
-  astErrors: {
-    value: (x: string[], y: string[]) => y,
+  }),
+  astErrors: Annotation<string[]>({
+    reducer: (x: string[], y: string[]) => y,
     default: () => [],
-  },
-}
+  }),
+})
+
+export type AgentGraphState = typeof StateAnnotation.State;
 
 // Node 1: Planner
 const planningNode = async (state: AgentGraphState) => {
@@ -82,7 +75,7 @@ const routeAfterVerification = (state: AgentGraphState) => {
 }
 
 export const buildAgentGraph = () => {
-  const workflow = new StateGraph({ channels: graphStateChannels })
+  const workflow = new StateGraph(StateAnnotation)
     .addNode('planningNode', planningNode)
     .addNode('codingNode', codingNode)
     .addNode('verifyingNode', verifyingNode)
@@ -105,7 +98,7 @@ export async function runAgentMission(role: AgentType, missionScope: string) {
   const result = await graph.invoke({
     role,
     missionScope,
-    messages: [new HumanMessage(\`Mission: \${missionScope}\`)],
+    messages: [new HumanMessage(`Mission: ${missionScope}`)],
   })
   return result
 }

@@ -3,6 +3,8 @@
  * Clusters large raw 3D meshes into 64-triangle meshlets during import.
  * This ensures that geometry rendering cost scales with screen resolution, not polycount.
  */
+import { logger } from '@/lib/observability/logger';
+
 export class MeshletBuilder {
   private maxVertices = 64;
   private maxTriangles = 126;
@@ -12,7 +14,7 @@ export class MeshletBuilder {
    * Uses spatial hashing or K-Means clustering algorithm.
    */
   public async buildMeshlets(vertices: Float32Array, indices: Uint32Array): Promise<any> {
-    console.log(`[Aethel Engine] Starting Meshlet clustering for ${indices.length / 3} triangles...`);
+    logger.info(`[Aethel Engine] Starting Meshlet clustering for ${indices.length / 3} triangles...`);
     
     const meshlets: any[] = [];
     const meshletVertices: any[] = [];
@@ -36,7 +38,7 @@ export class MeshletBuilder {
       meshletVertices.push(bounds); // Simplified storage
     }
     
-    console.log(`[Aethel Engine] Clustered into ${meshlets.length} meshlets.`);
+    logger.info(`[Aethel Engine] Clustered into ${meshlets.length} meshlets.`);
     
     return {
       meshlets,

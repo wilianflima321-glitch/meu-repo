@@ -11,6 +11,9 @@ import {
   Shield,
   Terminal,
   User,
+  Gamepad,
+  Volume2,
+  Eye,
 } from 'lucide-react'
 
 import type { SettingsCategory } from './SettingsPage.types'
@@ -38,6 +41,7 @@ export const SETTINGS_CATEGORIES: SettingsCategory[] = [
       { id: 'completion', label: 'Completion' },
       { id: 'chat', label: 'Chat' },
       { id: 'context', label: 'Context' },
+      { id: 'byok', label: 'Bring Your Own Key' },
     ],
   },
   {
@@ -62,6 +66,41 @@ export const SETTINGS_CATEGORIES: SettingsCategory[] = [
       { id: 'rendering', label: 'Rendering' },
       { id: 'particles', label: 'Particles' },
       { id: 'performance', label: 'Performance' },
+      { id: 'simulation', label: 'Simulation' },
+    ],
+  },
+  {
+    id: 'controls',
+    label: 'Controls & Inputs',
+    icon: <Gamepad className="w-4 h-4" />,
+    description: 'Configure game controls and keybindings',
+    subcategories: [
+      { id: 'gameplay', label: 'Gameplay Actions' },
+      { id: 'mouse', label: 'Mouse Settings' },
+      { id: 'gamepad', label: 'Gamepad Settings' },
+    ],
+  },
+  {
+    id: 'audio',
+    label: 'Audio',
+    icon: <Volume2 className="w-4 h-4" />,
+    description: 'Configure volumes and audio devices',
+    subcategories: [
+      { id: 'volumes', label: 'Volumes' },
+      { id: 'editor', label: 'Editor Sound' },
+      { id: 'device', label: 'Devices' },
+    ],
+  },
+  {
+    id: 'vr',
+    label: 'VR / XR',
+    icon: <Eye className="w-4 h-4" />,
+    description: 'Configure VR/XR settings',
+    subcategories: [
+      { id: 'general', label: 'General' },
+      { id: 'rendering', label: 'Rendering' },
+      { id: 'comfort', label: 'Comfort & Vignette' },
+      { id: 'input', label: 'XR Controllers' },
     ],
   },
   {

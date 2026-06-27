@@ -2,7 +2,7 @@
 
 Generated: deterministic local scan
 
-- Suspense boundaries: 33
+- Suspense boundaries: 34
 - Target: 30
 - Failures: 0
 
@@ -21,10 +21,11 @@ Generated: deterministic local scan
 - app/studio/film/FilmStudioClient.tsx: 4
 - app/studio/film/page.tsx: 1
 - app/studio/level/page.tsx: 1
+- app/studio/level/WorldStudioClient.tsx: 1
 - app/studio/page.tsx: 2
 - app/studio/quest/page.tsx: 1
-- app/studio/StudioGroupedEditorClient.tsx: 1
 - app/studio/vfx/page.tsx: 1
+- app/team/page.tsx: 1
 - app/verify-email/verify-email-content.tsx: 1
 - components/character/HairFurEditor.tsx: 1
 - components/dashboard/DashboardRoutingNotice.tsx: 1

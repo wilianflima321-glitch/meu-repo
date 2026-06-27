@@ -13,6 +13,7 @@
  */
 
 import { aiService } from '../ai-service';
+import { parseRepairedJson } from './json-repair';
 
 import { getModelRobustnessProfile } from './model-robustness-profiles'
 import { createComponentLogger } from '@/lib/observability/logger'
@@ -104,17 +105,27 @@ export class SelfReflectionEngine {
         temperature: 0,
         maxTokens: 700,
       });
-      const parsed = this.parseCheckResponse(response.content);
-      if (!parsed) {
-        log.warn(`[SelfReflection] ${label}: unparseable verifier response`);
-        return {
-          passed: false,
-          issues: [`${label}: verifier returned an unparseable response; treating as unverified.`],
-          suggestions: ['Retry the reflection or review the change manually.'],
-          score: 0.2,
-        };
+      
+      const record = await parseRepairedJson<Record<string, unknown>>(response.content, 'CheckOutcome: { passed: boolean, issues: string[], suggestions: string[], score: number }');
+      
+      if (typeof record.passed !== 'boolean') {
+        throw new Error('Missing boolean "passed" field');
       }
-      return parsed;
+
+      const toStringArray = (value: unknown): string[] =>
+        Array.isArray(value) ? value.map((entry) => String(entry)).filter(Boolean) : [];
+      const score =
+        typeof record.score === 'number' && record.score >= 0 && record.score <= 1
+          ? record.score
+          : record.passed
+            ? 0.8
+            : 0.3;
+      return {
+        passed: record.passed,
+        issues: toStringArray(record.issues),
+        suggestions: toStringArray(record.suggestions),
+        score,
+      };
     } catch (error) {
       log.error(`[SelfReflection] ${label} failed`, error instanceof Error ? error : undefined);
       return {
@@ -124,34 +135,6 @@ export class SelfReflectionEngine {
         score: 0,
       };
     }
-  }
-
-  private parseCheckResponse(content: string): CheckOutcome | null {
-    const match = content.match(/\{[\s\S]*\}/)
-    const repaired = match ? match[0] : content;
-    let raw: unknown;
-    try {
-      raw = JSON.parse(repaired);
-    } catch {
-      return null;
-    }
-    if (!raw || typeof raw !== 'object') return null;
-    const record = raw as Record<string, unknown>;
-    if (typeof record.passed !== 'boolean') return null;
-    const toStringArray = (value: unknown): string[] =>
-      Array.isArray(value) ? value.map((entry) => String(entry)).filter(Boolean) : [];
-    const score =
-      typeof record.score === 'number' && record.score >= 0 && record.score <= 1
-        ? record.score
-        : record.passed
-          ? 0.8
-          : 0.3;
-    return {
-      passed: record.passed,
-      issues: toStringArray(record.issues),
-      suggestions: toStringArray(record.suggestions),
-      score,
-    };
   }
 
   private async checkPhysicsAndLogic(action: ProposedAction, context: ProjectReflectionContext): Promise<CheckOutcome> {

@@ -7,6 +7,7 @@ import {
   fetchAiProviderStatus,
 } from '@/lib/ai-provider-status-client'
 import { isAuthenticated } from '@/lib/auth'
+import { syncAuthFromServer } from '@/lib/auth-session-sync'
 import { ONBOARDING_WIZARD_DISMISSED_KEY } from './aethel-dashboard-constants'
 import { coerceActiveTab } from './aethel-dashboard-core-types'
 import { getProjectIdFromLocation } from './aethel-dashboard-location-utils'
@@ -64,8 +65,15 @@ export function useDashboardRuntimeLifecycle({
   }, [authReady, hasToken, setShowOnboardingWizard, shouldShowFirstRunOnboarding])
 
   useEffect(() => {
-    setAuthReady(true)
-    setHasToken(isAuthenticated())
+    ;(async () => {
+      let isAuth = isAuthenticated()
+      if (!isAuth) {
+        isAuth = await syncAuthFromServer()
+      }
+      setHasToken(isAuth)
+      setAuthReady(true)
+    })()
+    
     setCopilotProjectId(getProjectIdFromLocation())
     trackEvent('engine', 'editor_open', { surface: 'dashboard' })
     analytics?.trackPageLoad?.('dashboard')

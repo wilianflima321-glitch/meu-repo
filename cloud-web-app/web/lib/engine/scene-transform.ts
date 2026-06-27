@@ -143,7 +143,7 @@ export class Transform {
   setNode(node: SceneNode): void {
     this._node = node;
   }
-  private markDirty(): void {
+  public markDirty(): void {
     this._dirty = true;
     if (this._node) {
       for (const child of this._node.children) {

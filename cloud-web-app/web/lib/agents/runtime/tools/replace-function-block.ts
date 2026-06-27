@@ -7,13 +7,13 @@ export const replaceFunctionBlockTool = tool(
     try {
       const content = fs.readFileSync(filePath, 'utf-8')
       if (!content.includes(targetContent)) {
-        return \`Error: targetContent not found in \${filePath}. Please provide the exact text you want to replace.\`
+        return `Error: targetContent not found in ${filePath}. Please provide the exact text you want to replace.`
       }
       const newContent = content.replace(targetContent, replacementContent)
       fs.writeFileSync(filePath, newContent, 'utf-8')
-      return \`Successfully replaced content in \${filePath}\`
+      return `Successfully replaced content in ${filePath}`
     } catch (e: any) {
-      return \`Error reading or writing to \${filePath}: \${e.message}\`
+      return `Error reading or writing to ${filePath}: ${e.message}`
     }
   },
   {

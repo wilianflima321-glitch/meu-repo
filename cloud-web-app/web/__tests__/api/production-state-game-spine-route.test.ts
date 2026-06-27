@@ -68,7 +68,7 @@ describe('api/projects/[id]/production-state/game-spine route', () => {
       browserRole: 'responsive-preview-and-review',
       heavyWorkPolicy: 'sidecar-or-cloud-only',
     })
-    expect(payload.contract.graphs).toHaveLength(12)
+    expect(payload.contract.graphs).toHaveLength(13)
     expect(payload.report.state).toBe('held')
     expect(payload.report.missingEvidence.length).toBeGreaterThan(0)
     expect(prismaMocks.prisma.project.update).not.toHaveBeenCalled()

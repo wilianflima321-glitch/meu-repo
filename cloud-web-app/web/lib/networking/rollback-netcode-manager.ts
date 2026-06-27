@@ -1,6 +1,7 @@
 // @aethel-heavy-async-boundary Studio/Multiplayer runtime
 import { EventEmitter } from 'events';
 import * as THREE from 'three';
+import { logger } from '@/lib/observability/logger';
 
 export interface PhysicsSnapshot {
   tick: number;
@@ -48,6 +49,24 @@ export class RollbackNetcodeManager extends EventEmitter {
     this.physicsEngineAdapter.step(1 / 60);
 
     this.currentTick++;
+
+    // 4. Purge stale inputs to prevent unbounded memory growth.
+    //    Any tick older than (currentTick - MAX_ROLLBACK_FRAMES) will never
+    //    be needed for a valid rollback window — safe to discard.
+    this.pruneInputBuffer();
+  }
+
+  /**
+   * Removes all inputBuffer entries that are outside the rollback window.
+   * Called every tick to keep memory O(MAX_ROLLBACK_FRAMES) instead of O(∞).
+   */
+  private pruneInputBuffer(): void {
+    const horizon = this.currentTick - this.MAX_ROLLBACK_FRAMES;
+    for (const tick of this.inputBuffer.keys()) {
+      if (tick < horizon) {
+        this.inputBuffer.delete(tick);
+      }
+    }
   }
 
   /**
@@ -70,12 +89,52 @@ export class RollbackNetcodeManager extends EventEmitter {
     this.serverTick = serverTick;
   }
 
+  /**
+   * Hard Sync: forces the client to teleport to the authoritative server snapshot.
+   * Called when the packet is too old for a normal rollback (> MAX_ROLLBACK_FRAMES).
+   *
+   * Steps:
+   *  1. Restore physics to the server-authoritative body state.
+   *  2. Align currentTick with the server tick so future ticks re-sync normally.
+   *  3. Clear the stale state buffer so no corrupted future rollbacks happen.
+   *  4. Emit 'hard-sync' for the viewport to do a snap-correction (no lerp).
+   */
+  private hardSync(serverTick: number, newInputs: PlayerInput[]): void {
+    logger.warn(`[Rollback] Hard Sync — client was ${this.currentTick - serverTick} frames behind. Snapping to tick ${serverTick}.`);
+
+    // Apply the authoritative inputs so they seed the new present
+    for (const input of newInputs) {
+      this.registerInput(serverTick, input);
+    }
+
+    // Restore physics bodies to server's authoritative positions
+    const snapshot = this.getSnapshotAt(serverTick);
+    if (snapshot) {
+      this.physicsEngineAdapter.restoreState(snapshot.bodies);
+    } else {
+      // If we have no snapshot (e.g. buffer was too old), trust the physics adapter
+      // to have received the body positions from the server message directly.
+      logger.warn('[Rollback] Hard Sync: no local snapshot available, physics bodies not restored — server should push full state.');
+    }
+
+    // Align tick counters — next tick() will continue from serverTick+1
+    this.currentTick = serverTick;
+    this.serverTick  = serverTick;
+
+    // Reset state buffer so no ghost rollbacks happen from corrupted future offsets
+    this.stateBuffer = new Array(this.MAX_ROLLBACK_FRAMES);
+
+    // Prune stale inputs immediately
+    this.pruneInputBuffer();
+
+    this.emit('hard-sync', { serverTick });
+  }
+
   private rollbackAndResimulate(targetTick: number, newInputs: PlayerInput[]): void {
     const framesToRollback = this.currentTick - targetTick;
     
     if (framesToRollback >= this.MAX_ROLLBACK_FRAMES) {
-      console.warn('[Rollback] Pacote muito antigo, desync forçado (teleporte).');
-      // Precisa fazer Hard Sync, não dá pra dar rollback.
+      this.hardSync(targetTick, newInputs);
       return;
     }
 

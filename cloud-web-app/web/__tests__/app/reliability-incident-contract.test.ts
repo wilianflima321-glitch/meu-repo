@@ -9,8 +9,8 @@ function read(path: string) {
 }
 
 describe('reliability incident response public contract', () => {
-  const page = read('cloud-web-app/web/app/reliability/page.tsx')
-  const trust = read('cloud-web-app/web/app/trust/page.tsx')
+  const page = read('cloud-web-app/web/app/reliability/page.tsx') + read('cloud-web-app/web/app/reliability/reliabilityContent.ts')
+  const trust = read('cloud-web-app/web/app/trust/page.tsx') + read('cloud-web-app/web/app/trust/trustContent.ts')
   const footer = read('cloud-web-app/web/components/ui/PublicFooter.tsx')
 
   it('publishes public status and incident grammar links', () => {
@@ -25,9 +25,9 @@ describe('reliability incident response public contract', () => {
 
   it('avoids fake SLA or uptime claims', () => {
     expect(page).toContain('response targets')
-    expect(page).toContain('nao e SLA contratual')
+    expect(page).toContain('not a contractual SLA')
     expect(page).toContain('No rolling uptime')
-    expect(page).toContain('Public incident history')
+    expect(page).toContain('public incident history')
     expect(page).not.toMatch(/\b99\.9+%/)
     expect(page).not.toMatch(/five nines/i)
     expect(page).not.toMatch(/SLA guaranteed/i)

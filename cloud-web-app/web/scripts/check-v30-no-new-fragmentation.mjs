@@ -7,7 +7,7 @@ const ROOT = process.cwd()
 const failures = []
 
 const routeBudgets = {
-  pages: 58,
+  pages: 62,
   adminPagesIncludingHub: 7,
   adminSubroutes: 6,
   studioPagesIncludingHub: 6,

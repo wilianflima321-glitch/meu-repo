@@ -22,7 +22,12 @@ export async function GET(req: NextRequest) {
     const user = requireAuth(req);
     await requireEntitlementsForUser(user.userId);
 
-    const [balanceAgg, entries] = await prisma.$transaction([
+    const userDb = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { plan: true }
+    });
+
+    const [balanceAgg, reservedAgg, usageAgg, entries] = await prisma.$transaction([
       prisma.creditLedgerEntry.aggregate({
         where: {
           userId: user.userId,
@@ -31,6 +36,22 @@ export async function GET(req: NextRequest) {
             { metadata: { equals: Prisma.JsonNull } },
             { NOT: { metadata: { path: ['settled'], equals: false } } },
           ],
+        },
+        _sum: { amount: true },
+      }),
+      prisma.creditLedgerEntry.aggregate({
+        where: {
+          userId: user.userId,
+          metadata: { path: ['settled'], equals: false },
+        },
+        _sum: { amount: true },
+      }),
+      prisma.creditLedgerEntry.aggregate({
+        where: {
+          userId: user.userId,
+          amount: { lt: 0 },
+          createdAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
+          entryType: 'usage'
         },
         _sum: { amount: true },
       }),
@@ -43,6 +64,10 @@ export async function GET(req: NextRequest) {
     ]);
 
     const currentBalance = balanceAgg._sum?.amount ?? 0;
+    const reservedRaw = reservedAgg._sum?.amount ?? 0;
+    const reserved = Math.abs(reservedRaw);
+    const available = currentBalance - reserved;
+    const monthlyUsage = Math.abs(usageAgg._sum?.amount ?? 0);
 
     let rolling = currentBalance;
     const transactions = entries.map((e) => {
@@ -65,6 +90,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       balance: currentBalance,
+      reserved,
+      available,
+      monthlyUsage,
+      plan: userDb?.plan || 'starter',
       currency: 'credits',
       transactions,
     });
@@ -77,6 +106,10 @@ export async function GET(req: NextRequest) {
         error,
         {
           balance: 0,
+          reserved: 0,
+          available: 0,
+          monthlyUsage: 0,
+          plan: 'starter',
           currency: 'credits',
           transactions: [],
           status: 'held',

@@ -78,12 +78,33 @@ class AIService {
    * Seleciona o melhor provider disponível
    */
   private selectProvider(): LLMProvider {
-    // Prioridade factual: OpenRouter (multi-provider padr?o) > Google > OpenAI > Anthropic
+    // Prioridade factual: OpenRouter (multi-provider padrão) > Google > OpenAI > Anthropic
     if (this.openrouter) return 'openrouter';
     if (this.google) return 'google';
     if (this.openai) return 'openai';
     if (this.anthropic) return 'anthropic';
     throw new Error('Nenhum provider de IA configurado. Configure ao menos uma API key no .env');
+  }
+
+  /** Returns the first provider for which a server-side API key is configured. */
+  private getFirstAvailableProvider(): LLMProvider | null {
+    if (this.openrouter) return 'openrouter';
+    if (this.google) return 'google';
+    if (this.openai) return 'openai';
+    if (this.anthropic) return 'anthropic';
+    return null;
+  }
+
+  /** True when the service has a server-side API key for the given provider. */
+  private hasServerKeyForProvider(provider: LLMProvider): boolean {
+    switch (provider) {
+      case 'openai': return Boolean(this.openai);
+      case 'openrouter': return Boolean(this.openrouter);
+      case 'anthropic': return Boolean(this.anthropic);
+      case 'google': return Boolean(this.google);
+      case 'groq': return Boolean(process.env.GROQ_API_KEY);
+      default: return false;
+    }
   }
   /**
    * Calcula custo estimado baseado no modelo e tokens
@@ -103,6 +124,51 @@ class AIService {
     options: AIQueryOptions = {}
   ): Promise<AIResponse> {
     const startTime = Date.now();
+
+    // =========================================================================
+    // PER-PROJECT AI MODEL PREFERENCE
+    // Reads the primary/fallback model from Project.settings.aiModel.
+    // Validates BYOK key compatibility before committing to a provider.
+    // =========================================================================
+    if (options.projectId && !options.model) {
+      try {
+        const project = await prisma.project.findUnique({
+          where: { id: options.projectId },
+          select: { settings: true },
+        });
+        if (project?.settings && typeof project.settings === 'object') {
+          const settings = project.settings as Record<string, unknown>;
+          const preferred = settings.aiModel as string | undefined;
+          const fallback = settings.aiModelFallback as string | undefined;
+          if (preferred) {
+            options.model = preferred;
+            log.info(`[ProjectRouting] Using project-preferred model: ${preferred}`, { projectId: options.projectId });
+
+            // BYOK compatibility check: if the preferred provider has no BYOK key
+            // and no server-side key is configured, fall back to an available provider.
+            const parsedPreferred = parseModelSelection(preferred);
+            const preferredProvider: LLMProvider = parsedPreferred.provider || this.selectProvider();
+            const hasServerKey = this.hasServerKeyForProvider(preferredProvider);
+            if (!hasServerKey && !options.apiKeyOverride) {
+              const availableProvider = this.getFirstAvailableProvider();
+              if (availableProvider && availableProvider !== preferredProvider) {
+                const effectiveModel = fallback
+                  ? fallback
+                  : this.getDefaultModel(availableProvider);
+                log.warn(
+                  `[ProjectRouting] BYOK key missing for "${preferredProvider}", falling back to "${availableProvider}":${effectiveModel}`,
+                  { projectId: options.projectId },
+                );
+                options.model = effectiveModel;
+                options.provider = availableProvider;
+              }
+            }
+          }
+        }
+      } catch (projErr) {
+        log.warn('[ProjectRouting] Failed to load project model settings', { error: String(projErr) });
+      }
+    }
 
     // Aethel Fusion: Inteligência de Roteamento
     let initialModel = options.model;
@@ -216,11 +282,17 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
       return response;
     } catch (error) {
       logger.error(`[AIService] Erro com provider ${provider}:`, error);
-      // Fallback para outro provider
+      // Fallback para outro provider — reset model to the default for the target
+      // provider so we don't send e.g. "gpt-4o-mini" to the Gemini API.
       const availableProviders = this.getAvailableProviders().filter(p => p !== provider);
       if (availableProviders.length > 0) {
-        log.info(`[AIService] Tentando fallback para ${availableProviders[0]}`);
-        return this.query(userQuery, context, { ...options, provider: availableProviders[0] });
+        const fallbackProvider = availableProviders[0];
+        log.info(`[AIService] Tentando fallback para ${fallbackProvider}`);
+        return this.query(userQuery, context, {
+          ...options,
+          provider: fallbackProvider,
+          model: this.getDefaultModel(fallbackProvider), // reset model for the new provider
+        });
       }
       throw error;
     }
@@ -322,13 +394,16 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
     options: AIQueryOptions,
     startTime: number
   ): Promise<AIResponse> {
-    if (!this.anthropic) {
+    const client = options.apiKeyOverride
+      ? new Anthropic({ apiKey: options.apiKeyOverride })
+      : this.anthropic;
+    if (!client) {
       throw new Error('Anthropic não configurado');
     }
     const model = options.model || 'claude-3-5-haiku-20241022';
     const systemMessage = messages.find(m => m.role === 'system');
     const userMessages = messages.filter(m => m.role !== 'system');
-    const response = await this.anthropic.messages.create({
+    const response = await client.messages.create({
       model,
       max_tokens: options.maxTokens ?? 2048,
       system: systemMessage?.content || '',
@@ -355,11 +430,14 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
     options: AIQueryOptions,
     startTime: number
   ): Promise<AIResponse> {
-    if (!this.google) {
+    const client = options.apiKeyOverride
+      ? new GoogleGenerativeAI(options.apiKeyOverride)
+      : this.google;
+    if (!client) {
       throw new Error('Google não configurado');
     }
     const model = options.model || 'gemini-1.5-flash';
-    const geminiModel = this.google.getGenerativeModel({ model });
+    const geminiModel = client.getGenerativeModel({ model });
     // Converter mensagens para formato Gemini
     const systemMessage = messages.find(m => m.role === 'system');
     const userMessages = messages.filter(m => m.role !== 'system');
@@ -369,11 +447,24 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
     ].join('\n\n');
     const result = await geminiModel.generateContent(prompt);
     const response = result.response;
+
+    // usageMetadata is populated by the Gemini SDK when the response is complete.
+    // promptTokenCount + candidatesTokenCount = total billed tokens.
+    const usage = response.usageMetadata;
+    const inputTokens  = usage?.promptTokenCount     ?? 0;
+    const outputTokens = usage?.candidatesTokenCount ?? 0;
+
+    // If the SDK didn't populate usageMetadata (older SDK version fallback),
+    // estimate from character counts (same heuristic used elsewhere in this file).
+    const tokensUsed = (inputTokens + outputTokens) > 0
+      ? inputTokens + outputTokens
+      : Math.ceil((prompt.length + response.text().length) / 4);
+
     return {
       content: response.text(),
       model,
       provider: 'google',
-      tokensUsed: 0, // Gemini não retorna contagem de tokens na API simples
+      tokensUsed,
       latencyMs: Date.now() - startTime,
     };
   }
@@ -389,8 +480,12 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
     maxTokens?: number;
     taskKind?: TaskKind;
     complexity?: TaskComplexity;
+    userId?: string;
+    apiKeyOverride?: string;
+    isBYOK?: boolean;
+    bypassEmergency?: boolean;
   }): Promise<AIResponse> {
-    const { messages, temperature, maxTokens, taskKind, complexity } = params;
+    const { messages, temperature, maxTokens, taskKind, complexity, userId, apiKeyOverride, isBYOK, bypassEmergency } = params;
 
     let initialModel = params.model;
     if (!initialModel && taskKind) {
@@ -422,7 +517,11 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
       maxTokens,
       systemPrompt: systemMessage?.content,
       taskKind,
-      complexity
+      complexity,
+      userId,
+      apiKeyOverride,
+      isBYOK,
+      bypassEmergency,
     });
   }
   /**
@@ -436,7 +535,9 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
     maxTokens?: number;
     taskKind?: TaskKind;
     complexity?: TaskComplexity;
-    userId?: string; // NOVO: Usado para cobrar a stream no BD
+    userId?: string;
+    apiKeyOverride?: string;
+    isBYOK?: boolean;
   }): AsyncGenerator<string, void, unknown> {
     let initialModel = params.model;
     if (!initialModel && params.taskKind) {
@@ -450,20 +551,23 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
     const parsedSelection = parseModelSelection(initialModel, params.provider);
     const provider = parsedSelection.provider || this.selectProvider();
     let model = parsedSelection.model || this.getDefaultModel(provider);
+    const isBYOK = params.isBYOK || !!params.apiKeyOverride;
     
     // --- FUSION ROUTER SHIELD --- (DEBT-AI-012)
-    const emergencyCheck = emergencyController.canMakeRequest(model, params.maxTokens || 2048);
-    if (!emergencyCheck.allowed) {
-      // Tentar fallback assim como no query normal
-      const cheapModel = this.openrouter ? EMERGENCY_FALLBACK_MODEL_ID : 'gpt-4o-mini';
-      const fallbackCheck = emergencyController.canMakeRequest(cheapModel, params.maxTokens || 2048);
-      if (!fallbackCheck.allowed) {
-        throw new Error(`[EMERGENCY MODE] ${emergencyCheck.reason}`);
+    if (!isBYOK) {
+      const emergencyCheck = emergencyController.canMakeRequest(model, params.maxTokens || 2048);
+      if (!emergencyCheck.allowed) {
+        // Tentar fallback assim como no query normal
+        const cheapModel = this.openrouter ? EMERGENCY_FALLBACK_MODEL_ID : 'gpt-4o-mini';
+        const fallbackCheck = emergencyController.canMakeRequest(cheapModel, params.maxTokens || 2048);
+        if (!fallbackCheck.allowed) {
+          throw new Error(`[EMERGENCY MODE] ${emergencyCheck.reason}`);
+        }
+        model = cheapModel;
+        logger.warn(`[AIService Stream] Emergency downgrade: ${initialModel} -> ${model}`);
+      } else if (emergencyCheck.model && emergencyCheck.model !== model) {
+        model = emergencyCheck.model;
       }
-      model = cheapModel;
-      logger.warn(`[AIService Stream] Emergency downgrade: ${initialModel} -> ${model}`);
-    } else if (emergencyCheck.model && emergencyCheck.model !== model) {
-      model = emergencyCheck.model;
     }
     
     // Apply Fusion / robustness hardening
@@ -477,58 +581,86 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
     let outputTokensCount = 0;
     
     try {
-      if (provider === 'openai' && this.openai) {
-        const stream = await this.openai.chat.completions.create({
-          model,
-          messages: hardenedMessages.map(m => ({
-            role: m.role as any,
-            content: m.content,
-          })),
-          temperature: temperature,
-          max_tokens: params.maxTokens ?? 2048,
-          stream: true,
-        });
-        for await (const chunk of stream) {
-          const content = chunk.choices[0]?.delta?.content;
-          if (content) {
-            outputTokensCount += Math.ceil(content.length / 4); // Estimativa rapida
-            yield content;
+      if (provider === 'openai') {
+        const client = params.apiKeyOverride
+          ? new OpenAI({ apiKey: params.apiKeyOverride })
+          : this.openai;
+        if (client) {
+          const stream = await client.chat.completions.create({
+            model,
+            messages: hardenedMessages.map(m => ({
+              role: m.role as any,
+              content: m.content,
+            })),
+            temperature: temperature,
+            max_tokens: params.maxTokens ?? 2048,
+            stream: true,
+          });
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content;
+            if (content) {
+              outputTokensCount += Math.ceil(content.length / 4); // Estimativa rapida
+              yield content;
+            }
           }
+        } else {
+          throw new Error('OpenAI client not configured');
         }
-      } else if (provider === 'openrouter' && this.openrouter) {
-        const stream = await this.openrouter.chat.completions.create({
-          model,
-          messages: hardenedMessages.map(m => ({
-            role: m.role as any,
-            content: m.content,
-          })),
-          temperature: temperature,
-          max_tokens: params.maxTokens ?? 2048,
-          stream: true,
-        });
-        for await (const chunk of stream) {
-          const content = chunk.choices[0]?.delta?.content;
-          if (content) {
-            outputTokensCount += Math.ceil(content.length / 4);
-            yield content;
+      } else if (provider === 'openrouter') {
+        const client = params.apiKeyOverride
+          ? new OpenAI({
+              apiKey: params.apiKeyOverride,
+              baseURL: 'https://openrouter.ai/api/v1',
+              defaultHeaders: {
+                'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+                'X-Title': 'Aethel Engine',
+              },
+            })
+          : this.openrouter;
+        if (client) {
+          const stream = await client.chat.completions.create({
+            model,
+            messages: hardenedMessages.map(m => ({
+              role: m.role as any,
+              content: m.content,
+            })),
+            temperature: temperature,
+            max_tokens: params.maxTokens ?? 2048,
+            stream: true,
+          });
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content;
+            if (content) {
+              outputTokensCount += Math.ceil(content.length / 4);
+              yield content;
+            }
           }
+        } else {
+          throw new Error('OpenRouter client not configured');
         }
-      } else if (provider === 'anthropic' && this.anthropic) {
-        const stream = await this.anthropic.messages.stream({
-          model,
-          max_tokens: params.maxTokens ?? 2048,
-          system: systemMessage?.content || '',
-          messages: userMessages.map(m => ({
-            role: m.role as 'user' | 'assistant',
-            content: m.content,
-          })),
-          temperature: temperature,
-        });
-        for await (const chunk of stream) {
-          if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
-            outputTokensCount += Math.ceil(chunk.delta.text.length / 4);
-            yield chunk.delta.text;
+      } else if (provider === 'anthropic') {
+        const client = params.apiKeyOverride
+          ? new Anthropic({ apiKey: params.apiKeyOverride })
+          : this.anthropic;
+        if (client) {
+          const stream = await client.messages.stream({
+            model,
+            max_tokens: params.maxTokens ?? 2048,
+            system: systemMessage?.content || '',
+            messages: userMessages.map(m => ({
+              role: m.role as 'user' | 'assistant',
+              content: m.content,
+            })),
+            temperature: temperature,
+          });
+          for await (const chunk of stream) {
+            if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+              outputTokensCount += Math.ceil(chunk.delta.text.length / 4);
+              yield chunk.delta.text;
+            }
           }
+        } else {
+          throw new Error('Anthropic client not configured');
         }
       } else {
         // Fallback: non-streaming response yielded all at once
@@ -538,7 +670,7 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
       }
     } finally {
       // Salva o gasto gerado pela stream! (Resolve DEBT-AI-012)
-      if (params.userId && outputTokensCount > 0) {
+      if (params.userId && outputTokensCount > 0 && !isBYOK) {
         // Estima inputTokens
         const inputTokensCount = Math.ceil(
           hardenedMessages.reduce((acc, m) => acc + (m.content?.length || 0), 0) / 4

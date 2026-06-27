@@ -1,7 +1,7 @@
 # BUNDLE_BOUNDARIES_AUDIT.md
 Generated: deterministic local scan
 
-- Files scanned: 2770
+- Files scanned: 2895
 - Failures: 0
 
 ## Counts
@@ -11,7 +11,7 @@ Generated: deterministic local scan
 - monacoEditorDirect: 0 (max 0)
 - monacoReactDirect: 0 (max 0)
 - framerMotionDirect: 0 (max 0)
-- dynamicImportsMin: 242 (min 100)
+- dynamicImportsMin: 261 (min 100)
 
 ## Top Offenders
 ### threeDirect
@@ -30,6 +30,7 @@ Generated: deterministic local scan
 ## Async Heavy Boundaries
 Files marked with @aethel-heavy-async-boundary are reported separately because they are split behind explicit dynamic boundaries and are not allowed to be imported by public route shells.
 ### threeDirect
+- components/engine/level-editor-physics-rapier.ts (1)
 - lib/aaa-asset-pipeline-runtime/importer.ts (1)
 - lib/aaa-asset-pipeline-runtime/optimizer.ts (1)
 - lib/aaa-material-system.ts (1)
@@ -47,14 +48,13 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/assets/asset-importer.ts (1)
 - lib/assets/asset-preview-mesh-runtime.tsx (1)
 - lib/assets/content-browser-loader.ts (1)
+- lib/audio/spatial-audio-occlusion.ts (1)
 - lib/audio/spatial-audio-source.ts (1)
+- lib/audio/spatial-audio-system.ts (1)
 - lib/character/control-rig-model.ts (1)
 - lib/character/ControlRigEditor.parts-runtime.tsx (1)
 - lib/character/FacialAnimationEditor.parts-runtime.tsx (1)
 - lib/character/HairFurEditor.parts-runtime.tsx (1)
-- lib/cinematic-lighting-probes.ts (1)
-- lib/cinematic-lighting-time-of-day.ts (1)
-- lib/cinematic-lighting.ts (1)
 ### reactThreeFiberDirect
 - lib/assets/asset-preview-mesh-runtime.tsx (1)
 - lib/camera/camera-system-react.tsx (1)
@@ -119,18 +119,34 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/editor/MonacoEditor.runtime.tsx (1)
 - lib/editor/MonacoEditorPro.runtime.tsx (1)
 ### framerMotionDirect
+- app/studio/SandboxVerificationHub.tsx (1)
+- components/agents/chat/CitationPill.tsx (1)
+- components/agents/chat/live/LiveSessionHUD.tsx (1)
+- components/agents/chat/ResearchProgressCard.tsx (1)
+- components/agents/chat/ResourceMonitorHUD.tsx (1)
+- components/viewport/ViewportContextMenu.tsx (1)
+- components/viewport/ViewportDropGhost.tsx (1)
+- components/visual-scripting/BlueprintsAIInput.tsx (1)
 - lib/ui/motion.tsx (1)
 - lib/ui/premium.tsx (1)
 
 ## Async Boundary Import References
+- components/engine/LocalAIModal.tsx statically imports @/lib/ai/local-inference-manager -> lib/ai/local-inference-manager.ts
+- components/ide/AIChatPanelPro.tsx statically imports @/components/agents/chat/live/LiveSessionHUD -> components/agents/chat/live/LiveSessionHUD.tsx
+- components/ide/AIChatPanelPro.tsx statically imports @/components/agents/chat/ResourceMonitorHUD -> components/agents/chat/ResourceMonitorHUD.tsx
+- components/nexus/AethelResearch.tsx statically imports @/components/agents/chat/ResearchProgressCard -> components/agents/chat/ResearchProgressCard.tsx
+- components/preview/SceneViewportStage.tsx statically imports @/components/viewport/ViewportContextMenu -> components/viewport/ViewportContextMenu.tsx
+- components/preview/SceneViewportStage.tsx statically imports @/components/viewport/ViewportDropGhost -> components/viewport/ViewportDropGhost.tsx
 - components/scene-editor/ScenePropertiesPanel.tsx statically imports ./scene-editor-models -> components/scene-editor/scene-editor-models.ts
 - components/viewport/AethelViewport3D.tsx statically imports @/lib/hooks/useRenderPipeline -> lib/hooks/useRenderPipeline.ts
+- components/visual-scripting/VisualScriptEditor.tsx statically imports ./BlueprintsAIInput -> components/visual-scripting/BlueprintsAIInput.tsx
 - lib/aaa-asset-pipeline-runtime/singletons.ts statically imports ./importer -> lib/aaa-asset-pipeline-runtime/importer.ts
 - lib/aaa-asset-pipeline-runtime/singletons.ts statically imports ./optimizer -> lib/aaa-asset-pipeline-runtime/optimizer.ts
 - lib/animation/animation-runtime/default-export.ts statically imports ./player -> lib/animation/animation-runtime/player.ts
 - lib/animation/animation-runtime/react.ts statically imports ./player -> lib/animation/animation-runtime/player.ts
 - lib/animation/animation-runtime/state-machine.ts statically imports ./player -> lib/animation/animation-runtime/player.ts
 - lib/assets/asset-importer.react.ts statically imports ./asset-importer -> lib/assets/asset-importer.ts
+- lib/audio/ai-soundscape-generator.ts statically imports ./spatial-audio-system -> lib/audio/spatial-audio-system.ts
 - lib/cloth-simulation-manager.ts statically imports ./cloth-simulation -> lib/cloth-simulation.ts
 - lib/cutscene/system/default-export.ts statically imports ./player -> lib/cutscene/system/player.ts
 - lib/cutscene/system/manager.ts statically imports ./player -> lib/cutscene/system/player.ts
@@ -143,6 +159,8 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/engine/asset-pipeline-runtime/manager.ts statically imports ./loaders -> lib/engine/asset-pipeline-runtime/loaders.ts
 - lib/engine/audio-group.ts statically imports ./audio-source -> lib/engine/audio-source.ts
 - lib/engine/audio-manager.ts statically imports ./audio-source -> lib/engine/audio-source.ts
+- lib/engine/useSceneDigest.ts statically imports ./scene-graph-manager -> lib/engine/scene-graph-manager.ts
+- lib/engine/useSceneGraph.ts statically imports ./scene-graph-manager -> lib/engine/scene-graph-manager.ts
 - lib/fluid-simulation-runtime/factories.ts statically imports ./flip -> lib/fluid-simulation-runtime/flip.ts
 - lib/fluid-simulation-runtime/factories.ts statically imports ./pbf -> lib/fluid-simulation-runtime/pbf.ts
 - lib/fluid-simulation-runtime/factories.ts statically imports ./sph -> lib/fluid-simulation-runtime/sph.ts
@@ -163,8 +181,6 @@ Files marked with @aethel-heavy-async-boundary are reported separately because t
 - lib/postprocessing/system/default-export.ts statically imports ./film-grain-pass -> lib/postprocessing/system/film-grain-pass.ts
 - lib/postprocessing/system/default-export.ts statically imports ./tonemapping-pass -> lib/postprocessing/system/tonemapping-pass.ts
 - lib/postprocessing/system/default-export.ts statically imports ./vignette-pass -> lib/postprocessing/system/vignette-pass.ts
-- lib/scene/scene-serializer-runtime/react.ts statically imports ./serializer -> lib/scene/scene-serializer-runtime/serializer.ts
-- lib/video-encoder-real.ts statically imports ./video-encoder-muxers -> lib/video-encoder-muxers.ts
 
 ## Public Route Import Violations
 - none

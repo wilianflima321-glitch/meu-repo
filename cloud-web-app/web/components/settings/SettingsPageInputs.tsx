@@ -87,6 +87,20 @@ function SettingText({ value, onChange }: SettingInputProps) {
   )
 }
 
+function SettingPassword({ value, onChange }: SettingInputProps) {
+  const textValue: number | string =
+    typeof value === 'number' || typeof value === 'string' ? value : ''
+
+  return (
+    <input
+      type="password"
+      value={textValue}
+      onChange={(event) => onChange(event.target.value)}
+      className="min-w-[300px] rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-3 py-1.5 text-sm text-[var(--aethel-text-primary)]"
+    />
+  )
+}
+
 function SettingSlider({ setting, value, onChange }: SettingInputProps) {
   const displayValue: number | string = typeof value === 'number' ? value : ''
 
@@ -113,6 +127,7 @@ const INPUT_COMPONENTS: Record<
   color: SettingText,
   keybinding: SettingText,
   number: SettingNumber,
+  password: SettingPassword,
   select: SettingSelect,
   slider: SettingSlider,
   text: SettingText,

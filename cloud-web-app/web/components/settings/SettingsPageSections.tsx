@@ -120,40 +120,65 @@ export function SettingsSidebar({
             <button
               type="button"
               onClick={() => onSelectCategory(category.id)}
-              className={`w-full flex items-center justify-between gap-3 rounded px-3 py-2 text-left transition-colors ${
+              className={`w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition-all duration-150 ${
                 selectedCategory === category.id && !selectedSubcategory
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)]'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_16%,transparent)] text-[var(--aethel-primary-light)] border border-[color-mix(in_srgb,var(--aethel-primary)_25%,transparent)]'
+                  : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] border border-transparent'
               }`}
             >
-              <span className="flex items-center gap-3">
-                {category.icon}
-                <span className="text-sm">{category.label}</span>
+              <span className="flex items-center gap-2.5">
+                <span className={selectedCategory === category.id ? 'text-[var(--aethel-primary-light)]' : ''}>{category.icon}</span>
+                <span className="text-sm font-medium">{category.label}</span>
               </span>
-              <span className="rounded-full bg-[var(--aethel-surface-tertiary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                selectedCategory === category.id
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+                  : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'
+              }`}>
                 {categoryCountLabel(category.visibleCount, category.count)}
               </span>
             </button>
 
             {selectedCategory === category.id && category.subcategories && (
-              <div className="ml-6 border-l border-[var(--aethel-border-primary)] mb-2">
-                {category.subcategories.map((subcategory) => (
-                  <button
-                    type="button"
-                    key={subcategory.id}
-                    onClick={() => onSelectSubcategory(category.id, subcategory.id)}
-                    className={`w-full flex items-center justify-between gap-2 px-4 py-1.5 text-left text-sm transition-colors ${
-                      selectedSubcategory === subcategory.id
-                        ? 'text-[var(--aethel-info-light)]'
-                        : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]'
-                    }`}
-                  >
-                    <span>{subcategory.label}</span>
-                    <span className="text-[10px] text-[var(--aethel-text-quaternary)]">
-                      {categoryCountLabel(subcategory.visibleCount, subcategory.count)}
-                    </span>
-                  </button>
-                ))}
+              <div className="mx-2 mb-2 mt-0.5 space-y-0.5">
+                {category.subcategories.map((subcategory) => {
+                  const isActive = selectedSubcategory === subcategory.id
+                  return (
+                    <button
+                      type="button"
+                      key={subcategory.id}
+                      onClick={() => onSelectSubcategory(category.id, subcategory.id)}
+                      className={`
+                        group w-full flex items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-left text-xs
+                        font-medium transition-all duration-150
+                        ${isActive
+                          ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_14%,transparent)] text-[var(--aethel-primary-light)] border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]'
+                          : 'text-[var(--aethel-text-quaternary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)] border border-transparent'}
+                      `}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span
+                          className={`h-1.5 w-1.5 shrink-0 rounded-full transition-colors ${
+                            isActive
+                              ? 'bg-[var(--aethel-neon-cyan)]'
+                              : 'bg-[var(--aethel-border-primary)] group-hover:bg-[var(--aethel-text-tertiary)]'
+                          }`}
+                          aria-hidden
+                        />
+                        {subcategory.label}
+                      </span>
+                      {(subcategory.count ?? 0) > 0 && (
+                        <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none transition-colors ${
+                          isActive
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_22%,transparent)] text-[var(--aethel-primary-light)]'
+                            : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)]'
+                        }`}>
+                          {subcategory.count}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>

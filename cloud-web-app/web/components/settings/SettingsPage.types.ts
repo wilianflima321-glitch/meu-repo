@@ -5,6 +5,7 @@ export type SettingInputType =
   | 'select'
   | 'number'
   | 'text'
+  | 'password'
   | 'color'
   | 'keybinding'
   | 'slider'

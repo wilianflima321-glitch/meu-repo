@@ -1,4 +1,5 @@
 import type { PluginAPI, PluginPermission } from './plugin-system.types'
+import { logger } from '@/lib/observability/logger'
 
 export class PluginSandbox {
   private allowedGlobals: Set<string>;
@@ -33,6 +34,12 @@ export class PluginSandbox {
       
       // Delete dangerous globals
       const dangerous = ['indexedDB', 'caches', 'importScripts', 'Worker', 'SharedWorker', 'XMLHttpRequest'];
+      ${this.permissions.includes('network') ? '' : `
+      const netDangerous = ['fetch', 'Request', 'Headers', 'Response'];
+      for (const n of netDangerous) {
+        try { delete self[n]; } catch(e) {}
+      }
+      `}
       for (const d of dangerous) {
         try { delete self[d]; } catch(e) {}
       }
@@ -90,9 +97,9 @@ export class PluginSandbox {
     this.worker.onmessage = async (e) => {
       const msg = e.data;
       if (msg.type === 'console') {
-        if (msg.level === 'error') console.error('[Plugin Worker]', ...msg.args);
-        else if (msg.level === 'warn') console.warn('[Plugin Worker]', ...msg.args);
-        else console.log('[Plugin Worker]', ...msg.args);
+        if (msg.level === 'error') logger.error('[Plugin Worker]', ...msg.args);
+        else if (msg.level === 'warn') logger.warn('[Plugin Worker]', ...msg.args);
+        else logger.info('[Plugin Worker]', ...msg.args);
       } 
       else if (msg.type === 'api_call') {
         try {
@@ -119,9 +126,6 @@ export class PluginSandbox {
   }
 
   createContext(): Record<string, unknown> {
-    // Legacy support: We no longer need to manually pass context objects
-    // because the Worker inherently isolates the memory.
-    // The API is proxied via MessageChannel.
     return { api: this.api };
   }
 
@@ -133,7 +137,20 @@ export class PluginSandbox {
     this.initWorker();
     return new Promise((resolve, reject) => {
       const executeId = ++this.callIdCounter;
-      this.pendingCalls.set(executeId, { resolve, reject });
+      
+      const timeoutId = setTimeout(() => {
+        if (this.pendingCalls.has(executeId)) {
+          this.pendingCalls.delete(executeId);
+          this.dispose();
+          reject(new Error('Plugin execution timeout: plugin execution exceeded 5 seconds.'));
+        }
+      }, 5000);
+
+      this.pendingCalls.set(executeId, {
+        resolve: (val) => { clearTimeout(timeoutId); resolve(val); },
+        reject:  (err) => { clearTimeout(timeoutId); reject(err); },
+      });
+
       this.worker!.postMessage({ type: 'execute', executeId, code });
     });
   }
@@ -143,6 +160,10 @@ export class PluginSandbox {
       this.worker.terminate();
       this.worker = null;
     }
+    for (const call of this.pendingCalls.values()) {
+      call.reject(new Error('Plugin execution terminated: sandbox was disposed.'));
+    }
+    this.pendingCalls.clear();
   }
 }
 

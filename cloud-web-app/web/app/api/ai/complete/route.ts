@@ -17,6 +17,29 @@ import { AI_INLINE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-co
 import { applyProjectRulesToMessages, loadProjectRulesContext } from '@/lib/server/project-rules'
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
 import { createComponentLogger } from '@/lib/observability/logger';
+
+const PROVIDER_HEADER_MAP: Record<string, string> = {
+  openai: 'x-aethel-byok-openai',
+  anthropic: 'x-aethel-byok-anthropic',
+  google: 'x-aethel-byok-google',
+  openrouter: 'x-aethel-byok-openrouter',
+  groq: 'x-aethel-byok-groq',
+};
+
+function inferProviderFromModel(model?: string): LLMProvider | undefined {
+  const raw = String(model || '').trim().toLowerCase()
+  if (!raw) return undefined
+  if (raw.startsWith('openrouter:')) return 'openrouter'
+  if (raw.startsWith('openai:')) return 'openai'
+  if (raw.startsWith('anthropic:')) return 'anthropic'
+  if (raw.startsWith('google:')) return 'google'
+  if (raw.startsWith('groq:')) return 'groq'
+  if (raw.startsWith('openai/') || raw.startsWith('anthropic/') || raw.startsWith('google/')) return 'openrouter'
+  if (raw.startsWith('gpt-')) return 'openai'
+  if (raw.startsWith('claude-')) return 'anthropic'
+  if (raw.startsWith('gemini-')) return 'google'
+  return undefined
+}
 import {
   applyAgentHandoffContextToMessages,
   loadAgentHandoffContext,
@@ -138,11 +161,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ suggestion: '' })
     }
 
-    const userRow = await prisma.user.findUnique({ where: { id: user.userId }, select: { plan: true } })
+    const userRow = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { plan: true, byokKey: true }
+    });
     const limits = getPlanLimits(userRow?.plan || 'starter_trial')
 
     const estimatedTokens = Math.max(300, Math.ceil(prompt.length / 4) + 300 + maxTokens)
-    if (estimatedTokens > limits.maxTokensPerRequest) {
+    const isByok = req.headers.get('x-aethel-byok-active') === '1' || !!userRow?.byokKey;
+
+    if (estimatedTokens > limits.maxTokensPerRequest && !isByok) {
       return NextResponse.json(
         {
           error: 'REQUEST_TOO_LARGE',
@@ -153,15 +181,35 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const quotaCheck = await checkAIQuota(user.userId, estimatedTokens)
-    if (!quotaCheck.allowed) {
-      return NextResponse.json({ error: quotaCheck.code, message: quotaCheck.reason }, { status: 429 })
+    if (!isByok) {
+      const quotaCheck = await checkAIQuota(user.userId, estimatedTokens)
+      if (!quotaCheck.allowed) {
+        return NextResponse.json({ error: quotaCheck.code, message: quotaCheck.reason }, { status: 429 })
+      }
     }
 
-    if (model) {
+    if (model && !isByok) {
       const modelCheck = await checkModelAccess(user.userId, model)
       if (!modelCheck.allowed) {
         return NextResponse.json({ error: modelCheck.code, message: modelCheck.reason }, { status: 403 })
+      }
+    }
+
+    // Resolve BYOK key
+    let byokKey: string | undefined = undefined;
+    if (isByok) {
+      const resolvedProvider = provider || inferProviderFromModel(model);
+      if (resolvedProvider) {
+        const headerName = PROVIDER_HEADER_MAP[resolvedProvider];
+        byokKey = req.headers.get(headerName) || req.headers.get('x-aethel-byok-key') || undefined;
+      }
+      if (!byokKey && userRow?.byokKey) {
+        try {
+          const { decryptString } = await import('@/lib/server/crypto');
+          byokKey = decryptString(userRow.byokKey);
+        } catch (e) {
+          logger.error('Failed to decrypt database BYOK key', e);
+        }
       }
     }
 
@@ -251,9 +299,14 @@ export async function POST(req: NextRequest) {
       model,
       temperature,
       maxTokens,
+      userId: user.userId,
+      isBYOK: isByok,
+      apiKeyOverride: byokKey,
     })
 
-    recordTokenUsage(user.userId, response.tokensUsed).catch(() => {})
+    if (!isByok) {
+      recordTokenUsage(user.userId, response.tokensUsed).catch(() => {})
+    }
 
     const suggestion = normalizeCompletion(response.content)
     return NextResponse.json({

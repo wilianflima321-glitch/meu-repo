@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import { CreativeWorkbenchShell } from '@/components/studio/CreativeWorkbenchShell'
 import StudioEngineModuleMiniPanel from '@/components/studio/StudioEngineModuleMiniPanel'
+import { RenderQueueDashboard } from '@/components/assets/RenderQueueDashboard'
+import { AssetBrowserPanel } from '@/components/studio/AssetBrowserPanel'
 import {
   getGroupTools,
   resolveActiveTool,
@@ -178,6 +180,8 @@ export default function FilmStudioClient() {
       viewport={viewport}
       timeline={timeline}
       inspector={inspector}
+      renderQueue={<RenderQueueDashboard />}
+      assetBrowser={<AssetBrowserPanel />}
     />
   )
 }

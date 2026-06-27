@@ -12,8 +12,9 @@ import {
   type ProviderStatusResponse,
 } from './_components/SettingsAIProvidersPanel'
 import AccountDataPanel from './_components/AccountDataPanel'
+import { BYOKVaultPanel } from '@/components/settings/BYOKVaultPanel'
 
-type Tab = 'overview' | 'editor' | 'profile' | 'security' | 'billing' | 'api'
+type Tab = 'overview' | 'editor' | 'profile' | 'security' | 'billing' | 'api' | 'engine'
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview')
@@ -49,7 +50,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     const queryTab = new URLSearchParams(window.location.search).get('tab')
-    if (queryTab === 'overview' || queryTab === 'editor' || queryTab === 'profile' || queryTab === 'security' || queryTab === 'billing' || queryTab === 'api') {
+    if (queryTab === 'overview' || queryTab === 'editor' || queryTab === 'profile' || queryTab === 'security' || queryTab === 'billing' || queryTab === 'api' || queryTab === 'engine') {
       setActiveTab(queryTab)
     }
   }, [])
@@ -70,6 +71,7 @@ export default function SettingsPage() {
       { id: 'security' as const, label: 'Security', description: '2FA, recovery, and account hardening' },
       { id: 'billing' as const, label: 'Billing', description: 'Plan, subscription, and usage' },
       { id: 'api' as const, label: 'AI providers', description: 'Provider status and setup' },
+      { id: 'engine' as const, label: 'Engine', description: 'Simulation, controls, audio, VR, Nanite' },
       { id: 'editor' as const, label: 'Advanced editor', description: 'Editor and engine controls' },
     ],
     []
@@ -137,6 +139,21 @@ export default function SettingsPage() {
             />
           )}
 
+            {activeTab === 'engine' && (
+              <div className="p-4 sm:p-6">
+                <h2 className="text-lg font-semibold">Engine settings</h2>
+                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">
+                  Configure simulation physics, camera controls, audio, VR, and Nanite rendering. These settings
+                  apply to the active project&apos;s viewport and playtest sessions.
+                </p>
+                <div className="mt-4 overflow-hidden rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40">
+                  <SettingsProvider>
+                    <SettingsUI className="min-h-[720px]" initialCategoryFilter="Engine" />
+                  </SettingsProvider>
+                </div>
+              </div>
+            )}
+
             {activeTab === 'editor' && (
               <div className="p-4 sm:p-6">
                 <h2 className="text-lg font-semibold">Advanced editor settings</h2>
@@ -177,6 +194,16 @@ export default function SettingsPage() {
                 </div>
                 <UserAuditLogPanel />
                 <AccountDataPanel />
+
+                {/* BYOK — Bring Your Own Key (AI provider key vault) */}
+                <div className="mt-6 border-t border-[var(--aethel-border-primary)] pt-6">
+                  <h3 className="mb-1 text-base font-semibold">AI key vault (BYOK)</h3>
+                  <p className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
+                    Store your own OpenAI or Anthropic key. When configured, all AI requests route through your key
+                    and bypass the platform billing ledger.
+                  </p>
+                  <BYOKVaultPanel />
+                </div>
               </div>
             )}
 

@@ -242,7 +242,18 @@ export function CreativeWorkbenchShell({
       data-creative-workbench={mode.toLowerCase()}
     >
       {/* -- Header ---------------------------------------------------------- */}
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-3 py-2">
+      <header
+        className="relative flex shrink-0 flex-wrap items-center justify-between gap-2 border-b px-3 py-2"
+        style={{
+          background: 'rgba(10,14,24,0.85)',
+          backdropFilter: 'blur(16px) saturate(150%)',
+          WebkitBackdropFilter: 'blur(16px) saturate(150%)',
+          borderColor: 'rgba(148,163,184,.12)',
+          boxShadow: 'inset 0 -1px 0 rgba(255,255,255,.04)',
+        }}
+      >
+        {/* Neon top accent line */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(59,130,246,.35)] to-transparent" />
         <div className="flex min-w-0 flex-col">
           <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-quaternary)]">
             {mode} workbench
@@ -285,8 +296,14 @@ export function CreativeWorkbenchShell({
         {leftOpen && (
           <>
             <aside
-              className="hidden shrink-0 flex-col gap-2 overflow-y-auto border-r border-[var(--aethel-border-subtle)] p-2 lg:flex"
-              style={{ width: st.leftW }}
+              className="hidden shrink-0 flex-col gap-2 overflow-y-auto p-2 lg:flex aethel-panel-enter-left"
+              style={{
+                width: st.leftW,
+                background: 'rgba(10,14,24,0.78)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                borderRight: '1px solid rgba(148,163,184,.10)',
+              }}
               aria-label="Left panels"
             >
               {outliner && st.outliner && (
@@ -354,8 +371,14 @@ export function CreativeWorkbenchShell({
               onKeyDelta={resizeRight}
             />
             <aside
-              className="hidden shrink-0 flex-col gap-2 overflow-y-auto border-l border-[var(--aethel-border-subtle)] p-2 lg:flex"
-              style={{ width: st.rightW }}
+              className="hidden shrink-0 flex-col gap-2 overflow-y-auto p-2 lg:flex aethel-panel-enter-right"
+              style={{
+                width: st.rightW,
+                background: 'rgba(10,14,24,0.78)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                borderLeft: '1px solid rgba(148,163,184,.10)',
+              }}
               aria-label="Right panels"
             >
               {inspector && st.inspector && (

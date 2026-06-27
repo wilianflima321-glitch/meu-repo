@@ -59,13 +59,17 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
     return (
       <div
         className={`
-          flex flex-col h-full bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-lg overflow-hidden
-          ${isMaximized ? 'fixed inset-0 z-50' : ''}
+          flex flex-col h-full
+          aethel-glass
+          border border-[var(--aethel-glass-border)]
+          rounded-xl overflow-hidden
+          ${isMaximized ? 'fixed inset-0 z-50 rounded-none border-0' : ''}
           ${className}
         `}
         role="application"
         aria-label="Terminal"
       >
+        {/* ── Tab / session header ── */}
         <TerminalSessionHeader
           sessions={sessions}
           activeSessionId={activeSessionId}
@@ -73,9 +77,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
           showSearch={showSearch}
           isMaximized={isMaximized}
           onSelectSession={switchSession}
-          onCloseSession={(sessionId) => {
-            void closeSession(sessionId);
-          }}
+          onCloseSession={(sessionId) => { void closeSession(sessionId); }}
           onRenameSession={renameSession}
           onCreateSession={(shellPath) => createSession(undefined, shellPath)}
           onToggleSearch={toggleSearch}
@@ -83,6 +85,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
           onClosePanel={onClose}
         />
 
+        {/* ── Search bar ── */}
         {showSearch && (
           <SearchBar
             onSearch={search}
@@ -92,10 +95,18 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
           />
         )}
 
+        {/* ── xterm.js canvas mount point ── */}
         <div
           ref={containerRef}
-          className="flex-1 p-2 overflow-hidden"
+          className="
+            flex-1 min-h-0 overflow-hidden
+            p-2
+            bg-[#090d13]
+            font-mono
+          "
+          style={{ fontSize }}
           onClick={focusTerminal}
+          aria-label="Terminal output"
         />
       </div>
     );

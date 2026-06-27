@@ -1,5 +1,7 @@
 pub mod contracts;
 pub mod daemon;
+pub mod geometry_clusterizer;
+pub mod gi_sdf;
 pub mod jobs;
 pub mod native_kernel;
 pub mod policy;

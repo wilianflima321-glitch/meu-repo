@@ -22,68 +22,71 @@ export function SettingsCategorySidebar({
   onToggleCategory,
 }: SettingsCategorySidebarProps) {
   return (
-    <div className="w-56 overflow-y-auto border-r border-[var(--aethel-border-primary)]">
-      <div className="border-b border-[var(--aethel-border-primary)] px-3 py-3">
+    <div
+      className="w-52 flex-shrink-0 overflow-y-auto"
+      style={{ borderRight: '1px solid rgba(148,163,184,.10)', background: 'rgba(8,11,20,0.60)' }}
+    >
+      <div className="px-2 py-3" style={{ borderBottom: '1px solid rgba(148,163,184,.08)' }}>
         <button
           type="button"
           onClick={() => onSelectCategory(null)}
-          className={`flex w-full items-center justify-between rounded px-3 py-2 text-sm transition-colors ${
+          className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${
             !activeCategoryId
-              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-              : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)]/50 hover:text-[var(--aethel-text-primary)]'
+              ? 'bg-[rgba(59,130,246,.18)] text-[var(--aethel-primary-light)] border border-[rgba(59,130,246,.28)]'
+              : 'text-[var(--aethel-text-tertiary)] hover:bg-[rgba(255,255,255,.04)] hover:text-[var(--aethel-text-primary)] border border-transparent'
           }`}
         >
           <span>All settings</span>
-          <span className="rounded-full bg-[var(--aethel-surface-tertiary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em]">
+          <span className="rounded-full px-1.5 py-0 text-[9px] font-mono tabular-nums" style={{ background: 'rgba(255,255,255,.08)' }}>
             {categories.reduce((total, category) => total + (category.count || 0), 0)}
           </span>
         </button>
       </div>
       {categories.map(category => (
         <div key={category.id}>
-          <div className="flex items-center gap-1 px-2 py-1">
+          <div className="flex items-center gap-0.5 px-2 py-0.5">
             <button
               type="button"
               onClick={() => onToggleCategory(category.id)}
               aria-label={`Toggle ${category.label}`}
-              className="rounded p-1 text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)]/50 hover:text-[var(--aethel-text-primary)]"
+              className="rounded p-1 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] transition-colors"
             >
               {expandedCategories.has(category.id) ? (
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-3 w-3" />
               ) : (
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3 w-3" />
               )}
             </button>
             <button
               type="button"
               onClick={() => onSelectCategory(category.id)}
-              className={`flex min-w-0 flex-1 items-center justify-between rounded px-2 py-1.5 text-sm transition-colors ${
+              className={`flex min-w-0 flex-1 items-center justify-between rounded-md px-2 py-1 text-xs font-medium transition-all ${
                 activeCategoryId === category.id && !activeChildId
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)]/50 hover:text-[var(--aethel-text-primary)]'
+                  ? 'border-l-2 border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] bg-[rgba(56,189,248,.10)] pl-1.5 text-[var(--aethel-info-light)]'
+                  : 'border border-transparent text-[var(--aethel-text-secondary)] hover:bg-[rgba(255,255,255,.04)] hover:text-[var(--aethel-text-primary)]'
               }`}
             >
               <span className="truncate">{category.label}</span>
-              <span className="ml-2 rounded-full bg-[var(--aethel-surface-tertiary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em]">
+              <span className="ml-2 text-[9px] font-mono text-[var(--aethel-text-quaternary)] tabular-nums">
                 {category.count || 0}
               </span>
             </button>
           </div>
           {expandedCategories.has(category.id) && category.children && (
-            <div className="pb-1 pl-6">
+            <div className="pb-1 pl-7">
               {category.children.map(child => (
                 <button
                   type="button"
                   key={child.id}
                   onClick={() => onSelectChild(category.id, child.id)}
-                  className={`flex w-full items-center justify-between rounded px-3 py-1.5 text-left text-sm transition-colors ${
+                  className={`flex w-full items-center justify-between rounded-md px-2 py-1 text-left text-[11px] transition-all ${
                     activeCategoryId === category.id && activeChildId === child.id
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)] text-[var(--aethel-info-light)]'
-                      : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)]/50 hover:text-[var(--aethel-text-primary)]'
+                      ? 'bg-[rgba(34,211,238,.12)] text-cyan-300 border border-[rgba(34,211,238,.20)]'
+                      : 'text-[var(--aethel-text-quaternary)] hover:bg-[rgba(255,255,255,.04)] hover:text-[var(--aethel-text-secondary)] border border-transparent'
                   }`}
                 >
                   <span className="truncate">{child.label}</span>
-                  <span className="ml-2 rounded-full bg-[var(--aethel-surface-tertiary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em]">
+                  <span className="ml-2 text-[9px] font-mono text-[var(--aethel-text-quaternary)] tabular-nums">
                     {child.count || 0}
                   </span>
                 </button>

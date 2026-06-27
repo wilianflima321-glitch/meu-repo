@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiClient, APIError } from '../lib/api-client';
+import { syncAuthFromServer } from '../lib/auth-session-sync';
 import { User } from '../types';
 
 interface AuthContextType {
@@ -38,6 +39,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           apiClient.logout();
           setUser(null);
           setToken(null);
+        }
+      } else {
+        // Se o localStorage estiver vazio, tenta fazer login silencioso via cookie HTTP-only
+        const synced = await syncAuthFromServer();
+        if (synced) {
+           const storedToken = localStorage.getItem('aethel-token');
+           if (storedToken) {
+             setToken(storedToken);
+             try {
+               const profile = await apiClient.getProfile();
+               setUser(profile);
+             } catch(e) {
+               console.warn('Failed to load profile after sync', e);
+             }
+           }
         }
       }
       setIsLoading(false);

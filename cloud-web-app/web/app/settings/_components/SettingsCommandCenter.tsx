@@ -4,7 +4,7 @@ import Link from 'next/link'
 import type { Dispatch, SetStateAction } from 'react'
 import { CANONICAL_FOCUS } from '@/lib/canonical-spacing'
 
-type SettingsTab = 'overview' | 'editor' | 'profile' | 'security' | 'billing' | 'api'
+type SettingsTab = 'overview' | 'editor' | 'profile' | 'security' | 'billing' | 'api' | 'engine'
 
 type SettingsCommandCenterProps = {
   configuredProviders: number

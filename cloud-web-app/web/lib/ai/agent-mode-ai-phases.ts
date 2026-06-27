@@ -1,4 +1,5 @@
-import { agentLlmChat } from './agent-llm-bridge';
+import { parseRepairedJson } from './json-repair';
+import { aiService } from '../ai-service';
 import type {
   AgentAction,
   AgentPlan,
@@ -13,9 +14,7 @@ import { EXECUTOR_PROMPT, PLANNER_PROMPT, REFLECTOR_PROMPT } from './agent-mode-
 
 type AddStep = (taskId: string, type: AgentStep['type'], content: string) => AgentStep;
 
-function parseJsonObject<T>(raw: string): T {
-  return JSON.parse(raw) as T;
-}
+
 
 export async function planAgentTask(params: {
   addStep: AddStep;
@@ -27,8 +26,8 @@ export async function planAgentTask(params: {
   const { addStep, onPlanned, task, thinkingBudget, tools } = params;
   const step = addStep(task.id, 'plan', 'Analyzing task and creating plan...');
 
-  const response = await agentLlmChat({
-    kind: 'planning',
+  const response = await aiService.chat({
+    taskKind: 'planning',
     messages: [
       { role: 'system', content: PLANNER_PROMPT },
       {
@@ -36,18 +35,16 @@ export async function planAgentTask(params: {
         content: `TASK: ${task.description}\n\nAVAILABLE TOOLS:\n${tools.map((tool) => `- ${tool.name}: ${tool.description}`).join('\n')}`,
       },
     ],
-    options: { temperature: 0.3, maxTokens: thinkingBudget, budget: 'balanced' },
+    temperature: 0.3,
+    maxTokens: thinkingBudget,
   });
 
   try {
-    const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('Invalid plan format');
-
-    const plan = parseJsonObject<AgentPlan>(jsonMatch[0]);
+    const plan = await parseRepairedJson<AgentPlan>(response.content, 'AgentPlan: { subtasks: [...], analysis: string, ... }');
     step.content = `Plan created: ${plan.subtasks.length} subtasks`;
     onPlanned(plan);
     return plan;
-  } catch {
+  } catch (error) {
     return {
       analysis: 'Simple task, direct execution',
       approach: 'Sequential execution',
@@ -82,23 +79,21 @@ export async function thinkAgentNextStep(params: {
     .replace('{tools}', tools.map((tool) => `- ${tool.name}: ${tool.description}\n  Input: ${JSON.stringify(tool.inputSchema)}`).join('\n\n'))
     .replace('{memory}', memory.map((entry) => `- [${entry.type}] ${entry.content}`).join('\n'));
 
-  const response = await agentLlmChat({
-    kind: 'tool-use',
+  const response = await aiService.chat({
+    taskKind: 'tool-use',
     messages: [
       { role: 'system', content: prompt },
       { role: 'user', content: 'What is the next step?' },
     ],
-    options: { temperature: 0.2, maxTokens: 2000, budget: 'balanced' },
+    temperature: 0.2,
+    maxTokens: 2000,
   });
 
   try {
-    const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('Invalid thinking format');
-
-    const thinking = parseJsonObject<AgentThinking>(jsonMatch[0]);
+    const thinking = await parseRepairedJson<AgentThinking>(response.content, 'AgentThinking: { thinking: string, action: { ... }, nextSteps: [...] }');
     step.content = thinking.thinking;
     return thinking;
-  } catch {
+  } catch (error) {
     return {
       thinking: 'Failed to process thinking',
       action: {
@@ -128,23 +123,21 @@ export async function reflectAgentAction(params: {
     .replace('{result}', JSON.stringify(result))
     .replace('{history}', history);
 
-  const response = await agentLlmChat({
-    kind: 'critic',
+  const response = await aiService.chat({
+    taskKind: 'critic',
     messages: [
       { role: 'system', content: prompt },
       { role: 'user', content: 'Analyze the result and decide the next step.' },
     ],
-    options: { temperature: 0.2, maxTokens: 1500, budget: 'max-quality' },
+    temperature: 0.2,
+    maxTokens: 1500,
   });
 
   try {
-    const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('Invalid reflection format');
-
-    const reflection = parseJsonObject<AgentReflection>(jsonMatch[0]);
+    const reflection = await parseRepairedJson<AgentReflection>(response.content, 'AgentReflection: { assessment: string, success: boolean, issues: [...], ... }');
     step.content = reflection.assessment;
     return reflection;
-  } catch {
+  } catch (error) {
     return {
       assessment: 'Failed to process reflection',
       success: false,

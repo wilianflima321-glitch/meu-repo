@@ -24,7 +24,8 @@
       "@/*": ["./*"],
       "@/components/*": ["./components/*"],
       "@/lib/*": ["./lib/*"],
-      "@/contexts/*": ["./contexts/*"]
+      "@/contexts/*": ["./contexts/*"],
+      "@aethel/runtime-contracts": ["../../packages/runtime-contracts/src/index.ts"]
     },
     "plugins": [
       {

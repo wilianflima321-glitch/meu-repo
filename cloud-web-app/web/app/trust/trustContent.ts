@@ -126,7 +126,7 @@ export const trustResources: TrustResource[] = [
   {
     eyebrow: 'Reliability',
     title: 'Reliability',
-    description: 'Incidents, response targets, and SLA limits.',
+    description: 'Incidents, response targets, and SLO/SLA limits.',
     href: '/reliability',
   },
   {

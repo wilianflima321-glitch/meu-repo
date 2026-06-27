@@ -1,7 +1,7 @@
 'use client'
 
 import type { Attachment, ChatThread, ToolCall } from './AIChatPanelPro.types'
-import { X, History, Zap, CheckCircle2, AlertTriangle, Loader2, Circle } from 'lucide-react'
+import { X, History, Zap, CheckCircle2, AlertTriangle, Loader2, Circle, ChevronDown } from 'lucide-react'
 
 type AttachmentPreviewProps = {
   attachment: Attachment
@@ -165,74 +165,109 @@ type ThinkingDisplayProps = {
 }
 
 export function ThinkingDisplay({ thinking, isExpanded, onToggle, steps }: ThinkingDisplayProps) {
-  // Parse thinking into steps if not provided
   const parsedSteps = steps || parseThinkingSteps(thinking)
+  const completedCount = parsedSteps.filter(s => s.status === 'completed').length
+  const hasActive = parsedSteps.some(s => s.status === 'in_progress')
 
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-expanded={isExpanded}
-      className="mb-2 w-full rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-3 py-2 text-left text-xs text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+    <div className="relative mb-2 overflow-hidden rounded-xl text-left text-xs aethel-neon-topline-cyan"
+      style={{
+        background: 'rgba(8,12,22,0.90)',
+        border: '1px solid rgba(34,211,238,.18)',
+        boxShadow: 'inset 0 0 24px rgba(34,211,238,.04), 0 4px 16px rgba(0,0,0,.40)',
+      }}
     >
-      <div className="flex items-center justify-between">
+      {/* Header toggle */}
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isExpanded}
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-inset"
+      >
         <div className="flex items-center gap-2">
-          <Loader2 className="h-3 w-3 animate-spin text-[var(--aethel-info-light)]" />
-          <span className="font-medium text-[var(--aethel-text-primary)]">Reasoning trace</span>
+          {hasActive ? (
+            <span className="aethel-beacon flex h-2 w-2 text-cyan-400 flex-shrink-0">
+              <span className="block h-2 w-2 rounded-full bg-cyan-400" />
+            </span>
+          ) : (
+            <CheckCircle2 className="h-3 w-3 text-emerald-400 flex-shrink-0" />
+          )}
+          <span className="font-semibold text-[var(--aethel-text-primary)] tracking-tight">Reasoning trace</span>
+          <span className="aethel-tag-reflection">
+            {completedCount}/{parsedSteps.length} steps
+          </span>
         </div>
-        <div className="flex items-center gap-1 text-[10px] text-[var(--aethel-text-tertiary)]">
-          {parsedSteps.filter(s => s.status === 'completed').length}/{parsedSteps.length} steps
-        </div>
-      </div>
+        <ChevronDown className={`h-3.5 w-3.5 text-[var(--aethel-text-quaternary)] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+      </button>
 
       {/* Steps Timeline */}
-      <div className="mt-2 space-y-1">
-        {parsedSteps.slice(0, isExpanded ? undefined : 3).map((step, index) => {
-          const StepIcon = step.status === 'completed' ? CheckCircle2
-                        : step.status === 'in_progress' ? Loader2
-                        : step.status === 'failed' ? AlertTriangle
-                        : Circle
+      <div className="px-3 pb-2 space-y-0.5">
+        {parsedSteps.slice(0, isExpanded ? undefined : 3).map((step) => {
+          const isActive = step.status === 'in_progress'
+          const isDone   = step.status === 'completed'
+          const isFailed = step.status === 'failed'
 
           return (
-            <div key={step.id} className="flex items-start gap-2">
-              <div className="mt-0.5">
-                {step.status === 'in_progress' ? (
-                  <Loader2 className="h-3 w-3 animate-spin text-[var(--aethel-info-light)]" />
+            <div
+              key={step.id}
+              className={`flex items-start gap-2.5 py-1 rounded-r-md transition-colors ${
+                isActive ? 'aethel-step-active' : isDone ? 'aethel-step-done' : 'aethel-step-pending'
+              }`}
+            >
+              <div className="mt-0.5 flex-shrink-0">
+                {isActive ? (
+                  <Loader2 className="h-3 w-3 animate-spin text-cyan-400" />
+                ) : isDone ? (
+                  <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                ) : isFailed ? (
+                  <AlertTriangle className="h-3 w-3 text-red-400" />
                 ) : (
-                  <StepIcon className={`h-3 w-3 ${
-                    step.status === 'completed' ? 'text-[var(--aethel-success-light)]'
-                    : step.status === 'failed' ? 'text-[var(--aethel-error-light)]'
-                    : 'text-[var(--aethel-text-quaternary)]'
-                  }`} />
+                  <Circle className="h-3 w-3 text-[var(--aethel-text-quaternary)]" />
                 )}
               </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <span className={`text-[10px] ${
-                    step.status === 'completed' ? 'text-[var(--aethel-text-primary)]'
-                    : step.status === 'in_progress' ? 'text-[var(--aethel-info-light)] font-medium'
-                    : 'text-[var(--aethel-text-tertiary)]'
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <span className={`text-[11px] leading-tight ${
+                    isActive ? 'text-cyan-300 font-medium'
+                    : isDone ? 'text-[var(--aethel-text-primary)]'
+                    : isFailed ? 'text-red-300'
+                    : 'text-[var(--aethel-text-quaternary)]'
                   }`}>
                     {step.title}
                   </span>
-                  {step.duration && (
-                    <span className="text-[9px] text-[var(--aethel-text-quaternary)]">{step.duration}ms</span>
-                  )}
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {isDone && (
+                      <span className="aethel-tag-reflection">✓ done</span>
+                    )}
+                    {step.duration != null && (
+                      <span className="text-[9px] font-mono text-[var(--aethel-text-quaternary)]">{step.duration}ms</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           )
         })}
+
+        {!isExpanded && parsedSteps.length > 3 && (
+          <button
+            type="button"
+            onClick={onToggle}
+            className="text-[10px] text-[var(--aethel-text-quaternary)] hover:text-cyan-400 transition-colors py-0.5"
+          >
+            +{parsedSteps.length - 3} more steps…
+          </button>
+        )}
       </div>
 
       {isExpanded && (
-        <div className="mt-3 pt-2 border-t border-[var(--aethel-border-secondary)]">
-          <div className="text-[11px] text-[var(--aethel-text-tertiary)] whitespace-pre-wrap font-mono">
+        <div className="mx-3 mb-3 mt-1 pt-2 border-t border-[var(--aethel-border-secondary)]">
+          <div className="text-[11px] text-[var(--aethel-text-tertiary)] whitespace-pre-wrap font-mono leading-relaxed">
             {thinking}
           </div>
         </div>
       )}
-    </button>
+    </div>
   )
 }
 

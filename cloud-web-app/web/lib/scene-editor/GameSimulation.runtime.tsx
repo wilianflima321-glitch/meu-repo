@@ -6,6 +6,11 @@ import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SceneObject } from '@/components/scene-editor/SceneEditor';
 import { PhysicsWorld, RigidBodyConfig, ColliderConfig, initPhysicsEngine } from '@/lib/physics-engine-real';
+import {
+  getSimulationTargetFps,
+  getSimulationTimeDilation,
+  isSimulationGodMode,
+} from '@/lib/settings/engine-settings';
 
 interface GameSimulationProps {
   objects: SceneObject[];
@@ -99,9 +104,16 @@ export function GameSimulation({ objects }: GameSimulationProps) {
 
   useFrame((state, dt) => {
     if (!physicsWorld.current) return;
+    if (isSimulationGodMode()) return;
 
-    // Step Physics
-    physicsWorld.current.step(dt);
+    const dilation = getSimulationTimeDilation();
+    const targetFps = getSimulationTargetFps();
+    const stepSize = (1 / targetFps) * dilation;
+    const steps = Math.max(1, Math.round(dt / stepSize));
+
+    for (let i = 0; i < steps; i += 1) {
+      physicsWorld.current.step(stepSize);
+    }
 
     // Sync Physics -> Scene
     bodyMap.current.forEach((body, id) => {

@@ -206,6 +206,21 @@ class MeshletSystem {
   }
 
   /**
+   * Request LOD swap for a specific mesh
+   */
+  requestLodSwap(meshId: string, lodLevel: number): void {
+    if (this.worker) {
+      this.worker.postMessage({
+        type: 'swap-lod',
+        meshId,
+        lodLevel
+      });
+    } else {
+      logger.warn('[MeshletSystem] Worker not available for LOD swap');
+    }
+  }
+
+  /**
    * Terminate the worker
    */
   dispose(): void {

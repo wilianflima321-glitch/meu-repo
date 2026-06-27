@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import type { FileItem } from '@/components/ide/CommandPalette';
+import { useAethelContext } from '@/contexts/AethelContextRegistry';
 import { analytics } from '@/lib/analytics';
 import {
   getAuthHeaders,
@@ -43,6 +44,11 @@ export function useWorkbenchFiles({
   const [initialFileResolved, setInitialFileResolved] = useState(false);
   const [workspaceFiles, setWorkspaceFiles] = useState<FileItem[]>([]);
   const [workspaceFilesLoaded, setWorkspaceFilesLoaded] = useState(false);
+  const { setActiveFile: setAethelActiveFile } = useAethelContext();
+
+  useEffect(() => {
+    setAethelActiveFile(activeFile?.path ?? null);
+  }, [activeFile?.path, setAethelActiveFile]);
 
   const readFile = useCallback(
     async (path: string, targetPane: EditorPane = 'primary') => {

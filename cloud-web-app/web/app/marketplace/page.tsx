@@ -20,7 +20,7 @@ import {
   MarketplaceInstallReview,
   type MarketplaceTrustFilter,
 } from './marketplace-page.parts'
-import type { MarketplaceInstallFeedback } from './marketplace-page.types'
+import { useMarketplaceInstall } from './use-marketplace-install'
 
 function hasMarketplaceSort(value: string): value is MarketplaceSort {
   return MARKETPLACE_SORT_OPTIONS.some((option) => option.value === value)
@@ -37,8 +37,13 @@ export default function MarketplacePage() {
   const [sortBy, setSortBy] = useState<MarketplaceSort>('evidence')
   const [trustFilter, setTrustFilter] = useState<MarketplaceTrustFilter>('verified')
   const [reviewingExtensionId, setReviewingExtensionId] = useState<string | null>(null)
-  const [installPending, setInstallPending] = useState(false)
-  const [installFeedback, setInstallFeedback] = useState<MarketplaceInstallFeedback | null>(null)
+  
+  const { installPending, installFeedback, setInstallFeedback, handleInstall, handleUninstall } = useMarketplaceInstall(
+    extensions,
+    setExtensions,
+    setReviewingExtensionId
+  )
+  
   const normalizedSearch = normalizeSearch(searchQuery)
 
   // Load the canonical "Catálogo Vivo": built-ins + curated packages with the
@@ -107,93 +112,6 @@ export default function MarketplacePage() {
   const handleRequestInstall = (extensionId: string) => {
     setInstallFeedback(null)
     setReviewingExtensionId(extensionId)
-  }
-
-  const redirectToLogin = (extensionId: string) => {
-    const next = encodeURIComponent(`/marketplace?install=${extensionId}`)
-    window.location.assign(`/login?next=${next}`)
-  }
-
-  const handleInstall = async (extensionId: string) => {
-    if (installPending) return
-    setInstallPending(true)
-    setInstallFeedback(null)
-
-    try {
-      const response = await fetch('/api/marketplace/install', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ extensionId }),
-      })
-
-      // Logged-out users are bounced to login (preserving their install intent).
-      if (response.status === 401) {
-        redirectToLogin(extensionId)
-        return
-      }
-
-      if (response.ok) {
-        setExtensions((prev) =>
-          prev.map((extension) =>
-            extension.id === extensionId ? { ...extension, installed: true } : extension,
-          ),
-        )
-        setInstallFeedback({ type: 'success', message: 'Installed. The extension is now active for your account.' })
-        setTimeout(() => {
-          setReviewingExtensionId(null)
-          setInstallFeedback(null)
-        }, 1200)
-        return
-      }
-
-      // Honest failure states — no placebo success.
-      const data = (await response.json().catch(() => null)) as { error?: string; message?: string } | null
-      if (response.status === 404) {
-        setInstallFeedback({
-          type: 'info',
-          message: 'This extension is in curated preview and is not yet available to install.',
-        })
-        return
-      }
-      // Entitlement gates throw FEATURE_NOT_AVAILABLE → 402; some flows use 403.
-      if (response.status === 402 || response.status === 403) {
-        setInstallFeedback({
-          type: 'error',
-          message: data?.error || data?.message || 'Your plan does not include marketplace installs yet.',
-        })
-        return
-      }
-      setInstallFeedback({
-        type: 'error',
-        message: data?.error || data?.message || 'Install failed. Please try again.',
-      })
-    } catch {
-      setInstallFeedback({ type: 'error', message: 'Network error. Check your connection and try again.' })
-    } finally {
-      setInstallPending(false)
-    }
-  }
-
-  const handleUninstall = async (extensionId: string) => {
-    // Optimistic flip with rollback on failure — honest, no silent no-op.
-    const previous = extensions
-    setExtensions((prev) => prev.map((extension) => (extension.id === extensionId ? { ...extension, installed: false } : extension)))
-    try {
-      const response = await fetch('/api/marketplace/uninstall', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ extensionId }),
-      })
-      if (response.status === 401) {
-        redirectToLogin(extensionId)
-        return
-      }
-      if (!response.ok) {
-        setExtensions(previous)
-      }
-    } catch {
-      setExtensions(previous)
-    }
   }
 
   const handleCancelReview = () => {

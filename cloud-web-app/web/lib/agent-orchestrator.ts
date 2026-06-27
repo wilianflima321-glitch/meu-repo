@@ -6,7 +6,7 @@
  * instead of generating static guidance strings.
  */
 
-import { agentLlmChat } from '@/lib/ai/agent-llm-bridge'
+import { aiService } from '@/lib/ai-service'
 import { resolveTaskKindForRole } from '@/lib/ai/fusion-role-map'
 
 export const AGENT_ROLE_PROFILES = {
@@ -435,17 +435,14 @@ export class AgentOrchestrator {
       ORCHESTRATOR_DISCLAIMER,
     ].join('\n')
 
-    const result = await agentLlmChat({
-      kind: fusionConfig.taskKind,
+    const result = await aiService.chat({
+      taskKind: fusionConfig.taskKind,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: prompt },
       ],
-      options: {
-        budget: fusionConfig.budget,
-        maxTokens: 2000,
-        temperature: 0.3,
-      },
+      maxTokens: 2000,
+      temperature: 0.3,
     })
 
     return result.content

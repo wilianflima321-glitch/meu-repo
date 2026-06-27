@@ -63,13 +63,13 @@ describe('PreviewRuntimeToolbar', () => {
     const { rerender } = render(<PreviewRuntimeToolbar {...baseProps} />)
 
     expect(screen.queryByText('Estado do runtime')).not.toBeInTheDocument()
-    expect(screen.getByText('Deploy trust')).toBeInTheDocument()
+    expect(screen.getByText('Deploy ready')).toBeInTheDocument()
 
     rerender(<PreviewRuntimeToolbar {...baseProps} showRuntimeSettings />)
 
-    expect(screen.getByText('Estado do runtime')).toBeInTheDocument()
-    expect(screen.getByText(/Estrat.gia de preview/i)).toBeInTheDocument()
-    expect(screen.getByText(/Pr.xima a..o recomendada/i)).toBeInTheDocument()
+    expect(screen.getByText('Health')).toBeInTheDocument()
+    expect(screen.getByText(/Path/i)).toBeInTheDocument()
+    expect(screen.getByText(/Next action/i)).toBeInTheDocument()
   })
 
   it('holds runtime actions when the lane policy blocks automation', () => {
@@ -81,9 +81,10 @@ describe('PreviewRuntimeToolbar', () => {
       />
     )
 
-    expect(screen.getByText('Automation held')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /run recommended runtime action/i })).toBeDisabled()
-    expect(screen.getByRole('button', { name: /auto-detectar/i })).toBeDisabled()
-    expect(screen.getByRole('button', { name: /provisionar runtime gerenciado/i })).toBeDisabled()
+    expect(screen.getByText('Run guard')).toBeInTheDocument()
+    expect(screen.getByText(/Browser operator lane/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /run recommended preview action/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /auto-detect/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /provision managed runtime/i })).toBeDisabled()
   })
 })

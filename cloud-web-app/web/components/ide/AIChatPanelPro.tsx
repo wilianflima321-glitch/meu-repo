@@ -29,6 +29,11 @@ import {
   useAIChatRunState,
   useAIChatSpeechPlayback,
 } from '@/components/agents/chat'
+import { ActiveContextBadge, type ActiveContextItem } from './ActiveContextBadge'
+import { useAethelContext } from '@/contexts/AethelContextRegistry'
+import { LiveSessionHUD } from '@/components/agents/chat/live/LiveSessionHUD'
+import { useRealtimeVoiceSession } from '@/components/agents/chat/voice/useRealtimeVoiceSession'
+import { ResourceMonitorHUD } from '@/components/agents/chat/ResourceMonitorHUD'
 
 export default function AIChatPanelPro({
   messages = [],
@@ -55,6 +60,7 @@ export default function AIChatPanelPro({
   onToggleLiveMode,
   liveStatus = 'idle',
   allowAttachments = false,
+  onAgentSelect,
   projectId,
   codebaseContextPreview,
 }: AIChatPanelProps) {
@@ -136,6 +142,7 @@ export default function AIChatPanelPro({
     currentModel,
     isLoading,
     models,
+    onAgentSelect,
     onInterrupt,
     onRegenerateResponse,
     onSendMessage,
@@ -155,6 +162,32 @@ export default function AIChatPanelPro({
   const { handleCopy, handleOpenCodeContextResult, handleOpenMentionContextBlock } =
     useAIChatContextActions()
   const { handleToggleSpeaking, isSpeaking } = useAIChatSpeechPlayback({ messages })
+
+  // Active context badge — derives from AethelContextRegistry
+  const { chips } = useAethelContext()
+  const contextItems = useMemo<ActiveContextItem[]>(() => {
+    const CHIP_KIND_MAP: Record<string, ActiveContextItem['kind']> = {
+      viewport: 'viewport',
+      file: 'code',
+      blueprint: 'node',
+      terminal: 'custom',
+      function: 'custom',
+    }
+    return chips.map((chip) => ({
+      kind: CHIP_KIND_MAP[chip.kind] ?? 'custom',
+      label: chip.label,
+      detail: chip.payload ? Object.values(chip.payload)[0] as string | undefined : undefined,
+    }))
+  }, [chips])
+
+  // Realtime voice session — active only when live mode is on
+  const voiceSession = useRealtimeVoiceSession({
+    isEnabled: isLiveMode ?? false,
+    modelId: currentModel ?? DEFAULT_OPENROUTER_MODEL_ID,
+    onMessageReceived: (text) => {
+      onSendMessage?.(text)
+    },
+  })
   const pendingDiff = editorBridge?.pendingDiff ?? null
   const [showInlineDiffPreview, setShowInlineDiffPreview] = useState(false)
   const latestEvidence = useMemo(() => {
@@ -164,6 +197,22 @@ export default function AIChatPanelPro({
 
     return candidate?.traceArtifact ?? candidate?.researchArtifact ?? null
   }, [messages])
+
+  // Calm mode — hides telemetry/ops panels by default, persisted to localStorage
+  const [calmMode, setCalmMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('aethel-chat-calm') !== 'false'
+    } catch {
+      return true
+    }
+  })
+  const toggleCalmMode = () => {
+    setCalmMode((prev) => {
+      const next = !prev
+      try { localStorage.setItem('aethel-chat-calm', String(next)) } catch { /* noop */ }
+      return next
+    })
+  }
 
   const handleOpenPendingDiff = () => {
     setShowInlineDiffPreview((previous) => !previous)
@@ -207,7 +256,7 @@ export default function AIChatPanelPro({
         liveStatus={liveStatus}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="relative flex min-w-0 flex-1 flex-col">
         <AIChatHeader
           consoleMode={consoleMode}
           onConsoleModeChange={setConsoleMode}
@@ -231,6 +280,9 @@ export default function AIChatPanelPro({
           onToggleSpeaking={handleToggleSpeaking}
           onClearChat={onClearChat}
           onToggleAdvancedControls={toggleAdvancedControls}
+          activeContextItems={contextItems}
+          calmMode={calmMode}
+          onToggleCalmMode={toggleCalmMode}
         />
 
         <AIChatContextStrip
@@ -242,32 +294,37 @@ export default function AIChatPanelPro({
           isAIWorking={isAIWorking}
         />
 
-        <AIChatCostMeter
-          projectId={projectId}
-          currentRunEstimate={estimatedCost}
-          selectedModelName={resolvedModel.name}
-          isAIWorking={isAIWorking}
-          onOpenEconomics={handleOpenEconomics}
-        />
+        {/* Calm mode hides the dense telemetry/ledger/cost strips; they are accessible via Ops toggle */}
+        {!calmMode && (
+          <>
+            <AIChatCostMeter
+              projectId={projectId}
+              currentRunEstimate={estimatedCost}
+              selectedModelName={resolvedModel.name}
+              isAIWorking={isAIWorking}
+              onOpenEconomics={handleOpenEconomics}
+            />
 
-        <AIChatLedgerStrip
-          agentCount={agentCount}
-          consoleMode={consoleMode}
-          currentRunEstimate={estimatedCost}
-          isAIWorking={isAIWorking}
-          latestEvidence={latestEvidence}
-          pendingDiff={pendingDiff}
-          onOpenDiff={handleOpenPendingDiff}
-          onOpenEconomics={handleOpenEconomics}
-          onOpenEvidence={handleOpenEvidence}
-        />
+            <AIChatLedgerStrip
+              agentCount={agentCount}
+              consoleMode={consoleMode}
+              currentRunEstimate={estimatedCost}
+              isAIWorking={isAIWorking}
+              latestEvidence={latestEvidence}
+              pendingDiff={pendingDiff}
+              onOpenDiff={handleOpenPendingDiff}
+              onOpenEconomics={handleOpenEconomics}
+              onOpenEvidence={handleOpenEvidence}
+            />
 
-        <AIChatTimeline
-          activeThreadTitle={activeThread?.title ?? null}
-          hasHistory={hasHistory}
-          items={timelineItems}
-          onOpenHistory={toggleHistorySidebar}
-        />
+            <AIChatTimeline
+              activeThreadTitle={activeThread?.title ?? null}
+              hasHistory={hasHistory}
+              items={timelineItems}
+              onOpenHistory={toggleHistorySidebar}
+            />
+          </>
+        )}
 
         <AIChatMessagesPane
           messages={messages}
@@ -284,23 +341,73 @@ export default function AIChatPanelPro({
           messagesEndRef={messagesEndRef}
         />
 
-        {showAdvancedControls ? (
-          <AIChatBenchmarkTelemetry
-            consoleMode={consoleMode}
-            isAIWorking={isAIWorking}
-            runDuration={runDuration}
-            estimatedCost={estimatedCost}
-            selectedModelName={resolvedModel.name}
-            onInterrupt={handleLiveInterrupt}
-            onSendLiveMessage={handleLiveSendMessage}
-            agentCount={agentCount}
-            agents={agents}
-            onAgentClick={handleAgentClick}
-            quickPrompts={modePreset.quickPrompts}
-            showAdvancedControls={showAdvancedControls}
-            onQuickPrompt={handleQuickPrompt}
-          />
+        {showAdvancedControls && !calmMode ? (
+          <>
+            <AIChatBenchmarkTelemetry
+              consoleMode={consoleMode}
+              isAIWorking={isAIWorking}
+              runDuration={runDuration}
+              estimatedCost={estimatedCost}
+              selectedModelName={resolvedModel.name}
+              onInterrupt={handleLiveInterrupt}
+              onSendLiveMessage={handleLiveSendMessage}
+              agentCount={agentCount}
+              agents={agents}
+              onAgentClick={handleAgentClick}
+              quickPrompts={modePreset.quickPrompts}
+              showAdvancedControls={showAdvancedControls}
+              onQuickPrompt={handleQuickPrompt}
+            />
+            <div className="px-3 pb-2">
+              <ResourceMonitorHUD
+                isWorking={isAIWorking}
+                cloudFraction={(estimatedCost ?? 0) > 0 ? Math.min((estimatedCost ?? 0) / 10, 1) : 0}
+              />
+            </div>
+          </>
         ) : null}
+
+        {/* Live voice session overlay */}
+        {isLiveMode && voiceSession.status !== 'disconnected' && (
+          <div className="absolute inset-x-0 bottom-20 z-30 flex justify-center px-4 pointer-events-none">
+            <div className="pointer-events-auto w-full max-w-sm">
+              <LiveSessionHUD
+                status={voiceSession.status}
+                speaker={voiceSession.speaker}
+                transcript={voiceSession.transcript}
+                isMuted={voiceSession.isMuted}
+                amplitude={voiceSession.amplitude}
+                onToggleMute={voiceSession.toggleMute}
+                onEndSession={voiceSession.endSession}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Voice unavailable banner — shown when live mode is on but WebRTC disconnected */}
+        {isLiveMode && voiceSession.status === 'disconnected' && (
+          <div
+            role="alert"
+            className="mx-3 mb-2 flex items-start gap-2.5 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_8%,transparent)] px-3 py-2.5"
+          >
+            <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--aethel-warning)]" aria-hidden />
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold text-[var(--aethel-warning-light)]">
+                Voice unavailable
+              </p>
+              <p className="mt-0.5 text-[10px] leading-relaxed text-[var(--aethel-text-tertiary)]">
+                WebRTC connection failed.{' '}
+                <a
+                  href="/settings?tab=byok"
+                  className="underline decoration-[var(--aethel-warning)]/40 hover:decoration-[var(--aethel-warning)] text-[var(--aethel-warning-light)]"
+                >
+                  Configure your OpenAI key in Settings
+                </a>{' '}
+                to enable live voice.
+              </p>
+            </div>
+          </div>
+        )}
 
         {pendingDiff ? (
           <AIChatPendingDiffTray

@@ -240,6 +240,15 @@ export class PhysicsBody {
   sleep(): void {
     this.rawBody.sleep();
   }
+
+  extractState() {
+    return {
+      position: this.position.clone(),
+      rotation: this.rotation.clone(),
+      linvel: this.linearVelocity.clone(),
+      angvel: this.angularVelocity.clone(),
+    };
+  }
 }
 
 // ============================================================================

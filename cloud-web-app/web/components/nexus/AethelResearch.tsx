@@ -13,6 +13,10 @@ import {
   Send,
   Shield,
 } from 'lucide-react'
+import {
+  ResearchProgressCard,
+  buildWebSearchSteps,
+} from '@/components/agents/chat/ResearchProgressCard'
 import { analytics } from '@/lib/analytics'
 import { buildResearchPrompt, saveResearchHandoff, type ResearchHandoffPayload } from '@/lib/research-handoff'
 import { buildResearchRuntimeSpinePlan } from '@/lib/research/research-runtime-spine'
@@ -30,7 +34,7 @@ interface ResearchResult {
   query: string
   summary: string
   sources: Source[]
-  status: 'idle' | 'complete'
+  status: 'idle' | 'searching' | 'complete' | 'fallback'
 }
 
 const PRESET_SOURCES: Source[] = [
@@ -106,7 +110,7 @@ export default function AethelResearch() {
     [query, result],
   )
 
-  const handleSearch = (event: React.FormEvent) => {
+  const handleSearch = async (event: React.FormEvent) => {
     event.preventDefault()
     const value = query.trim()
     if (!value) return
@@ -116,11 +120,53 @@ export default function AethelResearch() {
 
     setResult({
       query: value,
-      status: 'complete',
-      summary:
-        `Review packet prepared for "${value}". This surface uses a governed benchmark pack; live browser replay, account navigation, and artifact persistence stay held until the browser operator lane is explicitly started.`,
-      sources: PRESET_SOURCES,
+      status: 'searching',
+      summary: 'Running live retrieval...',
+      sources: [],
     })
+
+    try {
+      const response = await fetch('/api/research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: value, maxResults: 6 }),
+      })
+      const payload = await response.json().catch(() => ({}))
+
+      if (response.ok && Array.isArray(payload?.sources)) {
+        setResult({
+          query: value,
+          status: 'complete',
+          summary: typeof payload.summary === 'string' ? payload.summary : `Research completed for "${value}".`,
+          sources: payload.sources.map((source: any, index: number) => ({
+            id: String(source.id || index + 1),
+            title: String(source.title || 'Source'),
+            url: String(source.url || '#'),
+            credibility: typeof source.credibility === 'number' ? source.credibility : 0.8,
+            snippet: String(source.snippet || source.content || ''),
+            verified: true,
+          })),
+        })
+        return
+      }
+
+      setResult({
+        query: value,
+        status: 'fallback',
+        summary:
+          typeof payload?.message === 'string'
+            ? payload.message
+            : `Live retrieval unavailable. Showing governed benchmark pack for "${value}".`,
+        sources: PRESET_SOURCES,
+      })
+    } catch {
+      setResult({
+        query: value,
+        status: 'fallback',
+        summary: `Network error during research. Showing governed benchmark pack for "${value}".`,
+        sources: PRESET_SOURCES,
+      })
+    }
   }
 
   const handleCopyPrompt = async () => {
@@ -202,6 +248,15 @@ export default function AethelResearch() {
 
       {result.status !== 'idle' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-500">
+
+          {/* Live progress card while searching */}
+          {result.status === 'searching' && (
+            <ResearchProgressCard
+              steps={buildWebSearchSteps(result.query, 5)}
+              isRunning
+            />
+          )}
+
           {result.status === 'complete' && (
             <>
               <div className="group relative overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] p-5">

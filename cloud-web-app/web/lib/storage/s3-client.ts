@@ -48,6 +48,40 @@ const S3_CONFIG = {
   bucket: process.env.S3_BUCKET || 'aethel-assets',
 };
 
+// ─── Local Emulator (offline-first) ────────────────────────────────────────
+// When AWS credentials are absent, the client degrades to a local directory
+// (temp/s3-emulator/) so the entire asset upload flow works without billing.
+export const LOCAL_EMULATOR_DIR = 'temp/s3-emulator';
+
+function isLocalEmulatorMode(): boolean {
+  return !process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY;
+}
+
+export async function localPutObject(key: string, body: Buffer | string): Promise<boolean> {
+  const { promises: fs } = await import('node:fs');
+  const nodePath = await import('node:path');
+  const dest = nodePath.join(process.cwd(), LOCAL_EMULATOR_DIR, key);
+  await fs.mkdir(nodePath.dirname(dest), { recursive: true });
+  await fs.writeFile(dest, body);
+  return true;
+}
+
+export async function localGetObjectBuffer(key: string): Promise<Buffer | null> {
+  const { promises: fs } = await import('node:fs');
+  const nodePath = await import('node:path');
+  const src = nodePath.join(process.cwd(), LOCAL_EMULATOR_DIR, key);
+  try {
+    return await fs.readFile(src);
+  } catch {
+    return null;
+  }
+}
+
+export function localPresignUrl(key: string, expiresIn = 300): string {
+  const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  return `${base}/api/dev/s3-emulator/${key}?expires=${Date.now() + expiresIn * 1000}`;
+}
+
 /**
  * Verifica se o AWS SDK está disponível
  */
@@ -330,4 +364,72 @@ export async function copyObject(sourceKey: string, destinationKey: string): Pro
   }
 }
 
+/**
+ * Downloads an object from S3 to a local file path (server-side workers).
+ */
+export async function downloadObjectToFile(key: string, destinationPath: string): Promise<boolean> {
+  const client = await getS3Client();
+  const commands = await getS3Commands();
+  if (!client || !commands) return false;
+
+  try {
+    const command = new commands.GetObjectCommand({
+      Bucket: S3_CONFIG.bucket,
+      Key: key,
+    });
+    const response = await client.send(command) as { Body?: AsyncIterable<Uint8Array> | Uint8Array };
+    const body = response.Body;
+    if (!body) return false;
+
+    const fs = await import('node:fs/promises');
+    const chunks: Uint8Array[] = [];
+    if (Symbol.asyncIterator in Object(body)) {
+      for await (const chunk of body as AsyncIterable<Uint8Array>) {
+        chunks.push(chunk);
+      }
+    } else {
+      chunks.push(body as Uint8Array);
+    }
+    await fs.writeFile(destinationPath, Buffer.concat(chunks));
+    return true;
+  } catch (error) {
+    logger.error('[S3] Failed to download object:', error);
+    return false;
+  }
+}
+
 export const S3_BUCKET = S3_CONFIG.bucket;
+
+// ─── Unified Upload/Download helpers (replaces lib/server/s3-client.ts mock) ─
+// These are the canonical implementations used by /api/assets/upload-url.
+
+export async function createUploadUrl(
+  projectId: string,
+  assetType: string,
+  fileName: string,
+  mimeType: string,
+  expiresIn = 300
+): Promise<{ uploadUrl: string; storageKey: string; assetId: string }> {
+  const assetId = `asset_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  const storageKey = `projects/${projectId}/${assetType}/${assetId}/${fileName}`;
+
+  if (isLocalEmulatorMode()) {
+    const uploadUrl = localPresignUrl(storageKey, expiresIn);
+    logger.info('[S3/local] createUploadUrl using emulator', { storageKey });
+    return { uploadUrl, storageKey, assetId };
+  }
+
+  const url = await generateUploadUrl(storageKey, mimeType, { expiresIn });
+  if (!url) {
+    throw new Error('S3_PRESIGN_FAILED: Could not generate presigned upload URL');
+  }
+  return { uploadUrl: url, storageKey, assetId };
+}
+
+export async function getSignedDownloadUrl(key: string, expiresIn = 3600): Promise<string> {
+  if (isLocalEmulatorMode()) {
+    return localPresignUrl(key, expiresIn);
+  }
+  const url = await generateDownloadUrl(key, { expiresIn });
+  return url ?? localPresignUrl(key, expiresIn);
+}

@@ -25,6 +25,9 @@ const prismaMocks = vi.hoisted(() => ({
       findFirst: vi.fn(),
       update: vi.fn(),
     },
+    renderJob: {
+      create: vi.fn(),
+    },
   },
 }))
 
@@ -87,6 +90,7 @@ describe('api/projects/[id]/production-state/render-job route', () => {
       members: [],
     })
     prismaMocks.prisma.project.update.mockResolvedValue({ id: 'project-1' })
+    prismaMocks.prisma.renderJob.create.mockResolvedValue({ id: 'render-boss-final' })
     queueMocks.queueManager.isAvailable.mockResolvedValue(true)
     queueMocks.queueManager.addJob.mockResolvedValue({ id: 'queue-render-1' })
   })

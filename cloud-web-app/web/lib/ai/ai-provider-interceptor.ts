@@ -1,5 +1,6 @@
 import { billingAccumulator } from '../billing/redis-billing-accumulator';
 import { prisma } from '../db';
+import { logger } from '@/lib/observability/logger';
 
 export interface AIRequestConfig {
   userId: string;
@@ -24,19 +25,21 @@ export class AIProviderInterceptor {
     // 1. Busca configurações do usuário para checar BYOK
     const userSettings = await prisma.user.findUnique({
       where: { id: config.userId },
-      select: { openAiCustomKey: true, anthropicCustomKey: true } // Presumindo esses campos no schema
+      select: { byokKey: true }
     });
 
     let apiKey = process.env.OPENAI_API_KEY || '';
     let isCustomKey = false;
 
     // Se o usuário forneceu a própria chave, nós usamos ela e ISENTAMOS a cobrança
-    if (userSettings?.openAiCustomKey && config.model.includes('gpt')) {
-      apiKey = userSettings.openAiCustomKey;
-      isCustomKey = true;
-    } else if (userSettings?.anthropicCustomKey && config.model.includes('claude')) {
-      apiKey = userSettings.anthropicCustomKey;
-      isCustomKey = true;
+    if (userSettings?.byokKey) {
+      try {
+        const { decryptString } = await import('@/lib/server/crypto');
+        apiKey = decryptString(userSettings.byokKey);
+        isCustomKey = true;
+      } catch (e) {
+        logger.error('Failed to decrypt database BYOK key in interceptor', e);
+      }
     }
 
     return {

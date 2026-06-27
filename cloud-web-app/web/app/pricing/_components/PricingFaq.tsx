@@ -13,13 +13,18 @@ export function PricingFaq({ openFaq, onToggle }: { openFaq: number | null; onTo
 
         <div className="space-y-3 px-4 pb-5">
           {FAQ_ITEMS.map((item, i) => (
-            <div key={item.q} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)]">
+            <div
+              key={item.q}
+              className={`overflow-hidden rounded-xl border transition-all duration-200 ${openFaq === i ? 'border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]' : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)]'}`}
+            >
               <button type="button" onClick={() => onToggle(i)} className="flex w-full items-center justify-between p-5 text-left" aria-expanded={openFaq === i}>
-                <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{item.q}</span>
-                <span className={`ml-4 flex-shrink-0 text-[var(--aethel-text-tertiary)] transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`}><Codicon name="chevron-down" /></span>
+                <span className={`text-sm font-medium transition-colors ${openFaq === i ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-primary)]'}`}>{item.q}</span>
+                <span className={`ml-4 flex-shrink-0 text-[var(--aethel-text-tertiary)] transition-transform duration-200 ${openFaq === i ? 'rotate-180 text-[var(--aethel-info)]' : ''}`}><Codicon name="chevron-down" /></span>
               </button>
-              <div className={`overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-48 pb-5' : 'max-h-0'}`}>
-                <p className="px-5 text-sm leading-relaxed text-[var(--aethel-text-secondary)]">{item.a}</p>
+              <div className={`overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-64 pb-5' : 'max-h-0'}`}>
+                <div className="mx-5 mb-1 border-l-2 border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] pl-3">
+                  <p className="text-sm leading-relaxed text-[var(--aethel-text-secondary)]">{item.a}</p>
+                </div>
               </div>
             </div>
           ))}

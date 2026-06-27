@@ -83,9 +83,9 @@ describe('StudioMissionControl', () => {
     fireEvent.click(screen.getByRole('button', { name: /start session/i }))
     await waitFor(() => expect(screen.getByText('Studio session is active.')).toBeInTheDocument())
 
-    fireEvent.click(screen.getByRole('button', { name: /run 3-agent wave/i }))
+    fireEvent.click(screen.getByRole('button', { name: /validate plan/i }))
     await waitFor(() => expect(screen.getByText('Planned 3 coordinated task(s).')).toBeInTheDocument())
-    expect(screen.getByText('3')).toBeInTheDocument()
+    expect(screen.getAllByText('3')[0]).toBeInTheDocument()
     expect(screen.getByText('Producer: coordinate mission.')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /pause session/i }))
@@ -123,7 +123,7 @@ describe('StudioMissionControl', () => {
     expect(screen.getByLabelText('What should the Studio coordinate?')).toHaveValue(
       'Resume playable scene with QA evidence.'
     )
-    expect(screen.getByLabelText('Runtime target')).toHaveValue('local-worker')
+    expect(screen.getByLabelText('Runtime target')).toHaveValue('local-native')
     expect(screen.getByText('active')).toBeInTheDocument()
   })
 })

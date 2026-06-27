@@ -308,6 +308,7 @@ export async function executeExtensionModule(input: {
       if (msg.type === 'console') {
         const level = msg.level as 'log' | 'warn' | 'error' | 'info' | 'debug';
         const args = msg.args as string[];
+        // eslint-disable-next-line no-console
         console[level]?.(`[Extension:${input.filename}]`, ...args);
       }
     });

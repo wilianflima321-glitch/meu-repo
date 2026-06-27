@@ -1,3 +1,4 @@
+// @aethel-heavy-async-boundary
 import * as THREE from 'three';
 import { SpatialAudioManagerCore } from './spatial-audio-manager-core';
 import type { ActiveSound } from './spatial-audio-contracts';

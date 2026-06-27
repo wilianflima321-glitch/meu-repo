@@ -42,6 +42,7 @@ class QueueManager {
   private queues: Map<string, QueueAdapter> = new Map();
   private workers: Map<string, WorkerAdapter> = new Map();
   private events: Map<string, QueueEventsAdapter> = new Map();
+  private localProcessors: Map<string, (job: any) => Promise<any>> = new Map();
   private initialized = false;
   private available = false;
   /**
@@ -98,8 +99,32 @@ class QueueManager {
   ): Promise<QueueJobAdapter | null> {
     await this.initialize();
     if (!this.available) {
-      log.warn('[QueueManager] Queue system not available. Job not queued:', jobType);
-      return null;
+      log.info(`[QueueManager] Redis not available. Falling back to local in-memory queue for ${queueName}:${jobType}`);
+      const processor = this.localProcessors.get(queueName);
+      const jobId = options?.jobId ?? `mem_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+      
+      const job: QueueJobAdapter = {
+        id: jobId,
+        name: jobType,
+        data,
+        opts: options ?? {},
+        progress: 0,
+        attemptsMade: 0,
+        updateProgress: async (p: number) => {
+          log.info(`[LocalWorker:${queueName}] Job ${jobId} progress: ${p}%`);
+        },
+      } as any;
+
+      if (processor) {
+        setTimeout(() => {
+          processor(job).catch((err) => {
+            log.error(`[LocalWorker:${queueName}] In-memory job ${jobId} failed:`, err);
+          });
+        }, options?.delay || 0);
+      } else {
+        log.warn(`[QueueManager] No local processor registered for ${queueName}. Job ${jobId} is queued in-memory.`);
+      }
+      return job;
     }
     const queue = this.queues.get(queueName);
     if (!queue) {
@@ -131,8 +156,13 @@ class QueueManager {
     await this.initialize();
     const bullmq = await loadQueueDependencies();
     if (!this.available || !bullmq) {
-      log.warn('[QueueManager] Queue system not available. Worker not registered.');
-      return null;
+      log.warn(`[QueueManager] Redis/BullMQ not available. Registering local in-memory processor for ${queueName}.`);
+      this.localProcessors.set(queueName, processor);
+      return {
+        close: async () => {
+          this.localProcessors.delete(queueName);
+        },
+      } as any;
     }
     const connection = await getQueueRedisConnection();
     const { Worker } = bullmq;

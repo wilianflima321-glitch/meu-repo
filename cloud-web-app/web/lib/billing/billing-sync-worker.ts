@@ -1,114 +1,163 @@
 import { Redis } from 'ioredis';
+import { createComponentLogger } from '../observability/logger';
 import { prisma } from '../db';
 
+const log = createComponentLogger('worker.billing-sync');
 const BILLING_STREAM_KEY = 'aethel:billing:tokens_stream';
-const CONSUMER_GROUP = 'aethel:billing:sync_group';
+const CONSUMER_GROUP = 'aethel-billing-sync';
 const CONSUMER_NAME = `worker-${process.pid}`;
 
-export class BillingSyncWorker {
-  private redis: Redis;
-  private isRunning: boolean = false;
+let isShuttingDown = false;
+let redis: Redis | null = null;
 
-  constructor() {
-    this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+function getRedis(): Redis | null {
+  if (redis) return redis;
+  try {
+    redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    return redis;
+  } catch (error) {
+    log.error('billing_sync.redis_connect_failed', error);
+    return null;
+  }
+}
+
+async function ensureConsumerGroup(client: Redis) {
+  try {
+    await client.xgroup('CREATE', BILLING_STREAM_KEY, CONSUMER_GROUP, '0', 'MKSTREAM');
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.includes('BUSYGROUP')) {
+      throw error;
+    }
+  }
+}
+
+function monthWindow(date: Date): { window: string; windowStart: Date; windowEnd: Date } {
+  const windowStart = new Date(date.getFullYear(), date.getMonth(), 1);
+  const windowEnd = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  return {
+    window: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+    windowStart,
+    windowEnd,
+  };
+}
+
+async function syncBatch(events: Array<{ userId: string; tokens: number }>) {
+  const byUser = new Map<string, number>();
+  for (const event of events) {
+    byUser.set(event.userId, (byUser.get(event.userId) || 0) + event.tokens);
   }
 
-  public async start(): Promise<void> {
-    if (this.isRunning) return;
-    this.isRunning = true;
+  const now = new Date();
+  const { window, windowStart, windowEnd } = monthWindow(now);
 
-    // Garante que o consumer group existe
+  for (const [userId, tokens] of byUser.entries()) {
+    await prisma.usageBucket.upsert({
+      where: {
+        userId_window_windowStart: { userId, window, windowStart },
+      },
+      create: {
+        userId,
+        window,
+        windowStart,
+        windowEnd,
+        requests: 1,
+        tokens,
+      },
+      update: {
+        requests: { increment: 1 },
+        tokens: { increment: tokens },
+      },
+    });
+  }
+}
+
+async function syncLoop() {
+  log.info('billing_sync.worker_started');
+  const client = getRedis();
+  if (!client) {
+    log.warn('billing_sync.redis_unavailable');
+    return;
+  }
+
+  await ensureConsumerGroup(client);
+
+  while (!isShuttingDown) {
     try {
-      await this.redis.xgroup('CREATE', BILLING_STREAM_KEY, CONSUMER_GROUP, '0', 'MKSTREAM');
-    } catch (err: any) {
-      if (!err.message.includes('BUSYGROUP')) {
-        console.error('Failed to create consumer group', err);
-      }
-    }
+      const results = await client.xreadgroup(
+        'GROUP',
+        CONSUMER_GROUP,
+        CONSUMER_NAME,
+        'COUNT',
+        50,
+        'BLOCK',
+        5000,
+        'STREAMS',
+        BILLING_STREAM_KEY,
+        '>',
+      );
 
-    this.poll();
-  }
+      if (!results) continue;
 
-  public stop(): void {
-    this.isRunning = false;
-    this.redis.quit();
-  }
+      type StreamEntry = [string, string[]];
+      type StreamResult = [string, StreamEntry[]];
+      const streamResults = results as StreamResult[];
 
-  private async poll(): Promise<void> {
-    while (this.isRunning) {
-      try {
-        // Bloqueia por até 5000ms esperando novos eventos no stream
-        const result = await this.redis.xreadgroup(
-          'GROUP', CONSUMER_GROUP, CONSUMER_NAME,
-          'COUNT', 100, // Processa em batches de 100
-          'BLOCK', 5000,
-          'STREAMS', BILLING_STREAM_KEY, '>'
-        ) as any;
+      const events: Array<{ id: string; userId: string; tokens: number }> = [];
 
-        if (result && result.length > 0) {
-          const events = result[0][1];
-          await this.processBatch(events);
+      for (const [, entries] of streamResults) {
+        for (const entry of entries) {
+          const id = entry[0];
+          const fields = entry[1] as string[];
+          const map: Record<string, string> = {};
+          for (let i = 0; i < fields.length; i += 2) {
+            map[fields[i]] = fields[i + 1];
+          }
+          const userId = map.userId;
+          const tokensUsed = Number(map.tokensUsed || '0');
+          if (userId && tokensUsed > 0) {
+            events.push({ id, userId, tokens: tokensUsed });
+          }
         }
-      } catch (err) {
-        console.error('Error polling billing stream', err);
-        await new Promise(res => setTimeout(res, 2000)); // Backoff on error
-      }
-    }
-  }
-
-  private async processBatch(events: any[]): Promise<void> {
-    if (events.length === 0) return;
-
-    // 1. Agrupar os tokens por usuário
-    const usageByUser = new Map<string, number>();
-    const eventIds: string[] = [];
-
-    for (const event of events) {
-      const id = event[0];
-      const fields = event[1];
-      eventIds.push(id);
-
-      let userId = '';
-      let tokensUsed = 0;
-
-      for (let i = 0; i < fields.length; i += 2) {
-        if (fields[i] === 'userId') userId = fields[i + 1];
-        if (fields[i] === 'tokensUsed') tokensUsed = parseInt(fields[i + 1], 10);
       }
 
-      if (userId && tokensUsed > 0) {
-        usageByUser.set(userId, (usageByUser.get(userId) || 0) + tokensUsed);
-      }
-    }
-
-    // 2. Transação ACID no PostgreSQL para consolidar o saldo
-    try {
-      await prisma.$transaction(async (tx) => {
-        for (const [userId, tokens] of usageByUser.entries()) {
-          // Decrementa do UserCredits (ou incrementa em uso caso billing post-pago)
-          await tx.user.update({
-            where: { id: userId },
-            data: {
-              aiTokensUsed: { increment: tokens } // Assumindo campo aiTokensUsed no model User
-            }
-          });
+      if (events.length > 0) {
+        await syncBatch(events.map((e) => ({ userId: e.userId, tokens: e.tokens })));
+        for (const event of events) {
+          await client.xack(BILLING_STREAM_KEY, CONSUMER_GROUP, event.id);
+          const cacheKey = `aethel:billing:balance:${event.userId}`;
+          await client.hincrby(cacheKey, 'tokens_used_uncommitted', -event.tokens);
         }
-      });
-
-      // 3. PostgreSQL Commit com Sucesso! Agora sim podemos dar ACK no Redis
-      await this.redis.xack(BILLING_STREAM_KEY, CONSUMER_GROUP, ...eventIds);
-
-      // 4. Limpar o hash 'uncommitted' para estes usuários já que agora está consolidado
-      for (const [userId, tokens] of usageByUser.entries()) {
-        const cacheKey = `aethel:billing:balance:${userId}`;
-        // Reduz o valor uncommitted (ou zera se quisermos ser agressivos)
-        // Usamos hincrby com valor negativo
-        await this.redis.hincrby(cacheKey, 'tokens_used_uncommitted', -tokens);
+        log.info('billing_sync.batch_committed', { count: events.length });
       }
-
-    } catch (txError) {
-      console.error('Falha na transação Postgres! O Redis NÃO receberá ACK e os eventos serão reprocessados.', txError);
-      // NENHUM EVENTO É PERDIDO.
+    } catch (error) {
+      log.error('billing_sync.loop_error', error);
+      await new Promise((r) => setTimeout(r, 10000));
     }
   }
+
+  log.info('billing_sync.worker_stopped');
+}
+
+export function startBillingSyncWorker() {
+  syncLoop().catch((e) => log.error('billing_sync.fatal', e));
+}
+
+export function stopBillingSyncWorker() {
+  isShuttingDown = true;
+  redis?.disconnect();
+}
+
+if (require.main === module) {
+  startBillingSyncWorker();
+
+  process.on('SIGTERM', () => {
+    log.info('billing_sync.sigterm');
+    stopBillingSyncWorker();
+  });
+
+  process.on('SIGINT', () => {
+    log.info('billing_sync.sigint');
+    stopBillingSyncWorker();
+  });
 }

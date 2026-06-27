@@ -102,7 +102,7 @@ export function DesktopTargetPanel({
   const current = PLATFORMS[selectedPlatform]
 
   return (
-    <aside className="border border-[var(--aethel-border-primary)] bg-[rgba(8,10,16,0.84)] p-5 shadow-[0_26px_80px_rgba(2,6,23,0.28)]">
+      <aside className="rounded-xl border border-[var(--aethel-border-primary)] bg-[rgba(8,10,16,0.84)] p-5 shadow-[0_26px_80px_rgba(2,6,23,0.28)]">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Release channel</p>
@@ -117,7 +117,7 @@ export function DesktopTargetPanel({
             key={platform}
             type="button"
             onClick={() => onSelectPlatform(platform)}
-            className={`border px-4 py-3 text-left transition ${selectedPlatform === platform ? 'border-[color-mix(in_srgb,var(--aethel-info)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]' : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] hover:border-[var(--aethel-border-secondary)]'}`}
+            className={`rounded-xl border px-4 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${selectedPlatform === platform ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_9%,transparent)] -translate-y-px shadow-[0_0_0_1px_rgba(56,189,248,0.18),0_8px_20px_rgba(0,0,0,0.25),inset_0_0_16px_rgba(56,189,248,0.04)]' : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] hover:-translate-y-px hover:border-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]'}`}
           >
             <span className="flex items-center gap-2 text-sm font-semibold">
               {PLATFORMS[platform].name}

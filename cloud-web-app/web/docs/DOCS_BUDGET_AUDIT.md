@@ -5,12 +5,12 @@ This is a hard documentation budget. Historical archive markdown was removed fro
 
 | Scope | Count | Budget |
 | --- | ---: | ---: |
-| repoMarkdown | 328 | 336 |
+| repoMarkdown | 329 | 336 |
 | rootDocs | 199 | 200 |
 | rootMaster | 122 | 134 |
 | rootArchive | 0 | 0 |
 | interfaceBlueprints | 20 | 20 |
-| webDocs | 67 | 67 |
+| webDocs | 68 | 68 |
 
 ## Collapse Targets
 

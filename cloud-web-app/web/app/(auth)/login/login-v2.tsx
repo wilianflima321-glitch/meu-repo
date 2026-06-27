@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser'
 import { ArrowLeft, KeyRound, Mail, ChevronRight, Lock } from 'lucide-react'
 import Link from 'next/link'
@@ -9,6 +9,7 @@ import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
 import TurnstileField, { isTurnstileClientConfigured } from '@/components/auth/TurnstileField'
 import { analytics } from '@/lib/analytics'
 import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
+import { saveToken } from '@/lib/auth'
 
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -60,6 +61,36 @@ export default function LoginPageV2() {
   const [authNotice, setAuthNotice] = useState<string | null>(null)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
 
+  // Translate machine-readable SAML/auth error codes into human-friendly messages.
+  const SAML_ERROR_MESSAGES: Record<string, string> = {
+    SAML_ASSERTION_CARDINALITY_VIOLATION:
+      'This authentication response contains duplicate or structurally invalid assertions. Your session may have been tampered with. Please try again or contact your IT administrator.',
+    SAML_RESPONSE_CARDINALITY_VIOLATION:
+      'The SSO response contained multiple authentication blocks, which is a security violation. Please try again or contact your IT administrator.',
+    SAML_SIGNATURE_REFERENCE_MISMATCH:
+      'The digital signature on your SSO response does not match the authentication token. Please try again — if the issue persists, your IdP configuration may need updating.',
+    SAML_SIGNATURE_INVALID:
+      'The SSO signature verification failed. Make sure your Identity Provider certificate is current and properly configured.',
+    SAML_ASSERTION_EXPIRED:
+      'Your authentication session has expired. Please sign in again.',
+    SAML_ISSUER_MISMATCH:
+      'The SSO response came from an unexpected identity provider. Please use your organisation\'s configured SSO login.',
+    SAML_AUDIENCE_MISMATCH:
+      'The SSO token was not issued for this application. Please contact your IT administrator.',
+    SAML_CERTIFICATE_EXPIRED:
+      'The SSO certificate has expired. Please contact your IT administrator to renew the Identity Provider certificate.',
+    SAML_NOT_CONFIGURED:
+      'Single Sign-On is not configured for your organisation yet. Please use email/password login.',
+  }
+
+  useEffect(() => {
+    const err = searchParams.get('error')
+    if (!err) return
+    const decoded = decodeURIComponent(err)
+    setFormError(SAML_ERROR_MESSAGES[decoded] ?? decoded)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
+
   const nextTarget = useMemo(() => {
     const requested = searchParams.get('next')?.trim() || searchParams.get('from')?.trim()
     if (!requested || !requested.startsWith('/') || requested.startsWith('/api/')) return DEFAULT_REDIRECT
@@ -103,6 +134,9 @@ export default function LoginPageV2() {
         analytics?.track?.('error', 'error_api', { metadata: { source: 'login-form', status: response.status } })
         return
       }
+      if (payload.access_token) {
+        saveToken(payload.access_token)
+      }
       analytics?.track?.('user', 'login', { metadata: { source: 'auth-login', nextTarget } })
       window.location.assign(nextTarget)
     } catch {
@@ -115,7 +149,7 @@ export default function LoginPageV2() {
 
   const startOAuth = (provider: OAuthProvider) => {
     analytics?.track?.('user', 'oauth_start', { label: provider, metadata: { source: 'login-form', nextTarget } })
-    window.location.href = `/api/auth/oauth/${provider}`
+    window.location.href = `/api/auth/oauth/${provider}?next=${encodeURIComponent(nextTarget)}`
   }
 
   const handlePasskeyLogin = async () => {
@@ -151,6 +185,10 @@ export default function LoginPageV2() {
       if (!verifyResponse.ok) {
         setFormError(payload.error || payload.message || 'Passkey authentication failed.')
         return
+      }
+
+      if (payload.access_token) {
+        saveToken(payload.access_token)
       }
 
       analytics?.track?.('user', 'login', { metadata: { source: 'auth-passkey', nextTarget } })
@@ -231,7 +269,12 @@ export default function LoginPageV2() {
               </div>
 
               {formError && (
-                <div id="login-form-error" className="mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)]" role="alert" aria-live="polite">
+                <div
+                  id="login-form-error"
+                  className="mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)] backdrop-blur-sm shadow-[0_0_16px_rgba(239,68,68,0.10)]"
+                  role="alert"
+                  aria-live="polite"
+                >
                   {formError}
                 </div>
               )}
@@ -346,14 +389,15 @@ export default function LoginPageV2() {
                 </details>
               </div>
 
-              <div className="mt-8 flex flex-col items-center gap-3">
+              <div className="mt-6 flex flex-col gap-3">
                 <Link
                   href="/contact-sales?intent=sso"
-                  className="group flex items-center gap-1.5 text-xs font-medium text-[var(--aethel-info-light)] transition hover:text-[var(--aethel-info)]"
+                  className="group flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_6%,transparent)] text-xs font-semibold text-[var(--aethel-info-light)] transition-all hover:border-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] shadow-[0_0_12px_rgba(56,189,248,0.08)]"
                 >
-                  Team SSO / SAML for enterprise <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                  Sign in with SSO / SAML
+                  <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </Link>
-                <p className="text-sm text-[var(--aethel-text-secondary)]">
+                <p className="text-center text-sm text-[var(--aethel-text-secondary)]">
                   No account yet? <Link href="/register" className="font-semibold text-[var(--aethel-text-primary)] hover:underline">Create one</Link>
                 </p>
               </div>

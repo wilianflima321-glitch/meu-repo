@@ -4,6 +4,7 @@ import {
   type AethelToolchainDependencyMatrix,
   type AethelToolchainLaneId,
 } from '@/lib/runtime/runtime-toolchain-dependency-map'
+import { STUDIO_LOCAL_CONTRACT_VERSION } from '@/lib/runtime/runtime-contracts-bridge'
 
 export interface AethelToolchainEnvironmentReadiness {
   aiProviderConfigured: boolean
@@ -26,6 +27,7 @@ export interface AethelToolchainReadinessSnapshotInput {
 
 export interface AethelToolchainReadinessSnapshot {
   version: 1
+  contractVersion: number
   generatedAt: string
   capability: 'AETHEL_RUNTIME_TOOLCHAIN_READINESS'
   capabilityStatus: 'available' | 'held'
@@ -114,6 +116,7 @@ export function buildAethelToolchainReadinessSnapshot(
 
   return {
     version: 1,
+    contractVersion: STUDIO_LOCAL_CONTRACT_VERSION,
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     capability: 'AETHEL_RUNTIME_TOOLCHAIN_READINESS',
     capabilityStatus,

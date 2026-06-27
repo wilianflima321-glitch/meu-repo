@@ -246,7 +246,7 @@ export function InlineAIComposer({
           color: TEXT_TERTIARY,
         }}
       >
-        <span>Enter para enviar • Esc para fechar</span>
+        <span>Enter to send • Esc to close</span>
       </div>
     </div>
   )

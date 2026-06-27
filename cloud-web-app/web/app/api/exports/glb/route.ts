@@ -8,13 +8,18 @@
  */
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { prisma } from '@/lib/db'
+import { enqueueExportJob } from '@/lib/export/enqueue-export-job'
+import { requireAuth } from '@/lib/auth-server'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
-  const userId = req.headers.get('x-user-id')
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  let userId: string
+  try {
+    userId = requireAuth(req).userId
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   let body: { projectId?: string; sceneIds?: string[]; quality?: 'draft' | 'production' }
   try {
@@ -28,17 +33,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'projectId is required' }, { status: 400 })
   }
 
-  const job = await prisma.renderJob.create({
-    data: {
-      projectId,
-      requestedBy: userId,
-      status: 'queued',
-      provider: 'internal',
-    }
+  const jobId = await enqueueExportJob({
+    format: 'glb',
+    projectId,
+    userId,
+    quality,
+    sceneIds,
   })
-  const jobId = job.id
 
-  // TODO: enqueue actual GLB conversion via lib/render-farm/ when providers are available
+  // GLB conversion will be processed by export-format-worker
   return NextResponse.json({
     jobId,
     format: 'glb',
@@ -47,6 +50,6 @@ export async function POST(req: NextRequest) {
     sceneIds,
     quality,
     message: 'GLB export job queued. Poll /api/render/jobs/{jobId} for progress.',
-    _pending: 'lib/render-farm/providers not yet wired — job is a receipt stub.',
+    pollUrl: `/api/render/jobs/${jobId}`,
   }, { status: 202 })
 }

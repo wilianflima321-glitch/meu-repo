@@ -171,6 +171,23 @@ const nextConfig = {
       permanent: false,
     }))
   },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        '@tauri-apps/api/http': false,
+        '@tauri-apps/api/core': false,
+        '@tauri-apps/api/event': false,
+      }
+    } else {
+      config.externals.push({
+        '@tauri-apps/api/http': 'commonjs @tauri-apps/api/http',
+        '@tauri-apps/api/core': 'commonjs @tauri-apps/api/core',
+        '@tauri-apps/api/event': 'commonjs @tauri-apps/api/event',
+      })
+    }
+    return config
+  },
 }
 
 // Round 81 — opt-in bundle analyzer.

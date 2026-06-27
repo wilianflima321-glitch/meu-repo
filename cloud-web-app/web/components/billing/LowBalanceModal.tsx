@@ -70,20 +70,20 @@ const DEFAULT_PACKAGES: CreditPackage[] = [
 
 const BALANCE_MESSAGES: Record<BalanceLevel, { title: string; subtitle: string; color: string; icon: React.ReactNode }> = {
   low: {
-    title: 'Creditos acabando',
-    subtitle: 'Recarregue para continuar criando sem interrupcoes',
+    title: 'Credits running low',
+    subtitle: 'Reload to keep creating without interruptions',
     color: 'text-[var(--aethel-warning-light)]',
     icon: <Clock className="w-6 h-6" />,
   },
   critical: {
-    title: 'Saldo muito baixo',
-    subtitle: 'Restam poucos credits para operacoes de IA',
+    title: 'Balance critically low',
+    subtitle: 'Very few credits remain for AI operations',
     color: 'text-[var(--aethel-warning-light)]',
     icon: <AlertTriangle className="w-6 h-6" />,
   },
   empty: {
-    title: 'Creditos esgotados',
-    subtitle: 'Recarregue para continuar usando recursos de IA',
+    title: 'Credits exhausted',
+    subtitle: 'Reload to continue using AI features',
     color: 'text-[var(--aethel-error)]',
     icon: <Coins className="w-6 h-6" />,
   },
@@ -118,7 +118,7 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
         <div className="absolute -top-2.5 left-1/2 -translate-x-1/2
                       px-2 py-0.5 bg-[var(--aethel-primary)] rounded-full
                       text-[10px] font-semibold uppercase tracking-wider">
-          Mais Popular
+                    Most Popular
         </div>
       )}
 
@@ -137,7 +137,7 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
             <div className="flex items-center gap-1 mt-1 text-[var(--aethel-success)]">
               <Gift className="w-3.5 h-3.5" />
               <span className="text-xs font-medium">
-                +{pkg.bonus.toLocaleString()} bonus
+                +{pkg.bonus.toLocaleString()} free bonus
               </span>
             </div>
           )}
@@ -149,7 +149,7 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
           </p>
           {pkg.savings && (
             <p className="text-xs text-[var(--aethel-success)] font-medium">
-              {pkg.savings}% economia
+              {pkg.savings}% savings
             </p>
           )}
         </div>
@@ -170,7 +170,7 @@ function UsageEstimate({ minutes }: { minutes: number }) {
   if (minutes <= 0) {
     return (
       <p className="text-xs text-[var(--aethel-error)]">
-        You do not have credits for AI operations
+        No credits remaining for AI operations
       </p>
     );
   }
@@ -180,7 +180,7 @@ function UsageEstimate({ minutes }: { minutes: number }) {
 
   return (
     <p className="text-xs text-[var(--aethel-text-tertiary)]">
-      Estimactive: {hours > 0 ? `${hours}h ${mins}min` : `${mins} minutos`} de trabalho restante
+      Estimate: {hours > 0 ? `${hours}h ${mins}min` : `${mins} min`} of work remaining
     </p>
   );
 }
@@ -394,7 +394,7 @@ export function LowBalanceModal({
                     <p className="text-xs text-[color-mix(in_srgb,var(--aethel-primary)_70%,transparent)] mt-1">
                       Consider the Pro plan for unlimited credits at $49/month
                     </p>
-                    <button type="button" aria-label="View plans para upgrade de credits" className="flex items-center gap-1 mt-2 text-xs font-medium
+                    <button type="button" aria-label="View plans to upgrade credits" className="flex items-center gap-1 mt-2 text-xs font-medium
                                       text-[var(--aethel-primary)] hover:text-[var(--aethel-primary)] transition-colors">
                       View plans
                       <ChevronRight className="w-3 h-3" />

@@ -1,14 +1,16 @@
 export type NodeCategory =
-  | 'event'     // Eventos (OnStart, OnUpdate, etc.)
-  | 'action'    // Acoes (Move, Jump, Spawn, etc.)
-  | 'condition' // Condicoes (If, Compare, etc.)
-  | 'variable'  // Variaveis (Get, Set)
-  | 'math'      // Matematica (Add, Multiply, etc.)
-  | 'flow'      // Controle de fluxo (Branch, Loop, etc.)
-  | 'input'     // Input do jogador
-  | 'physics'   // Fisica (Raycast, Force, etc.)
-  | 'audio'     // Audio (Play Sound, etc.)
-  | 'ui';       // Interface do usuario
+  | 'event'      // Events  (OnStart, OnUpdate, etc.)
+  | 'action'     // Actions (Move, Jump, Spawn, etc.)
+  | 'condition'  // Conditions (If, Compare, etc.)
+  | 'variable'   // Variables (Get, Set)
+  | 'math'       // Math (Add, Multiply, etc.)
+  | 'flow'       // Control flow (Branch, Loop, etc.)
+  | 'input'      // Player input
+  | 'physics'    // Physics (Raycast, Force, etc.)
+  | 'audio'      // Audio (Play Sound, Spatial, Soundscape)
+  | 'ui'         // User interface
+  | 'material'   // Material / shader authoring
+  | 'world-gen'; // Procedural world generation
 
 export interface NodeDefinition {
   type: string;
@@ -24,7 +26,20 @@ export interface NodeDefinition {
 export interface PortDefinition {
   id: string;
   label: string;
-  type: 'exec' | 'boolean' | 'number' | 'string' | 'vector3' | 'object' | 'any';
+  type:
+    | 'exec'
+    | 'boolean'
+    | 'number'
+    | 'string'
+    | 'vector3'
+    | 'object'
+    | 'any'
+    // Material / shader types
+    | 'float'
+    | 'vec2'
+    | 'vec3'
+    | 'vec4'
+    | 'sampler2D';
   default?: unknown;
 }
 
@@ -608,5 +623,166 @@ export const NODE_CATALOG: NodeDefinition[] = [
     ],
     outputs: [{ id: 'exec', label: '', type: 'exec' }],
     color: 'var(--aethel-success)',
+  },
+
+  // ── MATERIAL NODES ────────────────────────────────────────────────────────
+
+  {
+    type: 'material_base_colour',
+    category: 'material',
+    label: 'Base Colour',
+    description: 'Constant RGBA colour value for PBR output',
+    inputs: [],
+    outputs: [{ id: 'colour', label: 'RGBA', type: 'vec4' as const }],
+    color: 'var(--aethel-accent)',
+  },
+  {
+    type: 'material_texture',
+    category: 'material',
+    label: 'Texture Sample',
+    description: 'Sample a 2D texture at given UV coordinates',
+    inputs: [{ id: 'uv', label: 'UV', type: 'vec2' as const }],
+    outputs: [
+      { id: 'colour', label: 'RGBA', type: 'vec4' as const },
+      { id: 'alpha', label: 'Alpha', type: 'float' as const },
+    ],
+    color: 'var(--aethel-accent)',
+  },
+  {
+    type: 'material_noise',
+    category: 'material',
+    label: 'Procedural Noise',
+    description: 'Simplex noise for organic surface variation',
+    inputs: [
+      { id: 'uv', label: 'UV', type: 'vec2' as const },
+      { id: 'frequency', label: 'Frequency', type: 'float' as const, default: 4.0 },
+    ],
+    outputs: [{ id: 'value', label: 'Value', type: 'float' as const }],
+    color: 'var(--aethel-accent)',
+  },
+  {
+    type: 'material_mix',
+    category: 'material',
+    label: 'Mix',
+    description: 'Lerp between two material values by a factor',
+    inputs: [
+      { id: 'a', label: 'A', type: 'vec4' as const },
+      { id: 'b', label: 'B', type: 'vec4' as const },
+      { id: 'factor', label: 'Factor', type: 'float' as const, default: 0.5 },
+    ],
+    outputs: [{ id: 'result', label: 'Result', type: 'vec4' as const }],
+    color: 'var(--aethel-accent)',
+  },
+  {
+    type: 'material_fresnel',
+    category: 'material',
+    label: 'Fresnel',
+    description: 'View-angle factor for rim lighting and reflections',
+    inputs: [
+      { id: 'power', label: 'Power', type: 'float' as const, default: 3.0 },
+    ],
+    outputs: [{ id: 'factor', label: 'Factor', type: 'float' as const }],
+    color: 'var(--aethel-accent)',
+  },
+  {
+    type: 'material_output',
+    category: 'material',
+    label: 'PBR Output',
+    description: 'Final PBR surface output — connect albedo, roughness, metallic, emissive',
+    inputs: [
+      { id: 'albedo',    label: 'Albedo',    type: 'vec4' as const },
+      { id: 'roughness', label: 'Roughness', type: 'float' as const, default: 0.5 },
+      { id: 'metallic',  label: 'Metallic',  type: 'float' as const, default: 0.0 },
+      { id: 'emissive',  label: 'Emissive',  type: 'vec3' as const },
+      { id: 'normal',    label: 'Normal',    type: 'vec3' as const },
+    ],
+    outputs: [],
+    color: 'var(--aethel-accent)',
+  },
+
+  // ── WORLD GENERATION NODES ────────────────────────────────────────────────
+
+  {
+    type: 'worldgen_generate_mesh',
+    category: 'world-gen',
+    label: 'Generate Mesh',
+    description: 'AI-driven mesh generation from a text prompt and style constraint',
+    inputs: [
+      { id: 'exec',    label: '',       type: 'exec' as const },
+      { id: 'prompt',  label: 'Prompt', type: 'string' as const },
+      { id: 'style',   label: 'Style',  type: 'string' as const },
+      { id: 'quality', label: 'Quality (0–1)', type: 'float' as const, default: 0.8 },
+    ],
+    outputs: [
+      { id: 'exec',   label: '',     type: 'exec' as const },
+      { id: 'meshId', label: 'Mesh', type: 'object' as const },
+    ],
+    color: 'var(--aethel-info)',
+  },
+  {
+    type: 'worldgen_generate_material',
+    category: 'world-gen',
+    label: 'Generate Material',
+    description: 'AI-driven PBR material generation with style coherence validation',
+    inputs: [
+      { id: 'exec',    label: '',       type: 'exec' as const },
+      { id: 'prompt',  label: 'Prompt', type: 'string' as const },
+      { id: 'biome',   label: 'Biome',  type: 'string' as const },
+    ],
+    outputs: [
+      { id: 'exec',       label: '',         type: 'exec' as const },
+      { id: 'materialId', label: 'Material', type: 'object' as const },
+    ],
+    color: 'var(--aethel-info)',
+  },
+  {
+    type: 'worldgen_populate_biome',
+    category: 'world-gen',
+    label: 'Populate Biome',
+    description: 'Scatter assets across a region using biome rules and density constraints',
+    inputs: [
+      { id: 'exec',    label: '',          type: 'exec' as const },
+      { id: 'region',  label: 'Region',    type: 'object' as const },
+      { id: 'biome',   label: 'Biome',     type: 'string' as const },
+      { id: 'density', label: 'Density',   type: 'float' as const, default: 1.0 },
+      { id: 'seed',    label: 'Seed',      type: 'number' as const, default: 42 },
+    ],
+    outputs: [
+      { id: 'exec',    label: '',          type: 'exec' as const },
+      { id: 'objects', label: 'Objects[]', type: 'object' as const },
+    ],
+    color: 'var(--aethel-info)',
+  },
+  {
+    type: 'worldgen_style_constraint',
+    category: 'world-gen',
+    label: 'Style Constraint',
+    description: 'Define and enforce a visual style boundary for coherent world generation',
+    inputs: [
+      { id: 'name',      label: 'Style Name',       type: 'string' as const },
+      { id: 'palette',   label: 'Colour Palette',   type: 'string' as const },
+      { id: 'threshold', label: 'Coherence Threshold (0–1)', type: 'float' as const, default: 0.72 },
+    ],
+    outputs: [
+      { id: 'constraint', label: 'Constraint', type: 'object' as const },
+    ],
+    color: 'var(--aethel-info)',
+  },
+  {
+    type: 'worldgen_check_coherence',
+    category: 'world-gen',
+    label: 'Check Coherence',
+    description: 'Validate that a generated asset matches the world style memory bank',
+    inputs: [
+      { id: 'exec',       label: '',           type: 'exec' as const },
+      { id: 'assetId',    label: 'Asset',       type: 'object' as const },
+      { id: 'constraint', label: 'Constraint',  type: 'object' as const },
+    ],
+    outputs: [
+      { id: 'passed',   label: 'Passed',   type: 'exec' as const },
+      { id: 'failed',   label: 'Failed',   type: 'exec' as const },
+      { id: 'score',    label: 'Score',    type: 'float' as const },
+    ],
+    color: 'var(--aethel-info)',
   },
 ];

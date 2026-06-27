@@ -68,7 +68,7 @@ describe('AIChatCostMeter', () => {
       metrics: {
         totalRequestsToday: 22,
         totalTokensToday: 5400,
-        avgCostPerRequestUsd: 0.37,
+        avgCostPerRequestUsd: 0.42,
         updatedAt: '2026-04-28T15:00:00.000Z',
       },
       guidance: ['Keep the wave small.'],

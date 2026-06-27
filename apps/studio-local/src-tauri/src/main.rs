@@ -14,6 +14,8 @@ use tauri::State;
 
 mod desktop_commands;
 mod wgpu_renderer;
+use aethel_studio_local::geometry_clusterizer::clusterize_mesh;
+use aethel_studio_local::gi_sdf::voxelize_scene_sdf;
 use tauri::Manager;
 
 const LOCAL_DEVICE_ID: &str = "local-device";
@@ -168,13 +170,85 @@ fn jobs_cancel(
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            let window = app.get_webview_window("main").unwrap();
+            // ----------------------------------------------------------------
+            // Graceful hardware init (DEBT-DESK / wgpu + ort)
+            //
+            // Heavy crates like wgpu and ort (ONNX Runtime) can fail on older
+            // machines without Vulkan / DirectX 12 or the required C++ runtimes.
+            // Instead of panicking and closing the window, we emit a structured
+            // IPC event so the React frontend can surface a friendly banner and
+            // fall back to WebGL + cloud AI transparently.
+            //
+            // Event schema  →  "runtime_capability"
+            //   { feature: "wgpu" | "ort", available: bool, reason: string }
+            // ----------------------------------------------------------------
+            let Some(window) = app.get_webview_window("main") else {
+                eprintln!("[Aethel] main webview window not found — skipping hardware init");
+                return Ok(());
+            };
             let window_arc = std::sync::Arc::new(window);
+
             tauri::async_runtime::spawn(async move {
-                println!("[Aethel] Injecting Native WGPU Surface...");
-                let _renderer = crate::wgpu_renderer::WgpuRenderer::mount_on_window(window_arc).await.unwrap();
-                println!("[Aethel] Native Engine Ready.");
+                use tauri::Emitter;
+
+                println!("[Aethel] Probing native wgpu surface…");
+                match crate::wgpu_renderer::WgpuRenderer::mount_on_window(window_arc.clone()).await {
+                    Ok(_renderer) => {
+                        println!("[Aethel] Native wgpu renderer ready.");
+                        let _ = window_arc.emit(
+                            "runtime_capability",
+                            serde_json::json!({
+                                "feature": "wgpu",
+                                "available": true,
+                                "reason": "Native GPU surface initialised successfully."
+                            }),
+                        );
+                    }
+                    Err(err) => {
+                        eprintln!("[Aethel] wgpu init failed: {err}");
+                        let _ = window_arc.emit(
+                            "runtime_capability",
+                            serde_json::json!({
+                                "feature": "wgpu",
+                                "available": false,
+                                "reason": format!(
+                                    "Native GPU initialisation failed: {err}. \
+                                     Falling back to WebGL rendering."
+                                )
+                            }),
+                        );
+                    }
+                }
+
+                // ONNX Runtime probe — gated behind the "local-ai" feature flag
+                // so the binary size stays small on machines that don't need it.
+                #[cfg(feature = "local-ai")]
+                {
+                    use ort::{Environment, ExecutionProvider};
+                    let ort_ok = Environment::builder()
+                        .with_name("aethel")
+                        .with_execution_providers([ExecutionProvider::CPU(Default::default())])
+                        .build()
+                        .is_ok();
+
+                    let _ = window_arc.emit(
+                        "runtime_capability",
+                        serde_json::json!({
+                            "feature": "ort",
+                            "available": ort_ok,
+                            "reason": if ort_ok {
+                                "ONNX Runtime initialised — local AI inference available."
+                            } else {
+                                "ONNX Runtime failed to initialise — local AI inference \
+                                 unavailable. Using cloud AI."
+                            }
+                        }),
+                    );
+                }
+
+                println!("[Aethel] Runtime init complete.");
             });
+
             Ok(())
         })
         .manage(Mutex::new(RuntimeJobStore::default()))
@@ -199,7 +273,9 @@ fn main() {
             native_kernel_manifest,
             jobs_route,
             jobs_list,
-            jobs_cancel
+            jobs_cancel,
+            clusterize_mesh,
+            voxelize_scene_sdf
         ])
         .run(tauri::generate_context!())
         .expect("failed to run Aethel Studio Local");

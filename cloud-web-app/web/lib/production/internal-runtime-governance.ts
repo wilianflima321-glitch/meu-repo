@@ -390,6 +390,16 @@ export const INTERNAL_RUNTIME_GOVERNANCE_DECISIONS: InternalRuntimeGovernanceDec
     evidenceSignals: ['mode-selector', 'cost-receipt', 'context-pack'],
     nextAction: 'Keep new chat features inside AIChatPanelPro or AgentsWindow instead of reintroducing standalone chat shells.',
   },
+  {
+    modulePath: 'lib/ai/advanced-ai-provider.ts',
+    decision: 'hold',
+    ownerSurface: 'ai-provider',
+    boundary: 'server-only',
+    reason: 'Advanced AI providers govern LLM client connections and should avoid exposure on broad client surfaces.',
+    risks: ['privacy-risk', 'agent-safety-risk'],
+    evidenceSignals: ['provider-session', 'cost-receipt', 'approval-receipt'],
+    nextAction: 'Ensure connections run server-side with strict key-vault protection.',
+  },
 ]
 
 export function listInternalRuntimeGovernanceDecisions(

@@ -17,7 +17,7 @@ import type {
 } from './ui/settings-types';
 import { useSettingsUiState } from './ui/useSettingsUiState';
 
-function SettingsUIView({ className }: { className?: string }) {
+function SettingsUIView({ className, initialCategoryFilter }: { className?: string; initialCategoryFilter?: string }) {
   const { isModified, scope, setScope, settings } = useSettings();
   const {
     activeCategoryId,
@@ -36,86 +36,97 @@ function SettingsUIView({ className }: { className?: string }) {
     setShowJSON,
     showJSON,
     toggleCategory,
-  } = useSettingsUiState({ settings });
+  } = useSettingsUiState({ settings, initialCategoryFilter });
 
   const modifiedCount = Array.from(settings.keys()).filter(key => isModified(key)).length;
 
   return (
-    <div className={`flex h-full flex-col bg-[var(--aethel-surface-secondary)] ${className || ''}`}>
-      <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
+    <div className={`flex h-full flex-col ${className || ''}`} style={{ background: 'rgba(8,11,20,0.94)' }}>
+      {/* Premium settings header with integrated search */}
+      <div
+        className="relative flex items-center justify-between gap-3 border-b px-4 py-3 flex-shrink-0"
+        style={{
+          background: 'rgba(10,14,24,0.90)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderColor: 'rgba(148,163,184,.12)',
+          boxShadow: 'inset 0 -1px 0 rgba(255,255,255,.04)',
+        }}
+      >
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(59,130,246,.40)] to-transparent" />
         <div className="flex items-center gap-3">
-          <Settings className="h-5 w-5 text-[var(--aethel-text-tertiary)]" />
+          <div
+            className="flex h-8 w-8 items-center justify-center rounded-lg"
+            style={{ background: 'rgba(59,130,246,.15)', border: '1px solid rgba(59,130,246,.25)' }}
+          >
+            <Settings className="h-4 w-4 text-[var(--aethel-primary-light)]" />
+          </div>
           <div>
-            <span className="text-lg font-medium text-[var(--aethel-text-primary)]">Settings</span>
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">
-              Tune editor, workspace, and engine defaults in one place.
+            <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Settings</span>
+            <p className="text-[10px] text-[var(--aethel-text-quaternary)] font-mono uppercase tracking-wider mt-0.5">
+              Engine · Workspace · Editor
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setScope('user')}
-            className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-sm transition-colors ${
-              scope === 'user'
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]'
-            }`}
-          >
-            <User className="h-4 w-4" />
-            User
-          </button>
-          <button
-            type="button"
-            onClick={() => setScope('workspace')}
-            className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-sm transition-colors ${
-              scope === 'workspace'
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]'
-            }`}
-          >
-            <Folder className="h-4 w-4" />
-            Workspace
-          </button>
-          <div className="mx-1 h-6 w-px bg-[var(--aethel-surface-quaternary)]" />
-          <button
-            type="button"
-            onClick={() => setShowJSON(!showJSON)}
-            className={`rounded p-1.5 transition-colors ${
-              showJSON
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]'
-            }`}
-            title="Open settings as JSON"
-          >
-            <FileJson className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
 
-      <div className="border-b border-[var(--aethel-border-primary)] px-4 py-2">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--aethel-text-tertiary)]" />
+        {/* Integrated search bar */}
+        <div
+          className="flex flex-1 max-w-xs items-center gap-2 rounded-lg px-3 py-1.5"
+          style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(148,163,184,.14)' }}
+        >
+          <Search className="h-3.5 w-3.5 text-[var(--aethel-text-quaternary)] flex-shrink-0" />
           <input
             ref={searchInputRef}
-            type="text"
-            suppressHydrationWarning
+            type="search"
             value={searchQuery}
-            onChange={event => setSearchQuery(event.target.value)}
-            placeholder="Search settings, descriptions, or categories..."
-            className="w-full rounded-lg bg-[var(--aethel-surface-tertiary)] py-2 pl-10 pr-8 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:ring-1 focus:ring-[var(--aethel-info)]"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search settings…"
+            className="flex-1 bg-transparent text-xs text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] outline-none"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              aria-label="Clear settings search"
-              className="absolute right-3 top-1/2 -translate-y-1/2"
+              className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] transition-colors"
+              aria-label="Clear search"
             >
-              <X className="h-4 w-4 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]" />
+              <X className="h-3 w-3" />
             </button>
           )}
         </div>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {(['user', 'workspace'] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setScope(s)}
+              className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-all ${
+                scope === s
+                  ? 'bg-[rgba(59,130,246,.18)] text-[var(--aethel-primary-light)] border border-[rgba(59,130,246,.30)]'
+                  : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] border border-transparent'
+              }`}
+            >
+              {s === 'user' ? <User className="h-3 w-3" /> : <Folder className="h-3 w-3" />}
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+            </button>
+          ))}
+          <div className="mx-1 h-4 w-px bg-[var(--aethel-border-secondary)]" />
+          <button
+            type="button"
+            onClick={() => setShowJSON(!showJSON)}
+            className={`rounded-md p-1.5 transition-all border ${
+              showJSON
+                ? 'bg-[rgba(59,130,246,.18)] text-[var(--aethel-primary-light)] border-[rgba(59,130,246,.30)]'
+                : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] border-transparent'
+            }`}
+            title="Open settings as JSON"
+          >
+            <FileJson className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      <div className="border-b border-[var(--aethel-border-secondary)] px-4 py-1.5" style={{ borderColor: 'rgba(148,163,184,.08)' }}>
         <SettingsSummaryBar
           activeFilterLabel={activeFilterLabel}
           filteredCount={filteredSettings.length}
@@ -152,8 +163,8 @@ function SettingsUIView({ className }: { className?: string }) {
   );
 }
 
-export function SettingsUI({ className }: { className?: string }) {
-  return <SettingsUIView className={className} />;
+export function SettingsUI({ className, initialCategoryFilter }: { className?: string; initialCategoryFilter?: string }) {
+  return <SettingsUIView className={className} initialCategoryFilter={initialCategoryFilter} />;
 }
 
 export {

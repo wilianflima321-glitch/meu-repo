@@ -9,7 +9,7 @@ function read(path: string) {
 }
 
 describe('public trust center contract', () => {
-  const page = read('cloud-web-app/web/app/trust/page.tsx')
+  const page = read('cloud-web-app/web/app/trust/page.tsx') + read('cloud-web-app/web/app/trust/trustContent.ts')
   const footer = read('cloud-web-app/web/components/ui/PublicFooter.tsx')
   const nav = read('cloud-web-app/web/lib/navigation/surfaces.ts')
 
@@ -26,7 +26,7 @@ describe('public trust center contract', () => {
   it('keeps compliance language honest and avoids fake certification claims', () => {
     expect(page).toContain('SOC 2 preparation')
     expect(page).toContain('responsible disclosure')
-    expect(page).toContain('audit activity')
+    expect(page).toContain('Audit activity')
     expect(page).toContain('SLO/SLA')
     expect(page).not.toMatch(/\bSOC 2 certified\b/i)
     expect(page).not.toMatch(/\bISO 27001 certified\b/i)

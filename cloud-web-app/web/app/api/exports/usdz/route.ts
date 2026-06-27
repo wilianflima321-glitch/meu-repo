@@ -5,13 +5,18 @@
  */
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { prisma } from '@/lib/db'
+import { enqueueExportJob } from '@/lib/export/enqueue-export-job'
+import { requireAuth } from '@/lib/auth-server'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
-  const userId = req.headers.get('x-user-id')
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  let userId: string
+  try {
+    userId = requireAuth(req).userId
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   let body: { projectId?: string; sceneIds?: string[] }
   try {
@@ -25,15 +30,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'projectId is required' }, { status: 400 })
   }
 
-  const job = await prisma.renderJob.create({
-    data: {
-      projectId,
-      requestedBy: userId,
-      status: 'queued',
-      provider: 'internal',
-    }
+  const jobId = await enqueueExportJob({
+    format: 'usdz',
+    projectId,
+    userId,
+    sceneIds,
   })
-  const jobId = job.id
 
   return NextResponse.json({
     jobId,
@@ -42,6 +44,6 @@ export async function POST(req: NextRequest) {
     projectId,
     sceneIds,
     message: 'USDZ export job queued. Poll /api/render/jobs/{jobId} for progress.',
-    _pending: 'lib/integrations/usd not yet wired — job is a receipt stub.',
+    pollUrl: `/api/render/jobs/${jobId}`,
   }, { status: 202 })
 }

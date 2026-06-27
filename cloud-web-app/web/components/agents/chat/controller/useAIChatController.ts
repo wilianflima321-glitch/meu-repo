@@ -16,6 +16,7 @@ import type { ChatMessage, ProviderGateState } from '@/components/agents/chat/se
 import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
 import type { MessageContext } from '@/components/ide/AIChatPanelPro.types'
 import { useSceneDigest } from '@/lib/engine/useSceneDigest'
+import { useAethelContext } from '@/contexts/AethelContextRegistry'
 
 type UseAIChatControllerArgs = {
   currentModel: string
@@ -168,8 +169,10 @@ export function useAIChatController({
   setProviderGate,
 }: UseAIChatControllerArgs) {
   const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null)
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null)
   const requestAbortRef = useRef<AbortController | null>(null)
   const sceneDigest = useSceneDigest()
+  const aethelContext = useAethelContext()
 
   const tryServeLocalDemo = useCallback(
     (input: { message: string; profile: AdvancedProfile; tags?: string[]; reason: string }): boolean => {
@@ -263,6 +266,7 @@ export function useAIChatController({
       if (sceneDigest) {
         requestMessage += `\n\n[System Context - 3D Viewport State]\nCamera Position: ${sceneDigest.activeCameraPosition ? `[${sceneDigest.activeCameraPosition.map(v => v.toFixed(2)).join(', ')}]` : 'Unknown'}\nSelected Entities: ${sceneDigest.selectedEntities.length > 0 ? JSON.stringify(sceneDigest.selectedEntities) : 'None'}`
       }
+      requestMessage += aethelContext.toPromptSuffix()
       const requestMessages = nextMessages.map((entry, index) => ({
         role: entry.role,
         content:
@@ -346,6 +350,8 @@ export function useAIChatController({
           model: currentModel,
           messages: requestMessages,
           projectId,
+          agentId: selectedAgentId || undefined,
+          headers: aethelContext.toApiHeaders(),
           profileOverride: profileResolution.profile,
           signal: controller.signal,
         })
@@ -480,6 +486,8 @@ export function useAIChatController({
       setProviderGate,
       tryServeLocalDemo,
       sceneDigest,
+      aethelContext,
+      selectedAgentId,
     ]
   )
 
@@ -497,7 +505,9 @@ export function useAIChatController({
       handleSendMessage,
       handleStopGenerating,
       lastFailedMessage,
+      selectedAgentId,
+      setSelectedAgentId,
     }),
-    [handleClearChat, handleSendMessage, handleStopGenerating, lastFailedMessage]
+    [handleClearChat, handleSendMessage, handleStopGenerating, lastFailedMessage, selectedAgentId]
   )
 }

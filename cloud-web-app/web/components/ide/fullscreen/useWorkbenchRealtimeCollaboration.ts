@@ -48,7 +48,7 @@ type DecodedWorkbenchUser = {
 
 function decodeWorkbenchUser(): DecodedWorkbenchUser | null {
   if (typeof window === 'undefined') return null;
-  const rawToken = window.localStorage.getItem('token');
+  const rawToken = window.localStorage.getItem('aethel-token');
   if (!rawToken) return null;
 
   try {

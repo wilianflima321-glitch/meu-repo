@@ -25,6 +25,7 @@ import { capabilityResponse } from '@/lib/server/capability-response'
 import { loadProjectRulesContext } from '@/lib/server/project-rules'
 import { planAgentWorkforceForMission } from '@/lib/production/agent-workforce-topology'
 import { buildAgentRuntimeSpinePlan } from '@/lib/agents/agent-runtime-spine'
+import { withLegacyAiRouteDeprecation } from '@/lib/server/ai-route-deprecation'
 
 export const runtime = 'nodejs'
 
@@ -418,7 +419,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         },
       })
 
-      return new NextResponse(stream, {
+      return withLegacyAiRouteDeprecation(
+        new NextResponse(stream, {
         headers: {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache, no-transform',
@@ -434,7 +436,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             ? { 'X-Usage-Remaining-TokensPerMonth': String(meteringDecision.remaining.tokensPerMonth) }
             : {}),
         },
-      })
+      }),
+      );
     }
 
     const orchestrator = getOrchestrator()
@@ -514,7 +517,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     })
 
-    return new NextResponse(stream, {
+    return withLegacyAiRouteDeprecation(
+      new NextResponse(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache, no-transform',
@@ -530,7 +534,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           ? { 'X-Usage-Remaining-TokensPerMonth': String(meteringDecision.remaining.tokensPerMonth) }
           : {}),
       },
-    })
+    }),
+    );
   } catch (error) {
     if (leaseId) {
       await releaseConcurrencyLease(leaseId)
@@ -565,7 +570,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       evidenceRefs: ['agent:status-route', 'tool:multi-agent-orchestrator'],
     })
 
-    return NextResponse.json({
+    return withLegacyAiRouteDeprecation(NextResponse.json({
       agents,
       mode: ORCHESTRATOR_EXECUTION_MODE,
       capability: 'multi_agent_orchestration',
@@ -582,7 +587,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       availableModes: getAvailableModes(),
       agentRuntimeSpine,
       timestamp: Date.now(),
-    })
+    }));
   } catch (error) {
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped

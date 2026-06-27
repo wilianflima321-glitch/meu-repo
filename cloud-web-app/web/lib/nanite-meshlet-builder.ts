@@ -11,7 +11,7 @@ import * as THREE from 'three';
 
 import { DEFAULT_NANITE_CONFIG } from './nanite-virtualized-geometry-contracts';
 import type { Meshlet, MeshletCluster, NaniteConfig, VirtualizedMesh } from './nanite-virtualized-geometry-contracts';
-import { simplifyMeshQuadric } from './lod/auto-lod-pipeline';
+import { simplifyMeshQuadric } from './engine/lod/auto-lod-pipeline';
 
 export class MeshletBuilder {
   private config: NaniteConfig;

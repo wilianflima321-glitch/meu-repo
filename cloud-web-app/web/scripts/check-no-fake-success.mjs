@@ -159,11 +159,24 @@ function extractNextResponseCalls(content) {
     while (i < content.length && depth > 0) {
       const ch = content[i]
       const prev = content[i - 1]
+      const next = content[i + 1]
 
       if (quote) {
         if (ch === quote && prev !== '\\') {
           quote = null
         }
+      } else if (ch === '/' && next === '/') {
+        // Skip single line comment
+        while (i < content.length && content[i] !== '\n') {
+          i += 1
+        }
+      } else if (ch === '/' && next === '*') {
+        // Skip multi line comment
+        i += 2
+        while (i < content.length - 1 && !(content[i] === '*' && content[i+1] === '/')) {
+          i += 1
+        }
+        i += 1
       } else if (ch === '"' || ch === "'" || ch === '`') {
         quote = ch
       } else if (ch === '(') {

@@ -61,24 +61,28 @@ Object.defineProperty(window, 'matchMedia', {
 // MOCK ResizeObserver
 // ============================================================================
 
-globalThis.ResizeObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-}));
+globalThis.ResizeObserver = vi.fn().mockImplementation(function() {
+  return {
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  };
+});
 
 // ============================================================================
 // MOCK IntersectionObserver
 // ============================================================================
 
-globalThis.IntersectionObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-  root: null,
-  rootMargin: '',
-  thresholds: [],
-}));
+globalThis.IntersectionObserver = vi.fn().mockImplementation(function() {
+  return {
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+    root: null,
+    rootMargin: '',
+    thresholds: [],
+  };
+});
 
 // ============================================================================
 // MOCK fetch

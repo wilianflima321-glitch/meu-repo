@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useViewportStore } from '@/lib/viewport/useViewportStore';
+import { useAethelContext } from '@/contexts/AethelContextRegistry';
 
 import type { VFXGraph } from '@/components/editors/VFXGraphEditor';
 import type { VisualScript } from '@/components/visual-scripting/VisualScriptEditor';
@@ -66,6 +67,21 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
     () => objects.find((object) => object.id === selectedIds[0]) ?? null,
     [objects, selectedIds]
   );
+  const { setViewportSelection } = useAethelContext();
+
+  useEffect(() => {
+    if (!selectedObject) {
+      setViewportSelection(null);
+      return;
+    }
+    setViewportSelection({
+      id: selectedObject.id,
+      name: selectedObject.name,
+      type: selectedObject.type,
+      position: selectedObject.position,
+    });
+  }, [selectedObject, setViewportSelection]);
+
   const vfxGlowIntensity = useMemo(() => deriveVfxGlowIntensity(vfxGraph), [vfxGraph]);
   const abilityAccent = useMemo(() => deriveAbilityAccent(selectedAbility), [selectedAbility]);
 
@@ -93,7 +109,7 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
     setObjects((current) =>
       current.map((object) => (object.id === anchor.id ? { ...object, ...patch } : object))
     );
-  }, []);
+  }, [setObjects]);
 
   // handleObjectTransformChange agora está no store, mas mantemos compatibilidade caso algo precise
   const { handleObjectTransformChange } = useViewportStore();
@@ -139,7 +155,7 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
       }
       setAssetImportStatus(`${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} staged locally - ${result.error}`);
     });
-  }, [assetImportPersistence, objects, projectId]);
+  }, [assetImportPersistence, objects, projectId, setObjects, setSelectedIds]);
 
   const activeWorkflowLabel = getViewportWorkflowLabel(workflowTool);
   const { exportStatus, renderQuality, setRenderQuality, handleExportViewport } = useViewportExport({

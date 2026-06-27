@@ -19,6 +19,18 @@ wgpu = "0.19"
 winit = "0.29"
 pollster = "0.3"
 rapier3d = "0.18"
+# ONNX Runtime for local AI inference (optional — graceful fallback on init failure)
+ort = { version = "2", features = ["load-dynamic"], optional = true }
+# Secure direct HTTP for BYOK / sidecar downloads (no system proxy leakage)
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+# Geometry clusterizer + SDF voxelizer (Sprint V33)
+bytemuck = { version = "1", features = ["derive"] }
+base64 = "0.22"
+
+[features]
+default = []
+# Enable local ONNX inference when the hardware and runtime libraries are present
+local-ai = ["ort"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }

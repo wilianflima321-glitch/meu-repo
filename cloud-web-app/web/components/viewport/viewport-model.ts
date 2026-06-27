@@ -12,7 +12,7 @@ export type ViewportRenderTarget = RuntimeModeId
 export type ViewportSceneObject = {
   id: string
   name: string
-  type: 'mesh' | 'light' | 'camera'
+  type: 'mesh' | 'light' | 'camera' | 'generated-mesh'
   geometry?: 'box' | 'sphere' | 'capsule' | 'cylinder' | 'plane'
   color: string
   position: [number, number, number]
@@ -21,6 +21,12 @@ export type ViewportSceneObject = {
   locked?: boolean
   visible?: boolean
   asset?: ViewportAssetImportMetadata
+  meshUrl?: string
+  generationMetadata?: {
+    prompt: string;
+    model: string;
+    qualityScore?: number;
+  }
 }
 
 export type AethelViewport3DProps = {

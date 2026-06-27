@@ -30,8 +30,18 @@ const meteringMocks = vi.hoisted(() => ({
   releaseConcurrencyLease: vi.fn(),
 }))
 
+const creditWalletMocks = vi.hoisted(() => ({
+  reserveCredits: vi.fn().mockResolvedValue({ reservationId: 'res-1' }),
+  settleCredits: vi.fn().mockResolvedValue(undefined),
+  cancelReservation: vi.fn().mockResolvedValue({ catch: vi.fn() }),
+  checkCreditQuota: vi.fn().mockResolvedValue(undefined),
+  createInsufficientCreditsResponse: vi.fn(),
+  calculateTokenCost: vi.fn(() => 10),
+}))
+
 const planLimitMocks = vi.hoisted(() => ({
-  checkModelAccess: vi.fn(),
+  checkModelAccess: vi.fn().mockResolvedValue({ allowed: true }),
+  recordTokenUsage: vi.fn().mockResolvedValue(undefined),
 }))
 
 const projectRulesMocks = vi.hoisted(() => ({
@@ -44,6 +54,9 @@ const prismaMocks = vi.hoisted(() => ({
     project: {
       findFirst: vi.fn(),
     },
+    user: {
+      findUnique: vi.fn(),
+    },
   },
 }))
 
@@ -54,6 +67,7 @@ vi.mock('@/lib/metering', () => meteringMocks)
 vi.mock('@/lib/plan-limits', () => planLimitMocks)
 vi.mock('@/lib/db', () => prismaMocks)
 vi.mock('@/lib/server/project-rules', () => projectRulesMocks)
+vi.mock('@/lib/credit-wallet', () => creditWalletMocks)
 vi.mock('@/lib/server/simulation-guard', () => ({
   blockIfSimulationDisabled: vi.fn(() => null),
 }))
@@ -80,6 +94,7 @@ describe('api/ai/chat agent handoff context', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     authMocks.requireAuth.mockReturnValue({ userId: 'user-1', email: 'builder@example.com' })
+    prismaMocks.prisma.user.findUnique.mockResolvedValue({ plan: 'starter', byokKey: null })
     entitlementMocks.requireEntitlementsForUser.mockResolvedValue({ plan: { limits: { concurrent: 2 } } })
     meteringMocks.acquireConcurrencyLease.mockResolvedValue({ leaseId: 'lease-1' })
     meteringMocks.estimateTokensFromText.mockReturnValue(42)

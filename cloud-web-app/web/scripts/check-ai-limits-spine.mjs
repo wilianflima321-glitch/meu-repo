@@ -50,6 +50,7 @@ const coreLimitedRoutes = [
   route('app/api/ai/inline-edit/route.ts', 'coreLimited', 'AI_INLINE_RATE_LIMIT', 'AI_INLINE_EDIT', '/api/ai/inline-edit'),
   route('app/api/ai/query/route.ts', 'coreLimited', 'AI_QUERY_RATE_LIMIT', 'ai.query', '/api/ai/query'),
   route('app/api/ai/stream/route.ts', 'coreLimited', 'AI_CORE_RATE_LIMIT', 'AI_STREAM', '/api/ai/stream'),
+  route('app/api/ai/voice/realtime-session/route.ts', 'coreLimited', 'AI_CORE_RATE_LIMIT', 'ai.voice.realtime-session', '/api/ai/voice/realtime-session'),
 ]
 
 const statusLimitedRoutes = [
@@ -66,6 +67,7 @@ const readLimitedRoutes = [
   route('app/api/ai/change/readiness/route.ts', 'readLimited', 'AI_CHANGE_READ_RATE_LIMIT', 'ai.change.readiness', '/api/ai/change/readiness'),
   route('app/api/ai/change/runs/route.ts', 'readLimited', 'AI_CHANGE_READ_RATE_LIMIT', 'ai.change.runs', '/api/ai/change/runs'),
   route('app/api/ai/director/[projectId]/route.ts', 'readLimited', 'AI_DIRECTOR_READ_RATE_LIMIT', 'ai.director.read', '/api/ai/director/[projectId]'),
+  route('app/api/ai/models/registry/route.ts', 'readLimited', 'AI_AGENT_READ_RATE_LIMIT', 'ai.models.registry', '/api/ai/models/registry'),
   route('app/api/ai/suggestions/route.ts', 'readLimited', 'AI_SUGGESTIONS_RATE_LIMIT', 'ai.suggestions.read', '/api/ai/suggestions'),
   route('app/api/ai/thinking/[sessionId]/route.ts', 'readLimited', 'AI_THINKING_RATE_LIMIT', 'ai.thinking.session', '/api/ai/thinking/[sessionId]'),
   route('app/api/ai/trace/[traceId]/route.ts', 'readLimited', 'AI_TRACE_RATE_LIMIT', 'ai.trace.read', '/api/ai/trace/[traceId]'),

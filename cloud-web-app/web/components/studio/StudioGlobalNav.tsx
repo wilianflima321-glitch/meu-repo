@@ -63,14 +63,14 @@ export default function StudioGlobalNav({ title, subtitle, rightSlot, className 
               {title ? <h1 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)] sm:text-xl">{title}</h1> : null}
               {subtitle ? <p className="mt-0.5 max-w-2xl text-xs text-[var(--aethel-text-tertiary)] sm:text-sm">{subtitle}</p> : null}
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="hidden flex-wrap items-center gap-2 md:flex">
               {!compact ? <NavLinkRow links={STUDIO_SECONDARY_LINKS} pathname={pathname} /> : null}
               {rightSlot}
             </div>
           </div>
 
           {!compact ? (
-            <nav aria-label="Studio primary navigation" className="block overflow-x-auto pb-1 no-scrollbar">
+            <nav aria-label="Studio primary navigation" className="hidden overflow-x-auto pb-1 md:block no-scrollbar">
               <div className="flex min-w-max items-center gap-2">
                 <NavLinkRow links={STUDIO_PRIMARY_LINKS} pathname={pathname} />
               </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { aiService } from '@/lib/ai-service';
@@ -38,6 +39,15 @@ import {
   applyAgentHandoffContextToMessages,
   loadAgentHandoffContext,
 } from '@/lib/production/agent-handoff-context'
+import { withLegacyAiRouteDeprecation } from '@/lib/server/ai-route-deprecation';
+
+const PROVIDER_HEADER_MAP: Record<string, string> = {
+  openai: 'x-aethel-byok-openai',
+  anthropic: 'x-aethel-byok-anthropic',
+  google: 'x-aethel-byok-google',
+  openrouter: 'x-aethel-byok-openrouter',
+  groq: 'x-aethel-byok-groq',
+};
 
 interface AIChatRequestBody {
   messages?: unknown;
@@ -145,7 +155,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const estimatedPromptTokens = estimateTokensFromText(promptText);
     const estimatedTotalTokens = estimatedPromptTokens + maxTokens;
 
-    const isByok = req.headers.get('x-aethel-byok-active') === '1';
+    const userRow = await prisma.user.findUnique({
+      where: { id: auth.userId },
+      select: { plan: true, byokKey: true }
+    });
+
+    const isByok = req.headers.get('x-aethel-byok-active') === '1' || !!userRow?.byokKey;
 
     if (isByok) {
       const rateLimitedByok = enforceAiCoreRateLimit({
@@ -164,6 +179,25 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           { error: modelCheck.code || 'MODEL_NOT_ALLOWED', message: modelCheck.reason || 'Model not allowed' },
           { status: 403 }
         )
+      }
+    }
+
+    // Resolve BYOK key
+    let byokKey: string | undefined = undefined;
+    if (isByok) {
+      const resolvedProvider = requestedProvider || inferProviderFromModel(requestedModel);
+      if (resolvedProvider) {
+        const headerName = PROVIDER_HEADER_MAP[resolvedProvider];
+        byokKey = req.headers.get(headerName) || req.headers.get('x-aethel-byok-key') || undefined;
+      }
+      if (!byokKey && userRow?.byokKey) {
+        try {
+          const { decryptString } = await import('@/lib/server/crypto');
+          byokKey = decryptString(userRow.byokKey);
+        } catch (e) {
+          const { logger } = await import('@/lib/observability/logger');
+          logger.error('Failed to decrypt database BYOK key', e);
+        }
       }
     }
 
@@ -392,6 +426,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         provider: requestedProvider,
         temperature: readNumber(body.temperature),
         maxTokens: resolvedMaxTokens,
+        userId: auth.userId,
+        isBYOK: isByok,
+        apiKeyOverride: byokKey,
       });
 
       const actualTokens = response.tokensUsed || 0;
@@ -403,7 +440,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         reservation = null;
       }
 
-      return NextResponse.json(
+      return withLegacyAiRouteDeprecation(
+        NextResponse.json(
         {
           content: response.content,
           provider: response.provider,
@@ -434,6 +472,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
               : {}),
           },
         }
+      ),
       );
     } catch (err) {
       if (reservation) {

@@ -10,7 +10,7 @@ import {
 
 describe('aethel dashboard model', () => {
   it('keeps mission control tabs focused before support and explore surfaces', () => {
-    expect(MISSION_CONTROL_TABS).toEqual(['overview', 'ai-chat', 'projects'])
+    expect(MISSION_CONTROL_TABS).toEqual(['overview', 'projects', 'activity'])
     expect(OPERATIONS_TABS).toEqual(['billing', 'wallet', 'connectivity'])
     expect(EXPLORE_TABS).toEqual(['templates', 'content-creation', 'unreal'])
     expect(DASHBOARD_TABS).not.toContain('download')
@@ -22,6 +22,7 @@ describe('aethel dashboard model', () => {
   it('keeps tab groups aligned with the full dashboard taxonomy', () => {
     const combined = [
       ...DASHBOARD_TAB_GROUPS.mission,
+      'ai-chat',
       ...DASHBOARD_TAB_GROUPS.operations,
       ...DASHBOARD_TAB_GROUPS.explore,
     ]

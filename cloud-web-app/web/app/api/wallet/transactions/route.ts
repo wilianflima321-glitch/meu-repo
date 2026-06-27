@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
       timestamp: entry.createdAt.toISOString(),
     }));
 
-    return NextResponse.json(transactions);
+    return NextResponse.json({ transactions });
   } catch (error) {
     routeLogger.error('Wallet transactions error:', error);
     const mapped = apiErrorToResponse(error);

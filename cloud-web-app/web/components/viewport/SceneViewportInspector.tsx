@@ -27,6 +27,7 @@ import {
   type GizmoPivotMode,
 } from '@/lib/viewport/gizmo-elite-controls'
 import { ViewportAssetQualityCard } from '@/components/viewport/ViewportAssetQualityCard'
+import { GenerationInspector } from '@/components/viewport/GenerationInspector'
 import { Vector3Input } from '@/components/ui/ScrubbableInput'
 
 function radToDeg(value: number) {
@@ -349,6 +350,9 @@ export function SceneViewportInspector({
               )}
               {selectedObject.asset ? (
                 <ViewportAssetQualityCard asset={selectedObject.asset} />
+              ) : null}
+              {selectedObject.generationMetadata || selectedObject.type === 'generated-mesh' ? (
+                <GenerationInspector metadata={selectedObject.generationMetadata} />
               ) : null}
             </div>
           ) : (

@@ -245,8 +245,9 @@ export async function GET(
       user.plan || undefined
     );
 
-    // Redirect to dashboard with token cookie
-    const response = NextResponse.redirect(new URL('/dashboard', req.url));
+    // Redirect to next target with token cookie
+    const nextTarget = req.cookies.get('oauth_next')?.value || '/dashboard';
+    const response = NextResponse.redirect(new URL(nextTarget, req.url));
     
     response.cookies.set('token', token, {
       httpOnly: true,
@@ -256,8 +257,9 @@ export async function GET(
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
 
-    // Clear OAuth state cookie
+    // Clear OAuth state cookies
     response.cookies.delete('oauth_state');
+    response.cookies.delete('oauth_next');
 
     return response;
   } catch (err) {

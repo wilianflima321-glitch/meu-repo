@@ -361,4 +361,110 @@ export const DEFAULT_SETTINGS: SettingDefinition[] = [
     description: 'Update preview in real-time while editing.',
     category: ['Aethel Engine', 'Material Editor'],
   },
+
+  // ── Engine: Nanite Virtualized Geometry ──────────────────────────────────
+  {
+    key: 'engine.nanite.viewport',
+    type: 'boolean',
+    default: false,
+    description: 'Enable Nanite virtualized geometry in the viewport (LOD streaming). Requires a high-end GPU.',
+    category: ['Engine', 'Rendering'],
+  },
+  {
+    key: 'engine.nanite.meshletSize',
+    type: 'number',
+    default: 128,
+    description: 'Target triangle count per Nanite meshlet cluster.',
+    category: ['Engine', 'Rendering'],
+    minimum: 64,
+    maximum: 512,
+  },
+
+  // ── Engine: Simulation ───────────────────────────────────────────────────
+  {
+    key: 'engine.simulation.gravity',
+    type: 'number',
+    default: -9.81,
+    description: 'Gravity constant applied to Rapier physics world (m/s²).',
+    category: ['Engine', 'Simulation'],
+    minimum: -50,
+    maximum: 0,
+  },
+  {
+    key: 'engine.simulation.enabled',
+    type: 'boolean',
+    default: false,
+    description: 'Run physics simulation in the editor viewport.',
+    category: ['Engine', 'Simulation'],
+  },
+  {
+    key: 'engine.simulation.fixedTimestep',
+    type: 'number',
+    default: 60,
+    description: 'Physics tick rate in Hz.',
+    category: ['Engine', 'Simulation'],
+    minimum: 30,
+    maximum: 120,
+  },
+
+  // ── Engine: Controls ─────────────────────────────────────────────────────
+  {
+    key: 'engine.controls.flySpeed',
+    type: 'number',
+    default: 5,
+    description: 'Fly-camera speed (units/sec).',
+    category: ['Engine', 'Controls'],
+    minimum: 0.5,
+    maximum: 100,
+  },
+  {
+    key: 'engine.controls.orbitSensitivity',
+    type: 'number',
+    default: 1.0,
+    description: 'Orbit camera mouse sensitivity multiplier.',
+    category: ['Engine', 'Controls'],
+    minimum: 0.1,
+    maximum: 5,
+  },
+  {
+    key: 'engine.controls.invertY',
+    type: 'boolean',
+    default: false,
+    description: 'Invert vertical look axis in fly-camera mode.',
+    category: ['Engine', 'Controls'],
+  },
+
+  // ── Engine: Audio ────────────────────────────────────────────────────────
+  {
+    key: 'engine.audio.masterVolume',
+    type: 'number',
+    default: 1.0,
+    description: 'Master audio volume in editor (0–1).',
+    category: ['Engine', 'Audio'],
+    minimum: 0,
+    maximum: 1,
+  },
+  {
+    key: 'engine.audio.spatialEnabled',
+    type: 'boolean',
+    default: true,
+    description: 'Enable Web Audio API spatial sound in editor playback.',
+    category: ['Engine', 'Audio'],
+  },
+
+  // ── Engine: VR ──────────────────────────────────────────────────────────
+  {
+    key: 'engine.vr.enabled',
+    type: 'boolean',
+    default: false,
+    description: 'Enable WebXR VR mode in viewport.',
+    category: ['Engine', 'VR'],
+  },
+  {
+    key: 'engine.vr.roomScale',
+    type: 'boolean',
+    default: true,
+    description: 'Use room-scale tracking (standing VR) when available.',
+    category: ['Engine', 'VR'],
+  },
 ];

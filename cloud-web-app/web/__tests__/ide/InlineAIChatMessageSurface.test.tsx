@@ -68,10 +68,10 @@ describe('InlineAIChatMessageSurface', () => {
       />
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /Abrir diff de revisao/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Open review diff/i }))
     expect(onReviewCode).toHaveBeenCalledWith('const nextValue = true')
 
-    fireEvent.click(screen.getByRole('button', { name: /Aplicar bloco de codigo ao editor/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Apply code block/i }))
     expect(onApplyCode).toHaveBeenCalledWith('const nextValue = true')
   })
 })

@@ -4,6 +4,7 @@ import { useCallback } from 'react'
 
 import { getAuthHeaders } from './aethel-dashboard-location-utils'
 import { ONBOARDING_WIZARD_DISMISSED_KEY } from './aethel-dashboard-constants'
+import { scaffoldProjectFromTemplate } from '@/lib/onboarding/scaffold-client'
 
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 
@@ -67,10 +68,30 @@ export function useDashboardOnboardingActions({
     if (data?.name?.trim()) {
       setNewProjectName(data.name.trim())
     }
-    if (data?.template) {
-      handleTemplateSelect(data.template)
+    if (!hasToken || !data?.template) {
+      if (data?.template) handleTemplateSelect(data.template)
+      return
     }
-  }, [handleDismissOnboardingWizard, handleTemplateSelect, persistOnboardingProgress, setNewProjectName])
+
+    void (async () => {
+      const result = await scaffoldProjectFromTemplate({
+        templateId: data.template,
+        name: data.name,
+        description: data.description,
+        headers: getAuthHeaders(),
+      })
+
+      if (result.ok) {
+        persistOnboardingProgress('complete_step', 'first_project')
+        if (result.openUrl && typeof window !== 'undefined') {
+          window.location.assign(result.openUrl)
+          return
+        }
+      }
+
+      handleTemplateSelect(data.template)
+    })()
+  }, [handleDismissOnboardingWizard, handleTemplateSelect, hasToken, persistOnboardingProgress, setNewProjectName])
 
   const handleOnboardingSkip = useCallback(() => {
     handleDismissOnboardingWizard('skip')

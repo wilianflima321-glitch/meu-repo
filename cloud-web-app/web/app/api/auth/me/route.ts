@@ -85,6 +85,11 @@ export async function GET(request: NextRequest) {
 
     const trial = trialStatus(user.trialEndsAt);
 
+    const authHeader = request.headers.get('authorization');
+    const tokenStr = (authHeader && authHeader.startsWith('Bearer ')) 
+      ? authHeader.substring(7) 
+      : request.cookies.get('token')?.value;
+
     return NextResponse.json({
       ...user,
       credits,
@@ -92,6 +97,7 @@ export async function GET(request: NextRequest) {
       trialEndsAt: user.trialEndsAt?.toISOString() ?? null,
       plan: plan || user.plan || (trial?.isActive ? 'starter_trial' : 'free'),
       authenticated: true,
+      token: tokenStr || null,
     });
   } catch (error) {
     const err = error as Error & { code?: string };
