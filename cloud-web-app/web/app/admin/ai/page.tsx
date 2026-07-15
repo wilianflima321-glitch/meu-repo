@@ -1,0 +1,249 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Activity, Cpu, Gauge } from 'lucide-react';
+
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
+import { AiAgentsAdminPanel } from '../ai-agents/AiAgentsAdminPanel';
+import { AiTrainingAdminPanel } from '../ai-training/AiTrainingAdminPanel';
+import { AiMonitorAdminPanel } from '../ai-monitor/AiMonitorAdminPanel';
+
+interface AiSettings {
+  model: string;
+  creditCost: number;
+  maxTokens: number;
+  policy: string;
+  enabled: boolean;
+}
+
+export default function AdminAI() {
+  const [aiSettings, setAiSettings] = useState<AiSettings>({
+    model: 'gpt-4',
+    creditCost: 0.01,
+    maxTokens: 1000,
+    policy: 'Block harmful content',
+    enabled: true,
+  });
+  const [environment, setEnvironment] = useState<'staging' | 'production'>('staging');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [showAgentsPanel, setShowAgentsPanel] = useState(false);
+  const [showMonitorPanel, setShowMonitorPanel] = useState(false);
+  const [showTrainingPanel, setShowTrainingPanel] = useState(false);
+
+  const environmentLabels: Record<'staging' | 'production', string> = {
+    staging: 'Homologa??o',
+    production: 'Produ??o',
+  };
+
+  const fetchSettings = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/admin/ai/settings?env=${environment}`);
+      if (!res.ok) throw new Error('Failed to load AI settings');
+      const json = await res.json();
+      setAiSettings(json.data);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error loading settings');
+    } finally {
+      setLoading(false);
+    }
+  }, [environment]);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
+  useEffect(() => {
+    const legacy = new URLSearchParams(window.location.search).get('legacy');
+    if (legacy === 'agents') setShowAgentsPanel(true);
+    if (legacy === 'monitor') setShowMonitorPanel(true);
+    if (legacy === 'training') setShowTrainingPanel(true);
+  }, []);
+
+  const handleUpdate = async () => {
+    try {
+      setSaving(true);
+      const res = await fetch('/api/admin/ai/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...aiSettings, environment }),
+      });
+      if (!res.ok) throw new Error('Failed to save settings');
+      await fetchSettings();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error saving settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const statusLabel = useMemo(() => (aiSettings.enabled ? 'Ativa' : 'Pausada'), [aiSettings.enabled]);
+
+  return (
+    <div className='p-6 max-w-6xl mx-auto'>
+      <AdminPageHeader
+        className='mb-6'
+        title='Aethel AI Administration'
+        meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
+        actions={(
+          <div className='flex gap-2'>
+            <select
+              value={environment}
+              onChange={(e) => setEnvironment(e.target.value as typeof environment)}
+              className='border p-2 rounded text-sm'
+            >
+              <option value='staging'>Staging</option>
+              <option value='production'>Production</option>
+            </select>
+            <button type="button"
+              onClick={fetchSettings}
+              className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
+            >
+              Atualizar
+            </button>
+          </div>
+        )}
+      />
+
+      {error && (
+        <div className='bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4'>
+          {error}
+        </div>
+      )}
+
+      <AdminSummaryGrid
+        className='mb-6'
+        columns={3}
+        items={[
+          {
+            icon: Activity,
+            label: 'Status',
+            value: statusLabel,
+            tone: aiSettings.enabled ? 'success' : 'default',
+            alert: !aiSettings.enabled,
+          },
+          {
+            icon: Cpu,
+            label: 'Modelo',
+            value: aiSettings.model,
+          },
+          {
+            icon: Gauge,
+            label: 'Max tokens',
+            value: aiSettings.maxTokens,
+          },
+        ]}
+      />
+
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-6 rounded-lg shadow'>
+        <div className='mb-4 flex items-center justify-between'>
+          <h2 className='text-xl font-semibold'>Settings</h2>
+          {loading && <span className='text-xs text-[var(--aethel-text-tertiary)]'>Loading...</span>}
+        </div>
+
+        <div className='mb-4'>
+          <label className='block mb-2'>IA Ativa</label>
+          <input
+            type='checkbox'
+            checked={aiSettings.enabled}
+            onChange={(e) => setAiSettings({ ...aiSettings, enabled: e.target.checked })}
+          />
+        </div>
+
+        <div className='mb-4'>
+          <label className='block mb-2'>Modelo de IA</label>
+          <input
+            type='text'
+            value={aiSettings.model}
+            onChange={(e) => setAiSettings({ ...aiSettings, model: e.target.value })}
+            className='border p-2 w-full'
+          />
+        </div>
+        <div className='mb-4'>
+          <label className='block mb-2'>Cost per Credit</label>
+          <input
+            type='number'
+            step='0.01'
+            value={aiSettings.creditCost}
+            onChange={(e) => setAiSettings({ ...aiSettings, creditCost: parseFloat(e.target.value) || 0 })}
+            className='border p-2 w-full'
+          />
+        </div>
+        <div className='mb-4'>
+          <label className='block mb-2'>Max Tokens</label>
+          <input
+            type='number'
+            value={aiSettings.maxTokens}
+            onChange={(e) => setAiSettings({ ...aiSettings, maxTokens: parseInt(e.target.value, 10) || 0 })}
+            className='border p-2 w-full'
+          />
+        </div>
+        <div className='mb-4'>
+          <label className='block mb-2'>Policy</label>
+          <textarea
+            value={aiSettings.policy}
+            onChange={(e) => setAiSettings({ ...aiSettings, policy: e.target.value })}
+            className='border p-2 w-full'
+            rows={3}
+          />
+        </div>
+        <button type="button"
+          onClick={handleUpdate}
+          disabled={saving}
+          aria-label="Save AI configuration changes"
+          className='bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50'
+        >
+          {saving ? 'Saving...' : 'Save changes'}
+        </button>
+      </div>
+
+      <details
+        id="agents"
+        className="mt-6 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] p-4"
+        open={showAgentsPanel}
+        onToggle={(event) => setShowAgentsPanel(event.currentTarget.open)}
+      >
+        <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+          Agent fleet
+        </summary>
+        <div className="mt-4">
+          <AiAgentsAdminPanel />
+        </div>
+      </details>
+
+      <details
+        id="monitor"
+        className="mt-6 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] p-4"
+        open={showMonitorPanel}
+        onToggle={(event) => setShowMonitorPanel(event.currentTarget.open)}
+      >
+        <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+          Live AI monitor
+        </summary>
+        <div className="mt-4">
+          <AiMonitorAdminPanel />
+        </div>
+      </details>
+
+      <details
+        id="training"
+        className="mt-6 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] p-4"
+        open={showTrainingPanel}
+        onToggle={(event) => setShowTrainingPanel(event.currentTarget.open)}
+      >
+        <summary className="cursor-pointer text-sm font-semibold text-[var(--aethel-text-primary)]">
+          Training jobs
+        </summary>
+        <div className="mt-4">
+          <AiTrainingAdminPanel />
+        </div>
+      </details>
+    </div>
+  );
+}

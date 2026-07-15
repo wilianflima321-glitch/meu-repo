@@ -1,0 +1,9 @@
+﻿2025-10-31T02:33:43.9472581Z ##[group]Run # Run Playwright tests and generate an HTML report in playwright-report
+2025-10-31T02:33:43.9473571Z [36;1m# Run Playwright tests and generate an HTML report in playwright-report[0m
+2025-10-31T02:33:43.9474489Z [36;1mnpx playwright test --project=chromium --reporter=html || true[0m
+2025-10-31T02:33:43.9516875Z shell: /usr/bin/bash -e {0}
+2025-10-31T02:33:43.9517118Z ##[endgroup]
+2025-10-31T02:33:45.2044706Z Error: Project(s) "chromium" not found. Available projects: ""
+2025-10-31T02:33:45.2047779Z     at filterProjects (/home/runner/work/meu-repo/meu-repo/node_modules/playwright/lib/runner/projectUtils.js:80:11)
+2025-10-31T02:33:45.2049228Z     at runTests (/home/runner/work/meu-repo/meu-repo/node_modules/playwright/lib/program.js:217:42)
+2025-10-31T02:33:45.2050623Z     at async i.<anonymous> (/home/runner/work/meu-repo/meu-repo/node_modules/playwright/lib/program.js:71:7)

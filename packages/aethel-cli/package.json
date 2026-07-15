@@ -1,0 +1,12 @@
+{
+  "name": "@aethel/cli",
+  "version": "0.0.0-private",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "aethel": "./src/index.mjs"
+  },
+  "files": [
+    "src"
+  ]
+}

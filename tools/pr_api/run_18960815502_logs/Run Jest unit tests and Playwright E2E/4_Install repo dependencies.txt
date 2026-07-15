@@ -1,0 +1,7 @@
+﻿2025-10-31T02:27:11.0985901Z ##[group]Run # use npm install instead of npm ci because this repository does not include a lockfile
+2025-10-31T02:27:11.0986660Z [36;1m# use npm install instead of npm ci because this repository does not include a lockfile[0m
+2025-10-31T02:27:11.0987154Z [36;1mnpm install --no-audit --no-fund[0m
+2025-10-31T02:27:11.1102816Z shell: /usr/bin/bash -e {0}
+2025-10-31T02:27:11.1103135Z ##[endgroup]
+2025-10-31T02:27:21.4991284Z 
+2025-10-31T02:27:21.5005096Z added 70 packages in 10s

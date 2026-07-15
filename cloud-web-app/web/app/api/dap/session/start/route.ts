@@ -1,0 +1,72 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-server';
+import { requireFeatureForUser } from '@/lib/entitlements';
+import { apiErrorToResponse } from '@/lib/api-errors';
+import { startDapSession } from '@/lib/server/dap-runtime';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/dap/session/start/route');
+
+interface StartSessionRequest {
+  type: string;
+  request: 'launch' | 'attach';
+  name: string;
+  program?: string;
+  args?: string[];
+  cwd?: string;
+  env?: Record<string, string>;
+  port?: number;
+  host?: string;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const user = requireAuth(request);
+		await requireFeatureForUser(user.userId, 'dap');
+
+    const config: StartSessionRequest = await request.json();
+
+    if (!config.type || !config.request) {
+      return NextResponse.json(
+        { success: false, error: 'Type and request are required' },
+        { status: 400 }
+      );
+    }
+
+    const session = await startDapSession({
+      userId: user.userId,
+      type: config.type,
+      workspaceRoot: config.cwd,
+      cwd: config.cwd,
+      env: config.env,
+      adapter: (config as any).adapter,
+    });
+
+    return NextResponse.json({
+      success: true,
+      sessionId: session.sessionId,
+      message: 'Debug session started',
+    });
+  } catch (error) {
+    routeLogger.error('Failed to start debug session:', error);
+    const code = (error as any)?.code;
+    if (code === 'DAP_UNSUPPORTED_TYPE') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'DAP_UNSUPPORTED_TYPE',
+          message:
+            'Unsupported DAP type or missing configured adapter. Configure AETHEL_DAP_NODE_CMD/AETHEL_DAP_NODE_ARGS (Node) or install/configure the corresponding adapter.'
+        },
+        { status: 422 }
+      );
+    }
+
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return NextResponse.json(
+      { success: false, error: 'Failed to start session' },
+      { status: 500 }
+    );
+  }
+}

@@ -1,0 +1,783 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+/*
+ * AETHEL ENGINE - UNIFIED DESIGN SYSTEM V2
+ * SOURCE: AETHEL_DESIGN_MANIFESTO_2026.md
+ * THEME: Deep Space Dark (Aethel)
+ */
+
+@layer base {
+  :root {
+    /* Premium identity system */
+    --aethel-brand-pure-black: #000000;
+    --aethel-brand-ink: #0a0a0a;
+    --aethel-brand-graphite: #1f1f23;
+    --aethel-brand-mist: #a1a1aa;
+    --aethel-brand-paper: #fafafa;
+
+    /* Aethel L5 core */
+    --aethel-bg: #0a0a0f;
+    --aethel-panel: rgba(13, 18, 31, 0.82);
+    --aethel-panel-strong: rgba(10, 14, 24, 0.94);
+    --aethel-panel-soft: rgba(18, 24, 39, 0.62);
+
+    /* App chrome background */
+    --aethel-app-background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(59, 130, 246, 0.08), transparent 70%),
+      radial-gradient(800px 500px at 90% 10%, rgba(139, 92, 246, 0.06), transparent 70%),
+      linear-gradient(180deg, rgba(10, 10, 15, 0) 0%, rgba(10, 10, 15, 0.4) 100%);
+
+    /* Shared shadow tokens */
+    --aethel-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+    --aethel-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+    --aethel-shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.45), 0 4px 6px -4px rgba(0, 0, 0, 0.25);
+    --aethel-shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+    --aethel-shadow-glow: 0 0 0 1px rgba(96, 165, 250, 0.2), 0 0 24px rgba(96, 165, 250, 0.18);
+
+    /* Motion tokens */
+    --aethel-duration-fast: 120ms;
+    --aethel-duration-normal: 200ms;
+    --aethel-duration-slow: 320ms;
+    --aethel-ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --aethel-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* WCAG 2.2 AA Focus & Target Size */
+    --aethel-focus: #60a5fa;
+    --aethel-focus-ring: 2px solid var(--aethel-primary);
+    --aethel-focus-offset: 2px;
+    --aethel-target-size-min: 44px;
+    --aethel-target-size-dense: 32px;
+
+    /* Surfaces */
+    --aethel-surface-primary: #0a0a0f;
+    --aethel-surface-secondary: #101622;
+    --aethel-surface-tertiary: #171f2d;
+    --aethel-surface-quaternary: #202a3a;
+    /* High-contrast surface for QR codes, barcodes and print-style content */
+    --aethel-surface-contrast: #ffffff;
+
+    /* Text */
+    --aethel-text-primary: #f7f9fc;
+    --aethel-text-secondary: #c6cfdd;
+    --aethel-text-tertiary: #94a0b8;
+    --aethel-text-quaternary: #6d7891;
+    /* Inverse text used on saturated primary/success/error buttons */
+    --aethel-text-inverse: #ffffff;
+
+    /* Borders */
+    --aethel-border-primary: rgba(148, 163, 184, 0.18);
+    --aethel-border-secondary: rgba(148, 163, 184, 0.12);
+    --aethel-border-subtle: rgba(255, 255, 255, 0.10);
+    --aethel-border-focus: rgba(96, 165, 250, 0.65);
+
+    /* Semantic */
+    --aethel-primary: #3b82f6;
+    --aethel-primary-light: #93c5fd;
+    --aethel-primary-dark: #1d4ed8;
+    --aethel-primary-50: #eff6ff;
+    --aethel-primary-900: #1e3a8a;
+    --aethel-secondary: #14b8a6;
+    --aethel-secondary-light: #5eead4;
+    --aethel-secondary-dark: #0f766e;
+    --aethel-accent: #8b5cf6;
+    --aethel-accent-light: #c4b5fd;
+    --aethel-accent-dark: #7c3aed;
+    --aethel-info: #38bdf8;
+    --aethel-info-light: #a5f3fc;
+    --aethel-info-dark: #0ea5e9;
+    --aethel-success: #22c55e;
+    --aethel-success-light: #86efac;
+    --aethel-success-dark: #16a34a;
+    --aethel-warning: #f59e0b;
+    --aethel-warning-light: #fcd34d;
+    --aethel-warning-dark: #d97706;
+    --aethel-error: #ef4444;
+    --aethel-error-light: #fca5a5;
+    --aethel-error-dark: #dc2626;
+    --aethel-text-muted: #64748b;
+
+    /* Typography */
+    --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-mono: var(--font-geist-mono), "SFMono-Regular", "Cascadia Code", ui-monospace, monospace;
+
+    /* ── SPRINT 3: Premium Neon & Glow Tokens ── */
+    --aethel-neon-cyan:    #22d3ee;
+    --aethel-neon-indigo:  #818cf8;
+    --aethel-neon-amber:   #fbbf24;
+    --aethel-neon-emerald: #34d399;
+    --aethel-neon-violet:  #a78bfa;
+
+    --aethel-glow-cyan:    0 0 8px rgba(34,211,238,.45),   0 0 24px rgba(34,211,238,.18);
+    --aethel-glow-indigo:  0 0 8px rgba(129,140,248,.45),  0 0 24px rgba(129,140,248,.18);
+    --aethel-glow-amber:   0 0 8px rgba(251,191,36,.55),   0 0 24px rgba(251,191,36,.22);
+    --aethel-glow-emerald: 0 0 8px rgba(52,211,153,.45),   0 0 24px rgba(52,211,153,.18);
+    --aethel-glow-violet:  0 0 8px rgba(167,139,250,.45),  0 0 24px rgba(167,139,250,.18);
+
+    /* Glass surfaces */
+    --aethel-glass-bg:     rgba(16, 22, 36, 0.72);
+    --aethel-glass-border: rgba(255, 255, 255, 0.08);
+    --aethel-glass-blur:   16px;
+
+    /* ── RGB channel tokens (enable rgba() neon glows without color-mix hacks) ── */
+    --aethel-info-rgb:     56, 189, 248;
+    --aethel-primary-rgb:  59, 130, 246;
+    --aethel-warning-rgb:  245, 158, 11;
+    --aethel-success-rgb:  34, 197, 94;
+    --aethel-accent-rgb:   139, 92, 246;
+    --aethel-error-rgb:    239, 68, 68;
+
+    /*
+     * ── AETHEL GLOBAL DESIGN SYSTEM (AGDS) — rigid semantic names ──
+     * These are aliases, not new colors: they resolve through the existing
+     * palette above, so switching `data-theme="light"` (which only overrides
+     * the aliased tokens) re-themes these automatically with zero extra
+     * declarations. Introduced so IDE chrome (docking, panels, dividers,
+     * hover/active states) has ONE name to reach for instead of hand-rolled
+     * `color-mix(in srgb, var(--aethel-*) NN%, transparent)` one-offs.
+     */
+    --aethel-bg-base: var(--aethel-bg);
+    --aethel-bg-panel: var(--aethel-surface-secondary);
+    --aethel-bg-panel-strong: var(--aethel-surface-tertiary);
+    --aethel-border-divider: var(--aethel-border-secondary);
+    --aethel-interactive-hover: color-mix(in srgb, var(--aethel-surface-tertiary) 55%, transparent);
+    --aethel-interactive-active: color-mix(in srgb, var(--aethel-surface-quaternary) 70%, transparent);
+
+    /* 4px baseline grid — use these instead of arbitrary p-[Npx] classes */
+    --aethel-space-1: 4px;
+    --aethel-space-2: 8px;
+    --aethel-space-3: 12px;
+    --aethel-space-4: 16px;
+    --aethel-space-5: 20px;
+    --aethel-space-6: 24px;
+    --aethel-space-7: 32px;
+    --aethel-space-8: 40px;
+
+    --aethel-radius-sm: 6px;
+    --aethel-radius-md: 10px;
+    --aethel-radius-lg: 16px;
+  }
+
+  html {
+    @apply antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }
+
+  input,
+  select,
+  textarea {
+    background: transparent;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .codicon {
+    display: inline-flex;
+    width: 1em;
+    height: 1em;
+    align-items: center;
+    justify-content: center;
+    vertical-align: -0.125em;
+  }
+
+  .codicon::before {
+    content: '';
+    display: block;
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.72;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 35%),
+      radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.12), transparent 30%),
+      linear-gradient(180deg, #0a0a0f 0%, #0b1018 48%, #0a0a0f 100%);
+    color: var(--aethel-text-primary);
+    font-family: var(--font-sans);
+  }
+
+  :where(button, [role='button'], a, input, select, textarea, [tabindex]):focus-visible {
+    outline: var(--aethel-focus-ring);
+    outline-offset: var(--aethel-focus-offset);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--aethel-info) 18%, transparent);
+  }
+
+  /* Target Size Enforcement (WCAG 2.2 AA) */
+  .aethel-target-min {
+    min-width: var(--aethel-target-size-min);
+    min-height: var(--aethel-target-size-min);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aethel-target-dense {
+    min-width: var(--aethel-target-size-dense);
+    min-height: var(--aethel-target-size-dense);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.28);
+    border-radius: 5px;
+    border: 3px solid var(--aethel-surface-primary);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.4);
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(59, 130, 246, 0.3);
+  }
+
+  /*
+   * LIGHT THEME - overrides when the root carries data-theme="light" or the
+   * user's system preference is light AND no explicit override is present.
+   *
+   * Rationale (audit V5 finding #5.1):
+   *   - Dark-only products miss 35-45% of daytime mobile users.
+   *   - The Aethel ThemeContext already emits 'dark' | 'light' | 'hc-*'; this
+   *     block is what gives those preferences visible effect on the global
+   *     chrome (buttons, surfaces, borders, text).
+   *   - Semantic tokens (primary/success/error) stay anchored for brand
+   *     identity; only surface + text + border shift.
+   */
+  :root[data-theme="light"] {
+    --aethel-bg: #f7f9fc;
+    --aethel-panel: rgba(255, 255, 255, 0.86);
+    --aethel-panel-strong: rgba(255, 255, 255, 0.96);
+    --aethel-panel-soft: rgba(248, 250, 252, 0.78);
+
+    --aethel-app-background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(59, 130, 246, 0.10), transparent 70%),
+      radial-gradient(800px 500px at 90% 10%, rgba(139, 92, 246, 0.08), transparent 70%),
+      linear-gradient(180deg, rgba(247, 249, 252, 0) 0%, rgba(247, 249, 252, 0.6) 100%);
+
+    --aethel-shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.08);
+    --aethel-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.10), 0 2px 4px -2px rgba(15, 23, 42, 0.06);
+    --aethel-shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.12), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
+    --aethel-shadow-xl: 0 25px 50px -12px rgba(15, 23, 42, 0.16);
+    --aethel-shadow-glow: 0 0 0 1px rgba(59, 130, 246, 0.18), 0 0 24px rgba(59, 130, 246, 0.14);
+
+    /* Surfaces flip to near-white with progressively darker depth */
+    --aethel-surface-primary: #ffffff;
+    --aethel-surface-secondary: #f7f9fc;
+    --aethel-surface-tertiary: #eef2f7;
+    --aethel-surface-quaternary: #e2e8f0;
+    /* The QR / print surface deliberately stays pure white */
+    --aethel-surface-contrast: #ffffff;
+
+    /* Text inverts depth - near-black primary, lighter greys for hierarchy */
+    --aethel-text-primary: #0f172a;
+    --aethel-text-secondary: #334155;
+    --aethel-text-tertiary: #64748b;
+    --aethel-text-quaternary: #94a3b8;
+    /* White foreground on saturated buttons still works, so keep it */
+    --aethel-text-inverse: #ffffff;
+
+    --aethel-border-primary: rgba(15, 23, 42, 0.14);
+    --aethel-border-secondary: rgba(15, 23, 42, 0.10);
+    --aethel-border-subtle: rgba(15, 23, 42, 0.06);
+    --aethel-border-focus: rgba(59, 130, 246, 0.55);
+
+    --aethel-text-muted: #475569;
+  }
+
+  /*
+   * System-preference fallback: only applies when the root does NOT have an
+   * explicit data-theme attribute. This respects user choice (ThemeContext
+   * always sets data-theme) while matching OS when unconfigured.
+   */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme]) {
+      color-scheme: light;
+    }
+  }
+
+  /*
+   * Respect prefers-reduced-motion - disable non-essential transitions to
+   * comply with WCAG 2.1 SC 2.3.3. Keeps focus ring and opacity animations
+   * which carry state information.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Grid Background Effect */
+  .bg-grid-aethel {
+    background-size: 40px 40px;
+    background-position: center;
+    background-color: var(--aethel-surface-primary);
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--aethel-border-secondary) 70%, transparent) 1px, transparent 1px),
+      linear-gradient(to right, color-mix(in srgb, var(--aethel-border-secondary) 70%, transparent) 1px, transparent 1px);
+  }
+
+  .aethel-panel-soft {
+    border: 1px solid var(--aethel-border-subtle);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.82));
+    box-shadow: 0 20px 60px rgba(2, 6, 23, 0.28);
+  }
+
+  .aethel-divider-soft {
+    border-color: var(--aethel-border-subtle);
+  }
+
+  .aethel-control {
+    border: 1px solid var(--aethel-border-secondary);
+    background: color-mix(in srgb, var(--aethel-surface-tertiary) 78%, transparent);
+    color: var(--aethel-text-secondary);
+    transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .aethel-control:hover {
+    border-color: color-mix(in srgb, var(--aethel-info) 28%, var(--aethel-border-secondary));
+    background: color-mix(in srgb, var(--aethel-surface-quaternary) 82%, transparent);
+    color: var(--aethel-text-primary);
+  }
+
+  .aethel-control:focus-visible {
+    outline: none;
+    border-color: var(--aethel-border-focus);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--aethel-info) 18%, transparent);
+  }
+
+  /* ── L5 Glow utility family (use rgb tokens, composable with hover:) ── */
+  .aethel-glow-cyan {
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-info-rgb), 0.25),
+      0 0 16px rgba(var(--aethel-info-rgb), 0.18),
+      0 0 40px rgba(var(--aethel-info-rgb), 0.06);
+  }
+  .aethel-glow-primary {
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-primary-rgb), 0.28),
+      0 0 16px rgba(var(--aethel-primary-rgb), 0.18),
+      0 0 40px rgba(var(--aethel-primary-rgb), 0.06);
+  }
+  .aethel-glow-warning {
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-warning-rgb), 0.30),
+      0 0 16px rgba(var(--aethel-warning-rgb), 0.20),
+      0 0 40px rgba(var(--aethel-warning-rgb), 0.08);
+  }
+  .aethel-glow-success {
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-success-rgb), 0.25),
+      0 0 16px rgba(var(--aethel-success-rgb), 0.16),
+      0 0 40px rgba(var(--aethel-success-rgb), 0.05);
+  }
+  .aethel-glow-accent {
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-accent-rgb), 0.28),
+      0 0 16px rgba(var(--aethel-accent-rgb), 0.18),
+      0 0 40px rgba(var(--aethel-accent-rgb), 0.06);
+  }
+
+  /* ── Card lift: premium hover elevation pattern ── */
+  .aethel-card-lift {
+    transition: transform 160ms var(--aethel-ease-snappy), box-shadow 160ms var(--aethel-ease-snappy);
+  }
+  .aethel-card-lift:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 0 0 1px rgba(var(--aethel-info-rgb), 0.22),
+      0 20px 40px -8px rgba(0, 0, 0, 0.35),
+      0 0 32px rgba(var(--aethel-info-rgb), 0.07);
+  }
+
+  /* ── Tab underline slide (CSS-only, no framer-motion dependency) ── */
+  .aethel-tab-indicator {
+    position: relative;
+  }
+  .aethel-tab-indicator::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 1px;
+    background: linear-gradient(90deg, var(--aethel-info), var(--aethel-primary));
+    box-shadow: 0 0 8px rgba(var(--aethel-info-rgb), 0.55);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 180ms var(--aethel-ease-snappy);
+  }
+  .aethel-tab-indicator[aria-selected="true"]::after {
+    transform: scaleX(1);
+  }
+
+  /* ── Glass panel (canonical glassmorphism card) ── */
+  .aethel-glass-panel {
+    background: color-mix(in srgb, var(--aethel-surface-secondary) 72%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--aethel-border-secondary);
+  }
+
+  /* ── Focus ring — checkbox/radio grade ── */
+  .aethel-focus-checkbox:focus-visible {
+    outline: 2px solid var(--aethel-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(var(--aethel-info-rgb), 0.18);
+  }
+}
+
+/* ============================================================================
+ * MOBILE NAV CLEARANCE
+ * Scrollable surfaces tagged `has-mobile-nav` must reserve space so their last
+ * rows are not hidden behind the fixed bottom navigation (shown only < md).
+ * ============================================================================ */
+@media (max-width: 767px) {
+  .has-mobile-nav {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* ============================================================================
+ * ACCESSIBILITY: High Contrast Support
+ * Tightens borders and secondary copy for users with stronger contrast needs.
+ * ============================================================================ */
+@media (prefers-contrast: high) {
+  :root {
+    --aethel-border-primary: rgba(255, 255, 255, 0.4);
+    --aethel-border-secondary: rgba(255, 255, 255, 0.3);
+    --aethel-text-secondary: #e2e8f0;
+    --aethel-text-tertiary: #cbd5e1;
+  }
+}
+
+/* ============================================================================
+ * ANIMATION KEYFRAMES
+ * Standard enter/exit patterns per design tokens
+ * ============================================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0);     }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+/* ── SPRINT 3: Premium Animations ── */
+@keyframes aethel-glow-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(34,211,238,.30), 0 0 18px rgba(34,211,238,.10); }
+  50%       { box-shadow: 0 0 12px rgba(34,211,238,.55), 0 0 36px rgba(34,211,238,.25); }
+}
+@keyframes aethel-amber-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(251,191,36,.35), 0 0 18px rgba(251,191,36,.12); }
+  50%       { box-shadow: 0 0 14px rgba(251,191,36,.65), 0 0 40px rgba(251,191,36,.28); }
+}
+@keyframes aethel-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+@keyframes aethel-beacon {
+  0%   { opacity: 1;   transform: scale(1);   }
+  70%  { opacity: 0;   transform: scale(2.2); }
+  100% { opacity: 0;   transform: scale(2.2); }
+}
+@keyframes aethel-progress-stripe {
+  from { background-position: 0 0; }
+  to   { background-position: 32px 0; }
+}
+@keyframes aethel-spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes aethel-float {
+  0%, 100% { transform: translateY(0);    }
+  50%       { transform: translateY(-4px); }
+}
+@keyframes aethel-slide-right {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+
+/* ── Utility Classes ── */
+.animate-glow-cyan   { animation: aethel-glow-pulse  2s ease-in-out infinite; }
+.animate-glow-amber  { animation: aethel-amber-pulse 2s ease-in-out infinite; }
+.animate-float       { animation: aethel-float        3s ease-in-out infinite; }
+.animate-spin-slow   { animation: aethel-spin-slow    4s linear infinite; }
+.animate-slide-right { animation: aethel-slide-right .25s var(--aethel-ease-snappy) both; }
+
+.aethel-shimmer {
+  background: linear-gradient(90deg,
+    var(--aethel-surface-tertiary) 0%,
+    var(--aethel-surface-quaternary) 40%,
+    var(--aethel-surface-tertiary) 80%);
+  background-size: 600px 100%;
+  animation: aethel-shimmer 1.6s ease-in-out infinite;
+}
+
+.aethel-glass {
+  background:        var(--aethel-glass-bg);
+  border:            1px solid var(--aethel-glass-border);
+  backdrop-filter:   blur(var(--aethel-glass-blur));
+  -webkit-backdrop-filter: blur(var(--aethel-glass-blur));
+}
+
+.aethel-neon-border-cyan   { border-color: rgba(34,211,238,.35);  box-shadow: inset 0 0 0 1px rgba(34,211,238,.15); }
+.aethel-neon-border-amber  { border-color: rgba(251,191,36,.45);  box-shadow: inset 0 0 0 1px rgba(251,191,36,.20); }
+.aethel-neon-border-indigo { border-color: rgba(129,140,248,.35); box-shadow: inset 0 0 0 1px rgba(129,140,248,.15); }
+
+/* Progress bar — animated stripes for "rendering" state */
+.aethel-progress-stripe {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    rgba(255,255,255,.06) 8px,
+    rgba(255,255,255,.06) 16px
+  );
+  background-size: 32px 100%;
+  animation: aethel-progress-stripe .9s linear infinite;
+}
+
+/* Beacon dot (Live / Rendering indicator) */
+.aethel-beacon {
+  position: relative;
+  display: inline-flex;
+}
+.aethel-beacon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: currentColor;
+  animation: aethel-beacon 1.6s cubic-bezier(.215,.61,.355,1) infinite;
+}
+
+/* ============================================================================
+ * FRENTE A40 — APPLY GHOST PREVIEW (Monaco decorations)
+ * Lines staged for removal by a pending AI diff. Added lines are rendered as
+ * green view zones styled inline in useApplyGhostPreview.ts.
+ * ============================================================================ */
+.aethel-apply-ghost-removed {
+  background: color-mix(in srgb, var(--aethel-error) 14%, transparent) !important;
+  box-shadow: inset 2px 0 0 0 color-mix(in srgb, var(--aethel-error) 70%, transparent);
+}
+
+.aethel-apply-ghost-removed-glyph {
+  background: color-mix(in srgb, var(--aethel-error) 60%, transparent);
+  width: 4px !important;
+  margin-left: 3px;
+  border-radius: 2px;
+}
+
+/* ============================================================================
+ * AETHEL DESIGN SYSTEM — EXTENDED UTILITY CLASSES (Sprint Visual)
+ * ============================================================================ */
+
+/* Neon glow on interactive primary buttons */
+.aethel-btn-primary-neon {
+  background: linear-gradient(120deg, var(--aethel-primary), var(--aethel-info));
+  box-shadow: 0 0 0 0 rgba(59,130,246,0);
+  transition: box-shadow .25s ease, brightness .15s ease;
+}
+.aethel-btn-primary-neon:hover {
+  box-shadow: 0 0 16px rgba(59,130,246,.45), 0 0 40px rgba(34,211,238,.18);
+  filter: brightness(1.08);
+}
+.aethel-btn-primary-neon:active {
+  filter: brightness(.94);
+}
+
+/* Deep glassmorphism — studio panels, inspector, outliner.
+ * (Previously duplicated as a second, always-overridden `@layer utilities`
+ * rule with a different gradient/shadow recipe — that dead rule was removed
+ * and this one, the one that actually renders, was tokenized.) */
+.aethel-panel {
+  background: var(--aethel-panel);
+  border: 1px solid var(--aethel-border-secondary);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+.aethel-panel-strong {
+  background: var(--aethel-panel-strong);
+  border: 1px solid var(--aethel-border-primary);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+/* Vault deep-shadow (BYOK / Security panels) */
+.aethel-vault {
+  background: rgba(6,9,18,0.96);
+  border: 1px solid rgba(59,130,246,.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    inset 0 -1px 0 rgba(0,0,0,.35),
+    0 0 0 1px rgba(0,0,0,.4),
+    0 24px 48px rgba(0,0,0,.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Neon top-line accent (used on active panels, rendering cards) */
+.aethel-neon-topline-cyan::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,.65) 40%, rgba(59,130,246,.50) 70%, transparent);
+  border-radius: 1px 1px 0 0;
+  pointer-events: none;
+}
+.aethel-neon-topline-amber::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(251,191,36,.65) 40%, rgba(234,179,8,.50) 70%, transparent);
+  border-radius: 1px 1px 0 0;
+  pointer-events: none;
+}
+
+/* Cyberpunk grid overlay (studio runboard) */
+.aethel-grid-overlay {
+  background-image:
+    linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Processing center card — render queue active state */
+.aethel-processing-card {
+  background: rgba(10,14,24,0.88);
+  border: 1px solid rgba(34,211,238,.22);
+  box-shadow: inset 0 0 20px rgba(34,211,238,.04), 0 4px 16px rgba(0,0,0,.45);
+}
+
+/* Collapsible step list indicator (AI reasoning trace) */
+.aethel-step-active {
+  border-left: 2px solid rgba(34,211,238,.70);
+  padding-left: 8px;
+  background: rgba(34,211,238,.05);
+  border-radius: 0 4px 4px 0;
+}
+.aethel-step-done {
+  border-left: 2px solid rgba(16,185,129,.45);
+  padding-left: 8px;
+}
+.aethel-step-pending {
+  border-left: 2px solid rgba(148,163,184,.18);
+  padding-left: 8px;
+}
+
+/* Reflection success tag (AI reasoning) */
+.aethel-tag-reflection {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(16,185,129,.15);
+  border: 1px solid rgba(16,185,129,.30);
+  color: #6ee7b7;
+}
+
+/* Native experimental badge keyframe (amber subtle pulse) */
+@keyframes aethel-amber-beacon {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .65; }
+}
+.animate-amber-beacon { animation: aethel-amber-beacon 1.8s ease-in-out infinite; }
+
+/* Sidebar slide-in animation for collapsible studio panels */
+@keyframes aethel-slide-in-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes aethel-slide-in-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.aethel-panel-enter-left  { animation: aethel-slide-in-left  .2s var(--aethel-ease-snappy) both; }
+.aethel-panel-enter-right { animation: aethel-slide-in-right .2s var(--aethel-ease-snappy) both; }
+
+/* Dense compact row (Unreal-style inspector rows) */
+.aethel-row-dense {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  transition: background .1s ease;
+}
+.aethel-row-dense:hover {
+  background: rgba(255,255,255,.03);
+}
+
+/* ============================================================================
+ * PRINT STYLES
+ * ============================================================================ */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  nav, footer, .no-print {
+    display: none !important;
+  }
+}

@@ -1,0 +1,5 @@
+2025-10-31T02:27:03.3350000Z Job is waiting for a hosted runner to come online.
+2025-10-31T02:27:03.3300000Z Requested labels: ubuntu-latest
+2025-10-31T02:27:03.3300000Z Job defined at: wilianflima321-glitch/meu-repo/.github/workflows/ci-playwright.yml@refs/heads/infra/playwright-ci-ensemble-workflow-fix
+2025-10-31T02:27:03.3300000Z Waiting for a runner to pick up this job...
+2025-10-31T02:27:03.3350000Z Job is about to start running on the hosted runner: GitHub Actions 1000000005

@@ -1,0 +1,111 @@
+'use client';
+
+import WorkbenchEditorCanvas from './WorkbenchEditorCanvas';
+import WorkbenchSplitEditorSurface from './WorkbenchSplitEditorSurface';
+import {
+  WorkbenchEditorEmptyState,
+  WorkbenchEditorErrorState,
+  WorkbenchEditorLoadingState,
+} from './WorkbenchEditorStates';
+import type { WorkbenchEditorSurfaceProps } from './WorkbenchEditorSurface.types';
+
+export default function WorkbenchEditorSurface({
+  activeFile,
+  secondaryFile,
+  splitEditorGroups,
+  splitEditorOpen,
+  splitActivePane,
+  splitDirection,
+  isReadingFile,
+  fileError,
+  fullAccessActive,
+  collaborationPeers,
+  collaborationSession,
+  collaborationNativeBindingEnabled,
+  projectId,
+  primaryEditorRef,
+  secondaryEditorRef,
+  editorRef,
+  setSplitActivePane,
+  setSecondaryFile,
+  setActiveFile,
+  setNextOpenTarget,
+  setSplitEditorOpen,
+  setEditorDiagnostics,
+  setSecondaryEditorDiagnostics,
+  setEditorDocumentSymbols,
+  setSecondaryEditorDocumentSymbols,
+  onInlineApplyResult,
+  onRequestFullAccess,
+  onSaveFile,
+  onCursorPresenceChange,
+  onSelectionPresenceChange,
+  onCursorStatusChange,
+  onSelectionStatusChange,
+}: WorkbenchEditorSurfaceProps) {
+  if (isReadingFile) {
+    return <WorkbenchEditorLoadingState />;
+  }
+
+  if (fileError) {
+    return <WorkbenchEditorErrorState error={fileError} />;
+  }
+
+  if (!activeFile) {
+    return <WorkbenchEditorEmptyState />;
+  }
+
+  const canvasSharedProps = {
+    projectId,
+    fullAccessActive,
+    collaborationPeers,
+    collaborationSession,
+    collaborationNativeBindingEnabled,
+    primaryEditorRef,
+    secondaryEditorRef,
+    editorRef,
+    setActiveFile,
+    setSecondaryFile,
+    setEditorDiagnostics,
+    setSecondaryEditorDiagnostics,
+    setEditorDocumentSymbols,
+    setSecondaryEditorDocumentSymbols,
+    setSplitActivePane,
+    onInlineApplyResult,
+    onRequestFullAccess,
+    onSaveFile,
+    onCursorPresenceChange,
+    onSelectionPresenceChange,
+    onCursorStatusChange,
+    onSelectionStatusChange,
+  };
+
+  if (!splitEditorOpen) {
+    return (
+      <WorkbenchEditorCanvas
+        fileState={activeFile}
+        pane="primary"
+        {...canvasSharedProps}
+      />
+    );
+  }
+
+  return (
+    <WorkbenchSplitEditorSurface
+      activeFile={activeFile}
+      secondaryFile={secondaryFile}
+      splitEditorGroups={splitEditorGroups}
+      splitActivePane={splitActivePane}
+      splitDirection={splitDirection}
+      editorRef={editorRef}
+      primaryEditorRef={primaryEditorRef}
+      secondaryEditorRef={secondaryEditorRef}
+      setSplitActivePane={setSplitActivePane}
+      setSecondaryFile={setSecondaryFile}
+      setActiveFile={setActiveFile}
+      setNextOpenTarget={setNextOpenTarget}
+      setSplitEditorOpen={setSplitEditorOpen}
+      canvasSharedProps={canvasSharedProps}
+    />
+  );
+}

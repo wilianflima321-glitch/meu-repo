@@ -1,0 +1,194 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+import Image from 'next/image'
+import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
+import TurnstileField, { isTurnstileClientConfigured } from '@/components/auth/TurnstileField'
+import { analytics } from '@/lib/analytics'
+import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
+import { saveToken } from '@/lib/auth'
+
+type AuthResponse = {
+  access_token?: string
+  error?: string
+  message?: string
+}
+
+const DEFAULT_MISSION = 'Create a first web project with chat and live preview'
+const REGISTER_HIGHLIGHTS = [
+  'Project setup and onboarding stay connected.',
+  'First value opens before advanced tools.',
+]
+const REGISTER_STATS = [
+  { value: '90s', label: 'first step' },
+  { value: '1', label: 'path' },
+  { value: 'Live', label: 'activity' },
+]
+
+const REGISTER_OAUTH_PROVIDERS = [
+  { id: 'github' as const, label: 'GitHub', mark: 'GH' },
+  { id: 'google' as const, label: 'Google', mark: 'G' },
+]
+
+function AuthProviderMark({ mark }: { mark: string }) {
+  return (
+    <span className="grid h-6 w-6 place-items-center border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[10px] font-bold tracking-[-0.02em] text-[var(--aethel-text-primary)]">
+      {mark}
+    </span>
+  )
+}
+
+export default function RegisterPageV2() {
+  const search = useBrowserSearch()
+  const searchParams = useMemo(() => new URLSearchParams(search), [search])
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [acceptTerms, setAcceptTerms] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const requestedPlan = useMemo(() => searchParams.get('plan')?.trim() || 'starter', [searchParams])
+  const isHumanVerificationPending = isTurnstileClientConfigured() && !turnstileToken
+
+  const requireHumanVerification = () => {
+    if (!isHumanVerificationPending) {
+      return true
+    }
+
+    setFormError('Complete human verification to continue.')
+    return false
+  }
+
+  const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!email.trim() || !password) return setFormError('Enter your email and password to create the account.')
+    if (password.length < 8) return setFormError('Use at least 8 characters for the password.')
+    if (password !== confirmPassword) return setFormError('Passwords do not match.')
+    if (!acceptTerms) return setFormError('You must agree to the Terms of Service and Privacy Policy to create an account.')
+    if (!requireHumanVerification()) return
+
+    setIsSubmitting(true)
+    setFormError(null)
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() || undefined, email: email.trim(), password, turnstileToken }),
+      })
+      const payload = (await response.json().catch(() => ({}))) as AuthResponse
+      if (!response.ok) {
+        setFormError(payload.error || payload.message || 'Failed to create account.')
+        analytics?.track?.('error', 'error_api', { metadata: { source: 'register-form', status: response.status } })
+        return
+      }
+      if (payload.access_token) {
+        saveToken(payload.access_token)
+      }
+      analytics?.track?.('user', 'register', { metadata: { source: 'auth-register', planIntent: requestedPlan } })
+      window.location.assign(`/dashboard?onboarding=1&source=register&mission=${encodeURIComponent(DEFAULT_MISSION)}`)
+    } catch {
+      setFormError('Network failure while creating account. Try again.')
+      analytics?.track?.('error', 'error_api', { metadata: { source: 'register-form', reason: 'network' } })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const startOAuth = (provider: 'github' | 'google') => {
+    analytics?.track?.('user', 'oauth_start', { label: provider, metadata: { source: 'register-form', planIntent: requestedPlan } })
+    window.location.href = `/api/auth/oauth/${provider}`
+  }
+
+  return (
+    <main className="relative min-h-screen overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-8 text-[var(--aethel-text-primary)] sm:px-6 lg:py-10">
+        <a href="#register-form" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-sm">Skip to the registration form</a>
+        <div className="pointer-events-none absolute inset-0 bg-grid-aethel opacity-45" />
+
+        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-[1120px] items-center">
+          <div className="grid w-full gap-5 lg:grid-cols-[460px_minmax(0,1fr)] lg:items-stretch">
+            <section className="mx-auto w-full max-w-[460px] rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-8 py-8 shadow-[var(--aethel-shadow-xl)] backdrop-blur-md lg:mx-0">
+              <div className="mb-7 flex items-center justify-between gap-3">
+                <Link href="/" className="inline-flex items-center gap-2 px-1 text-sm text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-primary)]"><ArrowLeft className="h-4 w-4" /> Back</Link>
+                <span className="border-l border-[color-mix(in_srgb,var(--aethel-primary)_42%,transparent)] pl-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-primary-light)]">{requestedPlan}</span>
+              </div>
+
+              <div className="mb-7">
+                <div className="mb-4 flex items-center gap-3"><Image src="/branding/aethel-mark.svg" alt="Aethel" width={36} height={36} sizes="36px" className="shadow-[0_0_0_1px_var(--aethel-border-primary)]" priority /><span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]">Aethel Studio</span></div>
+                <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[var(--aethel-text-primary)]">Create account</h1>
+                <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">Open Studio with your first project ready.</p>
+              </div>
+
+              <form id="register-form" onSubmit={handleRegister} className="space-y-4" noValidate aria-describedby={formError ? 'register-form-error' : undefined}>
+                <div className="space-y-2"><label htmlFor="name" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Name</label><input id="name" name="name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="Your name" /></div>
+                <div className="space-y-2"><label htmlFor="email" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Email</label><input id="email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="you@company.com" /></div>
+                <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><label htmlFor="password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Password</label><input id="password" name="password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="8+ characters" /></div><div className="space-y-2"><label htmlFor="confirm-password" className="text-sm font-medium text-[var(--aethel-text-secondary)]">Confirm</label><input id="confirm-password" name="confirm-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} required aria-invalid={Boolean(formError)} className="h-12 w-full rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/70 px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_58%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]" placeholder="Repeat password" /></div></div>
+                {/* Terms & Privacy consent — click-wrap required */}
+                <div className="flex items-start gap-3 py-1">
+                  <div className="flex h-5 items-center">
+                    <input
+                      id="accept-terms"
+                      name="acceptTerms"
+                      type="checkbox"
+                      checked={acceptTerms}
+                      onChange={(e) => setAcceptTerms(e.target.checked)}
+                      required
+                      aria-required="true"
+                      className="aethel-focus-checkbox h-4.5 w-4.5 cursor-pointer rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] text-[var(--aethel-info)] accent-[var(--aethel-info)] transition-shadow duration-150 checked:shadow-[0_0_8px_rgba(56,189,248,0.40)]"
+                    />
+                  </div>
+                  <label htmlFor="accept-terms" className="text-xs leading-5 text-[var(--aethel-text-secondary)] select-none cursor-pointer">
+                    I agree to the{' '}
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)] underline transition-colors"
+                    >
+                      Terms of Service
+                    </Link>{' '}
+                    and{' '}
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)] underline transition-colors"
+                    >
+                      Privacy Policy
+                    </Link>
+                    .
+                  </label>
+                </div>
+
+                <TurnstileField action="register" onTokenChange={setTurnstileToken} />
+                {formError ? <div id="register-form-error" className="border-l border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)]" role="alert" aria-live="polite">{formError}</div> : null}
+                <button
+                  type="submit"
+                  disabled={isSubmitting || isHumanVerificationPending || !acceptTerms}
+                  className="h-12 w-full bg-[var(--aethel-primary)] text-sm font-semibold text-white transition hover:bg-[var(--aethel-primary-light)] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSubmitting ? 'Creating account...' : 'Create account and open Studio'}
+                </button>
+              </form>
+
+              <div className="my-5 flex items-center gap-3"><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /><span className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">or</span><div className="h-px flex-1 bg-[var(--aethel-border-primary)]" /></div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {REGISTER_OAUTH_PROVIDERS.map((provider) => (
+                  <button key={provider.id} type="button" onClick={() => startOAuth(provider.id)} className="inline-flex h-11 items-center justify-center gap-2 border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)]/55 text-sm text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]">
+                    <AuthProviderMark mark={provider.mark} />
+                    {provider.label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">Already have an account? <Link href="/login" className="font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-text-primary)]">Sign in</Link></p>
+            </section>
+
+            <AuthExperiencePanel eyebrow="First access" domainLabel="Project first" title="Start with context, not clutter." description="Create the workspace and open the first useful action." highlights={REGISTER_HIGHLIGHTS} stats={REGISTER_STATS} />
+          </div>
+        </div>
+    </main>
+  )
+}

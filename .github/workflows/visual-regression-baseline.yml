@@ -1,0 +1,60 @@
+name: Visual Regression - Capture Baseline
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 5 * * 0' # weekly on Sunday 05:00 UTC
+
+jobs:
+  capture-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Start dev server (background)
+        run: |
+          npm run dev &
+          sleep 5
+
+      - name: Capture baseline screenshots
+        run: |
+          node tools/ide/visual-regression/capture_baseline.js --baseUrl http://localhost:3000 --out tools/ide/visual-regression/output/baseline
+
+      - name: Upload baseline artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baseline
+          path: tools/ide/visual-regression/output/baseline
+
+      - name: Commit baseline to branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin visual-baseline:visual-baseline || true
+          if git rev-parse --verify visual-baseline >/dev/null 2>&1; then
+            git checkout visual-baseline
+          else
+            git checkout -b visual-baseline
+          fi
+          mkdir -p tools/ide/visual-regression/baseline
+          cp -r tools/ide/visual-regression/output/baseline/* tools/ide/visual-regression/baseline/ || true
+          git add tools/ide/visual-regression/baseline
+          if git diff --staged --quiet; then
+            echo "No baseline changes to commit"
+          else
+            git commit -m "chore(visual-baseline): update baseline screenshots"
+            git push --set-upstream origin visual-baseline
+          fi

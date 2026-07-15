@@ -1,0 +1,8 @@
+[
+  { "name": "home", "path": "/" },
+  { "name": "dashboard", "path": "/dashboard" },
+  { "name": "ide", "path": "/ide" },
+  { "name": "settings", "path": "/settings" },
+  { "name": "login", "path": "/login" },
+  { "name": "register", "path": "/register" }
+]

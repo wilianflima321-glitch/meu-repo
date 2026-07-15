@@ -1,0 +1,10 @@
+﻿2025-10-31T01:58:38.0098989Z ##[group]Run actions/upload-artifact@v4
+2025-10-31T01:58:38.0099303Z with:
+2025-10-31T01:58:38.0099474Z   name: server-log
+2025-10-31T01:58:38.0099680Z   path: tools/llm-mock/server.log
+2025-10-31T01:58:38.0099921Z   if-no-files-found: warn
+2025-10-31T01:58:38.0100138Z   compression-level: 6
+2025-10-31T01:58:38.0100331Z   overwrite: false
+2025-10-31T01:58:38.0100531Z   include-hidden-files: false
+2025-10-31T01:58:38.0100740Z ##[endgroup]
+2025-10-31T01:58:38.2391097Z ##[warning]No files were found with the provided path: tools/llm-mock/server.log. No artifacts will be uploaded.

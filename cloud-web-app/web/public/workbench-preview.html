@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aethel Workbench Preview</title>
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --surface-1: rgba(10, 14, 24, 0.94);
+        --surface-2: rgba(16, 22, 34, 0.92);
+        --surface-3: rgba(23, 31, 45, 0.88);
+        --border-1: rgba(148, 163, 184, 0.16);
+        --border-2: rgba(148, 163, 184, 0.1);
+        --text-1: #f7f9fc;
+        --text-2: #c6cfdd;
+        --text-3: #94a0b8;
+        --text-4: #6d7891;
+        --info: #38bdf8;
+        --primary: #3b82f6;
+        --success: #22c55e;
+        --warning: #f59e0b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at top, rgba(56, 189, 248, 0.12), transparent 30%),
+          radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1), transparent 32%),
+          linear-gradient(180deg, #090a10 0%, #0b111a 48%, #090a10 100%);
+        color: var(--text-1);
+        font-family: Inter, system-ui, sans-serif;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-rows: 72px 1fr;
+        min-height: 100vh;
+        padding: 24px;
+        gap: 18px;
+      }
+
+      .topbar,
+      .workbench,
+      .panel {
+        border: 1px solid var(--border-1);
+        background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+        box-shadow: 0 28px 90px rgba(2, 6, 23, 0.45);
+        backdrop-filter: blur(18px);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 24px;
+        padding: 0 20px;
+      }
+
+      .brand,
+      .top-actions,
+      .status-row,
+      .list-item,
+      .chat-meta,
+      .composer-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .chip,
+      .badge {
+        border: 1px solid var(--border-2);
+        border-radius: 999px;
+        padding: 6px 10px;
+        color: var(--text-2);
+        background: rgba(23, 31, 45, 0.8);
+        font-size: 12px;
+      }
+
+      .badge.info {
+        color: #d4f4ff;
+        border-color: rgba(56, 189, 248, 0.25);
+        background: rgba(56, 189, 248, 0.14);
+      }
+
+      .badge.success {
+        color: #d8ffe6;
+        border-color: rgba(34, 197, 94, 0.24);
+        background: rgba(34, 197, 94, 0.12);
+      }
+
+      .workbench {
+        display: grid;
+        grid-template-columns: 280px minmax(460px, 1fr) 360px;
+        gap: 16px;
+        padding: 16px;
+        border-radius: 28px;
+      }
+
+      .panel {
+        border-radius: 22px;
+        overflow: hidden;
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border-2);
+        color: var(--text-2);
+        font-size: 13px;
+      }
+
+      .sidebar,
+      .assistant {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      .list {
+        padding: 14px;
+      }
+
+      .list-item {
+        justify-content: space-between;
+        padding: 12px;
+        border: 1px solid transparent;
+        border-radius: 16px;
+        color: var(--text-2);
+        font-size: 13px;
+      }
+
+      .list-item.active {
+        background: rgba(59, 130, 246, 0.1);
+        border-color: rgba(59, 130, 246, 0.2);
+      }
+
+      .list-item + .list-item {
+        margin-top: 10px;
+      }
+
+      .editor {
+        display: grid;
+        grid-template-rows: auto auto 1fr;
+      }
+
+      .mission {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-2);
+      }
+
+      .mission-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        border: 1px solid var(--border-1);
+        background: rgba(11, 17, 26, 0.88);
+      }
+
+      .title {
+        font-size: 14px;
+        color: var(--text-1);
+        font-weight: 600;
+      }
+
+      .muted {
+        color: var(--text-3);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 6px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-2);
+      }
+
+      .tab {
+        padding: 8px 12px;
+        border-radius: 12px;
+        color: var(--text-3);
+        font-size: 12px;
+      }
+
+      .tab.active {
+        color: var(--text-1);
+        background: rgba(23, 31, 45, 0.92);
+        border: 1px solid var(--border-2);
+      }
+
+      .editor-body {
+        display: grid;
+        grid-template-columns: 1.1fr 0.95fr;
+        gap: 16px;
+        padding: 16px;
+      }
+
+      .code,
+      .preview {
+        border: 1px solid var(--border-2);
+        border-radius: 18px;
+        overflow: hidden;
+        background: rgba(11, 17, 26, 0.88);
+      }
+
+      .code-header,
+      .preview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border-2);
+        font-size: 12px;
+        color: var(--text-3);
+      }
+
+      pre {
+        margin: 0;
+        padding: 18px;
+        color: var(--text-2);
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 12px;
+        line-height: 1.65;
+      }
+
+      .preview-content {
+        padding: 18px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .preview-card {
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(180deg, rgba(18, 24, 39, 0.88), rgba(10, 14, 24, 0.92));
+        padding: 16px;
+      }
+
+      .assistant-body {
+        padding: 16px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .message {
+        border-radius: 18px;
+        padding: 14px;
+        border: 1px solid var(--border-2);
+        background: rgba(18, 24, 39, 0.84);
+      }
+
+      .message.user {
+        background: rgba(59, 130, 246, 0.18);
+        border-color: rgba(59, 130, 246, 0.24);
+      }
+
+      .composer {
+        padding: 16px;
+        border-top: 1px solid var(--border-2);
+      }
+
+      .composer-box {
+        border-radius: 18px;
+        border: 1px solid var(--border-1);
+        background: rgba(11, 17, 26, 0.9);
+        padding: 14px;
+      }
+
+      .composer-input {
+        color: var(--text-2);
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+      }
+
+      .dot.red { background: #fb7185; }
+      .dot.yellow { background: #fbbf24; }
+      .dot.green { background: #34d399; }
+
+      .button {
+        border-radius: 14px;
+        padding: 10px 14px;
+        border: 1px solid transparent;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .button.primary {
+        color: white;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(56, 189, 248, 0.92));
+      }
+
+      .button.secondary {
+        color: var(--text-2);
+        border-color: var(--border-1);
+        background: rgba(23, 31, 45, 0.82);
+      }
+
+      @media (max-width: 1200px) {
+        .workbench {
+          grid-template-columns: 1fr;
+        }
+
+        .editor-body {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <img src="/branding/aethel-icon-source.png" alt="Aethel" width="36" height="36" style="border-radius: 12px;" />
+          <div>
+            <div class="title">Aethel Studio</div>
+            <div class="muted" style="font-size: 12px;">apps, research, preview e readiness no mesmo fluxo</div>
+          </div>
+        </div>
+        <div class="top-actions">
+          <span class="badge info">Preview parcial honesto</span>
+          <span class="badge success">Billing pronto</span>
+          <span class="chip">Ctrl+K</span>
+        </div>
+      </header>
+
+      <main class="workbench">
+        <section class="panel sidebar">
+          <div class="panel-header">
+            <span>Studio Home</span>
+            <span class="chip">3 projetos</span>
+          </div>
+          <div class="list">
+            <div class="list-item active">
+              <span>Mission Intake</span>
+              <span class="muted">90s</span>
+            </div>
+            <div class="list-item">
+              <span>Preview Runtime</span>
+              <span class="muted">partial</span>
+            </div>
+            <div class="list-item">
+              <span>Billing Readiness</span>
+              <span class="muted">ready</span>
+            </div>
+            <div class="list-item">
+              <span>First Value SLO</span>
+              <span class="muted">tracked</span>
+            </div>
+          </div>
+          <div class="list">
+            <div class="preview-card">
+              <div class="title">North-star rule</div>
+              <p class="muted" style="margin: 8px 0 0; font-size: 12px; line-height: 1.6;">
+                Nunca prometer healthy quando o studio estiver em fallback, parcial ou sem dependência externa configurada.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel editor">
+          <div class="mission">
+            <div class="mission-box">
+              <div>
+                <div class="title">Mission box</div>
+                <div class="muted" style="font-size: 12px;">"Crie um studio para apps com preview, billing e onboarding coerentes"</div>
+              </div>
+              <button class="button primary">Abrir studio</button>
+            </div>
+          </div>
+          <div class="tabs">
+            <div class="tab active">app/landing-v3.tsx</div>
+            <div class="tab">AIChatPanelPro.tsx</div>
+            <div class="tab">CanonicalPreviewSurface.tsx</div>
+          </div>
+          <div class="editor-body">
+            <div class="code">
+              <div class="code-header">
+                <span>Editor</span>
+                <span class="chip">TypeScript</span>
+              </div>
+              <pre>const northStar = {
+  mission: 'apps + research',
+  visualSystem: '--aethel-*',
+  readiness: 'explicit',
+  fallback: 'honest',
+}
+
+if (runtime.strategy === 'inline') {
+  state = 'degraded'
+}
+
+renderStudio({
+  landing: 'connected',
+  billing: 'clear-next-step',
+  onboarding: 'first_value_reached',
+})</pre>
+            </div>
+
+            <div class="preview">
+              <div class="preview-header">
+                <span>Preview</span>
+                <div class="status-row">
+                  <span class="badge info">inline fallback</span>
+                  <span class="chip">stale guard</span>
+                </div>
+              </div>
+              <div class="preview-content">
+                <div class="preview-card">
+                  <div class="title">Landing CTA</div>
+                  <p class="muted" style="margin-top: 8px; font-size: 12px;">Uma ação principal clara, uma secundária e uma rota enterprise sem ambiguidade.</p>
+                </div>
+                <div class="preview-card">
+                  <div class="title">Billing Status</div>
+                  <p class="muted" style="margin-top: 8px; font-size: 12px;">Readiness, assinatura e limites precisam refletir o estado real do runtime.</p>
+                </div>
+                <div class="preview-card">
+                  <div class="title">Onboarding</div>
+                  <p class="muted" style="margin-top: 8px; font-size: 12px;">Time to value e activation medidos com evento explícito, não só avanço de tela.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel assistant">
+          <div class="panel-header">
+            <span>AETHEL AI</span>
+            <span class="chip">contexto unico</span>
+          </div>
+          <div class="assistant-body">
+            <div class="message">
+              <div class="chat-meta">
+                <strong>Assistant</strong>
+                <span class="muted" style="font-size: 12px;">gemini / balanced</span>
+              </div>
+              <p style="margin: 8px 0 0; color: var(--text-2); font-size: 13px; line-height: 1.65;">
+                Ajustei header, chat e landing para usar a mesma camada visual, com superfícies menos genéricas e estados mais confiáveis.
+              </p>
+            </div>
+            <div class="message user">
+              <div class="chat-meta">
+                <strong>You</strong>
+                <span class="muted" style="font-size: 12px;">mission</span>
+              </div>
+              <p style="margin: 8px 0 0; color: var(--text-1); font-size: 13px; line-height: 1.65;">
+                Continue e feche as lacunas de UX, usabilidade, benchmark e fidelidade visual.
+              </p>
+            </div>
+            <div class="preview-card">
+              <div class="title">Checklist</div>
+              <p class="muted" style="margin-top: 8px; font-size: 12px; line-height: 1.6;">
+                WCAG 2.2, onboarding focado em activation, billing com próximo passo explícito, e superfície visual unificada.
+              </p>
+            </div>
+          </div>
+          <div class="composer">
+            <div class="composer-box">
+              <div class="composer-input">@codebase alinhar landing, auth, billing e preview ao visual system Aethel</div>
+              <div class="composer-actions" style="justify-content: space-between;">
+                <div class="composer-actions">
+                  <span class="chip">@codebase</span>
+                  <span class="chip">@docs:api</span>
+                </div>
+                <button class="button secondary">Enviar</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,433 @@
+import type {
+  RepositoryCartographyTotals,
+  RepositoryContextBudget,
+  RepositoryContextPlan,
+  RepositoryContextStrategy,
+  RepositoryCriticalGap,
+  RepositoryDuplicateGroup,
+  RepositoryPriority,
+  RepositoryRetrievalBatch,
+  RepositorySurface,
+  RepositorySurfaceDomain,
+} from './repository-cartography-contracts'
+
+export const ONE_MB = 1024 * 1024
+const DIRECT_READ_LIMIT = 256 * 1024
+const SUMMARY_LIMIT = 5 * ONE_MB
+const LARGE_ASSET_LIMIT = 50 * ONE_MB
+const HUGE_SURFACE_LIMIT = 250 * ONE_MB
+
+const domainKeys: RepositorySurfaceDomain[] = [
+  'app-code',
+  'api-server',
+  'engine-code',
+  'game-scene',
+  'film-shot',
+  'asset',
+  'audio',
+  'video',
+  'story-doc',
+  'test',
+  'config',
+  'infra',
+  'unknown',
+]
+
+const strategyKeys: RepositoryContextStrategy[] = [
+  'direct-read',
+  'summarize-first',
+  'index-only',
+  'external-mirror',
+  'manual-review',
+]
+
+function makeEmptyDomainCounts(): Record<RepositorySurfaceDomain, number> {
+  return domainKeys.reduce((counts, key) => {
+    counts[key] = 0
+    return counts
+  }, {} as Record<RepositorySurfaceDomain, number>)
+}
+
+function makeEmptyStrategyCounts(): Record<RepositoryContextStrategy, number> {
+  return strategyKeys.reduce((counts, key) => {
+    counts[key] = 0
+    return counts
+  }, {} as Record<RepositoryContextStrategy, number>)
+}
+
+export function unique<T>(items: T[]): T[] {
+  return Array.from(new Set(items))
+}
+
+function asNonEmptyString(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : undefined
+}
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+export function slugify(value: string): string {
+  const slug = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80)
+  return slug || 'surface'
+}
+
+function hasLicense(value: string | null | undefined): boolean {
+  return Boolean(asNonEmptyString(value))
+}
+
+export function buildDuplicateGroups(surfaces: RepositorySurface[]): RepositoryDuplicateGroup[] {
+  const byKey = new Map<string, { reason: RepositoryDuplicateGroup['reason']; surfaces: RepositorySurface[] }>()
+
+  for (const surface of surfaces) {
+    const hashKey = surface.hash ? `hash:${surface.hash}` : null
+    const nameSizeKey = `name-size:${surface.basename.toLowerCase()}:${surface.sizeBytes}`
+    const key = hashKey ?? nameSizeKey
+    const existing = byKey.get(key)
+    if (existing) {
+      existing.surfaces.push(surface)
+    } else {
+      byKey.set(key, {
+        reason: hashKey ? 'hash' : 'name-size',
+        surfaces: [surface],
+      })
+    }
+  }
+
+  return Array.from(byKey.entries())
+    .filter(([, group]) => group.surfaces.length > 1)
+    .map(([key, group], index) => ({
+      id: `duplicate-${index + 1}-${slugify(key)}`,
+      reason: group.reason,
+      totalBytes: group.surfaces.reduce((total, surface) => total + surface.sizeBytes, 0),
+      paths: group.surfaces.map((surface) => surface.path).sort((a, b) => a.localeCompare(b)),
+    }))
+}
+
+function scoreMustReadSurface(surface: RepositorySurface): number {
+  const lower = surface.path.toLowerCase()
+  if (lower.endsWith('.aethelrules')) return 100
+  if (lower.endsWith('readme.md')) return 95
+  if (lower.endsWith('package.json')) return 90
+  if (lower.includes('106_ai_game_film_production_contract')) return 88
+  if (lower.includes('90_canonical_product_quality_triage')) return 86
+  if (lower.includes('91_product_quality_execution_checklist')) return 84
+  if (lower.includes('creative-bible') || lower.includes('story-bible')) return 82
+  if (lower.includes('technical-bible') || lower.includes('game-design')) return 80
+  if (lower.includes('asset-manifest') || lower.includes('scene-manifest') || lower.includes('shot-list')) return 78
+  if (surface.domain === 'story-doc') return 70
+  if (surface.domain === 'config') return 65
+  if (surface.domain === 'test' && lower.includes('playtest')) return 60
+  if (surface.priority === 'critical') return 55
+  return 0
+}
+
+export function buildMustReadFirst(surfaces: RepositorySurface[]): string[] {
+  return surfaces
+    .filter((surface) => surface.strategy === 'direct-read' || surface.strategy === 'summarize-first')
+    .map((surface) => ({ surface, score: scoreMustReadSurface(surface) }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || a.surface.path.localeCompare(b.surface.path))
+    .slice(0, 16)
+    .map((entry) => entry.surface.path)
+}
+
+export function buildCriticalGaps(surfaces: RepositorySurface[], duplicates: RepositoryDuplicateGroup[]): RepositoryCriticalGap[] {
+  const gaps: RepositoryCriticalGap[] = []
+  const hasGameOrFilm = surfaces.some((surface) =>
+    ['game-scene', 'film-shot', 'engine-code', 'asset', 'audio', 'video'].includes(surface.domain)
+  )
+  const hasStoryDoc = surfaces.some((surface) => surface.domain === 'story-doc')
+  const hasTests = surfaces.some((surface) => surface.domain === 'test')
+  const hasRules = surfaces.some((surface) => surface.extension === 'aethelrules')
+  const hasBuildConfig = surfaces.some((surface) => surface.path.toLowerCase().endsWith('package.json'))
+  const unlicensedMedia = surfaces.filter(
+    (surface) =>
+      ['asset', 'audio', 'video', 'game-scene', 'film-shot'].includes(surface.domain) && !hasLicense(surface.license)
+  )
+  const externalMirrors = surfaces.filter((surface) => surface.strategy === 'external-mirror')
+  const unknownSurfaces = surfaces.filter((surface) => surface.domain === 'unknown')
+
+  if (hasGameOrFilm && !hasStoryDoc) {
+    gaps.push({
+      id: 'gap-story-bible',
+      severity: 'high',
+      title: 'Creative bible missing for game/film production',
+      recommendation: 'Create or locate story, gameplay, visual style, continuity, and shot intent before agents generate content.',
+      affectedPaths: [],
+    })
+  }
+
+  if (unlicensedMedia.length > 0) {
+    gaps.push({
+      id: 'gap-license-provenance',
+      severity: 'blocker',
+      title: 'Media assets need license/provenance review',
+      recommendation: 'Asset Librarian Agent must verify source, commercial rights, duplicates, LOD, and material maps before production use.',
+      affectedPaths: unlicensedMedia.slice(0, 12).map((surface) => surface.path),
+    })
+  }
+
+  if (duplicates.length > 0) {
+    gaps.push({
+      id: 'gap-duplicate-surfaces',
+      severity: 'medium',
+      title: 'Duplicate files can confuse agents and inflate context',
+      recommendation: 'Keep one canonical asset/code surface and mark copies as references, variants, or deprecated before editing.',
+      affectedPaths: duplicates.flatMap((group) => group.paths).slice(0, 12),
+    })
+  }
+
+  if (hasGameOrFilm && !hasTests) {
+    gaps.push({
+      id: 'gap-playtest-validation',
+      severity: 'high',
+      title: 'Playtest/render validation is missing',
+      recommendation: 'Add automated playtest, viewport capture, render preview, or build checks before agents claim quality or completion.',
+      affectedPaths: [],
+    })
+  }
+
+  if (!hasRules) {
+    gaps.push({
+      id: 'gap-project-rules',
+      severity: 'medium',
+      title: 'Project rules are missing from cartography input',
+      recommendation: 'Include .aethelrules or equivalent project policy in must-read context before agent edits.',
+      affectedPaths: [],
+    })
+  }
+
+  if (!hasBuildConfig && surfaces.some((surface) => ['app-code', 'api-server', 'engine-code'].includes(surface.domain))) {
+    gaps.push({
+      id: 'gap-build-contract',
+      severity: 'medium',
+      title: 'Build contract not visible',
+      recommendation: 'Surface package/build/test configuration so agents can validate real builds instead of guessing commands.',
+      affectedPaths: [],
+    })
+  }
+
+  if (externalMirrors.length > 0) {
+    gaps.push({
+      id: 'gap-external-mirror',
+      severity: 'medium',
+      title: 'Large external sources need mirrored metadata',
+      recommendation: 'Use paginated metadata from sources such as huggingface-hub, GitHub, S3, or marketplace manifests before downloading GB-scale content.',
+      affectedPaths: externalMirrors.slice(0, 12).map((surface) => surface.path),
+    })
+  }
+
+  if (unknownSurfaces.length > 0) {
+    gaps.push({
+      id: 'gap-unknown-surfaces',
+      severity: 'low',
+      title: 'Some surfaces are unclassified',
+      recommendation: 'Producer Agent should classify unknown files before allowing specialized agents to edit or delete them.',
+      affectedPaths: unknownSurfaces.slice(0, 12).map((surface) => surface.path),
+    })
+  }
+
+  return gaps
+}
+
+export function buildDoNotInvent(surfaces: RepositorySurface[], gaps: RepositoryCriticalGap[]): string[] {
+  const rules = [
+    'Do not create demo/prototype replacements when a canonical file, asset, scene, shot, or contract already exists.',
+    'Do not edit large binary assets directly; use manifest metadata, generated previews, and approved import/export steps.',
+    'Do not claim AAA, playable, shippable, or cinematic completion without validation evidence and human approval.',
+  ]
+
+  if (gaps.some((gap) => gap.id === 'gap-story-bible')) {
+    rules.push('Do not invent lore, combat feel, character motivation, shots, or continuity until the creative bible is captured.')
+  }
+  if (gaps.some((gap) => gap.id === 'gap-license-provenance')) {
+    rules.push('Do not use or publish unlicensed assets, audio, video, rigs, or marketplace packs in final output.')
+  }
+  if (gaps.some((gap) => gap.id === 'gap-duplicate-surfaces')) {
+    rules.push('Do not fork duplicate files into new variants until one canonical owner path is approved.')
+  }
+  if (surfaces.some((surface) => surface.strategy === 'external-mirror')) {
+    rules.push('Do not download GB-scale external repositories blindly; mirror file trees, hashes, licenses, and summaries first.')
+  }
+
+  return unique(rules)
+}
+
+export function buildIndexingPolicy(surfaces: RepositorySurface[]): string[] {
+  const direct = surfaces.filter((surface) => surface.strategy === 'direct-read').length
+  const summary = surfaces.filter((surface) => surface.strategy === 'summarize-first').length
+  const indexOnly = surfaces.filter((surface) => surface.strategy === 'index-only').length
+  const external = surfaces.filter((surface) => surface.strategy === 'external-mirror').length
+  const manual = surfaces.filter((surface) => surface.strategy === 'manual-review').length
+
+  return [
+    `${direct} tiny critical files may be read directly into agent context.`,
+    `${summary} medium text surfaces require summaries before agent planning.`,
+    `${indexOnly} large surfaces require chunk indexes, hashes, thumbnails, or generated previews instead of raw context.`,
+    `${external} external-mirror surfaces require paginated source metadata before download.`,
+    `${manual} manual-review surfaces require human/license approval before release use.`,
+    'Agents must request the Project Brain, Mission Ledger, mustReadFirst files, and graph-specific manifests before editing.',
+  ]
+}
+
+function surfacesByStrategy(
+  surfaces: RepositorySurface[],
+  strategy: RepositoryContextStrategy,
+  limit: number
+): RepositorySurface[] {
+  const priorityOrder: Record<RepositoryPriority, number> = { critical: 4, high: 3, medium: 2, low: 1 }
+  return surfaces
+    .filter((surface) => surface.strategy === strategy)
+    .sort(
+      (a, b) =>
+        priorityOrder[b.priority] - priorityOrder[a.priority] ||
+        b.sizeBytes - a.sizeBytes ||
+        a.path.localeCompare(b.path)
+    )
+    .slice(0, limit)
+}
+
+function buildRetrievalBatch(input: {
+  id: string
+  strategy: RepositoryContextStrategy
+  purpose: string
+  surfaces: string[]
+  maxSurfaceCount: number
+}): RepositoryRetrievalBatch | null {
+  if (input.surfaces.length === 0) return null
+  return {
+    id: input.id,
+    strategy: input.strategy,
+    purpose: input.purpose,
+    maxSurfaceCount: input.maxSurfaceCount,
+    surfaces: input.surfaces.slice(0, input.maxSurfaceCount),
+  }
+}
+
+function estimateChunkCount(surfaces: RepositorySurface[]): number {
+  return surfaces.reduce((total, surface) => {
+    if (surface.strategy === 'direct-read') return total + 1
+    if (surface.strategy === 'summarize-first') return total + Math.max(1, Math.ceil(surface.sizeBytes / (64 * 1024)))
+    if (surface.strategy === 'index-only') return total + Math.max(1, Math.ceil(surface.sizeBytes / (8 * ONE_MB)))
+    if (surface.strategy === 'external-mirror') return total + Math.max(1, Math.ceil(surface.sizeBytes / (64 * ONE_MB)))
+    return total + 1
+  }, 0)
+}
+
+export function buildContextBudget(
+  surfaces: RepositorySurface[],
+  contextPlan: RepositoryContextPlan,
+  criticalGaps: RepositoryCriticalGap[]
+): RepositoryContextBudget {
+  const bytesByStrategy = strategyKeys.reduce((totals, strategy) => {
+    totals[strategy] = surfaces
+      .filter((surface) => surface.strategy === strategy)
+      .reduce((total, surface) => total + surface.sizeBytes, 0)
+    return totals
+  }, {} as Record<RepositoryContextStrategy, number>)
+
+  const retrievalBatches = [
+    buildRetrievalBatch({
+      id: 'read-canonical-contracts',
+      strategy: 'direct-read',
+      purpose: 'Prime agents with mission rules, README, build config, and creative/technical bibles before planning.',
+      maxSurfaceCount: 16,
+      surfaces: contextPlan.mustReadFirst,
+    }),
+    buildRetrievalBatch({
+      id: 'summarize-medium-text',
+      strategy: 'summarize-first',
+      purpose: 'Summarize medium docs/code before adding them to chat context or agent plans.',
+      maxSurfaceCount: 24,
+      surfaces: surfacesByStrategy(surfaces, 'summarize-first', 24).map((surface) => surface.path),
+    }),
+    buildRetrievalBatch({
+      id: 'index-heavy-surfaces',
+      strategy: 'index-only',
+      purpose: 'Build indexes, hashes, thumbnails, symbol maps, LOD/material metadata, or generated previews instead of raw context.',
+      maxSurfaceCount: 24,
+      surfaces: surfacesByStrategy(surfaces, 'index-only', 24).map((surface) => surface.path),
+    }),
+    buildRetrievalBatch({
+      id: 'mirror-external-metadata',
+      strategy: 'external-mirror',
+      purpose: 'Fetch paginated source metadata, file trees, cards/readmes, hashes, and licenses before downloading GB-scale repositories.',
+      maxSurfaceCount: 24,
+      surfaces: surfacesByStrategy(surfaces, 'external-mirror', 24).map((surface) => surface.path),
+    }),
+    buildRetrievalBatch({
+      id: 'manual-review-queue',
+      strategy: 'manual-review',
+      purpose: 'Hold assets/scenes/shots for human/license approval before commercial use, render, deploy, or agent edits.',
+      maxSurfaceCount: 24,
+      surfaces: surfacesByStrategy(surfaces, 'manual-review', 24).map((surface) => surface.path),
+    }),
+  ].filter((batch): batch is RepositoryRetrievalBatch => Boolean(batch))
+
+  const largestContextRisks = surfaces
+    .filter((surface) => surface.strategy !== 'direct-read' || surface.sizeBytes > SUMMARY_LIMIT)
+    .sort((a, b) => b.sizeBytes - a.sizeBytes || a.path.localeCompare(b.path))
+    .slice(0, 12)
+    .map((surface) => ({
+      path: surface.path,
+      sizeBytes: surface.sizeBytes,
+      domain: surface.domain,
+      strategy: surface.strategy,
+      sourceKind: surface.sourceKind,
+    }))
+
+  return {
+    version: 1,
+    directReadBytes: bytesByStrategy['direct-read'],
+    summarizeFirstBytes: bytesByStrategy['summarize-first'],
+    indexOnlyBytes: bytesByStrategy['index-only'],
+    externalMirrorBytes: bytesByStrategy['external-mirror'],
+    manualReviewBytes: bytesByStrategy['manual-review'],
+    estimatedChunkCount: estimateChunkCount(surfaces),
+    retrievalBatches,
+    largestContextRisks,
+    guardrails: unique([
+      'Never load the full repository, game project, film timeline, or asset pack into chat context.',
+      'Read canonical contracts first, then summarize medium surfaces, then retrieve only the slices needed for the current mission.',
+      'For Hugging Face, GitHub, S3, marketplace, or browser-export sources, mirror metadata before downloading large payloads.',
+      'For binaries and media, use hashes, thumbnails, preview renders, LOD/material metadata, transcripts, and license records as context.',
+      'If retrieval batches are missing, stale, or blocked by critical gaps, keep agents in planning/review mode.',
+      ...criticalGaps
+        .filter((gap) => gap.severity === 'blocker' || gap.severity === 'high')
+        .map((gap) => `Resolve or explicitly accept ${gap.severity} gap before broad retrieval: ${gap.title}.`),
+    ]),
+  }
+}
+
+export function buildTotals(surfaces: RepositorySurface[]): RepositoryCartographyTotals {
+  const domainCounts = makeEmptyDomainCounts()
+  const strategyCounts = makeEmptyStrategyCounts()
+
+  for (const surface of surfaces) {
+    domainCounts[surface.domain] += 1
+    strategyCounts[surface.strategy] += 1
+  }
+
+  return {
+    totalFiles: surfaces.length,
+    totalBytes: surfaces.reduce((total, surface) => total + surface.sizeBytes, 0),
+    domainCounts,
+    strategyCounts,
+    largestSurfaces: surfaces
+      .slice()
+      .sort((a, b) => b.sizeBytes - a.sizeBytes)
+      .slice(0, 12)
+      .map((surface) => ({
+        path: surface.path,
+        sizeBytes: surface.sizeBytes,
+        domain: surface.domain,
+        strategy: surface.strategy,
+      })),
+  }
+}

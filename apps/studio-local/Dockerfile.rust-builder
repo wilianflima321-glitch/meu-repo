@@ -1,0 +1,91 @@
+# syntax=docker/dockerfile:1
+#
+# Deterministic Rust validation container for `apps/studio-local/src-tauri`.
+#
+# WHY THIS EXISTS
+# ----------------
+# Round 3 (Desktop Native Engine) added several Rust modules — asset_cooker,
+# gpu_culling, wasm_runtime, motion_matching, scene_graph, hardware_profiler,
+# mmap_commands, ecs_parallel, plus edits to desktop_commands.rs (PTY resize)
+# and native_kernel.rs — without a working `cargo`/`rustc` toolchain in the
+# authoring environment. Per the Director's directive, no Rust ships "in the
+# dark" going forward: this image gives anyone (CI, a teammate, or a future
+# agent session) a reproducible, dependency-complete way to run
+# `cargo check` / `cargo test` against Studio Local's exact toolchain and
+# system libraries, without installing Rust, Tauri's Linux prerequisites, or
+# Vulkan headers on their own machine.
+#
+# USAGE (run from the repository root)
+# -------------------------------------
+#   docker build -f apps/studio-local/Dockerfile.rust-builder \
+#     -t aethel-studio-local-rust-check apps/studio-local/src-tauri
+#   docker run --rm aethel-studio-local-rust-check
+#
+#   # To run the real test suite instead of just type-checking:
+#   docker run --rm aethel-studio-local-rust-check cargo test --all-targets
+#
+#   # To pull the freshly-resolved Cargo.lock back out (the "*" dependency
+#   # versions added in Round 3 — sysinfo, rayon, memmap2, image, wasmtime —
+#   # are deliberately unpinned until a real resolution has been observed;
+#   # see the comment in Cargo.toml):
+#   docker create --name aethel-lock-extract aethel-studio-local-rust-check
+#   docker cp aethel-lock-extract:/workspace/Cargo.lock ./Cargo.lock
+#   docker rm aethel-lock-extract
+#
+# This image intentionally only runs `cargo check`/`cargo test` (no linking
+# of the final bundled Tauri app, no `tauri build`) — proving the code
+# compiles and its unit tests pass against real crate APIs is the goal, not
+# producing a distributable binary.
+FROM rust:1.82-bookworm
+
+# Official Tauri v2 Linux build prerequisites (see the "Prerequisites"
+# section of tauri.app's docs) plus pkg-config/libvulkan so wgpu's and
+# openssl-sys's build scripts resolve during `cargo check` — no GPU driver
+# is required for type-checking, only the dev headers so configure-time
+# `pkg-config` probes don't fail before compilation even starts.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        curl \
+        wget \
+        file \
+        pkg-config \
+        libssl-dev \
+        libgtk-3-dev \
+        libayatana-appindicator3-dev \
+        librsvg2-dev \
+        libwebkit2gtk-4.1-dev \
+        libxdo-dev \
+        libvulkan-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+# Copy manifests first so the dependency-resolution/compilation layer stays
+# cached across rebuilds that only touch application source, not Cargo.toml.
+COPY Cargo.toml ./
+COPY Cargo.lock ./
+
+# `cargo check` needs real [lib]/[[bin]] target files to exist before it can
+# even resolve dependencies; a throwaway stub lets this layer warm the
+# dependency cache without waiting on (or invalidating on every edit of)
+# the real application source copied below. `cargo check` is used here
+# instead of `--locked` because several Round 3 dependencies are pinned as
+# "*" on purpose (see Cargo.toml) — this step is expected to rewrite
+# Cargo.lock with real, resolvable versions.
+RUN mkdir -p src && \
+    printf 'fn main() {}\n' > src/main.rs && \
+    printf '\n' > src/lib.rs && \
+    cargo check && \
+    rm -rf src
+
+# Now bring in the real crate: application source, build script, and the
+# Tauri config `build.rs` reads to generate its context.
+COPY build.rs ./
+COPY tauri.conf.json ./
+COPY src ./src
+
+# `--all-targets` also type-checks every `#[cfg(test)] mod tests` block
+# touched this round — exactly what would catch a signature mismatch
+# against `notify`, `wgpu`, `wasmtime`, `image`, or `ort`'s real API surface
+# that couldn't be verified any other way in the authoring environment.
+CMD ["cargo", "check", "--all-targets"]

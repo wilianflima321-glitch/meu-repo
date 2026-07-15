@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aethel-fleet
+  labels:
+    app.kubernetes.io/part-of: aethel-engine
+    app.kubernetes.io/managed-by: kustomize
+    # Agones scans namespaces annotated like this (or explicitly listed at
+    # install time via `--namespace`) to know where GameServer/Fleet CRs are
+    # allowed to live. Kept as a label (informational) rather than assuming
+    # a specific Agones install already whitelists this namespace — that is
+    # an Agones Helm-install-time decision (`gameservers.namespaces`), not
+    # something a Namespace object itself can force.
+    agones.dev/fleet-namespace: "true"

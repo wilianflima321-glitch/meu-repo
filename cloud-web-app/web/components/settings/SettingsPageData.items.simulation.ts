@@ -1,0 +1,130 @@
+import type { SettingItem } from './SettingsPage.types'
+
+/**
+ * Gameplay & Simulation settings — "Cheats", time dilation, and visual debug
+ * overlays that developers use during playtesting.
+ * These are surfaced under Engine > Simulation in the Settings panel.
+ */
+export const SIMULATION_SETTING_ITEMS: SettingItem[] = [
+  // ── Time Control ───────────────────────────────────────────────────────
+  {
+    id: 'simulation.timeDilation',
+    label: 'Time Dilation',
+    description: 'Global simulation speed multiplier. 1.0 = real-time. 0.1 = slow-motion. 2.0 = double speed.',
+    type: 'slider',
+    value: 1.0,
+    defaultValue: 1.0,
+    min: 0.1,
+    max: 2.0,
+    step: 0.05,
+    category: 'engine',
+    subcategory: 'simulation',
+  },
+  {
+    id: 'simulation.targetPhysicsFPS',
+    label: 'Physics Timestep (Hz)',
+    description: 'Fixed-step physics update rate. Lower values improve performance; higher values increase accuracy.',
+    type: 'select',
+    value: 60,
+    defaultValue: 60,
+    options: [
+      { label: '30 Hz (mobile-quality)', value: 30 },
+      { label: '60 Hz (standard)', value: 60 },
+      { label: '120 Hz (high-accuracy)', value: 120 },
+    ],
+    category: 'engine',
+    subcategory: 'simulation',
+  },
+
+  // ── God-mode / Cheats ──────────────────────────────────────────────────
+  {
+    id: 'simulation.godMode',
+    label: 'God Mode',
+    description: 'Player character becomes invincible (takes no damage). For playtesting only.',
+    type: 'toggle',
+    value: false,
+    defaultValue: false,
+    category: 'engine',
+    subcategory: 'simulation',
+    tags: ['cheat', 'playtest'],
+  },
+  {
+    id: 'simulation.infiniteResources',
+    label: 'Infinite Resources',
+    description: 'All in-game resources (ammo, health, currency) are set to unlimited.',
+    type: 'toggle',
+    value: false,
+    defaultValue: false,
+    category: 'engine',
+    subcategory: 'simulation',
+    tags: ['cheat', 'playtest'],
+  },
+  {
+    id: 'simulation.noClip',
+    label: 'No-Clip (Ghost Mode)',
+    description: 'Disable collision for the player — fly through geometry freely.',
+    type: 'toggle',
+    value: false,
+    defaultValue: false,
+    category: 'engine',
+    subcategory: 'simulation',
+    tags: ['cheat', 'playtest'],
+  },
+
+  // ── Visual Debuggers ───────────────────────────────────────────────────
+  {
+    id: 'simulation.showColliders',
+    label: 'Show Colliders',
+    description: 'Render all physics collision shapes as wireframe overlays.',
+    type: 'toggle',
+    value: false,
+    defaultValue: false,
+    category: 'engine',
+    subcategory: 'simulation',
+    tags: ['debug', 'physics'],
+  },
+  {
+    id: 'simulation.showNavmesh',
+    label: 'Show Navmesh',
+    description: 'Render the AI navigation mesh overlay in the viewport.',
+    type: 'toggle',
+    value: false,
+    defaultValue: false,
+    category: 'engine',
+    subcategory: 'simulation',
+    tags: ['debug', 'ai'],
+  },
+  {
+    id: 'simulation.showSkeletons',
+    label: 'Show Skeletons / Bones',
+    description: 'Render bone hierarchies for all skinned meshes.',
+    type: 'toggle',
+    value: false,
+    defaultValue: false,
+    category: 'engine',
+    subcategory: 'simulation',
+    tags: ['debug', 'animation'],
+  },
+  {
+    id: 'simulation.showFPSCounter',
+    label: 'Show FPS Counter',
+    description: 'Overlay realtime FPS, frame time, and draw call stats.',
+    type: 'toggle',
+    value: false,
+    defaultValue: false,
+    category: 'engine',
+    subcategory: 'simulation',
+    tags: ['debug', 'performance'],
+  },
+  {
+    id: 'simulation.showBoundingBoxes',
+    label: 'Show Bounding Boxes',
+    description: 'Render axis-aligned bounding boxes around all scene objects.',
+    type: 'toggle',
+    value: false,
+    defaultValue: false,
+    category: 'engine',
+    subcategory: 'simulation',
+    tags: ['debug', 'physics'],
+  },
+]

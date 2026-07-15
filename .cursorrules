@@ -1,0 +1,128 @@
+# Aethel Engine — Cursor/Claude Rules (V42 — Planning 100% A.0 Certificate)
+
+## Estrutura
+- **Produto real:** `cloud-web-app/web/` (Next 14 App Router)
+- **Desktop:** `apps/studio-local/` (Tauri 2 + Rust)
+- **Código morto (NÃO TOCAR):** `src/`, `client/`, `lib/` raiz, `components/` raiz, `runtime-templates/`
+- **Path alias:** `@/` → `cloud-web-app/web/`
+
+## The Wedge (24 meses — irrevogável)
+- **#1 mercado:** DX Criação + Publish Web + Vitrine Indie + IA criativa evidence-backed
+- **Web primeiro;** desktop AAA = long pole paralelo (B→D→G)
+- **H + I + J + L + M NÃO esperam G**
+- **Release Trains:** RTv1 ∥ AI-v1 ∥ FORGE-v1 ∥ IMMUNITY-v1 ∥ **STUDIO-v1** ∥ A.1–A.6 ∥ B→D
+
+## Zero-MVP + Anti-Mock Doctrine
+- Proibido MVP / phase-1 / basic / v2-later / stub / mock como produção
+- Proibido `success: true` + artifact vazio (Law XVI)
+- Proibido proxy capsule como personagem shipped (J.7)
+- Proibido MetaSounds play-log only como audio shipped (Law IV)
+- Cada PR A–F: **G + K + L + M + S-readiness** — ver `AETHEL_STUDIO_SUPREMACY_INDEX.md`; creative/IDE PR: J + L-readiness
+- **AgentShellPolicy (#48):** agent tools MUST NOT use host PTY — sandbox only after L.1
+- **WASM Shield (#57):** wgpu/Rapier native; gameplay scripts in WASM workers only after M.3
+- `// TODO` ou MVP label em ship path → reject (Law XI + XVI)
+
+## 16 Leis — docs canônicos
+- Roadmap: `docs/architecture/AETHEL_SUPREMACY_ROADMAP.md` v4.7
+- **Planning 100%:** `docs/architecture/AETHEL_PLANNING_COMPLETENESS.md` — **no new planning unless new competitor surface**
+- **Execution playbook:** `docs/architecture/AETHEL_SUPREMACY_EXECUTION_PLAYBOOK.md` v1.1
+- **Master index:** `docs/architecture/AETHEL_STUDIO_SUPREMACY_INDEX.md` v1.5
+- **Execution order:** Focus 1 → Focus 2 → Block 6 (no new planning unless new competitor surface)
+- **Claude boot:** `docs/architecture/AETHEL_FOCUS1_EXECUTION_PROGRESS.md` → Master Map current round only (Index § Document Authority if lost)
+- **SUPERSEDED:** `cloud-web-app/CLAUDE_MASTER_EXECUTION_PLAN_V7|V8` and siblings — do not treat as task queue
+- **No MD proliferation:** update Progress / Master Map / Index — do not create Session Radar / Handoff / V9
+- **Anti-Laziness (#66):** Fusion patches — no `// ...` / TODO stubs; LazyInspector before L.5 — `AETHEL_ANTI_LAZINESS_PROTOCOL.md`
+- **Studio S1→S7:** Material, World, Animation, MetaSounds, Gameplay, Netcode, Content (pillar specs)
+- **AAA / Onda G:** `docs/architecture/AETHEL_AAA_PARITY_TARGETS.md` (Micro-Poly, Radiance, Entropy)
+- **Vanguard / Onda K:** `docs/architecture/AETHEL_VANGUARD_TECHNOLOGIES_SPEC.md` (Neural, 3DGS, Spatial XR — post-G ship; K.0 in C–D)
+- **Forge / Onda L:** `docs/architecture/AETHEL_UNIVERSAL_IDE_FORGE_SPEC.md` (Universal IDE — post J.1)
+- **Immunity / Onda M:** `docs/architecture/AETHEL_RUNTIME_IMMUNITY_SPEC.md` (PSO Vault, Zero-Copy IO, WASM Shield — post C; M.0 in C–D)
+- Commerce: `docs/architecture/AETHEL_NETWORK_COMMERCE_LIVEOPS_SPEC.md`
+- Hub: `docs/architecture/AETHEL_GAME_HUB_PLATFORM_GROWTH_SPEC.md`
+- Hardware / Law XV: `docs/architecture/AETHEL_HARDWARE_SCALABILITY_SPEC.md`
+- **AI / Law XVI:** `docs/architecture/AETHEL_AI_FUSION_CREATIVE_SPEC.md` v1.1
+
+## Decisão arquitetural V33
+- Web: React Three Fiber (manter)
+- Desktop: wgpu Rust nativo (zero refletir R3F no Rust)
+
+## Law XVI — Creative Fusion + Travas (binding)
+- **Custody chain:** Intent → CostGuard → Squad → Fusion → Provider → Yjs Tx → Manifest → Viewport → Ledger
+- **Trava I:** CreativeBridge (J.1) + CreativeCostGuard — BYOK/credits reserve/settle; zero platform pay free tier
+- **Trava II:** CreativeFusionTransaction — all manifest/viewport/graph writes; Ctrl+Z atomic revert
+- **Trava III:** VideoToMechanic (J.6) = State Machine + BT scaffold only; user wires physics — no "video → GTA"
+- **Contracts:** `CreativeArtifactRequest`, `CreativeFusionTransaction`, `creative-cost-guard.ts`
+
+## Law XV — Scalable Fidelity (binding)
+- Capability Score 0–100; ScalableRenderGraph; FSR; baked-lighting publish mandatory
+- WebGL2 Safari official; bindless carve-out vs Lei V wgpu
+
+## Law XI — Fusion (binding)
+- Actor→Critic REJECT loop max 3; **dual-stack validation** before patch surface
+- **Web:** `npm run typecheck` + `npm run lint` (touched files)
+- **Rust (mandatory if `.rs` touched):** `cargo check` + `cargo clippy -- -D warnings` + `cargo test` in `apps/studio-local/src-tauri`
+- Critic **forbidden** from approving Desktop/backend patches without green Rust gates
+- Wire production tool bus + evidence ledger to Agents UI (A.5, J.2)
+
+## Patch guards (binding)
+- **H.0 blocker:** `payouts.ts` revenue lanes
+- **RTv1:** Hub checkout held until H auditado (fail-closed, not mock UI)
+- **AI-v1:** J.1 before marketing AI-native claims
+- Discovery 2k: 30 dias + Compression Mandate + IA moderation
+- Reviews fail-closed até F.2; Social moderação antes party/deep link
+- Cross-play marketing bloqueado até G.2
+
+## Stack canônico
+- Next 14 | React 18 | TS strict | Tailwind 4 + `var(--aethel-*)`
+- Monaco | xterm | Three/R3F/Drei | Yjs | Zustand | Prisma
+- Logger: `createComponentLogger` (NUNCA console.log)
+
+## Limites
+- Componente: ≤ 500 LoC
+- Sem PT-BR em UI (react-i18next / EN)
+- Sem hex em TSX (tokens only)
+
+## Quality gates pré-PR (Law XI — dual stack)
+
+### Web / TypeScript
+```bash
+cd cloud-web-app/web
+npm run typecheck && npm run lint && npm run test
+npm run qa:design-system-consistency
+npm run qa:hardcoded-colors
+npm run qa:button-types
+```
+
+### Desktop / Rust — **OBRIGATÓRIO se tocar `.rs`**
+```bash
+cd apps/studio-local/src-tauri
+cargo check
+cargo clippy -- -D warnings
+cargo test
+```
+
+**Critic QA:** proibido aprovar alteração em backend Desktop sem `cargo check` + `cargo clippy` verdes. PR misto = ambos os portões.
+
+## Arquivos canônicos importantes
+- Render: `lib/aaa-render-system.ts` (566 LoC) + `lib/aaa-renderer-impl.ts`
+- **Law XVI:** `lib/production/creative-artifact-bridge.ts`, `creative-cost-guard.ts`, `creative-fusion-transaction.ts`, `video-to-scaffold-extractor.ts`
+- **Law XI:** `lib/production/agent-tool-bus.ts`, `agent-tool-job-runner.ts`, `task-evidence-ledger.ts`
+- Fusion: `lib/ai/intelligent-model-router.ts`, `fusion-role-map.ts`, `agent-llm-bridge.ts`
+- Creative split (fix J.1): `lib/ai-tools-registry.creative.ts` vs `app/api/ai/*/generate`
+- Hardware Law XV: `packages/engine/render/hardware-profile.ts`, `scalable-render-graph/`
+- GAS: Rust `gameplay_ability_system.rs` — IPC binário 60Hz
+- Publish: `lib/production/publish-pipeline-orchestrator.ts` (+ baked-lighting)
+
+## Forbiddens
+- Criar `MonacoEditorPro.runtime.tsx`, `agent-run-ledger.ts`, `scene-graph-node.ts`
+- Bypass CreativeBridge or CostGuard (Trava I)
+- Manifest/viewport write without Yjs transaction (Trava II)
+- VideoToMechanic auto-physics or "video → GTA" marketing (Trava III)
+- Publish export without baked-lighting; Capability Score ignored
+- Checkout/earnings UI antes de H.0; AI-native marketing antes de J.1+J.2+J.12
+- Cross-play marketing antes de G.2; Reviews antes de F.2
+- Tocar código morto (`src/`, `client/`, etc.)
+
+## Platform Reality
+- Web = autoria + demos + webgl2 blueprint + CreativeBridge
+- Desktop = AAA ScalableRenderGraph + Nexus squads + sidecar AI

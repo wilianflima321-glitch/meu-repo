@@ -1,0 +1,89 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+import { withAdminAuth } from '@/lib/rbac';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+// =============================================================================
+// FEATURE FLAGS ADMIN API
+// =============================================================================
+
+const log = createComponentLogger('api/admin/feature-flags/route');
+
+export const GET = withAdminAuth(
+  async () => {
+    try {
+      const flags = await prisma.featureFlag.findMany({ orderBy: { updatedAt: 'desc' } });
+      return NextResponse.json({ items: flags });
+    } catch (error) {
+      log.error('[Admin Feature Flags] Error', error);
+      return NextResponse.json({ error: 'Failed to fetch flags' }, { status: 500 });
+    }
+  },
+  'ops:settings:feature_flags'
+);
+
+export const POST = withAdminAuth(
+  async (request, { user }) => {
+    try {
+      const body = await request.json();
+      const { key, name, description, type, percentage, rules, environments, enabled } = body as {
+        key?: string;
+        name?: string;
+        description?: string;
+        type?: string;
+        percentage?: number;
+        rules?: unknown;
+        environments?: unknown;
+        enabled?: boolean;
+      };
+
+      if (!key || !name) {
+        return NextResponse.json({ error: 'Key and name are required' }, { status: 400 });
+      }
+
+      const flag = await prisma.featureFlag.upsert({
+        where: { key },
+        create: {
+          key,
+          name,
+          description: description || null,
+          type: type || 'boolean',
+          percentage: typeof percentage === 'number' ? percentage : null,
+          rules: rules == null ? Prisma.JsonNull : rules as Prisma.InputJsonValue,
+          environments: environments == null ? Prisma.JsonNull : environments as Prisma.InputJsonValue,
+          enabled: enabled ?? true,
+          createdBy: user.id,
+        },
+        update: {
+          name,
+          description: description || null,
+          type: type || 'boolean',
+          percentage: typeof percentage === 'number' ? percentage : null,
+          rules: rules == null ? Prisma.JsonNull : rules as Prisma.InputJsonValue,
+          environments: environments == null ? Prisma.JsonNull : environments as Prisma.InputJsonValue,
+          enabled: enabled ?? true,
+        },
+      });
+
+      await prisma.auditLog.create({
+        data: {
+          action: 'FEATURE_FLAG_UPSERT',
+          category: 'system',
+          severity: 'info',
+          adminId: user.id,
+          adminEmail: user.email,
+          adminRole: user.role,
+          resource: 'feature-flags',
+          metadata: { key: flag.key, type: flag.type },
+        },
+      });
+
+      return NextResponse.json({ item: flag });
+    } catch (error) {
+      log.error('[Admin Feature Flags] Error', error);
+      return NextResponse.json({ error: 'Failed to upsert flag' }, { status: 500 });
+    }
+  },
+  'ops:settings:feature_flags'
+);

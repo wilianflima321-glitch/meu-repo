@@ -1,0 +1,45 @@
+# OMNI-PLAN PILAR 3 (A Frota) — Buffer-policy autoscaler for `fleet.yaml`.
+# Spec fields verified against Agones' official FleetAutoscaler reference
+# (autoscaling.agones.dev/v1, Buffer policy, FixedInterval sync) rather than
+# guessed, per the Director's "no infra written in the dark" directive.
+apiVersion: autoscaling.agones.dev/v1
+kind: FleetAutoscaler
+metadata:
+  name: aethel-headless-autoscaler
+  namespace: aethel-fleet
+  labels:
+    app.kubernetes.io/name: aethel-headless
+    app.kubernetes.io/part-of: aethel-engine
+spec:
+  fleetName: aethel-headless
+  policy:
+    type: Buffer
+    buffer:
+      # Keep 3 "Ready" GameServers warm at all times so a match found by
+      # `api/matchmaking` never blocks on a cold pod start; small enough
+      # that idle-buffer cost stays negligible even at zero paying traffic.
+      bufferSize: 3
+      minReplicas: 2
+      # PILAR 5 is what actually keeps this from being an open-ended AWS
+      # bill: `maxReplicas` is the *hard physical ceiling* Agones will ever
+      # scale to, independent of any single developer's plan; per-developer
+      # limits (Free tier's 10 concurrent users, Pro's machine-hour quota)
+      # are enforced earlier, in `lib/redis-cost-guard.ts`, before a game is
+      # ever allowed to request an allocation from this Fleet at all. This
+      # number should be raised over time in step with committed cloud
+      # spend, not left uncapped.
+      maxReplicas: 200
+  sync:
+    type: FixedInterval
+    fixedInterval:
+      seconds: 15
+
+# HONEST NEXT STEP (not implemented): Agones also supports a `Webhook`
+# autoscaler policy type, which would let `multiplayerCostGuard`'s own
+# aggregate cost view (e.g. "total committed machine-hours across all Free
+# tier games this month") veto a scale-up decision directly, instead of only
+# gating individual connection requests. That requires standing up a
+# `FleetAutoscaleReview` webhook endpoint implementing Agones' request/
+# response contract (`autoscaling.agones.dev/v1beta1`) — a reasonable Pilar
+# 5 follow-up once real usage data from the Buffer policy above exists to
+# tune it against.

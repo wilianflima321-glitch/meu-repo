@@ -1,0 +1,6 @@
+export type { WebGPUDeferredPassContract, WebGPUDeferredPassInput, WebGPURenderKernelState } from '@/lib/render/webgpu/deferred'
+export { buildWebGPUDeferredPassContract, WEBGPU_DEFERRED_REQUIRED_ATTACHMENTS, WEBGPU_DEFERRED_REQUIRED_EVIDENCE } from '@/lib/render/webgpu/deferred'
+export type { WebGPUForwardPlusInput, WebGPUForwardPlusPassContract } from '@/lib/render/webgpu/forward-plus'
+export { buildWebGPUForwardPlusPassContract, WEBGPU_FORWARD_PLUS_REQUIRED_EVIDENCE } from '@/lib/render/webgpu/forward-plus'
+export type { WebGPURenderKernelReceipt, WebGPURenderKernelReceiptInput } from '@/lib/render/webgpu/performance-receipts'
+export { buildWebGPURenderKernelReceipt, validateWebGPURenderKernelReceipt, WEBGPU_RENDER_KERNEL_REQUIRED_EVIDENCE } from '@/lib/render/webgpu/performance-receipts'

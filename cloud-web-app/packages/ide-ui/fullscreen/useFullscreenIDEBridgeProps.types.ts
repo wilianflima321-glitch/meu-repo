@@ -1,0 +1,136 @@
+'use client';
+
+import type { Dispatch, SetStateAction } from 'react';
+
+import type { FileItem } from '../CommandPalette';
+import type { EditorRef } from './FullscreenIDEWorkspaceBridge.types';
+import type { EntryNotice } from './WorkbenchEntryNotice';
+import type { WorkbenchEditorPaneProps } from './WorkbenchEditorPane';
+import type { WorkbenchPreviewPaneProps } from './WorkbenchPreviewPane';
+import type {
+  ActiveFileState,
+  WorkbenchCollaborationStatus,
+  EditorCursorStatus,
+  InlineApplyResult,
+  EditorSelectionStatus,
+  PreviewMode,
+  SidebarTab,
+} from './types';
+import type { BottomPanelMode, PanelState } from '../modern-shell/types';
+import type { RemotePeer } from '../../../web/hooks/useCollaborationAwareness';
+
+export type UseFullscreenIDEBridgePropsArgs = {
+  projectId: string;
+  activeFile: ActiveFileState | null;
+  bridgeActiveFile: ActiveFileState | null;
+  secondaryFile: ActiveFileState | null;
+  editorRef: EditorRef;
+  primaryEditorRef: EditorRef;
+  secondaryEditorRef: EditorRef;
+  headerCollaborators: RemotePeer[];
+  entryNotice: EntryNotice | null;
+  clearEntryNotice: () => void;
+  workspaceFilesLoaded: boolean;
+  workspaceFiles: FileItem[];
+  sidebarTab: SidebarTab;
+  modernPanelState: PanelState;
+  activeBottomPanel: BottomPanelMode;
+  previewMode: PreviewMode;
+  editorCursorStatus: EditorCursorStatus | null;
+  editorSelectionStatus: EditorSelectionStatus | null;
+  onResizePanel: (panel: keyof PanelState, size: number) => void;
+  onToggleSidebar: () => void;
+  onTogglePanel: (panel: keyof PanelState) => void;
+  setActiveBottomPanel: Dispatch<SetStateAction<BottomPanelMode>>;
+  onRunPrimaryAction: () => void;
+  handleOpenSettings: () => void;
+  openCommandPalette: (mode: 'commands' | 'files') => void;
+  handleSelectSidebarTab: (tab: SidebarTab) => void;
+  handleSelectPreviewMode: (mode: PreviewMode) => void;
+  handleToggleDiagnosticsPanel: () => void;
+  setSidebarTab: Dispatch<SetStateAction<SidebarTab>>;
+  nextOpenTarget: 'primary' | 'secondary';
+  readFile: (path: string, target?: 'primary' | 'secondary') => Promise<void> | void;
+  writeFile: (path: string, content: string) => Promise<void> | void;
+  setLastAiApply: Dispatch<SetStateAction<(InlineApplyResult & { appliedAt: string }) | null>>;
+  emitLayoutEvent: (eventName: string) => void;
+  activeDiagnostics: WorkbenchEditorPaneProps['activeDiagnostics'];
+  splitEditorGroups: WorkbenchEditorPaneProps['splitEditorGroups'];
+  outlineSymbols: WorkbenchEditorPaneProps['outlineSymbols'];
+  splitEditorOpen: boolean;
+  splitActivePane: WorkbenchEditorPaneProps['splitActivePane'];
+  splitDirection: WorkbenchEditorPaneProps['splitDirection'];
+  isCompactViewport: boolean;
+  isReadingFile: boolean;
+  fileError: string | null;
+  showIntelliSense: boolean;
+  showOutline: boolean;
+  showDiagnostics: boolean;
+  fullAccessActiveGrant: unknown;
+  collaborationConnected: boolean;
+  collaborationSession: WorkbenchEditorPaneProps['collaborationSession'];
+  collaborationNativeBindingEnabled: boolean;
+  collaborationStatus: WorkbenchCollaborationStatus;
+  collaborationSyncLed?: import('../../../web/lib/collaboration/collab-sync-state').CollabSyncLedSnapshot | null;
+  editorPeers: RemotePeer[];
+  setSplitActivePane: WorkbenchEditorPaneProps['setSplitActivePane'];
+  setSecondaryFile: WorkbenchEditorPaneProps['setSecondaryFile'];
+  setActiveFile: WorkbenchEditorPaneProps['setActiveFile'];
+  setShowIntelliSense: WorkbenchEditorPaneProps['setShowIntelliSense'];
+  setShowOutline: WorkbenchEditorPaneProps['setShowOutline'];
+  setShowDiagnostics: WorkbenchEditorPaneProps['setShowDiagnostics'];
+  setSplitDirection: WorkbenchEditorPaneProps['setSplitDirection'];
+  setNextOpenTarget: WorkbenchEditorPaneProps['setNextOpenTarget'];
+  setSplitEditorOpen: WorkbenchEditorPaneProps['setSplitEditorOpen'];
+  setEditorDiagnostics: WorkbenchEditorPaneProps['setEditorDiagnostics'];
+  setSecondaryEditorDiagnostics: WorkbenchEditorPaneProps['setSecondaryEditorDiagnostics'];
+  setEditorDocumentSymbols: WorkbenchEditorPaneProps['setEditorDocumentSymbols'];
+  setSecondaryEditorDocumentSymbols: WorkbenchEditorPaneProps['setSecondaryEditorDocumentSymbols'];
+  handleEditorUndo: () => void;
+  handleEditorRedo: () => void;
+  handleEditorFind: () => void;
+  handleEditorReplace: () => void;
+  handleAIPanel: () => void;
+  handleToggleSplitEditor: WorkbenchEditorPaneProps['onToggleSplitEditor'];
+  handleJumpToOutlineSymbol: WorkbenchEditorPaneProps['onJumpToOutlineSymbol'];
+  handleToggleFullAccess: WorkbenchEditorPaneProps['onRequestFullAccess'];
+  broadcastCursor: WorkbenchEditorPaneProps['onCursorPresenceChange'];
+  broadcastSelection: WorkbenchEditorPaneProps['onSelectionPresenceChange'];
+  handleEditorCursorStatus: NonNullable<WorkbenchEditorPaneProps['onCursorStatusChange']>;
+  handleEditorSelectionStatus: NonNullable<WorkbenchEditorPaneProps['onSelectionStatusChange']>;
+  previewRefreshTick: number;
+  previewRuntimeUrl: WorkbenchPreviewPaneProps['previewRuntimeUrl'];
+  previewRuntimeInput: WorkbenchPreviewPaneProps['previewRuntimeInput'];
+  showRuntimeSettings: boolean;
+  runtimeHealth: WorkbenchPreviewPaneProps['runtimeHealth'];
+  runtimeHealthCheckedAt: WorkbenchPreviewPaneProps['runtimeHealthCheckedAt'];
+  runtimeHealthHint: string;
+  runtimeReadiness: WorkbenchPreviewPaneProps['runtimeReadiness'];
+  runtimePrimaryAction: WorkbenchPreviewPaneProps['runtimePrimaryAction'];
+  runtimePrimaryActionLabel: string;
+  runtimeActionBlockedReason: string | null;
+  runtimeAutomationPlacement: string | null;
+  runtimeAutomationRequiresConfirmation: boolean;
+  runtimeStrategyLabel: string;
+  runtimeStrategyHint: string;
+  runtimeDiscoveryMessage: string | null;
+  runtimeDiscoveryTone: WorkbenchPreviewPaneProps['runtimeDiscoveryTone'];
+  isDiscoveringRuntime: boolean;
+  isProvisioningRuntime: boolean;
+  isSyncingRuntime: boolean;
+  syncRuntimeBlockedReason: string | null;
+  previewSandboxId: string | null;
+  forceInlinePreviewFallback: boolean;
+  isSavingFile: boolean;
+  setPreviewMode: WorkbenchPreviewPaneProps['setPreviewMode'];
+  setPreviewRuntimeInput: WorkbenchPreviewPaneProps['setPreviewRuntimeInput'];
+  setShowRuntimeSettings: WorkbenchPreviewPaneProps['setShowRuntimeSettings'];
+  setPreviewRefreshTick: WorkbenchPreviewPaneProps['setPreviewRefreshTick'];
+  applyRuntimeUrl: WorkbenchPreviewPaneProps['applyRuntimeUrl'];
+  handleUseInlineFallback: WorkbenchPreviewPaneProps['handleUseInlineFallback'];
+  refreshRuntimeReadiness: WorkbenchPreviewPaneProps['refreshRuntimeReadiness'];
+  discoverRuntime: WorkbenchPreviewPaneProps['discoverRuntime'];
+  provisionRuntime: WorkbenchPreviewPaneProps['provisionRuntime'];
+  syncRuntime: WorkbenchPreviewPaneProps['syncRuntime'];
+  checkRuntimeHealth: WorkbenchPreviewPaneProps['checkRuntimeHealth'];
+};

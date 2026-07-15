@@ -1,0 +1,25 @@
+﻿{
+    "total_count":  1,
+    "artifacts":  [
+                      {
+                          "id":  4425225627,
+                          "node_id":  "MDg6QXJ0aWZhY3Q0NDI1MjI1NjI3",
+                          "name":  "server-log",
+                          "size_in_bytes":  527,
+                          "url":  "https://api.github.com/repos/wilianflima321-glitch/meu-repo/actions/artifacts/4425225627",
+                          "archive_download_url":  "https://api.github.com/repos/wilianflima321-glitch/meu-repo/actions/artifacts/4425225627/zip",
+                          "expired":  false,
+                          "digest":  "sha256:411fb7a5a121ecdcc7aa15a9ef72f52a5a416b7bce49ead65ca06e7895c6e46b",
+                          "created_at":  "2025-10-31T02:21:14Z",
+                          "updated_at":  "2025-10-31T02:21:14Z",
+                          "expires_at":  "2026-01-29T02:17:27Z",
+                          "workflow_run":  {
+                                               "id":  18960662674,
+                                               "repository_id":  1083395558,
+                                               "head_repository_id":  1083395558,
+                                               "head_branch":  "infra/playwright-ci-ensemble-workflow-fix",
+                                               "head_sha":  "be29664bfa4b93846eefd9f386b0eb8b07538e74"
+                                           }
+                      }
+                  ]
+}

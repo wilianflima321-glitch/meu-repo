@@ -1,0 +1,483 @@
+/**
+ * API Facade (client-side)
+ *
+ * Este arquivo é importado diretamente por componentes do dashboard/chat.
+ * Ele expõe um client pequeno e estável para as rotas Next (/api/*).
+ */
+
+// O client-side deve falar somente com as rotas Next (/api/*),
+// para garantir auth/entitlements/metering no server.
+export const API_BASE = '/api';
+
+export type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: string };
+
+export type ChatThreadSummary = {
+	id: string;
+	title: string;
+	projectId: string | null;
+	archived: boolean;
+	createdAt: string;
+	updatedAt: string;
+	_count?: { messages: number };
+};
+
+export type ChatStoredMessage = {
+	id: string;
+	role: 'user' | 'assistant' | 'system' | string;
+	content: string;
+	model?: string | null;
+	metadata?: unknown;
+	createdAt: string;
+};
+
+export type CopilotWorkflowSummary = {
+	id: string;
+	title: string;
+	projectId: string | null;
+	chatThreadId: string | null;
+	archived: boolean;
+	contextVersion: number;
+	createdAt: string;
+	updatedAt: string;
+	lastUsedAt: string;
+};
+
+export type CopilotWorkflowDetail = CopilotWorkflowSummary & {
+	context?: unknown;
+};
+
+export type CopilotContextResponse = {
+	projectId: string | null;
+	workflowId: string | null;
+	chatThreadId?: string | null;
+	context?: unknown;
+	contextVersion?: number;
+};
+
+export type UserProfile = {
+	id: string;
+	email?: string;
+	name?: string;
+	avatar?: string | null;
+	plan?: string;
+	createdAt?: string;
+	updatedAt?: string;
+	metadata?: unknown;
+};
+
+export type BillingPlan = {
+	id: string;
+	name: string;
+	description?: string;
+	price?: number;
+	priceAnnual?: number;
+	priceBRL?: number;
+	priceAnnualBRL?: number;
+	currency?: string;
+	interval?: string;
+	popular?: boolean;
+	features?: string[];
+	limits?: Record<string, unknown>;
+};
+
+export type BillingReadiness = {
+	status: 'ready' | 'partial' | 'unavailable' | string;
+	checkoutReady: boolean;
+	portalReady?: boolean;
+	webhookReady?: boolean;
+	blockers?: string[];
+	instructions?: string[];
+	recommendedCommands?: string[];
+	gateway?: {
+		activeGateway: string;
+		checkoutEnabled: boolean;
+		allowLocalIdeRedirect?: boolean;
+		checkoutOrigin?: string | null;
+	};
+	provider?: {
+		id: string;
+		label: string;
+		setupEnv: string[];
+		surfaces: string[];
+		webhookPath?: string | null;
+	};
+	stripe?: {
+		configured: boolean;
+		secretKeyConfigured: boolean;
+		publishableKeyConfigured: boolean;
+		webhookSecretConfigured: boolean;
+		pricesReady: boolean;
+		configuredPriceCount: number;
+		requiredPriceCount: number;
+		missingEnv: string[];
+		configuredPrices: string[];
+	};
+	error?: string;
+};
+
+export type StudioCostLive = {
+	status: 'ready' | 'attention' | 'blocked' | string;
+	projectId?: string | null;
+	wallet: {
+		balance: number;
+		currency: string;
+		lowBalance: boolean;
+		lowBalanceThreshold: number;
+	};
+	budget: {
+		hourly: { spendUsd: number; budgetUsd: number; percent: number; status: 'healthy' | 'warning' | 'critical' | string };
+		daily: { spendUsd: number; budgetUsd: number; percent: number; status: 'healthy' | 'warning' | 'critical' | string };
+		monthly: { spendUsd: number; budgetUsd: number; percent: number; status: 'healthy' | 'warning' | 'critical' | string };
+	};
+	billing: {
+		status: string;
+		checkoutReady: boolean;
+		portalReady: boolean;
+		webhookReady: boolean;
+		blockers: string[];
+		providerLabel: string;
+		setupEnv: string[];
+	};
+	policy: {
+		emergencyLevel: string;
+		fallbackModel: string;
+		autoDowngradeOnWarning: boolean;
+		autoShutdownOnCritical: boolean;
+		maxTokensPerRequest: number;
+		allowedModels: string[];
+	};
+	metrics: {
+		totalRequestsToday: number;
+		totalTokensToday: number;
+		avgCostPerRequestUsd: number;
+		updatedAt: string;
+	};
+	guidance: string[];
+};
+
+export type BillingSubscriptionStatus = {
+	plan: string;
+	stripeCustomerId?: string | null;
+	subscription: {
+		id: string;
+		status: string;
+		currentPeriodEnd: string;
+		stripeSubscriptionId?: string | null;
+		stripePriceId?: string | null;
+	} | null;
+};
+
+export type WalletTransaction = {
+	id: string;
+	amount: number;
+	currency: string;
+	entry_type: string;
+	created_at: string;
+	reference?: string | null;
+	metadata?: Record<string, unknown> | null;
+	balance_after?: number | null;
+};
+
+export type WalletSummary = {
+	balance: number;
+	currency: string;
+	transactions: WalletTransaction[];
+};
+
+export type ConnectivityResponse = {
+	status?: string;
+	overall_status?: string;
+	timestamp?: string;
+	services?: Array<{
+		name: string;
+		status: string;
+		endpoints: Array<{
+			url: string;
+			healthy: boolean;
+			latency_ms: number | null;
+			status_code?: number | null;
+			error?: string | null;
+		}>;
+		latency_ms?: number;
+		message?: string;
+	}>;
+};
+
+export type PurchaseIntentResponse = {
+	intent_id: string;
+	entry: WalletTransaction;
+};
+
+export type TransferResponse = {
+	transfer_id: string;
+	sender_entry: WalletTransaction;
+	receiver_entry?: WalletTransaction;
+};
+
+export type UsageStatusResponse = {
+	data?: {
+		plan?: unknown;
+		usage?: {
+			tokens?: {
+				remaining?: unknown;
+			};
+		};
+	};
+};
+
+export type AIChatResponse = {
+	choices?: Array<{
+		message?: {
+			content?: string;
+		};
+	}>;
+	message?: {
+		content?: string;
+	};
+	content?: string;
+};
+
+type RequestOptions = {
+	method?: string;
+	headers?: Record<string, string>;
+	body?: unknown;
+};
+
+export class APIError extends Error {
+	public status: number;
+	public statusText: string;
+	public data: unknown;
+
+	constructor(status: number, statusText: string, message: string, data?: unknown) {
+		super(message);
+		this.name = 'APIError';
+		this.status = status;
+		this.statusText = statusText;
+		this.data = data;
+	}
+}
+
+function getAuthToken(): string | null {
+	if (typeof window === 'undefined') return null;
+	return window.localStorage.getItem('aethel-token');
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function readStringField(value: unknown, key: string): string | null {
+	if (!isRecord(value)) return null;
+	const field = value[key];
+	return typeof field === 'string' ? field : null;
+}
+
+async function requestJSON<T>(path: string, options: RequestOptions = {}): Promise<T> {
+	const token = getAuthToken();
+	const res = await fetch(`${API_BASE}${path}`, {
+		method: options.method ?? 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
+			...(options.headers ?? {}),
+		},
+		body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+	});
+
+	const text = await res.text().catch(() => '');
+	const data = (() => {
+		try {
+			return text ? JSON.parse(text) : null;
+		} catch {
+			return text;
+		}
+	})();
+
+	if (!res.ok) {
+		const message =
+			readStringField(data, 'message') ||
+			readStringField(data, 'error') ||
+			(typeof data === 'string' ? data : null) ||
+			`HTTP ${res.status}`;
+		throw new APIError(res.status, res.statusText, String(message), data);
+	}
+
+	return data as T;
+}
+
+async function* streamText(path: string, body: unknown): AsyncGenerator<string> {
+	const token = getAuthToken();
+	const res = await fetch(`${API_BASE}${path}`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
+		},
+		body: JSON.stringify(body),
+	});
+
+	if (!res.ok || !res.body) {
+		const text = await res.text().catch(() => '');
+		throw new APIError(res.status, res.statusText, text || `HTTP ${res.status}`);
+	}
+
+	const reader = res.body.getReader();
+	const decoder = new TextDecoder();
+	while (true) {
+		const { value, done } = await reader.read();
+		if (done) break;
+		if (!value) continue;
+		yield decoder.decode(value, { stream: true });
+	}
+}
+
+export const AethelAPIClient = {
+	health: () => requestJSON<{ status: string; timestamp: string; services: Record<string, string> }>('/health'),
+
+	getBillingPlans: async (): Promise<BillingPlan[]> => {
+		const data = await requestJSON<{ plans?: BillingPlan[]; success?: boolean } | BillingPlan[]>('/billing/plans');
+		return Array.isArray(data) ? data : Array.isArray(data?.plans) ? data.plans : [];
+	},
+
+	getBillingReadiness: async (): Promise<BillingReadiness> => {
+		return requestJSON<BillingReadiness>('/billing/readiness');
+	},
+
+	getStudioCostLive: async (projectId?: string): Promise<StudioCostLive> => {
+		const suffix = projectId ? `?projectId=${encodeURIComponent(projectId)}` : '';
+		return requestJSON<StudioCostLive>(`/studio/cost/live${suffix}`);
+	},
+
+	getBillingSubscription: async (): Promise<BillingSubscriptionStatus> => {
+		const payload = await requestJSON<{ success?: boolean; data?: BillingSubscriptionStatus }>('/billing/subscription');
+		if (payload?.data) return payload.data;
+		throw new APIError(500, 'Invalid billing subscription payload', 'BILLING_SUBSCRIPTION_INVALID_PAYLOAD', payload);
+	},
+
+	getWalletSummary: async (): Promise<WalletSummary> => {
+		return requestJSON<WalletSummary>('/wallet/summary');
+	},
+
+	getConnectivityStatus: async (): Promise<ConnectivityResponse> => {
+		return requestJSON<ConnectivityResponse>('/connectivity/status');
+	},
+
+	getCurrentPlan: async (): Promise<BillingPlan> => {
+		const usage = await requestJSON<UsageStatusResponse>('/usage/status');
+		const planId = String(usage?.data?.plan ?? '').trim();
+		const plans = await AethelAPIClient.getBillingPlans().catch(() => [] as BillingPlan[]);
+		const match = plans.find((p) => String(p.id) === planId);
+		return (
+			match ?? {
+				id: planId || 'unknown',
+				name: planId || 'unknown',
+				description: 'Plano atual conforme contrato.',
+			}
+		);
+	},
+
+	getCredits: async (): Promise<{ credits: number }> => {
+		const usage = await requestJSON<UsageStatusResponse>('/usage/status');
+		const remaining = Number(usage?.data?.usage?.tokens?.remaining ?? 0);
+		return { credits: Number.isFinite(remaining) ? remaining : 0 };
+	},
+
+	chat: (input: { model: string; messages: ChatMessage[] }) =>
+		requestJSON<AIChatResponse>('/ai/chat', { method: 'POST', body: input }),
+
+	chatStream: (input: { model: string; messages: ChatMessage[] }) => streamText('/ai/stream', input),
+
+	getCopilotContext: () => requestJSON<CopilotContextResponse>('/copilot/context'),
+
+	listChatThreads: (input?: { projectId?: string; archived?: boolean }) => {
+		const qs = new URLSearchParams();
+		if (input?.projectId) qs.set('projectId', input.projectId);
+		if (typeof input?.archived === 'boolean') qs.set('archived', input.archived ? 'true' : 'false');
+		const suffix = qs.toString() ? `?${qs.toString()}` : '';
+		return requestJSON<{ threads: ChatThreadSummary[] }>(`/chat/threads${suffix}`);
+	},
+
+	createChatThread: (input?: { title?: string; projectId?: string }) =>
+		requestJSON<{ thread: ChatThreadSummary }>(`/chat/threads`, { method: 'POST', body: input ?? {} }),
+
+	updateChatThread: (threadId: string, input: { title?: string; archived?: boolean }) =>
+		requestJSON<{ thread: ChatThreadSummary }>(`/chat/threads/${encodeURIComponent(threadId)}`, {
+			method: 'PATCH',
+			body: input,
+		}),
+
+	getChatMessages: (threadId: string) =>
+		requestJSON<{ threadId: string; messages: ChatStoredMessage[] }>(
+			`/chat/threads/${encodeURIComponent(threadId)}/messages`
+		),
+
+	appendChatMessage: (threadId: string, input: { role: 'user' | 'assistant' | 'system'; content: string; model?: string; metadata?: unknown }) =>
+		requestJSON<{ message: ChatStoredMessage }>(
+			`/chat/threads/${encodeURIComponent(threadId)}/messages`,
+			{ method: 'POST', body: input }
+		),
+
+	cloneChatThread: (input: { sourceThreadId: string; title?: string }) =>
+		requestJSON<{ thread: ChatThreadSummary; copiedMessages: number }>(`/chat/threads/clone`, { method: 'POST', body: input }),
+
+	mergeChatThreads: (input: { sourceThreadId: string; targetThreadId: string }) =>
+		requestJSON<{ mergedMessages: number }>(`/chat/threads/merge`, { method: 'POST', body: input }),
+
+	listCopilotWorkflows: (input?: { projectId?: string; archived?: boolean }) => {
+		const qs = new URLSearchParams();
+		if (input?.projectId) qs.set('projectId', input.projectId);
+		if (typeof input?.archived === 'boolean') qs.set('archived', input.archived ? 'true' : 'false');
+		const suffix = qs.toString() ? `?${qs.toString()}` : '';
+		return requestJSON<{ workflows: CopilotWorkflowSummary[] }>(`/copilot/workflows${suffix}`);
+	},
+
+	createCopilotWorkflow: (input?: { title?: string; projectId?: string; chatThreadId?: string }) =>
+		requestJSON<{ workflow: CopilotWorkflowSummary }>(`/copilot/workflows`, { method: 'POST', body: input ?? {} }),
+
+	getCopilotWorkflow: (workflowId: string) =>
+		requestJSON<{ workflow: CopilotWorkflowDetail }>(`/copilot/workflows/${encodeURIComponent(workflowId)}`),
+
+	updateCopilotWorkflow: (workflowId: string, input: { title?: string; archived?: boolean; chatThreadId?: string | null }) =>
+		requestJSON<{ workflow: CopilotWorkflowSummary }>(`/copilot/workflows/${encodeURIComponent(workflowId)}`, {
+			method: 'PATCH',
+			body: input,
+		}),
+
+	createPurchaseIntent: async (input: { amount: number; currency: string; reference?: string }): Promise<PurchaseIntentResponse> => {
+		return requestJSON<PurchaseIntentResponse>('/wallet/purchase-intent', { method: 'POST', body: input });
+	},
+
+	transferCredits: async (input: { target_user_id: string; amount: number; currency: string; reference?: string }): Promise<TransferResponse> => {
+		return requestJSON<TransferResponse>('/credits/transfer', { method: 'POST', body: input });
+	},
+
+	subscribe: async (planId: string, interval: 'month' | 'year' = 'month'): Promise<{ status: string; checkoutUrl?: string }> => {
+		const data = await requestJSON<{ success?: boolean; checkoutUrl?: string; sessionId?: string }>('/billing/checkout', {
+			method: 'POST',
+			body: { planId, interval },
+		});
+		return { status: data?.success ? 'checkout_created' : 'checkout_unknown', checkoutUrl: data?.checkoutUrl };
+	},
+
+	openBillingPortal: async (): Promise<{ url?: string }> => {
+		return requestJSON<{ url?: string }>('/billing/portal', {
+			method: 'POST',
+		});
+	},
+
+	// ========== Profile ==========
+
+	getProfile: async () => {
+		return requestJSON<{ profile: UserProfile }>('/auth/profile');
+	},
+
+	updateProfile: async (updates: Record<string, unknown>) => {
+		return requestJSON<{ profile: UserProfile }>('/auth/profile', { method: 'PATCH', body: updates });
+	},
+
+	deleteAccount: async () => {
+		return requestJSON<{ success: boolean }>('/auth/delete-account', { method: 'DELETE' });
+	},
+};
+
+export default API_BASE;

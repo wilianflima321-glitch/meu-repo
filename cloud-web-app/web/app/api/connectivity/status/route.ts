@@ -1,0 +1,147 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { requireAuth } from '@/lib/auth-server';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { optionalEnv } from '@/lib/env';
+import { createComponentLogger } from '@/lib/observability/logger';
+import { localEvidenceJson, shouldUseLocalEvidenceFallback } from '@/lib/server/local-evidence-fallback';
+
+const routeLogger = createComponentLogger('api/connectivity/status/route');
+
+export const dynamic = 'force-dynamic';
+
+type EndpointStatus = {
+  url: string;
+  healthy: boolean;
+  latency_ms: number | null;
+  status_code?: number | null;
+  error?: string | null;
+};
+
+type ServiceStatus = {
+  name: string;
+  status: string;
+  endpoints: EndpointStatus[];
+  latency_ms?: number;
+  message?: string;
+};
+
+async function time<T>(fn: () => Promise<T>): Promise<{ ok: boolean; latency_ms: number; error?: string } & ({ value: T } | { value?: undefined })> {
+  const start = Date.now();
+  try {
+    const value = await fn();
+    return { ok: true, latency_ms: Date.now() - start, value };
+  } catch (e) {
+    return { ok: false, latency_ms: Date.now() - start, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const user = requireAuth(req);
+    await requireEntitlementsForUser(user.userId);
+
+    const appUrl = optionalEnv('NEXT_PUBLIC_APP_URL') || 'http://localhost:3000';
+
+    const dbProbe = await time(async () => {
+      await prisma.$queryRaw`SELECT 1`;
+      return true;
+    });
+
+    const stripeConfigured = Boolean(optionalEnv('STRIPE_SECRET_KEY'));
+
+    const services: ServiceStatus[] = [
+      {
+        name: 'web_api',
+        status: 'healthy',
+        endpoints: [
+          {
+            url: `${appUrl}/api/health`,
+            healthy: true,
+            latency_ms: null,
+            status_code: null,
+          },
+        ],
+        message: 'Next.js API active (health available).',
+      },
+      {
+        name: 'database',
+        status: dbProbe.ok ? 'healthy' : 'down',
+        endpoints: [
+          {
+            url: 'postgresql://DATABASE_URL',
+            healthy: dbProbe.ok,
+            latency_ms: dbProbe.latency_ms,
+            error: dbProbe.ok ? null : dbProbe.error ?? 'DB probe failed',
+          },
+        ],
+        latency_ms: dbProbe.latency_ms,
+        message: dbProbe.ok ? 'Connection ok.' : 'Database connection failed.',
+      },
+      {
+        name: 'stripe',
+        status: stripeConfigured ? 'healthy' : 'degraded',
+        endpoints: [
+          {
+            url: 'stripe://STRIPE_SECRET_KEY',
+            healthy: stripeConfigured,
+            latency_ms: null,
+            error: stripeConfigured ? null : 'Stripe not configured',
+          },
+        ],
+        message: stripeConfigured ? 'Stripe configurado.' : 'Stripe ausente (checkout retorna 503).',
+      },
+    ];
+
+    const hasDown = services.some((s) => s.status === 'down');
+    const hasDegraded = services.some((s) => s.status === 'degraded');
+
+    const overall_status = hasDown ? 'down' : hasDegraded ? 'degraded' : 'healthy';
+
+    return NextResponse.json({
+      overall_status,
+      timestamp: new Date().toISOString(),
+      services,
+    });
+  } catch (error) {
+    routeLogger.error('Connectivity status error:', error);
+
+    if (shouldUseLocalEvidenceFallback(req, error)) {
+      return localEvidenceJson(
+        req,
+        error,
+        {
+          overall_status: 'degraded',
+          timestamp: new Date().toISOString(),
+          services: [
+            {
+              name: 'web_api',
+              status: 'healthy',
+              endpoints: [{ url: req.nextUrl.origin, healthy: true, latency_ms: null, status_code: null }],
+              message: 'Next.js app is reachable for local authenticated evidence.',
+            },
+            {
+              name: 'database',
+              status: 'held',
+              endpoints: [
+                {
+                  url: 'postgresql://DATABASE_URL',
+                  healthy: false,
+                  latency_ms: null,
+                  error: 'Database probe held in local evidence fallback.',
+                },
+              ],
+              message: 'Configure DATABASE_URL for production-grade connectivity evidence.',
+            },
+          ],
+        },
+        { surface: 'connectivity.status', state: 'held' },
+      );
+    }
+
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
+  }
+}

@@ -1,0 +1,55 @@
+[package]
+name = "aethel-studio-local"
+version = "0.1.0"
+edition = "2021"
+description = "Aethel Studio Local native runtime kernel"
+
+[lib]
+name = "aethel_studio_local"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
+tokio = { version = "1", features = ["full"] }
+portable-pty = "0.8"
+notify = "6.1"
+wgpu = "0.19"
+winit = "0.29"
+pollster = "0.3"
+rapier3d = "0.18"
+# ONNX Runtime for local AI inference (optional — graceful fallback on init failure)
+ort = { version = "2", features = ["load-dynamic"], optional = true }
+# Secure direct HTTP for BYOK / sidecar downloads (no system proxy leakage)
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+# Geometry clusterizer + SDF voxelizer (Sprint V33)
+bytemuck = { version = "1", features = ["derive"] }
+rfd = "0.14"
+
+# --- Round 3 (Desktop Native Engine) additions -----------------------------
+# Missão Suprema 2 (Profiler de Hardware Real): live CPU/RAM sampling.
+# Missão Suprema 5 (ECS Multi-Threading Extremo): rayon-driven parallel ECS tick.
+# Missão Suprema 4 (Memory-Mapped Files): zero-copy large-file streaming.
+# Missão Suprema 3 (Asset Cooker): PNG/JPG decode ahead of native BC1 encode.
+# Missão Suprema 7 (Live-Coding Determinístico): WASM gameplay hot-reload kernel.
+#
+# These are pinned as "*" (latest resolvable) rather than a specific minor
+# version deliberately: this patch was authored without a working `cargo`
+# toolchain to verify against (see the Round 3 report), so a hand-picked
+# version number risks being either already yanked or not yet published by
+# the time this is built. Pin these down to exact versions the first time
+# `cargo build` actually runs against them.
+sysinfo = "*"
+rayon = "*"
+memmap2 = "*"
+image = { version = "*", default-features = false, features = ["png", "jpeg"] }
+wasmtime = "*"
+
+[features]
+default = []
+# Enable local ONNX inference when the hardware and runtime libraries are present
+local-ai = ["ort"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }

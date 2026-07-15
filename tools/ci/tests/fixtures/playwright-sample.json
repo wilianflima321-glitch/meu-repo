@@ -1,0 +1,89 @@
+{
+  "config": {
+    "projects": [
+      { "name": "chromium" },
+      { "name": "firefox" }
+    ]
+  },
+  "suites": [
+    {
+      "title": "",
+      "suites": [
+        {
+          "title": "soft warn",
+          "specs": [
+            {
+              "title": "should surface warnings but pass",
+              "location": {
+                "file": "playwright/soft-warn.spec.ts",
+                "line": 12,
+                "column": 5
+              },
+              "tests": [
+                {
+                  "projectName": "chromium",
+                  "status": "passed",
+                  "results": [
+                    {
+                      "status": "passed",
+                      "duration": 612
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "should block weapon payload",
+              "location": {
+                "file": "playwright/soft-warn.spec.ts",
+                "line": 44,
+                "column": 5
+              },
+              "tests": [
+                {
+                  "projectName": "chromium",
+                  "status": "failed",
+                  "results": [
+                    {
+                      "status": "failed",
+                      "duration": 420,
+                      "error": {
+                        "message": "Expected warning banner when constraint violated"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "should skip on firefox until mock implemented",
+              "location": {
+                "file": "playwright/soft-warn.spec.ts",
+                "line": 88,
+                "column": 5
+              },
+              "tests": [
+                {
+                  "projectName": "firefox",
+                  "status": "skipped",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "firefox support pending"
+                    }
+                  ],
+                  "results": [
+                    {
+                      "status": "skipped",
+                      "duration": 0
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

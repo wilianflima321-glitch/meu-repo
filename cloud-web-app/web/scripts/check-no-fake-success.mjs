@@ -1,0 +1,221 @@
+#!/usr/bin/env node
+
+import fs from 'node:fs'
+import path from 'node:path'
+
+const ROOT = process.cwd()
+const API_DIR = path.join(ROOT, 'app', 'api')
+
+const STATUS_BY_ERROR = {
+  NOT_IMPLEMENTED: 501,
+  DEPRECATED_ROUTE: 410,
+  PAYMENT_GATEWAY_NOT_IMPLEMENTED: 501,
+  PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE: 503,
+  AUTH_NOT_CONFIGURED: 503,
+  AI_PROVIDER_NOT_CONFIGURED: 503,
+  AI_VIDEO_PROVIDER_UNAVAILABLE: 503,
+  AI_VIDEO_REQUEST_INVALID: 400,
+  AI_VIDEO_GENERATION_FAILED: 500,
+  AI_VIDEO_STATUS_FAILED: 500,
+  AI_DEMO_LIMIT_REACHED: 429,
+  AI_RATE_LIMIT_EXCEEDED: 429,
+  QUEUE_BACKEND_UNAVAILABLE: 503,
+  STUDIO_RUNTIME_GATED: 503,
+  ROUTE_NOT_MAPPED: 404,
+  SAML_NOT_CONFIGURED: 503,
+  SAML_RESPONSE_REQUIRED: 400,
+  SAML_ACS_VALIDATION_NOT_ENABLED: 501,
+  HIGH_RISK_APPROVAL_REQUIRED: 403,
+  DEPENDENCY_IMPACT_APPROVAL_REQUIRED: 409,
+  APPLY_WRITE_FAILED: 500,
+  ROLLBACK_WRITE_FAILED: 500,
+  ROLLBACK_RUN_NOT_FOUND: 404,
+  RUN_NOT_FOUND: 404,
+  LEARN_FEEDBACK_ALREADY_EXISTS: 409,
+  FILE_TOO_LARGE_FOR_PREVIEW: 413,
+  RUNTIME_PROVISION_BACKEND_NOT_CONFIGURED: 503,
+  RUNTIME_PROVISION_FAILED: 503,
+  RUNTIME_PROVISION_INVALID_URL: 502,
+  RUNTIME_PROVISION_UNHEALTHY: 503,
+  RUNTIME_PROVISION_EXCEPTION: 503,
+  PREVIEW_RUNTIME_RATE_LIMIT_EXCEEDED: 429,
+  FULL_ACCESS_REASON_REQUIRED: 400,
+  FULL_ACCESS_GRANT_ID_REQUIRED: 400,
+  FULL_ACCESS_GRANT_NOT_FOUND: 404,
+  FULL_ACCESS_GRANT_REQUIRED: 403,
+  FULL_ACCESS_REVOKE_FORBIDDEN: 403,
+  STUDIO_FULL_ACCESS_LIST_FAILED: 500,
+  STUDIO_FULL_ACCESS_GRANT_FAILED: 500,
+  STUDIO_FULL_ACCESS_REVOKE_FAILED: 500,
+  AGENT_SCOPE_MANIFEST_REQUIRED: 428,
+  AGENT_SCOPE_STALE_MANIFEST: 409,
+  AGENT_SCOPE_READ_ONLY: 423,
+  AGENT_SCOPE_BLOCKED: 423,
+  AGENT_SCOPE_OUTSIDE_OWNERSHIP: 409,
+  AGENT_READ_RECEIPTS_REQUIRED: 428,
+  AGENT_READ_RECEIPTS_CARTOGRAPHY_REQUIRED: 428,
+  AGENT_READ_RECEIPTS_CARTOGRAPHY_UNREAD: 428,
+  AGENT_READ_RECEIPTS_RESEARCH_UNREAD: 428,
+  AGENT_READ_RECEIPTS_SURFACE_UNREAD: 428,
+  AGENT_READ_RECEIPTS_RESEARCH_BLOCKED: 409,
+  JOB_ID_REQUIRED: 400,
+  JOB_NOT_FOUND: 404,
+  JOB_NOT_FAILED: 409,
+  JOB_ACTIVE_CANNOT_CANCEL: 409,
+  JOB_ALREADY_FINALIZED: 409,
+}
+
+const SKIP_SEGMENTS = new Set(['node_modules', '.next', 'dist', 'build'])
+
+function walk(dir, out = []) {
+  if (!fs.existsSync(dir)) return out
+  const entries = fs.readdirSync(dir, { withFileTypes: true })
+  for (const entry of entries) {
+    const abs = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      if (SKIP_SEGMENTS.has(entry.name)) continue
+      walk(abs, out)
+      continue
+    }
+    if (entry.name === 'route.ts' || entry.name === 'route.js') {
+      out.push(abs)
+    }
+  }
+  return out
+}
+
+function rel(file) {
+  return path.relative(ROOT, file).replace(/\\/g, '/')
+}
+
+function findPatternIndex(content, pattern) {
+  return content.search(pattern)
+}
+
+function includesStatusNear(content, index, status) {
+  if (index < 0) return false
+  const start = Math.max(0, index - 1200)
+  const end = Math.min(content.length, index + 1200)
+  const windowText = content.slice(start, end)
+  return new RegExp(`status\\s*:\\s*${status}`).test(windowText)
+}
+
+function isWrappedByNotImplementedCapability(content, index) {
+  if (index < 0) return false
+  const start = Math.max(0, index - 1200)
+  const end = Math.min(content.length, index + 1200)
+  const windowText = content.slice(start, end)
+  return /notImplementedCapability\s*\(\s*\{/.test(windowText)
+}
+
+function checkErrorStatusContract(content, fileRel, failures) {
+  for (const [errorCode, expectedStatus] of Object.entries(STATUS_BY_ERROR)) {
+    const pattern = new RegExp(`error\\s*:\\s*['"\`]${errorCode}['"\`]`, 'g')
+    let match
+    while ((match = pattern.exec(content)) !== null) {
+      if (isWrappedByNotImplementedCapability(content, match.index)) {
+        continue
+      }
+      if (!includesStatusNear(content, match.index, expectedStatus)) {
+        failures.push(
+          `${fileRel}: ${errorCode} sem status ${expectedStatus} no mesmo bloco de resposta`
+        )
+      }
+    }
+  }
+}
+
+function checkFakeSuccess(content, fileRel, failures) {
+  const calls = extractNextResponseCalls(content)
+  for (const call of calls) {
+    const hasSuccessTrue = /success\s*:\s*true/.test(call)
+    const hasErrorField = /error\s*:/.test(call)
+    if (hasSuccessTrue && hasErrorField) {
+      failures.push(
+        `${fileRel}: resposta mistura signal de erro com success=true (possivel fake success)`
+      )
+    }
+  }
+
+  const notImplemented200 = /NOT_IMPLEMENTED[\s\S]{0,220}status\s*:\s*200/g
+  if (notImplemented200.test(content)) {
+    failures.push(`${fileRel}: NOT_IMPLEMENTED nao pode retornar status 200`)
+  }
+}
+
+function extractNextResponseCalls(content) {
+  const calls = []
+  let cursor = 0
+  const token = 'NextResponse.json('
+
+  while (true) {
+    const start = content.indexOf(token, cursor)
+    if (start === -1) break
+
+    let i = start + token.length
+    let depth = 1
+    let quote = null
+
+    while (i < content.length && depth > 0) {
+      const ch = content[i]
+      const prev = content[i - 1]
+      const next = content[i + 1]
+
+      if (quote) {
+        if (ch === quote && prev !== '\\') {
+          quote = null
+        }
+      } else if (ch === '/' && next === '/') {
+        // Skip single line comment
+        while (i < content.length && content[i] !== '\n') {
+          i += 1
+        }
+      } else if (ch === '/' && next === '*') {
+        // Skip multi line comment
+        i += 2
+        while (i < content.length - 1 && !(content[i] === '*' && content[i+1] === '/')) {
+          i += 1
+        }
+        i += 1
+      } else if (ch === '"' || ch === "'" || ch === '`') {
+        quote = ch
+      } else if (ch === '(') {
+        depth += 1
+      } else if (ch === ')') {
+        depth -= 1
+      }
+      i += 1
+    }
+
+    calls.push(content.slice(start, i))
+    cursor = i
+  }
+
+  return calls
+}
+
+function main() {
+  const files = walk(API_DIR)
+  const failures = []
+
+  for (const file of files) {
+    const content = fs.readFileSync(file, 'utf8')
+    const fileRel = rel(file)
+
+    if (findPatternIndex(content, /error\s*:/) < 0) continue
+    checkErrorStatusContract(content, fileRel, failures)
+    checkFakeSuccess(content, fileRel, failures)
+  }
+
+  if (failures.length > 0) {
+    console.error('[no-fake-success] FAIL')
+    for (const failure of failures) {
+      console.error(`- ${failure}`)
+    }
+    process.exit(1)
+  }
+
+  console.log(`[no-fake-success] PASS files=${files.length}`)
+}
+
+main()

@@ -1,0 +1,59 @@
+# Aethel Execution Log
+
+## V30 corrected spine pass - 2026-06-07
+
+### Current truth
+
+- Main is aligned on `11ac68aad` before this pass.
+- Product surface budgets are already ratcheted to `58` pages, `6` admin subroutes and `5` studio subroutes.
+- There are `0` TS/TSX files above `800` lines, so V30 must protect this instead of reopening fragmentation.
+- V30 now also protects the current broad V30 `>500` LOC ceiling (`218` files across the web source tree) so the next rounds can ratchet down instead of drifting up.
+- The priority is internal spine and reproducibility. Final Figma/Claude visual polish should happen only after the V30 gates stay green.
+
+### Decisions locked
+
+- `npm` remains the default package manager.
+- Root, web and Studio Local npm lockfiles are first-class reproducibility artifacts.
+- `apps/studio-local/src-tauri/Cargo.lock` remains tracked for the desktop application.
+- `ModernIDEShell` remains the canonical IDE shell while V29/V30 gates validate it.
+- Admin stays at `6` visible areas and Studio stays at `5` visible groups unless a future RFC updates the route budgets.
+- Browser creative claims stay governed: no `Unreal-grade`, `AAA ready`, `final asset`, `desktop ready`, `signed installer` or `research verified` without receipts.
+
+### Completed in this pass
+
+- Removed the broad `.gitignore` rule that ignored every `package-lock.json`.
+- Added npm lockfile coverage for root, `cloud-web-app/web` and `apps/studio-local`.
+- Removed confirmed unused root dependencies: `@theia/filesystem`, `puppeteer-extra-plugin-stealth`, `technicalindicators`, `crypto-js` and `reflect-metadata`.
+- Regenerated the root lockfile from a clean temp package root, so stale Theia/stealth/technical-indicator lock ghosts do not survive from local `node_modules`.
+- Preserved `ccxt` and `inversify` because root source still imports them.
+- Added `qa:v30-lockfile-reproducibility`.
+- Added `qa:v30-no-new-fragmentation`.
+- Added `qa:v30-heavy-runtime-boundaries` to keep Three/R3F/Monaco out of public, dashboard, admin and product shells.
+- Added `qa:v30-quality-scorecard`; current internal score is `91/100`.
+- Added `qa:v30-total-spine`.
+- Split `lib/volumetric-clouds.ts` into runtime orchestration plus `lib/volumetric-clouds.shaders.ts`, dropping the runtime file below `500` LOC without changing shader behavior.
+- Split `lib/video-encoder-real.ts` into renderer/export orchestration plus `lib/video-encoder-muxers.ts`, isolating MP4/WebM container logic from the export pipeline.
+- Split `lib/control-rig-system.ts` into Control Rig orchestration plus `lib/control-rig-system.solvers.ts`, isolating IK/constraint algorithms from the main rig class.
+- Tightened the broad V30 `filesOver500` ratchet from `221` to `218`; the V29 baseline inventory now reports `215` with its narrower inventory rules.
+
+### Next internal spine cuts
+
+- Split the top `>500` files by contracts/defaults/runtime/adapters/tests without changing behavior. Current broad V30 count is `218`; market-grade target is `<160`.
+- Raise Storybook from `39` toward `80`; this is the biggest measurable UI/testability weakness after route compression.
+- Move remaining IDE assumptions behind one region registry: sidebar, editor, preview, agents/chat, terminal and problems.
+- Build `components/agents` as the only user-facing AI workspace grammar before adding more chat surfaces.
+- Build `CreativeWorkbenchShell` slots for viewport, outliner, inspector, timeline, asset browser and render/review queue.
+- Upgrade Studio Local from probe/bridge to desktop shell with capability manifest, sidecar lanes, logs and crash state.
+
+### Current quality critique
+
+- Strong: route compression, lockfile reproducibility, no files above `800` LOC, and no direct heavy runtime imports in public/dashboard/admin/product shells.
+- Weak: too many large internal modules remain above `500` LOC, Storybook coverage is still low for the amount of product surface, and agents/creative/editor regions still need one shared grammar before adding new capabilities.
+- Improved this round: `components/agents` now has Storybook coverage for `AgentCard`, `AgentTrustStrip`, `AgentWindowStates`, and `AgentWindowTabs`; this gives us a real lab for fleet/replay/trust UX before visual redesign.
+- Improved this round: `CreativeWorkbenchShell` now exists as the shared grammar for viewport, outliner, inspector, timeline, asset browser, render queue and review evidence; future mature creative editors should consume it instead of inventing new chrome.
+- Improved this round: preview now has Storybook coverage for `PreviewRuntimeTrustNotice` and `PreviewContextDock`; `qa:v30-story-coverage-ratchet` requires agent, preview and studio stories instead of letting coverage grow in the wrong places.
+- Improved this round: Studio runtime now has Storybook coverage for `StudioEngineModuleMiniPanel` and `StudioLocalRuntimeCapsule`, covering engine modules and desktop capability states.
+- Improved this round: `volumetric-clouds` no longer mixes shader source with orchestration in one large module; this is the first V30 large-file ratchet after the `0` files over `800` LOC milestone.
+- Improved this round: `video-encoder-real` no longer mixes muxer/container implementation with timeline rendering and export orchestration; future media work can harden muxing independently.
+- Improved this round: `control-rig-system` now keeps FABRIK, two-bone IK, spline IK, look-at and twist correction in a solver module, leaving the main rig class focused on orchestration.
+- Owner guidance: do not add new routes, shells or panels to solve capability gaps. First add contracts, receipts, adapters, and shared workbench slots.

@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Matches the layout convention already used by cloud-web-app/k8s/base
+# (labels, kustomize-managed). Excludes cloudflare-spectrum.tf — that's
+# applied separately via `terraform apply`, not kustomize/kubectl.
+resources:
+  - namespace.yaml
+  - fleet.yaml
+  - fleetautoscaler.yaml
+
+commonLabels:
+  app.kubernetes.io/part-of: aethel-engine

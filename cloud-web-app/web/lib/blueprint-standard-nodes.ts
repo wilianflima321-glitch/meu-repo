@@ -1,0 +1,333 @@
+import type { NodeDefinition } from './blueprint-system'
+
+// Standard node definitions
+export const StandardNodes: NodeDefinition[] = [
+  // Events
+  {
+    type: 'Event_BeginPlay',
+    category: 'Events',
+    displayName: 'Event Begin Play',
+    description: 'Called when the game starts',
+    color: '#c0392b',
+    inputs: [],
+    outputs: [{ id: 'exec', name: '', type: 'exec' }],
+    isEvent: true,
+  },
+  {
+    type: 'Event_Tick',
+    category: 'Events',
+    displayName: 'Event Tick',
+    description: 'Called every frame',
+    color: '#c0392b',
+    inputs: [],
+    outputs: [
+      { id: 'exec', name: '', type: 'exec' },
+      { id: 'deltaTime', name: 'Delta Seconds', type: 'data', dataType: 'float' },
+    ],
+    isEvent: true,
+  },
+  {
+    type: 'Event_BeginOverlap',
+    category: 'Events',
+    displayName: 'Event Begin Overlap',
+    description: 'Called when overlap begins',
+    color: '#c0392b',
+    inputs: [],
+    outputs: [
+      { id: 'exec', name: '', type: 'exec' },
+      { id: 'otherActor', name: 'Other Actor', type: 'data', dataType: 'object' },
+    ],
+    isEvent: true,
+  },
+
+  // Flow Control
+  {
+    type: 'Branch',
+    category: 'Flow Control',
+    displayName: 'Branch',
+    description: 'If/else branching',
+    color: '#8e44ad',
+    inputs: [
+      { id: 'exec', name: '', type: 'exec' },
+      { id: 'condition', name: 'Condition', type: 'data', dataType: 'boolean' },
+    ],
+    outputs: [
+      { id: 'true', name: 'True', type: 'exec' },
+      { id: 'false', name: 'False', type: 'exec' },
+    ],
+  },
+  {
+    type: 'ForLoop',
+    category: 'Flow Control',
+    displayName: 'For Loop',
+    description: 'Loop from first to last index',
+    color: '#8e44ad',
+    inputs: [
+      { id: 'exec', name: '', type: 'exec' },
+      { id: 'firstIndex', name: 'First Index', type: 'data', dataType: 'integer', defaultValue: 0 },
+      { id: 'lastIndex', name: 'Last Index', type: 'data', dataType: 'integer', defaultValue: 10 },
+    ],
+    outputs: [
+      { id: 'loopBody', name: 'Loop Body', type: 'exec' },
+      { id: 'index', name: 'Index', type: 'data', dataType: 'integer' },
+      { id: 'completed', name: 'Completed', type: 'exec' },
+    ],
+  },
+  {
+    type: 'Sequence',
+    category: 'Flow Control',
+    displayName: 'Sequence',
+    description: 'Execute multiple branches in order',
+    color: '#8e44ad',
+    inputs: [{ id: 'exec', name: '', type: 'exec' }],
+    outputs: [
+      { id: 'then0', name: 'Then 0', type: 'exec' },
+      { id: 'then1', name: 'Then 1', type: 'exec' },
+      { id: 'then2', name: 'Then 2', type: 'exec' },
+    ],
+  },
+  {
+    type: 'Delay',
+    category: 'Flow Control',
+    displayName: 'Delay',
+    description: 'Wait for specified time',
+    color: '#8e44ad',
+    inputs: [
+      { id: 'exec', name: '', type: 'exec' },
+      { id: 'duration', name: 'Duration', type: 'data', dataType: 'float', defaultValue: 1.0 },
+    ],
+    outputs: [{ id: 'completed', name: 'Completed', type: 'exec' }],
+    isLatent: true,
+  },
+
+  // Math
+  {
+    type: 'Add',
+    category: 'Math',
+    displayName: 'Add',
+    description: 'Add two values',
+    color: '#27ae60',
+    inputs: [
+      { id: 'a', name: 'A', type: 'data', dataType: 'float' },
+      { id: 'b', name: 'B', type: 'data', dataType: 'float' },
+    ],
+    outputs: [{ id: 'result', name: 'Result', type: 'data', dataType: 'float' }],
+    isPure: true,
+  },
+  {
+    type: 'Subtract',
+    category: 'Math',
+    displayName: 'Subtract',
+    description: 'Subtract two values',
+    color: '#27ae60',
+    inputs: [
+      { id: 'a', name: 'A', type: 'data', dataType: 'float' },
+      { id: 'b', name: 'B', type: 'data', dataType: 'float' },
+    ],
+    outputs: [{ id: 'result', name: 'Result', type: 'data', dataType: 'float' }],
+    isPure: true,
+  },
+  {
+    type: 'Multiply',
+    category: 'Math',
+    displayName: 'Multiply',
+    description: 'Multiply two values',
+    color: '#27ae60',
+    inputs: [
+      { id: 'a', name: 'A', type: 'data', dataType: 'float' },
+      { id: 'b', name: 'B', type: 'data', dataType: 'float' },
+    ],
+    outputs: [{ id: 'result', name: 'Result', type: 'data', dataType: 'float' }],
+    isPure: true,
+  },
+  {
+    type: 'Divide',
+    category: 'Math',
+    displayName: 'Divide',
+    description: 'Divide two values',
+    color: '#27ae60',
+    inputs: [
+      { id: 'a', name: 'A', type: 'data', dataType: 'float' },
+      { id: 'b', name: 'B', type: 'data', dataType: 'float' },
+    ],
+    outputs: [{ id: 'result', name: 'Result', type: 'data', dataType: 'float' }],
+    isPure: true,
+  },
+  {
+    type: 'RandomFloat',
+    category: 'Math',
+    displayName: 'Random Float',
+    description: 'Get random float in range',
+    color: '#27ae60',
+    inputs: [
+      { id: 'min', name: 'Min', type: 'data', dataType: 'float', defaultValue: 0 },
+      { id: 'max', name: 'Max', type: 'data', dataType: 'float', defaultValue: 1 },
+    ],
+    outputs: [{ id: 'result', name: 'Result', type: 'data', dataType: 'float' }],
+    isPure: true,
+  },
+  {
+    type: 'Clamp',
+    category: 'Math',
+    displayName: 'Clamp',
+    description: 'Clamp value between min and max',
+    color: '#27ae60',
+    inputs: [
+      { id: 'value', name: 'Value', type: 'data', dataType: 'float' },
+      { id: 'min', name: 'Min', type: 'data', dataType: 'float' },
+      { id: 'max', name: 'Max', type: 'data', dataType: 'float' },
+    ],
+    outputs: [{ id: 'result', name: 'Result', type: 'data', dataType: 'float' }],
+    isPure: true,
+  },
+  {
+    type: 'Lerp',
+    category: 'Math',
+    displayName: 'Lerp',
+    description: 'Linear interpolation',
+    color: '#27ae60',
+    inputs: [
+      { id: 'a', name: 'A', type: 'data', dataType: 'float' },
+      { id: 'b', name: 'B', type: 'data', dataType: 'float' },
+      { id: 'alpha', name: 'Alpha', type: 'data', dataType: 'float' },
+    ],
+    outputs: [{ id: 'result', name: 'Result', type: 'data', dataType: 'float' }],
+    isPure: true,
+  },
+
+  // Comparison
+  {
+    type: 'Equal',
+    category: 'Comparison',
+    displayName: 'Equal',
+    description: 'Check if values are equal',
+    color: '#3498db',
+    inputs: [
+      { id: 'a', name: 'A', type: 'data', dataType: 'float' },
+      { id: 'b', name: 'B', type: 'data', dataType: 'float' },
+    ],
+    outputs: [{ id: 'result', name: 'Result', type: 'data', dataType: 'boolean' }],
+    isPure: true,
+  },
+  {
+    type: 'Greater',
+    category: 'Comparison',
+    displayName: 'Greater Than',
+    description: 'Check if A > B',
+    color: '#3498db',
+    inputs: [
+      { id: 'a', name: 'A', type: 'data', dataType: 'float' },
+      { id: 'b', name: 'B', type: 'data', dataType: 'float' },
+    ],
+    outputs: [{ id: 'result', name: 'Result', type: 'data', dataType: 'boolean' }],
+    isPure: true,
+  },
+  {
+    type: 'Less',
+    category: 'Comparison',
+    displayName: 'Less Than',
+    description: 'Check if A < B',
+    color: '#3498db',
+    inputs: [
+      { id: 'a', name: 'A', type: 'data', dataType: 'float' },
+      { id: 'b', name: 'B', type: 'data', dataType: 'float' },
+    ],
+    outputs: [{ id: 'result', name: 'Result', type: 'data', dataType: 'boolean' }],
+    isPure: true,
+  },
+
+  // Transform
+  {
+    type: 'GetActorLocation',
+    category: 'Transform',
+    displayName: 'Get Actor Location',
+    description: 'Get the actor world location',
+    color: '#f39c12',
+    inputs: [{ id: 'target', name: 'Target', type: 'data', dataType: 'object' }],
+    outputs: [{ id: 'location', name: 'Location', type: 'data', dataType: 'vector' }],
+    isPure: true,
+  },
+  {
+    type: 'SetActorLocation',
+    category: 'Transform',
+    displayName: 'Set Actor Location',
+    description: 'Set the actor world location',
+    color: '#f39c12',
+    inputs: [
+      { id: 'exec', name: '', type: 'exec' },
+      { id: 'target', name: 'Target', type: 'data', dataType: 'object' },
+      { id: 'newLocation', name: 'New Location', type: 'data', dataType: 'vector' },
+      { id: 'sweep', name: 'Sweep', type: 'data', dataType: 'boolean', defaultValue: false },
+    ],
+    outputs: [
+      { id: 'exec', name: '', type: 'exec' },
+      { id: 'hitResult', name: 'Hit Result', type: 'data', dataType: 'object' },
+    ],
+  },
+  {
+    type: 'AddActorLocalOffset',
+    category: 'Transform',
+    displayName: 'Add Actor Local Offset',
+    description: 'Add offset to actor in local space',
+    color: '#f39c12',
+    inputs: [
+      { id: 'exec', name: '', type: 'exec' },
+      { id: 'target', name: 'Target', type: 'data', dataType: 'object' },
+      { id: 'deltaLocation', name: 'Delta Location', type: 'data', dataType: 'vector' },
+    ],
+    outputs: [{ id: 'exec', name: '', type: 'exec' }],
+  },
+
+  // Input
+  {
+    type: 'GetInputAxis',
+    category: 'Input',
+    displayName: 'Get Input Axis',
+    description: 'Get input axis value',
+    color: '#9b59b6',
+    inputs: [{ id: 'axisName', name: 'Axis Name', type: 'data', dataType: 'string' }],
+    outputs: [{ id: 'value', name: 'Value', type: 'data', dataType: 'float' }],
+    isPure: true,
+  },
+  {
+    type: 'IsInputKeyDown',
+    category: 'Input',
+    displayName: 'Is Input Key Down',
+    description: 'Check if key is pressed',
+    color: '#9b59b6',
+    inputs: [{ id: 'key', name: 'Key', type: 'data', dataType: 'string' }],
+    outputs: [{ id: 'isDown', name: 'Is Down', type: 'data', dataType: 'boolean' }],
+    isPure: true,
+  },
+
+  // Debug
+  {
+    type: 'PrintString',
+    category: 'Debug',
+    displayName: 'Print String',
+    description: 'Print text to screen',
+    color: '#1abc9c',
+    inputs: [
+      { id: 'exec', name: '', type: 'exec' },
+      { id: 'string', name: 'String', type: 'data', dataType: 'string' },
+      { id: 'duration', name: 'Duration', type: 'data', dataType: 'float', defaultValue: 2.0 },
+      { id: 'color', name: 'Color', type: 'data', dataType: 'color' },
+    ],
+    outputs: [{ id: 'exec', name: '', type: 'exec' }],
+  },
+  {
+    type: 'DrawDebugLine',
+    category: 'Debug',
+    displayName: 'Draw Debug Line',
+    description: 'Draw a debug line',
+    color: '#1abc9c',
+    inputs: [
+      { id: 'exec', name: '', type: 'exec' },
+      { id: 'start', name: 'Start', type: 'data', dataType: 'vector' },
+      { id: 'end', name: 'End', type: 'data', dataType: 'vector' },
+      { id: 'color', name: 'Color', type: 'data', dataType: 'color' },
+      { id: 'duration', name: 'Duration', type: 'data', dataType: 'float', defaultValue: 0 },
+    ],
+    outputs: [{ id: 'exec', name: '', type: 'exec' }],
+  },
+];

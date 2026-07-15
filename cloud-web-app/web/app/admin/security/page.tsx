@@ -1,0 +1,232 @@
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
+import { Activity, AlertTriangle, ShieldAlert } from 'lucide-react';
+
+import { EmergencyModePanel } from '@/components/admin/EmergencyModePanel';
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { getToken } from '@/lib/auth';
+import { AdminSecurityLegacyDrawers } from './AdminSecurityLegacyDrawers';
+
+type SecurityLog = {
+  id: string;
+  adminEmail?: string | null;
+  action?: string | null;
+  severity?: string | null;
+  ipAddress?: string | null;
+  createdAt: string;
+};
+
+type SecurityOverview = {
+  settings: {
+    enforce2FA: boolean;
+    blockSuspiciousIps: boolean;
+  };
+  stats: { total: number; warning: number; critical: number };
+  logs: SecurityLog[];
+};
+
+export default function AdminSecurity() {
+  const [data, setData] = useState<SecurityOverview | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const severityLabels: Record<string, string> = {
+    critical: 'critical',
+    warning: 'warning',
+    info: 'info',
+  };
+
+  const getAuthHeaders = useCallback(() => {
+    const token = getToken();
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  }, []);
+
+  const fetchSecurity = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/admin/security/overview', {
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.message || payload?.error || 'Failed to load security posture');
+      }
+      const json = await res.json();
+      setData(json);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error loading security posture');
+    } finally {
+      setLoading(false);
+    }
+  }, [getAuthHeaders]);
+
+  useEffect(() => {
+    fetchSecurity();
+  }, [fetchSecurity]);
+
+
+  const filteredLogs = (data?.logs || []).filter((log) => {
+    const term = search.trim().toLowerCase();
+    return (
+      !term ||
+      (log.action || '').toLowerCase().includes(term) ||
+      (log.adminEmail || '').toLowerCase().includes(term) ||
+      (log.ipAddress || '').toLowerCase().includes(term)
+    );
+  });
+
+  return (
+    <div className='p-6 max-w-6xl mx-auto'>
+      <AdminPageHeader
+        className='mb-6'
+        title='Security and logs'
+        subtitle='Operational view of hardening, critical events, and audit trail.'
+        meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
+        actions={(
+          <button type="button"
+            onClick={fetchSecurity}
+            className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
+          >
+            Refresh
+          </button>
+        )}
+      />
+
+      {error && (
+        <div className='mb-4 rounded border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-3 py-2 text-sm text-[var(--aethel-error)]'>
+          {error}
+        </div>
+      )}
+
+      <AdminSummaryGrid
+        className='mb-6'
+        columns={3}
+        items={[
+          {
+            icon: Activity,
+            label: 'Eventos',
+            value: data?.stats.total || 0,
+          },
+          {
+            icon: AlertTriangle,
+            label: 'Avisos',
+            value: data?.stats.warning || 0,
+            tone: 'warning',
+          },
+          {
+            icon: ShieldAlert,
+            label: 'Cr?ticos',
+            value: data?.stats.critical || 0,
+            tone: 'error',
+          },
+        ]}
+      />
+
+      <EmergencyModePanel />
+
+      <div className='mb-6 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
+        <h2 className='text-xl font-semibold mb-4'>Security settings</h2>
+        {loading ? (
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Loading settings...</p>
+        ) : (
+          <div className='space-y-3'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='font-medium'>2FA obrigatorio</p>
+                <p className='text-xs text-[var(--aethel-text-tertiary)]'>Controlado por ambiente e politica global de autenticacao.</p>
+              </div>
+              <span
+                className={`px-2 py-1 rounded text-xs ${
+                  data?.settings.enforce2FA ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+                }`}
+              >
+                {data?.settings.enforce2FA ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='font-medium'>Suspicious IP block</p>
+                <p className='text-xs text-[var(--aethel-text-tertiary)]'>Controlled by server-side rules and network observability.</p>
+              </div>
+              <span
+                className={`px-2 py-1 rounded text-xs ${
+                  data?.settings.blockSuspiciousIps ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+                }`}
+              >
+                {data?.settings.blockSuspiciousIps ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <AdminSecurityLegacyDrawers />
+
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
+        <div className='flex items-center justify-between mb-4 gap-3'>
+          <h2 className='text-xl font-semibold'>Logs de Auditoria</h2>
+          <input
+            type='text'
+            placeholder='Search action, admin, or IP'
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className='border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] p-2 rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)]'
+          />
+        </div>
+        <table className='w-full'>
+          <thead>
+            <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
+              <th className='p-3 text-left'>Action</th>
+              <th className='p-3 text-left'>Admin</th>
+              <th className='p-3 text-left'>Severidade</th>
+              <th className='p-3 text-left'>Timestamp</th>
+              <th className='p-3 text-left'>IP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Loading logs...</td>
+              </tr>
+            ) : filteredLogs.length === 0 ? (
+              <tr>
+                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>No audit logs found.</td>
+              </tr>
+            ) : (
+              filteredLogs.map((log) => (
+                <tr key={log.id} className='border-t border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)]'>
+                  <td className='p-3'>{log.action || '?'}</td>
+                  <td className='p-3'>{log.adminEmail || '?'}</td>
+                  <td className='p-3'>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        log.severity === 'critical'
+                          ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
+                          : log.severity === 'warning'
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+                            : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+                      }`}
+                    >
+                      {severityLabels[log.severity || 'info'] || log.severity || 'info'}
+                    </span>
+                  </td>
+                  <td className='p-3'>{new Date(log.createdAt).toLocaleString()}</td>
+                  <td className='p-3'>{log.ipAddress || '?'}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

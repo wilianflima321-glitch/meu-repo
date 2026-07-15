@@ -1,0 +1,500 @@
+import { logger } from '@/lib/observability/logger';
+import { EventEmitter } from 'events';
+import { HAPTIC_EFFECTS } from './haptics-system.effects';
+import { createDefaultHapticsConfig } from './haptics-system-defaults';
+import type { GamepadHapticState, HapticEffect, HapticEvent, HapticMotor, HapticPulse, HapticsConfig } from './haptics-system.contracts';
+
+export class HapticsSystem extends EventEmitter {
+  private static instance: HapticsSystem | null = null;
+
+  private config: HapticsConfig;
+  private effects: Map<string, HapticEffect> = new Map();
+  private gamepadStates: Map<number, GamepadHapticState> = new Map();
+  private activeEffects: Map<string, { timer: ReturnType<typeof setTimeout>; loopTimer?: ReturnType<typeof setInterval> }> = new Map();
+  private eventBindings: Map<string, HapticEvent> = new Map();
+
+  private isSupported = false;
+  private isMobileSupported = false;
+
+  constructor(config: Partial<HapticsConfig> = {}) {
+    super();
+
+    this.config = createDefaultHapticsConfig(config);
+
+    // Check platform support
+    this.checkSupport();
+
+    // Load default effects
+    for (const [id, effect] of Object.entries(HAPTIC_EFFECTS)) {
+      this.effects.set(id, effect);
+    }
+  }
+
+  static getInstance(): HapticsSystem {
+    if (!HapticsSystem.instance) {
+      HapticsSystem.instance = new HapticsSystem();
+    }
+    return HapticsSystem.instance;
+  }
+
+  // ============================================================================
+  // PLATFORM SUPPORT
+  // ============================================================================
+
+  private checkSupport(): void {
+    // Check Gamepad Haptic Actuators API
+    if (typeof navigator !== 'undefined' && 'getGamepads' in navigator) {
+      // Will check for actual actuator support when gamepad is connected
+      this.isSupported = true;
+    }
+
+    // Check Vibration API (mobile)
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      this.isMobileSupported = true;
+    }
+  }
+
+  isHapticsSupported(): boolean {
+    return this.isSupported || this.isMobileSupported;
+  }
+
+  isGamepadHapticsSupported(): boolean {
+    return this.isSupported;
+  }
+
+  isMobileHapticsSupported(): boolean {
+    return this.isMobileSupported;
+  }
+
+  // ============================================================================
+  // PLAY EFFECTS
+  // ============================================================================
+
+  play(effectId: string, options?: {
+    intensity?: number;
+    motor?: HapticMotor;
+    gamepadIndex?: number;
+    useMobile?: boolean;
+  }): string | null {
+    if (!this.config.enabled) return null;
+
+    const effect = this.effects.get(effectId);
+    if (!effect) {
+      logger.warn(`Haptic effect not found: ${effectId}`);
+      return null;
+    }
+
+    const intensity = (options?.intensity ?? effect.intensity ?? 1) * this.config.globalIntensity;
+    const motor = options?.motor ?? this.config.defaultMotor;
+    const useMobile = options?.useMobile ?? this.config.mobileEnabled;
+
+    // Generate unique play ID
+    const playId = `${effectId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Play on gamepad(s)
+    if (this.config.gamepadEnabled) {
+      if (options?.gamepadIndex !== undefined) {
+        this.playOnGamepad(options.gamepadIndex, effect, intensity, motor);
+      } else {
+        // Play on all connected gamepads
+        this.playOnAllGamepads(effect, intensity, motor);
+      }
+    }
+
+    // Play on mobile (Vibration API)
+    if (useMobile && this.isMobileSupported) {
+      this.playOnMobile(effect, intensity);
+    }
+
+    // Handle looping
+    if (effect.loop) {
+      const totalDuration = this.calculateEffectDuration(effect);
+      const loopTimer = setInterval(() => {
+        if (this.config.gamepadEnabled) {
+          this.playOnAllGamepads(effect, intensity, motor);
+        }
+        if (useMobile && this.isMobileSupported) {
+          this.playOnMobile(effect, intensity);
+        }
+      }, totalDuration);
+
+      this.activeEffects.set(playId, {
+        timer: setTimeout(() => {}, 0),
+        loopTimer
+      });
+    } else {
+      // Set cleanup timer
+      const duration = this.calculateEffectDuration(effect);
+      const timer = setTimeout(() => {
+        this.activeEffects.delete(playId);
+        this.emit('effectComplete', playId);
+      }, duration);
+
+      this.activeEffects.set(playId, { timer });
+    }
+
+    this.emit('play', effectId, playId);
+    return playId;
+  }
+
+  stop(playId: string): void {
+    const active = this.activeEffects.get(playId);
+    if (!active) return;
+
+    clearTimeout(active.timer);
+    if (active.loopTimer) {
+      clearInterval(active.loopTimer);
+    }
+
+    this.activeEffects.delete(playId);
+
+    // Stop all gamepad vibrations
+    this.stopAllGamepads();
+
+    // Stop mobile vibration
+    if (this.isMobileSupported) {
+      navigator.vibrate(0);
+    }
+
+    this.emit('stop', playId);
+  }
+
+  stopAll(): void {
+    for (const playId of this.activeEffects.keys()) {
+      this.stop(playId);
+    }
+  }
+
+  // ============================================================================
+  // GAMEPAD HAPTICS
+  // ============================================================================
+
+  private playOnGamepad(
+    gamepadIndex: number,
+    effect: HapticEffect,
+    intensity: number,
+    motor: HapticMotor
+  ): void {
+    const gamepads = navigator.getGamepads();
+    const gamepad = gamepads[gamepadIndex];
+
+    if (!gamepad || !gamepad.vibrationActuator) return;
+
+    // Play each pulse in sequence
+    let delay = 0;
+
+    for (const pulse of effect.pattern) {
+      setTimeout(() => {
+        this.pulseGamepad(gamepad, pulse, intensity, motor);
+      }, delay + (pulse.delay || 0));
+
+      delay += pulse.duration + (pulse.delay || 0);
+    }
+  }
+
+  private playOnAllGamepads(
+    effect: HapticEffect,
+    intensity: number,
+    motor: HapticMotor
+  ): void {
+    const gamepads = navigator.getGamepads();
+
+    for (let i = 0; i < gamepads.length; i++) {
+      if (gamepads[i]) {
+        this.playOnGamepad(i, effect, intensity, motor);
+      }
+    }
+  }
+
+  private pulseGamepad(
+    gamepad: Gamepad,
+    pulse: HapticPulse,
+    intensity: number,
+    motor: HapticMotor
+  ): void {
+    if (!gamepad.vibrationActuator) return;
+
+    let weakMag = pulse.weakMagnitude * intensity;
+    let strongMag = pulse.strongMagnitude * intensity;
+
+    // Apply motor filter
+    if (motor === 'weak') {
+      strongMag = 0;
+    } else if (motor === 'strong') {
+      weakMag = 0;
+    }
+
+    try {
+      // Standard Gamepad Haptics API
+      (gamepad.vibrationActuator as any).playEffect?.('dual-rumble', {
+        startDelay: 0,
+        duration: Math.min(pulse.duration, this.config.maxDuration),
+        weakMagnitude: Math.min(1, weakMag),
+        strongMagnitude: Math.min(1, strongMag),
+      });
+    } catch {
+      // Fallback for older API
+      try {
+        (gamepad.vibrationActuator as any).pulse?.(
+          Math.max(weakMag, strongMag),
+          pulse.duration
+        );
+      } catch {
+        // No haptics support
+      }
+    }
+  }
+
+  private stopAllGamepads(): void {
+    const gamepads = navigator.getGamepads();
+
+    for (const gamepad of gamepads) {
+      if (gamepad?.vibrationActuator) {
+        try {
+          (gamepad.vibrationActuator as any).reset?.();
+        } catch {
+          // Ignore
+        }
+      }
+    }
+  }
+
+  // ============================================================================
+  // MOBILE HAPTICS
+  // ============================================================================
+
+  private playOnMobile(effect: HapticEffect, intensity: number): void {
+    if (!this.isMobileSupported) return;
+
+    // Convert pattern to vibration array
+    const pattern: number[] = [];
+
+    for (const pulse of effect.pattern) {
+      if (pulse.delay) {
+        pattern.push(pulse.delay);
+      }
+
+      // Vibration API only supports on/off, use duration
+      const avgMagnitude = (pulse.weakMagnitude + pulse.strongMagnitude) / 2;
+      const adjustedDuration = Math.round(pulse.duration * avgMagnitude * intensity);
+      pattern.push(adjustedDuration);
+    }
+
+    try {
+      navigator.vibrate(pattern);
+    } catch {
+      // Vibration not supported or failed
+    }
+  }
+
+  // ============================================================================
+  // CONVENIENCE METHODS
+  // ============================================================================
+
+  // Basic haptics
+  tap(strength: 'light' | 'medium' | 'heavy' = 'medium'): string | null {
+    return this.play(`${strength}_tap`);
+  }
+
+  impact(strength: 'light' | 'medium' | 'heavy' = 'medium'): string | null {
+    return this.play(`impact_${strength}`);
+  }
+
+  selection(): string | null {
+    return this.play('selection');
+  }
+
+  // Game haptics
+  damage(intensity = 1): string | null {
+    return this.play('damage', { intensity });
+  }
+
+  explosion(intensity = 1): string | null {
+    return this.play('explosion', { intensity });
+  }
+
+  gunshot(intensity = 1): string | null {
+    return this.play('gunshot', { intensity });
+  }
+
+  punch(intensity = 1): string | null {
+    return this.play('punch', { intensity });
+  }
+
+  footstep(intensity = 0.5): string | null {
+    return this.play('footstep', { intensity });
+  }
+
+  // UI haptics
+  buttonPress(): string | null {
+    return this.play('button_press');
+  }
+
+  menuNavigate(): string | null {
+    return this.play('menu_navigate');
+  }
+
+  confirm(): string | null {
+    return this.play('confirm');
+  }
+
+  cancel(): string | null {
+    return this.play('cancel');
+  }
+
+  error(): string | null {
+    return this.play('error');
+  }
+
+  success(): string | null {
+    return this.play('success');
+  }
+
+  warning(): string | null {
+    return this.play('warning');
+  }
+
+  // Continuous effects
+  startRumble(intensity = 0.5): string | null {
+    return this.play('rumble', { intensity });
+  }
+
+  startEarthquake(intensity = 1): string | null {
+    return this.play('earthquake', { intensity });
+  }
+
+  // ============================================================================
+  // CUSTOM EFFECTS
+  // ============================================================================
+
+  registerEffect(id: string, effect: HapticEffect): void {
+    this.effects.set(id, effect);
+    this.emit('effectRegistered', id);
+  }
+
+  unregisterEffect(id: string): void {
+    this.effects.delete(id);
+    this.emit('effectUnregistered', id);
+  }
+
+  getEffect(id: string): HapticEffect | undefined {
+    return this.effects.get(id);
+  }
+
+  getEffects(): Map<string, HapticEffect> {
+    return new Map(this.effects);
+  }
+
+  // Create custom pulse sequence
+  createPulse(
+    duration: number,
+    weakMagnitude: number,
+    strongMagnitude: number
+  ): HapticPulse {
+    return {
+      duration: Math.min(duration, this.config.maxDuration),
+      weakMagnitude: Math.min(1, Math.max(0, weakMagnitude)),
+      strongMagnitude: Math.min(1, Math.max(0, strongMagnitude)),
+    };
+  }
+
+  // Play custom one-off pattern
+  playPattern(pattern: HapticPulse[], options?: {
+    intensity?: number;
+    loop?: boolean;
+  }): string | null {
+    const tempId = `custom_${Date.now()}`;
+    const effect: HapticEffect = {
+      name: 'Custom',
+      pattern,
+      loop: options?.loop,
+      intensity: options?.intensity,
+    };
+
+    this.effects.set(tempId, effect);
+    const playId = this.play(tempId, options);
+
+    // Cleanup temp effect
+    if (!options?.loop) {
+      const duration = this.calculateEffectDuration(effect);
+      setTimeout(() => {
+        this.effects.delete(tempId);
+      }, duration + 100);
+    }
+
+    return playId;
+  }
+
+  // ============================================================================
+  // EVENT BINDINGS
+  // ============================================================================
+
+  bindEvent(eventName: string, effectId: string, intensity = 1): void {
+    this.eventBindings.set(eventName, {
+      type: eventName,
+      effect: effectId,
+      intensity,
+    });
+  }
+
+  unbindEvent(eventName: string): void {
+    this.eventBindings.delete(eventName);
+  }
+
+  triggerEvent(eventName: string): string | null {
+    const binding = this.eventBindings.get(eventName);
+    if (!binding) return null;
+
+    return this.play(binding.effect, { intensity: binding.intensity });
+  }
+
+  // ============================================================================
+  // UTILITIES
+  // ============================================================================
+
+  private calculateEffectDuration(effect: HapticEffect): number {
+    let duration = 0;
+
+    for (const pulse of effect.pattern) {
+      duration += pulse.duration + (pulse.delay || 0);
+    }
+
+    return Math.min(duration, this.config.maxDuration);
+  }
+
+  setEnabled(enabled: boolean): void {
+    this.config.enabled = enabled;
+
+    if (!enabled) {
+      this.stopAll();
+    }
+
+    this.emit('enabledChanged', enabled);
+  }
+
+  setIntensity(intensity: number): void {
+    this.config.globalIntensity = Math.min(1, Math.max(0, intensity));
+    this.emit('intensityChanged', this.config.globalIntensity);
+  }
+
+  getConfig(): HapticsConfig {
+    return { ...this.config };
+  }
+
+  setConfig(config: Partial<HapticsConfig>): void {
+    this.config = { ...this.config, ...config };
+    this.emit('configChanged', this.config);
+  }
+
+  // ============================================================================
+  // CLEANUP
+  // ============================================================================
+
+  dispose(): void {
+    this.stopAll();
+    this.effects.clear();
+    this.eventBindings.clear();
+    this.removeAllListeners();
+    HapticsSystem.instance = null;
+  }
+}

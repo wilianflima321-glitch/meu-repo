@@ -1,0 +1,138 @@
+/**
+ * Default feature flags shipped with the Aethel runtime.
+ */
+
+import type { FeatureFlag } from './feature-flags.types';
+
+// ============================================================================
+// DEFAULT FEATURE FLAGS
+// ============================================================================
+
+export const DefaultFeatureFlags: FeatureFlag[] = [
+  // Core features
+  {
+    id: 'ff_1',
+    key: 'new_dashboard',
+    name: 'Novo Dashboard',
+    description: 'Nova versão do dashboard com melhorias de UX',
+    type: 'percentage',
+    enabled: true,
+    percentage: 50,
+    environments: {
+      development: { enabled: true, percentage: 100 },
+      staging: { enabled: true, percentage: 100 },
+      production: { enabled: true, percentage: 50 },
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'system',
+    tags: ['ui', 'dashboard'],
+  },
+  {
+    id: 'ff_2',
+    key: 'ai_code_review',
+    name: 'AI Code Review',
+    description: 'Revisão automática de código com IA',
+    type: 'rule_based',
+    enabled: true,
+    rules: [
+      { id: 'r1', attribute: 'user.plan', operator: 'in_list', value: ['pro', 'studio', 'enterprise'], priority: 1 },
+    ],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'system',
+    tags: ['ai', 'pro-feature'],
+  },
+  {
+    id: 'ff_3',
+    key: 'multiplayer_editing',
+    name: 'Edição Multiplayer',
+    description: 'Colaboração em tempo real no editor',
+    type: 'boolean',
+    enabled: true,
+    defaultValue: true,
+    dependsOn: ['new_dashboard'],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'system',
+    tags: ['collaboration'],
+  },
+  {
+    id: 'ff_4',
+    key: 'new_checkout_flow',
+    name: 'Novo Fluxo de Checkout',
+    description: 'A/B test do novo fluxo de pagamento',
+    type: 'variant',
+    enabled: true,
+    variants: [
+      { id: 'control', name: 'Controle', weight: 50 },
+      { id: 'variant_a', name: 'Variante A - Steps', weight: 25 },
+      { id: 'variant_b', name: 'Variante B - Single Page', weight: 25 },
+    ],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'system',
+    tags: ['billing', 'experiment'],
+  },
+  {
+    id: 'ff_5',
+    key: 'beta_features',
+    name: 'Features Beta',
+    description: 'Acesso a features em beta para usuários selecionados',
+    type: 'user_list',
+    enabled: true,
+    allowedUsers: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'system',
+    tags: ['beta'],
+  },
+  {
+    id: 'ff_6',
+    key: 'advanced_analytics',
+    name: 'Analytics Avançado',
+    description: 'Dashboard de analytics detalhado',
+    type: 'rule_based',
+    enabled: true,
+    rules: [
+      { id: 'r1', attribute: 'user.plan', operator: 'equals', value: 'enterprise', priority: 1 },
+      { id: 'r2', attribute: 'user.role', operator: 'equals', value: 'admin', priority: 2 },
+    ],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'system',
+    tags: ['analytics', 'enterprise'],
+  },
+  {
+    id: 'ff_7',
+    key: 'dark_mode_v2',
+    name: 'Dark Mode v2',
+    description: 'Nova implementação do modo escuro',
+    type: 'boolean',
+    enabled: false,
+    defaultValue: false,
+    killSwitch: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'system',
+    tags: ['ui', 'theme'],
+  },
+  {
+    id: 'ff_8',
+    key: 'export_webgpu',
+    name: 'Export WebGPU',
+    description: 'Suporte a export para WebGPU',
+    type: 'percentage',
+    enabled: true,
+    percentage: 10,
+    environments: {
+      development: { enabled: true, percentage: 100 },
+      staging: { enabled: true, percentage: 50 },
+      production: { enabled: true, percentage: 10 },
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'system',
+    tags: ['export', 'webgpu'],
+  },
+];

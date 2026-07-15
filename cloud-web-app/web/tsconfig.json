@@ -1,0 +1,86 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2022"
+    ],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/lib/*": [
+        "./lib/*"
+      ],
+      "@/contexts/*": [
+        "./contexts/*"
+      ],
+      "@aethel/runtime-contracts": [
+        "../packages/runtime-contracts/src/index.ts"
+      ],
+      "@aethel/runtime/*": [
+        "../packages/runtime/*"
+      ],
+      "@aethel/ide-ui/*": [
+        "../packages/ide-ui/*"
+      ],
+      "@aethel/visual-scripting/*": [
+        "../packages/visual-scripting/*"
+      ],
+      "@aethel/engine/*": [
+        "../packages/engine/*"
+      ],
+      "@aethel/export/*": [
+        "../packages/export/*"
+      ],
+      "@aethel/gameplay-ability-system": [
+        "./lib/gameplay-ability-system.ts"
+      ],
+      "@aethel/gameplay/*": [
+        "../packages/gameplay/*"
+      ],
+      "@aethel/agents/*": [
+        "../packages/agents/*"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "tailwind.config.ts",
+    "lib/build/build-pipeline.ts",
+    "tests/e2e/**/*",
+    "__tests__/**/*"
+  ]
+}

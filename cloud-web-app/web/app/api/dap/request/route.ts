@@ -1,0 +1,63 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-server';
+import { requireFeatureForUser } from '@/lib/entitlements';
+import { apiErrorToResponse } from '@/lib/api-errors';
+import { dapRequest, type DapPayload } from '@/lib/server/dap-runtime';
+
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/dap/request/route')
+
+interface DAPRequest {
+  sessionId: string;
+
+  command: string;
+  arguments: DapPayload;
+  seq: number;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const user = requireAuth(request);
+		await requireFeatureForUser(user.userId, 'dap');
+
+    const payload: DAPRequest = await request.json();
+    const { sessionId, command, arguments: args, seq } = payload;
+
+    if (!sessionId || !command) {
+      return NextResponse.json(
+        { success: false, message: 'Session ID and command are required' },
+        { status: 400 }
+      );
+    }
+
+    log.info(`DAP Request [${sessionId}]: ${command}`);
+
+    const responseBody = await dapRequest(sessionId, seq, command, args);
+
+    return NextResponse.json({
+      success: true,
+      seq,
+      command,
+      body: responseBody,
+    });
+  } catch (error) {
+    log.error('DAP request failed:', error);
+    const code = (error as any)?.code;
+    if (code === 'DAP_SESSION_NOT_FOUND') {
+      return NextResponse.json(
+        { success: false, message: 'DAP session not found (sessionId invalid or expired).' },
+        { status: 404 }
+      );
+    }
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return NextResponse.json(
+      {
+        success: false,
+        message: error instanceof Error ? error.message : 'Request failed'
+      },
+      { status: 500 }
+    );
+  }
+}

@@ -1,0 +1,58 @@
+# Aethel Rules
+
+These rules are the canonical project-wide constraints that every contributor
+(human or AI) MUST honour. They are loaded by the Aethel chat via
+`cloud-web-app/web/lib/server/project-rules.ts` and are also consumed natively
+by Cursor / Windsurf / Copilot Workspace when the repo is opened there.
+
+## Product Bar
+- Optimize for the user-facing path first: `/`, `/dashboard`, `/ide`, `/docs`, billing, auth, preview.
+- Prefer fewer, stronger surfaces over many shallow placeholders.
+- If a route only redirects, implement it in `next.config.js` or middleware instead of shipping a stub page.
+
+## Architecture
+- Keep the canonical design system in `cloud-web-app/web/lib/design-tokens.ts` + CSS variables from `cloud-web-app/web/app/globals.css`.
+- New UI primitives belong in `cloud-web-app/web/components/ui`.
+- Collaboration primitives belong in `cloud-web-app/web/components/collaboration`.
+- Avoid duplicate component names across folders. If a duplicate is unavoidable, document the canonical owner in `cloud-web-app/web/components/COMPONENT_CONSOLIDATION_MAP.md` first.
+- Do not vendor third-party source trees into the main repo.
+- Use project-relative paths only — never absolute OS paths (no `C:\…`, no `/home/…`).
+
+## Quality
+- No `console.log`, `console.info`, or `console.debug` in app code. Use `cloud-web-app/web/lib/observability/logger.ts` via `createComponentLogger('<module>')`.
+- `console.warn` / `console.error` are allowed for framework-sensitive paths only.
+- All new buttons must have an accessible name through text, `aria-label`, or `aria-labelledby`.
+- Prefer request IDs, structured logs, and explicit error capture on server paths.
+- Add or update tests when touching auth, billing, editor state, preview, or collaboration flows.
+- No hard-coded hex colours in TSX (`bg-white`, `text-white`, etc.). Use design tokens (`var(--aethel-*)`) or the escape tokens `--aethel-text-inverse` / `--aethel-surface-contrast`.
+
+## Observability
+- Every server-side module must call `createComponentLogger(<name>)` once at the top and use `log.info` / `log.debug` / `log.warn` / `log.error`.
+- Correlation IDs flow via the logger's `LogContext` — do not bypass the helper.
+
+## Workbench
+- The workbench is the product core. Favor `entry`-based convergence over parallel standalone shells.
+- Split orchestration from panels and hooks before growing god-components further. The hard line is **500 lines per component file** before a refactor is non-negotiable.
+- Collaboration features must degrade gracefully when realtime services are unavailable.
+- Remote cursors, presence dots and collaborator avatars are implemented via `components/collaboration/*` + `hooks/useCollaborationAwareness`.
+
+## Design system
+- Theme toggling must respect `prefers-color-scheme` by default and honour `localStorage` overrides second.
+- Every new component ships with at least one Storybook story under `components/**/*.stories.tsx`.
+- QA gates that must stay green before merging:
+  - `node tools/check-design-system-consistency.mjs` — 0 findings
+  - `node tools/check-hardcoded-colors.mjs` — 0 findings
+  - `node tools/check-button-types.mjs` — 0 findings
+
+## Forbidden
+- Reintroducing deleted dead libs (see `docs/master/80_DEAD_LIB_SWEEP.md` for the list).
+- Absolute OS paths in source or documentation.
+- `next.config.js` flags that disable Next/Image (`images.unoptimized: true`).
+- `any` types in new code unless justified by a `// TODO(strict):` comment.
+
+## Executor boot (Claude / Cursor agents)
+- Open `docs/architecture/AETHEL_FOCUS1_EXECUTION_PROGRESS.md` then Master Map **current round only** — do not preload the full architecture corpus.
+- Task queue = `AETHEL_CLAUDE_EXECUTION_MASTER_MAP.md`. Planning Completeness ≠ execution done.
+- Order: Focus 1 → Focus 2 → Block 6. Import shipped libs; never reimplement Bridge / spend-resolver / heightfield.
+- `cloud-web-app/CLAUDE_MASTER_EXECUTION_PLAN_V7|V8` and siblings are **SUPERSEDED** — ignore as DoD.
+- Do not create new alignment MDs; annotate Index / Master Map / Progress.

@@ -1,0 +1,52 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+    paths:
+      - 'cloud-web-app/web/**'
+      - '.github/workflows/lighthouse-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  lighthouse:
+    name: Lighthouse web surfaces
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        working-directory: cloud-web-app/web
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: cloud-web-app/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+          CI: '1'
+
+      - name: Run Lighthouse CI
+        run: npx @lhci/cli@0.13.x autorun
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+          CI: '1'
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_TOKEN }}
+
+      - name: Run dedicated PWA Lighthouse gate
+        run: npx @lhci/cli@0.13.x autorun --config=lighthouserc.pwa.js
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+          CI: '1'
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_TOKEN }}

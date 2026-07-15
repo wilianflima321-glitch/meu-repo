@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aethel Engine – Auditoria Máxima Completa 2026: Bit a Bit</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --secondary: #0ea5e9;
+      --success: #22c55e;
+      --warn: #f59e0b;
+      --error: #ef4444;
+      --ink: #0f172a;
+      --muted: #475569;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --line: #e2e8f0;
+      --soft: #f1f5f9;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+    }
+    .page {
+      max-width: 1120px;
+      margin: 32px auto 80px;
+      padding: 0 24px;
+    }
+    .cover {
+      background: linear-gradient(135deg, #eef2ff 0%, #e0f2fe 100%);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.1);
+    }
+    h1, h2, h3 { margin: 0 0 8px; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 22px; margin-top: 28px; }
+    h3 { font-size: 18px; margin-top: 16px; }
+    p { margin: 8px 0; color: var(--muted); }
+    .meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .meta .box {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .toc {
+      margin-top: 24px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .toc a { color: var(--primary); text-decoration: none; }
+    .toc ul { margin: 8px 0 0; padding-left: 18px; }
+    .section {
+      margin-top: 28px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--soft); }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+    }
+    .b-ok { background: var(--success); }
+    .b-warn { background: var(--warn); }
+    .b-err { background: var(--error); }
+    .scorebar {
+      height: 10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .scorebar > span {
+      display: block;
+      height: 100%;
+      background: var(--primary);
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .note {
+      border-left: 4px solid var(--secondary);
+      background: #f0f9ff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #0c4a6e;
+    }
+    .roadmap {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .roadmap .stage {
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fafafa;
+    }
+    .kicker { color: var(--secondary); font-weight: 700; font-size: 12px; text-transform: uppercase; }
+    .small { font-size: 12px; color: var(--muted); }
+    .muted { color: var(--muted); }
+    .code {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="cover" id="capa">
+      <div class="kicker">Aethel Engine</div>
+      <h1>Aethel Engine – Auditoria Máxima Completa 2026: Análise Bit a Bit</h1>
+      <p>Documento executivo e técnico completo, com status real do repositório, comparações de mercado e plano de execução priorizado.</p>
+      <div class="meta">
+        <div class="box"><strong>Data</strong><br/>2026-03-08</div>
+        <div class="box"><strong>Versão</strong><br/>3.0 Final</div>
+        <div class="box"><strong>Classificação</strong><br/>Crítica Executiva Completa</div>
+      </div>
+      <div class="toc">
+        <strong>Índice</strong>
+        <ul>
+          <li><a href="#summary">1. Executive Summary</a></li>
+          <li><a href="#repositorio">2. Estado Atual do Repositório</a></li>
+          <li><a href="#uiux">3. Auditoria de Interface (UI/UX)</a></li>
+          <li><a href="#ia">4. Sistema de IA e Orquestrador Multi-Agent</a></li>
+          <li><a href="#games">5. Módulo Games</a></li>
+          <li><a href="#films">6. Módulo Films</a></li>
+          <li><a href="#apps">7. Módulo Apps</a></li>
+          <li><a href="#research">8. Módulo Research Agent</a></li>
+          <li><a href="#infra">9. Infraestrutura e Backend</a></li>
+          <li><a href="#billing">10. Sistema de Pagamentos</a></li>
+          <li><a href="#gtm">11. Marketing e Go-to-Market</a></li>
+          <li><a href="#onboarding">12. Onboarding e First Value</a></li>
+          <li><a href="#mobile">13. Mobile e Responsividade</a></li>
+          <li><a href="#a11y">14. Acessibilidade</a></li>
+          <li><a href="#design">15. Design System e Tokens</a></li>
+          <li><a href="#security">16. Segurança e Compliance</a></li>
+          <li><a href="#repoorg">17. Organização do Repositório</a></li>
+          <li><a href="#scorecard">18. Scorecard 20 Dimensões</a></li>
+          <li><a href="#roadmap">19. Plano de Execução Priorizado</a></li>
+          <li><a href="#conclusao">20. Conclusão e Recomendação Estratégica</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="summary">
+      <h2>1. Executive Summary</h2>
+      <p><strong>Status geral:</strong> Base técnica de elite, produto ainda incompleto para o mercado. Bloqueios críticos em billing, preview com sandbox real, onboarding e evidência L4.</p>
+      <div class="grid-3">
+        <div>
+          <div class="kicker">Score Atual</div>
+          <div class="scorebar"><span style="width:62%"></span></div>
+          <div class="small">6.2 / 10</div>
+        </div>
+        <div>
+          <div class="kicker">Score Alvo (pós-sprints)</div>
+          <div class="scorebar"><span style="width:85%"></span></div>
+          <div class="small">8.5 / 10</div>
+        </div>
+        <div>
+          <div class="kicker">L4</div>
+          <div class="scorebar"><span style="width:40%"></span></div>
+          <div class="small">Bloqueado por evidência de produção</div>
+        </div>
+      </div>
+      <p><strong>Meta final (north star):</strong> 10.0 / 10 em todas as dimensões, após completar as sprints e hardening adicional.</p>
+      <table>
+        <thead>
+          <tr><th>Forças</th><th>Bloqueios Críticos</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              Governança de qualidade (11 gates, anti-fake-success).<br/>
+              Auditoria e rastreabilidade (hash-chain).<br/>
+              Multi-agent real com custos visíveis.
+            </td>
+            <td>
+              Billing incompleto.<br/>
+              Preview sem sandbox/HMR real.<br/>
+              Onboarding sem SLO provado.<br/>
+              Evidência L4 inexistente (production samples = 0).
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section" id="repositorio">
+      <h2>2. Estado Atual do Repositório</h2>
+      <h3>2.1 Estrutura de Arquivos</h3>
+      <table>
+        <thead>
+          <tr><th>Área</th><th>Estado Atual</th><th>Dívida</th><th>Ação</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>docs/master/</td><td>50 docs canônicos</td><td>Baixa</td><td><span class="badge b-ok">Manter</span></td></tr>
+          <tr><td>docs/archive/</td><td>3.503 MDs</td><td>Baixa</td><td><span class="badge b-ok">OK</span></td></tr>
+          <tr><td>cloud-admin-ia/</td><td>0 MDs (arquivado)</td><td>Baixa</td><td><span class="badge b-ok">Arquivado</span></td></tr>
+          <tr><td>shared/tools/</td><td>0 MDs (arquivado)</td><td>Baixa</td><td><span class="badge b-ok">Arquivado</span></td></tr>
+          <tr><td>AethelDashboard.tsx</td><td>7 linhas (shell)</td><td>OK</td><td><span class="badge b-ok">Estável</span></td></tr>
+          <tr><td>AethelDashboardRuntime.tsx</td><td>1.191 linhas (runtime)</td><td>P0</td><td><span class="badge b-warn">Decompor</span></td></tr>
+        </tbody>
+      </table>
+      <h3>2.2 Métricas de Qualidade</h3>
+      <table>
+        <thead>
+          <tr><th>Métrica</th><th>Valor Atual</th><th>Meta</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Bundle JS Dashboard</td><td>174 kB</td><td>&lt; 200 kB</td><td><span class="badge b-ok">OK</span></td></tr>
+          <tr><td>Production sample size</td><td>0</td><td>&gt;= 30</td><td><span class="badge b-err">Bloqueado</span></td></tr>
+          <tr><td>Rehearsal success</td><td>75%</td><td>&gt; 90%</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>Feedback coverage</td><td>50%</td><td>&gt;= 60%</td><td><span class="badge b-warn">Parcial</span></td></tr>
+        </tbody>
+      </table>
+      <h3>2.3 Gates de QA</h3>
+      <p><span class="badge b-ok">PASS</span> lint, typecheck, build, interface gates, route contracts, no fake success, mojibake, enterprise gate.</p>
+      <p><span class="badge b-warn">PARTIAL</span> WCAG (sem evidência completa), Core Loop Probe (production sample 0), Global Gap Scan (G1-G10).</p>
+      <h3>2.4 Stack Principal</h3>
+      <p>Next.js 14.2.5, React 18.3.1, Prisma 5.7.0, Three.js, @react-three/fiber, TailwindCSS, Zustand, Zod, OpenAI SDK, Anthropic SDK, Google Generative AI, AWS SDK, Headless UI, Heroicons.</p>
+      <h3>2.5 Gaps Críticos (G1–G10)</h3>
+      <table>
+        <thead><tr><th>Gap</th><th>Descrição</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>G1</td><td>Preview runtime sem HMR real</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G2</td><td>Onboarding zero-to-value parcial (SLO &lt; 90s não provado)</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G3</td><td>Mobile readiness parcial</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G4</td><td>Core Web Vitals sem baseline pública</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G5</td><td>AI recovery UX parcial</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G6</td><td>Dashboard monólito (1.199 linhas)</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G7</td><td>Colaboração sem stress test</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G8</td><td>Tema claro sem paridade WCAG completa</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G9</td><td>Telemetria parcial</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G10</td><td>Empty states e micro-interações parciais</td><td><span class="badge b-warn">Parcial</span></td></tr>
+        </tbody>
+      </table>
+      <div class="note">Oportunidades imediatas: reduzir ruído de docs não canônicos, decompor AethelDashboardRuntime.tsx, publicar baseline público de performance.</div>
+    </section>
+
+    <section class="section" id="uiux">
+      <h2>3. Auditoria da Interface (UI/UX) – Bit a Bit</h2>
+      <table>
+        <thead>
+          <tr><th>Superfície</th><th>Estado atual</th><th>Concorrente próximo</th><th>Score</th><th>Gaps específicos</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Landing Page</td><td>Base existente, sem hero demo, social proof ou pricing visível.</td><td>Linear, Bolt, Cursor</td><td>5.5/10</td><td>Hero video, screenshots reais, prova social, pricing, SEO.</td></tr>
+          <tr><td>Dashboard</td><td>Funcional, bundle leve; monólito 1.199 linhas.</td><td>Linear, Notion</td><td>7.0/10</td><td>Decompor, empty states completos, telemetria de first value.</td></tr>
+          <tr><td>IDE/Workbench</td><td>Monaco + multi-agent; preview parcial.</td><td>Cursor, Bolt</td><td>6.5/10</td><td>@-mentions completas, RAG semântico, HMR sandbox.</td></tr>
+          <tr><td>Nexus Chat</td><td>Multi-agent real, anti-fake-success.</td><td>Cursor, Perplexity</td><td>7.5/10</td><td>Citações inline, memórias, feedback granular.</td></tr>
+          <tr><td>Aethel Research</td><td>Verified synthesis AAA.</td><td>Perplexity</td><td>6.0/10</td><td>Citações, web real-time, métricas públicas.</td></tr>
+          <tr><td>Director Mode</td><td>Workflow/shot timeline, sem geração real.</td><td>LTX Studio</td><td>4.0/10</td><td>Video gen, retake, continuity, export.</td></tr>
+          <tr><td>Admin Panel</td><td>Métricas e readiness, sem billing real.</td><td>Stripe/Vercel</td><td>7.0/10</td><td>Alertas, cohorts, billing metrics.</td></tr>
+        </tbody>
+      </table>
+      <h3>Melhorias concretas (exemplos)</h3>
+      <p>Exemplos: <code>@Codebase</code> e <code>@Docs</code> no chat, preview sandbox via <code>E2B</code>, onboarding com template demo.</p>
+      <h3>Comparações de Mercado (detalhado)</h3>
+      <table>
+        <thead><tr><th>Produto</th><th>Destaques</th><th>Limitações</th><th>Preço</th></tr></thead>
+        <tbody>
+          <tr><td>Cursor IDE</td><td>RAG Merkle+embeddings, AST chunking, @Codebase/@Docs/@Git, multi-file edits.</td><td>Sem deploy one-click nativo.</td><td>$20/mês</td></tr>
+          <tr><td>Bolt.new</td><td>WebContainers, deploy one-click, Supabase nativo, Figma import.</td><td>Sem RAG, sem multi-agent real, web-only.</td><td>~$20/mês</td></tr>
+          <tr><td>Lovable</td><td>React UI + Supabase + GitHub sync, Stripe nativo.</td><td>Apenas web/React, sync issues.</td><td>$25/mês</td></tr>
+          <tr><td>Replit</td><td>Cloud IDE, colaboração real, deploy integrado, Ghostwriter.</td><td>Custo variável por uso.</td><td>$20/mês</td></tr>
+          <tr><td>Windsurf</td><td>Cascade + Memories, custo-benefício.</td><td>Comunidade menor.</td><td>$15/mês</td></tr>
+          <tr><td>GitHub Codespaces</td><td>Dev Containers, integração Actions, compliance forte.</td><td>Custo por hora/GB.</td><td>$0.18/h + $0.07/GB</td></tr>
+          <tr><td>Vercel v0</td><td>UI generation de alta qualidade em Next.js.</td><td>Foco em UI, não fullstack.</td><td>N/A</td></tr>
+          <tr><td>Linear</td><td>Design system referência, performance sub-16ms.</td><td>N/A</td><td>N/A</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section" id="ia">
+      <h2>4. Sistema de IA e Orquestrador Multi-Agent</h2>
+      <table>
+        <thead><tr><th>Nível</th><th>Definição</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>L1</td><td>Assistência inline</td><td><span class="badge b-ok">Funcional</span></td></tr>
+          <tr><td>L2</td><td>Chat contextual</td><td><span class="badge b-ok">Funcional</span></td></tr>
+          <tr><td>L3</td><td>Multi-agent sem autonomia</td><td><span class="badge b-ok">Funcional</span></td></tr>
+          <tr><td>L4</td><td>Apply/rollback supervisionado</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>L5</td><td>Autonomia completa</td><td><span class="badge b-err">Bloqueado</span></td></tr>
+        </tbody>
+      </table>
+      <p><strong>Core loop:</strong> PLAN → PATCH → VALIDATE → APPLY → ROLLBACK → LEARN. Production samples = 0, apply success = 75%, feedback = 50%.</p>
+      <table>
+        <thead><tr><th>Comparação</th><th>Cursor</th><th>Windsurf</th><th>Replit</th><th>Aethel</th></tr></thead>
+        <tbody>
+          <tr><td>RAG codebase</td><td>Merkle + embeddings</td><td>Básico</td><td>Básico</td><td>Parcial</td></tr>
+          <tr><td>Memories</td><td>—</td><td>Sim</td><td>—</td><td>Não</td></tr>
+          <tr><td>Multi-agent</td><td>Não</td><td>Não</td><td>Limitado</td><td>Sim</td></tr>
+          <tr><td>Preview sandbox</td><td>Local</td><td>Local</td><td>Cloud VM</td><td>Parcial</td></tr>
+        </tbody>
+      </table>
+      <div class="note">Plano de promoção L4: aumentar sample size, elevar apply success acima de 90%, feedback ≥ 60%, evidência de produção real.</div>
+    </section>
+
+    <section class="section" id="games">
+      <h2>5. Módulo Games</h2>
+      <p>Status: <span class="badge b-warn">L2 experimental</span></p>
+      <p>Existe: WebGPU canvas, asset preview, WASM engine, scene graphs.</p>
+      <table>
+        <thead><tr><th>Gap</th><th>Impacto</th><th>Solução</th></tr></thead>
+        <tbody>
+          <tr><td>3D assets (Meshy API)</td><td>Alto</td><td>Integrar Meshy API</td></tr>
+          <tr><td>Physics (Rapier)</td><td>Alto</td><td>Adicionar Rapier.js</td></tr>
+          <tr><td>State machine</td><td>Alto</td><td>XState</td></tr>
+          <tr><td>Sound AI</td><td>Médio</td><td>ElevenLabs</td></tr>
+          <tr><td>Sprite generation</td><td>Médio</td><td>DALL-E 3</td></tr>
+          <tr><td>Export Unity/Godot</td><td>Médio</td><td>Export GLB/FBX</td></tr>
+          <tr><td>Replay QA loop</td><td>Médio</td><td>Recorder + verifier</td></tr>
+          <tr><td>2D tilemap</td><td>Médio</td><td>Editor dedicado</td></tr>
+        </tbody>
+      </table>
+      <div class="note">Roadmap L3: integrar Meshy API, physics Rapier, state machine XState, export GLB/FBX, QA replay loop.</div>
+    </section>
+
+    <section class="section" id="films">
+      <h2>6. Módulo Films</h2>
+      <p>Status: <span class="badge b-warn">L2 experimental</span></p>
+      <p>Existe: Director Mode, shot timeline, workflow orchestration.</p>
+      <table>
+        <thead><tr><th>Gap</th><th>Impacto</th><th>Solução</th></tr></thead>
+        <tbody>
+          <tr><td>Video gen real</td><td>Alto</td><td>Integrar Kling/Runway/Veo</td></tr>
+          <tr><td>Audio-to-Video</td><td>Alto</td><td>Pipeline lipsync</td></tr>
+          <tr><td>Continuity engine</td><td>Alto</td><td>Identity store</td></tr>
+          <tr><td>Elements</td><td>Médio</td><td>Bindings via @</td></tr>
+          <tr><td>Retake</td><td>Médio</td><td>Segment regen</td></tr>
+          <tr><td>Storyboard → vídeo</td><td>Médio</td><td>Pipeline dedicado</td></tr>
+          <tr><td>NLE</td><td>Médio</td><td>Editor timeline</td></tr>
+          <tr><td>Export profissional</td><td>Médio</td><td>MP4/ProRes presets</td></tr>
+        </tbody>
+      </table>
+      <div class="note">Roadmap L3: integrar APIs de vídeo, continuity store, retake segmentado, export MP4.</div>
+    </section>
+
+    <section class="section" id="apps">
+      <h2>7. Módulo Apps</h2>
+      <p>Status: <span class="badge b-warn">L3 beta</span></p>
+      <p>Forças: multi-agent, anti-fake-success, RBAC, CI/CD, dependency guard.</p>
+      <table>
+        <thead><tr><th>Gap</th><th>Comparação de Mercado</th><th>Solução</th></tr></thead>
+        <tbody>
+          <tr><td>@-mentions completas</td><td>Cursor</td><td>UI + parser + resolução</td></tr>
+          <tr><td>RAG semântico persistente</td><td>Cursor</td><td>Merkle + embeddings + vector DB</td></tr>
+          <tr><td>Preview sandbox real</td><td>Bolt/Replit</td><td>E2B/WebContainers</td></tr>
+          <tr><td>Deploy one-click</td><td>Bolt/Lovable</td><td>Railway/Render</td></tr>
+          <tr><td>Figma import</td><td>Bolt</td><td>Parser + UI</td></tr>
+          <tr><td>Diff/blame</td><td>Cursor/VSCode</td><td>UI diff viewer</td></tr>
+          <tr><td>Billing completo</td><td>Lovable</td><td>Stripe checkout + portal</td></tr>
+          <tr><td>Colaboração stress test</td><td>Replit</td><td>Load tests 10/50/100</td></tr>
+        </tbody>
+      </table>
+      <div class="note">Caminho para L4: RAG persistente, HMR sandbox, deploy one-click, evidência de production runs.</div>
+    </section>
+
+    <section class="section" id="research">
+      <h2>8. Módulo Research Agent</h2>
+      <p>Comparação: Perplexity Deep Research (67.15% DRACO, 780M queries/mês, citações inline).</p>
+      <p>Gaps: sem citações inline, sem web real-time, sem métricas públicas.</p>
+      <div class="note">Diferencial único: research → code → deploy em loop único. Deve ser explicitado na UI.</div>
+    </section>
+
+    <section class="section" id="infra">
+      <h2>9. Infraestrutura e Backend</h2>
+      <p>Stack: Next.js 14, Prisma, AWS, Node WebSockets.</p>
+      <p>Sandbox: runtimeUrl parcial, sem E2B/WebContainers real.</p>
+      <p>Comparações: Bolt (WebContainers), Replit (VMs cloud), Codespaces ($0.18/hr).</p>
+      <p>Custos estimados: $8-34/mês por usuário (meta $5-14/mês).</p>
+      <div class="note">Recomendação: E2B ($0.05/hr), Railway/Render para deploy, Upstash Redis/rate-limit.</div>
+    </section>
+
+    <section class="section" id="billing">
+      <h2>10. Sistema de Pagamentos</h2>
+      <p>Status: <span class="badge b-err">Parcial</span> Stripe sem checkout completo.</p>
+      <p>Falta: pricing, planos, trial, upgrade self-service, invoices, webhooks completos.</p>
+      <div class="note">Sem billing = zero receita recorrente.</div>
+    </section>
+
+    <section class="section" id="gtm">
+      <h2>11. Marketing e Go-to-Market</h2>
+      <p>Status: <span class="badge b-err">Zero</span> landing pública, pricing, social proof e canais.</p>
+      <p>Necessário: hero video, testimonials, pricing tiers, SEO pillar pages, Product Hunt, Twitter/X, YouTube, Discord.</p>
+      <div class="note">Copy sugerida: “O único IDE com múltiplos agentes de IA que realmente dizem quando falham.”</div>
+    </section>
+
+    <section class="section" id="onboarding">
+      <h2>12. Onboarding e First Value</h2>
+      <p>Estado: rail com milestones e telemetria parcial, SLO &lt; 90s não provado.</p>
+      <p>Benchmarks: Slack (&lt;5 min), Canva (template click), Bolt (live app &lt;10 min).</p>
+      <p>Targets: first action &lt; 30s, first preview &lt; 90s, first deploy &lt; 5min.</p>
+    </section>
+
+    <section class="section" id="mobile">
+      <h2>13. Mobile e Responsividade</h2>
+      <p>Estado: desktop-first. Mobile crítico para landing, onboarding e Nexus Chat view-only.</p>
+      <p>Comparação: Linear (mobile excelente), Replit (mobile limitado).</p>
+      <p>Recomendação: touch targets &gt; 44px e layout responsivo em superfícies públicas.</p>
+    </section>
+
+    <section class="section" id="a11y">
+      <h2>14. Acessibilidade</h2>
+      <p>WCAG gate operacional, mas sem evidência completa de contraste.</p>
+      <p>Falta: contraste 4.5:1, skip links, focus trapping, navegação por teclado total.</p>
+      <p>Gate deve bloquear release se WCAG AA falhar.</p>
+    </section>
+
+    <section class="section" id="design">
+      <h2>15. Design System e Tokens</h2>
+      <p>Estado: legacy tokens zerados, design system parcial.</p>
+      <p>Oportunidades: motion tokens, spacing scale 4/8/12/16/24/32/48/64, typography consistente, keyboard-first.</p>
+    </section>
+
+    <section class="section" id="security">
+      <h2>16. Segurança e Compliance</h2>
+      <p>Existe: RBAC, security headers, audit trail, rate limits.</p>
+      <p>Gaps: SOC 2, GDPR docs, penetration test público, bug bounty.</p>
+      <p>Impacto: sem compliance docs = bloqueio para enterprise.</p>
+    </section>
+
+    <section class="section" id="repoorg">
+      <h2>17. Organização do Repositório</h2>
+      <p>Problemas: 3.606 MDs não canônicos (majoritariamente em arquivo), risco de orphan folders e necessidade de manter o indice canonico atualizado.</p>
+      <div class="code">git mv cloud-admin-ia/... docs/archive/
+git mv shared/tools/... docs/archive/</div>
+      <div class="note">Política proposta: TTL 7 dias para métricas, arquivar docs &gt; 90 dias sem update.</div>
+    </section>
+
+    <section class="section" id="scorecard">
+      <h2>18. Scorecard 20 Dimensões</h2>
+      <table>
+        <thead><tr><th>Dimensão</th><th>Score Atual</th><th>Score Alvo</th><th>Blockers</th><th>Sprint</th></tr></thead>
+        <tbody>
+          <tr><td>Qualidade de código</td><td>9.5</td><td>9.8</td><td>—</td><td>Manter</td></tr>
+          <tr><td>Arquitetura</td><td>8.5</td><td>9.5</td><td>RAG persistente</td><td>2</td></tr>
+          <tr><td>Design system</td><td>7.5</td><td>9.0</td><td>Tokens/motion</td><td>2-3</td></tr>
+          <tr><td>Qualidade visual UI</td><td>7.5</td><td>9.0</td><td>Polish</td><td>2</td></tr>
+          <tr><td>UX geral</td><td>6.5</td><td>8.5</td><td>Onboarding/HMR</td><td>2</td></tr>
+          <tr><td>Onboarding</td><td>5.0</td><td>9.0</td><td>SLO &lt; 90s</td><td>2</td></tr>
+          <tr><td>Mobile</td><td>5.0</td><td>8.0</td><td>Responsividade</td><td>3</td></tr>
+          <tr><td>Acessibilidade</td><td>6.0</td><td>9.0</td><td>WCAG AA</td><td>3</td></tr>
+          <tr><td>Perf/Core Vitals</td><td>6.0</td><td>9.0</td><td>Baseline pública</td><td>3</td></tr>
+          <tr><td>IA/Multi-agent</td><td>8.0</td><td>9.5</td><td>L4 evidence</td><td>1</td></tr>
+          <tr><td>Games</td><td>3.0</td><td>7.0</td><td>Assets/physics</td><td>5</td></tr>
+          <tr><td>Films</td><td>4.0</td><td>7.0</td><td>Video APIs</td><td>5</td></tr>
+          <tr><td>Apps</td><td>6.5</td><td>9.0</td><td>HMR/RAG</td><td>2</td></tr>
+          <tr><td>Research</td><td>6.0</td><td>8.5</td><td>Citações/web</td><td>4</td></tr>
+          <tr><td>Infra/Deploy</td><td>5.0</td><td>8.5</td><td>Sandbox</td><td>2-3</td></tr>
+          <tr><td>Billing</td><td>2.0</td><td>9.0</td><td>Stripe live</td><td>3</td></tr>
+          <tr><td>Marketing/GTM</td><td>1.0</td><td>8.0</td><td>Landing/pricing</td><td>4</td></tr>
+          <tr><td>Segurança/Compliance</td><td>6.5</td><td>9.0</td><td>SOC2/GDPR</td><td>6</td></tr>
+          <tr><td>Documentação</td><td>10.0</td><td>10.0</td><td>—</td><td>Manter</td></tr>
+          <tr><td>Velocidade de evolução</td><td>10.0</td><td>10.0</td><td>—</td><td>Manter</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Média:</strong> 6.2 / 10 → Alvo pós-sprints: 8.5 / 10 → Meta final: 10.0 / 10</p>
+    </section>
+
+    <section class="section" id="roadmap">
+      <h2>19. Plano de Execução Priorizado</h2>
+      <div class="roadmap">
+        <div class="stage">
+          <h3>Sprint 0</h3>
+          <p class="small">Desbloqueadores imediatos</p>
+          <ul>
+            <li>AETHEL_AI_DEMO_MODE=true</li>
+            <li>qa:core-loop-production-probe</li>
+            <li>Decompor AethelDashboardRuntime.tsx</li>
+            <li>Arquivamento concluído: 3.233 MDs movidos para <code>docs/archive/bulk-2026-03-10</code></li>
+          </ul>
+        </div>
+        <div class="stage">
+          <h3>Sprint 1</h3>
+          <p class="small">Core Loop L4</p>
+          <ul>
+            <li>Batch apply 50</li>
+            <li>Feedback ≥ 60%</li>
+            <li>Apply success ≥ 90%</li>
+          </ul>
+        </div>
+        <div class="stage">
+          <h3>Sprint 2</h3>
+          <p class="small">Preview + Onboarding</p>
+          <ul>
+            <li>E2B sandbox real</li>
+            <li>HMR via WebSockets</li>
+            <li>Onboarding demo + SLO</li>
+          </ul>
+        </div>
+      </div>
+      <div class="roadmap" style="margin-top:12px;">
+        <div class="stage">
+          <h3>Sprint 3</h3>
+          <p class="small">Billing + Deploy</p>
+          <ul>
+            <li>Stripe completo</li>
+            <li>Deploy one-click</li>
+            <li>Pricing 4 tiers</li>
+          </ul>
+        </div>
+        <div class="stage">
+          <h3>Sprint 4</h3>
+          <p class="small">Marketing + GTM</p>
+          <ul>
+            <li>Landing completa</li>
+            <li>Product Hunt</li>
+            <li>SEO + YouTube</li>
+          </ul>
+        </div>
+        <div class="stage">
+          <h3>Sprint 5-6</h3>
+          <p class="small">Games/Films + L5</p>
+          <ul>
+            <li>Meshy / Kling APIs</li>
+            <li>Collaborative Nexus</li>
+            <li>Sandbox isolation</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="conclusao">
+      <h2>20. Conclusão e Recomendação Estratégica</h2>
+      <p>Recomendação: lançar em 60 dias como “o IDE mais honesto do mercado”, com foco em Apps, multi-agent e anti-fake-success. Billing e preview sandbox real são os desbloqueadores obrigatórios.</p>
+      <p><strong>Critérios de sucesso:</strong> evidência L4 em produção, checkout funcional, SLO de first value comprovado, preview HMR-like.</p>
+      <p><strong>Meta final:</strong> 10.0/10 em todas as dimensões após hardening, compliance e maturidade comercial.</p>
+    </section>
+  </div>
+</body>
+</html>

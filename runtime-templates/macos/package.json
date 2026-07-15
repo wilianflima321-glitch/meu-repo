@@ -1,0 +1,103 @@
+{
+    "name": "@aethel/game-runtime-macos",
+    "version": "1.0.0",
+    "description": "Aethel Game Runtime for macOS",
+    "main": "main.js",
+    "private": true,
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder --mac",
+        "build:dmg": "electron-builder --mac dmg",
+        "build:zip": "electron-builder --mac zip",
+        "build:arm64": "electron-builder --mac --arm64",
+        "build:x64": "electron-builder --mac --x64",
+        "build:universal": "electron-builder --mac --universal"
+    },
+    "dependencies": {
+        "three": "^0.160.0",
+        "@dimforge/rapier3d-compat": "^0.11.2",
+        "electron-store": "^8.1.0"
+    },
+    "devDependencies": {
+        "electron": "^28.0.0",
+        "electron-builder": "^24.9.1",
+        "@electron/notarize": "^2.2.0"
+    },
+    "build": {
+        "appId": "com.aethel.game.${productName}",
+        "productName": "${GAME_NAME}",
+        "copyright": "Copyright © ${YEAR} ${DEVELOPER_NAME}",
+        "asar": true,
+        "asarUnpack": [
+            "assets/**/*",
+            "draco/**/*"
+        ],
+        "compression": "maximum",
+        "files": [
+            "main.js",
+            "preload.js",
+            "renderer/**/*",
+            "assets/**/*",
+            "draco/**/*",
+            "game.json",
+            "package.json"
+        ],
+        "mac": {
+            "category": "public.app-category.games",
+            "icon": "build/icon.icns",
+            "hardenedRuntime": true,
+            "gatekeeperAssess": false,
+            "entitlements": "build/entitlements.mac.plist",
+            "entitlementsInherit": "build/entitlements.mac.plist",
+            "target": [
+                {
+                    "target": "dmg",
+                    "arch": ["universal"]
+                },
+                {
+                    "target": "zip",
+                    "arch": ["universal"]
+                }
+            ],
+            "extendInfo": {
+                "NSHighResolutionCapable": true,
+                "LSMinimumSystemVersion": "10.15",
+                "CFBundleDocumentTypes": [
+                    {
+                        "CFBundleTypeName": "Aethel Save File",
+                        "CFBundleTypeExtensions": ["aethelsave"],
+                        "CFBundleTypeRole": "Editor"
+                    }
+                ]
+            }
+        },
+        "dmg": {
+            "background": "build/dmg-background.png",
+            "icon": "build/icon.icns",
+            "iconSize": 128,
+            "window": {
+                "width": 600,
+                "height": 400
+            },
+            "contents": [
+                {
+                    "x": 150,
+                    "y": 200
+                },
+                {
+                    "x": 450,
+                    "y": 200,
+                    "type": "link",
+                    "path": "/Applications"
+                }
+            ],
+            "title": "${productName}"
+        },
+        "afterSign": "scripts/notarize.js",
+        "publish": null,
+        "directories": {
+            "output": "dist",
+            "buildResources": "build"
+        }
+    }
+}

@@ -1,0 +1,292 @@
+'use client';
+
+import type { Dispatch, SetStateAction } from 'react';
+
+import CollaboratorsBar from '../../../web/components/collaboration/CollaboratorsBar';
+import type {
+  EditorPane,
+  WorkbenchCollaborationStatus,
+} from './types';
+import type { RemotePeer } from '../../../web/hooks/useCollaborationAwareness';
+import type { SplitDirection } from '../../../web/components/editor/SplitEditor';
+
+type WorkbenchEditorToolbarProps = {
+  isCompactViewport: boolean;
+  collaborationConnected: boolean;
+  collaborationStatus: WorkbenchCollaborationStatus;
+  collaborationPeers: RemotePeer[];
+  splitEditorOpen: boolean;
+  nextOpenTarget: EditorPane;
+  splitDirection: SplitDirection;
+  showIntelliSense: boolean;
+  showOutline: boolean;
+  showDiagnostics: boolean;
+  setNextOpenTarget: Dispatch<SetStateAction<EditorPane>>;
+  setSplitDirection: Dispatch<SetStateAction<SplitDirection>>;
+  setShowIntelliSense: Dispatch<SetStateAction<boolean>>;
+  setShowOutline: Dispatch<SetStateAction<boolean>>;
+  setShowDiagnostics: Dispatch<SetStateAction<boolean>>;
+  onFind: () => void;
+  onReplace: () => void;
+  onToggleSplitEditor: () => void;
+};
+
+const actionButtonClass =
+  'rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors';
+const inactiveActionClass =
+  'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]';
+
+function PresenceChip({
+  collaborationConnected,
+  collaborationStatus,
+}: {
+  collaborationConnected: boolean;
+  collaborationStatus: WorkbenchCollaborationStatus;
+}) {
+  const toneClasses =
+    collaborationStatus.tone === 'success'
+      ? {
+          border: 'border-[color-mix(in_srgb,var(--aethel-success)_28%,transparent)]',
+          background:
+            'bg-[color-mix(in_srgb,var(--aethel-success)_12%,var(--aethel-surface-secondary)_88%)]',
+          text: 'text-[var(--aethel-success-light)]',
+          dot: 'bg-[var(--aethel-success)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--aethel-success)_16%,transparent)]',
+        }
+      : collaborationStatus.tone === 'danger'
+        ? {
+            border: 'border-[color-mix(in_srgb,var(--aethel-error)_28%,transparent)]',
+            background:
+              'bg-[color-mix(in_srgb,var(--aethel-error)_12%,var(--aethel-surface-secondary)_88%)]',
+            text: 'text-[var(--aethel-error-light)]',
+            dot: 'bg-[var(--aethel-error)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--aethel-error)_14%,transparent)]',
+          }
+        : collaborationStatus.tone === 'warning'
+          ? {
+              border: 'border-[color-mix(in_srgb,var(--aethel-warning)_28%,transparent)]',
+              background:
+                'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,var(--aethel-surface-secondary)_88%)]',
+              text: 'text-[var(--aethel-warning-light)]',
+              dot: 'bg-[var(--aethel-warning)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]',
+            }
+          : {
+              border: 'border-[var(--aethel-border-secondary)]',
+              background: 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)]',
+              text: 'text-[var(--aethel-text-tertiary)]',
+              dot: collaborationConnected
+                ? 'bg-[var(--aethel-success)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--aethel-success)_16%,transparent)]'
+                : 'bg-[var(--aethel-text-quaternary)]',
+            };
+
+  return (
+    <div
+      className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] ${toneClasses.border} ${toneClasses.background} ${toneClasses.text}`}
+      title={collaborationStatus.errorMessage ?? collaborationStatus.detail}
+    >
+      <span
+        aria-hidden="true"
+        className={`inline-block h-2 w-2 rounded-full ${toneClasses.dot}`}
+      />
+      {collaborationStatus.label}
+    </div>
+  );
+}
+
+export default function WorkbenchEditorToolbar({
+  isCompactViewport,
+  collaborationConnected,
+  collaborationStatus,
+  collaborationPeers,
+  splitEditorOpen,
+  nextOpenTarget,
+  splitDirection,
+  showIntelliSense,
+  showOutline,
+  showDiagnostics,
+  setNextOpenTarget,
+  setSplitDirection,
+  setShowIntelliSense,
+  setShowOutline,
+  setShowDiagnostics,
+  onFind,
+  onReplace,
+  onToggleSplitEditor,
+}: WorkbenchEditorToolbarProps) {
+  const showCollaborators =
+    collaborationStatus.state === 'live' && collaborationPeers.length > 0;
+  const helperDetail = collaborationStatus.detail;
+  const presenceSurface = showCollaborators ? (
+    <CollaboratorsBar
+      peers={collaborationPeers}
+      maxVisible={4}
+      showStatusDot
+      className="max-w-full"
+    />
+  ) : (
+    <PresenceChip
+      collaborationConnected={collaborationConnected}
+      collaborationStatus={collaborationStatus}
+    />
+  );
+
+  if (isCompactViewport) {
+    return (
+      <>
+        <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_7%,transparent)] px-3 py-2 text-[11px] leading-5 text-[color-mix(in_srgb,var(--aethel-warning-light)_74%,transparent)]">
+          Compact editor: core tools stay available; full multi-pane layout unlocks at 1024px.
+        </div>
+        <div className="border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-3 py-2 text-[11px]">
+          <div className="flex min-w-0 items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-medium uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+                Editor tools
+              </p>
+              <p
+                className="truncate pt-1 text-[11px] text-[var(--aethel-text-secondary)]"
+                title={collaborationStatus.errorMessage ?? helperDetail}
+              >
+                {helperDetail}
+              </p>
+            </div>
+            <div className="shrink-0">{presenceSurface}</div>
+          </div>
+          <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+            <button
+              type="button"
+              onClick={onFind}
+              className={`${actionButtonClass} ${inactiveActionClass} shrink-0`}
+            >
+              Search
+            </button>
+            <button
+              type="button"
+              onClick={onToggleSplitEditor}
+              className={`${actionButtonClass} shrink-0 ${
+                splitEditorOpen
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+                  : inactiveActionClass
+              }`}
+            >
+              {splitEditorOpen ? 'Close split' : 'Split'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowDiagnostics((prev) => !prev)}
+              className={`${actionButtonClass} shrink-0 ${
+                showDiagnostics
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[var(--aethel-warning-light)]'
+                  : inactiveActionClass
+              }`}
+            >
+              Diagnostics
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-2.5 text-[11px]">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
+          <div className="flex min-w-0 flex-col text-[var(--aethel-text-tertiary)]">
+            <span className="font-medium uppercase tracking-[0.12em]">Editor tools</span>
+            <span
+              className="truncate pt-1 text-[11px] text-[var(--aethel-text-secondary)]"
+              title={collaborationStatus.errorMessage ?? helperDetail}
+            >
+              {helperDetail}
+            </span>
+          </div>
+          <div
+            aria-hidden="true"
+            className="hidden h-7 w-px bg-[color-mix(in_srgb,var(--aethel-border-secondary)_72%,transparent)] sm:block"
+          />
+          {presenceSurface}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={onFind}
+            className={`${actionButtonClass} ${inactiveActionClass}`}
+          >
+            Search
+          </button>
+          <button
+            type="button"
+            onClick={onReplace}
+            className={`${actionButtonClass} ${inactiveActionClass}`}
+          >
+            Replace
+          </button>
+          <button
+            type="button"
+            onClick={onToggleSplitEditor}
+            className={`${actionButtonClass} ${
+              splitEditorOpen
+                ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+                : inactiveActionClass
+            }`}
+          >
+            {splitEditorOpen ? 'Close split' : 'Split editor'}
+          </button>
+          {splitEditorOpen && (
+            <>
+              <button
+                type="button"
+                onClick={() => setNextOpenTarget((prev) => (prev === 'secondary' ? 'primary' : 'secondary'))}
+                className={`${actionButtonClass} ${
+                  nextOpenTarget === 'secondary'
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)]'
+                    : inactiveActionClass
+                }`}
+              >
+                {nextOpenTarget === 'secondary' ? 'Next file: secondary' : 'Next file: primary'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSplitDirection((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'))}
+                className={`${actionButtonClass} ${inactiveActionClass}`}
+              >
+                {splitDirection === 'horizontal' ? 'Stack vertically' : 'Split side by side'}
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowIntelliSense((prev) => !prev)}
+            className={`${actionButtonClass} ${
+              showIntelliSense
+                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
+                : inactiveActionClass
+            }`}
+          >
+            IntelliSense
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowOutline((prev) => !prev)}
+            className={`${actionButtonClass} ${
+              showOutline
+                ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+                : inactiveActionClass
+            }`}
+          >
+            Outline
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowDiagnostics((prev) => !prev)}
+            className={`${actionButtonClass} ${
+              showDiagnostics
+                ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[var(--aethel-warning-light)]'
+                : inactiveActionClass
+            }`}
+          >
+            Diagnostics
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}

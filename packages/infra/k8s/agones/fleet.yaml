@@ -1,0 +1,91 @@
+# OMNI-PLAN PILAR 3 (A Frota) — Agones Fleet running the Aethel Headless
+# server image. Requires Agones' CRDs + controller already installed on the
+# cluster (`agones.dev/v1` is NOT a built-in Kubernetes API group) — see
+# ../README.md for the one-time cluster bootstrap this repo does not
+# perform for you.
+#
+# Every GameServer this Fleet produces:
+#  - runs `physics_kernel.rs`'s server-authoritative mode (PILAR 4's
+#    Client Consensus: the server here only runs the lightweight anomaly
+#    detector, not full 60Hz physics for every entity).
+#  - is only ever handed to a player after
+#    `lib/multiplayer/dedicated-server-authority.ts#requestDedicatedServerAllocation`
+#    clears `multiplayerCostGuard` (PILAR 5) — this Fleet's replica count
+#    existing does not, by itself, mean any given developer/game is allowed
+#    to consume it.
+apiVersion: agones.dev/v1
+kind: Fleet
+metadata:
+  name: aethel-headless
+  namespace: aethel-fleet
+  labels:
+    app.kubernetes.io/name: aethel-headless
+    app.kubernetes.io/part-of: aethel-engine
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # Kept deliberately low — PILAR 5's whole thesis is "never pay for idle
+  # capacity nobody's plan is covering". `fleetautoscaler.yaml`'s Buffer
+  # policy is what actually grows this at runtime; `replicas` here is only
+  # the floor Agones falls back to before the autoscaler's first sync tick.
+  replicas: 2
+  scheduling: Packed # Bin-pack allocated GameServers onto fewer nodes so idle nodes can be scaled down by the cluster autoscaler — cost, not just game, optimization.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: aethel-headless
+    spec:
+      ports:
+        - name: game
+          portPolicy: Dynamic
+          containerPort: 7777
+          protocol: UDP
+      health:
+        initialDelaySeconds: 15
+        periodSeconds: 10
+        failureThreshold: 3
+      sdkServer:
+        logLevel: Info
+        grpcPort: 9357
+        httpPort: 9358
+      template:
+        spec:
+          containers:
+            - name: aethel-headless
+              # Built from `apps/studio-local/src-tauri`'s physics/ECS kernel
+              # compiled for a headless Linux target (no wgpu presentation
+              # surface, no window) — that build target does not exist yet;
+              # this Fleet is the consumer contract it needs to be built
+              # against, not a claim that the image is published today.
+              image: ghcr.io/aethel-engine/headless:latest
+              imagePullPolicy: Always
+              resources:
+                requests:
+                  cpu: '500m'
+                  memory: '512Mi'
+                limits:
+                  cpu: '2'
+                  memory: '2Gi'
+              ports:
+                - containerPort: 7777
+                  protocol: UDP
+              env:
+                - name: AETHEL_AUTHORITY_MODE
+                  value: 'server-authoritative-dedicated'
+                # PILAR 4: the server only runs the anomaly detector, real
+                # per-entity physics stays client-side in unpopulated areas.
+                - name: AETHEL_CLIENT_CONSENSUS_ENABLED
+                  value: 'true'
+                - name: AETHEL_MAX_PLAYER_SPEED_MPS
+                  value: '12.0'
+                - name: AETHEL_MAX_PLAYER_ACCEL_MPS2
+                  value: '30.0'
+              securityContext:
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ['ALL']

@@ -1,0 +1,149 @@
+name: UI Audit (Playwright + axe)
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: '0 4 * * *' # daily at 04:00 UTC
+
+concurrency:
+  group: ui-audit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ui-audit:
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: http://localhost:3000
+      A11Y_MAX_VIOLATIONS_PER_PAGE: "20"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cloud-web-app/web/package-lock.json
+
+      - name: Repo connectivity gate (pre-audit)
+        run: |
+          npm run qa:repo-connectivity
+
+      - name: Install root deps
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Install web deps
+        run: |
+          npm --prefix cloud-web-app/web ci
+
+      - name: Install Playwright browsers
+        run: |
+          npx playwright install --with-deps
+
+      - name: Interface gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run qa:interface-gate
+
+      - name: Lint gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run lint
+
+      - name: Typecheck gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run typecheck
+
+      - name: Canonical component gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run qa:canonical-components
+
+      - name: Route contracts gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run qa:route-contracts
+
+      - name: Anti fake-success gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run qa:no-fake-success
+
+      - name: WCAG critical gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run qa:wcag-critical
+
+      - name: Dashboard shell gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run qa:dashboard-shell
+
+      - name: Encoding sweep gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run qa:mojibake
+
+      - name: Start server (web app with static fallback)
+        run: |
+          check_ready() {
+            for i in $(seq 1 45); do
+              if curl -fsS "$BASE_URL" >/dev/null; then
+                return 0
+              fi
+              sleep 1
+            done
+            return 1
+          }
+
+          npm run portal:dev > /tmp/portal-dev.log 2>&1 &
+
+          if check_ready; then
+            echo "Web app is online at $BASE_URL"
+            exit 0
+          fi
+
+          echo "Web app did not start in time; switching to static audit site."
+          node tools/ide/ui-audit/static_server.js > /tmp/static-server.log 2>&1 &
+          if ! check_ready; then
+            echo "Static fallback did not become ready."
+            echo "--- portal-dev.log (tail) ---"
+            tail -n 80 /tmp/portal-dev.log || true
+            echo "--- static-server.log (tail) ---"
+            tail -n 80 /tmp/static-server.log || true
+            exit 1
+          fi
+
+      - name: Run UI audit
+        run: |
+          node tools/ide/ui-audit/run_audit.js --baseUrl "$BASE_URL"
+
+      - name: Assert runtime accessibility report
+        run: |
+          node tools/ide/ui-audit/assert_a11y_report.js \
+            --report tools/ide/ui-audit/output/ui-audit-report.json \
+            --required home,dashboard,ide,settings,login,register \
+            --maxViolations "$A11Y_MAX_VIOLATIONS_PER_PAGE"
+
+      - name: Run Lighthouse CI (Performance Budget)
+        continue-on-error: true
+        run: |
+          npx -y @lhci/cli@0.12.x autorun \
+            --upload.target=temporary-public-storage \
+            --collect.url="$BASE_URL" \
+            --assert.preset="lighthouse:recommended" \
+            --assert.assertions.cumulative-layout-shift="error" \
+            --assert.assertions.first-contentful-paint="off"
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-audit-artifacts
+          path: |
+            tools/ide/ui-audit/output
+            .lighthouseci/
+            /tmp/portal-dev.log
+            /tmp/static-server.log

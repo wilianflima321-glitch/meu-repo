@@ -1,0 +1,69 @@
+/**
+ * Onda M — Runtime Immunity scaffolds (AethelPack, Console HAL trait, AAA probes).
+ * Letter bo: Zstd WASM cook compression + JS pack writer.
+ */
+
+export {
+  AETHEL_PACK_MAGIC,
+  AETHEL_PACK_VERSION,
+  createEmptyAethelPackManifest,
+  validateAethelPackManifest,
+  type AethelPackManifest,
+  type AethelPackValidationResult,
+  type AethelTextureCodec,
+  type AethelCompression,
+} from './aethel-pack-manifest'
+
+export {
+  writeAethelPack,
+  readAethelPack,
+  proveJsAethelPackCookRoundTrip,
+  type AethelPackWriteInput,
+  type AethelPackWriteResult,
+  type AethelPackReadResult,
+} from './aethel-pack-writer'
+
+export {
+  probeZstdEncoder,
+  ensureZstdEncoder,
+  compressAethelPackPayload,
+  decompressAethelPackPayload,
+  resolveJsCookCompression,
+} from './aethel-pack-compress'
+
+export {
+  probeAethelPackRustCookWorker,
+  type AethelPackRustCookProbe,
+} from './aethel-pack-rust-probe'
+
+export {
+  runAethelPackCookPublishStage,
+  proveCookPackReadyFromJsWriter,
+  type CookPublishStageInput,
+  type CookPublishStageResult,
+} from './cook-publish-stage'
+
+export {
+  CONSOLE_HAL_DESKTOP_WIRED,
+  CONSOLE_HAL_DOCUMENTED_DESKTOP_BACKENDS,
+  createWgpuPortableHalScaffold,
+  createVulkanDesktopHalPartial,
+  createDx12DesktopHalPartial,
+  createPs5GnmHalHeld,
+  negotiateConsoleHal,
+  proveConsoleHalDesktopReady,
+  evaluateConsoleHalHonesty,
+  type ConsoleHalBackend,
+  type ConsoleHalTrait,
+  type ConsoleHalHonestyReport,
+  type ConsoleHalNegotiateResult,
+} from './console-hal'
+
+export {
+  probeAaaProductionCapability,
+  evaluateAaaProductionHonesty,
+  probeAaaProductionHonesty,
+  type AaaProductionCapabilitySnapshot,
+  type AaaProductionHonestyReport,
+  type AaaProductionHonestyInput,
+} from './aaa-production-capability'

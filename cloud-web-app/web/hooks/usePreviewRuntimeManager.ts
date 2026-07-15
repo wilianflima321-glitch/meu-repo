@@ -1,0 +1,579 @@
+'use client'
+
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { analytics } from '@/lib/analytics'
+import { useRuntimeLanePolicy } from '@/hooks/useRuntimeLanePolicy'
+import {
+  checkPreviewRuntimeHealth,
+  DEFAULT_PREVIEW_RUNTIME_URL,
+  discoverPreviewRuntimeDetails,
+  getPreviewRuntimeReadiness,
+  getStoredPreviewSandboxId,
+  getStoredPreviewRuntimeUrl,
+  normalizeRuntimeUrl,
+  persistPreviewSandboxId,
+  persistPreviewRuntimeUrl,
+  PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY,
+  PREVIEW_RUNTIME_URL_STORAGE_KEY,
+  provisionPreviewRuntime,
+  syncPreviewRuntime,
+  syncPreviewRuntimeFile,
+  type PreviewRuntimeHealthState,
+  type PreviewRuntimeReadinessResponse,
+} from '@/lib/preview/runtime-manager'
+
+type RuntimeMessageTone = 'info' | 'success' | 'warning'
+
+type UsePreviewRuntimeManagerOptions = {
+  projectId: string | null
+  previewEnabled: boolean
+  hasToken: boolean
+  previewUrlParam?: string | null
+}
+
+export function usePreviewRuntimeManager({
+  projectId,
+  previewEnabled,
+  hasToken,
+  previewUrlParam,
+}: UsePreviewRuntimeManagerOptions) {
+  const [previewRuntimeUrl, setPreviewRuntimeUrl] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    const fromStorage = getStoredPreviewRuntimeUrl(PREVIEW_RUNTIME_URL_STORAGE_KEY)
+    if (fromStorage) return fromStorage
+    return normalizeRuntimeUrl(DEFAULT_PREVIEW_RUNTIME_URL)
+  })
+  const [previewSandboxId, setPreviewSandboxId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    return getStoredPreviewSandboxId(PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)
+  })
+  const [previewRuntimeInput, setPreviewRuntimeInput] = useState('')
+  const [showRuntimeSettings, setShowRuntimeSettings] = useState(false)
+  const [runtimeHealth, setRuntimeHealth] = useState<PreviewRuntimeHealthState>({ status: 'idle' })
+  const [runtimeReadiness, setRuntimeReadiness] = useState<PreviewRuntimeReadinessResponse | null>(null)
+  const [runtimeHealthCheckedAt, setRuntimeHealthCheckedAt] = useState<Date | null>(null)
+  const [isDiscoveringRuntime, setIsDiscoveringRuntime] = useState(false)
+  const [isProvisioningRuntime, setIsProvisioningRuntime] = useState(false)
+  const [runtimeDiscoveryMessage, setRuntimeDiscoveryMessage] = useState<string | null>(null)
+  const [runtimeDiscoveryTone, setRuntimeDiscoveryTone] = useState<RuntimeMessageTone>('info')
+  const [isSyncingRuntime, setIsSyncingRuntime] = useState(false)
+  const runtimeAutoDiscoveryTriggeredRef = useRef(false)
+  const runtimeAutoProvisionTriggeredRef = useRef(false)
+  const runtimeAutoHoldNoticeShownRef = useRef(false)
+  const operatorLane = useRuntimeLanePolicy('browser-operator', {
+    activeCount: isDiscoveringRuntime || isProvisioningRuntime ? 1 : 0,
+  })
+  const fileSyncLane = useRuntimeLanePolicy('file-sync', {
+    activeCount: isSyncingRuntime ? 1 : 0,
+  })
+
+  const operatorRequiresManualConfirmation = Boolean(operatorLane.budget?.requiresConfirmation)
+  const operatorLaneBlockedReason = operatorLane.decision.canStart ? null : operatorLane.decision.reason
+  const operatorConfirmationReason = operatorRequiresManualConfirmation
+    ? 'Manual confirmation is required on this device profile before browser/operator preview actions can run automatically.'
+    : null
+  const syncLaneBlockedReason = fileSyncLane.decision.canStart ? null : fileSyncLane.decision.reason
+
+  const holdRuntimeAutomation = useCallback(
+    (message: string, tone: RuntimeMessageTone, options?: { silent?: boolean }) => {
+      if (!options?.silent) {
+        setRuntimeDiscoveryTone(tone)
+        setRuntimeDiscoveryMessage(message)
+      }
+
+      analytics?.track?.('engine', 'render_time', {
+        metadata: {
+          surface: 'ide-preview-runtime-lane',
+          status: 'held',
+          tone,
+          message,
+        },
+      })
+    },
+    []
+  )
+
+  const refreshRuntimeReadiness = useCallback(async () => {
+    try {
+      const readiness = await getPreviewRuntimeReadiness()
+      setRuntimeReadiness(readiness)
+      return readiness
+    } catch {
+      setRuntimeReadiness(null)
+      return null
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadReadiness = async () => {
+      const readiness = await refreshRuntimeReadiness()
+      if (cancelled) return
+      if (!readiness) setRuntimeReadiness(null)
+    }
+
+    void loadReadiness()
+    return () => {
+      cancelled = true
+    }
+  }, [refreshRuntimeReadiness])
+
+  useEffect(() => {
+    const normalized = normalizeRuntimeUrl(previewUrlParam ?? null)
+    if (!normalized) return
+    setPreviewRuntimeUrl(normalized)
+    persistPreviewRuntimeUrl(normalized, PREVIEW_RUNTIME_URL_STORAGE_KEY)
+  }, [previewUrlParam])
+
+  useEffect(() => {
+    setPreviewRuntimeInput(previewRuntimeUrl ?? '')
+  }, [previewRuntimeUrl])
+
+  const applyRuntimeUrl = useCallback(() => {
+    const normalized = normalizeRuntimeUrl(previewRuntimeInput)
+    setPreviewRuntimeUrl(normalized)
+    setRuntimeHealth({ status: normalized ? 'checking' : 'idle' })
+    setRuntimeDiscoveryMessage(null)
+    persistPreviewRuntimeUrl(normalized, PREVIEW_RUNTIME_URL_STORAGE_KEY)
+    setPreviewSandboxId(null)
+    persistPreviewSandboxId(null, PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)
+    analytics?.track?.('user', 'settings_change', {
+      metadata: {
+        source: 'ide-preview-runtime',
+        configured: Boolean(normalized),
+        runtimeUrl: normalized ?? null,
+      },
+    })
+  }, [previewRuntimeInput])
+
+  const discoverRuntime = useCallback(async (mode: 'auto' | 'manual' = 'manual'): Promise<boolean> => {
+    if (isDiscoveringRuntime) return false
+    if (operatorLaneBlockedReason) {
+      holdRuntimeAutomation(operatorLaneBlockedReason, 'warning', { silent: mode === 'auto' })
+      return false
+    }
+    if (mode === 'auto' && operatorConfirmationReason) {
+      holdRuntimeAutomation(operatorConfirmationReason, 'info')
+      return false
+    }
+    setIsDiscoveringRuntime(true)
+    if (mode === 'manual') {
+      setRuntimeDiscoveryTone('info')
+      setRuntimeDiscoveryMessage('Searching local runtime ports...')
+    }
+
+    try {
+      const discovery = await discoverPreviewRuntimeDetails()
+      const preferredRuntimeUrl = normalizeRuntimeUrl(discovery.preferredRuntimeUrl ?? null)
+      if (!preferredRuntimeUrl) {
+        const suggestedCommand = discovery.guidance?.recommendedCommands?.[0] || null
+        const suggestedInstruction = discovery.guidance?.instructions?.[0] || null
+        if (mode === 'manual') {
+          setRuntimeDiscoveryTone('warning')
+          setRuntimeDiscoveryMessage(
+            suggestedCommand
+              ? `No local runtime found. Next step: ${suggestedCommand}`
+              : suggestedInstruction || 'No local runtime found. Start npm run dev and try again.'
+          )
+        } else {
+          setRuntimeDiscoveryMessage(null)
+        }
+        analytics?.track?.('engine', 'render_time', {
+          metadata: {
+            surface: 'ide-preview-runtime-discovery',
+            mode,
+            status: 'not-found',
+          },
+        })
+        return false
+      }
+
+      setPreviewRuntimeUrl(preferredRuntimeUrl)
+      setPreviewRuntimeInput(preferredRuntimeUrl)
+      setRuntimeHealth({ status: 'checking' })
+      setRuntimeHealthCheckedAt(new Date())
+      setRuntimeDiscoveryTone('success')
+      setRuntimeDiscoveryMessage(`Runtime detectado: ${preferredRuntimeUrl}`)
+      persistPreviewRuntimeUrl(preferredRuntimeUrl, PREVIEW_RUNTIME_URL_STORAGE_KEY)
+      setPreviewSandboxId(null)
+      persistPreviewSandboxId(null, PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)
+
+      analytics?.track?.('engine', 'render_time', {
+        metadata: {
+          surface: 'ide-preview-runtime-discovery',
+          mode,
+          status: 'found',
+          runtimeUrl: preferredRuntimeUrl,
+        },
+      })
+      void refreshRuntimeReadiness()
+      return true
+    } catch (error) {
+      if (mode === 'manual') {
+        setRuntimeDiscoveryTone('warning')
+        setRuntimeDiscoveryMessage(
+          error instanceof Error ? `Falha ao detectar runtime: ${error.message}` : 'Falha ao detectar runtime.'
+        )
+      }
+      analytics?.track?.('engine', 'render_time', {
+        metadata: {
+          surface: 'ide-preview-runtime-discovery',
+          mode,
+          status: 'error',
+          reason: error instanceof Error ? error.message : 'unknown',
+        },
+      })
+      return false
+    } finally {
+      setIsDiscoveringRuntime(false)
+    }
+  }, [
+    holdRuntimeAutomation,
+    isDiscoveringRuntime,
+    operatorConfirmationReason,
+    operatorLaneBlockedReason,
+    refreshRuntimeReadiness,
+  ])
+
+  const provisionRuntime = useCallback(async (mode: 'auto' | 'manual' = 'manual'): Promise<boolean> => {
+    if (isProvisioningRuntime) return false
+    if (operatorLaneBlockedReason) {
+      holdRuntimeAutomation(operatorLaneBlockedReason, 'warning', { silent: mode === 'auto' })
+      return false
+    }
+    if (mode === 'auto' && operatorConfirmationReason) {
+      holdRuntimeAutomation(operatorConfirmationReason, 'info')
+      return false
+    }
+    setIsProvisioningRuntime(true)
+    if (mode === 'manual') {
+      setRuntimeDiscoveryTone('info')
+      setRuntimeDiscoveryMessage('Provisionando runtime gerenciado...')
+    }
+
+    try {
+      const provisionResult = await provisionPreviewRuntime(projectId)
+      const runtimeUrl = provisionResult.runtimeUrl
+      if (!runtimeUrl) {
+        throw new Error('Endpoint de provisionamento retornou URL de runtime vazia.')
+      }
+
+      setPreviewRuntimeUrl(runtimeUrl)
+      setPreviewRuntimeInput(runtimeUrl)
+      setRuntimeHealth({ status: 'checking' })
+      setRuntimeHealthCheckedAt(new Date())
+      setRuntimeDiscoveryTone('success')
+      const filesCount = provisionResult.metadata?.filesCount
+      const startMode = provisionResult.metadata?.startMode
+      const sandboxId = provisionResult.metadata?.sandboxId ?? null
+      const suffix = [startMode ? `modo=${startMode}` : null, Number.isFinite(filesCount) ? `arquivos=${filesCount}` : null]
+        .filter(Boolean)
+        .join(', ')
+      setRuntimeDiscoveryMessage(
+        suffix ? `Runtime provisionado (${suffix}): ${runtimeUrl}` : `Runtime provisionado: ${runtimeUrl}`
+      )
+      persistPreviewRuntimeUrl(runtimeUrl, PREVIEW_RUNTIME_URL_STORAGE_KEY)
+      setPreviewSandboxId(sandboxId)
+      persistPreviewSandboxId(sandboxId, PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)
+
+      analytics?.track?.('engine', 'render_time', {
+        metadata: {
+          surface: 'ide-preview-runtime-provision',
+          status: 'provisioned',
+          runtimeUrl,
+          mode: provisionResult.metadataMode || mode || 'unknown',
+          sandboxId: provisionResult.metadata?.sandboxId,
+          filesCount: provisionResult.metadata?.filesCount,
+          startMode: provisionResult.metadata?.startMode,
+        },
+      })
+      void refreshRuntimeReadiness()
+      return true
+    } catch (error) {
+      if (mode === 'manual') {
+        setRuntimeDiscoveryTone('warning')
+        setRuntimeDiscoveryMessage(
+          error instanceof Error ? `Falha ao provisionar runtime: ${error.message}` : 'Falha ao provisionar runtime.'
+        )
+      }
+      analytics?.track?.('engine', 'render_time', {
+        metadata: {
+          surface: 'ide-preview-runtime-provision',
+          status: 'error',
+          mode,
+          reason: error instanceof Error ? error.message : 'unknown',
+        },
+      })
+      return false
+    } finally {
+      setIsProvisioningRuntime(false)
+    }
+  }, [
+    holdRuntimeAutomation,
+    isProvisioningRuntime,
+    operatorConfirmationReason,
+    operatorLaneBlockedReason,
+    projectId,
+    refreshRuntimeReadiness,
+  ])
+
+  const syncRuntime = useCallback(async (): Promise<boolean> => {
+    if (isSyncingRuntime) return false
+    if (!previewSandboxId) {
+      setRuntimeDiscoveryTone('warning')
+      setRuntimeDiscoveryMessage('Sync unavailable: sandboxId not found.')
+      return false
+    }
+    if (syncLaneBlockedReason) {
+      holdRuntimeAutomation(syncLaneBlockedReason, 'warning')
+      return false
+    }
+    setIsSyncingRuntime(true)
+    setRuntimeDiscoveryTone('info')
+    setRuntimeDiscoveryMessage('Syncing workspace with runtime...')
+    try {
+      const result = await syncPreviewRuntime(projectId, previewSandboxId)
+      const filesCount = result.metadata?.filesCount
+      const suffix = Number.isFinite(filesCount) ? `files=${filesCount}` : null
+      setRuntimeDiscoveryTone('success')
+      setRuntimeDiscoveryMessage(
+        suffix ? `Runtime synced (${suffix}).` : 'Runtime synced.'
+      )
+      return true
+    } catch (error) {
+      setRuntimeDiscoveryTone('warning')
+      setRuntimeDiscoveryMessage(
+        error instanceof Error ? `Failed to sync runtime: ${error.message}` : 'Failed to sync runtime.'
+      )
+      return false
+    } finally {
+      setIsSyncingRuntime(false)
+    }
+  }, [holdRuntimeAutomation, isSyncingRuntime, previewSandboxId, projectId, syncLaneBlockedReason])
+
+  const syncRuntimeFile = useCallback(
+    async (path: string): Promise<boolean> => {
+      if (!previewSandboxId) return false
+      if (syncLaneBlockedReason) return false
+      try {
+        const result = await syncPreviewRuntimeFile(projectId, previewSandboxId, path)
+        return Boolean(result.success)
+      } catch (error) {
+        setRuntimeDiscoveryTone('warning')
+        setRuntimeDiscoveryMessage(
+          error instanceof Error ? `Failed to sync file: ${error.message}` : 'Failed to sync file.'
+        )
+        return false
+      }
+    },
+    [previewSandboxId, projectId, syncLaneBlockedReason]
+  )
+
+  const checkRuntime = useCallback(async (runtimeUrl: string | null) => {
+    if (!runtimeUrl) {
+      setRuntimeHealth({ status: 'idle' })
+      setRuntimeHealthCheckedAt(null)
+      return
+    }
+
+    setRuntimeHealth({ status: 'checking' })
+    setRuntimeHealthCheckedAt(new Date())
+    try {
+      const nextHealth = await checkPreviewRuntimeHealth(runtimeUrl)
+      setRuntimeHealth(nextHealth)
+    } catch {
+      setRuntimeHealth({ status: 'unreachable', reason: 'network' })
+    }
+  }, [])
+
+  useEffect(() => {
+    void checkRuntime(previewRuntimeUrl)
+  }, [previewRuntimeUrl, checkRuntime])
+
+  useEffect(() => {
+    if (!previewEnabled) return
+    if (previewRuntimeUrl) return
+    const recommendedAction = runtimeReadiness?.recommendedAction
+
+    if (
+      hasToken &&
+      recommendedAction === 'provision' &&
+      !runtimeAutoProvisionTriggeredRef.current
+    ) {
+      runtimeAutoProvisionTriggeredRef.current = true
+      void provisionRuntime('auto').then((provisioned) => {
+        if (provisioned || runtimeAutoDiscoveryTriggeredRef.current) return
+        runtimeAutoDiscoveryTriggeredRef.current = true
+        void discoverRuntime('auto')
+      })
+      return
+    }
+
+    if (
+      (recommendedAction === 'discover' || (!recommendedAction && !hasToken)) &&
+      !runtimeAutoDiscoveryTriggeredRef.current
+    ) {
+      runtimeAutoDiscoveryTriggeredRef.current = true
+      void discoverRuntime('auto')
+    }
+  }, [discoverRuntime, hasToken, previewEnabled, previewRuntimeUrl, provisionRuntime, runtimeReadiness?.recommendedAction])
+
+  useEffect(() => {
+    if (!previewEnabled) return
+    const wantsAutoOperatorAction =
+      !previewRuntimeUrl &&
+      (runtimeReadiness?.recommendedAction === 'provision' ||
+        runtimeReadiness?.recommendedAction === 'discover' ||
+        (!runtimeReadiness?.recommendedAction && !hasToken))
+
+    if (!wantsAutoOperatorAction) {
+      runtimeAutoHoldNoticeShownRef.current = false
+      return
+    }
+
+    if (operatorConfirmationReason && !runtimeAutoHoldNoticeShownRef.current) {
+      runtimeAutoHoldNoticeShownRef.current = true
+      holdRuntimeAutomation(operatorConfirmationReason, 'info')
+    }
+  }, [
+    hasToken,
+    holdRuntimeAutomation,
+    operatorConfirmationReason,
+    previewEnabled,
+    previewRuntimeUrl,
+    runtimeReadiness?.recommendedAction,
+  ])
+
+  useEffect(() => {
+    if (!previewEnabled || !previewRuntimeUrl) return
+    const interval = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return
+      void checkRuntime(previewRuntimeUrl)
+    }, 30000)
+    return () => window.clearInterval(interval)
+  }, [previewEnabled, previewRuntimeUrl, checkRuntime])
+
+  useEffect(() => {
+    if (!previewRuntimeUrl) return
+    if (runtimeHealth.status === 'checking' || runtimeHealth.status === 'idle') return
+    analytics?.track?.('engine', 'render_time', {
+      metadata: {
+        surface: 'ide-preview-runtime-health',
+        runtimeUrl: previewRuntimeUrl,
+        status: runtimeHealth.status,
+        latencyMs: runtimeHealth.latencyMs ?? null,
+        httpStatus: runtimeHealth.httpStatus ?? null,
+        reason: runtimeHealth.reason ?? null,
+      },
+    })
+  }, [previewRuntimeUrl, runtimeHealth.httpStatus, runtimeHealth.latencyMs, runtimeHealth.reason, runtimeHealth.status])
+
+  const runtimeHealthHint =
+    runtimeHealth.status === 'reachable'
+      ? `Runtime active${typeof runtimeHealth.latencyMs === 'number' ? ` (${runtimeHealth.latencyMs}ms)` : ''}.`
+      : runtimeHealth.status === 'checking'
+        ? 'Checking external runtime...'
+        : runtimeHealth.status === 'unhealthy'
+          ? 'Runtime returned an error. Preview will use the inline fallback.'
+          : runtimeHealth.status === 'unreachable'
+            ? 'Runtime is unreachable. Preview will use the inline fallback.'
+            : runtimeHealth.status === 'invalid'
+              ? 'Runtime URL is invalid or blocked. Fix it before using a dev server.'
+              : 'No external runtime configured. Inline mode is active.'
+
+  const managedProviderLabel =
+    runtimeReadiness?.managedProviderLabel || runtimeReadiness?.managedProvider || null
+
+  const runtimeStrategyLabel =
+    runtimeReadiness?.strategy === 'managed'
+      ? `managed sandbox${managedProviderLabel ? ` (${managedProviderLabel})` : ''}`
+      : runtimeReadiness?.strategy === 'local'
+        ? 'local server'
+        : runtimeReadiness?.strategy === 'browser-side'
+        ? 'webcontainer (browser)'
+          : 'inline'
+
+  const runtimeStrategyHint =
+    runtimeReadiness?.strategy === 'managed'
+      ? runtimeReadiness.readyForManagedProvision
+        ? 'Managed preview is configured; provisioning can be used as the primary path.'
+        : 'Managed preview detected, but runtime blockers remain.'
+      : runtimeReadiness?.strategy === 'local'
+        ? 'Local runtime detected; preview depends on your dev server staying online.'
+        : runtimeReadiness?.strategy === 'browser-side'
+          ? 'Browser-side runtime; no remote sandbox or local server is attached.'
+          : 'No managed sandbox or local runtime detected; preview stays in inline mode.'
+
+  const runtimePrimaryAction =
+    runtimeReadiness?.recommendedAction === 'provision'
+      ? 'provision'
+      : runtimeReadiness?.recommendedAction === 'discover'
+        ? 'discover'
+        : 'inline'
+
+  const runtimePrimaryActionLabel =
+    runtimePrimaryAction === 'provision'
+      ? 'Provision sandbox'
+      : runtimePrimaryAction === 'discover'
+        ? 'Detect local server'
+        : 'Use inline preview'
+
+  const handleUseInlineFallback = useCallback(() => {
+    setPreviewRuntimeInput('')
+    setPreviewRuntimeUrl(null)
+    setRuntimeHealth({ status: 'idle' })
+    setRuntimeHealthCheckedAt(null)
+    setRuntimeDiscoveryTone('info')
+    setRuntimeDiscoveryMessage('Inline mode active.')
+    persistPreviewRuntimeUrl(null, PREVIEW_RUNTIME_URL_STORAGE_KEY)
+    setPreviewSandboxId(null)
+    persistPreviewSandboxId(null, PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)
+  }, [])
+
+  const forceInlinePreviewFallback =
+    Boolean(previewRuntimeUrl) &&
+    (runtimeHealth.status === 'unreachable' ||
+      runtimeHealth.status === 'unhealthy' ||
+      runtimeHealth.status === 'invalid')
+
+  const runtimeActionBlockedReason =
+    runtimePrimaryAction === 'provision' || runtimePrimaryAction === 'discover'
+      ? operatorLaneBlockedReason
+      : null
+
+  return {
+    previewRuntimeUrl,
+    previewRuntimeInput,
+    setPreviewRuntimeInput,
+    showRuntimeSettings,
+    setShowRuntimeSettings,
+    runtimeHealth,
+    runtimeHealthCheckedAt,
+    isDiscoveringRuntime,
+    isProvisioningRuntime,
+    isSyncingRuntime,
+    runtimeDiscoveryMessage,
+    runtimeDiscoveryTone,
+    runtimeHealthHint,
+    runtimeReadiness,
+    refreshRuntimeReadiness,
+    runtimeStrategyLabel,
+    runtimeStrategyHint,
+    runtimePrimaryAction,
+    runtimePrimaryActionLabel,
+    runtimeActionBlockedReason,
+    runtimeAutomationPlacement: operatorLane.budget?.placement ?? null,
+    runtimeAutomationRequiresConfirmation: operatorRequiresManualConfirmation,
+    syncRuntimeBlockedReason: syncLaneBlockedReason,
+    forceInlinePreviewFallback,
+    applyRuntimeUrl,
+    discoverRuntime,
+    provisionRuntime,
+    syncRuntime,
+    syncRuntimeFile,
+    checkRuntimeHealth: checkRuntime,
+    handleUseInlineFallback,
+    previewSandboxId,
+  }
+}

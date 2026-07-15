@@ -1,0 +1,31 @@
+﻿2025-10-31T02:31:38.7613620Z Current runner version: '2.328.0'
+2025-10-31T02:31:38.7656208Z ##[group]Runner Image Provisioner
+2025-10-31T02:31:38.7657410Z Hosted Compute Agent
+2025-10-31T02:31:38.7658606Z Version: 20250912.392
+2025-10-31T02:31:38.7659616Z Commit: d921fda672a98b64f4f82364647e2f10b2267d0b
+2025-10-31T02:31:38.7660748Z Build Date: 2025-09-12T15:23:14Z
+2025-10-31T02:31:38.7661872Z ##[endgroup]
+2025-10-31T02:31:38.7662810Z ##[group]Operating System
+2025-10-31T02:31:38.7663724Z Ubuntu
+2025-10-31T02:31:38.7664776Z 24.04.3
+2025-10-31T02:31:38.7665644Z LTS
+2025-10-31T02:31:38.7666611Z ##[endgroup]
+2025-10-31T02:31:38.7667697Z ##[group]Runner Image
+2025-10-31T02:31:38.7668611Z Image: ubuntu-24.04
+2025-10-31T02:31:38.7669478Z Version: 20250929.60.1
+2025-10-31T02:31:38.7671331Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250929.60/images/ubuntu/Ubuntu2404-Readme.md
+2025-10-31T02:31:38.7673918Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250929.60
+2025-10-31T02:31:38.7676332Z ##[endgroup]
+2025-10-31T02:31:38.7678214Z ##[group]GITHUB_TOKEN Permissions
+2025-10-31T02:31:38.7680827Z Contents: read
+2025-10-31T02:31:38.7681672Z Metadata: read
+2025-10-31T02:31:38.7682497Z Packages: read
+2025-10-31T02:31:38.7683428Z ##[endgroup]
+2025-10-31T02:31:38.7686698Z Secret source: Actions
+2025-10-31T02:31:38.7687798Z Prepare workflow directory
+2025-10-31T02:31:38.8601317Z Prepare all required actions
+2025-10-31T02:31:38.8658763Z Getting action download info
+2025-10-31T02:31:39.2987812Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-31T02:31:39.3988275Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2025-10-31T02:31:39.4965485Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-10-31T02:31:39.7090480Z Complete job name: Run Jest unit tests and Playwright E2E

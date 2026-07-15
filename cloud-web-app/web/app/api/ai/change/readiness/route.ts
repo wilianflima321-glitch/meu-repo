@@ -1,0 +1,145 @@
+import { NextRequest } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
+import { requireEntitlementsForUser } from '@/lib/entitlements'
+import { isAnyAiProviderConfigured } from '@/lib/ai-provider-config'
+import { AI_CHANGE_READ_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
+import { capabilityResponse } from '@/lib/server/capability-response'
+import { filterChangeRunLedgerBySample, readChangeRunLedgerEvents } from '@/lib/server/change-run-ledger'
+import { computeCoreLoopReadiness, type CoreLoopThresholds } from '@/lib/server/core-loop-readiness'
+import {
+  buildCoreLoopTrend,
+  buildCoreLoopRecommendations,
+  buildExecutionModeCounts,
+  buildFeedbackCounts,
+  buildReasonPlaybook,
+  buildReasonCounts,
+  buildRiskCounts,
+  topEntries,
+} from '@/lib/server/core-loop-learning'
+
+export const dynamic = 'force-dynamic'
+
+const CAPABILITY = 'AI_CHANGE_READINESS'
+const DEFAULT_HOURS = 24 * 7
+const MAX_HOURS = 24 * 30
+const THRESHOLDS: CoreLoopThresholds = {
+  minSample: 20,
+  successRate: 0.9,
+  regressionRateMax: 0.05,
+  sandboxCoverage: 0.5,
+  feedbackCoverageMin: 0.6,
+}
+
+function parseHours(value: string | null): number {
+  const parsed = Number.parseInt(value || `${DEFAULT_HOURS}`, 10)
+  if (Number.isNaN(parsed)) return DEFAULT_HOURS
+  return Math.max(1, Math.min(parsed, MAX_HOURS))
+}
+
+export async function GET(request: NextRequest) {
+  const user = requireAuth(request)
+  const rateLimited = enforceAiCoreRateLimit({
+    req: request,
+    capability: 'ai.change.readiness',
+    route: '/api/ai/change/readiness',
+    config: AI_CHANGE_READ_RATE_LIMIT,
+  })
+  if (rateLimited) return rateLimited
+
+  await requireEntitlementsForUser(user.userId)
+
+  const hours = parseHours(request.nextUrl.searchParams.get('hours'))
+  const sinceIso = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString()
+  const events = await readChangeRunLedgerEvents({
+    userId: user.userId,
+    sinceIso,
+    limit: 2000,
+  })
+
+  const providerConfigured = isAnyAiProviderConfigured()
+  const reportAll = computeCoreLoopReadiness({
+    events,
+    thresholds: THRESHOLDS,
+    providerConfigured,
+    runGroupLimit: 100,
+    sampleClass: 'all',
+  })
+  const report = computeCoreLoopReadiness({
+    events,
+    thresholds: THRESHOLDS,
+    providerConfigured,
+    runGroupLimit: 100,
+    sampleClass: 'production',
+  })
+  const rehearsalReport = computeCoreLoopReadiness({
+    events,
+    thresholds: THRESHOLDS,
+    providerConfigured,
+    runGroupLimit: 100,
+    sampleClass: 'rehearsal',
+  })
+  const productionEvents = filterChangeRunLedgerBySample(events, 'production')
+  const reasonCounts = buildReasonCounts(productionEvents)
+  const feedbackCounts = buildFeedbackCounts(productionEvents)
+  const executionModeCounts = buildExecutionModeCounts(productionEvents)
+  const riskCounts = buildRiskCounts(productionEvents)
+  const baselineSinceIso = new Date(Date.now() - 24 * 30 * 60 * 60 * 1000).toISOString()
+  const baselineEvents = await readChangeRunLedgerEvents({
+    userId: user.userId,
+    sinceIso: baselineSinceIso,
+    limit: 2000,
+  })
+  const baselineReport = computeCoreLoopReadiness({
+    events: baselineEvents,
+    thresholds: THRESHOLDS,
+    providerConfigured: report.providerConfigured,
+    runGroupLimit: 100,
+    sampleClass: 'production',
+  })
+  const trend = buildCoreLoopTrend({
+    latest: report.metrics,
+    baseline: baselineReport.metrics,
+  })
+  const recommendations = buildCoreLoopRecommendations({
+    metrics: report.metrics,
+    thresholds: THRESHOLDS,
+    providerConfigured: report.providerConfigured,
+    reasonCounts,
+    feedbackCounts,
+  })
+
+  return capabilityResponse({
+    error: 'NONE',
+    message: 'Core-loop readiness loaded.',
+    status: 200,
+    capability: CAPABILITY,
+    capabilityStatus: 'PARTIAL',
+    metadata: {
+      hours,
+      sinceIso,
+      samplePolicy: 'production_only_for_promotion',
+      thresholds: report.thresholds,
+      metrics: {
+        ...report.metrics,
+        learnFeedbackCoverage: report.metrics.learnFeedbackCoverage,
+        reviewedApplyRuns: report.metrics.reviewedApplyRuns,
+        unreviewedApplyRuns: report.metrics.unreviewedApplyRuns,
+      },
+      metricsAll: reportAll.metrics,
+      rehearsalMetrics: rehearsalReport.metrics,
+      rollup: report.rollup,
+      rollupAll: reportAll.rollup,
+      reasonCounts: topEntries(reasonCounts, 8),
+      feedbackCounts: topEntries(feedbackCounts, 6),
+      allReasonCounts: topEntries(buildReasonCounts(events), 8),
+      allFeedbackCounts: topEntries(buildFeedbackCounts(events), 6),
+      executionModeCounts: topEntries(executionModeCounts, 6),
+      riskCounts: topEntries(riskCounts, 6),
+      trend,
+      recommendations,
+      reasonPlaybook: buildReasonPlaybook(reasonCounts, 6),
+      runGroups: report.runGroups.filter((group) => group.applyCount > 0).slice(0, 25),
+      rehearsalRunGroups: rehearsalReport.runGroups.filter((group) => group.applyCount > 0).slice(0, 25),
+    },
+  })
+}

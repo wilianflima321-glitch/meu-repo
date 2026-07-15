@@ -1,0 +1,18 @@
+﻿2025-10-31T02:33:39.9172828Z ##[group]Run # start server in background and capture logs
+2025-10-31T02:33:39.9173259Z [36;1m# start server in background and capture logs[0m
+2025-10-31T02:33:39.9173788Z [36;1mnohup node tools/llm-mock/server.js > tools/llm-mock/server.log 2>&1 & echo $! > tools/llm-mock/server.pid || true[0m
+2025-10-31T02:33:39.9174339Z [36;1m# install wait-on and wait for server to accept connections[0m
+2025-10-31T02:33:39.9174661Z [36;1mnpm i -g wait-on || true[0m
+2025-10-31T02:33:39.9175082Z [36;1mnpx wait-on http://127.0.0.1:8010 --timeout 30000 || (cat tools/llm-mock/server.log && exit 1)[0m
+2025-10-31T02:33:39.9208533Z shell: /usr/bin/bash -e {0}
+2025-10-31T02:33:39.9208801Z ##[endgroup]
+2025-10-31T02:33:41.9880358Z npm warn EBADENGINE Unsupported engine {
+2025-10-31T02:33:41.9882722Z npm warn EBADENGINE   package: 'joi@18.0.1',
+2025-10-31T02:33:41.9898714Z npm warn EBADENGINE   required: { node: '>= 20' },
+2025-10-31T02:33:41.9899566Z npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+2025-10-31T02:33:41.9900239Z npm warn EBADENGINE }
+2025-10-31T02:33:43.2505606Z 
+2025-10-31T02:33:43.2508666Z added 36 packages in 3s
+2025-10-31T02:33:43.2515782Z 
+2025-10-31T02:33:43.2516322Z 7 packages are looking for funding
+2025-10-31T02:33:43.2516876Z   run `npm fund` for details

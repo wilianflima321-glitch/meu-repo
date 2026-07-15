@@ -1,0 +1,60 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+    paths:
+      - 'cloud-web-app/web/**'
+      - '.github/workflows/lighthouse.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: cloud-web-app/web
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cloud-web-app/web/package-lock.json
+
+      - name: Install deps
+        run: npm ci --legacy-peer-deps --no-audit --no-fund
+
+      - name: Build
+        env:
+          # Minimal env so `next build` doesn't fail reading prisma/stripe keys.
+          DATABASE_URL: postgresql://user:pass@localhost:5432/ci
+          NEXTAUTH_SECRET: ci-secret
+          SKIP_ENV_VALIDATION: '1'
+        run: npm run build
+
+      - name: Install Lighthouse CI
+        run: npm i -g @lhci/cli@0.14.x
+
+      - name: Run Lighthouse CI
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/ci
+          SKIP_ENV_VALIDATION: '1'
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        run: lhci autorun || echo "::warning::Lighthouse CI reported warnings; see the run summary."
+
+      - name: Upload LHCI report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: cloud-web-app/web/.lighthouseci
+          retention-days: 14

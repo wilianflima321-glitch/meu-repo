@@ -1,0 +1,211 @@
+import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
+import { requireAuth } from '@/lib/auth-server';
+import { requireFeatureForUser } from '@/lib/entitlements';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+import { enforceRouteRateLimit, MARKETPLACE_READ_RATE_LIMIT } from '@/lib/server/route-rate-limit';
+
+const routeLogger = createComponentLogger('api/marketplace/extensions/route');
+
+export const dynamic = 'force-dynamic';
+
+// Extensões built-in do Aethel Engine
+const BUILTIN_EXTENSIONS = [
+  {
+    id: 'aethel.blueprint-editor',
+    name: 'Blueprint Visual Scripting',
+    description: 'Unreal-style visual scripting system for creating game logic without code',
+    version: '1.0.0',
+    author: 'Aethel Team',
+    category: 'editor',
+    downloads: 15420,
+    rating: 4.9,
+    price: 0,
+    icon: '/icons/blueprint.svg',
+    tags: ['visual-scripting', 'blueprints', 'nodes', 'official'],
+    builtin: true,
+  },
+  {
+    id: 'aethel.niagara-vfx',
+    name: 'Niagara VFX Editor',
+    description: 'Advanced particles and visual effects editor based on Unreal Niagara',
+    version: '1.0.0',
+    author: 'Aethel Team',
+    category: 'editor',
+    downloads: 12850,
+    rating: 4.8,
+    price: 0,
+    icon: '/icons/niagara.svg',
+    tags: ['vfx', 'particles', 'effects', 'official'],
+    builtin: true,
+  },
+  {
+    id: 'aethel.ai-assistant',
+    name: 'AI Game Assistant',
+    description: 'AI assistant for game creation - generates code, assets, and helps with gameplay',
+    version: '2.0.0',
+    author: 'Aethel Team',
+    category: 'ai',
+    downloads: 28900,
+    rating: 4.95,
+    price: 0,
+    icon: '/icons/ai.svg',
+    tags: ['ai', 'assistant', 'code-generation', 'official'],
+    builtin: true,
+  },
+  {
+    id: 'aethel.landscape-editor',
+    name: 'Landscape & Terrain Editor',
+    description: 'Editor completo de terrenos com sculpting, painting, e foliage procedural',
+    version: '1.0.0',
+    author: 'Aethel Team',
+    category: 'editor',
+    downloads: 9500,
+    rating: 4.7,
+    price: 0,
+    icon: '/icons/landscape.svg',
+    tags: ['terrain', 'landscape', 'sculpting', 'official'],
+    builtin: true,
+  },
+  {
+    id: 'aethel.physics-engine',
+    name: 'Advanced Physics Engine',
+    description: 'Full physics engine with rigid bodies, constraints, and realistic simulation',
+    version: '1.0.0',
+    author: 'Aethel Team',
+    category: 'engine',
+    downloads: 18200,
+    rating: 4.85,
+    price: 0,
+    icon: '/icons/physics.svg',
+    tags: ['physics', 'simulation', 'rigid-body', 'official'],
+    builtin: true,
+  },
+  {
+    id: 'aethel.multiplayer',
+    name: 'Multiplayer Networking',
+    description: 'Full networking system for multiplayer games with replication and matchmaking',
+    version: '1.0.0',
+    author: 'Aethel Team',
+    category: 'networking',
+    downloads: 11300,
+    rating: 4.6,
+    price: 0,
+    icon: '/icons/multiplayer.svg',
+    tags: ['multiplayer', 'networking', 'replication', 'official'],
+    builtin: true,
+  },
+];
+
+export async function GET(request: NextRequest) {
+  try {
+    const user = requireAuth(request);
+
+    const rateLimited = await enforceRouteRateLimit({
+      req: request,
+      capability: 'MARKETPLACE_EXTENSIONS_LIST',
+      route: '/api/marketplace/extensions',
+      config: MARKETPLACE_READ_RATE_LIMIT,
+      identifier: user.userId,
+    });
+    if (rateLimited) return rateLimited;
+
+    await requireFeatureForUser(user.userId, 'marketplace');
+    
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const search = searchParams.get('search');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
+    
+    // Busca items do marketplace no banco
+    const where: Prisma.MarketplaceItemWhereInput = {};
+    if (category && category !== 'all') {
+      where.category = category;
+    }
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+    
+    const [dbItems, total, installedRows] = await Promise.all([
+      prisma.marketplaceItem.findMany({
+        where,
+        orderBy: { downloads: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.marketplaceItem.count({ where }),
+      prisma.installedExtension.findMany({
+        where: { userId: user.userId },
+        select: { extensionId: true },
+      }),
+    ]);
+
+    const installedSet = new Set(installedRows.map(r => r.extensionId));
+    
+    // Converte items do DB para formato de extensão
+    const marketplaceExtensions = dbItems.map(item => ({
+      id: item.id,
+      name: item.title,
+      description: item.description,
+      version: '1.0.0',
+      author: item.authorId,
+      category: item.category,
+      downloads: item.downloads,
+      rating: item.rating,
+      price: item.price,
+      icon: '/icons/extension.svg',
+      tags: [],
+      builtin: false,
+      installed: installedSet.has(item.id),
+    }));
+    
+    // Combina built-in com marketplace
+    let allExtensions = [
+      ...BUILTIN_EXTENSIONS.map((ext) => ({ ...ext, installed: true })),
+      ...marketplaceExtensions,
+    ];
+    
+    // Filtra por categoria se especificado
+    if (category && category !== 'all') {
+      allExtensions = allExtensions.filter(ext => ext.category === category);
+    }
+    
+    // Filtra por busca se especificado
+    if (search) {
+      const searchLower = search.toLowerCase();
+      allExtensions = allExtensions.filter(ext => 
+        ext.name.toLowerCase().includes(searchLower) ||
+        ext.description.toLowerCase().includes(searchLower) ||
+        ext.tags.some(tag => tag.includes(searchLower))
+      );
+    }
+    
+    // Paginação
+    const startIndex = (page - 1) * limit;
+    const paginatedExtensions = allExtensions.slice(startIndex, startIndex + limit);
+    
+    return NextResponse.json({
+      success: true,
+      extensions: paginatedExtensions,
+      pagination: {
+        page,
+        limit,
+        total: allExtensions.length,
+        pages: Math.ceil(allExtensions.length / limit),
+      },
+      categories: ['all', 'editor', 'engine', 'ai', 'networking', 'tools', 'templates'],
+    });
+  } catch (error) {
+    routeLogger.error('Failed to list extensions:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
+  }
+}
+

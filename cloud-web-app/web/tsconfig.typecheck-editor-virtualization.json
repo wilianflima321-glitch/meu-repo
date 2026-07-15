@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": false
+  },
+  "include": [
+    "components/performance/useVirtualWindow.ts",
+    "components/engine/WorldOutliner.tsx",
+    "components/engine/WorldOutlinerParts.tsx",
+    "components/engine/EngineContentBrowser.tsx",
+    "components/engine/EngineContentBrowser.parts.tsx",
+    "components/engine/content-browser-core.ts",
+    "components/engine/content-browser-controls.tsx",
+    "components/animation/KeyframeSystem.tsx",
+    "components/animation/KeyframeSystem.model.ts",
+    "components/animation/KeyframeSystem.controls.tsx"
+  ]
+}

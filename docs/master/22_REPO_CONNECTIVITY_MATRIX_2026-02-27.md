@@ -1,0 +1,360 @@
+# 22_REPO_CONNECTIVITY_MATRIX_2026-02-27
+Status: EXECUTION MATRIX
+Date: 2026-02-27
+Owner: Platform Engineering + PM Técnico
+
+## 1) Objetivo
+Registrar conectividade real do repositório, identificar peças soltas e definir ações de correção sem mudar escopo de produto.
+
+## 2) Baseline factual coletado
+- `tracked_md_like=3617` (excluindo `node_modules/.next/.git`).
+- `docs/master/*.md=35`.
+- `docs/archive/**/*.md=3503`.
+- `cloud-web-app/web` com `21` arquivos `.md` soltos na raiz.
+- `cloud-web-app/web/.venv` presente e versionado.
+- `package.json` (raiz) com caminhos inexistentes em scripts:
+  - `examples/browser-ide-app`
+  - `cloud-ide-desktop/desktop-app`
+- `tsconfig.json` (raiz) referencia caminho inexistente:
+  - `cloud-ide-desktop/aethel_theia_fork/packages/ai-ide`
+- `.gitmodules` aponta submódulo ausente:
+  - `cloud-ide-desktop/aethel_theia_fork`
+- Pressão de manutenção:
+  - `55` arquivos `>=1200` linhas em `cloud-web-app/web` (top offender: `components/AethelDashboardRuntime.tsx`, `3528` linhas).
+
+## 3) Matriz de risco de conectividade
+| Domínio | Evidência | Impacto | Prioridade | Ação |
+|---|---|---|---|---|
+| Scripts raiz quebrados | paths inexistentes em `package.json` | Onboarding/CI confuso | P0 | Redirecionar scripts para superfícies ativas (`cloud-web-app/web`) ou remover comandos mortos |
+| Submódulo órfão | `.gitmodules` sem pasta real | Clone/setup inconsistente | P0 | Remover referência ou restaurar submódulo real com URL válida |
+| TS references inválidas | `tsconfig.json` com path inexistente | `tsc --build` instável | P0 | Ajustar `references` para módulos existentes |
+| Binários versionados | `.venv` com executáveis no Git | Ruído operacional e risco de segurança | P0 | Remover do versionamento + adicionar ignore |
+| Documentação dispersa | muitos `.md` fora de `docs/master` | Decisão por fonte errada | P1 | Consolidar índice e mover docs operacionais para `docs/archive` |
+| Componentes monolíticos | `AethelDashboardRuntime.tsx` 3k+ linhas | Manutenção e regressão | P1 | Decompor em blocos (header, mission, chat, preview, ops) |
+| Duplicatas de superfície | `NexusCanvas` raiz + `nexus/NexusCanvasV2` | Drift visual/funcional | P1 | Declarar canônico e remover legado |
+
+## 3.1) Classificação de diretórios de topo
+| Diretório | Classificação | Observação |
+|---|---|---|
+| `cloud-web-app/` | `ACTIVE` | Superfície principal de produto |
+| `docs/master/` | `ACTIVE` | Governança canônica |
+| `docs/archive/` | `LEGACY_ACTIVE` | Histórico consultivo, não canônico |
+| `src/` | `ACTIVE` | Código TypeScript compartilhado |
+| `tests/` | `ACTIVE` | Testes gerais do repositório |
+| `infra/` | `LEGACY_ACTIVE` | Infra auxiliar, requer revisão de aderência |
+| `infra-playwright-ci-agent/` | `LEGACY_ACTIVE` | Automação CI especializada |
+| `meu-repo/` (subpasta interna) | `ORPHAN_CANDIDATE` | Conteúdo auxiliar/duplicado; não participa do runtime principal |
+
+## 4) Decisões travadas desta rodada
+1. Fonte canônica de documentação: `docs/master`.
+2. Contrato mestre de execução: `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`.
+3. Sem fake-success; capacidades parciais continuam explícitas.
+4. Limpeza estrutural entra antes de expansão de features.
+
+## 5) Backlog imediato (ordem de commit)
+1. Corrigir `package.json`, `tsconfig.json`, `.gitmodules` para eliminar referências inválidas.
+2. Remover `.venv` do versionamento e reforçar `.gitignore`.
+3. Consolidar documentação de entrada (`00_INDEX` + `00_FONTE_CANONICA`) e atualizar referências antigas.
+4. Planejar decomposição dos top 10 arquivos gigantes.
+5. Unificar superfícies duplicadas (Nexus/Notification/Dashboard).
+
+## 6) Critério de pronto
+1. Zero caminho inexistente em scripts/config críticos.
+2. Zero binário de ambiente local versionado (`.venv`, artefatos temporários).
+3. Índice canônico sem contradição de path/fonte.
+4. Top-offenders de tamanho com plano de decomposição e owner definido.
+
+## 7) Incremental closures (2026-02-27)
+1. Script path connectivity: fixed (`missing_script_paths=0`).
+2. `.venv` artifacts removed from versioned source.
+3. Legacy Nexus canvas logic replaced by compatibility wrapper to canonical `NexusCanvasV2` runtime.
+4. Added automated connectivity gate script: `tools/check-repo-connectivity.mjs` (`npm run qa:repo-connectivity`).
+5. Moved loose web root Markdown docs to `docs/archive/web-status/` (kept `cloud-web-app/web/README.md` only in web root).
+6. Nexus chat surface canonicalized to `components/nexus/NexusChatMultimodal.tsx` with compatibility wrapper in legacy import path.
+7. Started monolith decomposition in `AethelDashboard` by extracting state/types contract to `components/dashboard/aethel-dashboard-model.ts`.
+8. Continued monolith decomposition in `AethelDashboard` by extracting defaults/constants/format helpers to `components/dashboard/aethel-dashboard-defaults.ts`.
+9. Enforced root connectivity gate in both visual workflows (`ui-audit.yml`, `visual-regression-compare.yml`) to block path regressions before browser steps.
+10. Expanded connectivity scanner coverage for loose web-root markdown, tracked secret-like files, and required canonical-doc presence checks.
+11. Continued dashboard split by extracting session-history creation/filter/toggle helpers to `components/dashboard/aethel-dashboard-session-utils.ts`.
+
+## 8) Recalibration snapshot (2026-02-28)
+1. Repository markdown inventory:
+- `md_total=3658`
+- `docs/master/*.md=41`
+- `docs/archive/**/*.md=3503`
+ - legacy external-path references in canonical folder: `116` (requires staged cleanup)
+2. Structural gate:
+- `npm run qa:repo-connectivity` -> PASS
+3. Remaining structural pressure:
+- high historical markdown volume outside canonical docs,
+- monolithic hotspots still present (`cloud-web-app/web/components/AethelDashboardRuntime.tsx` > 3000 lines),
+- orphan-candidate top-level folders still requiring explicit keep/remove policy.
+
+## 9) Immediate closure actions (no scope change)
+1. Keep connectivity gate mandatory in all PR pipelines.
+2. Continue dashboard decomposition until no single UI shell file exceeds agreed threshold.
+3. Publish explicit policy for orphan-candidate directories (`ACTIVE` vs `ARCHIVE` vs `REMOVE`).
+
+## 10) Incremental closure 2026-02-28 (dashboard split)
+1. Dashboard decomposition advanced with:
+- `components/dashboard/aethel-dashboard-project-utils.ts`
+- `components/dashboard/aethel-dashboard-wallet-utils.ts`
+2. Project derivation and wallet metric logic were removed from inline dashboard shell and delegated to shared helpers.
+
+## 11) Alignment closure 2026-02-28 (cross-domain gaps)
+1. Added canonical cross-domain gap matrix:
+- `docs/master/24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
+2. Connectivity and product readiness remain coupled:
+- no market-grade claim without both structural integrity and domain validation evidence.
+3. Active baseline for all canonical status metrics is anchored in:
+- `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`.
+
+## 12) Alignment closure 2026-02-28 (doc coherence gate)
+1. Added executable canonical doc coherence gate:
+- `tools/check-canonical-doc-alignment.mjs`
+- `npm run qa:canonical-doc-alignment`
+2. CI now enforces this gate in `web-lint` before build/test stages.
+
+## 13) Incremental closure 2026-02-28 (dashboard live-preview AI split)
+1. Added:
+- `components/dashboard/aethel-dashboard-livepreview-ai-utils.ts`
+2. Reduced dashboard shell inline live-preview AI glue by delegating payload/prompt/content helper logic to shared module.
+
+## 14) Incremental closure 2026-02-28 (dashboard billing split)
+1. Added:
+- `components/dashboard/aethel-dashboard-billing-utils.ts`
+2. Reduced dashboard shell inline billing handlers by delegating:
+- purchase/transfer validation and parsing
+- currency normalization
+- action success message builders
+- purchase/transfer/subscribe error mappers
+
+## 15) Incremental closure 2026-02-28 (dashboard copilot split + gate coverage)
+1. Added:
+- `components/dashboard/aethel-dashboard-copilot-utils.ts`
+2. Reduced dashboard shell inline copilot glue by delegating:
+- chat-message normalization from API payloads
+- workflow list extraction
+- workflow title generation
+- reusable copilot context patch construction
+3. Expanded `qa:repo-connectivity` canonical-doc presence checks to include:
+- `00_FONTE_CANONICA`, `15`, `19`, `23`, `24`, `25`, `26`.
+
+## 16) Incremental closure 2026-02-28 (root command-surface alignment)
+1. Root `package.json` now exposes canonical gate commands as passthroughs to `cloud-web-app/web`:
+- `lint`, `typecheck`, `build`
+- `qa:interface-gate`, `qa:canonical-components`, `qa:route-contracts`, `qa:no-fake-success`, `qa:mojibake`, `qa:enterprise-gate`
+2. This removes root-level command ambiguity during freeze execution.
+
+## 17) Incremental closure 2026-02-28 (dashboard UI block extraction)
+1. Added:
+- `components/dashboard/TrialBanner.tsx`
+2. Removed trial-banner markup from monolithic shell and delegated to component.
+3. Current top offender size:
+- `components/AethelDashboardRuntime.tsx` -> `2995` lines (decomposition continues).
+
+## 18) Incremental closure 2026-02-28 (dashboard header extraction)
+1. Added:
+- `components/dashboard/DashboardHeader.tsx`
+2. Removed header markup from monolithic shell and delegated status/actions to dedicated component.
+3. Current top offender size:
+- `components/AethelDashboardRuntime.tsx` -> `2936` lines (decomposition continues).
+4. Verification snapshot:
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS
+- `qa:mojibake` -> PASS
+
+## 19) Incremental closure 2026-02-28 (dashboard sidebar extraction)
+1. Added:
+- `components/dashboard/AethelDashboardSidebar.tsx`
+2. Removed sidebar nav/filter/session UI block from monolithic shell and delegated to dedicated component.
+3. Current top offender size:
+- `components/AethelDashboardRuntime.tsx` -> `2744` lines (decomposition continues).
+4. Verification snapshot:
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS
+- `qa:mojibake` -> PASS
+
+## 20) Incremental closure 2026-02-28 (dashboard overview extraction)
+1. Added:
+- `components/dashboard/DashboardOverviewTab.tsx`
+2. Removed overview block (status cards + wallet/connectivity summary + preview wrapper) from monolithic shell and delegated to dedicated component.
+3. Current top offender size:
+- `components/AethelDashboardRuntime.tsx` -> `2595` lines (decomposition continues).
+4. Verification snapshot:
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS
+- `qa:mojibake` -> PASS
+
+## 21) Incremental closure 2026-02-28 (dashboard projects extraction)
+1. Added:
+- `components/dashboard/DashboardProjectsTab.tsx`
+2. Removed projects tab block from monolithic shell and delegated to dedicated component.
+3. Current top offender size:
+- `components/AethelDashboardRuntime.tsx` -> `2535` lines (decomposition continues).
+4. Verification snapshot:
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS
+- `qa:mojibake` -> PASS
+
+## 22) Incremental closure 2026-02-28 (dashboard workflow bar extraction)
+1. Added:
+- `components/dashboard/DashboardCopilotWorkflowBar.tsx`
+2. Removed AI-chat workflow control toolbar from monolithic shell and delegated to dedicated component.
+3. Current top offender size:
+- `components/AethelDashboardRuntime.tsx` -> `2469` lines (decomposition continues).
+4. Verification snapshot:
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS
+- `qa:mojibake` -> PASS
+
+## 23) Incremental closure 2026-02-28 (dashboard tab extraction wave)
+1. Added:
+- `components/dashboard/DashboardAIChatTab.tsx`
+- `components/dashboard/DashboardWalletTab.tsx`
+- `components/dashboard/DashboardConnectivityTab.tsx`
+- `components/dashboard/DashboardContentCreationTab.tsx`
+- `components/dashboard/DashboardUnrealTab.tsx`
+2. `components/AethelDashboardRuntime.tsx` now delegates:
+- full AI chat tab surface (modes + workflow controls + streaming panel)
+- full wallet tab surface (balance/receivables/forms/history)
+
+## 24) Incremental closure 2026-03-01 (dashboard monolith threshold)
+1. Added:
+- `components/dashboard/FirstValueGuide.tsx`
+2. `components/AethelDashboardRuntime.tsx` line count reduced to `1098` (below 1200-pressure threshold used in this matrix).
+3. Updated pressure snapshot (`cloud-web-app/web`, >=1200 lines):
+- total files still high (`55`), but top offender moved from dashboard shell to domain-heavy modules.
+- current top offender: `lib/translations.ts` (`1698` lines).
+4. Conclusion:
+- dashboard shell is no longer the largest structural hotspot;
+- next decomposition wave should prioritize large domain modules (`lib/*`, editor/media subsystems).
+- connectivity monitor tab
+- content-creation tab and unreal tab static surfaces
+3. Current top offender size:
+- `components/AethelDashboardRuntime.tsx` -> `2003` lines (decomposition continues).
+4. Local quality snapshot:
+- targeted lint for changed dashboard surfaces -> PASS
+- `qa:repo-connectivity` baseline remains PASS
+
+## 24) Recalibration snapshot 2026-02-28 (full repo sweep)
+1. Markdown/document inventory (tracked scope):
+- `md_total=3658`
+- `docs/master/*.md=41`
+- `docs/archive/**/*.md=3503`
+- `cloud-web-app/web/*.md=1`
+2. Large-file pressure (tracked TS/TSX in `cloud-web-app/web`):
+- `>=1200 lines = 55 files`
+- current top hotspot remains `components/AethelDashboardRuntime.tsx` at `2003` lines
+3. Remaining structural risks to close:
+- canonical docs still carry mixed historical narrative blocks that can confuse execution if read without baseline `26`
+- many large runtime modules (`lib/*`, `components/*`) still exceed maintainability threshold and need staged decomposition
+
+## 25) Incremental closure 2026-02-28 (asset upload contract coherence)
+1. Presign/upload contract mismatch was removed:
+- presign route emits `method: PUT` for direct upload path
+- uploader hooks now support both `PUT` and `POST+fields` compatibility
+2. Added explicit capability response when presign URL generation fails:
+- `STORAGE_UPLOAD_URL_UNAVAILABLE` (`503`)
+- `capability=asset_upload_presign`
+- `capabilityStatus=PARTIAL`
+
+## 26) Incremental closure 2026-03-01 (dashboard shell integrity gate)
+1. Added dedicated guard:
+- `cloud-web-app/web/scripts/check-dashboard-shell-integrity.mjs`
+- command: `npm run qa:dashboard-shell`
+2. Guard rules:
+- `components/AethelDashboardRuntime.tsx` must stay `<=1200` lines;
+- no direct `@xyflow/react` import in dashboard shell path.
+3. Gate wiring:
+- included in `cloud-web-app/web` `qa:enterprise-gate`;
+- mirrored in root scripts;
+- enforced pre-audit/pre-compare in CI workflows.
+4. Current state:
+- `AethelDashboardRuntime.tsx` at `1198` lines.
+
+## 27) Incremental closure 2026-03-01 (quota precision alignment)
+1. `cloud-web-app/web/lib/plan-limits.ts` daily request checks now use canonical day buckets (`window='day'`, UTC) instead of monthly-average approximation.
+2. `recordTokenUsage` now updates both `month` and `day` usage buckets in a single transaction.
+3. Usage APIs now expose daily request visibility:
+- `GET /api/usage/status` includes `requestsToday.used|limit|remaining`;
+- `GET /api/quotas` includes `resource='ai_requests_daily'`.
+
+## 28) Incremental closure 2026-03-01 (build env robustness)
+1. Hardened `next.config.js` IPC env sanitation to prevent invalid incremental-cache IPC config (`port/key='undefined'`) during build.
+2. Freeze chain was revalidated with full `qa:enterprise-gate` PASS after this fix.
+3. Added asset quality-scoring substrate to reduce opaque intake decisions:
+- `lib/server/asset-quality.ts`
+- upload and confirm responses now include quality report metadata
+4. Verification snapshot:
+- targeted lint (asset/presign/hooks scope) -> PASS
+- `qa:repo-connectivity` -> PASS
+- `qa:canonical-doc-alignment` -> PASS
+
+## 26) Incremental closure 2026-02-28 (asset admission policy enforcement)
+1. Added plan-aware quality gate for asset intake:
+- `lib/server/asset-intake-policy.ts`
+2. Upload flow now blocks low-quality assets with explicit response contract:
+- `422 ASSET_QUALITY_GATE_FAILED`
+- includes `quality` + `intakePolicy` payload for actionable remediation.
+3. Confirm flow now returns policy context for observability:
+- `intakePolicy` and `quality` included in confirmation payload.
+4. Verification snapshot:
+- targeted lint (asset policy + upload + confirm) -> PASS
+
+## 27) Incremental closure 2026-02-28 (asset provenance governance closure)
+1. Added source/license policy gate:
+- `lib/server/asset-source-policy.ts`
+2. Enforced provenance checks in both ingestion entry points:
+- `app/api/assets/upload/route.ts`
+- `app/api/assets/presign/route.ts`
+3. Confirm stage now writes final readiness metadata and status transition:
+- `app/api/assets/[id]/confirm/route.ts` persists `status=ready` + policy/quality snapshot.
+4. Client hooks aligned with provenance contract:
+- `hooks/useProjectAssets.ts`
+- `hooks/useSecureUpload.ts`
+5. Verification snapshot:
+- targeted lint (assets governance scope) -> PASS
+
+## 28) Incremental closure 2026-02-28 (asset capability envelope unification)
+1. Asset policy/storage failures now use shared capability response shape in both upload and presign routes.
+2. Gate semantics are explicit and machine-readable for operators and clients:
+- `asset_source_policy_gate`
+- `asset_intake_quality_gate`
+- `asset_upload_presign`
+3. Verification snapshot:
+- `qa:no-fake-success` -> PASS
+- `qa:route-contracts` -> PASS
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS
+
+## 29) Incremental closure 2026-02-28 (multi-agent stream hardening)
+1. Hardened `app/api/agents/stream/route.ts` with:
+- auth + entitlement enforcement,
+- plan-aware role filtering and max-agent limits,
+- capability envelope for plan-gated orchestration,
+- metering + concurrency lease before SSE stream.
+2. Reworked `lib/agent-orchestrator.ts` to remove sequential settling behavior:
+- real interleaved parallel streaming,
+- explicit task cancellation state,
+- non-inflated role guidance (no unsupported claims).
+3. Updated `components/nexus/MultiAgentOrchestrator.tsx` UX:
+- stream error banner with gate transparency,
+- stop-stream control,
+- message merge per role to reduce noisy chunk spam.
+
+## 30) Incremental closure 2026-03-01 (global gap scanner)
+1. Added repository-wide factual scanner:
+- `tools/run-global-gap-scan.mjs`
+- command: `npm run qa:global-gap-scan`
+- output: `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`
+2. Snapshot from current wave:
+- markdown inventory: `md_total=3658`, `docs/master=52`, `outside_canonical=3606`
+- code pressure: `large_files_ge_1200=26`
+- blocking dialogs in active surfaces: `0` (deprecated residual: `4`)
+- explicit API gates with `NOT_IMPLEMENTED`: `18`
+- active canonical docs missing in read-order: `0` (closed in current wave)
+3. Decision:
+- treat this scanner output as freeze input for P0 sequencing (`P0-U..P0-X`) until counts trend down.
+
+

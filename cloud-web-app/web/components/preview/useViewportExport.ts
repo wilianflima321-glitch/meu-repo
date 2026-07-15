@@ -1,0 +1,225 @@
+'use client';
+
+import { useCallback, useState } from 'react';
+import type { VFXGraph } from '@/components/editors/VFXGraphEditor';
+import type {
+  ViewportCreativeMode,
+  ViewportSceneObject,
+} from '@/components/viewport/AethelViewport3D';
+import { useViewportRenderJobPersistence } from '@/hooks/useViewportRenderJobPersistence';
+import {
+  buildViewportRenderJobContract,
+  type ViewportRenderQuality,
+  type ViewportRenderSurfaceMode,
+} from '@/lib/viewport/viewport-render-contract';
+import { buildExportPipelinePlan } from '@aethel/export/export-pipeline-spine';
+import type { AssetQualityLedger } from '@/lib/product/workspace-blueprint';
+
+type UseViewportExportParams = {
+  activeWorkflowLabel: string;
+  creativeMode: ViewportCreativeMode;
+  facialBlendShapeCount: number;
+  facialExpressionIntensity: number;
+  hairHighlightColor: string | null;
+  hairPresetLabel: string;
+  hairVolumeIntensity: number;
+  isPlaying: boolean;
+  objects: ViewportSceneObject[];
+  selectedAbilityName: string | null;
+  selectedObject: {
+    id: string;
+    name: string;
+  } | null;
+  timelineDuration: number;
+  timelineTime: number;
+  vfxGraph: VFXGraph | null;
+  visualScriptEdgeCount: number;
+  visualScriptNodeCount: number;
+  projectId?: string | null;
+  renderMode: ViewportRenderSurfaceMode;
+};
+
+function downloadViewportManifest(payload: unknown, mode: ViewportCreativeMode) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `aethel-${mode}-viewport-render-contract.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+const ASSET_EXPORT_REQUIRED_EVIDENCE: AssetQualityLedger['requiredEvidence'] = [
+  'provenance',
+  'license',
+  'lods',
+  'pbr-maps',
+  'rig-or-skeleton',
+  'collision',
+  'navmesh',
+  'performance-trace',
+  'playtest',
+  'human-approval',
+];
+
+export function useViewportExport({
+  activeWorkflowLabel,
+  creativeMode,
+  facialBlendShapeCount,
+  facialExpressionIntensity,
+  hairHighlightColor,
+  hairPresetLabel,
+  hairVolumeIntensity,
+  isPlaying,
+  objects,
+  selectedAbilityName,
+  selectedObject,
+  timelineDuration,
+  timelineTime,
+  vfxGraph,
+  visualScriptEdgeCount,
+  visualScriptNodeCount,
+  projectId,
+  renderMode,
+}: UseViewportExportParams) {
+  const [exportStatus, setExportStatus] = useState('Viewport ready');
+  const [renderQuality, setRenderQuality] = useState<ViewportRenderQuality>('draft');
+  const renderPersistence = useViewportRenderJobPersistence(projectId);
+
+  const handleExportViewport = useCallback(async () => {
+    const assetFormats = objects.reduce<string[]>((formats, object) => {
+      if (object.asset) formats.push(object.asset.format);
+      return formats;
+    }, []);
+    const assetCount = objects.filter((object) => object.asset).length;
+    const contract = buildViewportRenderJobContract({
+      projectId,
+      mode: creativeMode,
+      renderMode,
+      quality: renderQuality,
+      selectedObjectId: selectedObject?.id ?? null,
+      selectedObjectName: selectedObject?.name ?? null,
+      timeline: {
+        currentTime: timelineTime,
+        duration: timelineDuration,
+        isPlaying,
+      },
+      scene: {
+        objectCount: objects.length,
+        assetCount,
+        selectedObjectId: selectedObject?.id ?? null,
+        selectedObjectName: selectedObject?.name ?? null,
+        assetFormats,
+        visualScriptNodes: visualScriptNodeCount,
+        visualScriptEdges: visualScriptEdgeCount,
+        vfxNodes: vfxGraph?.nodes.length ?? 0,
+        vfxConnections: vfxGraph?.connections.length ?? 0,
+      },
+    });
+    const assetQualityLedger: AssetQualityLedger = {
+      state: assetCount > 0 ? 'needs-review' : 'held',
+      requiredEvidence: ASSET_EXPORT_REQUIRED_EVIDENCE,
+      releaseHoldReason:
+        assetCount > 0
+          ? 'Assets need provenance, license, quality, performance, playtest, and human approval evidence before final export.'
+          : 'No asset quality ledger is attached to this viewport export.',
+    };
+    const exportPipeline = buildExportPipelinePlan({
+      format: renderQuality === 'draft' ? 'zip' : 'mp4',
+      durationSeconds: timelineDuration,
+      estimatedBytes: assetCount * 80_000_000 + Math.ceil(timelineDuration) * 2_000_000,
+      requiresGpu: renderQuality !== 'draft' || renderMode === 'cinematic',
+      runtimeLane: renderQuality === 'draft' ? 'browser-preview' : 'cloud-render',
+      studioLocalAvailable: false,
+      cloudRenderAvailable: false,
+      assetQualityLedger,
+      humanApproved: false,
+      evidenceRefs: [
+        ...contract.evidenceRefs,
+        'rollback-plan:viewport-export-contract',
+        'runtime-capability:browser-preview',
+      ],
+    });
+    const payload = {
+      mode: creativeMode,
+      exportedAt: new Date().toISOString(),
+      renderContract: contract,
+      exportPipeline,
+      assetQualityLedger,
+      selectedObjectId: selectedObject?.id ?? null,
+      selectedObjectName: selectedObject?.name ?? null,
+      timeline: {
+        currentTime: timelineTime,
+        duration: timelineDuration,
+        isPlaying,
+      },
+      workflow: {
+        active: activeWorkflowLabel,
+        visualScriptNodes: visualScriptNodeCount,
+        visualScriptEdges: visualScriptEdgeCount,
+        vfxNodes: vfxGraph?.nodes.length ?? 0,
+        vfxConnections: vfxGraph?.connections.length ?? 0,
+        selectedAbility: selectedAbilityName,
+      },
+      character: {
+        facialBlendShapeCount,
+        facialExpressionIntensity,
+        hairPresetLabel,
+        hairHighlightColor,
+        hairVolumeIntensity,
+      },
+      objects,
+    };
+
+    setExportStatus(
+      exportPipeline.state === 'available'
+        ? `${contract.profile.label} contract staged`
+        : `${contract.profile.label} held for evidence`,
+    );
+    const result = await renderPersistence.persistContract(contract, { enqueue: exportPipeline.state === 'available' });
+    downloadViewportManifest(payload, creativeMode);
+
+    if (result.ok) {
+      if (exportPipeline.state !== 'available') {
+        setExportStatus(`${contract.profile.label} saved - export held for evidence`);
+        return;
+      }
+      if (result.queued) {
+        setExportStatus(`${contract.profile.label} queued - evidence required`);
+        return;
+      }
+      setExportStatus(`${contract.profile.label} saved - ${result.message ?? 'queue not started'}`);
+      return;
+    }
+
+    setExportStatus(`${contract.profile.label} downloaded locally - ${result.error}`);
+  }, [
+    activeWorkflowLabel,
+    creativeMode,
+    facialBlendShapeCount,
+    facialExpressionIntensity,
+    hairHighlightColor,
+    hairPresetLabel,
+    hairVolumeIntensity,
+    isPlaying,
+    objects,
+    projectId,
+    renderMode,
+    renderPersistence,
+    renderQuality,
+    selectedAbilityName,
+    selectedObject,
+    timelineDuration,
+    timelineTime,
+    vfxGraph,
+    visualScriptEdgeCount,
+    visualScriptNodeCount,
+  ]);
+
+  return {
+    exportStatus,
+    renderQuality,
+    setRenderQuality,
+    handleExportViewport,
+  };
+}

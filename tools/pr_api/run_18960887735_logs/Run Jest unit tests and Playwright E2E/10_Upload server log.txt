@@ -1,0 +1,20 @@
+﻿2025-10-31T02:33:45.2311547Z ##[group]Run actions/upload-artifact@v4
+2025-10-31T02:33:45.2311824Z with:
+2025-10-31T02:33:45.2311991Z   name: server-log
+2025-10-31T02:33:45.2312194Z   path: tools/llm-mock/server.log
+2025-10-31T02:33:45.2312424Z   if-no-files-found: warn
+2025-10-31T02:33:45.2312634Z   compression-level: 6
+2025-10-31T02:33:45.2312826Z   overwrite: false
+2025-10-31T02:33:45.2313018Z   include-hidden-files: false
+2025-10-31T02:33:45.2313227Z ##[endgroup]
+2025-10-31T02:33:45.4567894Z With the provided path, there will be 1 file uploaded
+2025-10-31T02:33:45.4573531Z Artifact name is valid!
+2025-10-31T02:33:45.4575177Z Root directory input is valid!
+2025-10-31T02:33:45.6665146Z Beginning upload of artifact content to blob storage
+2025-10-31T02:33:45.8717719Z Uploaded bytes 247
+2025-10-31T02:33:45.9238339Z Finished uploading artifact content to blob storage!
+2025-10-31T02:33:45.9242323Z SHA256 digest of uploaded artifact zip is d393a51ed3a9ca80032d212ce1e5a33ab9769685d973612a384032c00be390c9
+2025-10-31T02:33:45.9244218Z Finalizing artifact upload
+2025-10-31T02:33:46.0490961Z Artifact server-log.zip successfully finalized. Artifact ID 4425297064
+2025-10-31T02:33:46.0492213Z Artifact server-log has been successfully uploaded! Final size is 247 bytes. Artifact ID is 4425297064
+2025-10-31T02:33:46.0501432Z Artifact download URL: https://github.com/wilianflima321-glitch/meu-repo/actions/runs/18960887735/artifacts/4425297064

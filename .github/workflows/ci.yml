@@ -1,0 +1,343 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      run_e2e:
+        description: 'Run the full Playwright matrix job (set to "true" to run)'
+        required: false
+        default: 'false'
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ==========================================================================
+  # WEB APP - LINT & TYPE CHECK
+  # ==========================================================================
+  web-lint:
+    name: Web App - Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Repo connectivity gate
+        run: npm run qa:repo-connectivity
+
+      - name: Canonical doc alignment gate
+        run: npm run qa:canonical-doc-alignment
+      
+      - name: QA gate - button types
+        run: npm run qa:button-types
+
+      - name: QA gate - hardcoded colors
+        run: npm run qa:hardcoded-colors
+
+      - name: Install dependencies
+        working-directory: cloud-web-app/web
+        run: npm ci
+
+      - name: Enterprise gate
+        working-directory: cloud-web-app/web
+        run: npm run qa:enterprise-gate
+
+      - name: Security audit
+        working-directory: cloud-web-app/web
+        run: npm audit --audit-level=high || echo "::warning::Security vulnerabilities found"
+
+  # ==========================================================================
+  # WEB APP - BUILD
+  # ==========================================================================
+  web-build:
+    name: Web App - Build
+    runs-on: ubuntu-latest
+    needs: web-lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: cloud-web-app/web
+        run: npm ci
+
+      - name: Build
+        working-directory: cloud-web-app/web
+        run: npm run build
+        env:
+          SKIP_ENV_VALIDATION: true
+          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          NEXTAUTH_SECRET: mock-secret-for-build
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: cloud-web-app/web/.next
+          retention-days: 7
+
+  web-merge-pressure-e2e:
+    name: Web App - Merge Pressure E2E
+    runs-on: ubuntu-latest
+    needs: web-lint
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install web dependencies
+        working-directory: cloud-web-app/web
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start portal
+        env:
+          SKIP_ENV_VALIDATION: true
+          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          NEXTAUTH_SECRET: mock-secret-for-build
+          NEXTAUTH_URL: http://localhost:3000
+        run: |
+          nohup npm run portal:dev > portal-dev.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:3000 >/dev/null 2>&1; then
+              echo "Portal is online"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "--- portal-dev.log (tail) ---"
+          tail -n 120 portal-dev.log || true
+          exit 1
+
+      - name: Run merge-pressure E2E
+        env:
+          BASE_URL: http://localhost:3000
+        run: npm run test:e2e:merge
+
+      - name: Upload merge-pressure artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-merge-pressure-e2e
+          path: |
+            portal-dev.log
+            playwright-report
+            test-results
+
+  # ==========================================================================
+  # DOCKER BUILD & PUSH
+  # ==========================================================================
+  docker-build:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: [web-build, web-merge-pressure-e2e]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/aethel-web
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./cloud-web-app/web
+          file: ./cloud-web-app/web/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ==========================================================================
+  # IDE - WINDOWS CHECK
+  # ==========================================================================
+  windows-check:
+    name: Windows checks (syntax, tsc, ai-ide tests)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        node: ['20']
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            ~/.cache
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Repo syntax check (PowerShell)
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File build/check_syntax.ps1
+
+      - name: TypeScript check (ai-ide package)
+        # If the theia fork tree isn't present in this repo (it often isn't in
+        # lightweight forks), skip the ai-ide tsc step instead of failing the
+        # whole job. This keeps CI green for other checks while preserving the
+        # intended tsc invocation when the tree is present.
+        shell: bash
+        run: |
+          if [ -f "cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json" ]; then
+            (cd cloud-ide-desktop/aethel_theia_fork && npx -y tsc --noEmit -p packages/ai-ide/tsconfig.json)
+          else
+            echo "::warning::ai-ide tsconfig not present in repo; skipping ai-ide TypeScript check"
+          fi
+
+      - name: Run ai-ide unit tests
+        shell: pwsh
+        run: |
+          if (Test-Path "cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/run-mocha.js") {
+            Push-Location cloud-ide-desktop/aethel_theia_fork/packages/ai-ide
+            node ./test/run-mocha.js
+            Pop-Location
+          } else {
+            Write-Host "::warning::ai-ide tests not present in repo; skipping ai-ide unit tests"
+          }
+
+      - name: Upload windows logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-logs
+          path: |
+            cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/*.log
+
+  e2e:
+    name: Playwright E2E (full matrix, manual)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['20']
+    needs: windows-check
+    if: ${{ github.event.inputs.run_e2e == 'true' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
+        run: npm run playwright:install
+
+      - name: Start dev mock backend + proxy shim
+        run: |
+          # Start the dev mock backend on port 8011 and capture logs
+          nohup env PORT=8011 node tools/dev-mock-backend/server.js > dev-mock.log 2>&1 &
+          # Start the proxy shim on port 8010 which forwards to the mock backend
+          nohup env LISTEN_PORT=8010 TARGET_PORT=8011 node tools/ci/proxy-shim.js > proxy-shim.log 2>&1 &
+
+      - name: Wait for backend (health check)
+        run: |
+          chmod +x tools/ci/dev-mock-health.sh || true
+          tools/ci/dev-mock-health.sh
+
+      - name: Run Playwright tests (with retries and traces on first retry)
+        env:
+          # ensure Playwright stores browsers in cache path
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
+        run: |
+          # run with 1 retry to reduce flakes; on first retry Playwright will collect trace
+          npx playwright test --config=playwright.config.ts --retries=1
+
+      - name: Upload Playwright traces (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: $(pwd)/playwright-report
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+
+      - name: Upload dev mock logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-mock-log
+          path: |
+            dev-mock.log
+            proxy-shim.log
+

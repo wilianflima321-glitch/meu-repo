@@ -1,0 +1,7 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Aethel mark</title>
+  <desc id="desc">A monochrome AE ligature mark for the Aethel governed Creator IDE.</desc>
+  <rect x="8" y="8" width="240" height="240" rx="44" fill="#0A0A0A"/>
+  <rect x="8.75" y="8.75" width="238.5" height="238.5" rx="43.25" stroke="#A1A1AA" stroke-opacity="0.34" stroke-width="1.5"/>
+  <text x="128" y="173" text-anchor="middle" fill="#FAFAFA" font-family="Inter, Geist, Arial Black, Arial, sans-serif" font-size="150" font-weight="900" letter-spacing="-19">&#198;</text>
+</svg>

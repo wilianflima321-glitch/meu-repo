@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Aethel Studio Local",
+  "version": "0.1.0",
+  "identifier": "dev.aethel.studio.local",
+  "build": {
+    "beforeDevCommand": "npm run vite:dev",
+    "beforeBuildCommand": "npm run vite:build",
+    "devUrl": "http://127.0.0.1:1420",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Aethel Studio Local",
+        "width": 1440,
+        "height": 960,
+        "minWidth": 960,
+        "minHeight": 640,
+        "decorations": false,
+        "transparent": true,
+        "fullscreen": false,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": {
+        "default-src": "'self' customprotocol: asset:",
+        "connect-src": "ipc: http://ipc.localhost http://127.0.0.1:* ws://127.0.0.1:* https://aethel.dev https://*.aethel.dev wss://*.aethel.dev",
+        "font-src": "'self' asset: data:",
+        "img-src": "'self' asset: http://asset.localhost blob: data: https:",
+        "style-src": "'self' 'unsafe-inline'",
+        "script-src": "'self' 'wasm-unsafe-eval'",
+        "worker-src": "'self' blob:"
+      },
+      "devCsp": {
+        "default-src": "'self' http://127.0.0.1:1420",
+        "connect-src": "ipc: http://ipc.localhost http://127.0.0.1:1420 ws://127.0.0.1:1420 http://127.0.0.1:* ws://127.0.0.1:*",
+        "font-src": "'self' data: http://127.0.0.1:1420",
+        "img-src": "'self' blob: data: http://127.0.0.1:1420",
+        "style-src": "'self' 'unsafe-inline' http://127.0.0.1:1420",
+        "script-src": "'self' 'unsafe-inline' 'unsafe-eval' http://127.0.0.1:1420",
+        "worker-src": "'self' blob:"
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "DeveloperTool",
+    "shortDescription": "Native runtime shell for Aethel Studio",
+    "longDescription": "Aethel Studio Local provides native runtime probes, job lanes, and local/cloud execution routing for large AI, game, film, app, and browser-operator work."
+  }
+}

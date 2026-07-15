@@ -1,0 +1,148 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aethel-runtime
+  namespace: aethel-engine
+  labels:
+    app.kubernetes.io/name: aethel-runtime
+    app.kubernetes.io/component: runtime
+    app.kubernetes.io/part-of: aethel-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aethel-runtime
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: aethel-runtime
+        app.kubernetes.io/component: runtime
+    spec:
+      serviceAccountName: aethel-runtime
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: runtime
+          image: ghcr.io/aethel-engine/runtime:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3001
+              protocol: TCP
+            - name: websocket
+              containerPort: 3002
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: aethel-config
+            - secretRef:
+                name: aethel-secrets
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: RUNTIME_MODE
+              value: "server"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2000m"
+              memory: "4Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - SYS_PTRACE  # Required for debugging
+          volumeMounts:
+            - name: workspaces
+              mountPath: /workspaces
+            - name: tmp
+              mountPath: /tmp
+            - name: lsp-cache
+              mountPath: /home/node/.cache
+      volumes:
+        - name: workspaces
+          persistentVolumeClaim:
+            claimName: aethel-workspaces
+        - name: tmp
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: lsp-cache
+          emptyDir:
+            sizeLimit: 2Gi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: aethel-runtime
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aethel-runtime
+  namespace: aethel-engine
+  labels:
+    app.kubernetes.io/name: aethel-runtime
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: aethel-runtime-pdb
+  namespace: aethel-engine
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aethel-runtime
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: aethel-workspaces
+  namespace: aethel-engine
+  labels:
+    app.kubernetes.io/name: aethel-runtime
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: fast-ssd  # Adjust based on cloud provider
+  resources:
+    requests:
+      storage: 100Gi

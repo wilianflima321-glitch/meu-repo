@@ -1,0 +1,11 @@
+﻿2025-10-31T02:01:27.5680071Z ##[group]Run # Run Jest only if the mock package has a package.json and tests configured
+2025-10-31T02:01:27.5680803Z [36;1m# Run Jest only if the mock package has a package.json and tests configured[0m
+2025-10-31T02:01:27.5681323Z [36;1mif [ -f tools/llm-mock/package.json ]; then[0m
+2025-10-31T02:01:27.5681881Z [36;1m  echo "Found tools/llm-mock/package.json — running npm test in that directory"[0m
+2025-10-31T02:01:27.5682461Z [36;1m  (cd tools/llm-mock && npm test --silent)[0m
+2025-10-31T02:01:27.5682797Z [36;1melse[0m
+2025-10-31T02:01:27.5683158Z [36;1m  echo "No package.json in tools/llm-mock — skipping Jest unit tests"[0m
+2025-10-31T02:01:27.5683583Z [36;1mfi[0m
+2025-10-31T02:01:27.5719089Z shell: /usr/bin/bash -e {0}
+2025-10-31T02:01:27.5793601Z ##[endgroup]
+2025-10-31T02:01:27.5865373Z No package.json in tools/llm-mock — skipping Jest unit tests

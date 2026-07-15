@@ -1,0 +1,255 @@
+# Alinhamento Profundo: Execução Técnica de UX e Monetização
+
+> [!CAUTION]
+> **SUPERSEDED (2026-07-11) — DO NOT EXECUTE FROM THIS FILE**  
+> Prices/UX billing: `AETHEL_PLANS_CANONICAL_REFERENCE.md` + `AETHEL_PAYG_AND_WALLET_SPEC.md` + Commerce/Hub specs.  
+> Task queue: Master Map Block 6. Nav: Studio Index § Document Authority.
+
+Este documento foi promovido de um "esboço de negócios" para **Diretrizes Estritas de Engenharia**. A Aethel não usa *mocks* nem simulações. A monetização será nativa, invisível ao usuário final, porém imutável no backend. Claude, execute os pilares abaixo exatamente nos arquivos especificados.
+
+## 1. O Marketplace Nativo (Fricção Zero)
+* **O Que Fazer:** Destruir a experiência de loja web. O Marketplace é uma aba da IDE com Drag-and-Drop nativo.
+* **Como Fazer:** O `FileExplorerPro` terá uma integração direta com o Asset Pipeline da engine. O Asset Streaming exibirá modelos 3D Proxy na Viewport antes da compra. Quando o usuário clica em comprar, o evento aciona a API real do Stripe via webhook seguro. Apenas após a confirmação (Clearance), a chave de decriptação da malha de Alta Resolução é enviada para a máquina do usuário via WebSocket.
+* **Onde Fazer:**
+  * **Frontend (IDE):** Modificar `web/components/ide/FileExplorerPro.tsx` e injetar a aba `MarketplaceBrowser`.
+  * **Backend (Stripe):** Modificar `web/lib/marketplace/payouts.ts`. **Apague a simulação `getCreatorEarningsSummary`**. Você escreverá uma query do Prisma conectada à tabela `Transaction` validando o webhook `payment_intent.succeeded` do Stripe Connect.
+  * **⚠️ NOTA TÉCNICA (verificado 2026-07-03):** o model `Transaction` **não existe** em `web/prisma/schema.prisma`. Os models existentes mais próximos são `Payment` e `CreditLedgerEntry`. Antes de escrever a query acima, decidir explicitamente: (a) criar um novo model `Transaction` via migration, com campos de status (`pending`/`cleared`/`failed`/`disputed`) para suportar o escrow de 14 dias da Seção 7.1, ou (b) estender `Payment`/`CreditLedgerEntry`. Este documento assume (a) implicitamente em várias seções (7.1, 7.4, 13.4) — se a decisão for (b), essas seções precisam ser reescritas para citar o model correto.
+  * **⚠️ NOTA TÉCNICA ADICIONAL:** a função `calculateRevenueSplit()` no mesmo arquivo `payouts.ts` hoje calcula um split **70/30** (`creatorShare = 0.70`), não o **88/12** definido como padrão-ouro na Seção 14.4 deste documento. A correção do mock (apagar a simulação) e a correção da taxa são a mesma tarefa de código — não tratar como dois PRs separados, ou o segundo pode ser esquecido. Há ainda um **segundo componente financeiro fake não catalogado**: `cloud-web-app/packages/engine/services/RedisLedgerClient.ts` — nome sugere Redis real, mas usa contador em memória e tem a escrita no Postgres comentada (`// await prisma.user.update(...)`). Corrigir junto.
+
+## 2. IA Compute Pass (A Bateria de Computação)
+* **O Que Fazer:** Substituir o Paywall cego por um HUD dinâmico ("Compute Battery") atrelado ao consumo real de GPU e API de LLMs.
+* **Como Fazer:** O backend Redis (Upstash) controlará a quota por tokens (LLM) e VRAM-hours (Malhas 3D). Na interface, um medidor circular exibirá a carga da bateria. O uso do *Agent-LSP* consome micro-créditos silenciosamente. Quando o usuário zerar a bateria, um modal da Stripe flutua para a recarga sem fechar a cena 3D atual. 
+* **Onde Fazer:**
+  * **Backend (Cost Guard):** Modificar `web/lib/observability/cost-guard.ts` integrando a API oficial `@upstash/redis` (Obrigatório: sem fallbacks em memória RAM).
+  * **UI:** Injetar o componente `ComputeBatteryHUD` no header do `web/components/ide/ModernIDEShell.tsx`.
+
+## 3. Segurança Enterprise e Rollback de Projetos
+* **O Que Fazer:** O atrativo principal para estúdios (B2B SaaS) não são assets grátis, é segurança e controle de dados.
+* **Como Fazer:** Implementar o *Workspace Switcher*. O plano Enterprise habilita a "Auditoria de Segurança AST" que varre o projeto inteiro buscando chaves vazadas de AWS/Stripe e código vulnerável. Além disso, os *Saves* do YJS CRDT serão ancorados ao banco Postgres periodicamente (Snapshots).
+* **Onde Fazer:**
+  * **Backend:** Modificar `web/lib/persistence/world-repository.ts` para criar branches imutáveis de cada snapshot.
+  * **Agent Security:** Criar `web/lib/security/ast-vulnerability-scanner.ts` rodando via Background Job Worker na arquitetura do monorepo.
+
+## 4. O Robô Juiz de Performance (Aethel Certified Badge)
+* **O Que Fazer:** O Marketplace será livre de "lixo poligonal". Nenhum modelo ou script subirá sem ser auditado fisicamente pela Engine.
+* **Como Fazer:** Quando o criador tentar publicar um Asset, o `AssetPublisherService` criará uma instância Headless (Sem UI) da WebGPU Engine no servidor ou no desktop. A engine spawnará o asset e fará um profiling automático: Contagem de triângulos, VRAM alocada, Cache Misses do ECS e número de Texturas 4K desenfreadas. O asset só vai para a loja se passar no *Frame Budget* estrito de 16ms (60 FPS).
+* **Onde Fazer:**
+  * Modificar `web/lib/runtime/frame-budget.ts` e exportá-lo para rodar no `Headless Validator`.
+  * Modificar a rota `web/app/api/marketplace/publish` para engatilhar o teste e barrar requisições inválidas de forma irreversível.
+
+## 5. A Plataforma de Publicação (A Máquina de Bilhões)
+* **O Problema Crítico:** Nós estávamos cobrando apenas pelo uso da ferramenta (SaaS) e por venda de texturas. Mas a verdadeira escalabilidade (nível Epic Games/Roblox) vem do **sucesso dos jogos dos nossos usuários**.
+* **O Que Fazer:** Aethel não é só um editor; é uma plataforma de hospedagem e distribuição (O verdadeiro nível Roblox/Epic). Você implementará o botão **"1-Click Publish"**.
+* **Como Fazer:** Quando o criador apertar Publicar, a engine fará o build WASM e fará o deploy automático numa URL hospedada por nós (`aethel.gg/jogo-do-usuario`). Além disso, você programará o nó nativo de **"In-App Purchase" (IAP)** no Visual Scripting. O desenvolvedor arrasta o nó "Vender Item Mágico por $5". A Aethel Engine processa o pagamento do jogador final via Stripe, fica com 12% (Take Rate de Sucesso), e repassa o resto ao criador. Se um usuário criar o próximo "Minecraft" na Aethel, nós lucramos com ele para sempre.
+* **Onde Fazer:**
+  * Modificar `web/packages/visual-scripting/nodes/MonetizationNodes.ts` (Criar sistema nativo de transação no ECS).
+  * Criar rota `web/app/api/platform/publish` integrando provisionamento de subdomínio e hospedagem serverless dos jogos.
+
+## 6. Auditoria Financeira Interna e Minimização de Custos (Arquitetura Anti-Falência)
+Após analisar os arquivos reais do repositório (`payouts.ts`, `cost-guard.ts`), identifiquei **limitações severas e mocks** que, se enviados para produção, causariam a falência da plataforma ou problemas judiciais com pagamentos. A infraestrutura interna será blindada para minimizar custos de servidor e entregar qualidade máxima.
+
+* **O Problema Crítico 1 (Mocks de Pagamento):** O arquivo atual `web/lib/marketplace/payouts.ts` gera "Vendas Simuladas" via loops locais.
+  * **O Que Fazer:** Destruir os mocks de `SaleTransaction`.
+  * **Como Fazer:** O fluxo de repasse usará o *Stripe Connect API* real (rotas de *Separate Charges and Transfers*). A engine processa o pagamento do comprador, retém 12%, e dispara a API `stripe.transfers.create` repassando o fundo para o criador. A query lerá a tabela `Transaction` do Prisma, não variáveis falsas.
+
+* **O Problema Crítico 2 (Vazamento de Memória no Cost-Guard):** O arquivo `web/lib/observability/cost-guard.ts` limita os gastos da IA usando um `new Map()` em memória. Em arquitetura Serverless (Vercel), esse Map reinicia a todo momento e vaza memória, permitindo que usuários ultrapassem o limite de API e gerem custos infinitos.
+  * **O Que Fazer:** Substituir o estado em memória por Redis Distribuído.
+  * **Como Fazer:** Usar a biblioteca `@upstash/redis` (Obrigatório). O `CostGuard` usará a estrutura *Token Bucket* atômica no Redis. Se a chamada ao LLM for custar $0.05, ele deduz isso atomicamente via Lua Script no Redis antes de aprovar. 
+  * **⚠️ NOTA TÉCNICA (verificado 2026-07-03):** `@upstash/redis@^1.34.3` **já está instalado** em `web/package.json` — não é preciso adicionar a biblioteca, só usá-la. Também já existe `web/lib/redis-cache.ts`, uma classe `RedisCache` madura (ioredis lazy-load + fallback em memória + decorator `createCachedDecorator`) que está sentada sem uso enquanto `cost-guard.ts` reimplementa tudo do zero com `Map()`. Isso reduz o esforço real desta tarefa de "construir infraestrutura Redis" para "conectar dois arquivos já escritos" — reclassificar prioridade para cima (alto impacto, baixo custo).
+
+* **O Problema Crítico 3 (Falência por Egress Fees de Cloud):** Hospedar Nuvens de Pontos e arquivos `.fbx` de 500MB na Amazon AWS S3 vai destruir nossas margens (A AWS cobra absurdos por Egress/Bandwidth).
+  * **O Que Fazer:** Tolerância zero para taxas de Egress.
+  * **Como Fazer:** Todo o sistema de *Asset Streaming* e hospedagem dos jogos (*1-Click Publish*) será ancorado no **Cloudflare R2** (Zero Egress Fees). Entregaremos o 3D pelo mundo inteiro via CDN da Cloudflare sem pagar um único centavo de taxa de download, minimizando o custo para quase $0.
+
+* **O Problema Crítico 4 (Custos de Inferência IA):** Usar IAs de ponta para tudo (ex: preencher um simples `switch/case` no código) drenará a "Bateria de Computação" rápido demais.
+  * **O Que Fazer:** Roteamento Híbrido de Modelos (Quality vs Cost).
+  * **Como Fazer:** O nosso *Agent-LSP* (que sugere código a cada tecla) rodará **Localmente** via WASM (WebLLM com Llama 3 8B) ou via *Groq API* (inferência LPU ultra barata e rápida). Custo virtualmente zero. A API pesada, cara e de alta qualidade (ex: Claude 3.5 Sonnet) só será chamada no Orquestrador quando o usuário solicitar mudanças arquitetônicas gigantes ("Crie o sistema de inventário"). 
+
+## 7. O Fundo do Poço Financeiro: Fraude, Impostos e Escala
+Ir mais a fundo significa prever os gargalos legais e financeiros que destroem plataformas depois que elas ganham tração. Como "Plataforma de Publicação" (Merchant of Record), a Aethel lidará com jogadores reais gastando dinheiro real. As seguintes execuções são obrigatórias para evitar o colapso estrutural:
+
+### 7.1. Escudo de Fraude e Escrow (O Problema do Chargeback)
+* **O Perigo:** Um usuário cria um jogo na Aethel, um jogador compra uma espada de $100 com cartão clonado, a Aethel repassa $88 para o criador. O verdadeiro dono do cartão dá *Chargeback*. O Stripe retira $100 da conta da Aethel + $15 de multa. A Aethel assume o prejuízo. Hackers usariam isso para lavar dinheiro e falir a engine.
+* **A Execução Estrita:** A rota de IAP (`web/lib/marketplace/payouts.ts`) implementará um **Escrow Period (Período de Retenção) de 14 dias**. Quando um jogador compra um item no jogo, os fundos ficam travados (Pending) no Stripe Connect. O criador vê o dinheiro no Dashboard ("Saldo Pendente"), mas não pode sacar. Se houver Chargeback, o saldo é estornado do Pending, protegendo o caixa da Aethel.
+
+### 7.2. A Interface da Transparência Financeira (Explicando ao Cliente)
+* **O Problema da Confiança:** Se o criador vê o dinheiro travado por 14 dias sem aviso, ele processa a Aethel ou nos difama no Twitter/X.
+* **A Execução Estrita na UX:** 
+  - O painel de Receitas (`web/components/ide/marketplace/`) terá dois saldos gigantes e distintos: **"Disponível para Saque" (Verde)** e **"Saldo em Retenção / Pending" (Amarelo)**.
+  - Haverá um ícone de "Informação" (?) ao lado do Saldo Pendente. Ao passar o mouse, a UI exibirá: *"Para proteger nossa comunidade contra fraudes de cartão de crédito, todas as vendas passam por um período de segurança de 14 dias antes do saque. Esse padrão garante o sucesso a longo prazo da plataforma."*
+  - **O Ciclo do Saque:** Após os 14 dias, o dinheiro desce para o "Disponível". O criador aperta "Sacar". O repasse via Stripe Connect leva de **2 a 5 dias úteis** para cair na conta bancária local do criador (dependendo do banco e do país). A UI mostrará uma barra de progresso (Processando Transferência).
+
+### 7.3. Blindagem Legal: Atualização dos Contratos
+* **O Problema Legal:** Não podemos reter dinheiro de terceiros se isso não estiver escrito no contrato.
+* **A Execução Estrita (Legal):** Você modificará fisicamente a página de Termos (`web/app/(legal)/terms/page.tsx`) e criará uma nova aba obrigatória de aceitação para publicação: **O Acordo do Criador da Aethel (Creator Agreement)**. 
+  - Nele, incluiremos a cláusula legal do *Escrow de 14 dias*.
+  - Incluiremos a isenção de responsabilidade sobre *Estornos/Chargebacks* (Se houver fraude, a Aethel tem o direito legal de revogar os fundos do criador).
+  - Incluiremos que a Aethel atua como *Merchant of Record* e detém a autoridade para recolher impostos globais.
+
+### 7.4. Linha do Tempo e Estratégia de Saques
+* **O Que Fazer:** Definir claramente o cronograma de liquidez para o usuário, garantindo que ele entenda o "Time-to-Cash".
+* **A Execução Estrita:**
+  - **Timeline:** Dia 0 (Venda) -> Dia 0-14 (Escrow/Risco de Chargeback) -> Dia 14 (Desbloqueio) -> Dia 14+ (Solicitação de Saque) -> Dia 16-19 (Depósito Bancário via Stripe).
+  - **Transparência UI:** Na aba de "Saques", uma timeline visual indicará onde o dinheiro está. Ex: "Aguardando período de proteção (7 dias restantes)". 
+  - **Prioridade de Atualização:** 
+    1. **Contratos (Jurídico):** Deve ser a primeira alteração para blindar a empresa (Antes de rodar código de pagamento). 
+    2. **UI (Tooltips/Painel):** Deve ser implementado simultaneamente para evitar tickets de suporte por falta de informação.
+    3. **Backend:** Por último, rodar o `trigger` de liberação automática de saldo no banco de dados.
+
+### 7.5. Merchant of Record e Global VAT (Impostos Globais)
+* **O Perigo:** Vender jogos na Europa ou EUA sem recolher VAT (Imposto de Valor Agregado) resulta em multas milionárias, já que a transação acontece no servidor da Aethel.
+* **A Execução Estrita:** Você integrará o **Stripe Tax API** no nó de Visual Scripting de Compra. No momento que o jogador no jogo clicar em "Comprar", a API da Aethel calcula a localização do IP (via Vercel Edge/Cloudflare) e adiciona o imposto local dinamicamente ao *Checkout Session*. A Aethel recolhe e retém a taxa automaticamente para repasse governamental, isentando o criador Indie de lidar com contabilidade internacional.
+
+### 7.6. Monetização de Netcode (Custos de Multiplayer)
+* **O Perigo:** Oferecer Server Meshing Dinâmico (Seção 24) de graça. Se um jogo explodir e 10.000 jogadores entrarem no MMO hospedado nos servidores da Aethel, a conta de CPU na Amazon AWS/Google Cloud (Agones) explode e destrói o nosso Take Rate de 12%.
+* **A Execução Estrita:** Os servidores rodarão via alocação Serverless (Containers On-Demand). O criador não paga "mensalidade de servidor". Ao invés disso, o Custo do Servidor (Compute Hours + Bandwidth) é **deduzido automaticamente do saldo de vendas do jogo (IAP)**. Se o jogo for grátis e não gerar IAP, ele tem um limite fixo (Capa Gratuita de 100 CCU - Concurrent Users) que usa arquitetura P2P (WebRTC) barata. Para passar disso, o criador precisa ativar o *Credit Wallet* ou habilitar In-App Purchases para o jogo se pagar sozinho. 
+
+## 8. Confiança, Segurança e DRM (O Escudo da Plataforma)
+Para operar no mesmo nível da Epic Games e Roblox, a Aethel não pode ser um antro de roubo de assets ou desrespeitar leis de segurança infantil (COPPA). Localizei no repositório os arquivos `asset-provenance.ts` e `vision-provider.ts` que usaremos para fechar essa última lacuna:
+
+### 8.1. DRM e Fingerprinting (Proteção contra Roubo)
+* **A Limitação Atual:** Um usuário pode comprar um modelo 3D (Espada Mágica), baixar o `.fbx`, mudar a cor e revender no nosso marketplace como se fosse dele.
+* **A Execução Estrita:** Ao invés de *Watermarks* idiotas, implementaremos **Geometry Hashing (Fingerprinting 3D)**. Quando um criador sobe uma malha, o motor lê a topologia dos vértices (via `asset-provenance.ts`) e cria um Hash criptográfico. Se outro usuário tentar subir um asset com 95% de semelhança topológica, o *upload é bloqueado* por "Falha de Proveniência" e o criador original é notificado. Ninguém rouba ninguém na Aethel.
+
+### 8.2. COPPA e Classificação Indicativa Automática (Age Ratings)
+* **A Limitação Atual:** Com o botão "1-Click Publish", alguém pode publicar um jogo hiper-violento ou adulto. Se uma criança abrir no navegador, a Aethel toma uma multa do governo americano (COPPA) ou Europeu.
+* **A Execução Estrita:** Toda vez que um criador solicitar a publicação de um jogo na nuvem (`aethel.gg`), a nossa API Vision (via Orquestrador de IA) rodará o jogo no servidor por 10 segundos, tirando screenshots. A IA fará a moderação automatizada (*Trust & Safety*) e aplicará a **Classificação Indicativa (Age Rating)**. Jogos '+18' são instantaneamente colocados em *Shadowban* (escondidos de buscas públicas) e bloqueados via Age-Gate (Data de nascimento da conta) para proteger o *Merchant of Record*.
+
+## 9. Marketing, Viralidade e Modding (O Motor de Crescimento)
+Ter a melhor Engine não garante que os jogos farão sucesso. A Aethel precisa construir a distribuição (Marketing) diretamente no núcleo técnico da plataforma.
+
+### 9.1. SEO e Viralização Nativa (OpenGraph)
+* **O Risco:** Um criador faz um jogo incrível, posta o link `aethel.gg/jogo` no Twitter ou WhatsApp, e aparece um link quebrado sem imagem. Ninguém clica, o jogo falha.
+* **A Execução Estrita:** Os subdomínios dos jogos publicados terão rotas de **SSR (Server-Side Rendering)** no Next.js (`web/app/play/[gameId]`). Nós injetaremos meta tags `OpenGraph` (`og:image`, `og:title`) dinamicamente. A engine renderizará uma thumbnail automática do mundo 3D no momento da publicação. O jogo *precisa* ser bonito ao ser compartilhado para atrair novos jogadores e gerar receita IAP.
+
+### 9.2. Analytics do Criador (Heatmaps de Morte)
+* **O Risco:** O jogo é difícil demais, 90% dos jogadores morrem no primeiro chefe e abandonam o jogo. O criador não sabe disso e o jogo morre, derrubando o nosso faturamento.
+* **A Execução Estrita:** O pacote `lib/observability/telemetry.ts` não será usado apenas para a Aethel, ele será liberado para os criadores. O desenvolvedor terá um painel **"Game Analytics"** na IDE. Ele poderá ver *Heatmaps* (Mapas de Calor) renderizados diretamente no mundo 3D mostrando as coordenadas espaciais onde os jogadores mais estão morrendo ou passando tempo. 
+
+### 9.3. UGC (User Generated Content) e Suporte a Mods
+* **A Vantagem Competitiva:** Jogos como Skyrim e Roblox vivem para sempre por causa dos *Mods*. 
+* **A Execução Estrita:** Jogos publicados na Aethel terão uma chave de API nativa para aceitar "Mods". Jogadores poderão usar uma versão "Lite" da engine no próprio navegador para criar roupas e armas para os jogos dos outros criadores, fomentando a verdadeira *Creator Economy*.
+
+## 10. A Dicotomia B2B vs Indie: Governança de Projetos (Público vs Privado)
+### 10.1. A Tríade da Triagem de Visibilidade
+* **O Que Fazer:** O painel atual (`web/components/engine/project-settings-model.ts`) e o Dashboard estão incompletos; não gerenciam privacidade. O Claude deve introduzir a Tríade de Visibilidade, sem criar lixo novo, reaproveitando os componentes existentes.
+* **A Execução Estrita:** Não basta ser "Público ou Privado". Os desenvolvedores escolherão entre 3 Estados de Distribuição:
+  1. **Hidden / Oculto (NDA):** Invisível em qualquer catálogo. Criptografia AES-256 (BYOK) ativa. Apenas convidados via RBAC podem ver ou editar. Essencial para B2B e Cinema.
+  2. **Showcase / Vitrine (Amostrar):** O projeto fica visível no Catálogo e no Perfil do desenvolvedor, mas **sem o botão de Play**. Usuários veem imagens, descrições e dão "Likes", mas não podem interagir com a Engine. Ideal para portfólios de modeladores 3D.
+  3. **Playable / Público (Interagir):** Padrão Roblox. Totalmente público no Catálogo, indexado pelo SEO (OpenGraph). Qualquer um pode jogar, interagir e gerar faturamento IAP na Nuvem.
+
+### 10.2. Controle de Acesso e Colaboração (RBAC)
+* **A Limitação:** No Figma 3D (Colaboração Simultânea), quem pode entrar na sala para mexer no projeto?
+* **A Execução Estrita:** Para projetos Ocultos, o Claude deve reforçar o pacote `lib/permissions.ts` na camada de Sockets. O `WorkspaceManager` exigirá **RBAC (Role-Based Access Control)**. Um usuário pode ser convocado para a sessão 3D apenas como "Viewer" (Câmera livre, mas não pode deletar a montanha), ou como "Editor". Qualquer conexão WebRTC paralela sem o Token JWT correto será imediatamente derrubada pelo servidor Rust.
+
+### 10.3. Pipelines de Saída Isolados (Export vs Publish)
+* **A Dor do Enterprise:** O estúdio de cinema não quer publicar no nosso site. Ele quer um arquivo para rodar localmente no servidor dele ou colocar num pen-drive.
+* **A Execução Estrita:** O Claude mutará o Core da Engine sem duplicar código, criando duas rotas:
+  - Rota 1 (Públicos): `PlatformPublisher` -> Compila WASM e joga no nosso CDN.
+  - Rota 2 (Ocultos/B2B): `NativeExporter` -> Aciona o pacote `@aethel/export`. Se o usuário for B2B/Privado, a Engine compila o projeto inteiro em um `.EXE` autônomo (Windows), `.APP` (Mac) ou gera renders de arquivo `.USDZ` (Universal Scene Description) exigido pela indústria de Cinema (Pixar/Disney) e Arquitetura. O arquivo é baixado para o disco local do usuário e apagado do nosso servidor de renderização instantaneamente por segurança.
+
+## 11. Triagem Criativa e a Experiência Inicial (O Aethel Creator Hub)
+O maior erro de um produto épico é ter uma "sala de espera" amadora. Ao auditar os arquivos de Dashboard atuais (ex: `DashboardProjectsTab.tsx`), constatamos que a Triagem se parece com um Painel de DevOps (AWS/Vercel) e não com o Hub de uma Game Engine de ponta. Nós destruiremos essa interface técnica e implementaremos o Padrão Ouro (Nível Roblox/Epic Games) com as seguintes execuções:
+
+### 11.1. A Engine Unificada (O Fim da Dicotomia Web/Studio)
+* **A Falha Crítica:** A interface atual força o criador a escolher se o projeto é `web` ou `unreal/studio` antes de começar. Isso quebra a experiência, causa ansiedade de escolha e divide a base de código.
+* **A Execução Estrita (One-Engine Rule):** O desenvolvedor está **proibido** de exigir que o criador escolha a plataforma. A Aethel é uma Engine ÚNICA. O projeto é apenas um "Aethel Workspace". O Orquestrador de IA (*Copilot*) e o Kernel da Engine rodarão escalonamento dinâmico. Se a cena for leve, ela renderiza via WebGPU. Se o criador arrastar 1 milhão de polígonos, a IA ou o próprio motor liga silenciosamente os Workers em Rust/Vulkan (Desktop) ou aciona a renderização em Nuvem (Pixel Streaming) se ele estiver no Chrome. Fricção zero para o criador.
+
+### 11.2. A Engine de Templates (O Fim da Tela Branca)
+* **A Falha Crítica:** Começar a Triagem com um "Projeto em Branco" afasta 90% dos criadores iniciantes. 
+* **A Execução Estrita:** A tela de criação terá uma vitrine rica de Gêneros/Templates pré-compilados. O Claude programará os scaffolds iniciais para injetar instantaneamente:
+  - `AAA Baseplate` (Física híbrida e Global Illumination PBR ligados).
+  - `FPS Controller` (Rapier3D amarrado à Câmera em primeira pessoa).
+  - `Top-Down RPG` (Sistemas de NavMesh e Pathfinding prontos).
+  - `Mobile Sync` (Autenticação Firebase e Banco de dados preparados).
+  O sonho criativo deve ser vendido antes mesmo do projeto carregar.
+
+### 11.3. A Separação de Privacidade e Times (Organizações)
+* **A Falha Crítica:** A UI joga todos os projetos numa lista única, assumindo que o desenvolvedor é um lobo solitário sem estúdio.
+* **A Execução Estrita:** O Dashboard terá um salto arquitetônico de navegação e permissões (RBAC). 
+  - A interface terá abas laterais separando **"Personal Hub"** e **"Studio/Organization Hub"**. 
+  - No *Organization Hub*, a privacidade entra em ação (Seção 10.1). 
+  - Se eu contratar um Sound Designer, eu o convido para a Equipe e dou a ele *Permissão Restrita* (Ele só enxerga o Áudio DSP daquele projeto e não tem acesso ao código fonte).
+
+### 11.4. O Dashboard Financeiro Imersivo
+* **A Falha Crítica:** A aba de Projetos atual não mostra se o jogo está fazendo sucesso. O financeiro está em um canto escuro do site.
+* **A Execução Estrita:** No Aethel Creator Hub, cada *Card* de projeto exibirá métricas vivas. Logo na tela inicial, o criador verá seu faturamento (Robux/Aethel Coins / Dólares), a integridade do Servidor Multiplayer (Agones) e o saldo em Retenção/Escrow (Seção 7). Ele respirará a saúde do seu negócio a cada clique.
+
+## 12. A Engenharia de UI Suprema (Micro-Interações e Imersão do Jogador)
+O maior erro que o Claude poderia cometer seria programar essas interfaces incríveis usando "React básico" (CSS transitions comuns e modais quadrados). Para atingir o topo absoluto do mercado e aniquilar a experiência visual do Roblox e da Epic Store, o Frontend do *Aethel Play* e do *Aethel Create* deve obedecer às seguintes leis de subnecessidades interativas:
+
+### 12.1. O Fim das Transições CSS Básicas (Física de Molas)
+* **A Falha Crítica:** Botões que mudam de cor duramente ou menus que "piscam" na tela gritam "site barato".
+* **A Execução Estrita:** O Claude está proibido de usar `transition: all 0.2s` para interações de núcleo. Toda a plataforma usará **Spring Physics (Física de Molas)** através de bibliotecas como *Framer Motion* ou código nativo do Tauri. Quando o jogador clica em "Comprar Item", o botão não apenas muda de cor, ele "afunda" com massa e resistência, e o modal de confirmação expande com energia cinética (stiffness e damping), dando um peso tátil à interface. É assim que a Apple e o Stripe constroem confiança.
+
+### 12.2. A Página do Jogo (Cinematic Game Detail Page)
+* **A Falha Crítica:** Quando o jogador clica em um jogo no `aethel.gg`, abrir uma página estática com uma foto e um botão de Play é nível amador.
+* **A Execução Estrita:** A página do jogo será uma **Experiência Cinematográfica Imersiva**. 
+  - O cabeçalho (Hero) fará *Auto-Play* do trailer do jogo em background (Muted, em loop).
+  - Um painel lateral ao vivo, via WebSockets, exibirá a Saúde do Servidor: Ping do jogador para o Data Center mais próximo (Agones), Número de Jogadores Ativos naquele exato segundo e Amigos que estão jogando agora.
+  - Isso gera urgência e prova social maciça antes mesmo do jogo carregar.
+
+### 12.3. O "Party System" Global (A Cola Social da Roblox)
+* **A Falha Crítica:** A plataforma ser apenas um diretório de links. Jogos multiplayer morrem rápido se os jogadores não puderem arrastar os amigos junto.
+* **A Execução Estrita:** Haverá um **Party System Overlay** persistente. O jogador convida 3 amigos para o "Grupo" na página principal do `aethel.gg`. Eles terão um Voice-Chat via WebRTC ativo no próprio site. Quando o Líder do Grupo clica em "Jogar" em qualquer jogo, os 3 amigos são sugados automaticamente para o mesmo servidor (Matchmaking via API do Aethel), sem precisarem clicar em nada. Isso transforma a Engine numa Rede Social de altíssima retenção.
+
+### 12.4. Loja Global Web: Preview 3D Interativo 
+* **A Falha Crítica:** Vender itens cosméticos ou malhas 3D mostrando apenas uma foto PNG 2D estática. 
+* **A Execução Estrita:** O Catalog (tanto para Jogadores comprarem Avatares, quanto para Criadores comprarem Assets) não terá apenas imagens. Quando o usuário passa o mouse na foto do item (ex: Um Chapéu Mágico), a foto instantaneamente é substituída por um **Mini-Canvas WebGPU Transparente**. O chapéu renderiza em 3D real no DOM, permitindo que o usuário gire o item com o mouse e veja o brilho (PBR) refletindo na luz antes de gastar dinheiro. É o ápice da conversão de vendas.
+
+## 13. O Publisher Portal (O Rito de Passagem Padrão Steamworks)
+Você tem total razão. Fomos parciais ao dizer "1-Click Publish". Na vida real, se permitirmos um botão mágico de publicar, a loja `aethel.gg` virará um lixão de testes vazios e imagens distorcidas. Para manter o padrão Epic/Steam, o processo de publicação (Cadastramento do Jogo) deve ser um rito rigoroso, blindado e altamente profissional, gerenciado por um sub-sistema chamado **Aethel Publisher Portal**.
+
+### 13.1. A Tela de Cadastro e Curadoria (Asset Requirements)
+* **A Falha Crítica:** Permitir que o usuário upe qualquer foto de qualquer tamanho como capa do jogo. O site ficará feio, quebrando o CSS.
+* **A Execução Estrita (Qualidade Exigida):** O Publisher Portal bloqueará a submissão do jogo se o criador não fornecer o *Kit de Marketing* exato. 
+  - **Hero Banner (Capa Principal):** Exigência de 1920x1080 (16:9), formato WebP. A interface terá uma grade sobreposta (Safe Zone Viewer) mostrando onde a logo da Aethel e o botão "Jogar" ficarão, forçando o criador a centralizar a arte.
+  - **Vertical Capsule (Para Mobile/Busca):** Exigência de 600x900 (2:3).
+  - Se a IA detectar muito texto na imagem (usando OCR nativo), o jogo é penalizado no algoritmo de recomendação (padrão Steam). Imagens devem ser arte, não panfletos.
+
+### 13.2. Os Modelos de Precificação (Venda, F2P e Aluguel)
+* **A Falha Crítica:** Achar que tudo será de graça ou engessar o desenvolvedor em um único modelo de negócios. O produto principal da Aethel é o **Jogo Completo**, não apenas assets.
+* **A Execução Estrita:** No cadastro do jogo, o criador tem total liberdade na matriz financeira:
+  1. **Modelo Premium (Pay-to-Play):** O jogo é pago na entrada. Ele define o valor em Dólar. A plataforma aplica *Preços Regionais Automáticos* (PPP - Paridade de Poder de Compra) para países emergentes.
+  2. **Modelo de Aluguel (Game Rentals):** Para jogos de alta qualidade (AAA), o desenvolvedor pode ativar o aluguel. Exemplo: $20 para comprar, ou $4 para "Alugar por 7 dias". Isso abaixa a barreira de entrada para o jogador, gera giro rápido de caixa e ajuda desenvolvedores menores a faturar com jogos curtos ou cinematográficos.
+  3. **Modelo F2P (Free-to-Play):** O jogo é de graça, com In-App Purchases (IAP) obrigatórias documentadas no formulário.
+  4. **Transparência de Taxa (Take Rate):** O sistema exibe visualmente a divisão: *"Venda de R$ 100 -> R$ 88 para você, R$ 12 para a Aethel."*
+
+### 13.3. A Soberania da Escolha (Publicação Opcional e Sigilo Enterprise)
+* **A Falha Crítica:** Forçar todos os usuários a publicarem na loja. Isso destrói o modelo B2B (Estúdios de Cinema e Empresas Privadas).
+* **A Execução Estrita:** Os usuários **NÃO são obrigados a vender ou publicar nada**. A publicação na Aethel Play é estritamente uma escolha.
+  - Se o desenvolvedor profissional (Enterprise) criar um projeto de arquitetura ou um filme confidencial, ele NUNCA clica no Publisher Portal. 
+  - O projeto fica restrito no seu *Organization Hub* com criptografia ponta-a-ponta, acessível apenas por membros autorizados da sua empresa, rodando na Cloud sem vitrine pública. A ferramenta serve à empresa, não o contrário.
+
+### 13.4. Royalties e Divisão Automática (Revenue Share)
+* **A Falha Crítica:** Dois amigos fazem um jogo juntos. O jogo vende 1 milhão. O dinheiro cai na conta do Dono do Projeto. O Dono foge com o dinheiro e o outro fica sem nada. A plataforma é processada.
+* **A Execução Estrita:** O formulário de cadastro exigirá o preenchimento de **Splits (Divisão de Lucros)**. 
+  - O criador adiciona o "Email do Modelador 3D" e define: "Ele ganha 20% das vendas".
+  - Quando um jogador comprar o jogo no `aethel.gg`, o backend da Aethel usará a API do Stripe Connect (*Split Payouts*) para dividir o dinheiro na fonte. $70 vai para o Dev, $18 vai para o Modelador, $12 para a Aethel. Ninguém tem a chance de roubar ninguém. A Aethel vira o árbitro perfeito.
+
+### 13.5. O Botão de "Early Access" vs "Full Release"
+* **A Falha Crítica:** Jogos lançados cheios de bugs queimam a reputação da nossa loja.
+* **A Execução Estrita:** Criadores terão que escolher a "Fase do Jogo" no cadastro. Se ele marcar "Early Access (Acesso Antecipado)", a página da loja dele ganhará uma tarja laranja gigante avisando aos jogadores: *"Este jogo está em desenvolvimento ativo. Podem haver falhas."* Isso blinda a Aethel de pedidos de reembolso em massa.
+
+### 13.6. KYC, Assinaturas Digitais e Compliance Fiscal (A Blindagem Governamental)
+* **A Falha Crítica:** Achar que basta um "checkbox" de Termos de Uso para o usuário começar a receber milhares de dólares. Se a Aethel repassar dinheiro sem coletar documentação fiscal, seremos fechados por agências governamentais sob acusações de lavagem de dinheiro.
+* **A Execução Estrita (Legal & Onboarding):** O Publisher Portal exigirá uma esteira rigorosa de **Compliance** antes que qualquer jogo Premium ou F2P (com IAP) possa ser publicado:
+  1. **Verificação de Identidade (KYC - Know Your Customer):** Integração com **Stripe Identity**. O criador é obrigado a usar a webcam ou o celular para escanear um Documento de Identidade (Passaporte, RG ou CNH) e tirar uma selfie. A IA do Stripe cruza a biometria para evitar fraudes e contas falsas.
+  2. **Assinatura Digital do Creator Agreement:** O contrato de "Merchant of Record" (Seção 7.3) não será um mero checkbox. O fluxo exigirá uma assinatura digital formal (via integração tipo *DocuSign* ou *Stripe Clickwrap* com registro de IP e Timestamp) atestando ciência sobre as regras de Chargeback, Direito Autoral (DMCA) e retenção de 14 dias.
+  3. **Formulários Fiscais Globais (W-9 / W-8BEN):** Antes do primeiro saque, se o criador não for dos Estados Unidos (ex: Brasileiro), o sistema da Aethel exigirá o preenchimento digital do formulário **W-8BEN** declarando que ele não é um contribuinte americano, para evitar a retenção na fonte de 30% do IRS americano. A integração com o *Stripe Connect Custom/Express* cuidará da geração do formulário `1099-K` no final do ano fiscal. Sem identidade e imposto provado, o botão "Publicar Jogo" ficará bloqueado com um cadeado legal.
+
+### 14.4. A Margem de Lucro (O Take Rate de 12%)
+* **A Concorrência:** A Unity cobra licenças anuais caríssimas e Taxa por Instalação (Install Fee). A Unreal cobra 5% depois de $1 Milhão em vendas. A Roblox rouba **70%** da receita do criador (o criador fica com apenas ~30%).
+* **O Posicionamento da Aethel:** Nós ficaremos com **12%** (O padrão de ouro criado pela Epic Games Store). O desenvolvedor leva 88% da grana (menos taxas do cartão). Como nosso Egress é zero (Cloudflare) e nossos servidores só escalam se o jogo faturar, esses 12% cobrem toda a operação e injetam lucro limpo e contínuo (SaaS B2B + IAP Marketplace). 
+* **⚠️ DIVERGÊNCIA CÓDIGO×PLANO (verificado 2026-07-03):** `calculateRevenueSplit()` em `web/lib/marketplace/payouts.ts` implementa **70/30 hoje**, não 88/12. Esta é a única fonte de verdade sobre a taxa até que o código seja corrigido — qualquer feature nova (Publisher Portal, splits de royalty, dashboard financeiro) que assuma 88/12 sem primeiro corrigir esta função vai exibir números que não batem com o que o backend realmente cobra. Tratar a correção da taxa como pré-requisito bloqueante de R2.1, não como detalhe de polimento.
+
+### 14.5. O Abismo do Banco de Dados (Custos de IOPS e Escritas)
+* **O Perigo Financeiro:** Se um jogo de RPG na Aethel salvar o inventário e a posição do jogador a cada 5 segundos diretamente no Banco de Dados (PostgreSQL/Supabase), as operações de escrita (Write IOPS) explodirão. O provedor de Cloud cobrará milhares de dólares apenas por "Consultas ao Banco", engolindo nossa margem de lucro.
+* **O Alinhamento de Qualidade (Batching via CRDT/Redis):** A engine bloqueará writes diretos do jogo para o SQL. O estado do jogo do usuário será sincronizado em memória (RAM) via **Redis (Upstash) ou YJS (WebSockets)**, que suportam milhões de mutações quase de graça. O sistema só fará o *Snapshot* (Escrita no Postgres) quando o jogador deslogar ou a cada 15 minutos (Batch Writing), reduzindo o custo de banco de dados em **99.9%**.
+
+### 14.6. O Escudo Anti-DDoS (A Falência por Botnet)
+* **O Perigo Financeiro:** Plataformas de jogos são alvos diários de ataques DDoS (Hacking). Se usarmos o firewall padrão de mercado (ex: AWS WAF), eles cobram por *Request* analisado. Um ataque forte de Botnet mandando 10 bilhões de requisições falsas para `aethel.gg` não derrubaria o site, mas geraria uma fatura surpresa de **$50.000,00** no fim do mês apenas pela "proteção".
+* **O Alinhamento de Qualidade (Proteção Flat-Rate):** Jamais usaremos proteção tarifada por requisição para a rota principal. Toda a malha de roteamento passará pelo plano fechado (Enterprise/Pro) do **Cloudflare**. A Cloudflare absorve DDoS Volumétrico no Edge da rede gratuitamente, sem repassar o custo das requisições falsas para a Aethel, eliminando totalmente o risco de "Falência por Hacking".
+
+---
+**Protocolo Final de Execução:** O Claude está terminantemente proibido de tratar a Aethel como um mero "fazedor de joguinhos" ou como um painel DevOps amador. A Triagem, o Dashboard e o Player Hub foram reconstruídos para serem majestosos. Micro-interações táteis (Molas), Preview 3D nativo, Party Systems globais, Páginas Cinematográficas e um **Publisher Portal de Nível Steamworks (Revenue Share nativo, Regras de Assets e KYC/Compliance Governamental)** garantirão que a interface não seja "básica", mas sim o **estado da arte do mercado bilionário de games**. A barreira técnica entre Web e Studio foi obliterada. A teoria esgotou todas as subnecessidades. A execução absoluta nos aguarda.

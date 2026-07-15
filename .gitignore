@@ -1,0 +1,90 @@
+# Node
+node_modules/
+
+# Logs
+*.log
+
+# Tooling caches
+**/.eslintcache
+
+# Mac
+.DS_Store
+
+# Build and distribution
+dist/
+build/
+
+# Next.js
+**/.next/
+**/.turbo/
+**/.swc/
+
+# TypeScript build outputs
+# **/lib/ - DISABLED: We need lib/ for source code
+**/*.tsbuildinfo
+**/coverage/
+**/.nyc_output/
+playwright-report/
+test-results/
+cloud-web-app/web/output/
+
+# Specific lib build outputs (not source)
+**/dist/lib/
+**/build/lib/
+
+# Rust/Tauri build outputs
+**/target/
+apps/studio-local/src-tauri/gen/
+
+# Env
+.env
+.env.local
+**/.venv/
+**/venv/
+
+# Editor swap files
+*.swp
+*.swo
+*~
+
+# IDEs
+.vscode/
+.idea/
+
+# Local data
+data.json
+*.zip
+*.patch
+*.bundle
+build-output*.txt
+
+# Copilot/agent chat artifacts
+.zencoder/
+.gh_token
+.aethel/
+.playwright-cli/
+
+# Security - never commit secrets
+*.pem
+*.key
+*.cert
+.env.production
+.env.staging
+
+# Backup files
+*.bak
+*.orig
+*.backup
+
+# OS files
+Thumbs.db
+ehthumbs.db
+
+# Python artifacts (tools)
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Storybook static build output
+**/storybook-static/

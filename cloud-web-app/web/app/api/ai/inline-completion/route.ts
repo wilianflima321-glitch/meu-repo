@@ -1,0 +1,216 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
+import { aiService } from '@/lib/ai-service'
+import { prisma } from '@/lib/db'
+import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
+import { capabilityResponse } from '@/lib/server/capability-response'
+import { buildAiProviderSetupMetadata } from '@/lib/capability-constants'
+import {
+  AI_DEMO_MODEL,
+  AI_DEMO_PROVIDER,
+  buildDemoCompletion,
+  demoRouteMetadata,
+  isAiDemoModeEnabled,
+} from '@/lib/server/ai-demo-mode'
+import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
+import { AI_INLINE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
+import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
+import {
+  auditByokUsage,
+  byokMissingCredentialResponse,
+  enforceByokProxyRateLimit,
+  parseByokFromRequest,
+} from '@/lib/ai/byok-request'
+
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const routeLogger = createComponentLogger('api/ai/inline-completion/route');
+/**
+ * Inline Completion API (compat surface for ghost-text clients)
+ * POST /api/ai/inline-completion
+ *
+ * Returns both `suggestion` (canonical) and `text` (compat alias).
+ */
+
+const SYSTEM_PROMPT = `You are an inline code completion engine.
+Rules:
+- Return only the text to insert at cursor.
+- Do not add markdown or explanations.
+- Do not repeat prefix/suffix content.
+- Keep completion concise.`
+
+function normalizeCompletion(text: string): string {
+  return String(text || '')
+    .replace(/```[\w]*\n?/g, '')
+    .replace(/```$/g, '')
+    .replace(/<\|[^|]+\|>/g, '')
+    .trimEnd()
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const user = requireAuth(req)
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'AI_INLINE_COMPLETION',
+      route: '/api/ai/inline-completion',
+      config: AI_INLINE_RATE_LIMIT,
+    })
+    if (rateLimited) return rateLimited
+    const body = await req.json().catch(() => null)
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'INVALID_BODY', message: 'Invalid JSON body.' }, { status: 400 })
+    }
+
+    const prompt = typeof (body as any).prompt === 'string' ? (body as any).prompt : ''
+    const provider = typeof (body as any).provider === 'string' ? (body as any).provider : undefined
+    const model = typeof (body as any).model === 'string' ? (body as any).model : undefined
+    const maxTokens = typeof (body as any).maxTokens === 'number' ? Math.max(1, Math.floor((body as any).maxTokens)) : 256
+    const temperature = typeof (body as any).temperature === 'number' ? Math.min(1, Math.max(0, (body as any).temperature)) : 0.1
+
+    if (!prompt) {
+      return NextResponse.json({ suggestion: '', text: '' })
+    }
+
+    const byokParsed = parseByokFromRequest(req)
+    const isByok = byokParsed.active
+    if (req.headers.get('x-aethel-byok-active') === '1' && !isByok) {
+      return NextResponse.json(byokMissingCredentialResponse(), { status: 400 })
+    }
+    const rateLimitedByok = enforceByokProxyRateLimit(req, '/api/ai/inline-completion')
+    if (rateLimitedByok) return rateLimitedByok
+
+    const userRow = await prisma.user.findUnique({ where: { id: user.userId }, select: { plan: true } })
+    const limits = getPlanLimits(userRow?.plan || 'starter_trial')
+
+    const estimatedTokens = Math.max(300, Math.ceil(prompt.length / 4) + 300 + maxTokens)
+    if (estimatedTokens > limits.maxTokensPerRequest && !isByok) {
+      return NextResponse.json(
+        {
+          error: 'REQUEST_TOO_LARGE',
+          message: `Request too large. Limit: ${limits.maxTokensPerRequest.toLocaleString()} tokens.`,
+          maxTokensPerRequest: limits.maxTokensPerRequest,
+        },
+        { status: 413 }
+      )
+    }
+
+    if (!isByok) {
+      const quotaCheck = await checkAIQuota(user.userId, estimatedTokens)
+      if (!quotaCheck.allowed) {
+        return NextResponse.json({ error: quotaCheck.code, message: quotaCheck.reason }, { status: 429 })
+      }
+    }
+
+    if (model && !isByok) {
+      const modelCheck = await checkModelAccess(user.userId, model)
+      if (!modelCheck.allowed) {
+        return NextResponse.json({ error: modelCheck.code, message: modelCheck.reason }, { status: 403 })
+      }
+    }
+
+    let byokKey: string | undefined
+    if (byokParsed.active) {
+      byokKey = byokParsed.apiKey
+      auditByokUsage({
+        userId: user.userId,
+        route: '/api/ai/inline-completion',
+        modelId: model,
+        estimatedTokens,
+        provider: byokParsed.provider,
+      })
+    }
+
+    if (aiService.getAvailableProviders().length === 0 && !byokKey) {
+      const blocked = blockIfSimulationDisabled({
+        capability: 'AI_INLINE_COMPLETION',
+        reason: 'AI_PROVIDER_NOT_CONFIGURED',
+        message: 'AI provider not configured. Configure a real provider to run inline completion.',
+        missingEnv: ['OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY'],
+      })
+      if (blocked) return blocked
+      if (isAiDemoModeEnabled()) {
+        const demoUsage = await consumeAiDemoUsage({
+          userId: user.userId,
+          route: '/api/ai/inline-completion',
+        })
+        if (!demoUsage.allowed) {
+          return capabilityResponse({
+            error: 'AI_DEMO_LIMIT_REACHED',
+            status: 429,
+            message: 'AI demo daily limit reached for this user.',
+            capability: 'AI_INLINE_COMPLETION',
+            capabilityStatus: 'PARTIAL',
+            milestone: 'P0',
+            metadata: {
+              ...buildAiProviderSetupMetadata({ route: '/api/ai/inline-completion' }),
+              demoMode: true,
+              demoLimit: demoUsage.limit,
+              demoUsed: demoUsage.used,
+              demoRemaining: demoUsage.remaining,
+              demoResetAt: demoUsage.resetAt,
+            },
+          })
+        }
+        const demo = demoRouteMetadata({ route: '/api/ai/inline-completion', capability: 'AI_INLINE_COMPLETION' })
+        const suggestion = buildDemoCompletion({ prompt })
+        return NextResponse.json({
+          suggestion,
+          text: suggestion,
+          provider: AI_DEMO_PROVIDER,
+          model: AI_DEMO_MODEL,
+          tokensUsed: 0,
+          latencyMs: 0,
+          demoRemaining: demoUsage.remaining,
+          demoLimit: demoUsage.limit,
+          demoResetAt: demoUsage.resetAt,
+          ...demo,
+        })
+      }
+
+      return capabilityResponse({
+        error: 'AI_PROVIDER_NOT_CONFIGURED',
+        status: 503,
+        message: 'AI provider not configured.',
+        capability: 'AI_INLINE_COMPLETION',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P0',
+        metadata: buildAiProviderSetupMetadata({ route: '/api/ai/inline-completion' }),
+      })
+    }
+
+    const response = await aiService.chat({
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: prompt },
+      ],
+      provider,
+      model,
+      temperature,
+      maxTokens,
+      userId: user.userId,
+      isBYOK: isByok,
+      apiKeyOverride: byokKey,
+    })
+
+    if (!isByok) {
+      recordTokenUsage(user.userId, response.tokensUsed).catch(() => {})
+    }
+    const suggestion = normalizeCompletion(response.content)
+
+    return NextResponse.json({
+      suggestion,
+      text: suggestion,
+      provider: response.provider,
+      model: response.model,
+      tokensUsed: response.tokensUsed,
+      latencyMs: response.latencyMs,
+    })
+  } catch (error) {
+    routeLogger.error('[AI Inline Completion] Error:', error)
+    return NextResponse.json(
+      { error: 'AI_ERROR', message: error instanceof Error ? error.message : 'AI request failed' },
+      { status: 500 }
+    )
+  }
+}

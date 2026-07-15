@@ -1,0 +1,56 @@
+﻿2025-10-31T02:28:59.4394001Z ##[group]Run # start server in background and capture logs
+2025-10-31T02:28:59.4394412Z [36;1m# start server in background and capture logs[0m
+2025-10-31T02:28:59.4394932Z [36;1mnohup node tools/llm-mock/server.js > tools/llm-mock/server.log 2>&1 & echo $! > tools/llm-mock/server.pid || true[0m
+2025-10-31T02:28:59.4395484Z [36;1m# install wait-on and wait for server to accept connections[0m
+2025-10-31T02:28:59.4395805Z [36;1mnpm i -g wait-on || true[0m
+2025-10-31T02:28:59.4396207Z [36;1mnpx wait-on http://127.0.0.1:8010 --timeout 30000 || (cat tools/llm-mock/server.log && exit 1)[0m
+2025-10-31T02:28:59.4440379Z shell: /usr/bin/bash -e {0}
+2025-10-31T02:28:59.4440622Z ##[endgroup]
+2025-10-31T02:29:02.3148761Z npm warn EBADENGINE Unsupported engine {
+2025-10-31T02:29:02.3149853Z npm warn EBADENGINE   package: 'joi@18.0.1',
+2025-10-31T02:29:02.3151787Z npm warn EBADENGINE   required: { node: '>= 20' },
+2025-10-31T02:29:02.3152606Z npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+2025-10-31T02:29:02.3153309Z npm warn EBADENGINE }
+2025-10-31T02:29:03.9008321Z 
+2025-10-31T02:29:03.9009221Z added 36 packages in 4s
+2025-10-31T02:29:03.9009943Z 
+2025-10-31T02:29:03.9011617Z 7 packages are looking for funding
+2025-10-31T02:29:03.9013564Z   run `npm fund` for details
+2025-10-31T02:29:34.5836032Z Error: Timed out waiting for: http://127.0.0.1:8010
+2025-10-31T02:29:34.5838118Z     at /opt/hostedtoolcache/node/18.20.8/x64/lib/node_modules/wait-on/lib/wait-on.js:131:31
+2025-10-31T02:29:34.5842730Z     at doInnerSub (/opt/hostedtoolcache/node/18.20.8/x64/lib/node_modules/wait-on/node_modules/rxjs/dist/cjs/internal/operators/mergeInternals.js:22:31)
+2025-10-31T02:29:34.5844509Z     at outerNext (/opt/hostedtoolcache/node/18.20.8/x64/lib/node_modules/wait-on/node_modules/rxjs/dist/cjs/internal/operators/mergeInternals.js:17:70)
+2025-10-31T02:29:34.5846637Z     at OperatorSubscriber._this._next (/opt/hostedtoolcache/node/18.20.8/x64/lib/node_modules/wait-on/node_modules/rxjs/dist/cjs/internal/operators/OperatorSubscriber.js:33:21)
+2025-10-31T02:29:34.5849545Z     at Subscriber.next (/opt/hostedtoolcache/node/18.20.8/x64/lib/node_modules/wait-on/node_modules/rxjs/dist/cjs/internal/Subscriber.js:51:18)
+2025-10-31T02:29:34.5851214Z     at AsyncAction.work (/opt/hostedtoolcache/node/18.20.8/x64/lib/node_modules/wait-on/node_modules/rxjs/dist/cjs/internal/observable/timer.js:28:28)
+2025-10-31T02:29:34.5852961Z     at AsyncAction._execute (/opt/hostedtoolcache/node/18.20.8/x64/lib/node_modules/wait-on/node_modules/rxjs/dist/cjs/internal/scheduler/AsyncAction.js:79:18)
+2025-10-31T02:29:34.5854799Z     at AsyncAction.execute (/opt/hostedtoolcache/node/18.20.8/x64/lib/node_modules/wait-on/node_modules/rxjs/dist/cjs/internal/scheduler/AsyncAction.js:67:26)
+2025-10-31T02:29:34.5856686Z     at AsyncScheduler.flush (/opt/hostedtoolcache/node/18.20.8/x64/lib/node_modules/wait-on/node_modules/rxjs/dist/cjs/internal/scheduler/AsyncScheduler.js:38:33)
+2025-10-31T02:29:34.5861037Z     at listOnTimeout (node:internal/timers:569:17)
+2025-10-31T02:29:34.5998483Z node:internal/modules/cjs/loader:1143
+2025-10-31T02:29:34.6002735Z   throw err;
+2025-10-31T02:29:34.6003104Z   ^
+2025-10-31T02:29:34.6003254Z 
+2025-10-31T02:29:34.6003498Z Error: Cannot find module 'pino'
+2025-10-31T02:29:34.6003873Z Require stack:
+2025-10-31T02:29:34.6004491Z - /home/runner/work/meu-repo/meu-repo/tools/llm-mock/lib/mock-core.js
+2025-10-31T02:29:34.6005347Z - /home/runner/work/meu-repo/meu-repo/tools/llm-mock/server.js
+2025-10-31T02:29:34.6006123Z     at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2025-10-31T02:29:34.6006843Z     at Module._load (node:internal/modules/cjs/loader:981:27)
+2025-10-31T02:29:34.6009739Z     at Module.require (node:internal/modules/cjs/loader:1231:19)
+2025-10-31T02:29:34.6010752Z     at require (node:internal/modules/helpers:177:18)
+2025-10-31T02:29:34.6011596Z     at Object.<anonymous> (/home/runner/work/meu-repo/meu-repo/tools/llm-mock/lib/mock-core.js:4:14)
+2025-10-31T02:29:34.6012472Z     at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2025-10-31T02:29:34.6013591Z     at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2025-10-31T02:29:34.6014247Z     at Module.load (node:internal/modules/cjs/loader:1203:32)
+2025-10-31T02:29:34.6014840Z     at Module._load (node:internal/modules/cjs/loader:1019:12)
+2025-10-31T02:29:34.6015475Z     at Module.require (node:internal/modules/cjs/loader:1231:19) {
+2025-10-31T02:29:34.6015987Z   code: 'MODULE_NOT_FOUND',
+2025-10-31T02:29:34.6016319Z   requireStack: [
+2025-10-31T02:29:34.6016872Z     '/home/runner/work/meu-repo/meu-repo/tools/llm-mock/lib/mock-core.js',
+2025-10-31T02:29:34.6017908Z     '/home/runner/work/meu-repo/meu-repo/tools/llm-mock/server.js'
+2025-10-31T02:29:34.6018245Z   ]
+2025-10-31T02:29:34.6018407Z }
+2025-10-31T02:29:34.6018493Z 
+2025-10-31T02:29:34.6018568Z Node.js v18.20.8
+2025-10-31T02:29:34.6030481Z ##[error]Process completed with exit code 1.
