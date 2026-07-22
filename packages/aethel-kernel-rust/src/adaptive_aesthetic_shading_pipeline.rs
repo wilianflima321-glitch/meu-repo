@@ -1,17 +1,18 @@
-//! Adaptive Aesthetic Shading Pipeline — Dual Photorealistic GTA VI & Stylized Arcane / LoL Engine.
+//! Adaptive Aesthetic Shading Pipeline — Dual Photorealistic & Stylized Rendering Engine.
 //!
-//! Enables seamless switching or blending between Ultra Photorealistic GTA VI / Dune rendering
-//! and Stylized Cinematic Arcane / LoL / Cyberpunk anime shading with custom cell-contour SDF rim lighting.
+//! Enables seamless switching or blending between Ultra Photorealistic PBR rendering
+//! and Stylized Cinematic Painterly / Anime cell shading with custom cell-contour SDF rim lighting.
 
 use serde::{Deserialize, Serialize};
 
 /// Target Rendering Aesthetic Style Preset.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RenderingAestheticPreset {
-    UltraPhotorealisticGtaVi, // GTA VI / Dune photorealism
-    StylizedCinematicArcane,  // Arcane / LoL painterly cell-contour
-    CyberpunkAnimeToon,        // Anime cell shading with chromatic aberration
-    HybridPhotoStylized,       // Blend photoreal skin + painterly VFX
+    PhotorealisticPbr,     // High-fidelity continuous PBR
+    PainterlyCellContour,  // Dynamic hand-painted cell-contour
+    HalftoneComic,         // Comic book halftone dots & ink outlines
+    HandDrawn2dAnime,      // 2D anime cell shading with chromatic aberration
+    HybridPhotoStylized,   // Blend photoreal skin + painterly VFX
 }
 
 /// Evaluated Aesthetic Shading Output.
@@ -31,21 +32,28 @@ impl AdaptiveAestheticShadingPipeline {
     /// Evaluates aesthetic shading parameters for the selected visual style.
     pub fn select_shading_parameters(preset: RenderingAestheticPreset) -> AestheticShadingParameters {
         match preset {
-            RenderingAestheticPreset::UltraPhotorealisticGtaVi => AestheticShadingParameters {
+            RenderingAestheticPreset::PhotorealisticPbr => AestheticShadingParameters {
                 preset,
                 cell_band_count: 0, // Continuous smooth PBR
                 rim_light_intensity: 0.2,
                 painterly_stroke_scale: 0.0,
                 specular_sharpness: 64.0,
             },
-            RenderingAestheticPreset::StylizedCinematicArcane => AestheticShadingParameters {
+            RenderingAestheticPreset::PainterlyCellContour => AestheticShadingParameters {
                 preset,
                 cell_band_count: 4, // 4 discrete hand-painted tone bands
                 rim_light_intensity: 1.8,
                 painterly_stroke_scale: 1.2,
                 specular_sharpness: 128.0,
             },
-            RenderingAestheticPreset::CyberpunkAnimeToon => AestheticShadingParameters {
+            RenderingAestheticPreset::HalftoneComic => AestheticShadingParameters {
+                preset,
+                cell_band_count: 3,
+                rim_light_intensity: 2.0,
+                painterly_stroke_scale: 0.8,
+                specular_sharpness: 160.0,
+            },
+            RenderingAestheticPreset::HandDrawn2dAnime => AestheticShadingParameters {
                 preset,
                 cell_band_count: 2,
                 rim_light_intensity: 2.5,
@@ -68,16 +76,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_gta_vi_preset_outputs_continuous_pbr() {
-        let pbr = AdaptiveAestheticShadingPipeline::select_shading_parameters(RenderingAestheticPreset::UltraPhotorealisticGtaVi);
+    fn test_photoreal_preset_outputs_continuous_pbr() {
+        let pbr = AdaptiveAestheticShadingPipeline::select_shading_parameters(RenderingAestheticPreset::PhotorealisticPbr);
         assert_eq!(pbr.cell_band_count, 0);
         assert_eq!(pbr.painterly_stroke_scale, 0.0);
     }
 
     #[test]
-    fn test_arcane_preset_outputs_painterly_cell_bands() {
-        let arcane = AdaptiveAestheticShadingPipeline::select_shading_parameters(RenderingAestheticPreset::StylizedCinematicArcane);
-        assert_eq!(arcane.cell_band_count, 4);
-        assert!(arcane.rim_light_intensity > 1.0);
+    fn test_painterly_preset_outputs_cell_bands() {
+        let painterly = AdaptiveAestheticShadingPipeline::select_shading_parameters(RenderingAestheticPreset::PainterlyCellContour);
+        assert_eq!(painterly.cell_band_count, 4);
+        assert!(painterly.rim_light_intensity > 1.0);
     }
 }

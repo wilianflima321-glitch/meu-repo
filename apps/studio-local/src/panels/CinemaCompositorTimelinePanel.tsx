@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Film, Play, Pause, Video, Disc, FastForward, Sliders, Volume2, Sparkles } from 'lucide-react';
+import { Film, Play, Pause, Video, Disc, Sliders, Volume2, Sparkles } from 'lucide-react';
 
 export const CinemaCompositorTimelinePanel: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -102,7 +102,7 @@ export const CinemaCompositorTimelinePanel: React.FC = () => {
           <Sliders className="w-4 h-4 text-purple-400 shrink-0" />
           <span className="w-28 text-purple-300 font-bold">Track 2: Shading</span>
           <div className="flex-1 bg-purple-900/60 h-5 rounded relative overflow-hidden flex items-center px-2 text-[10px] text-purple-200">
-            GTA VI Photoreal PBR ➔ Stylized Arcane 4-Band Cell Morphing
+            Photorealistic PBR ➔ Stylized Painterly 4-Band Cell Morphing
           </div>
         </div>
 
@@ -110,7 +110,7 @@ export const CinemaCompositorTimelinePanel: React.FC = () => {
           <Volume2 className="w-4 h-4 text-pink-400 shrink-0" />
           <span className="w-28 text-pink-300 font-bold">Track 3: Audio Sync</span>
           <div className="flex-1 bg-pink-900/60 h-5 rounded relative overflow-hidden flex items-center px-2 text-[10px] text-pink-200">
-            Multilingual Viseme Lip-Sync (Japanese Vocal Muscle Retargeting)
+            Multilingual Viseme Lip-Sync (Facial Muscle Retargeting)
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Palette, Sparkles, Droplets, Sun, Feather, Eye } from 'lucide-react';
 
 export const AestheticStyleStudioPanel: React.FC = () => {
-  const [aestheticPreset, setAestheticPreset] = useState<'GtaVi' | 'Arcane' | 'SpiderVerse' | 'AnimeToon'>('Arcane');
+  const [aestheticPreset, setAestheticPreset] = useState<'PhotorealisticPbr' | 'PainterlyCellContour' | 'HalftoneComic' | 'HandDrawn2dAnime'>('PainterlyCellContour');
   const [fluidChemistry, setFluidChemistry] = useState<'HemoglobinRed' | 'HemocyaninBlue' | 'AcidGreen' | 'BioluminescentGold'>('BioluminescentGold');
   const [inkStrokeWidth, setInkStrokeWidth] = useState(2.4);
 
@@ -28,50 +28,50 @@ export const AestheticStyleStudioPanel: React.FC = () => {
         </label>
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => setAestheticPreset('GtaVi')}
+            onClick={() => setAestheticPreset('PhotorealisticPbr')}
             className={`p-2.5 text-xs font-bold rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
-              aestheticPreset === 'GtaVi'
+              aestheticPreset === 'PhotorealisticPbr'
                 ? 'bg-indigo-900/60 border-indigo-500 text-indigo-200 shadow-md shadow-indigo-950'
                 : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
             }`}
           >
-            <span>GTA VI Photoreal PBR</span>
+            <span>Photorealistic PBR</span>
             <Sun className="w-4 h-4 text-amber-400" />
           </button>
 
           <button
-            onClick={() => setAestheticPreset('Arcane')}
+            onClick={() => setAestheticPreset('PainterlyCellContour')}
             className={`p-2.5 text-xs font-bold rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
-              aestheticPreset === 'Arcane'
+              aestheticPreset === 'PainterlyCellContour'
                 ? 'bg-purple-900/60 border-purple-500 text-purple-200 shadow-md shadow-purple-950'
                 : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
             }`}
           >
-            <span>Arcane / LoL Painterly</span>
+            <span>Painterly Cell Contour</span>
             <Feather className="w-4 h-4 text-purple-400" />
           </button>
 
           <button
-            onClick={() => setAestheticPreset('SpiderVerse')}
+            onClick={() => setAestheticPreset('HalftoneComic')}
             className={`p-2.5 text-xs font-bold rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
-              aestheticPreset === 'SpiderVerse'
+              aestheticPreset === 'HalftoneComic'
                 ? 'bg-pink-900/60 border-pink-500 text-pink-200 shadow-md shadow-pink-950'
                 : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
             }`}
           >
-            <span>Spider-Verse Halftone</span>
+            <span>Halftone Comic Ink</span>
             <Sparkles className="w-4 h-4 text-pink-400" />
           </button>
 
           <button
-            onClick={() => setAestheticPreset('AnimeToon')}
+            onClick={() => setAestheticPreset('HandDrawn2dAnime')}
             className={`p-2.5 text-xs font-bold rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
-              aestheticPreset === 'AnimeToon'
+              aestheticPreset === 'HandDrawn2dAnime'
                 ? 'bg-emerald-900/60 border-emerald-500 text-emerald-200 shadow-md shadow-emerald-950'
                 : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
             }`}
           >
-            <span>Ufotable Anime 2D</span>
+            <span>Hand-Drawn 2D Anime</span>
             <Eye className="w-4 h-4 text-emerald-400" />
           </button>
         </div>
@@ -92,7 +92,7 @@ export const AestheticStyleStudioPanel: React.FC = () => {
             }`}
           >
             <Droplets className="w-3.5 h-3.5 text-red-500" />
-            <span>Hemoglobin Red (Human)</span>
+            <span>Hemoglobin Red</span>
           </button>
 
           <button
@@ -104,7 +104,7 @@ export const AestheticStyleStudioPanel: React.FC = () => {
             }`}
           >
             <Droplets className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Hemocyanin Blue (Alien)</span>
+            <span>Hemocyanin Blue</span>
           </button>
 
           <button
@@ -116,7 +116,7 @@ export const AestheticStyleStudioPanel: React.FC = () => {
             }`}
           >
             <Droplets className="w-3.5 h-3.5 text-lime-400" />
-            <span>Hemolymph Green (Acid)</span>
+            <span>Hemolymph Green</span>
           </button>
 
           <button
@@ -128,7 +128,7 @@ export const AestheticStyleStudioPanel: React.FC = () => {
             }`}
           >
             <Droplets className="w-3.5 h-3.5 text-amber-400" />
-            <span>Bioluminescent Gold (Deity)</span>
+            <span>Bioluminescent Gold</span>
           </button>
         </div>
       </div>
