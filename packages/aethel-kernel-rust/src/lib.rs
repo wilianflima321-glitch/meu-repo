@@ -230,3 +230,8 @@ pub mod in_engine_compositor_zero_loss;
 pub mod agentic_cinematographer_director;
 pub mod multilingual_lipsync_bridge;
 pub mod gameplay_to_cinematic_seamless_bridge;
+pub mod anchor_geometric_latent_constraint;
+pub mod temporal_cohesion_solver_4d;
+pub mod artistic_soul_cinematography;
+pub mod persistent_material_memory;
+pub mod self_critique_aesthetic_pipeline;
