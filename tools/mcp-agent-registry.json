@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "Aethel Engine MCP Agent Registry (2026-V22)",
+  "version": "1.0.0",
+  "description": "Registry of Model Context Protocol (MCP) specialized sub-agents for autonomous game engine development, physics verification, and closed-loop self-healing.",
+  "agents": [
+    {
+      "id": "rigging-animation-agent",
+      "name": "Rigging & Animation Specialist Agent",
+      "capabilities": ["skeleton-skinning-audit", "usd-gltf-rig-contract-validation"],
+      "targetPaths": ["packages/runtime-contracts", "packages/aethel-kernel-rust/src/usd_gltf_autotopology_exporter.rs"]
+    },
+    {
+      "id": "vfx-fluid-agent",
+      "name": "VFX & Fluid Physics Specialist Agent",
+      "capabilities": ["sph-density-audit", "xpbd-substep-verify", "flip-apic-mass-conservation"],
+      "targetPaths": [
+        "packages/aethel-kernel-rust/src/matter_thermodynamics_sph.rs",
+        "packages/aethel-kernel-rust/src/position_based_dynamics.rs",
+        "packages/aethel-kernel-rust/src/hybrid_eulerian_lagrangian_pbd.rs",
+        "packages/aethel-kernel-rust/src/aerodynamic_navier_stokes.rs"
+      ]
+    },
+    {
+      "id": "audit-compliance-agent",
+      "name": "V22 Operational Compliance & Auditor Agent",
+      "capabilities": ["manifesto-audit", "release-evidence-signing", "capability-score-verification"],
+      "targetPaths": ["docs/", "task.md", "implementation_plan.md", "scripts/release_evidence_generator.mjs"]
+    },
+    {
+      "id": "self-healing-agent",
+      "name": "Self-Healing Runtime Hotfix Agent",
+      "capabilities": ["stack-trace-parsing", "closed-loop-hotfix", "playwright-ci-log-inspection"],
+      "targetPaths": [
+        "packages/aethel-kernel-rust/src/self_healing_runtime_daemon.rs",
+        "apps/studio-local",
+        "packages/runtime-contracts"
+      ]
+    }
+  ]
+}
