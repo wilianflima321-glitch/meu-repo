@@ -173,3 +173,7 @@ pub mod neural_procedural_texture_function;
 pub mod aethel_sentinel_gameplay_anticheat;
 pub mod decentralized_asset_provenance_contract;
 pub mod hardware_intrinsic_self_compiler;
+pub mod dna_shuffler;
+pub mod muscle_sim_rig;
+pub mod spectral_particle_field;
+pub mod ai_divergence_auditor;
