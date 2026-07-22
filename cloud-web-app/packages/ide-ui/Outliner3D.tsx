@@ -91,7 +91,7 @@ function filterNodes(nodes: SceneNode[], query: string): SceneNode[] {
 // ─── Icon + color per node type (semantic color coding) ──────────────────────
 
 interface NodeIconDef {
-  Icon: React.FC<{ size?: number; className?: string }>
+  Icon: React.ComponentType<any>
   colorClass: string
   label: string
 }
