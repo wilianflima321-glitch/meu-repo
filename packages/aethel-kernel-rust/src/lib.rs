@@ -215,3 +215,4 @@ pub mod predictive_vocal_chords_sync;
 pub mod audio_hardware_watcher_swarm;
 pub mod internal_refiner;
 pub mod master_bridge;
+pub mod accuracy_engine;
