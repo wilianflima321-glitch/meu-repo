@@ -205,3 +205,7 @@ pub mod temporal_fold_predictor;
 pub mod universal_abstract_instruction_layer;
 pub mod agent_tycoon_royalty_oracle;
 pub mod cognitive_interlace_studio;
+pub mod neural_speech_synthesis;
+pub mod lux_neural_midi_orchestrator;
+pub mod repo_mind_dependency_graph;
+pub mod live_auto_profiler_telepathic_terminal;
