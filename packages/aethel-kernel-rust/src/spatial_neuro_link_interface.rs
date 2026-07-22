@@ -31,14 +31,15 @@ impl SpatialNeuroLinkInterface {
     pub fn process_spatial_intent(input: &SpatialInputKind) -> Option<NeuroLinkMutationDirective> {
         match input {
             SpatialInputKind::VoiceCommand(cmd) => {
-                if cmd.contains("spectral light") || cmd.contains("luz spectral") {
+                let lower = cmd.to_lowercase();
+                if lower.contains("spectral light") || lower.contains("luz spectral") {
                     Some(NeuroLinkMutationDirective {
                         target_component: "lux_spectral_raymarched".to_string(),
                         parameter_name: "photon_intensity".to_string(),
                         new_value_float: 2.5,
                         live_recompile_required: false,
                     })
-                } else if cmd.contains("heavier punch") || cmd.contains("soco mais pesado") {
+                } else if lower.contains("punch") || (lower.contains("soco") && lower.contains("pesado")) {
                     Some(NeuroLinkMutationDirective {
                         target_component: "muscle_sim_rig".to_string(),
                         parameter_name: "max_joint_torque".to_string(),
