@@ -196,3 +196,8 @@ pub mod zero_copy_webgpu_pipeline_bridge;
 pub mod predictive_force_locomotion;
 pub mod aesthetic_profiler_auditor;
 pub mod dynamic_kernel_mode_hotswap;
+pub mod bio_kernel_homeostasis;
+pub mod vision_to_reality_orchestrator;
+pub mod edge_engine_hybrid_split;
+pub mod quantum_ip_watermark;
+pub mod collective_network_effect;
