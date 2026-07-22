@@ -187,3 +187,8 @@ pub mod mass_inertia_locomotion;
 pub mod environmental_context_choreographer;
 pub mod lux_facial_subsurface_occlusion;
 pub mod emotion_micro_saccade_engine;
+pub mod infinity_core_folded_geometry;
+pub mod agent_tycoon_executive_producer;
+pub mod aethel_synapse_link_haptics;
+pub mod metamorphic_core_engine;
+pub mod reality_mirror_auditor;
