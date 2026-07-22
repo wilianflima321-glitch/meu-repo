@@ -245,3 +245,4 @@ pub mod virtual_vram_neural_pager;
 pub mod cloud_edge_attribute_streamer;
 pub mod democratized_ai_lod_deployer;
 pub mod hardware_stress_mocking_resilience;
+pub mod full_system_soak_audit;
