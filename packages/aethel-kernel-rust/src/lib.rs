@@ -224,3 +224,8 @@ pub mod cinematic_quality_vision_auditor;
 pub mod universal_entity_chromatic_fluid;
 pub mod adaptive_aesthetic_shading_pipeline;
 pub mod hardware_safe_topological_lod;
+pub mod aethel_inker_painter_npr;
+pub mod spectral_lens_post_processing;
+pub mod in_engine_compositor_zero_loss;
+pub mod agentic_cinematographer_director;
+pub mod multilingual_lipsync_bridge;
