@@ -249,3 +249,4 @@ pub mod full_system_soak_audit;
 pub mod gemini_specter_cold_execution;
 pub mod context_hydration_summary_graph;
 pub mod pilar100_audit_sanity_loop;
+pub mod ai_fusion_moa_orchestrator;
