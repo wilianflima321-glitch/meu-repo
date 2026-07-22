@@ -192,3 +192,7 @@ pub mod agent_tycoon_executive_producer;
 pub mod aethel_synapse_link_haptics;
 pub mod metamorphic_core_engine;
 pub mod reality_mirror_auditor;
+pub mod zero_copy_webgpu_pipeline_bridge;
+pub mod predictive_force_locomotion;
+pub mod aesthetic_profiler_auditor;
+pub mod dynamic_kernel_mode_hotswap;
