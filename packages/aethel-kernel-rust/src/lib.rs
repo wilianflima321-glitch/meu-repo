@@ -235,3 +235,8 @@ pub mod temporal_cohesion_solver_4d;
 pub mod artistic_soul_cinematography;
 pub mod persistent_material_memory;
 pub mod self_critique_aesthetic_pipeline;
+pub mod quantum_rollback_netcode;
+pub mod neural_micro_fracture_destruction;
+pub mod infinite_spatial_octree_streamer;
+pub mod ecosystem_wildlife_homeostasis;
+pub mod self_healing_metamorphic_compiler;
