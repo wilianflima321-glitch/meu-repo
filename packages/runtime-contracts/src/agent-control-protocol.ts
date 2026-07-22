@@ -1,8 +1,8 @@
 /**
- * AGENT CONTROL PROTOCOL (ACP v1.17) - DETERMINISTIC IMPACT SIMULATION & EXECUTION CONTRACT
+ * AGENT CONTROL PROTOCOL (ACP v1.18) - DETERMINISTIC IMPACT SIMULATION & PROFIT MARGIN CONTRACT
  *
  * Enforces zero-hallucination, zero-breakage code mutations across the Aethel Engine repository.
- * Simulates code edit side effects prior to file system writes.
+ * Configures dynamic platform commercial pricing & profit margin multiplier.
  */
 
 export interface CodeMutationRequest {
@@ -21,7 +21,38 @@ export interface AcpImpactSimulationResult {
   mitigationPlan?: string;
 }
 
+export interface PlatformCommercialMarginConfig {
+  baseTokenCostUsd: number;
+  platformProfitMarginMultiplier: number; // Configurable margin (e.g. 1.0x = cost, 3.0x = 300% margin, 5.0x = 500% margin)
+  monetizationActive: boolean;
+}
+
 export class AgentControlProtocolEngine {
+  private static marginConfig: PlatformCommercialMarginConfig = {
+    baseTokenCostUsd: 0.0001,
+    platformProfitMarginMultiplier: 1.0, // Default to cost during testing phase
+    monetizationActive: false,
+  };
+
+  /**
+   * Updates platform profit margin multiplier when commercial monetization is activated.
+   */
+  public static setPlatformMarginMultiplier(multiplier: number, active: boolean = true): PlatformCommercialMarginConfig {
+    this.marginConfig.platformProfitMarginMultiplier = Math.max(1.0, multiplier);
+    this.marginConfig.monetizationActive = active;
+    return { ...this.marginConfig };
+  }
+
+  /**
+   * Calculates end-user token price including platform profit margin.
+   */
+  public static calculateUserTokenPrice(rawTokenCost: number): number {
+    if (!this.marginConfig.monetizationActive) {
+      return rawTokenCost; // Testing phase: pure raw cost
+    }
+    return rawTokenCost * this.marginConfig.platformProfitMarginMultiplier;
+  }
+
   /**
    * Simulates the impact of a proposed code change before committing to disk.
    */
