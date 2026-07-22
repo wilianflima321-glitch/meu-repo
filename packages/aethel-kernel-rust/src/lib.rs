@@ -221,3 +221,6 @@ pub mod layered_spectral_skin_sss;
 pub mod non_euclidean_thin_film_magic;
 pub mod micro_voxel_gaseous_fsi;
 pub mod cinematic_quality_vision_auditor;
+pub mod universal_entity_chromatic_fluid;
+pub mod adaptive_aesthetic_shading_pipeline;
+pub mod hardware_safe_topological_lod;
