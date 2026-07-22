@@ -177,3 +177,8 @@ pub mod dna_shuffler;
 pub mod muscle_sim_rig;
 pub mod spectral_particle_field;
 pub mod ai_divergence_auditor;
+pub mod kernel_polymorph;
+pub mod bio_cognitive_flow_tether;
+pub mod spatial_neuro_link_interface;
+pub mod decentralized_royalty_ledger;
+pub mod adversarial_chaos_monkey;
