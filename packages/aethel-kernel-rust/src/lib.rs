@@ -216,3 +216,8 @@ pub mod audio_hardware_watcher_swarm;
 pub mod internal_refiner;
 pub mod master_bridge;
 pub mod accuracy_engine;
+pub mod implicit_neural_sdf_surface;
+pub mod layered_spectral_skin_sss;
+pub mod non_euclidean_thin_film_magic;
+pub mod micro_voxel_gaseous_fsi;
+pub mod cinematic_quality_vision_auditor;
