@@ -34,7 +34,14 @@ cloud-web-app/web/output/
 
 # Rust/Tauri build outputs
 **/target/
+**/target-gnu/
+*.exe
 apps/studio-local/src-tauri/gen/
+
+# Rust toolchain homes on project drive (E:) — letter dc
+.cargo/
+.rustup/
+.mingw/
 
 # Env
 .env
@@ -85,6 +92,11 @@ __pycache__/
 *.pyc
 *.pyo
 .ipynb_checkpoints/
+script.js
+script.py
+test_align.rs
+update_entropy.py
+update_wire.py
 
 # Storybook static build output
 **/storybook-static/

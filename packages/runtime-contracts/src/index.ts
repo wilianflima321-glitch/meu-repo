@@ -1,4 +1,6 @@
-﻿export const STUDIO_LOCAL_CONTRACT_VERSION = 1 as const
+import { z } from 'zod'
+
+export const STUDIO_LOCAL_CONTRACT_VERSION = 1 as const
 
 export const STUDIO_LOCAL_ENDPOINTS = {
   health: '/health',
@@ -86,115 +88,132 @@ export const RUNTIME_SIDECAR_KINDS = [
 ] as const
 export type RuntimeSidecarKind = (typeof RUNTIME_SIDECAR_KINDS)[number]
 
-export interface RuntimeSidecarCapability {
-  kind: RuntimeSidecarKind
-  label: string
-  available: boolean
-  reason: string
-}
+export const RuntimeSidecarCapabilitySchema = z.object({
+  kind: z.enum(RUNTIME_SIDECAR_KINDS),
+  label: z.string(),
+  available: z.boolean(),
+  reason: z.string(),
+})
 
-export interface LocalRuntimeProbeReport {
-  version: typeof STUDIO_LOCAL_CONTRACT_VERSION
-  generatedAt: string
-  deviceId: string
-  os: string
-  arch: string
-  cpuLogicalCores: number
-  totalMemoryMb: number | null
-  availableMemoryMb: number | null
-  storageFreeMb: number | null
-  gpuAvailable: boolean
-  gpuName: string | null
-  webGpuAvailable: boolean
-  webNnAvailable: boolean
-  npuAvailable: boolean
-  windowsMlAvailable: boolean
-  directMlAvailable: boolean
-  onnxRuntimeAvailable: boolean
-  ffmpegAvailable: boolean
-  rapierAvailable: boolean
-  browserAutomationAvailable: boolean
-  nativeGraphicsBackends?: NativeGraphicsBackend[]
-  aiExecutionProviders?: NativeAiExecutionProvider[]
-  localToolchain?: LocalRuntimeToolchainFeature[]
-  thermalState: ThermalState
-  storagePressure: StoragePressure
-  preferredExecutor: RuntimeExecutionTarget
-  signature: string
-}
+export type RuntimeSidecarCapability = z.infer<typeof RuntimeSidecarCapabilitySchema>
 
-export interface RuntimeJobEvidenceRequirement {
-  kind:
-    | 'test-log'
-    | 'screenshot'
-    | 'video'
-    | 'render-preview'
-    | 'asset-report'
-    | 'browser-replay'
-    | 'diff'
-    | 'source-citation'
-    | 'cost-report'
-  required: boolean
-}
+export const LocalRuntimeProbeReportSchema = z.object({
+  version: z.literal(STUDIO_LOCAL_CONTRACT_VERSION),
+  generatedAt: z.string(),
+  deviceId: z.string(),
+  os: z.string(),
+  arch: z.string(),
+  cpuLogicalCores: z.number(),
+  totalMemoryMb: z.number().nullable(),
+  availableMemoryMb: z.number().nullable(),
+  storageFreeMb: z.number().nullable(),
+  gpuAvailable: z.boolean(),
+  gpuName: z.string().nullable(),
+  webGpuAvailable: z.boolean(),
+  webNnAvailable: z.boolean(),
+  npuAvailable: z.boolean(),
+  windowsMlAvailable: z.boolean(),
+  directMlAvailable: z.boolean(),
+  onnxRuntimeAvailable: z.boolean(),
+  ffmpegAvailable: z.boolean(),
+  rapierAvailable: z.boolean(),
+  browserAutomationAvailable: z.boolean(),
+  nativeGraphicsBackends: z.array(z.enum(NATIVE_GRAPHICS_BACKENDS)).optional(),
+  aiExecutionProviders: z.array(z.enum(NATIVE_AI_EXECUTION_PROVIDERS)).optional(),
+  localToolchain: z.array(z.enum(LOCAL_RUNTIME_TOOLCHAIN_FEATURES)).optional(),
+  thermalState: z.enum(['unknown', 'nominal', 'warm', 'critical']),
+  storagePressure: z.enum(['unknown', 'ok', 'low-space', 'critical']),
+  preferredExecutor: z.enum(RUNTIME_EXECUTION_TARGETS),
+  signature: z.string(),
+})
 
-export interface RuntimeJobScopeLock {
-  mode: 'read-only' | 'diff-only' | 'exclusive-apply-held'
-  allowedPaths: string[]
-  deniedPaths: string[]
-  reason: string
-}
+export type LocalRuntimeProbeReport = z.infer<typeof LocalRuntimeProbeReportSchema>
 
-export interface RuntimeJobRequest {
-  version: typeof STUDIO_LOCAL_CONTRACT_VERSION
-  projectId: string
-  missionId: string
-  lane: RuntimeJobLane
-  requestedTarget: RuntimeExecutionTarget
-  title: string
-  ownerAgent: string
-  scopeLock: RuntimeJobScopeLock
-  evidenceRequired: RuntimeJobEvidenceRequirement[]
-  rollbackPlan: string
-  maxCostUsd: number
-  requiresHumanApproval: boolean
-  createdAt: string
-}
+export const RuntimeJobEvidenceRequirementSchema = z.object({
+  kind: z.enum([
+    'test-log',
+    'screenshot',
+    'video',
+    'render-preview',
+    'asset-report',
+    'browser-replay',
+    'diff',
+    'source-citation',
+    'cost-report'
+  ]),
+  required: z.boolean(),
+})
 
-export interface RuntimeJobStatus {
-  version: typeof STUDIO_LOCAL_CONTRACT_VERSION
-  id: string
-  request: RuntimeJobRequest
-  state: RuntimeJobState
-  target: RuntimeExecutionTarget
-  safety: RuntimeSafetyLevel
-  progress: number
-  compactLog: string[]
-  evidenceRefs: string[]
-  blocker: string | null
-  updatedAt: string
-}
+export type RuntimeJobEvidenceRequirement = z.infer<typeof RuntimeJobEvidenceRequirementSchema>
 
-export interface RuntimeCloudSyncPayload {
-  version: typeof STUDIO_LOCAL_CONTRACT_VERSION
-  accountId: string
-  projectId: string
-  deviceId: string
-  probe: LocalRuntimeProbeReport
-  jobs: RuntimeJobStatus[]
-  missionLedgerRefs: string[]
-  signedAt?: string
-  nonce?: string
-  signature?: string
-}
+export const RuntimeJobScopeLockSchema = z.object({
+  mode: z.enum(['read-only', 'diff-only', 'exclusive-apply-held']),
+  allowedPaths: z.array(z.string()),
+  deniedPaths: z.array(z.string()),
+  reason: z.string(),
+})
 
-export interface RuntimeCloudSyncSigningPayload {
-  version: typeof STUDIO_LOCAL_CONTRACT_VERSION
-  userId: string
-  deviceId: string
-  signedAt: string
-  nonce: string
-  report: LocalRuntimeProbeReport
-}
+export type RuntimeJobScopeLock = z.infer<typeof RuntimeJobScopeLockSchema>
+
+export const RuntimeJobRequestSchema = z.object({
+  version: z.literal(STUDIO_LOCAL_CONTRACT_VERSION),
+  projectId: z.string(),
+  missionId: z.string(),
+  lane: z.enum(RUNTIME_JOB_LANES),
+  requestedTarget: z.enum(RUNTIME_EXECUTION_TARGETS),
+  title: z.string(),
+  ownerAgent: z.string(),
+  scopeLock: RuntimeJobScopeLockSchema,
+  evidenceRequired: z.array(RuntimeJobEvidenceRequirementSchema),
+  rollbackPlan: z.string(),
+  maxCostUsd: z.number(),
+  requiresHumanApproval: z.boolean(),
+  createdAt: z.string(),
+})
+
+export type RuntimeJobRequest = z.infer<typeof RuntimeJobRequestSchema>
+
+export const RuntimeJobStatusSchema = z.object({
+  version: z.literal(STUDIO_LOCAL_CONTRACT_VERSION),
+  id: z.string(),
+  request: RuntimeJobRequestSchema,
+  state: z.enum(['queued', 'running', 'held', 'needs-approval', 'complete', 'failed', 'cancelled']),
+  target: z.enum(RUNTIME_EXECUTION_TARGETS),
+  safety: z.enum(['ready', 'fallback', 'held', 'needs-confirmation']),
+  progress: z.number(),
+  compactLog: z.array(z.string()),
+  evidenceRefs: z.array(z.string()),
+  blocker: z.string().nullable(),
+  updatedAt: z.string(),
+})
+
+export type RuntimeJobStatus = z.infer<typeof RuntimeJobStatusSchema>
+
+export const RuntimeCloudSyncPayloadSchema = z.object({
+  version: z.literal(STUDIO_LOCAL_CONTRACT_VERSION),
+  accountId: z.string(),
+  projectId: z.string(),
+  deviceId: z.string(),
+  probe: LocalRuntimeProbeReportSchema,
+  jobs: z.array(RuntimeJobStatusSchema),
+  missionLedgerRefs: z.array(z.string()),
+  signedAt: z.string().optional(),
+  nonce: z.string().optional(),
+  signature: z.string().optional(),
+})
+
+export type RuntimeCloudSyncPayload = z.infer<typeof RuntimeCloudSyncPayloadSchema>
+
+export const RuntimeCloudSyncSigningPayloadSchema = z.object({
+  version: z.literal(STUDIO_LOCAL_CONTRACT_VERSION),
+  userId: z.string(),
+  deviceId: z.string(),
+  signedAt: z.string(),
+  nonce: z.string(),
+  report: LocalRuntimeProbeReportSchema,
+})
+
+export type RuntimeCloudSyncSigningPayload = z.infer<typeof RuntimeCloudSyncSigningPayloadSchema>
 
 export function isRuntimeJobLane(value: string): value is RuntimeJobLane {
   return RUNTIME_JOB_LANES.includes(value as RuntimeJobLane)
@@ -410,3 +429,29 @@ export function resolveSafeRuntimeTarget(input: {
 
   return input.probe.preferredExecutor === 'held' ? 'cloud-sandbox' : input.probe.preferredExecutor
 }
+
+export * from './evidence-contract'
+
+// --- SUPREMACIA UI & UX TEMPORAL --- //
+
+export const SynapticThresholdLimiterSchema = z.object({
+  hesitationMs: z.number(),
+  misclickRate: z.number(),
+  cognitiveOverloadDetected: z.boolean().describe('Verdadeiro quando a variância de cliques e scroll indica exaustão.'),
+  // O Agente usa isso para assumir o controle (Piloto Automático) se o humano fritar
+  systemInterventionLevel: z.enum(['none', 'simplify-ui', 'dialectic-suggestion', 'full-autopilot']),
+})
+export type SynapticThresholdLimiter = z.infer<typeof SynapticThresholdLimiterSchema>
+
+export const GenerativeUIStateSchema = z.object({
+  uiSeedHash: z.string(), // O Genoma Estético da Interface
+  ghostStateActive: z.boolean(), // Projeção preditiva local via Rust
+  collapseMode: z.enum(['generative-friendly', 'hlsl-raw', 'rust-raw']), // The Black Box Problem solver
+  temporalBranchId: z.string().uuid(), // O "Git" de memória Multiversal (Substitui o Undo)
+  predictiveHUDNextIntent: z.string().nullable(),
+  synapticLimiter: SynapticThresholdLimiterSchema, // A camada de Sintonia L7
+})
+export type GenerativeUIState = z.infer<typeof GenerativeUIStateSchema>
+
+export * from './matter-contract'
+

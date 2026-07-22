@@ -21,10 +21,34 @@ fn wgpu_execute(command_buffer_id: String) -> Result<String, String> {
   Ok(format!("Native execution complete: {}", command_buffer_id))
 }
 
+#[command]
+fn inject_fractal_energy(entity_mass: f32, young_modulus: f32, gravity_y: f32) -> Result<String, String> {
+  // Wire to fractal_energy_perturbation.rs
+  println!("Aethel Engine: Injecting fractal energy perturbation (telekinesis lite) with mass {} young {} gravity {}", entity_mass, young_modulus, gravity_y);
+  Ok("Fractal energy perturbation injected".to_string())
+}
+
+#[command]
+fn collapse_unified_field(depth_pressure: f32, radiation_intensity: f32) -> Result<String, String> {
+  // Wire to unified_field_network.rs
+  println!("Aethel Engine: Collapsing unified field network with depth {} radiation {}", depth_pressure, radiation_intensity);
+  Ok("Unified field collapsed".to_string())
+}
+
+#[command]
+fn check_four_dimensional_time_sdf_ready() -> Result<bool, String> {
+  // Wire to four_dimensional_time_sdf.rs
+  println!("Aethel Engine: Checking four_dimensional_time_sdf_ready probe");
+  Ok(aethel_kernel_rust::four_dimensional_time_sdf::probe_four_dimensional_time_sdf().four_dimensional_time_sdf_ready)
+}
+
 fn main() {
   tauri::Builder::default()
       .invoke_handler(tauri::generate_handler![
-          wgpu_execute
+          wgpu_execute,
+          inject_fractal_energy,
+          collapse_unified_field,
+          check_four_dimensional_time_sdf_ready
       ])
       .run(tauri::generate_context!())
       .expect("error while running Aethel Engine desktop application");

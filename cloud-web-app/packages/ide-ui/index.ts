@@ -23,6 +23,8 @@ export type { SceneNode } from './Outliner3D'
 export { Timeline3D } from './Timeline3D'
 export { PropertiesPanel3D } from './PropertiesPanel3D'
 export type { PropertiesPanelProps, PropertySection, Property } from './PropertiesPanel3D'
+export { FluidPlaytestViewportConsumer } from './FluidPlaytestViewportConsumer'
+export type { FluidParticle, FluidPlaytestProps } from './FluidPlaytestViewportConsumer'
 
 // Source Control
 export { GitIntegration } from './GitIntegration'

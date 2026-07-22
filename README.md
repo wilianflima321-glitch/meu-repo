@@ -35,28 +35,36 @@ Draft AI assets are not final. Raw text-to-3D meshes remain draft until curated,
 
 ## Setup Local
 
+Para inicializar a Aethel Engine completa (Cloud + Studio Local), execute o setup do monorepo a partir da raiz:
+
 ```bash
+# 1. Instalar dependências da raiz (workspaces)
 npm install
+
+# 2. Instalar dependências do Cloud Web App
 cd cloud-web-app/web
+npm install
+cd ../..
+
+# 3. Instalar dependências do Studio Local
+cd apps/studio-local
 npm install
 cd ../..
 ```
 
-Create local runtime env files:
+Crie os arquivos de ambiente locais do runtime:
 
 ```bash
 npm run setup:local-runtime
 ```
 
-Then configure at least:
+Configure as variáveis obrigatórias:
+- Em `cloud-web-app/web/.env.local`: Defina `JWT_SECRET` e `CSRF_SECRET`
+- Defina uma chave de provedor de IA (ex: `OPENROUTER_API_KEY`) ou use o modo demonstração.
 
-- `cloud-web-app/web/.env.local` with `JWT_SECRET` and `CSRF_SECRET`
-- One AI provider key such as `OPENROUTER_API_KEY`, or use the documented demo mode when available
-
-Run the web app:
+Inicie o servidor de desenvolvimento:
 
 ```bash
-cd cloud-web-app/web
 npm run dev
 ```
 

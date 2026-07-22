@@ -11,7 +11,8 @@ pub struct PhysicsKernel {
     pub integration_parameters: IntegrationParameters,
     pub physics_pipeline: PhysicsPipeline,
     pub island_manager: IslandManager,
-    pub broad_phase: BroadPhaseMultiSap,
+    // rapier3d 0.18 renamed BroadPhaseMultiSap → BroadPhase (letter dd)
+    pub broad_phase: BroadPhase,
     pub narrow_phase: NarrowPhase,
     pub impulse_joint_set: ImpulseJointSet,
     pub multibody_joint_set: MultibodyJointSet,
@@ -36,7 +37,7 @@ impl PhysicsKernel {
             integration_parameters: IntegrationParameters::default(),
             physics_pipeline: PhysicsPipeline::new(),
             island_manager: IslandManager::new(),
-            broad_phase: BroadPhaseMultiSap::new(),
+            broad_phase: BroadPhase::new(),
             narrow_phase: NarrowPhase::new(),
             impulse_joint_set: ImpulseJointSet::new(),
             multibody_joint_set: MultibodyJointSet::new(),

@@ -14,6 +14,7 @@ import SceneViewportWorkflowDrawer from './SceneViewportWorkflowDrawer';
 import { RendererHonestyBadge } from './RendererHonestyBadge';
 import { TerrainHeightfieldBrushPanel } from './TerrainHeightfieldBrushPanel';
 import { MultiplayerHonestyBadge } from '@/components/multiplayer/MultiplayerHonestyBadge';
+import { KernelRustFoundationHonestyBadge } from '@/components/kernel/KernelRustFoundationHonestyBadge';
 import type { useSceneViewportSurfaceState } from './useSceneViewportSurfaceState';
 
 /**
@@ -310,9 +311,10 @@ export function SceneViewportStage({
         terrainProjectId={projectId}
       />
 
-      {/* Focus 2A/C4 — honesty chrome; Focus 2B/C3 — durable terrain brush; Block 2B.3 MP honesty */}
+      {/* Focus 2A/C4 — honesty chrome; Focus 2B/C3 — durable terrain brush; Block 2B.3 MP honesty; letter dp kernel foundation */}
       <RendererHonestyBadge projectId={projectId} />
       <MultiplayerHonestyBadge projectId={projectId} />
+      <KernelRustFoundationHonestyBadge />
       <TerrainHeightfieldBrushPanel projectId={projectId} />
 
       {workflowTool ? (

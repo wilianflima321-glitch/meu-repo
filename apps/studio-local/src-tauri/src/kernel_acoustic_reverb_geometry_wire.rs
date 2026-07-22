@@ -1,0 +1,183 @@
+//! Acoustic Reverb Geometry desktop wire — letter **ei**.
+//!
+//! Thin studio-local IPC over `aethel_kernel_rust::acoustic_reverb_geometry`
+//! (Sabine/Eyring RT60 + early reflection soak). Honesty probe
+//! `acousticReverbGeometryReady` is **distinct** from ef
+//! `acousticRaytracingEchoReady`, eh `finiteElementAnalysisReady`,
+//! ee–ea fluid/PBD probes, dz–dq deepen probes, and dc–dm foundation
+//! probes (`slabAllocatorMmapReady`, `baremetalMemoryManagerReady`,
+//! `mmapEcsPagerReady`, `simdWorldSoaHotPathReady`, `simdClayMathReady`,
+//! `worldSoaSabLayoutReady`, `kernelDesktopWireReady`,
+//! `kernelMutDnaDesktopReady`, `kernelSpectralSonicDesktopReady`,
+//! `probe_kernel_foundation`).
+//! Full MetaSounds / HRTF AAA / Coins / Agones / Nanite / DLSS HELD.
+
+use aethel_kernel_rust::acoustic_reverb_geometry::{
+    probe_acoustic_reverb_geometry as kernel_probe, run_acoustic_reverb_geometry_soak,
+    AcousticReverbGeometrySoakReport,
+};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct KernelAcousticReverbGeometryWireReport {
+    pub acoustic_reverb_geometry_ready: bool,
+    pub larger_room_longer_rt60: bool,
+    pub higher_absorption_shorter_rt60: bool,
+    pub early_delay_tracks_nearest_wall: bool,
+    pub eyring_shorter_than_sabine: bool,
+    pub outputs_finite: bool,
+    pub sample_count: u32,
+    pub small_rt60_sabine_sec: f32,
+    pub large_rt60_sabine_sec: f32,
+    pub low_absorb_rt60_sec: f32,
+    pub high_absorb_rt60_sec: f32,
+    pub small_early_delay_sec: f32,
+    pub large_early_delay_sec: f32,
+    pub max_rt60_size_delta: f32,
+    pub max_rt60_absorb_delta: f32,
+    pub evidence_kind: String,
+    pub evidence_fingerprint: u64,
+    pub distinct_from_acoustic_raytracing_echo_probe: bool,
+    pub distinct_from_sonic_impedance_probe: bool,
+    pub distinct_from_spectral_sonic_desktop_probe: bool,
+    pub distinct_from_synesthetic_sensory_remap_probe: bool,
+    pub distinct_from_atmospheric_physical_damping_probe: bool,
+    pub distinct_from_lattice_boltzmann_fluid_solver_probe: bool,
+    pub distinct_from_aerodynamic_navier_stokes_probe: bool,
+    pub distinct_from_matter_thermodynamics_sph_probe: bool,
+    pub distinct_from_hybrid_eulerian_lagrangian_pbd_probe: bool,
+    pub distinct_from_position_based_dynamics_probe: bool,
+    pub distinct_from_finite_element_analysis_probe: bool,
+    pub distinct_from_autonomous_conflict_generator_probe: bool,
+    pub distinct_from_mnemonic_matter_entropy_probe: bool,
+    pub distinct_from_four_dimensional_time_sdf_probe: bool,
+    pub distinct_from_shadow_time_reversal_probe: bool,
+    pub distinct_from_curved_raymarcher_probe: bool,
+    pub distinct_from_fractal_energy_perturbation_probe: bool,
+    pub distinct_from_autonomous_entropy_corrector_probe: bool,
+    pub distinct_from_unified_field_network_probe: bool,
+    pub distinct_from_slab_allocator_mmap_probe: bool,
+    pub distinct_from_baremetal_memory_manager_probe: bool,
+    pub distinct_from_mmap_ecs_pager_probe: bool,
+    pub distinct_from_simd_world_soa_hot_path_probe: bool,
+    pub distinct_from_simd_clay_math_probe: bool,
+    pub distinct_from_world_soa_sab_layout_probe: bool,
+    pub distinct_from_desktop_wire_probe: bool,
+    pub distinct_from_mut_dna_desktop_probe: bool,
+    pub distinct_from_kernel_foundation_probe: bool,
+    pub letter: String,
+    pub note: String,
+    pub metasounds_hrtf_aaa_ready: bool,
+    pub chaos_pbd_parity_ready: bool,
+    pub unreal_mass_100k_ready: bool,
+    pub mmap_sab_production_ready: bool,
+    pub avx512_kernel_ready: bool,
+    pub gr_raymarch_ready: bool,
+    pub dual_timeline_240_ready: bool,
+}
+
+fn to_report(
+    r: AcousticReverbGeometrySoakReport,
+    note: impl Into<String>,
+) -> KernelAcousticReverbGeometryWireReport {
+    KernelAcousticReverbGeometryWireReport {
+        acoustic_reverb_geometry_ready: r.acoustic_reverb_geometry_ready,
+        larger_room_longer_rt60: r.larger_room_longer_rt60,
+        higher_absorption_shorter_rt60: r.higher_absorption_shorter_rt60,
+        early_delay_tracks_nearest_wall: r.early_delay_tracks_nearest_wall,
+        eyring_shorter_than_sabine: r.eyring_shorter_than_sabine,
+        outputs_finite: r.outputs_finite,
+        sample_count: r.sample_count,
+        small_rt60_sabine_sec: r.small_rt60_sabine_sec,
+        large_rt60_sabine_sec: r.large_rt60_sabine_sec,
+        low_absorb_rt60_sec: r.low_absorb_rt60_sec,
+        high_absorb_rt60_sec: r.high_absorb_rt60_sec,
+        small_early_delay_sec: r.small_early_delay_sec,
+        large_early_delay_sec: r.large_early_delay_sec,
+        max_rt60_size_delta: r.max_rt60_size_delta,
+        max_rt60_absorb_delta: r.max_rt60_absorb_delta,
+        evidence_kind: r.evidence_kind.into(),
+        evidence_fingerprint: r.evidence_fingerprint,
+        distinct_from_acoustic_raytracing_echo_probe: r
+            .distinct_from_acoustic_raytracing_echo_probe,
+        distinct_from_sonic_impedance_probe: r.distinct_from_sonic_impedance_probe,
+        distinct_from_spectral_sonic_desktop_probe: r.distinct_from_spectral_sonic_desktop_probe,
+        distinct_from_synesthetic_sensory_remap_probe: r
+            .distinct_from_synesthetic_sensory_remap_probe,
+        distinct_from_atmospheric_physical_damping_probe: r
+            .distinct_from_atmospheric_physical_damping_probe,
+        distinct_from_lattice_boltzmann_fluid_solver_probe: r
+            .distinct_from_lattice_boltzmann_fluid_solver_probe,
+        distinct_from_aerodynamic_navier_stokes_probe: r
+            .distinct_from_aerodynamic_navier_stokes_probe,
+        distinct_from_matter_thermodynamics_sph_probe: r
+            .distinct_from_matter_thermodynamics_sph_probe,
+        distinct_from_hybrid_eulerian_lagrangian_pbd_probe: r
+            .distinct_from_hybrid_eulerian_lagrangian_pbd_probe,
+        distinct_from_position_based_dynamics_probe: r.distinct_from_position_based_dynamics_probe,
+        distinct_from_finite_element_analysis_probe: r.distinct_from_finite_element_analysis_probe,
+        distinct_from_autonomous_conflict_generator_probe: r
+            .distinct_from_autonomous_conflict_generator_probe,
+        distinct_from_mnemonic_matter_entropy_probe: r.distinct_from_mnemonic_matter_entropy_probe,
+        distinct_from_four_dimensional_time_sdf_probe: r
+            .distinct_from_four_dimensional_time_sdf_probe,
+        distinct_from_shadow_time_reversal_probe: r.distinct_from_shadow_time_reversal_probe,
+        distinct_from_curved_raymarcher_probe: r.distinct_from_curved_raymarcher_probe,
+        distinct_from_fractal_energy_perturbation_probe: r
+            .distinct_from_fractal_energy_perturbation_probe,
+        distinct_from_autonomous_entropy_corrector_probe: r
+            .distinct_from_autonomous_entropy_corrector_probe,
+        distinct_from_unified_field_network_probe: r.distinct_from_unified_field_network_probe,
+        distinct_from_slab_allocator_mmap_probe: r.distinct_from_slab_allocator_mmap_probe,
+        distinct_from_baremetal_memory_manager_probe: r
+            .distinct_from_baremetal_memory_manager_probe,
+        distinct_from_mmap_ecs_pager_probe: r.distinct_from_mmap_ecs_pager_probe,
+        distinct_from_simd_world_soa_hot_path_probe: r.distinct_from_simd_world_soa_hot_path_probe,
+        distinct_from_simd_clay_math_probe: r.distinct_from_simd_clay_math_probe,
+        distinct_from_world_soa_sab_layout_probe: r.distinct_from_world_soa_sab_layout_probe,
+        distinct_from_desktop_wire_probe: r.distinct_from_desktop_wire_probe,
+        distinct_from_mut_dna_desktop_probe: r.distinct_from_mut_dna_desktop_probe,
+        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        letter: "ei".into(),
+        note: note.into(),
+        metasounds_hrtf_aaa_ready: r.metasounds_hrtf_aaa_ready,
+        chaos_pbd_parity_ready: r.chaos_pbd_parity_ready,
+        unreal_mass_100k_ready: r.unreal_mass_100k_ready,
+        mmap_sab_production_ready: r.mmap_sab_production_ready,
+        avx512_kernel_ready: r.avx512_kernel_ready,
+        gr_raymarch_ready: r.gr_raymarch_ready,
+        dual_timeline_240_ready: r.dual_timeline_240_ready,
+    }
+}
+
+/// Run acoustic reverb geometry soak via kernel.
+pub fn run_kernel_acoustic_reverb_geometry_soak() -> KernelAcousticReverbGeometryWireReport {
+    let r = run_acoustic_reverb_geometry_soak();
+    let note = if !r.acoustic_reverb_geometry_ready {
+        "Acoustic reverb geometry soak failed — acousticReverbGeometryReady stays false"
+    } else {
+        "Desktop soak: Sabine/Eyring RT60 from box volume+absorption + early reflection delay; larger room / higher absorption change RT60 — acousticReverbGeometryReady true; metasounds_hrtf_aaa_ready false; distinct from ef acousticRaytracingEchoReady, eh finiteElementAnalysisReady, ee–ea fluid/PBD, dz–dq deepen, and dc–dm foundation probes"
+    };
+    to_report(r, note)
+}
+
+/// Honesty probe — soak-gated `acousticReverbGeometryReady` (letter ei).
+pub fn probe_acoustic_reverb_geometry() -> KernelAcousticReverbGeometryWireReport {
+    to_report(
+        kernel_probe(),
+        "Acoustic reverb geometry probe (letter ei) — distinct from acousticRaytracingEchoReady, finiteElementAnalysisReady, latticeBoltzmannFluidSolverReady, aerodynamicNavierStokesReady, matterThermodynamicsSphReady, hybridEulerianLagrangianPbdReady, positionBasedDynamicsReady, atmosphericPhysicalDampingReady, autonomousConflictGeneratorReady, synestheticSensoryRemapReady, mnemonicMatterEntropyReady, fourDimensionalTimeSdfReady, shadowTimeReversalReady, curvedRaymarcherReady, fractalEnergyPerturbationReady, autonomousEntropyCorrectorReady, unifiedFieldNetworkReady, slabAllocatorMmapReady, baremetalMemoryManagerReady, mmapEcsPagerReady, simdWorldSoaHotPathReady, simdClayMathReady, worldSoaSabLayoutReady, kernelDesktopWireReady, kernelMutDnaDesktopReady, kernelSpectralSonicDesktopReady, and probe_kernel_foundation; metasounds_hrtf_aaa_ready HELD",
+    )
+}
+
+/// Tauri IPC — acoustic reverb geometry honesty.
+#[tauri::command]
+pub fn probe_acoustic_reverb_geometry_cmd() -> KernelAcousticReverbGeometryWireReport {
+    probe_acoustic_reverb_geometry()
+}
+
+/// Tauri IPC — run acoustic reverb geometry soak.
+#[tauri::command]
+pub fn run_kernel_acoustic_reverb_geometry_soak_cmd() -> KernelAcousticReverbGeometryWireReport {
+    run_kernel_acoustic_reverb_geometry_soak()
+}

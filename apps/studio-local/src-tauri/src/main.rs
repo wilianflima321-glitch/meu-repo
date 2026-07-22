@@ -29,6 +29,286 @@ use aethel_studio_local::physics_kernel::PhysicsKernel;
 use aethel_studio_local::auto_retopology_worker::{
     probe_auto_retopology_worker_cmd, run_auto_retopology_worker_cmd,
 };
+use aethel_studio_local::kernel_foundation_wire::{
+    probe_kernel_foundation_cmd, run_kernel_foundation_soak_cmd,
+};
+use aethel_studio_local::kernel_desktop_wire::{
+    probe_kernel_desktop_wire_cmd, run_kernel_desktop_soak_cmd,
+};
+use aethel_studio_local::kernel_mut_dna_desktop_wire::{
+    probe_kernel_mut_dna_desktop_cmd, run_kernel_mut_dna_desktop_soak_cmd,
+};
+use aethel_studio_local::kernel_spectral_sonic_desktop_wire::{
+    probe_kernel_spectral_sonic_desktop_cmd, run_kernel_spectral_sonic_desktop_soak_cmd,
+};
+use aethel_studio_local::kernel_world_soa_sab_wire::{
+    probe_world_soa_sab_layout_cmd, run_kernel_world_soa_sab_layout_soak_cmd,
+};
+use aethel_studio_local::kernel_mmap_ecs_pager_wire::{
+    probe_mmap_ecs_pager_cmd, run_kernel_mmap_ecs_pager_soak_cmd,
+};
+use aethel_studio_local::kernel_simd_clay_math_wire::{
+    probe_simd_clay_math_cmd, run_kernel_simd_clay_math_soak_cmd,
+};
+use aethel_studio_local::kernel_simd_world_soa_hot_path_wire::{
+    probe_simd_world_soa_hot_path_cmd, run_kernel_simd_world_soa_hot_path_soak_cmd,
+};
+use aethel_studio_local::kernel_baremetal_memory_manager_wire::{
+    probe_baremetal_memory_manager_cmd, run_kernel_baremetal_memory_manager_soak_cmd,
+};
+use aethel_studio_local::kernel_slab_allocator_mmap_wire::{
+    probe_slab_allocator_mmap_cmd, run_kernel_slab_allocator_mmap_soak_cmd,
+};
+use aethel_studio_local::kernel_unified_field_network_wire::{
+    probe_unified_field_network_cmd, run_kernel_unified_field_network_soak_cmd,
+};
+use aethel_studio_local::kernel_autonomous_entropy_corrector_wire::{
+    probe_autonomous_entropy_corrector_cmd, run_kernel_autonomous_entropy_corrector_soak_cmd,
+};
+use aethel_studio_local::kernel_fractal_energy_perturbation_wire::{
+    probe_fractal_energy_perturbation_cmd, run_kernel_fractal_energy_perturbation_soak_cmd,
+};
+use aethel_studio_local::kernel_curved_raymarcher_wire::{
+    probe_curved_raymarcher_cmd, run_kernel_curved_raymarcher_soak_cmd,
+};
+use aethel_studio_local::kernel_shadow_time_reversal_wire::{
+    probe_shadow_time_reversal_cmd, run_kernel_shadow_time_reversal_soak_cmd,
+};
+use aethel_studio_local::kernel_four_dimensional_time_sdf_wire::{
+    probe_four_dimensional_time_sdf_cmd, run_kernel_four_dimensional_time_sdf_soak_cmd,
+};
+use aethel_studio_local::kernel_mnemonic_matter_entropy_wire::{
+    probe_mnemonic_matter_entropy_cmd, run_kernel_mnemonic_matter_entropy_soak_cmd,
+};
+use aethel_studio_local::kernel_synesthetic_sensory_remap_wire::{
+    probe_synesthetic_sensory_remap_cmd, run_kernel_synesthetic_sensory_remap_soak_cmd,
+};
+use aethel_studio_local::kernel_autonomous_conflict_generator_wire::{
+    probe_autonomous_conflict_generator_cmd, run_kernel_autonomous_conflict_generator_soak_cmd,
+};
+use aethel_studio_local::kernel_atmospheric_physical_damping_wire::{
+    probe_atmospheric_physical_damping_cmd, run_kernel_atmospheric_physical_damping_soak_cmd,
+};
+use aethel_studio_local::kernel_position_based_dynamics_wire::{
+    probe_position_based_dynamics_cmd, run_kernel_position_based_dynamics_soak_cmd,
+};
+use aethel_studio_local::kernel_hybrid_eulerian_lagrangian_pbd_wire::{
+    probe_hybrid_eulerian_lagrangian_pbd_cmd, run_kernel_hybrid_eulerian_lagrangian_pbd_soak_cmd,
+};
+use aethel_studio_local::kernel_matter_thermodynamics_sph_wire::{
+    probe_matter_thermodynamics_sph_cmd, run_kernel_matter_thermodynamics_sph_soak_cmd,
+};
+use aethel_studio_local::kernel_aerodynamic_navier_stokes_wire::{
+    probe_aerodynamic_navier_stokes_cmd, run_kernel_aerodynamic_navier_stokes_soak_cmd,
+};
+use aethel_studio_local::kernel_lattice_boltzmann_fluid_solver_wire::{
+    probe_lattice_boltzmann_fluid_solver_cmd, run_kernel_lattice_boltzmann_fluid_solver_soak_cmd,
+};
+use aethel_studio_local::kernel_lattice_boltzmann_gas_fluid_wire::{
+    probe_lattice_boltzmann_gas_fluid_cmd, run_kernel_lattice_boltzmann_gas_fluid_soak_cmd,
+};
+use aethel_studio_local::kernel_acoustic_raytracing_echo_wire::{
+    probe_acoustic_raytracing_echo_cmd, run_kernel_acoustic_raytracing_echo_soak_cmd,
+};
+use aethel_studio_local::kernel_finite_element_analysis_wire::{
+    probe_finite_element_analysis_cmd, run_kernel_finite_element_analysis_soak_cmd,
+};
+use aethel_studio_local::kernel_acoustic_reverb_geometry_wire::{
+    probe_acoustic_reverb_geometry_cmd, run_kernel_acoustic_reverb_geometry_soak_cmd,
+};
+use aethel_studio_local::kernel_fm_additive_synthesis_wire::{
+    probe_fm_additive_synthesis_cmd, run_kernel_fm_additive_synthesis_soak_cmd,
+};
+use aethel_studio_local::kernel_hermite_duality_grid_wire::{
+    probe_hermite_duality_grid_cmd, run_kernel_hermite_duality_grid_soak_cmd,
+};
+use aethel_studio_local::kernel_hermite_sharp_features_wire::{
+    probe_hermite_sharp_features_cmd, run_kernel_hermite_sharp_features_soak_cmd,
+};
+use aethel_studio_local::kernel_sdf_sculptor_wire::{
+    probe_sdf_sculptor_cmd, run_kernel_sdf_sculptor_soak_cmd,
+};
+use aethel_studio_local::kernel_sdf_adaptive_cascades_wire::{
+    probe_sdf_adaptive_cascades_cmd, run_kernel_sdf_adaptive_cascades_soak_cmd,
+};
+use aethel_studio_local::kernel_stochastic_virtual_sdf_wire::{
+    probe_stochastic_virtual_sdf_cmd, run_kernel_stochastic_virtual_sdf_soak_cmd,
+};
+use aethel_studio_local::kernel_sdf_octree_hashing_wire::{
+    probe_sdf_octree_hashing_cmd, run_kernel_sdf_octree_hashing_soak_cmd,
+};
+use aethel_studio_local::kernel_sdf_motion_vector_buffer_wire::{
+    probe_sdf_motion_vector_buffer_cmd, run_kernel_sdf_motion_vector_buffer_soak_cmd,
+};
+use aethel_studio_local::kernel_velocity_buffer_ecs_wire::{
+    probe_velocity_buffer_ecs_cmd, run_kernel_velocity_buffer_ecs_soak_cmd,
+};
+use aethel_studio_local::kernel_hybrid_geometry_svo_wire::{
+    probe_hybrid_geometry_svo_cmd, run_kernel_hybrid_geometry_svo_soak_cmd,
+};
+use aethel_studio_local::kernel_svo_depth_lod_wire::{
+    probe_svo_depth_lod_cmd, run_kernel_svo_depth_lod_soak_cmd,
+};
+use aethel_studio_local::kernel_internal_voxel_density_wire::{
+    probe_internal_voxel_density_cmd, run_kernel_internal_voxel_density_soak_cmd,
+};
+use aethel_studio_local::kernel_micro_displacement_noise_wire::{
+    probe_micro_displacement_noise_cmd, run_kernel_micro_displacement_noise_soak_cmd,
+};
+use aethel_studio_local::kernel_volumetric_extinction_medium_wire::{
+    probe_volumetric_extinction_medium_cmd, run_kernel_volumetric_extinction_medium_soak_cmd,
+};
+use aethel_studio_local::kernel_sdf_audio_raymarching_wire::{
+    probe_sdf_audio_raymarching_cmd, run_kernel_sdf_audio_raymarching_soak_cmd,
+};
+use aethel_studio_local::kernel_contextual_physics_override_wire::{
+    probe_contextual_physics_override_cmd, run_kernel_contextual_physics_override_soak_cmd,
+};
+use aethel_studio_local::kernel_dynamic_matter_entropy_wire::{
+    probe_dynamic_matter_entropy_cmd, run_kernel_dynamic_matter_entropy_soak_cmd,
+};
+use aethel_studio_local::kernel_digital_pressure_chamber_wire::{
+    probe_digital_pressure_chamber_cmd, run_kernel_digital_pressure_chamber_soak_cmd,
+};
+use aethel_studio_local::kernel_geometric_scale_constraints_wire::{
+    probe_geometric_scale_constraints_cmd, run_kernel_geometric_scale_constraints_soak_cmd,
+};
+use aethel_studio_local::kernel_universal_logarithmic_scale_wire::{
+    probe_universal_logarithmic_scale_cmd, run_kernel_universal_logarithmic_scale_soak_cmd,
+};
+use aethel_studio_local::kernel_sparse_seed_instancing_wire::{
+    probe_sparse_seed_instancing_cmd, run_kernel_sparse_seed_instancing_soak_cmd,
+};
+use aethel_studio_local::kernel_lockfree_ring_buffer_wire::{
+    probe_lockfree_ring_buffer_cmd, run_kernel_lockfree_ring_buffer_soak_cmd,
+};
+use aethel_studio_local::kernel_atomic_thread_sync_wire::{
+    probe_atomic_thread_sync_cmd, run_kernel_atomic_thread_sync_soak_cmd,
+};
+use aethel_studio_local::kernel_crdt_quantum_sync_wire::{
+    probe_crdt_quantum_sync_cmd, run_kernel_crdt_quantum_sync_soak_cmd,
+};
+use aethel_studio_local::kernel_delta_seed_synchronization_wire::{
+    probe_delta_seed_synchronization_cmd, run_kernel_delta_seed_synchronization_soak_cmd,
+};
+use aethel_studio_local::kernel_state_sync_protocol_wire::{
+    probe_state_sync_protocol_cmd, run_kernel_state_sync_protocol_soak_cmd,
+};
+use aethel_studio_local::kernel_bitstream_reality_sync_wire::{
+    probe_bitstream_reality_sync_cmd, run_kernel_bitstream_reality_sync_soak_cmd,
+};
+use aethel_studio_local::kernel_binary_seed_streamer_wire::{
+    probe_binary_seed_streamer_cmd, run_kernel_binary_seed_streamer_soak_cmd,
+};
+use aethel_studio_local::kernel_cpu_affinity_micro_workers_wire::{
+    probe_cpu_affinity_micro_workers_cmd, run_kernel_cpu_affinity_micro_workers_soak_cmd,
+};
+use aethel_studio_local::kernel_asynchronous_reality_threads_wire::{
+    probe_asynchronous_reality_threads_cmd, run_kernel_asynchronous_reality_threads_soak_cmd,
+};
+use aethel_studio_local::kernel_thermal_scheduler_wire::{
+    probe_thermal_scheduler_cmd, run_kernel_thermal_scheduler_soak_cmd,
+};
+use aethel_studio_local::kernel_live_cache_manager_wire::{
+    probe_live_cache_manager_cmd, run_kernel_live_cache_manager_soak_cmd,
+};
+use aethel_studio_local::kernel_hierarchical_streaming_cache_wire::{
+    probe_hierarchical_streaming_cache_cmd, run_kernel_hierarchical_streaming_cache_soak_cmd,
+};
+use aethel_studio_local::kernel_metabolic_memory_wire::{
+    probe_metabolic_memory_cmd, run_kernel_metabolic_memory_soak_cmd,
+};
+use aethel_studio_local::kernel_ghost_state_predictor_wire::{
+    probe_ghost_state_predictor_cmd, run_kernel_ghost_state_predictor_soak_cmd,
+};
+use aethel_studio_local::kernel_reversible_quantum_undo_wire::{
+    probe_reversible_quantum_undo_cmd, run_kernel_reversible_quantum_undo_soak_cmd,
+};
+use aethel_studio_local::kernel_genomic_seed_library_wire::{
+    probe_genomic_seed_library_cmd, run_kernel_genomic_seed_library_soak_cmd,
+};
+use aethel_studio_local::kernel_genomic_seed_transmitter_wire::{
+    probe_genomic_seed_transmitter_cmd, run_kernel_genomic_seed_transmitter_soak_cmd,
+};
+use aethel_studio_local::kernel_formal_logic_verifier_wire::{
+    probe_formal_logic_verifier_cmd, run_kernel_formal_logic_verifier_soak_cmd,
+};
+use aethel_studio_local::kernel_quantum_overlap_wire::{
+    probe_quantum_overlap_cmd, run_kernel_quantum_overlap_soak_cmd,
+};
+use aethel_studio_local::kernel_blue_noise_dithering_wire::{
+    probe_blue_noise_dithering_cmd, run_kernel_blue_noise_dithering_soak_cmd,
+};
+use aethel_studio_local::kernel_recursive_fractal_enhancement_wire::{
+    probe_recursive_fractal_enhancement_cmd, run_kernel_recursive_fractal_enhancement_soak_cmd,
+};
+use aethel_studio_local::kernel_symmetric_vector_algebra_wire::{
+    probe_symmetric_vector_algebra_cmd, run_kernel_symmetric_vector_algebra_soak_cmd,
+};
+use aethel_studio_local::kernel_voxel_cone_radiosity_wire::{
+    probe_voxel_cone_radiosity_cmd, run_kernel_voxel_cone_radiosity_soak_cmd,
+};
+use aethel_studio_local::kernel_atmospheric_scattering_godrays_wire::{
+    probe_atmospheric_scattering_godrays_cmd, run_kernel_atmospheric_scattering_godrays_soak_cmd,
+};
+use aethel_studio_local::kernel_dynamic_physics_dsl_wire::{
+    probe_dynamic_physics_dsl_cmd, run_kernel_dynamic_physics_dsl_soak_cmd,
+};
+use aethel_studio_local::kernel_chromatic_glass_refraction_wire::{
+    probe_chromatic_glass_refraction_cmd, run_kernel_chromatic_glass_refraction_soak_cmd,
+};
+use aethel_studio_local::kernel_preintegrated_sss_transmittance_wire::{
+    probe_preintegrated_sss_transmittance_cmd,
+    run_kernel_preintegrated_sss_transmittance_soak_cmd,
+};
+use aethel_studio_local::kernel_aces_cinematic_tonemapper_wire::{
+    probe_aces_cinematic_tonemapper_cmd, run_kernel_aces_cinematic_tonemapper_soak_cmd,
+};
+use aethel_studio_local::kernel_fluid_ninja_compute_wire::{
+    probe_fluid_ninja_compute_cmd, run_kernel_fluid_ninja_compute_soak_cmd,
+};
+use aethel_studio_local::kernel_wgsl_surface_noise_kernel_wire::{
+    probe_wgsl_surface_noise_kernel_cmd, run_kernel_wgsl_surface_noise_kernel_soak_cmd,
+};
+use aethel_studio_local::kernel_infinite_anti_aliasing_wire::{
+    probe_infinite_anti_aliasing_cmd, run_kernel_infinite_anti_aliasing_soak_cmd,
+};
+use aethel_studio_local::kernel_spectral_dispersion_caustics_wire::{
+    probe_spectral_dispersion_caustics_cmd, run_kernel_spectral_dispersion_caustics_soak_cmd,
+};
+use aethel_studio_local::kernel_hybrid_cluster_shading_vsvm_wire::{
+    probe_hybrid_cluster_shading_vsvm_cmd, run_kernel_hybrid_cluster_shading_vsvm_soak_cmd,
+};
+use aethel_studio_local::kernel_atmospheric_spine_particles_wire::{
+    probe_atmospheric_spine_particles_cmd, run_kernel_atmospheric_spine_particles_soak_cmd,
+};
+use aethel_studio_local::kernel_radiance_cascades_gi_wire::{
+    probe_radiance_cascades_gi_cmd, run_kernel_radiance_cascades_gi_soak_cmd,
+};
+use aethel_studio_local::kernel_alexa_cinematic_optics_wire::{
+    probe_alexa_cinematic_optics_cmd, run_kernel_alexa_cinematic_optics_soak_cmd,
+};
+use aethel_studio_local::kernel_spectral_light_pipeline_wire::{
+    probe_spectral_light_pipeline_cmd, run_kernel_spectral_light_pipeline_soak_cmd,
+};
+use aethel_studio_local::kernel_usd_importer_bridge_wire::{
+    probe_usd_importer_bridge_cmd, run_kernel_usd_importer_bridge_soak_cmd,
+};
+use aethel_studio_local::kernel_msl_wgsl_compiler_wire::{
+    probe_msl_wgsl_compiler_cmd, run_kernel_msl_wgsl_compiler_soak_cmd,
+};
+use aethel_studio_local::kernel_strain_aware_texturing_wire::{
+    probe_strain_aware_texturing_cmd, run_kernel_strain_aware_texturing_soak_cmd,
+};
+use aethel_studio_local::kernel_gaze_foveated_reprojection_wire::{
+    probe_gaze_foveated_reprojection_cmd, run_kernel_gaze_foveated_reprojection_soak_cmd,
+};
+use aethel_studio_local::kernel_wgpu_wgsl_device_load_wire::{
+    probe_wgpu_wgsl_device_load_cmd, run_kernel_wgpu_wgsl_device_load_soak_cmd,
+};
+use aethel_studio_local::kernel_hdr_32bit_float_pipeline_wire::{
+    probe_hdr_32bit_float_pipeline_cmd, run_kernel_hdr_32bit_float_pipeline_soak_cmd,
+};
 use aethel_studio_local::onnx_native_gen::{
     probe_onnx_native_gen_cmd, probe_vram_pager_hooks_cmd, run_onnx_native_gen_cmd,
 };
@@ -350,6 +630,192 @@ fn main() {
             probe_onnx_native_gen_cmd,
             run_onnx_native_gen_cmd,
             probe_vram_pager_hooks_cmd,
+            probe_kernel_foundation_cmd,
+            run_kernel_foundation_soak_cmd,
+            probe_kernel_desktop_wire_cmd,
+            run_kernel_desktop_soak_cmd,
+            probe_kernel_mut_dna_desktop_cmd,
+            run_kernel_mut_dna_desktop_soak_cmd,
+            probe_kernel_spectral_sonic_desktop_cmd,
+            run_kernel_spectral_sonic_desktop_soak_cmd,
+            probe_world_soa_sab_layout_cmd,
+            run_kernel_world_soa_sab_layout_soak_cmd,
+            probe_mmap_ecs_pager_cmd,
+            run_kernel_mmap_ecs_pager_soak_cmd,
+            probe_simd_clay_math_cmd,
+            run_kernel_simd_clay_math_soak_cmd,
+            probe_simd_world_soa_hot_path_cmd,
+            run_kernel_simd_world_soa_hot_path_soak_cmd,
+            probe_baremetal_memory_manager_cmd,
+            run_kernel_baremetal_memory_manager_soak_cmd,
+            probe_slab_allocator_mmap_cmd,
+            run_kernel_slab_allocator_mmap_soak_cmd,
+            probe_unified_field_network_cmd,
+            run_kernel_unified_field_network_soak_cmd,
+            probe_autonomous_entropy_corrector_cmd,
+            run_kernel_autonomous_entropy_corrector_soak_cmd,
+            probe_fractal_energy_perturbation_cmd,
+            run_kernel_fractal_energy_perturbation_soak_cmd,
+            probe_curved_raymarcher_cmd,
+            run_kernel_curved_raymarcher_soak_cmd,
+            probe_shadow_time_reversal_cmd,
+            run_kernel_shadow_time_reversal_soak_cmd,
+            probe_four_dimensional_time_sdf_cmd,
+            run_kernel_four_dimensional_time_sdf_soak_cmd,
+            probe_mnemonic_matter_entropy_cmd,
+            run_kernel_mnemonic_matter_entropy_soak_cmd,
+            probe_synesthetic_sensory_remap_cmd,
+            run_kernel_synesthetic_sensory_remap_soak_cmd,
+            probe_autonomous_conflict_generator_cmd,
+            run_kernel_autonomous_conflict_generator_soak_cmd,
+            probe_atmospheric_physical_damping_cmd,
+            run_kernel_atmospheric_physical_damping_soak_cmd,
+            probe_position_based_dynamics_cmd,
+            run_kernel_position_based_dynamics_soak_cmd,
+            probe_hybrid_eulerian_lagrangian_pbd_cmd,
+            run_kernel_hybrid_eulerian_lagrangian_pbd_soak_cmd,
+            probe_matter_thermodynamics_sph_cmd,
+            run_kernel_matter_thermodynamics_sph_soak_cmd,
+            probe_aerodynamic_navier_stokes_cmd,
+            run_kernel_aerodynamic_navier_stokes_soak_cmd,
+            probe_lattice_boltzmann_fluid_solver_cmd,
+            run_kernel_lattice_boltzmann_fluid_solver_soak_cmd,
+            probe_lattice_boltzmann_gas_fluid_cmd,
+            run_kernel_lattice_boltzmann_gas_fluid_soak_cmd,
+            probe_acoustic_raytracing_echo_cmd,
+            run_kernel_acoustic_raytracing_echo_soak_cmd,
+            probe_finite_element_analysis_cmd,
+            run_kernel_finite_element_analysis_soak_cmd,
+            probe_acoustic_reverb_geometry_cmd,
+            run_kernel_acoustic_reverb_geometry_soak_cmd,
+            probe_fm_additive_synthesis_cmd,
+            run_kernel_fm_additive_synthesis_soak_cmd,
+            probe_hermite_duality_grid_cmd,
+            run_kernel_hermite_duality_grid_soak_cmd,
+            probe_hermite_sharp_features_cmd,
+            run_kernel_hermite_sharp_features_soak_cmd,
+            probe_sdf_sculptor_cmd,
+            run_kernel_sdf_sculptor_soak_cmd,
+            probe_sdf_adaptive_cascades_cmd,
+            run_kernel_sdf_adaptive_cascades_soak_cmd,
+            probe_stochastic_virtual_sdf_cmd,
+            run_kernel_stochastic_virtual_sdf_soak_cmd,
+            probe_sdf_octree_hashing_cmd,
+            run_kernel_sdf_octree_hashing_soak_cmd,
+            probe_sdf_motion_vector_buffer_cmd,
+            run_kernel_sdf_motion_vector_buffer_soak_cmd,
+            probe_velocity_buffer_ecs_cmd,
+            run_kernel_velocity_buffer_ecs_soak_cmd,
+            probe_hybrid_geometry_svo_cmd,
+            run_kernel_hybrid_geometry_svo_soak_cmd,
+            probe_svo_depth_lod_cmd,
+            run_kernel_svo_depth_lod_soak_cmd,
+            probe_internal_voxel_density_cmd,
+            run_kernel_internal_voxel_density_soak_cmd,
+            probe_micro_displacement_noise_cmd,
+            run_kernel_micro_displacement_noise_soak_cmd,
+            probe_volumetric_extinction_medium_cmd,
+            run_kernel_volumetric_extinction_medium_soak_cmd,
+            probe_sdf_audio_raymarching_cmd,
+            run_kernel_sdf_audio_raymarching_soak_cmd,
+            probe_contextual_physics_override_cmd,
+            run_kernel_contextual_physics_override_soak_cmd,
+            probe_dynamic_matter_entropy_cmd,
+            run_kernel_dynamic_matter_entropy_soak_cmd,
+            probe_digital_pressure_chamber_cmd,
+            run_kernel_digital_pressure_chamber_soak_cmd,
+            probe_geometric_scale_constraints_cmd,
+            run_kernel_geometric_scale_constraints_soak_cmd,
+            probe_universal_logarithmic_scale_cmd,
+            run_kernel_universal_logarithmic_scale_soak_cmd,
+            probe_sparse_seed_instancing_cmd,
+            run_kernel_sparse_seed_instancing_soak_cmd,
+            probe_lockfree_ring_buffer_cmd,
+            run_kernel_lockfree_ring_buffer_soak_cmd,
+            probe_atomic_thread_sync_cmd,
+            run_kernel_atomic_thread_sync_soak_cmd,
+            probe_crdt_quantum_sync_cmd,
+            run_kernel_crdt_quantum_sync_soak_cmd,
+            probe_delta_seed_synchronization_cmd,
+            run_kernel_delta_seed_synchronization_soak_cmd,
+            probe_state_sync_protocol_cmd,
+            run_kernel_state_sync_protocol_soak_cmd,
+            probe_bitstream_reality_sync_cmd,
+            run_kernel_bitstream_reality_sync_soak_cmd,
+            probe_binary_seed_streamer_cmd,
+            run_kernel_binary_seed_streamer_soak_cmd,
+            probe_cpu_affinity_micro_workers_cmd,
+            run_kernel_cpu_affinity_micro_workers_soak_cmd,
+            probe_asynchronous_reality_threads_cmd,
+            run_kernel_asynchronous_reality_threads_soak_cmd,
+            probe_thermal_scheduler_cmd,
+            run_kernel_thermal_scheduler_soak_cmd,
+            probe_live_cache_manager_cmd,
+            run_kernel_live_cache_manager_soak_cmd,
+            probe_hierarchical_streaming_cache_cmd,
+            run_kernel_hierarchical_streaming_cache_soak_cmd,
+            probe_metabolic_memory_cmd,
+            run_kernel_metabolic_memory_soak_cmd,
+            probe_ghost_state_predictor_cmd,
+            run_kernel_ghost_state_predictor_soak_cmd,
+            probe_reversible_quantum_undo_cmd,
+            run_kernel_reversible_quantum_undo_soak_cmd,
+            probe_genomic_seed_library_cmd,
+            run_kernel_genomic_seed_library_soak_cmd,
+            probe_genomic_seed_transmitter_cmd,
+            run_kernel_genomic_seed_transmitter_soak_cmd,
+            probe_formal_logic_verifier_cmd,
+            run_kernel_formal_logic_verifier_soak_cmd,
+            probe_quantum_overlap_cmd,
+            run_kernel_quantum_overlap_soak_cmd,
+            probe_blue_noise_dithering_cmd,
+            run_kernel_blue_noise_dithering_soak_cmd,
+            probe_recursive_fractal_enhancement_cmd,
+            run_kernel_recursive_fractal_enhancement_soak_cmd,
+            probe_symmetric_vector_algebra_cmd,
+            run_kernel_symmetric_vector_algebra_soak_cmd,
+            probe_voxel_cone_radiosity_cmd,
+            run_kernel_voxel_cone_radiosity_soak_cmd,
+            probe_atmospheric_scattering_godrays_cmd,
+            run_kernel_atmospheric_scattering_godrays_soak_cmd,
+            probe_dynamic_physics_dsl_cmd,
+            run_kernel_dynamic_physics_dsl_soak_cmd,
+            probe_chromatic_glass_refraction_cmd,
+            run_kernel_chromatic_glass_refraction_soak_cmd,
+            probe_preintegrated_sss_transmittance_cmd,
+            run_kernel_preintegrated_sss_transmittance_soak_cmd,
+            probe_aces_cinematic_tonemapper_cmd,
+            run_kernel_aces_cinematic_tonemapper_soak_cmd,
+            probe_fluid_ninja_compute_cmd,
+            run_kernel_fluid_ninja_compute_soak_cmd,
+            probe_wgsl_surface_noise_kernel_cmd,
+            run_kernel_wgsl_surface_noise_kernel_soak_cmd,
+            probe_infinite_anti_aliasing_cmd,
+            run_kernel_infinite_anti_aliasing_soak_cmd,
+            probe_spectral_dispersion_caustics_cmd,
+            run_kernel_spectral_dispersion_caustics_soak_cmd,
+            probe_hybrid_cluster_shading_vsvm_cmd,
+            run_kernel_hybrid_cluster_shading_vsvm_soak_cmd,
+            probe_atmospheric_spine_particles_cmd,
+            run_kernel_atmospheric_spine_particles_soak_cmd,
+            probe_radiance_cascades_gi_cmd,
+            run_kernel_radiance_cascades_gi_soak_cmd,
+            probe_alexa_cinematic_optics_cmd,
+            run_kernel_alexa_cinematic_optics_soak_cmd,
+            probe_spectral_light_pipeline_cmd,
+            run_kernel_spectral_light_pipeline_soak_cmd,
+            probe_msl_wgsl_compiler_cmd,
+            run_kernel_msl_wgsl_compiler_soak_cmd,
+            probe_usd_importer_bridge_cmd,
+            run_kernel_usd_importer_bridge_soak_cmd,
+            probe_strain_aware_texturing_cmd,
+            run_kernel_strain_aware_texturing_soak_cmd,
+            probe_gaze_foveated_reprojection_cmd,
+            run_kernel_gaze_foveated_reprojection_soak_cmd,
+            probe_wgpu_wgsl_device_load_cmd,
+            run_kernel_wgpu_wgsl_device_load_soak_cmd,
+            probe_hdr_32bit_float_pipeline_cmd,
+            run_kernel_hdr_32bit_float_pipeline_soak_cmd,
             voxelize_scene_sdf,
             scene_graph::scene_get_nodes,
             scene_graph::scene_select,
@@ -376,3 +842,6 @@ fn main() {
         .run(tauri::generate_context!())
         .expect("failed to run Aethel Studio Local");
 }
+/ /   D o m a i n   1   g z :   P o s i t i o n - b a s e d   d y n a m i c s   r e a l   k e r n e l . 
+ 
+ 

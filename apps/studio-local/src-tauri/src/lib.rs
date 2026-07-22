@@ -2,11 +2,193 @@ pub mod ambient_sensor_kernel;
 pub mod auto_retopology_worker;
 pub mod contracts;
 pub mod daemon;
+/// Unified SoA from `aethel-kernel-rust` (letter dc).
+pub mod ecs_core;
 pub mod ecs_parallel;
 pub mod gameplay_ability_system;
 pub mod geometry_clusterizer;
 pub mod gi_sdf;
 pub mod jobs;
+/// Kernel foundation IPC (letter dc surface; letter do web bridge).
+pub mod kernel_foundation_wire;
+/// WorldSoA + LBM desktop soak wire (letter de).
+pub mod kernel_desktop_wire;
+/// MutDNA + FrameArena desktop soak wire (letter df).
+pub mod kernel_mut_dna_desktop_wire;
+/// Timescale + Beer–Lambert + sonic desktop soak wire (letter dg).
+pub mod kernel_spectral_sonic_desktop_wire;
+/// WorldSoA SAB layout header wire (letter dh).
+pub mod kernel_world_soa_sab_wire;
+/// mmap ECS pager wire (letter di).
+pub mod kernel_mmap_ecs_pager_wire;
+/// SIMD clay math wire (letter dj).
+pub mod kernel_simd_clay_math_wire;
+/// SIMD → WorldSoA hot-path wire (letter dk).
+pub mod kernel_simd_world_soa_hot_path_wire;
+/// BareMetalMemoryManager wire (letter dl).
+pub mod kernel_baremetal_memory_manager_wire;
+/// Slab allocator mmap wire (letter dm).
+pub mod kernel_slab_allocator_mmap_wire;
+/// Unified Field Network wire (letter dq).
+pub mod kernel_unified_field_network_wire;
+/// Autonomous Entropy Corrector wire (letter dr).
+pub mod kernel_autonomous_entropy_corrector_wire;
+/// Fractal Energy Perturbation wire (letter ds).
+pub mod kernel_fractal_energy_perturbation_wire;
+/// Non-Euclidean Curved Raymarcher wire (letter dt).
+pub mod kernel_curved_raymarcher_wire;
+/// Shadow Kernel Time Reversal wire (letter du).
+pub mod kernel_shadow_time_reversal_wire;
+/// Four-Dimensional Time SDF wire (letter dv).
+pub mod kernel_four_dimensional_time_sdf_wire;
+/// Mnemonic Matter Entropy wire (letter dw).
+pub mod kernel_mnemonic_matter_entropy_wire;
+/// Synesthetic Sensory Remap wire (letter dx).
+pub mod kernel_synesthetic_sensory_remap_wire;
+/// Autonomous Conflict Generator wire (letter dy).
+pub mod kernel_autonomous_conflict_generator_wire;
+/// Atmospheric Physical Damping wire (letter dz).
+pub mod kernel_atmospheric_physical_damping_wire;
+/// Position-Based Dynamics wire (letter ea).
+pub mod kernel_position_based_dynamics_wire;
+/// Hybrid Eulerian–Lagrangian PBD wire (letter eb).
+pub mod kernel_hybrid_eulerian_lagrangian_pbd_wire;
+/// Matter Thermodynamics SPH wire (letter ec).
+pub mod kernel_matter_thermodynamics_sph_wire;
+/// Aerodynamic Navier–Stokes wire (letter gv).
+pub mod kernel_aerodynamic_navier_stokes_wire;
+/// Lattice-Boltzmann fluid solver wire (letter ee).
+pub mod kernel_lattice_boltzmann_fluid_solver_wire;
+pub mod kernel_lattice_boltzmann_gas_fluid_wire;
+/// Acoustic Raytracing Echo wire (letter ef).
+pub mod kernel_acoustic_raytracing_echo_wire;
+/// Finite Element Analysis wire (letter eh).
+pub mod kernel_finite_element_analysis_wire;
+/// Acoustic Reverb Geometry wire (letter ei).
+pub mod kernel_acoustic_reverb_geometry_wire;
+/// FM / Additive Synthesis wire (letter ej).
+pub mod kernel_fm_additive_synthesis_wire;
+/// Hermite Duality Grid wire (letter ek).
+pub mod kernel_hermite_duality_grid_wire;
+/// Hermite Sharp Features wire (letter el).
+pub mod kernel_hermite_sharp_features_wire;
+/// SDF Sculptor wire (letter em).
+pub mod kernel_sdf_sculptor_wire;
+/// SDF Adaptive Cascades wire (letter en).
+pub mod kernel_sdf_adaptive_cascades_wire;
+/// Stochastic Virtual SDF wire (letter eo).
+pub mod kernel_stochastic_virtual_sdf_wire;
+/// SDF Octree Hashing wire (letter ep).
+pub mod kernel_sdf_octree_hashing_wire;
+/// SDF Motion Vector Buffer wire (letter eq).
+pub mod kernel_sdf_motion_vector_buffer_wire;
+/// Velocity Buffer ECS wire (letter er).
+pub mod kernel_velocity_buffer_ecs_wire;
+/// Hybrid Geometry SVO wire (letter es).
+pub mod kernel_hybrid_geometry_svo_wire;
+/// SVO Depth LOD wire (letter et).
+pub mod kernel_svo_depth_lod_wire;
+/// Internal Voxel Density wire (letter eu).
+pub mod kernel_internal_voxel_density_wire;
+/// Micro Displacement Noise wire (letter ev).
+pub mod kernel_micro_displacement_noise_wire;
+/// Volumetric Extinction Medium wire (letter ew).
+pub mod kernel_volumetric_extinction_medium_wire;
+/// SDF Audio Raymarching wire (letter ex).
+pub mod kernel_sdf_audio_raymarching_wire;
+/// Contextual Physics Override wire (letter ey).
+pub mod kernel_contextual_physics_override_wire;
+/// Dynamic Matter Entropy wire (letter ez).
+pub mod kernel_dynamic_matter_entropy_wire;
+/// Digital Pressure Chamber wire (letter fa).
+pub mod kernel_digital_pressure_chamber_wire;
+/// Geometric Scale Constraints wire (letter fb).
+pub mod kernel_geometric_scale_constraints_wire;
+/// Universal Logarithmic Scale wire (letter fc).
+pub mod kernel_universal_logarithmic_scale_wire;
+/// Sparse Seed Instancing wire (letter fd).
+pub mod kernel_sparse_seed_instancing_wire;
+/// Lock-free Ring Buffer wire (letter fe).
+pub mod kernel_lockfree_ring_buffer_wire;
+/// Atomic Thread Sync wire (letter ff).
+pub mod kernel_atomic_thread_sync_wire;
+/// CRDT Quantum Sync wire (letter fg).
+pub mod kernel_crdt_quantum_sync_wire;
+/// Delta Seed Synchronization wire (letter fh).
+pub mod kernel_delta_seed_synchronization_wire;
+/// State Sync Protocol wire (letter fi).
+pub mod kernel_state_sync_protocol_wire;
+/// Bitstream Reality Sync wire (letter fj).
+pub mod kernel_bitstream_reality_sync_wire;
+/// Binary Seed Streamer wire (letter fk).
+pub mod kernel_binary_seed_streamer_wire;
+pub mod kernel_cpu_affinity_micro_workers_wire;
+/// Asynchronous Reality Threads wire (letter fm).
+pub mod kernel_asynchronous_reality_threads_wire;
+/// Thermal Scheduler wire (letter fn).
+pub mod kernel_thermal_scheduler_wire;
+/// Live Cache Manager wire (letter fo).
+pub mod kernel_live_cache_manager_wire;
+/// Hierarchical Streaming Cache wire (letter fp).
+pub mod kernel_hierarchical_streaming_cache_wire;
+/// Metabolic Memory wire (letter fq).
+pub mod kernel_metabolic_memory_wire;
+pub mod kernel_ghost_state_predictor_wire;
+pub mod kernel_reversible_quantum_undo_wire;
+/// Genomic Seed Library wire (letter ft).
+pub mod kernel_genomic_seed_library_wire;
+/// Genomic Seed Transmitter wire (letter fu).
+pub mod kernel_genomic_seed_transmitter_wire;
+/// Formal Logic Verifier wire (letter fv).
+pub mod kernel_formal_logic_verifier_wire;
+pub mod kernel_quantum_overlap_wire;
+/// Blue Noise Dithering Relaxer wire (letter fx).
+pub mod kernel_blue_noise_dithering_wire;
+pub mod kernel_recursive_fractal_enhancement_wire;
+/// Symmetric Vector Algebra wire (letter fz).
+pub mod kernel_symmetric_vector_algebra_wire;
+/// Voxel Cone Radiosity wire (letter ga).
+pub mod kernel_voxel_cone_radiosity_wire;
+/// Atmospheric Scattering Godrays wire (letter gb).
+pub mod kernel_atmospheric_scattering_godrays_wire;
+/// Dynamic Physics DSL wire (letter gc).
+pub mod kernel_dynamic_physics_dsl_wire;
+/// Chromatic Glass Refraction wire (letter gd).
+pub mod kernel_chromatic_glass_refraction_wire;
+/// Preintegrated SSS Transmittance wire (letter ge).
+pub mod kernel_preintegrated_sss_transmittance_wire;
+/// ACES Cinematic Tonemapper wire (letter gf).
+pub mod kernel_aces_cinematic_tonemapper_wire;
+/// Fluid Ninja Compute wire (letter gg).
+pub mod kernel_fluid_ninja_compute_wire;
+/// WGSL Surface Noise Kernel wire (letter gh).
+pub mod kernel_wgsl_surface_noise_kernel_wire;
+/// Infinite Anti-Aliasing wire (letter gi).
+pub mod kernel_infinite_anti_aliasing_wire;
+/// Spectral Dispersion Caustics wire (letter gj).
+pub mod kernel_spectral_dispersion_caustics_wire;
+/// Hybrid Cluster Shading VSVM wire (letter gk).
+pub mod kernel_hybrid_cluster_shading_vsvm_wire;
+/// Atmospheric Spine Particles wire (letter gl).
+pub mod kernel_atmospheric_spine_particles_wire;
+/// Radiance Cascades GI wire (letter gm).
+pub mod kernel_radiance_cascades_gi_wire;
+/// Alexa Cinematic Optics wire (letter gn).
+pub mod kernel_alexa_cinematic_optics_wire;
+/// Spectral Light Pipeline wire (letter go).
+pub mod kernel_spectral_light_pipeline_wire;
+/// MSL → WGSL compiler wire (letter gp).
+pub mod kernel_msl_wgsl_compiler_wire;
+/// USD Importer Bridge wire (letter gq).
+pub mod kernel_usd_importer_bridge_wire;
+/// HDR 32-bit float pipeline wire (letter gr).
+pub mod kernel_hdr_32bit_float_pipeline_wire;
+/// Strain-Aware Texturing wire (letter gs).
+pub mod kernel_strain_aware_texturing_wire;
+/// Gaze-Foveated Reprojection wire (letter gt).
+pub mod kernel_gaze_foveated_reprojection_wire;
+/// wgpu WGSL device load wire (letter gu) — gp emit → create_shader_module.
+pub mod kernel_wgpu_wgsl_device_load_wire;
 pub mod native_kernel;
 pub mod onnx_native_gen;
 pub mod physics_kernel;
@@ -502,3 +684,6 @@ mod tests {
         let _ = fs::remove_file(path);
     }
 }
+/ /   D o m a i n   1   g z :   P o s i t i o n - b a s e d   d y n a m i c s   r e a l   k e r n e l . 
+ 
+ 
