@@ -209,3 +209,7 @@ pub mod neural_speech_synthesis;
 pub mod lux_neural_midi_orchestrator;
 pub mod repo_mind_dependency_graph;
 pub mod live_auto_profiler_telepathic_terminal;
+pub mod spectral_vocoder_upsampler;
+pub mod audio_compute_scheduler;
+pub mod predictive_vocal_chords_sync;
+pub mod audio_hardware_watcher_swarm;
