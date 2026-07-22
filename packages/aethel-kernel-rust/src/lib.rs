@@ -229,3 +229,4 @@ pub mod spectral_lens_post_processing;
 pub mod in_engine_compositor_zero_loss;
 pub mod agentic_cinematographer_director;
 pub mod multilingual_lipsync_bridge;
+pub mod gameplay_to_cinematic_seamless_bridge;
