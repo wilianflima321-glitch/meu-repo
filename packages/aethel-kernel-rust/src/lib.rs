@@ -213,3 +213,5 @@ pub mod spectral_vocoder_upsampler;
 pub mod audio_compute_scheduler;
 pub mod predictive_vocal_chords_sync;
 pub mod audio_hardware_watcher_swarm;
+pub mod internal_refiner;
+pub mod master_bridge;
