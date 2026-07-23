@@ -19,8 +19,6 @@ pub const STREAM_GRID_SIDE: usize = 16;
 pub const MAX_ACTIVE_STREAM_CHUNKS: usize = STREAM_GRID_SIDE * STREAM_GRID_SIDE;
 /// Size of one terrain chunk in meters.
 pub const CHUNK_SIZE_METERS: f32 = 64.0;
-/// Float comparison epsilon.
-const EPS: f32 = 1e-5;
 
 /// Terrain Chunk LOD Level.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
