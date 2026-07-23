@@ -267,6 +267,9 @@ pub mod path_traced_radiance_cascades;
 pub mod vulkan_bindless_ray_tracer;
 pub mod strand_hair_subsurface_skin;
 pub mod distributed_gpu_cluster_sync;
+pub mod binary_netcode_serializer;
+pub mod tree_sitter_ast_indexer;
+pub mod async_bvh_ray_tracer;
 
 
 
