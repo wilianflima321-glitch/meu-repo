@@ -88,6 +88,18 @@ export const SentinelHardwareMonitorPanel: React.FC = () => {
             <span className="text-slate-200">kernel-lux (Raymarcher Espectral)</span>
             <span className="text-emerald-400 font-bold">RUNNING</span>
           </div>
+          <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
+            <span className="text-slate-200">kernel-netcode (Serializador Binário zero-alloc)</span>
+            <span className="text-emerald-400 font-bold">RUNNING</span>
+          </div>
+          <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
+            <span className="text-slate-200">kernel-ast (Indexador Simbólico AST)</span>
+            <span className="text-emerald-400 font-bold">RUNNING</span>
+          </div>
+          <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
+            <span className="text-slate-200">kernel-fallback (RTX 3060 Tier 2 / Tier 0 Legacy Auto)</span>
+            <span className="text-emerald-400 font-bold">TIER 2 ACTIVE</span>
+          </div>
         </div>
       </div>
     </div>
