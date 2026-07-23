@@ -9,7 +9,10 @@
 //! 6. **Zero-Truncation & Task Completion Mandate:** Models CANNOT be swapped or interrupted until work is 100% finished.
 //! 7. **Parallel Sub-Agent Unification & Master Validation Protocol (Cursor Supremacy):**
 //!    - Parallel execution of specialized sub-agents (Qwen 3.6 Plus code audit + Gemini 2.5 Flash 2M scanning + DeepSeek R1 math).
-//!    - Master Orchestrator (Claude) validates, cross-examines, and unifies all sub-agent outputs without hallucination.
+//!    - Master Orchestrator (Claude) validates, cross-examine, and unifies all sub-agent outputs without hallucination.
+//! 8. **Gemini Aesthetic, Vision & Narrative Audit Protocol (Zero-Hallucination & Non-Lazy Directive):**
+//!    - Prioritizes Gemini as the Ruthless Aesthetic, Image, Video, UI/UX & Game Quality Auditor.
+//!    - Constantly enforces alignment with game lore, narrative script, and AAA visual standards.
 
 use serde::{Deserialize, Serialize};
 
@@ -70,6 +73,27 @@ pub struct UnifiedMasterSynthesisResult {
     pub total_sub_agents_consulted: u32,
     pub zero_hallucination_verified: bool,
     pub master_validated_actions: Vec<String>,
+}
+
+/// Gemini Ruthless Aesthetic, Vision & Narrative Audit Package.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GeminiAestheticNarrativeAuditPack {
+    pub session_id: String,
+    pub gemini_model_version: String,
+    pub game_script_lore_ref: String,
+    pub visual_asset_target: String,
+    pub anti_laziness_directive: String,
+    pub strict_narrative_alignment_required: bool,
+    pub zero_hallucination_rigor: bool,
+}
+
+impl GeminiAestheticNarrativeAuditPack {
+    pub const GEMINI_RUTHLESS_AUDITOR_DIRECTIVE: &'static str =
+        "DIRECTIVA IMPLACÁVEL GEMINI (ESTÉTICA, VISÃO, UI & ALINHAMENTO NARRATIVO - ZERO ALUCINAÇÃO):\n\
+         - PROIBIÇÃO DE LAZINESS E ALUCINAÇÃO: Não dê elogios vazios ou resumos genéricos. Seja hiper-crítico.\n\
+         - FOCO PRIORITÁRIO: Avaliar estética visual de jogos, vídeos, imagens geradas, cenários e interfaces UI/UX.\n\
+         - ALINHAMENTO NARRATIVO OBRIGATÓRIO: Verifique rigorosamente se a estética visual, iluminação, cores e design de personagens estão 100% alinhados com o Roteiro e a História do jogo.\n\
+         - NÍVEL AAA DE EXIGÊNCIA: Aponte qualquer vazamento de luz, serrilhamento, desalinhamento de UI ou discrepância com a lore do jogo.";
 }
 
 /// Ephemeral Context Package injected by AI Orchestrator into AI Help (Qwen 3.6 Plus / Gemini / DeepSeek via OpenRouter).
@@ -166,6 +190,23 @@ impl AiFusionMoaOrchestrator {
         }
     }
 
+    /// Prepares Gemini for Ruthless Aesthetic, Image, Video, UI/UX & Narrative Alignment Audit.
+    pub fn prepare_gemini_aesthetic_narrative_audit(
+        session_id: &str,
+        game_script_lore: &str,
+        visual_asset_target: &str,
+    ) -> GeminiAestheticNarrativeAuditPack {
+        GeminiAestheticNarrativeAuditPack {
+            session_id: session_id.to_string(),
+            gemini_model_version: GEMINI_FLASH_2M_MODEL.to_string(),
+            game_script_lore_ref: game_script_lore.to_string(),
+            visual_asset_target: visual_asset_target.to_string(),
+            anti_laziness_directive: GeminiAestheticNarrativeAuditPack::GEMINI_RUTHLESS_AUDITOR_DIRECTIVE.to_string(),
+            strict_narrative_alignment_required: true,
+            zero_hallucination_rigor: true,
+        }
+    }
+
     /// Unifies and validates parallel sub-agent outputs (Qwen + Gemini + DeepSeek) into a Master Orchestrator report.
     pub fn master_unify_and_validate_sub_agents(
         master_model: &str,
@@ -214,6 +255,20 @@ mod tests {
             squad.fail_closed_blocked_reason.unwrap(),
             "credits_exhausted"
         );
+    }
+
+    #[test]
+    fn test_gemini_aesthetic_narrative_audit_pack_initialization() {
+        let pack = AiFusionMoaOrchestrator::prepare_gemini_aesthetic_narrative_audit(
+            "sess_999",
+            "Lore: Medieval Dark Fantasy",
+            "render_viewport_frame_402.png",
+        );
+
+        assert_eq!(pack.gemini_model_version, GEMINI_FLASH_2M_MODEL);
+        assert!(pack.strict_narrative_alignment_required);
+        assert!(pack.zero_hallucination_rigor);
+        assert!(pack.anti_laziness_directive.contains("IMPLACÁVEL GEMINI"));
     }
 
     #[test]
