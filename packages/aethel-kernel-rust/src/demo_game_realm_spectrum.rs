@@ -113,7 +113,7 @@ impl DemoGameRealmSpectrum {
             delta_time_ms: 16.66,
             active_fps: 60.0,
             gaussian_splats_rendered: self.gaussian_splats.count,
-            ocean_wave_jacobian_min: self.ocean_grid.foam_jacobian[0],
+            ocean_wave_jacobian_min: self.ocean_grid.foam_intensity[0],
             atmosphere_optical_depth_rayleigh: self.atmosphere_state.optical_depth_rayleigh,
             xpbd_ragdoll_bone_count: self.skeletal_rig.bone_count,
             audio_hrtf_itd_delay_ms: self.audio_state.itd_delay_ms,

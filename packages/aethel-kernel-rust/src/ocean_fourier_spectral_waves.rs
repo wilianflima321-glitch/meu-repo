@@ -58,6 +58,12 @@ pub struct OceanWaveGridSoA {
     _pad: CacheLinePad,
 }
 
+impl OceanWaveGridSoA {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
 impl Default for OceanWaveGridSoA {
     fn default() -> Self {
         Self {
