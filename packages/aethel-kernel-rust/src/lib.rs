@@ -263,6 +263,10 @@ pub mod skeletal_rig_ragdoll_xpbd;
 pub mod spectral_hrtf_audio_raytracer;
 pub mod ocean_fourier_spectral_waves;
 pub mod demo_game_realm_spectrum;
+pub mod path_traced_radiance_cascades;
+pub mod vulkan_bindless_ray_tracer;
+pub mod strand_hair_subsurface_skin;
+pub mod distributed_gpu_cluster_sync;
 
 
 
