@@ -167,6 +167,7 @@ impl EphemeralAiHelpContextPack {
     pub const CURSOR_SUPREMACY_ANTI_LAZINESS_DIRECTIVE: &'static str =
         "DIRECTIVA DE SUPREMACIA AETHEL (ANTI-PREGUIÇA E ZERO SUPERFICIALIDADE - OPENROUTER FUSION):\n\
          - PROIBIÇÃO ABSOLUTA de análises parciais, superficiais, resumos genéricos ou respostas lazies.\n\
+         - PRECISÃO MICRO-GRANULAR KB A KB E MB A MB: A análise não pode ser genérica em gigabytes; examine cada megabyte e kilobyte do repositório sempre que necessário com precisão de símbolo e AST.\n\
          - NENHUM arquivo ou conexão pode passar batido. Exija profundidade técnica de nível AAA.\n\
          - PROIBIÇÃO DE TROCA DE MODELO ANTES DO FIM: O modelo deve concluir 100% da tarefa sem truncamento.\n\
          - Mestre Orquestrador DEVE validar a pesquisa de todos os sub-agentes em paralelos e sintetizar sem alucinar.\n\
