@@ -80,6 +80,7 @@ pub mod optical_adversarial_discriminator;
 pub mod hdr_32bit_float_pipeline;
 pub mod genomic_seed_library;
 pub mod position_based_dynamics;
+pub mod voronoi_destruction_3d;
 pub mod usd_universal_exporter;
 pub mod geometric_scale_constraints;
 pub mod quantum_branching_vcs;
