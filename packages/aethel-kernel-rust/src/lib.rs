@@ -261,6 +261,8 @@ pub mod gaussian_splatting_3d_renderer;
 pub mod volumetric_atmosphere_cloud_solver;
 pub mod skeletal_rig_ragdoll_xpbd;
 pub mod spectral_hrtf_audio_raytracer;
+pub mod ocean_fourier_spectral_waves;
+
 
 
 
