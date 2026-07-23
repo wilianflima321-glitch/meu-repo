@@ -262,6 +262,7 @@ pub mod volumetric_atmosphere_cloud_solver;
 pub mod skeletal_rig_ragdoll_xpbd;
 pub mod spectral_hrtf_audio_raytracer;
 pub mod ocean_fourier_spectral_waves;
+pub mod demo_game_realm_spectrum;
 
 
 
