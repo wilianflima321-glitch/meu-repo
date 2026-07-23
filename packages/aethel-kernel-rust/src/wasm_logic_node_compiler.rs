@@ -157,7 +157,7 @@ impl LogicVm {
                 LogicInstruction::CmpGt => {
                     let b = self.pop()?;
                     let a = self.pop()?;
-                    self.push(if a > b { 1.0 } else { 0.0 });
+                    self.push(if a > b { 1.0 } else { 0.0 })?;
                 }
                 LogicInstruction::Branch { jump_target_if_false } => {
                     let cond = self.pop()?;
