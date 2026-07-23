@@ -5,13 +5,16 @@
 //! 2. **Trava II (Yjs CRDT Atomic Transaction):** Every asset/viewport write is wrapped in atomic Yjs transaction.
 //! 3. **MoA Adaptive Width:** Risk < 40 -> 1 Generator; 40..69 -> 2 Generators; >= 70 -> 3 Generators.
 //! 4. **No Mock Artifacts:** Rejects empty or fake payloads with non-lazy verification.
-//! 5. **Ephemeral AI Help Context Protocol:** Injects clean, purged, zero-drift context from AI Orchestrator to Gemini 3.6 Flash.
+//! 5. **Ephemeral AI Help Context Protocol:** Injects clean, purged, zero-drift context from AI Orchestrator to Qwen 3.6 Plus via OpenRouter.
 //! 6. **Project-Scoped Anti-Laziness Knowledge Ledger (Cursor Supremacy Protocol):**
 //!    - Zero-laziness mandate prohibiting partial or superficial analysis.
 //!    - Project-isolated persistent knowledge indexing (`.aethel/knowledge/project_audit_summary.md`).
-//!    - Cloud-synced project memory index preserving project state across sessions.
+//!    - Cloud-synced project memory index preserving project state across sessions via OpenRouter AI Fusion.
 
 use serde::{Deserialize, Serialize};
+
+/// Default AI Help model provider via OpenRouter.
+pub const DEFAULT_AI_HELP_MODEL: &'static str = "qwen/qwen-3.6-plus";
 
 /// Adaptive MoA Generator Squad Configuration.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -35,11 +38,12 @@ pub struct ProjectKnowledgeIndex {
     pub total_indexed_files: u32,
 }
 
-/// Ephemeral Context Package injected by AI Orchestrator into AI Help (Gemini 3.6 Flash).
+/// Ephemeral Context Package injected by AI Orchestrator into AI Help (Qwen 3.6 Plus via OpenRouter).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EphemeralAiHelpContextPack {
     pub orchestrator_session_id: String,
     pub target_task: String,
+    pub ai_help_model: String,
     pub sanitized_context_snapshot: String,
     pub max_ephemeral_tokens: u32,
     pub read_only_mode: bool,
@@ -50,7 +54,7 @@ pub struct EphemeralAiHelpContextPack {
 
 impl EphemeralAiHelpContextPack {
     pub const CURSOR_SUPREMACY_ANTI_LAZINESS_DIRECTIVE: &'static str =
-        "DIRECTIVA DE SUPREMACIA AETHEL (ANTI-PREGUIÇA E ZERO SUPERFICIALIDADE):\n\
+        "DIRECTIVA DE SUPREMACIA AETHEL (ANTI-PREGUIÇA E ZERO SUPERFICIALIDADE - QWEN 3.6 PLUS OPENROUTER):\n\
          - PROIBIÇÃO ABSOLUTA de análises parciais, superficiais, resumos genéricos ou respostas lazies.\n\
          - NENHUM arquivo ou conexão pode passar batido. Exija profundidade técnica de nível AAA.\n\
          - Utilize o Ledger de Conhecimento do Projeto (.aethel/knowledge) para recall seletivo sem acumular lixo no chat.\n\
@@ -100,7 +104,7 @@ impl AiFusionMoaOrchestrator {
         }
     }
 
-    /// Constructs a clean, ephemeral, auto-purging context package for the AI Help (Gemini 3.6 Flash) with Project Knowledge Ledger.
+    /// Constructs a clean, ephemeral, auto-purging context package for the AI Help (Qwen 3.6 Plus via OpenRouter) with Project Knowledge Ledger.
     pub fn prepare_ephemeral_help_context(
         orchestrator_session_id: &str,
         target_task: &str,
@@ -117,6 +121,7 @@ impl AiFusionMoaOrchestrator {
         EphemeralAiHelpContextPack {
             orchestrator_session_id: orchestrator_session_id.to_string(),
             target_task: target_task.to_string(),
+            ai_help_model: DEFAULT_AI_HELP_MODEL.to_string(),
             sanitized_context_snapshot: sanitized,
             max_ephemeral_tokens: 2_000_000,
             read_only_mode: !user_selected_help_as_editor,
@@ -147,7 +152,7 @@ mod tests {
     }
 
     #[test]
-    fn test_prepare_ephemeral_help_context_enforces_anti_laziness_and_project_isolation() {
+    fn test_prepare_ephemeral_help_context_enforces_qwen_3_6_plus_and_anti_laziness() {
         let proj_info = ProjectKnowledgeIndex {
             project_id: "aethel_engine_main".to_string(),
             project_root_uri: "e:\\Aethel engine".to_string(),
@@ -165,10 +170,11 @@ mod tests {
             Some(proj_info),
         );
 
+        assert_eq!(pack.ai_help_model, "qwen/qwen-3.6-plus");
         assert!(pack.read_only_mode);
         assert!(pack.auto_purge_after_completion);
         assert!(pack.aaa_rigor_mandate);
         assert!(pack.project_knowledge_ref.is_some());
-        assert!(pack.sanitized_context_snapshot.contains("DIRECTIVA DE SUPREMACIA AETHEL"));
+        assert!(pack.sanitized_context_snapshot.contains("QWEN 3.6 PLUS OPENROUTER"));
     }
 }
