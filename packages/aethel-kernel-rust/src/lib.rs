@@ -270,6 +270,7 @@ pub mod distributed_gpu_cluster_sync;
 pub mod binary_netcode_serializer;
 pub mod tree_sitter_ast_indexer;
 pub mod async_bvh_ray_tracer;
+pub mod heterogeneous_hardware_fallback_matrix;
 
 
 
