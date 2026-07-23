@@ -91,6 +91,7 @@ pub mod wasm_logic_node_compiler;
 pub mod svo_terrain_world_partition;
 pub mod nanite_micropolygon_compute_rasterizer;
 pub mod rollback_netcode_engine;
+pub mod virtual_shadow_maps_vsm;
 pub mod systemic_imperfection_chaos;
 pub mod dynamic_shader_rewriter;
 pub mod delta_seed_synchronization;
