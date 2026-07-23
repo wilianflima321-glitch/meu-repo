@@ -20,6 +20,11 @@
 //!     - Uses Meta Llama 3.1 405B / 3.3 70B via OpenRouter.
 //!     - Scoped strictly to `.md` files (plans, character lore, branching narrative scenes, skill trees, software specs).
 //!     - Zero-pollution mandate: align and consolidate existing `.md` ledgers without cluttering workspace.
+//! 11. **Generative Video & Image Engine Provider (Google Veo 3 / DaVinci / FLUX / Runway Integration):**
+//!     - Allows users to select specialized video/image AI models (Google Veo 3, DaVinci, FLUX 1.1 Pro).
+//!     - Mode 1: In-Engine Cinematic Cutscenes & Short Film generation.
+//!     - Mode 2: Video-to-3D Gaussian Splatting Environment Reconstruction (`gaussian_splatting_3d_renderer.rs`).
+//!     - Mode 3: Concept Texture & Skybox Injection (`direct_canvas_texture_injector.rs`).
 
 use serde::{Deserialize, Serialize};
 
@@ -33,6 +38,10 @@ pub const DEEPSEEK_R1_MATH_MODEL: &'static str = "deepseek/deepseek-r1";
 pub const LLAMA_405B_NARRATIVE_MODEL: &'static str = "meta-llama/llama-3.1-405b-instruct";
 /// Meta Llama 3.3 70B Instruct Model for Fast Narrative Branching.
 pub const LLAMA_3_3_70B_NARRATIVE_MODEL: &'static str = "meta-llama/llama-3.3-70b-instruct";
+/// Google Veo 3 Video Generation Model Provider.
+pub const GOOGLE_VEO_3_VIDEO_MODEL: &'static str = "google/veo-3-cinematic";
+/// FLUX / DaVinci High-Fidelity Image Model Provider.
+pub const DAVINCI_FLUX_IMAGE_MODEL: &'static str = "black-forest-labs/flux-1.1-pro";
 
 /// Adaptive MoA Generator Squad Configuration.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -125,6 +134,17 @@ impl LlamaMarkdownNarrativeSpecArchitectPack {
          - ESCOPO ESTRITO: Permissão de edição EXCLUSIVA para arquivos Markdown (.md), planos de arquitetura, roteiros de cenas, árvores de habilidades e especificações de software.\n\
          - ANTI-POLUIÇÃO: Consolide e alinhe documentos existentes. NÃO crie arquivos .md duplicados ou desnecessários.\n\
          - PROFUNDIDADE ILIMITADA (ZERO MVP): Gere histórias profundas, ramificações de diálogos, contextos de mundo e especificações de software no padrão AAA comercial sem cortes ou resumos lazies.";
+}
+
+/// Generative Video & Image Engine Integration Package.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GenerativeVideoImageEnginePack {
+    pub session_id: String,
+    pub selected_model: String,
+    pub generation_mode: String, // "CutsceneMovie", "VideoTo3DGaussianSplatting", "TextureSkyboxInjection"
+    pub prompt_guidance: String,
+    pub convert_to_3d_gaussian_splatting: bool,
+    pub in_engine_compositor_zero_loss: bool,
 }
 
 /// Sub-Task unit managed by the Agent-of-Agents Master Director.
@@ -286,7 +306,25 @@ impl AiFusionMoaOrchestrator {
         }
     }
 
-    /// Unifies and validates parallel sub-agent outputs (Qwen + Gemini + DeepSeek + Llama) into a Master Orchestrator report.
+    /// Prepares Generative Video/Image AI Model (Google Veo 3 / DaVinci / FLUX) for Cutscenes or 3D Gaussian Splatting Reconstruction.
+    pub fn prepare_generative_video_image_engine(
+        session_id: &str,
+        selected_model: &str,
+        generation_mode: &str,
+        prompt_guidance: &str,
+        convert_to_3d_splatting: bool,
+    ) -> GenerativeVideoImageEnginePack {
+        GenerativeVideoImageEnginePack {
+            session_id: session_id.to_string(),
+            selected_model: selected_model.to_string(),
+            generation_mode: generation_mode.to_string(),
+            prompt_guidance: prompt_guidance.to_string(),
+            convert_to_3d_gaussian_splatting: convert_to_3d_splatting,
+            in_engine_compositor_zero_loss: true,
+        }
+    }
+
+    /// Unifies and validates parallel sub-agent outputs (Qwen + Gemini + DeepSeek + Llama + Veo3) into a Master Orchestrator report.
     pub fn master_unify_and_validate_sub_agents(
         master_model: &str,
         sub_analyses: &[SubAgentAnalysisPayload],
@@ -404,6 +442,21 @@ mod tests {
         assert!(pack.zero_pollution_consolidation_mandate);
         assert!(pack.infinite_branching_lore_allowed);
         assert!(pack.allowed_file_extensions.contains(&".md".to_string()));
+    }
+
+    #[test]
+    fn test_generative_video_image_engine_pack_initialization() {
+        let pack = AiFusionMoaOrchestrator::prepare_generative_video_image_engine(
+            "sess_555",
+            GOOGLE_VEO_3_VIDEO_MODEL,
+            "VideoTo3DGaussianSplatting",
+            "Cinematic volumetric alien forest with bioluminescent plants",
+            true,
+        );
+
+        assert_eq!(pack.selected_model, GOOGLE_VEO_3_VIDEO_MODEL);
+        assert!(pack.convert_to_3d_gaussian_splatting);
+        assert!(pack.in_engine_compositor_zero_loss);
     }
 
     #[test]
