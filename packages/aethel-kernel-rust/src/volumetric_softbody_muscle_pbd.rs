@@ -171,8 +171,8 @@ impl VolumetricSoftbodyMusclePbd {
                 let curr_vol_6x = TetraElement::compute_signed_volume_6x(x0, x1, x2, x3);
                 let target_vol_6x = tetra.rest_volume_6x * (1.0 - 0.2 * muscle_activation);
 
-                let C = curr_vol_6x - target_vol_6x;
-                total_vol_error += C.abs() / 6.0;
+                let vol_constraint = curr_vol_6x - target_vol_6x;
+                total_vol_error += vol_constraint.abs() / 6.0;
 
                 let w0 = soa.inv_mass[p0];
                 let w1 = soa.inv_mass[p1];
@@ -184,7 +184,7 @@ impl VolumetricSoftbodyMusclePbd {
                     continue;
                 }
 
-                let delta = C / w_sum;
+                let delta = vol_constraint / w_sum;
                 let corr = 0.25 * delta;
 
                 if w0 > 0.0 {
