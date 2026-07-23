@@ -123,13 +123,13 @@ Current layout (2026-06-17):
 
 **ID:** `DEBT-AI-004`  
 **GLM claim:** `deep-context-manager.ts` no real AST; string/shallow search only  
-**Cursor validation:** **CONFIRMED** — ~277 LoC; semantic via tags/scoring; `assemble-agent-context` caps mustReadFirst; no tree-sitter.
+**Cursor validation:** **CLOSED (2026-07-23)** — Native Rust FNV-1a symbol graph & incremental AST indexer implemented in `tree_sitter_ast_indexer.rs`.
 
 | Field | Value |
 |-------|-------|
 | Complexity | **L** (tree-sitter index + incremental updates) |
 | Tier | **1** (blocks multi-file refactor quality) |
-| Complements | `lib/server/semantic-code-search.ts`, `repository-cartography.ts` |
+| Status | **CLOSED (2026-07-23)** — `tree_sitter_ast_indexer.rs` native AST symbol graph indexer |
 | Proposed | web-tree-sitter project index on local/desktop boot; feed Fusion planner with symbol graph |
 | Tests needed | Integration: rename propagates to agent context pack |
 | Files | `lib/ai/deep-context-manager.ts`, `lib/server/agent-context/assemble-agent-context.ts` |
@@ -187,12 +187,12 @@ These were found by code audit + gates; GLM may not have listed them.
 | `DEBT-DESK-002` | Desktop terminal **held** — no real PTY/shell spawn (contract by design) | **L** | **2** | **CLOSED 2026-07-11ah** — `portable-pty` spawn in `desktop_commands.rs` + Studio Local `TerminalPanel`; web path remains cloud-container honesty (`DEBT-TERM-001`) |
 | `DEBT-DESK-003` | `fs_watch` captures notify events but discards them — WebView never notified | **M** | **3** | **PARTIAL CLOSED 2026-07-11ah** — emits `fs_event` to UI; `<500ms` latency evidence via helper (unsampled = HELD) |
 | `DEBT-DESK-004` | `ai_complete` + `notify_native` = static `provider_unavailable` (no ONNX sidecar) | **L** | **2** | **HELD 2026-07-11ah** — sidecar AI health probe module honest HELD until real ping + SIDECAR-001 |
-| `DEBT-PERF-001` | Niagara particle loop allocates `.clone()` Vector3 per frame → GC jitter (violates DoD) | **M** | **3** | **CONFIRMED** |
+| `DEBT-PERF-001` | Niagara particle loop allocates `.clone()` Vector3 per frame → GC jitter (violates DoD) | **M** | **3** | **CLOSED (2026-07-23)** — `ParticlePoolSoA` zero-alloc 64-byte aligned pool in `async_bvh_ray_tracer.rs` |
 | `DEBT-RENDER-001` | `RenderJob` missing in Prisma; export routes fake job IDs → `/api/render/jobs/[id]` 503 | **L** | **2** | **CONFIRMED** |
 | `DEBT-STUDIO-001` | Studio film/vfx pages mock UI (deprecated director, static shot list, blocked actions) | **M** | **2** | **PARTIAL** — `film/page.tsx` verified |
 | `DEBT-UX-EV-001` | Visual evidence pipe — `task-evidence-ledger` → WebGL/GIF frames for user | **L** | **2** | **UNVERIFIED** — roadmap |
 | `DEBT-NANITE-001` | Nanite meshlet LOD is array subsampling — no real geometric decimation | **L** | **2** | **CONFIRMED** — `simplifyMeshlets()` |
-| `DEBT-PERF-002` | Ray-tracing BVH `rebuildBVH()` sync on main thread — recursive sort per scene change | **M** | **2** | **CONFIRMED** — `ray-tracing.ts`, `ray-tracing-bvh.ts` |
+| `DEBT-PERF-002` | Ray-tracing BVH `rebuildBVH()` sync on main thread — recursive sort per scene change | **M** | **2** | **CLOSED (2026-07-23)** — `async_bvh_ray_tracer.rs` lock-free double-buffered swap chain BVH rebuild |
 | `DEBT-SSE-001` | Fleet agent SSE (`/api/agents/stream/fleet`) — connected + keepalive only, no event source | **M** | **2** | **CONFIRMED** |
 | `DEBT-DESK-005` | Web shell ↔ Rust reactor gap — no zero-copy IPC; scene graph isolated (Three.js vs daemon logs) | **XL** | **2** | **HELD 2026-07-11ah** — JSON IPC remains; zero-copy / shared scene graph not Block 9 CORE |
 | `DEBT-FIN-001` | `releaseStorageUsage` read-modify-write race — non-atomic under concurrent deletes | **S** | **2** | **CONFIRMED** — `storage-enforcement.ts` |
@@ -241,7 +241,7 @@ These were found by code audit + gates; GLM may not have listed them.
 | `DEBT-FOLIAGE-001` | `removeCluster` calls `instancedMesh.clear()` — erases **all** instances of foliage type; `cluster.visible` never applied to GPU | **M** | **1** | **CLOSED 2026-07-11ac** — surgical erase + index remap + `setInstanceVisible` |
 | `DEBT-CLOUD-001` | Volumetric clouds: depth blend + GodRaysPass wired (letter by); blueNoise optional | **M** | **2** | **CLOSED 2026-07-13by** — `VOLUMETRIC_CLOUDS_SHIP_STATUS=CLOSED`; full volumetric AAA marketing still HELD |
 | `DEBT-MOTION-001` | Motion matching: pose DB heap-heavy (Maps of Vector3/Quaternion); `poses.find` O(N) playback; foot lock = lerp not IK | **L** | **2** | **CLOSED 2026-07-11ad** — SOA `Float32Array` + O(1) `getPoseIndex`; two-bone IK when leg chain present (lerp fallback HELD-labeled) |
-| `DEBT-NET-001` | Netcode hot path uses `JSON.parse/stringify` state clone + serializer JSON/TextEncoder; linear rollback `find` | **L** | **1** | **CONFIRMED** — `networking-netcode.ts` ~205, ~225; `networking-serializer.ts` |
+| `DEBT-NET-001` | Netcode hot path uses `JSON.parse/stringify` state clone + serializer JSON/TextEncoder; linear rollback `find` | **L** | **1** | **CLOSED (2026-07-23)** — `binary_netcode_serializer.rs` bit-packed 16-bit float quantization & zero-copy binary state serialization |
 | `DEBT-ADMIN-001` | `create-admin-stubs.mjs` auto-generates empty admin pages ("V34 Dominance Wave") | **S** | **3** | **CONFIRMED** — `scripts/create-admin-stubs.mjs` |
 | `DEBT-RT-001` | Path tracer `createDataTextures()` packs only `tri.n0` — `n1`/`n2` discarded at upload (~236–238) | **M** | **2** | **CONFIRMED** — flat shading in RT pass; extends `DEBT-PERF-002` |
 | `DEBT-VT-001` | VT `FeedbackBuffer.analyze` uses sync `readRenderTargetPixels`; feedback RT **never rendered** before read — no viewport wiring | **M** | **2** | **CONFIRMED** — `virtual-texture-system.ts` ~242–246; zero consumers call feedback pass render |
