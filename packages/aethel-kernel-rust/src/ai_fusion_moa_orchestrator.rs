@@ -5,17 +5,21 @@
 //! 2. **Trava II (Yjs CRDT Atomic Transaction):** Every asset/viewport write is wrapped in atomic Yjs transaction.
 //! 3. **MoA Adaptive Width:** Risk < 40 -> 1 Generator; 40..69 -> 2 Generators; >= 70 -> 3 Generators.
 //! 4. **No Mock Artifacts:** Rejects empty or fake payloads with non-lazy verification.
-//! 5. **Ephemeral AI Help Context Protocol:** Injects clean, purged, zero-drift context from AI Orchestrator to Qwen 3.6 Plus / Gemini / DeepSeek via OpenRouter.
+//! 5. **Ephemeral AI Help Context Protocol:** Injects clean, purged, zero-drift context from AI Orchestrator to Qwen 3.6 Plus / Gemini / DeepSeek / Llama via OpenRouter.
 //! 6. **Zero-Truncation & Task Completion Mandate:** Models CANNOT be swapped or interrupted until work is 100% finished.
 //! 7. **Parallel Sub-Agent Unification & Master Validation Protocol (Cursor Supremacy):**
 //!    - Parallel execution of specialized sub-agents (Qwen 3.6 Plus code audit + Gemini 2.5 Flash 2M scanning + DeepSeek R1 math).
-//!    - Master Orchestrator (Claude) validates, cross-examines, and unifies all sub-agent outputs without hallucination.
+//!    - Master Orchestrator (Claude) validates, cross-examine, and unifies all sub-agent outputs without hallucination.
 //! 8. **Gemini Aesthetic, Vision & Narrative Audit Protocol (Zero-Hallucination & Non-Lazy Directive):**
 //!    - Prioritizes Gemini as the Ruthless Aesthetic, Image, Video, UI/UX & Game Quality Auditor.
 //!    - Constantly enforces alignment with game lore, narrative script, and AAA visual standards.
 //! 9. **Continuous Autonomous Agent-of-Agents Execution Loop (Cursor Agent Multitask Parity):**
 //!    - Master Orchestrator operates as an autonomous multi-task director.
 //!    - Continuously spawns sub-agents, writes code, verifies via compiler checks, and proceeds step-by-step until whole app/game is 100% completed.
+//! 10. **Llama Markdown & Narrative Spec Architect Protocol (.md Scoped Editor):**
+//!     - Uses Meta Llama 3.1 405B / 3.3 70B via OpenRouter.
+//!     - Scoped strictly to `.md` files (plans, character lore, branching narrative scenes, skill trees, software specs).
+//!     - Zero-pollution mandate: align and consolidate existing `.md` ledgers without cluttering workspace.
 
 use serde::{Deserialize, Serialize};
 
@@ -25,6 +29,10 @@ pub const DEFAULT_AI_HELP_MODEL: &'static str = "qwen/qwen-3.6-plus";
 pub const GEMINI_FLASH_2M_MODEL: &'static str = "google/gemini-2.5-flash";
 /// DeepSeek R1 Mathematical Reasoning Model.
 pub const DEEPSEEK_R1_MATH_MODEL: &'static str = "deepseek/deepseek-r1";
+/// Flagship Meta Llama 3.1 405B Instruct Model for Massive Lore & Narrative Specs.
+pub const LLAMA_405B_NARRATIVE_MODEL: &'static str = "meta-llama/llama-3.1-405b-instruct";
+/// Meta Llama 3.3 70B Instruct Model for Fast Narrative Branching.
+pub const LLAMA_3_3_70B_NARRATIVE_MODEL: &'static str = "meta-llama/llama-3.3-70b-instruct";
 
 /// Adaptive MoA Generator Squad Configuration.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -97,6 +105,26 @@ impl GeminiAestheticNarrativeAuditPack {
          - FOCO PRIORITÁRIO: Avaliar estética visual de jogos, vídeos, imagens geradas, cenários e interfaces UI/UX.\n\
          - ALINHAMENTO NARRATIVO OBRIGATÓRIO: Verifique rigorosamente se a estética visual, iluminação, cores e design de personagens estão 100% alinhados com o Roteiro e a História do jogo.\n\
          - NÍVEL AAA DE EXIGÊNCIA: Aponte qualquer vazamento de luz, serrilhamento, desalinhamento de UI ou discrepância com a lore do jogo.";
+}
+
+/// Llama Markdown & Narrative Spec Architect Package (Scoped strictly to `.md` files).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct LlamaMarkdownNarrativeSpecArchitectPack {
+    pub session_id: String,
+    pub llama_model_version: String,
+    pub target_markdown_file: String,
+    pub allowed_file_extensions: Vec<String>,
+    pub zero_pollution_consolidation_mandate: bool,
+    pub infinite_branching_lore_allowed: bool,
+    pub aaa_no_mvp_requirement: bool,
+}
+
+impl LlamaMarkdownNarrativeSpecArchitectPack {
+    pub const LLAMA_NARRATIVE_ARCHITECT_DIRECTIVE: &'static str =
+        "DIRECTIVA DE ARQUITETO NARRATIVO LLAMA (DOCUMENTAÇÃO, LORE E ROTEIROS AAA):\n\
+         - ESCOPO ESTRITO: Permissão de edição EXCLUSIVA para arquivos Markdown (.md), planos de arquitetura, roteiros de cenas, árvores de habilidades e especificações de software.\n\
+         - ANTI-POLUIÇÃO: Consolide e alinhe documentos existentes. NÃO crie arquivos .md duplicados ou desnecessários.\n\
+         - PROFUNDIDADE ILIMITADA (ZERO MVP): Gere histórias profundas, ramificações de diálogos, contextos de mundo e especificações de software no padrão AAA comercial sem cortes ou resumos lazies.";
 }
 
 /// Sub-Task unit managed by the Agent-of-Agents Master Director.
@@ -232,7 +260,30 @@ impl AiFusionMoaOrchestrator {
         }
     }
 
-    /// Unifies and validates parallel sub-agent outputs (Qwen + Gemini + DeepSeek) into a Master Orchestrator report.
+    /// Prepares Llama 405B / 3.3 70B for Markdown, Lore & Software Spec Architecture (Scoped strictly to `.md`).
+    pub fn prepare_llama_markdown_narrative_architect(
+        session_id: &str,
+        target_md_file: &str,
+        use_405b_flagship: bool,
+    ) -> LlamaMarkdownNarrativeSpecArchitectPack {
+        let model = if use_405b_flagship {
+            LLAMA_405B_NARRATIVE_MODEL
+        } else {
+            LLAMA_3_3_70B_NARRATIVE_MODEL
+        };
+
+        LlamaMarkdownNarrativeSpecArchitectPack {
+            session_id: session_id.to_string(),
+            llama_model_version: model.to_string(),
+            target_markdown_file: target_md_file.to_string(),
+            allowed_file_extensions: vec![".md".to_string(), ".markdown".to_string()],
+            zero_pollution_consolidation_mandate: true,
+            infinite_branching_lore_allowed: true,
+            aaa_no_mvp_requirement: true,
+        }
+    }
+
+    /// Unifies and validates parallel sub-agent outputs (Qwen + Gemini + DeepSeek + Llama) into a Master Orchestrator report.
     pub fn master_unify_and_validate_sub_agents(
         master_model: &str,
         sub_analyses: &[SubAgentAnalysisPayload],
@@ -339,6 +390,20 @@ mod tests {
     }
 
     #[test]
+    fn test_llama_markdown_narrative_architect_pack_initialization() {
+        let pack = AiFusionMoaOrchestrator::prepare_llama_markdown_narrative_architect(
+            "sess_888",
+            "docs/lore/character_abilities.md",
+            true,
+        );
+
+        assert_eq!(pack.llama_model_version, LLAMA_405B_NARRATIVE_MODEL);
+        assert!(pack.zero_pollution_consolidation_mandate);
+        assert!(pack.infinite_branching_lore_allowed);
+        assert!(pack.allowed_file_extensions.contains(&".md".to_string()));
+    }
+
+    #[test]
     fn test_continuous_agent_runner_autonomous_loop() {
         let tasks = vec![
             AgentSubTask {
@@ -371,9 +436,13 @@ mod tests {
         assert_eq!(runner.completed_sub_tasks.len(), 1);
 
         // Step task 2
-        assert!(!AiFusionMoaOrchestrator::step_continuous_agent_runner(&mut runner));
+        assert!(AiFusionMoaOrchestrator::step_continuous_agent_runner(&mut runner));
+        assert_eq!(runner.completed_sub_tasks.len(), 2);
         assert!(runner.master_goal_achieved);
         assert!(!runner.is_active_loop);
+
+        // Step 3 (when queue is empty) returns false
+        assert!(!AiFusionMoaOrchestrator::step_continuous_agent_runner(&mut runner));
     }
 
     #[test]
