@@ -87,6 +87,7 @@ pub mod quantum_branching_vcs;
 pub mod hierarchical_streaming_cache;
 pub mod sdf_octree_hashing;
 pub mod wasm_shared_memory_buffer;
+pub mod wasm_logic_node_compiler;
 pub mod systemic_imperfection_chaos;
 pub mod dynamic_shader_rewriter;
 pub mod delta_seed_synchronization;
