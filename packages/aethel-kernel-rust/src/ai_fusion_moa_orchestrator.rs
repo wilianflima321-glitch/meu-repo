@@ -161,6 +161,7 @@ pub struct EphemeralAiHelpContextPack {
     pub auto_purge_after_completion: bool,
     pub aaa_rigor_mandate: bool,
     pub project_knowledge_ref: Option<ProjectKnowledgeIndex>,
+    pub cross_agent_prior_audits: Vec<SubAgentAnalysisPayload>,
 }
 
 impl EphemeralAiHelpContextPack {
@@ -241,6 +242,7 @@ impl AiFusionMoaOrchestrator {
             auto_purge_after_completion: true,
             aaa_rigor_mandate: true,
             project_knowledge_ref: project_knowledge,
+            cross_agent_prior_audits: Vec::new(),
         }
     }
 
