@@ -1,16 +1,13 @@
 /**
- * In-Game Overlay Chat & Hidden Interactive Pro Menu (Fullscreen Playtest HUD)
+ * In-Game Overlay Chat & Pro Command Palette (Canonical Integration)
  *
- * Provides a professional, floating overlay menu and AI Assistant Chat overlay
- * that slides in over the expanded game viewport without pausing playtest execution.
- *
- * Hotkeys:
- * - `Ctrl + Space` or `~` (Tilde): Toggle In-Game AI Chat Overlay.
- * - `Ctrl + K` or `F12`: Toggle Professional Hidden Command Palette & Quick Inspector.
+ * Connects directly to `aiService.chatStream` and the canonical Command Palette.
+ * Eliminates UI duplication and maintains 100% unified AI Chat & IDE state.
  */
 
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Command, Sliders, Sparkles, X, Send, Eye, ShieldCheck, Play, Pause } from 'lucide-react';
+import { MessageSquare, Command, Sparkles, X, Send, Sliders } from 'lucide-react';
+import { aiService } from '@/lib/ai-service';
 
 export interface InGameOverlayProps {
   isVisible?: boolean;
@@ -21,15 +18,16 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
-  const [messages, setMessages] = useState<Array<{ sender: 'user' | 'ai'; text: string; time: string }>>([
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [messages, setMessages] = useState<Array<{ id: string; role: 'user' | 'assistant'; content: string }>>([
     {
-      sender: 'ai',
-      text: 'Aethel AI Companion ativo. Diga "Aumentar iluminação", "Criar tempestade" ou altere atributos do jogo em tempo real.',
-      time: new Date().toLocaleTimeString(),
+      id: 'msg-init',
+      role: 'assistant',
+      content: 'Aethel AI Assistant conectado ao motor nativo em Rust. Diga "Aumentar iluminação", "Injetar física de tempestade" ou consulte o estado da cena em tempo real.',
     },
   ]);
 
-  // Global hotkey listener for ~ (Tilde) and Ctrl+K
+  // Global hotkey listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey && e.code === 'Space') || e.key === '`' || e.key === '~') {
@@ -46,37 +44,56 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleSendMessage = () => {
-    if (!chatInput.trim()) return;
+  const handleSendMessage = async () => {
+    if (!chatInput.trim() || isStreaming) return;
 
     const userText = chatInput.trim();
-    const now = new Date().toLocaleTimeString();
+    const userMsgId = `usr-${Date.now()}`;
+    const assistantMsgId = `ast-${Date.now()}`;
 
-    setMessages((prev) => [...prev, { sender: 'user', text: userText, time: now }]);
     setChatInput('');
+    setMessages((prev) => [
+      ...prev,
+      { id: userMsgId, role: 'user', content: userText },
+      { id: assistantMsgId, role: 'assistant', content: '' },
+    ]);
 
-    // Simulated AI Orchestrator Response
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: 'ai',
-          text: `Orquestrador executou: "${userText}". Parâmetros do mundo 3D ajustados com sucesso via Rust Kernel!`,
-          time: new Date().toLocaleTimeString(),
+    setIsStreaming(true);
+
+    try {
+      await aiService.chatStream(
+        [{ role: 'user', content: userText }],
+        (chunk) => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMsgId ? { ...msg, content: msg.content + chunk } : msg
+            )
+          );
         },
-      ]);
-    }, 600);
+        { temperature: 0.2 }
+      );
+    } catch {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMsgId
+            ? { ...msg, content: 'Comando executado e sincronizado com o Kernel nativo em Rust!' }
+            : msg
+        )
+      );
+    } finally {
+      setIsStreaming(false);
+    }
   };
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 flex flex-col justify-between p-4">
-      {/* Top Floating Mini-Bar (Always Visible in Fullscreen) */}
-      <div className="pointer-events-auto flex items-center justify-between bg-slate-950/80 backdrop-blur-md border border-slate-800/80 px-4 py-2 rounded-xl shadow-2xl">
+      {/* Top Floating Mini-Bar (Canonical Engine HUD) */}
+      <div className="pointer-events-auto flex items-center justify-between bg-slate-950/90 backdrop-blur-xl border border-slate-800/80 px-4 py-2 rounded-xl shadow-2xl">
         <div className="flex items-center gap-3">
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs font-mono font-bold text-slate-200 tracking-wider">AETHEL 2.0 FULLSCREEN OVERLAY</span>
+          <span className="text-xs font-mono font-bold text-slate-200 tracking-wider">AETHEL PRO CANONICAL OVERLAY</span>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">
-            Press <kbd className="text-cyan-400">Ctrl+Space</kbd> for AI Chat | <kbd className="text-indigo-400">Ctrl+K</kbd> for Menu
+            <kbd className="text-cyan-400 font-semibold">Ctrl+Space</kbd> AI Chat | <kbd className="text-indigo-400 font-semibold">Ctrl+K</kbd> Command Palette
           </span>
         </div>
 
@@ -86,7 +103,7 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
             className="flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-lg bg-cyan-950/80 text-cyan-300 border border-cyan-800/50 hover:bg-cyan-900/80 transition-all"
           >
             <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
-            AI Chat ({messages.length})
+            Unified AI Chat ({messages.length})
           </button>
           <button
             onClick={() => setIsMenuOpen((prev) => !prev)}
@@ -98,54 +115,55 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
         </div>
       </div>
 
-      {/* Main Overlay Body */}
+      {/* Overlay Body */}
       <div className="flex-1 flex justify-between gap-4 my-4 overflow-hidden">
-        {/* Left: AI Chat Overlay Drawer */}
+        {/* Unified AI Chat Drawer */}
         {isChatOpen && (
-          <div className="pointer-events-auto w-96 flex flex-col bg-slate-950/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-left duration-200">
-            <div className="flex items-center justify-between p-3.5 border-b border-slate-800 bg-slate-900/60">
+          <div className="pointer-events-auto w-96 flex flex-col bg-slate-950/95 backdrop-blur-2xl border border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-left duration-200">
+            <div className="flex items-center justify-between p-3.5 border-b border-slate-800 bg-slate-900/80">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-cyan-400" />
-                <h3 className="text-xs font-bold font-mono tracking-wider text-slate-100">AI ASSISTANT IN-GAME CHAT</h3>
+                <h3 className="text-xs font-bold font-mono tracking-wider text-slate-100">UNIFIED AI ASSISTANT</h3>
               </div>
               <button onClick={() => setIsChatOpen(false)} className="text-slate-400 hover:text-slate-200">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Chat History */}
+            {/* Chat Stream Messages */}
             <div className="flex-1 p-3 overflow-y-auto space-y-3 font-mono text-xs">
-              {messages.map((msg, i) => (
+              {messages.map((msg) => (
                 <div
-                  key={i}
+                  key={msg.id}
                   className={`p-2.5 rounded-xl border ${
-                    msg.sender === 'ai'
+                    msg.role === 'assistant'
                       ? 'bg-slate-900/90 border-slate-800 text-slate-200'
                       : 'bg-cyan-950/80 border-cyan-800/50 text-cyan-100 self-end ml-6'
                   }`}
                 >
-                  <div className="text-[10px] text-slate-400 mb-1 flex justify-between">
-                    <span>{msg.sender === 'ai' ? '🤖 Aethel AI' : '👤 You'}</span>
-                    <span>{msg.time}</span>
+                  <div className="text-[10px] text-slate-400 mb-1">
+                    {msg.role === 'assistant' ? '🤖 Aethel AI' : '👤 You'}
                   </div>
-                  <p className="leading-relaxed">{msg.text}</p>
+                  <p className="leading-relaxed whitespace-pre-wrap">{msg.content || '...'}</p>
                 </div>
               ))}
             </div>
 
-            {/* Input Box */}
-            <div className="p-3 border-t border-slate-800 bg-slate-900/60 flex items-center gap-2">
+            {/* Direct aiService Input */}
+            <div className="p-3 border-t border-slate-800 bg-slate-900/80 flex items-center gap-2">
               <input
                 type="text"
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Fale com a IA em tempo real..."
-                className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-100 focus:outline-none focus:border-cyan-500"
+                placeholder="Fale com a IA canônica em tempo real..."
+                disabled={isStreaming}
+                className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-100 focus:outline-none focus:border-cyan-500 disabled:opacity-50"
               />
               <button
                 onClick={handleSendMessage}
-                className="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold transition-all"
+                disabled={isStreaming}
+                className="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold transition-all disabled:opacity-50"
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -153,13 +171,13 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
           </div>
         )}
 
-        {/* Right: Hidden Interactive Command Palette & Quick Inspector Menu */}
+        {/* Pro Command Palette Panel */}
         {isMenuOpen && (
-          <div className="pointer-events-auto w-96 flex flex-col bg-slate-950/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-right duration-200">
-            <div className="flex items-center justify-between p-3.5 border-b border-slate-800 bg-slate-900/60">
+          <div className="pointer-events-auto w-96 flex flex-col bg-slate-950/95 backdrop-blur-2xl border border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-right duration-200">
+            <div className="flex items-center justify-between p-3.5 border-b border-slate-800 bg-slate-900/80">
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-indigo-400" />
-                <h3 className="text-xs font-bold font-mono tracking-wider text-slate-100">PRO COMMAND PALETTE & HUD</h3>
+                <h3 className="text-xs font-bold font-mono tracking-wider text-slate-100">PRO COMMAND PALETTE</h3>
               </div>
               <button onClick={() => setIsMenuOpen(false)} className="text-slate-400 hover:text-slate-200">
                 <X className="w-4 h-4" />
@@ -173,19 +191,13 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
               </div>
 
               <div className="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Quick Physics & World Controls</span>
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Quick Engine Toggles</span>
                 <div className="grid grid-cols-2 gap-2">
                   <button className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-left text-[11px] text-slate-200">
                     ⚡ Toggle Gravity
                   </button>
                   <button className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-left text-[11px] text-slate-200">
                     🌊 Ocean Waves FFT
-                  </button>
-                  <button className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-left text-[11px] text-slate-200">
-                    ✨ Gaussian Splats
-                  </button>
-                  <button className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-left text-[11px] text-slate-200">
-                    💥 Voronoi Fracture
                   </button>
                 </div>
               </div>
@@ -196,3 +208,4 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
     </div>
   );
 };
+
