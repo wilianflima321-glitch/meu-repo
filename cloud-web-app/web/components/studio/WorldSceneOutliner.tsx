@@ -45,18 +45,38 @@ interface WorldSceneOutlinerProps {
   selectedId: string | null
   onSelect: (node: SceneNode) => void
   onFocus: (node: SceneNode) => void
+  /**
+   * Fired after any local mutation (visibility/lock toggle) so a parent that
+   * owns the real backing store (e.g. `useLevelEditorStore`) can persist it.
+   * Optional — when absent, mutations still work locally (uncontrolled use).
+   */
+  onTreeChange?: (tree: SceneNode) => void
+  /** Real duplicate mutation — when absent, the Duplicate action is hidden rather than faked. */
+  onDuplicateNode?: (node: SceneNode) => void
+  /** Real delete mutation — when absent, the Delete action is hidden rather than faked. */
+  onDeleteNode?: (node: SceneNode) => void
 }
 
 export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
   initialTree = null,
   selectedId,
   onSelect,
-  onFocus
+  onFocus,
+  onTreeChange,
+  onDuplicateNode,
+  onDeleteNode,
 }) => {
   const [tree, setTree] = useState<SceneNode | null>(initialTree)
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(
     initialTree ? new Set([initialTree.id]) : new Set()
   )
+
+  // R7: keep in sync with a controlling parent's real backing store (e.g. the
+  // level editor's LevelObject[] store) instead of only reading it once.
+  useEffect(() => {
+    setTree(initialTree)
+    setExpandedNodes((prev) => (initialTree && prev.size === 0 ? new Set([initialTree.id]) : prev))
+  }, [initialTree])
 
   // Flattened list of visible/expanded nodes for keyboard navigation
   const [flatList, setFlatList] = useState<SceneNode[]>([])
@@ -99,7 +119,12 @@ export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
       }
       return node
     }
-    setTree((prev) => prev ? deepCloneAndModify(prev) : null)
+    setTree((prev) => {
+      if (!prev) return null
+      const next = deepCloneAndModify(prev)
+      onTreeChange?.(next)
+      return next
+    })
   }
 
   const getNodeIcon = (type: string) => {
@@ -257,10 +282,12 @@ export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
             <Focus size={12} className="text-[var(--aethel-neon-cyan)]" />
             Focus in Viewport
           </ContextMenuItem>
-          <ContextMenuItem onClick={() => onSelect(node)}>
-            <Copy size={12} />
-            Duplicate Node
-          </ContextMenuItem>
+          {onDuplicateNode ? (
+            <ContextMenuItem onClick={() => onDuplicateNode(node)}>
+              <Copy size={12} />
+              Duplicate Node
+            </ContextMenuItem>
+          ) : null}
           <ContextMenuSeparator />
           <ContextMenuItem onClick={() => updateNodeState(node.id, 'visible', !isVisible)}>
             {isVisible ? <EyeOff size={12} className="text-amber-400" /> : <Eye size={12} className="text-emerald-400" />}
@@ -270,11 +297,18 @@ export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
             {isLocked ? <Unlock size={12} className="text-emerald-400" /> : <Lock size={12} className="text-amber-400" />}
             {isLocked ? 'Unlock' : 'Lock'} Node
           </ContextMenuItem>
-          <ContextMenuSeparator />
-          <ContextMenuItem className="text-[var(--aethel-error)] hover:!bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]">
-            <Trash2 size={12} className="text-[var(--aethel-error)]" />
-            Delete Node
-          </ContextMenuItem>
+          {onDeleteNode ? (
+            <>
+              <ContextMenuSeparator />
+              <ContextMenuItem
+                onClick={() => onDeleteNode(node)}
+                className="text-[var(--aethel-error)] hover:!bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]"
+              >
+                <Trash2 size={12} className="text-[var(--aethel-error)]" />
+                Delete Node
+              </ContextMenuItem>
+            </>
+          ) : null}
         </ContextMenuContent>
       </ContextMenu>
     )

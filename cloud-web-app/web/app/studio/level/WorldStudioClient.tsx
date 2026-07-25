@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -9,6 +9,7 @@ import { RenderQueueDashboard } from '@/components/assets/RenderQueueDashboard'
 import { AssetBrowserPanel } from '@/components/studio/AssetBrowserPanel'
 import { WorldSceneOutliner, type SceneNode } from '@/components/studio/WorldSceneOutliner'
 import { WorldObjectInspector } from '@/components/studio/WorldObjectInspector'
+import { buildLevelSceneTree, useLevelEditorStore } from '@/lib/studio/level-editor-store'
 import {
   getGroupTools,
   resolveActiveTool,
@@ -221,6 +222,46 @@ export default function WorldStudioClient() {
   // Scene selection state shared between Outliner and Inspector
   const [selectedNode, setSelectedNode] = useState<SceneNode | null>(null)
 
+  // R7 (AAA Studio Deepening Sweep) — only the `level` tool has a real,
+  // shared backing store today (`useLevelEditorStore`, lifted out of
+  // `LevelEditor.tsx`). Other World Studio tools (scene/terrain/foliage/etc.)
+  // still keep their scene state fully local, so the outliner honestly stays
+  // in its empty state for them rather than showing stale or fabricated data.
+  const isLevelTool = activeTool.id === 'level'
+  const levelObjects = useLevelEditorStore((state) => state.objects)
+  const levelSelectedId = useLevelEditorStore((state) => state.selectedId)
+  const setLevelSelectedId = useLevelEditorStore((state) => state.setSelectedId)
+  const duplicateLevelObject = useLevelEditorStore((state) => state.duplicateObject)
+  const deleteLevelObject = useLevelEditorStore((state) => state.deleteObject)
+
+  const sceneTree = useMemo(
+    () => (isLevelTool ? buildLevelSceneTree(levelObjects, 'Main Level') : null),
+    [isLevelTool, levelObjects],
+  )
+
+  // Keep the shell's selection (drives the inspector + outliner highlight)
+  // in sync with the level store, whichever surface changed it first —
+  // the outliner, the `aethel:scene-focus` DOM event, or a duplicate/delete.
+  useEffect(() => {
+    if (!isLevelTool) return
+    if (!levelSelectedId) {
+      setSelectedNode(null)
+      return
+    }
+    const match = levelObjects.find((object) => object.id === levelSelectedId)
+    setSelectedNode(
+      match
+        ? {
+            id: match.id,
+            name: match.name,
+            type: match.type === 'light' || match.type === 'camera' ? match.type : 'mesh',
+            visible: match.visible,
+            locked: match.locked,
+          }
+        : null,
+    )
+  }, [isLevelTool, levelSelectedId, levelObjects])
+
   const onSelectTool = (id: string) => {
     const url = new URL(window.location.href)
     url.searchParams.set('tool', id)
@@ -229,13 +270,24 @@ export default function WorldStudioClient() {
 
   const handleNodeSelect = useCallback((node: SceneNode) => {
     setSelectedNode(node)
-  }, [])
+    if (isLevelTool) setLevelSelectedId(node.id === 'world-root' ? null : node.id)
+  }, [isLevelTool, setLevelSelectedId])
 
   const handleNodeFocus = useCallback((_node: SceneNode) => {
     // Viewport can subscribe to a context or event to frame the selected object.
     // Emitting a custom DOM event allows the R3F canvas to react without prop drilling.
     window.dispatchEvent(new CustomEvent('aethel:scene-focus', { detail: { nodeId: _node.id } }))
   }, [])
+
+  const handleDuplicateNode = useCallback((node: SceneNode) => {
+    if (!isLevelTool || node.id === 'world-root') return
+    duplicateLevelObject(node.id)
+  }, [isLevelTool, duplicateLevelObject])
+
+  const handleDeleteNode = useCallback((node: SceneNode) => {
+    if (!isLevelTool || node.id === 'world-root') return
+    deleteLevelObject(node.id)
+  }, [isLevelTool, deleteLevelObject])
 
   return (
     <CreativeWorkbenchShell
@@ -245,9 +297,12 @@ export default function WorldStudioClient() {
       evidence={buildToolEvidence(activeTool)}
       outliner={
         <WorldSceneOutliner
+          initialTree={sceneTree}
           selectedId={selectedNode?.id ?? null}
           onSelect={handleNodeSelect}
           onFocus={handleNodeFocus}
+          onDuplicateNode={isLevelTool ? handleDuplicateNode : undefined}
+          onDeleteNode={isLevelTool ? handleDeleteNode : undefined}
         />
       }
       inspector={

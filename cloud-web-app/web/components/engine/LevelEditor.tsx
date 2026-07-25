@@ -33,6 +33,7 @@ import { LevelViewport } from '@aethel/engine/LevelEditor.viewport-runtime';
 import { DetailsPanelMini, OutlinerMini, Toolbar } from './LevelEditorPanels';
 import { getSimulationTargetFps, getSimulationTimeDilation, isSimulationGodMode } from '@/lib/settings/engine-settings';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { useLevelEditorStore } from '@/lib/studio/level-editor-store';
 
 const log = createComponentLogger('LevelEditor');
 const LEVEL_ENGINE_MODULES = ['world-streaming', 'quest-system', 'save-manager', 'inventory-system'] as const
@@ -51,8 +52,18 @@ export type LevelEditorProps = {
 // ============================================================================
 
 export default function LevelEditor({ embedded = false }: LevelEditorProps = {}) {
-  const [objects, setObjects] = useState<LevelObject[]>(defaultObjects);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Onda AAA Studio Deepening Sweep — objects/selectedId lifted into a shared
+  // store so the World Studio shell's outliner/inspector slots (rendered as
+  // siblings when embedded, not children) can read and mutate the same real
+  // scene instead of only the embedded viewport seeing it.
+  const objects = useLevelEditorStore((state) => state.objects);
+  const setObjects = useLevelEditorStore((state) => state.setObjects);
+  const selectedId = useLevelEditorStore((state) => state.selectedId);
+  const setSelectedId = useLevelEditorStore((state) => state.setSelectedId);
+  const duplicateObject = useLevelEditorStore((state) => state.duplicateObject);
+  const deleteObject = useLevelEditorStore((state) => state.deleteObject);
+  const toggleVisibility = useLevelEditorStore((state) => state.toggleVisibility);
+  const toggleLocked = useLevelEditorStore((state) => state.toggleLocked);
   const [transformMode, setTransformMode] = useState<TransformMode>('translate');
   const [viewMode, setViewMode] = useState<ViewportMode>('perspective');
   const [snapMode, setSnapMode] = useState<SnapMode>('grid');
@@ -108,7 +119,7 @@ export default function LevelEditor({ embedded = false }: LevelEditorProps = {})
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isPlaying]);
+  }, [isPlaying, setObjects]);
 
   // Handle Play/Pause
   const handlePlayPause = useCallback(async () => {
@@ -144,37 +155,14 @@ export default function LevelEditor({ embedded = false }: LevelEditorProps = {})
       }
     }
     setIsPlaying(!isPlaying);
-  }, [isPlaying, objects, savedObjects]);
+  }, [isPlaying, objects, savedObjects, setObjects]);
 
   const selectedObject = useMemo(
     () => objects.find(o => o.id === selectedId) || null,
     [objects, selectedId]
   );
 
-  const handleDuplicate = useCallback((id: string) => {
-    const timestamp = Date.now();
-    let nextId: string | null = null;
-
-    setObjects(prev => {
-      const obj = prev.find(o => o.id === id);
-      if (!obj) return prev;
-
-      nextId = `${obj.id}_copy_${timestamp}`;
-
-      const newObj: LevelObject = {
-        ...obj,
-        id: nextId,
-        name: `${obj.name}_Copy`,
-        position: [obj.position[0] + 1, obj.position[1], obj.position[2] + 1],
-      };
-
-      return [...prev, newObj];
-    });
-
-    if (nextId) {
-      setSelectedId(nextId);
-    }
-  }, []);
+  const handleDuplicate = duplicateObject;
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -194,8 +182,7 @@ export default function LevelEditor({ embedded = false }: LevelEditorProps = {})
         case 'delete':
         case 'backspace':
           if (selectedId) {
-            setObjects(prev => prev.filter(o => o.id !== selectedId));
-            setSelectedId(null);
+            deleteObject(selectedId);
           }
           break;
         case 'd':
@@ -214,36 +201,23 @@ export default function LevelEditor({ embedded = false }: LevelEditorProps = {})
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleDuplicate, selectedId, selectedObject]);
+  }, [deleteObject, handleDuplicate, selectedId, selectedObject, setSelectedId]);
 
   const handleTransform = useCallback((id: string, position: [number, number, number], rotation: [number, number, number], scale: [number, number, number]) => {
     setObjects(prev => prev.map(obj =>
       obj.id === id ? { ...obj, position, rotation, scale } : obj
     ));
-  }, []);
+  }, [setObjects]);
 
   const handleObjectChange = useCallback((id: string, changes: Partial<LevelObject>) => {
     setObjects(prev => prev.map(obj =>
       obj.id === id ? { ...obj, ...changes } : obj
     ));
-  }, []);
+  }, [setObjects]);
 
-  const handleToggleVisibility = useCallback((id: string) => {
-    setObjects(prev => prev.map(obj =>
-      obj.id === id ? { ...obj, visible: !obj.visible } : obj
-    ));
-  }, []);
-
-  const handleToggleLock = useCallback((id: string) => {
-    setObjects(prev => prev.map(obj =>
-      obj.id === id ? { ...obj, locked: !obj.locked } : obj
-    ));
-  }, []);
-
-  const handleDelete = useCallback((id: string) => {
-    setObjects(prev => prev.filter(obj => obj.id !== id));
-    if (selectedId === id) setSelectedId(null);
-  }, [selectedId]);
+  const handleToggleVisibility = toggleVisibility;
+  const handleToggleLock = toggleLocked;
+  const handleDelete = deleteObject;
 
   const handleSave = useCallback(async () => {
     const levelData: LevelData = {
@@ -329,7 +303,22 @@ export default function LevelEditor({ embedded = false }: LevelEditorProps = {})
       }
     };
     loadLevel();
-  }, []);
+  }, [setObjects]);
+
+  // World Studio shell dispatches this when a user double-clicks/focuses a
+  // node in the (sibling, not child) `WorldSceneOutliner` — select + gizmo
+  // highlight the real object. Camera fly-to-selection is not implemented
+  // in `LevelViewport` yet, so this intentionally only selects rather than
+  // fabricating a camera move that doesn't exist.
+  useEffect(() => {
+    if (!embedded) return;
+    const handleSceneFocus = (event: Event) => {
+      const detail = (event as CustomEvent<{ nodeId?: string }>).detail;
+      if (detail?.nodeId) setSelectedId(detail.nodeId);
+    };
+    window.addEventListener('aethel:scene-focus', handleSceneFocus);
+    return () => window.removeEventListener('aethel:scene-focus', handleSceneFocus);
+  }, [embedded, setSelectedId]);
 
   const handleBuild = useCallback(() => {
     log.info('Building level...');
