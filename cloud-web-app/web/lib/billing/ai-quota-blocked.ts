@@ -138,7 +138,7 @@ export function normalizeAiQuotaBlocked(raw: unknown): AiQuotaBlockedResponse | 
         requiresSpendCap: type === 'enable_payg',
       } satisfies AiQuotaAction
     })
-    .filter((a): a is AiQuotaAction => Boolean(a))
+    .filter((a): a is NonNullable<typeof a> => Boolean(a))
 
   const ensured =
     actions.length > 0

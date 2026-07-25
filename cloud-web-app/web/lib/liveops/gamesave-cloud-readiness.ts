@@ -50,7 +50,7 @@ function isForceDisabled(forceDisabled?: boolean): boolean {
 async function loadLivePrismaStore(): Promise<PrismaGameSaveStore | null> {
   try {
     const { prisma } = await import('@/lib/prisma')
-    const delegate = (prisma as { gameSave?: PrismaGameSaveStore }).gameSave
+    const delegate = (prisma as unknown as { gameSave?: PrismaGameSaveStore }).gameSave
     if (!delegate || typeof delegate.findUnique !== 'function') {
       return null
     }

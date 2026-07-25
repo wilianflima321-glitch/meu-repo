@@ -10,6 +10,23 @@ export type ViewportCreativeMode = 'game' | 'film'
 export type ViewportRenderTarget = RuntimeModeId
 
 /**
+ * Real R3F WebGLRenderer telemetry sampled every frame from `gl.info`
+ * inside the Canvas (see `RenderStatsProbe` in `ViewportSceneCanvas.runtime.tsx`).
+ * No fabricated fields: VRAM bytes are intentionally omitted because WebGL2
+ * does not expose real GPU memory allocation to page JS — `gl.info.memory`
+ * only reports live geometry/texture *counts*, not bytes (Anti-Mock doctrine).
+ */
+export type ViewportRenderStats = {
+  fps: number
+  frameTimeMs: number
+  drawCalls: number
+  triangles: number
+  geometries: number
+  textures: number
+  pipelineLabel: string
+}
+
+/**
  * Auxiliary PBR maps derived from a single dropped albedo/base-color image
  * (data URLs). Generated procedurally on-device (Sobel-filter normals,
  * luminance-derived roughness/height) — see `lib/viewport/procedural-pbr.ts`.
@@ -101,6 +118,13 @@ export type AethelViewport3DProps = {
    * any, is under the cursor at drop time.
    */
   onRaycastReady?: (resolve: (clientX: number, clientY: number) => string | null) => void
+  /**
+   * Live WebGLRenderer stats sampled from inside the Canvas each frame
+   * (throttled), surfaced to `ViewportTopToolbar`'s Stat FPS overlay.
+   * Replaces the previously hardcoded 60 FPS / 42 calls / 412 MB VRAM
+   * placeholder numbers (Zero-MVP / Anti-Mock doctrine).
+   */
+  onRenderStats?: (stats: ViewportRenderStats) => void
 }
 
 export const viewportSeedObjects: ViewportSceneObject[] = [

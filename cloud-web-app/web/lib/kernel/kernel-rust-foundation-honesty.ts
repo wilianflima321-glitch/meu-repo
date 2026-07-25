@@ -339,7 +339,6 @@ export function makeKernelRustFoundationInjectEvidence(
   return {
     proven: true,
     source: 'vitest-inject',
-    gates,
     notes: ['letter dn — Vitest desktop soak evidence inject'],
     ...overrides,
     gates: overrides?.gates

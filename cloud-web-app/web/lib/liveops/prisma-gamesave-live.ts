@@ -15,7 +15,7 @@ import { createComponentLogger } from '@/lib/observability/logger'
 const log = createComponentLogger('prisma-gamesave-live')
 
 export function createLivePrismaGameSaveStore(): PrismaGameSaveStore {
-  const delegate = (prisma as { gameSave?: PrismaGameSaveStore }).gameSave
+  const delegate = (prisma as unknown as { gameSave?: PrismaGameSaveStore }).gameSave
   if (!delegate) {
     throw new Error('GameSave_delegate_missing_run_prisma_generate')
   }

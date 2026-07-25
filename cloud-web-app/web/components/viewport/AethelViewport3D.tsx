@@ -56,6 +56,7 @@ export type {
   AethelViewport3DProps,
   ViewportCreativeMode,
   ViewportPBRTextureMaps,
+  ViewportRenderStats,
   ViewportRenderTarget,
   ViewportSceneObject,
   ViewportTransformMode,

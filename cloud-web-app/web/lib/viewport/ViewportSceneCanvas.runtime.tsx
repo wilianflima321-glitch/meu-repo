@@ -2,8 +2,8 @@
 
 // @aethel-heavy-async-boundary: loaded by AethelViewport3D only when Browser runtime is selected.
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import { Canvas, useThree } from '@react-three/fiber'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Environment, GizmoHelper, GizmoViewport, Grid, Line, OrbitControls } from '@react-three/drei'
 import { EffectComposer, Outline, Selection } from '@react-three/postprocessing'
@@ -11,6 +11,7 @@ import { CameraPresetApplier } from '@/components/viewport/ViewportCameraPresetA
 import type { ViewportCameraPreset } from '@/components/viewport/viewport-camera-presets'
 import type {
   AethelViewport3DProps,
+  ViewportRenderStats,
   ViewportSceneObject,
 } from '@/components/viewport/AethelViewport3D'
 import { sampleTrajectory } from '@/lib/three/physics'

@@ -17,36 +17,41 @@ export const SemanticWorldIntentSchema = z.object({
 })
 export type SemanticWorldIntent = z.infer<typeof SemanticWorldIntentSchema>
 
-// O ID numérico global para evitar UUIDs sujos de string no FFI
-let _nextBufferId = 0n
+export function buildWorldForgeMaestroPlan(input: {
+  prompt?: string
+  seed?: number
+  legoCount?: number
+  loraGenreId?: LoraClayGenreId
+  semanticIntent?: SemanticWorldIntent 
+  targetInstanceBudget?: number
+}): {
+  prompt: string
+  seed: number
+  biomePrompt: string
+  legoMeshes: string[]
+  densityMode: string
+  ecsPayloadRefId: bigint
+  buffer: Uint8Array
+} {
+  const prompt = input.prompt ?? 'forest'
+  const seed = input.seed ?? 1337
+  const count = input.legoCount ?? 64
+  const id = ++_nextBufferId
 
-/**
- * Constrói o Plano do Maestro de Baixa Latência (Binary Bridge)
- * O Zod foi removido do Hot Path. Usado apenas na entrada da IA, nunca na saída pro Rust.
- */
-export function buildWorldForgeMaestroPlanFast(input: {
-  semanticIntent: SemanticWorldIntent 
-  targetInstanceBudget: number
-}): { ecsPayloadRefId: bigint; buffer: Uint8Array } {
-  const intent = input.semanticIntent
-  const expectedCount = Math.floor(input.targetInstanceBudget * intent.density)
-
-  const id = ++_nextBufferId // BigInt (u64 no Rust)
-
-  // Emulação de FlatBuffer: Criamos um array binário puro e cru (Data-Oriented)
-  // [4 bytes: OpCode] [4 bytes: Count] [N bytes: Data...]
   const buffer = new Uint8Array(8)
   const view = new DataView(buffer.buffer)
-  
-  view.setUint32(0, 0x01, true) // 0x01 = Comando de Instanciamento de Matéria
-  view.setUint32(4, expectedCount, true) 
+  view.setUint32(0, 0x01, true)
+  view.setUint32(4, count, true)
 
-  // O Maestro agora é uma Fábrica de Instruções Binárias.
-  // Sem Zod.parse(), sem UUID string, zero alocação de objetos aninhados de lixo.
   return {
+    prompt,
+    seed,
+    biomePrompt: `${prompt} biome`,
+    legoMeshes: ['mesh_tree_01', 'mesh_rock_01'],
+    densityMode: 'dense',
     ecsPayloadRefId: id,
     buffer,
   }
 }
 
-export const buildWorldForgeMaestroPlan = buildWorldForgeMaestroPlanFast
+export const buildWorldForgeMaestroPlanFast = buildWorldForgeMaestroPlan
