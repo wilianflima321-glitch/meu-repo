@@ -102,6 +102,13 @@ export interface AmbientCapabilitySnapshot {
   heldReasons: string[]
 }
 
+export interface AmbientCapabilityProbeInput {
+  csiDriverAvailable?: boolean
+  tinymlWeightsAvailable?: boolean
+  cameraPipelineAvailable?: boolean
+  linkMedium?: 'wifi' | 'ethernet' | 'unknown' | 'none'
+}
+
 /** Camera + CSI topology lock-on — implementation [HELD] without camera pipeline. */
 export interface AmbientFocusLockTarget {
   entityId: string
@@ -111,6 +118,8 @@ export interface AmbientFocusLockTarget {
   source: 'camera' | 'csi' | 'fused' | 'none'
   held: boolean
 }
+
+export type AmbientFocusLockRequest = AmbientFocusLockTarget
 
 export interface AmbientFocusLockState {
   locked: boolean
@@ -122,7 +131,7 @@ export interface AmbientFocusLockState {
 
 /** Gameplay heuristic inputs when CSI unavailable (Ethernet / no NIC). */
 export interface GameplayAffectHeuristicInput {
-  playerId: string
+  playerId?: string
   /** Recent damage taken intensity 0–1 */
   damageIntensity?: number
   /** Time since last enemy contact (ms) */

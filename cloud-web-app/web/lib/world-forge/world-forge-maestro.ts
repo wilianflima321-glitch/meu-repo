@@ -17,6 +17,10 @@ export const SemanticWorldIntentSchema = z.object({
 })
 export type SemanticWorldIntent = z.infer<typeof SemanticWorldIntentSchema>
 
+import type { PcgLegoMeshRef } from '@/lib/world-forge/pcg-hybrid-scatter'
+
+let _nextBufferId = 0n
+
 export function buildWorldForgeMaestroPlan(input: {
   prompt?: string
   seed?: number
@@ -28,8 +32,8 @@ export function buildWorldForgeMaestroPlan(input: {
   prompt: string
   seed: number
   biomePrompt: string
-  legoMeshes: string[]
-  densityMode: string
+  legoMeshes: PcgLegoMeshRef[]
+  densityMode: 'hybrid' | 'perlin' | 'wfc-lite'
   ecsPayloadRefId: bigint
   buffer: Uint8Array
 } {
@@ -47,8 +51,11 @@ export function buildWorldForgeMaestroPlan(input: {
     prompt,
     seed,
     biomePrompt: `${prompt} biome`,
-    legoMeshes: ['mesh_tree_01', 'mesh_rock_01'],
-    densityMode: 'dense',
+    legoMeshes: [
+      { id: 'tree_01', foliageTypeId: 'type_tree', sockets: ['ground'] },
+      { id: 'rock_01', foliageTypeId: 'type_rock', sockets: ['ground'] },
+    ],
+    densityMode: 'hybrid',
     ecsPayloadRefId: id,
     buffer,
   }

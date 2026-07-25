@@ -309,7 +309,7 @@ export function decideSpendLane(
 
 export async function reserveSpend(input: SpendReserveInput): Promise<SpendReserveResult> {
   const decision = decideSpendLane(input)
-  if (!decision.ok) return decision
+  if (!decision.ok || !('lane' in decision)) return decision as SpendReserveResult
 
   const raw = Math.max(1, Math.floor(input.estimatedRawTokens))
   const weighted = applyTokenWeight(raw, input.modelId)

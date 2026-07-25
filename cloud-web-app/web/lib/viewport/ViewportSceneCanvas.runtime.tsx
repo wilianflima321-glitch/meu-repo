@@ -60,6 +60,48 @@ function AssetDropRaycastBridge({ onReady }: { onReady?: (resolve: (clientX: num
   return null
 }
 
+/**
+ * Anti-Mock fix (Phase 3, AAA Studio Deepening Sweep) — samples the real
+ * `THREE.WebGLRenderer.info` counters every frame and reports a throttled,
+ * EMA-smoothed snapshot to the DOM-level Stat FPS overlay in
+ * `ViewportTopToolbar`. Previously that overlay hardcoded `60.0 FPS`,
+ * `42 calls`, `412 MB VRAM` regardless of actual scene load. VRAM is
+ * intentionally never fabricated here — WebGL2 does not expose real GPU
+ * byte allocation to page JS, only live geometry/texture object counts.
+ */
+function RenderStatsProbe({
+  pipelineLabel,
+  onStats,
+}: {
+  pipelineLabel: string
+  onStats?: (stats: ViewportRenderStats) => void
+}) {
+  const { gl } = useThree()
+  const emaFrameTimeMs = useRef(16.6)
+  const lastSampleAt = useRef(0)
+
+  useFrame((_, delta) => {
+    if (!onStats) return
+    const frameTimeMs = delta * 1000
+    emaFrameTimeMs.current = emaFrameTimeMs.current * 0.9 + frameTimeMs * 0.1
+    const now = typeof performance !== 'undefined' ? performance.now() : lastSampleAt.current + 500
+    if (now - lastSampleAt.current < 400) return
+    lastSampleAt.current = now
+    const info = gl.info
+    onStats({
+      fps: emaFrameTimeMs.current > 0 ? 1000 / emaFrameTimeMs.current : 0,
+      frameTimeMs: emaFrameTimeMs.current,
+      drawCalls: info.render.calls,
+      triangles: info.render.triangles,
+      geometries: info.memory.geometries,
+      textures: info.memory.textures,
+      pipelineLabel,
+    })
+  })
+
+  return null
+}
+
 const DEFAULT_FIDELITY: ViewportFidelityParams = {
   level: 'balanced',
   pipelineLabel: 'r3f-webgl2',
@@ -99,6 +141,7 @@ export function ViewportScene({
   focusTarget,
   focusNonce,
   onRaycastReady,
+  onRenderStats,
   fidelity = DEFAULT_FIDELITY,
   frameloop = 'always',
   terrainProjectId = null,
@@ -161,6 +204,7 @@ export function ViewportScene({
         focusNonce={focusNonce}
       />
       <AssetDropRaycastBridge onReady={onRaycastReady} />
+      <RenderStatsProbe pipelineLabel={fidelity.pipelineLabel} onStats={onRenderStats} />
       <RadianceStudioViewportBridge capabilityScore={capabilityScore} />
       <color attach="background" args={[renderMode === 'cinematic' ? 0x070b12 : 0x0b1220]} />
       <fog attach="fog" args={[renderMode === 'cinematic' ? 0x070b12 : 0x0b1220, 10, 22]} />

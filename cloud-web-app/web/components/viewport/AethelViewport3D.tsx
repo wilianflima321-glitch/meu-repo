@@ -18,6 +18,7 @@ import {
 import {
   viewportSeedObjects,
   type AethelViewport3DProps,
+  type ViewportRenderStats,
   type ViewportRenderTarget,
   type ViewportSceneObject,
 } from '@/components/viewport/viewport-model'
@@ -114,6 +115,7 @@ export function AethelViewport3D({
   const [webGpuAdapterAcquired, setWebGpuAdapterAcquired] = useState<boolean | null>(null)
   const [renderTarget, setRenderTarget] = useState<ViewportRenderTarget>('browser')
   const [focusSelectionNonce, setFocusSelectionNonce] = useState(0)
+  const [renderStats, setRenderStats] = useState<ViewportRenderStats | null>(null)
   const pixelStreamUrl = process.env.NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL
   const runtimeModes = useMemo(() => buildRuntimeModeViewModels({ pixelStreamUrl }), [pixelStreamUrl])
   const currentRuntimeMode = findRuntimeModeById(runtimeModes, renderTarget)
@@ -285,6 +287,7 @@ export function AethelViewport3D({
         onSnapEnabledChange={onSnapEnabledChange}
         onCameraPresetChange={setCameraPreset}
         onFrameSelection={frameSelection}
+        renderStats={renderTarget === 'browser' ? renderStats : null}
       />
 
       <ViewportGizmoMemoryChip chip={gizmoMemoryChip} />
@@ -370,6 +373,7 @@ export function AethelViewport3D({
           focusTarget={selectedObject?.position ?? null}
           focusNonce={focusSelectionNonce}
           onRaycastReady={onRaycastReady}
+          onRenderStats={setRenderStats}
           fidelity={fidelityParams}
           frameloop={frameloop}
           terrainProjectId={terrainProjectId}

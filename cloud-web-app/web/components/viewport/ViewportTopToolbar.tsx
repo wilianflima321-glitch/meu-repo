@@ -19,6 +19,7 @@ import {
   type ViewportCameraPreset,
 } from '@/components/viewport/viewport-camera-presets'
 import type {
+  ViewportRenderStats,
   ViewportTransformMode,
   ViewportTransformSpace,
 } from '@/components/viewport/AethelViewport3D'
@@ -42,6 +43,7 @@ export function ViewportTopToolbar({
   onSnapEnabledChange,
   onCameraPresetChange,
   onFrameSelection,
+  renderStats = null,
 }: {
   transformMode: ViewportTransformMode
   transformSpace: ViewportTransformSpace
@@ -53,6 +55,8 @@ export function ViewportTopToolbar({
   onSnapEnabledChange: (enabled: boolean) => void
   onCameraPresetChange: (preset: ViewportCameraPreset) => void
   onFrameSelection: () => void
+  /** Real R3F `gl.info` telemetry (Anti-Mock fix) — null until the first sample lands. */
+  renderStats?: ViewportRenderStats | null
 }) {
   const cameraPresetLabel =
     VIEWPORT_CAMERA_PRESETS.find((preset) => preset.id === cameraPreset)
@@ -148,31 +152,44 @@ export function ViewportTopToolbar({
         />
       </div>
 
-      {/* UE5-style Stat FPS Overlay */}
+      {/* Stat FPS Overlay — real THREE.WebGLRenderer.info telemetry, sampled in RenderStatsProbe (no fabricated numbers) */}
       {showStats && (
         <div className="absolute right-4 top-4 z-20 flex flex-col gap-1 rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.85)] p-3 font-mono text-[11px] text-[var(--aethel-text-primary)] shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
           <div className="flex items-center justify-between gap-4 border-b border-[var(--aethel-border-subtle)] pb-1.5 mb-1">
             <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
               <Activity className="h-3.5 w-3.5 animate-pulse" /> Stat FPS
             </span>
-            <span className="text-[10px] text-[var(--aethel-text-quaternary)]">WebGPU R3F</span>
+            <span className="text-[10px] text-[var(--aethel-text-quaternary)]">
+              {renderStats?.pipelineLabel ?? 'r3f-webgl2'}
+            </span>
           </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-            <span className="text-[var(--aethel-text-tertiary)]">Frame Rate:</span>
-            <span className="font-bold text-emerald-400">60.0 FPS</span>
-            
-            <span className="text-[var(--aethel-text-tertiary)]">Frame Time:</span>
-            <span className="font-bold text-cyan-400">16.6 ms</span>
-            
-            <span className="text-[var(--aethel-text-tertiary)]">Draw Calls:</span>
-            <span className="text-[var(--aethel-text-primary)]">42 calls</span>
-            
-            <span className="text-[var(--aethel-text-tertiary)]">Geometry:</span>
-            <span className="text-[var(--aethel-text-primary)]">128.4k tris</span>
-            
-            <span className="text-[var(--aethel-text-tertiary)]">VRAM Alloc:</span>
-            <span className="text-[var(--aethel-text-primary)]">412 MB</span>
-          </div>
+          {renderStats ? (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+              <span className="text-[var(--aethel-text-tertiary)]">Frame Rate:</span>
+              <span className="font-bold text-emerald-400">{renderStats.fps.toFixed(1)} FPS</span>
+
+              <span className="text-[var(--aethel-text-tertiary)]">Frame Time:</span>
+              <span className="font-bold text-cyan-400">{renderStats.frameTimeMs.toFixed(1)} ms</span>
+
+              <span className="text-[var(--aethel-text-tertiary)]">Draw Calls:</span>
+              <span className="text-[var(--aethel-text-primary)]">{renderStats.drawCalls} calls</span>
+
+              <span className="text-[var(--aethel-text-tertiary)]">Triangles:</span>
+              <span className="text-[var(--aethel-text-primary)]">
+                {renderStats.triangles >= 1000
+                  ? `${(renderStats.triangles / 1000).toFixed(1)}k tris`
+                  : `${renderStats.triangles} tris`}
+              </span>
+
+              <span className="text-[var(--aethel-text-tertiary)]">Geometries:</span>
+              <span className="text-[var(--aethel-text-primary)]">{renderStats.geometries}</span>
+
+              <span className="text-[var(--aethel-text-tertiary)]">Textures:</span>
+              <span className="text-[var(--aethel-text-primary)]">{renderStats.textures}</span>
+            </div>
+          ) : (
+            <p className="py-1 text-[var(--aethel-text-quaternary)]">Sampling renderer…</p>
+          )}
         </div>
       )}
     </>
