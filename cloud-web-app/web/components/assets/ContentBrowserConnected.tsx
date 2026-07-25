@@ -17,6 +17,7 @@ import { logger } from '@/lib/observability/logger';
 import React, { useState, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { X } from 'lucide-react';
 import ContentBrowser, { Asset, AssetFolder, AssetType } from './ContentBrowser';
 import useProjectAssets, { uploadLargeAsset, Asset as HookAsset, AssetFolder as HookFolder } from '@/hooks/useProjectAssets';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -122,10 +123,11 @@ function AssetPreviewModal({
               border: 'none',
               color: 'var(--aethel-text-quaternary)',
               cursor: 'pointer',
-              fontSize: '18px',
+              display: 'flex',
+              alignItems: 'center',
             }}
           >
-            ✕
+            <X size={18} />
           </button>
         </div>
 

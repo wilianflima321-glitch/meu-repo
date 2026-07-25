@@ -475,9 +475,11 @@ export function ImportModal({
               color: "var(--aethel-text-quaternary)",
               fontSize: "20px",
               cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
             }}
           >
-            ✕
+            <X size={18} />
           </button>
         </div>
 
@@ -560,9 +562,11 @@ export function ImportModal({
                     border: "none",
                     color: "var(--aethel-error)",
                     cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
                   }}
                 >
-                  ✕
+                  <X size={14} />
                 </button>
               </div>
             ))}

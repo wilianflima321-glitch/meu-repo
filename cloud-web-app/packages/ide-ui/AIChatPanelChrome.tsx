@@ -238,7 +238,9 @@ export function ThinkingDisplay({ thinking, isExpanded, onToggle, steps }: Think
                   </span>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     {isDone && (
-                      <span className="aethel-tag-reflection">✓ done</span>
+                      <span className="aethel-tag-reflection inline-flex items-center gap-1">
+                        <CheckCircle2 className="h-2.5 w-2.5" /> done
+                      </span>
                     )}
                     {step.duration != null && (
                       <span className="text-[9px] font-mono text-[var(--aethel-text-quaternary)]">{step.duration}ms</span>

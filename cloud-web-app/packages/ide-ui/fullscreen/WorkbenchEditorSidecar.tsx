@@ -33,7 +33,7 @@ function diagnosticsToErrors(
       line: diagnostic.line,
       column: diagnostic.column,
       file: filePath,
-      documentation: diagnostic.source ? `Origem: ${diagnostic.source}` : '',
+      documentation: diagnostic.source ? `Source: ${diagnostic.source}` : '',
       fixable: false,
     };
   });

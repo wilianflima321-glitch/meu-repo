@@ -3,6 +3,7 @@
 import { useState } from 'react'
 // @aethel-heavy-async-boundary
 import { motion, AnimatePresence } from 'framer-motion'
+import { Cpu } from 'lucide-react'
 
 // ─────────────────────────────────────────────────────────
 // SVG Donut chart for token breakdown
@@ -24,7 +25,7 @@ function DonutChart({ slices, total }: { slices: DonutSlice[]; total: number }) 
     <div className="flex items-center gap-4">
       <svg width={88} height={88} viewBox="0 0 88 88" aria-label="Token usage breakdown">
         {/* Track */}
-        <circle cx={44} cy={44} r={R} fill="none" stroke="#1e2a3a" strokeWidth={STROKE} />
+        <circle cx={44} cy={44} r={R} fill="none" stroke="var(--aethel-surface-quaternary)" strokeWidth={STROKE} />
 
         {slices.map((slice) => {
           const fraction = total > 0 ? slice.value / total : 0
@@ -50,10 +51,10 @@ function DonutChart({ slices, total }: { slices: DonutSlice[]; total: number }) 
         })}
 
         {/* Centre label */}
-        <text x={44} y={40} textAnchor="middle" fill="#e5e7eb" fontSize="11" fontWeight="700" fontFamily="monospace">
+        <text x={44} y={40} textAnchor="middle" fill="var(--aethel-text-primary)" fontSize="11" fontWeight="700" fontFamily="monospace">
           {total >= 1000 ? `${(total / 1000).toFixed(1)}k` : String(total)}
         </text>
-        <text x={44} y={52} textAnchor="middle" fill="#6b7280" fontSize="8" fontFamily="monospace">
+        <text x={44} y={52} textAnchor="middle" fill="var(--aethel-text-muted)" fontSize="8" fontFamily="monospace">
           tokens
         </text>
       </svg>
@@ -119,14 +120,14 @@ function MiniBar({
       <span className="w-9 shrink-0 text-[10px] font-semibold text-[var(--aethel-text-tertiary)]">{label}</span>
       <div
         className="relative flex-1 overflow-hidden rounded-full"
-        style={{ height: 4, background: '#111827' }}
+        style={{ height: 4, background: 'var(--aethel-surface-secondary)' }}
       >
         {/* Segmented ticks */}
         {[25, 50, 75].map((tick) => (
           <span
             key={tick}
             className="absolute top-0 h-full w-px"
-            style={{ left: `${tick}%`, background: '#1e2a3a', zIndex: 1 }}
+            style={{ left: `${tick}%`, background: 'var(--aethel-surface-quaternary)', zIndex: 1 }}
             aria-hidden
           />
         ))}
@@ -185,24 +186,26 @@ export function ResourceMonitorHUD({
     tokenBreakdown.prompt + tokenBreakdown.completion + tokenBreakdown.cached
 
   const donutSlices: DonutSlice[] = [
-    { label: 'Prompt',     value: tokenBreakdown.prompt,     color: '#00e5ff' },
-    { label: 'Completion', value: tokenBreakdown.completion, color: '#9333ea' },
-    { label: 'Cached',     value: tokenBreakdown.cached,     color: '#10b981' },
+    { label: 'Prompt',     value: tokenBreakdown.prompt,     color: 'var(--aethel-neon-cyan)' },
+    { label: 'Completion', value: tokenBreakdown.completion, color: 'var(--aethel-neon-violet)' },
+    { label: 'Cached',     value: tokenBreakdown.cached,     color: 'var(--aethel-neon-emerald)' },
   ]
 
   // When localAIMode — all compute is local, show $0.00 and GPU badge
   const effectiveLocalFraction  = localAIMode ? (isWorking ? 0.72 : 0.18) : localFraction
   const effectiveCloudFraction  = localAIMode ? 0 : cloudFraction
-  const primaryColor            = localAIMode ? '#00e5ff' : '#9333ea'
-  const localBarColor           = '#00e5ff'
-  const cloudBarColor           = localAIMode ? 'rgba(51,65,85,0.6)' : '#9333ea'
+  const primaryColor            = localAIMode ? 'var(--aethel-neon-cyan)' : 'var(--aethel-neon-violet)'
+  const localBarColor           = 'var(--aethel-neon-cyan)'
+  const cloudBarColor           = localAIMode
+    ? 'color-mix(in srgb, var(--aethel-surface-quaternary) 60%, transparent)'
+    : 'var(--aethel-neon-violet)'
 
   return (
     <div
       className="border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)]"
       style={localAIMode ? {
-        borderColor: 'rgba(0,229,255,0.18)',
-        boxShadow: isWorking ? '0 0 16px rgba(0,229,255,0.06)' : 'none',
+        borderColor: 'color-mix(in srgb, var(--aethel-neon-cyan) 18%, transparent)',
+        boxShadow: isWorking ? '0 0 16px color-mix(in srgb, var(--aethel-neon-cyan) 6%, transparent)' : 'none',
         transition: 'box-shadow 400ms ease',
       } : undefined}
     >
@@ -211,18 +214,18 @@ export function ResourceMonitorHUD({
         <div
           className="flex items-center gap-2 px-3 py-1.5"
           style={{
-            borderBottom: '1px solid rgba(0,229,255,0.12)',
-            background: 'rgba(0,229,255,0.04)',
+            borderBottom: '1px solid color-mix(in srgb, var(--aethel-neon-cyan) 12%, transparent)',
+            background: 'color-mix(in srgb, var(--aethel-neon-cyan) 4%, transparent)',
           }}
         >
-          <span className="text-[9px]" aria-hidden>⬡</span>
-          <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#00e5ff]">
+          <Cpu className="h-2.5 w-2.5 text-[var(--aethel-neon-cyan)]" aria-hidden />
+          <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--aethel-neon-cyan)]">
             GPU Local
           </span>
-          <span className="ml-auto font-mono text-[10px] font-bold text-[#10b981]">
+          <span className="ml-auto font-mono text-[10px] font-bold text-[var(--aethel-neon-emerald)]">
             $0.00
           </span>
-          <span className="text-[9px] text-[#4b5563]">Local Compute</span>
+          <span className="text-[9px] text-[var(--aethel-text-quaternary)]">Local Compute</span>
         </div>
       )}
 
@@ -244,7 +247,7 @@ export function ResourceMonitorHUD({
           )}
           <span
             className="relative inline-flex h-2 w-2 rounded-full"
-            style={{ background: isWorking ? primaryColor : '#374151' }}
+            style={{ background: isWorking ? primaryColor : 'var(--aethel-surface-quaternary)' }}
           />
         </span>
 

@@ -60,7 +60,7 @@ export function IdeDiagnosticsDock() {
     >
       <div className="flex shrink-0 items-center justify-between border-b border-[var(--aethel-glass-border)] px-3 py-2 bg-[var(--aethel-surface-primary)]">
         <div className="flex items-center gap-2 font-mono">
-          <FileCode className="w-4 h-4 text-indigo-400" />
+          <FileCode className="w-4 h-4 text-[var(--aethel-neon-indigo)]" />
           <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-text-primary)]">
             Problems &amp; Diagnostics
           </p>
@@ -80,7 +80,7 @@ export function IdeDiagnosticsDock() {
 
       {problems.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center text-xs text-[var(--aethel-text-secondary)] font-mono">
-          <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-1">
+          <div className="w-10 h-10 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] flex items-center justify-center text-[var(--aethel-success-light)] mb-1">
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <p className="font-bold text-[var(--aethel-text-primary)]">No diagnostics reported</p>

@@ -233,10 +233,11 @@ export function FilterBar({
               borderRadius: mode === 'grid' ? '4px 0 0 4px' : mode === 'columns' ? '0 4px 4px 0' : '0',
               color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
-              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
             }}
           >
-            {mode === 'grid' ? '▦' : mode === 'list' ? '☰' : '▥'}
+            {mode === 'grid' ? <LayoutGrid size={14} /> : mode === 'list' ? <List size={14} /> : <Columns size={14} />}
           </button>
         ))}
       </div>

@@ -5,6 +5,7 @@ import type { Euler, Vector3 } from 'three';
 import { EditorScaleReadinessBadge } from '@/components/editor/EditorScaleReadinessBadge';
 import { buildEditorScaleReadiness } from '@/lib/editor/editor-scale-readiness';
 import { ComponentSection, PropertyRow, Vector3Editor } from './DetailsPanelEditors';
+import { ComponentIcon } from './DetailsPanelIcons';
 import type { ComponentDefinition, InspectedObject, PropertyDefinition } from './DetailsPanel.types';
 
 export type { PropertyType, ComponentDefinition, InspectedObject } from './DetailsPanel.types';
@@ -232,7 +233,7 @@ export default function DetailsPanel({
     id: '1',
     name: 'Player',
     type: 'Blueprint',
-    icon: '📐',
+    icon: 'blueprint',
     transform: {
       position: makeVector3(0, 1, 0),
       rotation: makeEuler(0, Math.PI / 4, 0),
@@ -242,7 +243,7 @@ export default function DetailsPanel({
       {
         id: 'mesh',
         name: 'Static Mesh',
-        icon: '🔷',
+        icon: 'mesh',
         enabled: true,
         properties: [
           { name: 'mesh', displayName: 'Mesh', type: 'asset', value: '/Meshes/Character.fbx', assetType: 'mesh' },
@@ -255,7 +256,7 @@ export default function DetailsPanel({
       {
         id: 'collider',
         name: 'Capsule Collider',
-        icon: '⬭',
+        icon: 'collider',
         enabled: true,
         properties: [
           { name: 'radius', displayName: 'Radius', type: 'number', value: 0.5, min: 0.01, step: 0.01 },
@@ -268,7 +269,7 @@ export default function DetailsPanel({
       {
         id: 'rigidbody',
         name: 'Rigidbody',
-        icon: '⚡',
+        icon: 'rigidbody',
         enabled: true,
         properties: [
           { name: 'mass', displayName: 'Mass', type: 'number', value: 80, min: 0.001, step: 1 },
@@ -292,7 +293,7 @@ export default function DetailsPanel({
       {
         id: 'character',
         name: 'Character Movement',
-        icon: '🏃',
+        icon: 'character',
         enabled: true,
         properties: [
           { name: 'maxWalkSpeed', displayName: 'Max Walk Speed', type: 'number', value: 600, min: 0, step: 10 },
@@ -325,19 +326,19 @@ export default function DetailsPanel({
   });
   const [showAddComponent, setShowAddComponent] = useState(false);
   const availableComponents = [
-    { type: 'mesh', name: 'Static Mesh', icon: '🔷' },
-    { type: 'skeletal_mesh', name: 'Skeletal Mesh', icon: '🦴' },
-    { type: 'collider_box', name: 'Box Collider', icon: '📦' },
-    { type: 'collider_sphere', name: 'Sphere Collider', icon: '🔵' },
-    { type: 'collider_capsule', name: 'Capsule Collider', icon: '⬭' },
-    { type: 'rigidbody', name: 'Rigidbody', icon: '⚡' },
-    { type: 'light', name: 'Light', icon: '💡' },
-    { type: 'camera', name: 'Camera', icon: '📷' },
-    { type: 'audio', name: 'Audio Source', icon: '🔊' },
-    { type: 'particle', name: 'Particle System', icon: '✨' },
-    { type: 'script', name: 'Script', icon: '📜' },
-    { type: 'animator', name: 'Animator', icon: '🎬' },
-    { type: 'nav_agent', name: 'Nav Mesh Agent', icon: '🧭' },
+    { type: 'mesh', name: 'Static Mesh', icon: 'mesh' },
+    { type: 'skeletal_mesh', name: 'Skeletal Mesh', icon: 'skeletal_mesh' },
+    { type: 'collider_box', name: 'Box Collider', icon: 'collider_box' },
+    { type: 'collider_sphere', name: 'Sphere Collider', icon: 'collider_sphere' },
+    { type: 'collider_capsule', name: 'Capsule Collider', icon: 'collider_capsule' },
+    { type: 'rigidbody', name: 'Rigidbody', icon: 'rigidbody' },
+    { type: 'light', name: 'Light', icon: 'light' },
+    { type: 'camera', name: 'Camera', icon: 'camera' },
+    { type: 'audio', name: 'Audio Source', icon: 'audio' },
+    { type: 'particle', name: 'Particle System', icon: 'particle' },
+    { type: 'script', name: 'Script', icon: 'script' },
+    { type: 'animator', name: 'Animator', icon: 'animator' },
+    { type: 'nav_agent', name: 'Nav Mesh Agent', icon: 'nav_agent' },
   ];
   const handleTransformChange = useCallback((transform: NonNullable<InspectedObject['transform']>) => {
     if (!selectedObject) return;
@@ -490,7 +491,9 @@ export default function DetailsPanel({
           background: 'var(--aethel-surface-tertiary)',
           borderRadius: '6px',
         }}>
-          <span style={{ fontSize: '32px' }}>{selectedObject.icon}</span>
+          <span style={{ color: 'var(--aethel-text-secondary)' }}>
+            <ComponentIcon iconKey={selectedObject.icon} size={32} />
+          </span>
           <div style={{ flex: 1 }}>
             <input
               type="text"
@@ -551,7 +554,7 @@ export default function DetailsPanel({
         ))}
         {/* Add Component Button */}
         <div style={{ position: 'relative' }}>
-          <button type="button" aria-label="Abrir menu para adicionar novo componente"
+          <button type="button" aria-label="Open menu to add a new component"
             onClick={() => setShowAddComponent(!showAddComponent)}
             style={{
               width: '100%',
@@ -610,7 +613,7 @@ export default function DetailsPanel({
                   onMouseOver={(e) => e.currentTarget.style.background = 'var(--aethel-surface-quaternary)'}
                   onMouseOut={(e) => e.currentTarget.style.background = 'none'}
                 >
-                  <span>{comp.icon}</span>
+                  <ComponentIcon iconKey={comp.icon} size={16} />
                   <span>{comp.name}</span>
                 </button>
               ))}

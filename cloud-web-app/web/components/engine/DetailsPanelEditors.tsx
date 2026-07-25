@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FolderOpen, X, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
+import { ComponentIcon } from './DetailsPanelIcons';
 import type { ComponentDefinition, PropertyDefinition } from './DetailsPanel.types';
 
 function NumberInput({
@@ -539,10 +540,10 @@ export function ComponentSection({
         }}
         onClick={() => setExpanded(!expanded)}
       >
-        <span style={{ fontSize: '10px', color: 'var(--aethel-text-muted)' }}>
-          {expanded ? '▼' : '▶'}
+        <span style={{ color: 'var(--aethel-text-muted)', display: 'inline-flex' }}>
+          {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         </span>
-        <span style={{ fontSize: '16px' }}>{component.icon}</span>
+        <ComponentIcon iconKey={component.icon} size={16} />
         <span style={{
           flex: 1,
           fontWeight: 'bold',

@@ -257,7 +257,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
     setBlueprint(updatedBlueprint);
     manager.updateBlueprint(blueprint.id, updatedBlueprint);
 
-    log.info('✅ Blueprint compiled successfully!');
+    log.info('Blueprint compiled successfully');
     toast.success('Blueprint compiled successfully!');
   }, [blueprint, nodes, edges, manager, toast]);
 

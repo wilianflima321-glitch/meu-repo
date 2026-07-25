@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
+import { Star, Check } from 'lucide-react'
 import { CANONICAL_FOCUS } from '@/lib/canonical-spacing'
 import { createComponentLogger } from '@/lib/observability/logger'
 
@@ -58,14 +59,14 @@ function Stars({
           return (
             <span
               key={n}
-              className={`text-sm ${
+              className={
                 filled
                   ? 'text-[var(--aethel-warning-light)]'
                   : 'text-[var(--aethel-text-quaternary)]'
-              }`}
+              }
               aria-hidden
             >
-              ★
+              <Star size={14} fill={filled ? 'currentColor' : 'none'} />
             </span>
           )
         }
@@ -77,13 +78,13 @@ function Stars({
             aria-checked={n === value}
             aria-label={`${n} star${n === 1 ? '' : 's'}`}
             onClick={() => onChange?.(n)}
-            className={`text-lg leading-none transition ${CANONICAL_FOCUS} ${
+            className={`leading-none transition ${CANONICAL_FOCUS} ${
               filled
                 ? 'text-[var(--aethel-warning-light)]'
                 : 'text-[var(--aethel-text-quaternary)]'
             }`}
           >
-            ★
+            <Star size={18} fill={filled ? 'currentColor' : 'none'} />
           </button>
         )
       })}
@@ -286,11 +287,15 @@ export function VerifiedReviewsPanel({ gameId }: VerifiedReviewsPanelProps) {
                       : 'text-[var(--aethel-text-tertiary)]'
                   }`}
                 >
-                  {votingId === r.id
-                    ? '…'
-                    : r.viewerHasVoted
-                      ? 'Helpful ✓'
-                      : 'Helpful'}
+                  {votingId === r.id ? (
+                    '…'
+                  ) : r.viewerHasVoted ? (
+                    <span className="inline-flex items-center gap-1">
+                      Helpful <Check size={12} />
+                    </span>
+                  ) : (
+                    'Helpful'
+                  )}
                 </button>
                 <span className="text-[10px] text-[var(--aethel-text-quaternary)]">
                   {r.helpfulCount ?? 0} vote{(r.helpfulCount ?? 0) === 1 ? '' : 's'} · weight{' '}
