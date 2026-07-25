@@ -219,7 +219,8 @@ export async function runNativeGenConveyor(
       capabilityScore: score,
     })
     stages.push({
-      ...lod.receipt,
+      stage: 'lod-cascade',
+      status: lod.receipt.status as NativeGenStageStatus,
       evidence: [...lod.receipt.evidence, 'native-conveyor-bw-lod', 'lod2-far-tier'],
     })
     lods = lod.lods

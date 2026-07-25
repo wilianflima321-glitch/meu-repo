@@ -21,6 +21,7 @@ import {
 } from './creative-artifact-bridge'
 import { createCreativeWalletCostGuardAdapter } from './creative-cost-guard-creative-wallet-adapter'
 import type { CostGuardBlockReason, CostGuardLedgerAdapter } from './creative-cost-guard'
+import type { MeteringCostGuardAdapter } from './creative-cost-guard-metering-adapter'
 import type { PlanLimits } from '@/lib/plans'
 import type { MeteringDecision } from '@/lib/metering'
 

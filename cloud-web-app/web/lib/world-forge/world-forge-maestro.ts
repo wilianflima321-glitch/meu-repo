@@ -48,3 +48,5 @@ export function buildWorldForgeMaestroPlanFast(input: {
     buffer,
   }
 }
+
+export const buildWorldForgeMaestroPlan = buildWorldForgeMaestroPlanFast

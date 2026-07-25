@@ -34,16 +34,16 @@ function buildTimelineForIntent(intent: CinematicDirectorIntent): SequencerTimel
   const base = buildDemoCutsceneTimeline()
   const cam = base.tracks.find((t) => t.id === 'trk-cam')?.clips[0]
   const light = base.tracks.find((t) => t.id === 'trk-light')?.clips[0]
-  const fovCurve = cam?.curves.find((c) => c.property === 'camera.fov')
-  const xCurve = cam?.curves.find((c) => c.property === 'camera.position.x')
-  const intensity = light?.curves.find((c) => c.property === 'light.intensity')
+  const fovCurve = cam?.curves?.find((c) => c.property === 'camera.fov')
+  const xCurve = cam?.curves?.find((c) => c.property === 'camera.position.x')
+  const intensity = light?.curves?.find((c) => c.property === 'light.intensity')
 
   const stamp = (id: string, label: string, durationMs: number) => {
     base.id = id
     base.label = label
     base.durationMs = durationMs
     base.range = { startMs: 0, endMs: durationMs }
-    if (cam) {
+    if (cam && cam.curves) {
       cam.endMs = durationMs
       for (const curve of cam.curves) {
         for (const kf of curve.keyframes) {
@@ -51,7 +51,7 @@ function buildTimelineForIntent(intent: CinematicDirectorIntent): SequencerTimel
         }
       }
     }
-    if (light) {
+    if (light && light.curves) {
       light.endMs = durationMs
       for (const curve of light.curves) {
         for (const kf of curve.keyframes) {

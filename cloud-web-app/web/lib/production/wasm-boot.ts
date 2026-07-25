@@ -17,6 +17,7 @@ export async function bootAethelKernelWasm(): Promise<void> {
     // Importação dinâmica do pacote compilado via wasm-pack
     // Ignoramos completamente servidores Node pesados e processos nativos.
     // O WebAssembly toma conta da thread e roda a física do ECS a 90% da perf Bare-Metal.
+    // @ts-ignore -- dynamic WASM module loaded at runtime when built
     const aethelKernel = await import('@aethel/kernel-wasm');
     
     // Inicia a alocação do espaço latente direto na memória do browser

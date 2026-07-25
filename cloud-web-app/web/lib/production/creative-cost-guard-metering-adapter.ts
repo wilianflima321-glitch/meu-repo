@@ -8,7 +8,7 @@ import {
   consumeMeteredUsage,
   type MeteringDecision,
 } from '@/lib/metering'
-import type { PlanLimits } from '@/lib/plan-limits'
+import type { PlanLimits } from '@/lib/plans'
 import type { CostGuardLedgerAdapter, CostGuardBlockReason } from './creative-cost-guard'
 import { createComponentLogger } from '@/lib/observability/logger'
 

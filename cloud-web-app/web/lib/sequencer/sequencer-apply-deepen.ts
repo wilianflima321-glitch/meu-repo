@@ -93,11 +93,12 @@ export function applySequencerAtTime(
       const fov = sampleCurve(track, 'camera.fov', t)
       const roll = sampleCurve(track, 'camera.roll', t)
       if (px != null || py != null || pz != null || fov != null) {
+        const prevCam = camera
         camera = {
           position: {
-            x: px ?? camera?.position.x ?? 0,
-            y: py ?? camera?.position.y ?? 1.6,
-            z: pz ?? camera?.position.z ?? 5,
+            x: px ?? prevCam?.position.x ?? 0,
+            y: py ?? prevCam?.position.y ?? 1.6,
+            z: pz ?? prevCam?.position.z ?? 5,
           },
           lookAt: {
             x: lx ?? 0,

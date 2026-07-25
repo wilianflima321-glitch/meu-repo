@@ -6,6 +6,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+// @ts-ignore -- Node 22 built-in node:sqlite module
 import { DatabaseSync } from 'node:sqlite'
 import type { VectorChunkRecord } from './types'
 

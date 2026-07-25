@@ -196,7 +196,7 @@ export function injectSandboxedWasmPluginSync(
 
   try {
     const imports = buildSandboxImportObject(request.header.allowedSyscalls)
-    const module = compile(request.wasmBytes)
+    const module = compile(request.wasmBytes as unknown as BufferSource)
     const instance = instantiateSync(module, imports)
     log.info('wasm_sandbox_inject_ok', {
       moduleId: request.header.moduleId,
@@ -256,7 +256,7 @@ export async function injectSandboxedWasmPlugin(
 
   try {
     const imports = buildSandboxImportObject(request.header.allowedSyscalls)
-    const { instance } = await request.instantiate(request.wasmBytes, imports)
+    const { instance } = await request.instantiate(request.wasmBytes as unknown as BufferSource, imports)
     log.info('wasm_sandbox_inject_ok', {
       moduleId: request.header.moduleId,
       async: true,

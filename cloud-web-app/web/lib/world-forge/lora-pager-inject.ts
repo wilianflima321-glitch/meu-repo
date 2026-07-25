@@ -99,7 +99,7 @@ export function runLoraPagerInject(req: LoraPagerInjectRequest): LoraPagerInject
     }
   }
 
-  if (!LORA_CLAY_READY || !NATIVE_ONNX_READY || pack.weightsSoaked !== true) {
+  if (!Boolean(LORA_CLAY_READY) || !Boolean(NATIVE_ONNX_READY) || pack.weightsSoaked !== true) {
     // Unload/resume cleanly without claiming generate succeeded
     const unload = transitionVramPager(pager, 'unload_model')
     pager = unload.snapshot
