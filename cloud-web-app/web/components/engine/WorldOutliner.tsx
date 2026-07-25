@@ -9,6 +9,7 @@
  * Production-oriented world outliner surface.
  */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { Globe, Layers } from 'lucide-react';
 import type * as THREE from 'three';
 import { EditorScaleReadinessBadge } from '@/components/editor/EditorScaleReadinessBadge';
 import { useVirtualWindow } from '@/components/performance/useVirtualWindow';
@@ -514,8 +515,11 @@ export default function WorldOutliner({
         fontSize: '13px',
         color: 'var(--aethel-text-primary)',
         background: 'var(--aethel-surface-secondary)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
       }}>
-        🌍 World Outliner
+        <Globe className="w-4 h-4 text-sky-400" /> World Outliner
       </div>
 
       {/* Filter Bar */}
@@ -580,7 +584,7 @@ export default function WorldOutliner({
             textAlign: 'center',
             color: 'var(--aethel-text-quaternary)',
           }}>
-            <div style={{ fontSize: '32px', marginBottom: '8px' }}>🌐</div>
+            <Layers className="w-8 h-8 text-slate-600 mx-auto mb-2" />
             <div>No objects in scene</div>
           </div>
         )}

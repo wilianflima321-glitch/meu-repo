@@ -9,6 +9,7 @@
  * Production-oriented project settings surface.
  */
 import React, { useState, useCallback, useMemo } from 'react';
+import { Settings, Upload, Download, RotateCcw, Save, Search, CheckCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 import { createComponentLogger } from '@/lib/observability/logger'
 import { defaultSettings, type Setting, type SettingCategory } from './project-settings-model'
@@ -129,7 +130,9 @@ export default function ProjectSettings() {
         padding: '0 20px',
         gap: '16px',
       }}>
-        <span style={{ fontWeight: 'bold', fontSize: '16px' }}>⚙️ Project Settings</span>
+        <span style={{ fontWeight: 'bold', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Settings className="w-4 h-4 text-indigo-400" /> Project Settings
+        </span>
 
         <div style={{ flex: 1 }} />
 
@@ -161,6 +164,7 @@ export default function ProjectSettings() {
 
         <button type="button" aria-label="Import project settings"
           onClick={handleImport}
+          className="inline-flex items-center gap-1.5"
           style={{
             padding: '8px 16px',
             background: 'var(--aethel-surface-quaternary)',
@@ -170,11 +174,12 @@ export default function ProjectSettings() {
             cursor: 'pointer',
           }}
         >
-          📥 Import
+          <Upload className="w-3.5 h-3.5" /> Import
         </button>
 
         <button type="button" aria-label="Export project settings"
           onClick={handleExport}
+          className="inline-flex items-center gap-1.5"
           style={{
             padding: '8px 16px',
             background: 'var(--aethel-surface-quaternary)',
@@ -184,11 +189,12 @@ export default function ProjectSettings() {
             cursor: 'pointer',
           }}
         >
-          📤 Export
+          <Download className="w-3.5 h-3.5" /> Export
         </button>
 
         <button type="button" aria-label="Reset project settings"
           onClick={handleReset}
+          className="inline-flex items-center gap-1.5"
           style={{
             padding: '8px 16px',
             background: 'var(--aethel-surface-quaternary)',
@@ -198,12 +204,13 @@ export default function ProjectSettings() {
             cursor: 'pointer',
           }}
         >
-          🔄 Reset
+          <RotateCcw className="w-3.5 h-3.5" /> Reset
         </button>
 
         <button type="button" aria-label="Save project settings"
           onClick={handleSave}
           disabled={!hasChanges}
+          className="inline-flex items-center gap-1.5"
           style={{
             padding: '8px 20px',
             background: hasChanges ? 'var(--aethel-primary)' : 'var(--aethel-surface-quaternary)',
@@ -214,7 +221,7 @@ export default function ProjectSettings() {
             opacity: hasChanges ? 1 : 0.5,
           }}
         >
-          💾 Save
+          <Save className="w-3.5 h-3.5" /> Save
         </button>
       </div>
 
@@ -345,7 +352,7 @@ export default function ProjectSettings() {
                   padding: '48px',
                   color: 'var(--aethel-text-quaternary)',
                 }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
+                  <Search className="w-10 h-10 text-slate-600 mx-auto mb-3" />
                   <p>No settings found matching your search.</p>
                 </div>
               )}
@@ -369,7 +376,9 @@ export default function ProjectSettings() {
           {hasChanges ? (
             <span style={{ color: 'var(--aethel-warning)' }}>● Unsaved changes</span>
           ) : (
-            <span style={{ color: 'var(--aethel-success)' }}>✓ All changes saved</span>
+            <span style={{ color: 'var(--aethel-success)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <CheckCircle className="w-3 h-3" /> All changes saved
+            </span>
           )}
         </span>
         <div style={{ flex: 1 }} />

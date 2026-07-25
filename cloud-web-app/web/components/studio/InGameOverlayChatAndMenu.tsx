@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Command, Sparkles, X, Send, Sliders } from 'lucide-react';
+import { MessageSquare, Command, Sparkles, X, Send, Sliders, Bot, User, Zap, Waves } from 'lucide-react';
 import { aiService } from '@/lib/ai-service';
 
 export interface InGameOverlayProps {
@@ -141,8 +141,18 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
                       : 'bg-cyan-950/80 border-cyan-800/50 text-cyan-100 self-end ml-6'
                   }`}
                 >
-                  <div className="text-[10px] text-slate-400 mb-1">
-                    {msg.role === 'assistant' ? '🤖 Aethel AI' : '👤 You'}
+                  <div className="flex items-center gap-1 text-[10px] text-slate-400 mb-1 font-mono">
+                    {msg.role === 'assistant' ? (
+                      <>
+                        <Bot className="w-3 h-3 text-cyan-400" />
+                        <span>Aethel AI</span>
+                      </>
+                    ) : (
+                      <>
+                        <User className="w-3 h-3 text-slate-400" />
+                        <span>You</span>
+                      </>
+                    )}
                   </div>
                   <p className="leading-relaxed whitespace-pre-wrap">{msg.content || '...'}</p>
                 </div>
@@ -193,11 +203,11 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
               <div className="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Quick Engine Toggles</span>
                 <div className="grid grid-cols-2 gap-2">
-                  <button className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-left text-[11px] text-slate-200">
-                    ⚡ Toggle Gravity
+                  <button className="flex items-center gap-1.5 p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-left text-[11px] text-slate-200 transition-colors">
+                    <Zap className="w-3.5 h-3.5 text-amber-400" /> Toggle Gravity
                   </button>
-                  <button className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-left text-[11px] text-slate-200">
-                    🌊 Ocean Waves FFT
+                  <button className="flex items-center gap-1.5 p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-left text-[11px] text-slate-200 transition-colors">
+                    <Waves className="w-3.5 h-3.5 text-cyan-400" /> Ocean Waves FFT
                   </button>
                 </div>
               </div>

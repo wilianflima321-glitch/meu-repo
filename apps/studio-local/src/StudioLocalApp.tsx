@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useMemo, useState } from 'react'
 
 import type { NativeKernelManifest, RuntimeAdapter, RuntimeProbe } from '../../../packages/aethel-ide-shared/src/runtime-adapter/types'
+import { Clapperboard, Palette, ShieldCheck, Monitor, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createDesktopAdapter } from './desktop-bridge/createDesktopAdapter'
 import { STUDIO_LOCAL_DESKTOP_MANIFEST } from './desktop-capability-manifest'
 import { NativeIDEBackend } from './ide/NativeIDEBackend'
@@ -104,51 +105,51 @@ export function StudioLocalApp() {
           title={sidebarOpen ? 'Colapsar sidebar' : 'Expandir sidebar'}
           className="h-7 w-7 flex items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-600 transition-all text-xs font-mono"
         >
-          {sidebarOpen ? '◀' : '▶'}
+          {sidebarOpen ? <ChevronLeft className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
         </button>
         <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
           <button
             onClick={() => setActiveTab('cinema')}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               activeTab === 'cinema'
                 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-950'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🎬 Cinema Compositor
+            <Clapperboard className="h-3.5 w-3.5" /> Cinema Compositor
           </button>
 
           <button
             onClick={() => setActiveTab('aesthetic')}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               activeTab === 'aesthetic'
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-950'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🎨 Aesthetic & SSS Studio
+            <Palette className="h-3.5 w-3.5" /> Aesthetic & SSS Studio
           </button>
 
           <button
             onClick={() => setActiveTab('sentinel')}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               activeTab === 'sentinel'
                 ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-950'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🛡️ Sentinel & Terminal
+            <ShieldCheck className="h-3.5 w-3.5" /> Sentinel & Terminal
           </button>
 
           <button
             onClick={() => setActiveTab('editor')}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               activeTab === 'editor'
                 ? 'bg-slate-800 text-slate-200'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🕹️ Viewport & Workspace
+            <Monitor className="h-3.5 w-3.5" /> Viewport & Workspace
           </button>
         </div>
         </div>

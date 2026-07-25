@@ -8,6 +8,21 @@ import {
   type Asset,
   type ImportOptions,
 } from "./content-browser-core";
+import {
+  FolderOpen,
+  FileEdit,
+  Copy,
+  Download,
+  RefreshCw,
+  Trash2,
+  FolderPlus,
+  Upload,
+  Palette,
+  Cpu,
+  Sparkles,
+  Folder,
+  X,
+} from "lucide-react";
 
 // ============================================================================
 // COMPONENTS
@@ -203,20 +218,20 @@ export function ContextMenu({
 
   const items = asset
     ? [
-        { id: "open", label: "📂 Open", divider: false },
-        { id: "rename", label: "✏️ Rename", divider: false },
-        { id: "duplicate", label: "📋 Duplicate", divider: false },
+        { id: "open", label: "Open", divider: false },
+        { id: "rename", label: "Rename", divider: false },
+        { id: "duplicate", label: "Duplicate", divider: false },
         { id: "star", label: asset.starred ? "Unstar" : "Star", divider: true },
-        { id: "export", label: "📤 Export", divider: false },
-        { id: "reimport", label: "🔄 Reimport", divider: true },
-        { id: "delete", label: "🗑️ Delete", divider: false },
+        { id: "export", label: "Export", divider: false },
+        { id: "reimport", label: "Reimport", divider: true },
+        { id: "delete", label: "Delete", divider: false },
       ]
     : [
-        { id: "new_folder", label: "📁 New Folder", divider: false },
-        { id: "import", label: "📥 Import Asset", divider: true },
-        { id: "new_material", label: "🎨 New Material", divider: false },
-        { id: "new_blueprint", label: "📐 New Blueprint", divider: false },
-        { id: "new_particle", label: "✨ New Particle System", divider: false },
+        { id: "new_folder", label: "New Folder", divider: false },
+        { id: "import", label: "Import Asset", divider: true },
+        { id: "new_material", label: "New Material", divider: false },
+        { id: "new_blueprint", label: "New Blueprint", divider: false },
+        { id: "new_particle", label: "New Particle System", divider: false },
       ];
 
   return (
@@ -336,7 +351,7 @@ export function FolderTree({
             </span>
           )}
           {!hasChildren && <span style={{ width: "12px" }} />}
-          <span>📁</span>
+          <Folder className="w-3.5 h-3.5 text-amber-400 shrink-0 inline-block mr-1" />
           <span>{folder.name}</span>
         </div>
 
@@ -486,7 +501,7 @@ export function ImportModal({
             (e.currentTarget.style.borderColor = "var(--aethel-border-primary)")
           }
         >
-          <div style={{ fontSize: "48px", marginBottom: "12px" }}>📥</div>
+          <Upload className="w-10 h-10 text-[var(--aethel-primary)] mx-auto mb-3 opacity-80" />
           <div
             style={{
               color: "var(--aethel-text-quaternary)",

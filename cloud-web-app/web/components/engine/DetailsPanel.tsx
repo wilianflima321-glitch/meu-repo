@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { Move, ChevronDown, ChevronRight, RotateCcw, Box, Zap, Cpu } from 'lucide-react';
 import type { Euler, Vector3 } from 'three';
 import { EditorScaleReadinessBadge } from '@/components/editor/EditorScaleReadinessBadge';
 import { buildEditorScaleReadiness } from '@/lib/editor/editor-scale-readiness';
@@ -80,10 +81,10 @@ function TransformSection({
         }}
         onClick={() => setExpanded(!expanded)}
       >
-        <span style={{ fontSize: '10px', color: 'var(--aethel-text-muted)' }}>
-          {expanded ? '▼' : '▶'}
+        <span style={{ fontSize: '10px', color: 'var(--aethel-text-muted)', display: 'flex', alignItems: 'center' }}>
+          {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
         </span>
-        <span style={{ fontSize: '16px' }}>🔄</span>
+        <Move className="w-4 h-4 text-indigo-400" />
         <span style={{
           flex: 1,
           fontWeight: 'bold',

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, Zap } from 'lucide-react'
 import type { SceneNode } from './WorldSceneOutliner'
 import { ScrubbableInput } from '@/components/ui/ScrubbableInput'
 
@@ -152,8 +152,8 @@ export const WorldObjectInspector: React.FC<WorldObjectInspectorProps> = ({
       {/* Actions */}
       <div className="border-t border-[var(--aethel-glass-border)] pt-3 flex items-center justify-between">
         <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)] flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--aethel-neon-cyan)]" />
-          ⚡ Affects Play Mode
+          <Zap size={11} className="text-[var(--aethel-neon-cyan)] animate-pulse" />
+          Affects Play Mode
         </span>
         <button
           type="button"

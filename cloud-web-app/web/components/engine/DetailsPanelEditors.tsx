@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FolderOpen, X, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
 import type { ComponentDefinition, PropertyDefinition } from './DetailsPanel.types';
 
@@ -352,6 +353,7 @@ function AssetSelector({
       <button type="button" aria-label={assetType ? `Browse ${assetType} asset` : 'Browse asset'}
         onClick={() => {/* Open asset browser */}}
         disabled={readOnly}
+        className="inline-flex items-center justify-center"
         style={{
           padding: '4px 8px',
           background: 'var(--aethel-surface-quaternary)',
@@ -362,12 +364,13 @@ function AssetSelector({
           fontSize: '12px',
         }}
       >
-        📂
+        <FolderOpen className="w-3.5 h-3.5" />
       </button>
       {value && (
         <button type="button" aria-label="Clear selected asset"
           onClick={() => onChange(null)}
           disabled={readOnly}
+          className="inline-flex items-center justify-center"
           style={{
             padding: '4px 8px',
             background: 'var(--aethel-surface-quaternary)',
@@ -378,7 +381,7 @@ function AssetSelector({
             fontSize: '12px',
           }}
         >
-          ✕
+          <X className="w-3.5 h-3.5" />
         </button>
       )}
     </div>
@@ -569,6 +572,7 @@ export function ComponentSection({
               if (!shouldRemove) return;
               onRemove();
             }}
+            className="inline-flex items-center justify-center"
             style={{
               background: 'none',
               border: 'none',
@@ -578,7 +582,7 @@ export function ComponentSection({
               padding: '4px',
             }}
           >
-            🗑
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         )}
       </div>

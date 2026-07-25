@@ -9,6 +9,7 @@
  * Production-oriented content browser surface.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Inbox, Upload } from "lucide-react";
 import { EditorScaleReadinessBadge } from "@/components/editor/EditorScaleReadinessBadge";
 import { buildEditorScaleReadiness } from "@/lib/editor/editor-scale-readiness";
 import {
@@ -584,12 +585,13 @@ export default function EngineContentBrowser({
                 color: "var(--aethel-text-muted)",
               }}
             >
-              <div style={{ fontSize: "64px", marginBottom: "16px" }}>📭</div>
+              <Inbox className="w-12 h-12 text-slate-600 mb-3" />
               <div>No assets found</div>
               <button
                 type="button"
                 aria-label="Open import assets modal"
                 onClick={() => setShowImportModal(true)}
+                className="inline-flex items-center gap-1.5"
                 style={{
                   marginTop: "16px",
                   padding: "8px 24px",
@@ -600,7 +602,7 @@ export default function EngineContentBrowser({
                   cursor: "pointer",
                 }}
               >
-                📥 Import Assets
+                <Upload className="w-4 h-4" /> Import Assets
               </button>
             </div>
           )}
