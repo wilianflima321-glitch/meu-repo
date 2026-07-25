@@ -15,10 +15,12 @@ import {
   Wand2,
 } from 'lucide-react'
 import type {
+  ViewportPBRTextureMaps,
   ViewportSceneObject,
   ViewportTransformMode,
   ViewportTransformSpace,
 } from '@/components/viewport/AethelViewport3D'
+import { ViewportPBRTextureSlots } from '@/components/viewport/ViewportPBRTextureSlots'
 import {
   buildGizmoEliteControlState,
   buildGizmoInspectorSummary,
@@ -75,6 +77,7 @@ export function SceneViewportInspector({
   onSnapEnabledChange,
   onTogglePlayTest,
   onObjectTransformChange,
+  onObjectTextureMapsChange,
 }: {
   selectedObject: ViewportSceneObject | null
   selectedIds: string[]
@@ -101,6 +104,8 @@ export function SceneViewportInspector({
   onSnapEnabledChange: (enabled: boolean) => void
   onTogglePlayTest: () => void
   onObjectTransformChange?: (objectId: string, patch: ViewportTransformPatch) => void
+  /** Phase 4 (AAA Studio Deepening Sweep) — PBR texture drag-and-drop slots. */
+  onObjectTextureMapsChange?: (objectId: string, textureMaps: ViewportPBRTextureMaps | undefined) => void
 }) {
   const formatter = useCallback((value: number) => value.toFixed(2), [])
   const editable = Boolean(onObjectTransformChange && selectedObject && !selectedObject.locked)
@@ -348,6 +353,18 @@ export function SceneViewportInspector({
                   ) : null}
                 </>
               )}
+              {editable && onObjectTextureMapsChange ? (
+                <div>
+                  <p className={transformLabelClass}>PBR Material</p>
+                  <ViewportPBRTextureSlots
+                    textureMaps={selectedObject.textureMaps}
+                    onChange={(next) => onObjectTextureMapsChange(selectedObject.id, next)}
+                  />
+                  <p className="mt-1.5 text-[10px] text-[var(--aethel-text-quaternary)]">
+                    Drop an image on Albedo to auto-generate Normal/Roughness/Height, or drop on a single channel to override it.
+                  </p>
+                </div>
+              ) : null}
               {selectedObject.asset ? (
                 <ViewportAssetQualityCard asset={selectedObject.asset} />
               ) : null}

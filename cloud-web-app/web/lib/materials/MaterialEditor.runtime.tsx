@@ -118,7 +118,11 @@ function MaterialNode({ id, data, selected }: NodeProps) {
         {data.properties.length > 0 && (
           <div className="mt-2 space-y-1 border-t border-[var(--aethel-border-primary)] pt-2">
             {data.properties.map((prop, i) => (
-              <PropertyInput key={i} property={prop} />
+              <PropertyInput
+                key={i}
+                property={prop}
+                onChange={(value) => data.onPropertyChange?.(prop.name, value)}
+              />
             ))}
           </div>
         )}
@@ -146,8 +150,8 @@ function MaterialNode({ id, data, selected }: NodeProps) {
   );
 }
 
-function PropertyInput({ property }: { property: MaterialProperty }) {
-  const [value, setValue] = useState(property.value);
+function PropertyInput({ property, onChange }: { property: MaterialProperty; onChange?: (value: unknown) => void }) {
+  const textureInputRef = useRef<HTMLInputElement>(null);
 
   switch (property.type) {
     case 'color':
@@ -156,8 +160,8 @@ function PropertyInput({ property }: { property: MaterialProperty }) {
           <span className="text-xs text-[var(--aethel-text-secondary)]">{property.name}</span>
           <input
             type="color"
-            value={value as string}
-            onChange={(e) => setValue(e.target.value)}
+            value={property.value as string}
+            onChange={(e) => onChange?.(e.target.value)}
             className="w-6 h-6 rounded cursor-pointer"
           />
         </div>
@@ -172,25 +176,61 @@ function PropertyInput({ property }: { property: MaterialProperty }) {
             min={property.min ?? 0}
             max={property.max ?? 1}
             step={0.01}
-            value={value as number}
-            onChange={(e) => setValue(parseFloat(e.target.value))}
+            value={property.value as number}
+            onChange={(e) => onChange?.(parseFloat(e.target.value))}
             className="flex-1 h-1"
           />
           <span className="text-xs text-[var(--aethel-text-secondary)] w-8">
-            {(value as number).toFixed(2)}
+            {(property.value as number).toFixed(2)}
           </span>
         </div>
       );
 
-    case 'texture':
+    case 'texture': {
+      const uri = typeof property.value === 'string' ? property.value : '';
       return (
         <div className="flex items-center gap-2">
           <span className="text-xs text-[var(--aethel-text-secondary)]">{property.name}</span>
-          <button type="button" aria-label={`Select resource for ${property.name}`} className="px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] rounded hover:bg-[var(--aethel-surface-secondary)]">
-            Select...
+          {uri ? (
+            // eslint-disable-next-line @next/next/no-img-element -- data: URL thumbnail, next/image cannot optimize it
+            <img src={uri} alt={`${property.name} preview`} className="h-6 w-6 rounded object-cover border border-[var(--aethel-border-subtle)]" />
+          ) : null}
+          <button
+            type="button"
+            aria-label={`Select resource for ${property.name}`}
+            onClick={() => textureInputRef.current?.click()}
+            className="px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] rounded hover:bg-[var(--aethel-surface-secondary)]"
+          >
+            {uri ? 'Replace…' : 'Select...'}
           </button>
+          {uri ? (
+            <button
+              type="button"
+              aria-label={`Clear resource for ${property.name}`}
+              onClick={() => onChange?.('')}
+              className="px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] rounded hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-error-light)]"
+            >
+              Clear
+            </button>
+          ) : null}
+          <input
+            ref={textureInputRef}
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            aria-hidden="true"
+            tabIndex={-1}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => onChange?.(reader.result as string);
+              reader.readAsDataURL(file);
+            }}
+          />
         </div>
       );
+    }
 
     default:
       return null;
@@ -334,6 +374,30 @@ const nodeTypes = {
 
 export function MaterialEditor() {
   const toast = useToast();
+  // "Latest ref" indirection so the initial node literal below can already
+  // close over a stable `updateNodeProperty` before `setNodes` exists yet
+  // (useNodesState's initial argument is evaluated eagerly, before its own
+  // setter is available) — see updateNodeProperty for the real commit logic.
+  const setNodesRef = useRef<React.Dispatch<React.SetStateAction<Node<MaterialNodeData>[]>>>(() => {});
+
+  const updateNodeProperty = useCallback((nodeId: string, propertyName: string, value: unknown) => {
+    setNodesRef.current((currentNodes) =>
+      currentNodes.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                properties: node.data.properties.map((prop) =>
+                  prop.name === propertyName ? { ...prop, value } : prop
+                ),
+              },
+            }
+          : node
+      )
+    );
+  }, []);
+
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<MaterialNodeData>>([
     // Default output node
     {
@@ -346,9 +410,11 @@ export function MaterialEditor() {
         properties: [],
         inputs: NODE_DEFINITIONS['material_output'].inputs,
         outputs: [],
+        onPropertyChange: (name, value) => updateNodeProperty('output-1', name, value),
       },
     },
   ]);
+  setNodesRef.current = setNodes;
 
 	const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [material] = useState(() => new PBRMaterial());
@@ -372,8 +438,9 @@ export function MaterialEditor() {
     const def = NODE_DEFINITIONS[type];
     if (!def) return;
 
+    const id = `${type}-${Date.now()}`;
     const newNode: Node<MaterialNodeData> = {
-      id: `${type}-${Date.now()}`,
+      id,
       type: 'materialNode',
       position: { x: 200, y: 200 + Math.random() * 100 },
       data: {
@@ -382,11 +449,12 @@ export function MaterialEditor() {
         properties: [...def.defaultProperties],
         inputs: [...def.inputs],
         outputs: [...def.outputs],
+        onPropertyChange: (name, value) => updateNodeProperty(id, name, value),
       },
     };
 
     setNodes(nodes => [...nodes, newNode]);
-  }, [setNodes]);
+  }, [setNodes, updateNodeProperty]);
 
   const compileShader = useCallback(() => {
     const graph: MaterialGraph = {

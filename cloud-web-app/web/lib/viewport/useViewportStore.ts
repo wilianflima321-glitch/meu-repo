@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { viewportSeedObjects, type ViewportSceneObject, type ViewportTransformMode, type ViewportTransformSpace } from '@/components/viewport/AethelViewport3D';
+import { viewportSeedObjects, type ViewportPBRTextureMaps, type ViewportSceneObject, type ViewportTransformMode, type ViewportTransformSpace } from '@/components/viewport/AethelViewport3D';
 import type { GizmoAxisPlaneConstraint, GizmoPivotMode } from '@/lib/viewport/gizmo-elite-controls';
 
 export interface ViewportState {
@@ -20,6 +20,8 @@ export interface ViewportState {
   setGizmoPivotMode: (mode: GizmoPivotMode) => void;
   setSnapEnabled: (enabled: boolean) => void;
   handleObjectTransformChange: (objectId: string, patch: Partial<Pick<ViewportSceneObject, 'position' | 'rotation' | 'scale'>>) => void;
+  /** Phase 4 (AAA Studio Deepening Sweep) — PBR texture slots in the object inspector. */
+  handleObjectTextureMapsChange: (objectId: string, textureMaps: ViewportPBRTextureMaps | undefined) => void;
 }
 
 export const useViewportStore = create<ViewportState>((set) => ({
@@ -44,6 +46,12 @@ export const useViewportStore = create<ViewportState>((set) => ({
   handleObjectTransformChange: (objectId, patch) => set((state) => ({
     objects: state.objects.map((obj) => 
       obj.id === objectId && !obj.locked ? { ...obj, ...patch } : obj
+    )
+  })),
+
+  handleObjectTextureMapsChange: (objectId, textureMaps) => set((state) => ({
+    objects: state.objects.map((obj) =>
+      obj.id === objectId && !obj.locked ? { ...obj, textureMaps } : obj
     )
   })),
 }));

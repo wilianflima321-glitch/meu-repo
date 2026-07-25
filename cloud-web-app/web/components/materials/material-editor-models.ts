@@ -18,6 +18,14 @@ export interface MaterialNodeData extends Record<string, unknown> {
   properties: MaterialProperty[];
   outputs: { name: string; type: string }[];
   inputs: { name: string; type: string }[];
+  /**
+   * Phase 4 (AAA Studio Deepening Sweep) — commits a property edit back into
+   * this node's `properties` array in the ReactFlow graph state. Optional so
+   * existing node-definition literals (`NODE_DEFINITIONS`) stay valid without
+   * this field; `MaterialEditor.runtime.tsx` injects it when instantiating
+   * nodes so `PropertyInput` edits are no longer dropped on the floor.
+   */
+  onPropertyChange?: (propertyName: string, value: unknown) => void;
 }
 
 export type MaterialPort = { name: string; type: string };

@@ -138,7 +138,7 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
   }, [setObjects, visualScriptCollab]);
 
   // handleObjectTransformChange agora está no store, mas mantemos compatibilidade caso algo precise
-  const { handleObjectTransformChange } = useViewportStore();
+  const { handleObjectTransformChange, handleObjectTextureMapsChange } = useViewportStore();
 
   const handleFacialMetricsChange = useCallback((blendShapeCount: number, expressionIntensity: number) => {
     setFacialBlendShapeCount(blendShapeCount);
@@ -297,5 +297,6 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
     handleFacialMetricsChange,
     handleHairSignatureChange,
     handleObjectTransformChange,
+    handleObjectTextureMapsChange,
   };
 }

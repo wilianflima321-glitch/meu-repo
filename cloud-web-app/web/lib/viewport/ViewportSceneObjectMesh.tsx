@@ -64,6 +64,14 @@ function usePBRTextures(textureMaps?: ViewportPBRTextureMaps) {
 
 function GeometryForObject({ object, isSelected }: { object: ViewportSceneObject; isSelected: boolean }) {
   const pbrTextures = usePBRTextures(object.textureMaps)
+  // Phase 4 (AAA Studio Deepening Sweep) — inspector PBR slots apply to any
+  // mesh shape, not just imported planes. Displacement is intentionally
+  // plane-only below: box/sphere/capsule/cylinder primitives here don't carry
+  // enough subdivisions for a displacement map to read as anything but noise.
+  const solidTextureProps = pbrTextures
+    ? { map: pbrTextures.map, normalMap: pbrTextures.normalMap, roughnessMap: pbrTextures.roughnessMap }
+    : {}
+  const solidColor = pbrTextures ? 0xffffff : object.color
   if (object.type === 'camera') {
     return (
       <>
@@ -106,21 +114,21 @@ function GeometryForObject({ object, isSelected }: { object: ViewportSceneObject
       return (
         <mesh castShadow receiveShadow>
           <sphereGeometry args={[0.6, 32, 32]} />
-          <meshStandardMaterial color={object.color} metalness={0.5} roughness={0.28} emissive={isSelected ? 0x1d4ed8 : 0x000000} emissiveIntensity={isSelected ? 0.4 : 0} />
+          <meshStandardMaterial color={solidColor} metalness={pbrTextures ? 0.1 : 0.5} roughness={pbrTextures ? 1 : 0.28} emissive={isSelected ? 0x1d4ed8 : 0x000000} emissiveIntensity={isSelected ? 0.4 : 0} {...solidTextureProps} />
         </mesh>
       )
     case 'capsule':
       return (
         <mesh castShadow receiveShadow>
           <capsuleGeometry args={[0.4, 0.9, 6, 12]} />
-          <meshStandardMaterial color={object.color} metalness={0.35} roughness={0.3} emissive={isSelected ? 0x0f766e : 0x000000} emissiveIntensity={isSelected ? 0.35 : 0} />
+          <meshStandardMaterial color={solidColor} metalness={pbrTextures ? 0.1 : 0.35} roughness={pbrTextures ? 1 : 0.3} emissive={isSelected ? 0x0f766e : 0x000000} emissiveIntensity={isSelected ? 0.35 : 0} {...solidTextureProps} />
         </mesh>
       )
     case 'cylinder':
       return (
         <mesh castShadow receiveShadow>
           <cylinderGeometry args={[0.42, 0.55, 1.2, 24]} />
-          <meshStandardMaterial color={object.color} metalness={0.55} roughness={0.24} emissive={isSelected ? 0xf97316 : 0x000000} emissiveIntensity={isSelected ? 0.35 : 0} />
+          <meshStandardMaterial color={solidColor} metalness={pbrTextures ? 0.1 : 0.55} roughness={pbrTextures ? 1 : 0.24} emissive={isSelected ? 0xf97316 : 0x000000} emissiveIntensity={isSelected ? 0.35 : 0} {...solidTextureProps} />
         </mesh>
       )
     case 'plane':
@@ -145,7 +153,7 @@ function GeometryForObject({ object, isSelected }: { object: ViewportSceneObject
       return (
         <mesh castShadow receiveShadow>
           <boxGeometry args={[1.4, 1, 1]} />
-          <meshStandardMaterial color={object.color} metalness={0.62} roughness={0.22} emissive={isSelected ? 0x2563eb : 0x000000} emissiveIntensity={isSelected ? 0.3 : 0} />
+          <meshStandardMaterial color={solidColor} metalness={pbrTextures ? 0.1 : 0.62} roughness={pbrTextures ? 1 : 0.22} emissive={isSelected ? 0x2563eb : 0x000000} emissiveIntensity={isSelected ? 0.3 : 0} {...solidTextureProps} />
         </mesh>
       )
   }

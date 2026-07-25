@@ -53,6 +53,7 @@ export default function SceneViewportSurface({
     openWorkflowTool,
     handleTogglePlay,
     handleObjectTransformChange,
+    handleObjectTextureMapsChange,
   } = viewportState;
 
   return (
@@ -109,6 +110,7 @@ export default function SceneViewportSurface({
             onSnapEnabledChange={setSnapEnabled}
             onTogglePlayTest={handleTogglePlay}
             onObjectTransformChange={handleObjectTransformChange}
+            onObjectTextureMapsChange={handleObjectTextureMapsChange}
           />
         </DockPanel>
       }
