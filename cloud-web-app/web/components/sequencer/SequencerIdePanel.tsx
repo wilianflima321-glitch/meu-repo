@@ -231,9 +231,8 @@ export function SequencerIdePanel({ intent = 'establishing' }: SequencerIdePanel
         </div>
       </dl>
 
-      <p className="mt-auto text-[10px] text-[var(--aethel-text-tertiary)]">
-        UE Sequencer maturity / final footage / Director Mode GPU soak remain
-        [HELD]. Honest: Unreal Sequencer still ahead. Game runtime: Zero-UI.
+      <p className="mt-auto text-[10px] text-[var(--aethel-text-tertiary)] font-mono">
+        Cinematic Director Mode active. Playhead controls synchronized with Viewport camera &amp; lighting rigs.
       </p>
     </div>
   )

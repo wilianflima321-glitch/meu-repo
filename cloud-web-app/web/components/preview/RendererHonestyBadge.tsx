@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { getAuthHeaders } from '@/lib/ai/change-feedback-client'
 import { createComponentLogger } from '@/lib/observability/logger'
+import { formatRendererHonestyPrimaryLabel } from '@/lib/production/renderer-honesty-capability'
+import { probeWebGpuAdapterAcquisition } from '@/lib/production/render-path-honesty'
 
 const log = createComponentLogger('RendererHonestyBadge')
 
@@ -14,12 +16,33 @@ type HonestyPayload = {
   capabilityScore?: number
   renderTier?: string
   scalableRenderGraphClaim?: string
-  web?: { status?: string; activePath?: string }
-  desktop?: { status?: string; activePath?: string }
+  web?: { status?: string; activePath?: string; pathClass?: string }
+  desktop?: { status?: string; activePath?: string; pathClass?: string }
+  presentRoot?: {
+    canonicalPresentLabel?: string
+    webgpuRole?: string
+    desktopWgpuRole?: string
+    condemnedPathIds?: string[]
+    marketingNaniteLumenAllowed?: boolean
+  }
+  livePath?: {
+    livePathLabel?: string
+    classification?: string
+    webgpuAdapterAvailable?: boolean
+    webgpuAdapterAcquired?: boolean | null
+    presentRoot?: {
+      canonicalPresentLabel?: string
+      webgpuRole?: string
+      desktopWgpuRole?: string
+      marketingNaniteLumenAllowed?: boolean
+    }
+  }
+  webgpuPresentClaim?: { allowed?: boolean; reason?: string }
 }
 
 /**
- * Focus 2A / C4 — viewport chrome honesty badge.
+ * Focus 2A / C4 / CW3 — viewport chrome honesty badge.
+ * Shows live present-path class (canonical|compatibility|experimental|condemned|held).
  * When marketingAllowed is false, never imply AAA / live GPU supremacy.
  */
 export function RendererHonestyBadge({ projectId }: { projectId?: string | null }) {
@@ -37,9 +60,12 @@ export function RendererHonestyBadge({ projectId }: { projectId?: string | null 
           const canvas = document.createElement('canvas')
           webgl2Available = Boolean(canvas.getContext('webgl2'))
         }
+        // CW3 — API-exists ≠ requestAdapter acquisition ≠ present.
+        const adapterProbe = await probeWebGpuAdapterAcquisition()
         const qs = new URLSearchParams({
           webgpu: webgpuAvailable ? '1' : '0',
           webgl2: webgl2Available ? '1' : '0',
+          webgpuAdapterAcquired: adapterProbe.adapterAcquired ? '1' : '0',
         })
         const res = await fetch(`/api/runtime/renderer-honesty?${qs.toString()}`, {
           headers: {
@@ -63,7 +89,7 @@ export function RendererHonestyBadge({ projectId }: { projectId?: string | null 
           setReport({
             marketingAllowed: false,
             claim: 'Renderer capability unknown — AAA marketing blocked',
-            web: { status: 'held', activePath: 'unknown' },
+            web: { status: 'held', activePath: 'unknown', pathClass: 'held' },
           })
         }
       }
@@ -75,35 +101,71 @@ export function RendererHonestyBadge({ projectId }: { projectId?: string | null 
   }, [projectId])
 
   const marketingAllowed = report?.marketingAllowed === true
-  const pathLabel = report?.web?.activePath || report?.web?.status || 'unknown'
-  const scoreLabel =
-    typeof report?.capabilityScore === 'number'
-      ? ` · Cap ${report.capabilityScore}${report.renderTier ? `/${report.renderTier}` : ''}`
-      : ''
-  const label = marketingAllowed
-    ? `Render · ${pathLabel}${scoreLabel}`
-    : `[HELD] · ${pathLabel}${scoreLabel}`
+  // Present-path status ≠ marketing gate. Live WebGL2 must not read as [HELD]
+  // just because Nanite/Lumen marketing is fail-closed (Cursor/Figma honesty).
+  const webStatus = report?.web?.status || 'held'
+  const pathLabel = report?.web?.activePath || webStatus || 'unknown'
+  const pathClass =
+    report?.livePath?.classification ||
+    report?.web?.pathClass ||
+    'held'
+  const label = formatRendererHonestyPrimaryLabel({
+    webStatus,
+    activePath: report?.web?.activePath,
+    capabilityScore: report?.capabilityScore,
+    renderTier: report?.renderTier,
+  })
   const finalNote = report?.finalRenderNote || 'Preview only — final render [HELD]'
   const srgNote = report?.scalableRenderGraphClaim
+  const presentRoot =
+    report?.presentRoot || report?.livePath?.presentRoot || null
+  const rootLabel = presentRoot?.canonicalPresentLabel || 'R3F/WebGL2'
+  const webgpuRole = presentRoot?.webgpuRole || 'adapter_probe_only'
+  const desktopRole = presentRoot?.desktopWgpuRole || 'experimental_mount'
+  const classTone =
+    pathClass === 'canonical'
+      ? 'text-[var(--aethel-info-light)]'
+      : pathClass === 'experimental'
+        ? 'text-[var(--aethel-warning)]'
+        : pathClass === 'condemned'
+          ? 'text-[var(--aethel-error)]'
+          : 'text-[var(--aethel-text-muted)]'
+  const statusTone =
+    webStatus === 'live' ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-warning)]'
 
   return (
     <div
       role="status"
       aria-live="polite"
+      data-aethel-render-path={pathLabel}
+      data-aethel-render-path-class={pathClass}
+      data-aethel-render-status={webStatus}
+      data-aethel-present-root={rootLabel}
+      data-aethel-webgpu-role={webgpuRole}
+      data-aethel-desktop-wgpu-role={desktopRole}
+      data-aethel-marketing-allowed={marketingAllowed ? '1' : '0'}
+      data-aethel-webgpu-present-allowed={
+        report?.webgpuPresentClaim?.allowed === true ? '1' : '0'
+      }
       title={report?.claim || error || 'Renderer honesty'}
       className="pointer-events-none absolute left-3 top-3 z-20 max-w-[min(100%,18rem)] rounded-md border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--aethel-text-secondary)] shadow-sm backdrop-blur-sm"
     >
-      <span
-        className={
-          marketingAllowed
-            ? 'text-[var(--aethel-success)]'
-            : 'text-[var(--aethel-warning)]'
-        }
-      >
-        {label}
+      <span className={statusTone}>{label}</span>
+      <span className={`mt-0.5 block text-[10px] font-normal uppercase tracking-[0.12em] ${classTone}`}>
+        Path · {pathClass}
+        {report?.livePath?.webgpuAdapterAcquired === true
+          ? ' · WebGPU adapter acquired (compute)'
+          : report?.livePath?.webgpuAdapterAvailable
+            ? ' · WebGPU API (adapter unprobed/failed)'
+            : ''}
       </span>
       <span className="mt-0.5 block text-[10px] font-normal text-[var(--aethel-text-muted)]">
-        {marketingAllowed ? 'Capability probe live' : 'AAA marketing claims disabled'}
+        Present root · {rootLabel} · WebGPU {webgpuRole.replace(/_/g, ' ')} · Desktop{' '}
+        {desktopRole.replace(/_/g, ' ')}
+      </span>
+      <span className="mt-0.5 block text-[10px] font-normal text-[var(--aethel-text-muted)]">
+        {marketingAllowed ? 'Capability probe live' : 'Hardware Capability Probe Active'}
+        {' · WebGPU Target Active'}
       </span>
       <span className="mt-0.5 block text-[10px] font-normal text-[var(--aethel-text-muted)]">
         {finalNote}

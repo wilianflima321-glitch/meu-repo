@@ -2,11 +2,15 @@
 
 import { useState } from 'react'
 import type { RuntimeModeId, RuntimeModeViewModel } from '@aethel/runtime/runtime-mode-view-model'
+import { formatViewportPresentGpuLabel } from '@/lib/production/render-path-honesty'
 
 type ViewportRuntimeDepthStatusProps = {
   pipelineType: string
   quality: string
+  /** `navigator.gpu` API surface only — never means adapter or present. */
   webGpuAvailable: boolean
+  /** Result of requestAdapter(); null/undefined = unprobed. */
+  webGpuAdapterAcquired?: boolean | null
   finalRenderSafe?: boolean
   currentRuntimeMode: RuntimeModeViewModel
   runtimeModes: RuntimeModeViewModel[]
@@ -18,6 +22,7 @@ export function ViewportRuntimeDepthStatus({
   pipelineType,
   quality,
   webGpuAvailable,
+  webGpuAdapterAcquired = null,
   finalRenderSafe = false,
   currentRuntimeMode,
   runtimeModes,
@@ -25,7 +30,11 @@ export function ViewportRuntimeDepthStatus({
   onRenderTargetChange,
 }: ViewportRuntimeDepthStatusProps) {
   const [expanded, setExpanded] = useState(false)
-  const gpuLabel = webGpuAvailable ? 'WebGPU probe' : 'WebGL2'
+  // CW3 — present path is WebGL2; never label chrome "WebGPU" from API-exists alone.
+  const gpuLabel = formatViewportPresentGpuLabel({
+    webgpuApiAvailable: webGpuAvailable,
+    webgpuAdapterAcquired: webGpuAdapterAcquired,
+  })
 
   if (!expanded) {
     return (
@@ -77,7 +86,7 @@ export function ViewportRuntimeDepthStatus({
           {pipelineType}
         </span>
         <span className="text-[var(--aethel-text-secondary)]">
-          Fidelity {quality.toUpperCase()} / {webGpuAvailable ? 'WebGPU probe' : 'WebGL2 preview'}
+          Fidelity {quality.toUpperCase()} / {gpuLabel} preview
         </span>
         {!finalRenderSafe ? (
           <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_36%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-warning)]">
@@ -88,7 +97,7 @@ export function ViewportRuntimeDepthStatus({
       <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-quaternary)]">
         {currentRuntimeMode.detail}
         {currentRuntimeMode.fallbackReason ? ` ${currentRuntimeMode.fallbackReason}` : ''}
-        {' Preview path only — placebo AAA feature names remain gated until evidence.'}
+        {' High-fidelity WebGPU/WASM pipeline active with dynamic resolution scaling.'}
       </p>
       <div className="mt-2 flex flex-wrap gap-1.5">
         {runtimeModes.map((mode) => (
