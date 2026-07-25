@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { Plus, Zap, GitFork, Trash2, Save, Clapperboard } from 'lucide-react';
 import {
   ReactFlow,
   Node,
@@ -284,8 +285,9 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           borderRadius: '6px',
           border: '1px solid var(--aethel-border-primary)',
         }}>
-          <button type="button" aria-label="Add estado ao animation blueprint"
+          <button type="button" aria-label="Add state ao animation blueprint"
             onClick={() => handleAddState('state')}
+            className="inline-flex items-center gap-1.5"
             style={{
               padding: '6px 12px',
               background: 'var(--aethel-primary)',
@@ -296,10 +298,11 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
               fontSize: '11px',
             }}
           >
-            🎭 Add State
+            <Plus className="w-3.5 h-3.5" /> Add State
           </button>
           <button type="button" aria-label="Add conduit ao animation blueprint"
             onClick={() => handleAddState('conduit')}
+            className="inline-flex items-center gap-1.5"
             style={{
               padding: '6px 12px',
               background: 'var(--aethel-warning)',
@@ -310,10 +313,11 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
               fontSize: '11px',
             }}
           >
-            ⚡ Add Conduit
+            <Zap className="w-3.5 h-3.5" /> Add Conduit
           </button>
           <button type="button" aria-label="Add blend state ao animation blueprint"
             onClick={() => handleAddState('blend')}
+            className="inline-flex items-center gap-1.5"
             style={{
               padding: '6px 12px',
               background: 'var(--aethel-accent)',
@@ -324,11 +328,12 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
               fontSize: '11px',
             }}
           >
-            🔀 Add Blend
+            <GitFork className="w-3.5 h-3.5" /> Add Blend
           </button>
           {(selectedState || selectedTransition) && (
             <button type="button" aria-label="Delete selected item from animation blueprint"
               onClick={handleDeleteSelected}
+              className="inline-flex items-center gap-1.5"
               style={{
                 padding: '6px 12px',
                 background: 'var(--aethel-error)',
@@ -339,7 +344,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
                 fontSize: '11px',
               }}
             >
-              🗑️ Delete
+              <Trash2 className="w-3.5 h-3.5" /> Delete
             </button>
           )}
         </div>
@@ -438,7 +443,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
               textAlign: 'center',
               color: 'var(--aethel-text-muted)',
             }}>
-              <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎭</div>
+              <Clapperboard className="w-8 h-8 text-slate-600 mx-auto mb-2" />
               <div>Select a state or transition<br />to view properties</div>
             </div>
           )}
@@ -451,6 +456,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
         }}>
           <button type="button" aria-label="Save animation blueprint"
             onClick={() => onSave?.({ states, transitions, variables })}
+            className="inline-flex items-center justify-center gap-1.5"
             style={{
               width: '100%',
               padding: '10px',
@@ -463,7 +469,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
               cursor: 'pointer',
             }}
           >
-            💾 Save Blueprint
+            <Save className="w-4 h-4" /> Save Blueprint
           </button>
         </div>
       </div>

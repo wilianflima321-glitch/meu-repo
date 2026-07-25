@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { Package, Wrench } from 'lucide-react';
 import { Handle, Position, Node, NodeProps } from '@xyflow/react';
 import type {
   BlueprintComponent,
@@ -269,7 +270,7 @@ export const ComponentsPanel: React.FC<{
           `}
           style={{ paddingLeft: `${8 + depth * 16}px` }}
         >
-          <span>{comp.isRootComponent ? '📦' : '🔧'}</span>
+          {comp.isRootComponent ? <Package className="w-3.5 h-3.5 text-indigo-400 shrink-0" /> : <Wrench className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
           <span>{comp.name}</span>
           <span className="text-[var(--aethel-text-secondary)] ml-auto">{comp.type}</span>
         </div>

@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { Cpu } from 'lucide-react';
 import {
   ReactFlow,
   Background,
@@ -280,7 +281,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
         {/* Toolbar */}
         <div className="h-12 border-b border-[var(--aethel-border-primary)] flex items-center px-4 gap-4 bg-[var(--aethel-surface-tertiary)]">
           <div className="flex items-center gap-2">
-            <span className="text-[var(--aethel-info-light)]">📘</span>
+            <Cpu className="w-4 h-4 text-sky-400" />
             <input
               type="text"
               value={blueprint.name}

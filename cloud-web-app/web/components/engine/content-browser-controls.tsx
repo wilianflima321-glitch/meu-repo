@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Folder, Search, Filter, Star, LayoutGrid, List, Columns } from 'lucide-react';
 import { ASSET_CONFIG, type AssetFilter, type AssetType } from './content-browser-core';
 
 // Breadcrumb Navigation
@@ -25,6 +26,7 @@ export function BreadcrumbNav({
     }}>
       <button type="button" aria-label="Ir para a raiz do content browser"
         onClick={() => onNavigate('/')}
+        className="inline-flex items-center gap-1.5"
         style={{
           background: 'none',
           border: 'none',
@@ -36,7 +38,7 @@ export function BreadcrumbNav({
         onMouseOver={(e) => e.currentTarget.style.background = 'var(--aethel-surface-quaternary)'}
         onMouseOut={(e) => e.currentTarget.style.background = 'none'}
       >
-        📁 Content
+        <Folder className="w-3.5 h-3.5 text-amber-400" /> Content
       </button>
 
       {parts.map((part, i) => {
@@ -99,7 +101,7 @@ export function FilterBar({
       <div style={{ flex: 1, maxWidth: '300px' }}>
         <input
           type="text"
-          placeholder="🔍 Search assets..."
+          placeholder="Search assets..."
           value={filter.search || ''}
           onChange={(e) => onFilterChange({ ...filter, search: e.target.value })}
           style={{
@@ -118,6 +120,7 @@ export function FilterBar({
       <div style={{ position: 'relative' }}>
         <button type="button" aria-label={showTypeFilter ? 'Close asset type filter' : 'Open asset type filter'}
           onClick={() => setShowTypeFilter(!showTypeFilter)}
+          className="inline-flex items-center gap-1.5"
           style={{
             padding: '6px 12px',
             background: filter.type?.length ? 'var(--aethel-primary)' : 'var(--aethel-surface-primary)',
@@ -128,7 +131,7 @@ export function FilterBar({
             fontSize: '13px',
           }}
         >
-          📋 Type {filter.type?.length ? `(${filter.type.length})` : ''}
+          <Filter className="w-3.5 h-3.5" /> Type {filter.type?.length ? `(${filter.type.length})` : ''}
         </button>
 
         {showTypeFilter && (
@@ -166,8 +169,7 @@ export function FilterBar({
                     onFilterChange({ ...filter, type: Array.from(types) });
                   }}
                 />
-                <span style={{ color: config.color }}>{config.icon}</span>
-                <span style={{ color: 'var(--aethel-text-secondary)', fontSize: '12px' }}>{type}</span>
+                <span style={{ color: 'var(--aethel-text-secondary)', fontSize: '12px', textTransform: 'capitalize' }}>{type}</span>
               </label>
             ))}
           </div>
@@ -177,6 +179,7 @@ export function FilterBar({
       {/* Starred Filter */}
       <button type="button" aria-label={filter.starred ? 'Desactiver filtro de assets favoritos' : 'Ativar filtro de assets favoritos'}
         onClick={() => onFilterChange({ ...filter, starred: !filter.starred })}
+        className="inline-flex items-center gap-1.5"
         style={{
           padding: '6px 12px',
           background: filter.starred ? 'var(--aethel-warning)' : 'var(--aethel-surface-primary)',
@@ -187,7 +190,7 @@ export function FilterBar({
           fontSize: '13px',
         }}
       >
-        ⭐ Starred
+        <Star className="w-3.5 h-3.5" /> Starred
       </button>
 
       <div style={{ flex: 1 }} />

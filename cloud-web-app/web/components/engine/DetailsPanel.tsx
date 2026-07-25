@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { Move, ChevronDown, ChevronRight, RotateCcw, Box, Zap, Cpu } from 'lucide-react';
+import { Move, ChevronDown, ChevronRight, RotateCcw, Box, Zap, Cpu, SlidersHorizontal, Target, Plus } from 'lucide-react';
 import type { Euler, Vector3 } from 'three';
 import { EditorScaleReadinessBadge } from '@/components/editor/EditorScaleReadinessBadge';
 import { buildEditorScaleReadiness } from '@/lib/editor/editor-scale-readiness';
@@ -435,8 +435,11 @@ export default function DetailsPanel({
           fontWeight: 'bold',
           fontSize: '13px',
           background: 'var(--aethel-surface-tertiary)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
         }}>
-          📋 Details
+          <SlidersHorizontal className="w-4 h-4 text-indigo-400" /> Details
         </div>
         <div style={{
           flex: 1,
@@ -446,7 +449,7 @@ export default function DetailsPanel({
           color: 'var(--aethel-text-muted)',
         }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎯</div>
+            <Target className="w-10 h-10 text-slate-600 mx-auto mb-3" />
             <div>Select an object to view details</div>
           </div>
         </div>
@@ -468,8 +471,11 @@ export default function DetailsPanel({
         fontWeight: 'bold',
         fontSize: '13px',
         background: 'var(--aethel-surface-tertiary)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
       }}>
-        📋 Details
+        <SlidersHorizontal className="w-4 h-4 text-indigo-400" /> Details
       </div>
       <EditorScaleReadinessBadge readiness={detailsScaleReadiness} />
       {/* Content */}
@@ -545,11 +551,11 @@ export default function DetailsPanel({
         ))}
         {/* Add Component Button */}
         <div style={{ position: 'relative' }}>
-          <button type="button" aria-label={showAddComponent ? 'Close add component menu' : 'Open add component menu'}
+          <button type="button" aria-label="Abrir menu para adicionar novo componente"
             onClick={() => setShowAddComponent(!showAddComponent)}
             style={{
               width: '100%',
-              padding: '10px',
+              padding: '8px',
               background: 'var(--aethel-primary)',
               border: 'none',
               borderRadius: '6px',
@@ -563,7 +569,7 @@ export default function DetailsPanel({
               gap: '8px',
             }}
           >
-            ➕ Add Component
+            <Plus className="w-4 h-4" /> Add Component
           </button>
           {showAddComponent && (
             <div style={{

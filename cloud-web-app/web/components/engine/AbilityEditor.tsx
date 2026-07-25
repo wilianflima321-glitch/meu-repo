@@ -17,6 +17,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { Zap, Flame, Shield, Heart } from 'lucide-react';
 import {
   AbilitySystemComponent,
   GameplayAbilitySpec,
@@ -75,7 +76,7 @@ function createSampleAbilities(): GameplayAbilitySpec[] {
       id: 'fireball',
       name: 'Fireball',
       description: 'Launches a ball of fire at the target.',
-      icon: '🔥',
+      icon: 'Flame',
       activationType: 'triggered',
       targetingMode: 'projectile',
       costs: [{ attribute: 'Mana', value: 25 }],
@@ -93,7 +94,7 @@ function createSampleAbilities(): GameplayAbilitySpec[] {
       id: 'heal',
       name: 'Heal',
       description: 'Restores health to the target.',
-      icon: '💚',
+      icon: 'Heart',
       activationType: 'triggered',
       targetingMode: 'single',
       costs: [{ attribute: 'Mana', value: 30 }],
@@ -110,7 +111,7 @@ function createSampleAbilities(): GameplayAbilitySpec[] {
       id: 'shield',
       name: 'Shield Block',
       description: 'Raises shield, reducing incoming damage.',
-      icon: '🛡️',
+      icon: 'Shield',
       activationType: 'toggle',
       targetingMode: 'self',
       costs: [{ attribute: 'Stamina', value: 10 }],
@@ -194,7 +195,12 @@ function AbilityCard({
       }`}
     >
       <div className="flex items-center gap-3">
-        <span className="text-2xl">{ability.icon || '⚡'}</span>
+        <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
+          {ability.icon === 'Flame' ? <Flame className="w-4 h-4 text-orange-400" /> :
+           ability.icon === 'Heart' ? <Heart className="w-4 h-4 text-emerald-400" /> :
+           ability.icon === 'Shield' ? <Shield className="w-4 h-4 text-sky-400" /> :
+           <Zap className="w-4 h-4 text-amber-400" />}
+        </div>
         <div className="flex-1 min-w-0">
           <h4 className="font-medium text-[var(--aethel-text-primary)] truncate">{ability.name}</h4>
           <p className="text-xs text-[var(--aethel-text-tertiary)] truncate">{ability.description}</p>
@@ -498,7 +504,12 @@ export function AbilityEditor({
                 /* Ability Details */
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
-                    <span className="text-5xl">{selectedAbility.icon || '⚡'}</span>
+                    <div className="w-14 h-14 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
+                      {selectedAbility.icon === 'Flame' ? <Flame className="w-7 h-7 text-orange-400" /> :
+                       selectedAbility.icon === 'Heart' ? <Heart className="w-7 h-7 text-emerald-400" /> :
+                       selectedAbility.icon === 'Shield' ? <Shield className="w-7 h-7 text-sky-400" /> :
+                       <Zap className="w-7 h-7 text-amber-400" />}
+                    </div>
                     <div>
                       <h3 className="text-2xl font-bold text-[var(--aethel-text-primary)]">{selectedAbility.name}</h3>
                       <p className="text-[var(--aethel-text-tertiary)] mt-1">{selectedAbility.description}</p>
@@ -587,11 +598,14 @@ export function AbilityEditor({
         <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-4">Live Preview</h3>
 
         <div className="space-y-4">
-          <div className="aspect-square bg-[var(--aethel-surface-secondary)] rounded-lg flex items-center justify-center">
+          <div className="aspect-square bg-[var(--aethel-surface-secondary)] rounded-lg flex items-center justify-center border border-[var(--aethel-border-primary)]">
             {selectedAbility ? (
-              <span className="text-6xl">{selectedAbility.icon || '⚡'}</span>
+              selectedAbility.icon === 'Flame' ? <Flame className="w-16 h-16 text-orange-400" /> :
+              selectedAbility.icon === 'Heart' ? <Heart className="w-16 h-16 text-emerald-400" /> :
+              selectedAbility.icon === 'Shield' ? <Shield className="w-16 h-16 text-sky-400" /> :
+              <Zap className="w-16 h-16 text-amber-400" />
             ) : (
-              <span className="text-[var(--aethel-text-secondary)]">No ability selected</span>
+              <span className="text-[var(--aethel-text-secondary)] text-xs">No ability selected</span>
             )}
           </div>
 

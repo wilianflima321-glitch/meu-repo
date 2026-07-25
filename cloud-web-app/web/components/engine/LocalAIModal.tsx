@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Sparkles, CheckCircle2, Check } from 'lucide-react';
 import { localInferenceManager } from '@/lib/ai/local-inference-manager';
 import { setLocalAIActivated } from '@/lib/ai/local-chat-bridge';
 import { logger } from '@/lib/observability/logger';
@@ -91,8 +92,9 @@ export const LocalAIModal: React.FC = () => {
           <>
             <h2 className="text-2xl font-bold mb-4 text-blue-400">Activate Local Cognitive Engine?</h2>
             
-            <p className="text-slate-300 mb-4">
-              We noticed that your PC has a powerful GPU! 🚀
+            <p className="text-slate-300 mb-4 inline-flex items-center gap-1.5">
+              <span>We noticed that your PC has a powerful GPU!</span>
+              <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
             </p>
             <p className="text-slate-300 mb-6">
               You can download our <strong>Local AI Brain (4.5 GB)</strong> once. This will 
@@ -100,10 +102,10 @@ export const LocalAIModal: React.FC = () => {
               greatly improving your workflow for creating maps, NPCs, and interactive scenes.
             </p>
 
-            <div className="bg-slate-800 p-4 rounded text-sm text-slate-400 mb-6 border border-slate-700">
-              <p>✔ $0.00 cost for real-time NPCs</p>
-              <p>✔ Works fully offline</p>
-              <p>✔ Aethel&apos;s interface will be automatically adjusted</p>
+            <div className="bg-slate-800 p-4 rounded text-sm text-slate-400 mb-6 border border-slate-700 space-y-1">
+              <p className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> $0.00 cost for real-time NPCs</p>
+              <p className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> Works fully offline</p>
+              <p className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> Aethel&apos;s interface will be automatically adjusted</p>
             </div>
 
             <div className="flex justify-end gap-3">
@@ -139,7 +141,7 @@ export const LocalAIModal: React.FC = () => {
         ) : (
           <div className="text-center py-6">
             <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 flex items-center justify-center rounded-full mx-auto mb-4 text-3xl">
-              ✓
+              <Check className="w-8 h-8 text-emerald-400" />
             </div>
             <h2 className="text-2xl font-bold mb-2 text-white">Local AI Activated!</h2>
             <p className="text-slate-400">

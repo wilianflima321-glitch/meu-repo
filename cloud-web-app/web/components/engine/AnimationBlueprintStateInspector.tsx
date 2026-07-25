@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+import { Clapperboard } from 'lucide-react';
 import type { AnimationState, AnimationVariable } from './AnimationBlueprint';
 
 export function StateInspector({
@@ -34,7 +36,7 @@ export function StateInspector({
         alignItems: 'center',
         gap: '8px',
       }}>
-        🎭 {state.name}
+        <Clapperboard className="w-4 h-4 text-amber-400" /> {state.name}
       </div>
 
       {/* Name */}
