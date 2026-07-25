@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-pub type Entity = u32;
+pub use super::attributes::Entity;
 pub type TagId = u32;
 
 pub const WORDS_PER_TAG_SET: usize = 4;
@@ -118,7 +118,7 @@ impl TagSetTable {
 
     pub fn add_tag(&mut self, entity: Entity, tag_name: &str, registry: &mut GameplayTagRegistry) {
         let id = registry.register(tag_name);
-        let entry = self.explicit_tags.entry(entity).or_insert_with(Vec::new);
+        let entry = self.explicit_tags.entry(entity).or_default();
         if !entry.contains(&id) {
             entry.push(id);
         }

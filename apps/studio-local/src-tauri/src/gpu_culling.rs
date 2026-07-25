@@ -96,6 +96,11 @@ fn cull_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 }
 "#;
 
+// `dispatch` (below) is the only reader of these fields; it isn't called yet because
+// GPU-driven culling isn't wired into a live per-frame render loop (present/submit is
+// still CW3 Path A secondary-window only — see `wgpu_renderer.rs` present honesty docs).
+// Transitive dead-code analysis flags both the unused method and the fields it reads.
+#[allow(dead_code)]
 pub struct GpuCullingPipeline {
     pub pipeline: wgpu::ComputePipeline,
     pub bind_group_layout: wgpu::BindGroupLayout,
@@ -167,7 +172,6 @@ impl GpuCullingPipeline {
             layout: Some(&pipeline_layout),
             module: &shader,
             entry_point: "cull_main",
-            compilation_options: Default::default(),
         });
 
         Self { pipeline, bind_group_layout }
@@ -177,6 +181,7 @@ impl GpuCullingPipeline {
     /// the surviving instance count back to the CPU (useful for debug HUDs
     /// and tests; the render pass itself should prefer `draw_indirect`
     /// straight off the GPU-written counter buffer to avoid this readback).
+    #[allow(dead_code)]
     pub fn dispatch(
         &self,
         device: &Arc<wgpu::Device>,

@@ -177,15 +177,10 @@ pub fn fs_watch(
             return;
         }
 
-        for res in rx {
-            match res {
-                Ok(event) => {
-                    use tauri::Emitter;
-                    let paths: Vec<String> = event.paths.into_iter().map(|p| p.display().to_string()).collect();
-                    let _ = app_handle.emit("fs_event", paths);
-                },
-                Err(_) => (),
-            }
+        for event in rx.into_iter().flatten() {
+            use tauri::Emitter;
+            let paths: Vec<String> = event.paths.into_iter().map(|p| p.display().to_string()).collect();
+            let _ = app_handle.emit("fs_event", paths);
         }
     });
 

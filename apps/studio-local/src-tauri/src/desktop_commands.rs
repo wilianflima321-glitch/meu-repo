@@ -1,6 +1,7 @@
 //! Studio Local Desktop IPC commands facade.
 //! Modularized under `src/desktop/` for clean maintainability (V36 Audit).
 
+#[path = "desktop/mod.rs"]
 pub mod desktop;
 pub use desktop::*;
 

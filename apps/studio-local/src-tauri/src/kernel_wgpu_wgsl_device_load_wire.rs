@@ -199,7 +199,7 @@ pub fn run_wgpu_wgsl_device_load_soak() -> KernelWgpuWgslDeviceLoadWireReport {
         Ok(r) => r,
         Err(_) => {
             return fail_report(
-                "gp intent→WGSL emit failed — wgpuWgslDeviceLoadReady stays false (distinct from mslWgslCompilerReady)",
+                "gp intent→WGSL emit failed — wgpuWgslDeviceLoadReady stays false (distinct from the gp MSL/WGSL compiler's own ready field)",
             );
         }
     };
@@ -244,7 +244,7 @@ pub fn run_wgpu_wgsl_device_load_soak() -> KernelWgpuWgslDeviceLoadWireReport {
             distinct_from_strain_aware_texturing_probe: true,
             distinct_from_kernel_foundation_probe: true,
             letter: "gu".into(),
-            note: "wgpu adapter unavailable — compile-from-string path shipped; device load HELD; wgpu_adapter_available false; wgpuWgslDeviceLoadReady stays false (never fake); distinct from gp mslWgslCompilerReady; full_webgpu_product_path_ready false; gpu_device_submit_ready false".into(),
+            note: "wgpu adapter unavailable — compile-from-string path shipped; device load HELD; wgpu_adapter_available false; wgpuWgslDeviceLoadReady stays false (never fake); distinct from the gp MSL/WGSL compiler's own ready field; full_webgpu_product_path_ready false; gpu_device_submit_ready false".into(),
             full_webgpu_product_path_ready: false,
             full_metal_spirv_compiler_aaa_ready: false,
             gpu_device_submit_ready: false,
@@ -275,7 +275,7 @@ pub fn run_wgpu_wgsl_device_load_soak() -> KernelWgpuWgslDeviceLoadWireReport {
 
     let note = if ready {
         format!(
-            "Desktop soak: gp Physical Intent→WGSL string → wgpu create_shader_module on headless device ({}/{}) — module ok + invalid WGSL fail-closed + same intent→same label/hash — wgpuWgslDeviceLoadReady true; wgpu_adapter_available true; full_webgpu_product_path_ready false; gpu_device_submit_ready false; distinct from gp mslWgslCompilerReady + gh wgslSurfaceNoiseKernelReady + gt gazeFoveatedReprojectionReady + gs strainAwareTexturingReady + prior probes",
+            "Desktop soak: gp Physical Intent→WGSL string → wgpu create_shader_module on headless device ({}/{}) — module ok + invalid WGSL fail-closed + same intent→same label/hash — wgpuWgslDeviceLoadReady true; wgpu_adapter_available true; full_webgpu_product_path_ready false; gpu_device_submit_ready false; distinct from the gp MSL/WGSL compiler's own ready field + gh wgslSurfaceNoiseKernelReady + gt gazeFoveatedReprojectionReady + gs strainAwareTexturingReady + prior probes",
             gpu.adapter_name, gpu.adapter_backend
         )
     } else {
@@ -322,11 +322,11 @@ pub fn run_wgpu_wgsl_device_load_soak() -> KernelWgpuWgslDeviceLoadWireReport {
 pub fn probe_wgpu_wgsl_device_load() -> KernelWgpuWgslDeviceLoadWireReport {
     let mut r = run_wgpu_wgsl_device_load_soak();
     if r.wgpu_adapter_available && r.wgpu_wgsl_device_load_ready {
-        r.note = "wgpu WGSL device load probe (letter gu) — distinct from mslWgslCompilerReady, wgslSurfaceNoiseKernelReady, gazeFoveatedReprojectionReady, strainAwareTexturingReady, and probe_kernel_foundation; full_webgpu_product_path_ready HELD; gpu_device_submit_ready HELD".into();
+        r.note = "wgpu WGSL device load probe (letter gu) — distinct from the gp MSL/WGSL compiler's own ready field, wgslSurfaceNoiseKernelReady, gazeFoveatedReprojectionReady, strainAwareTexturingReady, and probe_kernel_foundation; full_webgpu_product_path_ready HELD; gpu_device_submit_ready HELD".into();
     } else if !r.wgpu_adapter_available {
-        r.note = "wgpu WGSL device load probe (letter gu) — adapter unavailable; wgpuWgslDeviceLoadReady false (honest); distinct from mslWgslCompilerReady; device HELD".into();
+        r.note = "wgpu WGSL device load probe (letter gu) — adapter unavailable; wgpuWgslDeviceLoadReady false (honest); distinct from the gp MSL/WGSL compiler's own ready field; device HELD".into();
     } else {
-        r.note = "wgpu WGSL device load probe (letter gu) — soak failed; wgpuWgslDeviceLoadReady false; distinct from mslWgslCompilerReady".into();
+        r.note = "wgpu WGSL device load probe (letter gu) — soak failed; wgpuWgslDeviceLoadReady false; distinct from the gp MSL/WGSL compiler's own ready field".into();
     }
     r
 }

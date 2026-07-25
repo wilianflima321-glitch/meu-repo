@@ -67,7 +67,7 @@ pub struct SceneNodeTransformPatch {
     pub scale: Option<[f32; 3]>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SceneGraphSnapshot {
     pub nodes: Vec<SceneNode>,
@@ -98,7 +98,7 @@ impl SceneGraphState {
     }
 }
 
-fn lock(state: &State<'_, Mutex<SceneGraphState>>) -> Result<std::sync::MutexGuard<'_, SceneGraphState>, String> {
+fn lock<'a>(state: &'a State<'a, Mutex<SceneGraphState>>) -> Result<std::sync::MutexGuard<'a, SceneGraphState>, String> {
     state.lock().map_err(|_| "Studio Local scene graph lock is poisoned.".to_string())
 }
 

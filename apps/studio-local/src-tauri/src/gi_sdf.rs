@@ -18,6 +18,9 @@
 
 use std::f32;
 
+/// One precomputed triangle: (vertex a, vertex b, vertex c, face normal).
+type TriangleWithNormal = ([f32; 3], [f32; 3], [f32; 3], [f32; 3]);
+
 // ---------------------------------------------------------------------------
 // Triangle SDF helper (SAT point-to-triangle distance)
 // ---------------------------------------------------------------------------
@@ -131,7 +134,7 @@ impl SDFVoxelizer {
         let face_count = indices.len() / 3;
 
         // Precompute triangle vertices
-        let tris: Vec<([f32; 3], [f32; 3], [f32; 3], [f32; 3])> = (0..face_count)
+        let tris: Vec<TriangleWithNormal> = (0..face_count)
             .map(|f| {
                 let get_v = |i: usize| -> [f32; 3] {
                     let vi = indices[i] as usize * 3;

@@ -42,22 +42,12 @@ struct RuntimeJobStoreSnapshot {
     jobs: Vec<RuntimeJobStatus>,
 }
 
+#[derive(Default)]
 pub struct RuntimeJobStore {
     next_id: u64,
     jobs: HashMap<String, RuntimeJobStatus>,
     persistence_path: Option<PathBuf>,
     last_persistence_error: Option<String>,
-}
-
-impl Default for RuntimeJobStore {
-    fn default() -> Self {
-        Self {
-            next_id: 0,
-            jobs: HashMap::new(),
-            persistence_path: None,
-            last_persistence_error: None,
-        }
-    }
 }
 
 impl RuntimeJobStore {

@@ -18,9 +18,14 @@ pub struct TerminalSessionResponse {
     pub cwd: Option<String>,
 }
 
+// `id`/`cwd` are populated for every session (and mirrored into the map key / spawn
+// args) but have no reader yet — a `terminal_list_sessions` introspection command
+// (parity with VS Code's terminal picker) is scoped for a future IDE-shell round.
 #[derive(Clone)]
 pub(crate) struct TerminalSessionRecord {
+    #[allow(dead_code)]
     pub id: String,
+    #[allow(dead_code)]
     pub cwd: Option<String>,
     pub pty_writer: Arc<Mutex<Box<dyn std::io::Write + Send>>>,
     pub pty_master: Arc<Mutex<Box<dyn portable_pty::MasterPty + Send>>>,

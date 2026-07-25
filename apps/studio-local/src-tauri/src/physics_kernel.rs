@@ -409,9 +409,12 @@ mod client_consensus_tests {
             ClientTransformReport { entity_id: 1, position: [0.0, 0.0, 0.0], velocity: [0.0, 0.0, 0.0], server_recv_time_ms: 0 },
             &cfg,
         );
-        // 100 meters in 1 second == 100 m/s, far above the 10 m/s cap.
+        // 12 meters in 1 second == 12 m/s, above the 10 m/s speed cap but
+        // still under the 15m teleport cap — isolates the speed check from
+        // the (separately tested) teleport check below, which runs first
+        // and would otherwise shadow `SpeedExceeded` with `TeleportSuspected`.
         let verdict = validator.validate(
-            ClientTransformReport { entity_id: 1, position: [100.0, 0.0, 0.0], velocity: [100.0, 0.0, 0.0], server_recv_time_ms: 1000 },
+            ClientTransformReport { entity_id: 1, position: [12.0, 0.0, 0.0], velocity: [12.0, 0.0, 0.0], server_recv_time_ms: 1000 },
             &cfg,
         );
         assert!(!verdict.accepted);

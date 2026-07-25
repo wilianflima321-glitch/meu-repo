@@ -44,6 +44,9 @@ use crate::desktop_commands::{ensure_allowed_existing_path, locked_project_root,
 pub const WASM_HOT_RELOADED_EVENT: &str = "wasm_hot_reloaded";
 pub const WASM_HOT_RELOAD_FAILED_EVENT: &str = "wasm_hot_reload_failed";
 
+/// `update(dt, y, vy) -> (new_y, new_vy)` export contract (see module docs above).
+type GameplayUpdateFn = TypedFunc<(f32, f32, f32), (f32, f32)>;
+
 /// Simulation state that must outlive any single WASM instance for a swap
 /// to feel like a hot-reload instead of a restart.
 #[derive(Debug, Clone, Copy, Default, Serialize)]
@@ -57,7 +60,7 @@ pub struct GameplayState {
 struct LoadedModule {
     store: Store<()>,
     instance: Instance,
-    update_fn: Option<TypedFunc<(f32, f32, f32), (f32, f32)>>,
+    update_fn: Option<GameplayUpdateFn>,
 }
 
 pub struct WasmGameplayHost {

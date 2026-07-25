@@ -224,7 +224,7 @@ impl GameplayEffectPool {
         self.definitions[row] = Some(definition);
 
         if !is_periodic {
-            self.entity_to_standing_rows.entry(target).or_insert_with(Vec::new).push(row);
+            self.entity_to_standing_rows.entry(target).or_default().push(row);
             self.recompute_affected_attributes(attributes, target, &modifiers_for_recompute);
         }
 

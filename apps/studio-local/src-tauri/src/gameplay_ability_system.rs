@@ -1,6 +1,7 @@
 //! OMNI-PLAN — Data-Oriented Gameplay Ability System (GAS) Re-Export.
 //! Modularized under `src/gas/` for clean maintainability (V36 Audit).
 
+#[path = "gas/mod.rs"]
 pub mod gas;
 pub use gas::*;
 

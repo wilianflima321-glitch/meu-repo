@@ -62,6 +62,10 @@ impl AmbientCsiRing {
         self.frames.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.frames.is_empty()
+    }
+
     pub fn latest(&self) -> Option<&AmbientCsiFrame> {
         self.frames.back()
     }

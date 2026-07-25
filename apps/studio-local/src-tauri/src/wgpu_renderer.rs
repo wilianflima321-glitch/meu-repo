@@ -18,7 +18,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
-use tauri::Window;
+use tauri::{WebviewWindow, Wry};
 use winit::dpi::PhysicalSize;
 use winit::event_loop::EventLoopBuilder;
 use winit::window::WindowBuilder;
@@ -30,6 +30,12 @@ const DEFAULT_PRESENT_SOAK_FRAMES: u32 = 3;
 const MAX_PRESENT_SOAK_FRAMES: u32 = 8;
 const PRESENT_PROBE_TIMEOUT: Duration = Duration::from_secs(45);
 
+// Held for identity/lifetime (surface must outlive present) and future present-loop
+// wiring (CW3 Path A secondary-window present already proves the technique in
+// `run_renderer_present_probe`; wiring it onto this mount is tracked, not silent).
+// Not read directly yet because `mount_on_window` is currently identity/mount-only —
+// see module docs above ("present honesty").
+#[allow(dead_code)]
 pub struct WgpuRenderer {
     pub instance: wgpu::Instance,
     pub surface: wgpu::Surface<'static>,
@@ -83,6 +89,9 @@ pub struct PresentProbeState(pub Mutex<Option<RendererPresentProbeReport>>);
 
 impl WgpuRenderer {
     /// Compiles and creates a Compute Pipeline from a raw WGSL shader string.
+    /// General-purpose helper for future compute passes (denoise, skinning, particles);
+    /// `GpuCullingPipeline` currently builds its own dedicated pipeline instead of this.
+    #[allow(dead_code)]
     pub fn create_compute_pipeline(
         &self,
         shader_source: &str,
@@ -99,7 +108,6 @@ impl WgpuRenderer {
                 layout: None,
                 module: &shader,
                 entry_point,
-                compilation_options: Default::default(),
             })
     }
 
@@ -108,14 +116,16 @@ impl WgpuRenderer {
     /// **Honesty:** this is surface+device mount for profiler identity — **not** a
     /// product present/submit loop. WebView exclusive present stays HELD; use
     /// [`run_renderer_present_probe`] for proven secondary-window present.
-    pub async fn mount_on_window(window: Arc<Window>) -> Result<Self, String> {
+    pub async fn mount_on_window(window: Arc<WebviewWindow<Wry>>) -> Result<Self, String> {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::PRIMARY,
             ..Default::default()
         });
 
-        // Safety: The Tauri Window must outlive the surface. We use Arc to ensure lifetime.
-        let surface = unsafe { instance.create_surface(window.clone()) }
+        // wgpu 0.19's `create_surface` is safe for any `Arc<T: HasWindowHandle + HasDisplayHandle>`
+        // target; the Tauri `WebviewWindow` Arc keeps the HWND alive for as long as the surface does.
+        let surface = instance
+            .create_surface(window.clone())
             .map_err(|e| e.to_string())?;
 
         let adapter = instance

@@ -16,7 +16,7 @@
 //
 // Output: Vec<Meshlet> serialized as little-endian binary (C-repr layout)
 
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 
 // ---------------------------------------------------------------------------
 // Meshlet (C-repr for WGSL compatibility)
@@ -75,6 +75,12 @@ pub struct InputMesh {
 pub struct MeshletClusterizer {
     max_verts_per_meshlet: usize,
     max_tris_per_meshlet: usize,
+}
+
+impl Default for MeshletClusterizer {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl MeshletClusterizer {

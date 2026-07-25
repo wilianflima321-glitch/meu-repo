@@ -36,7 +36,7 @@ pub struct MmapOpenResult {
     pub path: String,
 }
 
-fn lock(state: &State<'_, Mutex<MmapRegistry>>) -> Result<std::sync::MutexGuard<'_, MmapRegistry>, String> {
+fn lock<'a>(state: &'a State<'a, Mutex<MmapRegistry>>) -> Result<std::sync::MutexGuard<'a, MmapRegistry>, String> {
     state.lock().map_err(|_| "Studio Local mmap registry lock is poisoned.".to_string())
 }
 

@@ -41,8 +41,17 @@ $env:CARGO_TARGET_DIR = "E:\aethel-target-gnu"
 cd "E:\Aethel engine\apps\studio-local\src-tauri"
 cargo check
 cargo clippy -- -D warnings
-cargo test
+cargo test --lib -- --test-threads=1
 ```
+
+**`--test-threads=1` is required, not optional**, on this crate's `--lib` suite: several
+`kernel_*_wire` / `wgpu_renderer` / `gpu_culling` tests request a real `wgpu` adapter/device
+against the physical GPU. Running them concurrently (the default multi-threaded harness)
+causes intermittent multi-minute hangs from driver-level contention when two threads race
+to acquire the adapter at once — not a logic bug, confirmed by the identical suite completing
+in ~3s single-threaded with 53/53 passing vs. hanging indefinitely multi-threaded. Do not
+"fix" this by weakening a test; keep `--test-threads=1` for this crate's `cargo test` invocations
+(CI and local).
 
 Kernel package:
 

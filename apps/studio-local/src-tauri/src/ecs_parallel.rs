@@ -55,6 +55,10 @@ impl ParallelEntityWorld {
         self.position.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.position.is_empty()
+    }
+
     /// Advances every entity's position by its velocity, distributed across
     /// every core rayon's global thread pool can see.
     pub fn tick_parallel(&mut self, dt: f32) {

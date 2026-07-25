@@ -684,6 +684,5 @@ mod tests {
         let _ = fs::remove_file(path);
     }
 }
-/ /   D o m a i n   1   g z :   P o s i t i o n - b a s e d   d y n a m i c s   r e a l   k e r n e l . 
- 
- 
+
+// Domain 1 gz: Position-based dynamics real kernel.

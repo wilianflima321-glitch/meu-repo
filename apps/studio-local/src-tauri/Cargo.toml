@@ -60,3 +60,14 @@ local-ai = ["ort"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
+
+[target.'cfg(windows)'.build-dependencies]
+# tauri-build's WindowsResource::compile() only links the Common-Controls-v6
+# manifest into `[[bin]]` targets (`rustc-link-arg-bins`); `cargo test`'s
+# generated unit-test harness executable gets no manifest at all, so any
+# GUI-touching transitive dep that needs a v6-only comctl32 export (e.g.
+# `rfd`/`muda` calling `TaskDialogIndirect`) crashes the test binary at
+# Windows PE-loader time with STATUS_ENTRYPOINT_NOT_FOUND — before any Rust
+# code, including the test harness itself, ever runs. We re-embed the same
+# manifest scoped to `--tests` (see build.rs) so the harness gets it too.
+embed-resource = "3"
