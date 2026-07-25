@@ -46,11 +46,12 @@ rfd = "0.14"
 # version number risks being either already yanked or not yet published by
 # the time this is built. Pin these down to exact versions the first time
 # `cargo build` actually runs against them.
-sysinfo = "*"
-rayon = "*"
-memmap2 = "*"
-image = { version = "*", default-features = false, features = ["png", "jpeg"] }
-wasmtime = "*"
+# Fixed exact versions for production reliability (P3 / Desktop Engineering Rigor)
+sysinfo = "0.30"
+rayon = "1.10"
+memmap2 = "0.9"
+image = { version = "0.24", default-features = false, features = ["png", "jpeg"] }
+wasmtime = "18.0"
 
 [features]
 default = []
