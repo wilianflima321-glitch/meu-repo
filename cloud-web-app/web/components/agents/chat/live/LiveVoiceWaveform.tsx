@@ -21,6 +21,9 @@ interface LiveVoiceWaveformProps {
   className?: string
 }
 
+// Canvas 2D `fillStyle`/`shadowColor` cannot resolve CSS custom properties, so
+// these mirror the accent (#8b5cf6 = --aethel-accent) / neon-cyan design-token
+// palette as literal values rather than referencing var(--aethel-*) directly.
 const SPEAKER_COLORS: Record<WaveformSpeaker, { from: string; to: string; glow: string }> = {
   ai:   { from: '#8b5cf6', to: '#c084fc', glow: 'rgba(139,92,246,0.4)' },
   user: { from: '#06b6d4', to: '#00e5ff', glow: 'rgba(0,229,255,0.4)'  },

@@ -114,7 +114,7 @@ const FIXTURE_REPLAY_RUNS: BrowserOperatorRunSummary[] = [
   },
   {
     runId: 'run_storybook_02',
-    mission: 'Checked GitHub issue #142',
+    mission: 'Checked GitHub issue #142', // hex-allowed (issue number, not a colour)
     status: 'complete',
     updatedAt: new Date(Date.now() - 1000 * 400).toISOString(),
     stepCount: 5,
