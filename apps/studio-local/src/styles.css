@@ -37,6 +37,24 @@
   --aethel-surface-tertiary: #1a2233;
   --aethel-border-primary: var(--border);
   --aethel-border-secondary: #1c2635;
+  --aethel-border-subtle: #1a2333;
+
+  /* P1: Missing tokens — shadow, gradient and radius parity with web */
+  --aethel-shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.45);
+  --aethel-shadow-md:  0 4px 12px 0 rgb(0 0 0 / 0.55);
+  --aethel-shadow-lg:  0 8px 24px 0 rgb(0 0 0 / 0.65), 0 2px 6px 0 rgb(0 0 0 / 0.4);
+  --aethel-shadow-xl:  0 16px 40px 0 rgb(0 0 0 / 0.75), 0 4px 12px 0 rgb(0 0 0 / 0.5);
+
+  --aethel-gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  --aethel-gradient-cyan:    linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  --aethel-gradient-emerald: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+
+  --aethel-radius-sm:    8px;
+  --aethel-radius-panel: 16px;
+  --aethel-radius-xl:    24px;
+
+  --aethel-info: #60a5fa;
+
 }
 
 * {
