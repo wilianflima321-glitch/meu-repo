@@ -20,6 +20,10 @@ import { CinemaCompositorTimelinePanel } from './panels/CinemaCompositorTimeline
 import { AestheticStyleStudioPanel } from './panels/AestheticStyleStudioPanel'
 import { TelepathicArchitectDronePanel } from './panels/TelepathicArchitectDronePanel'
 import { SentinelHardwareMonitorPanel } from './panels/SentinelHardwareMonitorPanel'
+import { FpsOverlayBadge } from './panels/FpsOverlayBadge'
+
+// P4: Canonical AssetBrowser shared from web (same component, no duplication)
+import { AssetBrowserPanel } from '../../../cloud-web-app/web/components/studio/AssetBrowserPanel'
 
 type NativeSidecarCapability = {
   kind: string
@@ -187,13 +191,23 @@ export function StudioLocalApp() {
           )}
 
           {activeTab === 'editor' && (
-            <div className="flex flex-col gap-4">
-              <ScenePanel backend={ideBackend} />
-              <TerminalPanel backend={ideBackend} />
-              <HardwareProfilerPanel />
-              <AssetCookerPanel />
-              <JobsLane adapter={adapter} jobs={jobs} onJobsChange={setJobs} />
-              <CloudHandoffBridge probe={probe} />
+            <div className="grid grid-cols-2 gap-4 h-full">
+              {/* Left column: Scene + Terminal + Jobs */}
+              <div className="flex flex-col gap-4">
+                <div className="relative">
+                  <FpsOverlayBadge probe={probe} />
+                  <ScenePanel backend={ideBackend} />
+                </div>
+                <TerminalPanel backend={ideBackend} />
+                <JobsLane adapter={adapter} jobs={jobs} onJobsChange={setJobs} />
+              </div>
+              {/* Right column: Asset Browser + Cooker + Hardware + Handoff */}
+              <div className="flex flex-col gap-4">
+                <AssetBrowserPanel />
+                <AssetCookerPanel />
+                <HardwareProfilerPanel />
+                <CloudHandoffBridge probe={probe} />
+              </div>
             </div>
           )}
         </section>
