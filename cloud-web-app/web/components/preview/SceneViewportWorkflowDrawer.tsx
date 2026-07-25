@@ -107,7 +107,7 @@ export default function SceneViewportWorkflowDrawer({
   onVisualScriptChange,
 }: SceneViewportWorkflowDrawerProps) {
   return (
-    <div className="absolute inset-0 z-30 bg-[rgba(4,8,16,0.82)] backdrop-blur-sm">
+    <div className="absolute inset-0 z-30 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_82%,transparent)] backdrop-blur-sm">
       <div className="flex h-full flex-col overflow-hidden border-l border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]">
         <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
           <div>

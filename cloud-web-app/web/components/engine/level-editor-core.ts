@@ -1,3 +1,5 @@
+import { getWorkbenchLastProjectId } from '@/lib/storage/ui-persistence-spine';
+
 export interface PhysicsState {
   velocities: Map<string, [number, number, number]>;
   angularVelocities: Map<string, [number, number, number]>;
@@ -5,15 +7,14 @@ export interface PhysicsState {
 
 const GRAVITY = -9.81;
 const GROUND_Y = 0.05; // Floor height
-const WORKBENCH_PROJECT_STORAGE_KEY = 'aethel.workbench.lastProjectId';
 
 export function resolveProjectIdFromClient(): string {
   if (typeof window === 'undefined') return 'default';
   const params = new URLSearchParams(window.location.search);
   const fromQuery = params.get('projectId');
   if (fromQuery && fromQuery.trim()) return fromQuery.trim();
-  const fromStorage = localStorage.getItem(WORKBENCH_PROJECT_STORAGE_KEY);
-  if (fromStorage && fromStorage.trim()) return fromStorage.trim();
+  const fromStorage = getWorkbenchLastProjectId();
+  if (fromStorage) return fromStorage;
   return 'default';
 }
 

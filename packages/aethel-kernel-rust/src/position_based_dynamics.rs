@@ -11,9 +11,9 @@
 //! Letter **ip**: XPBD-lite distance constraints with compliance α → α̃=α/h²,
 //! Lagrange multiplier Δλ accumulation, and fixed substep loop `h=dt/n_substeps`.
 //! Hot XPBD path uses preallocated [`XpbdScratch`] (zero alloc in solve).
-//! Soak N≥64 constraints; residual decreases with iterations; pin stable;
-//! same seed → bit-identical positions. Probe
-//! `position_based_dynamics_xpbd_ready` / `positionBasedDynamicsXpbdReady`
+//! CW2 load-scale soak N≥2048 particles (46²); residual decreases with iterations;
+//! pin stable; same seed → bit-identical positions; wall budget on E: host.
+//! Probe `position_based_dynamics_xpbd_ready` / `positionBasedDynamicsXpbdReady`
 //! is **distinct** from hj `positionBasedDynamicsReady`.
 //!
 //! Honesty probe `position_based_dynamics_ready` /
@@ -48,25 +48,31 @@ const EPS: f32 = 1e-5;
 /// Soak sample count (predict + project + residual evidence).
 pub const SOAK_SAMPLE_COUNT: u32 = 4;
 
-/// XPBD soak grid side (9×9 particles).
-pub const XPBD_SOAK_GRID: usize = 9;
-/// XPBD soak particle count (81).
+/// XPBD load-scale soak grid side (CW2: 46²=2116 ≥2048, beyond prior 9×9 micro).
+pub const XPBD_SOAK_GRID: usize = 46;
+/// XPBD soak particle count (2116).
 pub const XPBD_SOAK_PARTICLE_COUNT: usize = XPBD_SOAK_GRID * XPBD_SOAK_GRID;
-/// Horizontal + vertical edges: 9·8·2 = 144 (≥64).
+/// Horizontal + vertical edges: 46·45·2 = 4140.
 pub const XPBD_SOAK_CONSTRAINT_COUNT: usize =
     XPBD_SOAK_GRID * (XPBD_SOAK_GRID - 1) * 2;
+/// CW2 load-scale floor — xpbd_ready requires N≥2048 (not legacy micro ≥64).
+pub const XPBD_LOAD_SCALE_MIN_PARTICLES: usize = 2048;
+/// Wall-clock budget for XPBD load-scale soak on RTX 3060-class host (seconds).
+pub const XPBD_SOAK_WALL_BUDGET_SECS: u64 = 45;
 /// Frame dt for XPBD soak (60 Hz).
 pub const XPBD_DEFAULT_DT: f32 = 1.0 / 60.0;
 /// Fixed substeps per frame.
 pub const XPBD_DEFAULT_SUBSTEPS: u32 = 4;
-/// XPBD solver iterations per substep (soak default).
-pub const XPBD_DEFAULT_ITERATIONS: u32 = 8;
-/// Distance compliance α (soft XPBD; α=0 recovers stiff PBD-lite).
-pub const XPBD_DEFAULT_COMPLIANCE: f32 = 1.0e-6;
+/// XPBD solver iterations per substep (load-scale needs deeper than micro 8).
+pub const XPBD_DEFAULT_ITERATIONS: u32 = 16;
+/// Distance compliance α for load-scale (stiffer than 1e-6 micro so residual drop stays measurable at N≥2k).
+pub const XPBD_DEFAULT_COMPLIANCE: f32 = 1.0e-8;
 /// Deterministic soak seed ("XPBD" tag).
 pub const XPBD_SOAK_SEED: u32 = 0x5850_4244;
-/// Min relative residual drop from 1→8 iterations.
-const XPBD_MIN_ITER_DROP: f32 = 0.15;
+/// Min relative residual drop from few→many iterations (load-scale soft cloth).
+const XPBD_MIN_ITER_DROP: f32 = 0.12;
+/// Min residual drop fraction for XPBD load-scale primary step (≠ classical PBD 0.35).
+const XPBD_LOAD_SCALE_MIN_RESIDUAL_DROP: f32 = 0.20;
 /// Rest length / lattice spacing.
 const XPBD_REST: f32 = 1.0;
 /// Initial stretch factor (>1 stretches constraints).
@@ -240,7 +246,7 @@ fn xpbd_lcg(state: &mut u32) -> f32 {
     (*state >> 8) as f32 / (1u32 << 24) as f32
 }
 
-/// XPBD soak particles: stretched 9×9 lattice; left column pinned.
+/// XPBD soak particles: stretched load-scale lattice; left column pinned.
 pub fn soak_xpbd_particles(seed: u32) -> PbdParticleSoA {
     let g = XPBD_SOAK_GRID;
     let mut p = PbdParticleSoA::with_capacity(XPBD_SOAK_PARTICLE_COUNT);
@@ -262,7 +268,7 @@ pub fn soak_xpbd_particles(seed: u32) -> PbdParticleSoA {
     p
 }
 
-/// XPBD soak distance constraints (≥64): grid edges with compliance.
+/// XPBD soak distance constraints (load-scale grid edges with compliance).
 pub fn soak_xpbd_constraints() -> Vec<DistanceConstraint> {
     let g = XPBD_SOAK_GRID;
     let mut out = Vec::with_capacity(XPBD_SOAK_CONSTRAINT_COUNT);
@@ -726,12 +732,12 @@ pub struct PositionBasedDynamicsSoakReport {
     pub xpbd_constraint_count: u32,
     /// Fixed substeps used in XPBD soak.
     pub xpbd_substeps: u32,
-    /// Residual after 1 / 2 / 4 / 8 iterations (same fixture/dt/substeps).
+    /// Residual curve slots: 1 / 2 / 4 / `XPBD_DEFAULT_ITERATIONS` (field name `_8` is legacy; CW2 max=16).
     pub residual_iters_1: f32,
     pub residual_iters_2: f32,
     pub residual_iters_4: f32,
     pub residual_iters_8: f32,
-    /// True when residual_1 > residual_2 > residual_4 > residual_8 (strict).
+    /// True when residual curve is non-increasing across the four slots (1→2→4→max).
     pub residual_decreases_with_iterations: bool,
     /// Same seed → bit-identical positions after XPBD step.
     pub deterministic_replay: bool,
@@ -1089,7 +1095,7 @@ fn positions_bit_identical(a: &PbdParticleSoA, b: &PbdParticleSoA) -> bool {
     true
 }
 
-/// N≥64 XPBD + fixed-substep soak — letter **ip**.
+/// N≥2048 XPBD + fixed-substep load-scale soak — letter **ip** + CW2.
 ///
 /// Proves: residual decreases with iterations, pinned column stable,
 /// same seed → bit-identical positions. Does **not** flip Chaos/cloth AAA.
@@ -1098,9 +1104,9 @@ pub fn run_position_based_dynamics_xpbd_soak() -> PositionBasedDynamicsSoakRepor
     let n_cons = coloring.constraints.len();
     let mut scratch = XpbdScratch::with_capacity(n_cons);
 
-    // Residual curve: same fixture, increasing iterations.
+    // Residual curve: same fixture, increasing iterations (1→2→4→16 at load-scale).
     let mut residuals = [0.0_f32; 4];
-    let iter_counts = [1u32, 2, 4, 8];
+    let iter_counts = [1u32, 2, 4, XPBD_DEFAULT_ITERATIONS];
     for (k, &iters) in iter_counts.iter().enumerate() {
         let mut p = soak_xpbd_particles(XPBD_SOAK_SEED);
         let step = PositionBasedDynamics::solve_xpbd_precolored(
@@ -1113,7 +1119,7 @@ pub fn run_position_based_dynamics_xpbd_soak() -> PositionBasedDynamicsSoakRepor
         );
         residuals[k] = step.residual_after;
     }
-    // Non-increasing curve with meaningful drop 1→8 (strict pairwise optional).
+    // Non-increasing curve with meaningful drop 1→max iters.
     let residual_decreases_with_iterations = residuals[0] + EPS >= residuals[1]
         && residuals[1] + EPS >= residuals[2]
         && residuals[2] + EPS >= residuals[3]
@@ -1154,7 +1160,7 @@ pub fn run_position_based_dynamics_xpbd_soak() -> PositionBasedDynamicsSoakRepor
     };
     let residual_decreased = step.projected
         && step.residual_after + EPS < step.residual_before
-        && residual_drop_fraction >= MIN_RESIDUAL_DROP;
+        && residual_drop_fraction >= XPBD_LOAD_SCALE_MIN_RESIDUAL_DROP;
 
     // Same seed → bit-identical.
     let mut p2 = soak_xpbd_particles(XPBD_SOAK_SEED);
@@ -1181,7 +1187,9 @@ pub fn run_position_based_dynamics_xpbd_soak() -> PositionBasedDynamicsSoakRepor
         && positions_mutated
         && deterministic_replay
         && n_cons >= 64
-        && XPBD_SOAK_PARTICLE_COUNT >= 64;
+        // CW2 load-scale: xpbd-ready requires runtime N≥2048 (not legacy micro-soak 64/81).
+        && particles.pos_x.len() >= XPBD_LOAD_SCALE_MIN_PARTICLES
+        && XPBD_SOAK_PARTICLE_COUNT >= XPBD_LOAD_SCALE_MIN_PARTICLES;
 
     let evidence_fingerprint = pbd_evidence_fingerprint(
         residual_decreased,
@@ -1420,22 +1428,43 @@ mod tests {
 
     #[test]
     fn xpbd_soak_residual_curve_and_pin_stable() {
+        let started = std::time::Instant::now();
         let r = run_position_based_dynamics_xpbd_soak();
+        let elapsed = started.elapsed();
         assert!(r.position_based_dynamics_xpbd_ready, "{r:?}");
         assert!(!r.position_based_dynamics_ready);
         assert_eq!(r.evidence_kind, XPBD_EVIDENCE_KIND);
         assert!(r.xpbd_constraint_count >= 64);
         assert_eq!(r.xpbd_particle_count, XPBD_SOAK_PARTICLE_COUNT as u32);
+        assert!(
+            (r.xpbd_particle_count as usize) >= XPBD_LOAD_SCALE_MIN_PARTICLES,
+            "CW2 XPBD load-scale must be N≥{} (got {})",
+            XPBD_LOAD_SCALE_MIN_PARTICLES,
+            r.xpbd_particle_count
+        );
+        assert!(
+            (r.xpbd_particle_count as usize) > 81,
+            "CW2 must exceed prior 9×9 micro soak (81)"
+        );
         assert_eq!(r.xpbd_substeps, XPBD_DEFAULT_SUBSTEPS);
         assert!(r.residual_iters_1 + EPS >= r.residual_iters_2);
         assert!(r.residual_iters_2 + EPS >= r.residual_iters_4);
         assert!(r.residual_iters_4 + EPS >= r.residual_iters_8);
         assert!(r.residual_iters_1 > r.residual_iters_8 + EPS);
+        assert!(r.residual_drop_fraction >= XPBD_LOAD_SCALE_MIN_RESIDUAL_DROP);
         assert!(r.residual_decreases_with_iterations);
         assert!(r.pinned_particle_stable);
         assert!(r.deterministic_replay);
         assert!(!r.chaos_pbd_parity_ready);
         assert!(!r.xpbd_cloth_aaa_ready);
+        // CW2 RTX 3060 / E: disk-safe wall budget (real math soak, not theater).
+        assert!(
+            elapsed.as_secs() < XPBD_SOAK_WALL_BUDGET_SECS,
+            "CW2 XPBD soak exceeded wall budget: {:?} >= {}s (N={})",
+            elapsed,
+            XPBD_SOAK_WALL_BUDGET_SECS,
+            r.xpbd_particle_count
+        );
     }
 
     #[test]

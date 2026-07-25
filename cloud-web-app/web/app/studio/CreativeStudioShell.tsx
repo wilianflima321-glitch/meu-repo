@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import StudioLayout from '@/components/studio/StudioLayout'
 import MaturityBadge from '@/components/ui/MaturityBadge'
+import { WorkbenchLoadingState } from '@/components/ui/WorkbenchSurfaceStates'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 import { CREATIVE_STUDIO_ROUTES, groupCreativeStudioRoutes, isPrimaryCreativeStudioRoute, getCreativeStudioRouteNavigationHref } from './creative-studio-routes'
 
@@ -43,13 +44,8 @@ function maturityGuidance(maturity?: string) {
 
 export function CreativeStudioLoading({ label }: { label: string }) {
   return (
-    <div className="flex h-full min-h-[420px] items-center justify-center bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)]">
-      <div className="flex items-center gap-3 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_55%,transparent)] px-5 py-4 shadow-[0_18px_60px_rgba(0,0,0,0.24)]">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--aethel-border-secondary)] border-t-[var(--aethel-primary-light)]" />
-        <span className="text-xs font-semibold uppercase tracking-[0.16em]">
-          Loading {label}
-        </span>
-      </div>
+    <div className="flex h-full min-h-[420px] items-center justify-center bg-[var(--aethel-surface-primary)]">
+      <WorkbenchLoadingState label={`Loading ${label}`} rows={3} />
     </div>
   )
 }
@@ -210,7 +206,7 @@ export default function CreativeStudioShell({
           <summary className={`${creativeTabClass(currentRouteIsSecondary)} inline-flex min-h-10 cursor-pointer list-none items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]`}>
             More editors
           </summary>
-          <div className="fixed left-3 right-3 top-36 z-50 grid max-h-[70vh] gap-2 overflow-y-auto rounded-[24px] border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-3 shadow-[0_24px_80px_rgba(0,0,0,0.42)] sm:left-auto sm:right-6 sm:w-[640px] sm:grid-cols-2 lg:grid-cols-3">
+          <div className="fixed left-3 right-3 top-36 z-50 grid max-h-[70vh] gap-2 overflow-y-auto rounded-[24px] border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-3 shadow-[var(--aethel-shadow-xl)] sm:left-auto sm:right-6 sm:w-[640px] sm:grid-cols-2 lg:grid-cols-3">
             {secondaryCreativeGroups.map((group) => (
               <div
                 key={group.id}

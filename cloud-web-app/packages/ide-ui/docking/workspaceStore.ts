@@ -45,6 +45,24 @@ export interface WorkspaceState {
 
 export type WorkspaceStore = UseBoundStore<StoreApi<WorkspaceState>>;
 
+/**
+ * CW4 — optional dual-write adapter so IDE dock layout stays on the UI persistence spine.
+ * Default remains raw localStorage for package isolation / Storybook.
+ */
+export type WorkspaceLayoutPersistenceAdapter = {
+  load(storageKey: string): string | null
+  save(storageKey: string, raw: string): void
+}
+
+let workspaceLayoutPersistenceAdapter: WorkspaceLayoutPersistenceAdapter | null = null
+
+/** Register from web (`ui-persistence-spine`) once at IDE boot. */
+export function registerWorkspaceLayoutPersistence(
+  adapter: WorkspaceLayoutPersistenceAdapter | null,
+): void {
+  workspaceLayoutPersistenceAdapter = adapter
+}
+
 const DEFAULT_REGION_SIZE: Record<DockRegionId, number> = {
   leftBar: 20,
   rightBar: 26,
@@ -74,7 +92,9 @@ function loadPersistedLayout(storageKey: string | undefined): {
 } {
   if (!storageKey || typeof window === 'undefined') return { regions: null, presets: {} };
   try {
-    const raw = window.localStorage.getItem(storageKey);
+    const raw =
+      workspaceLayoutPersistenceAdapter?.load(storageKey) ??
+      window.localStorage.getItem(storageKey);
     if (!raw) return { regions: null, presets: {} };
     const parsed = JSON.parse(raw) as {
       regions?: DockRegionLayout;
@@ -108,7 +128,12 @@ export function createWorkspaceStore(storageKey?: string): WorkspaceStore {
   const persist = (regions: DockRegionLayout, zenMode: boolean, presets: Record<string, DockRegionLayout>) => {
     if (!storageKey || typeof window === 'undefined') return;
     try {
-      window.localStorage.setItem(storageKey, JSON.stringify({ regions, zenMode, presets }));
+      const raw = JSON.stringify({ regions, zenMode, presets });
+      if (workspaceLayoutPersistenceAdapter) {
+        workspaceLayoutPersistenceAdapter.save(storageKey, raw);
+      } else {
+        window.localStorage.setItem(storageKey, raw);
+      }
     } catch {
       // Storage can legitimately fail (quota, private mode) — layout persistence is a nicety, not a requirement.
     }

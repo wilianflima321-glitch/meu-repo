@@ -1,4 +1,10 @@
 import {createComponentLogger, logger} from '@/lib/observability/logger'
+import {
+  getIconThemePreferenceId,
+  getThemePreferenceId,
+  setIconThemePreferenceId,
+  setThemePreferenceId,
+} from '@/lib/storage/ui-persistence-spine'
 
 const log = createComponentLogger('themes/theme-manager')
 
@@ -462,7 +468,8 @@ export class ThemeManager {
    */
   private loadCurrentTheme(): void {
     try {
-      const themeId = localStorage.getItem(this.STORAGE_KEY_THEME);
+      // CW4: theme id via spine (legacy key mirrored). Never store secrets here.
+      const themeId = getThemePreferenceId() ?? localStorage.getItem(this.STORAGE_KEY_THEME);
       if (themeId) {
         const theme = this.getThemes().find(t => t.id === themeId);
         if (theme) {
@@ -470,7 +477,8 @@ export class ThemeManager {
         }
       }
 
-      const iconThemeId = localStorage.getItem(this.STORAGE_KEY_ICON_THEME);
+      const iconThemeId =
+        getIconThemePreferenceId() ?? localStorage.getItem(this.STORAGE_KEY_ICON_THEME);
       if (iconThemeId) {
         const iconTheme = this.getIconThemes().find(t => t.id === iconThemeId);
         if (iconTheme) {
@@ -487,7 +495,7 @@ export class ThemeManager {
    */
   private saveCurrentTheme(): void {
     try {
-      localStorage.setItem(this.STORAGE_KEY_THEME, this.currentTheme.id);
+      setThemePreferenceId(this.currentTheme.id);
     } catch (error) {
       logger.error('[Theme Manager] Failed to save current theme:', error);
     }
@@ -498,7 +506,7 @@ export class ThemeManager {
    */
   private saveCurrentIconTheme(): void {
     try {
-      localStorage.setItem(this.STORAGE_KEY_ICON_THEME, this.currentIconTheme.id);
+      setIconThemePreferenceId(this.currentIconTheme.id);
     } catch (error) {
       logger.error('[Theme Manager] Failed to save current icon theme:', error);
     }

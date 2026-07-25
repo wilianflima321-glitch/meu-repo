@@ -7,6 +7,7 @@ import type { PanelState as ModernPanelState } from '../ModernIDEShell';
 import type { BottomPanelMode } from '../modern-shell/types';
 import type { SidebarTab } from './types';
 import { syncAuthFromServer } from '../../../web/lib/auth-session-sync';
+import { setUiPersistence } from '../../../web/lib/storage/ui-persistence-spine';
 
 type UseWorkbenchChromeParams = {
   lastProjectIdStorageKey: string;
@@ -203,17 +204,21 @@ export function useWorkbenchChrome({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(previewEnabledStorageKey, previewEnabled ? '1' : '0');
+    // CW4: spine + legacy mirror (setUiPersistence mirrors known keys).
+    void previewEnabledStorageKey;
+    setUiPersistence('ide.workbench.previewEnabled', previewEnabled ? '1' : '0');
   }, [previewEnabled, previewEnabledStorageKey]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(panelStateStorageKey, JSON.stringify(modernPanelState));
+    void panelStateStorageKey;
+    setUiPersistence('ide.workbench.panelState', modernPanelState);
   }, [modernPanelState, panelStateStorageKey]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(bottomPanelModeStorageKey, activeBottomPanel);
+    void bottomPanelModeStorageKey;
+    setUiPersistence('ide.workbench.bottomPanel', activeBottomPanel);
   }, [activeBottomPanel, bottomPanelModeStorageKey]);
 
   useEffect(() => {

@@ -51,8 +51,12 @@ const GenerateWorldForgePanel = dynamic(
   { ssr: false, loading: () => <CreativeStudioLoading label="Generate world…" /> },
 )
 
+function LevelEditorEmbedded() {
+  return <LevelEditor embedded />
+}
+
 const TOOL_VIEWPORTS: Record<string, React.ComponentType> = {
-  level: LevelEditor,
+  level: LevelEditorEmbedded,
   scene: SceneEditor,
   material: MaterialEditor,
   terrain: TerrainSculptingEditor,
@@ -94,15 +98,14 @@ function WorldToolPicker({
               'group relative flex w-full items-center gap-2.5 overflow-hidden rounded-xl border px-3 py-2.5 text-left transition-all duration-200',
               'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)]',
               active
-                ? 'border-[color-mix(in_srgb,var(--aethel-neon-cyan)_28%,transparent)] bg-[rgba(0,229,255,0.06)] shadow-[0_0_12px_rgba(0,229,255,0.08)]'
+                ? 'border-[color-mix(in_srgb,var(--aethel-neon-cyan)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-neon-cyan)_6%,transparent)] shadow-[0_0_12px_color-mix(in_srgb,var(--aethel-neon-cyan)_8%,transparent)]'
                 : 'border-transparent hover:border-[var(--aethel-border-subtle)] hover:bg-[var(--aethel-surface-secondary)]',
             ].join(' ')}
           >
             {/* Active glow strip */}
             {active && (
               <span
-                className="pointer-events-none absolute left-0 inset-y-0 w-0.5 rounded-full bg-[var(--aethel-neon-cyan)]"
-                style={{ boxShadow: '0 0 6px rgba(0,229,255,0.6)' }}
+                className="pointer-events-none absolute left-0 inset-y-0 w-0.5 rounded-full bg-[var(--aethel-neon-cyan)] shadow-[0_0_6px_color-mix(in_srgb,var(--aethel-neon-cyan)_60%,transparent)]"
                 aria-hidden
               />
             )}
@@ -179,7 +182,7 @@ function ViewportToolBanner({ label }: { label: string }) {
       aria-live="polite"
     >
       <span
-        className="rounded-full border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-elevated)_90%,transparent)] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-neon-cyan)] shadow-[0_0_16px_rgba(0,229,255,0.12)]"
+        className="rounded-full border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-elevated)_90%,transparent)] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-neon-cyan)] shadow-[0_0_16px_color-mix(in_srgb,var(--aethel-neon-cyan)_12%,transparent)]"
         style={{ backdropFilter: 'blur(12px)', animation: 'fadeOut 2s ease-out forwards' }}
       >
         {label}
@@ -189,7 +192,7 @@ function ViewportToolBanner({ label }: { label: string }) {
 }
 
 function WorldStudioViewport({ toolId, activeTool }: { toolId: string; activeTool: StudioTool }) {
-  const Viewport = TOOL_VIEWPORTS[toolId] ?? LevelEditor
+  const Viewport = TOOL_VIEWPORTS[toolId] ?? LevelEditorEmbedded
   const prevTool = useRef(toolId)
   const [bannerKey, setBannerKey] = useState(0)
   useEffect(() => {

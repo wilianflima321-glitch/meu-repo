@@ -1,4 +1,10 @@
 import type { ChatMessage } from '@/lib/api'
+import {
+  getUiPersistence,
+  removeUiPersistence,
+  setUiPersistence,
+  UI_PERSISTENCE_LEGACY_KEYS,
+} from '@/lib/storage/ui-persistence-spine'
 
 export interface WorkflowTemplate {
   id: string
@@ -118,10 +124,10 @@ export const DEFAULT_SETTINGS: DashboardSettings = {
 }
 
 export const STORAGE_KEYS = {
-  sessionHistory: 'aethel-dashboard::session-history',
-  settings: 'aethel-dashboard::settings',
-  activeTab: 'aethel-dashboard::active-tab',
-  chatHistory: 'aethel-dashboard::chat-history',
+  sessionHistory: UI_PERSISTENCE_LEGACY_KEYS.dashboardSessionHistory,
+  settings: UI_PERSISTENCE_LEGACY_KEYS.dashboardSettings,
+  activeTab: UI_PERSISTENCE_LEGACY_KEYS.dashboardActiveTab,
+  chatHistory: UI_PERSISTENCE_LEGACY_KEYS.dashboardChatHistory,
 } as const
 
 export const DASHBOARD_TABS: ActiveTab[] = [
@@ -283,11 +289,50 @@ export const clearStoredDashboardState = () => {
     return
   }
   try {
-    window.localStorage.removeItem(STORAGE_KEYS.sessionHistory)
-    window.localStorage.removeItem(STORAGE_KEYS.settings)
-    window.localStorage.removeItem(STORAGE_KEYS.activeTab)
-    window.localStorage.removeItem(STORAGE_KEYS.chatHistory)
+    removeUiPersistence('dashboard.sessionHistory')
+    removeUiPersistence('dashboard.settings')
+    removeUiPersistence('dashboard.activeTab')
+    removeUiPersistence('dashboard.chatHistory')
   } catch {
     // Storage may be unavailable in restricted browser contexts.
   }
+}
+
+/** CW4 helpers — prefer these over raw localStorage for dashboard critical keys. */
+export function persistDashboardSessionHistory(value: unknown): boolean {
+  return setUiPersistence('dashboard.sessionHistory', value)
+}
+
+export function persistDashboardChatHistory(value: unknown): boolean {
+  return setUiPersistence('dashboard.chatHistory', value)
+}
+
+export function persistDashboardSettings(value: unknown): boolean {
+  return setUiPersistence('dashboard.settings', value)
+}
+
+export function persistDashboardActiveTab(value: string): boolean {
+  return setUiPersistence('dashboard.activeTab', value)
+}
+
+export function readDashboardActiveTabRaw(): string | null {
+  return getUiPersistence('dashboard.activeTab', null, (v): v is string => typeof v === 'string')
+}
+
+export function readDashboardSessionHistoryRaw(): string | null {
+  const value = getUiPersistence<unknown>('dashboard.sessionHistory', null)
+  if (value === null) return null
+  return typeof value === 'string' ? value : JSON.stringify(value)
+}
+
+export function readDashboardChatHistoryRaw(): string | null {
+  const value = getUiPersistence<unknown>('dashboard.chatHistory', null)
+  if (value === null) return null
+  return typeof value === 'string' ? value : JSON.stringify(value)
+}
+
+export function readDashboardSettingsRaw(): string | null {
+  const value = getUiPersistence<unknown>('dashboard.settings', null)
+  if (value === null) return null
+  return typeof value === 'string' ? value : JSON.stringify(value)
 }

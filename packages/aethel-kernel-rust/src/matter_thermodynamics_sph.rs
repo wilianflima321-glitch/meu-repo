@@ -3,11 +3,12 @@
 //! SoA SPH (pos, vel, dens, temp) + Poly6 density + spiky pressure + viscosity +
 //! heat diffusion. Letter **io** (hu–im taken; critic audit owns **in**):
 //! pre-allocated uniform-grid spatial hash for neighbors; hot step rebuilds via
-//! clear+insert into fixed buffers (no alloc). Hash soak N≥1024 (11³) proves
+//! clear+insert into fixed buffers (no alloc). Hash soak N≥2048 (13³) proves
 //! density finite, KE bounded, avg C_step &lt; N²/8, max_neighbors ≤ min(128, N/8).
+//! CW2 load-scale: larger than micro-soak (N=8) / prior 11³; RTX 3060 CPU budget.
 //!
 //! Probes: `matterThermodynamicsSphReady` (small soak) +
-//! `matterThermodynamicsSphHashReady` (N≥1024 spatial-hash soak). Letter **hz**:
+//! `matterThermodynamicsSphHashReady` (N≥2048 spatial-hash soak). Letter **hz**:
 //! `evidence_kind` + `evidence_fingerprint` measure distinct (no hard-coded
 //! `distinct_from_*: true` grind).
 //!
@@ -17,9 +18,13 @@
 
 /// Soak particle count (small, deterministic).
 pub const SOAK_PARTICLE_COUNT: usize = 8;
-/// Spatial-hash deepen soak particle count (critic P0: ≥1024).
-/// 11³ = 1331 so spacing≈h still yields domain ≥ ~8h on every axis.
-pub const HASH_SOAK_PARTICLE_COUNT: usize = 1331;
+/// Spatial-hash load-scale soak particle count (CW2: ≥2048, beyond micro/11³).
+/// 13³ = 2197 so spacing≈h still yields domain ≥ ~8h on every axis.
+pub const HASH_SOAK_PARTICLE_COUNT: usize = 2197;
+/// Cubic lattice side for hash soak (side³ == HASH_SOAK_PARTICLE_COUNT).
+pub const HASH_SOAK_SIDE: usize = 13;
+/// Wall-clock budget for hash soak on RTX 3060-class host (seconds).
+pub const HASH_SOAK_WALL_BUDGET_SECS: u64 = 45;
 /// Uniform grid cells per axis (fixed; covers hash soak AABB with margin).
 pub const HASH_GRID_DIM: usize = 32;
 /// Hash soak steps (density → pressure → integrate).
@@ -860,7 +865,7 @@ impl MatterThermodynamicsSph {
 pub struct MatterThermodynamicsSphSoakReport {
     /// Soak-gated; distinct from eb / ea / dz / dy / dx / dw / dv / du / dt / ds / dr / dq / dc–dm.
     pub matter_thermodynamics_sph_ready: bool,
-    /// Letter **io**: N≥1024 spatial-hash soak (density finite, KE bounded, ≪N²).
+    /// Letter **io**/CW2: N≥2048 spatial-hash soak (density finite, KE bounded, ≪N²).
     pub matter_thermodynamics_sph_hash_ready: bool,
     pub density_changed: bool,
     pub thermal_energy_changed: bool,
@@ -1119,15 +1124,16 @@ fn soak_sph_particles() -> SphParticleSoA {
     p
 }
 
-/// Deterministic N≥1024 lattice for spatial-hash soak (seed = lattice coords).
+/// Deterministic N≥2048 lattice for spatial-hash load-scale soak (seed = lattice coords).
 ///
-/// Critic **io** rework geometry: spacing ≈ 0.96·h so 3×3×3 stencil stays
-/// local (≲40 candidates), and cubic 11³ domain extents ≥ ~8h on each axis.
+/// Critic **io** geometry + CW2 scale: spacing ≈ 0.96·h so 3×3×3 stencil stays
+/// local, and cubic 13³ domain extents ≥ ~8h on each axis.
 fn soak_hash_sph_particles(seed: u32) -> SphParticleSoA {
     let n = HASH_SOAK_PARTICLE_COUNT;
     let mut p = SphParticleSoA::with_capacity(n);
-    // 11×11×11 = 1331; (10)·0.96·h = 9.6h ≥ 8h on every axis.
-    let side = 11_usize;
+    // 13×13×13 = 2197; (12)·0.96·h = 11.52h ≥ 8h on every axis.
+    let side = HASH_SOAK_SIDE;
+    debug_assert_eq!(side * side * side, n);
     let spacing = DEFAULT_H * HASH_SOAK_SPACING_OVER_H;
     let jitter = (seed as f32) * 1.0e-6;
     let mut idx = 0_usize;
@@ -1393,10 +1399,10 @@ fn hash_soak_max_neighbors_limit(n: usize) -> u32 {
     }
 }
 
-/// N≥1024 spatial-hash soak — letter **io** (critic rework).
+/// N≥2048 spatial-hash load-scale soak — letter **io** + CW2.
 ///
 /// Proves: density finite, KE bounded, avg C_step &lt; N²/8 (ΣC &lt; S·N²/8),
-/// max_neighbors ≤ min(128, N/8), same seed→same.
+/// max_neighbors ≤ min(128, N/8), same seed→same, wall &lt; HASH_SOAK_WALL_BUDGET_SECS.
 /// Does **not** flip DualSPHysics / Chaos AAA.
 pub fn run_matter_thermodynamics_sph_hash_soak() -> MatterThermodynamicsSphSoakReport {
     let n = HASH_SOAK_PARTICLE_COUNT;
@@ -1501,7 +1507,8 @@ pub fn run_matter_thermodynamics_sph_hash_soak() -> MatterThermodynamicsSphSoakR
         && deterministic_replay
         && mass_conserved
         && pressure_force_active
-        && n >= 1024;
+        // CW2 load-scale: hash-ready requires N≥2048 (not legacy micro-soak 1024).
+        && n >= 2048;
 
     let evidence_kind = if hash_ready {
         SPH_HASH_EVIDENCE_KIND
@@ -1593,7 +1600,7 @@ pub fn run_matter_thermodynamics_sph_hash_soak() -> MatterThermodynamicsSphSoakR
     }
 }
 
-/// Honesty probe — small soak + N≥1024 hash soak (**hk**/**io**).
+/// Honesty probe — small soak + N≥2048 hash soak (**hk**/**io**/CW2).
 ///
 /// Keeps `evidence_kind` = [`SPH_EVIDENCE_KIND`] for hz cross-checks when small
 /// soak passes; hash fields report `matter_thermodynamics_sph_hash_ready`.
@@ -1711,7 +1718,11 @@ mod tests {
         assert!(!r.chaos_fluid_aaa_ready);
         assert!(!r.flip_apic_parity_ready);
         assert!(!r.chaos_hybrid_fluid_ready);
-        assert!(r.particle_count >= 1024);
+        assert!(
+            r.particle_count >= 2048,
+            "CW2 load-scale requires N≥2048, got {}",
+            r.particle_count
+        );
         assert!(r.spatial_hash_subquadratic, "comps={} n2={}", r.neighbor_comparisons, r.n_squared);
         assert!(r.kinetic_energy_bounded, "ke_max={}", r.kinetic_energy_max);
         assert!(r.deterministic_replay);
@@ -1727,9 +1738,16 @@ mod tests {
 
     #[test]
     fn sph_hash_soak_subquadratic_ke_bounded() {
+        let t0 = std::time::Instant::now();
         let r = run_matter_thermodynamics_sph_hash_soak();
+        let elapsed = t0.elapsed();
         assert!(r.matter_thermodynamics_sph_hash_ready, "{r:?}");
         assert_eq!(r.particle_count, HASH_SOAK_PARTICLE_COUNT as u32);
+        assert_eq!(HASH_SOAK_SIDE * HASH_SOAK_SIDE * HASH_SOAK_SIDE, HASH_SOAK_PARTICLE_COUNT);
+        assert!(
+            r.particle_count > 1331,
+            "CW2 must exceed prior 11³ micro-deepen soak (1331)"
+        );
         assert!(r.spatial_hash_subquadratic);
         assert!(r.kinetic_energy_bounded);
         assert!(r.deterministic_replay);
@@ -1748,6 +1766,14 @@ mod tests {
             "max_neighbors={} limit={} (critic locality)",
             r.max_neighbors,
             lim
+        );
+        // CW2 RTX 3060 / E: disk-safe wall budget (real math soak, not theater).
+        assert!(
+            elapsed.as_secs() < HASH_SOAK_WALL_BUDGET_SECS,
+            "CW2 SPH hash soak exceeded wall budget: {:?} >= {}s (N={})",
+            elapsed,
+            HASH_SOAK_WALL_BUDGET_SECS,
+            r.particle_count
         );
     }
 

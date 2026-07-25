@@ -18,7 +18,8 @@ import {
   ToolbarBtn,
   type CreativeWorkbenchEvidence,
 } from './CreativeWorkbenchShell.parts'
-import { readClientJson, writeClientJson } from '@/lib/storage/safe-client-storage'
+import { getWorkbenchLayout, setWorkbenchLayout } from '@/lib/storage/ui-persistence-spine'
+import { WorkbenchLoadingState } from '@/components/ui/WorkbenchSurfaceStates'
 import { cn } from '@/lib/utils'
 
 export type { CreativeWorkbenchEvidence, CreativeWorkbenchSlotStatus } from './CreativeWorkbenchShell.parts'
@@ -75,18 +76,14 @@ const DEFAULT_EVIDENCE: CreativeWorkbenchEvidence = {
   detail: 'No evidence package was provided for this workbench surface yet.',
 }
 
-// --- Persistence --------------------------------------------------------------
-
-function layoutKey(mode: string) {
-  return `aethel-workbench-layout:${mode.toLowerCase()}`
-}
+// --- Persistence (CW4 spine) --------------------------------------------------
 
 function loadLayout(mode: string): PanelState {
-  return { ...DEFAULTS, ...readClientJson<Partial<PanelState>>(layoutKey(mode), {}) }
+  return getWorkbenchLayout(mode, DEFAULTS)
 }
 
 function saveLayout(mode: string, state: PanelState) {
-  writeClientJson(layoutKey(mode), state)
+  setWorkbenchLayout(mode, state)
 }
 
 // --- Drag-resize hook ---------------------------------------------------------
@@ -229,12 +226,14 @@ export function CreativeWorkbenchShell({
     renderQueue  && st.renderQueue  && { label: 'Review queue',   key: 'renderQueue'  as const, node: renderQueue },
   ].filter(Boolean) as { label: string; key: keyof PanelVisibilityKeys; node: ReactNode }[]
 
-  // Don't render panels until localStorage resolves to avoid layout flash
-  if (!mounted) return (
-    <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)]">
-      <div className="h-4 w-24 animate-pulse rounded-full bg-[var(--aethel-surface-secondary)]" />
-    </div>
-  )
+  // Don't render panels until spine layout resolves (CW4/CW5) — avoid flash
+  if (!mounted) {
+    return (
+      <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)]">
+        <WorkbenchLoadingState label="Loading workbench layout…" rows={3} />
+      </div>
+    )
+  }
 
   return (
     <div
@@ -243,17 +242,10 @@ export function CreativeWorkbenchShell({
     >
       {/* -- Header ---------------------------------------------------------- */}
       <header
-        className="relative flex shrink-0 flex-wrap items-center justify-between gap-2 border-b px-3 py-2"
-        style={{
-          background: 'rgba(10,14,24,0.85)',
-          backdropFilter: 'blur(16px) saturate(150%)',
-          WebkitBackdropFilter: 'blur(16px) saturate(150%)',
-          borderColor: 'rgba(148,163,184,.12)',
-          boxShadow: 'inset 0 -1px 0 rgba(255,255,255,.04)',
-        }}
+        className="relative flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_85%,transparent)] px-3 py-2 shadow-[inset_0_-1px_0_var(--aethel-border-subtle)] backdrop-blur-md"
       >
-        {/* Neon top accent line */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(59,130,246,.35)] to-transparent" />
+        {/* Accent line */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] to-transparent" />
         <div className="flex min-w-0 flex-col">
           <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-quaternary)]">
             {mode} workbench
@@ -296,14 +288,8 @@ export function CreativeWorkbenchShell({
         {leftOpen && (
           <>
             <aside
-              className="hidden shrink-0 flex-col gap-2 overflow-y-auto p-2 lg:flex aethel-panel-enter-left"
-              style={{
-                width: st.leftW,
-                background: 'rgba(10,14,24,0.78)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-                borderRight: '1px solid rgba(148,163,184,.10)',
-              }}
+              className="hidden shrink-0 flex-col gap-2 overflow-y-auto border-r border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_78%,transparent)] p-2 backdrop-blur-md lg:flex aethel-panel-enter-left"
+              style={{ width: st.leftW }}
               aria-label="Left panels"
             >
               {outliner && st.outliner && (
@@ -371,14 +357,8 @@ export function CreativeWorkbenchShell({
               onKeyDelta={resizeRight}
             />
             <aside
-              className="hidden shrink-0 flex-col gap-2 overflow-y-auto p-2 lg:flex aethel-panel-enter-right"
-              style={{
-                width: st.rightW,
-                background: 'rgba(10,14,24,0.78)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-                borderLeft: '1px solid rgba(148,163,184,.10)',
-              }}
+              className="hidden shrink-0 flex-col gap-2 overflow-y-auto border-l border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_78%,transparent)] p-2 backdrop-blur-md lg:flex aethel-panel-enter-right"
+              style={{ width: st.rightW }}
               aria-label="Right panels"
             >
               {inspector && st.inspector && (

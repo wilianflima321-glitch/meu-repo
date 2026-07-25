@@ -4,8 +4,15 @@ export { DockRegion } from './DockRegion';
 export { DockTabStrip } from './DockTabStrip';
 export { DockResizeHandle } from './DockResizeHandle';
 export { useZenMode } from './useZenMode';
-export { createWorkspaceStore } from './workspaceStore';
-export type { WorkspaceState, WorkspaceStore } from './workspaceStore';
+export {
+  createWorkspaceStore,
+  registerWorkspaceLayoutPersistence,
+} from './workspaceStore';
+export type {
+  WorkspaceState,
+  WorkspaceStore,
+  WorkspaceLayoutPersistenceAdapter,
+} from './workspaceStore';
 export type {
   DockRegionId,
   DockRegionState,

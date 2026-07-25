@@ -1,3 +1,10 @@
+import {
+  getWorkbenchPreviewRuntimeUrl,
+  getWorkbenchPreviewSandboxId,
+  setWorkbenchPreviewRuntimeUrl,
+  setWorkbenchPreviewSandboxId,
+} from '@/lib/storage/ui-persistence-spine'
+
 export type PreviewRuntimeHealthStatus =
   | 'idle'
   | 'checking'
@@ -114,11 +121,19 @@ export function normalizeRuntimeUrl(input: string | null): string | null {
 
 export function getStoredPreviewRuntimeUrl(storageKey = PREVIEW_RUNTIME_URL_STORAGE_KEY): string | null {
   if (typeof window === 'undefined') return null;
+  // CW4 — critical workbench preview URL via spine (legacy key mirrored).
+  if (storageKey === PREVIEW_RUNTIME_URL_STORAGE_KEY) {
+    return normalizeRuntimeUrl(getWorkbenchPreviewRuntimeUrl());
+  }
   return normalizeRuntimeUrl(window.localStorage.getItem(storageKey));
 }
 
 export function persistPreviewRuntimeUrl(runtimeUrl: string | null, storageKey = PREVIEW_RUNTIME_URL_STORAGE_KEY) {
   if (typeof window === 'undefined') return;
+  if (storageKey === PREVIEW_RUNTIME_URL_STORAGE_KEY) {
+    setWorkbenchPreviewRuntimeUrl(runtimeUrl);
+    return;
+  }
   if (runtimeUrl) {
     window.localStorage.setItem(storageKey, runtimeUrl);
   } else {
@@ -128,12 +143,19 @@ export function persistPreviewRuntimeUrl(runtimeUrl: string | null, storageKey =
 
 export function getStoredPreviewSandboxId(storageKey = PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY): string | null {
   if (typeof window === 'undefined') return null;
+  if (storageKey === PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY) {
+    return getWorkbenchPreviewSandboxId();
+  }
   const value = window.localStorage.getItem(storageKey);
   return value && value.trim() ? value.trim() : null;
 }
 
 export function persistPreviewSandboxId(sandboxId: string | null, storageKey = PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY) {
   if (typeof window === 'undefined') return;
+  if (storageKey === PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY) {
+    setWorkbenchPreviewSandboxId(sandboxId);
+    return;
+  }
   if (sandboxId) {
     window.localStorage.setItem(storageKey, sandboxId);
   } else {

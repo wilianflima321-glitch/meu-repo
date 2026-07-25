@@ -3,6 +3,11 @@
 
 import { logger } from '@/lib/observability/logger';
 import { authHeaders } from '@/lib/auth';
+import { getWorkbenchLastProjectId } from '@/lib/storage/ui-persistence-spine';
+import {
+  WorkbenchErrorState,
+  WorkbenchLoadingState,
+} from '@/components/ui/WorkbenchSurfaceStates';
 import React, { useState, useEffect } from 'react';
 import Editor, { OnMount, OnChange } from '@monaco-editor/react';
 
@@ -39,8 +44,8 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
     const params = new URLSearchParams(window.location.search);
     const fromQuery = params.get('projectId');
     if (fromQuery && fromQuery.trim()) return fromQuery.trim();
-    const fromStorage = localStorage.getItem('aethel.workbench.lastProjectId');
-    if (fromStorage && fromStorage.trim()) return fromStorage.trim();
+    const fromStorage = getWorkbenchLastProjectId();
+    if (fromStorage) return fromStorage;
     return 'default';
   };
 
@@ -113,13 +118,12 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
   return (
     <div className="w-full h-full overflow-hidden rounded-md border border-[var(--aethel-border-primary)]">
       {loading ? (
-        <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
-          Loading file...
-        </div>
+        <WorkbenchLoadingState label="Loading file…" rows={3} />
       ) : loadError ? (
-        <div className="flex h-full items-center justify-center px-6 text-center text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">
-          {loadError}
-        </div>
+        <WorkbenchErrorState
+          title="Failed to load file"
+          description={loadError}
+        />
       ) : (
         <Editor
           height={height}
@@ -134,11 +138,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
             automaticLayout: true,
             padding: { top: 16, bottom: 16 },
           }}
-          loading={
-            <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
-              Loading Editor...
-            </div>
-          }
+          loading={<WorkbenchLoadingState label="Loading editor…" rows={2} />}
         />
       )}
     </div>

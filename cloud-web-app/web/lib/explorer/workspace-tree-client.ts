@@ -11,6 +11,7 @@ import {
   fetchHostDiskTreeAuthority,
   type HostDiskTreeResponse,
 } from '@/lib/explorer/host-disk-tree-client'
+import { getWorkbenchLastProjectId } from '@/lib/storage/ui-persistence-spine'
 
 export type WorkspaceTreeAuthorityNode = {
   name: string
@@ -40,8 +41,8 @@ function resolveProjectId(explicit?: string): string {
   const params = new URLSearchParams(window.location.search)
   const fromQuery = params.get('projectId')
   if (fromQuery?.trim()) return fromQuery.trim()
-  const fromStorage = window.localStorage.getItem('aethel.workbench.lastProjectId')
-  if (fromStorage?.trim()) return fromStorage.trim()
+  const fromStorage = getWorkbenchLastProjectId()
+  if (fromStorage) return fromStorage
   return 'default'
 }
 

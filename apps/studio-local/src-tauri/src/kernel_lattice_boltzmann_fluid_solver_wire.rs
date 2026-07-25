@@ -1,7 +1,7 @@
-//! Lattice-Boltzmann fluid solver desktop wire — letter **gw**.
+//! Lattice-Boltzmann fluid solver desktop wire — letter **gw** + CW2.
 //!
 //! Thin studio-local IPC over `aethel_kernel_rust::lattice_boltzmann_fluid_solver`
-//! (D2Q9 bounce-back + dust/tool inject soak). Honesty probe
+//! (D2Q9 bounce-back + dust/tool inject + CW2 N≥2048 cell soak). Honesty probe
 //! `latticeBoltzmannFluidSolverReady` is **distinct** from dc gas
 //! `lbmKernelReady`, ed `aerodynamicNavierStokesReady`, ec
 //! `matterThermodynamicsSphReady`, eb `hybridEulerianLagrangianPbdReady`, ea
@@ -30,6 +30,7 @@ pub struct KernelLatticeBoltzmannFluidSolverWireReport {
     pub bounce_back_walls: bool,
     pub outputs_finite: bool,
     pub sample_count: u32,
+    pub cell_count: u32,
     pub mean_speed_before: f32,
     pub mean_speed_after: f32,
     pub mean_dust_before: f32,
@@ -92,6 +93,7 @@ fn to_report(
         bounce_back_walls: r.bounce_back_walls,
         outputs_finite: r.outputs_finite,
         sample_count: r.sample_count,
+        cell_count: r.cell_count,
         mean_speed_before: r.mean_speed_before,
         mean_speed_after: r.mean_speed_after,
         mean_dust_before: r.mean_dust_before,
@@ -157,18 +159,18 @@ pub fn run_kernel_lattice_boltzmann_fluid_solver_soak() -> KernelLatticeBoltzman
 {
     let r = run_lattice_boltzmann_fluid_solver_soak();
     let note = if !r.lattice_boltzmann_fluid_solver_ready {
-        "Lattice-Boltzmann fluid solver soak failed — latticeBoltzmannFluidSolverReady stays false"
+        "Lattice-Boltzmann fluid solver soak failed (CW2 N≥2048 cells / mass / dust / velocity) — latticeBoltzmannFluidSolverReady stays false; full_lbm_parity_ready / chaos_fluid_aaa_ready HELD"
     } else {
-        "Desktop soak: D2Q9 bounce-back collide+stream + tool dust inject; mass conserved + dust/velocity respond — latticeBoltzmannFluidSolverReady true; full_lbm_parity_ready / chaos_fluid_aaa_ready false; distinct from dc lbmKernelReady (gas), ed aerodynamicNavierStokesReady, ec matterThermodynamicsSphReady, eb hybridEulerianLagrangianPbdReady, ea positionBasedDynamicsReady, dz atmosphericPhysicalDampingReady, dy autonomousConflictGeneratorReady, dx synestheticSensoryRemapReady, dw mnemonicMatterEntropyReady, dv fourDimensionalTimeSdfReady, du shadowTimeReversalReady, dt curvedRaymarcherReady, ds fractalEnergyPerturbationReady, dr autonomousEntropyCorrectorReady, dq unifiedFieldNetworkReady, and dc–dm foundation probes"
+        "Desktop soak: D2Q9 bounce-back collide+stream + tool dust inject + letter gw/CW2 N≥2048 cells (46²=2116); mass conserved + dust/velocity respond — latticeBoltzmannFluidSolverReady true; full_lbm_parity_ready / chaos_fluid_aaa_ready false; distinct from dc lbmKernelReady (gas), ed aerodynamicNavierStokesReady, ec matterThermodynamicsSphReady, eb hybridEulerianLagrangianPbdReady, ea positionBasedDynamicsReady, dz atmosphericPhysicalDampingReady, dy autonomousConflictGeneratorReady, dx synestheticSensoryRemapReady, dw mnemonicMatterEntropyReady, dv fourDimensionalTimeSdfReady, du shadowTimeReversalReady, dt curvedRaymarcherReady, ds fractalEnergyPerturbationReady, dr autonomousEntropyCorrectorReady, dq unifiedFieldNetworkReady, and dc–dm foundation probes"
     };
     to_report(r, note)
 }
 
-/// Honesty probe — soak-gated `latticeBoltzmannFluidSolverReady` (letter gw).
+/// Honesty probe — soak-gated `latticeBoltzmannFluidSolverReady` (letter gw / CW2).
 pub fn probe_lattice_boltzmann_fluid_solver() -> KernelLatticeBoltzmannFluidSolverWireReport {
     to_report(
         kernel_probe(),
-        "Lattice-Boltzmann fluid solver probe (letter gw) — distinct from lbmKernelReady (gas), aerodynamicNavierStokesReady, matterThermodynamicsSphReady, hybridEulerianLagrangianPbdReady, positionBasedDynamicsReady, atmosphericPhysicalDampingReady, autonomousConflictGeneratorReady, synestheticSensoryRemapReady, mnemonicMatterEntropyReady, fourDimensionalTimeSdfReady, shadowTimeReversalReady, curvedRaymarcherReady, fractalEnergyPerturbationReady, autonomousEntropyCorrectorReady, unifiedFieldNetworkReady, slabAllocatorMmapReady, baremetalMemoryManagerReady, mmapEcsPagerReady, simdWorldSoaHotPathReady, simdClayMathReady, worldSoaSabLayoutReady, kernelDesktopWireReady, kernelMutDnaDesktopReady, kernelSpectralSonicDesktopReady, and probe_kernel_foundation; full_lbm_parity_ready / chaos_fluid_aaa_ready HELD",
+        "Lattice-Boltzmann fluid solver probe (letter gw/CW2) — latticeBoltzmannFluidSolverReady (N≥2048 cells, mass conserved, dust/velocity respond, bounce-back); distinct from lbmKernelReady (gas), aerodynamicNavierStokesReady, matterThermodynamicsSphReady, hybridEulerianLagrangianPbdReady, positionBasedDynamicsReady, atmosphericPhysicalDampingReady, autonomousConflictGeneratorReady, synestheticSensoryRemapReady, mnemonicMatterEntropyReady, fourDimensionalTimeSdfReady, shadowTimeReversalReady, curvedRaymarcherReady, fractalEnergyPerturbationReady, autonomousEntropyCorrectorReady, unifiedFieldNetworkReady, slabAllocatorMmapReady, baremetalMemoryManagerReady, mmapEcsPagerReady, simdWorldSoaHotPathReady, simdClayMathReady, worldSoaSabLayoutReady, kernelDesktopWireReady, kernelMutDnaDesktopReady, kernelSpectralSonicDesktopReady, and probe_kernel_foundation; full_lbm_parity_ready / chaos_fluid_aaa_ready HELD",
     )
 }
 

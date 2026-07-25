@@ -16,13 +16,14 @@ import type {
   ToastType,
   WorkflowTemplate,
 } from './aethel-dashboard-model'
-import { STORAGE_KEYS, resolvePrimaryDashboardTab } from './aethel-dashboard-model'
+import { persistDashboardActiveTab, resolvePrimaryDashboardTab } from './aethel-dashboard-model'
 import { useDashboardAccessActions } from './useDashboardAccessActions'
 import { useDashboardBillingActions } from './useDashboardBillingActions'
 import { useDashboardChatActions } from './useDashboardChatActions'
 import { useDashboardOnboardingActions } from './useDashboardOnboardingActions'
 import { useDashboardWorkflowActions } from './useDashboardWorkflowActions'
 import { useDashboardWorkspaceActions } from './useDashboardWorkspaceActions'
+import { setUiPersistence } from '@/lib/storage/ui-persistence-spine'
 
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 
@@ -161,7 +162,7 @@ export function useDashboardActions({
     const nextTab = resolvePrimaryDashboardTab(tab)
     setActiveTab(nextTab)
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEYS.activeTab, nextTab)
+      persistDashboardActiveTab(nextTab)
     }
     trackEvent('user', 'settings_change', { section: 'dashboard-tab', tab: nextTab, requestedTab: tab })
   }, [setActiveTab, trackEvent])
@@ -317,9 +318,7 @@ export function useDashboardActions({
 
   const dismissFirstValueGuide = useCallback(() => {
     setShowFirstValueGuide(false)
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('aethel.dashboard.first-value.dismissed', '1')
-    }
+    setUiPersistence('dashboard.firstValueDismissed', '1')
     trackEvent('user', 'settings_change', { section: 'first-value-guide', action: 'dismiss' })
   }, [setShowFirstValueGuide, trackEvent])
 

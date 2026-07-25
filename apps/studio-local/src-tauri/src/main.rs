@@ -525,21 +525,30 @@ fn main() {
             tauri::async_runtime::spawn(async move {
                 use tauri::Emitter;
 
-                println!("[Aethel] Probing native wgpu surface…");
+                println!("[Aethel] Probing native wgpu surface (mount/identity — not product present)…");
                 match crate::wgpu_renderer::WgpuRenderer::mount_on_window(window_arc.clone()).await {
                     Ok(renderer) => {
-                        println!("[Aethel] Native wgpu renderer ready.");
+                        // Mount proves adapter+surface create for profiler identity.
+                        // Product present/submit is `renderer_present_probe` (secondary winit).
+                        // WebView exclusive HWND present remains HELD — do not claim UE RHI.
+                        println!(
+                            "[Aethel] Native wgpu adapter/surface mount ok — present loop via renderer_present_probe."
+                        );
                         let adapter_info = renderer.adapter.get_info();
                         if let Ok(mut identity) = gpu_identity_state.0.lock() {
                             identity.name = Some(adapter_info.name.clone());
                             identity.backend = Some(format!("{:?}", adapter_info.backend));
                         }
+                        // Drop renderer: holding a surface on the WebView HWND without a
+                        // present loop is identity-only; continuous exclusive present HELD.
+                        drop(renderer);
                         let _ = window_arc.emit(
                             "runtime_capability",
                             serde_json::json!({
                                 "feature": "wgpu",
                                 "available": true,
-                                "reason": "Native GPU surface initialised successfully."
+                                "presentLoop": "held_until_probe",
+                                "reason": "Native GPU adapter/surface mount ok — WebView exclusive present HELD; invoke renderer_present_probe for secondary-window submit+present evidence."
                             }),
                         );
                     }
@@ -550,9 +559,10 @@ fn main() {
                             serde_json::json!({
                                 "feature": "wgpu",
                                 "available": false,
+                                "presentLoop": "unavailable",
                                 "reason": format!(
                                     "Native GPU initialisation failed: {err}. \
-                                     Falling back to WebGL rendering."
+                                     Falling back to WebGL rendering. present stays fail-closed."
                                 )
                             }),
                         );
@@ -595,12 +605,16 @@ fn main() {
         .manage(desktop_commands::ProjectRootState::default())
         .manage(Mutex::new(scene_graph::SceneGraphState::default()))
         .manage(std::sync::Arc::new(hardware_profiler::GpuIdentityState::default()))
+        .manage(std::sync::Arc::new(wgpu_renderer::PresentProbeState::default()))
         .manage(Mutex::new(mmap_commands::MmapRegistry::default()))
         .manage(wasm_runtime::WasmHostState::default())
         .manage(Mutex::new(PhysicsKernel::new()))
         .invoke_handler(tauri::generate_handler![
             open_panel_window,
             hardware_profiler::hardware_profiler_sample_once,
+            wgpu_renderer::renderer_present_probe,
+            wgpu_renderer::present_frame,
+            wgpu_renderer::renderer_present_probe_last,
             physics_commands::poll_physics_state,
             scene_graph::scene_get_nodes,
             scene_graph::scene_select,

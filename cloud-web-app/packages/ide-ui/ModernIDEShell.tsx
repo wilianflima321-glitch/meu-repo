@@ -30,6 +30,12 @@ import type {
 import { useShellSourceControlTruth } from './modern-shell/useShellSourceControlTruth';
 import { useModernIDEPanels } from './modern-shell/useModernIDEPanels';
 import { WorkspaceProvider } from './docking';
+import { registerIdeDockSpinePersistence } from '../../web/lib/storage/register-ide-dock-spine';
+
+// CW4 — dual-write dock layout into versioned UI persistence spine (legacy mirrored).
+if (typeof window !== 'undefined') {
+  registerIdeDockSpinePersistence();
+}
 
 interface ModernIDEShellProps {
   projectId?: string;

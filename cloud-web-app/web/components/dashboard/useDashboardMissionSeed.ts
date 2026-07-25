@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { resolveDashboardEntrySeed } from './aethel-dashboard-entry-triage'
-import { STORAGE_KEYS, type ActiveTab, type ToastType } from './aethel-dashboard-model'
+import { persistDashboardActiveTab, type ActiveTab, type ToastType } from './aethel-dashboard-model'
 import {
   getMissionFromLocation,
   getOnboardingFlagFromLocation,
@@ -46,7 +46,7 @@ export function useDashboardMissionSeed({
     if (seed.showFirstValueGuide) {
       setShowFirstValueGuide(true)
       setActiveTab(seed.targetTab)
-      window.localStorage.setItem(STORAGE_KEYS.activeTab, seed.targetTab)
+      persistDashboardActiveTab(seed.targetTab)
       trackEvent('user', 'settings_change', {
         section: 'onboarding',
         action: 'entry',
@@ -59,7 +59,7 @@ export function useDashboardMissionSeed({
 
     if (!seed.chatSeed) return
     setActiveTab(seed.targetTab)
-    window.localStorage.setItem(STORAGE_KEYS.activeTab, seed.targetTab)
+    persistDashboardActiveTab(seed.targetTab)
     setChatMessage((prev) => (prev.trim() ? prev : seed.chatSeed ?? ''))
     setShowFirstValueGuide(seed.showFirstValueGuide)
     trackEvent('ai', 'ai_chat', { source: 'dashboard-mission-seed', lane: source || 'unknown' })

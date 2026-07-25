@@ -5,6 +5,36 @@
 
 ---
 
+## 0. HONESTY GOVERNANCE (binding — 2026-07-23 Consolidation Wave)
+
+**Status of this document:** **VISION / ACCEPTANCE TARGET** — not a ship certificate.  
+**Law XI / Anti-Hype:** Claims of “parity exceeded” vs Unreal / Cursor / Figma are **marketing-forbidden** until the acceptance matrix below is green with evidence (tests, soak, golden, budget).  
+**UI discipline:** Prefer deepen existing Studio/IDE surfaces (`CreativeWorkbenchShell`, workbench docks, Agents, Landscape, Sequencer). Do **not** invent 15 new hero panel files solely to match names in §2.
+
+| Spec panel file | Reality (2026-07-23) | Product depth | Marketing allowed |
+|---|---|---|---|
+| `ViewportStudioPanel.tsx` | **MISSING** — viewport lives in Scene/Studio shells | PARTIAL (R3F + honesty badges) | No (Nanite/Lumen/3DGS claims HELD) |
+| `AiTriumviratePanel.tsx` | **MISSING** — Agents/Nexus surfaces exist | PARTIAL (MoA live; J.11/J.12 STOPPED) | No “AI-native IDE” until J.1+J.2+J.12 |
+| `NodeEditorPanel.tsx` | **MISSING** — Visual Script / ReactFlow exist | PARTIAL | No “500+ nodes → WGSL” without bake soak |
+| `CinematicTimelinePanel.tsx` | **MISSING** — Sequencer IDE PARTIAL | PARTIAL (`sequencerPlayReady`) | No UE Sequencer exceeded |
+| `AssetBrowserPanel.tsx` | Name collision only — not this hero panel | PARTIAL (explorer/host tree) | No “99% seed disk” claim |
+| `MuscularRigPanel.tsx` | **MISSING** | PARTIAL (Law III web apply; Euphoria HELD) | No |
+| `AudioHrtfPanel.tsx` | **MISSING** | PARTIAL (MetaSounds CORE; HRTF AAA HELD) | No |
+| `TerminalConsolePanel.tsx` | **MISSING** — IDE terminal PARTIAL | PARTIAL (host PTY HELD / sandbox) | No “telepathic terminal” |
+| `HardwareProfilerPanel.tsx` | Name collision only — CapScore/honesty exist | PARTIAL | No Unreal Insights exceeded |
+| `WorldPartitionPanel.tsx` | **MISSING** | PARTIAL (`partitionStreamingReady`; UE parity HELD) | No zero-loading-screen |
+| `MultiplayerNetcodePanel.tsx` | **MISSING** | PARTIAL (rollback soak; GGPO/Agones HELD) | No dual-240 marketing |
+| `GlobalSettingsPanel.tsx` | **MISSING** — settings/BYOK/billing exist | PARTIAL | CostGuard claims OK only via Bridge |
+| `VoronoiDestructionPanel.tsx` | **MISSING** | Kernel math PARTIAL; UI absent | No Chaos exceeded |
+| `FacialBlendshapePanel.tsx` | **MISSING** | HELD / absent | No MetaHuman exceeded |
+| `NiagaraVfxGraphPanel.tsx` | **MISSING** | Kernel LBM PARTIAL; Niagara AAA HELD | No |
+
+**Acceptance columns required before any §2 “Parity Exceeded” line may be treated as DONE:** claim · code paths · status · benchmark · golden/video · RTX 3060 budget · disk budget · blocked_by · last proof · marketing yes/no.
+
+**Disk constraint (this workstation):** C: critically low free space; prefer `E:\aethel-target-gnu` / D: for cargo targets; no ONNX/weight dumps without Founder drop + content-addressed cache.
+
+---
+
 ## 🏛️ 1. EXECUTIVE DIRECTIVE & COMPETITIVE AUDIT
 
 ### 1.1 Deep Competitive Audit vs. Unreal Engine 5.5 & Cursor IDE Flagship Features
@@ -456,5 +486,7 @@ When the user requests Claude to execute visual UI changes, Claude MUST follow t
 
 ---
 
-### 🏆 SPECIFICATION SUMMARY & CERTIFICATION
-This master document provides **100% of the UI/UX architecture, 15 panel breakdowns (including Chaos Destruction, Metahuman Facial Rigging, and Niagara VFX parity), hotkeys, design tokens, multi-monitor docking mechanics, collaborative CRDT pointers, and implementation guidelines** necessary for Claude to style and refine the Aethel Engine Studio to surpass Unreal Engine 5.5, Unity, Godot, and Cursor IDE!
+### SPECIFICATION SUMMARY (honest)
+This document provides the **target** UI/UX architecture, 15 panel acceptance outlines, hotkeys, design-token *direction*, docking/CRDT goals, and Claude implementation guidelines.
+
+It does **not** certify that those panels exist, that competitor parity is shipped, or that glass/cyan/violet aesthetics override the live design system (`var(--aethel-*)` in product code). Treat §1 “Parity Exceeded” rows as **aspirational tests**, not current product truth. Execution queue remains Master Map + Progress Consolidation Wave.

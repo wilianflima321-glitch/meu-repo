@@ -15,7 +15,7 @@ import { CreativeWorkbenchShell } from './CreativeWorkbenchShell'
 // ── Slot content mocks ────────────────────────────────────────────────────────
 
 const MockViewport = ({ label }: { label: string }) => (
-  <div className="flex h-full items-center justify-center bg-[#08101A] text-xs text-[var(--aethel-text-quaternary)]">
+  <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)] text-xs text-[var(--aethel-text-quaternary)]">
     {label}
   </div>
 )

@@ -4,6 +4,7 @@ import type { VisualScript } from '@aethel/visual-scripting/VisualScriptEditor';
 import type { ViewportSceneObject } from '@/components/viewport/AethelViewport3D';
 import type { VFXGraph } from '@/components/editors/VFXGraphEditor';
 import type { GameplayAbilitySpec } from '@aethel/gameplay-ability-system';
+import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
 
 export const INITIAL_VIEWPORT_VISUAL_SCRIPT: VisualScript = {
   id: 'viewport-script',
@@ -59,10 +60,29 @@ export function deriveAbilityAccent(
 ): { color: string | null; label: string } {
   if (!ability) return { color: null, label: 'No ability in focus' };
   const normalized = `${ability.name} ${ability.description}`.toLowerCase();
-  if (normalized.includes('fire')) return { color: '#f97316', label: ability.name };
-  if (normalized.includes('heal')) return { color: '#22c55e', label: ability.name };
-  if (normalized.includes('shield')) return { color: '#60a5fa', label: ability.name };
-  return { color: '#a78bfa', label: ability.name };
+  // Token-resolved accents for Three (fallback = token RGB from design system).
+  if (normalized.includes('fire')) {
+    return {
+      color: resolveCssVarColor('--aethel-warning', 'rgb(245, 158, 11)'),
+      label: ability.name,
+    };
+  }
+  if (normalized.includes('heal')) {
+    return {
+      color: resolveCssVarColor('--aethel-success', 'rgb(34, 197, 94)'),
+      label: ability.name,
+    };
+  }
+  if (normalized.includes('shield')) {
+    return {
+      color: resolveCssVarColor('--aethel-info', 'rgb(56, 189, 248)'),
+      label: ability.name,
+    };
+  }
+  return {
+    color: resolveCssVarColor('--aethel-neon-violet', 'rgb(167, 139, 250)'),
+    label: ability.name,
+  };
 }
 
 export function deriveFacialExpressionIntensity(blendShapes: Record<string, number>): number {
@@ -84,7 +104,7 @@ export function deriveHairPreviewSignature(
       }
     | null,
 ) {
-  if (!hairData) return { color: null, density: 0, label: 'Sem preset' };
+  if (!hairData) return { color: null, density: 0, label: 'No preset' };
   const tipColor = hairData.gradient?.[hairData.gradient.length - 1]?.color ?? null;
   const density = Math.min(
     1.2,

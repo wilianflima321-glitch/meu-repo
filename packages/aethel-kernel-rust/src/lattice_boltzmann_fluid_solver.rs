@@ -1,9 +1,9 @@
-//! Lattice-Boltzmann fluid solver — letter **gw**.
+//! Lattice-Boltzmann fluid solver — letter **gw** + CW2 load-scale.
 //!
 //! Replaces empty ZST stub `simulate_unified_aerodynamics` (comment theater; no
-//! population / dust write). Real D2Q9 collide+stream on a small grid with
-//! optional bounce-back walls; tool-velocity injects momentum and lifts dust.
-//! Soak proves mass conservation + dust/velocity response.
+//! population / dust write). Real D2Q9 collide+stream with bounce-back walls;
+//! tool-velocity injects momentum and lifts dust. Micro unit fixtures stay
+//! small; honesty soak is CW2 N≥2048 cells (46²=2116) with wall budget.
 //!
 //! Honesty probe `lattice_boltzmann_fluid_solver_ready` /
 //! `latticeBoltzmannFluidSolverReady` is **distinct** from dc gas
@@ -23,7 +23,7 @@
 //!
 //! **HELD:** Full commercial LBM / Chaos fluid AAA
 //! (`full_lbm_parity_ready: false`, `chaos_fluid_aaa_ready: false`) ·
-//! Coins / Agones / Nanite / DLSS.
+//! Coins / Agones / Nanite / DLSS · fracture load-scale (separate module).
 
 /// D2Q9 discrete velocities (rest, E, N, W, S, NE, NW, SW, SE).
 const CX: [i32; 9] = [0, 1, 0, -1, 0, 1, -1, -1, 1];
@@ -42,9 +42,17 @@ const W: [f32; 9] = [
 /// Opposite direction for bounce-back (D2Q9).
 const OPP: [usize; 9] = [0, 3, 4, 1, 2, 7, 8, 5, 6];
 
-/// Soak grid resolution.
+/// Micro fixture grid (unit tests only — not CW2 ready gate).
 pub const SOAK_WIDTH: usize = 24;
 pub const SOAK_HEIGHT: usize = 24;
+/// CW2 load-scale side (46²=2116 ≥2048 cells equivalent).
+pub const LOAD_SCALE_SIDE: usize = 46;
+/// CW2 load-scale cell count (width×height).
+pub const LOAD_SCALE_CELL_COUNT: usize = LOAD_SCALE_SIDE * LOAD_SCALE_SIDE;
+/// CW2 load-scale floor — ready requires N≥2048 (not legacy micro 24²=576).
+pub const LOAD_SCALE_MIN_CELLS: usize = 2048;
+/// Wall-clock budget for LBM load-scale soak on RTX 3060-class host (seconds).
+pub const LOAD_SCALE_WALL_BUDGET_SECS: u64 = 45;
 /// Default BGK relaxation time.
 pub const DEFAULT_TAU: f32 = 0.8;
 /// Mass relative drift ε for soak.
@@ -578,6 +586,8 @@ pub struct LatticeBoltzmannFluidSolverSoakReport {
     pub bounce_back_walls: bool,
     pub outputs_finite: bool,
     pub sample_count: u32,
+    /// CW2 load-scale cell count (width×height); ready requires ≥2048.
+    pub cell_count: u32,
     pub mean_speed_before: f32,
     pub mean_speed_after: f32,
     pub mean_dust_before: f32,
@@ -662,6 +672,7 @@ fn lbm_held(
     bounce_back_walls: bool,
     outputs_finite: bool,
     sample_count: u32,
+    cell_count: u32,
     mean_speed_before: f32,
     mean_speed_after: f32,
     mean_dust_before: f32,
@@ -686,6 +697,7 @@ fn lbm_held(
         bounce_back_walls,
         outputs_finite,
         sample_count,
+        cell_count,
         mean_speed_before,
         mean_speed_after,
         mean_dust_before,
@@ -734,17 +746,24 @@ fn lbm_held(
     }
 }
 
-fn soak_grid() -> LatticeBoltzmannFluidGrid {
+fn micro_soak_grid() -> LatticeBoltzmannFluidGrid {
     let mut g = LatticeBoltzmannFluidGrid::new(SOAK_WIDTH, SOAK_HEIGHT);
     g.seed_settled_dust(0.2);
     g
 }
 
-/// Run tool-inject + multi-step bounce-back LBM soak.
+fn load_scale_soak_grid() -> LatticeBoltzmannFluidGrid {
+    let mut g = LatticeBoltzmannFluidGrid::new(LOAD_SCALE_SIDE, LOAD_SCALE_SIDE);
+    g.seed_settled_dust(0.2);
+    g
+}
+
+/// Run CW2 N≥2048 tool-inject + multi-step bounce-back LBM soak.
 ///
 /// Does **not** claim full commercial LBM / Chaos fluid AAA.
 pub fn run_lattice_boltzmann_fluid_solver_soak() -> LatticeBoltzmannFluidSolverSoakReport {
-    let mut grid = soak_grid();
+    let mut grid = load_scale_soak_grid();
+    let cell_count = (grid.width * grid.height) as u32;
     let bounce_back_walls = grid.solid.iter().any(|&s| s);
     let mean_speed_before = grid.mean_speed();
     let mean_dust_before = grid.mean_dust();
@@ -780,13 +799,17 @@ pub fn run_lattice_boltzmann_fluid_solver_soak() -> LatticeBoltzmannFluidSolverS
         && grid.dust.iter().all(|d| d.is_finite())
         && grid.vx.iter().all(|v| v.is_finite())
         && grid.vy.iter().all(|v| v.is_finite());
+    // CW2 load-scale: ready requires N≥2048 (not legacy micro-soak 24²=576).
+    let load_scale_ok = (cell_count as usize) >= LOAD_SCALE_MIN_CELLS
+        && LOAD_SCALE_CELL_COUNT >= LOAD_SCALE_MIN_CELLS;
 
     if !(outputs_finite
         && mass_conserved
         && dust_responded
         && velocity_changed
         && bounce_back_walls
-        && step0.lbm_active)
+        && step0.lbm_active
+        && load_scale_ok)
     {
         return lbm_held(
             mass_conserved,
@@ -796,6 +819,7 @@ pub fn run_lattice_boltzmann_fluid_solver_soak() -> LatticeBoltzmannFluidSolverS
             bounce_back_walls,
             outputs_finite,
             sample_count,
+            cell_count,
             mean_speed_before,
             mean_speed_after,
             mean_dust_before,
@@ -817,6 +841,7 @@ pub fn run_lattice_boltzmann_fluid_solver_soak() -> LatticeBoltzmannFluidSolverS
         bounce_back_walls: true,
         outputs_finite: true,
         sample_count,
+        cell_count,
         mean_speed_before,
         mean_speed_after,
         mean_dust_before,
@@ -889,7 +914,7 @@ mod tests {
 
     #[test]
     fn tool_velocity_lifts_dust_and_speed() {
-        let mut g = soak_grid();
+        let mut g = micro_soak_grid();
         let dust0 = g.mean_dust();
         let speed0 = g.mean_speed();
         let r = LatticeBoltzmannFluidSolver::simulate_unified_aerodynamics(&mut g, 3.0);
@@ -937,6 +962,14 @@ mod tests {
         assert!(r.velocity_changed);
         assert!(r.bounce_back_walls);
         assert!(r.outputs_finite);
+        assert!(
+            r.cell_count >= LOAD_SCALE_MIN_CELLS as u32,
+            "CW2 load-scale requires N≥{}, got {}",
+            LOAD_SCALE_MIN_CELLS,
+            r.cell_count
+        );
+        assert_eq!(r.cell_count, LOAD_SCALE_CELL_COUNT as u32);
+        assert_eq!(LOAD_SCALE_SIDE * LOAD_SCALE_SIDE, LOAD_SCALE_CELL_COUNT);
         assert!(r.distinct_from_gas_lbm_kernel_probe);
         assert_eq!(r.evidence_kind, FLUID_EVIDENCE_KIND);
         assert!(r.evidence_fingerprint != 0);
@@ -945,6 +978,21 @@ mod tests {
         assert!(!r.full_lbm_parity_ready);
         assert!(!r.chaos_fluid_aaa_ready);
         assert!(!r.full_cfd_parity_ready);
+    }
+
+    #[test]
+    fn lbm_load_scale_soak_within_wall_budget() {
+        let t0 = std::time::Instant::now();
+        let r = run_lattice_boltzmann_fluid_solver_soak();
+        let elapsed = t0.elapsed();
+        assert!(r.lattice_boltzmann_fluid_solver_ready, "{r:?}");
+        assert!(
+            elapsed.as_secs() < LOAD_SCALE_WALL_BUDGET_SECS,
+            "CW2 LBM wall budget {}s exceeded ({:?}) at N={}",
+            LOAD_SCALE_WALL_BUDGET_SECS,
+            elapsed,
+            r.cell_count
+        );
     }
 
     #[test]

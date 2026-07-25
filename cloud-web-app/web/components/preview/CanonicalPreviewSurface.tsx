@@ -65,7 +65,7 @@ function DesignModeRing() {
         }
       `}</style>
       <div className="absolute left-1/2 top-2.5 -translate-x-1/2">
-        <div className="flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-primary-light)] shadow-[0_4px_16px_rgba(0,0,0,0.2)]">
+        <div className="flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-primary-light)] shadow-[var(--aethel-shadow-md)]">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--aethel-primary-light)]" aria-hidden="true" />
           Design Mode
         </div>
@@ -91,7 +91,7 @@ function PreviewActionStrip({
 
   return (
     <form
-      className="absolute inset-x-3 bottom-3 z-10 mx-auto flex max-w-[640px] items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-2.5 py-2 shadow-[0_12px_40px_rgba(2,6,23,0.32)] backdrop-blur-sm"
+      className="absolute inset-x-3 bottom-3 z-10 mx-auto flex max-w-[640px] items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-2.5 py-2 shadow-[var(--aethel-shadow-lg)] backdrop-blur-sm"
       onSubmit={(event) => {
         event.preventDefault();
         void submitSuggestion();

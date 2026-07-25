@@ -12,7 +12,7 @@ import { ONBOARDING_WIZARD_DISMISSED_KEY } from './aethel-dashboard-constants'
 import { coerceActiveTab } from './aethel-dashboard-core-types'
 import { getProjectIdFromLocation } from './aethel-dashboard-location-utils'
 import { getScopedKeys } from './aethel-dashboard-defaults'
-import { STORAGE_KEYS, type ActiveTab, type DashboardSettings } from './aethel-dashboard-model'
+import { persistDashboardActiveTab, type ActiveTab, type DashboardSettings } from './aethel-dashboard-model'
 
 type AiProviderGate = {
   message: string
@@ -86,7 +86,7 @@ export function useDashboardRuntimeLifecycle({
     if (!tab) return
     const nextTab = coerceActiveTab(tab)
     setActiveTab(nextTab)
-    window.localStorage.setItem(STORAGE_KEYS.activeTab, nextTab)
+    persistDashboardActiveTab(nextTab)
   }, [setActiveTab])
 
   useEffect(() => {

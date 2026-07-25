@@ -42,6 +42,7 @@ import {
   getLastGpuOceanFftSoak,
   type GpuOceanFftGpuDeviceLike,
 } from '@/lib/ocean/gpu-fft-ocean';
+import { recordPresentPathTick } from '@/lib/production/render-path-honesty';
 
 export interface PostProcessConfig {
   enabled: boolean;
@@ -99,6 +100,9 @@ export interface AAARendererFrameEvidence {
   };
   finalRenderSafe: false;
   evidenceRefs: string[];
+  /** CW3 — which present path ticked (AAA WebGL off-canvas; not R3F IDE Canvas). */
+  presentPathId: 'web-aaa-webgl-offcanvas';
+  webgpuPresentClaimed: false;
   radiance?: {
     frameHooksReal: boolean;
     rtRendered: boolean;
@@ -608,6 +612,12 @@ export class AAARenderer {
 
     this.composer.render(activeDt);
 
+    // CW3 honesty hook — record off-canvas AAA WebGL present tick (not R3F IDE Canvas; never WebGPU).
+    recordPresentPathTick('web-aaa-webgl-offcanvas', {
+      frameId: this.frameId,
+      note: 'AAARenderer WebGL composer present (playtest/off-canvas)',
+    });
+
     if (this.radianceWire) {
       this.lastRadianceTick = this.radianceWire.tickPost(stepDt);
     }
@@ -755,6 +765,8 @@ export class AAARenderer {
       triangles: info.render.triangles,
       points: info.render.points,
       lines: info.render.lines,
+      presentPathId: 'web-aaa-webgl-offcanvas',
+      webgpuPresentClaimed: false,
       memory: {
         geometries: info.memory.geometries,
         textures: info.memory.textures,

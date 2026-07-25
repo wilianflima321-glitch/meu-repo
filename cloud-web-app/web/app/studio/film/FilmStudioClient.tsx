@@ -17,11 +17,10 @@ import {
 import { CreativeStudioLoading } from '../CreativeStudioShell'
 
 // --- Dynamic tool imports -----------------------------------------------------
-const DirectorMode = () => (
-  <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
-    Director Mode (Nexus Deprecated)
-  </div>
-)
+const DirectorMode = dynamic(() => import('@/components/nexus/DirectorMode'), {
+  ssr: false,
+  loading: () => <CreativeStudioLoading label="Director Mode" />,
+})
 
 const VideoTimelineEditor = dynamic(() => import('@/components/video/VideoTimelineEditor'), {
   ssr: false,

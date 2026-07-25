@@ -100,6 +100,8 @@ describe('AI-v1-c Nexus + VisualEvidence', () => {
     expect(ui.verdict).toBe('BLOCK')
     const agents = nexusCellsToAgentBoard(ui.cells)
     expect(agents[0]?.role).toMatch(/Nucleus/i)
+    // CW6: no fake peripheral→nucleus DAG while J.11 STOPPED / Apex has no dependsOn.
+    expect(ui.cells.every((c) => (c.dependsOnTaskIds?.length ?? 0) === 0)).toBe(true)
   })
 
   it('J-ACC-04 ledger receipt includes validation + visual evidence refs', () => {

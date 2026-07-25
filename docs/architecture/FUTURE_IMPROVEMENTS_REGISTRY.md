@@ -53,6 +53,8 @@ npm run qa:enterprise-gate   # must PASS
 
 Plus: linked `DEBT-*` blockers for that improvement must be **DONE** or **WAIVED** (document waiver + gate).
 
+**Truth machine rule (2026-07-23):** Administrative “debts suppressed” is **invalid** while scanners still show material `TODO`/`FIXME`/`stub`/`deprecated`/`HELD`/`needs_review`, while parity probes remain `false`, or while Master UX hero panels are missing. Improvements are not a cartório — only automated evidence + Progress honesty flips count. Consolidation Wave (Master Map §0c) outranks orphan `IMPROVE-*` cosmetic work.
+
 ---
 
 ## How Claude should use this file
@@ -164,7 +166,7 @@ Full list: ~57 `DEBT-*` in debt registry.
 | `IMPROVE-IDE-015` | UI catÃ¡logo de plugins | platform | C | `DEBT-PLUGIN-001` | â€” | draft | APIs `/api/plugins/*` stub; zero painel front para installed/available |
 | `IMPROVE-BLUEPRINT-001` | Matriz conformidade guardrails V33 | quality | D | â€” | 19_BEST_IN_MARKET | draft | Rule 1 foco, Color Rule machined, feedback conexÃµes VS, hub redirects â€” drift vs blueprint |
 | `IMPROVE-ADMIN-001` | Admin â†’ Card + StudioGlobalNav | platform | B | â€” | COMPONENT_CONSOLIDATION_MAP | draft | `AdminPageHeader`/`AdminSummaryGrid` estÃ©tica SaaS genÃ©rica vs Studio |
-| `IMPROVE-FILM-003` | DirectorMode viewport real | studio | C | `DEBT-RENDER-003` | â€” | draft | Placeholder â€œDirector Mode (Nexus Deprecated)â€ em `FilmStudioClient.tsx`/`film/page.tsx` |
+| `IMPROVE-FILM-003` | DirectorMode final footage / GPU soak | studio | C | `DEBT-RENDER-003` | â€” | draft | **Updated 2026-07-23:** `DirectorMode` + `SequencerIdePanel` intent wire is live (not “Nexus Deprecated” string). Residual = final footage / GPU shoot soak still HELD — not panel placeholder. |
 | `IMPROVE-STUDIO-005` | LevelEditor â€” eliminar sidebars embutidos | studio | A | â€” | Rule 1 | draft | Remover 250px OutlinerMini + 320px DetailsPanelMini de `LevelEditor.tsx` (~345â€“511); popular slots `outliner`/`inspector` do `CreativeWorkbenchShell` via callbacks |
 | `IMPROVE-STUDIO-006` | Studio Home â€” hub shell minimalista | studio | B | â€” | 19_BEST_IN_MARKET, 06_STUDIO_HOME | draft | `app/studio/page.tsx` ~203: remover `CreativeWorkbenchShell`; shell hub-only (missÃµes + grid); sem outliner/inspector diagnÃ³stico na primeira dobra |
 | `IMPROVE-STUDIO-007` | Maturity gating no hub e middleware | platform | B | â€” | â€” | draft | `isRouteVisible()` existe mas **nÃ£o Ã© consumido**; ALPHA (`/studio/film`, `/studio/vfx`) listados em `PRIMARY_CREATIVE_HREFS`; alinhar hub + `workbench-convergence.ts` |
@@ -550,10 +552,10 @@ Full list: ~57 `DEBT-*` in debt registry.
 
 ### Â§2.14 Batch 2 â€” Studio placebos reconfirmados (Film, Animation, Admin)
 
-**Film DirectorMode** â€” **CONFIRMED**  
-- `FilmStudioClient.tsx` ~18â€“20, `film/page.tsx` ~15â€“17: string estÃ¡tica â€œDirector Mode (Nexus Deprecated)â€.  
-- Ãudio invertido jÃ¡ em `IMPROVE-FILM-001/002`; viewport film ainda placebo.  
-- **IMPROVE:** `IMPROVE-FILM-003`.
+**Film DirectorMode** — **UPDATED 2026-07-23**  
+- Placeholder “Nexus Deprecated” cleared — `DirectorMode` + `SequencerIdePanel` intent wire is live.  
+- Residual = final footage / GPU soak HELD (not a dead string panel).  
+- **IMPROVE:** `IMPROVE-FILM-003` (re-scoped).
 
 **Animation rigs ocultos** â€” **CONFIRMED** (Batch 1)  
 - `animation/page.tsx` imports `ControlRigEditor`/`FacialAnimationEditor` sem JSX.  

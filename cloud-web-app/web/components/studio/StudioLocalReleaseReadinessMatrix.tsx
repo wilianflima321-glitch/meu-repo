@@ -52,7 +52,7 @@ export default function StudioLocalReleaseReadinessMatrix({ compact = false, cla
 
       <div className={`mt-4 grid gap-3 ${compact ? '' : 'lg:grid-cols-2'}`}>
         {items.map((item) => (
-          <article key={item.id} className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.26)] p-3">
+          <article key={item.id} className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_26%,transparent)] p-3">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">{item.label}</h3>

@@ -60,6 +60,27 @@ export function mapApplyPreflightDeny(input: DenyInput): ApplyPreflightUserCopy 
           'L.5 typecheck failed for this patch. Fix the types before applying. Nothing was written.',
         needsFullAccess: false,
       }
+    case 'AST_SYNTAX_FAIL':
+      return {
+        ...base,
+        code,
+        title: 'Patch rejected — syntax/AST errors',
+        detail:
+          serverMessage ||
+          'AST syntax validation failed for this patch. Fix parse errors before applying. Nothing was written.',
+        needsFullAccess: false,
+      }
+    case 'MULTI_FILE_VALIDATION_DENIED':
+    case 'PATH_DISJOINT_FAIL':
+      return {
+        ...base,
+        code,
+        title: 'Multi-file apply blocked — validation swarm',
+        detail:
+          serverMessage ||
+          'AST/L.5 validation denied one or more files in the batch. Nothing was written.',
+        needsFullAccess: false,
+      }
     case 'CREATIVE_COST_GUARD_DENIED':
       return {
         ...base,

@@ -2,10 +2,17 @@
  * Block 7B.2 — Resume Workspace session (tabs / panels / scroll).
  * Deepens the existing dock persistence key family — does not invent a parallel layout store.
  * Dock layout remains `aethel.ide.dock.v1`; this holds editor tabs + scroll offsets.
+ * CW4: reads/writes route through the versioned UI persistence spine.
  */
 
-export const WORKSPACE_SESSION_STORAGE_KEY = 'aethel.ide.session.v1'
-export const WORKSPACE_DOCK_STORAGE_KEY = 'aethel.ide.dock.v1'
+import {
+  getUiPersistence,
+  setUiPersistence,
+  UI_PERSISTENCE_LEGACY_KEYS,
+} from '@/lib/storage/ui-persistence-spine'
+
+export const WORKSPACE_SESSION_STORAGE_KEY = UI_PERSISTENCE_LEGACY_KEYS.ideSession
+export const WORKSPACE_DOCK_STORAGE_KEY = UI_PERSISTENCE_LEGACY_KEYS.ideDock
 
 export type WorkspaceSessionSnapshot = {
   version: 1
@@ -60,13 +67,8 @@ export function parseWorkspaceSession(raw: unknown): WorkspaceSessionSnapshot | 
 
 export function loadWorkspaceSession(): WorkspaceSessionSnapshot | null {
   if (typeof window === 'undefined') return null
-  try {
-    const raw = window.localStorage.getItem(WORKSPACE_SESSION_STORAGE_KEY)
-    if (!raw) return null
-    return parseWorkspaceSession(JSON.parse(raw))
-  } catch {
-    return null
-  }
+  const raw = getUiPersistence<unknown>('ide.session', null)
+  return parseWorkspaceSession(raw)
 }
 
 export function saveWorkspaceSession(snapshot: Omit<WorkspaceSessionSnapshot, 'version' | 'updatedAt'>): void {
@@ -79,22 +81,15 @@ export function saveWorkspaceSession(snapshot: Omit<WorkspaceSessionSnapshot, 'v
     panelScroll: snapshot.panelScroll,
     updatedAt: new Date().toISOString(),
   }
-  try {
-    window.localStorage.setItem(WORKSPACE_SESSION_STORAGE_KEY, JSON.stringify(next))
-  } catch {
-    // Quota / private mode — resume is best-effort.
-  }
+  setUiPersistence('ide.session', next)
 }
 
 export function hasRestorableWorkspaceSession(): boolean {
   const session = loadWorkspaceSession()
   if (session && (session.openTabPaths.length > 0 || session.activePath)) return true
   if (typeof window === 'undefined') return false
-  try {
-    return Boolean(window.localStorage.getItem(WORKSPACE_DOCK_STORAGE_KEY))
-  } catch {
-    return false
-  }
+  const dock = getUiPersistence<unknown>('ide.dock', null)
+  return dock !== null && dock !== undefined
 }
 
 /** Pure merge used when applying a resume snapshot onto current open tabs. */

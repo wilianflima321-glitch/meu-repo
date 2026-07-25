@@ -48,7 +48,7 @@ export function MagicWandChat({
 
   return (
     <div
-      className="fixed z-50 w-80 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_95%,transparent)] shadow-[0_24px_60px_rgba(0,0,0,0.5)]"
+      className="fixed z-50 w-80 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_95%,transparent)] shadow-[var(--aethel-shadow-xl)]"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,

@@ -39,9 +39,14 @@ cloud-web-app/web/output/
 apps/studio-local/src-tauri/gen/
 
 # Rust toolchain homes on project drive (E:) — letter dc
-.cargo/
-.rustup/
-.mingw/
+# Only ignore root toolchain homes — do NOT swallow package `.cargo/config.toml.example`.
+/.cargo/
+/.rustup/
+/.mingw/
+
+# Local workstation cargo target-dir override (absolute E: path — never commit; CI must not see it)
+**/.cargo/config.toml
+!**/.cargo/config.toml.example
 
 # Env
 .env

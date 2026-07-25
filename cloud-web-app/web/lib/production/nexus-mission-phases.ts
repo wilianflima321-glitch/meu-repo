@@ -26,6 +26,8 @@ export interface NexusCellUi {
   moaVerdict?: string
   healVerdict?: string
   healRounds?: number
+  /** Explicit dependency edges when known (CW6 task-graph visibility). */
+  dependsOnTaskIds?: string[]
 }
 
 export interface NexusMissionUiPayload {

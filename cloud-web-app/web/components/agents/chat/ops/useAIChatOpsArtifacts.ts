@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { getAgentsOpsMemory, setAgentsOpsMemory } from '@/lib/storage/ui-persistence-spine'
+
 export interface AIChatPendingDiff {
   path: string
   oldContent: string
@@ -28,10 +30,6 @@ interface UseAIChatOpsArtifactsParams {
   projectId?: string
 }
 
-function getOpsMemoryStorageKey(projectId?: string) {
-  return `aethel.ai.ops.memory.${projectId || 'default'}`
-}
-
 function countChangedLines(oldContent: string, newContent: string) {
   const oldLines = oldContent.split('\n')
   const newLines = newContent.split('\n')
@@ -52,19 +50,13 @@ export function useAIChatOpsArtifacts({
   projectId,
 }: UseAIChatOpsArtifactsParams) {
   const [memories, setMemories] = useState<AIChatMemoryItem[]>([])
-  const storageKey = useMemo(() => getOpsMemoryStorageKey(projectId), [projectId])
+  const storageProjectId = useMemo(() => projectId, [projectId])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
     try {
-      const raw = window.localStorage.getItem(storageKey)
-      if (!raw) {
-        setMemories([])
-        return
-      }
-
-      const parsed = JSON.parse(raw)
+      const parsed = getAgentsOpsMemory<unknown>(storageProjectId, [])
       if (!Array.isArray(parsed)) {
         setMemories([])
         return
@@ -73,25 +65,25 @@ export function useAIChatOpsArtifacts({
       setMemories(
         parsed.filter((item): item is AIChatMemoryItem => {
           return (
-            item &&
+            Boolean(item) &&
             typeof item === 'object' &&
-            typeof item.id === 'string' &&
-            typeof item.scope === 'string' &&
-            typeof item.key === 'string' &&
-            typeof item.value === 'string' &&
-            typeof item.timestamp === 'number'
+            typeof (item as AIChatMemoryItem).id === 'string' &&
+            typeof (item as AIChatMemoryItem).scope === 'string' &&
+            typeof (item as AIChatMemoryItem).key === 'string' &&
+            typeof (item as AIChatMemoryItem).value === 'string' &&
+            typeof (item as AIChatMemoryItem).timestamp === 'number'
           )
         })
       )
     } catch {
       setMemories([])
     }
-  }, [storageKey])
+  }, [storageProjectId])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    window.localStorage.setItem(storageKey, JSON.stringify(memories))
-  }, [memories, storageKey])
+    setAgentsOpsMemory(storageProjectId, memories)
+  }, [memories, storageProjectId])
 
   const addMemory = useCallback(
     (memory: Omit<AIChatMemoryItem, 'id' | 'timestamp'>) => {

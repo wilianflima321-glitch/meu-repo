@@ -31,6 +31,7 @@ import {
 } from '@/lib/viewport/gizmo-elite-controls'
 import { isEditableViewportKeyboardTarget } from '@/lib/viewport/viewport-keyboard-targets'
 import { parseAiViewportCommand } from '@/components/viewport/viewportAiCommand'
+import { probeWebGpuAdapterAcquisition } from '@/lib/production/render-path-honesty'
 import { buildRuntimeModeViewModels, findRuntimeModeById } from '@aethel/runtime/runtime-mode-view-model'
 
 const PixelStreamView = dynamic(() => import('@/components/streaming/pixel-stream-view'), {
@@ -109,6 +110,7 @@ export function AethelViewport3D({
   const [localGizmoConstraint, setLocalGizmoConstraint] = useState<GizmoAxisPlaneConstraint>('free')
   const [localGizmoPivotMode, setLocalGizmoPivotMode] = useState<GizmoPivotMode>('median')
   const [webGpuAvailable, setWebGpuAvailable] = useState(false)
+  const [webGpuAdapterAcquired, setWebGpuAdapterAcquired] = useState<boolean | null>(null)
   const [renderTarget, setRenderTarget] = useState<ViewportRenderTarget>('browser')
   const [focusSelectionNonce, setFocusSelectionNonce] = useState(0)
   const pixelStreamUrl = process.env.NEXT_PUBLIC_AETHEL_PIXEL_STREAM_URL
@@ -191,7 +193,18 @@ export function AethelViewport3D({
   }, [onImportAssets])
 
   useEffect(() => {
+    let cancelled = false
     setWebGpuAvailable(typeof navigator !== 'undefined' && 'gpu' in navigator)
+    // CW3 — API-exists ≠ adapter ≠ present; chrome label uses acquisition when known.
+    void probeWebGpuAdapterAcquisition().then((probe) => {
+      if (!cancelled) {
+        setWebGpuAvailable(probe.apiAvailable)
+        setWebGpuAdapterAcquired(probe.adapterAcquired)
+      }
+    })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -279,6 +292,7 @@ export function AethelViewport3D({
         pipelineType={fidelityParams.pipelineLabel}
         quality={fidelityParams.resolvedLevel}
         webGpuAvailable={webGpuAvailable}
+        webGpuAdapterAcquired={webGpuAdapterAcquired}
         finalRenderSafe={false}
         currentRuntimeMode={currentRuntimeMode}
         runtimeModes={runtimeModes}

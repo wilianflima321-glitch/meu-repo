@@ -1,20 +1,28 @@
-import { SearchCheck } from 'lucide-react'
 import { AgentEvidenceCard } from '@/components/agents/AgentEvidenceCard'
 import type { AIChatEvidenceArtifact } from '@/components/agents/evidence'
+import { evaluateEvidenceReceiptCompleteness } from '@/lib/production/agents-receipt-completeness'
+import { extractPatchHashRefsFromLedgerEvents } from '@/lib/production/agents-merge-governance'
+import { ReceiptCompletenessStrip } from '@/components/agents/chat/ledger/ReceiptCompletenessStrip'
+import { WorkbenchEmptyState } from '@/components/ui/WorkbenchSurfaceStates'
 
 interface AgentEvidencePanelProps {
   latestArtifact?: AIChatEvidenceArtifact | null
 }
 
 export function AgentEvidencePanel({ latestArtifact }: AgentEvidencePanelProps) {
+  const completeness = evaluateEvidenceReceiptCompleteness(latestArtifact)
+
   if (!latestArtifact) {
     return (
-      <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 p-4 text-center text-[11px] text-[var(--aethel-text-tertiary)]">
-        <SearchCheck className="h-5 w-5 text-[var(--aethel-text-quaternary)]" />
-        <p>No evidence receipt yet.</p>
-        <p className="max-w-[240px] text-[var(--aethel-text-quaternary)]">
-          After a governed Nexus / MoA run, the TaskEvidenceLedger receipt appears here (J-ACC-04).
-        </p>
+      <div className="flex h-full min-h-[180px] flex-col items-center justify-center p-2">
+        <WorkbenchEmptyState
+          icon="search"
+          title="No evidence receipt yet"
+          description="After a governed Nexus / MoA run, the TaskEvidenceLedger receipt appears here (J-ACC-04)."
+        />
+        <div className="mt-2 w-full max-w-sm px-4">
+          <ReceiptCompletenessStrip report={completeness} className="mx-0" />
+        </div>
       </div>
     )
   }
@@ -22,6 +30,7 @@ export function AgentEvidencePanel({ latestArtifact }: AgentEvidencePanelProps) 
   if (latestArtifact.kind === 'ledger') {
     return (
       <div className="h-full overflow-y-auto p-3">
+        <ReceiptCompletenessStrip report={completeness} className="mx-0 mb-3" />
         <div className="mb-3">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
             Task evidence ledger
@@ -38,9 +47,36 @@ export function AgentEvidencePanel({ latestArtifact }: AgentEvidencePanelProps) 
             </p>
           )}
           {latestArtifact.visualEvidenceHeld && (
-            <p className="mt-1 text-[10px] text-[var(--aethel-warning-light)]">
-              VisualEvidence WebM [HELD] — patch hashes attached
-            </p>
+            <div
+              className="mt-1 rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-1.5"
+              data-aethel-cw6="patch-hash-evidence"
+            >
+              <p className="text-[10px] text-[var(--aethel-warning-light)]">
+                VisualEvidence WebM [HELD] — patch-hash fallback only
+              </p>
+              {(() => {
+                const hashes = extractPatchHashRefsFromLedgerEvents(latestArtifact.events)
+                if (hashes.length === 0) {
+                  return (
+                    <p className="mt-0.5 font-mono text-[10px] text-[var(--aethel-text-quaternary)]">
+                      No sha256 refs on ledger events yet
+                    </p>
+                  )
+                }
+                return (
+                  <ul className="mt-1 space-y-0.5">
+                    {hashes.slice(0, 6).map((hash) => (
+                      <li
+                        key={hash}
+                        className="break-all font-mono text-[10px] text-[var(--aethel-text-secondary)]"
+                      >
+                        {hash}
+                      </li>
+                    ))}
+                  </ul>
+                )
+              })()}
+            </div>
           )}
         </div>
 
@@ -73,6 +109,7 @@ export function AgentEvidencePanel({ latestArtifact }: AgentEvidencePanelProps) 
 
   return (
     <div className="h-full overflow-y-auto p-3">
+      <ReceiptCompletenessStrip report={completeness} className="mx-0 mb-3" />
       <div className="mb-3">
         <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
           Receipts workflow

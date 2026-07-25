@@ -175,18 +175,18 @@ pub fn run_kernel_position_based_dynamics_soak() -> KernelPositionBasedDynamicsW
     let note = if !r.position_based_dynamics_ready {
         "Position-based dynamics soak failed — positionBasedDynamicsReady stays false"
     } else if !r.position_based_dynamics_xpbd_ready {
-        "Desktop soak: classical PBD ready; letter ip XPBD+substep deepen FAILED (residual curve/pin/replay/N≥64) — positionBasedDynamicsXpbdReady false; chaos/cloth AAA HELD"
+        "Desktop soak: classical PBD ready; letter ip/CW2 XPBD+substep deepen FAILED (residual curve/pin/replay/N≥2048) — positionBasedDynamicsXpbdReady false; chaos/cloth AAA HELD"
     } else {
-        "Desktop soak: SoA distance projection + letter ip XPBD compliance/Δλ + fixed substeps (N≥64, residual↓ with iters, pin stable, same-seed bit-identical) — positionBasedDynamicsReady + positionBasedDynamicsXpbdReady true; chaos_pbd_parity_ready / xpbd_cloth_aaa_ready false"
+        "Desktop soak: SoA distance projection + letter ip/CW2 XPBD compliance/Δλ + fixed substeps (N≥2048, residual↓ with iters, pin stable, same-seed bit-identical) — positionBasedDynamicsReady + positionBasedDynamicsXpbdReady true; chaos_pbd_parity_ready / xpbd_cloth_aaa_ready false"
     };
     to_report(r, note)
 }
 
-/// Honesty probe — soak-gated `positionBasedDynamicsReady` + XPBD deepen **ip**.
+/// Honesty probe — soak-gated `positionBasedDynamicsReady` + XPBD deepen **ip**/CW2.
 pub fn probe_position_based_dynamics() -> KernelPositionBasedDynamicsWireReport {
     to_report(
         kernel_probe(),
-        "Position-based dynamics probe (letter ip deepen / hj base) — positionBasedDynamicsReady + positionBasedDynamicsXpbdReady (N≥64, residual curve, pin stable, replay); chaos_pbd_parity_ready / xpbd_cloth_aaa_ready HELD",
+        "Position-based dynamics probe (letter ip/CW2 deepen / hj base) — positionBasedDynamicsReady + positionBasedDynamicsXpbdReady (N≥2048, residual curve, pin stable, replay); chaos_pbd_parity_ready / xpbd_cloth_aaa_ready HELD",
     )
 }
 

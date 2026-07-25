@@ -38,11 +38,19 @@ const log = createComponentLogger('LevelEditor');
 const LEVEL_ENGINE_MODULES = ['world-streaming', 'quest-system', 'save-manager', 'inventory-system'] as const
 
 
+export type LevelEditorProps = {
+  /**
+   * When true (World Studio / CreativeWorkbenchShell), hide embedded outliner +
+   * details columns so shell slots own those gutters (IMPROVE-STUDIO-005).
+   */
+  embedded?: boolean;
+};
+
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
-export default function LevelEditor() {
+export default function LevelEditor({ embedded = false }: LevelEditorProps = {}) {
   const [objects, setObjects] = useState<LevelObject[]>(defaultObjects);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [transformMode, setTransformMode] = useState<TransformMode>('translate');
@@ -367,18 +375,20 @@ export default function LevelEditor() {
 
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Left Panel - World Outliner */}
-        <div style={{ width: '250px', borderRight: '1px solid var(--aethel-border-primary)', background: 'var(--aethel-surface-secondary)' }}>
-          <OutlinerMini
-            objects={objects}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onToggleVisibility={handleToggleVisibility}
-            onToggleLock={handleToggleLock}
-            onDelete={handleDelete}
-            onDuplicate={handleDuplicate}
-          />
-        </div>
+        {/* Left Panel - World Outliner (standalone only; shell owns outliner when embedded) */}
+        {!embedded && (
+          <div style={{ width: '250px', borderRight: '1px solid var(--aethel-border-primary)', background: 'var(--aethel-surface-secondary)' }}>
+            <OutlinerMini
+              objects={objects}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              onToggleVisibility={handleToggleVisibility}
+              onToggleLock={handleToggleLock}
+              onDelete={handleDelete}
+              onDuplicate={handleDuplicate}
+            />
+          </div>
+        )}
 
         {/* Center - Viewport */}
         <div style={{ flex: 1, position: 'relative' }}>
@@ -461,7 +471,7 @@ export default function LevelEditor() {
                 border: '1px solid var(--aethel-border-primary)',
                 borderRadius: '14px',
                 background: 'color-mix(in srgb, var(--aethel-surface-secondary) 94%, transparent)',
-                boxShadow: '0 24px 70px rgba(0,0,0,0.35)',
+                boxShadow: 'var(--aethel-shadow-xl)',
               }}
             >
               <div style={{
@@ -508,7 +518,7 @@ export default function LevelEditor() {
             left: '0',
             right: '0',
             height: '24px',
-            background: 'rgba(0,0,0,0.7)',
+            background: 'color-mix(in srgb, var(--aethel-surface-primary) 82%, transparent)',
             display: 'flex',
             alignItems: 'center',
             padding: '0 12px',
@@ -525,15 +535,17 @@ export default function LevelEditor() {
           </div>
         </div>
 
-        {/* Right Panel - Details */}
-        <div style={{ width: '320px', borderLeft: '1px solid var(--aethel-border-primary)', background: 'var(--aethel-surface-secondary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ minHeight: 0, flex: 1, overflow: 'auto' }}>
-            <DetailsPanelMini
-              object={selectedObject}
-              onChange={handleObjectChange}
-            />
+        {/* Right Panel - Details (standalone only; shell owns inspector when embedded) */}
+        {!embedded && (
+          <div style={{ width: '320px', borderLeft: '1px solid var(--aethel-border-primary)', background: 'var(--aethel-surface-secondary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ minHeight: 0, flex: 1, overflow: 'auto' }}>
+              <DetailsPanelMini
+                object={selectedObject}
+                onChange={handleObjectChange}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

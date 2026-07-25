@@ -9,9 +9,11 @@ import { useViewportStore } from '@/lib/viewport/useViewportStore';
 import { FlyCameraHUD } from '@/components/viewport/FlyCameraHUD';
 import { ViewportContextMenu } from '@/components/viewport/ViewportContextMenu';
 import { ViewportDropGhost } from '@/components/viewport/ViewportDropGhost';
+import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
 
 import SceneViewportWorkflowDrawer from './SceneViewportWorkflowDrawer';
 import { RendererHonestyBadge } from './RendererHonestyBadge';
+import { ConsolidationTruthBadge } from './ConsolidationTruthBadge';
 import { TerrainHeightfieldBrushPanel } from './TerrainHeightfieldBrushPanel';
 import { MultiplayerHonestyBadge } from '@/components/multiplayer/MultiplayerHonestyBadge';
 import { KernelRustFoundationHonestyBadge } from '@/components/kernel/KernelRustFoundationHonestyBadge';
@@ -257,7 +259,7 @@ export function SceneViewportStage({
         scale: [1, 1, 1] as [number, number, number],
         visible: true,
         locked: false,
-        color: '#60a5fa',
+        color: resolveCssVarColor('--aethel-info', 'rgb(56, 189, 248)'),
       },
     ]);
   }, [parseAssetDragPayload, setObjects]);
@@ -313,6 +315,7 @@ export function SceneViewportStage({
 
       {/* Focus 2A/C4 — honesty chrome; Focus 2B/C3 — durable terrain brush; Block 2B.3 MP honesty; letter dp kernel foundation */}
       <RendererHonestyBadge projectId={projectId} />
+      <ConsolidationTruthBadge projectId={projectId} />
       <MultiplayerHonestyBadge projectId={projectId} />
       <KernelRustFoundationHonestyBadge />
       <TerrainHeightfieldBrushPanel projectId={projectId} />

@@ -101,20 +101,16 @@ export function Panel({
 }) {
   return (
     <section
-      className={cn('flex min-h-0 flex-col overflow-hidden rounded-lg', className)}
-      style={{
-        background: 'rgba(8,12,22,0.72)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        border: '1px solid rgba(148,163,184,.10)',
-      }}
+      className={cn(
+        'flex min-h-0 flex-col overflow-hidden rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] backdrop-blur-md',
+        className,
+      )}
       aria-label={label}
     >
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between px-2.5 py-1.5 text-left transition-colors hover:bg-[rgba(255,255,255,.03)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-inset"
-        style={{ borderBottom: '1px solid rgba(148,163,184,.08)' }}
+        className="flex w-full items-center justify-between border-b border-[var(--aethel-border-subtle)] px-2.5 py-1.5 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_40%,transparent)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-inset"
         aria-expanded={open}
       >
         <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">

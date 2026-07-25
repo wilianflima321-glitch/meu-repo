@@ -36,6 +36,26 @@ describe('sequencer delta (cg)', () => {
     expect(snap.camera).not.toBeNull()
   })
 
+  it('Director intents produce distinct timeline grammars (not rename theater)', () => {
+    const establishing = planCinematicDirectorShoot({ intent: 'establishing' })
+    const action = planCinematicDirectorShoot({ intent: 'action' })
+    const dialogue = planCinematicDirectorShoot({ intent: 'dialogue' })
+    expect(establishing.timeline.id).not.toBe(action.timeline.id)
+    expect(action.timeline.durationMs).toBeLessThan(establishing.timeline.durationMs)
+    expect(dialogue.timeline.id).toBe('director-dialogue')
+    const actionFovEnd = action.timeline.tracks
+      .flatMap((t) => t.clips)
+      .flatMap((c) => c.curves)
+      .find((c) => c.property === 'camera.fov')
+      ?.keyframes.at(-1)?.value
+    const establishFovEnd = establishing.timeline.tracks
+      .flatMap((t) => t.clips)
+      .flatMap((c) => c.curves)
+      .find((c) => c.property === 'camera.fov')
+      ?.keyframes.at(-1)?.value
+    expect(actionFovEnd).not.toBe(establishFovEnd)
+  })
+
   it('IDE panel scaffold forbids final footage claim', () => {
     const panel = createSequencerIdePanelScaffold()
     expect(panel.schema).toBe('aethel.sequencer.ide.v1')

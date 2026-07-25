@@ -1,9 +1,9 @@
 //! Matter Thermodynamics SPH desktop wire — letters **hk** / deepen **io**.
 //!
 //! Thin studio-local IPC over `aethel_kernel_rust::matter_thermodynamics_sph`
-//! (SoA SPH density + pressure + viscosity + heat + spatial-hash N≥1024 soak).
+//! (SoA SPH density + pressure + viscosity + heat + spatial-hash N≥2048 soak).
 //! Honesty probes `matterThermodynamicsSphReady` +
-//! `matterThermodynamicsSphHashReady` (**io**; hu–im taken). Full DualSPHysics /
+//! `matterThermodynamicsSphHashReady` (**io**/CW2; hu–im taken). Full DualSPHysics /
 //! Chaos fluid / Coins / Agones / Nanite / DLSS HELD.
 
 use aethel_kernel_rust::matter_thermodynamics_sph::{
@@ -158,7 +158,7 @@ fn to_report(
     }
 }
 
-/// Merge N≥1024 hash-soak fields into a small-soak report (desktop soak cmd).
+/// Merge N≥2048 hash-soak fields into a small-soak report (desktop soak cmd).
 fn merge_hash_fields(
     mut r: MatterThermodynamicsSphSoakReport,
     h: MatterThermodynamicsSphSoakReport,
@@ -175,7 +175,7 @@ fn merge_hash_fields(
     r
 }
 
-/// Run matter thermodynamics SPH soak via kernel — small soak + N≥1024 hash soak.
+/// Run matter thermodynamics SPH soak via kernel — small soak + N≥2048 hash soak.
 pub fn run_kernel_matter_thermodynamics_sph_soak() -> KernelMatterThermodynamicsSphWireReport {
     let r = merge_hash_fields(
         run_matter_thermodynamics_sph_soak(),
@@ -184,18 +184,18 @@ pub fn run_kernel_matter_thermodynamics_sph_soak() -> KernelMatterThermodynamics
     let note = if !r.matter_thermodynamics_sph_ready {
         "Matter Thermodynamics SPH soak failed — matterThermodynamicsSphReady stays false"
     } else if !r.matter_thermodynamics_sph_hash_ready {
-        "Desktop soak: small SPH ready; letter io N≥1024 spatial-hash deepen FAILED (subquad/locality/KE/replay) — matterThermodynamicsSphHashReady false; dualsphysics/chaos AAA HELD"
+        "Desktop soak: small SPH ready; letter io/CW2 N≥2048 spatial-hash deepen FAILED (subquad/locality/KE/replay) — matterThermodynamicsSphHashReady false; dualsphysics/chaos AAA HELD"
     } else {
-        "Desktop soak: SoA SPH density + pressure + viscosity + heat + letter io N≥1024 spatial-hash (avg C_step < N²/8, max_neighbors ≤ min(128,N/8), KE bounded, replay) — dualsphysics_parity_ready / chaos_fluid_aaa_ready false"
+        "Desktop soak: SoA SPH density + pressure + viscosity + heat + letter io/CW2 N≥2048 spatial-hash (avg C_step < N²/8, max_neighbors ≤ min(128,N/8), KE bounded, replay) — dualsphysics_parity_ready / chaos_fluid_aaa_ready false"
     };
     to_report(r, note)
 }
 
-/// Honesty probe — soak-gated `matterThermodynamicsSphReady` + hash deepen **io**.
+/// Honesty probe — soak-gated `matterThermodynamicsSphReady` + hash deepen **io**/CW2.
 pub fn probe_matter_thermodynamics_sph() -> KernelMatterThermodynamicsSphWireReport {
     to_report(
         kernel_probe(),
-        "Matter Thermodynamics SPH probe (letter io deepen rework / hk base) — matterThermodynamicsSphReady + matterThermodynamicsSphHashReady (N≥1024, avg C_step < N²/8, max_neighbors ≤ min(128,N/8), KE bounded, replay); dualsphysics_parity_ready / chaos_fluid_aaa_ready HELD",
+        "Matter Thermodynamics SPH probe (letter io/CW2 deepen / hk base) — matterThermodynamicsSphReady + matterThermodynamicsSphHashReady (N≥2048, avg C_step < N²/8, max_neighbors ≤ min(128,N/8), KE bounded, replay); dualsphysics_parity_ready / chaos_fluid_aaa_ready HELD",
     )
 }
 

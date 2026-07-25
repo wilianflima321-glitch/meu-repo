@@ -8,9 +8,11 @@ import {
 } from '@aethel/runtime/runtime-mode-view-model'
 import { buildGameScopePlan } from '@/lib/production/game-scope-orchestrator'
 import {
-  STUDIO_SESSION_STORAGE_KEY,
-  parseResponse,
-} from './StudioMissionControl.options'
+  clearStudioSessionId,
+  getStudioSessionId,
+  setStudioSessionId,
+} from '@/lib/storage/ui-persistence-spine'
+import { parseResponse } from './StudioMissionControl.options'
 import type {
   PlayableGameGenre,
   PlayableGameScope,
@@ -57,11 +59,11 @@ export default function StudioMissionControl() {
     setMission(record.mission)
     setMode(record.mode as StudioMode)
     setRuntimeTarget(runtimeModeForTarget(runtimeModes, record.runtimeTarget).runtimeTarget)
-    window.localStorage.setItem(STUDIO_SESSION_STORAGE_KEY, record.id)
+    setStudioSessionId(record.id)
   }, [runtimeModes])
 
   useEffect(() => {
-    const sessionId = window.localStorage.getItem(STUDIO_SESSION_STORAGE_KEY)
+    const sessionId = getStudioSessionId()
     if (!sessionId) return
 
     let isMounted = true
@@ -75,7 +77,7 @@ export default function StudioMissionControl() {
         setNotice(payload.session.status === 'active' ? 'Resumed active Studio session.' : 'Loaded last Studio session.')
       })
       .catch(() => {
-        window.localStorage.removeItem(STUDIO_SESSION_STORAGE_KEY)
+        clearStudioSessionId()
         if (isMounted) setNotice('Previous Studio session could not be resumed.')
       })
       .finally(() => {

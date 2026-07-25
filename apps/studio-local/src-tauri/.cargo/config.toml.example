@@ -1,0 +1,9 @@
+# Windows workstation only — copy to config.toml locally (gitignored).
+# Do NOT commit config.toml with an absolute E: path (breaks Linux CI).
+# Prefer shell: $env:CARGO_TARGET_DIR = "E:\aethel-target-gnu"
+#
+# Setup:
+#   Copy-Item .cargo/config.toml.example .cargo/config.toml
+
+[build]
+target-dir = "E:/aethel-target-gnu"

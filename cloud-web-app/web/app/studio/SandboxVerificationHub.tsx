@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 // @aethel-heavy-async-boundary
 import { motion, AnimatePresence } from 'framer-motion'
+import { resolveCssVarColor, resolveCssVarRgba } from '@/lib/style/resolve-css-var'
 
 // ─────────────────────────────────────────────────────────
 // Radial SVG Telemetry Dial
@@ -32,35 +33,44 @@ function TelemetryDial({
   label,
   value,
   max = 100,
-  color,
+  colorVar,
+  colorFallback,
   unit = '%',
 }: {
   label: string
   value: number
   max?: number
-  color: string
+  colorVar: string
+  colorFallback: string
   unit?: string
 }) {
   const fraction = Math.min(value / max, 1)
   const arcLength = ARC_FRACTION * CIRCUMFERENCE * fraction
   const dashOffset = -(ARC_FRACTION * CIRCUMFERENCE - arcLength)
+  const stroke = `var(${colorVar})`
 
   return (
     <div className="flex flex-col items-center gap-1">
       <svg width={72} height={72} viewBox="0 0 72 72" role="img" aria-label={`${label}: ${value}${unit}`}>
         {/* Background track */}
-        <path d={TRACK_D} fill="none" stroke="#1e2a3a" strokeWidth={5} strokeLinecap="round" />
+        <path
+          d={TRACK_D}
+          fill="none"
+          stroke="var(--aethel-surface-quaternary)"
+          strokeWidth={5}
+          strokeLinecap="round"
+        />
 
         {/* Value arc */}
         <path
           d={TRACK_D}
           fill="none"
-          stroke={color}
+          stroke={stroke}
           strokeWidth={5}
           strokeLinecap="round"
           strokeDasharray={`${ARC_FRACTION * CIRCUMFERENCE}`}
           strokeDashoffset={dashOffset}
-          style={{ transition: 'stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1)' }}
+          style={{ transition: 'stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1)', color: colorFallback }}
         />
 
         {/* Glow filter */}
@@ -76,18 +86,27 @@ function TelemetryDial({
           x={DIAL_CX}
           y={DIAL_CY + 4}
           textAnchor="middle"
-          fill="#e5e7eb"
+          fill="var(--aethel-text-primary)"
           fontSize="12"
           fontWeight="700"
           fontFamily="monospace"
         >
           {Math.round(value)}
         </text>
-        <text x={DIAL_CX} y={DIAL_CY + 14} textAnchor="middle" fill="#6b7280" fontSize="8" fontFamily="monospace">
+        <text
+          x={DIAL_CX}
+          y={DIAL_CY + 14}
+          textAnchor="middle"
+          fill="var(--aethel-text-muted)"
+          fontSize="8"
+          fontFamily="monospace"
+        >
           {unit}
         </text>
       </svg>
-      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#6b7280]">{label}</span>
+      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-muted)]">
+        {label}
+      </span>
     </div>
   )
 }
@@ -119,15 +138,19 @@ function MatrixRain({ visible }: { visible: boolean }) {
     const cols = Math.floor(W / COL_W)
     dropsRef.current = Array.from({ length: cols }, () => Math.random() * -H)
 
+    const fade = resolveCssVarRgba('--aethel-surface-primary', 0.12, 'rgb(10, 10, 15)')
+    const bright = resolveCssVarColor('--aethel-neon-emerald', 'rgb(52, 211, 153)')
+    const dim = resolveCssVarColor('--aethel-neon-cyan', 'rgb(34, 211, 238)')
+
     const draw = () => {
-      ctx.fillStyle = 'rgba(0,0,0,0.12)'
+      ctx.fillStyle = fade
       ctx.fillRect(0, 0, W, H)
       ctx.font = `${COL_W - 2}px monospace`
       dropsRef.current.forEach((y, i) => {
         const char = CHARS[Math.floor(Math.random() * CHARS.length)]
-        const bright = y > 0 && y < 14
-        ctx.fillStyle = bright ? '#00ffcc' : '#00e5ff'
-        ctx.globalAlpha = bright ? 1 : 0.35
+        const isBright = y > 0 && y < 14
+        ctx.fillStyle = isBright ? bright : dim
+        ctx.globalAlpha = isBright ? 1 : 0.35
         ctx.fillText(char, i * COL_W, y)
         ctx.globalAlpha = 1
         dropsRef.current[i] = y > H + Math.random() * 80 ? -COL_W * 2 : y + COL_W
@@ -163,11 +186,19 @@ function SuccessTick() {
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
     >
       <svg width="56" height="56" viewBox="0 0 56 56" aria-label="Verification passed">
-        <circle cx="28" cy="28" r="26" fill="none" stroke="#00ffcc" strokeWidth="2" opacity="0.3" />
+        <circle
+          cx="28"
+          cy="28"
+          r="26"
+          fill="none"
+          stroke="var(--aethel-neon-emerald)"
+          strokeWidth="2"
+          opacity="0.3"
+        />
         <motion.path
           d="M16 28 L24 36 L40 20"
           fill="none"
-          stroke="#00ffcc"
+          stroke="var(--aethel-neon-emerald)"
           strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -204,7 +235,7 @@ export function SandboxVerificationHub({
   const isError = state === 'error'
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[color-mix(in_srgb,#00e5ff_18%,transparent)] bg-[#060d16]">
+    <div className="relative overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_18%,transparent)] bg-[var(--aethel-surface-primary)]">
       {/* Matrix rain — visible only during compilation */}
       <AnimatePresence>
         {isCompiling && (
@@ -218,7 +249,7 @@ export function SandboxVerificationHub({
           >
             <MatrixRain visible={isCompiling} />
             {/* Gradient vignette so dials are still readable */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#060d16] via-[#060d16]/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--aethel-surface-primary)] via-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] to-transparent" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -229,19 +260,19 @@ export function SandboxVerificationHub({
       {/* Telemetry dials — always visible */}
       <div className="relative z-10 flex flex-col gap-3 p-4">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[color-mix(in_srgb,#00e5ff_70%,transparent)]">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[color-mix(in_srgb,var(--aethel-neon-cyan)_70%,transparent)]">
             Verification Hub
           </span>
           <span
             className={[
               'rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em]',
               isCompiling
-                ? 'bg-[color-mix(in_srgb,#00e5ff_14%,transparent)] text-[#00e5ff]'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-neon-cyan)_14%,transparent)] text-[var(--aethel-neon-cyan)]'
                 : isSuccess
-                  ? 'bg-[color-mix(in_srgb,#00ffcc_14%,transparent)] text-[#00ffcc]'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-neon-emerald)_14%,transparent)] text-[var(--aethel-neon-emerald)]'
                   : isError
-                    ? 'bg-[color-mix(in_srgb,#ef4444_14%,transparent)] text-[#ef4444]'
-                    : 'bg-[#0d1a26] text-[#4b5563]',
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)] text-[var(--aethel-error)]'
+                    : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-muted)]',
             ].join(' ')}
           >
             {state}
@@ -249,13 +280,34 @@ export function SandboxVerificationHub({
         </div>
 
         <div className="flex items-center justify-around">
-          <TelemetryDial label="CPU" value={cpuThreads} max={16} color="#00e5ff" unit="thr" />
-          <TelemetryDial label="MEM" value={memoryMB} max={4096} color="#9333ea" unit="MB" />
-          <TelemetryDial label="HPM" value={hpmScore} max={100} color="#00ffcc" unit="pts" />
+          <TelemetryDial
+            label="CPU"
+            value={cpuThreads}
+            max={16}
+            colorVar="--aethel-neon-cyan"
+            colorFallback="rgb(34, 211, 238)"
+            unit="thr"
+          />
+          <TelemetryDial
+            label="MEM"
+            value={memoryMB}
+            max={4096}
+            colorVar="--aethel-accent"
+            colorFallback="rgb(139, 92, 246)"
+            unit="MB"
+          />
+          <TelemetryDial
+            label="HPM"
+            value={hpmScore}
+            max={100}
+            colorVar="--aethel-neon-emerald"
+            colorFallback="rgb(52, 211, 153)"
+            unit="pts"
+          />
         </div>
 
         {isError && (
-          <p className="rounded-lg border border-[color-mix(in_srgb,#ef4444_30%,transparent)] bg-[color-mix(in_srgb,#ef4444_10%,transparent)] px-3 py-2 text-[10px] text-[#f87171]">
+          <p className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-3 py-2 text-[10px] text-[var(--aethel-error-light)]">
             Compilation failed — check the terminal for details.
           </p>
         )}

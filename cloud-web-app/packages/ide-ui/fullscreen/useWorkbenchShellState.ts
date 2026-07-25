@@ -18,11 +18,15 @@ import type {
 } from './types'
 import type { BottomPanelMode } from '../modern-shell/types'
 import { resolveWorkbenchEntryProfile } from './workbench-entry-triage'
+import {
+  getUiPersistence,
+  UI_PERSISTENCE_LEGACY_KEYS,
+} from '../../../web/lib/storage/ui-persistence-spine'
 
 export const LAST_PROJECT_ID_STORAGE_KEY = 'aethel.workbench.lastProjectId'
-export const PREVIEW_ENABLED_STORAGE_KEY = 'aethel.workbench.preview.enabled'
-export const PANEL_STATE_STORAGE_KEY = 'aethel.workbench.panelState'
-export const BOTTOM_PANEL_MODE_STORAGE_KEY = 'aethel.workbench.bottomPanelMode'
+export const PREVIEW_ENABLED_STORAGE_KEY = UI_PERSISTENCE_LEGACY_KEYS.workbenchPreviewEnabled
+export const PANEL_STATE_STORAGE_KEY = UI_PERSISTENCE_LEGACY_KEYS.workbenchPanelState
+export const BOTTOM_PANEL_MODE_STORAGE_KEY = UI_PERSISTENCE_LEGACY_KEYS.workbenchBottomPanel
 
 type UseWorkbenchShellStateOptions = {
   projectIdParam: string | null
@@ -69,7 +73,12 @@ export function useWorkbenchShellState({
   const [previewEnabled, setPreviewEnabled] = useState(() => {
     if (typeof window === 'undefined') return entryProfile.previewEnabled
     if (hasContextualEntry) return entryProfile.previewEnabled
-    const stored = window.localStorage.getItem(PREVIEW_ENABLED_STORAGE_KEY)
+    // CW4: spine first, legacy mirror fallback.
+    const stored = getUiPersistence<string | null>(
+      'ide.workbench.previewEnabled',
+      null,
+      (v): v is string => typeof v === 'string',
+    )
     if (stored === '1') return true
     if (stored === '0') return false
     return window.innerWidth >= 1280
@@ -86,9 +95,12 @@ export function useWorkbenchShellState({
     if (hasContextualEntry) return fallback
 
     try {
-      const stored = window.localStorage.getItem(PANEL_STATE_STORAGE_KEY)
-      if (!stored) return fallback
-      const parsed = JSON.parse(stored) as Partial<ModernPanelState>
+      const parsed = getUiPersistence<Partial<ModernPanelState> | null>(
+        'ide.workbench.panelState',
+        null,
+        (v): v is Partial<ModernPanelState> => Boolean(v) && typeof v === 'object',
+      )
+      if (!parsed) return fallback
       return {
         sidebar: { ...fallback.sidebar, ...parsed.sidebar },
         editor: { ...fallback.editor, ...parsed.editor },
@@ -102,7 +114,11 @@ export function useWorkbenchShellState({
   const [activeBottomPanel, setActiveBottomPanel] = useState<BottomPanelMode>(() => {
     if (typeof window === 'undefined') return entryProfile.bottomPanel
     if (hasContextualEntry) return entryProfile.bottomPanel
-    const stored = window.localStorage.getItem(BOTTOM_PANEL_MODE_STORAGE_KEY)
+    const stored = getUiPersistence<string | null>(
+      'ide.workbench.bottomPanel',
+      null,
+      (v): v is string => typeof v === 'string',
+    )
     return stored === 'terminal' ? 'terminal' : 'chat'
   })
   const [previewMode, setPreviewMode] = useState<PreviewMode>(entryProfile.previewMode)

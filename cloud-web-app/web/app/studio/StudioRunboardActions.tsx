@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Loader2, Play, Pause, GitMerge, Receipt, ChevronRight } from 'lucide-react';
 import { StudioLocalRuntimeCapsule } from '@/components/studio/StudioLocalRuntimeCapsule';
+import { WorkbenchErrorState } from '@/components/ui/WorkbenchSurfaceStates';
 import type { StudioMissionControlViewProps } from './StudioMissionControlView.types';
 
 type StudioRunboardActionsProps = Pick<
@@ -136,21 +137,26 @@ export function StudioRunboardActions({
 
       <StudioLocalRuntimeCapsule />
 
-      {/* Notice toast */}
-      {notice && (
-        <p
-          role="status"
-          className="
-            flex items-start gap-2 rounded-xl border border-[var(--aethel-border-subtle)]
-            bg-[var(--aethel-surface-primary)] px-3 py-2.5
-            text-xs text-[var(--aethel-text-secondary)]
-            animate-slide-right
-          "
-        >
-          <ChevronRight className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-[var(--aethel-neon-cyan)]" />
-          {notice}
-        </p>
-      )}
+      {/* Notice toast — CW5 error path uses WorkbenchSurfaceStates */}
+      {notice &&
+        (/^Could not\b/i.test(notice) ? (
+          <div data-aethel-cw5="mission-control-error" className="animate-slide-right">
+            <WorkbenchErrorState title="Studio action failed" description={notice} />
+          </div>
+        ) : (
+          <p
+            role="status"
+            className="
+              flex items-start gap-2 rounded-xl border border-[var(--aethel-border-subtle)]
+              bg-[var(--aethel-surface-primary)] px-3 py-2.5
+              text-xs text-[var(--aethel-text-secondary)]
+              animate-slide-right
+            "
+          >
+            <ChevronRight className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-[var(--aethel-neon-cyan)]" />
+            {notice}
+          </p>
+        ))}
 
       {/* Planned tasks */}
       {wave?.tasks && wave.tasks.length > 0 && (

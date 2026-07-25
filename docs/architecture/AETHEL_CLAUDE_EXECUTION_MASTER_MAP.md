@@ -62,6 +62,28 @@ Before executing any block, the executor MUST comply with `AETHEL_AAA_SYSTEM_ARC
 
 ---
 
+## 0c. Consolidation Wave (Founder-aligned 2026-07-23 ??? binding before new probe letters)
+
+**Problem:** Lab-grade math + supremacy MDs + shell UI outran product closure.  
+**Rule:** One full Consolidation Wave before any new exotic `aethel-kernel-rust` module or Master-UX hero `*Panel.tsx`.
+
+| Block | Mandate | Gate |
+|-------|---------|------|
+| **CW0** | Freeze surface inflation | No PR that only adds probe/vitrine |
+| **CW1** | Truth matrix (claim/path/status/bench/marketing) | Master UX §0 + Progress HELD honesty |
+| **CW2** | Kernel load-scale (SPH/XPBD/LBM/fracture) on RTX 3060 | Budgets + fixtures; AAA still HELD |
+| **CW3** | Single render authority path | Present-root doc + catalog classified; UE single RHI still OPEN |
+| **CW4** | UI persistence spine | localStorage exception-only |
+| **CW5** | Design-system government | Deepen shells; tokens only |
+| **CW6** | Agents work-OS (not J.11/J.12 restart) | Receipts + AST/L.5 multi-file swarm (PARTIAL; Composer HELD) |
+| **CW7** | Disk austerity | Cargo/target on E:/D:; CAS; prune |
+
+**Still STOPPED:** J.11 ACP / J.12 OrchestratorProd.  
+**Ledger:** [`AETHEL_FOCUS1_EXECUTION_PROGRESS.md`](./AETHEL_FOCUS1_EXECUTION_PROGRESS.md) Consolidation table — CW1–CW7 **PARTIAL** (CW2 SPH/XPBD/LBM/Voronoi N≥2048 Critic PASS — do not re-inflate; CW3 present-root doc + fail-closed WebGPU present + tick hook — UE single RHI still OPEN; CW5 CreativeStudioShell/page tokens + SurfaceStates; CW6 Path B AST/L.5 multi-file swarm on governed apply + per-file Ops validation, no ACP/Composer-surpass; CW7 actionable DISK_AUSTERITY + gitignored local E: config; CW4 dual-write debt). CW0 ACTIVE. J.11/J.12 STOPPED. **HELD** vs Cursor / Figma / UE Chaos.
+**UX vision (not ship cert):** [`AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md`](./AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md) §0.
+
+---
+
 ## 0b. Absolute Focus tracks (Founder order ??? binding)
 
 ### Focus 1 ??? Brain + Real Files (engine must not lie)

@@ -9,9 +9,14 @@ import { VideoToMechanicHonestyBanner } from '@/components/agents/chat/creative/
 import { UsdContentHonestyBanner } from '@/components/agents/chat/creative/UsdContentHonestyBanner'
 import { BrowserOperatorReceipt } from '@/components/agents/chat/creative/BrowserOperatorReceipt'
 import { LiveVoiceReceipt } from '@/components/agents/chat/creative/LiveVoiceReceipt'
+import { ReceiptCompletenessStrip } from '@/components/agents/chat/ledger/ReceiptCompletenessStrip'
 import type { AIChatConsoleMode } from '@/components/agents/chat/presets'
 import type { NexusMissionUiPayload } from '@/lib/production/nexus-mission-phases'
 import type { NexusCreativeOperatorHint } from '@/lib/production/nexus-squad-dispatch'
+import {
+  evaluateCreativeReceiptCompleteness,
+  type CreativeReceiptCompletenessInput,
+} from '@/lib/production/agents-receipt-completeness'
 
 export interface NexusCreativeReceipt {
   operator: NexusCreativeOperatorHint
@@ -68,10 +73,15 @@ export function AIChatActivityDeck({
   creativeReceipt = null,
 }: AIChatActivityDeckProps) {
   const showBoard = agents.length > 0 && (agentCount > 1 || Boolean(nexus?.cells.length))
+  const creativeCompleteness = evaluateCreativeReceiptCompleteness(
+    creativeReceipt as CreativeReceiptCompletenessInput | null,
+  )
 
   return (
     <>
       <NexusMissionPhaseStrip nexus={nexus} isWorking={isAIWorking && !nexus} />
+
+      {creativeReceipt ? <ReceiptCompletenessStrip report={creativeCompleteness} /> : null}
 
       {creativeReceipt?.operator.kind === 'graph-operator' && (
         <GraphOperatorReceipt

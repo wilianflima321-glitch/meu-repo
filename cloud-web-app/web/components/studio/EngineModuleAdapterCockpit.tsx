@@ -51,7 +51,7 @@ export default function EngineModuleAdapterCockpit({ compact = false, className 
 
   return (
     <section
-      className={`rounded-3xl border border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent))] p-5 shadow-[0_24px_90px_rgba(0,0,0,0.24)] ${className}`}
+      className={`rounded-3xl border border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent))] p-5 shadow-[var(--aethel-shadow-xl)] ${className}`}
       aria-label="Engine module adapter cockpit"
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

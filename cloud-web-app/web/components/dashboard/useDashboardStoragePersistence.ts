@@ -2,7 +2,12 @@ import { useEffect } from 'react'
 
 import type { ChatMessage } from '@/lib/api'
 import type { DashboardSettings } from './aethel-dashboard-model'
-import { STORAGE_KEYS, type SessionEntry } from './aethel-dashboard-model'
+import {
+  persistDashboardChatHistory,
+  persistDashboardSessionHistory,
+  persistDashboardSettings,
+  type SessionEntry,
+} from './aethel-dashboard-model'
 
 type Params = {
   sessionHistory: SessionEntry[]
@@ -12,20 +17,17 @@ type Params = {
 
 export function useDashboardStoragePersistence({ sessionHistory, chatHistory, settings }: Params) {
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEYS.sessionHistory, JSON.stringify(sessionHistory))
-    }
+    if (typeof window === 'undefined') return
+    persistDashboardSessionHistory(sessionHistory)
   }, [sessionHistory])
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEYS.chatHistory, JSON.stringify(chatHistory))
-    }
+    if (typeof window === 'undefined') return
+    persistDashboardChatHistory(chatHistory)
   }, [chatHistory])
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(settings))
-    }
+    if (typeof window === 'undefined') return
+    persistDashboardSettings(settings)
   }, [settings])
 }

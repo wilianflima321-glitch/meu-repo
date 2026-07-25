@@ -23,19 +23,24 @@ export function buildNexusMissionUiPayload(
   },
 ): NexusMissionUiPayload {
   const terminal = resolveTerminalPhase(mission.verdict)
+
   const cells: NexusCellUi[] = mission.cells.map((cell) => {
     const blocked =
       cell.moa.verdict === 'BLOCK' ||
       cell.moa.verdict === 'LAZY_RETRY' ||
       (cell.heal && cell.heal.verdict !== 'APPLY')
+    const role = cell.role === 'critical' ? 'nucleus' : 'peripheral'
     return {
       taskId: cell.taskId,
-      role: cell.role === 'critical' ? 'nucleus' : 'peripheral',
+      role,
       domainLabel: cell.role === 'critical' ? 'Nucleus (Maestro)' : 'Peripheral (Swarm)',
       status: blocked ? 'blocked' : mission.verdict === 'APPLY' ? 'completed' : 'working',
       moaVerdict: cell.moa.verdict,
       healVerdict: cell.heal?.verdict,
       healRounds: cell.heal?.turns.length ?? 0,
+      // CW6 honesty: ApexMissionCellOutcome has no real dependency DAG (J.11 STOPPED).
+      // Do not invent peripheral→nucleus edges as a cosmetic task graph.
+      dependsOnTaskIds: [],
     }
   })
 

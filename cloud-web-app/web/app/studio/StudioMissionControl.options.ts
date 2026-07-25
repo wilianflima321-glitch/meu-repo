@@ -1,6 +1,9 @@
 import type { PlayableGameGenre, PlayableGameScope, StudioMode, StudioSessionStatus } from './StudioMissionControl.types'
 
-export const STUDIO_SESSION_STORAGE_KEY = 'aethel:last-studio-session-id'
+import { UI_PERSISTENCE_LEGACY_KEYS } from '@/lib/storage/ui-persistence-spine'
+
+/** Legacy flat key — mirrored by CW4 UI persistence spine. */
+export const STUDIO_SESSION_STORAGE_KEY = UI_PERSISTENCE_LEGACY_KEYS.studioSession
 
 export const MODE_OPTIONS: Array<{ value: StudioMode; label: string }> = [
   { value: 'mission', label: 'Mission' },

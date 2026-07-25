@@ -11,16 +11,20 @@ import { AIChatRulesPanel } from '@/components/agents/chat/rules/AIChatRulesPane
 import type { AIChatEvidenceArtifact } from '@/components/agents/evidence'
 import { OPS_TABS, type AIChatOpsTab } from '@/components/agents/chat/presets'
 import { useAIChatOpsArtifacts, type AIChatApprovalChange } from './useAIChatOpsArtifacts'
+import { MergeReceiptGraphStrip } from '@/components/agents/chat/ledger/MergeReceiptGraphStrip'
+import type { GovernedApplyReceipt } from '@/lib/production/agents-merge-governance'
+import type { NexusCellUi } from '@/lib/production/nexus-mission-phases'
+import {
+  WorkbenchEmptyState,
+  WorkbenchErrorState,
+  WorkbenchLoadingState,
+} from '@/components/ui/WorkbenchSurfaceStates'
 
 const MonacoChatDiffPanel = dynamic(
   () => import('@aethel/ide-ui/MonacoChatDiffPanel').then((module) => module.MonacoChatDiffPanel),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex h-64 items-center justify-center text-[11px] text-[var(--aethel-text-tertiary)]">
-        Loading Monaco comparator...
-      </div>
-    ),
+    loading: () => <WorkbenchLoadingState label="Loading Monaco comparator…" rows={3} />,
   }
 )
 
@@ -41,6 +45,12 @@ interface AIChatOpsSidebarProps {
   defaultGoal: string
   latestEvidence?: AIChatEvidenceArtifact | null
   currentRunEstimate?: number
+  /** CW6 — visible apply-deny honesty when governed apply fails closed */
+  lastApplyDeny?: string | null
+  /** CW6 — session apply receipts from real governed apply path */
+  applyReceipts?: readonly GovernedApplyReceipt[]
+  /** CW6 — Nexus cells for dependency edges on merge graph */
+  nexusCells?: readonly NexusCellUi[]
 }
 
 export function AIChatOpsSidebar({
@@ -54,6 +64,9 @@ export function AIChatOpsSidebar({
   defaultGoal,
   latestEvidence,
   currentRunEstimate,
+  lastApplyDeny = null,
+  applyReceipts = [],
+  nexusCells = [],
 }: AIChatOpsSidebarProps) {
   const { approvalChanges, memories, addMemory, deleteMemory, updateMemory } = useAIChatOpsArtifacts({
     pendingDiff,
@@ -94,6 +107,14 @@ export function AIChatOpsSidebar({
 
   return (
     <aside className="flex w-80 flex-col border-l border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]">
+      {lastApplyDeny ? (
+        <div data-aethel-cw6="apply-deny-honesty" className="border-b border-[var(--aethel-border-secondary)]">
+          <WorkbenchErrorState
+            title="Apply blocked"
+            description={`${lastApplyDeny} Nothing was written — fix the issue or reject the pending edit.`}
+          />
+        </div>
+      ) : null}
       <div className="flex items-center gap-1 overflow-x-auto border-b border-[var(--aethel-border-secondary)] px-2 py-2">
         {OPS_TABS.map((tab) => (
           <button
@@ -126,7 +147,20 @@ export function AIChatOpsSidebar({
 
         {opsTab === 'rules' && <AIChatRulesPanel projectId={projectId} />}
 
-        {opsTab === 'evidence' && <AgentEvidencePanel latestArtifact={latestEvidence} />}
+        {opsTab === 'evidence' && (
+          <div className="flex h-full min-h-0 flex-col overflow-hidden">
+            <div className="shrink-0 border-b border-[var(--aethel-border-secondary)] p-2">
+              <MergeReceiptGraphStrip
+                cells={nexusCells}
+                applyReceipts={applyReceipts}
+                className="mx-0"
+              />
+            </div>
+            <div className="min-h-0 flex-1 overflow-hidden">
+              <AgentEvidencePanel latestArtifact={latestEvidence} />
+            </div>
+          </div>
+        )}
 
         {opsTab === 'economics' && (
           <AIChatEconomicsPanel
@@ -155,12 +189,11 @@ export function AIChatOpsSidebar({
               onReject={onRejectDiff}
             />
           ) : (
-            <div className="flex h-full min-h-[160px] flex-col items-center justify-center gap-2 p-4 text-center text-[11px] text-[var(--aethel-text-tertiary)]">
-              <p>No pending diff.</p>
-              <p className="max-w-[240px] text-[var(--aethel-text-quaternary)]">
-                Use &quot;Open diff&quot; on an assistant code block.
-              </p>
-            </div>
+            <WorkbenchEmptyState
+              icon="diff"
+              title="No pending diff"
+              description='Use "Open diff" on an assistant code block to review a governed apply candidate.'
+            />
           ))}
 
         {opsTab === 'execution' && <TaskOpsPanel projectId={projectId} defaultGoal={defaultGoal} />}

@@ -4,8 +4,13 @@
  */
 
 import type { ViewportFrameloopMode } from '@/lib/viewport/use-viewport-render-activity'
+import {
+  getUiPersistence,
+  setUiPersistence,
+  UI_PERSISTENCE_LEGACY_KEYS,
+} from '@/lib/storage/ui-persistence-spine'
 
-export const WORKSPACE_PROFILE_STORAGE_KEY = 'aethel.workspace.profile'
+export const WORKSPACE_PROFILE_STORAGE_KEY = UI_PERSISTENCE_LEGACY_KEYS.workspaceProfile
 export const WORKSPACE_PROFILE_EVENT = 'aethel.workspace.profile.changed'
 
 export type WorkspaceProfileId = 'code' | 'research' | 'game'
@@ -59,7 +64,9 @@ export function readWorkspaceProfile(): WorkspaceProfileId {
   try {
     const fromAttr = window.document.documentElement.getAttribute('data-workspace-profile')
     if (isWorkspaceProfileId(fromAttr)) return fromAttr
-    return normalizeWorkspaceProfile(window.localStorage.getItem(WORKSPACE_PROFILE_STORAGE_KEY))
+    return normalizeWorkspaceProfile(
+      getUiPersistence('workspace.profile', null, (v): v is string => typeof v === 'string'),
+    )
   } catch {
     return 'game'
   }
@@ -69,7 +76,7 @@ export function writeWorkspaceProfile(profile: WorkspaceProfileId): void {
   if (typeof window === 'undefined') return
   const next = normalizeWorkspaceProfile(profile)
   try {
-    window.localStorage.setItem(WORKSPACE_PROFILE_STORAGE_KEY, next)
+    setUiPersistence('workspace.profile', next)
     window.document.documentElement.setAttribute('data-workspace-profile', next)
     window.dispatchEvent(new CustomEvent(WORKSPACE_PROFILE_EVENT, { detail: { profile: next } }))
   } catch {

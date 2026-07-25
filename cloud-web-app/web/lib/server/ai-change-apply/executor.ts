@@ -25,6 +25,8 @@ import {
 import { summarizeTaskEvidenceLedger } from '@/lib/production/task-evidence-ledger'
 import { persistGovernedTaskEvidence } from './persist-governed-evidence'
 import { mirrorAppliedChangesToCanonicalStore } from './mirror-canonical-store'
+import { runMultiFileApplySwarm } from '@/lib/production/multi-file-apply-swarm'
+import { healDocumentBeforeApply } from '@/lib/production/auto-heal-apply'
 
 export async function applyAiChanges(params: {
   request: NextRequest
@@ -167,6 +169,80 @@ export async function applyAiChanges(params: {
         qaGate,
       },
     })
+  }
+
+  // CW6 Path B — parallel AST/Lazy prep + batch L.5 overlay (fail-closed receipt).
+  const enableAutoHeal = body.enableAutoHeal === true
+  const swarm = await runMultiFileApplySwarm({
+    cells: preparedChanges.map((prepared, index) => ({
+      taskId: `apply_cell_${index}`,
+      path: prepared.virtualPath,
+      content: prepared.nextDocument,
+      role: index === 0 ? 'critical' : 'peripheral',
+    })),
+    enableAutoHeal,
+    maxHealRounds: 3,
+    heal: enableAutoHeal
+      ? async ({ path, content }) => {
+          const healed = await healDocumentBeforeApply({
+            filePath: path,
+            document: content,
+            repairModelId: body.autoHealModelId,
+          })
+          return { content: healed.ok ? healed.document : content }
+        }
+      : undefined,
+  })
+
+  if (!swarm.ok) {
+    await appendChangeRunLedgerEvent({
+      eventType: 'apply_blocked',
+      capability: CAPABILITY,
+      userId,
+      projectId,
+      filePath: preparedChanges[0]?.virtualPath || 'swarm-gate',
+      outcome: 'blocked',
+      metadata: {
+        runId,
+        reason: swarm.code || 'MULTI_FILE_VALIDATION_DENIED',
+        runSource: RUN_SOURCE,
+        fileValidation: swarm.fileValidation,
+        parallelCells: swarm.parallelCells,
+        healRoundsUsed: swarm.healRoundsUsed,
+        composerSurpassClaim: false,
+        treeSitterAstIndexerWebWired: false,
+      },
+    }).catch(() => {})
+
+    return capabilityResponse({
+      error: swarm.code || 'MULTI_FILE_VALIDATION_DENIED',
+      message:
+        preparedChanges.length > 1
+          ? 'Multi-file apply blocked by AST/L.5 validation swarm. Nothing was written.'
+          : 'Apply blocked by AST/L.5 validation gate. Nothing was written.',
+      status: 422,
+      capability: CAPABILITY,
+      capabilityStatus: 'PARTIAL',
+      metadata: {
+        runId,
+        runSource: RUN_SOURCE,
+        fileValidation: swarm.fileValidation,
+        compilerLog: swarm.compilerLog.slice(0, 4000),
+        parallelCells: swarm.parallelCells,
+        healRoundsUsed: swarm.healRoundsUsed,
+        touchedPaths: preparedChanges.map((p) => p.virtualPath),
+        composerSurpassClaim: false,
+        treeSitterAstIndexerWebWired: false,
+        marketingAllowed: false,
+      },
+    })
+  }
+
+  // Prefer swarm-healed documents for the write path.
+  const contentByPath = new Map(swarm.files.map((f) => [f.path, f.content]))
+  for (const prepared of preparedChanges) {
+    const next = contentByPath.get(prepared.virtualPath.replace(/\\/g, '/'))
+    if (typeof next === 'string') prepared.nextDocument = next
   }
 
   const snapshots: Array<{ prepared: PreparedApplyChange; snapshot: RollbackSnapshotRecord }> = []
@@ -373,11 +449,19 @@ export async function applyAiChanges(params: {
     milestone: 'P0',
     metadata: {
       runId,
-      applyMode: snapshots.length === 1 ? 'single-file-atomic' : 'multi-file-serial',
+      applyMode:
+        snapshots.length === 1 ? 'single-file-atomic' : 'multi-file-swarm-validated',
       runSource: RUN_SOURCE,
       projectId,
       changeCount: snapshots.length,
       changes: changeSummary,
+      fileValidation: swarm.fileValidation,
+      parallelCells: swarm.parallelCells,
+      healRoundsUsed: swarm.healRoundsUsed,
+      touchedPaths: snapshots.map((entry) => entry.prepared.virtualPath),
+      composerSurpassClaim: false,
+      treeSitterAstIndexerWebWired: false,
+      marketingAllowed: false,
       rollbackToken: snapshots.length === 1 ? snapshots[0].snapshot.token : undefined,
       governance: {
         toolStatus: governedDecision.toolDecision.status,

@@ -3,6 +3,7 @@
  */
 
 import { useEffect, useState, type RefObject } from 'react'
+import { getUiPersistence } from '@/lib/storage/ui-persistence-spine'
 
 export type ViewportFrameloopMode = 'always' | 'never'
 
@@ -48,14 +49,16 @@ export function useViewportRenderActivity(options: {
   return { active, frameloop: active ? 'always' : 'never' }
 }
 
-/** localStorage / data attribute helper for Code profile pause (7A.4). */
+/** Spine / data-attribute helper for Code profile pause (7A.4 / CW4). */
 export function isCodeWorkspaceProfileActive(): boolean {
   if (typeof window === 'undefined') return false
   try {
-    // Prefer shared profile helper when available (same storage key).
     const fromAttr = window.document.documentElement.getAttribute('data-workspace-profile')
     if (fromAttr === 'code') return true
-    return window.localStorage.getItem('aethel.workspace.profile') === 'code'
+    return (
+      getUiPersistence('workspace.profile', null, (v): v is string => typeof v === 'string') ===
+      'code'
+    )
   } catch {
     return false
   }

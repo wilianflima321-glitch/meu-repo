@@ -18,6 +18,11 @@
  * requirement for the "Computação Líquida" edge-offload pillar: the
  * simulation clock can stop (or, later, be replaced by a remote tick
  * relaying state over the network) without the render clock ever noticing.
+ *
+ * CW3 present-path honesty: GameLoop → AAARenderer is the WebGL off-canvas /
+ * playtest present (`web-aaa-webgl-offcanvas`). Studio/IDE canonical present
+ * remains R3F/WebGL2 (`web-r3f-webgl2`). AAARenderer.render records the tick
+ * via `recordPresentPathTick` — never claims WebGPU present.
  */
 import { AAARenderer } from './aaa-renderer-impl';
 import { PhysicsWorld } from './physics-engine-real';
@@ -29,6 +34,7 @@ import { VisualScriptSystem } from './visual-script-integration';
 import { World } from './game-engine-core';
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import { getLastPresentPathTick } from '@/lib/production/render-path-honesty'
 import {
   resolvePhysicsAuthorityMode,
   competitiveModeUiOrNull,
@@ -292,6 +298,11 @@ export class GameLoop {
   /** Letter ci — true when CapScore FSR wire ran on AAARenderer. */
   isFsrUpscaleEnabled(): boolean {
     return this.fsrEnable?.enabled === true
+  }
+
+  /** CW3 — last present-path tick recorded by AAARenderer (off-canvas WebGL; never WebGPU). */
+  getLastPresentPathTick() {
+    return getLastPresentPathTick()
   }
 
   async init() {

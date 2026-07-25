@@ -34,6 +34,8 @@ export type GovernedApplyResult =
       banner: string
       error: string
       runId?: string
+      /** Deny metadata (fileValidation / compilerLog) for Ops receipts — not wallpaper. */
+      metadata?: Record<string, unknown> | null
     }
 
 function languageFromPath(filePath: string): string {
@@ -120,6 +122,7 @@ export async function runGovernedChangeApply(
       banner: formatApplyPreflightBanner(copy),
       error: copy.code,
       runId,
+      metadata,
     }
   }
 

@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic';
 import type * as monacoEditor from 'monaco-editor';
 
 import RemoteCursorLayer from '../../../web/components/collaboration/RemoteCursorLayer';
+import type { Diagnostic as MonacoDiagnostic } from '../../../web/components/editor/MonacoEditorPro.types';
+import { publishMonacoDiagnosticsToProblems } from '../../../web/lib/problems/monaco-diagnostics-bridge';
 import useNativeMonacoYjsBinding from './useNativeMonacoYjsBinding';
 import type { MonacoEditorProps } from '../../../web/components/editor/MonacoEditorPro';
 
@@ -59,9 +61,14 @@ export default function WorkbenchEditorCanvas({
 }: WorkbenchEditorCanvasProps) {
   const isSecondary = pane === 'secondary';
   const activeRef = isSecondary ? secondaryEditorRef : primaryEditorRef;
-  const setDiagnostics = isSecondary ? setSecondaryEditorDiagnostics : setEditorDiagnostics;
+  const setPaneDiagnostics = isSecondary ? setSecondaryEditorDiagnostics : setEditorDiagnostics;
   const setDocumentSymbols = isSecondary ? setSecondaryEditorDocumentSymbols : setEditorDocumentSymbols;
   const [mountedEditor, setMountedEditor] = useState<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
+
+  const setDiagnostics = (diagnostics: MonacoDiagnostic[]) => {
+    setPaneDiagnostics(diagnostics);
+    publishMonacoDiagnosticsToProblems(fileState.path, diagnostics);
+  };
 
   useNativeMonacoYjsBinding({
     enabled: collaborationNativeBindingEnabled,

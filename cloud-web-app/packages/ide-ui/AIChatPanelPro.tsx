@@ -37,6 +37,10 @@ import { ResourceMonitorHUD } from '../../web/components/agents/chat/ResourceMon
 import { FusionTransactionUndoBanner } from '../../web/components/agents/chat/ledger/FusionTransactionUndoBanner'
 import { NexusMissionPhaseStrip } from '../../web/components/agents/chat/activity/NexusMissionPhaseStrip'
 import { nexusCellsToAgentBoard } from '../../web/lib/production/nexus-mission-ui'
+import {
+  getAgentsOpsPrefs,
+  setAgentsOpsPrefs,
+} from '../../web/lib/storage/ui-persistence-spine'
 
 export default function AIChatPanelPro({
   messages = [],
@@ -71,6 +75,7 @@ export default function AIChatPanelPro({
   const editorBridge = useEditorApplyBridge()
   const {
     applyBusy,
+    applyReceipts,
     enableAdvancedControls,
     handleAcceptPendingDiff,
     handleRejectPendingDiff,
@@ -230,10 +235,12 @@ export default function AIChatPanelPro({
   const pendingDiff = editorBridge?.pendingDiff ?? null
   const [showInlineDiffPreview, setShowInlineDiffPreview] = useState(false)
 
-  // Calm mode — hides telemetry/ops panels by default, persisted to localStorage
+  // Calm mode — hides telemetry/ops panels by default (CW4 agents.opsPrefs spine).
   const [calmMode, setCalmMode] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('aethel-chat-calm') !== 'false'
+      const prefs = getAgentsOpsPrefs()
+      if (typeof prefs.calmMode === 'boolean') return prefs.calmMode
+      return true
     } catch {
       return true
     }
@@ -241,7 +248,7 @@ export default function AIChatPanelPro({
   const toggleCalmMode = () => {
     setCalmMode((prev) => {
       const next = !prev
-      try { localStorage.setItem('aethel-chat-calm', String(next)) } catch { /* noop */ }
+      setAgentsOpsPrefs({ calmMode: next })
       return next
     })
   }
@@ -533,6 +540,9 @@ export default function AIChatPanelPro({
         defaultGoal={lastUserGoal}
         latestEvidence={latestEvidence}
         currentRunEstimate={estimatedCost}
+        lastApplyDeny={lastApplyDeny}
+        applyReceipts={applyReceipts}
+        nexusCells={latestNexus?.cells ?? []}
       />
     </div>
   )

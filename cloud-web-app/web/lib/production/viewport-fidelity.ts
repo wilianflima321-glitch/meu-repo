@@ -3,7 +3,13 @@
  * Maps to real R3F / Three.js preview knobs — never Nanite/Lumen/deferred labels.
  */
 
-export const VIEWPORT_FIDELITY_STORAGE_KEY = 'aethel.viewport.fidelity'
+import {
+  getViewportFidelityPreference,
+  setViewportFidelityPreference,
+  UI_PERSISTENCE_LEGACY_KEYS,
+} from '@/lib/storage/ui-persistence-spine'
+
+export const VIEWPORT_FIDELITY_STORAGE_KEY = UI_PERSISTENCE_LEGACY_KEYS.viewportFidelity
 export const VIEWPORT_FIDELITY_SETTING_ID = 'engine.viewport.fidelity'
 
 export type ViewportFidelityLevel =
@@ -140,8 +146,8 @@ export function getViewportFidelityParams(
 export function readStoredViewportFidelity(): ViewportFidelityLevel {
   if (typeof window === 'undefined') return 'balanced'
   try {
-    const raw = window.localStorage.getItem(VIEWPORT_FIDELITY_STORAGE_KEY)
-    if (isViewportFidelityLevel(raw)) return raw
+    const fromSpine = getViewportFidelityPreference()
+    if (isViewportFidelityLevel(fromSpine)) return fromSpine
     // Migrate from settings bag if present
     const bag = window.localStorage.getItem('settings')
     if (bag) {
@@ -158,7 +164,7 @@ export function readStoredViewportFidelity(): ViewportFidelityLevel {
 
 export function writeStoredViewportFidelity(level: ViewportFidelityLevel): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(VIEWPORT_FIDELITY_STORAGE_KEY, level)
+  setViewportFidelityPreference(level)
   try {
     const bagRaw = window.localStorage.getItem('settings')
     const bag = bagRaw ? (JSON.parse(bagRaw) as Record<string, unknown>) : {}

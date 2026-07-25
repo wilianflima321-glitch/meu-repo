@@ -22,6 +22,7 @@ import {
   Sparkles,
   Folder,
   X,
+  Box,
 } from "lucide-react";
 
 // ============================================================================
@@ -96,7 +97,7 @@ export function AssetCard({
             style={{ objectFit: "cover" }}
           />
         ) : (
-          <span>{config.icon}</span>
+          <Box className="w-10 h-10" style={{ color: config.color }} />
         )}
 
         {/* Starred indicator */}

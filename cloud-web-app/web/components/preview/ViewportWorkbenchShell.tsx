@@ -13,6 +13,7 @@ import {
   Wand2,
 } from 'lucide-react'
 import { DockRegion, DockResizeHandle, WorkspaceProvider, useWorkspaceStore, useZenMode } from '../../../packages/ide-ui/docking'
+import { viewportDockStorageKey } from '@/lib/viewport/viewport-dock-persist'
 
 type ViewportWorkbenchShellProps = {
   title: string
@@ -52,7 +53,7 @@ const chipClass =
   'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em]'
 
 export function ViewportWorkbenchShell(props: ViewportWorkbenchShellProps) {
-  const storageKey = useMemo(() => `aethel.viewport.dock.${props.mode}.v1`, [props.mode])
+  const storageKey = useMemo(() => viewportDockStorageKey(props.mode), [props.mode])
   return (
     <WorkspaceProvider storageKey={storageKey}>
       <ViewportWorkbenchShellInner {...props} />
@@ -74,7 +75,7 @@ function ViewportWorkbenchShellInner({ title, subtitle, mode, center, left, righ
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-[var(--aethel-surface-primary)]">
-      <div className="border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(15,23,42,0.84),rgba(8,47,73,0.22))] px-4 py-3">
+      <div className="border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-surface-primary)_96%,transparent),color-mix(in_srgb,var(--aethel-surface-secondary)_84%,transparent),color-mix(in_srgb,var(--aethel-info)_18%,transparent))] px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -112,7 +113,7 @@ function ViewportWorkbenchShellInner({ title, subtitle, mode, center, left, righ
                 <SlidersHorizontal className="h-4 w-4" />
                 Tools
               </summary>
-              <div className="absolute right-0 z-30 mt-2 w-56 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_94%,transparent)] p-2 shadow-[0_24px_80px_rgba(2,6,23,0.42)] backdrop-blur-md">
+              <div className="absolute right-0 z-30 mt-2 w-56 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_94%,transparent)] p-2 shadow-[var(--aethel-shadow-xl)] backdrop-blur-md">
                 <button
                   type="button"
                   aria-label="Generate asset in viewport"
@@ -166,7 +167,7 @@ function ViewportWorkbenchShellInner({ title, subtitle, mode, center, left, righ
 
         <div
           ref={columnRef}
-          className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[linear-gradient(180deg,rgba(9,12,19,0.98),rgba(13,19,31,0.95))]"
+          className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent),color-mix(in_srgb,var(--aethel-surface-secondary)_95%,transparent))]"
         >
           <div className="min-h-0 flex-1 overflow-hidden">{center}</div>
 

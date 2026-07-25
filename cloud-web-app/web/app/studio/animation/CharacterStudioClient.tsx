@@ -84,7 +84,7 @@ function CharacterToolPicker({
               'group relative flex w-full items-center gap-2.5 overflow-hidden rounded-xl border px-3 py-2.5 text-left transition-all duration-200',
               'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)]',
               active
-                ? 'border-[color-mix(in_srgb,var(--aethel-neon-cyan)_28%,transparent)] bg-[rgba(0,229,255,0.06)]'
+                ? 'border-[color-mix(in_srgb,var(--aethel-neon-cyan)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-neon-cyan)_6%,transparent)]'
                 : 'border-transparent hover:border-[var(--aethel-border-subtle)] hover:bg-[var(--aethel-surface-secondary)]',
             ].join(' ')}
           >

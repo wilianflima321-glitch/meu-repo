@@ -13,7 +13,7 @@ type PreviewContextDockProps = {
   onRefresh?: () => void
 }
 
-const dockButtonClass = `inline-flex min-h-10 items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-elevated)] px-3 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] shadow-[0_18px_54px_rgba(2,6,23,0.34)] transition hover:border-[var(--aethel-border-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+const dockButtonClass = `inline-flex min-h-10 items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-elevated)] px-3 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] shadow-[var(--aethel-shadow-lg)] transition hover:border-[var(--aethel-border-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
 export function PreviewContextDock({ isInline, isInspecting, isStale, onInspect, onRefresh }: PreviewContextDockProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -36,7 +36,7 @@ export function PreviewContextDock({ isInline, isInspecting, isStale, onInspect,
   }
 
   return (
-    <div className="absolute bottom-4 right-4 z-30 w-[260px] rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] p-2 shadow-[0_24px_80px_rgba(2,6,23,0.42)] backdrop-blur-md" data-preview-context-menu="expanded">
+    <div className="absolute bottom-4 right-4 z-30 w-[260px] rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] p-2 shadow-[var(--aethel-shadow-xl)] backdrop-blur-md" data-preview-context-menu="expanded">
       <div className="flex items-center justify-between gap-2 px-2 py-1.5">
         <div>
           <p className="text-xs font-semibold text-[var(--aethel-text-primary)]">Preview edit menu</p>

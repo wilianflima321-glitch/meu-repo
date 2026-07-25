@@ -111,7 +111,15 @@ pub fn build_sidecar_capability_manifest(
             label: kind.label().to_string(),
             available,
             reason: if available {
-                format!("{} is available for local execution.", kind.label())
+                match kind {
+                    // Path A honesty: sidecar probe ≠ WebView/UE RHI present.
+                    // Secondary-window evidence is `renderer_present_probe` only.
+                    RuntimeSidecarKind::WgpuRenderer => format!(
+                        "{} mount/backend probe available — WebView exclusive present HELD; secondary present via renderer_present_probe only (not UE RHI).",
+                        kind.label()
+                    ),
+                    _ => format!("{} is available for local execution.", kind.label()),
+                }
             } else {
                 format!(
                     "{} was not confirmed by the Studio Local probe.",

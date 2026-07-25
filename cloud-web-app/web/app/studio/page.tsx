@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CreativeWorkbenchShell } from '@/components/studio/CreativeWorkbenchShell'
 import EngineSpineReadinessPanel from '@/components/studio/EngineSpineReadinessPanel'
 import { SurfaceQualityShell } from '@/components/product/SurfaceQualityShell'
+import { WorkbenchLoadingState } from '@/components/ui/WorkbenchSurfaceStates'
 import StudioMissionControl from './StudioMissionControl'
 import { CREATIVE_STUDIO_ROUTES, groupCreativeStudioRoutes, isPrimaryCreativeStudioRoute, getCreativeStudioRouteNavigationHref } from './creative-studio-routes'
 
@@ -43,7 +44,7 @@ function StudioHubOutliner() {
 // --- Studio hub inspector: engine readiness -----------------------------------
 function StudioHubInspector() {
   return (
-    <Suspense fallback={<div className="h-24 animate-pulse rounded-lg bg-[var(--aethel-surface-secondary)]" />}>
+    <Suspense fallback={<WorkbenchLoadingState label="Loading engine readiness…" rows={2} />}>
       <EngineSpineReadinessPanel />
     </Suspense>
   )
@@ -87,7 +88,7 @@ function StudioHubViewport() {
           </div>
 
           <div
-            className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
+            className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] shadow-[var(--aethel-shadow-lg)]"
             data-studio-surface-board="operator-density"
             data-studio-primary-lanes="5"
           >
@@ -129,7 +130,7 @@ function StudioHubViewport() {
         </section>
 
         {/* Advanced editors */}
-        <details className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] p-4 shadow-[0_18px_70px_rgba(0,0,0,0.18)]">
+        <details className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] p-4 shadow-[var(--aethel-shadow-lg)]">
           <summary className="cursor-pointer list-none">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -206,7 +207,7 @@ export default function CreativeStudioPage() {
       primaryAction={
         <a
           href="#studio-primary-surfaces"
-          className="rounded-full bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[0_14px_32px_rgba(2,6,23,0.16)]"
+          className="rounded-full bg-[var(--aethel-text-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-surface-primary)] shadow-[var(--aethel-shadow-md)]"
         >
           Open editor
         </a>

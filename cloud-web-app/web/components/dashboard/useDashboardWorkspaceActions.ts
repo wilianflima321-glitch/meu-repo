@@ -10,7 +10,7 @@ import type {
   SessionFilter,
   ToastType,
 } from './aethel-dashboard-model'
-import { STORAGE_KEYS, clearStoredDashboardState } from './aethel-dashboard-model'
+import { clearStoredDashboardState, persistDashboardActiveTab } from './aethel-dashboard-model'
 import { createProjectEntry, removeProjectEntry } from './aethel-dashboard-project-utils'
 import { DEFAULT_PROJECTS } from './aethel-dashboard-defaults'
 import { createInitialSessionEntry } from './aethel-dashboard-session-utils'
@@ -76,7 +76,7 @@ export function useDashboardWorkspaceActions({
     setActiveTab('activity')
     setChatMode('chat')
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEYS.activeTab, 'activity')
+      persistDashboardActiveTab('activity')
     }
     navigateToIdeWithContext('dashboard-agent-handoff', 'agents')
     trackEvent('ai', 'ai_chat', { source: 'first-value-guide', action: 'open-agents-in-ide' })

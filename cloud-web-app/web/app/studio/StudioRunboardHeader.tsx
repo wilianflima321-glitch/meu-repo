@@ -15,12 +15,11 @@ export function StudioRunboardHeader({
     <div className="relative flex flex-wrap items-start justify-between gap-4 overflow-hidden">
       {/* Ambient glow layer */}
       <div
-        className="pointer-events-none absolute -top-12 -left-8 h-48 w-96 rounded-full opacity-30"
-        style={{
-          background: isActive
-            ? 'radial-gradient(circle, rgba(34,211,238,.18) 0%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(129,140,248,.12) 0%, transparent 70%)',
-        }}
+        className={`pointer-events-none absolute -left-8 -top-12 h-48 w-96 rounded-full opacity-30 ${
+          isActive
+            ? 'bg-[radial-gradient(circle,color-mix(in_srgb,var(--aethel-neon-cyan)_18%,transparent)_0%,transparent_70%)]'
+            : 'bg-[radial-gradient(circle,color-mix(in_srgb,var(--aethel-neon-indigo)_12%,transparent)_0%,transparent_70%)]'
+        }`}
         aria-hidden
       />
 
@@ -48,7 +47,7 @@ export function StudioRunboardHeader({
           </span>
 
           {isActive && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300 animate-glow-cyan">
+            <span className="inline-flex animate-glow-cyan items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-neon-cyan)_10%,transparent)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--aethel-neon-cyan)]">
               <Zap className="h-3 w-3" aria-hidden />
               Live
             </span>

@@ -2,14 +2,17 @@
  * Block 7A.2 — Dock persistence keys + remount honesty.
  * Existing WorkspaceProvider storage covers layout; WebGL canvas singleton
  * across Next.js route changes remains [HELD] (no parallel remount invent).
+ * CW4: canonical key lives in UI persistence spine legacy registry.
  */
 
-export const IDE_DOCK_STORAGE_KEY = 'aethel.ide.dock.v1'
+import { UI_PERSISTENCE_LEGACY_KEYS } from '@/lib/storage/ui-persistence-spine'
+
+export const IDE_DOCK_STORAGE_KEY = UI_PERSISTENCE_LEGACY_KEYS.ideDock
 
 export type ViewportDockMode = 'viewport' | 'canvas' | 'runtime'
 
 export function viewportDockStorageKey(mode: ViewportDockMode): string {
-  return `aethel.viewport.dock.${mode}.v1`
+  return `${UI_PERSISTENCE_LEGACY_KEYS.viewportDockPrefix}${mode}.v1`
 }
 
 export type WebglRouteRemountHonesty = {

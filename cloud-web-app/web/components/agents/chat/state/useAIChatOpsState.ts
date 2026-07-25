@@ -4,6 +4,11 @@ import { useCallback, useEffect, useState } from 'react'
 import type { EditorApplyBridgeContextValue } from '@aethel/ide-ui/EditorApplyBridgeContext'
 import type { AIChatOpsTab } from '@/components/agents/chat/presets'
 import { runGovernedChangeApply } from '@/lib/ai/governed-change-apply-client'
+import {
+  appendGovernedApplyReceipt,
+  toGovernedApplyReceipt,
+  type GovernedApplyReceipt,
+} from '@/lib/production/agents-merge-governance'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('useAIChatOpsState')
@@ -30,6 +35,11 @@ export function useAIChatOpsState({ editorBridge }: UseAIChatOpsStateParams) {
   const [showAdvancedControls, setShowAdvancedControls] = useState(false)
   const [applyBusy, setApplyBusy] = useState(false)
   const [lastApplyDeny, setLastApplyDeny] = useState<string | null>(null)
+  const [applyReceipts, setApplyReceipts] = useState<GovernedApplyReceipt[]>([])
+
+  const pushReceipt = useCallback((receipt: GovernedApplyReceipt) => {
+    setApplyReceipts((prev) => appendGovernedApplyReceipt(prev, receipt))
+  }, [])
 
   const openOpsTab = useCallback((tab: AIChatOpsTab) => {
     setShowAdvancedControls(true)
@@ -86,19 +96,47 @@ export function useAIChatOpsState({ editorBridge }: UseAIChatOpsStateParams) {
         })
 
         if (!governed.ok) {
-          setLastApplyDeny(governed.banner)
+          const receipt = toGovernedApplyReceipt(filePath, governed)
+          pushReceipt(receipt)
+          setLastApplyDeny(
+            `${receipt.code || 'APPLY_DENIED'}: ${receipt.detail || governed.banner}`,
+          )
           announceApplyDeny(governed.copy.title, governed.copy.detail)
           log.warn('chat_diff_apply_denied', {
-            code: governed.error,
-            runId: governed.runId,
+            code: receipt.code,
+            runId: receipt.runId,
             filePath,
+            outcome: receipt.outcome,
+            marketingAllowed: receipt.marketingAllowed,
           })
           // Fail-closed: keep pendingDiff so the user can fix / reject
           return
         }
 
+        const applied = toGovernedApplyReceipt(filePath, governed)
+        pushReceipt(applied)
+        log.info('chat_diff_apply_receipt', {
+          outcome: applied.outcome,
+          runId: applied.runId,
+          filePath,
+          marketingAllowed: applied.marketingAllowed,
+        })
+
         const result = editorBridge.replaceEntireFile(finalModified)
         if (!result.ok) {
+          const editorDeny: GovernedApplyReceipt = {
+            outcome: 'denied',
+            filePath,
+            touchedPaths: [filePath],
+            taskDependencies: [],
+            fileValidation: [],
+            code: 'EDITOR_REPLACE_FAILED',
+            detail: result.message,
+            at: new Date().toISOString(),
+            marketingAllowed: false,
+            composerSurpassClaim: false,
+          }
+          pushReceipt(editorDeny)
           setLastApplyDeny(result.message)
           announceApplyDeny('Editor update failed', result.message)
           return
@@ -108,6 +146,19 @@ export function useAIChatOpsState({ editorBridge }: UseAIChatOpsStateParams) {
         setLastApplyDeny(null)
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Governed apply failed.'
+        const crashDeny: GovernedApplyReceipt = {
+          outcome: 'denied',
+          filePath,
+          touchedPaths: [filePath],
+          taskDependencies: [],
+          fileValidation: [],
+          code: 'APPLY_EXCEPTION',
+          detail: message,
+          at: new Date().toISOString(),
+          marketingAllowed: false,
+          composerSurpassClaim: false,
+        }
+        pushReceipt(crashDeny)
         setLastApplyDeny(message)
         announceApplyDeny('Apply failed', message)
         log.error('chat_diff_apply_failed', error instanceof Error ? error : undefined)
@@ -115,7 +166,7 @@ export function useAIChatOpsState({ editorBridge }: UseAIChatOpsStateParams) {
         setApplyBusy(false)
       }
     },
-    [applyBusy, editorBridge]
+    [applyBusy, editorBridge, pushReceipt]
   )
 
   const handleRejectPendingDiff = useCallback(() => {
@@ -133,6 +184,7 @@ export function useAIChatOpsState({ editorBridge }: UseAIChatOpsStateParams) {
 
   return {
     applyBusy,
+    applyReceipts,
     enableAdvancedControls,
     handleAcceptPendingDiff,
     handleRejectPendingDiff,
