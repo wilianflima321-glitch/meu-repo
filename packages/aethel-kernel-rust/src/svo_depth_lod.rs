@@ -42,7 +42,7 @@ pub const REF_OBJECT_SIZE: f32 = 1.0;
 /// Viewport height in pixels (soak default).
 pub const SOAK_VIEWPORT_HEIGHT: f32 = 720.0;
 /// Vertical FOV radians (≈60°) for projected-error path.
-pub const SOAK_FOV_Y: f32 = 1.047_197_6;
+pub const SOAK_FOV_Y: f32 = std::f32::consts::FRAC_PI_3;
 /// Screen-error (px) at/above this → max depth (soak near ≈1247px @ 0.5wu).
 pub const NEAR_ERROR_PX: f32 = 200.0;
 /// Screen-error (px) at/above this (and < near) → mid; else far (soak far ≈78px @ 8wu).

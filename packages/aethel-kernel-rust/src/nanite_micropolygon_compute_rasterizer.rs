@@ -23,7 +23,9 @@ pub const MAX_BATCH_CLUSTERS: usize = 256;
 pub const SW_RASTER_AREA_THRESHOLD: f32 = 16.0;
 /// Fixed-point shift for 16.16 precision edge functions.
 const FIXED_SHIFT: i32 = 16;
-/// Float comparison epsilon.
+/// Float comparison epsilon (referenced by `#[cfg(test)]` assertions below;
+/// invisible to a non-test `cargo clippy --lib` pass).
+#[allow(dead_code)]
 const EPS: f32 = 1e-5;
 
 /// Micro-triangle vertex representation in cluster local space.

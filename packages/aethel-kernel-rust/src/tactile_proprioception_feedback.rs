@@ -10,7 +10,7 @@ impl TactileProprioceptionFeedback {
         // A velocidade de arraste do cursor é punida matematicamente pela densidade do material.
         // Ao mesmo tempo, um harmônico grave é enviado ao driver de som.
         // O corpo do humano "sente" o peso físico daquilo que não existe.
-        let cursor_friction_penalty = material_density * 0.8;
-        cursor_friction_penalty
+        
+        material_density * 0.8
     }
 }

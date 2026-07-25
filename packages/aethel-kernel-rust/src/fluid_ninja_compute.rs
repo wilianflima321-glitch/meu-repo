@@ -712,6 +712,9 @@ pub fn run_fluid_ninja_compute_soak() -> FluidNinjaComputeSoakReport {
     let mut grid_a = FluidNinjaGrid::new(SOAK_GRID_N, SOAK_SEED);
     seed_fluid_scene(&mut grid_a, SOAK_SEED);
     let mass0 = grid_a.density_mass();
+    // Intentional NaN-safety guard: `!(mass0 > SOAK_EPS)` rejects NaN as invalid mass;
+    // `mass0 <= SOAK_EPS` would not (NaN comparisons are always false).
+    #[allow(clippy::neg_cmp_op_on_partial_ord)]
     if !(mass0 > SOAK_EPS) {
         return build_report(
             false, false, false, false, false, false, false, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0,

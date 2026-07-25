@@ -5,7 +5,7 @@ pub struct DistributedEdgeHosting;
 
 impl DistributedEdgeHosting {
     /// Fragmenta o peso do ECS de um mundo 3D Aethel entre todos os clientes ativos.
-    pub fn fragment_thermal_load(peer_count: u32, local_npu_capacity: f32) {
+    pub fn fragment_thermal_load(peer_count: u32, _local_npu_capacity: f32) {
         println!("[Edge Computing] Analisando Supercomputação P2P Distribuída. Peers: {}", peer_count);
         
         // Se 1.000 pessoas logam, o mundo não dá lag no servidor. 

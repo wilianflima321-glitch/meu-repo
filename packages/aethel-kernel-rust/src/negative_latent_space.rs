@@ -9,6 +9,12 @@ pub struct NegativeLatentSpace {
     pain_registry: HashSet<u64>,
 }
 
+impl Default for NegativeLatentSpace {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl NegativeLatentSpace {
     pub fn new() -> Self {
         Self {

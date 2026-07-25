@@ -107,13 +107,13 @@ impl FractalHeightfield {
                 let mut x = 0usize;
                 while x < size {
                     // Odd-x / even-y on this lattice → horizontal midpoints.
-                    if (x % step == half) && (y % step == 0) {
+                    if (x % step == half) && y.is_multiple_of(step) {
                         let avg = square_avg(&heights, size, x, y, half);
                         let noise = rng.next_signed() * amp;
                         set(&mut heights, size, x, y, avg + noise);
                     }
                     // Even-x / odd-y → vertical midpoints.
-                    if (x % step == 0) && (y % step == half) {
+                    if x.is_multiple_of(step) && (y % step == half) {
                         let avg = square_avg(&heights, size, x, y, half);
                         let noise = rng.next_signed() * amp;
                         set(&mut heights, size, x, y, avg + noise);

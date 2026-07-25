@@ -30,7 +30,7 @@ impl EmotionMicroSaccadeEngine {
         let saccade_y = (t * (saccade_freq * 1.3)).cos() * 0.003;
 
         // Periodic natural blink every 3.5 seconds
-        let blink_phase = (t % 3.5);
+        let blink_phase = t % 3.5;
         let eyelid_blink_weight = if blink_phase < 0.15 {
             (blink_phase / 0.075).sin().clamp(0.0, 1.0) // Smooth blink curve
         } else {

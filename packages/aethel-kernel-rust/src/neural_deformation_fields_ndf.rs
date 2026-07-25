@@ -5,7 +5,7 @@ pub struct NeuralDeformationFieldsNdf;
 
 impl NeuralDeformationFieldsNdf {
     /// Animação Orgânica por Preservação de Massa. O bíceps incha ao dobrar.
-    pub fn deform_volume_by_intention(anchor_vector: [f32; 3], mass_density: f32) {
+    pub fn deform_volume_by_intention(_anchor_vector: [f32; 3], _mass_density: f32) {
         // println!("[NDF] Ancoragem de braço detectada. Injetando Hidrodinâmica Muscular.");
         // O Maestro apenas diz "Mover braço para X". O NDF calcula como a "carne" se
         // amassa, contrai e expande, substituindo 300 ossos de rigging manual arcaicos.

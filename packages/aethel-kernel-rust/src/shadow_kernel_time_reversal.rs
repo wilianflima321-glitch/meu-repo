@@ -458,27 +458,24 @@ pub fn run_shadow_time_reversal_soak() -> ShadowTimeReversalSoakReport {
         && advanced_snapshot.position_delta_vs(&world) <= EPS;
 
     // Negative delta: multi-step rewind back to baseline.
-    let mut rewind_ok = false;
-    let mut final_delta = baseline.position_delta_vs(&world);
     let mut guard = SOAK_ADVANCE_FRAMES.saturating_add(2);
-    while guard > 0 && ring.len() > 0 {
+    while guard > 0 && !ring.is_empty() {
         guard -= 1;
         let r = ShadowKernelTimeReversal::execute_localized_time_reversal(
             &mut ring,
             &mut world,
             -FRAME_DT,
         );
-        final_delta = baseline.position_delta_vs(&world);
-        if final_delta <= EPS {
-            rewind_ok = true;
+        let step_delta = baseline.position_delta_vs(&world);
+        if step_delta <= EPS {
             break;
         }
         if !r.rewound && r.steps_applied == 0 {
             break;
         }
     }
-    final_delta = baseline.position_delta_vs(&world);
-    rewind_ok = final_delta <= EPS && positions_advanced;
+    let final_delta = baseline.position_delta_vs(&world);
+    let rewind_ok = final_delta <= EPS && positions_advanced;
 
     let rewind_restored_positions = rewind_ok && positive_delta_identity;
     let ring_depth = ring.capacity() as u32;

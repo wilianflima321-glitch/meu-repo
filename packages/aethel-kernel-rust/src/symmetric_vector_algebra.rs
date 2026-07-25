@@ -89,6 +89,9 @@ impl Mat4 {
         Self::from_rotation_translation(cols, t)
     }
 
+    // Inherent method predates `std::ops::Mul`; renaming/retrofitting the trait would
+    // change call-site ergonomics across existing soak code for no functional benefit.
+    #[allow(clippy::should_implement_trait)]
     #[inline]
     pub fn mul(self, other: Mat4) -> Mat4 {
         let a = &self.m;

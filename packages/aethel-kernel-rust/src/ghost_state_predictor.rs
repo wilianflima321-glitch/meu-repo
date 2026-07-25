@@ -65,6 +65,11 @@ impl GhostPositionBuffer {
         self.px.len().min(self.py.len()).min(self.pz.len())
     }
 
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     /// Mean absolute displacement from `origin` positions.
     pub fn mean_abs_from(&self, origin: &[(f32, f32, f32)]) -> f32 {
         let n = self.len().min(origin.len());

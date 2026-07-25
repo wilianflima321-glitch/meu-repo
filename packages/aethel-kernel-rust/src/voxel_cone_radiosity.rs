@@ -216,7 +216,7 @@ impl VoxelConeRadiosity {
             direction[1] / dir_len,
             direction[2] / dir_len,
         ];
-        let aperture = params.aperture.max(0.01).min(1.2);
+        let aperture = params.aperture.clamp(0.01, 1.2);
         let tan_a = aperture.tan();
         let max_dist = params.max_dist.max(EPS);
         let steps = params.steps.max(1);

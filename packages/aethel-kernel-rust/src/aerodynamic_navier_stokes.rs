@@ -456,9 +456,9 @@ impl AerodynamicNavierStokes {
 
         let mean_speed_after = grid.mean_speed();
         let max_speed = grid.max_speed();
-        let velocity_changed =
+        let _velocity_changed =
             (mean_speed_after - mean_speed_before).abs() >= MIN_VELOCITY_DELTA || max_speed >= EPS;
-        let div_bounded = mean_abs_div_after.is_finite() && mean_abs_div_after <= MAX_MEAN_ABS_DIV;
+        let _div_bounded = mean_abs_div_after.is_finite() && mean_abs_div_after <= MAX_MEAN_ABS_DIV;
         let ns_active =
             mean_speed_after > EPS && mean_abs_div_after <= MAX_MEAN_ABS_DIV && max_speed > EPS;
 

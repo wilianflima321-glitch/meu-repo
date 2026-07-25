@@ -25,7 +25,7 @@ impl CinematicQualityVisionAuditor {
         pupil_refraction_index: f32,
         skin_sss_dermal_perfusion: f32,
     ) -> FrameOpticalAuditReport {
-        let pupil_ok = pupil_refraction_index >= 1.33 && pupil_refraction_index <= 1.40;
+        let pupil_ok = (1.33..=1.40).contains(&pupil_refraction_index);
         let sss_fidelity = (skin_sss_dermal_perfusion * 100.0).clamp(70.0, 100.0);
         let error_margin = (100.0 - sss_fidelity) * 0.05;
 

@@ -145,10 +145,8 @@ impl GazeFoveatedReprojection {
             && periph_mean.is_finite()
             && reprojected_luma.is_finite();
         let in_unit_interval = quality.iter().all(|v| *v >= 0.0 && *v <= 1.0)
-            && fovea_mean >= 0.0
-            && fovea_mean <= 1.0
-            && periph_mean >= 0.0
-            && periph_mean <= 1.0;
+            && (0.0..=1.0).contains(&fovea_mean)
+            && (0.0..=1.0).contains(&periph_mean);
 
         let mut parts = vec![
             p.seed,

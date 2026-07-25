@@ -10,8 +10,8 @@ impl SdfDepthIlluminationSss {
         
         // A matemática simula a carne humana. Se você põe a mão contra o Sol, o meio brilha vermelho.
         // O Fóton não rebate apenas na casca, ele morre progressivamente dentro do campo.
-        let glow_intensity = (1.0 / (distance_to_core * absorption_coefficient)).exp();
         
-        glow_intensity
+        
+        (1.0 / (distance_to_core * absorption_coefficient)).exp()
     }
 }

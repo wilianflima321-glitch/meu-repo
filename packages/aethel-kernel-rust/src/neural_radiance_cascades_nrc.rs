@@ -3,7 +3,6 @@
 //! Replaces the ZST stub with a deterministic algorithm for Radiance Cascades.
 //! Instead of raymarching every pixel, it uses a branching hierarchy of probes.
 
-use crate::ecs_core::SceneGraph;
 
 pub struct RadianceCascade {
     pub level: u32,

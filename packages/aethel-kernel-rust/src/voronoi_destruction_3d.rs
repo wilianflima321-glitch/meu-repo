@@ -104,6 +104,10 @@ impl VoronoiFragmentSoA {
         self.center_x.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.center_x.is_empty()
+    }
+
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
             center_x: vec![0.0; capacity],
@@ -263,9 +267,7 @@ impl VoronoiDestruction3D {
         // Approximate Voronoi cell volumes: sample AABB on a grid; assign each sample
         // to nearest seed. Sample side scales with ∛N (load-scale: 13×2=26 → ~17.5k samples).
         let grid_est = ((num_seeds as f32).cbrt().ceil() as usize).max(2);
-        let sample_side = (grid_est * LOAD_SCALE_SAMPLE_SIDE_MULT)
-            .max(4)
-            .min(32);
+        let sample_side = (grid_est * LOAD_SCALE_SAMPLE_SIDE_MULT).clamp(4, 32);
         let mut volume_sample_count = 0u32;
         for iz in 0..sample_side {
             let tz = (iz as f32 + 0.5) / (sample_side as f32);
@@ -612,6 +614,6 @@ mod tests {
             r.site_count
         );
         assert_eq!(LOAD_SCALE_GRID_SIDE * LOAD_SCALE_GRID_SIDE * LOAD_SCALE_GRID_SIDE, LOAD_SCALE_SITE_COUNT);
-        assert!(LOAD_SCALE_SITE_COUNT >= LOAD_SCALE_MIN_SITES);
+        const { assert!(LOAD_SCALE_SITE_COUNT >= LOAD_SCALE_MIN_SITES) };
     }
 }

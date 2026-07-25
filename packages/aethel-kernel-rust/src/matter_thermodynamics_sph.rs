@@ -561,7 +561,7 @@ impl MatterThermodynamicsSph {
         } else {
             DEFAULT_H
         };
-        let mut hash = SphSpatialHash::with_capacity(n, h, HASH_GRID_DIM.min(16).max(4));
+        let mut hash = SphSpatialHash::with_capacity(n, h, HASH_GRID_DIM.clamp(4, 16));
         Self::estimate_density_hashed(particles, h, &mut hash);
     }
 
@@ -1457,13 +1457,9 @@ pub fn run_matter_thermodynamics_sph_hash_soak() -> MatterThermodynamicsSphSoakR
     let density_finite = particles.dens.iter().all(|v| v.is_finite() && *v > 0.0);
     let density_changed = (dens_after - dens_before).abs() >= MIN_DENSITY_DELTA
         || dens_after > DEFAULT_REST_DENSITY + MIN_DENSITY_DELTA;
-    let ke_bounded = ke_max.is_finite() && ke_max < KE_BOUND && ke_max >= 0.0;
+    let ke_bounded = ke_max.is_finite() && (0.0..KE_BOUND).contains(&ke_max);
     // Critic: ΣC < S·N²/D (D≥8) ⇔ average C_step < N²/8.
-    let avg_step_comparisons = if steps > 0 {
-        sum_step_comparisons / steps
-    } else {
-        0
-    };
+    let avg_step_comparisons = sum_step_comparisons.checked_div(steps).unwrap_or(0);
     let subquadratic = avg_step_comparisons > 0
         && sum_step_comparisons < steps.saturating_mul(n2 / SUBQUADRATIC_DIVISOR)
         && avg_step_comparisons < n2 / SUBQUADRATIC_DIVISOR

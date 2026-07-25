@@ -10,8 +10,8 @@ impl AnisotropicNeuralMicrofacets {
         
         // Se a superfície está espremida, o brilho distorce e estica (Anisotropia física).
         // Se a superfície é plana e úmida, o brilho é perfeitamente espelhado com AA ativo.
-        let specular_spread = light_intensity * (1.0 / (curvature_tensor + 0.01));
         
-        specular_spread
+        
+        light_intensity * (1.0 / (curvature_tensor + 0.01))
     }
 }

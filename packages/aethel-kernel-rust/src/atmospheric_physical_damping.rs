@@ -221,11 +221,6 @@ impl AgenticVolumetricSound {
     }
 }
 
-#[inline]
-fn speed3(v: &[f32; 3]) -> f32 {
-    (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt()
-}
-
 /// Letter **hl** soak report — atmospheric physical damping evidence.
 #[derive(Debug, Clone, PartialEq)]
 pub struct AtmosphericPhysicalDampingSoakReport {
@@ -302,7 +297,7 @@ fn damping_evidence_fingerprint(
     water_speed_factor: f32,
     water_pitch_shift: f32,
 ) -> u64 {
-    let mut h: u64 = 0x6174_6d_64; // "atmd"
+    let mut h: u64 = 0x6174_6d64; // "atmd"
     h = h.rotate_left(11) ^ if fast_objects_slow_down_more_rapidly { 0x4653 } else { 0 };
     h = h.rotate_left(5) ^ if friction_damps_velocity { 0x4652 } else { 0 };
     h = h.rotate_left(7) ^ if water_damps_more_than_air { 0x5744 } else { 0 };

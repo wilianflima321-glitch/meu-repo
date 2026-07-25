@@ -37,7 +37,7 @@ impl HydraMeshNode {
 
     /// Transmite o estado da Física Pura de forma vetorizada via UDP-like data channels.
     /// Sem JSON, sem strings. Apenas `[f32]`.
-    pub fn broadcast_quantum_state(&self, raw_buffer_ptr: u32, length: usize) {
+    pub fn broadcast_quantum_state(&self, _raw_buffer_ptr: u32, _length: usize) {
         // Rust iteraria sobre `self.peers` injetando o byte array no DataChannel WebRTC.
         // O tempo de sincronização entre 2 desenvolvedores cai de 150ms (Cloud) para ~20ms (P2P Direto).
     }

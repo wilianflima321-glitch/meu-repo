@@ -324,7 +324,7 @@ fn meat_evidence_fingerprint(
     materials_distinct: bool,
     vein_deterministic: bool,
 ) -> u64 {
-    let mut h: u64 = 0x6d65_6174_6976_64; // "meat ivd"
+    let mut h: u64 = 0x6d65_6174_697664; // "meat ivd"
     h ^= fingerprint;
     h = h.rotate_left(11) ^ if deep_denser { 0xDEE9 } else { 0 };
     h = h.rotate_left(5) ^ if materials_distinct { 0xA5A5 } else { 0 };

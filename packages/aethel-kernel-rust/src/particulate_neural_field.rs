@@ -166,7 +166,7 @@ pub fn run_particulate_neural_field_soak() -> ParticulateNeuralFieldSoakReport {
     ParticulateNeuralFieldSoakReport {
         particulate_neural_field_ready: p_x_mutated,
         zero_alloc_hot_loop: true,
-        cache_line_aligned: size_of::<ParticulateSoABlock>() % 64 == 0,
+        cache_line_aligned: size_of::<ParticulateSoABlock>().is_multiple_of(64),
         block_count_processed: arena.len(),
     }
 }

@@ -199,7 +199,7 @@ fn cie_xyz_bar(lambda_nm: f32) -> (f32, f32, f32) {
         + gaussian_cmf(lambda_nm, 501.1, 0.0490, 0.0382) * (-0.065_188);
     let y = gaussian_cmf(lambda_nm, 568.8, 0.0213, 0.0247) * 0.821_230
         + gaussian_cmf(lambda_nm, 530.9, 0.0613, 0.0322) * 0.286_009;
-    let z = gaussian_cmf(lambda_nm, 437.0, 0.0845, 0.0278) * 1.217_200
+    let z = gaussian_cmf(lambda_nm, 437.0, 0.0845, 0.0278) * 1.217_2
         + gaussian_cmf(lambda_nm, 459.0, 0.0385, 0.0725) * 0.681_254;
     (x.max(0.0), y.max(0.0), z.max(0.0))
 }

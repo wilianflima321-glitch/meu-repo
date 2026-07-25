@@ -5,7 +5,7 @@ pub struct GazeFoveatedUiCollapse;
 
 impl GazeFoveatedUiCollapse {
     /// Desaparece a interface baseada no foco (Foveated) e Estresse mental.
-    pub fn adapt_ui_to_cognitive_load(eye_tracking_confidence: f32, hesitation_ms: u32) {
+    pub fn adapt_ui_to_cognitive_load(_eye_tracking_confidence: f32, hesitation_ms: u32) {
         if hesitation_ms > 2000 {
             // println!("[UX Collapse] Estresse detectado. Surgindo Ferramentas Semânticas de IA.");
         } else {

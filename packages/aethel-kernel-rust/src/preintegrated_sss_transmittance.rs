@@ -272,6 +272,9 @@ pub fn run_preintegrated_sss_transmittance_soak() -> PreintegratedSssTransmittan
         }
         if prev_lum.is_finite() && prev_lum < f32::INFINITY {
             // Strict decrease: thicker → lower luminance.
+            // Intentional NaN-safety guard: `!(lum < prev_lum - SOAK_EPS)` treats NaN as a
+            // monotonicity violation; `lum >= prev_lum - SOAK_EPS` would not (NaN cmp is false).
+            #[allow(clippy::neg_cmp_op_on_partial_ord)]
             if !(lum < prev_lum - SOAK_EPS) {
                 monotonic = false;
             }
@@ -283,6 +286,8 @@ pub fn run_preintegrated_sss_transmittance_soak() -> PreintegratedSssTransmittan
     let thick = &curve[curve.len() - 1];
     let thin_lum = luminance(thin.transmittance_rgb);
     let thick_lum = luminance(thick.transmittance_rgb);
+    // Intentional NaN-safety guard: see loop above.
+    #[allow(clippy::neg_cmp_op_on_partial_ord)]
     if !(thin_lum > thick_lum + SOAK_EPS) {
         monotonic = false;
     }

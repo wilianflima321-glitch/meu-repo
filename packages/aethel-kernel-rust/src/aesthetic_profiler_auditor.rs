@@ -12,7 +12,7 @@ pub struct AestheticQualityReport {
     pub joint_torque_deviation_percent: f32,
     pub spectral_dispersion_fidelity: f32,
     pub aesthetic_score: f32,
-    pub AAA_cinematic_certified: bool,
+    pub aaa_cinematic_certified: bool,
     pub recommendation: String,
 }
 
@@ -40,7 +40,7 @@ impl AestheticProfilerAuditor {
             joint_torque_deviation_percent: deviation,
             spectral_dispersion_fidelity: 99.8,
             aesthetic_score: score,
-            AAA_cinematic_certified: certified,
+            aaa_cinematic_certified: certified,
             recommendation,
         }
     }
@@ -53,10 +53,10 @@ mod tests {
     #[test]
     fn test_aesthetic_profiler_flags_unrealistic_torque() {
         let report = AestheticProfilerAuditor::audit_biomechanical_fidelity(250.0, 240.0); // 4.16% deviation (<5%)
-        assert!(report.AAA_cinematic_certified);
+        assert!(report.aaa_cinematic_certified);
         assert_eq!(report.recommendation, "PERFECT_BIOMECHANICAL_FIDELITY");
 
         let bad_report = AestheticProfilerAuditor::audit_biomechanical_fidelity(400.0, 240.0); // 66.6% deviation
-        assert!(!bad_report.AAA_cinematic_certified);
+        assert!(!bad_report.aaa_cinematic_certified);
     }
 }

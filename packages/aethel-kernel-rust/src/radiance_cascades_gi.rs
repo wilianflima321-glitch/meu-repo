@@ -209,7 +209,7 @@ pub struct RadianceCascadeStack {
 impl RadianceCascadeStack {
     /// Build empty cascade pyramid: fine res, then res/2, res/4, …
     pub fn empty(seed: u64, fine_res: usize, levels: usize, half_extent: f32) -> Self {
-        let n_levels = levels.max(1).min(8);
+        let n_levels = levels.clamp(1, 8);
         let mut cascade_levels = Vec::with_capacity(n_levels);
         let mut res = fine_res.max(2);
         for li in 0..n_levels {

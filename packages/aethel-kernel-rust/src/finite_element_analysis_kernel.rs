@@ -292,7 +292,7 @@ impl FiniteElementAnalysisKernel {
 
         let free = mesh.free_dofs();
         let m = free.len();
-        if m < 2 || m > MAX_FREE_DOF {
+        if !(2..=MAX_FREE_DOF).contains(&m) {
             return FeaStepResult::IDENTITY;
         }
 

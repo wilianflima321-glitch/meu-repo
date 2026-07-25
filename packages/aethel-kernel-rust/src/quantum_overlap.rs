@@ -99,6 +99,10 @@ impl AabbSoA {
         self.min_x.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.min_x.is_empty()
+    }
+
     pub fn push(&mut self, aabb: Aabb) {
         let a = Aabb::new(aabb.min, aabb.max);
         self.min_x.push(a.min[0]);
@@ -225,6 +229,10 @@ impl SphereSoA {
 
     pub fn len(&self) -> usize {
         self.cx.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.cx.is_empty()
     }
 
     pub fn push(&mut self, sphere: Sphere) {

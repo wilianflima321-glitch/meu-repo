@@ -54,6 +54,9 @@ impl WorldVec3 {
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
 
+    // Inherent methods predate `std::ops::Add`/`Sub`; retrofitting the traits would change
+    // call-site ergonomics across existing soak code for no functional benefit.
+    #[allow(clippy::should_implement_trait)]
     #[inline]
     pub fn add(self, o: Self) -> Self {
         Self {
@@ -63,6 +66,7 @@ impl WorldVec3 {
         }
     }
 
+    #[allow(clippy::should_implement_trait)]
     #[inline]
     pub fn sub(self, o: Self) -> Self {
         Self {

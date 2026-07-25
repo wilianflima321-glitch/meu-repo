@@ -24,7 +24,7 @@
 //! Coins / Agones / Nanite / DLSS.
 
 use crate::position_based_dynamics::{
-    soak_constraint_coloring, soak_constraints, ConstraintColoring, DistanceConstraint,
+    soak_constraint_coloring, ConstraintColoring, DistanceConstraint,
     PbdParticleSoA, PbdStepResult, PositionBasedDynamics, DEFAULT_SOLVER_ITERATIONS,
     SOAK_PARTICLE_COUNT,
 };
@@ -838,6 +838,7 @@ pub fn probe_hybrid_eulerian_lagrangian_pbd() -> HybridEulerianLagrangianPbdSoak
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::position_based_dynamics::soak_constraints;
 
     #[test]
     fn grid_sample_reads_jet_velocity() {
@@ -853,7 +854,6 @@ mod tests {
     #[test]
     fn deposit_mutates_grid_velocity() {
         let mut g = EulerianFluidGrid::soak_grid();
-        let before = g.velocity_l1();
         g.deposit_to_prev(1.5, 2.0, 1.0, 0.5);
         // It deposits to prev_vel, so we should check prev_vel
         let mut prev_l1 = 0.0;

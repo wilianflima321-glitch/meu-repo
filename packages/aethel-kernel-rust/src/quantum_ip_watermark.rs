@@ -21,10 +21,10 @@ impl QuantumIpWatermark {
     /// Embeds quantum watermark hash into frame metadata.
     pub fn generate_frame_watermark(creator_key: &str, asset_hash: &str) -> QuantumWatermarkPayload {
         let timestamp = 1774137600_u64;
-        let seed = (sha256::digest(format!("{}:{}", creator_key, asset_hash).as_bytes())
+        let seed = sha256::digest(format!("{}:{}", creator_key, asset_hash).as_bytes())
             .bytes()
             .take(4)
-            .fold(0_u32, |acc, b| (acc << 8) | b as u32));
+            .fold(0_u32, |acc, b| (acc << 8) | b as u32);
 
         QuantumWatermarkPayload {
             creator_signature: creator_key.to_string(),

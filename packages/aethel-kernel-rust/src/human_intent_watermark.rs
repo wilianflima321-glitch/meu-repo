@@ -6,7 +6,7 @@ pub struct HumanIntentWatermark;
 
 impl HumanIntentWatermark {
     /// Injeta a comprovação de intencionalidade biológica.
-    pub fn certify_human_authorization(seed_hash: u64, human_prompt_log: &str) {
+    pub fn certify_human_authorization(seed_hash: u64, _human_prompt_log: &str) {
         println!("[Proof of Logic] Certificando autoria biológica sobre Ativo Gerado (Seed: {})...", seed_hash);
         
         // Grava no bit do objeto (Metadados Atômicos):

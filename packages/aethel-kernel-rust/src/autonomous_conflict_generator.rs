@@ -91,7 +91,15 @@ impl ConflictEventBuffer {
     pub fn soak_buffer() -> Self {
         Self::new()
     }
+}
 
+impl Default for ConflictEventBuffer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ConflictEventBuffer {
     #[inline]
     pub fn capacity(&self) -> usize {
         SOAK_CAPACITY
@@ -441,7 +449,7 @@ pub fn run_autonomous_conflict_generator_soak() -> AutonomousConflictGeneratorSo
     // --- Couple one high spawn into WorldSoA velocity ---
     let mut couple_buf = ConflictEventBuffer::soak_buffer();
     let mut world = WorldSoA::with_capacity(SOAK_CAPACITY);
-    for i in 0..SOAK_CAPACITY {
+    for _i in 0..SOAK_CAPACITY {
         world.add_entity(0.0, 0.0, 0.0).unwrap();
     }
     let mut vel_before = 0.0_f32;
@@ -603,7 +611,7 @@ mod tests {
     fn couple_raises_velocity_field() {
         let mut buf = ConflictEventBuffer::soak_buffer();
         let mut world = WorldSoA::with_capacity(SOAK_CAPACITY);
-        for i in 0..SOAK_CAPACITY {
+        for _ in 0..SOAK_CAPACITY {
             world.add_entity(0.0, 0.0, 0.0).unwrap();
         }
         let mut before = 0.0_f32;
@@ -629,7 +637,7 @@ mod tests {
     fn couple_skipped_when_no_spawn() {
         let mut buf = ConflictEventBuffer::soak_buffer();
         let mut world = WorldSoA::with_capacity(SOAK_CAPACITY);
-        for i in 0..SOAK_CAPACITY {
+        for _ in 0..SOAK_CAPACITY {
             world.add_entity(0.0, 0.0, 0.0).unwrap();
         }
         let spawn = AutonomousConflictGenerator::antagonize_impossible_physics(

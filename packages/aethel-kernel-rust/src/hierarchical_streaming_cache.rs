@@ -147,8 +147,8 @@ impl HierarchicalStreamingCache {
     }
 
     fn l2_put(&mut self, key: u64, value: CacheValue) {
-        if self.l2.contains_key(&key) {
-            self.l2.insert(key, value);
+        if let std::collections::hash_map::Entry::Occupied(mut e) = self.l2.entry(key) {
+            e.insert(value);
             self.l2_touch(key);
             return;
         }

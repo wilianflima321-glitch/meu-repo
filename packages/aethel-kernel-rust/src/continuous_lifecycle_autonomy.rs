@@ -6,7 +6,7 @@ pub struct ContinuousLifecycleAutonomy;
 
 impl ContinuousLifecycleAutonomy {
     /// Disparado no instante em que o Slab mmap é despertado.
-    pub fn fast_forward_entropy(offline_duration_seconds: u64, weather_state: &str) {
+    pub fn fast_forward_entropy(offline_duration_seconds: u64, _weather_state: &str) {
         let offline_days = offline_duration_seconds as f32 / 86400.0;
         println!("[Lifecycle Autonomy] O Universo ficou suspenso por {:.2} dias virtuais.", offline_days);
         

@@ -90,6 +90,11 @@ impl BlueNoisePointSet {
         self.points.len()
     }
 
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.points.is_empty()
+    }
+
     /// Minimum pairwise Euclidean distance (unit square, no wrap).
     pub fn min_pairwise_distance(&self) -> f32 {
         let n = self.points.len();

@@ -12,7 +12,7 @@ pub struct ColdExecutionPayload {
     pub prompt_task: String,
     pub execution_time_ms: f32,
     pub zero_placeholder_guaranteed: bool,
-    pub Cot_reasoning_internalized: bool,
+    pub cot_reasoning_internalized: bool,
     pub cold_execution_active: bool,
 }
 
@@ -28,7 +28,7 @@ impl GeminiSpecterColdExecution {
             prompt_task: task_prompt.to_string(),
             execution_time_ms: 145.0, // Sub-500ms super-fast response (145ms)
             zero_placeholder_guaranteed: true,
-            Cot_reasoning_internalized: true,
+            cot_reasoning_internalized: true,
             cold_execution_active: is_cold,
         }
     }
@@ -44,6 +44,6 @@ mod tests {
         assert!(payload.cold_execution_active);
         assert!(payload.execution_time_ms < 500.0);
         assert!(payload.zero_placeholder_guaranteed);
-        assert!(payload.Cot_reasoning_internalized);
+        assert!(payload.cot_reasoning_internalized);
     }
 }

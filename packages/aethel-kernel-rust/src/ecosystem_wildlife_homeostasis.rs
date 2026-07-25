@@ -34,7 +34,7 @@ impl EcosystemWildlifeHomeostasis {
             precipitation_rate_mm_h: rain,
             vegetation_density_index: veg,
             predator_prey_equilibrium_ratio: ratio,
-            ecological_balance_healthy: ratio >= 0.8 && ratio <= 1.5,
+            ecological_balance_healthy: (0.8..=1.5).contains(&ratio),
         }
     }
 }

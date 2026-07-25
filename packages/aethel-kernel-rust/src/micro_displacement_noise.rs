@@ -136,7 +136,7 @@ impl MicroDisplacementNoise {
         let mut amp = params.base_amplitude.max(0.0);
         let mut freq = params.base_frequency.max(EPS);
         let mut sum = 0.0;
-        let octaves = params.octaves.max(1).min(8);
+        let octaves = params.octaves.clamp(1, 8);
         for o in 0..octaves {
             let p = [
                 world_pos[0] * freq,

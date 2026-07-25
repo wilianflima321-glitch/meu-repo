@@ -17,9 +17,6 @@ use serde::{Deserialize, Serialize};
 pub const ROLLBACK_HISTORY_CAPACITY: usize = 120;
 /// Maximum predicted entities per netcode state snapshot.
 pub const MAX_NETCODE_ENTITIES: usize = 64;
-/// Float comparison epsilon.
-const EPS: f32 = 1e-5;
-
 /// Player Input State for a single frame tick.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct PlayerInput {

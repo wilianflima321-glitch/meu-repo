@@ -11,6 +11,12 @@ pub struct GhostRefactorer {
     is_running: Arc<AtomicBool>,
 }
 
+impl Default for GhostRefactorer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GhostRefactorer {
     pub fn new() -> Self {
         Self {

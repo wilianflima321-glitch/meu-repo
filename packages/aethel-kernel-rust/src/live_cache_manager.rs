@@ -136,8 +136,8 @@ impl LiveCacheManager {
     /// Returns the key that was evicted, if any.
     pub fn put(&mut self, key: u64, value: CacheValue) -> Option<u64> {
         self.puts = self.puts.saturating_add(1);
-        if self.map.contains_key(&key) {
-            self.map.insert(key, value);
+        if let std::collections::hash_map::Entry::Occupied(mut e) = self.map.entry(key) {
+            e.insert(value);
             self.touch(key);
             return None;
         }
@@ -278,10 +278,7 @@ pub fn run_live_cache_manager_soak() -> LiveCacheManagerSoakReport {
     let probe_key: u64 = 0xDEAD_BEEF;
     let probe_val: u64 = 0xCAFE_F00D;
     let _ = cache.put_u64(probe_key, probe_val);
-    let hit = match cache.get(probe_key) {
-        Some(CacheValue::U64(v)) if *v == probe_val => true,
-        _ => false,
-    };
+    let hit = matches!(cache.get(probe_key), Some(CacheValue::U64(v)) if *v == probe_val);
     let hit_after_put_ok = hit && cache.hits() >= 1;
 
     // Miss on an evicted key.

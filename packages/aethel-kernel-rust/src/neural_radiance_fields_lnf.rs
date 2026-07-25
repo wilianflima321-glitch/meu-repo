@@ -11,11 +11,11 @@ impl NeuralRadianceFieldsLnf {
         // Se o chão é Barro Vermelho, a barriga da estátua branca receberá um gradiente
         // de luz difusa vermelha (Maestro-Radiance). O visual limpo e irreal 
         // de engines antigas (2005) é matematicamente eliminado.
-        let bled_color = [
+        
+        [
             floor_albedo[0] * shadow_intensity * 0.4,
             floor_albedo[1] * shadow_intensity * 0.4,
             floor_albedo[2] * shadow_intensity * 0.4,
-        ];
-        bled_color
+        ]
     }
 }

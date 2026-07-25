@@ -12,7 +12,7 @@ pub struct AtomicIntelligence;
 impl AtomicIntelligence {
     /// Quando uma parte é "Arrancada" ou Desconectada, ela não vira Ragdoll (Física Burra).
     /// Ela acorda sua agência local usando o Tensor de Intenção.
-    pub fn awaken_detached_matter(tensor: &IntentTensor, position: &mut [f32; 3], velocity: &mut [f32; 3]) {
+    pub fn awaken_detached_matter(tensor: &IntentTensor, _position: &mut [f32; 3], velocity: &mut [f32; 3]) {
         if tensor.local_autonomy_level > 0.5 {
             // A matéria reage organicamente ao dano estrutural.
             println!("[Atomic AI] Matéria isolada ({}) assumindo controle autônomo.", tensor.semantic_id);

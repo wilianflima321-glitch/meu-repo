@@ -282,7 +282,6 @@ pub fn scale_add_f32(input: &[f32], scale: f32, add: f32, out: &mut [f32]) {
             SimdClayLane::Sse2 => unsafe { scale_add_f32_sse2(input, scale, add, out) },
             SimdClayLane::Scalar => scale_add_f32_scalar(input, scale, add, out),
         }
-        return;
     }
     #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
     {
@@ -314,7 +313,6 @@ pub fn sdf_sphere_batch(
                 sdf_sphere_batch_scalar(px, py, pz, cx, cy, cz, radius, out)
             }
         }
-        return;
     }
     #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
     {

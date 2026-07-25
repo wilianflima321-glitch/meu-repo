@@ -218,7 +218,7 @@ impl DynamicPhysicsDsl {
     ///   `vortex <cx> <cy> <cz> <force>`
     pub fn parse_program(source: &str) -> Result<Vec<Stmt>, DslError> {
         let mut stmts = Vec::new();
-        for raw in source.split(|c| c == ';' || c == '\n') {
+        for raw in source.split([';', '\n']) {
             let line = raw.trim();
             if line.is_empty() || line.starts_with('#') || line.starts_with("//") {
                 continue;

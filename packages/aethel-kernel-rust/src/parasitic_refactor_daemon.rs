@@ -9,6 +9,12 @@ pub struct ParasiticRefactorDaemon {
     pub is_active: AtomicBool,
 }
 
+impl Default for ParasiticRefactorDaemon {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ParasiticRefactorDaemon {
     pub fn new() -> Self {
         Self {

@@ -159,7 +159,6 @@ impl SkeletalRagdollSoA {
         }
 
         // Iterative Forward & Backward passes
-        let mut p0 = root;
         let mut p1 = [self.joint_pos_x[1], self.joint_pos_y[1], self.joint_pos_z[1]];
         let mut p2 = [self.joint_pos_x[2], self.joint_pos_y[2], self.joint_pos_z[2]];
 
@@ -175,23 +174,14 @@ impl SkeletalRagdollSoA {
                 p2[2] + (dir12[2] / d12) * l1,
             ];
 
-            let dir01 = [p0[0] - p1[0], p0[1] - p1[1], p0[2] - p1[2]];
-            let d01 = (dir01[0] * dir01[0] + dir01[1] * dir01[1] + dir01[2] * dir01[2]).sqrt().max(1e-4);
-            p0 = [
-                p1[0] + (dir01[0] / d01) * l0,
-                p1[1] + (dir01[1] / d01) * l0,
-                p1[2] + (dir01[2] / d01) * l0,
-            ];
-
             // Backward Pass: set root back to origin and project forwards
-            p0 = root;
-
-            let f01 = [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]];
+            // (root is a fixed anchor — no forward-pass candidate to preserve)
+            let f01 = [p1[0] - root[0], p1[1] - root[1], p1[2] - root[2]];
             let fd01 = (f01[0] * f01[0] + f01[1] * f01[1] + f01[2] * f01[2]).sqrt().max(1e-4);
             p1 = [
-                p0[0] + (f01[0] / fd01) * l0,
-                p0[1] + (f01[0] / fd01) * l0,
-                p0[2] + (f01[0] / fd01) * l0,
+                root[0] + (f01[0] / fd01) * l0,
+                root[1] + (f01[0] / fd01) * l0,
+                root[2] + (f01[0] / fd01) * l0,
             ];
 
             let f12 = [p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]];

@@ -569,8 +569,8 @@ pub fn run_sdf_motion_vector_buffer_soak() -> SdfMotionVectorBufferSoakReport {
         && static_mean_abs < STATIC_MEAN_MV_EPS
         && static_dev < STATIC_MEAN_MV_EPS;
 
-    let translated_nonzero = translated_mean_abs > STATIC_MEAN_MV_EPS * 10.0
-        && translated_mean_abs > 0.05;
+    // `STATIC_MEAN_MV_EPS * 10.0` is always < 0.05, so the stricter bound alone is equivalent.
+    let translated_nonzero = translated_mean_abs > 0.05;
 
     let translated_coherent = translated_coherence >= COHERENCE_MIN
         && translated_err < TRANSLATION_ERR_MAX

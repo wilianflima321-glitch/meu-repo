@@ -96,12 +96,7 @@ impl AstSymbolGraphSoA {
     /// Finds symbol index by name hash.
     pub fn find_symbol(&self, name: &str) -> Option<usize> {
         let target_hash = Self::fnv1a_hash_symbol(name);
-        for i in 0..self.active_symbol_count {
-            if self.symbol_name_hash[i] == target_hash {
-                return Some(i);
-            }
-        }
-        None
+        (0..self.active_symbol_count).find(|&i| self.symbol_name_hash[i] == target_hash)
     }
 }
 

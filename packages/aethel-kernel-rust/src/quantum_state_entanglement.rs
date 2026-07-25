@@ -5,7 +5,7 @@ pub struct QuantumStateEntanglement;
 
 impl QuantumStateEntanglement {
     /// Sincroniza dois escultores na China e no Brasil como se estivessem num Cabo LAN.
-    pub fn entangle_intent_vectors(remote_hash_delta: String) {
+    pub fn entangle_intent_vectors(_remote_hash_delta: String) {
         // println!("[Quantum Entanglement] Sincronizando Intenção: {}", remote_hash_delta);
         // Não sincronizamos cordenadas XYZ rígidas, sincronizamos a Função Matemática.
         // Se a internet cair 1 segundo, o motor deduz a expansão vetorial usando Física (JIT).

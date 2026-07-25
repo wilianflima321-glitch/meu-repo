@@ -21,7 +21,7 @@ impl LuxFacialSubsurfaceOcclusion {
     pub fn compute_dynamic_skin_sss(
         muscle_tension: f32,
         jaw_opening: f32,
-        ambient_light_lux: f32,
+        _ambient_light_lux: f32,
     ) -> FacialSpectralSssState {
         let tension_clamped = muscle_tension.clamp(0.0, 1.0);
 

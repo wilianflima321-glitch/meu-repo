@@ -77,7 +77,7 @@ mod tests {
     fn test_host_hardware_detection_and_vector_width() {
         let profile = HostHardwareProfile::detect_current_host();
         let vec_width = HardwareIntrinsicSelfCompiler::select_vector_width(&profile);
-        assert!(vec_width >= 1 && vec_width <= 16);
+        assert!((1..=16).contains(&vec_width));
         assert!(profile.logical_cores >= 1);
     }
 }

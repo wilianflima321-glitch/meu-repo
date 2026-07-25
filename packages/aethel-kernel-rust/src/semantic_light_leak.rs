@@ -41,5 +41,5 @@ pub fn probe_semantic_light_leak() -> bool {
     let mut ecs = SceneGraph::new();
     ecs.add_entity(0.0, 0.0, 0.0);
     let leak = LightLeakEstimator::compute_leak_heuristic(&ecs);
-    leak >= 0.0 && leak <= 1.0
+    (0.0..=1.0).contains(&leak)
 }

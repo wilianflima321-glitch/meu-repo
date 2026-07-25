@@ -29,19 +29,19 @@
 use serde::{Deserialize, Serialize};
 
 /// Default AI Help model provider via OpenRouter.
-pub const DEFAULT_AI_HELP_MODEL: &'static str = "qwen/qwen-3.6-plus";
+pub const DEFAULT_AI_HELP_MODEL: &str = "qwen/qwen-3.6-plus";
 /// Gemini 2.5 Flash 2M Context Model.
-pub const GEMINI_FLASH_2M_MODEL: &'static str = "google/gemini-2.5-flash";
+pub const GEMINI_FLASH_2M_MODEL: &str = "google/gemini-2.5-flash";
 /// DeepSeek R1 Mathematical Reasoning Model.
-pub const DEEPSEEK_R1_MATH_MODEL: &'static str = "deepseek/deepseek-r1";
+pub const DEEPSEEK_R1_MATH_MODEL: &str = "deepseek/deepseek-r1";
 /// Flagship Meta Llama 3.1 405B Instruct Model for Massive Lore & Narrative Specs.
-pub const LLAMA_405B_NARRATIVE_MODEL: &'static str = "meta-llama/llama-3.1-405b-instruct";
+pub const LLAMA_405B_NARRATIVE_MODEL: &str = "meta-llama/llama-3.1-405b-instruct";
 /// Meta Llama 3.3 70B Instruct Model for Fast Narrative Branching.
-pub const LLAMA_3_3_70B_NARRATIVE_MODEL: &'static str = "meta-llama/llama-3.3-70b-instruct";
+pub const LLAMA_3_3_70B_NARRATIVE_MODEL: &str = "meta-llama/llama-3.3-70b-instruct";
 /// Google Veo 3 Video Generation Model Provider.
-pub const GOOGLE_VEO_3_VIDEO_MODEL: &'static str = "google/veo-3-cinematic";
+pub const GOOGLE_VEO_3_VIDEO_MODEL: &str = "google/veo-3-cinematic";
 /// FLUX / DaVinci High-Fidelity Image Model Provider.
-pub const DAVINCI_FLUX_IMAGE_MODEL: &'static str = "black-forest-labs/flux-1.1-pro";
+pub const DAVINCI_FLUX_IMAGE_MODEL: &str = "black-forest-labs/flux-1.1-pro";
 
 /// Adaptive MoA Generator Squad Configuration.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

@@ -20,7 +20,7 @@ pub struct MetamorphicCoreEngine;
 
 impl MetamorphicCoreEngine {
     /// Evaluates current kernel state and executes a metamorphic self-evolution step.
-    pub fn Evolve_kernel_state(current_generation: u32) -> MetamorphicCoreState {
+    pub fn evolve_kernel_state(current_generation: u32) -> MetamorphicCoreState {
         let next_generation = current_generation + 1;
         let active_layout = format!("SOA_ZERO_COPY_GEN_{}", next_generation);
         let payload = format!("METAMORPHIC_KERNEL_V{}", next_generation);
@@ -41,7 +41,7 @@ mod tests {
 
     #[test]
     fn test_metamorphic_kernel_evolution() {
-        let state = MetamorphicCoreEngine::Evolve_kernel_state(1);
+        let state = MetamorphicCoreEngine::evolve_kernel_state(1);
         assert_eq!(state.kernel_generation, 2);
         assert!(!state.code_integrity_hash.is_empty());
     }

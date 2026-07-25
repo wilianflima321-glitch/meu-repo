@@ -11,8 +11,8 @@ impl MicrofacetBrdfNeural {
         // F0 é a refletância em incidência normal (0 graus).
         // Se a câmera olha pro lado de um metal, o brilho explode (Fresnel F90 = 1.0) perfeitamente.
         let f0 = metallic_factor * 0.04; // Aproximação de dielétricos vs metais.
-        let fresnel = f0 + (1.0 - f0) * (1.0 - view_angle).powi(5);
         
-        fresnel // A luz tem Presença Física e Densidade. O Holograma morre.
+        
+        f0 + (1.0 - f0) * (1.0 - view_angle).powi(5) // A luz tem Presença Física e Densidade. O Holograma morre.
     }
 }

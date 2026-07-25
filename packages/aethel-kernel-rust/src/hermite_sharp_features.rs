@@ -24,7 +24,7 @@ use crate::hermite_duality_grid::{
 /// Dihedral angle (radians) above which an edge-pair is a crease.
 pub const CREASE_DIHEDRAL_RAD: f32 = std::f32::consts::FRAC_PI_4; // 45°
 /// Cosine of crease threshold (dot < this ⇒ crease).
-const CREASE_DOT_MAX: f32 = 0.707_106_78; // cos(45°)
+const CREASE_DOT_MAX: f32 = std::f32::consts::FRAC_1_SQRT_2; // cos(45°)
 /// Min |sharp − smooth| vertex delta for soak evidence.
 const MIN_SHARP_SMOOTH_DELTA: f32 = 0.08;
 /// Min crease edges marked on a sharp box corner soak.

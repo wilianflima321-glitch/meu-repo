@@ -46,7 +46,7 @@ pub struct WgslComputeDispatchPipeline {
 
 impl WgslComputeDispatchPipeline {
     pub fn new_particle_compute(particle_count: usize) -> Self {
-        let workgroups = [((particle_count + 63) / 64) as u32, 1, 1];
+        let workgroups = [particle_count.div_ceil(64) as u32, 1, 1];
         let buffer_bytes = particle_count * 32; // SoA position (vec4) + velocity (vec4)
         let wgsl = r#"
 @group(0) @binding(0) var<storage, read_write> particles: array<Particle>;

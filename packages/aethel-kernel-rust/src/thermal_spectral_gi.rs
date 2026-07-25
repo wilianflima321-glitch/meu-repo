@@ -18,6 +18,12 @@ pub struct ThermalSpectralGi {
     pub emitters: Vec<usize>, // entity IDs acting as thermal radiators
 }
 
+impl Default for ThermalSpectralGi {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ThermalSpectralGi {
     pub fn new() -> Self {
         Self { emitters: Vec::new() }
@@ -32,15 +38,15 @@ impl ThermalSpectralGi {
             255.0
         } else {
             let r = temp - 60.0;
-            329.698727446 * (r.powf(-0.1332047592))
+            329.698_73 * (r.powf(-0.133_204_76))
         };
 
         let green = if temp <= 66.0 {
             let g = temp;
-            99.4708025861 * g.ln() - 161.1195681661
+            99.470_8 * g.ln() - 161.119_57
         } else {
             let g = temp - 60.0;
-            288.1221695283 * (g.powf(-0.0755148492))
+            288.122_16 * (g.powf(-0.075_514_846))
         };
 
         let blue = if temp >= 66.0 {
@@ -49,7 +55,7 @@ impl ThermalSpectralGi {
             0.0
         } else {
             let b = temp - 10.0;
-            138.5177312231 * b.ln() - 305.0447927307
+            138.517_73 * b.ln() - 305.044_8
         };
 
         let clamp_rgb = |c: f32| (c / 255.0).clamp(0.0, 1.0);

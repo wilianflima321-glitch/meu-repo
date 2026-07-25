@@ -62,6 +62,11 @@ impl VelocityMotionBuffer {
         self.dx.len().min(self.dy.len()).min(self.dz.len())
     }
 
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     /// Mean absolute motion magnitude.
     pub fn mean_abs(&self) -> f32 {
         let n = self.len();

@@ -107,6 +107,9 @@ impl LbmFluidStepResult {
     }
 }
 
+// Field is only ever read via the unsafe raw-pointer reinterpretation in `AlignedVec`'s
+// `Deref`/`DerefMut` below, so rustc's field-level dead-code analysis cannot see the use.
+#[allow(dead_code)]
 #[repr(align(64))]
 #[derive(Clone, Copy, Debug)]
 pub struct CacheLine([f32; 16]);
@@ -125,7 +128,7 @@ pub struct AlignedVec {
 
 impl AlignedVec {
     pub fn new(len: usize, default_val: f32) -> Self {
-        let num_blocks = (len + 15) / 16;
+        let num_blocks = len.div_ceil(16);
         let buffer = vec![CacheLine([default_val; 16]); num_blocks];
         Self { buffer, len }
     }
@@ -148,6 +151,9 @@ impl std::ops::DerefMut for AlignedVec {
     }
 }
 
+// Field is only ever read via the unsafe raw-pointer reinterpretation in `AlignedBoolVec`'s
+// `Deref`/`DerefMut` below, so rustc's field-level dead-code analysis cannot see the use.
+#[allow(dead_code)]
 #[repr(align(64))]
 #[derive(Clone, Copy, Debug)]
 pub struct CacheLineBool([bool; 64]);
@@ -166,7 +172,7 @@ pub struct AlignedBoolVec {
 
 impl AlignedBoolVec {
     pub fn new(len: usize, default_val: bool) -> Self {
-        let num_blocks = (len + 63) / 64;
+        let num_blocks = len.div_ceil(64);
         let buffer = vec![CacheLineBool([default_val; 64]); num_blocks];
         Self { buffer, len }
     }
@@ -746,6 +752,7 @@ fn lbm_held(
     }
 }
 
+#[allow(dead_code)] // used by `#[cfg(test)]` below; invisible to non-test clippy pass
 fn micro_soak_grid() -> LatticeBoltzmannFluidGrid {
     let mut g = LatticeBoltzmannFluidGrid::new(SOAK_WIDTH, SOAK_HEIGHT);
     g.seed_settled_dust(0.2);

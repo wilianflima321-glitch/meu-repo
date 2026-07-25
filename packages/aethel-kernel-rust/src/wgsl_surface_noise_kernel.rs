@@ -43,20 +43,17 @@ pub const CONTINUITY_STEP: f32 = 1.0 / 64.0;
 
 /// Noise algorithm variant for surface displacement.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default)]
 pub enum SurfaceNoiseKind {
     /// Trilinear value noise (smooth lattice).
     Value,
     /// Gradient / Perlin-lite (dot with hashed grads).
+    #[default]
     Gradient,
     /// Simplex-lite (skewed lattice, 2D/3D).
     SimplexLite,
 }
 
-impl Default for SurfaceNoiseKind {
-    fn default() -> Self {
-        Self::Gradient
-    }
-}
 
 /// Parameters for surface noise evaluation / buffer fill.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -185,7 +182,7 @@ impl WgslSurfaceNoiseKernel {
         let mut freq = params.base_frequency.max(EPS);
         let mut sum = 0.0_f32;
         let mut amp_sum = 0.0_f32;
-        let octaves = params.octaves.max(1).min(8);
+        let octaves = params.octaves.clamp(1, 8);
         for o in 0..octaves {
             let p = [uv[0] * freq, uv[1] * freq];
             let seed = params.seed.wrapping_add(o.wrapping_mul(0x9e37));
@@ -275,14 +272,14 @@ impl WgslSurfaceNoiseKernel {
         let nx0 = lerp(n00, n10, u);
         let nx1 = lerp(n01, n11, u);
         // Scale so typical range sits near [-1, 1].
-        (lerp(nx0, nx1, v) * 1.41421356).clamp(-1.0, 1.0)
+        (lerp(nx0, nx1, v) * std::f32::consts::SQRT_2).clamp(-1.0, 1.0)
     }
 
     /// 2D simplex-lite noise ∈ ~[-1, 1].
     pub fn simplex_lite_2d(p: [f32; 2], seed: u32) -> f32 {
         // Skew to simplex grid (F2 = 0.5*(√3-1), G2 = (3-√3)/6).
-        const F2: f32 = 0.366025403;
-        const G2: f32 = 0.211324865;
+        const F2: f32 = 0.366_025_4;
+        const G2: f32 = 0.211_324_87;
         let s = (p[0] + p[1]) * F2;
         let i = (p[0] + s).floor();
         let j = (p[1] + s).floor();

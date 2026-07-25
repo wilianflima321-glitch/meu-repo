@@ -26,9 +26,9 @@ impl NonEuclideanThinFilmMagic {
         let phase = (film_thickness_nm * view_angle_rad.cos() / 150.0).sin();
 
         // Thin-film iridescence rainbow colors
-        let r = (phase * 3.14).sin().abs();
-        let g = (phase * 3.14 + 1.0).sin().abs();
-        let b = (phase * 3.14 + 2.0).sin().abs();
+        let r = (phase * std::f32::consts::PI).sin().abs();
+        let g = (phase * std::f32::consts::PI + 1.0).sin().abs();
+        let b = (phase * std::f32::consts::PI + 2.0).sin().abs();
 
         let space_time_refraction_distortion = space_time_curvature.clamp(0.0, 5.0) * 0.2;
         let chromatic_aberration_intensity = (space_time_curvature * 0.15).clamp(0.0, 1.0);

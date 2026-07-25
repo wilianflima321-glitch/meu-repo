@@ -21,7 +21,7 @@ impl InfinityCoreFoldedGeometry {
     pub fn project_folded_surface(
         pos: [f32; 3],
         view_scale_exponent: i32,
-        seed: u64,
+        _seed: u64,
     ) -> FoldedGeometrySurfaceSample {
         let scale_factor = 10.0_f32.powi(view_scale_exponent.clamp(-12, 12));
         let scaled_x = pos[0] * scale_factor;

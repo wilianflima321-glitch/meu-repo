@@ -99,6 +99,9 @@ impl ThermalBudgetScheduler {
     /// Thermal score 0–100 (0 = at/below cool, 100 = at/above hot).
     pub fn thermal_score(&self) -> f32 {
         let span = self.config.hot_celsius - self.config.cool_celsius;
+        // Intentional NaN-safety guard: `!(span > 0.0)` is true for NaN (rejecting it),
+        // whereas `span <= 0.0` would be false for NaN and let it flow through.
+        #[allow(clippy::neg_cmp_op_on_partial_ord)]
         if !(span > 0.0) {
             return 0.0;
         }
@@ -174,6 +177,8 @@ pub fn quota_from_temp(temp_celsius: f32, config: &ThermalBudgetConfig) -> u32 {
         return q_hot;
     }
     let span = hot - cool;
+    // Intentional NaN-safety guard: see `thermal_score` above.
+    #[allow(clippy::neg_cmp_op_on_partial_ord)]
     if !(span > 0.0) {
         return q_cool;
     }
