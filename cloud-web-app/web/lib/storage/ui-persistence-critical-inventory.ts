@@ -97,6 +97,36 @@ export const CW4_HELD_RAW_LOCALSTORAGE_DEBT: readonly Cw4HeldDebtEntry[] = [
     disposition: 'non-critical-debt',
   },
   {
+    keyPattern: 'aethel.runtime.local-capabilities.v1',
+    reason: 'Device hardware-capability probe cache (useLocalRuntimeBridge / StudioLocalRuntimeCapsule) — cross-tab synced via storage events, but a capability cache, not chrome/session state',
+    criticalIdeStudioPath: false,
+    disposition: 'non-critical-debt',
+  },
+  {
+    keyPattern: 'terminal-profiles / terminal-sessions (TerminalProfileManager)',
+    reason: 'Terminal shell profile + session presets — user content, not workbench chrome',
+    criticalIdeStudioPath: false,
+    disposition: 'non-critical-debt',
+  },
+  {
+    keyPattern: 'controller-mapper custom profiles',
+    reason: 'Gamepad/controller input-mapping presets — domain content, not chrome/session',
+    criticalIdeStudioPath: false,
+    disposition: 'non-critical-debt',
+  },
+  {
+    keyPattern: 'aethel research-handoff payload',
+    reason: 'One-shot Deep Research → IDE handoff payload, read once then removed — transient transfer, not persisted chrome state',
+    criticalIdeStudioPath: false,
+    disposition: 'non-critical-debt',
+  },
+  {
+    keyPattern: 'snippet-manager user snippets',
+    reason: 'User-authored code snippet library — domain content, not workbench chrome',
+    criticalIdeStudioPath: false,
+    disposition: 'non-critical-debt',
+  },
+  {
     keyPattern: 'multi-tab LWW / lock',
     reason: 'Cross-tab invalidate lite shipped; full lock/LWW HELD',
     criticalIdeStudioPath: false,
