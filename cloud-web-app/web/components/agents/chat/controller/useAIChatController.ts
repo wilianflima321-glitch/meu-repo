@@ -60,6 +60,16 @@ function formatAiErrorForUser(err: unknown): string {
           err.message ||
           'Change rejected — project typecheck failed. Nothing was written.'
         )
+      case 'L5_LINT_FAIL':
+        return (
+          err.message ||
+          'Change rejected — project lint (ESLint) failed. Nothing was written.'
+        )
+      case 'RUST_GATE_SANDBOX_UNAVAILABLE':
+        return (
+          err.message ||
+          'Change rejected — Rust changes need a sandbox gate that is not available yet. Nothing was written.'
+        )
       case 'QUOTA_EXCEEDED':
       case 'ULTRA_REQUIRES_WALLET':
       case 'INSUFFICIENT_WALLET':

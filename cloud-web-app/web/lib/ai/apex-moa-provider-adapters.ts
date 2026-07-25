@@ -1,6 +1,6 @@
 /**
  * Focus 1A / A1 — Live provider adapters for MoA + Auto-Heal.
- * Real `agentLlmChat` + `runProjectL5Typecheck` — never mock in production paths.
+ * Real `agentLlmChat` + `runProjectL5Gate` (typecheck + lint) — never mock in production paths.
  */
 
 import { agentLlmChat } from '@/lib/ai/agent-llm-bridge'
@@ -8,10 +8,8 @@ import { createComponentLogger } from '@/lib/observability/logger'
 import type { MoAGeneratorFn } from '@/lib/production/apex-moa-orchestrator'
 import type { HealRepairFn, ValidationFn } from '@/lib/production/auto-heal-loop'
 import type { CriticalFuseFn } from '@/lib/production/critical-synthesizer'
-import {
-  runProjectL5Typecheck,
-  type L5VirtualFile,
-} from '@/lib/production/project-l5-typecheck'
+import { runProjectL5Gate } from '@/lib/production/project-l5-gate'
+import type { L5VirtualFile } from '@/lib/production/project-l5-typecheck'
 
 const log = createComponentLogger('apex-moa-provider-adapters')
 
@@ -64,7 +62,7 @@ export function createHealRepairFn(options?: {
         {
           role: 'user',
           content:
-            `Heal round ${round}/3. Fix ALL TypeScript errors below. Return complete repaired file in one code fence.\n\n` +
+            `Heal round ${round}/3. Fix ALL TypeScript/ESLint errors below. Return complete repaired file in one code fence.\n\n` +
             `## compilerLog\n${compilerLog.slice(0, 6000)}\n\n` +
             `## previousPatch\n\`\`\`\n${previousPatch.slice(0, 12000)}\n\`\`\``,
         },
@@ -86,7 +84,7 @@ export function createL5ValidationFn(input: {
   ambientFiles?: L5VirtualFile[]
 }): ValidationFn {
   return async (patch: string) =>
-    runProjectL5Typecheck({
+    runProjectL5Gate({
       files: [{ fileName: input.filePath, content: patch }],
       ambientFiles: input.ambientFiles,
     })

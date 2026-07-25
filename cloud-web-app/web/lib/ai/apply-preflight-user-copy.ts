@@ -60,6 +60,26 @@ export function mapApplyPreflightDeny(input: DenyInput): ApplyPreflightUserCopy 
           'L.5 typecheck failed for this patch. Fix the types before applying. Nothing was written.',
         needsFullAccess: false,
       }
+    case 'L5_LINT_FAIL':
+      return {
+        ...base,
+        code,
+        title: 'Patch rejected — project lint failed',
+        detail:
+          serverMessage ||
+          'L.5 ESLint check failed for this patch (same rules as npm run lint). Fix the lint errors before applying. Nothing was written.',
+        needsFullAccess: false,
+      }
+    case 'RUST_GATE_SANDBOX_UNAVAILABLE':
+      return {
+        ...base,
+        code,
+        title: 'Patch rejected — Rust gate unavailable',
+        detail:
+          serverMessage ||
+          'Rust changes require cargo check + clippy + test in an isolated sandbox, which is not available yet. Apply this change manually and run the Rust gates yourself. Nothing was written.',
+        needsFullAccess: false,
+      }
     case 'AST_SYNTAX_FAIL':
       return {
         ...base,

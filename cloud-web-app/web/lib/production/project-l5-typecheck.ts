@@ -82,15 +82,38 @@ export function runProjectL5Typecheck(input: ProjectL5TypecheckInput): ProjectVa
       if (content !== undefined) {
         return ts.createSourceFile(key, content, languageVersion, true)
       }
-      // Missing ambient import → synthetic stub module so we don't fail on unresolved paths alone
+      // Real disk first — this is how TS default lib files (lib.dom.d.ts,
+      // lib.es2022.d.ts, etc.) get loaded. Without this, `console`, `Promise`,
+      // `fetch`, and every other stdlib/DOM global would silently vanish and
+      // any real-world file using them would false-fail L.5 typecheck.
+      const diskCandidates = [fileName]
+      // TS's host-driven `createProgram` (unlike the `tsc` CLI path) probes
+      // default-lib `lib` compiler-option entries (e.g. "es2022", "dom")
+      // against the lib directory WITHOUT the real `lib.` filename prefix
+      // (actual files on disk are `lib.es2022.d.ts`, `lib.dom.d.ts`, ...).
+      // Try that canonical candidate too before falling back to a stub.
+      const slash = Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\'))
+      const dir = slash >= 0 ? fileName.slice(0, slash + 1) : ''
+      const base = slash >= 0 ? fileName.slice(slash + 1) : fileName
+      if (!base.startsWith('lib.')) {
+        diskCandidates.push(`${dir}lib.${base}`)
+      }
+      for (const candidate of diskCandidates) {
+        try {
+          const real = ts.sys.readFile(candidate)
+          if (real !== undefined) {
+            return ts.createSourceFile(key, real, languageVersion, true)
+          }
+        } catch {
+          // try next candidate
+        }
+      }
+      // Missing ambient import (not a real lib file) → synthetic stub module
+      // so we don't fail on unresolved local .d.ts paths alone.
       if (key.endsWith('.d.ts')) {
         return ts.createSourceFile(key, 'export {}', languageVersion, true)
       }
-      try {
-        return ts.createCompilerHost(options, true).getSourceFile(fileName, languageVersion, onError)
-      } catch {
-        return undefined
-      }
+      return undefined
     },
     fileExists(fileName) {
       const key = normalizeFileName(fileName)

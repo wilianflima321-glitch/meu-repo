@@ -181,7 +181,7 @@ export async function runMultiFileApplySwarm(input: {
   }
 
   for (let round = 0; round <= maxHealRounds; round++) {
-    const gate = runGovernedApplyValidationGate({
+    const gate = await runGovernedApplyValidationGate({
       files: working.map((c) => ({
         filePath: c.path,
         content: c.content,
@@ -217,7 +217,9 @@ export async function runMultiFileApplySwarm(input: {
       input.enableAutoHeal === true &&
       typeof input.heal === 'function' &&
       round < maxHealRounds &&
-      (gate.code === 'L5_PROJECT_TYPECHECK_FAIL' || gate.code === 'MULTI_FILE_VALIDATION_DENIED')
+      (gate.code === 'L5_PROJECT_TYPECHECK_FAIL' ||
+        gate.code === 'L5_LINT_FAIL' ||
+        gate.code === 'MULTI_FILE_VALIDATION_DENIED')
 
     if (!canHeal) {
       log.warn('swarm_gate_deny', { code: gate.code, healRoundsUsed })
@@ -236,7 +238,9 @@ export async function runMultiFileApplySwarm(input: {
 
     const deniedPaths = new Set(
       gate.fileValidation
-        .filter((e) => e.status === 'denied_l5' || e.status === 'denied_ast')
+        .filter(
+          (e) => e.status === 'denied_l5' || e.status === 'denied_ast' || e.status === 'denied_lint',
+        )
         .map((e) => e.path),
     )
 

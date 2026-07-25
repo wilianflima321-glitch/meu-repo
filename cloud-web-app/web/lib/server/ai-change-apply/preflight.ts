@@ -8,8 +8,12 @@ import { hashContent } from '@/lib/server/change-rollback-store'
 import { resolveScopedWorkspacePath, toVirtualWorkspacePath } from '@/lib/server/workspace-scope'
 import { analyzeDependencyImpact } from '@/lib/server/dependency-impact-guard'
 import { inspectLazyPatch } from '@/lib/production/lazy-inspector'
-import { validateDocumentWithProjectL5 } from '@/lib/production/project-l5-typecheck'
+import { validateDocumentWithProjectL5Gate, gateCheckFailed } from '@/lib/production/project-l5-gate'
 import { healDocumentBeforeApply } from '@/lib/production/auto-heal-apply'
+import {
+  isRustSourcePath,
+  buildRustGateUnavailableDetail,
+} from '@/lib/production/rust-gate-unavailable'
 import type { FullAccessGrantRecord } from '@/lib/server/full-access-ledger'
 import {
   CAPABILITY,
@@ -231,6 +235,34 @@ export async function buildPreparedChange(params: {
     }
   }
 
+  // Law XI honesty guard — `.rs` dual-stack validation needs an isolated sandbox
+  // (Onda L / L.1) that does not exist yet. Fail-closed instead of silently
+  // applying an unreviewed Rust patch (see rust-gate-unavailable.ts).
+  if (isRustSourcePath(virtualPath)) {
+    const detail = buildRustGateUnavailableDetail(virtualPath)
+    await appendChangeRunLedgerEvent({
+      eventType: 'apply_blocked',
+      capability: 'AI_CHANGE_APPLY',
+      userId: params.userId,
+      projectId: params.projectId,
+      filePath: virtualPath,
+      outcome: 'blocked',
+      metadata: { reason: detail.code, runId: params.runId, runSource: RUN_SOURCE },
+    }).catch(() => {})
+
+    return {
+      ok: false,
+      response: capabilityResponse({
+        error: detail.code,
+        message: detail.message,
+        status: 422,
+        capability: CAPABILITY,
+        capabilityStatus: 'PARTIAL',
+        metadata: { path: virtualPath, runId: params.runId },
+      }),
+    }
+  }
+
   const validation = validateAiChange({
     original: currentContent,
     modified: nextDocument,
@@ -293,9 +325,9 @@ export async function buildPreparedChange(params: {
     }
   }
 
-  // L.5 project typecheck (Focus 1A) — fail-closed before apply
+  // L.5 project gate: typecheck + lint (Focus 1A + Law XI dual TS gate) — fail-closed before apply
   let documentForL5 = nextDocument
-  let l5 = validateDocumentWithProjectL5({
+  let l5 = await validateDocumentWithProjectL5Gate({
     filePath: virtualPath,
     content: documentForL5,
   })
@@ -307,7 +339,7 @@ export async function buildPreparedChange(params: {
     })
     if (healed.ok) {
       documentForL5 = healed.document
-      l5 = validateDocumentWithProjectL5({
+      l5 = await validateDocumentWithProjectL5Gate({
         filePath: virtualPath,
         content: documentForL5,
       })
@@ -331,9 +363,9 @@ export async function buildPreparedChange(params: {
       return {
         ok: false,
         response: capabilityResponse({
-          error: 'L5_AUTO_HEAL_EXHAUSTED',
-          message:
-            'Apply blocked: Auto-Heal could not clear project L.5 typecheck within 3 rounds.',
+        error: 'L5_AUTO_HEAL_EXHAUSTED',
+        message:
+          'Apply blocked: Auto-Heal could not clear project L.5 typecheck + lint within 3 rounds.',
           status: 422,
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
@@ -350,6 +382,9 @@ export async function buildPreparedChange(params: {
   }
 
   if (l5.verdict === 'FAIL') {
+    const l5FailCode = gateCheckFailed(l5, 'L5_LINT')
+      ? 'L5_LINT_FAIL'
+      : 'L5_PROJECT_TYPECHECK_FAIL'
     await appendChangeRunLedgerEvent({
       eventType: 'apply_blocked',
       capability: 'AI_CHANGE_APPLY',
@@ -358,7 +393,7 @@ export async function buildPreparedChange(params: {
       filePath: virtualPath,
       outcome: 'blocked',
       metadata: {
-        reason: 'L5_PROJECT_TYPECHECK_FAIL',
+        reason: l5FailCode,
         compilerLog: l5.compilerLog.slice(0, 4000),
         runId: params.runId,
         runSource: RUN_SOURCE,
@@ -368,9 +403,11 @@ export async function buildPreparedChange(params: {
     return {
       ok: false,
       response: capabilityResponse({
-        error: 'L5_PROJECT_TYPECHECK_FAIL',
+        error: l5FailCode,
         message:
-          'Apply blocked by project L.5 typecheck. Pass enableAutoHeal=true to run live Auto-Heal (≤3 rounds).',
+          l5FailCode === 'L5_LINT_FAIL'
+            ? 'Apply blocked by project L.5 lint (ESLint). Pass enableAutoHeal=true to run live Auto-Heal (≤3 rounds).'
+            : 'Apply blocked by project L.5 typecheck. Pass enableAutoHeal=true to run live Auto-Heal (≤3 rounds).',
         status: 422,
         capability: CAPABILITY,
         capabilityStatus: 'PARTIAL',

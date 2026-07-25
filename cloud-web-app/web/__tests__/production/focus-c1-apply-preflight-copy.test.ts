@@ -23,6 +23,19 @@ describe('apply-preflight-user-copy Focus C1', () => {
     expect(copy.detail).toMatch(/Nothing was written/i)
   })
 
+  it('maps L5_LINT_FAIL', () => {
+    const copy = mapApplyPreflightDeny({ error: 'L5_LINT_FAIL' })
+    expect(copy.title).toMatch(/lint/i)
+    expect(copy.detail).toMatch(/Nothing was written/i)
+  })
+
+  it('maps RUST_GATE_SANDBOX_UNAVAILABLE', () => {
+    const copy = mapApplyPreflightDeny({ error: 'RUST_GATE_SANDBOX_UNAVAILABLE' })
+    expect(copy.title).toMatch(/rust gate/i)
+    expect(copy.detail).toMatch(/Nothing was written/i)
+    expect(copy.needsFullAccess).toBe(false)
+  })
+
   it('maps CREATIVE_COST_GUARD_DENIED with blockedReason', () => {
     const copy = mapApplyPreflightDeny({
       error: 'CREATIVE_COST_GUARD_DENIED',

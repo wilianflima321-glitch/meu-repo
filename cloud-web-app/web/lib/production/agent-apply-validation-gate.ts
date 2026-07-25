@@ -9,10 +9,12 @@
 import * as ts from 'typescript'
 import { createComponentLogger } from '@/lib/observability/logger'
 import { inspectLazyPatch } from '@/lib/production/lazy-inspector'
+import { runProjectL5Gate, gateCheckFailed } from '@/lib/production/project-l5-gate'
+import type { L5VirtualFile } from '@/lib/production/project-l5-typecheck'
 import {
-  runProjectL5Typecheck,
-  type L5VirtualFile,
-} from '@/lib/production/project-l5-typecheck'
+  isRustSourcePath,
+  buildRustGateUnavailableDetail,
+} from '@/lib/production/rust-gate-unavailable'
 
 const log = createComponentLogger('agent-apply-validation-gate')
 
@@ -28,6 +30,8 @@ export type FileValidationGateStatus =
   | 'denied_ast'
   | 'denied_lazy'
   | 'denied_l5'
+  | 'denied_lint'
+  | 'denied_rust_gate_unavailable'
   | 'denied_disjoint'
   | 'skipped_non_ts'
 
@@ -45,6 +49,8 @@ export type ApplyValidationGateResult = {
     | 'AST_SYNTAX_FAIL'
     | 'LAZY_INSPECTOR_REJECT'
     | 'L5_PROJECT_TYPECHECK_FAIL'
+    | 'L5_LINT_FAIL'
+    | 'RUST_GATE_SANDBOX_UNAVAILABLE'
     | 'MULTI_FILE_VALIDATION_DENIED'
     | 'PATH_DISJOINT_FAIL'
   compilerLog: string
@@ -150,10 +156,10 @@ export function assertDisjointApplyPaths(paths: readonly string[]): {
 /**
  * Fail-closed AST → Lazy → batch L.5 overlay for one or many patched files.
  */
-export function runGovernedApplyValidationGate(input: {
+export async function runGovernedApplyValidationGate(input: {
   files: Array<{ filePath: string; content: string; taskId?: string }>
   ambientFiles?: L5VirtualFile[]
-}): ApplyValidationGateResult {
+}): Promise<ApplyValidationGateResult> {
   const baseHonesty = {
     composerSurpassClaim: false as const,
     treeSitterAstIndexerWebWired: TREE_SITTER_AST_INDEXER_WEB_WIRED,
@@ -193,6 +199,18 @@ export function runGovernedApplyValidationGate(input: {
 
   for (const file of input.files) {
     const path = normalizePath(file.filePath)
+    if (isRustSourcePath(path)) {
+      const detail = buildRustGateUnavailableDetail(path)
+      fileValidation.push({
+        path,
+        status: 'denied_rust_gate_unavailable',
+        code: detail.code,
+        detail: detail.message,
+        taskId: file.taskId,
+      })
+      compilerChunks.push(`${path}: ${detail.code}`)
+      continue
+    }
     if (!isTsLike(path)) {
       fileValidation.push({
         path,
@@ -236,11 +254,18 @@ export function runGovernedApplyValidationGate(input: {
   }
 
   const hardDeny = fileValidation.find(
-    (entry) => entry.status === 'denied_ast' || entry.status === 'denied_lazy',
+    (entry) =>
+      entry.status === 'denied_ast' ||
+      entry.status === 'denied_lazy' ||
+      entry.status === 'denied_rust_gate_unavailable',
   )
   if (hardDeny) {
     const code =
-      hardDeny.status === 'denied_lazy' ? 'LAZY_INSPECTOR_REJECT' : 'AST_SYNTAX_FAIL'
+      hardDeny.status === 'denied_lazy'
+        ? 'LAZY_INSPECTOR_REJECT'
+        : hardDeny.status === 'denied_rust_gate_unavailable'
+          ? 'RUST_GATE_SANDBOX_UNAVAILABLE'
+          : 'AST_SYNTAX_FAIL'
     log.warn('apply_gate_pre_l5_deny', { code, path: hardDeny.path })
     return {
       ok: false,
@@ -264,12 +289,18 @@ export function runGovernedApplyValidationGate(input: {
     }
   }
 
-  const l5 = runProjectL5Typecheck({
+  const l5 = await runProjectL5Gate({
     files: tsFiles,
     ambientFiles: input.ambientFiles,
   })
 
   if (l5.verdict === 'FAIL') {
+    const lintFailed = gateCheckFailed(l5, 'L5_LINT')
+    const failCode: 'L5_PROJECT_TYPECHECK_FAIL' | 'L5_LINT_FAIL' = lintFailed
+      ? 'L5_LINT_FAIL'
+      : 'L5_PROJECT_TYPECHECK_FAIL'
+    const deniedStatus: 'denied_l5' | 'denied_lint' = lintFailed ? 'denied_lint' : 'denied_l5'
+
     const failingPaths = new Set<string>()
     for (const line of l5.compilerLog.split('\n')) {
       const match = line.match(/^([^:(]+)/)
@@ -281,8 +312,8 @@ export function runGovernedApplyValidationGate(input: {
       if (failingPaths.size === 0 || failingPaths.has(entry.path)) {
         return {
           ...entry,
-          status: 'denied_l5' as const,
-          code: 'L5_PROJECT_TYPECHECK_FAIL',
+          status: deniedStatus,
+          code: failCode,
           detail: l5.compilerLog.slice(0, 400),
         }
       }
@@ -292,11 +323,12 @@ export function runGovernedApplyValidationGate(input: {
     log.warn('apply_gate_l5_deny', {
       files: tsFiles.length,
       multi: input.files.length > 1,
+      failCode,
     })
 
     return {
       ok: false,
-      code: input.files.length > 1 ? 'MULTI_FILE_VALIDATION_DENIED' : 'L5_PROJECT_TYPECHECK_FAIL',
+      code: input.files.length > 1 ? 'MULTI_FILE_VALIDATION_DENIED' : failCode,
       compilerLog: l5.compilerLog.slice(0, 8000),
       fileValidation: nextValidation,
       ...baseHonesty,

@@ -23,7 +23,7 @@ describe('CW6 agent apply validation gate', () => {
     expect(TREE_SITTER_AST_INDEXER_WEB_WIRED).toBe(false)
   })
 
-  it('denies bad AST/syntax before apply', () => {
+  it('denies bad AST/syntax before apply', async () => {
     const ast = validateFileAstSyntax({
       filePath: 'src/broken.ts',
       content: 'export const x: string = ;\n',
@@ -31,7 +31,7 @@ describe('CW6 agent apply validation gate', () => {
     expect(ast.verdict).toBe('FAIL')
     expect(ast.compilerLog).toMatch(/syntax error/i)
 
-    const gate = runGovernedApplyValidationGate({
+    const gate = await runGovernedApplyValidationGate({
       files: [{ filePath: 'src/broken.ts', content: 'export const x: string = ;\n', taskId: 't1' }],
     })
     expect(gate.ok).toBe(false)
@@ -40,8 +40,8 @@ describe('CW6 agent apply validation gate', () => {
     expect(gate.fileValidation.some((e) => e.status === 'denied_ast')).toBe(true)
   })
 
-  it('denies multi-file batch when L.5 overlay fails (type errors)', () => {
-    const gate = runGovernedApplyValidationGate({
+  it('denies multi-file batch when L.5 overlay fails (type errors)', async () => {
+    const gate = await runGovernedApplyValidationGate({
       files: [
         {
           filePath: 'src/a.ts',
@@ -62,9 +62,9 @@ describe('CW6 agent apply validation gate', () => {
     expect(gate.treeSitterAstIndexerWebWired).toBe(false)
   })
 
-  it('passes clean multi-file overlay', () => {
+  it('passes clean multi-file overlay', async () => {
     // Self-contained files — L.5 overlay does not pull real node_modules resolution.
-    const gate = runGovernedApplyValidationGate({
+    const gate = await runGovernedApplyValidationGate({
       files: [
         {
           filePath: 'src/a.ts',
@@ -82,6 +82,51 @@ describe('CW6 agent apply validation gate', () => {
     expect(gate.compilerLog).toBe('')
     expect(gate.fileValidation.every((e) => e.status === 'pass')).toBe(true)
     expect(gate.composerSurpassClaim).toBe(false)
+  })
+
+  it('denies a real ESLint no-console error under lib/** (Law XI lint gate, real project config)', async () => {
+    const gate = await runGovernedApplyValidationGate({
+      files: [
+        {
+          filePath: 'lib/l5-lint-fixture-fail.ts',
+          content: "export function bad(): void {\n  console.log('should be blocked by no-console')\n}\n",
+          taskId: 't_lint_fail',
+        },
+      ],
+    })
+    expect(gate.ok).toBe(false)
+    expect(gate.code).toBe('L5_LINT_FAIL')
+    expect(gate.compilerLog).toMatch(/no-console/i)
+    expect(gate.fileValidation.some((e) => e.status === 'denied_lint')).toBe(true)
+  })
+
+  it('passes real ESLint on clean code under lib/**', async () => {
+    const gate = await runGovernedApplyValidationGate({
+      files: [
+        {
+          filePath: 'lib/l5-lint-fixture-pass.ts',
+          content: 'export function add(a: number, b: number): number {\n  return a + b\n}\n',
+          taskId: 't_lint_pass',
+        },
+      ],
+    })
+    expect(gate.ok).toBe(true)
+    expect(gate.fileValidation.every((e) => e.status === 'pass')).toBe(true)
+  })
+
+  it('fail-closes .rs writes — no host cargo exec without L.1 sandbox (Law XI honesty)', async () => {
+    const gate = await runGovernedApplyValidationGate({
+      files: [
+        {
+          filePath: 'apps/studio-local/src-tauri/src/some_new_module.rs',
+          content: 'pub fn add(a: i32, b: i32) -> i32 { a + b }\n',
+          taskId: 't_rust',
+        },
+      ],
+    })
+    expect(gate.ok).toBe(false)
+    expect(gate.code).toBe('RUST_GATE_SANDBOX_UNAVAILABLE')
+    expect(gate.fileValidation.some((e) => e.status === 'denied_rust_gate_unavailable')).toBe(true)
   })
 })
 
