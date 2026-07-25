@@ -21,6 +21,7 @@ import type { ViewportFidelityParams } from '@/lib/production/viewport-fidelity'
 import type { ViewportFrameloopMode } from '@/lib/viewport/use-viewport-render-activity'
 import { TerrainHeightfieldLiveLayer } from '@/components/preview/TerrainHeightfieldLiveLayer'
 import { RadianceStudioViewportBridge } from '@/lib/viewport/RadianceStudioViewportBridge'
+import { ViewportReferencePane } from '@/lib/viewport/ViewportReferencePane'
 
 const ALLOW_EXTERNAL_HDRI = process.env.NEXT_PUBLIC_AETHEL_EXTERNAL_HDRI === '1'
 
@@ -146,6 +147,7 @@ export function ViewportScene({
   frameloop = 'always',
   terrainProjectId = null,
   capabilityScore,
+  quadView = false,
 }: Omit<AethelViewport3DProps, 'onTogglePlayTest' | 'onTransformModeChange' | 'onTransformSpaceChange' | 'onSnapEnabledChange' | 'onAIAction'> & {
   cameraPreset: ViewportCameraPreset
   focusTarget?: [number, number, number] | null
@@ -156,6 +158,8 @@ export function ViewportScene({
   frameloop?: ViewportFrameloopMode
   /** Law XV Capability Score - Radiance studio wire (cf). */
   capabilityScore?: number
+  /** Phase 4 (AAA Studio Deepening Sweep) — Top/Front/Side reference panes beside the main view. */
+  quadView?: boolean
 }) {
   const [heightfieldLive, setHeightfieldLive] = useState(false)
   const primarySelectedId = selectedIds[0] ?? null
@@ -188,7 +192,13 @@ export function ViewportScene({
   const directional = renderMode === 'cinematic' ? Math.max(fidelity.directionalIntensity, 1.6) : fidelity.directionalIntensity
 
   return (
-    <div className="relative h-full w-full" data-viewport-fidelity={fidelity.level} data-final-render-safe="false">
+    <div
+      className={quadView ? 'grid h-full w-full grid-cols-2 grid-rows-2 gap-1 p-1' : 'relative h-full w-full'}
+      data-viewport-fidelity={fidelity.level}
+      data-final-render-safe="false"
+      data-viewport-quad-view={quadView}
+    >
+      <div className={quadView ? 'relative col-start-1 row-start-1 overflow-hidden rounded-lg' : 'contents'}>
       <Canvas
         shadows={fidelity.shadows}
         dpr={[1, fidelity.dprMax]}
@@ -279,6 +289,39 @@ export function ViewportScene({
         <GizmoViewport axisColors={['red', 'lime', 'deepskyblue']} labelColor="white" />
       </GizmoHelper>
     </Canvas>
+      </div>
+
+      {quadView ? (
+        <>
+          <div className="relative col-start-2 row-start-1 overflow-hidden rounded-lg">
+            <ViewportReferencePane
+              label="Top"
+              preset="top"
+              objects={objects}
+              selectedIds={selectedIds}
+              onSelectionChange={onSelectionChange}
+            />
+          </div>
+          <div className="relative col-start-1 row-start-2 overflow-hidden rounded-lg">
+            <ViewportReferencePane
+              label="Front"
+              preset="front"
+              objects={objects}
+              selectedIds={selectedIds}
+              onSelectionChange={onSelectionChange}
+            />
+          </div>
+          <div className="relative col-start-2 row-start-2 overflow-hidden rounded-lg">
+            <ViewportReferencePane
+              label="Side"
+              preset="side"
+              objects={objects}
+              selectedIds={selectedIds}
+              onSelectionChange={onSelectionChange}
+            />
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

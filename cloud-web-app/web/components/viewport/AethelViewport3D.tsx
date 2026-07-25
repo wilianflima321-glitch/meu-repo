@@ -109,6 +109,7 @@ export function AethelViewport3D({
   const [aiCommand, setAiCommand] = useState('move this object 2 up')
   const [assetDragActive, setAssetDragActive] = useState(false)
   const [cameraPreset, setCameraPreset] = useState<ViewportCameraPreset>('perspective')
+  const [quadView, setQuadView] = useState(false)
   const [localGizmoConstraint, setLocalGizmoConstraint] = useState<GizmoAxisPlaneConstraint>('free')
   const [localGizmoPivotMode, setLocalGizmoPivotMode] = useState<GizmoPivotMode>('median')
   const [webGpuAvailable, setWebGpuAvailable] = useState(false)
@@ -230,17 +231,21 @@ export function AethelViewport3D({
       }
       if (event.code === 'KeyX') {
         event.preventDefault()
-        commitGizmoConstraint(gizmoConstraint === 'x' ? 'free' : 'x')
+        // Blender convention: X locks to the X axis; Shift+X locks to the YZ plane
+        // (i.e. movement stays free in Y and Z, excluded from X) — see
+        // TransformGizmoProfessional / getGizmoConstraintAxes for how 'yz' maps to
+        // the real drei/three.js plane-picker handle, not just axis visibility.
+        commitGizmoConstraint(event.shiftKey ? (gizmoConstraint === 'yz' ? 'free' : 'yz') : (gizmoConstraint === 'x' ? 'free' : 'x'))
         return
       }
       if (event.code === 'KeyY') {
         event.preventDefault()
-        commitGizmoConstraint(gizmoConstraint === 'y' ? 'free' : 'y')
+        commitGizmoConstraint(event.shiftKey ? (gizmoConstraint === 'xz' ? 'free' : 'xz') : (gizmoConstraint === 'y' ? 'free' : 'y'))
         return
       }
       if (event.code === 'KeyZ') {
         event.preventDefault()
-        commitGizmoConstraint(gizmoConstraint === 'z' ? 'free' : 'z')
+        commitGizmoConstraint(event.shiftKey ? (gizmoConstraint === 'xy' ? 'free' : 'xy') : (gizmoConstraint === 'z' ? 'free' : 'z'))
         return
       }
       if (event.code === 'KeyG') {
@@ -288,6 +293,8 @@ export function AethelViewport3D({
         onCameraPresetChange={setCameraPreset}
         onFrameSelection={frameSelection}
         renderStats={renderTarget === 'browser' ? renderStats : null}
+        quadView={quadView}
+        onQuadViewChange={setQuadView}
       />
 
       <ViewportGizmoMemoryChip chip={gizmoMemoryChip} />
@@ -377,6 +384,7 @@ export function AethelViewport3D({
           fidelity={fidelityParams}
           frameloop={frameloop}
           terrainProjectId={terrainProjectId}
+          quadView={quadView}
         />
       )}
     </div>

@@ -9,6 +9,7 @@ import {
   Crosshair,
   Film,
   Gauge,
+  Grid2x2,
   Move3D,
   RotateCw,
   Scale3D,
@@ -44,6 +45,8 @@ export function ViewportTopToolbar({
   onCameraPresetChange,
   onFrameSelection,
   renderStats = null,
+  quadView = false,
+  onQuadViewChange,
 }: {
   transformMode: ViewportTransformMode
   transformSpace: ViewportTransformSpace
@@ -57,6 +60,9 @@ export function ViewportTopToolbar({
   onFrameSelection: () => void
   /** Real R3F `gl.info` telemetry (Anti-Mock fix) — null until the first sample lands. */
   renderStats?: ViewportRenderStats | null
+  /** Phase 4 (AAA Studio Deepening Sweep) — Top/Front/Side reference panes beside the main view. */
+  quadView?: boolean
+  onQuadViewChange?: (enabled: boolean) => void
 }) {
   const cameraPresetLabel =
     VIEWPORT_CAMERA_PRESETS.find((preset) => preset.id === cameraPreset)
@@ -150,6 +156,19 @@ export function ViewportTopToolbar({
           activeButton={activeButton}
           compactTextButton={compactTextButton}
         />
+        {onQuadViewChange ? (
+          <button
+            type="button"
+            aria-label={`${quadView ? 'Disable' : 'Enable'} quad-view reference panes`}
+            aria-pressed={quadView}
+            title="Quad View — Top / Front / Side reference panes"
+            onClick={() => onQuadViewChange(!quadView)}
+            className={quadView ? activeButton : iconButton}
+            data-viewport-quad-view-toggle={quadView}
+          >
+            <Grid2x2 className="h-4 w-4" />
+          </button>
+        ) : null}
       </div>
 
       {/* Stat FPS Overlay — real THREE.WebGLRenderer.info telemetry, sampled in RenderStatsProbe (no fabricated numbers) */}
