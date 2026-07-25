@@ -191,9 +191,11 @@ interface FoliageInstances3DProps {
   instancias: FoliageInstance[];
   types: FoliageType[];
   windTime: number;
+  /** Wind direction in degrees (0 = +X, 90 = +Z) — a real vector, not a scalar. */
+  windDirectionDeg: number;
 }
 
-export function FoliageInstances3D({ instancias, types, windTime }: FoliageInstances3DProps) {
+export function FoliageInstances3D({ instancias, types, windTime, windDirectionDeg }: FoliageInstances3DProps) {
   const palette = useMemo(
     () => ({
       tree: resolveCssVarColor('--aethel-success-dark', 'rgb(5, 150, 105)'),
@@ -226,6 +228,7 @@ export function FoliageInstances3D({ instancias, types, windTime }: FoliageInsta
             type={foliageType}
             instances={typeInstances}
             windTime={windTime}
+            windDirectionDeg={windDirectionDeg}
             color={palette[foliageType.category] ?? palette.fallback}
           />
         );
@@ -255,16 +258,21 @@ function FoliageTypeInstancedMesh({
   type,
   instances,
   windTime,
+  windDirectionDeg,
   color,
 }: {
   type: FoliageType;
   instances: FoliageInstance[];
   windTime: number;
+  windDirectionDeg: number;
   color: string;
 }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const geometry = useMemo(() => geometryForCategory(type.category), [type.category]);
   const yLift = type.category === 'tree' ? 1 : 0.2;
+  const windRad = (windDirectionDeg * Math.PI) / 180;
+  const windDirX = Math.cos(windRad);
+  const windDirZ = Math.sin(windRad);
 
   useLayoutEffect(() => {
     const mesh = meshRef.current;
@@ -272,13 +280,16 @@ function FoliageTypeInstancedMesh({
     const dummy = new THREE.Object3D();
     for (let i = 0; i < instances.length; i++) {
       const inst = instances[i];
+      // Real 2D wind vector: sway direction follows windDirectionDeg, phase
+      // varies with the projection along that direction (not just world X).
+      const phase = inst.position.x * windDirX + inst.position.z * windDirZ;
       const windOffset = type.windEnabled
-        ? Math.sin(windTime * type.windFrequencia + inst.position.x) * type.windStrength * 0.1
+        ? Math.sin(windTime * type.windFrequencia + phase) * type.windStrength * 0.1
         : 0;
       dummy.position.set(
-        inst.position.x + windOffset,
+        inst.position.x + windOffset * windDirX,
         inst.position.y + yLift,
-        inst.position.z,
+        inst.position.z + windOffset * windDirZ,
       );
       dummy.rotation.copy(inst.rotation);
       dummy.scale.copy(inst.scale);
@@ -287,7 +298,7 @@ function FoliageTypeInstancedMesh({
     }
     mesh.count = instances.length;
     mesh.instanceMatrix.needsUpdate = true;
-  }, [instances, windTime, type.windEnabled, type.windFrequencia, type.windStrength, yLift]);
+  }, [instances, windTime, type.windEnabled, type.windFrequencia, type.windStrength, yLift, windDirX, windDirZ]);
 
   return (
     <instancedMesh

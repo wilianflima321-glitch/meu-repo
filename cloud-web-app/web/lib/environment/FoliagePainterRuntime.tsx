@@ -37,6 +37,9 @@ import {
   Plus,
   RotateCcw,
   Move,
+  Sprout,
+  Flower2,
+  Layers,
 } from 'lucide-react';
 
 export type {
@@ -46,6 +49,15 @@ export type {
   FoliageToolType,
   FoliageType,
 } from '@/lib/environment/foliage-painter-types';
+
+const CATEGORY_TABS: { id: 'all' | FoliageType['category']; label: string; icon: React.ReactNode }[] = [
+  { id: 'all', label: 'All', icon: <Layers className="w-3.5 h-3.5" /> },
+  { id: 'tree', label: 'Trees', icon: <TreeDeciduous className="w-3.5 h-3.5" /> },
+  { id: 'bush', label: 'Bushes', icon: <Sprout className="w-3.5 h-3.5" /> },
+  { id: 'grass', label: 'Grass', icon: <Sprout className="w-3.5 h-3.5" /> },
+  { id: 'flower', label: 'Flowers', icon: <Flower2 className="w-3.5 h-3.5" /> },
+  { id: 'rock', label: 'Rocks', icon: <Mountain className="w-3.5 h-3.5" /> },
+];
 
 export default function FoliagePintarer({
   sceneId,
@@ -74,7 +86,10 @@ export default function FoliagePintarer({
   const [isSimulating, setIsSimulating] = useState(false);
   const [windTime, setWindTime] = useState(0);
   const [windTurbulence, setWindTurbulence] = useState(0.3);
+  const [windDirectionDeg, setWindDirectionDeg] = useState(0);
   const [brushPosition] = useState<THREE.Vector3 | null>(null);
+  const [activeCategory, setActiveCategory] = useState<'all' | FoliageType['category']>('all');
+  const [lastStroke, setLastStroke] = useState<{ placed: number; constraintRejected: number } | null>(null);
 
   const updateFoliageType = useCallback((typeId: string, patch: Partial<FoliageType>) => {
     setFoliageTypes((prev) =>
@@ -112,6 +127,11 @@ export default function FoliagePintarer({
     [layers]
   );
 
+  const visibleFoliageTypes = useMemo(
+    () => (activeCategory === 'all' ? foliageTypes : foliageTypes.filter((t) => t.category === activeCategory)),
+    [foliageTypes, activeCategory],
+  );
+
   const handlePintar = useCallback((point: THREE.Vector3) => {
     if (!activeCamada || activeCamada.locked || selectedTypes.length === 0) return;
 
@@ -124,6 +144,7 @@ export default function FoliagePintarer({
           selectedTypes,
           foliageTypes,
           brush: brushSettings,
+          onStrokeResult: setLastStroke,
         }),
       );
     } else if (brushSettings.tool === 'erase') {
@@ -183,14 +204,43 @@ export default function FoliagePintarer({
     <div className="flex h-full w-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
       <div className="w-64 border-r border-[var(--aethel-border-primary)] flex flex-col">
         <div className="p-3 border-b border-[var(--aethel-border-primary)]">
-          <h3 className="text-sm font-semibold flex items-center gap-2">
+          <h3 className="text-sm font-semibold flex items-center gap-2 mb-2">
             <TreeDeciduous className="w-4 h-4 text-[var(--aethel-success)]" />
             Foliage types
           </h3>
+          <div className="flex flex-wrap gap-1" role="tablist" aria-label="Foliage species category">
+            {CATEGORY_TABS.map((tab) => {
+              const active = activeCategory === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  aria-label={`Show ${tab.label} foliage species`}
+                  onClick={() => setActiveCategory(tab.id)}
+                  className={`flex items-center gap-1 rounded px-1.5 py-1 text-[10px] font-semibold uppercase tracking-wide transition-colors ${
+                    active
+                      ? 'bg-[var(--aethel-success)]/25 text-[var(--aethel-success)] border border-[var(--aethel-success)]/50'
+                      : 'text-[var(--aethel-text-tertiary)] border border-transparent hover:bg-[var(--aethel-surface-quaternary)]'
+                  }`}
+                  data-testid={`foliage-category-tab-${tab.id}`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {foliageTypes.map((type) => (
+          {visibleFoliageTypes.length === 0 ? (
+            <p className="p-2 text-center text-xs text-[var(--aethel-text-tertiary)]">
+              No species in this category.
+            </p>
+          ) : null}
+          {visibleFoliageTypes.map((type) => (
             <FoliageTypeCard
               key={type.id}
               type={type}
@@ -255,6 +305,7 @@ export default function FoliagePintarer({
             instancias={visibleInstances}
             types={foliageTypes}
             windTime={windTime}
+            windDirectionDeg={windDirectionDeg}
           />
           <OrbitControls makeDefault />
           <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
@@ -309,8 +360,19 @@ export default function FoliagePintarer({
           </button>
         </div>
 
-        <div className="absolute bottom-4 left-4">
+        <div className="absolute bottom-4 left-4 space-y-2">
           <FoliageStats layers={layers} types={foliageTypes} />
+          {lastStroke ? (
+            <div
+              className="rounded-lg border border-[var(--aethel-glass-border)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] px-3 py-1.5 text-[10px] font-mono text-[var(--aethel-text-tertiary)]"
+              data-testid="foliage-last-stroke"
+            >
+              Last stroke: <span className="text-[var(--aethel-success)]">{lastStroke.placed} placed</span>
+              {lastStroke.constraintRejected > 0 ? (
+                <span className="text-[var(--aethel-warning)]"> · {lastStroke.constraintRejected} blocked by slope/height</span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -488,6 +550,15 @@ export default function FoliagePintarer({
                     />
                     Enable wind
                   </label>
+                  <Slider
+                    label="Direction"
+                    value={windDirectionDeg}
+                    min={0}
+                    max={359}
+                    step={1}
+                    unit="°"
+                    onChange={setWindDirectionDeg}
+                  />
                   <Slider
                     label="Global strength"
                     value={type.windStrength}
