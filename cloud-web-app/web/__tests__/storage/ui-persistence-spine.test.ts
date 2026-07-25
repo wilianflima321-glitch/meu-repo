@@ -160,7 +160,7 @@ describe('ui-persistence-spine (CW4)', () => {
     expect(getUiPersistence('dashboard.activeTab', 'overview')).toBe('overview')
   })
 
-  it('re-syncs ide.dock from legacy after WorkspaceProvider raw write (no stale bag)', () => {
+  it('migrates ide.dock from legacy once, then the bag is authoritative (CW4 closed)', () => {
     window.localStorage.setItem(
       UI_PERSISTENCE_LEGACY_KEYS.ideDock,
       JSON.stringify({ regions: { bottomBar: { size: 22 } }, zenMode: false, presets: {} }),
@@ -170,10 +170,24 @@ describe('ui-persistence-spine (CW4)', () => {
       regions: { bottomBar: { size: 22 } },
     })
 
-    // External writer (WorkspaceProvider) updates legacy only — bag must not win with stale.
+    // CW4 fix: WorkspaceProvider can no longer write the legacy key directly
+    // (the spine adapter is registered structurally before any store is
+    // created — see docking/WorkspaceProvider.tsx). A foreign/stale write to
+    // the raw legacy key alone (simulating an old tab or manual edit) must
+    // NOT silently override the now-authoritative bag — the old resync-on-
+    // read behavior that caused this is exactly the dual-write hazard that
+    // was closed. Only `setIdeDockLayout` (bag write, mirrored outward)
+    // changes what `getUiPersistence('ide.dock', ...)` returns.
     window.localStorage.setItem(
       UI_PERSISTENCE_LEGACY_KEYS.ideDock,
       JSON.stringify({ regions: { bottomBar: { size: 40 } }, zenMode: true, presets: {} }),
+    )
+    expect(getUiPersistence('ide.dock', null)).toMatchObject({
+      regions: { bottomBar: { size: 22 } },
+    })
+
+    expect(setIdeDockLayout({ regions: { bottomBar: { size: 40 } }, zenMode: true, presets: {} })).toBe(
+      true,
     )
     expect(getUiPersistence('ide.dock', null)).toMatchObject({
       regions: { bottomBar: { size: 40 } },
@@ -276,7 +290,7 @@ describe('ui-persistence-spine (CW4)', () => {
     expect(JSON.stringify(bag.entries)).not.toMatch(/sk-|api[_-]?key|password|byok/i)
   })
 
-  it('re-syncs viewport.dock from legacy WorkspaceProvider raw writes', () => {
+  it('migrates viewport.dock from legacy once, then the bag is authoritative (CW4 closed)', () => {
     window.localStorage.setItem(
       `${UI_PERSISTENCE_LEGACY_KEYS.viewportDockPrefix}canvas.v1`,
       JSON.stringify({ zenMode: false, size: 18 }),
@@ -286,10 +300,17 @@ describe('ui-persistence-spine (CW4)', () => {
       canvas: { zenMode: false, size: 18 },
     })
 
+    // Same guarantee as ide.dock above — a foreign raw write must not win
+    // over the bag; only setViewportDockLayoutForMode (spine write) does.
     window.localStorage.setItem(
       `${UI_PERSISTENCE_LEGACY_KEYS.viewportDockPrefix}canvas.v1`,
       JSON.stringify({ zenMode: true, size: 33 }),
     )
+    expect(getUiPersistence('viewport.dock', {})).toMatchObject({
+      canvas: { zenMode: false, size: 18 },
+    })
+
+    expect(setViewportDockLayoutForMode('canvas', { zenMode: true, size: 33 })).toBe(true)
     expect(getUiPersistence('viewport.dock', {})).toMatchObject({
       canvas: { zenMode: true, size: 33 },
     })

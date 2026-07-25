@@ -29,13 +29,10 @@ import type {
 } from './modern-shell/types';
 import { useShellSourceControlTruth } from './modern-shell/useShellSourceControlTruth';
 import { useModernIDEPanels } from './modern-shell/useModernIDEPanels';
+// CW4 — spine adapter registration lives in `docking/WorkspaceProvider.tsx`
+// (the sole `createWorkspaceStore` call site) so every dock consumer, not
+// just this shell, is covered structurally. See its module doc comment.
 import { WorkspaceProvider } from './docking';
-import { registerIdeDockSpinePersistence } from '../../web/lib/storage/register-ide-dock-spine';
-
-// CW4 — dual-write dock layout into versioned UI persistence spine (legacy mirrored).
-if (typeof window !== 'undefined') {
-  registerIdeDockSpinePersistence();
-}
 
 interface ModernIDEShellProps {
   projectId?: string;

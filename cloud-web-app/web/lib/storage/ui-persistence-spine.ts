@@ -272,64 +272,28 @@ export function migrateUiPersistenceSpine(): UiPersistenceBag {
 }
 
 /**
- * Namespaces still owned by raw writers outside the spine (compat window).
- * Bag entries for these must re-sync from legacy on read or they go stale
- * after the first one-shot migrate (dual-write lie).
+ * CW4 (closed): `ide.dock` + `viewport.dock` used to need a read-time
+ * re-sync from their raw legacy keys because `WorkspaceProvider` could
+ * mount and write directly to `localStorage` *before* the spine adapter
+ * was registered on some routes (viewport-only shells never imported the
+ * IDE shell module that carried the registration side effect). The spine
+ * bag would then silently go stale one write later — a real dual-write
+ * hazard, not just duplicated data.
+ *
+ * Fixed at the root: `docking/WorkspaceProvider.tsx` — the single call
+ * site for `createWorkspaceStore` — now registers the spine adapter at
+ * module scope, so no `WorkspaceStore` can ever be created before the
+ * adapter exists, on any route. `ide.dock`/`viewport.dock` writes go
+ * through `setIdeDockLayout`/`setViewportDockLayoutForMode` exclusively;
+ * the raw legacy key is written *by* `mirrorLegacy` below as a one-way,
+ * same-call compat mirror (one release), never read back into the bag
+ * after the initial one-shot `migrateUiPersistenceSpine()` bootstrap.
+ * Do not reintroduce a read-time legacy resync — that recreates the race.
  */
-const LEGACY_WRITE_AUTHORITY: ReadonlySet<UiPersistenceNamespace> = new Set([
-  'ide.dock', // WorkspaceProvider → localStorage.setItem(aethel.ide.dock.v1)
-  'viewport.dock', // ViewportWorkbenchShell WorkspaceProvider raw mode keys
-])
-
-function syncLegacyWriteAuthority(bag: UiPersistenceBag): { bag: UiPersistenceBag; changed: boolean } {
-  let changed = false
-  if (LEGACY_WRITE_AUTHORITY.has('ide.dock')) {
-    const legacy = parseLegacyJson(readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.ideDock))
-    if (legacy !== null) {
-      const prev = bag.entries['ide.dock']
-      const prevJson = prev === undefined ? undefined : JSON.stringify(prev)
-      const nextJson = JSON.stringify(legacy)
-      if (prevJson !== nextJson) {
-        bag.entries['ide.dock'] = legacy
-        changed = true
-      }
-    }
-  }
-  if (LEGACY_WRITE_AUTHORITY.has('viewport.dock') && typeof window !== 'undefined') {
-    const docks: Record<string, unknown> = {
-      ...(typeof bag.entries['viewport.dock'] === 'object' && bag.entries['viewport.dock']
-        ? (bag.entries['viewport.dock'] as Record<string, unknown>)
-        : {}),
-    }
-    let dockChanged = false
-    for (const mode of UI_PERSISTENCE_VIEWPORT_DOCK_MODES) {
-      const legacyKey = `${UI_PERSISTENCE_LEGACY_KEYS.viewportDockPrefix}${mode}.v1`
-      const legacy = parseLegacyJson(readLegacyRaw(legacyKey))
-      if (legacy === null) continue
-      const prevJson = docks[mode] === undefined ? undefined : JSON.stringify(docks[mode])
-      const nextJson = JSON.stringify(legacy)
-      if (prevJson !== nextJson) {
-        docks[mode] = legacy
-        dockChanged = true
-      }
-    }
-    if (dockChanged) {
-      bag.entries['viewport.dock'] = docks
-      changed = true
-    }
-  }
-  return { bag, changed }
-}
-
 function ensureMigrated(): UiPersistenceBag {
   // Always run — migrate is idempotent and must pick up legacy keys written
   // after an earlier empty migrate (e.g. tests / late session resume writes).
-  const bag = migrateUiPersistenceSpine()
-  const synced = syncLegacyWriteAuthority(bag)
-  if (synced.changed) {
-    writeBag(synced.bag)
-  }
-  return synced.bag
+  return migrateUiPersistenceSpine()
 }
 
 /** @deprecated no-op kept for test imports during CW4 rollout */

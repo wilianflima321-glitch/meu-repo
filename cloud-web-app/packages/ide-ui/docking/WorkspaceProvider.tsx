@@ -3,6 +3,19 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createWorkspaceStore, type WorkspaceStore } from './workspaceStore';
 import type { DockPanelMeta } from './types';
+// CW4 — single, structural registration point for the UI persistence spine
+// adapter (see ui-persistence-spine.ts `ensureMigrated` doc comment).
+// `createWorkspaceStore` (below, in `WorkspaceProvider`) is the *only* place
+// in the codebase that creates a dock `WorkspaceStore`; registering the spine
+// adapter here at module scope — not per-shell (IDE vs. viewport) — closes
+// the "raw authority window": no consumer of `<WorkspaceProvider>` can ever
+// mount a store before this module (and its side effect) has been evaluated,
+// regardless of which route/shell imports it first.
+import { registerIdeDockSpinePersistence } from '../../../web/lib/storage/register-ide-dock-spine';
+
+if (typeof window !== 'undefined') {
+  registerIdeDockSpinePersistence();
+}
 
 const WorkspaceStoreContext = createContext<WorkspaceStore | null>(null);
 

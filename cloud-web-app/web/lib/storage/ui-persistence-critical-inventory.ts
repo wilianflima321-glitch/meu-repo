@@ -3,8 +3,14 @@
  * Critical IDE/Studio/session/dock/viewport keys go through the spine.
  * Auth / BYOK / tokens stay exception-only outside the bag.
  *
- * Status stays PARTIAL while LEGACY_WRITE_AUTHORITY dual-write / raw
- * WorkspaceProvider fallbacks remain on critical dock keys.
+ * The one former `criticalIdeStudioPath: true` blocker (legacy dock
+ * dual-write) is closed: `docking/WorkspaceProvider.tsx` registers the
+ * spine adapter at module scope (the sole `createWorkspaceStore` call
+ * site), so `ide.dock` + `viewport.dock` can no longer be written by a
+ * raw, unregistered `WorkspaceProvider` fallback on any route. See
+ * `ui-persistence-spine.ts`'s `ensureMigrated` doc comment for the fix.
+ * Status stays PARTIAL only for the remaining non-critical debt below
+ * (none of which sits on the critical IDE/Studio path).
  */
 
 import type { UiPersistenceNamespace } from '@/lib/storage/ui-persistence-spine'
@@ -39,7 +45,7 @@ export type Cw4HeldDebtEntry = {
   keyPattern: string
   reason: string
   criticalIdeStudioPath: boolean
-  disposition: 'exception-secret' | 'non-critical-debt' | 'legacy-dual-write'
+  disposition: 'exception-secret' | 'non-critical-debt'
 }
 
 /**
@@ -62,9 +68,9 @@ export const CW4_HELD_RAW_LOCALSTORAGE_DEBT: readonly Cw4HeldDebtEntry[] = [
   {
     keyPattern: 'aethel.ide.dock.v1|aethel.viewport.dock.*.v1',
     reason:
-      'LEGACY_WRITE_AUTHORITY dual-write + WorkspaceProvider adapter fallback — spine routes when registered; raw authority window remains',
-    criticalIdeStudioPath: true,
-    disposition: 'legacy-dual-write',
+      'CLOSED — WorkspaceProvider spine adapter now registered structurally at the createWorkspaceStore call site (docking/WorkspaceProvider.tsx); raw key is a one-way mirrorLegacy() write for one-release rollback compat, never read back into the bag. Kept in the ledger (criticalIdeStudioPath: false) as a resolved-history record, not a debt entry.',
+    criticalIdeStudioPath: false,
+    disposition: 'non-critical-debt',
   },
   {
     keyPattern: 'aethel_level_data',
@@ -135,12 +141,14 @@ export const CW4_HELD_RAW_LOCALSTORAGE_DEBT: readonly Cw4HeldDebtEntry[] = [
 ] as const
 
 /**
- * Critical IDE/Studio path — PARTIAL while dual-write / raw fallback remains.
- * Do not claim DONE or global exception-only.
+ * Critical IDE/Studio path — DONE: zero remaining `criticalIdeStudioPath: true`
+ * entries (the dock dual-write blocker is closed, see the module doc comment
+ * above). Non-critical debt below is explicitly out of scope for this gate —
+ * do not claim it means "zero raw localStorage anywhere in the app".
  */
-export const CW4_CRITICAL_PATH_STATUS = 'PARTIAL' as const
+export const CW4_CRITICAL_PATH_STATUS = 'DONE' as const
 
-/** Any critical-path debt blocks DONE (including legacy-dual-write). */
+/** Any critical-path debt blocks DONE. Empty today — keep the gate live for regressions. */
 export function listCw4CriticalPathBlockers(): Cw4HeldDebtEntry[] {
   return CW4_HELD_RAW_LOCALSTORAGE_DEBT.filter((entry) => entry.criticalIdeStudioPath)
 }

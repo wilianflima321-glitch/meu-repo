@@ -79,7 +79,7 @@ Before executing any block, the executor MUST comply with `AETHEL_AAA_SYSTEM_ARC
 | **CW7** | Disk austerity | Cargo/target on E:/D:; CAS; prune |
 
 **Still STOPPED:** J.11 ACP / J.12 OrchestratorProd.  
-**Ledger:** [`AETHEL_FOCUS1_EXECUTION_PROGRESS.md`](./AETHEL_FOCUS1_EXECUTION_PROGRESS.md) Consolidation table — CW1–CW7 **PARTIAL** (CW2 SPH/XPBD/LBM/Voronoi N≥2048 Critic PASS — do not re-inflate; CW3 present-root doc + fail-closed WebGPU present + tick hook — UE single RHI still OPEN; CW5 CreativeStudioShell/page tokens + SurfaceStates; CW6 Path B AST/L.5 multi-file swarm on governed apply + per-file Ops validation, no ACP/Composer-surpass; CW7 actionable DISK_AUSTERITY + gitignored local E: config; CW4 dual-write debt). CW0 ACTIVE. J.11/J.12 STOPPED. **HELD** vs Cursor / Figma / UE Chaos.
+**Ledger:** [`AETHEL_FOCUS1_EXECUTION_PROGRESS.md`](./AETHEL_FOCUS1_EXECUTION_PROGRESS.md) Consolidation table — CW1–CW7 **PARTIAL** (CW2 SPH/XPBD/LBM/Voronoi N≥2048 Critic PASS — do not re-inflate; CW3 present-root doc + fail-closed WebGPU present + tick hook — UE single RHI still OPEN; CW5 CreativeStudioShell/page tokens + SurfaceStates; CW6 Path B AST/L.5 multi-file swarm on governed apply + per-file Ops validation, no ACP/Composer-surpass; CW7 actionable DISK_AUSTERITY + gitignored local E: config; **CW4 critical-path DONE 2026-07-25** — dock dual-write closed at root, see Progress ledger). CW0 ACTIVE. J.11/J.12 STOPPED. **HELD** vs Cursor / Figma / UE Chaos.
 **UX vision (not ship cert):** [`AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md`](./AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md) §0.
 
 ---

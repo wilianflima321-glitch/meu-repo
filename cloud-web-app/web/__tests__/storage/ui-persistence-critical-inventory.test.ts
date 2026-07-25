@@ -16,7 +16,7 @@ const webRoot = join(__dirname, '../..')
 
 describe('CW4 critical persistence inventory', () => {
   it('lists critical IDE/Studio namespaces including preview runtime', () => {
-    expect(CW4_CRITICAL_PATH_STATUS).toBe('PARTIAL')
+    expect(CW4_CRITICAL_PATH_STATUS).toBe('DONE')
     expect(CW4_CRITICAL_SPINE_NAMESPACES).toEqual(
       expect.arrayContaining([
         'ide.dock',
@@ -30,11 +30,13 @@ describe('CW4 critical persistence inventory', () => {
     )
   })
 
-  it('treats dual-write dock debt as critical-path blockers (blocks DONE)', () => {
+  it('has zero critical-path blockers — dock dual-write blocker is closed', () => {
     expect(CW4_HELD_RAW_LOCALSTORAGE_DEBT.length).toBeGreaterThan(3)
     const blockers = listCw4CriticalPathBlockers()
-    expect(blockers.length).toBeGreaterThan(0)
-    expect(blockers.some((e) => e.disposition === 'legacy-dual-write')).toBe(true)
+    expect(blockers.length).toBe(0)
+    expect(CW4_HELD_RAW_LOCALSTORAGE_DEBT.every((e) => e.criticalIdeStudioPath === false)).toBe(
+      true,
+    )
     expect(
       CW4_HELD_RAW_LOCALSTORAGE_DEBT.some((e) => e.disposition === 'exception-secret'),
     ).toBe(true)
@@ -51,6 +53,20 @@ describe('CW4 critical persistence inventory', () => {
     // Prior lie: non-ide keys always fell through to localStorage.setItem
     expect(adapterSrc).not.toMatch(
       /if \(storageKey !== UI_PERSISTENCE_LEGACY_KEYS\.ideDock\) \{\s*try \{\s*window\.localStorage\.setItem/,
+    )
+  })
+
+  it('registers the spine adapter structurally at the sole createWorkspaceStore call site', () => {
+    const providerSrc = readFileSync(
+      join(webRoot, '../packages/ide-ui/docking/WorkspaceProvider.tsx'),
+      'utf8',
+    )
+    // Must be a module-scope side effect (not inside a specific shell like
+    // ModernIDEShell), so every <WorkspaceProvider> consumer — IDE or
+    // viewport, on any route — is covered before any store is created.
+    expect(providerSrc).toContain('registerIdeDockSpinePersistence')
+    expect(providerSrc).toMatch(
+      /if \(typeof window !== 'undefined'\) \{\s*registerIdeDockSpinePersistence\(\);?\s*\}/,
     )
   })
 })
