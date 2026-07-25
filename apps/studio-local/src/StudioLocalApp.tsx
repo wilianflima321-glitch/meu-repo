@@ -48,6 +48,7 @@ export function StudioLocalApp() {
   const [jobs, setJobs] = useState<JobRecord[]>([])
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'editor' | 'cinema' | 'aesthetic' | 'sentinel'>('cinema')
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   useEffect(() => {
     let cancelled = false
@@ -92,7 +93,15 @@ export function StudioLocalApp() {
           </div>
         </div>
 
-        {/* Apex Navigation Tabs */}
+        {/* Sidebar toggle + Apex Navigation Tabs */}
+        <div className="flex items-center gap-2">
+        <button
+          onClick={() => setSidebarOpen((o) => !o)}
+          title={sidebarOpen ? 'Colapsar sidebar' : 'Expandir sidebar'}
+          className="h-7 w-7 flex items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-600 transition-all text-xs font-mono"
+        >
+          {sidebarOpen ? '◀' : '▶'}
+        </button>
         <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
           <button
             onClick={() => setActiveTab('cinema')}
@@ -138,14 +147,18 @@ export function StudioLocalApp() {
             🕹️ Viewport & Workspace
           </button>
         </div>
+        </div>
 
         <span className="studio-local-channel font-mono text-xs px-2.5 py-1 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50">
-          822/822 Kernels Active
+          {kernel?.capabilities?.length ?? probe?.services?.length ?? '—'}/{STUDIO_LOCAL_DESKTOP_MANIFEST.capabilities.length} Kernels Active
         </span>
       </header>
 
-      <main className="flex-1 p-6 flex gap-6 overflow-hidden">
-        <aside className="w-80 shrink-0 flex flex-col gap-4">
+      <main className="flex-1 p-4 flex gap-4 overflow-hidden">
+        <aside
+          className="shrink-0 flex flex-col gap-4 transition-all duration-200 overflow-hidden"
+          style={{ width: sidebarOpen ? 300 : 0, opacity: sidebarOpen ? 1 : 0, padding: sidebarOpen ? undefined : 0 }}
+        >
           <LocalRuntimeStatus probe={probe} error={error} />
           <CapabilityProbe manifest={STUDIO_LOCAL_DESKTOP_MANIFEST} kernel={kernel} />
           <SidecarManager sidecars={sidecars} />
