@@ -11,19 +11,19 @@ const STATUS_TONE: Record<EditorScaleReadiness['status'], { label: string; borde
     label: 'Ready',
     border: 'rgba(52, 211, 153, 0.45)',
     background: 'rgba(6, 78, 59, 0.22)',
-    color: '#86efac',
+    color: 'var(--aethel-success-light)',
   },
   watch: {
     label: 'Watch',
     border: 'rgba(251, 191, 36, 0.48)',
     background: 'rgba(120, 53, 15, 0.24)',
-    color: '#fbbf24',
+    color: 'var(--aethel-neon-amber)',
   },
   guarded: {
     label: 'Guarded',
     border: 'rgba(248, 113, 113, 0.5)',
     background: 'rgba(127, 29, 29, 0.24)',
-    color: '#fca5a5',
+    color: 'var(--aethel-error-light)',
   },
 };
 

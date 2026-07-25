@@ -80,7 +80,7 @@ export default function OnboardingWorldPage() {
     >
       <div className="grid gap-6 p-6 lg:grid-cols-[1fr_320px]">
         {/* Viewport Simulation */}
-        <div className="relative flex h-[500px] flex-col items-center justify-center overflow-hidden rounded-3xl border border-[var(--aethel-border-primary)] bg-gradient-to-br from-[#0c0d12] to-[#141824] shadow-2xl">
+        <div className="relative flex h-[500px] flex-col items-center justify-center overflow-hidden rounded-3xl border border-[var(--aethel-border-primary)] bg-gradient-to-br from-[var(--aethel-bg)] to-[var(--aethel-surface-secondary)] shadow-2xl">
           {/* Simulated 3D Grid & Gizmo */}
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] bg-center" />
           

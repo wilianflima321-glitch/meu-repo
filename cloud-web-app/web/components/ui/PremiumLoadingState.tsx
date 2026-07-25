@@ -17,7 +17,7 @@ const VARIANT_STYLES: Record<Variant, string> = {
   data: 'flex items-center justify-center min-h-[200px]',
   inline: 'inline-flex items-center gap-2',
   splash:
-    'fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-[var(--aethel-bg)] via-[#0a0a18] to-[var(--aethel-bg)]',
+    'fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-[var(--aethel-bg)] via-[var(--aethel-panel-strong)] to-[var(--aethel-bg)]',
 }
 
 export default function PremiumLoadingState({

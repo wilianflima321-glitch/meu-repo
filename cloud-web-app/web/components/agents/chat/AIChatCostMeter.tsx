@@ -137,7 +137,7 @@ export function AIChatCostMeter({
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-primary)_76%,transparent)]">
             {isBYOK ? (
                <div
-                 className={`h-full rounded-full transition-[width] bg-[#39ff14] shadow-[0_0_8px_#39ff14]`}
+                 className={`h-full rounded-full transition-[width] bg-[var(--aethel-neon-emerald)] shadow-[0_0_8px_var(--aethel-neon-emerald)]`}
                  style={{ width: `100%` }}
                />
             ) : (

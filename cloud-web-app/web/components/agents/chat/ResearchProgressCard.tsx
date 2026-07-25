@@ -30,10 +30,15 @@ const STEP_ICONS: Record<string, React.ReactNode> = {
 }
 
 const STATUS_COLORS: Record<ResearchStepStatus, string> = {
-  pending: '#374151',
-  active:  '#00e5ff',
-  done:    '#10b981',
-  error:   '#f87171',
+  pending: 'var(--aethel-text-quaternary)',
+  active:  'var(--aethel-neon-cyan)',
+  done:    'var(--aethel-success)',
+  error:   'var(--aethel-error-light)',
+}
+
+/** Alpha-blended status colour for backgrounds/borders (CSS custom props can't be string-concatenated with a hex alpha suffix). */
+function statusColorMix(status: ResearchStepStatus, percent: number): string {
+  return `color-mix(in srgb, ${STATUS_COLORS[status]} ${percent}%, transparent)`
 }
 
 interface ResearchProgressCardProps {
@@ -69,28 +74,28 @@ export function ResearchProgressCard({
         className="flex items-center gap-2 px-3 py-2"
         style={{ borderBottom: '1px solid rgba(0,229,255,0.10)' }}
       >
-        <Globe className="h-3.5 w-3.5 text-[#00e5ff]" />
-        <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#00e5ff]">
+        <Globe className="h-3.5 w-3.5 text-[var(--aethel-neon-cyan)]" />
+        <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-neon-cyan)]">
           Deep Research
         </span>
         {isRunning && (
-          <Loader2 className="ml-auto h-3 w-3 animate-spin text-[#4b5563]" aria-hidden />
+          <Loader2 className="ml-auto h-3 w-3 animate-spin text-[var(--aethel-text-quaternary)]" aria-hidden />
         )}
         {!isRunning && sourcesFound !== undefined && (
-          <span className="ml-auto rounded border border-[rgba(16,185,129,0.28)] bg-[rgba(16,185,129,0.10)] px-1.5 py-0.5 text-[9px] font-bold text-[#34d399]">
+          <span className="ml-auto rounded border border-[rgba(16,185,129,0.28)] bg-[rgba(16,185,129,0.10)] px-1.5 py-0.5 text-[9px] font-bold text-[var(--aethel-neon-emerald)]">
             {sourcesFound} sources
           </span>
         )}
       </div>
 
       {/* Progress bar */}
-      <div className="h-0.5 bg-[#111827]">
+      <div className="h-0.5 bg-[var(--aethel-bg)]">
         <motion.div
           className="h-full"
           style={{
             background: isRunning
-              ? 'linear-gradient(90deg, #00e5ff, #9333ea)'
-              : '#10b981',
+              ? 'linear-gradient(90deg, var(--aethel-neon-cyan), var(--aethel-accent))'
+              : 'var(--aethel-success)',
           }}
           initial={{ width: 0 }}
           animate={{ width: `${progress * 100}%` }}
@@ -115,8 +120,8 @@ export function ResearchProgressCard({
                 className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded"
                 style={{
                   color: STATUS_COLORS[step.status],
-                  background: `${STATUS_COLORS[step.status]}18`,
-                  border: `1px solid ${STATUS_COLORS[step.status]}30`,
+                  background: statusColorMix(step.status, 18),
+                  border: `1px solid ${statusColorMix(step.status, 30)}`,
                 }}
               >
                 {step.status === 'active' ? (
@@ -134,23 +139,23 @@ export function ResearchProgressCard({
                   className="text-[11px] font-medium leading-5"
                   style={{
                     color: step.status === 'done'
-                      ? '#6b7280'
+                      ? 'var(--aethel-text-tertiary)'
                       : step.status === 'active'
-                      ? '#e5e7eb'
-                      : '#4b5563',
+                      ? 'var(--aethel-text-secondary)'
+                      : 'var(--aethel-text-quaternary)',
                     fontFamily: step.status !== 'pending' ? "'Geist Mono', monospace" : undefined,
                   }}
                 >
                   {step.label}
                 </div>
                 {step.detail && step.status !== 'pending' && (
-                  <div className="mt-0.5 truncate text-[9px] text-[#374151]">{step.detail}</div>
+                  <div className="mt-0.5 truncate text-[9px] text-[var(--aethel-text-quaternary)]">{step.detail}</div>
                 )}
               </div>
 
               {/* Step icon */}
               {step.icon && (
-                <span className="mt-0.5 shrink-0 text-[#4b5563]">
+                <span className="mt-0.5 shrink-0 text-[var(--aethel-text-quaternary)]">
                   {STEP_ICONS[step.icon]}
                 </span>
               )}

@@ -64,7 +64,7 @@ export function CitationPill({ source }: CitationPillProps) {
         style={{
           background: 'rgba(0,229,255,0.10)',
           border: '1px solid rgba(0,229,255,0.30)',
-          color: '#00e5ff',
+          color: 'var(--aethel-neon-cyan)',
           boxShadow: open ? '0 0 8px rgba(0,229,255,0.22)' : 'none',
           fontFamily: "'Geist Mono', monospace",
           verticalAlign: 'super',
@@ -102,21 +102,21 @@ export function CitationPill({ source }: CitationPillProps) {
             >
               <span
                 className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-[9px] font-bold"
-                style={{ background: 'rgba(0,229,255,0.12)', color: '#00e5ff', border: '1px solid rgba(0,229,255,0.28)' }}
+                style={{ background: 'rgba(0,229,255,0.12)', color: 'var(--aethel-neon-cyan)', border: '1px solid rgba(0,229,255,0.28)' }}
               >
                 {source.index}
               </span>
-              <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-[#e5e7eb]">
+              <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-[var(--aethel-text-secondary)]">
                 {source.title}
               </span>
               {source.url && (
-                <ExternalLink className="h-3 w-3 shrink-0 text-[#4b5563]" aria-hidden />
+                <ExternalLink className="h-3 w-3 shrink-0 text-[var(--aethel-text-quaternary)]" aria-hidden />
               )}
             </div>
 
             {/* Snippet */}
             {source.snippet && (
-              <p className="line-clamp-3 px-3 py-2 text-[10px] leading-[1.6] text-[#6b7280]">
+              <p className="line-clamp-3 px-3 py-2 text-[10px] leading-[1.6] text-[var(--aethel-text-tertiary)]">
                 {source.snippet}
               </p>
             )}
@@ -127,7 +127,7 @@ export function CitationPill({ source }: CitationPillProps) {
                 className="flex items-center justify-between px-3 py-1.5"
                 style={{ borderTop: '1px solid rgba(0,229,255,0.08)' }}
               >
-                <span className="truncate text-[9px] text-[#374151]">
+                <span className="truncate text-[9px] text-[var(--aethel-text-quaternary)]">
                   {source.subtitle ?? new URL(source.url ?? 'https://example.com').hostname}
                 </span>
                 {source.url && (
@@ -135,7 +135,7 @@ export function CitationPill({ source }: CitationPillProps) {
                     href={source.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-2 shrink-0 rounded border border-[rgba(0,229,255,0.18)] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-[#00e5ff] transition hover:bg-[rgba(0,229,255,0.08)]"
+                    className="ml-2 shrink-0 rounded border border-[rgba(0,229,255,0.18)] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-neon-cyan)] transition hover:bg-[rgba(0,229,255,0.08)]"
                     onClick={(e) => e.stopPropagation()}
                   >
                     Open

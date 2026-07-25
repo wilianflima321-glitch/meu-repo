@@ -30,7 +30,7 @@ export function FlyCameraHUD({ isActive, speed = 1 }: FlyCameraHUDProps) {
 
   return (
     <div
-      className="pointer-events-none absolute bottom-16 left-4 z-20 flex items-center gap-2 overflow-hidden rounded-xl border border-[color-mix(in_srgb,#00e5ff_28%,transparent)] bg-[rgba(2,6,23,0.72)] px-3 py-2 [backdrop-filter:blur(10px)]"
+      className="pointer-events-none absolute bottom-16 left-4 z-20 flex items-center gap-2 overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_28%,transparent)] bg-[rgba(2,6,23,0.72)] px-3 py-2 [backdrop-filter:blur(10px)]"
       role="status"
       aria-live="polite"
       aria-label={`Fly camera ${isActive ? 'active' : 'inactive'}, speed ${speed}x`}
@@ -43,28 +43,28 @@ export function FlyCameraHUD({ isActive, speed = 1 }: FlyCameraHUDProps) {
       {/* Animated flight indicator */}
       <span className="relative flex h-2 w-2 shrink-0">
         {isActive && (
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#00e5ff] opacity-60" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--aethel-neon-cyan)] opacity-60" />
         )}
         <span
           className="relative inline-flex h-2 w-2 rounded-full"
-          style={{ background: isActive ? '#00e5ff' : '#374151' }}
+          style={{ background: isActive ? 'var(--aethel-neon-cyan)' : 'var(--aethel-text-quaternary)' }}
         />
       </span>
 
-      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#00e5ff]">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-neon-cyan)]">
         Fly
       </span>
 
       <span className="text-[var(--aethel-border-subtle)] text-[10px]">|</span>
 
       {/* Speed readout */}
-      <span className="font-mono text-[11px] font-bold text-[#e5e7eb]">
+      <span className="font-mono text-[11px] font-bold text-[var(--aethel-text-secondary)]">
         {speed.toFixed(1)}
-        <span className="ml-0.5 text-[9px] font-normal text-[#6b7280]">×</span>
+        <span className="ml-0.5 text-[9px] font-normal text-[var(--aethel-text-tertiary)]">×</span>
       </span>
 
       {/* WASD hint — visible only first time */}
-      <span className="ml-1 text-[9px] text-[#4b5563]">WASD</span>
+      <span className="ml-1 text-[9px] text-[var(--aethel-text-quaternary)]">WASD</span>
     </div>
   )
 }

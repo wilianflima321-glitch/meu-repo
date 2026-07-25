@@ -101,7 +101,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
           className="
             flex-1 min-h-0 overflow-hidden
             p-2
-            bg-[#090d13]
+            bg-[var(--aethel-bg)]
             font-mono
           "
           style={{ fontSize }}

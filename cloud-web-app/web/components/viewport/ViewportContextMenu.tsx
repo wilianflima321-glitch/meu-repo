@@ -86,15 +86,15 @@ export function ViewportContextMenu({
             // Clamp to viewport
             transform: `translate(${x + 200 > window.innerWidth ? '-100%' : '0'}, ${y + 280 > window.innerHeight ? '-100%' : '0'})`,
           }}
-          className="min-w-[192px] overflow-hidden rounded-2xl border border-[color-mix(in_srgb,#00e5ff_18%,transparent)] bg-[rgba(2,6,23,0.92)] shadow-[0_24px_60px_rgba(0,0,0,0.6),0_0_20px_rgba(0,229,255,0.07)] [backdrop-filter:blur(16px)]"
+          className="min-w-[192px] overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_18%,transparent)] bg-[rgba(2,6,23,0.92)] shadow-[0_24px_60px_rgba(0,0,0,0.6),0_0_20px_rgba(0,229,255,0.07)] [backdrop-filter:blur(16px)]"
           // Block viewport key events propagating through menu
           onKeyDown={(e) => e.stopPropagation()}
         >
           {/* Header */}
           {objectName && (
-            <div className="flex items-center gap-2 border-b border-[color-mix(in_srgb,#00e5ff_10%,transparent)] px-3 py-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#00e5ff]" aria-hidden />
-              <span className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-[#00e5ff]">
+            <div className="flex items-center gap-2 border-b border-[color-mix(in_srgb,var(--aethel-neon-cyan)_10%,transparent)] px-3 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--aethel-neon-cyan)]" aria-hidden />
+              <span className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-neon-cyan)]">
                 {objectName}
               </span>
             </div>
@@ -106,7 +106,7 @@ export function ViewportContextMenu({
                 return (
                   <div
                     key={item.id}
-                    className="my-1 h-px bg-[color-mix(in_srgb,#334155_45%,transparent)]"
+                    className="my-1 h-px bg-[color-mix(in_srgb,var(--aethel-border-primary)_45%,transparent)]"
                     role="separator"
                     aria-hidden
                   />
@@ -123,19 +123,19 @@ export function ViewportContextMenu({
                   className={[
                     'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[11px] font-medium transition-colors',
                     item.danger
-                      ? 'text-[#f87171] hover:bg-[color-mix(in_srgb,#ef4444_14%,transparent)]'
-                      : 'text-[#cbd5e1] hover:bg-[color-mix(in_srgb,#00e5ff_8%,transparent)] hover:text-[#f1f5f9]',
+                      ? 'text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)]'
+                      : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-neon-cyan)_8%,transparent)] hover:text-[var(--aethel-text-primary)]',
                     item.disabled ? 'pointer-events-none opacity-35' : '',
                   ].join(' ')}
                 >
                   {item.icon && (
-                    <span className={item.danger ? 'text-[#f87171]' : 'text-[#64748b]'}>
+                    <span className={item.danger ? 'text-[var(--aethel-error-light)]' : 'text-[var(--aethel-text-tertiary)]'}>
                       {item.icon}
                     </span>
                   )}
                   <span className="flex-1">{item.label}</span>
                   {item.shortcut && (
-                    <kbd className="ml-2 rounded border border-[#1e293b] bg-[#0f172a] px-1.5 py-0.5 text-[9px] font-mono text-[#64748b]">
+                    <kbd className="ml-2 rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-1.5 py-0.5 text-[9px] font-mono text-[var(--aethel-text-tertiary)]">
                       {item.shortcut}
                     </kbd>
                   )}

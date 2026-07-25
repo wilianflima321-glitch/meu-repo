@@ -13,10 +13,10 @@
 export type AgentBadgeKind = 'qa' | 'sys' | 'gen' | 'custom'
 
 const KIND_STYLES: Record<AgentBadgeKind, { bg: string; border: string; text: string; glow: string }> = {
-  qa:     { bg: 'rgba(0,229,255,0.10)',  border: 'rgba(0,229,255,0.32)',  text: '#00e5ff', glow: '0 0 8px rgba(0,229,255,0.28)' },
-  sys:    { bg: 'rgba(147,51,234,0.12)', border: 'rgba(147,51,234,0.38)', text: '#c084fc', glow: '0 0 8px rgba(147,51,234,0.28)' },
-  gen:    { bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.30)', text: '#fbbf24', glow: '0 0 8px rgba(245,158,11,0.22)' },
-  custom: { bg: 'rgba(99,102,241,0.10)', border: 'rgba(99,102,241,0.30)', text: '#a5b4fc', glow: '0 0 8px rgba(99,102,241,0.22)' },
+  qa:     { bg: 'rgba(0,229,255,0.10)',  border: 'rgba(0,229,255,0.32)',  text: 'var(--aethel-neon-cyan)',    glow: '0 0 8px rgba(0,229,255,0.28)' },
+  sys:    { bg: 'rgba(147,51,234,0.12)', border: 'rgba(147,51,234,0.38)', text: 'var(--aethel-accent-light)', glow: '0 0 8px rgba(147,51,234,0.28)' },
+  gen:    { bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.30)', text: 'var(--aethel-neon-amber)',   glow: '0 0 8px rgba(245,158,11,0.22)' },
+  custom: { bg: 'rgba(99,102,241,0.10)', border: 'rgba(99,102,241,0.30)', text: 'var(--aethel-neon-indigo)',  glow: '0 0 8px rgba(99,102,241,0.22)' },
 }
 
 export interface MonacoAgentBadgeProps {

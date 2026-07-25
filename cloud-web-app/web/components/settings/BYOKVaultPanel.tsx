@@ -192,7 +192,7 @@ export function BYOKVaultPanel({ userId }: { userId?: string }) {
               style={{
                 background: 'rgba(59,130,246,.15)',
                 border: '1px solid rgba(59,130,246,.30)',
-                color: '#93c5fd',
+                color: 'var(--aethel-primary-light)',
               }}
             >
               <Cpu className="h-2.5 w-2.5" />
