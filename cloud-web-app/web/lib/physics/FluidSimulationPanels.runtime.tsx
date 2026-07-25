@@ -8,6 +8,7 @@ import { Html as DreiHtml, Line } from '@react-three/drei';
 import { Box, ChevronDown, ChevronRight, Droplet, Eye, Pause, Play, RotateCcw, Wind } from 'lucide-react';
 import * as THREE from 'three';
 import type { FluidEditorState, FluidParams, FluidToolType, SPHFluidSimulation } from '@/lib/physics/fluid-simulation-core';
+import { ScrubbableInput } from '@/components/ui/ScrubbableInput';
 
 interface SliderProps {
   label: string;
@@ -67,28 +68,41 @@ interface Vector3InputProps {
   step?: number;
 }
 
-export function Vector3Input({ label, value, onChange, min = -100, max = 100, step = 0.1 }: Vector3InputProps) {
+export function Vector3Input({ label, value, onChange, step = 0.1 }: Vector3InputProps) {
   return (
     <div className="mb-3">
-      <label className="text-xs text-[var(--aethel-text-secondary)] block mb-1.5">{label}</label>
+      <label className="text-xs text-[var(--aethel-text-secondary)] font-mono block mb-1.5 font-bold uppercase tracking-wider">{label}</label>
       <div className="grid grid-cols-3 gap-1.5">
-        {(['x', 'y', 'z'] as const).map((axis) => (
-          <div key={axis} className="relative">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[var(--aethel-text-tertiary)] uppercase">
-              {axis}
-            </span>
-            <input
-              type="number"
-              value={value[axis]}
-              min={min}
-              max={max}
-              step={step}
-              onChange={(e) => onChange({ ...value, [axis]: parseFloat(e.target.value) || 0 })}
-              className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 pl-6
-                       text-xs text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
-            />
-          </div>
-        ))}
+        <ScrubbableInput
+          label="X"
+          value={value.x}
+          step={step}
+          precision={2}
+          labelClassName="text-red-500 font-bold"
+          onChange={(v) => onChange({ ...value, x: v })}
+          onCommit={(v) => onChange({ ...value, x: v })}
+          ariaLabel={`${label} X`}
+        />
+        <ScrubbableInput
+          label="Y"
+          value={value.y}
+          step={step}
+          precision={2}
+          labelClassName="text-green-500 font-bold"
+          onChange={(v) => onChange({ ...value, y: v })}
+          onCommit={(v) => onChange({ ...value, y: v })}
+          ariaLabel={`${label} Y`}
+        />
+        <ScrubbableInput
+          label="Z"
+          value={value.z}
+          step={step}
+          precision={2}
+          labelClassName="text-sky-500 font-bold"
+          onChange={(v) => onChange({ ...value, z: v })}
+          onCommit={(v) => onChange({ ...value, z: v })}
+          ariaLabel={`${label} Z`}
+        />
       </div>
     </div>
   );

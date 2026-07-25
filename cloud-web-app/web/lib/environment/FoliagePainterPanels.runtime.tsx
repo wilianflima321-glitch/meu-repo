@@ -4,10 +4,10 @@
 
 import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
-import { ChevronDown, ChevronRight, Droplets, Eye, EyeOff, Mountain, Trash2, TreeDeciduous } from 'lucide-react';
+import { ChevronDown, ChevronRight, Droplets, Eye, EyeOff, Mountain, Trash2, TreeDeciduous, Sprout, Flower2, Layers, Sparkles } from 'lucide-react';
 import * as THREE from 'three';
 import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
-import type { FoliageCamada, FoliageInstance, FoliageType } from '@/lib/environment/FoliagePainterRuntime';
+import type { FoliageCamada, FoliageInstance, FoliageType } from '@/lib/environment/foliage-painter-types';
 import { buildGeometryFromHeightfield } from '@/lib/production/heightfield-viewport-bridge';
 
 interface SliderProps {
@@ -315,42 +315,42 @@ interface FoliageTypeCardProps {
 
 export function FoliageTypeCard({ type, isSelecionared, onSelecionar, instanceCount }: FoliageTypeCardProps) {
   const categoryColors: Record<string, string> = {
-    tree: 'bg-[var(--aethel-success)]',
-    bush: 'bg-[var(--aethel-success)]',
-    grass: 'bg-[var(--aethel-success)]',
-    flower: 'bg-[var(--aethel-primary)]',
-    rock: 'bg-[var(--aethel-text-quaternary)]',
+    tree: 'bg-emerald-950/80 border border-emerald-800/50 text-emerald-400',
+    bush: 'bg-green-950/80 border border-green-800/50 text-green-400',
+    grass: 'bg-lime-950/80 border border-lime-800/50 text-lime-400',
+    flower: 'bg-pink-950/80 border border-pink-800/50 text-pink-400',
+    rock: 'bg-slate-900 border border-slate-700 text-slate-300',
   };
 
   const categoryIcons: Record<string, React.ReactNode> = {
     tree: <TreeDeciduous className="w-4 h-4" />,
-    bush: <TreeDeciduous className="w-3 h-3" />,
-    grass: <Droplets className="w-4 h-4" />,
-    flower: <Droplets className="w-4 h-4" />,
+    bush: <Sprout className="w-4 h-4" />,
+    grass: <Sprout className="w-4 h-4" />,
+    flower: <Flower2 className="w-4 h-4" />,
     rock: <Mountain className="w-4 h-4" />,
   };
 
   return (
     <button type="button" aria-label={`${isSelecionared ? 'Deselect' : 'Select'} foliage type ${type.name}`}
       onClick={onSelecionar}
-      className={`w-full p-2 rounded flex items-center gap-2 text-left transition-colors ${
+      className={`w-full p-2.5 rounded-lg flex items-center gap-2.5 text-left transition-all ${
         isSelecionared
-          ? 'bg-[var(--aethel-success)]/30 border border-[var(--aethel-success)]'
-          : 'bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]/50 border border-transparent'
+          ? 'bg-[color-mix(in_srgb,var(--aethel-success)_14%,transparent)] border border-[var(--aethel-success)] shadow-sm'
+          : 'bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] border border-[var(--aethel-glass-border)]'
       }`}
     >
-      <div className={`p-1.5 rounded ${categoryColors[type.category]}`}>
-        {categoryIcons[type.category]}
+      <div className={`p-2 rounded-md ${categoryColors[type.category] || 'bg-slate-800 text-slate-300'}`}>
+        {categoryIcons[type.category] || <TreeDeciduous className="w-4 h-4" />}
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium truncate">{type.name}</div>
-        <div className="text-[10px] text-[var(--aethel-text-tertiary)]">{instanceCount} instancias</div>
+      <div className="flex-1 min-w-0 font-mono">
+        <div className="text-xs font-bold text-[var(--aethel-text-primary)] truncate">{type.name}</div>
+        <div className="text-[10px] text-[var(--aethel-text-tertiary)]">{instanceCount.toLocaleString()} instances</div>
       </div>
       <input
         type="checkbox"
         checked={isSelecionared}
         onChange={() => {}}
-        className="rounded border-[var(--aethel-border-secondary)]"
+        className="rounded border-[var(--aethel-border-secondary)] accent-[var(--aethel-success)] cursor-pointer"
       />
     </button>
   );
@@ -431,17 +431,19 @@ export function FoliageStats({ layers, types }: FoliageStatsProps) {
   }, [layers, types]);
 
   return (
-    <div className="bg-[var(--aethel-surface-tertiary)] rounded p-3 text-xs">
-      <div className="font-medium mb-2">Estatisticas</div>
+    <div className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-glass-border)] rounded-lg p-3 text-xs font-mono">
+      <div className="font-bold text-[var(--aethel-text-primary)] mb-2 flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
+        <Layers className="w-3.5 h-3.5 text-emerald-400" /> Foliage Statistics
+      </div>
       <div className="space-y-1">
-        <div className="flex justify-between">
-          <span className="text-[var(--aethel-text-tertiary)]">Total de instancias:</span>
-          <span>{stats.totalInstances.toLocaleString()}</span>
+        <div className="flex justify-between border-b border-[var(--aethel-glass-border)] pb-1 mb-1">
+          <span className="text-[var(--aethel-text-tertiary)]">Total Instances:</span>
+          <span className="font-bold text-[var(--aethel-neon-cyan)]">{stats.totalInstances.toLocaleString()}</span>
         </div>
         {Object.entries(stats.byCategory).map(([cat, count]) => (
           <div key={cat} className="flex justify-between">
             <span className="text-[var(--aethel-text-tertiary)] capitalize">{cat}:</span>
-            <span>{count.toLocaleString()}</span>
+            <span className="text-[var(--aethel-text-secondary)]">{count.toLocaleString()}</span>
           </div>
         ))}
       </div>
