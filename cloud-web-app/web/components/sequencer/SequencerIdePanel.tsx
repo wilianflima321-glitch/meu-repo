@@ -15,23 +15,33 @@ import {
   planCinematicDirectorShoot,
   proveSequencerPlayReady,
   type CinematicDirectorIntent,
+  type SequencerViewportTargets,
 } from '@/lib/sequencer'
 
 export type SequencerIdePanelProps = {
   /** Director Mode intent — must rebuild timeline/controller (not cosmetic chrome). */
   intent?: CinematicDirectorIntent
+  /**
+   * Real R3F camera/lights to drive (Phase 4, AAA Studio Deepening Sweep).
+   * When omitted (tests, storybook, or before the preview stage mounts) this
+   * falls back to an internal mutable mock so numeric readouts still work —
+   * but nothing renders anywhere, which is why production call sites
+   * (`DirectorMode`) should always supply the live preview stage's targets.
+   */
+  viewportTargets?: SequencerViewportTargets | null
 }
 
-export function SequencerIdePanel({ intent = 'establishing' }: SequencerIdePanelProps = {}) {
+export function SequencerIdePanel({ intent = 'establishing', viewportTargets = null }: SequencerIdePanelProps = {}) {
   const mock = useMemo(() => createSequencerViewportMockTargets(), [])
+  const activeTargets = viewportTargets ?? mock.targets
   const director = useMemo(() => planCinematicDirectorShoot({ intent }), [intent])
   const scaffold = useMemo(
     () => createSequencerIdePanelScaffold(director.timeline),
     [director.timeline],
   )
   const controller = useMemo(
-    () => createSequencerPlayController(scaffold.timeline, mock.targets),
-    [scaffold.timeline, mock.targets],
+    () => createSequencerPlayController(scaffold.timeline, activeTargets),
+    [scaffold.timeline, activeTargets],
   )
 
   const [timeMs, setTimeMs] = useState(0)
@@ -219,7 +229,9 @@ export function SequencerIdePanel({ intent = 'establishing' }: SequencerIdePanel
         </div>
         <div>
           <dt className="text-[var(--aethel-text-secondary)]">Applied intensity</dt>
-          <dd>{mock.light.intensity.toFixed(2)}</dd>
+          <dd data-testid="sequencer-applied-light">
+            {(activeTargets.lights?.[0]?.intensity ?? 0).toFixed(2)}
+          </dd>
         </div>
         <div>
           <dt className="text-[var(--aethel-text-secondary)]">Events</dt>

@@ -7,12 +7,13 @@
  */
 
 import dynamic from 'next/dynamic'
-import { Suspense, useMemo, useState } from 'react'
+import { Suspense, useCallback, useMemo, useState } from 'react'
 
 import {
   planCinematicDirectorShoot,
   type CinematicDirectorIntent,
 } from '@/lib/sequencer/cinematic-director-bridge'
+import type { SequencerCameraTarget, SequencerLightTarget, SequencerViewportTargets } from '@/lib/sequencer/sequencer-viewport-wire'
 
 const SequencerIdePanel = dynamic(() => import('@/components/sequencer/SequencerIdePanel'), {
   ssr: false,
@@ -22,6 +23,18 @@ const SequencerIdePanel = dynamic(() => import('@/components/sequencer/Sequencer
     </div>
   ),
 })
+
+const DirectorModePreviewStage = dynamic(
+  () => import('@/components/nexus/DirectorModePreviewStage').then((mod) => mod.DirectorModePreviewStage),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full items-center justify-center bg-[var(--aethel-bg-base)] text-[var(--aethel-text-tertiary)]">
+        Loading previz stage…
+      </div>
+    ),
+  },
+)
 
 const INTENTS: { id: CinematicDirectorIntent; label: string }[] = [
   { id: 'establishing', label: 'Establishing' },
@@ -34,6 +47,14 @@ const INTENTS: { id: CinematicDirectorIntent; label: string }[] = [
 export default function DirectorMode() {
   const [intent, setIntent] = useState<CinematicDirectorIntent>('establishing')
   const plan = useMemo(() => planCinematicDirectorShoot({ intent }), [intent])
+  const [viewportTargets, setViewportTargets] = useState<SequencerViewportTargets | null>(null)
+
+  const handleStageReady = useCallback(
+    (targets: { camera: SequencerCameraTarget; light: SequencerLightTarget }) => {
+      setViewportTargets({ camera: targets.camera, lights: [targets.light] })
+    },
+    [],
+  )
 
   return (
     <div
@@ -73,16 +94,29 @@ export default function DirectorMode() {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden" data-director-intent={intent}>
-        <Suspense
-          fallback={
-            <div className="flex h-full items-center justify-center text-[var(--aethel-text-secondary)]">
-              Loading director timeline…
-            </div>
-          }
-        >
-          <SequencerIdePanel intent={intent} />
-        </Suspense>
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2" data-director-intent={intent}>
+        <div className="min-h-0 flex-1 overflow-hidden rounded-lg border border-[var(--aethel-border-subtle)]" data-director-live-bind={viewportTargets ? 'true' : 'false'}>
+          <Suspense
+            fallback={
+              <div className="flex h-full items-center justify-center bg-[var(--aethel-bg-base)] text-[var(--aethel-text-tertiary)]">
+                Loading previz stage…
+              </div>
+            }
+          >
+            <DirectorModePreviewStage onTargetsReady={handleStageReady} />
+          </Suspense>
+        </div>
+        <div className="h-[300px] shrink-0 overflow-auto">
+          <Suspense
+            fallback={
+              <div className="flex h-full items-center justify-center text-[var(--aethel-text-secondary)]">
+                Loading director timeline…
+              </div>
+            }
+          >
+            <SequencerIdePanel intent={intent} viewportTargets={viewportTargets} />
+          </Suspense>
+        </div>
       </div>
     </div>
   )
