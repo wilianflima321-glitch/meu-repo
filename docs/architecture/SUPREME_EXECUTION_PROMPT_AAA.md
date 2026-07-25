@@ -1,38 +1,60 @@
 # 👑 O PROMPT SUPREMO DEFINITIVO DE AUDITORIA, CRÍTICA PARALELA E ENGENHARIA AAA
 ## AETHEL ENGINE & STUDIO PRO (WEB CLOUD + APP DESKTOP LOCAL)
 
-> **DIRETRIZ MESTRA:** Este prompt concede autoridade total de execução autônoma com **Linha de Pensamento Crítica em Paralelo** para absorver todo o repositório, criticar cada pixel e linha de código, refatorar qualquer componente ou subcomponente e entregar a melhor plataforma de desenvolvimento 3D/WASM do mercado mundial.
+> **DIRETRIZ MESTRA DE AUTONOMIA:** Este prompt concede autoridade total de decisão e execução autônoma para a inteligência artificial (Claude / Gemini) absorver todo o repositório, criticar implacavelmente qualquer interface, refatorar limpa e profissionalmente o que for necessário e entregar a melhor plataforma de desenvolvimento 3D/WASM do mercado mundial.
 
 ---
 
 ### 1. 🌌 IDENTIDADE, AGÊNCIA E AUTO-CRÍTICA EM PARALELO (2M TOKENS)
+- **Decisão e Autonomia Total:** A IA tem autoridade irrestrita para DECIDIR o que refatorar, qual componente melhorar e como elevar a usabilidade para o nível AAA sem pedir confirmação ou permissão.
 - **Pensamento Crítico em Paralelo:** Enquanto constrói ou refatora qualquer interface, a IA DEVE manter uma linha paralela de auto-crítica implacável:
   - *"Isso parece genérico ou infantil?"*
   - *"Existe alguma limitação de UX que frustraria um desenvolvedor sênior de jogos?"*
-  - *"Essa interação é tão fluida quanto o Blender 4 ou Unreal Engine 5.5?"*
+  - *"Essa interação é tão fluida quanto o Blender 4, Unreal Engine 5.5 ou Houdini?"*
   - *"Os ícones, espaçamentos, bordas e estados de foco são idênticos aos de ferramentas profissionais como Figma e Linear?"*
 - **Zero Hallucination & Zero Placeholders:** É estritamente proibido o uso de `// código omitido`, fallbacks fakes ou estruturas estáticas temporárias. Todo o código entregue deve ser AAA de ponta a ponta.
-- **Autonomia Absoluta:** NUNCA pergunte *"Você quer que eu faça isso?"*. Identifique falhas de UX, navegação, estética ou interatividade e **EXECUTE A SOLUÇÃO DIRETA**.
 
 ---
 
 ### 2. ⚔️ REQUISITOS DE MATURIDADE & RECURSOS DE CONCORRENTES (CHECKLIST AAA)
-Para superar Unreal Engine 5.5, Unity 6, Blender 4, Houdini e Cursor IDE, cada módulo DEVE possuir os seguintes recursos avançados de usabilidade:
+Para superar Unreal Engine 5.5, Unity 6, Blender 4, Houdini, Rider e Cursor IDE, a IA deve avaliar e refatorar os 7 Módulos Mestres do ecossistema:
 
-#### 🟢 Viewport 3D & Gizmos de Transformação:
+---
+
+### 🎛️ MAPA DOS 7 MÓDULOS MESTRES DA AETHEL ENGINE
+
+#### 1. 🎬 **Viewport 3D, Render Rigs & Telemetria:**
 - **Gizmos RGB de Precisão:** Eixo X (Vermelho), Y (Verde), Z (Azul), alças de plano (XY, YZ, ZX), caixas de escala e anéis de rotação.
-- **Divisão Multi-Viewport:** Alternância instantânea entre tela cheia e visualização quádrupla (*Quad View: Top, Front, Side, Perspective*).
-- **Controles de Snapping:** Encaixe de grade configurável (1m, 0.5m, 0.1m) e passos de rotação angular (5°, 15°, 45°, 90°).
+- **Teclas de Atalho de Transformação:** `W` (Move), `E` (Rotate), `R` (Scale), `F` (Focus), `G` (Snap), `X/Y/Z` (Constraint).
 - **HUD de Telemetria Gráfica (`Stat FPS`):** Telemetria em tempo real (60.0 FPS, 16.6ms, Draw Calls, Tris, VRAM).
+- **Divisão Multi-Viewport:** Alternância instantânea entre tela cheia e visualização quádrupla (*Quad View: Top, Front, Side, Perspective*).
 
-#### 🟢 Interface do Usuário & Navegação Globais:
-- **Palette de Comandos Global (`Ctrl+K` / `Cmd+K`):** Lançador rápido de ações com busca fuzzy (estilo Raycast / VS Code).
-- **Histórico de Desfazer/Refazer (Undo/Redo Stack Panel):** Painel de histórico visual com pilha de ações executadas (estilo Photoshop / UE5).
-- **Menus de Contexto Portais Edge-Aware:** Clique direito com cálculo automático de bordas para nunca sair da tela.
+#### 2. 🌲 **Outliner, Hierarquia de Cena & ECS:**
+- **Nós de Cena:** Árvore de nós com ícones vetoriais de categoria (Mesh, Light, Camera, Group).
+- **Menu de Contexto Edge-Aware (Clique Direito):** *Focus in Viewport, Duplicate, Lock/Unlock, Hide/Show, Delete*.
+- **Estado Vazio Honesto:** Mensagem profissional com botão de ação quando a cena estiver vazia.
 
-#### 🟢 Inspector, Outliner e Editores Técnicos:
+#### 3. 📐 **Object Inspector & Arraste Numérico:**
 - **Scrubbable Numeric Inputs:** Arraste de ponteiro (*Pointer Lock API*), modificadores de precisão (`Shift` fino, `Ctrl` rápido) e cálculo de expressões de matemática direta (`10*2.5`).
-- **Cutscene Sequencer IDE:** Trilho de transporte SVG (`Play`, `Pause`, `Stop`, `Rewind`), relógio de Timecode cinematográfico (`00:00.00`) e barras de scrubbing.
+- **Slots de Textura PBR & Materiais:** Drag-and-drop de materiais e texturas (Albedo, Normal, Roughness, Metallic).
+
+#### 4. 🎞️ **Cinematics, Sequencer & Control Rig:**
+- **Sequencer Cutscene IDE:** Trilho de transporte SVG (`Play`, `Pause`, `Stop`, `Rewind`), relógio de Timecode cinematográfico (`00:00.00`) e barras de scrubbing.
+- **Control Rig & IK Skeleton:** Hierarquia de ossos com cadeias IK coloridas (Head, Spine, Limbs) e presets de pose (*T-Pose / A-Pose*).
+- **Animation Blueprint:** Grafos de estado com transições ativadas por eventos.
+
+#### 5. 🌿 **World, Landscape, Foliage & Physics:**
+- **Foliage & Landscape Painter:** Seletores visuais de espécies (Árvores, Arbustos, Flores, Rochas), variação de escala e estatísticas da paisagem.
+- **Fluid & VFX Physics Panels:** Presets visuais de simulação (Água, Mel, Óleo, Lava) e inputs scrubbable para vetores de gravidade e vento.
+
+#### 6. 🧠 **Gameplay Systems & Visual Scripting:**
+- **Blueprint Graph Editor:** Grafos de nós de programação visual com conexões vetoriais e execução de lógica em tempo real.
+- **Gameplay Ability System (GAS):** Editor de habilidades, tempos de recarga (*Cooldown*), custo de mana e efeitos de combate.
+
+#### 7. 🖥️ **IDE Shell, Navegação & Produtividade Globais:**
+- **App Desktop (`StudioLocalApp.tsx`) & Web Cloud Studio:** Navegação mestre de 4 abas, rodapé com métricas dinâmicas do Kernel WASM/Rust e suporte a janelas nativas.
+- **Command Palette Global (`Ctrl+K` / `Cmd+K`):** Lançador rápido de ações com busca fuzzy (estilo Raycast / VS Code).
+- **Problems & Diagnostics Dock (`IdeDiagnosticsDock.tsx`):** Contador de erros, alertas e avisos do LSP/Monaco com ícones de severidade.
 - **Asset Content Browser:** Previews em miniatura 3D, tags de tipo de asset e filtros por extensão.
 
 ---
@@ -46,21 +68,7 @@ Para superar Unreal Engine 5.5, Unity 6, Blender 4, Houdini e Cursor IDE, cada m
 
 ---
 
-### 4. 🎛️ COBERTURA COMPLETA DE COMPONENTES E SUBCOMPONENTES
-Ao executar a auditoria, inspecione e refatore todas as seguintes áreas sem omissão:
-1. **Viewport 3D & Gizmos:** Toolbar flutuante com gizmos de rotação, movimento e escala (*W, E, R*), teclas de atalho (*F, G, X, Y, Z*), menu de câmera acessível e HUD de telemetria gráfica (`Stat FPS`).
-2. **World Scene Outliner:** Árvore de nós com ícones de categoria, menu de contexto no clique direito (*Focus, Duplicate, Lock, Hide, Delete*) e estado vazio honesto.
-3. **World Object Inspector:** Campos numéricos X, Y, Z com cores contextuais (Vermelho, Verde, Azul) vinculados ao `ScrubbableInput`.
-4. **Cutscene Sequencer IDE:** Trilho de transporte com botões SVG (`Play`, `Pause`, `Stop`, `Rewind`), indicador de Timecode `00:00.00` e barras de scrubbing.
-5. **Gameplay Ability System & Blueprint Editors:** Grafos de nós de programação visual com conexões vetoriais e seletores de habilidades.
-6. **Environment & Foliage Painter:** Seletores visuais de espécies de plantas/rochas, sliders de variação de escala e estatísticas da paisagem em tempo real.
-7. **Fluid & Physics Simulation Panels:** Presets visuais de simulação (Água, Mel, Óleo, Lava) e inputs scrubbable para vetores de gravidade e vento.
-8. **App Desktop Shell (`StudioLocalApp.tsx`):** Navegação mestre de 4 abas, rodapé com métricas dinâmicas do Kernel WASM/Rust e suporte a janelas nativas.
-9. **Problems & Diagnostics Dock (`IdeDiagnosticsDock.tsx`):** Contador de erros, alertas e avisos do LSP/Monaco com ícones de severidade.
-
----
-
-### 5. 🔄 PROTOCOLO DE AUTO-EXECUÇÃO E REGISTRO PERMANENTE
+### 4. 🔄 PROTOCOLO DE AUTO-EXECUÇÃO E REGISTRO PERMANENTE
 Ao concluir qualquer bloco de refatoração:
 1. Compile e valide o código para garantir zero erros de tipagem TypeScript ou React.
 2. Atualize o mapa de execução da arquitetura (`AETHEL_FOCUS1_EXECUTION_PROGRESS.md` / `UX_DEEP_COMPONENT_AUDIT.md`).
