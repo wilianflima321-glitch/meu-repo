@@ -7,17 +7,28 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Play, Pause, Square, Film, Clapperboard, RotateCcw, Clock } from 'lucide-react'
 import {
   createSequencerIdePanelScaffold,
   createSequencerPlayController,
   createSequencerViewportMockTargets,
   planCinematicDirectorShoot,
   proveSequencerPlayReady,
+  type CinematicDirectorIntent,
 } from '@/lib/sequencer'
 
-export function SequencerIdePanel() {
-  const scaffold = useMemo(() => createSequencerIdePanelScaffold(), [])
+export type SequencerIdePanelProps = {
+  /** Director Mode intent — must rebuild timeline/controller (not cosmetic chrome). */
+  intent?: CinematicDirectorIntent
+}
+
+export function SequencerIdePanel({ intent = 'establishing' }: SequencerIdePanelProps = {}) {
   const mock = useMemo(() => createSequencerViewportMockTargets(), [])
+  const director = useMemo(() => planCinematicDirectorShoot({ intent }), [intent])
+  const scaffold = useMemo(
+    () => createSequencerIdePanelScaffold(director.timeline),
+    [director.timeline],
+  )
   const controller = useMemo(
     () => createSequencerPlayController(scaffold.timeline, mock.targets),
     [scaffold.timeline, mock.targets],
@@ -32,15 +43,6 @@ export function SequencerIdePanel() {
   const [eventNames, setEventNames] = useState<string>('')
   const rafRef = useRef<number | null>(null)
   const lastTsRef = useRef<number | null>(null)
-
-  const director = useMemo(
-    () =>
-      planCinematicDirectorShoot({
-        intent: 'establishing',
-        timeline: scaffold.timeline,
-      }),
-    [scaffold.timeline],
-  )
 
   const syncFromTick = useCallback(
     (r: ReturnType<typeof controller.tick>) => {
@@ -114,30 +116,48 @@ export function SequencerIdePanel() {
     setIsPlaying(true)
   }
 
+  // Helper to format ms as professional timecode 00:00.00
+  const formatTimecode = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000)
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    const milliseconds = Math.floor((ms % 1000) / 10)
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(2, '0')}`
+  }
+
   return (
     <div
-      className="flex h-full flex-col gap-3 p-4"
+      className="flex h-full flex-col gap-3 p-4 bg-[var(--aethel-bg-base)] border border-[var(--aethel-glass-border)] rounded-xl"
       data-testid="sequencer-ide-panel-cl"
       data-letter="cl"
+      data-director-intent={intent}
+      data-timeline-id={scaffold.timeline.id}
       data-sequencer-play-ready={playReady ? 'true' : 'false'}
     >
-      <header className="space-y-1">
-        <h2 className="text-sm font-semibold text-[var(--aethel-text-primary)]">
-          {scaffold.title}
+      <header className="space-y-1 border-b border-[var(--aethel-glass-border)] pb-3">
+        <h2 className="text-sm font-bold text-[var(--aethel-text-primary)] flex items-center gap-2 font-mono">
+          <Clapperboard className="w-4 h-4 text-indigo-400" />
+          {scaffold.timeline.label || scaffold.title}
         </h2>
-        <p className="text-xs text-[var(--aethel-text-secondary)]">
+        <p className="text-xs text-[var(--aethel-text-secondary)] leading-relaxed">
           Cutscene timeline — scrub/play applies camera / lights / events.
-          Cinematic Director #63 engine shoot. Final footage [HELD].
+          Intent <strong className="text-[var(--aethel-neon-cyan)] uppercase font-mono">{intent}</strong>. Cinematic Director #63 engine shoot.
         </p>
       </header>
 
-      <div className="flex items-center gap-2">
+      {/* Transport Controls */}
+      <div className="flex items-center gap-2 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-glass-border)] rounded-lg p-1.5">
         <button
           type="button"
           onClick={onPlayPause}
-          className="rounded border border-[var(--aethel-border)] px-3 py-1 text-xs text-[var(--aethel-text-primary)]"
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-all ${
+            isPlaying
+              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+              : 'bg-[var(--aethel-neon-cyan)]/20 text-[var(--aethel-neon-cyan)] border border-[var(--aethel-neon-cyan)]/40 hover:bg-[var(--aethel-neon-cyan)]/30'
+          }`}
           data-testid="sequencer-play-toggle"
         >
+          {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
           {isPlaying ? 'Pause' : 'Play'}
         </button>
         <button
@@ -147,25 +167,39 @@ export function SequencerIdePanel() {
             syncFromTick(r)
             setIsPlaying(false)
           }}
-          className="rounded border border-[var(--aethel-border)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)]"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[var(--aethel-border-subtle)] text-xs font-mono text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] transition-all"
           data-testid="sequencer-stop"
         >
+          <Square className="w-3.5 h-3.5" />
           Stop
         </button>
-        <span className="text-[10px] text-[var(--aethel-text-tertiary)]">
-          {playReady ? 'play ready' : 'play soak pending'} · viewport apply
-        </span>
+        <button
+          type="button"
+          onClick={() => onScrub(0)}
+          className="p-1.5 rounded-lg border border-[var(--aethel-border-subtle)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] transition-all"
+          title="Rewind to start"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+        </button>
+
+        <div className="ml-auto flex items-center gap-2 font-mono text-xs text-[var(--aethel-neon-cyan)] bg-[var(--aethel-surface-secondary)] px-2.5 py-1 rounded-md border border-[var(--aethel-glass-border)]">
+          <Clock className="w-3.5 h-3.5 text-indigo-400" />
+          <span>{formatTimecode(timeMs)}</span>
+        </div>
       </div>
 
-      <label className="flex flex-col gap-1 text-xs text-[var(--aethel-text-secondary)]">
-        Playhead ({Math.round(timeMs)} ms)
+      <label className="flex flex-col gap-1.5 text-xs text-[var(--aethel-text-secondary)] font-mono">
+        <span className="flex justify-between items-center text-[10px] text-[var(--aethel-text-tertiary)] uppercase tracking-wider">
+          <span>Playhead Position</span>
+          <span>{Math.round(timeMs)} ms / {scaffold.timeline.durationMs} ms</span>
+        </span>
         <input
           type="range"
           min={0}
           max={scaffold.timeline.durationMs}
           value={timeMs}
           onChange={(e) => onScrub(Number(e.target.value))}
-          className="w-full"
+          className="w-full accent-[var(--aethel-neon-cyan)] cursor-pointer h-1.5 bg-[var(--aethel-surface-tertiary)] rounded-lg"
           data-testid="sequencer-scrub"
         />
       </label>
