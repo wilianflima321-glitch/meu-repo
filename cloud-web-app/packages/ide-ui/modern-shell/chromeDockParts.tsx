@@ -92,7 +92,6 @@ export function handleBottomDockItemClick(
     onSelectSidebarTab,
     onSelectPreviewMode,
     onSelectBottomPanel,
-    onToggleDiagnostics,
   }: BottomDockHandlers,
 ) {
   if (itemId === 'explorer') {
@@ -143,7 +142,20 @@ export function handleBottomDockItemClick(
   }
 
   if (itemId === 'diagnostics') {
-    onToggleDiagnostics?.();
+    // Phase 3 (AAA Studio Deepening Sweep) — this used to only call
+    // `onToggleDiagnostics` (the per-file editor sidecar, already reachable
+    // via the editor toolbar's own "Diagnostics" button), so the bottom
+    // dock's "Errors" rail item never actually opened the project-wide,
+    // ProblemsManager-backed `IdeDiagnosticsDock`. Route it there instead,
+    // mirroring the terminal/chat toggle behavior below.
+    onSelectBottomPanel?.('diagnostics');
+    if (panelState.chat.open && activeBottomPanel === 'diagnostics') {
+      onTogglePanel('chat');
+      return;
+    }
+    if (!panelState.chat.open) {
+      onTogglePanel('chat');
+    }
     return;
   }
 

@@ -78,7 +78,14 @@ export function ModernIDEShellCenterStack({
   const store = useWorkspaceStore();
   const bottomBarSize = store((s) => s.regions.bottomBar.size);
 
-  const bottomDockVisible = !isCompact && Boolean(terminal || chat)
+  // Phase 3 (AAA Studio Deepening Sweep) — previously gated on `Boolean(terminal || chat)`,
+  // which reads as "only show the dock when a chat/terminal surface exists". In practice both
+  // slots are always populated by the sole caller (`ModernIDEShellPanels`), which masked a real
+  // bug: the Diagnostics tab (`IdeDiagnosticsDock`) lived inside this same gated wrapper, so any
+  // future caller without chat/terminal content would also lose the ability to view Diagnostics
+  // even with nothing to do with chat/terminal. Diagnostics availability should not depend on
+  // unrelated surfaces being present.
+  const bottomDockVisible = !isCompact
   const showChatInDock = activeBottomPanel === 'chat'
   const showDiagnosticsInDock = activeBottomPanel === 'diagnostics'
   const showTerminalInDock = activeBottomPanel === 'terminal'

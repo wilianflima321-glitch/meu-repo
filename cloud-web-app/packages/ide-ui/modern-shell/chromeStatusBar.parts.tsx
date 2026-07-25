@@ -106,7 +106,9 @@ export function getPreviewIcon(previewMode: PreviewMode | undefined) {
 
 export function formatBottomPanelLabel(activeBottomPanel: BottomPanelMode | undefined, panelState?: PanelState) {
   if (!panelState?.chat.open || !activeBottomPanel) return null;
-  return activeBottomPanel === 'terminal' ? 'Terminal' : 'AI Console';
+  if (activeBottomPanel === 'terminal') return 'Terminal';
+  if (activeBottomPanel === 'diagnostics') return 'Diagnostics';
+  return 'AI Console';
 }
 
 export function buildDiagnosticsMetrics(activeDiagnostics: MonacoDiagnostic[]): StatusMetricDescriptor[] {
