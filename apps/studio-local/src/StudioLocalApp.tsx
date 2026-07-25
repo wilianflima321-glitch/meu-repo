@@ -215,7 +215,7 @@ export function StudioLocalApp() {
 
       <footer className="studio-local-footer bg-slate-900 border-t border-slate-800 px-6 py-2 flex items-center justify-between text-xs text-slate-400 font-mono">
         <span>{STUDIO_LOCAL_DESKTOP_MANIFEST.capabilities.length} governed capabilities connected to Rust Kernel</span>
-        <span>AETHEL SINGULARITY CERTIFIED (822 Unit Tests Passed)</span>
+        <span>AETHEL STUDIO PRO · Native Engine {kernel?.version ?? 'Runtime'}</span>
       </footer>
     </div>
   )

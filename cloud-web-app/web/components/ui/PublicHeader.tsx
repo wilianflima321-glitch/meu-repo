@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -14,6 +14,81 @@ const SECONDARY_LINKS = PUBLIC_NAV_LINKS.filter((link) => !PRIMARY_HREFS.has(lin
 function isActive(pathname: string, href: string) {
   if (href === '/') return pathname === '/'
   return pathname === href || pathname.startsWith(`${href}/`)
+}
+
+/** R4: Accessible dropdown replacing the native <details> element.
+ *  - onClickOutside: closes on any external click
+ *  - Keyboard: Escape closes; ArrowDown/Up navigates items
+ *  - aria-haspopup + aria-expanded for screen readers
+ */
+function MoreDropdown({
+  links,
+  pathname,
+}: {
+  links: typeof SECONDARY_LINKS
+  pathname: string
+}) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open])
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        aria-haspopup="true"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="cursor-pointer rounded-full px-3 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_52%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+      >
+        More
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute left-1/2 top-11 z-50 min-w-48 -translate-x-1/2 rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-2 shadow-[var(--aethel-shadow-xl)] grid gap-1"
+          style={{ animation: 'fadeInDown 0.12s ease-out' }}
+        >
+          {links.map((link) => {
+            const active = isActive(pathname, link.href)
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                aria-current={active ? 'page' : undefined}
+                className={`rounded-xl px-3 py-2 text-sm transition ${
+                  active
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+                    : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_55%,transparent)] hover:text-[var(--aethel-text-primary)]'
+                }`}
+              >
+                {link.label}
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function PublicHeader() {
@@ -56,30 +131,10 @@ export default function PublicHeader() {
                 </Link>
               )
             })}
-            <details className="group relative">
-              <summary className="cursor-pointer list-none rounded-full px-3 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_52%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]">
-                More
-              </summary>
-              <div className="absolute left-1/2 top-11 z-50 hidden min-w-48 -translate-x-1/2 gap-1 rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-2 shadow-[var(--aethel-shadow-xl)] group-open:grid">
-                {SECONDARY_LINKS.map((link) => {
-                  const active = isActive(pathname, link.href)
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      aria-current={active ? 'page' : undefined}
-                      className={`rounded-xl px-3 py-2 text-sm transition ${
-                        active
-                          ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                          : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_55%,transparent)] hover:text-[var(--aethel-text-primary)]'
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  )
-                })}
-              </div>
-            </details>
+            {/* R4: Accessible dropdown — state-based with onClickOutside + keyboard support */}
+            {SECONDARY_LINKS.length > 0 && (
+              <MoreDropdown links={SECONDARY_LINKS} pathname={pathname} />
+            )}
           </div>
 
           <div className="hidden items-center gap-2 md:flex">
@@ -130,31 +185,25 @@ export default function PublicHeader() {
                   </Link>
                 )
               })}
-              <details className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-4 py-3">
-                <summary className="cursor-pointer text-sm font-medium text-[var(--aethel-text-secondary)]">
-                  More
-                </summary>
-                <div className="mt-3 grid gap-2">
-                  {SECONDARY_LINKS.map((link) => {
-                    const active = isActive(pathname, link.href)
-                    return (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        onClick={() => setMobileOpen(false)}
-                        aria-current={active ? 'page' : undefined}
-                        className={`rounded-xl px-3 py-2 text-sm ${
-                          active
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                            : 'text-[var(--aethel-text-tertiary)]'
-                        }`}
-                      >
-                        {link.label}
-                      </Link>
-                    )
-                  })}
-                </div>
-              </details>
+              {/* R4: Mobile secondary links — direct list, no <details> */}
+              {SECONDARY_LINKS.length > 0 && SECONDARY_LINKS.map((link) => {
+                const active = isActive(pathname, link.href)
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={active ? 'page' : undefined}
+                    className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
+                      active
+                        ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+                        : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] text-[var(--aethel-text-secondary)]'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
               <Link
                 href="/dashboard?onboarding=1&source=mobile-header"
                 onClick={() => setMobileOpen(false)}

@@ -25,71 +25,33 @@ export interface SceneNode {
   locked?: boolean
 }
 
-const DEFAULT_TREE: SceneNode = {
-  id: 'world-root',
-  name: 'World (Root)',
-  type: 'world',
-  visible: true,
-  locked: false,
-  children: [
-    {
-      id: 'group-lighting',
-      name: 'Lighting Group',
-      type: 'group',
-      visible: true,
-      locked: false,
-      children: [
-        { id: 'light-ambient', name: 'Ambient Light', type: 'ambient', visible: true, locked: false },
-        { id: 'light-directional', name: 'Directional Light (Sun)', type: 'light', visible: true, locked: false },
-        { id: 'light-sky', name: 'Skybox Environment', type: 'light', visible: true, locked: false }
-      ]
-    },
-    {
-      id: 'group-static-meshes',
-      name: 'Static Meshes',
-      type: 'group',
-      visible: true,
-      locked: false,
-      children: [
-        { id: 'mesh-terrain', name: 'Landscape Ground', type: 'mesh', visible: true, locked: false },
-        { id: 'mesh-castle-wall', name: 'Castle Wall Barrier', type: 'mesh', visible: true, locked: false },
-        { id: 'mesh-water-plane', name: 'Water Surface Plane', type: 'mesh', visible: false, locked: true }
-      ]
-    },
-    {
-      id: 'group-cameras',
-      name: 'Camera Rigging',
-      type: 'group',
-      visible: true,
-      locked: false,
-      children: [
-        { id: 'camera-main', name: 'Main Playtest Camera', type: 'camera', visible: true, locked: false },
-        { id: 'camera-cinematic', name: 'Cinematic Path Camera', type: 'camera', visible: true, locked: false }
-      ]
-    }
-  ]
-}
+// R3: DEFAULT_TREE removed — component now uses `initialTree` prop from the real backend.
+// When no data is provided, an explicit empty state is rendered instead of fictional scene data.
 
 interface WorldSceneOutlinerProps {
+  /** Real scene tree from the backend. When null/undefined, renders an explicit empty state. */
+  initialTree?: SceneNode | null
   selectedId: string | null
   onSelect: (node: SceneNode) => void
   onFocus: (node: SceneNode) => void
 }
 
 export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
+  initialTree = null,
   selectedId,
   onSelect,
   onFocus
 }) => {
-  const [tree, setTree] = useState<SceneNode>(DEFAULT_TREE)
+  const [tree, setTree] = useState<SceneNode | null>(initialTree)
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(
-    new Set(['world-root', 'group-lighting', 'group-static-meshes', 'group-cameras'])
+    initialTree ? new Set([initialTree.id]) : new Set()
   )
 
   // Flattened list of visible/expanded nodes for keyboard navigation
   const [flatList, setFlatList] = useState<SceneNode[]>([])
 
   useEffect(() => {
+    if (!tree) { setFlatList([]); return }
     const list: SceneNode[] = []
     const traverse = (node: SceneNode) => {
       list.push(node)
@@ -126,7 +88,7 @@ export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
       }
       return node
     }
-    setTree((prev) => deepCloneAndModify(prev))
+    setTree((prev) => prev ? deepCloneAndModify(prev) : null)
   }
 
   const getNodeIcon = (type: string) => {
@@ -207,7 +169,7 @@ export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
             border-l-2 transition-all duration-150 text-[11px] font-mono
             focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[var(--aethel-info)]
             ${isSelected 
-              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] text-[var(--aethel-neon-cyan)] border-[var(--aethel-info)] shadow-[inset_4px_0_16px_rgba(56,189,248,0.07)]' 
+              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] text-[var(--aethel-neon-cyan)] border-[var(--aethel-info)] shadow-[inset_4px_0_16px_color-mix(in_srgb,var(--aethel-info)_7%,transparent)]' 
               : 'border-transparent text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]'
             }
           `}
@@ -280,7 +242,20 @@ export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
         Scene Hierarchy
       </div>
       <div className="flex flex-col min-h-0 flex-1">
-        {renderBranch(tree)}
+        {tree ? (
+          renderBranch(tree)
+        ) : (
+          /* R3: Honest empty state — no fake scene data */
+          <div className="flex flex-col items-center justify-center gap-2 h-full py-8 text-center px-4">
+            <Layers size={24} className="text-[var(--aethel-text-quaternary)] opacity-40" />
+            <p className="text-[11px] font-mono text-[var(--aethel-text-tertiary)]">
+              No scene loaded
+            </p>
+            <p className="text-[10px] text-[var(--aethel-text-quaternary)] leading-relaxed">
+              Create a new world or open an existing project to populate the hierarchy.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

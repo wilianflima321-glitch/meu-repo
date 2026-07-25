@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react'
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from 'react'
 import { AlertCircle, CheckCircle, Info } from 'lucide-react'
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -62,7 +62,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
-    const inputId = id || `input-${Math.random().toString(36).slice(2, 9)}`
+    // useId() is stable across server/client hydration (React 18+)
+    const generatedId = useId()
+    const inputId = id || generatedId
     const hasError = Boolean(error)
     const hasSuccess = Boolean(success) && !hasError
 
