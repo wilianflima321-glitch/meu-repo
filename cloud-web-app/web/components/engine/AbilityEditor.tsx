@@ -16,7 +16,7 @@
  * @see lib/gameplay-ability-system.ts for backend implementation
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Zap, Flame, Shield, Heart } from 'lucide-react';
 import {
   AbilitySystemComponent,
@@ -27,6 +27,7 @@ import {
   AbilityActivationType,
   TargetingMode,
 } from '@aethel/gameplay-ability-system';
+import { useGameplayAbilitySystem } from '@/lib/hooks/useGameplayAbilitySystem';
 
 // Icons (inline SVG to avoid dependencies)
 const Icons = {
@@ -179,10 +180,14 @@ function AttributeBar({ name, current, max, color = 'blue' }: {
 function AbilityCard({
   ability,
   isSelected,
+  isOnCooldown,
+  cooldownRemaining,
   onClick
 }: {
   ability: GameplayAbilitySpec;
   isSelected: boolean;
+  isOnCooldown?: boolean;
+  cooldownRemaining?: number;
   onClick: () => void;
 }) {
   return (
@@ -205,6 +210,14 @@ function AbilityCard({
           <h4 className="font-medium text-[var(--aethel-text-primary)] truncate">{ability.name}</h4>
           <p className="text-xs text-[var(--aethel-text-tertiary)] truncate">{ability.description}</p>
         </div>
+        {isOnCooldown ? (
+          <span
+            className="shrink-0 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] px-1.5 py-0.5 text-[10px] font-mono text-[var(--aethel-warning-light)]"
+            data-testid="ability-cooldown-badge"
+          >
+            {(cooldownRemaining ?? 0).toFixed(1)}s
+          </span>
+        ) : null}
       </div>
       <div className="flex gap-1 mt-2 flex-wrap">
         {ability.tags.ability.slice(0, 2).map((tag, i) => (
@@ -245,18 +258,33 @@ function EffectCard({ effect }: { effect: GameplayEffectSpec }) {
 // Main Editor Component
 // ============================================================================
 
+const INITIAL_ABILITIES = createSampleAbilities();
+
 export function AbilityEditor({
-  asc,
+  asc: externalAsc,
   entityId = 'player',
   onAbilityChange,
   onSave,
   className = '',
 }: AbilityEditorProps): JSX.Element {
+  // Live Gameplay Ability System — replaces the previous local-only sample
+  // state (Anti-Mock fix): abilities are granted to a real ASC, costs/
+  // cooldowns are paid for real on activation, and attribute regen ticks
+  // at the hook's game-loop rate. `asc` prop is accepted for future callers
+  // that own an external ASC; today's call sites don't supply one, so the
+  // internal live system below is what actually backs this editor.
+  const gas = useGameplayAbilitySystem({
+    attributes: DEFAULT_ATTRIBUTES,
+    useStandardAttributes: false,
+    abilities: INITIAL_ABILITIES,
+  });
+
   // State
-  const [abilities, setAbilities] = useState<GameplayAbilitySpec[]>(createSampleAbilities);
+  const [abilities, setAbilities] = useState<GameplayAbilitySpec[]>(INITIAL_ABILITIES);
   const [selectedAbility, setSelectedAbility] = useState<GameplayAbilitySpec | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState<'abilities' | 'attributes' | 'effects'>('abilities');
+  const [testFeedback, setTestFeedback] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -268,19 +296,14 @@ export function AbilityEditor({
     manaCost: 0,
   });
 
-  // Sample attributes for preview
-  const [attributes] = useState(() => ({
-    Health: 80,
-    MaxHealth: 100,
-    Mana: 45,
-    MaxMana: 50,
-    Stamina: 100,
-    MaxStamina: 100,
-  }));
+  // Live runtime state (cooldown/canActivate/costs available) for the
+  // currently selected ability — sourced from the real ASC, not a stub.
+  const liveSelected = selectedAbility ? gas.abilities.get(selectedAbility.id) : undefined;
 
   // Handlers
   const handleSelectAbility = useCallback((ability: GameplayAbilitySpec) => {
     setSelectedAbility(ability);
+    setTestFeedback(null);
     setFormData({
       name: ability.name,
       description: ability.description,
@@ -291,6 +314,34 @@ export function AbilityEditor({
     });
     onAbilityChange?.(ability);
   }, [onAbilityChange]);
+
+  // Re-grant an edited spec to the live ASC (grantAbility no-ops if the id
+  // already exists, so an in-place edit removes then re-grants).
+  const applyAbilityUpdate = useCallback((updated: GameplayAbilitySpec) => {
+    setAbilities(prev => prev.map(a => (a.id === updated.id ? updated : a)));
+    setSelectedAbility(updated);
+    gas.removeAbility(updated.id);
+    gas.grantAbility(updated);
+    onAbilityChange?.(updated);
+  }, [gas, onAbilityChange]);
+
+  const handleUpdateManaCost = useCallback((manaCost: number) => {
+    if (!selectedAbility) return;
+    applyAbilityUpdate({
+      ...selectedAbility,
+      costs: manaCost > 0 ? [{ attribute: 'Mana', value: manaCost }] : [],
+    });
+  }, [selectedAbility, applyAbilityUpdate]);
+
+  const handleUpdateCooldown = useCallback((duration: number) => {
+    if (!selectedAbility) return;
+    applyAbilityUpdate({
+      ...selectedAbility,
+      cooldown: duration > 0
+        ? { duration, tags: selectedAbility.cooldown?.tags ?? [] }
+        : undefined,
+    });
+  }, [selectedAbility, applyAbilityUpdate]);
 
   const handleCreateAbility = useCallback(() => {
     const newAbility: GameplayAbilitySpec = {
@@ -315,7 +366,23 @@ export function AbilityEditor({
     setAbilities(prev => [...prev, newAbility]);
     setSelectedAbility(newAbility);
     setEditMode(false);
-  }, [formData]);
+    gas.grantAbility(newAbility);
+  }, [formData, gas]);
+
+  const handleTestAbility = useCallback(() => {
+    if (!selectedAbility) return;
+    const live = gas.abilities.get(selectedAbility.id);
+    if (live?.isOnCooldown) {
+      setTestFeedback(`On cooldown — ${live.cooldownRemaining.toFixed(1)}s remaining`);
+      return;
+    }
+    const activated = gas.activateAbility(selectedAbility.id);
+    setTestFeedback(
+      activated
+        ? `Activated "${selectedAbility.name}" — costs paid against the live ASC.`
+        : 'Cannot activate — insufficient resources or blocked by tags.',
+    );
+  }, [gas, selectedAbility]);
 
   const handleSave = useCallback(() => {
     onSave?.();
@@ -378,14 +445,19 @@ export function AbilityEditor({
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {abilities.map(ability => (
-            <AbilityCard
-              key={ability.id}
-              ability={ability}
-              isSelected={selectedAbility?.id === ability.id}
-              onClick={() => handleSelectAbility(ability)}
-            />
-          ))}
+          {abilities.map(ability => {
+            const live = gas.abilities.get(ability.id);
+            return (
+              <AbilityCard
+                key={ability.id}
+                ability={ability}
+                isSelected={selectedAbility?.id === ability.id}
+                isOnCooldown={live?.isOnCooldown}
+                cooldownRemaining={live?.cooldownRemaining}
+                onClick={() => handleSelectAbility(ability)}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -534,9 +606,23 @@ export function AbilityEditor({
                     <div className="p-4 bg-[var(--aethel-surface-secondary)] rounded-lg">
                       <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)] mb-1">
                         <Icons.Clock />
-                        <span className="text-sm">Cooldown</span>
+                        <span className="text-sm">Cooldown (s)</span>
                       </div>
-                      <p className="text-[var(--aethel-text-primary)] font-medium">{selectedAbility.cooldown?.duration || 0}s</p>
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.5}
+                        aria-label="Edit cooldown duration in seconds"
+                        value={selectedAbility.cooldown?.duration ?? 0}
+                        onChange={e => handleUpdateCooldown(Number(e.target.value))}
+                        className="w-full bg-transparent text-[var(--aethel-text-primary)] font-medium focus-visible:outline-none"
+                        data-testid="ability-cooldown-input"
+                      />
+                      {liveSelected?.isOnCooldown ? (
+                        <p className="mt-1 text-[10px] font-mono text-[var(--aethel-warning-light)]">
+                          {liveSelected.cooldownRemaining.toFixed(1)}s remaining
+                        </p>
+                      ) : null}
                     </div>
                   </div>
 
@@ -549,19 +635,38 @@ export function AbilityEditor({
                     </div>
                   </div>
 
-                  {selectedAbility.costs.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Costs</h4>
-                      <div className="flex gap-4">
-                        {selectedAbility.costs.map((cost, i) => (
-                          <div key={i} className="px-3 py-1 bg-[var(--aethel-surface-secondary)] rounded text-sm">
-                            <span className="text-[var(--aethel-text-tertiary)]">{cost.attribute}:</span>
-                            <span className="text-[var(--aethel-error)] ml-1">-{cost.value}</span>
-                          </div>
-                        ))}
+                  <div>
+                    <h4 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Costs</h4>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 px-3 py-1 bg-[var(--aethel-surface-secondary)] rounded text-sm">
+                        <span className="text-[var(--aethel-text-tertiary)]">Mana:</span>
+                        <span className="text-[var(--aethel-error)]">-</span>
+                        <input
+                          type="number"
+                          min={0}
+                          aria-label="Edit mana cost"
+                          value={selectedAbility.costs.find(c => c.attribute === 'Mana')?.value ?? 0}
+                          onChange={e => handleUpdateManaCost(Number(e.target.value))}
+                          className="w-16 bg-transparent text-[var(--aethel-error)] focus-visible:outline-none"
+                          data-testid="ability-mana-cost-input"
+                        />
                       </div>
+                      {liveSelected ? (
+                        <span className="text-xs text-[var(--aethel-text-tertiary)]" data-testid="ability-mana-available">
+                          {(liveSelected.costs.find(c => c.attribute === 'Mana')?.available ?? gas.attributes.get('Mana')?.currentValue ?? 0).toFixed(0)} Mana available
+                        </span>
+                      ) : null}
                     </div>
-                  )}
+                  </div>
+
+                  {testFeedback ? (
+                    <p
+                      className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]"
+                      data-testid="ability-test-feedback"
+                    >
+                      {testFeedback}
+                    </p>
+                  ) : null}
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-64 text-[var(--aethel-text-secondary)]">
@@ -574,9 +679,27 @@ export function AbilityEditor({
           {activeTab === 'attributes' && (
             <div className="max-w-md space-y-4">
               <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-4">Entity Attributes</h3>
-              <AttributeBar name="Health" current={attributes.Health} max={attributes.MaxHealth} color="red" />
-              <AttributeBar name="Mana" current={attributes.Mana} max={attributes.MaxMana} color="blue" />
-              <AttributeBar name="Stamina" current={attributes.Stamina} max={attributes.MaxStamina} color="yellow" />
+              <p className="text-xs text-[var(--aethel-text-tertiary)] -mt-2">
+                Live values from the ASC game loop — Mana/Stamina regen ticks in real time.
+              </p>
+              <AttributeBar
+                name="Health"
+                current={gas.attributes.get('Health')?.currentValue ?? 0}
+                max={gas.attributes.get('MaxHealth')?.currentValue ?? 1}
+                color="red"
+              />
+              <AttributeBar
+                name="Mana"
+                current={gas.attributes.get('Mana')?.currentValue ?? 0}
+                max={gas.attributes.get('MaxMana')?.currentValue ?? 1}
+                color="blue"
+              />
+              <AttributeBar
+                name="Stamina"
+                current={gas.attributes.get('Stamina')?.currentValue ?? 0}
+                max={gas.attributes.get('MaxStamina')?.currentValue ?? 1}
+                color="yellow"
+              />
             </div>
           )}
 
@@ -610,8 +733,17 @@ export function AbilityEditor({
           </div>
 
           {selectedAbility && (
-            <button type="button" aria-label="Testar ability selecionada" className="w-full py-2 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition">
-              Test Ability
+            <button
+              type="button"
+              aria-label={`Test ${selectedAbility.name} against the live ability system`}
+              onClick={handleTestAbility}
+              disabled={liveSelected?.isOnCooldown}
+              className="w-full py-2 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              data-testid="ability-test-button"
+            >
+              {liveSelected?.isOnCooldown
+                ? `Cooldown ${liveSelected.cooldownRemaining.toFixed(1)}s`
+                : 'Test Ability'}
             </button>
           )}
 
