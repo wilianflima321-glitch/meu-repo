@@ -2,6 +2,11 @@
   "name": "aethel-engine",
   "version": "2.0.0",
   "description": "Aethel AI Engine - Superior autonomous AI platform",
+  "workspaces": [
+    "cloud-web-app/web",
+    "apps/studio-local",
+    "packages/*"
+  ],
   "scripts": {
     "start": "npm --prefix cloud-web-app/web run start",
     "ide": "npm --prefix cloud-web-app/web run dev",
