@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useRef, useEffect } from 'react'
 import {
   Camera,
   ChevronDown,
@@ -123,17 +124,67 @@ export function ViewportTopToolbar({
         <Crosshair className="h-4 w-4" />
         <span className="sr-only">F</span>
       </button>
-      <details className="relative" data-viewport-camera-menu="progressive">
-        <summary
-          aria-label="Open viewport view menu"
-          className="inline-flex cursor-pointer list-none items-center gap-2 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-2.5 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] [&::-webkit-details-marker]:hidden"
-        >
-          <Camera className="h-4 w-4" />
-          <span className="sr-only">Use Top/Front/Side</span>
-          <span>{cameraPresetLabel}</span>
-          <ChevronDown className="h-3.5 w-3.5" />
-        </summary>
-        <div className="absolute left-0 top-11 z-30 grid min-w-[140px] gap-1 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.94)] p-2 shadow-[0_22px_64px_rgba(0,0,0,0.44)] backdrop-blur-md">
+      <ViewportCameraDropdown
+        cameraPreset={cameraPreset}
+        cameraPresetLabel={cameraPresetLabel}
+        onCameraPresetChange={onCameraPresetChange}
+        activeButton={activeButton}
+        compactTextButton={compactTextButton}
+      />
+    </div>
+  )
+}
+
+function ViewportCameraDropdown({
+  cameraPreset,
+  cameraPresetLabel,
+  onCameraPresetChange,
+  activeButton,
+  compactTextButton,
+}: {
+  cameraPreset: ViewportCameraPreset
+  cameraPresetLabel: string
+  onCameraPresetChange: (preset: ViewportCameraPreset) => void
+  activeButton: string
+  compactTextButton: string
+}) {
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open])
+
+  return (
+    <div ref={menuRef} className="relative" data-viewport-camera-menu="progressive">
+      <button
+        type="button"
+        aria-haspopup="true"
+        aria-expanded={open}
+        aria-label="Open viewport view menu"
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex cursor-pointer list-none items-center gap-2 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-2.5 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+      >
+        <Camera className="h-4 w-4" />
+        <span>{cameraPresetLabel}</span>
+        <ChevronDown className="h-3.5 w-3.5" />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-11 z-30 grid min-w-[140px] gap-1 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.94)] p-2 shadow-[0_22px_64px_rgba(0,0,0,0.44)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-100">
           <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
             View menu
           </p>
@@ -142,7 +193,10 @@ export function ViewportTopToolbar({
               key={preset.id}
               type="button"
               aria-label={`Activate ${preset.label} camera`}
-              onClick={() => onCameraPresetChange(preset.id)}
+              onClick={() => {
+                onCameraPresetChange(preset.id)
+                setOpen(false)
+              }}
               className={
                 cameraPreset === preset.id ? activeButton : compactTextButton
               }
@@ -151,7 +205,7 @@ export function ViewportTopToolbar({
             </button>
           ))}
         </div>
-      </details>
+      )}
     </div>
   )
 }
