@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { RotateCcw } from 'lucide-react'
 import type { SceneNode } from './WorldSceneOutliner'
+import { ScrubbableInput } from '@/components/ui/ScrubbableInput'
 
 export interface TransformState {
   position: { x: number; y: number; z: number }
@@ -80,45 +81,49 @@ export const WorldObjectInspector: React.FC<WorldObjectInspectorProps> = ({
     section: 'position' | 'rotation' | 'scale'
   ) => {
     const vals = transform[section]
+    const step = section === 'scale' ? 0.01 : 0.1
+    const suffix = section === 'rotation' ? '°' : section === 'scale' ? 'x' : ''
     return (
       <div className="space-y-1.5">
         <label className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)] font-mono">
           {label}
         </label>
-        <div className="grid grid-cols-3 gap-2">
-          {/* X Axis */}
-          <div className="flex items-center gap-1.5 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-glass-border)] rounded-lg px-2 py-1">
-            <span className="text-[9px] font-bold text-red-500 font-mono">X</span>
-            <input
-              type="number"
-              step={section === 'scale' ? 0.1 : 0.5}
-              value={Number(vals.x.toFixed(3))}
-              onChange={(e) => handleValueChange(section, 'x', parseFloat(e.target.value) || 0)}
-              className="w-full bg-transparent border-none text-[10px] font-mono text-[var(--aethel-text-primary)] outline-none"
-            />
-          </div>
-          {/* Y Axis */}
-          <div className="flex items-center gap-1.5 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-glass-border)] rounded-lg px-2 py-1">
-            <span className="text-[9px] font-bold text-green-500 font-mono">Y</span>
-            <input
-              type="number"
-              step={section === 'scale' ? 0.1 : 0.5}
-              value={Number(vals.y.toFixed(3))}
-              onChange={(e) => handleValueChange(section, 'y', parseFloat(e.target.value) || 0)}
-              className="w-full bg-transparent border-none text-[10px] font-mono text-[var(--aethel-text-primary)] outline-none"
-            />
-          </div>
-          {/* Z Axis */}
-          <div className="flex items-center gap-1.5 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-glass-border)] rounded-lg px-2 py-1">
-            <span className="text-[9px] font-bold text-sky-500 font-mono">Z</span>
-            <input
-              type="number"
-              step={section === 'scale' ? 0.1 : 0.5}
-              value={Number(vals.z.toFixed(3))}
-              onChange={(e) => handleValueChange(section, 'z', parseFloat(e.target.value) || 0)}
-              className="w-full bg-transparent border-none text-[10px] font-mono text-[var(--aethel-text-primary)] outline-none"
-            />
-          </div>
+        {/* R7: ScrubbableInput — click-drag scrubbing (Blender/UE5 parity).
+            Shift = fine (0.001 step), Ctrl = coarse (1.0 step), math expressions supported. */}
+        <div className="grid grid-cols-3 gap-1.5">
+          <ScrubbableInput
+            label="X"
+            value={vals.x}
+            step={step}
+            precision={3}
+            suffix={suffix}
+            labelClassName="text-red-500 font-bold"
+            onChange={(v) => handleValueChange(section, 'x', v)}
+            onCommit={(v) => handleValueChange(section, 'x', v)}
+            ariaLabel={`${label} X`}
+          />
+          <ScrubbableInput
+            label="Y"
+            value={vals.y}
+            step={step}
+            precision={3}
+            suffix={suffix}
+            labelClassName="text-green-500 font-bold"
+            onChange={(v) => handleValueChange(section, 'y', v)}
+            onCommit={(v) => handleValueChange(section, 'y', v)}
+            ariaLabel={`${label} Y`}
+          />
+          <ScrubbableInput
+            label="Z"
+            value={vals.z}
+            step={step}
+            precision={3}
+            suffix={suffix}
+            labelClassName="text-sky-500 font-bold"
+            onChange={(v) => handleValueChange(section, 'z', v)}
+            onCommit={(v) => handleValueChange(section, 'z', v)}
+            ariaLabel={`${label} Z`}
+          />
         </div>
       </div>
     )

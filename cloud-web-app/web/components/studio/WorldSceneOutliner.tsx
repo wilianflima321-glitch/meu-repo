@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   ChevronDown,
   ChevronRight,
@@ -13,8 +13,19 @@ import {
   Box,
   Sun,
   Camera,
-  Layers
+  Layers,
+  Focus,
+  Copy,
+  Trash2
 } from 'lucide-react'
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuLabel,
+} from '@/components/ui/context-menu'
 
 export interface SceneNode {
   id: string
@@ -156,7 +167,10 @@ export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
     const isLocked = !!node.locked
 
     return (
-      <div key={node.id} className="flex flex-col">
+      // R6: ContextMenu wraps each node for right-click action menu (UE5/Unity parity)
+      <ContextMenu key={node.id}>
+        <ContextMenuTrigger>
+          <div className="flex flex-col">
         {/* Node Row */}
         <div
           id={`outliner-node-${node.id}`}
@@ -168,8 +182,8 @@ export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
             group relative flex items-center justify-between px-2 py-1 select-none cursor-pointer
             border-l-2 transition-all duration-150 text-[11px] font-mono
             focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[var(--aethel-info)]
-            ${isSelected 
-              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] text-[var(--aethel-neon-cyan)] border-[var(--aethel-info)] shadow-[inset_4px_0_16px_color-mix(in_srgb,var(--aethel-info)_7%,transparent)]' 
+            ${isSelected
+              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] text-[var(--aethel-neon-cyan)] border-[var(--aethel-info)] shadow-[inset_4px_0_16px_color-mix(in_srgb,var(--aethel-info)_7%,transparent)]'
               : 'border-transparent text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]'
             }
           `}
@@ -233,6 +247,36 @@ export const WorldSceneOutliner: React.FC<WorldSceneOutlinerProps> = ({
           </div>
         )}
       </div>
+        </ContextMenuTrigger>
+
+        {/* R6: Right-click context menu — UE5/Unity Outliner parity */}
+        <ContextMenuContent>
+          <ContextMenuLabel>{node.name}</ContextMenuLabel>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={() => onFocus(node)}>
+            <Focus size={12} className="text-[var(--aethel-neon-cyan)]" />
+            Focus in Viewport
+          </ContextMenuItem>
+          <ContextMenuItem onClick={() => onSelect(node)}>
+            <Copy size={12} />
+            Duplicate Node
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={() => updateNodeState(node.id, 'visible', !isVisible)}>
+            {isVisible ? <EyeOff size={12} className="text-amber-400" /> : <Eye size={12} className="text-emerald-400" />}
+            {isVisible ? 'Hide' : 'Show'} Node
+          </ContextMenuItem>
+          <ContextMenuItem onClick={() => updateNodeState(node.id, 'locked', !isLocked)}>
+            {isLocked ? <Unlock size={12} className="text-emerald-400" /> : <Lock size={12} className="text-amber-400" />}
+            {isLocked ? 'Unlock' : 'Lock'} Node
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem className="text-[var(--aethel-error)] hover:!bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]">
+            <Trash2 size={12} className="text-[var(--aethel-error)]" />
+            Delete Node
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
     )
   }
 
