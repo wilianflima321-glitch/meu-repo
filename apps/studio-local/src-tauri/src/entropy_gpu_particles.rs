@@ -187,7 +187,7 @@ fn seeded_initial_state(particle_count: u32) -> (Vec<[f32; 4]>, Vec<[f32; 4]>) {
     let mut positions = Vec::with_capacity(particle_count as usize);
     let mut velocities = Vec::with_capacity(particle_count as usize);
     let mut seed: u32 = 0x9E37_79B9;
-    let mut next = |s: &mut u32| -> f32 {
+    let next = |s: &mut u32| -> f32 {
         *s ^= *s << 13;
         *s ^= *s >> 17;
         *s ^= *s << 5;
@@ -272,6 +272,14 @@ impl EntropyGpuKernel {
     /// Returns `(final_positions, wall_micros)` where `wall_micros` covers
     /// only the per-step encode+submit+poll loop (setup and final readback
     /// excluded), which is the number that actually predicts per-frame cost.
+    ///
+    /// Each parameter here is an independent physical simulation input
+    /// (device/queue handles, initial SoA state, dt/gravity/domain scalars,
+    /// step count) checked individually by the soak below; folding them
+    /// into a config struct would only add indirection at this single call
+    /// site for no behavioral or readability gain — same style trade-off
+    /// already documented crate-wide in aethel-kernel-rust/src/lib.rs.
+    #[allow(clippy::too_many_arguments)]
     fn run_steps(
         &self,
         device: &wgpu::Device,
@@ -459,8 +467,8 @@ pub fn run_entropy_gpu_particle_soak(
 
     // Determinism check kept deliberately small (independent of the main
     // particle_count) so the soak's wall time doesn't double at 100k+ scale.
-    let determinism_n = particle_count.min(4096).max(64);
-    let determinism_steps = steps.min(10).max(1);
+    let determinism_n = particle_count.clamp(64, 4096);
+    let determinism_steps = steps.clamp(1, 10);
     let (seed_pos, seed_vel) = seeded_initial_state(determinism_n);
     let (run_a, _) = kernel.run_steps(
         &device,

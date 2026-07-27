@@ -121,6 +121,7 @@ use aethel_studio_local::kernel_strain_aware_texturing_wire::*;
 use aethel_studio_local::kernel_gaze_foveated_reprojection_wire::*;
 use aethel_studio_local::kernel_wgpu_wgsl_device_load_wire::*;
 use aethel_studio_local::kernel_hdr_32bit_float_pipeline_wire::*;
+use aethel_studio_local::kernel_svo_terrain_world_partition_wire::*;
 use aethel_studio_local::onnx_native_gen::*;
 use tauri::Manager;
 
@@ -419,6 +420,7 @@ fn main() {
         .manage(Mutex::new(mmap_commands::MmapRegistry::default()))
         .manage(wasm_runtime::WasmHostState::default())
         .manage(Mutex::new(PhysicsKernel::new()))
+        .manage(Mutex::new(WorldPartitionStreamState::default()))
         .invoke_handler(tauri::generate_handler![
             open_panel_window,
             hardware_profiler::hardware_profiler_sample_once,
@@ -681,7 +683,11 @@ fn main() {
             motion_matching::motion_matching_status,
             physics_commands::poll_physics_state,
             entropy_gpu_particles::entropy_gpu_particle_soak_cmd,
-            entropy_gpu_particles::probe_entropy_gpu_particles_cmd
+            entropy_gpu_particles::probe_entropy_gpu_particles_cmd,
+            probe_svo_terrain_world_partition_cmd,
+            run_kernel_svo_terrain_world_partition_soak_cmd,
+            world_partition_stream_tick_cmd,
+            world_partition_stream_reset_cmd
         ])
         .run(tauri::generate_context!())
         .expect("failed to run Aethel Studio Local");

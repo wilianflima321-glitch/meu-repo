@@ -189,6 +189,9 @@ pub mod kernel_strain_aware_texturing_wire;
 pub mod kernel_gaze_foveated_reprojection_wire;
 /// wgpu WGSL device load wire (letter gu) — gp emit → create_shader_module.
 pub mod kernel_wgpu_wgsl_device_load_wire;
+/// SVO Terrain World Partition desktop wire (letter ip4) — camera-driven
+/// identity-based hydrate/evict streaming, stateful per-frame tick command.
+pub mod kernel_svo_terrain_world_partition_wire;
 pub mod native_kernel;
 pub mod onnx_native_gen;
 pub mod physics_kernel;
