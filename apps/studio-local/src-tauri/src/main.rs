@@ -14,6 +14,7 @@ use tauri::State;
 
 mod asset_cooker;
 mod desktop_commands;
+mod entropy_gpu_particles;
 mod gpu_culling;
 mod hardware_profiler;
 mod mmap_commands;
@@ -678,7 +679,9 @@ fn main() {
             wasm_runtime::wasm_host_status,
             motion_matching::motion_matching_evaluate,
             motion_matching::motion_matching_status,
-            physics_commands::poll_physics_state
+            physics_commands::poll_physics_state,
+            entropy_gpu_particles::entropy_gpu_particle_soak_cmd,
+            entropy_gpu_particles::probe_entropy_gpu_particles_cmd
         ])
         .run(tauri::generate_context!())
         .expect("failed to run Aethel Studio Local");
