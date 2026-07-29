@@ -56,7 +56,7 @@ jobs:
           workspaces: apps/studio-local/src-tauri
       - name: Build Studio Local bundle
         run: npm --prefix apps/studio-local run build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: studio-local-${{ matrix.os }}
           path: apps/studio-local/src-tauri/target/release/bundle/**
