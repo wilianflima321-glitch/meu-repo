@@ -271,7 +271,7 @@ export function StatusBar({
         background: 'color-mix(in srgb, var(--aethel-surface-primary) 92%, transparent)',
         backdropFilter: 'blur(12px)',
         borderTop: `1px solid ${BORDER_SECONDARY}`,
-        boxShadow: '0 -4px 24px rgba(0,0,0,0.2)',
+        boxShadow: '0 -4px 24px color-mix(in srgb, var(--aethel-brand-pure-black) 20%, transparent)',
       }}
     >
       <div className="flex min-w-0 flex-wrap items-center gap-2">

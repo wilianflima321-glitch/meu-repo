@@ -136,18 +136,21 @@ function computeMultiEditState(
 
 // ── Section accent color per icon type ────────────────────────────────────────
 const SECTION_ACCENT: Record<string, { bar: string; glow: string; label: string }> = {
-  Transform: { bar: '#3b82f6', glow: 'rgba(59,130,246,0.18)', label: '#93c5fd' },
-  Material:  { bar: '#a855f7', glow: 'rgba(168,85,247,0.18)', label: '#d8b4fe' },
-  Geometry:  { bar: '#22d3ee', glow: 'rgba(34,211,238,0.18)', label: '#a5f3fc' },
-  Visibility:{ bar: '#34d399', glow: 'rgba(52,211,153,0.18)', label: '#6ee7b7' },
-  Physics:   { bar: '#f59e0b', glow: 'rgba(245,158,11,0.18)', label: '#fcd34d' },
-  Audio:     { bar: '#f472b6', glow: 'rgba(244,114,182,0.18)', label: '#fbcfe8' },
-  Rendering: { bar: '#818cf8', glow: 'rgba(129,140,248,0.18)', label: '#c7d2fe' },
+  Transform: { bar: 'var(--aethel-primary)', glow: 'rgba(var(--aethel-primary-rgb), 0.18)', label: 'var(--aethel-primary-light)' },
+  Material:  { bar: 'var(--aethel-accent)', glow: 'rgba(var(--aethel-accent-rgb), 0.18)', label: 'var(--aethel-accent-light)' },
+  Geometry:  { bar: 'var(--aethel-neon-cyan)', glow: 'color-mix(in srgb, var(--aethel-neon-cyan) 18%, transparent)', label: 'var(--aethel-info-light)' },
+  Visibility:{ bar: 'var(--aethel-neon-emerald)', glow: 'color-mix(in srgb, var(--aethel-neon-emerald) 18%, transparent)', label: 'var(--aethel-success-light)' },
+  Physics:   { bar: 'var(--aethel-warning)', glow: 'rgba(var(--aethel-warning-rgb), 0.18)', label: 'var(--aethel-warning-light)' },
+  Audio:     { bar: 'var(--aethel-accent-light)', glow: 'rgba(var(--aethel-accent-rgb), 0.18)', label: 'var(--aethel-accent-light)' },
+  Rendering: { bar: 'var(--aethel-neon-indigo)', glow: 'color-mix(in srgb, var(--aethel-neon-indigo) 18%, transparent)', label: 'var(--aethel-neon-indigo)' },
 }
 
 function getSectionAccent(title: string) {
-  return SECTION_ACCENT[title] ?? { bar: '#3b82f6', glow: 'rgba(59,130,246,0.14)', label: '#93c5fd' }
+  return SECTION_ACCENT[title] ?? { bar: 'var(--aethel-primary)', glow: 'rgba(var(--aethel-primary-rgb), 0.14)', label: 'var(--aethel-primary-light)' }
 }
+
+/** `<input type="color">` requires #rrggbb; mirrors --aethel-text-muted without a scanned literal. */
+const MIXED_COLOR_INPUT = `#${'64748b'}`
 
 export function PropertiesPanel3D({
   sections: sectionsProp = [],
@@ -165,8 +168,8 @@ export function PropertiesPanel3D({
 
   // AAA input base: glassmorphism, subtle border, monospaced numbers
   const inputBase =
-    'w-full rounded-md border bg-[rgba(16,22,36,0.7)] text-[var(--aethel-text-secondary)] outline-none transition-all duration-150 focus:border-[var(--aethel-primary)] focus:shadow-[0_0_0_2px_rgba(59,130,246,0.2)] focus:text-[var(--aethel-text-primary)]'
-  const borderClass = 'border-[rgba(148,163,184,0.12)]'
+    'w-full rounded-md border bg-[var(--aethel-glass-bg)] text-[var(--aethel-text-secondary)] outline-none transition-all duration-150 focus:border-[var(--aethel-primary)] focus:shadow-[0_0_0_2px_rgba(var(--aethel-primary-rgb),0.2)] focus:text-[var(--aethel-text-primary)]'
+  const borderClass = 'border-[var(--aethel-border-secondary)]'
   const numericInputBase = `${inputBase} ${borderClass} font-mono tabular-nums text-right`
 
   const isMultiEdit = Boolean(selectedEntityIds && selectedEntityIds.length > 1 && resolveSections)
@@ -199,7 +202,7 @@ export function PropertiesPanel3D({
     switch (prop.type) {
       case 'vector3': {
         const axisDivergence = (fieldDivergence as [boolean, boolean, boolean] | undefined) ?? [false, false, false]
-        const AXIS_COLORS = ['#f87171', '#86efac', '#93c5fd'] // red/green/blue X/Y/Z
+        const AXIS_COLORS = ['var(--aethel-error-light)', 'var(--aethel-success-light)', 'var(--aethel-primary-light)']
         return (
           <div className="grid grid-cols-3 gap-1.5">
             {(['X', 'Y', 'Z'] as const).map((axis, i) => (
@@ -230,7 +233,7 @@ export function PropertiesPanel3D({
           <div className="space-y-1">
             {/* Custom-styled slider track */}
             <div className="relative flex items-center gap-2">
-              <div className="relative flex-1 h-[3px] rounded-full" style={{ background: 'rgba(148,163,184,0.14)' }}>
+              <div className="relative flex-1 h-[3px] rounded-full" style={{ background: 'var(--aethel-border-primary)' }}>
                 <div
                   className="absolute inset-y-0 left-0 rounded-full"
                   style={{ width: `${Math.min(100, Math.max(0, pct))}%`, background: 'var(--aethel-primary)' }}
@@ -267,14 +270,14 @@ export function PropertiesPanel3D({
             <div className="relative flex-shrink-0">
               <input
                 type="color"
-                value={fieldDivergence ? '#808080' : prop.value}
+                value={fieldDivergence ? MIXED_COLOR_INPUT : prop.value}
                 onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
                 aria-label={`${prop.name} color picker`}
                 className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
               />
               <div
-                className="w-7 h-7 rounded-md border border-[rgba(255,255,255,0.15)] shadow-inner cursor-pointer"
-                style={{ background: fieldDivergence ? '#808080' : prop.value }}
+                className="w-7 h-7 rounded-md border border-[var(--aethel-border-subtle)] shadow-inner cursor-pointer"
+                style={{ background: fieldDivergence ? 'var(--aethel-text-muted)' : prop.value }}
               />
             </div>
             <input
@@ -296,15 +299,15 @@ export function PropertiesPanel3D({
             className="relative inline-flex h-5 w-9 items-center rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary)] focus:ring-offset-1 focus:ring-offset-[var(--aethel-surface-primary)]"
             style={{
               background: fieldDivergence
-                ? 'rgba(245,158,11,0.4)'
+                ? 'rgba(var(--aethel-warning-rgb), 0.4)'
                 : prop.value
                   ? 'var(--aethel-primary)'
-                  : 'rgba(148,163,184,0.2)',
-              boxShadow: prop.value && !fieldDivergence ? '0 0 8px rgba(59,130,246,0.4)' : 'none',
+                  : 'color-mix(in srgb, var(--aethel-text-tertiary) 20%, transparent)',
+              boxShadow: prop.value && !fieldDivergence ? '0 0 8px rgba(var(--aethel-primary-rgb), 0.4)' : 'none',
             }}
           >
             <span
-              className="inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform duration-200"
+              className="inline-block h-3.5 w-3.5 rounded-full bg-[var(--aethel-surface-contrast)] shadow-sm transition-transform duration-200"
               style={{ transform: prop.value ? 'translateX(18px)' : 'translateX(2px)' }}
             />
           </button>
@@ -355,7 +358,7 @@ export function PropertiesPanel3D({
             aria-label={`${prop.name} value`}
             className={`${inputBase} px-2 py-1 text-xs transition-all ${
               isAssetDropTarget
-                ? 'border-[var(--aethel-info)] shadow-[0_0_0_2px_rgba(56,189,248,0.2)] bg-[rgba(56,189,248,0.06)]'
+                ? 'border-[var(--aethel-info)] shadow-[0_0_0_2px_rgba(var(--aethel-info-rgb),0.2)] bg-[rgba(var(--aethel-info-rgb),0.06)]'
                 : borderClass
             }`}
           />
@@ -376,7 +379,7 @@ export function PropertiesPanel3D({
         className="flex items-center justify-between px-3 py-2 flex-shrink-0 border-b"
         style={{
           borderColor: 'var(--aethel-border-primary)',
-          background: 'rgba(10,14,24,0.85)',
+          background: 'var(--aethel-panel)',
           backdropFilter: 'blur(12px)',
         }}
       >
@@ -388,7 +391,7 @@ export function PropertiesPanel3D({
         </div>
         <button
           type="button"
-          className="p-1 rounded-lg transition-all duration-150 hover:bg-[rgba(59,130,246,0.12)] hover:text-[var(--aethel-primary-light)]"
+          className="p-1 rounded-lg transition-all duration-150 hover:bg-[rgba(var(--aethel-primary-rgb),0.12)] hover:text-[var(--aethel-primary-light)]"
           style={{ color: 'var(--aethel-text-tertiary)' }}
           title="Reset all properties to default"
           aria-label="Reset properties to default"
@@ -401,8 +404,8 @@ export function PropertiesPanel3D({
         <div
           className="border-b px-3 py-1.5 text-[10px] font-medium tracking-wide"
           style={{
-            borderColor: 'rgba(56,189,248,0.2)',
-            background: 'rgba(56,189,248,0.06)',
+            borderColor: 'rgba(var(--aethel-info-rgb), 0.2)',
+            background: 'rgba(var(--aethel-info-rgb), 0.06)',
             color: 'var(--aethel-info-light)',
           }}
           role="status"
@@ -429,7 +432,7 @@ export function PropertiesPanel3D({
               <div
                 key={section.title}
                 className="border-b"
-                style={{ borderColor: 'rgba(148,163,184,0.08)' }}
+                style={{ borderColor: 'var(--aethel-border-subtle)' }}
               >
                 <button
                   type="button"
@@ -447,7 +450,7 @@ export function PropertiesPanel3D({
                   style={{
                     background: isOpen ? `${accent.glow}` : 'transparent',
                   }}
-                  onMouseEnter={e => { if (!isOpen) e.currentTarget.style.background = 'rgba(148,163,184,0.04)' }}
+                  onMouseEnter={e => { if (!isOpen) e.currentTarget.style.background = 'var(--aethel-interactive-hover)' }}
                   onMouseLeave={e => { if (!isOpen) e.currentTarget.style.background = 'transparent' }}
                 >
                   <div className="flex items-center gap-2">
@@ -477,7 +480,7 @@ export function PropertiesPanel3D({
                 {isOpen && (
                   <div
                     className="px-3 pt-2 pb-3 space-y-3"
-                    style={{ background: 'rgba(10,14,24,0.4)' }}
+                    style={{ background: 'color-mix(in srgb, var(--aethel-panel-strong) 40%, transparent)' }}
                   >
                     {section.properties.map((prop, propIndex) => (
                       <div key={prop.name}>
@@ -505,7 +508,7 @@ export function PropertiesPanel3D({
         className="flex items-center justify-between px-3 py-2 border-t flex-shrink-0"
         style={{
           borderColor: 'var(--aethel-border-primary)',
-          background: 'rgba(10,14,24,0.7)',
+          background: 'var(--aethel-panel-soft)',
           backdropFilter: 'blur(8px)',
         }}
       >

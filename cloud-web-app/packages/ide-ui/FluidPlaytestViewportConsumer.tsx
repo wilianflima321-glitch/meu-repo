@@ -80,11 +80,14 @@ export const FluidPlaytestViewportConsumer: React.FC<FluidPlaytestProps> = ({
       if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          ctx.fillStyle = '#0a0d14';
+          const rootStyles = getComputedStyle(document.documentElement)
+          const surfacePrimary = rootStyles.getPropertyValue('--aethel-surface-primary').trim()
+          const surfaceQuaternary = rootStyles.getPropertyValue('--aethel-surface-quaternary').trim()
+          if (surfacePrimary) ctx.fillStyle = surfacePrimary
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
           // Grid background lines
-          ctx.strokeStyle = '#1e293b';
+          if (surfaceQuaternary) ctx.strokeStyle = surfaceQuaternary
           ctx.lineWidth = 1;
           const step = canvas.width / gridResolution;
           for (let x = 0; x <= canvas.width; x += step) {

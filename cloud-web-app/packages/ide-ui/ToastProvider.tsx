@@ -10,11 +10,11 @@ import {
   type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react'
+import { X, CheckCircle2, AlertCircle, AlertTriangle, Info, Loader2 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type ToastVariant = 'success' | 'error' | 'warning' | 'info'
+export type ToastVariant = 'success' | 'error' | 'warning' | 'info' | 'loading'
 
 export interface Toast {
   id: string
@@ -35,6 +35,7 @@ interface ToastContextValue {
   error: (message: string, options?: ToastOptions) => string
   warning: (message: string, options?: ToastOptions) => string
   info: (message: string, options?: ToastOptions) => string
+  loading: (message: string, options?: ToastOptions) => string
   dismiss: (id: string) => void
   dismissAll: () => void
 }
@@ -46,40 +47,52 @@ const ToastContext = createContext<ToastContextValue | null>(null)
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const DEFAULT_DURATION = 4000
-const MAX_TOASTS = 5
+const MAX_TOASTS = 4
 
 const VARIANT_CONFIG: Record<
   ToastVariant,
   {
-    Icon: React.FC<{ size?: number }>
+    Icon: React.FC<{ size?: number; className?: string }>
     iconColor: string
     borderColor: string
     bgColor: string
+    glowColor: string
   }
 > = {
   success: {
-    Icon: CheckCircle,
-    iconColor: 'var(--aethel-success, #4ade80)',
-    borderColor: 'color-mix(in srgb, #4ade80 30%, transparent)',
-    bgColor: 'color-mix(in srgb, #4ade80 8%, var(--aethel-surface-secondary))',
+    Icon: CheckCircle2,
+    iconColor: 'var(--aethel-success)',
+    borderColor: 'rgba(var(--aethel-success-rgb), 0.3)',
+    bgColor: 'rgba(var(--aethel-success-rgb), 0.06)',
+    glowColor: 'rgba(var(--aethel-success-rgb), 0.15)',
   },
   error: {
     Icon: AlertCircle,
     iconColor: 'var(--aethel-error)',
-    borderColor: 'color-mix(in srgb, var(--aethel-error) 35%, transparent)',
-    bgColor: 'color-mix(in srgb, var(--aethel-error) 10%, var(--aethel-surface-secondary))',
+    borderColor: 'rgba(var(--aethel-error-rgb), 0.3)',
+    bgColor: 'rgba(var(--aethel-error-rgb), 0.06)',
+    glowColor: 'rgba(var(--aethel-error-rgb), 0.15)',
   },
   warning: {
     Icon: AlertTriangle,
-    iconColor: 'var(--aethel-warning-light, #fbbf24)',
-    borderColor: 'color-mix(in srgb, #fbbf24 30%, transparent)',
-    bgColor: 'color-mix(in srgb, #fbbf24 8%, var(--aethel-surface-secondary))',
+    iconColor: 'var(--aethel-warning)',
+    borderColor: 'rgba(var(--aethel-warning-rgb), 0.3)',
+    bgColor: 'rgba(var(--aethel-warning-rgb), 0.06)',
+    glowColor: 'rgba(var(--aethel-warning-rgb), 0.15)',
   },
   info: {
     Icon: Info,
-    iconColor: 'var(--aethel-info-light, #60a5fa)',
-    borderColor: 'color-mix(in srgb, #60a5fa 30%, transparent)',
-    bgColor: 'color-mix(in srgb, #60a5fa 8%, var(--aethel-surface-secondary))',
+    iconColor: 'var(--aethel-primary)',
+    borderColor: 'rgba(var(--aethel-primary-rgb), 0.3)',
+    bgColor: 'rgba(var(--aethel-primary-rgb), 0.06)',
+    glowColor: 'rgba(var(--aethel-primary-rgb), 0.15)',
+  },
+  loading: {
+    Icon: Loader2,
+    iconColor: 'var(--aethel-accent)',
+    borderColor: 'rgba(var(--aethel-accent-rgb), 0.3)',
+    bgColor: 'rgba(var(--aethel-accent-rgb), 0.06)',
+    glowColor: 'rgba(var(--aethel-accent-rgb), 0.15)',
   },
 }
 
@@ -103,8 +116,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     options?: ToastOptions
   ): string => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2)}`
-    const t: Toast = { id, message, variant, ...options }
-    setToasts(prev => [t, ...prev].slice(0, MAX_TOASTS))
+    // Ensure sticky loading doesn't auto-dismiss unless overriden
+    const effectiveDuration = variant === 'loading' && options?.duration === undefined ? 0 : options?.duration
+    const t: Toast = { id, message, variant, ...options, duration: effectiveDuration }
+    
+    setToasts(prev => {
+      const next = [t, ...prev]
+      if (next.length > MAX_TOASTS) {
+        return next.slice(0, MAX_TOASTS)
+      }
+      return next
+    })
     return id
   }, [])
 
@@ -114,6 +136,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     error:   (msg, opts) => add(msg, 'error',   opts),
     warning: (msg, opts) => add(msg, 'warning', opts),
     info:    (msg, opts) => add(msg, 'info',    opts),
+    loading: (msg, opts) => add(msg, 'loading', opts),
     dismiss,
     dismissAll,
   }
@@ -151,19 +174,20 @@ function ToastRegion({
   return (
     <>
       <style>{`
-        @keyframes aethel-toast-in {
-          from { opacity: 0; transform: translateX(24px) scale(0.96); }
-          to   { opacity: 1; transform: translateX(0)    scale(1); }
+        @keyframes aethel-toast-enter {
+          0% { opacity: 0; transform: translateY(16px) scale(0.95); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-        @keyframes aethel-toast-out {
-          from { opacity: 1; transform: translateX(0)    scale(1); max-height: 120px; }
-          to   { opacity: 0; transform: translateX(24px) scale(0.96); max-height: 0; }
+        @keyframes aethel-toast-exit {
+          0% { opacity: 1; transform: translateY(0) scale(1); margin-bottom: 8px; max-height: 120px; }
+          100% { opacity: 0; transform: scale(0.9); margin-bottom: 0; max-height: 0; padding-top: 0; padding-bottom: 0; border-width: 0; }
         }
-        [data-aethel-toast] {
-          animation: aethel-toast-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        .aethel-toast-item {
+          animation: aethel-toast-enter 0.3s cubic-bezier(0.2, 1, 0.2, 1) forwards;
+          transform-origin: bottom center;
         }
-        [data-aethel-toast][data-exiting] {
-          animation: aethel-toast-out 180ms ease-in both;
+        .aethel-toast-item[data-exiting="true"] {
+          animation: aethel-toast-exit 0.2s ease-in forwards;
         }
       `}</style>
       <div
@@ -173,11 +197,11 @@ function ToastRegion({
           position: 'fixed',
           bottom: 24,
           right: 24,
-          zIndex: 9999,
+          zIndex: 99999,
           display: 'flex',
           flexDirection: 'column-reverse',
           gap: 8,
-          maxWidth: 380,
+          maxWidth: 360,
           width: 'calc(100vw - 48px)',
           pointerEvents: 'none',
         }}
@@ -203,7 +227,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
   const startExit = useCallback(() => {
     if (exiting) return
     setExiting(true)
-    exitTimeoutRef.current = setTimeout(() => onDismiss(toast.id), 180)
+    exitTimeoutRef.current = setTimeout(() => onDismiss(toast.id), 200)
   }, [exiting, onDismiss, toast.id])
 
   // Auto-dismiss with progress bar
@@ -230,45 +254,73 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
     }
   }, [duration, startExit])
 
-  const { Icon, iconColor, borderColor, bgColor } = VARIANT_CONFIG[toast.variant]
+  const { Icon, iconColor, borderColor, bgColor, glowColor } = VARIANT_CONFIG[toast.variant]
 
   return (
     <div
       role="alert"
-      data-aethel-toast
-      data-exiting={exiting || undefined}
+      className="aethel-toast-item"
+      data-exiting={exiting}
       style={{
         pointerEvents: 'all',
-        background: bgColor,
-        border: `1px solid ${borderColor}`,
-        borderRadius: 10,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)',
+        background: 'var(--aethel-panel-strong)',
+        backdropFilter: 'blur(16px)',
+        border: '1px solid var(--aethel-border-secondary)',
+        borderRadius: 12,
+        boxShadow: `0 16px 40px color-mix(in srgb, var(--aethel-brand-pure-black) 60%, transparent), 0 0 0 1px ${borderColor} inset, 0 8px 16px ${glowColor}`,
         overflow: 'hidden',
         position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px' }}>
+      {/* Background tint based on variant */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: `linear-gradient(135deg, ${bgColor} 0%, transparent 100%)`,
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
+
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px', position: 'relative', zIndex: 1 }}>
         {/* Icon */}
-        <span style={{ color: iconColor, flexShrink: 0, marginTop: 1 }}>
-          <Icon size={16} />
+        <span
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 24,
+            height: 24,
+            borderRadius: 8,
+            background: bgColor,
+            color: iconColor,
+            flexShrink: 0,
+            boxShadow: `0 0 0 1px ${borderColor}`,
+          }}
+        >
+          <Icon size={14} className={toast.variant === 'loading' ? 'animate-spin' : ''} />
         </span>
 
         {/* Text */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, marginTop: 1 }}>
           <p style={{
             margin: 0,
             fontSize: 13,
-            fontWeight: 500,
+            fontWeight: 600,
             color: 'var(--aethel-text-primary)',
             lineHeight: 1.4,
+            letterSpacing: '0.01em',
           }}>
             {toast.message}
           </p>
           {toast.description && (
             <p style={{
-              margin: '4px 0 0',
+              margin: '2px 0 0',
               fontSize: 11,
-              color: 'var(--aethel-text-secondary)',
+              color: 'var(--aethel-text-tertiary)',
               lineHeight: 1.4,
             }}>
               {toast.description}
@@ -283,35 +335,35 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
           onClick={startExit}
           style={{
             flexShrink: 0,
-            padding: 2,
+            padding: 4,
             border: 'none',
             background: 'transparent',
             cursor: 'pointer',
             color: 'var(--aethel-text-tertiary)',
             display: 'flex',
-            borderRadius: 4,
-            marginTop: -1,
+            borderRadius: 6,
+            marginTop: -2,
+            marginRight: -4,
+            transition: 'all 100ms ease',
           }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'var(--aethel-text-secondary)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'var(--aethel-text-tertiary)' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--aethel-text-primary)'; e.currentTarget.style.background = 'var(--aethel-interactive-hover)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--aethel-text-tertiary)'; e.currentTarget.style.background = 'transparent' }}
         >
           <X size={14} />
         </button>
       </div>
 
-      {/* Progress bar */}
+      {/* Progress bar line */}
       {duration > 0 && (
-        <div style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          height: 2,
-          width: `${progress}%`,
-          background: iconColor,
-          opacity: 0.6,
-          transition: 'width 16ms linear',
-          borderRadius: '0 0 0 10px',
-        }} />
+        <div style={{ width: '100%', height: 2, background: 'var(--aethel-border-secondary)', position: 'relative', zIndex: 1 }}>
+          <div style={{
+            height: '100%',
+            width: `${progress}%`,
+            background: iconColor,
+            boxShadow: `0 0 6px ${iconColor}`,
+            transition: 'width 16ms linear',
+          }} />
+        </div>
       )}
     </div>
   )

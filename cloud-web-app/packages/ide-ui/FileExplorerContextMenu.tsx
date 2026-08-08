@@ -1,31 +1,34 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Codicon, { type CodiconName } from './Codicon'
 import type { FileNode } from './FileExplorerPro.types'
 
 // ─── Injected once per page load — not per component instance ─────────────────
 const CTX_MENU_STYLES = `
   @keyframes aethel-ctx-in {
-    from { opacity: 0; transform: scale(0.95) translateY(-4px); }
-    to   { opacity: 1; transform: scale(1)   translateY(0); }
+    0% { opacity: 0; transform: scale(0.9) translateY(-8px); }
+    40% { opacity: 1; transform: scale(1.02) translateY(2px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
   }
   [data-aethel-ctx-menu] {
-    animation: aethel-ctx-in 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: aethel-ctx-in 250ms cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
     transform-origin: top left;
   }
   [data-aethel-ctx-menu] button kbd {
     display: inline-flex;
     align-items: center;
-    padding: 1px 5px;
+    padding: 2px 6px;
     border-radius: 4px;
     font-size: 10px;
     font-family: var(--font-mono, ui-monospace, monospace);
-    border: 1px solid var(--aethel-border-secondary);
-    background: color-mix(in srgb, var(--aethel-surface-primary) 60%, transparent);
-    color: var(--aethel-text-quaternary);
-    line-height: 1.4;
+    border: 1px solid color-mix(in srgb, var(--aethel-border-secondary) 50%, transparent);
+    background: color-mix(in srgb, var(--aethel-surface-secondary) 40%, transparent);
+    color: var(--aethel-text-tertiary);
+    line-height: 1.2;
     pointer-events: none;
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--aethel-brand-pure-black) 10%, transparent) inset;
   }
 `
 
@@ -54,9 +57,12 @@ export function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps)
   const [activeIndex, setActiveIndex] = useState(0)
   const [menuPosition, setMenuPosition] = useState({ left: x, top: y })
   const isFolder = file.type === 'folder'
+  const [mounted, setMounted] = useState(false)
 
   // Ensure CSS is in the document exactly once
   useEffect(() => { ensureContextMenuStyles() }, [])
+  
+  useEffect(() => { setMounted(true) }, [])
 
   const menuItems = [
     ...(isFolder ? [
@@ -79,7 +85,7 @@ export function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps)
     if (!menu || typeof window === 'undefined') return
     const width = menu.offsetWidth || 192
     const height = menu.offsetHeight || 120
-    const margin = 8
+    const margin = 12
 
     const maxLeft = Math.max(margin, window.innerWidth - width - margin)
     const maxTop = Math.max(margin, window.innerHeight - height - margin)
@@ -122,29 +128,30 @@ export function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps)
     }
   }, [activateActionAtIndex, actionableItems.length, activeIndex, onClose])
 
-  return (
+  const menuContent = (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50"
+        className="fixed inset-0 z-[9998]"
         onClick={onClose}
+        onContextMenu={(e) => { e.preventDefault(); onClose(); }}
       />
 
-      {/* Menu — styles injected once at module load, no per-render <style> tag */}
+      {/* Menu — styles injected once at module load */}
       <div
         ref={menuRef}
         data-aethel-ctx-menu
         role="menu"
         aria-label={`Context actions for ${file.name}`}
         onKeyDown={handleMenuKeyDown}
-        className="fixed z-50 min-w-52 py-1"
+        className="fixed z-[9999] min-w-[220px] py-1.5 backdrop-blur-xl"
         style={{
           left: menuPosition.left,
           top: menuPosition.top,
-          background: 'var(--aethel-surface-tertiary)',
-          border: '1px solid var(--aethel-border-secondary)',
-          borderRadius: 10,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.25)',
+          background: 'color-mix(in srgb, var(--aethel-surface-tertiary) 85%, transparent)',
+          border: '1px solid color-mix(in srgb, var(--aethel-border-primary) 60%, transparent)',
+          borderRadius: 12,
+          boxShadow: '0 0 0 1px var(--aethel-border-subtle) inset, 0 12px 40px color-mix(in srgb, var(--aethel-brand-pure-black) 55%, transparent), 0 4px 12px color-mix(in srgb, var(--aethel-brand-pure-black) 30%, transparent)',
         }}
       >
         {(() => {
@@ -154,8 +161,8 @@ export function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps)
               return (
                 <div
                   key={`divider-${i}`}
-                  className="my-1 border-t"
-                  style={{ borderColor: 'var(--aethel-border-secondary)' }}
+                  className="my-1.5 border-t"
+                  style={{ borderColor: 'color-mix(in srgb, var(--aethel-border-secondary) 40%, transparent)' }}
                 />
               )
             }
@@ -175,24 +182,27 @@ export function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps)
                   onClose()
                 }}
                 style={{
-                  width: '100%',
+                  width: 'calc(100% - 12px)',
+                  margin: '0 6px',
+                  borderRadius: 6,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '6px 12px',
-                  fontSize: 12,
+                  gap: 10,
+                  padding: '7px 10px',
+                  fontSize: 13,
+                  fontWeight: 500,
                   background: actionIndex === activeIndex
                     ? item.danger
-                      ? 'color-mix(in srgb, var(--aethel-error) 18%, transparent)'
+                      ? 'color-mix(in srgb, var(--aethel-error) 20%, transparent)'
                       : 'var(--aethel-interactive-hover)'
                     : 'transparent',
                   color: item.danger
                     ? 'var(--aethel-error)'
-                    : 'var(--aethel-text-secondary)',
+                    : actionIndex === activeIndex ? 'var(--aethel-text-primary)' : 'var(--aethel-text-secondary)',
                   border: 'none',
-                  cursor: 'pointer',
+                  cursor: 'default',
                   textAlign: 'left',
-                  transition: 'background 80ms ease',
+                  transition: 'all 120ms ease',
                 }}
               >
                 {item.icon && <Codicon name={item.icon} />}
@@ -205,6 +215,9 @@ export function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps)
       </div>
     </>
   )
+
+  if (!mounted) return null
+  return createPortal(menuContent, document.body)
 }
 
 // ============= Main Component =============

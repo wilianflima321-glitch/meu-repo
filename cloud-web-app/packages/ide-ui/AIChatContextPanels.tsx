@@ -19,7 +19,7 @@ export function CodebaseContextPanel({
   if (!input.toLowerCase().includes('@codebase')) return null
 
   return (
-    <div className="mt-3 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.88))] p-3">
+    <div className="mt-3 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)] bg-[linear-gradient(180deg,var(--aethel-panel-strong),var(--aethel-glass-bg))] p-3">
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
           <div className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--aethel-info-light)]">
@@ -129,7 +129,7 @@ export function MentionContextPanel({
   if (!(preview.blocks.length > 0 || preview.loading || preview.error)) return null
 
   return (
-    <div className="mt-3 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.88))] p-3">
+    <div className="mt-3 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[linear-gradient(180deg,var(--aethel-panel-strong),var(--aethel-glass-bg))] p-3">
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
           <div className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--aethel-info-light)]">

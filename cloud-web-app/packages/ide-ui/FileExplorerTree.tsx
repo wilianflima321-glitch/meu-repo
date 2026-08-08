@@ -23,6 +23,14 @@ const FILE_ICONS: Record<string, { icon: CodiconName; color: string }> = {
   svg: { icon: 'symbol-file', color: 'text-[var(--aethel-text-tertiary)]' },
   package: { icon: 'extensions', color: 'text-[var(--aethel-text-tertiary)]' },
   config: { icon: 'gear', color: 'text-[var(--aethel-text-tertiary)]' },
+  rs: { icon: 'symbol-enum', color: 'text-[var(--aethel-warning-light)]' },
+  py: { icon: 'symbol-method', color: 'text-[var(--aethel-info-dark)]' },
+  gltf: { icon: 'box', color: 'text-[var(--aethel-neon-emerald)]' },
+  glb: { icon: 'box', color: 'text-[var(--aethel-neon-emerald)]' },
+  obj: { icon: 'box', color: 'text-[var(--aethel-text-tertiary)]' },
+  fbx: { icon: 'box', color: 'text-[var(--aethel-text-tertiary)]' },
+  blend: { icon: 'box', color: 'text-[var(--aethel-warning-dark)]' },
+  wgsl: { icon: 'symbol-color', color: 'text-[var(--aethel-info)]' },
 }
 
 function getFileIcon(name: string, isOpen = false) {

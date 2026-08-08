@@ -312,7 +312,7 @@ export function highlightMatches(text: string, indices: number[]): ReactNode {
       <mark
         key={`match-${i}`}
         className="rounded-sm bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] px-px font-semibold text-[var(--aethel-info-light)] not-italic"
-        style={{ textShadow: '0 0 8px rgba(56,189,248,0.45)' }}
+        style={{ textShadow: '0 0 8px rgba(var(--aethel-info-rgb), 0.45)' }}
       >
         {text[index]}
       </mark>

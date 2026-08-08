@@ -38,7 +38,7 @@ const ChatStub = () => (
 )
 
 const TerminalStub = () => (
-  <div className="h-full bg-[#0d0d0d] p-3 font-mono text-[11px] text-[#6ee7b7]">
+  <div className="h-full bg-[var(--aethel-surface-primary)] p-3 font-mono text-[11px] text-[var(--aethel-success-light)]">
     <p>$ npm run dev</p>
     <p className="opacity-70">Next.js started on http://localhost:3000</p>
     <p className="opacity-70">Ready in 842ms</p>

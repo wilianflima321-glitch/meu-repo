@@ -12,9 +12,9 @@ export const BORDER_FOCUS = 'var(--aethel-border-focus)'
 export const ACCENT_CYAN = 'var(--aethel-info)'
 export const ACCENT_SUCCESS = 'var(--aethel-success-light)'
 export const PRIMARY_GRADIENT = 'linear-gradient(135deg, var(--aethel-primary), var(--aethel-info))'
-export const FOCUS_RING = '0 0 0 3px rgba(6, 182, 212, 0.12)'
+export const FOCUS_RING = '0 0 0 3px rgba(var(--aethel-info-rgb), 0.12)'
 
-export const MESSAGE_TIME_FORMATTER = new Intl.DateTimeFormat('pt-BR', {
+export const MESSAGE_TIME_FORMATTER = new Intl.DateTimeFormat('en-US', {
   hour: '2-digit',
   minute: '2-digit',
 })

@@ -141,7 +141,7 @@ export function CommandPaletteUI({
       <div
         className="fixed inset-0 z-50 transition-opacity duration-200"
         style={{
-          background: 'radial-gradient(circle at center, rgba(10,14,24,0.4) 0%, rgba(10,14,24,0.9) 100%)',
+          background: 'radial-gradient(circle at center, color-mix(in srgb, var(--aethel-panel-strong) 40%, transparent) 0%, var(--aethel-panel-strong) 100%)',
           backdropFilter: 'blur(16px)',
         }}
         onClick={close}
@@ -156,14 +156,14 @@ export function CommandPaletteUI({
         <div 
           className="overflow-hidden rounded-2xl shadow-2xl transition-all duration-300"
           style={{
-            background: 'rgba(10,14,24,0.85)',
-            border: '1px solid rgba(148,163,184,0.15)',
-            boxShadow: '0 32px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05) inset, 0 8px 32px rgba(59,130,246,0.1)',
+            background: 'var(--aethel-panel)',
+            border: '1px solid var(--aethel-border-primary)',
+            boxShadow: '0 32px 64px color-mix(in srgb, var(--aethel-brand-pure-black) 60%, transparent), 0 0 0 1px var(--aethel-border-subtle) inset, 0 8px 32px rgba(var(--aethel-primary-rgb), 0.1)',
             backdropFilter: 'blur(32px)',
           }}
         >
           {/* Search bar */}
-          <div className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: '1px solid rgba(148,163,184,0.1)' }}>
+          <div className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: '1px solid var(--aethel-border-secondary)' }}>
             {currentMode.prefix ? (
               <span className="font-mono text-xs font-bold px-2 py-0.5 rounded" style={{ color: 'var(--aethel-info)', background: 'color-mix(in srgb, var(--aethel-info) 10%, transparent)' }}>
                 {currentMode.prefix}
@@ -190,7 +190,7 @@ export function CommandPaletteUI({
             <div
               ref={listRef}
               className="w-[45%] overflow-y-auto"
-              style={{ borderRight: '1px solid rgba(148,163,184,0.1)', background: 'rgba(0,0,0,0.2)' }}
+              style={{ borderRight: '1px solid var(--aethel-border-secondary)', background: 'color-mix(in srgb, var(--aethel-brand-pure-black) 20%, transparent)' }}
               role="listbox"
               aria-label="Palette results"
               aria-live="polite"
@@ -234,7 +234,7 @@ export function CommandPaletteUI({
 
             {/* Right: preview — 55% */}
             <div className="w-[55%] overflow-hidden relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-[rgba(255,255,255,0.02)] to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-surface-contrast)_2%,transparent)] to-transparent pointer-events-none" />
               {showPreview && selectedItem ? (
                 <FilePreviewPanel item={selectedItem} query={query} />
               ) : filteredItems.length > 0 ? (
@@ -245,7 +245,7 @@ export function CommandPaletteUI({
                 <div className="flex h-full flex-col items-center justify-center gap-4 text-[var(--aethel-text-tertiary)]">
                   <div className="text-[12px] font-medium text-[var(--aethel-text-secondary)]">Universal Search</div>
                   <div className="flex gap-2 text-[10px] items-center">
-                    <span className="rounded font-mono px-1.5 py-0.5" style={{ background: 'rgba(148,163,184,0.1)', color: 'var(--aethel-text-secondary)' }}>Ctrl+K</span>
+                    <span className="rounded font-mono px-1.5 py-0.5" style={{ background: 'var(--aethel-interactive-hover)', color: 'var(--aethel-text-secondary)' }}>Ctrl+K</span>
                     <span>Search everything</span>
                   </div>
                 </div>
@@ -257,22 +257,22 @@ export function CommandPaletteUI({
           <div 
             className="flex items-center justify-between px-4 py-2 text-[10px]"
             style={{ 
-              borderTop: '1px solid rgba(148,163,184,0.1)',
-              background: 'rgba(10,14,24,0.6)',
+              borderTop: '1px solid var(--aethel-border-secondary)',
+              background: 'var(--aethel-panel-soft)',
               color: 'var(--aethel-text-tertiary)'
             }}
           >
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded font-mono px-1.5 py-0.5" style={{ background: 'rgba(148,163,184,0.1)', color: 'var(--aethel-text-secondary)' }}>Ctrl+K</kbd> 
+                <kbd className="rounded font-mono px-1.5 py-0.5" style={{ background: 'var(--aethel-interactive-hover)', color: 'var(--aethel-text-secondary)' }}>Ctrl+K</kbd> 
                 Everything
               </span>
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded font-mono px-1.5 py-0.5" style={{ background: 'rgba(148,163,184,0.1)', color: 'var(--aethel-text-secondary)' }}>Ctrl+Shift+P</kbd> 
+                <kbd className="rounded font-mono px-1.5 py-0.5" style={{ background: 'var(--aethel-interactive-hover)', color: 'var(--aethel-text-secondary)' }}>Ctrl+Shift+P</kbd> 
                 Commands
               </span>
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded font-mono px-1.5 py-0.5" style={{ background: 'rgba(148,163,184,0.1)', color: 'var(--aethel-text-secondary)' }}>Ctrl+P</kbd> 
+                <kbd className="rounded font-mono px-1.5 py-0.5" style={{ background: 'var(--aethel-interactive-hover)', color: 'var(--aethel-text-secondary)' }}>Ctrl+P</kbd> 
                 Files
               </span>
             </div>
