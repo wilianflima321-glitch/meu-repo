@@ -84,6 +84,8 @@ describe('FullStackScaffoldEngine (L.9)', () => {
 
     expect(result.ok).toBe(true)
     expect(result.preview?.url).toBe('https://3000-test-session-123.e2b.dev')
+    expect(result.commitGate?.ok).toBe(true)
+    expect(result.commitGate?.marketingAllowed).toBe(false)
 
     // Verify session creation called
     expect(sandboxExecutor.createForgeSandboxSession).toHaveBeenCalledWith(expect.objectContaining({
@@ -144,7 +146,8 @@ describe('FullStackScaffoldEngine (L.9)', () => {
     })
 
     expect(result.ok).toBe(false)
-    expect(result.message).toMatch(/never became reachable|preview orchestration failed/i)
+    expect(result.message).toMatch(/never became reachable|preview orchestration failed|L8_PREVIEW/i)
     expect(result.preview?.ok).toBe(false)
+    expect(result.commitGate?.ok).toBe(false)
   })
 })

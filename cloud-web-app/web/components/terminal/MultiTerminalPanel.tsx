@@ -9,12 +9,17 @@ export interface MultiTerminalPanelProps {
   className?: string;
   initialSessions?: number;
   onClose?: () => void;
+  /** L.4 — enables Forge sandbox terminal entry when project is bound. */
+  forgeProjectId?: string;
+  existingSandboxSessionId?: string;
 }
 
 export const MultiTerminalPanel: React.FC<MultiTerminalPanelProps> = ({
   className = '',
   initialSessions = 1,
   onClose,
+  forgeProjectId,
+  existingSandboxSessionId,
 }) => {
   const [terminals, setTerminals] = useState<string[]>(() =>
     Array.from({ length: initialSessions }, () => crypto.randomUUID())
@@ -127,6 +132,8 @@ export const MultiTerminalPanel: React.FC<MultiTerminalPanelProps> = ({
             <XTerminal
               sessionId={id}
               className="rounded-none border-0"
+              forgeProjectId={forgeProjectId}
+              existingSandboxSessionId={existingSandboxSessionId}
               onClose={terminals.length > 1 ? () => removeTerminal(index) : undefined}
             />
           </div>

@@ -1,6 +1,10 @@
 'use client';
 
 import type { TerminalSession } from './terminalModels';
+import {
+  closeForgeTerminalSessionRequest,
+  createForgeTerminalSessionRequest,
+} from './forgeTerminalClient';
 
 type CreateTerminalSessionResponse = {
   sessionId: string;
@@ -16,6 +20,9 @@ type CreateTerminalSessionOptions = {
   initialShell?: string;
   cwd?: string;
   shell?: string;
+  /** When set, opens L.4 Forge sandbox lane instead of human host PTY. */
+  forgeProjectId?: string;
+  existingSandboxSessionId?: string;
 };
 
 export function getTerminalSessionName(sessionCount: number) {
@@ -28,10 +35,22 @@ export async function createTerminalSessionRequest({
   initialShell,
   cwd,
   shell,
+  forgeProjectId,
+  existingSandboxSessionId,
 }: CreateTerminalSessionOptions): Promise<{
   session: TerminalSession;
   websocketUrl?: string;
 }> {
+  if (forgeProjectId) {
+    const forge = await createForgeTerminalSessionRequest({
+      projectId: forgeProjectId,
+      projectRootPath: cwd || initialCwd,
+      existingSandboxSessionId,
+      sessionCount,
+    });
+    return { session: forge.session };
+  }
+
   const fallbackName = getTerminalSessionName(sessionCount);
   const response = await fetch('/api/terminal/create', {
     method: 'POST',
@@ -57,12 +76,20 @@ export async function createTerminalSessionRequest({
       cwd: data.cwd || cwd || '~',
       createdAt: new Date(),
       isActive: true,
+      executionLane: 'human-host-pty',
     },
     websocketUrl: data.websocketUrl,
   };
 }
 
-export async function closeTerminalSessionRequest(sessionId: string) {
+export async function closeTerminalSessionRequest(
+  sessionId: string,
+  executionLane?: TerminalSession['executionLane'],
+) {
+  if (executionLane === 'forge-sandbox') {
+    await closeForgeTerminalSessionRequest(sessionId);
+    return;
+  }
   await fetch('/api/terminal/close', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

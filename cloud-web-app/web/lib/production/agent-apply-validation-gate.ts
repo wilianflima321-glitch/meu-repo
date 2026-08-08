@@ -16,6 +16,11 @@ import {
   buildRustGateUnavailableDetail,
   runProjectRustGate
 } from '@/lib/production/rust-gate-unavailable'
+import {
+  forgeCommitGateBlocksSuccess,
+  runForgeCommitCiGate,
+} from '@/lib/production/forge-commit-ci-gate'
+import type { PreviewOrchestrationResult } from '@/lib/production/preview-orchestrator'
 
 const log = createComponentLogger('agent-apply-validation-gate')
 
@@ -35,6 +40,7 @@ export type FileValidationGateStatus =
   | 'denied_rust_gate_unavailable'
   | 'denied_rust_fail'
   | 'denied_disjoint'
+  | 'denied_commit_ci'
   | 'skipped_non_ts'
 
 export type FileValidationStatusEntry = {
@@ -56,6 +62,7 @@ export type ApplyValidationGateResult = {
     | 'RUST_GATE_FAIL'
     | 'MULTI_FILE_VALIDATION_DENIED'
     | 'PATH_DISJOINT_FAIL'
+    | 'FORGE_COMMIT_CI_FAIL'
   compilerLog: string
   fileValidation: FileValidationStatusEntry[]
   /** Always false — gate pass ≠ Cursor Composer parity. */
@@ -164,6 +171,12 @@ export async function runGovernedApplyValidationGate(input: {
   ambientFiles?: L5VirtualFile[]
   sandboxSessionId?: string
   projectRootPath?: string
+  /**
+   * Optional L.8 preview result. When provided, L.2/L.9 commit/CI gate also
+   * requires a reachable preview before apply success is honest.
+   */
+  preview?: PreviewOrchestrationResult | null
+  requirePreview?: boolean
 }): Promise<ApplyValidationGateResult> {
   const baseHonesty = {
     composerSurpassClaim: false as const,
@@ -380,6 +393,39 @@ export async function runGovernedApplyValidationGate(input: {
       compilerLog: l5.compilerLog.slice(0, 8000),
       fileValidation: nextValidation,
       ...baseHonesty,
+    }
+  }
+
+  // L.2/L.9 commit/CI — when preview is in scope, block apply success if L.8 failed.
+  // L.5 already ran above; this gate re-checks preview honesty only (files re-validated cheaply).
+  if (input.requirePreview || input.preview) {
+    const commitGate = await runForgeCommitCiGate({
+      files: tsFiles,
+      ambientFiles: input.ambientFiles,
+      requireL5: true,
+      preview: input.preview,
+      requirePreview: true,
+      sandboxAvailable: Boolean(input.sandboxSessionId),
+      requireSandbox: Boolean(input.sandboxSessionId) || input.requirePreview === true,
+    })
+    if (forgeCommitGateBlocksSuccess(commitGate)) {
+      log.warn('apply_gate_commit_ci_deny', { blocked: commitGate.blockedReasons })
+      return {
+        ok: false,
+        code: 'FORGE_COMMIT_CI_FAIL',
+        compilerLog: (commitGate.compilerLog || commitGate.blockedReasons.join('\n')).slice(0, 8000),
+        fileValidation: fileValidation.map((entry) =>
+          entry.status === 'pass'
+            ? {
+                ...entry,
+                status: 'denied_commit_ci' as const,
+                code: 'FORGE_COMMIT_CI_FAIL',
+                detail: commitGate.blockedReasons[0],
+              }
+            : entry,
+        ),
+        ...baseHonesty,
+      }
     }
   }
 

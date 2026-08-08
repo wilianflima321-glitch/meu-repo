@@ -98,6 +98,7 @@ const FILE_VALIDATION_STATUSES = new Set([
   'denied_ast',
   'denied_lazy',
   'denied_l5',
+  'denied_commit_ci',
   'denied_lint',
   'denied_rust_gate_unavailable',
   'denied_disjoint',

@@ -6,6 +6,11 @@ import {
   type ForgeSandboxSession
 } from './forge-sandbox-executor'
 import { orchestratePreviewSession, type PreviewOrchestrationResult, type PreviewStrategy } from './preview-orchestrator'
+import {
+  forgeCommitGateBlocksSuccess,
+  runForgeCommitCiGate,
+  type ForgeCommitCiGateResult,
+} from './forge-commit-ci-gate'
 import type { CostGuardLedgerAdapter } from './creative-cost-guard'
 import { createComponentLogger } from '../observability/logger'
 
@@ -24,6 +29,8 @@ export interface ScaffoldEngineResult {
   ok: boolean
   message?: string
   preview?: PreviewOrchestrationResult
+  /** L.2/L.9 commit/CI gate — present on both success and blocked paths. */
+  commitGate?: ForgeCommitCiGateResult
 }
 
 /**
@@ -89,18 +96,32 @@ export async function scaffoldAndPreviewProject(input: ScaffoldEngineInput): Pro
 
     log.info('scaffold_completed', { durationMs: Date.now() - startedAt, previewOk: previewResult.ok })
 
-    // Zero-MVP: scaffolding without a reachable preview is not a successful ship path.
-    if (!previewResult.ok || (preferred !== 'inline' && !previewResult.url)) {
+    // L.2/L.9 commit/CI gate — blocks success when L.2 template, L.8 preview, or sandbox fail.
+    const commitGate = await runForgeCommitCiGate({
+      templateId: input.templateId,
+      requireDevContainer: true,
+      preview: previewResult,
+      requirePreview: preferred !== 'inline',
+      sandboxAvailable: true,
+      requireSandbox: true,
+    })
+
+    if (forgeCommitGateBlocksSuccess(commitGate) || !previewResult.ok || (preferred !== 'inline' && !previewResult.url)) {
       return {
         ok: false,
-        message: previewResult.message || 'Scaffold completed but L.8 preview orchestration failed.',
+        message:
+          commitGate.blockedReasons[0] ||
+          previewResult.message ||
+          'Scaffold completed but L.2/L.8/L.9 commit gate failed.',
         preview: previewResult,
+        commitGate,
       }
     }
 
     return {
       ok: true,
       preview: previewResult,
+      commitGate,
     }
 
   } catch (error) {

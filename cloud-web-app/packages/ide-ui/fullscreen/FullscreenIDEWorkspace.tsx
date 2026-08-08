@@ -197,7 +197,12 @@ export function FullscreenIDEWorkspace({
                 />
               ),
               chat: <AgentsWorkspaceContainer projectId={projectId} />,
-              terminal: <MultiTerminalPanel className="h-full" />,
+              terminal: (
+                <MultiTerminalPanel
+                  className="h-full"
+                  forgeProjectId={projectId}
+                />
+              ),
               editor: <WorkbenchEditorPane {...editorPaneProps} />,
               preview: <WorkbenchPreviewPane {...previewPaneProps} />,
             }}

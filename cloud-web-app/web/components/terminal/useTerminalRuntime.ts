@@ -18,6 +18,8 @@ type UseTerminalRuntimeOptions = {
   initialCwd: string;
   initialSessionId?: string;
   initialShell?: string;
+  forgeProjectId?: string;
+  existingSandboxSessionId?: string;
   onData?: (data: string) => void;
   onTitleChange?: (title: string) => void;
   ref: ForwardedRef<XTerminalRef>;
@@ -30,6 +32,8 @@ export function useTerminalRuntime({
   initialCwd,
   initialSessionId,
   initialShell,
+  forgeProjectId,
+  existingSandboxSessionId,
   onData,
   onTitleChange,
   ref,
@@ -76,6 +80,7 @@ export function useTerminalRuntime({
     activeSessionId,
     connectToSession,
     createSession,
+    createForgeSession,
     closeSession,
     isConnected,
     renameSession,
@@ -85,6 +90,8 @@ export function useTerminalRuntime({
     initialSessionId,
     initialCwd,
     initialShell,
+    forgeProjectId,
+    existingSandboxSessionId,
     terminalRef,
     websocketRef,
     fitTerminal,
@@ -134,6 +141,7 @@ export function useTerminalRuntime({
     closeSession,
     containerRef,
     createSession,
+    createForgeSession,
     focusTerminal,
     isConnected,
     isMaximized,

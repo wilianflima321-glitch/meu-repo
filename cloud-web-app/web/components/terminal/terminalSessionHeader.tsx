@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Maximize2, Minimize2, Search, Split, X } from 'lucide-react';
+import { FlaskConical, Maximize2, Minimize2, Search, Split, X } from 'lucide-react';
 
 import { ShellSelector, TerminalTab } from './XTerminalChrome';
 import type { TerminalSession } from './terminalModels';
@@ -18,6 +18,8 @@ interface TerminalSessionHeaderProps {
   onCloseSession: (sessionId: string) => void;
   onRenameSession: (sessionId: string, newName: string) => void;
   onCreateSession: (shellPath?: string) => void | Promise<unknown>;
+  /** L.4 — open Forge sandbox lane (agent shell policy); omitted when no project bound. */
+  onCreateForgeSession?: () => void | Promise<unknown>;
   onToggleSearch: () => void;
   onToggleMaximized: () => void;
   onClosePanel?: () => void;
@@ -33,11 +35,14 @@ export function TerminalSessionHeader({
   onCloseSession,
   onRenameSession,
   onCreateSession,
+  onCreateForgeSession,
   onToggleSearch,
   onToggleMaximized,
   onClosePanel,
 }: TerminalSessionHeaderProps) {
-  const selectedShell = sessions.find((s) => s.id === activeSessionId)?.shell;
+  const active = sessions.find((s) => s.id === activeSessionId);
+  const selectedShell = active?.shell;
+  const forgeActive = active?.executionLane === 'forge-sandbox';
 
   return (
     <div
@@ -76,7 +81,18 @@ export function TerminalSessionHeader({
 
         {/* Block 9 — honest PTY path (cloud container ≠ local machine) */}
         <span className="mr-1">
-          <TerminalPtyHonestyBadge compact />
+          {forgeActive ? (
+            <span
+              role="status"
+              title="Forge sandbox lane — agents use this path; not host PTY"
+              className="inline-flex items-center gap-1 rounded border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_45%,transparent)] bg-[color-mix(in_srgb,var(--aethel-neon-cyan)_10%,transparent)] px-1.5 py-0 text-[9px] font-mono font-medium uppercase tracking-widest text-[var(--aethel-neon-cyan)]"
+            >
+              <FlaskConical className="h-2.5 w-2.5" aria-hidden />
+              Forge
+            </span>
+          ) : (
+            <TerminalPtyHonestyBadge compact />
+          )}
         </span>
 
         {/* Connection dot */}
@@ -106,10 +122,20 @@ export function TerminalSessionHeader({
           />
         </TerminalIconButton>
 
-        {/* Split */}
+        {/* L.4 Forge sandbox pane */}
+        {onCreateForgeSession && (
+          <TerminalIconButton
+            onClick={() => { void onCreateForgeSession(); }}
+            label="New Forge sandbox terminal (agent lane — not host PTY)"
+          >
+            <FlaskConical size={13} />
+          </TerminalIconButton>
+        )}
+
+        {/* Split — human host PTY */}
         <TerminalIconButton
           onClick={() => { void onCreateSession(); }}
-          label="Split terminal"
+          label="Split human terminal (host/cloud PTY — not agent)"
         >
           <Split size={13} />
         </TerminalIconButton>

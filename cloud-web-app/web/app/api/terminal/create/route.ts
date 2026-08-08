@@ -5,6 +5,11 @@ import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { createTerminalSession } from '@/lib/server/terminal-pty-runtime';
+import {
+  detectAgentShellCaller,
+  evaluateAgentShellPolicy,
+} from '@/lib/production/agent-shell-policy';
+import { describeTerminalLaneSplit } from '@/lib/server/forge-terminal-bridge';
 
 import { createComponentLogger } from '@/lib/observability/logger'
 
@@ -23,6 +28,31 @@ export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
     await requireEntitlementsForUser(user.userId);
+
+    // L.4 / Law #48 — human-host-pty only. Agents must use /api/terminal/forge.
+    const callerKind = detectAgentShellCaller(request.headers);
+    if (callerKind === 'agent') {
+      const policy = evaluateAgentShellPolicy({
+        callerKind: 'agent',
+        requestedTarget: 'host-pty',
+        sandboxAvailable: false,
+      });
+      log.warn('terminal_create_agent_host_pty_blocked', {
+        userId: user.userId,
+        status: policy.status,
+      });
+      return NextResponse.json(
+        {
+          success: false,
+          error: policy.reason,
+          lane: 'human-host-pty',
+          agentShellPolicy: policy,
+          useInstead: '/api/terminal/forge',
+          laneSplit: describeTerminalLaneSplit(),
+        },
+        { status: 403 },
+      );
+    }
 
     const body: CreateTerminalRequest = await request.json();
     const { 

@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react';
 
+/** L.4 lane split — human host PTY vs Forge sandbox (agents never host PTY). */
+export type TerminalExecutionLane = 'human-host-pty' | 'forge-sandbox';
+
 export interface TerminalSession {
   id: string;
   name: string;
@@ -7,6 +10,11 @@ export interface TerminalSession {
   cwd: string;
   createdAt: Date;
   isActive: boolean;
+  /** Default human-host-pty; forge-sandbox sessions stream via /api/terminal/forge. */
+  executionLane?: TerminalExecutionLane;
+  /** L.1 sandbox session id when executionLane === forge-sandbox. */
+  forgeSessionId?: string;
+  provider?: string;
 }
 
 export interface TerminalTheme {
@@ -40,6 +48,9 @@ export interface XTerminalProps {
   sessionId?: string;
   initialCwd?: string;
   initialShell?: string;
+  /** L.4 — enables Forge sandbox terminal button when project is bound. */
+  forgeProjectId?: string;
+  existingSandboxSessionId?: string;
   theme?: TerminalTheme;
   fontSize?: number;
   fontFamily?: string;

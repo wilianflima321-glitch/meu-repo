@@ -16,6 +16,8 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
       sessionId: initialSessionId,
       initialCwd = '~',
       initialShell,
+      forgeProjectId,
+      existingSandboxSessionId,
       theme = TERMINAL_THEMES['dark-plus'],
       fontSize = 14,
       fontFamily = "'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace",
@@ -32,6 +34,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
       closeSession,
       containerRef,
       createSession,
+      createForgeSession,
       focusTerminal,
       isConnected,
       isMaximized,
@@ -50,6 +53,8 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
       initialSessionId,
       initialCwd,
       initialShell,
+      forgeProjectId,
+      existingSandboxSessionId,
       onData,
       onTitleChange,
       ref,
@@ -80,6 +85,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
           onCloseSession={(sessionId) => { void closeSession(sessionId); }}
           onRenameSession={renameSession}
           onCreateSession={(shellPath) => createSession(undefined, shellPath)}
+          onCreateForgeSession={forgeProjectId ? () => createForgeSession() : undefined}
           onToggleSearch={toggleSearch}
           onToggleMaximized={toggleMaximized}
           onClosePanel={onClose}
