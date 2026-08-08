@@ -18,11 +18,71 @@ import {
   resolveHubDemoListingLabel,
   stampPublishListingEvidence,
 } from '@/lib/hub/publish-listing-authority'
+import {
+  buildMeasuredExportBundleEvidence,
+  mergeExportJobCompressionOptions,
+} from '@/lib/hub/export-bundle-measurement'
 import { createMemoryTelemetrySpool } from '@/lib/liveops/telemetry-spool'
 import {
   enqueueSessionPlaytime,
   flushPlaytimeSpool,
 } from '@/lib/liveops/playtime-client'
+
+describe('RTv1 measured export/cook bundle evidence', () => {
+  it('stamps measured size into export options for listing authority', () => {
+    const measured = buildMeasuredExportBundleEvidence({
+      artifactByteLength: 42 * 1024 * 1024,
+      cookPackByteLength: 1024,
+    })
+    expect(measured.ok).toBe(true)
+    if (!measured.ok) return
+    expect(measured.evidence.fileSize).toBe(42 * 1024 * 1024)
+    expect(measured.evidence.compressionMandatePassed).toBe(true)
+    expect(measured.evidence.cookPackByteLength).toBe(1024)
+
+    const options = mergeExportJobCompressionOptions({ keep: true }, measured.evidence)
+    expect(options.demoBundleBytes).toBe(42 * 1024 * 1024)
+    expect(options.cookPackByteLength).toBe(1024)
+    expect(options.compressionMandatePassed).toBe(true)
+    expect(options.keep).toBe(true)
+
+    const listing = evaluatePublishListingEvidence({
+      gameId: 'measured-demo',
+      webExportDownloadUrl: 'https://cdn.example/demo/index.html',
+      webExportFileSizeBytes: measured.evidence.fileSize,
+      cookPackByteLength: measured.evidence.cookPackByteLength,
+      explicitCompressionMandatePassed: options.compressionMandatePassed === true,
+    })
+    expect(listing.compressionMandatePassed).toBe(true)
+    expect(listing.demoBundleBytes).toBe(42 * 1024 * 1024)
+  })
+
+  it('fail-closes when measurement is missing (never invents size)', () => {
+    const missing = buildMeasuredExportBundleEvidence({ artifactByteLength: 0 })
+    expect(missing.ok).toBe(false)
+    if (missing.ok) return
+    expect(missing.reason).toMatch(/bundle_measurement_missing/)
+  })
+
+  it('marks oversize bundles compressionMandatePassed=false', () => {
+    const oversize = buildMeasuredExportBundleEvidence({
+      artifactByteLength: DISCOVERY_MAX_DEMO_BUNDLE_BYTES + 1,
+    })
+    expect(oversize.ok).toBe(true)
+    if (!oversize.ok) return
+    expect(oversize.evidence.compressionMandatePassed).toBe(false)
+    expect(oversize.evidence.oversize).toBe(true)
+
+    const listing = evaluatePublishListingEvidence({
+      gameId: 'too-big',
+      webExportDownloadUrl: 'https://cdn.example/big/index.html',
+      webExportFileSizeBytes: oversize.evidence.fileSize,
+      explicitCompressionMandatePassed: oversize.evidence.compressionMandatePassed,
+    })
+    expect(listing.compressionMandatePassed).toBe(false)
+    expect(listing.demoBundleBytes).toBe(DISCOVERY_MAX_DEMO_BUNDLE_BYTES + 1)
+  })
+})
 
 describe('RTv1 publish listing compression evidence', () => {
   const prevRoot = process.env.AETHEL_HUB_LISTING_EVIDENCE_ROOT

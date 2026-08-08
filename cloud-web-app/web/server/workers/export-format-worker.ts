@@ -10,9 +10,16 @@ import {
   isSerializedVirtualizedMesh,
 } from '@aethel/export/nanite-bakedown';
 import { buildPublishPipelinePlan, type PublishTarget } from '@/lib/production/publish-pipeline-orchestrator';
+import { stampWebExportJobFromCookArtifact } from '@/lib/hub/stamp-export-bundle-measurement';
 import { runPublishPackagingStage } from './export-format-worker.publish';
 
 const log = createComponentLogger('worker.export-format');
+
+function readOptionalPositiveInt(value: unknown): number | null {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.floor(n);
+}
 
 const GEOMETRY_FORMATS = new Set(['glb', 'gltf', 'usdz', 'usda', 'usd']);
 const PUBLISH_TARGETS = new Set<PublishTarget>(['web-static', 'native-tauri']);
@@ -107,6 +114,26 @@ async function processExportJob(data: ExportJobData) {
     data: { status: 'processing', progress: 25 },
   });
 
+  try {
+    return await processExportJobInner(data);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    await prisma.renderJob
+      .update({
+        where: { id: jobId },
+        data: {
+          status: 'failed',
+          errorMessage: message.slice(0, 2000),
+          completedAt: new Date(),
+        },
+      })
+      .catch(() => undefined);
+    throw error;
+  }
+}
+
+async function processExportJobInner(data: ExportJobData) {
+  const jobId = data.jobId;
   const format = (data.format || 'glb').toLowerCase();
   const isGeometryFormat = GEOMETRY_FORMATS.has(format);
 
@@ -114,6 +141,9 @@ async function processExportJob(data: ExportJobData) {
   let contentType: string;
   let fileExtension: string = format;
   let body: Buffer | string;
+  let cookPackByteLength: number | null = null;
+  let bakeReceiptRef: string | null = null;
+  let lightmapBytes: number | null = null;
 
   if (isGeometryFormat) {
     const scene = await buildProjectExportScene(data.projectId, data.sceneIds ?? []);
@@ -153,10 +183,17 @@ async function processExportJob(data: ExportJobData) {
       },
     });
 
-    const artifact = await runPublishPackagingStage(jobId, data.projectId, plan);
+    bakeReceiptRef =
+      typeof data.options?.bakeReceiptRef === 'string' ? data.options.bakeReceiptRef : null;
+    lightmapBytes = readOptionalPositiveInt(data.options?.lightmapBytes);
+    const artifact = await runPublishPackagingStage(jobId, data.projectId, plan, {
+      bakeReceiptRef,
+      lightmapBytes,
+    });
     body = artifact.body;
     contentType = artifact.contentType;
     fileExtension = artifact.fileExtension;
+    cookPackByteLength = artifact.cookPackByteLength;
     storageKey = `exports/${data.projectId}/${jobId}/export.${fileExtension}`;
   } else {
     // Non-geometry formats (wav/mp4/project archive) — real binary encoding
@@ -186,6 +223,10 @@ async function processExportJob(data: ExportJobData) {
   const signedUrl = uploaded.ok ? await generateDownloadUrl(storageKey, { fileName: downloadFileName }) : null;
   const outputUrl = signedUrl || `${baseUrl}/api/render/jobs/${jobId}/artifact?format=${encodeURIComponent(format)}`;
 
+  const measuredByteLength = Buffer.isBuffer(body)
+    ? body.length
+    : Buffer.byteLength(typeof body === 'string' ? body : String(body), 'utf8');
+
   await prisma.renderJob.update({
     where: { id: jobId },
     data: {
@@ -197,7 +238,44 @@ async function processExportJob(data: ExportJobData) {
     },
   });
 
-  return { jobId, outputUrl, storageKey };
+  // Hub listing evidence path reads ExportJob (platform web). Mirror web-static
+  // cook artifact measurement so Compression Mandate can pass without inventing sizes.
+  if (format === 'web-static') {
+    const stamped = await stampWebExportJobFromCookArtifact({
+      projectId: data.projectId,
+      userId: data.userId,
+      renderJobId: jobId,
+      downloadUrl: outputUrl,
+      artifactByteLength: measuredByteLength,
+      cookPackByteLength,
+      bakeReceiptRef,
+      lightmapBytes,
+    });
+    if (!stamped.ok) {
+      log.error('export_format.web_export_stamp_failed', {
+        jobId,
+        reason: stamped.reason,
+      });
+      await prisma.renderJob.update({
+        where: { id: jobId },
+        data: {
+          status: 'failed',
+          errorMessage: stamped.reason,
+          completedAt: new Date(),
+        },
+      });
+      throw new Error(stamped.reason);
+    }
+    log.info('export_format.web_export_measured', {
+      jobId,
+      exportJobId: stamped.exportJobId,
+      fileSize: stamped.evidence.fileSize,
+      cookPackByteLength,
+      compressionMandatePassed: stamped.evidence.compressionMandatePassed,
+    });
+  }
+
+  return { jobId, outputUrl, storageKey, fileSize: measuredByteLength };
 }
 
 export async function startExportWorker() {

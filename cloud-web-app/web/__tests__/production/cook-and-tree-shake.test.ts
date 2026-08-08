@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest'
 
 import {
   buildPublishPipelinePlan,
+  evaluateBakedLightingPublishGate,
   FORBIDDEN_RUNTIME_PACKAGES,
   verifyRuntimeBundleIsolation,
 } from '@/lib/production/publish-pipeline-orchestrator'
+import { buildMeasuredExportBundleEvidence } from '@/lib/hub/export-bundle-measurement'
 import { transpileProjectScripts, type TranspileSourceAsset } from '@/lib/production/visual-script-transpile-stage'
 import { computeParallelGroups } from '@/lib/production/studio-local-cook-queue'
 import type { AbilityGraph } from '@aethel/gameplay/ability-graph-compiler'
@@ -35,6 +37,31 @@ describe('publish pipeline orchestrator (Cook & Build Pipeline)', () => {
     expect(plan.forbiddenRuntimePackages).toContain('zustand')
     expect(plan.entrypoint).toBe('packages/engine/runtime-main.ts')
     expect(plan.nativeBuildCommand).toBeNull()
+  })
+
+  it('fail-closes web-static baked-lighting without receipt (Law XV) and measures real bundle bytes only', () => {
+    const blocked = evaluateBakedLightingPublishGate({ target: 'web-static' })
+    expect(blocked.allowed).toBe(false)
+    expect(blocked.shipStatus).toBe('HELD')
+
+    const ok = evaluateBakedLightingPublishGate({
+      target: 'web-static',
+      bakeReceiptRef: 'bake:project-1:v1',
+      lightmapBytes: 4096,
+    })
+    expect(ok.allowed).toBe(true)
+
+    const empty = buildMeasuredExportBundleEvidence({ artifactByteLength: null })
+    expect(empty.ok).toBe(false)
+    const measured = buildMeasuredExportBundleEvidence({
+      artifactByteLength: 2048,
+      cookPackByteLength: 512,
+    })
+    expect(measured.ok).toBe(true)
+    if (measured.ok) {
+      expect(measured.evidence.fileSize).toBe(2048)
+      expect(measured.evidence.cookPackByteLength).toBe(512)
+    }
   })
 
   it('captures a real tauri build command for native-tauri without executing it', () => {

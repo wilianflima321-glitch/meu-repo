@@ -12,6 +12,7 @@ import { prisma } from '../../lib/db';
 import { createComponentLogger } from '../../lib/observability/logger';
 import type { PublishPipelinePlan, PublishTarget } from '@/lib/production/publish-pipeline-orchestrator';
 import {
+  evaluateBakedLightingPublishGate,
   evaluatePublishAssetCookStage,
   verifyRuntimeBundleIsolation,
 } from '@/lib/production/publish-pipeline-orchestrator';
@@ -19,6 +20,7 @@ import { assertRuntimeExportClean } from '@/lib/runtime/editor-runtime-boundary'
 import { transpileProjectScripts, type TranspileSourceAsset } from '@/lib/production/visual-script-transpile-stage';
 import { writeAethelPack } from '@/lib/immunity/aethel-pack-writer';
 import { ensureZstdEncoder } from '@/lib/immunity/aethel-pack-compress';
+import { buildMeasuredExportBundleEvidence } from '@/lib/hub/export-bundle-measurement';
 
 const log = createComponentLogger('worker.export-format.publish');
 
@@ -26,6 +28,15 @@ export interface PublishArtifact {
   body: Buffer;
   contentType: string;
   fileExtension: string;
+  /** Measured zip / artifact bytes (never invented). */
+  measuredByteLength: number;
+  cookPackByteLength: number;
+  compressionMandatePassed: boolean;
+}
+
+export interface PublishPackagingStageOptions {
+  bakeReceiptRef?: string | null;
+  lightmapBytes?: number | null;
 }
 
 /**
@@ -87,6 +98,12 @@ interface GeneratedGameManifestJson {
     bc7AstcHeld: true;
     virtualTexturingHeld: true;
   };
+  bakedLighting: {
+    allowed: boolean;
+    reason: string;
+    bakeReceiptRef: string | null;
+    lightmapBytes: number | null;
+  };
 }
 
 async function reportProgress(jobId: string, progress: number, currentStep: string) {
@@ -134,8 +151,27 @@ async function describeOrRunNativeTauriBuild(plan: PublishPipelinePlan): Promise
 export async function runPublishPackagingStage(
   jobId: string,
   projectId: string,
-  plan: PublishPipelinePlan
+  plan: PublishPipelinePlan,
+  stageOptions: PublishPackagingStageOptions = {},
 ): Promise<PublishArtifact> {
+  await reportProgress(jobId, 25, 'Baked lighting gate (Law XV)');
+  const bakeGate = evaluateBakedLightingPublishGate({
+    target: plan.target,
+    bakeReceiptRef: stageOptions.bakeReceiptRef,
+    lightmapBytes: stageOptions.lightmapBytes,
+  });
+  if (!bakeGate.allowed) {
+    log.error('publish.baked_lighting_held', {
+      jobId,
+      projectId,
+      reason: bakeGate.reason,
+      shipStatus: bakeGate.shipStatus,
+    });
+    throw new Error(
+      `HELD not_implemented: ${bakeGate.reason} (Law XV — refuse success:true without bake receipt/lightmap)`,
+    );
+  }
+
   await reportProgress(jobId, 30, 'Cooking assets (AethelPack)');
   // Law VI / bo — JS AethelPack cook: prefer Zstd WASM when proven; else deflate.
   // BC7/ASTC native encode remains HELD; publish ships rgba8-fallback placeholder slots
@@ -248,6 +284,15 @@ export async function runPublishPackagingStage(
       bc7AstcHeld: true,
       virtualTexturingHeld: true,
     },
+    bakedLighting: {
+      allowed: bakeGate.allowed,
+      reason: bakeGate.reason,
+      bakeReceiptRef: stageOptions.bakeReceiptRef?.trim() || null,
+      lightmapBytes:
+        typeof stageOptions.lightmapBytes === 'number' && stageOptions.lightmapBytes > 0
+          ? Math.floor(stageOptions.lightmapBytes)
+          : null,
+    },
   };
 
   await reportProgress(jobId, 90, 'Packaging target artifact');
@@ -300,5 +345,21 @@ export async function runPublishPackagingStage(
   }
 
   const body = zip.toBuffer();
-  return { body, contentType: 'application/zip', fileExtension: 'zip' };
+  const measured = buildMeasuredExportBundleEvidence({
+    artifactByteLength: body.length,
+    cookPackByteLength: cookGate.packByteLength,
+  });
+  if (!measured.ok) {
+    log.error('publish.bundle_measurement_missing', { jobId, projectId, reason: measured.reason });
+    throw new Error(measured.reason);
+  }
+
+  return {
+    body,
+    contentType: 'application/zip',
+    fileExtension: 'zip',
+    measuredByteLength: measured.evidence.fileSize,
+    cookPackByteLength: cookGate.packByteLength,
+    compressionMandatePassed: measured.evidence.compressionMandatePassed,
+  };
 }

@@ -9,6 +9,10 @@ import AdmZip from 'adm-zip';
 import { generateDownloadUrl, isS3Available, putObject, S3_BUCKET } from '../../lib/storage/s3-client';
 import { existsSync } from 'node:fs';
 import { createComponentLogger } from '@/lib/observability/logger'
+import {
+  buildMeasuredExportBundleEvidence,
+  mergeExportJobCompressionOptions,
+} from '@/lib/hub/export-bundle-measurement'
 import { addPackageScaffold } from './build-queue-worker.package'
 import { clearProcessing, drainDelayed, markProcessing, reapProcessing, scheduleRetry, shouldRunReaper } from './build-queue-worker-queue'
 import { createRedisClient } from './build-queue-worker-redis'
@@ -309,6 +313,10 @@ async function processExportJob(redis: RedisClient, msg: BuildQueueMessage) {
   zip.writeZip(tmpZipPath);
   const zipBytes = await readFile(tmpZipPath);
   const hash = crypto.createHash('sha256').update(zipBytes as unknown as Uint8Array).digest('hex');
+  const measured = buildMeasuredExportBundleEvidence({ artifactByteLength: zipBytes.length });
+  if (!measured.ok) {
+    throw new Error(measured.reason);
+  }
 
   await updateExportState(redis, msg.exportId, { status: 'packaging', progress: 55, currentStep: 'Packaging complete' });
   await prisma.exportJob.update({
@@ -355,6 +363,18 @@ async function processExportJob(redis: RedisClient, msg: BuildQueueMessage) {
     downloadExpiresAt = null;
   }
 
+  const existingRow = await prisma.exportJob.findUnique({
+    where: { id: msg.exportId },
+    select: { options: true },
+  });
+  const existingOptions =
+    existingRow?.options && typeof existingRow.options === 'object' && !Array.isArray(existingRow.options)
+      ? (existingRow.options as Record<string, unknown>)
+      : msg.options && typeof msg.options === 'object'
+        ? (msg.options as Record<string, unknown>)
+        : null;
+  const options = mergeExportJobCompressionOptions(existingOptions, measured.evidence);
+
   await prisma.exportJob.update({
     where: { id: msg.exportId },
     data: {
@@ -364,7 +384,8 @@ async function processExportJob(redis: RedisClient, msg: BuildQueueMessage) {
       completedAt: new Date(),
       downloadUrl: downloadUrl,
       downloadExpiresAt: downloadExpiresAt,
-      fileSize: zipBytes.length,
+      fileSize: measured.evidence.fileSize,
+      options,
       error: null,
     },
   });
@@ -372,10 +393,12 @@ async function processExportJob(redis: RedisClient, msg: BuildQueueMessage) {
   await updateExportState(redis, msg.exportId, {
     status: 'completed',
     progress: 100,
-    currentStep: `Completed (sha256=${hash.slice(0, 12)}...)`,
+    currentStep: `Completed (sha256=${hash.slice(0, 12)}...; ${measured.evidence.reason})`,
     downloadUrl,
     downloadExpiresAt: downloadExpiresAt ? downloadExpiresAt.toISOString() : null,
-    fileSize: zipBytes.length,
+    fileSize: measured.evidence.fileSize,
+    demoBundleBytes: measured.evidence.demoBundleBytes,
+    compressionMandatePassed: measured.evidence.compressionMandatePassed,
     storedUrl,
   });
 }
