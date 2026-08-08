@@ -3,7 +3,7 @@
 import type { ChatDiffFile } from '@/lib/ai/ai-apply-bridge'
 
 interface AIChatPendingDiffTrayProps {
-  pendingDiff: ChatDiffFile
+  pendingDiffs: ChatDiffFile[]
   onOpenDiff: () => void
   onAcceptDiff: () => void
   onRejectDiff: () => void
@@ -12,8 +12,8 @@ interface AIChatPendingDiffTrayProps {
   denyMessage?: string | null
 }
 
-function getChangedLineCount(pendingDiff: ChatDiffFile): number {
-  return pendingDiff.lines.filter((line) => line.type === 'added' || line.type === 'removed').length
+function getChangedLineCount(pendingDiffs: ChatDiffFile[]): number {
+  return pendingDiffs.reduce((acc, diff) => acc + diff.lines.filter((line) => line.type === 'added' || line.type === 'removed').length, 0)
 }
 
 function getShortPath(path: string): string {
@@ -22,7 +22,7 @@ function getShortPath(path: string): string {
 }
 
 export function AIChatPendingDiffTray({
-  pendingDiff,
+  pendingDiffs,
   onOpenDiff,
   onAcceptDiff,
   onRejectDiff,
@@ -30,8 +30,9 @@ export function AIChatPendingDiffTray({
   applyBusy = false,
   denyMessage = null,
 }: AIChatPendingDiffTrayProps) {
-  const changedLineCount = getChangedLineCount(pendingDiff)
-  const fileLabel = getShortPath(pendingDiff.path)
+  const changedLineCount = getChangedLineCount(pendingDiffs)
+  const fileCount = pendingDiffs.length
+  const fileLabel = fileCount === 1 ? getShortPath(pendingDiffs[0].path) : `${fileCount} files`
 
   return (
     <div className="border-y border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_92%,transparent)] px-4 py-3">

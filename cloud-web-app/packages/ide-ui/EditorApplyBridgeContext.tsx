@@ -26,8 +26,9 @@ import { useApplyGhostPreview } from './useApplyGhostPreview'
 
 export type EditorApplyBridgeContextValue = {
   activeFilePath: string | null
-  pendingDiff: ChatDiffFile | null
-  clearPendingDiff: () => void
+  pendingDiffs: ChatDiffFile[]
+  clearPendingDiffs: () => void
+  stageDiffs: (diffs: ChatDiffFile[]) => void
   stageDiffForActiveFile: (newCode: string) => ApplyBridgeResult
   applySnippetToEditor: (code: string) => ApplyBridgeResult
   insertSnippetAtCursor: (code: string) => ApplyBridgeResult
@@ -65,17 +66,17 @@ export function EditorApplyBridgeProvider({
   writeFile,
   readFile,
 }: ProviderProps) {
-  const [pendingDiff, setPendingDiff] = useState<ChatDiffFile | null>(null)
+  const [pendingDiffs, setPendingDiffs] = useState<ChatDiffFile[]>([])
   const [createFileModalOpen, setCreateFileModalOpen] = useState(false)
   const [createFilePath, setCreateFilePath] = useState('/src/untitled.ts')
   const [createFileError, setCreateFileError] = useState<string | null>(null)
   const [createFileBusy, setCreateFileBusy] = useState(false)
   const pendingCreateFileRequestRef = useRef<PendingCreateFileRequest | null>(null)
 
-  const clearPendingDiff = useCallback(() => setPendingDiff(null), [])
+  const clearPendingDiffs = useCallback(() => setPendingDiffs([]), [])
 
   // Frente A40: paint the staged diff as a holographic ghost on the editor.
-  useApplyGhostPreview(editorRef, pendingDiff, activeFilePath)
+  useApplyGhostPreview(editorRef, pendingDiffs.length === 1 ? pendingDiffs[0] : null, activeFilePath)
 
   const persistActiveFileFromModel = useCallback(async () => {
     const path = activeFilePath
@@ -88,18 +89,22 @@ export function EditorApplyBridgeProvider({
     try {
       await writeFile(path, model.getValue())
     } catch {
-      // O `writeFile` do IDE ja expoe o error no estado global.
+      // The IDE's `writeFile` already surfaces the error in global state.
     }
   }, [activeFilePath, editorRef, writeFile])
 
   const stageDiffForActiveFile = useCallback(
     (newCode: string): ApplyBridgeResult => {
       if (!activeFilePath) return { ok: false, message: 'Open a file in the editor.' }
-      setPendingDiff(buildChatDiffFile(activeFilePath, activeFileContent, newCode))
+      setPendingDiffs([{ ...buildChatDiffFile(activeFilePath, activeFileContent, newCode) }])
       return { ok: true }
     },
     [activeFilePath, activeFileContent]
   )
+
+  const stageDiffs = useCallback((diffs: ChatDiffFile[]) => {
+    setPendingDiffs(diffs)
+  }, [])
 
   const applySnippetToEditor = useCallback(
     (code: string): ApplyBridgeResult => {
@@ -196,9 +201,10 @@ export function EditorApplyBridgeProvider({
   const value = useMemo<EditorApplyBridgeContextValue>(
     () => ({
       activeFilePath,
-      pendingDiff,
-      clearPendingDiff,
+      pendingDiffs,
+      clearPendingDiffs,
       stageDiffForActiveFile,
+      stageDiffs,
       applySnippetToEditor,
       insertSnippetAtCursor: insertAtCursor,
       replaceEntireFile: replaceFile,
@@ -206,9 +212,10 @@ export function EditorApplyBridgeProvider({
     }),
     [
       activeFilePath,
-      pendingDiff,
-      clearPendingDiff,
+      pendingDiffs,
+      clearPendingDiffs,
       stageDiffForActiveFile,
+      stageDiffs,
       applySnippetToEditor,
       insertAtCursor,
       replaceFile,

@@ -1,12 +1,32 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ClipboardList, RefreshCw, Play, AlertTriangle, Info, X } from 'lucide-react'
-import {
-  buildLocalAgentPlanPreview,
-  type AgentSession,
-  type AgentStepStatus,
-} from '../../web/lib/ai/ai-agent-mode'
+import { ClipboardList, RefreshCw, Play, AlertTriangle, Info, X, CheckCircle2, Clock, Loader2, ArrowRight } from 'lucide-react'
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type AgentStepStatus = 'pending' | 'running' | 'ok' | 'error' | 'skipped'
+
+export interface AgentSession {
+  projectId: string
+  steps: {
+    id: string
+    kind: string
+    label: string
+    detail?: string
+    status: AgentStepStatus
+  }[]
+}
+
+export function buildLocalAgentPlanPreview(ctx: { projectId: string }, goal: string): AgentSession {
+  return {
+    projectId: ctx.projectId,
+    steps: [
+      { id: '1', kind: 'PLAN', label: 'Draft plan for: ' + goal, status: 'ok' },
+      { id: '2', kind: 'EXECUTE', label: 'Execution requires connected backend.', status: 'skipped' },
+    ]
+  }
+}
 
 interface TaskStep {
   id: string
@@ -40,23 +60,26 @@ interface TaskOpsPanelProps {
   defaultGoal?: string
 }
 
-const STATUS_LABELS: Record<TaskRecord['status'], string> = {
-  pending: 'pending',
-  planned: 'planned',
-  running: 'running',
-  blocked: 'blocked',
-  failed: 'failed',
-  done: 'done',
+// ─── Status UI Config ─────────────────────────────────────────────────────────
+
+type StatusConfig = {
+  label: string
+  color: string
+  bg: string
+  border: string
+  Icon: React.ElementType
 }
 
-const STATUS_TONES: Record<TaskRecord['status'], string> = {
-  pending: 'text-[var(--aethel-text-tertiary)]',
-  planned: 'text-[var(--aethel-info-light)]',
-  running: 'text-[var(--aethel-info-light)]',
-  blocked: 'text-[var(--aethel-warning-light)]',
-  failed: 'text-[var(--aethel-error-light)]',
-  done: 'text-[var(--aethel-success-light)]',
+const TASK_STATUS_CONFIG: Record<TaskRecord['status'], StatusConfig> = {
+  pending: { label: 'PENDING', color: 'var(--aethel-text-quaternary)', bg: 'color-mix(in srgb, var(--aethel-text-quaternary) 10%, transparent)', border: 'color-mix(in srgb, var(--aethel-text-quaternary) 20%, transparent)', Icon: Clock },
+  planned: { label: 'PLANNED', color: 'var(--aethel-info)', bg: 'color-mix(in srgb, var(--aethel-info) 10%, transparent)', border: 'color-mix(in srgb, var(--aethel-info) 20%, transparent)', Icon: ClipboardList },
+  running: { label: 'RUNNING', color: 'var(--aethel-primary)', bg: 'color-mix(in srgb, var(--aethel-primary) 10%, transparent)', border: 'color-mix(in srgb, var(--aethel-primary) 20%, transparent)', Icon: Loader2 },
+  blocked: { label: 'BLOCKED', color: 'var(--aethel-warning)', bg: 'color-mix(in srgb, var(--aethel-warning) 10%, transparent)', border: 'color-mix(in srgb, var(--aethel-warning) 20%, transparent)', Icon: AlertTriangle },
+  failed:  { label: 'FAILED',  color: 'var(--aethel-error)', bg: 'color-mix(in srgb, var(--aethel-error) 10%, transparent)',  border: 'color-mix(in srgb, var(--aethel-error) 20%, transparent)',  Icon: X },
+  done:    { label: 'DONE',    color: 'var(--aethel-success)', bg: 'color-mix(in srgb, var(--aethel-success) 10%, transparent)',  border: 'color-mix(in srgb, var(--aethel-success) 20%, transparent)',  Icon: CheckCircle2 },
 }
+
+const STEP_STATUS_CONFIG: Record<TaskStep['status'], StatusConfig> = TASK_STATUS_CONFIG
 
 function getTaskStorageKey(projectId?: string) {
   return `aethel.ai.taskId.${projectId || 'default'}`
@@ -65,19 +88,34 @@ function getTaskStorageKey(projectId?: string) {
 function formatTimestamp(value?: string) {
   if (!value) return '—'
   try {
-    return new Date(value).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })
+    return new Date(value).toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' })
   } catch {
     return value
   }
 }
 
-const AGENT_STATUS_CLASS: Record<AgentStepStatus, string> = {
-  pending: 'text-[var(--aethel-text-tertiary)]',
-  running: 'text-[var(--aethel-info-light)]',
-  ok: 'text-[var(--aethel-success-light)]',
-  error: 'text-[var(--aethel-error-light)]',
-  skipped: 'text-[var(--aethel-text-quaternary)]',
+// ─── StatusBadge ─────────────────────────────────────────────────────────────
+
+function StatusBadge({ status, config }: { status: string; config: StatusConfig }) {
+  const { label, color, bg, border, Icon } = config
+  const isRunning = status === 'running'
+  return (
+    <div
+      className="flex items-center gap-1.5 px-2 py-0.5 rounded-md border"
+      style={{
+        background: bg,
+        borderColor: border,
+        color: color,
+        boxShadow: isRunning ? `0 0 8px ${bg}` : 'none',
+      }}
+    >
+      <Icon size={10} className={isRunning ? 'animate-spin' : ''} />
+      <span className="text-[9px] font-bold tracking-widest">{label}</span>
+    </div>
+  )
 }
+
+// ─── TaskOpsPanel ─────────────────────────────────────────────────────────────
 
 export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps) {
   const storageKey = useMemo(() => getTaskStorageKey(projectId), [projectId])
@@ -173,171 +211,255 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
   }, [goal, projectId, storageKey])
 
   return (
-    <div className="flex h-full flex-col bg-[var(--aethel-surface-primary)]">
-      <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-3">
+    <div className="flex h-full flex-col bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] relative">
+      {/* ── Header ── */}
+      <div
+        className="flex items-center justify-between px-4 z-10 flex-shrink-0"
+        style={{
+          height: 44,
+          background: 'color-mix(in srgb, var(--aethel-surface-secondary) 85%, transparent)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid color-mix(in srgb, var(--aethel-text-quaternary) 10%, transparent)',
+        }}
+      >
         <div className="flex items-center gap-2">
-          <ClipboardList className="h-4 w-4 text-[var(--aethel-info-light)]" />
-          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Real execution</span>
+          <div className="flex items-center justify-center w-6 h-6 rounded-md" style={{ background: 'color-mix(in srgb, var(--aethel-primary) 15%, transparent)' }}>
+            <ClipboardList size={12} style={{ color: 'var(--aethel-primary-light)' }} />
+          </div>
+          <span className="text-xs font-bold tracking-wide" style={{ letterSpacing: '0.04em' }}>
+            TASK OPS
+          </span>
         </div>
         <button
           type="button"
           onClick={() => taskId && loadTask(taskId)}
           disabled={!taskId || isRefreshing}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs transition-all duration-150 disabled:opacity-40"
+          style={{ color: 'var(--aethel-text-tertiary)' }}
+          onMouseEnter={e => { if (!e.currentTarget.disabled) { e.currentTarget.style.background = 'color-mix(in srgb, var(--aethel-text-quaternary) 10%, transparent)'; e.currentTarget.style.color = 'var(--aethel-text-primary)' } }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--aethel-text-tertiary)' }}
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
           Refresh
         </button>
       </div>
 
-      <div className="border-b border-[var(--aethel-border-primary)] p-3">
-        <label className="mb-1 block text-[10px] uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
-          Plan goal
-        </label>
-        <textarea
-          value={goal}
-          onChange={(event) => setGoal(event.target.value)}
-          rows={3}
-          className="w-full resize-none rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
-          placeholder="Describe what needs to run with real evidence..."
-        />
-        <div className="mt-2 flex items-center justify-between">
-          <span className="text-[10px] text-[var(--aethel-text-tertiary)]">
-            {taskId ? `Active task: ${taskId}` : 'No active task'}
-          </span>
-          <button
-            type="button"
-            onClick={handlePlan}
-            disabled={isPlanning}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:brightness-110 disabled:opacity-60"
-          >
-            <Play className="h-3.5 w-3.5" />
-            Create plan
-          </button>
-        </div>
-        {error && (
-          <div className="mt-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-2 py-1.5 text-[11px] text-[var(--aethel-error-light)]">
-            {error}
+      <div className="flex-1 overflow-y-auto">
+        {/* ── Goal Input Section ── */}
+        <div className="p-4 border-b" style={{ borderColor: 'color-mix(in srgb, var(--aethel-text-quaternary) 6%, transparent)' }}>
+          <label className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--aethel-text-tertiary)' }}>
+            Goal Definition
+          </label>
+          <textarea
+            value={goal}
+            onChange={(event) => setGoal(event.target.value)}
+            rows={3}
+            className="w-full resize-none rounded-xl text-xs outline-none transition-all duration-200"
+            style={{
+              background: 'color-mix(in srgb, var(--aethel-surface-secondary) 60%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--aethel-text-quaternary) 12%, transparent)',
+              color: 'var(--aethel-text-primary)',
+              padding: '12px 14px',
+            }}
+            onFocus={e => { e.target.style.borderColor = 'var(--aethel-primary)'; e.target.style.boxShadow = '0 0 0 1px color-mix(in srgb, var(--aethel-primary) 30%, transparent) inset' }}
+            onBlur={e => { e.target.style.borderColor = 'color-mix(in srgb, var(--aethel-text-quaternary) 12%, transparent)'; e.target.style.boxShadow = 'none' }}
+            placeholder="Describe what needs to run with real evidence..."
+          />
+          <div className="mt-3 flex items-center justify-between">
+            <span className="font-mono text-[9px]" style={{ color: 'var(--aethel-text-quaternary)' }}>
+              {taskId ? `ID: ${taskId.split('-')[0]}...` : 'No active task'}
+            </span>
+            <button
+              type="button"
+              onClick={handlePlan}
+              disabled={isPlanning || !goal.trim()}
+              className="flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-bold transition-all duration-150 disabled:opacity-50"
+              style={{
+                background: 'linear-gradient(135deg, var(--aethel-primary) 0%, var(--aethel-primary-dark) 100%)',
+                color: 'white',
+                boxShadow: '0 4px 12px color-mix(in srgb, var(--aethel-primary) 25%, transparent)',
+              }}
+            >
+              {isPlanning ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
+              Execute
+            </button>
           </div>
-        )}
-        {localAgentPreview && (
-          <div className="mt-3 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] p-3">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-start gap-2">
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--aethel-info-light)]" />
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold text-[var(--aethel-text-primary)]">
-                    Agent mode draft (contract)
-                  </p>
-                  <p className="mt-1 text-[10px] leading-relaxed text-[var(--aethel-text-tertiary)]">
-                    Task API is unavailable or incomplete. This is the expected sequence when the backend is connected; it does not indicate real execution.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setLocalAgentPreview(null)}
-                className="shrink-0 rounded p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]"
-                aria-label="Close draft"
-              >
-                <X className="h-4 w-4" />
-              </button>
+          
+          {error && (
+            <div className="mt-3 flex items-start gap-2 rounded-lg p-3 text-xs" style={{ background: 'color-mix(in srgb, var(--aethel-error) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--aethel-error) 20%, transparent)', color: 'var(--aethel-error-light)' }}>
+              <AlertTriangle size={14} className="mt-0.5 shrink-0 text-red-500" />
+              <span style={{ wordBreak: 'break-word' }}>{error}</span>
             </div>
-            <ul className="mt-2 space-y-1.5 border-t border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] pt-2">
-              {localAgentPreview.steps.map((step) => (
-                <li
-                  key={step.id}
-                  className="flex items-start justify-between gap-2 rounded-md border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_65%,transparent)] px-2 py-1.5"
-                >
-                  <div className="min-w-0">
-                    <span className="text-[10px] font-mono uppercase text-[var(--aethel-text-quaternary)]">
-                      {step.kind}
-                    </span>
-                    <p className="text-[11px] text-[var(--aethel-text-secondary)]">{step.label}</p>
-                    {step.detail ? (
-                      <p className="mt-0.5 text-[10px] text-[var(--aethel-text-quaternary)]">{step.detail}</p>
-                    ) : null}
-                  </div>
-                  <span className={`shrink-0 text-[10px] uppercase tracking-wide ${AGENT_STATUS_CLASS[step.status]}`}>
-                    {step.status}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+          )}
 
-      {!task && (
-        <div className="flex flex-1 items-center justify-center p-4 text-center text-xs text-[var(--aethel-text-tertiary)]">
-          {localAgentPreview
-            ? 'When the task API is available, detailed progress appears in this area.'
-            : 'Create a plan to track execution.'}
-        </div>
-      )}
-
-      {task && (
-        <div className="flex-1 overflow-auto p-3 space-y-3">
-          <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-[var(--aethel-text-primary)]">{task.goal}</p>
-                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Created at {formatTimestamp(task.createdAt)}</p>
-              </div>
-              <span className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${STATUS_TONES[task.status]}`}>
-                {STATUS_LABELS[task.status]}
-              </span>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] p-3">
-            <p className="mb-2 text-[10px] uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">Etapas</p>
-            <div className="space-y-2">
-              {task.steps.map((step) => (
-                <div key={step.id} className="flex items-start justify-between rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-3 py-2">
+          {/* Fallback mock UI */}
+          {localAgentPreview && (
+            <div className="mt-4 rounded-xl p-3 border" style={{ background: 'color-mix(in srgb, var(--aethel-primary) 5%, transparent)', borderColor: 'color-mix(in srgb, var(--aethel-primary) 20%, transparent)' }}>
+              <div className="flex items-start justify-between gap-2 mb-3">
+                <div className="flex items-start gap-2">
+                  <Info size={14} style={{ color: 'var(--aethel-primary-light)', marginTop: 2 }} />
                   <div>
-                    <p className="text-xs font-medium text-[var(--aethel-text-primary)]">{step.title}</p>
-                    <p className="text-[10px] text-[var(--aethel-text-tertiary)]">
-                      {formatTimestamp(step.startedAt)} → {formatTimestamp(step.finishedAt)}
-                    </p>
-                  </div>
-                  <span className={`text-[10px] uppercase tracking-[0.12em] ${STATUS_TONES[step.status]}`}>
-                    {step.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] p-3">
-            <p className="mb-2 text-[10px] uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">Logs</p>
-            {task.logs.length === 0 ? (
-              <div className="text-xs text-[var(--aethel-text-tertiary)]">Sem logs registrados.</div>
-            ) : (
-              <div className="space-y-2">
-                {task.logs.map((log, index) => (
-                  <div key={`${log.timestamp}-${index}`} className="rounded-md border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{formatTimestamp(log.timestamp)}</span>
-                      <span className={`text-[10px] uppercase tracking-[0.12em] ${STATUS_TONES[log.level === 'info' ? 'planned' : log.level === 'warning' ? 'blocked' : 'failed']}`}>
-                        {log.level}
-                      </span>
+                    <div className="text-[11px] font-bold" style={{ color: 'var(--aethel-primary-light)' }}>Agent Offline Mock</div>
+                    <div className="text-[10px] leading-relaxed mt-1" style={{ color: 'var(--aethel-text-tertiary)' }}>
+                      Backend unreachable. Showing sample plan structure.
                     </div>
-                    <p className="text-xs text-[var(--aethel-text-secondary)]">{log.message}</p>
+                  </div>
+                </div>
+                <button onClick={() => setLocalAgentPreview(null)} className="text-[var(--aethel-text-quaternary)] hover:text-white"><X size={14} /></button>
+              </div>
+              <div className="space-y-1.5">
+                {localAgentPreview.steps.map(step => (
+                  <div key={step.id} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: 'color-mix(in srgb, var(--aethel-surface-secondary) 60%, transparent)', border: '1px solid color-mix(in srgb, var(--aethel-text-quaternary) 10%, transparent)' }}>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: 'color-mix(in srgb, var(--aethel-text-quaternary) 10%, transparent)' }}>{step.kind}</span>
+                      <span style={{ color: 'var(--aethel-text-secondary)' }}>{step.label}</span>
+                    </div>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-
-          {task.error && (
-            <div className="flex items-start gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-xs text-[var(--aethel-error-light)]">
-              <AlertTriangle className="h-4 w-4" />
-              {task.error}
             </div>
           )}
         </div>
-      )}
+
+        {/* ── Active Task View ── */}
+        {!task && !localAgentPreview && (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <ClipboardList size={32} style={{ color: 'color-mix(in srgb, var(--aethel-text-quaternary) 15%, transparent)', marginBottom: 12 }} />
+            <p className="text-xs" style={{ color: 'var(--aethel-text-tertiary)' }}>
+              Enter a goal above and click Execute to start a managed task.
+            </p>
+          </div>
+        )}
+
+        {task && (
+          <div className="p-4 space-y-6">
+            {/* Header Card */}
+            <div className="rounded-xl p-4 flex flex-col gap-3" style={{ background: 'color-mix(in srgb, var(--aethel-surface-secondary) 60%, transparent)', border: '1px solid color-mix(in srgb, var(--aethel-text-quaternary) 10%, transparent)' }}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-xs font-semibold leading-relaxed" style={{ color: 'var(--aethel-text-primary)' }}>
+                    {task.goal}
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 font-mono text-[9px]" style={{ color: 'var(--aethel-text-tertiary)' }}>
+                    <span>Created {formatTimestamp(task.createdAt)}</span>
+                    <span>•</span>
+                    <span>Updated {formatTimestamp(task.updatedAt)}</span>
+                  </div>
+                </div>
+                <StatusBadge status={task.status} config={TASK_STATUS_CONFIG[task.status]} />
+              </div>
+              
+              {/* Overall Progress Bar */}
+              {task.steps.length > 0 && (
+                <div className="mt-1">
+                  <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'color-mix(in srgb, var(--aethel-text-quaternary) 10%, transparent)' }}>
+                    <div
+                      className="h-full transition-all duration-500"
+                      style={{
+                        width: `${(task.steps.filter(s => s.status === 'done').length / task.steps.length) * 100}%`,
+                        background: TASK_STATUS_CONFIG[task.status].color,
+                        boxShadow: `0 0 8px ${TASK_STATUS_CONFIG[task.status].bg}`
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Timeline View */}
+            <div>
+              <div className="mb-3 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--aethel-text-tertiary)' }}>
+                Execution Pipeline
+              </div>
+              
+              <div className="relative pl-3 space-y-4">
+                {/* Vertical line connecting steps */}
+                <div className="absolute left-[17px] top-4 bottom-4 w-px" style={{ background: 'color-mix(in srgb, var(--aethel-text-quaternary) 10%, transparent)' }} />
+                
+                {task.steps.map((step, idx) => {
+                  const cfg = STEP_STATUS_CONFIG[step.status]
+                  const isRunning = step.status === 'running'
+                  return (
+                    <div key={step.id} className="relative flex items-start gap-4 group">
+                      {/* Node Dot */}
+                      <div
+                        className="relative z-10 flex items-center justify-center w-[11px] h-[11px] rounded-full mt-1 shrink-0 transition-all duration-300"
+                        style={{
+                          background: isRunning ? 'var(--aethel-surface-primary)' : cfg.bg,
+                          border: `2px solid ${cfg.color}`,
+                          boxShadow: isRunning ? `0 0 10px ${cfg.color}` : 'none',
+                          transform: isRunning ? 'scale(1.3)' : 'scale(1)'
+                        }}
+                      />
+                      
+                      {/* Content Card */}
+                      <div
+                        className="flex-1 rounded-xl p-3 transition-all duration-200"
+                        style={{
+                          background: isRunning ? 'color-mix(in srgb, var(--aethel-surface-secondary) 80%, transparent)' : 'color-mix(in srgb, var(--aethel-surface-secondary) 40%, transparent)',
+                          border: `1px solid ${isRunning ? cfg.border : 'color-mix(in srgb, var(--aethel-text-quaternary) 6%, transparent)'}`,
+                          boxShadow: isRunning ? `0 4px 12px ${cfg.bg}` : 'none'
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-semibold" style={{ color: isRunning ? 'var(--aethel-text-primary)' : 'var(--aethel-text-secondary)' }}>
+                            {step.title}
+                          </span>
+                          <span className="font-mono text-[9px]" style={{ color: 'var(--aethel-text-quaternary)' }}>
+                            {formatTimestamp(step.finishedAt || step.startedAt)}
+                          </span>
+                        </div>
+                        {step.notes && (
+                          <div className="text-[11px] mt-2 p-2 rounded bg-[color-mix(in_srgb,black_20%,transparent)] border border-[color-mix(in_srgb,white_2%,transparent)]" style={{ color: 'var(--aethel-text-tertiary)' }}>
+                            {step.notes}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Logs Area */}
+            <div className="pt-2">
+              <div className="mb-3 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--aethel-text-tertiary)' }}>
+                System Output
+              </div>
+              
+              <div className="rounded-xl overflow-hidden font-mono text-[10px]" style={{ background: 'var(--aethel-surface-primary)', border: '1px solid color-mix(in srgb, var(--aethel-text-quaternary) 10%, transparent)' }}>
+                {task.logs.length === 0 ? (
+                  <div className="p-4 text-center" style={{ color: 'var(--aethel-text-quaternary)' }}>
+                    No output logs yet.
+                  </div>
+                ) : (
+                  <div className="max-h-64 overflow-y-auto p-2 space-y-0.5">
+                    {task.logs.map((log, index) => {
+                      let color = 'var(--aethel-text-quaternary)' // info
+                      if (log.level === 'warning') color = 'var(--aethel-warning-light)'
+                      if (log.level === 'error') color = 'var(--aethel-error-light)'
+                      return (
+                        <div key={index} className="flex items-start gap-3 hover:bg-[color-mix(in_srgb,white_3%,transparent)] px-2 py-1 rounded">
+                          <span className="shrink-0 opacity-50">{formatTimestamp(log.timestamp)}</span>
+                          <span className="shrink-0 font-bold" style={{ color }}>[{log.level.toUpperCase()}]</span>
+                          <span style={{ color: 'var(--aethel-text-secondary)', wordBreak: 'break-all' }}>{log.message}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {task.error && (
+              <div className="flex items-start gap-2 rounded-xl p-3 text-xs" style={{ background: 'color-mix(in srgb, var(--aethel-error) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--aethel-error) 20%, transparent)', color: 'var(--aethel-error-light)' }}>
+                <AlertTriangle size={14} className="mt-0.5 shrink-0 text-red-500" />
+                <span style={{ wordBreak: 'break-word' }}>{task.error}</span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

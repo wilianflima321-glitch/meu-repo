@@ -128,7 +128,7 @@ export function useInlineAIChatSession(
                   remaining: usage.remaining,
                   limit: usage.limit,
                 })
-              : `DEMO_LIMIT_REACHED: limite diario do demo local atingido (${usage.used}/${usage.limit}). Configure um provider em /settings?tab=api ou tente novamente em ${usage.resetAt}.`
+              : `DEMO_LIMIT_REACHED: local demo daily limit reached (${usage.used}/${usage.limit}). Configure a provider at /settings?tab=api or try again at ${usage.resetAt}.`
           } else {
             const controller = new AbortController()
             requestAbortRef.current = controller
@@ -147,7 +147,7 @@ export function useInlineAIChatSession(
 
           setMessages((previousMessages) => [
             ...previousMessages,
-            createInlineAIMessage('assistant', responseContent || 'Sem resposta da IA.', {
+            createInlineAIMessage('assistant', responseContent || 'No response from AI.', {
               codeBlocks: extractCodeBlocks(responseContent),
               traceArtifact,
             }),

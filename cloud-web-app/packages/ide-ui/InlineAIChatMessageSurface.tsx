@@ -2,22 +2,10 @@
 
 import React from 'react'
 import { AgentEvidenceCard } from '../../web/components/agents'
-import { tokens } from '../../web/lib/design-tokens'
 import { Bot, Sparkles, User } from 'lucide-react'
 
 import { stripCodeBlocks, type InlineAIMessage } from './InlineAIChat.helpers'
-import {
-  ACCENT_CYAN,
-  BORDER_SECONDARY,
-  MESSAGE_TIME_FORMATTER,
-  PRIMARY_GRADIENT,
-  SURFACE_SECONDARY,
-  SURFACE_TERTIARY,
-  TEXT_INVERSE,
-  TEXT_SECONDARY,
-  TEXT_TERTIARY,
-  mixColor,
-} from './InlineAIChat.styles'
+import { MESSAGE_TIME_FORMATTER } from './InlineAIChat.styles'
 import { CodeBlock, FormattedMessageBody, LoadingState } from './InlineAIChatPrimitives'
 
 type InlineAIMessageListProps = {
@@ -46,15 +34,8 @@ export function InlineAIMessageList({
   return (
     <div
       aria-live="polite"
-      style={{
-        flex: 1,
-        overflow: 'auto',
-        padding: tokens.spacing['4'],
-        display: 'flex',
-        flexDirection: 'column',
-        gap: tokens.spacing['4'],
-      }}
-      >
+      className="flex flex-1 flex-col gap-4 overflow-auto p-4"
+    >
       {messages.map((message) => (
         <MessageBubble
           key={message.id}
@@ -78,26 +59,8 @@ function MessageBubble({ message, onApplyCode, onReviewCode }: MessageBubbleProp
 
   if (isSystem) {
     return (
-      <div
-        style={{
-          maxWidth: '100%',
-          padding: tokens.spacing['3'],
-          borderRadius: tokens.radius.lg,
-          border: `1px solid ${mixColor(ACCENT_CYAN, 24)}`,
-          background: mixColor(ACCENT_CYAN, 8),
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: tokens.spacing['2'],
-            marginBottom: tokens.spacing['2'],
-            color: ACCENT_CYAN,
-            fontSize: tokens.typography.fontSize.xs,
-            fontWeight: tokens.typography.fontWeight.medium,
-          }}
-        >
+      <div className="w-full max-w-full rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] p-3">
+        <div className="mb-2 flex items-center gap-2 text-xs font-medium text-[var(--aethel-info)]">
           <Sparkles size={12} />
           <span>{roleLabel}</span>
           <span aria-hidden="true">|</span>
@@ -110,52 +73,25 @@ function MessageBubble({ message, onApplyCode, onReviewCode }: MessageBubbleProp
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: tokens.spacing['3'],
-        alignItems: 'flex-start',
-        flexDirection: isUser ? 'row-reverse' : 'row',
-      }}
-    >
+    <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
       <div
-        style={{
-          width: '30px',
-          height: '30px',
-          borderRadius: tokens.radius.md,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          background: isUser ? mixColor(SURFACE_TERTIARY, 82) : PRIMARY_GRADIENT,
-          border: isUser ? `1px solid ${BORDER_SECONDARY}` : 'none',
-        }}
+        className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-md ${
+          isUser
+            ? 'border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]'
+            : 'bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))]'
+        }`}
       >
-        {isUser ? <User size={14} color={TEXT_SECONDARY} /> : <Bot size={14} color={TEXT_INVERSE} />}
+        {isUser ? <User size={14} className="text-[var(--aethel-text-secondary)]" /> : <Bot size={14} className="text-[var(--aethel-text-primary)]" />}
       </div>
 
       <div
-        style={{
-          maxWidth: '85%',
-          padding: tokens.spacing['3'],
-          background: isUser
-            ? `linear-gradient(135deg, ${mixColor(ACCENT_CYAN, 16)}, ${mixColor('var(--aethel-primary)', 10)})`
-            : mixColor(SURFACE_SECONDARY, 74),
-          border: `1px solid ${isUser ? mixColor(ACCENT_CYAN, 24) : BORDER_SECONDARY}`,
-          borderRadius: tokens.radius.lg,
-        }}
+        className={`max-w-[85%] rounded-lg border p-3 ${
+          isUser
+            ? 'border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-info)_16%,transparent),color-mix(in_srgb,var(--aethel-primary)_10%,transparent))]'
+            : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)]'
+        }`}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: tokens.spacing['3'],
-            marginBottom: tokens.spacing['2'],
-            color: TEXT_TERTIARY,
-            fontSize: tokens.typography.fontSize.xs,
-          }}
-        >
+        <div className="mb-2 flex items-center justify-between gap-3 text-xs text-[var(--aethel-text-tertiary)]">
           <span>{roleLabel}</span>
           <span>{MESSAGE_TIME_FORMATTER.format(message.timestamp)}</span>
         </div>
@@ -163,12 +99,7 @@ function MessageBubble({ message, onApplyCode, onReviewCode }: MessageBubbleProp
         {plainTextContent ? (
           <FormattedMessageBody content={plainTextContent} />
         ) : (
-          <div
-            style={{
-              fontSize: tokens.typography.fontSize.sm,
-              color: TEXT_SECONDARY,
-            }}
-          >
+          <div className="text-sm text-[var(--aethel-text-secondary)]">
             Suggested code below.
           </div>
         )}
@@ -183,7 +114,7 @@ function MessageBubble({ message, onApplyCode, onReviewCode }: MessageBubbleProp
         ))}
 
         {!isUser && !isSystem && message.traceArtifact ? (
-          <div style={{ marginTop: tokens.spacing['3'] }}>
+          <div className="mt-3">
             <AgentEvidenceCard artifact={message.traceArtifact} compact />
           </div>
         ) : null}

@@ -38,9 +38,9 @@ interface AIChatOpsSidebarProps {
   showAdvancedControls: boolean
   opsTab: AIChatOpsTab
   onOpsTabChange: (tab: AIChatOpsTab) => void
-  pendingDiff?: PendingDiff | null
-  onAcceptDiff: (finalModified: string) => void | Promise<void>
-  onRejectDiff: () => void
+  pendingDiffs?: PendingDiff[]
+  onAcceptDiff: (targetPath?: string, finalModified?: string) => void | Promise<void>
+  onRejectDiff: (targetPath?: string) => void
   projectId?: string
   defaultGoal: string
   latestEvidence?: AIChatEvidenceArtifact | null
@@ -57,7 +57,7 @@ export function AIChatOpsSidebar({
   showAdvancedControls,
   opsTab,
   onOpsTabChange,
-  pendingDiff,
+  pendingDiffs,
   onAcceptDiff,
   onRejectDiff,
   projectId,
@@ -69,15 +69,15 @@ export function AIChatOpsSidebar({
   nexusCells = [],
 }: AIChatOpsSidebarProps) {
   const { approvalChanges, memories, addMemory, deleteMemory, updateMemory } = useAIChatOpsArtifacts({
-    pendingDiff,
+    pendingDiffs,
     projectId,
   })
 
   const handleApproveChanges = useCallback(
     (changes: AIChatApprovalChange[]) => {
-      const change = changes[0]
-      if (!change) return
-      onAcceptDiff(change.newContent)
+      if (changes.length === 0) return
+      // Approve-all applies every currently pending diff, not just the first one.
+      onAcceptDiff()
     },
     [onAcceptDiff]
   )
@@ -92,14 +92,17 @@ export function AIChatOpsSidebar({
 
   const handleApproveSingleChange = useCallback(
     (change: AIChatApprovalChange) => {
-      onAcceptDiff(change.newContent)
+      onAcceptDiff(change.filePath, change.newContent)
     },
     [onAcceptDiff]
   )
 
-  const handleRejectSingleChange = useCallback(() => {
-    onRejectDiff()
-  }, [onRejectDiff])
+  const handleRejectSingleChange = useCallback(
+    (change: AIChatApprovalChange) => {
+      onRejectDiff(change.filePath)
+    },
+    [onRejectDiff]
+  )
 
   if (!showAdvancedControls) {
     return null
@@ -180,16 +183,24 @@ export function AIChatOpsSidebar({
         )}
 
         {opsTab === 'diff' &&
-          (pendingDiff ? (
-            <MonacoChatDiffPanel
-              filePath={pendingDiff.path}
-              original={pendingDiff.oldContent}
-              modified={pendingDiff.newContent}
-              onAcceptAll={onAcceptDiff}
-              onReject={onRejectDiff}
-            />
-          ) : (
-            <WorkbenchEmptyState
+          (pendingDiffs && pendingDiffs.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {pendingDiffs.map((diff, index) => (
+                <div key={index}>
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--aethel-text-muted)]">
+                    File: {diff.path}
+                  </div>
+                  <MonacoChatDiffPanel
+                    filePath={diff.path}
+                    original={diff.oldContent}
+                    modified={diff.newContent}
+                    onAcceptAll={(finalStr: string) => onAcceptDiff(diff.path, finalStr)}
+                    onReject={() => onRejectDiff(diff.path)}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (<WorkbenchEmptyState
               icon="diff"
               title="No pending diff"
               description='Use "Open diff" on an assistant code block to review a governed apply candidate.'

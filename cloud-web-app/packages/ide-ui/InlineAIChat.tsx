@@ -7,7 +7,6 @@
 
 import React, { useEffect, useId } from 'react'
 import { useEditorApplyBridge } from './EditorApplyBridgeContext'
-import { tokens } from '../../web/lib/design-tokens'
 
 import { buildContextSummary, getLoadingLabel, type InlineAIChatProps } from './InlineAIChat.helpers'
 import {
@@ -18,7 +17,7 @@ import {
   InlineAIStatusCard,
   SuggestionStrip,
 } from './InlineAIChatSections'
-import { SURFACE_SECONDARY, TEXT_PRIMARY } from './InlineAIChat.styles'
+
 import { useInlineAIChatSession } from './useInlineAIChatSession'
 
 export function InlineAIChat({
@@ -91,16 +90,7 @@ export function InlineAIChat({
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        background: SURFACE_SECONDARY,
-        color: TEXT_PRIMARY,
-        fontFamily: tokens.typography.fontFamily.sans,
-      }}
-    >
+    <div className="flex flex-col h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] font-sans">
       <InlineAIHeader
         activeFile={activeFile}
         bodyId={bodyId}

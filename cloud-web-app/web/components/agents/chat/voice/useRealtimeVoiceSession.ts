@@ -133,7 +133,7 @@ export function useRealtimeVoiceSession({
       stopPlayback()
       const samples = decodeBase64Float32(pcmBase64)
       const buffer = ctx.createBuffer(1, samples.length, sampleRate)
-      buffer.copyToChannel(samples, 0)
+      buffer.copyToChannel(samples as any, 0)
       const source = ctx.createBufferSource()
       source.buffer = buffer
       source.connect(ctx.destination)

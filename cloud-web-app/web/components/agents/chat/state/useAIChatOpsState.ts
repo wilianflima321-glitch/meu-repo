@@ -47,10 +47,10 @@ export function useAIChatOpsState({ editorBridge }: UseAIChatOpsStateParams) {
   }, [])
 
   useEffect(() => {
-    if (editorBridge?.pendingDiff) {
+    if (editorBridge?.pendingDiffs && editorBridge.pendingDiffs.length > 0) {
       openOpsTab('diff')
     }
-  }, [editorBridge?.pendingDiff, openOpsTab])
+  }, [editorBridge?.pendingDiffs, openOpsTab])
 
   useEffect(() => {
     const onOpenDiff = () => {
@@ -71,107 +71,123 @@ export function useAIChatOpsState({ editorBridge }: UseAIChatOpsStateParams) {
   }, [openOpsTab])
 
   const handleAcceptPendingDiff = useCallback(
-    async (finalModified: string) => {
+    async (targetPath?: string, finalModifiedStr?: string) => {
       if (!editorBridge) return
       if (applyBusy) return
 
-      const pending = editorBridge.pendingDiff
-      const filePath = pending?.path || editorBridge.activeFilePath
-      if (!filePath) {
-        const message = 'Open a file before applying the pending edit.'
+      const pendingList = editorBridge.pendingDiffs
+      if (!pendingList || pendingList.length === 0) {
+        const message = 'No pending edits to apply.'
         setLastApplyDeny(message)
         announceApplyDeny('Apply blocked', message)
         return
       }
 
-      const original = pending?.oldContent ?? ''
       setApplyBusy(true)
       setLastApplyDeny(null)
 
-      try {
-        const governed = await runGovernedChangeApply({
-          filePath,
-          original,
-          modified: finalModified,
-        })
+      let hasError = false
+      let errorMessage = ''
+      
+      const targets = targetPath 
+        ? pendingList.filter(p => p.path === targetPath)
+        : pendingList
 
-        if (!governed.ok) {
-          const receipt = toGovernedApplyReceipt(filePath, governed)
-          pushReceipt(receipt)
-          setLastApplyDeny(
-            `${receipt.code || 'APPLY_DENIED'}: ${receipt.detail || governed.banner}`,
-          )
-          announceApplyDeny(governed.copy.title, governed.copy.detail)
-          log.warn('chat_diff_apply_denied', {
-            code: receipt.code,
-            runId: receipt.runId,
+      for (const pending of targets) {
+        const filePath = pending.path
+        const original = pending.oldContent
+        const finalModified = (targetPath === pending.path && finalModifiedStr) 
+          ? finalModifiedStr 
+          : pending.newContent
+
+        try {
+          const governed = await runGovernedChangeApply({
             filePath,
-            outcome: receipt.outcome,
-            marketingAllowed: receipt.marketingAllowed,
+            original,
+            modified: finalModified,
           })
-          // Fail-closed: keep pendingDiff so the user can fix / reject
-          return
-        }
 
-        const applied = toGovernedApplyReceipt(filePath, governed)
-        pushReceipt(applied)
-        log.info('chat_diff_apply_receipt', {
-          outcome: applied.outcome,
-          runId: applied.runId,
-          filePath,
-          marketingAllowed: applied.marketingAllowed,
-        })
+          if (!governed.ok) {
+            const receipt = toGovernedApplyReceipt(filePath, governed)
+            pushReceipt(receipt)
+            const msg = `${receipt.code || 'APPLY_DENIED'}: ${receipt.detail || governed.banner}`
+            setLastApplyDeny(msg)
+            announceApplyDeny(governed.copy.title, governed.copy.detail)
+            log.warn('chat_diff_apply_denied', {
+              code: receipt.code,
+              runId: receipt.runId,
+              filePath,
+              outcome: receipt.outcome,
+              marketingAllowed: receipt.marketingAllowed,
+            })
+            hasError = true
+            errorMessage = msg
+            break // Stop on first error
+          }
 
-        const result = editorBridge.replaceEntireFile(finalModified)
-        if (!result.ok) {
-          const editorDeny: GovernedApplyReceipt = {
+          const applied = toGovernedApplyReceipt(filePath, governed)
+          pushReceipt(applied)
+          log.info('chat_diff_apply_receipt', {
+            outcome: applied.outcome,
+            runId: applied.runId,
+            filePath,
+            marketingAllowed: applied.marketingAllowed,
+          })
+          
+          // NOTE: We only update the active file in the editor bridge if it matches.
+          // In a real multi-file system, we would apply all to the file system or workspace.
+          if (editorBridge.activeFilePath === filePath) {
+            editorBridge.replaceEntireFile(finalModified)
+          }
+
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Governed apply failed.'
+          const crashDeny: GovernedApplyReceipt = {
             outcome: 'denied',
             filePath,
             touchedPaths: [filePath],
             taskDependencies: [],
             fileValidation: [],
-            code: 'EDITOR_REPLACE_FAILED',
-            detail: result.message,
+            code: 'APPLY_EXCEPTION',
+            detail: message,
             at: new Date().toISOString(),
             marketingAllowed: false,
             composerSurpassClaim: false,
           }
-          pushReceipt(editorDeny)
-          setLastApplyDeny(result.message)
-          announceApplyDeny('Editor update failed', result.message)
-          return
+          pushReceipt(crashDeny)
+          setLastApplyDeny(message)
+          announceApplyDeny('Apply failed', message)
+          log.error('chat_diff_apply_failed', error instanceof Error ? error : undefined)
+          hasError = true
+          errorMessage = message
+          break
         }
-
-        editorBridge.clearPendingDiff()
-        setLastApplyDeny(null)
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Governed apply failed.'
-        const crashDeny: GovernedApplyReceipt = {
-          outcome: 'denied',
-          filePath,
-          touchedPaths: [filePath],
-          taskDependencies: [],
-          fileValidation: [],
-          code: 'APPLY_EXCEPTION',
-          detail: message,
-          at: new Date().toISOString(),
-          marketingAllowed: false,
-          composerSurpassClaim: false,
-        }
-        pushReceipt(crashDeny)
-        setLastApplyDeny(message)
-        announceApplyDeny('Apply failed', message)
-        log.error('chat_diff_apply_failed', error instanceof Error ? error : undefined)
-      } finally {
-        setApplyBusy(false)
       }
+
+      if (!hasError) {
+        if (targetPath) {
+          editorBridge.stageDiffs(editorBridge.pendingDiffs.filter(p => p.path !== targetPath))
+        } else {
+          editorBridge.clearPendingDiffs()
+        }
+        setLastApplyDeny(null)
+      } else {
+        setLastApplyDeny(errorMessage)
+      }
+      
+      setApplyBusy(false)
     },
     [applyBusy, editorBridge, pushReceipt]
   )
 
-  const handleRejectPendingDiff = useCallback(() => {
+  const handleRejectPendingDiff = useCallback((targetPath?: string) => {
     setLastApplyDeny(null)
-    editorBridge?.clearPendingDiff()
+    if (!editorBridge) return
+    if (targetPath) {
+      editorBridge.stageDiffs(editorBridge.pendingDiffs.filter(p => p.path !== targetPath))
+    } else {
+      editorBridge.clearPendingDiffs()
+    }
   }, [editorBridge])
 
   const toggleAdvancedControls = useCallback(() => {

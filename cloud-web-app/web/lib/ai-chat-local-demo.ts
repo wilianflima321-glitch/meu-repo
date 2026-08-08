@@ -103,20 +103,20 @@ export function consumeLocalDemoUsage(limit?: number): LocalDemoUsageDecision {
 }
 
 export function buildLocalDemoChatContent(params: BuildLocalDemoChatContentParams): string {
-  const normalizedMessage = sanitizeText(params.message || 'sem mensagem')
+  const normalizedMessage = sanitizeText(params.message || 'no message provided')
   const providerSummary = getAiProviderSetupSummary()
   return [
-    'DEMO LOCAL (provider de IA nao configurado).',
+    'LOCAL DEMO (AI provider not configured).',
     '',
-    `Resumo do pedido: ${normalizedMessage}`,
+    `Request summary: ${normalizedMessage}`,
     '',
-    'Plano sugerido para avancar sem bloquear o onboarding:',
-    `1. Definir objetivo testavel em modo ${params.qualityMode}.`,
-    `2. Executar com ${params.agentCount} agente(s) e validar riscos antes do apply.`,
-    `3. ${params.enableWebResearch ? 'Incluir pesquisa web apenas para evidencias verificaveis.' : 'Seguir com execucao local para reduzir custo e latencia.'}`,
-    '4. Configurar provider real para sair do demo local e receber respostas com contexto completo.',
+    'Suggested plan to keep moving without blocking onboarding:',
+    `1. Define a testable goal in ${params.qualityMode} mode.`,
+    `2. Run with ${params.agentCount} agent(s) and validate risks before applying.`,
+    `3. ${params.enableWebResearch ? 'Include web research only for verifiable evidence.' : 'Continue with local execution to reduce cost and latency.'}`,
+    '4. Configure a real provider to leave local demo mode and receive responses with full context.',
     '',
-    `Demo local restante hoje: ${params.remaining}/${params.limit}.`,
-    `Setup recomendado: abra /settings?tab=api e configure ${providerSummary}.`,
+    `Local demo remaining today: ${params.remaining}/${params.limit}.`,
+    `Recommended setup: open /settings?tab=api and configure ${providerSummary}.`,
   ].join('\n')
 }

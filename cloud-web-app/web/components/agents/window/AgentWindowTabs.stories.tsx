@@ -13,7 +13,7 @@ export default meta
 type Story = StoryObj<typeof AgentWindowTabs>
 
 function InteractiveAgentWindowTabs() {
-  const [activeView, setActiveView] = useState<'fleet' | 'navigation' | 'replay'>('fleet')
+  const [activeView, setActiveView] = useState<'fleet' | 'navigation' | 'replay' | 'evolution'>('fleet')
 
   return (
     <div className="w-[560px] overflow-hidden rounded-2xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)]">

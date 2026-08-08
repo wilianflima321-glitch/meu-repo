@@ -1,20 +1,9 @@
 'use client'
 
 import React from 'react'
-import { tokens } from '../../web/lib/design-tokens'
 import { Check, FileText, Sparkles } from 'lucide-react'
 
 import { buildContextSummary, getInlineAIFileName, type InlineAIChatProps } from './InlineAIChat.helpers'
-import {
-  ACCENT_CYAN,
-  ACCENT_SUCCESS,
-  BORDER_PRIMARY,
-  BORDER_SECONDARY,
-  SURFACE_PRIMARY,
-  TEXT_SECONDARY,
-  TEXT_TERTIARY,
-  mixColor,
-} from './InlineAIChat.styles'
 import { ContextBadge } from './InlineAIChatPrimitives'
 
 type InlineAIContextPanelProps = {
@@ -73,59 +62,22 @@ export function InlineAIContextPanel({
   return (
     <div
       id={id}
-      style={{
-        padding: tokens.spacing['3'],
-        background: mixColor(ACCENT_CYAN, 8),
-        borderBottom: `1px solid ${BORDER_SECONDARY}`,
-      }}
+      className="p-3 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)]"
     >
-      <div
-        style={{
-          marginBottom: tokens.spacing['2'],
-          color: ACCENT_CYAN,
-          fontWeight: tokens.typography.fontWeight.medium,
-          fontSize: tokens.typography.fontSize.xs,
-          textTransform: 'uppercase',
-          letterSpacing: '0.08em',
-        }}
-      >
+      <div className="mb-2 text-xs font-medium uppercase tracking-widest text-[var(--aethel-info)]">
         Active context
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: tokens.spacing['2'],
-        }}
-      >
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2">
         {detailItems.map((item) => (
           <div
             key={item.label}
-            style={{
-              padding: tokens.spacing['3'],
-              borderRadius: tokens.radius.lg,
-              border: `1px solid ${mixColor(BORDER_PRIMARY, 70)}`,
-              background: mixColor(SURFACE_PRIMARY, 76),
-            }}
+            className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_76%,transparent)] p-3"
           >
-            <div
-              style={{
-                marginBottom: tokens.spacing['1'],
-                fontSize: tokens.typography.fontSize.xs,
-                color: TEXT_TERTIARY,
-              }}
-            >
+            <div className="mb-1 text-xs text-[var(--aethel-text-tertiary)]">
               {item.label}
             </div>
-            <div
-              style={{
-                fontSize: tokens.typography.fontSize.sm,
-                color: TEXT_SECONDARY,
-                lineHeight: tokens.typography.lineHeight.relaxed,
-                wordBreak: 'break-word',
-              }}
-            >
+            <div className="break-words text-sm leading-relaxed text-[var(--aethel-text-secondary)]">
               {item.value}
             </div>
           </div>
@@ -141,73 +93,31 @@ export function InlineAIStatusCard({
   summary,
 }: InlineAIStatusCardProps) {
   return (
-    <div
-      style={{
-        padding: `${tokens.spacing['3']} ${tokens.spacing['4']} 0`,
-      }}
-    >
-      <div
-        style={{
-          padding: tokens.spacing['3'],
-          borderRadius: tokens.radius.xl,
-          border: `1px solid ${BORDER_SECONDARY}`,
-          background: mixColor(SURFACE_PRIMARY, 74),
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: tokens.spacing['3'],
-            flexWrap: 'wrap',
-          }}
-        >
+    <div className="px-4 pt-3">
+      <div className="rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] p-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div
-              style={{
-                fontSize: tokens.typography.fontSize.sm,
-                fontWeight: tokens.typography.fontWeight.semibold,
-              }}
-            >
+            <div className="text-sm font-semibold">
               {summary.scopeLabel}
             </div>
-            <div
-              style={{
-                marginTop: tokens.spacing['1'],
-                fontSize: tokens.typography.fontSize.xs,
-                color: TEXT_SECONDARY,
-                lineHeight: tokens.typography.lineHeight.relaxed,
-              }}
-            >
+            <div className="mt-1 text-xs leading-relaxed text-[var(--aethel-text-secondary)]">
               {summary.operatorLabel}
             </div>
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: tokens.spacing['2'],
-              flexWrap: 'wrap',
-            }}
-          >
+          <div className="flex flex-wrap items-center gap-2">
             {activeFile && <ContextBadge label={getInlineAIFileName(activeFile.path)} icon={<FileText size={12} />} />}
             {projectContext && <ContextBadge label={`${projectContext.files.length} files`} icon={<Sparkles size={12} />} />}
             <ContextBadge
-              label={summary.canApplyDirectly ? 'Manual application ready' : 'Modo consulta'}
+              label={summary.canApplyDirectly ? 'Manual application ready' : 'Query mode'}
               icon={<Check size={12} />}
-              accent={summary.canApplyDirectly ? ACCENT_SUCCESS : TEXT_SECONDARY}
+              accentClass={summary.canApplyDirectly ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-text-secondary)]'}
             />
           </div>
         </div>
 
         <div
-          style={{
-            marginTop: tokens.spacing['3'],
-            fontSize: tokens.typography.fontSize.xs,
-            color: TEXT_TERTIARY,
-          }}
+          className="mt-3 text-xs text-[var(--aethel-text-tertiary)]"
         >
           {summary.detailLabel}
         </div>

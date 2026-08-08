@@ -31,8 +31,8 @@ import {
 } from '../../web/components/agents/chat'
 import { ActiveContextBadge, type ActiveContextItem } from './ActiveContextBadge'
 import { useAethelContext } from '../../web/contexts/AethelContextRegistry'
-import { LiveSessionHUD } from '../../web/components/agents/chat/live/LiveSessionHUD'
 import { useRealtimeVoiceSession } from '../../web/components/agents/chat/voice/useRealtimeVoiceSession'
+import { AIChatVoiceSessionOverlay } from './AIChatVoiceSessionOverlay'
 import { ResourceMonitorHUD } from '../../web/components/agents/chat/ResourceMonitorHUD'
 import { FusionTransactionUndoBanner } from '../../web/components/agents/chat/ledger/FusionTransactionUndoBanner'
 import { NexusMissionPhaseStrip } from '../../web/components/agents/chat/activity/NexusMissionPhaseStrip'
@@ -232,7 +232,7 @@ export default function AIChatPanelPro({
       onSendMessage?.(text)
     },
   })
-  const pendingDiff = editorBridge?.pendingDiff ?? null
+  const pendingDiffs = editorBridge?.pendingDiffs ?? []
   const [showInlineDiffPreview, setShowInlineDiffPreview] = useState(false)
 
   // Calm mode — hides telemetry/ops panels by default (CW4 agents.opsPrefs spine).
@@ -270,10 +270,10 @@ export default function AIChatPanelPro({
   }
 
   useEffect(() => {
-    if (!pendingDiff) {
+    if (pendingDiffs.length === 0) {
       setShowInlineDiffPreview(false)
     }
-  }, [pendingDiff])
+  }, [pendingDiffs])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -361,7 +361,7 @@ export default function AIChatPanelPro({
               currentRunEstimate={estimatedCost}
               isAIWorking={isAIWorking}
               latestEvidence={latestEvidence}
-              pendingDiff={pendingDiff}
+              pendingDiff={pendingDiffs.length > 0 ? pendingDiffs[0] : null}
               onOpenDiff={handleOpenPendingDiff}
               onOpenEconomics={handleOpenEconomics}
               onOpenEvidence={handleOpenEvidence}
@@ -418,69 +418,19 @@ export default function AIChatPanelPro({
           </>
         ) : null}
 
-        {/* Live voice session overlay */}
-        {isLiveMode && voiceSession.status !== 'disconnected' && (
-          <div className="absolute inset-x-0 bottom-20 z-30 flex justify-center px-4 pointer-events-none">
-            <div className="pointer-events-auto w-full max-w-sm">
-              <LiveSessionHUD
-                status={voiceSession.status}
-                speaker={voiceSession.speaker}
-                transcript={voiceSession.transcript}
-                isMuted={voiceSession.isMuted}
-                amplitude={voiceSession.amplitude}
-                onToggleMute={voiceSession.toggleMute}
-                onEndSession={voiceSession.endSession}
-              />
-            </div>
-          </div>
-        )}
+        <AIChatVoiceSessionOverlay isLiveMode={isLiveMode} voiceSession={voiceSession} />
 
-        {/* Voice unavailable banner — shown when live mode is on but WebRTC disconnected */}
-        {isLiveMode && voiceSession.status === 'disconnected' && (
-          <div
-            role="alert"
-            className="mx-3 mb-2 flex items-start gap-2.5 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_8%,transparent)] px-3 py-2.5"
-          >
-            <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--aethel-warning)]" aria-hidden />
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold text-[var(--aethel-warning-light)]">
-                Voice unavailable
-              </p>
-              <p className="mt-0.5 text-[10px] leading-relaxed text-[var(--aethel-text-tertiary)]">
-                WebRTC connection failed.{' '}
-                <a
-                  href="/settings?tab=byok"
-                  className="underline decoration-[var(--aethel-warning)]/40 hover:decoration-[var(--aethel-warning)] text-[var(--aethel-warning-light)]"
-                >
-                  Configure your OpenAI key in Settings
-                </a>{' '}
-                to enable live voice.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {pendingDiff ? (
+        {pendingDiffs.length > 0 ? (
           <AIChatPendingDiffTray
-            pendingDiff={pendingDiff}
+            pendingDiffs={pendingDiffs}
             onOpenDiff={handleOpenPendingDiff}
             onAcceptDiff={() => {
-              void handleAcceptPendingDiff(pendingDiff.newContent)
+              void handleAcceptPendingDiff()
             }}
             onRejectDiff={handleRejectPendingDiff}
             diffOpen={showInlineDiffPreview}
             applyBusy={applyBusy}
             denyMessage={lastApplyDeny}
-          />
-        ) : null}
-
-        {pendingDiff && showInlineDiffPreview ? (
-          <AIChatProposalPreview
-            pendingDiff={pendingDiff}
-            onAcceptDiff={(finalModified) => {
-              void handleAcceptPendingDiff(finalModified)
-            }}
-            onRejectDiff={handleRejectPendingDiff}
           />
         ) : null}
 
@@ -533,7 +483,7 @@ export default function AIChatPanelPro({
         showAdvancedControls={showAdvancedControls}
         opsTab={opsTab}
         onOpsTabChange={setOpsTab}
-        pendingDiff={pendingDiff}
+        pendingDiffs={pendingDiffs}
         onAcceptDiff={handleAcceptPendingDiff}
         onRejectDiff={handleRejectPendingDiff}
         projectId={projectId}

@@ -384,7 +384,7 @@ export function useAIChatController({
         requestAbortRef.current = controller
         setProviderGate(null)
 
-        // Local-first (Missão Executiva 4 — WebLLM): try on-device inference
+        // Local-first (Executive Mission 4 — WebLLM): try on-device inference
         // before spending cloud API budget. `ensureLocalEngineReady()` is the
         // single hardware-gated choke point (deviceMemory + WebGPU) — any
         // `false`/thrown result here just means "use the cloud path below",

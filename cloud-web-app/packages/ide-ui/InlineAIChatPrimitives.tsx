@@ -6,7 +6,6 @@ import { Check, Copy, Loader2, Sparkles } from 'lucide-react'
 
 import { type InlineAIMessageCodeBlock } from './InlineAIChat.helpers'
 import {
-  ACCENT_CYAN,
   BORDER_SECONDARY,
   PRIMARY_GRADIENT,
   SURFACE_PRIMARY,
@@ -21,26 +20,15 @@ import {
 export function ContextBadge({
   label,
   icon,
-  accent = TEXT_SECONDARY,
+  accentClass = 'text-[var(--aethel-text-secondary)]',
 }: {
   label: string
   icon: React.ReactNode
-  accent?: string
+  accentClass?: string
 }) {
   return (
     <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: tokens.spacing['1'],
-        padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
-        borderRadius: tokens.radius.full,
-        border: `1px solid ${mixColor(accent, 32)}`,
-        background: mixColor(accent, 12),
-        color: accent,
-        fontSize: tokens.typography.fontSize.xs,
-        whiteSpace: 'nowrap',
-      }}
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border border-current bg-current/10 whitespace-nowrap text-xs ${accentClass}`}
     >
       {icon}
       {label}
@@ -53,19 +41,9 @@ export function LoadingState({ label }: { label: string }) {
     <div
       role="status"
       aria-live="polite"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: tokens.spacing['2'],
-        padding: tokens.spacing['3'],
-        borderRadius: tokens.radius.lg,
-        border: `1px solid ${mixColor(ACCENT_CYAN, 28)}`,
-        background: mixColor(ACCENT_CYAN, 10),
-        color: TEXT_SECONDARY,
-        fontSize: tokens.typography.fontSize.sm,
-      }}
+      className="flex items-center gap-2 p-3 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-sm text-[var(--aethel-text-secondary)]"
     >
-      <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+      <Loader2 size={16} className="animate-spin" />
       <span>{label}</span>
     </div>
   )

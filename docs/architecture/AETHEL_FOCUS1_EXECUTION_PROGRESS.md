@@ -559,7 +559,7 @@ Two independent audits recorded here (documentation alignment only this round �
 
 | # | File:line | Issue |
 |---|-----------|-------|
-| 1–2 | `usd-gltf-exporter.ts:23-47` | `success: true` + empty `entityPayload` / `ArrayBuffer(0)` |
+| 1–2 | `usd-gltf-exporter.ts:23-47` | ~~`success: true` + empty `entityPayload` / `ArrayBuffer(0)`~~ **DONE** (2026-08-08 P2f item #2 — commit see changelog p2f-2) |
 | 3–6 | `discovery-feed-engine.ts:576-631`, `arcade/page.tsx:72-74` | `marketingDiscoveryAllowed: true` / probe hardcodes without IA mod + compression |
 | 7–9 | `consolidation-truth-matrix.ts:184-231` | ~~`marketingAllowed: true` for J.11/J.12 / 15-panel / VisualEvidence before gates~~ **DONE** (2026-08-08 P2d item #1 — commit `a15f64efa`) |
 | 10 | `email-system.ts:51` | mock email provider default in prod path |
@@ -568,7 +568,7 @@ Two independent audits recorded here (documentation alignment only this round �
 
 **Positive fail-closed (keep):** `NATIVE_ONNX_READY=false`, anti-capsule in `usd-integrator.ts`, Hub honesty badges default false, majority `*_aaa_ready: false`.
 
-**Execution queue (one item at a time, platform first):** see P2d (90-day plan) → P1b (J/L deepen) → ~~BLOCKERs 7–9 (consolidation-truth-matrix)~~ **DONE** → 1–2 (USD export) → 3–6 (discovery probes) → L.5 Rust wire via L.1 → RTv1 operational wires (P1c).
+**Execution queue (one item at a time, platform first):** see P2d (90-day plan) → P1b (J/L deepen) → ~~BLOCKERs 7–9 (consolidation-truth-matrix)~~ **DONE** → ~~1–2 (USD export)~~ **DONE** → 3–6 (discovery probes) → L.5 Rust wire via L.1 → RTv1 operational wires (P1c).
 
 #### P2c — Git-verified work (synthesizer 2026-08-08)
 

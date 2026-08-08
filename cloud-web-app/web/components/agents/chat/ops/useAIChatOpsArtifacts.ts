@@ -26,7 +26,7 @@ export interface AIChatApprovalChange {
 }
 
 interface UseAIChatOpsArtifactsParams {
-  pendingDiff?: AIChatPendingDiff | null
+  pendingDiffs?: AIChatPendingDiff[]
   projectId?: string
 }
 
@@ -46,7 +46,7 @@ function countChangedLines(oldContent: string, newContent: string) {
 }
 
 export function useAIChatOpsArtifacts({
-  pendingDiff,
+  pendingDiffs,
   projectId,
 }: UseAIChatOpsArtifactsParams) {
   const [memories, setMemories] = useState<AIChatMemoryItem[]>([])
@@ -118,17 +118,15 @@ export function useAIChatOpsArtifacts({
   }, [])
 
   const approvalChanges = useMemo<AIChatApprovalChange[]>(() => {
-    if (!pendingDiff) return []
+    if (!pendingDiffs || pendingDiffs.length === 0) return []
 
-    return [
-      {
-        filePath: pendingDiff.path,
-        oldContent: pendingDiff.oldContent,
-        newContent: pendingDiff.newContent,
-        lineChanges: countChangedLines(pendingDiff.oldContent, pendingDiff.newContent),
-      },
-    ]
-  }, [pendingDiff])
+    return pendingDiffs.map(diff => ({
+      filePath: diff.path,
+      oldContent: diff.oldContent,
+      newContent: diff.newContent,
+      lineChanges: countChangedLines(diff.oldContent, diff.newContent),
+    }))
+  }, [pendingDiffs])
 
   return {
     addMemory,
