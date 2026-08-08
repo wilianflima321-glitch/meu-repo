@@ -35,20 +35,70 @@ const log = createComponentLogger('email-system')
 // EMAIL SERVICE
 // ============================================================================
 
+function isProductionRuntime(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
+
+function isMockEmailExplicitlyAllowed(): boolean {
+  return process.env.EMAIL_ALLOW_MOCK === '1' || process.env.EMAIL_ALLOW_MOCK === 'true';
+}
+
+function resolveEmailProvider(input: {
+  configuredProvider?: EmailProvider
+  resendKey?: string
+  sendGridKey?: string
+}): { provider: EmailProvider; failClosedReason: string | null } {
+  const { configuredProvider, resendKey, sendGridKey } = input
+  const production = isProductionRuntime()
+  const allowMock = isMockEmailExplicitlyAllowed()
+
+  let provider: EmailProvider
+  if (configuredProvider) {
+    provider = configuredProvider
+  } else if (resendKey) {
+    provider = 'resend'
+  } else if (sendGridKey) {
+    provider = 'sendgrid'
+  } else if (!production || allowMock) {
+    provider = 'mock'
+  } else {
+    // Production without real provider config — never silently mock.
+    return {
+      provider: 'mock',
+      failClosedReason:
+        'Email provider not configured in production — set EMAIL_PROVIDER + API key (RESEND_API_KEY / SENDGRID_API_KEY), or EMAIL_ALLOW_MOCK=1 for an explicit non-default override',
+    }
+  }
+
+  if (provider === 'mock' && production && !allowMock) {
+    return {
+      provider: 'mock',
+      failClosedReason:
+        'Email mock provider is forbidden in production — configure a real provider or set EMAIL_ALLOW_MOCK=1 explicitly',
+    }
+  }
+
+  return { provider, failClosedReason: null }
+}
+
 export class EmailService {
-  private static instance: EmailService;
+  private static instance: EmailService | null = null;
   private provider: EmailProvider;
   private apiKey?: string;
   private fromAddress: EmailAddress;
   private queue: EmailOptions[] = [];
   private processing = false;
+  /** Set when production path would have silently mocked — send fails closed. */
+  private failClosedReason: string | null = null;
 
   private constructor() {
     const configuredProvider = process.env.EMAIL_PROVIDER as EmailProvider | undefined;
     const resendKey = process.env.RESEND_API_KEY || process.env.EMAIL_API_KEY;
     const sendGridKey = process.env.SENDGRID_API_KEY || process.env.EMAIL_API_KEY;
 
-    this.provider = configuredProvider || (resendKey ? 'resend' : 'mock');
+    const resolved = resolveEmailProvider({ configuredProvider, resendKey, sendGridKey });
+    this.provider = resolved.provider;
+    this.failClosedReason = resolved.failClosedReason;
     this.apiKey =
       this.provider === 'resend'
         ? resendKey
@@ -59,6 +109,12 @@ export class EmailService {
       email: process.env.EMAIL_FROM || 'noreply@aethel.dev',
       name: 'Aethel Engine',
     };
+
+    if (this.failClosedReason) {
+      log.warn('[Email] Production fail-closed — mock provider blocked', {
+        reason: this.failClosedReason,
+      });
+    }
   }
 
   static getInstance(): EmailService {
@@ -66,6 +122,28 @@ export class EmailService {
       EmailService.instance = new EmailService();
     }
     return EmailService.instance;
+  }
+
+  /** Test / process-reload helper — never call from product send paths. */
+  static resetInstanceForTests(): void {
+    EmailService.instance = null;
+  }
+
+  /** Honest probe for readiness / marketing — never invents a configured provider. */
+  getProviderHonesty(): {
+    provider: EmailProvider
+    configured: boolean
+    mockAllowedInCurrentEnv: boolean
+    failClosed: boolean
+    failClosedReason: string | null
+  } {
+    return {
+      provider: this.provider,
+      configured: this.failClosedReason === null && this.provider !== 'mock',
+      mockAllowedInCurrentEnv: !isProductionRuntime() || isMockEmailExplicitlyAllowed(),
+      failClosed: this.failClosedReason !== null,
+      failClosedReason: this.failClosedReason,
+    };
   }
 
   /**
@@ -107,8 +185,20 @@ export class EmailService {
       trackOpens: options.trackOpens ?? true,
       trackClicks: options.trackClicks ?? true,
     };
+    const recipients = this.normalizeRecipients(email.to);
 
-    // Se tem data de envio futura, adiciona à fila
+    // Fail closed before queueing — never invent a successful scheduled send in prod.
+    if (this.failClosedReason) {
+      return {
+        id: `error_${Date.now()}`,
+        success: false,
+        provider: this.provider,
+        timestamp: new Date(),
+        recipients,
+        error: this.failClosedReason,
+      };
+    }
+
     if (email.sendAt && email.sendAt > new Date()) {
       this.queue.push(email);
       return {
@@ -116,7 +206,7 @@ export class EmailService {
         success: true,
         provider: this.provider,
         timestamp: new Date(),
-        recipients: this.normalizeRecipients(email.to),
+        recipients,
       };
     }
 
@@ -130,6 +220,10 @@ export class EmailService {
     const recipients = this.normalizeRecipients(email.to);
 
     try {
+      if (this.failClosedReason) {
+        throw new Error(this.failClosedReason);
+      }
+
       if (this.provider !== 'mock' && !this.apiKey) {
         throw new Error(`Email provider "${this.provider}" is configured without an API key`);
       }
@@ -143,8 +237,12 @@ export class EmailService {
           return await this.sendViaSES(email, recipients);
         case 'smtp':
           return await this.sendViaSMTP(email, recipients);
-        default:
+        case 'mock':
           return this.mockSend(email, recipients);
+        default:
+          throw new Error(
+            `Email provider "${String(this.provider)}" is not supported — refuse silent mock`,
+          );
       }
     } catch (error) {
       log.error('[Email] Send failed', error);
@@ -247,34 +345,42 @@ export class EmailService {
   }
 
   /**
-   * AWS SES integration
+   * AWS SES integration — not wired; fail closed (never silent mock).
    */
   private async sendViaSES(
-    email: EmailOptions,
-    recipients: string[]
+    _email: EmailOptions,
+    _recipients: string[]
   ): Promise<EmailResult> {
-    // Implementação AWS SES seria aqui
-    return this.mockSend(email, recipients);
+    throw new Error(
+      'Email provider "ses" is not implemented — refuse silent mock (configure resend or sendgrid)',
+    );
   }
 
   /**
-   * SMTP integration
+   * SMTP integration — not wired; fail closed (never silent mock).
    */
   private async sendViaSMTP(
-    email: EmailOptions,
-    recipients: string[]
+    _email: EmailOptions,
+    _recipients: string[]
   ): Promise<EmailResult> {
-    // Implementação SMTP com nodemailer seria aqui
-    return this.mockSend(email, recipients);
+    throw new Error(
+      'Email provider "smtp" is not implemented — refuse silent mock (configure resend or sendgrid)',
+    );
   }
 
   /**
-   * Mock send para desenvolvimento
+   * Mock send for development / test only — production path must fail closed first.
    */
   private mockSend(
     email: EmailOptions,
     recipients: string[]
   ): EmailResult {
+    if (isProductionRuntime() && !isMockEmailExplicitlyAllowed()) {
+      throw new Error(
+        'Email mock provider is forbidden in production — configure a real provider or set EMAIL_ALLOW_MOCK=1 explicitly',
+      );
+    }
+
     log.info('[Email Mock]', {
       to: recipients,
       subject: email.subject,
