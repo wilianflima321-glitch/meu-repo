@@ -120,8 +120,8 @@
     "@types/jest": "^30.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.9.1",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
     "@types/sinon": "^21.0.0",
     "@types/testing-library__react": "^10.0.1",
     "axe-core": "^4.7.2",
@@ -154,5 +154,9 @@
     "uuid": "^9.0.1",
     "ws": "^8.16.0",
     "zustand": "^5.0.14"
+  },
+  "overrides": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   }
 }
