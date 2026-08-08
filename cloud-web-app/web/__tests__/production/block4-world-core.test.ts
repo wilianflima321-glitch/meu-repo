@@ -129,15 +129,31 @@ describe('Block 4 World CORE — TERRAIN-001 smooth kernel', () => {
 })
 
 describe('Block 4 World CORE — ASSET-001 hierarchy metadata', () => {
-  it('marks USD as HELD and GLB with meshUrl as live hierarchy-preserving', () => {
+  it('marks USDA/USD as HELD; USDZ+meshUrl and GLB as live hierarchy-preserving', () => {
     const usd = buildViewportImportedObject({
       existingCount: 0,
       importedAt: '2026-07-11T12:00:00.000Z',
       index: 0,
-      file: { fileName: 'Level.usdz', sizeBytes: 100 },
+      file: { fileName: 'Level.usd', sizeBytes: 100 },
     })
     expect(usd?.asset?.viewerStatus).toBe('held')
     expect(usd?.meshUrl).toBeUndefined()
+
+    const usdz = buildViewportImportedObject({
+      existingCount: 0,
+      importedAt: '2026-07-11T12:00:00.000Z',
+      index: 1,
+      file: {
+        fileName: 'Prop.usdz',
+        sizeBytes: 512,
+        meshUrl: 'blob:prop-usdz',
+        hierarchyPreserved: true,
+        viewerStatus: 'live',
+      },
+    })
+    expect(usdz?.asset?.viewerStatus).toBe('live')
+    expect(usdz?.meshUrl).toBe('blob:prop-usdz')
+    expect(usdz?.asset?.qualityGate).toBe('preview-ready')
 
     const objects = buildViewportImportedObjects({
       existingCount: 0,

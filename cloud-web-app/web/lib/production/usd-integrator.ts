@@ -1,8 +1,9 @@
 /**
  * AI-v1-e / J.7 — UsdIntegrator (content honesty)
  * Prompt positions library assets; Meshy/Tripo → USD cook path.
- * Never ships proxy capsule as character. Browser USD viewer stays honest HELD.
- * Aligns with Block 4 ASSET-001 hierarchy (GLTF/FBX/OBJ live; USD/USDZ held).
+ * Never ships proxy capsule as character. Browser viewer is honest per format:
+ *   USDZ preview = PARTIAL (three USDZLoader); USDA / .usd / USDC = HELD.
+ * Aligns with Block 4 ASSET-001 hierarchy (GLTF/FBX/OBJ live).
  */
 
 import { createHash, randomUUID } from 'crypto'
@@ -24,14 +25,76 @@ import type { ViewportAssetImportFormat } from '@/lib/viewport/viewport-asset-im
 
 const log = createComponentLogger('usd-integrator')
 
-/** Browser USD/USDZ viewer — HELD per ASSET-001 hierarchy (J.7 honesty) */
-export const USD_BROWSER_VIEWER_SHIP_STATUS = 'HELD' as const
+/** Logical USD family formats for the browser support matrix (J.7). */
+export type UsdBrowserFormatId = 'usdz' | 'usda' | 'usd' | 'usdc'
+
+export type UsdFormatShipStatus = 'PARTIAL' | 'HELD'
+
+export type UsdBrowserLoaderId = 'three-usdzloader' | 'none'
+
+export interface UsdBrowserFormatSupport {
+  format: UsdBrowserFormatId
+  shipStatus: UsdFormatShipStatus
+  viewerStatus: UsdImportViewerStatus
+  browserLoader: UsdBrowserLoaderId
+  claim: string
+}
+
+/**
+ * Explicit per-format matrix — never claim Pixar OpenUSD / Hydra stage in-browser.
+ * USDZ preview uses Three.js USDZLoader (USDA-in-ZIP mesh subset only).
+ */
+export const USD_BROWSER_FORMAT_SUPPORT = {
+  usdz: {
+    format: 'usdz',
+    shipStatus: 'PARTIAL',
+    viewerStatus: 'live',
+    browserLoader: 'three-usdzloader',
+    claim:
+      'Browser mesh preview via three/examples/jsm/loaders/USDZLoader (USDA-in-ZIP). Not OpenUSD/Pixar Hydra.',
+  },
+  usda: {
+    format: 'usda',
+    shipStatus: 'HELD',
+    viewerStatus: 'held',
+    browserLoader: 'none',
+    claim: 'Standalone USDA ASCII stage has no browser loader — intake recorded; preview HELD.',
+  },
+  usd: {
+    format: 'usd',
+    shipStatus: 'HELD',
+    viewerStatus: 'held',
+    browserLoader: 'none',
+    claim: 'Generic .usd (USDA or crate) has no browser loader — intake recorded; preview HELD.',
+  },
+  usdc: {
+    format: 'usdc',
+    shipStatus: 'HELD',
+    viewerStatus: 'held',
+    browserLoader: 'none',
+    claim: 'Binary USDC crate is unsupported in-browser (USDZLoader rejects crate files).',
+  },
+} as const satisfies Record<UsdBrowserFormatId, UsdBrowserFormatSupport>
+
+/**
+ * Aggregate browser USD viewer ship status.
+ * PARTIAL = USDZ preview path exists; full USD/USDA/USDC stage remains HELD.
+ */
+export const USD_BROWSER_VIEWER_SHIP_STATUS = 'PARTIAL' as const
+
+/** ZIP local-file header magic — minimum eligibility probe before USDZLoader. */
+const USDZ_ZIP_MAGIC = [0x50, 0x4b, 0x03, 0x04] as const
 
 export const USD_INTEGRATOR_HONESTY = {
   noProxyCapsule: 'Proxy capsule is not a shipped character.',
   noTripoOnlyAaa: 'Tripo/Meshy amorphous mesh is not a shipped AAA character without USD cook.',
-  usdViewerHeld: 'USD/USDZ browser viewer is HELD — GLTF/FBX/OBJ live; USD cook path pending.',
+  usdViewerHeld:
+    'Full USD/USDA/USDC browser stage is HELD — USDZ mesh preview is PARTIAL via Three.js USDZLoader; OpenUSD/Hydra not claimed.',
+  usdzPreviewPartial:
+    'USDZ browser preview is PARTIAL (Three.js USDA-in-ZIP) — not a Pixar OpenUSD stage.',
   libraryPlacementOk: 'UsdIntegrator may position library assets from prompt — not invent final hero mesh.',
+  noFullUsdStage:
+    'Cannot claim shipped full Pixar USD stage from browser preview — USDA/USD/USDC remain HELD; USDZ is preview-only.',
 } as const
 
 export type UsdShipKind = 'character' | 'prop' | 'environment' | 'unknown'
@@ -51,6 +114,7 @@ export type UsdIntegratorBlockReason =
   | 'proxy_capsule_forbidden'
   | 'tripo_only_amorphous_forbidden'
   | 'usd_viewer_held'
+  | 'usd_format_unsupported'
   | 'cost_guard'
   | 'transaction_aborted'
   | 'empty_artifact'
@@ -65,28 +129,75 @@ export interface UsdCharacterShipGateResult {
   viewerStatus: UsdImportViewerStatus
 }
 
+export function isUsdBrowserFormatId(format: string): format is UsdBrowserFormatId {
+  return format === 'usdz' || format === 'usda' || format === 'usd' || format === 'usdc'
+}
+
+export function resolveUsdBrowserFormatSupport(
+  format: string,
+): UsdBrowserFormatSupport | null {
+  if (!isUsdBrowserFormatId(format)) return null
+  return USD_BROWSER_FORMAT_SUPPORT[format]
+}
+
 /**
- * Resolve honest viewer status for an import format (ASSET-001 + J.7).
+ * Fail-closed eligibility for USDZ browser preview bytes (ZIP magic).
+ * Does not parse USDA; loader still may reject crate-inside-zip at runtime.
+ */
+export function evaluateUsdzPreviewEligibility(bytes: ArrayBuffer | Uint8Array): {
+  eligible: boolean
+  reason?: 'empty_payload' | 'not_zip_container'
+  message: string
+} {
+  const view = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes)
+  if (view.byteLength === 0) {
+    return {
+      eligible: false,
+      reason: 'empty_payload',
+      message: 'USDZ preview denied — empty payload (Law XVI fail-closed).',
+    }
+  }
+  if (view.byteLength < 4 || USDZ_ZIP_MAGIC.some((b, i) => view[i] !== b)) {
+    return {
+      eligible: false,
+      reason: 'not_zip_container',
+      message: 'USDZ preview denied — buffer is not a ZIP container (PK\\x03\\x04).',
+    }
+  }
+  return {
+    eligible: true,
+    message: USD_BROWSER_FORMAT_SUPPORT.usdz.claim,
+  }
+}
+
+/**
+ * Resolve honest viewer status for an import format (ASSET-001 + J.7 matrix).
  */
 export function resolveUsdImportViewerStatus(format: ViewportAssetImportFormat): UsdImportViewerStatus {
-  if (format === 'usd' || format === 'usdz') return 'held'
+  const usd = resolveUsdBrowserFormatSupport(format)
+  if (usd) return usd.viewerStatus
   if (format === 'glb' || format === 'gltf' || format === 'fbx' || format === 'obj') return 'live'
   return 'placeholder'
 }
 
 /**
  * Character ship gate — capsule / Tripo-only amorphous never count as shipped character.
+ * Full OpenUSD stage claims stay blocked even when USDZ preview is live.
  */
 export function evaluateUsdCharacterShipGate(input: {
   shipKind: UsdShipKind
   geometryProxy?: 'capsule' | 'box' | 'sphere' | 'none'
   source?: 'library-usd' | 'meshy' | 'tripo' | 'gltf-hierarchy' | 'unknown'
   usdCookReceiptId?: string
-  format?: ViewportAssetImportFormat
+  format?: ViewportAssetImportFormat | UsdBrowserFormatId
   claimShippedAaa?: boolean
+  claimFullUsdStage?: boolean
 }): UsdCharacterShipGateResult {
   const format = input.format
-  const viewerStatus = format ? resolveUsdImportViewerStatus(format) : 'placeholder'
+  const support = format ? resolveUsdBrowserFormatSupport(format) : null
+  const viewerStatus = format
+    ? support?.viewerStatus ?? resolveUsdImportViewerStatus(format as ViewportAssetImportFormat)
+    : 'placeholder'
 
   if (input.shipKind === 'character' && input.geometryProxy === 'capsule') {
     return {
@@ -112,22 +223,40 @@ export function evaluateUsdCharacterShipGate(input: {
     }
   }
 
-  if (viewerStatus === 'placeholder' && input.claimShippedAaa) {
+  if (input.claimFullUsdStage || (input.claimShippedAaa && support)) {
+    return {
+      allowed: false,
+      reason: 'usd_viewer_held',
+      message: USD_INTEGRATOR_HONESTY.noFullUsdStage,
+      shipKind: input.shipKind,
+      viewerStatus,
+    }
+  }
+
+  if (viewerStatus !== 'live' && input.claimShippedAaa) {
     return {
       allowed: false,
       reason: 'usd_viewer_held',
       message: USD_INTEGRATOR_HONESTY.usdViewerHeld,
       shipKind: input.shipKind,
-      viewerStatus: viewerStatus,
+      viewerStatus,
     }
   }
 
-  if (format === 'usd' || format === 'usdz') {
+  if (support) {
+    if (support.shipStatus === 'HELD') {
+      return {
+        allowed: true,
+        message: `USD intake recorded — ${support.format} viewer HELD (${USD_BROWSER_VIEWER_SHIP_STATUS} aggregate; USDZ preview only)`,
+        shipKind: input.shipKind,
+        viewerStatus: 'held',
+      }
+    }
     return {
       allowed: true,
-      message: `USD intake recorded — viewer ${USD_BROWSER_VIEWER_SHIP_STATUS}`,
+      message: `USDZ intake recorded — browser preview ${support.shipStatus}; ${USD_INTEGRATOR_HONESTY.usdzPreviewPartial}`,
       shipKind: input.shipKind,
-      viewerStatus: 'held',
+      viewerStatus: 'live',
     }
   }
 
@@ -158,6 +287,8 @@ export interface UsdIntegratorSuccess {
   honesty: typeof USD_INTEGRATOR_HONESTY
   viewerStatus: UsdImportViewerStatus
   usdCookStatus: 'HELD' | 'library-placed'
+  browserViewerShipStatus: typeof USD_BROWSER_VIEWER_SHIP_STATUS
+  formatSupport: ReadonlyArray<UsdBrowserFormatSupport>
   ledger: TaskEvidenceLedger
 }
 
@@ -190,6 +321,7 @@ export async function runUsdIntegrator(input: {
   /** If true, reject — Tripo-only character without cook */
   claimTripoCharacterShipped?: boolean
   claimCapsuleCharacterShipped?: boolean
+  claimFullUsdStage?: boolean
 }): Promise<UsdIntegratorResult> {
   let ledger = createTaskEvidenceLedger({
     taskId: `usd-int-${randomUUID().slice(0, 8)}`,
@@ -242,6 +374,27 @@ export async function runUsdIntegrator(input: {
     }
   }
 
+  if (input.claimFullUsdStage) {
+    const gate = evaluateUsdCharacterShipGate({
+      shipKind,
+      claimFullUsdStage: true,
+    })
+    ledger = appendTaskEvidence(ledger, {
+      kind: 'validation',
+      title: 'USD stage claim REJECT',
+      summary: gate.message,
+      refs: ['gate:full-usd-stage'],
+      actor: 'UsdIntegrator',
+    })
+    return {
+      success: false,
+      blockedReason: 'usd_viewer_held',
+      message: gate.message,
+      honesty: USD_INTEGRATOR_HONESTY,
+      ledger,
+    }
+  }
+
   if (!input.libraryAssets.length) {
     return {
       success: false,
@@ -285,6 +438,8 @@ export async function runUsdIntegrator(input: {
     .digest('hex')
     .slice(0, 12)}`
 
+  const formatMatrix = Object.values(USD_BROWSER_FORMAT_SUPPORT)
+
   const { result: bridge, ledger: bridgeLedger } = await dispatchCreativeArtifact({
     request: {
       domain: 'mesh',
@@ -314,6 +469,7 @@ export async function runUsdIntegrator(input: {
         geometryProxy: 'none',
         usdCookStatus: 'library-placed',
         browserUsdViewer: USD_BROWSER_VIEWER_SHIP_STATUS,
+        formatSupport: formatMatrix,
         honesty: USD_INTEGRATOR_HONESTY,
         updatedAt: new Date().toISOString(),
       })
@@ -352,12 +508,13 @@ export async function runUsdIntegrator(input: {
   ledger = appendTaskEvidence(ledger, {
     kind: 'artifact',
     title: 'UsdIntegrator library placement',
-    summary: `${placements.length} assets placed — no capsule proxy; USD viewer ${USD_BROWSER_VIEWER_SHIP_STATUS}`,
+    summary: `${placements.length} assets placed — no capsule proxy; browser USD viewer ${USD_BROWSER_VIEWER_SHIP_STATUS} (USDZ preview only)`,
     refs: [
       `placement:${placementId}`,
       `tx:${tx.id}`,
       `snap:${tx.snapshotHashBefore}→${committed.snapshotHashAfter}`,
       'j7:no-proxy-capsule',
+      'j7:usdz-preview-partial',
     ],
     actor: 'UsdIntegrator',
   })
@@ -367,11 +524,12 @@ export async function runUsdIntegrator(input: {
     count: placements.length,
     shipKind,
     txId: tx.id,
+    browserViewer: USD_BROWSER_VIEWER_SHIP_STATUS,
   })
 
   const primaryExt = input.libraryAssets[0]?.libraryPath.split('.').pop()?.toLowerCase()
   const primaryFormat = (
-    ['glb', 'gltf', 'fbx', 'obj', 'usd', 'usdz'] as const
+    ['glb', 'gltf', 'fbx', 'obj', 'usd', 'usda', 'usdz'] as const
   ).includes(primaryExt as ViewportAssetImportFormat)
     ? (primaryExt as ViewportAssetImportFormat)
     : undefined
@@ -388,6 +546,8 @@ export async function runUsdIntegrator(input: {
       ? resolveUsdImportViewerStatus(primaryFormat)
       : 'placeholder',
     usdCookStatus: 'library-placed',
+    browserViewerShipStatus: USD_BROWSER_VIEWER_SHIP_STATUS,
+    formatSupport: formatMatrix,
     ledger,
   }
 }

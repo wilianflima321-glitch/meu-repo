@@ -101,7 +101,7 @@ export function AethelViewport3D({
   gizmoMemoryLabel,
   gizmoMemoryError,
   gizmoMemoryCanPersist = false,
-  assetImportStatus = 'Drop GLTF, GLB, FBX, OBJ, USD, or USDZ',
+  assetImportStatus = 'Drop GLTF, GLB, FBX, OBJ, or USDZ (preview); USDA/USD held',
   onImportAssets,
   onRaycastReady,
   terrainProjectId = null,

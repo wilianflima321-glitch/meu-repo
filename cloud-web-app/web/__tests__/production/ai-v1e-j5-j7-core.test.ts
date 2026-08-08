@@ -226,19 +226,34 @@ describe('AI-v1-e J.7 USD / character content honesty', () => {
     expect(gate.reason).toBe('tripo_only_amorphous_forbidden')
   })
 
-  it('USD/USDZ viewer stays HELD — aligns ASSET-001 hierarchy', () => {
-    expect(USD_BROWSER_VIEWER_SHIP_STATUS).toBe('HELD')
-    expect(resolveUsdImportViewerStatus('usdz')).toBe('held')
+  it('USD browser viewer is PARTIAL — USDZ preview live; USDA/USD HELD', () => {
+    expect(USD_BROWSER_VIEWER_SHIP_STATUS).toBe('PARTIAL')
+    expect(resolveUsdImportViewerStatus('usdz')).toBe('live')
+    expect(resolveUsdImportViewerStatus('usd')).toBe('held')
     expect(resolveUsdImportViewerStatus('glb')).toBe('live')
 
-    const usd = buildViewportImportedObject({
+    const usdz = buildViewportImportedObject({
       existingCount: 0,
       importedAt: '2026-07-11T18:00:00.000Z',
       index: 0,
-      file: { fileName: 'Hero.usdz', sizeBytes: 100 },
+      file: {
+        fileName: 'Hero.usdz',
+        sizeBytes: 100,
+        meshUrl: 'blob:hero-usdz',
+        viewerStatus: 'live',
+      },
     })
-    expect(usd?.asset?.viewerStatus).toBe('held')
-    expect(usd?.meshUrl).toBeUndefined()
+    expect(usdz?.asset?.viewerStatus).toBe('live')
+    expect(usdz?.meshUrl).toBe('blob:hero-usdz')
+
+    const usda = buildViewportImportedObject({
+      existingCount: 0,
+      importedAt: '2026-07-11T18:00:00.000Z',
+      index: 1,
+      file: { fileName: 'Stage.usda', sizeBytes: 100 },
+    })
+    expect(usda?.asset?.viewerStatus).toBe('held')
+    expect(usda?.meshUrl).toBeUndefined()
   })
 
   it('library placement commits via FusionTx — no capsule stand-in', async () => {

@@ -109,6 +109,26 @@ function GeometryForObject({ object, isSelected }: { object: ViewportSceneObject
     )
   }
 
+  // J.7 honesty: held USD/USDA intake must never render a solid proxy capsule/sphere as character.
+  const heldUsdFormat =
+    object.asset?.viewerStatus === 'held' &&
+    (object.asset.format === 'usd' || object.asset.format === 'usda' || object.asset.format === 'usdz')
+  if (heldUsdFormat) {
+    return (
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[1.4, 1, 1]} />
+        <meshStandardMaterial
+          color={object.color}
+          wireframe
+          transparent
+          opacity={0.55}
+          emissive={isSelected ? 0x2563eb : 0x000000}
+          emissiveIntensity={isSelected ? 0.3 : 0}
+        />
+      </mesh>
+    )
+  }
+
   switch (object.geometry) {
     case 'sphere':
       return (

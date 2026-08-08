@@ -5,6 +5,7 @@
  */
 
 import {
+  USD_BROWSER_FORMAT_SUPPORT,
   USD_BROWSER_VIEWER_SHIP_STATUS,
   USD_INTEGRATOR_HONESTY,
 } from '@/lib/production/usd-integrator'
@@ -22,6 +23,13 @@ export function UsdContentHonestyBanner({
   blockedReason,
   className,
 }: UsdContentHonestyBannerProps) {
+  const matrix = [
+    `USDZ [${USD_BROWSER_FORMAT_SUPPORT.usdz.shipStatus}]`,
+    `USDA [${USD_BROWSER_FORMAT_SUPPORT.usda.shipStatus}]`,
+    `USD [${USD_BROWSER_FORMAT_SUPPORT.usd.shipStatus}]`,
+    `USDC [${USD_BROWSER_FORMAT_SUPPORT.usdc.shipStatus}]`,
+  ].join(' · ')
+
   return (
     <div
       className={
@@ -30,6 +38,7 @@ export function UsdContentHonestyBanner({
       }
       role="status"
       data-aethel-j7="usd-content-honesty"
+      data-aethel-j7-viewer={USD_BROWSER_VIEWER_SHIP_STATUS}
     >
       <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
         UsdIntegrator · viewer [{USD_BROWSER_VIEWER_SHIP_STATUS}]
@@ -37,8 +46,9 @@ export function UsdContentHonestyBanner({
       <p className="mt-1 text-[11px] leading-4 text-[var(--aethel-text-secondary)]">
         {blockedReason
           ? blockedReason
-          : `${USD_INTEGRATOR_HONESTY.noProxyCapsule} ${USD_INTEGRATOR_HONESTY.usdViewerHeld}`}
+          : `${USD_INTEGRATOR_HONESTY.noProxyCapsule} ${USD_INTEGRATOR_HONESTY.usdzPreviewPartial}`}
       </p>
+      <p className="mt-1 font-mono text-[10px] text-[var(--aethel-text-tertiary)]">{matrix}</p>
       {(typeof placementCount === 'number' || fusionTransactionId) && (
         <p className="mt-1 font-mono text-[10px] text-[var(--aethel-text-tertiary)]">
           {typeof placementCount === 'number' ? `placements:${placementCount}` : null}

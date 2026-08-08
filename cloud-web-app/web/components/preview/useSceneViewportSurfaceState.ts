@@ -193,7 +193,7 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
     if (otherFiles.length === 0) {
       if (imageFiles.length === 0) {
         setAssetImportStatus(
-          `No supported assets detected. Use GLTF, GLB, FBX, OBJ, USD, USDZ, or ${PBR_SOURCE_IMAGE_EXTENSIONS.map((ext) => ext.toUpperCase()).join('/')} for PBR materials.`
+          `No supported assets detected. Use GLTF, GLB, FBX, OBJ, USDZ (preview), or ${PBR_SOURCE_IMAGE_EXTENSIONS.map((ext) => ext.toUpperCase()).join('/')} for PBR materials. USDA/USD intake is HELD.`
         );
       }
       return;
@@ -209,7 +209,7 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
     }).then((importedObjects) => {
       if (importedObjects.length === 0) {
         setAssetImportStatus(
-          `No supported assets detected. Use GLTF, GLB, FBX, OBJ, USD, USDZ, or ${PBR_SOURCE_IMAGE_EXTENSIONS.map((ext) => ext.toUpperCase()).join('/')} for PBR materials.`
+          `No supported assets detected. Use GLTF, GLB, FBX, OBJ, USDZ (preview), or ${PBR_SOURCE_IMAGE_EXTENSIONS.map((ext) => ext.toUpperCase()).join('/')} for PBR materials. USDA/USD intake is HELD.`
         );
         return;
       }
@@ -219,10 +219,12 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
       const totalBytes = importedObjects.reduce((sum, object) => sum + (object.asset?.sizeBytes ?? 0), 0);
       const liveCount = importedObjects.filter((o) => o.asset?.viewerStatus === 'live').length;
       const heldCount = importedObjects.filter((o) => o.asset?.viewerStatus === 'held').length;
+      const usdzLive = importedObjects.filter((o) => o.asset?.format === 'usdz' && o.asset.viewerStatus === 'live').length;
       const batch = buildViewportAssetImportBatch(importedObjects, { projectId, importedAt });
-      const heldNote = heldCount > 0 ? ` · ${heldCount} USD [HELD]` : '';
+      const heldNote = heldCount > 0 ? ` · ${heldCount} USDA/USD [HELD]` : '';
+      const usdzNote = usdzLive > 0 ? ` · ${usdzLive} USDZ [PARTIAL preview]` : '';
       setAssetImportStatus(
-        `${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} staged (${liveCount} live hierarchy)${heldNote} - ${formatViewportAssetSize(totalBytes)} - license review required`
+        `${importedObjects.length} asset${importedObjects.length === 1 ? '' : 's'} staged (${liveCount} live hierarchy)${usdzNote}${heldNote} - ${formatViewportAssetSize(totalBytes)} - license review required`
       );
       void assetImportPersistence.persistBatch(batch).then((result) => {
         if (result.ok) {

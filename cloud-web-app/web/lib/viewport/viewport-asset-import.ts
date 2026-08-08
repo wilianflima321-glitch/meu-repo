@@ -1,7 +1,8 @@
 import type { ViewportSceneObject } from '@/components/viewport/AethelViewport3D'
 import type { GameAssetQualityTier } from '@/lib/production/game-asset-quality-pipeline'
+import { resolveUsdBrowserFormatSupport } from '@/lib/production/usd-integrator'
 
-export type ViewportAssetImportFormat = 'glb' | 'gltf' | 'fbx' | 'obj' | 'usd' | 'usdz'
+export type ViewportAssetImportFormat = 'glb' | 'gltf' | 'fbx' | 'obj' | 'usd' | 'usda' | 'usdz'
 export type ViewportAssetLicenseStatus = 'needs-review' | 'approved' | 'blocked'
 
 export type ViewportAssetImportMetadata = {
@@ -14,12 +15,12 @@ export type ViewportAssetImportMetadata = {
   qualityGate: 'raw-intake' | 'preview-ready'
   qualityTier?: GameAssetQualityTier
   evidenceRef: string
-  /** True when meshUrl points at hierarchy-preserving GLTF/FBX/OBJ (not a primitive stand-in). */
+  /** True when meshUrl points at hierarchy-preserving GLTF/FBX/OBJ/USDZ (not a primitive stand-in). */
   hierarchyPreserved?: boolean
   boneCount?: number
   meshCount?: number
   animationCount?: number
-  /** Honest viewer status — usd/usdz stay held until a web loader ships. */
+  /** Honest viewer status — USDA/USD HELD; USDZ live when meshUrl + USDZLoader path. */
   viewerStatus?: 'live' | 'placeholder' | 'held'
 }
 
@@ -62,6 +63,7 @@ export const VIEWPORT_ASSET_IMPORT_EXTENSIONS: readonly ViewportAssetImportForma
   'fbx',
   'obj',
   'usd',
+  'usda',
   'usdz',
 ]
 
@@ -77,9 +79,19 @@ const FORMAT_GEOMETRY: Record<ViewportAssetImportFormat, NonNullable<ViewportSce
   gltf: 'box',
   fbx: 'capsule',
   obj: 'cylinder',
-  usd: 'sphere',
-  usdz: 'sphere',
+  // Held USD formats must not look like solid character proxies — wireframe box via mesh path.
+  usd: 'box',
+  usda: 'box',
+  usdz: 'box',
 }
+
+const PREVIEW_READY_FORMATS: ReadonlySet<ViewportAssetImportFormat> = new Set([
+  'glb',
+  'gltf',
+  'fbx',
+  'obj',
+  'usdz',
+])
 
 export function getViewportAssetImportFormat(fileName: string): ViewportAssetImportFormat | null {
   const extension = fileName.trim().toLowerCase().split('.').pop()
@@ -146,6 +158,18 @@ export function buildViewportImportedObject({
     -1.2 - Math.floor(slot / 3) * 0.9,
   ]
 
+  const usdSupport = resolveUsdBrowserFormatSupport(format)
+  const defaultViewerStatus =
+    file.viewerStatus ??
+    (usdSupport
+      ? // USDZ is PARTIAL: live only when a real object URL is attached for USDZLoader.
+        usdSupport.shipStatus === 'PARTIAL' && file.meshUrl
+          ? 'live'
+          : 'held'
+      : file.meshUrl
+        ? 'live'
+        : 'placeholder')
+
   return {
     id: `asset-${importedAt}-${index}-${baseName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
     name: baseName,
@@ -164,21 +188,18 @@ export function buildViewportImportedObject({
       source: 'drag-drop',
       importedAt,
       licenseStatus: 'needs-review',
-      qualityGate: file.meshUrl && (format === 'glb' || format === 'gltf' || format === 'fbx' || format === 'obj')
-        ? 'preview-ready'
-        : 'raw-intake',
+      qualityGate:
+        file.meshUrl && PREVIEW_READY_FORMATS.has(format) && defaultViewerStatus === 'live'
+          ? 'preview-ready'
+          : 'raw-intake',
       evidenceRef: buildViewportAssetEvidenceRef(file.fileName, importedAt),
-      hierarchyPreserved: file.hierarchyPreserved ?? Boolean(file.meshUrl && format !== 'usd' && format !== 'usdz'),
+      hierarchyPreserved:
+        file.hierarchyPreserved ??
+        Boolean(file.meshUrl && defaultViewerStatus === 'live' && format !== 'usd' && format !== 'usda'),
       ...(typeof file.boneCount === 'number' ? { boneCount: file.boneCount } : {}),
       ...(typeof file.meshCount === 'number' ? { meshCount: file.meshCount } : {}),
       ...(typeof file.animationCount === 'number' ? { animationCount: file.animationCount } : {}),
-      viewerStatus:
-        file.viewerStatus ??
-        (format === 'usd' || format === 'usdz'
-          ? 'held'
-          : file.meshUrl
-            ? 'live'
-            : 'placeholder'),
+      viewerStatus: defaultViewerStatus,
     },
   }
 }
@@ -201,7 +222,8 @@ export async function buildViewportImportedObjectsFromFiles({
     const format = getViewportAssetImportFormat(file.name)
     if (!format) continue
 
-    if (format === 'usd' || format === 'usdz') {
+    if (format === 'usd' || format === 'usda') {
+      // Fail-closed: no browser loader — intake only, never attach meshUrl or solid proxy.
       const object = buildViewportImportedObject({
         existingCount,
         file: {
@@ -209,6 +231,24 @@ export async function buildViewportImportedObjectsFromFiles({
           sizeBytes: file.size,
           viewerStatus: 'held',
           hierarchyPreserved: false,
+        },
+        importedAt,
+        index: imported.length,
+      })
+      if (object) imported.push(object)
+      continue
+    }
+
+    if (format === 'usdz') {
+      const meshUrl = URL.createObjectURL(file)
+      const object = buildViewportImportedObject({
+        existingCount,
+        file: {
+          fileName: file.name,
+          sizeBytes: file.size,
+          meshUrl,
+          hierarchyPreserved: true,
+          viewerStatus: 'live',
         },
         importedAt,
         index: imported.length,

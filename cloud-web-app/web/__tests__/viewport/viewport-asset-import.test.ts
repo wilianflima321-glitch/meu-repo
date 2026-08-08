@@ -12,6 +12,7 @@ describe('viewport asset import intake', () => {
     expect(getViewportAssetImportFormat('hero.glb')).toBe('glb')
     expect(getViewportAssetImportFormat('cinematic_camera.FBX')).toBe('fbx')
     expect(getViewportAssetImportFormat('environment.usdz')).toBe('usdz')
+    expect(getViewportAssetImportFormat('stage.usda')).toBe('usda')
     expect(getViewportAssetImportFormat('notes.txt')).toBeNull()
   })
 
