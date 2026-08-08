@@ -644,7 +644,7 @@ Founder pivot 2026-07-25 + this audit **reconfirm**: these remain **STOPPED / HE
 
 | Gate | Result |
 |------|--------|
-| `npx vitest run __tests__/production` | **521 / 536 passed** (15 failed) at audit time → **536 / 538** after #10 → **541 / 543** after #1 → **546 / 548** after #2 → **552 / 554 passed** after #3 (2026-08-08; +6 new tests in `law-xvi-p2f3-fusion-yjs-undo.test.ts`; same 2 unrelated pre-existing `focus1-focus2-spend-l5.test.ts` renderer-honesty failures) |
+| `npx vitest run __tests__/production` | **521 / 536** at audit → **536 / 538** after #10 → **541 / 543** after #1 → **546 / 548** after #2 → **552 / 554** after #3 → **555 / 557 passed** after inline-stream (2026-08-08; +3 `inline-ai-chat-stream.test.ts`; same 2 unrelated pre-existing `focus1-focus2-spend-l5.test.ts` renderer-honesty failures) |
 | `npm run typecheck` | **BLOCKED** — `typescript/bin/tsc` missing in `node_modules` (deps repair needed) — still reproduces 2026-08-08, not touched (out of scope, do not reinstall `node_modules` per known history of dependency regressions). Manually verified with `npx -p typescript tsc --noEmit` (hoisted 5.9.3): **zero new errors** in the 7 files touched by item #1; pre-existing unrelated errors remain elsewhere in the monorepo (`@react-three/fiber` JSX intrinsics, `ide-ui` type mismatches). |
 
 **Veredicto comercial:** **NÃO** pronto para vender como "Universal IDE" / "AI-native IDE" — claim honesto = DX criativo governado + web demos (alinhado Wedge #1).
