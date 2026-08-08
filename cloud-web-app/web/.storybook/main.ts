@@ -24,6 +24,8 @@ import type { StorybookConfig } from '@storybook/react-vite'
 const config: StorybookConfig = {
   stories: [
     '../components/**/*.stories.@(ts|tsx|mdx)',
+    // CW5 — ide-ui shell stories share the same token government as web components
+    '../../packages/ide-ui/**/*.stories.@(ts|tsx|mdx)',
   ],
   addons: [
     '@storybook/addon-essentials',

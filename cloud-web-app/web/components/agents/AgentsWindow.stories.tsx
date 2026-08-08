@@ -123,7 +123,11 @@ const FIXTURE_REPLAY_RUNS: BrowserOperatorRunSummary[] = [
 ]
 
 const NOOP = () => {}
-const FOCUS_CLASS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
+const FOCUS_CLASS =
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)]'
+const STORY_FRAME =
+  'h-[600px] w-[380px] overflow-hidden rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]'
+const STORY_FRAME_COL = `${STORY_FRAME} flex flex-col`
 
 // ── Meta ──────────────────────────────────────────────────────────────────────
 
@@ -166,7 +170,7 @@ export const FleetRunning: Story = {
     },
   },
   render: () => (
-    <div className="h-[600px] w-[380px] rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 overflow-hidden flex flex-col">
+    <div className={STORY_FRAME_COL}>
       <AgentWindowTabs
         activeView="fleet"
         setActiveView={NOOP}
@@ -199,7 +203,7 @@ export const FleetPaused: Story = {
     },
   },
   render: () => (
-    <div className="h-[600px] w-[380px] rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 overflow-hidden flex flex-col">
+    <div className={STORY_FRAME_COL}>
       <AgentWindowTabs
         activeView="fleet"
         setActiveView={NOOP}
@@ -232,7 +236,7 @@ export const Loading: Story = {
     },
   },
   render: () => (
-    <div className="h-[600px] w-[380px] rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 overflow-hidden">
+    <div className={STORY_FRAME}>
       <AgentWindowLoading />
     </div>
   ),
@@ -250,7 +254,7 @@ export const Error: Story = {
     },
   },
   render: () => (
-    <div className="h-[600px] w-[380px] rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 overflow-hidden">
+    <div className={STORY_FRAME}>
       <AgentWindowError focusClass={FOCUS_CLASS} onRetry={NOOP} />
     </div>
   ),
@@ -268,7 +272,7 @@ export const NoProject: Story = {
     },
   },
   render: () => (
-    <div className="h-[600px] w-[380px] rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 overflow-hidden">
+    <div className={STORY_FRAME}>
       <AgentWindowNoProject />
     </div>
   ),
@@ -286,7 +290,7 @@ export const Replay: Story = {
     },
   },
   render: () => (
-    <div className="h-[600px] w-[380px] rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 overflow-hidden flex flex-col">
+    <div className={STORY_FRAME_COL}>
       <AgentWindowTabs
         activeView="replay"
         setActiveView={NOOP}

@@ -95,11 +95,11 @@ function MockViewport3D() {
 function MockCanvasPreview() {
   return (
     <div className="flex h-full items-center justify-center bg-[var(--aethel-brand-paper)]">
-      <div className="w-64 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
-        <div className="mb-4 h-4 w-32 rounded bg-gray-200" />
-        <div className="mb-2 h-3 w-full rounded bg-gray-100" />
-        <div className="mb-4 h-3 w-3/4 rounded bg-gray-100" />
-        <div className="h-9 w-full rounded-xl bg-blue-600" />
+      <div className="w-64 rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-text-inverse)] p-6 shadow-[var(--aethel-shadow-lg)]">
+        <div className="mb-4 h-4 w-32 rounded bg-[var(--aethel-border-secondary)]" />
+        <div className="mb-2 h-3 w-full rounded bg-[var(--aethel-border-primary)] opacity-60" />
+        <div className="mb-4 h-3 w-3/4 rounded bg-[var(--aethel-border-primary)] opacity-60" />
+        <div className="h-9 w-full rounded-xl bg-[var(--aethel-primary)]" />
       </div>
     </div>
   )
@@ -107,17 +107,19 @@ function MockCanvasPreview() {
 
 function MockRuntimeOverlay() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 bg-black">
-      <div className="flex items-center gap-2 text-xs text-green-400">
-        <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
+    <div className="flex h-full flex-col items-center justify-center gap-4 bg-[var(--aethel-brand-pure-black)]">
+      <div className="flex items-center gap-2 text-xs text-[var(--aethel-success-light)]">
+        <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--aethel-success-light)]" />
         Live — localhost:3000
       </div>
-      <div className="w-56 rounded-xl border border-white/10 bg-white/5 p-4">
-        <div className="mb-2 h-3 w-24 rounded bg-white/20" />
-        <div className="h-2 w-full rounded bg-white/10" />
-        <div className="mt-2 h-2 w-3/4 rounded bg-white/10" />
+      <div className="w-56 rounded-xl border border-[color-mix(in_srgb,var(--aethel-text-inverse)_10%,transparent)] bg-[color-mix(in_srgb,var(--aethel-text-inverse)_5%,transparent)] p-4">
+        <div className="mb-2 h-3 w-24 rounded bg-[color-mix(in_srgb,var(--aethel-text-inverse)_20%,transparent)]" />
+        <div className="h-2 w-full rounded bg-[color-mix(in_srgb,var(--aethel-text-inverse)_10%,transparent)]" />
+        <div className="mt-2 h-2 w-3/4 rounded bg-[color-mix(in_srgb,var(--aethel-text-inverse)_10%,transparent)]" />
       </div>
-      <p className="text-[11px] text-white/30">Hot reload — 0.14s</p>
+      <p className="text-[11px] text-[color-mix(in_srgb,var(--aethel-text-inverse)_30%,transparent)]">
+        Hot reload — 0.14s
+      </p>
     </div>
   )
 }

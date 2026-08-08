@@ -50,9 +50,9 @@ function peer(clientId: number, name: string, color: string, x: number, y: numbe
 export const ThreeLiveCursors: Story = {
   args: {
     peers: [
-      peer(1, 'Ada Lovelace', 'tomato', 60, 80),
-      peer(2, 'Grace Hopper', 'turquoise', 220, 160),
-      peer(3, 'Alan Turing', 'cornflowerblue', 350, 230),
+      peer(1, 'Ada Lovelace', 'var(--aethel-error)', 60, 80),
+      peer(2, 'Grace Hopper', 'var(--aethel-neon-cyan)', 220, 160),
+      peer(3, 'Alan Turing', 'var(--aethel-primary)', 350, 230),
     ],
   },
 }
@@ -62,12 +62,12 @@ export const WithIdleCursorFaded: Story = {
     fadeIdle: true,
     idleMs: 1000,
     peers: [
-      peer(1, 'Ada Lovelace', 'tomato', 60, 80),
+      peer(1, 'Ada Lovelace', 'var(--aethel-error)', 60, 80),
       {
         clientId: 2,
         id: '2',
         name: 'Grace Hopper',
-        color: 'turquoise',
+        color: 'var(--aethel-neon-cyan)',
         cursor: { x: 220, y: 160 },
         lastActivity: Date.now() - 10_000, // idle
       },

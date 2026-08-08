@@ -75,7 +75,7 @@ Before executing any block, the executor MUST comply with `AETHEL_AAA_SYSTEM_ARC
 | **CW2** | Kernel load-scale (SPH/XPBD/LBM/fracture) on RTX 3060 | Budgets + fixtures; AAA still HELD |
 | **CW3** | Single render authority path | **DONE-core (2026-08-08)** — present-root + catalog + fail-closed marketing; UE single RHI / WebGPU viewport / WebView exclusive still HELD |
 | **CW4** | UI persistence spine | localStorage exception-only |
-| **CW5** | Design-system government | Deepen shells; tokens only |
+| **CW5** | Design-system government | **PARTIAL** — L.10 colors 0 + Storybook token sync gate; **Figma HELD** |
 | **CW6** | Agents work-OS (not J.11/J.12 restart) | **DONE apply-path (2026-08-02)** — AST/L.5 multi-file swarm; `COMPOSER_SURPASS_CLAIM=false` (not Cursor surpass) |
 | **CW7** | Disk austerity | Cargo/target on E:/D:; CAS; prune |
 
