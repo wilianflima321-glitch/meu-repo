@@ -2,9 +2,8 @@
  * Timeline3D authored lanes → scene-node sample at playhead (pure).
  * Maps position / rotation / scale / visibility / material intensity→color.
  *
- * Event remains HELD (fail-closed):
- * - Event: no IDE event-cue bus / gameplay dispatch on `ISceneService` — crossing
- *   markers are reported in `held` only (no fake gameplay fire).
+ * Event lane: edge-triggered crossings → typed cues (editor/runtime hooks).
+ * GAS / gameplay / physics wiring is separate — this module never fakes them.
  */
 
 import type { SequencerTimeline, SequencerTrack } from '@/lib/sequencer/core/types'
@@ -14,6 +13,7 @@ import {
   resolveTrackLane,
   type AuthorableTimelineLane,
 } from '@/lib/sequencer/timeline-authoring'
+import type { TimelineEventCue } from '@/lib/sequencer/timeline-event-cue-bus'
 
 export const TIMELINE_SCENE_APPLY_WIRED = true as const
 
@@ -39,14 +39,6 @@ export type TimelineSceneNodePatch = {
   intensity?: number
 }
 
-export type TimelineSceneHeldLane = {
-  lane: 'event'
-  reason: 'event_held'
-  trackId: string
-  eventName?: string
-  timeMs?: number
-}
-
 export type TimelineSceneSkip = {
   trackId: string
   lane: string | null
@@ -57,7 +49,8 @@ export type TimelineSceneSkip = {
 export type TimelineSceneApplySnapshot = {
   timeMs: number
   patches: TimelineSceneNodePatch[]
-  held: TimelineSceneHeldLane[]
+  /** Edge-triggered event crossings for this scrub step (not every frame while parked). */
+  eventCues: TimelineEventCue[]
   skipped: TimelineSceneSkip[]
 }
 
@@ -118,22 +111,55 @@ function sampleVec3Channel(
   }
 }
 
-function eventsCrossing(track: SequencerTrack, prevMs: number, timeMs: number): TimelineSceneHeldLane[] {
-  const held: TimelineSceneHeldLane[] = []
+/** True when playhead crosses cueTime between prev and next (either direction). */
+export function playheadCrossedCue(prevMs: number, nextMs: number, cueTimeMs: number): boolean {
+  if (!Number.isFinite(prevMs) || !Number.isFinite(nextMs) || !Number.isFinite(cueTimeMs)) {
+    return false
+  }
+  if (prevMs === nextMs) return false
+  if (nextMs > prevMs) return cueTimeMs > prevMs && cueTimeMs <= nextMs
+  return cueTimeMs < prevMs && cueTimeMs >= nextMs
+}
+
+function authoredCueValue(
+  metadata: Record<string, unknown> | undefined,
+): string | number | boolean | undefined {
+  if (!metadata) return undefined
+  const raw = metadata.cueValue ?? metadata.value ?? metadata.eventValue
+  if (typeof raw === 'string' || typeof raw === 'number' || typeof raw === 'boolean') {
+    return raw
+  }
+  return undefined
+}
+
+function eventsCrossing(
+  track: SequencerTrack,
+  prevMs: number,
+  timeMs: number,
+): TimelineEventCue[] {
+  const cues: TimelineEventCue[] = []
+  const nodeId = resolveTrackTargetNodeId(track) ?? undefined
   for (const clip of track.clips) {
     if (clip.metadata?.bindOnly === true) continue
     const t = clip.startMs
-    if (t > prevMs && t <= timeMs) {
-      held.push({
-        lane: 'event',
-        reason: 'event_held',
-        trackId: track.id,
-        eventName: String(clip.metadata?.eventName ?? clip.label),
-        timeMs: t,
-      })
-    }
+    if (!playheadCrossedCue(prevMs, timeMs, t)) continue
+
+    const nameRaw = clip.metadata?.eventName ?? clip.metadata?.cueName ?? clip.label
+    const cueName = typeof nameRaw === 'string' ? nameRaw.trim() : ''
+    if (!cueName) continue // fail-closed: no invent
+
+    const value = authoredCueValue(clip.metadata as Record<string, unknown> | undefined)
+    cues.push({
+      trackId: track.id,
+      clipId: clip.id,
+      cueName,
+      timeMs: t,
+      timeSec: t / 1000,
+      ...(nodeId ? { nodeId } : {}),
+      ...(value !== undefined ? { value } : {}),
+    })
   }
-  return held
+  return cues
 }
 
 function clamp01(n: number): number {
@@ -186,6 +212,7 @@ export function scaleCssColorByIntensity(baselineColor: string, intensity: numbe
 /**
  * Pure sample of authored Timeline3D lanes at timeMs.
  * Fail-closed: tracks without a documented target node id are skipped (not invented).
+ * Event crossings are returned as cues — dispatch to the bus is the wire's job.
  */
 export function sampleTimelineSceneAtTime(
   timeline: SequencerTimeline,
@@ -195,7 +222,7 @@ export function sampleTimelineSceneAtTime(
 ): TimelineSceneApplySnapshot {
   const t = clampTime(timeMs, timeline.durationMs)
   const patches: TimelineSceneNodePatch[] = []
-  const held: TimelineSceneHeldLane[] = []
+  const eventCues: TimelineEventCue[] = []
   const skipped: TimelineSceneSkip[] = []
 
   for (const track of timeline.tracks) {
@@ -221,7 +248,7 @@ export function sampleTimelineSceneAtTime(
     }
 
     if (lane === 'event') {
-      held.push(...eventsCrossing(track, prevTimeMs, t))
+      eventCues.push(...eventsCrossing(track, prevTimeMs, t))
       continue
     }
 
@@ -330,5 +357,5 @@ export function sampleTimelineSceneAtTime(
     }
   }
 
-  return { timeMs: t, patches, held, skipped }
+  return { timeMs: t, patches, eventCues, skipped }
 }

@@ -1,6 +1,9 @@
 /**
  * Timeline3D scrub/play → live ISceneService apply (Zero-MVP).
- * Demo/fixture bindings must not mutate the real viewport scene graph.
+ * Demo/fixture bindings must not mutate the real viewport scene graph
+ * and must never emit to the production event-cue bus.
+ *
+ * Event cues are editor/runtime hooks only — GAS/gameplay bind is separate.
  */
 
 import type { ISceneService, IDESceneNode } from '../../../packages/ide-ui/backend/types'
@@ -12,13 +15,17 @@ import {
   type TimelineSceneVec3,
   TIMELINE_SCENE_APPLY_WIRED,
 } from '@/lib/sequencer/timeline-scene-apply'
+import {
+  emitTimelineEventCues,
+  TIMELINE_EVENT_CUE_BUS_WIRED,
+} from '@/lib/sequencer/timeline-event-cue-bus'
 
 export const TIMELINE_SCENE_VIEWPORT_WIRE_WIRED = true as const
 
 export type TimelineSceneViewportApplyResult = {
   wired: typeof TIMELINE_SCENE_VIEWPORT_WIRE_WIRED
   applied: boolean
-  /** Demo/fixture path — real scene left untouched. */
+  /** Demo/fixture path — real scene left untouched; bus silent. */
   demoBlocked: boolean
   nodesUpdated: number
   transformsApplied: number
@@ -26,7 +33,12 @@ export type TimelineSceneViewportApplyResult = {
   colorsApplied: number
   /** Material patches rejected (missing node / no live color channel / locked). */
   colorRejected: number
-  /** Event lane still HELD — no cue bus. */
+  /** Event cues emitted to the production bus this scrub step. */
+  eventsEmitted: number
+  /**
+   * @deprecated Prefer eventsEmitted. Was “held” count when no cue bus existed;
+   * now 0 when bus is wired (demo still reports sampled crossings without emit).
+   */
   heldEvent: number
   /** @deprecated Prefer colorRejected; kept 0 when material applies (compat). */
   heldMaterial: number
@@ -59,6 +71,7 @@ function nodeExists(scene: ISceneService, nodeId: string): IDESceneNode | undefi
 /**
  * Sample authored timeline at timeSec and push transforms/visibility/color into the live scene.
  * Fail-closed: demo binds, missing node ids, and absent/unsupported color channels do not invent targets.
+ * Event crossings emit once per edge via `emitTimelineEventCues` (never in demoMode).
  */
 export function applyTimelineScrubToScene(input: {
   timeline: SequencerTimeline
@@ -73,6 +86,7 @@ export function applyTimelineScrubToScene(input: {
 
   if (input.isDemo) {
     const snapshot = sampleTimelineSceneAtTime(input.timeline, timeMs, prevTimeMs)
+    // Fail-closed: demo never emits to the production cue bus.
     return {
       wired: TIMELINE_SCENE_VIEWPORT_WIRE_WIRED,
       applied: false,
@@ -83,7 +97,8 @@ export function applyTimelineScrubToScene(input: {
       colorsApplied: 0,
       colorRejected: 0,
       heldMaterial: 0,
-      heldEvent: snapshot.held.filter((h) => h.lane === 'event').length,
+      eventsEmitted: 0,
+      heldEvent: snapshot.eventCues.length,
       skippedMissingNode: snapshot.skipped.filter((s) => s.reason === 'missing_node_id').length,
       skippedOther: snapshot.skipped.filter((s) => s.reason !== 'missing_node_id').length,
       snapshot,
@@ -145,9 +160,14 @@ export function applyTimelineScrubToScene(input: {
     }
   }
 
+  const eventsEmitted =
+    TIMELINE_EVENT_CUE_BUS_WIRED && snapshot.eventCues.length > 0
+      ? emitTimelineEventCues(snapshot.eventCues)
+      : 0
+
   return {
     wired: TIMELINE_SCENE_APPLY_WIRED && TIMELINE_SCENE_VIEWPORT_WIRE_WIRED,
-    applied: touched.size > 0,
+    applied: touched.size > 0 || eventsEmitted > 0,
     demoBlocked: false,
     nodesUpdated: touched.size,
     transformsApplied,
@@ -155,7 +175,8 @@ export function applyTimelineScrubToScene(input: {
     colorsApplied,
     colorRejected,
     heldMaterial: 0,
-    heldEvent: snapshot.held.filter((h) => h.lane === 'event').length,
+    eventsEmitted,
+    heldEvent: 0,
     skippedMissingNode: snapshot.skipped.filter((s) => s.reason === 'missing_node_id').length,
     skippedOther: snapshot.skipped.filter((s) => s.reason !== 'missing_node_id').length,
     snapshot,

@@ -8,7 +8,7 @@
 // file). Relative paths are used instead of a new tsconfig alias because no
 // existing web import proves an `@aethel/ide-ui` alias actually resolves
 // through Next's webpack config today.
-import { useCallback, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Boxes, Film, SlidersHorizontal, Terminal as TerminalIcon } from 'lucide-react';
 import { Outliner3D } from '../../../packages/ide-ui/Outliner3D';
 import type { SceneNode } from '../../../packages/ide-ui/Outliner3D';
@@ -21,6 +21,10 @@ import { DockPanel } from '../../../packages/ide-ui/docking';
 import { ConsoleIntegration } from '../../../packages/ide-ui/ConsoleIntegration';
 import { getProjectTimelineBinding } from '@/lib/sequencer/project-timeline-store';
 import { applyTimelineScrubToScene } from '@/lib/sequencer/timeline-scene-viewport-wire';
+import {
+  subscribeTimelineEventCues,
+  type TimelineEventCue,
+} from '@/lib/sequencer/timeline-event-cue-bus';
 import { createComponentLogger } from '@/lib/observability/logger';
 
 const log = createComponentLogger('CanvasViewportSurface');
@@ -41,13 +45,33 @@ const EMPTY_TIMELINE_SNAPSHOT: IDETimelineSnapshot = {
 // than fabricate a second renderer, this surface reuses the *same* scene
 // state (`useViewportStore` via `WebIDEBackend`) so Outliner/Properties here
 // reflect the real, shared engine scene graph instead of a disconnected mock.
-function NexusCanvasV2({ renderMode, nodeCount }: { renderMode: 'draft' | 'cinematic'; nodeCount: number }) {
+function NexusCanvasV2({
+  renderMode,
+  nodeCount,
+  lastEventCue,
+}: {
+  renderMode: 'draft' | 'cinematic';
+  nodeCount: number;
+  lastEventCue: TimelineEventCue | null;
+}) {
   return (
-    <div className="flex h-full w-full items-center justify-center bg-[var(--aethel-surface-primary)]">
+    <div className="relative flex h-full w-full items-center justify-center bg-[var(--aethel-surface-primary)]">
       <div className="text-center text-xs text-[var(--aethel-text-secondary)]">
         Canvas mode shares the live Scene viewport graph ({nodeCount} object{nodeCount === 1 ? '' : 's'}).
         <div className="mt-1 text-[10px] text-[var(--aethel-text-tertiary)]">Render Mode: {renderMode}</div>
       </div>
+      {lastEventCue ? (
+        <div
+          className="absolute bottom-2 left-2 max-w-[min(100%,24rem)] truncate rounded-sm border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-elevated)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]"
+          title="Timeline event cue (editor hook — not gameplay/GAS)"
+        >
+          Event cue: {lastEventCue.cueName}
+          {lastEventCue.value !== undefined ? ` = ${String(lastEventCue.value)}` : ''}
+          {' @ '}
+          {lastEventCue.timeSec.toFixed(2)}s
+          {lastEventCue.nodeId ? ` · ${lastEventCue.nodeId}` : ''}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -79,7 +103,20 @@ export default function CanvasViewportSurface({
     () => EMPTY_TIMELINE_SNAPSHOT,
   );
   const [playheadSec, setPlayheadSec] = useState(0);
+  const [lastEventCue, setLastEventCue] = useState<TimelineEventCue | null>(null);
   const prevPlayheadRef = useRef(0);
+
+  useEffect(() => {
+    return subscribeTimelineEventCues((cue) => {
+      setLastEventCue(cue);
+      log.debug('timeline_event_cue', {
+        trackId: cue.trackId,
+        cueName: cue.cueName,
+        timeSec: cue.timeSec,
+        nodeId: cue.nodeId,
+      });
+    });
+  }, []);
 
   const scrubLiveScene = useCallback(
     (timeSec: number) => {
@@ -89,7 +126,8 @@ export default function CanvasViewportSurface({
         prevPlayheadRef.current = timeSec;
         return;
       }
-      // Demo/fixture binds must not mutate the real viewport scene graph.
+      // Demo/fixture binds must not mutate the real viewport scene graph
+      // and must not emit to the production event-cue bus.
       if (binding.isDemo || timeline.isDemo) {
         prevPlayheadRef.current = timeSec;
         return;
@@ -114,7 +152,7 @@ export default function CanvasViewportSurface({
           colorsApplied: result.colorsApplied,
           colorRejected: result.colorRejected,
           noColorSupportNodes: result.noColorSupportNodes,
-          heldEvent: result.heldEvent,
+          eventsEmitted: result.eventsEmitted,
         });
       }
     },
@@ -144,7 +182,13 @@ export default function CanvasViewportSurface({
           />
         </DockPanel>
       }
-      center={<NexusCanvasV2 renderMode={renderMode} nodeCount={nodes.length} />}
+      center={
+        <NexusCanvasV2
+          renderMode={renderMode}
+          nodeCount={nodes.length}
+          lastEventCue={lastEventCue}
+        />
+      }
       right={
         <DockPanel id="properties" title="Properties" icon={SlidersHorizontal} defaultRegion="rightBar">
           <PropertiesPanel3D

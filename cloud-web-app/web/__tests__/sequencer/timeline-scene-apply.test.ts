@@ -13,11 +13,18 @@ import {
   createAuthoringTimelineShell,
 } from '@/lib/sequencer/timeline-authoring'
 import {
+  playheadCrossedCue,
   resolveTrackTargetNodeId,
   sampleTimelineSceneAtTime,
   scaleCssColorByIntensity,
 } from '@/lib/sequencer/timeline-scene-apply'
 import { applyTimelineScrubToScene } from '@/lib/sequencer/timeline-scene-viewport-wire'
+import {
+  __resetTimelineEventCueBusForTests,
+  listRecentTimelineEventCues,
+  subscribeTimelineEventCues,
+  type TimelineEventCue,
+} from '@/lib/sequencer/timeline-event-cue-bus'
 import { buildDemoCutsceneTimeline } from '@/lib/sequencer/sequencer-apply-deepen'
 import {
   isValidSceneColorLiteral,
@@ -196,7 +203,7 @@ describe('timeline-scene-apply sampling', () => {
     expect(end.patches.find((p) => p.lane === 'visibility')?.visible).toBe(false)
   })
 
-  it('samples material intensity into color patches (event stays HELD)', () => {
+  it('samples material intensity into color patches and event crossings as cues', () => {
     let tl = createAuthoringTimelineShell('proj-material')
     let r = addAuthoringKeyframe(tl, {
       lane: 'material',
@@ -236,8 +243,33 @@ describe('timeline-scene-apply sampling', () => {
     expect(mat?.nodeId).toBe('mesh-a')
     expect(mat?.intensity).toBeCloseTo(0.6, 5)
     expect(mat?.color).toBe(scaleCssColorByIntensity('#ff0000', mat!.intensity!))
-    expect(snap.held.some((h) => h.lane === 'event' && h.eventName)).toBe(true)
-    expect(snap.held.some((h) => (h as { lane: string }).lane === 'material')).toBe(false)
+    expect(snap.eventCues.some((c) => c.clipId === 'evt-cue' && c.nodeId === 'mesh-a')).toBe(true)
+    expect(snap.eventCues.every((c) => c.cueName.length > 0)).toBe(true)
+  })
+
+  it('edge-triggers event cues once per cross, not while parked on keyframe', () => {
+    expect(playheadCrossedCue(0, 500, 500)).toBe(true)
+    expect(playheadCrossedCue(500, 500, 500)).toBe(false)
+    expect(playheadCrossedCue(600, 400, 500)).toBe(true)
+    expect(playheadCrossedCue(400, 450, 500)).toBe(false)
+
+    let tl = createAuthoringTimelineShell('proj-edge')
+    const r = addAuthoringKeyframe(tl, {
+      lane: 'event',
+      timeSec: 1,
+      keyframeId: 'evt-edge',
+      targetNodeId: 'mesh-b',
+    })
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    tl = r.timeline
+
+    const cross = sampleTimelineSceneAtTime(tl, 1000, 0)
+    expect(cross.eventCues).toHaveLength(1)
+    expect(cross.eventCues[0]?.clipId).toBe('evt-edge')
+
+    const parked = sampleTimelineSceneAtTime(tl, 1000, 1000)
+    expect(parked.eventCues).toHaveLength(0)
   })
 
   it('scaleCssColorByIntensity darkens baseline at intensity 0.5', () => {
@@ -250,6 +282,7 @@ describe('timeline-scene-apply sampling', () => {
 describe('timeline-scene-viewport-wire apply', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    __resetTimelineEventCueBusForTests()
   })
 
   it('applies transform + visibility to live scene nodes', () => {
@@ -372,22 +405,75 @@ describe('timeline-scene-viewport-wire apply', () => {
     expect(scene.getNodes()[0]!.color).toBe(before)
   })
 
-  it('demoMode must not mutate the real scene', () => {
+  it('demoMode must not mutate the real scene or emit production cues', () => {
     const demo = buildDemoCutsceneTimeline()
     const scene = makeScene([seedNode('should-stay', { position: [3, 3, 3], color: '#112233' })])
     const beforePos = scene.getNodes()[0]!.position.slice() as [number, number, number]
     const beforeColor = scene.getNodes()[0]!.color
+    const received: TimelineEventCue[] = []
+    const unsub = subscribeTimelineEventCues((c) => received.push(c))
     const result = applyTimelineScrubToScene({
       timeline: demo,
       timeSec: 1.5,
+      prevTimeSec: 0,
       scene,
       isDemo: true,
     })
+    unsub()
     expect(result.demoBlocked).toBe(true)
     expect(result.applied).toBe(false)
     expect(result.colorsApplied).toBe(0)
+    expect(result.eventsEmitted).toBe(0)
+    expect(received).toHaveLength(0)
+    expect(listRecentTimelineEventCues()).toHaveLength(0)
     expect(scene.getNodes()[0]!.position).toEqual(beforePos)
     expect(scene.getNodes()[0]!.color).toBe(beforeColor)
+  })
+
+  it('emits typed event cues on live scrub crossing (edge once)', () => {
+    let tl = createAuthoringTimelineShell('proj-cues')
+    const r = addAuthoringKeyframe(tl, {
+      lane: 'event',
+      timeSec: 0.75,
+      keyframeId: 'cue-live',
+      targetNodeId: 'hero',
+    })
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    tl = r.timeline
+
+    const received: TimelineEventCue[] = []
+    const unsub = subscribeTimelineEventCues((c) => received.push(c))
+    const scene = makeScene([seedNode('hero')])
+
+    const first = applyTimelineScrubToScene({
+      timeline: tl,
+      timeSec: 0.75,
+      prevTimeSec: 0,
+      scene,
+      isDemo: false,
+    })
+    expect(first.eventsEmitted).toBe(1)
+    expect(first.heldEvent).toBe(0)
+    expect(received).toHaveLength(1)
+    expect(received[0]).toMatchObject({
+      trackId: 'lane-event',
+      clipId: 'cue-live',
+      nodeId: 'hero',
+      timeMs: 750,
+    })
+    expect(received[0]!.cueName.length).toBeGreaterThan(0)
+
+    const parked = applyTimelineScrubToScene({
+      timeline: tl,
+      timeSec: 0.75,
+      prevTimeSec: 0.75,
+      scene,
+      isDemo: false,
+    })
+    expect(parked.eventsEmitted).toBe(0)
+    expect(received).toHaveLength(1)
+    unsub()
   })
 
   it('fail-closed when bound node id is absent from the scene', () => {
