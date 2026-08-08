@@ -17,6 +17,7 @@ mod desktop_commands;
 mod entropy_gpu_particles;
 mod gpu_culling;
 mod hardware_profiler;
+mod lsp_farm;
 mod mmap_commands;
 mod motion_matching;
 mod physics_commands;
@@ -31,8 +32,12 @@ use aethel_studio_local::physics_kernel::PhysicsKernel;
 // kernel_*_wire modules) became unused as a result and were removed here to keep
 // `cargo clippy -D warnings` green. The underlying modules remain declared `pub` in
 // `lib.rs` and their code is untouched; only the now-dead glob-imports in this file
-// were dropped. Re-wiring into `generate_handler!` is a deliberate follow-up decision,
-// not made in this pass (Onda G deferred — see AETHEL_FOCUS1_EXECUTION_PROGRESS.md P2g).
+// were dropped. Re-wiring soak/probe kernel wires into `generate_handler!` remains a
+// deliberate follow-up (Onda G deferred — see AETHEL_FOCUS1_EXECUTION_PROGRESS.md P2g).
+//
+// L.13 exception (2026-08-08): minimal `lsp_farm::*` commands are registered below
+// (honesty/probe/spawn/list/stop/ipc_probe) without re-expanding the cut kernel-wire
+// handler surface. Monaco desktop hover/definition acceptance stays OPEN.
 use aethel_studio_local::kernel_svo_terrain_world_partition_wire::*;
 use tauri::Manager;
 
@@ -386,6 +391,7 @@ fn main() {
         .manage(std::sync::Arc::new(hardware_profiler::GpuIdentityState::default()))
         .manage(std::sync::Arc::new(wgpu_renderer::PresentProbeState::default()))
         .manage(Mutex::new(mmap_commands::MmapRegistry::default()))
+        .manage(Mutex::new(lsp_farm::LspFarmRegistry::default()))
         .manage(wasm_runtime::WasmHostState::default())
         .manage(Mutex::new(PhysicsKernel::new()))
         .manage(Mutex::new(WorldPartitionStreamState::default()))
@@ -416,6 +422,13 @@ fn main() {
             motion_matching::motion_matching_status,
             entropy_gpu_particles::entropy_gpu_particle_soak_cmd,
             entropy_gpu_particles::probe_entropy_gpu_particles_cmd,
+            // L.13 UniversalLspFarm first-light (minimal; do not re-expand cut kernel wires)
+            lsp_farm::lsp_farm_honesty,
+            lsp_farm::lsp_farm_probe,
+            lsp_farm::lsp_farm_spawn,
+            lsp_farm::lsp_farm_list,
+            lsp_farm::lsp_farm_stop,
+            lsp_farm::lsp_farm_ipc_probe,
             aethel_studio_local::plugin_sandbox::execute_sandbox_plugin,
             aethel_studio_local::plugin_sandbox::start_sandbox_telemetry,
             aethel_studio_local::plugin_sandbox::export_vibe_embedding,

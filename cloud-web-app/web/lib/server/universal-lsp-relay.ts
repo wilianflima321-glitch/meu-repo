@@ -9,9 +9,10 @@
  *
  * Honesty (Zero-MVP):
  * - Cloud HTTP relay path is real (`/api/lsp/*` + this registry).
- * - Tauri desktop sidecar spawn (`apps/studio-local/src-tauri/src/lsp_farm.rs`)
- *   is **HELD** — not stubbed as shipped.
- * - Acceptance hover/definition in Monaco desktop export remains open until Tauri farm.
+ * - Tauri desktop sidecar first-light (`apps/studio-local/src-tauri/src/lsp_farm.rs`)
+ *   is **PARTIAL** — real binary discovery + process spawn + stdio initialize IPC probe;
+ *   fail-closed when binary missing (never fake diagnostics).
+ * - Monaco desktop hover/definition acceptance remains **OPEN** (multi-week).
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'
@@ -51,7 +52,8 @@ export type LspFarmLanguageStatus = {
 
 export type UniversalLspFarmHonesty = {
   cloudRelayCore: true
-  tauriSidecarSpawn: 'held'
+  /** `partial` = Tauri lsp_farm first-light shipped; never `live` until Monaco acceptance. */
+  tauriSidecarSpawn: 'partial'
   monacoDesktopHoverDefinition: 'open'
   marketingAllowed: false
   message: string
@@ -98,11 +100,11 @@ async function probeCommandOnPath(command: string): Promise<boolean> {
 export function describeUniversalLspFarmHonesty(): UniversalLspFarmHonesty {
   return {
     cloudRelayCore: true,
-    tauriSidecarSpawn: 'held',
+    tauriSidecarSpawn: 'partial',
     monacoDesktopHoverDefinition: 'open',
     marketingAllowed: false,
     message:
-      'L.13 cloud relay registry is live; Tauri lsp_farm.rs sidecar spawn and Monaco desktop hover/definition acceptance remain HELD/open.',
+      'L.13 cloud relay + Tauri lsp_farm first-light (spawn/IPC probe) are real; Monaco desktop hover/definition acceptance remains OPEN; marketing blocked.',
   }
 }
 

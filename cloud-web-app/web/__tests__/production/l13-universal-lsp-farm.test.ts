@@ -29,7 +29,7 @@ vi.mock('@/lib/observability/logger', () => ({
 }))
 
 describe('L.13 UniversalLspFarm (cloud relay core)', () => {
-  it('resolves HTTP relay paths and never claims Tauri sidecar live', () => {
+  it('resolves HTTP relay paths and never claims Tauri sidecar live / Monaco acceptance', () => {
     const endpoint = resolveUniversalLspEndpoint({
       AETHEL_LSP_WS_URL: 'ws://lsp.example/farm',
       AETHEL_LSP_WS_FARM_LIVE: '1',
@@ -38,11 +38,15 @@ describe('L.13 UniversalLspFarm (cloud relay core)', () => {
     expect(endpoint.httpRelayPath).toBe('/api/lsp')
     expect(endpoint.wsUrl).toBe('ws://lsp.example/farm')
     expect(endpoint.wsFarmLive).toBe(true)
-    expect(endpoint.tauriSidecar).toBe('held')
+    // First-light desktop farm exists; refuse env uplift to marketing `live`.
+    expect(endpoint.tauriSidecar).toBe('partial')
+    expect(resolveUniversalLspEndpoint({ AETHEL_LSP_TAURI_SIDECAR: 'live' }).tauriSidecar).toBe(
+      'partial',
+    )
 
     const honesty = describeUniversalLspFarmHonesty()
     expect(honesty.cloudRelayCore).toBe(true)
-    expect(honesty.tauriSidecarSpawn).toBe('held')
+    expect(honesty.tauriSidecarSpawn).toBe('partial')
     expect(honesty.marketingAllowed).toBe(false)
     expect(honesty.monacoDesktopHoverDefinition).toBe('open')
   })
