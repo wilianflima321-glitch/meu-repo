@@ -39,6 +39,10 @@ pub struct Meshlet {
     /// Backface culling cone (axis.xyz + cutoff as cos(half_angle))
     pub cone_axis: [f32; 3],
     pub cone_cutoff: f32,
+    /// ID of the parent cluster in the HLOD DAG (u32::MAX if root)
+    pub parent_id: u32,
+    /// The hierarchy level of this cluster (0 = leaf)
+    pub level: u32,
 }
 
 impl Default for Meshlet {
@@ -52,6 +56,8 @@ impl Default for Meshlet {
             bounds_radius: 0.0,
             cone_axis: [0.0, 1.0, 0.0],
             cone_cutoff: -1.0,
+            parent_id: u32::MAX,
+            level: 0,
         }
     }
 }
@@ -176,6 +182,84 @@ impl MeshletClusterizer {
             meshlet.lod_error = radius;
 
             meshlets.push(meshlet);
+        }
+
+        // Build the Hierarchical Level of Detail (HLOD) DAG
+        self.build_hlod_hierarchy(meshlets)
+    }
+
+    /// Groups meshlets into a tree structure to enable hierarchical cluster culling.
+    /// Returns the flattened array of meshlets (parents appended after children).
+    fn build_hlod_hierarchy(&self, mut meshlets: Vec<Meshlet>) -> Vec<Meshlet> {
+        if meshlets.is_empty() {
+            return meshlets;
+        }
+
+        let mut current_level_indices: Vec<usize> = (0..meshlets.len()).collect();
+        let mut level = 1;
+
+        while current_level_indices.len() > 1 {
+            // Very simple spatial grouping: sort by X axis to group nearby clusters
+            // In a production AAA system, this would use Morton Codes (Z-curve) or K-Means.
+            current_level_indices.sort_by(|&a, &b| {
+                meshlets[a].bounds_center[0]
+                    .partial_cmp(&meshlets[b].bounds_center[0])
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            });
+
+            let mut next_level_indices = Vec::new();
+
+            // Group into sets of 4
+            for chunk in current_level_indices.chunks(4) {
+                let mut parent = Meshlet {
+                    level,
+                    ..Meshlet::default()
+                };
+                let parent_id = meshlets.len() as u32;
+
+                let mut min_x = f32::MAX;
+                let mut min_y = f32::MAX;
+                let mut min_z = f32::MAX;
+                let mut max_x = f32::MIN;
+                let mut max_y = f32::MIN;
+                let mut max_z = f32::MIN;
+
+                for &child_idx in chunk {
+                    // Link child to parent
+                    meshlets[child_idx].parent_id = parent_id;
+
+                    let child = &meshlets[child_idx];
+                    let r = child.bounds_radius;
+                    min_x = min_x.min(child.bounds_center[0] - r);
+                    min_y = min_y.min(child.bounds_center[1] - r);
+                    min_z = min_z.min(child.bounds_center[2] - r);
+                    max_x = max_x.max(child.bounds_center[0] + r);
+                    max_y = max_y.max(child.bounds_center[1] + r);
+                    max_z = max_z.max(child.bounds_center[2] + r);
+                }
+
+                // Parent bounding sphere roughly encompassing children
+                parent.bounds_center = [
+                    (min_x + max_x) * 0.5,
+                    (min_y + max_y) * 0.5,
+                    (min_z + max_z) * 0.5,
+                ];
+                parent.bounds_radius = (max_x - min_x).max(max_y - min_y).max(max_z - min_z) * 0.5;
+                
+                // Parent LOD error is its radius (simplified metric)
+                parent.lod_error = parent.bounds_radius;
+
+                // Propagate parent error down to children to serve as the HLOD cutoff
+                for &child_idx in chunk {
+                    meshlets[child_idx].parent_error = parent.lod_error;
+                }
+
+                next_level_indices.push(meshlets.len());
+                meshlets.push(parent);
+            }
+
+            current_level_indices = next_level_indices;
+            level += 1;
         }
 
         meshlets

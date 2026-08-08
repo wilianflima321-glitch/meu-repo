@@ -256,6 +256,7 @@ impl EntropyGpuKernel {
             layout: Some(&pipeline_layout),
             module: &shader,
             entry_point: "integrate_main",
+            compilation_options: Default::default(),
         });
         Self {
             pipeline,

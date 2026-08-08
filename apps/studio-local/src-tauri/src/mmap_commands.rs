@@ -24,8 +24,17 @@ use crate::desktop_commands::{ensure_allowed_existing_path, locked_project_root,
 
 #[derive(Default)]
 pub struct MmapRegistry {
-    open_maps: HashMap<String, (Mmap, PathBuf)>,
-    next_handle: u64,
+    pub open_maps: HashMap<String, (Mmap, PathBuf)>,
+    pub next_handle: u64,
+}
+
+impl MmapRegistry {
+    pub fn read_binary_slice(&self, handle: &str, offset: usize, length: usize) -> Option<Vec<u8>> {
+        let (mmap, _) = self.open_maps.get(handle)?;
+        let end = offset.checked_add(length)?;
+        let slice = mmap.get(offset..end)?;
+        Some(slice.to_vec())
+    }
 }
 
 #[derive(Debug, Serialize)]

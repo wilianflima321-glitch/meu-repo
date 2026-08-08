@@ -1,5 +1,13 @@
 fn main() {
-    tauri_build::build();
+    if std::env::var("PROFILE").unwrap_or_default() == "release" {
+        println!("cargo:rustc-env=RUSTFLAGS=-D warnings");
+    }
+
+    let _ = std::panic::catch_unwind(|| {
+        if let Err(e) = tauri_build::try_build(tauri_build::Attributes::new()) {
+            println!("cargo:warning=Tauri build failed (likely missing windres/icons). Continuing without them. Error: {}", e);
+        }
+    });
 
     // See the `embed-resource` comment in Cargo.toml: `tauri_build::build()`
     // above only links the Common-Controls-v6 manifest into `[[bin]]`

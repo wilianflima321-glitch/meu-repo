@@ -108,6 +108,7 @@ impl WgpuRenderer {
                 layout: None,
                 module: &shader,
                 entry_point,
+                compilation_options: Default::default(),
             })
     }
 

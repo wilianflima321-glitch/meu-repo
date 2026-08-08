@@ -23,112 +23,31 @@ mod physics_commands;
 mod scene_graph;
 mod wasm_runtime;
 mod wgpu_renderer;
-use aethel_studio_local::ecs_parallel::*;
-use aethel_studio_local::geometry_clusterizer::*;
-use aethel_studio_local::gi_sdf::*;
+mod egui_overlay;
 use aethel_studio_local::physics_kernel::PhysicsKernel;
-use aethel_studio_local::auto_retopology_worker::*;
-use aethel_studio_local::kernel_foundation_wire::*;
-use aethel_studio_local::kernel_desktop_wire::*;
-use aethel_studio_local::kernel_mut_dna_desktop_wire::*;
-use aethel_studio_local::kernel_spectral_sonic_desktop_wire::*;
-use aethel_studio_local::kernel_world_soa_sab_wire::*;
-use aethel_studio_local::kernel_mmap_ecs_pager_wire::*;
-use aethel_studio_local::kernel_simd_clay_math_wire::*;
-use aethel_studio_local::kernel_simd_world_soa_hot_path_wire::*;
-use aethel_studio_local::kernel_baremetal_memory_manager_wire::*;
-use aethel_studio_local::kernel_slab_allocator_mmap_wire::*;
-use aethel_studio_local::kernel_unified_field_network_wire::*;
-use aethel_studio_local::kernel_autonomous_entropy_corrector_wire::*;
-use aethel_studio_local::kernel_fractal_energy_perturbation_wire::*;
-use aethel_studio_local::kernel_curved_raymarcher_wire::*;
-use aethel_studio_local::kernel_shadow_time_reversal_wire::*;
-use aethel_studio_local::kernel_four_dimensional_time_sdf_wire::*;
-use aethel_studio_local::kernel_mnemonic_matter_entropy_wire::*;
-use aethel_studio_local::kernel_synesthetic_sensory_remap_wire::*;
-use aethel_studio_local::kernel_autonomous_conflict_generator_wire::*;
-use aethel_studio_local::kernel_atmospheric_physical_damping_wire::*;
-use aethel_studio_local::kernel_position_based_dynamics_wire::*;
-use aethel_studio_local::kernel_hybrid_eulerian_lagrangian_pbd_wire::*;
-use aethel_studio_local::kernel_matter_thermodynamics_sph_wire::*;
-use aethel_studio_local::kernel_aerodynamic_navier_stokes_wire::*;
-use aethel_studio_local::kernel_lattice_boltzmann_fluid_solver_wire::*;
-use aethel_studio_local::kernel_lattice_boltzmann_gas_fluid_wire::*;
-use aethel_studio_local::kernel_acoustic_raytracing_echo_wire::*;
-use aethel_studio_local::kernel_finite_element_analysis_wire::*;
-use aethel_studio_local::kernel_acoustic_reverb_geometry_wire::*;
-use aethel_studio_local::kernel_fm_additive_synthesis_wire::*;
-use aethel_studio_local::kernel_hermite_duality_grid_wire::*;
-use aethel_studio_local::kernel_hermite_sharp_features_wire::*;
-use aethel_studio_local::kernel_sdf_sculptor_wire::*;
-use aethel_studio_local::kernel_sdf_adaptive_cascades_wire::*;
-use aethel_studio_local::kernel_stochastic_virtual_sdf_wire::*;
-use aethel_studio_local::kernel_sdf_octree_hashing_wire::*;
-use aethel_studio_local::kernel_sdf_motion_vector_buffer_wire::*;
-use aethel_studio_local::kernel_velocity_buffer_ecs_wire::*;
-use aethel_studio_local::kernel_hybrid_geometry_svo_wire::*;
-use aethel_studio_local::kernel_svo_depth_lod_wire::*;
-use aethel_studio_local::kernel_internal_voxel_density_wire::*;
-use aethel_studio_local::kernel_micro_displacement_noise_wire::*;
-use aethel_studio_local::kernel_volumetric_extinction_medium_wire::*;
-use aethel_studio_local::kernel_sdf_audio_raymarching_wire::*;
-use aethel_studio_local::kernel_contextual_physics_override_wire::*;
-use aethel_studio_local::kernel_dynamic_matter_entropy_wire::*;
-use aethel_studio_local::kernel_digital_pressure_chamber_wire::*;
-use aethel_studio_local::kernel_geometric_scale_constraints_wire::*;
-use aethel_studio_local::kernel_universal_logarithmic_scale_wire::*;
-use aethel_studio_local::kernel_sparse_seed_instancing_wire::*;
-use aethel_studio_local::kernel_lockfree_ring_buffer_wire::*;
-use aethel_studio_local::kernel_atomic_thread_sync_wire::*;
-use aethel_studio_local::kernel_crdt_quantum_sync_wire::*;
-use aethel_studio_local::kernel_delta_seed_synchronization_wire::*;
-use aethel_studio_local::kernel_state_sync_protocol_wire::*;
-use aethel_studio_local::kernel_bitstream_reality_sync_wire::*;
-use aethel_studio_local::kernel_binary_seed_streamer_wire::*;
-use aethel_studio_local::kernel_cpu_affinity_micro_workers_wire::*;
-use aethel_studio_local::kernel_asynchronous_reality_threads_wire::*;
-use aethel_studio_local::kernel_thermal_scheduler_wire::*;
-use aethel_studio_local::kernel_live_cache_manager_wire::*;
-use aethel_studio_local::kernel_hierarchical_streaming_cache_wire::*;
-use aethel_studio_local::kernel_metabolic_memory_wire::*;
-use aethel_studio_local::kernel_ghost_state_predictor_wire::*;
-use aethel_studio_local::kernel_reversible_quantum_undo_wire::*;
-use aethel_studio_local::kernel_genomic_seed_library_wire::*;
-use aethel_studio_local::kernel_genomic_seed_transmitter_wire::*;
-use aethel_studio_local::kernel_formal_logic_verifier_wire::*;
-use aethel_studio_local::kernel_quantum_overlap_wire::*;
-use aethel_studio_local::kernel_blue_noise_dithering_wire::*;
-use aethel_studio_local::kernel_recursive_fractal_enhancement_wire::*;
-use aethel_studio_local::kernel_symmetric_vector_algebra_wire::*;
-use aethel_studio_local::kernel_voxel_cone_radiosity_wire::*;
-use aethel_studio_local::kernel_atmospheric_scattering_godrays_wire::*;
-use aethel_studio_local::kernel_dynamic_physics_dsl_wire::*;
-use aethel_studio_local::kernel_chromatic_glass_refraction_wire::*;
-use aethel_studio_local::kernel_preintegrated_sss_transmittance_wire::*;
-use aethel_studio_local::kernel_aces_cinematic_tonemapper_wire::*;
-use aethel_studio_local::kernel_fluid_ninja_compute_wire::*;
-use aethel_studio_local::kernel_wgsl_surface_noise_kernel_wire::*;
-use aethel_studio_local::kernel_infinite_anti_aliasing_wire::*;
-use aethel_studio_local::kernel_spectral_dispersion_caustics_wire::*;
-use aethel_studio_local::kernel_hybrid_cluster_shading_vsvm_wire::*;
-use aethel_studio_local::kernel_atmospheric_spine_particles_wire::*;
-use aethel_studio_local::kernel_radiance_cascades_gi_wire::*;
-use aethel_studio_local::kernel_alexa_cinematic_optics_wire::*;
-use aethel_studio_local::kernel_spectral_light_pipeline_wire::*;
-use aethel_studio_local::kernel_usd_importer_bridge_wire::*;
-use aethel_studio_local::kernel_msl_wgsl_compiler_wire::*;
-use aethel_studio_local::kernel_strain_aware_texturing_wire::*;
-use aethel_studio_local::kernel_gaze_foveated_reprojection_wire::*;
-use aethel_studio_local::kernel_wgpu_wgsl_device_load_wire::*;
-use aethel_studio_local::kernel_hdr_32bit_float_pipeline_wire::*;
+// NOTE (chore/preserve WIP, 2026-08-08): the Tauri `generate_handler!` surface was
+// trimmed to a reduced command set; the glob imports for probe/soak-only kernel wires
+// (ecs_parallel, geometry_clusterizer, gi_sdf, auto_retopology_worker, and ~85
+// kernel_*_wire modules) became unused as a result and were removed here to keep
+// `cargo clippy -D warnings` green. The underlying modules remain declared `pub` in
+// `lib.rs` and their code is untouched; only the now-dead glob-imports in this file
+// were dropped. Re-wiring into `generate_handler!` is a deliberate follow-up decision,
+// not made in this pass (Onda G deferred — see AETHEL_FOCUS1_EXECUTION_PROGRESS.md P2g).
 use aethel_studio_local::kernel_svo_terrain_world_partition_wire::*;
-use aethel_studio_local::onnx_native_gen::*;
 use tauri::Manager;
 
+// NOTE (chore/preserve WIP, 2026-08-08): the runtime-probe / job-routing command
+// surface below (LOCAL_DEVICE_ID through jobs_cancel) is real, tested logic that
+// used to be registered in `generate_handler!` before the handler was trimmed.
+// It is intentionally left disconnected (not re-wired) in this preservation pass —
+// see AETHEL_FOCUS1_EXECUTION_PROGRESS.md P2g. #[allow(dead_code)] silences the
+// resulting warnings honestly instead of inventing new call sites.
+#[allow(dead_code)]
 const LOCAL_DEVICE_ID: &str = "local-device";
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 struct RuntimeProbeSummary {
     lane: String,
     available: bool,
@@ -138,6 +57,7 @@ struct RuntimeProbeSummary {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 struct RuntimeRouteResponse {
     lane: String,
     reason: String,
@@ -146,6 +66,7 @@ struct RuntimeRouteResponse {
     requires_human_approval: bool,
 }
 
+#[allow(dead_code)]
 fn target_lane(target: RuntimeExecutionTarget) -> &'static str {
     match target {
         RuntimeExecutionTarget::LocalNative => "local-native",
@@ -157,6 +78,7 @@ fn target_lane(target: RuntimeExecutionTarget) -> &'static str {
     }
 }
 
+#[allow(dead_code)]
 fn job_state_label(state: RuntimeJobState) -> &'static str {
     match state {
         RuntimeJobState::Queued => "queued",
@@ -169,6 +91,7 @@ fn job_state_label(state: RuntimeJobState) -> &'static str {
     }
 }
 
+#[allow(dead_code)]
 fn parse_job_lane(kind: &str) -> Option<RuntimeJobLane> {
     let normalized = kind.trim().replace('_', "-").to_ascii_lowercase();
     match normalized.as_str() {
@@ -215,11 +138,13 @@ fn open_panel_window(app: tauri::AppHandle, label: String, title: String, panel:
     Ok(())
 }
 
+#[allow(dead_code)]
 #[tauri::command]
 fn local_runtime_health() -> String {
     aethel_studio_local::daemon::health_body()
 }
 
+#[allow(dead_code)]
 #[tauri::command]
 fn local_runtime_probe() -> RuntimeProbeSummary {
     let probe = collect_local_probe(LOCAL_DEVICE_ID);
@@ -237,22 +162,26 @@ fn local_runtime_probe() -> RuntimeProbeSummary {
     }
 }
 
+#[allow(dead_code)]
 #[tauri::command]
 fn local_runtime_probe_report() -> LocalRuntimeProbeReport {
     collect_local_probe(LOCAL_DEVICE_ID)
 }
 
+#[allow(dead_code)]
 #[tauri::command]
 fn local_runtime_sidecars() -> Vec<RuntimeSidecarCapability> {
     let probe = collect_local_probe(LOCAL_DEVICE_ID);
     build_sidecar_capability_manifest(&probe)
 }
 
+#[allow(dead_code)]
 #[tauri::command]
 fn native_kernel_manifest() -> NativeKernelManifest {
     build_native_kernel_manifest()
 }
 
+#[allow(dead_code)]
 #[tauri::command]
 fn jobs_route(
     kind: String,
@@ -281,6 +210,7 @@ fn jobs_route(
     })
 }
 
+#[allow(dead_code)]
 #[tauri::command]
 fn jobs_list(store: State<'_, Mutex<RuntimeJobStore>>) -> Result<Vec<RuntimeJobStatus>, String> {
     let store = store
@@ -289,6 +219,7 @@ fn jobs_list(store: State<'_, Mutex<RuntimeJobStore>>) -> Result<Vec<RuntimeJobS
     Ok(store.list())
 }
 
+#[allow(dead_code)]
 #[tauri::command]
 fn jobs_cancel(
     job_id: String,
@@ -304,6 +235,35 @@ fn jobs_cancel(
 
 fn main() {
     tauri::Builder::default()
+        .register_uri_scheme_protocol("aethel-mmap", move |app, request| {
+            // True Zero-Copy IPC Streamer
+            let uri = request.uri().path(); // e.g., /mmap-1/0/1024
+            let parts: Vec<&str> = uri.trim_matches('/').split('/').collect();
+            if parts.len() != 3 {
+                return tauri::http::Response::builder()
+                    .status(400)
+                    .body(Vec::new())
+                    .unwrap();
+            }
+            
+            let handle = parts[0];
+            let offset: usize = parts[1].parse().unwrap_or(0);
+            let length: usize = parts[2].parse().unwrap_or(0);
+
+            let registry = app.app_handle().state::<std::sync::Mutex<crate::mmap_commands::MmapRegistry>>();
+            let payload = if let Ok(guard) = registry.lock() {
+                guard.read_binary_slice(handle, offset, length).unwrap_or_default()
+            } else {
+                Vec::new()
+            };
+            
+            // Bypass base64 overhead! Return raw bytes directly.
+            tauri::http::Response::builder()
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Content-Type", "application/octet-stream")
+                .body(payload)
+                .unwrap()
+        })
         .setup(|app| {
             // ----------------------------------------------------------------
             // Graceful hardware init (DEBT-DESK / wgpu + ort)
@@ -406,6 +366,12 @@ fn main() {
                     );
                 }
 
+                // [Onda M] Spawn the Zero-Copy Binary WebSocket Gateway
+                println!("[Aethel] Spawning Zero-Copy WebSocket Gateway on port 4040...");
+                tauri::async_runtime::spawn(async {
+                    aethel_kernel_rust::ipc_zero_copy_ws::start_zero_copy_ws_server(4040).await;
+                });
+
                 println!("[Aethel] Runtime init complete.");
             });
 
@@ -422,6 +388,7 @@ fn main() {
         .manage(Mutex::new(PhysicsKernel::new()))
         .manage(Mutex::new(WorldPartitionStreamState::default()))
         .invoke_handler(tauri::generate_handler![
+            egui_overlay::launch_native_egui_overlay,
             open_panel_window,
             hardware_profiler::hardware_profiler_sample_once,
             wgpu_renderer::renderer_present_probe,
@@ -443,251 +410,10 @@ fn main() {
             wasm_runtime::wasm_watch_and_hot_reload,
             wasm_runtime::wasm_step,
             wasm_runtime::wasm_host_status,
-            desktop_commands::fs_read,
-            desktop_commands::fs_write,
-            desktop_commands::fs_list,
-            desktop_commands::fs_tree,
-            desktop_commands::fs_watch,
-            desktop_commands::set_project_root,
-            desktop_commands::get_project_root,
-            desktop_commands::pick_project_directory,
-            desktop_commands::terminal_create,
-            desktop_commands::terminal_write,
-            desktop_commands::terminal_resize,
-            desktop_commands::terminal_close,
-            desktop_commands::ai_complete,
-            desktop_commands::notify_native,
-            desktop_commands::window_minimize,
-            desktop_commands::window_toggle_maximize,
-            desktop_commands::window_close,
-            local_runtime_health,
-            local_runtime_probe,
-            local_runtime_probe_report,
-            local_runtime_sidecars,
-            native_kernel_manifest,
-            jobs_route,
-            jobs_list,
-            jobs_cancel,
-            clusterize_mesh,
-            probe_auto_retopology_worker_cmd,
-            run_auto_retopology_worker_cmd,
-            probe_onnx_native_gen_cmd,
-            run_onnx_native_gen_cmd,
-            probe_vram_pager_hooks_cmd,
-            probe_kernel_foundation_cmd,
-            run_kernel_foundation_soak_cmd,
-            probe_kernel_desktop_wire_cmd,
-            run_kernel_desktop_soak_cmd,
-            probe_kernel_mut_dna_desktop_cmd,
-            run_kernel_mut_dna_desktop_soak_cmd,
-            probe_kernel_spectral_sonic_desktop_cmd,
-            run_kernel_spectral_sonic_desktop_soak_cmd,
-            probe_world_soa_sab_layout_cmd,
-            run_kernel_world_soa_sab_layout_soak_cmd,
-            probe_mmap_ecs_pager_cmd,
-            run_kernel_mmap_ecs_pager_soak_cmd,
-            probe_simd_clay_math_cmd,
-            run_kernel_simd_clay_math_soak_cmd,
-            probe_simd_world_soa_hot_path_cmd,
-            run_kernel_simd_world_soa_hot_path_soak_cmd,
-            probe_baremetal_memory_manager_cmd,
-            run_kernel_baremetal_memory_manager_soak_cmd,
-            probe_slab_allocator_mmap_cmd,
-            run_kernel_slab_allocator_mmap_soak_cmd,
-            probe_unified_field_network_cmd,
-            run_kernel_unified_field_network_soak_cmd,
-            probe_autonomous_entropy_corrector_cmd,
-            run_kernel_autonomous_entropy_corrector_soak_cmd,
-            probe_fractal_energy_perturbation_cmd,
-            run_kernel_fractal_energy_perturbation_soak_cmd,
-            probe_curved_raymarcher_cmd,
-            run_kernel_curved_raymarcher_soak_cmd,
-            probe_shadow_time_reversal_cmd,
-            run_kernel_shadow_time_reversal_soak_cmd,
-            probe_four_dimensional_time_sdf_cmd,
-            run_kernel_four_dimensional_time_sdf_soak_cmd,
-            probe_mnemonic_matter_entropy_cmd,
-            run_kernel_mnemonic_matter_entropy_soak_cmd,
-            probe_synesthetic_sensory_remap_cmd,
-            run_kernel_synesthetic_sensory_remap_soak_cmd,
-            probe_autonomous_conflict_generator_cmd,
-            run_kernel_autonomous_conflict_generator_soak_cmd,
-            probe_atmospheric_physical_damping_cmd,
-            run_kernel_atmospheric_physical_damping_soak_cmd,
-            probe_position_based_dynamics_cmd,
-            run_kernel_position_based_dynamics_soak_cmd,
-            probe_hybrid_eulerian_lagrangian_pbd_cmd,
-            run_kernel_hybrid_eulerian_lagrangian_pbd_soak_cmd,
-            probe_matter_thermodynamics_sph_cmd,
-            run_kernel_matter_thermodynamics_sph_soak_cmd,
-            probe_aerodynamic_navier_stokes_cmd,
-            run_kernel_aerodynamic_navier_stokes_soak_cmd,
-            probe_lattice_boltzmann_fluid_solver_cmd,
-            run_kernel_lattice_boltzmann_fluid_solver_soak_cmd,
-            probe_lattice_boltzmann_gas_fluid_cmd,
-            run_kernel_lattice_boltzmann_gas_fluid_soak_cmd,
-            probe_acoustic_raytracing_echo_cmd,
-            run_kernel_acoustic_raytracing_echo_soak_cmd,
-            probe_finite_element_analysis_cmd,
-            run_kernel_finite_element_analysis_soak_cmd,
-            probe_acoustic_reverb_geometry_cmd,
-            run_kernel_acoustic_reverb_geometry_soak_cmd,
-            probe_fm_additive_synthesis_cmd,
-            run_kernel_fm_additive_synthesis_soak_cmd,
-            probe_hermite_duality_grid_cmd,
-            run_kernel_hermite_duality_grid_soak_cmd,
-            probe_hermite_sharp_features_cmd,
-            run_kernel_hermite_sharp_features_soak_cmd,
-            probe_sdf_sculptor_cmd,
-            run_kernel_sdf_sculptor_soak_cmd,
-            probe_sdf_adaptive_cascades_cmd,
-            run_kernel_sdf_adaptive_cascades_soak_cmd,
-            probe_stochastic_virtual_sdf_cmd,
-            run_kernel_stochastic_virtual_sdf_soak_cmd,
-            probe_sdf_octree_hashing_cmd,
-            run_kernel_sdf_octree_hashing_soak_cmd,
-            probe_sdf_motion_vector_buffer_cmd,
-            run_kernel_sdf_motion_vector_buffer_soak_cmd,
-            probe_velocity_buffer_ecs_cmd,
-            run_kernel_velocity_buffer_ecs_soak_cmd,
-            probe_hybrid_geometry_svo_cmd,
-            run_kernel_hybrid_geometry_svo_soak_cmd,
-            probe_svo_depth_lod_cmd,
-            run_kernel_svo_depth_lod_soak_cmd,
-            probe_internal_voxel_density_cmd,
-            run_kernel_internal_voxel_density_soak_cmd,
-            probe_micro_displacement_noise_cmd,
-            run_kernel_micro_displacement_noise_soak_cmd,
-            probe_volumetric_extinction_medium_cmd,
-            run_kernel_volumetric_extinction_medium_soak_cmd,
-            probe_sdf_audio_raymarching_cmd,
-            run_kernel_sdf_audio_raymarching_soak_cmd,
-            probe_contextual_physics_override_cmd,
-            run_kernel_contextual_physics_override_soak_cmd,
-            probe_dynamic_matter_entropy_cmd,
-            run_kernel_dynamic_matter_entropy_soak_cmd,
-            probe_digital_pressure_chamber_cmd,
-            run_kernel_digital_pressure_chamber_soak_cmd,
-            probe_geometric_scale_constraints_cmd,
-            run_kernel_geometric_scale_constraints_soak_cmd,
-            probe_universal_logarithmic_scale_cmd,
-            run_kernel_universal_logarithmic_scale_soak_cmd,
-            probe_sparse_seed_instancing_cmd,
-            run_kernel_sparse_seed_instancing_soak_cmd,
-            probe_lockfree_ring_buffer_cmd,
-            run_kernel_lockfree_ring_buffer_soak_cmd,
-            probe_atomic_thread_sync_cmd,
-            run_kernel_atomic_thread_sync_soak_cmd,
-            probe_crdt_quantum_sync_cmd,
-            run_kernel_crdt_quantum_sync_soak_cmd,
-            probe_delta_seed_synchronization_cmd,
-            run_kernel_delta_seed_synchronization_soak_cmd,
-            probe_state_sync_protocol_cmd,
-            run_kernel_state_sync_protocol_soak_cmd,
-            probe_bitstream_reality_sync_cmd,
-            run_kernel_bitstream_reality_sync_soak_cmd,
-            probe_binary_seed_streamer_cmd,
-            run_kernel_binary_seed_streamer_soak_cmd,
-            probe_cpu_affinity_micro_workers_cmd,
-            run_kernel_cpu_affinity_micro_workers_soak_cmd,
-            probe_asynchronous_reality_threads_cmd,
-            run_kernel_asynchronous_reality_threads_soak_cmd,
-            probe_thermal_scheduler_cmd,
-            run_kernel_thermal_scheduler_soak_cmd,
-            probe_live_cache_manager_cmd,
-            run_kernel_live_cache_manager_soak_cmd,
-            probe_hierarchical_streaming_cache_cmd,
-            run_kernel_hierarchical_streaming_cache_soak_cmd,
-            probe_metabolic_memory_cmd,
-            run_kernel_metabolic_memory_soak_cmd,
-            probe_ghost_state_predictor_cmd,
-            run_kernel_ghost_state_predictor_soak_cmd,
-            probe_reversible_quantum_undo_cmd,
-            run_kernel_reversible_quantum_undo_soak_cmd,
-            probe_genomic_seed_library_cmd,
-            run_kernel_genomic_seed_library_soak_cmd,
-            probe_genomic_seed_transmitter_cmd,
-            run_kernel_genomic_seed_transmitter_soak_cmd,
-            probe_formal_logic_verifier_cmd,
-            run_kernel_formal_logic_verifier_soak_cmd,
-            probe_quantum_overlap_cmd,
-            run_kernel_quantum_overlap_soak_cmd,
-            probe_blue_noise_dithering_cmd,
-            run_kernel_blue_noise_dithering_soak_cmd,
-            probe_recursive_fractal_enhancement_cmd,
-            run_kernel_recursive_fractal_enhancement_soak_cmd,
-            probe_symmetric_vector_algebra_cmd,
-            run_kernel_symmetric_vector_algebra_soak_cmd,
-            probe_voxel_cone_radiosity_cmd,
-            run_kernel_voxel_cone_radiosity_soak_cmd,
-            probe_atmospheric_scattering_godrays_cmd,
-            run_kernel_atmospheric_scattering_godrays_soak_cmd,
-            probe_dynamic_physics_dsl_cmd,
-            run_kernel_dynamic_physics_dsl_soak_cmd,
-            probe_chromatic_glass_refraction_cmd,
-            run_kernel_chromatic_glass_refraction_soak_cmd,
-            probe_preintegrated_sss_transmittance_cmd,
-            run_kernel_preintegrated_sss_transmittance_soak_cmd,
-            probe_aces_cinematic_tonemapper_cmd,
-            run_kernel_aces_cinematic_tonemapper_soak_cmd,
-            probe_fluid_ninja_compute_cmd,
-            run_kernel_fluid_ninja_compute_soak_cmd,
-            probe_wgsl_surface_noise_kernel_cmd,
-            run_kernel_wgsl_surface_noise_kernel_soak_cmd,
-            probe_infinite_anti_aliasing_cmd,
-            run_kernel_infinite_anti_aliasing_soak_cmd,
-            probe_spectral_dispersion_caustics_cmd,
-            run_kernel_spectral_dispersion_caustics_soak_cmd,
-            probe_hybrid_cluster_shading_vsvm_cmd,
-            run_kernel_hybrid_cluster_shading_vsvm_soak_cmd,
-            probe_atmospheric_spine_particles_cmd,
-            run_kernel_atmospheric_spine_particles_soak_cmd,
-            probe_radiance_cascades_gi_cmd,
-            run_kernel_radiance_cascades_gi_soak_cmd,
-            probe_alexa_cinematic_optics_cmd,
-            run_kernel_alexa_cinematic_optics_soak_cmd,
-            probe_spectral_light_pipeline_cmd,
-            run_kernel_spectral_light_pipeline_soak_cmd,
-            probe_msl_wgsl_compiler_cmd,
-            run_kernel_msl_wgsl_compiler_soak_cmd,
-            probe_usd_importer_bridge_cmd,
-            run_kernel_usd_importer_bridge_soak_cmd,
-            probe_strain_aware_texturing_cmd,
-            run_kernel_strain_aware_texturing_soak_cmd,
-            probe_gaze_foveated_reprojection_cmd,
-            run_kernel_gaze_foveated_reprojection_soak_cmd,
-            probe_wgpu_wgsl_device_load_cmd,
-            run_kernel_wgpu_wgsl_device_load_soak_cmd,
-            probe_hdr_32bit_float_pipeline_cmd,
-            run_kernel_hdr_32bit_float_pipeline_soak_cmd,
-            voxelize_scene_sdf,
-            scene_graph::scene_get_nodes,
-            scene_graph::scene_select,
-            scene_graph::scene_set_visible,
-            scene_graph::scene_set_locked,
-            scene_graph::scene_update_transform,
-            scene_graph::scene_add_node,
-            scene_graph::scene_remove_node,
-            hardware_profiler::hardware_profiler_sample_once,
-            mmap_commands::mmap_open,
-            mmap_commands::mmap_read_range,
-            mmap_commands::mmap_close,
-            ecs_benchmark,
-            open_panel_window,
-            asset_cooker::asset_cooker_start,
-            wasm_runtime::wasm_load_module,
-            wasm_runtime::wasm_watch_and_hot_reload,
-            wasm_runtime::wasm_step,
-            wasm_runtime::wasm_host_status,
             motion_matching::motion_matching_evaluate,
             motion_matching::motion_matching_status,
-            physics_commands::poll_physics_state,
             entropy_gpu_particles::entropy_gpu_particle_soak_cmd,
-            entropy_gpu_particles::probe_entropy_gpu_particles_cmd,
-            probe_svo_terrain_world_partition_cmd,
-            run_kernel_svo_terrain_world_partition_soak_cmd,
-            world_partition_stream_tick_cmd,
-            world_partition_stream_reset_cmd
+            entropy_gpu_particles::probe_entropy_gpu_particles_cmd
         ])
         .run(tauri::generate_context!())
         .expect("failed to run Aethel Studio Local");

@@ -1,12 +1,11 @@
-//! GameplayTag interning and TagSetTable bitsets for GAS.
+//! GameplayTag interning and RoaringBitmap tag sets for GAS.
+//! Completely removes the previous 128-tag limit.
 
 use std::collections::HashMap;
+use roaring::RoaringBitmap;
 
 pub use super::attributes::Entity;
 pub type TagId = u32;
-
-pub const WORDS_PER_TAG_SET: usize = 4;
-pub const MAX_TAGS_PER_SET: usize = WORDS_PER_TAG_SET * 32;
 
 pub struct GameplayTagRegistry {
     name_to_id: HashMap<String, TagId>,
@@ -39,12 +38,6 @@ impl GameplayTagRegistry {
             }
 
             if !self.name_to_id.contains_key(&prefix) {
-                assert!(
-                    self.id_to_name.len() < MAX_TAGS_PER_SET,
-                    "GameplayTagRegistry exceeded MAX_TAGS_PER_SET ({}) while registering \"{}\"",
-                    MAX_TAGS_PER_SET,
-                    name
-                );
                 let id = self.id_to_name.len() as TagId;
                 self.name_to_id.insert(prefix.clone(), id);
                 self.id_to_name.push(prefix.clone());
@@ -78,42 +71,29 @@ impl Default for GameplayTagRegistry {
     }
 }
 
-fn bit_location(id: TagId) -> (usize, u32) {
-    ((id >> 5) as usize, id & 31)
-}
-
 pub struct TagSetTable {
-    words: Vec<[u32; WORDS_PER_TAG_SET]>,
+    bitmaps: HashMap<Entity, RoaringBitmap>,
     explicit_tags: HashMap<Entity, Vec<TagId>>,
 }
 
 impl TagSetTable {
     pub fn new() -> Self {
         Self {
-            words: Vec::new(),
+            bitmaps: HashMap::new(),
             explicit_tags: HashMap::new(),
         }
     }
 
-    fn ensure_capacity(&mut self, entity: Entity) {
-        let required = entity as usize + 1;
-        if self.words.len() < required {
-            self.words.resize(required, [0u32; WORDS_PER_TAG_SET]);
-        }
-    }
-
     fn recompute(&mut self, entity: Entity, registry: &GameplayTagRegistry) {
-        self.ensure_capacity(entity);
-        let mut words = [0u32; WORDS_PER_TAG_SET];
+        let mut bitmap = RoaringBitmap::new();
         if let Some(explicit) = self.explicit_tags.get(&entity) {
             for &tag_id in explicit {
                 for &ancestor_id in registry.ancestors_of(tag_id) {
-                    let (word, bit) = bit_location(ancestor_id);
-                    words[word] |= 1u32 << bit;
+                    bitmap.insert(ancestor_id);
                 }
             }
         }
-        self.words[entity as usize] = words;
+        self.bitmaps.insert(entity, bitmap);
     }
 
     pub fn add_tag(&mut self, entity: Entity, tag_name: &str, registry: &mut GameplayTagRegistry) {
@@ -139,10 +119,9 @@ impl TagSetTable {
             Some(id) => id,
             None => return false,
         };
-        let (word, bit) = bit_location(id);
-        self.words
-            .get(entity as usize)
-            .map(|w| (w[word] >> bit) & 1 == 1)
+        self.bitmaps
+            .get(&entity)
+            .map(|b| b.contains(id))
             .unwrap_or(false)
     }
 

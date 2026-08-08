@@ -172,6 +172,7 @@ impl GpuCullingPipeline {
             layout: Some(&pipeline_layout),
             module: &shader,
             entry_point: "cull_main",
+            compilation_options: Default::default(),
         });
 
         Self { pipeline, bind_group_layout }

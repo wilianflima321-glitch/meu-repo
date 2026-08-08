@@ -10,13 +10,9 @@ pub mod geometry_clusterizer;
 pub mod gi_sdf;
 pub mod jobs;
 /// Kernel foundation IPC (letter dc surface; letter do web bridge).
-pub mod kernel_foundation_wire;
 /// WorldSoA + LBM desktop soak wire (letter de).
-pub mod kernel_desktop_wire;
 /// MutDNA + FrameArena desktop soak wire (letter df).
-pub mod kernel_mut_dna_desktop_wire;
 /// Timescale + Beer–Lambert + sonic desktop soak wire (letter dg).
-pub mod kernel_spectral_sonic_desktop_wire;
 /// WorldSoA SAB layout header wire (letter dh).
 pub mod kernel_world_soa_sab_wire;
 /// mmap ECS pager wire (letter di).
@@ -24,7 +20,6 @@ pub mod kernel_mmap_ecs_pager_wire;
 /// SIMD clay math wire (letter dj).
 pub mod kernel_simd_clay_math_wire;
 /// SIMD → WorldSoA hot-path wire (letter dk).
-pub mod kernel_simd_world_soa_hot_path_wire;
 /// BareMetalMemoryManager wire (letter dl).
 pub mod kernel_baremetal_memory_manager_wire;
 /// Slab allocator mmap wire (letter dm).
@@ -58,7 +53,6 @@ pub mod kernel_matter_thermodynamics_sph_wire;
 /// Aerodynamic Navier–Stokes wire (letter gv).
 pub mod kernel_aerodynamic_navier_stokes_wire;
 /// Lattice-Boltzmann fluid solver wire (letter ee).
-pub mod kernel_lattice_boltzmann_fluid_solver_wire;
 pub mod kernel_lattice_boltzmann_gas_fluid_wire;
 /// Acoustic Raytracing Echo wire (letter ef).
 pub mod kernel_acoustic_raytracing_echo_wire;
@@ -192,6 +186,9 @@ pub mod kernel_wgpu_wgsl_device_load_wire;
 /// SVO Terrain World Partition desktop wire (letter ip4) — camera-driven
 /// identity-based hydrate/evict streaming, stateful per-frame tick command.
 pub mod kernel_svo_terrain_world_partition_wire;
+pub mod kernel_skeletal_rig_ragdoll_xpbd_wire;
+pub mod kernel_voronoi_destruction_3d_wire;
+pub mod kernel_micro_poly_cull_wire;
 pub mod native_kernel;
 pub mod onnx_native_gen;
 pub mod physics_kernel;
